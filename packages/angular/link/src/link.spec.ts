@@ -81,6 +81,9 @@ describe('SlLink', () => {
       expect(link.querySelector('[data-part="external-hint"]')?.getAttribute('data-ui')).toBe(
         'visually-hidden',
       );
+      const box = link.querySelector('[data-part="external-icon"] > [data-ui="icon"]');
+      expect(box?.hasAttribute('data-directional')).toBe(true);
+      expect(box?.querySelector('svg[data-glyph="external"]')).not.toBeNull();
     });
 
     it('glues the marker to the last word with a word joiner', () => {

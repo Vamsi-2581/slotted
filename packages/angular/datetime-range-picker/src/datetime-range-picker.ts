@@ -61,6 +61,7 @@ import type {
   ValidationErrors,
   Validator,
 } from '@angular/forms';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlCalendar } from '@slotted/angular/calendar';
 import type { CalendarValue, CalendarView } from '@slotted/angular/calendar';
 import { SlDateTimeField } from '@slotted/angular/datetime-field';
@@ -186,7 +187,7 @@ function rangeOf(work: Work): DateTimeRange | null {
   selector: '[slDateTimeRangePicker]',
   standalone: true,
   exportAs: 'slDateTimeRangePicker',
-  imports: [NgTemplateOutlet, SlCalendar, SlDateTimeField],
+  imports: [NgTemplateOutlet, SlCalendar, SlDateTimeField, SlGlyph, SlIcon],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -211,6 +212,7 @@ function rangeOf(work: Work): DateTimeRange | null {
         <span data-part="summary" [attr.data-placeholder]="summary() === null ? '' : null">{{
           summary() ?? resolvedChooseLabel()
         }}</span>
+        <span slIcon><svg slGlyph name="calendar"></svg></span>
       </button>
       @if (clearable() && held() !== null) {
         <button
@@ -219,7 +221,9 @@ function rangeOf(work: Work): DateTimeRange | null {
           [attr.aria-label]="clearLabel() ?? defaults.clearLabel"
           [disabled]="!editable()"
           (click)="clear($event)"
-        ></button>
+        >
+          <span slIcon><svg slGlyph name="x"></svg></span>
+        </button>
       }
       <input
         data-part="hidden-input"

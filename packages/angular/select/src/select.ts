@@ -46,6 +46,7 @@ import {
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 
 import { injectSelectDefaults } from './select-defaults';
@@ -113,7 +114,7 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
   selector: 'sl-select',
   standalone: true,
   exportAs: 'slSelect',
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   styleUrls: ['../../../styles/src/select/select.css', '../../../styles/src/tag/tag.css'],
@@ -195,7 +196,9 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
               [disabled]="resolvedDisabled() || resolvedReadOnly()"
               [attr.aria-label]="removeLabelFor(value)"
               (click)="onRemoveChip(value, $event)"
-            ></button>
+            >
+              <span slIcon><svg slGlyph name="x"></svg></span>
+            </button>
           </span>
         }
         <span
@@ -220,12 +223,16 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
         data-part="clear"
         [attr.aria-label]="resolvedClearLabel()"
         (click)="onClear($event)"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="x"></svg></span>
+      </button>
     }
     @if (loading()) {
       <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
     } @else {
-      <span data-part="arrow"></span>
+      <span data-part="arrow"
+        ><span slIcon><svg slGlyph name="chevron-down"></svg></span
+      ></span>
     }
 
     @if (name(); as submissionName) {
@@ -353,7 +360,9 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
           -->
           @if (resolvedSearch()) {
             <div data-part="search">
-              <span data-part="search-icon" aria-hidden="true"></span>
+              <span data-part="search-icon" aria-hidden="true"
+                ><span slIcon><svg slGlyph name="search"></svg></span
+              ></span>
               <input
                 #search
                 type="text"

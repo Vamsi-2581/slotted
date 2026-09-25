@@ -28,6 +28,7 @@ import {
 import type { EmbeddedViewRef } from '@angular/core';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlAvatar } from '@slotted/angular/avatar';
 import { SlField } from '@slotted/angular/field';
 import { SlHighlight } from '@slotted/angular/highlight';
@@ -156,7 +157,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
   exportAs: 'slEntityPicker',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [NgTemplateOutlet, SlAvatar, SlHighlight, SlSelect, SlSelectItem],
+  imports: [NgTemplateOutlet, SlAvatar, SlGlyph, SlHighlight, SlIcon, SlSelect, SlSelectItem],
   styleUrls: [
     '../../../styles/src/entity-picker/entity-picker.css',
     '../../../styles/src/tag/tag.css',
@@ -262,6 +263,8 @@ function sameIds(a: readonly string[], b: readonly string[]) {
                           data-loading
                           aria-hidden="true"
                         ></span>
+                      } @else if (resolution(id) === 'missing') {
+                        <span slIcon><svg slGlyph name="circle-alert"></svg></span>
                       }
                     </span>
                   }
@@ -291,7 +294,9 @@ function sameIds(a: readonly string[], b: readonly string[]) {
                     tabindex="-1"
                     [attr.aria-label]="removeLabel(id)"
                     (click)="onRemoveClick(id, $event)"
-                  ></button>
+                  >
+                    <span slIcon><svg slGlyph name="x"></svg></span>
+                  </button>
                 }
               </span>
             }
@@ -329,7 +334,9 @@ function sameIds(a: readonly string[], b: readonly string[]) {
           data-part="clear"
           [attr.aria-label]="labels().clear"
           (click)="onClear($event)"
-        ></button>
+        >
+          <span slIcon><svg slGlyph name="x"></svg></span>
+        </button>
       }
       <button
         type="button"
@@ -342,7 +349,9 @@ function sameIds(a: readonly string[], b: readonly string[]) {
         @if (busy()) {
           <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
         } @else {
-          <span data-part="arrow"></span>
+          <span data-part="arrow"
+            ><span slIcon><svg slGlyph name="chevron-down"></svg></span
+          ></span>
         }
       </button>
     </div>
@@ -470,12 +479,16 @@ function sameIds(a: readonly string[], b: readonly string[]) {
               (pointerenter)="setHighlighted(CREATE, 'pointer', $event)"
               (click)="activate(CREATE, 'pointer', $event)"
             >
-              <span data-part="media" aria-hidden="true"></span>
+              <span data-part="media" aria-hidden="true"
+                ><span slIcon><svg slGlyph name="plus"></svg></span
+              ></span>
               <span data-part="label">{{ createText() }}</span>
             </div>
           }
           @if (failed()) {
-            <div data-part="error">{{ labels().error }}</div>
+            <div data-part="error">
+              <span slIcon><svg slGlyph name="circle-alert"></svg></span>{{ labels().error }}
+            </div>
             <div
               role="option"
               data-part="item"
@@ -488,7 +501,9 @@ function sameIds(a: readonly string[], b: readonly string[]) {
               (pointerenter)="setHighlighted(RETRY, 'pointer', $event)"
               (click)="activate(RETRY, 'pointer', $event)"
             >
-              <span data-part="media" aria-hidden="true"></span>
+              <span data-part="media" aria-hidden="true"
+                ><span slIcon><svg slGlyph name="rotate-ccw"></svg></span
+              ></span>
               <span data-part="label">{{ labels().retry }}</span>
             </div>
           }
@@ -555,7 +570,9 @@ function sameIds(a: readonly string[], b: readonly string[]) {
             <span data-part="meta">{{ entity.meta }}</span>
           }
         }
-        <span data-part="indicator"></span>
+        <span data-part="indicator"
+          ><span slIcon><svg slGlyph name="check"></svg></span
+        ></span>
       </div>
     </ng-template>
   `,

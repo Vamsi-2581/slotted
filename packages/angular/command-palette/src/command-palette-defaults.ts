@@ -86,6 +86,8 @@ export interface CommandPaletteDefaults {
   countLabel: string;
   recentLabel: string;
   clearLabel: string;
+  /** The word on the close control a full-screen palette draws. */
+  closeLabel: string;
   backLabel: string;
   hintNavigate: string;
   hintSelect: string;
@@ -117,6 +119,7 @@ export const COMMAND_PALETTE_FALLBACK: CommandPaletteDefaults = {
   countLabel: '{count} results',
   recentLabel: 'Recent',
   clearLabel: 'Clear',
+  closeLabel: 'Close',
   backLabel: 'Back',
   hintNavigate: 'Navigate',
   hintSelect: 'Select',

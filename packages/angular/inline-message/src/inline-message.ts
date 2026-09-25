@@ -8,6 +8,8 @@ import {
   input,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import type { GlyphName } from '@slotted/angular/icon';
 
 import { injectInlineMessageDefaults, SlInlineMessageIdFactory } from './inline-message-defaults';
 import type {
@@ -24,6 +26,18 @@ export type {
   InlineMessageSize,
   InlineMessageTone,
 } from './inline-message-defaults';
+
+/**
+ * The glyph each tone draws: `specs/components/inline-message/contract.json`
+ * holds the map. Help is not a severity and draws none.
+ */
+const TONE_GLYPH: Record<InlineMessageTone, GlyphName | null> = {
+  accent: 'circle-info',
+  secondary: null,
+  success: 'circle-check',
+  warning: 'triangle-alert',
+  danger: 'circle-alert',
+};
 
 /**
  * The two roles that announce, and the value that does not. Both roles imply
@@ -59,11 +73,17 @@ const LIVE_ROLE: Record<InlineMessageLive, string | null> = {
   selector: '[slInlineMessage]',
   standalone: true,
   exportAs: 'slInlineMessage',
+  imports: [SlGlyph, SlIcon],
   template: `@if (prefixWord() !== '') {
       <span data-part="prefix">{{ prefixWord() }}</span>
     }
     @if (!hideIcon()) {
-      <span aria-hidden="true" data-part="icon"><ng-content select="[slInlineMessageIcon]" /></span>
+      <span aria-hidden="true" data-part="icon"
+        ><ng-content select="[slInlineMessageIcon]">
+          @if (glyph(); as name) {
+            <span slIcon><svg slGlyph [name]="name"></svg></span>
+          }</ng-content
+      ></span>
     }
     <span data-part="text"><ng-content /></span>`,
   styleUrl: '../../../styles/src/inline-message/inline-message.css',
@@ -164,6 +184,13 @@ export class SlInlineMessage {
   protected readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   protected readonly resolvedLive = computed(() => this.live() ?? this.defaults.live);
   protected readonly resolvedMark = computed(() => this.mark() ?? this.defaults.mark);
+  /* The glyph the family draws when the page supplies none. A message that is
+     waiting draws a ring instead, and one that asked for no mark draws none. */
+  protected readonly glyph = computed<GlyphName | null>(() => {
+    const mark = this.resolvedMark();
+    if (this.loading() || mark === 'none') return null;
+    return mark === 'dot' ? 'dot' : TONE_GLYPH[this.resolvedTone()];
+  });
   protected readonly role = computed(() => this.writtenRole ?? LIVE_ROLE[this.resolvedLive()]);
 
   /* Unstated asks the table; the empty string is a consumer removing the word. */

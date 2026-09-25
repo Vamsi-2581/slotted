@@ -36,7 +36,7 @@ const anatomy: AnatomyRow[] = [
     element: 'the consumer’s own element, with slSplitButton on it',
     required: true,
     purpose:
-      'The group. It carries role="group", data-ui="split-button", the three appearance axes it hands to both halves, and data-disabled, data-loading and data-full-width. It paints two things: the join, and the chevron.',
+      'The group. It carries role="group", data-ui="split-button", the three appearance axes it hands to both halves, and data-disabled, data-loading and data-full-width. It paints the join; the chevron is the chevron-down Glyph element inside the menu trigger.',
   },
   {
     part: 'primary',
@@ -51,7 +51,7 @@ const anatomy: AnatomyRow[] = [
       'the consumer’s own button, with slSplitButtonMenuTrigger and [slMenuTriggerFor] on it — SlIconButton, extended, hosting slMenuTriggerFor',
     required: true,
     purpose:
-      'The menu button. It carries aria-haspopup="menu", aria-expanded and aria-controls from menu, the chevron from this family, and an accessible name the type makes mandatory. Square from the control height; it never shrinks.',
+      'The menu button. It carries aria-haspopup="menu", aria-expanded and aria-controls from menu, the chevron from this family — content the consumer passes replaces it — and an accessible name the type makes mandatory. Square from the control height; it never shrinks.',
   },
 ];
 
@@ -480,7 +480,9 @@ export const ANGULAR_SPLIT_BUTTON_DOCS = {
     aria-expanded="false"
   >
     <span data-part="icon">
-      <span aria-hidden="true"></span>
+      <span data-ui="icon" data-part="root" aria-hidden="true">
+        <svg data-part="glyph" data-glyph="chevron-down"></svg>
+      </span>
     </span>
   </button>
 </div>
@@ -492,7 +494,6 @@ export const ANGULAR_SPLIT_BUTTON_DOCS = {
         label: 'Retuning the family for an application',
         source: `[data-ui='split-button'] {
   --slotted-split-button-radius: var(--slotted-radius-full);
-  --slotted-split-button-chevron: var(--slotted-icon-ellipsis);
 }`,
       }),
     ],

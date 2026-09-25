@@ -51,7 +51,7 @@ const anatomy: AnatomyRow[] = [
     element: 'the element carrying slPageBody',
     required: true,
     purpose:
-      'The padded column: one slContainer at the page’s width and inset, slHeadingLevel as a host directive so a section inside takes h2, and aria-busy while loading. Under fill it stretches to what is left.',
+      'The padded column: one slContainer at the page’s width and inset, slHeadingLevel as a host directive so a section inside takes h2, and aria-busy while loading. Under fill, from 600 pixels of the page’s width up, it stretches to what is left.',
   },
   {
     part: 'footer',
@@ -88,7 +88,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'width',
     title: 'The measure of the content',
-    note: 'The four sizes are the slContainer’s own — measure for prose, content for a form, wide for an application screen, full for a table that needs every pixel — and the header, the body and the footer align to the same column.',
+    note: 'The four sizes are the slContainer’s own — measure for prose, content for a form, wide for an application screen, full for a table that needs every pixel — and the header, the body and the footer align to the same column. Below 600 pixels of the page’s own width, the compact size class, an inset above step 4 is held at step 4.',
     snippet: defineSnippet({
       id: 'page-angular-width',
       language: 'angular',
@@ -110,7 +110,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'fill',
     title: 'A body that fills',
-    note: 'The body stops growing with its content and the two panes inside it take the rest of the height and scroll on their own, as a master–detail does. Nothing scrolls outside them, so the header keeps its area — and its pill still folds it.',
+    note: 'The body stops growing with its content and the two panes inside it take the rest of the height and scroll on their own, as a master–detail does. Nothing scrolls outside them, so a pane is what moves the header: scrolled down past 16 pixels it snaps the area shut, back at its top it opens it again, and the pill still folds it by hand. Only a principal scroller moves it — not a form control, and at least half the body’s height — so a textarea or a short scroll area in the body leaves the header alone. Below 600 pixels of the page’s width fill does not apply: the body grows with its content, the page scrolls, and the header scrolls away with it.',
     snippet: defineSnippet({
       id: 'page-angular-fill',
       language: 'angular',
@@ -215,7 +215,7 @@ export const ANGULAR_PAGE_DOCS = {
     api: apiRows([
       [
         'width',
-        "'measure' | 'content' | 'wide' | 'full'",
+        "'measure' | 'content' | 'wide' | 'full' | 'bleed'",
         'wide',
         'slPage, providePageDefaults',
         'The measure of the content column: the slContainer’s own sizes, handed to the container the body renders and read by the header and the footer through injection',
@@ -225,7 +225,7 @@ export const ANGULAR_PAGE_DOCS = {
         '0 to 12',
         '6',
         'slPage, providePageDefaults',
-        'The inset of the column from the edge of the page, as a step on the space scale — the slContainer’s own',
+        'The inset of the column from the edge of the page, as a step on the space scale — the slContainer’s own. Held at 4 below 600 pixels of the page’s width',
       ],
       [
         'scroll',
@@ -239,7 +239,7 @@ export const ANGULAR_PAGE_DOCS = {
         'boolean',
         'false',
         'slPage',
-        'The body stops growing with its content and its child stretches to what is left, for a master–detail, a splitter or a canvas that scroll their own panes',
+        'The body stops growing with its content and its child stretches to what is left, for a master–detail, a splitter or a canvas that scroll their own panes. The body’s principal scroller snaps the header’s area. From 600 pixels of the page’s width up; below it the page scrolls as without fill',
       ],
       [
         'ground',

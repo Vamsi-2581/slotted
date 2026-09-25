@@ -765,7 +765,7 @@ export const Anatomy: Story = {
       1,
       scene(
         'Every part, at rest',
-        'The nav row — the way back is written too, and yields to the breadcrumbs beside it; narrow the stage below 640 pixels and it returns — the title row with visual — the supplier’s mark as an image here, the kind of record as an icon on the other screens, initials where nothing else exists — heading, mark, subheading, actions and record navigation, the area with the description and the facts, the pill on the edge, and the tabs. Scroll the screen to see which of them stay.',
+        'The nav row — the way back is written too, and yields to the breadcrumbs beside it; narrow the stage below 600 pixels and it returns — the title row with visual — the supplier’s mark as an image here, the kind of record as an icon on the other screens, initials where nothing else exists — heading, mark, subheading, actions and record navigation, the area with the description and the facts, the pill on the edge, and the tabs. Scroll the screen to see which of them stay.',
         screen(HEADER('', { figure: true, visual: 'image' })),
       ),
     ),
@@ -1034,7 +1034,7 @@ export const Content: Story = {
       1,
       scene(
         'A nine-word title, five marks, a long subheading',
-        'Expanded, the title wraps and clamps at three lines; the marks wrap to a second row; the subheading wraps. Scroll: the bar holds the title to one line and the subheading to another.',
+        'Expanded, the title wraps and clamps at two lines; the marks wrap to a second row; the subheading wraps. Scroll: the bar holds the title to one line and the subheading to another.',
         viewport(`<main slPage>
   <header slPageHeader>
     <div slPageHeaderTitleArea>
@@ -1093,7 +1093,7 @@ export const Narrow: Story = {
       1,
       scene(
         'The same header in a 360-pixel column',
-        'Below 640 pixels the breadcrumbs go and the way back stays, the title steps down a size, the toolbar folds its actions and the arrows take the row under the title. Scroll inside the column: the bar is still one line.',
+        'Below 600 pixels the breadcrumbs go and the way back stays, the title steps down a size, the toolbar folds its actions and the arrows take the row under the title. Scroll inside the column: the bar is still one line.',
         `<div class="slotted-demo-measure">${screen(HEADER('', { figure: true }), { compact: true })}</div>`,
       ),
     ),

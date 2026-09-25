@@ -40,6 +40,13 @@ const anatomy: AnatomyRow[] = [
       'The row. Carries data-ui="list-item", every axis, data-selected, data-current, data-disabled, data-loading and aria-current. It is its own container, so the row reflows on its own inline size rather than the viewport.',
   },
   {
+    part: 'marker',
+    element: 'span',
+    required: false,
+    purpose:
+      'The bullet, rendered only when marker is bullet: the dot Glyph in the marker column, before content and hidden from assistive technology. A numbered marker is a counter the stylesheet writes, because it is text.',
+  },
+  {
     part: 'content',
     element: 'div, button or a',
     required: true,

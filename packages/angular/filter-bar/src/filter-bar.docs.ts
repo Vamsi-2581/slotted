@@ -36,14 +36,14 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: true,
     purpose:
-      'O landmark role="search" com o nome da família. Carrega data-ui="filter-bar", data-apply, data-size, data-dirty, data-open, data-sticky. É o contentor de query; nada nele muda de grelha.',
+      'O landmark role="search" com o nome da família. Carrega data-ui="filter-bar", data-apply, data-size, data-dirty, data-open, data-sticky, data-bar-wrapped. É o contentor de query; nada nele muda de grelha.',
   },
   {
     part: 'frame',
     element: 'div',
     required: true,
     purpose:
-      'A grelha, um elemento dentro da raiz, porque uma container query não restyla o elemento que mede. Três composições: larga, média e estreita.',
+      'A grelha, um elemento dentro da raiz, porque uma container query não restyla o elemento que mede. Três composições: larga, média e estreita. Cada membro começa no topo da sua linha e tem a altura de um controle, por isso a busca e a contagem alinham com a primeira linha de pills.',
   },
   {
     part: 'search',
@@ -51,13 +51,6 @@ const anatomy: AnatomyRow[] = [
     required: true,
     purpose:
       'O campo de busca global — um text-field embrulhado — a primeira parada de tabulação. Escape limpa a query; a tecla shortcut chega aqui.',
-  },
-  {
-    part: 'search-icon',
-    element: 'span',
-    required: true,
-    purpose:
-      'A lupa antes da busca, máscara de --slotted-icon-search no adorno inicial do text-field, no tamanho que o campo dá aos seus adornos.',
   },
   {
     part: 'bar',
@@ -278,7 +271,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'chips',
     title: 'As regras aplicadas como chips',
-    note: 'Um chip por regra de primeiro nível de um campo não fixado: o nome do campo em medium, a frase de describeFilter a seguir, o X do tag. Além de chipLimit os chips dobram atrás de "+n more"; um campo que a aplicação já não declara fica à vista, inválido e removível.',
+    note: 'Um chip por regra de primeiro nível de um campo não fixado: o nome do campo em medium, a frase de describeFilter a seguir, o X do tag. Uma lista de um valor lê-se como igualdade — "Status is Paid" em vez de "Status any of Paid" — e volta à forma de lista no segundo valor; a condição continua a ser anyOf. Além de chipLimit os chips dobram atrás de "+n more"; um campo que a aplicação já não declara fica à vista, inválido e removível.',
     snippet: defineSnippet({
       id: 'filter-bar-angular-chips',
       language: 'angular',
@@ -349,7 +342,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'query',
     title: 'A busca global',
-    note: 'A query é o único campo que não pertence a nenhuma coluna. Debounced por queryDelay sob live; Escape limpa com a razão clear; shortcut é a tecla do documento que chega ao campo, desenhada dentro dele com kbd.',
+    note: 'A query é o único campo que não pertence a nenhuma coluna. Debounced por queryDelay sob live; Escape limpa com a razão clear; shortcut é a tecla do documento que chega ao campo, desenhada dentro dele com kbd — e escondida onde a entrada primária é um ecrã táctil, onde não há tecla para carregar.',
     snippet: defineSnippet({
       id: 'filter-bar-angular-query',
       language: 'angular',
@@ -385,7 +378,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'narrow',
     title: 'Três composições pela largura da barra',
-    note: 'Larga, uma linha. Média, a busca com os controles e a contagem, a toolbar numa linha própria. Estreita, abaixo de 36rem: os pills e os chips dobram atrás de "Filters (n)", que abre o construtor. Redimensione o palco.',
+    note: 'Larga, uma linha — enquanto a toolbar cabe nela: quando os pills iriam para uma segunda linha ao lado da busca, a raiz leva data-bar-wrapped e desenha a composição média. A medida é lida na composição larga, com o atributo retirado para a leitura, e por isso não oscila. Média, a busca com os controles e a contagem, a toolbar numa linha própria. Estreita, abaixo de 36rem: os pills e os chips dobram atrás de "Filters (n)", que abre o construtor. Redimensione o palco.',
     snippet: defineSnippet({
       id: 'filter-bar-angular-narrow',
       language: 'angular',

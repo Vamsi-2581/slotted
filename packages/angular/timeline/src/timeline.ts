@@ -22,6 +22,7 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { tabbables } from '@slotted/core/focus';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
@@ -68,12 +69,6 @@ import {
   type TimelineTone,
   type TimelineVariant,
 } from './timeline.constants';
-
-const STYLES = [
-  '../../../styles/src/timeline/timeline.css',
-  '../../../styles/src/spinner/spinner.css',
-  '../../../styles/src/visually-hidden/visually-hidden.css',
-];
 
 let counter = 0;
 
@@ -128,7 +123,11 @@ let counter = 0;
       </div>
     }
   `,
-  styleUrls: STYLES,
+  styleUrls: [
+    '../../../styles/src/timeline/timeline.css',
+    '../../../styles/src/spinner/spinner.css',
+    '../../../styles/src/visually-hidden/visually-hidden.css',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slTimeline',
@@ -417,7 +416,9 @@ export class SlTimelineList {
           type="button"
           (click)="toggle($event)"
         >
-          <span aria-hidden="true" data-part="group-indicator"></span>
+          <span aria-hidden="true" data-part="group-indicator"
+            ><span slIcon><svg slGlyph name="chevron-down"></svg></span
+          ></span>
           {{ label() }}
           <span data-ui="visually-hidden">{{
             ', ' + (isOpen() ? timeline.messageSet().collapse : timeline.messageSet().expand)
@@ -428,8 +429,12 @@ export class SlTimelineList {
       }
     </ng-template>
   `,
-  imports: [NgTemplateOutlet],
-  styleUrls: STYLES,
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon],
+  styleUrls: [
+    '../../../styles/src/timeline/timeline.css',
+    '../../../styles/src/spinner/spinner.css',
+    '../../../styles/src/visually-hidden/visually-hidden.css',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slTimelineGroup',
@@ -511,7 +516,12 @@ export class SlTimelineGroupList {
 @Component({
   selector: 'li[slTimelineItem], article[slTimelineItem]',
   standalone: true,
-  imports: [forwardRef(() => SlTimelineTime)],
+  imports: [forwardRef(() => SlTimelineTime), SlGlyph, SlIcon],
+  /*
+   * A finished dot's check is the marker's default content, which projected
+   * artwork replaces. `data-check` tells the sheet it is the family's own, so
+   * the marker stays a dot rather than becoming a badge.
+   */
   template: `
     <ng-content select="[slTimelineOpposite]"></ng-content>
     <div data-part="rail">
@@ -519,7 +529,11 @@ export class SlTimelineGroupList {
         @if (loading()) {
           <span aria-hidden="true" data-part="root" data-ui="spinner"></span>
         } @else {
-          <ng-content select="[slTimelineMarker]"></ng-content>
+          <ng-content select="[slTimelineMarker]">
+            @if (finished() && !current()) {
+              <span slIcon data-check=""><svg slGlyph name="check"></svg></span>
+            }
+          </ng-content>
         }
       </span>
       @if (!last()) {
@@ -555,7 +569,11 @@ export class SlTimelineGroupList {
       <ng-content select="[slTimelineActions]"></ng-content>
     </div>
   `,
-  styleUrls: STYLES,
+  styleUrls: [
+    '../../../styles/src/timeline/timeline.css',
+    '../../../styles/src/spinner/spinner.css',
+    '../../../styles/src/visually-hidden/visually-hidden.css',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slTimelineItem',

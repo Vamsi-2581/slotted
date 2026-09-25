@@ -37,6 +37,7 @@ import {
 import type { OnInit } from '@angular/core';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 
 import { injectTagsInputDefaults } from './tags-input-defaults';
@@ -106,6 +107,7 @@ function longDuration(element: HTMLElement) {
   selector: 'sl-tags-input',
   standalone: true,
   exportAs: 'slTagsInput',
+  imports: [SlGlyph, SlIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   /* `tag`'s sheet beside this family's own: the chips wear its identifier. */
@@ -190,7 +192,9 @@ function longDuration(element: HTMLElement) {
             >
               <span data-part="body">
                 @if (messageFor(index); as message) {
-                  <span data-part="start"></span>
+                  <span data-part="start"
+                    ><span slIcon><svg slGlyph name="circle-alert"></svg></span
+                  ></span>
                 }
                 <span data-part="label">{{ labelFor(chip) }}</span>
               </span>
@@ -204,7 +208,9 @@ function longDuration(element: HTMLElement) {
                   data-part="remove"
                   [attr.aria-label]="removeLabelFor(chip)"
                   (click)="onRemoveClick(index, $event)"
-                ></button>
+                >
+                  <span slIcon><svg slGlyph name="x"></svg></span>
+                </button>
               }
             </span>
           }
@@ -266,7 +272,9 @@ function longDuration(element: HTMLElement) {
         data-part="clear"
         [attr.aria-label]="resolvedClearLabel()"
         (click)="onClear($event)"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="x"></svg></span>
+      </button>
     }
     <span data-part="hint" [id]="hintId">{{ hintText() }}</span>
 

@@ -93,6 +93,11 @@ function setup(providers: unknown[] = []) {
     host: fixture.componentInstance,
     root,
     part: (name: string) => root.querySelector(`[data-part="${name}"]`) as HTMLElement,
+    /** The glyph a part draws, read from the `slIcon` inside it. */
+    glyph: (name: string) =>
+      root
+        .querySelector(`[data-part="${name}"] > [data-ui="icon"] > svg[data-glyph]`)
+        ?.getAttribute('data-glyph'),
     lines: () => [...root.querySelectorAll('[data-part="line"]')] as HTMLElement[],
     settle: () => fixture.detectChanges(),
   };
@@ -100,7 +105,7 @@ function setup(providers: unknown[] = []) {
 
 describe('SlCodeBlock', () => {
   it('is selected in public by the family identifier, and draws the fence parts from text', () => {
-    const { root, part, lines } = setup();
+    const { glyph, root, part, lines } = setup();
     expect(root.getAttribute('data-ui')).toBe(contract.ui);
     expect(root.getAttribute('data-part')).toBe('root');
     expect(root.getAttribute('data-language')).toBe('ts');
@@ -123,6 +128,8 @@ describe('SlCodeBlock', () => {
     }
     /* The scroll-area's root is this family's body: the template's part wins over the directive's. */
     expect(part('body').getAttribute('data-ui')).toBe('scroll-area');
+    /* A `.ts` name is no kind the upload map knows: the plain file glyph. */
+    expect(glyph('icon')).toBe('file');
     expect(part('code').className).toBe('language-ts');
     expect(lines()).toHaveLength(4);
     expect(lines()[2]!.getAttribute('data-line')).toBe('3');
@@ -187,9 +194,10 @@ describe('SlCodeBlock', () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal('navigator', { ...globalThis.navigator, clipboard: { writeText } });
     try {
-      const { host, part, settle } = setup();
+      const { glyph, host, part, settle } = setup();
       host.marks.set({ remove: '2' });
       settle();
+      expect(glyph('copy')).toBe('copy');
       part('copy').click();
       await vi.waitFor(() => expect(host.onCopy).toHaveBeenCalled());
       expect(writeText).toHaveBeenCalledWith(
@@ -199,6 +207,7 @@ describe('SlCodeBlock', () => {
       expect(host.onCopy.mock.calls[0]![0].reason).toBe('pointer');
       settle();
       expect(part('copy').hasAttribute('data-complete')).toBe(true);
+      expect(glyph('copy')).toBe('check');
     } finally {
       vi.unstubAllGlobals();
     }
@@ -222,6 +231,9 @@ describe('SlCodeBlock', () => {
     const wrap = root.querySelector('[data-part="wrap"]') as HTMLButtonElement;
     expect(wrap.getAttribute('aria-pressed')).toBe('true');
     expect(wrap.getAttribute('aria-label')).toBe('Unwrap lines');
+    expect(wrap.querySelector('[data-ui="icon"] > svg')?.getAttribute('data-glyph')).toBe(
+      'text-wrap',
+    );
     expect(lines()[0]!.style.getPropertyValue('--slotted-code-block-indent')).toBe('2');
     expect(lines()[1]!.style.getPropertyValue('--slotted-code-block-indent')).toBe('');
     wrap.click();

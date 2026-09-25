@@ -96,6 +96,8 @@ let summaryCounter = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
+    // The family's identifier on the part: its rules reach it by name, never as any descendant.
+    'data-ui': 'form',
     'data-part': 'summary',
     role: 'alert',
     tabindex: '-1',

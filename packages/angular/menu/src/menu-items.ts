@@ -17,6 +17,7 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlMenu } from './menu';
 import type { MenuTone, MenuValueReason } from './menu-defaults';
@@ -87,6 +88,7 @@ export interface MenuSelectEvent {
     'button[slMenuItem], a[slMenuItem], button[slMenuCheckboxItem], button[slMenuRadioItem]',
   standalone: true,
   exportAs: 'slMenuItem',
+  imports: [SlGlyph, SlIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
@@ -108,13 +110,18 @@ export interface MenuSelectEvent {
   },
   template: `
     @if (role !== 'menuitem') {
-      <span data-part="indicator"></span>
+      <span data-part="indicator"
+        ><span slIcon><svg slGlyph [name]="role === 'menuitemradio' ? 'dot' : 'check'"></svg></span
+      ></span>
     }
     <ng-content select="[slMenuItemIcon]" />
     <span data-part="label"><ng-content /></span>
     <ng-content select="[slMenuItemDescription]" />
     @if (legend(); as printed) {
       <span data-part="shortcut" aria-hidden="true">{{ printed }}</span>
+    }
+    @if (opensSubmenu()) {
+      <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
     }
   `,
 })
@@ -156,6 +163,12 @@ export class SlMenuItem {
   private readonly isRadio =
     inject(new HostAttributeToken('slMenuRadioItem'), { optional: true }) !== null;
   protected readonly isLink = this.element.tagName === 'A';
+
+  /**
+   * Set by `slMenuTriggerFor` on the same element: an item that opens a
+   * submenu ends in a chevron that points along the reading direction.
+   */
+  readonly opensSubmenu = signal(false);
 
   protected readonly role = this.isCheckbox
     ? 'menuitemcheckbox'

@@ -100,6 +100,7 @@ const enabled = (item: HTMLElement) => item.dataset['disabled'] === undefined;
           [id]="contentId"
           [attr.aria-labelledby]="ariaLabel() === undefined ? triggerId : null"
           [attr.aria-label]="ariaLabel() ?? null"
+          [attr.aria-describedby]="ariaDescribedBy() ?? null"
           [attr.aria-busy]="loading() ? true : null"
           [attr.data-loading]="loading() ? '' : null"
           (keydown)="onKeyDown($event)"
@@ -115,6 +116,8 @@ export class SlMenu {
   readonly value = input<string | undefined>(undefined);
   /** The accessible name, for a menu opened from a control with no words. */
   readonly ariaLabel = input<string | undefined>(undefined, { alias: 'aria-label' });
+  /** The ids of what describes the menu, written on the element that carries `role="menu"`. */
+  readonly ariaDescribedBy = input<string | undefined>(undefined, { alias: 'aria-describedby' });
 
   readonly open = model<boolean>(false);
   /** One output for one transition, carrying the reason and the event. */

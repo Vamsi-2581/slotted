@@ -31,6 +31,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import type { Signal } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlSideNavigation } from './side-navigation';
 import { SlSideNavigationIdFactory } from './side-navigation-defaults';
@@ -334,9 +335,11 @@ export class SlSideNavigationLink extends SideNavigationRow {
   selector: 'button[slSideNavigationTrigger]',
   standalone: true,
   exportAs: 'slSideNavigationTrigger',
-  imports: [SlTooltipLayer, SlTooltipContent],
+  imports: [SlGlyph, SlIcon, SlTooltipLayer, SlTooltipContent],
   template: `<ng-content />
-    <span data-part="indicator" aria-hidden="true"></span>
+    <span data-part="indicator" aria-hidden="true"
+      ><span slIcon directional><svg slGlyph name="chevron-right"></svg></span
+    ></span>
     @if (hint()) {
       <ng-template slTooltipLayer>
         <div slTooltipContent>{{ item.labelText() }}</div>

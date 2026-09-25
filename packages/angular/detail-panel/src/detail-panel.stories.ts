@@ -1062,7 +1062,7 @@ export const Narrow: Story = {
       1,
       scene(
         'A 375-pixel phone',
-        'Below 640 pixels of the root’s own width the columns are one: the fields follow the sections with a rule above them, the header’s actions wrap under the title into the toolbar’s overflow, and every field a desktop reader has is still here.',
+        'Below 600 pixels of the root’s own width the columns are one: the fields follow the sections with a rule above them, the header’s actions wrap under the title into the toolbar’s overflow, and every field a desktop reader has is still here.',
         room(PANEL(), 'screen', 'phone'),
       ) +
         scene(

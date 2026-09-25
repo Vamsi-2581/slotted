@@ -21,6 +21,8 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import type { GlyphName } from '@slotted/angular/icon';
 import { writeToClipboard } from '@slotted/core/clipboard';
 import {
   copyText,
@@ -48,20 +50,18 @@ import {
   type CodeBlockWrapReason,
 } from './code-block.constants';
 
-const STYLES = ['../../../styles/src/code-block/code-block.css'];
-
 /** How long the check stays in place of the sheets. */
 const COPIED_FOR = 2000;
 
-const KIND_ICON: Record<string, string> = {
-  archive: '--slotted-icon-file-archive',
-  audio: '--slotted-icon-file-audio',
-  document: '--slotted-icon-file-type',
-  image: '--slotted-icon-file-image',
-  pdf: '--slotted-icon-file-text',
-  presentation: '--slotted-icon-presentation',
-  spreadsheet: '--slotted-icon-file-spreadsheet',
-  video: '--slotted-icon-file-video',
+const KIND_ICON: Record<string, GlyphName> = {
+  archive: 'file-archive',
+  audio: 'file-audio',
+  document: 'file-type',
+  image: 'file-image',
+  pdf: 'file-text',
+  presentation: 'presentation',
+  spreadsheet: 'file-spreadsheet',
+  video: 'file-video',
 };
 
 let counter = 0;
@@ -93,15 +93,13 @@ export class SlCodeBlockLine {
 @Component({
   selector: '[slCodeBlock]',
   standalone: true,
-  imports: [NgTemplateOutlet, SlScrollArea, SlScrollAreaContent, SlSkeleton],
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon, SlScrollArea, SlScrollAreaContent, SlSkeleton],
   template: `
     @if (hasHeader()) {
       <div data-part="header">
         @if (icon(); as glyph) {
-          <span
-            aria-hidden="true"
-            data-part="icon"
-            [style.mask-image]="'var(' + glyph + ')'"
+          <span aria-hidden="true" data-part="icon"
+            ><span slIcon><svg slGlyph [name]="glyph"></svg></span
           ></span>
         }
         @if (title(); as words) {
@@ -122,7 +120,9 @@ export class SlCodeBlockLine {
                 [attr.data-pressed]="isWrapped() ? '' : null"
                 (click)="toggleWrap($event)"
                 (keydown)="remember($event)"
-              ></button>
+              >
+                <span slIcon><svg slGlyph name="text-wrap"></svg></span>
+              </button>
             }
             @if (copyControl()) {
               <button
@@ -132,7 +132,10 @@ export class SlCodeBlockLine {
                 [attr.data-complete]="copied() ? '' : null"
                 (click)="copyFromControl($event)"
                 (keydown)="remember($event)"
-              ></button>
+              >
+                <!-- The check stands in for the sheets while the copy is confirmed. -->
+                <span slIcon><svg slGlyph [name]="copied() ? 'check' : 'copy'"></svg></span>
+              </button>
             }
           </div>
         }
@@ -169,7 +172,7 @@ export class SlCodeBlockLine {
       </button>
     }
   `,
-  styleUrls: STYLES,
+  styleUrl: '../../../styles/src/code-block/code-block.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slCodeBlock',
@@ -312,7 +315,7 @@ export class SlCodeBlock {
   protected readonly icon = computed(() => {
     const name = this.fileName() ?? this.title();
     if (!name || this.title() === undefined) return undefined;
-    return KIND_ICON[fileKind({ name, type: '' })] ?? '--slotted-icon-file';
+    return KIND_ICON[fileKind({ name, type: '' })] ?? 'file';
   });
   protected readonly regionName = computed(
     () => this.title() ?? this.ariaLabel ?? this.labelSet().region,

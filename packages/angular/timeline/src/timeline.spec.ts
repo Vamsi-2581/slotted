@@ -200,13 +200,22 @@ describe('SlTimeline', () => {
   });
 
   it('derives completion and the dashed side from the declared order', () => {
-    const { host, item, settle } = setup();
+    const { host, item, part, settle } = setup();
+    /* A finished dot holds the family's check, marked so the sheet keeps it a dot. */
+    const check = (index: number) =>
+      part(item(index), 'marker')
+        .querySelector('[data-ui="icon"][data-check] > svg[data-glyph]')
+        ?.getAttribute('data-glyph');
     expect(item(0).hasAttribute('data-complete')).toBe(false);
+    expect(part(item(0), 'marker').childElementCount).toBe(0);
     host.autoComplete.set(true);
     settle();
     expect(item(0).getAttribute('data-complete')).toBe('');
     expect(item(1).getAttribute('data-complete')).toBe('');
     expect(item(2).hasAttribute('data-complete')).toBe(false);
+    expect(check(0)).toBe('check');
+    expect(check(1)).toBe('check');
+    expect(part(item(2), 'marker').childElementCount).toBe(0);
     expect(item(2).getAttribute('data-connector')).toBe('dashed');
     expect(item(0).hasAttribute('data-connector')).toBe(false);
     host.order.set('newest-first');
@@ -464,6 +473,11 @@ describe('SlTimelineGroup', () => {
     settle();
     const trigger = root.querySelector('[data-part="group-trigger"]') as HTMLButtonElement;
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(
+      trigger
+        .querySelector('[data-part="group-indicator"] > [data-ui="icon"] > svg[data-glyph]')
+        ?.getAttribute('data-glyph'),
+    ).toBe('chevron-down');
     expect(trigger.textContent?.replace(/\s+/g, ' ').trim()).toBe('Today , Hide events');
     const list = document.getElementById(
       trigger.getAttribute('aria-controls') as string,

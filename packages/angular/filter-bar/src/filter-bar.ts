@@ -72,7 +72,7 @@ import { createRemovalFocus, createRovingTabindex } from '@slotted/core/focus';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
-import { SlButton } from '@slotted/angular/button';
+import { SlButton, SlButtonStart } from '@slotted/angular/button';
 import { SlDatePicker } from '@slotted/angular/date-picker';
 import { SlDateTimePicker } from '@slotted/angular/datetime-picker';
 import {
@@ -83,6 +83,7 @@ import {
   SlDrawerHeader,
   SlDrawerTitle,
 } from '@slotted/angular/drawer';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlKbd } from '@slotted/angular/kbd';
 import { SlMenu, SlMenuGroup, SlMenuItem, SlMenuTrigger } from '@slotted/angular/menu';
 import { SlMultiSelect, SlMultiSelectItem } from '@slotted/angular/multi-select';
@@ -124,8 +125,6 @@ import {
   type FilterBarValueReason,
 } from './filter-bar.constants';
 
-const STYLES = ['../../../styles/src/filter-bar/filter-bar.css'];
-
 type Condition = FilterCondition<string, unknown>;
 
 const BAR_ITEMS =
@@ -145,6 +144,31 @@ function blankRule(field: FilterBarField): FilterDescriptor {
 }
 
 const STICKY_TOP = '--slotted-page-sticky-top';
+
+const BAR_WRAPPED = 'data-bar-wrapped';
+
+/**
+ * Marks the root when the bar's controls take more than one line in the
+ * composition the root's width selects. The attribute comes off before the
+ * read, so the answer is the same whether the fallback it draws is in place
+ * or not: read in the fallback, where the bar has a line of its own, the
+ * answer would be "fits", and the next read would wrap it again. A control
+ * starts a second line when its top is at or below another control's bottom,
+ * because controls on one line share its middle. A control without a box —
+ * hidden in this composition, or never laid out — is not counted.
+ */
+function measureBarWrap(root: HTMLElement, bar: HTMLElement) {
+  root.removeAttribute(BAR_WRAPPED);
+  let top = -Infinity;
+  let bottom = Infinity;
+  for (const control of bar.children) {
+    const box = control.getBoundingClientRect();
+    if (!(box.width > 0 && box.height > 0)) continue;
+    top = Math.max(top, box.top);
+    bottom = Math.min(bottom, box.bottom);
+  }
+  root.toggleAttribute(BAR_WRAPPED, top >= bottom);
+}
 
 function isEditable(element: Element | null) {
   if (!element) return false;
@@ -452,7 +476,7 @@ export class SlFilterBarCondition {
 @Component({
   selector: '[slFilterBarRule]',
   standalone: true,
-  imports: [SlFilterBarCondition, SlSelect, SlSelectItem],
+  imports: [SlFilterBarCondition, SlGlyph, SlIcon, SlSelect, SlSelectItem],
   template: `
     <div data-part="field">
       <sl-select
@@ -489,7 +513,9 @@ export class SlFilterBarCondition {
         type="button"
         [attr.aria-label]="labels().removeRule"
         (click)="removeRequest.emit()"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="x"></svg></span>
+      </button>
     } @else {
       <span></span>
     }
@@ -559,8 +585,11 @@ export class SlFilterBarRule {
   imports: [
     forwardRef(() => SlFilterBarGroup),
     SlButton,
+    SlButtonStart,
     SlFilterBarPart,
     SlFilterBarRule,
+    SlGlyph,
+    SlIcon,
     SlSegment,
     SlSegmentedControl,
   ],
@@ -638,6 +667,9 @@ export class SlFilterBarRule {
         [disabled]="!firstField()"
         (click)="addRule()"
       >
+        <span slButtonStart
+          ><span slIcon><svg slGlyph name="plus"></svg></span
+        ></span>
         {{ labels().addRule }}
       </button>
       <button
@@ -650,6 +682,9 @@ export class SlFilterBarRule {
         [disabled]="!firstField()"
         (click)="addGroup()"
       >
+        <span slButtonStart
+          ><span slIcon><svg slGlyph name="plus"></svg></span
+        ></span>
         {{ labels().addGroup }}
       </button>
       @if (path().length === 0) {
@@ -842,6 +877,7 @@ export class SlFilterBarRuleEditor {
   standalone: true,
   imports: [
     SlButton,
+    SlButtonStart,
     SlDrawer,
     SlDrawerBody,
     SlDrawerClose,
@@ -851,6 +887,8 @@ export class SlFilterBarRuleEditor {
     SlFilterBarGroup,
     SlFilterBarPart,
     SlFilterBarRuleEditor,
+    SlGlyph,
+    SlIcon,
     SlKbd,
     SlMenu,
     SlMenuGroup,
@@ -875,7 +913,9 @@ export class SlFilterBarRuleEditor {
     <div data-part="frame">
       <div data-part="search">
         <div slTextField [size]="sizeValue()" [clearable]="true">
-          <span slTextFieldStart aria-hidden="true" data-part="search-icon"></span>
+          <span slTextFieldStart
+            ><span slIcon><svg slGlyph name="search"></svg></span
+          ></span>
           <input
             #search
             slTextFieldInput
@@ -917,6 +957,7 @@ export class SlFilterBarRuleEditor {
               @if (isActive(field.key)) {
                 <span>{{ sentence(field) }}</span>
               }
+              <span slIcon><svg slGlyph name="chevron-down"></svg></span>
             </button>
             <ng-template slPopoverLayer>
               <div slPopoverContent [attr.aria-label]="field.label">
@@ -949,16 +990,10 @@ export class SlFilterBarRuleEditor {
           [disabled]="disabled() || unfiltered().length === 0"
           [slMenuTriggerFor]="addMenu"
         >
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          >
-            <path d="M12 5v14M5 12h14" />
-          </svg>
+          <!-- The glyph stands in the button's own box; bare in the label it has no size. -->
+          <span slButtonStart
+            ><span slIcon><svg slGlyph name="plus"></svg></span
+          ></span>
           {{ labelSet().add }}
         </button>
         <sl-menu #addMenu [attr.aria-label]="labelSet().add">
@@ -1030,19 +1065,24 @@ export class SlFilterBarRuleEditor {
           [disabled]="disabled()"
           (click)="requestOpen(true, 'pointer', $event)"
         >
-          <span>{{ summaryWord() }}</span> <span>{{ summaryCount() }}</span>
+          <span>{{ summaryWord() }}</span
+          >&ngsp;<span>{{ summaryCount() }}</span>
         </button>
       </div>
 
       <div data-part="end">
         @if (presets(); as views) {
           @if (views.length > 0) {
+            <!-- Clearable: leaving a preset is the control's own clear, and
+                 without it the one way out of a saved view is deleting it. -->
             <div data-part="preset">
               <sl-select
+                clearable
                 [size]="sizeValue()"
                 [disabled]="disabled()"
                 [items]="presetItems()"
                 [attr.aria-label]="labelSet().preset"
+                [placeholder]="labelSet().presetNone"
                 [value]="currentPreset()"
                 (valueChange)="choosePreset($any($event))"
               >
@@ -1118,7 +1158,8 @@ export class SlFilterBarRuleEditor {
                     [attr.aria-label]="labelSet().unknownField(chip.key) + ': ' + chip.sentence"
                     [attr.title]="chip.sentence"
                   >
-                    <span>{{ chip.label }}</span> <span>{{ chip.sentence }}</span>
+                    <span>{{ chip.label }}</span
+                    >&ngsp;<span>{{ chip.sentence }}</span>
                   </button>
                   <button slTagRemove></button>
                 </span>
@@ -1143,7 +1184,8 @@ export class SlFilterBarRuleEditor {
                       [attr.aria-label]="chip.label + ': ' + chip.sentence"
                       [attr.title]="chip.label + ': ' + chip.sentence"
                     >
-                      <span>{{ chip.label }}</span> <span>{{ chip.sentence }}</span>
+                      <span>{{ chip.label }}</span
+                      >&ngsp;<span>{{ chip.sentence }}</span>
                     </button>
                     <button slTagRemove></button>
                   </span>
@@ -1274,7 +1316,7 @@ export class SlFilterBarRuleEditor {
       </footer>
     </sl-drawer>
   `,
-  styleUrls: STYLES,
+  styleUrl: '../../../styles/src/filter-bar/filter-bar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slFilterBar',
@@ -1580,6 +1622,39 @@ export class SlFilterBar {
       };
       doc.addEventListener('keydown', listener);
       onCleanup(() => doc.removeEventListener('keydown', listener));
+    });
+
+    /**
+     * The bar's own line. After the first render, and on the microtask after
+     * anything in the frame comes, goes or changes its text. A resize is read
+     * on the next frame instead: the attribute changes the root's height, and
+     * a change made inside the observer's own callback to a box it observes
+     * ends the browser's loop with an error.
+     */
+    afterRenderEffect((onCleanup) => {
+      const root = this.host.nativeElement;
+      const bar = this.barElement().nativeElement;
+      const frame = bar.parentElement;
+      if (!frame) return;
+      const measure = () => measureBarWrap(root, bar);
+      let pending = 0;
+      const sizes =
+        typeof ResizeObserver === 'undefined'
+          ? undefined
+          : new ResizeObserver(() => {
+              cancelAnimationFrame(pending);
+              pending = requestAnimationFrame(measure);
+            });
+      sizes?.observe(root);
+      sizes?.observe(bar);
+      const contents = new MutationObserver(measure);
+      contents.observe(frame, { characterData: true, childList: true, subtree: true });
+      measure();
+      onCleanup(() => {
+        sizes?.disconnect();
+        contents.disconnect();
+        cancelAnimationFrame(pending);
+      });
     });
 
     /* Sticky: the bar reads the page property and adds its own height for what follows. */

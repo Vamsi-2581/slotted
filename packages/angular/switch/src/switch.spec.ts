@@ -68,7 +68,9 @@ describe('SlSwitch', () => {
     expect(control(fixture).getAttribute('type')).toBe('checkbox');
     expect(control(fixture).getAttribute('role')).toBe('switch');
     expect(query(fixture, '[data-part="track"]')).not.toBeNull();
-    expect(query(fixture, '[data-part="thumb"]')).not.toBeNull();
+    expect(query(fixture, '[data-part="thumb"] svg[data-glyph]').getAttribute('data-glyph')).toBe(
+      'check',
+    );
     expect(query(fixture, '[data-part="label"]').textContent?.trim()).toBe('Alertas por e-mail');
     expect(query(fixture, '[data-part="description"]').textContent?.trim()).toBe(
       'Um aviso a cada pedido.',
@@ -259,6 +261,7 @@ describe('SlSwitch', () => {
 
     expect(root(fixture).getAttribute('data-size')).toBe('sm');
     expect(root(fixture).getAttribute('data-indicator')).toBe('none');
+    expect(query(fixture, '[data-part="thumb"] svg[data-glyph]')).toBeNull();
     expect(root(fixture).getAttribute('data-label-placement')).toBe('start');
   });
 

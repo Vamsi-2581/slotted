@@ -5,13 +5,15 @@ import {
   inject,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlTag } from './tag';
 
 /**
  * The control at the end of the chip, on the consumer's own button so its
- * listeners and its attributes stay theirs. The glyph is the family's, drawn
- * from a mask in the stylesheet: a character is never an icon.
+ * listeners and its attributes stay theirs. The glyph is the family's `x`,
+ * drawn as the `Glyph` element unless the consumer wrote content of their own:
+ * a character is never an icon.
  *
  * Its name is composed rather than repeated. The hidden word and the tag's own
  * label are joined by `aria-labelledby`, so it announces "Remove Design"
@@ -24,7 +26,10 @@ import { SlTag } from './tag';
   selector: 'button[slTagRemove]',
   standalone: true,
   exportAs: 'slTagRemove',
-  template: `<span hidden [id]="tag.removeWordId">{{ tag.resolvedRemoveLabel() }}</span>`,
+  imports: [SlGlyph, SlIcon],
+  template: `<ng-content
+      ><span slIcon><svg slGlyph name="x"></svg></span></ng-content
+    ><span hidden [id]="tag.removeWordId">{{ tag.resolvedRemoveLabel() }}</span>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {

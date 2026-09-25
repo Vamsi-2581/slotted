@@ -118,9 +118,12 @@ describe('SlStatCard', () => {
 
   it('derives the tone from goodWhen and the sign, never from the sign alone', () => {
     const { fixture, host, root, part } = mount();
+    const glyphOf = (indicator: Element | null) =>
+      indicator?.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
     expect(root.getAttribute('data-tone')).toBe('success');
     expect(part('delta')?.getAttribute('data-tone')).toBe('success');
     expect(part('delta')?.getAttribute('data-trend')).toBe('up');
+    expect(glyphOf(part('indicator'))).toBe('trending-up');
 
     host.goodWhen.set('down');
     fixture.detectChanges();
@@ -130,11 +133,14 @@ describe('SlStatCard', () => {
     fixture.detectChanges();
     expect(root.getAttribute('data-tone')).toBe('success');
     expect(part('delta')?.getAttribute('data-trend')).toBe('down');
+    /* One glyph for a rise and a fall, which the sheet turns over. */
+    expect(glyphOf(part('indicator'))).toBe('trending-up');
 
     host.delta.set(0);
     fixture.detectChanges();
     expect(root.getAttribute('data-tone')).toBe('neutral');
     expect(part('delta')?.getAttribute('data-trend')).toBe('flat');
+    expect(glyphOf(part('indicator'))).toBe('minus');
 
     host.delta.set(undefined);
     fixture.detectChanges();

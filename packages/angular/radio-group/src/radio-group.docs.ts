@@ -464,7 +464,10 @@ bootstrapApplication(App, {
 >
   <div data-part="item" data-checked>
     <input data-part="control" type="radio" name="shipping" id="std" value="standard" checked />
-    <span data-part="indicator"></span>
+    <span data-part="indicator"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="dot" aria-hidden="true"></svg></span
+    ></span>
     <label data-part="label" for="std">Entrega padrão</label>
     <p data-part="description" id="std-description">Chega em até cinco dias úteis.</p>
   </div>

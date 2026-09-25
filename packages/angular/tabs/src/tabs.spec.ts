@@ -292,6 +292,7 @@ describe('SlTabs', () => {
     const control = all('[data-part="dismiss"]')[1] as HTMLElement;
     expect(control.getAttribute('tabindex')).toBe('-1');
     expect(control.getAttribute('aria-label')).toBe('Fechar b');
+    expect(control.querySelector('[data-ui="icon"] > svg[data-glyph="x"]')).not.toBeNull();
 
     click(control);
     await fixture.whenStable();

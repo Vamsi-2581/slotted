@@ -91,6 +91,13 @@ const anatomy: AnatomyRow[] = [
       'Empties the query. Out of the tab sequence and drawn only while there is something to clear.',
   },
   {
+    part: 'close',
+    element: 'button',
+    required: false,
+    purpose:
+      'The way out where the scrim is not: the word closeLabel at the end of the field, drawn by the stylesheet only while the dialog is full screen, asking open to be false with the reason dismiss. Absent inline.',
+  },
+  {
     part: 'list',
     element: 'div',
     required: true,
@@ -691,6 +698,13 @@ export const ANGULAR_COMMAND_PALETTE_DOCS = {
         'Clear',
         'sl-command-palette',
         'The clear control’s accessible name',
+      ],
+      [
+        'closeLabel',
+        'string',
+        'Close',
+        'sl-command-palette',
+        'The word on the close control, drawn only while the dialog is full screen',
       ],
       ['backLabel', 'string', 'Back', 'sl-command-palette', 'The trail’s accessible name'],
       [

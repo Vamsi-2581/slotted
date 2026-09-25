@@ -4,7 +4,7 @@ import type { ComponentFixture } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ChangeRequest } from '@slotted/core/state';
-import { SlPage } from '@slotted/angular/page';
+import { SlPage, SlPageBody } from '@slotted/angular/page';
 import { SlPageHeader } from './page-header';
 import { providePageHeaderDefaults } from './page-header-defaults';
 import {
@@ -214,6 +214,15 @@ describe('SlPageHeader', () => {
     expect(toggle().getAttribute('aria-expanded')).toBe('true');
     expect(toggle().getAttribute('aria-controls')).toBe(area().id);
     expect(toggle().getAttribute('aria-label')).toBe('Recolher cabeçalho');
+    expect(
+      toggle().querySelector('[data-ui="icon"] > svg[data-glyph="chevron-down"]'),
+    ).not.toBeNull();
+    /* The way back keeps its label, and draws a mirrored arrow before it. */
+    const back = root().querySelector('[data-part="back"]') as HTMLElement;
+    expect(back.firstElementChild?.getAttribute('data-ui')).toBe('icon');
+    expect(back.firstElementChild?.hasAttribute('data-directional')).toBe(true);
+    expect(back.querySelector('svg[data-glyph="arrow-left"]')).not.toBeNull();
+    expect(back.textContent?.trim()).toBe('Pedidos');
     expect(area().getAttribute('role')).toBe('region');
     expect(area().getAttribute('aria-label')).toBe('Cabeçalho da página');
     expect(root().hasAttribute('data-expanded')).toBe(true);
@@ -263,13 +272,17 @@ describe('SlPageHeader', () => {
   it('pins as a pressed toggle button, and a pin opens a collapsed area', () => {
     click(toggle());
     expect(host.expanded()).toBe(false);
+    const glyph = () =>
+      pin().querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
     expect(pin().getAttribute('aria-pressed')).toBe('false');
+    expect(glyph()).toBe('pin');
     click(pin());
     expect(host.pinnedRequests.at(-1)?.reason).toBe('pointer');
     expect(host.pinned()).toBe(true);
     expect(pin().getAttribute('aria-pressed')).toBe('true');
     expect(pin().hasAttribute('data-pressed')).toBe(true);
     expect(pin().getAttribute('aria-label')).toBe('Soltar cabeçalho');
+    expect(glyph()).toBe('pin-off');
     expect(host.expandedRequests.at(-1)?.reason).toBe('programmatic');
     expect(host.expanded()).toBe(true);
   });
@@ -375,6 +388,116 @@ describe('SlPageHeader', () => {
     expect(root().hasAttribute('data-tall')).toBe(true);
     expect(host.pinned()).toBe(false);
     expect(host.pinnedRequests.at(-1)?.reason).toBe('programmatic');
+  });
+
+  /**
+   * Below the compact size class the header is in the flow: the stylesheet
+   * reads `data-compact` and takes the root out of `sticky`, and nothing is
+   * left for another family to stop under.
+   */
+  it('writes data-compact below the compact size class, and takes it off above it', async () => {
+    const width = { value: 390 };
+    Object.defineProperty(root(), 'clientWidth', { configurable: true, get: () => width.value });
+    FakeResizeObserver.last?.callback([], {} as ResizeObserver);
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    fixture.detectChanges();
+    expect(root().hasAttribute('data-compact')).toBe(true);
+    expect(document.documentElement.style.getPropertyValue('--slotted-page-sticky-top')).toBe(
+      '0px',
+    );
+
+    width.value = 1024;
+    FakeResizeObserver.last?.callback([], {} as ResizeObserver);
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    fixture.detectChanges();
+    expect(root().hasAttribute('data-compact')).toBe(false);
+  });
+});
+
+/**
+ * A page that fills does not scroll: a list inside its body does. The header
+ * is given the body, so that list moving down past sixteen pixels snaps the
+ * area shut and the same list back at its top opens it again.
+ */
+describe('SlPageHeader in a page that fills', () => {
+  @Component({
+    standalone: true,
+    imports: [
+      SlPage,
+      SlPageBody,
+      SlPageHeader,
+      SlPageHeaderArea,
+      SlPageHeaderControls,
+      SlPageHeaderToggle,
+    ],
+    template: `<main slPage scroll="self" [fill]="fill()">
+      <header slPageHeader [(expanded)]="expanded" (expandedRequest)="requests.push($event)">
+        <div slPageHeaderArea></div>
+        <div slPageHeaderControls><button slPageHeaderToggle></button></div>
+      </header>
+      <div slPageBody>
+        <div id="list"></div>
+        <textarea id="note"></textarea>
+      </div>
+    </main>`,
+  })
+  class Filled {
+    readonly fill = signal(true);
+    readonly expanded = signal(true);
+    readonly requests: ChangeRequest<boolean>[] = [];
+  }
+
+  let fixture: ComponentFixture<Filled>;
+  let host: Filled;
+
+  const scrollList = (top: number, selector = '#list') => {
+    const list = fixture.nativeElement.querySelector(selector) as HTMLElement;
+    Object.defineProperty(list, 'scrollTop', { configurable: true, value: top });
+    list.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+  };
+
+  beforeEach(async () => {
+    vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver);
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+    fixture = TestBed.createComponent(Filled);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+    vi.unstubAllGlobals();
+  });
+
+  it('collapses when a scroller in the body passes sixteen pixels, and re-opens at its top', () => {
+    scrollList(10);
+    expect(host.expanded()).toBe(true);
+
+    scrollList(40);
+    expect(host.expanded()).toBe(false);
+    expect(host.requests.at(-1)?.reason).toBe('scroll');
+
+    scrollList(0);
+    expect(host.expanded()).toBe(true);
+    expect(host.requests.at(-1)?.reason).toBe('scroll');
+  });
+
+  /** A note typed into the body scrolls its own text, not the content the header heads. */
+  it('leaves the header alone when a textarea in the body scrolls', () => {
+    scrollList(40, '#note');
+    expect(host.expanded()).toBe(true);
+    expect(host.requests).toEqual([]);
+  });
+
+  it('reads the page on every scroll, so a page that stops filling stops the snap', () => {
+    host.fill.set(false);
+    fixture.detectChanges();
+    scrollList(40);
+    expect(host.expanded()).toBe(true);
+    expect(host.requests).toEqual([]);
   });
 });
 

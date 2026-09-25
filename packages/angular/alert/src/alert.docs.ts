@@ -225,7 +225,7 @@ export const ANGULAR_ALERT_DOCS = {
         "'accent' | 'secondary' | 'success' | 'warning' | 'danger'",
         'accent',
         'slAlert',
-        'Which of the five semantic colours the message speaks in, and which mark it draws: circle-info, circle, circle-check, triangle-alert, circle-alert',
+        'Which of the five semantic colours the message speaks in, and which mark it draws: circle-info, circle, circle-check, circle-alert, circle-x',
       ],
       [
         'variant',

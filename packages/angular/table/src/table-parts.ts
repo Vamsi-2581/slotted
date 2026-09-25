@@ -4,13 +4,22 @@ import {
   Component,
   computed,
   Directive,
+  ElementRef,
   inject,
   input,
   numberAttribute,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlCheckbox } from '@slotted/angular/checkbox';
 import { SlSkeleton } from '@slotted/angular/skeleton';
+import {
+  SlTooltip,
+  SlTooltipContent,
+  SlTooltipLayer,
+  SlTooltipTrigger,
+  provideTooltipDefaults,
+} from '@slotted/angular/tooltip';
 
 import { SlTable } from './table';
 import type { TableAlign, TableSticky, TableText } from './table-defaults';
@@ -158,16 +167,40 @@ export class SlTableRow {
 /**
  * A column's name. `scope="col"` is what makes a screen reader repeat it for
  * every cell under it, and `aria-sort` is written here and on no other header.
+ *
+ * A name cut by its own box — `text="truncate"` on a column with no room —
+ * reads `Op…` to the eye while the whole of it is still what a screen reader
+ * repeats under every cell. The hint closes that gap: it opens only while the
+ * name is measured as cut, which a header that wraps or fits never is, and it
+ * is shown rather than read — `describes="none"`, because the header already
+ * states the words.
  */
-@Directive({
+@Component({
   selector: 'th[slTableColumnHeader]',
   standalone: true,
   exportAs: 'slTableColumnHeader',
+  imports: [SlTooltipContent, SlTooltipLayer],
+  template: `<ng-content />
+    <ng-template slTooltipLayer>
+      <div slTooltipContent>{{ hint() }}</div>
+    </ng-template>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   hostDirectives: [
     {
       directive: SlTableCellAxes,
       inputs: ['align', 'blockAlign', 'numeric', 'text', 'sticky', 'stickyOffset'],
     },
+    SlTooltip,
+    SlTooltipTrigger,
+  ],
+  providers: [
+    provideTooltipDefaults({
+      describes: 'none',
+      openOn: 'hover',
+      side: 'bottom',
+      whenClipped: true,
+    }),
   ],
   host: {
     'data-part': 'column-header',
@@ -181,11 +214,18 @@ export class SlTableColumnHeader {
   readonly scope = input<string | undefined>(undefined);
 
   private readonly table = inject(SlTable);
+  private readonly tooltip = inject(SlTooltip);
+  private readonly native: HTMLElement = inject(ElementRef).nativeElement;
 
   readonly ariaSort = computed(() => {
     const sort = this.table.sort();
     return sort !== null && sort.column === this.column() ? sort.direction : null;
   });
+
+  /** The words the header itself holds, read when the hint is about to show them. */
+  protected readonly hint = computed(() =>
+    this.tooltip.isOpen() ? (this.native.textContent ?? '').trim() : '',
+  );
 }
 
 /**
@@ -230,10 +270,15 @@ export class SlTableCell {}
  * The consumer's own listener runs as well: this is a listener on the host, so
  * both fire and a consumer who calls `preventDefault()` keeps the sort still.
  */
-@Directive({
+@Component({
   selector: 'button[slTableSort]',
   standalone: true,
   exportAs: 'slTableSort',
+  imports: [SlGlyph, SlIcon],
+  /* The direction mark follows the name: one chevron the stylesheet turns over
+     for ascending and shows, muted, under the pointer on an unsorted column. */
+  template: `<ng-content /><span slIcon><svg slGlyph name="chevron-down"></svg></span>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'sort',
     type: 'button',
@@ -380,10 +425,16 @@ export class SlTableSelectAll {
  * The Disclosure pattern, borrowed whole: a `button` carrying `aria-expanded`
  * and naming the row it opens.
  */
-@Directive({
+@Component({
   selector: 'button[slTableExpander]',
   standalone: true,
   exportAs: 'slTableExpander',
+  imports: [SlGlyph, SlIcon],
+  /* The chevron is drawn unless the consumer wrote content of their own. */
+  template: `<ng-content
+    ><span slIcon><svg slGlyph name="chevron-right"></svg></span
+  ></ng-content>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'expander',
     type: 'button',

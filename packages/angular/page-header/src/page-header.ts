@@ -83,6 +83,7 @@ type MovedBy = 'control' | 'pin' | 'programmatic' | 'scroll';
     '[attr.data-revealed]': "revealed() ? '' : null",
     '[attr.data-scrolled]': "scrolled() ? '' : null",
     '[attr.data-tall]': "tall() ? '' : null",
+    '[attr.data-compact]': "compact() ? '' : null",
     '[attr.data-loading]': "loading() ? '' : null",
     '[attr.aria-busy]': "loading() ? 'true' : null",
   },
@@ -129,6 +130,8 @@ export class SlPageHeader {
   readonly scrolled = signal(false);
   /** The header is too much of the screen to hold; the pin is hidden and a held header let go. */
   readonly tall = signal(false);
+  /** The header is narrower than the compact size class; it is in the flow and nothing condenses it. */
+  readonly compact = signal(false);
   /** Whether the area is shown whole in place although the scroll has passed it. */
   readonly revealed = signal(false);
 
@@ -182,7 +185,9 @@ export class SlPageHeader {
           onRevealed: (next) => this.revealed.set(next),
           onScrollRequest: (next) => this.request(next, 'scroll', undefined, 'scroll'),
           onTall: (next) => this.tall.set(next),
+          onCompact: (next) => this.compact.set(next),
           onPinRequest: (next) => this.requestPinned(next, 'programmatic'),
+          contained: () => this.filledBody(),
         });
       };
       attach();
@@ -194,6 +199,18 @@ export class SlPageHeader {
       this.resolvedCollapse();
       untracked(() => this.engine?.refresh());
     });
+  }
+
+  /**
+   * The body of the page this header heads, while that page fills: nothing
+   * scrolls outside it there, so its principal scroller is what snaps the area.
+   * Read from the DOM on every scroll, so a page that turns `fill` on or off
+   * is followed without rebuilding the engine.
+   */
+  private filledBody(): HTMLElement | null {
+    const page = this.native.closest<HTMLElement>('[data-ui="page"]');
+    if (page === null || !page.hasAttribute('data-fill')) return null;
+    return page.querySelector<HTMLElement>(':scope > [data-part="scroll"] > [data-part="body"]');
   }
 
   private request(

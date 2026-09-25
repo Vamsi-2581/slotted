@@ -6,6 +6,7 @@ import {
   input,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlSkeleton } from '@slotted/angular/skeleton';
 import { SlVisuallyHidden } from '@slotted/angular/visually-hidden';
 
@@ -32,11 +33,14 @@ import {
 @Component({
   selector: '[slStatCardDelta]',
   standalone: true,
-  imports: [SlSkeleton, SlVisuallyHidden],
+  imports: [SlGlyph, SlIcon, SlSkeleton, SlVisuallyHidden],
+  /* One glyph for a rise and a fall, turned over by the sheet for a fall. */
   template: `@if (card.loading()) {
       <span slSkeleton inlineSize="3.5em"></span>
     } @else {
-      <span data-part="indicator" aria-hidden="true"></span
+      <span data-part="indicator" aria-hidden="true"
+        ><span slIcon [directional]="trend() !== 'flat'"
+          ><svg slGlyph [name]="trend() === 'flat' ? 'minus' : 'trending-up'"></svg></span></span
       ><span slVisuallyHidden>{{ card.resolvedMessages()[trend()] }} </span>{{ formatted()
       }}<ng-content />
     }`,

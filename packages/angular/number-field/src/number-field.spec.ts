@@ -466,6 +466,22 @@ describe('SlNumberField', () => {
       expect(parts).toEqual(['decrement', 'input', 'increment']);
     });
 
+    it('draws a chevron in each stacked half and the minus and plus when split', () => {
+      const glyph = (fixture: Fixture, part: 'increment' | 'decrement') =>
+        stepper(fixture, part).querySelector('svg[data-glyph]')?.getAttribute('data-glyph');
+      const stacked = renderTemplate(
+        `<div slNumberField><input slNumberFieldInput defaultValue="3" /></div>`,
+      );
+      expect(glyph(stacked, 'increment')).toBe('chevron-down');
+      expect(glyph(stacked, 'decrement')).toBe('chevron-down');
+
+      const split = renderTemplate(
+        `<div slNumberField stepper="split"><input slNumberFieldInput defaultValue="3" /></div>`,
+      );
+      expect(glyph(split, 'increment')).toBe('plus');
+      expect(glyph(split, 'decrement')).toBe('minus');
+    });
+
     it('withdraws them entirely when the arrangement says none', () => {
       const fixture = renderTemplate(
         `<div slNumberField stepper="none"><input slNumberFieldInput defaultValue="3" /></div>`,

@@ -44,8 +44,13 @@ test('names every stylesheet with a literal a compiler can resolve', () => {
     for (const [, value] of code.matchAll(/styleUrl\s*:\s*([^,\n]+)/g)) {
       if (!/^'[^']+'$/.test(value.trim())) violations.push(`${path}: styleUrl: ${value.trim()}`);
     }
-    for (const [, list] of code.matchAll(/styleUrls\s*:\s*\[([\s\S]*?)\]/g)) {
-      for (const entry of list.split(',')) {
+    for (const [, value] of code.matchAll(/styleUrls\s*:\s*(\[[\s\S]*?\]|[^,\n]+)/g)) {
+      const list = value.match(/^\[([\s\S]*)\]$/);
+      if (!list) {
+        violations.push(`${path}: styleUrls: ${value.trim()}`);
+        continue;
+      }
+      for (const entry of list[1].split(',')) {
         if (entry.trim().length === 0) continue;
         if (!/^'[^']+'$/.test(entry.trim()))
           violations.push(`${path}: styleUrls entry ${entry.trim()}`);

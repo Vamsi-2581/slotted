@@ -22,6 +22,7 @@ import {
 import type { OnInit } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor } from '@angular/forms';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlCheckboxGroup } from '@slotted/angular/checkbox-group';
 import { SlField } from '@slotted/angular/field';
 import { SlFieldGroup } from '@slotted/angular/field-group';
@@ -58,9 +59,9 @@ function activationReason(event: Event): CheckboxCheckedReason {
  * The host element is the root, and it carries no role.
  *
  * **The mark is a sibling, not a pseudo-element.** Firefox renders neither
- * `::before` nor `::after` on an `input`, a glyph token is authored black so it
- * can be masked, and a mask on the control would clip its border and ground
- * away with the mark.
+ * `::before` nor `::after` on an `input`, so the glyph is drawn in an element
+ * beside the control. It is the dash while indeterminate — mixed outranks the
+ * check — and the stylesheet only reveals it on `:checked` or `:indeterminate`.
  *
  * **Angular pays one element for the root, and React pays none.** React can
  * render a wrapper from inside a component; an Angular component's host *is*
@@ -85,6 +86,7 @@ function showsNothing(label: HTMLElement): boolean {
   selector: '[slCheckbox]',
   standalone: true,
   exportAs: 'slCheckbox',
+  imports: [SlGlyph, SlIcon],
   template: `<input
       #control
       data-part="control"
@@ -102,7 +104,9 @@ function showsNothing(label: HTMLElement): boolean {
       (click)="onClick($event)"
       (blur)="onBlur()"
     />
-    <span data-part="indicator"></span>
+    <span data-part="indicator"
+      ><span slIcon><svg slGlyph [name]="resolvedIndeterminate() ? 'minus' : 'check'"></svg></span
+    ></span>
     <label #label data-part="label" [attr.for]="controlId"><ng-content /></label>
     <ng-content select="[slCheckboxDescription]" />`,
   styleUrl: '../../../styles/src/checkbox/checkbox.css',

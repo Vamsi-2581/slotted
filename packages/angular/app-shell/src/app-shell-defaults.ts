@@ -41,7 +41,14 @@ export type AppShellDismissPolicy = 'close' | 'none';
 
 /** Why the navigation region opened or closed. */
 export type AppShellOpenReason =
-  'pointer' | 'keyboard' | 'escape' | 'outsidePress' | 'select' | 'resize' | 'programmatic';
+  | 'pointer'
+  | 'keyboard'
+  | 'escape'
+  | 'outsidePress'
+  | 'back'
+  | 'select'
+  | 'resize'
+  | 'programmatic';
 
 /** Why the secondary pane opened or closed. No `select`: a pane has no destinations. */
 export type AppShellAsideOpenReason = Exclude<AppShellOpenReason, 'select'>;
@@ -77,6 +84,8 @@ export interface AppShellDefaults {
   collapsedTo: AppShellCollapsedTo;
   dividers: boolean;
   escape: AppShellDismissPolicy;
+  /** The platform's way back — a phone's gesture, a browser's button — closes a modal layer. */
+  back: AppShellDismissPolicy;
   messages: AppShellMessages;
   modal: boolean;
   navMode: AppShellNavMode;
@@ -108,6 +117,7 @@ const FALLBACK: AppShellDefaults = {
   collapsedTo: 'rail',
   dividers: true,
   escape: 'close',
+  back: 'close',
   messages: DEFAULT_APP_SHELL_MESSAGES,
   modal: true,
   navMode: 'auto',

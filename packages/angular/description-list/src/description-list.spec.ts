@@ -266,6 +266,9 @@ describe('a clamped value', () => {
 
     expect(toggle().getAttribute('aria-expanded')).toBe('false');
     expect(toggle().textContent?.trim()).toBe('Show more');
+    expect(
+      toggle().querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph'),
+    ).toBe('chevron-down');
 
     toggle().click();
     fixture.detectChanges();
@@ -364,6 +367,9 @@ describe('copying, the missing value and the row action', () => {
   it('puts the rendered value on the clipboard and says it finished', async () => {
     const { fixture, root } = panels();
     const control = root.querySelector('[data-part="copy"]') as HTMLButtonElement;
+    const glyph = () =>
+      control.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
+    expect(glyph()).toBe('copy');
 
     control.click();
     await fixture.whenStable();
@@ -371,6 +377,7 @@ describe('copying, the missing value and the row action', () => {
 
     expect(writeText).toHaveBeenCalledWith('arn:aws:iam::421900075512:role/billing');
     expect(control.getAttribute('data-complete')).toBe('');
+    expect(glyph()).toBe('check');
     expect(fixture.componentInstance.results[0]?.copied).toBe(true);
   });
 

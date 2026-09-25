@@ -103,6 +103,9 @@ describe('SlBreadcrumb', () => {
 
       expect(ellipsis()?.getAttribute('aria-label')).toBe('Show 3 hidden levels');
       expect(ellipsis()?.getAttribute('aria-expanded')).toBe('false');
+      expect(
+        ellipsis()?.querySelector('[data-ui="icon"] > svg[data-glyph="ellipsis"]'),
+      ).not.toBeNull();
       expect(items().filter((item) => item.hasAttribute('hidden'))).toHaveLength(3);
     });
 

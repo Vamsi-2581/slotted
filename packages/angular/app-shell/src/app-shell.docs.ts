@@ -98,7 +98,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'The disclosure control for the navigation region: aria-expanded, aria-controls and the family’s own label, all taken from the shell’s context rather than from where it stands. Draws --slotted-icon-panel-open or --slotted-icon-panel-close, mirrored by navSide and by direction.',
+      'The disclosure control for the navigation region: aria-expanded, aria-controls and the family’s own label, all taken from the shell’s context rather than from where it stands. Draws the panel-open or panel-close Glyph element by state, mirrored by navSide and by direction.',
   },
   {
     part: 'nav',
@@ -314,7 +314,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'navModes',
     title: 'Inline, overlaid, and the width that decides',
-    note: 'inline makes the region a column; overlay takes it out of the grid and over the content with a veil, a focus scope and inert on everything behind it; auto answers the shell’s own inline size at 768 pixels — not the window’s, which is why the narrow frame here behaves like a phone inside a wide page. Press the toggle in the overlaid frame: Escape and a press outside both close it.',
+    note: 'inline makes the region a column; overlay takes it out of the grid and over the content with a veil, a focus scope and inert on everything behind it; auto answers the shell’s own inline size at 600 pixels — not the window’s, which is why the narrow frame here behaves like a phone inside a wide page. Press the toggle in the overlaid frame: Escape and a press outside both close it.',
     snippet: defineSnippet({
       id: 'app-shell-angular-nav-modes',
       language: 'angular',
@@ -541,7 +541,7 @@ export const ANGULAR_APP_SHELL_DOCS = {
         "'inline' | 'overlay' | 'auto'",
         'auto',
         'slAppShell, provideAppShellDefaults',
-        'How the region occupies space. auto is inline at or above 768 pixels of the shell’s own inline size and overlay below it, answered in CSS for the layout and in script for the keyboard',
+        'How the region occupies space. auto is inline at or above 600 pixels of the shell’s own inline size and overlay below it, answered in CSS for the layout and in script for the keyboard',
       ],
       [
         'asideMode',
@@ -614,11 +614,18 @@ export const ANGULAR_APP_SHELL_DOCS = {
         'Whether a press outside an overlaid panel closes it',
       ],
       [
+        'back',
+        "'close' | 'none'",
+        'close',
+        'slAppShell, provideAppShellDefaults',
+        "The platform's way back — a phone's gesture, a browser's button — closes the layer instead of leaving the page, while it is modal: @slotted/core/dismissable-layer holds one history entry per modal layer and answers the popstate that leaves it with the reason back",
+      ],
+      [
         'closeOnNavigate',
         'boolean',
         'true',
         'slAppShell, provideAppShellDefaults',
-        'Whether a click on an a[href] inside the overlaid navigation closes it, with the reason select. Without it a phone costs two taps per destination',
+        'Whether a click on an a[href] inside the overlaid navigation closes it, with the reason select — a router’s preventDefault included, an aria-disabled link excluded. Without it a phone costs two taps per destination',
       ],
       [
         'messages',
@@ -783,6 +790,7 @@ export const ANGULAR_APP_SHELL_DOCS = {
   --slotted-app-shell-row-text-line-height: var(--slotted-line-height-sm);
   --slotted-app-shell-rail-size: 3rem;
   --slotted-app-shell-nav-size-md: 16rem;
+  --slotted-app-shell-nav-overlay-size: 22rem;
   --slotted-app-shell-aside-size-md: 20rem;
   --slotted-app-shell-banner-block-size: 3.5rem;
   --slotted-app-shell-radius: var(--slotted-radius-md);
@@ -807,6 +815,9 @@ export const ANGULAR_APP_SHELL_DOCS = {
   --slotted-app-shell-nav-surface: transparent;
   --slotted-app-shell-aside-surface: var(--slotted-surface);
   --slotted-app-shell-footer-color: var(--slotted-text-muted);
+  /* The bar of the two scrolling bodies: thumb and track. */
+  --slotted-app-shell-scrollbar-thumb-color: var(--slotted-border-strong);
+  --slotted-app-shell-scrollbar-track-color: transparent;
 }
 
 /* A dark column on a light frame: the property resolves in the region's own

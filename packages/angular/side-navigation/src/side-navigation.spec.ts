@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ChangeRequest } from '@slotted/core/state';
 import { SlAppShell, SlAppShellNav, SlAppShellNavBody } from '@slotted/angular/app-shell';
@@ -108,6 +108,7 @@ const COLUMN = `<div slSideNavigationSection>
     [(expanded)]="expanded"
     [(flyout)]="flyout"
     [mode]="mode()"
+    [compactAt]="compactAt()"
     [size]="size()"
     [truncate]="truncate()"
     [multiple]="multiple()"
@@ -125,6 +126,7 @@ class Host {
   readonly expanded = signal<readonly string[]>([]);
   readonly flyout = signal<string | null>(null);
   readonly mode = signal<SideNavigationMode | undefined>(undefined);
+  readonly compactAt = signal<number | undefined>(undefined);
   readonly size = signal<SideNavigationSize | undefined>(undefined);
   readonly truncate = signal<SideNavigationTruncate | undefined>(undefined);
   readonly multiple = signal<boolean | undefined>(undefined);
@@ -206,6 +208,9 @@ describe('SlSideNavigation', () => {
     expect(
       trigger('entregas').querySelector('[data-part="indicator"]')?.getAttribute('aria-hidden'),
     ).toBe('true');
+    const box = trigger('entregas').querySelector('[data-part="indicator"] > [data-ui="icon"]');
+    expect(box?.hasAttribute('data-directional')).toBe(true);
+    expect(box?.querySelector('svg[data-glyph="chevron-right"]')).not.toBeNull();
   });
 
   it('opens and closes a group with the reason the device gave', () => {
@@ -322,5 +327,39 @@ describe('SlSideNavigation', () => {
     expect(root().getAttribute('data-size')).toBe('lg');
     expect(root().getAttribute('data-truncate')).toBe('none');
     expect(root().hasAttribute('data-guides')).toBe(false);
+  });
+
+  describe('measuring the room', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    it('measures after the first render, against a bound compactAt', () => {
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          observe() {}
+          disconnect() {}
+        },
+      );
+      /* A read during construction would force a style pass before the
+         bindings exist: inside app-shell it drew the column at rail width. */
+      const reads: boolean[] = [];
+      vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+        this: HTMLElement,
+      ) {
+        reads.push(this.hasAttribute('data-mode'));
+        return { width: 300 } as DOMRect;
+      });
+      fixture = TestBed.createComponent(Host);
+      host = fixture.componentInstance;
+      host.mode.set('auto');
+      host.compactAt.set(500);
+      fixture.detectChanges();
+      expect(reads.length).toBeGreaterThan(0);
+      expect(reads.every(Boolean)).toBe(true);
+      expect(root().hasAttribute('data-compact')).toBe(true);
+    });
   });
 });

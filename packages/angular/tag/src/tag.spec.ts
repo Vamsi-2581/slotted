@@ -129,6 +129,14 @@ describe('SlTagRemove', () => {
     expect(words).toBe('Remove Ana Reis');
   });
 
+  it('draws the x glyph, hidden, inside the control', () => {
+    const { byId } = mount();
+
+    const glyph = byId('removable-remove').querySelector('[data-ui="icon"] > svg[data-glyph]');
+    expect(glyph?.getAttribute('data-glyph')).toBe('x');
+    expect(glyph?.parentElement?.getAttribute('aria-hidden')).toBe('true');
+  });
+
   it('says the removal was asked for by the control', () => {
     const { byId, host } = mount();
 
@@ -245,6 +253,11 @@ describe('SlTagToggle', () => {
         .querySelector('[data-part="indicator"]')
         ?.getAttribute('aria-hidden'),
     ).toBe('true');
+    expect(
+      byId('uncontrolled-toggle')
+        .querySelector('[data-part="indicator"] > [data-ui="icon"] > svg[data-glyph]')
+        ?.getAttribute('data-glyph'),
+    ).toBe('check');
   });
 });
 

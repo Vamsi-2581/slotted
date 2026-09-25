@@ -81,8 +81,9 @@ function renderTemplate(template: string, providers: unknown[] = []) {
 
 type Fixture = ReturnType<typeof renderTemplate>;
 
+/* The family's own root: the trigger's icon box is a `root` part too. */
 const region = (fixture: Fixture) =>
-  fixture.nativeElement.querySelector('[data-part="root"]') as HTMLElement;
+  fixture.nativeElement.querySelector('[data-ui="fullscreen"][data-part="root"]') as HTMLElement;
 const trigger = (fixture: Fixture) =>
   fixture.nativeElement.querySelector('[data-part="trigger"]') as HTMLButtonElement;
 
@@ -127,6 +128,19 @@ describe('SlFullscreen', () => {
     expect(trigger(fixture).textContent?.trim()).toBe('Exit full screen');
     expect(trigger(fixture).hasAttribute('aria-pressed')).toBe(false);
     expect(fixture.componentInstance.on()).toBe(true);
+  });
+
+  it('draws the glyph of the next press', async () => {
+    installAgent();
+    const fixture = renderTemplate(PANEL);
+    await settle(fixture);
+    const glyph = () =>
+      trigger(fixture).querySelector('[data-part="icon"] > [data-ui="icon"] > svg[data-glyph]');
+
+    expect(glyph()?.getAttribute('data-glyph')).toBe(contract.icon.enter);
+    click(trigger(fixture));
+    await settle(fixture);
+    expect(glyph()?.getAttribute('data-glyph')).toBe(contract.icon.exit);
   });
 
   it('asks the agent inside the press', async () => {
@@ -199,19 +213,6 @@ describe('SlFullscreen', () => {
     expect(region(fixture).hasAttribute('data-mode')).toBe(false);
   });
 
-  it('keeps the words as the name of an icon-only control, and projects the consumer’s', () => {
-    const fixture = renderTemplate(`<section slFullscreen>
-      <button slFullscreenTrigger iconOnly></button>
-      <button slFullscreenTrigger id="own"><svg slFullscreenIcon></svg>Apresentar</button>
-    </section>`);
-
-    expect(trigger(fixture).hasAttribute('data-icon-only')).toBe(true);
-    expect(trigger(fixture).textContent?.trim()).toBe('Full screen');
-    const own = fixture.nativeElement.querySelector('#own') as HTMLElement;
-    expect(own.textContent?.trim()).toBe('Apresentar');
-    expect(own.querySelector('[data-part="icon"] svg')).not.toBeNull();
-  });
-
   it('marks the content part with the family identifier on the consumer’s element', () => {
     const fixture = renderTemplate(`<section slFullscreen>
       <main slFullscreenContent id="chart" class="chart"></main>
@@ -223,6 +224,20 @@ describe('SlFullscreen', () => {
     expect(content.getAttribute('data-part')).toBe('content');
     expect(content.classList.contains('chart')).toBe(true);
     expect(content.parentElement).toBe(region(fixture));
+  });
+
+  it('keeps the words as the name of an icon-only control, and projects the consumer’s', () => {
+    const fixture = renderTemplate(`<section slFullscreen>
+      <button slFullscreenTrigger iconOnly></button>
+      <button slFullscreenTrigger id="own"><svg slFullscreenIcon></svg>Apresentar</button>
+    </section>`);
+
+    expect(trigger(fixture).hasAttribute('data-icon-only')).toBe(true);
+    expect(trigger(fixture).textContent?.trim()).toBe('Full screen');
+    const own = fixture.nativeElement.querySelector('#own') as HTMLElement;
+    expect(own.textContent?.trim()).toBe('Apresentar');
+    expect(own.querySelector('[data-part="icon"] > svg[slFullscreenIcon]')).not.toBeNull();
+    expect(own.querySelector('[data-glyph]')).toBeNull();
   });
 
   it('reads size, variant and messages from the provider, and the instance wins', () => {

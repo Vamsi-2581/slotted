@@ -8,6 +8,7 @@ import {
   input,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { injectStatusIndicatorDefaults } from './status-indicator-defaults';
 import {
@@ -15,6 +16,7 @@ import {
   STATUS_INDICATOR_DEFAULT_MARK,
   STATUS_INDICATOR_DEFAULT_SIZE,
   STATUS_INDICATOR_DEFAULT_STATUS,
+  STATUS_INDICATOR_GLYPHS,
   STATUS_INDICATOR_LABELS,
   STATUS_INDICATOR_ROLE,
   type StatusIndicatorLive,
@@ -46,7 +48,12 @@ import {
 @Component({
   selector: '[slStatusIndicator]',
   standalone: true,
-  template: `<span aria-hidden="true" data-part="mark"></span
+  imports: [SlGlyph, SlIcon],
+  /* The icon mark's glyph follows the status; the sheet sizes and colours it. */
+  template: `<span aria-hidden="true" data-part="mark">
+      @if (markValue() === 'icon') {
+        <span slIcon><svg slGlyph [name]="glyph()"></svg></span>
+      }</span
     ><span data-part="label"
       ><ng-content
         ><span data-part="announcement" data-ui="visually-hidden">{{ name() }}</span></ng-content
@@ -104,6 +111,8 @@ export class SlStatusIndicator {
   readonly liveValue = computed(
     () => this.live() ?? this.defaults.live ?? STATUS_INDICATOR_DEFAULT_LIVE,
   );
+
+  readonly glyph = computed(() => STATUS_INDICATOR_GLYPHS[this.status()]);
 
   readonly roleValue = computed(() => this.ownRole ?? STATUS_INDICATOR_ROLE[this.liveValue()]);
 

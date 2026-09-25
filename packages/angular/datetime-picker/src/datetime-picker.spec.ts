@@ -143,6 +143,15 @@ describe('anatomy', () => {
     const fixture = renderTemplate(`<div slDateTimePicker ${OPEN} [defaultValue]="tenth"></div>`);
     expect(list(fixture)?.getAttribute('aria-label')).toContain('set');
   });
+
+  /** The two marks are `Glyph` elements inside an `Icon` box, never masks. */
+  it('draws the calendar on the trigger and the clock on now as glyph elements', () => {
+    const fixture = renderTemplate(`<div slDateTimePicker ${OPEN} [defaultValue]="tenth"></div>`);
+    const mark = (element: Element | null | undefined) =>
+      element?.querySelector("[data-ui='icon'] > svg[data-glyph]")?.getAttribute('data-glyph');
+    expect(mark(trigger(fixture))).toBe(contract.marks.trigger);
+    expect(mark(panel(fixture)?.querySelector('[data-part="now"]'))).toBe(contract.marks.now);
+  });
 });
 
 describe('focus follows the missing half', () => {

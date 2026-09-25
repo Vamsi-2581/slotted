@@ -978,7 +978,7 @@ export const NavModes: StoryObj<Data> = {
         aurora('asideMode="inline" navMode="inline"'),
       ),
       scene(
-        "navMode='auto' — the same shell, in a frame narrower than 768 pixels",
+        "navMode='auto' — the same shell, in a frame narrower than 600 pixels",
         "The shell answers its own inline size and not the window's: this frame is 420 pixels wide inside a page that is not, and both regions have already left the grid. Press the control — the panel comes in over the content and the veil covers what is behind it.",
         `<div class="slotted-demo-measure">${aurora('[asideOpen]="false"', { size: 'tall' })}</div>`,
       ),
@@ -1037,7 +1037,7 @@ export const Aside: StoryObj<Data> = {
 </div>`),
       ),
       scene(
-        "asideMode='inline' in a frame narrower than 768 pixels",
+        "asideMode='inline' in a frame narrower than 600 pixels",
         'No room beside the content, so the inline pane drops under it as a row of its own, taking at most half the shell. The head, the body and the foot hold: the body is what scrolls.',
         `<div class="slotted-demo-measure">${aurora('asideMode="inline" [navOpen]="false" navMode="inline"', { size: 'tall' })}</div>`,
       ),
@@ -1216,7 +1216,7 @@ export const Persistence: StoryObj<Data> = {
       template: grid(
         scene(
           'Every request says why, for both regions',
-          "Press a control: pointer. Press it with the keyboard: keyboard. Drag the browser window narrow until the frame crosses 768 pixels: resize, for the navigation and for the pane — the one reason a product ignores when it persists the reader's preference, and the only one no surveyed implementation reports.",
+          "Press a control: pointer. Press it with the keyboard: keyboard. Drag the browser window narrow until the frame crosses 600 pixels: resize, for the navigation and for the pane — the one reason a product ignores when it persists the reader's preference, and the only one no surveyed implementation reports.",
           `<div slStack [gap]="4">
             ${viewport(
               `<div slAppShell [(navOpen)]="open" (navOpenChangeRequest)="recordNav($event)" (asideOpenChangeRequest)="recordAside($event)">

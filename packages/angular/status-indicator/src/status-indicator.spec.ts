@@ -42,6 +42,29 @@ describe('SlStatusIndicator', () => {
     expect(part(fixture, 'label')?.textContent?.trim()).toBe('Healthy');
   });
 
+  /**
+   * The icon mark is the family's non-chromatic answer, so the artwork each
+   * status draws is the contract's, rendered as the `Glyph` element. The dot
+   * holds none: it is painted, not drawn.
+   */
+  it('draws the glyph the contract names for each status, and none in a dot', () => {
+    for (const status of contract.axes.status as StatusIndicatorStatus[]) {
+      TestBed.resetTestingModule();
+      const fixture = renderTemplate(
+        `<span slStatusIndicator status="${status}" mark="icon">Build</span>`,
+      );
+      const glyphs = part(fixture, 'mark')!.querySelectorAll('[data-ui="icon"] > svg[data-glyph]');
+      expect(glyphs.length).toBe(1);
+      expect(glyphs[0]!.getAttribute('data-glyph')).toBe(
+        contract.statusGlyphs[status as keyof typeof contract.statusGlyphs],
+      );
+    }
+
+    TestBed.resetTestingModule();
+    const dot = renderTemplate(`<span slStatusIndicator status="danger">Build</span>`);
+    expect(part(dot, 'mark')!.querySelector('svg')).toBeNull();
+  });
+
   it('renders the defaults the contract declares', () => {
     const fixture = renderTemplate(`<span slStatusIndicator>Draft</span>`);
 

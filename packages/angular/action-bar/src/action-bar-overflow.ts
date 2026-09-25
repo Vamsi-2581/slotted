@@ -13,6 +13,7 @@ import {
   ViewEncapsulation,
   viewChild,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlMenu, SlMenuSeparator, SlMenuTrigger } from '@slotted/angular/menu';
 import type { MenuAlign, MenuSide, MenuSize } from '@slotted/angular/menu';
 
@@ -56,7 +57,7 @@ import type { ActionBarOverflowLabel } from './action-bar';
   selector: 'sl-action-bar-overflow',
   standalone: true,
   exportAs: 'slActionBarOverflow',
-  imports: [NgTemplateOutlet, SlMenu, SlMenuSeparator, SlMenuTrigger],
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon, SlMenu, SlMenuSeparator, SlMenuTrigger],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: { style: 'display: contents' },
@@ -68,7 +69,7 @@ import type { ActionBarOverflowLabel } from './action-bar';
       [slMenuTriggerFor]="surface"
       [attr.aria-label]="name()"
     >
-      <span aria-hidden="true"></span>
+      <span slIcon><svg slGlyph name="ellipsis"></svg></span>
     </button>
     <sl-menu #surface [align]="align()" [side]="side()" [size]="size()">
       @for (unit of bar.surfaceUnits(); track unit.id) {

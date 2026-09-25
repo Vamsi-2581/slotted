@@ -22,6 +22,7 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { collectOutline } from '@slotted/core/outline';
@@ -157,7 +158,7 @@ function platformClick(event: MouseEvent): boolean {
   selector: '[slTableOfContents]',
   standalone: true,
   exportAs: 'slTableOfContents',
-  imports: [NgTemplateOutlet, SlSkeleton],
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon, SlSkeleton],
   template: `
     @if (collapsed()) {
       <button
@@ -176,7 +177,9 @@ function platformClick(event: MouseEvent): boolean {
           }
         </span>
         <span data-part="current">{{ currentLabel() }}</span>
-        <span data-part="indicator" aria-hidden="true"></span>
+        <span data-part="indicator" aria-hidden="true"
+          ><span slIcon><svg slGlyph name="chevron-down"></svg></span
+        ></span>
       </button>
     } @else if (hasLabel()) {
       <div data-part="label" [id]="labelId">

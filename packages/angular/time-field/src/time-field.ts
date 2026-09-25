@@ -51,6 +51,7 @@ import type {
   ValidationErrors,
   Validator,
 } from '@angular/forms';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 
 import { injectTimeFieldDefaults } from './time-field-defaults';
@@ -117,6 +118,7 @@ export interface TimeFieldChangeRequest extends ChangeRequest<PlainTime | null> 
   selector: '[slTimeField]',
   standalone: true,
   exportAs: 'slTimeField',
+  imports: [SlGlyph, SlIcon],
   template: `<ng-content select="[slTimeFieldStart]" />
     @if (expression() !== null) {
       <input
@@ -137,6 +139,7 @@ export interface TimeFieldChangeRequest extends ChangeRequest<PlainTime | null> 
         aria-live="polite"
         [attr.data-resolved]="resolved() === null ? null : ''"
         [attr.data-crosses-midnight]="crossesMidnight() ? '' : null"
+        ><span slIcon directional><svg slGlyph name="chevron-right"></svg></span
         >{{ previewText() }}</span
       >
     } @else {
@@ -187,7 +190,9 @@ export interface TimeFieldChangeRequest extends ChangeRequest<PlainTime | null> 
         type="button"
         [attr.aria-label]="resolvedClearLabel()"
         (click)="clear($event)"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="x"></svg></span>
+      </button>
     }
     <ng-content select="[slTimeFieldEnd]" />
     <input data-part="hidden-input" type="hidden" readonly [attr.name]="name()" [value]="iso()" />`,

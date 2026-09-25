@@ -22,6 +22,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import type { Signal } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlTopNavigation } from './top-navigation';
 import type { TopNavigationPriority } from './top-navigation-defaults';
@@ -126,6 +127,15 @@ const HINT_TEMPLATE = `<ng-content />
     <div slTooltipContent>{{ text() }}</div>
   </ng-template>
 }`;
+
+/**
+ * The same, with the family's own mark before the content: a Glyph element in
+ * an icon box, which the control sizes. None of these marks points along the
+ * reading direction, so none of them is `directional`.
+ */
+function markedHintTemplate(glyph: string) {
+  return `<span slIcon><svg slGlyph name="${glyph}"></svg></span>${HINT_TEMPLATE}`;
+}
 
 const HINT_HOST = {
   '[attr.aria-describedby]': 'describedBy()',
@@ -279,8 +289,8 @@ export class SlTopNavigationNav {
   selector: 'button[slTopNavigationMore]',
   standalone: true,
   exportAs: 'slTopNavigationMore',
-  imports: [SlTooltipLayer, SlTooltipContent],
-  template: HINT_TEMPLATE,
+  imports: [SlGlyph, SlIcon, SlTooltipLayer, SlTooltipContent],
+  template: markedHintTemplate('ellipsis'),
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   hostDirectives: [SlTooltip],
@@ -480,7 +490,10 @@ export class SlTopNavigationLink {
   selector: 'button[slTopNavigationTrigger]',
   standalone: true,
   exportAs: 'slTopNavigationTrigger',
-  template: `<ng-content /><span data-part="indicator" aria-hidden="true"></span>`,
+  imports: [SlGlyph, SlIcon],
+  template: `<ng-content /><span data-part="indicator" aria-hidden="true"
+      ><span slIcon><svg slGlyph name="chevron-down"></svg></span
+    ></span>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
@@ -511,8 +524,8 @@ export class SlTopNavigationTrigger {
 @Component({
   selector: 'button[slTopNavigationSearchClose]',
   standalone: true,
-  imports: [SlTooltipLayer, SlTooltipContent],
-  template: HINT_TEMPLATE,
+  imports: [SlGlyph, SlIcon, SlTooltipLayer, SlTooltipContent],
+  template: markedHintTemplate('x'),
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   hostDirectives: [SlTooltip],
@@ -538,8 +551,8 @@ export class SlTopNavigationSearchClose extends TopNavigationControl {
 @Component({
   selector: 'button[slTopNavigationSearchToggle]',
   standalone: true,
-  imports: [SlTooltipLayer, SlTooltipContent],
-  template: HINT_TEMPLATE,
+  imports: [SlGlyph, SlIcon, SlTooltipLayer, SlTooltipContent],
+  template: markedHintTemplate('search'),
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   hostDirectives: [SlTooltip],
@@ -671,8 +684,9 @@ export class SlTopNavigationActions {
   selector: 'a[slTopNavigationHelp], button[slTopNavigationHelp]',
   standalone: true,
   exportAs: 'slTopNavigationHelp',
-  imports: [SlTooltipLayer, SlTooltipContent],
-  template: `<ng-content>{{ fallback() }}</ng-content>
+  imports: [SlGlyph, SlIcon, SlTooltipLayer, SlTooltipContent],
+  template: `<span slIcon><svg slGlyph name="circle-question"></svg></span
+    ><ng-content>{{ fallback() }}</ng-content>
     @if (hint()) {
       <ng-template slTooltipLayer>
         <div slTooltipContent>{{ text() }}</div>
@@ -723,8 +737,8 @@ export class SlTopNavigationHelp extends TopNavigationControl {
   selector: 'button[slTopNavigationNotifications]',
   standalone: true,
   exportAs: 'slTopNavigationNotifications',
-  imports: [SlTooltipLayer, SlTooltipContent],
-  template: HINT_TEMPLATE,
+  imports: [SlGlyph, SlIcon, SlTooltipLayer, SlTooltipContent],
+  template: markedHintTemplate('bell'),
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   hostDirectives: [SlTooltip],

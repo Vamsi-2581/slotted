@@ -1,3 +1,4 @@
+import { isClipped } from '@slotted/core/overflow';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import {
@@ -70,6 +71,15 @@ export class SlTooltip {
   readonly open = model<boolean>(false);
   /** The tooltip never opens. The trigger's own `disabled` is the consumer's. */
   readonly disabled = input(false, { transform: booleanAttribute });
+  /**
+   * Opens only while the trigger's own content is cut by its box — a column
+   * header narrowed to `Op…`, a breadcrumb in a rail. The measurement is taken
+   * at the moment the hint would open, so a column dragged wider stops opening
+   * one without anything being told.
+   */
+  readonly whenClipped = input<boolean | undefined, boolean | string | undefined>(undefined, {
+    transform: optionalBoolean,
+  });
 
   readonly variant = input<TooltipVariant | undefined>(undefined);
   readonly size = input<TooltipSize | undefined>(undefined);
@@ -142,6 +152,7 @@ export class SlTooltip {
   readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   readonly resolvedDescribes = computed(() => this.describes() ?? this.defaults.describes);
+  readonly resolvedWhenClipped = computed(() => this.whenClipped() ?? this.defaults.whenClipped);
   readonly resolvedOpenOn = computed(() => this.openOn() ?? this.defaults.openOn);
   readonly resolvedSide = computed(() => this.side() ?? this.defaults.side);
   readonly resolvedAlign = computed(() => this.align() ?? this.defaults.align);
@@ -237,6 +248,13 @@ export class SlTooltip {
   toggle(next: boolean, reason: TooltipOpenReason, source?: Event) {
     this.cancelPending();
     if (next === this.isOpen()) return;
+    /**
+     * Measured here rather than watched: the answer is needed at the moment the
+     * hint would open, and a box measured then is never a box two column drags
+     * old.
+     */
+    const trigger = this.triggerNode();
+    if (next && this.resolvedWhenClipped() && trigger !== null && !isClipped(trigger)) return;
 
     let cancelled = false;
     const state = createControllable<boolean>({

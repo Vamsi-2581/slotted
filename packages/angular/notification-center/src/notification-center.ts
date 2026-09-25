@@ -20,6 +20,8 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import type { GlyphName } from '@slotted/angular/icon';
 import { SlButton } from '@slotted/angular/button';
 import { SlSkeleton, SlSkeletonText } from '@slotted/angular/skeleton';
 import { SlTab, SlTabList, SlTabs } from '@slotted/angular/tabs';
@@ -52,9 +54,22 @@ import {
   type NotificationItem,
   type NotificationView,
 } from './notification-center-defaults';
+import { SlNotificationControl } from './notification-control';
 
 /** How many skeleton rows stand in while nothing has arrived. */
 const WAITING_ROWS = [0, 1, 2];
+
+/**
+ * The family's own visual for an item with a tone and no visual of its own,
+ * as the contract's `toneGlyph` names it: every glyph a circle.
+ */
+const TONE_GLYPH: Record<NotificationCenterTone, GlyphName> = {
+  accent: 'circle-info',
+  secondary: 'bell',
+  success: 'circle-check',
+  warning: 'circle-alert',
+  danger: 'circle-x',
+};
 
 /** What an item template is handed. */
 export interface NotificationItemContext {
@@ -177,7 +192,18 @@ export class SlNotificationActions {
 @Component({
   selector: '[slNotificationCenter]',
   standalone: true,
-  imports: [NgTemplateOutlet, SlButton, SlSkeleton, SlSkeletonText, SlTab, SlTabList, SlTabs],
+  imports: [
+    NgTemplateOutlet,
+    SlButton,
+    SlGlyph,
+    SlIcon,
+    SlNotificationControl,
+    SlSkeleton,
+    SlSkeletonText,
+    SlTab,
+    SlTabList,
+    SlTabs,
+  ],
   template: `
     <div data-part="header">
       @switch (levelValue()) {
@@ -333,7 +359,9 @@ export class SlNotificationActions {
             />
           </span>
         } @else if (item.tone !== undefined) {
-          <span data-part="visual" [attr.data-tone]="item.tone"></span>
+          <span data-part="visual" [attr.data-tone]="item.tone"
+            ><span slIcon data-tone-glyph=""><svg slGlyph [name]="toneGlyph(item.tone)"></svg></span
+          ></span>
         }
         <div data-part="content">
           @if (itemTemplate(); as own) {
@@ -373,19 +401,23 @@ export class SlNotificationActions {
           <div data-part="controls">
             @if (controlsValue() !== 'dismiss') {
               <button
+                slNotificationControl
                 data-part="read-toggle"
-                type="button"
-                [attr.aria-label]="item.read ? messageSet().markUnread : messageSet().markRead"
+                [text]="item.read ? messageSet().markUnread : messageSet().markRead"
                 (click)="requestRead([item.key], !item.read, pressReason($event), $event)"
-              ></button>
+              >
+                <span slIcon><svg slGlyph [name]="item.read ? 'dot' : 'check'"></svg></span>
+              </button>
             }
             @if (controlsValue() !== 'read') {
               <button
+                slNotificationControl
                 data-part="dismiss"
-                type="button"
-                [attr.aria-label]="messageSet().dismiss"
+                [text]="messageSet().dismiss"
                 (click)="remove(item.key, pressReason($event), $event)"
-              ></button>
+              >
+                <span slIcon><svg slGlyph name="x"></svg></span>
+              </button>
             }
           </div>
         }
@@ -464,6 +496,13 @@ export class SlNotificationCenter {
   private readonly moreElement = viewChild<ElementRef<HTMLElement>>('more');
   protected readonly itemTemplate = contentChild(SlNotificationItem);
   protected readonly visualTemplate = contentChild(SlNotificationVisual);
+  /**
+   * The tone's glyph, for an item with no visual of its own. `data-tone-glyph`
+   * tells the sheet the glyph is the family's, not the consumer's.
+   */
+  protected toneGlyph(tone: NotificationCenterTone): GlyphName {
+    return TONE_GLYPH[tone];
+  }
   protected readonly actionsTemplate = contentChild(SlNotificationActions);
 
   readonly id = inject(SlNotificationCenterIdFactory).next();

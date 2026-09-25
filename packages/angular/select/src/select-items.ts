@@ -12,6 +12,8 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import type { GlyphName } from '@slotted/angular/icon';
 
 import { matchRanges } from '@slotted/core/highlight';
 
@@ -38,7 +40,7 @@ import type { SelectOptionValue } from './select-defaults';
   exportAs: 'slSelectItem',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [SlHighlight],
+  imports: [SlGlyph, SlHighlight, SlIcon],
   host: {
     'data-part': 'item',
     role: 'option',
@@ -58,8 +60,10 @@ import type { SelectOptionValue } from './select-defaults';
     '(pointerenter)': 'onPointerEnter($event)',
   },
   template: `
-    @if (icon()) {
-      <span data-part="icon">{{ icon() }}</span>
+    @if (icon(); as glyph) {
+      <span data-part="icon"
+        ><span slIcon><svg slGlyph [name]="glyph"></svg></span
+      ></span>
     }
     <span data-part="label">
       @if (label(); as text) {
@@ -75,15 +79,17 @@ import type { SelectOptionValue } from './select-defaults';
     @if (description()) {
       <span data-part="description">{{ description() }}</span>
     }
-    <span data-part="indicator"></span>
+    <span data-part="indicator"
+      ><span slIcon><svg slGlyph name="check"></svg></span
+    ></span>
   `,
 })
 export class SlSelectItem {
   readonly value = input.required<SelectOptionValue>();
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly description = input<string | undefined>(undefined);
-  /** A glyph token name, drawn as a mask by the stylesheet's icon column. */
-  readonly icon = input<string | undefined>(undefined);
+  /** The glyph drawn in the first column, as a `Glyph` inside an `Icon` box. */
+  readonly icon = input<GlyphName | undefined>(undefined);
   /**
    * What typeahead matches on, what the search filters on, and what the mark
    * splits, when the label is not plain text.

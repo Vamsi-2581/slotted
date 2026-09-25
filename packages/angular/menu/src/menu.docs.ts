@@ -78,7 +78,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span[slMenuItemIcon]',
     required: false,
     purpose:
-      "The mark in the first column, from a glyph token or the consumer's own element. It shares the column with the indicator, because a checkbox item's mark is its icon.",
+      "The mark in the first column: content the consumer passes — the library's Glyph in an icon box, or their own element — which the column sizes and never paints. It shares the column with the indicator, because a checkbox item's mark is its icon.",
   },
   {
     part: 'label',
@@ -154,7 +154,9 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'A glyph in the first column',
       source: `<button slMenuItem>
-  <sl-icon slMenuItemIcon name="copy" />
+  <span slMenuItemIcon
+    ><span slIcon><svg slGlyph name="copy"></svg></span
+  ></span>
   Duplicate
 </button>`,
     }),
@@ -520,6 +522,13 @@ const api = apiRows([
     '—',
     'sl-menu',
     'Names the surface itself, for a menu opened from a control with no words.',
+  ],
+  [
+    'aria-describedby',
+    'string',
+    '—',
+    'sl-menu',
+    'The ids of what describes the menu, written on the element that carries role="menu".',
   ],
 ]);
 

@@ -1,8 +1,10 @@
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createFocusScope } from '@slotted/core/focus';
-import { createWidthGate } from '@slotted/core/measure';
+import { COMPACT_BELOW, createWidthGate } from '@slotted/core/measure';
 import { setPortalContainer } from '@slotted/core/portal';
+import { createPresence } from '@slotted/core/presence';
+import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { createControllable } from '@slotted/core/state';
 import {
   afterNextRender,
@@ -20,8 +22,10 @@ import {
   model,
   output,
   signal,
+  viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { injectAppShellDefaults } from './app-shell-defaults';
 import type {
@@ -61,10 +65,11 @@ export type {
  * The inline size the navigation stops being a column at. The stylesheet needs
  * it literal — `@container (inline-size: var(--x))` is invalid CSS — and the
  * script needs it to know whether `Escape`, the focus scope and `inert` are in
- * play. `specs/components/app-shell/contract.json` states it once, and
+ * play. It is the limit of the compact size class, `COMPACT_BELOW`;
+ * `specs/components/app-shell/contract.json` states it once, and
  * `app-shell.styles.test.mjs` compares the stylesheet's own condition to it.
  */
-export const APP_SHELL_OVERLAY_AT = 768;
+export const APP_SHELL_OVERLAY_AT = COMPACT_BELOW;
 
 let nextId = 0;
 
@@ -94,8 +99,8 @@ let nextId = 0;
       </div>
     }
     <ng-content />
-    @if ((overlay() || asideOverlay()) && resolvedModal()) {
-      <div data-part="scrim" data-status="open"></div>
+    @if (veilStatus() !== 'unmounted') {
+      <div data-part="scrim" [attr.data-status]="veilStatus()" #scrim></div>
     }
     <div data-part="layer" #layer></div>`,
   styleUrl: '../../../styles/src/app-shell/app-shell.css',
@@ -150,6 +155,11 @@ export class SlAppShell {
   readonly escape = input<AppShellDismissPolicy | undefined>(undefined);
   /** Defaults to the provider, then `close`. */
   readonly outsidePress = input<AppShellDismissPolicy | undefined>(undefined);
+  /**
+   * The platform's way back — a phone's gesture, a browser's button — closes
+   * a modal layer instead of leaving the page. Defaults to the provider, then `close`.
+   */
+  readonly back = input<AppShellDismissPolicy | undefined>(undefined);
   /** Defaults to the provider, then `true`. */
   readonly closeOnNavigate = input<boolean | undefined>(undefined, { transform: optionalBoolean });
   /** Strings for this shell, over the provider's and over the family's own. */
@@ -227,6 +237,7 @@ export class SlAppShell {
   readonly resolvedDividers = computed(() => this.dividers() ?? this.defaults.dividers);
   readonly resolvedModal = computed(() => this.modal() ?? this.defaults.modal);
   readonly resolvedEscape = computed(() => this.escape() ?? this.defaults.escape);
+  readonly resolvedBack = computed(() => this.back() ?? this.defaults.back);
   readonly resolvedOutsidePress = computed(() => this.outsidePress() ?? this.defaults.outsidePress);
   readonly resolvedCloseOnNavigate = computed(
     () => this.closeOnNavigate() ?? this.defaults.closeOnNavigate,
@@ -253,6 +264,23 @@ export class SlAppShell {
 
   readonly overlay = computed(() => this.resolvedMode() === 'overlay' && this.navOpen());
 
+  /**
+   * The veil has a presence of its own, as a dialog's backdrop does. The
+   * stylesheet fades it in from `entering` and out through `exiting`, and a
+   * veil mounted straight at `open` gave that transition no closed style to
+   * start from: it appeared in one frame beside a panel that took two hundred
+   * milliseconds to arrive, and left the same way. One presence for both
+   * layers, because there is one veil: with both regions overlaid and both
+   * open it stays, and it leaves when the last of them does.
+   */
+  private readonly veil = computed(
+    () => (this.overlay() || this.asideOverlay()) && this.resolvedModal(),
+  );
+  protected readonly veilStatus = signal<PresenceStatus>('unmounted');
+  private readonly veilRef = viewChild<ElementRef<HTMLElement>>('scrim');
+  /** Created on the first resolved value, so a veil the template opens with does not fade in. */
+  private veilPresence: PresenceHandle | null = null;
+
   protected readonly skipTargets = computed(() => {
     const messages = this.resolvedMessages();
     const regions = this.regions();
@@ -268,6 +296,23 @@ export class SlAppShell {
 
   constructor() {
     const destroyRef = inject(DestroyRef);
+
+    effect(() => {
+      const veil = this.veil();
+      if (this.veilPresence === null) {
+        this.veilPresence = createPresence({
+          present: veil,
+          onStatusChange: (next) => this.veilStatus.set(next),
+        });
+        this.veilStatus.set(this.veilPresence.status);
+        return;
+      }
+      this.veilPresence.sync(veil);
+    });
+    effect(() => {
+      this.veilPresence?.setNode(this.veilRef()?.nativeElement ?? null);
+    });
+    destroyRef.onDestroy(() => this.veilPresence?.destroy());
 
     afterNextRender(() => {
       const layer = this.host.querySelector<HTMLElement>(':scope > [data-part="layer"]');
@@ -356,6 +401,9 @@ export class SlAppShell {
         const modal = this.resolvedModal();
         const escape = this.resolvedEscape();
         const outsidePress = this.resolvedOutsidePress();
+        /* A history entry is a modal layer's: a layer the page stays reachable
+           under has no claim on the way back. */
+        const back = modal && this.resolvedBack() === 'close';
 
         release?.();
         release = null;
@@ -370,6 +418,7 @@ export class SlAppShell {
           const control = trigger();
           layer = createDismissableLayer(node, {
             ...(control === null ? {} : { branches: [control] }),
+            back,
             content: node,
             escape: escape === 'close',
             modal,
@@ -496,12 +545,16 @@ export class SlAppShell {
   /**
    * A click that lands on an `a[href]` inside the region asks to close, in the
    * overlaid mode only. Vaadin and PatternFly both do it, and without it a
-   * phone costs two taps per destination.
+   * phone costs two taps per destination. `defaultPrevented` is no refusal
+   * here: a client-side router prevents the native navigation of every link it
+   * routes. A disabled destination (`aria-disabled="true"`) stays open; any
+   * other refusal cancels the request.
    */
   protected onClick(event: MouseEvent) {
-    if (!this.overlay() || !this.resolvedCloseOnNavigate() || event.defaultPrevented) return;
+    if (!this.overlay() || !this.resolvedCloseOnNavigate()) return;
     const link = (event.target as Element | null)?.closest?.('a[href]');
     if (!link || this.nodes.nav?.contains(link) !== true) return;
+    if (link.getAttribute('aria-disabled') === 'true') return;
     this.request(false, 'select', event);
   }
 }
@@ -710,10 +763,17 @@ export class SlAppShellAsideFooter {}
  * stand in the pane's own header, in the banner's actions, or anywhere else,
  * and there is still exactly one control carrying the pane's state.
  */
-@Directive({
+@Component({
   selector: 'button[slAppShellAsideToggle]',
   standalone: true,
   exportAs: 'slAppShellAsideToggle',
+  imports: [SlGlyph, SlIcon],
+  /* The panel mark says what a press does, unless the consumer wrote content of their own. */
+  template: `<ng-content
+    ><span slIcon
+      ><svg slGlyph [name]="shell.asideOpen() ? 'panel-close' : 'panel-open'"></svg></span
+  ></ng-content>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'aside-toggle',
     type: 'button',
@@ -766,10 +826,16 @@ export class SlAppShellFooter {
  * so it can stand in the banner, in the navigation's own footer, or anywhere
  * else, and there is still exactly one control carrying the state.
  */
-@Directive({
+@Component({
   selector: 'button[slAppShellNavToggle]',
   standalone: true,
   exportAs: 'slAppShellNavToggle',
+  imports: [SlGlyph, SlIcon],
+  /* The panel mark says what a press does, unless the consumer wrote content of their own. */
+  template: `<ng-content
+    ><span slIcon><svg slGlyph [name]="shell.navOpen() ? 'panel-close' : 'panel-open'"></svg></span
+  ></ng-content>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'nav-toggle',
     type: 'button',

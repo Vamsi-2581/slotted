@@ -135,6 +135,29 @@ describe('SlTransfer', () => {
     expect(button('move-to-target').querySelector('[data-part="end"] > span')).not.toBeNull();
   });
 
+  /** Every mark the family owns is the Glyph element, in the slot it points from. */
+  it('draws the chevrons, the search glyph and the empty mark with the Glyph element', async () => {
+    const fixture = await setup((host) => host.reorderable.set(true));
+    const glyph = (scope: Element | null, slot: string) =>
+      scope
+        ?.querySelector(`${slot} > [data-ui="icon"] > svg[data-glyph]`)
+        ?.getAttribute('data-glyph');
+    expect(glyph(button('move-to-target'), '[data-part="end"]')).toBe('chevron-right');
+    expect(glyph(button('move-all-to-target'), '[data-part="end"]')).toBe('chevrons-right');
+    expect(glyph(button('move-to-source'), '[data-part="start"]')).toBe('chevron-right');
+    expect(glyph(button('move-all-to-source'), '[data-part="start"]')).toBe('chevrons-right');
+    expect(glyph(button('move-up'), '[data-part="start"]')).toBe('chevron-down');
+    expect(glyph(button('move-down'), '[data-part="start"]')).toBe('chevron-down');
+    expect(glyph(pane('source'), '[data-part="search-icon"]')).toBe('search');
+    expect(glyph(pane('target'), '[data-part="empty"]')).toBe('inbox');
+
+    const search = pane('target').querySelector<HTMLInputElement>('input[type="search"]')!;
+    search.value = 'zzz';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+    await settle(fixture);
+    expect(glyph(pane('target'), '[data-part="empty"][data-query]')).toBe('search-x');
+  });
+
   it('asks to move the selection with the direction, the keys and the reason of the press', async () => {
     const fixture = await setup((host) => host.defaultSelected.set(['fabio', 'ana']));
     button('move-to-target').dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));

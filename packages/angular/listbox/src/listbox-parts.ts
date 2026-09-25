@@ -8,6 +8,7 @@ import {
   input,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlListboxContext } from './listbox-context';
 import { SlListboxIdFactory } from './listbox-defaults';
@@ -147,19 +148,26 @@ export class SlListboxGroup {
  * The mark that says an option is chosen. The listbox reserves its column
  * whether or not the mark is painted, so a list does not shift sideways as one
  * option is chosen; `indicator="none"` removes the element and the column with
- * it.
+ * it. The tick is a `Glyph` sized by the column, and content the consumer
+ * wrote replaces it.
  */
-@Directive({
+@Component({
   selector: '[slListboxIndicator]',
   standalone: true,
+  imports: [SlGlyph, SlIcon],
+  template: `<ng-content
+    ><span slIcon><svg slGlyph name="check"></svg></span
+  ></ng-content>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   host: { 'data-part': 'indicator', 'aria-hidden': 'true' },
 })
 export class SlListboxIndicator {}
 
 /**
  * The option's own artwork, in the same column the mark uses and never beside
- * it. A glyph token through `--slotted-listbox-option-icon`, or an element of
- * the page's own.
+ * it: a `span[slIcon]` holding an `svg[slGlyph]`, or an element of the page's
+ * own. The column sizes and centres it; no stylesheet fills it.
  */
 @Directive({
   selector: '[slListboxIcon]',

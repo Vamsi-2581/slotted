@@ -1,3 +1,5 @@
+import type { GlyphName } from '@slotted/angular/icon';
+
 /**
  * The six operational states. The vocabulary is closed, and that is a decision
  * rather than an omission: a seventh value would carry no tone, no glyph and
@@ -15,6 +17,20 @@ export type StatusIndicatorLive = 'off' | 'polite' | 'assertive';
 export type StatusIndicatorLabels = Partial<Record<StatusIndicatorStatus, string>>;
 
 export const STATUS_INDICATOR_DEFAULT_STATUS: StatusIndicatorStatus = 'neutral';
+
+/**
+ * The glyph each status draws when the mark is an icon, as the contract's
+ * `statusGlyphs` names it. Two statuses never share one: the icon mark is the
+ * family's non-chromatic answer, and `neutral` and `unknown` share a tone.
+ */
+export const STATUS_INDICATOR_GLYPHS: Record<StatusIndicatorStatus, GlyphName> = {
+  neutral: 'circle',
+  info: 'circle-info',
+  success: 'circle-check',
+  warning: 'triangle-alert',
+  danger: 'circle-alert',
+  unknown: 'circle-question',
+};
 export const STATUS_INDICATOR_DEFAULT_MARK: StatusIndicatorMark = 'dot';
 export const STATUS_INDICATOR_DEFAULT_SIZE: StatusIndicatorSize = 'md';
 export const STATUS_INDICATOR_DEFAULT_LIVE: StatusIndicatorLive = 'off';

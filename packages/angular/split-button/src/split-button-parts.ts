@@ -10,6 +10,7 @@ import {
   inject,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import {
   blockActivation,
   BUTTON_WAIT,
@@ -85,8 +86,8 @@ const OPENING_KEYS = new Set(['ArrowDown', 'ArrowUp', 'Enter', ' ']);
  * this family's part. It takes `aria-haspopup`, `aria-expanded`,
  * `aria-controls` and the four keys of the Menu Button pattern from `menu`,
  * and every tone, variant and size from `button`. The chevron is the
- * family's, drawn in the icon part by the stylesheet, so the consumer writes
- * no content; the accessible name is the consumer's, and `SlIconButton`
+ * family's, the `chevron-down` Glyph element in the icon part, which `button`
+ * sizes; content the consumer writes replaces it; the accessible name is the consumer's, and `SlIconButton`
  * refuses to render without one in development.
  *
  * `slMenuTriggerFor` is a host directive rather than a second attribute the
@@ -106,8 +107,12 @@ const OPENING_KEYS = new Set(['ArrowDown', 'ArrowUp', 'Enter', ' ']);
 @Component({
   selector: 'button[slSplitButtonMenuTrigger]',
   standalone: true,
+  imports: [SlGlyph, SlIcon],
+  /* The chevron is drawn unless the consumer wrote content of their own. */
   template: `<span data-part="icon"
-    ><span aria-hidden="true"></span>
+    ><ng-content
+      ><span slIcon><svg slGlyph name="chevron-down"></svg></span
+    ></ng-content>
     @if (waiting()) {
       <span
         data-part="indicator"

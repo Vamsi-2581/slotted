@@ -9,6 +9,7 @@ import {
   input,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlTabs } from './tabs';
 import type { TabsDismissReason, TabsSelectionReason } from './tabs';
@@ -70,6 +71,7 @@ export class SlTabList {
 @Component({
   selector: '[slTab]',
   standalone: true,
+  imports: [SlGlyph, SlIcon],
   exportAs: 'slTab',
   template: `@if (href(); as destination) {
       <a
@@ -115,7 +117,9 @@ export class SlTabList {
         [attr.aria-label]="dismissLabel()"
         [disabled]="resolvedDisabled()"
         (click)="onDismiss($event)"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="x"></svg></span>
+      </button>
     }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,

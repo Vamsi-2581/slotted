@@ -18,6 +18,7 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -197,6 +198,7 @@ export class SlDescriptionListHint {}
 @Component({
   selector: 'dd[slDescriptionListDescription]',
   standalone: true,
+  imports: [SlGlyph, SlIcon],
   template: `
     <span #value data-part="value">
       <ng-content></ng-content>
@@ -217,7 +219,10 @@ export class SlDescriptionListHint {}
         type="button"
         (click)="onCopy($event)"
         (keydown)="onKeydown($event)"
-      ></button>
+      >
+        <!-- A finished copy changes its mark as well as its colour. -->
+        <span slIcon><svg slGlyph [name]="copied() ? 'check' : 'copy'"></svg></span>
+      </button>
     }
     @if (clampValue() > 0 && overflows()) {
       <button
@@ -228,6 +233,7 @@ export class SlDescriptionListHint {}
         (keydown)="onKeydown($event)"
       >
         {{ revealed() ? list.labelsValue().collapse : list.labelsValue().reveal }}
+        <span slIcon><svg slGlyph name="chevron-down"></svg></span>
       </button>
     }
   `,

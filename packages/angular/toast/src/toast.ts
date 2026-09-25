@@ -9,12 +9,15 @@ import {
   effect,
   ElementRef,
   inject,
+  Injector,
   input,
   output,
   signal,
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import type { GlyphName } from '@slotted/angular/icon';
 import { createRemovalFocus } from '@slotted/core/focus';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPresence } from '@slotted/core/presence';
@@ -23,7 +26,25 @@ import type { ChangeRequest } from '@slotted/core/state';
 import type { ToastMessage, ToastStore } from '@slotted/core/toast';
 
 import { injectToastDefaults, SlToastService } from './toast-defaults';
-import type { ToastAttach, ToastContent, ToastPlacement, ToastStacking } from './toast-defaults';
+import type {
+  ToastAttach,
+  ToastContent,
+  ToastPlacement,
+  ToastStacking,
+  ToastTone,
+} from './toast-defaults';
+
+/**
+ * The glyph each tone draws: `specs/components/toast/contract.json` holds the
+ * map, and the binding draws it because a stylesheet paints no icon.
+ */
+const TONE_GLYPH: Record<ToastTone, GlyphName> = {
+  accent: 'circle-info',
+  secondary: 'circle',
+  success: 'circle-check',
+  warning: 'triangle-alert',
+  danger: 'circle-alert',
+};
 
 /** Which way a message is dragged away, given the edge its region sits at. */
 function swipeAxis(placement: ToastPlacement, direction: string) {
@@ -78,6 +99,12 @@ export class SlToastItem {
 
   private readonly region = inject(SlToastRegion);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  /**
+   * The message's own injector, handed to a page's body template so the parts
+   * inside it — the mark's glyph above all — read this message and not the
+   * place the template was declared.
+   */
+  readonly injector = inject(Injector);
 
   private readonly status = signal<'entering' | 'open' | 'exiting' | 'unmounted'>('entering');
   protected readonly dragging = signal(false);
@@ -85,6 +112,14 @@ export class SlToastItem {
   private drag: { id: number; x: number; y: number } | null = null;
 
   protected readonly tone = computed(() => this.message().data.tone ?? this.region.defaults.tone);
+  /**
+   * The glyph the tone's mark draws, and none while a promise is in flight:
+   * the spinner belongs to `progress-indicator`, and two families drawing one
+   * would be two answers to one question. The slot keeps its box either way.
+   */
+  readonly mark = computed<GlyphName | null>(() =>
+    this.message().loading ? null : TONE_GLYPH[this.tone()],
+  );
   protected readonly variant = computed(
     () => this.message().data.variant ?? this.region.defaults.variant,
   );
@@ -196,7 +231,7 @@ export class SlToastItem {
   selector: 'sl-toast-region',
   standalone: true,
   exportAs: 'slToastRegion',
-  imports: [NgTemplateOutlet, SlToastItem],
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon, SlToastItem],
   template: `<section
     #layer
     data-part="root"
@@ -218,15 +253,20 @@ export class SlToastItem {
   >
     <ol data-part="list">
       @for (message of visible(); track message.id; let index = $index) {
-        <li [slToastItem]="message" [slToastItemIndex]="index">
+        <li [slToastItem]="message" [slToastItemIndex]="index" #item="slToastItem">
           @if (message.data.body; as body) {
             <ng-container
               [ngTemplateOutlet]="body"
               [ngTemplateOutletContext]="{ $implicit: message }"
+              [ngTemplateOutletInjector]="item.injector"
             />
           } @else {
             @if (!message.data.hideIcon) {
-              <span aria-hidden="true" data-part="icon"></span>
+              <span aria-hidden="true" data-part="icon">
+                @if (item.mark(); as glyph) {
+                  <span slIcon><svg slGlyph [name]="glyph"></svg></span>
+                }
+              </span>
             }
             <div data-part="content">
               @if (message.data.title) {
@@ -242,7 +282,9 @@ export class SlToastItem {
                 data-part="close"
                 [attr.aria-label]="message.data.closeLabel ?? defaults.closeLabel"
                 (click)="store.dismiss(message.id, 'dismiss')"
-              ></button>
+              >
+                <span slIcon><svg slGlyph name="x"></svg></span>
+              </button>
             }
             @if (message.data.actions; as actions) {
               <div data-part="actions">

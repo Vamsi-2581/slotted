@@ -120,6 +120,13 @@ describe('what it is made of', () => {
     const fixture = renderTemplate(`<div slTimePicker ${BOUNDS} defaultOpen step="1800"></div>`);
     expect(labels(fixture)).toEqual(['09:00', '09:30', '10:00', '10:30', '11:00']);
   });
+
+  /** The mark is a `Glyph` element inside an `Icon` box, never a mask. */
+  it('draws the clock on the trigger as a glyph element', () => {
+    const fixture = renderTemplate(`<div slTimePicker ${BOUNDS}></div>`);
+    const mark = trigger(fixture).querySelector("[data-ui='icon'] > svg[data-glyph]");
+    expect(mark?.getAttribute('data-glyph')).toBe('clock');
+  });
 });
 
 describe('the list the consumer configures', () => {

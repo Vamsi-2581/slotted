@@ -122,6 +122,16 @@ describe('SlStepper', () => {
     }
     expect(item(3).getAttribute('data-invalid')).toBe('');
     expect(item(4).getAttribute('data-disabled')).toBe('');
+
+    /* A check over a finished step, a cross over a failed one, and the number
+       alone everywhere else, the current step included. */
+    const glyphs = [0, 1, 2, 3, 4].map(
+      (index) =>
+        item(index)
+          .querySelector('[data-part="marker"] > [data-ui="icon"] > svg[data-glyph]')
+          ?.getAttribute('data-glyph') ?? null,
+    );
+    expect(glyphs).toEqual(['check', null, null, 'x', null]);
   });
 
   it('says where each step is and what state it is in', () => {

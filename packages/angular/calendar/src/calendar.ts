@@ -32,6 +32,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import type { OnInit } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import {
   CALENDAR_NEXT_LABEL,
@@ -79,6 +80,7 @@ let sequence = 0;
   selector: '[slCalendar]',
   standalone: true,
   exportAs: 'slCalendar',
+  imports: [SlGlyph, SlIcon],
   template: `<div data-part="header">
       <button
         data-part="previous"
@@ -86,7 +88,9 @@ let sequence = 0;
         [attr.aria-label]="resolvedPreviousLabel()"
         [disabled]="!editable()"
         (click)="turnPage(-1, $event)"
-      ></button>
+      >
+        <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
+      </button>
       <!--
         The heading is a live region: paging with a key changes nothing that
         focus lands on, so without this nothing announces the new month.
@@ -100,6 +104,9 @@ let sequence = 0;
         (click)="walkUp()"
       >
         {{ heading() }}
+        @if (currentView() !== 'year') {
+          <span slIcon><svg slGlyph name="chevron-down"></svg></span>
+        }
       </button>
       <button
         data-part="next"
@@ -107,7 +114,9 @@ let sequence = 0;
         [attr.aria-label]="resolvedNextLabel()"
         [disabled]="!editable()"
         (click)="turnPage(1, $event)"
-      ></button>
+      >
+        <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
+      </button>
     </div>
 
     @switch (currentView()) {

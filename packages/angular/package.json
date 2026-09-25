@@ -20,7 +20,7 @@
     "@slotted/core": "workspace:*"
   },
   "devDependencies": {
-    "@angular/router": "22.1.4",
+    "@angular/router": "22.1.7",
     "@ng-icons/core": "35.0.1",
     "@ng-icons/lucide": "35.0.1",
     "@slotted/core": "workspace:*",

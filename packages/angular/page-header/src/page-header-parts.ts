@@ -10,6 +10,7 @@ import {
   inject,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlPageHeader } from './page-header';
 
@@ -32,11 +33,22 @@ export class SlPageHeaderTitleArea {}
 @Directive({ selector: '[slPageHeaderNav]', standalone: true, host: { 'data-part': 'nav' } })
 export class SlPageHeaderNav {}
 
-/** The way back: the consumer's own link or button, with the arrow the family draws before it. */
-@Directive({ selector: '[slPageHeaderBack]', standalone: true, host: { 'data-part': 'back' } })
+/**
+ * The way back: the consumer's own link or button, with the arrow the family
+ * draws before it. The arrow points along the reading direction and mirrors
+ * with it.
+ */
+@Component({
+  selector: '[slPageHeaderBack]',
+  standalone: true,
+  imports: [SlGlyph, SlIcon],
+  template: `<span slIcon directional><svg slGlyph name="arrow-left"></svg></span><ng-content />`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { 'data-part': 'back' },
+})
 export class SlPageHeaderBack {}
 
-/** The slot a breadcrumb sits in. Hidden below 640 pixels. */
+/** The slot a breadcrumb sits in. Hidden below 600 pixels. */
 @Directive({
   selector: '[slPageHeaderBreadcrumbs]',
   standalone: true,
@@ -224,10 +236,16 @@ export class SlPageHeaderControls {}
  * are the platform's. `aria-expanded` and `aria-controls` are the pattern's
  * two properties.
  */
-@Directive({
+@Component({
   selector: 'button[slPageHeaderToggle]',
   standalone: true,
   exportAs: 'slPageHeaderToggle',
+  imports: [SlGlyph, SlIcon],
+  /* The stylesheet turns the chevron half a turn while the area is shown. */
+  template: `<ng-content
+    ><span slIcon><svg slGlyph name="chevron-down"></svg></span
+  ></ng-content>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'toggle',
     type: 'button',
@@ -254,10 +272,16 @@ export class SlPageHeaderToggle {
 }
 
 /** The pin: a toggle button with `aria-pressed`, which is the `pressed` state the vocabulary has. */
-@Directive({
+@Component({
   selector: 'button[slPageHeaderPin]',
   standalone: true,
   exportAs: 'slPageHeaderPin',
+  imports: [SlGlyph, SlIcon],
+  /* The mark says what a press does: pin while free, unpin while held. */
+  template: `<ng-content
+    ><span slIcon><svg slGlyph [name]="header.pinned() ? 'pin-off' : 'pin'"></svg></span
+  ></ng-content>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'pin',
     type: 'button',

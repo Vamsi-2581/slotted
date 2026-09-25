@@ -417,7 +417,11 @@ export const ANGULAR_SWITCH_DOCS = {
         label: 'Anatomy, as it reaches the DOM',
         source: `<span data-ui="switch" data-part="root" data-size="md" data-indicator="mark" data-checked>
   <input data-part="control" type="checkbox" role="switch" id="slotted-switch-1" checked />
-  <span data-part="track"><span data-part="thumb"></span></span>
+  <span data-part="track"
+    ><span data-part="thumb"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="check" aria-hidden="true"></svg></span></span
+  ></span>
   <label data-part="label" for="slotted-switch-1">Cobrança automática</label>
   <p data-part="description" id="slotted-switch-2-description">Debitada no dia 5.</p>
 </span>`,

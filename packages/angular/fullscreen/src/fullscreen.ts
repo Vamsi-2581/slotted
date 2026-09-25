@@ -18,6 +18,7 @@ import {
   untracked,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { createFullscreen, fullscreenSupported } from '@slotted/core/fullscreen';
 import type {
   FullscreenController,
@@ -215,8 +216,12 @@ function activationReason(event: Event): FullscreenReason {
   selector: 'button[slFullscreenTrigger]',
   standalone: true,
   exportAs: 'slFullscreenTrigger',
+  imports: [SlGlyph, SlIcon],
+  /* The mark follows the state unless the consumer projected their own. */
   template: `<span data-part="icon" aria-hidden="true"
-      ><ng-content select="[slFullscreenIcon]" /></span
+      ><ng-content select="[slFullscreenIcon]"
+        ><span slIcon
+          ><svg slGlyph [name]="on() ? 'minimize' : 'maximize'"></svg></span></ng-content></span
     ><span data-part="label"
       ><ng-content>{{ label() }}</ng-content></span
     >`,
@@ -279,11 +284,6 @@ export class SlFullscreenTrigger implements AfterViewInit {
   }
 }
 
-/** Marks the consumer's own mark for the control's icon part. */
-@Directive({
-  selector: '[slFullscreenIcon]',
-  standalone: true,
-})
 /**
  * The part that takes the height the other children of the region leave
  * while it is full screen — a chart under its header, a document under its
@@ -300,4 +300,9 @@ export class SlFullscreenTrigger implements AfterViewInit {
 })
 export class SlFullscreenContent {}
 
+/** Marks the consumer's own mark for the control's icon part. */
+@Directive({
+  selector: '[slFullscreenIcon]',
+  standalone: true,
+})
 export class SlFullscreenIcon {}

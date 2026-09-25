@@ -36,6 +36,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import type { OnInit } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type {
   AbstractControl,
@@ -98,7 +99,7 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
   selector: '[slDateRangePicker]',
   standalone: true,
   exportAs: 'slDateRangePicker',
-  imports: [SlCalendar, SlDateField],
+  imports: [SlCalendar, SlDateField, SlGlyph, SlIcon],
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SlDateRangePicker), multi: true },
     { provide: NG_VALIDATORS, useExisting: forwardRef(() => SlDateRangePicker), multi: true },
@@ -172,7 +173,9 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
           [attr.aria-label]="clearLabel() ?? defaults.clearLabel"
           [disabled]="!editable()"
           (click)="clear($event)"
-        ></button>
+        >
+          <span slIcon><svg slGlyph name="x"></svg></span>
+        </button>
       }
       <button
         #trigger
@@ -184,7 +187,9 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
         [attr.aria-controls]="isOpen() ? contentId : null"
         [disabled]="!editable()"
         (click)="toggle($event)"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="calendar"></svg></span>
+      </button>
     </div>
 
     @if (isOpen()) {

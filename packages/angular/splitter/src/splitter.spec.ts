@@ -292,3 +292,47 @@ describe('the instance a template can reach', () => {
     expect(host.value()).toBe(0.5);
   });
 });
+
+@Component({
+  imports: [SlSplitter],
+  template: `
+    <div id="workspace">
+      <aside>Fila</aside>
+      @if (shown()) {
+        <div slSplitter></div>
+      }
+    </div>
+  `,
+})
+class BlockHost {
+  readonly shown = signal(true);
+}
+
+describe('the container it measures', () => {
+  /**
+   * A bar that is the first node of an `@if` block is built before the block is
+   * placed in the document, so it has no parent yet when it is constructed. It
+   * watches the container once it is rendered, or its limits keep the measure of
+   * whatever box they were first computed against.
+   */
+  it('watches its container when it is the root of a control-flow block', async () => {
+    const observed: Element[] = [];
+    class RecordingObserver {
+      observe(target: Element) {
+        observed.push(target);
+      }
+      unobserve() {}
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', RecordingObserver);
+    try {
+      const fixture = TestBed.createComponent(BlockHost);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const workspace = fixture.nativeElement.querySelector('#workspace') as HTMLElement;
+      expect(observed).toContain(workspace);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});

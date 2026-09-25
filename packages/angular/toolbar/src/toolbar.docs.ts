@@ -72,7 +72,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button inside sl-toolbar-overflow, carrying the Menu family’s own trigger',
     required: false,
     purpose:
-      'The control that opens what did not fit. It prints U+2026, its accessible name carries the count, and the bar writes hidden on it while nothing has given way — the same measurement that decides whether it is needed is the one that reveals it to read its width. The host is display: contents, so the button is a child of the bar itself.',
+      'The control that opens what did not fit. It prints U+2026, its accessible name carries the count, and the bar writes hidden on it while nothing has given way — the same measurement that decides whether it is needed is the one that reveals it to read its width. The host is display: contents, so the button is a child of the bar itself. On a coarse pointer it is the comfortable target wide as well as tall.',
   },
 ];
 
@@ -220,7 +220,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'overflowMenu',
     title: 'What is left over, behind one control',
-    note: 'The bar measures itself and gives way from the end. What stays visible is what has nowhere to go: an item that declares no counterpart cannot be hidden, which is how the primary action survives without a priority ranking it above the others. The counterpart is an ng-template, so a menu item that is never reached builds nothing.',
+    note: 'The bar measures its own width and gives way from the end, so what holds it gives it a width that does not come from the bar’s content: a bar as wide as what it shows is the trigger alone after a fold, and never sees the room come back. What stays visible is what has nowhere to go: an item that declares no counterpart cannot be hidden, which is how the primary action survives without a priority ranking it above the others. The counterpart is an ng-template, so a menu item that is never reached builds nothing.',
     snippet: defineSnippet({
       id: 'toolbar-angular-overflow-menu',
       language: 'angular',
@@ -428,7 +428,9 @@ export const ANGULAR_TOOLBAR_DOCS = {
     <button tabindex="-1">Arquivar</button>
   </div>
   <button data-part="overflow" type="button" tabindex="-1" aria-label="1 more action">
-    <span aria-hidden="true">…</span>
+    <span data-ui="icon" data-part="root" aria-hidden="true">
+      <svg data-part="glyph" data-glyph="ellipsis"></svg>
+    </span>
   </button>
 </div>`,
       }),

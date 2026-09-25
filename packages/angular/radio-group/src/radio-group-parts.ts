@@ -13,6 +13,7 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlRadioGroup } from './radio-group';
 import { SlRadioGroupIdFactory } from './radio-group-defaults';
@@ -65,6 +66,7 @@ function activationReason(event: Event): RadioGroupSelectionReason {
   selector: '[slRadio]',
   standalone: true,
   exportAs: 'slRadio',
+  imports: [SlGlyph, SlIcon],
   template: `<input
       #control
       data-part="control"
@@ -78,7 +80,9 @@ function activationReason(event: Event): RadioGroupSelectionReason {
       (click)="onClick($event)"
       (blur)="onBlur()"
     />
-    <span data-part="indicator"></span>
+    <span data-part="indicator"
+      ><span slIcon><svg slGlyph name="dot"></svg></span
+    ></span>
     <label data-part="label" [attr.for]="controlId"><ng-content /></label>
     <ng-content select="[slRadioDescription]" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,

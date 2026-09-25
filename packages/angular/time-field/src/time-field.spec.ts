@@ -209,6 +209,13 @@ describe('the duration expression', () => {
     const fixture = open();
     write(fixture, '+40m');
     expect(preview(fixture)?.textContent?.trim()).toBe('12:40');
+    /* The chevron is the glyph element, marked to turn in a right-to-left context. */
+    expect(
+      preview(fixture)?.querySelector('[data-ui="icon"]')?.hasAttribute('data-directional'),
+    ).toBe(true);
+    expect(preview(fixture)?.querySelector('svg[data-glyph]')?.getAttribute('data-glyph')).toBe(
+      'chevron-right',
+    );
     expect(fixture.componentInstance.onRequest).not.toHaveBeenCalled();
   });
 
@@ -360,6 +367,10 @@ describe('the adornments and the clear control', () => {
     const held = renderTemplate(
       `<div slTimeField clearable locale="pt-BR" [defaultValue]="control.value"></div>`,
     );
-    expect(held.nativeElement.querySelector('[data-part="clear"]')).not.toBeNull();
+    expect(
+      held.nativeElement
+        .querySelector('[data-part="clear"] svg[data-glyph]')
+        ?.getAttribute('data-glyph'),
+    ).toBe('x');
   });
 });

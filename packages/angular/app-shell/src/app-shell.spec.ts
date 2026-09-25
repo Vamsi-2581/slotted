@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter, RouterLink } from '@angular/router';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -123,6 +124,43 @@ class ForcedHost {
   readonly requests: AppShellOpenRequest[] = [];
 }
 
+@Component({
+  standalone: true,
+  imports: PARTS,
+  template: `<div slAppShell navMode="overlay" [(navOpen)]="open">
+    <header slAppShellBanner>
+      <div slAppShellBrand><button slAppShellNavToggle></button></div>
+    </header>
+    <nav slAppShellNav>
+      <div slAppShellNavBody><a href="#painel">Painel</a></div>
+    </nav>
+    <main slAppShellMain>Encomendas</main>
+  </div>`,
+})
+class ClosedOverlayHost {
+  readonly open = signal(false);
+}
+
+@Component({
+  standalone: true,
+  imports: [...PARTS, RouterLink],
+  template: `<div slAppShell navMode="overlay" [(navOpen)]="open">
+    <nav slAppShellNav>
+      <div slAppShellNavBody>
+        <a routerLink="/painel">Painel</a>
+        <a routerLink="/cargas" aria-disabled="true" (click)="$event.preventDefault()">Cargas</a>
+      </div>
+    </nav>
+    <main slAppShellMain>Encomendas</main>
+  </div>`,
+})
+class RoutedHost {
+  readonly open = signal(true);
+}
+
+@Component({ standalone: true, template: '' })
+class Destination {}
+
 function setup(providers: unknown[] = []) {
   TestBed.configureTestingModule({ imports: [Host], providers: providers as never[] });
   const fixture = TestBed.createComponent(Host);
@@ -188,12 +226,18 @@ describe('SlAppShell', () => {
     const host = fixture.componentInstance;
     const toggle = query(fixture, '[data-part="nav-toggle"]');
 
+    const glyph = () =>
+      toggle.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
+    /* The mark says what a press does: the region closes while it is open. */
+    expect(glyph()).toBe('panel-close');
+
     toggle.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
     fixture.detectChanges();
     expect(host.open()).toBe(false);
     expect(host.requests.at(-1)?.reason).toBe('pointer');
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
     expect(toggle.getAttribute('aria-label')).toBe('Abrir navegação');
+    expect(glyph()).toBe('panel-open');
 
     toggle.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
     fixture.detectChanges();
@@ -348,5 +392,84 @@ describe('SlAppShell', () => {
     expect(host.open()).toBe(true);
     expect(host.asideOpen()).toBe(true);
     expect(host.requests).toEqual([]);
+  });
+
+  /**
+   * The stylesheet fades the veil in from `entering` and out through
+   * `exiting`, and a veil mounted straight at `open` gives that transition no
+   * closed style to start from: it appeared in one frame beside a panel that
+   * took two hundred milliseconds to arrive. The presence module holds the two
+   * extra statuses, as it does for `dialog`.
+   */
+  it('fades the veil in through entering, and holds it through exiting', async () => {
+    TestBed.configureTestingModule({ imports: [ClosedOverlayHost] });
+    const fixture = TestBed.createComponent(ClosedOverlayHost);
+    fixture.detectChanges();
+    const scrim = () =>
+      fixture.nativeElement.querySelector('[data-part="scrim"]') as HTMLElement | null;
+    const frame = async () => {
+      await new Promise<void>((done) => requestAnimationFrame(() => done()));
+      fixture.detectChanges();
+    };
+
+    expect(scrim()).toBeNull();
+
+    query(fixture as never, '[data-part="nav-toggle"]').dispatchEvent(
+      new MouseEvent('click', { bubbles: true, detail: 1 }),
+    );
+    fixture.detectChanges();
+    expect(scrim()?.getAttribute('data-status')).toBe('entering');
+
+    await frame();
+    expect(scrim()?.getAttribute('data-status')).toBe('open');
+
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    expect(scrim()?.getAttribute('data-status')).toBe('exiting');
+
+    await frame();
+    expect(scrim()).toBeNull();
+  });
+
+  describe('a destination in the overlaid navigation', () => {
+    async function routed() {
+      TestBed.configureTestingModule({
+        imports: [RoutedHost],
+        providers: [provideRouter([{ path: '**', component: Destination }])],
+      });
+      const fixture = TestBed.createComponent(RoutedHost);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const choose = async (name: string) => {
+        const link = [...fixture.nativeElement.querySelectorAll('a')].find(
+          (a: HTMLAnchorElement) => a.textContent?.trim() === name,
+        ) as HTMLAnchorElement;
+        link.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+      };
+      return { fixture, choose };
+    }
+
+    /**
+     * RouterLink calls preventDefault on its anchor's click before the click
+     * reaches the root. Reading defaultPrevented as a refusal kept every
+     * routed destination open, and a phone paid two taps per destination.
+     */
+    it('closes on a RouterLink, whose router prevented the native navigation', async () => {
+      const { fixture, choose } = await routed();
+      await choose('Painel');
+      expect(fixture.componentInstance.open()).toBe(false);
+    });
+
+    it('stays open on a disabled destination', async () => {
+      const { fixture, choose } = await routed();
+      await choose('Cargas');
+      expect(fixture.componentInstance.open()).toBe(true);
+    });
   });
 });

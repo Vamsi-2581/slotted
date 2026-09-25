@@ -288,6 +288,23 @@ describe('SlNotificationCenter', () => {
     expect(article(0).querySelector('[data-part="visual"]')?.textContent).toBe('');
     expect(article(1).querySelector('[data-part="visual"]')?.textContent).toBe('');
     expect(article(2).querySelector('[data-part="visual"]')).toBeNull();
+    /* The family's own visual: the tone's glyph, marked as the family's. */
+    const toneGlyph = (index: number) =>
+      article(index)
+        .querySelector('[data-part="visual"] > [data-ui="icon"][data-tone-glyph] > svg')
+        ?.getAttribute('data-glyph');
+    expect(toneGlyph(0)).toBe('circle-alert');
+    expect(toneGlyph(1)).toBe('circle-x');
+  });
+
+  it('draws check to mark read, dot to mark unread, and x to dismiss', () => {
+    const glyph = (index: number, part: string) =>
+      article(index)
+        .querySelector(`[data-part="${part}"] > [data-ui="icon"] > svg[data-glyph]`)
+        ?.getAttribute('data-glyph');
+    expect(glyph(0, 'read-toggle')).toBe('check');
+    expect(glyph(2, 'read-toggle')).toBe('dot');
+    expect(glyph(0, 'dismiss')).toBe('x');
   });
 
   it('asks to mark read and never marks itself', () => {
@@ -307,6 +324,37 @@ describe('SlNotificationCenter', () => {
 
     host.centre().markAllRead();
     expect(host.readRequests.at(-1)).toMatchObject({ keys: ['n1', 'n2'], reason: 'programmatic' });
+  });
+
+  /**
+   * Two glyphs with no words beside them are two controls nobody can tell
+   * apart until they are named: each of the family's own controls opens a
+   * tooltip with its accessible name, on keyboard focus in the same task.
+   */
+  it('names its own controls with a tooltip as well as with aria-label', async () => {
+    /* A key first: jsdom, like a browser, shows focus only after the keyboard was the last thing used. */
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Tab' }));
+    const read = button('Marcar como lida');
+    read.focus();
+    read.dispatchEvent(new FocusEvent('focus'));
+    await settle();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await settle();
+    const hint = document.querySelector('[role="tooltip"]');
+    expect(hint?.textContent?.trim()).toBe('Marcar como lida');
+    expect(read.getAttribute('aria-describedby')).toBe(hint?.id);
+
+    read.dispatchEvent(new FocusEvent('blur'));
+    await settle();
+    expect(read.getAttribute('aria-describedby')).toBeNull();
+
+    const dismiss = button('Dispensar');
+    dismiss.focus();
+    dismiss.dispatchEvent(new FocusEvent('focus'));
+    await settle();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await settle();
+    expect(document.querySelector('[role="tooltip"]')?.textContent?.trim()).toBe('Dispensar');
   });
 
   it('counts the unread in the heading, disables mark-all at zero and reports the count', async () => {

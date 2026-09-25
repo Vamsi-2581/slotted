@@ -738,7 +738,11 @@ const code = defineSnippet({
     <div data-part="chips" role="row" aria-describedby="hint-id">
       <span data-ui="tag" data-part="root" data-size="sm" role="gridcell" tabindex="-1">
         <span data-part="body"><span data-part="label">ana.pereira@example.com</span></span>
-        <button data-part="remove" type="button" tabindex="-1"></button>
+        <button data-part="remove" type="button" tabindex="-1">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="x" aria-hidden="true"></svg
+          ></span>
+        </button>
       </span>
       <span
         data-ui="tag"
@@ -752,18 +756,29 @@ const code = defineSnippet({
         aria-describedby="message-id"
       >
         <span data-part="body">
-          <span data-part="start"></span>
+          <span data-part="start"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="circle-alert" aria-hidden="true"></svg></span
+          ></span>
           <span data-part="label">jhon.company</span>
         </span>
         <span data-part="message" id="message-id">Please include an '@' in the email address.</span>
-        <button data-part="remove" type="button" tabindex="-1"></button>
+        <button data-part="remove" type="button" tabindex="-1">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="x" aria-hidden="true"></svg
+          ></span>
+        </button>
       </span>
       <span data-part="field" role="gridcell">
         <input data-part="input" type="email" aria-invalid="true" />
       </span>
     </div>
   </div>
-  <button data-part="clear" type="button"></button>
+  <button data-part="clear" type="button">
+    <span data-ui="icon" data-part="root" aria-hidden="true"
+      ><svg data-part="glyph" data-glyph="x" aria-hidden="true"></svg
+    ></span>
+  </button>
   <span data-part="hint" id="hint-id">Press Delete to remove a value.</span>
 </sl-tags-input>`,
 });

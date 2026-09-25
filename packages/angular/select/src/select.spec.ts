@@ -320,6 +320,21 @@ describe('SlSelect', () => {
     expect(fixture.componentInstance.valueReason()).toBe('clear');
   });
 
+  /** Every icon the family owns is a `Glyph` element inside an `Icon` box, never a mask. */
+  it('draws the chevron, the cross and the tick as glyph elements', () => {
+    fixture.componentInstance.clearable.set(true);
+    fixture.componentInstance.value.set('apple');
+    fixture.detectChanges();
+    const glyph = (part: string) =>
+      document.querySelector(`[data-part='${part}'] > [data-ui='icon'] > svg[data-glyph]`);
+    expect(glyph('arrow')?.getAttribute('data-glyph')).toBe('chevron-down');
+    expect(glyph('clear')?.getAttribute('data-glyph')).toBe('x');
+
+    open();
+    const tick = named('Apple').querySelector("[data-part='indicator'] > [data-ui='icon'] > svg");
+    expect(tick?.getAttribute('data-glyph')).toBe('check');
+  });
+
   it('refuses to open while it is read-only', () => {
     fixture.componentInstance.readOnly.set(true);
     fixture.detectChanges();
@@ -488,6 +503,14 @@ describe('SlSelect, searching', () => {
     await TestBed.configureTestingModule({ imports: [SearchHost] }).compileComponents();
     fixture = TestBed.createComponent(SearchHost);
     fixture.detectChanges();
+  });
+
+  it('draws the magnifier as a glyph element', () => {
+    openSearch();
+    const magnifier = document.querySelector(
+      "[data-part='search-icon'] > [data-ui='icon'] > svg[data-glyph]",
+    );
+    expect(magnifier?.getAttribute('data-glyph')).toBe('search');
   });
 
   /**
@@ -663,5 +686,33 @@ describe('SlSelect, searching', () => {
     openSearch();
     expect(field().value).toBe('');
     expect(visible()).toHaveLength(4);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlSelect, SlSelectItem],
+  template: `
+    <sl-select aria-label="Fruit">
+      <sl-select-item value="apple" icon="dot">Apple</sl-select-item>
+      <sl-select-item value="cherry">Cherry</sl-select-item>
+    </sl-select>
+  `,
+})
+class IconHost {}
+
+/** The first column holds the glyph the icon input names; no stylesheet fills it. */
+describe('SlSelect, the icon column', () => {
+  it('draws the named glyph in the first column, and prints no name there', async () => {
+    await TestBed.configureTestingModule({ imports: [IconHost] }).compileComponents();
+    const fixture = TestBed.createComponent(IconHost);
+    fixture.detectChanges();
+    press('ArrowDown');
+    fixture.detectChanges();
+
+    const column = named('Apple').querySelector("[data-part='icon']");
+    expect(column?.querySelector("[data-ui='icon'] > svg")?.getAttribute('data-glyph')).toBe('dot');
+    expect(column?.textContent?.trim()).toBe('');
+    expect(named('Cherry').querySelector("[data-part='icon']")).toBeNull();
   });
 });

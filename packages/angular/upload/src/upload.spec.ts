@@ -160,6 +160,39 @@ describe('SlUpload', () => {
     ]);
   });
 
+  it('draws the region’s mark, each kind’s mark and each control’s mark as glyphs', async () => {
+    const glyph = (node: Element | null) =>
+      node
+        ?.querySelector(':scope > [data-ui="icon"] > svg[data-glyph]')
+        ?.getAttribute('data-glyph');
+
+    /* The region carries the mark in the dropzone shape, so the trigger does not. */
+    expect(glyph(part('dropzone'))).toBe('upload');
+    expect(glyph(part('trigger'))).toBeUndefined();
+
+    fixture.componentInstance.multiple.set(true);
+    fixture.componentInstance.autoUpload.set(false);
+    fixture.detectChanges();
+    choose([
+      makeFile('a.pdf', { type: 'application/pdf' }),
+      makeFile('b.xlsx', { lastModified: 2 }),
+    ]);
+    await settle();
+    expect(parts('preview').map(glyph)).toEqual(['file-text', 'file-spreadsheet']);
+    const marks: Record<string, string> = {
+      cancel: 'x',
+      pause: 'pause',
+      remove: 'trash',
+      retry: 'rotate-ccw',
+      start: 'play',
+    };
+    const controls = parts('actions').flatMap((node) => [...node.children]);
+    expect(controls.length).toBeGreaterThan(0);
+    for (const control of controls) {
+      expect(glyph(control)).toBe(marks[control.getAttribute('data-part') ?? '']);
+    }
+  });
+
   describe('the drag', () => {
     const transfer = (items: Array<{ kind: string; type: string }>, files: File[] = []) =>
       ({ files, items, types: ['Files'] }) as unknown as DataTransfer;
@@ -295,6 +328,11 @@ describe('SlUpload', () => {
     expect(viewer.closest('[data-ui="upload"]')).toBe(viewer);
     expect(viewer.getAttribute('data-size')).toBe('md');
     expect(layerPart('viewerTitle')?.textContent).toBe('a.png');
+    expect(
+      layerPart('viewerClose')
+        ?.querySelector(':scope > [data-ui="icon"] > svg')
+        ?.getAttribute('data-glyph'),
+    ).toBe('x');
 
     (layerPart('viewerClose') as HTMLElement).click();
     fixture.detectChanges();

@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -136,6 +137,20 @@ describe('the shape it renders', () => {
       expect(root.querySelector(`[data-part='${part}']`)).not.toBeNull();
     }
     expect(contract.members.tree.parts).toContain('canvas');
+  });
+
+  /** The chevron is the Glyph element on a branch, and a leaf's box stays empty. */
+  it('draws the chevron on every branch and nothing on a leaf', () => {
+    const { byKey } = mount();
+    const chevron = (key: string) =>
+      byKey(key)?.querySelector(
+        ":scope > [data-part='row'] > [data-part='expander'] > [data-ui='icon'] > svg[data-glyph]",
+      );
+    expect(chevron('src')?.getAttribute('data-glyph')).toBe('chevron-right');
+    expect(chevron('index.ts')).toBeNull();
+    expect(
+      byKey('index.ts')?.querySelector(":scope > [data-part='row'] > [data-part='expander']"),
+    ).not.toBeNull();
   });
 
   it('holds only what is open, in reading order', () => {
@@ -333,6 +348,12 @@ describe('the cascade', () => {
     host.value.set(['index.ts']);
     fixture.detectChanges();
     expect(byKey('src')?.dataset['indeterminate']).toBe('');
+    const mark = (key: string) =>
+      byKey(key)
+        ?.querySelector(":scope > [data-part='row'] > [data-part='indicator'] svg[data-glyph]")
+        ?.getAttribute('data-glyph');
+    expect(mark('src')).toBe('minus');
+    expect(mark('index.ts')).toBe('check');
   });
 
   it('says a collapsed branch still holds one', () => {
@@ -474,5 +495,64 @@ describe('the composed shape', () => {
     ) as HTMLElement;
     expect(row.querySelector("[data-part='icon']")).not.toBeNull();
     expect(row.querySelector("[data-part='meta']")?.textContent).toBe('2');
+  });
+});
+
+/**
+ * A hierarchy of unknown depth is written in Angular as one template that calls
+ * itself. Every instance of it is declared at the root, so the element injector
+ * of a nested node never meets the node it is rendered inside; the depth is the
+ * nesting of the document the reader sees.
+ */
+describe('a recursive template', () => {
+  interface Branch {
+    id: string;
+    children: Branch[];
+  }
+
+  @Component({
+    standalone: true,
+    imports: [NgTemplateOutlet, SlTree, SlTreeGroup, SlTreeNode],
+    template: `<div slTree aria-label="Recursive" [expandedKeys]="expanded()">
+      <ng-container [ngTemplateOutlet]="branch" [ngTemplateOutletContext]="{ $implicit: roots }" />
+      <ng-template #branch let-nodes>
+        @for (node of nodes; track node.id) {
+          <li
+            slTreeNode
+            [value]="node.id"
+            [label]="node.id"
+            [hasChildren]="node.children.length > 0"
+          >
+            @if (node.children.length > 0) {
+              <ul slTreeGroup>
+                <ng-container
+                  [ngTemplateOutlet]="branch"
+                  [ngTemplateOutletContext]="{ $implicit: node.children }"
+                />
+              </ul>
+            }
+          </li>
+        }
+      </ng-template>
+    </div>`,
+  })
+  class RecursiveHost {
+    readonly expanded = signal<readonly string[]>([]);
+    readonly roots: Branch[] = [
+      { id: 'a', children: [{ id: 'b', children: [{ id: 'c', children: [] }] }] },
+    ];
+  }
+
+  it('counts the depth from the nesting it renders', async () => {
+    const fixture = TestBed.createComponent(RecursiveHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.componentInstance.expanded.set(['a', 'b']);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const root = fixture.nativeElement as HTMLElement;
+    const depth = (key: string) =>
+      root.querySelector<HTMLElement>(`[data-key="${key}"]`)?.dataset['depth'];
+    expect([depth('a'), depth('b'), depth('c')]).toEqual(['0', '1', '2']);
   });
 });

@@ -12,6 +12,7 @@ import {
   output,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { initialsFrom, toneFrom } from '@slotted/core/identity';
 
@@ -83,7 +84,7 @@ const INITIALS_MAX: Record<AvatarSize, number> = { xs: 1, sm: 2, md: 2, lg: 2, x
   selector: '[slAvatar]',
   standalone: true,
   exportAs: 'slAvatar',
-  imports: [SlAvatarImage],
+  imports: [SlAvatarImage, SlGlyph, SlIcon],
   providers: [
     /* The component is its own image host, and a decorator is evaluated before
        the class it decorates exists. */
@@ -95,7 +96,12 @@ const INITIALS_MAX: Record<AvatarSize, number> = { xs: 1, sm: 2, md: 2, lg: 2, x
     <ng-content select="img"></ng-content
     ><span data-part="fallback">
       @if (custom() === undefined) {
-        {{ initials() }}
+        <!-- No picture and no name to take initials from: the person glyph. -->
+        @if (initials() === '') {
+          <span slIcon><svg slGlyph name="person"></svg></span>
+        } @else {
+          {{ initials() }}
+        }
       }
       <ng-content select="[slAvatarFallback]"></ng-content
     ></span>`,

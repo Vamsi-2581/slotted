@@ -34,6 +34,7 @@ import {
       <li
         slListItem
         id="row"
+        [marker]="marker()"
         [tone]="tone()"
         [selected]="selected()"
         [current]="current()"
@@ -64,6 +65,7 @@ import {
   `,
 })
 class Host {
+  readonly marker = signal<'none' | 'bullet' | 'number' | undefined>(undefined);
   readonly tone = signal<ListItemTone | undefined>(undefined);
   readonly selected = signal(false);
   readonly current = signal<ListItemCurrent>(false);
@@ -93,6 +95,25 @@ describe('SlListItem', () => {
     for (const part of ['content', 'start', 'body', 'label', 'description', 'end', 'actions']) {
       expect(el(fixture, part).getAttribute('data-part')).toBe(part);
     }
+  });
+
+  /** The bullet is the dot Glyph in a part of its own; the number stays text. */
+  it('draws the bullet with the dot glyph before the content', () => {
+    const fixture = setup();
+    expect(el(fixture, 'row').querySelector('[data-part="marker"]')).toBeNull();
+
+    fixture.componentInstance.marker.set('bullet');
+    fixture.detectChanges();
+    const marker = el(fixture, 'row').firstElementChild;
+    expect(marker?.getAttribute('data-part')).toBe('marker');
+    expect(marker?.getAttribute('aria-hidden')).toBe('true');
+    expect(
+      marker?.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph'),
+    ).toBe('dot');
+
+    fixture.componentInstance.marker.set('number');
+    fixture.detectChanges();
+    expect(el(fixture, 'row').querySelector('[data-part="marker"]')).toBeNull();
   });
 
   /** Interactive content may not nest inside `a` or `button`. */

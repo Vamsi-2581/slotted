@@ -30,6 +30,7 @@ import {
   type ValidationErrors,
   type Validator,
 } from '@angular/forms';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlButton, SlButtonEnd, SlButtonStart } from '@slotted/angular/button';
 import { SlCheckbox } from '@slotted/angular/checkbox';
 import {
@@ -181,6 +182,8 @@ export class SlTransferPart {
     SlButtonEnd,
     SlButtonStart,
     SlCheckbox,
+    SlGlyph,
+    SlIcon,
     SlListbox,
     SlListboxDescription,
     SlListboxEmpty,
@@ -228,7 +231,10 @@ export class SlTransferPart {
           [focusableWhenDisabled]="!isDisabled()"
           (click)="move(selectedToMove('source'), 'target', pressReason($event), $event)"
         >
-          {{ t().moveToTarget }}<span slButtonEnd aria-hidden="true"><span></span></span>
+          {{ t().moveToTarget
+          }}<span slButtonEnd aria-hidden="true"
+            ><span slIcon><svg slGlyph name="chevron-right"></svg></span
+          ></span>
         </button>
         <button
           slButton
@@ -240,7 +246,10 @@ export class SlTransferPart {
           [focusableWhenDisabled]="!isDisabled()"
           (click)="move(enabledVisible('source'), 'target', pressReason($event), $event)"
         >
-          {{ t().moveAllToTarget }}<span slButtonEnd aria-hidden="true"><span></span></span>
+          {{ t().moveAllToTarget
+          }}<span slButtonEnd aria-hidden="true"
+            ><span slIcon><svg slGlyph name="chevrons-right"></svg></span
+          ></span>
         </button>
         <button
           slButton
@@ -253,7 +262,9 @@ export class SlTransferPart {
           [focusableWhenDisabled]="!isDisabled()"
           (click)="move(selectedToMove('target'), 'source', pressReason($event), $event)"
         >
-          <span slButtonStart aria-hidden="true"><span></span></span>{{ t().moveToSource }}
+          <span slButtonStart aria-hidden="true"
+            ><span slIcon><svg slGlyph name="chevron-right"></svg></span></span
+          >{{ t().moveToSource }}
         </button>
         <button
           slButton
@@ -265,7 +276,9 @@ export class SlTransferPart {
           [focusableWhenDisabled]="!isDisabled()"
           (click)="move(enabledVisible('target'), 'source', pressReason($event), $event)"
         >
-          <span slButtonStart aria-hidden="true"><span></span></span>{{ t().moveAllToSource }}
+          <span slButtonStart aria-hidden="true"
+            ><span slIcon><svg slGlyph name="chevrons-right"></svg></span></span
+          >{{ t().moveAllToSource }}
         </button>
         @if (resolvedReorderable()) {
           <div data-part="reorder" role="group" [attr.aria-label]="t().reorder">
@@ -280,7 +293,9 @@ export class SlTransferPart {
               [focusableWhenDisabled]="!isDisabled()"
               (click)="shift(-1, pressReason($event), $event, false)"
             >
-              <span slButtonStart aria-hidden="true"><span></span></span>{{ t().moveUp }}
+              <span slButtonStart aria-hidden="true"
+                ><span slIcon><svg slGlyph name="chevron-down"></svg></span></span
+              >{{ t().moveUp }}
             </button>
             <button
               slButton
@@ -293,7 +308,9 @@ export class SlTransferPart {
               [focusableWhenDisabled]="!isDisabled()"
               (click)="shift(1, pressReason($event), $event, false)"
             >
-              <span slButtonStart aria-hidden="true"><span></span></span>{{ t().moveDown }}
+              <span slButtonStart aria-hidden="true"
+                ><span slIcon><svg slGlyph name="chevron-down"></svg></span></span
+              >{{ t().moveDown }}
             </button>
           </div>
         }
@@ -337,7 +354,10 @@ export class SlTransferPart {
         @if (resolvedSearchable()) {
           <div data-part="search">
             <div slTextField [clearable]="true" [size]="innerSize()">
-              <span slTextFieldStart aria-hidden="true" data-part="search-icon"></span>
+              <span slTextFieldStart aria-hidden="true"
+                ><span data-part="search-icon"
+                  ><span slIcon><svg slGlyph name="search"></svg></span></span
+              ></span>
               <input
                 slTextFieldInput
                 type="search"
@@ -399,6 +419,9 @@ export class SlTransferPart {
             @if (isEmpty(side)) {
               <div slListboxEmpty>
                 <div data-part="empty" [attr.data-query]="typed(side) ? '' : null">
+                  <span slIcon
+                    ><svg slGlyph [name]="typed(side) ? 'search-x' : 'inbox'"></svg
+                  ></span>
                   {{ typed(side) ? t().noResults : t().empty }}
                 </div>
               </div>

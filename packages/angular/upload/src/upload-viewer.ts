@@ -1,7 +1,7 @@
 import { SlDialog, SlDialogTitle } from '@slotted/angular/dialog';
 import type { DialogChangeRequest } from '@slotted/angular/dialog';
 import { formatBytes, isViewable } from '@slotted/core/upload';
-import type { UploadFile } from '@slotted/core/upload';
+import type { FileKind, UploadFile } from '@slotted/core/upload';
 import { DomSanitizer } from '@angular/platform-browser';
 import {
   ChangeDetectionStrategy,
@@ -13,6 +13,8 @@ import {
   output,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import type { GlyphName } from '@slotted/angular/icon';
 
 import type {
   UploadKindLabels,
@@ -20,6 +22,23 @@ import type {
   UploadSize,
   UploadViewingReason,
 } from './upload-defaults';
+
+/**
+ * What a file is drawn as on its tile: one glyph per kind, the plain file for
+ * anything no kind claims. The row's tile and the viewer's stage read the same
+ * map, so a kind never has two marks.
+ */
+export const KIND_GLYPH: Record<FileKind, GlyphName> = {
+  archive: 'file-archive',
+  audio: 'file-audio',
+  document: 'file-type',
+  image: 'file-image',
+  other: 'file',
+  pdf: 'file-text',
+  presentation: 'presentation',
+  spreadsheet: 'file-spreadsheet',
+  video: 'file-video',
+};
 
 export interface UploadViewingRequest {
   key: string | null;
@@ -49,7 +68,7 @@ export interface UploadViewingRequest {
   exportAs: 'slUploadViewer',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [SlDialog, SlDialogTitle],
+  imports: [SlDialog, SlDialogTitle, SlGlyph, SlIcon],
   host: {
     '[attr.hidden]': 'current() ? null : ""',
     '(keydown)': 'onKey($event)',
@@ -82,14 +101,18 @@ export interface UploadViewingRequest {
                   [attr.aria-label]="labels().viewerExternal"
                   data-part="viewerExternal"
                   type="button"
-                ></button>
+                >
+                  <span slIcon><svg slGlyph name="external"></svg></span>
+                </button>
               }
               <button
                 (click)="close($event)"
                 [attr.aria-label]="labels().viewerClose"
                 data-part="viewerClose"
                 type="button"
-              ></button>
+              >
+                <span slIcon><svg slGlyph name="x"></svg></span>
+              </button>
             </span>
           </div>
 
@@ -101,7 +124,9 @@ export interface UploadViewingRequest {
                 [disabled]="index() <= 0"
                 data-part="viewerPrevious"
                 type="button"
-              ></button>
+              >
+                <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
+              </button>
             }
 
             @switch (stage()) {
@@ -125,7 +150,9 @@ export interface UploadViewingRequest {
                   [attr.data-extension]="extensionLabel()"
                   [attr.data-kind]="file.kind"
                   data-part="preview"
-                ></span>
+                >
+                  <span slIcon><svg slGlyph [name]="kindGlyph[file.kind]"></svg></span>
+                </span>
                 <p>{{ labels().viewerUnsupported }}</p>
               }
             }
@@ -137,7 +164,9 @@ export interface UploadViewingRequest {
                 [disabled]="index() === -1 || index() >= shown().length - 1"
                 data-part="viewerNext"
                 type="button"
-              ></button>
+              >
+                <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
+              </button>
             }
           </div>
         </div>
@@ -156,6 +185,8 @@ export class SlUploadViewer {
   readonly size = input<UploadSize>('md');
 
   readonly viewingChange = output<UploadViewingRequest>();
+
+  protected readonly kindGlyph = KIND_GLYPH;
 
   /**
    * Only what the viewer can render, so previous and next skip a spreadsheet

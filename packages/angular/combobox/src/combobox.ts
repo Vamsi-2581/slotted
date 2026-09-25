@@ -36,6 +36,7 @@ import {
 } from '@angular/core';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 
 import { injectComboboxDefaults } from './combobox-defaults';
@@ -97,6 +98,7 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
   selector: 'sl-combobox',
   standalone: true,
   exportAs: 'slCombobox',
+  imports: [SlGlyph, SlIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   styleUrls: ['../../../styles/src/combobox/combobox.css'],
@@ -149,7 +151,9 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
         data-part="clear"
         [attr.aria-label]="resolvedClearLabel()"
         (click)="onClear($event)"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="x"></svg></span>
+      </button>
     }
     <button
       type="button"
@@ -162,7 +166,9 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
       @if (loading()) {
         <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
       } @else {
-        <span data-part="arrow"></span>
+        <span data-part="arrow"
+          ><span slIcon><svg slGlyph name="chevron-down"></svg></span
+        ></span>
       }
     </button>
 

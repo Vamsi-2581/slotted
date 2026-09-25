@@ -63,7 +63,9 @@ describe('SlRadioGroup', () => {
 
     const item = items(fixture)[0]?.parentElement as HTMLElement;
     expect(item.getAttribute('data-part')).toBe('item');
-    expect(item.querySelector('[data-part="indicator"]')).not.toBeNull();
+    expect(
+      item.querySelector('[data-part="indicator"] svg[data-glyph]')?.getAttribute('data-glyph'),
+    ).toBe('dot');
     expect(item.querySelector('[data-part="label"]')?.textContent).toContain('Padrão');
   });
 

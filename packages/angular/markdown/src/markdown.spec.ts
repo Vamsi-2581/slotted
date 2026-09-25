@@ -226,5 +226,11 @@ describe('SlMarkdown', () => {
     const back = root.querySelector("[data-part='backref']");
     expect(back?.getAttribute('href')).toBe('#fnref-a');
     expect(back?.closest('p')?.textContent).toContain('Source');
+    /* The arrow is the Glyph element, hidden, and the link keeps its own name. */
+    expect(
+      back
+        ?.querySelector('[data-ui="icon"][aria-hidden="true"] > svg[data-glyph]')
+        ?.getAttribute('data-glyph'),
+    ).toBe('arrow-left');
   });
 });

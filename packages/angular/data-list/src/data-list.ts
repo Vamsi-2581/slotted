@@ -18,6 +18,7 @@ import {
   TemplateRef,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlButton, SlButtonEnd } from '@slotted/angular/button';
 import { SlCheckbox } from '@slotted/angular/checkbox';
 import {
@@ -219,6 +220,8 @@ interface RecordView<Row> {
     SlButtonEnd,
     SlCheckbox,
     SlDataListPart,
+    SlGlyph,
+    SlIcon,
     SlList,
     SlListItem,
     SlListItemActions,
@@ -292,7 +295,12 @@ interface RecordView<Row> {
             [attr.aria-label]="sortName()"
             [slMenuTriggerFor]="sortMenu"
           >
-            {{ sortText() }}<span slButtonEnd></span>
+            {{ sortText()
+            }}<span slButtonEnd>
+              @if (firstKey()) {
+                <span slIcon size="sm"><svg slGlyph name="chevron-down"></svg></span>
+              }
+            </span>
           </button>
           <sl-menu #sortMenu align="end" [aria-label]="say(labelSet().sort)">
             <sl-menu-radio-group
@@ -560,6 +568,7 @@ interface RecordView<Row> {
               {{
                 view.expanded ? say(labelSet().less) : say(labelSet().more, { count: view.hidden })
               }}
+              <span slIcon size="sm"><svg slGlyph name="chevron-down"></svg></span>
             </button>
           }
         </div>

@@ -15,7 +15,9 @@ description() !== undefined || resolvedToolbar() !== 'none') {
         [attr.aria-expanded]="layerOpen()['help'] ?? false"
         [attr.data-open]="layerOpen()['help'] ? '' : null"
         (click)="toggleLayer('help')"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="circle-info"></svg></span>
+      </button>
       <div
         #helpLayer
         popover="auto"
@@ -42,7 +44,9 @@ description() !== undefined || resolvedToolbar() !== 'none') {
       [attr.aria-label]="messages.resetZoom"
       [attr.title]="messages.resetZoom"
       (click)="resetZoomFromToolbar($event)"
-    ></button>
+    >
+      <span slIcon><svg slGlyph name="rotate-ccw"></svg></span>
+    </button>
     }
     <button
       type="button"
@@ -52,14 +56,18 @@ description() !== undefined || resolvedToolbar() !== 'none') {
       [attr.aria-pressed]="tableOpen()"
       [attr.data-pressed]="tableOpen() ? '' : null"
       (click)="requestTable(!tableOpen(), pressReason(), $event)"
-    ></button>
+    >
+      <span slIcon><svg slGlyph name="file-spreadsheet"></svg></span>
+    </button>
     <button
       type="button"
       data-part="fullscreen-toggle"
       [attr.aria-label]="fullscreen() ? messages.exitFullscreen : messages.fullscreen"
       [attr.title]="fullscreen() ? messages.exitFullscreen : messages.fullscreen"
       (click)="requestFullscreen(!fullscreen(), pressReason(), $event)"
-    ></button>
+    >
+      <span slIcon><svg slGlyph [name]="fullscreen() ? 'minimize' : 'maximize'"></svg></span>
+    </button>
     <button
       #menuControl
       type="button"
@@ -70,7 +78,9 @@ description() !== undefined || resolvedToolbar() !== 'none') {
       [attr.aria-expanded]="layerOpen()['menu'] ?? false"
       [attr.data-open]="layerOpen()['menu'] ? '' : null"
       (click)="toggleLayer('menu')"
-    ></button>
+    >
+      <span slIcon><svg slGlyph name="ellipsis"></svg></span>
+    </button>
     <div
       #menu
       popover="auto"

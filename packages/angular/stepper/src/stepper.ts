@@ -18,6 +18,8 @@ import {
   untracked,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import type { GlyphName } from '@slotted/angular/icon';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import { stepFocusIndex, stepPercent, stepReachable, stepStatus } from '@slotted/core/steps';
@@ -267,7 +269,7 @@ export class SlStepperList {
 @Component({
   selector: 'li[slStepperStep]',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon],
   template: `
     @switch (stepper.navigationValue()) {
       @case ('none') {
@@ -317,7 +319,12 @@ export class SlStepperList {
     }
 
     <ng-template #header>
-      <span aria-hidden="true" data-part="marker">{{ index() + 1 }}</span>
+      <span aria-hidden="true" data-part="marker"
+        >{{ index() + 1 }}
+        @if (mark(); as mark) {
+          <span slIcon><svg slGlyph [name]="mark"></svg></span>
+        }
+      </span>
       <span data-part="label">
         {{ label() }}
         @if (description()) {
@@ -368,6 +375,15 @@ export class SlStepperStep {
   readonly status = computed(() => this.stepper.statusOf(this.index()));
   readonly unreachable = computed(
     () => this.disabled() === true || !this.stepper.reachable(this.index()),
+  );
+  /**
+   * The glyph drawn over the number: a cross for a step in error, a check for
+   * a finished one the reader has left. The current step keeps its number
+   * even when it is also complete, because the number is what says where the
+   * reader is.
+   */
+  readonly mark = computed<GlyphName | null>(() =>
+    this.invalid() ? 'x' : this.status() === 'complete' && !this.current() ? 'check' : null,
   );
 
   readonly announced = computed(() => {

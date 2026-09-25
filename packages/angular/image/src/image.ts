@@ -11,6 +11,7 @@ import {
   output,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlAspectRatio } from '@slotted/angular/aspect-ratio';
 import type { AspectRatioValue } from '@slotted/angular/aspect-ratio';
@@ -79,7 +80,7 @@ interface Derived {
   selector: '[slImage]',
   standalone: true,
   exportAs: 'slImage',
-  imports: [NgTemplateOutlet, SlAspectRatio, SlImageMedia],
+  imports: [NgTemplateOutlet, SlAspectRatio, SlGlyph, SlIcon, SlImageMedia],
   providers: [
     /* The component is its own media host, and a decorator is evaluated before
        the class it decorates exists. */
@@ -116,7 +117,10 @@ interface Derived {
           <img alt="" [src]="preview" />
         }
         <ng-content select="[slImagePlaceholder]"></ng-content></span
-      ><span data-part="fallback"><ng-content select="[slImageFallback]"></ng-content></span>
+      ><span data-part="fallback"
+        ><ng-content select="[slImageFallback]"
+          ><span slIcon><svg slGlyph name="image-off"></svg></span></ng-content
+      ></span>
     </ng-template>
     <ng-template #own>
       <img

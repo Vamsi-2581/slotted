@@ -658,6 +658,24 @@ describe('the two steppers', () => {
     expect(stepper(fixture, 'increment').disabled).toBe(true);
     expect(stepper(fixture, 'decrement').disabled).toBe(false);
   });
+
+  it('draw a chevron in each stacked half and the minus and plus when split', () => {
+    const glyph = (fixture: Fixture, part: 'increment' | 'decrement') =>
+      stepper(fixture, part).querySelector('svg[data-glyph]')?.getAttribute('data-glyph');
+    const stacked = renderTemplate(`
+      <div slCurrencyField stepper="stacked">
+        <input slCurrencyFieldInput currency="BRL" locale="pt-BR" defaultValue="100" />
+      </div>`);
+    expect(glyph(stacked, 'increment')).toBe('chevron-down');
+    expect(glyph(stacked, 'decrement')).toBe('chevron-down');
+
+    const split = renderTemplate(`
+      <div slCurrencyField stepper="split">
+        <input slCurrencyFieldInput currency="BRL" locale="pt-BR" defaultValue="100" />
+      </div>`);
+    expect(glyph(split, 'increment')).toBe('plus');
+    expect(glyph(split, 'decrement')).toBe('minus');
+  });
 });
 
 describe('the field around it', () => {

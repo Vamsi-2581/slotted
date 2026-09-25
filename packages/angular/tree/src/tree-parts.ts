@@ -1,16 +1,20 @@
 import {
+  afterEveryRender,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
   contentChildren,
   Directive,
+  ElementRef,
   inject,
   input,
   numberAttribute,
+  signal,
   ViewEncapsulation,
 } from '@angular/core';
 import type { Signal } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlTreeContext } from './tree-context';
 
@@ -34,6 +38,7 @@ export const NODE_SELECTOR = "[data-part='node']";
   selector: 'li[slTreeNode]',
   standalone: true,
   exportAs: 'slTreeNode',
+  imports: [SlGlyph, SlIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `<div data-part="row" (click)="onRowClick($event)">
@@ -45,10 +50,19 @@ export const NODE_SELECTOR = "[data-part='node']";
              fetching moves neither its own name nor the rows below it. -->
         <span data-part="loader" data-ui="spinner" aria-hidden="true"></span>
       } @else {
-        <span data-part="expander" aria-hidden="true" (click)="onExpanderClick($event)"></span>
+        <span data-part="expander" aria-hidden="true" (click)="onExpanderClick($event)">
+          <!-- A leaf keeps the box and draws nothing in it. -->
+          @if (branch()) {
+            <span slIcon><svg slGlyph name="chevron-right"></svg></span>
+          }
+        </span>
       }
       @if (tree.indicatorMode() === 'checkbox') {
-        <span data-part="indicator" aria-hidden="true" (click)="onIndicatorClick($event)"></span>
+        <!-- The dash outranks the check: a branch partly chosen shows the state
+             its children are in. -->
+        <span data-part="indicator" aria-hidden="true" (click)="onIndicatorClick($event)"
+          ><span slIcon><svg slGlyph [name]="indeterminate() ? 'minus' : 'check'"></svg></span
+        ></span>
       }
       <ng-content select="[slTreeIcon]" />
       <span data-part="label" [attr.id]="labelId()"
@@ -154,6 +168,15 @@ export class SlTreeNode {
    * counted from.
    */
   private readonly parent = inject(SlTreeNode, { optional: true, skipSelf: true });
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  /**
+   * The nodes this one is rendered inside, counted in the document once it is
+   * attached. A template that calls itself declares every instance at the root,
+   * so the injector finds no parent for any of them and the whole tree would
+   * draw flat; the document still nests them, and so does the level the
+   * platform reports.
+   */
+  private readonly renderedDepth = signal<number | null>(null);
 
   /**
    * The nodes written inside this one. Angular creates projected content with
@@ -171,7 +194,8 @@ export class SlTreeNode {
    * of itself.
    */
   readonly depth: Signal<number> = computed(
-    () => this.level() ?? (this.parent === null ? 0 : this.parent.depth() + 1),
+    () =>
+      this.level() ?? this.renderedDepth() ?? (this.parent === null ? 0 : this.parent.depth() + 1),
   );
   protected readonly expanded = computed(() => this.branch() && this.tree.isExpanded(this.value()));
   protected readonly selected = computed(() => this.tree.isSelected(this.value()));
@@ -206,6 +230,30 @@ export class SlTreeNode {
   protected readonly setSize = computed(() => this.tree.setSizeOf(this.value()));
   protected readonly posInSet = computed(() => this.tree.posInSetOf(this.value()));
   protected readonly tabIndex = computed(() => this.tree.nodeTabIndex(this.value()));
+
+  constructor() {
+    /*
+     * Projected content is created with the parent's view, before a closed
+     * branch has placed its group in the document, so one read at creation
+     * finds no ancestor. The count waits until the node is attached, and stops
+     * there: a view is never moved to another parent.
+     */
+    const measure = afterEveryRender({
+      read: () => {
+        const element = this.host.nativeElement;
+        const root = element.closest("[data-ui='tree']");
+        if (root === null) return;
+        let depth = 0;
+        let node = element.parentElement?.closest(NODE_SELECTOR);
+        while (node && root.contains(node)) {
+          depth += 1;
+          node = node.parentElement?.closest(NODE_SELECTOR);
+        }
+        this.renderedDepth.set(depth);
+        measure.destroy();
+      },
+    });
+  }
 
   protected onRowClick(event: MouseEvent) {
     if (this.resolvedDisabled()) return;

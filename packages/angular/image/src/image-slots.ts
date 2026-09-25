@@ -14,8 +14,8 @@ export class SlImagePlaceholder {}
 
 /**
  * Content of the fallback, in place of the glyph, once the picture has
- * failed: a message, a retry, a logotype. The glyph is drawn on an empty
- * fallback only, so projecting anything here replaces it.
+ * failed: a message, a retry, a logotype. The glyph is the slot's default
+ * content, so projecting anything here replaces it.
  */
 @Directive({
   selector: '[slImageFallback]',

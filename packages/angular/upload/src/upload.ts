@@ -38,6 +38,7 @@ import {
 } from '@angular/core';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlProgressBar } from '@slotted/angular/progress-indicator';
 
 import {
@@ -53,7 +54,7 @@ import {
   type UploadVariant,
   type UploadView,
 } from './upload-defaults';
-import { SlUploadViewer } from './upload-viewer';
+import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
 
 /**
  * Files, and what happens to them.
@@ -73,7 +74,7 @@ import { SlUploadViewer } from './upload-viewer';
   selector: 'div[slUpload]',
   standalone: true,
   exportAs: 'slUpload',
-  imports: [NgTemplateOutlet, SlProgressBar, SlUploadViewer],
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon, SlProgressBar, SlUploadViewer],
   styleUrls: [
     '../../../styles/src/upload/upload.css',
     '../../../styles/src/progress-indicator/progress-indicator.css',
@@ -120,7 +121,9 @@ import { SlUploadViewer } from './upload-viewer';
         [attr.data-drop-invalid]="verdict() === 'invalid' ? '' : null"
         data-part="dropzone"
       >
+        <!-- The region carries the mark, so the trigger inside it does not. -->
         @if (resolvedVariant() === 'dropzone') {
+          <span slIcon><svg slGlyph name="upload"></svg></span>
           {{ labels().dropzone }}
         }
         <ng-container [ngTemplateOutlet]="triggerTemplate" />
@@ -153,6 +156,8 @@ import { SlUploadViewer } from './upload-viewer';
               >
                 @if (url(file) && file.type.startsWith('image/')) {
                   <img [src]="url(file)" alt="" />
+                } @else {
+                  <span slIcon><svg slGlyph [name]="kindGlyph[file.kind]"></svg></span>
                 }
               </span>
             }
@@ -186,7 +191,9 @@ import { SlUploadViewer } from './upload-viewer';
                   [attr.aria-label]="action.label + ': ' + file.name"
                   [attr.data-part]="action.part"
                   type="button"
-                ></button>
+                >
+                  <span slIcon><svg slGlyph [name]="action.glyph"></svg></span>
+                </button>
               }
             </span>
 
@@ -226,6 +233,9 @@ import { SlUploadViewer } from './upload-viewer';
 
     <ng-template #triggerTemplate>
       <label #trigger data-part="trigger">
+        @if (resolvedVariant() !== 'dropzone') {
+          <span slIcon><svg slGlyph name="upload"></svg></span>
+        }
         <input
           #control
           (change)="onPicked($event)"
@@ -259,6 +269,7 @@ export class SlUpload implements ControlValueAccessor, Validator {
   private readonly writtenId = inject(new HostAttributeToken('id'), { optional: true });
   readonly controlId = this.writtenId ?? `slotted-upload-${(SlUpload.count += 1)}`;
   readonly descriptionId = `${this.controlId}-description`;
+  protected readonly kindGlyph = KIND_GLYPH;
 
   /** Present means the consumer owns the selection. */
   readonly files = model<readonly UploadFile[]>([]);
@@ -783,12 +794,29 @@ export class SlUpload implements ControlValueAccessor, Validator {
   protected actions(file: UploadFile) {
     if (this.readOnly()) return [];
     const labels = this.labels();
-    const start = { part: 'start', label: labels.start, action: 'start' as const };
-    const resume = { part: 'start', label: labels.resume, action: 'resume' as const };
-    const pause = { part: 'pause', label: labels.pause, action: 'pause' as const };
-    const retry = { part: 'retry', label: labels.retry, action: 'retry' as const };
-    const cancel = { part: 'cancel', label: labels.cancel, action: 'cancel' as const };
-    const remove = { part: 'remove', label: labels.remove, action: 'remove' as const };
+    /* Five marks chosen against each other, because they appear together on one
+       row: a cross means *stop this* and a bin means *take it away*. */
+    const start = { part: 'start', glyph: 'play', label: labels.start, action: 'start' } as const;
+    const resume = {
+      part: 'start',
+      glyph: 'play',
+      label: labels.resume,
+      action: 'resume',
+    } as const;
+    const pause = { part: 'pause', glyph: 'pause', label: labels.pause, action: 'pause' } as const;
+    const retry = {
+      part: 'retry',
+      glyph: 'rotate-ccw',
+      label: labels.retry,
+      action: 'retry',
+    } as const;
+    const cancel = { part: 'cancel', glyph: 'x', label: labels.cancel, action: 'cancel' } as const;
+    const remove = {
+      part: 'remove',
+      glyph: 'trash',
+      label: labels.remove,
+      action: 'remove',
+    } as const;
 
     switch (file.status) {
       case 'ready':

@@ -235,6 +235,9 @@ describe('SlDataList', () => {
     await mount((h) => h.fields.set(2));
     const more = buttonNamed(record('Acme Logistics'), 'Show 3 more');
     expect(more.getAttribute('aria-expanded')).toBe('false');
+    expect(
+      more.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph'),
+    ).toBe('chevron-down');
     expect(more.getAttribute('aria-controls')).toBe(
       record('Acme Logistics').querySelector('dl')?.id,
     );
@@ -281,6 +284,12 @@ describe('SlDataList', () => {
   it('sorts from the menu and says the key on the trigger', async () => {
     await mount();
     const trigger = root().querySelector<HTMLButtonElement>('[data-part=sort] button')!;
+    const glyph = () =>
+      trigger
+        .querySelector('[data-part="end"] > [data-ui="icon"] > svg[data-glyph]')
+        ?.getAttribute('data-glyph');
+    /* Without a key there is nothing to point at, and no chevron is drawn. */
+    expect(glyph()).toBeUndefined();
     click(trigger);
     await settle();
     const items = [...document.querySelectorAll<HTMLElement>('[role=menuitemradio]')];
@@ -294,6 +303,7 @@ describe('SlDataList', () => {
     expect(records()[0]?.textContent).toContain('Borealis Foods');
     expect(trigger.textContent).toContain('Sort: Balance');
     expect(trigger.getAttribute('aria-label')).toBe('Sort, Balance ascending');
+    expect(glyph()).toBe('chevron-down');
   });
 
   it('makes the title a link or a command, and refuses a disabled or busy one', async () => {

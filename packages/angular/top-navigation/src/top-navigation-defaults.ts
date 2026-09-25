@@ -1,11 +1,12 @@
 import { inject, Injectable, InjectionToken } from '@angular/core';
+import { COMPACT_BELOW } from '@slotted/core/measure';
 
 /** The control height step of everything in the bar. */
 export type TopNavigationSize = 'sm' | 'md' | 'lg';
 
 /**
  * Which step of the bar's width folds an item into the panel: `low` folds
- * first, under 1024 pixels; `medium` under 768; `high` under 480.
+ * first, under 1024 pixels; `medium` under 600; `high` under 480.
  */
 export type TopNavigationPriority = 'high' | 'medium' | 'low';
 
@@ -69,12 +70,13 @@ export const TOP_NAVIGATION_FALLBACK: TopNavigationDefaults = {
 /**
  * The three steps of the bar's width, in CSS pixels, under which each
  * priority folds. The stylesheet reads the same three literals in its
- * container conditions; this is the copy the script reads.
+ * container conditions; this is the copy the script reads. `medium` is the
+ * compact size class's limit, where app-shell overlays its regions.
  */
 export const TOP_NAVIGATION_COLLAPSE_AT: Readonly<Record<TopNavigationPriority, number>> = {
   high: 480,
   low: 1024,
-  medium: 768,
+  medium: COMPACT_BELOW,
 };
 
 export const TOP_NAVIGATION_DEFAULTS = new InjectionToken<TopNavigationDefaults>(

@@ -176,6 +176,15 @@ describe('SlTagsInput', () => {
     const [good, bad] = chips();
     expect(good?.hasAttribute('data-invalid')).toBe(false);
     expect(bad?.hasAttribute('data-invalid')).toBe(true);
+    /* Every chip's remove button draws the cross. */
+    expect(
+      good?.querySelector("[data-part='remove'] svg[data-glyph]")?.getAttribute('data-glyph'),
+    ).toBe('x');
+    /* The mark is the alert glyph in `tag`'s start slot, on the failing chip only. */
+    expect(good?.querySelector("[data-part='start']")).toBeNull();
+    expect(
+      bad?.querySelector("[data-part='start'] svg[data-glyph]")?.getAttribute('data-glyph'),
+    ).toBe('circle-alert');
   });
 
   it('refuses a duplicate under the locale rule and focuses the chip that holds it', async () => {
@@ -228,7 +237,9 @@ describe('SlTagsInput', () => {
     press(locked!, 'Delete');
     await settle(fixture);
     expect(chipValues()).toEqual(['support@x.com', 'a']);
-    document.querySelector<HTMLElement>("[data-part='clear']")?.click();
+    const clear = document.querySelector<HTMLElement>("[data-part='clear']");
+    expect(clear?.querySelector('svg[data-glyph]')?.getAttribute('data-glyph')).toBe('x');
+    clear?.click();
     await settle(fixture);
     expect(chipValues()).toEqual(['support@x.com']);
   });

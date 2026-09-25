@@ -136,6 +136,11 @@ describe('SlActionBar', () => {
       expect(always?.hasAttribute('hidden')).toBe(true);
       expect(trigger().hasAttribute('hidden')).toBe(false);
       expect(trigger().getAttribute('aria-label')).toBe('1 more action');
+      expect(
+        trigger().querySelector(
+          '[data-ui="icon"][aria-hidden="true"] > svg[data-glyph="ellipsis"]',
+        ),
+      ).not.toBeNull();
     });
 
     it('reads the same rank table the other binding does', () => {

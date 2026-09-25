@@ -3,7 +3,7 @@ import { inject, Injectable, InjectionToken } from '@angular/core';
 /** Every section in the flow with a heading each, or a strip with one section shown. */
 export type DetailPanelLayout = 'stacked' | 'tabs';
 
-/** Which side the aside column takes above 640 pixels; `none` when the consumer renders no aside. */
+/** Which side the aside column takes above 600 pixels; `none` when the consumer renders no aside. */
 export type DetailPanelAside = 'end' | 'start' | 'none';
 
 /** The heading rank the page-header defaults to. Stacked sections take the rank below. */

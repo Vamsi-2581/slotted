@@ -57,7 +57,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: true,
     purpose:
-      "The chevron, drawn as a mask and turned over while the popup is open. It is placed against the frame's end and is inert: the trigger's own padding runs underneath it.",
+      "The chevron, a `Glyph` inside an `Icon` box, turned over while the popup is open. It is placed against the frame's end and is inert: the trigger's own padding runs underneath it.",
   },
   {
     part: 'busy',
@@ -113,7 +113,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span, aria-hidden',
     required: false,
     purpose:
-      'The magnifier, drawn as a mask from the glyph scale. It is what makes the row a field rather than a heading.',
+      'The magnifier, a `Glyph` inside an `Icon` box. It is what makes the row a field rather than a heading.',
   },
   {
     part: 'search-input',
@@ -173,7 +173,8 @@ const anatomy: AnatomyRow[] = [
     part: 'icon',
     element: 'span',
     required: false,
-    purpose: 'The artwork in the first column, from a glyph token named by the icon input.',
+    purpose:
+      'The artwork in the first column: the glyph the icon input names, drawn as a Glyph inside an Icon box.',
   },
   {
     part: 'label',
@@ -270,7 +271,7 @@ const scenes: ReferenceSceneMeta[] = [
   </sl-select-group>
   <sl-select-separator />
   <sl-select-group label="Citrus">
-    <sl-select-item value="pomelo">Pomelo</sl-select-item>
+    <sl-select-item value="pomelo" icon="dot">Pomelo</sl-select-item>
   </sl-select-group>
 </sl-select>`,
     }),
@@ -766,10 +767,10 @@ const api = apiRows([
   ['description', 'string', '—', 'sl-select-item', 'The line under the label.'],
   [
     'icon',
-    'string',
+    'GlyphName',
     '—',
     'sl-select-item',
-    'A glyph token name, drawn as a mask in the first column.',
+    'The glyph drawn in the first column, as a Glyph inside an Icon box.',
   ],
   [
     'textValue',

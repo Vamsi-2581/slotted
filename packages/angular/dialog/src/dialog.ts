@@ -87,6 +87,11 @@ export abstract class SlDialogBase {
   /** Whether the reader has taken the layer. Two-way, as `open` is. */
   readonly fullscreen = model<boolean>(false);
   readonly escape = input<DialogDismissPolicy | undefined>(undefined);
+  /**
+   * The platform's way back — a phone's gesture, a browser's button — closes
+   * the layer instead of leaving the page, while the layer is modal.
+   */
+  readonly back = input<DialogDismissPolicy | undefined>(undefined);
   /** Whether the layer's content is still on its way. */
   readonly loading = input(false, { transform: booleanAttribute });
   /** A parent for this layer alone, instead of the shared portal root. */
@@ -181,6 +186,7 @@ export abstract class SlDialogBase {
     () => this.fullScreen() ?? (this.isAlert() ? 'never' : this.defaults.fullScreen),
   );
   readonly resolvedEscape = computed(() => this.escape() ?? this.defaults.escape);
+  readonly resolvedBack = computed(() => this.back() ?? this.defaults.back);
   /**
    * A confirmation has no corner controls at all, for the reason it has no
    * close button, so neither the state nor the control that sets it is its.
@@ -214,6 +220,15 @@ export abstract class SlDialogBase {
 
   /** What the stylesheet keys on, which is a frame behind what was asked. */
   readonly visible = computed(() => this.status() === 'open');
+  /**
+   * Whether the layer takes focus and the pointer. `entering` counts: the
+   * focus scope enters in that frame, and a layer still `inert` then refuses
+   * the initial focus and leaves it on `body`.
+   */
+  readonly interactive = computed(() => {
+    const status = this.status();
+    return status === 'entering' || status === 'open';
+  });
 
   readonly labelledBy = computed(() =>
     this.hasTitle() && this.writtenLabel === null ? this.titleId : null,
@@ -265,6 +280,9 @@ export abstract class SlDialogBase {
       const escape = this.resolvedEscape() === 'close';
       const outsidePress = this.resolvedOutsidePress() === 'close';
       const modal = this.resolvedModal();
+      /* A history entry is a modal layer's: a layer the page stays reachable
+         under has no claim on the way back. */
+      const back = modal && this.resolvedBack() === 'close';
       const trigger = this.triggerNode();
 
       /* The frame is the layer and the panel is what a press is inside of: the
@@ -272,6 +290,7 @@ export abstract class SlDialogBase {
          the pointerdown, so a selection dragged out of the panel is not a press
          on the scrim. */
       this.layer = createDismissableLayer(node, {
+        back,
         branches: trigger === null ? [] : [trigger],
         content: panel,
         escape,
@@ -424,7 +443,7 @@ const LAYER_TEMPLATE = `
       [attr.data-modal]="resolvedModal() ? '' : null"
       [attr.data-open]="visible() ? '' : null"
       [attr.data-loading]="loading() ? '' : null"
-      [attr.inert]="visible() ? null : ''"
+      [attr.inert]="interactive() ? null : ''"
     >
       <div data-part="backdrop"></div>
       <div data-part="viewport">

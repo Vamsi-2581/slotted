@@ -136,6 +136,17 @@ describe('SlAlert', () => {
     expect(bare.querySelector('[data-part="icon"]')).toBeNull();
   });
 
+  it('draws each tone’s glyph from the contract’s map, solid', () => {
+    for (const [tone, glyph] of Object.entries(contract.toneGlyphs)) {
+      const alert = root(renderTemplate(`<section slAlert tone="${tone}">${MESSAGE}</section>`));
+      const drawn = alert.querySelector(
+        '[data-part="icon"] > [data-ui="icon"] > svg[data-part="glyph"]',
+      );
+      expect(drawn?.getAttribute('data-glyph'), tone).toBe(glyph);
+      expect(drawn?.hasAttribute('data-solid'), tone).toBe(true);
+    }
+  });
+
   it('puts the page’s own mark in the box the tone’s would have had', () => {
     const alert = root(
       renderTemplate(
@@ -145,12 +156,22 @@ describe('SlAlert', () => {
 
     const glyph = alert.querySelector('[data-testid="glyph"]') as Element;
     expect(glyph.parentElement?.getAttribute('data-part')).toBe('icon');
+    expect(alert.querySelector('[data-glyph]')).toBeNull();
   });
 
   describe('dismissal', () => {
     it('renders no control until the alert says it can be dismissed', () => {
       const alert = root(renderTemplate(`<section slAlert>${MESSAGE}</section>`));
       expect(alert.querySelector('[data-part="dismiss"]')).toBeNull();
+    });
+
+    it('draws the control as the x glyph', () => {
+      const alert = root(renderTemplate(`<section slAlert dismissible>${MESSAGE}</section>`));
+      const glyph = alert.querySelector(
+        '[data-part="dismiss"] > [data-ui="icon"] > svg[data-part="glyph"]',
+      );
+      expect(glyph?.getAttribute('data-glyph')).toBe('x');
+      expect(glyph?.getAttribute('aria-hidden')).toBe('true');
     });
 
     it('closes itself when nobody owns the value, and stays in the document', () => {

@@ -219,6 +219,17 @@ describe('what it is made of', () => {
     ).toBe('16:30:00');
     expect(surface(fixture)).toBeNull();
   });
+
+  /** Both marks are `Glyph` elements inside an `Icon` box, never masks. */
+  it('draws the clock and the cross as glyph elements', () => {
+    const fixture = renderTemplate(`<div ${BASE} clearable [defaultValue]="run"></div>`);
+    const glyph = (name: string) =>
+      part(fixture, name)
+        ?.querySelector("[data-ui='icon'] > svg[data-glyph]")
+        ?.getAttribute('data-glyph');
+    expect(glyph('trigger')).toBe(contract.triggerIcon);
+    expect(glyph('clear')).toBe('x');
+  });
 });
 
 describe('what the frame says', () => {

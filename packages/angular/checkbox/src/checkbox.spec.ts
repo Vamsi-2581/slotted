@@ -87,7 +87,9 @@ describe('SlCheckbox', () => {
     expect(root(fixture).getAttribute('data-ui')).toBe('checkbox');
     expect(root(fixture).getAttribute('data-part')).toBe('root');
     expect(control(fixture).getAttribute('type')).toBe('checkbox');
-    expect(query(fixture, '[data-part="indicator"]')).not.toBeNull();
+    expect(
+      query(fixture, '[data-part="indicator"] svg[data-glyph]').getAttribute('data-glyph'),
+    ).toBe('check');
     expect(query(fixture, '[data-part="label"]').textContent).toContain('Aceito');
     expect(query(fixture, '[data-part="description"]').textContent).toContain(
       'Enviaremos o recibo.',
@@ -185,6 +187,10 @@ describe('SlCheckbox', () => {
     expect(control(fixture).indeterminate).toBe(true);
     expect(control(fixture).checked).toBe(false);
     expect(root(fixture).getAttribute('data-indeterminate')).toBe('');
+    /* Mixed is the dash, in place of the check. */
+    expect(
+      query(fixture, '[data-part="indicator"] svg[data-glyph]').getAttribute('data-glyph'),
+    ).toBe('minus');
     expect(control(fixture).getAttribute('value')).toBe('all');
   });
 

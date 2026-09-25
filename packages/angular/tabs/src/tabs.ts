@@ -18,6 +18,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import type { OnInit } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { injectTabsDefaults, SlTabsIdFactory } from './tabs-defaults';
 import type {
@@ -98,6 +99,7 @@ export function escapeTabValue(value: string): string {
 @Component({
   selector: '[slTabs]',
   standalone: true,
+  imports: [SlGlyph, SlIcon],
   exportAs: 'slTabs',
   template: `<ng-content />
     @if (paging()) {
@@ -109,7 +111,9 @@ export function escapeTabValue(value: string): string {
         tabindex="-1"
         [disabled]="overflow().atStart"
         (click)="page(-1)"
-      ></button>
+      >
+        <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
+      </button>
       <button
         aria-hidden="true"
         data-part="scroll"
@@ -118,7 +122,9 @@ export function escapeTabValue(value: string): string {
         tabindex="-1"
         [disabled]="overflow().atEnd"
         (click)="page(1)"
-      ></button>
+      >
+        <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
+      </button>
     }`,
   styleUrl: '../../../styles/src/tabs/tabs.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

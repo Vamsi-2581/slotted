@@ -62,9 +62,14 @@ export class SlTooltipTrigger {
   private readonly native: HTMLElement = inject(ElementRef).nativeElement;
   private holding = false;
 
-  /** Named by the layer under `label`, described by it otherwise. */
+  /**
+   * Named by the layer under `label`, described by it otherwise. Under `none`
+   * the trigger references nothing: it already says the words.
+   */
   private readonly names = computed(
-    () => this.tooltip.isOpen() || this.tooltip.resolvedDescribes() === 'label',
+    () =>
+      this.tooltip.resolvedDescribes() !== 'none' &&
+      (this.tooltip.isOpen() || this.tooltip.resolvedDescribes() === 'label'),
   );
   protected readonly describedBy = computed(() =>
     this.names() && this.tooltip.resolvedDescribes() === 'description'
@@ -350,10 +355,16 @@ function toggleAttribute(element: HTMLElement, name: string, present: boolean) {
     'data-part': 'content',
     role: 'tooltip',
     '[attr.id]': 'tooltip.contentId',
+    '[attr.aria-hidden]': 'hidden()',
   },
 })
 export class SlTooltipContent {
   protected readonly tooltip = inject(SlTooltip);
+
+  /** Hidden from the reader under `none`, which is a hint shown and not read. */
+  protected readonly hidden = computed(() =>
+    this.tooltip.resolvedDescribes() === 'none' ? true : null,
+  );
 }
 
 /**

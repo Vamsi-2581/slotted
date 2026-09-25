@@ -413,7 +413,10 @@ bootstrapApplication(App, {
         label: 'Anatomy, as it reaches the DOM',
         source: `<div data-ui="checkbox" data-part="root" data-size="md" data-label-placement="end" data-checked>
   <input data-part="control" type="checkbox" id="terms" checked />
-  <span data-part="indicator"></span>
+  <span data-part="indicator"
+    ><span data-ui="icon" data-part="root" aria-hidden="true"
+      ><svg data-part="glyph" data-glyph="check" aria-hidden="true"></svg></span
+  ></span>
   <label data-part="label" for="terms">Aceito os termos</label>
   <p data-part="description" id="terms-description">Enviaremos o recibo.</p>
 </div>`,

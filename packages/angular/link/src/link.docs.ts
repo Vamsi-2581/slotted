@@ -41,7 +41,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      'The marker a new tab earns, drawn as a mask from --slotted-icon-external and hidden from assistive technology. Rendered only when the link opens a new browsing context.',
+      'The marker a new tab earns: the external Glyph inside a directional icon box, sized to the text and hidden from assistive technology. Rendered only when the link opens a new browsing context.',
   },
   {
     part: 'external-hint',
@@ -245,7 +245,7 @@ export const ANGULAR_LINK_DOCS = {
         language: 'angular',
         label: 'Anatomy, as it reaches the DOM',
         source:
-          '<a data-ui="link" data-part="root" data-underline="always" data-variant="accent" href="/docs">\n  Documentation\n  <span aria-hidden="true" data-part="external-icon"></span>\n  <span data-part="external-hint" data-ui="visually-hidden"> (opens in a new tab)</span>\n</a>',
+          '<a data-ui="link" data-part="root" data-underline="always" data-variant="accent" href="/docs">\n  Documentation\n  <span aria-hidden="true" data-part="external-icon">\n    <span slIcon directional><svg slGlyph name="external"></svg></span>\n  </span>\n  <span data-part="external-hint" data-ui="visually-hidden"> (opens in a new tab)</span>\n</a>',
       }),
       defineSnippet({
         id: 'link-theming',

@@ -317,6 +317,9 @@ describe('SlToolbar under overflow="menu"', () => {
     expect(unit('Duplicar').hasAttribute('hidden')).toBe(false);
     expect(trigger().hasAttribute('hidden')).toBe(false);
     expect(trigger().getAttribute('aria-label')).toBe('1 more action');
+    expect(
+      trigger().querySelector('[data-ui="icon"][aria-hidden="true"] > svg[data-glyph="ellipsis"]'),
+    ).not.toBeNull();
   });
 
   /**

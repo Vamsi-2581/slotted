@@ -75,7 +75,8 @@ const steps = [
   { size: 'measure', note: '16ch here · the comfortable reading line' },
   { size: 'content', note: '14rem here · the default' },
   { size: 'wide', note: '22rem here · a dense application page' },
-  { size: 'full', note: 'no maximum, and the gutters remain' },
+  { size: 'full', note: '120rem elsewhere · the frame, up to the ceiling' },
+  { size: 'bleed', note: 'no maximum, and the gutters remain' },
 ];
 
 const referenceStories: ReferencePageConfig['stories'] = () => ({

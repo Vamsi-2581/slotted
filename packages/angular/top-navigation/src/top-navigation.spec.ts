@@ -226,6 +226,20 @@ describe('SlTopNavigation', () => {
     expect(part('more').getAttribute('aria-controls')).toBe(part('panel').id);
     expect(part('search-toggle').getAttribute('aria-label')).toBe('Procurar');
     expect(part('trigger').querySelector('[data-part="indicator"]')).not.toBeNull();
+
+    /* Each control leads with the family's mark, and the section's trigger ends in one. */
+    const mark = (name: string) =>
+      part(name).firstElementChild?.querySelector('svg[data-glyph]')?.getAttribute('data-glyph');
+    expect(mark('more')).toBe('ellipsis');
+    expect(mark('search-toggle')).toBe('search');
+    expect(mark('help')).toBe('circle-question');
+    expect(mark('notifications')).toBe('bell');
+    expect(mark('search-close')).toBe('x');
+    expect(
+      part('trigger').querySelector(
+        '[data-part="indicator"] > [data-ui="icon"] > svg[data-glyph="chevron-down"]',
+      ),
+    ).not.toBeNull();
   });
 
   it('names a control of the product’s own from label, live, and keeps the count inside it', async () => {
@@ -280,8 +294,8 @@ describe('SlTopNavigation', () => {
     expect(host.collapses.at(-1)).toEqual(['relatorios', 'faturacao']);
   });
 
-  it('moves the context to the panel under 768, and help only under 480', async () => {
-    await mount(700);
+  it('moves the context to the panel under 600, and help only under 480', async () => {
+    await mount(560);
     click(part('more'));
     expect(part('panel').firstElementChild).toBe(part('context'));
     expect(part('panel').contains(part('help'))).toBe(false);
@@ -335,8 +349,8 @@ describe('SlTopNavigation', () => {
     expect(document.activeElement).toBe(part('more'));
   });
 
-  it('opens the search over the bar under 768, focuses the field, and closes on Escape', async () => {
-    await mount(700);
+  it('opens the search over the bar under 600, focuses the field, and closes on Escape', async () => {
+    await mount(560);
     expect(root().hasAttribute('data-search-open')).toBe(false);
     click(part('search-toggle'));
     expect(host.searchRequests.at(-1)).toMatchObject({ reason: 'pointer', value: true });
@@ -351,7 +365,7 @@ describe('SlTopNavigation', () => {
   });
 
   it('closes the search when focus leaves it, and from its close control', async () => {
-    await mount(700);
+    await mount(560);
     click(part('search-toggle'));
     const field = fixture.nativeElement.querySelector('input') as HTMLElement;
     field.dispatchEvent(
@@ -365,7 +379,7 @@ describe('SlTopNavigation', () => {
     expect(host.searchRequests.at(-1)).toMatchObject({ reason: 'pointer', value: false });
   });
 
-  it('writes no search state above 768, where the field is always there', async () => {
+  it('writes no search state above 600, where the field is always there', async () => {
     await mount(1280);
     host.searchOpen.set(true);
     fixture.detectChanges();
@@ -383,7 +397,7 @@ describe('SlTopNavigation', () => {
   });
 
   it('exposes the imperative surface', async () => {
-    await mount(700);
+    await mount(560);
     const bar = host.bar();
     bar.openMore();
     fixture.detectChanges();

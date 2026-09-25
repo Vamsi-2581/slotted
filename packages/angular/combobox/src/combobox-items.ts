@@ -13,6 +13,8 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import type { GlyphName } from '@slotted/angular/icon';
 
 import { SlHighlight } from '@slotted/angular/highlight';
 
@@ -38,7 +40,7 @@ import type { ComboboxOptionValue } from './combobox-defaults';
   exportAs: 'slComboboxItem',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [SlHighlight],
+  imports: [SlGlyph, SlHighlight, SlIcon],
   host: {
     'data-part': 'item',
     role: 'option',
@@ -58,8 +60,10 @@ import type { ComboboxOptionValue } from './combobox-defaults';
     '(pointerenter)': 'onPointerEnter($event)',
   },
   template: `
-    @if (icon()) {
-      <span data-part="icon">{{ icon() }}</span>
+    @if (icon(); as glyph) {
+      <span data-part="icon"
+        ><span slIcon><svg slGlyph [name]="glyph"></svg></span
+      ></span>
     }
     <span data-part="label">
       @if (ranges().length > 0) {
@@ -71,7 +75,9 @@ import type { ComboboxOptionValue } from './combobox-defaults';
     @if (description()) {
       <span data-part="description">{{ description() }}</span>
     }
-    <span data-part="indicator"></span>
+    <span data-part="indicator"
+      ><span slIcon><svg slGlyph name="check"></svg></span
+    ></span>
   `,
 })
 export class SlComboboxItem {
@@ -80,7 +86,8 @@ export class SlComboboxItem {
   readonly label = input.required<string>();
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly description = input<string | undefined>(undefined);
-  readonly icon = input<string | undefined>(undefined);
+  /** The glyph drawn in the first column, as a `Glyph` inside an `Icon` box. */
+  readonly icon = input<GlyphName | undefined>(undefined);
   readonly position = input(undefined, {
     transform: (given: number | string | undefined) =>
       given === undefined ? undefined : numberAttribute(given),

@@ -1,17 +1,19 @@
 import {
+  ChangeDetectionStrategy,
+  Component,
   computed,
   Directive,
-  effect,
   ElementRef,
   inject,
   input,
   OnDestroy,
   OnInit,
-  Renderer2,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import type { GlyphName } from '@slotted/angular/icon';
 
 import { SlDialogBase } from './dialog';
-import type { DialogOpenReason } from './dialog-defaults';
+import type { DialogOpenReason, DialogTone } from './dialog-defaults';
 
 /**
  * A click synthesised by the keyboard reports no detail; a real one reports the
@@ -86,69 +88,47 @@ export class SlDialogTrigger implements OnInit, OnDestroy {
  * belongs to. The stylesheet puts it in the column before the close, which is
  * where a window's controls put it.
  *
- * The element is created rather than declared, because the directive is on the
- * consumer's own `<header>` and a `ViewContainerRef` taken from it inserts a
- * sibling of that element rather than a child of it. React reaches the same
- * DOM by rendering the part, and the two have to land together.
+ * It is a component on the consumer's own `<header>`, so the toggle is a child
+ * of that element written after the projected content, which is the DOM React
+ * reaches by rendering the part; the two have to land together.
+ *
+ * `aria-pressed` says which way the toggle is set, so the name stays one word
+ * in every state: a label that changed with the state would be read as a
+ * second control. The mark is the opposite of the state, because a mark on a
+ * control says what pressing it does.
  */
-@Directive({
+@Component({
   selector: '[slDialogHeader]',
   standalone: true,
   exportAs: 'slDialogHeader',
+  imports: [SlGlyph, SlIcon],
+  template: `<ng-content />
+    @if (dialog.resolvedFullscreenToggle()) {
+      <button
+        type="button"
+        data-part="fullscreen"
+        aria-label="Full screen"
+        [attr.aria-pressed]="dialog.resolvedFullscreen()"
+        (click)="toggle($event)"
+      >
+        <span slIcon
+          ><svg slGlyph [name]="dialog.resolvedFullscreen() ? 'minimize' : 'maximize'"></svg
+        ></span>
+      </button>
+    }`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'data-part': 'header' },
 })
-export class SlDialogHeader implements OnDestroy {
-  private readonly dialog = inject(SlDialogBase);
-  private readonly host: HTMLElement = inject(ElementRef).nativeElement;
-  private readonly renderer = inject(Renderer2);
+export class SlDialogHeader {
+  protected readonly dialog = inject(SlDialogBase);
 
-  private control: HTMLButtonElement | undefined;
-  private release: (() => void) | undefined;
-
-  constructor() {
-    effect(() => {
-      const wanted = this.dialog.resolvedFullscreenToggle();
-      if (wanted && this.control === undefined) this.mount();
-      if (!wanted && this.control !== undefined) this.unmount();
-      if (this.control !== undefined) {
-        /* `aria-pressed` says which way it is set, so the name stays one word
-           in every state: a label that changed with the state would be read as
-           a second control. */
-        this.renderer.setAttribute(
-          this.control,
-          'aria-pressed',
-          String(this.dialog.resolvedFullscreen()),
-        );
-      }
-    });
-  }
-
-  ngOnDestroy() {
-    this.unmount();
-  }
-
-  private mount() {
-    const control: HTMLButtonElement = this.renderer.createElement('button');
-    this.renderer.setAttribute(control, 'type', 'button');
-    this.renderer.setAttribute(control, 'data-part', 'fullscreen');
-    this.renderer.setAttribute(control, 'aria-label', 'Full screen');
-    this.release = this.renderer.listen(control, 'click', (event: MouseEvent) => {
-      if (event.defaultPrevented) return;
-      this.dialog.requestFullscreen(
-        !this.dialog.resolvedFullscreen(),
-        activationReason(event) === 'keyboard' ? 'keyboard' : 'pointer',
-        event,
-      );
-    });
-    this.renderer.appendChild(this.host, control);
-    this.control = control;
-  }
-
-  private unmount() {
-    this.release?.();
-    this.release = undefined;
-    if (this.control !== undefined) this.renderer.removeChild(this.host, this.control);
-    this.control = undefined;
+  protected toggle(event: MouseEvent) {
+    if (event.defaultPrevented) return;
+    this.dialog.requestFullscreen(
+      !this.dialog.resolvedFullscreen(),
+      activationReason(event) === 'keyboard' ? 'keyboard' : 'pointer',
+      event,
+    );
   }
 }
 
@@ -224,10 +204,16 @@ export class SlDialogFooter {}
  * means; `docs/component-features.md` §8 calls the source `closeButton`, and a
  * twelfth reason would be a change to a contract outside this family.
  */
-@Directive({
+@Component({
   selector: '[slDialogClose]',
   standalone: true,
   exportAs: 'slDialogClose',
+  imports: [SlGlyph, SlIcon],
+  /* The cross is drawn unless the consumer wrote content of their own. */
+  template: `<ng-content
+    ><span slIcon><svg slGlyph name="x"></svg></span
+  ></ng-content>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'close',
     type: 'button',
@@ -260,14 +246,42 @@ export class SlDialogClose {
   }
 }
 
-/** The tone's own mark, which is geometry rather than a character. */
-@Directive({
+/**
+ * The glyph each tone draws, and a triangle where no tone was resolved. Warning
+ * and danger differ in silhouette as well as colour, because under forced
+ * colours the silhouette is all that is left.
+ */
+const TONE_GLYPH: Record<DialogTone, GlyphName> = {
+  accent: 'circle-info',
+  secondary: 'circle-info',
+  success: 'circle-check',
+  warning: 'triangle-alert',
+  danger: 'circle-alert',
+};
+
+/**
+ * The tone's own mark, which is geometry rather than a character. A mark the
+ * consumer writes as content replaces the tone's.
+ */
+@Component({
   selector: '[slAlertDialogIcon]',
   standalone: true,
   exportAs: 'slAlertDialogIcon',
+  imports: [SlGlyph, SlIcon],
+  template: `<ng-content
+    ><span slIcon><svg slGlyph [name]="glyph()"></svg></span
+  ></ng-content>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'data-part': 'icon', 'aria-hidden': 'true' },
 })
-export class SlAlertDialogIcon {}
+export class SlAlertDialogIcon {
+  private readonly dialog = inject(SlDialogBase);
+
+  protected readonly glyph = computed<GlyphName>(() => {
+    const tone = this.dialog.resolvedTone();
+    return tone === null ? 'triangle-alert' : TONE_GLYPH[tone];
+  });
+}
 
 /**
  * The least destructive action, and where focus lands when the layer opens.

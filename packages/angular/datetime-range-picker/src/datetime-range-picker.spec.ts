@@ -179,6 +179,17 @@ describe('what it is made of', () => {
       (fixture.nativeElement.querySelector('input[name="fim"]') as HTMLInputElement).value,
     ).toBe('2026-09-16T11:00:00');
   });
+
+  /** Both marks are `Glyph` elements inside an `Icon` box, never masks. */
+  it('draws the calendar and the cross as glyph elements', () => {
+    const fixture = renderTemplate(`<div ${BASE} clearable [defaultValue]="run"></div>`);
+    const glyph = (name: string) =>
+      part(fixture, name)
+        ?.querySelector("[data-ui='icon'] > svg[data-glyph]")
+        ?.getAttribute('data-glyph');
+    expect(glyph('trigger')).toBe(contract.triggerIcon);
+    expect(glyph('clear')).toBe('x');
+  });
 });
 
 describe('the duration and the lists', () => {

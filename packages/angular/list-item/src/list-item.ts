@@ -12,6 +12,7 @@ import {
   input,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { injectListItemDefaults } from './list-item-defaults';
 import type {
@@ -47,7 +48,16 @@ export type {
   selector: 'li[slListItem]',
   standalone: true,
   exportAs: 'slListItem',
-  template: '<ng-content></ng-content>',
+  imports: [SlGlyph, SlIcon],
+  /* The bullet is the dot glyph in a part of its own before the row's content;
+     the number is a counter the stylesheet writes, because it is text rather
+     than an icon. */
+  template: `@if (resolvedMarker() === 'bullet') {
+      <span data-part="marker" aria-hidden="true"
+        ><span slIcon><svg slGlyph name="dot"></svg></span
+      ></span>
+    }
+    <ng-content></ng-content>`,
   styleUrl: '../../../styles/src/list-item/list-item.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,

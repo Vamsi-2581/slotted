@@ -148,7 +148,7 @@ export const ANGULAR_AVATAR_DOCS = {
       'The colour derived from a name is an aid to scanning a list, never the identifier: five tones mean collisions are certain, and colour alone is not a signal.',
       'The component is written on the element the page chose, so an a or a button is an avatar with the platform’s own keyboard behaviour. The family paints the focus ring and the hover edge only on an element the browser treats as interactive, and holds both back when it is disabled.',
       'An interactive avatar smaller than 24 by 24 CSS pixels grows a centred overlay to --slotted-target-min, so WCAG 2.2 2.5.8 is met at the two tighter densities without changing any layout.',
-      'The fallback glyph is a mask from --slotted-icon-person, not a character. Under forced colours the family draws its edge in currentColor and leaves the photograph alone.',
+      'The fallback glyph is the person slGlyph in an aria-hidden slIcon, not a character. Under forced colours the family draws its edge in currentColor and leaves the photograph alone.',
       'The picture crosses over the initials on --slotted-duration-short, which prefers-reduced-motion collapses to 1ms in the theme. Nothing here loops.',
     ],
     snippets: [

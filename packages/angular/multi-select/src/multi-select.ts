@@ -45,6 +45,7 @@ import {
 } from '@angular/core';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 
 import { injectMultiSelectDefaults } from './multi-select-defaults';
@@ -114,6 +115,7 @@ const same = (a: readonly string[], b: readonly string[]) =>
   selector: 'sl-multi-select',
   standalone: true,
   exportAs: 'slMultiSelect',
+  imports: [SlGlyph, SlIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   /*
@@ -197,7 +199,9 @@ const same = (a: readonly string[], b: readonly string[]) =>
                   data-part="remove"
                   [attr.aria-label]="removeLabelFor(chip)"
                   (click)="onRemoveClick(chip, $event)"
-                ></button>
+                >
+                  <span slIcon><svg slGlyph name="x"></svg></span>
+                </button>
               }
             </span>
           }
@@ -258,7 +262,9 @@ const same = (a: readonly string[], b: readonly string[]) =>
         data-part="clear"
         [attr.aria-label]="resolvedClearLabel()"
         (click)="onClear($event)"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="x"></svg></span>
+      </button>
     }
     @if (loading()) {
       <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
@@ -271,7 +277,9 @@ const same = (a: readonly string[], b: readonly string[]) =>
         [attr.aria-label]="resolvedTriggerLabel()"
         (click)="onToggle($event)"
       >
-        <span data-part="arrow"></span>
+        <span data-part="arrow"
+          ><span slIcon><svg slGlyph name="chevron-down"></svg></span
+        ></span>
       </button>
     }
 
@@ -355,7 +363,9 @@ const same = (a: readonly string[], b: readonly string[]) =>
             >
               <span data-part="icon"></span>
               <span data-part="label">{{ resolvedCreateLabel().replace('{query}', query) }}</span>
-              <span data-part="indicator"></span>
+              <span data-part="indicator"
+                ><span slIcon><svg slGlyph name="plus"></svg></span
+              ></span>
             </div>
           } @else if (!loading() && optionCount() === 0) {
             <div data-part="empty">{{ resolvedEmptyLabel() }}</div>

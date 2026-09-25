@@ -79,7 +79,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'What the application is right now — the workspace, the store, the environment — as the consumer’s own content. It keeps its width in the bar; below 768 pixels the element is moved to the top of the panel.',
+      'What the application is right now — the workspace, the store, the environment — as the consumer’s own content. It keeps its width in the bar; below 600 pixels the element is moved to the top of the panel.',
   },
   {
     part: 'nav',
@@ -119,7 +119,8 @@ const anatomy: AnatomyRow[] = [
     part: 'indicator',
     element: 'span, rendered by the trigger',
     required: false,
-    purpose: 'The trigger’s chevron, a mask from the glyph scale, turned half a turn while open.',
+    purpose:
+      'The trigger’s chevron, the chevron-down Glyph element, turned half a turn while open.',
   },
   {
     part: 'more',
@@ -147,20 +148,20 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'The search region, with the consumer’s text-field inside, growing in the middle of the bar to 28rem and never under 12rem: the first thing to give way when the bar is short of room. Below 768 pixels it exists only while searchOpen, and then takes the whole bar.',
+      'The search region, with the consumer’s text-field inside, standing at the start of the middle of the bar and growing to 28rem, never under 12rem: the first thing to give way when the bar is short of room. Below 600 pixels it exists only while searchOpen, and then takes the whole bar.',
   },
   {
     part: 'search-toggle',
     element: 'button, rendered by the actions',
     required: false,
     purpose:
-      'The magnifier that asks searchOpen to be true, rendered whenever the bar has a search and shown below 768 pixels while the search is closed.',
+      'The magnifier that asks searchOpen to be true, rendered whenever the bar has a search and shown below 600 pixels while the search is closed.',
   },
   {
     part: 'search-close',
     element: 'button, rendered by the search',
     required: false,
-    purpose: 'The cross at the end of the open search below 768 pixels: the pointer’s way back.',
+    purpose: 'The cross at the end of the open search below 600 pixels: the pointer’s way back.',
   },
   {
     part: 'actions',
@@ -194,7 +195,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'A pill around the consumer’s avatar — xs at md, one step under the control — and, above 768 pixels, a name beside it. slMenuTriggerFor on the same element. It never folds.',
+      'A pill around the consumer’s avatar — xs at md, one step under the control — and, above 600 pixels, a name beside it. slMenuTriggerFor on the same element. It never folds.',
   },
   {
     part: 'action',
@@ -282,7 +283,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'priority',
     title: 'Three steps of the width',
-    note: 'The same bar in four rooms of a stated width. On a desktop everything shows; on a laptop (under 1024) the low items have folded into more; on a tablet (under 768) the medium ones have gone with them, the search is a magnifier and the context has moved to the panel; on a phone (under 480) the high ones and the help fold too and the name leaves the eye.',
+    note: 'The same bar in four rooms of a stated width. On a desktop everything shows; on a laptop (under 1024) the low items have folded into more; a tablet at 640 folds the same low items and keeps the rest; on a phone the medium ones fold under 600, where the search becomes a magnifier and the context moves to the panel, and the high ones and the help fold under 480, where the name leaves the eye.',
     snippet: defineSnippet({
       id: 'top-navigation-angular-priority',
       language: 'angular',
@@ -314,7 +315,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'search',
     title: 'The search gives way to a magnifier',
-    note: 'On a laptop the field stands in the middle of the bar. On a tablet it is a magnifier in the actions; pressing it opens the field over the whole bar with focus inside, and Escape, the cross or focus leaving it hand the bar back.',
+    note: 'On a laptop the field stands at the start of the middle of the bar, after the brand and the destinations. On a phone it is a magnifier in the actions; pressing it opens the field over the whole bar with focus inside, and Escape, the cross or focus leaving it hand the bar back.',
     snippet: defineSnippet({
       id: 'top-navigation-angular-search',
       language: 'angular',
@@ -394,7 +395,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'context',
     title: 'What the application is right now',
-    note: 'A workspace switcher and an environment badge after the brand. On a tablet the whole region is moved to the top of the panel — the same element, so the switcher still opens its menu there.',
+    note: 'A workspace switcher and an environment badge after the brand. On a phone the whole region is moved to the top of the panel — the same element, so the switcher still opens its menu there.',
     snippet: defineSnippet({
       id: 'top-navigation-angular-context',
       language: 'angular',
@@ -567,7 +568,7 @@ const events: EventRow[] = [
     name: 'searchOpenChangeRequest',
     payload:
       'ChangeRequest<boolean> with reason (pointer | keyboard | escape | blur | resize | programmatic)',
-    when: 'Below 768 pixels: before the magnifier opens the field, and before Escape, the cross, focus leaving the field or the width widening past 768 closes it. Above, the value has no effect. searchOpen is a model.',
+    when: 'Below 600 pixels: before the magnifier opens the field, and before Escape, the cross, focus leaving the field or the width widening past 600 closes it. Above, the value has no effect. searchOpen is a model.',
   },
   {
     name: 'collapseChange',
@@ -607,7 +608,7 @@ export const ANGULAR_TOP_NAVIGATION_DOCS = {
         'model<boolean>',
         'false',
         'slTopNavigation',
-        'Whether the search has taken the bar, below 768 pixels, two-way. Above 768 it has no effect',
+        'Whether the search has taken the bar, below 600 pixels, two-way. Above 600 it has no effect',
       ],
       [
         'size',
@@ -656,7 +657,7 @@ export const ANGULAR_TOP_NAVIGATION_DOCS = {
         "'high' | 'medium' | 'low'",
         'medium',
         'slTopNavigationItem',
-        'Which step of the width folds the item: low under 1024 pixels, medium under 768, high under 480',
+        'Which step of the width folds the item: low under 1024 pixels, medium under 600, high under 480',
       ],
       [
         'disabled',
@@ -714,7 +715,7 @@ export const ANGULAR_TOP_NAVIGATION_DOCS = {
         'a container query in the consumer’s stylesheet',
         '—',
         'anything placed in context, search or actions',
-        'The bar is a named query container, so a consumer’s own control answers the bar’s width — (inline-size < 768px) — without measuring anything',
+        'The bar is a named query container, so a consumer’s own control answers the bar’s width — (inline-size < 600px) — without measuring anything',
       ],
     ]),
     accessibility: [
@@ -723,7 +724,7 @@ export const ANGULAR_TOP_NAVIGATION_DOCS = {
       'more is a button with aria-expanded and aria-controls pointing at the panel, and its name carries the count of what folded — Mais, 3. The panel is built right after the nav, so Tab from more enters it, the way the disclosure pattern assumes; closed, it is visibility: hidden and its rows leave the tab sequence. Escape closes it and returns focus to more.',
       'The folded destinations are the consumer’s own elements, moved into the panel and back, so a section trigger keeps its menu and a link keeps its badge, its href and the router’s aria-current. Below 480 pixels the name is clipped rather than removed, so the home link keeps its name; help’s label is clipped in the bar and shown in the panel, so help has one name in both places.',
       'Every icon-only control — the magnifier, the cross, help, the bell, the account, more — carries an accessible name from the family’s messages or the consumer’s aria-label, read with HostAttributeToken before the family writes its own, and repeats it in a tooltip on hover and on visible focus. The count stands inside the bell’s button, so a reader hears Notificações, 3 without the family composing a string.',
-      'Below 768 pixels the open search moves focus into the field and the closed search returns it to the magnifier, unless focus already went somewhere else — which is what closed it. A disabled destination is aria-disabled with its href kept: perceivable, focusable, refused on press. The item carries data-disabled and never aria-disabled, which ARIA 1.2 deprecates on listitem.',
+      'Below 600 pixels the open search moves focus into the field and the closed search returns it to the magnifier, unless focus already went somewhere else — which is what closed it. A disabled destination is aria-disabled with its href kept: perceivable, focusable, refused on press. The item carries data-disabled and never aria-disabled, which ARIA 1.2 deprecates on listitem.',
     ],
     snippets: [
       defineSnippet({

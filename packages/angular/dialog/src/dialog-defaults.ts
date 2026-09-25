@@ -63,7 +63,14 @@ export type DialogFinalFocus = HTMLElement | false;
 
 /** Why the layer opened or closed. */
 export type DialogOpenReason =
-  'pointer' | 'keyboard' | 'dismiss' | 'escape' | 'outsidePress' | 'submit' | 'programmatic';
+  | 'pointer'
+  | 'keyboard'
+  | 'dismiss'
+  | 'escape'
+  | 'outsidePress'
+  | 'back'
+  | 'submit'
+  | 'programmatic';
 
 /**
  * The request the family emits before the layer moves, with the result the
@@ -94,6 +101,8 @@ export interface DialogFullscreenRequest {
 }
 
 export interface DialogDefaults {
+  /** The platform's way back — a phone's gesture, a browser's button — closes a modal layer. */
+  back: DialogDismissPolicy;
   escape: DialogDismissPolicy;
   fullScreen: DialogFullScreen;
   modal: boolean;
@@ -106,6 +115,7 @@ export interface DialogDefaults {
 }
 
 const FALLBACK: DialogDefaults = {
+  back: 'close',
   escape: 'close',
   fullScreen: 'narrow',
   modal: true,

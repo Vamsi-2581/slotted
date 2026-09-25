@@ -19,6 +19,7 @@ import {
   ViewContainerRef,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { initialLoadingVisibility, nextLoadingVisibility } from '@slotted/core/loading';
 import { prepareMarkdown } from '@slotted/core/markdown';
 import type {
@@ -166,6 +167,8 @@ const KINDS = new Set<string>([
     SlButton,
     SlCheckbox,
     SlCodeBlock,
+    SlGlyph,
+    SlIcon,
     SlInlineMessage,
     SlLink,
     SlProse,
@@ -244,6 +247,7 @@ const KINDS = new Set<string>([
           data-part="backref"
           [href]="'#' + reference"
           [attr.aria-label]="resolvedLabels().backReference(footnote.number, index + 1)"
+          ><span slIcon><svg slGlyph name="arrow-left"></svg></span
         ></a>
       }
     </ng-template>

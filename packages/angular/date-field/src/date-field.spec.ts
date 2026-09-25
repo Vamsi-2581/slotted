@@ -481,7 +481,9 @@ describe('the composition surface', () => {
        ></div>`,
     );
 
-    (fixture.nativeElement.querySelector('[data-part="clear"]') as HTMLButtonElement).click();
+    const clear = fixture.nativeElement.querySelector('[data-part="clear"]') as HTMLButtonElement;
+    expect(clear.querySelector('svg[data-glyph]')?.getAttribute('data-glyph')).toBe('x');
+    clear.click();
     fixture.detectChanges();
 
     expect(text(fixture)).toEqual(['dd', 'mm', 'aaaa']);

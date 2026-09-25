@@ -25,6 +25,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import type { OnInit } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlCalendar, asDates } from '@slotted/angular/calendar';
 import type { CalendarSelectionMode, CalendarValue, CalendarView } from '@slotted/angular/calendar';
 import { SlDateField, SlDateFieldEnd } from '@slotted/angular/date-field';
@@ -70,7 +71,7 @@ let sequence = 0;
   selector: '[slDatePicker]',
   standalone: true,
   exportAs: 'slDatePicker',
-  imports: [SlCalendar, SlDateField, SlDateFieldEnd],
+  imports: [SlCalendar, SlDateField, SlDateFieldEnd, SlGlyph, SlIcon],
   template: `<div data-part="control" (keydown)="onControlKeyDown($event)">
       <div
         slDateField
@@ -102,7 +103,9 @@ let sequence = 0;
             [attr.aria-controls]="isOpen() ? contentId : null"
             [disabled]="!editable()"
             (click)="toggle($event)"
-          ></button>
+          >
+            <span slIcon><svg slGlyph name="calendar"></svg></span>
+          </button>
         </span>
       </div>
     </div>

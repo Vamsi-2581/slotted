@@ -18,8 +18,12 @@ export type TooltipSize = 'sm' | 'md';
  * `label` writes `aria-labelledby` instead, which is the icon-only button whose
  * only words are the tooltip's — described by it and named by nothing, that
  * button is announced as "button".
+ *
+ * `none` writes neither and hides the content from the reader: the hint that
+ * repeats words the trigger already carries is read twice under either
+ * reference.
  */
-export type TooltipDescribes = 'description' | 'label';
+export type TooltipDescribes = 'description' | 'label' | 'none';
 
 /** What opens it. `hover` also opens on keyboard focus, and instantly. */
 export type TooltipOpenOn = 'hover' | 'focus' | 'manual';
@@ -67,6 +71,8 @@ export interface TooltipDefaults {
   strategy: TooltipStrategy;
   touchDelay: number;
   variant: TooltipVariant;
+  /** Opens only while the trigger's own content is cut by its box. */
+  whenClipped: boolean;
 }
 
 /**
@@ -102,6 +108,7 @@ export const TOOLTIP_FALLBACK: TooltipDefaults = {
   strategy: 'absolute',
   touchDelay: 500,
   variant: 'inverse',
+  whenClipped: false,
 };
 
 export const TOOLTIP_DEFAULTS = new InjectionToken<TooltipDefaults>('slotted tooltip defaults', {
@@ -125,6 +132,11 @@ export class SlTooltipGroup {
  * An application decides once how its tooltips behave and look. A tooltip that
  * states any of them itself still wins.
  *
+ * What is stated here is written over the defaults already in force rather than
+ * over the fallback, which is what React's provider does and what a family that
+ * sets two axes for itself needs: a column header asking for `describes="none"`
+ * would otherwise hand the application's own delays back to the fallback.
+ *
  * The group is provided beside the defaults, so a component that sets its own
  * defaults also gets its own warmup window — the same scoping React's provider
  * gives.
@@ -133,7 +145,10 @@ export function provideTooltipDefaults(defaults: Partial<TooltipDefaults>): Prov
   return [
     {
       provide: TOOLTIP_DEFAULTS,
-      useFactory: (): TooltipDefaults => ({ ...TOOLTIP_FALLBACK, ...defaults }),
+      useFactory: (): TooltipDefaults => ({
+        ...(inject(TOOLTIP_DEFAULTS, { optional: true, skipSelf: true }) ?? TOOLTIP_FALLBACK),
+        ...defaults,
+      }),
     },
     SlTooltipGroup,
   ];

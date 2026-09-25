@@ -40,6 +40,7 @@ import {
 } from '@angular/core';
 import type { OnInit } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 import { SlTimeField, SlTimeFieldEnd } from '@slotted/angular/time-field';
 import type { TimeFieldChangeRequest, TimeFieldHourCycle } from '@slotted/angular/time-field';
@@ -80,7 +81,7 @@ let sequence = 0;
   selector: '[slTimePicker]',
   standalone: true,
   exportAs: 'slTimePicker',
-  imports: [NgTemplateOutlet, SlTimeField, SlTimeFieldEnd],
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon, SlTimeField, SlTimeFieldEnd],
   template: `<div data-part="control" (keydown)="onControlKeyDown($event)">
       <div
         slTimeField
@@ -116,7 +117,9 @@ let sequence = 0;
             [disabled]="!editable()"
             (click)="toggle($event)"
             (keydown)="onTriggerKeyDown($event)"
-          ></button>
+          >
+            <span slIcon><svg slGlyph name="clock"></svg></span>
+          </button>
         </span>
       </div>
     </div>

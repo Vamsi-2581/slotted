@@ -112,6 +112,22 @@ describe('SlPagination', () => {
     expect(part('last').getAttribute('aria-label')).toBe('Last page');
   });
 
+  it('draws one chevron for a step and two for an end, each mirrored with the text', () => {
+    const { part } = setup();
+
+    const glyphs = ['first', 'previous', 'next', 'last'].map((name) => {
+      const box = part(name).querySelector('[data-ui="icon"]');
+      expect(box?.hasAttribute('data-directional')).toBe(true);
+      return box?.querySelector('svg[data-glyph]')?.getAttribute('data-glyph');
+    });
+    expect(glyphs).toEqual(['chevrons-right', 'chevron-right', 'chevron-right', 'chevrons-right']);
+    expect(
+      part('page-size-label').querySelector(
+        ':scope > [data-ui="icon"] > svg[data-glyph="chevron-down"]',
+      ),
+    ).not.toBeNull();
+  });
+
   it('moves the page when a trigger is pressed, and carries the reason', () => {
     const { host, part, current, settle } = setup();
 

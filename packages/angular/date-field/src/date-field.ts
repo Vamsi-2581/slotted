@@ -42,6 +42,7 @@ import type {
   ValidationErrors,
   Validator,
 } from '@angular/forms';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 
 import { injectDateFieldDefaults } from './date-field-defaults';
@@ -97,6 +98,7 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
   selector: '[slDateField]',
   standalone: true,
   exportAs: 'slDateField',
+  imports: [SlGlyph, SlIcon],
   template: `<ng-content select="[slDateFieldStart]" />
     <div
       data-part="segments"
@@ -144,7 +146,9 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
         type="button"
         [attr.aria-label]="resolvedClearLabel()"
         (click)="clear($event)"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="x"></svg></span>
+      </button>
     }
     <ng-content select="[slDateFieldEnd]" />
     <input data-part="hidden-input" type="hidden" readonly [attr.name]="name()" [value]="iso()" />`,

@@ -417,6 +417,29 @@ describe('the three selection modes', () => {
 });
 
 describe('the three views', () => {
+  /**
+   * The chevrons are `Glyph` elements inside `Icon` boxes, never masks: the
+   * page triggers mirror under `dir="rtl"`, and the year view, with no way
+   * up, draws no chevron on its heading.
+   */
+  it('draws the page chevrons and the way up as glyph elements', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth"></div>`,
+    );
+    const icon = (part: string) =>
+      root(fixture).querySelector(`[data-part="${part}"] > [data-ui="icon"]`);
+    for (const part of ['previous', 'next']) {
+      expect(icon(part)?.hasAttribute('data-directional')).toBe(true);
+      expect(icon(part)?.querySelector('svg')?.getAttribute('data-glyph')).toBe('chevron-right');
+    }
+    expect(icon('heading')?.querySelector('svg')?.getAttribute('data-glyph')).toBe('chevron-down');
+
+    click(fixture, root(fixture).querySelector('[data-part="heading"]') as HTMLElement);
+    click(fixture, root(fixture).querySelector('[data-part="heading"]') as HTMLElement);
+    expect(root(fixture).getAttribute('data-view')).toBe('year');
+    expect(icon('heading')).toBeNull();
+  });
+
   it('walks up from the day view and back down', () => {
     const fixture = renderTemplate(
       `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth"></div>`,

@@ -210,6 +210,33 @@ describe('what an application decides once', () => {
   });
 });
 
+describe('the marks', () => {
+  const glyphIn = (item: HTMLElement | undefined, part: string) =>
+    item?.querySelector(`[data-part="${part}"] > [data-ui="icon"] > svg[data-part="glyph"]`);
+
+  it('draws each tone’s glyph from the contract’s map, and the close as the x glyph', () => {
+    for (const [tone, glyph] of Object.entries(contract.toneGlyphs)) {
+      const fixture = render();
+      fixture.componentInstance.toasts.show({ title: tone, tone: tone as never });
+      fixture.detectChanges();
+
+      const item = items(fixture)[0];
+      expect(glyphIn(item, 'icon')?.getAttribute('data-glyph'), tone).toBe(glyph);
+      expect(glyphIn(item, 'close')?.getAttribute('data-glyph'), tone).toBe('x');
+    }
+  });
+
+  it('draws no tone glyph while a promise is in flight, and keeps the box', () => {
+    const fixture = render();
+    fixture.componentInstance.toasts.show({ title: 'Saving', loading: true });
+    fixture.detectChanges();
+
+    const icon = items(fixture)[0]?.querySelector('[data-part="icon"]');
+    expect(icon).not.toBeNull();
+    expect(icon?.querySelector('svg')).toBeNull();
+  });
+});
+
 describe('the service', () => {
   it('reads as signals, so a zoneless application renders on them', () => {
     const fixture = render();

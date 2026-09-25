@@ -442,12 +442,12 @@ export const Priority: Story = {
       ),
       scene(
         'Tablet, 640 pixels',
-        'Under 768: Frota — the medium one — has gone with them, more counts three, the workspace has moved to the panel, and the search is a magnifier in the actions.',
+        'Under 1024 and from 600 up, the bar folds as on the laptop: Relatórios and Faturação are in more, which counts two. Frota — the medium one — the workspace, the field and the name keep their places in the bar.',
         stage(aurora({ ref: 'p3' }), 'tablet'),
       ),
       scene(
         'Phone, 375 pixels',
-        'Under 480: Painel and Cargas fold too, help moves to the panel, the name leaves the eye, and the gaps close up. What stays is the mark, more, the magnifier, the bell and the account.',
+        'Under 600 Frota — the medium one — folds, the workspace moves to the panel and the search becomes a magnifier in the actions; under 480 Painel and Cargas — the high ones — fold too, help moves to the panel, the name leaves the eye, and the gaps close up. More counts five. What stays is the mark, more, the magnifier, the bell and the account.',
         stage(aurora({ ref: 'p4' }), 'phone'),
       ),
       scene(
@@ -480,7 +480,7 @@ export const Panel: Story = {
         )}<p slText size="sm" tone="muted">Last request: {{ reason() }}</p></div>`,
       ),
       scene(
-        'Open on a tablet, the medium and low ones folded',
+        'Open on a tablet, the low ones folded',
         'Above 480 the panel stands under the bar’s end at 20rem. Tab from more into it, press Escape, and focus returns to more; a press outside closes it too, and a press on more toggles it.',
         stage(aurora({ attributes: `[moreOpen]="true"`, ref: 'n2' }), 'tablet', true),
       ),
@@ -489,7 +489,7 @@ export const Panel: Story = {
         'Frota folded into the panel still opens its own menu: the row is the same element, with the same slMenuTriggerFor on it.',
         stage(
           `<header slTopNavigation [moreOpen]="true">${brand()}<nav slTopNavigationNav><ul slTopNavigationList>${item('painel', 'Painel', 'high')}${fleet('frotan3')}</ul></nav><div slTopNavigationActions>${account('accountn3')}</div></header>`,
-          'tablet',
+          'phone',
           true,
         ),
       ),
@@ -503,20 +503,20 @@ export const Search: Story = {
     template: grid(
       scene(
         'Laptop: the field',
-        'Above 768 the field stands in the middle of the bar, up to 28rem wide, with the shortcut at its end. Nothing here needs the magnifier.',
+        'Above 600 the field stands in the middle of the bar, up to 28rem wide, with the shortcut at its end. Nothing here needs the magnifier.',
         stage(aurora({ ref: 's1', withContext: false }), 'laptop'),
       ),
       scene(
-        'Tablet: the magnifier',
-        'Below 768 the field has left and a magnifier stands first in the actions. Press it: the field takes the bar and focus lands in it.',
-        stage(aurora({ ref: 's2', withContext: false }), 'tablet'),
+        'Phone: the magnifier',
+        'Below 600 the field has left and a magnifier stands first in the actions. Press it: the field takes the bar and focus lands in it.',
+        stage(aurora({ ref: 's2', withContext: false }), 'phone'),
       ),
       scene(
-        'Tablet: the field open over the bar',
+        'Phone: the field open over the bar',
         'Everything else has left the eye; the cross at the end and Escape hand the bar back and return focus to the magnifier. Focus leaving the field closes it too.',
         stage(
           aurora({ attributes: `[searchOpen]="true"`, ref: 's3', withContext: false }),
-          'tablet',
+          'phone',
         ),
       ),
     ),
@@ -649,10 +649,10 @@ export const Context: Story = {
       ),
       scene(
         'Moved to the panel',
-        'On a tablet the whole region has moved to the top of the panel — the same element, so the switcher still opens its menu from there.',
+        'On a phone the whole region has moved to the top of the panel — the same element, so the switcher still opens its menu from there.',
         stage(
           `<header slTopNavigation [moreOpen]="true">${brand()}${context('workspacesk2', true)}<nav slTopNavigationNav><ul slTopNavigationList>${item('painel', 'Painel', 'high')}${item('cargas', 'Cargas', 'high')}</ul></nav><div slTopNavigationActions>${account('accountk2')}</div></header>`,
-          'tablet',
+          'phone',
           true,
         ),
       ),
@@ -736,7 +736,7 @@ export const Content: Story = {
       ),
       scene(
         'A name beside the avatar',
-        'Maria Bartolomeu stands beside her avatar above 768 pixels and gives way below it; the avatar is the whole control on a tablet.',
+        'Maria Bartolomeu stands beside her avatar above 600 pixels and gives way below it; the avatar is the whole control on a phone.',
         stage(
           `<header slTopNavigation value="painel">${brand()}<nav slTopNavigationNav><ul slTopNavigationList>${item('painel', 'Painel', 'high')}${item('cargas', 'Cargas', 'high')}</ul></nav>${search()}${actions({ accountName: 'Maria Bartolomeu', ref: 'ct3' })}</header>`,
           'desktop',
@@ -887,7 +887,7 @@ export const Keyboard: Story = {
     },
     template: scene(
       'Every control is a tab stop, on a tablet',
-      'Skip, the mark, Painel, Cargas, more, the panel’s rows when it is open, the magnifier, help, the bell, the account — in that order, with no arrow keys.',
+      'Skip, the mark, the workspace, Painel, Cargas, Frota, more, the panel’s rows when it is open, the field, help, the bell, the account — in that order, with no arrow keys.',
       `<div slStack gap="4">${stage(
         aurora({
           attributes: `skipTo="conteudo-keyboard" (moreOpenChangeRequest)="record('more ' + ($event.value ? 'open' : 'closed') + ' · ' + $event.reason)" (searchOpenChangeRequest)="record('search ' + ($event.value ? 'open' : 'closed') + ' · ' + $event.reason)" (valueChangeRequest)="record('value ' + $event.value + ' · ' + $event.reason)"`,
@@ -897,7 +897,7 @@ export const Keyboard: Story = {
         true,
       )}<div slStack gap="1">
   @if (log().length === 0) {
-    <p slText size="sm" tone="muted">Tab through the bar; press Enter on a destination, on more, on the magnifier; press Escape inside the panel or the open search.</p>
+    <p slText size="sm" tone="muted">Tab through the bar; press Enter on a destination or on more; press Escape inside the panel.</p>
   }
   @for (entry of log(); track $index) {
     <p slText size="sm" tone="muted">{{ entry }}</p>

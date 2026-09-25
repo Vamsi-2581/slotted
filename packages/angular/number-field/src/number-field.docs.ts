@@ -610,8 +610,16 @@ export const ANGULAR_NUMBER_FIELD_DOCS = {
   />
   <span data-part="end">BRL</span>
   <span data-part="stepper">
-    <button data-part="increment" type="button" tabindex="-1" aria-label="Increase"></button>
-    <button data-part="decrement" type="button" tabindex="-1" aria-label="Decrease"></button>
+    <button data-part="increment" type="button" tabindex="-1" aria-label="Increase">
+      <span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="chevron-down" aria-hidden="true"></svg
+      ></span>
+    </button>
+    <button data-part="decrement" type="button" tabindex="-1" aria-label="Decrease">
+      <span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="chevron-down" aria-hidden="true"></svg
+      ></span>
+    </button>
   </span>
   <input type="hidden" name="valor" value="1480" />
 </div>`,

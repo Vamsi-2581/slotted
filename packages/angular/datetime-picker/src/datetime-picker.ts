@@ -51,6 +51,7 @@ import {
 } from '@angular/core';
 import type { OnInit } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlCalendar } from '@slotted/angular/calendar';
 import type { CalendarValue, CalendarView } from '@slotted/angular/calendar';
 import { SlDateTimeField, SlDateTimeFieldEnd } from '@slotted/angular/datetime-field';
@@ -106,7 +107,7 @@ export interface DateTimePickerHighlight {
   selector: '[slDateTimePicker]',
   standalone: true,
   exportAs: 'slDateTimePicker',
-  imports: [NgTemplateOutlet, SlCalendar, SlDateTimeField, SlDateTimeFieldEnd],
+  imports: [NgTemplateOutlet, SlCalendar, SlDateTimeField, SlDateTimeFieldEnd, SlGlyph, SlIcon],
   template: `<div data-part="control" (keydown)="onControlKeyDown($event)">
       <div
         slDateTimeField
@@ -147,7 +148,9 @@ export interface DateTimePickerHighlight {
             [disabled]="!editable()"
             (click)="toggle($event)"
             (keydown)="onTriggerKeyDown($event)"
-          ></button>
+          >
+            <span slIcon><svg slGlyph name="calendar"></svg></span>
+          </button>
         </span>
       </div>
     </div>
@@ -181,6 +184,7 @@ export interface DateTimePickerHighlight {
             </span>
             <ng-content select="[slDateTimePickerPresets]" />
             <button data-part="now" type="button" (click)="chooseNow($event)">
+              <span slIcon size="sm"><svg slGlyph name="clock"></svg></span>
               {{ resolvedNowLabel() }}
             </button>
           </div>

@@ -4,6 +4,7 @@ import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import { SlAppShellNav } from '@slotted/angular/app-shell';
 import {
+  afterNextRender,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
@@ -182,7 +183,12 @@ export class SlSideNavigation {
   constructor() {
     const destroyRef = inject(DestroyRef);
 
-    if (typeof ResizeObserver !== 'undefined') {
+    /* After the first render and not in the constructor: a measure there
+       forced a style pass before any binding existed — `compactAt` was still
+       its default, and inside app-shell the column resolved at rail width and
+       then animated open. */
+    afterNextRender(() => {
+      if (typeof ResizeObserver === 'undefined') return;
       const gate = createWidthGate(this.host, {
         at: this.resolvedCompactAt(),
         onChange: (narrow) => this.narrow.set(narrow),
@@ -196,7 +202,7 @@ export class SlSideNavigation {
       void this.host.ownerDocument.fonts?.ready.then(() =>
         this.measureTick.update((tick) => tick + 1),
       );
-    }
+    });
 
     /* Compact mode ending takes the flyout with it: there is no rail to stand beside. */
     effect(() => {

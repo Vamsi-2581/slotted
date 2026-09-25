@@ -22,6 +22,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import type { EmbeddedViewRef } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlPopover } from './popover';
 import type { PopoverFocusTarget } from './popover-defaults';
@@ -436,10 +437,16 @@ export class SlPopoverFooter {}
  * device has no Escape key at all. Its accessible name comes from the defaults
  * provider, and a name the consumer wrote on the element wins over it.
  */
-@Directive({
+@Component({
   selector: 'button[slPopoverClose]',
   standalone: true,
   exportAs: 'slPopoverClose',
+  imports: [SlGlyph, SlIcon],
+  /* The cross is drawn unless the consumer wrote content of their own. */
+  template: `<ng-content
+    ><span slIcon size="sm"><svg slGlyph name="x"></svg></span
+  ></ng-content>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'close',
     type: 'button',

@@ -56,6 +56,7 @@ import type {
   ValidationErrors,
   Validator,
 } from '@angular/forms';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 import { SlTimeField } from '@slotted/angular/time-field';
 import type { TimeFieldChangeRequest } from '@slotted/angular/time-field';
@@ -145,7 +146,7 @@ function other(position: TimeRangePickerPosition): TimeRangePickerPosition {
   selector: '[slTimeRangePicker]',
   standalone: true,
   exportAs: 'slTimeRangePicker',
-  imports: [NgTemplateOutlet, SlTimeField],
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon, SlTimeField],
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SlTimeRangePicker), multi: true },
     { provide: NG_VALIDATORS, useExisting: forwardRef(() => SlTimeRangePicker), multi: true },
@@ -166,6 +167,7 @@ function other(position: TimeRangePickerPosition): TimeRangePickerPosition {
         <span data-part="summary" [attr.data-placeholder]="summary() === null ? '' : null">{{
           summary() ?? resolvedChooseLabel()
         }}</span>
+        <span slIcon><svg slGlyph name="clock"></svg></span>
       </button>
       @if (clearable() && held() !== null) {
         <button
@@ -174,7 +176,9 @@ function other(position: TimeRangePickerPosition): TimeRangePickerPosition {
           [attr.aria-label]="clearLabel() ?? defaults.clearLabel"
           [disabled]="!editable()"
           (click)="clear($event)"
-        ></button>
+        >
+          <span slIcon><svg slGlyph name="x"></svg></span>
+        </button>
       }
       <input
         data-part="hidden-input"

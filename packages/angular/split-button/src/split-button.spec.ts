@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { provideButtonDefaults, SlButtonStart } from '@slotted/angular/button';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlMenu, SlMenuItem, SlMenuRadioGroup } from '@slotted/angular/menu';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -82,6 +83,8 @@ class Host {
     SlSplitButtonPrimary,
     SlSplitButtonMenuTrigger,
     SlSplitButtonChoices,
+    SlGlyph,
+    SlIcon,
     SlMenu,
     SlMenuItem,
     SlMenuRadioGroup,
@@ -95,11 +98,9 @@ class Host {
       (valueChange)="record($event)"
     >
       <button slSplitButtonPrimary>{{ labels[value() ?? held ?? 'merge'] }}</button>
-      <button
-        slSplitButtonMenuTrigger
-        [slMenuTriggerFor]="more"
-        aria-label="More merge options"
-      ></button>
+      <button slSplitButtonMenuTrigger [slMenuTriggerFor]="more" aria-label="More merge options">
+        <span slIcon><svg slGlyph name="ellipsis"></svg></span>
+      </button>
       <sl-menu #more>
         <sl-menu-radio-group slSplitButtonChoices (valueChange)="held = $event">
           <button slMenuRadioItem value="merge">Create a merge commit</button>
@@ -195,9 +196,14 @@ describe('slSplitButton', () => {
     expect(trigger().getAttribute('aria-haspopup')).toBe('menu');
     expect(trigger().getAttribute('aria-expanded')).toBe('false');
     expect(trigger().getAttribute('aria-label')).toBe('More save options');
-    expect(trigger().querySelector("[data-part='icon'] > span")?.getAttribute('aria-hidden')).toBe(
-      'true',
-    );
+    expect(
+      trigger().querySelector("[data-part='icon'] > [data-ui='icon']")?.getAttribute('aria-hidden'),
+    ).toBe('true');
+    expect(
+      trigger().querySelector(
+        "[data-part='icon'] > [data-ui='icon'] > svg[data-glyph='chevron-down']",
+      ),
+    ).not.toBeNull();
     /* The menu's element stands in the root and takes no room. */
     expect(getComputedStyle(root().querySelector('sl-menu')!).display).toBe('none');
   });
@@ -356,6 +362,10 @@ describe('slSplitButtonChoices', () => {
   it('remembers the chosen alternative as the root’s value when controlled', async () => {
     fixture.componentInstance.value.set('squash');
     await settle();
+    /* The consumer's own mark replaces the chevron, as popover's close does. */
+    const menuTrigger = fixture.nativeElement.querySelector('[data-part="menu-trigger"]');
+    expect(menuTrigger.querySelector('svg[data-glyph="ellipsis"]')).not.toBeNull();
+    expect(menuTrigger.querySelector('svg[data-glyph="chevron-down"]')).toBeNull();
     await open();
     expect(radio('Squash and merge').getAttribute('aria-checked')).toBe('true');
 

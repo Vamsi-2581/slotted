@@ -179,6 +179,32 @@ describe('SlMultiSelect', () => {
     expect(fixture.componentInstance.reason()).toBe('submit');
   });
 
+  /**
+   * Every icon the family owns is a `Glyph` element inside an `Icon` box, never
+   * a mask, and the offer to add takes the plus where a chosen option takes the
+   * check.
+   */
+  it('draws the chevron, the cross, the tick and the plus as glyph elements', async () => {
+    fixture.componentInstance.creatable.set(true);
+    fixture.componentInstance.defaultValue.set(['blueberry']);
+    await settle(fixture);
+    const glyph = (part: string) =>
+      document.querySelector(`[data-part='${part}'] > [data-ui='icon'] > svg[data-glyph]`);
+    expect(glyph('arrow')?.getAttribute('data-glyph')).toBe('chevron-down');
+    expect(glyph('clear')?.getAttribute('data-glyph')).toBe('x');
+    expect(glyph('remove')?.getAttribute('data-glyph')).toBe('x');
+
+    await open(fixture);
+    const mark = (option: Element | null) =>
+      option?.querySelector("[data-part='indicator'] > [data-ui='icon'] > svg");
+    expect(mark(optionFor('blueberry'))?.getAttribute('data-glyph')).toBe('check');
+
+    type(fixture, 'Quince');
+    await settle(fixture);
+    const offer = document.querySelector("[data-part='item'][data-create]");
+    expect(mark(offer)?.getAttribute('data-glyph')).toBe('plus');
+  });
+
   it('takes up to the limit and reports the rest rather than dropping it', async () => {
     fixture.componentInstance.creatable.set(true);
     fixture.componentInstance.max.set(2);
@@ -317,5 +343,32 @@ describe('SlMultiSelect', () => {
     fixture.componentInstance.max.set(undefined);
     await settle(fixture);
     expect(instance.validate()).toEqual({ duplicate: true });
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlMultiSelect, SlMultiSelectItem],
+  template: `
+    <sl-multi-select aria-label="Fruit" [portal]="false">
+      <sl-multi-select-item value="blueberry" label="Blueberry" icon="dot" />
+      <sl-multi-select-item value="raspberry" label="Raspberry" />
+    </sl-multi-select>
+  `,
+})
+class IconHost {}
+
+/** The first column holds the glyph the icon input names; no stylesheet fills it. */
+describe('SlMultiSelect, the icon column', () => {
+  it('draws the named glyph in the first column, and prints no name there', async () => {
+    await TestBed.configureTestingModule({ imports: [IconHost] }).compileComponents();
+    const fixture = TestBed.createComponent(IconHost);
+    fixture.detectChanges();
+    await open(fixture);
+
+    const column = optionFor('blueberry').querySelector("[data-part='icon']");
+    expect(column?.querySelector("[data-ui='icon'] > svg")?.getAttribute('data-glyph')).toBe('dot');
+    expect(column?.textContent?.trim()).toBe('');
+    expect(optionFor('raspberry').querySelector("[data-part='icon']")).toBeNull();
   });
 });

@@ -21,6 +21,7 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import {
   categoryIndex,
   chartKeyAction,
@@ -172,7 +173,7 @@ function focusVisible(element: Element) {
 @Component({
   selector: 'figure[slChart]',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon],
   templateUrl: './chart.html',
   styleUrls: [
     '../../../styles/src/button/button.css',

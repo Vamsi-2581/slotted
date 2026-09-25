@@ -41,6 +41,7 @@ import {
       [modal]="modal()"
       [escape]="escape()"
       [outsidePress]="outsidePress()"
+      [back]="back()"
       [mount]="mount()"
       [loading]="loading()"
       [fullscreenToggle]="fullscreenToggle()"
@@ -67,6 +68,7 @@ class DialogHost {
   readonly modal = signal(true);
   readonly escape = signal<'close' | 'none' | undefined>(undefined);
   readonly outsidePress = signal<'close' | 'none' | undefined>(undefined);
+  readonly back = signal<'close' | 'none' | undefined>(undefined);
   readonly mount = signal<'active' | 'lazy' | 'eager' | undefined>(undefined);
   readonly loading = signal(false);
   readonly described = signal(true);
@@ -183,6 +185,23 @@ describe('SlDialog', () => {
       expect(contract.members.dialog.defaults.fullscreenToggle).toBe(false);
     });
 
+    it('draws what the press does next: maximize at rest, minimize once pressed', () => {
+      open();
+      const glyph = () => toggle()?.querySelector('[data-ui="icon"] > svg[data-glyph]');
+      expect(glyph()?.getAttribute('data-glyph')).toBe('maximize');
+
+      press(toggle() as Element);
+      fixture.detectChanges();
+      expect(glyph()?.getAttribute('data-glyph')).toBe('minimize');
+    });
+
+    it('draws the close as the x glyph', () => {
+      open(false);
+      const glyph = part('close').querySelector('[data-ui="icon"] > svg[data-glyph]');
+      expect(glyph?.getAttribute('data-glyph')).toBe('x');
+      expect(glyph?.getAttribute('aria-hidden')).toBe('true');
+    });
+
     it('takes the layer on a press and gives it back on the next one', () => {
       open();
       expect(toggle()?.getAttribute('aria-pressed')).toBe('false');
@@ -244,6 +263,14 @@ describe('SlDialog', () => {
     expect(layer()).not.toBeNull();
     expect(layer()?.hasAttribute('data-open')).toBe(false);
     expect(layer()?.hasAttribute('inert')).toBe(true);
+  });
+
+  it('takes focus in the frame it enters, before the stylesheet reads it as open', () => {
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+
+    expect(layer()?.hasAttribute('data-open')).toBe(false);
+    expect(layer()?.hasAttribute('inert')).toBe(false);
   });
 
   it('moves the layer into the portal rather than leaving it where it was written', () => {
@@ -326,6 +353,38 @@ describe('SlDialog', () => {
 
     expect(fixture.componentInstance.requests.at(-1)?.reason).toBe('escape');
     expect(fixture.componentInstance.open()).toBe(false);
+  });
+
+  /**
+   * The platform's way back reaches the layer and not the page: a modal layer
+   * holds one history entry, and the popstate that leaves it closes the layer
+   * with the reason back. A layer told not to answer holds no entry.
+   */
+  it('closes on the platform way back, carrying back', async () => {
+    const popped = () =>
+      new Promise<void>((resolve) =>
+        window.addEventListener('popstate', () => resolve(), { once: true }),
+      );
+    const length = history.length;
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+    expect(history.length).toBe(length + 1);
+
+    const gesture = popped();
+    history.back();
+    await gesture;
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.requests.at(-1)?.reason).toBe('back');
+    expect(fixture.componentInstance.open()).toBe(false);
+  });
+
+  it('holds no history entry when the consumer says back does not close it', () => {
+    fixture.componentInstance.back.set('none');
+    const length = history.length;
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+    expect(history.length).toBe(length);
   });
 
   it('refuses Escape when the consumer says the layer does not answer it', () => {
@@ -542,6 +601,22 @@ describe('SlAlertDialog', () => {
   it('takes the role the pattern gives it and a tone of its own', () => {
     expect(panel()?.getAttribute('role')).toBe('alertdialog');
     expect(layer()?.getAttribute('data-tone')).toBe('danger');
+  });
+
+  it('draws each tone’s own glyph as the mark', () => {
+    const glyphs = {
+      accent: 'circle-info',
+      secondary: 'circle-info',
+      success: 'circle-check',
+      warning: 'triangle-alert',
+      danger: 'circle-alert',
+    } as const;
+    for (const [tone, glyph] of Object.entries(glyphs)) {
+      fixture.componentInstance.tone.set(tone as keyof typeof glyphs);
+      fixture.detectChanges();
+      const drawn = part('icon').querySelector('[data-ui="icon"] > svg[data-part="glyph"]');
+      expect(drawn?.getAttribute('data-glyph'), tone).toBe(glyph);
+    }
   });
 
   /**

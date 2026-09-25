@@ -59,7 +59,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'The grid of main and aside: two tracks above 640 pixels of the root’s width, one below. Absent under status="not-found" and "error", where the message stands.',
+      'The grid of main and aside: two tracks above 600 pixels of the root’s width, one below. Absent under status="not-found" and "error", where the message stands.',
   },
   {
     part: 'main',
@@ -86,7 +86,7 @@ const anatomy: AnatomyRow[] = [
     element: 'the aside carrying slDetailPanelAside',
     required: false,
     purpose:
-      'The metadata column, a complementary landmark named by messages.aside. Beside the sections above 640 pixels, in the column the aside axis names; under them below, with a rule above. Never hidden.',
+      'The metadata column, a complementary landmark named by messages.aside. Beside the sections above 600 pixels, in the column the aside axis names; under them below, with a rule above. Never hidden.',
   },
   {
     part: 'message',
@@ -325,7 +325,7 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'narrow',
-    title: 'Below 640 pixels',
+    title: 'Below 600 pixels',
     note: 'The root measures its own width, not the viewport. At 360 pixels the columns are one: the aside follows the sections in the flow with a rule above it, the header’s actions wrap under the title, and nothing is hidden — a phone reader reaches every field a desktop reader does.',
     snippet: defineSnippet({
       id: 'detail-panel-angular-narrow',
@@ -442,7 +442,7 @@ export const ANGULAR_DETAIL_PANEL_DOCS = {
         "'end' | 'start' | 'none'",
         'end',
         'slDetailPanel, provideDetailPanelDefaults',
-        'Which column the aside takes above 640 pixels. none says the consumer renders no aside and the body is one column at every width',
+        'Which column the aside takes above 600 pixels. none says the consumer renders no aside and the body is one column at every width',
       ],
       [
         'level',

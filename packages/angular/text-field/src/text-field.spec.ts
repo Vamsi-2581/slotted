@@ -67,7 +67,7 @@ describe('SlTextField', () => {
     expect(input(fixture).getAttribute('data-part')).toBe('input');
     expect(query(fixture, '[data-part="start"]').textContent).toBe('R$');
     expect(query(fixture, '[data-part="end"]').textContent).toBe('BRL');
-    expect(query(fixture, '[data-part="clear"]')).not.toBeNull();
+    expect(query(fixture, '[data-part="clear"] svg[data-glyph="x"]')).not.toBeNull();
   });
 
   it('writes every axis a consumer may style on, and the contract’s defaults', () => {
@@ -203,6 +203,9 @@ describe('SlTextField', () => {
     const label = button.getAttribute('aria-label');
     expect(input(fixture).getAttribute('type')).toBe('password');
     expect(button.getAttribute('aria-pressed')).toBe('false');
+    expect(query(fixture, '[data-part="reveal"] svg[data-glyph]').getAttribute('data-glyph')).toBe(
+      'eye',
+    );
 
     button.click();
     fixture.detectChanges();
@@ -210,6 +213,10 @@ describe('SlTextField', () => {
     expect(input(fixture).getAttribute('type')).toBe('text');
     expect(query(fixture, '[data-part="reveal"]').getAttribute('aria-pressed')).toBe('true');
     expect(query(fixture, '[data-part="reveal"]').getAttribute('aria-label')).toBe(label);
+    /* A revealed value is one a press will hide: the glyph is the crossed eye. */
+    expect(query(fixture, '[data-part="reveal"] svg[data-glyph]').getAttribute('data-glyph')).toBe(
+      'eye-off',
+    );
   });
 
   it('offers no reveal toggle on a control that is not a password', () => {

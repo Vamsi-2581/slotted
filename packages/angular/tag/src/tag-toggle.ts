@@ -13,6 +13,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import type { Signal, WritableSignal } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlTag } from './tag';
 import { TAG_BODY_TEMPLATE } from './tag-body';
@@ -77,7 +78,11 @@ class SelectionState {
   selector: 'button[slTagToggle]',
   standalone: true,
   exportAs: 'slTagToggle',
-  template: `<span aria-hidden="true" data-part="indicator"></span>${TAG_BODY_TEMPLATE}`,
+  imports: [SlGlyph, SlIcon],
+  /* The selection mark's check, which the sheet uncovers when the chip is on. */
+  template: `<span aria-hidden="true" data-part="indicator"
+      ><span slIcon><svg slGlyph name="check"></svg></span></span
+    >${TAG_BODY_TEMPLATE}`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {

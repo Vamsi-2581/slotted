@@ -57,7 +57,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: true,
     purpose:
-      'The chevron inside the trigger, drawn as a mask and turned over while the popup is open.',
+      'The chevron inside the trigger, a `Glyph` inside an `Icon` box, turned over while the popup is open.',
   },
   {
     part: 'busy',
@@ -117,7 +117,8 @@ const anatomy: AnatomyRow[] = [
     part: 'icon',
     element: 'span',
     required: false,
-    purpose: 'The artwork in the first column, from a glyph token named by the icon input.',
+    purpose:
+      'The artwork in the first column: the glyph the icon input names, drawn as a Glyph inside an Icon box.',
   },
   {
     part: 'label',
@@ -703,10 +704,10 @@ const api = apiRows([
   ['description', 'string', '—', 'sl-combobox-item', 'The line under the label.'],
   [
     'icon',
-    'string',
+    'GlyphName',
     '—',
     'sl-combobox-item',
-    'A glyph token name, drawn as a mask in the first column.',
+    'The glyph drawn in the first column, as a Glyph inside an Icon box.',
   ],
   [
     'position',

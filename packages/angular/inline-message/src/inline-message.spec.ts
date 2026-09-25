@@ -198,6 +198,31 @@ describe('SlInlineMessage', () => {
 
     expect(root(fixture, '#bare').querySelector('[data-part="icon"]')).toBeNull();
     expect(root(fixture, '#own').querySelector('[data-part="icon"] svg')).not.toBeNull();
+    expect(root(fixture, '#own').querySelector('[data-glyph]')).toBeNull();
+  });
+
+  it('draws the glyph the contract maps each tone to, and none for help', () => {
+    for (const [tone, glyph] of Object.entries(contract.toneGlyphs)) {
+      const fixture = renderTemplate(`<p slInlineMessage tone="${tone}">Uma mensagem.</p>`);
+      const icon = root(fixture).querySelector('[data-part="icon"]') as Element;
+      const drawn = icon.querySelector('[data-ui="icon"] > svg[data-part="glyph"]');
+      if (glyph === null) expect(icon.childElementCount, tone).toBe(0);
+      else expect(drawn?.getAttribute('data-glyph'), tone).toBe(glyph);
+    }
+  });
+
+  it('draws the dot for a bullet, nothing for no mark, and nothing while waiting', () => {
+    const fixture = renderTemplate(
+      `<p slInlineMessage id="dot" mark="dot" tone="danger">Um ponto.</p>
+       <p slInlineMessage id="none" mark="none" tone="danger">Nada.</p>
+       <p slInlineMessage id="waiting" loading tone="danger">A verificar.</p>`,
+    );
+    const icon = (id: string) =>
+      root(fixture, `#${id}`).querySelector('[data-part="icon"]') as Element;
+
+    expect(icon('dot').querySelector('svg[data-glyph]')?.getAttribute('data-glyph')).toBe('dot');
+    expect(icon('none').childElementCount).toBe(0);
+    expect(icon('waiting').childElementCount).toBe(0);
   });
 
   it('keeps a native attribute and a role the consumer wrote', () => {

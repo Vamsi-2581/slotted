@@ -319,7 +319,10 @@ describe('what stands in', () => {
 
     expect(placeholderOf(root).contains(query('#skeleton'))).toBe(true);
     expect(fallbackOf(root).contains(query('#retry'))).toBe(true);
-    expect(fallbackOf(query('#plain')).childElementCount).toBe(0);
+    expect(fallbackOf(root).querySelector('[data-glyph]')).toBeNull();
+    expect(
+      fallbackOf(query('#plain')).querySelector('[data-ui="icon"] > svg[data-glyph="image-off"]'),
+    ).not.toBeNull();
   });
 });
 

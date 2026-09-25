@@ -14,6 +14,7 @@ import type {
   TimeFilter,
 } from '@slotted/core/filter';
 import type { ChangeRequest } from '@slotted/core/state';
+import { provideTooltipDefaults } from '@slotted/angular/tooltip';
 import { SlTable } from './table';
 import { SlTableContent } from './table-content';
 import { provideTableDefaults, TABLE_LABELS } from './table-defaults';
@@ -163,6 +164,10 @@ describe('SlTable', () => {
   it('cycles ascending, descending, then none', () => {
     const trigger = queryAll(fixture, '[data-part="sort"]')[1] as HTMLElement;
     const header = trigger.closest('th') as HTMLElement;
+    /* The mark follows the name as the Glyph element; the stylesheet turns it. */
+    expect(
+      trigger.lastElementChild?.querySelector('svg[data-glyph]')?.getAttribute('data-glyph'),
+    ).toBe('chevron-down');
 
     trigger.click();
     fixture.detectChanges();
@@ -243,6 +248,9 @@ describe('SlTable', () => {
   it('opens a row detail through the disclosure pattern', () => {
     const expander = query(fixture, '[data-part="expander"]');
     expect(expander.getAttribute('aria-expanded')).toBe('false');
+    expect(
+      expander.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph'),
+    ).toBe('chevron-right');
     expect(query(fixture, '[data-part="detail"]')).toBeNull();
 
     expander.click();
@@ -559,6 +567,46 @@ describe('where a cell sits in its row', () => {
   });
 });
 
+describe('a column name its own box cuts', () => {
+  /**
+   * A header reading `Cli…` says nothing to the eye while the whole of it is
+   * still what a screen reader repeats under every cell. The hint says the
+   * words, and only while the box is measured as cutting them.
+   */
+  it('opens a hint over it, and none over a name that fits', async () => {
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideTooltipDefaults({ openDelay: 0 })],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.detectChanges();
+
+    const measure = (element: Element, sizes: { client: number; scroll: number }) => {
+      Object.defineProperty(element, 'clientWidth', { configurable: true, value: sizes.client });
+      Object.defineProperty(element, 'scrollWidth', { configurable: true, value: sizes.scroll });
+    };
+    const hint = () => document.querySelector('[role="tooltip"]');
+    const header = queryAll(fixture, '[data-part="column-header"]').find(
+      (cell) => cell.textContent?.trim() === 'Client',
+    )!;
+    /* jsdom does not expand the `overflow` shorthand, so the axis is written. */
+    header.style.overflowX = 'hidden';
+
+    measure(header, { client: 160, scroll: 160 });
+    header.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    fixture.detectChanges();
+    expect(hint()).toBeNull();
+
+    measure(header, { client: 48, scroll: 160 });
+    header.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    fixture.detectChanges();
+    expect(hint()?.textContent).toBe('Client');
+    /* The header already states the words: naming them twice is reading them twice. */
+    expect(hint()?.getAttribute('aria-hidden')).toBe('true');
+    expect(header.getAttribute('aria-describedby')).toBeNull();
+  });
+});
+
 describe('the column filter', () => {
   const panelButton = (label: string) =>
     [...document.querySelectorAll('[data-part="filter-actions"] button')].find(
@@ -594,7 +642,7 @@ describe('the column filter', () => {
 
     expect(fixture.componentInstance.chosen()).toEqual(setFilter(['Paid']));
     expect(trigger.getAttribute('data-filtered')).toBe('');
-    expect(trigger.getAttribute('aria-label')).toBe('Filter status: Is any of Paid');
+    expect(trigger.getAttribute('aria-label')).toBe('Filter status: Is Paid');
   });
 
   /**

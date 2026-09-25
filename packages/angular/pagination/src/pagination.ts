@@ -14,6 +14,7 @@ import {
   untracked,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { clampPage, itemRange, pageItems, totalPages } from '@slotted/core/pagination';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -265,6 +266,18 @@ abstract class SlPaginationTrigger {
   }
 }
 
+/**
+ * One chevron for a step and two for an end, drawn unless the consumer wrote
+ * content of their own. Every one points along the reading direction and
+ * mirrors with it; the stylesheet turns the two that point back.
+ */
+const STEP_TRIGGER_TEMPLATE = `<ng-content
+  ><span slIcon directional><svg slGlyph name="chevron-right"></svg></span
+></ng-content>`;
+const END_TRIGGER_TEMPLATE = `<ng-content
+  ><span slIcon directional><svg slGlyph name="chevrons-right"></svg></span
+></ng-content>`;
+
 const triggerHost = {
   '[attr.aria-label]': 'accessibleLabel()',
   '[attr.aria-disabled]': 'unavailable() ? "true" : null',
@@ -274,10 +287,13 @@ const triggerHost = {
   '(click)': 'activate($event)',
 } as const;
 
-@Directive({
+@Component({
   selector: '[slPaginationFirst]',
   standalone: true,
   exportAs: 'slPaginationFirst',
+  imports: [SlGlyph, SlIcon],
+  template: END_TRIGGER_TEMPLATE,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     ...triggerHost,
     'data-part': 'first',
@@ -291,10 +307,13 @@ export class SlPaginationFirst extends SlPaginationTrigger {
   protected override defaultLabel = () => this.pagination.labelSet().first;
 }
 
-@Directive({
+@Component({
   selector: '[slPaginationPrevious]',
   standalone: true,
   exportAs: 'slPaginationPrevious',
+  imports: [SlGlyph, SlIcon],
+  template: STEP_TRIGGER_TEMPLATE,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     ...triggerHost,
     'data-part': 'previous',
@@ -308,10 +327,13 @@ export class SlPaginationPrevious extends SlPaginationTrigger {
   protected override defaultLabel = () => this.pagination.labelSet().previous;
 }
 
-@Directive({
+@Component({
   selector: '[slPaginationNext]',
   standalone: true,
   exportAs: 'slPaginationNext',
+  imports: [SlGlyph, SlIcon],
+  template: STEP_TRIGGER_TEMPLATE,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     ...triggerHost,
     'data-part': 'next',
@@ -325,10 +347,13 @@ export class SlPaginationNext extends SlPaginationTrigger {
   protected override defaultLabel = () => this.pagination.labelSet().next;
 }
 
-@Directive({
+@Component({
   selector: '[slPaginationLast]',
   standalone: true,
   exportAs: 'slPaginationLast',
+  imports: [SlGlyph, SlIcon],
+  template: END_TRIGGER_TEMPLATE,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     ...triggerHost,
     'data-part': 'last',
@@ -440,6 +465,7 @@ export class SlPaginationStatus {
 @Component({
   selector: 'sl-pagination-page-size',
   standalone: true,
+  imports: [SlGlyph, SlIcon],
   template: `
     <label data-part="page-size-label">
       <ng-content>{{ pagination.labelSet().pageSize }}</ng-content>
@@ -453,6 +479,7 @@ export class SlPaginationStatus {
           <option [value]="size">{{ size }}</option>
         }
       </select>
+      <span slIcon><svg slGlyph name="chevron-down"></svg></span>
     </label>
   `,
   styleUrls: ['../../../styles/src/pagination/pagination.css'],

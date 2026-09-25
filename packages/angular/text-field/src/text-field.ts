@@ -9,6 +9,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { SlField } from '@slotted/angular/field';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { injectTextFieldDefaults, SlTextFieldControl } from './text-field-defaults';
 import type { TextFieldSize, TextFieldVariant } from './text-field-defaults';
@@ -35,6 +36,7 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
   selector: '[slTextField]',
   standalone: true,
   exportAs: 'slTextField',
+  imports: [SlGlyph, SlIcon],
   template: `<ng-content select="[slTextFieldStart]" />
     <ng-content />
     @if (showClear()) {
@@ -43,7 +45,9 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
         type="button"
         [attr.aria-label]="resolvedClearLabel()"
         (click)="control()!.clear($event)"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="x"></svg></span>
+      </button>
     }
     @if (showReveal()) {
       <button
@@ -52,7 +56,9 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
         [attr.aria-label]="resolvedRevealLabel()"
         [attr.aria-pressed]="control()!.revealed()"
         (click)="control()!.toggleReveal($event)"
-      ></button>
+      >
+        <span slIcon><svg slGlyph [name]="control()!.revealed() ? 'eye-off' : 'eye'"></svg></span>
+      </button>
     }
     <ng-content select="[slTextFieldEnd]" />`,
   styleUrl: '../../../styles/src/text-field/text-field.css',

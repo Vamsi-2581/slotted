@@ -98,11 +98,13 @@ describe('SlAvatar', () => {
     expect(fallbackOf(query('#plain')).textContent?.trim()).toBe('A');
   });
 
-  /** The glyph is a mask in the stylesheet, reached by `:empty`. */
-  it('leaves the fallback empty when there is no name, so the glyph is drawn', () => {
+  it('draws the person glyph when there is no name, and only then', () => {
     const { query } = mount();
 
-    expect(fallbackOf(query('#nameless')).textContent?.trim()).toBe('');
+    const nameless = fallbackOf(query('#nameless'));
+    expect(nameless.textContent?.trim()).toBe('');
+    expect(nameless.querySelector('[data-ui="icon"] > svg[data-glyph="person"]')).not.toBeNull();
+    expect(fallbackOf(query('#plain')).querySelector('[data-glyph]')).toBeNull();
   });
 
   it('renders the projected fallback in place of the initials', () => {
@@ -110,6 +112,7 @@ describe('SlAvatar', () => {
 
     expect(query('#custom').querySelector('#logo')).not.toBeNull();
     expect(fallbackOf(query('#custom')).textContent?.trim()).toBe('');
+    expect(fallbackOf(query('#custom')).querySelector('[data-glyph]')).toBeNull();
   });
 
   it('requests no picture at all when there is none to request', () => {

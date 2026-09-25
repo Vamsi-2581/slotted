@@ -203,6 +203,60 @@ describe('SlEntityPicker', () => {
     expect(asked.length).toBe(before + 1);
   });
 
+  /** Every icon the family owns is a `Glyph` element inside an `Icon` box, never a mask. */
+  describe('glyph elements', () => {
+    const glyph = (scope: ParentNode | null | undefined, part: string) =>
+      scope
+        ?.querySelector(`[data-part='${part}'] > [data-ui='icon'] > svg[data-glyph]`)
+        ?.getAttribute('data-glyph');
+
+    it('draws the cross, the chevron and the tick', async () => {
+      const fixture = await mount((host) => host.initial.set('ana'));
+      expect(glyph(document, 'clear')).toBe('x');
+      expect(glyph(document, 'arrow')).toBe('chevron-down');
+
+      input().focus();
+      type('Ana');
+      await settle(fixture);
+      const chosen = options().find((row) => row.dataset['value'] === 'ana');
+      expect(glyph(chosen, 'indicator')).toBe('check');
+    });
+
+    it('draws the alert mark in the face of an id it cannot resolve', async () => {
+      const fixture = await mount((host) => {
+        host.mode.set('multiple');
+        host.initial.set(['gone']);
+      });
+      await settle(fixture);
+      const chip = document.querySelector("[data-part='chips'] > [data-unresolved]");
+      expect(glyph(chip, 'start')).toBe('circle-alert');
+      expect(glyph(chip, 'remove')).toBe('x');
+    });
+
+    it('draws the alert beside a failure and the turning arrow on the offer to retry', async () => {
+      const { source } = recordingSource(true);
+      const fixture = await mount((host) => host.source.set(source));
+      input().focus();
+      type('ana');
+      await settle(fixture);
+      const error = document.querySelector("[data-part='error']");
+      expect(error?.querySelector("[data-ui='icon'] > svg")?.getAttribute('data-glyph')).toBe(
+        'circle-alert',
+      );
+      expect(glyph(document.querySelector('[data-retry]'), 'media')).toBe('rotate-ccw');
+    });
+
+    it('draws the plus on the offer to create', async () => {
+      const fixture = await mount((host) =>
+        host.maker.set(async (query) => ({ id: 'new', label: query })),
+      );
+      input().focus();
+      type('Zeta');
+      await settle(fixture);
+      expect(glyph(document.querySelector('[data-create]'), 'media')).toBe('plus');
+    });
+  });
+
   it('chooses what it created, with reason submit', async () => {
     const fixture = await mount((host) =>
       host.maker.set(async (query) => ({ id: 'new', label: query })),

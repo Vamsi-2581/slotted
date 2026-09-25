@@ -154,11 +154,42 @@ describe('SlFilterBar', () => {
     expect(part('add').getAttribute('data-ui')).toBe('button');
   });
 
+  /**
+   * The plus before "Add filter" is the button family's own glyph box: in the
+   * label it was a bare svg with no size, drawn at the label's height.
+   */
+  it("draws the add trigger's glyph in the button's start slot", () => {
+    const { part } = setup();
+    const start = part('add').querySelector('[data-part="start"]');
+    expect(start).not.toBeNull();
+    expect(start?.querySelector('[data-ui="icon"] > svg[data-glyph="plus"]')).not.toBeNull();
+    expect(part('add').querySelector(':scope > svg, [data-part="label"] > svg')).toBeNull();
+  });
+
+  /* No stylesheet paints a glyph: each one is an `icon` holding the library's `Glyph`. */
+  it('draws its glyphs as elements: magnifier, chevrons, plus, and a cross on each rule', () => {
+    const { part, parts, settle } = setup();
+    const glyph = (host: Element | null) =>
+      host?.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
+    expect(glyph(part('search'))).toBe('search');
+    expect(parts('pill').map(glyph)).toEqual(['chevron-down', 'chevron-down']);
+    part('summary').click();
+    settle();
+    const builder = document.querySelector(
+      '[data-ui="filter-bar"][data-part="builder"]',
+    ) as HTMLElement;
+    const removes = [...builder.querySelectorAll('[data-part="rule"] > [data-part="remove"]')];
+    expect(removes).toHaveLength(3);
+    expect(removes.map(glyph)).toEqual(['x', 'x', 'x']);
+    expect(glyph(builder.querySelector('[data-part="add-rule"]'))).toBe('plus');
+    expect(glyph(builder.querySelector('[data-part="add-group"]'))).toBe('plus');
+  });
+
   it('draws a pinned field as a pill, filled while it holds a rule, and an unpinned one as a chip', () => {
     const { parts } = setup();
     const pills = parts('pill');
     expect(pills.map((pill) => pill.textContent?.replace(/\s+/g, '').trim())).toEqual([
-      'Statusanyof Paid'.replace(' ', ''),
+      'StatusisPaid',
       'Owner',
     ]);
     expect(pills[0]!.hasAttribute('data-filtered')).toBe(true);
@@ -169,6 +200,37 @@ describe('SlFilterBar', () => {
     expect(chips[0]!.querySelector('[data-part="body"]')?.getAttribute('aria-label')).toBe(
       'Amount: greater than 100',
     );
+    /* The name and the sentence are two runs with a space between them. An
+       Angular template drops a typed space, so the markup writes &ngsp;: the
+       space separates the words of the chip's own accessible name as well as
+       the words on the screen. */
+    expect(chips[0]!.querySelector('[data-part="label"]')?.textContent).toBe(
+      'Amount greater than 100',
+    );
+  });
+
+  /**
+   * A list of one is the equality of that value, so the sentence says so; the
+   * condition is still `anyOf`, and a second value returns the list form.
+   */
+  it('reads a set of one as an equality and a set of two as a list', () => {
+    const { host, parts, settle } = setup();
+    expect(parts('pill')[0]!.textContent?.replace(/\s+/g, '')).toBe('StatusisPaid');
+    host.value.set({
+      join: 'and',
+      rules: [
+        {
+          field: 'status',
+          filter: {
+            kind: 'set',
+            join: 'and',
+            conditions: [{ operator: 'anyOf', value: ['paid', 'refunded'] }],
+          },
+        },
+      ],
+    });
+    settle();
+    expect(parts('pill')[0]!.textContent?.replace(/\s+/g, '')).toBe('StatusanyofPaid,Refunded');
   });
 
   it('holds one tab stop for the bar and one for the chips, with arrows between', () => {
@@ -273,6 +335,16 @@ describe('SlFilterBar', () => {
     part('reset');
   });
 
+  /** With no view chosen the select says so, as the React binding's does; an empty trigger named nothing. */
+  it('draws the preset select with the no-view words while none is chosen', () => {
+    const { host, part, settle } = setup();
+    host.value.set(null);
+    host.presets.set([{ key: 'paid', label: 'Paid orders', value: TREE }]);
+    settle();
+    const trigger = part('preset').querySelector('[data-part="trigger"]') as HTMLElement;
+    expect(trigger.textContent).toContain('No saved view');
+  });
+
   it('chooses a preset with select and marks the bar dirty when the value leaves it', () => {
     const { host, root, part, settle } = setup();
     host.value.set(null);
@@ -291,6 +363,23 @@ describe('SlFilterBar', () => {
     removeOf(root, 'Amount').click();
     settle();
     expect(root.hasAttribute('data-dirty')).toBe(true);
+  });
+
+  /** Leaving a view is the select's own clear; without it the one way out was deleting the view. */
+  it('leaves a chosen preset through the select clear and keeps the value standing', () => {
+    const { host, part, settle } = setup();
+    host.value.set(null);
+    host.presets.set([{ key: 'paid', label: 'Paid orders', value: TREE }]);
+    host.preset.set('paid');
+    settle();
+    const clear = part('preset').querySelector('[data-part="clear"]') as HTMLElement;
+    expect(clear).toBeTruthy();
+    clear.click();
+    settle();
+    const last = host.onPreset.mock.calls.at(-1)![0];
+    expect(last.value).toBe(null);
+    expect(last.reason).toBe('clear');
+    expect(host.onValue.mock.calls.length).toBe(0);
   });
 
   it('folds the chips past the limit and reveals them on request', () => {
@@ -326,11 +415,16 @@ describe('SlFilterBar', () => {
     settle();
     expect(part('chip').hasAttribute('data-invalid')).toBe(true);
     expect(part('chip').querySelector('[data-part="body"]')?.getAttribute('aria-label')).toBe(
-      'Unknown field region: any of south',
+      'Unknown field region: is south',
     );
     removeOf(root, 'region').click();
     settle();
     expect(host.value()).toBeNull();
+  });
+
+  it('keeps the space between the summary word and its count', () => {
+    const { part } = setup();
+    expect(part('summary').textContent?.trim()).toMatch(/^\S+ \(\d+\)$/);
   });
 
   it('opens the builder from the summary control, draws the tree, and applies with submit', () => {
@@ -451,10 +545,10 @@ describe('SlFilterBar', () => {
     expect(root.querySelector('[data-part="chips"]')?.hasAttribute('data-revealed')).toBe(false);
   });
   it('under sticky reads the page offset for itself and publishes the sum for what follows, once', () => {
-    let notify: (() => void) | undefined;
+    const notify: (() => void)[] = [];
     class Observer {
       constructor(callback: () => void) {
-        notify = callback;
+        notify.push(callback);
       }
       observe() {}
       disconnect() {}
@@ -478,14 +572,102 @@ describe('SlFilterBar', () => {
       fixture.detectChanges();
       const parent = fixture.nativeElement.firstElementChild as HTMLElement;
       const root = parent.firstElementChild as HTMLElement;
-      notify?.();
-      notify?.();
+      notify.forEach((callback) => callback());
+      notify.forEach((callback) => callback());
       expect(root.style.getPropertyValue('--slotted-page-sticky-top')).toBe('56px');
       expect(parent.style.getPropertyValue('--slotted-page-sticky-top')).toBe('calc(56px + 48px)');
       fixture.destroy();
       expect(parent.style.getPropertyValue('--slotted-page-sticky-top')).toBe('56px');
     } finally {
       height.mockRestore();
+      vi.unstubAllGlobals();
+    }
+  });
+  /**
+   * A stand-in for the layout jsdom does not do. Without `data-bar-wrapped`
+   * on the root the bar is drawn in the wide composition, and when `wraps` is
+   * true every control after the second starts a second line there; with the
+   * attribute the bar has a line of its own and every control fits on it.
+   */
+  function stubBarLayout(wraps: { current: boolean }) {
+    return vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      const bar = this.parentElement;
+      if (bar?.getAttribute('data-part') !== 'bar') return { height: 0, width: 0 } as DOMRect;
+      const wide = !bar.closest('[data-ui="filter-bar"]')?.hasAttribute('data-bar-wrapped');
+      const second = wide && wraps.current && [...bar.children].indexOf(this) > 1;
+      const top = second ? 42 : 0;
+      return { bottom: top + 34, height: 34, top, width: 80 } as DOMRect;
+    });
+  }
+
+  function mountBar() {
+    @Component({
+      imports: [SlFilterBar],
+      template: `<div slFilterBar [fields]="fields"></div>`,
+    })
+    class Plain {
+      readonly fields = FIELDS;
+    }
+    TestBed.configureTestingModule({ imports: [Plain] });
+    const fixture = TestBed.createComponent(Plain);
+    fixture.detectChanges();
+    return fixture.nativeElement.firstElementChild as HTMLElement;
+  }
+
+  it('gives the bar a line of its own when its controls would wrap beside the search', () => {
+    const layout = stubBarLayout({ current: true });
+    try {
+      expect(mountBar().hasAttribute('data-bar-wrapped')).toBe(true);
+    } finally {
+      layout.mockRestore();
+    }
+  });
+
+  it('keeps the one-line composition while the controls fit beside the search', () => {
+    const layout = stubBarLayout({ current: false });
+    try {
+      expect(mountBar().hasAttribute('data-bar-wrapped')).toBe(false);
+    } finally {
+      layout.mockRestore();
+    }
+  });
+
+  /**
+   * The bar fits on its own line, and it would wrap beside the search: the
+   * decision is read in the one-line composition whichever one is drawn, so a
+   * resize that finds the fallback in place keeps it, and only a bar that
+   * fits beside the search again gives it up.
+   */
+  it('decides from the one-line composition, so the fallback holds until the bar fits there', () => {
+    const notify: (() => void)[] = [];
+    class Observer {
+      constructor(callback: () => void) {
+        notify.push(callback);
+      }
+      observe() {}
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', Observer);
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+      callback(0);
+      return 0;
+    });
+    vi.stubGlobal('cancelAnimationFrame', () => {});
+    const wraps = { current: true };
+    const layout = stubBarLayout(wraps);
+    try {
+      const root = mountBar();
+      for (let frame = 0; frame < 3; frame += 1) {
+        notify.forEach((callback) => callback());
+        expect(root.hasAttribute('data-bar-wrapped')).toBe(true);
+      }
+      wraps.current = false;
+      notify.forEach((callback) => callback());
+      expect(root.hasAttribute('data-bar-wrapped')).toBe(false);
+    } finally {
+      layout.mockRestore();
       vi.unstubAllGlobals();
     }
   });

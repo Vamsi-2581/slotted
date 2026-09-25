@@ -21,6 +21,7 @@ import {
 import type { OnInit } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor } from '@angular/forms';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 import { SlVisuallyHidden } from '@slotted/angular/visually-hidden';
 
@@ -73,7 +74,7 @@ export function activationReason(activation: { detail: number; isTrusted: boolea
   selector: '[slSwitch]',
   standalone: true,
   exportAs: 'slSwitch',
-  imports: [SlVisuallyHidden],
+  imports: [SlGlyph, SlIcon, SlVisuallyHidden],
   template: `<input
       #control
       data-part="control"
@@ -94,7 +95,12 @@ export function activationReason(activation: { detail: number; isTrusted: boolea
       (click)="onClick($event)"
       (blur)="onBlur()"
     />
-    <span data-part="track"><span data-part="thumb"></span></span>
+    <span data-part="track"
+      ><span data-part="thumb">
+        @if (resolvedIndicator() === 'mark') {
+          <span slIcon><svg slGlyph name="check"></svg></span>
+        }</span
+    ></span>
     <label data-part="label" [attr.for]="controlId"><ng-content /></label>
     <ng-content select="[slSwitchDescription]" />
     <span slVisuallyHidden role="status" [attr.id]="pendingId">{{ announcement() }}</span>`,

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/listbox/contract.json';
@@ -10,6 +11,7 @@ import type { ListboxActiveRequest, ListboxChangeRequest } from './listbox';
 import {
   SlListboxEmpty,
   SlListboxGroup,
+  SlListboxIcon,
   SlListboxIndicator,
   SlListboxLabel,
   SlListboxLoader,
@@ -30,9 +32,12 @@ const CITIES = [
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    SlGlyph,
+    SlIcon,
     SlListbox,
     SlListboxEmpty,
     SlListboxGroup,
+    SlListboxIcon,
     SlListboxIndicator,
     SlListboxLabel,
     SlListboxLoader,
@@ -115,6 +120,27 @@ describe('SlListbox, identity and wiring', () => {
     expect(box(fixture).getAttribute('role')).toBe('listbox');
     expect(options(fixture)).toHaveLength(5);
     expect(options(fixture)[0]?.getAttribute('role')).toBe('option');
+  });
+
+  /** The option's own artwork is content the column holds; no stylesheet fills it. */
+  it('holds the artwork it is given in the icon column', () => {
+    const fixture = renderTemplate(`<div slListbox aria-label="Region">
+      <div slListboxOption value="europe">
+        <span slListboxIcon><span slIcon><svg slGlyph name="dot"></svg></span></span>
+        <span slListboxLabel>europe</span>
+      </div>
+    </div>`);
+    const mark = byKey(fixture, 'europe').querySelector(
+      '[data-part="icon"] > [data-ui="icon"] > svg',
+    );
+    expect(mark?.getAttribute('data-glyph')).toBe('dot');
+  });
+
+  /** The tick is an element, not a mask: an svg glyph inside the icon box. */
+  it('draws the tick as a check glyph inside the indicator', () => {
+    const fixture = renderTemplate(`<div slListbox aria-label="Region">${OPTIONS}</div>`);
+    const indicator = options(fixture)[0]?.querySelector('[data-part="indicator"]');
+    expect(indicator?.querySelector('[data-ui="icon"] > svg[data-glyph="check"]')).not.toBeNull();
   });
 
   it('declares the axes it was given, so a stylesheet can reach every one', () => {

@@ -8,6 +8,7 @@ import {
   input,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import {
   STEP_REPEAT_DELAY,
   STEP_REPEAT_DELAY_COARSE,
@@ -56,6 +57,7 @@ export type {
   selector: '[slCurrencyField]',
   standalone: true,
   exportAs: 'slCurrencyField',
+  imports: [SlGlyph, SlIcon],
   template: `@if (resolvedStepper() === 'split') {
       <button
         data-part="decrement"
@@ -68,7 +70,9 @@ export type {
         (pointerup)="release()"
         (pointerleave)="release()"
         (pointercancel)="release()"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="minus"></svg></span>
+      </button>
     }
     <ng-content select="[slCurrencyFieldStart]" />
     <ng-content />
@@ -85,7 +89,9 @@ export type {
         (pointerup)="release()"
         (pointerleave)="release()"
         (pointercancel)="release()"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="plus"></svg></span>
+      </button>
     } @else if (resolvedStepper() === 'stacked') {
       <span data-part="stepper">
         <button
@@ -99,7 +105,11 @@ export type {
           (pointerup)="release()"
           (pointerleave)="release()"
           (pointercancel)="release()"
-        ></button>
+        >
+          <!-- Both halves draw the down chevron; the stylesheet turns the
+               increment's half a turn. -->
+          <span slIcon><svg slGlyph name="chevron-down"></svg></span>
+        </button>
         <button
           data-part="decrement"
           type="button"
@@ -111,7 +121,9 @@ export type {
           (pointerup)="release()"
           (pointerleave)="release()"
           (pointercancel)="release()"
-        ></button>
+        >
+          <span slIcon><svg slGlyph name="chevron-down"></svg></span>
+        </button>
       </span>
     }
     @if (control()?.submissionName(); as submissionName) {

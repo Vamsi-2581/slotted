@@ -13,6 +13,8 @@ import {
   TemplateRef,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import type { GlyphName } from '@slotted/angular/icon';
 
 import { SlCollapsible } from './collapsible';
 
@@ -72,8 +74,11 @@ export class SlCollapsibleHeader {
   selector: 'button[slCollapsibleTrigger]',
   standalone: true,
   exportAs: 'slCollapsibleTrigger',
+  imports: [SlGlyph, SlIcon],
   template: `@if (collapsible.resolvedIndicator() !== 'none') {
-      <span data-part="indicator" aria-hidden="true"></span>
+      <span data-part="indicator" aria-hidden="true"
+        ><span slIcon><svg slGlyph [name]="indicatorGlyph()"></svg></span
+      ></span>
     }
     <span data-part="label"><ng-content /></span>
     @if (description()) {
@@ -100,6 +105,15 @@ export class SlCollapsibleTrigger {
    * the accessible name — "Entrega, 3 de 12 itens" is what a reader hears.
    */
   readonly description = input<string | undefined>(undefined);
+
+  /**
+   * The chevron is one glyph the stylesheet turns; plus and minus are two, so
+   * the state picks between them here.
+   */
+  protected readonly indicatorGlyph = computed<GlyphName>(() => {
+    if (this.collapsible.resolvedIndicator() !== 'plus-minus') return 'chevron-down';
+    return this.collapsible.isOpen() ? 'minus' : 'plus';
+  });
 
   protected ids() {
     return this.collapsible.ids();

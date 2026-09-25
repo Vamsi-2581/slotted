@@ -100,7 +100,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: true,
     purpose:
-      'The chevron inside the trigger, drawn as a mask from the glyph scale and turned over while the popup is open.',
+      'The chevron inside the trigger, a `Glyph` inside an `Icon` box, turned over while the popup is open.',
   },
   {
     part: 'positioner',
@@ -839,7 +839,13 @@ const api: ApiRow[] = apiRows([
   ],
   ['disabled', 'boolean', '—', 'sl-multi-select-item', 'Whether the option can be taken.'],
   ['description', 'string', '—', 'sl-multi-select-item', 'A second line under the label.'],
-  ['icon', 'string', '—', 'sl-multi-select-item', 'The mark in the option’s first column.'],
+  [
+    'icon',
+    'GlyphName',
+    '—',
+    'sl-multi-select-item',
+    'The glyph drawn in the option’s first column, as a Glyph inside an Icon box.',
+  ],
   [
     'position',
     'number',

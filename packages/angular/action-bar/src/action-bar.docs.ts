@@ -561,7 +561,9 @@ export const ANGULAR_ACTION_BAR_DOCS = {
       <button>Aprovar</button>
     </div>
     <button data-part="overflow" type="button" aria-label="1 more action">
-      <span aria-hidden="true"></span>
+      <span data-ui="icon" data-part="root" aria-hidden="true">
+        <svg data-part="glyph" data-glyph="ellipsis"></svg>
+      </span>
     </button>
   </div>
 </footer>`,

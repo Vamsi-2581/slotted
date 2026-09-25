@@ -66,6 +66,7 @@ export class SlMenuTrigger {
 
   constructor() {
     const destroyRef = inject(DestroyRef);
+    this.item?.opensSubmenu.set(true);
 
     /* The menu is told which control anchors it, and a bar is told which
        trigger answers to which menu, both as soon as the input resolves. */

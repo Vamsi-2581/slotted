@@ -188,7 +188,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'states',
     title: 'Every state the family paints',
-    note: 'A tab that is not selected raises its ink on hover and fills on press; a selected one does neither, because it is already at full strength. Disabled is the native attribute, which is also what makes the browser skip it.',
+    note: 'A tab that is not selected raises its ink on hover. In the line variant a neutral bar appears where the mark would go and darkens on press; in the contained variant the cell fills instead. A selected one does neither, because it is already at full strength. Disabled is the native attribute, which is also what makes the browser skip it.',
     snippet: defineSnippet({
       id: 'tabs-angular-states',
       language: 'angular',

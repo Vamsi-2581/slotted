@@ -15,11 +15,26 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import type { GlyphName } from '@slotted/angular/icon';
 
 import { injectAlertDefaults, SlAlertIdFactory } from './alert-defaults';
 import type { AlertLive, AlertReach, AlertTone, AlertVariant } from './alert-defaults';
 
 export type { AlertLive, AlertReach, AlertTone, AlertVariant } from './alert-defaults';
+
+/**
+ * The glyph each tone draws, in its solid form: `specs/components/alert/contract.json`
+ * holds the map. Every one is circled, so every mark is the same disc and the
+ * symbol cut out of it tells the five apart.
+ */
+const TONE_GLYPH: Record<AlertTone, GlyphName> = {
+  accent: 'circle-info',
+  secondary: 'circle',
+  success: 'circle-check',
+  warning: 'circle-alert',
+  danger: 'circle-x',
+};
 
 /**
  * Why the message closed. `dismiss` is the control at its corner;
@@ -52,8 +67,12 @@ export type AlertCloseReason = 'dismiss' | 'programmatic';
   selector: '[slAlert]',
   standalone: true,
   exportAs: 'slAlert',
+  imports: [SlGlyph, SlIcon],
   template: `@if (!hideIcon()) {
-      <span aria-hidden="true" data-part="icon"><ng-content select="[slAlertIcon]" /></span>
+      <span aria-hidden="true" data-part="icon"
+        ><ng-content select="[slAlertIcon]"
+          ><span slIcon><svg slGlyph [name]="glyph()" solid></svg></span></ng-content
+      ></span>
     }
     <ng-content />
     @if (dismissible()) {
@@ -62,7 +81,9 @@ export type AlertCloseReason = 'dismiss' | 'programmatic';
         data-part="dismiss"
         [attr.aria-label]="resolvedDismissLabel()"
         (click)="onDismiss($event)"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="x"></svg></span>
+      </button>
     }`,
   styleUrl: '../../../styles/src/alert/alert.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -143,6 +164,7 @@ export class SlAlert {
   private holdsFocus = false;
 
   protected readonly resolvedTone = computed(() => this.tone() ?? this.defaults.tone);
+  protected readonly glyph = computed(() => TONE_GLYPH[this.resolvedTone()]);
   protected readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   protected readonly resolvedReach = computed(() => this.reach() ?? this.defaults.reach);
   readonly resolvedLive = computed(() => this.live() ?? this.defaults.live);

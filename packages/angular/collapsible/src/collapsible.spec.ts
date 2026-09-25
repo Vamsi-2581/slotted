@@ -110,6 +110,28 @@ describe('SlCollapsible', () => {
     expect(panel().getAttribute('aria-labelledby')).toBe(trigger().getAttribute('id'));
   });
 
+  /** The mark is the Glyph element, chosen from the indicator and the state. */
+  it('draws the indicator glyph the indicator and the state select', () => {
+    const glyph = () =>
+      fixture.nativeElement
+        .querySelector('[data-part="indicator"] > [data-ui="icon"] > svg[data-glyph]')
+        ?.getAttribute('data-glyph');
+
+    expect(glyph()).toBe('chevron-down');
+    click();
+    expect(glyph()).toBe('chevron-down');
+
+    host.indicator.set('plus-minus');
+    fixture.detectChanges();
+    expect(glyph()).toBe('minus');
+    click();
+    expect(glyph()).toBe('plus');
+
+    host.indicator.set('none');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-part="indicator"]')).toBeNull();
+  });
+
   it('toggles from the platform, and reports which device asked', () => {
     click(1);
     expect(host.open()).toBe(true);

@@ -13,6 +13,7 @@ import {
 } from '@slotted/core/extent';
 import { createControllable } from '@slotted/core/state';
 import {
+  afterNextRender,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
@@ -166,21 +167,25 @@ export class SlSplitter {
 
   constructor() {
     /**
-     * Guarded, because this constructor runs on the server too: Angular builds
-     * the component during a server render and `ResizeObserver` is not there.
-     * Unguarded, every page carrying a splitter threw before it rendered a
+     * Guarded, because `ResizeObserver` is absent from a server render and from
+     * jsdom. Unguarded, every page carrying a splitter threw before it rendered a
      * character — which is what the first run of `splitter.spec.ts` reported,
      * eighteen failures deep, all from this one line.
      *
-     * Nothing is lost by its absence. The limits are recomputed whenever the
-     * value moves, and a server render has no pointer to move it with.
+     * The container is read after the first render, not here: a bar that is the
+     * first node of an `@if` or `@for` block is built before the block is placed
+     * in the document, so its parent is still null in the constructor, and its
+     * limits kept the measure of whatever box they were first computed against.
+     * A render the server does never runs this, and has no pointer to move the
+     * bar with.
      */
-    const container = this.element.parentElement;
-    const observer =
-      typeof ResizeObserver === 'undefined'
-        ? null
-        : new ResizeObserver(() => this.measured.update((count) => count + 1));
-    if (observer !== null && container !== null) observer.observe(container);
+    let observer: ResizeObserver | null = null;
+    afterNextRender(() => {
+      const container = this.container();
+      if (typeof ResizeObserver === 'undefined' || container === null) return;
+      observer = new ResizeObserver(() => this.measured.update((count) => count + 1));
+      observer.observe(container);
+    });
 
     this.destroyRef.onDestroy(() => {
       observer?.disconnect();

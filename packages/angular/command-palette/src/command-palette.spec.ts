@@ -191,6 +191,23 @@ describe('SlCommandPalette', () => {
     expect(host.selected.length).toBe(1);
   });
 
+  /** The family's own marks are Glyph elements; the page chevron mirrors in a right-to-left document. */
+  it('draws the search, clear and arrow marks as glyphs', () => {
+    const glyph = (scope: Element, selector: string) =>
+      scope
+        .querySelector(`${selector} > [data-ui="icon"] > svg[data-glyph]`)
+        ?.getAttribute('data-glyph');
+    expect(glyph(fixture.nativeElement, '[data-part="search"]')).toBe('search');
+    expect(glyph(fixture.nativeElement, '[data-part="clear"]')).toBe('x');
+    const team = options().find((o) => o.textContent?.includes('Switch team')) as HTMLElement;
+    expect(glyph(team, '[data-part="arrow"]')).toBe('chevron-right');
+    expect(
+      team
+        .querySelector('[data-part="arrow"] > [data-ui="icon"]')
+        ?.hasAttribute('data-directional'),
+    ).toBe(true);
+  });
+
   it('opens a page on an item with children, draws the trail, and returns on Backspace', () => {
     const team = options().find((o) => o.textContent?.includes('Switch team')) as HTMLElement;
     expect(team.hasAttribute('data-page')).toBe(true);
@@ -340,6 +357,19 @@ describe('SlCommandPalette in a dialog', () => {
     ).not.toBeNull();
   });
 
+  /**
+   * A palette opens on its field: the reader pressed a control to search, and
+   * a second press to reach the box is the press they already made.
+   */
+  it('puts the caret in the field when it opens from its trigger', () => {
+    const trigger = fixture.nativeElement.querySelector(
+      '[data-part="trigger"]',
+    ) as HTMLButtonElement;
+    trigger.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(document.querySelector('[role="combobox"]'));
+  });
+
   it('opens on the hotkey and closes with Escape in steps', () => {
     key(document.body, 'k', { ctrlKey: true });
     fixture.detectChanges();
@@ -357,6 +387,23 @@ describe('SlCommandPalette in a dialog', () => {
     fixture.detectChanges();
     expect(host.open()).toBe(false);
     expect(host.openRequests.at(-1)?.reason).toBe('escape');
+  });
+
+  /**
+   * The way out where the scrim is not. The part is in the DOM whenever the
+   * palette is a dialog; the stylesheet decides when it is seen.
+   */
+  it('closes from the close part with the reason dismiss', () => {
+    key(document.body, 'k', { ctrlKey: true });
+    fixture.detectChanges();
+    const close = document.querySelector(
+      '[data-ui="command-palette"] [data-part="close"]',
+    ) as HTMLButtonElement;
+    expect(close.textContent?.trim()).toBe('Close');
+    close.click();
+    fixture.detectChanges();
+    expect(host.open()).toBe(false);
+    expect(host.openRequests.at(-1)?.reason).toBe('dismiss');
   });
 
   it('turns the hotkey off with null', () => {

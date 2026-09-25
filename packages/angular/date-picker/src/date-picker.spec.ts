@@ -137,6 +137,13 @@ describe('what the trigger says', () => {
     expect(label).toContain('Alterar data');
     expect(label).toContain('setembro');
   });
+
+  /** The mark is a `Glyph` element inside an `Icon` box, never a mask. */
+  it('draws the calendar as a glyph element', () => {
+    const fixture = renderTemplate(`<div slDatePicker locale="pt-BR"></div>`);
+    const mark = trigger(fixture).querySelector("[data-ui='icon'] > svg[data-glyph]");
+    expect(mark?.getAttribute('data-glyph')).toBe('calendar');
+  });
 });
 
 describe('opening and closing', () => {

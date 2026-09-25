@@ -150,6 +150,36 @@ describe('SlCombobox', () => {
     });
   });
 
+  /** Every icon the family owns is a `Glyph` element inside an `Icon` box, never a mask. */
+  describe('the glyph elements', () => {
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({ imports: [BoundHost] }).compileComponents();
+    });
+
+    it('draws the chevron, the cross and the tick as glyph elements', async () => {
+      const fixture = TestBed.createComponent(BoundHost);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const glyph = (part: string) =>
+        document.querySelector(`[data-part='${part}'] > [data-ui='icon'] > svg[data-glyph]`);
+      expect(glyph('arrow')?.getAttribute('data-glyph')).toBe('chevron-down');
+
+      /* The cross stands only while there is text to clear. */
+      field().focus();
+      field().value = 'Blue';
+      field().dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      expect(glyph('clear')?.getAttribute('data-glyph')).toBe('x');
+
+      const chosen = document.querySelector("[data-part='item'][data-selected]");
+      const tick = chosen?.querySelector("[data-part='indicator'] > [data-ui='icon'] > svg");
+      expect(tick?.getAttribute('data-glyph')).toBe('check');
+    });
+  });
+
   /**
    * CB7. The default refuses text that matched no option: the field goes back
    * to the committed value and says what it refused. `allowsCustomValue` takes
@@ -322,5 +352,38 @@ describe('SlCombobox', () => {
       expect(combobox.value()).toBe('blueberry');
       expect(bound.componentInstance.value).toBe('blueberry');
     });
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlCombobox, SlComboboxItem],
+  template: `
+    <sl-combobox aria-label="Reviewer" [portal]="false">
+      <sl-combobox-item value="amanda" label="Amanda Okoro" icon="person" />
+      <sl-combobox-item value="norman" label="Norman Vaz" />
+    </sl-combobox>
+  `,
+})
+class IconHost {}
+
+/** The first column holds the glyph the icon input names; no stylesheet fills it. */
+describe('SlCombobox, the icon column', () => {
+  it('draws the named glyph in the first column, and prints no name there', async () => {
+    await TestBed.configureTestingModule({ imports: [IconHost] }).compileComponents();
+    const fixture = TestBed.createComponent(IconHost);
+    fixture.detectChanges();
+    field().focus();
+    field().dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowDown' }));
+    fixture.detectChanges();
+
+    const item = (value: string) =>
+      document.querySelector(`[data-part='item'][data-value='${value}']`);
+    const column = item('amanda')?.querySelector("[data-part='icon']");
+    expect(column?.querySelector("[data-ui='icon'] > svg")?.getAttribute('data-glyph')).toBe(
+      'person',
+    );
+    expect(column?.textContent?.trim()).toBe('');
+    expect(item('norman')?.querySelector("[data-part='icon']")).toBeNull();
   });
 });

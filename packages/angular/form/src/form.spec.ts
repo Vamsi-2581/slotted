@@ -189,6 +189,18 @@ describe('SlForm', () => {
 
     expect(actions.getAttribute('data-align')).toBe('end');
   });
+
+  /**
+   * The stylesheet names the two parts by the family's identifier, so a nested
+   * family's part of the same name — a table's summary row, a section's
+   * actions — is not painted as the form's.
+   */
+  it('names its summary and its action row by the family, so a nested family’s parts keep their own look', () => {
+    const fixture = mount({ errors: { name: 'Informe seu nome' } });
+    expect(summaryOf(fixture)?.getAttribute('data-ui')).toBe(contract.ui);
+    const actions = fixture.nativeElement.querySelector('[data-part="actions"]') as HTMLElement;
+    expect(actions.getAttribute('data-ui')).toBe(contract.ui);
+  });
 });
 
 describe('SlForm defaults', () => {

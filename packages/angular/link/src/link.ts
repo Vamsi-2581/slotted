@@ -12,6 +12,7 @@ import {
   Renderer2,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { injectLinkDefaults } from './link-defaults';
 import {
@@ -41,6 +42,7 @@ import {
 @Component({
   selector: 'a[slLink]',
   standalone: true,
+  imports: [SlGlyph, SlIcon],
   /**
    * The joiner is a text node of its own, before the marker and outside it:
    * what it forbids is the line break between the last word of the link and
@@ -48,10 +50,11 @@ import {
    * load-bearing — Angular collapses a newline between two nodes into one
    * space, and a space before the joiner puts back exactly the break the
    * joiner exists to forbid. The formatter is told to leave it alone, and
-   * `link.spec.ts` asserts the rendered text in case it stops listening.
+   * `link.spec.ts` asserts the rendered text in case it stops listening. The
+   * arrow mirrors in a right-to-left document, which is what `directional` is.
    */
   // prettier-ignore
-  template: `<ng-content></ng-content>@if (newTab()) {&#8288;<span aria-hidden="true" data-part="external-icon"></span><span data-part="external-hint" data-ui="visually-hidden">{{ hint() }}</span>&#8288;}`,
+  template: `<ng-content></ng-content>@if (newTab()) {&#8288;<span aria-hidden="true" data-part="external-icon"><span slIcon directional><svg slGlyph name="external"></svg></span></span><span data-part="external-hint" data-ui="visually-hidden">{{ hint() }}</span>&#8288;}`,
   styleUrls: [
     '../../../styles/src/link/link.css',
     '../../../styles/src/visually-hidden/visually-hidden.css',

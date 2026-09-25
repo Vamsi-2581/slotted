@@ -21,6 +21,7 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlDialog, SlDialogTitle } from '@slotted/angular/dialog';
 import type { DialogChangeRequest, DialogDismissPolicy } from '@slotted/angular/dialog';
@@ -127,7 +128,7 @@ export class SlCommandPaletteEmpty {
   exportAs: 'slCommandPalette',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [NgTemplateOutlet, SlDialog, SlDialogTitle, SlHighlight, SlShortcut],
+  imports: [NgTemplateOutlet, SlDialog, SlDialogTitle, SlGlyph, SlHighlight, SlIcon, SlShortcut],
   styleUrls: [
     '../../../styles/src/command-palette/command-palette.css',
     '../../../styles/src/skeleton/skeleton.css',
@@ -174,12 +175,18 @@ export class SlCommandPaletteEmpty {
           @if (loading()) {
             <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
           } @else {
-            <span data-part="search" aria-hidden="true"></span>
+            <span data-part="search" aria-hidden="true"
+              ><span slIcon><svg slGlyph name="search"></svg></span
+            ></span>
           }
           @if (rows().trail.length > 0) {
             <ol data-part="pages" [attr.aria-label]="resolvedBackLabel()">
               @for (entry of rows().trail; track entry.id; let index = $index) {
                 <li>
+                  <!-- The chevron between two pages, mirrored in a right-to-left document. -->
+                  @if (index > 0) {
+                    <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
+                  }
                   <button data-part="page" type="button" (click)="returnTo(index, $event)">
                     <span>{{ entry.label }}</span>
                   </button>
@@ -212,7 +219,16 @@ export class SlCommandPaletteEmpty {
             tabindex="-1"
             [attr.aria-label]="resolvedClearLabel()"
             (click)="clear($event)"
-          ></button>
+          >
+            <span slIcon><svg slGlyph name="x"></svg></span>
+          </button>
+          @if (!inline()) {
+            <!-- The way out where the scrim is not: shown by the stylesheet
+                 under the dialog's full-screen query alone. -->
+            <button data-part="close" type="button" (click)="setOpen(false, 'dismiss', $event)">
+              {{ resolvedCloseLabel() }}
+            </button>
+          }
         </div>
 
         <div
@@ -391,7 +407,10 @@ export class SlCommandPaletteEmpty {
           </span>
         }
         @if (item.children) {
-          <span data-part="arrow" aria-hidden="true"></span>
+          <!-- The mark that says the item opens a page, mirrored in a right-to-left document. -->
+          <span data-part="arrow" aria-hidden="true"
+            ><span slIcon directional><svg slGlyph name="chevron-right"></svg></span
+          ></span>
         }
         @if (pending().has(item.id)) {
           <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
@@ -456,6 +475,7 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
   readonly countLabel = input<string | undefined>(undefined);
   readonly recentLabel = input<string | undefined>(undefined);
   readonly clearLabel = input<string | undefined>(undefined);
+  readonly closeLabel = input<string | undefined>(undefined);
   readonly backLabel = input<string | undefined>(undefined);
   readonly hintNavigate = input<string | undefined>(undefined);
   readonly hintSelect = input<string | undefined>(undefined);
@@ -536,6 +556,9 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
   );
   protected readonly resolvedClearLabel = computed(
     () => this.clearLabel() ?? this.defaults.clearLabel,
+  );
+  protected readonly resolvedCloseLabel = computed(
+    () => this.closeLabel() ?? this.defaults.closeLabel,
   );
   protected readonly resolvedBackLabel = computed(
     () => this.backLabel() ?? this.defaults.backLabel,

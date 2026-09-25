@@ -63,7 +63,8 @@ const anatomy: AnatomyRow[] = [
     part: 'indicator',
     element: 'span',
     required: false,
-    purpose: 'The trigger’s chevron, a mask from the glyph token, turned half a turn while open.',
+    purpose:
+      'The trigger’s chevron: the chevron-down Glyph element in an icon box, turned half a turn while open.',
   },
   {
     part: 'panel',

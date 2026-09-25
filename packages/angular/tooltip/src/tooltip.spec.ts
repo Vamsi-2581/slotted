@@ -21,6 +21,7 @@ import {
       slTooltip
       [(open)]="open"
       [describes]="describes()"
+      [whenClipped]="whenClipped()"
       [disabled]="disabled()"
       [openDelay]="openDelay()"
       [closeDelay]="closeDelay()"
@@ -37,7 +38,8 @@ import {
 })
 class Host {
   readonly open = signal(false);
-  readonly describes = signal<'description' | 'label'>('description');
+  readonly describes = signal<'description' | 'label' | 'none'>('description');
+  readonly whenClipped = signal(false);
   readonly disabled = signal(false);
   readonly openDelay = signal(0);
   readonly closeDelay = signal(0);
@@ -119,6 +121,46 @@ describe('SlTooltip', () => {
     await settle(fixture);
     expect(trigger(fixture).getAttribute('aria-labelledby')).toBe(hint()?.id);
     expect(trigger(fixture).getAttribute('aria-describedby')).toBeNull();
+  });
+
+  /**
+   * The hint over a name cut by its box, and nothing over a name that fits. The
+   * measurement is taken when the hint would open rather than watched, so the
+   * same trigger answers differently after its column is dragged wider.
+   */
+  it('opens over a cut name alone under whenClipped', async () => {
+    const measure = (element: Element, sizes: { client: number; scroll: number }) => {
+      Object.defineProperty(element, 'clientWidth', { configurable: true, value: sizes.client });
+      Object.defineProperty(element, 'scrollWidth', { configurable: true, value: sizes.scroll });
+    };
+
+    fixture.componentInstance.whenClipped.set(true);
+    await settle(fixture);
+    /* jsdom does not expand the `overflow` shorthand, so the axis is written. */
+    trigger(fixture).style.overflowX = 'hidden';
+
+    measure(trigger(fixture), { client: 120, scroll: 120 });
+    trigger(fixture).dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    await settle(fixture);
+    expect(layer()).toBeNull();
+
+    measure(trigger(fixture), { client: 48, scroll: 120 });
+    trigger(fixture).dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    await settle(fixture);
+    expect(hint()?.textContent).toBe('Saves without publishing');
+  });
+
+  /**
+   * A hint that repeats words the trigger already carries — the full name of a
+   * column whose header is clipped — is read twice under either reference.
+   */
+  it('references nothing and hides the hint under none', async () => {
+    fixture.componentInstance.describes.set('none');
+    fixture.componentInstance.open.set(true);
+    await settle(fixture);
+    expect(trigger(fixture).getAttribute('aria-describedby')).toBeNull();
+    expect(trigger(fixture).getAttribute('aria-labelledby')).toBeNull();
+    expect(hint()?.getAttribute('aria-hidden')).toBe('true');
   });
 
   /**

@@ -13,6 +13,7 @@ import {
   ViewEncapsulation,
   viewChild,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlMenu, SlMenuSeparator, SlMenuTrigger } from '@slotted/angular/menu';
 import type { MenuAlign, MenuSide, MenuSize } from '@slotted/angular/menu';
 
@@ -55,7 +56,7 @@ import type { ToolbarOverflowLabel } from './toolbar';
   selector: 'sl-toolbar-overflow',
   standalone: true,
   exportAs: 'slToolbarOverflow',
-  imports: [NgTemplateOutlet, SlMenu, SlMenuSeparator, SlMenuTrigger],
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon, SlMenu, SlMenuSeparator, SlMenuTrigger],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: { style: 'display: contents' },
@@ -67,7 +68,7 @@ import type { ToolbarOverflowLabel } from './toolbar';
       [slMenuTriggerFor]="surface"
       [attr.aria-label]="name()"
     >
-      <span aria-hidden="true"></span>
+      <span slIcon><svg slGlyph name="ellipsis"></svg></span>
     </button>
     <sl-menu #surface [align]="align()" [side]="side()" [size]="size()">
       @for (unit of toolbar.collapsedUnits(); track unit.id) {

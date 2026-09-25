@@ -121,7 +121,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      'The trigger’s chevron, drawn from a glyph token: along the reading direction while closed, down while open, mirrored in a right-to-left document.',
+      'The trigger’s chevron, the chevron-right Glyph element in a directional icon box: along the reading direction while closed, down while open, mirrored in a right-to-left document.',
   },
   {
     part: 'actions',
@@ -374,11 +374,13 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'side-navigation-angular-loading',
       language: 'angular',
       label: 'Three rows on their way',
-      source: `<ul slSideNavigationList aria-busy="true">
-  <li slSideNavigationSkeleton labelSize="55%"></li>
-  <li slSideNavigationSkeleton labelSize="70%"></li>
-  <li slSideNavigationSkeleton labelSize="45%"></li>
-</ul>`,
+      source: `<nav slSideNavigation aria-busy="true">
+  <ul slSideNavigationList>
+    <li slSideNavigationSkeleton labelSize="55%"></li>
+    <li slSideNavigationSkeleton labelSize="70%"></li>
+    <li slSideNavigationSkeleton labelSize="45%"></li>
+  </ul>
+</nav>`,
     }),
   },
   {
@@ -680,7 +682,11 @@ export const ANGULAR_SIDE_NAVIGATION_DOCS = {
       <li data-part="item" data-value="entregas" data-expanded>
         <button data-part="trigger" id="t-b" aria-expanded="true" aria-controls="g-b">
           <span data-part="label" id="l-b"> Entregas </span>
-          <span data-part="indicator" aria-hidden="true"></span>
+          <span data-part="indicator" aria-hidden="true">
+            <span data-ui="icon" data-part="root" data-directional aria-hidden="true">
+              <svg data-part="glyph" data-glyph="chevron-right"></svg>
+            </span>
+          </span>
         </button>
         <ul data-part="group" id="g-b" aria-labelledby="l-b">
           …

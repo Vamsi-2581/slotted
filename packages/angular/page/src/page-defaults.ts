@@ -1,7 +1,7 @@
 import { inject, InjectionToken } from '@angular/core';
 
 /** The width of the content column: the container's own sizes. */
-export type PageWidth = 'measure' | 'content' | 'wide' | 'full';
+export type PageWidth = 'measure' | 'content' | 'wide' | 'full' | 'bleed';
 
 /** The inset of the content column from the edge of the page: the container's own steps. */
 export type PageInset = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;

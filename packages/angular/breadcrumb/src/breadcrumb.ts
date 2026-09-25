@@ -20,6 +20,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 
@@ -220,7 +221,7 @@ export class SlBreadcrumbList {
 @Component({
   selector: 'li[slBreadcrumbItem]',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon],
   template: `
     @if (revealsAfter()) {
       <button
@@ -230,7 +231,9 @@ export class SlBreadcrumbList {
         type="button"
         (click)="trail.expand('pointer', $event)"
         (keydown)="onEllipsisKeydown($event)"
-      ></button>
+      >
+        <span slIcon><svg slGlyph name="ellipsis"></svg></span>
+      </button>
       <span aria-hidden="true" data-part="separator">
         <ng-container *ngTemplateOutlet="trail.separatorValue() ?? null"></ng-container>
       </span>

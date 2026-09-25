@@ -97,7 +97,7 @@ const anatomy: AnatomyRow[] = [
     element: 'th[slTableColumnHeader]',
     required: false,
     purpose:
-      'A column name, scoped to its column. It carries aria-sort when it is the sorted one, and on no other header.',
+      'A column name, scoped to its column. It carries aria-sort when it is the sorted one, and on no other header. A name its box cuts — text="truncate" on a column with no room — opens a hint with the whole of it, shown rather than read, because the header already states the words.',
   },
   {
     part: 'row-header',

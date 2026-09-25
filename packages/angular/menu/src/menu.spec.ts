@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SlMenu } from './menu';
@@ -8,6 +9,7 @@ import {
   SlMenuGroup,
   SlMenuItem,
   SlMenuItemDescription,
+  SlMenuItemIcon,
   SlMenuRadioGroup,
   SlMenuSeparator,
 } from './menu-items';
@@ -17,19 +19,27 @@ import { provideMenuDefaults } from './menu-defaults';
 @Component({
   standalone: true,
   imports: [
+    SlGlyph,
+    SlIcon,
     SlMenu,
     SlMenuGroup,
     SlMenuItem,
     SlMenuItemDescription,
+    SlMenuItemIcon,
     SlMenuRadioGroup,
     SlMenuSeparator,
     SlMenuTrigger,
   ],
   template: `
     <button [slMenuTriggerFor]="document">Document</button>
-    <sl-menu #document [size]="size()">
+    <sl-menu #document aria-describedby="document-help" [size]="size()">
       <sl-menu-group label="File">
-        <button slMenuItem shortcut="Mod+D" (select)="ran.set($event.reason)">Duplicate</button>
+        <button slMenuItem shortcut="Mod+D" (select)="ran.set($event.reason)">
+          <span slMenuItemIcon
+            ><span slIcon><svg slGlyph name="copy"></svg></span
+          ></span>
+          Duplicate
+        </button>
         <button slMenuItem [disabled]="true" (select)="ran.set($event.reason)">Publish</button>
       </sl-menu-group>
       <hr slMenuSeparator />
@@ -88,6 +98,17 @@ describe('SlMenu', () => {
     await fixture.whenStable();
   };
 
+  /* The first column holds the consumer's element, and the stylesheet paints nothing there. */
+  it('puts the icon it is given in the first column', async () => {
+    await open();
+
+    expect(
+      item('Duplicate')?.querySelector(
+        '[data-part="icon"] > [data-ui="icon"] > svg[data-glyph="copy"]',
+      ),
+    ).not.toBeNull();
+  });
+
   it('wires the control to the surface it discloses', async () => {
     expect(trigger.getAttribute('aria-haspopup')).toBe('menu');
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
@@ -98,6 +119,7 @@ describe('SlMenu', () => {
     expect(trigger.getAttribute('aria-controls')).toBe(surface()?.id);
     expect(surface()?.getAttribute('aria-labelledby')).toBe(trigger.id);
     expect(surface()?.getAttribute('role')).toBe('menu');
+    expect(surface()?.getAttribute('aria-describedby')).toBe('document-help');
   });
 
   it('opens onto the first item, as the pattern requires', async () => {
@@ -178,6 +200,18 @@ describe('SlMenu', () => {
     const checkbox = item('Show comments');
     expect(checkbox?.getAttribute('role')).toBe('menuitemcheckbox');
     expect(checkbox?.getAttribute('aria-checked')).toBe('false');
+    expect(
+      checkbox?.querySelector(
+        '[data-part="indicator"] > [data-ui="icon"] > svg[data-glyph="check"]',
+      ),
+    ).not.toBeNull();
+    expect(
+      item('Name')?.querySelector(
+        '[data-part="indicator"] > [data-ui="icon"] > svg[data-glyph="dot"]',
+      ),
+    ).not.toBeNull();
+    /* An item that opens nothing ends in no chevron. */
+    expect(checkbox?.lastElementChild?.getAttribute('data-ui')).not.toBe('icon');
 
     click(checkbox);
     fixture.detectChanges();
@@ -288,6 +322,10 @@ describe('SlMenu', () => {
 
     const parentItem = item('Export as');
     expect(parentItem?.getAttribute('aria-haspopup')).toBe('menu');
+    const chevron = parentItem?.lastElementChild;
+    expect(chevron?.getAttribute('data-ui')).toBe('icon');
+    expect(chevron?.hasAttribute('data-directional')).toBe(true);
+    expect(chevron?.querySelector('svg[data-glyph="chevron-right"]')).not.toBeNull();
 
     parentItem?.focus();
     press('ArrowRight');

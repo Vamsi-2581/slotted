@@ -169,8 +169,7 @@ type Story = StoryObj<SideNavigationStoryArgs>;
 
 /* ── Templates ─────────────────────────────────────────────────────────── */
 
-const icon = (name: string) =>
-  `<span slSideNavigationIcon><ng-icon name="${name}" size="16" /></span>`;
+const icon = (name: string) => `<span slSideNavigationIcon><ng-icon name="${name}" /></span>`;
 
 const destination = (
   value: string,

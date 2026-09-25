@@ -43,7 +43,7 @@ const anatomy: AnatomyRow[] = [
     element: 'the element carrying slFormSummary',
     required: false,
     purpose:
-      'The region a reader is sent to after a failed submit, with role="alert" and tabindex="-1". Rendered by the form under summary="auto", or placed by the consumer under summary="none". It exists only while something is wrong.',
+      'The region a reader is sent to after a failed submit, with role="alert" and tabindex="-1". Rendered by the form under summary="auto", or placed by the consumer under summary="none". It exists only while something is wrong. It carries data-ui="form" beside its data-part, so the family’s rules reach it wherever it stands and never a nested family’s summary — a table’s totals row.',
   },
   {
     part: 'summary-title',
@@ -71,7 +71,7 @@ const anatomy: AnatomyRow[] = [
     element: 'the element carrying slFormActions',
     required: false,
     purpose:
-      'The row a form’s actions stand in, aligned to the reading end. Below 360 container pixels it becomes a column of full-width actions with the primary one first — a reader’s thumb is at the bottom of a phone and their eye at the end of a row.',
+      'The row a form’s actions stand in, aligned to the reading end. Below 360 container pixels it becomes a column of full-width actions with the primary one first — a reader’s thumb is at the bottom of a phone and their eye at the end of a row. It carries data-ui="form" beside its data-part, so a nested family’s actions — a section’s — keep their own row.',
   },
 ];
 

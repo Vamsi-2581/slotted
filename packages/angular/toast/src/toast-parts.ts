@@ -1,4 +1,7 @@
-import { Directive } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, Directive, inject } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+
+import { SlToastItem } from './toast';
 
 /**
  * The parts, for a page that writes its own message body inside
@@ -6,17 +9,34 @@ import { Directive } from '@angular/core';
  *
  * They carry the part name and nothing else: the geometry, the tone and the
  * states are the item's and the region's, and a directive that repeated any of
- * them would be a second place to change them.
+ * them would be a second place to change them. The two that draw a glyph read
+ * it from the item they sit in.
  */
 
-/** The tone's mark, or the page's own — a spinner while a promise is in flight. */
-@Directive({
+/**
+ * The tone's mark, or the page's own — a spinner while a promise is in flight.
+ * Content the page writes replaces the tone's glyph; with none, the item's
+ * glyph is drawn, and none while the message waits.
+ */
+@Component({
   selector: '[slToastIcon]',
   standalone: true,
   exportAs: 'slToastIcon',
+  imports: [SlGlyph, SlIcon],
+  template: `<ng-content>
+    @if (mark(); as glyph) {
+      <span slIcon><svg slGlyph [name]="glyph"></svg></span>
+    }
+  </ng-content>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'data-part': 'icon', 'aria-hidden': 'true' },
 })
-export class SlToastIcon {}
+export class SlToastIcon {
+  private readonly item = inject(SlToastItem, { optional: true });
+
+  /* Outside an item there is no tone, and the default tone's glyph stands. */
+  protected readonly mark = computed(() => (this.item === null ? 'circle-info' : this.item.mark()));
+}
 
 /** The words, and the one column that is allowed to shrink. */
 @Directive({
@@ -61,10 +81,16 @@ export class SlToastDescription {}
 export class SlToastActions {}
 
 /** The control that puts the message away. A real button with a real name. */
-@Directive({
+@Component({
   selector: 'button[slToastClose]',
   standalone: true,
   exportAs: 'slToastClose',
+  imports: [SlGlyph, SlIcon],
+  /* The cross is drawn unless the consumer wrote content of their own. */
+  template: `<ng-content
+    ><span slIcon><svg slGlyph name="x"></svg></span
+  ></ng-content>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'data-part': 'close', type: 'button' },
 })
 export class SlToastClose {}

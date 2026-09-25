@@ -120,6 +120,10 @@ async function mount(configure?: (host: TestHost) => void, providers: unknown[] 
   return { fixture, host: fixture.componentInstance, root, part, parts, legendItems, settle };
 }
 
+/** The glyph a part draws, as the `Glyph` element inside its icon box. */
+const glyphOf = (element: HTMLElement | null) =>
+  element?.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
+
 const key = (target: HTMLElement, name: string, init: KeyboardEventInit = {}) =>
   target.dispatchEvent(
     new KeyboardEvent('keydown', { key: name, bubbles: true, cancelable: true, ...init }),
@@ -225,6 +229,8 @@ describe('SlChart', () => {
 
   it('opens the table inside the plot', async () => {
     const { host, part, settle } = await mount();
+    expect(glyphOf(part('view-toggle'))).toBe('file-spreadsheet');
+    expect(glyphOf(part('menu-trigger'))).toBe('ellipsis');
 
     part('view-toggle')!.click();
     await settle();
@@ -242,7 +248,7 @@ describe('SlChart', () => {
     key(part('plot')!, '+');
     await settle();
     expect(host.zoom()).toEqual({ start: 0.25, end: 0.75 });
-    expect(part('zoom-reset')).not.toBeNull();
+    expect(glyphOf(part('zoom-reset'))).toBe('rotate-ccw');
 
     key(part('plot')!, '0');
     await settle();
@@ -270,9 +276,11 @@ describe('SlChart', () => {
   it('takes the whole screen as a layer where the API is absent, and leaves on Escape', async () => {
     const { host, root, part, settle } = await mount();
 
+    expect(glyphOf(part('fullscreen-toggle'))).toBe('maximize');
     part('fullscreen-toggle')!.click();
     await settle();
     expect(root.hasAttribute('data-fullscreen')).toBe(true);
+    expect(glyphOf(part('fullscreen-toggle'))).toBe('minimize');
 
     key(root, 'Escape');
     await settle();

@@ -339,6 +339,13 @@ describe('the relative expression', () => {
     expect(preview(fixture)?.dataset['resolved']).toBe('');
     expect(preview(fixture)?.dataset['rollsDay']).toBe('');
     expect(preview(fixture)?.querySelector('[data-part="preview-date"]')).not.toBeNull();
+    /* The chevron is the glyph element, marked to turn in a right-to-left context. */
+    expect(
+      preview(fixture)?.querySelector('[data-ui="icon"]')?.hasAttribute('data-directional'),
+    ).toBe(true);
+    expect(preview(fixture)?.querySelector('svg[data-glyph]')?.getAttribute('data-glyph')).toBe(
+      'chevron-right',
+    );
 
     input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
     fixture.detectChanges();
@@ -493,6 +500,7 @@ describe('the contract with the consumer', () => {
       `<div slDateTimeField clearable locale="pt-BR" name="quando" [defaultValue]="tenth"></div>`,
     );
     const clear = fixture.nativeElement.querySelector('[data-part="clear"]') as HTMLButtonElement;
+    expect(clear.querySelector('svg[data-glyph]')?.getAttribute('data-glyph')).toBe('x');
     clear.click();
     fixture.detectChanges();
 

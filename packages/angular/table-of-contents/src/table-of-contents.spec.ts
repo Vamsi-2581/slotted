@@ -360,6 +360,11 @@ describe('SlTableOfContents', () => {
 
     it('renders a trigger with the label and the current text that opens the list', () => {
       expect(trigger().getAttribute('aria-expanded')).toBe('false');
+      expect(
+        trigger().querySelector(
+          '[data-part="indicator"] > [data-ui="icon"] > svg[data-glyph="chevron-down"]',
+        ),
+      ).not.toBeNull();
       expect(fixture.nativeElement.querySelector('[data-part="current"]')?.textContent).toBe(
         'Endereços',
       );

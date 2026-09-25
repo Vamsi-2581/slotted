@@ -1,6 +1,6 @@
 # Component craft rubric
 
-Assess every dimension in writing before the human gate. Dimensions 1 through 8 judge the quality of what exists; 9 and 10 judge whether enough exists, and they are the two a minimal component fails; 11 judges whether a consumer can find any of it. This rubric directs attention; it is not an exhaustive rule set. Do not turn it into regex enforcement or assume every valid decision can be enumerated ahead of time. Use behavioural evidence, rendered output, source reading, and component context.
+Assess every dimension in writing before the human gate. Dimensions 1 through 8 judge the quality of what exists; 9 and 10 judge whether enough exists, and they are the two a minimal component fails; 11 judges whether a consumer can find any of it. The craft bar at the end turns dimensions 2 and 4 into pass conditions read from a specimen. This rubric directs attention; it is not an exhaustive rule set. Do not turn it into regex enforcement or assume every valid decision can be enumerated ahead of time. Use behavioural evidence, rendered output, source reading, and component context.
 
 ## 1. Icons
 
@@ -12,11 +12,11 @@ Assess every dimension in writing before the human gate. Dimensions 1 through 8 
 
 ## 2. Motion
 
-**Meaning:** The rule has two sides and only one of them has been enforced. A state change a person's eye has to follow — a panel opening, a control filling, a value moving — carries a transition from the motion scale. Motion that carries no information is refused. Reduced motion is inherited from the theme, while infinite animation stops explicitly.
+**Meaning:** Motion is how a component answers a person. Every state change carries a designed transition from the motion scale: the answer to a hover, a press and a keyboard focus, and the enter and exit of anything that appears, disappears, moves or resizes — a panel opening, a control filling, a value moving, a row arriving. That feedback is information, and a family without it is unfinished. Motion is refused only when it is decorative: tied to no state change and no action, or standing between a person and the next interaction. Enter and exit are two movements, not one played backwards. Reduced motion is inherited from the theme, while infinite animation stops explicitly.
 
-**Verify:** Exercise every animated state in a real browser, read the timing choices in context, and emulate `prefers-reduced-motion: reduce` for looping motion. For every state pair the family can move between, say whether it transitions and why.
+**Verify:** Exercise every animated state in a real browser, read the timing choices in context, and emulate `prefers-reduced-motion: reduce`. For every state pair the family can move between, name the transition — properties, duration token, easing token — or the reason it snaps. Read the `transition-*` values of the specimen against the craft bar.
 
-**Fails when:** A useful transition snaps without reason; a state change the eye must follow happens instantly because animating felt risky; a duration or easing is handwritten; an animation loops under reduced motion; decorative motion blocks interaction.
+**Fails when:** A state change snaps without a written reason; a state change the eye must follow happens instantly because animating felt risky; an element appears or disappears with a colour swap alone; enter and exit share one easing; a duration or easing is handwritten; an animation loops under reduced motion; decorative motion blocks interaction.
 
 ## 3. Responsiveness
 
@@ -30,7 +30,7 @@ Assess every dimension in writing before the human gate. Dimensions 1 through 8 
 
 **Meaning:** Alignment, spacing rhythm, type, and optical balance form a deliberate whole rather than a collection of valid declarations — at rest and in every state the component can be in.
 
-**Verify:** Read every capture at full size in both schemes, including the state captures from step 8. Compare related edges, baselines, gaps, hit areas, glyph weight, and text centring. Then work the detail list: the focus ring's distance from the border and whether it survives on a tinted surface; whether hover is legible at a glance without shouting; whether press gives feedback; whether disabled stays readable rather than merely faded; whether a state change shifts anything by a pixel; whether an icon sits on the same optical line as its label; whether the component holds at 200% browser zoom. Inspect interactive states in the live harness.
+**Verify:** Read every capture at full size in both schemes, including the state captures from step 8. Compare related edges, baselines, gaps, hit areas, glyph weight, and text centring. Then work the detail list: the focus ring's distance from the border and whether it survives on a tinted surface; whether hover is legible at a glance without shouting; whether press gives feedback; whether disabled stays readable rather than merely faded; whether a state change shifts anything by a pixel; whether an icon sits on the same optical line as its label; whether the component holds at 200% browser zoom. Inspect interactive states in the live harness. Work every row of the craft bar against the family's specimen.
 
 **Fails when:** An edge sits on a half-pixel without intent; a gap breaks the foundation rhythm; text is optically off-centre; focus changes layout; a state is styled but was never looked at; the component looks unfinished despite passing automated checks.
 
@@ -84,10 +84,6 @@ Assess every dimension in writing before the human gate. Dimensions 1 through 8 
 
 **Fails when:** A line is unanswered; the two bindings were levelled down to the smaller shape so they would look alike; a control that belongs in a form has no `ControlValueAccessor`; defaults can only be set per instance; the family's handler replaces the consumer's instead of composing with it; state a consumer must style is not in the DOM.
 
-## Scoring
-
-A dimension that merely passes is not finished. For each of the eleven, name the one change that would most improve it, then say whether it was made and why. A self-assessment with eleven passes and no named improvements has not been written; it has been asserted.
-
 ## 11. Documentation
 
 **Meaning:** The family's two reference pages let a consumer build with it without reading its source. What to import, what it is made of, one captioned demonstration per declared scenario with the code that produced it, every input, every output, the composition surface, and the accessibility decisions.
@@ -97,3 +93,33 @@ A dimension that merely passes is not finished. For each of the eleven, name the
 **Fails when:** The page shows the component and never shows how it is written; a scenario the contract declares has no demonstration; a caption repeats the title; a demonstration sits in a mostly empty canvas; two examples touch because the story laid itself out; a table is clipped; an output is undocumented while the contract declares a state model; a story paints its own ground with an inline style.
 
 **Not finished when:** you have read the story files instead of the rendered pages. The defects this dimension exists to catch — the empty canvas, the collision, the clipped table — are invisible in the source and obvious in the picture.
+
+## Craft bar
+
+The rows below are the motto at the head of `SKILL.md` as pass conditions. Each is read from a specimen
+of the harness page (`harness.md` › Specimen), in the schemes and axes the row
+names, and the self-assessment records the number that decides it.
+
+| Criterion       | Pass condition                                                                                                                                                                                                                                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pixel grid      | The block size of every framed part (a part that paints a border, a background or a ring) is a whole pixel at 1×, comfortable density. Inline size of content-sized parts and text parts are exempt.                                                                                                                                                                            |
+| Hover           | Every interactive part has a non-empty hover delta; a surface step is ≥ 0.02 OKLab L on each surface (`packages/tokens/src/theme-conformance.mjs`).                                                                                                                                                                                                                             |
+| Press           | The active delta differs from the hover delta.                                                                                                                                                                                                                                                                                                                                  |
+| Focus           | On every `focusable` part: indicator ≥ 2px, ≥ 3:1 between the indicator colour and the part's `ground`, in light, dark and high-contrast (WCAG 2.4.13); offset clears the part's border.                                                                                                                                                                                        |
+| Transition      | Every property in a hover or active delta that paints is listed in `transition-property`; no declared `all` with a non-zero duration; durations and easings are motion tokens. A property paints unless its box draws nothing with it (a border colour on a zero-width border, an outline colour with `outline-style: none`). The focus indicator is governed by the Focus row. |
+| Motion          | A part that appears, disappears, moves or resizes has an enter and an exit transition on motion tokens; enter uses `--slotted-easing-enter`, exit `--slotted-easing-exit`. A colour-only swap does not satisfy it.                                                                                                                                                              |
+| Reduced motion  | Under `--motion reduce`, motion-scale durations collapse and infinite animations stop.                                                                                                                                                                                                                                                                                          |
+| Disabled        | Label contrast holds the token-foundation value; no bare `opacity: 0.5`.                                                                                                                                                                                                                                                                                                        |
+| Schemes         | High-contrast and `--forced-colors active` specimens read as the same component.                                                                                                                                                                                                                                                                                                |
+| Density and RTL | Dense and rtl specimens keep the anatomy; lengths scale, meaning does not change.                                                                                                                                                                                                                                                                                               |
+| Target size     | Interactive parts meet § Target size of `docs/token-foundation.md`.                                                                                                                                                                                                                                                                                                             |
+| Intent          | Every value in the family stylesheet is a token or a literal whose reason is written beside the rule or in the family's design document. A value with neither is removed or given its reason.                                                                                                                                                                                   |
+
+A row the family fails is a defect of dimension 2 or 4, fixed before the gate.
+When the failing value belongs to a composed family, the self-assessment names
+that family's files and the defect goes to `docs/process/build-order.md` ›
+_Reaberturas prometidas por escrito_.
+
+## Scoring
+
+A dimension that merely passes is not finished. For each of the eleven, name the one change that would most improve it, then say whether it was made and why. A self-assessment with eleven passes and no named improvements has not been written; it has been asserted.

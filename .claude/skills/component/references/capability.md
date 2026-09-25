@@ -25,6 +25,26 @@ element the family is built on.
 Record what each one calls the family, since the same capability hides under
 different names.
 
+When no implementation ships the family under any name, the survey is of
+analogues: implementations that ship its parts or its interactions inside
+another component — the job row inside a file uploader, the progress track
+inside a toast. Name at least three, each with the part or interaction of this
+family it informs; an analogue informs only a part with the same role and the
+same interaction. The section states that no direct counterpart exists and
+lists the names searched.
+
+At least one surveyed implementation with a live demonstration is also read for
+its picture and its motion: the one whose rendering is the best the survey
+found, captured as a specimen (`harness.md` › Specimen) in light and dark with
+`--states` on its interactive element. Public demonstrations worth trying first:
+ReUI (`https://reui.io/preview/base/<name>`), shadcn/ui, Radix Themes, Geist,
+Primer. Step 8 compares the family's states with that specimen, value by value.
+
+A surveyed implementation contributes capabilities, ideas and measurements. It
+never contributes the shape of the API: its row records how it exposes a
+capability, and the family's own shape follows `frameworks.md` and improves on
+it in a respect the inventory names, or states that the two coincide.
+
 ### 2. Table stakes
 
 Every capability that two or more surveyed implementations ship. One row each:

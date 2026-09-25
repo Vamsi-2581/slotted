@@ -17,8 +17,7 @@ Static thumbnails for triage: `https://reui.io/thumbnails/components/<name>-ligh
 and `-dark.webp`.
 
 The catalog is `https://reui.io/llms-full.txt`: one line per Pro block and free
-example, with the block's description and the primitives it composes. Cache it
-once per session in `tools/harness/out/reui/llms-full.txt` and search it there.
+example, with the block's description and the primitives it composes. Step 2 of `SKILL.md` caches it; search the cached copy.
 A block line names the primitives it uses ("ReUI Frame, Badge, shadcn Sidebar"),
 which is how a family is found inside blocks whose title does not name it.
 
@@ -38,7 +37,7 @@ a measurement.
 ## Values
 
 Every value in a dossier comes from a specimen JSON written by
-`scripts/capture.mjs`. The table below maps a computed value to the Slotted
+`tools/harness/specimen.mjs`. The table below maps a computed value to the Slotted
 scale in `docs/token-foundation.md`.
 
 | Computed value (px)                                                | Slotted token                                                                                              |

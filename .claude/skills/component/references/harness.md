@@ -35,6 +35,45 @@ The capture is the whole page, not the window: the shooter drives Chrome through
 
 The shooter prints the PNG's absolute path, and the name states every axis. Its default output directory is `$TMPDIR` or `/tmp`. Always read the image; file existence and size do not distinguish the component from a browser error page.
 
+## Specimen
+
+A picture shows what a reader notices; a specimen holds the numbers. It is the
+computed styles of one page, written as JSON beside a full-page picture:
+
+```bash
+node tools/harness/specimen.mjs --family <family> \
+  --theme <light|dark|high-contrast> --width <420|240|720> \
+  --density <comfortable|compact|dense> --dir <ltr|rtl> \
+  --motion <no-preference|reduce> --forced-colors <none|active> \
+  --click <selector> --states <selector> --limit <n>
+```
+
+The same tool reads a reference page on the web, so a surveyed implementation
+and the family are compared with one property list:
+
+```bash
+node tools/harness/specimen.mjs --url <https page> --name <name> \
+  --ready <selector the page sets once painted> --missing-text <text of its 404 page> \
+  --theme <light|dark> --width <px> --states <selector>
+```
+
+The record lists every `data-ui`, `data-part` and `data-slot` element, their
+direct children, every `svg` and every interactive element, with rect, data and
+aria attributes, `focusable`, `ground` (the first opaque background behind it),
+56 computed properties, and the same properties for a `::before` or `::after`
+that paints. `--states` adds, for its first `--limit` rendered matches (default
+6), the computed delta and a clipped picture of hover, press and keyboard focus
+against rest; `deltas.focus` is `null` on an element that cannot take focus.
+`--click` reaches a state behind an interaction by real clicks, in order, before
+anything is read. Chrome runs with a fine pointer, so hover rules gated on
+`@media (hover: hover)` apply.
+
+Output goes to `tools/harness/out/specimen/<family or name>/`; every axis away
+from its default and every selector enter the file name. The tool exits 1 when a
+reference answers other than 200, shows its missing text, never matches
+`--ready` after one reload, or when a `--click` or `--states` selector matches
+nothing. Read the JSON with a script and print only the rows a decision needs.
+
 ## Fragment contract
 
 Author `packages/styles/src/<family>/<family>.harness.html` as one or more scenes:

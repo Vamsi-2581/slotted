@@ -1,13 +1,17 @@
 ---
 name: component
-description: Use when explicitly invoked as $component <family> in the Slotted repository to build or rebuild one component family, or a tightly related pair; do not infer it from a request to change component code.
-
-Important execution constraints:
-
-Do not emit suggestions, prompts, or detours about explaining work in a web browser, generating mockups/diagrams in chat, or opening a local URL for visuals. Do not route this skill through a brainstorming flow; execute the sequence in this document directly and report only the project artifacts/files and test results required by the steps.
+description: Use when explicitly invoked as /component <family> (Claude Code) or $component <family> (Codex) in the Slotted repository to build or rebuild one component family, or a tightly related pair; do not infer it from a request to change component code.
 ---
 
 # Component craft
+
+> Qualidade de execução: obsessão por craft. Pixel-perfect, refinamento extremo,
+> microinterações exclusivas, animações premium, hovers/actives/focus
+> cuidadosamente desenhados e zero aparência de template ou AI-slop. Cada pixel
+> deve ser intencional.
+
+That motto is the bar of every step. `references/rubric.md` › Craft bar states it
+as pass conditions, read from numbers rather than from impressions.
 
 Build or rebuild one family, or a tightly related pair, without hiding framework-native APIs. The same bar applies whether the family exists or not.
 
@@ -19,7 +23,7 @@ Step 3 answers _is there enough component here_. Every other step in this skill 
 
 Step 9 answers _is this worth building on_. Four fifths of a family is written after the picture is right and before anyone has seen it, so the gate that catches a wrong anatomy belongs there, not at the end.
 
-The target is a family a team would choose over the best headless library plus their own CSS. The anti-goal is a styled `div` with one prop — an unstyled Bootstrap, with neither the features nor the looks.
+The target is a family a team would choose over the best headless library plus their own CSS. The anti-goal is a styled `div` with one prop — an unstyled Bootstrap, with neither the features nor the looks — and its twin, a family whose every value is a framework default: the look of a template.
 
 ## Permission
 
@@ -33,8 +37,10 @@ negotiable:
 
 Repeatedly re-reading the same source is discouraged; skipping required reads is not.
 
-Performance constraints for this skill:
+Execution constraints:
 
+- Execute the sequence in this document directly; do not route it through a brainstorming flow.
+- Do not offer to explain work in a browser, to draw mockups or diagrams in chat, or to open a local URL for visuals. Report the project artifacts and test results the steps require.
 - Treat each invocation as one-family scope; finish Step 15 for that family and then reset for the next family.
 - If multiple `/component` tasks are running, queue them unless the request is explicitly independent and file-disjoint.
 - Do not spawn subagents by default for standard component rebuilds. Use them only for independent, parallelizable work (for example, parallel proofing of shared docs/tests) on disjoint paths.
@@ -67,21 +73,9 @@ When reading source, prefer the narrowest useful set. Read the next source only 
 
 Follow these steps in order. Replace `<family>` with the invoked family name. When the invocation names a tightly related pair, apply every step and every gate to both.
 
-1. **Load the law before component code.** Read `docs/build-briefing.md` first, then `references/quick-law.md`.
-   Then read:
+1. **Load the law before component code.** Read `docs/build-briefing.md`, then `references/quick-law.md`, and follow its reading order: the minimum scope documents always, the full-law list on a first pass and in the cases it names. Whatever the pass, read `references/capability.md` before step 3, `references/rubric.md` before step 4, `references/frameworks.md` before step 5, `references/harness.md` before step 8 and `references/stories.md` before step 11.
 
-- the section of `docs/component-features.md` that covers this family, and sections 2 and 18;
-- `references/frameworks.md` and the family-specific design doc in `docs/history/designs/` if it exists.
-
-Only when the compact brief and these files leave an unresolved question, read
-`docs/token-foundation.md`, `docs/state-and-events.md`, `references/rubric.md`,
-`references/patterns.md`, `references/stories.md`, and `references/capability.md`.
-Read `references/stories.md` before step 11 rather than after it.
-
-When this is the first pass on a family, read the full-law list in that order before
-coding. In follow-up passes, read only what is necessary to close the open decision.
-
-Do not inspect the family implementation first.
+   Do not inspect the family implementation first.
 
 2. **Detect the mode. Both modes reach the same bar.** If `specs/components/<family>/` exists, rebuild the family; otherwise, create it. A family listed in `specs/legacy-families.json` moves to the current contract schema and leaves that list in the same commit.
 
@@ -155,6 +149,8 @@ Do not inspect the family implementation first.
    - layout primitives or spacing system, or
    - any state transition logic shared across states.
 
+   Then read the numbers. Take the family's specimen (`references/harness.md` › Specimen) in light, dark and high-contrast, with `--states` on each interactive part, plus `--motion reduce`, `--forced-colors active`, `--density dense` and `--dir rtl`. Work every row of `references/rubric.md` › Craft bar against it, and compare each state delta with the reference specimen from step 3, value by value: a reference value that is better is adopted onto a token, and a family value that is better is kept and named.
+
    Code completion is not the exit condition, and neither is a correct picture. The exit condition is a picture with nothing left to fix — and the way to find what is left is to name, in writing, the one detail you would change if you had another hour, then change it.
 
 9. **Stop at the visual gate.** The picture is settled and nothing has been bound to a framework yet. Hand over the harness page path and the captures read, the step 3 capability inventory with its four sections, the anatomy the contract declares — parts, states, state model — and every decision taken so far. Ask the reviewer to open the harness and exercise hover, focus, keyboard and resizing there. Wait, and incorporate the answer before step 10.
@@ -167,15 +163,14 @@ Do not inspect the family implementation first.
 
 11. **Write both reference pages, then read them rendered.** Follow `references/stories.md`. The pages are where a consumer meets the family's API, and they are held to a contract of their own: the import, the anatomy, one captioned demonstration per declared scenario with the code that produced it, the inputs, the outputs, the composition surface, and the accessibility decisions. Two demonstrations and no source is the shape this step used to produce, and `specs/reference-pages.test.mjs` now refuses it.
 
-    Lay every demonstration out with the workbench primitives; the stage owns the gap between examples, and a story that reaches for an inline style is refused. Then, if a Storybook reference page is already running, read it at 1280 and 720 pixels, in light and in dark — the page, not the story file:
+    Lay every demonstration out with the workbench primitives; the stage owns the gap between examples, and a story that reaches for an inline style is refused. Then read both reference pages rendered, at 1280 and 720 pixels, in light and in dark — the page, not the story file:
 
     ```
     http://localhost:6006/iframe.html?viewMode=docs&id=components-<family>--reference
     http://localhost:6007/iframe.html?viewMode=docs&id=components-<family>--reference
     ```
 
-    Validate on a Storybook server only if it is already running:
-    http://localhost:6006 for React or http://localhost:6007 for Angular. Do not start new Storybook processes for validation.
+    Use a Storybook server that is already answering on 6006 (React) or 6007 (Angular). When one is not, start that one in the background — `pnpm --filter @slotted/storybook-react dev` or `pnpm --filter @slotted/storybook-angular dev` — and never a second instance on a port that already answers. Stop only the servers this run started, after the release gate is answered.
 
     Read every story the family declares in `viewMode=story` as well, and read the page in dense as well as comfortable. The docs page and the story view lay the same scene out under different rules, and a scene that holds inside one can escape its stage in the other: a matrix was drawn out of an 88-pixel box and over the two scenes below it in the story view alone. Open every code drawer before judging the page — a closed `<details>` is a snippet nobody looked at, and the one inside it was set in a proportional face for as long as the drawers stayed shut.
 
@@ -198,16 +193,13 @@ Do not inspect the family implementation first.
     pnpm check:affected
     ```
 
-If this is a shared-tool change (schema, harness, core utilities, or tests that
-affect every family), or if `pnpm check:affected` is not available, run
-`pnpm check` instead.
+    If this is a shared-tool change (schema, harness, core utilities, or tests that affect every family), or if `pnpm check:affected` is not available, run `pnpm check` instead.
 
-Do not pipe a verification command into `head`, `tail`, or `grep`; preserve its exit status.
-Run only the minimum verification for the current cycle and do not add extra verification passes to chase a lower command count.
+    Do not pipe a verification command into `head`, `tail`, or `grep`; preserve its exit status. Run only the minimum verification for the current cycle and do not add extra verification passes to chase a lower command count.
 
-13. **Write the self-assessment.** Assess all eleven dimensions in `references/rubric.md`: Icons, Motion, Responsiveness, Refinement, Tokens, Patterns, Accessibility, Native API, Capability, Ecosystem integration, and Documentation. Follow its Scoring rule: for each dimension name the one change that would most improve it, and say whether it was made. Then state, against `docs/component-features.md` section 18, the family's anatomy, its controlled and uncontrolled contract with reasons, its state matrix, its density and direction behaviour, and its loading, empty, error and extreme-content cases. Cite capture paths, behavioural tests, the APG checklist, relevant code, and the reasoning behind context-dependent choices. Fix anything below the bar before continuing.
+13. **Write the self-assessment.** Assess all eleven dimensions in `references/rubric.md`: Icons, Motion, Responsiveness, Refinement, Tokens, Patterns, Accessibility, Native API, Capability, Ecosystem integration, and Documentation. Follow its Scoring rule: for each dimension name the one change that would most improve it, and say whether it was made. Record every row of the Craft bar with the specimen number that decides it. Then state, against `docs/component-features.md` section 18, the family's anatomy, its controlled and uncontrolled contract with reasons, its state matrix, its density and direction behaviour, and its loading, empty, error and extreme-content cases. Cite capture paths, behavioural tests, the APG checklist, relevant code, and the reasoning behind context-dependent choices. Fix anything below the bar before continuing.
 
-14. **Stop at the release gate.** The picture was approved at step 9; this gate is about everything built on top of it. Decide every open question first, as `docs/build-briefing.md` requires: the gate carries decisions already taken, not questions for the reviewer. Hand over the absolute harness path, the reference-page URLs with the widths and schemes they were read at, the step 3 capability inventory with its four sections, the eleven-dimension self-assessment, and the decisions taken. Ask the person to open the harness and, if storybook is already running on 6006 (React) or 6007 (Angular), open that one reference page and exercise hover, focus, keyboard, and resizing; do not start a Storybook server solely to satisfy this step.
+14. **Stop at the release gate.** The picture was approved at step 9; this gate is about everything built on top of it. Decide every open question first, as `docs/build-briefing.md` requires: the gate carries decisions already taken, not questions for the reviewer. Hand over the absolute harness path, the reference-page URLs with the widths and schemes they were read at, the step 3 capability inventory with its four sections, the eleven-dimension self-assessment, and the decisions taken. Ask the person to open the harness and both reference pages, on the servers step 11 left answering, and exercise hover, focus, keyboard, and resizing.
 
 15. **Commit after the release gate.** Make one commit per step of substance, name every staged file explicitly, and include only this family's work. Do not stage a directory.
 

@@ -96,7 +96,8 @@ as one row of **Surveyed**.
 
 ## 7. Superar
 
-The result of every check in the craft bar of `SKILL.md`, for both sides, with
+The result of every row of `.claude/skills/component/references/rubric.md` ›
+Craft bar, for both sides, with
 the number that decides it.
 
 | Critério | ReUI | Slotted hoje | Alvo | Fonte |

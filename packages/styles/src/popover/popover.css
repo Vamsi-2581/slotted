@@ -436,8 +436,26 @@
    * measures the arrow from the layer's own left and top and `data-side` names
    * a physical edge, and an arrow behind a bordered panel leaves the panel's own
    * border running straight across its base.
+   *
+   * Where the arrow may stand is the straight run of the panel's edge. The
+   * positioner keeps it `arrowPadding` from the edge of the **layer**, and
+   * the panel stands a `gap` inside the layer, so beside an anchor near a
+   * corner the arrow landed on the panel's rounded corner, and the half of
+   * the rotated square the panel normally hides showed outside it as a point
+   * of a diamond. Clamped here, the arrow meets a straight edge whatever
+   * padding, gap or radius a theme sets.
    */
   [data-ui='popover'] > [data-part='arrow'] {
+    --_arrow-x: clamp(
+      calc(var(--_gap) + var(--_radius)),
+      var(--slotted-positioner-arrow-x, 0px),
+      calc(100% - var(--_gap) - var(--_radius) - var(--_arrow-size))
+    );
+    --_arrow-y: clamp(
+      calc(var(--_gap) + var(--_radius)),
+      var(--slotted-positioner-arrow-y, 0px),
+      calc(100% - var(--_gap) - var(--_radius) - var(--_arrow-size))
+    );
     position: absolute;
     z-index: 1;
     inline-size: var(--_arrow-size);
@@ -448,7 +466,7 @@
   }
 
   [data-ui='popover'][data-side='top'] > [data-part='arrow'] {
-    left: var(--slotted-positioner-arrow-x, 0);
+    left: var(--_arrow-x);
     top: auto;
     bottom: calc(var(--_gap) - var(--_arrow-size) / 2);
     border-right-width: var(--_border-width);
@@ -457,7 +475,7 @@
   }
 
   [data-ui='popover'][data-side='bottom'] > [data-part='arrow'] {
-    left: var(--slotted-positioner-arrow-x, 0);
+    left: var(--_arrow-x);
     top: calc(var(--_gap) - var(--_arrow-size) / 2);
     bottom: auto;
     border-top-width: var(--_border-width);
@@ -466,7 +484,7 @@
   }
 
   [data-ui='popover'][data-side='left'] > [data-part='arrow'] {
-    top: var(--slotted-positioner-arrow-y, 0);
+    top: var(--_arrow-y);
     left: auto;
     right: calc(var(--_gap) - var(--_arrow-size) / 2);
     border-top-width: var(--_border-width);
@@ -475,7 +493,7 @@
   }
 
   [data-ui='popover'][data-side='right'] > [data-part='arrow'] {
-    top: var(--slotted-positioner-arrow-y, 0);
+    top: var(--_arrow-y);
     left: calc(var(--_gap) - var(--_arrow-size) / 2);
     right: auto;
     border-bottom-width: var(--_border-width);

@@ -493,3 +493,49 @@
     </div>
   </div>
 </section>
+
+<!--
+  An anchor at the top-right corner: the layer ends at the stage's edge and
+  the positioner puts the arrow `arrowPadding` (12px) from the layer's right,
+  which is inside the layer's gap and over the panel's rounded corner. The
+  stylesheet clamps it back onto the straight edge.
+-->
+<section data-scene="corner" data-fixed>
+  <div
+    style="position: relative; display: flex; justify-content: flex-end; padding-block: 16px 232px"
+  >
+    <button
+      data-ui="button"
+      data-part="root"
+      data-tone="secondary"
+      data-variant="outline"
+      data-size="md"
+      type="button"
+    >
+      <span data-part="label">Account</span>
+    </button>
+    <div
+      data-ui="popover"
+      data-part="root"
+      data-side="bottom"
+      data-align="end"
+      data-size="md"
+      data-width="auto"
+      data-open
+      style="
+        top: calc(16px + 2.25rem);
+        right: 0;
+        --slotted-positioner-available-width: calc(100% - 8px);
+        --slotted-positioner-arrow-x: calc(100% - 12px - 0.625rem);
+      "
+    >
+      <div data-part="arrow"></div>
+      <div data-part="content" role="dialog" tabindex="-1" aria-labelledby="popover-corner-title">
+        <div data-part="header">
+          <div data-part="title" id="popover-corner-title">Signed in as Ana Souza</div>
+          <p data-part="description">Workspace owner · 3 workspaces</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

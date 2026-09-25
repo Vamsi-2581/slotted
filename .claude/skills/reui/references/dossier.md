@@ -17,11 +17,11 @@ Family, mode (`survey`, `polish` or `build`), date, and the git HEAD read.
 The first line states the coverage, then the `llms-full.txt` search terms used
 and the count found for each.
 
-| Cobertura | Condição                                                                       | Seleção mínima                                                                                  |
-| --------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| `direta`  | ReUI ships the family as a primitive or as `c-*` examples                       | The primitive's source and docs when it exists, three free examples, two Pro blocks with the family in product context |
-| `análogo` | ReUI draws the family's parts or interactions inside other components           | One item per Slotted part or interaction with a counterpart, up to six items                    |
-| `nenhuma` | No item shares a part or an interaction with the family                         | None. The Slotted siblings that share the family's parts (control height, row, focus ring, motion) are captured with `--family <sibling>` and fill the `ReUI` column of sections 3–5, headed with the sibling's name. |
+| Cobertura | Condição                                                              | Seleção mínima                                                                                                                                                                                                        |
+| --------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `direta`  | ReUI ships the family as a primitive or as `c-*` examples             | The primitive's source and docs when it exists, three free examples, two Pro blocks with the family in product context                                                                                                |
+| `análogo` | ReUI draws the family's parts or interactions inside other components | One item per Slotted part or interaction with a counterpart, up to six items                                                                                                                                          |
+| `nenhuma` | No item shares a part or an interaction with the family               | None. The Slotted siblings that share the family's parts (control height, row, focus ring, motion) are captured with `--family <sibling>` and fill the `ReUI` column of sections 3–5, headed with the sibling's name. |
 
 One row per ReUI item captured.
 
@@ -99,8 +99,8 @@ the number that decides it.
 
 The ordered change list. One row per change.
 
-| # | Ficheiro | Mudança | Linhas do dossiê que resolve | Captura que o prova |
-| - | -------- | ------- | ---------------------------- | ------------------- |
+| #   | Ficheiro | Mudança | Linhas do dossiê que resolve | Captura que o prova |
+| --- | -------- | ------- | ---------------------------- | ------------------- |
 
 A state the harness page does not render gets a row that adds its scene,
 placed before the row that changes the state.

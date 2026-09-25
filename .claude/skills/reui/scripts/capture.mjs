@@ -31,18 +31,50 @@ const REPO = resolve(fileURLToPath(import.meta.url), '../../../../..');
 const READY_TIMEOUT = 20000;
 
 const PROPERTIES = [
-  'display', 'width', 'height', 'min-height',
-  'padding-block-start', 'padding-inline-end', 'padding-block-end', 'padding-inline-start',
-  'gap', 'column-gap', 'row-gap',
-  'border-top-width', 'border-top-style', 'border-top-color', 'border-bottom-color',
-  'border-top-left-radius', 'border-top-right-radius',
-  'color', 'background-color', 'background-image', 'box-shadow', 'opacity', 'transform', 'filter',
+  'display',
+  'width',
+  'height',
+  'min-height',
+  'padding-block-start',
+  'padding-inline-end',
+  'padding-block-end',
+  'padding-inline-start',
+  'gap',
+  'column-gap',
+  'row-gap',
+  'border-top-width',
+  'border-top-style',
+  'border-top-color',
+  'border-bottom-color',
+  'border-top-left-radius',
+  'border-top-right-radius',
+  'color',
+  'background-color',
+  'background-image',
+  'box-shadow',
+  'opacity',
+  'transform',
+  'filter',
   'backdrop-filter',
-  'outline-style', 'outline-width', 'outline-color', 'outline-offset',
-  'font-family', 'font-size', 'font-weight', 'line-height', 'letter-spacing',
-  'text-decoration-line', 'font-variant-numeric', 'cursor',
-  'transition-property', 'transition-duration', 'transition-timing-function', 'transition-delay',
-  'animation-name', 'animation-duration', 'animation-timing-function',
+  'outline-style',
+  'outline-width',
+  'outline-color',
+  'outline-offset',
+  'font-family',
+  'font-size',
+  'font-weight',
+  'line-height',
+  'letter-spacing',
+  'text-decoration-line',
+  'font-variant-numeric',
+  'cursor',
+  'transition-property',
+  'transition-duration',
+  'transition-timing-function',
+  'transition-delay',
+  'animation-name',
+  'animation-duration',
+  'animation-timing-function',
 ];
 
 const STATES = {
@@ -71,18 +103,31 @@ const { values, positionals } = parseArgs({
 
 const [item] = positionals;
 if (!item && !values.family) {
-  console.error('usage: capture.mjs (<item> | --family <slotted-family> [--density comfortable|compact|dense] [--dir ltr|rtl]) [--base base|radix] [--style nova] [--theme light|dark|high-contrast] [--width 1280] [--motion no-preference|reduce] [--forced-colors none|active] [--states <selector>] [--limit 6] [--out <dir>]');
+  console.error(
+    'usage: capture.mjs (<item> | --family <slotted-family> [--density comfortable|compact|dense] [--dir ltr|rtl]) [--base base|radix] [--style nova] [--theme light|dark|high-contrast] [--width 1280] [--motion no-preference|reduce] [--forced-colors none|active] [--states <selector>] [--limit 6] [--out <dir>]',
+  );
   process.exit(1);
 }
 
 const kind = values.family ? 'slotted' : item.startsWith('c-') ? 'example' : 'block';
 const route = kind === 'example' ? 'example/' : '';
 const url = values.family
-  ? captureUrl({ family: values.family, scheme: values.theme, width: values.width, density: values.density, dir: values.dir }).href
+  ? captureUrl({
+      family: values.family,
+      scheme: values.theme,
+      width: values.width,
+      density: values.density,
+      dir: values.dir,
+    }).href
   : `https://reui.io/preview/${values.base}/${route}${item}?embed=1&style=${values.style}&theme=${values.theme}`;
 const outDir = resolve(values.out ?? join(REPO, 'tools/harness/out/reui', values.family ?? item));
 /* Every axis that changes the picture is in the name, so two runs never overwrite each other. */
-const slug = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+const slug = (text) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40);
 const stem = [
   values.family ? 'slotted' : values.style,
   values.theme,
@@ -92,7 +137,9 @@ const stem = [
   values.motion !== 'no-preference' ? `motion-${values.motion}` : undefined,
   values['forced-colors'] !== 'none' ? 'forced' : undefined,
   values.states ? slug(values.states) : undefined,
-].filter(Boolean).join('-');
+]
+  .filter(Boolean)
+  .join('-');
 /* The harness draws one cell per stage width and pads it with 80 pixels of chrome. */
 if (values.family && !WIDTHS.includes(Number(values.width))) {
   console.error(`--family needs --width in ${WIDTHS.join(', ')}`);
@@ -179,7 +226,12 @@ const readStyles = (selector) => `(() => {
 
 try {
   await devtools.send('Page.enable');
-  await devtools.send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 2, mobile: false });
+  await devtools.send('Emulation.setDeviceMetricsOverride', {
+    width,
+    height: 900,
+    deviceScaleFactor: 2,
+    mobile: false,
+  });
   await devtools.send('Emulation.setEmulatedMedia', {
     media: '',
     features: [
@@ -195,7 +247,11 @@ try {
     const loaded = devtools.once('Page.loadEventFired');
     await devtools.send('Page.navigate', { url });
     await loaded;
-    ready = values.family ? ((await evaluate(READY_EXPRESSION)) ? 'ready' : 'timeout') : await evaluate(`new Promise((done) => {
+    ready = values.family
+      ? (await evaluate(READY_EXPRESSION))
+        ? 'ready'
+        : 'timeout'
+      : await evaluate(`new Promise((done) => {
       const started = performance.now();
       const poll = () => document.documentElement.hasAttribute('data-preview-ready')
         ? done('ready')
@@ -204,22 +260,48 @@ try {
       poll();
     })`);
   }
-  if (ready === 'not-found') throw new Error(`${url} rendered the not-found page: unknown ${kind} name`);
-  if (ready === 'timeout') throw new Error(`${url} never set data-preview-ready within ${READY_TIMEOUT}ms, twice`);
+  if (ready === 'not-found')
+    throw new Error(`${url} rendered the not-found page: unknown ${kind} name`);
+  if (ready === 'timeout')
+    throw new Error(`${url} never set data-preview-ready within ${READY_TIMEOUT}ms, twice`);
   await evaluate('document.fonts.ready.then(() => true)');
 
   const height = await evaluate('Math.ceil(document.documentElement.scrollHeight)');
-  await devtools.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 2, mobile: false });
+  await devtools.send('Emulation.setDeviceMetricsOverride', {
+    width,
+    height,
+    deviceScaleFactor: 2,
+    mobile: false,
+  });
   const page = await screenshot(`${stem}.png`);
 
   const tokens = await evaluate(`(() => {
     const computed = getComputedStyle(document.documentElement);
     return Object.fromEntries([...computed].filter((name) => name.startsWith('--')).map((name) => [name, computed.getPropertyValue(name).trim()]));
   })()`);
-  const parts = await evaluate(readStyles('[data-slot], [data-ui], [data-part], :is([data-slot], [data-ui], [data-part]) > *, svg, a, button, input, select, textarea, [role], [tabindex]'));
-  const keyframes = await evaluate(`[...document.styleSheets].flatMap((sheet) => { try { return [...sheet.cssRules]; } catch { return []; } }).filter((rule) => rule instanceof CSSKeyframesRule).map((rule) => rule.cssText)`);
+  const parts = await evaluate(
+    readStyles(
+      '[data-slot], [data-ui], [data-part], :is([data-slot], [data-ui], [data-part]) > *, svg, a, button, input, select, textarea, [role], [tabindex]',
+    ),
+  );
+  const keyframes = await evaluate(
+    `[...document.styleSheets].flatMap((sheet) => { try { return [...sheet.cssRules]; } catch { return []; } }).filter((rule) => rule instanceof CSSKeyframesRule).map((rule) => rule.cssText)`,
+  );
 
-  const specimen = { url, item: item ?? values.family, kind, base: values.base, style: values.style, theme: values.theme, width, picture: page, tokens, keyframes, parts, states: [] };
+  const specimen = {
+    url,
+    item: item ?? values.family,
+    kind,
+    base: values.base,
+    style: values.style,
+    theme: values.theme,
+    width,
+    picture: page,
+    tokens,
+    keyframes,
+    parts,
+    states: [],
+  };
 
   if (values.states) {
     const selector = values.states;
@@ -242,7 +324,10 @@ try {
     /* A client-rendered preview may replace nodes between calls, so each node id is resolved when used. */
     async function nodeAt(index) {
       const { root } = await devtools.send('DOM.getDocument', { depth: 0 });
-      const { nodeId } = await devtools.send('DOM.querySelector', { nodeId: root.nodeId, selector: `[data-reui-capture="${index}"]` });
+      const { nodeId } = await devtools.send('DOM.querySelector', {
+        nodeId: root.nodeId,
+        selector: `[data-reui-capture="${index}"]`,
+      });
       if (!nodeId) throw new Error(`--states ${selector}: element ${index} left the page`);
       return nodeId;
     }
@@ -255,7 +340,12 @@ try {
         width: entry.rect.width + 32,
         height: entry.rect.height + 32,
       };
-      const record = { index, rest: entry, pictures: { rest: await screenshot(`${stem}-${index}-rest.png`, clip) }, deltas: {} };
+      const record = {
+        index,
+        rest: entry,
+        pictures: { rest: await screenshot(`${stem}-${index}-rest.png`, clip) },
+        deltas: {},
+      };
 
       for (const [state, forced] of Object.entries(STATES)) {
         /* Forcing :focus on a span paints a state no reader can reach; it is recorded as absent. */
@@ -265,7 +355,13 @@ try {
         }
         if (state === 'focus') {
           for (const type of ['rawKeyDown', 'keyUp']) {
-            await devtools.send('Input.dispatchKeyEvent', { type, key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9, nativeVirtualKeyCode: 9 });
+            await devtools.send('Input.dispatchKeyEvent', {
+              type,
+              key: 'Tab',
+              code: 'Tab',
+              windowsVirtualKeyCode: 9,
+              nativeVirtualKeyCode: 9,
+            });
           }
           await evaluate(`(document.querySelector(${JSON.stringify(marked)})?.focus(), true)`);
         }
@@ -274,10 +370,16 @@ try {
         await wait(50);
         const [now] = await evaluate(readStyles(marked));
         record.deltas[state] = Object.fromEntries(
-          PROPERTIES.filter((name) => !/^(transition|animation)-/.test(name) && now.style[name] !== entry.style[name]).map((name) => [name, [entry.style[name], now.style[name]]]),
+          PROPERTIES.filter(
+            (name) =>
+              !/^(transition|animation)-/.test(name) && now.style[name] !== entry.style[name],
+          ).map((name) => [name, [entry.style[name], now.style[name]]]),
         );
         record.pictures[state] = await screenshot(`${stem}-${index}-${state}.png`, clip);
-        await devtools.send('CSS.forcePseudoState', { nodeId: await nodeAt(index), forcedPseudoClasses: [] });
+        await devtools.send('CSS.forcePseudoState', {
+          nodeId: await nodeAt(index),
+          forcedPseudoClasses: [],
+        });
         if (state === 'focus') await evaluate('(document.activeElement?.blur(), true)');
       }
       specimen.states.push(record);
@@ -288,7 +390,9 @@ try {
   await writeFile(file, JSON.stringify(specimen, null, 2));
   console.log(`picture  ${page}`);
   console.log(`specimen ${file}`);
-  console.log(`parts ${specimen.parts.length}, tokens ${Object.keys(tokens).length}, keyframes ${keyframes.length}, states ${specimen.states.length}`);
+  console.log(
+    `parts ${specimen.parts.length}, tokens ${Object.keys(tokens).length}, keyframes ${keyframes.length}, states ${specimen.states.length}`,
+  );
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;

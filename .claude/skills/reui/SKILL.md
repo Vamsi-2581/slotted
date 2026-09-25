@@ -27,11 +27,11 @@ by `scripts/capture.mjs`, on both sides.
 `/reui <family> [survey|polish|build]`. Without a mode: `polish` when
 `specs/components/<family>/` exists, `build` otherwise.
 
-| Mode     | Output                                             | Stops at                          |
-| -------- | -------------------------------------------------- | --------------------------------- |
-| `survey` | Dossier                                            | Dossier written                   |
-| `polish` | Dossier, then the delta applied to the family      | Dossier gate, then report         |
-| `build`  | Dossier, then `/component <family>` fed by it      | The two `/component` gates        |
+| Mode     | Output                                        | Stops at                   |
+| -------- | --------------------------------------------- | -------------------------- |
+| `survey` | Dossier                                       | Dossier written            |
+| `polish` | Dossier, then the delta applied to the family | Dossier gate, then report  |
+| `build`  | Dossier, then `/component <family>` fed by it | The two `/component` gates |
 
 `polish` changes stylesheets, token files, and binding markup that the contract
 already declares. A delta row that edits `contract.json` moves the run to
@@ -56,13 +56,13 @@ node tools/harness/build.mjs <family>
 node .claude/skills/reui/scripts/capture.mjs --family <family> --theme light --width 720 --states '<selector>'
 ```
 
-| Axis              | Flag                                                      | Sides        |
-| ----------------- | --------------------------------------------------------- | ------------ |
-| Scheme            | `--theme light\|dark` (Slotted also `high-contrast`)      | both         |
-| Page width        | `--width` (ReUI default 1280; Slotted 240, 420, 720)      | both         |
-| Reduced motion    | `--motion reduce`                                         | both         |
-| Forced colours    | `--forced-colors active`                                  | both         |
-| Density, direction| `--density dense`, `--dir rtl`                            | Slotted      |
+| Axis               | Flag                                                 | Sides   |
+| ------------------ | ---------------------------------------------------- | ------- |
+| Scheme             | `--theme light\|dark` (Slotted also `high-contrast`) | both    |
+| Page width         | `--width` (ReUI default 1280; Slotted 240, 420, 720) | both    |
+| Reduced motion     | `--motion reduce`                                    | both    |
+| Forced colours     | `--forced-colors active`                             | both    |
+| Density, direction | `--density dense`, `--dir rtl`                       | Slotted |
 
 Every axis away from its default and the `--states` selector enter the file
 stem, so runs never overwrite each other. Each run writes `<stem>.png` (full
@@ -132,32 +132,32 @@ full-page picture of each item in both themes.
 Section 7 of the dossier checks each criterion on both sides. "Premium" in this
 repository means these numbers, not an adjective.
 
-| Criterion        | Pass condition                                                                                              |
-| ---------------- | ----------------------------------------------------------------------------------------------------------- |
-| Pixel grid       | The block size of every framed part (a part that paints a border, a background or a ring) is a whole pixel at 1×, comfortable density. Inline size of content-sized parts and text parts are exempt. |
-| Hover            | Every interactive part has a non-empty hover delta; a surface step is ≥ 0.02 OKLab L on each surface (`packages/tokens/src/theme-conformance.mjs`). |
-| Press            | The active delta differs from the hover delta.                                                              |
-| Focus            | On every `focusable` part: indicator ≥ 2px, ≥ 3:1 between the indicator colour and the part's `ground`, in light, dark and high-contrast (WCAG 2.4.13); offset clears the part's border. |
-| Transition       | Every property in any state delta is listed in `transition-property`; no declared `all` with a non-zero duration; durations and easings are motion tokens. |
-| Reduced motion   | Motion-scale durations collapse; infinite animations stop.                                                  |
-| Disabled         | Label contrast holds the token-foundation value; no bare `opacity: 0.5`.                                    |
-| Schemes          | High-contrast and forced-colours captures read as the same component. ReUI ships neither.                  |
-| Density and RTL  | Dense and rtl captures keep the anatomy; lengths scale, meaning does not change.                            |
-| Target size      | Interactive parts meet § Target size of `docs/token-foundation.md`.                                         |
+| Criterion       | Pass condition                                                                                                                                                                                       |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pixel grid      | The block size of every framed part (a part that paints a border, a background or a ring) is a whole pixel at 1×, comfortable density. Inline size of content-sized parts and text parts are exempt. |
+| Hover           | Every interactive part has a non-empty hover delta; a surface step is ≥ 0.02 OKLab L on each surface (`packages/tokens/src/theme-conformance.mjs`).                                                  |
+| Press           | The active delta differs from the hover delta.                                                                                                                                                       |
+| Focus           | On every `focusable` part: indicator ≥ 2px, ≥ 3:1 between the indicator colour and the part's `ground`, in light, dark and high-contrast (WCAG 2.4.13); offset clears the part's border.             |
+| Transition      | Every property in any state delta is listed in `transition-property`; no declared `all` with a non-zero duration; durations and easings are motion tokens.                                           |
+| Reduced motion  | Motion-scale durations collapse; infinite animations stop.                                                                                                                                           |
+| Disabled        | Label contrast holds the token-foundation value; no bare `opacity: 0.5`.                                                                                                                             |
+| Schemes         | High-contrast and forced-colours captures read as the same component. ReUI ships neither.                                                                                                            |
+| Density and RTL | Dense and rtl captures keep the anatomy; lengths scale, meaning does not change.                                                                                                                     |
+| Target size     | Interactive parts meet § Target size of `docs/token-foundation.md`.                                                                                                                                  |
 
 A criterion Slotted fails is a delta row, whatever ReUI does. A criterion ReUI
 fails and Slotted passes is recorded as `superar` and not changed.
 
 ## Common mistakes
 
-| Mistake                                                    | Correction                                                         |
-| ---------------------------------------------------------- | ------------------------------------------------------------------ |
-| Measuring by eye from a screenshot                         | Copy the computed value from the specimen JSON.                     |
-| Reading `px-2` or `rounded-md` as the value                | Class names locate a rule; the specimen holds the value.            |
-| Capturing only ReUI                                        | The dossier compares two specimens; the Slotted side is captured first and after. |
-| Hover captured as empty on ReUI                            | `capture.mjs` launches Chrome with a fine pointer; an empty delta is a finding, not a capture error. |
-| A literal colour or duration copied into a stylesheet      | Semantic token by role; motion token. `motion.test.mjs` rejects literal durations. |
-| Opening reui.io pages for general browsing                 | `capture.mjs` on a named item, or `ctx_fetch_and_index` for docs and `llms-full.txt`. |
-| Treating ReUI as the ceiling                               | Section 7 is where Slotted exceeds it; every `superar` row names the number. |
-| Stopping because ReUI has no such family                   | Coverage `análogo` or `nenhuma`; the craft bar still produces the delta. |
-| Copying an analogue's value into a part with another role  | An analogue informs only the part with the same role and interaction. |
+| Mistake                                                   | Correction                                                                                           |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Measuring by eye from a screenshot                        | Copy the computed value from the specimen JSON.                                                      |
+| Reading `px-2` or `rounded-md` as the value               | Class names locate a rule; the specimen holds the value.                                             |
+| Capturing only ReUI                                       | The dossier compares two specimens; the Slotted side is captured first and after.                    |
+| Hover captured as empty on ReUI                           | `capture.mjs` launches Chrome with a fine pointer; an empty delta is a finding, not a capture error. |
+| A literal colour or duration copied into a stylesheet     | Semantic token by role; motion token. `motion.test.mjs` rejects literal durations.                   |
+| Opening reui.io pages for general browsing                | `capture.mjs` on a named item, or `ctx_fetch_and_index` for docs and `llms-full.txt`.                |
+| Treating ReUI as the ceiling                              | Section 7 is where Slotted exceeds it; every `superar` row names the number.                         |
+| Stopping because ReUI has no such family                  | Coverage `análogo` or `nenhuma`; the craft bar still produces the delta.                             |
+| Copying an analogue's value into a part with another role | An analogue informs only the part with the same role and interaction.                                |

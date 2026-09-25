@@ -628,6 +628,7 @@ de outra da mesma onda.
   `@slotted/core/dashboard-grid`. React `DashboardGrid` + `DashboardWidget`
   (`usePersistedDashboardLayout`); Angular `[slDashboardGrid]` + `sl-dashboard-widget`
   (conteúdo em templates, à maneira de `mat-tab`; `persistedDashboardLayout`).
+
 - `wizard` — etapas com dados acumulados, validação por etapa, voltar/avançar/
   enviar, rascunho, retomada e erro global. O estado vive fora de `stepper`,
   que só o desenha. Navegação direta depende de etapas concluídas; URL, reload
@@ -641,6 +642,7 @@ de outra da mesma onda.
   dele. Aritmética e rascunho em `@slotted/core/wizard` (`storagePersistence`). React
   `Wizard`, `WizardStep`, `WizardEdit`, `WizardComplete`, ações em `Button`; Angular
   `[slWizard]`, `ng-template[slWizardStep]`, `form[slWizardForm]` do consumidor.
+
 - `detail-panel` — resumo, metadados, status, `tabs` ou seções, ações e
   histórico (`timeline`). Abre em página, `drawer` ou `master-detail` conforme
   a profundidade; URL e foco tornam a abertura compartilhável e reversível. Não
@@ -745,6 +747,7 @@ slNotificationActions]`, `[slNotificationCenterActions | Footer | Empty]`,
   `popover` e `dialog`, não as famílias (`popover` não ancora num alvo externo). Navegação em
   `@slotted/core/tour`; `dismissable-layer.raise()`, `portal.raise()` e `focus-scope` passam a
   servir uma camada que volta ao topo sobre um diálogo aberto a meio do tour.
+
 - `action-sheet` — variante de `menu` para toque: ações curtas, cancelamento
   explícito, safe area, modal opcional. Compõe `drawer` com `side="bottom"`.
   Não duplica `dialog` com formulário.
@@ -815,6 +818,7 @@ Cada família traz um subsistema. Uma sessão por família.
   42rem a lista é uma grelha e cada job uma subgrelha. `upload` entra pelo diálogo de importação no
   slot `actions`, não no cabeçalho. React `ImportExportCenter` e `useJobToasts`; Angular
   `section[slImportExportCenter]`, `[(view)]`, `[(expanded)]` e `jobToasts`.
+
 - `search-results` — query, escopo, filtros, ordenação, facets, sugestões,
   resultados com `highlight`, paginação ou carga contínua e estados sem
   resultado e erro. Mantém URL e foco; anuncia a contagem; oferece correção da

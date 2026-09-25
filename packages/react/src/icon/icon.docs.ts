@@ -48,8 +48,16 @@ export const REACT_ICON_DOCS = {
         'The name the icon carries; absent, the icon leaves the accessibility tree',
       ],
       ['children', 'ReactNode', '—', 'Icon', 'The glyph — a Lucide component, an svg, any artwork'],
+      [
+        'name',
+        'GlyphName',
+        '—',
+        'Glyph',
+        'One of the library’s own icons, drawn as an svg inside the box; families draw theirs with it',
+      ],
     ]),
     accessibility: [
+      'A glyph is drawn aria-hidden and focusable=false: it is artwork, and the Icon around it is what carries a name. A family’s close button is named by its own aria-label, never by the cross it draws.',
       'There is no decorative prop. An icon with no name is hidden with aria-hidden, and an icon with one takes role="img" and carries it, so named and hidden cannot both be true.',
       'WAI-ARIA requires a label on role="img" (§5.2.8 lists img among the roles for which a name is required), which is why the role appears only once a name exists.',
       'A name written as aria-label or aria-labelledby counts as much as the label prop, so the icon a consumer labelled directly is not hidden from the tree.',
@@ -59,6 +67,13 @@ export const REACT_ICON_DOCS = {
       'The optical shift is computed from the cap height of the surrounding font and the size of the box, so an icon stays on the text’s optical line at every combination of the two rather than at the one ratio a constant would fit.',
     ],
     snippets: [
+      defineSnippet({
+        id: 'icon-react-library-glyph',
+        language: 'tsx',
+        label: 'The library’s own icons are real svg elements',
+        source:
+          '<Button aria-label="Close">\n  <Icon size="sm">\n    <Glyph name="x" />\n  </Icon>\n</Button>;',
+      }),
       defineSnippet({
         id: 'icon-react-decorative',
         language: 'tsx',

@@ -110,6 +110,16 @@ other families stand on. Justify it at the gate before writing it.
 
 ## Decisions already taken
 
+- **A family's own icon is the `Glyph` element, in every family.** The close
+  button's cross, a pager's chevrons, a field's clear and reveal buttons, a
+  checkbox's tick: each is `<Icon><Glyph name="…" /></Icon>` (React) or
+  `<span slIcon><svg slGlyph name="…"></svg></span>` (Angular), a real `<svg>`
+  drawn from `@slotted/core/glyph`. No stylesheet paints an icon — no mask of a
+  glyph token, no pseudo-element, no family hook falling back to one. A harness
+  fragment writes `<svg data-part="glyph" data-glyph="…"></svg>` and the build
+  draws it. `packages/styles/src/glyph-element.test.mjs` enforces it; its
+  `PENDING` list only shrinks. Decided 2026-09-25.
+
 - **Measure belongs to `container`, and to it alone.** No text family or layout
   primitive caps its own line length; two families offering a maximum measure
   would be two answers to one question.
@@ -263,6 +273,15 @@ other families stand on. Justify it at the gate before writing it.
   or a nested section inside stops under the section's header, and layers add
   up under one name. Decided in wave 7 for `page`, `page-header` and
   `section`; it binds `anchor-nav`, `app-shell` and `filter-bar` in wave 8.
+- **The edge of a control at rest is a line, not a separator.**
+  `--slotted-control-border-color` reads 1.7:1 in `light` and 1.8:1 in `dark`,
+  held to a 1.5:1 floor by `theme-conformance`; `--slotted-border-strong` and
+  the focus ring keep 3:1. At 3:1 the edge was the darkest line on every form
+  and both schemes read as high-contrast. A control is identified by its fill,
+  `--slotted-control-shadow` — now `0 1px 2px` at an ink that is visible — its
+  label and its size; the states that carry meaning keep their ratio. A family
+  that needs a 3:1 line on a control at rest states which state it marks and
+  reads that state's token, not the resting edge.
 - **A scroll-driven change carries the reason `scroll`.** The header area
   collapsing because the reader scrolled past it is a change the consumer did
   not make and may refuse; `specs/contract.schema.mjs` names the reason, so a

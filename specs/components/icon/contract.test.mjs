@@ -16,9 +16,15 @@ test('names the identifier a consumer selects the family by', () => {
   assert.equal(contract.schemaVersion, 5);
 });
 
-test('is one member with one part, because a box has no anatomy', () => {
+/**
+ * The box has no anatomy of its own. Its one other part is the library's own
+ * artwork: `Glyph` / `svg[slGlyph]`, the element every family draws its icons
+ * with, so a close button's cross is a real `<svg>` and never a pseudo-element
+ * or a mask a stylesheet invented. A consumer's artwork stays theirs.
+ */
+test('is one member: the box, and the library’s own glyph inside it', () => {
   assert.deepEqual(Object.keys(contract.members), ['icon']);
-  assert.deepEqual(contract.members.icon.parts, ['root']);
+  assert.deepEqual(contract.members.icon.parts, ['root', 'glyph']);
 });
 
 test('frames the artwork rather than owning it', () => {
@@ -79,6 +85,7 @@ test('names one reference page, covering direction and the accessibility choice'
     'in-context',
     'direction',
     'accessibility',
+    'library-glyphs',
   ]);
 });
 

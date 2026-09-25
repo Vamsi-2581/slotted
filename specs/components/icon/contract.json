@@ -16,10 +16,19 @@
       },
       "capabilities": ["size"],
       "states": ["default"],
-      "parts": ["root"]
+      "parts": ["root", "glyph"]
     }
   },
   "scenarios": {
-    "icon": ["playground", "sizes", "baseline", "tone", "in-context", "direction", "accessibility"]
+    "icon": [
+      "playground",
+      "sizes",
+      "baseline",
+      "tone",
+      "in-context",
+      "direction",
+      "accessibility",
+      "library-glyphs"
+    ]
   }
 }

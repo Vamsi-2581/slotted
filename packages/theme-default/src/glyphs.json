@@ -54,5 +54,6 @@
   "--slotted-icon-trending-up": { "icon": "trending-up" },
   "--slotted-icon-image-off": { "icon": "image-off" },
   "--slotted-icon-funnel": { "icon": "funnel" },
-  "--slotted-icon-grip-vertical": { "icon": "grip-vertical" }
+  "--slotted-icon-grip-vertical": { "icon": "grip-vertical" },
+  "--slotted-icon-grip-horizontal": { "icon": "grip-horizontal" }
 }

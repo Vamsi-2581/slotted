@@ -54,8 +54,16 @@ export const ANGULAR_ICON_DOCS = {
         'slIcon',
         'The glyph — an ng-icon, an svg, any artwork the consumer projects',
       ],
+      [
+        'name',
+        'GlyphName',
+        '—',
+        'slGlyph',
+        'One of the library’s own icons, drawn as an svg inside the box; families draw theirs with it',
+      ],
     ]),
     accessibility: [
+      'A glyph is drawn aria-hidden and focusable=false: it is artwork, and the Icon around it is what carries a name. A family’s close button is named by its own aria-label, never by the cross it draws.',
       'There is no decorative input. An icon with no name is hidden with aria-hidden, and an icon with one takes role="img" and carries it, so named and hidden cannot both be true.',
       'WAI-ARIA requires a label on role="img" (§5.2.8 lists img among the roles for which a name is required), which is why the role appears only once a name exists.',
       'An aria-label or aria-labelledby written on the element is read as a name, so the icon a consumer labelled directly keeps its label and stays in the tree.',
@@ -65,6 +73,13 @@ export const ANGULAR_ICON_DOCS = {
       'The optical shift is computed from the cap height of the surrounding font and the size of the box, so an icon stays on the text’s optical line at every combination of the two rather than at the one ratio a constant would fit.',
     ],
     snippets: [
+      defineSnippet({
+        id: 'icon-angular-library-glyph',
+        language: 'angular',
+        label: 'The library’s own icons are real svg elements',
+        source:
+          '<button slButton aria-label="Close">\n  <span slIcon size="sm"><svg slGlyph name="x"></svg></span>\n</button>',
+      }),
       defineSnippet({
         id: 'icon-angular-decorative',
         language: 'angular',

@@ -10,6 +10,7 @@ import {
   parseScenes,
   renderHarness,
   scopeControlNames,
+  scopeGlyphMasks,
 } from './build.mjs';
 import { captureClip, captureName, parseArguments } from './shoot.mjs';
 
@@ -344,8 +345,8 @@ test('refuses an axis value the harness cannot render', () => {
 
 /**
  * A family whose smallest meaningful layout is wider than the widest default
- * stage could not be photographed at all: `app-shell` answers its own inline
- * size at 768 pixels, so all three defaults rendered the narrow layout and the
+ * stage could not be photographed at all: `app-shell`, while it answered its
+ * own inline size at 768 pixels, rendered the narrow layout at all three defaults, and the
  * wide one — the navigation as a column, the pane beside the content, the rail
  * — never reached an image. A fixed-width stage does not answer it, because
  * the capture is clipped to the width the shooter was asked for.
@@ -623,5 +624,13 @@ test('narrows to the scene named and not to every scene whose name starts with i
   assert.ok(
     html.includes('dataset.scene === scene'),
     'the filter still matches the scene by prefix',
+  );
+});
+
+test('scopes a solid glyph’s mask to its cell, so each copy cuts its own symbol', () => {
+  const markup = '<mask id="sl-glyph-harness-3"></mask><path mask="url(#sl-glyph-harness-3)"/>';
+  assert.equal(
+    scopeGlyphMasks(markup, 'dark-420'),
+    '<mask id="sl-glyph-harness-3--dark-420"></mask><path mask="url(#sl-glyph-harness-3--dark-420)"/>',
   );
 });

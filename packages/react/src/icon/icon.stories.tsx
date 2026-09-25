@@ -8,11 +8,14 @@ import {
   Search,
   TriangleAlert,
 } from 'lucide-react';
+import { GLYPHS } from '@slotted/core/glyph';
+import type { GlyphName } from '@slotted/core/glyph';
 import { createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { CSSProperties } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+import { Glyph } from './glyph';
 import { Icon } from './icon';
 import { REACT_ICON_DOCS, REACT_ICON_TOKENS } from './icon.docs';
 import type { IconSize, IconTone } from './icon.types';
@@ -340,6 +343,35 @@ export const Accessibility: Story = {
               </Icon>
               a name written as aria-label counts the same, and is not hidden
             </span>
+          </div>
+        </div>
+      </section>
+    </div>
+  ),
+};
+
+export const LibraryGlyphs: Story = {
+  parameters: scenario('library-glyphs'),
+  render: () => (
+    <div className="slotted-demo-grid" data-columns="1">
+      <section className="slotted-demo-scene">
+        <header className="slotted-demo-scene__header">
+          <span className="slotted-demo-scene__label">The library’s own icons</span>
+          <span className="slotted-demo-scene__note">
+            Every icon a family draws for itself — a close button’s cross, a pager’s chevrons — is
+            one of these, a real svg inside the Icon box.
+          </span>
+        </header>
+        <div className="slotted-demo-stage">
+          <div className="slotted-demo-grid" data-columns="4">
+            {(Object.keys(GLYPHS) as GlyphName[]).map((name) => (
+              <span className="slotted-demo-row" key={name}>
+                <Icon>
+                  <Glyph name={name} />
+                </Icon>
+                {name}
+              </span>
+            ))}
           </div>
         </div>
       </section>

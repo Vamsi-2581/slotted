@@ -9,11 +9,13 @@ import {
   lucideSearch,
   lucideTriangleAlert,
 } from '@ng-icons/lucide';
+import { GLYPHS } from '@slotted/core/glyph';
 import { createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
 
+import { SlGlyph } from './glyph';
 import { SlIcon } from './icon';
 import { ANGULAR_ICON_DOCS, ANGULAR_ICON_TOKENS } from './icon.docs';
 import type { IconSize, IconTone } from './icon.types';
@@ -51,7 +53,7 @@ const meta: Meta<IconStoryArgs> = {
   component: SlIcon,
   decorators: [
     moduleMetadata({
-      imports: [NgIcon, SlIcon],
+      imports: [NgIcon, SlGlyph, SlIcon],
       providers: [
         provideIcons({
           lucideArrowRight,
@@ -342,5 +344,32 @@ export const Accessibility: Story = {
     </div>
   </section>
 </div>`,
+  }),
+};
+
+export const LibraryGlyphs: Story = {
+  parameters: scenario('library-glyphs'),
+  render: () => ({
+    props: { names: Object.keys(GLYPHS) },
+    template: `
+      <div class="slotted-demo-grid" data-columns="1">
+        <section class="slotted-demo-scene">
+          <header class="slotted-demo-scene__header">
+            <span class="slotted-demo-scene__label">The library’s own icons</span>
+            <span class="slotted-demo-scene__note">
+              Every icon a family draws for itself — a close button’s cross, a pager’s chevrons — is
+              one of these, a real svg inside the icon box.
+            </span>
+          </header>
+          <div class="slotted-demo-stage">
+            <div class="slotted-demo-grid" data-columns="4">
+              @for (name of names; track name) {
+                <span class="slotted-demo-row"><span slIcon><svg slGlyph [name]="name"></svg></span>{{ name }}</span>
+              }
+            </div>
+          </div>
+        </section>
+      </div>
+    `,
   }),
 };

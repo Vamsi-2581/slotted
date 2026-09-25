@@ -5,8 +5,10 @@ import test from 'node:test';
 
 import {
   DEFAULT_STROKE_WIDTH,
+  generateModule,
   GLYPH_PREFIX,
   lucideIcon,
+  pathOf,
   renderGlyph,
 } from './generate-icon-glyphs.mjs';
 import { centringOffset, inkBox, VIEW_BOX } from './glyph-ink.mjs';
@@ -407,4 +409,33 @@ test('scopes the law to the families the rebuild has reached', () => {
   );
 
   assert.match(buildLog, /only the four motion-scale\s+duration tokens\s+collapse/i);
+});
+
+/**
+ * The element and the mask are one drawing. The module the `Glyph` element
+ * renders is generated from the same manifest, and every Lucide element it
+ * rewrites as path data keeps the ink box Lucide's own element has — the box
+ * the centring offset was computed from.
+ */
+test('draws the glyph element from the drawing the mask is drawn from', async () => {
+  const { changed } = await generateModule({ check: true });
+  assert.equal(
+    changed,
+    false,
+    'packages/core/src/glyph/glyphs.ts is out of date; run node scripts/generate-icon-glyphs.mjs',
+  );
+  const round = (box) => Object.values(box).map((value) => Number(value.toFixed(3)));
+  for (const [name, entry] of Object.entries(glyphs)) {
+    const node = lucideIcon(entry.icon);
+    const options = {
+      paint: entry.paint ?? 'stroke',
+      strokeWidth: entry['stroke-width'] ?? DEFAULT_STROKE_WIDTH,
+    };
+    const asPaths = node.map(([tag, attributes]) => ['path', { d: pathOf(tag, attributes) }]);
+    assert.deepEqual(
+      round(inkBox(asPaths, options)),
+      round(inkBox(node, options)),
+      `${name}: the path form of "${entry.icon}" is not the same geometry`,
+    );
+  }
 });

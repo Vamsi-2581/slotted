@@ -4,11 +4,11 @@ Assess every dimension in writing before the human gate. Dimensions 1 through 8 
 
 ## 1. Icons
 
-**Meaning:** Every component-owned icon is real geometry from a glyph token, never a character or emoji. The component supplies intrinsic icons instead of asking the consumer to supply its own semantics.
+**Meaning:** Every component-owned icon is the `Glyph` element — a real `<svg>` from `@slotted/core/glyph`, rendered by the binding inside the `icon` box (`<Icon><Glyph name="…" /></Icon>`, `<span slIcon><svg slGlyph name="…"></svg></span>`). One mechanism for every family: never a `mask-image`, a `::before`/`::after` standing in for an icon, a family hook whose fallback is a glyph token, or a character or emoji. The component supplies intrinsic icons instead of asking the consumer to supply its own semantics.
 
-**Verify:** Inspect each icon in light and dark captures, read how its geometry is produced, and inspect the family's `forced-colors` rule. Confirm directional artwork behaves deliberately in right-to-left documents.
+**Verify:** Read the binding and find the `Glyph` element for every icon the family draws; read the stylesheet and find none painted. `packages/styles/src/glyph-element.test.mjs` fails on a glyph token in CSS outside its `PENDING` list. Inspect each icon in light, dark and high-contrast captures. Confirm directional artwork mirrors through `directional` on the `icon` box.
 
-**Fails when:** `content` draws `/`, `*`, or another character; an expected glyph is absent; a mask disappears in forced colors; direction-sensitive geometry points the wrong way.
+**Fails when:** a stylesheet paints an icon (mask, pseudo-element, background image); `content` draws `/`, `*`, `×` or another character; an expected glyph is absent; direction-sensitive geometry points the wrong way.
 
 ## 2. Motion
 

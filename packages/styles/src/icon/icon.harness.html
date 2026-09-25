@@ -5,7 +5,10 @@
   unmaintained copy of a maintained catalogue in the repository. Four trivial
   shapes on the same 24-unit grid are enough to judge the box: two that point
   somewhere, one stroked ring and one filled disc, so both painting conventions
-  are on screen.
+  are on screen. The last scene is the exception: the library's own glyphs, the
+  ones every family draws with the `Glyph` element, written as empty
+  `<svg data-glyph>` elements the harness build draws from the same module the
+  bindings render.
 
   Text beside the icons carries the type scale inline, because the harness
   loads this family's stylesheet and the theme, and nothing else.
@@ -436,5 +439,94 @@
       </span>
       — nothing beside the icon says the payment failed, so the icon says it
     </span>
+  </div>
+</section>
+
+<section data-scene="library-glyphs">
+  <div
+    style="
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+      gap: 12px 16px;
+      font:
+        14px/1.4 system-ui,
+        sans-serif;
+    "
+  >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="x"></svg></span
+      >x</span
+    >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="check"></svg></span
+      >check</span
+    >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
+      >chevron-right</span
+    >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+      >chevron-down</span
+    >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="search"></svg></span
+      >search</span
+    >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="funnel"></svg></span
+      >funnel</span
+    >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="calendar"></svg></span
+      >calendar</span
+    >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="clock"></svg></span
+      >clock</span
+    >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="copy"></svg></span
+      >copy</span
+    >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="trash"></svg></span
+      >trash</span
+    >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="pin"></svg></span
+      >pin</span
+    >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="ellipsis"></svg></span
+      >ellipsis</span
+    >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="circle-check" data-solid></svg></span
+      >circle-check · solid</span
+    >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="circle-alert" data-solid></svg></span
+      >circle-alert · solid</span
+    >
+    <span style="display: inline-flex; align-items: center; gap: 8px"
+      ><span data-ui="icon" data-part="root" aria-hidden="true"
+        ><svg data-part="glyph" data-glyph="triangle-alert" data-solid></svg></span
+      >triangle-alert · solid</span
+    >
   </div>
 </section>

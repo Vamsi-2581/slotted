@@ -16,14 +16,20 @@ const source = new URL('.', import.meta.url).pathname;
  * This test holds the rule for every family that draws one, part by part:
  *
  * 1. the mark is sized from the title's type (`1em` of a root whose font size
- *    is the title's, or the title's own size variable) — never from
+ *    is the title's, the title's own size variable, or a filled disc one
+ *    step above `1em`, rounded to even pixels) — never from
  *    `--slotted-control-icon-size-*`;
- * 2. it aligns to the first line: `align-self: start` and a block-start
- *    margin of half the difference between the line and the mark;
+ * 2. it aligns to the first line, in one of two forms: `align-self: start`
+ *    and a block-start margin of half the difference between the line and
+ *    the mark; or (`anchor: 'baseline'`) `align-self: baseline` and a
+ *    relative offset of half the mark less one `cap`, rounded to a whole
+ *    pixel, which ties the mark to the glyphs' own pixel snapping — the
+ *    fractional margin of the first form lands the mark a pixel above or
+ *    below the capitals depending on where the box falls on the page;
  * 3. the distance from the mark to the words is `--slotted-space-4` (8px), and
  *    every restatement of it — a reach, a size — keeps that step;
  * 4. nothing is drawn behind it: no radius, no border, no shadow, no padding,
- *    and the only ground is the ink the mask paints with;
+ *    and the only ground is the `Glyph` element's own ink;
  * 5. where the family has a `solid` variant, the mark takes the ink the words
  *    are read in on that fill.
  *
@@ -36,8 +42,9 @@ const MARKS = [
   {
     family: 'alert',
     part: 'icon',
+    anchor: 'baseline',
     size: /^var\(--_mark-size\)$/,
-    sizeValue: /^1em$/,
+    sizeValue: /^round\(nearest,\s*1\.2em,\s*2px\)$/,
     gap: '--_column-gap',
     solid: "[data-variant='solid']",
   },
@@ -149,7 +156,7 @@ function privateProperties(css) {
   return values;
 }
 
-function audit({ family, part, rest = /./, size, sizeValue, gap, solid }) {
+function audit({ family, part, rest = /./, size, sizeValue, gap, solid, anchor = 'start' }) {
   const css = withoutForcedColors(stylesheet(family));
   const privates = privateProperties(css);
   const own = rules(css).filter(({ selector }) => selector.includes(`[data-part='${part}']`));
@@ -176,12 +183,24 @@ function audit({ family, part, rest = /./, size, sizeValue, gap, solid }) {
   if (privates.get(sizeName) === undefined) findings.push(`${sizeName} is never defined`);
 
   /* 2. On the first line. */
-  if (!declared('align-self').includes('start')) findings.push('is not aligned to the start');
-  const margins = declared('margin-block-start');
-  if (margins.length === 0) findings.push('has no block-start margin onto the first line');
-  for (const value of margins) {
-    if (!/^calc\(\s*\(.+ - var\(--_[a-z-]+\)\) \/ 2\s*\)$/.test(value)) {
-      findings.push(`margin-block-start "${value}" is not half the line less the mark`);
+  if (anchor === 'baseline') {
+    if (!declared('align-self').includes('baseline')) findings.push('is not on the baseline');
+    if (!declared('position').includes('relative')) findings.push('is not offset relatively');
+    const offsets = declared('inset-block-start');
+    if (offsets.length === 0) findings.push('has no offset from the baseline');
+    for (const value of offsets) {
+      if (!/^round\(nearest,\s*\(var\(--_[a-z-]+\) - 1cap\) \/ 2,\s*1px\)$/.test(value)) {
+        findings.push(`inset-block-start "${value}" is not half the mark less the capitals`);
+      }
+    }
+  } else {
+    if (!declared('align-self').includes('start')) findings.push('is not aligned to the start');
+    const margins = declared('margin-block-start');
+    if (margins.length === 0) findings.push('has no block-start margin onto the first line');
+    for (const value of margins) {
+      if (!/^calc\(\s*\(.+ - var\(--_[a-z-]+\)\) \/ 2\s*\)$/.test(value)) {
+        findings.push(`margin-block-start "${value}" is not half the line less the mark`);
+      }
     }
   }
 
@@ -239,5 +258,7 @@ test('reads the rules it guards', () => {
       selector.includes(`[data-part='${part}']`),
     ),
   );
-  assert.ok(guarded.length >= 15, `Expected the status-mark rules, found ${guarded.length}`);
+  /* 13 since the marks became `Glyph` elements: the mask, its per-tone image
+     and its `:not(:empty)` guard were rules of their own, and went with it. */
+  assert.ok(guarded.length >= 13, `Expected the status-mark rules, found ${guarded.length}`);
 });

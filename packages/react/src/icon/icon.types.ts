@@ -1,3 +1,4 @@
+import type { GlyphName } from '@slotted/core/glyph';
 import type { ComponentPropsWithRef } from 'react';
 
 /**
@@ -26,4 +27,15 @@ export interface IconProps extends ComponentPropsWithRef<'span'> {
   size?: IconSize | undefined;
   /** `inherit` takes the colour of whatever contains the icon. */
   tone?: IconTone | undefined;
+}
+
+export interface GlyphProps extends Omit<ComponentPropsWithRef<'svg'>, 'children'> {
+  /** One of the library's own icons: its glyph token without `--slotted-icon-`. */
+  name: GlyphName;
+  /**
+   * The first shape filled and the symbol cut out of it — a tone's status
+   * mark. For glyphs whose first shape encloses the rest (`circle-*`,
+   * `triangle-alert`).
+   */
+  solid?: boolean | undefined;
 }

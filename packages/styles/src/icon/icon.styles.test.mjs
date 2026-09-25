@@ -119,3 +119,12 @@ test('exercises every declared part, and both painting conventions, in the fragm
   assert.match(fragment, /data-directional/, 'no scene shows the mirrored case');
   assert.match(fragment, /role="img"/, 'no scene shows an icon that carries a name');
 });
+
+test('sizes a glyph host inside the box through the font it reads', () => {
+  // A glyph component such as `ng-icon` sizes its own host at `1em` from a
+  // stylesheet outside any layer, which no normal declaration in the component
+  // layer outranks. The box therefore does not fight that host: it gives the
+  // host a font-size equal to the box, and `1em` is then the box.
+  const rule = normalized.split(`${ui}>*,`)[1]?.split('}')[0] ?? '';
+  assert.ok(rule.includes('font-size:var(--_size)'), 'the host is left at the text’s font-size');
+});

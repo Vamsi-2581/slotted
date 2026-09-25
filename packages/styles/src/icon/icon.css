@@ -49,11 +49,20 @@
    * host in between, as `<ng-icon><svg/></ng-icon>` does. This reaches into
    * markup the consumer wrote, deliberately: a box whose content sets its own
    * size is not a box.
+   *
+   * Such a host sizes itself at `1em` from a stylesheet outside any layer,
+   * and an unlayered declaration outranks a layered one whatever its
+   * specificity: the two lengths below never reach it. The box does not fight
+   * that host. It gives the host a font-size equal to the box, and `1em` is
+   * then the box — 14 pixels at `sm`, the type's size at `text`. The font-size
+   * is on the child and not on the box, because `vertical-align` above reads
+   * `cap` from the text the box sits in.
    */
   [data-ui='icon'] > *,
   [data-ui='icon'] svg {
     block-size: 100%;
     display: block;
+    font-size: var(--_size);
     inline-size: 100%;
   }
 

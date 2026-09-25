@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
+import { drawGlyphs } from './glyph.mjs';
 import { attachScript, bundleScript, splitFragment } from './script.mjs';
 
 export const SCHEMES = ['light', 'dark', 'high-contrast'];
@@ -56,8 +57,8 @@ export function parseScenes(fragment) {
      * The widths this scene is worth photographing at, when the three the page
      * ships are not among them.
      *
-     * `app-shell` found the gap: the shell's own breakpoint is 768 pixels, so
-     * every one of the three default widths renders the narrow layout and the
+     * `app-shell` found the gap while the shell's own breakpoint was 768 pixels:
+     * every one of the three default widths rendered the narrow layout and the
      * wide one — the navigation as a column, the pane beside the content, the
      * rail — could not be photographed at all. A fixed-width stage does not
      * answer it either, because the capture is clipped to the width the shooter
@@ -136,6 +137,18 @@ export function scopeControlNames(markup, suffix) {
 }
 
 /**
+ * A solid glyph cuts its symbol out with a `<mask>` the svg references by id,
+ * and `url(#id)` resolves to the first element with that id in the document:
+ * nine copies of one scene drew nine discs with nothing cut out, because the
+ * eight later ones pointed at a mask in a hidden cell. The mask's id and its
+ * reference are therefore made per cell, like a radio group's `name`; nothing
+ * else a fragment writes is rewritten.
+ */
+export function scopeGlyphMasks(markup, suffix) {
+  return markup.replace(/sl-glyph-harness-\d+/g, (id) => `${id}--${suffix}`);
+}
+
+/**
  * The theme name selects the block the stylesheet emits, so the attribute in
  * the document and the theme the stylesheet was built from have to agree. A
  * page that names one theme and loads another paints nothing.
@@ -176,7 +189,7 @@ export function renderHarness({
           }
           data-slotted-scheme="${scheme}"
           style="inline-size: ${width}px"
-        >${scopeControlNames(markup, `${scheme}-${width}`)}</div>
+        >${scopeGlyphMasks(scopeControlNames(markup, `${scheme}-${width}`), `${scheme}-${width}`)}</div>
       </figure>`,
         ).join('') +
         /* One scene at one width in the three schemes is a line of its own.
@@ -320,7 +333,7 @@ async function main() {
   const { scenes, css, script } = splitFragment(fragment);
   let html = renderHarness({
     family,
-    fragment: scenes,
+    fragment: drawGlyphs(scenes),
     familyCss: await read(`packages/styles/src/${family}/${family}.css`),
     composedCss: composed.join('\n'),
     pageCss: css,

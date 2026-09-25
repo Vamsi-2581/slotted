@@ -16,6 +16,8 @@
     "./accordion/tokens.json": "./src/accordion/accordion.tokens.json",
     "./action-bar/action-bar.css": "./src/action-bar/action-bar.css",
     "./action-bar/tokens.json": "./src/action-bar/action-bar.tokens.json",
+    "./action-sheet/action-sheet.css": "./src/action-sheet/action-sheet.css",
+    "./action-sheet/tokens.json": "./src/action-sheet/action-sheet.tokens.json",
     "./alert/alert.css": "./src/alert/alert.css",
     "./alert/tokens.json": "./src/alert/alert.tokens.json",
     "./app-shell/app-shell.css": "./src/app-shell/app-shell.css",

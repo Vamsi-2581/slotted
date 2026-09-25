@@ -239,6 +239,10 @@
       "types": "./dist/types/otp-input/index.d.ts",
       "import": "./dist/otp-input.js"
     },
+    "./import-export-center": {
+      "types": "./dist/types/import-export-center/index.d.ts",
+      "import": "./dist/import-export-center.js"
+    },
     "./page": {
       "types": "./dist/types/page/index.d.ts",
       "import": "./dist/page.js"

@@ -60,6 +60,7 @@ export default defineConfig({
         'multi-select': resolve(import.meta.dirname, 'src/multi-select/index.ts'),
         'notification-center': resolve(import.meta.dirname, 'src/notification-center/index.ts'),
         'otp-input': resolve(import.meta.dirname, 'src/otp-input/index.ts'),
+        'import-export-center': resolve(import.meta.dirname, 'src/import-export-center/index.ts'),
         page: resolve(import.meta.dirname, 'src/page/index.ts'),
         'page-header': resolve(import.meta.dirname, 'src/page-header/index.ts'),
         popover: resolve(import.meta.dirname, 'src/popover/index.ts'),

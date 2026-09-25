@@ -107,3 +107,4 @@ export * from './visually-hidden';
 export * from './splitter';
 export * from './split-button';
 export * from './transfer';
+export * from './tour';

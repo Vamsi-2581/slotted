@@ -25,8 +25,9 @@ export const ANGULAR_FULLSCREEN_TOKENS = fullscreenTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { provideFullscreenDefaults, SlFullscreen, SlFullscreenIcon, SlFullscreenTrigger } from '@slotted/angular/fullscreen';",
-  selector: '[slFullscreen], button[slFullscreenTrigger], [slFullscreenIcon]',
+    "import { provideFullscreenDefaults, SlFullscreen, SlFullscreenContent, SlFullscreenIcon, SlFullscreenTrigger } from '@slotted/angular/fullscreen';",
+  selector:
+    '[slFullscreen], button[slFullscreenTrigger], [slFullscreenContent], [slFullscreenIcon]',
   exportAs: 'slFullscreen, slFullscreenTrigger',
 };
 
@@ -44,6 +45,13 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'The control. It carries data-ui="fullscreen" of its own, so it is styled wherever it stands — inside the region, or in a bar outside it with [slFullscreenTrigger]="fs". Its words and its mark say what the press does next.',
+  },
+  {
+    part: 'content',
+    element: 'the consumer’s own element, with slFullscreenContent on it',
+    required: false,
+    purpose:
+      'A direct child of the region that takes, in full screen, the height the other children leave; its first child fills it. Without it, a region with one child gives that child the height, and a lone img, video or canvas fills it with object-fit: contain.',
   },
   {
     part: 'icon',
@@ -71,8 +79,11 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'A panel the reader can give the whole screen',
       source: `<section slFullscreen>
-  <h2 slHeading>Receita por mês</h2>
-  <button slFullscreenTrigger iconOnly></button>
+  <div slFullscreenContent>
+    <figure slChart title="Receita por mês" [data]="monthly" [series]="revenue">
+      <button slFullscreenTrigger slChartActions iconOnly></button>
+    </figure>
+  </div>
 </section>`,
     }),
   },
@@ -86,6 +97,23 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'Expanding in the layout',
       source: `<section slFullscreen mode="layout">
   <button slFullscreenTrigger></button>
+</section>`,
+    }),
+  },
+  {
+    id: 'fill',
+    title: 'The height of the screen, not only its width',
+    note: 'The browser stretches the region and none of its children. slFullscreenContent takes the height a bar and a caption leave, and the chart’s plot grows into it; a region with a single card gives the card the height instead.',
+    snippet: defineSnippet({
+      id: 'fullscreen-angular-fill',
+      language: 'angular',
+      label: 'A bar, the content part and a caption',
+      source: `<section slFullscreen>
+  <div slToolbar><button slFullscreenTrigger></button></div>
+  <div slFullscreenContent>
+    <figure slChart title="Receita por mês" [data]="monthly" [series]="revenue"></figure>
+  </div>
+  <p slText>Fonte: fechamento contábil.</p>
 </section>`,
     }),
   },
@@ -329,6 +357,13 @@ export const ANGULAR_FULLSCREEN_DOCS = {
         'The instance: fullscreen(), mode(), supported(), error(), messages(), enter(), exit(), toggle()',
       ],
       [
+        'slFullscreenContent',
+        'directive',
+        '—',
+        'a direct child of the region',
+        'The part that takes the height in full screen, on the consumer’s own element',
+      ],
+      [
         'slFullscreenIcon',
         'directive',
         '—',
@@ -355,6 +390,7 @@ export const ANGULAR_FULLSCREEN_DOCS = {
         language: 'angular',
         label: 'The anatomy as it reaches the DOM',
         source: `<section data-ui="fullscreen" data-part="root" data-fullscreen data-mode="native">
+  <div data-ui="fullscreen" data-part="content">…</div>
   <button
     data-ui="fullscreen"
     data-part="trigger"

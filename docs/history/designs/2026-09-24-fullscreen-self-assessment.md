@@ -5,7 +5,7 @@ Data: 2026-09-24. Desenho e inventário em `2026-09-24-fullscreen-design.md`.
 Evidência comum a todas as linhas:
 
 - Testes: contrato 9, core 14 (`fullscreen`) e 17 (`portal`), styles da família dentro de 1491, React 17 (13 de comportamento e 4 da página), Angular 16 (12 e 4).
-- Capturas do harness (`tools/harness/out/fullscreen.html`), todas `--at 1000`: light, dark e high-contrast a 420; light a 240; `dense`; `rtl`; foco, hover e active do `trigger` em light e dark.
+- Capturas do harness (`tools/harness/out/fullscreen.html`), todas `--at 1000`, com as cenas `lone` e `media` para a altura: light, dark e high-contrast a 420; light a 240; `dense`; `rtl`; foco, hover e active do `trigger` em light e dark.
 - `tools/harness/audit.mjs` na página React a 1280 e 620 px: 14 stages, sem achados.
 - Página Angular: não lida. O Storybook Angular em 6007 lê os entry points no arranque e não resolve `@slotted/angular/fullscreen` sem reinício.
 
@@ -21,13 +21,13 @@ Evidência comum a todas as linhas:
 | Patterns               | Button Pattern do APG transcrito no desenho §2; especificação WHATWG §2–§4.                                                                                                     | Nenhuma pendente.                                                                                                                                    | —     |
 | Accessibility          | Sem `aria-pressed`; rótulo como nome também com `iconOnly`; `Tab` contido; foco e rolagem restaurados; anúncio de entrada e saída.                                             | `layout` sem `inert`: o cursor virtual alcança a página coberta. A alternativa cala o `live-announcer`.                                              | não   |
 | Native API             | `button` e `div` nativos; `ref`, `render`, `type` do consumidor; `onClick` composto e `preventDefault()` recusa.                                                                | Nenhuma pendente.                                                                                                                                    | —     |
-| Capability             | Duas vias, erro, `navigationUI`, `webkit`, saída ao desmontar, restauro de contexto, `target` fora da região, documento inteiro, overlays dentro.                              | Portal que segue a tela cheia: sem ele `select`, `menu` e `tooltip` abriam invisíveis. Commit próprio.                                              | sim   |
+| Capability             | Duas vias, erro, `navigationUI`, `webkit`, saída ao desmontar, restauro de contexto, `target` fora da região, documento inteiro, overlays dentro, altura do ecrã dada ao conteúdo. | A altura: a região enchia o ecrã e o conteúdo não. Coluna flexível, parte `content`, filho único e mídia com `object-fit: contain` (desenho §5). | sim   |
 | Ecosystem integration  | React: provider, hook, context, `render`. Angular: `model()`, `output()` com razão, `exportAs`, `provideFullscreenDefaults()`, `HostAttributeToken` para `type`.            | `chart` passar a ler `@slotted/core/fullscreen`; reabertura registada.                                                                               | não   |
 | Documentation          | Duas páginas com 11 cenas cada, import, anatomia, entradas, saídas, composição e acessibilidade.                                                                                | Ler a página Angular renderizada depois do reinício do Storybook 6007.                                                                               | não   |
 
 ## 2. Secção 18 do guia
 
-- **Anatomia:** `root` (região), `trigger` (controle, com `data-ui` próprio), `icon`, `label`.
+- **Anatomia:** `root` (região), `trigger` (controle, com `data-ui` próprio), `content` (filho direto que recebe a altura, com `data-ui` próprio), `icon`, `label`.
 - **Controlado e não controlado:** React `fullscreen`/`defaultFullscreen`/`onFullscreenChange(value, request)`; Angular `[(fullscreen)]` com `fullscreenChangeRequest` cancelável e `defaultFullscreen`. Razões `pointer`, `keyboard`, `escape`, `programmatic`. A saída nativa já aconteceu quando o pedido chega; um consumidor que a recusa fica na via `layout`.
 - **Matriz de estados:** `default`, `hover`, `active`, `focus-visible`, `disabled` e `fullscreen` no `trigger`; `fullscreen` com `data-mode` na região. `disabled` vence `hover` e `active`.
 - **Densidade e direção:** o `trigger` lê a escala de controle; a região em tela cheia usa só propriedades lógicas, e a área segura física entra simétrica nas duas bordas inline.

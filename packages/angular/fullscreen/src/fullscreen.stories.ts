@@ -1,16 +1,22 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucidePresentation, lucideX } from '@ng-icons/lucide';
 import { SlCard, SlCardBody, SlCardHeader } from '@slotted/angular/card';
+import { SlChart } from '@slotted/angular/chart';
+import type { ChartSeries } from '@slotted/core/chart';
 import { SlSelect, SlSelectItem } from '@slotted/angular/select';
-import { SlSparkline } from '@slotted/angular/sparkline';
 import { SlHeading, SlText } from '@slotted/angular/typography';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { applicationConfig, moduleMetadata } from '@storybook/angular-vite';
 
-import { SlFullscreen, SlFullscreenIcon, SlFullscreenTrigger } from './fullscreen';
+import {
+  SlFullscreen,
+  SlFullscreenContent,
+  SlFullscreenIcon,
+  SlFullscreenTrigger,
+} from './fullscreen';
 import { provideFullscreenDefaults } from './fullscreen-defaults';
 import { ANGULAR_FULLSCREEN_DOCS, ANGULAR_FULLSCREEN_TOKENS } from './fullscreen.docs';
 
@@ -23,6 +29,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
   bindScenes(ANGULAR_FULLSCREEN_DOCS.fullscreen.scenes, {
     playground: Playground,
     layout: Layout,
+    fill: Fill,
     controlled: Controlled,
     error: ErrorState,
     overlays: Overlays,
@@ -34,59 +41,62 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     composition: Composition,
   }) as never;
 
-/** The consumer's panel: a card with a title, a figure and a chart. */
-const panel = (control = '<button slFullscreenTrigger iconOnly></button>', extra = '') => `
-  <article slCard>
-    <header slCardHeader>
-      <div class="slotted-demo-row">
-        <h3 slHeading size="lg">Receita por mês</h3>
-        ${control}
-      </div>
-      <p slText size="sm" tone="muted">Jan – Jun 2026 · R$ mil · R$ 2,9 mi no semestre</p>
-    </header>
-    <div slCardBody>
-      <span slSparkline [data]="revenue" label="Receita de janeiro a junho" size="lg" type="bar"></span>
-      ${extra}
-    </div>
-  </article>`;
+const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const REVENUE = [412, 468, 431, 522, 497, 588, 604, 571, 633, 689, 702, 758];
+const brlThousands = (value: number, locale: string | undefined) =>
+  new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'BRL',
+    maximumFractionDigits: 0,
+  }).format(value * 1000);
 
-const REVENUE = [412, 468, 431, 522, 497, 588];
+/** Every value the chart binds, named once so the templates read as a consumer would write them. */
+const CHART = {
+  monthly: MONTHS.map((month, index) => ({ month, revenue: REVENUE[index] })),
+  series: [{ kind: 'bar', field: 'revenue', label: 'Receita' }] as ChartSeries[],
+  month: { field: 'month', label: 'Mês' },
+  brl: { format: brlThousands },
+};
+
+/**
+ * The consumer's panel: a chart in the content part, the region's control in
+ * the chart's own actions. In full screen the content part takes the height,
+ * and the chart's plot takes what its header leaves.
+ */
+const panel = (
+  control = '<button slFullscreenTrigger iconOnly></button>',
+  extra = '',
+  description = 'Milhares de reais, 2026',
+) => `
+  <div slFullscreenContent>
+    <figure slChart title="Receita por mês" description="${description}" variant="card" toolbar="none"
+      [data]="monthly" [series]="series" [x]="month" [y]="brl">
+      <div slChartActions class="slotted-demo-row">${extra}${control}</div>
+    </figure>
+  </div>`;
 
 /* Components compile their template ahead of time, so they read constants
-   rather than the function the story templates call. The status line of a
-   demo sits in the card body, so it stays in view while the panel is full
-   screen. */
+   rather than the function the story templates call. Each demo prints its
+   status in the chart's description, which stays in view in full screen. */
 const OPEN = `
-  <article slCard>
-    <header slCardHeader>
-      <div class="slotted-demo-row">
-        <h3 slHeading size="lg">Receita por mês</h3>`;
-const BODY = `
-      </div>
-      <p slText size="sm" tone="muted">Jan – Jun 2026 · R$ mil · R$ 2,9 mi no semestre</p>
-    </header>
-    <div slCardBody>
-      <span slSparkline [data]="revenue" label="Receita de janeiro a junho" size="lg" type="bar"></span>`;
-const HEAD_ICON = `${OPEN}<button slFullscreenTrigger iconOnly></button>${BODY}`;
-const HEAD_OUTLINE = `${OPEN}<button slFullscreenTrigger variant="outline"></button>${BODY}`;
+  <div slFullscreenContent>
+    <figure slChart title="Receita por mês" variant="card" toolbar="none"
+      [data]="monthly" [series]="series" [x]="month" [y]="brl" [description]="status()">
+      <div slChartActions class="slotted-demo-row">`;
 const CLOSE = `
-    </div>
-  </article>`;
+      </div>
+    </figure>
+  </div>`;
+const PANEL_ICON = `${OPEN}<button slFullscreenTrigger iconOnly></button>${CLOSE}`;
+const PANEL_OUTLINE = `${OPEN}<button slFullscreenTrigger variant="outline"></button>${CLOSE}`;
+
+const DEMO_IMPORTS = [SlChart, SlFullscreen, SlFullscreenContent, SlFullscreenTrigger];
 
 /** The page holds the state, and prints each request's reason. */
 @Component({
   selector: 'fullscreen-controlled-demo',
   standalone: true,
-  imports: [
-    SlCard,
-    SlCardBody,
-    SlCardHeader,
-    SlFullscreen,
-    SlFullscreenTrigger,
-    SlHeading,
-    SlSparkline,
-    SlText,
-  ],
+  imports: DEMO_IMPORTS,
   template: `
     <section
       slFullscreen
@@ -95,78 +105,63 @@ const CLOSE = `
         log.set([($event.value ? 'enter' : 'exit') + ' · ' + $event.reason].concat(log()))
       "
     >
-      ${HEAD_ICON}
-      <p slText size="sm" tone="muted">
-        {{ log().length === 0 ? 'Nenhum pedido ainda.' : log().slice(0, 4).join(' — ') }}
-      </p>
-      ${CLOSE}
+      ${PANEL_ICON}
     </section>
   `,
 })
 class ControlledDemo {
   readonly presenting = signal(false);
   readonly log = signal<string[]>([]);
-  readonly revenue = REVENUE;
+  readonly status = computed(() =>
+    this.log().length === 0 ? 'Nenhum pedido ainda.' : this.log().slice(0, 4).join(' — '),
+  );
+  readonly monthly = CHART.monthly;
+  readonly series = CHART.series;
+  readonly month = CHART.month;
+  readonly brl = CHART.brl;
 }
 
 /** Prints the last refusal. */
 @Component({
   selector: 'fullscreen-error-demo',
   standalone: true,
-  imports: [
-    SlCard,
-    SlCardBody,
-    SlCardHeader,
-    SlFullscreen,
-    SlFullscreenTrigger,
-    SlHeading,
-    SlSparkline,
-    SlText,
-  ],
+  imports: DEMO_IMPORTS,
   template: `
-    <section slFullscreen (fullscreenError)="kind.set($event.kind)">
-      ${HEAD_ICON}
-      <p slText size="sm" tone="muted">
-        {{
-          kind() === null
-            ? 'O navegador ainda não recusou nada.'
-            : 'Último erro: ' + kind() + ' — a região entrou no layout.'
-        }}
-      </p>
-      ${CLOSE}
-    </section>
+    <section slFullscreen (fullscreenError)="kind.set($event.kind)">${PANEL_ICON}</section>
   `,
 })
 class ErrorDemo {
   readonly kind = signal<string | null>(null);
-  readonly revenue = REVENUE;
+  readonly status = computed(() => {
+    const kind = this.kind();
+    return kind === null
+      ? 'O navegador ainda não recusou nada.'
+      : `Último erro: ${kind} — a região entrou no layout.`;
+  });
+  readonly monthly = CHART.monthly;
+  readonly series = CHART.series;
+  readonly month = CHART.month;
+  readonly brl = CHART.brl;
 }
 
 /** Prints the reason of the last request. */
 @Component({
   selector: 'fullscreen-keyboard-demo',
   standalone: true,
-  imports: [
-    SlCard,
-    SlCardBody,
-    SlCardHeader,
-    SlFullscreen,
-    SlFullscreenTrigger,
-    SlHeading,
-    SlSparkline,
-    SlText,
-  ],
+  imports: DEMO_IMPORTS,
   template: `
     <section slFullscreen mode="layout" (fullscreenChangeRequest)="reason.set($event.reason)">
-      ${HEAD_OUTLINE}
-      <p slText size="sm" tone="muted">Última razão: {{ reason() }}</p>
-      ${CLOSE}
+      ${PANEL_OUTLINE}
     </section>
   `,
 })
 class KeyboardDemo {
   readonly reason = signal('—');
-  readonly revenue = REVENUE;
+  readonly status = computed(() => `Última razão: ${this.reason()}`);
+  readonly monthly = CHART.monthly;
+  readonly series = CHART.series;
+  readonly month = CHART.month;
+  readonly brl = CHART.brl;
 }
 
 const DIRECTIVES = [
@@ -177,13 +172,14 @@ const DIRECTIVES = [
   SlCard,
   SlCardBody,
   SlCardHeader,
+  SlChart,
   SlFullscreen,
+  SlFullscreenContent,
   SlFullscreenIcon,
   SlFullscreenTrigger,
   SlHeading,
   SlSelect,
   SlSelectItem,
-  SlSparkline,
   SlText,
 ];
 
@@ -235,7 +231,7 @@ export const Playground: Story = {
   args: { mode: 'auto', navigationUI: 'auto' },
   parameters: { ...scenario('playground'), controls: { disable: false } },
   render: (args) => ({
-    props: { ...args, revenue: REVENUE },
+    props: { ...args, ...CHART },
     template: `
       <div class="slotted-demo-stage" data-layout="block">
         <section slFullscreen [mode]="mode" [navigationUI]="navigationUI">${panel()}</section>
@@ -246,11 +242,53 @@ export const Playground: Story = {
 export const Layout: Story = {
   parameters: scenario('layout'),
   render: () => ({
-    props: { revenue: REVENUE },
+    props: CHART,
     template: scene(
       'mode=layout',
       'Press the control: the panel is fixed over this page, the page stops scrolling, and Escape or the control gives it back.',
       `<section slFullscreen mode="layout">${panel('<button slFullscreenTrigger variant="outline"></button>')}</section>`,
+    ),
+  }),
+};
+
+export const Fill: Story = {
+  parameters: scenario('fill'),
+  render: () => ({
+    props: CHART,
+    template: grid(
+      2,
+      scene(
+        'slFullscreenContent between a bar and a caption',
+        'In full screen the bar and the caption keep their height and the content part takes the rest; the chart’s plot grows into it.',
+        `<section slFullscreen mode="layout">
+          <div class="slotted-demo-row">
+            <p slText size="sm" tone="muted">Painel financeiro · atualizado às 09:40</p>
+            <button slFullscreenTrigger variant="outline"></button>
+          </div>
+          <div slFullscreenContent>
+            <figure slChart title="Receita por mês" toolbar="none"
+              [data]="monthly" [series]="series" [x]="month" [y]="brl"></figure>
+          </div>
+          <p slText size="sm" tone="muted">Fonte: fechamento contábil de cada mês.</p>
+        </section>`,
+      ) +
+        scene(
+          'A lone card',
+          'With one child and no content part, the child is given the height: the card’s frame reaches the bottom of the screen.',
+          `<section slFullscreen mode="layout">
+            <article slCard>
+              <header slCardHeader>
+                <div class="slotted-demo-row">
+                  <h3 slHeading size="lg">Pedidos em aberto</h3>
+                  <button slFullscreenTrigger iconOnly></button>
+                </div>
+              </header>
+              <div slCardBody>
+                <p slText>1.510 pedidos, 12% acima da semana passada.</p>
+              </div>
+            </article>
+          </section>`,
+        ),
     ),
   }),
 };
@@ -260,7 +298,7 @@ export const Controlled: Story = {
   render: () => ({
     template: scene(
       '[(fullscreen)] + fullscreenChangeRequest',
-      'The page holds the value; the line under the panel prints the reason of every request, escape included.',
+      'The page holds the value; the chart’s description prints the reason of every request, escape included.',
       `<fullscreen-controlled-demo />`,
     ),
   }),
@@ -272,7 +310,7 @@ export const ErrorState: Story = {
   render: () => ({
     template: scene(
       'fullscreenError',
-      'Inside Storybook’s preview frame the browser may refuse; the line prints the kind, and the panel is full screen in the layout either way.',
+      'Inside Storybook’s preview frame the browser may refuse; the chart’s description prints the kind, and the panel is full screen in the layout either way.',
       `<fullscreen-error-demo />`,
     ),
   }),
@@ -281,7 +319,7 @@ export const ErrorState: Story = {
 export const Overlays: Story = {
   parameters: scenario('overlays'),
   render: () => ({
-    props: { revenue: REVENUE },
+    props: CHART,
     template: scene(
       'sl-select inside the region',
       'Enter full screen, then open the period: the list opens inside the region, above the chart.',
@@ -385,7 +423,7 @@ export const IconOnly: Story = {
 export const Outside: Story = {
   parameters: scenario('outside'),
   render: () => ({
-    props: { revenue: REVENUE },
+    props: CHART,
     template: scene(
       'exportAs + [slFullscreenTrigger]',
       'The control in the bar drives the section below; the control inside the section takes the reader back.',
@@ -411,7 +449,7 @@ export const Composition: Story = {
     }),
   ],
   render: () => ({
-    props: { revenue: REVENUE },
+    props: CHART,
     template: scene(
       'Provider, a label and a mark of the consumer',
       'The provider sets the step and the Portuguese messages; the control says Apresentar and Terminar and changes its mark with the state.',

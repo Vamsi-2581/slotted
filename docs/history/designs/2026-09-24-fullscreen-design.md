@@ -103,6 +103,7 @@ Da especificação, também lida em 2026-09-24:
 | `trigger` | `button` | o controle; `data-ui` próprio, `data-fullscreen`, `data-size`, `data-variant`, `data-icon-only`; dentro ou fora do `root` |
 | `icon`    | `span`   | `maximize` ou `minimize`, `aria-hidden`                                                                 |
 | `label`   | `span`   | "Tela cheia" ou "Sair da tela cheia"; visualmente oculto com `iconOnly`                                |
+| `content` | `div`    | filho direto da região, com `data-ui` próprio; recebe a altura em tela cheia                            |
 
 O `trigger` carrega `data-ui="fullscreen"` além de `data-part="trigger"`: fora do `root`
 (uma barra acima de um gráfico), um seletor descendente não o alcança. Uma família, um
@@ -150,6 +151,23 @@ O conteúdo da região é do consumidor. Nenhuma parte de barra, título ou fund
   harness). `position`, `inset`, `margin`, tamanhos, `transform` e `z-index` são
   `!important`, como a folha do agente os faz na via nativa. Chão, borda e inserção não
   são: continuam do consumidor em tela cheia.
+- **A altura é da família.** O agente estica o elemento em tela cheia e nenhum filho
+  dele, e `inset: 0` faz o mesmo na via `layout`: a região ocupava o ecrã e o conteúdo
+  ficava com a própria altura, um gráfico do tamanho de um cartão no topo de um ecrã
+  vazio. A largura nunca teve o problema, porque um filho de bloco estica na linha.
+  Três regras respondem:
+  1. em tela cheia a região é uma coluna flexível, na camada da biblioteca e sem
+     `!important`: um consumidor que deu à região um `grid` ou um `flex` seu mantém-no;
+  2. a parte `content`, filho direto, fica com a altura que os outros filhos deixam
+     (`flex: 1 0 auto`) e dá-a ao seu primeiro filho; os seguintes ficam com a sua;
+  3. sem `content`, um filho único recebe a altura, sem contar a raiz do portal que a via
+     nativa acrescenta; um `img`, `video` ou `canvas` único enche-a com
+     `object-fit: contain`.
+
+  A parte `content` leva `data-ui="fullscreen"` porque `content` é também a camada de
+  `select`, `popover` e `dialog`, que o portal põe dentro da região. Custo: numa região sem
+  `display` próprio, os filhos em linha tornam-se blocos em tela cheia e as margens
+  verticais deixam de colapsar.
 - **Profundidade.** Em `layout`, `z-index: calc(var(--slotted-z-index-overlay) +
 var(--slotted-layer-depth))`, a fórmula de `dialog`; uma camada aberta de dentro fica acima.
 

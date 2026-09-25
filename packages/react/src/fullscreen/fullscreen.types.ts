@@ -101,6 +101,17 @@ export interface FullscreenProps
   render?: ((props: FullscreenRootProps) => ReactNode) | undefined;
 }
 
+/** What `render` receives for the content part. */
+export interface FullscreenContentRootProps extends HTMLAttributes<HTMLElement> {
+  'data-part': 'content';
+  'data-ui': 'fullscreen';
+}
+
+export interface FullscreenContentProps extends ComponentPropsWithRef<'div'> {
+  /** Renders the wiring into the consumer's own element: a `main`, a `figure`. */
+  render?: ((props: FullscreenContentRootProps) => ReactNode) | undefined;
+}
+
 /** What `render` receives for the control. */
 export interface FullscreenTriggerRootProps extends HTMLAttributes<HTMLElement> {
   'data-disabled'?: '' | undefined;

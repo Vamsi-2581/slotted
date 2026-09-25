@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/fullscreen/contract.json';
-import { Fullscreen, FullscreenTrigger } from './fullscreen';
+import { Fullscreen, FullscreenContent, FullscreenTrigger } from './fullscreen';
 import { FullscreenDefaultsProvider } from './fullscreen-defaults';
 import { useFullscreen } from './use-fullscreen';
 
@@ -195,6 +195,22 @@ describe('Fullscreen', () => {
         </Fullscreen>
       </FullscreenDefaultsProvider>,
     );
+
+  it('marks the content part with the family identifier, and passes its element through', () => {
+    render(
+      <Fullscreen>
+        <FullscreenContent className="chart" id="chart">
+          <p>Chart</p>
+        </FullscreenContent>
+      </Fullscreen>,
+    );
+
+    const content = document.getElementById('chart')!;
+    expect(content).toHaveAttribute('data-ui', contract.ui);
+    expect(content).toHaveAttribute('data-part', 'content');
+    expect(content).toHaveClass('chart');
+    expect(content.parentElement).toBe(region());
+  });
 
     expect(trigger()).toHaveAttribute('data-size', 'lg');
     expect(trigger()).toHaveAttribute('data-variant', 'outline');

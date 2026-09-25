@@ -284,4 +284,20 @@ export class SlFullscreenTrigger implements AfterViewInit {
   selector: '[slFullscreenIcon]',
   standalone: true,
 })
+/**
+ * The part that takes the height the other children of the region leave
+ * while it is full screen — a chart under its header, a document under its
+ * toolbar — and whose first child fills it. A direct child of the region; at
+ * rest it is the element the consumer wrote, unchanged.
+ */
+@Directive({
+  selector: '[slFullscreenContent]',
+  standalone: true,
+  host: {
+    'data-ui': 'fullscreen',
+    'data-part': 'content',
+  },
+})
+export class SlFullscreenContent {}
+
 export class SlFullscreenIcon {}

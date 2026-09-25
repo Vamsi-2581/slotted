@@ -18,6 +18,13 @@
     "reason": "escape"
   },
   "restores": ["focus", "page scroll", "root scroll"],
+  "fill": {
+    "root": "a column while full screen, in the library's layer: a consumer who gave the region a grid or a flex of its own keeps it, and a grid of definite height already stretches its rows",
+    "content": "the direct child that takes the height the other children leave, at least its own content's height; its first child takes that height and any child after it keeps its own, so a caption under a chart stays a line",
+    "lone": "a region with one child and no content part gives that child the height: the panel or the card a region most often is",
+    "media": "a lone img, video or canvas fills the height and keeps its ratio with object-fit: contain, the answer the agent's own sheet gives a video in full screen",
+    "reason": "the agent stretches the fullscreen element and none of its children, so a region in full screen kept its content's height and left the rest of the screen empty. The width already stretched, because a block child does; the height is the axis the family owed"
+  },
   "wiring": {
     "type": "button on the trigger, unless the consumer wrote another",
     "aria-pressed": "never. The Button pattern: a toggle whose label changes with its state is not announced as pressed",
@@ -127,13 +134,14 @@
       },
       "capabilities": ["fullscreen", "size", "appearance", "content", "disabled", "wiring"],
       "states": ["default", "hover", "active", "focus-visible", "fullscreen", "disabled"],
-      "parts": ["root", "trigger", "icon", "label"]
+      "parts": ["root", "trigger", "content", "icon", "label"]
     }
   },
   "scenarios": {
     "fullscreen": [
       "playground",
       "layout",
+      "fill",
       "controlled",
       "error",
       "overlays",
@@ -148,6 +156,7 @@
   "identity": {
     "root": "data-ui=fullscreen and data-part=root on the region",
     "trigger": "data-ui=fullscreen and data-part=trigger on the control, because the control may stand outside the region — a toolbar above a chart, the page header above a document — and a descendant selector from the root would not reach it",
-    "reason": "one family, one identifier; the part says which of the two elements it is"
+    "reason": "one family, one identifier; the part says which of the two elements it is",
+    "content": "data-ui=fullscreen and data-part=content on a direct child of the region: content is also the layer part of select, popover and dialog, and the portal puts those layers inside a region in full screen"
   }
 }

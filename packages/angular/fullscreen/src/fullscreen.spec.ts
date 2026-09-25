@@ -3,7 +3,12 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/fullscreen/contract.json';
-import { SlFullscreen, SlFullscreenIcon, SlFullscreenTrigger } from './fullscreen';
+import {
+  SlFullscreen,
+  SlFullscreenContent,
+  SlFullscreenIcon,
+  SlFullscreenTrigger,
+} from './fullscreen';
 import { provideFullscreenDefaults } from './fullscreen-defaults';
 
 /**
@@ -50,7 +55,7 @@ afterEach(() => {
 
 @Component({
   standalone: true,
-  imports: [SlFullscreen, SlFullscreenTrigger, SlFullscreenIcon],
+  imports: [SlFullscreen, SlFullscreenContent, SlFullscreenTrigger, SlFullscreenIcon],
   template: '',
 })
 class Host {
@@ -205,6 +210,19 @@ describe('SlFullscreen', () => {
     const own = fixture.nativeElement.querySelector('#own') as HTMLElement;
     expect(own.textContent?.trim()).toBe('Apresentar');
     expect(own.querySelector('[data-part="icon"] svg')).not.toBeNull();
+  });
+
+  it('marks the content part with the family identifier on the consumer’s element', () => {
+    const fixture = renderTemplate(`<section slFullscreen>
+      <main slFullscreenContent id="chart" class="chart"></main>
+    </section>`);
+
+    const content = fixture.nativeElement.querySelector('#chart') as HTMLElement;
+    expect(content.tagName).toBe('MAIN');
+    expect(content.getAttribute('data-ui')).toBe(contract.ui);
+    expect(content.getAttribute('data-part')).toBe('content');
+    expect(content.classList.contains('chart')).toBe(true);
+    expect(content.parentElement).toBe(region(fixture));
   });
 
   it('reads size, variant and messages from the provider, and the instance wins', () => {

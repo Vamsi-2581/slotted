@@ -6,6 +6,8 @@ import type { MouseEvent, Ref } from 'react';
 import { useFullscreenDefaults } from './fullscreen-defaults';
 import type {
   FullscreenHandle,
+  FullscreenContentProps,
+  FullscreenContentRootProps,
   FullscreenProps,
   FullscreenReason,
   FullscreenRootProps,
@@ -84,6 +86,21 @@ export function Fullscreen({
 }
 
 /**
+/**
+ * The part that takes the height the other children of the region leave
+ * while it is full screen — a chart under its header, a document under its
+ * toolbar — and whose first child fills it. A direct child of the region; at
+ * rest it is a plain block the consumer styles.
+ */
+export function FullscreenContent({ ref, render, ...nativeProps }: FullscreenContentProps) {
+  const rootProps: FullscreenContentRootProps = {
+    ...nativeProps,
+    'data-part': 'content',
+    'data-ui': 'fullscreen',
+  };
+  return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
+}
+
  * A click synthesised by the keyboard reports no detail; a real one reports
  * the click count.
  */

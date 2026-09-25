@@ -6,22 +6,41 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { Card, CardBody, CardHeader } from '../card';
+import { Chart } from '../chart';
+import type { ChartRecord, ChartSeries } from '../chart';
 import { Grid, Measure, Scene } from '../field/field-demo';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
-import { Sparkline } from '../sparkline';
 import { Heading, Text } from '../typography';
-import { Fullscreen, FullscreenTrigger } from './fullscreen';
+import { Fullscreen, FullscreenContent, FullscreenTrigger } from './fullscreen';
 import { FullscreenDefaultsProvider } from './fullscreen-defaults';
 import { REACT_FULLSCREEN_DOCS, REACT_FULLSCREEN_TOKENS } from './fullscreen.docs';
 import type { FullscreenError, FullscreenProps } from './fullscreen.types';
 import { useFullscreen } from './use-fullscreen';
 
-const REVENUE = [412, 468, 431, 522, 497, 588];
+const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const REVENUE = [412, 468, 431, 522, 497, 588, 604, 571, 633, 689, 702, 758];
+const MONTHLY: ChartRecord[] = MONTHS.map((month, index) => ({
+  month,
+  revenue: REVENUE[index],
+}));
+const PERIODS = [
+  { label: 'Últimos 3 meses', value: '3m' },
+  { label: 'Últimos 6 meses', value: '6m' },
+  { label: 'Últimos 12 meses', value: '12m' },
+];
+const SERIES: ChartSeries[] = [{ kind: 'bar', field: 'revenue', label: 'Receita' }];
+const brlThousands = (value: number, locale: string | undefined) =>
+  new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'BRL',
+    maximumFractionDigits: 0,
+  }).format(value * 1000);
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
   bindScenes(REACT_FULLSCREEN_DOCS.fullscreen.scenes, {
     playground: Playground,
     layout: Layout,
+    fill: Fill,
     controlled: Controlled,
     error: ErrorState,
     overlays: Overlays,
@@ -55,32 +74,39 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** The consumer's panel: a card with a title, a figure and a chart. */
+/**
+ * The consumer's panel: a chart in the content part, the region's control in
+ * the chart's own actions. In full screen the content part takes the height,
+ * and the chart's plot takes what its header leaves.
+ */
 function RevenuePanel({
-  children,
   control = <FullscreenTrigger iconOnly />,
+  description = 'Milhares de reais, 2026',
+  extra,
 }: {
-  children?: ReactNode;
   control?: ReactNode;
+  description?: ReactNode;
+  extra?: ReactNode;
 }) {
   return (
-    <Card>
-      <CardHeader>
-        <div className="slotted-demo-row">
-          <Heading level={3} size="lg">
-            Receita por mês
-          </Heading>
-          {control}
-        </div>
-        <Text size="sm" tone="muted">
-          Jan – Jun 2026 · R$ mil · R$ 2,9 mi no semestre
-        </Text>
-      </CardHeader>
-      <CardBody>
-        <Sparkline aria-label="Receita de janeiro a junho" data={REVENUE} size="lg" type="bar" />
-        {children}
-      </CardBody>
-    </Card>
+    <FullscreenContent>
+      <Chart
+        actions={
+          <>
+            {extra}
+            {control}
+          </>
+        }
+        data={MONTHLY}
+        description={description}
+        series={SERIES}
+        title="Receita por mês"
+        toolbar="none"
+        variant="card"
+        x={{ field: 'month', label: 'Mês' }}
+        y={{ format: brlThousands }}
+      />
+    </FullscreenContent>
   );
 }
 
@@ -110,24 +136,75 @@ export const Layout: Story = {
   ),
 };
 
+export const Fill: Story = {
+  parameters: scenario('fill'),
+  render: () => (
+    <Grid columns={2}>
+      <Scene
+        label="FullscreenContent between a bar and a caption"
+        note="In full screen the bar and the caption keep their height and the content part takes the rest; the chart’s plot grows into it."
+      >
+        <Fullscreen mode="layout">
+          <div className="slotted-demo-row">
+            <Text size="sm" tone="muted">
+              Painel financeiro · atualizado às 09:40
+            </Text>
+            <FullscreenTrigger variant="outline" />
+          </div>
+          <FullscreenContent>
+            <Chart
+              data={MONTHLY}
+              series={SERIES}
+              title="Receita por mês"
+              toolbar="none"
+              x={{ field: 'month', label: 'Mês' }}
+              y={{ format: brlThousands }}
+            />
+          </FullscreenContent>
+          <Text size="sm" tone="muted">
+            Fonte: fechamento contábil de cada mês.
+          </Text>
+        </Fullscreen>
+      </Scene>
+      <Scene
+        label="A lone card"
+        note="With one child and no content part, the child is given the height: the card’s frame reaches the bottom of the screen."
+      >
+        <Fullscreen mode="layout">
+          <Card>
+            <CardHeader>
+              <div className="slotted-demo-row">
+                <Heading level={3} size="lg">
+                  Pedidos em aberto
+                </Heading>
+                <FullscreenTrigger iconOnly />
+              </div>
+            </CardHeader>
+            <CardBody>
+              <Text>1.510 pedidos, 12% acima da semana passada.</Text>
+            </CardBody>
+          </Card>
+        </Fullscreen>
+      </Scene>
+    </Grid>
+  ),
+};
+
 function ControlledPanel() {
   const [presenting, setPresenting] = useState(false);
   const [log, setLog] = useState<string[]>([]);
   return (
-    <>
-      <Fullscreen
-        fullscreen={presenting}
-        onFullscreenChange={(next, request) => {
-          setLog((entries) => [`${next ? 'enter' : 'exit'} · ${request.reason}`, ...entries]);
-          setPresenting(next);
-        }}
-      >
-        <RevenuePanel />
-      </Fullscreen>
-      <Text size="sm" tone="muted">
-        {log.length === 0 ? 'Nenhum pedido ainda.' : log.slice(0, 4).join(' — ')}
-      </Text>
-    </>
+    <Fullscreen
+      fullscreen={presenting}
+      onFullscreenChange={(next, request) => {
+        setLog((entries) => [`${next ? 'enter' : 'exit'} · ${request.reason}`, ...entries]);
+        setPresenting(next);
+      }}
+    >
+      <RevenuePanel
+        description={log.length === 0 ? 'Nenhum pedido ainda.' : log.slice(0, 4).join(' — ')}
+      />
+    </Fullscreen>
   );
 }
 
@@ -146,16 +223,15 @@ export const Controlled: Story = {
 function RefusedPanel() {
   const [error, setError] = useState<FullscreenError | null>(null);
   return (
-    <>
-      <Fullscreen onFullscreenError={setError}>
-        <RevenuePanel />
-      </Fullscreen>
-      <Text size="sm" tone="muted">
-        {error === null
-          ? 'O navegador ainda não recusou nada.'
-          : `Último erro: ${error.kind} — a região entrou no layout.`}
-      </Text>
-    </>
+    <Fullscreen onFullscreenError={setError}>
+      <RevenuePanel
+        description={
+          error === null
+            ? 'O navegador ainda não recusou nada.'
+            : `Último erro: ${error.kind} — a região entrou no layout.`
+        }
+      />
+    </Fullscreen>
   );
 }
 
@@ -180,18 +256,20 @@ export const Overlays: Story = {
       note="Enter full screen, then open the period: the list opens inside the region, above the chart."
     >
       <Fullscreen>
-        <RevenuePanel>
-          <Select defaultValue="6m">
-            <SelectTrigger aria-label="Período">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="3m">Últimos 3 meses</SelectItem>
-              <SelectItem value="6m">Últimos 6 meses</SelectItem>
-              <SelectItem value="12m">Últimos 12 meses</SelectItem>
-            </SelectContent>
-          </Select>
-        </RevenuePanel>
+        <RevenuePanel
+          extra={
+            <Select defaultValue="12m" items={PERIODS}>
+              <SelectTrigger aria-label="Período">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="3m">Últimos 3 meses</SelectItem>
+                <SelectItem value="6m">Últimos 6 meses</SelectItem>
+                <SelectItem value="12m">Últimos 12 meses</SelectItem>
+              </SelectContent>
+            </Select>
+          }
+        />
       </Fullscreen>
     </Scene>
   ),
@@ -230,14 +308,12 @@ export const DocumentRegion: Story = {
 function KeyboardPanel() {
   const [reason, setReason] = useState('—');
   return (
-    <>
-      <Fullscreen mode="layout" onFullscreenChange={(_, request) => setReason(request.reason)}>
-        <RevenuePanel control={<FullscreenTrigger variant="outline" />} />
-      </Fullscreen>
-      <Text size="sm" tone="muted">
-        Última razão: {reason}
-      </Text>
-    </>
+    <Fullscreen mode="layout" onFullscreenChange={(_, request) => setReason(request.reason)}>
+      <RevenuePanel
+        control={<FullscreenTrigger variant="outline" />}
+        description={`Última razão: ${reason}`}
+      />
+    </Fullscreen>
   );
 }
 

@@ -25,7 +25,7 @@ export const REACT_FULLSCREEN_TOKENS = fullscreenTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { Fullscreen, FullscreenTrigger, FullscreenDefaultsProvider, useFullscreen } from '@slotted/react';",
+    "import { Fullscreen, FullscreenContent, FullscreenTrigger, FullscreenDefaultsProvider, useFullscreen } from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -42,6 +42,13 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'The control. It carries data-ui="fullscreen" of its own, so it is styled wherever it stands — inside the region, or in a toolbar outside it with target. Its words and its mark say what the press does next.',
+  },
+  {
+    part: 'content',
+    element: 'div, or the element render returns',
+    required: false,
+    purpose:
+      'A direct child of the region that takes, in full screen, the height the other children leave; its first child fills it. Without it, a region with one child gives that child the height, and a lone img, video or canvas fills it with object-fit: contain.',
   },
   {
     part: 'icon',
@@ -69,9 +76,9 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A panel the reader can give the whole screen',
       source: `<Fullscreen>
-  <h2>Receita por mês</h2>
-  <FullscreenTrigger iconOnly />
-  <RevenueChart />
+  <FullscreenContent>
+    <Chart actions={<FullscreenTrigger iconOnly />} title="Receita por mês" {...revenue} />
+  </FullscreenContent>
 </Fullscreen>;`,
     }),
   },
@@ -86,6 +93,25 @@ const scenes: ReferenceSceneMeta[] = [
       source: `<Fullscreen mode="layout">
   <FullscreenTrigger />
   <ContractTerms />
+</Fullscreen>;`,
+    }),
+  },
+  {
+    id: 'fill',
+    title: 'The height of the screen, not only its width',
+    note: 'The browser stretches the region and none of its children. FullscreenContent takes the height a bar and a caption leave, and the chart’s plot grows into it; a region with a single card gives the card the height instead.',
+    snippet: defineSnippet({
+      id: 'fullscreen-react-fill',
+      language: 'tsx',
+      label: 'A bar, the content part and a caption',
+      source: `<Fullscreen>
+  <Toolbar>
+    <FullscreenTrigger />
+  </Toolbar>
+  <FullscreenContent>
+    <Chart title="Receita por mês" {...revenue} />
+  </FullscreenContent>
+  <Text>Fonte: fechamento contábil.</Text>
 </Fullscreen>;`,
     }),
   },
@@ -379,6 +405,13 @@ export const REACT_FULLSCREEN_DOCS = {
         'The native elements',
       ],
       [
+        'FullscreenContent',
+        "ComponentPropsWithRef<'div'> & { render? }",
+        '—',
+        'a direct child of Fullscreen',
+        'The part that takes the height in full screen; render substitutes its element',
+      ],
+      [
         'useFullscreenContext',
         '() => FullscreenHandle | null',
         '—',
@@ -398,6 +431,9 @@ export const REACT_FULLSCREEN_DOCS = {
         language: 'tsx',
         label: 'The anatomy as it reaches the DOM',
         source: `<div data-ui="fullscreen" data-part="root" data-fullscreen data-mode="native">
+  <div data-ui="fullscreen" data-part="content">
+    …
+  </div>
   <button
     data-ui="fullscreen"
     data-part="trigger"

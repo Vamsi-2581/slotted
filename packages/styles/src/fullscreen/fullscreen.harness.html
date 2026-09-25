@@ -24,12 +24,36 @@
       background: var(--slotted-surface-raised);
       border: var(--slotted-border-width-thin) solid var(--slotted-border-subtle);
       border-radius: var(--slotted-radius-lg);
+      display: grid;
+      gap: var(--slotted-space-5);
       padding: var(--slotted-space-6);
     }
 
-    [data-demo-panel] {
+    /* In full screen the region is the family's column; the header keeps
+       its distance from the chart by its own margin. */
+    [data-demo-header] {
       display: grid;
+      gap: var(--slotted-space-3);
+    }
+
+    [data-demo-panel][data-fullscreen] > [data-demo-header] {
+      margin-block-end: var(--slotted-space-5);
+    }
+
+    /* The consumer's card inside a region, framed in every state: the lone
+       child that is given the height. */
+    [data-demo-card] {
+      background: var(--slotted-surface-raised);
+      border: var(--slotted-border-width-thin) solid var(--slotted-border-subtle);
+      border-radius: var(--slotted-radius-lg);
+      display: grid;
+      align-content: start;
       gap: var(--slotted-space-5);
+      padding: var(--slotted-space-6);
+    }
+
+    [data-demo-media] {
+      background: var(--slotted-surface-sunken);
     }
 
     [data-demo-head] {
@@ -71,8 +95,10 @@
       flex: 1;
     }
 
-    [data-demo-fullscreen] [data-demo-bars] {
-      block-size: 220px;
+    /* Given the height of the content part, the chart takes it. */
+    [data-demo-fullscreen] [data-part='content'] > [data-demo-bars] {
+      block-size: auto;
+      min-block-size: 120px;
     }
 
     [data-demo-column] {
@@ -107,28 +133,32 @@
   </style>
 
   <div data-ui="fullscreen" data-part="root" data-demo-panel id="r1">
-    <div data-demo-head>
-      <h3 data-demo-title>Receita por mês</h3>
-      <button
-        data-ui="fullscreen"
-        data-part="trigger"
-        data-size="sm"
-        data-variant="ghost"
-        data-icon-only
-        type="button"
-      >
-        <span data-part="icon" aria-hidden="true"></span>
-        <span data-part="label">Tela cheia</span>
-      </button>
-    </div>
-    <p data-demo-meta>Jan – Jun 2026 · R$ mil</p>
-    <div data-demo-bars aria-hidden="true">
-      <span style="block-size: 42%"></span>
-      <span style="block-size: 58%"></span>
-      <span style="block-size: 51%"></span>
-      <span style="block-size: 74%"></span>
-      <span style="block-size: 66%"></span>
-      <span style="block-size: 88%"></span>
+    <header data-demo-header>
+      <div data-demo-head>
+        <h3 data-demo-title>Receita por mês</h3>
+        <button
+          data-ui="fullscreen"
+          data-part="trigger"
+          data-size="sm"
+          data-variant="ghost"
+          data-icon-only
+          type="button"
+        >
+          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="label">Tela cheia</span>
+        </button>
+      </div>
+      <p data-demo-meta>Jan – Jun 2026 · R$ mil</p>
+    </header>
+    <div data-ui="fullscreen" data-part="content">
+      <div data-demo-bars aria-hidden="true">
+        <span style="block-size: 42%"></span>
+        <span style="block-size: 58%"></span>
+        <span style="block-size: 51%"></span>
+        <span style="block-size: 74%"></span>
+        <span style="block-size: 66%"></span>
+        <span style="block-size: 88%"></span>
+      </div>
     </div>
   </div>
 </section>
@@ -143,28 +173,32 @@
     data-fullscreen
     data-mode="layout"
   >
-    <div data-demo-head>
-      <h3 data-demo-title>Receita por mês</h3>
-      <button
-        data-ui="fullscreen"
-        data-part="trigger"
-        data-size="sm"
-        data-variant="ghost"
-        data-fullscreen
-        type="button"
-      >
-        <span data-part="icon" aria-hidden="true"></span>
-        <span data-part="label">Sair da tela cheia</span>
-      </button>
-    </div>
-    <p data-demo-meta>Jan – Jun 2026 · R$ mil</p>
-    <div data-demo-bars aria-hidden="true">
-      <span style="block-size: 42%"></span>
-      <span style="block-size: 58%"></span>
-      <span style="block-size: 51%"></span>
-      <span style="block-size: 74%"></span>
-      <span style="block-size: 66%"></span>
-      <span style="block-size: 88%"></span>
+    <header data-demo-header>
+      <div data-demo-head>
+        <h3 data-demo-title>Receita por mês</h3>
+        <button
+          data-ui="fullscreen"
+          data-part="trigger"
+          data-size="sm"
+          data-variant="ghost"
+          data-fullscreen
+          type="button"
+        >
+          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="label">Sair da tela cheia</span>
+        </button>
+      </div>
+      <p data-demo-meta>Jan – Jun 2026 · R$ mil</p>
+    </header>
+    <div data-ui="fullscreen" data-part="content">
+      <div data-demo-bars aria-hidden="true">
+        <span style="block-size: 42%"></span>
+        <span style="block-size: 58%"></span>
+        <span style="block-size: 51%"></span>
+        <span style="block-size: 74%"></span>
+        <span style="block-size: 66%"></span>
+        <span style="block-size: 88%"></span>
+      </div>
     </div>
   </div>
 </section>
@@ -179,28 +213,32 @@
     data-mode="native"
     style="position: absolute; inset: 0"
   >
-    <div data-demo-head>
-      <h3 data-demo-title>Receita por mês</h3>
-      <button
-        data-ui="fullscreen"
-        data-part="trigger"
-        data-size="sm"
-        data-variant="outline"
-        data-fullscreen
-        type="button"
-      >
-        <span data-part="icon" aria-hidden="true"></span>
-        <span data-part="label">Sair da tela cheia</span>
-      </button>
-    </div>
-    <p data-demo-meta>Jan – Jun 2026 · R$ mil</p>
-    <div data-demo-bars aria-hidden="true">
-      <span style="block-size: 42%"></span>
-      <span style="block-size: 58%"></span>
-      <span style="block-size: 51%"></span>
-      <span style="block-size: 74%"></span>
-      <span style="block-size: 66%"></span>
-      <span style="block-size: 88%"></span>
+    <header data-demo-header>
+      <div data-demo-head>
+        <h3 data-demo-title>Receita por mês</h3>
+        <button
+          data-ui="fullscreen"
+          data-part="trigger"
+          data-size="sm"
+          data-variant="outline"
+          data-fullscreen
+          type="button"
+        >
+          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="label">Sair da tela cheia</span>
+        </button>
+      </div>
+      <p data-demo-meta>Jan – Jun 2026 · R$ mil</p>
+    </header>
+    <div data-ui="fullscreen" data-part="content">
+      <div data-demo-bars aria-hidden="true">
+        <span style="block-size: 42%"></span>
+        <span style="block-size: 58%"></span>
+        <span style="block-size: 51%"></span>
+        <span style="block-size: 74%"></span>
+        <span style="block-size: 66%"></span>
+        <span style="block-size: 88%"></span>
+      </div>
     </div>
   </div>
 </section>
@@ -420,6 +458,38 @@
         <span data-part="label">Apresentar</span>
       </button>
     </div>
+  </div>
+</section>
+
+<section data-scene="lone" data-fixed>
+  <div data-ui="fullscreen" data-part="root" data-fullscreen data-mode="layout">
+    <article data-demo-card>
+      <div data-demo-head>
+        <h3 data-demo-title>Pedidos em aberto</h3>
+        <button
+          data-ui="fullscreen"
+          data-part="trigger"
+          data-size="sm"
+          data-variant="ghost"
+          data-icon-only
+          data-fullscreen
+          type="button"
+        >
+          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="label">Sair da tela cheia</span>
+        </button>
+      </div>
+      <p data-demo-meta>O único filho recebe a altura: a moldura do cartão chega ao fundo.</p>
+    </article>
+  </div>
+</section>
+
+<section data-scene="media" data-fixed>
+  <div data-ui="fullscreen" data-part="root" data-demo-media data-fullscreen data-mode="layout">
+    <img
+      alt="Planta do armazém, vista de cima"
+      src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'%3E%3Crect width='1600' height='900' fill='%233b82f6'/%3E%3Crect x='120' y='120' width='600' height='660' fill='%2393c5fd'/%3E%3Crect x='820' y='120' width='660' height='300' fill='%23bfdbfe'/%3E%3Crect x='820' y='480' width='660' height='300' fill='%2360a5fa'/%3E%3C/svg%3E"
+    />
   </div>
 </section>
 

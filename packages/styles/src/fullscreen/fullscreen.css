@@ -59,6 +59,89 @@
     );
   }
 
+  /**
+   * ── The height ────────────────────────────────────────────────────────
+   *
+   * The agent stretches the fullscreen element and none of its children, and
+   * so does `inset: 0` in the layout: the region filled the screen and its
+   * content kept its own height, a chart the size of a card at the top of an
+   * empty screen. The width never had the problem, because a block child
+   * stretches across its container; the height is the axis this sheet owes.
+   *
+   * The region becomes a column. It is written in the library's layer and
+   * not `!important`, unlike the geometry of the layout: a consumer who gave
+   * the region a grid or a flex of their own keeps it, and a grid of definite
+   * height already stretches its rows. A child keeps at least its own height
+   * (the automatic minimum of a flex item), so content taller than the screen
+   * still scrolls in the region.
+   */
+  [data-ui='fullscreen'][data-part='root'][data-fullscreen] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /**
+   * The content part takes the height the other children leave — a header
+   * above it, a footer under it — and is never shorter than what it holds.
+   * Its first child takes that height; any child after it keeps its own, so
+   * a caption under a chart stays a line rather than half the screen. Two
+   * things that share the height are a layout of the consumer's inside the
+   * first child. The grid exists only in full screen: at rest the part is
+   * whatever the consumer made it.
+   *
+   * A direct child carrying the family's own identifier, as the control
+   * does. `content` is also the name of the layer of `select`, `popover` and
+   * `dialog`, and the portal puts those layers inside the region while it is
+   * full screen; a descendant selector on the part alone turned an open list
+   * into a grid. A flex share only reaches a direct child in any case.
+   */
+  [data-ui='fullscreen'][data-part='root'][data-fullscreen]
+    > [data-ui='fullscreen'][data-part='content'] {
+    display: grid;
+    flex: 1 0 auto;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(min-content, 1fr);
+  }
+
+  /**
+   * A region with one child and no content part gives that child the
+   * height: the panel or the card a region most often is. The control is
+   * never that child's stand-in — a region holding only its control has
+   * nothing to fill.
+   *
+   * One child, not counting the portal's root. In native full screen
+   * `@slotted/core/portal` appends its root to the region so a menu opened
+   * inside is painted; `:only-child` would stop matching the moment the
+   * menu opened, and the panel would drop to its own height under it. The
+   * root is always appended last.
+   */
+  [data-ui='fullscreen'][data-part='root'][data-fullscreen]
+    > :first-child:is(:last-child, :has(+ [data-slotted-portal]:last-child)):not(
+      [data-part='trigger'],
+      img,
+      video,
+      canvas
+    ) {
+    flex: 1 0 auto;
+  }
+
+  /**
+   * A lone picture, film or canvas fills the height as well, and keeps its
+   * ratio inside it: `object-fit: contain`, the answer the agent's own sheet
+   * gives a video in full screen. It may shrink below its natural height,
+   * which a photograph taller than the screen has to.
+   */
+  [data-ui='fullscreen'][data-part='root'][data-fullscreen]
+    > :is(img, video, canvas):first-child:is(
+      :last-child,
+      :has(+ [data-slotted-portal]:last-child)
+    ) {
+    flex: 1 1 0;
+    inline-size: 100%;
+    min-block-size: 0;
+    object-fit: contain;
+  }
+
   [data-ui='fullscreen'][data-part='root']::backdrop {
     background-color: var(--slotted-fullscreen-surface, var(--slotted-surface, Canvas));
   }

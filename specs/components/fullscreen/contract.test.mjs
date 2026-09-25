@@ -27,7 +27,7 @@ test('names the identifier a consumer selects the family by', () => {
  */
 test('is a region and a control, each carrying the identifier', () => {
   assert.equal(member.nativeElement, 'div');
-  assert.deepEqual(member.parts, ['root', 'trigger', 'icon', 'label']);
+  assert.deepEqual(member.parts, ['root', 'trigger', 'content', 'icon', 'label']);
   assert.match(contract.identity.trigger, /outside the region/);
 });
 
@@ -76,6 +76,18 @@ test('changes label and icon with the state and never writes aria-pressed', () =
 });
 
 test('restores the context it took', () => {
+/**
+ * The agent stretches the fullscreen element and none of its children. The
+ * region fills the screen, so its content must be given the height too — by
+ * the content part, by a lone child, and without stretching media out of its
+ * ratio.
+ */
+test('gives the content the height of the screen, not only its width', () => {
+  assert.deepEqual(Object.keys(contract.fill), ['root', 'content', 'lone', 'media', 'reason']);
+  assert.match(contract.fill.root, /keeps it/);
+  assert.match(contract.fill.media, /object-fit: contain/);
+});
+
   assert.deepEqual(contract.restores, ['focus', 'page scroll', 'root scroll']);
 });
 

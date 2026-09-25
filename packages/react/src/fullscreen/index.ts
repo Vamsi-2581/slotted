@@ -1,9 +1,16 @@
-export { Fullscreen, FullscreenTrigger, useFullscreenContext } from './fullscreen';
+export {
+  Fullscreen,
+  FullscreenContent,
+  FullscreenTrigger,
+  useFullscreenContext,
+} from './fullscreen';
 export { FullscreenDefaultsProvider, useFullscreenDefaults } from './fullscreen-defaults';
 export { useFullscreen } from './use-fullscreen';
 export type {
   FullscreenChangeHandler,
   FullscreenChangeRequest,
+  FullscreenContentProps,
+  FullscreenContentRootProps,
   FullscreenDefaults,
   FullscreenDefaultsProviderProps,
   FullscreenError,

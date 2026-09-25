@@ -1,4 +1,9 @@
-export { SlFullscreen, SlFullscreenIcon, SlFullscreenTrigger } from './fullscreen';
+export {
+  SlFullscreen,
+  SlFullscreenContent,
+  SlFullscreenIcon,
+  SlFullscreenTrigger,
+} from './fullscreen';
 export type { FullscreenReason } from './fullscreen';
 export {
   FULLSCREEN_DEFAULTS,

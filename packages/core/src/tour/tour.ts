@@ -486,3 +486,36 @@ export function scrollTargetIntoView(target: Element, signal?: AbortSignal): Pro
     raf(watch);
   });
 }
+
+/**
+ * Keeps a layer over the layer its target lives in — a dialog a step's
+ * `prepare` opened. A single raise when the target is found is not enough:
+ * the dialog finishes opening a moment later, adds its own layer after the
+ * tour's and writes `inert` over it, and the tour stood under the dialog it
+ * was pointing into, unreachable. This watches the portal root for both, and
+ * calls `raise` whenever the layer stands before the target's or is inert
+ * while the target is not. A target on the page under the layer is left alone.
+ */
+export function keepOverTarget(layer: Element, target: Element, raise: () => void): () => void {
+  const parent = layer.parentElement;
+  if (parent === null) return () => {};
+
+  const inertAround = (node: Element) => node.closest('[inert]') !== null;
+  const check = () => {
+    if (!layer.isConnected || !target.isConnected || layer.contains(target)) return;
+    /* Only a target in another layer of the same root: one on the page stays under the tour. */
+    const home = [...parent.children].find((child) => child !== layer && child.contains(target));
+    if (home === undefined) return;
+    if (parent.lastElementChild !== layer || (inertAround(layer) && !inertAround(target))) raise();
+  };
+
+  check();
+  const observer = new MutationObserver(check);
+  observer.observe(parent.ownerDocument.documentElement, {
+    attributes: true,
+    attributeFilter: ['inert'],
+    childList: true,
+    subtree: true,
+  });
+  return () => observer.disconnect();
+}

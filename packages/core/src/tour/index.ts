@@ -6,6 +6,7 @@ export {
   isCompactViewport,
   formatTourProgress,
   isTextEntry,
+  keepOverTarget,
   resolveStep,
   resolveTarget,
   scrollTargetIntoView,

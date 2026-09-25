@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   cardFits,
+  keepOverTarget,
   compactSide,
   formatTourProgress,
   isTextEntry,
@@ -269,5 +270,58 @@ describe('cardFits', () => {
     const phone = { width: 375, height: 667 };
     expect(cardFits({ x: 0, y: 100, width: 375, height: 420 }, phone)).toBe(true);
     expect(cardFits({ x: 0, y: 40, width: 375, height: 600 }, phone)).toBe(false);
+  });
+});
+
+describe('keepOverTarget', () => {
+  const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  /**
+   * A dialog a step opened is drawn, and only then takes the stack: its layer
+   * is added after the tour's and makes it inert a moment after the tour first
+   * rose over it. The tour is raised again every time that happens.
+   */
+  it('raises the layer whenever a layer holding the target stands over it or makes it inert', async () => {
+    document.body.innerHTML = '<div id="portals"><div id="tour"></div></div>';
+    const portals = document.getElementById('portals') as HTMLElement;
+    const tour = document.getElementById('tour') as HTMLElement;
+    const dialog = document.createElement('div');
+    dialog.innerHTML = '<input id="email" />';
+    portals.append(dialog);
+    const target = document.getElementById('email') as HTMLElement;
+
+    let raised = 0;
+    const raise = () => {
+      raised += 1;
+      portals.append(tour);
+      tour.removeAttribute('inert');
+    };
+    const stop = keepOverTarget(tour, target, raise);
+    expect(raised).toBe(1);
+    expect(portals.lastElementChild).toBe(tour);
+
+    tour.setAttribute('inert', '');
+    await flush();
+    expect(raised).toBe(2);
+    expect(tour.hasAttribute('inert')).toBe(false);
+
+    stop();
+    tour.setAttribute('inert', '');
+    await flush();
+    expect(raised).toBe(2);
+  });
+
+  it('leaves a layer alone whose target is on the page under it', async () => {
+    document.body.innerHTML =
+      '<button id="page"></button><div id="portals"><div id="tour"></div></div>';
+    let raised = 0;
+    const stop = keepOverTarget(
+      document.getElementById('tour') as HTMLElement,
+      document.getElementById('page') as HTMLElement,
+      () => (raised += 1),
+    );
+    await flush();
+    expect(raised).toBe(0);
+    stop();
   });
 });

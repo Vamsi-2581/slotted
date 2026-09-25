@@ -141,6 +141,14 @@ describe('what it is made of', () => {
     expect(document.querySelector('input[name="fim"]')).toHaveValue('16:30:00');
     expect(surface()).toBeNull();
   });
+
+  /** Both marks are `Glyph` elements inside an `Icon` box, never masks. */
+  it('draws the clock and the cross as glyph elements', () => {
+    render(<TRP clearable defaultValue={RUN} />);
+    const glyph = (name: string) => part(name).querySelector("[data-ui='icon'] > svg[data-glyph]");
+    expect(glyph('trigger')).toHaveAttribute('data-glyph', contract.triggerIcon);
+    expect(glyph('clear')).toHaveAttribute('data-glyph', 'x');
+  });
 });
 
 describe('what the frame says', () => {

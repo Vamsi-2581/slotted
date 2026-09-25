@@ -44,6 +44,7 @@ export const COMMAND_PALETTE_FALLBACK: CommandPaletteDefaults = {
   countLabel: '{count} results',
   recentLabel: 'Recent',
   clearLabel: 'Clear',
+  closeLabel: 'Close',
   backLabel: 'Back',
   hintNavigate: 'Navigate',
   hintSelect: 'Select',

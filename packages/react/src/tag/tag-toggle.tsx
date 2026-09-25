@@ -3,6 +3,7 @@ import type { ChangeReason } from '@slotted/core/state';
 import { useId, useState } from 'react';
 import type { MouseEvent } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { TagContent, TagFrame, TagRemove, useAppearance, useRemoval } from './tag-chip';
 import type { TagButtonBodyProps, TagToggleProps } from './tag.types';
 
@@ -80,7 +81,14 @@ export function TagToggle({
     children: (
       <TagContent
         end={end}
-        indicator={<span aria-hidden="true" data-part="indicator" />}
+        indicator={
+          /* The selection mark's check, which the sheet uncovers when the chip is on. */
+          <span aria-hidden="true" data-part="indicator">
+            <Icon>
+              <Glyph name="check" />
+            </Icon>
+          </span>
+        }
         labelId={labelId}
         start={start}
       >

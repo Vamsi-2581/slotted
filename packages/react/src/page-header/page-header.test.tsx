@@ -3,7 +3,7 @@ import { createRef, useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/page-header/contract.json';
-import { Page } from '../page';
+import { Page, PageBody } from '../page';
 import { PageHeader } from './page-header';
 import { PageHeaderDefaultsProvider } from './page-header-defaults';
 import {
@@ -141,7 +141,15 @@ describe('PageHeader', () => {
     render(<Full />);
     const control = screen.getByRole('button', { name: 'Recolher cabeçalho' });
     expect(control).toHaveAttribute('aria-expanded', 'true');
+    expect(
+      control.querySelector('[data-ui="icon"] > svg[data-glyph="chevron-down"]'),
+    ).not.toBeNull();
     expect(control.getAttribute('aria-controls')).toBe(area().id);
+    /* The way back keeps its name, and draws a mirrored arrow before it. */
+    const back = screen.getByRole('link', { name: 'Pedidos' });
+    expect(back.firstElementChild).toHaveAttribute('data-ui', 'icon');
+    expect(back.firstElementChild).toHaveAttribute('data-directional');
+    expect(back.querySelector('svg[data-glyph="arrow-left"]')).not.toBeNull();
     expect(screen.getByRole('region', { name: 'Cabeçalho da página' })).toBe(area());
     expect(root()).toHaveAttribute('data-expanded');
   });
@@ -226,8 +234,11 @@ describe('PageHeader', () => {
       />,
     );
     const control = pin();
+    const glyph = () =>
+      control.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
     expect(control).toHaveAttribute('aria-pressed', 'false');
     expect(control).toHaveAccessibleName('Fixar cabeçalho');
+    expect(glyph()).toBe('pin');
 
     fireEvent.click(control, { detail: 1 });
     expect(onPinnedChange).toHaveBeenLastCalledWith(
@@ -241,6 +252,7 @@ describe('PageHeader', () => {
     expect(control).toHaveAttribute('aria-pressed', 'true');
     expect(control).toHaveAttribute('data-pressed');
     expect(control).toHaveAccessibleName('Soltar cabeçalho');
+    expect(glyph()).toBe('pin-off');
     expect(root()).toHaveAttribute('data-expanded');
   });
 
@@ -434,5 +446,126 @@ describe('PageHeader parts', () => {
       false,
       expect.objectContaining({ reason: 'programmatic' }),
     );
+  });
+
+  /**
+   * Below the compact size class the header is in the flow: the stylesheet
+   * reads `data-compact` and takes the root out of `sticky`, and nothing is
+   * left for another family to stop under.
+   */
+  it('writes data-compact below the compact size class, and takes it off above it', () => {
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+      callback(0);
+      return 0;
+    });
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+    vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver);
+    FakeResizeObserver.all = [];
+    render(<Full />);
+    expect(root()).not.toHaveAttribute('data-compact');
+
+    const width = { value: 390 };
+    Object.defineProperty(root(), 'clientWidth', { configurable: true, get: () => width.value });
+    const resize = () =>
+      act(() => {
+        for (const observer of FakeResizeObserver.all) observer.callback([], {} as ResizeObserver);
+      });
+    resize();
+    expect(root()).toHaveAttribute('data-compact');
+    expect(document.documentElement.style.getPropertyValue('--slotted-page-sticky-top')).toBe(
+      '0px',
+    );
+
+    width.value = 1024;
+    resize();
+    expect(root()).not.toHaveAttribute('data-compact');
+  });
+});
+
+/**
+ * A page that fills does not scroll: a list inside its body does. The header
+ * is given the body, so that list moving down past sixteen pixels snaps the
+ * area shut and the same list back at its top opens it again.
+ */
+describe('PageHeader in a page that fills', () => {
+  function Filled({
+    fill,
+    onExpandedChange,
+  }: {
+    fill: boolean;
+    onExpandedChange: PageHeaderProps['onExpandedChange'];
+  }) {
+    return (
+      <Page fill={fill} scroll="self">
+        <PageHeader onExpandedChange={onExpandedChange}>
+          <PageHeaderArea />
+          <PageHeaderControls>
+            <PageHeaderToggle />
+          </PageHeaderControls>
+        </PageHeader>
+        <PageBody>
+          <div data-testid="list" />
+          <textarea data-testid="note" />
+        </PageBody>
+      </Page>
+    );
+  }
+
+  const scrollList = (top: number, testId = 'list') => {
+    const list = screen.getByTestId(testId);
+    Object.defineProperty(list, 'scrollTop', { configurable: true, value: top });
+    act(() => {
+      list.dispatchEvent(new Event('scroll'));
+    });
+  };
+
+  beforeEach(() => {
+    vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver);
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('collapses when a scroller in the body passes sixteen pixels, and re-opens at its top', () => {
+    const onExpandedChange = vi.fn();
+    render(<Filled fill onExpandedChange={onExpandedChange} />);
+
+    scrollList(10);
+    expect(onExpandedChange).not.toHaveBeenCalled();
+
+    scrollList(40);
+    expect(onExpandedChange).toHaveBeenLastCalledWith(
+      false,
+      expect.objectContaining({ reason: 'scroll' }),
+    );
+    expect(root()).not.toHaveAttribute('data-expanded');
+
+    scrollList(0);
+    expect(onExpandedChange).toHaveBeenLastCalledWith(
+      true,
+      expect.objectContaining({ reason: 'scroll' }),
+    );
+    expect(root()).toHaveAttribute('data-expanded');
+  });
+
+  /** A note typed into the body scrolls its own text, not the content the header heads. */
+  it('leaves the header alone when a textarea in the body scrolls', () => {
+    const onExpandedChange = vi.fn();
+    render(<Filled fill onExpandedChange={onExpandedChange} />);
+    scrollList(40, 'note');
+    expect(onExpandedChange).not.toHaveBeenCalled();
+    expect(root()).toHaveAttribute('data-expanded');
+  });
+
+  it('reads the page on every scroll, so a page that stops filling stops the snap', () => {
+    const onExpandedChange = vi.fn();
+    const { rerender } = render(<Filled fill onExpandedChange={onExpandedChange} />);
+    rerender(<Filled fill={false} onExpandedChange={onExpandedChange} />);
+
+    scrollList(40);
+    expect(onExpandedChange).not.toHaveBeenCalled();
+    expect(root()).toHaveAttribute('data-expanded');
   });
 });

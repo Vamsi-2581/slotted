@@ -80,6 +80,20 @@ describe('the shape it renders', () => {
     expect(contract.members.tree.parts).toContain('canvas');
   });
 
+  /** The chevron is the Glyph element on a branch, and a leaf's box stays empty. */
+  it('draws the chevron on every branch and nothing on a leaf', () => {
+    render(<Files />);
+    const chevron = (key: string) =>
+      byKey(key)?.querySelector(
+        ":scope > [data-part='row'] > [data-part='expander'] > [data-ui='icon'] > svg[data-glyph]",
+      );
+    expect(chevron('src')).toHaveAttribute('data-glyph', 'chevron-right');
+    expect(chevron('index.ts')).toBeNull();
+    expect(
+      byKey('index.ts')?.querySelector(":scope > [data-part='row'] > [data-part='expander']"),
+    ).not.toBeNull();
+  });
+
   /** A collapsed branch renders no group, so its children are not in the set. */
   it('holds only what is open, in reading order', () => {
     render(<Files defaultExpandedKeys={['src']} />);
@@ -370,6 +384,12 @@ describe('the cascade', () => {
     render(<Cascading defaultValue={['index.ts']} />);
     expect(byKey('src')?.dataset['indeterminate']).toBe('');
     expect(byKey('src')?.dataset['selected']).toBeUndefined();
+    const mark = (key: string) =>
+      byKey(key)
+        ?.querySelector(":scope > [data-part='row'] > [data-part='indicator'] svg[data-glyph]")
+        ?.getAttribute('data-glyph');
+    expect(mark('src')).toBe('minus');
+    expect(mark('index.ts')).toBe('check');
   });
 
   it('says a collapsed branch still holds one', () => {

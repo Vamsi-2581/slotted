@@ -14,6 +14,7 @@ import type { ChangeEvent, KeyboardEvent, MouseEvent, ReactNode, Ref } from 'rea
 
 import { Avatar } from '../avatar';
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
 import { useEntityPicker } from './entity-picker';
 import type { EntityPickerRootProps } from './entity-picker.types';
@@ -492,7 +493,11 @@ export function EntityPickerControl() {
           input
         )}
         {showClear ? (
-          <button aria-label={labels.clear} data-part="clear" onClick={onClear} type="button" />
+          <button aria-label={labels.clear} data-part="clear" onClick={onClear} type="button">
+            <Icon>
+              <Glyph name="x" />
+            </Icon>
+          </button>
         ) : null}
         <button
           aria-label={labels.trigger}
@@ -505,7 +510,11 @@ export function EntityPickerControl() {
           {busy ? (
             <span aria-hidden="true" data-part="busy" data-ui="spinner" />
           ) : (
-            <span data-part="arrow" />
+            <span data-part="arrow">
+              <Icon>
+                <Glyph name="chevron-down" />
+              </Icon>
+            </span>
           )}
         </button>
       </div>
@@ -618,6 +627,10 @@ function Chip({
                 data-size="xs"
                 data-ui="skeleton"
               />
+            ) : missing ? (
+              <Icon>
+                <Glyph name="circle-alert" />
+              </Icon>
             ) : null}
           </span>
         ) : null}
@@ -644,7 +657,11 @@ function Chip({
           onClick={onRemove}
           tabIndex={-1}
           type="button"
-        />
+        >
+          <Icon>
+            <Glyph name="x" />
+          </Icon>
+        </button>
       )}
     </span>
   );

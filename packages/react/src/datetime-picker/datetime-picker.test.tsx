@@ -88,6 +88,18 @@ describe('anatomy', () => {
     const head = panel()?.querySelector('[data-part="head-value"]');
     expect(head?.querySelector('[data-placeholder]')?.textContent).toBe('--:--');
   });
+
+  /** The two marks are `Glyph` elements inside an `Icon` box, never masks. */
+  it('draws the calendar on the trigger and the clock on now as glyph elements', () => {
+    render(<DateTimePicker {...base} defaultOpen value={TENTH} />);
+    const mark = (element: Element | null | undefined) =>
+      element?.querySelector("[data-ui='icon'] > svg[data-glyph]");
+    expect(mark(trigger())).toHaveAttribute('data-glyph', 'calendar');
+    expect(mark(panel()?.querySelector('[data-part="now"]'))).toHaveAttribute(
+      'data-glyph',
+      'clock',
+    );
+  });
 });
 
 describe('focus follows the missing half', () => {

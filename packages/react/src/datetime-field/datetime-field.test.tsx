@@ -267,6 +267,9 @@ describe('the relative expression', () => {
     expect(preview).toHaveAttribute('data-resolved');
     expect(preview).toHaveAttribute('data-rolls-day');
     expect(preview.querySelector('[data-part="preview-date"]')).not.toBeNull();
+    /* The chevron is the glyph element, marked to turn in a right-to-left context. */
+    expect(preview.querySelector('[data-ui="icon"]')).toHaveAttribute('data-directional');
+    expect(preview.querySelector('svg[data-glyph]')).toHaveAttribute('data-glyph', 'chevron-right');
 
     fireEvent.keyDown(input, { key: 'Enter' });
     expect(hidden()).toHaveValue('2026-09-12T12:00:00');
@@ -453,7 +456,9 @@ describe('the contract with the consumer', () => {
         name="quando"
       />,
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
+    const clear = screen.getByRole('button', { name: 'Clear' });
+    expect(clear.querySelector('svg[data-glyph]')).toHaveAttribute('data-glyph', 'x');
+    fireEvent.click(clear);
     expect(hidden()).toHaveValue('');
     expect(root()).not.toHaveAttribute('data-incomplete');
   });

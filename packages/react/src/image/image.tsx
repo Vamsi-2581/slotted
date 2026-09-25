@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import type { CSSProperties, ReactEventHandler, ReactNode } from 'react';
 
 import { AspectRatio } from '../aspect-ratio/aspect-ratio';
+import { Glyph, Icon } from '../icon';
 import { useImageDefaults } from './image-defaults';
 import type {
   ImageMediaProps,
@@ -193,7 +194,14 @@ export function Image({
         ) : null}
         {placeholderContent}
       </span>
-      <span data-part="fallback">{fallback}</span>
+      <span data-part="fallback">
+        {/* The mark a picture leaves behind, unless the consumer wrote their own. */}
+        {fallback ?? (
+          <Icon>
+            <Glyph name="image-off" />
+          </Icon>
+        )}
+      </span>
     </>
   );
 

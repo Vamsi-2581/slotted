@@ -43,6 +43,28 @@ describe('StatusIndicator', () => {
   });
 
   /**
+   * The icon mark is the family's non-chromatic answer, so the artwork each
+   * status draws is the contract's, rendered as the `Glyph` element. The dot
+   * holds none: it is painted, not drawn.
+   */
+  it('draws the glyph the contract names for each status, and none in a dot', () => {
+    for (const status of STATUSES) {
+      const { unmount } = render(
+        <StatusIndicator mark="icon" status={status}>
+          Build
+        </StatusIndicator>,
+      );
+      const glyphs = mark().querySelectorAll('[data-ui="icon"] > svg[data-glyph]');
+      expect(glyphs).toHaveLength(1);
+      expect(glyphs[0]).toHaveAttribute('data-glyph', contract.statusGlyphs[status]);
+      unmount();
+    }
+
+    render(<StatusIndicator status="danger">Build</StatusIndicator>);
+    expect(mark().querySelector('svg')).toBeNull();
+  });
+
+  /**
    * The family's own rule, and the one every surveyed implementation breaks.
    * Spectrum asks the consumer for an `aria-label` and ships a nameless dot
    * when they forget; here the word is in the document, clipped rather than

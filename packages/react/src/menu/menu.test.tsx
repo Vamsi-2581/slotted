@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/menu/contract.json';
+import { Glyph, Icon } from '../icon';
 import { Menu } from './menu';
 import { MenuDefaultsProvider } from './menu-defaults';
 import { MenuContent, MenuTrigger } from './menu-parts';
@@ -50,6 +51,30 @@ const press = (key: string, options: Record<string, unknown> = {}) =>
   fireEvent.keyDown(document.activeElement ?? document.body, { key, ...options });
 
 describe('Menu', () => {
+  /* The first column holds what the consumer passes, and the stylesheet paints nothing there. */
+  it('puts the icon it is given in the first column', async () => {
+    render(
+      <Basic>
+        <MenuItem
+          icon={
+            <Icon>
+              <Glyph name="copy" />
+            </Icon>
+          }
+        >
+          Duplicate
+        </MenuItem>
+      </Basic>,
+    );
+    await open();
+
+    expect(
+      item('Duplicate').querySelector(
+        '[data-part="icon"] > [data-ui="icon"] > svg[data-glyph="copy"]',
+      ),
+    ).not.toBeNull();
+  });
+
   it('wires the trigger to the surface it discloses', async () => {
     render(<Basic />);
     const trigger = screen.getByRole('button', { name: 'Document' });
@@ -285,6 +310,11 @@ describe('Menu', () => {
 
     const checkbox = screen.getByRole('menuitemcheckbox', { name: 'Comments' });
     expect(checkbox).toHaveAttribute('aria-checked', 'false');
+    expect(
+      checkbox.querySelector(
+        '[data-part="indicator"] > [data-ui="icon"] > svg[data-glyph="check"]',
+      ),
+    ).not.toBeNull();
 
     fireEvent.click(checkbox, { detail: 1 });
 
@@ -340,6 +370,11 @@ describe('Menu', () => {
       'aria-checked',
       'true',
     );
+    expect(
+      screen
+        .getByRole('menuitemradio', { name: 'Name' })
+        .querySelector('[data-part="indicator"] > [data-ui="icon"] > svg[data-glyph="dot"]'),
+    ).not.toBeNull();
 
     fireEvent.click(screen.getByRole('menuitemradio', { name: 'Date' }), { detail: 1 });
 
@@ -439,6 +474,10 @@ describe('a submenu', () => {
     expect(parentItem).toHaveAttribute('data-part', 'item');
     expect(parentItem).toHaveAttribute('aria-haspopup', 'menu');
     expect(parentItem).toHaveAttribute('aria-expanded', 'false');
+    const chevron = parentItem.lastElementChild;
+    expect(chevron).toHaveAttribute('data-ui', 'icon');
+    expect(chevron).toHaveAttribute('data-directional');
+    expect(chevron?.querySelector('svg[data-glyph="chevron-right"]')).not.toBeNull();
   });
 
   it('opens on the inline end and closes back onto the item that owns it', async () => {

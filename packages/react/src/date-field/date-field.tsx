@@ -31,6 +31,7 @@ import {
 import type { ClipboardEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { useDateFieldDefaults } from './date-field-defaults';
 import type {
   DateFieldChangeRequest,
@@ -499,7 +500,11 @@ export function DateField({
           data-part="clear"
           onClick={clear}
           type="button"
-        />
+        >
+          <Icon>
+            <Glyph name="x" />
+          </Icon>
+        </button>
       ) : null}
       {end === undefined ? null : <span data-part="end">{end}</span>}
       <input

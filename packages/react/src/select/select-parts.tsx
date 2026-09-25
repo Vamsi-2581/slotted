@@ -11,6 +11,7 @@ import type { KeyboardEvent, MouseEvent, Ref } from 'react';
 import { createPortal } from 'react-dom';
 
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { useSelect } from './select';
 import { ChipRow } from './select-tags';
 import {
@@ -381,7 +382,11 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
         {children}
       </button>
       {showClear ? (
-        <button aria-label={select.clearLabel} data-part="clear" onClick={clear} type="button" />
+        <button aria-label={select.clearLabel} data-part="clear" onClick={clear} type="button">
+          <Icon>
+            <Glyph name="x" />
+          </Icon>
+        </button>
       ) : null}
       {/*
         While an answer is travelling the control shows the ring rather than the
@@ -393,7 +398,11 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
       {select.loading ? (
         <span aria-hidden="true" data-part="busy" data-ui="spinner" />
       ) : (
-        <span data-part="arrow" />
+        <span data-part="arrow">
+          <Icon>
+            <Glyph name="chevron-down" />
+          </Icon>
+        </span>
       )}
       <NativeSelect />
     </>
@@ -596,7 +605,15 @@ export function SelectSearch({ icon, ref, render, ...nativeProps }: SelectSearch
 
   const field = (
     <>
-      {icon === null ? null : (icon ?? <span aria-hidden="true" data-part="search-icon" />)}
+      {icon === null
+        ? null
+        : (icon ?? (
+            <span aria-hidden="true" data-part="search-icon">
+              <Icon>
+                <Glyph name="search" />
+              </Icon>
+            </span>
+          ))}
       <input
         {...nativeProps}
         aria-activedescendant={

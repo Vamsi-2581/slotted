@@ -45,6 +45,7 @@ import {
 import type { ClipboardEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { useDateTimeFieldDefaults } from './datetime-field-defaults';
 import type {
   DateTimeFieldChangeRequest,
@@ -655,6 +656,9 @@ export function DateTimeField({
             {...(resolved === null ? {} : { 'data-resolved': '' })}
             {...(rollsDay ? { 'data-rolls-day': '' } : {})}
           >
+            <Icon directional>
+              <Glyph name="chevron-right" />
+            </Icon>
             {resolved === null ? (
               ''
             ) : rollsDay ? (
@@ -744,7 +748,11 @@ export function DateTimeField({
           data-part="clear"
           onClick={clear}
           type="button"
-        />
+        >
+          <Icon>
+            <Glyph name="x" />
+          </Icon>
+        </button>
       ) : null}
       {end === undefined ? null : <span data-part="end">{end}</span>}
       <input

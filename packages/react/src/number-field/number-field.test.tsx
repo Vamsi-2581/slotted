@@ -440,6 +440,19 @@ describe('NumberField', () => {
       expect(parts).toEqual(['decrement', 'input', 'increment']);
     });
 
+    it('draws a chevron in each stacked half and the minus and plus when split', () => {
+      const glyph = (part: 'increment' | 'decrement') =>
+        stepper(part).querySelector('svg[data-glyph]')?.getAttribute('data-glyph');
+      const { unmount } = render(<NumberField defaultValue={3} />);
+      expect(glyph('increment')).toBe('chevron-down');
+      expect(glyph('decrement')).toBe('chevron-down');
+      unmount();
+
+      render(<NumberField defaultValue={3} stepper="split" />);
+      expect(glyph('increment')).toBe('plus');
+      expect(glyph('decrement')).toBe('minus');
+    });
+
     it('withdraws them entirely when the arrangement says none', () => {
       render(<NumberField defaultValue={3} stepper="none" />);
       expect(frameOf(control()).querySelector('[data-part="increment"]')).toBeNull();

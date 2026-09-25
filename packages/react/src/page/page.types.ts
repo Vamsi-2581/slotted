@@ -68,8 +68,11 @@ export interface PageProps extends ComponentPropsWithRef<'main'> {
    * Fills the height it was given: the body stops growing with its content and
    * the container inside it stretches to what is left, for a master–detail, a
    * splitter or a canvas that scroll their own panes. With `scroll="self"`
-   * nothing then scrolls outside the body, so the header does not collapse on
-   * scroll.
+   * nothing then scrolls outside the body, so the body's principal scroller —
+   * not a form control, and at least half the body's height — is what
+   * collapses the header: past 16 pixels down it snaps the area shut, and back
+   * at its top it opens it again. From 600 pixels of the page's width up;
+   * below it the page scrolls as it does without `fill`.
    */
   fill?: boolean | undefined;
   /**

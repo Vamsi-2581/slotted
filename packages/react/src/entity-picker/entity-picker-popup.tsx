@@ -11,6 +11,7 @@ import type { MouseEvent, PointerEvent } from 'react';
 import { createPortal } from 'react-dom';
 
 import { Highlight } from '../highlight';
+import { Glyph, Icon } from '../icon';
 import { useEntityPicker } from './entity-picker';
 import { EntityFace } from './entity-picker-control';
 
@@ -280,7 +281,11 @@ export function EntityPickerPopup() {
           </span>
         ) : null}
         {content}
-        <span data-part="indicator" />
+        <span data-part="indicator">
+          <Icon>
+            <Glyph name="check" />
+          </Icon>
+        </span>
       </div>
     );
   };
@@ -303,7 +308,11 @@ export function EntityPickerPopup() {
       {...(picker.highlighted === key ? { 'data-current': '' } : {})}
       {...(picker.creating && key === CREATE_OPTION ? { 'data-loading': '' } : {})}
     >
-      <span aria-hidden="true" data-part="media" />
+      <span aria-hidden="true" data-part="media">
+        <Icon>
+          <Glyph name={key === CREATE_OPTION ? 'plus' : 'rotate-ccw'} />
+        </Icon>
+      </span>
       <span data-part="label">{label}</span>
     </div>
   );
@@ -371,7 +380,14 @@ export function EntityPickerPopup() {
               (event) => picker.activate(CREATE_OPTION, 'pointer', event.nativeEvent),
             )
           : null}
-        {failed ? <div data-part="error">{labels.error}</div> : null}
+        {failed ? (
+          <div data-part="error">
+            <Icon>
+              <Glyph name="circle-alert" />
+            </Icon>
+            {labels.error}
+          </div>
+        ) : null}
         {failed
           ? offer(RETRY_OPTION, labels.retry, () => {
               picker.retry();

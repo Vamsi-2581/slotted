@@ -71,6 +71,8 @@ import type {
   ToggleEvent as ReactToggleEvent,
 } from 'react';
 
+import { Glyph, Icon } from '../icon';
+import type { GlyphName } from '../icon';
 import { useChartDefaults } from './chart-defaults';
 import type {
   ChartLegendItemProps,
@@ -1029,7 +1031,11 @@ export function Chart(props: ChartProps) {
                   aria-label={messages.help}
                   data-part="help"
                   type="button"
-                />
+                >
+                  <Icon>
+                    <Glyph name="circle-info" />
+                  </Icon>
+                </button>
                 <div
                   {...helpLayer.layerProps}
                   data-part="help-content"
@@ -1058,17 +1064,20 @@ export function Chart(props: ChartProps) {
                   announce(describeZoom(model, FULL_ZOOM, messages));
                   plot.current?.focus();
                 }}
+                glyph="rotate-ccw"
                 part="zoom-reset"
               />
             ) : null}
             <ToolbarButton
               label={messages.tableView}
               onPress={(reason, source) => requestTable(!tableValue, reason, source)}
+              glyph="file-spreadsheet"
               part="view-toggle"
               pressed={tableValue}
             />
             <ToolbarButton
               label={fullscreenValue ? messages.exitFullscreen : messages.fullscreen}
+              glyph={fullscreenValue ? 'minimize' : 'maximize'}
               onPress={(reason, source) => toggleFullscreen(reason, source)}
               part="fullscreen-toggle"
             />
@@ -1079,7 +1088,11 @@ export function Chart(props: ChartProps) {
               data-part="menu-trigger"
               title={messages.more}
               type="button"
-            />
+            >
+              <Icon>
+                <Glyph name="ellipsis" />
+              </Icon>
+            </button>
             <div {...menu.layerProps} aria-label={messages.more} data-part="menu" role="menu">
               <MenuItem
                 action="view"
@@ -1402,11 +1415,13 @@ function LegendButton({
 }
 
 function ToolbarButton({
+  glyph,
   label,
   onPress,
   part,
   pressed,
 }: {
+  glyph: GlyphName;
   label: string;
   onPress: (reason: ChangeReason, source: unknown) => void;
   part: 'zoom-reset' | 'view-toggle' | 'fullscreen-toggle';
@@ -1424,7 +1439,11 @@ function ToolbarButton({
       ref={element}
       title={label}
       type="button"
-    />
+    >
+      <Icon>
+        <Glyph name={glyph} />
+      </Icon>
+    </button>
   );
 }
 

@@ -3,6 +3,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { MouseEvent, PointerEvent, ReactNode, Ref } from 'react';
 
 import { Highlight } from '../highlight';
+import { Glyph, Icon } from '../icon';
 import { useCombobox } from './combobox';
 import type { ComboboxGroupProps, ComboboxItemProps } from './combobox.types';
 
@@ -121,7 +122,11 @@ export function ComboboxItem({
       {icon === undefined ? null : <span data-part="icon">{icon}</span>}
       <span data-part="label">{marked}</span>
       {description === undefined ? null : <span data-part="description">{description}</span>}
-      <span data-part="indicator" />
+      <span data-part="indicator">
+        <Icon>
+          <Glyph name="check" />
+        </Icon>
+      </span>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import type { ChangeEvent, MouseEvent } from 'react';
 import { useCheckboxGroup } from '../checkbox-group';
 import { useField, useFieldDefaults } from '../field';
 import { useFieldGroup } from '../field-group';
+import { Glyph, Icon } from '../icon';
 import { useCheckboxDefaults } from './checkbox-defaults';
 import type { CheckboxCheckedReason, CheckboxProps, CheckboxRootProps } from './checkbox.types';
 
@@ -244,7 +245,14 @@ export function Checkbox({
           type="checkbox"
           value={value}
         />
-        <span data-part="indicator" />
+        {/* Mixed is the dash, and it outranks the check: a control that is both
+            indeterminate and checked draws the state its children are in. The
+            stylesheet only reveals the mark, on `:checked` or `:indeterminate`. */}
+        <span data-part="indicator">
+          <Icon>
+            <Glyph name={resolvedIndeterminate ? 'minus' : 'check'} />
+          </Icon>
+        </span>
         {/* Rendered without children as well: the target and the wash are the
             label's pseudo-elements, and a box named by aria-label keeps both. */}
         <label data-part="label" htmlFor={controlId} ref={labelRef}>

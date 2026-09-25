@@ -75,7 +75,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      'O chevron do gatilho, uma máscara de --slotted-icon-chevron-down que roda entre baixo e cima.',
+      'O chevron do gatilho, o glifo chevron-down dentro de um icon, que roda entre baixo e cima.',
   },
   {
     part: 'group-list',
@@ -110,7 +110,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: true,
     purpose:
-      'O marcador sobre a linha, centrado na primeira linha do título. Vazio desenha um ponto do tamanho do spinner; com glifo ou avatar desenha um emblema; loading desenha o spinner no lugar do ponto; complete vaza um check no disco.',
+      'O marcador sobre a linha, centrado na primeira linha do título. Vazio desenha um ponto do tamanho do spinner; com glifo ou avatar desenha um emblema; loading desenha o spinner no lugar do ponto; complete, sem marcador do consumidor, recebe o glifo check (um icon com data-check) vazado no disco e continua ponto.',
   },
   {
     part: 'connector',

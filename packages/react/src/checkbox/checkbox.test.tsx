@@ -60,7 +60,10 @@ describe('Checkbox', () => {
     expect(root()).toHaveAttribute('data-part', 'root');
     expect(root()).toHaveClass('page-box');
     expect(control()).toHaveAttribute('data-part', 'control');
-    expect(root().querySelector('[data-part="indicator"]')).not.toBeNull();
+    expect(root().querySelector('[data-part="indicator"] svg[data-glyph]')).toHaveAttribute(
+      'data-glyph',
+      'check',
+    );
     expect(root().querySelector('[data-part="label"]')).toHaveTextContent('Receber avisos');
     expect(root().querySelector('[data-part="description"]')).toHaveTextContent(
       'Um resumo por dia.',
@@ -176,6 +179,11 @@ describe('Checkbox', () => {
     expect((control() as HTMLInputElement).indeterminate).toBe(true);
     expect(control()).not.toHaveAttribute('indeterminate');
     expect(root()).toHaveAttribute('data-indeterminate', '');
+    /* Mixed is the dash, in place of the check. */
+    expect(root().querySelector('[data-part="indicator"] svg[data-glyph]')).toHaveAttribute(
+      'data-glyph',
+      'minus',
+    );
     expect(control()).not.toBeChecked();
     expect(control()).toHaveAttribute('value', 'all');
   });

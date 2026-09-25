@@ -75,7 +75,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      "The mark in the first column, from a glyph token or the consumer's own element. It shares the column with the indicator, because a checkbox item's mark is its icon.",
+      "The mark in the first column: content the consumer passes — the library's Glyph in an icon box, or their own element — which the column sizes and never paints. It shares the column with the indicator, because a checkbox item's mark is its icon.",
   },
   {
     part: 'label',
@@ -157,7 +157,15 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A glyph in the first column',
       source: `<>
-  <MenuItem icon={<Icon name="copy" />}>Duplicate</MenuItem>
+  <MenuItem
+    icon={
+      <Icon>
+        <Glyph name="copy" />
+      </Icon>
+    }
+  >
+    Duplicate
+  </MenuItem>
   <MenuItem>Rename</MenuItem>
 </>;`,
     }),
@@ -674,7 +682,11 @@ const code = defineSnippet({
         tabindex="-1"
         aria-keyshortcuts="Control+D"
       >
-        <span data-part="icon"></span>
+        <span data-part="icon">
+          <span data-ui="icon" data-part="root" aria-hidden="true">
+            <svg data-part="glyph" data-glyph="copy" />
+          </span>
+        </span>
         <span data-part="label">Duplicate</span>
         <span data-part="shortcut" aria-hidden="true">
           Ctrl+D
@@ -690,7 +702,11 @@ const code = defineSnippet({
       type="button"
       tabindex="-1"
     >
-      <span data-part="indicator"></span>
+      <span data-part="indicator">
+        <span data-ui="icon" data-part="root" aria-hidden="true">
+          <svg data-part="glyph" data-glyph="check" />
+        </span>
+      </span>
       <span data-part="label">Show comments</span>
     </button>
   </div>

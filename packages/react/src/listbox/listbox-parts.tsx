@@ -1,5 +1,6 @@
 import { useId } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { useListbox } from './listbox-context';
 import type {
   ListboxGroupProps,
@@ -149,7 +150,9 @@ export function ListboxLoader({ children, render, ...nativeProps }: ListboxMessa
 /**
  * The mark that says an option is chosen. The listbox reserves its column
  * whether or not the mark is drawn, so a list does not shift sideways as one
- * option is chosen; `indicator="none"` is what removes the column with it.
+ * option is chosen; `indicator="none"` is what removes the column with it. The
+ * tick is a `Glyph` sized by the column, and children of the consumer's own
+ * replace it.
  */
 export function ListboxIndicator({ children, ...nativeProps }: ListboxPartProps) {
   const listbox = useListbox();
@@ -157,16 +160,19 @@ export function ListboxIndicator({ children, ...nativeProps }: ListboxPartProps)
 
   return (
     <span aria-hidden="true" data-part="indicator" {...nativeProps}>
-      {children}
+      {children ?? (
+        <Icon>
+          <Glyph name="check" />
+        </Icon>
+      )}
     </span>
   );
 }
 
 /**
  * The option's own artwork, in the same column the mark uses and never beside
- * it. Two ways to fill it, as `alert`'s and `menu`'s icon parts take them: a
- * glyph token through `--slotted-listbox-option-icon`, or an element of the
- * consumer's own.
+ * it: an `Icon` holding a `Glyph`, or an element of the consumer's own. The
+ * column sizes and centres it; no stylesheet fills it.
  */
 export function ListboxIcon({ children, ...nativeProps }: ListboxPartProps) {
   return (

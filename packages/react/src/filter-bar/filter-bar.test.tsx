@@ -28,6 +28,20 @@ const FIELDS: FilterBarField[] = [
   { key: 'note', kind: 'boolean', label: 'Has note' },
 ];
 
+const TWO_VALUES: FilterGroup = {
+  join: 'and',
+  rules: [
+    {
+      field: 'status',
+      filter: {
+        kind: 'set',
+        join: 'and',
+        conditions: [{ operator: 'anyOf', value: ['paid', 'refunded'] }],
+      },
+    },
+  ],
+};
+
 const TREE: FilterGroup = {
   join: 'and',
   rules: [
@@ -85,7 +99,7 @@ describe('FilterBar', () => {
   it('draws a pinned field as a pill, filled while it holds a rule, and an unpinned one as a chip', () => {
     render(<Orders defaultValue={TREE} />);
     const pills = parts('pill');
-    expect(pills.map((pill) => pill.textContent)).toEqual(['Statusany of Paid', 'Owner']);
+    expect(pills.map((pill) => pill.textContent)).toEqual(['Statusis Paid', 'Owner']);
     expect(pills[0]!.hasAttribute('data-filtered')).toBe(true);
     expect(pills[1]!.hasAttribute('data-filtered')).toBe(false);
     expect(pills[0]!.getAttribute('aria-haspopup')).toBe('dialog');
@@ -93,6 +107,12 @@ describe('FilterBar', () => {
     expect(chips).toHaveLength(2);
     expect(chips[0]!.getAttribute('role')).toBe('gridcell');
     expect(screen.getByRole('button', { name: 'Amount: greater than 100' })).not.toBeNull();
+    /* The name and the sentence are two runs with a space between them. The
+       space is a text node rather than a gap, because it separates the words of
+       the chip's own accessible name as well as the words on the screen. */
+    expect(chips[0]!.querySelector('[data-part="label"]')?.textContent).toBe(
+      'Amount greater than 100',
+    );
     expect(screen.getByRole('button', { name: 'Remove Amount greater than 100' })).not.toBeNull();
   });
 
@@ -308,10 +328,8 @@ describe('FilterBar', () => {
     render(<Orders defaultValue={value} onValueChange={onValueChange} />);
     const chip = part('chip');
     expect(chip.hasAttribute('data-invalid')).toBe(true);
-    expect(
-      screen.getByRole('button', { name: 'Unknown field region: any of south' }),
-    ).not.toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Remove region any of south' }));
+    expect(screen.getByRole('button', { name: 'Unknown field region: is south' })).not.toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Remove region is south' }));
     expect(onValueChange.mock.calls[0]![0]).toBeNull();
   });
 
@@ -328,6 +346,24 @@ describe('FilterBar', () => {
     expect(builder).not.toBeNull();
     expect(builder.querySelectorAll('[data-part="rule"]')).toHaveLength(3);
     expect(builder.querySelector('[data-part="group"]')?.getAttribute('data-depth')).toBe('0');
+  });
+
+  /* No stylesheet paints a glyph: each one is an `icon` holding the library's `Glyph`. */
+  it('draws its glyphs as elements: magnifier, chevrons, plus, and a cross on each rule', () => {
+    render(<Orders defaultOpen defaultValue={TREE} />);
+    const glyph = (host: Element | null) =>
+      host?.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
+    expect(glyph(part('search'))).toBe('search');
+    expect(parts('pill').map(glyph)).toEqual(['chevron-down', 'chevron-down']);
+    expect(glyph(part('add'))).toBe('plus');
+    const builder = document.querySelector(
+      '[data-ui="filter-bar"][data-part="builder"]',
+    ) as HTMLElement;
+    const removes = [...builder.querySelectorAll('[data-part="rule"] > [data-part="remove"]')];
+    expect(removes).toHaveLength(3);
+    expect(removes.map(glyph)).toEqual(['x', 'x', 'x']);
+    expect(glyph(builder.querySelector('[data-part="add-rule"]'))).toBe('plus');
+    expect(glyph(builder.querySelector('[data-part="add-group"]'))).toBe('plus');
   });
 
   it('lets the builder add a group and applies the tree with submit', () => {
@@ -399,8 +435,20 @@ describe('FilterBar', () => {
   });
 
   it('writes the applied sentence on a pinned pill from the same words the chips use', () => {
-    render(<Orders defaultValue={TREE} labels={{ operators: { anyOf: 'is one of' } }} />);
-    expect(parts('pill')[0]!.textContent).toBe('Statusis one of Paid');
+    render(<Orders defaultValue={TWO_VALUES} labels={{ operators: { anyOf: 'is one of' } }} />);
+    expect(parts('pill')[0]!.textContent).toBe('Statusis one of Paid, Refunded');
+  });
+
+  /**
+   * A list of one is the equality of that value, so the sentence says so; the
+   * condition is still `anyOf`, and a second value returns the list form.
+   */
+  it('reads a set of one as an equality and a set of two as a list', () => {
+    const one = render(<Orders defaultValue={TREE} />);
+    expect(parts('pill')[0]!.textContent).toBe('Statusis Paid');
+    one.unmount();
+    render(<Orders defaultValue={TWO_VALUES} />);
+    expect(parts('pill')[0]!.textContent).toBe('Statusany of Paid, Refunded');
   });
   it('under sticky reads the page offset for itself and publishes the sum for what follows, once', () => {
     let notify: (() => void) | undefined;
@@ -431,6 +479,85 @@ describe('FilterBar', () => {
       expect(parent.style.getPropertyValue('--slotted-page-sticky-top')).toBe('56px');
     } finally {
       height.mockRestore();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  /**
+   * A stand-in for the layout jsdom does not do. Without `data-bar-wrapped`
+   * on the root the bar is drawn in the wide composition, and when `wraps` is
+   * true every control after the second starts a second line there; with the
+   * attribute the bar has a line of its own and every control fits on it.
+   */
+  function stubBarLayout(wraps: { current: boolean }) {
+    return vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      const bar = this.parentElement;
+      if (bar?.getAttribute('data-part') !== 'bar') return { height: 0, width: 0 } as DOMRect;
+      const wide = !bar.closest('[data-ui="filter-bar"]')?.hasAttribute('data-bar-wrapped');
+      const second = wide && wraps.current && [...bar.children].indexOf(this) > 1;
+      const top = second ? 42 : 0;
+      return { bottom: top + 34, height: 34, top, width: 80 } as DOMRect;
+    });
+  }
+
+  it('gives the bar a line of its own when its controls would wrap beside the search', () => {
+    const wraps = { current: true };
+    const layout = stubBarLayout(wraps);
+    try {
+      render(<FilterBar fields={FIELDS} />);
+      expect(screen.getByRole('search').hasAttribute('data-bar-wrapped')).toBe(true);
+    } finally {
+      layout.mockRestore();
+    }
+  });
+
+  it('keeps the one-line composition while the controls fit beside the search', () => {
+    const layout = stubBarLayout({ current: false });
+    try {
+      render(<FilterBar fields={FIELDS} />);
+      expect(screen.getByRole('search').hasAttribute('data-bar-wrapped')).toBe(false);
+    } finally {
+      layout.mockRestore();
+    }
+  });
+
+  /**
+   * The bar fits on its own line, and it would wrap beside the search: the
+   * decision is read in the one-line composition whichever one is drawn, so a
+   * resize that finds the fallback in place keeps it, and only a bar that
+   * fits beside the search again gives it up.
+   */
+  it('decides from the one-line composition, so the fallback holds until the bar fits there', () => {
+    const notify: (() => void)[] = [];
+    class Observer {
+      constructor(callback: () => void) {
+        notify.push(callback);
+      }
+      observe() {}
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', Observer);
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+      callback(0);
+      return 0;
+    });
+    vi.stubGlobal('cancelAnimationFrame', () => {});
+    const wraps = { current: true };
+    const layout = stubBarLayout(wraps);
+    try {
+      render(<FilterBar fields={FIELDS} />);
+      const root = screen.getByRole('search');
+      for (let frame = 0; frame < 3; frame += 1) {
+        act(() => notify.forEach((callback) => callback()));
+        expect(root.hasAttribute('data-bar-wrapped')).toBe(true);
+      }
+      wraps.current = false;
+      act(() => notify.forEach((callback) => callback()));
+      expect(root.hasAttribute('data-bar-wrapped')).toBe(false);
+    } finally {
+      layout.mockRestore();
       vi.unstubAllGlobals();
     }
   });

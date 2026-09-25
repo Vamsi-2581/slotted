@@ -599,7 +599,7 @@ export const Narrow: Story = {
     <Grid columns={1}>
       <Scene
         label="A 375-pixel phone"
-        note="Below 640 pixels of the root’s own width the columns are one: the fields follow the sections with a rule above them, the header’s actions wrap under the title into the toolbar’s overflow, and every field a desktop reader has is still here."
+        note="Below 600 pixels of the root’s own width the columns are one: the fields follow the sections with a rule above them, the header’s actions wrap under the title into the toolbar’s overflow, and every field a desktop reader has is still here."
       >
         <Room room="phone" size="tall">
           <OrderPanel />

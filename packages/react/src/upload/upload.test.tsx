@@ -109,6 +109,41 @@ describe('Upload', () => {
     ]);
   });
 
+  it('draws the region’s mark, each kind’s mark and each control’s mark as glyphs', () => {
+    const glyph = (node: Element | null) =>
+      node
+        ?.querySelector(':scope > [data-ui="icon"] > svg[data-glyph]')
+        ?.getAttribute('data-glyph');
+    const { unmount } = render(<Upload multiple />);
+
+    /* The region carries the mark in the dropzone shape, so the trigger does not. */
+    expect(glyph(part('dropzone'))).toBe('upload');
+    expect(glyph(part('trigger'))).toBeUndefined();
+
+    choose([
+      makeFile('a.pdf', { type: 'application/pdf' }),
+      makeFile('b.xlsx', { lastModified: 2 }),
+    ]);
+    expect(parts('preview').map(glyph)).toEqual(['file-text', 'file-spreadsheet']);
+    const marks = {
+      cancel: 'x',
+      pause: 'pause',
+      remove: 'trash',
+      retry: 'rotate-ccw',
+      start: 'play',
+    };
+    const controls = parts('actions').flatMap((node) => [...node.children]);
+    expect(controls.length).toBeGreaterThan(0);
+    for (const control of controls) {
+      const name = control.getAttribute('data-part') as keyof typeof marks;
+      expect(glyph(control)).toBe(marks[name]);
+    }
+    unmount();
+
+    render(<Upload variant="button" />);
+    expect(glyph(part('trigger'))).toBe('upload');
+  });
+
   describe('the drag', () => {
     /**
      * `dragenter` and `dragleave` fire for every element the pointer crosses. A
@@ -275,6 +310,9 @@ describe('Upload', () => {
     expect(panel).toHaveAttribute('role', 'dialog');
     expect(panel).toHaveAccessibleName('a.png');
 
+    expect(
+      document.querySelector('[data-part="viewerClose"] > [data-ui="icon"] > svg[data-glyph="x"]'),
+    ).not.toBeNull();
     fireEvent.click(document.querySelector('[data-part="viewerClose"]') as HTMLElement);
     await waitFor(() => expect(document.querySelector('[data-part="viewer"]')).toBeNull());
   });

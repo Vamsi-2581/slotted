@@ -206,6 +206,28 @@ describe('Timeline', () => {
     expect(part(item(0), 'marker').querySelector('[data-testid="glyph"]')).not.toBeNull();
   });
 
+  /**
+   * A finished dot holds the family's check, marked so the sheet keeps it a
+   * dot; a pending or current dot is empty, and consumer artwork replaces the
+   * check.
+   */
+  it('draws the check glyph in a finished dot and nowhere else', () => {
+    const check = (index: number) =>
+      part(item(index), 'marker').querySelector('[data-ui="icon"][data-check] > svg[data-glyph]');
+    const { unmount } = render(<Invoice autoComplete />);
+    expect(check(0)?.getAttribute('data-glyph')).toBe('check');
+    expect(check(1)?.getAttribute('data-glyph')).toBe('check');
+    expect(part(item(2), 'marker').childElementCount).toBe(0);
+    unmount();
+
+    render(
+      <Timeline label="Marker">
+        <TimelineItem complete marker={<svg data-testid="glyph" />} title="Custom" />
+      </Timeline>,
+    );
+    expect(check(0)).toBeNull();
+  });
+
   it('inherits tone and variant from the root and lets an event override them', () => {
     render(<Invoice tone="accent" variant="subtle" />);
     expect(item(0).dataset['tone']).toBe('accent');
@@ -401,6 +423,11 @@ describe('TimelineGroup', () => {
     render(<Grouped collapsible />);
     const trigger = screen.getByRole('button', { name: 'Today, Hide events' });
     expect(trigger.dataset['part']).toBe('group-trigger');
+    expect(
+      part(trigger, 'group-indicator')
+        .querySelector('[data-ui="icon"] > svg[data-glyph]')
+        ?.getAttribute('data-glyph'),
+    ).toBe('chevron-down');
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
     const list = document.getElementById(
       trigger.getAttribute('aria-controls') as string,

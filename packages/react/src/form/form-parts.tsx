@@ -25,6 +25,7 @@ export function FormSummary({ ref, ...nativeProps }: FormSummaryProps) {
   return (
     <div
       aria-labelledby={form.summaryId}
+      data-ui="form"
       data-part="summary"
       role="alert"
       tabIndex={-1}
@@ -92,6 +93,7 @@ export function FormActions({ align, ref, ...nativeProps }: FormActionsProps) {
   return (
     <div
       data-align={align ?? form?.align ?? defaults.align}
+      data-ui="form"
       data-part="actions"
       {...nativeProps}
       ref={ref}

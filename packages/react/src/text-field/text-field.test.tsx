@@ -31,7 +31,7 @@ describe('TextField', () => {
     expect(input).toHaveAttribute('data-part', 'input');
     expect(root.querySelector('[data-part="start"]')).toHaveTextContent('R$');
     expect(root.querySelector('[data-part="end"]')).toHaveTextContent('BRL');
-    expect(root.querySelector('[data-part="clear"]')).not.toBeNull();
+    expect(root.querySelector('[data-part="clear"] svg[data-glyph="x"]')).not.toBeNull();
   });
 
   /**
@@ -197,6 +197,7 @@ describe('TextField', () => {
     const toggle = screen.getByRole('button', { name: 'Show password' });
     expect(screen.getByTestId('input')).toHaveAttribute('type', 'password');
     expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    expect(toggle.querySelector('svg[data-glyph]')).toHaveAttribute('data-glyph', 'eye');
 
     fireEvent.click(toggle);
 
@@ -205,6 +206,8 @@ describe('TextField', () => {
       'aria-pressed',
       'true',
     );
+    /* A revealed value is one a press will hide: the glyph is the crossed eye. */
+    expect(toggle.querySelector('svg[data-glyph]')).toHaveAttribute('data-glyph', 'eye-off');
   });
 
   it('holds the caret where it was when the type swaps', async () => {

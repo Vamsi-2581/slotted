@@ -155,10 +155,11 @@ describe('Markdown', () => {
       'id',
       'footnote-label',
     );
-    expect(screen.getByRole('link', { name: 'Back to reference 1' })).toHaveAttribute(
-      'href',
-      '#fnref-a',
-    );
+    const back = screen.getByRole('link', { name: 'Back to reference 1' });
+    expect(back).toHaveAttribute('href', '#fnref-a');
+    /* The arrow is the Glyph element, hidden, and the link keeps its own name. */
+    const glyph = back.querySelector('[data-ui="icon"][aria-hidden="true"] > svg[data-glyph]');
+    expect(glyph).toHaveAttribute('data-glyph', 'arrow-left');
   });
 
   it('draws the empty part for a document with nothing in it', () => {

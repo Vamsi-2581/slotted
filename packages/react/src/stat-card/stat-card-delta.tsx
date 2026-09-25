@@ -2,6 +2,7 @@ import '@slotted/styles/stat-card/stat-card.css';
 
 import { useMemo } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { Skeleton } from '../skeleton';
 import { VisuallyHidden } from '../visually-hidden';
 import { toneOf, trendOf, useStatCard } from './stat-card-context';
@@ -59,7 +60,12 @@ export function StatCardDelta({
     ...nativeProps,
     children: (
       <>
-        <span aria-hidden="true" data-part="indicator" />
+        {/* One glyph for a rise and a fall, turned over by the sheet for a fall. */}
+        <span aria-hidden="true" data-part="indicator">
+          <Icon directional={trend !== 'flat'}>
+            <Glyph name={trend === 'flat' ? 'minus' : 'trending-up'} />
+          </Icon>
+        </span>
         <VisuallyHidden>{card.messages[trend]} </VisuallyHidden>
         {children ?? formatted}
       </>

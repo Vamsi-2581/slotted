@@ -142,6 +142,9 @@ describe('SideNavigation', () => {
       'aria-hidden',
       'true',
     );
+    const box = trigger('entregas').querySelector('[data-part="indicator"] > [data-ui="icon"]');
+    expect(box).toHaveAttribute('data-directional');
+    expect(box?.querySelector('svg[data-glyph="chevron-right"]')).not.toBeNull();
   });
 
   it('opens and closes a group with the reason the device gave', () => {

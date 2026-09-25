@@ -137,6 +137,10 @@ describe('DataList', () => {
     const acme = record('Acme Logistics');
     const more = within(acme).getByRole('button', { name: 'Show 3 more' });
     expect(more).toHaveAttribute('aria-expanded', 'false');
+    expect(more.querySelector('[data-ui="icon"] > svg[data-glyph]')).toHaveAttribute(
+      'data-glyph',
+      'chevron-down',
+    );
     expect(more.getAttribute('aria-controls')).toBe(acme.querySelector('dl')?.id);
     fireEvent.click(more, { detail: 1 });
     expect(onExpandedChange).toHaveBeenCalledWith(
@@ -230,6 +234,8 @@ describe('DataList', () => {
   it('sorts from the menu and announces the order', async () => {
     const onQueryChange = vi.fn();
     render(<Harness onQueryChange={onQueryChange} />);
+    /* Without a key there is nothing to point at, and no chevron is drawn. */
+    expect(document.querySelector('[data-part="sort"] svg[data-glyph]')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Sort' }), { detail: 1 });
     await screen.findByRole('menu');
     expect(screen.queryByRole('menuitemradio', { name: 'Created' })).toBeNull();
@@ -251,6 +257,9 @@ describe('DataList', () => {
     );
     const trigger = screen.getByRole('button', { name: /Sort, Balance ascending/ });
     expect(trigger).toHaveTextContent('Sort: Balance');
+    expect(
+      trigger.querySelector('[data-part="end"] > [data-ui="icon"] > svg[data-glyph]'),
+    ).toHaveAttribute('data-glyph', 'chevron-down');
     fireEvent.click(trigger, { detail: 1 });
     await screen.findByRole('menu');
     fireEvent.click(screen.getByRole('menuitemradio', { name: 'Descending' }), { detail: 1 });

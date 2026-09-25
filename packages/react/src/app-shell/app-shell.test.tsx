@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -314,6 +314,34 @@ describe('AppShell', () => {
       expect(container.querySelector('[data-part="nav"]')).not.toHaveAttribute('inert');
     });
 
+    /**
+     * The stylesheet fades the veil in from `entering` and out through
+     * `exiting`, and a veil mounted straight at `open` gives that transition
+     * no closed style to start from: it appeared in one frame beside a panel
+     * that took two hundred milliseconds to arrive. The presence module holds
+     * the two extra statuses, as it does for `dialog`.
+     */
+    it('fades the veil in through entering, and holds it through exiting', async () => {
+      const { container } = render(<Shell defaultNavOpen={false} navMode="overlay" />);
+      const scrim = () => container.querySelector('[data-part="scrim"]');
+      const frame = () =>
+        act(() => new Promise<void>((done) => requestAnimationFrame(() => done())));
+
+      expect(scrim()).toBeNull();
+
+      press(screen.getByRole('button', { name: 'Abrir navegação' }));
+      expect(scrim()).toHaveAttribute('data-status', 'entering');
+
+      await frame();
+      expect(scrim()).toHaveAttribute('data-status', 'open');
+
+      escape();
+      expect(scrim()).toHaveAttribute('data-status', 'exiting');
+
+      await frame();
+      expect(scrim()).toBeNull();
+    });
+
     it('inerts nothing when it is not modal, and draws no veil', () => {
       const { container } = render(<Shell modal={false} navMode="overlay" />);
 
@@ -332,6 +360,55 @@ describe('AppShell', () => {
       press(link);
 
       expect(onNavOpenChange.mock.calls.at(-1)?.[1].reason).toBe('select');
+    });
+
+    /**
+     * A client-side router's link calls preventDefault on its own click before
+     * the click reaches the root: React Router's Link and Next's Link both do.
+     * Reading defaultPrevented as a refusal kept every routed destination open.
+     */
+    it('closes on a destination whose router prevented the native navigation', () => {
+      const onNavOpenChange = vi.fn();
+      render(
+        <AppShell navMode="overlay" onNavOpenChange={onNavOpenChange}>
+          <AppShellNav>
+            <AppShellNavBody>
+              <a href="/painel" onClick={(event) => event.preventDefault()}>
+                Painel
+              </a>
+            </AppShellNavBody>
+          </AppShellNav>
+          <AppShellMain>Encomendas</AppShellMain>
+        </AppShell>,
+      );
+
+      const link = screen.getByRole('link', { name: 'Painel' });
+      fireEvent.pointerDown(link);
+      press(link);
+
+      expect(onNavOpenChange.mock.calls.at(-1)?.[1].reason).toBe('select');
+    });
+
+    it('leaves the region open on a disabled destination', () => {
+      const onNavOpenChange = vi.fn();
+      render(
+        <AppShell navMode="overlay" onNavOpenChange={onNavOpenChange}>
+          <AppShellNav>
+            <AppShellNavBody>
+              <a aria-disabled="true" href="/painel" onClick={(event) => event.preventDefault()}>
+                Painel
+              </a>
+            </AppShellNavBody>
+          </AppShellNav>
+          <AppShellMain>Encomendas</AppShellMain>
+        </AppShell>,
+      );
+
+      const link = screen.getByRole('link', { name: 'Painel' });
+      fireEvent.pointerDown(link);
+      press(link);
+
+      expect(onNavOpenChange).not.toHaveBeenCalled();
     });
 
     it('leaves the region open on a destination when the axis says so', () => {
@@ -427,6 +504,24 @@ describe('AppShell', () => {
         'aria-expanded',
         'false',
       );
+    });
+
+    /* The mark says what a press does: the pane closes while it is open. */
+    it('draws the panel mark for the press it offers', () => {
+      render(<Shell asideMode="inline" />);
+      const glyph = (name: string) =>
+        screen
+          .getByRole('button', { name })
+          .querySelector('[data-ui="icon"] > svg[data-glyph]')
+          ?.getAttribute('data-glyph');
+
+      expect(glyph('Fechar navegação')).toBe('panel-close');
+      expect(glyph('Fechar painel lateral')).toBe('panel-close');
+
+      press(screen.getByRole('button', { name: 'Fechar navegação' }));
+      press(screen.getByRole('button', { name: 'Fechar painel lateral' }));
+      expect(glyph('Abrir navegação')).toBe('panel-open');
+      expect(glyph('Abrir painel lateral')).toBe('panel-open');
     });
 
     it('starts closed when told, and reports and waits when controlled', () => {

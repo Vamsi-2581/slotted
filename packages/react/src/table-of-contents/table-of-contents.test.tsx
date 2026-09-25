@@ -347,6 +347,11 @@ describe('collapsed', () => {
     const { container } = render(<Collapsed />);
     const trigger = screen.getByRole('button', { name: /Nesta página/ });
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(
+      trigger.querySelector(
+        '[data-part="indicator"] > [data-ui="icon"] > svg[data-glyph="chevron-down"]',
+      ),
+    ).not.toBeNull();
     expect(container.querySelector('[data-part="current"]')?.textContent).toBe('Endereços');
     const panel = container.querySelector('[data-part="panel"]') as HTMLElement;
     expect(trigger.getAttribute('aria-controls')).toBe(panel.id);

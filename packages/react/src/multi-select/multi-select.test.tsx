@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/multi-select/contract.json';
+import { Glyph, Icon } from '../icon';
 import { MultiSelect } from './multi-select';
 import { MultiSelectDefaultsProvider } from './multi-select-defaults';
 import { MultiSelectGroup, MultiSelectItem } from './multi-select-items';
@@ -284,6 +285,51 @@ describe('MultiSelect', () => {
     fireEvent.change(field, { target: { value: 'figs' } });
     fireEvent.keyDown(field, { key: 'Enter' });
     expect(chipLabels()).toEqual(['figs']);
+  });
+
+  /**
+   * Every icon the family owns is a `Glyph` element inside an `Icon` box, never
+   * a mask, and the offer to add takes the plus where a chosen option takes the
+   * check.
+   */
+  it('draws the chevron, the cross, the tick and the plus as glyph elements', async () => {
+    const { container } = render(<Basic creatable defaultValue={['blueberry']} />);
+    const glyph = (part: string) =>
+      container.querySelector(`[data-part='${part}'] > [data-ui='icon'] > svg[data-glyph]`);
+    expect(glyph('arrow')).toHaveAttribute('data-glyph', 'chevron-down');
+    expect(glyph('clear')).toHaveAttribute('data-glyph', 'x');
+    expect(glyph('remove')).toHaveAttribute('data-glyph', 'x');
+
+    await openByArrow();
+    const mark = (option: HTMLElement) =>
+      option.querySelector("[data-part='indicator'] > [data-ui='icon'] > svg");
+    expect(mark(optionNamed('Blueberry'))).toHaveAttribute('data-glyph', 'check');
+
+    type('Quince');
+    expect(mark(optionNamed('Add “Quince”'))).toHaveAttribute('data-glyph', 'plus');
+  });
+
+  /** The first column holds the artwork it is given; no stylesheet fills it. */
+  it('holds an item icon in the first column', async () => {
+    render(
+      <Basic>
+        <MultiSelectItem
+          icon={
+            <Icon>
+              <Glyph name="dot" />
+            </Icon>
+          }
+          value="blueberry"
+        >
+          Blueberry
+        </MultiSelectItem>
+      </Basic>,
+    );
+    await openByArrow();
+    const mark = optionNamed('Blueberry').querySelector(
+      "[data-part='icon'] > [data-ui='icon'] > svg[data-glyph]",
+    );
+    expect(mark).toHaveAttribute('data-glyph', 'dot');
   });
 
   it('clears the whole set at once, and says so', () => {

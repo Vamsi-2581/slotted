@@ -347,6 +347,9 @@ describe('Toolbar under overflow="menu"', () => {
     expect(unit('Publicar')).not.toHaveAttribute('hidden');
     expect(trigger()).not.toHaveAttribute('hidden');
     expect(trigger()).toHaveAccessibleName('1 more action');
+    expect(
+      trigger().querySelector('[data-ui="icon"][aria-hidden="true"] > svg[data-glyph="ellipsis"]'),
+    ).not.toBeNull();
   });
 
   /**

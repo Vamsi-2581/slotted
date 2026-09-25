@@ -5,6 +5,7 @@ import '@slotted/styles/tag/tag.css';
 import { useEffect, useRef, useState } from 'react';
 import type { MouseEvent } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import type { SelectOptionValue } from './select.types';
 
 /**
@@ -116,7 +117,11 @@ export function ChipRow({
               disabled={disabled}
               onClick={(event) => onRemove(value, event)}
               type="button"
-            />
+            >
+              <Icon>
+                <Glyph name="x" />
+              </Icon>
+            </button>
           </span>
         );
       })}

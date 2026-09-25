@@ -126,6 +126,14 @@ describe('what it is made of', () => {
     expect(document.querySelector('input[name="inicio"]')).toHaveValue('2026-09-12T14:00:00');
     expect(document.querySelector('input[name="fim"]')).toHaveValue('2026-09-16T11:00:00');
   });
+
+  /** Both marks are `Glyph` elements inside an `Icon` box, never masks. */
+  it('draws the calendar and the cross as glyph elements', () => {
+    render(<DTRP clearable defaultValue={RUN} />);
+    const glyph = (name: string) => part(name).querySelector("[data-ui='icon'] > svg[data-glyph]");
+    expect(glyph('trigger')).toHaveAttribute('data-glyph', contract.triggerIcon);
+    expect(glyph('clear')).toHaveAttribute('data-glyph', 'x');
+  });
 });
 
 describe('the duration, said while the run is drawn', () => {

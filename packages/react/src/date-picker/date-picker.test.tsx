@@ -80,6 +80,13 @@ describe('what the trigger says', () => {
     expect(trigger().getAttribute('aria-label')).toContain('Alterar data');
     expect(trigger().getAttribute('aria-label')).toContain('setembro');
   });
+
+  /** The mark is a `Glyph` element inside an `Icon` box, never a mask. */
+  it('draws the calendar as a glyph element', () => {
+    render(<DatePicker locale="pt-BR" />);
+    const mark = trigger().querySelector("[data-ui='icon'] > svg[data-glyph]");
+    expect(mark).toHaveAttribute('data-glyph', 'calendar');
+  });
 });
 
 describe('opening and closing', () => {

@@ -13,7 +13,7 @@ export type TopNavigationSize = 'sm' | 'md' | 'lg';
 
 /**
  * Which step of the bar's width folds an item into the panel: `low` folds
- * first, under 1024 pixels; `medium` under 768; `high` under 480.
+ * first, under 1024 pixels; `medium` under 600; `high` under 480.
  */
 export type TopNavigationPriority = 'high' | 'medium' | 'low';
 

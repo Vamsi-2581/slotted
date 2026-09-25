@@ -117,6 +117,22 @@ describe('StatCard', () => {
     expect(root()).toHaveAttribute('data-tone', 'neutral');
   });
 
+  /** One glyph for a rise and a fall, which the sheet turns over, and `minus` for none. */
+  it('draws trending-up for a rise or a fall and minus for no change', () => {
+    const glyph = () =>
+      part('indicator')!
+        .querySelector('[data-ui="icon"] > svg[data-glyph]')
+        ?.getAttribute('data-glyph');
+    const { rerender } = render(<Revenue delta={0.124} />);
+    expect(glyph()).toBe('trending-up');
+
+    rerender(<Revenue delta={-0.03} />);
+    expect(glyph()).toBe('trending-up');
+
+    rerender(<Revenue delta={0} />);
+    expect(glyph()).toBe('minus');
+  });
+
   it('lets an explicit tone win, on the root and on the delta', () => {
     render(
       <StatCard delta={0.1} tone="warning">

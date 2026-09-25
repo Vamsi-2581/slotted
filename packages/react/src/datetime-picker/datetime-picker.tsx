@@ -40,6 +40,7 @@ import type { CalendarHandle, CalendarView } from '../calendar';
 import { DateTimeField } from '../datetime-field';
 import type { DateTimeFieldHandle } from '../datetime-field';
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { useDateTimePickerDefaults } from './datetime-picker-defaults';
 import type {
   DateTimePickerHighlight,
@@ -770,6 +771,9 @@ export function DateTimePicker({
             }}
             type="button"
           >
+            <Icon size="sm">
+              <Glyph name="clock" />
+            </Icon>
             {nowLabel ?? defaults.nowLabel}
           </button>
         </div>
@@ -886,7 +890,11 @@ export function DateTimePicker({
               onKeyDown={onTriggerKeyDown}
               ref={triggerRef}
               type="button"
-            />
+            >
+              <Icon>
+                <Glyph name="calendar" />
+              </Icon>
+            </button>
           }
           granularity={resolvedGranularity}
           invalid={resolvedInvalid}

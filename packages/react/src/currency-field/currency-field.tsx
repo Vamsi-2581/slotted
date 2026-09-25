@@ -22,6 +22,7 @@ import {
 import type { KeyboardEvent, PointerEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { useCurrencyFieldDefaults } from './currency-field-defaults';
 import type { CurrencyFieldProps, CurrencyFieldRootProps } from './currency-field.types';
 
@@ -560,7 +561,18 @@ export function CurrencyField({
         onPointerUp={stopRepeating}
         tabIndex={-1}
         type="button"
-      />
+      >
+        {/* Stacked, both are the down chevron and the stylesheet turns the
+            increment's half a turn; split, they are the minus and the plus,
+            which do not change with the reading direction. */}
+        <Icon>
+          <Glyph
+            name={
+              resolvedStepper === 'split' ? (direction === 1 ? 'plus' : 'minus') : 'chevron-down'
+            }
+          />
+        </Icon>
+      </button>
     );
   };
 

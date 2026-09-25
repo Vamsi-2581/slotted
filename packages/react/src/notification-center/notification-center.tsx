@@ -21,9 +21,14 @@ import {
 } from 'react';
 
 import { Button } from '../button';
+import { Glyph, Icon } from '../icon';
+import type { GlyphName } from '../icon';
 import { Skeleton, SkeletonText } from '../skeleton';
 import { Tab, TabList, Tabs } from '../tabs';
 import type { TabsChangeRequest } from '../tabs';
+import { Tooltip } from '../tooltip';
+import { TooltipContent, TooltipLayer, TooltipTrigger } from '../tooltip/tooltip-parts';
+import type { TooltipTriggerProps } from '../tooltip/tooltip.types';
 import { useNotificationCenterDefaults } from './notification-center-defaults';
 import type {
   NotificationCenterControls,
@@ -41,6 +46,36 @@ import type {
   NotificationItemState,
   NotificationView,
 } from './notification-center.types';
+
+/**
+ * One of the family's own controls on an item, and the tooltip it opens with
+ * the words its accessible name carries: on hover, on keyboard focus, and on
+ * a press held on touch. Two glyphs with no words beside them are two
+ * controls nobody can tell apart until they are named, and `aria-label`
+ * names them only to a screen reader.
+ */
+function Control({ text, ...props }: TooltipTriggerProps & { text: string }) {
+  return (
+    <Tooltip openOn="hover" side="bottom">
+      <TooltipTrigger aria-label={text} {...props} />
+      <TooltipLayer>
+        <TooltipContent>{text}</TooltipContent>
+      </TooltipLayer>
+    </Tooltip>
+  );
+}
+
+/**
+ * The family's own visual for an item with a tone and no visual of its own,
+ * as the contract's `toneGlyph` names it: every glyph a circle.
+ */
+const TONE_GLYPH: Record<NotificationCenterTone, GlyphName> = {
+  accent: 'circle-info',
+  secondary: 'bell',
+  success: 'circle-check',
+  warning: 'circle-alert',
+  danger: 'circle-x',
+};
 
 /** How many skeleton rows stand in while nothing has arrived. */
 const WAITING_ROWS = 3;
@@ -198,29 +233,43 @@ function Item({
     >
       {presentNode(item.visual) || item.tone !== undefined ? (
         <span data-part="visual" data-tone={item.tone}>
-          {item.visual}
+          {presentNode(item.visual) ? (
+            item.visual
+          ) : (
+            /* `data-tone-glyph` tells the sheet the glyph is the family's, not the consumer's. */
+            <Icon data-tone-glyph="">
+              <Glyph name={TONE_GLYPH[tone]} />
+            </Icon>
+          )}
         </span>
       ) : null}
       <div data-part="content">{content}</div>
       {readToggle || dismiss ? (
         <div data-part="controls">
           {readToggle ? (
-            <button
-              aria-label={item.read ? context.messages.markUnread : context.messages.markRead}
+            <Control
               data-part="read-toggle"
               onClick={(event) => context.onRead([item.key], !item.read, pressReason(event), event)}
-              type="button"
-            />
+              text={item.read ? context.messages.markUnread : context.messages.markRead}
+            >
+              {/* Unread offers the check; read offers the dot, to mark it unread again. */}
+              <Icon>
+                <Glyph name={item.read ? 'dot' : 'check'} />
+              </Icon>
+            </Control>
           ) : null}
           {dismiss ? (
-            <button
-              aria-label={context.messages.dismiss}
+            <Control
               data-part="dismiss"
               onClick={(event) =>
                 context.onRemove?.(item.key, createRequest(pressReason(event), event))
               }
-              type="button"
-            />
+              text={context.messages.dismiss}
+            >
+              <Icon>
+                <Glyph name="x" />
+              </Icon>
+            </Control>
           ) : null}
         </div>
       ) : null}

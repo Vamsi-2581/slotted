@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ComponentPropsWithRef, MouseEvent, ReactNode } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { SkeletonText } from '../skeleton';
 import type { SkeletonTextRootProps } from '../skeleton';
 import { usePageHeader } from './page-header';
@@ -85,7 +86,7 @@ function part(name: string, displayName: string) {
 export const PageHeaderTitleArea = part('title-area', 'PageHeaderTitleArea');
 /** The row above the title: the way back, then the breadcrumbs. */
 export const PageHeaderNav = part('nav', 'PageHeaderNav');
-/** The slot a Breadcrumb sits in. Hidden below 640 pixels, where the way back says where the reader came from. */
+/** The slot a Breadcrumb sits in. Hidden below 600 pixels, where the way back says where the reader came from. */
 export const PageHeaderBreadcrumbs = part('breadcrumbs', 'PageHeaderBreadcrumbs');
 /** Visual, title, actions and navigation, on one row that wraps. */
 export const PageHeaderTitleRow = part('title-row', 'PageHeaderTitleRow');
@@ -120,7 +121,15 @@ export function PageHeaderBack({
 }: PageHeaderBackProps) {
   const rootProps: PageHeaderPartProps = {
     ...nativeProps,
-    children,
+    /* The arrow points along the reading direction and mirrors with it. */
+    children: (
+      <>
+        <Icon directional>
+          <Glyph name="arrow-left" />
+        </Icon>
+        {children}
+      </>
+    ),
     className,
     'data-part': 'back',
     style,
@@ -299,7 +308,12 @@ export function PageHeaderToggle({
     'aria-controls': ids.areaId,
     'aria-expanded': expanded,
     'aria-label': ariaLabel ?? (expanded ? messages.collapse : messages.expand),
-    children: children as ReactNode,
+    /* The stylesheet turns the chevron half a turn while the area is shown. */
+    children: (children as ReactNode) ?? (
+      <Icon>
+        <Glyph name="chevron-down" />
+      </Icon>
+    ),
     className,
     'data-part': 'toggle',
     onClick: (event: MouseEvent<HTMLButtonElement>) => {
@@ -335,7 +349,12 @@ export function PageHeaderPin({
     ...nativeProps,
     'aria-label': ariaLabel ?? (pinned ? messages.unpin : messages.pin),
     'aria-pressed': pinned,
-    children: children as ReactNode,
+    /* The mark says what a press does: pin while free, unpin while held. */
+    children: (children as ReactNode) ?? (
+      <Icon>
+        <Glyph name={pinned ? 'pin-off' : 'pin'} />
+      </Icon>
+    ),
     className,
     'data-part': 'pin',
     ...(pinned ? { 'data-pressed': '' } : {}),

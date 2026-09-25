@@ -1,5 +1,6 @@
 import { useId, type ReactNode, type Ref } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { usePagination } from './pagination';
 import type {
   PaginationItemsProps,
@@ -13,6 +14,18 @@ import type {
 } from './pagination.types';
 
 type TriggerPart = 'first' | 'previous' | 'next' | 'last';
+
+/**
+ * One chevron for a step and two for an end. Every one points along the
+ * reading direction and mirrors with it; the stylesheet turns the two that
+ * point back.
+ */
+const TRIGGER_GLYPH = {
+  first: 'chevrons-right',
+  previous: 'chevron-right',
+  next: 'chevron-right',
+  last: 'chevrons-right',
+} as const;
 
 /**
  * A control that moves the page, in whichever element `itemHref` decided.
@@ -46,7 +59,11 @@ function Trigger({
   const rootProps: PaginationTriggerRootProps = {
     'aria-label': label,
     ...nativeProps,
-    children,
+    children: children ?? (
+      <Icon directional>
+        <Glyph name={TRIGGER_GLYPH[part]} />
+      </Icon>
+    ),
     'data-disabled': unavailable && !pagination.loading ? '' : undefined,
     'data-loading': pagination.loading ? '' : undefined,
     'data-part': part,
@@ -272,6 +289,9 @@ export function PaginationPageSize({
     <label data-part="page-size-label">
       {label ?? pagination.labels.pageSize}
       {control}
+      <Icon>
+        <Glyph name="chevron-down" />
+      </Icon>
     </label>
   );
 }

@@ -7,6 +7,7 @@ import type { OverflowState, ScrollAffordanceHandle } from '@slotted/core/overfl
 import { createControllable } from '@slotted/core/state';
 import { createContext, useContext, useEffect, useId, useRef, useState } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { useTabsDefaults } from './tabs-defaults';
 import type {
   TabsActivationDirection,
@@ -315,7 +316,11 @@ export function Tabs({
               onClick={() => affordance.current?.page(-1)}
               tabIndex={-1}
               type="button"
-            />
+            >
+              <Icon directional>
+                <Glyph name="chevron-right" />
+              </Icon>
+            </button>
             <button
               aria-hidden="true"
               data-direction="end"
@@ -324,7 +329,11 @@ export function Tabs({
               onClick={() => affordance.current?.page(1)}
               tabIndex={-1}
               type="button"
-            />
+            >
+              <Icon directional>
+                <Glyph name="chevron-right" />
+              </Icon>
+            </button>
           </>
         ) : null}
       </>

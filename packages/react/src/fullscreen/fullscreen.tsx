@@ -3,11 +3,12 @@ import '@slotted/styles/fullscreen/fullscreen.css';
 import { createContext, useContext, useState } from 'react';
 import type { MouseEvent, Ref } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { useFullscreenDefaults } from './fullscreen-defaults';
 import type {
-  FullscreenHandle,
   FullscreenContentProps,
   FullscreenContentRootProps,
+  FullscreenHandle,
   FullscreenProps,
   FullscreenReason,
   FullscreenRootProps,
@@ -86,7 +87,6 @@ export function Fullscreen({
 }
 
 /**
-/**
  * The part that takes the height the other children of the region leave
  * while it is full screen — a chart under its header, a document under its
  * toolbar — and whose first child fills it. A direct child of the region; at
@@ -101,6 +101,7 @@ export function FullscreenContent({ ref, render, ...nativeProps }: FullscreenCon
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }
 
+/**
  * A click synthesised by the keyboard reports no detail; a real one reports
  * the click count.
  */
@@ -144,7 +145,12 @@ export function FullscreenTrigger({
     children: (
       <>
         <span aria-hidden="true" data-part="icon">
-          {mark}
+          {/* The mark follows the state unless the consumer drew their own. */}
+          {mark ?? (
+            <Icon>
+              <Glyph name={on ? 'minimize' : 'maximize'} />
+            </Icon>
+          )}
         </span>
         <span data-part="label">{words ?? (on ? messages.exit : messages.enter)}</span>
       </>

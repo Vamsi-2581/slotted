@@ -74,6 +74,17 @@ describe('Pagination', () => {
     expect(current()).toHaveAccessibleName('Page 3');
   });
 
+  it('draws one chevron for a step and two for an end, each mirrored with the text', () => {
+    render(<Numbered defaultPage={3} />);
+
+    const glyphs = (['first', 'previous', 'next', 'last'] as const).map((name) => {
+      const box = control(name).querySelector('[data-ui="icon"]');
+      expect(box).toHaveAttribute('data-directional');
+      return box?.querySelector('svg[data-glyph]')?.getAttribute('data-glyph');
+    });
+    expect(glyphs).toEqual(['chevrons-right', 'chevron-right', 'chevron-right', 'chevrons-right']);
+  });
+
   describe('the page', () => {
     it('moves when a page is pressed, and carries the reason', () => {
       const onPageChange = vi.fn();
@@ -146,6 +157,11 @@ describe('Pagination', () => {
       expect(select).toHaveAttribute('data-part', 'page-size');
       expect(select).toHaveAccessibleName('Rows per page');
       expect(select.closest('[data-part="page-size-label"]')).not.toBeNull();
+      expect(
+        select.parentElement?.querySelector(
+          ':scope > [data-ui="icon"] > svg[data-glyph="chevron-down"]',
+        ),
+      ).not.toBeNull();
     });
 
     it('moves the size, carries the reason, and takes the page with it', () => {

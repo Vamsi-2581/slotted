@@ -108,6 +108,9 @@ describe('Breadcrumb', () => {
 
       expect(ellipsis()).toHaveAccessibleName('Show 3 hidden levels');
       expect(ellipsis()).toHaveAttribute('aria-expanded', 'false');
+      expect(
+        ellipsis()?.querySelector('[data-ui="icon"] > svg[data-glyph="ellipsis"]'),
+      ).not.toBeNull();
       expect(trail().querySelectorAll('[data-part="item"][hidden]')).toHaveLength(3);
       expect(crumbs().filter((crumb) => crumb.hasAttribute('hidden'))).toHaveLength(0);
     });

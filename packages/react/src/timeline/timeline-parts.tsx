@@ -18,6 +18,7 @@ import {
   type ReactNode,
 } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import {
   TimelineContext,
   TimelineItemContext,
@@ -174,7 +175,11 @@ export function TimelineGroup({
           onClick={(event) => move(!isOpen, event.detail === 0 ? 'keyboard' : 'pointer', event)}
           type="button"
         >
-          <span aria-hidden="true" data-part="group-indicator" />
+          <span aria-hidden="true" data-part="group-indicator">
+            <Icon>
+              <Glyph name="chevron-down" />
+            </Icon>
+          </span>
           {label}
           <span data-ui="visually-hidden">
             {`, ${isOpen ? timeline.messages.collapse : timeline.messages.expand}`}
@@ -290,6 +295,18 @@ export function TimelineItem({
     /* The three sources are the dependency, by their presence. */
   }, [feed, labelledBy.length]);
 
+  /**
+   * A finished dot's check, which artwork the consumer put in the marker
+   * replaces. `data-check` tells the sheet it is the family's own, so the
+   * marker stays a dot rather than becoming a badge.
+   */
+  const check =
+    finished && !current ? (
+      <Icon data-check="">
+        <Glyph name="check" />
+      </Icon>
+    ) : null;
+
   const body = (
     <div data-part="content">
       {title === undefined ? null : (
@@ -343,7 +360,11 @@ export function TimelineItem({
         {opposite === undefined ? null : <div data-part="opposite">{opposite}</div>}
         <div data-part="rail">
           <span data-part="marker">
-            {loading ? <span aria-hidden="true" data-part="root" data-ui="spinner" /> : marker}
+            {loading ? (
+              <span aria-hidden="true" data-part="root" data-ui="spinner" />
+            ) : (
+              (marker ?? check)
+            )}
           </span>
           {last ? null : <span aria-hidden="true" data-part="connector" />}
         </div>

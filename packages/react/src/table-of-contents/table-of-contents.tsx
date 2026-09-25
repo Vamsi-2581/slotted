@@ -25,6 +25,7 @@ import {
 } from 'react';
 import type { KeyboardEvent, ReactNode, RefObject } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { Skeleton } from '../skeleton';
 import { TableOfContentsContext } from './table-of-contents-context';
 import { useTableOfContentsDefaults } from './table-of-contents-defaults';
@@ -522,7 +523,11 @@ export function TableOfContents({
               {hasLabel ? label : resolvedMessages.navigation}
             </span>
             <span data-part="current">{currentLabel}</span>
-            <span aria-hidden="true" data-part="indicator" />
+            <span aria-hidden="true" data-part="indicator">
+              <Icon>
+                <Glyph name="chevron-down" />
+              </Icon>
+            </span>
           </button>
         ) : hasLabel ? (
           <div data-part="label" id={labelId}>

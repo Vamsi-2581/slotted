@@ -119,6 +119,8 @@ export interface CommandPaletteDefaults {
   countLabel: string;
   recentLabel: string;
   clearLabel: string;
+  /** The word on the close control a full-screen palette draws. */
+  closeLabel: string;
   backLabel: string;
   hintNavigate: string;
   hintSelect: string;
@@ -202,6 +204,7 @@ export interface CommandPaletteProps<
   countLabel?: string | undefined;
   recentLabel?: string | undefined;
   clearLabel?: string | undefined;
+  closeLabel?: string | undefined;
   backLabel?: string | undefined;
   hintNavigate?: string | undefined;
   hintSelect?: string | undefined;

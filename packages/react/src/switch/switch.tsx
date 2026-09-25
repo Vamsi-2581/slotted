@@ -6,6 +6,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import type { ChangeEvent, MouseEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { VisuallyHidden } from '../visually-hidden';
 import { SWITCH_LOADING_ANNOUNCE_DELAY, useSwitchDefaults } from './switch-defaults';
 import type { SwitchProps, SwitchRootProps } from './switch.types';
@@ -239,7 +240,15 @@ export function Switch({
         {...(checked === undefined ? { defaultChecked } : { checked })}
       />
       <span data-part="track">
-        <span data-part="thumb" />
+        {/* The check is always in the DOM while there is a mark at all, and the
+            stylesheet fades it in with the checked state. */}
+        <span data-part="thumb">
+          {resolvedIndicator === 'mark' ? (
+            <Icon>
+              <Glyph name="check" />
+            </Icon>
+          ) : null}
+        </span>
       </span>
       {children === undefined ? null : (
         <label data-part="label" htmlFor={controlId}>

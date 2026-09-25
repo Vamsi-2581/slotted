@@ -112,6 +112,38 @@ describe('Dialog', () => {
       expect(layer()).not.toHaveAttribute('data-fullscreen');
     });
 
+    it('draws the close as the x glyph, and draws nothing over content the consumer wrote', () => {
+      const { unmount } = render(<Basic defaultOpen />);
+      const close = () => document.querySelector('[data-part="close"]') as HTMLElement;
+      expect(close().querySelector('[data-ui="icon"] > svg[data-glyph]')).toHaveAttribute(
+        'data-glyph',
+        'x',
+      );
+      unmount();
+
+      render(
+        <Dialog defaultOpen>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Own mark</DialogTitle>
+              <DialogClose>Done</DialogClose>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>,
+      );
+      expect(close().querySelector('svg')).toBeNull();
+      expect(close()).toHaveTextContent('Done');
+    });
+
+    it('draws what the press does next: maximize at rest, minimize once pressed', () => {
+      render(<Basic defaultOpen fullscreenToggle />);
+      const glyph = () => toggle().querySelector('[data-ui="icon"] > svg[data-glyph]');
+
+      expect(glyph()).toHaveAttribute('data-glyph', 'maximize');
+      press(toggle());
+      expect(glyph()).toHaveAttribute('data-glyph', 'minimize');
+    });
+
     it('stands in the corner beside the close, and not in place of it', () => {
       render(<Basic defaultOpen fullscreenToggle />);
 
@@ -245,6 +277,33 @@ describe('Dialog', () => {
     escape();
     expect(onOpenChange.mock.calls[0]?.[0]).toBe(false);
     expect((onOpenChange.mock.calls[0]?.[1] as DialogChangeRequest).reason).toBe('escape');
+  });
+
+  /**
+   * The platform's way back reaches the layer and not the page: a modal layer
+   * holds one history entry, and the popstate that leaves it closes the layer
+   * with the reason back. A layer told not to answer holds no entry.
+   */
+  it('closes on the platform way back, carrying back', async () => {
+    const onOpenChange = vi.fn();
+    const length = history.length;
+    render(<Basic defaultOpen onOpenChange={onOpenChange} />);
+    expect(history.length).toBe(length + 1);
+
+    const gesture = new Promise<void>((resolve) =>
+      window.addEventListener('popstate', () => resolve(), { once: true }),
+    );
+    history.back();
+    await gesture;
+
+    expect(onOpenChange.mock.calls[0]?.[0]).toBe(false);
+    expect((onOpenChange.mock.calls[0]?.[1] as DialogChangeRequest).reason).toBe('back');
+  });
+
+  it('holds no history entry when the consumer says back does not close it', () => {
+    const length = history.length;
+    render(<Basic defaultOpen back="none" />);
+    expect(history.length).toBe(length);
   });
 
   it('refuses Escape when the consumer says the layer does not answer it', () => {
@@ -589,6 +648,21 @@ describe('AlertDialog', () => {
 
     expect(panel()).toHaveAttribute('role', 'alertdialog');
     expect(layer()?.dataset['tone']).toBe('danger');
+  });
+
+  it.each([
+    ['accent', 'circle-info'],
+    ['secondary', 'circle-info'],
+    ['success', 'circle-check'],
+    ['warning', 'triangle-alert'],
+    ['danger', 'circle-alert'],
+  ] as const)('draws the %s mark as the %s glyph', (tone, glyph) => {
+    render(<Confirm defaultOpen tone={tone} />);
+
+    const icon = document.querySelector('[data-part="icon"]') as HTMLElement;
+    const drawn = icon.querySelector('[data-ui="icon"] > svg[data-part="glyph"]');
+    expect(drawn).toHaveAttribute('data-glyph', glyph);
+    expect(drawn).toHaveAttribute('aria-hidden', 'true');
   });
 
   /**

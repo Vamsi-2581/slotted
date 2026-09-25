@@ -59,6 +59,25 @@ describe('Collapsible', () => {
     expect(panel()?.getAttribute('aria-labelledby')).toBe(trigger().getAttribute('id'));
   });
 
+  /** The mark is the Glyph element, chosen from the indicator and the state. */
+  it('draws the indicator glyph the indicator and the state select', () => {
+    const glyph = () =>
+      document.querySelector('[data-part="indicator"] > [data-ui="icon"] > svg[data-glyph]');
+
+    const { rerender } = render(<Basic />);
+    expect(glyph()).toHaveAttribute('data-glyph', 'chevron-down');
+    fireEvent.click(trigger());
+    expect(glyph()).toHaveAttribute('data-glyph', 'chevron-down');
+
+    rerender(<Basic indicator="plus-minus" />);
+    expect(glyph()).toHaveAttribute('data-glyph', 'minus');
+    fireEvent.click(trigger());
+    expect(glyph()).toHaveAttribute('data-glyph', 'plus');
+
+    rerender(<Basic indicator="none" />);
+    expect(document.querySelector('[data-part="indicator"]')).toBeNull();
+  });
+
   /**
    * The trigger is a `button`, so `Enter` and `Space` are the platform's and no
    * key listener exists for the toggle.

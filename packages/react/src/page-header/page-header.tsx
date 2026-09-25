@@ -42,6 +42,18 @@ export function usePageHeader(): PageHeaderContextValue {
 const useIsomorphicLayoutEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
 
 /**
+ * The body of the page a header heads, while that page fills: nothing
+ * scrolls outside it there, so its principal scroller is what snaps the area.
+ * Read from the DOM on every scroll, so a page that turns `fill` on or off is
+ * followed without rebuilding the engine.
+ */
+function filledBody(root: HTMLElement): HTMLElement | null {
+  const page = root.closest<HTMLElement>('[data-ui="page"]');
+  if (page === null || !page.hasAttribute('data-fill')) return null;
+  return page.querySelector<HTMLElement>(':scope > [data-part="scroll"] > [data-part="body"]');
+}
+
+/**
  * The shell of a screen's top: a title area that never leaves, a header area
  * that scrolls away under it and comes back, a pill of controls on the
  * chrome's edge, and a slot for tabs. SAP Fiori's Dynamic Page, rebuilt on one
@@ -100,6 +112,7 @@ export function PageHeader({
   const [scrolled, setScrolled] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [tall, setTall] = useState(false);
+  const [compact, setCompact] = useState(false);
   const [root, setRoot] = useState<HTMLElement | null>(null);
   const engine = useRef<StickyHeaderHandle | null>(null);
 
@@ -236,7 +249,9 @@ export function PageHeader({
       onRevealed: setRevealed,
       onScrollRequest: (next) => requestExpanded(next, 'scroll', undefined, 'scroll'),
       onTall: setTall,
+      onCompact: setCompact,
       onPinRequest: (next) => requestPinned(next, 'programmatic', undefined),
+      contained: () => filledBody(root),
     });
     engine.current = handle;
     return () => {
@@ -283,6 +298,7 @@ export function PageHeader({
     ...(revealed ? { 'data-revealed': '' } : {}),
     ...(scrolled ? { 'data-scrolled': '' } : {}),
     ...(tall ? { 'data-tall': '' } : {}),
+    ...(compact ? { 'data-compact': '' } : {}),
     'data-size': resolvedSize,
     'data-ui': 'page-header',
     style,

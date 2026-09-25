@@ -24,9 +24,11 @@ import {
 import type { ClipboardEvent, DragEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
+import type { GlyphName } from '../icon';
 import { ProgressBar } from '../progress-indicator';
 import { useUploadDefaults, useUploadFormatters } from './upload-defaults';
-import { UploadViewer } from './upload-viewer';
+import { KIND_GLYPH, UploadViewer } from './upload-viewer';
 import type { UploadFilesReason, UploadHandle, UploadProps, UploadRootProps } from './upload.types';
 
 /**
@@ -497,14 +499,18 @@ export function Upload({
 
   const controls = (file: UploadFile): ReactNode => {
     if (resolvedReadOnly === true) return null;
-    const button = (part: string, label: string, action: Parameters<typeof act>[1]) => (
+    const button = (part: UploadAction, label: string, action: Parameters<typeof act>[1]) => (
       <button
         aria-label={`${label}: ${file.name}`}
         data-part={part}
         key={part}
         onClick={(event) => act(file, action, event)}
         type="button"
-      />
+      >
+        <Icon>
+          <Glyph name={ACTION_GLYPH[part]} />
+        </Icon>
+      </button>
     );
 
     switch (file.status) {
@@ -563,7 +569,13 @@ export function Upload({
             data-kind={file.kind}
             data-part="preview"
           >
-            {url !== undefined && file.type.startsWith('image/') ? <img alt="" src={url} /> : null}
+            {url !== undefined && file.type.startsWith('image/') ? (
+              <img alt="" src={url} />
+            ) : (
+              <Icon>
+                <Glyph name={KIND_GLYPH[file.kind]} />
+              </Icon>
+            )}
           </span>
         )}
 
@@ -653,7 +665,15 @@ export function Upload({
             onDrop={handleDrop}
             onPaste={handlePaste}
           >
-            {variant === 'dropzone' ? labels.dropzone : null}
+            {/* The region carries the mark, so the trigger inside it does not. */}
+            {variant === 'dropzone' ? (
+              <>
+                <Icon>
+                  <Glyph name="upload" />
+                </Icon>
+                {labels.dropzone}
+              </>
+            ) : null}
             {trigger()}
             {variant === 'field' ? (
               <span data-part="meta">
@@ -721,6 +741,11 @@ export function Upload({
   function trigger() {
     return (
       <label data-part="trigger" ref={triggerRef}>
+        {variant === 'dropzone' ? null : (
+          <Icon>
+            <Glyph name="upload" />
+          </Icon>
+        )}
         <input
           accept={accept}
           aria-describedby={
@@ -762,6 +787,21 @@ export function Upload({
  * nothing about an item whose name the platform has not given us yet, so it is
  * skipped rather than guessed at.
  */
+/**
+ * Five marks chosen against each other, because they appear together on one
+ * row. A cross means *stop this* and a bin means *take it away*: reusing the
+ * cross for both would make two controls one control drawn twice.
+ */
+const ACTION_GLYPH = {
+  cancel: 'x',
+  pause: 'pause',
+  remove: 'trash',
+  retry: 'rotate-ccw',
+  start: 'play',
+} as const satisfies Record<string, GlyphName>;
+
+type UploadAction = keyof typeof ACTION_GLYPH;
+
 function matchesTypeOnly(type: string, accept: string) {
   const tokens = accept
     .split(',')

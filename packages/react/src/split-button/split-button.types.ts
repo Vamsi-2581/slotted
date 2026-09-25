@@ -107,7 +107,8 @@ export interface SplitButtonMenuProps extends Omit<MenuProps, 'anchor' | 'ref' |
  * `button`'s IconButton, rendered as `menu`'s trigger and carrying this
  * family's part. The accessible name is mandatory at the type level: a split
  * button whose second half is named by nothing announces "button" beside
- * "Save". The chevron is the family's; there are no children.
+ * "Save". The chevron is the family's, and children the consumer passes
+ * replace it.
  */
 export type SplitButtonMenuTriggerProps = Omit<
   IconButtonProps,
@@ -123,6 +124,8 @@ export type SplitButtonMenuTriggerProps = Omit<
   | 'loadingDelay'
   | 'loadingLabel'
 > & {
+  /** Replaces the family's chevron. */
+  children?: ReactNode | undefined;
   render?: ((props: ButtonRootProps) => ReactNode) | undefined;
 };
 

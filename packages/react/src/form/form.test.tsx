@@ -324,6 +324,23 @@ describe('Form', () => {
       expect(screen.getByTestId('actions')).toHaveAttribute('data-align', 'between');
     });
 
+    /**
+     * The stylesheet names the two parts by the family's identifier, so a
+     * nested family's part of the same name — a table's summary row, a
+     * section's actions — is not painted as the form's.
+     */
+    it('names its summary and its action row by the family, so a nested family’s parts keep their own look', () => {
+      render(
+        <Form errors={{ name: 'Informe seu nome' }}>
+          <Fields />
+          <FormActions data-testid="actions" />
+        </Form>,
+      );
+
+      expect(summary()).toHaveAttribute('data-ui', 'form');
+      expect(screen.getByTestId('actions')).toHaveAttribute('data-ui', 'form');
+    });
+
     it('lets an application decide once how its forms behave', () => {
       render(
         <FormDefaultsProvider align="stretch" summaryTitle="Corrija estes campos">

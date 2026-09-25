@@ -103,6 +103,7 @@ export interface PageHeaderContextValue {
 /** What `render` receives for the root. */
 export interface PageHeaderRootProps extends HTMLAttributes<HTMLElement> {
   'data-collapse': PageHeaderCollapse;
+  'data-compact'?: '' | undefined;
   'data-expanded'?: '' | undefined;
   'data-level': PageHeaderLevel;
   'data-loading'?: '' | undefined;

@@ -238,6 +238,10 @@ describe('DescriptionListDescription', () => {
 
     const toggle = screen.getByRole('button', { name: 'Show more' });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle.querySelector('[data-ui="icon"] > svg[data-glyph]')).toHaveAttribute(
+      'data-glyph',
+      'chevron-down',
+    );
 
     fireEvent.click(toggle);
     const collapse = screen.getByRole('button', { name: 'Show less' });
@@ -426,12 +430,15 @@ describe('copying', () => {
     render(<Copyable />);
 
     const control = screen.getByRole('button', { name: 'Copy' });
+    const glyph = () => control.querySelector('[data-ui="icon"] > svg[data-glyph]');
+    expect(glyph()).toHaveAttribute('data-glyph', 'copy');
     fireEvent.click(control);
 
     await waitFor(() =>
       expect(writeText).toHaveBeenCalledWith('arn:aws:iam::421900075512:role/billing'),
     );
     await waitFor(() => expect(control).toHaveAttribute('data-complete', ''));
+    expect(glyph()).toHaveAttribute('data-glyph', 'check');
   });
 
   /** A formatted value is what the reader sees, and not always what is copied. */

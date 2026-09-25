@@ -595,7 +595,8 @@ export interface TableSelectProps
 export interface TableSelectAllProps
   extends Omit<ComponentPropsWithRef<'th'>, 'align' | 'children'>, TableCellAxes {}
 
-export interface TableExpanderProps extends Omit<ComponentPropsWithRef<'button'>, 'children'> {
+/** Children replace the chevron the expander draws by default. */
+export interface TableExpanderProps extends ComponentPropsWithRef<'button'> {
   value?: string | undefined;
 }
 

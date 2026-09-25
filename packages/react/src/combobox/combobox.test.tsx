@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/combobox/contract.json';
 import { Field, FieldLabel } from '../field';
+import { Glyph, Icon } from '../icon';
 import { Combobox } from './combobox';
 import { ComboboxDefaultsProvider } from './combobox-defaults';
 import { ComboboxGroup, ComboboxItem } from './combobox-items';
@@ -556,6 +557,44 @@ describe('Combobox', () => {
 
     type('berry');
     await waitFor(() => expect(screen.getAllByRole('group', { hidden: false })).toHaveLength(1));
+  });
+
+  /** Every icon the family owns is a `Glyph` element inside an `Icon` box, never a mask. */
+  it('draws the chevron, the cross and the tick as glyph elements', async () => {
+    const { container } = render(<Basic defaultInputValue="Blueberry" defaultValue="blueberry" />);
+    const glyph = (part: string) =>
+      container.querySelector(`[data-part='${part}'] > [data-ui='icon'] > svg[data-glyph]`);
+    expect(glyph('arrow')).toHaveAttribute('data-glyph', 'chevron-down');
+    expect(glyph('clear')).toHaveAttribute('data-glyph', 'x');
+
+    await openByArrow();
+    const tick = optionNamed('Blueberry').querySelector(
+      "[data-part='indicator'] > [data-ui='icon'] > svg",
+    );
+    expect(tick).toHaveAttribute('data-glyph', 'check');
+  });
+
+  /** The first column holds the artwork it is given; no stylesheet fills it. */
+  it('holds an item icon in the first column', async () => {
+    render(
+      <Basic>
+        <ComboboxItem
+          icon={
+            <Icon>
+              <Glyph name="person" />
+            </Icon>
+          }
+          value="blueberry"
+        >
+          Blueberry
+        </ComboboxItem>
+      </Basic>,
+    );
+    await openByArrow();
+    const mark = optionNamed('Blueberry').querySelector(
+      "[data-part='icon'] > [data-ui='icon'] > svg[data-glyph]",
+    );
+    expect(mark).toHaveAttribute('data-glyph', 'person');
   });
 
   it('clears both contracts, and says why', async () => {

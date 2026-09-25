@@ -184,6 +184,11 @@ describe('ActionBar', () => {
       await waitFor(() =>
         expect(screen.getByRole('button', { name: '1 more action' })).toBeInTheDocument(),
       );
+      expect(
+        screen
+          .getByRole('button', { name: '1 more action' })
+          .querySelector('[data-ui="icon"][aria-hidden="true"] > svg[data-glyph="ellipsis"]'),
+      ).not.toBeNull();
     });
   });
 

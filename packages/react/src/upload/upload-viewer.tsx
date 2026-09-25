@@ -1,9 +1,11 @@
 import { createPortalRoot } from '@slotted/core/portal';
 import { isViewable } from '@slotted/core/upload';
-import type { UploadFile } from '@slotted/core/upload';
+import type { FileKind, UploadFile } from '@slotted/core/upload';
 import { useEffect, useState } from 'react';
 
 import { Dialog, DialogContent } from '../dialog';
+import { Glyph, Icon } from '../icon';
+import type { GlyphName } from '../icon';
 import type { UploadFormatters, UploadLabels } from './upload.types';
 
 /**
@@ -162,14 +164,22 @@ export function UploadViewer({
                     data-part="viewerExternal"
                     onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
                     type="button"
-                  />
+                  >
+                    <Icon>
+                      <Glyph name="external" />
+                    </Icon>
+                  </button>
                 )}
                 <button
                   aria-label={labels.viewerClose}
                   data-part="viewerClose"
                   onClick={(event) => onViewing(null, 'pointer', event)}
                   type="button"
-                />
+                >
+                  <Icon>
+                    <Glyph name="x" />
+                  </Icon>
+                </button>
               </span>
             </div>
 
@@ -181,7 +191,11 @@ export function UploadViewer({
                   disabled={index <= 0}
                   onClick={(event) => move(-1, event)}
                   type="button"
-                />
+                >
+                  <Icon directional>
+                    <Glyph name="chevron-right" />
+                  </Icon>
+                </button>
               ) : null}
 
               <UploadStage current={current} labels={labels} url={url} />
@@ -193,7 +207,11 @@ export function UploadViewer({
                   disabled={index === -1 || index >= shown.length - 1}
                   onClick={(event) => move(1, event)}
                   type="button"
-                />
+                >
+                  <Icon directional>
+                    <Glyph name="chevron-right" />
+                  </Icon>
+                </button>
               ) : null}
             </div>
           </div>
@@ -251,11 +269,32 @@ function UploadStage({
         data-extension={extensionLabel(current.name)}
         data-kind={current.kind}
         data-part="preview"
-      />
+      >
+        <Icon>
+          <Glyph name={KIND_GLYPH[current.kind]} />
+        </Icon>
+      </span>
       <p>{labels.viewerUnsupported}</p>
     </>
   );
 }
+
+/**
+ * What a file is drawn as on its tile: one glyph per kind, the plain file for
+ * anything no kind claims. The row's tile and the viewer's stage read the same
+ * map, so a kind never has two marks.
+ */
+export const KIND_GLYPH: Record<FileKind, GlyphName> = {
+  archive: 'file-archive',
+  audio: 'file-audio',
+  document: 'file-type',
+  image: 'file-image',
+  other: 'file',
+  pdf: 'file-text',
+  presentation: 'presentation',
+  spreadsheet: 'file-spreadsheet',
+  video: 'file-video',
+};
 
 function extensionLabel(name: string) {
   const dot = name.lastIndexOf('.');

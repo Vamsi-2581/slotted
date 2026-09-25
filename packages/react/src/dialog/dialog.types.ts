@@ -69,7 +69,14 @@ export type DialogFinalFocus = RefObject<HTMLElement | null> | false;
 /** Why the layer opened or closed. */
 export type DialogOpenReason = Extract<
   ChangeRequest<boolean>['reason'],
-  'pointer' | 'keyboard' | 'dismiss' | 'escape' | 'outsidePress' | 'submit' | 'programmatic'
+  | 'pointer'
+  | 'keyboard'
+  | 'dismiss'
+  | 'escape'
+  | 'outsidePress'
+  | 'back'
+  | 'submit'
+  | 'programmatic'
 >;
 
 /**
@@ -105,6 +112,8 @@ export interface DialogHandle {
 
 /** What an application sets once for every dialog under it. */
 export interface DialogDefaults {
+  /** The platform's way back — a phone's gesture, a browser's button — closes a modal layer. */
+  back: DialogDismissPolicy;
   escape: DialogDismissPolicy;
   fullScreen: DialogFullScreen;
   modal: boolean;
@@ -132,6 +141,7 @@ export interface DialogContextValue {
   /** The consumer's parent for this layer, or nothing for the shared root. */
   container: Element | null | undefined;
   descriptionId: string;
+  back: DialogDismissPolicy;
   escape: DialogDismissPolicy;
   finalFocus: DialogFinalFocus | undefined;
   fullScreen: DialogFullScreen;
@@ -181,6 +191,12 @@ export interface DialogContextValue {
    * layer that appears already open has no closed style to transition from.
    */
   visible: boolean;
+  /**
+   * Whether the layer takes focus and the pointer. `entering` counts: the
+   * focus scope enters in that frame, and a layer still `inert` then refuses
+   * the initial focus and leaves it on `body`.
+   */
+  interactive: boolean;
 }
 
 /** What the two members share. */
@@ -198,6 +214,11 @@ interface DialogOwnProps {
   mount?: DialogMount | undefined;
   fullScreen?: DialogFullScreen | undefined;
   escape?: DialogDismissPolicy | undefined;
+  /**
+   * The platform's way back — a phone's gesture, a browser's button — closes
+   * the layer instead of leaving the page, while the layer is modal.
+   */
+  back?: DialogDismissPolicy | undefined;
   /** Whether the layer's content is still on its way. */
   loading?: boolean | undefined;
   /** A parent for this layer alone, instead of the shared portal root. */

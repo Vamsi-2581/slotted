@@ -1,7 +1,7 @@
 import '@slotted/styles/top-navigation/top-navigation.css';
 
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
-import { createWidthGate } from '@slotted/core/measure';
+import { COMPACT_BELOW, createWidthGate } from '@slotted/core/measure';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { createControllable } from '@slotted/core/state';
@@ -32,12 +32,13 @@ import type {
  * The three steps of the bar's width, in CSS pixels, under which each
  * priority folds. The stylesheet reads the same three literals in its
  * container conditions and `top-navigation.styles.test.mjs` compares them
- * with the contract; this is the copy the script reads.
+ * with the contract; this is the copy the script reads. `medium` is the
+ * compact size class's limit, where app-shell overlays its regions.
  */
 export const TOP_NAVIGATION_COLLAPSE_AT: Readonly<Record<TopNavigationPriority, number>> = {
   high: 480,
   low: 1024,
-  medium: 768,
+  medium: COMPACT_BELOW,
 };
 
 /** Every control a reader can land on in the bar, in DOM order. */

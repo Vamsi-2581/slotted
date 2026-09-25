@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import type { FocusEvent, HTMLAttributes, KeyboardEvent, MouseEvent, ReactNode, Ref } from 'react';
 import { createPortal } from 'react-dom';
 
+import { Glyph, Icon } from '../icon';
+import type { GlyphName } from '../icon';
 import { Tooltip } from '../tooltip';
 import { TooltipContent, TooltipLayer, TooltipTrigger } from '../tooltip/tooltip-parts';
 import { useTopNavigation } from './top-navigation';
@@ -261,6 +263,7 @@ function More() {
     'aria-controls': navigation.ids.panelId,
     'aria-expanded': navigation.moreOpen,
     'aria-label': label,
+    children: <Mark glyph="ellipsis" />,
     ...(navigation.currentFolded ? { 'data-current': '' } : {}),
     ...(navigation.moreOpen ? { 'data-open': '' } : {}),
     ...(navigation.panelHolds ? { 'data-overflow': String(navigation.collapsed.length) } : {}),
@@ -417,7 +420,9 @@ export function TopNavigationTrigger({
     children: (
       <>
         {children}
-        <span aria-hidden="true" data-part="indicator" />
+        <span aria-hidden="true" data-part="indicator">
+          <Mark glyph="chevron-down" />
+        </span>
       </>
     ),
     'data-part': 'trigger',
@@ -536,6 +541,7 @@ function SearchClose({
       <TooltipTrigger
         aria-label={text}
         data-part="search-close"
+        children={<Mark glyph="x" />}
         onClick={(event: MouseEvent<HTMLButtonElement>) =>
           onClose(activationReason(event), event.nativeEvent)
         }
@@ -555,6 +561,7 @@ function SearchToggle() {
       <TooltipTrigger
         aria-label={text}
         data-part="search-toggle"
+        children={<Mark glyph="search" />}
         onClick={(event: MouseEvent<HTMLButtonElement>) =>
           navigation.setSearchOpen(true, activationReason(event), event.nativeEvent)
         }
@@ -598,6 +605,19 @@ export function TopNavigationActions({
 }
 
 /**
+ * The family's own mark on a control: a Glyph element in an icon box, which
+ * the control sizes. None of these marks points along the reading direction,
+ * so none of them is `directional`.
+ */
+function Mark({ glyph }: { glyph: GlyphName }) {
+  return (
+    <Icon>
+      <Glyph name={glyph} />
+    </Icon>
+  );
+}
+
+/**
  * An icon-only control the family names and marks: the mark is the
  * stylesheet's, the name is the consumer's `aria-label` or the family's
  * message, and the tooltip repeats the name.
@@ -605,17 +625,26 @@ export function TopNavigationActions({
 function Control({
   'aria-label': ariaLabel,
   children,
+  glyph,
   message,
   part,
   ref,
   render,
   ...nativeProps
-}: TopNavigationControlProps & { message: string; part: string }) {
+}: TopNavigationControlProps & { glyph?: GlyphName; message: string; part: string }) {
   const text = ariaLabel ?? message;
   const rootProps: TopNavigationControlRootProps = {
     ...nativeProps,
     'aria-label': text,
-    children,
+    children:
+      glyph === undefined ? (
+        children
+      ) : (
+        <>
+          <Mark glyph={glyph} />
+          {children}
+        </>
+      ),
     'data-part': part,
     type: 'button',
   };
@@ -664,7 +693,12 @@ export function TopNavigationHelp({
   const rootProps = {
     ...nativeProps,
     ...(ariaLabel !== undefined ? { 'aria-label': ariaLabel } : {}),
-    children: children ?? text,
+    children: (
+      <>
+        <Mark glyph="circle-question" />
+        {children ?? text}
+      </>
+    ),
     'data-part': 'help',
     ...(href !== undefined ? { href } : {}),
   };
@@ -696,7 +730,14 @@ export function TopNavigationHelp({
 /** Notifications: the bell, with the count in its corner. It never folds. */
 export function TopNavigationNotifications(props: TopNavigationControlProps) {
   const navigation = useTopNavigation();
-  return <Control {...props} message={navigation.messages.notifications} part="notifications" />;
+  return (
+    <Control
+      {...props}
+      glyph="bell"
+      message={navigation.messages.notifications}
+      part="notifications"
+    />
+  );
 }
 
 /**

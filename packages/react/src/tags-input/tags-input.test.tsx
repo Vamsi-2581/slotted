@@ -120,6 +120,17 @@ describe('TagsInput', () => {
     const [good, bad] = chips();
     expect(good).not.toHaveAttribute('data-invalid');
     expect(bad).toHaveAttribute('data-invalid');
+    /* Every chip's remove button draws the cross. */
+    expect(good?.querySelector("[data-part='remove'] svg[data-glyph]")).toHaveAttribute(
+      'data-glyph',
+      'x',
+    );
+    /* The mark is the alert glyph in `tag`'s start slot, on the failing chip only. */
+    expect(good?.querySelector("[data-part='start']")).toBeNull();
+    expect(bad?.querySelector("[data-part='start'] svg[data-glyph]")).toHaveAttribute(
+      'data-glyph',
+      'circle-alert',
+    );
     /* The sentence is the platform's own — jsdom's is terse, a browser's is
        translated — and the family repeats none of its own. */
     expect(bad).toHaveAccessibleDescription();
@@ -214,7 +225,9 @@ describe('TagsInput', () => {
     expect(locked).toHaveFocus();
     press('Delete');
     expect(onValueChange).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
+    const clear = screen.getByRole('button', { name: 'Clear' });
+    expect(clear.querySelector('svg[data-glyph]')).toHaveAttribute('data-glyph', 'x');
+    fireEvent.click(clear);
     expect(onValueChange).toHaveBeenLastCalledWith(
       ['support@x.com'],
       expect.objectContaining({ reason: 'clear' }),

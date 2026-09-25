@@ -40,7 +40,10 @@ describe('RadioGroup', () => {
     const row = item(0).parentElement as HTMLElement;
     expect(row).toHaveAttribute('data-part', 'item');
     expect(item(0)).toHaveAttribute('data-part', 'control');
-    expect(row.querySelector('[data-part="indicator"]')).not.toBeNull();
+    expect(row.querySelector('[data-part="indicator"] svg[data-glyph]')).toHaveAttribute(
+      'data-glyph',
+      'dot',
+    );
     expect(row.querySelector('[data-part="label"]')).toHaveTextContent('standard');
   });
 

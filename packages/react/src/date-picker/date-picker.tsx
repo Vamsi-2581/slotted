@@ -24,6 +24,7 @@ import type { CalendarValue, CalendarView } from '../calendar';
 import { DateField } from '../date-field';
 import type { DateFieldHandle } from '../date-field';
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { useDatePickerDefaults } from './date-picker-defaults';
 import type { DatePickerProps, DatePickerRootProps } from './date-picker.types';
 
@@ -367,7 +368,11 @@ export function DatePicker({
               onClick={(event) => setOpen(!isOpen, 'pointer', event)}
               ref={triggerRef}
               type="button"
-            />
+            >
+              <Icon>
+                <Glyph name="calendar" />
+              </Icon>
+            </button>
           }
           invalid={resolvedInvalid}
           isDateUnavailable={isDateUnavailable}

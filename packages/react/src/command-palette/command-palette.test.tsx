@@ -67,6 +67,7 @@ describe('CommandPalette', () => {
       if (
         [
           'trigger',
+          'close',
           'busy',
           'pages',
           'page',
@@ -84,6 +85,32 @@ describe('CommandPalette', () => {
         continue;
       expect(container.querySelector(`[data-part='${part}']`), part).not.toBeNull();
     }
+  });
+
+  /** The family's own marks are Glyph elements; the chevrons mirror in a right-to-left document. */
+  it('draws the search, clear, arrow and trail marks as glyphs', () => {
+    const nested: CommandPaletteItem[] = [
+      {
+        id: 'settings',
+        label: 'Settings',
+        children: [{ id: 'members', label: 'Members', children: [{ id: 'ana', label: 'Ana' }] }],
+      },
+    ];
+    const { container } = render(
+      <CommandPalette
+        defaultPages={['settings', 'members']}
+        items={nested}
+        presentation="inline"
+      />,
+    );
+    const glyph = (selector: string) =>
+      container.querySelector(`${selector} > [data-ui='icon'] > svg[data-glyph]`);
+    expect(glyph("[data-part='search']")?.getAttribute('data-glyph')).toBe('search');
+    expect(glyph("[data-part='clear']")?.getAttribute('data-glyph')).toBe('x');
+    const trail = container.querySelectorAll("[data-part='pages'] > li > [data-ui='icon']");
+    expect(trail).toHaveLength(1);
+    expect(trail[0]?.hasAttribute('data-directional')).toBe(true);
+    expect(trail[0]?.querySelector('svg')?.getAttribute('data-glyph')).toBe('chevron-right');
   });
 
   it('wires the combobox pattern: expanded, controls, activedescendant, options', () => {
@@ -219,7 +246,8 @@ describe('CommandPalette', () => {
     const { container } = render(<Inline onPagesChange={onPagesChange} />);
     const team = screen.getByRole('option', { name: /Switch team/ });
     expect(team.hasAttribute('data-page')).toBe(true);
-    expect(team.querySelector("[data-part='arrow']")).not.toBeNull();
+    const arrow = team.querySelector("[data-part='arrow'] > [data-ui='icon'][data-directional]");
+    expect(arrow?.querySelector('svg')?.getAttribute('data-glyph')).toBe('chevron-right');
     fireEvent.click(team);
     expect(onPagesChange).toHaveBeenCalledWith(
       ['team'],
@@ -362,6 +390,22 @@ describe('CommandPalette', () => {
     expect(onOpenChange).toHaveBeenLastCalledWith(
       false,
       expect.objectContaining({ reason: 'escape' }),
+    );
+  });
+
+  it('closes from the close part with the reason dismiss', async () => {
+    const onOpenChange = vi.fn();
+    render(<CommandPalette items={ITEMS} onOpenChange={onOpenChange} />);
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    await screen.findByRole('combobox');
+    const close = document.querySelector(
+      '[data-ui="command-palette"] [data-part="close"]',
+    ) as HTMLButtonElement;
+    expect(close.textContent).toBe('Close');
+    fireEvent.click(close);
+    expect(onOpenChange).toHaveBeenLastCalledWith(
+      false,
+      expect.objectContaining({ reason: 'dismiss' }),
     );
   });
 

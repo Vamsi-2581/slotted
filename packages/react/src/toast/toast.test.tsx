@@ -322,6 +322,42 @@ describe('a queue the page owns', () => {
   });
 });
 
+describe('the marks', () => {
+  const glyphIn = (item: HTMLElement, part: string) =>
+    item.querySelector(`[data-part="${part}"] > [data-ui="icon"] > svg[data-part="glyph"]`);
+
+  it('draws each tone’s glyph from the contract’s map, and the close as the x glyph', () => {
+    const tones = Object.keys(contract.toneGlyphs) as (keyof typeof contract.toneGlyphs)[];
+    for (const tone of tones) {
+      /* One message per render: the region shows a limited number at once. */
+      const { toaster, unmount } = setup();
+      act(() => {
+        toaster.show({ tone, title: tone });
+      });
+      const item = items()[0] as HTMLElement;
+      expect(glyphIn(item, 'icon'), tone).toHaveAttribute('data-glyph', contract.toneGlyphs[tone]);
+      expect(glyphIn(item, 'close'), tone).toHaveAttribute('data-glyph', 'x');
+      unmount();
+    }
+  });
+
+  it('draws no tone glyph while waiting, and none over a mark the page supplied', () => {
+    const { toaster } = setup();
+    act(() => {
+      toaster.show({ id: 'waiting', loading: true, title: 'Saving' });
+      toaster.show({ id: 'own', title: 'Mine', icon: <b data-own-mark="" /> });
+    });
+
+    const waiting = items().find((item) => item.hasAttribute('data-loading'));
+    const own = items().find((item) => !item.hasAttribute('data-loading'));
+    const icon = (item: HTMLElement | undefined) =>
+      item?.querySelector('[data-part="icon"]') as HTMLElement;
+    expect(icon(waiting).childElementCount).toBe(0);
+    expect(icon(own).querySelector('svg')).toBeNull();
+    expect(icon(own).querySelector('[data-own-mark]')).not.toBeNull();
+  });
+});
+
 describe('composition', () => {
   it('lets a page render its own message and keep the family’s behaviour', () => {
     const { toaster } = setup(() => (

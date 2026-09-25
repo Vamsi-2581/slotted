@@ -2,6 +2,7 @@ import '@slotted/styles/list-item/list-item.css';
 
 import { createContext, useContext } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { useList } from '../list';
 import { useListItemDefaults } from './list-item-defaults';
 import type { ListItemContextValue, ListItemProps, ListItemRootProps } from './list-item.types';
@@ -34,6 +35,7 @@ export function useListItem(): ListItemContextValue {
  */
 export function ListItem({
   align,
+  children,
   current = false,
   disabled = false,
   inset,
@@ -62,6 +64,22 @@ export function ListItem({
 
   const rootProps: ListItemRootProps = {
     ...nativeProps,
+    /* The bullet is the dot glyph in a part of its own before the row's
+       content; the number is a counter the stylesheet writes, because it is
+       text rather than an icon. */
+    children:
+      resolvedMarker === 'bullet' ? (
+        <>
+          <span aria-hidden="true" data-part="marker">
+            <Icon>
+              <Glyph name="dot" />
+            </Icon>
+          </span>
+          {children}
+        </>
+      ) : (
+        children
+      ),
     ...(current === false ? {} : { 'aria-current': current, 'data-current': '' }),
     ...(position === undefined ? {} : { 'aria-posinset': position }),
     ...(setSize === undefined ? {} : { 'aria-setsize': setSize }),

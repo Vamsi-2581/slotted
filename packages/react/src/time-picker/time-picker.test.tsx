@@ -92,6 +92,13 @@ describe('what it is made of', () => {
     render(<TimePicker {...base} defaultOpen step={1800} />);
     expect(labels()).toEqual(['09:00', '09:30', '10:00', '10:30', '11:00']);
   });
+
+  /** The mark is a `Glyph` element inside an `Icon` box, never a mask. */
+  it('draws the clock on the trigger as a glyph element', () => {
+    render(<TimePicker {...base} />);
+    const mark = trigger().querySelector("[data-ui='icon'] > svg[data-glyph]");
+    expect(mark).toHaveAttribute('data-glyph', 'clock');
+  });
 });
 
 describe('the list the consumer configures', () => {

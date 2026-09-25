@@ -38,6 +38,7 @@ import type { KeyboardEvent, ReactNode } from 'react';
 import { Button } from '../button';
 import { DatePicker } from '../date-picker';
 import { DateTimePicker } from '../datetime-picker';
+import { Glyph, Icon } from '../icon';
 import {
   MultiSelect,
   MultiSelectContent,
@@ -379,12 +380,11 @@ export function RuleEditor({
         </>
       )}
       {onRemove ? (
-        <button
-          aria-label={labels.removeRule}
-          data-part="remove"
-          onClick={onRemove}
-          type="button"
-        />
+        <button aria-label={labels.removeRule} data-part="remove" onClick={onRemove} type="button">
+          <Icon>
+            <Glyph name="x" />
+          </Icon>
+        </button>
       ) : (
         <span />
       )}
@@ -518,6 +518,11 @@ export function GroupEditor({
           onClick={addRule}
           render={(props) => <button {...props} data-part="add-rule" />}
           size={size === 'lg' ? 'md' : 'sm'}
+          start={
+            <Icon>
+              <Glyph name="plus" />
+            </Icon>
+          }
           tone="secondary"
           variant="ghost"
         >
@@ -528,6 +533,11 @@ export function GroupEditor({
           onClick={addGroup}
           render={(props) => <button {...props} data-part="add-group" />}
           size={size === 'lg' ? 'md' : 'sm'}
+          start={
+            <Icon>
+              <Glyph name="plus" />
+            </Icon>
+          }
           tone="secondary"
           variant="ghost"
         >

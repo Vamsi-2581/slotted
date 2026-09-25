@@ -539,7 +539,7 @@ export const Priority: Story = {
       </Scene>
       <Scene
         label="Tablet, 640 pixels"
-        note="Under 768: Frota — the medium one — has gone with them, more counts three, the workspace has moved to the panel, and the search is a magnifier in the actions."
+        note="Under 1024 and from 600 up, the bar folds as on the laptop: Relatórios and Faturação are in more, which counts two. Frota — the medium one — the workspace, the field and the name keep their places in the bar."
       >
         <Stage room="tablet">
           <Aurora />
@@ -547,7 +547,7 @@ export const Priority: Story = {
       </Scene>
       <Scene
         label="Phone, 375 pixels"
-        note="Under 480: Painel and Cargas fold too, help moves to the panel, the name leaves the eye, and the gaps close up. What stays is the mark, more, the magnifier, the bell and the account."
+        note="Under 600 Frota — the medium one — folds, the workspace moves to the panel and the search becomes a magnifier in the actions; under 480 Painel and Cargas — the high ones — fold too, help moves to the panel, the name leaves the eye, and the gaps close up. More counts five. What stays is the mark, more, the magnifier, the bell and the account."
       >
         <Stage room="phone">
           <Aurora />
@@ -603,7 +603,7 @@ export const Panel: Story = {
         <ControlledPanel />
       </Scene>
       <Scene
-        label="Open on a tablet, the medium and low ones folded"
+        label="Open on a tablet, the low ones folded"
         note="Above 480 the panel stands under the bar's end at 20rem. Tab from more into it, press Escape, and focus returns to more; a press outside closes it too, and a press on more toggles it."
       >
         <Stage room="tablet" tall>
@@ -614,7 +614,7 @@ export const Panel: Story = {
         label="A folded section keeps its menu"
         note="Frota folded into the panel still opens its own menu: the row is the same element, wrapped in the same Menu."
       >
-        <Stage room="tablet" tall>
+        <Stage room="phone" tall>
           <TopNavigation defaultMoreOpen>
             <Brand />
             <Destinations items={DESTINATIONS.slice(0, 2)} />
@@ -634,25 +634,25 @@ export const SearchScene: Story = {
     <Grid columns={1}>
       <Scene
         label="Laptop: the field"
-        note="Above 768 the field stands in the middle of the bar, up to 28rem wide, with the shortcut at its end. Nothing here needs the magnifier."
+        note="Above 600 the field stands in the middle of the bar, up to 28rem wide, with the shortcut at its end. Nothing here needs the magnifier."
       >
         <Stage room="laptop">
           <Aurora context={false} />
         </Stage>
       </Scene>
       <Scene
-        label="Tablet: the magnifier"
-        note="Below 768 the field has left and a magnifier stands first in the actions. Press it: the field takes the bar and focus lands in it."
+        label="Phone: the magnifier"
+        note="Below 600 the field has left and a magnifier stands first in the actions. Press it: the field takes the bar and focus lands in it."
       >
-        <Stage room="tablet">
+        <Stage room="phone">
           <Aurora context={false} />
         </Stage>
       </Scene>
       <Scene
-        label="Tablet: the field open over the bar"
+        label="Phone: the field open over the bar"
         note="Everything else has left the eye; the cross at the end and Escape hand the bar back and return focus to the magnifier. Focus leaving the field closes it too."
       >
-        <Stage room="tablet">
+        <Stage room="phone">
           <Aurora context={false} defaultSearchOpen />
         </Stage>
       </Scene>
@@ -888,9 +888,9 @@ export const ContextScene: Story = {
       </Scene>
       <Scene
         label="Moved to the panel"
-        note="On a tablet the whole region has moved to the top of the panel — the same elements, so the switcher still opens its menu from there."
+        note="On a phone the whole region has moved to the top of the panel — the same elements, so the switcher still opens its menu from there."
       >
-        <Stage room="tablet" tall>
+        <Stage room="phone" tall>
           <TopNavigation defaultMoreOpen>
             <Brand />
             <Context environment />
@@ -1042,7 +1042,7 @@ export const Content: Story = {
       </Scene>
       <Scene
         label="A name beside the avatar"
-        note="Maria Bartolomeu stands beside her avatar above 768 pixels and gives way below it; the avatar is the whole control on a tablet."
+        note="Maria Bartolomeu stands beside her avatar above 600 pixels and gives way below it; the avatar is the whole control on a phone."
       >
         <Stage room="desktop">
           <TopNavigation defaultValue="painel">
@@ -1318,8 +1318,8 @@ function KeyboardLog() {
       <Stack gap={1}>
         {log.length === 0 ? (
           <Text size="sm" tone="muted">
-            Tab through the bar; press Enter on a destination, on more, on the magnifier; press
-            Escape inside the panel or the open search.
+            Tab through the bar; press Enter on a destination or on more; press Escape inside the
+            panel.
           </Text>
         ) : (
           log.map((entry, index) => (
@@ -1338,7 +1338,7 @@ export const Keyboard: Story = {
   render: () => (
     <Scene
       label="Every control is a tab stop, on a tablet"
-      note="Skip, the mark, Painel, Cargas, more, the panel's rows when it is open, the magnifier, help, the bell, the account — in that order, with no arrow keys."
+      note="Skip, the mark, Painel, Cargas, Frota, more, the panel's rows when it is open, the field, help, the bell, the account — in that order, with no arrow keys."
     >
       <KeyboardLog />
     </Scene>

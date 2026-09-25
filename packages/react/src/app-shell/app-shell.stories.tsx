@@ -252,7 +252,7 @@ export const NavModes: Story = {
         <Aurora shell={{ asideMode: 'inline', navMode: 'inline' }} />
       </Scene>
       <Scene
-        label="navMode='auto' — the same shell, in a frame narrower than 768 pixels"
+        label="navMode='auto' — the same shell, in a frame narrower than 600 pixels"
         note="The shell answers its own inline size and not the window's: this frame is 420 pixels wide inside a page that is not, and both regions have already left the grid. Press the control — the panel comes in over the content and the veil covers what is behind it."
       >
         <div className="slotted-demo-measure">
@@ -338,7 +338,7 @@ export const Aside: Story = {
         <AuroraSelection shell={{ navMode: 'inline' }} />
       </Scene>
       <Scene
-        label="asideMode='inline' in a frame narrower than 768 pixels"
+        label="asideMode='inline' in a frame narrower than 600 pixels"
         note="No room beside the content, so the inline pane drops under it as a row of its own. The head, the body and the foot hold: the body is what scrolls."
       >
         <div className="slotted-demo-measure">
@@ -603,7 +603,7 @@ export const Persistence: Story = {
     <Grid columns={1}>
       <Scene
         label="Every request says why, for both regions"
-        note="Press a control: pointer. Press it with the keyboard: keyboard. Drag the browser window narrow until the frame crosses 768 pixels: resize, for the navigation and for the pane — the one reason a product ignores when it persists the reader's preference, and the only one no surveyed implementation reports."
+        note="Press a control: pointer. Press it with the keyboard: keyboard. Drag the browser window narrow until the frame crosses 600 pixels: resize, for the navigation and for the pane — the one reason a product ignores when it persists the reader's preference, and the only one no surveyed implementation reports."
       >
         <RequestLog />
       </Scene>

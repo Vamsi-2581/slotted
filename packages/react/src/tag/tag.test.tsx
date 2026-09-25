@@ -41,6 +41,11 @@ describe('Tag', () => {
 
     rerender(<Tag onRemove={() => undefined}>Design</Tag>);
     expect(container.querySelector('[data-part="remove"]')).not.toBeNull();
+    expect(
+      container
+        .querySelector('[data-part="remove"] > [data-ui="icon"] > svg[data-glyph]')
+        ?.getAttribute('data-glyph'),
+    ).toBe('x');
   });
 
   /**
@@ -151,7 +156,7 @@ describe('TagDefaultsProvider', () => {
         <Tag size="lg">Sobrescreve</Tag>
       </TagDefaultsProvider>,
     );
-    const chips = [...container.querySelectorAll('[data-part="root"]')];
+    const chips = [...container.querySelectorAll('[data-ui="tag"][data-part="root"]')];
 
     expect(chips[0]).toHaveAttribute('data-tone', 'accent');
     expect(chips[0]).toHaveAttribute('data-size', 'sm');
@@ -310,6 +315,11 @@ describe('TagToggle', () => {
       'aria-hidden',
       'true',
     );
+    expect(
+      container
+        .querySelector('[data-part="indicator"] > [data-ui="icon"] > svg[data-glyph]')
+        ?.getAttribute('data-glyph'),
+    ).toBe('check');
   });
 });
 

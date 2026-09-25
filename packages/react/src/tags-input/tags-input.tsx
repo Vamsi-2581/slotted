@@ -32,6 +32,7 @@ import type {
 } from 'react';
 
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { CHIP_SELECTOR, ChipRow } from './tags-input-chips';
 import type { TagsInputChipsContext } from './tags-input-chips';
 import { TAGS_INPUT_FALLBACK, useTagsInputDefaults } from './tags-input-defaults';
@@ -632,12 +633,11 @@ export function TagsInput({
         </span>
       )}
       {showClear ? (
-        <button
-          aria-label={resolved.clearLabel}
-          data-part="clear"
-          onClick={onClear}
-          type="button"
-        />
+        <button aria-label={resolved.clearLabel} data-part="clear" onClick={onClear} type="button">
+          <Icon>
+            <Glyph name="x" />
+          </Icon>
+        </button>
       ) : null}
       <span data-part="hint" id={hintId}>
         {hint}

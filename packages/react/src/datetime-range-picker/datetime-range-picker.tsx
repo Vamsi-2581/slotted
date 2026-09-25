@@ -50,6 +50,7 @@ import type { CalendarHandle, CalendarValue, CalendarView } from '../calendar';
 import { DateTimeField } from '../datetime-field';
 import type { DateTimeFieldChangeRequest, DateTimeFieldHandle } from '../datetime-field';
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { useDateTimeRangePickerDefaults } from './datetime-range-picker-defaults';
 import type {
   DateTimeRange,
@@ -1472,6 +1473,9 @@ export function DateTimeRangePicker({
           <span data-part="summary" {...(summary === null ? { 'data-placeholder': '' } : {})}>
             {summary ?? chooseLabel ?? defaults.chooseLabel}
           </span>
+          <Icon>
+            <Glyph name="calendar" />
+          </Icon>
         </button>
         {clearable && held !== null ? (
           <button
@@ -1485,7 +1489,11 @@ export function DateTimeRangePicker({
               triggerRef.current?.focus();
             }}
             type="button"
-          />
+          >
+            <Icon>
+              <Glyph name="x" />
+            </Icon>
+          </button>
         ) : null}
         <input
           data-part="hidden-input"

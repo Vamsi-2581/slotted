@@ -9,6 +9,7 @@ import type { ChangeEvent, ClipboardEvent, KeyboardEvent, MouseEvent, Ref } from
 import { createPortal } from 'react-dom';
 
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { useMultiSelect } from './multi-select';
 import { ChipRow } from './multi-select-chips';
 import {
@@ -365,12 +366,11 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
         </span>
       )}
       {showClear ? (
-        <button
-          aria-label={multiSelect.clearLabel}
-          data-part="clear"
-          onClick={clear}
-          type="button"
-        />
+        <button aria-label={multiSelect.clearLabel} data-part="clear" onClick={clear} type="button">
+          <Icon>
+            <Glyph name="x" />
+          </Icon>
+        </button>
       ) : null}
       {multiSelect.loading ? (
         <span aria-hidden="true" data-part="busy" data-ui="spinner" />
@@ -383,7 +383,11 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
           tabIndex={-1}
           type="button"
         >
-          <span data-part="arrow" />
+          <span data-part="arrow">
+            <Icon>
+              <Glyph name="chevron-down" />
+            </Icon>
+          </span>
         </button>
       )}
       {/*
@@ -718,7 +722,11 @@ export function MultiSelectContent({
             <span data-part="label">
               {multiSelect.createLabel.replace('{query}', multiSelect.query)}
             </span>
-            <span data-part="indicator" />
+            <span data-part="indicator">
+              <Icon>
+                <Glyph name="plus" />
+              </Icon>
+            </span>
           </div>
         ) : null}
         {!multiSelect.loading && count === 0 && !offering ? (

@@ -5,6 +5,8 @@ import type { TagsVerdict } from '@slotted/core/tags';
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
+import { Glyph, Icon } from '../icon';
+
 /** The chips in the row, in the order the row holds them. */
 export const CHIP_SELECTOR = "[data-part='chips'] > [role='gridcell']:not([data-part='field'])";
 
@@ -235,7 +237,13 @@ function Chip({ context, index, value }: ChipProps) {
       {...(locked || context.disabled ? { 'data-disabled': '' } : {})}
     >
       <span data-part="body">
-        {message === null ? null : <span data-part="start" />}
+        {message === null ? null : (
+          <span data-part="start">
+            <Icon>
+              <Glyph name="circle-alert" />
+            </Icon>
+          </span>
+        )}
         <span data-part="label">{label}</span>
       </span>
       {message === null ? null : (
@@ -250,7 +258,11 @@ function Chip({ context, index, value }: ChipProps) {
           onClick={onRemove}
           tabIndex={-1}
           type="button"
-        />
+        >
+          <Icon>
+            <Glyph name="x" />
+          </Icon>
+        </button>
       )}
     </span>
   );

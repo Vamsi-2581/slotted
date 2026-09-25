@@ -117,7 +117,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      'The trigger’s chevron, drawn from a glyph token: along the reading direction while closed, down while open, mirrored in a right-to-left document.',
+      'The trigger’s chevron, the chevron-right Glyph element in a directional icon box: along the reading direction while closed, down while open, mirrored in a right-to-left document.',
   },
   {
     part: 'actions',
@@ -388,11 +388,13 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'side-navigation-react-loading',
       language: 'tsx',
       label: 'Three rows on their way',
-      source: `<SideNavigationList aria-busy="true">
-  <SideNavigationSkeleton labelSize="55%" />
-  <SideNavigationSkeleton labelSize="70%" />
-  <SideNavigationSkeleton labelSize="45%" />
-</SideNavigationList>;`,
+      source: `<SideNavigation aria-busy="true">
+  <SideNavigationList>
+    <SideNavigationSkeleton labelSize="55%" />
+    <SideNavigationSkeleton labelSize="70%" />
+    <SideNavigationSkeleton labelSize="45%" />
+  </SideNavigationList>
+</SideNavigation>;`,
     }),
   },
   {
@@ -729,7 +731,11 @@ export const REACT_SIDE_NAVIGATION_DOCS = {
           <span data-part="label" id="l-b">
             Entregas
           </span>
-          <span data-part="indicator" aria-hidden="true" />
+          <span data-part="indicator" aria-hidden="true">
+            <span data-ui="icon" data-part="root" data-directional aria-hidden="true">
+              <svg data-part="glyph" data-glyph="chevron-right" />
+            </span>
+          </span>
         </button>
         <ul data-part="group" id="g-b" aria-labelledby="l-b">
           …

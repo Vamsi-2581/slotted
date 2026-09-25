@@ -3,6 +3,7 @@ import type { Ref } from 'react';
 
 import { Button } from '../button/button';
 import { IconButton } from '../button/icon-button';
+import { Glyph, Icon } from '../icon';
 import type { ButtonRootProps, IconButtonProps } from '../button/button.types';
 import { Menu } from '../menu/menu';
 import { MenuRadioGroup } from '../menu/menu-items';
@@ -83,8 +84,9 @@ export function SplitButtonMenu({ children, disabled, ref, ...menuProps }: Split
  * The menu trigger: `button`'s IconButton rendered as `menu`'s trigger, so
  * it carries `aria-haspopup`, `aria-expanded`, `aria-controls` and the four
  * keys of the Menu Button pattern from `menu`, and every tone, variant and
- * size from `button`. The chevron is the family's, drawn in the icon part by
- * the stylesheet; the accessible name is the consumer's and the type
+ * size from `button`. The chevron is the family's, the `chevron-down` Glyph
+ * element in the icon part, which `button` sizes; children the consumer
+ * passes replace it. The accessible name is the consumer's and the type
  * requires it.
  *
  * The ref `menu` hands to `render` is the anchor the positioner measures
@@ -98,6 +100,7 @@ export function SplitButtonMenu({ children, disabled, ref, ...menuProps }: Split
  * half working beside one half broken — so `aria-disabled` is what stays.
  */
 export function SplitButtonMenuTrigger({
+  children,
   disabled = false,
   ref,
   render,
@@ -142,7 +145,11 @@ export function SplitButtonMenuTrigger({
             }}
             shape="square"
           >
-            <span aria-hidden="true" />
+            {children ?? (
+              <Icon>
+                <Glyph name="chevron-down" />
+              </Icon>
+            )}
           </IconButton>
         );
       }}

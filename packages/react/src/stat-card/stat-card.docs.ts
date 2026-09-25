@@ -66,7 +66,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      'The end of the header, for your own Link or Button. Stays on the first line when the name wraps.',
+      'The end of the header, for your own Link or Button. Stays on the first line when the name wraps, set on the name’s own size and line so the header keeps its height whichever face has loaded.',
   },
   {
     part: 'figure',
@@ -86,7 +86,8 @@ const anatomy: AnatomyRow[] = [
     part: 'unit',
     element: 'span',
     required: false,
-    purpose: 'The unit, a step down, wherever you put it inside the value: $ before, % after.',
+    purpose:
+      'The unit, a step down, wherever you put it inside the value: $ before, % after. The value spaces it from the figure by its own gap on either side.',
   },
   {
     part: 'delta',

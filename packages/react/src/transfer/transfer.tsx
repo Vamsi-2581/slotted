@@ -33,6 +33,7 @@ import { Button } from '../button';
 import { Checkbox } from '../checkbox';
 import { useField, useFieldDefaults } from '../field';
 import { FieldContext } from '../field/field-context';
+import { Glyph, Icon } from '../icon';
 import {
   Listbox,
   ListboxDescription,
@@ -704,21 +705,30 @@ export function Transfer<T = TransferItem>({
     keys: readonly string[],
     glyphAt: 'start' | 'end',
     shortcut?: string,
-  ) => (
-    <Button
-      {...(shortcut === undefined ? {} : { 'aria-keyshortcuts': shortcut })}
-      disabled={frozen || keys.length === 0}
-      focusableWhenDisabled={!isDisabled}
-      onClick={(event) => move(keys, to, pressReason(event), event)}
-      render={(props) => <button {...props} data-part={part} />}
-      size={innerSize}
-      tone="secondary"
-      variant="outline"
-      {...(glyphAt === 'start' ? { start: <span /> } : { end: <span /> })}
-    >
-      {label}
-    </Button>
-  );
+  ) => {
+    /* One chevron for a selection, two for everything; the stylesheet turns
+       the box toward the side the items go. */
+    const glyph = (
+      <Icon>
+        <Glyph name={part.startsWith('move-all') ? 'chevrons-right' : 'chevron-right'} />
+      </Icon>
+    );
+    return (
+      <Button
+        {...(shortcut === undefined ? {} : { 'aria-keyshortcuts': shortcut })}
+        disabled={frozen || keys.length === 0}
+        focusableWhenDisabled={!isDisabled}
+        onClick={(event) => move(keys, to, pressReason(event), event)}
+        render={(props) => <button {...props} data-part={part} />}
+        size={innerSize}
+        tone="secondary"
+        variant="outline"
+        {...(glyphAt === 'start' ? { start: glyph } : { end: glyph })}
+      >
+        {label}
+      </Button>
+    );
+  };
 
   const selectedToMove = (side: TransferSide) =>
     keysToMove({
@@ -785,7 +795,13 @@ export function Transfer<T = TransferItem>({
               }
               placeholder={fillLabel(labels.search, { pane: title(side) })}
               size={innerSize}
-              start={<span data-part="search-icon" />}
+              start={
+                <span data-part="search-icon">
+                  <Icon>
+                    <Glyph name="search" />
+                  </Icon>
+                </span>
+              }
               type="search"
               value={query[side]}
             />
@@ -815,6 +831,9 @@ export function Transfer<T = TransferItem>({
             disabled={isDisabled}
             emptyContent={
               <div data-part="empty" {...(typed ? { 'data-query': '' } : {})}>
+                <Icon>
+                  <Glyph name={typed ? 'search-x' : 'inbox'} />
+                </Icon>
                 {typed ? labels.noResults : labels.empty}
               </div>
             }
@@ -986,7 +1005,13 @@ export function Transfer<T = TransferItem>({
                     }
                     render={(props) => <button {...props} data-part={part} />}
                     size={innerSize}
-                    start={<span />}
+                    start={
+                      /* One chevron for both; the stylesheet turns it up for
+                         move-up. */
+                      <Icon>
+                        <Glyph name="chevron-down" />
+                      </Icon>
+                    }
                     tone="secondary"
                     variant="ghost"
                   >

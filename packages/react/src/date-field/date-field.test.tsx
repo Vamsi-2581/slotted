@@ -350,6 +350,7 @@ describe('the pointer', () => {
     );
 
     const button = screen.getByRole('button', { name: 'Limpar' });
+    expect(button.querySelector('svg[data-glyph]')).toHaveAttribute('data-glyph', 'x');
     fireEvent.mouseDown(button);
     expect(segmentFor('day')).not.toHaveFocus();
   });

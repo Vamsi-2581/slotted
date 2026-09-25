@@ -57,7 +57,14 @@ export type AppShellDismissPolicy = 'close' | 'none';
 
 /** Why the navigation region opened or closed. */
 export type AppShellOpenReason =
-  'pointer' | 'keyboard' | 'escape' | 'outsidePress' | 'select' | 'resize' | 'programmatic';
+  | 'pointer'
+  | 'keyboard'
+  | 'escape'
+  | 'outsidePress'
+  | 'back'
+  | 'select'
+  | 'resize'
+  | 'programmatic';
 
 /** Why the secondary pane opened or closed. No `select`: a pane has no destinations. */
 export type AppShellAsideOpenReason = Exclude<AppShellOpenReason, 'select'>;
@@ -93,6 +100,8 @@ export interface AppShellDefaults {
   collapsedTo: AppShellCollapsedTo;
   dividers: boolean;
   escape: AppShellDismissPolicy;
+  /** The platform's way back — a phone's gesture, a browser's button — closes a modal layer. */
+  back: AppShellDismissPolicy;
   messages: AppShellMessages;
   modal: boolean;
   navMode: AppShellNavMode;
@@ -149,6 +158,8 @@ export interface AppShellContextValue {
   collapsedTo: AppShellCollapsedTo;
   dividers: boolean;
   escape: AppShellDismissPolicy;
+  /** The platform's way back — a phone's gesture, a browser's button — closes a modal layer. */
+  back: AppShellDismissPolicy;
   messages: AppShellMessages;
   modal: boolean;
   /** The resolved mode, which is `auto` answered against the shell's own width. */
@@ -226,6 +237,11 @@ export interface AppShellProps extends Omit<Native<'div'>, 'ref'>, Common {
   defaultNavOpen?: boolean | undefined;
   dividers?: boolean | undefined;
   escape?: AppShellDismissPolicy | undefined;
+  /**
+   * The platform's way back — a phone's gesture, a browser's button — closes
+   * a modal layer instead of leaving the page. Defaults to the provider, then `close`.
+   */
+  back?: AppShellDismissPolicy | undefined;
   /** Strings for this shell, over the provider's and over the family's own. */
   messages?: Partial<AppShellMessages> | undefined;
   /** Whether the overlaid region contains focus and makes the rest of the shell `inert`. */

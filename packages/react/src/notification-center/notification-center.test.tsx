@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import type { ComponentPropsWithRef } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -141,8 +141,25 @@ describe('NotificationCenter', () => {
     expect(article(0).querySelector('[data-part="visual"]')).toContainElement(
       screen.getByTestId('avatar'),
     );
-    expect(article(1).querySelector('[data-part="visual"]')).toBeEmptyDOMElement();
+    expect(article(0).querySelector('[data-part="visual"] [data-glyph]')).toBeNull();
+    /* The family's own visual: the tone's glyph, marked as the family's. */
+    expect(
+      article(1)
+        .querySelector('[data-part="visual"] > [data-ui="icon"][data-tone-glyph] > svg')
+        ?.getAttribute('data-glyph'),
+    ).toBe('circle-x');
     expect(article(2).querySelector('[data-part="visual"]')).toBeNull();
+  });
+
+  it('draws check to mark read, dot to mark unread, and x to dismiss', () => {
+    render(<Centre />);
+    const glyph = (index: number, part: string) =>
+      article(index)
+        .querySelector(`[data-part="${part}"] > [data-ui="icon"] > svg[data-glyph]`)
+        ?.getAttribute('data-glyph');
+    expect(glyph(0, 'read-toggle')).toBe('check');
+    expect(glyph(2, 'read-toggle')).toBe('dot');
+    expect(glyph(0, 'dismiss')).toBe('x');
   });
 
   it('asks to mark read and never marks itself', () => {
@@ -166,6 +183,32 @@ describe('NotificationCenter', () => {
     expect(onReadChange).toHaveBeenLastCalledWith(
       { keys: ['n1', 'n2'], read: true },
       expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+
+  /**
+   * Two glyphs with no words beside them are two controls nobody can tell
+   * apart until they are named: each of the family's own controls opens a
+   * tooltip with its accessible name, on keyboard focus in the same task.
+   */
+  it('names its own controls with a tooltip as well as with aria-label', async () => {
+    render(<Centre />);
+
+    /* A key first: jsdom, like a browser, shows focus only after the keyboard was the last thing used. */
+    fireEvent.keyDown(document.body, { key: 'Tab' });
+    const read = screen.getAllByRole('button', { name: 'Marcar como lida' })[0] as HTMLElement;
+    read.focus();
+    fireEvent.focus(read);
+    await waitFor(() => expect(document.querySelector('[role="tooltip"]')).not.toBeNull());
+    expect(document.querySelector('[role="tooltip"]')).toHaveTextContent('Marcar como lida');
+    fireEvent.blur(read);
+    await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toBeNull());
+
+    const dismiss = screen.getAllByRole('button', { name: 'Dispensar' })[0] as HTMLElement;
+    dismiss.focus();
+    fireEvent.focus(dismiss);
+    await waitFor(() =>
+      expect(document.querySelector('[role="tooltip"]')).toHaveTextContent('Dispensar'),
     );
   });
 

@@ -451,7 +451,11 @@ export const REACT_RADIO_GROUP_DOCS = {
 >
   <div data-part="item" data-checked>
     <input data-part="control" type="radio" name="shipping" id="std" value="standard" checked />
-    <span data-part="indicator" />
+    <span data-part="indicator">
+      <span data-ui="icon" data-part="root" aria-hidden="true">
+        <svg data-part="glyph" data-glyph="dot" aria-hidden="true"></svg>
+      </span>
+    </span>
     <label data-part="label" for="std">
       Entrega padrão
     </label>

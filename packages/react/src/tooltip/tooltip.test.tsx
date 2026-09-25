@@ -153,6 +153,42 @@ describe('Tooltip', () => {
   });
 
   /**
+   * The hint over a name cut by its box, and nothing over a name that fits. The
+   * measurement is taken when the hint would open rather than watched, so the
+   * same trigger answers differently after its column is dragged wider.
+   */
+  it('opens over a cut name alone under whenClipped', async () => {
+    function measure(element: Element, { client, scroll }: { client: number; scroll: number }) {
+      Object.defineProperty(element, 'clientWidth', { configurable: true, value: client });
+      Object.defineProperty(element, 'scrollWidth', { configurable: true, value: scroll });
+    }
+
+    render(<Basic openDelay={0} whenClipped />);
+    /* jsdom does not expand the `overflow` shorthand, so the axis is written. */
+    trigger().style.overflowX = 'hidden';
+
+    measure(trigger(), { client: 120, scroll: 120 });
+    hover(trigger());
+    expect(layer()).toBeNull();
+
+    measure(trigger(), { client: 48, scroll: 120 });
+    hover(trigger());
+    await waitFor(() => expect(hint()?.textContent).toBe('Saves without publishing'));
+  });
+
+  /**
+   * A hint that repeats words the trigger already carries — the full name of a
+   * column whose header is clipped — is read twice under either reference.
+   */
+  it('references nothing and hides the hint under describes="none"', async () => {
+    render(<Basic defaultOpen describes="none" />);
+    await waitFor(() => expect(hint()).not.toBeNull());
+    expect(trigger().getAttribute('aria-describedby')).toBeNull();
+    expect(trigger().getAttribute('aria-labelledby')).toBeNull();
+    expect(hint()?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  /**
    * Under `label` the layer is the trigger's accessible name, so it has to be
    * in the document before anyone opens it. Anything else is a button silently
    * announced as "button".

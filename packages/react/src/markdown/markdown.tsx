@@ -16,6 +16,7 @@ import { Alert, AlertContent, AlertDescription, AlertTitle } from '../alert';
 import { Button } from '../button';
 import { Checkbox } from '../checkbox';
 import { CodeBlock } from '../code-block';
+import { Glyph, Icon } from '../icon';
 import { InlineMessage } from '../inline-message';
 import { Link } from '../link';
 import { Prose, ProseAnchor, ProseFootnotes, ProseScroll, useProseDefaults } from '../prose';
@@ -427,7 +428,12 @@ function renderFootnoteBody(footnote: MarkdownFootnote, context: RenderContext):
       data-part="backref"
       href={`#${reference}`}
       key={reference}
-    />
+    >
+      {/* Turned a quarter by the sheet, so it points up the page to the reference. */}
+      <Icon>
+        <Glyph name="arrow-left" />
+      </Icon>
+    </a>
   ));
   const last = footnote.children.at(-1);
   if (last?.kind !== 'paragraph') {

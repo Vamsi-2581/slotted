@@ -138,6 +138,22 @@ describe('Alert', () => {
     expect(screen.getByTestId('alert').querySelector('[data-part="icon"]')).toBeNull();
   });
 
+  it('draws each tone’s glyph from the contract’s map, solid', () => {
+    for (const [tone, glyph] of Object.entries(contract.toneGlyphs)) {
+      const { unmount } = render(
+        <Alert data-testid="alert" tone={tone as never}>
+          <AlertContent>Uma mensagem.</AlertContent>
+        </Alert>,
+      );
+      const drawn = screen
+        .getByTestId('alert')
+        .querySelector('[data-part="icon"] > [data-ui="icon"] > svg[data-part="glyph"]');
+      expect(drawn, tone).toHaveAttribute('data-glyph', glyph);
+      expect(drawn, tone).toHaveAttribute('data-solid');
+      unmount();
+    }
+  });
+
   it('puts the page’s own mark in the box the tone’s would have had', () => {
     render(
       <Alert data-testid="alert" icon={<svg data-testid="glyph" />}>
@@ -146,6 +162,7 @@ describe('Alert', () => {
     );
 
     expect(screen.getByTestId('glyph').parentElement).toHaveAttribute('data-part', 'icon');
+    expect(screen.getByTestId('alert').querySelector('[data-glyph]')).toBeNull();
   });
 
   describe('dismissal', () => {
@@ -157,6 +174,20 @@ describe('Alert', () => {
       );
 
       expect(screen.queryByRole('button')).toBeNull();
+    });
+
+    it('draws the control as the x glyph', () => {
+      render(
+        <Alert data-testid="alert" dismissible>
+          <AlertContent>Pronto.</AlertContent>
+        </Alert>,
+      );
+
+      const glyph = screen
+        .getByRole('button', { name: 'Dismiss' })
+        .querySelector('[data-ui="icon"] > svg[data-part="glyph"]');
+      expect(glyph).toHaveAttribute('data-glyph', 'x');
+      expect(glyph).toHaveAttribute('aria-hidden', 'true');
     });
 
     /**

@@ -1,6 +1,7 @@
 import { stepFocusIndex } from '@slotted/core/steps';
 import { Children, isValidElement, useContext, useEffect, useRef, type ReactNode } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import {
   StepperListLabel,
   StepperRegistry,
@@ -157,6 +158,13 @@ export function StepperStep({
   const status = stepper.statusOf(index);
   const current = index === stepper.step;
   const unreachable = disabled === true || !stepper.reachable(index);
+  /**
+   * The glyph drawn over the number: a cross for a step in error, a check for
+   * a finished one the reader has left. The current step keeps its number
+   * even when it is also complete, because the number is what says where the
+   * reader is.
+   */
+  const mark = invalid === true ? 'x' : status === 'complete' && !current ? 'check' : undefined;
 
   const announced = [
     stepper.labels.position(index, stepper.count),
@@ -183,6 +191,11 @@ export function StepperStep({
       <>
         <span aria-hidden="true" data-part="marker">
           {marker ?? index + 1}
+          {mark === undefined ? null : (
+            <Icon>
+              <Glyph name={mark} />
+            </Icon>
+          )}
         </span>
         <span data-part="label">
           {label}

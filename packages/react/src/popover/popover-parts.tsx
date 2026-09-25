@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { HTMLAttributes, MouseEvent, Ref } from 'react';
 import { createPortal } from 'react-dom';
 
+import { Glyph, Icon } from '../icon';
 import { usePopover, usePopoverReposition } from './popover';
 import type {
   PopoverAnchorProps,
@@ -497,7 +498,11 @@ export function PopoverClose({ children, ref, render, ...nativeProps }: PopoverC
   const rootProps = {
     ...nativeProps,
     'aria-label': nativeProps['aria-label'] ?? popover.closeLabel,
-    children,
+    children: children ?? (
+      <Icon size="sm">
+        <Glyph name="x" />
+      </Icon>
+    ),
     'data-part': 'close',
     onClick: compose(nativeProps.onClick, onClick),
   };

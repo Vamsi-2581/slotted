@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import type { MouseEvent } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { useRadioGroup } from './radio-group';
 import type { RadioGroupSelectionReason, RadioProps, RadioRootProps } from './radio-group.types';
 
@@ -77,7 +78,11 @@ export function Radio({
           type="radio"
           value={value}
         />
-        <span data-part="indicator" />
+        <span data-part="indicator">
+          <Icon>
+            <Glyph name="dot" />
+          </Icon>
+        </span>
         {children === undefined ? null : (
           <label data-part="label" htmlFor={controlId}>
             {children}

@@ -55,7 +55,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: true,
     purpose:
-      "The chevron, drawn as a mask from the glyph scale and turned over while the popup is open. It is placed against the frame's end and is inert: the trigger's own padding runs underneath it, so a press there still opens the popup.",
+      "The chevron, a `Glyph` inside an `Icon` box, turned over while the popup is open. It is placed against the frame's end and is inert: the trigger's own padding runs underneath it, so a press there still opens the popup.",
   },
   {
     part: 'busy',
@@ -111,7 +111,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span, aria-hidden',
     required: false,
     purpose:
-      'The magnifier, drawn as a mask from the glyph scale. It is what makes the row a field rather than a heading, and searchProps.icon replaces it or removes it.',
+      'The magnifier, a `Glyph` inside an `Icon` box. It is what makes the row a field rather than a heading, and searchProps.icon replaces it or removes it.',
   },
   {
     part: 'search-input',
@@ -174,7 +174,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      "The artwork in the first column, from a glyph token or the consumer's own element. It is not the check: a country's flag and the mark saying it is chosen are two facts about one row.",
+      "The artwork in the first column: an Icon holding a Glyph, or the consumer's own element. It is not the check: a country's flag and the mark saying it is chosen are two facts about one row.",
   },
   {
     part: 'label',
@@ -284,7 +284,16 @@ const scenes: ReferenceSceneMeta[] = [
   </SelectGroup>
   <SelectSeparator />
   <SelectGroup label="Citrus">
-    <SelectItem value="pomelo">Pomelo</SelectItem>
+    <SelectItem
+      icon={
+        <Icon>
+          <Glyph name="dot" />
+        </Icon>
+      }
+      value="pomelo"
+    >
+      Pomelo
+    </SelectItem>
   </SelectGroup>
 </SelectContent>;`,
     }),

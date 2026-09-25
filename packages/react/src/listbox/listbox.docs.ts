@@ -75,7 +75,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      'The option own artwork, in the same column the mark uses and never beside it. A glyph token through --slotted-listbox-option-icon, or an element of the page own.',
+      'The option own artwork, in the same column the mark uses and never beside it: an Icon holding a Glyph, or an element of the page own. No stylesheet fills it.',
   },
   {
     part: 'label',

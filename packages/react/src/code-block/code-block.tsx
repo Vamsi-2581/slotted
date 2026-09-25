@@ -16,6 +16,8 @@ import { fileKind } from '@slotted/core/upload';
 import { useEffect, useId, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent, MouseEvent } from 'react';
 
+import { Glyph, Icon } from '../icon';
+import type { GlyphName } from '../icon';
 import { ScrollArea } from '../scroll-area';
 import type { ScrollAreaHandle } from '../scroll-area';
 import { Skeleton } from '../skeleton';
@@ -30,15 +32,15 @@ import type {
 /** How long the check stays in place of the sheets: six short steps of the motion scale. */
 const COPIED_FOR = 2000;
 
-const KIND_ICON: Record<string, string> = {
-  archive: '--slotted-icon-file-archive',
-  audio: '--slotted-icon-file-audio',
-  document: '--slotted-icon-file-type',
-  image: '--slotted-icon-file-image',
-  pdf: '--slotted-icon-file-text',
-  presentation: '--slotted-icon-presentation',
-  spreadsheet: '--slotted-icon-file-spreadsheet',
-  video: '--slotted-icon-file-video',
+const KIND_ICON: Record<string, GlyphName> = {
+  archive: 'file-archive',
+  audio: 'file-audio',
+  document: 'file-type',
+  image: 'file-image',
+  pdf: 'file-text',
+  presentation: 'presentation',
+  spreadsheet: 'file-spreadsheet',
+  video: 'file-video',
 };
 
 /**
@@ -217,9 +219,7 @@ export function CodeBlock({
   /* ── Header ──────────────────────────────────────────────────────────── */
 
   const name = fileName ?? (typeof title === 'string' ? title : undefined);
-  const icon = name
-    ? (KIND_ICON[fileKind({ name, type: '' })] ?? '--slotted-icon-file')
-    : undefined;
+  const icon = name ? (KIND_ICON[fileKind({ name, type: '' })] ?? 'file') : undefined;
   const hasHeader =
     title !== undefined || language !== 'text' || copyControl || actions !== undefined;
   const controls = loading ? null : (
@@ -236,7 +236,11 @@ export function CodeBlock({
           }}
           type="button"
           {...(wrap ? { 'data-pressed': '' } : {})}
-        />
+        >
+          <Icon>
+            <Glyph name="text-wrap" />
+          </Icon>
+        </button>
       ) : null}
       {copyControl ? (
         <button
@@ -245,7 +249,12 @@ export function CodeBlock({
           type="button"
           {...copyHandlers}
           {...(copied ? { 'data-complete': '' } : {})}
-        />
+        >
+          {/* The check stands in for the sheets while the copy is confirmed. */}
+          <Icon>
+            <Glyph name={copied ? 'check' : 'copy'} />
+          </Icon>
+        </button>
       ) : null}
     </div>
   );
@@ -282,7 +291,11 @@ export function CodeBlock({
       {hasHeader ? (
         <div data-part="header">
           {icon && title !== undefined ? (
-            <span aria-hidden="true" data-part="icon" style={{ maskImage: `var(${icon})` }} />
+            <span aria-hidden="true" data-part="icon">
+              <Icon>
+                <Glyph name={icon} />
+              </Icon>
+            </span>
           ) : null}
           {title !== undefined ? (
             <span data-part="title" id={`${base}title`}>

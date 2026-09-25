@@ -3,6 +3,7 @@ import { createContext, useContext } from 'react';
 import type { DialogDefaults, DialogDefaultsProviderProps } from './dialog.types';
 
 const FALLBACK: DialogDefaults = {
+  back: 'close',
   escape: 'close',
   fullScreen: 'narrow',
   modal: true,
@@ -36,6 +37,7 @@ export function DialogDefaultsProvider({ children, ...defaults }: DialogDefaults
   return (
     <DialogDefaultsContext.Provider
       value={{
+        back: defaults.back ?? inherited.back,
         escape: defaults.escape ?? inherited.escape,
         fullScreen: defaults.fullScreen ?? inherited.fullScreen,
         modal: defaults.modal ?? inherited.modal,

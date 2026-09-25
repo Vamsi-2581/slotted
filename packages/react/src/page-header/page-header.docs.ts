@@ -34,14 +34,14 @@ const anatomy: AnatomyRow[] = [
     element: 'header, or the element render returns',
     required: true,
     purpose:
-      'The family: sticky with a negative offset the size of the header area, carrying data-ui="page-header", the three axes, data-expanded, data-revealed, data-loading and the measured fact data-scrolled. It is its own container, so the rows reflow on its own inline size.',
+      'The family: sticky with a negative offset the size of the header area, carrying data-ui="page-header", the three axes, data-expanded, data-revealed, data-loading and the measured facts data-scrolled and data-compact. Below 600 pixels of its own width it carries data-compact, is not sticky and scrolls away with the page. It is its own container, so the rows reflow on its own inline size.',
   },
   {
     part: 'title-area',
     element: 'div',
     required: true,
     purpose:
-      'The strip that never leaves: the nav row, the title row. Sticky at 0 inside the root, opaque, above the header area in the stack.',
+      'The strip that never leaves: the nav row, the title row. Sticky at 0 inside the root, opaque, above the header area in the stack. Below 600 pixels it is in the flow with the root.',
   },
   {
     part: 'nav',
@@ -54,14 +54,14 @@ const anatomy: AnatomyRow[] = [
     element: 'a, or the element render returns',
     required: false,
     purpose:
-      'The way back to where the reader came from. The arrow before it is the family’s, drawn from the glyph scale and mirrored in a right-to-left document. Beside breadcrumbs it yields to them — their first crumb says the same — and below 640 pixels, where the breadcrumbs go, it is what remains of the nav row. Write both once; the width decides.',
+      'The way back to where the reader came from. The arrow before it is the family’s, drawn from the glyph scale and mirrored in a right-to-left document. Beside breadcrumbs it yields to them — their first crumb says the same — and below 600 pixels, where the breadcrumbs go, it is what remains of the nav row. Write both once; the width decides. On a coarse pointer it is a full touch target without growing the row.',
   },
   {
     part: 'breadcrumbs',
     element: 'div',
     required: false,
     purpose:
-      'The slot a Breadcrumb sits in. Hidden below 640 pixels, where the way back already says where the reader came from.',
+      'The slot a Breadcrumb sits in. Hidden below 600 pixels, where the way back already says where the reader came from.',
   },
   {
     part: 'title-row',
@@ -89,35 +89,35 @@ const anatomy: AnatomyRow[] = [
     element: 'h1 to h3, from level, or the element render returns',
     required: true,
     purpose:
-      'The heading. Expanded it wraps to three lines and then clamps, with the full text in title; snapped it is one line with an ellipsis, a step smaller. While loading it renders Skeleton’s text shape.',
+      'The heading. Expanded it wraps to two lines and then clamps, with the full text in title; snapped it is one line with an ellipsis, a step smaller. While loading it renders Skeleton’s text shape.',
   },
   {
     part: 'marks',
     element: 'div',
     required: false,
     purpose:
-      'The status beside the heading — a Tag, a Badge, a StatusIndicator — centred on the heading’s line. It wraps when there are many.',
+      'The status beside the heading — a Tag, a Badge, a StatusIndicator — centred on the heading’s line. It wraps when there are many. Below 600 pixels it takes a line of its own under the heading, so the header is as tall waiting as loaded whatever the marks say.',
   },
   {
     part: 'subheading',
     element: 'p',
     required: false,
     purpose:
-      'One line under the heading, in the muted text, part of what stays visible. Snapped it truncates to one line; expanded it wraps.',
+      'One line under the heading, in the muted text, part of what stays visible. Snapped, or below 600 pixels, it truncates to one line; otherwise it wraps to two lines and clamps.',
   },
   {
     part: 'actions',
     element: 'div',
     required: false,
     purpose:
-      'The slot a Toolbar sits in, at the end of the title row. Overflow is the toolbar’s: with overflow="menu" what does not fit folds into its menu.',
+      'The slot a Toolbar sits in, at the end of the title row. Overflow is the toolbar’s: with overflow="menu" what does not fit folds into its menu. Such a toolbar keeps the actions on the title row at every width: it fills what the title leaves, never narrower than its menu’s trigger, and folds what does not fit there, so what folded comes back when the row widens; loose buttons take a row of their own under the title. A toolbar without a frame gives its block inset back to the row, so it stands a control tall, the height the title reserves.',
   },
   {
     part: 'navigation',
     element: 'div',
     required: false,
     purpose:
-      'The previous and next record, after the actions at the far end of the row, set apart by a rule. Below 640 pixels the row wraps under the title.',
+      'The previous and next record, after the actions at the far end of the row, set apart by a rule. Below 600 pixels the row wraps under the title.',
   },
   {
     part: 'header-area',
@@ -131,7 +131,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'The picture of the record, a column before the content. Below 640 pixels it takes a row above it.',
+      'The picture of the record, a column before the content. Below 600 pixels it takes a row above it.',
   },
   {
     part: 'content',
@@ -166,7 +166,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'A toggle button with aria-pressed, which is the pressed state the vocabulary has. It exists when it is rendered; there is no prop to hide it. The stylesheet hides it where the header is too much of the screen to hold — expanded it would take more than six tenths of the scrollport, or the header is narrower than 640 pixels — and a header held when that becomes true is let go, with the reason programmatic.',
+      'A toggle button with aria-pressed, which is the pressed state the vocabulary has. It exists when it is rendered; there is no prop to hide it. The stylesheet hides it where the header is too much of the screen to hold — expanded it would take more than six tenths of the scrollport, or the header is narrower than 600 pixels — and a header held when that becomes true is let go, with the reason programmatic.',
   },
   {
     part: 'tabs',
@@ -253,7 +253,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'collapse',
     title: 'What a scroll does, and what the control does',
-    note: 'Scroll the left screen: the area leaves with the reason scroll and the toggle offers to bring it back in place. Press the toggle at rest: the area folds as a grid track. The right screen is collapse="manual": the whole header stays while the page scrolls.',
+    note: 'Scroll the left screen: the area leaves with the reason scroll and the toggle offers to bring it back in place. Press the toggle at rest: the area folds as a grid track. The right screen is collapse="manual": the whole header stays while the page scrolls. In a Page with fill nothing scrolls outside the body: a scroller inside it snaps the area shut once it is past 16 pixels down, and opens it again back at its top.',
     snippet: defineSnippet({
       id: 'page-header-react-collapse',
       language: 'tsx',
@@ -270,7 +270,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'pin',
     title: 'The pin',
-    note: 'Pressed, the whole header stays while the page scrolls and the area counts into the chrome. Let go while stuck and the area stays revealed until the next scroll; collapse by the toggle and the pin lets go first. Narrow the stage below 640 pixels, or shorten the window until the header would take most of it: the pin goes, and a held header is let go.',
+    note: 'Pressed, the whole header stays while the page scrolls and the area counts into the chrome. Let go while stuck and the area stays revealed until the next scroll; collapse by the toggle and the pin lets go first. Narrow the stage below 600 pixels, or shorten the window until the header would take most of it: the pin goes, and a held header is let go.',
     snippet: defineSnippet({
       id: 'page-header-react-pin',
       language: 'tsx',
@@ -319,7 +319,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'navigation',
     title: 'Previous and next record',
-    note: 'The two arrows at the far end of the title row move between orders without leaving the screen; the heading, the breadcrumb page and the facts follow. Below 640 pixels the pair wraps under the title with the actions.',
+    note: 'The two arrows at the far end of the title row move between orders without leaving the screen; the heading, the breadcrumb page and the facts follow. Below 600 pixels the pair wraps under the title with the actions.',
     snippet: defineSnippet({
       id: 'page-header-react-navigation',
       language: 'tsx',
@@ -387,7 +387,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'content',
     title: 'Content the family did not choose',
-    note: 'A nine-word title clamps at three lines with the whole string in title; five marks wrap; a subheading of fifteen words wraps expanded and truncates snapped; a translated description keeps its measure. Scroll to see the bar hold one line.',
+    note: 'A nine-word title clamps at two lines with the whole string in title; five marks wrap; a subheading of fifteen words wraps expanded and truncates snapped; a translated description keeps its measure. Scroll to see the bar hold one line.',
     snippet: defineSnippet({
       id: 'page-header-react-content',
       language: 'tsx',
@@ -400,8 +400,8 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'narrow',
-    title: 'Below 640 pixels',
-    note: 'The family answers its own inline size: the breadcrumbs go and the way back stays, the title steps down, the actions and the navigation take the row under the title, and the figure takes a row above the content.',
+    title: 'Below 600 pixels',
+    note: 'The family answers its own inline size: the header is not sticky and scrolls away with the page, nothing collapses it on scroll and the toggle still folds the area in place; the breadcrumbs go and the way back stays, the title steps down, the subheading takes one line, and the figure takes a row above the content. Actions written as Toolbar overflow="menu", each item with its counterpart, stay on the title row and fold what does not fit into the menu, where every action is still reachable; loose actions and the navigation take the row under the title.',
     snippet: defineSnippet({
       id: 'page-header-react-narrow',
       language: 'tsx',

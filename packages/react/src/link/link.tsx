@@ -3,6 +3,7 @@ import '@slotted/styles/visually-hidden/visually-hidden.css';
 
 import type { SyntheticEvent } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { useLinkDefaults } from './link-defaults';
 import type { LinkProps, LinkRootProps } from './link.types';
 
@@ -89,7 +90,13 @@ export function Link({
         {newTab ? (
           <>
             {WORD_JOINER}
-            <span aria-hidden="true" data-part="external-icon" />
+            <span aria-hidden="true" data-part="external-icon">
+              {/* An arrow that means "away from here" points the other way in a
+                  right-to-left document. */}
+              <Icon directional>
+                <Glyph name="external" />
+              </Icon>
+            </span>
             <span data-part="external-hint" data-ui="visually-hidden">
               {` ${resolved.externalHint}`}
             </span>

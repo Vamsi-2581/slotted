@@ -117,7 +117,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      'The consumer’s avatar or icon at the small step. For an item with a tone and no visual, the family’s own: the tone’s glyph on the tone’s surface in a circle of the same size. Absent when the item has neither.',
+      'The consumer’s avatar or icon at the small step. For an item with a tone and no visual, the family’s own: the tone’s glyph filled — the tone’s surface as a disc under the ringed glyph, at the avatar’s diameter. Absent when the item has neither.',
   },
   {
     part: 'content',
@@ -144,7 +144,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'The family’s two controls at the inline end, muted at rest and in the text ink on the row under the pointer or holding focus. Which exist is the controls axis; below 320 pixels they drop under the content.',
+      'The family’s two controls at the inline end, muted at rest and in the text ink on the row under the pointer or holding focus. Each opens a tooltip with its name on hover, on keyboard focus and on a held touch. Which exist is the controls axis; below 320 pixels they drop under the content, and under a coarse pointer they grow to the comfortable target.',
   },
   {
     part: 'read-toggle',

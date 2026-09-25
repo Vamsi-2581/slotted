@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import type { HTMLAttributes, MouseEvent, ReactNode, Ref } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { useAppShell } from './app-shell';
 import type {
   AppShellActionsProps,
@@ -351,7 +352,12 @@ export function AppShellNavToggle({
     'aria-controls': ariaControls ?? shell.navId,
     'aria-expanded': shell.open,
     'aria-label': ariaLabel ?? (shell.open ? shell.messages.close : shell.messages.open),
-    children,
+    /* The panel mark says what a press does: open while closed, close while open. */
+    children: children ?? (
+      <Icon>
+        <Glyph name={shell.open ? 'panel-close' : 'panel-open'} />
+      </Icon>
+    ),
     className,
     'data-part': 'nav-toggle',
     id: id ?? shell.toggleId,
@@ -400,7 +406,11 @@ export function AppShellAsideToggle({
     'aria-expanded': shell.asideOpen,
     'aria-label':
       ariaLabel ?? (shell.asideOpen ? shell.messages.closeAside : shell.messages.openAside),
-    children,
+    children: children ?? (
+      <Icon>
+        <Glyph name={shell.asideOpen ? 'panel-close' : 'panel-open'} />
+      </Icon>
+    ),
     className,
     'data-part': 'aside-toggle',
     id: id ?? shell.asideToggleId,

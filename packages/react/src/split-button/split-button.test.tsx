@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/split-button/contract.json';
 import { ButtonDefaultsProvider } from '../button';
+import { Glyph, Icon } from '../icon';
 import { MenuContent, MenuItem, MenuRadioItem } from '../menu';
 import type { MenuHandle } from '../menu';
 import { SplitButton } from './split-button';
@@ -59,11 +60,38 @@ describe('SplitButton', () => {
     expect(trigger()).toHaveAttribute('data-shape', 'square');
     expect(trigger()).toHaveAttribute('aria-haspopup', 'menu');
     expect(trigger()).toHaveAttribute('aria-expanded', 'false');
-    expect(trigger().querySelector('[data-part="icon"] > span')).toHaveAttribute(
+    expect(trigger().querySelector('[data-part="icon"] > [data-ui="icon"]')).toHaveAttribute(
       'aria-hidden',
       'true',
     );
+    expect(
+      trigger().querySelector(
+        '[data-part="icon"] > [data-ui="icon"] > svg[data-glyph="chevron-down"]',
+      ),
+    ).not.toBeNull();
     expect(root().children).toHaveLength(2);
+  });
+
+  /* The chevron is the default; what the consumer passes replaces it, as popover's close does. */
+  it('draws the consumer’s own mark in place of the chevron', () => {
+    render(
+      <SplitButton>
+        <SplitButtonPrimary>Save</SplitButtonPrimary>
+        <SplitButtonMenu>
+          <SplitButtonMenuTrigger aria-label="More save options">
+            <Icon>
+              <Glyph name="ellipsis" />
+            </Icon>
+          </SplitButtonMenuTrigger>
+          <MenuContent>
+            <MenuItem>Save as draft</MenuItem>
+          </MenuContent>
+        </SplitButtonMenu>
+      </SplitButton>,
+    );
+
+    expect(trigger().querySelector('svg[data-glyph="ellipsis"]')).not.toBeNull();
+    expect(trigger().querySelector('svg[data-glyph="chevron-down"]')).toBeNull();
   });
 
   it('hands one appearance to both halves, from the prop, the provider, button’s provider, then the contract', () => {

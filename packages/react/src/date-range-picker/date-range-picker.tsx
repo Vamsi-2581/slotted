@@ -37,6 +37,7 @@ import type { CalendarHandle, CalendarValue, CalendarView, DateRange } from '../
 import { DateField } from '../date-field';
 import type { DateFieldHandle } from '../date-field';
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { useDateRangePickerDefaults } from './date-range-picker-defaults';
 import type {
   DateRangePickerPosition,
@@ -674,7 +675,11 @@ export function DateRangePicker({
               focusField('start');
             }}
             type="button"
-          />
+          >
+            <Icon>
+              <Glyph name="x" />
+            </Icon>
+          </button>
         ) : null}
         <button
           aria-controls={isOpen ? contentId : undefined}
@@ -689,7 +694,11 @@ export function DateRangePicker({
           }}
           ref={triggerRef}
           type="button"
-        />
+        >
+          <Icon>
+            <Glyph name="calendar" />
+          </Icon>
+        </button>
       </div>
       {container === null ? surface : null}
     </>

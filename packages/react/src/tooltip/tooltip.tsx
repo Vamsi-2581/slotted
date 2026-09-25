@@ -1,5 +1,6 @@
 import '@slotted/styles/tooltip/tooltip.css';
 
+import { isClipped } from '@slotted/core/overflow';
 import { createControllable } from '@slotted/core/state';
 import {
   createContext,
@@ -88,6 +89,7 @@ export function Tooltip({
   strategy,
   touchDelay,
   variant,
+  whenClipped,
 }: TooltipProps) {
   const defaults = useTooltipDefaults();
   const group = useTooltipGroup();
@@ -129,8 +131,23 @@ export function Tooltip({
    * the moment they were made. A timer that fired against the render it was
    * created in would answer with a state two interactions old.
    */
-  const latest = useRef({ current, group, onOpenChange, open });
-  latest.current = { current, group, onOpenChange, open };
+  const resolvedWhenClipped = whenClipped ?? defaults.whenClipped;
+  const latest = useRef({
+    current,
+    group,
+    onOpenChange,
+    open,
+    triggerNode,
+    whenClipped: resolvedWhenClipped,
+  });
+  latest.current = {
+    current,
+    group,
+    onOpenChange,
+    open,
+    triggerNode,
+    whenClipped: resolvedWhenClipped,
+  };
 
   const cancelPending = useCallback(() => {
     if (timer.current !== undefined) clearTimeout(timer.current);
@@ -142,6 +159,14 @@ export function Tooltip({
       cancelPending();
       const state = latest.current;
       if (next === state.current) return;
+      /**
+       * Measured here rather than watched: the answer is needed at the moment
+       * the hint would open, and a box measured then is never a box two column
+       * drags old.
+       */
+      if (next && state.whenClipped && state.triggerNode !== null) {
+        if (!isClipped(state.triggerNode)) return;
+      }
 
       let cancelled = false;
       const controllable = createControllable<boolean>({

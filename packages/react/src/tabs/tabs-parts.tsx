@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import type { HTMLAttributes, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { useTabs } from './tabs';
 import type {
   TabActionsProps,
@@ -198,7 +199,11 @@ export function Tab({
              */
             tabIndex={-1}
             type="button"
-          />
+          >
+            <Icon>
+              <Glyph name="x" />
+            </Icon>
+          </button>
         ) : null}
       </>
     ),

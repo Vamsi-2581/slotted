@@ -29,6 +29,7 @@ import {
 } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { useCalendarDefaults } from './calendar-defaults';
 import {
   isRange,
@@ -465,7 +466,11 @@ export function Calendar({
           disabled={!editable}
           onClick={turnPage(-1)}
           type="button"
-        />
+        >
+          <Icon directional>
+            <Glyph name="chevron-right" />
+          </Icon>
+        </button>
         {/* The heading is a live region: paging with a key changes nothing
             focus lands on, so without this nothing announces the new month. */}
         <button
@@ -477,6 +482,11 @@ export function Calendar({
           type="button"
         >
           {heading}
+          {currentView === 'year' ? null : (
+            <Icon>
+              <Glyph name="chevron-down" />
+            </Icon>
+          )}
         </button>
         <button
           aria-label={resolvedNext}
@@ -484,7 +494,11 @@ export function Calendar({
           disabled={!editable}
           onClick={turnPage(1)}
           type="button"
-        />
+        >
+          <Icon directional>
+            <Glyph name="chevron-right" />
+          </Icon>
+        </button>
       </div>
       {grids}
     </>

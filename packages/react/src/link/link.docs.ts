@@ -39,7 +39,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      'The marker a new tab earns, drawn as a mask from --slotted-icon-external and hidden from assistive technology. Rendered only when the resolved target is _blank.',
+      'The marker a new tab earns: the external Glyph inside a directional icon box, sized to the text and hidden from assistive technology. Rendered only when the resolved target is _blank.',
   },
   {
     part: 'external-hint',
@@ -239,7 +239,7 @@ export const REACT_LINK_DOCS = {
         language: 'tsx',
         label: 'Anatomy, as it reaches the DOM',
         source:
-          '<a data-ui="link" data-part="root" data-underline="always" data-variant="accent" href="/docs">\n  Documentation\n  {/* Rendered only for a new browsing context. */}\n  <span aria-hidden="true" data-part="external-icon" />\n  <span data-part="external-hint" data-ui="visually-hidden">\n    {\' (opens in a new tab)\'}\n  </span>\n</a>;',
+          '<a data-ui="link" data-part="root" data-underline="always" data-variant="accent" href="/docs">\n  Documentation\n  {/* Rendered only for a new browsing context. */}\n  <span aria-hidden="true" data-part="external-icon">\n    <Icon directional>\n      <Glyph name="external" />\n    </Icon>\n  </span>\n  <span data-part="external-hint" data-ui="visually-hidden">\n    {\' (opens in a new tab)\'}\n  </span>\n</a>;',
       }),
       defineSnippet({
         id: 'link-theming',

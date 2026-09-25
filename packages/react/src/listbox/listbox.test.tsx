@@ -3,10 +3,12 @@ import { createRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/listbox/contract.json';
+import { Glyph, Icon } from '../icon';
 import { Listbox } from './listbox';
 import { ListboxDefaultsProvider } from './listbox-defaults';
 import {
   ListboxGroup,
+  ListboxIcon,
   ListboxIndicator,
   ListboxLabel,
   ListboxMeta,
@@ -95,6 +97,31 @@ describe('Listbox, identity and wiring', () => {
   it('drops the indicator when the axis says the ground is enough', () => {
     render(<Regions indicator="none" defaultValue="europe" />);
     expect(byKey('europe').querySelector("[data-part='indicator']")).toBeNull();
+  });
+
+  /** The option's own artwork is content the column holds; no stylesheet fills it. */
+  it('holds the artwork it is given in the icon column', () => {
+    render(
+      <Listbox aria-label="Region">
+        <ListboxOption value="europe">
+          <ListboxIcon>
+            <Icon>
+              <Glyph name="dot" />
+            </Icon>
+          </ListboxIcon>
+          <ListboxLabel>europe</ListboxLabel>
+        </ListboxOption>
+      </Listbox>,
+    );
+    const mark = byKey('europe').querySelector("[data-part='icon'] > [data-ui='icon'] > svg");
+    expect(mark).toHaveAttribute('data-glyph', 'dot');
+  });
+
+  /** The tick is an element, not a mask: an svg glyph inside the icon box. */
+  it('draws the tick as a check glyph inside the indicator', () => {
+    render(<Regions defaultValue="europe" />);
+    const indicator = byKey('europe').querySelector("[data-part='indicator']");
+    expect(indicator?.querySelector("[data-ui='icon'] > svg[data-glyph='check']")).not.toBeNull();
   });
 });
 

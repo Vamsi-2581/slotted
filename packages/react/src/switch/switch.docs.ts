@@ -438,7 +438,11 @@ export const REACT_SWITCH_DOCS = {
         source: `<span data-ui="switch" data-part="root" data-size="md" data-indicator="mark" data-checked>
   <input data-part="control" type="checkbox" role="switch" id="autopay" checked />
   <span data-part="track">
-    <span data-part="thumb" />
+    <span data-part="thumb">
+      <span data-ui="icon" data-part="root" aria-hidden="true">
+        <svg data-part="glyph" data-glyph="check" aria-hidden="true"></svg>
+      </span>
+    </span>
   </span>
   <label data-part="label" htmlFor="autopay">
     Cobrança automática

@@ -101,6 +101,9 @@ describe('Tabs', () => {
       if (part === 'scroll') continue;
       expect(drawn).toContain(part);
     }
+    expect(
+      root().querySelector('[data-part="dismiss"] > [data-ui="icon"] > svg[data-glyph="x"]'),
+    ).not.toBeNull();
   });
 
   /** `mount="active"` is the default: only the selected panel exists. */

@@ -30,6 +30,9 @@ const tokenise = (code: string): CodeLine[] =>
 
 const root = () => document.querySelector('[data-ui="code-block"]') as HTMLElement;
 const part = (name: string) => root().querySelector(`[data-part="${name}"]`) as HTMLElement;
+/** The glyph a part draws, read from the `Icon` inside it. */
+const glyph = (name: string) =>
+  part(name).querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
 const lines = () => [...root().querySelectorAll('[data-part="line"]')] as HTMLElement[];
 
 describe('CodeBlock', () => {
@@ -54,6 +57,8 @@ describe('CodeBlock', () => {
     ]) {
       expect(part(name)).not.toBeNull();
     }
+    /* A `.ts` name is no kind the upload map knows: the plain file glyph. */
+    expect(glyph('icon')).toBe('file');
     expect(part('code').className).toBe('language-ts');
     expect(lines()).toHaveLength(4);
     expect(lines()[2]!.dataset['line']).toBe('3');
@@ -122,6 +127,7 @@ describe('CodeBlock', () => {
     const onCopy = vi.fn();
     try {
       render(<CodeBlock code={CODE} lineNumbers marks={{ remove: '2' }} onCopy={onCopy} />);
+      expect(glyph('copy')).toBe('copy');
       fireEvent.click(screen.getByRole('button', { name: 'Copy code' }));
       await waitFor(() => expect(onCopy).toHaveBeenCalled());
       expect(writeText).toHaveBeenCalledWith(
@@ -130,6 +136,7 @@ describe('CodeBlock', () => {
       expect(onCopy.mock.calls[0]![0].copied).toBe(true);
       expect(onCopy.mock.calls[0]![0].reason).toBe('pointer');
       expect(part('copy').hasAttribute('data-complete')).toBe(true);
+      expect(glyph('copy')).toBe('check');
     } finally {
       vi.unstubAllGlobals();
     }
@@ -148,6 +155,7 @@ describe('CodeBlock', () => {
     expect(root().hasAttribute('data-wrap')).toBe(true);
     const wrap = screen.getByRole('button', { name: 'Unwrap lines' });
     expect(wrap.getAttribute('aria-pressed')).toBe('true');
+    expect(glyph('wrap')).toBe('text-wrap');
     expect(lines()[0]!.style.getPropertyValue('--slotted-code-block-indent')).toBe('2');
     expect(lines()[1]!.style.getPropertyValue('--slotted-code-block-indent')).toBe('');
     fireEvent.click(wrap);

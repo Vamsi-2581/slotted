@@ -1,5 +1,6 @@
 import { Children, isValidElement, type ReactNode } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { BreadcrumbItemProvider, useBreadcrumb, useBreadcrumbItem } from './breadcrumb';
 import type {
   BreadcrumbItemProps,
@@ -129,7 +130,11 @@ function BreadcrumbEllipsis({ hidden, last }: { hidden: number; last: boolean })
           if (event.key === 'Enter' || event.key === ' ') trail.expand('keyboard', event);
         }}
         type="button"
-      />
+      >
+        <Icon>
+          <Glyph name="ellipsis" />
+        </Icon>
+      </button>
       {last ? null : <Separator>{trail.separator}</Separator>}
     </li>
   );

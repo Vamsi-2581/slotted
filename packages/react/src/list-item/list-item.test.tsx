@@ -255,6 +255,30 @@ describe('ListItem', () => {
     expect(screen.getByTestId('row')).toHaveAttribute('data-variant', 'plain');
     expect(screen.getByTestId('row')).toHaveAttribute('data-size', 'md');
     expect(screen.getByTestId('row')).toHaveAttribute('data-marker', 'none');
+    expect(screen.getByTestId('row').querySelector('[data-part="marker"]')).toBeNull();
+  });
+
+  /** The bullet is the dot Glyph in a part of its own; the number stays text. */
+  it('draws the bullet with the dot glyph before the content', () => {
+    render(
+      <List>
+        <ListItem data-testid="bullet" marker="bullet">
+          <ListItemContent />
+        </ListItem>
+        <ListItem data-testid="number" marker="number">
+          <ListItemContent />
+        </ListItem>
+      </List>,
+    );
+
+    const marker = screen.getByTestId('bullet').firstElementChild;
+    expect(marker).toHaveAttribute('data-part', 'marker');
+    expect(marker).toHaveAttribute('aria-hidden', 'true');
+    expect(marker?.querySelector('[data-ui="icon"] > svg[data-glyph]')).toHaveAttribute(
+      'data-glyph',
+      'dot',
+    );
+    expect(screen.getByTestId('number').querySelector('[data-part="marker"]')).toBeNull();
   });
 
   it('declares no state model, and the contract agrees', () => {

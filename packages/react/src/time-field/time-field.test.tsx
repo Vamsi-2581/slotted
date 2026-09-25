@@ -297,6 +297,12 @@ describe('the duration expression', () => {
     openExpression();
     fireEvent.change(expression(), { target: { value: '+40m' } });
     expect(preview()).toHaveTextContent('15:20');
+    /* The chevron is the glyph element, marked to turn in a right-to-left context. */
+    expect(preview().querySelector('[data-ui="icon"]')).toHaveAttribute('data-directional');
+    expect(preview().querySelector('svg[data-glyph]')).toHaveAttribute(
+      'data-glyph',
+      'chevron-right',
+    );
     expect(onValueChange).not.toHaveBeenCalled();
   });
 
@@ -545,7 +551,10 @@ describe('the escape hatches', () => {
     unmount();
 
     render(<TimeField clearable defaultValue={HALF_PAST_TWO} locale="pt-BR" />);
-    expect(screen.getByRole('button')).toBeInTheDocument();
+    expect(screen.getByRole('button').querySelector('svg[data-glyph]')).toHaveAttribute(
+      'data-glyph',
+      'x',
+    );
   });
 });
 

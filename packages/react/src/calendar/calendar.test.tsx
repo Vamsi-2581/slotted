@@ -365,6 +365,26 @@ describe('the three selection modes', () => {
 });
 
 describe('the three views', () => {
+  /**
+   * The chevrons are `Glyph` elements inside `Icon` boxes, never masks: the
+   * page triggers mirror under `dir="rtl"`, and the year view, with no way
+   * up, draws no chevron on its heading.
+   */
+  it('draws the page chevrons and the way up as glyph elements', () => {
+    const { unmount } = render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" />);
+    const icon = (part: string) =>
+      document.querySelector(`[data-part="${part}"] > [data-ui="icon"]`);
+    for (const part of ['previous', 'next']) {
+      expect(icon(part)).toHaveAttribute('data-directional');
+      expect(icon(part)?.querySelector('svg')).toHaveAttribute('data-glyph', 'chevron-right');
+    }
+    expect(icon('heading')?.querySelector('svg')).toHaveAttribute('data-glyph', 'chevron-down');
+
+    unmount();
+    render(<Calendar defaultFocusedDate={NINTH} defaultView="year" locale="pt-BR" />);
+    expect(icon('heading')).toBeNull();
+  });
+
   it('walks up from the day view and back down', () => {
     render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" />);
 

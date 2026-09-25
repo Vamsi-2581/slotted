@@ -75,6 +75,9 @@ describe('Link', () => {
       const marker = link.querySelector('[data-part="external-icon"]');
       expect(marker).not.toBeNull();
       expect(marker).toHaveAttribute('aria-hidden', 'true');
+      const box = marker?.querySelector('[data-ui="icon"]');
+      expect(box).toHaveAttribute('data-directional');
+      expect(box?.querySelector('svg[data-glyph="external"]')).not.toBeNull();
     });
 
     /**

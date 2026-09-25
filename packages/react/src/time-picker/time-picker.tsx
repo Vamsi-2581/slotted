@@ -32,6 +32,7 @@ import type { KeyboardEvent, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { TimeField } from '../time-field';
 import type { TimeFieldHandle } from '../time-field';
 import { useTimePickerDefaults } from './time-picker-defaults';
@@ -616,7 +617,11 @@ export function TimePicker({
               onKeyDown={onTriggerKeyDown}
               ref={triggerRef}
               type="button"
-            />
+            >
+              <Icon>
+                <Glyph name="clock" />
+              </Icon>
+            </button>
           }
           granularity={resolvedGranularity}
           invalid={resolvedInvalid}

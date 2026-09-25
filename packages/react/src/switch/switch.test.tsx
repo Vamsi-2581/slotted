@@ -24,7 +24,10 @@ describe('Switch', () => {
     expect(root()).toHaveClass('settings-row');
     expect(control()).toHaveAttribute('data-part', 'control');
     expect(root().querySelector('[data-part="track"]')).not.toBeNull();
-    expect(root().querySelector('[data-part="thumb"]')).not.toBeNull();
+    expect(root().querySelector('[data-part="thumb"] svg[data-glyph]')).toHaveAttribute(
+      'data-glyph',
+      'check',
+    );
     expect(root().querySelector('[data-part="label"]')).toHaveTextContent('Alertas');
     expect(root().querySelector('[data-part="description"]')).toHaveTextContent(
       'Um aviso a cada pedido.',
@@ -275,6 +278,7 @@ describe('Switch', () => {
 
     expect(root()).toHaveAttribute('data-size', 'sm');
     expect(root()).toHaveAttribute('data-indicator', 'none');
+    expect(root().querySelector('[data-part="thumb"] svg[data-glyph]')).toBeNull();
     expect(root()).toHaveAttribute('data-label-placement', 'start');
   });
 

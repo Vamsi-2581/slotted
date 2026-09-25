@@ -1,3 +1,4 @@
+import { Glyph, Icon } from '../icon';
 import { TreeDepthContext, useTree, useTreeDepth } from './tree-context';
 import type {
   TreeGroupProps,
@@ -114,7 +115,14 @@ export function TreeNode({
             if (!branch || isDisabled) return;
             tree.pressExpander(value, event);
           }}
-        />
+        >
+          {/* A leaf keeps the box and draws nothing in it. */}
+          {branch ? (
+            <Icon>
+              <Glyph name="chevron-right" />
+            </Icon>
+          ) : null}
+        </span>
       )}
       {tree.indicator === 'checkbox' ? (
         <span
@@ -125,7 +133,13 @@ export function TreeNode({
             if (isDisabled) return;
             tree.pressIndicator(value, event);
           }}
-        />
+        >
+          {/* The dash outranks the check: a branch partly chosen shows the
+              state its children are in. */}
+          <Icon>
+            <Glyph name={indeterminate ? 'minus' : 'check'} />
+          </Icon>
+        </span>
       ) : null}
       {icon === undefined ? null : (
         <span data-part="icon" aria-hidden="true">

@@ -121,6 +121,27 @@ describe('Transfer', () => {
     expect(button('move-to-source')).toHaveAttribute('aria-keyshortcuts', 'Delete');
   });
 
+  /** Every mark the family owns is the Glyph element, in the slot it points from. */
+  it('draws the chevrons, the search glyph and the empty mark with the Glyph element', () => {
+    mount({ reorderable: true });
+    const glyph = (scope: Element | null, slot: string) =>
+      scope
+        ?.querySelector(`${slot} > [data-ui="icon"] > svg[data-glyph]`)
+        ?.getAttribute('data-glyph');
+    expect(glyph(button('move-to-target'), '[data-part="end"]')).toBe('chevron-right');
+    expect(glyph(button('move-all-to-target'), '[data-part="end"]')).toBe('chevrons-right');
+    expect(glyph(button('move-to-source'), '[data-part="start"]')).toBe('chevron-right');
+    expect(glyph(button('move-all-to-source'), '[data-part="start"]')).toBe('chevrons-right');
+    expect(glyph(button('move-up'), '[data-part="start"]')).toBe('chevron-down');
+    expect(glyph(button('move-down'), '[data-part="start"]')).toBe('chevron-down');
+    expect(glyph(pane('source'), '[data-part="search-icon"]')).toBe('search');
+    expect(glyph(pane('target'), '[data-part="empty"]')).toBe('inbox');
+
+    const search = pane('target').querySelector<HTMLInputElement>('input[type="search"]')!;
+    fireEvent.change(search, { target: { value: 'zzz' } });
+    expect(glyph(pane('target'), '[data-part="empty"][data-query]')).toBe('search-x');
+  });
+
   it('moves the selection with Enter and back with Delete, from inside the list', () => {
     const { onTargetKeysChange } = mount({ defaultSelectedKeys: ['bruno'] });
     fireEvent.keyDown(option('bruno'), { key: 'Enter' });

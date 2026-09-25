@@ -790,6 +790,13 @@ export const REACT_DIALOG_DOCS = {
         'Whether a press outside the layer asks to close it. AlertDialog fixes it at none',
       ],
       [
+        'back',
+        "'close' | 'none'",
+        'close',
+        'Dialog, DialogDefaultsProvider',
+        "The platform's way back — a phone's gesture, a browser's button — closes the layer instead of leaving the page, while it is modal: @slotted/core/dismissable-layer holds one history entry per modal layer and answers the popstate that leaves it with the reason back",
+      ],
+      [
         'surface',
         "'panel' | 'plain'",
         'panel',
@@ -874,6 +881,13 @@ export const REACT_DIALOG_DOCS = {
         'none',
         'AlertDialog',
         'Fixed. An outside press never closes an alert dialog, which is one of the two rules the pattern gives the member',
+      ],
+      [
+        'back',
+        "'close' | 'none'",
+        'close',
+        'AlertDialog',
+        "The platform's way back cancels a confirmation as Escape does: a modal layer holds one history entry, and the popstate that leaves it closes the layer with the reason back",
       ],
       [
         'surface',

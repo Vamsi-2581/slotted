@@ -42,6 +42,7 @@ import type { FocusEvent, ReactNode } from 'react';
 
 import { Button } from '../button';
 import { Checkbox } from '../checkbox';
+import { Glyph, Icon } from '../icon';
 import { List, ListSection, type ListSectionLevel } from '../list';
 import {
   ListItem,
@@ -606,6 +607,9 @@ export function DataList<Row>({
               type="button"
             >
               {isExpanded ? say(labels.less) : say(labels.more, { count: hiddenCount })}
+              <Icon size="sm">
+                <Glyph name="chevron-down" />
+              </Icon>
             </button>
           ) : null}
         </ListItemContent>
@@ -654,7 +658,17 @@ export function DataList<Row>({
               : say(labels.sort)
           }
           disabled={showLoader}
-          end={<span />}
+          end={
+            /* The direction's chevron, turned by the stylesheet for ascending;
+               without a key there is nothing to point at. */
+            firstKey ? (
+              <Icon size="sm">
+                <Glyph name="chevron-down" />
+              </Icon>
+            ) : (
+              <span />
+            )
+          }
           ref={triggerRef}
           size="sm"
           tone="secondary"

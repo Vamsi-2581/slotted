@@ -2,8 +2,10 @@ import '@slotted/styles/app-shell/app-shell.css';
 
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createFocusScope } from '@slotted/core/focus';
-import { createWidthGate } from '@slotted/core/measure';
+import { COMPACT_BELOW, createWidthGate } from '@slotted/core/measure';
 import { setPortalContainer } from '@slotted/core/portal';
+import { createPresence } from '@slotted/core/presence';
+import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { createControllable } from '@slotted/core/state';
 import {
   createContext,
@@ -32,10 +34,11 @@ import type {
  * The inline size the navigation stops being a column at. The stylesheet needs
  * it literal — `@container (inline-size: var(--x))` is invalid CSS — and the
  * script needs it to know whether `Escape`, the focus scope and `inert` are in
- * play. The contract states it once and `app-shell.styles.test.mjs` compares
- * the stylesheet's own condition against the same number.
+ * play. It is the limit of the compact size class, `COMPACT_BELOW`; the
+ * contract states it once and `app-shell.styles.test.mjs` compares the
+ * stylesheet's own condition against the same number.
  */
-export const APP_SHELL_OVERLAY_AT = 768;
+export const APP_SHELL_OVERLAY_AT = COMPACT_BELOW;
 
 const AppShellContext = createContext<AppShellContextValue | undefined>(undefined);
 
@@ -91,6 +94,7 @@ export function AppShell({
   defaultNavOpen,
   dividers,
   escape,
+  back,
   messages,
   modal,
   navMode,
@@ -122,6 +126,7 @@ export function AppShell({
   const resolvedCollapsedTo = collapsedTo ?? defaults.collapsedTo;
   const resolvedDividers = dividers ?? defaults.dividers;
   const resolvedEscape = escape ?? defaults.escape;
+  const resolvedBack = back ?? defaults.back;
   const resolvedModal = modal ?? defaults.modal;
   const resolvedNavSide = navSide ?? defaults.navSide;
   const resolvedNavSize = navSize ?? defaults.navSize;
@@ -311,6 +316,32 @@ export function AppShell({
   const asideOverlay = resolvedAsideMode === 'overlay' && currentAsideOpen;
 
   /**
+   * The veil has a presence of its own, as a dialog's backdrop does. The
+   * stylesheet fades it in from `entering` and out through `exiting`, and a
+   * veil mounted straight at `open` gave that transition no closed style to
+   * start from: it appeared in one frame beside a panel that took two hundred
+   * milliseconds to arrive, and left the same way. One presence for both
+   * layers, because there is one veil: with both regions overlaid and both
+   * open it stays, and it leaves when the last of them does.
+   */
+  const veil = (overlay || asideOverlay) && resolvedModal;
+  const [veilStatus, setVeilStatus] = useState<PresenceStatus>(veil ? 'open' : 'unmounted');
+  const veilPresence = useRef<PresenceHandle | null>(null);
+  if (veilPresence.current === null) {
+    veilPresence.current = createPresence({ present: veil, onStatusChange: setVeilStatus });
+  }
+  useEffect(() => {
+    veilPresence.current?.sync(veil);
+  }, [veil]);
+  useEffect(() => {
+    const handle = veilPresence.current;
+    return () => handle?.destroy();
+  }, []);
+  const setVeil = useCallback((node: HTMLDivElement | null) => {
+    veilPresence.current?.setNode(node);
+  }, []);
+
+  /**
    * One layer per region, and the same three modules for both. The pane's
    * layer is the navigation's with the region, the trigger and the request
    * swapped; `@slotted/core/dismissable-layer` keeps one stack, so with both
@@ -325,6 +356,9 @@ export function AppShell({
     ) => {
       const dismissable = createDismissableLayer(panel, {
         ...(trigger === null ? {} : { branches: [trigger] }),
+        /* A history entry is a modal layer's: a layer the page stays reachable
+           under has no claim on the way back. */
+        back: resolvedModal && resolvedBack === 'close',
         content: panel,
         escape: resolvedEscape === 'close',
         modal: resolvedModal,
@@ -362,7 +396,7 @@ export function AppShell({
         dismissable.destroy();
       };
     },
-    [resolvedEscape, resolvedModal, resolvedOutsidePress],
+    [resolvedBack, resolvedEscape, resolvedModal, resolvedOutsidePress],
   );
 
   useEffect(() => {
@@ -386,16 +420,20 @@ export function AppShell({
   /**
    * A click that lands on an `a[href]` inside the region asks to close, in the
    * overlaid mode only. Vaadin and PatternFly both do it, and without it a
-   * phone costs two taps per destination.
+   * phone costs two taps per destination. `defaultPrevented` is no refusal
+   * here: a client-side router prevents the native navigation of every link it
+   * routes. A disabled destination (`aria-disabled="true"`) stays open; any
+   * other refusal cancels the request.
    */
   const onRootClick = useCallback(
     (event: MouseEvent<HTMLElement>) => {
       nativeProps.onClick?.(event as never);
-      if (!overlay || !resolvedCloseOnNavigate || event.defaultPrevented) return;
+      if (!overlay || !resolvedCloseOnNavigate) return;
       const target = event.target as Element | null;
       const link = target?.closest?.('a[href]');
       if (link === null || link === undefined) return;
       if (nodes.current.nav?.contains(link) !== true) return;
+      if (link.getAttribute('aria-disabled') === 'true') return;
       setOpen(false, 'select', event.nativeEvent);
     },
     [nativeProps, overlay, resolvedCloseOnNavigate, setOpen],
@@ -440,6 +478,7 @@ export function AppShell({
       collapsedTo: resolvedCollapsedTo,
       dividers: resolvedDividers,
       escape: resolvedEscape,
+      back: resolvedBack,
       mainId,
       messages: resolvedMessages,
       modal: resolvedModal,
@@ -471,6 +510,7 @@ export function AppShell({
       resolvedCloseOnNavigate,
       resolvedCollapsedTo,
       resolvedDividers,
+      resolvedBack,
       resolvedEscape,
       resolvedMessages,
       resolvedMode,
@@ -520,9 +560,9 @@ export function AppShell({
       <>
         {skipLinks.length > 0 ? <div data-part="skip">{skipLinks}</div> : null}
         {children}
-        {(overlay || asideOverlay) && resolvedModal ? (
-          <div data-part="scrim" data-status="open" />
-        ) : null}
+        {veilStatus === 'unmounted' ? null : (
+          <div data-part="scrim" data-status={veilStatus} ref={setVeil} />
+        )}
         <div data-part="layer" ref={setLayer} />
       </>
     ),

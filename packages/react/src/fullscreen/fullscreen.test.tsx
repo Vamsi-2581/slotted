@@ -49,7 +49,9 @@ afterEach(() => {
   delete (HTMLElement.prototype as unknown as Record<string, unknown>)['requestFullscreen'];
 });
 
-const region = () => document.querySelector('[data-part="root"]') as HTMLElement;
+/* The family's own root: the trigger's icon box is a `root` part too. */
+const region = () =>
+  document.querySelector('[data-ui="fullscreen"][data-part="root"]') as HTMLElement;
 const trigger = () => screen.getByRole('button') as HTMLButtonElement;
 
 function Panel(props: Parameters<typeof Fullscreen>[0]) {
@@ -88,6 +90,26 @@ describe('Fullscreen', () => {
     expect(trigger()).toHaveAttribute('data-fullscreen');
     expect(trigger()).toHaveAccessibleName('Exit full screen');
     expect(trigger()).not.toHaveAttribute('aria-pressed');
+  });
+
+  it('draws the glyph of the next press, and lets the consumer’s mark replace it', async () => {
+    installAgent();
+    const { unmount } = render(<Panel />);
+    const glyph = () => trigger().querySelector('[data-part="icon"] > [data-ui="icon"] > svg');
+
+    expect(glyph()).toHaveAttribute('data-glyph', contract.icon.enter);
+    fireEvent.click(trigger());
+    await waitFor(() => expect(trigger()).toHaveAttribute('data-fullscreen'));
+    expect(glyph()).toHaveAttribute('data-glyph', contract.icon.exit);
+    unmount();
+
+    render(
+      <Fullscreen>
+        <FullscreenTrigger icon={<svg data-own="" />} />
+      </Fullscreen>,
+    );
+    expect(trigger().querySelector('[data-part="icon"] > svg[data-own]')).not.toBeNull();
+    expect(trigger().querySelector('[data-glyph]')).toBeNull();
   });
 
   it('asks the agent inside the press, with the navigation interface asked for', () => {
@@ -176,6 +198,22 @@ describe('Fullscreen', () => {
     expect(onFullscreenChange).not.toHaveBeenCalled();
   });
 
+  it('marks the content part with the family identifier, and passes its element through', () => {
+    render(
+      <Fullscreen>
+        <FullscreenContent className="chart" id="chart">
+          <p>Chart</p>
+        </FullscreenContent>
+      </Fullscreen>,
+    );
+
+    const content = document.getElementById('chart')!;
+    expect(content).toHaveAttribute('data-ui', contract.ui);
+    expect(content).toHaveAttribute('data-part', 'content');
+    expect(content).toHaveClass('chart');
+    expect(content.parentElement).toBe(region());
+  });
+
   it('keeps the words as the name of an icon-only control', () => {
     render(
       <Fullscreen>
@@ -195,22 +233,6 @@ describe('Fullscreen', () => {
         </Fullscreen>
       </FullscreenDefaultsProvider>,
     );
-
-  it('marks the content part with the family identifier, and passes its element through', () => {
-    render(
-      <Fullscreen>
-        <FullscreenContent className="chart" id="chart">
-          <p>Chart</p>
-        </FullscreenContent>
-      </Fullscreen>,
-    );
-
-    const content = document.getElementById('chart')!;
-    expect(content).toHaveAttribute('data-ui', contract.ui);
-    expect(content).toHaveAttribute('data-part', 'content');
-    expect(content).toHaveClass('chart');
-    expect(content.parentElement).toBe(region());
-  });
 
     expect(trigger()).toHaveAttribute('data-size', 'lg');
     expect(trigger()).toHaveAttribute('data-variant', 'outline');

@@ -65,11 +65,14 @@ describe('the fallback order', () => {
     expect(fallback()).toHaveTextContent('+7');
   });
 
-  /** The glyph is a mask in the stylesheet, reached by `:empty`. */
-  it('leaves the fallback empty when there is no name, so the glyph is drawn', () => {
-    render(<Avatar data-testid="avatar" />);
+  it('draws the person glyph when there is no name, and only then', () => {
+    const { rerender } = render(<Avatar data-testid="avatar" />);
 
-    expect(fallback()).toBeEmptyDOMElement();
+    expect(fallback().querySelector('[data-ui="icon"] > svg[data-glyph="person"]')).not.toBeNull();
+    expect(fallback()).toHaveTextContent('');
+
+    rerender(<Avatar data-testid="avatar" name="Ada Lovelace" />);
+    expect(fallback().querySelector('[data-glyph]')).toBeNull();
   });
 
   it('renders the consumer content in place of the initials', () => {
@@ -81,6 +84,7 @@ describe('the fallback order', () => {
 
     expect(screen.getByTestId('logo')).toBeInTheDocument();
     expect(fallback()).not.toHaveTextContent('AI');
+    expect(fallback().querySelector('[data-glyph]')).toBeNull();
   });
 
   it('requests no picture at all when there is none to request', () => {

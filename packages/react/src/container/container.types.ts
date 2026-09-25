@@ -9,7 +9,7 @@ import type { ComponentPropsWithRef, HTMLAttributes, ReactNode } from 'react';
  * follows the inherited type and the reader's zoom. `full` removes the
  * maximum and keeps the inset.
  */
-export type ContainerSize = 'measure' | 'content' | 'wide' | 'full';
+export type ContainerSize = 'measure' | 'content' | 'wide' | 'full' | 'bleed';
 
 /**
  * The gap between the column and the edge of the space the container was

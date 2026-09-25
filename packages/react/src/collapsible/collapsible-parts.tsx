@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { MouseEvent } from 'react';
 
+import { Glyph, Icon } from '../icon';
+import type { GlyphName } from '../icon';
 import { useCollapsible } from './collapsible';
 import type {
   CollapsibleActionsProps,
@@ -79,6 +81,10 @@ export function CollapsibleTrigger({
 }: CollapsibleTriggerProps) {
   const { disabled: familyDisabled, held, ids, indicator, open, toggle } = useCollapsible();
   const resolvedDisabled = disabled ?? familyDisabled;
+  /* The chevron is one glyph the stylesheet turns; plus and minus are two, so
+     the state picks between them here. */
+  let indicatorGlyph: GlyphName = 'chevron-down';
+  if (indicator === 'plus-minus') indicatorGlyph = open ? 'minus' : 'plus';
 
   const rootProps: CollapsibleTriggerRootProps = {
     ...nativeProps,
@@ -87,7 +93,13 @@ export function CollapsibleTrigger({
     'aria-expanded': open,
     children: (
       <>
-        {indicator === 'none' ? null : <span aria-hidden="true" data-part="indicator" />}
+        {indicator === 'none' ? null : (
+          <span aria-hidden="true" data-part="indicator">
+            <Icon>
+              <Glyph name={indicatorGlyph} />
+            </Icon>
+          </span>
+        )}
         <span data-part="label">{children}</span>
         {description === undefined ? null : <span data-part="description">{description}</span>}
       </>

@@ -216,6 +216,44 @@ describe('InlineMessage', () => {
 
     expect(screen.getByTestId('bare').querySelector('[data-part="icon"]')).toBeNull();
     expect(screen.getByTestId('own').querySelector('[data-part="icon"] svg')).not.toBeNull();
+    expect(screen.getByTestId('own').querySelector('[data-glyph]')).toBeNull();
+  });
+
+  it('draws the glyph the contract maps each tone to, and none for help', () => {
+    for (const [tone, glyph] of Object.entries(contract.toneGlyphs)) {
+      const { unmount } = render(
+        <InlineMessage data-testid="message" tone={tone as never}>
+          Uma mensagem.
+        </InlineMessage>,
+      );
+      const icon = screen.getByTestId('message').querySelector('[data-part="icon"]') as Element;
+      const drawn = icon.querySelector('[data-ui="icon"] > svg[data-part="glyph"]');
+      if (glyph === null) expect(icon.childElementCount, tone).toBe(0);
+      else expect(drawn?.getAttribute('data-glyph'), tone).toBe(glyph);
+      unmount();
+    }
+  });
+
+  it('draws the dot for a bullet, nothing for no mark, and nothing while waiting', () => {
+    render(
+      <>
+        <InlineMessage data-testid="dot" mark="dot" tone="danger">
+          Um ponto.
+        </InlineMessage>
+        <InlineMessage data-testid="none" mark="none" tone="danger">
+          Nada.
+        </InlineMessage>
+        <InlineMessage data-testid="waiting" loading tone="danger">
+          A verificar.
+        </InlineMessage>
+      </>,
+    );
+    const icon = (id: string) =>
+      screen.getByTestId(id).querySelector('[data-part="icon"]') as Element;
+
+    expect(icon('dot').querySelector('svg[data-glyph]')).toHaveAttribute('data-glyph', 'dot');
+    expect(icon('none').childElementCount).toBe(0);
+    expect(icon('waiting').childElementCount).toBe(0);
   });
 
   it('passes native props through and renders into the element a page asks for', () => {

@@ -89,6 +89,13 @@ const anatomy: AnatomyRow[] = [
       'Empties the query. Out of the tab sequence and drawn only while there is something to clear.',
   },
   {
+    part: 'close',
+    element: 'button',
+    required: false,
+    purpose:
+      'The way out where the scrim is not: the word closeLabel at the end of the field, drawn by the stylesheet only while the dialog is full screen, asking open to be false with the reason dismiss. Absent inline.',
+  },
+  {
     part: 'list',
     element: 'div',
     required: true,
@@ -699,6 +706,13 @@ export const REACT_COMMAND_PALETTE_DOCS = {
       ],
       ['recentLabel', 'string', 'Recent', 'CommandPalette', 'The heading over the recents'],
       ['clearLabel', 'string', 'Clear', 'CommandPalette', 'The clear control’s accessible name'],
+      [
+        'closeLabel',
+        'string',
+        'Close',
+        'CommandPalette',
+        'The word on the close control, drawn only while the dialog is full screen',
+      ],
       ['backLabel', 'string', 'Back', 'CommandPalette', 'The trail’s accessible name'],
       [
         'hintNavigate',

@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useRef } from 'react';
 import type { Ref } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { Menu, MenuContent, MenuSeparator, MenuTrigger } from '../menu';
 import { useToolbarOverflow } from './toolbar-context';
 import type { ToolbarOverflowLabel, ToolbarOverflowProps } from './toolbar.types';
@@ -88,7 +89,11 @@ export function ToolbarOverflow({
             ...props,
             ...nativeProps,
             'aria-label': nameFor(label, collapsed.length),
-            children: <span aria-hidden="true" />,
+            children: (
+              <Icon>
+                <Glyph name="ellipsis" />
+              </Icon>
+            ),
             'data-part': 'overflow',
           };
 

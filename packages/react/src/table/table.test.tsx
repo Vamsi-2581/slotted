@@ -4,6 +4,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/table/contract.json';
+import { TooltipDefaultsProvider } from '../tooltip/tooltip-defaults';
 import { Table } from './table';
 import { TableContent } from './table-content';
 import { DEFAULT_TABLE_LABELS, TableDefaultsProvider } from './table-defaults';
@@ -178,6 +179,11 @@ describe('sorting', () => {
 
     const trigger = screen.getByRole('button', { name: 'Client' });
     const header = trigger.closest('th') as HTMLElement;
+    /* The mark follows the name as the Glyph element; the stylesheet turns it. */
+    expect(trigger.lastElementChild?.querySelector('svg[data-glyph]')).toHaveAttribute(
+      'data-glyph',
+      'chevron-down',
+    );
 
     fireEvent.click(trigger);
     expect(header).toHaveAttribute('aria-sort', 'ascending');
@@ -289,6 +295,45 @@ describe('where a cell sits in its row', () => {
       </Table>,
     );
     expect(screen.getByText('Bottom')).toHaveAttribute('data-block-align', 'end');
+  });
+});
+
+describe('a column name its own box cuts', () => {
+  function measure(element: Element, { client, scroll }: { client: number; scroll: number }) {
+    Object.defineProperty(element, 'clientWidth', { configurable: true, value: client });
+    Object.defineProperty(element, 'scrollWidth', { configurable: true, value: scroll });
+  }
+
+  /**
+   * A header reading `Cli…` says nothing to the eye while the whole of it is
+   * still what a screen reader repeats under every cell. The hint says the
+   * words, and only while the box is measured as cutting them.
+   */
+  it('opens a hint over it, and none over a name that fits', async () => {
+    render(
+      <TooltipDefaultsProvider openDelay={0}>
+        <Invoices />
+      </TooltipDefaultsProvider>,
+    );
+    const header = screen.getByText('Client').closest('th') as HTMLElement;
+    /* jsdom does not expand the `overflow` shorthand, so the axis is written. */
+    header.style.overflowX = 'hidden';
+
+    measure(header, { client: 160, scroll: 160 });
+    fireEvent.pointerEnter(header, { pointerType: 'mouse' });
+    expect(document.querySelector('[role="tooltip"]')).toBeNull();
+
+    measure(header, { client: 48, scroll: 160 });
+    fireEvent.pointerEnter(header, { pointerType: 'mouse' });
+    const hint = await waitFor(() => {
+      const found = document.querySelector('[role="tooltip"]');
+      expect(found).not.toBeNull();
+      return found as HTMLElement;
+    });
+    expect(hint.textContent).toBe('Client');
+    /* The header already states the words: naming them twice is reading them twice. */
+    expect(hint).toHaveAttribute('aria-hidden', 'true');
+    expect(header).not.toHaveAttribute('aria-describedby');
   });
 });
 
@@ -959,6 +1004,10 @@ describe('expansion', () => {
 
     const expander = screen.getByRole('button');
     expect(expander).toHaveAttribute('aria-expanded', 'false');
+    expect(expander.querySelector('[data-ui="icon"] > svg[data-glyph]')).toHaveAttribute(
+      'data-glyph',
+      'chevron-right',
+    );
     expect(screen.queryByText('Two reminders sent.')).toBeNull();
 
     fireEvent.click(expander);

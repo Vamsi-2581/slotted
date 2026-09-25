@@ -37,6 +37,7 @@ export const TOOLTIP_FALLBACK: TooltipDefaults = {
   strategy: 'absolute',
   touchDelay: 500,
   variant: 'inverse',
+  whenClipped: false,
 };
 
 /**

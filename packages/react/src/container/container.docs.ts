@@ -19,7 +19,7 @@ export const REACT_CONTAINER_TOKENS = containerTokens.map((name) => ({
     : 'The foundation scale this family reads',
 }));
 
-const SIZE = "'measure' | 'content' | 'wide' | 'full'";
+const SIZE = "'measure' | 'content' | 'wide' | 'full' | 'bleed'";
 const INSET = '0 | 1 | … | 12';
 
 export const REACT_CONTAINER_DOCS = {
@@ -30,7 +30,7 @@ export const REACT_CONTAINER_DOCS = {
         SIZE,
         'content',
         'Container',
-        'What the column bounds. measure is the comfortable reading line, counted in characters; full removes the maximum and keeps the inset',
+        'What the column bounds. measure is the comfortable reading line, counted in characters; full is the space the frame gives up to --slotted-container-full, 120rem; bleed removes the maximum. Both keep the inset',
       ],
       [
         'inset',

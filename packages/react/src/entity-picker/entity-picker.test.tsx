@@ -238,6 +238,59 @@ describe('EntityPicker', () => {
     expect(document.querySelector("[data-part='root'][data-complete]")).not.toBeNull();
   });
 
+  /** Every icon the family owns is a `Glyph` element inside an `Icon` box, never a mask. */
+  describe('glyph elements', () => {
+    const glyph = (scope: ParentNode | null | undefined, part: string) =>
+      scope?.querySelector(`[data-part='${part}'] > [data-ui='icon'] > svg[data-glyph]`);
+
+    it('draws the cross, the chevron and the tick', async () => {
+      const { source } = recordingSource();
+      render(<Picker defaultValue="ana" source={source} />);
+      await waitFor(() => expect(input()).toHaveValue('Ana Silva'));
+      expect(glyph(document, 'clear')).toHaveAttribute('data-glyph', 'x');
+      expect(glyph(document, 'arrow')).toHaveAttribute('data-glyph', 'chevron-down');
+
+      act(() => input().focus());
+      type('Ana');
+      const chosen = await screen.findByRole('option', { name: /ana@acme\.com/ });
+      expect(glyph(chosen, 'indicator')).toHaveAttribute('data-glyph', 'check');
+    });
+
+    it('draws the alert mark in the face of an id it cannot resolve', async () => {
+      const { source } = recordingSource();
+      render(<Picker defaultValue={['gone']} selectionMode="multiple" source={source} />);
+      const chip = await screen.findByRole('gridcell', { name: 'Unavailable, gone' });
+      expect(glyph(chip, 'start')).toHaveAttribute('data-glyph', 'circle-alert');
+      expect(glyph(chip, 'remove')).toHaveAttribute('data-glyph', 'x');
+    });
+
+    it('draws the alert beside a failure and the turning arrow on the offer to retry', async () => {
+      const { source } = recordingSource({ fail: true });
+      render(<Picker source={source} />);
+      act(() => input().focus());
+      type('ana');
+      const error = (await screen.findByText('Couldn’t load results')).closest(
+        "[data-part='error']",
+      );
+      expect(error?.querySelector("[data-ui='icon'] > svg")).toHaveAttribute(
+        'data-glyph',
+        'circle-alert',
+      );
+      const retry = document.querySelector("[data-part='item'][data-retry]");
+      expect(glyph(retry, 'media')).toHaveAttribute('data-glyph', 'rotate-ccw');
+    });
+
+    it('draws the plus on the offer to create', async () => {
+      const { source } = recordingSource();
+      const onCreate = vi.fn(async (query: string) => ({ id: 'new', label: query }));
+      render(<Picker onCreate={onCreate} source={source} />);
+      act(() => input().focus());
+      type('Zeta');
+      const offer = await screen.findByRole('option', { name: 'Create “Zeta”' });
+      expect(glyph(offer, 'media')).toHaveAttribute('data-glyph', 'plus');
+    });
+  });
+
   it('offers to search again after a failure, and Enter does', async () => {
     const { asked, source } = recordingSource({ fail: true });
     render(<Picker source={source} />);

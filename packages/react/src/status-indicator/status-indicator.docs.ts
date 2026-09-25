@@ -281,14 +281,14 @@ export const REACT_STATUS_INDICATOR_DOCS = {
         language: 'tsx',
         label: 'Anatomy, as it reaches the DOM',
         source:
-          '<span\n  data-ui="status-indicator"\n  data-part="root"\n  data-status="danger"\n  data-mark="icon"\n  data-size="md"\n  data-pulse=""\n  role="status"\n>\n  <span aria-hidden="true" data-part="mark" />\n  <span data-part="label">\n    Build 4821 failed\n    {/* Or, with no visible words: */}\n    <span data-part="announcement" data-ui="visually-hidden">\n      Error\n    </span>\n  </span>\n</span>;',
+          '<span\n  data-ui="status-indicator"\n  data-part="root"\n  data-status="danger"\n  data-mark="icon"\n  data-size="md"\n  data-pulse=""\n  role="status"\n>\n  <span aria-hidden="true" data-part="mark">\n    <span aria-hidden="true" data-part="root" data-ui="icon">\n      <svg data-glyph="circle-alert" data-part="glyph" />\n    </span>\n  </span>\n  <span data-part="label">\n    Build 4821 failed\n    {/* Or, with no visible words: */}\n    <span data-part="announcement" data-ui="visually-hidden">\n      Error\n    </span>\n  </span>\n</span>;',
       }),
       defineSnippet({
         id: 'status-indicator-theming',
         language: 'css',
-        label: 'Retuning the family, and adding a status of your own',
+        label: 'Retuning the family',
         source:
-          "[data-ui='status-indicator'] {\n  --slotted-status-indicator-mark-border-width: 2px;\n}\n\n/* A domain status borrows a tone and replaces the artwork. */\n[data-ui='status-indicator'][data-status='info'][data-domain='syncing'] [data-part='mark'] {\n  --slotted-status-indicator-mark-image: url('/icons/sync.svg');\n}",
+          "[data-ui='status-indicator'] {\n  --slotted-status-indicator-mark-border-width: 2px;\n}",
       }),
     ],
   },

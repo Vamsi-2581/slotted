@@ -40,6 +40,7 @@ import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { TimeField } from '../time-field';
 import type { TimeFieldChangeRequest, TimeFieldHandle } from '../time-field';
 import { useTimeRangePickerDefaults } from './time-range-picker-defaults';
@@ -1139,6 +1140,9 @@ export function TimeRangePicker({
           <span data-part="summary" {...(summary === null ? { 'data-placeholder': '' } : {})}>
             {summary ?? chooseLabel ?? defaults.chooseLabel}
           </span>
+          <Icon>
+            <Glyph name="clock" />
+          </Icon>
         </button>
         {clearable && held !== null ? (
           <button
@@ -1152,7 +1156,11 @@ export function TimeRangePicker({
               triggerRef.current?.focus();
             }}
             type="button"
-          />
+          >
+            <Icon>
+              <Glyph name="x" />
+            </Icon>
+          </button>
         ) : null}
         <input
           data-part="hidden-input"

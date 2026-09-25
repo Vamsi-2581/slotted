@@ -5,6 +5,8 @@ import { useEffect, useLayoutEffect, useState } from 'react';
 import type { MouseEvent, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
+import { Glyph, Icon } from '../icon';
+import type { GlyphName } from '../icon';
 import { useDialog } from './dialog';
 import type {
   AlertDialogActionProps,
@@ -19,6 +21,7 @@ import type {
   DialogDescriptionProps,
   DialogOpenReason,
   DialogTitleProps,
+  DialogTone,
   DialogTriggerProps,
   DialogTriggerRootProps,
 } from './dialog.types';
@@ -184,6 +187,9 @@ export function DialogContent({
        the pointerdown, so a selection dragged out of the panel is not a press
        on the scrim. */
     const layerHandle = createDismissableLayer(root, {
+      /* A history entry is a modal layer's: a layer the page stays reachable
+         under has no claim on the way back. */
+      back: dialog.modal && dialog.back === 'close',
       branches,
       content,
       escape: dialog.escape === 'close',
@@ -270,7 +276,7 @@ export function DialogContent({
   /* `inert` alongside the stylesheet's own closed state, so a browser without
      `content-visibility` still cannot put focus inside a layer that is shut. */
   return createPortal(
-    <div {...rootProps} {...(dialog.visible ? {} : { inert: true })} ref={dialog.registerLayer}>
+    <div {...rootProps} {...(dialog.interactive ? {} : { inert: true })} ref={dialog.registerLayer}>
       <div data-part="backdrop" />
       <div data-part="viewport">{panel}</div>
     </div>,
@@ -338,7 +344,11 @@ function DialogFullscreen() {
         );
       }}
       type="button"
-    />
+    >
+      <Icon>
+        <Glyph name={dialog.fullscreen ? 'minimize' : 'maximize'} />
+      </Icon>
+    </button>
   );
 }
 
@@ -469,7 +479,12 @@ export function DialogClose({
   const rootProps = {
     'aria-label': 'Close',
     ...rest,
-    children,
+    /* The cross is drawn unless the consumer wrote content of their own. */
+    children: children ?? (
+      <Icon>
+        <Glyph name="x" />
+      </Icon>
+    ),
     className,
     'data-part': 'close' as const,
     onClick: handleClick,
@@ -480,11 +495,40 @@ export function DialogClose({
   return <button {...rootProps} ref={ref} />;
 }
 
-/** The tone's own mark, which is geometry rather than a character. */
-export function AlertDialogIcon({ className, ref, render, style, ...rest }: AlertDialogIconProps) {
+/**
+ * The glyph each tone draws, and a triangle where no tone was resolved. Warning
+ * and danger differ in silhouette as well as colour, because under forced
+ * colours the silhouette is all that is left.
+ */
+const TONE_GLYPH: Record<DialogTone, GlyphName> = {
+  accent: 'circle-info',
+  secondary: 'circle-info',
+  success: 'circle-check',
+  warning: 'triangle-alert',
+  danger: 'circle-alert',
+};
+
+/**
+ * The tone's own mark, which is geometry rather than a character. A mark the
+ * consumer writes as children replaces the tone's.
+ */
+export function AlertDialogIcon({
+  children,
+  className,
+  ref,
+  render,
+  style,
+  ...rest
+}: AlertDialogIconProps) {
+  const dialog = useDialog();
   const rootProps = {
     'aria-hidden': true,
     ...rest,
+    children: children ?? (
+      <Icon>
+        <Glyph name={dialog.tone === undefined ? 'triangle-alert' : TONE_GLYPH[dialog.tone]} />
+      </Icon>
+    ),
     className,
     'data-part': 'icon' as const,
     style,

@@ -3,6 +3,7 @@ import '@slotted/styles/tag/tag.css';
 import { createContext, useContext } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode, SyntheticEvent } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { useTagDefaults } from './tag-defaults';
 import type {
   TagAppearanceProps,
@@ -213,6 +214,9 @@ export function TagRemove({ labelId, removal, wordId }: TagRemoveOptions) {
       }}
       type="button"
     >
+      <Icon>
+        <Glyph name="x" />
+      </Icon>
       <span hidden id={wordId}>
         {removal.removeLabel}
       </span>

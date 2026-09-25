@@ -143,6 +143,16 @@ describe('Stepper', () => {
       }
       expect(item(3)).toHaveAttribute('data-invalid', '');
       expect(item(4)).toHaveAttribute('data-disabled', '');
+
+      /* A check over a finished step, a cross over a failed one, and the
+         number alone everywhere else, the current step included. */
+      const glyphs = [0, 1, 2, 3, 4].map(
+        (index) =>
+          marker(index)
+            .querySelector('[data-ui="icon"] > svg[data-glyph]')
+            ?.getAttribute('data-glyph') ?? null,
+      );
+      expect(glyphs).toEqual(['check', null, null, 'x', null]);
     });
 
     it('fills the connector for a step the reader walked past', () => {

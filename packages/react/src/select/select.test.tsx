@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/select/contract.json';
 import { Field, FieldLabel } from '../field';
+import { Glyph, Icon } from '../icon';
 import { Select } from './select';
 import { SelectDefaultsProvider } from './select-defaults';
 import { SelectGroup, SelectItem, SelectSeparator } from './select-items';
@@ -385,6 +386,44 @@ describe('Select', () => {
     expect(onValueChange).toHaveBeenCalledWith(null, expect.objectContaining({ reason: 'clear' }));
   });
 
+  /** Every icon the family owns is a `Glyph` element inside an `Icon` box, never a mask. */
+  it('draws the chevron, the cross and the tick as glyph elements', async () => {
+    const { container } = render(<Basic clearable defaultValue="apple" />);
+    const glyph = (part: string) =>
+      container.querySelector(`[data-part='${part}'] > [data-ui='icon'] > svg[data-glyph]`);
+    expect(glyph('arrow')).toHaveAttribute('data-glyph', 'chevron-down');
+    expect(glyph('clear')).toHaveAttribute('data-glyph', 'x');
+
+    await open();
+    const tick = optionNamed('Apple').querySelector(
+      "[data-part='indicator'] > [data-ui='icon'] > svg",
+    );
+    expect(tick).toHaveAttribute('data-glyph', 'check');
+  });
+
+  /** The first column holds the artwork it is given; no stylesheet fills it. */
+  it('holds an item icon in the first column', async () => {
+    render(
+      <Basic>
+        <SelectItem
+          icon={
+            <Icon>
+              <Glyph name="dot" />
+            </Icon>
+          }
+          value="apple"
+        >
+          Apple
+        </SelectItem>
+      </Basic>,
+    );
+    await open();
+    const mark = optionNamed('Apple').querySelector(
+      "[data-part='icon'] > [data-ui='icon'] > svg[data-glyph]",
+    );
+    expect(mark).toHaveAttribute('data-glyph', 'dot');
+  });
+
   it('lets a consumer own the value and refuse a change', async () => {
     function Controlled() {
       const [value, setValue] = useState<SelectSelection>('apple');
@@ -548,6 +587,15 @@ describe('Select', () => {
     };
     const type = (value: string) => fireEvent.change(field(), { target: { value } });
     const labels = () => screen.getAllByRole('option').map((option) => option.textContent);
+
+    it('draws the magnifier as a glyph element', async () => {
+      render(<Searchable />);
+      await openSearch();
+      const magnifier = document.querySelector(
+        "[data-part='search-icon'] > [data-ui='icon'] > svg[data-glyph]",
+      );
+      expect(magnifier).toHaveAttribute('data-glyph', 'search');
+    });
 
     /**
      * The popup stops being a listbox and becomes a dialog holding one, which

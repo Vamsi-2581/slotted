@@ -161,6 +161,13 @@ const api = apiRows([
     'The tooltip never opens. The trigger’s own disabled is the consumer’s.',
   ],
   [
+    'whenClipped',
+    'boolean',
+    'false',
+    'Tooltip',
+    'Opens only while the trigger’s own content is cut by its box — a column header narrowed to “Op…”. The measurement is taken at the moment the hint would open, so a column dragged wider stops opening one.',
+  ],
+  [
     'openDelay',
     'number',
     '600',

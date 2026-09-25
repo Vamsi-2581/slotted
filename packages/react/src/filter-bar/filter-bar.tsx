@@ -23,6 +23,7 @@ import {
   useEffect,
   useId,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -39,6 +40,7 @@ import {
   DrawerPanel,
   DrawerTitle,
 } from '../drawer';
+import { Glyph, Icon } from '../icon';
 import { Kbd } from '../kbd';
 import { Menu, MenuContent, MenuGroup, MenuItem, MenuTrigger } from '../menu';
 import {
@@ -110,6 +112,33 @@ function isEditable(element: Element | null) {
  * `@slotted/core/filter` are what a consumer applies to its own rows.
  */
 const STICKY_TOP = '--slotted-page-sticky-top';
+
+const BAR_WRAPPED = 'data-bar-wrapped';
+
+const useIsomorphicLayoutEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
+
+/**
+ * Marks the root when the bar's controls take more than one line in the
+ * composition the root's width selects. The attribute comes off before the
+ * read, so the answer is the same whether the fallback it draws is in place
+ * or not: read in the fallback, where the bar has a line of its own, the
+ * answer would be "fits", and the next read would wrap it again. A control
+ * starts a second line when its top is at or below another control's bottom,
+ * because controls on one line share its middle. A control without a box —
+ * hidden in this composition, or never laid out — is not counted.
+ */
+function measureBarWrap(element: HTMLElement, barNode: HTMLElement) {
+  element.removeAttribute(BAR_WRAPPED);
+  let top = -Infinity;
+  let bottom = Infinity;
+  for (const control of barNode.children) {
+    const box = control.getBoundingClientRect();
+    if (!(box.width > 0 && box.height > 0)) continue;
+    top = Math.max(top, box.top);
+    bottom = Math.min(bottom, box.bottom);
+  }
+  element.toggleAttribute(BAR_WRAPPED, top >= bottom);
+}
 
 export function FilterBar({
   apply: applyProp,
@@ -471,6 +500,41 @@ export function FilterBar({
     for (const ring of rings.current) ring.refresh();
   });
 
+  /* ── The bar's own line ──────────────────────────────────────────────── */
+
+  /**
+   * Before paint on mount, and on the microtask after anything in the frame
+   * comes, goes or changes its text. A resize is read on the next frame instead:
+   * the attribute changes the root's height, and a change made inside the
+   * observer's own callback to a box it observes ends the browser's loop with
+   * an error.
+   */
+  useIsomorphicLayoutEffect(() => {
+    const element = root.current;
+    const barNode = bar.current;
+    const frame = barNode?.parentElement;
+    if (!element || !barNode || !frame) return;
+    const measure = () => measureBarWrap(element, barNode);
+    let pending = 0;
+    const sizes =
+      typeof ResizeObserver === 'undefined'
+        ? undefined
+        : new ResizeObserver(() => {
+            cancelAnimationFrame(pending);
+            pending = requestAnimationFrame(measure);
+          });
+    sizes?.observe(element);
+    sizes?.observe(barNode);
+    const contents = new MutationObserver(measure);
+    contents.observe(frame, { characterData: true, childList: true, subtree: true });
+    measure();
+    return () => {
+      sizes?.disconnect();
+      contents.disconnect();
+      cancelAnimationFrame(pending);
+    };
+  }, []);
+
   /* ── Sticky ──────────────────────────────────────────────────────────── */
 
   useEffect(() => {
@@ -631,7 +695,11 @@ export function FilterBar({
             placeholder={labels.search}
             ref={search}
             size={size}
-            start={<span aria-hidden="true" data-part="search-icon" />}
+            start={
+              <Icon>
+                <Glyph name="search" />
+              </Icon>
+            }
             type="search"
             value={typed ?? shownQuery}
           />
@@ -659,6 +727,9 @@ export function FilterBar({
                     >
                       <span>{field.label}</span>
                       {active ? <span>{sentence(field, rule)}</span> : null}
+                      <Icon>
+                        <Glyph name="chevron-down" />
+                      </Icon>
                     </button>
                   )}
                 />
@@ -679,7 +750,11 @@ export function FilterBar({
                   disabled={disabled || unfiltered.length === 0}
                   render={(inner) => <button {...inner} data-part="add" />}
                   size={size}
-                  start={<PlusMark />}
+                  start={
+                    <Icon>
+                      <Glyph name="plus" />
+                    </Icon>
+                  }
                   tone="secondary"
                   variant="ghost"
                 >
@@ -760,8 +835,11 @@ export function FilterBar({
 
         <div data-part="end">
           {presets && presets.length > 0 ? (
+            /* Clearable: leaving a preset is the control's own clear, and
+               without it the one way out of a saved view is deleting it. */
             <div data-part="preset">
               <Select
+                clearable
                 disabled={disabled}
                 items={presets.map((entry) => ({ label: entry.label, value: entry.key }))}
                 onValueChange={(next, request) =>
@@ -1024,21 +1102,6 @@ function countActive(group: FilterGroup): number {
   };
   walk(active);
   return count;
-}
-
-function PlusMark() {
-  return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <path d="M12 5v14M5 12h14" />
-    </svg>
-  );
 }
 
 interface RuleEditorPopoverBodyProps {

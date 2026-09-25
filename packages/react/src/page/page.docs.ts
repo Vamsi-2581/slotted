@@ -47,7 +47,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div, or the element render returns',
     required: true,
     purpose:
-      'The padded column: one Container at the page’s width and inset, one HeadingLevel deeper than the header, and aria-busy while loading. Under fill it stretches to what is left and the child inside it takes that height.',
+      'The padded column: one Container at the page’s width and inset, one HeadingLevel deeper than the header, and aria-busy while loading. Under fill, from 600 pixels of the page’s width up, it stretches to what is left and the child inside it takes that height.',
   },
   {
     part: 'footer',
@@ -83,7 +83,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'width',
     title: 'The measure of the content',
-    note: 'The four sizes are the Container’s own — measure for prose, content for a form, wide for an application screen, full for a table that needs every pixel — and the header, the body and the footer align to the same column.',
+    note: 'The four sizes are the Container’s own — measure for prose, content for a form, wide for an application screen, full for a table that needs every pixel — and the header, the body and the footer align to the same column. Below 600 pixels of the page’s own width, the compact size class, an inset above step 4 is held at step 4.',
     snippet: defineSnippet({
       id: 'page-react-width',
       language: 'tsx',
@@ -107,7 +107,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'fill',
     title: 'A body that fills',
-    note: 'The body stops growing with its content and the two panes inside it take the rest of the height and scroll on their own, as a master–detail does. Nothing scrolls outside them, so the header keeps its area — and its pill still folds it.',
+    note: 'The body stops growing with its content and the two panes inside it take the rest of the height and scroll on their own, as a master–detail does. Nothing scrolls outside them, so a pane is what moves the header: scrolled down past 16 pixels it snaps the area shut, back at its top it opens it again, and the pill still folds it by hand. Only a principal scroller moves it — not a form control, and at least half the body’s height — so a textarea or a short scroll area in the body leaves the header alone. Below 600 pixels of the page’s width fill does not apply: the body grows with its content, the page scrolls, and the header scrolls away with it.',
     snippet: defineSnippet({
       id: 'page-react-fill',
       language: 'tsx',
@@ -226,7 +226,7 @@ export const REACT_PAGE_DOCS = {
     api: apiRows([
       [
         'width',
-        "'measure' | 'content' | 'wide' | 'full'",
+        "'measure' | 'content' | 'wide' | 'full' | 'bleed'",
         'wide',
         'Page, PageDefaultsProvider',
         'The measure of the content column: the Container’s own sizes, handed to the container the body renders and read by the header and the footer through usePage()',
@@ -236,7 +236,7 @@ export const REACT_PAGE_DOCS = {
         '0 to 12',
         '6',
         'Page, PageDefaultsProvider',
-        'The inset of the column from the edge of the page, as a step on the space scale — the Container’s own',
+        'The inset of the column from the edge of the page, as a step on the space scale — the Container’s own. Held at 4 below 600 pixels of the page’s width',
       ],
       [
         'scroll',
@@ -250,7 +250,7 @@ export const REACT_PAGE_DOCS = {
         'boolean',
         'false',
         'Page',
-        'The body stops growing with its content and its child stretches to what is left, for a master–detail, a splitter or a canvas that scroll their own panes',
+        'The body stops growing with its content and its child stretches to what is left, for a master–detail, a splitter or a canvas that scroll their own panes. The body’s principal scroller snaps the header’s area. From 600 pixels of the page’s width up; below it the page scrolls as without fill',
       ],
       [
         'ground',

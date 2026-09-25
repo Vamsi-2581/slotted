@@ -1,8 +1,10 @@
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceStatus } from '@slotted/core/presence';
-import { useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
 
+import { Glyph, Icon } from '../icon';
+import type { GlyphName } from '../icon';
 import { useToastRegion } from './toast';
 import type {
   ToastCloseProps,
@@ -11,7 +13,29 @@ import type {
   ToastPartProps,
   ToastPartRenderProps,
   ToastProps,
+  ToastTone,
 } from './toast.types';
+
+/**
+ * The glyph each tone draws: `specs/components/toast/contract.json` holds the
+ * map, and the binding draws it because a stylesheet paints no icon.
+ */
+const TONE_GLYPH: Record<ToastTone, GlyphName> = {
+  accent: 'circle-info',
+  secondary: 'circle',
+  success: 'circle-check',
+  warning: 'triangle-alert',
+  danger: 'circle-alert',
+};
+
+/**
+ * What the mark needs from the message it sits in, so a `ToastIcon` the page
+ * composes itself draws the same glyph as the family's own arrangement.
+ */
+const ToastItemContext = createContext<{ tone: ToastTone; loading: boolean }>({
+  tone: 'accent',
+  loading: false,
+});
 
 /**
  * How long a message stays in the document after it has left the queue.
@@ -92,6 +116,7 @@ export function Toast({ children, index = 0, message, ref, ...nativeProps }: Toa
   const variant = content.variant ?? region.defaults.variant;
   const dismissible = content.dismissible ?? region.defaults.dismissible;
   const progress = (content.progress ?? region.defaults.progress) && message.duration > 0;
+  const item = useMemo(() => ({ tone, loading: message.loading }), [tone, message.loading]);
 
   function endDrag(element: HTMLElement, pointerId: number, distance: number) {
     drag.current = null;
@@ -183,25 +208,27 @@ export function Toast({ children, index = 0, message, ref, ...nativeProps }: Toa
       style={style}
       tabIndex={nativeProps.tabIndex ?? -1}
     >
-      {children ?? content.render?.(message) ?? (
-        <>
-          {content.hideIcon ? null : <ToastIcon>{content.icon}</ToastIcon>}
-          <ToastContent>
-            {content.title === undefined ? null : <ToastTitle>{content.title}</ToastTitle>}
-            {content.description === undefined ? null : (
-              <ToastDescription>{content.description}</ToastDescription>
-            )}
-          </ToastContent>
-          {dismissible ? (
-            <ToastClose
-              aria-label={content.closeLabel ?? region.defaults.closeLabel}
-              onClick={() => region.store.dismiss(message.id, 'dismiss')}
-            />
-          ) : null}
-          {content.actions === undefined ? null : <ToastActions>{content.actions}</ToastActions>}
-          {progress ? <ToastProgress /> : null}
-        </>
-      )}
+      <ToastItemContext.Provider value={item}>
+        {children ?? content.render?.(message) ?? (
+          <>
+            {content.hideIcon ? null : <ToastIcon>{content.icon}</ToastIcon>}
+            <ToastContent>
+              {content.title === undefined ? null : <ToastTitle>{content.title}</ToastTitle>}
+              {content.description === undefined ? null : (
+                <ToastDescription>{content.description}</ToastDescription>
+              )}
+            </ToastContent>
+            {dismissible ? (
+              <ToastClose
+                aria-label={content.closeLabel ?? region.defaults.closeLabel}
+                onClick={() => region.store.dismiss(message.id, 'dismiss')}
+              />
+            ) : null}
+            {content.actions === undefined ? null : <ToastActions>{content.actions}</ToastActions>}
+            {progress ? <ToastProgress /> : null}
+          </>
+        )}
+      </ToastItemContext.Provider>
     </li>
   );
 }
@@ -209,13 +236,22 @@ export function Toast({ children, index = 0, message, ref, ...nativeProps }: Toa
 /**
  * The tone's mark, or the page's own. A spinner from `progress-indicator` goes
  * here while a promise is in flight: the spinner belongs to that family, and
- * two families drawing one would be two answers to one question.
+ * two families drawing one would be two answers to one question. A message
+ * waiting on a promise with no mark of its own therefore draws none, and the
+ * box stays so the line does not move when the tick arrives.
  */
 export function ToastIcon({ children, render, ...nativeProps }: ToastIconProps) {
+  const item = useContext(ToastItemContext);
   const partProps = {
     ...nativeProps,
     'aria-hidden': true,
-    children,
+    children:
+      children ??
+      (item.loading ? null : (
+        <Icon>
+          <Glyph name={TONE_GLYPH[item.tone]} />
+        </Icon>
+      )),
     'data-part': 'icon',
   } as const;
 
@@ -259,10 +295,16 @@ export function ToastActions({ children, render, ...nativeProps }: ToastPartRend
 }
 
 /** The control that puts the message away. A real button with a real name. */
-export function ToastClose({ render, ...nativeProps }: ToastCloseProps) {
+export function ToastClose({ children, render, ...nativeProps }: ToastCloseProps) {
   const partProps = {
     type: 'button' as const,
     ...nativeProps,
+    /* The cross is drawn unless the consumer wrote content of their own. */
+    children: children ?? (
+      <Icon>
+        <Glyph name="x" />
+      </Icon>
+    ),
     'data-part': 'close',
   };
 

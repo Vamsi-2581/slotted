@@ -2,6 +2,7 @@ import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import { useEffect, useId, useRef, useState, type CSSProperties, type MouseEvent } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { copyToClipboard } from './description-list-clipboard';
 import {
   DescriptionListItemProvider,
@@ -335,7 +336,12 @@ export function DescriptionListDescription({
             onClick={(event) => void press(event, write)}
             onKeyDown={remember}
             type="button"
-          />
+          >
+            {/* A finished copy changes its mark as well as its colour. */}
+            <Icon>
+              <Glyph name={copied ? 'check' : 'copy'} />
+            </Icon>
+          </button>
         ) : null}
         {clamped && overflows ? (
           <button
@@ -348,6 +354,9 @@ export function DescriptionListDescription({
             type="button"
           >
             {current ? list.labels.collapse : list.labels.reveal}
+            <Icon>
+              <Glyph name="chevron-down" />
+            </Icon>
           </button>
         ) : null}
       </>

@@ -428,7 +428,11 @@ export const REACT_CHECKBOX_DOCS = {
     aria-describedby="terms-description"
     checked
   />
-  <span data-part="indicator" />
+  <span data-part="indicator">
+    <span data-ui="icon" data-part="root" aria-hidden="true">
+      <svg data-part="glyph" data-glyph="check" aria-hidden="true"></svg>
+    </span>
+  </span>
   <label data-part="label" for="terms">
     Aceito os termos
   </label>

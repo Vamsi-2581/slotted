@@ -4,6 +4,8 @@ import { parseShortcut, resolveKey, resolveShortcut } from '@slotted/core/keys';
 import { createContext, useCallback, useContext, useId, useState } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
+import { Glyph, Icon } from '../icon';
+import type { GlyphName } from '../icon';
 import { useResolvedPlatform } from '../kbd/kbd-defaults';
 import { useMenu, useMenuSurface } from './menu';
 import type {
@@ -325,15 +327,25 @@ export function MenuCheckboxItem({
       checked={held}
       closesByDefault={false}
       commit={commit}
-      indicator={<MenuIndicator />}
+      indicator={<MenuIndicator glyph="check" />}
       role="menuitemcheckbox"
     />
   );
 }
 
-/** The mark's box, which exists whether or not the mark is drawn. */
-function MenuIndicator() {
-  return <span data-part="indicator" />;
+/**
+ * The mark's box, which exists whether or not the mark is drawn: a check for a
+ * checkbox item, a dot for a radio item. The stylesheet shows it while the
+ * item is checked.
+ */
+function MenuIndicator({ glyph }: { glyph: GlyphName }) {
+  return (
+    <span data-part="indicator">
+      <Icon>
+        <Glyph name={glyph} />
+      </Icon>
+    </span>
+  );
 }
 
 interface RadioGroupValue {
@@ -385,7 +397,7 @@ export function MenuRadioItem({ value, ...props }: MenuRadioItemProps) {
       checked={group.value === value}
       closesByDefault={false}
       commit={(reason, source) => group.select(value, reason, source)}
-      indicator={<MenuIndicator />}
+      indicator={<MenuIndicator glyph="dot" />}
       role="menuitemradio"
     />
   );

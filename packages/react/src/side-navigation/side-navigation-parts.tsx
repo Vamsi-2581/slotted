@@ -18,6 +18,7 @@ import {
 import type { FocusEvent, MouseEvent, ReactNode, Ref } from 'react';
 import { createPortal } from 'react-dom';
 
+import { Glyph, Icon } from '../icon';
 import { Skeleton } from '../skeleton';
 import { Tooltip } from '../tooltip';
 import { TooltipContent, TooltipLayer, TooltipTrigger } from '../tooltip/tooltip-parts';
@@ -394,7 +395,11 @@ export function SideNavigationTrigger({
     children: (
       <>
         {children}
-        <span aria-hidden="true" data-part="indicator" />
+        <span aria-hidden="true" data-part="indicator">
+          <Icon directional>
+            <Glyph name="chevron-right" />
+          </Icon>
+        </span>
       </>
     ),
     className,

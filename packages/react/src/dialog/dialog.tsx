@@ -57,6 +57,7 @@ interface FamilyProps extends DialogProps {
  * the asymmetry rather than levelling both down to the smaller shape.
  */
 function DialogFamily({
+  back,
   children,
   container,
   defaultFullscreen,
@@ -105,6 +106,7 @@ function DialogFamily({
   const resolvedFullScreen = fullScreen ?? (isAlert ? 'never' : defaults.fullScreen);
   const resolvedInitialFocus = initialFocus ?? (isAlert ? 'cancel' : 'first');
   const resolvedEscape = escape ?? defaults.escape;
+  const resolvedBack = back ?? defaults.back;
   const resolvedPlacement = placement ?? defaults.placement;
   const resolvedScroll = scroll ?? defaults.scroll;
   const resolvedSurface = surface ?? defaults.surface;
@@ -247,6 +249,7 @@ function DialogFamily({
       close: (reason, result, source) => request(false, reason, result, source),
       container,
       descriptionId: descriptionRendered ? `${baseId}description` : '',
+      back: resolvedBack,
       escape: resolvedEscape,
       finalFocus,
       fullScreen: resolvedFullScreen,
@@ -279,6 +282,7 @@ function DialogFamily({
       triggerId: `${baseId}trigger`,
       /** What the stylesheet keys on, which is a frame behind what was asked. */
       visible: status === 'open',
+      interactive: status === 'entering' || status === 'open',
     }),
     [
       announce,
@@ -293,6 +297,7 @@ function DialogFamily({
       member,
       mounted,
       request,
+      resolvedBack,
       resolvedEscape,
       resolvedFullScreen,
       resolvedFullscreenToggle,

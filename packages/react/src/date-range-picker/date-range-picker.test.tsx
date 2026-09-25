@@ -112,6 +112,14 @@ describe('what the trigger says', () => {
     expect(name).toMatch(/11 de setembro de 2026/);
     expect(name).toContain('4 nights');
   });
+
+  /** Both marks are `Glyph` elements inside an `Icon` box, never masks. */
+  it('draws the calendar and the cross as glyph elements', () => {
+    render(<DateRangePicker clearable defaultValue={RUN} locale="pt-BR" />);
+    const glyph = (name: string) => part(name).querySelector("[data-ui='icon'] > svg[data-glyph]");
+    expect(glyph('trigger')).toHaveAttribute('data-glyph', 'calendar');
+    expect(glyph('clear')).toHaveAttribute('data-glyph', 'x');
+  });
 });
 
 describe('the length, said while the run is drawn', () => {

@@ -2,12 +2,27 @@ import '@slotted/styles/inline-message/inline-message.css';
 
 import { useId } from 'react';
 
+import { Glyph, Icon } from '../icon';
+import type { GlyphName } from '../icon';
 import { useInlineMessageDefaults } from './inline-message-defaults';
 import type {
   InlineMessageLive,
   InlineMessageProps,
   InlineMessageRootProps,
+  InlineMessageTone,
 } from './inline-message.types';
+
+/**
+ * The glyph each tone draws: `specs/components/inline-message/contract.json`
+ * holds the map. Help is not a severity and draws none.
+ */
+const TONE_GLYPH: Record<InlineMessageTone, GlyphName | null> = {
+  accent: 'circle-info',
+  secondary: null,
+  success: 'circle-check',
+  warning: 'triangle-alert',
+  danger: 'circle-alert',
+};
 
 /**
  * The two roles that announce, and the value that does not. Both roles imply
@@ -61,6 +76,15 @@ export function InlineMessage({
   const generatedId = useId();
 
   const resolvedTone = tone ?? defaults.tone;
+  const resolvedMark = mark ?? defaults.mark;
+  /* The glyph the family draws when the page supplies none. A message that is
+     waiting draws a ring instead, and one that asked for no mark draws none. */
+  const glyph: GlyphName | null =
+    loading || resolvedMark === 'none'
+      ? null
+      : resolvedMark === 'dot'
+        ? 'dot'
+        : TONE_GLYPH[resolvedTone];
   const resolvedLive = live ?? defaults.live;
   const role = LIVE_ROLE[resolvedLive];
   /* Unstated asks the table; the empty string is a consumer removing the word. */
@@ -77,7 +101,12 @@ export function InlineMessage({
         {word === '' ? null : <span data-part="prefix">{word}</span>}
         {hideIcon ? null : (
           <span aria-hidden="true" data-part="icon">
-            {icon}
+            {icon ??
+              (glyph === null ? null : (
+                <Icon>
+                  <Glyph name={glyph} />
+                </Icon>
+              ))}
           </span>
         )}
         {/* The wrapper is the family's, not the consumer's: it is what makes
@@ -87,7 +116,7 @@ export function InlineMessage({
       </>
     ),
     'data-live': resolvedLive,
-    'data-mark': mark ?? defaults.mark,
+    'data-mark': resolvedMark,
     'data-part': 'root',
     'data-size': size ?? defaults.size,
     'data-tone': resolvedTone,

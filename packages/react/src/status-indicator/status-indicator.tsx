@@ -1,9 +1,11 @@
 import '@slotted/styles/status-indicator/status-indicator.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
+import { Glyph, Icon } from '../icon';
 import { useStatusIndicatorDefaults } from './status-indicator-defaults';
 import {
   STATUS_INDICATOR_DEFAULT_STATUS,
+  STATUS_INDICATOR_GLYPHS,
   STATUS_INDICATOR_LABELS,
 } from './status-indicator.constants';
 import type { StatusIndicatorProps, StatusIndicatorRootProps } from './status-indicator.types';
@@ -55,10 +57,11 @@ export function StatusIndicator({
   const rootProps: StatusIndicatorRootProps = {
     ...nativeProps,
     /**
-     * The mark is hidden rather than left to be ignored. It is an empty box
-     * painted by a background and a mask, so nothing would be announced
-     * either way — but a family whose whole subject is what a reader hears
-     * should say which of its parts is not for them.
+     * The mark is hidden rather than left to be ignored. It is a painted dot
+     * or a glyph that is itself hidden, so nothing would be announced either
+     * way — but a family whose whole subject is what a reader hears should
+     * say which of its parts is not for them. The icon mark's glyph follows
+     * the status; the stylesheet sizes and colours it and draws none of it.
      *
      * The label part is always rendered, even holding nothing but the clipped
      * word, so the two bindings and the harness write one shape rather than
@@ -66,7 +69,13 @@ export function StatusIndicator({
      */
     children: (
       <>
-        <span aria-hidden="true" data-part="mark" />
+        <span aria-hidden="true" data-part="mark">
+          {resolved.mark === 'icon' ? (
+            <Icon>
+              <Glyph name={STATUS_INDICATOR_GLYPHS[status]} />
+            </Icon>
+          ) : null}
+        </span>
         <span data-part="label">
           {children ?? (
             <span data-part="announcement" data-ui="visually-hidden">

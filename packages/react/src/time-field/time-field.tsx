@@ -41,6 +41,7 @@ import {
 import type { ClipboardEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { useTimeFieldDefaults } from './time-field-defaults';
 import type {
   TimeFieldChangeRequest,
@@ -594,6 +595,9 @@ export function TimeField({
             {...(resolved === null ? {} : { 'data-resolved': '' })}
             {...(resolved !== null && resolved.days !== 0 ? { 'data-crosses-midnight': '' } : {})}
           >
+            <Icon directional>
+              <Glyph name="chevron-right" />
+            </Icon>
             {resolved === null
               ? ''
               : resolved.days === 0
@@ -659,7 +663,11 @@ export function TimeField({
           data-part="clear"
           onClick={clear}
           type="button"
-        />
+        >
+          <Icon>
+            <Glyph name="x" />
+          </Icon>
+        </button>
       ) : null}
       {end === undefined ? null : <span data-part="end">{end}</span>}
       <input

@@ -6,6 +6,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ChangeEvent, MouseEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { useTextFieldDefaults } from './text-field-defaults';
 import type { TextFieldProps, TextFieldRootProps } from './text-field.types';
 
@@ -210,7 +211,11 @@ export function TextField({
           data-part="clear"
           onClick={clear}
           type="button"
-        />
+        >
+          <Icon>
+            <Glyph name="x" />
+          </Icon>
+        </button>
       ) : null}
       {showReveal ? (
         <button
@@ -219,7 +224,13 @@ export function TextField({
           data-part="reveal"
           onClick={toggleReveal}
           type="button"
-        />
+        >
+          {/* The button announces what pressing it does: a revealed value is
+              one a press will hide, so it shows the crossed eye. */}
+          <Icon>
+            <Glyph name={isRevealed ? 'eye-off' : 'eye'} />
+          </Icon>
+        </button>
       ) : null}
       {end === undefined ? null : <span data-part="end">{end}</span>}
     </>

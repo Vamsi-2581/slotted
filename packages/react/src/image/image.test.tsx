@@ -309,13 +309,16 @@ describe('what stands in', () => {
 
     expect(placeholder()).toContainElement(screen.getByTestId('skeleton'));
     expect(fallback()).toContainElement(screen.getByRole('button', { name: 'Retry' }));
+    expect(fallback().querySelector('[data-glyph]')).toBeNull();
   });
 
-  /** The glyph is a mask in the stylesheet, reached by `:empty`. */
-  it('leaves the fallback empty by default, so the glyph is drawn', () => {
+  it('draws the image-off glyph in the fallback by default', () => {
     render(<Image alt="Warehouse B" src={PHOTO} />);
 
-    expect(fallback()).toBeEmptyDOMElement();
+    expect(
+      fallback().querySelector('[data-ui="icon"] > svg[data-glyph="image-off"]'),
+    ).not.toBeNull();
+    expect(fallback()).toHaveTextContent('');
   });
 });
 

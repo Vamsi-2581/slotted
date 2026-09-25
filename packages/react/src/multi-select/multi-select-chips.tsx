@@ -4,6 +4,7 @@ import type { CollapseHandle } from '@slotted/core/overflow';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { useMultiSelect } from './multi-select';
 import { CHIP_SELECTOR } from './multi-select-collection';
 import type { MultiSelectOptionValue } from './multi-select.types';
@@ -192,7 +193,11 @@ function Chip({ count, index, label, value }: ChipProps) {
           onClick={onRemove}
           tabIndex={-1}
           type="button"
-        />
+        >
+          <Icon>
+            <Glyph name="x" />
+          </Icon>
+        </button>
       )}
     </span>
   );

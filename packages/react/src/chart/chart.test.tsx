@@ -55,6 +55,9 @@ const base = { data, series, x: { field: 'month' }, locale: 'en-US', title: 'Rev
 
 const root = () => document.querySelector('[data-ui="chart"]')!;
 const part = (name: string) => document.querySelector<HTMLElement>(`[data-part="${name}"]`);
+/** The glyph a part draws, as the `Glyph` element inside its icon box. */
+const glyph = (name: string) =>
+  part(name)?.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
 const parts = (name: string) => [
   ...document.querySelectorAll<HTMLElement>(`[data-part="${name}"]`),
 ];
@@ -236,7 +239,7 @@ describe('Chart', () => {
         { start: 0.25, end: 0.75 },
         expect.objectContaining({ reason: 'keyboard' }),
       );
-      expect(part('zoom-reset')).not.toBeNull();
+      expect(glyph('zoom-reset')).toBe('rotate-ccw');
       fireEvent.keyDown(part('plot')!, { key: '0' });
       expect(onZoomChange).toHaveBeenLastCalledWith(
         { start: 0, end: 1 },
@@ -288,7 +291,10 @@ describe('Chart', () => {
   describe('views and states', () => {
     it('opens the table inside the plot and says so', () => {
       const onTableOpenChange = vi.fn();
-      render(<Chart {...base} onTableOpenChange={onTableOpenChange} />);
+      render(<Chart {...base} help="Monthly totals." onTableOpenChange={onTableOpenChange} />);
+      expect(glyph('view-toggle')).toBe('file-spreadsheet');
+      expect(glyph('menu-trigger')).toBe('ellipsis');
+      expect(glyph('help')).toBe('circle-info');
 
       fireEvent.pointerDown(part('view-toggle')!);
       fireEvent.click(part('view-toggle')!);
@@ -337,10 +343,13 @@ describe('Chart', () => {
       const onFullscreenChange = vi.fn();
       render(<Chart {...base} onFullscreenChange={onFullscreenChange} />);
 
+      expect(glyph('fullscreen-toggle')).toBe('maximize');
       fireEvent.click(part('fullscreen-toggle')!);
       expect(root()).toHaveAttribute('data-fullscreen');
+      expect(glyph('fullscreen-toggle')).toBe('minimize');
       fireEvent.keyDown(root(), { key: 'Escape' });
       expect(root()).not.toHaveAttribute('data-fullscreen');
+      expect(glyph('fullscreen-toggle')).toBe('maximize');
       expect(onFullscreenChange).toHaveBeenLastCalledWith(
         false,
         expect.objectContaining({ reason: 'escape' }),

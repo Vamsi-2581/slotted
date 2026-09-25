@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useRef } from 'react';
 import type { Ref } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { Menu, MenuContent, MenuSeparator, MenuTrigger } from '../menu';
 import { useActionBarOverflow } from './action-bar-context';
 import type { ActionBarOverflowLabel, ActionBarOverflowProps } from './action-bar.types';
@@ -87,7 +88,11 @@ export function ActionBarOverflow({
             ...props,
             ...nativeProps,
             'aria-label': nameFor(label, surface.length),
-            children: <span aria-hidden="true" />,
+            children: (
+              <Icon>
+                <Glyph name="ellipsis" />
+              </Icon>
+            ),
             'data-part': 'overflow',
           };
 

@@ -116,7 +116,8 @@ export function TooltipTrigger({ children, ref, render, ...nativeProps }: Toolti
   };
 
   const described = tooltip.describes === 'description';
-  const names = tooltip.open || tooltip.describes === 'label';
+  /* Under `none` the trigger references nothing: it already says the words. */
+  const names = tooltip.describes !== 'none' && (tooltip.open || tooltip.describes === 'label');
 
   const rootProps: TooltipTriggerRootProps = {
     ...nativeProps,
@@ -357,6 +358,7 @@ export function TooltipContent({ children, ref, render, ...nativeProps }: Toolti
   const rootProps: TooltipContentRootProps = {
     ...nativeProps,
     children,
+    ...(tooltip.describes === 'none' ? { 'aria-hidden': true } : {}),
     'data-part': 'content',
     id: tooltip.contentId,
     role: 'tooltip',

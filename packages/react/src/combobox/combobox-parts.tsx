@@ -8,6 +8,7 @@ import type { ChangeEvent, KeyboardEvent, MouseEvent, Ref } from 'react';
 import { createPortal } from 'react-dom';
 
 import { useField } from '../field';
+import { Glyph, Icon } from '../icon';
 import { useCombobox } from './combobox';
 import {
   entryHighlight,
@@ -323,7 +324,11 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
         value={combobox.completion ?? combobox.inputValue}
       />
       {showClear ? (
-        <button aria-label={combobox.clearLabel} data-part="clear" onClick={clear} type="button" />
+        <button aria-label={combobox.clearLabel} data-part="clear" onClick={clear} type="button">
+          <Icon>
+            <Glyph name="x" />
+          </Icon>
+        </button>
       ) : null}
       <button
         aria-label={combobox.triggerLabel}
@@ -337,7 +342,11 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
         {combobox.loading ? (
           <span aria-hidden="true" data-part="busy" data-ui="spinner" />
         ) : (
-          <span data-part="arrow" />
+          <span data-part="arrow">
+            <Icon>
+              <Glyph name="chevron-down" />
+            </Icon>
+          </span>
         )}
       </button>
       {combobox.name === undefined ? null : (

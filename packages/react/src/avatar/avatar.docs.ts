@@ -155,7 +155,7 @@ export const REACT_AVATAR_DOCS = {
       'The colour derived from a name is an aid to scanning a list, never the identifier: five tones mean collisions are certain, and colour alone is not a signal. The name is what identifies the person, and it is present in every state.',
       'An avatar is not focusable and not a command. render can make the root an anchor or a button, and the family paints the focus ring and the hover edge for exactly that case — and holds both back when the avatar is disabled.',
       'An interactive avatar smaller than 24 by 24 CSS pixels grows a centred overlay to --slotted-target-min, so WCAG 2.2 2.5.8 is met at the two tighter densities without changing any layout. Inside a stack the overlay can reach under a neighbour; the raised member wins the pointer.',
-      'The fallback glyph is a mask from --slotted-icon-person, not a character: no font can be relied on to carry a silhouette, and a character would be read out.',
+      'The fallback glyph is the person Glyph in an aria-hidden Icon, not a character: no font can be relied on to carry a silhouette, and a character would be read out.',
       'Under forced colours the family draws its edge in currentColor, because the theme maps every tone ground to one system colour. The photograph is left alone: a portrait reduced to two system colours is not a portrait.',
       'The picture crosses over the initials on --slotted-duration-short, which prefers-reduced-motion collapses to 1ms in the theme. Nothing here loops.',
     ],

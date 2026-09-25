@@ -55,7 +55,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: true,
     purpose:
-      'The chevron inside the trigger, drawn as a mask and turned over while the popup is open.',
+      'The chevron inside the trigger, a `Glyph` inside an `Icon` box, turned over while the popup is open.',
   },
   {
     part: 'busy',
@@ -115,7 +115,8 @@ const anatomy: AnatomyRow[] = [
     part: 'icon',
     element: 'span',
     required: false,
-    purpose: "The artwork in the first column, from a glyph token or the consumer's own element.",
+    purpose:
+      "The artwork in the first column: an Icon holding a Glyph, or the consumer's own element.",
   },
   {
     part: 'label',

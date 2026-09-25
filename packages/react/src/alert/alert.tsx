@@ -4,9 +4,24 @@ import { createControllable } from '@slotted/core/state';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { FocusEvent, MouseEvent, SyntheticEvent } from 'react';
 
+import { Glyph, Icon } from '../icon';
+import type { GlyphName } from '../icon';
 import { useAlertDefaults } from './alert-defaults';
 import { AlertProvider } from './alert-parts';
-import type { AlertCloseReason, AlertProps, AlertRootProps } from './alert.types';
+import type { AlertCloseReason, AlertProps, AlertRootProps, AlertTone } from './alert.types';
+
+/**
+ * The glyph each tone draws, in its solid form: `specs/components/alert/contract.json`
+ * holds the map. Every one is circled, so every mark is the same disc and the
+ * symbol cut out of it tells the five apart.
+ */
+const TONE_GLYPH: Record<AlertTone, GlyphName> = {
+  accent: 'circle-info',
+  secondary: 'circle',
+  success: 'circle-check',
+  warning: 'circle-alert',
+  danger: 'circle-x',
+};
 
 /**
  * A message about the page, a section, or the thing beside it: a tone, a mark,
@@ -115,7 +130,11 @@ export function Alert({
       <AlertProvider value={context}>
         {hideIcon ? null : (
           <span aria-hidden="true" data-part="icon">
-            {icon}
+            {icon ?? (
+              <Icon>
+                <Glyph name={TONE_GLYPH[tone ?? defaults.tone]} solid />
+              </Icon>
+            )}
           </span>
         )}
         {children}
@@ -130,7 +149,11 @@ export function Alert({
               requestClose('dismiss', event);
             }}
             type="button"
-          />
+          >
+            <Icon>
+              <Glyph name="x" />
+            </Icon>
+          </button>
         ) : null}
       </AlertProvider>
     ),

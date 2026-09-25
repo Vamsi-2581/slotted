@@ -5,6 +5,7 @@ import type { ReactEventHandler } from 'react';
 
 import { initialsFrom, toneFrom } from '@slotted/core/identity';
 
+import { Glyph, Icon } from '../icon';
 import { useAvatarDefaults } from './avatar-defaults';
 import type {
   AvatarImageProps,
@@ -142,7 +143,17 @@ export function Avatar({
         ) : (
           renderImage(imageProps)
         )}
-        <span data-part="fallback">{children ?? letters}</span>
+        <span data-part="fallback">
+          {/* No picture and no name to take initials from: the person glyph. */}
+          {children ??
+            (letters === '' ? (
+              <Icon>
+                <Glyph name="person" />
+              </Icon>
+            ) : (
+              letters
+            ))}
+        </span>
       </>
     ),
     'data-part': 'root',

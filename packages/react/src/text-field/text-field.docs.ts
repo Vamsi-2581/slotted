@@ -464,7 +464,11 @@ export const REACT_TEXT_FIELD_DOCS = {
         source: `<div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
   <span data-part="start">R$</span>
   <input data-part="input" id="valor-control" aria-describedby="valor-description" />
-  <button data-part="clear" type="button" aria-label="Clear" />
+  <button data-part="clear" type="button" aria-label="Clear">
+    <span data-ui="icon" data-part="root" aria-hidden="true">
+      <svg data-part="glyph" data-glyph="x" aria-hidden="true"></svg>
+    </span>
+  </button>
   <span data-part="end">BRL</span>
 </div>;`,
       }),

@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, PointerEvent, Ref } from 'react';
 import { createPortal } from 'react-dom';
 
+import { Glyph, Icon } from '../icon';
 import { MenuItemIcon, MenuItemLabel } from './menu-items';
 import { MenuSurfaceProvider, useMenu } from './menu';
 import type {
@@ -103,7 +104,8 @@ function moveOut(trigger: HTMLElement | null, step: 1 | -1) {
  * It renders three different elements and holds one behaviour. On its own it is
  * the consumer's control, given through `render`; on a bar it is the bar's own
  * `menuitem`; inside another menu's surface it is an item of that surface, with
- * `aria-haspopup` and a chevron the stylesheet draws.
+ * `aria-haspopup` and a chevron at the end that points along the reading
+ * direction.
  */
 export function MenuTrigger({ children, icon, ref, render, ...nativeProps }: MenuTriggerProps) {
   const menu = useMenu();
@@ -260,6 +262,9 @@ export function MenuTrigger({ children, icon, ref, render, ...nativeProps }: Men
       <>
         {icon === undefined ? null : <MenuItemIcon>{icon}</MenuItemIcon>}
         <MenuItemLabel>{children}</MenuItemLabel>
+        <Icon directional>
+          <Glyph name="chevron-right" />
+        </Icon>
       </>
     );
 

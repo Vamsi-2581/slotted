@@ -1,13 +1,19 @@
 import {
   createContext,
   useContext,
+  useRef,
   type CSSProperties,
   type MouseEvent,
   type ReactNode,
+  type Ref,
+  type RefObject,
 } from 'react';
 
 import { Checkbox } from '../checkbox';
+import { Glyph, Icon } from '../icon';
 import { Skeleton } from '../skeleton';
+import { Tooltip } from '../tooltip';
+import { TooltipContent, TooltipLayer, TooltipTrigger } from '../tooltip/tooltip-parts';
 import { useTable } from './table';
 import type {
   TableBodyProps,
@@ -160,9 +166,33 @@ export function TableRow({
   );
 }
 
+/** Two refs on one element: the family's, and whatever the consumer passed. */
+function attach<T>(node: T, ...refs: (Ref<T> | undefined)[]) {
+  for (const ref of refs) {
+    if (typeof ref === 'function') ref(node);
+    else if (ref !== null && ref !== undefined) ref.current = node;
+  }
+}
+
+/**
+ * The words the header itself holds, read when the layer mounts to show them
+ * rather than kept in state beside them: the layer is built on opening, so the
+ * reading is of the header as it is at that moment.
+ */
+function HeaderHint({ header }: { header: RefObject<HTMLElement | null> }) {
+  return <>{(header.current?.textContent ?? '').trim()}</>;
+}
+
 /**
  * A column's name. `scope="col"` is what makes a screen reader repeat it for
  * every cell under it, and `aria-sort` is written here and on no other header.
+ *
+ * A name cut by its own box — `text="truncate"` on a column with no room —
+ * reads `Op…` to the eye while the whole of it is still what a screen reader
+ * repeats under every cell. The hint closes that gap: it opens only while the
+ * name is measured as cut, which a header that wraps or fits never is, and it
+ * is shown rather than read — `describes="none"`, because the header already
+ * states the words.
  */
 export function TableColumnHeader({
   align,
@@ -179,20 +209,40 @@ export function TableColumnHeader({
   ...nativeProps
 }: TableColumnHeaderProps) {
   const table = useTable();
+  const node = useRef<HTMLElement | null>(null);
   const sorted = column !== undefined && table.sort?.column === column;
+
+  const headerProps = {
+    ...nativeProps,
+    ...cellAttributes({ align, blockAlign, numeric, sticky, stickyOffset, text }, style),
+    ...(sorted ? { 'aria-sort': table.sort?.direction } : {}),
+    children,
+    'data-part': 'column-header',
+    scope: scope ?? 'col',
+  };
 
   return (
     <TableColumnContext.Provider value={column}>
-      <th
-        {...nativeProps}
-        {...cellAttributes({ align, blockAlign, numeric, sticky, stickyOffset, text }, style)}
-        {...(sorted ? { 'aria-sort': table.sort?.direction } : {})}
-        data-part="column-header"
-        ref={ref}
-        scope={scope ?? 'col'}
-      >
-        {children}
-      </th>
+      <Tooltip describes="none" openOn="hover" side="bottom" whenClipped>
+        <TooltipTrigger
+          {...(headerProps as object)}
+          render={(hint) => (
+            <th
+              {...(hint as object)}
+              ref={(element: HTMLElement | null) => {
+                hint.ref?.(element);
+                node.current = element;
+                attach(element, ref);
+              }}
+            />
+          )}
+        />
+        <TooltipLayer>
+          <TooltipContent>
+            <HeaderHint header={node} />
+          </TooltipContent>
+        </TooltipLayer>
+      </Tooltip>
     </TableColumnContext.Provider>
   );
 }
@@ -274,7 +324,17 @@ export function TableSort({
 
   const sortProps = {
     ...nativeProps,
-    children,
+    /* The direction mark follows the name: one chevron the stylesheet turns
+       over for ascending and shows, muted, under the pointer on an unsorted
+       column. */
+    children: (
+      <>
+        {children}
+        <Icon>
+          <Glyph name="chevron-down" />
+        </Icon>
+      </>
+    ),
     'data-part': 'sort',
     onClick: press,
     type: 'button' as const,
@@ -398,6 +458,14 @@ export function TableExpander({ onClick, ref, value, ...nativeProps }: TableExpa
       aria-controls={row.detailId}
       aria-expanded={open}
       aria-label={nativeProps['aria-label'] ?? (open ? table.labels.collapse : table.labels.expand)}
+      /* The chevron is drawn unless the consumer wrote content of their own. */
+      children={
+        nativeProps.children ?? (
+          <Icon>
+            <Glyph name="chevron-right" />
+          </Icon>
+        )
+      }
       data-part="expander"
       onClick={press}
       ref={ref}

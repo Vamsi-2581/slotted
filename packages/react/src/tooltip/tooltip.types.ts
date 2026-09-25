@@ -18,8 +18,13 @@ export type TooltipSize = 'sm' | 'md';
  * `label` writes `aria-labelledby` instead, which is the icon-only button whose
  * only words are the tooltip's — described by it and named by nothing, that
  * button is announced as "button".
+ *
+ * `none` writes neither and hides the content from the reader. It is the hint
+ * that repeats words the trigger already carries — the full name of a column
+ * whose header is clipped — where a reference would have the reader hear the
+ * same words twice.
  */
-export type TooltipDescribes = 'description' | 'label';
+export type TooltipDescribes = 'description' | 'label' | 'none';
 
 /**
  * What opens it. `hover` also opens on keyboard focus, and instantly, because a
@@ -99,6 +104,8 @@ export interface TooltipDefaults {
   strategy: TooltipStrategy;
   touchDelay: number;
   variant: TooltipVariant;
+  /** Opens only while the trigger's own content is cut by its box. */
+  whenClipped: boolean;
 }
 
 export interface TooltipDefaultsProviderProps extends Partial<TooltipDefaults> {
@@ -242,6 +249,13 @@ export interface TooltipProps {
   /** How long a press is held before a coarse pointer opens the hint. */
   touchDelay?: number | undefined;
   variant?: TooltipVariant | undefined;
+  /**
+   * Opens only while the trigger's own content is cut by its box — a column
+   * header narrowed to `Op…`, a breadcrumb in a rail. The measurement is taken
+   * at the moment the hint would open, so a column dragged wider stops opening
+   * one without anything being told.
+   */
+  whenClipped?: boolean | undefined;
 }
 
 export interface TooltipTriggerProps extends ComponentPropsWithRef<'button'> {

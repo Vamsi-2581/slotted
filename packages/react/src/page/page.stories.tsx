@@ -171,9 +171,15 @@ export const Width: Story = {
       </Scene>
       <Scene
         label="full"
-        note="No maximum, only the gutters: a table that needs every pixel, a canvas, a board."
+        note="The space the frame gives, up to --slotted-container-full — 120rem, a 1920-pixel display. Past it the column centres, so an ultra-wide screen does not stretch a line of text across three thousand pixels."
       >
-        <Policy note="full — no maximum" width="full" />
+        <Policy note="full — 120rem" width="full" />
+      </Scene>
+      <Scene
+        label="bleed"
+        note="No maximum, only the gutters: a table that needs every pixel, a canvas, a board. Asked for by name, because full is what a person types without thinking."
+      >
+        <Policy note="bleed — no maximum" width="bleed" />
       </Scene>
     </Grid>
   ),
@@ -216,7 +222,7 @@ export const Fill: Story = {
     <Grid columns={1}>
       <Scene
         label="Two panes that scroll themselves"
-        note="fill makes the body exactly the height that is left; the list and the detail inside it scroll on their own. Nothing scrolls outside them, so the header keeps its area — and the chevron still folds it."
+        note="fill makes the body exactly the height that is left; the list and the detail inside it scroll on their own. Nothing scrolls outside them, so a pane scrolling down past 16 pixels snaps the header’s area shut and back at its top opens it again; the chevron still folds it. Below 600 pixels fill does not apply and the page scrolls."
       >
         <div className="slotted-demo-viewport" data-size="screen">
           <Page fill scroll="self" width="full">

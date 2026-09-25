@@ -154,6 +154,19 @@ describe('TopNavigation', () => {
     expect(part('more')).toHaveAttribute('aria-expanded', 'false');
     expect(part('more').getAttribute('aria-controls')).toBe(part('panel').id);
     expect(part('search-toggle')).toHaveAttribute('aria-label', 'Procurar');
+
+    /* Each control leads with the family's mark, and the section's trigger ends in one. */
+    const mark = (name: string) =>
+      part(name).firstElementChild?.querySelector('svg[data-glyph]')?.getAttribute('data-glyph');
+    expect(mark('more')).toBe('ellipsis');
+    expect(mark('search-toggle')).toBe('search');
+    expect(mark('help')).toBe('circle-question');
+    expect(mark('notifications')).toBe('bell');
+    expect(
+      part('trigger').querySelector(
+        '[data-part="indicator"] > [data-ui="icon"] > svg[data-glyph="chevron-down"]',
+      ),
+    ).not.toBeNull();
   });
 
   it('marks the current destination on the link and asks value to move on a press', () => {
@@ -229,8 +242,8 @@ describe('TopNavigation', () => {
     expect(onCollapseChange).toHaveBeenCalledWith(['relatorios', 'faturacao'], 'resize');
   });
 
-  it('folds the medium items under 768 and the high ones under 480, marking more current', () => {
-    widthOf(700);
+  it('folds the medium items under 600 and the high ones under 480, marking more current', () => {
+    widthOf(560);
     const { unmount } = render(<Bar defaultValue="painel" />);
     expect(item('rotas')).toHaveAttribute('data-collapsed');
     expect(item('frota')).toHaveAttribute('data-collapsed');
@@ -313,8 +326,8 @@ describe('TopNavigation', () => {
     expect(part('panel')).not.toHaveAttribute('data-open');
   });
 
-  it('opens the search over the bar under 768, focuses the field, and closes on Escape', () => {
-    widthOf(700);
+  it('opens the search over the bar under 600, focuses the field, and closes on Escape', () => {
+    widthOf(560);
     const onSearchOpenChange = vi.fn();
     render(<Bar onSearchOpenChange={onSearchOpenChange} />);
     expect(root()).not.toHaveAttribute('data-search-open');
@@ -336,10 +349,13 @@ describe('TopNavigation', () => {
   });
 
   it('closes the search from its close control and when focus leaves it', () => {
-    widthOf(700);
+    widthOf(560);
     const onSearchOpenChange = vi.fn();
     render(<Bar defaultSearchOpen onSearchOpenChange={onSearchOpenChange} />);
     expect(root()).toHaveAttribute('data-search-open');
+    expect(
+      part('search-close').querySelector('[data-ui="icon"] > svg[data-glyph="x"]'),
+    ).not.toBeNull();
     fireEvent.click(part('search-close'), { detail: 1 });
     expect(onSearchOpenChange).toHaveBeenLastCalledWith(
       false,
@@ -356,7 +372,7 @@ describe('TopNavigation', () => {
     );
   });
 
-  it('writes no search state above 768, where the field is always there', () => {
+  it('writes no search state above 600, where the field is always there', () => {
     widthOf(1280);
     render(<Bar defaultSearchOpen />);
     expect(root()).not.toHaveAttribute('data-search-open');
@@ -375,7 +391,7 @@ describe('TopNavigation', () => {
   });
 
   it('exposes the imperative surface', () => {
-    widthOf(700);
+    widthOf(560);
     const handle: { current: import('./top-navigation.types').TopNavigationHandle | null } = {
       current: null,
     };

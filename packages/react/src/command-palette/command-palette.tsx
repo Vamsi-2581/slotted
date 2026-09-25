@@ -26,6 +26,7 @@ import type { KeyboardEvent, MouseEvent, PointerEvent, ReactNode } from 'react';
 import { Dialog, DialogContent, DialogTrigger } from '../dialog';
 import type { DialogChangeRequest } from '../dialog';
 import { Highlight } from '../highlight';
+import { Glyph, Icon } from '../icon';
 import { Shortcut } from '../kbd';
 import { useResolvedPlatform } from '../kbd/kbd-defaults';
 import { useCommandPaletteDefaults } from './command-palette-defaults';
@@ -118,6 +119,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
   children,
   className,
   clearLabel,
+  closeLabel,
   clearOnClose,
   closeOnSelect,
   container,
@@ -194,6 +196,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
     countLabel: countLabel ?? defaults.countLabel,
     recentLabel: recentLabel ?? defaults.recentLabel,
     clearLabel: clearLabel ?? defaults.clearLabel,
+    closeLabel: closeLabel ?? defaults.closeLabel,
     backLabel: backLabel ?? defaults.backLabel,
     hintNavigate: hintNavigate ?? defaults.hintNavigate,
     hintSelect: hintSelect ?? defaults.hintSelect,
@@ -701,7 +704,14 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
               <Shortcut keys={shortcut} separator="" size="inherit" variant="outline" />
             </span>
           )}
-          {item.children === undefined ? null : <span aria-hidden="true" data-part="arrow" />}
+          {item.children === undefined ? null : (
+            /* The mark that says the item opens a page, mirrored in a right-to-left document. */
+            <span aria-hidden="true" data-part="arrow">
+              <Icon directional>
+                <Glyph name="chevron-right" />
+              </Icon>
+            </span>
+          )}
           {isPending ? <span aria-hidden="true" data-part="busy" data-ui="spinner" /> : null}
         </>
       ) : (
@@ -835,12 +845,22 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
         {resolved.loading ? (
           <span aria-hidden="true" data-part="busy" data-ui="spinner" />
         ) : (
-          <span aria-hidden="true" data-part="search" />
+          <span aria-hidden="true" data-part="search">
+            <Icon>
+              <Glyph name="search" />
+            </Icon>
+          </span>
         )}
         {model.trail.length === 0 ? null : (
           <ol aria-label={resolved.backLabel} data-part="pages">
             {model.trail.map((entry, index) => (
               <li key={entry.id}>
+                {/* The chevron between two pages, mirrored in a right-to-left document. */}
+                {index === 0 ? null : (
+                  <Icon directional>
+                    <Glyph name="chevron-right" />
+                  </Icon>
+                )}
                 <button
                   data-part="page"
                   onClick={(event) => setPages(currentPages.slice(0, index + 1), 'pointer', event)}
@@ -890,7 +910,22 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
           }}
           tabIndex={-1}
           type="button"
-        />
+        >
+          <Icon>
+            <Glyph name="x" />
+          </Icon>
+        </button>
+        {inline ? null : (
+          /* The way out where the scrim is not: shown by the stylesheet
+             under the dialog's full-screen query alone. */
+          <button
+            data-part="close"
+            onClick={(event) => setOpen(false, 'dismiss', event)}
+            type="button"
+          >
+            {resolved.closeLabel}
+          </button>
+        )}
       </div>
       <div
         aria-busy={resolved.loading ? true : undefined}

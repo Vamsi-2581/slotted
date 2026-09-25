@@ -3,20 +3,21 @@
    * A short list of actions that rises from the bottom edge, and the explicit
    * way out beneath it.
    *
-   *   ┌─ root ─────────────────────────────────────────────┐
-   *   │ ┌─ backdrop ─────────────────────────────────────┐ │
-   *   │ │         ┌─ panel ──────────────────────┐       │ │
-   *   │ │         │ header    title · message     │       │ │
-   *   │ │         │ list      item · item · item  │       │ │
-   *   │ │         │ footer    cancel              │       │ │
-   *   └─┴─────────┴───────────────────────────────┴───────┴─┘
+   *   ┌─ drawer root ──────────────────────────────────────────┐
+   *   │ ┌─ backdrop ─────────────────────────────────────────┐ │
+   *   │ │        ┌─ drawer panel ─────────────────────┐      │ │
+   *   │ │        │ ┌─ root ─────────────────────────┐ │      │ │
+   *   │ │        │ │ header   title · message       │ │      │ │
+   *   │ │        │ │ list     item · item · item    │ │      │ │
+   *   │ │        │ │ footer   cancel                │ │      │ │
+   *   └─┴────────┴─┴────────────────────────────────┴─┴──────┴─┘
    *
-   * The layer is `drawer`'s — a one-cell grid holding the scrim and the panel,
-   * fixed to the viewport — and the panel is not: it measures its content,
-   * never more than the layer less a strip of scrim, and never wider than
-   * `--slotted-action-sheet-inline-size`. A bottom drawer states its height and
-   * spans the layer, which is the reason this family draws its own
-   * (`docs/history/designs/2026-09-24-action-sheet-design.md` §4.1).
+   * The layer, the scrim, the slide, the width and the drag are `drawer`'s: the
+   * family renders it with `side="bottom"` and `size="content"`, and its own
+   * root sits inside the panel. This stylesheet reaches only the root and its
+   * children, and `drawer`'s reaches only the panel and its own parts, so the
+   * two never style each other's boxes
+   * (`docs/history/designs/2026-09-25-action-sheet-on-drawer-design.md`).
    *
    * Every part is reached with a child combinator, except the rows of the
    * list, which a group may hold one level down.
@@ -44,8 +45,6 @@
      * 44 pixels and words of 16 beside a menu of 34 and 13.
      */
     --_item-height: var(--slotted-control-height-lg, 38px);
-    --_measure: var(--slotted-action-sheet-inline-size, 32rem);
-    --_radius: var(--slotted-action-sheet-radius, var(--slotted-radius-lg, 8px));
     --_rule-size: var(--slotted-border-width-thin, 1px);
     --_rule: var(--slotted-action-sheet-rule-color, var(--slotted-border-subtle, ButtonBorder));
     --_muted: var(--slotted-text-muted, GrayText);
@@ -58,102 +57,28 @@
       var(--slotted-tone-secondary-subtle-active, ButtonFace)
     );
     --_accent: var(--slotted-text, CanvasText);
+    --_list-inset: var(--slotted-space-2, 0.25rem);
+
     /**
-     * The sheet crosses its own height, `drawer`'s longest travel, and takes
-     * the pair that family measured: the long step arriving, one step down
-     * leaving.
+     * Every row of the panel's grid. The panel of a bottom sheet is four rows —
+     * resizer, header, body, footer — with the body the one flexible row. A box
+     * auto-placed in the first row alone sits in an `auto` track, which a capped
+     * panel does not shrink below its content; spanning all four puts the
+     * flexible row under the root, and the list is what scrolls.
      */
-    --_slide: var(--slotted-duration-long) var(--slotted-easing-enter);
+    grid-row: 1 / -1;
     /**
-     * `allow-discrete` holds a closed eager or lazy layer visible for as long
-     * as the panel is leaving; `presence` reads the longest transition on this
-     * element to know how long to keep an active layer mounted.
+     * The family's measure. The binding hands the same value to `drawer`'s
+     * panel as `--slotted-drawer-sheet-inline-size`, so the panel and the root
+     * are one width; the root is centred in the panel for the case where a
+     * theme gives the panel more.
      */
-    --_reveal: content-visibility var(--slotted-duration-medium) allow-discrete;
-
-    box-sizing: border-box;
-    display: grid;
-    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
-    inset: 0;
-    position: fixed;
-    z-index: calc(var(--slotted-z-index-overlay, 1000) + var(--slotted-layer-depth, 0));
-
-    color: var(--slotted-text, CanvasText);
-    font-family: var(--slotted-control-font-family, var(--slotted-font-family-sans));
-
-    content-visibility: visible;
-    transition: var(--_reveal);
-  }
-
-  @media (pointer: coarse) {
-    [data-ui='action-sheet'] {
-      --_label-size: var(--slotted-font-size-lg, 1rem);
-    }
-  }
-
-  /** Leaving is shorter than arriving: a reader who has decided is waiting. */
-  [data-ui='action-sheet']:not([data-open]) {
-    --_slide: var(--slotted-duration-medium) var(--slotted-easing-exit);
-  }
-
-  [data-ui='action-sheet'][inert] {
-    content-visibility: hidden;
-    pointer-events: none;
-  }
-
-  /**
-   * A sheet that is not modal leaves the page operable, so the layer lets the
-   * pointer through everywhere the panel is not. The press outside still
-   * reaches `dismissable-layer`, which listens on the document.
-   */
-  [data-ui='action-sheet']:not([data-modal]) {
-    pointer-events: none;
-  }
-
-  [data-ui='action-sheet']:not([data-modal]) > [data-part='panel'] {
-    pointer-events: auto;
-  }
-
-  /* ── The scrim ────────────────────────────────────────────────────────── */
-
-  /**
-   * `dialog`'s pair, as `scrim-motion.test.mjs` requires of every family that
-   * paints one.
-   */
-  [data-ui='action-sheet'] > [data-part='backdrop'] {
-    grid-area: 1 / 1;
-    background: var(--slotted-action-sheet-scrim, var(--slotted-scrim, Canvas));
-    opacity: 0;
-    transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
-  }
-
-  [data-ui='action-sheet'][data-open] > [data-part='backdrop'] {
-    opacity: 1;
-    transition: opacity var(--slotted-duration-long) var(--slotted-easing-standard);
-  }
-
-  /**
-   * Painted only while modal. A scrim is the promise that the page behind it
-   * is inert, and a non-modal sheet keeps the page live; `drawer` paints it in
-   * both cases, and this is where the two families part.
-   */
-  [data-ui='action-sheet']:not([data-modal]) > [data-part='backdrop'] {
-    visibility: hidden;
-  }
-
-  /* ── The panel ────────────────────────────────────────────────────────── */
-
-  [data-ui='action-sheet'] > [data-part='panel'] {
-    grid-area: 1 / 1;
-    align-self: end;
     justify-self: center;
+    inline-size: min(100%, var(--slotted-action-sheet-inline-size, 32rem));
     box-sizing: border-box;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr) auto;
-    inline-size: min(100%, var(--_measure));
-    /* A strip of scrim stays above the sheet, so there is always an outside to press. */
-    max-block-size: calc(100% - var(--slotted-space-12, 4rem));
     min-block-size: 0;
     /**
      * A phone held sideways puts its notch on one inline edge. The inset is
@@ -163,36 +88,13 @@
      */
     padding-inline: max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
 
-    background: var(--slotted-action-sheet-surface, var(--slotted-surface-raised, Canvas));
-    border-color: var(--_rule);
-    border-style: solid;
-    border-width: var(--_rule-size) var(--_rule-size) 0;
-    border-start-start-radius: var(--_radius);
-    border-start-end-radius: var(--_radius);
-    box-shadow: var(--slotted-shadow-lg);
-    /* So the leading corners clip the row that scrolls under them. */
-    overflow: hidden;
-
-    translate: 0 0;
-    transition: translate var(--_slide);
+    color: var(--slotted-text, CanvasText);
+    font-family: var(--slotted-control-font-family, var(--slotted-font-family-sans));
   }
 
-  /**
-   * The panel takes focus from script alone — when the pointer leaves an item,
-   * or when nothing in it can run — and `Tab` never lands on it, so it draws no
-   * ring: the item that holds the keyboard is what draws one.
-   */
-  [data-ui='action-sheet'] > [data-part='panel']:focus {
-    outline: none;
-  }
-
-  [data-ui='action-sheet']:not([data-open]) > [data-part='panel'] {
-    translate: 0 100%;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    [data-ui='action-sheet'] > [data-part='panel'] {
-      translate: 0 0;
+  @media (pointer: coarse) {
+    [data-ui='action-sheet'] {
+      --_label-size: var(--slotted-font-size-lg, 1rem);
     }
   }
 
@@ -203,7 +105,7 @@
    * set small and the actions large — the hierarchy UIKit and Ionic draw, and
    * the reverse of `drawer`, whose title names a task the body carries out.
    */
-  [data-ui='action-sheet'] > [data-part='panel'] > [data-part='header'] {
+  [data-ui='action-sheet'] > [data-part='header'] {
     border-block-end: var(--_rule-size) solid var(--_rule);
     display: grid;
     padding-block: var(--slotted-space-6, 1rem) var(--slotted-space-5, 0.75rem);
@@ -241,7 +143,7 @@
    * row was 44 pixels and a three-line label was painted over the two items
    * below it.
    */
-  [data-ui='action-sheet'] > [data-part='panel'] > [data-part='list'] {
+  [data-ui='action-sheet'] > [data-part='list'] {
     --_mark: 0px;
     --_column-gap: 0px;
 
@@ -253,10 +155,18 @@
     min-block-size: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
+    /**
+     * `menu`'s geometry: the rows stand a step in from the sheet's edges, so a
+     * lit row is a rounded ground inside the sheet rather than a band across
+     * it, and its ring never meets the sheet's edge. The item gives the same
+     * step back in its own inset, so every label still starts on the title's
+     * line.
+     */
     padding-block: var(--slotted-space-2, 0.25rem);
+    padding-inline: var(--_list-inset);
   }
 
-  [data-ui='action-sheet'] > [data-part='panel'] > [data-part='list']:has([data-part='icon']) {
+  [data-ui='action-sheet'] > [data-part='list']:has([data-part='icon']) {
     --_mark: var(--_icon-size);
     --_column-gap: var(--_gap);
   }
@@ -265,9 +175,7 @@
    * The home indicator sits under the last row of a sheet with no footer, so
    * that row carries the bottom inset instead.
    */
-  [data-ui='action-sheet']
-    > [data-part='panel']:not(:has(> [data-part='footer']))
-    > [data-part='list'] {
+  [data-ui='action-sheet']:not(:has(> [data-part='footer'])) > [data-part='list'] {
     padding-block-end: calc(var(--slotted-space-2, 0.25rem) + env(safe-area-inset-bottom, 0px));
   }
 
@@ -283,7 +191,7 @@
     font-weight: var(--slotted-font-weight-semibold, 600);
     line-height: var(--slotted-line-height-sm, 1.45);
     padding-block: var(--slotted-space-4, 0.5rem) var(--slotted-space-2, 0.25rem);
-    padding-inline: var(--_inset);
+    padding-inline: calc(var(--_inset) - var(--_list-inset));
   }
 
   [data-ui='action-sheet'] [data-part='separator'] {
@@ -320,7 +228,8 @@
     margin: 0;
     min-block-size: var(--_item-height);
     padding-block: var(--slotted-space-4, 0.5rem);
-    padding-inline: var(--_inset);
+    padding-inline: calc(var(--_inset) - var(--_list-inset));
+    border-radius: var(--slotted-control-radius, 6px);
     row-gap: var(--slotted-space-1, 0.125rem);
     text-align: start;
     text-decoration: none;
@@ -350,8 +259,8 @@
   }
 
   /**
-   * Inset, so the ring stays inside the row and never under the neighbour's
-   * edge or the sheet's rounded corner.
+   * Inset, so the ring follows the row's own corner and never meets the
+   * neighbour's edge.
    */
   [data-ui='action-sheet'] [data-part='item']:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
@@ -468,7 +377,7 @@
    * more action. It carries the bottom safe-area inset, which is where a
    * phone's home indicator sits.
    */
-  [data-ui='action-sheet'] > [data-part='panel'] > [data-part='footer'] {
+  [data-ui='action-sheet'] > [data-part='footer'] {
     background: var(--slotted-action-sheet-footer-surface, var(--slotted-surface-sunken, Canvas));
     border-block-start: var(--_rule-size) solid var(--_rule);
     display: grid;
@@ -513,8 +422,14 @@
     }
   }
 
+  /**
+   * `button`'s press: the face settles a hairline and gives up its lift. It is
+   * instant, as a press is, and the ground eases back on release.
+   */
   [data-ui='action-sheet'] [data-part='cancel']:active:not(:disabled) {
     background: var(--slotted-tone-secondary-subtle-active, ButtonFace);
+    box-shadow: none;
+    translate: 0 var(--slotted-border-width-thin, 1px);
   }
 
   [data-ui='action-sheet'] [data-part='cancel']:focus-visible {

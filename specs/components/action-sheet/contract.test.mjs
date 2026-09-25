@@ -33,22 +33,16 @@ test('cites both patterns it answers', () => {
 });
 
 /**
- * The scope paragraph says the family composes drawer. It composes the modules
- * drawer composes, and says why it does not render drawer's parts and what the
- * duplication costs.
+ * The scope paragraph says the family composes drawer, and since the bottom
+ * sheet reopening of 2026-09-25 it does: drawer measures its content and caps
+ * its width, which were the two facts that kept the family apart
+ * (`docs/history/designs/2026-09-25-action-sheet-on-drawer-design.md`).
  */
-test('composes the overlay modules rather than rewriting them, and records why not drawer', () => {
-  assert.deepEqual(contract.composes, [
-    'portal',
-    'dismissable-layer',
-    'presence',
-    'focus',
-    'typeahead',
-    'state',
-  ]);
-  assert.match(contract.identity.reason, /block-size/);
-  assert.match(contract.identity.reason, /whole inline extent|full width/);
-  assert.ok(contract.identity.cost.length > 0, 'the duplication is not written down');
+test('composes drawer for the layer and keeps only the menu', () => {
+  assert.deepEqual(contract.composes, ['drawer', 'focus', 'typeahead', 'state']);
+  assert.match(contract.identity.reason, /inside drawer's panel/);
+  assert.match(contract.identity.reason, /grid-row: 1 \/ -1/);
+  assert.ok(contract.identity.cost.length > 0, 'the cost of the composition is not written down');
 });
 
 test('is a dialog that holds a menu', () => {
@@ -136,8 +130,6 @@ test('declares its anatomy, every part described', () => {
   assert.deepEqual(sheet.parts, [
     'root',
     'trigger',
-    'backdrop',
-    'panel',
     'header',
     'title',
     'message',
@@ -224,6 +216,7 @@ test('takes the touch target from the theme under a coarse pointer, not at every
   assert.match(contract.geometry.label, /--slotted-font-size-md/);
   assert.match(contract.geometry.label, /--slotted-font-size-lg/);
   assert.match(contract.geometry.measure, /--slotted-action-sheet-inline-size/);
+  assert.match(contract.geometry.measure, /--slotted-drawer-sheet-inline-size/);
   assert.match(contract.geometry.safeArea, /safe-area-inset-bottom/);
   assert.match(contract.geometry.scroll, /list/);
 });
@@ -256,7 +249,8 @@ test('declares its axes and resolves each from prop, defaults and family', () =>
 
 /** A scrim is the promise of an inert page, and a non-modal sheet keeps the page live. */
 test('paints the scrim only while modal', () => {
-  assert.match(contract.anatomy.backdrop, /only while modal/);
+  assert.match(contract.modal.false, /scrimFrom/);
+  assert.match(contract.modal.false, /no scrim is painted/);
 });
 
 /** Every table-stakes row the family does not ship names who owns it instead. */
@@ -273,13 +267,16 @@ test('names the owner or the composition of everything it declines', () => {
     'radioItems',
     'boldItem',
     'headerClose',
-    'dragToDismiss',
     'translucent',
-    'drawerParts',
+    'grabber',
+    'dragAxis',
   ]) {
     assert.ok(name in contract.declined, `${name} is not declined in writing`);
   }
-  assert.equal(contract.declined.dragToDismiss.deferTo, 'drawer');
+  for (const name of ['dragToDismiss', 'drawerParts']) {
+    assert.ok(!(name in contract.declined), `${name} is still declined though drawer now owns it`);
+  }
+  assert.match(contract.drag, /pointer/);
 });
 
 test('declares a scenario for each capability a reference page demonstrates', () => {

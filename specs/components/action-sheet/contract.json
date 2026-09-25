@@ -5,13 +5,13 @@
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
   "listPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/menubar/",
   "patternStatus": "No APG pattern describes an action sheet. The layer answers the modal dialog pattern and the list of actions answers the menu pattern, each item by item in docs/history/designs/2026-09-24-action-sheet-design.md section 2",
-  "composes": ["portal", "dismissable-layer", "presence", "focus", "typeahead", "state"],
+  "composes": ["drawer", "focus", "typeahead", "state"],
   "identity": {
-    "reason": "The family composes the modules drawer composes and does not render drawer's parts. A bottom drawer's panel measures block-size: min(extent, 100%), 24rem at md, and an action sheet measures its content: two actions and a cancel are 200 pixels, and min() takes no max-content. The bottom panel also spans the whole inline extent of the layer, which on a 1280-pixel screen stretches a row of actions to 1280 pixels. The panel's body, close and resizer would be three empty parts here, and data-ui=drawer is an identifier identity.test.mjs forbids this stylesheet to reach",
-    "cost": "The layer, the scrim, the slide and the footer's safe area are written a second time, around seventy lines, and the two families can move apart. The behaviour the scope asked to share is shared: portal, dismissable-layer, presence, focus and the scroll lock are the same modules drawer calls"
+    "reason": "The family renders drawer with side=bottom and size=content, and its own root sits inside drawer's panel spanning every row of the panel's grid (grid-row: 1 / -1), so the panel's flexible row is the one that shrinks when the sheet reaches its cap and the root shrinks with it. drawer owns the layer, the scrim, the slide, the width, the portal, dismissable-layer, presence, the focus scope, the drag and the keyboard inset; this family owns the header, the menu and the cancel. Each stylesheet reaches only its own children, so identity.test.mjs holds. docs/history/designs/2026-09-25-action-sheet-on-drawer-design.md",
+    "cost": "The sheet's radius, surface and scrim are drawer's and no longer this family's own tokens. The measure stays the family's, and crossing into drawer's panel costs one custom property written by each binding"
   },
   "wiring": {
-    "role": "dialog on the panel part, in both modal and non-modal sheets",
+    "role": "dialog on the panel, which is drawer's panel rendered by the family; the family's own parts are inside it",
     "aria-modal": "true on the panel only while modal, which is the only state in which the page is inert and the scrim is painted",
     "aria-labelledby": "the panel names its title part; a consumer who writes aria-label on the sheet instead keeps it",
     "aria-describedby": "the panel names its message part when one is present",
@@ -140,10 +140,8 @@
     "link": "an item whose action navigates renders an anchor through render in React, or is written as a[slActionSheetItem] in Angular; the role and the keyboard are the same"
   },
   "anatomy": {
-    "root": "the layer, fixed to the viewport and stacked with --slotted-z-index-overlay plus the depth dismissable-layer writes. A one-cell grid holding the backdrop and the panel",
+    "root": "the family's box inside drawer's panel: a grid of header, list and footer spanning every row of the panel, min-block-size 0 so the list is the row that scrolls. drawer's root, backdrop and panel hold the layer, the scrim and the role=dialog",
     "trigger": "the consumer's control that opens the sheet, rendered where it was written and never in the layer",
-    "backdrop": "the scrim, painted only while modal. drawer paints it in both cases; here a scrim over a page that still answers would promise an inertness that is not there",
-    "panel": "the sheet, role=dialog, docked to the bottom edge and centred, three grid rows: header, list, footer",
     "header": "title and message",
     "title": "an h2, the name of the dialog and of the menu. Set small and semibold: the title is the context and the actions are the content, the hierarchy UIKit and Ionic draw",
     "message": "a p, the dialog's description",
@@ -160,7 +158,7 @@
   },
   "geometry": {
     "dock": "the panel is aligned to the bottom edge of the layer and centred on it, with its two top corners rounded",
-    "measure": "inline-size: min(100%, var(--slotted-action-sheet-inline-size)), 32rem by default, so the sheet never spans a wide screen",
+    "measure": "inline-size: min(100%, var(--slotted-action-sheet-inline-size)), 32rem by default, centred. The measure is the family's and the sheet is drawer's: the binding hands it to drawer's panel as --slotted-drawer-sheet-inline-size, through DrawerPanel's style in React and the panel drawer's instance exposes in Angular, so an action sheet stays narrower than a filter sheet",
     "reach": "max-block-size leaves --slotted-space-12 of scrim above the sheet, so there is always somewhere outside to press",
     "item": "min-block-size: var(--slotted-control-height-lg), which the theme raises to --slotted-target-comfortable (44 pixels) under pointer: coarse, per density. A fixed 44 pixels at every width made the sheet a phone's sheet on a desktop, rows of 44 beside menu's 34. Density moves the height, the inset and the gaps",
     "label": "--slotted-font-size-md under a fine pointer, where the sheet sits beside menu's 13-pixel items, and --slotted-font-size-lg under pointer: coarse, where a phone's own sheets set their actions at 16 to 20 points. The mark is 1.125 times the label, so it follows the label rather than the control glyph scale",
@@ -171,11 +169,12 @@
     "active": "the layer exists only while open, and @slotted/core/presence holds it through its exit",
     "lazy": "the layer is built on the first open and kept",
     "eager": "the layer exists from the start and is inert while closed",
-    "default": "active"
+    "default": "active",
+    "reason": "drawer's mount axis, passed through"
   },
   "modal": {
     "true": "the page is inert, the scroll is locked, focus is contained, the scrim is painted and aria-modal is written",
-    "false": "the page stays operable, nothing is contained or locked, no scrim is painted, and a press outside still closes the sheet under outsidePress=close"
+    "false": "the page stays operable, nothing is contained or locked, and no scrim is painted: the family passes drawer a scrimFrom above every extent, so drawer's root carries data-undimmed and lets the press through. A press outside still closes the sheet under outsidePress=close"
   },
   "stateAttributes": {
     "open": "data-open",
@@ -228,10 +227,6 @@
     ]
   },
   "declined": {
-    "drawerParts": {
-      "reason": "See identity: a bottom drawer's panel has a stated block size and spans the layer, and its body, close and resizer would be empty parts here",
-      "replacedBy": "the modules drawer composes — portal, dismissable-layer, presence, focus — called directly"
-    },
     "controller": {
       "reason": "Ionic's actionSheetController and Ant Mobile's ActionSheet.show return the choice from a promise. The decision dialog and drawer took holds: with state and @if it is three lines, and the close request already carries the chosen value as request.result",
       "replacedBy": "const [open, setOpen] = useState(false); <ActionSheet open={open} onOpenChange={(next, request) => { setOpen(next); if (request.reason === 'select') run(request.result); }}>"
@@ -247,10 +242,6 @@
     "headerClose": {
       "reason": "Vant's closeable draws a close mark in the header. The cancel is already the explicit way out, and two controls for one exit compete for the thumb",
       "replacedBy": "<ActionSheetCancel>Cancel</ActionSheetCancel>"
-    },
-    "dragToDismiss": {
-      "reason": "Material 3's drag handle and Vaul's gesture pull a sheet away. The sheet that is dragged is drawer with side=bottom and its resizer, which owns the gesture, its keyboard and its threshold",
-      "deferTo": "drawer"
     },
     "translucent": {
       "reason": "Ionic's translucent blurs the page behind the sheet. The surface is a theme decision",
@@ -271,6 +262,18 @@
     "popoverPresentation": {
       "reason": "iPadOS presents an action sheet as a popover anchored to its control. On a pointer device the same list of actions is a menu, and the breakpoint is the application's",
       "deferTo": "menu"
+    },
+    "grabber": {
+      "reason": "UIKit draws no grabber on an action sheet. The cancel, Escape, the press outside, back and the body drag already close it; a grabber would be a sixth way to the same close",
+      "replacedBy": "<Drawer side=\"bottom\"><DrawerPanel><DrawerResizer />…</DrawerPanel></Drawer> for a sheet whose height the reader chooses"
+    },
+    "dragAxis": {
+      "reason": "drawer's drag axis chooses between the body and the resizer, and an action sheet has no resizer. Refusing the drag is cancelling the close it asks for",
+      "replacedBy": "onOpenChange={(next, request) => { if (request.reason === 'pointer' && !next) request.cancel(); }}"
+    },
+    "ownMeasure": {
+      "reason": "--slotted-action-sheet-radius, -surface and -scrim were the family's own sheet. The sheet is drawer's now, and a second radius, surface and scrim for the same layer would be two answers to one question",
+      "replacedBy": "[data-ui='drawer'] { --slotted-drawer-radius: 12px; --slotted-drawer-surface: var(--slotted-surface-raised); }"
     }
   },
   "members": {
@@ -291,8 +294,6 @@
       "parts": [
         "root",
         "trigger",
-        "backdrop",
-        "panel",
         "header",
         "title",
         "message",
@@ -324,5 +325,6 @@
       "defaults",
       "accessibility"
     ]
-  }
+  },
+  "drag": "through drawer: a touch anywhere on the sheet's body moves it, and a release nearer to closed than to the content height, or a fling downward faster than 500 px/s, asks to close with the reason pointer. A sheet that must not close by drag cancels that request, which is the mechanism that already refuses every other close"
 }

@@ -81,9 +81,11 @@
     transition: visibility var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
+  /* Visible at once on the way in: a frame hidden until the end of a transition
+     cannot take focus in the frame it opens, and the card is focused then. */
   [data-ui='tour'][data-open] {
     visibility: visible;
-    transition: visibility var(--slotted-duration-long) var(--slotted-easing-standard);
+    transition: none;
   }
 
   [data-ui='tour'][data-size='sm'] {

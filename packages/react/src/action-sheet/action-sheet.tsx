@@ -1,22 +1,21 @@
 import '@slotted/styles/action-sheet/action-sheet.css';
 import '@slotted/styles/spinner/spinner.css';
 
-import { createPresence } from '@slotted/core/presence';
-import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { createControllable } from '@slotted/core/state';
 import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
-  useId,
   useImperativeHandle,
   useMemo,
   useRef,
   useState,
 } from 'react';
 
+import { Drawer } from '../drawer';
+import type { DrawerChangeRequest, DrawerHandle } from '../drawer';
 import { useActionSheetDefaults } from './action-sheet-defaults';
+import { entryTarget } from './action-sheet-entry';
 import type {
   ActionSheetContextValue,
   ActionSheetHandle,
@@ -28,7 +27,8 @@ const ActionSheetContext = createContext<ActionSheetContextValue | undefined>(un
 
 /**
  * What the sheet around this part says. A part outside one has no sheet to
- * belong to, so this throws rather than rendering an item that closes nothing.
+ * belong to and no state to report, so this throws rather than rendering
+ * something that looks right and closes nothing.
  */
 export function useActionSheet(): ActionSheetContextValue {
   const context = useContext(ActionSheetContext);
@@ -39,19 +39,24 @@ export function useActionSheet(): ActionSheetContextValue {
 }
 
 /**
+ * A `scrimFrom` no extent reaches. A sheet that is not modal keeps the page
+ * live, and a scrim over a live page would promise an inertness that is not
+ * there, so `drawer` is asked to leave it undimmed at every height.
+ */
+const NEVER_DIMMED = 2;
+
+/**
  * A short list of actions that rises from the bottom edge, and the explicit
  * way out beneath it.
  *
- * The layer is composed from `packages/core`, the modules `drawer` composes:
- * `portal` places it and keeps the theme of the region that opened it,
- * `dismissable-layer` owns Escape, the outside press, the way back, `inert`,
- * the scroll lock and the single z-index stack, `presence` keeps it mounted
- * long enough to leave, and `focus` contains the keyboard and gives it back.
- * `docs/history/designs/2026-09-24-action-sheet-design.md` §4.1 says why the
- * family does not render `drawer`'s parts.
+ * The sheet is `drawer`'s — `side="bottom"`, `size="content"` — which owns the
+ * layer, the portal, the scrim, the slide, the width, Escape, the press
+ * outside, the way back, the drag that closes it and the virtual keyboard.
+ * This family owns what is inside: the title and message, the menu of actions
+ * and the cancel, and the state, because only it knows that a close was a
+ * choice (`select`) and what was chosen.
  *
- * This component renders no DOM. It is the provider: the trigger stays where
- * it is written while the layer is portalled out.
+ * `docs/history/designs/2026-09-25-action-sheet-on-drawer-design.md`.
  */
 export function ActionSheet({
   back,
@@ -71,85 +76,33 @@ export function ActionSheet({
   ref,
 }: ActionSheetProps) {
   const defaults = useActionSheetDefaults();
-  const baseId = useId();
 
   const [ownOpen, setOwnOpen] = useState<boolean>(defaultOpen ?? false);
   const currentOpen = open ?? ownOpen;
+  const resolvedModal = modal ?? defaults.modal;
 
-  const resolvedMount = mount ?? defaults.mount;
-
-  /**
-   * The status rather than a boolean. `entering` is one frame long, and it is
-   * what gives the panel a closed style to transition from.
-   */
-  const [status, setStatus] = useState<PresenceStatus>(currentOpen ? 'open' : 'unmounted');
-  const presence = useRef<PresenceHandle | null>(null);
-  if (presence.current === null) {
-    presence.current = createPresence({ present: currentOpen, onStatusChange: setStatus });
-  }
-
-  useEffect(() => {
-    presence.current?.sync(currentOpen);
-  }, [currentOpen]);
-
-  useEffect(() => {
-    const handle = presence.current;
-    return () => handle?.destroy();
-  }, []);
-
-  /** Whether this sheet has ever been open, which is what `lazy` reads. */
-  const seen = useRef(currentOpen);
-  if (currentOpen) seen.current = true;
-
-  const mounted =
-    resolvedMount === 'eager'
-      ? true
-      : resolvedMount === 'lazy'
-        ? seen.current
-        : status !== 'unmounted';
-
-  const nodes = useRef({
-    list: null as HTMLElement | null,
-    panel: null as HTMLElement | null,
-    trigger: null as HTMLElement | null,
-  });
-  const lastReason = useRef<ActionSheetOpenReason | null>(null);
-
-  const [titleRendered, setTitleRendered] = useState(false);
-  const [messageRendered, setMessageRendered] = useState(false);
+  const drawer = useRef<DrawerHandle>(null);
+  const nodes = useRef({ list: null as HTMLElement | null, panel: null as HTMLElement | null });
 
   /**
-   * A part says it exists, so the panel names only what was rendered: an
-   * `aria-labelledby` pointing at an id nothing carries is worse than none.
+   * Asks to move, and answers whether the move stands. `drawer`'s own request
+   * — Escape, the press outside, the way back, the drag — is refused when this
+   * one is, so the consumer's `cancel()` holds whichever family asked first.
    */
-  const announce = useCallback<ActionSheetContextValue['announce']>((part) => {
-    if (part === 'title') setTitleRendered(true);
-    else setMessageRendered(true);
-    return () => {
-      if (part === 'title') setTitleRendered(false);
-      else setMessageRendered(false);
-    };
-  }, []);
-
-  /**
-   * Stable for the life of the component. `presence` reads `setNode(null)`
-   * during an exit as the exit ending, and an inline ref callback is called
-   * with `null` on every render — the lesson `drawer` recorded.
-   */
-  const registerLayer = useCallback((node: HTMLElement | null) => {
-    presence.current?.setNode(node);
-  }, []);
-
   const requestOpen = useCallback(
-    (next: boolean, reason: ActionSheetOpenReason, result: string | undefined, source: unknown) => {
-      if (next === currentOpen) return;
+    (
+      next: boolean,
+      reason: ActionSheetOpenReason,
+      result: string | undefined,
+      source: unknown,
+    ): boolean => {
+      if (next === currentOpen) return true;
 
       let cancelled = false;
       const state = createControllable<boolean>({
         controlled: open,
         initial: currentOpen,
         onRequest: (raw) => {
-          cancelled = raw.cancelled;
           onOpenChange?.(raw.value, {
             get cancelled() {
               return raw.cancelled;
@@ -161,22 +114,48 @@ export function ActionSheet({
             source: raw.source,
             value: raw.value,
           });
+          cancelled = raw.cancelled;
         },
       });
 
       const moved = state.request(next, reason, source);
-      if (cancelled) return;
-      if (!next) lastReason.current = reason;
+      if (cancelled) return false;
       if (moved) setOwnOpen(next);
+      return true;
     },
     [currentOpen, onOpenChange, open],
+  );
+
+  const fromDrawer = useCallback(
+    (next: boolean, request: DrawerChangeRequest) => {
+      if (!requestOpen(next, request.reason, undefined, request.source)) request.cancel();
+    },
+    [requestOpen],
+  );
+
+  /**
+   * Where focus enters, decided when the sheet has opened and its actions
+   * exist: the consumer's element, or the least destructive action. `drawer`
+   * reads `current` at that moment, which is why this is a getter.
+   */
+  const entry = useMemo(
+    () =>
+      initialFocus === false
+        ? (false as const)
+        : {
+            get current(): HTMLElement | null {
+              const panel = drawer.current?.panel ?? null;
+              return initialFocus?.current ?? (panel === null ? null : entryTarget(panel));
+            },
+          },
+    [initialFocus],
   );
 
   useImperativeHandle<ActionSheetHandle, ActionSheetHandle>(
     ref,
     () => ({
-      open: () => requestOpen(true, 'programmatic', undefined, undefined),
-      close: () => requestOpen(false, 'programmatic', undefined, undefined),
+      open: () => void requestOpen(true, 'programmatic', undefined, undefined),
+      close: () => void requestOpen(false, 'programmatic', undefined, undefined),
       focus: () => {
         const stop = nodes.current.list?.querySelector<HTMLElement>(
           "[data-part='item'][tabindex='0']",
@@ -189,56 +168,34 @@ export function ActionSheet({
 
   const value = useMemo<ActionSheetContextValue>(
     () => ({
-      announce,
-      back: back ?? defaults.back,
-      baseId,
       cancelLabel: cancelLabel ?? defaults.cancelLabel,
-      close: (reason, result, source) => requestOpen(false, reason, result, source),
+      close: (reason, result, source) => void requestOpen(false, reason, result, source),
       closeOnSelect: closeOnSelect ?? defaults.closeOnSelect,
-      container,
-      escape: escape ?? defaults.escape,
-      finalFocus,
-      initialFocus,
-      interactive: status === 'entering' || status === 'open',
-      lastReason,
-      messageId: messageRendered ? `${baseId}message` : '',
-      modal: modal ?? defaults.modal,
-      mount: resolvedMount,
-      mounted,
       nodes: nodes.current,
-      open: currentOpen,
-      openWith: (reason, source) => requestOpen(true, reason, undefined, source),
-      outsidePress: outsidePress ?? defaults.outsidePress,
-      panelId: `${baseId}panel`,
-      registerLayer,
-      titleId: titleRendered ? `${baseId}title` : '',
-      triggerId: `${baseId}trigger`,
-      /** What the stylesheet keys on, which is a frame behind what was asked. */
-      visible: status === 'open',
     }),
-    [
-      announce,
-      back,
-      baseId,
-      cancelLabel,
-      closeOnSelect,
-      container,
-      currentOpen,
-      defaults,
-      escape,
-      finalFocus,
-      initialFocus,
-      messageRendered,
-      modal,
-      mounted,
-      outsidePress,
-      registerLayer,
-      requestOpen,
-      resolvedMount,
-      status,
-      titleRendered,
-    ],
+    [cancelLabel, closeOnSelect, defaults, requestOpen],
   );
 
-  return <ActionSheetContext.Provider value={value}>{children}</ActionSheetContext.Provider>;
+  return (
+    <Drawer
+      back={back ?? defaults.back}
+      container={container}
+      drag="panel"
+      escape={escape ?? defaults.escape}
+      initialFocus={entry}
+      modal={resolvedModal}
+      mode="overlay"
+      mount={mount ?? defaults.mount}
+      onOpenChange={fromDrawer}
+      open={currentOpen}
+      outsidePress={outsidePress ?? defaults.outsidePress}
+      ref={drawer}
+      scrimFrom={resolvedModal ? 0 : NEVER_DIMMED}
+      side="bottom"
+      size="content"
+      {...(finalFocus === undefined ? {} : { finalFocus })}
+    >
+      <ActionSheetContext.Provider value={value}>{children}</ActionSheetContext.Provider>
+    </Drawer>
+  );
 }

@@ -1,31 +1,24 @@
-import { createDismissableLayer } from '@slotted/core/dismissable-layer';
-import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
-import { createFocusScope } from '@slotted/core/focus';
-import type { FocusScopeHandle } from '@slotted/core/focus';
-import { createPortalRoot } from '@slotted/core/portal';
-import type { PortalRootHandle } from '@slotted/core/portal';
-import { createPresence } from '@slotted/core/presence';
-import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
+import { SlDrawer } from '@slotted/angular/drawer';
+import type { DrawerChangeRequest } from '@slotted/angular/drawer';
 import { createControllable } from '@slotted/core/state';
 import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
   effect,
-  ElementRef,
   HostAttributeToken,
   inject,
   input,
   model,
   output,
   signal,
+  untracked,
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
 
-import { injectActionSheetDefaults, SlActionSheetIdFactory } from './action-sheet-defaults';
+import { injectActionSheetDefaults } from './action-sheet-defaults';
 import type {
   ActionSheetChangeRequest,
   ActionSheetDismissPolicy,
@@ -54,51 +47,60 @@ export function entryTarget(panel: HTMLElement): HTMLElement {
 }
 
 /**
+ * A `scrimFrom` no extent reaches. A sheet that is not modal keeps the page
+ * live, and a scrim over a live page would promise an inertness that is not
+ * there, so `drawer` is asked to leave it undimmed at every height.
+ */
+const NEVER_DIMMED = 2;
+
+/** The family's measure, handed to `drawer`'s sheet. */
+const MEASURE = 'var(--slotted-action-sheet-inline-size, 32rem)';
+
+/**
  * A short list of actions that rises from the bottom edge, and the explicit
  * way out beneath it.
  *
- * The layer is composed from `packages/core`, the modules `drawer` composes:
- * `portal`, `dismissable-layer`, `presence` and `focus`.
- * `docs/history/designs/2026-09-24-action-sheet-design.md` §4.1 says why the
- * family does not render `drawer`'s parts.
+ * The sheet is `<sl-drawer>` — `side="bottom"`, `size="content"` — which owns
+ * the layer, the portal, the scrim, the slide, the width, Escape, the press
+ * outside, the way back, the drag that closes it and the virtual keyboard.
+ * This family owns what is inside and the state, because only it knows that a
+ * close was a choice (`select`) and what was chosen.
  *
- * The host renders `display: contents` and stays where the consumer wrote it;
- * the layer is the `div` in the template, moved into the portal while mounted
- * and given back before it is destroyed. The host is the portal's origin, so
- * the layer keeps the theme of the region it was written in with or without a
- * trigger.
+ * The parts are the consumer's own elements, projected into the drawer's
+ * panel, and dependency injection does not reach from them into this
+ * component's view, where the drawer lives. So the parts talk to the sheet,
+ * and the sheet hands `drawer` what they said — the trigger, whether a title
+ * and a message exist — and reads back the ids the panel is named by.
+ *
+ * `docs/history/designs/2026-09-25-action-sheet-on-drawer-design.md`.
  */
 @Component({
   selector: 'sl-action-sheet',
   standalone: true,
   exportAs: 'slActionSheet',
+  imports: [SlDrawer],
   template: `
-    @if (mounted()) {
-      <div
-        #layer
-        data-ui="action-sheet"
-        data-part="root"
-        [attr.data-mount]="resolvedMount()"
-        [attr.data-modal]="resolvedModal() ? '' : null"
-        [attr.data-open]="visible() ? '' : null"
-        [attr.inert]="interactive() ? null : ''"
-      >
-        <div data-part="backdrop"></div>
-        <div
-          #panel
-          data-part="panel"
-          role="dialog"
-          tabindex="-1"
-          [id]="panelId"
-          [attr.aria-modal]="resolvedModal() ? 'true' : null"
-          [attr.aria-label]="writtenLabel"
-          [attr.aria-labelledby]="labelledBy()"
-          [attr.aria-describedby]="describedBy()"
-        >
-          <ng-content />
-        </div>
-      </div>
-    }
+    <sl-drawer
+      #drawer
+      mode="overlay"
+      side="bottom"
+      size="content"
+      drag="panel"
+      [open]="open()"
+      [modal]="resolvedModal()"
+      [scrimFrom]="resolvedModal() ? 0 : neverDimmed"
+      [mount]="resolvedMount()"
+      [escape]="resolvedEscape()"
+      [outsidePress]="resolvedOutsidePress()"
+      [back]="resolvedBack()"
+      [container]="container()"
+      [initialFocus]="entry()"
+      [finalFocus]="finalFocus()"
+      (openChangeRequest)="fromDrawer($event)"
+      (closed)="onClosed()"
+    >
+      <div data-ui="action-sheet" data-part="root"><ng-content /></div>
+    </sl-drawer>
   `,
   styleUrls: [
     '../../../styles/src/action-sheet/action-sheet.css',
@@ -109,71 +111,49 @@ export function entryTarget(panel: HTMLElement): HTMLElement {
   host: { '[style.display]': "'contents'" },
 })
 export class SlActionSheet {
-  /** Whether the sheet is open. Two-way, so a template may bind it directly. */
   readonly open = model<boolean>(false);
 
   readonly modal = input(undefined, { transform: optionalBoolean });
   readonly mount = input<ActionSheetMount | undefined>(undefined);
   readonly escape = input<ActionSheetDismissPolicy | undefined>(undefined);
   readonly outsidePress = input<ActionSheetDismissPolicy | undefined>(undefined);
-  /** The platform's way back closes the sheet instead of leaving the page, while modal. */
   readonly back = input<ActionSheetDismissPolicy | undefined>(undefined);
   readonly closeOnSelect = input(undefined, { transform: optionalBoolean });
-  /** The words the cancel shows when it is given none. */
   readonly cancelLabel = input<string | undefined>(undefined);
-  /** A parent for this layer alone, instead of the shared portal root. */
   readonly container = input<Element | null | undefined>(undefined);
-  /**
-   * Where focus goes when the sheet opens. Unstated, the first action that can
-   * run, or the least destructive one when that action is `danger`. `false`
-   * moves nothing, for a sheet that stands open beside the reader's work.
-   */
   readonly initialFocus = input<HTMLElement | false | undefined>(undefined);
-  /** Where focus goes when the sheet closes. Defaults to what held it on opening. */
   readonly finalFocus = input<HTMLElement | false | undefined>(undefined);
 
-  /** One output per transition, carrying its reason, its result and its event. */
   readonly openChangeRequest = output<ActionSheetChangeRequest>();
-  /** Fires once the sheet has closed, with the value of the item chosen. */
   readonly closed = output<string | undefined>();
 
   private readonly defaults = injectActionSheetDefaults();
-  private readonly host: HTMLElement = inject(ElementRef).nativeElement;
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly baseId = inject(SlActionSheetIdFactory).next();
-  private readonly origin = this.host.parentElement;
 
   /**
-   * A consumer's `aria-label` on `<sl-action-sheet>`, read before the host
-   * bindings are written and moved to the panel, which carries the role.
+   * A consumer's own `aria-label` on `<sl-action-sheet>`, read before the host
+   * bindings are written and handed to the panel, which is the element the
+   * role is on.
    */
-  protected readonly writtenLabel = inject(new HostAttributeToken('aria-label'), {
+  private readonly writtenLabel = inject(new HostAttributeToken('aria-label'), {
     optional: true,
   });
 
-  protected readonly layerRef = viewChild<ElementRef<HTMLElement>>('layer');
-  protected readonly panelRef = viewChild<ElementRef<HTMLElement>>('panel');
+  protected readonly drawer = viewChild<SlDrawer>('drawer');
+  protected readonly neverDimmed = NEVER_DIMMED;
 
+  /** What the parts say exists; the sheet hands it to `drawer`. */
   readonly hasTitle = signal(false);
   readonly hasMessage = signal(false);
   readonly triggerNode = signal<HTMLElement | null>(null);
 
-  readonly titleId = `${this.baseId}-title`;
-  readonly messageId = `${this.baseId}-message`;
-  readonly panelId = `${this.baseId}-panel`;
-  readonly triggerId = `${this.baseId}-trigger`;
+  /** The ids `drawer`'s panel is named and described by, once it exists. */
+  readonly titleId = computed(() => this.drawer()?.titleId ?? null);
+  readonly messageId = computed(() => this.drawer()?.descriptionId ?? null);
+  readonly panelId = computed(() => this.drawer()?.panelId ?? null);
+  readonly triggerId = computed(() => this.drawer()?.triggerId ?? null);
+  readonly mounted = computed(() => this.drawer()?.mounted() ?? false);
 
-  private readonly status = signal<PresenceStatus>('unmounted');
-  private readonly presence: PresenceHandle = createPresence({
-    present: false,
-    onStatusChange: (next) => this.status.set(next),
-  });
-
-  private readonly seen = signal(false);
   private result: string | undefined = undefined;
-  private lastReason: ActionSheetOpenReason | null = null;
-  /** A sheet torn down while open emits no `closed`: nothing is listening. */
-  private destroyed = false;
 
   readonly resolvedModal = computed(() => this.modal() ?? this.defaults.modal);
   readonly resolvedMount = computed(() => this.mount() ?? this.defaults.mount);
@@ -181,152 +161,86 @@ export class SlActionSheet {
     () => this.closeOnSelect() ?? this.defaults.closeOnSelect,
   );
   readonly resolvedCancelLabel = computed(() => this.cancelLabel() ?? this.defaults.cancelLabel);
-  private readonly resolvedEscape = computed(() => this.escape() ?? this.defaults.escape);
-  private readonly resolvedBack = computed(() => this.back() ?? this.defaults.back);
-  private readonly resolvedOutsidePress = computed(
+  protected readonly resolvedEscape = computed(() => this.escape() ?? this.defaults.escape);
+  protected readonly resolvedBack = computed(() => this.back() ?? this.defaults.back);
+  protected readonly resolvedOutsidePress = computed(
     () => this.outsidePress() ?? this.defaults.outsidePress,
   );
 
-  readonly mounted = computed(() => {
-    const mount = this.resolvedMount();
-    if (mount === 'eager') return true;
-    if (mount === 'lazy') return this.seen();
-    return this.status() !== 'unmounted';
+  /**
+   * Where focus enters, decided when the sheet has opened and its actions
+   * exist: the consumer's element, or the least destructive action.
+   */
+  protected readonly entry = computed(() => {
+    const wanted = this.initialFocus();
+    if (wanted === false) return false as const;
+    return (): HTMLElement | null => {
+      if (wanted !== undefined) return wanted;
+      const panel = this.drawer()?.panel ?? null;
+      return panel === null ? null : entryTarget(panel);
+    };
   });
-
-  /** What the stylesheet keys on, which is a frame behind what was asked. */
-  readonly visible = computed(() => this.status() === 'open');
-  /** `entering` counts: the focus scope enters in that frame. */
-  readonly interactive = computed(() => {
-    const status = this.status();
-    return status === 'entering' || status === 'open';
-  });
-
-  protected readonly labelledBy = computed(() =>
-    this.hasTitle() && this.writtenLabel === null ? this.titleId : null,
-  );
-  protected readonly describedBy = computed(() => (this.hasMessage() ? this.messageId : null));
-
-  private portal: PortalRootHandle | null = null;
-  private layer: DismissableLayerHandle | null = null;
-  private scope: FocusScopeHandle | null = null;
 
   constructor() {
+    /* What the parts said, handed to the drawer that renders the panel. */
     effect(() => {
-      if (this.open()) this.seen.set(true);
-      this.presence.sync(this.open());
-    });
-
-    /** Where the layer lives, for as long as it is in the document. */
-    effect(() => {
-      const node = this.layerRef()?.nativeElement ?? null;
-      this.presence.setNode(node);
-      if (node === null) {
-        this.releasePortal();
-        return;
-      }
-      if (this.portal !== null) return;
-      const named = this.container();
-      this.portal = createPortalRoot({
-        origin: this.origin,
-        ...(named === undefined ? {} : { container: named }),
+      const drawer = this.drawer();
+      if (drawer === undefined) return;
+      const title = this.hasTitle();
+      const message = this.hasMessage();
+      const trigger = this.triggerNode();
+      untracked(() => {
+        drawer.hasTitle.set(title);
+        drawer.hasDescription.set(message);
+        drawer.triggerNode.set(trigger);
       });
-      this.portal.container?.append(node);
     });
 
     /**
-     * Everything the sheet does while it is open, taken down when it closes
-     * rather than when the node leaves: `presence` keeps the node through the
-     * exit, and a layer still holding the scroll lock and the page's `inert`
-     * for those milliseconds is a page nobody can touch.
+     * What only this family knows about the panel: its measure, handed to
+     * `drawer`'s sheet token; that it takes focus from script when the pointer
+     * leaves an item; and a label the consumer wrote on the host.
      */
-    effect((onCleanup) => {
-      const node = this.layerRef()?.nativeElement;
-      const panel = this.panelRef()?.nativeElement;
-      if (!this.open() || node === undefined || panel === undefined) return;
-
-      this.lastReason = null;
-      const modal = this.resolvedModal();
-      const outsidePress = this.resolvedOutsidePress() === 'close';
-      const trigger = this.triggerNode();
-
-      this.layer = createDismissableLayer(node, {
-        back: modal && this.resolvedBack() === 'close',
-        branches: trigger === null ? [] : [trigger],
-        content: panel,
-        escape: this.resolvedEscape() === 'close',
-        modal,
-        onDismiss: (request) => {
-          if (request.reason === 'outsidePress' && !outsidePress) return request.cancel();
-          this.request(false, request.reason as ActionSheetOpenReason, undefined, request.source);
-        },
-        outsidePress,
-        outsidePressEvent: 'click',
-      });
-
-      const origin = panel.ownerDocument.activeElement as HTMLElement | null;
-      const returnTo = this.finalFocus();
-      const wanted = this.initialFocus();
-      this.scope = createFocusScope(panel, {
-        contain: modal,
-        initial: wanted === false ? false : () => wanted ?? entryTarget(panel),
-        restore:
-          returnTo === false
-            ? false
-            : () => {
-                /* A press on the live page behind a non-modal sheet was the
-                   reader going somewhere; taking focus back would fight them. */
-                if (!modal && this.lastReason === 'outsidePress') return null;
-                const target = returnTo ?? origin;
-                const usable =
-                  target !== null && target.isConnected && target !== target.ownerDocument.body;
-                return usable ? target : this.triggerNode();
-              },
-      });
-      this.scope.enter();
-
-      onCleanup(() => {
-        this.scope?.destroy();
-        this.scope = null;
-        this.layer?.destroy();
-        this.layer = null;
-        if (!this.destroyed) this.closed.emit(this.result);
-        this.result = undefined;
-      });
-    });
-
-    this.destroyRef.onDestroy(() => {
-      this.destroyed = true;
-      this.scope?.destroy();
-      this.layer?.destroy();
-      this.presence.destroy();
-      this.releasePortal();
+    effect(() => {
+      /* `panel` reads the drawer's view query, so this runs again whenever the
+         layer — and the panel with it — is built. */
+      const panel = this.drawer()?.panel ?? null;
+      if (panel === null) return;
+      panel.style.setProperty('--slotted-drawer-sheet-inline-size', MEASURE);
+      panel.tabIndex = -1;
+      if (this.writtenLabel !== null) panel.setAttribute('aria-label', this.writtenLabel);
     });
   }
 
-  /** The layer is given back to the host before the portal goes. */
-  private releasePortal() {
-    if (this.portal === null) return;
-    const node = this.layerRef()?.nativeElement;
-    if (node !== undefined) this.host.append(node);
-    this.portal.release();
-    this.portal = null;
+  /**
+   * `drawer`'s own request — the trigger, Escape, the press outside, the way
+   * back, the drag — asks this family first, and a refusal here refuses it
+   * there, so the consumer's `cancel()` holds whichever family asked.
+   */
+  protected fromDrawer(request: DrawerChangeRequest) {
+    if (!this.request(request.value, request.reason, undefined, request.source)) {
+      request.cancel();
+    }
   }
 
-  /** Asks to open or close, carrying the reason, the result and the event. */
+  protected onClosed() {
+    this.closed.emit(this.result);
+    this.result = undefined;
+  }
+
+  /** Asks to move, and answers whether the move stands. */
   request(
     next: boolean,
     reason: ActionSheetOpenReason,
     result: string | undefined,
     source: unknown,
-  ) {
-    if (next === this.open()) return;
+  ): boolean {
+    if (next === this.open()) return true;
 
     let cancelled = false;
     const state = createControllable<boolean>({
       initial: this.open(),
       onRequest: (raw) => {
-        cancelled = raw.cancelled;
         this.openChangeRequest.emit({
           cancel: () => raw.cancel(),
           get cancelled() {
@@ -338,30 +252,26 @@ export class SlActionSheet {
           source: raw.source,
           value: raw.value,
         });
+        cancelled = raw.cancelled;
       },
     });
 
-    if (!state.request(next, reason, source) || cancelled) return;
-    if (!next) {
-      this.result = result;
-      this.lastReason = reason;
-    }
+    if (!state.request(next, reason, source) || cancelled) return false;
+    if (!next) this.result = result;
     this.open.set(next);
+    return true;
   }
 
-  /** Opens the sheet from code, carrying `programmatic`. */
   show() {
     this.request(true, 'programmatic', undefined, undefined);
   }
 
-  /** Closes it from code, carrying `programmatic`. */
   close() {
     this.request(false, 'programmatic', undefined, undefined);
   }
 
-  /** Moves focus to the item the list holds as its stop. */
   focus() {
-    const panel = this.panelRef()?.nativeElement;
+    const panel = this.drawer()?.panel ?? null;
     const stop = panel?.querySelector<HTMLElement>("[data-part='item'][tabindex='0']");
     (stop ?? panel)?.focus();
   }

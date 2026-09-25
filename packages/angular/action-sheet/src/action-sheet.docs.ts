@@ -32,31 +32,17 @@ const imports: ReferenceImport = {
 const anatomy: AnatomyRow[] = [
   {
     part: 'root',
-    element: 'div inside <sl-action-sheet>, moved into a portal',
+    element: 'div inside <sl-drawer>’s panel',
     required: true,
     purpose:
-      'The layer, fixed to the viewport and stacked with --slotted-z-index-overlay plus the depth dismissable-layer writes. It carries data-ui="action-sheet", data-open, data-modal and data-mount, and is a one-cell grid holding the scrim and the panel.',
+      'The family’s own box, data-ui="action-sheet": a grid of header, list and footer that spans every row of drawer’s panel, so the list is the one row that scrolls when the sheet reaches its cap. The layer around it is <sl-drawer> with side="bottom" and size="content", which owns the portal, the scrim, the role="dialog" panel, the slide, the drag and the width — here the family’s --slotted-action-sheet-inline-size, handed to the drawer’s sheet through its panel.',
   },
   {
     part: 'trigger',
     element: 'the consumer’s own button with [slActionSheetTrigger]',
     required: false,
     purpose:
-      'The control that opens the sheet, rendered where it is written. aria-haspopup="dialog", aria-expanded and aria-controls. It is also the layer’s branch, so a press on it is not read as a press outside.',
-  },
-  {
-    part: 'backdrop',
-    element: 'div',
-    required: true,
-    purpose:
-      'The scrim, painted only while modal. A scrim promises that the page behind it is inert, and a non-modal sheet keeps the page live.',
-  },
-  {
-    part: 'panel',
-    element: 'div with role="dialog"',
-    required: true,
-    purpose:
-      'The sheet, docked to the bottom edge and centred, at most --slotted-action-sheet-inline-size wide, leaving a strip of scrim above it. Three rows: header, list, footer; only the list scrolls.',
+      'The control that opens the sheet, rendered where it is written. aria-haspopup="dialog", aria-expanded and aria-controls. The sheet hands it to the drawer as the layer’s branch, so a press on it is not read as a press outside.',
   },
   {
     part: 'header',
@@ -348,7 +334,7 @@ const events: EventRow[] = [
   {
     name: 'openChangeRequest',
     payload: 'ActionSheetChangeRequest',
-    when: 'Before the sheet moves, for every way it can: reason is pointer or keyboard from the trigger, select from an item, dismiss from the cancel, escape, outsidePress, back, or programmatic from show() and close(). result carries the chosen item’s value when the reason is select, and cancel() refuses the move.',
+    when: 'Before the sheet moves, for every way it can: reason is pointer or keyboard from the trigger, pointer from a drag of the sheet that asks to close, select from an item, dismiss from the cancel, escape, outsidePress, back, or programmatic from show() and close(). result carries the chosen item’s value when the reason is select, and cancel() refuses the move.',
   },
   {
     name: 'openChange',
@@ -418,6 +404,7 @@ const accessibility = [
   'A screen reader hears the title twice on entry, once for the dialog and once for the menu. Without a name the menu would be anonymous to a reader moving by widget, and the repetition is the cheaper cost.',
   'Focus enters on the first action that can run. When that action is destructive it enters on the cancel, which is the least destructive action the dialog pattern’s first note recommends; with no cancel, on the first action that is not danger. It returns to the element that held it on close, except after a press outside a non-modal sheet, where the reader was going somewhere else.',
   'A disabled or loading action keeps its place in the ring and takes aria-disabled, as the menu pattern requires; a loading one also carries aria-busy. The cancel is never disabled, because a sheet that cannot be left is a trap. Every action is a control’s height tall, which the theme raises to the 44-pixel comfortable target under a coarse pointer; on a phone the label grows from 14 to 16 pixels with it.',
+  'The layer is <sl-drawer>, so the sheet answers everything a drawer from the bottom answers: a touch on its body drags it and a release toward the edge asks to close with the reason pointer, which cancel() refuses like any other close; with the virtual keyboard open the sheet lands above the keys. Nothing of that needs a key: Escape and the cancel are the keyboard’s way out.',
   'A mouse or a pen moving over an action focuses it, so one row is lit whichever device drives; a finger does not, because focus moving under a touch that is about to scroll would light rows at random.',
 ];
 
@@ -426,18 +413,27 @@ const snippets = [
     id: 'action-sheet-angular-anatomy',
     language: 'angular',
     label: 'Anatomy, as it reaches the DOM',
-    source: `<div data-ui="action-sheet" data-part="root" data-mount="active" data-modal data-open>
+    source: `<div data-ui="drawer" data-part="root" data-side="bottom" data-size="content" data-modal data-open>
   <div data-part="backdrop"></div>
-  <div data-part="panel" role="dialog" aria-modal="true" aria-labelledby="s-t">
-    <header data-part="header">
-      <h2 data-part="title" id="s-t">Partilhar relatório</h2>
-    </header>
-    <div data-part="list" role="menu" aria-labelledby="s-t">
-      <button data-part="item" role="menuitem" tabindex="0">
-        <span data-part="label">Copiar ligação</span>
-      </button>
+  <div
+    data-part="panel"
+    role="dialog"
+    tabindex="-1"
+    aria-modal="true"
+    aria-labelledby="s-t"
+    style="--slotted-drawer-sheet-inline-size: var(--slotted-action-sheet-inline-size, 32rem)"
+  >
+    <div data-ui="action-sheet" data-part="root">
+      <header data-part="header">
+        <h2 data-part="title" id="s-t">Partilhar relatório</h2>
+      </header>
+      <div data-part="list" role="menu" aria-labelledby="s-t">
+        <button data-part="item" role="menuitem" tabindex="0">
+          <span data-part="label">Copiar ligação</span>
+        </button>
+      </div>
+      <div data-part="footer"><button data-part="cancel" type="button">Cancelar</button></div>
     </div>
-    <div data-part="footer"><button data-part="cancel" type="button">Cancelar</button></div>
   </div>
 </div>`,
   }),
@@ -445,11 +441,20 @@ const snippets = [
     id: 'action-sheet-theming',
     language: 'css',
     label: 'Retuning the family for an application',
-    source: `[data-ui='action-sheet'] {
+    source: `/* The measure is read by drawer's panel, which is the root's parent, so it is
+   written where both see it: the theme. */
+:root {
   --slotted-action-sheet-inline-size: 28rem;
-  --slotted-action-sheet-radius: var(--slotted-radius-lg);
-  --slotted-action-sheet-scrim: rgb(12 20 40 / 0.6);
+}
+
+[data-ui='action-sheet'] {
   --slotted-action-sheet-footer-surface: transparent;
+  --slotted-action-sheet-highlight: var(--slotted-tone-accent-subtle-hover);
+}
+
+/* The sheet's corner, surface and scrim are drawer's. */
+[data-ui='drawer'] {
+  --slotted-drawer-radius: 12px;
 }`,
   }),
 ];

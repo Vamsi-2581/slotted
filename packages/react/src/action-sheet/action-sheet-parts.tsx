@@ -1,20 +1,26 @@
-import { createDismissableLayer } from '@slotted/core/dismissable-layer';
-import { createFocusScope, createRovingTabindex } from '@slotted/core/focus';
+import { createRovingTabindex } from '@slotted/core/focus';
 import type { RovingTabindexHandle } from '@slotted/core/focus';
-import { createPortalRoot } from '@slotted/core/portal';
 import { createTypeahead, isPrintable } from '@slotted/core/typeahead';
 import type { TypeaheadHandle } from '@slotted/core/typeahead';
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
-import type { ComponentPropsWithRef, KeyboardEvent, MouseEvent, PointerEvent, Ref } from 'react';
-import { createPortal } from 'react-dom';
+import { useEffect, useId, useRef, useState } from 'react';
+import type {
+  ComponentPropsWithRef,
+  CSSProperties,
+  KeyboardEvent,
+  MouseEvent,
+  PointerEvent,
+  Ref,
+} from 'react';
 
+import { DrawerDescription, DrawerPanel, DrawerTitle, DrawerTrigger, useDrawer } from '../drawer';
+import type { DrawerPanelRootProps, DrawerTriggerRootProps } from '../drawer';
 import { useActionSheet } from './action-sheet';
+import { entryTarget, items, ITEM_SELECTOR } from './action-sheet-entry';
 import type {
   ActionSheetCancelProps,
   ActionSheetCancelRootProps,
   ActionSheetContentProps,
   ActionSheetContentRootProps,
-  ActionSheetContextValue,
   ActionSheetGroupLabelProps,
   ActionSheetGroupProps,
   ActionSheetHeaderProps,
@@ -23,7 +29,6 @@ import type {
   ActionSheetListProps,
   ActionSheetMessageProps,
   ActionSheetMessageRootProps,
-  ActionSheetOpenReason,
   ActionSheetSelectEvent,
   ActionSheetSeparatorProps,
   ActionSheetTitleProps,
@@ -32,10 +37,7 @@ import type {
   ActionSheetTriggerRootProps,
 } from './action-sheet.types';
 
-/** Layout on the client, and nothing at all on the server. */
-const useIsomorphicLayoutEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
-
-const ITEM_SELECTOR = "[data-part='item']";
+export { entryTarget };
 
 /** Two refs on one element: the family's, and whatever the consumer passed. */
 function attach<T>(node: T, ...refs: (Ref<T> | undefined)[]) {
@@ -68,9 +70,6 @@ function activationReason(event: MouseEvent): 'pointer' | 'keyboard' {
   return event.detail === 0 ? 'keyboard' : 'pointer';
 }
 
-const items = (list: HTMLElement | null) =>
-  list === null ? [] : [...list.querySelectorAll<HTMLElement>(ITEM_SELECTOR)];
-
 /** What typeahead matches on: what the item says it is, or its label. */
 const textOf = (item: HTMLElement) =>
   item.dataset['textValue'] ??
@@ -78,244 +77,115 @@ const textOf = (item: HTMLElement) =>
   item.textContent?.trim() ??
   '';
 
-const operable = (item: HTMLElement) =>
-  item.dataset['disabled'] === undefined && item.dataset['loading'] === undefined;
-
 /**
- * Where focus enters, from the dialog pattern's first note: the first action
- * that can run, unless it is destructive, in which case the least destructive
- * action — the cancel, or the first action that is not `danger`, or the panel.
+ * The control that opens the sheet: `drawer`'s trigger, which is also the
+ * layer's branch — a press on it counts as inside the layer, or opening would
+ * be read as an outside press and close what it had just opened.
  */
-export function entryTarget(panel: HTMLElement): HTMLElement {
-  const list = panel.querySelector<HTMLElement>("[data-part='list']");
-  const enabled = items(list).filter(operable);
-  const first = enabled[0];
-  if (first !== undefined && first.dataset['tone'] !== 'danger') return first;
-  const cancel = panel.querySelector<HTMLElement>("[data-part='cancel']");
-  if (cancel !== null) return cancel;
-  return enabled.find((item) => item.dataset['tone'] !== 'danger') ?? panel;
+export function ActionSheetTrigger({ render, ...nativeProps }: ActionSheetTriggerProps) {
+  return (
+    <DrawerTrigger
+      {...nativeProps}
+      {...(render === undefined
+        ? {}
+        : {
+            render: (props: DrawerTriggerRootProps) =>
+              render(props as unknown as ActionSheetTriggerRootProps),
+          })}
+    />
+  );
 }
 
 /**
- * The control that opens the sheet. It is also the layer's branch: a press on
- * it counts as inside the layer, or opening would be read as an outside press
- * and close what it had just opened.
+ * The family's measure, handed to `drawer`'s sheet. The stylesheet reads the
+ * same token on the family's root, so the panel and the root are one width.
  */
-export function ActionSheetTrigger({
-  children,
-  onClick,
-  ref,
-  render,
-  ...nativeProps
-}: ActionSheetTriggerProps) {
-  const sheet = useActionSheet();
-
-  const rootProps: ActionSheetTriggerRootProps = {
-    ...nativeProps,
-    'aria-controls': sheet.mounted ? sheet.panelId : undefined,
-    'aria-expanded': sheet.open,
-    'aria-haspopup': 'dialog',
-    children,
-    'data-part': 'trigger',
-    ...(sheet.open ? { 'data-open': '' } : {}),
-    id: nativeProps.id ?? sheet.triggerId,
-    onClick: compose(onClick, (event: MouseEvent<HTMLButtonElement>) => {
-      if (sheet.open) sheet.close(activationReason(event), undefined, event.nativeEvent);
-      else sheet.openWith(activationReason(event), event.nativeEvent);
-    }) as ActionSheetTriggerRootProps['onClick'],
-    ref: (node: HTMLElement | null) => {
-      sheet.nodes.trigger = node;
-      attach(node as HTMLButtonElement | null, ref);
-    },
-    type: 'button',
-  };
-
-  if (render !== undefined) return render(rootProps);
-  return <button {...(rootProps as ActionSheetTriggerProps)} />;
-}
-
-/** Where the layer is placed, and what it inherits once it is there. */
-function usePortalContainer(sheet: ActionSheetContextValue): Element | null {
-  const [container, setContainer] = useState<Element | null>(null);
-
-  useIsomorphicLayoutEffect(() => {
-    if (!sheet.mounted) return;
-    /* The trigger is the origin: its region's scheme, density, theme and
-       direction are the layer's. A sheet opened from code has no trigger, and
-       the document is then the honest origin. */
-    const root = createPortalRoot({
-      origin: sheet.nodes.trigger,
-      ...(sheet.container === undefined ? {} : { container: sheet.container }),
-    });
-    setContainer(root.container);
-    return () => {
-      setContainer(null);
-      root.release();
-    };
-  }, [sheet.container, sheet.mounted, sheet.nodes]);
-
-  return container;
-}
+const MEASURE = {
+  '--slotted-drawer-sheet-inline-size': 'var(--slotted-action-sheet-inline-size, 32rem)',
+} as CSSProperties;
 
 /**
- * The layer, the scrim and the panel. `render` substitutes the panel, which is
- * the element with the role.
+ * `drawer`'s panel, with the family's root inside it. `render` substitutes
+ * the panel, which is the element with the role.
+ *
+ * The panel takes focus when the pointer leaves an item, so one row is never
+ * left lit under a pointer that has moved on; that is what `tabIndex={-1}` is
+ * for, and `Tab` never lands on it.
  */
 export function ActionSheetContent({
   children,
   ref,
   render,
+  style,
   ...nativeProps
 }: ActionSheetContentProps) {
   const sheet = useActionSheet();
-  const portal = usePortalContainer(sheet);
-  const [layer, setLayer] = useState<HTMLElement | null>(null);
-  const [panel, setPanel] = useState<HTMLElement | null>(null);
 
-  const labelled = sheet.titleId !== '' && nativeProps['aria-label'] === undefined;
-
-  const { registerLayer } = sheet;
-  const attachLayer = useCallback(
-    (node: HTMLDivElement | null) => {
-      setLayer(node);
-      registerLayer(node);
-    },
-    [registerLayer],
-  );
-
-  /**
-   * Everything the sheet does while it is open, taken down when it closes
-   * rather than when the node unmounts: `presence` keeps the node through the
-   * exit, and a layer still holding the scroll lock and the page's `inert` for
-   * those milliseconds is a page nobody can touch.
-   */
-  useEffect(() => {
-    if (panel === null || layer === null || !sheet.open) return;
-
-    sheet.lastReason.current = null;
-    const branches = sheet.nodes.trigger === null ? [] : [sheet.nodes.trigger];
-    const dismissable = createDismissableLayer(layer, {
-      /* A history entry is a modal layer's: a sheet the page stays reachable
-         under has no claim on the way back. */
-      back: sheet.modal && sheet.back === 'close',
-      branches,
-      content: panel,
-      escape: sheet.escape === 'close',
-      modal: sheet.modal,
-      onDismiss: (request) => {
-        if (request.reason === 'outsidePress' && sheet.outsidePress === 'none') {
-          return request.cancel();
-        }
-        sheet.close(request.reason as ActionSheetOpenReason, undefined, request.source);
-      },
-      outsidePress: sheet.outsidePress === 'close',
-      /* The click rather than the pointerdown, so a scroll of the page that
-         began on the scrim is not a press on it. */
-      outsidePressEvent: 'click',
-    });
-
-    const origin = panel.ownerDocument.activeElement as HTMLElement | null;
-    const returnTo = sheet.finalFocus;
-    const wanted = sheet.initialFocus;
-    const scope = createFocusScope(panel, {
-      contain: sheet.modal,
-      initial: wanted === false ? false : () => wanted?.current ?? entryTarget(panel),
-      restore:
-        returnTo === false
-          ? false
-          : () => {
-              /* A press on the live page behind a non-modal sheet was the
-                 reader going somewhere; taking focus back would fight them. */
-              if (!sheet.modal && sheet.lastReason.current === 'outsidePress') return null;
-              const target = returnTo?.current ?? origin;
-              const usable =
-                target !== null && target.isConnected && target !== target.ownerDocument.body;
-              return usable ? target : sheet.nodes.trigger;
-            },
-    });
-    scope.enter();
-
-    return () => {
-      scope.destroy();
-      dismissable.destroy();
-    };
-  }, [sheet, layer, panel]);
-
-  if (!sheet.mounted || portal === null) return null;
-
-  const panelProps: ActionSheetContentRootProps = {
-    ...nativeProps,
-    ...(sheet.messageId === '' ? {} : { 'aria-describedby': sheet.messageId }),
-    ...(labelled ? { 'aria-labelledby': sheet.titleId } : {}),
-    ...(sheet.modal ? { 'aria-modal': true } : {}),
-    children,
-    'data-part': 'panel',
-    id: sheet.panelId,
-    ref: (node: HTMLElement | null) => {
-      setPanel(node);
-      sheet.nodes.panel = node;
-      attach(node as HTMLDivElement | null, ref);
-    },
-    role: 'dialog',
-    /* The panel takes focus when the pointer leaves an item, so one row is
-       never left lit under a pointer that has moved on. */
-    tabIndex: -1,
-  };
-
-  const layerNode = (
-    <div
-      data-mount={sheet.mount}
-      data-part="root"
-      data-ui="action-sheet"
-      {...(sheet.modal ? { 'data-modal': '' } : {})}
-      {...(sheet.interactive ? {} : { inert: true })}
-      {...(sheet.visible ? { 'data-open': '' } : {})}
-      ref={attachLayer}
+  return (
+    <DrawerPanel
+      {...nativeProps}
+      ref={(node: HTMLDivElement | null) => {
+        sheet.nodes.panel = node;
+        attach(node, ref);
+      }}
+      style={{ ...MEASURE, ...style }}
+      tabIndex={-1}
+      {...(render === undefined
+        ? {}
+        : {
+            render: (props: DrawerPanelRootProps) =>
+              render(props as unknown as ActionSheetContentRootProps),
+          })}
     >
-      <div data-part="backdrop" />
-      {render === undefined ? (
-        <div {...(panelProps as ActionSheetContentProps)} />
-      ) : (
-        render(panelProps)
-      )}
-    </div>
+      <div data-part="root" data-ui="action-sheet">
+        {children}
+      </div>
+    </DrawerPanel>
   );
-
-  return createPortal(layerNode, portal);
 }
 
 export function ActionSheetHeader(props: ActionSheetHeaderProps) {
   return <header data-part="header" {...props} />;
 }
 
-/** The name of the dialog and of the list. */
+/**
+ * The name of the dialog and of the list: `drawer`'s title, so the panel is
+ * named by it, with the family's own element.
+ */
 export function ActionSheetTitle({ ref, render, ...nativeProps }: ActionSheetTitleProps) {
-  const { announce, baseId } = useActionSheet();
-  useEffect(() => announce('title'), [announce]);
-
-  const rootProps: ActionSheetTitleRootProps = {
-    ...nativeProps,
-    'data-part': 'title',
-    id: `${baseId}title`,
-    ref: (node) => attach(node as HTMLHeadingElement | null, ref),
-  };
-  if (render !== undefined) return render(rootProps);
-  return <h2 {...(rootProps as ActionSheetTitleProps)} />;
+  return (
+    <DrawerTitle
+      {...nativeProps}
+      render={(props) => {
+        const root = {
+          ...props,
+          ref: (node: HTMLElement | null) => attach(node as HTMLHeadingElement | null, ref),
+        } as ActionSheetTitleRootProps;
+        return render === undefined ? <h2 {...(root as ActionSheetTitleProps)} /> : render(root);
+      }}
+    />
+  );
 }
 
-/** The dialog's description. */
+/**
+ * The dialog's description: `drawer`'s, so the panel is described by it, and
+ * `message` in this family's words — `description` is the second line of an
+ * item here, as it is in `menu`.
+ */
 export function ActionSheetMessage({ ref, render, ...nativeProps }: ActionSheetMessageProps) {
-  const { announce, baseId } = useActionSheet();
-  useEffect(() => announce('message'), [announce]);
-
-  const rootProps: ActionSheetMessageRootProps = {
-    ...nativeProps,
-    'data-part': 'message',
-    id: `${baseId}message`,
-    ref: (node) => attach(node as HTMLParagraphElement | null, ref),
-  };
-  if (render !== undefined) return render(rootProps);
-  return <p {...(rootProps as ActionSheetMessageProps)} />;
+  return (
+    <DrawerDescription
+      {...nativeProps}
+      render={(props) => {
+        const root = {
+          ...props,
+          'data-part': 'message',
+          ref: (node: HTMLElement | null) => attach(node as HTMLParagraphElement | null, ref),
+        } as ActionSheetMessageRootProps;
+        return render === undefined ? <p {...(root as ActionSheetMessageProps)} /> : render(root);
+      }}
+    />
+  );
 }
 
 /**
@@ -325,6 +195,7 @@ export function ActionSheetMessage({ ref, render, ...nativeProps }: ActionSheetM
  */
 export function ActionSheetList({ onFocus, onKeyDown, ref, ...nativeProps }: ActionSheetListProps) {
   const sheet = useActionSheet();
+  const { titleId } = useDrawer();
   const [list, setList] = useState<HTMLDivElement | null>(null);
   const roving = useRef<RovingTabindexHandle | null>(null);
   const typeahead = useRef<TypeaheadHandle | null>(null);
@@ -353,12 +224,12 @@ export function ActionSheetList({ onFocus, onKeyDown, ref, ...nativeProps }: Act
     roving.current?.refresh();
   });
 
-  const labelled = sheet.titleId !== '' && nativeProps['aria-label'] === undefined;
+  const labelled = titleId !== '' && nativeProps['aria-label'] === undefined;
 
   return (
     <div
       aria-orientation="vertical"
-      {...(labelled ? { 'aria-labelledby': sheet.titleId } : {})}
+      {...(labelled ? { 'aria-labelledby': titleId } : {})}
       {...nativeProps}
       data-part="list"
       onFocus={compose(onFocus, (event) => {

@@ -55,7 +55,7 @@ const uniqueId = (prefix: string) => `${prefix}-${(nextId += 1)}`;
     '[attr.aria-expanded]': 'sheet().open()',
     '[attr.aria-controls]': 'controls()',
     '[attr.data-open]': "sheet().open() ? '' : null",
-    '[id]': 'sheet().triggerId',
+    '[attr.id]': 'sheet().triggerId()',
     '(click)': 'press($event)',
   },
 })
@@ -65,7 +65,7 @@ export class SlActionSheetTrigger implements OnInit, OnDestroy {
 
   private readonly native: HTMLElement = inject(ElementRef).nativeElement;
   protected readonly controls = computed(() =>
-    this.sheet().mounted() ? this.sheet().panelId : null,
+    this.sheet().mounted() ? this.sheet().panelId() : null,
   );
 
   ngOnInit() {
@@ -100,7 +100,7 @@ export class SlActionSheetHeader {}
 @Directive({
   selector: '[slActionSheetTitle]',
   standalone: true,
-  host: { 'data-part': 'title', '[id]': 'sheet.titleId' },
+  host: { 'data-part': 'title', '[attr.id]': 'sheet.titleId()' },
 })
 export class SlActionSheetTitle implements OnInit, OnDestroy {
   protected readonly sheet = inject(SlActionSheet);
@@ -118,7 +118,7 @@ export class SlActionSheetTitle implements OnInit, OnDestroy {
 @Directive({
   selector: '[slActionSheetMessage]',
   standalone: true,
-  host: { 'data-part': 'message', '[id]': 'sheet.messageId' },
+  host: { 'data-part': 'message', '[attr.id]': 'sheet.messageId()' },
 })
 export class SlActionSheetMessage implements OnInit, OnDestroy {
   protected readonly sheet = inject(SlActionSheet);
@@ -156,7 +156,7 @@ export class SlActionSheetList implements OnInit, AfterContentChecked {
   private readonly typeahead = createTypeahead();
 
   protected readonly labelledBy = computed(() =>
-    this.sheet.hasTitle() && !this.element.hasAttribute('aria-label') ? this.sheet.titleId : null,
+    this.sheet.hasTitle() && !this.element.hasAttribute('aria-label') ? this.sheet.titleId() : null,
   );
 
   constructor() {

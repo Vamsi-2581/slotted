@@ -110,7 +110,7 @@ export interface ActionSheetContentRootProps extends HTMLAttributes<HTMLElement>
   'data-part': 'panel';
 }
 
-/** The layer, the scrim and the panel. `render` substitutes the panel. */
+/** `drawer`'s panel with the family's root inside. `render` substitutes the panel. */
 export interface ActionSheetContentProps extends ComponentPropsWithRef<'div'> {
   render?: (props: ActionSheetContentRootProps) => ReactNode;
 }
@@ -190,33 +190,14 @@ export interface ActionSheetCancelProps extends ComponentPropsWithRef<'button'> 
   render?: (props: ActionSheetCancelRootProps) => ReactNode;
 }
 
+/**
+ * What the family hands its own parts. The layer, the ids the panel is named
+ * by and the open state's presence are `drawer`'s, and its parts read them
+ * from `useDrawer`.
+ */
 export interface ActionSheetContextValue {
-  /** The prefix every generated id of this sheet carries. */
-  baseId: string;
-  back: ActionSheetDismissPolicy;
   cancelLabel: string;
   close: (reason: ActionSheetOpenReason, result: string | undefined, source: unknown) => void;
   closeOnSelect: boolean;
-  container: Element | null | undefined;
-  escape: ActionSheetDismissPolicy;
-  finalFocus: RefObject<HTMLElement | null> | false | undefined;
-  initialFocus: RefObject<HTMLElement | null> | false | undefined;
-  /** Whether the layer takes focus and pointer, a frame ahead of `visible`. */
-  interactive: boolean;
-  messageId: string;
-  modal: boolean;
-  mount: ActionSheetMount;
-  mounted: boolean;
-  nodes: { trigger: HTMLElement | null; panel: HTMLElement | null; list: HTMLElement | null };
-  open: boolean;
-  openWith: (reason: ActionSheetOpenReason, source: unknown) => void;
-  outsidePress: ActionSheetDismissPolicy;
-  panelId: string;
-  /** Why the sheet last asked to close, which decides whether focus returns. */
-  lastReason: RefObject<ActionSheetOpenReason | null>;
-  registerLayer: (node: HTMLElement | null) => void;
-  announce: (part: 'title' | 'message') => () => void;
-  titleId: string;
-  triggerId: string;
-  visible: boolean;
+  nodes: { panel: HTMLElement | null; list: HTMLElement | null };
 }

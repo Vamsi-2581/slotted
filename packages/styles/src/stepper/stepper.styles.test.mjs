@@ -222,3 +222,23 @@ test('restates the statuses forced colours would flatten, and names no system co
     );
   }
 });
+
+/**
+ * A vertical connector leaves the same room at both of its ends. Its end is
+ * measured from the bottom of the item, which is where the next marker
+ * begins, so an end inset of zero drew a rule that stopped short of the
+ * marker above and ran into the marker below: the reviewer read it as
+ * misaligned in every vertical flow, `wizard`'s progress column first.
+ */
+test('leaves the same room above and below a vertical connector', () => {
+  const rule =
+    /\[data-ui='stepper'\]\[data-orientation='vertical'\]\[data-part='separator'\]\{([^}]*)\}/.exec(
+      normalized,
+    );
+  assert.ok(rule, 'no vertical connector rule');
+  const start = /inset-block-start:calc\(var\(--_marker\)\+(.+?)\);/.exec(rule[1]);
+  const end = /inset-block-end:(.+?);/.exec(rule[1]);
+  assert.ok(start && end, 'the connector states both block insets');
+  assert.equal(end[1], start[1], 'the room below the connector differs from the room above it');
+  assert.notEqual(end[1], '0', 'the connector runs into the next marker');
+});

@@ -477,15 +477,23 @@
   }
 
   /**
-   * Down the marker's own centre line, from below the marker to the bottom of
-   * the item — which is where the next one begins. It ran to `--_gap` above
-   * that edge until the capture showed a four-pixel dash: the item is only as
-   * tall as its own header plus the gap to the next, so the two insets met.
+   * Down the marker's own centre line, from below this marker to above the
+   * next one, with the same room at both ends. The bottom of the item is where
+   * the next marker begins, so the end inset is that room and not zero: at
+   * zero the rule stopped short of the marker above and ran into the marker
+   * below, which read as misaligned in every vertical flow.
+   *
+   * The room is its own length rather than `--_gap`, the space between a
+   * marker and its label. A one-line step is its header plus the step gap
+   * tall, and `--_gap` at both ends of a step gap of one rem left a rule of
+   * no length at all; a quarter rem leaves half the step gap drawn.
    */
   [data-ui='stepper'][data-orientation='vertical'] [data-part='separator'] {
+    --_rule-room: var(--slotted-stepper-connector-gap, var(--slotted-space-2, 0.25rem));
+
     inline-size: var(--_rule);
-    inset-block-end: 0;
-    inset-block-start: calc(var(--_marker) + var(--_gap));
+    inset-block-end: var(--_rule-room);
+    inset-block-start: calc(var(--_marker) + var(--_rule-room));
     inset-inline-start: calc(0.5 * (var(--_marker) - var(--_rule)));
     position: absolute;
   }

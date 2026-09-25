@@ -356,6 +356,20 @@ Ordem sugerida: (`chart`, `event-calendar`), (`audit-log`, `workflow-tracker`),
 `dashboard-grid` e `stat-card` passam a usá-lo. Cada bloco segue o formato da
 rodada 21 com "onda 12".
 
+## Rodada 23 — reabertura de `drawer` como bottom sheet · 1 sessão
+
+Sozinha: muda a camada de que `app-shell`, `detail-panel`, `master-detail` e
+`action-sheet` dependem, e revoga uma recusa escrita (`panelDrag`). Começa
+depois da rodada 21 e do passe de revisão que edita `packages/*/drawer`.
+
+```
+/component drawer
+
+Reabertura em docs/process/build-order.md, secção "Reaberturas prometidas por
+escrito", linha drawer: a bottom sheet fiel às nativas de iOS e Android. Em
+seguida, a linha action-sheet da mesma secção.
+```
+
 ## Quantas sessões ao mesmo tempo
 
 Duas é confortável, três é o teto útil. O limite é a revisão humana em cada

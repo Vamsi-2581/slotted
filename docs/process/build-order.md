@@ -87,6 +87,8 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `prose`                         | `scroll-margin-block-start` dos headings soma `--slotted-page-sticky-top` ao ar de `_flow`, como `section` lê a propriedade: um salto nativo (`#id` na URL) aterra sob a chrome de `page`; `table-of-contents` compensa ao rolar por si              | —                                         | `2026-09-16-table-of-contents-design.md` §5                                |
 | `page-header`, `section`        | `deferTo: "anchor-nav"` nos três ponteiros dos contratos passa a `table-of-contents`, o nome com que a família foi entregue                                                                                                                          | —                                         | `2026-09-16-table-of-contents-capability-inventory.md` §5                  |
 | `list-item`                     | hover e press de uma linha cujo alvo é um descendente esticado (`title::after` de `data-list`) sem que outra família escreva `--_fill`: um atributo ou uma parte pública que a linha leia                                                            | —                                         | `2026-09-24-data-list-self-assessment.md` §5                               |
+| `drawer`                        | bottom sheet fiel às nativas com `side="bottom"`: detent pela altura do conteúdo, arraste do painel com passagem de scroll (revoga `panelDrag`), largura máxima em ecrã largo, snap por velocidade, scrim por detent, teclado virtual                | rodada 21; revisão que edita `drawer`     | `2026-09-24-action-sheet-design.md`, pedido pós-gate                       |
+| `action-sheet`                  | compor `drawer` `side="bottom"` em vez de reescrever camada, scrim e deslize, quando a folha de `drawer` medir o conteúdo e tiver largura máxima                                                                                                     | `drawer` (reabertura acima)               | `2026-09-24-action-sheet-design.md` §4.1                                   |
 | `chart`                         | a tela cheia própria (`requestFullscreen` no host, camada fixa) passa a `@slotted/core/fullscreen`: restauro de contexto, `webkit`, portal que segue e erro emitido                                                                                  | —                                         | `2026-09-24-fullscreen-design.md` §7                                       |
 
 As reaberturas sem barreira entram no passe de revisão (`docs/process/implementation-review.md`).
@@ -710,6 +712,14 @@ slNotificationActions]`, `[slNotificationCenterActions | Footer | Empty]`,
 - `action-sheet` — variante de `menu` para toque: ações curtas, cancelamento
   explícito, safe area, modal opcional. Compõe `drawer` com `side="bottom"`.
   Não duplica `dialog` com formulário.
+
+  Entregue em 2026-09-24. Inventário e decisões em
+  `docs/history/designs/2026-09-24-action-sheet-design.md`, autoavaliação em
+  `docs/history/designs/2026-09-24-action-sheet-self-assessment.md`. Diálogo que contém um
+  `menu`; compõe os módulos de `drawer` (`portal`, `dismissable-layer`, `presence`, `focus`)
+  em vez das suas partes, e a recomposição sobre `drawer` está nas reaberturas. React
+  `ActionSheet` e partes; Angular `sl-action-sheet` e `SL_ACTION_SHEET`.
+
 - `fullscreen` — pede e sai de fullscreen nativo, expõe estado e erro, restaura
   o contexto; rótulo e ícone acompanham o estado. Fallback "expandir no layout"
   quando a API não existe. Nunca bloqueia Escape do navegador. Motor:

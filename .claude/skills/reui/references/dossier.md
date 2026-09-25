@@ -49,12 +49,13 @@ changes is compared with the ReUI item captured again at `--width 720`.
 
 `ReUI` and `Slotted hoje` are computed values copied from the specimen JSON.
 `Alvo` is a token, or a literal with the token-foundation section that allows
-it. `Veredicto` is `adotar`, `adaptar`, `superar` or `recusar`, followed by one
-clause naming the evidence.
+it. `Veredicto` is `adotar`, `adaptar`, `superar`, `recusar` or `outra família`,
+followed by one clause naming the evidence; `outra família` names the composed
+family that owns the value.
 
 The minimum property set: height, inline padding, gap, font size, weight, line
-height, letter spacing, radius, border width, icon size, and the rect of every
-part at 1×.
+height, letter spacing, radius, border width, icon size, and the rect at 1× of
+every compared part.
 
 ## 4. Coreografia de estados
 
@@ -76,8 +77,14 @@ and the reduced-motion behaviour, for ReUI and for the Slotted target.
 
 What the ReUI items show the family doing that the Slotted family does not do.
 
-| Capacidade | Onde aparece no ReUI | Veredicto | Família dona, se não esta |
-| ---------- | -------------------- | --------- | ------------------------- |
+| Capacidade | Onde aparece no ReUI | Forma no ReUI | Forma no Slotted | Em que a forma Slotted é melhor | Veredicto | Família dona, se não esta |
+| ---------- | -------------------- | ------------- | ---------------- | ------------------------------- | --------- | ------------------------- |
+
+`Forma` is the consumer-facing API: props, parts, events, state ownership.
+`Forma no Slotted` follows `/component` (`references/frameworks.md`), not the
+ReUI shape. `Em que a forma Slotted é melhor` names one concrete respect —
+composition, native API, accessibility, state ownership, framework idiom — or
+states that the two shapes coincide.
 
 `Veredicto` is `adotar`, `adaptar`, `recusar` or `adiar para <família>`, the
 Portuguese of `adopt`, `adapt`, `decline` and `defer to <family>` in
@@ -106,4 +113,5 @@ A state the harness page does not render gets a row that adds its scene,
 placed before the row that changes the state.
 
 A row that edits `specs/components/<family>/contract.json` is marked
-`contrato`; its presence moves a `polish` run to `build`.
+`contrato`; its presence moves a `polish` run to `build`. A row that edits a
+composed family's files is marked `outra família`.

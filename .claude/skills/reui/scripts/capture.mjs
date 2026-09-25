@@ -18,6 +18,7 @@
  * marker is absent after 20 seconds, or when the state selector matches no
  * rendered element.
  */
+import { createHash } from 'node:crypto';
 import { chmod, mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -43,6 +44,9 @@ const PROPERTIES = [
   'column-gap',
   'row-gap',
   'border-top-width',
+  'border-bottom-width',
+  'border-inline-start-width',
+  'border-inline-end-width',
   'border-top-style',
   'border-top-color',
   'border-bottom-color',
@@ -54,6 +58,9 @@ const PROPERTIES = [
   'box-shadow',
   'opacity',
   'transform',
+  'rotate',
+  'translate',
+  'scale',
   'filter',
   'backdrop-filter',
   'outline-style',
@@ -66,6 +73,9 @@ const PROPERTIES = [
   'line-height',
   'letter-spacing',
   'text-decoration-line',
+  'text-decoration-color',
+  'text-decoration-thickness',
+  'text-underline-offset',
   'font-variant-numeric',
   'cursor',
   'transition-property',
@@ -75,6 +85,8 @@ const PROPERTIES = [
   'animation-name',
   'animation-duration',
   'animation-timing-function',
+  'content',
+  'inset',
 ];
 
 const STATES = {
@@ -95,6 +107,7 @@ const { values, positionals } = parseArgs({
     style: { type: 'string', default: 'nova' },
     theme: { type: 'string', default: 'light' },
     width: { type: 'string', default: '1280' },
+    click: { type: 'string', multiple: true, default: [] },
     states: { type: 'string' },
     limit: { type: 'string', default: '6' },
     out: { type: 'string' },
@@ -104,7 +117,7 @@ const { values, positionals } = parseArgs({
 const [item] = positionals;
 if (!item && !values.family) {
   console.error(
-    'usage: capture.mjs (<item> | --family <slotted-family> [--density comfortable|compact|dense] [--dir ltr|rtl]) [--base base|radix] [--style nova] [--theme light|dark|high-contrast] [--width 1280] [--motion no-preference|reduce] [--forced-colors none|active] [--states <selector>] [--limit 6] [--out <dir>]',
+    'usage: capture.mjs (<item> | --family <slotted-family> [--density comfortable|compact|dense] [--dir ltr|rtl]) [--base base|radix] [--style nova] [--theme light|dark|high-contrast] [--width 1280] [--motion no-preference|reduce] [--forced-colors none|active] [--click <selector>]... [--states <selector>] [--limit 6] [--out <dir>]',
   );
   process.exit(1);
 }
@@ -121,13 +134,18 @@ const url = values.family
     }).href
   : `https://reui.io/preview/${values.base}/${route}${item}?embed=1&style=${values.style}&theme=${values.theme}`;
 const outDir = resolve(values.out ?? join(REPO, 'tools/harness/out/reui', values.family ?? item));
-/* Every axis that changes the picture is in the name, so two runs never overwrite each other. */
+/*
+ * Every axis that changes the picture is in the name, so two runs never
+ * overwrite each other. A selector is shortened for reading and hashed for
+ * uniqueness: two selectors that share a prefix still land in two files.
+ */
 const slug = (text) =>
-  text
+  `${text
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
-    .slice(0, 40);
+    .slice(0, 24)
+    .replace(/-+$/, '')}-${createHash('sha1').update(text).digest('hex').slice(0, 6)}`;
 const stem = [
   values.family ? 'slotted' : values.style,
   values.theme,
@@ -136,6 +154,7 @@ const stem = [
   values.family && values.dir !== 'ltr' ? values.dir : undefined,
   values.motion !== 'no-preference' ? `motion-${values.motion}` : undefined,
   values['forced-colors'] !== 'none' ? 'forced' : undefined,
+  values.click.length > 0 ? `click-${slug(values.click.join(' '))}` : undefined,
   values.states ? slug(values.states) : undefined,
 ]
   .filter(Boolean)
@@ -206,7 +225,8 @@ const readStyles = (selector) => `(() => {
       aria: Object.fromEntries([...element.attributes].filter((a) => a.name.startsWith('aria-') || a.name.startsWith('data-')).map((a) => [a.name, a.value])),
       text: (element.textContent ?? '').trim().replace(/\\s+/g, ' ').slice(0, 60),
       class: typeof element.className === 'string' ? element.className : element.getAttribute('class'),
-      focusable: element.matches('a[href], button, input, select, textarea, summary, [tabindex], [contenteditable=""], [contenteditable="true"]') && !element.matches(':disabled, [tabindex="-1"]'),
+      /* tabindex="-1" counts: a part focused from script still paints its focus state. */
+      focusable: element.matches('a[href], button, input, select, textarea, summary, [tabindex], [contenteditable=""], [contenteditable="true"]') && !element.matches(':disabled'),
       /* The first opaque background behind the element: the colour a focus ring or a hover step is read against. */
       ground: (() => {
         /* Opaque means no alpha channel in the serialisation: rgb(...), or a colour function without ' / α'. */
@@ -220,6 +240,11 @@ const readStyles = (selector) => `(() => {
       })(),
       rect: { x: Math.round(rect.x * 100) / 100, y: Math.round(rect.y * 100) / 100, width: Math.round(rect.width * 100) / 100, height: Math.round(rect.height * 100) / 100 },
       style: Object.fromEntries(properties.map((name) => [name, computed.getPropertyValue(name)])),
+      /* A pseudo-element that paints (content other than none) carries a hit area, a halo or an indicator. */
+      pseudo: Object.fromEntries(['::before', '::after'].flatMap((pseudo) => {
+        const styles = getComputedStyle(element, pseudo);
+        return ['none', 'normal'].includes(styles.content) ? [] : [[pseudo, Object.fromEntries(properties.map((name) => [name, styles.getPropertyValue(name)]))]];
+      })),
     };
   }).filter((entry) => entry.rect.width > 0 && entry.rect.height > 0);
 })()`;
@@ -265,6 +290,48 @@ try {
   if (ready === 'timeout')
     throw new Error(`${url} never set data-preview-ready within ${READY_TIMEOUT}ms, twice`);
   await evaluate('document.fonts.ready.then(() => true)');
+
+  /*
+   * The ready marker fires when the item commits, and icon components can still
+   * swap placeholders for glyphs after it. The page counts as painted when the
+   * node count, the svg count and the number of complete images hold for two
+   * consecutive 250ms windows, within 5 seconds.
+   */
+  async function settle() {
+    let previous = '';
+    let stable = 0;
+    for (let tick = 0; tick < 20 && stable < 2; tick += 1) {
+      await wait(250);
+      const now = await evaluate(
+        `[document.querySelectorAll('*').length, document.querySelectorAll('svg').length, [...document.images].filter((i) => i.complete).length].join()`,
+      );
+      stable = now === previous ? stable + 1 : 0;
+      previous = now;
+    }
+  }
+  await settle();
+
+  /* A state behind an interaction — an open menu, a second step — is reached by real clicks, in order. */
+  for (const target of values.click) {
+    const point = await evaluate(`(() => {
+      const element = document.querySelector(${JSON.stringify(target)});
+      if (!element) return null;
+      element.scrollIntoView({ block: 'center' });
+      const r = element.getBoundingClientRect();
+      return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+    })()`);
+    if (!point) throw new Error(`--click ${target}: no element matches`);
+    await devtools.send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...point });
+    for (const type of ['mousePressed', 'mouseReleased']) {
+      await devtools.send('Input.dispatchMouseEvent', {
+        type,
+        ...point,
+        button: 'left',
+        clickCount: 1,
+      });
+    }
+    await settle();
+  }
 
   const height = await evaluate('Math.ceil(document.documentElement.scrollHeight)');
   await devtools.send('Emulation.setDeviceMetricsOverride', {
@@ -369,12 +436,18 @@ try {
         await devtools.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: forced });
         await wait(50);
         const [now] = await evaluate(readStyles(marked));
-        record.deltas[state] = Object.fromEntries(
+        const changed = (before = {}, after = {}, prefix = '') =>
           PROPERTIES.filter(
-            (name) =>
-              !/^(transition|animation)-/.test(name) && now.style[name] !== entry.style[name],
-          ).map((name) => [name, [entry.style[name], now.style[name]]]),
-        );
+            (name) => !/^(transition|animation)-/.test(name) && before[name] !== after[name],
+          ).map((name) => [`${prefix}${name}`, [before[name], after[name]]]);
+        record.deltas[state] = Object.fromEntries([
+          ...changed(entry.style, now.style),
+          ...['::before', '::after'].flatMap((pseudo) =>
+            entry.pseudo[pseudo] || now.pseudo[pseudo]
+              ? changed(entry.pseudo[pseudo], now.pseudo[pseudo], `${pseudo} `)
+              : [],
+          ),
+        ]);
         record.pictures[state] = await screenshot(`${stem}-${index}-${state}.png`, clip);
         await devtools.send('CSS.forcePseudoState', {
           nodeId: await nodeAt(index),

@@ -188,6 +188,13 @@ export const RUNTIME_PROPERTY_PREFIXES = [
    * scrolls. It is a fact about the page the tour stands over.
    */
   '--slotted-tour-target-',
+  /**
+   * `observeKeyboardInset` in `@slotted/core/measure` — how much of the layout viewport the
+   * virtual keyboard covers, read from `visualViewport`. An open overlay layer
+   * writes it on its own root so what it holds lands above the keys. It is a
+   * fact about the device at this moment, which no theme can hold.
+   */
+  '--slotted-keyboard-inset',
 ];
 
 /** Whether a custom property is written by script rather than by a theme. */

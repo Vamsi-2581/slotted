@@ -120,6 +120,7 @@ test('names every runtime prefix once, where a family can find the reason', () =
     '--slotted-chart-frame-start',
     '--slotted-chart-frame-size',
     '--slotted-tour-target-',
+    '--slotted-keyboard-inset',
   ]);
   assert.equal(isRuntimeProperty('--slotted-positioner-arrow-x'), true);
   assert.equal(isRuntimeProperty('--slotted-space-4'), false);

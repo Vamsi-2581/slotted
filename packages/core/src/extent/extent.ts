@@ -284,3 +284,104 @@ export function extentBounds(
   if (stops.length === 0) return { min: clamp(min, 0, 1), max: clamp(max, 0, 1) };
   return { min: stops[0] as number, max: stops.at(-1) as number };
 }
+
+/**
+ * A release faster than this, in pixels per second, goes to the next stop in
+ * the direction it was travelling, whatever the distance it covered.
+ *
+ * It is `DEFAULT_SIGNIFICANT_VEL_THRESHOLD` of Material's
+ * `BottomSheetBehavior`; Vaul takes 400 and MUI's `SwipeableDrawer` 450. A
+ * length per second and not a fraction of the layer, because a flick is a
+ * speed of the hand and the hand does not know how tall the layer is: half a
+ * layer per second was 200 pixels per second on a phone held sideways, which
+ * closed a sheet on a slow drag.
+ */
+export const SHEET_FLING_PX_PER_S = 500;
+
+/**
+ * How far a touch travels before the sheet decides whether the gesture is its
+ * own, a scroll, or a sideways swipe it never takes. Android's touch slop.
+ */
+export const SHEET_DRAG_SLOP_PX = 8;
+
+export interface SettleRequest {
+  /** Where the panel was when the hand left, as a fraction. */
+  readonly fraction: number;
+  /** Fractions per second, positive while growing. */
+  readonly velocity: number;
+  /** The layer's length along the panel's axis, in pixels. */
+  readonly span: number;
+  /** The stops the panel may rest on. */
+  readonly stops: readonly number[];
+  /** Whether the closed position is a stop. */
+  readonly dismissible?: boolean;
+}
+
+/**
+ * Where a released panel comes to rest: a stop, or `'close'`.
+ *
+ * The closed position is the stop `0`, which is the whole of the dismissal
+ * rule — a sheet released nearer to closed than to its lowest stop closes, the
+ * reading `BottomSheetBehavior`'s hide threshold and Vaul's close threshold
+ * both make. A fling faster than `SHEET_FLING_PX_PER_S` goes to the first stop
+ * beyond the release in the direction of travel; anything slower goes to the
+ * stop nearest where the release was heading.
+ */
+export function settleExtent({
+  dismissible = true,
+  fraction,
+  span,
+  stops,
+  velocity,
+}: SettleRequest): number | 'close' {
+  const ordered = orderSnapPoints(stops).filter((stop) => stop > 0);
+  const candidates = dismissible ? [0, ...ordered] : ordered;
+  if (candidates.length === 0) return clamp(fraction, 0, 1);
+
+  let landed: number;
+  if (Math.abs(velocity * span) >= SHEET_FLING_PX_PER_S) {
+    landed =
+      velocity > 0
+        ? (candidates.find((stop) => stop > fraction + Number.EPSILON) ??
+          (candidates.at(-1) as number))
+        : ([...candidates].reverse().find((stop) => stop < fraction - Number.EPSILON) ??
+          (candidates[0] as number));
+  } else {
+    landed = nearestSnap(projectExtent({ fraction, velocity }), candidates);
+  }
+
+  return landed === 0 && dismissible ? 'close' : landed;
+}
+
+/**
+ * Where a panel pulled past its highest stop is drawn: it follows the hand with
+ * friction that grows with the distance, and the release puts it back. Compose,
+ * Vaul, Ionic and gorhom all resist rather than stop dead, because a sheet that
+ * ignores the hand reads as a sheet that has stopped responding.
+ */
+export function dampenExtent(fraction: number, max: number): number {
+  if (fraction <= max) return fraction;
+  return Math.min(1, max + Math.log1p((fraction - max) * 8) / 20);
+}
+
+/**
+ * The stops a sheet rests on: the consumer's snap points, and the height of
+ * its content when the size step is `content` — the stop gorhom's dynamic
+ * sizing adds. With neither, the rest the panel is at is the only stop, so a
+ * sheet dragged by its body goes back to where it was or closes.
+ */
+export function sheetStops({
+  rest,
+  restIsStop,
+  snapPoints,
+}: {
+  readonly rest: number | undefined;
+  readonly restIsStop: boolean;
+  readonly snapPoints: readonly number[];
+}): number[] {
+  const stops = orderSnapPoints(snapPoints);
+  if (rest !== undefined && (restIsStop || stops.length === 0)) {
+    return orderSnapPoints([...stops, rest]);
+  }
+  return stops;
+}

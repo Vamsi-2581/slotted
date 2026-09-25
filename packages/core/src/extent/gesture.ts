@@ -1,3 +1,5 @@
+import { sheetStops } from './extent';
+
 /**
  * What a resize gesture does to the document while the pointer is down, and
  * undoes when it comes up.
@@ -13,6 +15,7 @@
  * who had set either keeps it. This is the one file in `@slotted/core/extent`
  * that touches the DOM; the arithmetic beside it touches none.
  */
+
 export type ResizeCursor = 'col-resize' | 'row-resize';
 
 /**
@@ -72,4 +75,77 @@ export function measureLength(value: string, against: HTMLElement): number {
   probe.remove();
 
   return pixels;
+}
+
+/**
+ * How tall a panel would be if it measured its content, whatever it measures
+ * now: its own height, less the scrolling row's box, plus everything that row
+ * holds. It is the content stop of a sheet, read when a gesture or a key needs
+ * it rather than kept, because content changes while a sheet is open.
+ */
+export function contentLength(panel: HTMLElement, body: HTMLElement | null): number {
+  if (body === null) return panel.scrollHeight;
+  return panel.offsetHeight - body.clientHeight + body.scrollHeight;
+}
+
+/** Two fractions a rounding apart are the same stop. */
+const SAME_STOP = 0.002;
+
+/**
+ * The stops a sheet rests on and its rest among them, measured now.
+ *
+ * Under `content` the rest is the height of what the panel holds, capped where
+ * the stylesheet caps it — `reserve` short of the layer, a length the caller
+ * reads from its own stylesheet. Otherwise the rest is what the panel measures
+ * while nothing has moved it, and `rest` is the last such measurement.
+ */
+export function measureSheetStops({
+  atRest,
+  content,
+  panel,
+  reserve,
+  rest,
+  snapPoints,
+  span,
+}: {
+  readonly atRest: boolean;
+  readonly content: boolean;
+  readonly panel: HTMLElement;
+  readonly reserve: string;
+  readonly rest: number | undefined;
+  readonly snapPoints: readonly number[];
+  readonly span: number;
+}): { rest: number | undefined; stops: number[] } {
+  if (span <= 0) return { rest: undefined, stops: [] };
+  let measured = rest;
+  if (content) {
+    const body = panel.querySelector<HTMLElement>(':scope > [data-part="body"]');
+    const cap = span - measureLength(reserve, panel);
+    measured = Math.min(contentLength(panel, body), cap) / span;
+  } else if (atRest) {
+    measured = panel.offsetHeight / span;
+  }
+  return {
+    rest: measured,
+    stops: sheetStops({ rest: measured, restIsStop: content, snapPoints }),
+  };
+}
+
+/**
+ * What a settled fraction is asked as. The content stop is `undefined`, so the
+ * sheet follows its content again when the content grows.
+ */
+export function stopAsExtent(
+  fraction: number,
+  rest: number | undefined,
+  content: boolean,
+): number | undefined {
+  return content && rest !== undefined && Math.abs(fraction - rest) < SAME_STOP
+    ? undefined
+    : fraction;
+}
+
+/** Whether two fractions name the same stop. */
+export function sameStop(a: number, b: number): boolean {
+  return Math.abs(a - b) < SAME_STOP;
 }

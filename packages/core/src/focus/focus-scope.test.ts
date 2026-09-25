@@ -252,22 +252,22 @@ describe('createFocusScope', () => {
   /**
    * The same move made by a layer that was there first: a tour whose step
    * opened this dialog is raised back over it, which moves it after the
-   * dialog in the document. A page that already followed the layer when the
-   * scope was made is still the page.
+   * dialog in the document — before or after this scope was made. The page
+   * the modal layer made inert is out of focus's reach either way.
    */
-  it('lets focus go to a layer raised over it, and not to what already followed it', () => {
+  it('lets focus go to a layer raised over it, whenever it was raised', () => {
     document.body.innerHTML =
-      '<div id="tour"><button>next</button></div><div id="layer"><button>a</button></div><div id="after"><button>late</button></div>';
+      '<div id="page"><button>page</button></div><div id="tour"><button>next</button></div><div id="layer"><button>a</button></div>';
     const tour = document.getElementById('tour') as HTMLElement;
     const layer = document.getElementById('layer') as HTMLElement;
+    document.body.append(tour);
     const scope = createFocusScope(layer);
     scope.enter();
 
-    document.body.append(tour);
     (tour.querySelector('button') as HTMLElement).focus();
     expect(tour.contains(document.activeElement)).toBe(true);
 
-    (document.querySelector('#after button') as HTMLElement).focus();
+    (document.querySelector('#page button') as HTMLElement).focus();
     expect(layer.contains(document.activeElement)).toBe(true);
     scope.destroy();
   });

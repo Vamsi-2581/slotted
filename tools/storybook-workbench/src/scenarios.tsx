@@ -131,8 +131,13 @@ const capabilityApi = {
    * every surveyed implementation calls it. A proportion is a quantity the
    * consumer states and the family draws, and it has no extent: there is no
    * `max` a ratio is measured against, so a page for it is not asked for one.
+   *
+   * `rating`'s summary states a distribution — how many readings each level
+   * has — and calls it `counts`. It is not one value, and a `data` that held a
+   * count per level would be the one prop in the family named for nothing it
+   * holds; the summary draws it against its levels, so `max` is still asked.
    */
-  measurement: [['value', 'data', 'ratio']],
+  measurement: [['value', 'data', 'ratio', 'counts']],
   /**
    * Nothing, for the reason `content` asks for nothing. `alert` names the axis
    * `live` because the box itself becomes a live region; `toast` names it

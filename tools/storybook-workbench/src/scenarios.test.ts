@@ -184,9 +184,19 @@ describe('workbench scenario metadata', () => {
       ]),
     ).toEqual([]);
     expect(apiMetadataErrors({ capabilities: ['measurement'], defaults: {} }, [])).toEqual([
-      'missing API value or data or ratio',
+      'missing API value or data or ratio or counts',
       'missing API max',
     ]);
+  });
+
+  /** A distribution is a count per level, and `rating`'s summary calls it `counts`. */
+  it('lets a measured distribution be called counts, drawn against its levels', () => {
+    expect(
+      apiMetadataErrors({ capabilities: ['measurement'], defaults: {} }, [
+        { name: 'counts', defaultValue: '—' },
+        { name: 'max', defaultValue: '5' },
+      ]),
+    ).toEqual([]);
   });
 
   /** A proportion is a measurement with no extent, so `ratio` owes no `max`. */

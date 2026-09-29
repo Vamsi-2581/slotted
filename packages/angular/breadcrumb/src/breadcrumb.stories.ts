@@ -236,6 +236,7 @@ export const Content: Story = {
          <li slBreadcrumbItem><span slBreadcrumbPage>Dashboard</span></li>
        </ol>
      </nav>`,
+    'block',
   )}
 </div>`,
   }),

@@ -19,7 +19,7 @@ Desenho: `2026-09-29-breadcrumb-rebuild-design.md`. Dossiê ReUI:
 | 8. API nativa | React: `ComponentPropsWithRef<'button'>`, `render`, `ref`, handler composto com o de `MenuTrigger` (teste); Angular: componente no `button` do consumidor, `HostAttributeToken` para `type` e `aria-current`, `data-part` reposto após `slMenuTriggerFor` (teste) | — | — |
 | 9. Capacidade | inventário do desenho §1: seletor, colapso por largura, glifo/contagem no crumb adotados; `disabled` e `collapsedState` recusados com dono | relatar a contagem dobrada por evento, como `toolbar` | não: `data-collapsed` e o nome da reticência já a expõem; nenhum consumidor da demo precisa do evento |
 | 10. Ecossistema | `overflow` no `BreadcrumbDefaultsProvider` e em `provideBreadcrumbDefaults`; `createCollapse` libertado no cleanup do efeito e no `DestroyRef` | — | — |
-| 11. Documentação | cenários `switcher` e `overflow` nas duas páginas; anatomia `trigger`; `overflow` e `current` nas tabelas; React lido renderizado a 1280 claro e escuro, `audit.mjs` sem achados a 1280 e 620 | ler a página Angular renderizada | pendente: o Storybook Angular serve o módulo anterior e precisa de reinício |
+| 11. Documentação | cenários `switcher` e `overflow` nas duas páginas; anatomia `trigger`; `overflow` e `current` nas tabelas; as duas páginas lidas renderizadas (React no 6006, Angular numa instância nova no 6017, porque o 6007 servia o módulo anterior); `audit.mjs` sem achados a 1280 e 620 nas duas | cena "One crumb" num palco `block`: num `stack` a trilha encolhia a 66px e o `audit.mjs` acusava-a | feita |
 
 ## Craft bar
 

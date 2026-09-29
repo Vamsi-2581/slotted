@@ -205,6 +205,7 @@ export const Content: Story = {
       </Scene>
       <Scene
         label="One crumb"
+        layout="block"
         note="A trail whose only crumb is the page itself draws no separator, and the landmark keeps its name."
       >
         <Trail levels={[]} />

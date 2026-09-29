@@ -28,16 +28,33 @@ test('renders the landmark the pattern asks for', () => {
   assert.equal(breadcrumb.defaults.label, 'Breadcrumb');
 });
 
-test('names the seven parts a trail is made of', () => {
+test('names the eight parts a trail is made of', () => {
   assert.deepEqual(breadcrumb.parts, [
     'root',
     'list',
     'item',
     'link',
     'page',
+    'trigger',
     'separator',
     'ellipsis',
   ]);
+});
+
+/**
+ * A crumb that switches between siblings — the organisation, the project, the
+ * environment — is a `button` that opens a `menu`. It is its own part because a
+ * `link` is an `a`, and an `a` without `href` cannot take focus. The menu is the
+ * consumer's composition; the trail owns how the crumb looks and that the
+ * current one still says it is the page.
+ */
+test('lets a crumb open a menu of its siblings without losing aria-current', () => {
+  assert.equal(contract.trigger.element, 'button');
+  assert.equal(contract.trigger.composes, 'menu');
+  assert.equal(contract.trigger.current, 'aria-current');
+  assert.equal(contract.trigger.glyph, 'chevron-down');
+  assert.equal(contract.trigger.keyboard, 'menu');
+  assert.ok(breadcrumb.states.includes('open'));
 });
 
 /**
@@ -92,13 +109,31 @@ test('gives the collapse a controlled and uncontrolled pair', () => {
     reasons: ['pointer', 'keyboard'],
   });
   assert.equal(breadcrumb.defaults.defaultExpanded, false);
-  assert.deepEqual(contract.stateAttributes, { expanded: 'data-expanded' });
+  assert.deepEqual(contract.stateAttributes, { expanded: 'data-expanded', open: 'data-open' });
 });
 
 /**
  * The ellipsis stops existing the moment it is pressed, so focus has to be
  * given somewhere. Leaving it on a removed element loses it to the body.
  */
+/**
+ * A trail that does not fit its width folds its middle crumbs into the same
+ * ellipsis the count collapses into. What folded is read from the layout, so it
+ * is not a value a consumer owns; `wrap` keeps the older behaviour.
+ */
+test('folds the crumbs that do not fit into the ellipsis', () => {
+  assert.ok(breadcrumb.capabilities.includes('overflow'));
+  assert.deepEqual(contract.axes, { overflow: ['collapse', 'wrap'] });
+  assert.deepEqual(contract.resolution, { overflow: ['prop', 'defaults', 'collapse'] });
+  assert.equal(breadcrumb.defaults.overflow, 'collapse');
+  assert.ok(contract.provides.breadcrumbDefaults.includes('overflow'));
+  assert.match(contract.collapse.measurement, /@slotted\/core\/overflow/);
+  assert.match(contract.collapse.order, /nearest the root/);
+  assert.match(contract.collapse.expanded, /does not fold/);
+  assert.match(contract.collapse.reports, /data-collapsed/);
+  assert.ok(!('overflow' in contract.stateModel));
+});
+
 test('says where focus lands once the trail expands', () => {
   assert.equal(contract.collapse.focusAfterExpand, 'the first revealed link');
 
@@ -127,7 +162,13 @@ test('names an owner for everything it declines', () => {
     assert.ok(decline.deferTo, `${capability} declines and names no owner`);
     assert.ok(decline.reason.length > 40, `${capability} declines without a reason`);
   }
-  assert.deepEqual(Object.keys(contract.declined), ['skeleton', 'size', 'menu']);
+  assert.deepEqual(Object.keys(contract.declined), [
+    'skeleton',
+    'size',
+    'menu',
+    'collapsedState',
+    'disabled',
+  ]);
 });
 
 test('names one scenario page for the family', () => {
@@ -140,6 +181,8 @@ test('names one scenario page for the family', () => {
     'context',
     'content',
     'composition',
+    'switcher',
+    'overflow',
     'keyboard',
   ]);
 });

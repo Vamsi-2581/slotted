@@ -1841,6 +1841,14 @@
       "forcedColor": "CanvasText"
     },
     {
+      "name": "--slotted-rating-edge",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
       "name": "--slotted-avatar-size-xs",
       "layer": "component",
       "axis": "density",

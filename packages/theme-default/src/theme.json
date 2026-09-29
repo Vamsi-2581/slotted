@@ -234,7 +234,8 @@
       "--slotted-code-punctuation": "#475569",
       "--slotted-code-tag": "#be123c",
       "--slotted-code-attribute": "#0369a1",
-      "--slotted-code-constant": "#9a3412"
+      "--slotted-code-constant": "#9a3412",
+      "--slotted-rating-edge": "transparent"
     },
     "dark": {
       "--slotted-focus-ring-color": "#60a5fa",
@@ -334,7 +335,8 @@
       "--slotted-code-punctuation": "#cbd5e1",
       "--slotted-code-tag": "#fb7185",
       "--slotted-code-attribute": "#7dd3fc",
-      "--slotted-code-constant": "#fb923c"
+      "--slotted-code-constant": "#fb923c",
+      "--slotted-rating-edge": "transparent"
     },
     "high-contrast": {
       "--slotted-focus-ring-color": "#000000",
@@ -434,7 +436,8 @@
       "--slotted-code-punctuation": "#1e293b",
       "--slotted-code-tag": "#881337",
       "--slotted-code-attribute": "#0c4a6e",
-      "--slotted-code-constant": "#7c2d12"
+      "--slotted-code-constant": "#7c2d12",
+      "--slotted-rating-edge": "#000000"
     }
   },
   "densities": {

@@ -22,7 +22,7 @@ convention.
 | ----------- | -------------------------------------------------------------- | ------ |
 | `primitive` | A value with no meaning attached: a step on a scale.           | 115    |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 112    |
-| `component` | One family adjusting a semantic value for itself.              | 27     |
+| `component` | One family adjusting a semantic value for itself.              | 28     |
 
 A token is a **scale root** when it states a value rather than composing one: a
 primitive, a colour a scheme paints, or the geometry a density defines. Every
@@ -821,6 +821,7 @@ that reads a semantic token keeps working without writing a rule of its own.
 | `--slotted-code-tag`                 | `CanvasText`   |
 | `--slotted-code-attribute`           | `CanvasText`   |
 | `--slotted-code-constant`            | `CanvasText`   |
+| `--slotted-rating-edge`              | `CanvasText`   |
 
 Every tone maps by rule rather than by row: `accent` is the selected tone and
 takes `Highlight` and `HighlightText`; the other four take `ButtonFace` and
@@ -999,6 +1000,30 @@ an aside in the same voice the page uses for one; the other eleven are hues the
 semantic layer does not hold. Under forced colours the whole scale is
 `CanvasText`: the system owns the palette, and code is then read by its shape,
 which is what `prose` decided for a fence.
+
+## Rating edge
+
+This token answers what edge a rating symbol is drawn with, and it is in the
+component layer because no semantic token varies the way it has to: absent in
+`light` and `dark`, black in `high-contrast`.
+
+| Token                   | Light         | Dark          | High contrast |
+| ----------------------- | ------------- | ------------- | ------------- |
+| `--slotted-rating-edge` | `transparent` | `transparent` | `#000000`     |
+
+`rating` draws a lit star as one solid shape in the tone's solid step and an
+unlit star as the same shape in `--slotted-tone-secondary-surface`. In
+`high-contrast` every tone ground is the page's white, so the unlit star would
+vanish and the lit one would be a yellow shape on white at 1.5:1; the edge
+draws both shapes in black there. `--slotted-current-edge` has the same values
+and names the edge of the row the reader is on, so it is not borrowed.
+
+In `light` and `dark` the lit star stands at 1.53:1 against a white page and the
+unlit one at 1.2:1. The row is identified by its shape, its count and the value
+the family writes beside it or in its accessible name, which is the reading
+`--slotted-control-border-color` settled for the edge of a control; the scheme
+that promises the ratio is `high-contrast`, and it keeps it. Under forced
+colours the edge is `CanvasText`.
 
 ## Rules for component tokens and containers
 

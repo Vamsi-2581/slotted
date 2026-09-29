@@ -208,14 +208,51 @@ test('paints focus and nothing else', () => {
 });
 
 /**
- * The family animates nothing. There is no state change here for an eye to
- * follow: a focus indicator that fades in is a focus indicator that is not
- * there yet, and every other change to this region is the consumer replacing
- * its content.
+ * The arrival is the message, so a live region enters and a hidden one leaves
+ * (`docs/history/designs/2026-09-25-result-state-reui-dossier.md` § 5). The
+ * entry is gated on `live` for `alert`'s reason: `@starting-style` applies on
+ * first paint as well, and a region that is not announcing is not arriving.
+ * Every duration and curve is a motion token, which is what lets the theme
+ * collapse them under reduced motion.
  */
-test('animates nothing, and says so rather than leaving a duration out by accident', () => {
-  assert.doesNotMatch(normalized, /transition:/);
-  assert.doesNotMatch(normalized, /animation:/);
+test('enters when it announces and leaves when it is hidden, on motion tokens alone', () => {
+  assert.match(
+    normalized,
+    /@starting-style\{\[data-ui='result-state'\]\[data-part='root'\]:is\(\[data-live='polite'\],\[data-live='assertive'\]\)/,
+  );
+  const hidden = rule(`${root}[hidden]`);
+  assert.match(hidden, /display:none/);
+  assert.match(hidden, /--slotted-easing-exit/);
+  assert.match(rule(root), /--slotted-easing-enter/);
+  assert.match(rule(root), /transition-behavior:allow-discrete/);
+  for (const match of normalized.matchAll(/transition:([^;}]+)/g)) {
+    assert.doesNotMatch(
+      match[1] ?? '',
+      /\ball\b|\d+m?s\b/,
+      'a transition names all or a literal time',
+    );
+    assert.match(match[1] ?? '', /--slotted-duration-/);
+  }
+});
+
+/**
+ * Each drawing is a rule of its own on the media box, in the neutral surface
+ * and border roles, and the picture leans the other way in a right-to-left
+ * page because depth is read from the reading edge. Under forced colours the
+ * drawing keeps the theme's own system-colour mapping rather than the
+ * browser's, which would erase every fill and leave the stack as three
+ * outlines on top of one another.
+ */
+test('draws each illustration from neutral roles, mirrored in rtl and kept under forced colours', () => {
+  for (const drawing of contract.axes.illustration.filter((value) => value !== 'none')) {
+    assert.ok(
+      normalized.includes(`[data-illustration='${drawing}']>[data-part='media']`),
+      `${drawing} draws nothing`,
+    );
+  }
+  assert.match(normalized, /:dir\(rtl\)/);
+  assert.match(normalized, /forced-color-adjust:none/);
+  assert.doesNotMatch(normalized, /\[data-illustration='none'\]/);
 });
 
 /**
@@ -235,6 +272,12 @@ test('exercises every part in the harness fragment', () => {
   }
   for (const align of contract.axes.align) {
     assert.ok(fragment.includes(`data-align="${align}"`), `the fragment never renders ${align}`);
+  }
+  for (const drawing of contract.axes.illustration.filter((value) => value !== 'none')) {
+    assert.ok(
+      fragment.includes(`data-illustration="${drawing}"`),
+      `the fragment never renders ${drawing}`,
+    );
   }
 });
 

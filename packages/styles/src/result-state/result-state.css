@@ -75,7 +75,38 @@
     --_inset-inline: var(--slotted-result-state-padding-inline, var(--slotted-space-6, 1rem));
     --_row-gap: var(--slotted-result-state-row-gap, var(--slotted-space-6, 1rem));
     --_column-gap: var(--slotted-result-state-column-gap, var(--slotted-space-4, 0.5rem));
-    --_text-gap: var(--slotted-result-state-text-gap, var(--slotted-space-3, 0.375rem));
+    /**
+     * Eight pixels between the title and the sentence under it. Six glued the
+     * description to an eighteen- and a twenty-four-pixel title; ReUI's three
+     * blocks hold eight (`docs/history/designs/2026-09-25-result-state-reui-dossier.md`
+     * § 3).
+     */
+    --_text-gap: var(--slotted-result-state-text-gap, var(--slotted-space-4, 0.5rem));
+    /**
+     * The distance from the message to the controls under it, one step wider
+     * than the row gap. The picture and the words are one statement and the
+     * controls are the answer to it, so the eye is given the pause between the
+     * two rather than between the picture and its title. ReUI holds 28 pixels
+     * there against 16 above the title (dossier § 3); 28 has no step, and 24 at
+     * `section` and 32 at `page` keep the one-step difference the reach already
+     * keeps everywhere else.
+     */
+    --_actions-gap: var(--slotted-result-state-actions-block-gap, var(--slotted-space-8, 1.5rem));
+    /**
+     * Headline tracking, the value `page-header` and `section` set on their own
+     * titles. ReUI closes its titles by 0.025em, which at eighteen pixels of this
+     * theme's face starts to touch the round letters.
+     */
+    --_title-tracking: var(--slotted-result-state-title-letter-spacing, -0.01em);
+
+    /**
+     * The one length every drawing is built from: the largest control height,
+     * so the illustration tightens with density the way the old mark did and
+     * the words do not. Each drawing derives its own boxes from it below, and
+     * every box it produces is a whole pixel at all three densities.
+     */
+    --_art: var(--slotted-control-height-lg, 38px);
+    --_art-glyph: var(--slotted-control-icon-size-lg, 18px);
 
     /**
      * A container name rather than the anonymous form, because a result state
@@ -117,10 +148,28 @@
      */
     font-size: var(--_title-font-size);
     grid-template-columns: minmax(0, 1fr);
+    /**
+     * The layers behind a stack of cards paint beneath the front card, and a
+     * layer with a negative stacking order paints beneath the nearest
+     * stacking context's own blocks. Without one here, that context is
+     * whatever the page happens to have — a card around the region, say — and
+     * the layers vanish under its surface.
+     */
+    isolation: isolate;
     line-height: var(--_title-line-height);
     padding-block: var(--_inset-block);
     padding-inline: var(--_inset-inline);
     row-gap: var(--_row-gap);
+    /**
+     * The entry, which runs only where the arrival is the message (the
+     * `@starting-style` rule under Motion). A transition is read from the
+     * state being entered, so the shown box carries the entering curve and the
+     * hidden box carries the leaving one.
+     */
+    transition:
+      opacity var(--slotted-duration-short) var(--slotted-easing-enter),
+      display var(--slotted-duration-short) var(--slotted-easing-enter);
+    transition-behavior: allow-discrete;
   }
 
   /* ── Status: what the region is reporting ─────────────────────────────
@@ -172,6 +221,7 @@
     --_inset-block: var(--slotted-result-state-padding-block, var(--slotted-space-4, 0.5rem));
     --_inset-inline: var(--slotted-result-state-padding-inline, var(--slotted-space-4, 0.5rem));
     --_row-gap: var(--slotted-result-state-row-gap, var(--slotted-space-3, 0.375rem));
+    --_title-tracking: var(--slotted-result-state-title-letter-spacing, 0);
 
     /* No column gap: the distance from the mark to the words belongs to the
        mark, and the distance from the words to the controls to the controls,
@@ -206,6 +256,10 @@
      * eighteen-pixel one read as settled.
      */
     --_row-gap: var(--slotted-result-state-row-gap, var(--slotted-space-8, 1.5rem));
+    --_actions-gap: var(--slotted-result-state-actions-block-gap, var(--slotted-space-9, 2rem));
+    /* Half again, the proportion the page's own media box already takes. */
+    --_art: calc(var(--slotted-control-height-lg, 38px) * 1.5);
+    --_art-glyph: calc(var(--slotted-control-icon-size-lg, 18px) * 1.5);
   }
 
   /* ── Align ────────────────────────────────────────────────────────────
@@ -302,6 +356,361 @@
     margin-inline-end: var(--_column-gap);
   }
 
+  /* ── Illustration: the picture the family draws around the page's glyph ─
+   *
+   * Three drawings, each made of the surface and border roles a card is
+   * painted in, with the page's glyph in the muted text role. R5's third band
+   * refuses a tone glyph enlarged on an empty surface and admits an
+   * illustration drawn for the space; none of these takes a tone, and each
+   * gives the glyph a geometric relation to something — a frame, a stack, a
+   * row it stands in for.
+   *
+   * `inline` reach draws none of them: a table cell holds a line of text, and
+   * the guide forbids an illustration from dominating a dense screen. The
+   * artwork the page supplied is drawn there as it is.
+   *
+   * Under forced colours the browser would replace every fill with `Canvas`
+   * and leave each drawing as outlines laid on top of one another. The theme
+   * already maps the roles used here to system colours in that mode, so the
+   * drawing opts out of the browser's adjustment and keeps the theme's.
+   *
+   * The measurements, and where each came from, are in
+   * `docs/history/designs/2026-09-25-result-state-reui-dossier.md` § 3.
+   */
+
+  /**
+   * A framed tile: a ring on the sunken surface around a raised card, with
+   * the glyph in the card. The inner card is the largest control height, the
+   * ring one step of air around it, so the whole tile is 46, 40 and 38 pixels
+   * at the three densities and its corners stay concentric — the outer radius
+   * is the inner one plus the ring.
+   */
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='tile']
+    > [data-part='media']:not(:empty) {
+    --_ring: var(--slotted-space-2, 0.25rem);
+    --_inner-radius: var(--slotted-radius-lg, 8px);
+
+    background-color: var(--slotted-surface-sunken);
+    block-size: calc(var(--_art) + 2 * var(--_ring));
+    border: var(--slotted-border-width-thin, 1px) solid var(--slotted-border-subtle);
+    border-radius: calc(var(--_inner-radius) + var(--_ring));
+    box-sizing: border-box;
+    color: var(--slotted-text-muted);
+    forced-color-adjust: none;
+    inline-size: calc(var(--_art) + 2 * var(--_ring));
+    min-inline-size: 0;
+    position: relative;
+    transition:
+      opacity var(--slotted-duration-medium) var(--slotted-easing-enter),
+      scale var(--slotted-duration-medium) var(--slotted-easing-enter);
+  }
+
+  /**
+   * The inner card, set in from the ring by the ring less the border it sits
+   * inside, so it is exactly `--_art` square. It paints beneath the glyph
+   * because the root is the stacking context (`isolation` above) and the tile
+   * is not one.
+   */
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='tile']
+    > [data-part='media']:not(:empty)::before {
+    background-color: var(--slotted-surface-raised);
+    border: var(--slotted-border-width-thin, 1px) solid var(--slotted-border-subtle);
+    border-radius: var(--_inner-radius);
+    box-shadow: var(--slotted-shadow-xs);
+    content: '';
+    inset: calc(var(--_ring) - var(--slotted-border-width-thin, 1px));
+    position: absolute;
+    z-index: -1;
+  }
+
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='tile']
+    > [data-part='media']:not(:empty)
+    > * {
+    block-size: var(--_art-glyph);
+    inline-size: var(--_art-glyph);
+    position: relative;
+  }
+
+  /**
+   * Three layers leaning back from the reader, the glyph on the front one.
+   *
+   * Each layer is a square of `--_side` — the largest control height plus a
+   * step, 42, 36 and 34 pixels — sheared by `skewY(-26deg)` and narrowed by
+   * `scaleX(0.9)`: the matrix ReUI's stack draws with, `matrix(1, -0.4877, 0,
+   * 1, 0, 0)`, where 0.4877 is the tangent of 26 degrees. The layers behind
+   * step back by (−0.36, −0.3) of a side in the tile's own coordinates, which
+   * after the shear and the narrowing is the (−13.65, −6.04) pixels ReUI steps
+   * its layers by at a 42-pixel side.
+   *
+   * Three layers and two pseudo-elements: the front face is `::before`, the
+   * middle layer `::after`, and the farthest is the box's own shadow, drawn
+   * twice — a fill, then a pixel wider in the border colour — because a
+   * shadow has no border of its own. The box itself paints nothing, since a
+   * transformed box is a stacking context and its own background would sit
+   * above nothing and beneath both pseudo-elements.
+   *
+   * The drawing's visual bounds are wider and taller than the box, so the box
+   * reserves the difference in its margins and is moved back onto the centre
+   * of those bounds: 0.325 of a side along the lean and 0.145 down, the
+   * centre of the sheared stack measured against the centre of the square.
+   */
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='stack']
+    > [data-part='media']:not(:empty) {
+    --_side: calc(var(--_art) + var(--slotted-space-2, 0.25rem));
+    --_lean: 1;
+    --_step-x: calc(var(--_side) * -0.36 * var(--_lean));
+    --_step-y: calc(var(--_side) * -0.3);
+    --_layer-border: var(--slotted-border-width-thin, 1px);
+    --_far: color-mix(in oklab, var(--slotted-border-subtle) 60%, transparent);
+
+    block-size: var(--_side);
+    border-radius: var(--slotted-radius-lg, 8px);
+    box-shadow:
+      calc(2 * var(--_step-x)) calc(2 * var(--_step-y)) 0 0 var(--slotted-surface-raised),
+      calc(2 * var(--_step-x)) calc(2 * var(--_step-y)) 0 var(--_layer-border) var(--_far);
+    box-sizing: border-box;
+    color: var(--slotted-text-muted);
+    forced-color-adjust: none;
+    inline-size: var(--_side);
+    margin-block: calc(var(--_side) * 0.37);
+    margin-inline: calc(var(--_side) * 0.28);
+    min-inline-size: 0;
+    position: relative;
+    transform: skewY(calc(-26deg * var(--_lean))) scaleX(0.9);
+    transition: box-shadow var(--slotted-duration-long) var(--slotted-easing-enter);
+    translate: calc(var(--_side) * 0.325 * var(--_lean)) calc(var(--_side) * 0.145);
+  }
+
+  /** Depth is read from the reading edge, so the stack leans the other way. */
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='stack']:dir(rtl)
+    > [data-part='media']:not(:empty) {
+    --_lean: -1;
+  }
+
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='stack']
+    > [data-part='media']:not(:empty)::before,
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='stack']
+    > [data-part='media']:not(:empty)::after {
+    background-color: var(--slotted-surface-raised);
+    border: var(--_layer-border) solid var(--slotted-border-subtle);
+    border-radius: inherit;
+    content: '';
+    inset: 0;
+    position: absolute;
+  }
+
+  /**
+   * The front face, a shade stronger at its edge than the layers behind it
+   * — ReUI's front stroke is half again as opaque as the others — with a
+   * lift under it for the ground the stack stands on. The shade is mixed
+   * from the two border roles rather than borrowed from the control edge,
+   * because a face drawn in the control edge is read by `field-surface.test.mjs`
+   * as a field, and this is a drawing.
+   */
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='stack']
+    > [data-part='media']:not(:empty)::before {
+    border-color: color-mix(
+      in oklab,
+      var(--slotted-border-subtle),
+      var(--slotted-border-strong) 30%
+    );
+    box-shadow: var(--slotted-shadow-sm);
+    z-index: -1;
+  }
+
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='stack']
+    > [data-part='media']:not(:empty)::after {
+    transition: translate var(--slotted-duration-long) var(--slotted-easing-enter);
+    translate: var(--_step-x) var(--_step-y);
+    z-index: -2;
+  }
+
+  /**
+   * The glyph on the front face, sheared with it. Half a side is 21, 18 and
+   * 17 pixels, where ReUI sets 24 on a 42-pixel face; the face here is the
+   * same size and the glyph is a size smaller, because a glyph as tall as
+   * the title's line box competes with the title.
+   */
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='stack']
+    > [data-part='media']:not(:empty)
+    > * {
+    block-size: calc(var(--_side) * 0.5);
+    inline-size: calc(var(--_side) * 0.5);
+  }
+
+  /**
+   * A stack of cards: the front card holds the page's glyph where a row's
+   * thumbnail would be and two lines where its text would be, and two cards
+   * behind it show a step of their top edges above it.
+   *
+   * Every length is ReUI's (`c-empty-15`, dossier § 3) on the nearest step:
+   * the card is 208 pixels wide, its padding sixteen, the thumbnail the
+   * smallest control height, the gap to the lines twelve, each card behind
+   * set in twelve pixels a side and twelve pixels higher. The card's height is
+   * the thumbnail plus its padding, 62, 58 and 56 pixels.
+   *
+   * The cards behind are the two pseudo-elements, beneath the front card
+   * because the root is the stacking context and the card is not one; they
+   * stand above the box, which reserves their two steps in its top margin.
+   *
+   * ReUI fades the bottom of the drawing into `--background`. That supposes
+   * the colour of the ground, and a result state inside a card or on the
+   * sunken surface is on another one; a mask would clip the cards behind,
+   * which stand outside the box. The drawing does not fade.
+   */
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']
+    > [data-part='media'] {
+    --_pad: var(--slotted-space-6, 1rem);
+    --_gap: var(--slotted-space-5, 0.75rem);
+    --_thumb: var(--slotted-control-height-sm, 30px);
+    --_step: var(--slotted-space-5, 0.75rem);
+    --_line: var(--slotted-space-4, 0.5rem);
+    --_line-2: var(--slotted-space-3, 0.375rem);
+    --_line-gap: var(--slotted-space-3, 0.375rem);
+    /* Where the lines start: after the thumbnail when there is one. */
+    --_lines-x: calc(var(--_pad) + var(--_thumb) + var(--_gap));
+    /* The two lines are 75 and 50 per cent of the room ReUI's card leaves them. */
+    --_line-1-length: calc(
+      (
+          var(--slotted-space-11, 3rem) * 4 + var(--slotted-space-6, 1rem) - var(--_lines-x) -
+            var(--_pad)
+        ) *
+        0.75
+    );
+    --_line-2-length: calc(
+      (
+          var(--slotted-space-11, 3rem) * 4 + var(--slotted-space-6, 1rem) - var(--_lines-x) -
+            var(--_pad)
+        ) *
+        0.5
+    );
+    /* A length, not a percentage: a percentage in a background offset is a
+       share of the room the layer leaves, which differs for each line height
+       and set the two lines four and three pixels above centre. */
+    --_line-1-y: calc(
+      (var(--_thumb) + 2 * var(--_pad) - var(--_line) - var(--_line-gap) - var(--_line-2)) / 2
+    );
+    /* `background-position` has no logical keyword, so the edge is a value. */
+    --_edge: left;
+    --_ink: var(--slotted-border-subtle);
+    /**
+     * Mixed with the card's own surface rather than with transparency: each
+     * cap overlaps its bar by half a line, and a translucent ink doubles where
+     * the two overlap, which drew a darker bead at both ends of the line.
+     */
+    --_ink-2: color-mix(in oklab, var(--slotted-border-subtle) 60%, var(--slotted-surface-raised));
+
+    align-items: center;
+    /**
+     * The lines are drawn in the card's own background, each a bar with a
+     * round cap at either end — a disc the line's height across, then the bar
+     * between the two discs — so the ends are the pill a skeleton line is,
+     * not the square end a gradient on its own draws.
+     */
+    background:
+      radial-gradient(closest-side, var(--_ink) calc(100% - 0.5px), transparent) var(--_edge)
+        var(--_lines-x) top var(--_line-1-y) / var(--_line) var(--_line) no-repeat,
+      radial-gradient(closest-side, var(--_ink) calc(100% - 0.5px), transparent) var(--_edge)
+        calc(var(--_lines-x) + var(--_line-1-length) - var(--_line)) top var(--_line-1-y) /
+        var(--_line) var(--_line) no-repeat,
+      linear-gradient(var(--_ink), var(--_ink)) var(--_edge)
+        calc(var(--_lines-x) + var(--_line) / 2) top var(--_line-1-y) /
+        calc(var(--_line-1-length) - var(--_line)) var(--_line) no-repeat,
+      radial-gradient(closest-side, var(--_ink-2) calc(100% - 0.5px), transparent) var(--_edge)
+        var(--_lines-x) top calc(var(--_line-1-y) + var(--_line) + var(--_line-gap)) /
+        var(--_line-2) var(--_line-2) no-repeat,
+      radial-gradient(closest-side, var(--_ink-2) calc(100% - 0.5px), transparent) var(--_edge)
+        calc(var(--_lines-x) + var(--_line-2-length) - var(--_line-2)) top
+        calc(var(--_line-1-y) + var(--_line) + var(--_line-gap)) / var(--_line-2) var(--_line-2)
+        no-repeat,
+      linear-gradient(var(--_ink-2), var(--_ink-2)) var(--_edge)
+        calc(var(--_lines-x) + var(--_line-2) / 2) top
+        calc(var(--_line-1-y) + var(--_line) + var(--_line-gap)) /
+        calc(var(--_line-2-length) - var(--_line-2)) var(--_line-2) no-repeat,
+      var(--slotted-surface-raised);
+    /* Offsets are measured from the card's outer edge, where the thumbnail's
+       padding is measured from too. */
+    background-origin: border-box;
+    block-size: calc(var(--_thumb) + 2 * var(--_pad));
+    border: var(--slotted-border-width-thin, 1px) solid var(--slotted-border-subtle);
+    border-radius: var(--slotted-radius-lg, 8px);
+    box-shadow: var(--slotted-shadow-sm);
+    box-sizing: border-box;
+    color: var(--slotted-text-muted);
+    display: flex;
+    forced-color-adjust: none;
+    inline-size: calc(var(--slotted-space-11, 3rem) * 4 + var(--slotted-space-6, 1rem));
+    justify-content: flex-start;
+    margin-block-start: calc(2 * var(--_step));
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    padding-inline: calc(var(--_pad) - var(--slotted-border-width-thin, 1px));
+    position: relative;
+  }
+
+  /** No thumbnail without a glyph: the lines start at the padding. */
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']
+    > [data-part='media']:empty {
+    --_lines-x: var(--_pad);
+  }
+
+  /**
+   * Right to left, the thumbnail moves to the inline start by itself and the
+   * lines are placed from the right edge. The card is not mirrored with a
+   * transform: a transformed box is a stacking context, and the cards behind
+   * would then paint over the front one.
+   */
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']:dir(rtl)
+    > [data-part='media'] {
+    --_edge: right;
+  }
+
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']
+    > [data-part='media']::before,
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']
+    > [data-part='media']::after {
+    background-color: var(--slotted-surface-sunken);
+    block-size: 100%;
+    border: var(--slotted-border-width-thin, 1px) solid var(--slotted-border-subtle);
+    border-radius: inherit;
+    box-sizing: border-box;
+    content: '';
+    inset-block-start: calc(-1 * var(--slotted-border-width-thin, 1px));
+    position: absolute;
+    transition: translate var(--slotted-duration-long) var(--slotted-easing-enter);
+    z-index: -1;
+  }
+
+  /** The farthest card, painted first. */
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']
+    > [data-part='media']::before {
+    border-color: var(--_ink-2);
+    inset-inline: calc(2 * var(--_step) - var(--slotted-border-width-thin, 1px));
+    translate: 0 calc(-2 * var(--_step));
+  }
+
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']
+    > [data-part='media']::after {
+    inset-inline: calc(var(--_step) - var(--slotted-border-width-thin, 1px));
+    translate: 0 calc(-1 * var(--_step));
+  }
+
+  /**
+   * The thumbnail is the page's glyph on the sunken surface, padded from its
+   * edge to the glyph size.
+   */
+  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']
+    > [data-part='media']
+    > * {
+    background-color: var(--slotted-surface-sunken);
+    block-size: var(--_thumb);
+    border-radius: var(--slotted-radius-sm, 4px);
+    box-sizing: border-box;
+    flex: none;
+    inline-size: var(--_thumb);
+    padding: calc((var(--_thumb) - var(--slotted-control-icon-size-md, 16px)) / 2);
+  }
+
   /* ── The words, which are the live region ─────────────────────────────
    *
    * `min-inline-size: 0` is what lets the column shrink below its content
@@ -336,6 +745,7 @@
       --slotted-result-state-title-font-weight,
       var(--slotted-font-weight-semibold, 600)
     );
+    letter-spacing: var(--_title-tracking);
     line-height: var(--_title-line-height);
     margin: 0;
     min-inline-size: 0;
@@ -374,6 +784,13 @@
 
   [data-ui='result-state'][data-align='center'] > [data-part='actions'] {
     justify-content: center;
+  }
+
+  /** The pause between the message and its answer (`--_actions-gap`). */
+  [data-ui='result-state']:not([data-reach='inline'])
+    > [data-part='content']
+    + [data-part='actions'] {
+    margin-block-start: calc(var(--_actions-gap) - var(--_row-gap));
   }
 
   /**
@@ -480,12 +897,77 @@
     }
   }
 
+  /* ── Motion ───────────────────────────────────────────────────────────
+   *
+   * The exit. A hidden region keeps its element for the reason a hidden
+   * `alert` does — a live region has to be in the document before its text
+   * changes — and fades out on the leaving curve, carrying `display` so the
+   * box holds its place until the fade is over. `display: none` is restated
+   * because the root's own `display: grid` would win over the user agent's
+   * rule for `[hidden]`.
+   */
+  [data-ui='result-state'][data-part='root'][hidden] {
+    display: none;
+    opacity: 0;
+    transition:
+      opacity var(--slotted-duration-short) var(--slotted-easing-exit),
+      display var(--slotted-duration-short) var(--slotted-easing-exit);
+  }
+
+  /**
+   * The entry belongs to a region that announces, for `alert`'s reason:
+   * `@starting-style` applies on first paint as well, and a region with
+   * `live="off"` is one the page has decided is not an arrival. The words
+   * fade in; the drawing assembles — the layers behind a stack and the cards
+   * behind a card start hidden behind the front one and open to where they
+   * rest, the second a short step after the first, and a tile settles from a
+   * shade smaller. Every duration is on the motion scale, which the theme
+   * collapses under reduced motion.
+   */
+  @starting-style {
+    [data-ui='result-state'][data-part='root']:is([data-live='polite'], [data-live='assertive']) {
+      opacity: 0;
+    }
+
+    [data-ui='result-state'][data-part='root']:is([data-live='polite'], [data-live='assertive'])
+      > [data-part='media'] {
+      --_step-x: 0px;
+      --_step-y: 0px;
+    }
+
+    [data-ui='result-state'][data-part='root']:is(
+        [data-live='polite'],
+        [data-live='assertive']
+      )[data-illustration='tile']
+      > [data-part='media'] {
+      opacity: 0;
+      scale: 0.96;
+    }
+
+    [data-ui='result-state'][data-part='root']:is(
+        [data-live='polite'],
+        [data-live='assertive']
+      )[data-illustration='cards']
+      > [data-part='media']::before,
+    [data-ui='result-state'][data-part='root']:is(
+        [data-live='polite'],
+        [data-live='assertive']
+      )[data-illustration='cards']
+      > [data-part='media']::after {
+      translate: 0 0;
+    }
+  }
+
+  /** The farther of two moving layers leaves a short step after the nearer. */
+  [data-ui='result-state'][data-illustration='cards'] > [data-part='media']::before {
+    transition-delay: var(--slotted-duration-short);
+  }
+
   /* ── Forced colours ───────────────────────────────────────────────────
    *
-   * Nothing. The operating system replaces every author colour, and the theme
-   * already remaps `--slotted-text` and `--slotted-text-muted`, so the words
-   * carry the region as they do everywhere else. The one rule that lived here
-   * forced the status mask back to `CanvasText`, and RS1 removed the mask
-   * (R5); artwork a page supplies is the page's to answer for.
+   * Nothing beyond the drawings' own `forced-color-adjust`, above. The
+   * operating system replaces every author colour, the theme already remaps
+   * `--slotted-text` and `--slotted-text-muted`, and the words carry the
+   * region as they do everywhere else.
    */
 }

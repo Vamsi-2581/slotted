@@ -31,7 +31,15 @@ const DECORATIVE = new Map([
     'radio-group/indicator',
     'the dot: a masked circle, no text, grown in from 0.6 — the movement CK6 kept',
   ],
+  [
+    'result-state/media',
+    'the illustration: an aria-hidden drawing around one glyph, never text — a tile settled in from 0.96 and a stack drawn sheared and narrowed at rest',
+  ],
   ['slider/thumb', 'the thumb: an empty control the press grows under the finger'],
+  [
+    'rating/symbol',
+    'the star and its lit copy: two glyph boxes with no text, lifted under the pointer and settled under the press',
+  ],
   [
     'spinner/(root)',
     'the ring: an empty box painted with a mask, named by aria-label and never holding text, grown in from 0.6 on the frame the wait begins',

@@ -471,6 +471,209 @@
   </div>
 </section>
 
+<section data-scene="illustration">
+  <div style="display: grid; gap: var(--slotted-space-9)">
+    <!-- The three drawings the family makes around the page's glyph, at
+         section reach, then stack at page reach, cards with no glyph, and a
+         drawing asked for at inline reach, where none is drawn. -->
+    <section
+      data-ui="result-state"
+      data-part="root"
+      data-status="empty"
+      data-reach="section"
+      data-align="center"
+      data-live="polite"
+      data-illustration="tile"
+    >
+      <div data-part="media" aria-hidden="true">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="inbox"></svg
+        ></span>
+      </div>
+      <div data-part="content" role="status">
+        <div data-part="title">Nenhuma mensagem</div>
+        <p data-part="description">As mensagens que chegarem aparecem aqui.</p>
+      </div>
+      <div data-part="actions">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="accent"
+          data-variant="solid"
+          data-size="md"
+          type="button"
+        >
+          <span data-part="label">Escrever mensagem</span>
+        </button>
+      </div>
+    </section>
+    <section
+      data-ui="result-state"
+      data-part="root"
+      data-status="empty"
+      data-reach="section"
+      data-align="center"
+      data-live="polite"
+      data-illustration="stack"
+    >
+      <div data-part="media" aria-hidden="true">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="bell"></svg
+        ></span>
+      </div>
+      <div data-part="content" role="status">
+        <div data-part="title">Convide as primeiras pessoas</div>
+        <p data-part="description">
+          Donos, editores e revisores entram por convite ou por um link partilhado.
+        </p>
+      </div>
+      <div data-part="actions">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="accent"
+          data-variant="solid"
+          data-size="md"
+          type="button"
+        >
+          <span data-part="label">Convidar membros</span></button
+        ><button
+          data-ui="button"
+          data-part="root"
+          data-tone="neutral"
+          data-variant="outline"
+          data-size="md"
+          type="button"
+        >
+          <span data-part="label">Copiar link</span>
+        </button>
+      </div>
+    </section>
+    <section
+      data-ui="result-state"
+      data-part="root"
+      data-status="empty"
+      data-reach="section"
+      data-align="center"
+      data-live="polite"
+      data-illustration="cards"
+    >
+      <div data-part="media" aria-hidden="true">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="file-text"></svg
+        ></span>
+      </div>
+      <div data-part="content" role="status">
+        <div data-part="title">O espaço de registos está vazio</div>
+        <p data-part="description">
+          Ligue uma fonte ou carregue um CSV para começar a organizar pessoas e equipas.
+        </p>
+      </div>
+      <div data-part="actions">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="accent"
+          data-variant="solid"
+          data-size="md"
+          type="button"
+        >
+          <span data-part="label">Ligar fonte</span></button
+        ><button
+          data-ui="button"
+          data-part="root"
+          data-tone="neutral"
+          data-variant="outline"
+          data-size="md"
+          type="button"
+        >
+          <span data-part="label">Carregar CSV</span>
+        </button>
+      </div>
+    </section>
+    <section
+      data-ui="result-state"
+      data-part="root"
+      data-status="empty"
+      data-reach="page"
+      data-align="center"
+      data-live="off"
+      data-illustration="stack"
+    >
+      <div data-part="media" aria-hidden="true">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="search"></svg
+        ></span>
+      </div>
+      <div data-part="content">
+        <div data-part="title">Nenhum resultado para “contrato”</div>
+        <p data-part="description">
+          Tente outra palavra, ou limpe os filtros ativos para ver tudo de novo.
+        </p>
+      </div>
+      <div data-part="actions">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="accent"
+          data-variant="solid"
+          data-size="md"
+          type="button"
+        >
+          <span data-part="label">Limpar filtros</span>
+        </button>
+      </div>
+    </section>
+    <section
+      data-ui="result-state"
+      data-part="root"
+      data-status="empty"
+      data-reach="section"
+      data-align="center"
+      data-live="off"
+      data-illustration="cards"
+    >
+      <div data-part="media" aria-hidden="true"></div>
+      <div data-part="content">
+        <div data-part="title">Sem produtos</div>
+        <p data-part="description">Ainda não há dados aqui. Avisamos quando houver novidades.</p>
+      </div>
+      <div data-part="actions"></div>
+    </section>
+    <section
+      data-ui="result-state"
+      data-part="root"
+      data-status="empty"
+      data-reach="inline"
+      data-align="center"
+      data-live="off"
+      data-illustration="stack"
+    >
+      <div data-part="media" aria-hidden="true">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="search"></svg
+        ></span>
+      </div>
+      <div data-part="content">
+        <div data-part="title">Nenhuma linha corresponde ao filtro</div>
+        <p data-part="description"></p>
+      </div>
+      <div data-part="actions">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="neutral"
+          data-variant="outline"
+          data-size="md"
+          type="button"
+        >
+          <span data-part="label">Limpar</span>
+        </button>
+      </div>
+    </section>
+  </div>
+</section>
+
 <section data-scene="content">
   <div style="display: grid; gap: var(--slotted-space-9)">
     <!-- A translated title with no break opportunity, and an identifier no

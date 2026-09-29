@@ -133,6 +133,28 @@ test('paints nothing for the status, and says so', () => {
 });
 
 /**
+ * The picture a page asks the family to draw around its own glyph: a framed
+ * tile, three leaning layers, or a stack of cards. R5's third band refuses a
+ * tone glyph enlarged on an empty surface and admits "uma ilustração desenhada
+ * para o espaço"; these are drawn for the space, in the neutral surface and
+ * border roles, and none of them takes a tone. `none` is the default, so a
+ * region that says nothing about its picture draws what RS1 left: the page's
+ * own artwork, or nothing.
+ *
+ * ReUI ships the three as a second component per drawing (`IconStack`,
+ * `IconTile`) or as markup written by hand in each example
+ * (`docs/history/designs/2026-09-25-result-state-reui-dossier.md` § 6). Here
+ * they are one axis on the region, and the glyph is the `media` part that
+ * already exists.
+ */
+test('draws one of three neutral illustrations around the page glyph, and none by default', () => {
+  assert.deepEqual(contract.axes.illustration, ['none', 'tile', 'stack', 'cards']);
+  assert.equal(contract.members.resultState.defaults.illustration, 'none');
+  assert.ok(contract.scenarios.resultState.includes('illustration'));
+  assert.equal(contract.illustrationPaints.tone, null);
+});
+
+/**
  * The same three words `alert` uses, with the same meaning: which scope the
  * message applies to, with the geometry following from that. A size axis would
  * say the same message can be drawn large or small, which is not the choice a
@@ -209,6 +231,7 @@ test('names one reference page, covering every axis and every part', () => {
     'reach',
     'align',
     'media',
+    'illustration',
     'actions',
     'live',
     'content',

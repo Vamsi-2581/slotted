@@ -73,7 +73,7 @@ When reading source, prefer the narrowest useful set. Read the next source only 
 
 Follow these steps in order. Replace `<family>` with the invoked family name. When the invocation names a tightly related pair, apply every step and every gate to both.
 
-1. **Load the law before component code.** Read `docs/build-briefing.md`, then `references/quick-law.md`, and follow its reading order: the minimum scope documents always, the full-law list on a first pass and in the cases it names. Whatever the pass, read `references/capability.md` before step 3, `references/rubric.md` before step 4, `references/frameworks.md` before step 5, `references/harness.md` before step 8 and `references/stories.md` before step 11.
+1. **Load the law before component code.** Read `docs/build-briefing.md`, then `references/quick-law.md`, and follow its reading order: the minimum scope documents always, the full-law list on a first pass and in the cases it names. Whatever the pass, read `references/capability.md` before step 3, `references/rubric.md` before step 4, `references/frameworks.md` before step 5, `references/polish-lenses.md` before step 7, `references/harness.md` before step 8 and `references/stories.md` before step 11.
 
    Do not inspect the family implementation first.
 
@@ -149,7 +149,7 @@ Follow these steps in order. Replace `<family>` with the invoked family name. Wh
    - layout primitives or spacing system, or
    - any state transition logic shared across states.
 
-   Then read the numbers. Take the family's specimen (`references/harness.md` › Specimen) in light, dark and high-contrast, with `--states` on each interactive part, plus `--motion reduce`, `--forced-colors active`, `--density dense` and `--dir rtl`. Work every row of `references/rubric.md` › Craft bar against it, and compare each state delta with the reference specimen from step 3, value by value: a reference value that is better is adopted onto a token, and a family value that is better is kept and named.
+   Then read the numbers. Take the family's specimen (`references/harness.md` › Specimen) in light, dark and high-contrast, with `--states` on each interactive part, plus `--motion reduce`, `--forced-colors active`, `--density dense` and `--dir rtl`. Work every row of `references/rubric.md` › Craft bar against it, read the stylesheet through `references/polish-lenses.md`, and compare each state delta with the reference specimen from step 3, value by value: a reference value that is better is adopted onto a token, and a family value that is better is kept and named.
 
    Code completion is not the exit condition, and neither is a correct picture. The exit condition is a picture with nothing left to fix — and the way to find what is left is to name, in writing, the one detail you would change if you had another hour, then change it.
 

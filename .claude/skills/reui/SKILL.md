@@ -89,7 +89,8 @@ picture of each item in both themes.
 ## Process
 
 1. **Load.** `references/translation.md`, `references/dossier.md`,
-   `.claude/skills/component/references/rubric.md` › Craft bar, and for the
+   `.claude/skills/component/references/rubric.md` › Craft bar,
+   `.claude/skills/component/references/polish-lenses.md`, and for the
    family: `specs/components/<family>/contract.json`,
    `packages/styles/src/<family>/`, its entry in `docs/component-features.md`,
    and the assertions of the tests in `packages/styles/src/*.test.mjs` that

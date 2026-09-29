@@ -45,7 +45,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'A pílula que segura os eventos novos até o leitor os pedir. Existe enquanto freshCount é maior do que zero, antes da lista e fora do feed, e é anunciada uma vez por mudança de contagem.',
+      'A pílula que segura os eventos novos até o leitor os pedir. Aparece quando freshCount passa de zero e fica montada depois disso, com hidden a zero e a última contagem como texto, para sair com transição. Fica antes da lista e fora do feed, é anunciada uma vez por mudança de contagem, e quem a pressiona passa para o primeiro evento revelado.',
   },
   {
     part: 'list',
@@ -290,7 +290,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'fresh',
     title: 'Eventos novos enquanto o leitor lê',
-    note: 'Um feed que insere no topo empurra o que está a ser lido. Com freshCount, a família segura os novos atrás de uma pílula, anuncia a contagem em polite, e onReveal é o momento em que o consumidor os junta ao array.',
+    note: 'Um feed que insere no topo empurra o que está a ser lido. Com freshCount, a família segura os novos atrás de uma pílula, anuncia a contagem em polite, e (revealRequest) é o momento em que o consumidor os junta ao array. A pílula sai com transição, e o foco que estava nela passa ao primeiro evento revelado.',
     snippet: defineSnippet({
       id: 'timeline-angular-fresh',
       language: 'angular',

@@ -359,6 +359,43 @@ describe('Timeline in feed mode', () => {
     rerender(<Invoice freshCount={0} mode="feed" onReveal={onReveal} />);
     expect(screen.queryByRole('button', { name: /new events/ })).toBeNull();
   });
+
+  it('renders no pill until there is something to hold', () => {
+    render(<Invoice mode="feed" />);
+    expect(root().querySelector('[data-part="fresh"]')).toBeNull();
+  });
+
+  it('keeps the pill mounted and hidden with its last count, so it can leave', () => {
+    const { rerender } = render(<Invoice freshCount={3} mode="feed" />);
+    rerender(<Invoice freshCount={0} mode="feed" />);
+    const fresh = part(root(), 'fresh');
+    expect(fresh.hidden).toBe(true);
+    expect(fresh.textContent).toBe('3 new events');
+    rerender(<Invoice freshCount={2} mode="feed" />);
+    expect(fresh.hidden).toBe(false);
+    expect(fresh.textContent).toBe('2 new events');
+  });
+
+  it('takes the reader to the first revealed event, at the top of a newest-first feed', () => {
+    const { rerender } = render(<Invoice freshCount={2} mode="feed" order="newest-first" />);
+    part(root(), 'fresh').focus();
+    rerender(<Invoice freshCount={0} mode="feed" order="newest-first" />);
+    expect(document.activeElement).toBe(root().querySelectorAll('[data-part="item"]')[0]);
+  });
+
+  it('takes the reader to the first revealed event after the old ones, oldest-first', () => {
+    const { rerender } = render(<Invoice freshCount={2} mode="feed" />);
+    part(root(), 'fresh').focus();
+    rerender(<Invoice freshCount={0} mode="feed" />);
+    const items = root().querySelectorAll('[data-part="item"]');
+    expect(document.activeElement).toBe(items[items.length - 2]);
+  });
+
+  it('leaves focus alone when the reader was not on the pill', () => {
+    const { rerender } = render(<Invoice freshCount={2} mode="feed" />);
+    rerender(<Invoice freshCount={0} mode="feed" />);
+    expect(document.activeElement).toBe(document.body);
+  });
 });
 
 describe('TimelineGroup', () => {

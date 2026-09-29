@@ -4,8 +4,16 @@ import '@slotted/styles/visually-hidden/visually-hidden.css';
 
 import { tabbables } from '@slotted/core/focus';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
-import { feedFocusTarget } from '@slotted/core/timeline';
-import { useEffect, useId, useRef, type KeyboardEvent, type RefObject } from 'react';
+import { feedFocusTarget, revealFocusIndex } from '@slotted/core/timeline';
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type RefObject,
+} from 'react';
 
 import { useTimelineDefaults } from './timeline-defaults';
 import {
@@ -73,6 +81,16 @@ export function Timeline({
   const listId = `slotted-timeline-${generatedId}`;
   const listRef = useRef<HTMLElement | null>(null);
   const moreRef = useRef<HTMLElement | null>(null);
+  const freshRef = useRef<HTMLButtonElement | null>(null);
+
+  /**
+   * The pill's last count, kept past the render that drops it to zero: the
+   * pill stays mounted from its first appearance, hidden at zero with the
+   * words it had, so it can leave with a transition instead of vanishing.
+   */
+  const [heldCount, setHeldCount] = useState(freshCount);
+  if (freshCount > 0 && freshCount !== heldCount) setHeldCount(freshCount);
+  const previousFresh = useRef(freshCount);
 
   const resolvedMode = mode ?? defaults.mode ?? 'list';
   const resolvedGrowing = growing ?? defaults.growing ?? 'none';
@@ -165,6 +183,24 @@ export function Timeline({
   }, [freshCount]);
 
   /**
+   * A reader who pressed the pill is taken to the first event it revealed,
+   * not left on a control that is hiding. Before paint, while the pill still
+   * holds focus.
+   */
+  useLayoutEffect(() => {
+    const revealed = previousFresh.current;
+    previousFresh.current = freshCount;
+    const pill = freshRef.current;
+    if (freshCount > 0 || revealed <= 0 || pill === null) return;
+    if (!pill.contains(pill.ownerDocument.activeElement)) return;
+    const all = articles();
+    const index = revealFocusIndex({ loaded: all.length, revealed, order: context.order });
+    const event = index === null ? undefined : all[index];
+    if (event === undefined) return;
+    (event.hasAttribute('tabindex') ? event : tabbables(event)[0])?.focus();
+  }, [freshCount]);
+
+  /**
    * `growing="scroll"` asks when the end of the loaded list enters the
    * scrollport. Only in an effect, and only where the observer exists: a
    * server, or a test without one, asks for nothing and the consumer who
@@ -230,13 +266,15 @@ export function Timeline({
         <TimelineListContext.Provider
           value={{ currentIndex: layout.currentIndex, loaded: layout.count }}
         >
-          {freshCount > 0 ? (
+          {heldCount > 0 ? (
             <button
               data-part="fresh"
+              hidden={freshCount <= 0}
               onClick={(event) => onReveal?.(event.detail === 0 ? 'keyboard' : 'pointer', event)}
+              ref={freshRef}
               type="button"
             >
-              {resolvedMessages.freshItems(freshCount)}
+              {resolvedMessages.freshItems(heldCount)}
             </button>
           ) : null}
           {list}

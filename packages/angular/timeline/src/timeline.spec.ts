@@ -358,7 +358,53 @@ describe('SlTimeline in feed mode', () => {
     expect(host.onReveal).toHaveBeenCalledWith(expect.objectContaining({ reason: 'pointer' }));
     host.freshCount.set(0);
     settle();
+    expect(fresh.hidden).toBe(true);
+    expect(fresh.textContent?.trim()).toBe('3 new events');
+    host.freshCount.set(2);
+    settle();
+    expect(fresh.hidden).toBe(false);
+    expect(fresh.textContent?.trim()).toBe('2 new events');
+  });
+
+  it('renders no pill until there is something to hold', () => {
+    const { host, root, settle } = setup();
+    host.mode.set('feed');
+    settle();
     expect(root.querySelector('[data-part="fresh"]')).toBeNull();
+  });
+
+  it('takes the reader to the first revealed event, at the top of a newest-first feed', () => {
+    const { host, root, settle } = setup();
+    host.mode.set('feed');
+    host.order.set('newest-first');
+    host.freshCount.set(2);
+    settle();
+    (root.querySelector('[data-part="fresh"]') as HTMLButtonElement).focus();
+    host.freshCount.set(0);
+    settle();
+    expect(document.activeElement).toBe(root.querySelectorAll('[data-part="item"]')[0]);
+  });
+
+  it('takes the reader to the first revealed event after the old ones, oldest-first', () => {
+    const { host, root, settle } = setup();
+    host.mode.set('feed');
+    host.freshCount.set(2);
+    settle();
+    (root.querySelector('[data-part="fresh"]') as HTMLButtonElement).focus();
+    host.freshCount.set(0);
+    settle();
+    const items = root.querySelectorAll('[data-part="item"]');
+    expect(document.activeElement).toBe(items[items.length - 2]);
+  });
+
+  it('leaves focus alone when the reader was not on the pill', () => {
+    const { host, settle } = setup();
+    host.mode.set('feed');
+    host.freshCount.set(2);
+    settle();
+    host.freshCount.set(0);
+    settle();
+    expect(document.activeElement).toBe(document.body);
   });
 });
 

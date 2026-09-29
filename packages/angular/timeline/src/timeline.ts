@@ -1,5 +1,6 @@
 import { NgTemplateOutlet } from '@angular/common';
 import {
+  afterNextRender,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
@@ -13,7 +14,9 @@ import {
   forwardRef,
   HostAttributeToken,
   inject,
+  Injector,
   input,
+  linkedSignal,
   model,
   numberAttribute,
   output,
@@ -32,6 +35,7 @@ import {
   feedFocusTarget,
   formatTimestamp,
   isComplete,
+  revealFocusIndex,
   setSizeOf,
   sideOf,
 } from '@slotted/core/timeline';
@@ -97,9 +101,15 @@ let counter = 0;
   selector: '[slTimeline]',
   standalone: true,
   template: `
-    @if (freshCount() > 0) {
-      <button data-part="fresh" type="button" (click)="reveal($event)">
-        {{ messageSet().freshItems(freshCount()) }}
+    @if (heldCount() > 0) {
+      <button
+        #fresh
+        data-part="fresh"
+        type="button"
+        [hidden]="freshCount() <= 0"
+        (click)="reveal($event)"
+      >
+        {{ messageSet().freshItems(heldCount()) }}
       </button>
     }
     <ng-content></ng-content>
@@ -178,6 +188,9 @@ export class SlTimeline {
   private readonly defaults = injectTimelineDefaults();
   private readonly destroyRef = inject(DestroyRef);
   private readonly moreElement = viewChild<ElementRef<HTMLElement>>('more');
+  private readonly freshElement = viewChild<ElementRef<HTMLButtonElement>>('fresh');
+  private readonly host: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly injector = inject(Injector);
   private readonly items = signal<readonly SlTimelineItem[]>([]);
 
   readonly id = `slotted-timeline-${(counter += 1)}`;
@@ -216,6 +229,16 @@ export class SlTimeline {
   }));
   readonly feed = computed(() => this.modeValue() === 'feed');
 
+  /**
+   * The pill's last count, kept past the change that drops it to zero: the
+   * pill stays mounted from its first appearance, hidden at zero with the
+   * words it had, so it can leave with a transition instead of vanishing.
+   */
+  readonly heldCount = linkedSignal<number, number>({
+    source: this.freshCount,
+    computation: (count, previous) => (count > 0 ? count : (previous?.value ?? 0)),
+  });
+
   /** How many events the list laid out. */
   readonly loaded = computed(() => this.items().length);
   /** The index of the event marked current, in DOM order, or -1. */
@@ -227,6 +250,23 @@ export class SlTimeline {
       const count = this.freshCount();
       if (count <= 0) return;
       getLiveAnnouncer().announce(untracked(() => this.messageSet()).freshItems(count));
+    });
+
+    /**
+     * A reader who pressed the pill is taken to the first event it revealed,
+     * not left on a control that is hiding. Whether focus is on the pill is
+     * read now, before the view hides it; the event is focused once the view
+     * has rendered what the reveal added.
+     */
+    let previousFresh = 0;
+    effect(() => {
+      const count = this.freshCount();
+      const revealed = previousFresh;
+      previousFresh = count;
+      if (count > 0 || revealed <= 0) return;
+      const pill = untracked(() => this.freshElement())?.nativeElement;
+      if (pill === undefined || !pill.contains(pill.ownerDocument.activeElement)) return;
+      afterNextRender({ write: () => this.focusRevealed(revealed) }, { injector: this.injector });
     });
 
     /**
@@ -262,6 +302,16 @@ export class SlTimeline {
     const reason: TimelineLoadMoreReason =
       (event as MouseEvent).detail === 0 ? 'keyboard' : 'pointer';
     this.loadMoreRequest.emit({ event, reason });
+  }
+
+  private focusRevealed(revealed: number) {
+    const all = [...this.host.querySelectorAll<HTMLElement>('[data-part="item"]')].filter(
+      (article) => article.closest('[data-part="group-list"][hidden]') === null,
+    );
+    const index = revealFocusIndex({ loaded: all.length, revealed, order: this.orderValue() });
+    const event = index === null ? undefined : all[index];
+    if (event === undefined) return;
+    (event.hasAttribute('tabindex') ? event : tabbables(event)[0])?.focus();
   }
 
   reveal(event: Event) {

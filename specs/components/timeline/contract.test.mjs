@@ -143,6 +143,23 @@ test('requests more and reveals fresh items with a reason and no value', () => {
 });
 
 /**
+ * The pill leaves as it came, with a transition: a part that unmounts has no
+ * frame to fade in. Once it has appeared it stays mounted, hidden while the
+ * count is zero, and keeps the last count as its words while it fades. The
+ * reader who pressed it is taken to the first event it revealed, not left on
+ * a control that is no longer there.
+ */
+test('keeps the fresh pill mounted to leave, and moves focus to what it revealed', () => {
+  assert.match(contract.fresh.mount, /stays mounted/);
+  assert.match(contract.fresh.mount, /hidden while freshCount is 0/);
+  assert.match(contract.fresh.mount, /last count/);
+  assert.match(contract.fresh.focus, /first revealed event/);
+  assert.match(contract.fresh.focus, /newest-first/);
+  assert.match(contract.fresh.focus, /oldest-first/);
+  assert.equal(contract.fresh.focusLogic, 'revealFocusIndex');
+});
+
+/**
  * `current` is a fact the consumer states about one event, mirrored into
  * `aria-current`, and `complete` is either stated or derived — and the
  * derivation needs the order, which is why `order` is an axis rather than a

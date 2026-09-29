@@ -356,3 +356,21 @@ export function feedFocusTarget({ from, key, ctrlKey, metaKey, count }: FeedFocu
   if (key === 'PageUp') return from > 0 ? from - 1 : from === 0 ? 0 : null;
   return null;
 }
+
+export interface RevealFocusInput {
+  /** The events loaded once the reveal has rendered, groups that are closed left out. */
+  loaded: number;
+  /** How many events the pill held: the last count it showed. */
+  revealed: number;
+  order: TimelineOrder;
+}
+
+/**
+ * Where focus lands when the fresh pill it was on hides: the first event the
+ * reveal added. A newest-first list adds at the top; an oldest-first list
+ * adds after the events already there. `null` is nothing to land on.
+ */
+export function revealFocusIndex({ loaded, revealed, order }: RevealFocusInput): number | null {
+  if (loaded <= 0 || revealed <= 0) return null;
+  return order === 'newest-first' ? 0 : Math.max(0, loaded - revealed);
+}

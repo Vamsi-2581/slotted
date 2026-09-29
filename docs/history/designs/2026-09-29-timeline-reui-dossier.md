@@ -169,3 +169,30 @@ A linha reaberta acima foi resolvida numa segunda passagem `polish`. A contagem 
 | 14  | `timeline.css` | primeira coluna de `alternate` em `round(down, …, 1px)` | trilho em x 378.5 | x 378; linha centrada em 384.5 no marcador de 13 |
 
 Partes emolduradas fracionárias: 24 → 0 em `comfortable`, `compact` e `dense`; em `rtl` restam 3 (`fresh` e dois `group-trigger`), cujo x depende da largura do texto, isenta pelo critério Pixel grid.
+
+### Passagem `build`: saída de `fresh` e foco depois de revelar
+
+A linha "`fresh` a entrar e a sair" de § 5 exigia mudar `fresh.when` no contrato, e a execução passou a `build` para ela. A mesma leitura mostrou um defeito de acessibilidade: a binding desmontava a pílula quando `freshCount` descia a zero, e quem a tinha pressionado ficava com o foco no `body`.
+
+Decisões:
+
+| Decisão | Forma | Custo |
+| ------- | ----- | ----- |
+| A pílula fica montada | `contract.fresh.mount`: montada desde o primeiro render com `freshCount > 0`; `hidden` a zero, com a última contagem como texto | um `button` escondido na timeline que já recebeu eventos novos; nenhum na que nunca recebeu |
+| Entrada e saída | `@starting-style`: `opacity` 0 e `translate` de −`--slotted-space-2` para 0 em 200ms `easing-enter`; `[hidden]`: o inverso em 120ms `easing-exit` com `display … allow-discrete` e `pointer-events: none` | a lista sobe a altura da pílula no fim dos 120ms |
+| Foco depois de revelar | `contract.fresh.focus` e `revealFocusIndex` em `@slotted/core/timeline`: primeiro evento para `newest-first`, carregados − revelados para `oldest-first`; um `article` recebe o foco, um `li` passa-o ao primeiro tabbable | só quando o foco estava na pílula; noutro caso nada muda |
+| Nome do output na página Angular | a nota da cena `fresh` passa de `onReveal` a `(revealRequest)` | — |
+
+Provas:
+
+| Prova | Resultado |
+| ----- | --------- |
+| `specs/components/timeline/contract.test.mjs` | 18/18; o teste novo falhou antes de `contract.json` mudar |
+| `packages/core/src/timeline/timeline.test.ts` | 25/25; os quatro casos de `revealFocusIndex` falharam antes da função |
+| `packages/react/src/timeline` | 47/47; três testes novos falharam antes da binding |
+| `packages/angular/timeline` | 29/29 |
+| Cenário no Chrome, célula `light-720` do harness, `prefers-reduced-motion: no-preference` | `fresh` e `group-list`: `display: flex` com `opacity` 0.989 dois quadros depois de `hidden`; `display: none` aos 400ms; `opacity` 0 no primeiro quadro da reentrada e 1 aos 400ms |
+| O mesmo cenário com `reduce` | saída no quadro seguinte (`display: none`), durações colapsadas |
+| `tools/harness/audit.mjs` nas duas páginas de referência | saída 0 |
+
+Com isto, a linha Motion de § 7 passa: chevron, `group-list` e `fresh` têm entrada e saída em tokens de movimento, com a saída mais curta do que a entrada.

@@ -8,6 +8,7 @@ import {
   isInstant,
   isPast,
   relativeUnit,
+  revealFocusIndex,
   setSizeOf,
   sideOf,
   timestampOf,
@@ -204,5 +205,24 @@ describe('feedFocusTarget', () => {
     expect(feedFocusTarget({ from: 1, key: 'Home', metaKey: true, count: 3 })).toBe('before');
     expect(feedFocusTarget({ from: 1, key: 'End', count: 3 })).toBeNull();
     expect(feedFocusTarget({ from: 1, key: 'ArrowDown', count: 3 })).toBeNull();
+  });
+});
+
+describe('revealFocusIndex', () => {
+  it('lands on the first revealed event at the top of a newest-first list', () => {
+    expect(revealFocusIndex({ loaded: 8, revealed: 3, order: 'newest-first' })).toBe(0);
+  });
+
+  it('lands on the first revealed event after the old ones in an oldest-first list', () => {
+    expect(revealFocusIndex({ loaded: 8, revealed: 3, order: 'oldest-first' })).toBe(5);
+  });
+
+  it('answers nothing when there is nothing to land on', () => {
+    expect(revealFocusIndex({ loaded: 0, revealed: 3, order: 'newest-first' })).toBeNull();
+    expect(revealFocusIndex({ loaded: 8, revealed: 0, order: 'oldest-first' })).toBeNull();
+  });
+
+  it('keeps inside the list when the consumer revealed fewer than it counted', () => {
+    expect(revealFocusIndex({ loaded: 2, revealed: 3, order: 'oldest-first' })).toBe(0);
   });
 });

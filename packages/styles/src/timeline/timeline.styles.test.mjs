@@ -231,6 +231,30 @@ test('steps the fresh pill by state layer and presses the group heading in place
  * one, and never slides; the chevron takes the curve of the state it
  * arrives at.
  */
+/**
+ * The bindings keep the fresh pill mounted and write `hidden` at a count of
+ * zero; the author's `display: flex` would otherwise keep it on the page. It
+ * enters on the entering curve and leaves on the shorter exiting one.
+ */
+test('hides the fresh pill it keeps, and moves it in and out on both curves', () => {
+  assert.ok(normalized.includes("[data-part='fresh'][hidden]{display:none;opacity:0;"));
+  assert.ok(
+    normalized.includes(
+      'opacityvar(--slotted-duration-short)var(--slotted-easing-exit),translatevar(--slotted-duration-short)var(--slotted-easing-exit),displayvar(--slotted-duration-short)allow-discrete;',
+    ),
+  );
+  assert.ok(
+    normalized.includes(
+      "@starting-style{[data-ui='timeline'][data-part='fresh']:not([hidden]){opacity:0;",
+    ),
+  );
+  assert.ok(
+    normalized.includes(
+      'opacityvar(--slotted-duration-medium)var(--slotted-easing-enter),translatevar(--slotted-duration-medium)var(--slotted-easing-enter);',
+    ),
+  );
+});
+
 test('fades a group list in and out and turns the chevron on both curves', () => {
   assert.ok(normalized.includes('@starting-style{'));
   assert.ok(

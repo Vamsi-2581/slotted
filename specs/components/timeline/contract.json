@@ -52,7 +52,10 @@
     "when": "freshCount > 0",
     "request": "onReveal",
     "reasons": ["pointer", "keyboard"],
-    "announce": "polite, once per change of freshCount"
+    "announce": "polite, once per change of freshCount",
+    "mount": "from the first render with freshCount > 0 the part stays mounted: hidden while freshCount is 0, with the last count as its words, so it leaves with a transition rather than vanishing",
+    "focus": "when freshCount falls to 0 with focus inside the part, focus moves to the first revealed event: the first event for newest-first, the event at the loaded count less the revealed count for oldest-first; an article takes focus itself, a list item passes it to its first tabbable, and an event with neither leaves focus where the platform puts it",
+    "focusLogic": "revealFocusIndex"
   },
   "focus": {
     "item": "tabindex=\"0\" in feed mode, none in list mode",

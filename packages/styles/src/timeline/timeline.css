@@ -871,6 +871,41 @@
     border-color: var(--_tone-border);
     color: var(--_tone-text);
     margin-block-end: var(--_item-gap);
+    opacity: 1;
+    transition:
+      background-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      border-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
+      opacity var(--slotted-duration-medium) var(--slotted-easing-enter),
+      translate var(--slotted-duration-medium) var(--slotted-easing-enter);
+    translate: 0 0;
+  }
+
+  /**
+   * New events arrive from above, so the pill drops a step into place as it
+   * fades in, and rises the same step as it fades out on the shorter exiting
+   * curve. The bindings keep it mounted once it has appeared and write
+   * `hidden` at a count of zero; `allow-discrete` holds it on the page until
+   * it has faded. Scale is not used: the pill holds text (`text-scale.test.mjs`).
+   */
+  @starting-style {
+    [data-ui='timeline'] [data-part='fresh']:not([hidden]) {
+      opacity: 0;
+      translate: 0 calc(-1 * var(--slotted-space-2, 0.25rem));
+    }
+  }
+
+  [data-ui='timeline'] [data-part='fresh'][hidden] {
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity var(--slotted-duration-short) var(--slotted-easing-exit),
+      translate var(--slotted-duration-short) var(--slotted-easing-exit),
+      display var(--slotted-duration-short) allow-discrete;
+    translate: 0 calc(-1 * var(--slotted-space-2, 0.25rem));
   }
 
   /**

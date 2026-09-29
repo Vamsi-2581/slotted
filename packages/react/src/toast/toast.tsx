@@ -61,6 +61,35 @@ function matchesHotkey(event: KeyboardEvent, hotkey: string): boolean {
 }
 
 /**
+ * A message's own height, which is not the height it is drawn at: a closed
+ * pile draws every message at the front one's height, and an opening one
+ * animates it. The override is lifted for the one read, and not at all while
+ * the height is moving, because lifting it then cancels the movement — the
+ * last measurement stands until the transition ends and the observer fires
+ * again. Chrome names the logical property's transition by its physical one.
+ */
+function naturalHeight(item: HTMLElement): number {
+  const moving =
+    typeof item.getAnimations === 'function' &&
+    item
+      .getAnimations()
+      .some((animation) =>
+        ['block-size', 'height', 'width'].includes(
+          (animation as Animation & { transitionProperty?: string }).transitionProperty ?? '',
+        ),
+      );
+  if (moving) {
+    const last = Number.parseFloat(item.style.getPropertyValue('--slotted-toast-height'));
+    if (!Number.isNaN(last)) return last;
+  }
+  const inline = item.style.blockSize;
+  item.style.blockSize = 'auto';
+  const height = item.getBoundingClientRect().height;
+  item.style.blockSize = inline;
+  return height;
+}
+
+/**
  * The place transient messages appear, and the only part of this family a page
  * renders directly.
  *
@@ -241,7 +270,7 @@ export function ToastRegion({
       const gap = Number.parseFloat(view.getComputedStyle(list).rowGap) || 0;
       let offset = 0;
       items.forEach((item, index) => {
-        const height = item.getBoundingClientRect().height;
+        const height = naturalHeight(item);
         item.style.setProperty('--slotted-toast-height', `${height}px`);
         item.style.setProperty('--slotted-toast-stack-offset', `${offset}px`);
         if (index === 0) node.style.setProperty('--slotted-toast-front-height', `${height}px`);

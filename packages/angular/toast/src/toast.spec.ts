@@ -245,6 +245,39 @@ describe('the marks', () => {
   });
 });
 
+describe('the pile', () => {
+  it('measures each message at its own height, and writes the open pile’s whole height', () => {
+    const heights = [70, 46, 46];
+    class Observer {
+      observe() {}
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', Observer);
+    const rect = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        /* The closed pile draws every message at the front one's height; only
+           with the override lifted does a message report its own. */
+        const index = this.parentElement ? [...this.parentElement.children].indexOf(this) : -1;
+        return { height: this.style.blockSize === 'auto' ? (heights[index] ?? 0) : 70 } as DOMRect;
+      });
+
+    const fixture = render([provideToastDefaults({ stacking: 'stack' })]);
+    for (const id of ['a', 'b', 'c']) fixture.componentInstance.toasts.show({ id, title: id });
+    fixture.detectChanges();
+    TestBed.tick();
+
+    /* No stylesheet in this document, so the list's gap reads as zero. */
+    expect(
+      items(fixture).map((item) => item.style.getPropertyValue('--slotted-toast-height')),
+    ).toEqual(['70px', '46px', '46px']);
+    expect(region(fixture).style.getPropertyValue('--slotted-toast-stack-height')).toBe('162px');
+    expect(items(fixture).every((item) => item.style.blockSize === '')).toBe(true);
+    rect.mockRestore();
+    vi.unstubAllGlobals();
+  });
+});
+
 describe('the service', () => {
   it('reads as signals, so a zoneless application renders on them', () => {
     const fixture = render();

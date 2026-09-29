@@ -168,3 +168,14 @@ Pedido: o loading usa o loader `contained` do `progress-indicator`; `secondary` 
 | Gap no modo `stack`: as bindings escrevem `--slotted-toast-stack-height` (soma das alturas e dos gaps); a lista expandida toma esse `block-size` e, pela linha 3, o ponteiro | `contract.json` (`runtimeProperties`, `stacking.measured`), `toast.tsx`, `toast.ts`, `toast.css`, `runtime-properties.mjs` | cena `expanded`: lista 186 px de 3720 a 3906, itens 46, 46 e 70 em 3720, 3778 e 3836 |
 
 Os valores fixos das cenas `stack` e `expanded` seguem a linha de 20 px: 70 / 46 / 46, desvios 0 / 82 / 140.
+
+## Terceira ronda (2026-09-29)
+
+Dois defeitos da medição da pilha, anteriores a este dossiê, verificados antes da correção.
+
+| Defeito | Evidência antes | Correção | Evidência depois |
+| ------- | --------------- | -------- | ---------------- |
+| A pilha fechada desenha cada mensagem à altura da da frente, e a medição lia essa altura: `--slotted-toast-height` 70 / 70 / 70 para mensagens de 70 / 46 / 46; aberta, cada mensagem de uma linha ficava com 24 px vazios e a pilha com 234 | cenário no Chrome sobre a cena `stack` com o algoritmo da binding: `{"collapsed":["70px","70px","70px"],"stack":"234px"}` | `naturalHeight()` nas duas bindings: lê com `block-size: auto` em linha e repõe; não mede enquanto a altura transita (o Chrome nomeia a transição de `block-size` como `height`), para não cancelar a abertura | mesmo cenário: `70/46/46`, pilha 186; a 80 ms da abertura a mensagem mede 52.4, com a transição `height\|opacity\|translate` a correr |
+| Angular: o `effect` de componente corre antes de o template ser atualizado, por isso as mensagens que acabavam de chegar não estavam na lista e a pilha nunca era medida | spec novo: `['', '', '']` | `afterRenderEffect` | spec: `70px / 46px / 46px`, pilha 162 (sem folha de estilo no documento, o gap lê 0) |
+
+Testes: `toast.test.tsx` e `toast.spec.ts` modelam a altura forçada (70 salvo com `block-size: auto`).

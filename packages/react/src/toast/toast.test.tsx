@@ -369,7 +369,7 @@ describe('the marks', () => {
 });
 
 describe('the pile', () => {
-  it('writes the open pile’s whole height, so its gaps are the region’s', () => {
+  it('measures each message at its own height, and writes the open pile’s whole height', () => {
     const heights = [70, 46, 46];
     class Observer {
       observe() {}
@@ -379,8 +379,10 @@ describe('the pile', () => {
     const rect = vi
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(function (this: HTMLElement) {
+        /* The closed pile draws every message at the front one's height; only
+           with the override lifted does a message report its own. */
         const index = items().indexOf(this);
-        return { height: heights[index] ?? 0 } as DOMRect;
+        return { height: this.style.blockSize === 'auto' ? (heights[index] ?? 0) : 70 } as DOMRect;
       });
 
     const { toaster } = setup(() => <ToastRegion attach="inline" stacking="stack" />);
@@ -390,7 +392,13 @@ describe('the pile', () => {
 
     /* No stylesheet in this document, so the list's gap reads as zero. */
     expect(region().style.getPropertyValue('--slotted-toast-stack-height')).toBe('162px');
+    expect(items().map((item) => item.style.getPropertyValue('--slotted-toast-height'))).toEqual([
+      '70px',
+      '46px',
+      '46px',
+    ]);
     expect(items()[2]?.style.getPropertyValue('--slotted-toast-stack-offset')).toBe('116px');
+    expect(items().every((item) => item.style.blockSize === '')).toBe(true);
     rect.mockRestore();
     vi.unstubAllGlobals();
   });

@@ -24,10 +24,78 @@ test('styles every part the contract declares', () => {
 });
 
 test('reacts to every state the contract declares', () => {
-  assert.ok(normalized.includes("[data-part='link']:not([data-disabled]):hover"));
-  assert.ok(normalized.includes("[data-part='link']:not([data-disabled]):active"));
-  assert.ok(normalized.includes("[data-part='link']:focus-visible"));
+  const crumbs = ":is([data-part='link'],[data-part='trigger'])";
+  assert.ok(normalized.includes(`${crumbs}:not([data-disabled]):hover`));
+  assert.ok(normalized.includes(`${crumbs}:not([data-disabled]):is(:active,[data-open])`));
+  assert.ok(normalized.includes(`${crumbs}:focus-visible`));
   assert.ok(normalized.includes("[data-part='item'][hidden]{display:none"));
+});
+
+/**
+ * A switcher is the crumb it stands for, dressed on a `button`; the one for the
+ * page the reader is on keeps the page's colour and weight, and its hover and
+ * press still differ.
+ */
+test('dresses a switcher as a crumb and keeps the page on the current one', () => {
+  assert.ok(
+    normalized.includes(
+      "[data-part='trigger']{appearance:none;background-color:transparent;border:0;",
+    ),
+  );
+  assert.ok(
+    normalized.includes("[data-part='trigger'][aria-current='page']{color:var(--_strong);"),
+  );
+  assert.ok(
+    normalized.includes(
+      "[data-part='trigger'][aria-current='page']:not([data-disabled]):is(:active,[data-open]){color:var(--_hover);",
+    ),
+  );
+});
+
+/**
+ * Every crumb, ring and ellipsis ground lands on whole pixels because the line
+ * does, and two wrapped lines stand a target apart (WCAG 2.5.8).
+ */
+test('rounds the line to whole pixels and spaces wrapped lines a target apart', () => {
+  assert.match(
+    normalized,
+    /line-height:round\(nearest,calc\(var\(--slotted-breadcrumb-line-height,var\(--slotted-line-height-md,1\.5\)\)\*1em\),2px\)/,
+  );
+  assert.ok(normalized.includes('calc(var(--slotted-target-min,24px)-1lh)'));
+  assert.ok(
+    normalized.includes(
+      'block-size:round(nearest,var(--slotted-breadcrumb-separator-length,0.9em),1px)',
+    ),
+  );
+});
+
+test('hands the ellipsis box its air back to the gap', () => {
+  assert.ok(
+    normalized.includes('margin-inline:min(0px,calc(var(--slotted-space-2,0.25rem)-var(--_gap)))'),
+  );
+});
+
+/**
+ * Revealed crumbs arrive by opacity on the enter curve; folding back does not
+ * animate, because it follows a resize.
+ */
+test('fades the revealed crumbs in and folds them back at once', () => {
+  assert.ok(
+    normalized.includes(
+      "[data-ui='breadcrumb'][data-expanded][data-part='item']{transition:opacityvar(--slotted-duration-medium)var(--slotted-easing-enter);",
+    ),
+  );
+  assert.ok(
+    normalized.includes(
+      "@starting-style{[data-ui='breadcrumb'][data-expanded][data-part='item']{opacity:0;",
+    ),
+  );
+  assert.ok(!/\[hidden\][^{]*\{[^}]*transition/.test(normalized));
+});
+
+test('spaces what a crumb carries beside its label', () => {
+  assert.ok(normalized.includes(":is([data-ui='icon'],[data-ui='avatar']){margin-inline-end:"));
+  assert.ok(normalized.includes(">[data-ui='badge']{margin-inline-start:"));
 });
 
 /**
@@ -102,10 +170,12 @@ test('sets the ellipsis on the crumbs’ line, with a whole target and a glyph',
  * A crumb is text with no border for the ring to clear, and the ellipsis is a
  * button box. Two distances, and the second is the larger.
  */
-test('hugs a crumb closer than it hugs the ellipsis', () => {
+test('hugs a crumb at one pixel and rings the ellipsis inward', () => {
   assert.ok(normalized.includes('outline-offset:var(--slotted-breadcrumb-focus-ring-offset,1px)'));
   assert.ok(
-    normalized.includes('outline-offset:var(--slotted-breadcrumb-ellipsis-focus-ring-offset,2px)'),
+    normalized.includes(
+      'outline-offset:var(--slotted-breadcrumb-ellipsis-focus-ring-offset,calc(-1*var(--slotted-focus-ring-width,2px)))',
+    ),
   );
 });
 

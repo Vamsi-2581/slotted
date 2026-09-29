@@ -1,6 +1,13 @@
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
+/**
+ * What a trail does with crumbs its width cannot hold. `collapse` folds the
+ * middle ones into the ellipsis; `wrap` lets the row break onto a second line
+ * and only the count collapses.
+ */
+export type BreadcrumbOverflow = 'collapse' | 'wrap';
+
 /** Why the trail expanded. Only two things can ask: a press and a key. */
 export type BreadcrumbExpandReason = 'pointer' | 'keyboard';
 
@@ -17,6 +24,7 @@ export interface BreadcrumbDefaults {
   itemsBeforeCollapse?: number | undefined;
   label?: string | undefined;
   maxItems?: number | undefined;
+  overflow?: BreadcrumbOverflow | undefined;
   /** The mark drawn between two crumbs. Absent, the stylesheet draws its own. */
   separator?: ReactNode | undefined;
 }
@@ -26,6 +34,8 @@ export interface BreadcrumbDefaultsProviderProps extends BreadcrumbDefaults {
 }
 
 export interface BreadcrumbRootProps extends ComponentPropsWithRef<'nav'> {
+  /** How many crumbs are folded into the ellipsis, count and width together. */
+  'data-collapsed': string | undefined;
   'data-expanded': '' | undefined;
   'data-part': string;
   'data-ui': string;
@@ -56,6 +66,20 @@ export interface BreadcrumbLinkProps extends ComponentPropsWithRef<'a'> {
   render?: ((props: BreadcrumbLinkRootProps) => ReactNode) | undefined;
 }
 
+export interface BreadcrumbTriggerRootProps extends ComponentPropsWithRef<'button'> {
+  'data-part': string;
+}
+
+export interface BreadcrumbTriggerProps extends ComponentPropsWithRef<'button'> {
+  /**
+   * The page the reader is on. The switcher still says so, with
+   * `aria-current="page"`, and takes the page's weight.
+   */
+  current?: boolean | undefined;
+  /** Substitutes the button — a `MenuTrigger`'s own, typically. */
+  render?: ((props: BreadcrumbTriggerRootProps) => ReactNode) | undefined;
+}
+
 export interface BreadcrumbPageRootProps extends ComponentPropsWithRef<'span'> {
   'aria-current': 'page';
   'data-part': string;
@@ -80,6 +104,8 @@ export interface BreadcrumbProps extends ComponentPropsWithRef<'nav'> {
   maxItems?: number | undefined;
   /** Called before the trail expands, with the request that carries the reason. */
   onExpandedChange?: ((expanded: boolean, request: BreadcrumbChangeRequest) => void) | undefined;
+  /** What the trail does with crumbs its width cannot hold. `collapse` by default. */
+  overflow?: BreadcrumbOverflow | undefined;
   render?: ((props: BreadcrumbRootProps) => ReactNode) | undefined;
   /** The mark between two crumbs. Absent, the stylesheet draws a rotated rule. */
   separator?: ReactNode | undefined;
@@ -94,7 +120,10 @@ export interface BreadcrumbContextValue {
   itemsAfterCollapse: number;
   itemsBeforeCollapse: number;
   maxItems: number;
+  overflow: BreadcrumbOverflow;
   separator: ReactNode;
+  /** The list reports how many crumbs it folded, so the root can say so. */
+  setCollapsed: (count: number) => void;
 }
 
 /** What one crumb is told by the list that laid it out. */

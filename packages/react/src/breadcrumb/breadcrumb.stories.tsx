@@ -4,7 +4,15 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Breadcrumb } from './breadcrumb';
 import { BreadcrumbDefaultsProvider } from './breadcrumb-defaults';
-import { BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage } from './breadcrumb-parts';
+import { Glyph, Icon } from '../icon';
+import { Menu, MenuContent, MenuRadioGroup, MenuRadioItem, MenuTrigger } from '../menu';
+import {
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbTrigger,
+} from './breadcrumb-parts';
 import { REACT_BREADCRUMB_DOCS, REACT_BREADCRUMB_TOKENS } from './breadcrumb.docs';
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
@@ -16,6 +24,8 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     context: Context,
     content: Content,
     composition: Composition,
+    switcher: Switcher,
+    overflow: Overflow,
     keyboard: Keyboard,
   }) as never;
 
@@ -179,11 +189,12 @@ export const Content: Story = {
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
-        label="Long, translated and unbroken"
+        label='Long, translated and unbroken, overflow="wrap"'
         note="A German compound, a pasted identifier and an Arabic label. The row wraps before anything truncates, and the string survives whatever is cut."
       >
         <div className="slotted-demo-measure">
           <Trail
+            overflow="wrap"
             levels={[
               'Zahlungsabwicklungseinstellungen',
               'INV-2026-08-0041-RECONCILIATION-REPORT',
@@ -230,6 +241,150 @@ export const Composition: Story = {
         <BreadcrumbDefaultsProvider label="Trilha" maxItems={4} separator="·">
           <Trail />
         </BreadcrumbDefaultsProvider>
+      </Scene>
+    </div>
+  ),
+};
+
+/**
+ * A switcher over the crumbs a reader moves sideways between rather than up:
+ * which company's books, which ledger, which period. Each menu marks the
+ * sibling the trail is on, and the last is the page itself.
+ */
+function Switch({
+  current = false,
+  icon,
+  label,
+  options,
+}: {
+  current?: boolean;
+  icon?: 'inbox' | 'file-text';
+  label: string;
+  options: string[];
+}) {
+  return (
+    <BreadcrumbItem>
+      <Menu>
+        <MenuTrigger
+          render={(props) => (
+            <BreadcrumbTrigger {...props} current={current}>
+              {icon === undefined ? null : (
+                <Icon>
+                  <Glyph name={icon} />
+                </Icon>
+              )}
+              {label}
+            </BreadcrumbTrigger>
+          )}
+        />
+        <MenuContent>
+          <MenuRadioGroup aria-label={label} defaultValue={label}>
+            {options.map((option) => (
+              <MenuRadioItem key={option} value={option}>
+                {option}
+              </MenuRadioItem>
+            ))}
+          </MenuRadioGroup>
+        </MenuContent>
+      </Menu>
+    </BreadcrumbItem>
+  );
+}
+
+export const Switcher: Story = {
+  parameters: scenario('switcher'),
+  render: () => (
+    <div className="slotted-demo-grid" data-columns="1">
+      <Scene
+        label="BreadcrumbTrigger inside MenuTrigger"
+        note="Open a crumb: its chevron turns, the underline stays while the menu is up, and the menu marks the sibling the trail is on. The period is the page itself, so it keeps aria-current."
+      >
+        <Breadcrumb>
+          <BreadcrumbList>
+            <Switch
+              icon="inbox"
+              label="Northwind Trading"
+              options={['Northwind Trading', 'Contoso Ltd', 'Fabrikam Inc']}
+            />
+            <Switch
+              label="Accounts receivable"
+              options={['Accounts receivable', 'Accounts payable']}
+            />
+            <Switch
+              current
+              label="August 2026"
+              options={['June 2026', 'July 2026', 'August 2026']}
+            />
+          </BreadcrumbList>
+        </Breadcrumb>
+      </Scene>
+      <Scene
+        label="Beside plain crumbs"
+        note="A switcher is one crumb among links: it keeps their colour, their underline and their focus ring, and only the chevron says a list opens here rather than a page."
+      >
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="#workspace">Workspace</BreadcrumbLink>
+            </BreadcrumbItem>
+            <Switch label="Billing" options={['Billing', 'Payroll', 'Tax']} />
+            <BreadcrumbItem>
+              <BreadcrumbPage>
+                <Icon>
+                  <Glyph name="file-text" />
+                </Icon>
+                INV-2026-08-0041
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </Scene>
+    </div>
+  ),
+};
+
+function Room({ children, room }: { children: React.ReactNode; room: 'phone' | 'tablet' }) {
+  return (
+    <div className="slotted-demo-room" data-room={room}>
+      <div className="slotted-demo-viewport">{children}</div>
+    </div>
+  );
+}
+
+export const Overflow: Story = {
+  parameters: scenario('overflow'),
+  render: () => (
+    <div className="slotted-demo-grid" data-columns="1">
+      <Scene
+        label="640 pixels"
+        layout="block"
+        note="Eight crumbs at tablet width. Whatever does not fit folds into the ellipsis from the crumb nearest the root, and the first and the last two always stay."
+      >
+        <Room room="tablet">
+          <Trail levels={[...DEEP, 'Accounts receivable', 'August 2026']} maxItems={0} />
+        </Room>
+      </Scene>
+      <Scene
+        label="375 pixels"
+        layout="block"
+        note="The same trail on a phone. The ellipsis names every crumb it holds, and pressing it expands the trail onto a second line."
+      >
+        <Room room="phone">
+          <Trail levels={[...DEEP, 'Accounts receivable', 'August 2026']} maxItems={0} />
+        </Room>
+      </Scene>
+      <Scene
+        label='overflow="wrap" at 375 pixels'
+        layout="block"
+        note="Every crumb kept, the row broken onto as many lines as it takes. Lines stand a target apart, so two crumbs above each other are never one tap."
+      >
+        <Room room="phone">
+          <Trail
+            levels={[...DEEP, 'Accounts receivable', 'August 2026']}
+            maxItems={0}
+            overflow="wrap"
+          />
+        </Room>
       </Scene>
     </div>
   ),

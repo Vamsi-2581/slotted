@@ -10,7 +10,7 @@ export function useBreadcrumbDefaults(): BreadcrumbDefaults {
 
 /**
  * An application decides once what its trails are called, how deep they may get
- * before they fold, and what is drawn between two crumbs. A trail that states
+ * before they fold, whether they fold for want of width, and what is drawn between two crumbs. A trail that states
  * any of those itself still wins: an explicit prop is never overridden by
  * context.
  */
@@ -27,6 +27,7 @@ export function BreadcrumbDefaultsProvider({
         itemsBeforeCollapse: defaults.itemsBeforeCollapse ?? inherited.itemsBeforeCollapse,
         label: defaults.label ?? inherited.label,
         maxItems: defaults.maxItems ?? inherited.maxItems,
+        overflow: defaults.overflow ?? inherited.overflow,
         separator: defaults.separator ?? inherited.separator,
       }}
     >

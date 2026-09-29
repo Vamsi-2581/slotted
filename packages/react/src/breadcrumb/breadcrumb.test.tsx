@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState, type Ref } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/breadcrumb/contract.json';
 import { Breadcrumb } from './breadcrumb';
@@ -10,8 +10,10 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
+  BreadcrumbTrigger,
   collapsedRange,
 } from './breadcrumb-parts';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from '../menu';
 import type { BreadcrumbProps } from './breadcrumb.types';
 
 const LEVELS = ['Workspace', 'Northwind', 'Accounts', 'Billing', 'Invoices'];
@@ -254,5 +256,197 @@ describe('Breadcrumb', () => {
       expect(() => render(<BreadcrumbList />)).toThrow(/inside a Breadcrumb/);
       quiet.mockRestore();
     });
+  });
+});
+
+/**
+ * jsdom lays nothing out, so a width is given to each crumb and to the list,
+ * and `createCollapse` does the arithmetic a browser runs. The same stub
+ * `toolbar` uses.
+ */
+function withLayout() {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
+  Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+    configurable: true,
+    get(this: HTMLElement) {
+      return Number(this.dataset['testWidth'] ?? 0);
+    },
+  });
+  HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect(this: HTMLElement) {
+    const width = Number(this.dataset['testWidth'] ?? 0);
+    return { bottom: 0, height: 0, left: 0, right: width, top: 0, width, x: 0, y: 0 } as DOMRect;
+  };
+}
+
+function Narrow({ room, ...props }: Partial<BreadcrumbProps> & { room: number }) {
+  return (
+    <Breadcrumb {...props}>
+      <BreadcrumbList data-test-width={room}>
+        {LEVELS.map((level) => (
+          <BreadcrumbItem data-test-width={100} key={level}>
+            <BreadcrumbLink href={`#${level}`}>{level}</BreadcrumbLink>
+          </BreadcrumbItem>
+        ))}
+        <BreadcrumbItem data-test-width={100}>
+          <BreadcrumbPage>INV-0041</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+}
+
+describe('Breadcrumb overflow', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    Reflect.deleteProperty(HTMLElement.prototype, 'clientWidth');
+  });
+
+  it('folds the middle crumbs nearest the root into the ellipsis', () => {
+    withLayout();
+    render(<Narrow room={350} />);
+
+    expect(ellipsis()).toHaveAccessibleName('Show 3 hidden levels');
+    expect(crumbs().map((crumb) => crumb.textContent)).toEqual([
+      'Workspace',
+      '',
+      'Invoices',
+      'INV-0041',
+    ]);
+    expect(trail()).toHaveAttribute('data-collapsed', '3');
+  });
+
+  it('folds only as many as the width asks for', () => {
+    withLayout();
+    render(<Narrow room={450} />);
+
+    expect(ellipsis()).toHaveAccessibleName('Show 2 hidden levels');
+    expect(screen.getByText('Billing')).toBeVisible();
+    expect(screen.getByText('Northwind').closest('li')).toHaveAttribute('hidden');
+  });
+
+  it('draws no ellipsis while the trail fits', () => {
+    withLayout();
+    render(<Narrow room={600} />);
+
+    expect(ellipsis()).toBeNull();
+    expect(trail()).not.toHaveAttribute('data-collapsed');
+  });
+
+  it('wraps instead when asked to, per instance or once for the application', () => {
+    withLayout();
+    const { unmount } = render(<Narrow overflow="wrap" room={350} />);
+    expect(ellipsis()).toBeNull();
+    unmount();
+
+    render(
+      <BreadcrumbDefaultsProvider overflow="wrap">
+        <Narrow room={350} />
+      </BreadcrumbDefaultsProvider>,
+    );
+    expect(ellipsis()).toBeNull();
+  });
+
+  it('expands what the width folded and gives focus to the first crumb it revealed', () => {
+    withLayout();
+    const onExpandedChange = vi.fn();
+    render(<Narrow onExpandedChange={onExpandedChange} room={350} />);
+
+    fireEvent.click(ellipsis() as HTMLElement);
+
+    expect(onExpandedChange).toHaveBeenCalledWith(
+      true,
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+    expect(ellipsis()).toBeNull();
+    expect(crumbs()).toHaveLength(6);
+    expect(screen.getByText('Northwind')).toHaveFocus();
+    expect(trail()).toHaveAttribute('data-expanded');
+  });
+});
+
+describe('BreadcrumbTrigger', () => {
+  it('is a button dressed as a crumb, with a chevron after its label', () => {
+    render(
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbTrigger>web-app</BreadcrumbTrigger>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>,
+    );
+
+    const trigger = screen.getByRole('button', { name: 'web-app' });
+    expect(trigger).toHaveAttribute('data-part', 'trigger');
+    expect(trigger).toHaveAttribute('type', 'button');
+    expect(trigger.querySelector('svg')).toHaveAttribute('data-glyph', 'chevron-down');
+    expect(trigger).not.toHaveAttribute('aria-current');
+  });
+
+  it('keeps aria-current on the switcher of the page the reader is on', () => {
+    render(
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbTrigger current>Production</BreadcrumbTrigger>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Production' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+  });
+
+  it("opens the menu composed around it and stays the trail's own part", () => {
+    const onClick = vi.fn();
+    render(
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <Menu>
+              <MenuTrigger
+                render={(props) => (
+                  <BreadcrumbTrigger
+                    {...props}
+                    current
+                    onClick={(event) => {
+                      props.onClick?.(event);
+                      onClick();
+                    }}
+                  >
+                    Production
+                  </BreadcrumbTrigger>
+                )}
+              />
+              <MenuContent>
+                <MenuItem>Preview</MenuItem>
+              </MenuContent>
+            </Menu>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>,
+    );
+
+    const trigger = screen.getByRole('button', { name: 'Production' });
+    expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
+    expect(trigger).toHaveAttribute('data-part', 'trigger');
+    expect(trigger).toHaveAttribute('aria-current', 'page');
+
+    fireEvent.click(trigger);
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(trigger).toHaveAttribute('data-open');
   });
 });

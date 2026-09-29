@@ -5,6 +5,7 @@ export {
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
+  BreadcrumbTrigger,
   collapsedRange,
 } from './breadcrumb-parts';
 export type {
@@ -19,8 +20,11 @@ export type {
   BreadcrumbLinkRootProps,
   BreadcrumbListProps,
   BreadcrumbListRootProps,
+  BreadcrumbOverflow,
   BreadcrumbPageProps,
   BreadcrumbPageRootProps,
   BreadcrumbProps,
   BreadcrumbRootProps,
+  BreadcrumbTriggerProps,
+  BreadcrumbTriggerRootProps,
 } from './breadcrumb.types';

@@ -48,6 +48,11 @@ export const BreadcrumbItemProvider = BreadcrumbItemContext.Provider;
  * they leave the accessibility tree with the page — and the button that hides
  * them names the count, which is what a reader hears in place of them.
  *
+ * **A trail that does not fit folds.** With `overflow="collapse"` the list
+ * measures itself and folds the middle crumbs that its width cannot hold into
+ * the same ellipsis, nearest the root first; what folded is read from the
+ * layout and reported in `data-collapsed`, not owned by anyone.
+ *
  * **It is not a back button.** The trail is where the page sits in the
  * hierarchy, not where the reader came from, and section 7 of the feature guide
  * says so.
@@ -61,6 +66,7 @@ export function Breadcrumb({
   label,
   maxItems,
   onExpandedChange,
+  overflow,
   render,
   separator,
   ...nativeProps
@@ -69,6 +75,7 @@ export function Breadcrumb({
   const generatedId = useId();
 
   const [own, setOwn] = useState(defaultExpanded ?? false);
+  const [collapsed, setCollapsed] = useState(0);
   const current = expanded ?? own;
   const revealedId = `slotted-breadcrumb-${generatedId}`;
 
@@ -104,13 +111,16 @@ export function Breadcrumb({
     itemsAfterCollapse: itemsAfterCollapse ?? defaults.itemsAfterCollapse ?? 2,
     itemsBeforeCollapse: itemsBeforeCollapse ?? defaults.itemsBeforeCollapse ?? 1,
     maxItems: maxItems ?? defaults.maxItems ?? 8,
+    overflow: overflow ?? defaults.overflow ?? 'collapse',
     separator: separator ?? defaults.separator,
+    setCollapsed,
   };
 
   const rootProps: BreadcrumbRootProps = {
     'aria-label': label ?? defaults.label ?? 'Breadcrumb',
     ...nativeProps,
     children,
+    'data-collapsed': collapsed > 0 ? String(collapsed) : undefined,
     'data-expanded': current ? '' : undefined,
     'data-part': 'root',
     'data-ui': 'breadcrumb',

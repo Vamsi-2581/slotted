@@ -1,4 +1,13 @@
-import { Children, isValidElement, type ReactNode } from 'react';
+import { createCollapse } from '@slotted/core/overflow';
+import {
+  Children,
+  isValidElement,
+  type ReactNode,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { Glyph, Icon } from '../icon';
 import { BreadcrumbItemProvider, useBreadcrumb, useBreadcrumbItem } from './breadcrumb';
@@ -11,6 +20,8 @@ import type {
   BreadcrumbListRootProps,
   BreadcrumbPageProps,
   BreadcrumbPageRootProps,
+  BreadcrumbTriggerProps,
+  BreadcrumbTriggerRootProps,
 } from './breadcrumb.types';
 
 /**
@@ -45,6 +56,8 @@ export function collapsedRange(count: number, before: number, after: number) {
 export function BreadcrumbList({ children, ref, render, ...nativeProps }: BreadcrumbListProps) {
   const trail = useBreadcrumb();
   const items = Children.toArray(children).filter((child) => isValidElement(child));
+  const before = Math.max(0, trail.itemsBeforeCollapse);
+  const after = Math.max(0, trail.itemsAfterCollapse);
   /**
    * The range is computed whether or not the trail is expanded, because two
    * different things read it. The collapse reads it only while folded; the
@@ -55,17 +68,79 @@ export function BreadcrumbList({ children, ref, render, ...nativeProps }: Breadc
   const range =
     trail.maxItems <= 0 || items.length <= trail.maxItems
       ? undefined
-      : collapsedRange(items.length, trail.itemsBeforeCollapse, trail.itemsAfterCollapse);
+      : collapsedRange(items.length, before, after);
   const collapsed = trail.expanded ? undefined : range;
+  /** Whether there is a middle at all: crumbs outside the ones that never fold. */
+  const middle = items.length > before + after;
+
+  /**
+   * The width collapse runs only while the count has hidden nothing: a trail
+   * the count already folded shows only the crumbs that never fold, so there
+   * is nothing left for the width to take, and one writer per `hidden`
+   * attribute is what keeps the two from undoing each other. React writes it on
+   * the crumbs the count hides; `createCollapse` writes it on the crumbs the
+   * width hides and on the ellipsis's own item.
+   */
+  const measuring =
+    trail.overflow === 'collapse' && !trail.expanded && range === undefined && middle;
+  const list = useRef<HTMLOListElement | null>(null);
+  const ellipsis = useRef<HTMLLIElement | null>(null);
+  const [folded, setFolded] = useState(0);
+  const { setCollapsed } = trail;
+
+  useLayoutEffect(() => {
+    const container = list.current;
+    if (!measuring || container === null) {
+      setFolded(0);
+      return;
+    }
+    const units = () =>
+      [...container.children].filter(
+        (unit): unit is HTMLElement => unit instanceof HTMLElement && unit !== ellipsis.current,
+      );
+    const handle = createCollapse(container, {
+      /* Only the middle folds: the first crumbs and the last ones never do. */
+      collapsible: (unit) => {
+        const index = units().indexOf(unit);
+        return index >= before && index < units().length - after;
+      },
+      onChange: (hidden) => setFolded(hidden.length),
+      /* Nearest the root first, so the folded run stays beside the ellipsis. */
+      rank: (unit) => units().indexOf(unit),
+      trigger: () => ellipsis.current,
+      units,
+    });
+    return () => {
+      handle.destroy();
+      setFolded(0);
+    };
+  }, [after, before, items.length, measuring]);
+
+  const hiddenCount = collapsed === undefined ? folded : collapsed.end - collapsed.start;
+  useLayoutEffect(() => {
+    setCollapsed(hiddenCount);
+  }, [hiddenCount, setCollapsed]);
+
+  const setList = useCallback(
+    (node: HTMLOListElement | null) => {
+      list.current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref !== null && ref !== undefined) ref.current = node;
+    },
+    [ref],
+  );
 
   const laidOut: ReactNode[] = [];
   for (const [index, child] of items.entries()) {
-    if (collapsed !== undefined && index === collapsed.start) {
+    if (index === before && (collapsed !== undefined || measuring)) {
       laidOut.push(
         <BreadcrumbEllipsis
           key="slotted-breadcrumb-ellipsis"
-          hidden={collapsed.end - collapsed.start}
-          last={false}
+          hidden={hiddenCount}
+          /* Until the width has been measured the ellipsis stands for nothing,
+             so it is rendered hidden and `createCollapse` owns it from there. */
+          idle={collapsed === undefined}
+          itemRef={ellipsis}
         />,
       );
     }
@@ -76,7 +151,8 @@ export function BreadcrumbList({ children, ref, render, ...nativeProps }: Breadc
         value={{
           hidden,
           last: index === items.length - 1,
-          revealedId: index === (range?.start ?? -1) ? trail.firstRevealedId : undefined,
+          /* The first crumb an expansion reveals, whichever collapse hid it. */
+          revealedId: middle && index === before ? trail.firstRevealedId : undefined,
         }}
       >
         {child}
@@ -88,9 +164,10 @@ export function BreadcrumbList({ children, ref, render, ...nativeProps }: Breadc
     ...nativeProps,
     children: laidOut,
     'data-part': 'list',
+    ref: setList,
   };
 
-  return render === undefined ? <ol {...rootProps} ref={ref} /> : render(rootProps);
+  return render === undefined ? <ol {...rootProps} /> : render(rootProps);
 }
 
 /**
@@ -113,11 +190,19 @@ function Separator({ children }: { children: ReactNode }) {
  * how much is behind them. It is a `button` with `aria-expanded`, so a reader
  * hears that it opens something before pressing it.
  */
-function BreadcrumbEllipsis({ hidden, last }: { hidden: number; last: boolean }) {
+function BreadcrumbEllipsis({
+  hidden,
+  idle,
+  itemRef,
+}: {
+  hidden: number;
+  idle: boolean;
+  itemRef: { current: HTMLLIElement | null };
+}) {
   const trail = useBreadcrumb();
 
   return (
-    <li data-part="item">
+    <li data-part="item" hidden={idle} ref={itemRef}>
       <button
         aria-expanded={false}
         aria-label={`Show ${hidden} hidden ${hidden === 1 ? 'level' : 'levels'}`}
@@ -135,7 +220,7 @@ function BreadcrumbEllipsis({ hidden, last }: { hidden: number; last: boolean })
           <Glyph name="ellipsis" />
         </Icon>
       </button>
-      {last ? null : <Separator>{trail.separator}</Separator>}
+      <Separator>{trail.separator}</Separator>
     </li>
   );
 }
@@ -180,6 +265,50 @@ export function BreadcrumbLink({ children, ref, render, ...nativeProps }: Breadc
   };
 
   return render === undefined ? <a {...rootProps} ref={ref} /> : render(rootProps);
+}
+
+/**
+ * A crumb that opens a menu of its siblings — the organisation, the project,
+ * the environment. It is a `button`, because an `a` without `href` takes no
+ * focus, dressed as the crumb it stands for, with a chevron after the label.
+ * The menu is composed around it:
+ *
+ * ```tsx
+ * <Menu>
+ *   <MenuTrigger render={(props) => <BreadcrumbTrigger {...props}>web-app</BreadcrumbTrigger>} />
+ *   <MenuContent>…</MenuContent>
+ * </Menu>
+ * ```
+ *
+ * `current` keeps `aria-current="page"` on the switcher of the page the reader
+ * is on, which a switcher does not stop being.
+ */
+export function BreadcrumbTrigger({
+  children,
+  current,
+  ref,
+  render,
+  ...nativeProps
+}: BreadcrumbTriggerProps) {
+  const item = useBreadcrumbItem();
+
+  const rootProps: BreadcrumbTriggerRootProps = {
+    type: 'button',
+    ...nativeProps,
+    'aria-current': current === true ? 'page' : nativeProps['aria-current'],
+    children: (
+      <>
+        {children}
+        <Icon>
+          <Glyph name="chevron-down" />
+        </Icon>
+      </>
+    ),
+    'data-part': 'trigger',
+    id: nativeProps.id ?? item?.revealedId,
+  };
+
+  return render === undefined ? <button {...rootProps} ref={ref} /> : render(rootProps);
 }
 
 /**

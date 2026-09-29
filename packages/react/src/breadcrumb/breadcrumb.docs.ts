@@ -25,7 +25,7 @@ export const REACT_BREADCRUMB_TOKENS = breadcrumbTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import {\n  Breadcrumb,\n  BreadcrumbDefaultsProvider,\n  BreadcrumbItem,\n  BreadcrumbLink,\n  BreadcrumbList,\n  BreadcrumbPage,\n} from '@slotted/react';",
+    "import {\n  Breadcrumb,\n  BreadcrumbDefaultsProvider,\n  BreadcrumbItem,\n  BreadcrumbLink,\n  BreadcrumbList,\n  BreadcrumbPage,\n  BreadcrumbTrigger,\n} from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -34,14 +34,14 @@ const anatomy: AnatomyRow[] = [
     element: 'nav',
     required: true,
     purpose:
-      'The navigation landmark and its name. Carries data-ui="breadcrumb" and data-expanded, and owns the collapse.',
+      'The navigation landmark and its name. Carries data-ui="breadcrumb", data-expanded, and data-collapsed with the count of folded crumbs, and owns the collapse.',
   },
   {
     part: 'list',
     element: 'ol',
     required: true,
     purpose:
-      'The ordered list, which is what carries the hierarchy and the set size. It decides which crumbs the collapse hides.',
+      'The ordered list, which is what carries the hierarchy and the set size. It decides which crumbs the collapse hides, by count and, with overflow="collapse", by its own width.',
   },
   {
     part: 'item',
@@ -64,6 +64,13 @@ const anatomy: AnatomyRow[] = [
       'The page the reader is on, carrying aria-current="page". Text rather than a link, because a link to this page goes nowhere.',
   },
   {
+    part: 'trigger',
+    element: 'button',
+    required: false,
+    purpose:
+      'A crumb that opens a menu of its siblings, with a chevron after its label. The menu is composed around it; current keeps aria-current="page" on the switcher of this page.',
+  },
+  {
     part: 'separator',
     element: 'span',
     required: false,
@@ -75,7 +82,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'What the collapse hides, and the control that reveals it. Its accessible name carries the count.',
+      'What the collapse hides, in an item of its own in front of the first crumb that can fold, and the control that reveals it. Its accessible name carries the count.',
   },
 ];
 
@@ -164,9 +171,33 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'switcher',
+    title: 'Crumbs that switch between siblings',
+    note: 'Organisation, project and environment each open a menu of their siblings. The open one keeps its underline and turns its chevron, and the environment the reader is on still says it is this page.',
+    snippet: defineSnippet({
+      id: 'breadcrumb-react-switcher',
+      language: 'tsx',
+      label: 'A crumb composed with Menu',
+      source:
+        '<BreadcrumbItem>\n  <Menu>\n    <MenuTrigger\n      render={(props) => (\n        <BreadcrumbTrigger {...props} current>\n          Production\n        </BreadcrumbTrigger>\n      )}\n    />\n    <MenuContent>\n      <MenuItem>Preview</MenuItem>\n      <MenuItem>Development</MenuItem>\n    </MenuContent>\n  </Menu>\n</BreadcrumbItem>;',
+    }),
+  },
+  {
+    id: 'overflow',
+    title: 'A trail narrower than its crumbs',
+    note: 'Drag the column narrower: the middle crumbs fold into the ellipsis from the one nearest the root, the first and the last two stay, and the ellipsis names how many it holds. overflow="wrap" breaks the row instead.',
+    snippet: defineSnippet({
+      id: 'breadcrumb-react-overflow',
+      language: 'tsx',
+      label: 'Folding for want of width',
+      source:
+        '<Breadcrumb>\n  <BreadcrumbList>{levels}</BreadcrumbList>\n</Breadcrumb>;\n\n// Keep every crumb and let the row wrap.\n<Breadcrumb overflow="wrap">\n  <BreadcrumbList>{levels}</BreadcrumbList>\n</Breadcrumb>;',
+    }),
+  },
+  {
     id: 'keyboard',
     title: 'Keyboard and announcement',
-    note: 'Tab reaches every crumb and the ellipsis; Enter follows a crumb; Enter or Space on the ellipsis expands the trail and moves focus to the first crumb it revealed.',
+    note: 'Tab reaches every crumb and the ellipsis; Enter follows a crumb; Enter or Space on the ellipsis expands the trail and moves focus to the first crumb it revealed. A switcher takes the keys of the menu composed on it.',
     snippet: defineSnippet({
       id: 'breadcrumb-react-keyboard',
       language: 'tsx',
@@ -223,6 +254,13 @@ export const REACT_BREADCRUMB_DOCS = {
         'What an uncontrolled trail starts from, read once',
       ],
       [
+        'overflow',
+        "'collapse' | 'wrap'",
+        'collapse',
+        'Breadcrumb',
+        'What the trail does with crumbs its width cannot hold: fold the middle into the ellipsis, or wrap',
+      ],
+      [
         'separator',
         'ReactNode',
         '—',
@@ -235,6 +273,13 @@ export const REACT_BREADCRUMB_DOCS = {
         '—',
         'BreadcrumbLink',
         'The destination, and every other anchor attribute reaches the element unchanged',
+      ],
+      [
+        'current',
+        'boolean',
+        'false',
+        'BreadcrumbTrigger',
+        'The switcher of the page the reader is on: writes aria-current="page" and takes the page weight',
       ],
     ]),
     composition: apiRows([
@@ -255,10 +300,10 @@ export const REACT_BREADCRUMB_DOCS = {
       ],
       [
         'BreadcrumbDefaultsProvider',
-        'label | maxItems | itemsBeforeCollapse | itemsAfterCollapse | separator',
+        'label | maxItems | itemsBeforeCollapse | itemsAfterCollapse | overflow | separator',
         '—',
         'Application',
-        'Sets those five once for everything below it; a prop on the trail still wins',
+        'Sets those six once for everything below it; a prop on the trail still wins',
       ],
     ]),
     accessibility: [
@@ -266,6 +311,8 @@ export const REACT_BREADCRUMB_DOCS = {
       'The current page is a span rather than a link, because a link to the page the reader is already on goes nowhere. The APG makes aria-current optional there; this family writes it anyway, so the end of the trail is announced as this page.',
       'The separator is never announced. It is drawn as geometry in CSS — a rotated rule, not a character and not a glyph — which is the same reasoning the APG example gives, and it mirrors from :dir(rtl) so a trail inside a left-to-right island leans the way that island reads.',
       'A crumb the collapse hides carries the hidden attribute, so it leaves the accessibility tree with the page. That is the cost of expanding in place rather than into an overlay, and it is paid by the ellipsis: its accessible name says how many crumbs it hides, and it carries aria-expanded.',
+      'A crumb the width folds is hidden the same way, and the ellipsis counts it with the others. Hiding only the label of a narrow crumb would leave the link named by nothing but an aria-hidden icon; a folded crumb is out of the tree whole, and the ellipsis says so.',
+      'A switcher is a button with aria-haspopup from the menu composed on it, and the switcher of this page keeps aria-current="page", so the end of the trail is still announced as the current page when it opens a menu.',
       'Pressing the ellipsis removes it, so focus is given to the first crumb it revealed. Focus on a removed element falls to the body, which is the defect that rule exists to prevent.',
       'A crumb wider than the trail truncates with an ellipsis, and the full string stays in the DOM and in the accessible name — the repository rule for every truncation.',
     ],

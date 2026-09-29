@@ -85,6 +85,14 @@
      * which is what "density changes size without changing meaning" asks for.
      */
     --_title-font-size: var(--slotted-font-size-xl, 1.125rem);
+    /**
+     * 1.5 rather than the heading step's 1.45, because the title's line is the
+     * one length every framed row above the footer adds up from. At 1.45 the
+     * sixteen-pixel title of `sm` drew a 23.2 pixel line and put the header at
+     * 114.19 and the panel at 167.19; at 1.5 both title steps land on a whole
+     * pixel, 24 and 27 (dossier `2026-09-29-alert-dialog-reui-dossier.md`).
+     */
+    --_title-line-height: var(--slotted-line-height-md, 1.5);
     --_description-font-size: var(--slotted-font-size-md, 0.875rem);
     --_body-font-size: var(--slotted-font-size-md, 0.875rem);
     --_icon-size: var(--slotted-control-icon-size-lg, 18px);
@@ -445,7 +453,7 @@
        the difference between the title's line and the mark, in the title's own
        type, because the header's line is not the title's. */
     margin-block-start: calc(
-      (var(--_title-font-size) * var(--slotted-line-height-xl, 1.45) - var(--_status-size)) / 2
+      (var(--_title-font-size) * var(--_title-line-height) - var(--_status-size)) / 2
     );
     margin-inline-end: var(--_mark-gap);
   }
@@ -490,7 +498,7 @@
     overflow-wrap: anywhere;
     font-size: var(--_title-font-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
-    line-height: var(--slotted-line-height-xl, 1.45);
+    line-height: var(--_title-line-height);
     color: var(--slotted-dialog-title-color, var(--slotted-text, CanvasText));
   }
 
@@ -507,6 +515,24 @@
     font-size: var(--_description-font-size);
     line-height: var(--slotted-line-height-md, 1.5);
     color: var(--slotted-dialog-description-color, var(--slotted-text-muted, GrayText));
+  }
+
+  /**
+   * The name of the thing the dialog acts on. A confirmation says which
+   * project or which member it removes, and a consumer marks that name with
+   * `strong`; left to the user agent it was bold in the muted colour, heavier
+   * than the title and no easier to find. It takes the title's colour and
+   * weight instead, which is what both product confirmations in the survey do
+   * with a span of their own.
+   */
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='description']
+    :is(strong, b) {
+    font-weight: var(--slotted-font-weight-semibold, 600);
+    color: var(--slotted-dialog-title-color, var(--slotted-text, CanvasText));
   }
 
   /* ── The close button ─────────────────────────────────────────────────── */

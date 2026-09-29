@@ -115,3 +115,4 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 - [2026-09-25-alert-reui-dossier.md](2026-09-25-alert-reui-dossier.md)
 - [2026-09-25-result-state-reui-dossier.md](2026-09-25-result-state-reui-dossier.md)
 - [2026-09-25-rating-reui-dossier.md](2026-09-25-rating-reui-dossier.md)
+- [2026-09-29-alert-dialog-reui-dossier.md](2026-09-29-alert-dialog-reui-dossier.md)

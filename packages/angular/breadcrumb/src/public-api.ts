@@ -4,6 +4,7 @@ export {
   SlBreadcrumbLink,
   SlBreadcrumbList,
   SlBreadcrumbPage,
+  SlBreadcrumbTrigger,
 } from './breadcrumb';
 export {
   BREADCRUMB_DEFAULTS_TOKEN,
@@ -11,8 +12,13 @@ export {
   BREADCRUMB_DEFAULT_ITEMS_BEFORE,
   BREADCRUMB_DEFAULT_LABEL,
   BREADCRUMB_DEFAULT_MAX_ITEMS,
+  BREADCRUMB_DEFAULT_OVERFLOW,
   collapsedRange,
   injectBreadcrumbDefaults,
   provideBreadcrumbDefaults,
 } from './breadcrumb.constants';
-export type { BreadcrumbDefaults, BreadcrumbExpandReason } from './breadcrumb.constants';
+export type {
+  BreadcrumbDefaults,
+  BreadcrumbExpandReason,
+  BreadcrumbOverflow,
+} from './breadcrumb.constants';

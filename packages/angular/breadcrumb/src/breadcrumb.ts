@@ -1,13 +1,19 @@
 import {
   afterNextRender,
+  afterRenderEffect,
+  ApplicationRef,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  type ComponentRef,
   computed,
   contentChildren,
+  createComponent,
+  DestroyRef,
   Directive,
   effect,
   ElementRef,
+  EnvironmentInjector,
   forwardRef,
   HostAttributeToken,
   inject,
@@ -17,10 +23,12 @@ import {
   output,
   signal,
   TemplateRef,
+  untracked,
   ViewEncapsulation,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import { createCollapse, type CollapseHandle } from '@slotted/core/overflow';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 
@@ -29,9 +37,11 @@ import {
   BREADCRUMB_DEFAULT_ITEMS_BEFORE,
   BREADCRUMB_DEFAULT_LABEL,
   BREADCRUMB_DEFAULT_MAX_ITEMS,
+  BREADCRUMB_DEFAULT_OVERFLOW,
   collapsedRange,
   injectBreadcrumbDefaults,
   type BreadcrumbExpandReason,
+  type BreadcrumbOverflow,
 } from './breadcrumb.constants';
 
 /**
@@ -46,6 +56,11 @@ import {
  * positioner and a dismissal policy; this needs none of them. The hidden
  * crumbs carry `hidden`, so they leave the accessibility tree with the page,
  * and the button that hides them names the count.
+ *
+ * **A trail that does not fit folds.** With `overflow="collapse"` the list
+ * measures itself and folds the middle crumbs its width cannot hold into the
+ * same ellipsis, nearest the root first; what folded is read from the layout
+ * and reported in `data-collapsed`, not owned by anyone.
  *
  * **It is a component on the consumer's own `nav`.** A directive carries no
  * `styleUrl`, and the element was never the family's to choose.
@@ -63,6 +78,7 @@ import {
     'data-part': 'root',
     '[attr.aria-label]': 'accessibleLabel()',
     '[attr.data-expanded]': 'expanded() ? "" : null',
+    '[attr.data-collapsed]': 'collapsedCount() > 0 ? collapsedCount() : null',
   },
 })
 export class SlBreadcrumb {
@@ -83,6 +99,11 @@ export class SlBreadcrumb {
   readonly itemsBeforeCollapse = input(undefined, { transform: optionalNumber });
   readonly itemsAfterCollapse = input(undefined, { transform: optionalNumber });
   readonly separator = input<TemplateRef<unknown> | undefined>(undefined);
+  /** What the trail does with crumbs its width cannot hold. */
+  readonly overflow = input<BreadcrumbOverflow | undefined>(undefined);
+
+  /** How many crumbs are folded into the ellipsis, written by the list. */
+  readonly collapsedCount = signal(0);
 
   /**
    * Emitted before the trail expands, carrying the value it replaces, the
@@ -118,6 +139,9 @@ export class SlBreadcrumb {
       BREADCRUMB_DEFAULT_ITEMS_AFTER,
   );
   readonly separatorValue = computed(() => this.separator() ?? this.defaults.separator);
+  readonly overflowValue = computed(
+    () => this.overflow() ?? this.defaults.overflow ?? BREADCRUMB_DEFAULT_OVERFLOW,
+  );
 
   /**
    * Where focus goes once the ellipsis stops existing, registered by the list —
@@ -158,15 +182,66 @@ export class SlBreadcrumb {
 }
 
 /**
+ * The control that reveals what the collapse hides, in an item of its own.
+ *
+ * The list creates it rather than any crumb drawing it, because it has to be a
+ * sibling of the crumbs: a crumb that drew it inside itself hid it together
+ * with itself, since the first crumb the collapse hides is the one it stands
+ * in front of. Its accessible name carries the count, because three dots say
+ * nothing about how much is behind them.
+ */
+@Component({
+  selector: 'li[slBreadcrumbEllipsis]',
+  standalone: true,
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon],
+  template: `
+    <button
+      [attr.aria-label]="label()"
+      aria-expanded="false"
+      data-part="ellipsis"
+      type="button"
+      (click)="trail.expand('pointer', $event)"
+      (keydown)="onKeydown($event)"
+    >
+      <span slIcon><svg slGlyph name="ellipsis"></svg></span>
+    </button>
+    <span aria-hidden="true" data-part="separator">
+      <ng-container *ngTemplateOutlet="trail.separatorValue() ?? null"></ng-container>
+    </span>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  host: { 'data-part': 'item' },
+})
+class SlBreadcrumbEllipsis {
+  readonly trail = inject(SlBreadcrumb);
+  /* Declared below this class, and read only when an instance is created. */
+  private readonly list = inject(SlBreadcrumbList);
+
+  readonly label = computed(() => {
+    const hidden = this.list.hiddenCount();
+    return `Show ${hidden} hidden ${hidden === 1 ? 'level' : 'levels'}`;
+  });
+
+  onKeydown(event: KeyboardEvent) {
+    /* `Enter` and `Space` both activate a button and the browser turns each
+       into a click; this is what tells the two apart in the request. */
+    if (event.key === 'Enter' || event.key === ' ') this.trail.expand('keyboard', event);
+  }
+}
+
+/**
  * The ordered list, and the one part that knows how many crumbs there are.
  *
- * It queries its items rather than projecting them blindly, because three
- * facts about a crumb can only be known from the outside: whether it is the
- * last — the last draws no separator — whether the collapse is hiding it, and
- * whether it is the first one an expansion reveals.
+ * It queries its items rather than projecting them blindly, because two facts
+ * about a crumb can only be known from the outside: whether it is the last —
+ * the last draws no separator — and whether the count collapse is hiding it.
+ * It also owns the ellipsis, which it places in front of the first crumb that
+ * can fold, and the width collapse.
  *
  * That is where the two bindings differ and the DOM does not: React maps its
- * children, Angular writes the same three facts back onto queried items.
+ * children, Angular writes the same facts back onto queried items and inserts
+ * the ellipsis's item itself.
  */
 @Directive({
   selector: 'ol[slBreadcrumbList]',
@@ -180,64 +255,158 @@ export class SlBreadcrumbList {
      the query predicate in a static initializer — a direct reference would read
      the binding before it exists. `forwardRef` defers the read to the query. */
   private readonly items = contentChildren<SlBreadcrumbItem>(forwardRef(() => SlBreadcrumbItem));
+  private readonly host: HTMLOListElement = inject(ElementRef).nativeElement;
+  private readonly injector = inject(Injector);
+  private readonly environment = inject(EnvironmentInjector);
+  private readonly application = inject(ApplicationRef);
+
+  private ellipsis: ComponentRef<SlBreadcrumbEllipsis> | null = null;
+  private collapse: CollapseHandle | null = null;
+  private readonly folded = signal(0);
+
+  /**
+   * The range is computed whether or not the trail is expanded, because two
+   * different things read it. The collapse reads it only while folded; the
+   * focus target reads it afterwards, and it has to still be there — the id
+   * used to disappear with the ellipsis, which left focus on a removed button
+   * and therefore on the body.
+   */
+  private readonly range = computed(() => {
+    const count = this.items().length;
+    const maxItems = this.trail.maxItemsValue();
+    return maxItems <= 0 || count <= maxItems
+      ? undefined
+      : collapsedRange(count, this.trail.beforeValue(), this.trail.afterValue());
+  });
+  private readonly counted = computed(() => (this.trail.expanded() ? undefined : this.range()));
+  /** Whether there is a middle at all: crumbs outside the ones that never fold. */
+  private readonly middle = computed(
+    () =>
+      this.items().length >
+      Math.max(0, this.trail.beforeValue()) + Math.max(0, this.trail.afterValue()),
+  );
+  /**
+   * The width collapse runs only while the count has hidden nothing: a trail
+   * the count already folded shows only the crumbs that never fold. One writer
+   * per `hidden` attribute keeps the two from undoing each other — the item's
+   * host binding writes it for the count, `createCollapse` for the width.
+   */
+  private readonly measuring = computed(
+    () =>
+      this.trail.overflowValue() === 'collapse' &&
+      !this.trail.expanded() &&
+      this.range() === undefined &&
+      this.middle(),
+  );
+
+  readonly hiddenCount = computed(() => {
+    const counted = this.counted();
+    return counted === undefined ? this.folded() : counted.end - counted.start;
+  });
 
   constructor() {
     effect(() => {
       const items = this.items();
-      const maxItems = this.trail.maxItemsValue();
-      /**
-       * The range is computed whether or not the trail is expanded, because two
-       * different things read it. The collapse reads it only while folded; the
-       * focus target reads it afterwards, and it has to still be there — the id
-       * used to disappear with the ellipsis, which left focus on a removed
-       * button and therefore on the body.
-       */
-      const range =
-        maxItems <= 0 || items.length <= maxItems
-          ? undefined
-          : collapsedRange(items.length, this.trail.beforeValue(), this.trail.afterValue());
-      const collapsed = this.trail.expanded() ? undefined : range;
-
+      const counted = this.counted();
       for (const [index, item] of items.entries()) {
         item.last.set(index === items.length - 1);
-        item.collapsed.set(
-          collapsed !== undefined && index >= collapsed.start && index < collapsed.end,
-        );
-        item.revealsAfter.set(collapsed !== undefined && index === collapsed.start);
-        item.hiddenCount.set(collapsed === undefined ? 0 : collapsed.end - collapsed.start);
+        item.collapsed.set(counted !== undefined && index >= counted.start && index < counted.end);
       }
-
-      const revealed = range === undefined ? undefined : items[range.start];
+      /* The first crumb an expansion reveals, whichever collapse hid it. */
+      const revealed = this.middle() ? items[Math.max(0, this.trail.beforeValue())] : undefined;
       this.trail.registerFocusTarget(revealed === undefined ? undefined : () => revealed.focus());
+      this.trail.collapsedCount.set(this.hiddenCount());
     });
+
+    afterRenderEffect(() => {
+      const items = this.items();
+      const counted = this.counted() !== undefined;
+      const measuring = this.measuring();
+      const anchor =
+        counted || measuring ? items[Math.max(0, this.trail.beforeValue())] : undefined;
+      untracked(() => this.place(anchor?.element, counted, measuring));
+    });
+
+    inject(DestroyRef).onDestroy(() => {
+      this.collapse?.destroy();
+      this.ellipsis?.destroy();
+    });
+  }
+
+  /**
+   * Puts the ellipsis's item in front of the first crumb that can fold, or
+   * takes it away, and starts or stops the width measurement.
+   */
+  private place(anchor: HTMLElement | undefined, counted: boolean, measuring: boolean) {
+    if (!measuring) {
+      this.collapse?.destroy();
+      this.collapse = null;
+      this.folded.set(0);
+    }
+    if (anchor === undefined) {
+      if (this.ellipsis !== null) {
+        this.application.detachView(this.ellipsis.hostView);
+        this.ellipsis.destroy();
+        this.ellipsis = null;
+      }
+      return;
+    }
+
+    const item = this.ensureEllipsis();
+    if (item.nextElementSibling !== anchor) this.host.insertBefore(item, anchor);
+
+    if (counted) {
+      item.removeAttribute('hidden');
+      return;
+    }
+    if (this.collapse === null) {
+      /* Until the width has been measured the ellipsis stands for nothing. */
+      item.setAttribute('hidden', '');
+      const units = () =>
+        [...this.host.children].filter(
+          (unit): unit is HTMLElement => unit instanceof HTMLElement && unit !== item,
+        );
+      const before = Math.max(0, this.trail.beforeValue());
+      const after = Math.max(0, this.trail.afterValue());
+      this.collapse = createCollapse(this.host, {
+        /* Only the middle folds: the first crumbs and the last ones never do. */
+        collapsible: (unit) => {
+          const index = units().indexOf(unit);
+          return index >= before && index < units().length - after;
+        },
+        onChange: (hidden) => this.folded.set(hidden.length),
+        /* Nearest the root first, so the folded run stays beside the ellipsis. */
+        rank: (unit) => units().indexOf(unit),
+        trigger: () => item,
+        units,
+      });
+    } else {
+      this.collapse.refresh();
+    }
+  }
+
+  private ensureEllipsis(): HTMLElement {
+    if (this.ellipsis === null) {
+      this.ellipsis = createComponent(SlBreadcrumbEllipsis, {
+        elementInjector: this.injector,
+        environmentInjector: this.environment,
+        hostElement: this.host.ownerDocument.createElement('li'),
+      });
+      this.application.attachView(this.ellipsis.hostView);
+    }
+    return this.ellipsis.location.nativeElement as HTMLElement;
   }
 }
 
 /**
- * One ancestor, or the current page. It carries the ellipsis before it and the
- * separator after it, so a consumer writes neither and never leaves a trailing
- * one behind.
+ * One ancestor, or the current page. It carries the separator after it, so a
+ * consumer writes none and never leaves a trailing one behind.
  */
 @Component({
   selector: 'li[slBreadcrumbItem]',
   standalone: true,
-  imports: [NgTemplateOutlet, SlGlyph, SlIcon],
+  imports: [NgTemplateOutlet],
   template: `
-    @if (revealsAfter()) {
-      <button
-        [attr.aria-label]="ellipsisLabel()"
-        aria-expanded="false"
-        data-part="ellipsis"
-        type="button"
-        (click)="trail.expand('pointer', $event)"
-        (keydown)="onEllipsisKeydown($event)"
-      >
-        <span slIcon><svg slGlyph name="ellipsis"></svg></span>
-      </button>
-      <span aria-hidden="true" data-part="separator">
-        <ng-container *ngTemplateOutlet="trail.separatorValue() ?? null"></ng-container>
-      </span>
-    }
     <ng-content></ng-content>
     @if (!last()) {
       <span aria-hidden="true" data-part="separator">
@@ -257,28 +426,15 @@ export class SlBreadcrumbList {
 export class SlBreadcrumbItem {
   readonly trail = inject(SlBreadcrumb);
 
-  private readonly element: HTMLElement = inject(ElementRef).nativeElement;
+  readonly element: HTMLElement = inject(ElementRef).nativeElement;
 
   /** Written by the list, which is the only part that can see the whole trail. */
   readonly last = signal(false);
   readonly collapsed = signal(false);
-  readonly revealsAfter = signal(false);
-  readonly hiddenCount = signal(0);
 
   /** The crumb's own control, whatever the consumer made it. */
   focus() {
     this.element.querySelector<HTMLElement>('a, button, [tabindex]')?.focus();
-  }
-
-  readonly ellipsisLabel = computed(() => {
-    const hidden = this.hiddenCount();
-    return `Show ${hidden} hidden ${hidden === 1 ? 'level' : 'levels'}`;
-  });
-
-  onEllipsisKeydown(event: KeyboardEvent) {
-    /* `Enter` and `Space` both activate a button and the browser turns each
-       into a click; this is what tells the two apart in the request. */
-    if (event.key === 'Enter' || event.key === ' ') this.trail.expand('keyboard', event);
   }
 }
 
@@ -317,6 +473,54 @@ export class SlBreadcrumbLink {
   },
 })
 export class SlBreadcrumbPage {}
+
+/**
+ * A crumb that opens a menu of its siblings — the organisation, the project,
+ * the environment. It is a component on the consumer's own `button`, because an
+ * `a` without `href` takes no focus, and it draws the chevron after the label.
+ * The menu composes on the same element:
+ *
+ * ```html
+ * <button slBreadcrumbTrigger current [slMenuTriggerFor]="environments">Production</button>
+ * ```
+ *
+ * `current` keeps `aria-current="page"` on the switcher of the page the reader
+ * is on, which a switcher does not stop being.
+ */
+@Component({
+  selector: 'button[slBreadcrumbTrigger]',
+  standalone: true,
+  imports: [SlGlyph, SlIcon],
+  template: `<ng-content></ng-content><span slIcon><svg slGlyph name="chevron-down"></svg></span>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  exportAs: 'slBreadcrumbTrigger',
+  host: {
+    'data-part': 'trigger',
+    '[attr.type]': 'ownType ?? "button"',
+    '[attr.aria-current]': 'current() ? "page" : ownCurrent',
+  },
+})
+export class SlBreadcrumbTrigger {
+  readonly current = input(false, { transform: booleanAttribute });
+
+  protected readonly ownType = inject(new HostAttributeToken('type'), { optional: true });
+  protected readonly ownCurrent = inject(new HostAttributeToken('aria-current'), {
+    optional: true,
+  });
+  private readonly element: HTMLElement = inject(ElementRef).nativeElement;
+
+  constructor() {
+    /**
+     * `slMenuTriggerFor` on the same element binds `data-part` to `null` when
+     * its trigger is a plain control, which erased this part and the whole
+     * crumb's styling with it. The erasing expression is a constant, so the
+     * part written back after the first render is never erased again —
+     * `docs/build-briefing.md` records the rule.
+     */
+    afterNextRender(() => this.element.setAttribute('data-part', 'trigger'));
+  }
+}
 
 /**
  * Absence has to survive the transform: `numberAttribute` maps an unset input

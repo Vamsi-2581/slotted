@@ -3,12 +3,16 @@ import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { applicationConfig, moduleMetadata } from '@storybook/angular-vite';
 
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import { SlMenu, SlMenuItem, SlMenuRadioGroup, SlMenuTrigger } from '@slotted/angular/menu';
+
 import {
   SlBreadcrumb,
   SlBreadcrumbItem,
   SlBreadcrumbLink,
   SlBreadcrumbList,
   SlBreadcrumbPage,
+  SlBreadcrumbTrigger,
 } from './breadcrumb';
 import { provideBreadcrumbDefaults } from './breadcrumb.constants';
 import { ANGULAR_BREADCRUMB_DOCS, ANGULAR_BREADCRUMB_TOKENS } from './breadcrumb.docs';
@@ -29,6 +33,8 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     context: Context,
     content: Content,
     composition: Composition,
+    switcher: Switcher,
+    overflow: Overflow,
     keyboard: Keyboard,
   }) as never;
 
@@ -38,6 +44,13 @@ const parts = [
   SlBreadcrumbLink,
   SlBreadcrumbList,
   SlBreadcrumbPage,
+  SlBreadcrumbTrigger,
+  SlGlyph,
+  SlIcon,
+  SlMenu,
+  SlMenuItem,
+  SlMenuRadioGroup,
+  SlMenuTrigger,
 ];
 
 const meta: Meta<BreadcrumbStoryArgs> = {
@@ -199,10 +212,10 @@ export const Content: Story = {
     template: `
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
-    'Long, translated and unbroken',
+    'Long, translated and unbroken, overflow="wrap"',
     'A German compound, a pasted identifier and an Arabic label. The row wraps before anything truncates, and the string survives whatever is cut.',
     `<div class="slotted-demo-measure">
-       <nav slBreadcrumb>
+       <nav slBreadcrumb overflow="wrap">
          <ol slBreadcrumbList>
            <li slBreadcrumbItem>
              <a slBreadcrumbLink href="#settings">Zahlungsabwicklungseinstellungen</a>
@@ -255,6 +268,99 @@ export const Composition: Story = {
          <li slBreadcrumbItem><span slBreadcrumbPage>INV-2026-08-0041</span></li>
        </ol>
      </nav>`,
+  )}
+</div>`,
+  }),
+};
+
+/**
+ * A switcher over the crumbs a reader moves sideways between rather than up:
+ * which company's books, which ledger, which period. Each menu marks the
+ * sibling the trail is on, and the last is the page itself.
+ */
+const SWITCH = (label: string, options: string[], extra = '', icon = '') => {
+  const id = label.replace(/[^a-z]/gi, '').toLowerCase();
+  return `
+  <li slBreadcrumbItem>
+    <button slBreadcrumbTrigger ${extra} [slMenuTriggerFor]="${id}">${icon}${label}</button>
+    <sl-menu #${id}>
+      <sl-menu-radio-group aria-label="${label}" value="${label}">
+        ${options.map((option) => `<button slMenuRadioItem value="${option}">${option}</button>`).join('')}
+      </sl-menu-radio-group>
+    </sl-menu>
+  </li>`;
+};
+
+const INBOX = '<span slIcon><svg slGlyph name="inbox"></svg></span>';
+
+export const Switcher: Story = {
+  parameters: scenario('switcher'),
+  render: () => ({
+    template: `
+<div class="slotted-demo-grid" data-columns="1">
+  ${scene(
+    'slBreadcrumbTrigger with slMenuTriggerFor',
+    'Open a crumb: its chevron turns, the underline stays while the menu is up, and the menu marks the sibling the trail is on. The period is the page itself, so it keeps aria-current.',
+    `<nav slBreadcrumb>
+       <ol slBreadcrumbList>
+         ${SWITCH('Northwind Trading', ['Northwind Trading', 'Contoso Ltd', 'Fabrikam Inc'], '', INBOX)}
+         ${SWITCH('Accounts receivable', ['Accounts receivable', 'Accounts payable'])}
+         ${SWITCH('August 2026', ['June 2026', 'July 2026', 'August 2026'], 'current')}
+       </ol>
+     </nav>`,
+  )}
+  ${scene(
+    'Beside plain crumbs',
+    'A switcher is one crumb among links: it keeps their colour, their underline and their focus ring, and only the chevron says a list opens here rather than a page.',
+    `<nav slBreadcrumb>
+       <ol slBreadcrumbList>
+         <li slBreadcrumbItem><a slBreadcrumbLink href="#workspace">Workspace</a></li>
+         ${SWITCH('Billing', ['Billing', 'Payroll', 'Tax'])}
+         <li slBreadcrumbItem>
+           <span slBreadcrumbPage><span slIcon><svg slGlyph name="file-text"></svg></span>INV-2026-08-0041</span>
+         </li>
+       </ol>
+     </nav>`,
+  )}
+</div>`,
+  }),
+};
+
+const WIDE = `${DEEP.replace(
+  '<li slBreadcrumbItem><span slBreadcrumbPage>INV-2026-08-0041</span></li>',
+  `<li slBreadcrumbItem><a slBreadcrumbLink href="#receivable">Accounts receivable</a></li>
+  <li slBreadcrumbItem><a slBreadcrumbLink href="#august">August 2026</a></li>
+  <li slBreadcrumbItem><span slBreadcrumbPage>INV-2026-08-0041</span></li>`,
+)}`;
+
+const room = (size: 'phone' | 'tablet', body: string) =>
+  `<div class="slotted-demo-room" data-room="${size}"><div class="slotted-demo-viewport">${body}</div></div>`;
+
+export const Overflow: Story = {
+  parameters: scenario('overflow'),
+  render: () => ({
+    template: `
+<div class="slotted-demo-grid" data-columns="1">
+  ${scene(
+    '640 pixels',
+    'Eight crumbs at tablet width. Whatever does not fit folds into the ellipsis from the crumb nearest the root, and the first and the last two always stay.',
+    room('tablet', `<nav slBreadcrumb [maxItems]="0"><ol slBreadcrumbList>${WIDE}</ol></nav>`),
+    'block',
+  )}
+  ${scene(
+    '375 pixels',
+    'The same trail on a phone. The ellipsis names every crumb it holds, and pressing it expands the trail onto a second line.',
+    room('phone', `<nav slBreadcrumb [maxItems]="0"><ol slBreadcrumbList>${WIDE}</ol></nav>`),
+    'block',
+  )}
+  ${scene(
+    'overflow="wrap" at 375 pixels',
+    'Every crumb kept, the row broken onto as many lines as it takes. Lines stand a target apart, so two crumbs above each other are never one tap.',
+    room(
+      'phone',
+      `<nav slBreadcrumb overflow="wrap" [maxItems]="0"><ol slBreadcrumbList>${WIDE}</ol></nav>`,
+    ),
+    'block',
   )}
 </div>`,
   }),

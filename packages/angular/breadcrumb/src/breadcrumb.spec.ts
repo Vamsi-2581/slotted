@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { describe, expect, it, vi } from 'vitest';
+import { SlMenu, SlMenuItem, SlMenuTrigger } from '@slotted/angular/menu';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/breadcrumb/contract.json';
 import {
@@ -9,6 +10,7 @@ import {
   SlBreadcrumbLink,
   SlBreadcrumbList,
   SlBreadcrumbPage,
+  SlBreadcrumbTrigger,
 } from './breadcrumb';
 import { collapsedRange, provideBreadcrumbDefaults } from './breadcrumb.constants';
 
@@ -186,5 +188,200 @@ describe('SlBreadcrumb', () => {
     expect(
       fixture.nativeElement.querySelector('[data-ui="breadcrumb"]')?.getAttribute('aria-label'),
     ).toBe('Caminho');
+  });
+});
+
+/**
+ * jsdom lays nothing out, so a width is given to each crumb and to the list,
+ * and `createCollapse` does the arithmetic a browser runs.
+ */
+function withLayout() {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
+  Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+    configurable: true,
+    get(this: HTMLElement) {
+      return Number(this.dataset['testWidth'] ?? 0);
+    },
+  });
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+    this: HTMLElement,
+  ) {
+    const width = Number(this.dataset['testWidth'] ?? 0);
+    return { bottom: 0, height: 0, left: 0, right: width, top: 0, width, x: 0, y: 0 } as DOMRect;
+  });
+}
+
+@Component({
+  imports: [SlBreadcrumb, SlBreadcrumbItem, SlBreadcrumbLink, SlBreadcrumbList, SlBreadcrumbPage],
+  template: `<nav slBreadcrumb [overflow]="overflow()" [maxItems]="maxItems()">
+    <ol slBreadcrumbList [attr.data-test-width]="room()">
+      @for (level of levels; track level) {
+        <li slBreadcrumbItem data-test-width="100">
+          <a slBreadcrumbLink [href]="'#' + level">{{ level }}</a>
+        </li>
+      }
+      <li slBreadcrumbItem data-test-width="100"><span slBreadcrumbPage>INV-0041</span></li>
+    </ol>
+  </nav>`,
+})
+class Narrow {
+  readonly levels = ['Workspace', 'Northwind', 'Accounts', 'Billing', 'Invoices'];
+  readonly room = signal(350);
+  readonly overflow = signal<'collapse' | 'wrap' | undefined>(undefined);
+  readonly maxItems = signal<number | undefined>(undefined);
+}
+
+function narrow(configure: (host: Narrow) => void = () => undefined, providers: unknown[] = []) {
+  withLayout();
+  TestBed.configureTestingModule({ imports: [Narrow], providers: providers as never[] });
+  const fixture = TestBed.createComponent(Narrow);
+  configure(fixture.componentInstance);
+  fixture.detectChanges();
+  TestBed.tick();
+  const root = fixture.nativeElement.querySelector('[data-ui="breadcrumb"]') as HTMLElement;
+  const shown = () =>
+    [...root.querySelectorAll<HTMLElement>('[data-part="item"]')].filter(
+      (item) => !item.hasAttribute('hidden'),
+    );
+  return {
+    fixture,
+    root,
+    ellipsis: () => root.querySelector('[data-part="ellipsis"]') as HTMLButtonElement | null,
+    shown,
+    settle: () => {
+      fixture.detectChanges();
+      TestBed.tick();
+    },
+  };
+}
+
+describe('SlBreadcrumb overflow', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    Reflect.deleteProperty(HTMLElement.prototype, 'clientWidth');
+  });
+
+  it('folds the middle crumbs nearest the root into the ellipsis', () => {
+    const { ellipsis, root, shown } = narrow();
+
+    expect(ellipsis()?.getAttribute('aria-label')).toBe('Show 3 hidden levels');
+    expect(shown().map((item) => item.textContent?.trim())).toEqual([
+      'Workspace',
+      '',
+      'Invoices',
+      'INV-0041',
+    ]);
+    expect(root.getAttribute('data-collapsed')).toBe('3');
+  });
+
+  /**
+   * The ellipsis is an item of its own, in front of the first crumb that can
+   * fold. It used to be drawn inside that crumb, which the collapse hides — so
+   * the control that reveals the trail was hidden with what it revealed.
+   */
+  it('keeps the ellipsis out of the crumbs it hides', () => {
+    const { ellipsis } = narrow((host) => host.maxItems.set(4));
+    const item = ellipsis()?.closest('[data-part="item"]') as HTMLElement;
+
+    expect(item.hasAttribute('hidden')).toBe(false);
+    expect(item.querySelector('[data-part="link"]')).toBeNull();
+    expect(item.nextElementSibling?.hasAttribute('hidden')).toBe(true);
+  });
+
+  it('draws no ellipsis while the trail fits', () => {
+    const { ellipsis, root } = narrow((host) => host.room.set(600));
+
+    expect(ellipsis()?.closest('[data-part="item"]')?.hasAttribute('hidden')).toBe(true);
+    expect(root.hasAttribute('data-collapsed')).toBe(false);
+  });
+
+  it('wraps instead when asked to, per instance or once for the application', () => {
+    expect(narrow((host) => host.overflow.set('wrap')).ellipsis()).toBeNull();
+    TestBed.resetTestingModule();
+    expect(
+      narrow(undefined, [provideBreadcrumbDefaults({ overflow: 'wrap' })]).ellipsis(),
+    ).toBeNull();
+  });
+
+  it('expands what the width folded and gives focus to the first crumb it revealed', () => {
+    const { ellipsis, fixture, root, settle, shown } = narrow();
+
+    ellipsis()?.click();
+    settle();
+
+    expect(ellipsis()).toBeNull();
+    expect(shown()).toHaveLength(6);
+    expect(root.hasAttribute('data-expanded')).toBe(true);
+    expect(fixture.nativeElement.ownerDocument.activeElement?.textContent).toBe('Northwind');
+  });
+});
+
+describe('SlBreadcrumbTrigger', () => {
+  @Component({
+    imports: [
+      SlBreadcrumb,
+      SlBreadcrumbItem,
+      SlBreadcrumbList,
+      SlBreadcrumbTrigger,
+      SlMenu,
+      SlMenuItem,
+      SlMenuTrigger,
+    ],
+    template: `<nav slBreadcrumb>
+      <ol slBreadcrumbList>
+        <li slBreadcrumbItem><button slBreadcrumbTrigger>web-app</button></li>
+        <li slBreadcrumbItem>
+          <button slBreadcrumbTrigger current [slMenuTriggerFor]="environments">Production</button>
+          <sl-menu #environments><button slMenuItem>Preview</button></sl-menu>
+        </li>
+      </ol>
+    </nav>`,
+  })
+  class Switchers {}
+
+  function switchers() {
+    TestBed.configureTestingModule({ imports: [Switchers] });
+    const fixture = TestBed.createComponent(Switchers);
+    fixture.detectChanges();
+    TestBed.tick();
+    const [plain, current] = [
+      ...fixture.nativeElement.querySelectorAll('button[slBreadcrumbTrigger]'),
+    ] as HTMLButtonElement[];
+    return { fixture, plain: plain!, current: current! };
+  }
+
+  it('is a button dressed as a crumb, with a chevron after its label', () => {
+    const { plain } = switchers();
+
+    expect(plain.getAttribute('data-part')).toBe('trigger');
+    expect(plain.getAttribute('type')).toBe('button');
+    expect(plain.querySelector('[data-ui="icon"] > svg')?.getAttribute('data-glyph')).toBe(
+      'chevron-down',
+    );
+    expect(plain.hasAttribute('aria-current')).toBe(false);
+  });
+
+  it('keeps aria-current and its own part beside the menu composed on it', () => {
+    const { current, fixture } = switchers();
+
+    expect(current.getAttribute('aria-current')).toBe('page');
+    expect(current.getAttribute('aria-haspopup')).toBe('menu');
+    expect(current.getAttribute('data-part')).toBe('trigger');
+
+    current.click();
+    fixture.detectChanges();
+    TestBed.tick();
+
+    expect(current.getAttribute('aria-expanded')).toBe('true');
+    expect(current.hasAttribute('data-open')).toBe(true);
+    expect(current.getAttribute('data-part')).toBe('trigger');
   });
 });

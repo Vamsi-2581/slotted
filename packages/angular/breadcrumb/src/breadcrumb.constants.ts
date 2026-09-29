@@ -1,6 +1,13 @@
 import { InjectionToken, inject } from '@angular/core';
 import type { TemplateRef } from '@angular/core';
 
+/**
+ * What a trail does with crumbs its width cannot hold. `collapse` folds the
+ * middle ones into the ellipsis; `wrap` lets the row break onto a second line
+ * and only the count collapses.
+ */
+export type BreadcrumbOverflow = 'collapse' | 'wrap';
+
 /** Why the trail expanded. Only two things can ask: a press and a key. */
 export type BreadcrumbExpandReason = 'pointer' | 'keyboard';
 
@@ -15,6 +22,7 @@ export interface BreadcrumbDefaults {
   itemsBeforeCollapse?: number;
   label?: string;
   maxItems?: number;
+  overflow?: BreadcrumbOverflow;
   /** The mark drawn between two crumbs, rendered once per item. */
   separator?: TemplateRef<unknown>;
 }
@@ -23,6 +31,7 @@ export const BREADCRUMB_DEFAULT_LABEL = 'Breadcrumb';
 export const BREADCRUMB_DEFAULT_MAX_ITEMS = 8;
 export const BREADCRUMB_DEFAULT_ITEMS_BEFORE = 1;
 export const BREADCRUMB_DEFAULT_ITEMS_AFTER = 2;
+export const BREADCRUMB_DEFAULT_OVERFLOW: BreadcrumbOverflow = 'collapse';
 
 export const BREADCRUMB_DEFAULTS_TOKEN = new InjectionToken<BreadcrumbDefaults>(
   'slotted breadcrumb defaults',
@@ -31,7 +40,7 @@ export const BREADCRUMB_DEFAULTS_TOKEN = new InjectionToken<BreadcrumbDefaults>(
 
 /**
  * An application decides once what its trails are called, how deep they may get
- * before they fold, and what is drawn between two crumbs. A trail that states
+ * before they fold, whether they fold for want of width, and what is drawn between two crumbs. A trail that states
  * any of those itself still wins: an explicit input is never overridden by the
  * token.
  */

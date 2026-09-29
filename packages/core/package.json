@@ -168,6 +168,10 @@
       "types": "./dist/types/progress/index.d.ts",
       "import": "./dist/progress.js"
     },
+    "./rating": {
+      "types": "./dist/types/rating/index.d.ts",
+      "import": "./dist/rating.js"
+    },
     "./pagination": {
       "types": "./dist/types/pagination/index.d.ts",
       "import": "./dist/pagination.js"

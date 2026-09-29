@@ -45,6 +45,7 @@ export default defineConfig({
         positioner: resolve(import.meta.dirname, 'src/positioner/index.ts'),
         presence: resolve(import.meta.dirname, 'src/presence/index.ts'),
         progress: resolve(import.meta.dirname, 'src/progress/index.ts'),
+        rating: resolve(import.meta.dirname, 'src/rating/index.ts'),
         pagination: resolve(import.meta.dirname, 'src/pagination/index.ts'),
         recurrence: resolve(import.meta.dirname, 'src/recurrence/index.ts'),
         'scroll-spy': resolve(import.meta.dirname, 'src/scroll-spy/index.ts'),

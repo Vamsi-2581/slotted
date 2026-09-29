@@ -71,6 +71,7 @@ export * from './popover';
 export * from './progress-indicator';
 export * from './prose';
 export * from './radio-group';
+export * from './rating';
 export * from './result-state';
 export * from './saved-views';
 export * from './scroll-area';

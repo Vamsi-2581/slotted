@@ -86,6 +86,7 @@ test('names every runtime prefix once, where a family can find the reason', () =
     '--slotted-toast-height',
     '--slotted-toast-index',
     '--slotted-toast-play-state',
+    '--slotted-toast-stack-height',
     '--slotted-toast-stack-offset',
     '--slotted-toast-swipe-x',
     '--slotted-toast-swipe-y',

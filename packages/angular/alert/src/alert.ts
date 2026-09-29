@@ -5,7 +5,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChild,
   DestroyRef,
+  Directive,
   effect,
   ElementRef,
   HostAttributeToken,
@@ -26,11 +28,13 @@ export type { AlertLive, AlertReach, AlertTone, AlertVariant } from './alert-def
 /**
  * The glyph each tone draws, in its solid form: `specs/components/alert/contract.json`
  * holds the map. Every one is circled, so every mark is the same disc and the
- * symbol cut out of it tells the five apart.
+ * symbol cut out of it tells the tones apart. `secondary` draws none: a neutral
+ * note has no severity to state, and a disc with nothing cut out of it said
+ * nothing. Its absence is itself the difference under forced colours.
  */
-const TONE_GLYPH: Record<AlertTone, GlyphName> = {
+const TONE_GLYPH: Record<AlertTone, GlyphName | null> = {
   accent: 'circle-info',
-  secondary: 'circle',
+  secondary: null,
   success: 'circle-check',
   warning: 'circle-alert',
   danger: 'circle-x',
@@ -63,15 +67,29 @@ export type AlertCloseReason = 'dismiss' | 'programmatic';
  * announce the second time the message arrived — and `data-open` is only a
  * state a consumer can style if the element is there to carry it.
  */
+/**
+ * A mark the page supplies instead of the tone's own. It is projected into the
+ * box the family draws, so it keeps the size, the colour and the place on the
+ * message's first line that the tone's own mark would have had.
+ */
+@Directive({
+  selector: '[slAlertIcon]',
+  standalone: true,
+  exportAs: 'slAlertIcon',
+})
+export class SlAlertIcon {}
+
 @Component({
   selector: '[slAlert]',
   standalone: true,
   exportAs: 'slAlert',
   imports: [SlGlyph, SlIcon],
-  template: `@if (!hideIcon()) {
+  template: `@if (!hideIcon() && (glyph() || suppliedIcon())) {
       <span aria-hidden="true" data-part="icon"
-        ><ng-content select="[slAlertIcon]"
-          ><span slIcon><svg slGlyph [name]="glyph()" solid></svg></span></ng-content
+        ><ng-content select="[slAlertIcon]">
+          @if (glyph(); as name) {
+            <span slIcon><svg slGlyph [name]="name" solid></svg></span>
+          }</ng-content
       ></span>
     }
     <ng-content />
@@ -165,6 +183,8 @@ export class SlAlert {
 
   protected readonly resolvedTone = computed(() => this.tone() ?? this.defaults.tone);
   protected readonly glyph = computed(() => TONE_GLYPH[this.resolvedTone()]);
+  /** A mark the page projected, which draws even where the tone has none. */
+  protected readonly suppliedIcon = contentChild(SlAlertIcon);
   protected readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   protected readonly resolvedReach = computed(() => this.reach() ?? this.defaults.reach);
   readonly resolvedLive = computed(() => this.live() ?? this.defaults.live);

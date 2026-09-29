@@ -10,7 +10,7 @@
   },
   "toneGlyphs": {
     "accent": "circle-info",
-    "secondary": "circle",
+    "secondary": null,
     "success": "circle-check",
     "warning": "circle-alert",
     "danger": "circle-x"

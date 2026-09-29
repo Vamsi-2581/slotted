@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, Directive, inject } from '@angular/core';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import { SlLoader } from '@slotted/angular/progress-indicator';
 
 import { SlToastItem } from './toast';
 
@@ -14,17 +15,19 @@ import { SlToastItem } from './toast';
  */
 
 /**
- * The tone's mark, or the page's own — a spinner while a promise is in flight.
- * Content the page writes replaces the tone's glyph; with none, the item's
- * glyph is drawn, and none while the message waits.
+ * The tone's mark, or the page's own. Content the page writes replaces it;
+ * with none, the item's glyph is drawn, `progress-indicator`'s contained
+ * loader while the message waits, and nothing for `secondary`.
  */
 @Component({
   selector: '[slToastIcon]',
   standalone: true,
   exportAs: 'slToastIcon',
-  imports: [SlGlyph, SlIcon],
+  imports: [SlGlyph, SlIcon, SlLoader],
   template: `<ng-content>
-    @if (mark(); as glyph) {
+    @if (loading()) {
+      <div slLoader contained decorative [delay]="0" [minDuration]="0" [tone]="tone()"></div>
+    } @else if (mark(); as glyph) {
       <span slIcon><svg slGlyph [name]="glyph" solid></svg></span>
     }
   </ng-content>`,
@@ -36,6 +39,8 @@ export class SlToastIcon {
 
   /* Outside an item there is no tone, and the default tone's glyph stands. */
   protected readonly mark = computed(() => (this.item === null ? 'circle-info' : this.item.mark()));
+  protected readonly loading = computed(() => this.item?.message().loading ?? false);
+  protected readonly tone = computed(() => this.item?.tone() ?? 'accent');
 }
 
 /** The words, and the one column that is allowed to shrink. */

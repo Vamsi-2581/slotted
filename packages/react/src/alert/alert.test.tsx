@@ -138,20 +138,34 @@ describe('Alert', () => {
     expect(screen.getByTestId('alert').querySelector('[data-part="icon"]')).toBeNull();
   });
 
-  it('draws each tone’s glyph from the contract’s map, solid', () => {
+  it('draws each tone’s glyph from the contract’s map, solid, and no mark for secondary', () => {
     for (const [tone, glyph] of Object.entries(contract.toneGlyphs)) {
       const { unmount } = render(
         <Alert data-testid="alert" tone={tone as never}>
           <AlertContent>Uma mensagem.</AlertContent>
         </Alert>,
       );
-      const drawn = screen
-        .getByTestId('alert')
-        .querySelector('[data-part="icon"] > [data-ui="icon"] > svg[data-part="glyph"]');
-      expect(drawn, tone).toHaveAttribute('data-glyph', glyph);
-      expect(drawn, tone).toHaveAttribute('data-solid');
+      const alert = screen.getByTestId('alert');
+      if (glyph === null) {
+        expect(alert.querySelector('[data-part="icon"]'), tone).toBeNull();
+      } else {
+        const drawn = alert.querySelector(
+          '[data-part="icon"] > [data-ui="icon"] > svg[data-part="glyph"]',
+        );
+        expect(drawn, tone).toHaveAttribute('data-glyph', glyph);
+        expect(drawn, tone).toHaveAttribute('data-solid');
+      }
       unmount();
     }
+  });
+
+  it('draws a mark the page supplied on a secondary alert', () => {
+    render(
+      <Alert data-testid="alert" icon={<svg data-testid="glyph" />} tone="secondary">
+        <AlertContent>Nota.</AlertContent>
+      </Alert>,
+    );
+    expect(screen.getByTestId('glyph').parentElement).toHaveAttribute('data-part', 'icon');
   });
 
   it('puts the page’s own mark in the box the tone’s would have had', () => {

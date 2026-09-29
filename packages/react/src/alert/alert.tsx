@@ -13,11 +13,13 @@ import type { AlertCloseReason, AlertProps, AlertRootProps, AlertTone } from './
 /**
  * The glyph each tone draws, in its solid form: `specs/components/alert/contract.json`
  * holds the map. Every one is circled, so every mark is the same disc and the
- * symbol cut out of it tells the five apart.
+ * symbol cut out of it tells the tones apart. `secondary` draws none: a neutral
+ * note has no severity to state, and a disc with nothing cut out of it said
+ * nothing. Its absence is itself the difference under forced colours.
  */
-const TONE_GLYPH: Record<AlertTone, GlyphName> = {
+const TONE_GLYPH: Record<AlertTone, GlyphName | null> = {
   accent: 'circle-info',
-  secondary: 'circle',
+  secondary: null,
   success: 'circle-check',
   warning: 'circle-alert',
   danger: 'circle-x',
@@ -122,19 +124,22 @@ export function Alert({
     if (state.request(false, reason, source)) setUncontrolledOpen(false);
   }
 
+  const glyph = TONE_GLYPH[tone ?? defaults.tone];
+
   const rootProps: AlertRootProps = {
     ...(hasTitle ? { 'aria-labelledby': titleId } : {}),
     ...nativeProps,
     ...(isOpen ? { 'data-open': '' } : {}),
     children: (
       <AlertProvider value={context}>
-        {hideIcon ? null : (
+        {hideIcon || (icon == null && glyph === null) ? null : (
           <span aria-hidden="true" data-part="icon">
-            {icon ?? (
-              <Icon>
-                <Glyph name={TONE_GLYPH[tone ?? defaults.tone]} solid />
-              </Icon>
-            )}
+            {icon ??
+              (glyph === null ? null : (
+                <Icon>
+                  <Glyph name={glyph} solid />
+                </Icon>
+              ))}
           </span>
         )}
         {children}

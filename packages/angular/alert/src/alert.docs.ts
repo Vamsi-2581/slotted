@@ -225,7 +225,7 @@ export const ANGULAR_ALERT_DOCS = {
         "'accent' | 'secondary' | 'success' | 'warning' | 'danger'",
         'accent',
         'slAlert',
-        'Which of the five semantic colours the message speaks in, and which mark it draws: circle-info, circle, circle-check, circle-alert, circle-x',
+        'Which of the five semantic colours the message speaks in, and which mark it draws: circle-info, none for secondary, circle-check, circle-alert, circle-x',
       ],
       [
         'variant',
@@ -332,7 +332,7 @@ export const ANGULAR_ALERT_DOCS = {
       'The applicable pattern is the WAI-ARIA APG Alert Pattern (w3.org/WAI/ARIA/apg/patterns/alert/). It declares one role and no keyboard interaction: an alert is not a widget, so it holds no keys. Its two prose requirements — that an alert must not affect keyboard focus, and must not disappear on its own — are what this family declines automatic focus and automatic dismissal for.',
       'The box is a landmark, not a live region. MDN’s alert role reference states that the role “should only be used for text content, not interactive elements such as links or buttons”, and every alert worth shipping has a dismiss control. The directive belongs on a section, named by its own title through aria-labelledby, and the region that announces is the slAlertContent element, which holds the title and the description alone.',
       'live defaults to off because the APG records that “screen readers do not inform users of alerts that are present on the page before page load completes”. An alert already on the page announces nothing whatever role it carries; polite and assertive are for a message that arrives while the reader is working, and both are written as a role that already implies aria-live and aria-atomic.',
-      'Every tone carries a mark as well as a colour. Under forced colours the five grounds become one system colour and the five borders one more, so the circle, the triangle and the crossed circle are the only thing distinguishing an error from a note — WCAG 2.2 1.4.1.',
+      'Every tone with a severity carries a mark as well as a colour, and secondary carries none: a neutral note has no severity to state. Under forced colours the five grounds become one system colour and the five borders one more, so the mark, and its absence on a note, is the only thing distinguishing an error from a note — WCAG 2.2 1.4.1.',
       'The dismiss control is a real button with a real name and an inner control rather than a Button (R2): its box is the glyph plus a step of air on each side, floored at --slotted-target-min, which is the WCAG 2.2 2.5.8 minimum of 24 CSS pixels; at rest it has no frame and no ground, and hover moves only the ground.',
       'When the message closes with focus inside it, the keyboard goes back to the element it came from. None of the ten surveyed implementations answers this, and the failure it prevents is the one a real product hits first: the dismiss control is destroyed, focus falls to the document body, and the next Tab starts again at the top of the page.',
       'Closing hides rather than removes, so the live region is still in the document if the message comes back and data-open is a state a consumer can style. An application that must not pay for the hidden subtree writes its own @if and never uses defaultOpen.',

@@ -136,15 +136,28 @@ describe('SlAlert', () => {
     expect(bare.querySelector('[data-part="icon"]')).toBeNull();
   });
 
-  it('draws each tone’s glyph from the contract’s map, solid', () => {
+  it('draws each tone’s glyph from the contract’s map, solid, and no mark for secondary', () => {
     for (const [tone, glyph] of Object.entries(contract.toneGlyphs)) {
       const alert = root(renderTemplate(`<section slAlert tone="${tone}">${MESSAGE}</section>`));
+      if (glyph === null) {
+        expect(alert.querySelector('[data-part="icon"]'), tone).toBeNull();
+        continue;
+      }
       const drawn = alert.querySelector(
         '[data-part="icon"] > [data-ui="icon"] > svg[data-part="glyph"]',
       );
       expect(drawn?.getAttribute('data-glyph'), tone).toBe(glyph);
       expect(drawn?.hasAttribute('data-solid'), tone).toBe(true);
     }
+  });
+
+  it('draws a mark the page projected on a secondary alert', () => {
+    const alert = root(
+      renderTemplate(
+        `<section slAlert tone="secondary"><svg slAlertIcon data-own=""></svg>${MESSAGE}</section>`,
+      ),
+    );
+    expect(alert.querySelector('[data-part="icon"] > [data-own]')).not.toBeNull();
   });
 
   it('puts the page’s own mark in the box the tone’s would have had', () => {

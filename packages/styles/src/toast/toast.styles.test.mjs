@@ -184,6 +184,37 @@ test('steps the close control by at least a surface step on every ground', () =>
  */
 test('keeps the pointer in the region across the gap between two messages', () => {
   assert.match(rule(`${ui}[data-expanded]>[data-part='list']`), /pointer-events:auto/);
+  /* A pile's messages are positioned, so its list is given the open pile's
+     measured height or it covers no gap at all. */
+  assert.match(
+    rule(`${ui}[data-stacking='stack'][data-expanded]>[data-part='list']`),
+    /block-size:var\(--slotted-toast-stack-height/,
+  );
+  assert.ok(contract.runtimeProperties.includes('--slotted-toast-stack-height'));
+});
+
+/**
+ * The loading mark is `progress-indicator`'s contained loader. The mark's slot
+ * gives it the mark's size and ink, so the disc that waits and the disc that
+ * answers are one silhouette on every variant.
+ */
+test('sizes and inks the loader in the mark’s box', () => {
+  const mark = rule(`${item}>[data-part='icon']`);
+  assert.match(mark, /--slotted-progress-indicator-size:var\(--_mark-size\)/);
+  assert.match(mark, /--slotted-progress-indicator-indicator-color:var\(--_mark\)/);
+  assert.match(
+    mark,
+    /--slotted-progress-indicator-track-color:color-mix\(in oklab,var\(--_mark\) 24%,var\(--_ground\)\)/,
+  );
+  const loading = fragment.split('data-scene="loading"')[1]?.split('</section>')[0] ?? '';
+  assert.match(loading, /data-shape="morph"/);
+  assert.match(loading, /data-contained=""/);
+});
+
+/** A neutral message states no severity, so no scene draws it a mark. */
+test('draws no mark on a secondary message', () => {
+  assert.equal(contract.toneGlyphs.secondary, null);
+  assert.doesNotMatch(fragment, /data-glyph="circle"/);
 });
 
 /**

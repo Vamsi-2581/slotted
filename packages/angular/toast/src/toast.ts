@@ -17,6 +17,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import { SlLoader } from '@slotted/angular/progress-indicator';
 import type { GlyphName } from '@slotted/angular/icon';
 import { createRemovalFocus } from '@slotted/core/focus';
 import { createPortalRoot } from '@slotted/core/portal';
@@ -38,9 +39,9 @@ import type {
  * The glyph each tone draws: `specs/components/toast/contract.json` holds the
  * map, and the binding draws it because a stylesheet paints no icon.
  */
-const TONE_GLYPH: Record<ToastTone, GlyphName> = {
+const TONE_GLYPH: Record<ToastTone, GlyphName | null> = {
   accent: 'circle-info',
-  secondary: 'circle',
+  secondary: null,
   success: 'circle-check',
   warning: 'circle-alert',
   danger: 'circle-x',
@@ -111,11 +112,11 @@ export class SlToastItem {
   private readonly offset = signal<{ x: number; y: number } | null>(null);
   private drag: { id: number; x: number; y: number } | null = null;
 
-  protected readonly tone = computed(() => this.message().data.tone ?? this.region.defaults.tone);
+  readonly tone = computed(() => this.message().data.tone ?? this.region.defaults.tone);
   /**
-   * The glyph the tone's mark draws, and none while a promise is in flight:
-   * the spinner belongs to `progress-indicator`, and two families drawing one
-   * would be two answers to one question. The slot keeps its box either way.
+   * The glyph the tone's mark draws: none while a promise is in flight, when
+   * the mark is `progress-indicator`'s contained loader, and none for
+   * `secondary`, a neutral message with no severity to state.
    */
   readonly mark = computed<GlyphName | null>(() =>
     this.message().loading ? null : TONE_GLYPH[this.tone()],
@@ -231,7 +232,7 @@ export class SlToastItem {
   selector: 'sl-toast-region',
   standalone: true,
   exportAs: 'slToastRegion',
-  imports: [NgTemplateOutlet, SlGlyph, SlIcon, SlToastItem],
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon, SlLoader, SlToastItem],
   template: `<section
     #layer
     data-part="root"
@@ -261,10 +262,19 @@ export class SlToastItem {
               [ngTemplateOutletInjector]="item.injector"
             />
           } @else {
-            @if (!message.data.hideIcon) {
+            @if (!message.data.hideIcon && (message.loading || item.mark())) {
               <span aria-hidden="true" data-part="icon">
-                @if (item.mark(); as glyph) {
-                  <span slIcon><svg slGlyph [name]="glyph"></svg></span>
+                @if (message.loading) {
+                  <div
+                    slLoader
+                    contained
+                    decorative
+                    [delay]="0"
+                    [minDuration]="0"
+                    [tone]="item.tone()"
+                  ></div>
+                } @else if (item.mark(); as glyph) {
+                  <span slIcon><svg slGlyph [name]="glyph" solid></svg></span>
                 }
               </span>
             }
@@ -486,6 +496,8 @@ export class SlToastRegion {
           if (index === 0) section.style.setProperty('--slotted-toast-front-height', `${height}px`);
           offset += height + gap;
         });
+        /* The open pile's whole height, so its gaps are the region's. */
+        section.style.setProperty('--slotted-toast-stack-height', `${Math.max(0, offset - gap)}px`);
       };
 
       const observer = new view.ResizeObserver(measure);

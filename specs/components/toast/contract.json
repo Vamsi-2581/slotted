@@ -137,7 +137,7 @@
   },
   "toneGlyphs": {
     "accent": "circle-info",
-    "secondary": "circle",
+    "secondary": null,
     "success": "circle-check",
     "warning": "circle-alert",
     "danger": "circle-x"
@@ -147,12 +147,13 @@
     "measured": [
       "--slotted-toast-height",
       "--slotted-toast-front-height",
-      "--slotted-toast-stack-offset"
+      "--slotted-toast-stack-offset",
+      "--slotted-toast-stack-height"
     ],
     "expandsOn": ["hover", "focus"],
     "step": "--slotted-toast-stack-step",
-    "reason": "Closed, the messages share the one anchor `placement` already names, step back by a token distance computed from `--slotted-toast-index` and are held back in opacity by the same index. Open, each one returns to its own height and its own place in the column. Both states are positioned and differ only by a translate, an opacity and a height, which is what lets one become the other rather than snap — and a pile of messages that are not all the same height cannot be opened from arithmetic alone. Three measurements are what the second half costs, and they are the same three Base UI takes.",
-    "cost": "One ResizeObserver per region, and three runtime custom properties a static picture cannot produce on its own. The alternative was considered and rejected: with no measurement the closed pile is the same picture, and opening it is a snap rather than a movement — which is the whole of what the axis is for."
+    "reason": "Closed, the messages share the one anchor `placement` already names, step back by a token distance computed from `--slotted-toast-index` and are held back in opacity by the same index. Open, each one returns to its own height and its own place in the column. Both states are positioned and differ only by a translate, an opacity and a height, which is what lets one become the other rather than snap — and a pile of messages that are not all the same height cannot be opened from arithmetic alone. Three measurements are what the second half costs, and they are the same three Base UI takes. A fourth, the open pile's whole height, gives the list the size of what it holds, so the gaps between open messages belong to the region and a pointer crossing one does not close the pile under it.",
+    "cost": "One ResizeObserver per region, and four runtime custom properties a static picture cannot produce on its own. The alternative was considered and rejected: with no measurement the closed pile is the same picture, and opening it is a snap rather than a movement — which is the whole of what the axis is for."
   },
   "swipe": {
     "direction": "follows `placement`: a region at the block end swipes toward the block end, one at the block start swipes toward the block start, and both also swipe toward the inline edge they sit on",
@@ -167,6 +168,7 @@
     "--slotted-toast-height",
     "--slotted-toast-index",
     "--slotted-toast-play-state",
+    "--slotted-toast-stack-height",
     "--slotted-toast-stack-offset",
     "--slotted-toast-swipe-x",
     "--slotted-toast-swipe-y"

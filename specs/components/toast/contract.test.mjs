@@ -231,6 +231,7 @@ test('names every runtime property it writes, and files none as a token', () => 
     '--slotted-toast-height',
     '--slotted-toast-index',
     '--slotted-toast-play-state',
+    '--slotted-toast-stack-height',
     '--slotted-toast-stack-offset',
     '--slotted-toast-swipe-x',
     '--slotted-toast-swipe-y',

@@ -156,3 +156,15 @@ A saída do ReUI dura o mesmo que a entrada, com a mesma curva. O Slotted sai em
 O hover no gap (§ 4) não tem captura: o specimen não posiciona o ponteiro entre dois elementos. A asserção de `toast.styles.test.mjs` fixa a regra.
 
 Não aplicados: linha 7 (`contrato`, modo `stack`) e linha 8 (`outra família`: `button`).
+
+## Segunda ronda (2026-09-29)
+
+Pedido: o loading usa o loader `contained` do `progress-indicator`; `secondary` deixa de desenhar marca em `toast` e `alert`; a linha 7 (gap no modo `stack`) é aplicada. As três mudam contratos.
+
+| Mudança | Ficheiros | Evidência |
+| ------- | --------- | --------- |
+| Loading: `Loader contained decorative` (React) e `slLoader contained decorative` (Angular) no `icon` quando `loading` está ativo e a página não forneceu marca; o slot dá ao loader `--slotted-progress-indicator-size: var(--_mark-size)`, a tinta `--_mark` e a pista a 24% dessa tinta sobre `--_ground` | `toast-parts.tsx`, `toast.ts`, `toast-parts.ts`, `toast.css`, cena `loading` (com `solid`) | contentor 16 px e forma 12 px a 13 px de texto; 14 px em `dense`; a forma lê-se em `raised` e `solid` (`slotted-{light,dark}-720-…-03df39`, `-dense-…-03df39`) |
+| `secondary` sem marca: `toneGlyphs.secondary: null`, a regra de `inline-message`; a parte `icon` não é desenhada quando não há glifo, loader nem marca da página, e o texto começa no inset | contratos de `alert` e `toast`, bindings React e Angular das duas famílias (`SlAlertIcon` passa para `alert.ts` para o `contentChild`), harness, docs | `Filters cleared` e `Nota` sem marca (`…-f20354-2-rest.png`, `alert/…-7d0dc6-0-rest.png`) |
+| Gap no modo `stack`: as bindings escrevem `--slotted-toast-stack-height` (soma das alturas e dos gaps); a lista expandida toma esse `block-size` e, pela linha 3, o ponteiro | `contract.json` (`runtimeProperties`, `stacking.measured`), `toast.tsx`, `toast.ts`, `toast.css`, `runtime-properties.mjs` | cena `expanded`: lista 186 px de 3720 a 3906, itens 46, 46 e 70 em 3720, 3778 e 3836 |
+
+Os valores fixos das cenas `stack` e `expanded` seguem a linha de 20 px: 70 / 46 / 46, desvios 0 / 82 / 140.

@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
 
 import { Glyph, Icon } from '../icon';
+import { Loader } from '../progress-indicator';
 import type { GlyphName } from '../icon';
 import { useToastRegion } from './toast';
 import type {
@@ -19,10 +20,11 @@ import type {
 /**
  * The glyph each tone draws: `specs/components/toast/contract.json` holds the
  * map, and the binding draws it because a stylesheet paints no icon.
+ * `secondary` draws none: a neutral message has no severity to state.
  */
-const TONE_GLYPH: Record<ToastTone, GlyphName> = {
+const TONE_GLYPH: Record<ToastTone, GlyphName | null> = {
   accent: 'circle-info',
-  secondary: 'circle',
+  secondary: null,
   success: 'circle-check',
   warning: 'circle-alert',
   danger: 'circle-x',
@@ -234,24 +236,31 @@ export function Toast({ children, index = 0, message, ref, ...nativeProps }: Toa
 }
 
 /**
- * The tone's mark, or the page's own. A spinner from `progress-indicator` goes
- * here while a promise is in flight: the spinner belongs to that family, and
- * two families drawing one would be two answers to one question. A message
- * waiting on a promise with no mark of its own therefore draws none, and the
- * box stays so the line does not move when the tick arrives.
+ * The tone's mark, or the page's own. While a promise is in flight it is
+ * `progress-indicator`'s contained loader: the loader belongs to that family,
+ * and the stylesheet sizes it to the mark and paints it in the mark's ink, so
+ * the disc that waits and the disc that answers are one silhouette. A tone with
+ * no mark and no mark of the page's draws no part at all, and the words start
+ * at the message's own inset.
  */
 export function ToastIcon({ children, render, ...nativeProps }: ToastIconProps) {
   const item = useContext(ToastItemContext);
+  const glyph = TONE_GLYPH[item.tone];
+  const mark =
+    children ??
+    (item.loading ? (
+      <Loader contained decorative delay={0} minDuration={0} tone={item.tone} />
+    ) : glyph === null ? null : (
+      <Icon>
+        <Glyph name={glyph} solid />
+      </Icon>
+    ));
+  if (mark === null) return null;
+
   const partProps = {
     ...nativeProps,
     'aria-hidden': true,
-    children:
-      children ??
-      (item.loading ? null : (
-        <Icon>
-          <Glyph name={TONE_GLYPH[item.tone]} solid />
-        </Icon>
-      )),
+    children: mark,
     'data-part': 'icon',
   } as const;
 

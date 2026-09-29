@@ -247,6 +247,8 @@ export function ToastRegion({
         if (index === 0) node.style.setProperty('--slotted-toast-front-height', `${height}px`);
         offset += height + gap;
       });
+      /* The open pile's whole height, so its gaps are the region's. */
+      node.style.setProperty('--slotted-toast-stack-height', `${Math.max(0, offset - gap)}px`);
     };
 
     const observer = new view.ResizeObserver(measure);

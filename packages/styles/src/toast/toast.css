@@ -428,6 +428,18 @@
    */
   [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon'] {
     --slotted-icon-size: calc(var(--_mark-size) * 12 / 11);
+    /**
+     * The loading mark is `progress-indicator`'s contained loader, and these
+     * three are the whole of what this family says to it: the disc is the
+     * mark's size, so the loader and the tick that replaces it are one
+     * silhouette, and it is drawn in the mark's ink with the track the
+     * loader's own 24 per cent of that ink over this message's ground — on a
+     * `solid` message that is the on-solid ink over the fill, which the
+     * loader's tone could not know.
+     */
+    --slotted-progress-indicator-size: var(--_mark-size);
+    --slotted-progress-indicator-indicator-color: var(--_mark);
+    --slotted-progress-indicator-track-color: color-mix(in oklab, var(--_mark) 24%, var(--_ground));
 
     align-items: center;
     align-self: baseline;
@@ -764,6 +776,18 @@
     > [data-part='list']
     > [data-part='item'] {
     block-size: var(--slotted-toast-height, auto);
+  }
+
+  /**
+   * The messages of a pile are positioned, so the list is as tall as none of
+   * them, and the rule that gives an expanded list the pointer covered no gap
+   * at all. Opened, it is as tall as the open pile — the measured sum of every
+   * message and the gaps between them — and the gaps are the region's. The
+   * messages hang from the list's edge at `placement`, so the list grows away
+   * from that edge and nothing it holds moves.
+   */
+  [data-ui='toast'][data-stacking='stack'][data-expanded] > [data-part='list'] {
+    block-size: var(--slotted-toast-stack-height, auto);
   }
 
   [data-ui='toast'][data-stacking='stack'][data-expanded]

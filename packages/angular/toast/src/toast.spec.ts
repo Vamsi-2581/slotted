@@ -221,19 +221,27 @@ describe('the marks', () => {
       fixture.detectChanges();
 
       const item = items(fixture)[0];
-      expect(glyphIn(item, 'icon')?.getAttribute('data-glyph'), tone).toBe(glyph);
+      if (glyph === null) expect(item?.querySelector('[data-part="icon"]'), tone).toBeNull();
+      else {
+        expect(glyphIn(item, 'icon')?.getAttribute('data-glyph'), tone).toBe(glyph);
+        expect(glyphIn(item, 'icon')?.hasAttribute('data-solid'), tone).toBe(true);
+      }
       expect(glyphIn(item, 'close')?.getAttribute('data-glyph'), tone).toBe('x');
     }
   });
 
-  it('draws no tone glyph while a promise is in flight, and keeps the box', () => {
+  it('draws the contained loader while a promise is in flight, and no tone glyph', () => {
     const fixture = render();
     fixture.componentInstance.toasts.show({ title: 'Saving', loading: true });
     fixture.detectChanges();
 
     const icon = items(fixture)[0]?.querySelector('[data-part="icon"]');
-    expect(icon).not.toBeNull();
-    expect(icon?.querySelector('svg')).toBeNull();
+    const loader = icon?.querySelector('[data-ui="progress-indicator"]');
+    expect(loader?.getAttribute('data-shape')).toBe('morph');
+    expect(loader?.hasAttribute('data-contained')).toBe(true);
+    expect(loader?.getAttribute('aria-hidden')).toBe('true');
+    expect(loader?.hasAttribute('role')).toBe(false);
+    expect(icon?.querySelector('svg[data-part="glyph"]')).toBeNull();
   });
 });
 

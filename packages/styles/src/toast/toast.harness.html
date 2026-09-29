@@ -67,10 +67,6 @@
         <div data-part="content"><div data-part="title">Two people joined</div></div>
       </li>
       <li data-open="" data-part="item" data-tone="secondary" data-variant="raised" tabindex="-1">
-        <span aria-hidden="true" data-part="icon"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="circle" data-solid></svg></span
-        ></span>
         <div data-part="content"><div data-part="title">Filters cleared</div></div>
       </li>
       <li data-open="" data-part="item" data-tone="success" data-variant="raised" tabindex="-1">
@@ -180,10 +176,6 @@
   >
     <ol data-part="list">
       <li data-open="" data-part="item" data-tone="secondary" data-variant="raised" tabindex="-1">
-        <span aria-hidden="true" data-part="icon"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="circle" data-solid></svg></span
-        ></span>
         <div data-part="content">
           <div data-part="title">Message archived</div>
           <p data-part="description">It is out of the inbox and still in the account.</p>
@@ -285,10 +277,9 @@
 </section>
 
 <section data-scene="loading" data-fixed>
-  <!-- A message waiting on a promise draws no tone mark of its own: the
-       spinner belongs to `progress-indicator`, and two families drawing one
-       would be two answers to one question. The box stays, so nothing jumps
-       when the spinner becomes a tick. -->
+  <!-- A message waiting on a promise draws `progress-indicator`'s contained
+       loader in the mark's box: a disc the size of every other tone's disc,
+       so nothing jumps when the loader becomes a tick. -->
   <div
     aria-label="Notifications"
     data-attach="viewport"
@@ -310,28 +301,58 @@
         tabindex="-1"
       >
         <span aria-hidden="true" data-part="icon">
-          <!-- The mark slot is one glyph square. A spinner is sized from the
-               control scale, which is a control's height and not an icon's, so
-               the consumer states the size — as the reference pages do. -->
+          <!-- The family's own loading mark: `progress-indicator`'s contained
+               loader, drawn by the binding at the mark's size and ink. -->
           <div
             aria-hidden="true"
+            data-contained=""
             data-indeterminate=""
             data-part="root"
-            data-shape="circular"
+            data-shape="morph"
             data-size="sm"
             data-tone="accent"
             data-ui="progress-indicator"
-            style="--slotted-progress-indicator-size: 1em"
           >
-            <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-              <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
-              <circle cx="24" cy="24" data-part="indicator" pathLength="100" r="20"></circle>
-            </svg>
+            <div data-part="track"><div data-part="indicator"></div></div>
           </div>
         </span>
         <div data-part="content">
           <div data-part="title">Publishing</div>
           <p data-part="description">This takes about a minute.</p>
+        </div>
+        <button aria-label="Close" data-part="close" type="button">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="x"></svg
+          ></span>
+        </button>
+      </li>
+      <li
+        data-loading=""
+        data-open=""
+        data-part="item"
+        data-tone="accent"
+        data-variant="solid"
+        tabindex="-1"
+      >
+        <span aria-hidden="true" data-part="icon">
+          <!-- The family's own loading mark: `progress-indicator`'s contained
+               loader, drawn by the binding at the mark's size and ink. -->
+          <div
+            aria-hidden="true"
+            data-contained=""
+            data-indeterminate=""
+            data-part="root"
+            data-shape="morph"
+            data-size="sm"
+            data-tone="accent"
+            data-ui="progress-indicator"
+          >
+            <div data-part="track"><div data-part="indicator"></div></div>
+          </div>
+        </span>
+        <div data-part="content">
+          <div data-part="title">Publishing</div>
+          <p data-part="description">The same loader in the ink the words are read in.</p>
         </div>
         <button aria-label="Close" data-part="close" type="button">
           <span data-ui="icon" data-part="root" aria-hidden="true"
@@ -356,7 +377,7 @@
     data-swipe="true"
     data-ui="toast"
     role="region"
-    style="--slotted-toast-count: 3; --slotted-toast-front-height: 68px"
+    style="--slotted-toast-count: 3; --slotted-toast-front-height: 70px"
     tabindex="-1"
   >
     <ol data-part="list">
@@ -404,10 +425,6 @@
         style="--slotted-toast-index: 2"
         tabindex="-1"
       >
-        <span aria-hidden="true" data-part="icon"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="circle" data-solid></svg></span
-        ></span>
         <div data-part="content"><div data-part="title">Filters cleared</div></div>
       </li>
     </ol>
@@ -417,8 +434,10 @@
 <section data-scene="expanded" data-fixed>
   <!-- The same pile with the pointer over it or the keyboard inside it. Every
        message returns to its own height and its own place in the column, and
-       the two states differ only by a translate and a scale — which is what
-       lets one become the other rather than snap. -->
+       the two states differ only by a translate, an opacity and a height —
+       which is what lets one become the other rather than snap. The list is
+       as tall as the open pile, so the gaps between messages are the
+       region's. -->
   <div
     aria-label="Notifications"
     data-attach="viewport"
@@ -429,7 +448,11 @@
     data-swipe="true"
     data-ui="toast"
     role="region"
-    style="--slotted-toast-count: 3; --slotted-toast-front-height: 68px"
+    style="
+      --slotted-toast-count: 3;
+      --slotted-toast-front-height: 70px;
+      --slotted-toast-stack-height: 186px;
+    "
     tabindex="-1"
   >
     <ol data-part="list">
@@ -440,7 +463,7 @@
         data-variant="raised"
         style="
           --slotted-toast-index: 0;
-          --slotted-toast-height: 68px;
+          --slotted-toast-height: 70px;
           --slotted-toast-stack-offset: 0px;
         "
         tabindex="-1"
@@ -466,8 +489,8 @@
         data-variant="raised"
         style="
           --slotted-toast-index: 1;
-          --slotted-toast-height: 44px;
-          --slotted-toast-stack-offset: 80px;
+          --slotted-toast-height: 46px;
+          --slotted-toast-stack-offset: 82px;
         "
         tabindex="-1"
       >
@@ -484,15 +507,11 @@
         data-variant="raised"
         style="
           --slotted-toast-index: 2;
-          --slotted-toast-height: 44px;
-          --slotted-toast-stack-offset: 136px;
+          --slotted-toast-height: 46px;
+          --slotted-toast-stack-offset: 140px;
         "
         tabindex="-1"
       >
-        <span aria-hidden="true" data-part="icon"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="circle" data-solid></svg></span
-        ></span>
         <div data-part="content"><div data-part="title">Filters cleared</div></div>
       </li>
     </ol>
@@ -537,10 +556,6 @@
   >
     <ol data-part="list">
       <li data-open="" data-part="item" data-tone="secondary" data-variant="raised" tabindex="-1">
-        <span aria-hidden="true" data-part="icon"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="circle" data-solid></svg></span
-        ></span>
         <div data-part="content"><div data-part="title">bottom, centred</div></div>
       </li>
     </ol>

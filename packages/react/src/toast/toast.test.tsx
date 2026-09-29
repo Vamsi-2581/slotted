@@ -335,13 +335,18 @@ describe('the marks', () => {
         toaster.show({ tone, title: tone });
       });
       const item = items()[0] as HTMLElement;
-      expect(glyphIn(item, 'icon'), tone).toHaveAttribute('data-glyph', contract.toneGlyphs[tone]);
+      const glyph = contract.toneGlyphs[tone];
+      if (glyph === null) expect(item.querySelector('[data-part="icon"]'), tone).toBeNull();
+      else {
+        expect(glyphIn(item, 'icon'), tone).toHaveAttribute('data-glyph', glyph);
+        expect(glyphIn(item, 'icon'), tone).toHaveAttribute('data-solid');
+      }
       expect(glyphIn(item, 'close'), tone).toHaveAttribute('data-glyph', 'x');
       unmount();
     }
   });
 
-  it('draws no tone glyph while waiting, and none over a mark the page supplied', () => {
+  it('draws the contained loader while waiting, and nothing over a mark the page supplied', () => {
     const { toaster } = setup();
     act(() => {
       toaster.show({ id: 'waiting', loading: true, title: 'Saving' });
@@ -352,9 +357,42 @@ describe('the marks', () => {
     const own = items().find((item) => !item.hasAttribute('data-loading'));
     const icon = (item: HTMLElement | undefined) =>
       item?.querySelector('[data-part="icon"]') as HTMLElement;
-    expect(icon(waiting).childElementCount).toBe(0);
+    const loader = icon(waiting).querySelector('[data-ui="progress-indicator"]');
+    expect(loader).toHaveAttribute('data-shape', 'morph');
+    expect(loader).toHaveAttribute('data-contained');
+    expect(loader).toHaveAttribute('aria-hidden', 'true');
+    expect(loader).not.toHaveAttribute('role');
+    expect(icon(waiting).querySelector('svg[data-part="glyph"]')).toBeNull();
     expect(icon(own).querySelector('svg')).toBeNull();
     expect(icon(own).querySelector('[data-own-mark]')).not.toBeNull();
+  });
+});
+
+describe('the pile', () => {
+  it('writes the open pile’s whole height, so its gaps are the region’s', () => {
+    const heights = [70, 46, 46];
+    class Observer {
+      observe() {}
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', Observer);
+    const rect = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        const index = items().indexOf(this);
+        return { height: heights[index] ?? 0 } as DOMRect;
+      });
+
+    const { toaster } = setup(() => <ToastRegion attach="inline" stacking="stack" />);
+    act(() => {
+      for (const id of ['a', 'b', 'c']) toaster.show({ id, title: id });
+    });
+
+    /* No stylesheet in this document, so the list's gap reads as zero. */
+    expect(region().style.getPropertyValue('--slotted-toast-stack-height')).toBe('162px');
+    expect(items()[2]?.style.getPropertyValue('--slotted-toast-stack-offset')).toBe('116px');
+    rect.mockRestore();
+    vi.unstubAllGlobals();
   });
 });
 

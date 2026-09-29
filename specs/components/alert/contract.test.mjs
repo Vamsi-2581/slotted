@@ -86,19 +86,24 @@ test('speaks in the library’s five shared tones and invents no sixth word', ()
 });
 
 /**
- * A glyph per tone, so the five are distinguishable in greyscale, in the
- * `high-contrast` scheme and under forced colours, where every tone ground
- * becomes one system colour and the silhouette is all that is left. WCAG 2.2
- * 1.4.1. Every mark is circled, so all five share one silhouette and one
- * centre and the symbol inside tells them apart: a triangle's visual centre
- * is not its box's centre, and it never sat on the line the way the circles
- * did. Warning and danger therefore differ by `!` against `×`. This departs
- * from `status-indicator`, which still draws the triangle for warning.
+ * A glyph per tone that states a severity, so the tones are distinguishable
+ * in greyscale, in the `high-contrast` scheme and under forced colours, where
+ * every tone ground becomes one system colour and the silhouette is all that
+ * is left. WCAG 2.2 1.4.1. Every mark is circled, so all share one silhouette
+ * and one centre and the symbol inside tells them apart: a triangle's visual
+ * centre is not its box's centre, and it never sat on the line the way the
+ * circles did. Warning and danger therefore differ by `!` against `×`. This
+ * departs from `status-indicator`, which still draws the triangle for warning.
+ *
+ * `secondary` draws none. A neutral note has no severity to state, and the
+ * disc it drew had nothing cut out of it: a round blank beside the title.
+ * With no mark the note is still told apart from the other four, by the
+ * absence, which is the rule `inline-message` already holds.
  */
-test('gives every tone a mark, so colour is never the only signal', () => {
+test('gives every tone with a severity a mark, so colour is never the only signal', () => {
   assert.deepEqual(contract.toneGlyphs, {
     accent: 'circle-info',
-    secondary: 'circle',
+    secondary: null,
     success: 'circle-check',
     warning: 'circle-alert',
     danger: 'circle-x',

@@ -101,14 +101,5 @@ export class SlAlertDescription {}
 })
 export class SlAlertActions {}
 
-/**
- * A mark the page supplies instead of the tone's own. It is projected into the
- * box the family draws, so it keeps the size, the colour and the place on the
- * message's first line that the tone's own mark would have had.
- */
-@Directive({
-  selector: '[slAlertIcon]',
-  standalone: true,
-  exportAs: 'slAlertIcon',
-})
-export class SlAlertIcon {}
+/* `SlAlertIcon` lives in `./alert`: the alert reads whether one was projected. */
+export { SlAlertIcon } from './alert';

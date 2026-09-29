@@ -116,12 +116,15 @@ test('draws the mark as a disc with the symbol cut out, on the title’s first l
   assert.match(rule(`${ui}>[data-part='content']`), /align-self:baseline/);
   assert.match(icon, /contain:layout/);
   for (const glyph of Object.values(contract.toneGlyphs)) {
+    if (glyph === null) continue;
     assert.match(
       fragment,
       new RegExp(`data-glyph="${glyph}" data-solid`),
       `no scene draws the ${glyph} mark solid`,
     );
   }
+  /* A neutral note states no severity, so no scene draws it a blank disc. */
+  assert.doesNotMatch(fragment, /data-glyph="circle"/);
 });
 
 test('paints one tone three ways, and gives soft an edge of its own', () => {

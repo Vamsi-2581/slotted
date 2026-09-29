@@ -53,6 +53,7 @@ describe('ResultState', () => {
     expect(region).toHaveAttribute('data-reach', defaults.reach);
     expect(region).toHaveAttribute('data-align', defaults.align);
     expect(region).toHaveAttribute('data-live', defaults.live);
+    expect(region).toHaveAttribute('data-illustration', defaults.illustration);
   });
 
   /**
@@ -209,7 +210,13 @@ describe('ResultState', () => {
 
   it('lets an application set its defaults once, and lets one region overrule them', () => {
     render(
-      <ResultStateDefaultsProvider align="start" live="off" reach="inline" status="no-results">
+      <ResultStateDefaultsProvider
+        align="start"
+        illustration="cards"
+        live="off"
+        reach="inline"
+        status="no-results"
+      >
         <ResultState data-testid="inherited">
           <ResultStateContent data-testid="inherited-content">Nada.</ResultStateContent>
         </ResultState>
@@ -223,6 +230,7 @@ describe('ResultState', () => {
     expect(inherited).toHaveAttribute('data-status', 'no-results');
     expect(inherited).toHaveAttribute('data-reach', 'inline');
     expect(inherited).toHaveAttribute('data-align', 'start');
+    expect(inherited).toHaveAttribute('data-illustration', 'cards');
     expect(screen.getByTestId('inherited-content')).not.toHaveAttribute('role');
 
     const stated = screen.getByTestId('stated');
@@ -242,6 +250,34 @@ describe('ResultState', () => {
       expect(screen.getByTestId('region')).toHaveAttribute('data-status', status);
       unmount();
     }
+    for (const illustration of contract.axes.illustration) {
+      const { unmount } = render(
+        <ResultState data-testid="region" illustration={illustration as 'none'}>
+          <ResultStateContent>Texto.</ResultStateContent>
+        </ResultState>,
+      );
+      expect(screen.getByTestId('region')).toHaveAttribute('data-illustration', illustration);
+      unmount();
+    }
+  });
+
+  /**
+   * The drawing is made around the page's glyph, in the box the family already
+   * draws for `media`, and it stays hidden from assistive technology like
+   * every picture in that box: the title says what the drawing shows.
+   */
+  it('draws the illustration around the glyph the page puts in the media box', () => {
+    render(
+      <ResultState data-testid="region" illustration="stack" media={<svg data-testid="glyph" />}>
+        <ResultStateContent>Convide as primeiras pessoas.</ResultStateContent>
+      </ResultState>,
+    );
+
+    const region = screen.getByTestId('region');
+    const media = region.querySelector('[data-part="media"]');
+    expect(region).toHaveAttribute('data-illustration', 'stack');
+    expect(media).toHaveAttribute('aria-hidden', 'true');
+    expect(media).toContainElement(screen.getByTestId('glyph'));
   });
 
   /**

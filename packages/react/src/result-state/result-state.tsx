@@ -9,8 +9,10 @@ import type { ResultStateProps, ResultStateRootProps } from './result-state.type
 /**
  * The region that stands in for content that is not there, and says what to do
  * next: a title, a description, the controls that get the reader out, and a
- * line of documentation under them. The page's own illustration goes above
- * them where there is one; the family draws none of its own (RS1).
+ * line of documentation under them. Above them goes the page's own artwork,
+ * or one of three neutral drawings the family makes around the page's glyph
+ * (`illustration`); a tone glyph enlarged above the title is the one picture
+ * it never draws (RS1).
  *
  * It is not `alert`. An alert sits beside the content it is about; this
  * replaces it. `inline-message` is a line of text under one control.
@@ -38,6 +40,7 @@ import type { ResultStateProps, ResultStateRootProps } from './result-state.type
 export function ResultState({
   align,
   children,
+  illustration,
   live,
   media,
   reach,
@@ -65,9 +68,9 @@ export function ResultState({
     children: (
       <ResultStateProvider value={context}>
         {/* Always drawn and empty until the page fills it: the stylesheet
-            withdraws an empty box, so a region with no illustration is a
-            title, a description and an action with nothing standing above
-            them (RS1). */}
+            withdraws an empty box, so a region with no picture is a title, a
+            description and an action with nothing standing above them (RS1).
+            A stack of cards is the one drawing that stands without a glyph. */}
         <div aria-hidden="true" data-part="media">
           {media}
         </div>
@@ -75,6 +78,7 @@ export function ResultState({
       </ResultStateProvider>
     ),
     'data-align': align ?? defaults.align,
+    'data-illustration': illustration ?? defaults.illustration,
     'data-live': live ?? defaults.live,
     'data-part': 'root',
     'data-reach': reach ?? defaults.reach,

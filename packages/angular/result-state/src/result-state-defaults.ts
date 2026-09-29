@@ -25,6 +25,14 @@ export type ResultStateReach = 'inline' | 'section' | 'page';
 export type ResultStateAlign = 'center' | 'start';
 
 /**
+ * The picture the family draws around the page's glyph: a framed tile, three
+ * layers leaning back, or a stack of cards, all in the neutral surface and
+ * border roles. `none` draws nothing of the family's own, and `inline` reach
+ * draws none of them.
+ */
+export type ResultStateIllustration = 'none' | 'tile' | 'stack' | 'cards';
+
+/**
  * Whether the text announces itself, and how loudly. The default is `polite`,
  * where `alert`'s is `off`: WCAG 2.2's Understanding document for SC 4.1.3
  * names this family's own text as its example of a status message, and a
@@ -34,6 +42,7 @@ export type ResultStateLive = 'off' | 'polite' | 'assertive';
 
 export interface ResultStateDefaults {
   align: ResultStateAlign;
+  illustration: ResultStateIllustration;
   live: ResultStateLive;
   reach: ResultStateReach;
   status: ResultStateStatus;
@@ -41,6 +50,7 @@ export interface ResultStateDefaults {
 
 const FALLBACK: ResultStateDefaults = {
   align: 'center',
+  illustration: 'none',
   live: 'polite',
   reach: 'section',
   status: 'empty',
@@ -62,6 +72,7 @@ export function provideResultStateDefaults(defaults: Partial<ResultStateDefaults
     provide: RESULT_STATE_DEFAULTS,
     useFactory: (): ResultStateDefaults => ({
       align: defaults.align ?? FALLBACK.align,
+      illustration: defaults.illustration ?? FALLBACK.illustration,
       live: defaults.live ?? FALLBACK.live,
       reach: defaults.reach ?? FALLBACK.reach,
       status: defaults.status ?? FALLBACK.status,

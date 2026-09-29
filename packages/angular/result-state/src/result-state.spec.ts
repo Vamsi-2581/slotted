@@ -84,6 +84,7 @@ describe('SlResultState', () => {
     expect(region.getAttribute('data-reach')).toBe(defaults.reach);
     expect(region.getAttribute('data-align')).toBe(defaults.align);
     expect(region.getAttribute('data-live')).toBe(defaults.live);
+    expect(region.getAttribute('data-illustration')).toBe(defaults.illustration);
   });
 
   /**
@@ -227,6 +228,7 @@ describe('SlResultState', () => {
       [
         provideResultStateDefaults({
           align: 'start',
+          illustration: 'cards',
           live: 'off',
           reach: 'inline',
           status: 'no-results',
@@ -238,6 +240,7 @@ describe('SlResultState', () => {
     expect(inherited.getAttribute('data-status')).toBe('no-results');
     expect(inherited.getAttribute('data-reach')).toBe('inline');
     expect(inherited.getAttribute('data-align')).toBe('start');
+    expect(inherited.getAttribute('data-illustration')).toBe('cards');
     expect(inherited.querySelector('#quiet')?.getAttribute('role')).toBeNull();
 
     const stated = fixture.nativeElement.querySelector('#stated') as HTMLElement;
@@ -272,6 +275,33 @@ describe('SlResultState', () => {
       );
       expect(region.getAttribute('data-align')).toBe(align);
     }
+    for (const illustration of contract.axes.illustration) {
+      const region = root(
+        renderTemplate(
+          `<section slResultState illustration="${illustration}"><div slResultStateContent>Texto.</div></section>`,
+        ),
+      );
+      expect(region.getAttribute('data-illustration')).toBe(illustration);
+    }
+  });
+
+  /**
+   * The drawing is made around the page's glyph, projected into the box the
+   * family draws for `media`, and stays hidden from assistive technology like
+   * every picture in that box: the title says what the drawing shows.
+   */
+  it('draws the illustration around the glyph the page projects into the media box', () => {
+    const region = root(
+      renderTemplate(`<section slResultState illustration="stack">
+        <svg slResultStateMedia id="glyph"></svg>
+        <div slResultStateContent>Convide as primeiras pessoas.</div>
+      </section>`),
+    );
+
+    const media = region.querySelector('[data-part="media"]');
+    expect(region.getAttribute('data-illustration')).toBe('stack');
+    expect(media?.getAttribute('aria-hidden')).toBe('true');
+    expect(media?.querySelector('#glyph')).not.toBeNull();
   });
 
   /**

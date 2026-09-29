@@ -7,6 +7,7 @@ export {
 export type {
   ResultStateAlign,
   ResultStateDefaults,
+  ResultStateIllustration,
   ResultStateLive,
   ResultStateReach,
   ResultStateStatus,

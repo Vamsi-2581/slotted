@@ -13,6 +13,7 @@ import {
 import { injectResultStateDefaults, SlResultStateIdFactory } from './result-state-defaults';
 import type {
   ResultStateAlign,
+  ResultStateIllustration,
   ResultStateLive,
   ResultStateReach,
   ResultStateStatus,
@@ -20,6 +21,7 @@ import type {
 
 export type {
   ResultStateAlign,
+  ResultStateIllustration,
   ResultStateLive,
   ResultStateReach,
   ResultStateStatus,
@@ -52,9 +54,9 @@ export type {
   standalone: true,
   exportAs: 'slResultState',
   /* The picture box is always in the markup and empty until the page fills
-     it: the stylesheet withdraws an empty box, so a region with no
-     illustration is a title, a description and an action with nothing
-     standing above them (RS1). */
+     it: the stylesheet withdraws an empty box, so a region with no picture is
+     a title, a description and an action with nothing standing above them
+     (RS1). A stack of cards is the one drawing that stands without a glyph. */
   template: `<div aria-hidden="true" data-part="media">
       <ng-content select="[slResultStateMedia]" />
     </div>
@@ -68,6 +70,7 @@ export type {
     '[attr.data-status]': 'resolvedStatus()',
     '[attr.data-reach]': 'resolvedReach()',
     '[attr.data-align]': 'resolvedAlign()',
+    '[attr.data-illustration]': 'resolvedIllustration()',
     '[attr.data-live]': 'resolvedLive()',
     '[attr.tabindex]': 'writtenTabIndex ?? -1',
     '[attr.aria-labelledby]': 'labelledBy()',
@@ -82,6 +85,13 @@ export class SlResultState {
   readonly align = input<ResultStateAlign | undefined>(undefined);
   /** Defaults to the provider, then to `polite`. */
   readonly live = input<ResultStateLive | undefined>(undefined);
+  /**
+   * The drawing made around the projected `slResultStateMedia`. Defaults to
+   * the provider, then to `none`. `tile` and `stack` frame a glyph and draw
+   * nothing without one; `cards` puts the glyph where a row's thumbnail would
+   * be and draws its two lines with or without it.
+   */
+  readonly illustration = input<ResultStateIllustration | undefined>(undefined);
   private readonly defaults = injectResultStateDefaults();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   /** An explicit tab index the consumer wrote is never replaced by the family's. */
@@ -98,6 +108,9 @@ export class SlResultState {
   protected readonly resolvedStatus = computed(() => this.status() ?? this.defaults.status);
   protected readonly resolvedReach = computed(() => this.reach() ?? this.defaults.reach);
   protected readonly resolvedAlign = computed(() => this.align() ?? this.defaults.align);
+  protected readonly resolvedIllustration = computed(
+    () => this.illustration() ?? this.defaults.illustration,
+  );
   readonly resolvedLive = computed(() => this.live() ?? this.defaults.live);
 
   /**

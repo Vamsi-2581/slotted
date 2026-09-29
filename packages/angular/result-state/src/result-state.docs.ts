@@ -42,7 +42,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div, rendered by the directive',
     required: false,
     purpose:
-      'The page’s own illustration, hidden from assistive technology. An element carrying slResultStateMedia is projected into it and keeps the height the reach gives it, so an illustration that has not loaded moves nothing when it arrives. Empty, the stylesheet withdraws it: the family draws no mark of its own, because a tone glyph alone above a title is the pattern R5 refuses.',
+      'The page’s glyph or its own artwork, hidden from assistive technology. An element carrying slResultStateMedia is projected into it and keeps the height the reach gives it, so artwork that has not loaded moves nothing when it arrives. With illustration set, the family draws a tile, a stack or a stack of cards around the glyph. Empty, the stylesheet withdraws it, except under cards, which draws its lines without a glyph.',
   },
   {
     part: 'content',
@@ -143,6 +143,18 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'illustration',
+    title: 'A drawing around the page’s glyph',
+    note: 'Three drawings in the neutral surface and border roles — a framed tile, three layers leaning back, a stack of cards — made around the projected glyph. None takes a tone, and inline reach draws none. A region that announces assembles its drawing as it arrives; under reduced motion it arrives assembled.',
+    snippet: defineSnippet({
+      id: 'result-state-angular-illustration',
+      language: 'angular',
+      label: 'The three drawings, and the stack of cards without a glyph',
+      source:
+        '<section slResultState illustration="stack">\n  <span slIcon slResultStateMedia><svg slGlyph name="bell"></svg></span>\n  <div slResultStateContent>\n    <div slResultStateTitle>Nenhum alerta configurado</div>\n  </div>\n</section>\n\n<!-- A framed tile, and a stack of cards standing in for rows. -->\n<section slResultState illustration="tile">\n  <span slIcon slResultStateMedia><svg slGlyph name="inbox"></svg></span>\n</section>\n<section slResultState illustration="cards">\n  <span slIcon slResultStateMedia><svg slGlyph name="file-text"></svg></span>\n</section>\n\n<!-- The cards draw their two lines with no glyph at all. -->\n<section slResultState illustration="cards"></section>',
+    }),
+  },
+  {
     id: 'actions',
     title: 'The way out of the situation',
     note: 'The controls are the consumer’s own buttons in a part outside the live region — a reader hearing the message is not read two button labels in the middle of it. Narrow the window past 20rem and watch them stack.',
@@ -215,14 +227,14 @@ export const ANGULAR_RESULT_STATE_DOCS = {
         "'empty' | 'no-results' | 'not-found' | 'error' | 'forbidden' | 'offline' | 'success'",
         'empty',
         'slResultState',
-        'What the region is reporting, and which mark it draws: inbox, search-x, circle-question, circle-alert, lock, cloud-off, circle-check. It is not a tone — empty, no-results and not-found share one, and forbidden and offline share another',
+        'What the region is reporting, written on the root as data-status for a page to key its own artwork on. The family paints nothing for it (RS1): what happened is in the title',
       ],
       [
         'reach',
         "'inline' | 'section' | 'page'",
         'section',
         'slResultState',
-        'The scope the message applies to. inline is a row for a table cell and draws no illustration box; page takes the top step of the type scale and a mark half again the largest control',
+        'The scope the message applies to. inline is a row for a table cell and draws no illustration; page takes the top step of the type scale and draws the illustration half again as large',
       ],
       [
         'align',
@@ -239,11 +251,18 @@ export const ANGULAR_RESULT_STATE_DOCS = {
         'Whether the text announces itself. polite writes role="status" on the content part and assertive writes role="alert"; both imply aria-live and aria-atomic, and neither is written on the box',
       ],
       [
+        'illustration',
+        "'none' | 'tile' | 'stack' | 'cards'",
+        'none',
+        'slResultState',
+        'The drawing the family makes around the projected slResultStateMedia, in the neutral surface and border roles and never in a tone. tile and stack frame a glyph and draw nothing without one; cards draws its lines with or without it; none draws nothing of the family’s own',
+      ],
+      [
         'slResultStateMedia',
         'directive',
         '—',
         'a projected element',
-        'Artwork the page supplies instead of the status’s mark. It is projected into the box the family draws, so it keeps the height the reach gives it. React passes a media node instead',
+        'The glyph an illustration is drawn around, or artwork the page supplies under illustration="none". It is projected into the box the family draws, so it keeps the height the reach gives it. React passes a media node instead',
       ],
     ]),
     composition: apiRows([
@@ -273,7 +292,7 @@ export const ANGULAR_RESULT_STATE_DOCS = {
         '(defaults: Partial<ResultStateDefaults>) => Provider',
         '—',
         'an application or a route',
-        'Sets status, reach, align and live once for every region under it; an explicit input on one region still wins',
+        'Sets status, reach, align, live and illustration once for every region under it; an explicit input on one region still wins',
       ],
       [
         'ng-content',
@@ -294,11 +313,11 @@ export const ANGULAR_RESULT_STATE_DOCS = {
       'There is no APG pattern for this family: the Authoring Practices list holds no empty, error or result state, and the nearest official guidance is the Region landmark practice, which states that “a region landmark must have a label”. The root is a section and the attribute is written only once a title exists, so an unlabelled region is a plain grouping element rather than a landmark with no name.',
       'The box is a landmark, not a live region. MDN’s alert role reference states that the role “should only be used for text content, not interactive elements such as links or buttons”, and this family has a row of buttons in it. The region that announces is slResultStateContent, which holds the title and the description alone; the mark, the actions and the footer are its siblings.',
       'live defaults to polite, which is the one place this family and alert disagree. WCAG 2.2’s Understanding document for SC 4.1.3 names this family’s own text as its example: “brief text messages displayed about the completion or status of the search, such as ‘Searching…’, ‘18 results returned’ or ‘No results returned’ would be status updates”. An alert may be a standing notice that was on the page before it loaded; a result is always the outcome of an operation. None of the seven surveyed implementations writes a live role of any kind.',
-      'Every status carries a mark as well as a colour. Under forced colours the seven grounds become one system colour, so the tray, the struck magnifier, the question, the crossed circle, the lock, the struck cloud and the tick are the only thing distinguishing a permission problem from a failed request — WCAG 2.2 1.4.1.',
-      'The mark is hidden from assistive technology, and so is the artwork projected into it. The title and the description already say what the picture says; an illustration that adds information is not decorative, and what it adds belongs in the description.',
+      'Status is never carried by colour alone, because the family paints no colour for it: what happened is in the title and the description, which forced colours leave legible. The illustrations keep the theme’s system-colour mapping under forced colours, so a stack is still three layers and not three outlines laid over one another.',
+      'The media box is hidden from assistive technology, with the projected glyph, the drawing made around it and any artwork the page supplies. The title and the description already say what the picture says; an illustration that adds information is not decorative, and what it adds belongs in the description.',
       'The root carries tabindex="-1" and is not in the tab sequence. A template that has just emptied a table calls focus() on the instance exportAs gives it; the family never does it, because moving focus unprompted is a change of context nobody asked for. A tabindex the page wrote is read with HostAttributeToken and kept.',
       'The family holds no mutable value, so it has no model(), no output() and no ControlValueAccessor. Which status a region is in is a fact about the consumer’s own data — a region that decided it would be deciding whether the fetch failed.',
-      'The family animates nothing. There is no state change here for an eye to follow, and a focus indicator that fades in is a focus indicator that is not there yet.',
+      'A region that announces arrives: its words fade in and its drawing assembles, on the entering curve, and a hidden region fades out on the leaving curve. Under reduced motion the drawing arrives assembled. The focus indicator is not animated, because a focus indicator that fades in is one that is not there yet.',
     ],
     snippets: [
       defineSnippet({
@@ -306,7 +325,7 @@ export const ANGULAR_RESULT_STATE_DOCS = {
         language: 'angular',
         label: 'Anatomy, as it reaches the DOM',
         source:
-          '<section\n  data-ui="result-state"\n  data-part="root"\n  data-status="empty"\n  data-reach="section"\n  data-align="center"\n  data-live="polite"\n  aria-labelledby="slotted-result-state-1-title"\n  tabindex="-1"\n>\n  <div aria-hidden="true" data-part="media"></div>\n  <div data-part="content" role="status">\n    <div data-part="title" id="slotted-result-state-1-title">Nenhum projeto ainda</div>\n    <p data-part="description">Crie um projeto para começar.</p>\n  </div>\n  <div data-part="actions">…</div>\n  <div data-part="footer">…</div>\n</section>',
+          '<section\n  data-ui="result-state"\n  data-part="root"\n  data-status="empty"\n  data-reach="section"\n  data-align="center"\n  data-live="polite"\n  data-illustration="none"\n  aria-labelledby="slotted-result-state-1-title"\n  tabindex="-1"\n>\n  <div aria-hidden="true" data-part="media"></div>\n  <div data-part="content" role="status">\n    <div data-part="title" id="slotted-result-state-1-title">Nenhum projeto ainda</div>\n    <p data-part="description">Crie um projeto para começar.</p>\n  </div>\n  <div data-part="actions">…</div>\n  <div data-part="footer">…</div>\n</section>',
       }),
       defineSnippet({
         id: 'result-state-theming',

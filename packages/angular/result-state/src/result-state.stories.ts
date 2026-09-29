@@ -6,12 +6,14 @@ import { applicationConfig, moduleMetadata } from '@storybook/angular-vite';
 import { SlButton } from '@slotted/angular/button';
 import { SlCard, SlCardBody } from '@slotted/angular/card';
 import { SlContainer } from '@slotted/angular/container';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlLink } from '@slotted/angular/link';
 
 import { SlResultState } from './result-state';
 import { provideResultStateDefaults } from './result-state-defaults';
 import type {
   ResultStateAlign,
+  ResultStateIllustration,
   ResultStateLive,
   ResultStateReach,
   ResultStateStatus,
@@ -28,6 +30,7 @@ import { ANGULAR_RESULT_STATE_DOCS, ANGULAR_RESULT_STATE_TOKENS } from './result
 
 interface ResultStateStoryArgs {
   align: ResultStateAlign;
+  illustration: ResultStateIllustration;
   live: ResultStateLive;
   reach: ResultStateReach;
   status: ResultStateStatus;
@@ -40,6 +43,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     reach: Reach,
     align: Align,
     media: Media,
+    illustration: Illustration,
     actions: Actions,
     live: Live,
     content: Content,
@@ -57,6 +61,8 @@ const meta: Meta<ResultStateStoryArgs> = {
         SlCard,
         SlCardBody,
         SlContainer,
+        SlGlyph,
+        SlIcon,
         SlLink,
         SlResultState,
         SlResultStateActions,
@@ -138,6 +144,7 @@ const STATUSES: readonly [ResultStateStatus, string, string][] = [
 export const Playground: Story = {
   args: {
     align: 'center',
+    illustration: 'none',
     live: 'polite',
     reach: 'section',
     status: 'empty',
@@ -154,7 +161,11 @@ export const Playground: Story = {
             [reach]="reach"
             [align]="align"
             [live]="live"
+            [illustration]="illustration"
           >
+            @if (illustration !== 'none') {
+              <span slIcon slResultStateMedia><svg slGlyph name="inbox"></svg></span>
+            }
             <div slResultStateContent>
               <div slResultStateTitle>Nenhum projeto ainda</div>
               <p slResultStateDescription>
@@ -331,6 +342,100 @@ export const Media: Story = {
               'A região começa no título e mantém o mesmo ritmo.',
             ),
           ),
+        ),
+    ),
+  }),
+};
+
+/** A glyph projected into the media box, for the drawings made around it. */
+const glyph = (name: string) =>
+  `<span slIcon slResultStateMedia><svg slGlyph name="${name}"></svg></span>`;
+
+export const Illustration: Story = {
+  parameters: scenario('illustration'),
+  render: () => ({
+    template: grid(
+      1,
+      scene(
+        'A glyph in a framed tile, for a collection that has never held anything',
+        'A ring on the sunken surface around a raised card, the glyph in the muted text role. It is the largest control height with a step of air a side, so it tightens with density while the title keeps its size.',
+        panel(`<section slResultState illustration="tile" live="off">
+             ${glyph('inbox')}
+             <div slResultStateContent>
+               <div slResultStateTitle>Nenhuma mensagem</div>
+               <p slResultStateDescription>As mensagens que chegarem a este quadro aparecem aqui.</p>
+             </div>
+             <div slResultStateActions>
+               <button slButton size="sm" type="button">Escrever mensagem</button>
+             </div>
+           </section>`),
+      ) +
+        scene(
+          'Three layers leaning back, for the first of many things to come',
+          'The glyph stands on the front layer and is sheared with it. Switch the direction to rtl and the stack leans the other way, because depth is read from the reading edge; the glyph keeps its own direction.',
+          panel(`<section slResultState illustration="stack" live="off">
+               ${glyph('bell')}
+               <div slResultStateContent>
+                 <div slResultStateTitle>Nenhum alerta configurado</div>
+                 <p slResultStateDescription>
+                   Um alerta avisa a equipa quando uma execução falha ou demora mais do que o previsto.
+                 </p>
+               </div>
+               <div slResultStateActions>
+                 <button slButton size="sm" type="button">Criar alerta</button>
+                 <button slButton size="sm" variant="outline" type="button">Ver modelos</button>
+               </div>
+             </section>`),
+        ) +
+        scene(
+          'A stack of cards, standing in for the rows that are not there',
+          'The glyph takes the thumbnail’s place and two lines stand in for the text. Without a glyph the lines start at the card’s padding; the drawing needs no colour of the ground, so it holds on the sunken panel and on a raised surface alike.',
+          panel(`<section slResultState illustration="cards" live="off">
+               ${glyph('file-text')}
+               <div slResultStateContent>
+                 <div slResultStateTitle>Nenhum relatório gerado</div>
+                 <p slResultStateDescription>
+                   Ligue uma fonte de dados ou carregue um CSV para gerar o primeiro relatório.
+                 </p>
+               </div>
+               <div slResultStateActions>
+                 <button slButton size="sm" type="button">Ligar fonte</button>
+                 <button slButton size="sm" variant="outline" type="button">Carregar CSV</button>
+               </div>
+             </section>`) +
+            `<div class="slotted-demo-surface" data-surface="raised">
+               <section slResultState illustration="cards" live="off">
+                 <div slResultStateContent>
+                   <div slResultStateTitle>Sem execuções nesta semana</div>
+                   <p slResultStateDescription>As execuções agendadas aparecem aqui assim que começarem.</p>
+                 </div>
+               </section>
+             </div>`,
+        ) +
+        scene(
+          'The whole route, and a table cell that asks for a drawing',
+          'At page reach the drawing is half again as large. At inline reach none is drawn — a cell holds one line of text — and the glyph stands beside the words at control size.',
+          panel(`<section slResultState illustration="stack" live="off" reach="page" status="no-results">
+               ${glyph('search')}
+               <div slResultStateContent>
+                 <div slResultStateTitle>Nenhum resultado para “contrato de serviço”</div>
+                 <p slResultStateDescription>
+                   Tente outra palavra, ou limpe os três filtros ativos para ver tudo de novo.
+                 </p>
+               </div>
+               <div slResultStateActions>
+                 <button slButton type="button">Limpar filtros</button>
+               </div>
+             </section>`) +
+            panel(`<section slResultState illustration="stack" live="off" reach="inline" status="no-results">
+               ${glyph('search')}
+               <div slResultStateContent>
+                 <div slResultStateTitle>Nenhuma linha corresponde ao filtro</div>
+               </div>
+               <div slResultStateActions>
+                 <button slButton size="sm" variant="ghost" type="button">Limpar</button>
+               </div>
+             </section>`),
         ),
     ),
   }),

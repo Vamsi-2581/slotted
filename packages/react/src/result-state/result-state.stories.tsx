@@ -6,6 +6,7 @@ import { useRef, useState } from 'react';
 import { Button } from '../button';
 import { Card, CardBody } from '../card';
 import { Container } from '../container';
+import { Glyph, Icon } from '../icon';
 import { Link } from '../link';
 import { ResultState } from './result-state';
 import { ResultStateDefaultsProvider } from './result-state-defaults';
@@ -65,6 +66,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     reach: Reach,
     align: Align,
     media: Media,
+    illustration: Illustration,
     actions: Actions,
     live: Live,
     content: Content,
@@ -97,6 +99,7 @@ type Story = StoryObj<typeof meta>;
 export const Playground: Story = {
   args: {
     align: 'center',
+    illustration: 'none',
     live: 'polite',
     reach: 'section',
     status: 'empty',
@@ -105,7 +108,16 @@ export const Playground: Story = {
   render: (args) => (
     <div className="slotted-demo-stage" data-layout="block">
       <Panel>
-        <ResultState {...args}>
+        <ResultState
+          {...args}
+          media={
+            args.illustration === undefined || args.illustration === 'none' ? undefined : (
+              <Icon>
+                <Glyph name="inbox" />
+              </Icon>
+            )
+          }
+        >
           <ResultStateContent>
             <ResultStateTitle>Nenhum projeto ainda</ResultStateTitle>
             <ResultStateDescription>
@@ -303,6 +315,158 @@ export const Media: Story = {
                 A região começa no título e mantém o mesmo ritmo.
               </ResultStateDescription>
             </ResultStateContent>
+          </ResultState>
+        </Panel>
+      </Scene>
+    </Grid>
+  ),
+};
+
+export const Illustration: Story = {
+  parameters: scenario('illustration'),
+  render: () => (
+    <Grid columns={1}>
+      <Scene
+        label="A glyph in a framed tile, for a collection that has never held anything"
+        note="A ring on the sunken surface around a raised card, the glyph in the muted text role. It is the largest control height with a step of air a side, so it tightens with density while the title keeps its size."
+      >
+        <Panel>
+          <ResultState
+            illustration="tile"
+            live="off"
+            media={
+              <Icon>
+                <Glyph name="inbox" />
+              </Icon>
+            }
+          >
+            <ResultStateContent>
+              <ResultStateTitle>Nenhuma mensagem</ResultStateTitle>
+              <ResultStateDescription>
+                As mensagens que chegarem a este quadro aparecem aqui.
+              </ResultStateDescription>
+            </ResultStateContent>
+            <ResultStateActions>
+              <Button size="sm">Escrever mensagem</Button>
+            </ResultStateActions>
+          </ResultState>
+        </Panel>
+      </Scene>
+      <Scene
+        label="Three layers leaning back, for the first of many things to come"
+        note="The glyph stands on the front layer and is sheared with it. Switch the direction to rtl and the stack leans the other way, because depth is read from the reading edge; the glyph keeps its own direction."
+      >
+        <Panel>
+          <ResultState
+            illustration="stack"
+            live="off"
+            media={
+              <Icon>
+                <Glyph name="bell" />
+              </Icon>
+            }
+          >
+            <ResultStateContent>
+              <ResultStateTitle>Nenhum alerta configurado</ResultStateTitle>
+              <ResultStateDescription>
+                Um alerta avisa a equipa quando uma execução falha ou demora mais do que o previsto.
+              </ResultStateDescription>
+            </ResultStateContent>
+            <ResultStateActions>
+              <Button size="sm">Criar alerta</Button>
+              <Button size="sm" variant="outline">
+                Ver modelos
+              </Button>
+            </ResultStateActions>
+          </ResultState>
+        </Panel>
+      </Scene>
+      <Scene
+        label="A stack of cards, standing in for the rows that are not there"
+        note="The glyph takes the thumbnail's place and two lines stand in for the text. Without a glyph the lines start at the card's padding; the drawing needs no colour of the ground, so it holds on the sunken panel and on a raised surface alike."
+      >
+        <Panel>
+          <ResultState
+            illustration="cards"
+            live="off"
+            media={
+              <Icon>
+                <Glyph name="file-text" />
+              </Icon>
+            }
+          >
+            <ResultStateContent>
+              <ResultStateTitle>Nenhum relatório gerado</ResultStateTitle>
+              <ResultStateDescription>
+                Ligue uma fonte de dados ou carregue um CSV para gerar o primeiro relatório.
+              </ResultStateDescription>
+            </ResultStateContent>
+            <ResultStateActions>
+              <Button size="sm">Ligar fonte</Button>
+              <Button size="sm" variant="outline">
+                Carregar CSV
+              </Button>
+            </ResultStateActions>
+          </ResultState>
+        </Panel>
+        <div className="slotted-demo-surface" data-surface="raised">
+          <ResultState illustration="cards" live="off">
+            <ResultStateContent>
+              <ResultStateTitle>Sem execuções nesta semana</ResultStateTitle>
+              <ResultStateDescription>
+                As execuções agendadas aparecem aqui assim que começarem.
+              </ResultStateDescription>
+            </ResultStateContent>
+          </ResultState>
+        </div>
+      </Scene>
+      <Scene
+        label="The whole route, and a table cell that asks for a drawing"
+        note="At page reach the drawing is half again as large. At inline reach none is drawn — a cell holds one line of text — and the glyph stands beside the words at control size."
+      >
+        <Panel>
+          <ResultState
+            illustration="stack"
+            live="off"
+            media={
+              <Icon>
+                <Glyph name="search" />
+              </Icon>
+            }
+            reach="page"
+            status="no-results"
+          >
+            <ResultStateContent>
+              <ResultStateTitle>Nenhum resultado para “contrato de serviço”</ResultStateTitle>
+              <ResultStateDescription>
+                Tente outra palavra, ou limpe os três filtros ativos para ver tudo de novo.
+              </ResultStateDescription>
+            </ResultStateContent>
+            <ResultStateActions>
+              <Button>Limpar filtros</Button>
+            </ResultStateActions>
+          </ResultState>
+        </Panel>
+        <Panel>
+          <ResultState
+            illustration="stack"
+            live="off"
+            media={
+              <Icon>
+                <Glyph name="search" />
+              </Icon>
+            }
+            reach="inline"
+            status="no-results"
+          >
+            <ResultStateContent>
+              <ResultStateTitle>Nenhuma linha corresponde ao filtro</ResultStateTitle>
+            </ResultStateContent>
+            <ResultStateActions>
+              <Button size="sm" variant="ghost">
+                Limpar
+              </Button>
+            </ResultStateActions>
           </ResultState>
         </Panel>
       </Scene>

@@ -32,7 +32,7 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `number-field` | [2026-09-03](2026-09-03-number-field-capability-inventory.md) | [2026-09-03](2026-09-03-number-field-design.md) | [2026-09-03](2026-09-03-number-field-self-assessment.md) |
 | `overlay-infrastructure` | [2026-09-03](2026-09-03-overlay-infrastructure-capability-inventory.md) | [2026-09-03](2026-09-03-overlay-infrastructure-design.md) | [2026-09-03](2026-09-03-overlay-infrastructure-self-assessment.md) |
 | `progress-indicator` | — | [2026-09-03](2026-09-03-progress-indicator-family-design.md) | [2026-09-03](2026-09-03-progress-indicator-self-assessment.md) |
-| `result-state` | [2026-09-03](2026-09-03-result-state-capability-inventory.md) | [2026-09-03](2026-09-03-result-state-design.md) | [2026-09-04](2026-09-04-result-state-self-assessment.md) |
+| `result-state` | [2026-09-03](2026-09-03-result-state-capability-inventory.md) | [2026-09-03](2026-09-03-result-state-design.md) | [2026-09-04](2026-09-04-result-state-self-assessment.md), [2026-09-28](2026-09-28-result-state-illustration-self-assessment.md) |
 | `slider-and-form` | [2026-09-03](2026-09-03-slider-and-form-capability-inventory.md) | [2026-09-03](2026-09-03-slider-and-form-design.md) | [2026-09-03](2026-09-03-slider-and-form-self-assessment.md) |
 | `switch` | [2026-09-03](2026-09-03-switch-capability-inventory.md) | [2026-09-03](2026-09-03-switch-design.md) | — |
 | `tabs-and-toolbar` | [2026-09-03](2026-09-03-tabs-and-toolbar-capability-inventory.md) | [2026-09-03](2026-09-03-tabs-and-toolbar-design.md) | — |
@@ -112,3 +112,4 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 
 - [2026-09-25-status-indicator-reui-dossier.md](2026-09-25-status-indicator-reui-dossier.md)
 - [2026-09-25-alert-reui-dossier.md](2026-09-25-alert-reui-dossier.md)
+- [2026-09-25-result-state-reui-dossier.md](2026-09-25-result-state-reui-dossier.md)

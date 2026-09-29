@@ -25,6 +25,14 @@ export type ResultStateReach = 'inline' | 'section' | 'page';
 export type ResultStateAlign = 'center' | 'start';
 
 /**
+ * The picture the family draws around the page's glyph: a framed tile, three
+ * layers leaning back, or a stack of cards, all in the neutral surface and
+ * border roles. `none` draws nothing of the family's own, and `inline` reach
+ * draws none of them.
+ */
+export type ResultStateIllustration = 'none' | 'tile' | 'stack' | 'cards';
+
+/**
  * Whether the text announces itself, and how loudly. The default is `polite`,
  * where `alert`'s is `off`: WCAG 2.2's Understanding document for SC 4.1.3
  * names this family's own text as its example of a status message, and a
@@ -35,6 +43,7 @@ export type ResultStateLive = 'off' | 'polite' | 'assertive';
 /** What an application sets once for every result state under it. */
 export interface ResultStateDefaults {
   align: ResultStateAlign;
+  illustration: ResultStateIllustration;
   live: ResultStateLive;
   reach: ResultStateReach;
   status: ResultStateStatus;
@@ -51,6 +60,7 @@ export interface ResultStatePartProps extends ComponentPropsWithRef<'div'> {
 
 export interface ResultStateRootProps extends ComponentPropsWithRef<'section'> {
   'data-align': ResultStateAlign;
+  'data-illustration': ResultStateIllustration;
   'data-live': ResultStateLive;
   'data-part': string;
   'data-reach': ResultStateReach;
@@ -96,13 +106,20 @@ export interface ResultStateProps extends Omit<ComponentPropsWithRef<'section'>,
   /** Defaults to the provider, then to `polite`. */
   live?: ResultStateLive | undefined;
   /**
-   * The page's own illustration. It is projected into the box the family
-   * draws, so it keeps the height the reach gives it — which is what stops an
-   * illustration that has not loaded from moving the title and the actions
-   * when it arrives. Unstated, the box is withdrawn by the stylesheet and the
-   * region is a title, a description and an action (RS1): the family draws no
-   * picture of its own, because a tone glyph alone above a title is the
-   * pattern R5 refuses.
+   * The drawing made around `media`. Defaults to the provider, then to `none`.
+   * `tile` and `stack` frame a glyph and draw nothing without one; `cards`
+   * puts the glyph where a row's thumbnail would be and draws its two lines
+   * with or without it.
+   */
+  illustration?: ResultStateIllustration | undefined;
+  /**
+   * The page's glyph, or its own illustration. It is projected into the box
+   * the family draws, so it keeps the height the reach gives it — which is
+   * what stops an illustration that has not loaded from moving the title and
+   * the actions when it arrives. With `illustration` set, a glyph here is what
+   * the drawing is made around. Unstated with `illustration="none"`, the box is
+   * withdrawn by the stylesheet and the region is a title, a description and an
+   * action (RS1).
    */
   media?: ReactNode | undefined;
   /**

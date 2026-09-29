@@ -15,6 +15,7 @@ export type {
   ResultStateDefaultsProviderProps,
   ResultStateDescriptionProps,
   ResultStateFooterProps,
+  ResultStateIllustration,
   ResultStateLive,
   ResultStatePartProps,
   ResultStateProps,

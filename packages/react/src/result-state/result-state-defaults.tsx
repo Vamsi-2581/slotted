@@ -4,6 +4,7 @@ import type { ResultStateDefaults, ResultStateDefaultsProviderProps } from './re
 
 const FALLBACK: ResultStateDefaults = {
   align: 'center',
+  illustration: 'none',
   live: 'polite',
   reach: 'section',
   status: 'empty',
@@ -36,6 +37,7 @@ export function ResultStateDefaultsProvider({
     <ResultStateDefaultsContext.Provider
       value={{
         align: defaults.align ?? inherited.align,
+        illustration: defaults.illustration ?? inherited.illustration,
         live: defaults.live ?? inherited.live,
         reach: defaults.reach ?? inherited.reach,
         status: defaults.status ?? inherited.status,

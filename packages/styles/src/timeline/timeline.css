@@ -6,8 +6,9 @@
    *
    * The whole family is drawn from the control glyph size. An empty marker is
    * a dot as large as the glyph a badge holds, so a dot, a spinner and the
-   * glyph inside a badge are one size; a marker holding a glyph or an avatar is
-   * a badge one step of air wider than the glyph on each side. The rail is a
+   * glyph inside a badge are one size; a marker holding a glyph is a badge the
+   * control icon wide plus one step of air on each side, and a marker holding
+   * an avatar is the smallest avatar. The rail is a
    * column as wide as the widest marker the timeline holds. The connector is a
    * hairline that runs from the centre of one marker to the centre of the
    * next. Everything else — how far the words stand off the rail, the rhythm
@@ -37,10 +38,20 @@
       var(--_rule) +
         round(nearest, var(--_dot) * var(--slotted-timeline-core-ratio, 0.4) - var(--_rule), 2px)
     );
-    /* The badge around a glyph: the glyph and one step of air on each side. */
+    /* The badge around a glyph: the control icon and one step of air on each side, 21 at `md`. */
     --_badge: calc(
       var(--_rule) +
         round(up, var(--_icon) + 2 * var(--slotted-space-1, 0.125rem) - var(--_rule), 2px)
+    );
+    /**
+     * A face in the marker: the smallest avatar, rounded to the line's parity.
+     * The badge's 21 put the initials at 8.4 pixels, under
+     * `--slotted-avatar-size-xs`, the smallest step `avatar` draws; this is 25
+     * at comfortable density and 21 at the two tighter ones, where that step
+     * is 20.
+     */
+    --_avatar: calc(
+      var(--_rule) + round(up, var(--slotted-avatar-size-xs, 24px) - var(--_rule), 2px)
     );
     --_rail: var(--_dot);
     --_rule: var(--slotted-timeline-connector-thickness, var(--slotted-border-width-thin, 1px));
@@ -106,6 +117,10 @@
    */
   [data-ui='timeline']:has([data-part='marker'] > :not([data-ui='spinner'], [data-check])) {
     --_rail: var(--_badge);
+  }
+
+  [data-ui='timeline']:has([data-part='marker'] > [data-ui='avatar']) {
+    --_rail: max(var(--_badge), var(--_avatar));
   }
 
   /* ── Tone ───────────────────────────────────────────────────────────────
@@ -288,7 +303,11 @@
    */
   [data-ui='timeline'] [data-part='marker'] {
     --_marker: var(--_dot);
-    --_lift: calc((1lh - var(--_marker)) / 2);
+    /**
+     * Rounded to a whole pixel: a line of 19.5 put a 13-pixel dot at a
+     * quarter pixel and antialiased its edge on both sides.
+     */
+    --_lift: round(nearest, calc((1lh - var(--_marker)) / 2), 1px);
     /* The tone's ink faded into the ground: the soft disc a dot sits in. */
     --_tint: color-mix(in srgb, var(--_tone-mark) 16%, var(--_surface));
 
@@ -331,9 +350,10 @@
   }
 
   /**
-   * A badge. The glyph is the badge less one step of air on each side, so a
-   * Lucide drawing that fills its own box to the edge stands two pixels off
-   * the ring. The avatar is the badge's face and fills it without a ring.
+   * A badge. The glyph is the control icon less one step of air on each side:
+   * 12 in a badge of 21 at `md`, so a Lucide drawing that
+   * fills its own box to the edge stands four and a half pixels off the ring.
+   * The avatar fills its own marker without a ring.
    *
    * The check of a finished dot is the one icon the family puts in a marker
    * itself, marked `data-check` by the binding so it is never read as a badge:
@@ -363,10 +383,12 @@
   }
 
   [data-ui='timeline'] [data-part='marker'] > [data-ui='avatar'] {
-    --slotted-avatar-size: var(--_badge);
+    --slotted-avatar-size: var(--_avatar);
   }
 
   [data-ui='timeline'] [data-part='marker']:has(> [data-ui='avatar']) {
+    --_marker: var(--_avatar);
+
     background-color: transparent;
     border-width: 0;
   }
@@ -701,16 +723,23 @@
     min-block-size: var(--slotted-target-min, 24px);
     padding: 0;
     text-align: start;
-    transition: color var(--slotted-control-transition-duration)
-      var(--slotted-control-transition-easing);
+    transition:
+      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
+      translate var(--slotted-duration-instant) var(--slotted-control-transition-easing);
   }
 
   [data-ui='timeline'] [data-part='group-trigger']:enabled:hover {
     color: var(--_strong);
   }
 
+  /**
+   * The heading has no ground to step, and its hover already takes the
+   * strongest ink, so a press answers in place: the label settles by a
+   * hairline, the press `button` draws on a solid fill.
+   */
   [data-ui='timeline'] [data-part='group-trigger']:enabled:active {
-    color: var(--_tone-text);
+    color: var(--_strong);
+    translate: 0 var(--slotted-border-width-thin, 1px);
   }
 
   [data-ui='timeline'] [data-part='group-trigger']:focus-visible {
@@ -730,9 +759,10 @@
     flex: none;
   }
 
+  /* Each direction takes the curve of the state it arrives at: closing leaves, opening arrives. */
   [data-ui='timeline'] [data-part='group-indicator'] > [data-ui='icon'] {
     rotate: -90deg;
-    transition: rotate var(--slotted-duration-medium) var(--slotted-easing-standard);
+    transition: rotate var(--slotted-duration-medium) var(--slotted-easing-exit);
   }
 
   [data-ui='timeline']
@@ -741,10 +771,33 @@
     [data-part='group-indicator']
     > [data-ui='icon'] {
     rotate: 0deg;
+    transition-timing-function: var(--slotted-easing-enter);
+  }
+
+  /**
+   * The events of a period fade in and out and never slide: twenty events
+   * sliding are a page jumping. The closing fade is the shorter one, and
+   * `allow-discrete` holds the list on the page until it has faded, then
+   * `hidden` takes it out. A group open at the first render fades in too,
+   * because `@starting-style` cannot tell a first render from an opening.
+   */
+  [data-ui='timeline'] [data-part='group-list'] {
+    opacity: 1;
+    transition: opacity var(--slotted-duration-medium) var(--slotted-easing-enter);
+  }
+
+  @starting-style {
+    [data-ui='timeline'] [data-part='group-list']:not([hidden]) {
+      opacity: 0;
+    }
   }
 
   [data-ui='timeline'] [data-part='group-list'][hidden] {
     display: none;
+    opacity: 0;
+    transition:
+      opacity var(--slotted-duration-short) var(--slotted-easing-exit),
+      display var(--slotted-duration-short) allow-discrete;
   }
 
   /* A folded group ends at its heading; the distance to the next is the group's own. */
@@ -799,12 +852,27 @@
     margin-block-end: var(--_item-gap);
   }
 
+  /**
+   * The pill answers with a state layer: its own text colour, at a low
+   * strength, mixed into the tinted ground, the step `tag` and `avatar` take
+   * for the same reason. The tinted ramp ends at the surface the pill rests
+   * on — `subtle-hover` lightened it toward the page in the light scheme, and
+   * matched the page in the dark one, and `subtle-active` was the rest colour.
+   */
   [data-ui='timeline'] [data-part='fresh']:enabled:hover {
-    background-color: var(--slotted-tone-accent-subtle-hover, Canvas);
+    background-color: color-mix(
+      in oklab,
+      var(--_tone-surface),
+      currentColor var(--slotted-timeline-state-layer-hover, 8%)
+    );
   }
 
   [data-ui='timeline'] [data-part='fresh']:enabled:active {
-    background-color: var(--slotted-tone-accent-subtle-active, Canvas);
+    background-color: color-mix(
+      in oklab,
+      var(--_tone-surface),
+      currentColor var(--slotted-timeline-state-layer-active, 14%)
+    );
   }
 
   [data-ui='timeline'] button[data-part='more']:enabled:hover {
@@ -813,6 +881,11 @@
 
   [data-ui='timeline'] button[data-part='more']:enabled:active {
     background-color: var(--slotted-tone-secondary-subtle-active, Canvas);
+  }
+
+  /* A press lands at once, as a `button` does; the release eases back. */
+  [data-ui='timeline'] :is([data-part='fresh'], button[data-part='more']):enabled:active {
+    transition-duration: var(--slotted-duration-instant);
   }
 
   [data-ui='timeline'] [data-part='fresh']:focus-visible,
@@ -1246,7 +1319,7 @@
 
     [data-ui='timeline'][data-orientation='horizontal']:not([data-reflow='false'])
       [data-part='marker'] {
-      --_lift: calc((1lh - var(--_marker)) / 2);
+      --_lift: round(nearest, calc((1lh - var(--_marker)) / 2), 1px);
 
       margin-inline-start: 0;
     }

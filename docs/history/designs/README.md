@@ -119,3 +119,4 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 - [2026-09-29-avatar-reui-dossier.md](2026-09-29-avatar-reui-dossier.md)
 - [2026-09-29-breadcrumb-reui-dossier.md](2026-09-29-breadcrumb-reui-dossier.md)
 - [2026-09-29-toast-reui-dossier.md](2026-09-29-toast-reui-dossier.md)
+- [2026-09-29-timeline-reui-dossier.md](2026-09-29-timeline-reui-dossier.md)

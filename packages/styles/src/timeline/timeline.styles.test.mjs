@@ -149,9 +149,89 @@ test('runs the line from centre to centre as a border', () => {
  * `alert` draw their marks with: half the difference between one line and the
  * mark, measured in the rail whose type is the title's.
  */
-test('centres the marker on the first line of the title', () => {
-  assert.ok(normalized.includes('--_lift:calc((1lh-var(--_marker))/2)'));
+test('centres the marker on the first line of the title, on a whole pixel', () => {
+  assert.ok(normalized.includes('--_lift:round(nearest,calc((1lh-var(--_marker))/2),1px)'));
+  assert.ok(!normalized.includes('--_lift:calc('), 'no lift left unrounded');
   assert.ok(normalized.includes('margin-block-start:var(--_lift)'));
+});
+
+/**
+ * A face in the marker is the smallest avatar rounded to the line's parity,
+ * never the badge: 21 put the initials at 8.4 pixels.
+ */
+test('draws an avatar marker at the smallest avatar', () => {
+  assert.ok(
+    normalized.includes(
+      '--_avatar:calc(var(--_rule)+round(up,var(--slotted-avatar-size-xs,24px)-var(--_rule),2px));',
+    ),
+  );
+  assert.ok(
+    normalized.includes(
+      "[data-part='marker']>[data-ui='avatar']{--slotted-avatar-size:var(--_avatar);}",
+    ),
+  );
+  assert.ok(
+    normalized.includes(
+      "[data-ui='timeline']:has([data-part='marker']>[data-ui='avatar']){--_rail:max(var(--_badge),var(--_avatar));}",
+    ),
+  );
+});
+
+/**
+ * The tinted ramp ends at the surface `fresh` rests on, so its steps are a
+ * state layer of its own ink; the group heading, with no ground, settles by
+ * a hairline. Each press differs from its hover in every scheme.
+ */
+test('steps the fresh pill by state layer and presses the group heading in place', () => {
+  assert.ok(
+    normalized.includes(
+      "[data-part='fresh']:enabled:hover{background-color:color-mix(inoklab,var(--_tone-surface),currentColorvar(--slotted-timeline-state-layer-hover,8%));}",
+    ),
+  );
+  assert.ok(
+    normalized.includes(
+      "[data-part='fresh']:enabled:active{background-color:color-mix(inoklab,var(--_tone-surface),currentColorvar(--slotted-timeline-state-layer-active,14%));}",
+    ),
+  );
+  assert.ok(!normalized.includes('--slotted-tone-accent-subtle-'), 'no tinted role under fresh');
+  assert.ok(
+    normalized.includes(
+      "[data-part='group-trigger']:enabled:active{color:var(--_strong);translate:0var(--slotted-border-width-thin,1px);}",
+    ),
+  );
+  assert.ok(
+    normalized.includes(
+      'translatevar(--slotted-duration-instant)var(--slotted-control-transition-easing);',
+    ),
+    'the settle is listed in the transition',
+  );
+});
+
+/**
+ * A period fades in on the entering curve and out on the shorter exiting
+ * one, and never slides; the chevron takes the curve of the state it
+ * arrives at.
+ */
+test('fades a group list in and out and turns the chevron on both curves', () => {
+  assert.ok(normalized.includes('@starting-style{'));
+  assert.ok(
+    normalized.includes(
+      "[data-part='group-list']{opacity:1;transition:opacityvar(--slotted-duration-medium)var(--slotted-easing-enter);}",
+    ),
+  );
+  assert.ok(
+    normalized.includes(
+      'transition:opacityvar(--slotted-duration-short)var(--slotted-easing-exit),displayvar(--slotted-duration-short)allow-discrete;',
+    ),
+  );
+  assert.ok(
+    normalized.includes(
+      "[data-part='group-indicator']>[data-ui='icon']{rotate:-90deg;transition:rotatevar(--slotted-duration-medium)var(--slotted-easing-exit);}",
+    ),
+  );
+  assert.ok(
+    normalized.includes('rotate:0deg;transition-timing-function:var(--slotted-easing-enter);'),
+  );
 });
 
 /**

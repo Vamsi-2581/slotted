@@ -169,8 +169,17 @@
      * on the same clock as the picture. Without it the rim snapped from red to
      * grey a frame before the face had finished appearing, which was the one
      * thing left moving on its own in the loading sequence.
+     *
+     * The ground crosses on the same clock, because hover and press answer on
+     * it; the ring and the transform are what a group raises a member with, and
+     * they are listed here so the group states only the curve and never
+     * replaces this list — it did, and the edge snapped inside a stack.
      */
-    transition: border-color var(--slotted-duration-short) var(--slotted-easing-standard);
+    transition:
+      border-color var(--slotted-duration-short) var(--slotted-easing-standard),
+      background-color var(--slotted-duration-short) var(--slotted-easing-standard),
+      box-shadow var(--slotted-duration-short) var(--slotted-easing-standard),
+      transform var(--slotted-duration-short) var(--slotted-easing-standard);
     /* Initials are a label, not a selection: dragging across a row of faces
        should not highlight a column of letters. */
     user-select: none;
@@ -228,14 +237,17 @@
    * avatar, and every one of the fourteen surveyed implementations fills.
    */
   [data-ui='avatar'][data-part='root'][data-variant='soft'] {
-    background-color: var(--_surface, ButtonFace);
+    --_ground: var(--_surface, ButtonFace);
+
+    background-color: var(--_ground);
     color: var(--_text, ButtonText);
   }
 
   [data-ui='avatar'][data-part='root'][data-variant='solid'] {
     --_edge: var(--_solid-edge);
+    --_ground: var(--_solid, ButtonFace);
 
-    background-color: var(--_solid, ButtonFace);
+    background-color: var(--_ground);
     color: var(--_on-solid, ButtonText);
   }
 
@@ -249,9 +261,12 @@
    * `radius-md` is six pixels, which is a gentle round on a 64-pixel square and
    * a quarter-circle on a 20-pixel one; a proportion is the same shape at every
    * step. A theme that disagrees states the token.
+   *
+   * Rounded to the pixel: a sixth of 64 is 10.67 and of 28 is 4.67, and a
+   * fractional radius spreads the curve over partial pixels at every corner.
    */
   [data-ui='avatar'][data-part='root'][data-shape='square'] {
-    --_radius: var(--slotted-avatar-radius, calc(var(--_size) / 6));
+    --_radius: var(--slotted-avatar-radius, round(nearest, calc(var(--_size) / 6), 1px));
   }
 
   /* ── Size ─────────────────────────────────────────────────────────────── */
@@ -297,11 +312,17 @@
     object-fit: cover;
     opacity: 0;
     position: absolute;
-    transition: opacity var(--slotted-duration-short) var(--slotted-easing-standard);
+    transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
+  /**
+   * A transition runs on the curve of the state it arrives at: the picture
+   * enters on the entering curve and, when a later request fails, leaves on the
+   * exiting one. The fallback below is the mirror of it.
+   */
   [data-ui='avatar'][data-status='loaded'] [data-part='image'] {
     opacity: 1;
+    transition-timing-function: var(--slotted-easing-enter);
   }
 
   /* ── What stands in for it ────────────────────────────────────────────── */
@@ -333,7 +354,7 @@
      * tree, which is what the briefing's rule about truncation protects.
      */
     overflow: hidden;
-    transition: opacity var(--slotted-duration-short) var(--slotted-easing-standard);
+    transition: opacity var(--slotted-duration-short) var(--slotted-easing-enter);
   }
 
   [data-ui='avatar'][data-status='loaded'] [data-part='fallback'] {
@@ -343,6 +364,7 @@
      * underneath, which is what a photograph with transparency is drawn on.
      */
     opacity: 0;
+    transition-timing-function: var(--slotted-easing-exit);
   }
 
   /**
@@ -460,10 +482,61 @@
     overflow-clip-margin: var(--slotted-target-min, 24px);
   }
 
+  /**
+   * Hover and press answer on the ground, the way `tag` answers on its own: the
+   * letters' colour laid over the fill at eight and fourteen per cent. The rim
+   * keeps the tone. It used to turn `border-strong` on hover, which took the
+   * colour out of the one thing the pointer was on, and in `high-contrast` the
+   * tone's rim and `border-strong` are both black, so the hover changed nothing.
+   *
+   * Press exists because `render` makes the root a link or a button, and a
+   * command that does not answer the press reads as one that did not register.
+   */
   [data-ui='avatar'][data-part='root']:any-link:not([data-disabled]):hover,
   button[data-ui='avatar'][data-part='root']:not([data-disabled]):hover,
   [data-ui='avatar'][data-part='root'][tabindex]:not([data-disabled]):hover {
+    background-color: color-mix(
+      in oklab,
+      var(--_ground),
+      currentColor var(--slotted-avatar-state-layer-hover, 8%)
+    );
+  }
+
+  [data-ui='avatar'][data-part='root']:any-link:not([data-disabled]):active,
+  button[data-ui='avatar'][data-part='root']:not([data-disabled]):active,
+  [data-ui='avatar'][data-part='root'][tabindex]:not([data-disabled]):active {
+    background-color: color-mix(
+      in oklab,
+      var(--_ground),
+      currentColor var(--slotted-avatar-state-layer-active, 14%)
+    );
+  }
+
+  /**
+   * A photograph covers the ground, so a face answers on its frame instead: the
+   * rim steps to `border-strong` and a ring of the same colour grows outside it,
+   * one pixel under the pointer and two under the press. The ring is what keeps
+   * the hover visible in `high-contrast`, where the rim is black before and
+   * after.
+   *
+   * One attribute fewer than the group's raise on purpose. Inside a stack the
+   * ring belongs to the group — the surface-coloured gap between a raised face
+   * and the one it covers — and the lower weight is what lets the group's
+   * declaration of the same token win without either file knowing the order
+   * the other is loaded in.
+   */
+  [data-ui='avatar'][data-status='loaded']:any-link:not([data-disabled]):hover,
+  button[data-ui='avatar'][data-status='loaded']:not([data-disabled]):hover,
+  [data-ui='avatar'][data-status='loaded'][tabindex]:not([data-disabled]):hover {
     --_edge: var(--slotted-border-strong, CanvasText);
+    --slotted-avatar-ring-width: var(--slotted-border-width-thin, 1px);
+    --slotted-avatar-ring-color: var(--slotted-border-strong, CanvasText);
+  }
+
+  [data-ui='avatar'][data-status='loaded']:any-link:not([data-disabled]):active,
+  button[data-ui='avatar'][data-status='loaded']:not([data-disabled]):active,
+  [data-ui='avatar'][data-status='loaded'][tabindex]:not([data-disabled]):active {
+    --slotted-avatar-ring-width: var(--slotted-border-width-thick, 2px);
   }
 
   /**

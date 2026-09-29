@@ -16,15 +16,14 @@
     /**
      * How much of a member the next one covers, as a fraction of its own box.
      * A proportion rather than a step of the space scale, because what has to
-     * stay constant is the amount of face that remains visible: at 0.22 the
-     * leading four fifths of every avatar is showing, at every size and at
+     * stay constant is the amount of face that remains visible: at 0.28 the
+     * leading 72 per cent of every avatar is showing, at every size and at
      * every density.
      *
-     * The value is what two initials can afford to lose. Measured on the
-     * harness at `md`, a pair of letters spans the middle 55 per cent of the
-     * box, so a quarter covered clips the second one and a fifth does not. MUI
-     * lands in the same place from the other direction, with a fixed eight
-     * pixels on a forty-pixel avatar.
+     * The references sit either side of it: ReUI covers 0.25 of a 32-pixel
+     * avatar, 0.33 of a 24 and 0.20 of a 20 (the 2026-09-29 dossier), MUI
+     * eight pixels of forty. The covering is rounded to the pixel where it is
+     * used, below.
      */
     --_overlap: var(--slotted-avatar-group-overlap, 0.28);
 
@@ -89,11 +88,16 @@
     position: relative;
   }
 
+  /**
+   * The member lists what it transitions; the group states only the curve, so
+   * nothing the avatar crosses is dropped inside a stack. A face leaving the
+   * row rises on the entering curve and settles back on the exiting one: the
+   * curve of the state it arrives at, which is why the rest rule carries the
+   * exit.
+   */
   [data-ui='avatar-group'][data-part='root'][data-layout='stack']
     [data-ui='avatar'][data-part='root'] {
-    transition:
-      transform var(--slotted-duration-short) var(--slotted-easing-standard),
-      box-shadow var(--slotted-duration-short) var(--slotted-easing-standard);
+    transition-timing-function: var(--slotted-easing-exit);
   }
 
   /* ── Size ─────────────────────────────────────────────────────────────── */
@@ -138,7 +142,9 @@
    * over every member.
    */
   [data-ui='avatar-group'][data-part='root'][data-layout='stack'] > * + * {
-    margin-inline-start: calc(var(--_size) * var(--_overlap) * -1);
+    /* Whole pixels: 0.28 of 36 is 10.08, which left every member after the
+       first on a fractional x (50.92, 76.84, 102.77) and softened its edge. */
+    margin-inline-start: calc(round(nearest, calc(var(--_size) * var(--_overlap)), 1px) * -1);
   }
 
   /**
@@ -207,11 +213,23 @@
 
     z-index: 1;
     transform: translateY(var(--_raise-lift));
+    transition-timing-function: var(--slotted-easing-enter);
   }
 
   [data-ui='avatar-group'][data-layout='stack'] [data-ui='avatar'][data-part='root']:focus-visible {
     z-index: 1;
     transform: translateY(var(--_raise-lift));
+    transition-timing-function: var(--slotted-easing-enter);
+  }
+
+  /**
+   * The press settles the raised face halfway back into the row. It is a
+   * translate and not a scale for the reason the lift is (R7), and it is a
+   * different answer from the hover, which is the whole point of a press.
+   */
+  [data-ui='avatar-group'][data-layout='stack']
+    [data-ui='avatar'][data-part='root']:not([data-disabled]):active {
+    transform: translateY(calc(var(--_raise-lift) / 2));
   }
 
   /**
@@ -236,12 +254,14 @@
 
   /**
    * `+12` is three figures where a pair of initials is two, so the avatar in
-   * the overflow reads its type a step smaller. Tabular figures keep the box
+   * the overflow reads its type a step smaller: 0.36 of the box against the
+   * initials' 0.4, rounded to the pixel — 13 at 36, 9 at 24. It was 0.32, which
+   * is 7.68 pixels at 24, under the nine ReUI sets on a 20-pixel face. Tabular figures keep the box
    * from jittering as the count crosses a power of ten, which is the same rule
    * `badge` applies to its own count.
    */
   [data-ui='avatar-group'] [data-part='overflow'] [data-ui='avatar'][data-part='root'] {
-    --slotted-avatar-initials-size: calc(var(--_size) * 0.32);
+    --slotted-avatar-initials-size: round(nearest, calc(var(--_size) * 0.36), 1px);
 
     font-variant-numeric: tabular-nums;
   }

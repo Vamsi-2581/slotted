@@ -108,7 +108,10 @@ test('states the size it lays out at, in the token every member already reads', 
  */
 test('overlaps by a fraction of the member, in a logical direction', () => {
   const overlap = rule(`${root}[data-layout='stack'] > * + *`);
-  assert.ok(overlap.includes('margin-inline-start:calc('));
+  assert.ok(
+    overlap.includes('margin-inline-start:calc(round(nearest,'),
+    'the covering is whole pixels',
+  );
   assert.ok(overlap.includes('var(--_overlap)'));
   assert.ok(overlap.includes('-1'), 'the stack should move members closer together');
   assert.ok(!overlap.includes('var(--slotted-avatar-ring-width)'));
@@ -142,7 +145,19 @@ test('raises the member under the pointer, and holds that back when it is disabl
   const focus = `${ui}[data-layout='stack'] ${member}:focus-visible`;
   assert.ok(rule(hover).includes('z-index:1'), 'no raise on hover');
   assert.ok(rule(focus).includes('z-index:1'), 'no raise on focus');
-  assert.ok(rule(`${root}[data-layout='stack'] ${member}`).includes('transition:'));
+  assert.ok(
+    rule(`${root}[data-layout='stack'] ${member}`).includes(
+      'transition-timing-function:var(--slotted-easing-exit)',
+    ),
+    'the face settles back on the exiting curve',
+  );
+  assert.ok(rule(hover).includes('transition-timing-function:var(--slotted-easing-enter)'));
+  assert.ok(
+    rule(`${ui}[data-layout='stack'] ${member}:not([data-disabled]):active`)
+      .replace(/\s/g, '')
+      .includes('transform:translateY(calc(var(--_raise-lift)/2))'),
+    'the press must differ from the hover',
+  );
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
 
@@ -205,7 +220,7 @@ test('leaves the item positioned and unlayered', () => {
  */
 test('gives the summary room for a third figure', () => {
   const overflow = rule(`${ui} [data-part='overflow'] ${member}`);
-  assert.ok(overflow.includes('--slotted-avatar-initials-size:calc('));
+  assert.ok(overflow.includes('--slotted-avatar-initials-size:round(nearest,calc('));
   assert.ok(overflow.includes('font-variant-numeric:tabular-nums'));
 });
 

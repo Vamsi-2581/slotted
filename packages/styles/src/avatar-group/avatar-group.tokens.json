@@ -8,8 +8,8 @@
   "--slotted-avatar-size-xl",
   "--slotted-avatar-size-xs",
   "--slotted-border-width-thick",
-  "--slotted-duration-short",
-  "--slotted-easing-standard",
+  "--slotted-easing-enter",
+  "--slotted-easing-exit",
   "--slotted-shadow-sm",
   "--slotted-space-2",
   "--slotted-space-4"

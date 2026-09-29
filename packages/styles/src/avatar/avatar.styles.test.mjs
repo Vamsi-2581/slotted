@@ -155,7 +155,7 @@ test('derives its type, its glyph and its corner from the one length', () => {
   assert.ok(/--_initials-size:var\(--slotted-avatar-initials-size,calc\(var\(--_size\)/.test(body));
   assert.ok(/--_glyph-size:var\(--slotted-avatar-glyph-size,calc\(var\(--_size\)/.test(body));
   assert.ok(
-    /--_radius:var\(--slotted-avatar-radius,calc\(var\(--_size\)/.test(
+    /--_radius:var\(--slotted-avatar-radius,round\(nearest,calc\(var\(--_size\)/.test(
       rule(`${root}[data-shape='square']`),
     ),
   );
@@ -303,9 +303,31 @@ test('answers hover only where the element is interactive, and never when disabl
   }
   for (const { selectors } of rules) {
     for (const selector of selectors) {
-      assert.ok(!/:active\b/.test(selector), `${selector} gives press feedback`);
+      if (/:active\b/.test(selector)) {
+        assert.ok(
+          /:not\(\[data-disabled\]\):active$/.test(selector),
+          `${selector} presses a disabled avatar`,
+        );
+      }
     }
   }
+});
+
+/**
+ * `render` makes the root a link or a button, and a command answers the press
+ * with something other than its hover: a deeper state layer on the letters, a
+ * thicker ring around a photograph.
+ */
+test('answers the press differently from the hover', () => {
+  const hover = rule(`${root}:any-link:not([data-disabled]):hover`);
+  const active = rule(`${root}:any-link:not([data-disabled]):active`);
+  assert.ok(hover.includes('--slotted-avatar-state-layer-hover'));
+  assert.ok(active.includes('--slotted-avatar-state-layer-active'));
+  assert.ok(
+    rule(`${ui}[data-status='loaded']:any-link:not([data-disabled]):active`).includes(
+      '--slotted-avatar-ring-width:var(--slotted-border-width-thick',
+    ),
+  );
 });
 
 test('paints focus wherever the element turned out to be focusable', () => {

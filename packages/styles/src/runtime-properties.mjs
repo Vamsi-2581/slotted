@@ -220,6 +220,28 @@ export const RUNTIME_PROPERTY_PREFIXES = [
    * fact about the device at this moment, which no theme can hold.
    */
   '--slotted-keyboard-inset',
+  /**
+   * `rating` — how much of one symbol of the display member is lit, from 0 to
+   * 1, written on each item by the binding from the value it reports. A 4.6 of
+   * five is four items at 1 and one at 0.6; the share is a fact about this
+   * instance's value, which no theme can hold. The input member derives the
+   * same share in its stylesheet from the checked radio and never writes it.
+   */
+  '--slotted-rating-fill',
+  /**
+   * `rating` — one level's share of all the ratings a summary counts, from 0
+   * to 1, written on the level's bar by the binding from the counts it is
+   * given.
+   */
+  '--slotted-rating-share',
+  /**
+   * `rating` — where the spectrum places the mean and the two ends of its 95%
+   * interval on the scale, from 1 to the maximum, written on the summary's
+   * root from `summariseRatings`.
+   */
+  '--slotted-rating-mean',
+  '--slotted-rating-low',
+  '--slotted-rating-high',
 ];
 
 /** Whether a custom property is written by script rather than by a theme. */

@@ -158,6 +158,8 @@
     "./prose/tokens.json": "./src/prose/prose.tokens.json",
     "./radio-group/radio-group.css": "./src/radio-group/radio-group.css",
     "./radio-group/tokens.json": "./src/radio-group/radio-group.tokens.json",
+    "./rating/rating.css": "./src/rating/rating.css",
+    "./rating/tokens.json": "./src/rating/rating.tokens.json",
     "./result-state/result-state.css": "./src/result-state/result-state.css",
     "./result-state/tokens.json": "./src/result-state/result-state.tokens.json",
     "./saved-views/saved-views.css": "./src/saved-views/saved-views.css",

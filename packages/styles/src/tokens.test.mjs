@@ -132,6 +132,11 @@ test('names every runtime prefix once, where a family can find the reason', () =
     '--slotted-event-calendar-slot',
     '--slotted-tour-target-',
     '--slotted-keyboard-inset',
+    '--slotted-rating-fill',
+    '--slotted-rating-share',
+    '--slotted-rating-mean',
+    '--slotted-rating-low',
+    '--slotted-rating-high',
   ]);
   assert.equal(isRuntimeProperty('--slotted-positioner-arrow-x'), true);
   assert.equal(isRuntimeProperty('--slotted-space-4'), false);

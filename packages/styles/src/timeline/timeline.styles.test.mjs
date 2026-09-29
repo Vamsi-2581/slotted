@@ -156,6 +156,25 @@ test('centres the marker on the first line of the title, on a whole pixel', () =
 });
 
 /**
+ * Every length an event's position sums is a whole pixel: the leading, the
+ * room the horizontal list keeps for the ring, the first side of an
+ * alternating row. The secondary text takes the title's size, so no event is
+ * set taller than its own title's line.
+ */
+test('stacks events on whole pixels, with the secondary text at the title size', () => {
+  assert.ok(
+    normalized.includes('--_leading:round(up,calc(var(--_font-size)*var(--_line-height)),1px);'),
+  );
+  assert.ok(!normalized.includes('line-height:var(--_line-height)'), 'no fractional leading');
+  assert.ok(normalized.includes('padding-block:round(up,var(--_reach),1px)'));
+  assert.ok(normalized.includes('[before]round(down,calc((100%-var(--_rail))/2-var(--_gap)),1px)'));
+  assert.ok(
+    normalized.includes('--_meta-size:var(--slotted-timeline-meta-font-size,var(--_font-size));'),
+  );
+  assert.ok(!normalized.includes('var(--slotted-font-size-sm'), 'no fixed secondary size');
+});
+
+/**
  * A face in the marker is the smallest avatar rounded to the line's parity,
  * never the badge: 21 put the initials at 8.4 pixels.
  */

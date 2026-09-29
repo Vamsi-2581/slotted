@@ -25,6 +25,14 @@
   [data-ui='timeline'] {
     --_icon: var(--slotted-control-icon-size-md, 16px);
     --_font-size: var(--slotted-timeline-font-size, var(--slotted-control-font-size-md, 13px));
+    /**
+     * The actor, the description, the group heading and the two pills: the
+     * title's size, told apart from it by weight and ink. A fixed
+     * `--slotted-font-size-sm` stood a description of 13 under a title of 12
+     * at `sm` and in the tighter densities, and its 19.5-pixel line put every
+     * event after the first at half a pixel.
+     */
+    --_meta-size: var(--slotted-timeline-meta-font-size, var(--_font-size));
     /* The control gap and one step more: a mark eight pixels from a word reads as touching it. */
     --_gap: var(
       --slotted-timeline-gap,
@@ -68,6 +76,12 @@
     --_line-gap: var(--slotted-timeline-line-gap, var(--slotted-space-1, 0.125rem));
     --_opposite: var(--slotted-timeline-opposite-size, 8rem);
     --_line-height: var(--slotted-timeline-line-height, var(--slotted-line-height-md, 1.5));
+    /**
+     * The ratio set in whole pixels: 20 at `md` rather than 19.5. Every event
+     * is a stack of these lines, and a one-line event of 19.5 put the next
+     * event, its marker and its ring at half a pixel.
+     */
+    --_leading: round(up, calc(var(--_font-size) * var(--_line-height)), 1px);
     --_muted: var(--slotted-timeline-color-muted, var(--slotted-text-muted, GrayText));
     --_strong: var(--slotted-timeline-color, var(--slotted-text, CanvasText));
     /**
@@ -88,7 +102,7 @@
     display: block;
     font-family: var(--slotted-timeline-font-family, var(--slotted-font-family-sans, inherit));
     font-size: var(--_font-size);
-    line-height: var(--_line-height);
+    line-height: var(--_leading);
   }
 
   [data-ui='timeline'][data-size='sm'] {
@@ -283,7 +297,7 @@
     flex-direction: column;
     grid-column: rail;
     grid-row: 1;
-    line-height: var(--_line-height);
+    line-height: var(--_leading);
     position: relative;
   }
 
@@ -653,13 +667,13 @@
     color: var(--_muted);
     column-gap: var(--slotted-space-3, 0.375rem);
     display: flex;
-    font-size: var(--slotted-timeline-meta-font-size, var(--slotted-font-size-sm, 0.8125rem));
+    font-size: var(--_meta-size);
     min-inline-size: 0;
   }
 
   [data-ui='timeline'] [data-part='description'] {
     color: var(--_muted);
-    font-size: var(--slotted-timeline-meta-font-size, var(--slotted-font-size-sm, 0.8125rem));
+    font-size: var(--_meta-size);
     min-inline-size: 0;
     overflow-wrap: anywhere;
   }
@@ -700,11 +714,18 @@
     margin-block-start: var(--_item-gap);
   }
 
+  /**
+   * A flex box, so a trigger inside it is the whole line: an inline-flex
+   * trigger on the heading's baseline added the font's descent under its
+   * 24 pixels, and the heading measured 26.5.
+   */
   [data-ui='timeline'] [data-part='group-label'] {
+    align-items: center;
     color: var(--_muted);
-    font-size: var(--slotted-timeline-meta-font-size, var(--slotted-font-size-sm, 0.8125rem));
+    display: flex;
+    font-size: var(--_meta-size);
     font-weight: var(--slotted-timeline-group-weight, var(--slotted-font-weight-semibold, 600));
-    line-height: var(--_line-height);
+    line-height: var(--_leading);
     margin: 0 0 var(--slotted-timeline-group-gap, var(--slotted-space-4, 0.5rem));
   }
 
@@ -825,7 +846,7 @@
     /* Block-level, so no line box of the list's leading stands around it. */
     display: flex;
     font: inherit;
-    font-size: var(--slotted-timeline-meta-font-size, var(--slotted-font-size-sm, 0.8125rem));
+    font-size: var(--_meta-size);
     font-weight: var(--slotted-timeline-title-weight, var(--slotted-font-weight-medium, 500));
     inline-size: fit-content;
     justify-content: center;
@@ -912,7 +933,7 @@
     color: var(--_muted);
     column-gap: var(--_gap);
     display: flex;
-    font-size: var(--slotted-timeline-meta-font-size, var(--slotted-font-size-sm, 0.8125rem));
+    font-size: var(--_meta-size);
     min-block-size: var(--slotted-control-height-sm, 30px);
   }
 
@@ -976,9 +997,14 @@
     margin-inline-start: 0;
   }
 
+  /**
+   * The first side is a whole number of pixels and the second takes the
+   * rest: two equal fractions of an odd remainder put the rail, and every
+   * marker on it, at half a pixel.
+   */
   [data-ui='timeline'][data-placement='alternate'] [data-part='item'] {
     grid-template-columns:
-      [before] minmax(0, 1fr)
+      [before] round(down, calc((100% - var(--_rail)) / 2 - var(--_gap)), 1px)
       [rail] var(--_rail)
       [after] minmax(0, 1fr);
   }
@@ -1085,10 +1111,12 @@
     /**
      * A scroll container clips what stands outside it, and the ring of the
      * current marker stands outside the rail by its offset and its width: the
-     * list keeps that much room above and before the first marker.
+     * list keeps that much room above and before the first marker, rounded
+     * up to a whole pixel: the ring's 3.5 put every marker and every scene
+     * below the list at half a pixel.
      */
-    padding-block: var(--_reach) var(--slotted-space-2, 0.25rem);
-    padding-inline: var(--_reach);
+    padding-block: round(up, var(--_reach), 1px) var(--slotted-space-2, 0.25rem);
+    padding-inline: round(up, var(--_reach), 1px);
   }
 
   [data-ui='timeline'][data-orientation='horizontal'] [data-part='item'] {

@@ -155,3 +155,17 @@ Recaptura (`slotted-*-720`, estados `611ce8`):
 | 8   | comentários da raiz, de `--_badge` e da regra do emblema com 21, 12 e 4.5px |
 
 Reaberto: em `dense`, os marcadores do segundo evento em diante assentam em y x.5 (128.5, 267.5). A causa não é o `--_lift`: o evento começa em x.5 porque `description` e `actor` ficam em `--slotted-font-size-sm` (13px, linha 19.5) enquanto o título desce a 12px (linha 18). A descrição fica maior do que o título em `dense` e em `size="sm"`; a correção muda a escala de tipo do desenho § 7 e fica para a próxima passagem.
+
+### Segunda passagem: escala de tipo e grelha de píxel
+
+A linha reaberta acima foi resolvida numa segunda passagem `polish`. A contagem cobre as 61 partes emolduradas (`marker`, `fresh`, `more`, `group-trigger`) com y, x ou altura fracionários, em `slotted-light-720`.
+
+| #   | Ficheiro | Mudança | Antes | Depois |
+| --- | -------- | ------- | ----- | ------ |
+| 10  | `timeline.css`, `timeline.tokens.json` | `actor`, `description`, `group-label`, `fresh` e `more` em `--_meta-size`, que é o tamanho do título; sai `--slotted-font-size-sm` | descrição 13px sob título 12px em `dense` e `size="sm"` | 12px sob 12px em `dense`; 13px sob 13px em `md` |
+| 11  | `timeline.css` | `--_leading: round(up, calc(var(--_font-size) * var(--_line-height)), 1px)` na raiz, no `rail` e no `group-label` | linha 19.5 em `md`; eventos de uma linha com 19.5 de altura | linha 20 em `md`, 18 em `dense` |
+| 12  | `timeline.css` | `group-label` em `display: flex` | 26.5 com `group-trigger` | 24 |
+| 13  | `timeline.css` | `padding` da lista horizontal em `round(up, var(--_reach), 1px)` | 3.5; todas as cenas seguintes em x.5 | 4 |
+| 14  | `timeline.css` | primeira coluna de `alternate` em `round(down, …, 1px)` | trilho em x 378.5 | x 378; linha centrada em 384.5 no marcador de 13 |
+
+Partes emolduradas fracionárias: 24 → 0 em `comfortable`, `compact` e `dense`; em `rtl` restam 3 (`fresh` e dois `group-trigger`), cujo x depende da largura do texto, isenta pelo critério Pixel grid.

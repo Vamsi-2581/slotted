@@ -25,7 +25,7 @@ import { SlToastItem } from './toast';
   imports: [SlGlyph, SlIcon],
   template: `<ng-content>
     @if (mark(); as glyph) {
-      <span slIcon><svg slGlyph [name]="glyph"></svg></span>
+      <span slIcon><svg slGlyph [name]="glyph" solid></svg></span>
     }
   </ng-content>`,
   changeDetection: ChangeDetectionStrategy.OnPush,

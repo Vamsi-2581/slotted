@@ -51,8 +51,9 @@ const MARKS = [
   {
     family: 'toast',
     part: 'icon',
+    anchor: 'baseline',
     size: /^var\(--_mark-size\)$/,
-    sizeValue: /^1em$/,
+    sizeValue: /^round\(nearest,\s*1\.2em,\s*2px\)$/,
     gap: '--_column-gap',
     solid: "[data-variant='solid']",
   },

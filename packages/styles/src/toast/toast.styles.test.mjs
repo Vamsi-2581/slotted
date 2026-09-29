@@ -134,25 +134,67 @@ test('draws every part the contract declares, and shows it in the harness', () =
 });
 
 /**
- * The mark is the title's own size on the title's first line (R5), drawn with
- * the rule `alert` draws its own: a square of `1em` — the message's font size
- * is the title's — pushed down by half the difference between one line and the
- * mark. It stays on the first line when the title wraps, which a mark centred
- * on the whole block would not. `packages/styles/src/status-mark.test.mjs`
- * holds the same rule for every family that draws one.
+ * The mark is `alert`'s (R5): a filled disc a step above the title's `1em`,
+ * rounded to even pixels, hung from the first line's baseline by a whole-pixel
+ * offset. A message about a failure draws the same silhouette as the alert
+ * about it. `packages/styles/src/status-mark.test.mjs` holds the same rule for
+ * every family that draws one.
  */
-test('places the mark on the title’s first line at the title’s size', () => {
-  assert.match(rule(item), /--_mark-size:1em/);
+test('places the mark on the title’s first line, as alert does', () => {
+  assert.match(rule(item), /--_mark-size:round\(nearest,1\.2em,2px\)/);
   const mark = rule(`${item}>[data-part='icon']`);
-  assert.match(mark, /align-self:start/);
+  assert.match(mark, /align-self:baseline/);
   assert.match(mark, /block-size:var\(--_mark-size\)/);
   assert.match(mark, /inline-size:var\(--_mark-size\)/);
-  assert.match(mark, /margin-block-start:calc\(\(1lh - var\(--_mark-size\)\) \/ 2\)/);
-  /* The glyph is the binding's `Glyph`, sized by the slot through the icon
-     token; the sheet paints no mark of its own. */
-  assert.match(mark, /--slotted-icon-size:var\(--_mark-size\)/);
+  assert.match(mark, /inset-block-start:round\(nearest,\(var\(--_mark-size\) - 1cap\) \/ 2,1px\)/);
+  assert.match(mark, /margin-block-start:calc\(-1 \* var\(--_mark-size\)\)/);
+  assert.match(rule(`${item}>[data-part='content']`), /align-self:baseline/);
+  /* The glyph is the binding's solid `Glyph`, whose ring reaches radius 11 of
+     24, so the icon box is 12/11 of the disc; the sheet paints no mark. */
+  assert.match(mark, /--slotted-icon-size:calc\(var\(--_mark-size\) \* 12 \/ 11\)/);
   assert.doesNotMatch(normalized, /mask-image/);
   assert.ok(!normalized.includes(`[data-part='icon']::before`), 'the mark is a pseudo-element');
+  for (const [, glyph] of fragment.matchAll(
+    /<svg data-part="glyph" data-glyph="(circle[a-z-]*)"(?! data-solid)/g,
+  ))
+    assert.fail(`the harness draws ${glyph} as an outline`);
+});
+
+/**
+ * An even line box: at 13-pixel type the scale's 1.5 gave 19.5, and a message
+ * of one line was 45.5 pixels tall. Rounded, the line is 20 at 13 and 18 at 12,
+ * and every message lands on a whole pixel.
+ */
+test('rounds the line box to an even number of pixels', () => {
+  assert.match(rule(item), /line-height:round\(nearest,calc\(var\(--_line-height\) \* 1em\),2px\)/);
+});
+
+/**
+ * White at eight per cent over the `danger` fill moved OKLab lightness by
+ * 0.019, under the 0.02 a surface step has to reach; ten moves it by 0.025.
+ */
+test('steps the close control by at least a surface step on every ground', () => {
+  assert.match(rule(item), /currentcolor var\(--slotted-toast-state-layer-hover,10%\)/);
+  assert.match(rule(item), /currentcolor var\(--slotted-toast-state-layer-active,16%\)/);
+});
+
+/**
+ * The gaps between messages are the region's while the reader is in it: a
+ * pointer crossing one left the region, cleared the pause and closed the pile.
+ */
+test('keeps the pointer in the region across the gap between two messages', () => {
+  assert.match(rule(`${ui}[data-expanded]>[data-part='list']`), /pointer-events:auto/);
+});
+
+/**
+ * Under reduced motion the bar is a full rule. Pausing it held whatever width
+ * the forwards fill had reached over the declared one.
+ */
+test('draws the countdown as a full rule under reduced motion', () => {
+  const reduced = normalized.split('@media (prefers-reduced-motion:reduce){')[1] ?? '';
+  const bar = reduced.split(`${item}>[data-part='progress']{`)[1]?.split('}')[0] ?? '';
+  assert.match(bar, /animation-name:none/);
+  assert.match(bar, /inline-size:100%/);
 });
 
 /**

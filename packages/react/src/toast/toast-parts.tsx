@@ -249,7 +249,7 @@ export function ToastIcon({ children, render, ...nativeProps }: ToastIconProps) 
       children ??
       (item.loading ? null : (
         <Icon>
-          <Glyph name={TONE_GLYPH[item.tone]} />
+          <Glyph name={TONE_GLYPH[item.tone]} solid />
         </Icon>
       )),
     'data-part': 'icon',

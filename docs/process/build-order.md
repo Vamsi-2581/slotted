@@ -837,6 +837,21 @@ decisão de produto, uma por vez, com escopo escrito aqui antes da invocação.
 Duas já têm capacidade adiada para elas por escrito: `floating-window` (arrasto
 e redimensionamento de `dialog`) e `gauge` (arco de `progress-indicator`).
 
+- `rating` — invocada em 2026-09-25, revista em 2026-09-28. Três membros sob `data-ui="rating"`:
+  `rating`, um `radiogroup` de rádios nativos (um por valor, dois por símbolo com `step` 0,5), com
+  `value`/`defaultValue`/`onValueChange` e razões `pointer`, `keyboard`, `clear`, `clearable`,
+  `readOnly`, `disabled`, `required`, `invalid`, pré-visualização por `:hover`, arrasto por toque e
+  evento `onPreviewChange`; `ratingDisplay`, `role="img"`, frações livres por
+  `--slotted-rating-fill`, partes `value` e `count`, variantes `compact` e `histogram`; `ratingSummary`,
+  `bars` ou `spectrum` (média, intervalo de 95% e conclusão de `summariseRatings`), agregado e
+  distribuição por nível com `selectedLevels`/`defaultSelectedLevels`/`onSelectedLevelsChange`.
+  Setas sem volta ao início, `Home`/`End`, `Backspace`/`Delete` limpam. `size` `sm`/`md`/`lg` fora
+  da densidade; `tone` sem `secondary`; aresta de esquema `--slotted-rating-edge`. Comportamento em
+  `@slotted/core/rating`. React `Rating`, `RatingDisplay`, `RatingSummary`, `RatingProvider`;
+  Angular `div[slRating]` com `ControlValueAccessor`, `div[slRatingDisplay]`,
+  `section[slRatingSummary]`, `provideRating()`. Desenho em
+  `docs/history/designs/2026-09-25-rating-design.md`.
+
 ## Regra de commit
 
 Uma família por commit, `pnpm check` por família e `pnpm check:full` por onda.

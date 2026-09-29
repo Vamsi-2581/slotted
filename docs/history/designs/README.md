@@ -81,6 +81,7 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `markdown` | [2026-09-24 §1](2026-09-24-markdown-design.md) | [2026-09-24](2026-09-24-markdown-design.md) | [2026-09-24](2026-09-24-markdown-self-assessment.md) |
 | `wizard` | [2026-09-25 §1](2026-09-25-wizard-design.md) | [2026-09-25](2026-09-25-wizard-design.md) | [2026-09-25](2026-09-25-wizard-self-assessment.md) |
 | `import-export-center` | [2026-09-25 §1](2026-09-25-import-export-center-design.md) | [2026-09-25](2026-09-25-import-export-center-design.md) | [2026-09-25](2026-09-25-import-export-center-self-assessment.md) |
+| `rating` | [2026-09-25 §1](2026-09-25-rating-design.md) | [2026-09-25](2026-09-25-rating-design.md) | [2026-09-29](2026-09-29-rating-self-assessment.md) |
 
 ## Fundação
 
@@ -113,3 +114,4 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 - [2026-09-25-status-indicator-reui-dossier.md](2026-09-25-status-indicator-reui-dossier.md)
 - [2026-09-25-alert-reui-dossier.md](2026-09-25-alert-reui-dossier.md)
 - [2026-09-25-result-state-reui-dossier.md](2026-09-25-result-state-reui-dossier.md)
+- [2026-09-25-rating-reui-dossier.md](2026-09-25-rating-reui-dossier.md)

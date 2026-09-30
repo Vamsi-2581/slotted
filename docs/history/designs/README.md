@@ -68,6 +68,7 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `code-block` | [2026-09-14](2026-09-14-code-block-capability-inventory.md) | [2026-09-14](2026-09-14-code-block-design.md) | [2026-09-14](2026-09-14-code-block-self-assessment.md) |
 | `date-range-picker` | [2026-09-14](2026-09-14-date-range-picker-capability-inventory.md) | [2026-09-14](2026-09-14-date-range-picker-design.md) | [2026-09-14](2026-09-14-date-range-picker-self-assessment.md) |
 | `filter-bar` | [2026-09-14](2026-09-14-filter-bar-capability-inventory.md) | [2026-09-14](2026-09-14-filter-bar-design.md) | [2026-09-14](2026-09-14-filter-bar-self-assessment.md) |
+| `attachment` | — | [2026-09-30](2026-09-30-attachment-design.md) | [2026-09-30](2026-09-30-attachment-self-assessment.md) |
 | `table-filter-operands` | [2026-09-14](2026-09-14-table-filter-operands-capability-inventory.md) | [2026-09-14](2026-09-14-table-filter-operands-design.md) | [2026-09-14](2026-09-14-table-filter-operands-self-assessment.md) |
 | `tags-input` | [2026-09-14](2026-09-14-tags-input-capability-inventory.md) | [2026-09-14](2026-09-14-tags-input-design.md) | [2026-09-14](2026-09-14-tags-input-self-assessment.md) |
 | `timeline` | [2026-09-14](2026-09-14-timeline-capability-inventory.md) | [2026-09-14](2026-09-14-timeline-design.md) | [2026-09-14](2026-09-14-timeline-self-assessment.md) |

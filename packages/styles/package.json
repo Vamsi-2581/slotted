@@ -24,6 +24,8 @@
     "./app-shell/tokens.json": "./src/app-shell/app-shell.tokens.json",
     "./aspect-ratio/aspect-ratio.css": "./src/aspect-ratio/aspect-ratio.css",
     "./aspect-ratio/tokens.json": "./src/aspect-ratio/aspect-ratio.tokens.json",
+    "./attachment/attachment.css": "./src/attachment/attachment.css",
+    "./attachment/tokens.json": "./src/attachment/attachment.tokens.json",
     "./avatar-group/avatar-group.css": "./src/avatar-group/avatar-group.css",
     "./avatar-group/tokens.json": "./src/avatar-group/avatar-group.tokens.json",
     "./avatar/avatar.css": "./src/avatar/avatar.css",

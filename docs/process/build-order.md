@@ -853,6 +853,20 @@ e redimensionamento de `dialog`) e `gauge` (arco de `progress-indicator`).
   `section[slRatingSummary]`, `provideRating()`. Desenho em
   `docs/history/designs/2026-09-25-rating-design.md`.
 
+- `attachment` — invocada em 2026-09-30, adiada pelo dossiê ReUI do `upload` (secção 6). Ficheiro
+  que já pertence a uma mensagem, um registo ou uma bandeja: um membro sob `data-ui="attachment"`,
+  com o conjunto como parte `group` (`ul`, `layout` `list`/`grid`/`strip`). Partes `preview` (azulejo
+  da escala `--slotted-upload-kind-*` ou miniatura com recuo ao azulejo), `body`, `trigger` (`a` ou
+  `button` esticado sobre a raiz), `filename`/`name`/`extension`, `detail`, `message`, `progress`
+  (`ProgressBar`), `actions`, `action`, `remove`. Estados `invalid`, `loading`, `disabled`; `size`
+  `sm`/`md`/`lg`, `orientation` `horizontal`/`vertical`. Remoção é pedido sem valor (`remove`,
+  `keyboard`), com `Backspace`/`Delete` e foco por `removal-focus`. React `Attachment`,
+  `AttachmentGroup` e partes, `AttachmentDefaultsProvider`; Angular `[slAttachment]`,
+  `[slAttachmentGroup]`, `provideAttachmentDefaults()`. Desenho em
+  `docs/history/designs/2026-09-30-attachment-design.md`, autoavaliação em
+  `docs/history/designs/2026-09-30-attachment-self-assessment.md`. Saída animada de um anexo
+  removido fica aberta, como a da linha do `upload`.
+
 ## Regra de commit
 
 Uma família por commit, `pnpm check` por família e `pnpm check:full` por onda.

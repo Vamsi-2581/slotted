@@ -4,6 +4,7 @@ export * from './action-sheet';
 export * from './alert';
 export * from './app-shell';
 export * from './aspect-ratio';
+export * from './attachment';
 export * from './avatar';
 export * from './avatar-group';
 export * from './badge';

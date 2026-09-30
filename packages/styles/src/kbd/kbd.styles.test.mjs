@@ -60,25 +60,30 @@ test('names the family and the part together, so the combination is never a key'
 });
 
 /**
- * The block size is the key's own line box plus a symmetric inset and its two
- * edges, so no density and no legend can leave a cap clipped. The same sum is
- * the minimum inline size, which is what makes a one-letter cap square instead
- * of a slot.
- *
- * It is the height and not a floor. As a floor the legend decided: a symbol the
- * keyboard face does not carry is drawn from a fallback whose ascent is its
- * own, the line box grew to hold both fonts' leading, and `⌘` stood 27.92px
- * beside an `Esc` of 25.19 on the same row (K1).
+ * The height is a step of a scale, and nothing inside the cap moves it. As a
+ * sum of the legend's line box the legend decided — `⌘` stood 27.92px beside an
+ * `Esc` of 25.19 (K1) — and as a sum of the edges the variant decided: a
+ * `raised` key stood 25.19 beside an `outline` key of 24.19. Every absolute
+ * step reads the space scale, and the same length is the minimum inline size,
+ * which is what makes a one-letter cap square instead of a slot.
  */
-test('takes its height from the type it holds, and no height token', () => {
+test('states one height per size, which no legend and no variant changes', () => {
   assert.ok(!declarations.includes('--slotted-kbd-height'), 'the family invents a height scale');
+  assert.ok(!declarations.includes('--_own-size'), 'the height is a sum of what is inside');
   const base = rule(ui);
-  assert.ok(base.includes('--_own-size:calc('));
-  assert.ok(base.includes('var(--_font-size) * var(--_line-height)'));
-  assert.ok(base.includes('2 * var(--_inset-block)'));
-  assert.ok(base.includes('var(--_edge-width) + var(--_base-width)'));
-  /* Inside a control the cap is the foundation's inner size; alone, its own. */
-  assert.ok(base.includes('--_block-size:var(--slotted-control-inner-size,var(--_own-size))'));
+  assert.ok(base.includes('--_size:var(--slotted-space-8'));
+  /* Inside a control the cap is the foundation's inner size; alone, its step. */
+  assert.ok(base.includes('--_block-size:var(--slotted-control-inner-size,var(--_size))'));
+  assert.ok(rule(`${ui}[data-size='xs']`).includes('--_size:var(--slotted-space-6'));
+  assert.ok(rule(`${ui}[data-size='sm']`).includes('--_size:var(--slotted-space-7'));
+  assert.ok(
+    rule(`${ui}[data-size='lg']`).includes(
+      '--_size:calc(var(--slotted-space-8,1.5rem) + var(--slotted-space-2,0.25rem))',
+    ),
+  );
+  for (const variant of ['outline', 'soft', 'plain']) {
+    assert.ok(!rule(`${ui}[data-variant='${variant}']`).includes('--_size'), variant);
+  }
 
   const cap = rule(root);
   assert.ok(cap.includes('block-size:var(--_block-size)'), 'the height follows the legend');
@@ -168,14 +173,33 @@ test('raises the key with an edge that survives forced colours', () => {
 });
 
 /**
- * The boundary is not decoration on this family: it is the whole signal that
- * says the word inside is a key rather than a word, so it reads the one border
- * token the theme holds to 3:1 against the surface it separates.
+ * The base is the signal that says the word inside is a key, so it reads the
+ * one border token the theme holds to 3:1 against the surface. The rim is the
+ * edge a control draws: the strong token on all four sides was a frame round a
+ * word. `outline` draws nothing but its edge, so it keeps the strong one all
+ * round.
  */
-test('draws the rim with the one border the theme holds to a ratio', () => {
+test('draws the base with the one border the theme holds to a ratio', () => {
   const base = rule(ui);
-  assert.ok(base.includes('--_border:var(--slotted-border-strong'));
+  assert.ok(base.includes('--_border:var(--slotted-control-border-color'));
   assert.ok(base.includes('--_base:var(--slotted-border-strong'));
+  assert.ok(
+    rule(`${ui}[data-variant='outline']`).includes('--_border:var(--slotted-border-strong'),
+  );
+});
+
+/**
+ * The face runs into the base: an image, so forced colours drop it with the
+ * ground and keep the edges. It belongs to `raised` alone and leaves with the
+ * available state.
+ */
+test('shades the raised face toward its base, and only while it is available', () => {
+  assert.ok(rule(ui).includes('--_face:none'));
+  assert.ok(rule(root).includes('background-image:var(--_face)'));
+  const raised = rule(`${ui}[data-variant='raised']`);
+  assert.ok(raised.includes('--_face:linear-gradient('));
+  assert.ok(raised.includes('color-mix(in oklab,var(--_background),var(--_base) 10%)'));
+  assert.ok(rule(`${ui}[data-disabled]`).includes('--_face:none'));
 });
 
 /**
@@ -272,10 +296,13 @@ test('answers every value of every axis', () => {
  */
 test('scales the relative step by the text around it, insets included', () => {
   const inherited = rule(`${ui}[data-size='inherit']`);
-  assert.ok(inherited.includes('--_font-size:0.875em'));
-  for (const custom of ['--_inset-inline', '--_inset-block', '--_gap']) {
+  assert.ok(inherited.includes('--_font-size:0.8em'));
+  for (const custom of ['--_size', '--_inset-inline', '--_gap']) {
     assert.match(inherited, new RegExp(`${custom}:[0-9.]+em`), `${custom} is not relative`);
   }
+  /* 1.5 of a legend at 0.8 is 1.2 of the text: inside any line box of 1.3. */
+  assert.ok(inherited.includes('--_size:1.5em'));
+  assert.ok(normalized.includes(`${ui}[data-size='inherit']{--_size:round(nearest,1.5em,1px)`));
 });
 
 /**

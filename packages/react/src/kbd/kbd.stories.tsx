@@ -11,7 +11,7 @@ import { Shortcut } from './shortcut';
 import type { KbdSize, KbdVariant } from './kbd.types';
 
 const VARIANTS: readonly KbdVariant[] = ['raised', 'outline', 'soft', 'plain'];
-const SIZES: readonly KbdSize[] = ['sm', 'md', 'lg'];
+const SIZES: readonly KbdSize[] = ['xs', 'sm', 'md', 'lg'];
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
   bindScenes(REACT_KBD_DOCS.kbd.scenes, {

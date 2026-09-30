@@ -78,14 +78,14 @@ test('paints a key that looks like a key by default', () => {
 });
 
 /**
- * Three absolute steps that read the control type scale, so a key shrinks with
- * density beside the controls it sits with — and a fourth that reads the text
- * around it instead. Every surveyed size axis is absolute, which makes a key
+ * Four absolute steps — `xs` for a caption or a tooltip — whose legend reads
+ * the control type scale, so a key's type shrinks with density beside the
+ * controls it sits with, and a fifth that reads the text around it instead. Every surveyed size axis is absolute, which makes a key
  * inside an `h2` a stamp and one in fine print a slab. `inherit` is the value
  * prose should use, and it is the gap none of the twelve fills.
  */
 test('scales with the controls beside it, or with the text around it', () => {
-  assert.deepEqual(contract.axes.size, ['sm', 'md', 'lg', 'inherit']);
+  assert.deepEqual(contract.axes.size, ['xs', 'sm', 'md', 'lg', 'inherit']);
   assert.equal(contract.members.kbd.defaults.size, 'md');
 });
 

@@ -92,13 +92,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'sizes',
     title: 'How large the key is',
-    note: 'The three absolute steps read the control type scale, so they shrink with density. inherit reads the text around it, which is the step a heading and a footnote both need.',
+    note: 'Four absolute heights, 16, 20, 24 and 28 pixels, that no legend and no variant changes; the legend reads the control type scale, so it shrinks with density inside the same box. xs fits a caption or a tooltip. inherit reads the text around it and stays inside its line, which is the step a heading and a footnote both need.',
     snippet: defineSnippet({
       id: 'kbd-react-sizes',
       language: 'tsx',
       label: 'Absolute steps, and the relative one',
       source:
-        '<Kbd keyName="escape" size="sm" />;\n<Kbd keyName="escape" size="lg" />;\n\n<h2>\n  Press <Kbd keyName="escape" size="inherit" /> to close\n</h2>;',
+        '<Kbd keyName="escape" size="xs" />;\n<Kbd keyName="escape" size="sm" />;\n<Kbd keyName="escape" size="lg" />;\n\n<h2>\n  Press <Kbd keyName="escape" size="inherit" /> to close\n</h2>;',
     }),
   },
   {
@@ -225,10 +225,10 @@ export const REACT_KBD_DOCS = {
       ],
       [
         'size',
-        "'sm' | 'md' | 'lg' | 'inherit'",
+        "'xs' | 'sm' | 'md' | 'lg' | 'inherit'",
         'md',
         'Kbd, Shortcut',
-        'The first three read the control type scale and answer density; inherit reads the text around the key',
+        'xs to lg are fixed heights of 16, 20, 24 and 28 pixels whose legend answers density; inherit reads the text around the key and stays inside its line',
       ],
       [
         'variant',

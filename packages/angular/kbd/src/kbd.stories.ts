@@ -139,7 +139,7 @@ export const Sizes: Story = {
       scene(
         'The three absolute steps',
         'Type and glyph come from the control type scale, the only scale the theme restates per density, so a key shrinks beside the controls it sits with.',
-        ['sm', 'md', 'lg']
+        ['xs', 'sm', 'md', 'lg']
           .map((size) => `<kbd slKbd keyName="escape" size="${size}"></kbd>`)
           .join(''),
       ) +

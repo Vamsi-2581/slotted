@@ -7,11 +7,11 @@ import { resolvePlatform } from '@slotted/core/keys';
 export type { KbdPlatform, KbdPlatformInput } from '@slotted/core/keys';
 
 /**
- * Three absolute steps from the control type scale, and one that reads the text
+ * Four absolute heights — 16, 20, 24 and 28 pixels — and one that reads the text
  * around it. `inherit` is the step prose wants: an absolute cap inside a heading
  * is a stamp, and one in fine print is a slab.
  */
-export type KbdSize = 'sm' | 'md' | 'lg' | 'inherit';
+export type KbdSize = 'xs' | 'sm' | 'md' | 'lg' | 'inherit';
 
 /**
  * `raised` is the only value that looks like a key. `outline` owns no ground,

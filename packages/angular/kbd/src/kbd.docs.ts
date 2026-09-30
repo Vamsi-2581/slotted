@@ -94,13 +94,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'sizes',
     title: 'How large the key is',
-    note: 'The three absolute steps read the control type scale, so they shrink with density. inherit reads the text around it, which is the step a heading and a footnote both need.',
+    note: 'Four absolute heights, 16, 20, 24 and 28 pixels, that no legend and no variant changes; the legend reads the control type scale, so it shrinks with density inside the same box. xs fits a caption or a tooltip. inherit reads the text around it and stays inside its line, which is the step a heading and a footnote both need.',
     snippet: defineSnippet({
       id: 'kbd-angular-sizes',
       language: 'angular',
       label: 'Absolute steps, and the relative one',
       source:
-        '<kbd slKbd keyName="escape" size="sm"></kbd>\n<kbd slKbd keyName="escape" size="lg"></kbd>\n\n<h2>Press <kbd slKbd keyName="escape" size="inherit"></kbd> to close</h2>',
+        '<kbd slKbd keyName="escape" size="xs"></kbd>\n<kbd slKbd keyName="escape" size="sm"></kbd>\n<kbd slKbd keyName="escape" size="lg"></kbd>\n\n<h2>Press <kbd slKbd keyName="escape" size="inherit"></kbd> to close</h2>',
     }),
   },
   {
@@ -227,10 +227,10 @@ export const ANGULAR_KBD_DOCS = {
       ],
       [
         'size',
-        "'sm' | 'md' | 'lg' | 'inherit'",
+        "'xs' | 'sm' | 'md' | 'lg' | 'inherit'",
         'md',
         'slKbd, slShortcut',
-        'The first three read the control type scale and answer density; inherit reads the text around the key',
+        'xs to lg are fixed heights of 16, 20, 24 and 28 pixels whose legend answers density; inherit reads the text around the key and stays inside its line',
       ],
       [
         'variant',

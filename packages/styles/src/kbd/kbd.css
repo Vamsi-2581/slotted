@@ -11,28 +11,28 @@
    * `badge` proved with `anchor` — so it carries `data-ui` itself and the pair
    * is what tells a whole combination from one key of it.
    *
-   * There is no height token. The block size is derived — the key's own line
-   * box plus a symmetric inset and its two edges — so a cap never disagrees
-   * with the type it contains and no density can leave it clipped. It is a
-   * height and not a floor: as a floor it was the legend that decided, and a
-   * legend the keyboard font does not carry is drawn from a fallback whose
-   * ascent is its own, so `⌘` stood 27.92px beside an `Esc` of 25.19 (K1). The
-   * same sum is the minimum inline size, which is what makes a one-letter cap
-   * square instead of a slot.
+   * The height is a step of a scale, never a sum of what is inside. A key cap
+   * whose height followed its legend drew `⌘` taller than `Esc` (K1), and a
+   * cap whose height followed its variant drew a `raised` key one pixel taller
+   * than an `outline` one beside it (25.19 against 24.19). Every size states
+   * one whole-pixel height, and every legend and every variant fits inside it.
+   * The same length is the minimum inline size, which is what makes a
+   * one-letter cap square instead of a slot.
    */
   [data-ui='kbd'] {
     /**
-     * Type and glyph come from the control scale, the only scale that moves
-     * with density, so a key shrinks beside the controls it sits with. Inset
-     * and gap come from the space scale: a density step inside an inset this
-     * small would be sub-pixel, and density already moves the type, which moves
-     * the box.
+     * The height comes from the space scale — 16, 20, 24, 28 — and not from
+     * the control geometry. A cap on its own is a glyph box, not a control,
+     * and the inner-size steps (22, 24, 28) leave no room below `sm` for the
+     * key a caption or a tooltip needs. The type still comes from the control
+     * scale, the one that moves with density, so a dense page draws a smaller
+     * legend inside the same box.
      */
+    --_size: var(--slotted-space-8, 1.5rem);
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_inset-inline: var(--slotted-space-3, 0.375rem);
-    --_inset-block: var(--slotted-space-1, 0.125rem);
+    --_radius: var(--slotted-kbd-radius, var(--slotted-radius-md, 6px));
     --_gap: var(--slotted-space-2, 0.25rem);
-    --_line-height: var(--slotted-line-height-xs, 1.4);
 
     /**
      * The rim, and the edge the face sits above.
@@ -41,42 +41,41 @@
      * shadow. Chrome drops `box-shadow` outright under `forced-colors: active`
      * — measured while `badge` was built — so a key made of a shadow is a flat
      * key exactly where the reader most needs the affordance. A border
-     * survives, and a face sitting half a pixel above its own bottom edge is
-     * what a keycap looks like anyway.
+     * survives, and a face sitting a pixel above its own bottom edge is what
+     * a keycap looks like anyway. The thicker edge sits inside the stated
+     * height: it lifts the legend half a pixel and never grows the cap.
      */
     --_edge-width: var(--slotted-kbd-border-width, var(--slotted-border-width-thin, 1px));
     --_base-width: var(--_edge-width);
 
-    --_own-size: calc(
-      var(--_font-size) * var(--_line-height) + 2 * var(--_inset-block) + var(--_edge-width) +
-        var(--_base-width)
-    );
     /**
      * Inside a control — a shortcut hint at the end of a search field — the
      * cap is the height the foundation gives the inside of a control,
      * `--slotted-control-inner-size`, which the field writes on its adornment
-     * from its own size step. The legend is centred in the cell whatever the
-     * cap's height, so nothing else changes. On its own the cap keeps the
-     * height its type gives it. A 24-pixel cap sat in a 26-pixel field at
-     * dense before this (`docs/token-foundation.md`, Control geometry).
+     * from its own size step. On its own the cap keeps its size step. A
+     * 24-pixel cap sat in a 26-pixel field at dense before this
+     * (`docs/token-foundation.md`, Control geometry).
      */
-    --_block-size: var(--slotted-control-inner-size, var(--_own-size));
+    --_block-size: var(--slotted-control-inner-size, var(--_size));
 
     /**
-     * The ground, the rim and the ink. `raised` is the default, and it reads
-     * `--slotted-border-strong` for both edges: it is the one border token the
-     * theme holds to 3:1 against the surface it separates, and on this family
-     * the boundary is not decoration — it is the whole signal that says the
-     * word inside is a key rather than a word.
+     * The ground, the rim and the ink. `raised` is the default: the rim a
+     * control draws on three sides, and `--slotted-border-strong` below, the
+     * one border token the theme holds to 3:1 against the surface. The strong
+     * edge on all four sides was a frame drawn round a word; on the base alone
+     * it is the shadow a key casts, and it is still the signal that says the
+     * word inside is a key.
      */
     --_background: var(--slotted-surface-raised, Canvas);
-    --_border: var(--slotted-border-strong, ButtonBorder);
+    --_face: none;
+    --_border: var(--slotted-control-border-color, ButtonBorder);
     --_base: var(--slotted-border-strong, ButtonBorder);
     --_color: var(--slotted-text, CanvasText);
   }
 
   [data-ui='kbd'][data-part='root'] {
     background-color: var(--_background);
+    background-image: var(--_face);
     /**
      * The height the family states, not the height the legend asks for. A key
      * is a cap of a fixed size with a symbol drawn on it, and a row of caps
@@ -85,7 +84,7 @@
     block-size: var(--_block-size);
     border: var(--_edge-width) solid var(--_border);
     border-block-end: var(--_base-width) solid var(--_base);
-    border-radius: var(--slotted-kbd-radius, var(--slotted-radius-sm, 4px));
+    border-radius: var(--_radius);
     box-sizing: border-box;
     color: var(--_color);
     /**
@@ -95,8 +94,15 @@
      * from sitting low once the box stops following it.
      */
     display: inline-grid;
-    /* The keyboard's own face. A key legend is set in the type a terminal sets. */
-    font-family: var(--slotted-kbd-font-family, var(--slotted-font-family-mono, monospace));
+    /**
+     * The interface face, the one the label beside the key is set in. The
+     * monospaced face drew `Backspace` 70.45px wide against the interface
+     * face's narrower word, and it does not carry `⌘ ⇧ ⌥ ↩ ⌫`, so every
+     * modifier came from a second face and a cap held two typefaces. Equal
+     * advance, the one thing a monospaced legend gave, the square minimum
+     * width already gives a one-letter key, and `tabular-nums` gives figures.
+     */
+    font-family: var(--slotted-kbd-font-family, var(--slotted-control-font-family, sans-serif));
     font-size: var(--_font-size);
     /* A shortcut that counts — `⌘1` to `⌘9` — must not jitter as the figure
        changes, which is the rule `badge` applies to its own count. */
@@ -106,14 +112,14 @@
      * The legend's own line box is the em box and nothing more. Leading is what
      * a fallback font varies — the strut and the glyph's own box are aligned on
      * the baseline and each carries half of its font's leading — so a line box
-     * that stops at 1 is a line box no substituted glyph can grow. The leading
-     * this drops is already in `--_block-size`, which is where it belongs: it
-     * is the cap's height and not the legend's.
+     * that stops at 1 is a line box no substituted glyph can grow. The air
+     * around the legend is the stated height less the em box, and it belongs
+     * to the cap, not to the legend.
      */
     line-height: 1;
     min-inline-size: var(--_block-size);
     place-items: center;
-    /* The inset only ever counted in the cap's own height; the cell centres the legend. */
+    /* The stated height holds the air; the cell centres the legend in it. */
     padding-block: 0;
     padding-inline: var(--_inset-inline);
     /**
@@ -179,17 +185,17 @@
   }
 
   /**
-   * The interface face, at a size that matches the words beside it.
-   *
-   * The monospaced face is chosen for its Latin: its symbol coverage is
-   * incidental, and measured here `⌘ ⇧ ⌥ ⌃ ↩ ⌫ ↑` all rendered visibly thinner
-   * and smaller than `Esc` and `Tab` in the same cap — a shortcut whose
-   * modifiers whisper and whose letter shouts. The interface face draws the same
-   * marks at the weight of the type around them.
+   * The interface face for a mark, whatever face the legend is set in. A
+   * consumer who sets `--slotted-kbd-font-family` to a monospaced face keeps
+   * `⌘ ⇧ ⌥ ↩ ⌫` at the weight of the interface type: measured with the
+   * monospaced legend, every mark rendered thinner and smaller than `Esc` in the
+   * same cap. A tenth larger than the legend: at 1em `⌘` and `↵` stood
+   * below the cap height of `K`, and at 1.15em `⌫` stood wider than the
+   * `Esc` beside it.
    */
   [data-ui='kbd'] [data-part='legend'][data-legend='symbol'] {
     font-family: var(--slotted-kbd-symbol-font-family, var(--slotted-font-family-sans, sans-serif));
-    font-size: 1.15em;
+    font-size: 1.1em;
   }
 
   /**
@@ -274,7 +280,7 @@
   [data-ui='kbd'] [data-part='separator'] {
     color: var(--slotted-text-muted, GrayText);
     flex: none;
-    font-family: var(--slotted-kbd-font-family, var(--slotted-font-family-mono, monospace));
+    font-family: var(--slotted-kbd-font-family, var(--slotted-control-font-family, sans-serif));
     font-size: var(--_font-size);
     line-height: 1;
   }
@@ -291,14 +297,35 @@
 
   /* ── Size ──────────────────────────────────────────────────────────────── */
 
+  /**
+   * Four absolute steps, 16 to 28 pixels in steps of four, and one relative
+   * step. The radius is a quarter of the height or near it (4/16, 6/20, 6/24,
+   * 8/28), so a small cap is as round as a large one and not a pill.
+   *
+   * `xs` is the cap a caption, a tooltip or a dense table cell needs, where a
+   * 20-pixel key stood taller than the 12-pixel line it sat in. The type
+   * scale starts at 12px, and 12px in a 16-pixel cap left one pixel of air
+   * above an ascender, so this step writes the one size the scale lacks.
+   */
+  [data-ui='kbd'][data-size='xs'] {
+    --_size: var(--slotted-space-6, 1rem);
+    --_font-size: 0.6875rem;
+    --_inset-inline: var(--slotted-space-2, 0.25rem);
+    --_radius: var(--slotted-kbd-radius, var(--slotted-radius-sm, 4px));
+    --_gap: var(--slotted-space-1, 0.125rem);
+  }
+
   [data-ui='kbd'][data-size='sm'] {
+    --_size: var(--slotted-space-7, 1.25rem);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_inset-inline: var(--slotted-space-2, 0.25rem);
   }
 
   [data-ui='kbd'][data-size='lg'] {
+    --_size: calc(var(--slotted-space-8, 1.5rem) + var(--slotted-space-2, 0.25rem));
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_inset-inline: var(--slotted-space-4, 0.5rem);
+    --_radius: var(--slotted-kbd-radius, var(--slotted-radius-lg, 8px));
   }
 
   /**
@@ -307,12 +334,26 @@
    * slab; here the cap is a proportion of the text it interrupts, so it is the
    * right size in both. The insets go with it, in the same relative unit, or a
    * large key would carry a small key's padding.
+   *
+   * The height is 1.5 of the legend, which is 1.2 of the surrounding text: it
+   * stays inside a line box of 1.3 or more, so a key in a paragraph never
+   * pushes its line away from the next one. The previous sum, legend line plus
+   * insets plus edges, made 25.8px on 16px text set at 24px lines. The radius
+   * is a quarter of that height, the proportion of the absolute steps.
    */
   [data-ui='kbd'][data-size='inherit'] {
-    --_font-size: 0.875em;
+    --_size: 1.5em;
+    --_font-size: 0.8em;
     --_inset-inline: 0.4em;
-    --_inset-block: 0.1em;
+    --_radius: var(--slotted-kbd-radius, 0.375em);
     --_gap: 0.25em;
+  }
+
+  /* A fractional height puts both horizontal edges between pixels. */
+  @supports (inline-size: round(nearest, 1.5em, 1px)) {
+    [data-ui='kbd'][data-size='inherit'] {
+      --_size: round(nearest, 1.5em, 1px);
+    }
   }
 
   /* ── Painting ──────────────────────────────────────────────────────────── */
@@ -324,6 +365,19 @@
    */
   [data-ui='kbd'][data-variant='raised'] {
     --_base-width: var(--slotted-kbd-base-width, var(--slotted-border-width-thick, 2px));
+    /**
+     * The skirt. The lower part of the face turns a tenth of the way toward
+     * the base colour, so the face runs into the thick edge instead of meeting
+     * it at a line: `#ffffff` to `#f1f3f6` in light, `#171719` to `#202023` in
+     * dark. The top 40% stays the flat face, which is where the legend's cap
+     * band sits. A gradient is an image, so forced colours drop it with the
+     * ground and leave the edges, which is the whole key there.
+     */
+    --_face: linear-gradient(
+      to bottom,
+      var(--_background) 40%,
+      color-mix(in oklab, var(--_background), var(--_base) 10%)
+    );
   }
 
   /**
@@ -338,6 +392,8 @@
    */
   [data-ui='kbd'][data-variant='outline'] {
     --_background: transparent;
+    /* The edge is all this variant draws, so it is the strong one all round. */
+    --_border: var(--slotted-border-strong, ButtonBorder);
     --_color: inherit;
   }
 
@@ -397,6 +453,7 @@
    */
   [data-ui='kbd'][data-disabled] {
     --_background: var(--slotted-disabled-background, Canvas);
+    --_face: none;
     --_border: var(--slotted-disabled-border, GrayText);
     --_base: var(--slotted-disabled-border, GrayText);
     --_color: var(--slotted-disabled-foreground, GrayText);

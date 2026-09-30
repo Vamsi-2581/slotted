@@ -893,3 +893,16 @@ test('makes the account row a control rather than a block of text', () => {
     )?.[1] ?? '';
   assert.match(brand, /padding-block: var\(--slotted-space-2\)/);
 });
+
+/**
+ * A column narrower than the reflow thresholds families state for themselves —
+ * `field` at 320 pixels — so a demonstration of the narrow layout is not drawn
+ * in the wide one. The 360-pixel measure stays what it was.
+ */
+test('offers a drawer-width measure under every family reflow threshold', () => {
+  assert.match(css, /\.slotted-demo-measure\s*\{\s*inline-size:\s*min\(100%,\s*360px\);/);
+  const drawer =
+    /\.slotted-demo-measure\[data-width='drawer'\]\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  const width = Number(/min\(100%,\s*(\d+)px\)/.exec(drawer)?.[1]);
+  assert.ok(width > 0 && width < 320, `the drawer measure is ${width}px, not under 320`);
+});

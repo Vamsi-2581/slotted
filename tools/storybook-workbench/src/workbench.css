@@ -630,6 +630,16 @@
 }
 
 /**
+ * A drawer's column, narrower than any family's own reflow threshold. `field`
+ * stacks a side label below 320 pixels of its own width and `alert` reflows
+ * below 360, so a demonstration of that reflow in a 360-pixel measure showed
+ * the wide layout under a caption promising the narrow one.
+ */
+.slotted-demo-measure[data-width='drawer'] {
+  inline-size: min(100%, 280px);
+}
+
+/**
  * A box that stands in for the viewport, so a family that pins itself to an
  * edge can be demonstrated inside a page rather than over it.
  *

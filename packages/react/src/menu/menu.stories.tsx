@@ -1,10 +1,11 @@
 import { bindScenes, createReferencePage, isolated, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ArrowUpRight, Copy } from 'lucide-react';
+import { ArrowUpRight, Copy, File, Inbox, LogOut, Trash2, User } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
+import { Avatar } from '../avatar';
 import { Button } from '../button';
 import { Menu } from './menu';
 import { MenuDefaultsProvider } from './menu-defaults';
@@ -13,7 +14,10 @@ import {
   MenuCheckboxItem,
   MenuEmpty,
   MenuGroup,
+  MenuHeader,
   MenuItem,
+  MenuItemDescription,
+  MenuItemLabel,
   MenuRadioGroup,
   MenuRadioItem,
   MenuSeparator,
@@ -76,8 +80,10 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     commands: Commands,
     composition: Composition,
     groups: Groups,
+    header: Header,
     icons: Icons,
     keyboard: Keyboard,
+    meta: ItemMeta,
     placement: Placement,
     playground: Playground,
     'radio-items': RadioItems,
@@ -318,6 +324,72 @@ export const SubmenuOpen: Story = {
       </Menu>
     </Viewport>
   ),
+};
+
+/* Who the menu belongs to, above the commands: the avatar starts at the
+   icons' edge and the arrows begin at Profile. */
+export const Header: Story = {
+  parameters: scenario('header'),
+  render: (_args, context) => (
+    <Viewport size="tall">
+      <Menu defaultOpen={isolated(context)} portal={false}>
+        <Trigger>Account</Trigger>
+        <MenuContent>
+          <MenuHeader>
+            <Avatar decorative name="Ada Lovelace" size="md" />
+            <MenuItemLabel>Ada Lovelace</MenuItemLabel>
+            <MenuItemDescription>ada@analytical.engine</MenuItemDescription>
+          </MenuHeader>
+          <MenuSeparator />
+          <MenuItem icon={<User aria-hidden />} shortcut="Mod+Shift+P">
+            Profile
+          </MenuItem>
+          <MenuSeparator />
+          <MenuItem icon={<LogOut aria-hidden />} tone="danger">
+            Sign out
+          </MenuItem>
+        </MenuContent>
+      </Menu>
+    </Viewport>
+  ),
+};
+
+/* Counts end on one edge, shortcuts keep theirs, and the submenu trigger
+   shows the value it is set to. */
+export const ItemMeta: Story = {
+  parameters: scenario('meta'),
+  render: (_args, context) => {
+    const [status, setStatus] = useState('Available');
+    return (
+      <Viewport size="tall">
+        <Menu defaultOpen={isolated(context)} portal={false}>
+          <Trigger>Workspace</Trigger>
+          <MenuContent>
+            <MenuItem icon={<Inbox aria-hidden />} meta="12" shortcut="Mod+1">
+              Inbox
+            </MenuItem>
+            <MenuItem icon={<File aria-hidden />} meta="3" shortcut="Mod+2">
+              Drafts
+            </MenuItem>
+            <MenuItem disabled icon={<Trash2 aria-hidden />} meta="0">
+              Trash
+            </MenuItem>
+            <MenuSeparator />
+            <Menu portal={false}>
+              <MenuTrigger meta={status}>Status</MenuTrigger>
+              <MenuContent>
+                <MenuRadioGroup value={status} onValueChange={setStatus}>
+                  <MenuRadioItem value="Available">Available</MenuRadioItem>
+                  <MenuRadioItem value="Away">Away</MenuRadioItem>
+                  <MenuRadioItem value="Do not disturb">Do not disturb</MenuRadioItem>
+                </MenuRadioGroup>
+              </MenuContent>
+            </Menu>
+          </MenuContent>
+        </Menu>
+      </Viewport>
+    );
+  },
 };
 
 export const Tone: Story = {

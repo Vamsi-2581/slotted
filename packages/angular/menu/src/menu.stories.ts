@@ -1,5 +1,14 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideArrowUpRight, lucideCopy } from '@ng-icons/lucide';
+import {
+  lucideArrowUpRight,
+  lucideCopy,
+  lucideFile,
+  lucideInbox,
+  lucideLogOut,
+  lucideTrash2,
+  lucideUser,
+} from '@ng-icons/lucide';
+import { SlAvatar } from '@slotted/angular/avatar';
 import { SlButton } from '@slotted/angular/button';
 import { bindScenes, createReferencePage, isolated, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
@@ -11,8 +20,11 @@ import type { MenuAlign, MenuSide, MenuSize } from './menu-defaults';
 import {
   SlMenuEmpty,
   SlMenuGroup,
+  SlMenuHeader,
   SlMenuItem,
   SlMenuItemDescription,
+  SlMenuItemIcon,
+  SlMenuItemMeta,
   SlMenuRadioGroup,
   SlMenuSeparator,
 } from './menu-items';
@@ -40,8 +52,10 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     commands: Commands,
     composition: Composition,
     groups: Groups,
+    header: Header,
     icons: Icons,
     keyboard: Keyboard,
+    meta: ItemMeta,
     placement: Placement,
     playground: Playground,
     'radio-items': RadioItems,
@@ -59,17 +73,31 @@ const meta: Meta<MenuStoryArgs> = {
     moduleMetadata({
       imports: [
         NgIcon,
+        SlAvatar,
         SlButton,
         SlMenu,
         SlMenuEmpty,
         SlMenuGroup,
+        SlMenuHeader,
         SlMenuItem,
         SlMenuItemDescription,
+        SlMenuItemIcon,
+        SlMenuItemMeta,
         SlMenuRadioGroup,
         SlMenuSeparator,
         SlMenuTrigger,
       ],
-      providers: [provideIcons({ lucideArrowUpRight, lucideCopy })],
+      providers: [
+        provideIcons({
+          lucideArrowUpRight,
+          lucideCopy,
+          lucideFile,
+          lucideInbox,
+          lucideLogOut,
+          lucideTrash2,
+          lucideUser,
+        }),
+      ],
     }),
   ],
   parameters: {
@@ -310,6 +338,76 @@ export const SubmenuOpen: Story = {
             <button slMenuItem>Email</button>
           </sl-menu>
           <button slMenuItem>Embed…</button>
+        </sl-menu>
+      </div>
+    `,
+  }),
+};
+
+/* Who the menu belongs to, above the commands: the avatar starts at the
+   icons' edge and the arrows begin at Profile. */
+export const Header: Story = {
+  parameters: scenario('header'),
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
+    template: `
+      <div class="slotted-demo-viewport" data-place="top" data-size="tall">
+        <button slButton size="sm" variant="outline" [slMenuTriggerFor]="account">Account</button>
+        <sl-menu #account [open]="pictured" [portal]="false">
+          <div slMenuHeader>
+            <span slAvatar name="Ada Lovelace" size="md" decorative></span>
+            <span data-part="label">Ada Lovelace</span>
+            <span slMenuItemDescription>ada@analytical.engine</span>
+          </div>
+          <hr slMenuSeparator />
+          <button slMenuItem shortcut="Mod+Shift+P">
+            <span slMenuItemIcon><ng-icon aria-hidden="true" name="lucideUser" size="16"></ng-icon></span>
+            Profile
+          </button>
+          <hr slMenuSeparator />
+          <button slMenuItem tone="danger">
+            <span slMenuItemIcon><ng-icon aria-hidden="true" name="lucideLogOut" size="16"></ng-icon></span>
+            Sign out
+          </button>
+        </sl-menu>
+      </div>
+    `,
+  }),
+};
+
+/* Counts end on one edge, shortcuts keep theirs, and the submenu trigger
+   shows the value it is set to. */
+export const ItemMeta: Story = {
+  parameters: scenario('meta'),
+  render: (_args, context) => ({
+    props: { pictured: isolated(context), presence: 'Available' },
+    template: `
+      <div class="slotted-demo-viewport" data-place="top" data-size="tall">
+        <button slButton size="sm" variant="outline" [slMenuTriggerFor]="workspace">Workspace</button>
+        <sl-menu #workspace [open]="pictured" [portal]="false">
+          <button slMenuItem shortcut="Mod+1">
+            <span slMenuItemIcon><ng-icon aria-hidden="true" name="lucideInbox" size="16"></ng-icon></span>
+            Inbox <span slMenuItemMeta>12</span>
+          </button>
+          <button slMenuItem shortcut="Mod+2">
+            <span slMenuItemIcon><ng-icon aria-hidden="true" name="lucideFile" size="16"></ng-icon></span>
+            Drafts <span slMenuItemMeta>3</span>
+          </button>
+          <button slMenuItem [disabled]="true">
+            <span slMenuItemIcon><ng-icon aria-hidden="true" name="lucideTrash2" size="16"></ng-icon></span>
+            Trash <span slMenuItemMeta>0</span>
+          </button>
+          <hr slMenuSeparator />
+          <button slMenuItem [slMenuTriggerFor]="status">
+            Status <span slMenuItemMeta>{{ presence }}</span>
+          </button>
+          <sl-menu #status [portal]="false">
+            <sl-menu-radio-group [(value)]="presence">
+              <button slMenuRadioItem value="Available">Available</button>
+              <button slMenuRadioItem value="Away">Away</button>
+              <button slMenuRadioItem value="Do not disturb">Do not disturb</button>
+            </sl-menu-radio-group>
+          </sl-menu>
         </sl-menu>
       </div>
     `,

@@ -7,6 +7,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   Directive,
   ElementRef,
   HostAttributeToken,
@@ -117,6 +118,7 @@ export interface MenuSelectEvent {
     <ng-content select="[slMenuItemIcon]" />
     <span data-part="label"><ng-content /></span>
     <ng-content select="[slMenuItemDescription]" />
+    <ng-content select="[slMenuItemMeta]" />
     @if (legend(); as printed) {
       <span data-part="shortcut" aria-hidden="true">{{ printed }}</span>
     }
@@ -289,6 +291,43 @@ export class SlMenuItemDescription {
 
   constructor() {
     this.item?.describedBy.set(this.id);
+  }
+}
+
+/**
+ * What the item holds or counts — a number, a status, the value a submenu is
+ * set to — in a column of its own before the shortcut or the chevron. It reads
+ * as part of the item's name; typeahead matches the label alone.
+ */
+@Directive({
+  selector: '[slMenuItemMeta]',
+  standalone: true,
+  host: { 'data-part': 'meta' },
+})
+export class SlMenuItemMeta {}
+
+/**
+ * Who the menu belongs to: an avatar, a name, a line under it, above the
+ * commands. Not an item — the arrows and typeahead never reach it, because a
+ * `menu` owns only items, groups and separators — so the surface names it as
+ * its description and a reader hears it once, as the menu opens. The name is a
+ * `data-part="label"` element and the line under it `slMenuItemDescription`;
+ * any other child is the media, set beside both.
+ */
+@Directive({
+  selector: '[slMenuHeader]',
+  standalone: true,
+  host: { 'data-part': 'header', '[attr.id]': 'id' },
+})
+export class SlMenuHeader {
+  protected readonly id = `sl-menu-header-${Math.random().toString(36).slice(2, 8)}`;
+  private readonly menu = inject(SlMenu);
+
+  constructor() {
+    this.menu.headerId.set(this.id);
+    inject(DestroyRef).onDestroy(() => {
+      if (this.menu.headerId() === this.id) this.menu.headerId.set(null);
+    });
   }
 }
 

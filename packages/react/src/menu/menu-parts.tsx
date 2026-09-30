@@ -12,7 +12,7 @@ import type { KeyboardEvent, PointerEvent, Ref } from 'react';
 import { createPortal } from 'react-dom';
 
 import { Glyph, Icon } from '../icon';
-import { MenuItemIcon, MenuItemLabel } from './menu-items';
+import { MenuItemIcon, MenuItemLabel, MenuItemMeta } from './menu-items';
 import { MenuSurfaceProvider, useMenu } from './menu';
 import type {
   MenuContentProps,
@@ -107,7 +107,14 @@ function moveOut(trigger: HTMLElement | null, step: 1 | -1) {
  * `aria-haspopup` and a chevron at the end that points along the reading
  * direction.
  */
-export function MenuTrigger({ children, icon, ref, render, ...nativeProps }: MenuTriggerProps) {
+export function MenuTrigger({
+  children,
+  icon,
+  meta,
+  ref,
+  render,
+  ...nativeProps
+}: MenuTriggerProps) {
   const menu = useMenu();
   const parent = menu.parent;
   const onBar = menu.onBar;
@@ -262,6 +269,7 @@ export function MenuTrigger({ children, icon, ref, render, ...nativeProps }: Men
       <>
         {icon === undefined ? null : <MenuItemIcon>{icon}</MenuItemIcon>}
         <MenuItemLabel>{children}</MenuItemLabel>
+        {meta === undefined ? null : <MenuItemMeta>{meta}</MenuItemMeta>}
         <Icon directional>
           <Glyph name="chevron-right" />
         </Icon>
@@ -314,6 +322,7 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
   const [status, setStatus] = useState<PresenceStatus>('unmounted');
   const [positioned, setPositioned] = useState(false);
   const [openItem, setOpenItem] = useState<HTMLElement | null>(null);
+  const [headerId, setHeaderId] = useState<string | null>(null);
 
   const presence = useRef<PresenceHandle | null>(null);
   const typeahead = useRef<TypeaheadHandle | null>(null);
@@ -524,8 +533,14 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
     node: surfaceNode,
     openItem,
     rootTrigger: parent?.rootTrigger ?? menu.triggerNode,
+    setHeaderId,
     setOpenItem,
   };
+
+  /* The consumer's description and the header's, joined: the header names who
+     the menu belongs to, and whatever the consumer wrote still reaches the reader. */
+  const describedBy =
+    [nativeProps['aria-describedby'], headerId].filter(Boolean).join(' ') || undefined;
 
   const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     const direction = readingDirection(surfaceNode);
@@ -606,6 +621,7 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
       <div
         {...nativeProps}
         aria-busy={loading === true ? true : undefined}
+        aria-describedby={describedBy}
         aria-labelledby={nativeProps['aria-label'] === undefined ? menu.triggerId : undefined}
         data-loading={loading === true ? '' : undefined}
         data-part="content"

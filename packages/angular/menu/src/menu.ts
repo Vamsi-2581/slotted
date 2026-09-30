@@ -100,7 +100,7 @@ const enabled = (item: HTMLElement) => item.dataset['disabled'] === undefined;
           [id]="contentId"
           [attr.aria-labelledby]="ariaLabel() === undefined ? triggerId : null"
           [attr.aria-label]="ariaLabel() ?? null"
-          [attr.aria-describedby]="ariaDescribedBy() ?? null"
+          [attr.aria-describedby]="describedBy()"
           [attr.aria-busy]="loading() ? true : null"
           [attr.data-loading]="loading() ? '' : null"
           (keydown)="onKeyDown($event)"
@@ -118,6 +118,12 @@ export class SlMenu {
   readonly ariaLabel = input<string | undefined>(undefined, { alias: 'aria-label' });
   /** The ids of what describes the menu, written on the element that carries `role="menu"`. */
   readonly ariaDescribedBy = input<string | undefined>(undefined, { alias: 'aria-describedby' });
+  /** Written by `slMenuHeader`: the block the surface is described by. */
+  readonly headerId = signal<string | null>(null);
+  /** The consumer's description and the header's, joined. */
+  protected readonly describedBy = computed(
+    () => [this.ariaDescribedBy(), this.headerId()].filter(Boolean).join(' ') || null,
+  );
 
   readonly open = model<boolean>(false);
   /** One output for one transition, carrying the reason and the event. */

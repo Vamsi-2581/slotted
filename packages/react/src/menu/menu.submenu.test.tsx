@@ -138,3 +138,72 @@ describe('where a submenu lands', () => {
     }
   });
 });
+
+function ThreeLevels() {
+  return (
+    <Menu>
+      <MenuTrigger>Share</MenuTrigger>
+      <MenuContent>
+        <MenuItem>Copy link</MenuItem>
+        <Menu>
+          <MenuTrigger>Send to</MenuTrigger>
+          <MenuContent>
+            <MenuItem>Slack</MenuItem>
+            <Menu>
+              <MenuTrigger>More</MenuTrigger>
+              <MenuContent>
+                <MenuItem>Teams</MenuItem>
+                <MenuItem>Matrix</MenuItem>
+              </MenuContent>
+            </Menu>
+          </MenuContent>
+        </Menu>
+      </MenuContent>
+    </Menu>
+  );
+}
+
+/**
+ * A submenu is this family opened from an item, so the third level holds every
+ * rule the second does: the keyboard reaches it, Escape closes only it, and
+ * the inline-start arrow hands focus back to the item that opened it.
+ */
+describe('three levels deep', () => {
+  async function openThird() {
+    render(<ThreeLevels />);
+    fireEvent.click(screen.getByRole('button', { name: 'Share' }), { detail: 1 });
+    await screen.findByRole('menu');
+
+    const sendTo = screen.getByRole('menuitem', { name: 'Send to' });
+    sendTo.focus();
+    fireEvent.keyDown(sendTo, { key: 'ArrowRight' });
+    await waitFor(() => expect(screen.getAllByRole('menu')).toHaveLength(2));
+
+    const more = screen.getByRole('menuitem', { name: 'More' });
+    more.focus();
+    fireEvent.keyDown(more, { key: 'ArrowRight' });
+    await waitFor(() => expect(screen.getAllByRole('menu')).toHaveLength(3));
+    await waitFor(() => expect(screen.getByRole('menuitem', { name: 'Teams' })).toHaveFocus());
+    return { sendTo, more };
+  }
+
+  it('opens the third level from the keyboard onto its first item', async () => {
+    const { more } = await openThird();
+    expect(more).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('closes only the topmost level on Escape, and returns focus to its parent item', async () => {
+    const { more } = await openThird();
+    fireEvent.keyDown(screen.getByRole('menuitem', { name: 'Teams' }), { key: 'Escape' });
+    await waitFor(() => expect(screen.getAllByRole('menu')).toHaveLength(2));
+    await waitFor(() => expect(more).toHaveFocus());
+    expect(more).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('closes the third level on ArrowLeft and leaves the second open', async () => {
+    const { more } = await openThird();
+    fireEvent.keyDown(screen.getByRole('menuitem', { name: 'Teams' }), { key: 'ArrowLeft' });
+    await waitFor(() => expect(screen.getAllByRole('menu')).toHaveLength(2));
+    await waitFor(() => expect(more).toHaveFocus());
+  });
+});

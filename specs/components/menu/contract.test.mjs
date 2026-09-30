@@ -139,6 +139,9 @@ test('makes a submenu the same family opened from an item', () => {
   assert.equal(contract.submenu.side, 'inline-end');
   assert.equal(contract.submenu.align, 'start');
   assert.ok(contract.submenu.openDelay > 0);
+  /* The submenu block and the member's defaults state one delay, not two. */
+  assert.equal(contract.submenu.openDelay, member.defaults.submenuOpenDelay);
+  assert.equal(contract.submenu.closeDelay, member.defaults.submenuCloseDelay);
   assert.equal(contract.submenu.graceArea, 'pointer-intent');
   assert.match(contract.submenu.reason, /composition|same family/i);
 });
@@ -165,6 +168,7 @@ test('names every part, and no part it does not own', () => {
   assert.deepEqual(member.parts, [
     'root',
     'content',
+    'header',
     'group',
     'group-label',
     'item',
@@ -172,6 +176,7 @@ test('names every part, and no part it does not own', () => {
     'icon',
     'label',
     'description',
+    'meta',
     'shortcut',
     'separator',
     'empty',
@@ -254,6 +259,8 @@ test('declares a scenario for every capability a reference page has to prove', (
     'groups',
     'submenu',
     'submenu-open',
+    'header',
+    'meta',
     'tone',
     'placement',
     'scrolling',
@@ -261,4 +268,27 @@ test('declares a scenario for every capability a reference page has to prove', (
     'keyboard',
     'composition',
   ]);
+});
+
+/**
+ * The block at the top of an account or workspace menu. It is not an item:
+ * the arrows and typeahead never reach it, and the surface names it as its
+ * description, so a reader hears who the menu belongs to as it opens.
+ */
+test('describes the surface with a header the ring never enters', () => {
+  assert.equal(contract.header.part, 'header');
+  assert.equal(contract.header.focusable, false);
+  assert.equal(contract.header.announcedBy, 'aria-describedby');
+  assert.match(contract.header.reason, /menuitem|group|separator/);
+});
+
+/**
+ * Content at the end of an item that is not a shortcut: a count, a status, the
+ * value a submenu holds. It reads with the item and never feeds typeahead.
+ */
+test('gives an item a meta column of its own, outside typeahead', () => {
+  assert.equal(contract.meta.part, 'meta');
+  assert.equal(contract.meta.column, 3);
+  assert.equal(contract.meta.typeahead, false);
+  assert.equal(contract.shortcut.part, 'shortcut');
 });

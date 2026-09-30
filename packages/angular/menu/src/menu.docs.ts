@@ -25,9 +25,9 @@ export const ANGULAR_MENU_TOKENS = menuTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { SlMenu, SlMenuGroup, SlMenuItem, SlMenuItemDescription, SlMenuItemIcon, SlMenuRadioGroup, SlMenuSeparator, SlMenuTrigger } from '@slotted/angular/menu';",
+    "import { SlMenu, SlMenuGroup, SlMenuHeader, SlMenuItem, SlMenuItemDescription, SlMenuItemIcon, SlMenuItemMeta, SlMenuRadioGroup, SlMenuSeparator, SlMenuTrigger } from '@slotted/angular/menu';",
   selector:
-    'sl-menu, [slMenuTriggerFor], button[slMenuItem], button[slMenuCheckboxItem], button[slMenuRadioItem], sl-menu-group, sl-menu-radio-group, hr[slMenuSeparator]',
+    'sl-menu, [slMenuTriggerFor], button[slMenuItem], button[slMenuCheckboxItem], button[slMenuRadioItem], sl-menu-group, sl-menu-radio-group, hr[slMenuSeparator], [slMenuHeader], [slMenuItemMeta]',
   exportAs: 'slMenu, slMenuTrigger, slMenuItem, slMenuGroup, slMenuRadioGroup',
 };
 
@@ -44,7 +44,14 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: true,
     purpose:
-      'The painted surface, and the element carrying role="menu". It owns the three columns every item passes through, is bounded by the height the positioner reports, and scrolls inside it.',
+      'The painted surface, and the element carrying role="menu". It owns the four columns every item passes through, is bounded by the height the positioner reports, and scrolls inside it.',
+  },
+  {
+    part: 'header',
+    element: 'div[slMenuHeader]',
+    required: false,
+    purpose:
+      'Who the menu belongs to: an avatar or a mark, a name in a data-part="label" element, a line under it in slMenuItemDescription. It spans every column with a grid of its own, is never an item, and the surface names it with aria-describedby, so a reader hears it once as the menu opens.',
   },
   {
     part: 'group',
@@ -92,6 +99,13 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'The line under the label. The item points at it with aria-describedby, so a reader hears the command and then the warning rather than one long name.',
+  },
+  {
+    part: 'meta',
+    element: 'span[slMenuItemMeta]',
+    required: false,
+    purpose:
+      'What the item holds or counts — a number, a status, the value a submenu is set to — end-aligned in its own column before the shortcut, so every meta in the menu lines up. It reads as part of the name; typeahead matches the label alone.',
   },
   {
     part: 'shortcut',
@@ -240,6 +254,40 @@ const scenes: ReferenceSceneMeta[] = [
       source: `<sl-menu #sendTo [open]="true">
   <button slMenuItem>Slack</button>
 </sl-menu>`,
+    }),
+  },
+  {
+    id: 'header',
+    title: 'Header',
+    note: "An account menu opens with who it belongs to. The avatar starts at the icons' edge, the arrows begin at the first command, and a reader hears the name and the address as the surface's description.",
+    snippet: defineSnippet({
+      id: 'menu-angular-header',
+      language: 'angular',
+      label: 'A header above the commands',
+      source: `<sl-menu #account>
+  <div slMenuHeader>
+    <span slAvatar name="Ada Lovelace" size="md" decorative></span>
+    <span data-part="label">Ada Lovelace</span>
+    <span slMenuItemDescription>ada@analytical.engine</span>
+  </div>
+  <hr slMenuSeparator />
+  <button slMenuItem>Profile</button>
+  <button slMenuItem tone="danger">Sign out</button>
+</sl-menu>`,
+    }),
+  },
+  {
+    id: 'meta',
+    title: 'Meta',
+    note: 'Counts and the value a submenu holds, in a column of their own: the numbers end on one edge, the shortcuts keep theirs, and a submenu trigger shows its current value before the chevron.',
+    snippet: defineSnippet({
+      id: 'menu-angular-meta',
+      language: 'angular',
+      label: 'A count per item, a value on a submenu trigger',
+      source: `<button slMenuItem shortcut="Mod+1">Inbox <span slMenuItemMeta>12</span></button>
+<button slMenuItem [slMenuTriggerFor]="status">
+  Status <span slMenuItemMeta>{{ presence() }}</span>
+</button>`,
     }),
   },
   {
@@ -576,6 +624,20 @@ const composition = apiRows([
     "Put on the consumer's own element rather than replacing it: the wiring, the state attributes and the keyboard arrive on the button, the link or the icon control they already have.",
   ],
   [
+    'slMenuHeader',
+    'directive',
+    '—',
+    'sl-menu',
+    'The block above the commands. Its children are the media, a data-part="label" name and a slMenuItemDescription line; the surface is described by it.',
+  ],
+  [
+    'slMenuItemMeta',
+    'directive',
+    '—',
+    'button[slMenuItem]',
+    'What the item holds or counts, projected into its own column before the shortcut or the chevron.',
+  ],
+  [
     'exportAs',
     'template reference',
     '—',
@@ -602,6 +664,7 @@ const accessibility = [
   'The platform supplies the press: an item is a native button, so Enter and Space run it and the pointer semantics are the browser\'s own. role="menuitem" replaces role="button" so a reader hears an item rather than a control, and an item written as an anchor keeps its href.',
   'The family supplies the composite keyboard the WAI-ARIA menu and menubar pattern describes: arrows move and wrap, Home and End reach the ends, printable characters jump by name, the inline-end arrow opens a submenu and the inline-start one closes it, Escape closes one surface and Tab closes every surface and moves focus past the control that opened them.',
   'A disabled item stays focusable and takes aria-disabled rather than the native attribute, because the pattern asks that a reader be able to find a command that is currently unavailable — and a natively disabled button cannot be focused at all.',
+  'A header is not an item and never takes focus: role="menu" owns only items, groups and separators. The surface points at it with aria-describedby, joined to any description the consumer gave, so a reader hears who the menu belongs to once, as it opens.',
   'A reader hears the surface named by the control that opened it, each option as checked or not through aria-checked, each group by the label inside it, and a shortcut through aria-keyshortcuts — the printed legend is hidden, so the name stays the command rather than the command and its keys.',
 ];
 

@@ -407,11 +407,13 @@
       data-open
       style="
         /* Where the positioner puts a submenu (M2): its layer at the parent
-           surface's edge, so the layer's own gap separates the two panels, and
-           one inset above the item that opened it, so the first items line up. */
+           surface's edge — the parent's inset plus its measure, which for
+           three short labels is the floor, min(12rem, 60%) — so the layer's
+           own gap separates the two panels, and one inset above the item
+           that opened it, so the first items line up. */
         top: 50px;
-        inset-inline-start: 132px;
-        --slotted-positioner-available-width: calc(100% - 132px);
+        inset-inline-start: calc(12px + min(12rem, 60%));
+        --slotted-positioner-available-width: calc(100% - 12px - min(12rem, 60%));
         --slotted-positioner-transform-origin: left top;
       "
     >
@@ -519,6 +521,115 @@
       </button>
       <button data-part="item" role="menuitem" type="button">
         <span data-part="label">Travel</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section data-scene="header">
+  <div
+    data-ui="menu"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-open
+    style="position: relative; --slotted-positioner-available-width: 100%"
+  >
+    <div data-part="content" role="menu" aria-label="Account" aria-describedby="harness-account">
+      <div data-part="header" id="harness-account">
+        <span
+          data-ui="avatar"
+          data-part="root"
+          data-size="md"
+          data-shape="circle"
+          data-tone="accent"
+          data-variant="soft"
+          role="img"
+          aria-label="Ada Lovelace"
+          ><span data-part="fallback">AL</span></span
+        >
+        <span data-part="label">Ada Lovelace</span>
+        <span data-part="description">ada@analytical.engine</span>
+      </div>
+      <hr data-part="separator" aria-orientation="horizontal" />
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="icon"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="person"></svg></span
+        ></span>
+        <span data-part="label">Profile</span>
+        <span data-part="shortcut" aria-hidden="true">⇧⌘P</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="icon"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="lock"></svg></span
+        ></span>
+        <span data-part="label">Security</span>
+      </button>
+      <hr data-part="separator" aria-orientation="horizontal" />
+      <button data-part="item" role="menuitem" type="button" data-tone="danger">
+        <span data-part="label">Sign out</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!--
+  Meta: a count, a status, the value a submenu holds — its own column, so the
+  metas line up with each other and the shortcuts keep theirs.
+-->
+<section data-scene="meta">
+  <div
+    data-ui="menu"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-open
+    style="position: relative; --slotted-positioner-available-width: 100%"
+  >
+    <div data-part="content" role="menu" aria-label="Workspace">
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="icon"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="inbox"></svg></span
+        ></span>
+        <span data-part="label">Inbox</span>
+        <span data-part="meta">12</span>
+        <span data-part="shortcut" aria-hidden="true">⌘1</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="icon"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file"></svg></span
+        ></span>
+        <span data-part="label">Drafts</span>
+        <span data-part="meta">3</span>
+        <span data-part="shortcut" aria-hidden="true">⌘2</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button" aria-disabled="true" data-disabled>
+        <span data-part="icon"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="trash"></svg></span
+        ></span>
+        <span data-part="label">Trash</span>
+        <span data-part="meta">0</span>
+      </button>
+      <hr data-part="separator" aria-orientation="horizontal" />
+      <button
+        data-part="item"
+        role="menuitem"
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded="false"
+      >
+        <span data-part="label">Status</span>
+        <span data-part="meta">Available</span>
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
       </button>
     </div>
   </div>

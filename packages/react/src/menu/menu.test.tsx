@@ -10,7 +10,10 @@ import { MenuContent, MenuTrigger } from './menu-parts';
 import {
   MenuCheckboxItem,
   MenuGroup,
+  MenuHeader,
   MenuItem,
+  MenuItemDescription,
+  MenuItemLabel,
   MenuRadioGroup,
   MenuRadioItem,
   MenuSeparator,
@@ -552,5 +555,57 @@ describe('a controlled menu', () => {
 
     fireEvent.click(screen.getByRole('menuitem', { name: 'Duplicate' }), { detail: 1 });
     await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+  });
+});
+
+describe('header and meta', () => {
+  function Account() {
+    return (
+      <Menu>
+        <MenuTrigger>Document</MenuTrigger>
+        <MenuContent aria-describedby="help">
+          <MenuHeader>
+            <span aria-hidden="true">AL</span>
+            <MenuItemLabel>Ada Lovelace</MenuItemLabel>
+            <MenuItemDescription>ada@analytical.engine</MenuItemDescription>
+          </MenuHeader>
+          <MenuItem meta="12">Inbox</MenuItem>
+          <MenuItem meta="3">Drafts</MenuItem>
+          <Menu>
+            <MenuTrigger meta="Available">Status</MenuTrigger>
+            <MenuContent>
+              <MenuItem>Away</MenuItem>
+            </MenuContent>
+          </Menu>
+        </MenuContent>
+      </Menu>
+    );
+  }
+
+  it('describes the surface by its header, joined to the description the consumer gave', async () => {
+    render(<Account />);
+    const surface = await open();
+    const header = surface.querySelector<HTMLElement>("[data-part='header']");
+    expect(header).not.toBeNull();
+    expect(surface.getAttribute('aria-describedby')).toBe(`help ${header?.id}`);
+  });
+
+  it('keeps the header out of the ring the arrows walk', async () => {
+    render(<Account />);
+    const surface = await open();
+    const header = surface.querySelector("[data-part='header']");
+    expect(header).not.toHaveAttribute('tabindex');
+    await waitFor(() => expect(screen.getByRole('menuitem', { name: /Inbox/ })).toHaveFocus());
+    fireEvent.keyDown(screen.getByRole('menuitem', { name: /Inbox/ }), { key: 'ArrowUp' });
+    expect(screen.getByRole('menuitem', { name: /Status/ })).toHaveFocus();
+  });
+
+  it('puts the meta in its own part on an item and on a submenu trigger', async () => {
+    render(<Account />);
+    await open();
+    const inbox = screen.getByRole('menuitem', { name: /Inbox/ });
+    expect(inbox.querySelector("[data-part='meta']")?.textContent).toBe('12');
+    const status = screen.getByRole('menuitem', { name: /Status/ });
+    expect(status.querySelector("[data-part='meta']")?.textContent).toBe('Available');
   });
 });

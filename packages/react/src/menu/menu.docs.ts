@@ -25,7 +25,7 @@ export const REACT_MENU_TOKENS = menuTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { Menu, MenuCheckboxItem, MenuContent, MenuGroup, MenuItem, MenuRadioGroup, MenuRadioItem, MenuSeparator, MenuTrigger } from '@slotted/react';",
+    "import { Menu, MenuCheckboxItem, MenuContent, MenuGroup, MenuHeader, MenuItem, MenuItemDescription, MenuItemLabel, MenuRadioGroup, MenuRadioItem, MenuSeparator, MenuTrigger } from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -41,7 +41,14 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: true,
     purpose:
-      'The painted surface, and the element carrying role="menu". It owns the three columns every item passes through, is bounded by the height the positioner reports, and scrolls inside it.',
+      'The painted surface, and the element carrying role="menu". It owns the four columns every item passes through, is bounded by the height the positioner reports, and scrolls inside it.',
+  },
+  {
+    part: 'header',
+    element: 'div',
+    required: false,
+    purpose:
+      'Who the menu belongs to: an avatar or a mark, a name in label, a line under it in description. It spans every column with a grid of its own, is never an item, and the surface names it with aria-describedby, so a reader hears it once as the menu opens.',
   },
   {
     part: 'group',
@@ -89,6 +96,13 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'The line under the label. The item points at it with aria-describedby, so a reader hears the command and then the warning rather than one long name.',
+  },
+  {
+    part: 'meta',
+    element: 'span',
+    required: false,
+    purpose:
+      'What the item holds or counts — a number, a status, the value a submenu is set to — end-aligned in its own column before the shortcut, so every meta in the menu lines up. It reads as part of the name; typeahead matches the label alone.',
   },
   {
     part: 'shortcut',
@@ -258,6 +272,56 @@ const scenes: ReferenceSceneMeta[] = [
     <MenuItem>Slack</MenuItem>
   </MenuContent>
 </Menu>;`,
+    }),
+  },
+  {
+    id: 'header',
+    title: 'Header',
+    note: "An account menu opens with who it belongs to. The avatar starts at the icons' edge, the arrows begin at the first command, and a reader hears the name and the address as the surface's description.",
+    snippet: defineSnippet({
+      id: 'menu-react-header',
+      language: 'tsx',
+      label: 'A header above the commands',
+      source: `<MenuContent>
+  <MenuHeader>
+    <Avatar name="Ada Lovelace" size="md" />
+    <MenuItemLabel>Ada Lovelace</MenuItemLabel>
+    <MenuItemDescription>ada@analytical.engine</MenuItemDescription>
+  </MenuHeader>
+  <MenuSeparator />
+  <MenuItem
+    icon={
+      <Icon>
+        <Glyph name="person" />
+      </Icon>
+    }
+  >
+    Profile
+  </MenuItem>
+  <MenuItem tone="danger">Sign out</MenuItem>
+</MenuContent>;`,
+    }),
+  },
+  {
+    id: 'meta',
+    title: 'Meta',
+    note: 'Counts and the value a submenu holds, in a column of their own: the numbers end on one edge, the shortcuts keep theirs, and a submenu trigger shows its current value before the chevron.',
+    snippet: defineSnippet({
+      id: 'menu-react-meta',
+      language: 'tsx',
+      label: 'A count per item, a value on a submenu trigger',
+      source: `<MenuContent>
+  <MenuItem meta="12" shortcut="Mod+1">
+    Inbox
+  </MenuItem>
+  <MenuItem meta="3" shortcut="Mod+2">
+    Drafts
+  </MenuItem>
+  <Menu>
+    <MenuTrigger meta="Available">Status</MenuTrigger>
+    <MenuContent>…</MenuContent>
+  </Menu>
+</MenuContent>;`,
     }),
   },
   {
@@ -567,6 +631,13 @@ const api = apiRows([
     'The line under the label, referenced with aria-describedby.',
   ],
   [
+    'meta',
+    'ReactNode',
+    '—',
+    'MenuItem, MenuTrigger',
+    'What the item holds or counts, in its own column before the shortcut or the chevron.',
+  ],
+  [
     'shortcut',
     'string',
     '—',
@@ -636,6 +707,20 @@ const composition = apiRows([
     "Replaces the rendered element with the consumer's own, keeping the wiring, the state attributes and the handlers.",
   ],
   [
+    'MenuHeader',
+    'component',
+    '—',
+    'MenuContent',
+    'The block above the commands. Its children are the media, a MenuItemLabel and a MenuItemDescription; the surface is described by it.',
+  ],
+  [
+    'MenuItemMeta',
+    'component',
+    '—',
+    'MenuItem children',
+    'The meta part, for an item written from its parts rather than from props.',
+  ],
+  [
     'useMenu',
     'hook',
     '—',
@@ -662,6 +747,7 @@ const accessibility = [
   'The platform supplies the press: an item is a native button, so Enter and Space run it and the pointer semantics are the browser\'s own. role="menuitem" replaces role="button" so a reader hears an item rather than a control, and an item that is a link keeps its href and its role.',
   'The family supplies the composite keyboard the WAI-ARIA menu and menubar pattern describes: arrows move and wrap, Home and End reach the ends, printable characters jump by name, the inline-end arrow opens a submenu and the inline-start one closes it, Escape closes one surface and Tab closes every surface and moves focus past the control that opened them.',
   'A disabled item stays focusable and takes aria-disabled rather than the native attribute, because the pattern asks that a reader be able to find a command that is currently unavailable — and a natively disabled button cannot be focused at all.',
+  'A header is not an item and never takes focus: role="menu" owns only items, groups and separators. The surface points at it with aria-describedby, joined to any description the consumer gave, so a reader hears who the menu belongs to once, as it opens.',
   'A reader hears the surface named by the control that opened it, each option as checked or not through aria-checked, each group by the label inside it, and a shortcut through aria-keyshortcuts — the printed legend is hidden, so the name stays the command rather than the command and its keys.',
 ];
 

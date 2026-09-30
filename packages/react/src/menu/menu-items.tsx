@@ -1,7 +1,7 @@
 import { createControllable } from '@slotted/core/state';
 import type { KbdPlatform } from '@slotted/core/keys';
 import { parseShortcut, resolveKey, resolveShortcut } from '@slotted/core/keys';
-import { createContext, useCallback, useContext, useId, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useId, useState } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 import { Glyph, Icon } from '../icon';
@@ -14,9 +14,11 @@ import type {
   MenuEmptyProps,
   MenuGroupLabelProps,
   MenuGroupProps,
+  MenuHeaderProps,
   MenuItemDescriptionProps,
   MenuItemIconProps,
   MenuItemLabelProps,
+  MenuItemMetaProps,
   MenuItemProps,
   MenuItemRootProps,
   MenuItemShortcutProps,
@@ -107,6 +109,15 @@ export function MenuItemDescription({ children, ...nativeProps }: MenuItemDescri
   );
 }
 
+/** What the item holds or counts, in its own column before the shortcut. */
+export function MenuItemMeta({ children, ...nativeProps }: MenuItemMetaProps) {
+  return (
+    <span {...nativeProps} data-part="meta">
+      {children}
+    </span>
+  );
+}
+
 /**
  * The binding printed at the end of the item.
  *
@@ -165,6 +176,7 @@ function Item({
   disabled,
   icon,
   indicator,
+  meta,
   onSelect,
   ref,
   render,
@@ -261,6 +273,7 @@ function Item({
         {description === undefined ? null : (
           <MenuItemDescription id={descriptionId}>{description}</MenuItemDescription>
         )}
+        {meta === undefined ? null : <MenuItemMeta>{meta}</MenuItemMeta>}
         {shortcut === undefined ? null : <MenuItemShortcut keys={shortcut} />}
       </>
     ),
@@ -426,6 +439,32 @@ export function MenuGroup({ children, label, ...nativeProps }: MenuGroupProps) {
 export function MenuGroupLabel({ children, ...nativeProps }: MenuGroupLabelProps) {
   return (
     <div {...nativeProps} data-part="group-label">
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Who the menu belongs to: an avatar, a name, a line under it, above the
+ * commands. Not an item — the arrows and typeahead never reach it, because a
+ * `menu` owns only items, groups and separators — so the surface names it as
+ * its description and a reader hears it once, as the menu opens. The name and
+ * the line under it are `MenuItemLabel` and `MenuItemDescription`; any other
+ * child is the media, set beside both.
+ */
+export function MenuHeader({ children, id, ...nativeProps }: MenuHeaderProps) {
+  const surface = useMenuSurface();
+  const generated = `${useId()}header`;
+  const own = id ?? generated;
+  const register = surface?.setHeaderId;
+
+  useEffect(() => {
+    register?.(own);
+    return () => register?.(null);
+  }, [own, register]);
+
+  return (
+    <div {...nativeProps} data-part="header" id={own}>
       {children}
     </div>
   );

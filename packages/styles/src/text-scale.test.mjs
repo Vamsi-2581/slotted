@@ -37,6 +37,10 @@ const DECORATIVE = new Map([
   ],
   ['slider/thumb', 'the thumb: an empty control the press grows under the finger'],
   [
+    'menu/indicator',
+    'the check or the dot of a menu item: one aria-hidden Glyph and never text, grown in from 0.8 as the item is checked',
+  ],
+  [
     'icon/(root)',
     'a glyph box: one aria-hidden svg and never text — text-field grows the new mark in from 0.8 when copy turns to a check and an eye to a crossed eye',
   ],

@@ -19,7 +19,6 @@
   "--slotted-control-radius",
   "--slotted-control-transition-duration",
   "--slotted-control-transition-easing",
-  "--slotted-disabled-background",
   "--slotted-disabled-foreground",
   "--slotted-duration-medium",
   "--slotted-duration-short",

@@ -155,6 +155,8 @@ export interface MenuTriggerRootProps extends HTMLAttributes<HTMLElement> {
 export interface MenuTriggerProps extends ComponentPropsWithRef<'button'> {
   /** The mark in the first column, when the trigger is a submenu's item. */
   icon?: ReactNode;
+  /** The value the submenu is set to, before the chevron, when the trigger is an item. */
+  meta?: ReactNode;
   /**
    * Renders the consumer's own control instead of the family's `button`. The
    * wiring, the state attribute and the handlers come with it.
@@ -203,6 +205,12 @@ export interface MenuItemProps extends Omit<ComponentPropsWithRef<'button'>, 'on
   icon?: ReactNode;
   /** The second line, under the label. */
   description?: ReactNode;
+  /**
+   * What the item holds or counts — a number, a status, the value a submenu
+   * is set to — in a column of its own before the shortcut. It reads as part
+   * of the item's name; typeahead matches the label alone.
+   */
+  meta?: ReactNode;
   /**
    * A shortcut in this library's own notation — `Mod+K`. It is printed with the
    * platform's own legends and announced with `aria-keyshortcuts`; the family
@@ -258,6 +266,8 @@ export type MenuEmptyProps = ComponentPropsWithRef<'div'>;
 export type MenuItemIconProps = ComponentPropsWithRef<'span'>;
 export type MenuItemLabelProps = ComponentPropsWithRef<'span'>;
 export type MenuItemDescriptionProps = ComponentPropsWithRef<'span'>;
+export type MenuItemMetaProps = ComponentPropsWithRef<'span'>;
+export type MenuHeaderProps = ComponentPropsWithRef<'div'>;
 
 export interface MenuItemShortcutProps extends ComponentPropsWithRef<'span'> {
   /** The shortcut in this library's notation. Printed for the platform. */
@@ -331,6 +341,8 @@ export interface MenuSurfaceValue {
   openItem: HTMLElement | null;
   setOpenItem: (node: HTMLElement | null) => void;
   depth: number;
+  /** A header names itself here, and the surface is described by it. */
+  setHeaderId: (id: string | null) => void;
 }
 
 /**

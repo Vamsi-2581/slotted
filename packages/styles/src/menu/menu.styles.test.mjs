@@ -37,5 +37,5 @@ test('paints no mark of its own', () => {
       .split(`[data-ui='menu'][data-part='item'][aria-haspopup='menu']>[data-ui='icon']{`)
       .at(-1)
       ?.split('}')[0] ?? '';
-  assert.ok(chevron.includes('grid-column:3'));
+  assert.ok(chevron.includes('grid-column:4'));
 });

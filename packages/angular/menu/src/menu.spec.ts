@@ -7,9 +7,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SlMenu } from './menu';
 import {
   SlMenuGroup,
+  SlMenuHeader,
   SlMenuItem,
   SlMenuItemDescription,
   SlMenuItemIcon,
+  SlMenuItemMeta,
   SlMenuRadioGroup,
   SlMenuSeparator,
 } from './menu-items';
@@ -445,5 +447,133 @@ describe('SlMenu', () => {
     await scoped.whenStable();
 
     expect(document.querySelector("[data-ui='menu']")?.getAttribute('data-size')).toBe('lg');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlMenu, SlMenuItem, SlMenuTrigger],
+  template: `
+    <button [slMenuTriggerFor]="share">Share</button>
+    <sl-menu #share>
+      <button slMenuItem>Copy link</button>
+      <button slMenuItem [slMenuTriggerFor]="sendTo">Send to</button>
+      <sl-menu #sendTo>
+        <button slMenuItem>Slack</button>
+        <button slMenuItem [slMenuTriggerFor]="more">More</button>
+        <sl-menu #more>
+          <button slMenuItem>Teams</button>
+          <button slMenuItem>Matrix</button>
+        </sl-menu>
+      </sl-menu>
+    </sl-menu>
+  `,
+})
+class ThreeLevels {}
+
+/**
+ * A submenu is this family opened from an item, so the third level holds every
+ * rule the second does: the keyboard reaches it, Escape closes only it, and
+ * the inline-start arrow hands focus back to the item that opened it.
+ */
+describe('SlMenu three levels deep', () => {
+  let fixture: ComponentFixture<ThreeLevels>;
+
+  const settle = async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+  };
+  const surfaces = () => document.querySelectorAll("[data-ui='menu'] [data-part='content']");
+
+  const openThird = async () => {
+    TestBed.configureTestingModule({ imports: [ThreeLevels] });
+    fixture = TestBed.createComponent(ThreeLevels);
+    await settle();
+    click(fixture.nativeElement.querySelector('button'));
+    await settle();
+    item('Send to')?.focus();
+    press('ArrowRight');
+    await settle();
+    item('More')?.focus();
+    press('ArrowRight');
+    await settle();
+  };
+
+  it('opens the third level from the keyboard onto its first item', async () => {
+    await openThird();
+    expect(surfaces()).toHaveLength(3);
+    expect(document.activeElement).toBe(item('Teams'));
+    expect(item('More')?.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('closes only the topmost level on Escape, and returns focus to its parent item', async () => {
+    await openThird();
+    press('Escape');
+    await settle();
+    expect(surfaces()).toHaveLength(2);
+    expect(document.activeElement).toBe(item('More'));
+  });
+
+  it('closes the third level on ArrowLeft and leaves the second open', async () => {
+    await openThird();
+    press('ArrowLeft');
+    await settle();
+    expect(surfaces()).toHaveLength(2);
+    expect(document.activeElement).toBe(item('More'));
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlMenu, SlMenuHeader, SlMenuItem, SlMenuItemDescription, SlMenuItemMeta, SlMenuTrigger],
+  template: `
+    <button [slMenuTriggerFor]="account">Account</button>
+    <sl-menu #account aria-describedby="help">
+      <div slMenuHeader>
+        <span aria-hidden="true">AL</span>
+        <span data-part="label">Ada Lovelace</span>
+        <span slMenuItemDescription>ada@analytical.engine</span>
+      </div>
+      <button slMenuItem>Inbox <span slMenuItemMeta>12</span></button>
+      <button slMenuItem [slMenuTriggerFor]="status">
+        Status <span slMenuItemMeta>Available</span>
+      </button>
+      <sl-menu #status>
+        <button slMenuItem>Away</button>
+      </sl-menu>
+    </sl-menu>
+  `,
+})
+class Account {}
+
+describe('SlMenu header and meta', () => {
+  let fixture: ComponentFixture<Account>;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({ imports: [Account] });
+    fixture = TestBed.createComponent(Account);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    click(fixture.nativeElement.querySelector('button'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+  });
+
+  it('describes the surface by its header, joined to the description the consumer gave', () => {
+    const header = document.querySelector<HTMLElement>("[data-part='header']");
+    expect(header).not.toBeNull();
+    expect(surface()?.getAttribute('aria-describedby')).toBe(`help ${header?.id}`);
+  });
+
+  it('keeps the header out of the ring the arrows walk', () => {
+    expect(document.querySelector("[data-part='header']")?.hasAttribute('tabindex')).toBe(false);
+    expect(document.activeElement).toBe(item('Inbox'));
+    press('ArrowUp');
+    expect(document.activeElement).toBe(item('Status'));
+  });
+
+  it('projects the meta into its own part on an item and on a submenu trigger', () => {
+    expect(item('Inbox')?.querySelector("[data-part='meta']")?.textContent).toBe('12');
+    expect(item('Status')?.querySelector("[data-part='meta']")?.textContent).toBe('Available');
   });
 });

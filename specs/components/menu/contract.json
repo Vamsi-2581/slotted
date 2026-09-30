@@ -153,7 +153,7 @@
     "trigger": "item",
     "side": "inline-end",
     "align": "start",
-    "openDelay": 100,
+    "openDelay": 150,
     "closeDelay": 300,
     "graceArea": "pointer-intent",
     "reason": "A submenu is this same family opened from an item rather than from a button, which is composition instead of a second component. The context decides the trigger element and three keys; nothing else changes, so a submenu holds every capability the menu holds, including the ones added after it."
@@ -171,6 +171,18 @@
     "announcedBy": "aria-keyshortcuts",
     "bound": false,
     "reason": "The item takes a shortcut in the library's own notation — Mod+K — and prints it with the platform's glyphs, which no surveyed implementation does: all five print the string the consumer wrote, on every operating system. The family does not listen for the key. An application binds its own shortcuts, and a menu that bound them would fire commands while the menu was closed."
+  },
+  "meta": {
+    "part": "meta",
+    "column": 3,
+    "typeahead": false,
+    "reason": "A count, a status or the value a submenu holds, at the end of the item and before its shortcut or chevron, in a column of its own so every item's meta lines up. ReUI places a Badge with ml-auto inside the item, which shares no edge from one row to the next. The meta reads as part of the item's name, and typeahead matches the label alone, so \"Companies 12\" is still reached by typing c."
+  },
+  "header": {
+    "part": "header",
+    "focusable": false,
+    "announcedBy": "aria-describedby",
+    "reason": "The identity block at the top of an account or workspace menu: an avatar, a name, an address. role=\"menu\" owns only menuitem, menuitemcheckbox, menuitemradio, group and separator, so the header is not a node a reader walks to. The surface names it with aria-describedby, joined to any description the consumer gave, so a reader hears it once as the menu opens; the arrows and typeahead never reach it. ReUI draws the same block as a free div, which lands in the icon column of a grid."
   },
   "item": {
     "element": "button",
@@ -403,6 +415,7 @@
       "parts": [
         "root",
         "content",
+        "header",
         "group",
         "group-label",
         "item",
@@ -410,6 +423,7 @@
         "icon",
         "label",
         "description",
+        "meta",
         "shortcut",
         "separator",
         "empty"
@@ -427,6 +441,8 @@
       "groups",
       "submenu",
       "submenu-open",
+      "header",
+      "meta",
       "tone",
       "placement",
       "scrolling",

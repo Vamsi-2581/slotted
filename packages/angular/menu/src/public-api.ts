@@ -6,9 +6,11 @@ export {
   shortcutLegends,
   SlMenuEmpty,
   SlMenuGroup,
+  SlMenuHeader,
   SlMenuItem,
   SlMenuItemDescription,
   SlMenuItemIcon,
+  SlMenuItemMeta,
   SlMenuRadioGroup,
   SlMenuSeparator,
 } from './menu-items';

@@ -31,6 +31,7 @@
   "--slotted-icon-search": { "icon": "search" },
   "--slotted-icon-search-x": { "icon": "search-x" },
   "--slotted-icon-lock": { "icon": "lock" },
+  "--slotted-icon-caps-lock": { "icon": "arrow-big-up-dash" },
   "--slotted-icon-cloud-off": { "icon": "cloud-off" },
   "--slotted-icon-loader-circle": { "icon": "loader-circle", "stroke-width": 3.5 },
   "--slotted-icon-maximize": { "icon": "maximize" },

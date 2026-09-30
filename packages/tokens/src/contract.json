@@ -633,6 +633,13 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-caps-lock",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-icon-cloud-off",
       "layer": "primitive",
       "axis": "base",

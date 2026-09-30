@@ -364,10 +364,13 @@
   }
 
   /**
-   * A badge. The glyph is the control icon less one step of air on each side:
-   * 12 in a badge of 21 at `md`, so a Lucide drawing that
-   * fills its own box to the edge stands four and a half pixels off the ring.
-   * The avatar fills its own marker without a ring.
+   * A badge. The glyph is the control icon less one step of air on each side,
+   * made the badge's parity: 13 in a badge of 21 at `md`, four whole pixels
+   * off each edge. The badge is odd so the line runs through its middle; a
+   * glyph of 12 stood four and a half pixels in, the browser painted it on
+   * the next whole pixel, and its ink sat half a CSS pixel right of and below
+   * the disc's centre at every zoom — two device pixels at 400%, measured on
+   * the painted capture. The avatar fills its own marker without a ring.
    *
    * The check of a finished dot is the one icon the family puts in a marker
    * itself, marked `data-check` by the binding so it is never read as a badge:
@@ -384,7 +387,9 @@
   }
 
   [data-ui='timeline'] [data-part='marker'] > [data-ui='icon'] {
-    --slotted-icon-size: var(--_glyph);
+    --slotted-icon-size: calc(
+      var(--_badge) - 2 * round(down, (var(--_badge) - var(--_glyph)) / 2, 1px)
+    );
 
     color: inherit;
   }
@@ -780,10 +785,22 @@
     flex: none;
   }
 
-  /* Each direction takes the curve of the state it arrives at: closing leaves, opening arrives. */
+  /**
+   * A fold is one movement: the chevron, the list's height, its ink and the
+   * heading's distance to it share a duration and a curve, the disclosure
+   * motion `collapsible` draws. Measured frame by frame before this rule, the
+   * list faded while the page below stood still and then jumped 56 pixels in
+   * one frame, the exiting curve held the list at 0.9 for the first fifty-five milliseconds
+   * after the press, and the chevron finished seventy milliseconds after the list had gone.
+   */
+  [data-ui='timeline'] [data-part='group'] {
+    --_fold: var(--slotted-duration-medium)
+      var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
   [data-ui='timeline'] [data-part='group-indicator'] > [data-ui='icon'] {
     rotate: -90deg;
-    transition: rotate var(--slotted-duration-medium) var(--slotted-easing-exit);
+    transition: rotate var(--_fold);
   }
 
   [data-ui='timeline']
@@ -792,36 +809,44 @@
     [data-part='group-indicator']
     > [data-ui='icon'] {
     rotate: 0deg;
-    transition-timing-function: var(--slotted-easing-enter);
   }
 
   /**
-   * The events of a period fade in and out and never slide: twenty events
-   * sliding are a page jumping. The closing fade is the shorter one, and
-   * `allow-discrete` holds the list on the page until it has faded, then
-   * `hidden` takes it out. A group open at the first render fades in too,
-   * because `@starting-style` cannot tell a first render from an opening.
+   * A folded list stays laid out at no height rather than leaving the page:
+   * the page below then slides with it instead of jumping, and a group open
+   * at the first render has no earlier style to grow from, so nothing moves
+   * while a page loads. `hidden` still says what it did — the binding writes
+   * it, and `visibility` takes the folded events out of the accessibility
+   * tree and the tab order, at the end of the fold and at the start of an
+   * opening. The clip margin keeps the current marker's ring and a focus
+   * ring at the list's edge whole.
    */
   [data-ui='timeline'] [data-part='group-list'] {
+    interpolate-size: allow-keywords;
     opacity: 1;
-    transition: opacity var(--slotted-duration-medium) var(--slotted-easing-enter);
-  }
-
-  @starting-style {
-    [data-ui='timeline'] [data-part='group-list']:not([hidden]) {
-      opacity: 0;
-    }
+    overflow: clip;
+    overflow-clip-margin: max(
+      round(up, var(--_reach), 1px),
+      calc(var(--slotted-focus-ring-width, 2px) + var(--slotted-focus-ring-offset, 2px))
+    );
+    transition:
+      block-size var(--_fold),
+      opacity var(--_fold),
+      visibility var(--_fold);
   }
 
   [data-ui='timeline'] [data-part='group-list'][hidden] {
-    display: none;
+    block-size: 0;
+    display: flex;
     opacity: 0;
-    transition:
-      opacity var(--slotted-duration-short) var(--slotted-easing-exit),
-      display var(--slotted-duration-short) allow-discrete;
+    visibility: hidden;
   }
 
   /* A folded group ends at its heading; the distance to the next is the group's own. */
+  [data-ui='timeline'] [data-part='group-label'] {
+    transition: margin-block-end var(--_fold);
+  }
+
   [data-ui='timeline'] [data-part='group-label']:has(+ [data-part='group-list'][hidden]) {
     margin-block-end: 0;
   }
@@ -866,46 +891,60 @@
     --_tone-surface: var(--slotted-tone-accent-surface, Canvas);
     --_tone-border: var(--slotted-tone-accent-border, Highlight);
     --_tone-text: var(--slotted-tone-accent-text, Highlight);
+    /**
+     * The pill arrives and leaves as the group lists fold: its height, its
+     * border, the distance under it and its ink move together, so the events
+     * below slide by the pill's height rather than jumping by it in a frame.
+     */
+    --_fold: var(--slotted-duration-medium)
+      var(--slotted-control-transition-easing, var(--slotted-easing-standard));
 
     background-color: var(--_tone-surface);
     border-color: var(--_tone-border);
     color: var(--_tone-text);
+    interpolate-size: allow-keywords;
     margin-block-end: var(--_item-gap);
     opacity: 1;
+    overflow: clip;
     transition:
       background-color var(--slotted-control-transition-duration)
         var(--slotted-control-transition-easing),
       border-color var(--slotted-control-transition-duration)
         var(--slotted-control-transition-easing),
       color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
-      opacity var(--slotted-duration-medium) var(--slotted-easing-enter),
-      translate var(--slotted-duration-medium) var(--slotted-easing-enter);
-    translate: 0 0;
+      block-size var(--_fold),
+      min-block-size var(--_fold),
+      border-block-width var(--_fold),
+      margin-block-end var(--_fold),
+      opacity var(--_fold),
+      display var(--_fold) allow-discrete;
   }
 
   /**
-   * New events arrive from above, so the pill drops a step into place as it
-   * fades in, and rises the same step as it fades out on the shorter exiting
-   * curve. The bindings keep it mounted once it has appeared and write
+   * The bindings keep the pill mounted once it has appeared and write
    * `hidden` at a count of zero; `allow-discrete` holds it on the page until
-   * it has faded. Scale is not used: the pill holds text (`text-scale.test.mjs`).
+   * it has folded away. Its first appearance grows from nothing, because the
+   * pill arriving is itself the news. Scale is not used: the pill holds text
+   * (`text-scale.test.mjs`).
    */
   @starting-style {
     [data-ui='timeline'] [data-part='fresh']:not([hidden]) {
+      block-size: 0;
+      border-block-width: 0;
+      margin-block-end: 0;
+      min-block-size: 0;
       opacity: 0;
-      translate: 0 calc(-1 * var(--slotted-space-2, 0.25rem));
     }
   }
 
   [data-ui='timeline'] [data-part='fresh'][hidden] {
+    block-size: 0;
+    border-block-width: 0;
     display: none;
+    margin-block-end: 0;
+    min-block-size: 0;
     opacity: 0;
     pointer-events: none;
-    transition:
-      opacity var(--slotted-duration-short) var(--slotted-easing-exit),
-      translate var(--slotted-duration-short) var(--slotted-easing-exit),
-      display var(--slotted-duration-short) allow-discrete;
-    translate: 0 calc(-1 * var(--slotted-space-2, 0.25rem));
   }
 
   /**

@@ -227,53 +227,73 @@ test('steps the fresh pill by state layer and presses the group heading in place
 });
 
 /**
- * A period fades in on the entering curve and out on the shorter exiting
- * one, and never slides; the chevron takes the curve of the state it
- * arrives at.
+ * A fold is one movement: the chevron, the list's height, its ink and the
+ * heading's distance share `--_fold`, the duration and curve `collapsible`
+ * folds with. A folded list stays laid out at no height, so the page below
+ * slides with it and a group open at the first render grows from nothing
+ * earlier — no `@starting-style` is involved in a group.
  */
+test('folds a group as one movement, with the page below sliding', () => {
+  assert.ok(
+    normalized.includes(
+      "[data-part='group']{--_fold:var(--slotted-duration-medium)var(--slotted-control-transition-easing,var(--slotted-easing-standard));}",
+    ),
+  );
+  assert.ok(
+    normalized.includes(
+      "[data-part='group-indicator']>[data-ui='icon']{rotate:-90deg;transition:rotatevar(--_fold);}",
+    ),
+  );
+  assert.ok(
+    normalized.includes(
+      'transition:block-sizevar(--_fold),opacityvar(--_fold),visibilityvar(--_fold);',
+    ),
+  );
+  assert.ok(
+    normalized.includes(
+      "[data-part='group-list'][hidden]{block-size:0;display:flex;opacity:0;visibility:hidden;}",
+    ),
+  );
+  assert.ok(
+    normalized.includes("[data-part='group-label']{transition:margin-block-endvar(--_fold);}"),
+  );
+  assert.ok(!/group-list'\]:not\(\[hidden\]\)/.test(normalized), 'no starting style on a group');
+});
+
 /**
  * The bindings keep the fresh pill mounted and write `hidden` at a count of
  * zero; the author's `display: flex` would otherwise keep it on the page. It
- * enters on the entering curve and leaves on the shorter exiting one.
+ * grows in and folds away on the group's movement, height and border and
+ * the distance under it included, so the events below slide by it.
  */
-test('hides the fresh pill it keeps, and moves it in and out on both curves', () => {
-  assert.ok(normalized.includes("[data-part='fresh'][hidden]{display:none;opacity:0;"));
+test('folds the fresh pill it keeps in and out, the events below sliding', () => {
   assert.ok(
     normalized.includes(
-      'opacityvar(--slotted-duration-short)var(--slotted-easing-exit),translatevar(--slotted-duration-short)var(--slotted-easing-exit),displayvar(--slotted-duration-short)allow-discrete;',
+      "[data-part='fresh'][hidden]{block-size:0;border-block-width:0;display:none;margin-block-end:0;min-block-size:0;opacity:0;",
     ),
   );
   assert.ok(
     normalized.includes(
-      "@starting-style{[data-ui='timeline'][data-part='fresh']:not([hidden]){opacity:0;",
+      "@starting-style{[data-ui='timeline'][data-part='fresh']:not([hidden]){block-size:0;border-block-width:0;margin-block-end:0;min-block-size:0;opacity:0;}}",
     ),
   );
   assert.ok(
     normalized.includes(
-      'opacityvar(--slotted-duration-medium)var(--slotted-easing-enter),translatevar(--slotted-duration-medium)var(--slotted-easing-enter);',
+      'block-sizevar(--_fold),min-block-sizevar(--_fold),border-block-widthvar(--_fold),margin-block-endvar(--_fold),opacityvar(--_fold),displayvar(--_fold)allow-discrete;',
     ),
   );
 });
 
-test('fades a group list in and out and turns the chevron on both curves', () => {
-  assert.ok(normalized.includes('@starting-style{'));
+/**
+ * The glyph in a badge takes the badge's parity. An odd badge keeps the line
+ * in its middle; an even glyph in it stood half a pixel in and was painted
+ * half a CSS pixel off centre at every zoom.
+ */
+test('centres a badge glyph on whole pixels', () => {
   assert.ok(
     normalized.includes(
-      "[data-part='group-list']{opacity:1;transition:opacityvar(--slotted-duration-medium)var(--slotted-easing-enter);}",
+      "[data-part='marker']>[data-ui='icon']{--slotted-icon-size:calc(var(--_badge)-2*round(down,(var(--_badge)-var(--_glyph))/2,1px));",
     ),
-  );
-  assert.ok(
-    normalized.includes(
-      'transition:opacityvar(--slotted-duration-short)var(--slotted-easing-exit),displayvar(--slotted-duration-short)allow-discrete;',
-    ),
-  );
-  assert.ok(
-    normalized.includes(
-      "[data-part='group-indicator']>[data-ui='icon']{rotate:-90deg;transition:rotatevar(--slotted-duration-medium)var(--slotted-easing-exit);}",
-    ),
-  );
-  assert.ok(
-    normalized.includes('rotate:0deg;transition-timing-function:var(--slotted-easing-enter);'),
   );
 });
 

@@ -196,3 +196,33 @@ Provas:
 | `tools/harness/audit.mjs` nas duas páginas de referência | saída 0 |
 
 Com isto, a linha Motion de § 7 passa: chevron, `group-list` e `fresh` têm entrada e saída em tokens de movimento, com a saída mais curta do que a entrada.
+
+### Revisão de 2026-09-30: dobra dos grupos e glifo do emblema
+
+Dois defeitos relatados depois da passagem `build`: a dobra dos grupos "travada", e o ícone do emblema deslocado com zoom grande.
+
+**Dobra.** Amostragem por quadro no Chrome (`prefers-reduced-motion: no-preference`, cena `groups`, célula `light-720`), y do grupo seguinte:
+
+| Momento | Antes | Depois |
+| ------- | ----- | ------ |
+| fecho, primeiros quadros | `opacity` 0.99, 0.96, 0.90 aos 22, 38 e 55ms (`easing-exit` atrasa o início) | 0.59 aos 35ms |
+| fecho, página abaixo | parada em 142 até aos 122ms, depois 142 → 86 num quadro | 150 → 124 → 103 → 94 → 89 → 87 → 86 |
+| fecho, fim | lista a 138ms, chevron a 205ms | lista e chevron a 202ms |
+| abertura, página abaixo | 86 → 150 no primeiro quadro | 86 → 92 → 125 → 138 → 145 → 148 → 150 |
+| repouso depois de abrir | 150, contra 142 antes de fechar | 150 nos dois sentidos |
+
+A lista fechada deixa de sair do layout: `block-size: 0`, `visibility: hidden` e `overflow: clip` com margem de recorte para o anel do atual e o anel de foco, com `interpolate-size: allow-keywords`. Sem `@starting-style`, um grupo aberto no primeiro render não cresce ao carregar a página. Lista, chevron e margem do rótulo partilham `--_fold`: `--slotted-duration-medium` e `--slotted-control-transition-easing`, o movimento de `collapsible`, nos dois sentidos. O `fresh` passa ao mesmo movimento, com altura, borda e margem: a pílula mede 30 → 27 → 0 ao sair e 2 → 30 ao entrar.
+
+Isto substitui, para a dobra e para o `fresh`, a regra `easing-enter` a entrar e `easing-exit` a sair da linha Motion de § 7. `.claude/skills/component/references/polish-lenses.md` › Precedence regista o conflito sobre a curva de saída como não decidido; a medida acima é a evidência a favor da curva de desaceleração nos dois sentidos para uma dobra.
+
+**Glifo do emblema.** A caixa do glifo estava centrada no DOM (desvio 0), mas o PNG capturado com `deviceScaleFactor` real mostrava a tinta meio píxel CSS à direita e abaixo do centro em todos os fatores: margens esquerda/direita de 30/26 a 4× e 37/32 a 5× no harness; 22/18 e 28/24 com o Lucide `CreditCard` do Storybook React. O emblema é ímpar (21) para a linha passar no meio, o glifo era par (12), e a caixa ficava a 4.5px da aresta. O glifo passa à paridade do emblema: `calc(var(--_badge) - 2 * round(down, (var(--_badge) - var(--_glyph)) / 2, 1px))`, 13 em 21, 11 em 17 no `dense`.
+
+| Fator | Harness antes (E/D/C/B) | Harness depois | Storybook React depois |
+| ----- | ----------------------- | -------------- | ---------------------- |
+| 1 | 7/6/7/6 | 6/6/6/6 | 4/4/6/6 |
+| 2 | 15/13/15/13 | 13/13/13/13 | 9/9/12/12 |
+| 3 | 22/19/22/19 | 20/20/20/20 | 13/13/18/18 |
+| 4 | 30/26/30/26 | 26/26/26/26 | 18/18/24/24 |
+| 5 | 37/32/37/32 | 33/33/33/33 | — |
+
+Em fatores fracionários (1.25, 1.5) resta no máximo 1 píxel de dispositivo, o arredondamento do próprio disco (31.5 → 32 a 1.5×).

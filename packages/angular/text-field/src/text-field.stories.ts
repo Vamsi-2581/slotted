@@ -629,8 +629,10 @@ export const Composition: Story = {
           'exportAs hands the template the directive, and inputElement is the native element — which already has focus, select and setSelectionRange, so no handle is invented for them.',
           `<div slTextField>
              <input slTextFieldInput #campo="slTextFieldInput" defaultValue="Selecione tudo" />
-           </div>
-           <button type="button" (click)="campo.inputElement.select()">Selecionar</button>`,
+             <span slTextFieldEnd>
+               <button slTextFieldAction (click)="campo.inputElement.select()">Selecionar</button>
+             </span>
+           </div>`,
         ),
     ),
   }),

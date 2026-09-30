@@ -345,8 +345,10 @@ const scenes: ReferenceSceneMeta[] = [
 <!-- exportAs, for the element the template has to reach. -->
 <div slTextField>
   <input slTextFieldInput #campo="slTextFieldInput" />
-</div>
-<button type="button" (click)="campo.inputElement.select()">Selecionar</button>`,
+  <span slTextFieldEnd>
+    <button slTextFieldAction (click)="campo.inputElement.select()">Selecionar</button>
+  </span>
+</div>`,
     }),
   },
   {

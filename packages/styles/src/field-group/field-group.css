@@ -129,7 +129,9 @@
     margin: 0;
   }
 
-  [data-ui='field-group'][data-required-mark='text'] > [data-part='legend'] > [data-part='mark'] {
+  [data-ui='field-group']:is([data-necessity='optional'], [data-necessity='words'])
+    > [data-part='legend']
+    > [data-part='mark'] {
     color: var(--slotted-field-group-mark-text-color, var(--slotted-text-muted));
     font-size: var(--slotted-control-font-size-sm, 12px);
     font-weight: var(--slotted-font-weight-regular, 400);

@@ -80,6 +80,11 @@ const PARTS = [
   { family: 'dialog', part: 'fullscreen' },
   { family: 'drawer', part: 'close' },
   /**
+   * The help beside a field's label: a glyph on a line of 13-pixel text, where
+   * a `Button` would bring a control height into a row of type.
+   */
+  { family: 'field', part: 'help' },
+  /**
    * A file's five controls. They are inner controls for the reason the rest of
    * this list is: each is a glyph on a row twenty-six pixels tall, and a
    * `Button` there would bring a height, a padding, a frame, a shadow and a

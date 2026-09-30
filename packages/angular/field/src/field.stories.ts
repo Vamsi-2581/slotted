@@ -3,18 +3,21 @@ import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { applicationConfig, moduleMetadata } from '@storybook/angular-vite';
 
+import { SlBadge } from '@slotted/angular/badge';
+
 import { SlField } from './field';
 import { provideFieldDefaults } from './field-defaults';
-import type { FieldLabelPlacement, FieldRequiredMark, FieldSize } from './field-defaults';
+import type { FieldLabelPlacement, FieldNecessity, FieldSize } from './field-defaults';
 import { SlFieldDescription, SlFieldError } from './field-messages';
-import { SlFieldControl, SlFieldLabel } from './field-parts';
+import { SlFieldAction, SlFieldControl, SlFieldLabel } from './field-parts';
 import { SlFieldCounter } from './field-counter';
+import { SlFieldHeader, SlFieldHelp, SlFieldIndicator } from './field-header';
 import { ANGULAR_FIELD_DOCS, ANGULAR_FIELD_TOKENS } from './field.docs';
 
 interface FieldStoryArgs {
   labelPlacement: FieldLabelPlacement;
   required: boolean;
-  requiredMark: FieldRequiredMark;
+  necessity: FieldNecessity;
   size: FieldSize;
 }
 
@@ -27,17 +30,23 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     states: States,
     messages: Messages,
     counter: Counter,
+    header: Header,
     content: Content,
     composition: Composition,
     accessibility: Accessibility,
   }) as never;
 
 const DIRECTIVES = [
+  SlBadge,
   SlField,
+  SlFieldAction,
   SlFieldControl,
   SlFieldCounter,
   SlFieldDescription,
   SlFieldError,
+  SlFieldHeader,
+  SlFieldHelp,
+  SlFieldIndicator,
   SlFieldLabel,
 ];
 
@@ -51,7 +60,7 @@ const meta: Meta<FieldStoryArgs> = {
       page: createReferencePage({
         title: 'Field',
         description:
-          'One control, its name, its necessity, its help and its error — and the four identifiers that bind them, derived from one base so nothing has to be coordinated between siblings.',
+          'One control, its name, its necessity, its help and its error — and the identifiers that bind them, derived from one base so nothing has to be coordinated between siblings.',
         framework: 'Angular',
         ...ANGULAR_FIELD_DOCS.field,
         tokens: ANGULAR_FIELD_TOKENS,
@@ -88,13 +97,18 @@ const grid = (columns: 1 | 2 | 3, scenes: string) =>
   `<div class="slotted-demo-grid" data-columns="${String(columns)}">${scenes}</div>`;
 
 /** A narrow column, for showing what a field does below 320 pixels. */
-const measure = (body: string) => `<div class="slotted-demo-measure">${body}</div>`;
+/**
+ * A narrow column: 360 pixels, or a drawer's 280 — the one under the 320
+ * pixels of its own width below which a side label stacks.
+ */
+const measure = (body: string, width?: 'drawer') =>
+  `<div class="slotted-demo-measure"${width ? ` data-width="${width}"` : ''}>${body}</div>`;
 
 export const Playground: Story = {
   args: {
     labelPlacement: 'top',
     required: true,
-    requiredMark: 'mark',
+    necessity: 'mark',
     size: 'md',
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
@@ -106,7 +120,7 @@ export const Playground: Story = {
           slField
           [size]="size"
           [labelPlacement]="labelPlacement"
-          [requiredMark]="requiredMark"
+          [necessity]="necessity"
           [required]="required"
         >
           <label slFieldLabel>E-mail</label>
@@ -136,14 +150,34 @@ export const Necessity: Story = {
       ) +
         scene(
           'The words, for a form where most fields are optional',
-          'Marking the two required fields in a form of twenty optional ones leaves the other eighteen ambiguous. requiredMark="text" names both sides, and the two words come from the token.',
-          `<div slField required requiredMark="text">
+          'Marking the two required fields in a form of twenty optional ones leaves the other eighteen ambiguous. necessity="words" names both sides, and the two words come from the token.',
+          `<div slField required necessity="words">
              <label slFieldLabel>CNPJ</label>
              <input slFieldControl value="12.345.678/0001-90" />
            </div>
-           <div slField requiredMark="text">
+           <div slField necessity="words">
              <label slFieldLabel>Inscrição estadual</label>
              <input slFieldControl />
+           </div>`,
+        ) +
+        scene(
+          'Only the exception, for a form where most fields are required',
+          'necessity="optional" writes (optional) on the field a reader may skip and nothing on the others — the recommendation GOV.UK and Carbon make, because twenty asterisks say less than one word.',
+          `<div slField required necessity="optional">
+             <label slFieldLabel>Razão social</label>
+             <input slFieldControl value="Sirius Group Tecnologia Ltda." />
+           </div>
+           <div slField necessity="optional">
+             <label slFieldLabel>Nome fantasia</label>
+             <input slFieldControl />
+           </div>`,
+        ) +
+        scene(
+          'Nothing, when the form says it once',
+          'necessity="none" draws no mark. aria-required still reaches the control, so a reader hears “required” on every field the form marked.',
+          `<div slField required necessity="none">
+             <label slFieldLabel>CNPJ</label>
+             <input slFieldControl value="12.345.678/0001-90" />
            </div>`,
         ),
     ),
@@ -154,7 +188,7 @@ export const Placement: Story = {
   parameters: scenario('placement'),
   render: () => ({
     template: grid(
-      2,
+      1,
       scene(
         'Beside the control, in a page-width form',
         'The label takes a track of its own and the control the rest. A label of twelve words wraps inside its track and stays level with the control’s first line rather than sliding under it.',
@@ -168,16 +202,22 @@ export const Placement: Story = {
          </div>`,
       ) +
         scene(
-          'The same two fields, in a 320-pixel column',
+          'The same two fields, in a 280-pixel drawer',
           'Nothing changed but the width the field has. The container query is on the field itself, so a form in a drawer stacks while the same markup in a page grid does not.',
-          measure(`<div slField labelPlacement="side">
+          measure(
+            `<div slField labelPlacement="side">
              <label slFieldLabel>Razão social</label>
              <input slFieldControl value="Sirius Group Tecnologia" />
-           </div>`) +
-            measure(`<div slField labelPlacement="side">
+           </div>`,
+            'drawer',
+          ) +
+            measure(
+              `<div slField labelPlacement="side">
              <label slFieldLabel>Endereço de correspondência da matriz</label>
              <input slFieldControl value="Avenida Paulista, 1000" />
-           </div>`),
+           </div>`,
+              'drawer',
+            ),
         ),
     ),
   }),
@@ -311,7 +351,7 @@ export const Counter: Story = {
       ) +
         scene(
           'The same counter beside a side label',
-          'Label, control and count share the first row, each in a track of its own — the count stays at the end of the row rather than dropping under the control.',
+          'The count stands under the label, at the end of the label’s track — the place a header puts it too — so a side field says its count in one place and the control keeps the whole of its track.',
           `<div slField labelPlacement="side">
              <label slFieldLabel>Assunto</label>
              <span slFieldCounter>12/60</span>
@@ -319,6 +359,109 @@ export const Counter: Story = {
            </div>`,
         ),
     ),
+  }),
+};
+
+export const Header: Story = {
+  parameters: scenario('header'),
+  render: () => ({
+    props: {
+      bio: 'Engenheira de dados; contribuidora do Apache Arrow.',
+      generated: 'Engenheira de dados na Sirius; mantém a camada de ingestão e o Arrow interno.',
+    },
+    template:
+      grid(
+        2,
+        scene(
+          'A password, its rule and the way back in',
+          'Hover the circle or tab to it and the rule opens; press it and it stays until a second press. The link takes the end of the row and a 24-pixel target that gives the line its height back.',
+          `<div slField required>
+           <div slFieldHeader>
+             <label slFieldLabel>Senha</label>
+             <button slFieldHelp="No mínimo oito caracteres, com letras e números."></button>
+             <a slFieldAction href="#recuperar">Esqueceu a senha?</a>
+           </div>
+           <input slFieldControl type="password" autocomplete="current-password" />
+         </div>`,
+        ) +
+          scene(
+            'What qualifies the field, heard on the control',
+            'The badge stands outside the label, so the asterisk stays against the last word, and it joins the control’s description with the help: a reader on the control hears “Beta”, then the rule, then the sentence under it.',
+            `<div slField required>
+             <div slFieldHeader>
+               <label slFieldLabel>Endpoint de notificações</label>
+               <button slFieldHelp="O endereço que recebe um POST a cada fatura emitida."></button>
+               <span slFieldIndicator><span slBadge size="sm" tone="accent" variant="soft">Beta</span></span>
+             </div>
+             <input slFieldControl type="url" value="https://api.sirius.com.br/webhooks/faturas" />
+             <span slFieldDescription>Use HTTPS; o certificado é verificado a cada envio.</span>
+           </div>
+           <div slField disabled>
+             <div slFieldHeader>
+               <label slFieldLabel>Centro de custo</label>
+               <button slFieldHelp="Liberado depois que a unidade for escolhida."></button>
+               <span slFieldIndicator><span slBadge size="sm" tone="secondary" variant="soft">Pro</span></span>
+             </div>
+             <input slFieldControl placeholder="Escolha uma unidade primeiro" />
+           </div>`,
+          ) +
+          scene(
+            'An action beside a count the page keeps',
+            'Press the action and the text is replaced; type past 160 and the count turns before the form has decided anything. A count after an action stands twelve pixels from it, so a link and a number never read as one phrase.',
+            `<div slField [invalid]="bio.length > 160">
+             <div slFieldHeader>
+               <label slFieldLabel>Apresentação</label>
+               <button slFieldAction (click)="bio = generated">Gerar a partir do cargo</button>
+               <span slFieldCounter [invalid]="bio.length > 160">{{ bio.length }}/160</span>
+             </div>
+             <textarea
+               slFieldControl
+               rows="3"
+               [value]="bio"
+               (input)="bio = $any($event.target).value"
+             ></textarea>
+           </div>`,
+          ) +
+          scene(
+            'All of it in a 280-pixel drawer',
+            'The row wraps rather than squeezing: the label breaks between words, and the badge, the action and the count move to a line of their own, the action and the count still at its end.',
+            measure(
+              `<div slField required>
+             <div slFieldHeader>
+               <label slFieldLabel>Endereço de correspondência da matriz</label>
+               <button slFieldHelp="Recebe as notas fiscais em papel."></button>
+               <span slFieldIndicator><span slBadge size="sm" tone="warning" variant="soft">Obrigatório para PJ</span></span>
+               <button slFieldAction>Usar o de cobrança</button>
+               <span slFieldCounter>0/120</span>
+             </div>
+             <input slFieldControl />
+           </div>`,
+              'drawer',
+            ),
+          ),
+      ) +
+      grid(
+        1,
+        scene(
+          'The same row beside the control',
+          'With the label beside the control the header takes the label’s track: the help follows the label, the action wraps under it, and the count stands on a line of its own at the end of the track.',
+          `<div slField labelPlacement="side">
+             <div slFieldHeader>
+               <label slFieldLabel>Senha</label>
+               <button slFieldHelp="No mínimo oito caracteres, com letras e números."></button>
+               <a slFieldAction href="#recuperar">Esqueceu a senha?</a>
+             </div>
+             <input slFieldControl type="password" />
+           </div>
+           <div slField labelPlacement="side">
+             <div slFieldHeader>
+               <label slFieldLabel>Assunto</label>
+               <span slFieldCounter>12/60</span>
+             </div>
+             <input slFieldControl value="Fatura março" />
+           </div>`,
+        ),
+      ),
   }),
 };
 
@@ -330,7 +473,7 @@ export const Content: Story = {
       scene(
         'A label no language can break, and a digest for a description',
         'Both break rather than overflowing, and the whole string stays in the DOM and findable by a page search. The necessity word never breaks: it is the one part of a label that is always a word.',
-        measure(`<div slField labelPlacement="side" required requiredMark="text">
+        measure(`<div slField labelPlacement="side" required necessity="words">
              <label slFieldLabel lang="de">Kraftfahrzeug-Haftpflichtversicherungsnummer</label>
              <input slFieldControl />
              <span slFieldDescription>
@@ -359,7 +502,7 @@ export const Composition: Story = {
       providers: [
         provideFieldDefaults({
           necessityWords: { optional: '(opcional)', required: '(obrigatório)' },
-          requiredMark: 'text',
+          necessity: 'words',
           size: 'sm',
         }),
       ],
@@ -402,9 +545,12 @@ export const Accessibility: Story = {
       2,
       scene(
         'Tab into the control and listen',
-        'A screen reader reads the label, then “required”, then the help, then the error — one name, one description built from two elements in a fixed order, and no asterisk read aloud.',
+        'A screen reader reads the label, then “required”, then the help behind the icon, the description and the error — one name, one description in a fixed order, and no asterisk read aloud.',
         `<div slField id="cnpj" invalid required>
-           <label slFieldLabel>CNPJ</label>
+           <div slFieldHeader>
+             <label slFieldLabel>CNPJ</label>
+             <button slFieldHelp="O da matriz, com os catorze dígitos."></button>
+           </div>
            <input slFieldControl value="12.345.678" />
            <span slFieldDescription>Somente números, com filial e dígito.</span>
            <span slFieldError live="polite">Faltam seis dígitos.</span>

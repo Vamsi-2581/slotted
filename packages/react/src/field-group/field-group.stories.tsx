@@ -66,7 +66,7 @@ export const Playground: Story = {
   args: {
     orientation: 'vertical',
     required: false,
-    requiredMark: 'mark',
+    necessity: 'mark',
     size: 'md',
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
@@ -149,7 +149,7 @@ export const States: Story = {
               <FieldLabel>Dia do repasse</FieldLabel>
               <FieldControl defaultValue="5" />
             </Field>
-            <Field requiredMark="text">
+            <Field necessity="words">
               <FieldLabel>Valor mínimo</FieldLabel>
               <FieldControl defaultValue="R$ 250,00" />
             </Field>
@@ -229,7 +229,7 @@ export const Provision: Story = {
         label="One attribute for the whole section"
         note="The group sets the step, the placement and the necessity style for every field inside it. Nothing is repeated per field, and nothing had to be threaded through by the page."
       >
-        <FieldGroup labelPlacement="side" required requiredMark="text" size="sm">
+        <FieldGroup labelPlacement="side" required necessity="words" size="sm">
           <FieldGroupLegend>Dados fiscais</FieldGroupLegend>
           <FieldGroupContent>
             <Field required>
@@ -273,7 +273,7 @@ export const Content: Story = {
         label="The page’s heading, inside the legend"
         note="The heading keeps its own type and loses only the block break, so the necessity words stay on its line. A reader hears the question once rather than as a heading and then again as a group name."
       >
-        <FieldGroup required requiredMark="text" size="lg">
+        <FieldGroup required necessity="words" size="lg">
           <FieldGroupLegend>
             <h2>Qual é a sua nacionalidade?</h2>
           </FieldGroupLegend>
@@ -324,11 +324,11 @@ export const Composition: Story = {
         <FieldGroup size="sm">
           <FieldGroupLegend>Contrato</FieldGroupLegend>
           <FieldGroupContent>
-            <Field required requiredMark="text">
+            <Field required necessity="words">
               <FieldLabel>Número</FieldLabel>
               <FieldControl defaultValue="CT-2026-0041" />
             </Field>
-            <FieldGroup orientation="horizontal" requiredMark="none">
+            <FieldGroup orientation="horizontal" necessity="none">
               <FieldGroupLegend>Vigência</FieldGroupLegend>
               <FieldGroupContent>
                 <Field required>

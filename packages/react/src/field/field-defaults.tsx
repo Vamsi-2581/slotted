@@ -3,7 +3,7 @@ import { createContext, useContext, useMemo } from 'react';
 import type { FieldDefaults, FieldDefaultsProviderProps, FieldNecessityWords } from './field.types';
 
 /**
- * The two words `requiredMark="text"` writes.
+ * The two words `necessity="optional"` and `necessity="words"` write.
  *
  * Spectrum's `necessityIndicator="label"` publishes the idea and localises the
  * pair itself; here it is a value an application replaces, because a library
@@ -15,12 +15,21 @@ export const FIELD_NECESSITY_WORDS: FieldNecessityWords = {
   required: '(required)',
 };
 
+/**
+ * The accessible name of the help control. The hint itself describes the
+ * button, so the name says what the button is for rather than repeating the
+ * hint; an application translates it once, and a page that wants the label in
+ * the name writes `aria-label` on the one control.
+ */
+export const FIELD_HELP_LABEL = 'More information';
+
 const FALLBACK: FieldDefaults = {
   disabled: undefined,
+  helpLabel: FIELD_HELP_LABEL,
   labelPlacement: 'top',
+  necessity: 'mark',
   necessityWords: FIELD_NECESSITY_WORDS,
   readOnly: undefined,
-  requiredMark: 'mark',
   size: 'md',
 };
 
@@ -48,23 +57,25 @@ export function useFieldDefaults(): FieldDefaults {
 export function FieldDefaultsProvider({
   children,
   disabled,
+  helpLabel,
   labelPlacement,
+  necessity,
   necessityWords,
   readOnly,
-  requiredMark,
   size,
 }: FieldDefaultsProviderProps) {
   const inherited = useFieldDefaults();
   const value = useMemo<FieldDefaults>(
     () => ({
       disabled: disabled ?? inherited.disabled,
+      helpLabel: helpLabel ?? inherited.helpLabel,
       labelPlacement: labelPlacement ?? inherited.labelPlacement,
+      necessity: necessity ?? inherited.necessity,
       necessityWords: { ...inherited.necessityWords, ...necessityWords },
       readOnly: readOnly ?? inherited.readOnly,
-      requiredMark: requiredMark ?? inherited.requiredMark,
       size: size ?? inherited.size,
     }),
-    [disabled, inherited, labelPlacement, necessityWords, readOnly, requiredMark, size],
+    [disabled, helpLabel, inherited, labelPlacement, necessity, necessityWords, readOnly, size],
   );
 
   return <FieldDefaultsContext.Provider value={value}>{children}</FieldDefaultsContext.Provider>;

@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   contentChild,
+  forwardRef,
   HostAttributeToken,
   inject,
   input,
@@ -14,14 +15,19 @@ import { SlInlineMessage } from '@slotted/angular/inline-message';
 
 import {
   deriveFieldIds,
+  FIELD_DESCRIBED_ORDER,
   injectFieldDefaults,
+  SlFieldContext,
   SlFieldDefaultsSource,
+  SlFieldHeaderSlot,
+  SlFieldHelpSlot,
   SlFieldIdFactory,
+  SlFieldIndicatorSlot,
 } from './field-defaults';
 import type {
   FieldLabelPlacement,
+  FieldNecessity,
   FieldNecessityWords,
-  FieldRequiredMark,
   FieldSize,
 } from './field-defaults';
 import { formatFieldCount, isFieldCountOver, SlFieldCounter } from './field-counter';
@@ -32,8 +38,8 @@ export type { FieldCount } from './field-counter';
 export type {
   FieldIds,
   FieldLabelPlacement,
+  FieldNecessity,
   FieldNecessityWords,
-  FieldRequiredMark,
   FieldSize,
 } from './field-defaults';
 
@@ -63,12 +69,15 @@ export type {
   standalone: true,
   exportAs: 'slField',
   imports: [SlInlineMessage],
-  template: `<ng-content select="[slFieldLabel]" />
+  template: `<ng-content select="[slFieldLabel], [slFieldHeader]" />
     <ng-content select="[slFieldCounter]" />
     @if (drawnCount(); as count) {
-      <span data-part="counter" [attr.data-invalid]="countOver() ? '' : null">{{
-        formatCount(count)
-      }}</span>
+      <span
+        data-part="counter"
+        [id]="ids().counter"
+        [attr.data-invalid]="countOver() ? '' : null"
+        >{{ formatCount(count) }}</span
+      >
     }
     <ng-content />
     <p
@@ -102,12 +111,13 @@ export type {
   styleUrl: '../../../styles/src/field/field.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  providers: [{ provide: SlFieldContext, useExisting: forwardRef(() => SlField) }],
   host: {
     'data-ui': 'field',
     'data-part': 'root',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-label-placement]': 'resolvedLabelPlacement()',
-    '[attr.data-required-mark]': 'resolvedRequiredMark()',
+    '[attr.data-necessity]': 'resolvedNecessity()',
     '[attr.data-disabled]': "resolvedDisabled() === true ? '' : null",
     '[attr.data-invalid]': "invalid() === true ? '' : null",
     '[attr.data-readonly]': "resolvedReadOnly() === true ? '' : null",
@@ -120,7 +130,7 @@ export class SlField {
   /** Defaults to the token, then to `top`. */
   readonly labelPlacement = input<FieldLabelPlacement | undefined>(undefined);
   /** Defaults to the token, then to `mark`. */
-  readonly requiredMark = input<FieldRequiredMark | undefined>(undefined);
+  readonly necessity = input<FieldNecessity | undefined>(undefined);
   /** Merged over the token's pair, for one field that names necessity its own way. */
   readonly necessityWords = input<Partial<FieldNecessityWords> | undefined>(undefined);
 
@@ -153,12 +163,19 @@ export class SlField {
   /**
    * What the control inside published about its value. A control this library
    * ships calls `setCount`; the field draws the counter in the spare column of
-   * its label row, and only when the page wrote none of its own.
+   * its label row — the header draws it at its own end when there is one — and
+   * only when the page wrote none of its own.
    */
   private readonly countState = signal<FieldCount | undefined>(undefined);
-  protected readonly counter = contentChild(SlFieldCounter, { descendants: true });
+  /** The counter the page wrote, anywhere in the field. */
+  readonly writtenCounter = contentChild(SlFieldCounter, { descendants: true });
+  protected readonly header = contentChild(SlFieldHeaderSlot);
+  protected readonly help = contentChild(SlFieldHelpSlot, { descendants: true });
+  protected readonly indicator = contentChild(SlFieldIndicatorSlot, { descendants: true });
   protected readonly drawnCount = computed(() =>
-    this.counter() === undefined ? this.countState() : undefined,
+    this.writtenCounter() === undefined && this.header() === undefined
+      ? this.countState()
+      : undefined,
   );
   protected readonly countOver = computed(() => {
     const count = this.drawnCount();
@@ -206,9 +223,9 @@ export class SlField {
   readonly resolvedLabelPlacement = computed(
     () => this.labelPlacement() ?? this.defaults().labelPlacement,
   );
-  readonly resolvedRequiredMark = computed(
-    () => this.requiredMark() ?? this.defaults().requiredMark,
-  );
+  readonly resolvedNecessity = computed(() => this.necessity() ?? this.defaults().necessity);
+  /** The accessible name of the help control, until one states its own. */
+  readonly resolvedHelpLabel = computed(() => this.defaults().helpLabel);
   readonly resolvedDisabled = computed(() => this.disabled() ?? this.defaults().disabled);
   readonly resolvedReadOnly = computed(() => this.readOnly() ?? this.defaults().readOnly);
   readonly resolvedWords = computed<FieldNecessityWords>(() => ({
@@ -225,15 +242,22 @@ export class SlField {
   );
 
   /**
-   * Description first, error second, and only the ones with something to say.
-   * Two known slots have one correct reading order, so it is stated rather than
-   * read from the DOM.
+   * The contract's order, and only the parts with something to say: the
+   * indicator, the help, the description, the count, the error. Known slots
+   * have one correct reading order, so it is stated rather than read from the
+   * DOM. The count is there whenever one is drawn — the page's, or the one the
+   * field or its header draws from what the control published.
    */
   readonly describedBy = computed(() => {
-    const parts = [
-      this.description() === undefined ? undefined : this.ids().description,
-      this.error() === undefined ? undefined : this.ids().error,
-    ].filter(Boolean);
+    const present = {
+      counter: this.writtenCounter() !== undefined || this.countState() !== undefined,
+      description: this.description() !== undefined,
+      error: this.error() !== undefined,
+      help: this.help() !== undefined,
+      indicator: this.indicator() !== undefined,
+    };
+    const ids = this.ids();
+    const parts = FIELD_DESCRIBED_ORDER.filter((slot) => present[slot]).map((slot) => ids[slot]);
     return parts.length === 0 ? null : parts.join(' ');
   });
 }

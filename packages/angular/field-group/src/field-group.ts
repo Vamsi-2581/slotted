@@ -19,7 +19,7 @@ import type {
   FieldDefaults,
   FieldLabelPlacement,
   FieldNecessityWords,
-  FieldRequiredMark,
+  FieldNecessity,
   FieldSize,
 } from '@slotted/angular/field';
 import { SlInlineMessage } from '@slotted/angular/inline-message';
@@ -56,7 +56,7 @@ export interface FieldGroupIds {
  * names them both.
  *
  * **The group provides for its fields.** It answers `SlFieldDefaultsSource` for
- * its own subtree, so `size`, `labelPlacement`, `requiredMark`, the necessity
+ * its own subtree, so `size`, `labelPlacement`, `necessity`, the necessity
  * words, `disabled` and `readOnly` reach every field inside — the same six an
  * application sets once with `provideFieldDefaults()`. `required` is not among
  * them: it is a fact about one value, and a section cannot know it.
@@ -103,7 +103,7 @@ export interface FieldGroupIds {
     'data-part': 'root',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-orientation]': 'orientation()',
-    '[attr.data-required-mark]': 'resolvedRequiredMark()',
+    '[attr.data-necessity]': 'resolvedNecessity()',
     '[attr.data-disabled]': "disabled() === true ? '' : null",
     '[attr.data-invalid]': "invalid() === true ? '' : null",
     '[attr.data-readonly]': "readOnly() === true ? '' : null",
@@ -118,7 +118,9 @@ export class SlFieldGroup extends SlFieldDefaultsSource {
   /** How the fields inside flow. */
   readonly orientation = input<FieldGroupOrientation>('vertical');
   /** Provided to every field inside. Defaults to the token, then to `mark`. */
-  readonly requiredMark = input<FieldRequiredMark | undefined>(undefined);
+  readonly necessity = input<FieldNecessity | undefined>(undefined);
+  /** Provided to every field inside: the accessible name of its help controls. */
+  readonly helpLabel = input<string | undefined>(undefined);
   /** Merged over the token's pair, and provided to every field inside. */
   readonly necessityWords = input<Partial<FieldNecessityWords> | undefined>(undefined);
   /** Provided to every field inside, unless the field states its own. */
@@ -176,9 +178,7 @@ export class SlFieldGroup extends SlFieldDefaultsSource {
   protected readonly error = contentChild(SlFieldGroupError, { descendants: false });
 
   readonly resolvedSize = computed(() => this.size() ?? this.inherited().size);
-  readonly resolvedRequiredMark = computed(
-    () => this.requiredMark() ?? this.inherited().requiredMark,
-  );
+  readonly resolvedNecessity = computed(() => this.necessity() ?? this.inherited().necessity);
   readonly resolvedWords = computed<FieldNecessityWords>(() => ({
     ...this.inherited().necessityWords,
     ...this.necessityWords(),
@@ -214,10 +214,11 @@ export class SlFieldGroup extends SlFieldDefaultsSource {
   fieldDefaults(): FieldDefaults {
     return {
       disabled: this.disabled() ?? this.inherited().disabled,
+      helpLabel: this.helpLabel() ?? this.inherited().helpLabel,
       labelPlacement: this.labelPlacement() ?? this.inherited().labelPlacement,
+      necessity: this.resolvedNecessity(),
       necessityWords: this.resolvedWords(),
       readOnly: this.readOnly() ?? this.inherited().readOnly,
-      requiredMark: this.resolvedRequiredMark(),
       size: this.resolvedSize(),
     };
   }

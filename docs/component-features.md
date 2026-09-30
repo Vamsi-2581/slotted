@@ -329,8 +329,9 @@ Estas capacidades sustentam componentes públicos e devem possuir testes própri
 
 ### Field e Field Group `[Core]`
 
-- **Anatomia:** Label, Control, Description, Error, Counter e RequiredMark; Group adiciona legend e descrição comum.
-- **Contrato:** `required`, `invalid`, `disabled`, `readonly`, orientação e mensagens; IDs e relações são gerados de forma estável.
+- **Anatomia:** Header, Label, Mark, Help, Indicator, Action, Counter, Control, Description e Error; Group adiciona legend e descrição comum.
+- **Contrato:** `required`, `invalid`, `disabled`, `readonly`, `necessity` (`mark`, `optional`, `words`, `none`), posição do rótulo e mensagens; IDs e relações são gerados de forma estável, e indicador, ajuda, descrição, contador e erro entram em `aria-describedby` nessa ordem.
+- A linha do rótulo (`header`) põe a ajuda, o indicador, a ação e o contador ao lado do `label`, nunca dentro dele. A ajuda abre um tooltip por hover, foco ou pressão, e o mesmo texto descreve o controlo por um nó oculto.
 - Marca de obrigatório é apresentação, não instala validação. Erro aparece após interação/submit conforme política do form e é anunciado uma vez.
 
 ### Text Field `[Core]`

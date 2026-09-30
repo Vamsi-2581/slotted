@@ -1,19 +1,49 @@
-import { useEffect } from 'react';
+import { useEffect, useId, useRef } from 'react';
+import type { FocusEvent, MouseEvent, PointerEvent } from 'react';
 
+import { Glyph, Icon } from '../icon';
 import { InlineMessage } from '../inline-message';
-import { formatFieldCount, isFieldCountOver, useField } from './field-context';
+import {
+  Tooltip,
+  TooltipArrow,
+  TooltipContent,
+  TooltipLayer,
+  TooltipTrigger,
+  useTooltip,
+} from '../tooltip';
+import { formatFieldCount, isFieldCountOver, necessityMark, useField } from './field-context';
+import { FIELD_HELP_LABEL, FIELD_NECESSITY_WORDS } from './field-defaults';
 import type {
+  FieldActionProps,
+  FieldActionRootProps,
   FieldControlProps,
   FieldControlRootProps,
   FieldCounterProps,
   FieldCounterRootProps,
+  FieldDescribedSlot,
+  FieldHeaderProps,
+  FieldHeaderRootProps,
+  FieldHelpProps,
+  FieldIndicatorProps,
+  FieldIndicatorRootProps,
   FieldLabelProps,
   FieldLabelRootProps,
   FieldMessageProps,
 } from './field.types';
 
-/** The two identifiers that join a field's `aria-describedby`, in reading order. */
-function useRegisterMessage(slot: 'description' | 'error', present: boolean) {
+/** The consumer's handler first, and the family's unless the consumer prevented it. */
+function compose<E extends { defaultPrevented: boolean }>(
+  theirs: ((event: E) => void) | undefined,
+  ours: (event: E) => void,
+) {
+  return (event: E) => {
+    theirs?.(event);
+    if (!event.defaultPrevented) ours(event);
+  };
+}
+
+/** A part that joins the field's `aria-describedby`, registered while it has something to say. */
+function useRegisterMessage(slot: FieldDescribedSlot, present: boolean) {
   const field = useField();
   const register = field?.registerMessage;
 
@@ -51,7 +81,11 @@ export function FieldLabel({
   ...nativeProps
 }: FieldLabelProps) {
   const field = useField();
-  const mark = markText(field?.requiredMark ?? 'mark', field?.required === true, field);
+  const mark = necessityMark(
+    field?.necessity ?? 'mark',
+    field?.required === true,
+    field?.necessityWords ?? FIELD_NECESSITY_WORDS,
+  );
 
   const rootProps: FieldLabelRootProps = {
     ...nativeProps,
@@ -59,11 +93,8 @@ export function FieldLabel({
       <>
         {children}
         {mark === null ? null : (
-          <span
-            {...(field?.requiredMark === 'text' ? {} : { 'aria-hidden': true })}
-            data-part="mark"
-          >
-            {mark}
+          <span {...(mark.hidden ? { 'aria-hidden': true } : {})} data-part="mark">
+            {mark.text}
           </span>
         )}
       </>
@@ -74,20 +105,6 @@ export function FieldLabel({
   };
 
   return render === undefined ? <label {...rootProps} ref={ref} /> : render(rootProps);
-}
-
-function markText(
-  requiredMark: string,
-  required: boolean,
-  field: ReturnType<typeof useField>,
-): string | null {
-  if (requiredMark === 'none') return null;
-  if (requiredMark === 'text') {
-    return required
-      ? (field?.necessityWords.required ?? '(required)')
-      : (field?.necessityWords.optional ?? '(optional)');
-  }
-  return required ? '*' : null;
 }
 
 /**
@@ -229,7 +246,226 @@ export function FieldCounter({
     children: own && count !== undefined ? formatFieldCount(count) : children,
     ...(over ? { 'data-invalid': '' } : {}),
     'data-part': 'counter',
+    id: nativeProps.id ?? field?.ids.counter,
   };
 
   return render === undefined ? <span {...rootProps} ref={ref} /> : render(rootProps);
+}
+
+/**
+ * The label row, when the label has company: the help, an indicator, an action
+ * and the counter beside it. ReUI writes the same row by hand in four of its
+ * examples; here it is a part, so its alignment, its gap and its place in a
+ * side layout are the family's.
+ *
+ * It draws the count the control published at its own end when the page wrote
+ * no counter, which is where a field without a header puts it too.
+ */
+export function FieldHeader({ children, ref, render, ...nativeProps }: FieldHeaderProps) {
+  const field = useField();
+  const register = field?.registerHeader;
+
+  useEffect(() => {
+    if (register === undefined) return;
+    register(true);
+    return () => register(false);
+  }, [register]);
+
+  const count = field?.count;
+  const drawn =
+    count === undefined || field?.hasCounter === true ? null : (
+      <span
+        {...(isFieldCountOver(count) ? { 'data-invalid': '' } : {})}
+        data-part="counter"
+        id={field?.ids.counter}
+      >
+        {formatFieldCount(count)}
+      </span>
+    );
+
+  const rootProps: FieldHeaderRootProps = {
+    ...nativeProps,
+    children: (
+      <>
+        {children}
+        {drawn}
+      </>
+    ),
+    'data-part': 'header',
+  };
+
+  return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
+}
+
+/**
+ * What qualifies the field — `Beta`, `Pro`, `New` — as one or more `Badge`s
+ * after the label. It stands outside the `label`, so the necessity mark stays
+ * against the label's last word, and it joins the control's description, so a
+ * reader on the control hears it.
+ */
+export function FieldIndicator({ children, id, ref, render, ...nativeProps }: FieldIndicatorProps) {
+  const field = useField();
+  useRegisterMessage('indicator', hasContent(children));
+
+  const rootProps: FieldIndicatorRootProps = {
+    ...nativeProps,
+    children,
+    'data-part': 'indicator',
+    id: id ?? field?.ids.indicator,
+  };
+
+  return render === undefined ? <span {...rootProps} ref={ref} /> : render(rootProps);
+}
+
+/**
+ * A link or a button at the end of the label row — `Forgot password?`,
+ * `Generate`. A `button type="button"` by default, so it never submits the form
+ * it sits in; a link through `render`, which receives the props without `type`.
+ * The field does not disable it with the control: what it does is the page's.
+ */
+export function FieldAction({ ref, render, type, ...nativeProps }: FieldActionProps) {
+  const rootProps: FieldActionRootProps = { ...nativeProps, 'data-part': 'action' };
+
+  return render === undefined ? (
+    <button {...rootProps} ref={ref} type={type ?? 'button'} />
+  ) : (
+    render(rootProps)
+  );
+}
+
+/**
+ * The help beside the label: a button drawing `circle-question`, and the hint in
+ * a `Tooltip`.
+ *
+ * **A press is the hint.** A tooltip opens on a coarse pointer only by a long
+ * press, because a tap is the trigger's own action; this button has no other
+ * action, so the family runs the tooltip by hand (`openOn="manual"`) and a press
+ * pins the hint open, a second press closes it. Hover and keyboard focus still
+ * open it the way every tooltip opens, and a hint opened by hover closes when
+ * the pointer leaves, unless a press pinned it. It is Carbon's toggletip.
+ *
+ * **The words are written once and heard in two places.** The tooltip's layer
+ * exists only while it is open, so the button and the control are described by
+ * a `hidden` node inside the button carrying the same text — a directly referenced hidden element
+ * still enters the description (accname 1.2, step 2A) — and the tooltip is asked
+ * to describe nothing, so the hint is not read twice.
+ *
+ * **It stays operable on a disabled field.** The help is often where the reason
+ * the field is off is written.
+ */
+export function FieldHelp({
+  children,
+  defaultOpen,
+  onOpenChange,
+  open,
+  side,
+  ...buttonProps
+}: FieldHelpProps) {
+  const field = useField();
+  const fallbackId = useId();
+  const textId = field?.ids.help ?? `slotted-field-help-${fallbackId}`;
+  useRegisterMessage('help', hasContent(children));
+
+  return (
+    <>
+      <Tooltip
+        closeOnPress={false}
+        defaultOpen={defaultOpen}
+        describes="none"
+        onOpenChange={onOpenChange}
+        open={open}
+        openOn="manual"
+        side={side}
+      >
+        <FieldHelpTrigger
+          {...buttonProps}
+          aria-describedby={buttonProps['aria-describedby'] ?? textId}
+          aria-label={buttonProps['aria-label'] ?? field?.helpLabel ?? FIELD_HELP_LABEL}
+        >
+          <span data-part="help-text" hidden id={textId}>
+            {children}
+          </span>
+        </FieldHelpTrigger>
+        <TooltipLayer>
+          <TooltipContent>{children}</TooltipContent>
+          <TooltipArrow />
+        </TooltipLayer>
+      </Tooltip>
+    </>
+  );
+}
+
+type FieldHelpTriggerProps = Omit<FieldHelpProps, 'defaultOpen' | 'onOpenChange' | 'open' | 'side'>;
+
+function FieldHelpTrigger({
+  children,
+  onBlur,
+  onClick,
+  onFocus,
+  onPointerEnter,
+  onPointerLeave,
+  ref,
+  ...nativeProps
+}: FieldHelpTriggerProps) {
+  const tooltip = useTooltip();
+  const pinned = useRef(false);
+
+  /* A hint closed from anywhere — Escape, a press outside, the consumer — is
+     no longer pinned by the press that opened it. */
+  useEffect(() => {
+    if (!tooltip.open) pinned.current = false;
+  }, [tooltip.open]);
+
+  const enter = (event: PointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType === 'touch') return;
+    if (!tooltip.open) tooltip.openAfterDelay(event.nativeEvent);
+  };
+
+  const leave = (event: PointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType === 'touch' || pinned.current) return;
+    tooltip.closeAfterDelay(event.nativeEvent);
+  };
+
+  /** `:focus-visible` rather than every focus: a press focuses the button too. */
+  const focus = (event: FocusEvent<HTMLButtonElement>) => {
+    if (!event.target.matches(':focus-visible')) return;
+    tooltip.toggle(true, 'keyboard', event.nativeEvent);
+  };
+
+  const blur = (event: FocusEvent<HTMLButtonElement>) => {
+    tooltip.toggle(false, 'blur', event.nativeEvent);
+  };
+
+  /**
+   * A click synthesised by the keyboard reports no detail; a real one reports
+   * the click count, which is how `Enter` and `Space` are told from a press.
+   */
+  const press = (event: MouseEvent<HTMLButtonElement>) => {
+    const reason = event.detail === 0 ? 'keyboard' : 'pointer';
+    if (tooltip.open && pinned.current) {
+      pinned.current = false;
+      tooltip.toggle(false, reason, event.nativeEvent);
+      return;
+    }
+    pinned.current = true;
+    tooltip.toggle(true, reason, event.nativeEvent);
+  };
+
+  return (
+    <TooltipTrigger
+      {...nativeProps}
+      data-part="help"
+      onBlur={compose(onBlur, blur)}
+      onClick={compose(onClick, press)}
+      onFocus={compose(onFocus, focus)}
+      onPointerEnter={compose(onPointerEnter, enter)}
+      onPointerLeave={compose(onPointerLeave, leave)}
+      ref={ref}
+    >
+      <Icon>
+        <Glyph name="circle-question" />
+      </Icon>
+      {children}
+    </TooltipTrigger>
+  );
 }

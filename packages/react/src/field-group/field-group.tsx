@@ -46,7 +46,7 @@ export function deriveFieldGroupIds(base: string): FieldGroupIds {
  * names them both.
  *
  * **The group provides for its fields.** `size`, `labelPlacement`,
- * `requiredMark`, the necessity words, `disabled` and `readOnly` reach every
+ * `necessity`, the necessity words, the help label, `disabled` and `readOnly` reach every
  * field inside through the same provider an application uses, so a compact
  * section is one attribute rather than one per field. `required` is not
  * provided: it is a fact about one value, and a section cannot know it.
@@ -55,16 +55,17 @@ export function FieldGroup({
   'aria-describedby': describedBy,
   children,
   disabled,
+  helpLabel,
   id,
   invalid,
   labelPlacement,
+  necessity,
   necessityWords,
   orientation,
   readOnly,
   ref,
   render,
   required,
-  requiredMark,
   size,
   ...nativeProps
 }: FieldGroupProps) {
@@ -84,7 +85,7 @@ export function FieldGroup({
   }, []);
 
   const resolvedSize = size ?? defaults.size;
-  const resolvedRequiredMark = requiredMark ?? defaults.requiredMark;
+  const resolvedNecessity = necessity ?? defaults.necessity;
   const resolvedWords = { ...defaults.necessityWords, ...necessityWords };
 
   const merged =
@@ -106,9 +107,9 @@ export function FieldGroup({
      */
     messageSize: resolvedSize === 'sm' ? 'sm' : 'md',
     necessityWords: resolvedWords,
+    necessity: resolvedNecessity,
     registerMessage,
     required,
-    requiredMark: resolvedRequiredMark,
     size: resolvedSize,
   };
 
@@ -121,8 +122,8 @@ export function FieldGroup({
     ...(readOnly === true ? { 'data-readonly': '' } : {}),
     ...(required === true ? { 'data-required': '' } : {}),
     'data-orientation': orientation ?? 'vertical',
+    'data-necessity': resolvedNecessity,
     'data-part': 'root',
-    'data-required-mark': resolvedRequiredMark,
     'data-size': resolvedSize,
     'data-ui': 'field-group',
     disabled,
@@ -132,10 +133,11 @@ export function FieldGroup({
     <FieldGroupContext.Provider value={value}>
       <FieldDefaultsProvider
         disabled={disabled}
+        helpLabel={helpLabel}
         labelPlacement={labelPlacement}
+        necessity={resolvedNecessity}
         necessityWords={resolvedWords}
         readOnly={readOnly}
-        requiredMark={resolvedRequiredMark}
         size={resolvedSize}
       >
         {render === undefined ? <fieldset {...rootProps} ref={ref} /> : render(rootProps)}

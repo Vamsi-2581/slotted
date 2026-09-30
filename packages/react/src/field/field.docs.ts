@@ -2,6 +2,7 @@ import { defineSnippet } from '@slotted/storybook-workbench';
 import type {
   AnatomyRow,
   ApiRow,
+  EventRow,
   ReferenceImport,
   ReferenceSceneMeta,
 } from '@slotted/storybook-workbench';
@@ -24,7 +25,7 @@ export const REACT_FIELD_TOKENS = fieldTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import {\n  Field,\n  FieldControl,\n  FieldCounter,\n  FieldDefaultsProvider,\n  FieldDescription,\n  FieldError,\n  FieldLabel,\n} from '@slotted/react';",
+    "import {\n  Field,\n  FieldAction,\n  FieldControl,\n  FieldCounter,\n  FieldDefaultsProvider,\n  FieldDescription,\n  FieldError,\n  FieldHeader,\n  FieldHelp,\n  FieldIndicator,\n  FieldLabel,\n} from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -34,6 +35,13 @@ const anatomy: AnatomyRow[] = [
     required: true,
     purpose:
       'The field. Carries data-ui="field", the three axes, and data-disabled, data-invalid, data-required and data-readonly. It is its own container, so the side label reflows on the field’s width rather than the window’s.',
+  },
+  {
+    part: 'header',
+    element: 'div, or the element render returns',
+    required: false,
+    purpose:
+      'The label row, when the label has company: the help, an indicator, an action and the counter. It aligns them on the label’s first baseline, wraps when it runs out of room, and puts the action and the count at its end. A field whose label stands alone writes the label on the root and no header.',
   },
   {
     part: 'label',
@@ -47,7 +55,28 @@ const anatomy: AnatomyRow[] = [
     element: 'span, inside the label',
     required: false,
     purpose:
-      'The necessity marker the label draws itself: an asterisk, or (required) and (optional) as words. The glyph is aria-hidden because aria-required already carries the semantics; the words are not, because they are information.',
+      'The necessity marker the label draws itself: an asterisk on a required field, (optional) on the fields a reader may skip, or both words. The glyph is aria-hidden because aria-required already carries the semantics; the words are not, because they are information.',
+  },
+  {
+    part: 'help',
+    element: 'button, fixed',
+    required: false,
+    purpose:
+      'A circle-question glyph beside the label that opens the field’s help in a tooltip — on hover, on keyboard focus, and on a press, which pins it until a second press, Escape or a press elsewhere. A hidden node inside it carries the same words, so the button and the control are described by the help whether the tooltip is open or not.',
+  },
+  {
+    part: 'indicator',
+    element: 'span, or the element render returns',
+    required: false,
+    purpose:
+      'What qualifies the field — Beta, Pro, New — as one or more Badges after the label. Outside the label, so the necessity mark stays against the last word; in the control’s description, so a reader on the control hears it.',
+  },
+  {
+    part: 'action',
+    element: 'button type="button", or the element render returns',
+    required: false,
+    purpose:
+      'A link or a button at the end of the label row: Forgot password?, Generate. Accent ink that darkens a third of the way on hover with the underline drawn, two thirds on press. The field does not disable it with the control.',
   },
   {
     part: 'control',
@@ -61,7 +90,15 @@ const anatomy: AnatomyRow[] = [
     element: 'span, or the element render returns',
     required: false,
     purpose:
-      'A count the page owns, at the end of the label row — where Carbon puts it. It carries its own data-invalid, because a count can pass its limit before validation has run.',
+      'The count, at the end of the label row — where Carbon puts it — and inside the header when there is one. The control publishes it and the field draws it; a page that counts words or bytes writes its own. It joins the control’s description, and carries its own data-invalid, because a count can pass its limit before validation has run.',
+  },
+];
+
+const events: EventRow[] = [
+  {
+    name: 'onOpenChange',
+    payload: '(open: boolean, request: TooltipChangeRequest)',
+    when: 'On FieldHelp, before the hint opens or closes, once per transition. The reason is pointer for a hover or a press, keyboard for focus, Enter or Space, escape, blur or programmatic, and cancel() refuses the change.',
   },
 ];
 
@@ -81,13 +118,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'necessity',
     title: 'Saying which answers are required',
-    note: 'The asterisk is the convention; the words are what a form of mostly optional fields needs, because marking the two that are required leaves the rest ambiguous. Both forms come from the same axis.',
+    note: 'The asterisk is the convention. A form where most fields are required marks the exception instead — optional writes (optional) on the fields a reader may skip and nothing on the rest — and words names both sides. All four answers come from one axis an application sets once.',
     snippet: defineSnippet({
       id: 'field-react-necessity',
       language: 'tsx',
-      label: 'A mark, two words, or nothing',
+      label: 'A mark, a word on the optional fields, both words, or nothing',
       source:
-        '// The glyph is aria-hidden; aria-required on the control says it once.\n<Field required>…</Field>;\n\n// (required) on a required field, (optional) on one that is not.\n<Field required requiredMark="text">\n  …\n</Field>;\n<Field requiredMark="text">…</Field>;',
+        '// The glyph is aria-hidden; aria-required on the control says it once.\n<Field required>…</Field>;\n\n// (optional) on the fields a reader may skip, nothing on the rest.\n<Field necessity="optional">…</Field>;\n\n// (required) on a required field, (optional) on one that is not.\n<Field necessity="words" required>\n  …\n</Field>;',
     }),
   },
   {
@@ -151,6 +188,18 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'header',
+    title: 'The label row: help, indicator, action and count',
+    note: 'Hover the circle, or tab to it: the hint opens. Press it and it stays until a second press, which is what a finger needs. The row is as tall as the label with or without them, aligns on the label’s baseline, and in a narrow field sends the action and the count to a line of their own.',
+    snippet: defineSnippet({
+      id: 'field-react-header',
+      language: 'tsx',
+      label: 'A header around the label and what stands beside it',
+      source:
+        '<Field required>\n  <FieldHeader>\n    <FieldLabel>Senha</FieldLabel>\n    <FieldHelp>No mínimo oito caracteres, com letras e números.</FieldHelp>\n    <FieldAction render={(props) => <a {...props} href="/recuperar" />}>\n      Esqueceu a senha?\n    </FieldAction>\n  </FieldHeader>\n  <FieldControl type="password" />\n</Field>;\n\n<Field>\n  <FieldHeader>\n    <FieldLabel>Endpoint da API</FieldLabel>\n    <FieldIndicator>\n      <Badge size="sm" tone="accent" variant="soft">\n        Beta\n      </Badge>\n    </FieldIndicator>\n  </FieldHeader>\n  <FieldControl />\n</Field>;',
+    }),
+  },
+  {
     id: 'content',
     title: 'Content the field did not choose',
     note: 'A German compound with no break opportunity, a container digest in the description, and an Arabic field in a right-to-left document — the label breaks rather than sliding under the control, and the necessity word never breaks.',
@@ -171,19 +220,19 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'One decision for the application, and one control of your own',
       source:
-        '<FieldDefaultsProvider necessityWords={{ optional: \'(opcional)\' }} requiredMark="text" size="sm">\n  <App />\n</FieldDefaultsProvider>;\n\n// A control the library does not own, wired without a wrapper.\nfunction MoneyInput() {\n  const field = useField();\n  return <input id={field?.ids.control} aria-describedby={field?.describedBy} />;\n}',
+        '<FieldDefaultsProvider necessityWords={{ optional: \'(opcional)\' }} necessity="words" size="sm">\n  <App />\n</FieldDefaultsProvider>;\n\n// A control the library does not own, wired without a wrapper.\nfunction MoneyInput() {\n  const field = useField();\n  return <input id={field?.ids.control} aria-describedby={field?.describedBy} />;\n}',
     }),
   },
   {
     id: 'accessibility',
     title: 'What a reader hears, in order',
-    note: 'Turn a screen reader on and enter the control: the label, then “required”, then the help, then the error — one name, one description built from two elements in a fixed order, and no asterisk read aloud.',
+    note: 'Turn a screen reader on and enter the control: the label, then “required”, then the indicator, the help behind the icon, the description, the count and the error — one name, one description in a fixed order, and no asterisk read aloud.',
     snippet: defineSnippet({
       id: 'field-react-accessibility',
       language: 'tsx',
-      label: 'The four identifiers, and the two that are read',
+      label: 'The identifiers, and the ones that are read',
       source:
-        '<div data-ui="field" data-part="root">\n  <label data-part="label" for="cnpj-control">\n    CNPJ\n    <span aria-hidden="true" data-part="mark">\n      *\n    </span>\n  </label>\n  <input\n    aria-describedby="cnpj-description cnpj-error"\n    aria-invalid="true"\n    aria-required="true"\n    id="cnpj-control"\n  />\n</div>;',
+        '<div data-ui="field" data-part="root">\n  <div data-part="header">\n    <label data-part="label" for="cnpj-control">\n      CNPJ\n      <span aria-hidden="true" data-part="mark">\n        *\n      </span>\n    </label>\n    <button aria-describedby="cnpj-help" aria-label="More information" data-part="help">\n      <span data-part="help-text" hidden id="cnpj-help">\n        Somente números.\n      </span>\n    </button>\n  </div>\n  <input\n    aria-describedby="cnpj-help cnpj-description cnpj-error"\n    aria-invalid="true"\n    aria-required="true"\n    id="cnpj-control"\n  />\n</div>;',
     }),
   },
 ];
@@ -209,18 +258,18 @@ export const REACT_FIELD_DOCS = {
         'Where the label sits. side reflows to top below 320 pixels of the field’s own inline size, which is a container query rather than a viewport one',
       ],
       [
-        'requiredMark',
-        "'mark' | 'text' | 'none'",
+        'necessity',
+        "'mark' | 'optional' | 'words' | 'none'",
         'mark',
         'Field',
-        'How necessity is said: an asterisk, the words (required) and (optional), or nothing — for a form that says once that every field is required',
+        'How necessity is said: an asterisk on a required field, (optional) on the fields a reader may skip, both words, or nothing — for a form that says once that every field is required',
       ],
       [
         'necessityWords',
         '{ required?: string; optional?: string }',
         '(required) / (optional)',
         'Field, FieldDefaultsProvider',
-        'The two words requiredMark="text" writes, merged over the inherited pair so one can be replaced alone',
+        'The two words necessity="optional" and necessity="words" write, merged over the inherited pair so one can be replaced alone',
       ],
       [
         'required',
@@ -255,7 +304,56 @@ export const REACT_FIELD_DOCS = {
         'string',
         'generated',
         'Field',
-        'The base every identifier is derived from — <id>-control, <id>-label, <id>-description, <id>-error. Generated with useId when unstated',
+        'The base every identifier is derived from — <id>-control, <id>-label, <id>-indicator, <id>-help, <id>-description, <id>-counter, <id>-error. Generated with useId when unstated',
+      ],
+      [
+        'children',
+        'ReactNode',
+        '—',
+        'FieldHelp',
+        'The help. Written once, it reaches the tooltip and the hidden node that describes the button and the control',
+      ],
+      [
+        'open',
+        'boolean',
+        '—',
+        'FieldHelp',
+        'Whether the hint is showing, controlled. Pair it with onOpenChange; leave both unset and the help owns the state',
+      ],
+      [
+        'defaultOpen',
+        'boolean',
+        'false',
+        'FieldHelp',
+        'Whether the hint starts open, read once when the help owns the state',
+      ],
+      [
+        'side',
+        "'top' | 'bottom' | 'inline-start' | 'inline-end' | 'left' | 'right'",
+        'top',
+        'FieldHelp',
+        'Where the hint opens, flipping when there is no room',
+      ],
+      [
+        'aria-label',
+        'string',
+        'helpLabel',
+        'FieldHelp',
+        'The accessible name of the help control. Unstated, it is the provider’s helpLabel; stated, it wins for this control alone',
+      ],
+      [
+        'helpLabel',
+        'string',
+        'More information',
+        'FieldDefaultsProvider, FieldGroup',
+        'The accessible name of every help control under it, so an application translates it once',
+      ],
+      [
+        'type',
+        "'button' | 'submit' | 'reset'",
+        'button',
+        'FieldAction',
+        'button by default, so the action never submits the form it sits in. A link rendered through render receives the props without it',
       ],
       [
         'tone',
@@ -286,13 +384,21 @@ export const REACT_FIELD_DOCS = {
         'Holds one line box open whether or not there is a message, so a form that renders its error unconditionally does not move when the error arrives',
       ],
     ]),
+    events,
     composition: apiRows([
       [
         'render',
         '(props) => ReactNode',
         '—',
-        'Field, FieldLabel, FieldControl, FieldCounter',
-        'Substitutes the rendered element and hands it every attribute. A textarea as the control, an output as the counter, a fieldset as the field. The props are typed against HTMLAttributes<HTMLElement> so they can be spread onto any element, which is what makes the substitution real',
+        'Field, FieldHeader, FieldLabel, FieldIndicator, FieldAction, FieldControl, FieldCounter',
+        'Substitutes the rendered element and hands it every attribute. A textarea as the control, an output as the counter, a link as the action, a fieldset as the field. The props are typed against HTMLAttributes<HTMLElement> so they can be spread onto any element, which is what makes the substitution real. FieldHelp is fixed: its button carries the name, the description and the control of the tooltip, and all three are the family’s',
+      ],
+      [
+        'onClick and the pointer and focus handlers',
+        'native',
+        '—',
+        'FieldHelp, FieldAction',
+        'The consumer’s handler runs first and the family’s after it, unless the consumer called preventDefault',
       ],
       [
         'useField()',
@@ -303,24 +409,27 @@ export const REACT_FIELD_DOCS = {
       ],
       [
         'FieldDefaultsProvider',
-        '{ size, labelPlacement, requiredMark, necessityWords, disabled, readOnly }',
+        '{ size, labelPlacement, necessity, necessityWords, helpLabel, disabled, readOnly }',
         '—',
         'a subtree',
-        'The six decisions an application takes once. FieldGroup renders one for the fields inside it, so a compact or disabled section is one attribute rather than one per field',
+        'The seven decisions an application takes once. FieldGroup renders one for the fields inside it, so a compact or disabled section is one attribute rather than one per field',
       ],
       [
         'ref',
         'Ref<HTMLElement>',
         '—',
         'every part',
-        'Reaches the default element. A part rendered through render is written by the consumer, so they attach their own ref to it. There is no imperative handle either way: the family holds no state and moves nothing',
+        'Reaches the default element — on FieldHelp, the button. A part rendered through render is written by the consumer, so they attach their own ref to it. There is no imperative handle: the one state the family holds, the hint, is open and onOpenChange',
       ],
     ]),
     accessibility: [
       'There is no WAI-ARIA APG pattern for a field. Four documents cover it between them: the APG’s Providing Accessible Names and Descriptions practice (w3.org/WAI/ARIA/apg/practices/names-and-descriptions/) for the label and the description, the HTML specification for label[for] and fieldset[disabled], and WCAG 2.2 Understanding 3.3.1 Error Identification and 3.3.2 Labels or Instructions for the error and the help.',
       'The label is associated explicitly. The APG’s naming practice records that the implicit form — wrapping the control in the label — is one some combinations of assistive technology and browser fail to treat as an accessible name at all, so the field derives an identifier and points for at it rather than nesting.',
       'aria-required, never the native required. The native attribute engages browser constraint validation and changes submit behaviour, which the library must not impose as a side effect of describing a field. A consumer who wants it writes required on the control themselves and it survives, because an explicit value on the control always wins. disabled and readonly are native, because removing a control from the tab order and from submission is what those two words mean.',
-      'The accessible description is the help and then the error, in that order, whatever order the page wrote them in. Two known slots have one correct reading order, and deriving it from registration order would make what a reader hears depend on when an effect ran.',
+      'The accessible description is the indicator, the help behind the icon, the description, the count and the error, in that order, whatever order the page wrote them in. Known slots have one correct reading order, and deriving it from registration order would make what a reader hears depend on when an effect ran. The count is there because docs/component-features.md §2.8 requires a counter related to its control by identifier.',
+      'The help, the indicator and the action stand beside the label, never inside it. A button is labelable content, which HTML forbids inside a label other than the control it labels, and a press on it would reach the label and move focus to the control instead of opening the hint.',
+      'The help is a toggletip. A tooltip alone opens on a coarse pointer only by a long press, because a tap is the trigger’s own action; the help has no other action, so a press opens it and a second press closes it. Its words also sit in a hidden node inside the button, which describes the button and the control while the tooltip is closed — a directly referenced hidden element still enters the description — and the tooltip itself describes nothing, so the hint is never read twice.',
+      'A disabled field leaves its help and its action operable. The help is often where the reason the field is off is written.',
       'The necessity marker is hidden and the necessity words are not. A reader working through a form of twenty required fields does not need to hear “asterisk” twenty times, and aria-required already says it; (optional), by contrast, is information nobody else supplies.',
       'The error is text in the flow of the page, which is what WCAG 2.2 SC 3.3.1 requires. It is never a tooltip, and because it is an inline-message it also carries the severity as a clipped word — so a reader who cannot see the red ink still hears “Error:” before the sentence.',
       'live defaults to off. A message already present when the page finishes loading is announced by nothing whatever role it carries, so a form that raises the error after submit sets live="polite" and the reader hears it once rather than on every render.',
@@ -331,7 +440,7 @@ export const REACT_FIELD_DOCS = {
         language: 'tsx',
         label: 'Anatomy, as it reaches the DOM',
         source:
-          '<div\n  data-ui="field"\n  data-part="root"\n  data-size="md"\n  data-label-placement="top"\n  data-required-mark="mark"\n  data-required\n  data-invalid\n>\n  <label data-part="label" for="cnpj-control">\n    CNPJ\n    <span aria-hidden="true" data-part="mark">\n      *\n    </span>\n  </label>\n  <span data-part="counter">14/18</span>\n  <input data-part="control" id="cnpj-control" aria-invalid="true" aria-required="true" />\n  <p data-ui="inline-message" data-part="root" data-tone="secondary" id="cnpj-description">\n    <span data-part="text">Somente números.</span>\n  </p>\n</div>;',
+          '<div\n  data-ui="field"\n  data-part="root"\n  data-size="md"\n  data-label-placement="top"\n  data-necessity="mark"\n  data-required\n  data-invalid\n>\n  <label data-part="label" for="cnpj-control">\n    CNPJ\n    <span aria-hidden="true" data-part="mark">\n      *\n    </span>\n  </label>\n  <span data-part="counter">14/18</span>\n  <input data-part="control" id="cnpj-control" aria-invalid="true" aria-required="true" />\n  <p data-ui="inline-message" data-part="root" data-tone="secondary" id="cnpj-description">\n    <span data-part="text">Somente números.</span>\n  </p>\n</div>;',
       }),
       defineSnippet({
         id: 'field-theming',

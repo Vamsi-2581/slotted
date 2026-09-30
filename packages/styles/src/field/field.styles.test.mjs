@@ -21,9 +21,35 @@ const ui = `[data-ui='${contract.ui}']`;
 const root = `${ui}[data-part='root']`;
 const member = contract.members.field;
 
-/** The declarations of the first rule whose selector starts with `selector`. */
+/** A selector list split at its top-level commas, leaving `:is(a, b)` whole. */
+function selectors(list) {
+  const out = [];
+  let depth = 0;
+  let start = 0;
+  for (let index = 0; index < list.length; index += 1) {
+    const char = list[index];
+    if (char === '(') depth += 1;
+    else if (char === ')') depth -= 1;
+    else if (char === ',' && depth === 0) {
+      out.push(list.slice(start, index).trim());
+      start = index + 1;
+    }
+  }
+  out.push(list.slice(start).trim());
+  return out;
+}
+
+/**
+ * The declarations of every rule whose selector list names `selector`, in
+ * source order. A label on the root and a label in the header share their type
+ * in one rule, so a rule is found by any selector in its list rather than by
+ * the text that happens to precede its brace.
+ */
 function rule(selector) {
-  return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
+  return [...normalized.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+    .filter(([, list]) => selectors(list).includes(selector))
+    .map(([, , body]) => body)
+    .join('');
 }
 
 test('lives in the component layer', () => {
@@ -86,6 +112,7 @@ test('owns the container the side label is measured against', () => {
 test('places its children without selecting the messages', () => {
   assert.match(rule(`${root}>*`), /grid-column:1 \/ -1/);
   assert.match(rule(`${ui}>[data-part='label']`), /grid-column:1 \/ -1/);
+  assert.match(rule(`${ui}>[data-part='header']`), /grid-column:1 \/ -1/);
   assert.match(rule(`${ui}>[data-part='counter']`), /grid-column:3/);
   assert.ok(
     !normalized.includes(`${ui}>[data-ui='inline-message']{`),
@@ -109,10 +136,22 @@ test('stops the label at the counter only when there is a counter', () => {
  * A control spanning to the last track would meet the counter's cell on the
  * first row and be pushed to a row of its own, which is the side layout undone.
  */
-test('keeps the side label, its control and the counter on one row', () => {
+test('keeps the side label and its control on one row, and the count in the label track', () => {
   const query = normalized.split('@container slotted-field (min-width:320px){')[1] ?? '';
-  assert.ok(query.includes(`${root}[data-label-placement='side']>*{grid-column:2 / 3`));
-  assert.ok(query.includes(`[data-label-placement='side']>[data-part='counter']{grid-column:3`));
+  assert.ok(
+    query.includes(`${root}[data-label-placement='side']>*{align-self:start;grid-column:2 / 3`),
+    'a side child stretches to the height of the label beside it',
+  );
+  assert.ok(
+    query.includes(
+      `[data-label-placement='side']>[data-part='counter']{grid-column:1;grid-row:2;justify-self:end`,
+    ),
+    'the counter a field draws beside its control is not where a header puts it',
+  );
+  assert.ok(
+    query.includes(`${root}[data-label-placement='side']>[data-part='header']{grid-column:1`),
+    'the header does not take the label track',
+  );
 });
 
 /**
@@ -160,7 +199,9 @@ test('paints the mark as a severity and the words as a qualifier', () => {
     /color:var\(--slotted-field-mark-color,var\(--slotted-tone-danger-text\)\)/,
   );
   assert.match(
-    rule(`${ui}[data-required-mark='text']>[data-part='label']>[data-part='mark']`),
+    rule(
+      `${ui}:is([data-necessity='optional'],[data-necessity='words'])>[data-part='label']>[data-part='mark']`,
+    ),
     /color:var\(--slotted-field-mark-text-color,var\(--slotted-text-muted\)\)/,
   );
 });
@@ -246,4 +287,74 @@ test('sets the type of what the field says: xs, and a weight up for an outcome',
  */
 test('never distributes surplus height between its rows', () => {
   assert.match(declarations, /\[data-ui='field'\]\[data-part='root'\][^}]*align-content:\s*start/);
+});
+
+/**
+ * The header aligns what it holds on the label's first baseline, wraps when it
+ * runs out of room, and puts the action and the counter at its end. ReUI
+ * centres every item of the same row (`items-center`), which sets a 13-pixel
+ * label and a 12-pixel count on one centre instead of one line of text.
+ */
+test('sets the header on the label’s baseline and ends it with the action and the count', () => {
+  const header = rule(`${ui}>[data-part='header']`);
+  assert.match(header, /align-items:baseline/);
+  assert.match(header, /display:flex/);
+  assert.match(header, /flex-wrap:wrap/);
+  assert.match(rule(`${ui}>[data-part='header']>[data-part='action']`), /margin-inline-start:auto/);
+  assert.match(
+    rule(`${ui}>[data-part='header']>[data-part='counter']`),
+    /margin-inline-start:auto/,
+  );
+});
+
+/**
+ * Nothing in the header makes the row taller than the label. The help gives
+ * back the difference between its box and the label's line, and never stands
+ * shorter than that line — at dense the inside of a control is 16 pixels and
+ * the line 17.39, and a shorter button overflowed downward and grew the row.
+ * The badges of the indicator are centred on the line rather than set on its
+ * baseline, where their inset stood them 1.77 pixels above it.
+ */
+test('keeps the label row as tall as the label', () => {
+  const help = rule(`${ui}>[data-part='header']>[data-part='help']`);
+  assert.match(help, /--_box:max\(min\(/);
+  assert.match(help, /,1lh\);/);
+  assert.match(help, /margin-block:calc\(/);
+  assert.match(rule(`${ui}>[data-part='header']>[data-part='indicator']`), /align-self:center/);
+});
+
+/**
+ * The action speaks the vocabulary `link` settled for text that answers a
+ * pointer: accent ink, a hover a third of the way to the body colour with the
+ * underline drawn, a press two thirds of the way. The press differs from the
+ * hover, which ReUI's does not.
+ */
+test('answers the pointer on the action the way a link does', () => {
+  const hover = normalized.match(
+    /\[data-part='action'\]:not\(:disabled,\[aria-disabled='true'\]\):hover\{([^}]*)\}/,
+  )?.[1];
+  const active = normalized.match(
+    /\[data-part='action'\]:not\(:disabled,\[aria-disabled='true'\]\):active\{([^}]*)\}/,
+  )?.[1];
+  assert.match(hover ?? '', /65%/);
+  assert.match(active ?? '', /35%/);
+  assert.match(hover ?? '', /text-decoration-color:currentColor/);
+});
+
+/** The glyph sits on the band between the capitals and the lowercase. */
+test('centres the help glyph on the label’s text rather than on its line box', () => {
+  assert.match(
+    rule(`${ui}>[data-part='header']>[data-part='help']>[data-ui='icon']`),
+    /vertical-align:calc\(\(\(1cap \+ 1ex\) \/ 2 - var\(--_help-glyph\)\) \/ 2\)/,
+  );
+});
+
+/** The help and the action stay operable when the field is disabled. */
+test('leaves the help and the action alone on a disabled field', () => {
+  for (const part of contract.disabledLeaves) {
+    assert.ok(
+      !normalized.includes(`${root}[data-disabled]>[data-part='header']>[data-part='${part}']`),
+      `a disabled field repaints its ${part}`,
+    );
+  }
 });

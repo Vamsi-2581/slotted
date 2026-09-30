@@ -38,7 +38,14 @@ export function Grid({ children, columns }: { children: ReactNode; columns: 1 | 
   );
 }
 
-/** A narrow column, for showing what a field does below 320 pixels. */
-export function Measure({ children }: { children: ReactNode }) {
-  return <div className="slotted-demo-measure">{children}</div>;
+/**
+ * A narrow column: 360 pixels, or a drawer's 280 — the one under the 320
+ * pixels of its own width below which a side label stacks.
+ */
+export function Measure({ children, width }: { children: ReactNode; width?: 'drawer' }) {
+  return (
+    <div className="slotted-demo-measure" data-width={width}>
+      {children}
+    </div>
+  );
 }

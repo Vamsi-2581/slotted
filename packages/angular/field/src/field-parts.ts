@@ -3,12 +3,14 @@ import {
   Component,
   computed,
   Directive,
+  ElementRef,
   HostAttributeToken,
   inject,
   ViewEncapsulation,
 } from '@angular/core';
 
 import { SlField } from './field';
+import { necessityMark } from './field-defaults';
 
 /**
  * Names the control, and says whether it has to be answered.
@@ -48,18 +50,15 @@ export class SlFieldLabel {
   protected readonly labelFor = computed(() => this.writtenFor ?? this.field.ids().control);
   protected readonly labelId = computed(() => this.writtenId ?? this.field.ids().label);
 
-  protected readonly markHidden = computed(() => this.field.resolvedRequiredMark() !== 'text');
-
-  protected readonly mark = computed(() => {
-    const style = this.field.resolvedRequiredMark();
-    const required = this.field.required() === true;
-    if (style === 'none') return null;
-    if (style === 'text') {
-      const words = this.field.resolvedWords();
-      return required ? words.required : words.optional;
-    }
-    return required ? '*' : null;
-  });
+  private readonly necessity = computed(() =>
+    necessityMark(
+      this.field.resolvedNecessity(),
+      this.field.required() === true,
+      this.field.resolvedWords(),
+    ),
+  );
+  protected readonly markHidden = computed(() => this.necessity()?.hidden === true);
+  protected readonly mark = computed(() => this.necessity()?.text ?? null);
 }
 
 /**
@@ -125,4 +124,29 @@ export class SlFieldControl {
   protected readonly readonlyAttribute = computed(
     () => this.writtenReadonly ?? (this.field.resolvedReadOnly() === true ? '' : null),
   );
+}
+
+/**
+ * A link or a button at the end of the label row — `Forgot password?`,
+ * `Generate` — written on the consumer's own `a` or `button`. On a `button` the
+ * directive writes `type="button"` unless the page wrote a type, so it never
+ * submits the form it sits in; on a link it writes nothing. The field does not
+ * disable it with the control: what it does is the page's.
+ */
+@Directive({
+  selector: '[slFieldAction]',
+  standalone: true,
+  exportAs: 'slFieldAction',
+  host: {
+    'data-part': 'action',
+    '[attr.type]': 'type',
+  },
+})
+export class SlFieldAction {
+  private readonly writtenType = inject(new HostAttributeToken('type'), { optional: true });
+  protected readonly type =
+    this.writtenType ??
+    (inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.tagName === 'BUTTON'
+      ? 'button'
+      : null);
 }

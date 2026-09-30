@@ -128,7 +128,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'The page’s h1, inside the legend',
       source:
-        '<FieldGroup required requiredMark="text">\n  <FieldGroupLegend>\n    <h1>Qual é a sua nacionalidade?</h1>\n  </FieldGroupLegend>\n  <FieldGroupContent>…</FieldGroupContent>\n</FieldGroup>;',
+        '<FieldGroup required necessity="words">\n  <FieldGroupLegend>\n    <h1>Qual é a sua nacionalidade?</h1>\n  </FieldGroupLegend>\n  <FieldGroupContent>…</FieldGroupContent>\n</FieldGroup>;',
     }),
   },
   {
@@ -140,7 +140,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A section inside a section, and a list for its content',
       source:
-        '<FieldGroup size="sm">\n  <FieldGroup requiredMark="none">\n    <FieldGroupContent render={(props) => <ul {...props} />}>…</FieldGroupContent>\n  </FieldGroup>\n</FieldGroup>;',
+        '<FieldGroup size="sm">\n  <FieldGroup necessity="none">\n    <FieldGroupContent render={(props) => <ul {...props} />}>…</FieldGroupContent>\n  </FieldGroup>\n</FieldGroup>;',
     }),
   },
   {
@@ -178,18 +178,18 @@ export const REACT_FIELD_GROUP_DOCS = {
         'How the fields inside flow. A row wraps rather than squeezing, so a field keeps enough width to hold what is being typed into it',
       ],
       [
-        'requiredMark',
-        "'mark' | 'text' | 'none'",
+        'necessity',
+        "'mark' | 'optional' | 'words' | 'none'",
         'mark',
         'FieldGroup',
-        'How the set’s necessity is said on its legend, and the style provided to every field inside',
+        'How the set’s necessity is said on its legend — an asterisk, (optional) on an optional set only, both words, or nothing — and the style provided to every field inside',
       ],
       [
         'necessityWords',
         '{ required?: string; optional?: string }',
         '(required) / (optional)',
         'FieldGroup',
-        'The two words requiredMark="text" writes, merged over the inherited pair and provided to every field inside',
+        'The two words necessity="optional" and necessity="words" write, merged over the inherited pair and provided to every field inside',
       ],
       [
         'labelPlacement',
@@ -306,7 +306,7 @@ export const REACT_FIELD_GROUP_DOCS = {
         language: 'tsx',
         label: 'Anatomy, as it reaches the DOM',
         source:
-          '<fieldset\n  data-ui="field-group"\n  data-part="root"\n  data-size="md"\n  data-orientation="vertical"\n  data-required-mark="mark"\n  data-required\n  aria-describedby="nat-description"\n  disabled\n>\n  <legend data-part="legend">\n    Nacionalidade\n    <span aria-hidden="true" data-part="mark">\n      *\n    </span>\n  </legend>\n  <p data-ui="inline-message" data-part="root" data-tone="secondary" id="nat-description">\n    <span data-part="text">Marque todas as que se aplicam.</span>\n  </p>\n  <div data-part="content">…</div>\n</fieldset>;',
+          '<fieldset\n  data-ui="field-group"\n  data-part="root"\n  data-size="md"\n  data-orientation="vertical"\n  data-necessity="mark"\n  data-required\n  aria-describedby="nat-description"\n  disabled\n>\n  <legend data-part="legend">\n    Nacionalidade\n    <span aria-hidden="true" data-part="mark">\n      *\n    </span>\n  </legend>\n  <p data-ui="inline-message" data-part="root" data-tone="secondary" id="nat-description">\n    <span data-part="text">Marque todas as que se aplicam.</span>\n  </p>\n  <div data-part="content">…</div>\n</fieldset>;',
       }),
       defineSnippet({
         id: 'field-group-theming',

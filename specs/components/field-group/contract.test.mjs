@@ -138,8 +138,9 @@ test('provides for the fields inside it what an application provides for all of 
   assert.deepEqual(contract.provides.fieldDefaults, [
     'size',
     'labelPlacement',
-    'requiredMark',
+    'necessity',
     'necessityWords',
+    'helpLabel',
     'disabled',
     'readOnly',
   ]);
@@ -156,12 +157,25 @@ test('leaves every shared state unset, so the application can answer it', () => 
     assert.ok(group.capabilities.includes(capability), `the group cannot be ${capability}`);
     assert.ok(!(capability in group.defaults), `${capability} defaults instead of deferring`);
   }
-  assert.deepEqual(Object.keys(group.defaults).sort(), ['orientation', 'requiredMark', 'size']);
+  assert.deepEqual(Object.keys(group.defaults).sort(), ['necessity', 'orientation', 'size']);
+});
+
+/**
+ * The legend says the group's necessity with the field's four answers, so a
+ * form of optional sections marks them the way it marks its optional fields.
+ */
+test('says necessity for the group with the answers a field gives', () => {
+  assert.deepEqual(contract.axes.necessity, field.axes.necessity);
+  assert.ok(!('requiredMark' in contract.axes));
+  assert.equal(group.defaults.necessity, field.members.field.defaults.necessity);
 });
 
 test('paints the four states a group can be in, on one element', () => {
   assert.deepEqual(group.states, ['default', 'disabled', 'invalid', 'required', 'readonly']);
-  assert.deepEqual(contract.stateAttributes, field.stateAttributes);
+  /* The four a group shares with its fields; `open` is the field's help, which
+     a group does not draw. */
+  const { open: _help, ...shared } = field.stateAttributes;
+  assert.deepEqual(contract.stateAttributes, shared);
 });
 
 test('moves nothing, so it declares no state model', () => {

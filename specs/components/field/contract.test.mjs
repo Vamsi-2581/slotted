@@ -21,15 +21,45 @@ test('names the identifier a consumer selects the family by', () => {
 });
 
 /**
- * One member, five parts. A field never appears without its box, so every piece
+ * One member, nine parts. A field never appears without its box, so every piece
  * of it is a part of that box rather than a member of its own — the shape
  * `card` and `alert` already have. `counter` is the part Angular Material and
  * Carbon both draw and neither names: Angular Material asks for a
  * `mat-hint align="end"`, which shares a row with the error and pushes it.
+ *
+ * `header` is the label row, and the four parts after `mark` live in it. ReUI
+ * writes the same row by hand in four of its examples — a `div` with
+ * `justify-between` around the label and whatever sits beside it — which is
+ * the reason it is a part here: a row every page rebuilds is a row the family
+ * owns (`docs/history/designs/2026-09-30-field-label-row-design.md`).
  */
-test('is one member, and the five parts the family draws', () => {
+test('is one member, and the nine parts the family draws', () => {
   assert.deepEqual(Object.keys(contract.members), ['field']);
-  assert.deepEqual(field.parts, ['root', 'label', 'mark', 'control', 'counter']);
+  assert.deepEqual(field.parts, [
+    'root',
+    'header',
+    'label',
+    'mark',
+    'help',
+    'indicator',
+    'action',
+    'counter',
+    'control',
+  ]);
+});
+
+/**
+ * The help control cannot sit inside the `label`. A `button` is labelable
+ * content, which HTML forbids inside a `label` other than the control it
+ * labels, and a press on it would reach the label and move focus to the
+ * control instead of opening the hint. That is the objection the 2026-09-02
+ * inventory declined contextual help on; the header is what answers it, by
+ * giving the button a sibling place in the same row.
+ */
+test('keeps every control of the label row out of the label', () => {
+  assert.deepEqual(contract.header.inside, ['label', 'help', 'indicator', 'action', 'counter']);
+  assert.deepEqual(contract.header.outsideLabel, ['help', 'indicator', 'action', 'counter']);
+  assert.equal(contract.header.optional, true);
 });
 
 /**
@@ -86,17 +116,74 @@ test('speaks through the message family instead of drawing a message', () => {
  * `docs/history/designs/2026-08-31-field-primitive-design.md` records.
  */
 test('derives every identifier from one base', () => {
-  assert.deepEqual(contract.identifiers, ['control', 'label', 'description', 'error']);
+  assert.deepEqual(contract.identifiers, [
+    'control',
+    'label',
+    'indicator',
+    'help',
+    'description',
+    'counter',
+    'error',
+  ]);
 });
 
 /**
- * Description first, error second, and the order is fixed rather than read from
- * the DOM. Two known slots have one correct reading order, and deriving it from
- * registration order would make the accessible description depend on when an
- * effect ran.
+ * A fixed order rather than one read from the DOM. Known slots have one correct
+ * reading order, and deriving it from registration order would make the
+ * accessible description depend on when an effect ran.
+ *
+ * What qualifies the field comes first — the indicator (`Beta`), then the help
+ * behind the icon — then what the page says under the control, then the count,
+ * and the error last, where it has always been. The counter is in the list
+ * because `docs/component-features.md` §2.8 requires the label, the
+ * description, the error *and the counter* to be related by identifier, and
+ * until this pass the counter was not.
  */
-test('reads the help before the error, whatever order the page wrote them in', () => {
-  assert.deepEqual(contract.describedBy, ['description', 'error']);
+test('reads what qualifies the field, then the help, the count and the error', () => {
+  assert.deepEqual(contract.describedBy, ['indicator', 'help', 'description', 'counter', 'error']);
+});
+
+/**
+ * The text behind the help icon reaches the control's description through a
+ * node the family keeps hidden, not through the tooltip's layer: the layer
+ * exists only while it is open, so a reference to it would describe nothing
+ * the rest of the time. A `hidden` element directly referenced by
+ * `aria-describedby` still enters the description (accname 1.2, step 2A).
+ * The tooltip is asked to describe nothing, so the hint is not read twice.
+ */
+test('describes the control with the help text whether the hint is open or not', () => {
+  assert.equal(contract.help.describedBy, 'hidden-node');
+  assert.equal(contract.help.tooltipDescribes, 'none');
+  assert.equal(contract.help.glyph, 'circle-question');
+  assert.equal(contract.help.name, 'More information');
+});
+
+/**
+ * A tooltip opens on a coarse pointer only by a long press, because a tap is
+ * the trigger's own action (`specs/components/tooltip/contract.json` › touch).
+ * The help icon has no other action, so its tap is the hint: the family
+ * controls the tooltip's `open` and toggles it on activation, which is the
+ * toggletip Carbon ships and the reason a reader on a phone finds the hint at
+ * all. Hover and focus still open it the way every other tooltip opens.
+ */
+test('opens the hint on a tap, where a tooltip alone would need a long press', () => {
+  assert.equal(contract.help.opensOn, 'press, hover and focus');
+  assert.deepEqual(contract.stateModel.open, {
+    controlled: 'open',
+    uncontrolled: 'defaultOpen',
+    request: 'onOpenChange',
+    reasons: ['pointer', 'keyboard', 'escape', 'blur', 'programmatic'],
+  });
+});
+
+/**
+ * A disabled field is a field nobody can type in, not a field nobody may ask
+ * about. The help stays operable — it is often where the reason the field is
+ * disabled is written — and the action belongs to the page, so the field does
+ * not disable either.
+ */
+test('leaves the help and the action operable on a disabled field', () => {
+  assert.deepEqual(contract.disabledLeaves, ['help', 'action']);
 });
 
 /**
@@ -119,15 +206,20 @@ test('describes the control without taking over its submission', () => {
 });
 
 /**
- * Three values for necessity, which is the axis Spectrum spends
+ * Four values for necessity, which is the axis Spectrum spends
  * `necessityIndicator` on, Angular Material `hideRequiredMarker`, and Chakra and
- * Ark a `fallback` prop. `text` is the one that also speaks for a field that is
- * *not* required, which is how a form of mostly optional fields marks the few
- * that are not.
+ * Ark a `fallback` prop.
+ *
+ * `optional` marks only the fields a reader may skip, which is what GOV.UK and
+ * Carbon recommend for a form where most fields are required: the exception is
+ * what gets the word. `words` says both. The axis was `requiredMark` until it
+ * had a value that marks the field that is *not* required, and a name that
+ * described one of four answers could not stay.
  */
-test('says necessity as a mark, as words, or not at all', () => {
-  assert.deepEqual(contract.axes.requiredMark, ['mark', 'text', 'none']);
-  assert.equal(field.defaults.requiredMark, 'mark');
+test('says necessity as a mark, as a word on the optional fields, as words, or not at all', () => {
+  assert.deepEqual(contract.axes.necessity, ['mark', 'optional', 'words', 'none']);
+  assert.ok(!('requiredMark' in contract.axes));
+  assert.equal(field.defaults.necessity, 'mark');
   assert.deepEqual(Object.keys(contract.necessityWords), ['required', 'optional']);
 });
 
@@ -190,7 +282,7 @@ test('leaves every shared state unset, so the group can answer it', () => {
     assert.ok(field.capabilities.includes(capability), `field cannot be ${capability}`);
     assert.ok(!(capability in field.defaults), `${capability} defaults instead of deferring`);
   }
-  assert.deepEqual(Object.keys(field.defaults).sort(), ['labelPlacement', 'requiredMark', 'size']);
+  assert.deepEqual(Object.keys(field.defaults).sort(), ['labelPlacement', 'necessity', 'size']);
 });
 
 /**
@@ -198,13 +290,24 @@ test('leaves every shared state unset, so the group can answer it', () => {
  * `disabled`. The field paints all four on its root so the label, the mark and
  * the messages follow from one place rather than each part repeating the state.
  */
-test('paints the four states a field can be in, on one element', () => {
-  assert.deepEqual(field.states, ['default', 'disabled', 'invalid', 'required', 'readonly']);
+test('declares the states of its root and of its two controls', () => {
+  assert.deepEqual(field.states, [
+    'default',
+    'hover',
+    'active',
+    'focus-visible',
+    'disabled',
+    'invalid',
+    'required',
+    'readonly',
+    'open',
+  ]);
   assert.deepEqual(contract.stateAttributes, {
     disabled: 'data-disabled',
     invalid: 'data-invalid',
     required: 'data-required',
     readonly: 'data-readonly',
+    open: 'data-open',
   });
 });
 
@@ -221,17 +324,19 @@ test('lets the counter go over its limit before the field is in error', () => {
 });
 
 /**
- * The field is told its state; it holds none. The value belongs to the control
- * and the validity to `form` in wave 3, which `docs/process/build-order.md` names as
- * the owner of submission and validation. The assertion keeps the absence a
+ * The field is told its state and holds one of its own: whether the hint behind
+ * the help icon is showing. The value belongs to the control and the validity
+ * to `form`, which `docs/process/build-order.md` names as the owner of
+ * submission and validation. The assertion keeps every other absence a
  * decision rather than an oversight.
  */
-test('moves nothing, so it declares no state model', () => {
-  assert.ok(!('stateModel' in contract));
+test('moves only the hint, so it declares one state model', () => {
+  assert.deepEqual(Object.keys(contract.stateModel), ['open']);
   for (const member of Object.values(contract.members)) {
-    for (const capability of member.capabilities) {
-      assert.ok(!MUTABLE_CAPABILITIES.includes(capability), `${capability} holds state`);
-    }
+    const mutable = member.capabilities.filter((capability) =>
+      MUTABLE_CAPABILITIES.includes(capability),
+    );
+    assert.deepEqual(mutable, ['open']);
   }
 });
 
@@ -256,8 +361,9 @@ test('names the decisions an application takes once', () => {
   assert.deepEqual(contract.provides.fieldDefaults, [
     'size',
     'labelPlacement',
-    'requiredMark',
+    'necessity',
     'necessityWords',
+    'helpLabel',
   ]);
 });
 
@@ -271,6 +377,7 @@ test('names one reference page, covering every axis and every state', () => {
     'states',
     'messages',
     'counter',
+    'header',
     'content',
     'composition',
     'accessibility',

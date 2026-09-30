@@ -1,7 +1,7 @@
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import { SlField, SlFieldControl, SlFieldDescription, SlFieldLabel } from '@slotted/angular/field';
-import type { FieldRequiredMark, FieldSize } from '@slotted/angular/field';
+import type { FieldNecessity, FieldSize } from '@slotted/angular/field';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
 
@@ -17,7 +17,7 @@ import { ANGULAR_FIELD_GROUP_DOCS, ANGULAR_FIELD_GROUP_TOKENS } from './field-gr
 interface FieldGroupStoryArgs {
   orientation: FieldGroupOrientation;
   required: boolean;
-  requiredMark: FieldRequiredMark;
+  necessity: FieldNecessity;
   size: FieldSize;
 }
 
@@ -110,7 +110,7 @@ export const Playground: Story = {
   args: {
     orientation: 'vertical',
     required: false,
-    requiredMark: 'mark',
+    necessity: 'mark',
     size: 'md',
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
@@ -122,7 +122,7 @@ export const Playground: Story = {
           slFieldGroup
           [size]="size"
           [orientation]="orientation"
-          [requiredMark]="requiredMark"
+          [necessity]="necessity"
           [required]="required"
         >
           <legend slFieldGroupLegend>Endereço de cobrança</legend>
@@ -179,7 +179,7 @@ export const States: Story = {
              <label slFieldLabel>Dia do repasse</label>
              <input slFieldControl value="5" />
            </div>
-           <div slField requiredMark="text">
+           <div slField necessity="words">
              <label slFieldLabel>Valor mínimo</label>
              <input slFieldControl value="R$ 250,00" />
            </div>
@@ -246,7 +246,7 @@ export const Provision: Story = {
       scene(
         'One attribute for the whole section',
         'The group sets the step, the placement and the necessity style for every field inside it. Nothing is repeated per field, and nothing had to be threaded through by the page.',
-        `<fieldset slFieldGroup size="sm" labelPlacement="side" required requiredMark="text">
+        `<fieldset slFieldGroup size="sm" labelPlacement="side" required necessity="words">
            <legend slFieldGroupLegend>Dados fiscais</legend>
            <div slField required>
              <label slFieldLabel>CNPJ</label>
@@ -285,7 +285,7 @@ export const Content: Story = {
       scene(
         'The page’s heading, inside the legend',
         'The heading keeps its own type and loses only the block break, so the necessity words stay on its line. A reader hears the question once rather than as a heading and then again as a group name.',
-        `<fieldset slFieldGroup size="lg" required requiredMark="text">
+        `<fieldset slFieldGroup size="lg" required necessity="words">
            <legend slFieldGroupLegend><h2>Qual é a sua nacionalidade?</h2></legend>
            <span slFieldGroupDescription>
              Se você tem dupla nacionalidade, marque todas as opções relevantes.
@@ -322,11 +322,11 @@ export const Composition: Story = {
         'The inner group inherits the step the outer one decided and restates only the necessity style, so a nested set is a difference from its parent rather than a repetition of it.',
         `<fieldset slFieldGroup size="sm">
            <legend slFieldGroupLegend>Contrato</legend>
-           <div slField required requiredMark="text">
+           <div slField required necessity="words">
              <label slFieldLabel>Número</label>
              <input slFieldControl value="CT-2026-0041" />
            </div>
-           <fieldset slFieldGroup orientation="horizontal" requiredMark="none">
+           <fieldset slFieldGroup orientation="horizontal" necessity="none">
              <legend slFieldGroupLegend>Vigência</legend>
              ${vigencia}
            </fieldset>

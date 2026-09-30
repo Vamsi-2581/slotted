@@ -86,6 +86,7 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `import-export-center` | [2026-09-25 §1](2026-09-25-import-export-center-design.md) | [2026-09-25](2026-09-25-import-export-center-design.md) | [2026-09-25](2026-09-25-import-export-center-self-assessment.md) |
 | `rating` | [2026-09-25 §1](2026-09-25-rating-design.md) | [2026-09-25](2026-09-25-rating-design.md) | [2026-09-29](2026-09-29-rating-self-assessment.md) |
 | `text-field` (passo ReUI) | [2026-09-30 §1](2026-09-30-text-field-rebuild-design.md) | [2026-09-30](2026-09-30-text-field-rebuild-design.md) | [2026-09-30](2026-09-30-text-field-self-assessment.md) |
+| `field-label-row` | [2026-09-30 §1](2026-09-30-field-label-row-design.md) | [2026-09-30](2026-09-30-field-label-row-design.md) | [2026-09-30](2026-09-30-field-self-assessment.md) |
 
 ## Fundação
 
@@ -130,4 +131,5 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 - [2026-09-30-filter-bar-reui-dossier.md](2026-09-30-filter-bar-reui-dossier.md)
 - [2026-09-30-upload-reui-dossier.md](2026-09-30-upload-reui-dossier.md)
 - [2026-09-30-text-field-reui-dossier.md](2026-09-30-text-field-reui-dossier.md)
+- [2026-09-30-field-reui-dossier.md](2026-09-30-field-reui-dossier.md)
 - [2026-09-30-kbd-reui-dossier.md](2026-09-30-kbd-reui-dossier.md)

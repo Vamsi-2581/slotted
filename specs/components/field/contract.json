@@ -9,8 +9,8 @@
   },
   "messageMark": "none",
   "messagePlacement": "after",
-  "identifiers": ["control", "label", "description", "error"],
-  "describedBy": ["description", "error"],
+  "identifiers": ["control", "label", "indicator", "help", "description", "counter", "error"],
+  "describedBy": ["indicator", "help", "description", "counter", "error"],
   "wiring": {
     "id": "always",
     "aria-describedby": "merged",
@@ -24,6 +24,21 @@
     "optional": "(optional)"
   },
   "markHidden": true,
+  "header": {
+    "optional": true,
+    "inside": ["label", "help", "indicator", "action", "counter"],
+    "outsideLabel": ["help", "indicator", "action", "counter"],
+    "reason": "A button is labelable content, which HTML forbids inside a label other than the control it labels, and a press on it would move focus to the control. The header gives the help, the indicator, the action and the counter a place beside the label rather than inside it. A field with a label alone writes the label on the root."
+  },
+  "help": {
+    "glyph": "circle-question",
+    "name": "More information",
+    "describedBy": "hidden-node",
+    "tooltipDescribes": "none",
+    "opensOn": "press, hover and focus",
+    "reason": "The tooltip layer exists only while it is open, so the control and the button are described by a hidden node carrying the same text; the tooltip describes nothing, so the hint is not read twice. The family controls the tooltip's open and toggles it on activation, because a tooltip alone opens on a coarse pointer only by a long press."
+  },
+  "disabledLeaves": ["help", "action"],
   "containerName": "slotted-field",
   "reflowBreakpoint": "320px",
   "literals": {
@@ -31,18 +46,27 @@
     "reflowBreakpoint": "320px is literal because CSS forbids a custom property in a container condition, which docs/token-foundation.md rule 4 records."
   },
   "provides": {
-    "fieldDefaults": ["size", "labelPlacement", "requiredMark", "necessityWords"]
+    "fieldDefaults": ["size", "labelPlacement", "necessity", "necessityWords", "helpLabel"]
   },
   "axes": {
     "size": ["sm", "md", "lg"],
     "labelPlacement": ["top", "side"],
-    "requiredMark": ["mark", "text", "none"]
+    "necessity": ["mark", "optional", "words", "none"]
   },
   "stateAttributes": {
     "disabled": "data-disabled",
     "invalid": "data-invalid",
     "required": "data-required",
-    "readonly": "data-readonly"
+    "readonly": "data-readonly",
+    "open": "data-open"
+  },
+  "stateModel": {
+    "open": {
+      "controlled": "open",
+      "uncontrolled": "defaultOpen",
+      "request": "onOpenChange",
+      "reasons": ["pointer", "keyboard", "escape", "blur", "programmatic"]
+    }
   },
   "members": {
     "field": {
@@ -50,7 +74,7 @@
       "defaults": {
         "size": "md",
         "labelPlacement": "top",
-        "requiredMark": "mark"
+        "necessity": "mark"
       },
       "capabilities": [
         "appearance",
@@ -61,10 +85,31 @@
         "invalid",
         "required",
         "readOnly",
+        "open",
         "wiring"
       ],
-      "states": ["default", "disabled", "invalid", "required", "readonly"],
-      "parts": ["root", "label", "mark", "control", "counter"]
+      "states": [
+        "default",
+        "hover",
+        "active",
+        "focus-visible",
+        "disabled",
+        "invalid",
+        "required",
+        "readonly",
+        "open"
+      ],
+      "parts": [
+        "root",
+        "header",
+        "label",
+        "mark",
+        "help",
+        "indicator",
+        "action",
+        "counter",
+        "control"
+      ]
     }
   },
   "scenarios": {
@@ -76,6 +121,7 @@
       "states",
       "messages",
       "counter",
+      "header",
       "content",
       "composition",
       "accessibility"

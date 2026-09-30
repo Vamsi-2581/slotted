@@ -60,7 +60,7 @@ describe('SlFieldGroup', () => {
 
     expect(group.getAttribute('data-size')).toBe(defaults.size);
     expect(group.getAttribute('data-orientation')).toBe(defaults.orientation);
-    expect(group.getAttribute('data-required-mark')).toBe(defaults.requiredMark);
+    expect(group.getAttribute('data-necessity')).toBe(defaults.necessity);
     for (const state of ['data-disabled', 'data-invalid', 'data-required', 'data-readonly']) {
       expect(group.hasAttribute(state)).toBe(false);
     }
@@ -159,15 +159,15 @@ describe('SlFieldGroup', () => {
 
   it('lets a group inside a group inherit what it does not restate', () => {
     const fixture = renderTemplate(
-      `<fieldset slFieldGroup size="sm" requiredMark="text">
-         <fieldset slFieldGroup id="inner" requiredMark="none">
+      `<fieldset slFieldGroup size="sm" necessity="words">
+         <fieldset slFieldGroup id="inner" necessity="none">
            <div slField id="deep"></div>
          </fieldset>
        </fieldset>`,
     );
 
     expect(root(fixture, '#deep').getAttribute('data-size')).toBe('sm');
-    expect(root(fixture, '#deep').getAttribute('data-required-mark')).toBe('none');
+    expect(root(fixture, '#deep').getAttribute('data-necessity')).toBe('none');
   });
 
   /**
@@ -190,7 +190,7 @@ describe('SlFieldGroup', () => {
 
   it('says the set’s necessity in words when the page asks for words', () => {
     const fixture = renderTemplate(
-      `<fieldset slFieldGroup required requiredMark="text">
+      `<fieldset slFieldGroup required necessity="words">
          <legend slFieldGroupLegend>Nacionalidade</legend>
        </fieldset>`,
     );

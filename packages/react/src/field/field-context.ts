@@ -1,6 +1,13 @@
 import { createContext, useContext } from 'react';
 
-import type { FieldContextValue, FieldCount, FieldIds } from './field.types';
+import type {
+  FieldContextValue,
+  FieldCount,
+  FieldDescribedSlot,
+  FieldIds,
+  FieldNecessity,
+  FieldNecessityWords,
+} from './field.types';
 
 /**
  * `undefined` outside a field, which is what lets a control this library ships
@@ -20,14 +27,51 @@ export function useField(): FieldContextValue | undefined {
   return useContext(FieldContext);
 }
 
-/** The four identifiers a field derives from its base, in one place. */
+/** The identifiers a field derives from its base, in one place. */
 export function deriveFieldIds(base: string): FieldIds {
   return {
     control: `${base}-control`,
+    counter: `${base}-counter`,
     description: `${base}-description`,
     error: `${base}-error`,
+    help: `${base}-help`,
+    indicator: `${base}-indicator`,
     label: `${base}-label`,
   };
+}
+
+/** The reading order of the control's description, as the contract names it. */
+export const FIELD_DESCRIBED_ORDER: readonly FieldDescribedSlot[] = [
+  'indicator',
+  'help',
+  'description',
+  'counter',
+  'error',
+];
+
+/**
+ * What the necessity mark says, and whether a reader hears it. The asterisk is
+ * hidden, because `aria-required` on the control already carries the fact and a
+ * form of twenty required fields does not need "asterisk" twenty times; the
+ * words are not, because `(optional)` is information rather than decoration.
+ * `null` when nothing is drawn. `field-group` draws its legend's mark with the
+ * same answer.
+ */
+export function necessityMark(
+  necessity: FieldNecessity,
+  required: boolean,
+  words: FieldNecessityWords,
+): { hidden: boolean; text: string } | null {
+  switch (necessity) {
+    case 'mark':
+      return required ? { hidden: true, text: '*' } : null;
+    case 'optional':
+      return required ? null : { hidden: false, text: words.optional };
+    case 'words':
+      return { hidden: false, text: required ? words.required : words.optional };
+    case 'none':
+      return null;
+  }
 }
 
 /**

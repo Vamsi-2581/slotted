@@ -1,10 +1,37 @@
+<!--
+  The field does not own its control, and every scene writes a native input so
+  the picture is the field's alone. A native input is 21 pixels tall, and the
+  field centres a side label on a control of the scale's height; the page gives
+  the native controls that height, so a side row is laid out against the
+  control the field is written for rather than against the user agent's.
+-->
+<style>
+  [data-ui='field'][data-size='sm'] > :is(input, textarea)[data-part='control'] {
+    --harness-control: var(--slotted-control-height-sm);
+  }
+  [data-ui='field'][data-size='md'] > :is(input, textarea)[data-part='control'] {
+    --harness-control: var(--slotted-control-height-md);
+  }
+  [data-ui='field'][data-size='lg'] > :is(input, textarea)[data-part='control'] {
+    --harness-control: var(--slotted-control-height-lg);
+  }
+  [data-ui='field'] > input[data-part='control'] {
+    block-size: var(--harness-control);
+    box-sizing: border-box;
+  }
+  [data-ui='field'] > textarea[data-part='control'] {
+    box-sizing: border-box;
+    min-block-size: var(--harness-control);
+  }
+</style>
+
 <section data-scene="default">
   <div
     data-ui="field"
     data-part="root"
     data-size="md"
     data-label-placement="top"
-    data-required-mark="mark"
+    data-necessity="mark"
   >
     <label data-part="label" for="default-control">E-mail</label>
     <input
@@ -36,7 +63,7 @@
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
       data-required
     >
       <label data-part="label" for="necessity-mark"
@@ -54,7 +81,7 @@
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="text"
+      data-necessity="words"
       data-required
     >
       <label data-part="label" for="necessity-required"
@@ -72,7 +99,7 @@
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="text"
+      data-necessity="words"
     >
       <label data-part="label" for="necessity-optional"
         >Inscrição estadual<span data-part="mark">(optional)</span></label
@@ -84,7 +111,35 @@
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="none"
+      data-necessity="optional"
+      data-required
+    >
+      <label data-part="label" for="necessity-only-required">Razão social</label>
+      <input
+        data-part="control"
+        id="necessity-only-required"
+        aria-required="true"
+        value="Sirius Group"
+      />
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-necessity="optional"
+    >
+      <label data-part="label" for="necessity-only-optional"
+        >Nome fantasia<span data-part="mark">(optional)</span></label
+      >
+      <input data-part="control" id="necessity-only-optional" />
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-necessity="none"
       data-required
     >
       <label data-part="label" for="necessity-none">Razão social</label>
@@ -100,7 +155,7 @@
       data-part="root"
       data-size="md"
       data-label-placement="side"
-      data-required-mark="mark"
+      data-necessity="mark"
     >
       <label data-part="label" for="placement-side">Razão social</label>
       <input
@@ -127,7 +182,7 @@
       data-part="root"
       data-size="md"
       data-label-placement="side"
-      data-required-mark="mark"
+      data-necessity="mark"
     >
       <label data-part="label" for="placement-wrap">Endereço de correspondência da matriz</label>
       <textarea data-part="control" id="placement-wrap" rows="3">Avenida Paulista, 1000</textarea>
@@ -142,7 +197,7 @@
       data-part="root"
       data-size="sm"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
     >
       <label data-part="label" for="size-sm">Apelido</label>
       <input data-part="control" id="size-sm" value="sm" aria-describedby="size-sm-description" />
@@ -164,7 +219,7 @@
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
     >
       <label data-part="label" for="size-md">Apelido</label>
       <input data-part="control" id="size-md" value="md" aria-describedby="size-md-description" />
@@ -186,7 +241,7 @@
       data-part="root"
       data-size="lg"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
     >
       <label data-part="label" for="size-lg">Apelido</label>
       <input data-part="control" id="size-lg" value="lg" aria-describedby="size-lg-description" />
@@ -213,7 +268,7 @@
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
       data-required
       data-invalid
     >
@@ -259,7 +314,7 @@
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
       data-readonly
     >
       <label data-part="label" for="state-readonly">Identificador da conta</label>
@@ -288,7 +343,7 @@
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
       data-required
       data-disabled
     >
@@ -322,7 +377,7 @@
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
       data-invalid
     >
       <label data-part="label" for="state-reserve">Telefone</label>
@@ -357,7 +412,7 @@
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
     >
       <label data-part="label" for="counter-under">Descrição pública</label>
       <span data-part="counter">64/140</span>
@@ -369,7 +424,7 @@ Integramos folha, ponto e benefícios em um só lugar.</textarea>
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
       data-invalid
     >
       <label data-part="label" for="counter-over">Descrição pública</label>
@@ -401,11 +456,322 @@ Integramos folha, ponto, benefícios, admissão, desligamento e o fechamento con
       data-part="root"
       data-size="md"
       data-label-placement="side"
-      data-required-mark="mark"
+      data-necessity="mark"
     >
       <label data-part="label" for="counter-side">Assunto</label>
       <span data-part="counter">12/60</span>
       <input data-part="control" id="counter-side" value="Fatura março" />
+    </div>
+  </div>
+</section>
+
+<section data-scene="header">
+  <div data-ui="stack" data-part="root" data-gap="7">
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-necessity="mark"
+      data-required
+    >
+      <div data-part="header">
+        <label data-part="label" for="header-password"
+          >Senha<span aria-hidden="true" data-part="mark">*</span></label
+        >
+        <button
+          data-part="help"
+          type="button"
+          aria-label="Mais informações"
+          aria-describedby="header-password-help"
+        >
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="circle-question"></svg
+          ></span>
+          <span data-part="help-text" id="header-password-help" hidden
+            >No mínimo oito caracteres, com letras e números.</span
+          >
+        </button>
+        <a data-part="action" href="#recuperar">Esqueceu a senha?</a>
+      </div>
+      <input
+        data-part="control"
+        id="header-password"
+        type="password"
+        aria-required="true"
+        aria-describedby="header-password-help"
+        value="segredo"
+      />
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-necessity="mark"
+    >
+      <div data-part="header">
+        <label data-part="label" for="header-endpoint">Endpoint da API</label>
+        <button
+          data-part="help"
+          type="button"
+          aria-label="Mais informações"
+          aria-describedby="header-endpoint-help"
+        >
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="circle-question"></svg
+          ></span>
+          <span data-part="help-text" id="header-endpoint-help" hidden
+            >O endereço base que recebe as notificações.</span
+          >
+        </button>
+        <span data-part="indicator" id="header-endpoint-indicator"
+          ><span
+            data-ui="badge"
+            data-part="root"
+            data-tone="accent"
+            data-variant="soft"
+            data-size="sm"
+            data-shape="square"
+            ><span data-part="label">Beta</span></span
+          ></span
+        >
+      </div>
+      <input
+        data-part="control"
+        id="header-endpoint"
+        aria-describedby="header-endpoint-indicator header-endpoint-help header-endpoint-description"
+        value="https://api.sirius.com.br"
+      />
+      <p
+        data-ui="inline-message"
+        data-mark="none"
+        data-part="root"
+        data-tone="secondary"
+        data-size="sm"
+        data-live="off"
+        id="header-endpoint-description"
+      >
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">Use HTTPS; o certificado é verificado a cada envio.</span>
+      </p>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-necessity="mark"
+    >
+      <div data-part="header">
+        <label data-part="label" for="header-bio">Apresentação</label>
+        <button data-part="action" type="button">Gerar com IA</button>
+        <span data-part="counter" id="header-bio-counter">24/160</span>
+      </div>
+      <textarea data-part="control" id="header-bio" rows="2" aria-describedby="header-bio-counter">
+Engenheira e contribuidora.</textarea>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-necessity="mark"
+      data-required
+    >
+      <div data-part="header">
+        <label data-part="label" for="header-long"
+          >Endereço de correspondência da matriz<span aria-hidden="true" data-part="mark"
+            >*</span
+          ></label
+        >
+        <button
+          data-part="help"
+          type="button"
+          aria-label="Mais informações"
+          aria-describedby="header-long-help"
+        >
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="circle-question"></svg
+          ></span>
+          <span data-part="help-text" id="header-long-help" hidden
+            >Recebe as notas fiscais em papel.</span
+          >
+        </button>
+        <span data-part="indicator" id="header-long-indicator"
+          ><span
+            data-ui="badge"
+            data-part="root"
+            data-tone="warning"
+            data-variant="soft"
+            data-size="sm"
+            data-shape="square"
+            ><span data-part="label">Obrigatório para PJ</span>
+          </span></span
+        >
+        <button data-part="action" type="button">Usar o de cobrança</button>
+        <span data-part="counter" id="header-long-counter">0/120</span>
+      </div>
+      <input
+        data-part="control"
+        id="header-long"
+        aria-required="true"
+        aria-describedby="header-long-indicator header-long-help header-long-counter"
+      />
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-necessity="mark"
+      data-disabled
+    >
+      <div data-part="header">
+        <label data-part="label" for="header-disabled">Centro de custo</label>
+        <button
+          data-part="help"
+          type="button"
+          aria-label="Mais informações"
+          aria-describedby="header-disabled-help"
+        >
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="circle-question"></svg
+          ></span>
+          <span data-part="help-text" id="header-disabled-help" hidden
+            >Liberado depois que a unidade for escolhida.</span
+          >
+        </button>
+        <span data-part="indicator" id="header-disabled-indicator"
+          ><span
+            data-ui="badge"
+            data-part="root"
+            data-tone="secondary"
+            data-variant="soft"
+            data-size="sm"
+            data-shape="square"
+            ><span data-part="label">Pro</span>
+          </span></span
+        >
+      </div>
+      <input
+        data-part="control"
+        id="header-disabled"
+        disabled
+        aria-describedby="header-disabled-indicator header-disabled-help"
+        placeholder="Escolha uma unidade primeiro"
+      />
+    </div>
+  </div>
+</section>
+
+<section data-scene="header-side">
+  <div data-ui="stack" data-part="root" data-gap="7">
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="side"
+      data-necessity="mark"
+    >
+      <div data-part="header">
+        <label data-part="label" for="side-password">Senha</label>
+        <button
+          data-part="help"
+          type="button"
+          aria-label="Mais informações"
+          aria-describedby="side-password-help"
+        >
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="circle-question"></svg
+          ></span>
+          <span data-part="help-text" id="side-password-help" hidden
+            >No mínimo oito caracteres, com letras e números.</span
+          >
+        </button>
+        <a data-part="action" href="#recuperar">Esqueceu a senha?</a>
+      </div>
+      <input
+        data-part="control"
+        id="side-password"
+        type="password"
+        aria-describedby="side-password-help"
+        value="segredo"
+      />
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="side"
+      data-necessity="mark"
+    >
+      <div data-part="header">
+        <label data-part="label" for="side-subject">Assunto</label>
+        <span data-part="counter" id="side-subject-counter">12/60</span>
+      </div>
+      <input
+        data-part="control"
+        id="side-subject"
+        aria-describedby="side-subject-counter"
+        value="Fatura março"
+      />
+    </div>
+  </div>
+</section>
+
+<section data-scene="help">
+  <div style="padding-block-start: 3.5rem">
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-necessity="mark"
+    >
+      <div data-part="header" style="position: relative">
+        <label data-part="label" for="help-open">Prazo de pagamento</label>
+        <button
+          data-part="help"
+          type="button"
+          aria-label="Mais informações"
+          aria-describedby="help-open-help"
+          data-open
+          aria-expanded="true"
+        >
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="circle-question"></svg
+          ></span>
+          <span data-part="help-text" id="help-open-help" hidden
+            >Dias corridos a partir da emissão da nota.</span
+          >
+        </button>
+        <div
+          data-ui="tooltip"
+          data-part="root"
+          data-side="top"
+          data-align="center"
+          data-variant="inverse"
+          data-size="md"
+          data-hoverable
+          data-open
+          style="
+            top: auto;
+            bottom: calc(100% + 0.25rem);
+            left: 9.25rem;
+            translate: -50% 0;
+            --slotted-positioner-arrow-x: calc(50% - 0.25rem);
+            --slotted-positioner-available-width: 100%;
+            --slotted-positioner-transform-origin: center bottom;
+          "
+        >
+          <div data-part="arrow"></div>
+          <div data-part="content" role="tooltip" aria-hidden="true">
+            Dias corridos a partir da emissão da nota.
+          </div>
+        </div>
+      </div>
+      <input data-part="control" id="help-open" aria-describedby="help-open-help" value="30" />
     </div>
   </div>
 </section>
@@ -417,12 +783,12 @@ Integramos folha, ponto, benefícios, admissão, desligamento e o fechamento con
       data-part="root"
       data-size="md"
       data-label-placement="side"
-      data-required-mark="text"
+      data-necessity="words"
       data-required
     >
       <label data-part="label" for="content-long"
-        >Kraftfahrzeug-Haftpflichtversicherungsnummer<span data-part="mark">(required)</span></label
-      >
+        >Kraftfahrzeug-Haftpflichtversicherungsnummer<span data-part="mark">(required)</span>
+      </label>
       <input
         data-part="control"
         id="content-long"
@@ -449,7 +815,7 @@ Integramos folha, ponto, benefícios, admissão, desligamento e o fechamento con
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
       data-invalid
     >
       <label data-part="label" for="content-rtl" lang="ar" dir="rtl">رقم التعريف الضريبي</label>
@@ -491,7 +857,7 @@ Integramos folha, ponto, benefícios, admissão, desligamento e o fechamento con
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
       data-required
       data-invalid
     >
@@ -525,7 +891,7 @@ Integramos folha, ponto, benefícios, admissão, desligamento e o fechamento con
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
       data-required
       data-invalid
     >
@@ -559,7 +925,7 @@ Integramos folha, ponto, benefícios, admissão, desligamento e o fechamento con
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
       data-required
       data-invalid
     >
@@ -593,7 +959,7 @@ Integramos folha, ponto, benefícios, admissão, desligamento e o fechamento con
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
       data-required
       data-invalid
     >

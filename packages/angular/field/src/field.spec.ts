@@ -6,8 +6,9 @@ import contract from '../../../../specs/components/field/contract.json';
 import { SlField } from './field';
 import { provideFieldDefaults } from './field-defaults';
 import { SlFieldDescription, SlFieldError } from './field-messages';
-import { SlFieldControl, SlFieldLabel } from './field-parts';
+import { SlFieldAction, SlFieldControl, SlFieldLabel } from './field-parts';
 import { SlFieldCounter } from './field-counter';
+import { SlFieldHeader, SlFieldHelp, SlFieldIndicator } from './field-header';
 
 @Component({
   standalone: true,
@@ -18,6 +19,10 @@ import { SlFieldCounter } from './field-counter';
     SlFieldCounter,
     SlFieldDescription,
     SlFieldError,
+    SlFieldHeader,
+    SlFieldHelp,
+    SlFieldIndicator,
+    SlFieldAction,
   ],
   template: `<div slField></div>`,
 })
@@ -61,7 +66,7 @@ describe('SlField', () => {
 
     expect(field.getAttribute('data-size')).toBe(defaults.size);
     expect(field.getAttribute('data-label-placement')).toBe(defaults.labelPlacement);
-    expect(field.getAttribute('data-required-mark')).toBe(defaults.requiredMark);
+    expect(field.getAttribute('data-necessity')).toBe(defaults.necessity);
     for (const state of ['data-disabled', 'data-invalid', 'data-required', 'data-readonly']) {
       expect(field.hasAttribute(state)).toBe(false);
     }
@@ -150,12 +155,14 @@ describe('SlField', () => {
     expect(control.getAttribute('aria-invalid')).toBe('false');
   });
 
-  it('says necessity as a mark, as words, or not at all', () => {
+  it('says necessity as a mark, as a word on the optional fields, as words, or not at all', () => {
     const fixture = renderTemplate(
       `<div slField id="a" required><label slFieldLabel>CNPJ</label></div>
-       <div slField id="b" required requiredMark="text"><label slFieldLabel>CNPJ</label></div>
-       <div slField id="c" requiredMark="text"><label slFieldLabel>IE</label></div>
-       <div slField id="d" required requiredMark="none"><label slFieldLabel>CNPJ</label></div>`,
+       <div slField id="b" required necessity="words"><label slFieldLabel>CNPJ</label></div>
+       <div slField id="c" necessity="words"><label slFieldLabel>IE</label></div>
+       <div slField id="d" required necessity="none"><label slFieldLabel>CNPJ</label></div>
+       <div slField id="e" necessity="optional"><label slFieldLabel>Fantasia</label></div>
+       <div slField id="f" required necessity="optional"><label slFieldLabel>Razão</label></div>`,
     );
 
     const markOf = (id: string) =>
@@ -167,11 +174,14 @@ describe('SlField', () => {
     expect(markOf('b')?.hasAttribute('aria-hidden')).toBe(false);
     expect(markOf('c')?.textContent).toBe('(optional)');
     expect(markOf('d')).toBeNull();
+    expect(markOf('e')?.textContent).toBe('(optional)');
+    expect(markOf('e')?.hasAttribute('aria-hidden')).toBe(false);
+    expect(markOf('f')).toBeNull();
   });
 
   it('lets an application translate the two necessity words once', () => {
     const fixture = renderTemplate(
-      `<div slField requiredMark="text"><label slFieldLabel>IE</label></div>`,
+      `<div slField necessity="words"><label slFieldLabel>IE</label></div>`,
       [provideFieldDefaults({ necessityWords: { optional: '(opcional)' } })],
     );
 
@@ -287,5 +297,153 @@ describe('SlField', () => {
     expect(first.nativeElement.querySelector('input').id).toBe(
       second.nativeElement.querySelector('input').id,
     );
+  });
+
+  /**
+   * The help, the indicator and the action are siblings of the label in the
+   * header, never inside it: a `button` inside a `label` is invalid HTML, and a
+   * press on it would reach the label and move focus to the control.
+   */
+  it('keeps every control of the label row beside the label, never inside it', () => {
+    const fixture = renderTemplate(
+      `<div slField id="senha">
+         <div slFieldHeader>
+           <label slFieldLabel>Senha</label>
+           <button slFieldHelp="No mínimo oito caracteres."></button>
+           <span slFieldIndicator>Beta</span>
+           <a slFieldAction href="/recuperar">Esqueceu a senha?</a>
+         </div>
+         <input slFieldControl />
+       </div>`,
+    );
+
+    const header = root(fixture, '[data-part="header"]');
+    const label = root(fixture, '[data-part="label"]');
+    for (const part of ['help', 'indicator', 'action']) {
+      const element = header.querySelector(`[data-part="${part}"]`);
+      expect(element?.parentElement).toBe(header);
+      expect(label.contains(element)).toBe(false);
+    }
+    expect(root(fixture, '[data-part="help"]').getAttribute('type')).toBe('button');
+    expect(root(fixture, 'a[data-part="action"]').hasAttribute('type')).toBe(false);
+  });
+
+  it('describes the control with the indicator, the help, the description, the count and the error', () => {
+    const fixture = renderTemplate(
+      `<div slField id="bio">
+         <div slFieldHeader>
+           <label slFieldLabel>Apresentação</label>
+           <button slFieldHelp="Aparece no perfil público."></button>
+           <span slFieldIndicator>Beta</span>
+           <span slFieldCounter>24/160</span>
+         </div>
+         <input slFieldControl />
+         <span slFieldError>Longa demais.</span>
+         <span slFieldDescription>Uma frase.</span>
+       </div>`,
+    );
+
+    expect(root(fixture, '[data-part="control"]').getAttribute('aria-describedby')).toBe(
+      'bio-indicator bio-help bio-description bio-counter bio-error',
+    );
+    expect(root(fixture, '[data-part="counter"]').id).toBe('bio-counter');
+    expect(root(fixture, '[data-part="indicator"]').id).toBe('bio-indicator');
+  });
+
+  /**
+   * The tooltip's layer exists only while it is open, so the button and the
+   * control are described by a hidden node carrying the same text.
+   */
+  it('describes the help button with the help text while the hint is closed', () => {
+    const fixture = renderTemplate(
+      `<div slField id="prazo">
+         <div slFieldHeader>
+           <label slFieldLabel>Prazo</label>
+           <button slFieldHelp="Dias corridos."></button>
+         </div>
+       </div>`,
+    );
+
+    const help = root(fixture, '[data-part="help"]');
+    const text = fixture.nativeElement.querySelector('#prazo-help') as HTMLElement;
+    expect(help.getAttribute('aria-label')).toBe('More information');
+    expect(help.getAttribute('aria-describedby')).toBe('prazo-help');
+    expect(text.textContent?.trim()).toBe('Dias corridos.');
+    expect(text.hidden).toBe(true);
+    expect(document.querySelector('[role="tooltip"]')).toBeNull();
+  });
+
+  it('opens and closes the hint on a press, as a request with its reason', () => {
+    const fixture = renderTemplate(
+      `<div slField>
+         <div slFieldHeader>
+           <label slFieldLabel>Prazo</label>
+           <button slFieldHelp="Dias corridos."></button>
+         </div>
+       </div>`,
+    );
+
+    const help = root(fixture, '[data-part="help"]');
+    help.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    fixture.detectChanges();
+    expect(help.hasAttribute('data-open')).toBe(true);
+
+    help.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+    fixture.detectChanges();
+    expect(help.hasAttribute('data-open')).toBe(false);
+  });
+
+  it('lets an application name the help control once, and a page name one of its own', () => {
+    const fixture = renderTemplate(
+      `<div slField id="a"><div slFieldHeader><label slFieldLabel>Prazo</label>
+         <button slFieldHelp="Dias corridos."></button></div></div>
+       <div slField id="b"><div slFieldHeader><label slFieldLabel>Juros</label>
+         <button slFieldHelp="Ao mês." aria-label="Como os juros são calculados"></button></div></div>`,
+      [provideFieldDefaults({ helpLabel: 'Mais informações' })],
+    );
+
+    expect(root(fixture, '#a [data-part="help"]').getAttribute('aria-label')).toBe(
+      'Mais informações',
+    );
+    expect(root(fixture, '#b [data-part="help"]').getAttribute('aria-label')).toBe(
+      'Como os juros são calculados',
+    );
+  });
+
+  it('leaves the help and the action operable on a disabled field', () => {
+    const fixture = renderTemplate(
+      `<div slField disabled>
+         <div slFieldHeader>
+           <label slFieldLabel>Centro de custo</label>
+           <button slFieldHelp="Liberado depois da unidade."></button>
+           <button slFieldAction>Escolher unidade</button>
+         </div>
+         <input slFieldControl />
+       </div>`,
+    );
+
+    expect(root(fixture, '[data-part="control"]').hasAttribute('disabled')).toBe(true);
+    expect(root(fixture, '[data-part="help"]').hasAttribute('disabled')).toBe(false);
+    expect(root(fixture, '[data-part="action"]').hasAttribute('disabled')).toBe(false);
+    expect(root(fixture, '[data-part="action"]').getAttribute('type')).toBe('button');
+  });
+
+  it('draws the published count in the header when there is one', () => {
+    const fixture = renderTemplate(
+      `<div slField id="nif" #field="slField">
+         <div slFieldHeader><label slFieldLabel>NIF</label></div>
+       </div>`,
+    );
+    const field = fixture.debugElement
+      .query((node) => node.nativeElement?.hasAttribute?.('slField'))
+      .injector.get(SlField);
+    field.setCount({ length: 3, max: 14 });
+    fixture.detectChanges();
+
+    const counters = fixture.nativeElement.querySelectorAll('[data-part="counter"]');
+    expect(counters).toHaveLength(1);
+    expect(counters[0].parentElement).toBe(root(fixture, '[data-part="header"]'));
+    expect(counters[0].id).toBe('nif-counter');
+    expect(counters[0].textContent?.trim()).toBe('3/14');
   });
 });

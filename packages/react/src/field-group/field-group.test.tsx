@@ -35,7 +35,7 @@ describe('FieldGroup', () => {
     const { defaults } = contract.members.fieldGroup;
     expect(group).toHaveAttribute('data-size', defaults.size);
     expect(group).toHaveAttribute('data-orientation', defaults.orientation);
-    expect(group).toHaveAttribute('data-required-mark', defaults.requiredMark);
+    expect(group).toHaveAttribute('data-necessity', defaults.necessity);
     for (const state of ['data-disabled', 'data-invalid', 'data-required', 'data-readonly']) {
       expect(group).not.toHaveAttribute(state);
     }
@@ -158,7 +158,7 @@ describe('FieldGroup', () => {
 
   it('says the set’s necessity in words when the application asks for words', () => {
     render(
-      <FieldGroup necessityWords={{ required: '(obrigatório)' }} required requiredMark="text">
+      <FieldGroup necessityWords={{ required: '(obrigatório)' }} required necessity="words">
         <FieldGroupLegend>Nacionalidade</FieldGroupLegend>
       </FieldGroup>,
     );

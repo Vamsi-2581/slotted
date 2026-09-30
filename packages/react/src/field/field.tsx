@@ -2,9 +2,21 @@ import '@slotted/styles/field/field.css';
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 
-import { deriveFieldIds, FieldContext, formatFieldCount, isFieldCountOver } from './field-context';
+import {
+  deriveFieldIds,
+  FIELD_DESCRIBED_ORDER,
+  FieldContext,
+  formatFieldCount,
+  isFieldCountOver,
+} from './field-context';
 import { useFieldDefaults } from './field-defaults';
-import type { FieldContextValue, FieldCount, FieldProps, FieldRootProps } from './field.types';
+import type {
+  FieldContextValue,
+  FieldCount,
+  FieldDescribedSlot,
+  FieldProps,
+  FieldRootProps,
+} from './field.types';
 
 const isDevelopment = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV === true;
 
@@ -30,9 +42,10 @@ const isDevelopment = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).
  *
  * **The control counts and the field places the count.** A control this library
  * ships publishes the length of its value and the limit it was given; the field
- * draws the counter in the spare column of its label row, and only when the
- * page has written no counter of its own. A count over words, bytes or line
- * items is one only the page can compute, so a written counter always wins.
+ * draws the counter at the end of its label row — inside the `FieldHeader`
+ * when the page wrote one — and only when the page has written no counter of
+ * its own. A count over words, bytes or line items is one only the page can
+ * compute, so a written counter always wins.
  */
 export function Field({
   children,
@@ -40,12 +53,12 @@ export function Field({
   id,
   invalid,
   labelPlacement,
+  necessity,
   necessityWords,
   readOnly,
   ref,
   render,
   required,
-  requiredMark,
   size,
   ...nativeProps
 }: FieldProps) {
@@ -56,12 +69,13 @@ export function Field({
     [generatedId, id],
   );
 
-  const [messages, setMessages] = useState<readonly ('description' | 'error')[]>([]);
+  const [messages, setMessages] = useState<readonly FieldDescribedSlot[]>([]);
   const [count, setCount] = useState<FieldCount | undefined>(undefined);
   const [hasCounter, setHasCounter] = useState(false);
+  const [hasHeader, setHasHeader] = useState(false);
   const hasControl = useRef(false);
 
-  const registerMessage = useCallback((slot: 'description' | 'error', present: boolean) => {
+  const registerMessage = useCallback((slot: FieldDescribedSlot, present: boolean) => {
     setMessages((current) => {
       if (present === current.includes(slot)) return current;
       return present ? [...current, slot] : current.filter((candidate) => candidate !== slot);
@@ -73,6 +87,7 @@ export function Field({
   }, []);
 
   const registerCounter = useCallback((present: boolean) => setHasCounter(present), []);
+  const registerHeader = useCallback((present: boolean) => setHasHeader(present), []);
 
   useEffect(() => {
     if (!isDevelopment || hasControl.current) return;
@@ -82,52 +97,61 @@ export function Field({
   }, []);
 
   /**
-   * Description first, error second, whatever order the page wrote them in. Two
-   * known slots have one correct reading order, and deriving it from
-   * registration order would make the accessible description depend on when an
-   * effect ran.
+   * The contract's order, whatever order the page wrote the parts in: the
+   * indicator, the help, the description, the count, the error. Known slots
+   * have one correct reading order, and deriving it from registration order
+   * would make the accessible description depend on when an effect ran. The
+   * count is there whenever one is drawn — the page's, or the one the field
+   * draws from what the control published.
    */
+  const counted = hasCounter || count !== undefined;
   const describedBy =
-    [
-      messages.includes('description') ? ids.description : undefined,
-      messages.includes('error') ? ids.error : undefined,
-    ]
-      .filter(Boolean)
+    FIELD_DESCRIBED_ORDER.filter((slot) => (slot === 'counter' ? counted : messages.includes(slot)))
+      .map((slot) => ids[slot])
       .join(' ') || undefined;
 
   const resolvedSize = size ?? defaults.size;
   const resolvedDisabled = disabled ?? defaults.disabled;
   const resolvedReadOnly = readOnly ?? defaults.readOnly;
-  const resolvedRequiredMark = requiredMark ?? defaults.requiredMark;
+  const resolvedNecessity = necessity ?? defaults.necessity;
 
   const value: FieldContextValue = {
     count,
     describedBy,
     disabled: resolvedDisabled,
+    hasCounter,
+    hasHeader,
+    helpLabel: defaults.helpLabel,
     ids,
     invalid,
     /* A message is quieter than the control it is about, so it starts one step
        below and only the largest field's message reaches the second step. */
     messageSize: resolvedSize === 'lg' ? 'md' : 'sm',
+    necessity: resolvedNecessity,
     necessityWords: { ...defaults.necessityWords, ...necessityWords },
     readOnly: resolvedReadOnly,
     registerControl,
     registerCounter,
+    registerHeader,
     registerMessage,
     required,
-    requiredMark: resolvedRequiredMark,
     setCount,
     size: resolvedSize,
   };
 
   /**
-   * Drawn by the field only when the page drew none. Its place in the DOM does
-   * not matter — the stylesheet puts it in the label row's spare column — so it
-   * is written last rather than woven into the page's own children.
+   * Drawn by the field only when the page drew none and wrote no header — a
+   * header draws it at its own end. Its place in the DOM does not matter here —
+   * the stylesheet puts it in the label row's spare column — so it is written
+   * last rather than woven into the page's own children.
    */
   const drawnCounter =
-    count === undefined || hasCounter ? null : (
-      <span {...(isFieldCountOver(count) ? { 'data-invalid': '' } : {})} data-part="counter">
+    count === undefined || hasCounter || hasHeader ? null : (
+      <span
+        {...(isFieldCountOver(count) ? { 'data-invalid': '' } : {})}
+        data-part="counter"
+        id={ids.counter}
+      >
         {formatFieldCount(count)}
       </span>
     );
@@ -145,8 +169,8 @@ export function Field({
     ...(resolvedReadOnly === true ? { 'data-readonly': '' } : {}),
     ...(required === true ? { 'data-required': '' } : {}),
     'data-label-placement': labelPlacement ?? defaults.labelPlacement,
+    'data-necessity': resolvedNecessity,
     'data-part': 'root',
-    'data-required-mark': resolvedRequiredMark,
     'data-size': resolvedSize,
     'data-ui': 'field',
   };

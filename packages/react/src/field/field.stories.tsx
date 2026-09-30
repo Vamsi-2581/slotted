@@ -3,15 +3,20 @@ import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 
+import { Badge } from '../badge';
 import { Field } from './field';
 import { useField } from './field-context';
 import { FieldDefaultsProvider } from './field-defaults';
 import { Grid, Measure, Scene } from './field-demo';
 import {
+  FieldAction,
   FieldControl,
   FieldCounter,
   FieldDescription,
   FieldError,
+  FieldHeader,
+  FieldHelp,
+  FieldIndicator,
   FieldLabel,
 } from './field-parts';
 import { REACT_FIELD_DOCS, REACT_FIELD_TOKENS } from './field.docs';
@@ -25,6 +30,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     states: States,
     messages: Messages,
     counter: Counter,
+    header: Header,
     content: Content,
     composition: Composition,
     accessibility: Accessibility,
@@ -39,7 +45,7 @@ const meta = {
       page: createReferencePage({
         title: 'Field',
         description:
-          'One control, its name, its necessity, its help and its error — and the four identifiers that bind them, derived from one base so nothing has to be coordinated between siblings.',
+          'One control, its name, its necessity, its help and its error — and the identifiers that bind them, derived from one base so nothing has to be coordinated between siblings.',
         framework: 'React',
         ...REACT_FIELD_DOCS.field,
         tokens: REACT_FIELD_TOKENS,
@@ -56,7 +62,7 @@ export const Playground: Story = {
   args: {
     labelPlacement: 'top',
     required: true,
-    requiredMark: 'mark',
+    necessity: 'mark',
     size: 'md',
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
@@ -90,15 +96,37 @@ export const Necessity: Story = {
       </Scene>
       <Scene
         label="The words, for a form where most fields are optional"
-        note='Marking the two required fields in a form of twenty optional ones leaves the other eighteen ambiguous. requiredMark="text" names both sides, and the two words come from the provider.'
+        note='Marking the two required fields in a form of twenty optional ones leaves the other eighteen ambiguous. necessity="words" names both sides, and the two words come from the provider.'
       >
-        <Field required requiredMark="text">
+        <Field required necessity="words">
           <FieldLabel>CNPJ</FieldLabel>
           <FieldControl defaultValue="12.345.678/0001-90" />
         </Field>
-        <Field requiredMark="text">
+        <Field necessity="words">
           <FieldLabel>Inscrição estadual</FieldLabel>
           <FieldControl />
+        </Field>
+      </Scene>
+      <Scene
+        label="Only the exception, for a form where most fields are required"
+        note='necessity="optional" writes (optional) on the field a reader may skip and nothing on the others — the recommendation GOV.UK and Carbon make, because twenty asterisks say less than one word.'
+      >
+        <Field necessity="optional" required>
+          <FieldLabel>Razão social</FieldLabel>
+          <FieldControl defaultValue="Sirius Group Tecnologia Ltda." />
+        </Field>
+        <Field necessity="optional">
+          <FieldLabel>Nome fantasia</FieldLabel>
+          <FieldControl />
+        </Field>
+      </Scene>
+      <Scene
+        label="Nothing, when the form says it once"
+        note='necessity="none" draws no mark. aria-required still reaches the control, so a reader hears “required” on every field the form marked.'
+      >
+        <Field necessity="none" required>
+          <FieldLabel>CNPJ</FieldLabel>
+          <FieldControl defaultValue="12.345.678/0001-90" />
         </Field>
       </Scene>
     </Grid>
@@ -108,7 +136,7 @@ export const Necessity: Story = {
 export const Placement: Story = {
   parameters: scenario('placement'),
   render: () => (
-    <Grid columns={2}>
+    <Grid columns={1}>
       <Scene
         label="Beside the control, in a page-width form"
         note="The label takes a track of its own and the control the rest. A label of twelve words wraps inside its track and stays level with the control’s first line rather than sliding under it."
@@ -123,16 +151,16 @@ export const Placement: Story = {
         </Field>
       </Scene>
       <Scene
-        label="The same two fields, in a 320-pixel column"
+        label="The same two fields, in a 280-pixel drawer"
         note="Nothing changed but the width the field has. The container query is on the field itself, so a form in a drawer stacks while the same markup in a page grid does not."
       >
-        <Measure>
+        <Measure width="drawer">
           <Field labelPlacement="side">
             <FieldLabel>Razão social</FieldLabel>
             <FieldControl defaultValue="Sirius Group Tecnologia" />
           </Field>
         </Measure>
-        <Measure>
+        <Measure width="drawer">
           <Field labelPlacement="side">
             <FieldLabel>Endereço de correspondência da matriz</FieldLabel>
             <FieldControl defaultValue="Avenida Paulista, 1000" />
@@ -292,7 +320,7 @@ export const Counter: Story = {
       </Scene>
       <Scene
         label="The same counter beside a side label"
-        note="Label, control and count share the first row, each in a track of its own — the count stays at the end of the row rather than dropping under the control."
+        note="The count stands under the label, at the end of the label’s track — the place a header puts it too — so a side field says its count in one place and the control keeps the whole of its track."
       >
         <Field labelPlacement="side">
           <FieldLabel>Assunto</FieldLabel>
@@ -301,6 +329,139 @@ export const Counter: Story = {
         </Field>
       </Scene>
     </Grid>
+  ),
+};
+
+function Bio() {
+  const [value, setValue] = useState('Engenheira de dados; contribuidora do Apache Arrow.');
+  const over = value.length > 160;
+  return (
+    <Field invalid={over}>
+      <FieldHeader>
+        <FieldLabel>Apresentação</FieldLabel>
+        <FieldAction
+          onClick={() =>
+            setValue(
+              'Engenheira de dados na Sirius; mantém a camada de ingestão e o Arrow interno.',
+            )
+          }
+        >
+          Gerar a partir do cargo
+        </FieldAction>
+        <FieldCounter invalid={over}>{`${value.length}/160`}</FieldCounter>
+      </FieldHeader>
+      <FieldControl
+        onChange={(event) => setValue(event.currentTarget.value)}
+        render={(props) => <textarea {...props} rows={3} />}
+        value={value}
+      />
+    </Field>
+  );
+}
+
+export const Header: Story = {
+  parameters: scenario('header'),
+  render: () => (
+    <>
+      <Grid columns={2}>
+        <Scene
+          label="A password, its rule and the way back in"
+          note="Hover the circle or tab to it and the rule opens; press it and it stays until a second press. The link takes the end of the row and a 24-pixel target that gives the line its height back."
+        >
+          <Field required>
+            <FieldHeader>
+              <FieldLabel>Senha</FieldLabel>
+              <FieldHelp>No mínimo oito caracteres, com letras e números.</FieldHelp>
+              <FieldAction render={(props) => <a {...props} href="#recuperar" />}>
+                Esqueceu a senha?
+              </FieldAction>
+            </FieldHeader>
+            <FieldControl autoComplete="current-password" type="password" />
+          </Field>
+        </Scene>
+        <Scene
+          label="What qualifies the field, heard on the control"
+          note="The badge stands outside the label, so the asterisk stays against the last word, and it joins the control’s description with the help: a reader on the control hears “Beta”, then the rule, then the sentence under it."
+        >
+          <Field required>
+            <FieldHeader>
+              <FieldLabel>Endpoint de notificações</FieldLabel>
+              <FieldHelp>O endereço que recebe um POST a cada fatura emitida.</FieldHelp>
+              <FieldIndicator>
+                <Badge size="sm" tone="accent" variant="soft">
+                  Beta
+                </Badge>
+              </FieldIndicator>
+            </FieldHeader>
+            <FieldControl defaultValue="https://api.sirius.com.br/webhooks/faturas" type="url" />
+            <FieldDescription>Use HTTPS; o certificado é verificado a cada envio.</FieldDescription>
+          </Field>
+          <Field disabled>
+            <FieldHeader>
+              <FieldLabel>Centro de custo</FieldLabel>
+              <FieldHelp>Liberado depois que a unidade for escolhida.</FieldHelp>
+              <FieldIndicator>
+                <Badge size="sm" tone="secondary" variant="soft">
+                  Pro
+                </Badge>
+              </FieldIndicator>
+            </FieldHeader>
+            <FieldControl placeholder="Escolha uma unidade primeiro" />
+          </Field>
+        </Scene>
+        <Scene
+          label="An action beside a count the page keeps"
+          note="Press the action and the text is replaced; type past 160 and the count turns before the form has decided anything. A count after an action stands twelve pixels from it, so a link and a number never read as one phrase."
+        >
+          <Bio />
+        </Scene>
+        <Scene
+          label="All of it in a 280-pixel drawer"
+          note="The row wraps rather than squeezing: the label breaks between words, and the badge, the action and the count move to a line of their own, the action and the count still at its end."
+        >
+          <Measure width="drawer">
+            <Field required>
+              <FieldHeader>
+                <FieldLabel>Endereço de correspondência da matriz</FieldLabel>
+                <FieldHelp>Recebe as notas fiscais em papel.</FieldHelp>
+                <FieldIndicator>
+                  <Badge size="sm" tone="warning" variant="soft">
+                    Obrigatório para PJ
+                  </Badge>
+                </FieldIndicator>
+                <FieldAction>Usar o de cobrança</FieldAction>
+                <FieldCounter>0/120</FieldCounter>
+              </FieldHeader>
+              <FieldControl />
+            </Field>
+          </Measure>
+        </Scene>
+      </Grid>
+      <Grid columns={1}>
+        <Scene
+          label="The same row beside the control"
+          note="With the label beside the control the header takes the label’s track: the help follows the label, the action wraps under it, and the count stands on a line of its own at the end of the track."
+        >
+          <Field labelPlacement="side">
+            <FieldHeader>
+              <FieldLabel>Senha</FieldLabel>
+              <FieldHelp>No mínimo oito caracteres, com letras e números.</FieldHelp>
+              <FieldAction render={(props) => <a {...props} href="#recuperar" />}>
+                Esqueceu a senha?
+              </FieldAction>
+            </FieldHeader>
+            <FieldControl type="password" />
+          </Field>
+          <Field labelPlacement="side">
+            <FieldHeader>
+              <FieldLabel>Assunto</FieldLabel>
+              <FieldCounter>12/60</FieldCounter>
+            </FieldHeader>
+            <FieldControl defaultValue="Fatura março" />
+          </Field>
+        </Scene>
+      </Grid>
+    </>
   ),
 };
 
@@ -313,7 +474,7 @@ export const Content: Story = {
         note="Both break rather than overflowing, and the whole string stays in the DOM and findable by a page search. The necessity word never breaks: it is the one part of a label that is always a word."
       >
         <Measure>
-          <Field labelPlacement="side" required requiredMark="text">
+          <Field labelPlacement="side" required necessity="words">
             <FieldLabel lang="de">Kraftfahrzeug-Haftpflichtversicherungsnummer</FieldLabel>
             <FieldControl />
             <FieldDescription>
@@ -364,7 +525,7 @@ export const Composition: Story = {
       >
         <FieldDefaultsProvider
           necessityWords={{ optional: '(opcional)', required: '(obrigatório)' }}
-          requiredMark="text"
+          necessity="words"
           size="sm"
         >
           <Field required>
@@ -398,10 +559,13 @@ export const Accessibility: Story = {
     <Grid columns={2}>
       <Scene
         label="Tab into the control and listen"
-        note="A screen reader reads the label, then “required”, then the help, then the error — one name, one description built from two elements in a fixed order, and no asterisk read aloud."
+        note="A screen reader reads the label, then “required”, then the help behind the icon, the description and the error — one name, one description in a fixed order, and no asterisk read aloud."
       >
         <Field id="cnpj" invalid required>
-          <FieldLabel>CNPJ</FieldLabel>
+          <FieldHeader>
+            <FieldLabel>CNPJ</FieldLabel>
+            <FieldHelp>O da matriz, com os catorze dígitos.</FieldHelp>
+          </FieldHeader>
           <FieldControl defaultValue="12.345.678" />
           <FieldDescription>Somente números, com filial e dígito.</FieldDescription>
           <FieldError live="polite">Faltam seis dígitos.</FieldError>

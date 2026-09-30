@@ -1,4 +1,13 @@
-import { booleanAttribute, Directive, input } from '@angular/core';
+import {
+  booleanAttribute,
+  computed,
+  Directive,
+  HostAttributeToken,
+  inject,
+  input,
+} from '@angular/core';
+
+import { SlFieldContext } from './field-defaults';
 
 /**
  * What a control tells the field about its own value, so the field can draw the
@@ -41,7 +50,8 @@ export function isFieldCountOver(count: FieldCount): boolean {
  * counters in one row is one row too many.
  *
  * It lives in a module of its own so `field.ts` can look for it without
- * importing the parts that inject `SlField`, which would be a cycle.
+ * importing the parts that inject `SlField`, which would be a cycle; it reaches
+ * the field through `SlFieldContext` for the same reason.
  */
 @Directive({
   selector: '[slFieldCounter]',
@@ -49,10 +59,23 @@ export function isFieldCountOver(count: FieldCount): boolean {
   exportAs: 'slFieldCounter',
   host: {
     'data-part': 'counter',
+    '[attr.id]': 'counterId()',
     '[attr.data-invalid]': "invalid() ? '' : null",
   },
 })
 export class SlFieldCounter {
+  private readonly field = inject(SlFieldContext, { optional: true });
+  private readonly writtenId = inject(new HostAttributeToken('id'), { optional: true });
+
+  /**
+   * The identifier the field's description reads the count by, which
+   * `docs/component-features.md` §2.8 requires of a counter. A consumer's own
+   * `id` wins.
+   */
+  protected readonly counterId = computed(
+    () => this.writtenId ?? this.field?.ids().counter ?? null,
+  );
+
   /**
    * The count has passed its limit. It is the counter's own state rather than
    * the field's: a count can pass its maximum while validation has not run, and

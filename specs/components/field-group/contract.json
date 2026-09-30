@@ -21,8 +21,9 @@
     "fieldDefaults": [
       "size",
       "labelPlacement",
-      "requiredMark",
+      "necessity",
       "necessityWords",
+      "helpLabel",
       "disabled",
       "readOnly"
     ]
@@ -30,7 +31,7 @@
   "axes": {
     "size": ["sm", "md", "lg"],
     "orientation": ["vertical", "horizontal"],
-    "requiredMark": ["mark", "text", "none"]
+    "necessity": ["mark", "optional", "words", "none"]
   },
   "stateAttributes": {
     "disabled": "data-disabled",
@@ -44,7 +45,7 @@
       "defaults": {
         "size": "md",
         "orientation": "vertical",
-        "requiredMark": "mark"
+        "necessity": "mark"
       },
       "capabilities": [
         "appearance",

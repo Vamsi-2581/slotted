@@ -2,6 +2,7 @@ import { defineSnippet } from '@slotted/storybook-workbench';
 import type {
   AnatomyRow,
   ApiRow,
+  EventRow,
   ReferenceImport,
   ReferenceSceneMeta,
 } from '@slotted/storybook-workbench';
@@ -24,7 +25,7 @@ export const ANGULAR_FIELD_TOKENS = fieldTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import {\n  provideFieldDefaults,\n  SlField,\n  SlFieldControl,\n  SlFieldCounter,\n  SlFieldDescription,\n  SlFieldError,\n  SlFieldLabel,\n} from '@slotted/angular/field';",
+    "import {\n  provideFieldDefaults,\n  SlField,\n  SlFieldAction,\n  SlFieldControl,\n  SlFieldCounter,\n  SlFieldDescription,\n  SlFieldError,\n  SlFieldHeader,\n  SlFieldHelp,\n  SlFieldIndicator,\n  SlFieldLabel,\n} from '@slotted/angular/field';",
   selector: '[slField]',
   exportAs: 'slField',
 };
@@ -38,6 +39,13 @@ const anatomy: AnatomyRow[] = [
       'The field. Carries data-ui="field", the three axes, and data-disabled, data-invalid, data-required and data-readonly. It is its own container, so the side label reflows on the field’s width rather than the window’s.',
   },
   {
+    part: 'header',
+    element: 'the element carrying slFieldHeader — a div',
+    required: false,
+    purpose:
+      'The label row, when the label has company: the help, an indicator, an action and the counter. It aligns them on the label’s first baseline, wraps when it runs out of room, and puts the action and the count at its end — drawing the count the control published there when the page wrote none. A field whose label stands alone writes the label on the root and no header.',
+  },
+  {
     part: 'label',
     element: 'label[slFieldLabel]',
     required: false,
@@ -49,7 +57,28 @@ const anatomy: AnatomyRow[] = [
     element: 'span, drawn inside the label',
     required: false,
     purpose:
-      'The necessity marker the label draws itself: an asterisk, or (required) and (optional) as words. The glyph is aria-hidden because aria-required already carries the semantics; the words are not, because they are information.',
+      'The necessity marker the label draws itself: an asterisk on a required field, (optional) on the fields a reader may skip, or both words. The glyph is aria-hidden because aria-required already carries the semantics; the words are not, because they are information.',
+  },
+  {
+    part: 'help',
+    element: 'button[slFieldHelp]',
+    required: false,
+    purpose:
+      'A circle-question glyph beside the label that opens the directive’s value in a tooltip — on hover, on keyboard focus, and on a press, which pins it until a second press, Escape or a press elsewhere. SlTooltip and SlTooltipTrigger are composed on the button as host directives, and a hidden node inside it carries the same words, so the button and the control are described by the help whether the tooltip is open or not.',
+  },
+  {
+    part: 'indicator',
+    element: 'the element carrying slFieldIndicator — a span',
+    required: false,
+    purpose:
+      'What qualifies the field — Beta, Pro, New — as one or more slBadges after the label. Outside the label, so the necessity mark stays against the last word; in the control’s description, so a reader on the control hears it.',
+  },
+  {
+    part: 'action',
+    element: 'the a or button carrying slFieldAction',
+    required: false,
+    purpose:
+      'A link or a button at the end of the label row: Forgot password?, Generate. On a button the directive writes type="button" unless the page wrote one; on a link it writes nothing. The field does not disable it with the control.',
   },
   {
     part: 'control',
@@ -63,7 +92,20 @@ const anatomy: AnatomyRow[] = [
     element: 'the element carrying slFieldCounter',
     required: false,
     purpose:
-      'A count the page owns, at the end of the label row — where Carbon puts it. It carries its own data-invalid, because a count can pass its limit before validation has run.',
+      'The count, at the end of the label row — where Carbon puts it — and inside the header when there is one. The control publishes it and the field draws it; a page that counts words or bytes writes its own slFieldCounter. It joins the control’s description, and carries its own data-invalid, because a count can pass its limit before validation has run.',
+  },
+];
+
+const events: EventRow[] = [
+  {
+    name: '(openChange)',
+    payload: 'boolean',
+    when: 'On button[slFieldHelp], after the hint opened or closed — the model half of [(open)].',
+  },
+  {
+    name: '(openChangeRequest)',
+    payload: 'ChangeRequest<boolean>',
+    when: 'On button[slFieldHelp], before the hint opens or closes, once per transition. The reason is pointer for a hover or a press, keyboard for focus, Enter or Space, escape, blur or programmatic, and cancel() refuses the change.',
   },
 ];
 
@@ -83,13 +125,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'necessity',
     title: 'Saying which answers are required',
-    note: 'The asterisk is the convention; the words are what a form of mostly optional fields needs, because marking the two that are required leaves the rest ambiguous. Both forms come from the same input.',
+    note: 'The asterisk is the convention. A form where most fields are required marks the exception instead — optional writes (optional) on the fields a reader may skip and nothing on the rest — and words names both sides. All four answers come from one input an application sets once.',
     snippet: defineSnippet({
       id: 'field-angular-necessity',
       language: 'angular',
-      label: 'A mark, two words, or nothing',
+      label: 'A mark, a word on the optional fields, both words, or nothing',
       source:
-        '<div slField required>…</div>\n<div slField required requiredMark="text">…</div>\n<div slField requiredMark="text">…</div>',
+        '<div slField required>…</div>\n<div slField necessity="optional">…</div>\n<div slField required necessity="words">…</div>\n<div slField required necessity="none">…</div>',
     }),
   },
   {
@@ -153,6 +195,18 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'header',
+    title: 'The label row: help, indicator, action and count',
+    note: 'Hover the circle, or tab to it: the hint opens. Press it and it stays until a second press, which is what a finger needs. The row is as tall as the label with or without them, aligns on the label’s baseline, and in a narrow field sends the action and the count to a line of their own.',
+    snippet: defineSnippet({
+      id: 'field-angular-header',
+      language: 'angular',
+      label: 'A header around the label and what stands beside it',
+      source:
+        '<div slField required>\n  <div slFieldHeader>\n    <label slFieldLabel>Senha</label>\n    <button slFieldHelp="No mínimo oito caracteres, com letras e números."></button>\n    <a slFieldAction routerLink="/recuperar">Esqueceu a senha?</a>\n  </div>\n  <input slFieldControl type="password" />\n</div>\n\n<div slField>\n  <div slFieldHeader>\n    <label slFieldLabel>Endpoint da API</label>\n    <span slFieldIndicator><span slBadge size="sm" tone="accent" variant="soft">Beta</span></span>\n  </div>\n  <input slFieldControl />\n</div>',
+    }),
+  },
+  {
     id: 'content',
     title: 'Content the field did not choose',
     note: 'A German compound with no break opportunity, a container digest in the description, and an Arabic field in a right-to-left document — the label breaks rather than sliding under the control, and the necessity word never breaks.',
@@ -173,19 +227,19 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'ts',
       label: 'One decision for the application, and one control of your own',
       source:
-        "bootstrapApplication(App, {\n  providers: [\n    provideFieldDefaults({\n      size: 'sm',\n      requiredMark: 'text',\n      necessityWords: { optional: '(opcional)' },\n    }),\n  ],\n});",
+        "bootstrapApplication(App, {\n  providers: [\n    provideFieldDefaults({\n      size: 'sm',\n      necessity: 'words',\n      necessityWords: { optional: '(opcional)' },\n    }),\n  ],\n});",
     }),
   },
   {
     id: 'accessibility',
     title: 'What a reader hears, in order',
-    note: 'Turn a screen reader on and enter the control: the label, then “required”, then the help, then the error — one name, one description built from two elements in a fixed order, and no asterisk read aloud.',
+    note: 'Turn a screen reader on and enter the control: the label, then “required”, then the indicator, the help behind the icon, the description, the count and the error — one name, one description in a fixed order, and no asterisk read aloud.',
     snippet: defineSnippet({
       id: 'field-angular-accessibility',
       language: 'angular',
-      label: 'The four identifiers, and the two that are read',
+      label: 'The identifiers, and the ones that are read',
       source:
-        '<div data-ui="field" data-part="root">\n  <label data-part="label" for="cnpj-control">\n    CNPJ<span aria-hidden="true" data-part="mark">*</span>\n  </label>\n  <input\n    data-part="control"\n    id="cnpj-control"\n    aria-describedby="cnpj-description cnpj-error"\n    aria-invalid="true"\n    aria-required="true"\n  />\n</div>',
+        '<div data-ui="field" data-part="root">\n  <div data-part="header">\n    <label data-part="label" for="cnpj-control">\n      CNPJ<span aria-hidden="true" data-part="mark">*</span>\n    </label>\n    <button data-part="help" aria-label="More information" aria-describedby="cnpj-help">\n      <span data-part="help-text" id="cnpj-help" hidden>Somente números.</span>\n    </button>\n  </div>\n  <input\n    data-part="control"\n    id="cnpj-control"\n    aria-describedby="cnpj-help cnpj-description cnpj-error"\n    aria-invalid="true"\n    aria-required="true"\n  />\n</div>',
     }),
   },
 ];
@@ -211,18 +265,18 @@ export const ANGULAR_FIELD_DOCS = {
         'Where the label sits. side reflows to top below 320 pixels of the field’s own inline size, which is a container query rather than a viewport one',
       ],
       [
-        'requiredMark',
-        "'mark' | 'text' | 'none'",
+        'necessity',
+        "'mark' | 'optional' | 'words' | 'none'",
         'mark',
         'slField',
-        'How necessity is said: an asterisk, the words (required) and (optional), or nothing — for a form that says once that every field is required',
+        'How necessity is said: an asterisk on a required field, (optional) on the fields a reader may skip, both words, or nothing — for a form that says once that every field is required',
       ],
       [
         'necessityWords',
         '{ required?: string; optional?: string }',
         '(required) / (optional)',
         'slField, provideFieldDefaults',
-        'The two words requiredMark="text" writes, merged over the inherited pair so one can be replaced alone',
+        'The two words necessity="optional" and necessity="words" write, merged over the inherited pair so one can be replaced alone',
       ],
       [
         'required',
@@ -257,7 +311,49 @@ export const ANGULAR_FIELD_DOCS = {
         'string',
         'generated',
         'slField',
-        'A static attribute, read with HostAttributeToken, that becomes the base for <id>-control, <id>-label, <id>-description and <id>-error. Generated by an application-scoped factory when unstated, so two applications in one server process do not collide',
+        'A static attribute, read with HostAttributeToken, that becomes the base for <id>-control, <id>-label, <id>-indicator, <id>-help, <id>-description, <id>-counter and <id>-error. Generated by an application-scoped factory when unstated, so two applications in one server process do not collide',
+      ],
+      [
+        'slFieldHelp',
+        'string',
+        "''",
+        'button[slFieldHelp]',
+        'The help. Written once as the directive’s value, it reaches the tooltip and the hidden node that describes the button and the control',
+      ],
+      [
+        'open',
+        'boolean',
+        'false',
+        'button[slFieldHelp]',
+        'Whether the hint is showing — the composed SlTooltip’s model, exposed on the button, so [(open)] binds it both ways',
+      ],
+      [
+        'side',
+        "'top' | 'bottom' | 'inline-start' | 'inline-end' | 'left' | 'right'",
+        'top',
+        'button[slFieldHelp]',
+        'Where the hint opens, flipping when there is no room',
+      ],
+      [
+        'aria-label',
+        'string',
+        'helpLabel',
+        'button[slFieldHelp]',
+        'The accessible name of the help control, read with HostAttributeToken. Unstated, it is the token’s helpLabel; written, it wins for this control alone',
+      ],
+      [
+        'helpLabel',
+        'string',
+        'More information',
+        'provideFieldDefaults, slFieldGroup',
+        'The accessible name of every help control under it, so an application translates it once',
+      ],
+      [
+        'type',
+        "'button' | 'submit' | 'reset'",
+        'button on a button',
+        '[slFieldAction]',
+        'Written on a button that states no type, so the action never submits the form it sits in. A link carries none',
       ],
       [
         'tone',
@@ -288,13 +384,21 @@ export const ANGULAR_FIELD_DOCS = {
         'Holds one line box open whether or not there is a message, so a form that renders its error unconditionally does not move when the error arrives',
       ],
     ]),
+    events,
     composition: apiRows([
+      [
+        'exportAs="slFieldHelp"',
+        'SlFieldHelp',
+        '—',
+        'button[slFieldHelp]',
+        'Hands the template the help control. Its state is the composed tooltip’s, bound through [(open)] and (openChangeRequest) rather than through a method',
+      ],
       [
         'exportAs="slField"',
         'SlField',
         '—',
         'slField',
-        'Hands the template the instance, so a page can point its own element at ids().control, ids().description or ids().error without inventing an identifier. There is no imperative method beyond it: the family holds no state and moves nothing',
+        'Hands the template the instance, so a page can point its own element at ids().control, ids().description or ids().error without inventing an identifier, and read count() to draw a count of its own',
       ],
       [
         'slFieldControl',
@@ -305,24 +409,27 @@ export const ANGULAR_FIELD_DOCS = {
       ],
       [
         'provideFieldDefaults()',
-        '{ size, labelPlacement, requiredMark, necessityWords, disabled, readOnly }',
+        '{ size, labelPlacement, necessity, necessityWords, helpLabel, disabled, readOnly }',
         '—',
         'an application or a route',
-        'The six decisions an application takes once. slFieldGroup answers the same source for its own subtree, so a compact or disabled section is one attribute rather than one per field',
+        'The seven decisions an application takes once. slFieldGroup answers the same source for its own subtree, so a compact or disabled section is one attribute rather than one per field',
       ],
       [
         'ng-content',
         'projected content',
         '—',
         'slField',
-        'The label, the counter and the two message markers are selected by name; everything else — the control, and anything beside it — is projected as written',
+        'The label or the header, the counter and the two message markers are selected by name; everything else — the control, and anything beside it — is projected as written. slFieldHeader projects what it holds in the order the page wrote it',
       ],
     ]),
     accessibility: [
       'There is no WAI-ARIA APG pattern for a field. Four documents cover it between them: the APG’s Providing Accessible Names and Descriptions practice (w3.org/WAI/ARIA/apg/practices/names-and-descriptions/) for the label and the description, the HTML specification for label[for] and fieldset[disabled], and WCAG 2.2 Understanding 3.3.1 Error Identification and 3.3.2 Labels or Instructions for the error and the help.',
       'The label is associated explicitly. The APG’s naming practice records that the implicit form — wrapping the control in the label — is one some combinations of assistive technology and browser fail to treat as an accessible name at all, so the field derives an identifier and points for at it rather than nesting.',
       'aria-required, never the native required. The native attribute engages browser constraint validation and changes submit behaviour, which the library must not impose as a side effect of describing a field. A consumer who writes required on the control keeps it, because every written attribute is read with HostAttributeToken before the binding that would replace it. disabled and readonly are native, because removing a control from the tab order and from submission is what those two words mean.',
-      'The accessible description is the help and then the error, in that order, whatever order the page wrote them in. Two known slots have one correct reading order, so the field states it rather than reading it from the DOM.',
+      'The accessible description is the indicator, the help behind the icon, the description, the count and the error, in that order, whatever order the page wrote them in. Known slots have one correct reading order, so the field states it rather than reading it from the DOM. The count is there because docs/component-features.md §2.8 requires a counter related to its control by identifier.',
+      'The help, the indicator and the action stand beside the label, never inside it. A button is labelable content, which HTML forbids inside a label other than the control it labels, and a press on it would reach the label and move focus to the control instead of opening the hint.',
+      'The help is a toggletip. A tooltip alone opens on a coarse pointer only by a long press, because a tap is the trigger’s own action; the help has no other action, so a press opens it and a second press closes it. Its words also sit in a hidden node inside the button, which describes the button and the control while the tooltip is closed — a directly referenced hidden element still enters the description — and the tooltip itself describes nothing, so the hint is never read twice.',
+      'A disabled field leaves its help and its action operable. The help is often where the reason the field is off is written.',
       'The necessity marker is hidden and the necessity words are not. A reader working through a form of twenty required fields does not need to hear “asterisk” twenty times, and aria-required already says it; (optional), by contrast, is information nobody else supplies.',
       'The error is text in the flow of the page, which is what WCAG 2.2 SC 3.3.1 requires. It is never a tooltip, and because it is an inline-message it also carries the severity as a clipped word — so a reader who cannot see the red ink still hears “Error:” before the sentence.',
       'live defaults to off. A message already present when the page finishes loading is announced by nothing whatever role it carries, so a form that raises the error after submit writes live="polite" and the reader hears it once.',
@@ -333,7 +440,7 @@ export const ANGULAR_FIELD_DOCS = {
         language: 'angular',
         label: 'Anatomy, as it reaches the DOM',
         source:
-          '<div\n  data-ui="field"\n  data-part="root"\n  data-size="md"\n  data-label-placement="top"\n  data-required-mark="mark"\n  data-required\n  data-invalid\n>\n  <label data-part="label" for="cnpj-control">\n    CNPJ<span aria-hidden="true" data-part="mark">*</span>\n  </label>\n  <span data-part="counter">14/18</span>\n  <input data-part="control" id="cnpj-control" aria-invalid="true" aria-required="true" />\n  <p data-ui="inline-message" data-part="root" data-tone="secondary" id="cnpj-description">\n    <span data-part="text">Somente números.</span>\n  </p>\n</div>',
+          '<div\n  data-ui="field"\n  data-part="root"\n  data-size="md"\n  data-label-placement="top"\n  data-necessity="mark"\n  data-required\n  data-invalid\n>\n  <label data-part="label" for="cnpj-control">\n    CNPJ<span aria-hidden="true" data-part="mark">*</span>\n  </label>\n  <span data-part="counter">14/18</span>\n  <input data-part="control" id="cnpj-control" aria-invalid="true" aria-required="true" />\n  <p data-ui="inline-message" data-part="root" data-tone="secondary" id="cnpj-description">\n    <span data-part="text">Somente números.</span>\n  </p>\n</div>',
       }),
       defineSnippet({
         id: 'field-theming',

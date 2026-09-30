@@ -7,7 +7,7 @@ import {
   inject,
   ViewEncapsulation,
 } from '@angular/core';
-import { SlFieldMessage } from '@slotted/angular/field';
+import { necessityMark, SlFieldMessage } from '@slotted/angular/field';
 
 import { SlFieldGroup } from './field-group';
 
@@ -40,18 +40,15 @@ export class SlFieldGroupLegend {
   private readonly writtenId = inject(new HostAttributeToken('id'), { optional: true });
 
   protected readonly legendId = computed(() => this.writtenId ?? this.group.ids().legend);
-  protected readonly markHidden = computed(() => this.group.resolvedRequiredMark() !== 'text');
-
-  protected readonly mark = computed(() => {
-    const style = this.group.resolvedRequiredMark();
-    const required = this.group.required() === true;
-    if (style === 'none') return null;
-    if (style === 'text') {
-      const words = this.group.resolvedWords();
-      return required ? words.required : words.optional;
-    }
-    return required ? '*' : null;
-  });
+  private readonly necessity = computed(() =>
+    necessityMark(
+      this.group.resolvedNecessity(),
+      this.group.required() === true,
+      this.group.resolvedWords(),
+    ),
+  );
+  protected readonly markHidden = computed(() => this.necessity()?.hidden === true);
+  protected readonly mark = computed(() => this.necessity()?.text ?? null);
 }
 
 /**

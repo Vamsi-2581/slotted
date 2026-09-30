@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 
+import { FIELD_NECESSITY_WORDS, necessityMark } from '../field';
 import { InlineMessage } from '../inline-message';
 import { useFieldGroup } from './field-group';
 import type {
@@ -41,18 +42,11 @@ export function FieldGroupLegend({
   ...nativeProps
 }: FieldGroupLegendProps) {
   const group = useFieldGroup();
-  const requiredMark = group?.requiredMark ?? 'mark';
-  const required = group?.required === true;
-  const mark =
-    requiredMark === 'none'
-      ? null
-      : requiredMark === 'text'
-        ? required
-          ? (group?.necessityWords.required ?? '(required)')
-          : (group?.necessityWords.optional ?? '(optional)')
-        : required
-          ? '*'
-          : null;
+  const mark = necessityMark(
+    group?.necessity ?? 'mark',
+    group?.required === true,
+    group?.necessityWords ?? FIELD_NECESSITY_WORDS,
+  );
 
   const rootProps: FieldGroupLegendRootProps = {
     ...nativeProps,
@@ -60,8 +54,8 @@ export function FieldGroupLegend({
       <>
         {children}
         {mark === null ? null : (
-          <span {...(requiredMark === 'text' ? {} : { 'aria-hidden': true })} data-part="mark">
-            {mark}
+          <span {...(mark.hidden ? { 'aria-hidden': true } : {})} data-part="mark">
+            {mark.text}
           </span>
         )}
       </>

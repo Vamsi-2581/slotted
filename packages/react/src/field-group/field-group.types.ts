@@ -3,8 +3,8 @@ import type { ComponentPropsWithRef, HTMLAttributes, ReactNode } from 'react';
 import type {
   FieldLabelPlacement,
   FieldMessageProps,
+  FieldNecessity,
   FieldNecessityWords,
-  FieldRequiredMark,
   FieldSize,
 } from '../field';
 
@@ -23,8 +23,8 @@ export interface FieldGroupContextValue {
   messageSize: 'sm' | 'md';
   necessityWords: FieldNecessityWords;
   registerMessage: (slot: 'description' | 'error', present: boolean) => void;
+  necessity: FieldNecessity;
   required: boolean | undefined;
-  requiredMark: FieldRequiredMark;
   size: FieldSize;
 }
 
@@ -41,7 +41,7 @@ export interface FieldGroupRootProps extends HTMLAttributes<HTMLElement> {
   'data-part': string;
   'data-readonly'?: '' | undefined;
   'data-required'?: '' | undefined;
-  'data-required-mark': FieldRequiredMark;
+  'data-necessity': FieldNecessity;
   'data-size': FieldSize;
   'data-ui': string;
 }
@@ -61,6 +61,8 @@ export interface FieldGroupProps extends Omit<ComponentPropsWithRef<'fieldset'>,
   invalid?: boolean | undefined;
   /** Provided to every field inside, unless the field states its own. */
   labelPlacement?: FieldLabelPlacement | undefined;
+  /** Provided to every field inside: the accessible name of its help controls. */
+  helpLabel?: string | undefined;
   /** Merged over the provider's pair, and provided to every field inside. */
   necessityWords?: Partial<FieldNecessityWords> | undefined;
   /** How the fields inside flow. Defaults to `vertical`. */
@@ -70,7 +72,7 @@ export interface FieldGroupProps extends Omit<ComponentPropsWithRef<'fieldset'>,
   /** Draws the necessity marker on the legend, and is not provided to the fields. */
   required?: boolean | undefined;
   /** Provided to every field inside. Defaults to the field provider, then `mark`. */
-  requiredMark?: FieldRequiredMark | undefined;
+  necessity?: FieldNecessity | undefined;
   render?: ((props: FieldGroupRootProps) => ReactNode) | undefined;
   /** Provided to every field inside. Defaults to `md`. */
   size?: FieldSize | undefined;

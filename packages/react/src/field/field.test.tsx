@@ -1,16 +1,22 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { useEffect } from 'react';
+import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/field/contract.json';
 import {
   Field,
+  FieldAction,
   FieldControl,
   FieldCounter,
   FieldDefaultsProvider,
   FieldDescription,
   FieldError,
+  FieldHeader,
+  FieldHelp,
+  FieldIndicator,
   FieldLabel,
 } from './index';
+import { useField as useFieldForTest } from './field-context';
 
 describe('Field', () => {
   it('is selected in public by the family identifier and its parts', () => {
@@ -43,7 +49,7 @@ describe('Field', () => {
     const { defaults } = contract.members.field;
     expect(field).toHaveAttribute('data-size', defaults.size);
     expect(field).toHaveAttribute('data-label-placement', defaults.labelPlacement);
-    expect(field).toHaveAttribute('data-required-mark', defaults.requiredMark);
+    expect(field).toHaveAttribute('data-necessity', defaults.necessity);
     for (const state of ['data-disabled', 'data-invalid', 'data-required', 'data-readonly']) {
       expect(field).not.toHaveAttribute(state);
     }
@@ -156,7 +162,7 @@ describe('Field', () => {
    * required fields does not need to hear "asterisk" twenty times; `(optional)`
    * is information rather than decoration.
    */
-  it('says necessity as a mark, as words, or not at all', () => {
+  it('says necessity as a mark, as a word on the optional fields, as words, or not at all', () => {
     const { rerender } = render(
       <Field data-testid="field" required>
         <FieldLabel>CNPJ</FieldLabel>
@@ -166,21 +172,37 @@ describe('Field', () => {
     expect(screen.getByText('*')).toHaveAttribute('data-part', 'mark');
 
     rerender(
-      <Field data-testid="field" required requiredMark="text">
+      <Field data-testid="field" required necessity="words">
         <FieldLabel>CNPJ</FieldLabel>
       </Field>,
     );
     expect(screen.getByText('(required)')).not.toHaveAttribute('aria-hidden');
 
     rerender(
-      <Field data-testid="field" requiredMark="text">
+      <Field data-testid="field" necessity="words">
         <FieldLabel>Inscrição estadual</FieldLabel>
       </Field>,
     );
     expect(screen.getByText('(optional)')).toBeInTheDocument();
 
     rerender(
-      <Field data-testid="field" required requiredMark="none">
+      <Field data-testid="field" necessity="optional">
+        <FieldLabel>Nome fantasia</FieldLabel>
+      </Field>,
+    );
+    expect(screen.getByText('(optional)')).not.toHaveAttribute('aria-hidden');
+
+    rerender(
+      <Field data-testid="field" necessity="optional" required>
+        <FieldLabel>Razão social</FieldLabel>
+      </Field>,
+    );
+    expect(screen.queryByText('(optional)')).not.toBeInTheDocument();
+    expect(screen.queryByText('(required)')).not.toBeInTheDocument();
+    expect(screen.queryByText('*')).not.toBeInTheDocument();
+
+    rerender(
+      <Field data-testid="field" necessity="none" required>
         <FieldLabel>CNPJ</FieldLabel>
       </Field>,
     );
@@ -189,7 +211,7 @@ describe('Field', () => {
 
   it('lets an application translate the two necessity words once', () => {
     render(
-      <FieldDefaultsProvider necessityWords={{ optional: '(opcional)' }} requiredMark="text">
+      <FieldDefaultsProvider necessity="words" necessityWords={{ optional: '(opcional)' }}>
         <Field>
           <FieldLabel>Inscrição estadual</FieldLabel>
         </Field>
@@ -321,5 +343,218 @@ describe('Field', () => {
     expect(control).toHaveAttribute('autocomplete', 'email');
     expect(control).toHaveAttribute('maxlength', '64');
     expect(control).toHaveAttribute('inputmode', 'email');
+  });
+
+  /**
+   * The label row, when the label has company. The help control is a sibling
+   * of the label rather than a child: a `button` inside a `label` is invalid
+   * HTML, and a press on it would reach the label and move focus to the control.
+   */
+  it('keeps every control of the label row beside the label, never inside it', () => {
+    render(
+      <Field id="senha">
+        <FieldHeader data-testid="header">
+          <FieldLabel>Senha</FieldLabel>
+          <FieldHelp>No mínimo oito caracteres.</FieldHelp>
+          <FieldIndicator>Beta</FieldIndicator>
+          <FieldAction>Esqueceu a senha?</FieldAction>
+        </FieldHeader>
+        <FieldControl data-testid="control" />
+      </Field>,
+    );
+
+    const header = screen.getByTestId('header');
+    const label = screen.getByText('Senha');
+    expect(header).toHaveAttribute('data-part', 'header');
+    expect(header.tagName).toBe('DIV');
+    for (const part of ['help', 'indicator', 'action']) {
+      const element = header.querySelector(`[data-part='${part}']`);
+      expect(element?.parentElement).toBe(header);
+      expect(label.contains(element)).toBe(false);
+    }
+    expect(screen.getByRole('button', { name: 'Esqueceu a senha?' })).toHaveAttribute(
+      'type',
+      'button',
+    );
+  });
+
+  /**
+   * The contract's reading order: what qualifies the field, the help behind
+   * the icon, the description, the count, the error.
+   */
+  it('describes the control with the indicator, the help, the description, the count and the error', () => {
+    render(
+      <Field id="bio">
+        <FieldHeader>
+          <FieldLabel>Apresentação</FieldLabel>
+          <FieldHelp>Aparece no perfil público.</FieldHelp>
+          <FieldIndicator>Beta</FieldIndicator>
+          <FieldCounter>24/160</FieldCounter>
+        </FieldHeader>
+        <FieldControl data-testid="control" />
+        <FieldError>Longa demais.</FieldError>
+        <FieldDescription>Uma frase.</FieldDescription>
+      </Field>,
+    );
+
+    expect(screen.getByTestId('control')).toHaveAttribute(
+      'aria-describedby',
+      'bio-indicator bio-help bio-description bio-counter bio-error',
+    );
+    expect(screen.getByText('24/160')).toHaveAttribute('id', 'bio-counter');
+    expect(screen.getByText('Beta').closest('[data-part="indicator"]')).toHaveAttribute(
+      'id',
+      'bio-indicator',
+    );
+  });
+
+  /**
+   * The tooltip's layer exists only while it is open, so the description
+   * points at a node the family keeps hidden, which a directly referenced
+   * `hidden` element still contributes to (accname 1.2, step 2A).
+   */
+  it('describes the control and the help button with the help text while the hint is closed', () => {
+    render(
+      <Field id="prazo">
+        <FieldHeader>
+          <FieldLabel>Prazo</FieldLabel>
+          <FieldHelp>Dias corridos.</FieldHelp>
+        </FieldHeader>
+        <FieldControl data-testid="control" />
+      </Field>,
+    );
+
+    const help = screen.getByRole('button', { name: 'More information' });
+    const text = document.getElementById('prazo-help');
+    expect(text).toHaveTextContent('Dias corridos.');
+    expect(text).toHaveAttribute('hidden');
+    expect(help).toHaveAttribute('aria-describedby', 'prazo-help');
+    expect(help).toHaveAttribute('type', 'button');
+    expect(screen.getByTestId('control')).toHaveAttribute('aria-describedby', 'prazo-help');
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
+  /**
+   * A tooltip alone opens on a coarse pointer only by a long press. The help
+   * has no other action, so its press is the hint: the first press pins it
+   * open, the second closes it, and each is a request carrying its reason.
+   */
+  it('opens and closes the hint on a press, as a request with its reason', () => {
+    const onOpenChange = vi.fn();
+    render(
+      <Field id="prazo">
+        <FieldHeader>
+          <FieldLabel>Prazo</FieldLabel>
+          <FieldHelp onOpenChange={onOpenChange}>Dias corridos.</FieldHelp>
+        </FieldHeader>
+      </Field>,
+    );
+
+    const help = screen.getByRole('button', { name: 'More information' });
+    act(() => {
+      fireEvent.click(help, { detail: 1 });
+    });
+    expect(onOpenChange).toHaveBeenLastCalledWith(
+      true,
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+    expect(help).toHaveAttribute('data-open');
+
+    act(() => {
+      fireEvent.click(help, { detail: 0 });
+    });
+    expect(onOpenChange).toHaveBeenLastCalledWith(
+      false,
+      expect.objectContaining({ reason: 'keyboard' }),
+    );
+    expect(help).not.toHaveAttribute('data-open');
+  });
+
+  it('lets an application name the help control once, and a page name one of its own', () => {
+    render(
+      <FieldDefaultsProvider helpLabel="Mais informações">
+        <Field>
+          <FieldHeader>
+            <FieldLabel>Prazo</FieldLabel>
+            <FieldHelp>Dias corridos.</FieldHelp>
+          </FieldHeader>
+        </Field>
+        <Field>
+          <FieldHeader>
+            <FieldLabel>Juros</FieldLabel>
+            <FieldHelp aria-label="Como os juros são calculados">Ao mês.</FieldHelp>
+          </FieldHeader>
+        </Field>
+      </FieldDefaultsProvider>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Mais informações' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Como os juros são calculados' }),
+    ).toBeInTheDocument();
+  });
+
+  /** A disabled field still answers what it is for, and why it is off. */
+  it('leaves the help and the action operable on a disabled field', () => {
+    render(
+      <Field disabled>
+        <FieldHeader>
+          <FieldLabel>Centro de custo</FieldLabel>
+          <FieldHelp>Liberado depois da unidade.</FieldHelp>
+          <FieldAction>Escolher unidade</FieldAction>
+        </FieldHeader>
+        <FieldControl data-testid="control" />
+      </Field>,
+    );
+
+    expect(screen.getByTestId('control')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'More information' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Escolher unidade' })).toBeEnabled();
+  });
+
+  /** The action becomes a link on request, and keeps the consumer's handler. */
+  it('renders the action as a link and composes the consumer’s handler', () => {
+    const onClick = vi.fn();
+    render(
+      <Field>
+        <FieldHeader>
+          <FieldLabel>Senha</FieldLabel>
+          <FieldAction onClick={onClick} render={(props) => <a {...props} href="/recuperar" />}>
+            Esqueceu a senha?
+          </FieldAction>
+        </FieldHeader>
+      </Field>,
+    );
+
+    const link = screen.getByRole('link', { name: 'Esqueceu a senha?' });
+    expect(link).toHaveAttribute('data-part', 'action');
+    expect(link).not.toHaveAttribute('type');
+    fireEvent.click(link);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  /**
+   * The count a control publishes is drawn once: at the end of the header when
+   * the page wrote one, on the root otherwise.
+   */
+  it('draws the published count in the header when there is one', () => {
+    function Counting() {
+      const setCount = useFieldForTest()?.setCount;
+      useEffect(() => setCount?.({ length: 3, max: 14 }), [setCount]);
+      return null;
+    }
+    render(
+      <Field id="nif">
+        <FieldHeader data-testid="header">
+          <FieldLabel>NIF</FieldLabel>
+        </FieldHeader>
+        <Counting />
+      </Field>,
+    );
+
+    const counter = screen.getByText('3/14');
+    expect(counter.parentElement).toBe(screen.getByTestId('header'));
+    expect(counter).toHaveAttribute('id', 'nif-counter');
+    expect(document.querySelectorAll('[data-part="counter"]')).toHaveLength(1);
   });
 });

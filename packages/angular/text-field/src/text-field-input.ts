@@ -20,8 +20,9 @@ import type { OnInit } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor } from '@angular/forms';
 import { SlField } from '@slotted/angular/field';
+import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 
-import { SlTextFieldControl } from './text-field-defaults';
+import { injectTextFieldDefaults, SlTextFieldControl } from './text-field-defaults';
 import type { TextFieldType } from './text-field-defaults';
 import { SlTextField } from './text-field';
 
@@ -67,7 +68,10 @@ function activationReason(event: Event): ChangeReason {
     '[attr.aria-required]': 'ariaRequired()',
     '[attr.disabled]': 'disabledAttribute()',
     '[attr.readonly]': 'readonlyAttribute()',
+    '[attr.aria-busy]': "textField.loading() === true ? 'true' : null",
     '(input)': 'onInput($event)',
+    '(keydown)': 'readCapsLock($event)',
+    '(keyup)': 'readCapsLock($event)',
     '(blur)': 'onBlur()',
   },
 })
@@ -127,6 +131,7 @@ export class SlTextFieldInput implements ControlValueAccessor, OnInit, SlTextFie
    */
   readonly textField = inject(SlTextField);
   private readonly field = inject(SlField, { optional: true });
+  private readonly defaults = injectTextFieldDefaults();
 
   private readonly writtenId = inject(new HostAttributeToken('id'), { optional: true });
   private readonly writtenType = inject(new HostAttributeToken('type'), { optional: true });
@@ -151,6 +156,9 @@ export class SlTextFieldInput implements ControlValueAccessor, OnInit, SlTextFie
   private onChangeFn: (value: string) => void = () => undefined;
   private onTouchedFn: () => void = () => undefined;
 
+  private readonly ownCapsLock = signal(false);
+  readonly capsLock = this.ownCapsLock.asReadonly();
+  readonly currentValue = this.mirror.asReadonly();
   readonly empty = computed(() => this.mirror() === '');
   readonly revealed = computed(() => this.revealedValue() ?? this.ownRevealed());
   readonly password = computed(() => (this.writtenType ?? 'text') === 'password');
@@ -305,7 +313,24 @@ export class SlTextFieldInput implements ControlValueAccessor, OnInit, SlTextFie
   }
 
   protected onBlur() {
+    this.ownCapsLock.set(false);
     this.onTouchedFn();
+  }
+
+  /**
+   * Caps Lock is read from the key events the control already receives, and
+   * only in a password: the platform exposes the modifier on an event and
+   * nowhere else. It is announced once, as it turns on.
+   */
+  protected readCapsLock(event: KeyboardEvent) {
+    if (!this.password() || typeof event.getModifierState !== 'function') return;
+    const on = event.getModifierState('CapsLock');
+    if (on && !this.ownCapsLock()) {
+      getLiveAnnouncer(this.element.ownerDocument).announce(
+        this.textField.capsLockLabel() ?? this.defaults.capsLockLabel,
+      );
+    }
+    this.ownCapsLock.set(on);
   }
 
   /** Emits the request and says whether anything may commit. */

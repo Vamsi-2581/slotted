@@ -46,21 +46,32 @@ test('styles every part the contract declares', () => {
  * inside a border is a control drawn twice.
  */
 /**
- * Only when a button is the last thing in the frame. With an `end` adornment
- * after it the frame keeps its own padding, because the adornment is text and
- * text is inset like text.
+ * Only when a button is the first or last thing in the frame, and then the air
+ * beside it is the air above it: the ground a hover paints is a smaller copy
+ * of the frame, and its corner is the frame's less that air
+ * (docs/history/designs/2026-09-30-text-field-reui-dossier.md § 3). With an
+ * `end` of text after it the frame keeps its own padding, because text is
+ * inset like text.
  */
-test('gives the end back to a button only when the button ends the frame', () => {
-  assert.ok(
-    normalized.includes(
-      `${root}:has(>[data-part='clear']:last-child,>[data-part='reveal']:last-child){`,
-    ),
-    'the frame gives its end padding away whenever a button exists',
+test('insets a button at either end concentrically with the frame', () => {
+  const frame = rule(root);
+  assert.match(
+    frame,
+    /--_inset:max\(0px,calc\(\(var\(--_height\) - 2 \* var\(--slotted-control-border-width,1px\) - var\(--_action-size\)\) \/ 2\)\)/,
   );
   assert.match(
-    rule(`${root}:has(>[data-part='clear']:last-child,>[data-part='reveal']:last-child)`),
-    /padding-inline-end:max\(0px,calc\(var\(--_padding-inline\) - \(var\(--_action-size\) - var\(--_icon-size\)\) \/ 2\)\)/,
-    'the gutter is measured against something other than the drawn button',
+    frame,
+    /--_action-radius:max\(var\(--slotted-radius-xs,2px\),calc\(var\(--slotted-text-field-radius,var\(--slotted-control-radius,4px\)\) - var\(--_inset\)\)\)/,
+  );
+  assert.match(
+    rule(
+      `${root}:has(>:is([data-part='clear'],[data-part='copy'],[data-part='reveal']):not([hidden]):last-child,>[data-part='end']:last-child>[data-part='action']:last-child)`,
+    ),
+    /padding-inline-end:var\(--_inset\)/,
+  );
+  assert.match(
+    rule(`${root}:has(>[data-part='start']:first-child>[data-part='action']:first-child)`),
+    /padding-inline-start:var\(--_inset\)/,
   );
 });
 
@@ -114,7 +125,7 @@ test('takes every step from the control scales rather than stating one', () => {
  * reaches `--slotted-target-min` in both axes and never shrinks a box that is
  * already larger.
  */
-test('draws both buttons inside the frame and keeps the target minimum', () => {
+test('draws every button inside the frame and keeps the target minimum', () => {
   const frame = rule(root);
   assert.match(frame, /--_inner-size:var\(--slotted-control-inner-size-md,24px\)/);
   assert.match(
@@ -122,17 +133,40 @@ test('draws both buttons inside the frame and keeps the target minimum', () => {
     /--_action-size:var\(--slotted-text-field-action-size,min\(calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\),var\(--_inner-size\)\)\)/,
   );
 
-  const action = rule(`${ui}>[data-part='clear'],${ui}>[data-part='reveal']`);
-  assert.match(action, /inline-size:var\(--_action-size\)/);
+  const action = rule(
+    `${ui}>:is([data-part='clear'],[data-part='copy'],[data-part='reveal']),${ui}>:is([data-part='start'],[data-part='end'])>[data-part='action']`,
+  );
+  assert.match(action, /min-inline-size:var\(--_action-size\)/);
   assert.match(action, /block-size:var\(--_action-size\)/);
+  assert.match(action, /border-radius:var\(--_action-radius\)/);
   assert.match(action, /position:relative/);
+  assert.match(action, /--slotted-icon-size:var\(--_icon-size\)/);
 
-  const target = rule(`${ui}>[data-part='clear']::after,${ui}>[data-part='reveal']::after`);
+  const target = rule(
+    `${ui}>:is([data-part='clear'],[data-part='copy'],[data-part='reveal'])::after,${ui}>:is([data-part='start'],[data-part='end'])>[data-part='action']::after`,
+  );
   assert.match(target, /position:absolute/);
   assert.match(
     target,
     /inset:min\(0px,calc\(\(100% - var\(--slotted-target-min,24px\)\) \/ 2\)\)/,
     'the hit area does not reach the WCAG 2.2 minimum in both axes',
+  );
+});
+
+/**
+ * A button without text has to carry its name in an attribute, so the
+ * attribute that makes it accessible is the one that keeps it square; a
+ * button named by its own words takes a step of air a side and the value's
+ * ink.
+ */
+test('pads a labelled action and keeps an icon action square', () => {
+  const labelled = rule(
+    `${ui}>:is([data-part='start'],[data-part='end'])>[data-part='action']:not([aria-label],[aria-labelledby])`,
+  );
+  assert.match(labelled, /padding-inline:var\(--slotted-space-3,0\.375rem\)/);
+  assert.match(
+    labelled,
+    /color:var\(--slotted-text-field-action-label-color,var\(--slotted-text,CanvasText\)\)/,
   );
 });
 
@@ -145,7 +179,7 @@ test('draws both buttons inside the frame and keeps the target minimum', () => {
  */
 test('aligns a text adornment optically with a glyph one', () => {
   const adornment = rule(
-    `${ui}>[data-part='start']:not(:has(svg,img,[data-ui='icon'])),${ui}>[data-part='end']:not(:has(svg,img,[data-ui='icon']))`,
+    `${ui}>[data-part='start']:not(:has(svg,img,[data-ui='icon'],[data-part='action'])),${ui}>[data-part='end']:not(:has(svg,img,[data-ui='icon'],[data-part='action']))`,
   );
   assert.match(adornment, /padding-inline:calc\(var\(--_icon-size\) \/ 8\)/);
   assert.match(
@@ -193,12 +227,7 @@ test('points the focus ring at the invalid colour rather than repainting it', ()
  * never a mask or a character. The stylesheet only sizes the `icon` box, at
  * the control's own icon step.
  */
-test('sizes the glyph element of both buttons and paints none itself', () => {
-  assert.ok(
-    normalized.includes(
-      `${ui}>[data-part='clear'],${ui}>[data-part='reveal']{--slotted-icon-size:var(--_icon-size);}`,
-    ),
-  );
+test('paints no glyph itself', () => {
   assert.doesNotMatch(declarations, /mask-image/);
   assert.doesNotMatch(declarations, /content:'[^']+'/, 'a character is drawn as an icon');
 });
@@ -243,7 +272,9 @@ test('rings the frame for the control, and each button for itself', () => {
     /outline:var\(--slotted-focus-ring-width,2px\) solid/,
   );
   assert.match(
-    rule(`${ui}>[data-part='clear']:focus-visible,${ui}>[data-part='reveal']:focus-visible`),
+    rule(
+      `${ui}>:is([data-part='clear'],[data-part='copy'],[data-part='reveal']):focus-visible,${ui}>:is([data-part='start'],[data-part='end'])>[data-part='action']:focus-visible`,
+    ),
     /outline-offset:calc\(var\(--slotted-focus-ring-offset,2px\) \* -1\)/,
   );
 });

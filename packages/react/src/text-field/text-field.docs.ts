@@ -24,7 +24,7 @@ export const REACT_TEXT_FIELD_TOKENS = textFieldTokens.map((name) => ({
 }));
 
 const imports: ReferenceImport = {
-  source: "import { TextField, TextFieldDefaultsProvider } from '@slotted/react';",
+  source: "import { TextField, TextFieldAction, TextFieldDefaultsProvider } from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -33,7 +33,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div, or the element render returns',
     required: true,
     purpose:
-      'The frame. Carries data-ui="text-field", the two axes, and data-disabled, data-invalid and data-readonly. It has no role: a textbox may hold only non-interactive children, so the buttons are the control’s siblings and the box around them announces nothing. className and style reach this element.',
+      'The frame. Carries data-ui="text-field", the two axes, and data-disabled, data-invalid, data-readonly and data-loading. It has no role: a textbox may hold only non-interactive children, so the buttons are the control’s siblings and the box around them announces nothing. className and style reach this element.',
   },
   {
     part: 'input',
@@ -56,11 +56,39 @@ const anatomy: AnatomyRow[] = [
     purpose: 'An adornment after the value in the reading direction: a unit, a domain, a suffix.',
   },
   {
+    part: 'action',
+    element: 'button (TextFieldAction), inside start or end',
+    required: false,
+    purpose:
+      'A button of the consumer’s inside the frame: a submit, a menu trigger naming a country, a tooltip on an information mark. Square when named by aria-label, padded when named by its text; aria-expanded="true" keeps it pressed while the menu it opened is open.',
+  },
+  {
+    part: 'busy',
+    element: 'span[data-ui="spinner"]',
+    required: false,
+    purpose:
+      'The shared ring, before the buttons, while loading is true. Rendered whenever loading is stated and hidden while it is false, so it leaves as well as arrives. Hidden from assistive technology: aria-busy on the input says it.',
+  },
+  {
+    part: 'caps-lock',
+    element: 'span',
+    required: false,
+    purpose:
+      'A mark in a password while Caps Lock is on and the control has focus. Hidden from assistive technology; capsLockLabel is announced once as it turns on.',
+  },
+  {
     part: 'clear',
     element: 'button',
     required: false,
     purpose:
-      'Empties the value with reason "clear" and returns focus to the control. Drawn only when there is something to clear and the reader may change it, and never smaller than 24 CSS pixels.',
+      'Empties the value with reason "clear" and returns focus to the control. Rendered while clearable, hidden while there is nothing to clear or the reader may not change it, and never smaller than 24 CSS pixels.',
+  },
+  {
+    part: 'copy',
+    element: 'button',
+    required: false,
+    purpose:
+      'Writes the value to the clipboard, turns to a check with data-complete for two seconds and announces the outcome. Stays for a read-only value; hidden while the value is empty or disabled.',
   },
   {
     part: 'reveal',
@@ -158,6 +186,91 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'menu',
+    title: 'A button of your own inside the frame',
+    note: 'A country code that opens a menu, a category beside a search, a submit named in words, an overflow mark: each is a real button in start or end. Open one — it stays pressed while its menu is open, and the value keeps its place beside it.',
+    snippet: defineSnippet({
+      id: 'text-field-react-menu',
+      language: 'tsx',
+      label: 'A menu trigger composed onto an action',
+      source: `<Menu>
+  <TextField
+    type="tel"
+    start={
+      <MenuTrigger
+        render={(props) => (
+          <TextFieldAction {...props}>
+            {country}{' '}
+            <Icon>
+              <ChevronDown />
+            </Icon>
+          </TextFieldAction>
+        )}
+      />
+    }
+  />
+  <MenuContent>
+    <MenuRadioGroup value={country} onValueChange={setCountry}>
+      <MenuRadioItem value="+55">Brasil +55</MenuRadioItem>
+      <MenuRadioItem value="+351">Portugal +351</MenuRadioItem>
+    </MenuRadioGroup>
+  </MenuContent>
+</Menu>;
+
+// Named by its text: padded. Named by aria-label: square.
+<TextField end={<TextFieldAction type="submit">Pesquisar</TextFieldAction>} />;`,
+    }),
+  },
+  {
+    id: 'copy',
+    title: 'Copying a value somebody has to paste elsewhere',
+    note: 'Press the copy button: the mark turns to a check in the success ink for two seconds and the outcome is announced. A clipboard that refuses — an insecure page, a denied permission — is announced as a failure and shows no check.',
+    snippet: defineSnippet({
+      id: 'text-field-react-copy',
+      language: 'tsx',
+      label: 'A read-only link and a key',
+      source: `<TextField
+  readOnly
+  copyable
+  defaultValue="https://nexora.app/convite/8f3a"
+  onValueCopy={({ copied }) => copied && track('invite-copied')}
+/>;`,
+    }),
+  },
+  {
+    id: 'password',
+    title: 'A password: showing it, and warning about Caps Lock',
+    note: 'Focus the password and turn Caps Lock on: the warning mark appears before the eye and is announced once. The eye swaps to a crossed eye and back, and the caret stays where it was.',
+    snippet: defineSnippet({
+      id: 'text-field-react-password',
+      language: 'tsx',
+      label: 'Reveal, and the Caps Lock mark every password gets',
+      source: `<TextField
+  type="password"
+  autoComplete="current-password"
+  revealable
+  start={
+    <Icon>
+      <Lock />
+    </Icon>
+  }
+/>;`,
+    }),
+  },
+  {
+    id: 'loading',
+    title: 'Checking the value while the reader keeps typing',
+    note: 'A user name checked against the server: the ring stands before the buttons and the input is aria-busy, but it stays editable. Toggle loading off and the ring shrinks out rather than vanishing.',
+    snippet: defineSnippet({
+      id: 'text-field-react-loading',
+      language: 'tsx',
+      label: 'An asynchronous check',
+      source: `const { isFetching } = useQuery(['handle', handle], checkHandle);
+
+<TextField start="@" value={handle} onValueChange={setHandle} loading={isFetching} clearable />;`,
+    }),
+  },
+  {
     id: 'states',
     title: 'The four states the frame paints',
     note: 'Read-only keeps full-strength ink and only its ground changes, because the value is real and still submitted; disabled is muted to a measured colour rather than faded, so a disabled form still says what it holds.',
@@ -225,7 +338,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Setting it once, and reaching past it',
-    note: 'The provider carries the five decisions an application takes once; render substitutes the frame; ref reaches the element, which already has focus, select and setSelectionRange.',
+    note: 'The provider carries the decisions an application takes once; render substitutes the frame; ref reaches the element, which already has focus, select and setSelectionRange.',
     snippet: defineSnippet({
       id: 'text-field-react-composition',
       language: 'tsx',
@@ -270,7 +383,12 @@ const events: EventRow[] = [
     when: 'Before the password toggle moves, with reason "pointer" or "keyboard" recovered from the click. A form that hides the password again on blur owns this bit.',
   },
   {
-    name: 'onChange, onInput, onFocus, onBlur',
+    name: 'onValueCopy',
+    payload: '({ copied, reason, source, value }: TextFieldCopyDetail)',
+    when: 'Once the copy button has asked the clipboard. copied is false when the clipboard refused; reason is "pointer" or "keyboard". onCopy stays the input’s native clipboard event.',
+  },
+  {
+    name: 'onChange, onInput, onFocus, onBlur, onKeyDown, onKeyUp',
     payload: 'the element’s own events',
     when: 'Whenever the element fires them. The family composes with a consumer’s handler rather than replacing it: the consumer’s runs first, and always runs.',
   },
@@ -331,6 +449,20 @@ export const REACT_TEXT_FIELD_DOCS = {
         'false',
         'TextField',
         'Draws a toggle that turns a password into characters. It appears only on type="password" and is withdrawn when the control is disabled',
+      ],
+      [
+        'copyable',
+        'boolean',
+        'false',
+        'TextField',
+        'Draws a button that writes the value to the clipboard, shows a check for two seconds and announces the outcome. Hidden while the value is empty or disabled',
+      ],
+      [
+        'loading',
+        'boolean',
+        'false',
+        'TextField',
+        'Draws the shared ring before the buttons and marks the input aria-busy; the value stays editable. Stated at all, false included, the ring keeps its place so it can leave with motion',
       ],
       [
         'revealed',
@@ -409,6 +541,20 @@ export const REACT_TEXT_FIELD_DOCS = {
         'TextField, TextFieldDefaultsProvider',
         'What the two buttons announce. The reveal label does not change with its state — aria-pressed carries that — and both are set once for an application',
       ],
+      [
+        'copyLabel / copiedLabel / copyFailedLabel',
+        'string',
+        'Copy / Copied / Copy failed',
+        'TextField, TextFieldDefaultsProvider',
+        'The copy button’s name, and the two announcements of its outcome',
+      ],
+      [
+        'capsLockLabel',
+        'string',
+        'Caps Lock is on',
+        'TextField, TextFieldDefaultsProvider',
+        'What a password announces once as Caps Lock turns on while it has focus',
+      ],
     ]),
     composition: apiRows([
       [
@@ -417,6 +563,13 @@ export const REACT_TEXT_FIELD_DOCS = {
         '—',
         'TextField',
         'Substitutes the frame and hands it every attribute. The props are typed against HTMLAttributes<HTMLElement>, so they can be spread onto a label or a fieldset. The input is fixed: substituting the element that holds the value, the identifier and the wiring would leave the family with nothing to be',
+      ],
+      [
+        'TextFieldAction',
+        'ComponentPropsWithRef<"button"> & { render? }',
+        'type="button"',
+        'start, end',
+        'A button of the consumer’s inside the frame. Every native prop reaches the button; render substitutes it, and a MenuTrigger, PopoverTrigger or TooltipTrigger hands it its wiring through its own render',
       ],
       [
         'ref',
@@ -434,10 +587,10 @@ export const REACT_TEXT_FIELD_DOCS = {
       ],
       [
         'TextFieldDefaultsProvider',
-        '{ size, variant, mono, clearLabel, revealLabel }',
+        '{ size, variant, mono, clearLabel, revealLabel, copyLabel, copiedLabel, copyFailedLabel, capsLockLabel }',
         '—',
         'a subtree',
-        'The five decisions an application takes once. size is the one a field outranks, so a control inside a field takes the field’s step',
+        'The decisions an application takes once. size is the one a field outranks, so a control inside a field takes the field’s step',
       ],
       [
         'useField()',
@@ -453,6 +606,9 @@ export const REACT_TEXT_FIELD_DOCS = {
       'The control takes its name from the field’s label, through for pointing at the identifier the field derived. The APG’s naming practice records that the implicit form — wrapping the control in the label — is one some combinations of assistive technology and browser fail to treat as a name at all.',
       'aria-required, never the native required. The native attribute engages browser constraint validation and changes submit behaviour, which the library must not impose as a side effect of describing a field; a consumer who wants it writes required on the control and it survives untouched. disabled and readonly are native, because that is what those two words mean.',
       'Both buttons are real buttons with names an application translates once, and both are at least 24 CSS pixels wide — WCAG 2.2 SC 2.5.8 — at every step and every density. The reveal toggle keeps one label and carries its state in aria-pressed, which is the APG’s rule for a toggle.',
+      'The copy button announces its outcome through the shared live announcer — Copied, or Copy failed — because the check that replaces the mark is seen and not heard. The Caps Lock mark is hidden from assistive technology and its label is announced once as it turns on, while the password has focus.',
+      'loading writes aria-busy on the input and leaves it enabled: an asynchronous check of a user name must not take the keyboard away. The ring is hidden from assistive technology.',
+      'A menu inside the frame is the APG Menu Button pattern (w3.org/WAI/ARIA/apg/patterns/menu-button/), supplied by menu’s trigger on the action: aria-haspopup, aria-expanded, and Enter, Space and ArrowDown to open.',
       'Nothing is bound to Escape. Some user agents clear a search input on the key; a control that swallowed it inside a dialog would be a control a keyboard user cannot leave, and WCAG 2.1.4 exists for the class of defect single-key shortcuts produce.',
       'The invalid state is never colour alone: aria-invalid announces it, the field’s error says it in words, and inline-message writes a clipped “Error:” before the sentence. In the high-contrast scheme the border cannot carry it at all, which is why it never has to.',
     ],

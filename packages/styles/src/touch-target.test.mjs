@@ -69,7 +69,8 @@ const INNER = [
   { family: 'select', selector: "[data-ui='select']>[data-part='clear']" },
   {
     family: 'text-field',
-    selector: "[data-ui='text-field']>:is([data-part='clear'],[data-part='reveal'])",
+    selector:
+      "[data-ui='text-field']>:is([data-part='clear'],[data-part='copy'],[data-part='reveal'])",
   },
 ];
 

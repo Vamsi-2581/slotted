@@ -27,9 +27,20 @@ test('names the identifier a consumer selects the family by', () => {
  * presentational children, so the clear and reveal buttons are siblings of the
  * `input` inside a frame with no role — never children of the control.
  */
-test('draws a frame holding the control, its adornments and its two buttons', () => {
+test('draws a frame holding the control, its adornments and its buttons', () => {
   assert.deepEqual(Object.keys(contract.members), ['textField']);
-  assert.deepEqual(member.parts, ['root', 'input', 'start', 'end', 'clear', 'reveal']);
+  assert.deepEqual(member.parts, [
+    'root',
+    'input',
+    'start',
+    'end',
+    'action',
+    'busy',
+    'caps-lock',
+    'clear',
+    'copy',
+    'reveal',
+  ]);
   assert.equal(member.nativeElement, 'input');
   assert.equal(contract.controlPart, 'input');
   assert.equal(contract.rootRole, null, 'the frame carries no role of its own');
@@ -92,21 +103,92 @@ test('takes its identity and its state from the field around it', () => {
 });
 
 /**
+ * `complete` is the one state written on a part rather than on the frame: the
+ * copy button, for as long as its check is shown.
+ *
  * Three states are mirrored and `required` is not: the label draws the
  * necessity marker and the frame paints nothing for it, so an attribute for it
  * would be an attribute nothing reads.
  */
 test('mirrors onto the frame exactly the states the frame paints', () => {
   assert.equal(contract.mirrorsState, true);
-  assert.deepEqual(Object.keys(contract.stateAttributes), ['disabled', 'invalid', 'readonly']);
+  assert.deepEqual(Object.keys(contract.stateAttributes), [
+    'disabled',
+    'invalid',
+    'readonly',
+    'loading',
+    'complete',
+  ]);
   assert.deepEqual(member.states, [
     'default',
     'hover',
+    'active',
     'focus-visible',
     'disabled',
     'invalid',
     'readonly',
+    'loading',
+    'complete',
   ]);
+});
+
+/**
+ * The consumer's button inside the frame. A menu trigger is composed onto it
+ * rather than drawn by this family: `menu` owns the popup, and `select` is
+ * refused because it binds to the field as its control and would take the
+ * input's identifier (docs/history/designs/2026-09-30-text-field-rebuild-design.md § 1.2).
+ */
+test('lets the consumer place its own buttons inside the frame', () => {
+  assert.deepEqual(contract.action, {
+    part: 'action',
+    element: 'button',
+    placedIn: ['start', 'end'],
+    composes: ['menu', 'popover', 'tooltip'],
+    square: 'aria-label or aria-labelledby',
+    open: 'aria-expanded',
+  });
+});
+
+/**
+ * Loading belongs to the consumer and leaves the value editable: an
+ * asynchronous check of a user name must not take the keyboard away.
+ */
+test('waits with the shared ring and keeps the value editable', () => {
+  assert.equal(contract.waiting.busy.part, 'busy');
+  assert.equal(contract.waiting.busy.ui, 'spinner');
+  assert.equal(contract.waiting.busy.stylesheet, 'spinner/spinner.css');
+  assert.equal(contract.waiting.editable, true);
+  assert.equal(contract.waiting.control, 'aria-busy');
+});
+
+/**
+ * The shape `code-block` already ships. The feedback is transient, so it is
+ * not a state model: the clipboard is not a value this family holds.
+ */
+test('copies the value and says whether it could', () => {
+  assert.deepEqual(contract.copy, {
+    part: 'copy',
+    module: '@slotted/core/clipboard',
+    complete: 'data-complete',
+    completeFor: 2000,
+    glyphs: ['copy', 'check'],
+    output: 'onValueCopy',
+    detail: ['copied', 'reason', 'source', 'value'],
+    announces: ['copiedLabel', 'copyFailedLabel'],
+  });
+  assert.ok(!('copied' in contract.stateModel));
+});
+
+/** A fact of the platform, read and never requested. */
+test('warns about Caps Lock in a password it has focus in', () => {
+  assert.deepEqual(contract.capsLock, {
+    part: 'caps-lock',
+    types: ['password'],
+    read: "KeyboardEvent.getModifierState('CapsLock')",
+    while: 'focus',
+    glyph: 'caps-lock',
+    announces: 'capsLockLabel',
+  });
 });
 
 /** The count is the control's and the place is the field's. */
@@ -149,6 +231,10 @@ test('lets an application decide once what its text fields look like', () => {
     'mono',
     'clearLabel',
     'revealLabel',
+    'copyLabel',
+    'copiedLabel',
+    'copyFailedLabel',
+    'capsLockLabel',
   ]);
 });
 
@@ -159,6 +245,10 @@ test('declares one scenario per demonstration the reference page owes', () => {
     'variants',
     'adornments',
     'actions',
+    'menu',
+    'copy',
+    'password',
+    'loading',
     'states',
     'count',
     'types',

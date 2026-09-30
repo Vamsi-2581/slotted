@@ -1,12 +1,18 @@
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { AtSign, Search } from 'lucide-react';
+import { AtSign, BadgeCheck, ChevronDown, Ellipsis, Info, Lock, Search } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { Field, FieldCounter, FieldDescription, FieldError, FieldLabel } from '../field';
+import { Button } from '../button';
+import { ButtonGroup } from '../button-group';
 import { Icon } from '../icon';
-import { TextField } from './text-field';
+import { Kbd } from '../kbd';
+import { Menu, MenuContent, MenuItem, MenuRadioGroup, MenuRadioItem, MenuTrigger } from '../menu';
+import { Switch } from '../switch';
+import { Tooltip, TooltipContent, TooltipLayer, TooltipTrigger } from '../tooltip';
+import { TextField, TextFieldAction } from './text-field';
 import { TextFieldDefaultsProvider } from './text-field-defaults';
 import { Grid, Measure, Scene } from './text-field-demo';
 import { REACT_TEXT_FIELD_DOCS, REACT_TEXT_FIELD_TOKENS } from './text-field.docs';
@@ -18,6 +24,10 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     variants: Variants,
     adornments: Adornments,
     actions: Actions,
+    menu: MenuInside,
+    copy: Copy,
+    password: Password,
+    loading: Loading,
     states: States,
     count: Count,
     types: Types,
@@ -186,7 +196,305 @@ export const Actions: Story = {
           revealable
           type="password"
         />
-        <TextField clearable defaultValue="ada@sirius.com.br" end="✓" type="email" />
+        <TextField
+          clearable
+          defaultValue="ada@sirius.com.br"
+          end={
+            <Icon>
+              <BadgeCheck />
+            </Icon>
+          }
+          type="email"
+        />
+      </Scene>
+    </Grid>
+  ),
+};
+
+function CountryCode() {
+  const [country, setCountry] = useState('+55');
+  return (
+    <Menu>
+      <TextField
+        aria-label="Telefone"
+        autoComplete="tel-national"
+        defaultValue="11 98765-4321"
+        start={
+          <MenuTrigger
+            render={(props) => (
+              <TextFieldAction {...props} aria-label={undefined}>
+                {country}
+                <Icon>
+                  <ChevronDown />
+                </Icon>
+              </TextFieldAction>
+            )}
+          />
+        }
+        type="tel"
+      />
+      <MenuContent>
+        <MenuRadioGroup onValueChange={(value) => setCountry(value as string)} value={country}>
+          <MenuRadioItem value="+55">Brasil +55</MenuRadioItem>
+          <MenuRadioItem value="+351">Portugal +351</MenuRadioItem>
+          <MenuRadioItem value="+244">Angola +244</MenuRadioItem>
+          <MenuRadioItem value="+1">Estados Unidos +1</MenuRadioItem>
+        </MenuRadioGroup>
+      </MenuContent>
+    </Menu>
+  );
+}
+
+function CategorySearch() {
+  const [category, setCategory] = useState('Todos');
+  return (
+    <Menu>
+      <TextField
+        aria-label="Pesquisar produtos"
+        end={
+          <MenuTrigger
+            render={(props) => (
+              <TextFieldAction {...props}>
+                {category}
+                <Icon>
+                  <ChevronDown />
+                </Icon>
+              </TextFieldAction>
+            )}
+          />
+        }
+        placeholder="Pesquisar produtos"
+        start={
+          <Icon>
+            <Search />
+          </Icon>
+        }
+        type="search"
+      />
+      <MenuContent>
+        <MenuRadioGroup onValueChange={(value) => setCategory(value as string)} value={category}>
+          <MenuRadioItem value="Todos">Todos</MenuRadioItem>
+          <MenuRadioItem value="Parafusos">Parafusos</MenuRadioItem>
+          <MenuRadioItem value="Arruelas">Arruelas</MenuRadioItem>
+        </MenuRadioGroup>
+      </MenuContent>
+    </Menu>
+  );
+}
+
+export const MenuInside: Story = {
+  name: 'Menu',
+  parameters: scenario('menu'),
+  render: () => (
+    <Grid columns={2}>
+      <Scene
+        label="A menu that names part of the value"
+        note="The country code is a menu of radio items: open it with Enter, Space or ArrowDown, and the trigger stays pressed while the menu is open. A category beside a search is the same shape at the other end."
+        layout="stack"
+      >
+        <CountryCode />
+        <CategorySearch />
+      </Scene>
+      <Scene
+        label="A command, an overflow, a hint and a shortcut"
+        note="A button named by its words is padded and carries the value’s ink; one named by aria-label is square and quiet, like the family’s own. A key sits at the inner height of the control."
+        layout="stack"
+      >
+        <TextField
+          aria-label="Pesquisar notas"
+          defaultValue="nota fiscal"
+          end={<TextFieldAction>Pesquisar</TextFieldAction>}
+          type="search"
+        />
+        <Menu>
+          <TextField
+            aria-label="Nome do ficheiro"
+            defaultValue="relatorio-q3.pdf"
+            end={
+              <MenuTrigger
+                render={(props) => (
+                  <TextFieldAction {...props} aria-label="Mais ações">
+                    <Icon>
+                      <Ellipsis />
+                    </Icon>
+                  </TextFieldAction>
+                )}
+              />
+            }
+          />
+          <MenuContent>
+            <MenuItem>Renomear</MenuItem>
+            <MenuItem>Duplicar</MenuItem>
+            <MenuItem>Mover para…</MenuItem>
+          </MenuContent>
+        </Menu>
+        <TextField
+          aria-label="Limite de crédito"
+          defaultValue="5.000,00"
+          end={
+            <Tooltip>
+              <TooltipTrigger
+                render={(props) => (
+                  <TextFieldAction {...props} aria-label="Como o limite é calculado">
+                    <Icon>
+                      <Info />
+                    </Icon>
+                  </TextFieldAction>
+                )}
+              />
+              <TooltipLayer>
+                <TooltipContent>Média dos últimos seis meses de faturação.</TooltipContent>
+              </TooltipLayer>
+            </Tooltip>
+          }
+          inputMode="decimal"
+          start="R$"
+        />
+        <TextField
+          aria-label="Pesquisar na documentação"
+          end={
+            <>
+              <Kbd keyName="mod" />
+              <Kbd>K</Kbd>
+            </>
+          }
+          placeholder="Pesquisar na documentação"
+          type="search"
+        />
+      </Scene>
+      <Scene
+        label="Joined to a button outside the frame"
+        note="An addon outside the border is button-group’s shape: shared edges, one seam, corners on the ends. The field takes the width the button leaves, so the button’s label never wraps."
+        layout="block"
+      >
+        <ButtonGroup justify="start">
+          <TextField aria-label="Domínio" defaultValue="nexora.app" start="https://" />
+          <Button tone="secondary" variant="outline">
+            Verificar
+          </Button>
+        </ButtonGroup>
+      </Scene>
+    </Grid>
+  ),
+};
+
+export const Copy: Story = {
+  parameters: scenario('copy'),
+  render: () => (
+    <Grid columns={2}>
+      <Scene
+        label="A link somebody has to paste elsewhere"
+        note="Press the copy button: the mark turns to a check in the success ink for two seconds and “Copied” is announced. The value is read-only and still selectable."
+        layout="stack"
+      >
+        <TextField
+          aria-label="Link de convite"
+          copyable
+          defaultValue="https://nexora.app/convite/8f3a"
+          readOnly
+        />
+      </Scene>
+      <Scene
+        label="A secret key, set in the monospaced face"
+        note="Copy stays while the value is read-only and leaves only when there is nothing to copy or the control is disabled."
+        layout="stack"
+      >
+        <TextField
+          aria-label="Chave da API"
+          copyable
+          defaultValue="sk_live_51Hx9fQ2"
+          mono
+          readOnly
+          start={
+            <Icon>
+              <Lock />
+            </Icon>
+          }
+        />
+        <TextField aria-label="Chave vazia" copyable placeholder="Nenhuma chave gerada" readOnly />
+      </Scene>
+    </Grid>
+  ),
+};
+
+export const Password: Story = {
+  parameters: scenario('password'),
+  render: () => (
+    <Grid columns={2}>
+      <Scene
+        label="Sign in"
+        note="Focus the password and switch Caps Lock on: the warning mark appears before the eye, in the warning ink, and “Caps Lock is on” is announced once. Blur the control and it goes."
+        layout="stack"
+      >
+        <Field>
+          <FieldLabel>Senha</FieldLabel>
+          <TextField
+            autoComplete="current-password"
+            defaultValue="senha-secreta"
+            revealable
+            start={
+              <Icon>
+                <Lock />
+              </Icon>
+            }
+            type="password"
+          />
+        </Field>
+      </Scene>
+      <Scene
+        label="Choose a new one"
+        note="The rule is the application’s, written in the field’s description; the family counts and reveals, and does not score a password."
+        layout="stack"
+      >
+        <Field>
+          <FieldLabel>Nova senha</FieldLabel>
+          <TextField
+            autoComplete="new-password"
+            revealable
+            showCount
+            countMax={12}
+            type="password"
+          />
+          <FieldDescription>Pelo menos 12 caracteres, com um número.</FieldDescription>
+        </Field>
+      </Scene>
+    </Grid>
+  ),
+};
+
+function HandleCheck() {
+  const [loading, setLoading] = useState(true);
+  return (
+    <div className="slotted-demo-stack">
+      <Field>
+        <FieldLabel>Nome de utilizador</FieldLabel>
+        <TextField clearable defaultValue="ada.lovelace" loading={loading} start="@" />
+        <FieldDescription>Verificamos se o nome está livre enquanto escreve.</FieldDescription>
+      </Field>
+      <Switch checked={loading} onCheckedChange={setLoading}>
+        A verificar
+      </Switch>
+    </div>
+  );
+}
+
+export const Loading: Story = {
+  parameters: scenario('loading'),
+  render: () => (
+    <Grid columns={2}>
+      <Scene
+        label="A check that never takes the keyboard"
+        note="The ring stands before the clear button and the input is aria-busy, but the value stays editable. Switch the check off and the ring shrinks out on the leaving curve."
+        layout="block"
+      >
+        <HandleCheck />
+      </Scene>
+      <Scene
+        label="Searching as the reader types"
+        note="The same ring in a search, with nothing after it: it takes the end of the frame the clear button would take."
+        layout="stack"
+      >
+        <TextField aria-label="Fornecedor" defaultValue="fornecedor" loading type="search" />
       </Scene>
     </Grid>
   ),
@@ -385,11 +693,14 @@ function KeyboardScenes() {
             setSubmitted(new FormData(event.currentTarget).get('q')?.toString() ?? '');
           }}
         >
-          <TextField clearable defaultValue="pressione Enter" name="q" type="search" />
+          <Field>
+            <FieldLabel>Pesquisa</FieldLabel>
+            <TextField clearable defaultValue="pressione Enter" name="q" type="search" />
+            <FieldDescription>
+              {submitted === '' ? 'Nada enviado.' : `Enviado: ${submitted}`}
+            </FieldDescription>
+          </Field>
         </form>
-        <FieldDescription>
-          {submitted === '' ? 'Nada enviado.' : `Enviado: ${submitted}`}
-        </FieldDescription>
       </Scene>
     </Grid>
   );

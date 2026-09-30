@@ -4,15 +4,24 @@ import {
   Component,
   computed,
   contentChild,
+  DestroyRef,
+  ElementRef,
   inject,
   input,
+  output,
+  signal,
   ViewEncapsulation,
 } from '@angular/core';
 import { SlField } from '@slotted/angular/field';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import { writeToClipboard } from '@slotted/core/clipboard';
+import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 
 import { injectTextFieldDefaults, SlTextFieldControl } from './text-field-defaults';
-import type { TextFieldSize, TextFieldVariant } from './text-field-defaults';
+import type { TextFieldCopyDetail, TextFieldSize, TextFieldVariant } from './text-field-defaults';
+
+/** How long the check stays in place of the copy mark: `code-block`'s number. */
+const COPIED_FOR = 2000;
 
 export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-field-defaults';
 
@@ -39,14 +48,43 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
   imports: [SlGlyph, SlIcon],
   template: `<ng-content select="[slTextFieldStart]" />
     <ng-content />
-    @if (showClear()) {
+    <!-- The ring, the mark and the two buttons below stay rendered for as long
+         as their capability is on, and leave through hidden, so the stylesheet
+         can take them out as well as bring them in. -->
+    @if (loading() !== undefined) {
+      <span data-part="busy" data-ui="spinner" aria-hidden="true" [hidden]="!loading()"></span>
+    }
+    @if (control()?.password()) {
+      <span data-part="caps-lock" aria-hidden="true" [hidden]="!control()!.capsLock()">
+        <span slIcon><svg slGlyph name="caps-lock"></svg></span>
+      </span>
+    }
+    @if (clearable()) {
       <button
         data-part="clear"
         type="button"
+        [hidden]="!showClear()"
         [attr.aria-label]="resolvedClearLabel()"
         (click)="control()!.clear($event)"
       >
         <span slIcon><svg slGlyph name="x"></svg></span>
+      </button>
+    }
+    @if (copyable()) {
+      <button
+        data-part="copy"
+        type="button"
+        [hidden]="!showCopy()"
+        [attr.aria-label]="copyLabel() ?? defaults.copyLabel"
+        [attr.data-complete]="copied() ? '' : null"
+        (click)="copy($event)"
+      >
+        <!-- Two blocks, so the check is a new element and arrives. -->
+        @if (copied()) {
+          <span slIcon><svg slGlyph name="check"></svg></span>
+        } @else {
+          <span slIcon><svg slGlyph name="copy"></svg></span>
+        }
       </button>
     }
     @if (showReveal()) {
@@ -57,7 +95,11 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
         [attr.aria-pressed]="control()!.revealed()"
         (click)="control()!.toggleReveal($event)"
       >
-        <span slIcon><svg slGlyph [name]="control()!.revealed() ? 'eye-off' : 'eye'"></svg></span>
+        @if (control()!.revealed()) {
+          <span slIcon><svg slGlyph name="eye-off"></svg></span>
+        } @else {
+          <span slIcon><svg slGlyph name="eye"></svg></span>
+        }
       </button>
     }
     <ng-content select="[slTextFieldEnd]" />`,
@@ -73,6 +115,7 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
     '[attr.data-disabled]': "control()?.resolvedDisabled() === true ? '' : null",
     '[attr.data-invalid]': "control()?.resolvedInvalid() === true ? '' : null",
     '[attr.data-readonly]': "control()?.resolvedReadOnly() === true ? '' : null",
+    '[attr.data-loading]': "loading() === true ? '' : null",
   },
 })
 export class SlTextField {
@@ -92,8 +135,37 @@ export class SlTextField {
   readonly clearLabel = input<string | undefined>(undefined);
   /** The reveal button's accessible name. It does not change with the state. */
   readonly revealLabel = input<string | undefined>(undefined);
+  /**
+   * Draws a button that writes the value to the clipboard, shows a check for
+   * two seconds and announces the outcome. It stays for a read-only value and
+   * leaves while the value is empty or disabled.
+   */
+  readonly copyable = input(false, { transform: booleanAttribute });
+  /** The copy button's accessible name. */
+  readonly copyLabel = input<string | undefined>(undefined);
+  /** What a copy that reached the clipboard announces. */
+  readonly copiedLabel = input<string | undefined>(undefined);
+  /** What a copy the clipboard refused announces. */
+  readonly copyFailedLabel = input<string | undefined>(undefined);
+  /** What the Caps Lock mark announces when it appears in a password. */
+  readonly capsLockLabel = input<string | undefined>(undefined);
+  /**
+   * Draws the shared ring before the buttons while something about the value
+   * is being checked, and marks the control `aria-busy`. The value stays
+   * editable. Stating it at all — `false` included — keeps the ring's place,
+   * so it can leave as well as arrive.
+   */
+  readonly loading = input<boolean | undefined, boolean | string | undefined>(undefined, {
+    transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
+  });
 
-  private readonly defaults = injectTextFieldDefaults();
+  /** Once the copy button has asked the clipboard, with the outcome. */
+  readonly valueCopy = output<TextFieldCopyDetail>();
+
+  protected readonly defaults = injectTextFieldDefaults();
+  private readonly element: HTMLElement = inject(ElementRef).nativeElement;
+  protected readonly copied = signal(false);
+  private copiedTimer: ReturnType<typeof setTimeout> | undefined;
   private readonly field = inject(SlField, { optional: true });
 
   /**
@@ -127,6 +199,33 @@ export class SlTextField {
       !control.empty() && control.resolvedDisabled() !== true && control.resolvedReadOnly() !== true
     );
   });
+
+  /** A read-only value may still be copied: only an empty or disabled one withdraws it. */
+  protected readonly showCopy = computed(() => {
+    const control = this.control();
+    return control !== undefined && !control.empty() && control.resolvedDisabled() !== true;
+  });
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.copiedTimer));
+  }
+
+  protected async copy(event: MouseEvent) {
+    const reason = event.detail === 0 ? 'keyboard' : 'pointer';
+    const value = this.control()?.currentValue() ?? '';
+    const done = (await writeToClipboard(value)) !== 'refused';
+    if (done) {
+      this.copied.set(true);
+      clearTimeout(this.copiedTimer);
+      this.copiedTimer = setTimeout(() => this.copied.set(false), COPIED_FOR);
+    }
+    getLiveAnnouncer(this.element.ownerDocument).announce(
+      done
+        ? (this.copiedLabel() ?? this.defaults.copiedLabel)
+        : (this.copyFailedLabel() ?? this.defaults.copyFailedLabel),
+    );
+    this.valueCopy.emit({ copied: done, reason, source: event, value });
+  }
 
   /** A read-only password may still be read: only `disabled` withdraws it. */
   protected readonly showReveal = computed(() => {

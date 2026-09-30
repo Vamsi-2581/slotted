@@ -10,11 +10,23 @@ import {
 } from '@slotted/angular/field';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
+import { SlButton } from '@slotted/angular/button';
+import { SlButtonGroup } from '@slotted/angular/button-group';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import { SlKbd } from '@slotted/angular/kbd';
+import { SlMenu, SlMenuItem, SlMenuRadioGroup, SlMenuTrigger } from '@slotted/angular/menu';
+import { SlSwitch } from '@slotted/angular/switch';
+import {
+  SlTooltip,
+  SlTooltipContent,
+  SlTooltipLayer,
+  SlTooltipTrigger,
+} from '@slotted/angular/tooltip';
 
 import { SlTextField } from './text-field';
 import type { TextFieldSize, TextFieldVariant } from './text-field-defaults';
 import { SlTextFieldInput } from './text-field-input';
-import { SlTextFieldEnd, SlTextFieldStart } from './text-field-parts';
+import { SlTextFieldAction, SlTextFieldEnd, SlTextFieldStart } from './text-field-parts';
 import { ANGULAR_TEXT_FIELD_DOCS, ANGULAR_TEXT_FIELD_TOKENS } from './text-field.docs';
 
 interface TextFieldStoryArgs {
@@ -32,6 +44,10 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     variants: Variants,
     adornments: Adornments,
     actions: Actions,
+    menu: MenuInside,
+    copy: Copy,
+    password: Password,
+    loading: Loading,
     states: States,
     count: Count,
     types: Types,
@@ -47,11 +63,28 @@ const DIRECTIVES = [
   SlFieldDescription,
   SlFieldError,
   SlFieldLabel,
+  SlButton,
+  SlButtonGroup,
+  SlGlyph,
+  SlIcon,
+  SlKbd,
+  SlMenu,
+  SlMenuItem,
+  SlMenuRadioGroup,
+  SlMenuTrigger,
+  SlSwitch,
   SlTextField,
+  SlTextFieldAction,
   SlTextFieldEnd,
   SlTextFieldInput,
   SlTextFieldStart,
+  SlTooltip,
+  SlTooltipContent,
+  SlTooltipLayer,
+  SlTooltipTrigger,
 ];
+
+const glyph = (name: string) => `<span slIcon><svg slGlyph name="${name}"></svg></span>`;
 
 const meta: Meta<TextFieldStoryArgs> = {
   title: 'Components/TextField',
@@ -248,6 +281,187 @@ export const Actions: Story = {
            </div>
            <div slTextField clearable revealable>
              <input slTextFieldInput type="password" defaultValue="outra-senha" />
+           </div>`,
+        ),
+    ),
+  }),
+};
+
+export const MenuInside: Story = {
+  name: 'Menu',
+  parameters: scenario('menu'),
+  render: () => ({
+    props: { country: '+55', category: 'Todos' },
+    template: grid(
+      2,
+      scene(
+        'A menu that names part of the value',
+        'The country code is a menu of radio items: open it with Enter, Space or ArrowDown, and the trigger stays pressed while the menu is open. A category beside a search is the same shape at the other end.',
+        `<div slTextField>
+           <span slTextFieldStart>
+             <button slTextFieldAction [slMenuTriggerFor]="countries">{{ country }} ${glyph('chevron-down')}</button>
+           </span>
+           <input slTextFieldInput type="tel" aria-label="Telefone" defaultValue="11 98765-4321" />
+         </div>
+         <sl-menu #countries>
+           <sl-menu-radio-group [(value)]="country">
+             <button slMenuRadioItem value="+55">Brasil +55</button>
+             <button slMenuRadioItem value="+351">Portugal +351</button>
+             <button slMenuRadioItem value="+244">Angola +244</button>
+             <button slMenuRadioItem value="+1">Estados Unidos +1</button>
+           </sl-menu-radio-group>
+         </sl-menu>
+         <div slTextField>
+           <span slTextFieldStart>${glyph('search')}</span>
+           <input slTextFieldInput type="search" aria-label="Pesquisar produtos" placeholder="Pesquisar produtos" />
+           <span slTextFieldEnd>
+             <button slTextFieldAction [slMenuTriggerFor]="categories">{{ category }} ${glyph('chevron-down')}</button>
+           </span>
+         </div>
+         <sl-menu #categories>
+           <sl-menu-radio-group [(value)]="category">
+             <button slMenuRadioItem value="Todos">Todos</button>
+             <button slMenuRadioItem value="Parafusos">Parafusos</button>
+             <button slMenuRadioItem value="Arruelas">Arruelas</button>
+           </sl-menu-radio-group>
+         </sl-menu>`,
+      ) +
+        scene(
+          'A command, an overflow, a hint and a shortcut',
+          'A button named by its words is padded and carries the value’s ink; one named by aria-label is square and quiet, like the family’s own. A key sits at the inner height of the control.',
+          `<div slTextField>
+             <input slTextFieldInput type="search" aria-label="Pesquisar notas" defaultValue="nota fiscal" />
+             <span slTextFieldEnd><button slTextFieldAction>Pesquisar</button></span>
+           </div>
+           <div slTextField>
+             <input slTextFieldInput aria-label="Nome do ficheiro" defaultValue="relatorio-q3.pdf" />
+             <span slTextFieldEnd>
+               <button slTextFieldAction aria-label="Mais ações" [slMenuTriggerFor]="more">${glyph('ellipsis')}</button>
+             </span>
+           </div>
+           <sl-menu #more>
+             <button slMenuItem>Renomear</button>
+             <button slMenuItem>Duplicar</button>
+             <button slMenuItem>Mover para…</button>
+           </sl-menu>
+           <div slTextField>
+             <span slTextFieldStart>R$</span>
+             <input slTextFieldInput inputmode="decimal" aria-label="Limite de crédito" defaultValue="5.000,00" />
+             <span slTextFieldEnd>
+               <ng-container slTooltip [portal]="false">
+                 <button slTextFieldAction slTooltipTrigger aria-label="Como o limite é calculado">${glyph('circle-info')}</button>
+                 <ng-template slTooltipLayer>
+                   <div slTooltipContent>Média dos últimos seis meses de faturação.</div>
+                 </ng-template>
+               </ng-container>
+             </span>
+           </div>
+           <div slTextField>
+             <input slTextFieldInput type="search" aria-label="Pesquisar na documentação" placeholder="Pesquisar na documentação" />
+             <span slTextFieldEnd><kbd slKbd keyName="mod"></kbd><kbd slKbd>K</kbd></span>
+           </div>`,
+        ) +
+        scene(
+          'Joined to a button outside the frame',
+          'An addon outside the border is button-group’s shape: shared edges, one seam, corners on the ends. The field takes the width the button leaves, so the button’s label never wraps.',
+          `<div slButtonGroup justify="start">
+             <div slTextField>
+               <span slTextFieldStart>https://</span>
+               <input slTextFieldInput aria-label="Domínio" defaultValue="nexora.app" />
+             </div>
+             <button slButton tone="secondary" variant="outline">Verificar</button>
+           </div>`,
+          'block',
+        ),
+    ),
+  }),
+};
+
+export const Copy: Story = {
+  parameters: scenario('copy'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'A link somebody has to paste elsewhere',
+        'Press the copy button: the mark turns to a check in the success ink for two seconds and “Copied” is announced. The value is read-only and still selectable.',
+        `<div slTextField copyable>
+           <input slTextFieldInput readonly aria-label="Link de convite" defaultValue="https://nexora.app/convite/8f3a" />
+         </div>`,
+      ) +
+        scene(
+          'A secret key, set in the monospaced face',
+          'Copy stays while the value is read-only and leaves only when there is nothing to copy or the control is disabled.',
+          `<div slTextField copyable mono>
+             <span slTextFieldStart>${glyph('lock')}</span>
+             <input slTextFieldInput readonly aria-label="Chave da API" defaultValue="sk_live_51Hx9fQ2" />
+           </div>
+           <div slTextField copyable>
+             <input slTextFieldInput readonly aria-label="Chave vazia" placeholder="Nenhuma chave gerada" />
+           </div>`,
+        ),
+    ),
+  }),
+};
+
+export const Password: Story = {
+  parameters: scenario('password'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'Sign in',
+        'Focus the password and switch Caps Lock on: the warning mark appears before the eye, in the warning ink, and “Caps Lock is on” is announced once. Blur the control and it goes.',
+        `<div slField>
+           <label slFieldLabel>Senha</label>
+           <div slTextField revealable>
+             <span slTextFieldStart>${glyph('lock')}</span>
+             <input slTextFieldInput type="password" autocomplete="current-password" defaultValue="senha-secreta" />
+           </div>
+         </div>`,
+      ) +
+        scene(
+          'Choose a new one',
+          'The rule is the application’s, written in the field’s description; the family counts and reveals, and does not score a password.',
+          `<div slField>
+             <label slFieldLabel>Nova senha</label>
+             <div slTextField revealable>
+               <input slTextFieldInput type="password" autocomplete="new-password" showCount countMax="12" />
+             </div>
+             <span slFieldDescription>Pelo menos 12 caracteres, com um número.</span>
+           </div>`,
+        ),
+    ),
+  }),
+};
+
+export const Loading: Story = {
+  parameters: scenario('loading'),
+  render: () => ({
+    props: { checking: true },
+    template: grid(
+      2,
+      scene(
+        'A check that never takes the keyboard',
+        'The ring stands before the clear button and the input is aria-busy, but the value stays editable. Switch the check off and the ring shrinks out on the leaving curve.',
+        `<div class="slotted-demo-stack">
+           <div slField>
+             <label slFieldLabel>Nome de utilizador</label>
+             <div slTextField clearable [loading]="checking">
+               <span slTextFieldStart>@</span>
+               <input slTextFieldInput defaultValue="ada.lovelace" />
+             </div>
+             <span slFieldDescription>Verificamos se o nome está livre enquanto escreve.</span>
+           </div>
+           <span slSwitch [checked]="checking" (checkedChange)="checking = $event.value">A verificar</span>
+         </div>`,
+        'block',
+      ) +
+        scene(
+          'Searching as the reader types',
+          'The same ring in a search, with nothing after it: it takes the end of the frame the clear button would take.',
+          `<div slTextField loading>
+             <input slTextFieldInput type="search" aria-label="Fornecedor" defaultValue="fornecedor" />
            </div>`,
         ),
     ),

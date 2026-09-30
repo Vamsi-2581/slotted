@@ -285,7 +285,7 @@
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
     >
       <label data-part="label" for="count-control">Assunto</label>
       <span data-part="counter">28/60</span>
@@ -303,7 +303,7 @@
       data-part="root"
       data-size="md"
       data-label-placement="top"
-      data-required-mark="mark"
+      data-necessity="mark"
     >
       <label data-part="label" for="count-over">Apelido público</label>
       <span data-part="counter" data-invalid>21/16</span>
@@ -355,6 +355,254 @@
           ><svg data-part="glyph" data-glyph="x"></svg
         ></span>
       </button>
+    </div>
+  </div>
+</section>
+
+<section data-scene="menu">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <span data-part="start"
+        ><button data-part="action" type="button" aria-haspopup="menu" aria-expanded="false">
+          +55
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span></button
+      ></span>
+      <input data-part="input" type="tel" value="11 98765-4321" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" type="search" placeholder="Pesquisar produtos" />
+      <span data-part="end"
+        ><button data-part="action" type="button" aria-haspopup="menu" aria-expanded="true">
+          Todos
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span></button
+      ></span>
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" value="relatorio-q3.pdf" />
+      <span data-part="end"
+        ><button
+          data-part="action"
+          type="button"
+          aria-label="Mais ações"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="ellipsis"></svg
+          ></span></button
+      ></span>
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <span data-part="start"
+        ><span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="search"></svg></span
+      ></span>
+      <input data-part="input" type="search" value="nota fiscal" />
+      <span data-part="end"><button data-part="action" type="button">Pesquisar</button></span>
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <span data-part="start"
+        ><span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="search"></svg></span
+      ></span>
+      <input data-part="input" type="search" placeholder="Pesquisar na documentação" />
+      <span data-part="end"
+        ><kbd data-ui="kbd" data-part="root" data-key="mod" data-size="md" data-variant="raised"
+          ><span data-part="legend" aria-hidden="true" data-legend="symbol">⌘</span
+          ><span data-part="name">Command</span></kbd
+        ><kbd data-ui="kbd" data-part="root" data-key="k" data-size="md" data-variant="raised"
+          ><span data-part="legend" aria-hidden="true">K</span><span data-part="name">K</span></kbd
+        ></span
+      >
+    </div>
+    <div
+      data-ui="text-field"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-disabled=""
+    >
+      <input data-part="input" value="Desativado" disabled />
+      <span data-part="end"><button data-part="action" type="button" disabled>Enviar</button></span>
+    </div>
+  </div>
+</section>
+
+<section data-scene="copy">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div
+      data-ui="text-field"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-readonly=""
+    >
+      <input data-part="input" value="https://slotted.dev/convite/8f3a" readonly />
+      <button data-part="copy" type="button" aria-label="Copiar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="copy"></svg
+        ></span>
+      </button>
+    </div>
+    <div
+      data-ui="text-field"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-readonly=""
+    >
+      <input data-part="input" value="https://slotted.dev/convite/8f3a" readonly />
+      <button data-part="copy" type="button" aria-label="Copiar" data-complete="">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="check"></svg
+        ></span>
+      </button>
+    </div>
+    <div
+      data-ui="text-field"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-readonly=""
+      data-mono=""
+    >
+      <span data-part="start"
+        ><span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="lock"></svg></span
+      ></span>
+      <input data-part="input" value="sk_live_51Hx…9fQ2" readonly />
+      <button data-part="copy" type="button" aria-label="Copiar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="copy"></svg
+        ></span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section data-scene="password">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <span data-part="start"
+        ><span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="lock"></svg></span
+      ></span>
+      <input data-part="input" type="password" value="senha-secreta" />
+      <span data-part="caps-lock" aria-hidden="true"
+        ><span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="caps-lock"></svg></span
+      ></span>
+      <button data-part="reveal" type="button" aria-pressed="false" aria-label="Mostrar senha">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="eye"></svg
+        ></span>
+      </button>
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" type="password" value="senha-secreta" />
+      <span data-part="caps-lock" aria-hidden="true" hidden
+        ><span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="caps-lock"></svg></span
+      ></span>
+      <button data-part="reveal" type="button" aria-pressed="false" aria-label="Mostrar senha">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="eye"></svg
+        ></span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section data-scene="loading">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div
+      data-ui="text-field"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-loading=""
+    >
+      <span data-part="start" aria-hidden="true">@</span>
+      <input data-part="input" value="ada.lovelace" aria-busy="true" />
+      <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
+      <button data-part="clear" type="button" aria-label="Limpar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
+    </div>
+    <div
+      data-ui="text-field"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-loading=""
+    >
+      <input data-part="input" type="search" value="fornecedor" aria-busy="true" />
+      <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" value="ada.lovelace" />
+      <span data-part="busy" data-ui="spinner" aria-hidden="true" hidden></span>
+      <button data-part="clear" type="button" aria-label="Limpar" hidden>
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section data-scene="group">
+  <div data-ui="button-group" data-part="root" data-orientation="horizontal" data-justify="start">
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <span data-part="start" aria-hidden="true">https://</span>
+      <input data-part="input" value="slotted.dev" />
+    </div>
+    <button
+      data-ui="button"
+      data-part="root"
+      data-tone="secondary"
+      data-variant="outline"
+      data-size="md"
+      type="button"
+    >
+      <span data-part="label">Verificar</span>
+    </button>
+  </div>
+</section>
+
+<section data-scene="narrow">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div
+      data-ui="text-field"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-loading=""
+    >
+      <span data-part="start"
+        ><span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="search"></svg></span
+      ></span>
+      <input data-part="input" type="search" value="uma pesquisa longa que não cabe na largura" />
+      <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
+      <button data-part="clear" type="button" aria-label="Limpar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
+      <span data-part="end"
+        ><button data-part="action" type="button" aria-haspopup="menu" aria-expanded="false">
+          Todos
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span></button
+      ></span>
     </div>
   </div>
 </section>

@@ -1,10 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/text-field/contract.json';
 import { Field, FieldCounter, FieldError, FieldLabel } from '../field';
-import { TextField } from './text-field';
+import { TextField, TextFieldAction } from './text-field';
 import { TextFieldDefaultsProvider } from './text-field-defaults';
 
 const frame = () => screen.getByTestId('frame');
@@ -364,5 +364,131 @@ describe('TextField', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Show password' }));
     expect(screen.getByTestId('input')).toHaveAttribute('type', 'text');
+  });
+
+  it('copies the value, shows a check and reports whether the clipboard took it', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', { ...globalThis.navigator, clipboard: { writeText } });
+    const onValueCopy = vi.fn();
+    try {
+      render(
+        <TextField
+          copyable
+          defaultValue="https://slotted.dev/x"
+          onValueCopy={onValueCopy}
+          readOnly
+        />,
+      );
+      const button = screen.getByRole('button', { name: 'Copy' });
+      expect(button.querySelector('svg[data-glyph]')).toHaveAttribute('data-glyph', 'copy');
+      fireEvent.click(button, { detail: 1 });
+      await waitFor(() => expect(onValueCopy).toHaveBeenCalled());
+      expect(writeText).toHaveBeenCalledWith('https://slotted.dev/x');
+      expect(onValueCopy.mock.calls[0]![0]).toMatchObject({
+        copied: true,
+        reason: 'pointer',
+        value: 'https://slotted.dev/x',
+      });
+      expect(button).toHaveAttribute('data-complete');
+      expect(button.querySelector('svg[data-glyph]')).toHaveAttribute('data-glyph', 'check');
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('hides the copy button while there is nothing to copy', () => {
+    render(<TextField copyable data-testid="input" />);
+    expect(screen.queryByRole('button', { name: 'Copy' })).toBeNull();
+    fireEvent.change(screen.getByTestId('input'), { target: { value: 'a' } });
+    expect(screen.getByRole('button', { name: 'Copy' })).toBeVisible();
+  });
+
+  it('marks the control busy and keeps it editable while loading', () => {
+    const { rerender } = render(<TextField data-testid="input" loading />);
+    const input = screen.getByTestId('input');
+    const root = input.closest('[data-ui="text-field"]')!;
+    expect(input).toHaveAttribute('aria-busy', 'true');
+    expect(input).not.toBeDisabled();
+    expect(root).toHaveAttribute('data-loading');
+    expect(root.querySelector('[data-part="busy"][data-ui="spinner"]')).not.toHaveAttribute(
+      'hidden',
+    );
+
+    rerender(<TextField data-testid="input" loading={false} />);
+    expect(input).not.toHaveAttribute('aria-busy');
+    expect(root).not.toHaveAttribute('data-loading');
+    expect(root.querySelector('[data-part="busy"]')).toHaveAttribute('hidden');
+
+    rerender(<TextField data-testid="input" />);
+    expect(root.querySelector('[data-part="busy"]')).toBeNull();
+  });
+
+  it('warns about Caps Lock in a focused password, once, and forgets it on blur', () => {
+    const onKeyDown = vi.fn();
+    render(<TextField data-testid="input" onKeyDown={onKeyDown} type="password" />);
+    const input = screen.getByTestId('input');
+    const mark = () => input.parentElement!.querySelector('[data-part="caps-lock"]')!;
+    expect(mark()).toHaveAttribute('hidden');
+
+    fireEvent.keyDown(input, { key: 'a', modifierCapsLock: true });
+    expect(onKeyDown).toHaveBeenCalledOnce();
+    expect(mark()).not.toHaveAttribute('hidden');
+    expect(mark().querySelector('svg[data-glyph]')).toHaveAttribute('data-glyph', 'caps-lock');
+
+    fireEvent.blur(input);
+    expect(mark()).toHaveAttribute('hidden');
+  });
+
+  it('draws no Caps Lock mark outside a password', () => {
+    render(<TextField data-testid="input" />);
+    expect(
+      screen.getByTestId('input').parentElement!.querySelector('[data-part="caps-lock"]'),
+    ).toBeNull();
+  });
+
+  it('puts the consumer’s own button inside the frame as a real button', () => {
+    const onClick = vi.fn();
+    render(
+      <TextField
+        end={
+          <TextFieldAction aria-label="More" onClick={onClick}>
+            …
+          </TextFieldAction>
+        }
+      />,
+    );
+    const action = screen.getByRole('button', { name: 'More' });
+    expect(action).toHaveAttribute('data-part', 'action');
+    expect(action).toHaveAttribute('type', 'button');
+    expect(action.parentElement).toHaveAttribute('data-part', 'end');
+    fireEvent.click(action);
+    expect(onClick).toHaveBeenCalledOnce();
+  });
+
+  it('lets an action render into another element and keep its part', () => {
+    render(
+      <TextField
+        start={<TextFieldAction render={(props) => <button {...props} data-testid="custom" />} />}
+      />,
+    );
+    expect(screen.getByTestId('custom')).toHaveAttribute('data-part', 'action');
+  });
+
+  it('keeps the frame’s buttons in the order the stylesheet insets', () => {
+    render(
+      <TextField
+        clearable
+        copyable
+        data-testid="input"
+        defaultValue="a"
+        loading
+        revealable
+        type="password"
+      />,
+    );
+    const parts = [...screen.getByTestId('input').parentElement!.children].map((child) =>
+      child.getAttribute('data-part'),
+    );
+    expect(parts).toEqual(['input', 'busy', 'caps-lock', 'clear', 'copy', 'reveal']);
   });
 });

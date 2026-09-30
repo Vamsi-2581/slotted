@@ -28,9 +28,21 @@ export type TextFieldRevealReason = Extract<
   'pointer' | 'keyboard'
 >;
 
+/** What a finished copy reports: whether the clipboard took it, and why it was asked. */
+export interface TextFieldCopyDetail {
+  copied: boolean;
+  reason: Extract<ChangeRequest<string>['reason'], 'pointer' | 'keyboard'>;
+  source: unknown;
+  value: string;
+}
+
 /** What an application sets once for every text field under it. */
 export interface TextFieldDefaults {
+  capsLockLabel: string;
   clearLabel: string;
+  copiedLabel: string;
+  copyFailedLabel: string;
+  copyLabel: string;
   mono: boolean;
   revealLabel: string;
   size: TextFieldSize;
@@ -49,6 +61,7 @@ export interface TextFieldDefaultsProviderProps extends Partial<TextFieldDefault
 export interface TextFieldRootProps extends HTMLAttributes<HTMLElement> {
   'data-disabled'?: '' | undefined;
   'data-invalid'?: '' | undefined;
+  'data-loading'?: '' | undefined;
   'data-mono'?: '' | undefined;
   'data-part': string;
   'data-readonly'?: '' | undefined;
@@ -73,10 +86,27 @@ export interface TextFieldProps extends Omit<
   ComponentPropsWithRef<'input'>,
   'defaultValue' | 'size' | 'type' | 'value'
 > {
+  /**
+   * What the Caps Lock mark announces when it appears in a password. The mark
+   * itself is hidden from assistive technology; the announcement is the text.
+   */
+  capsLockLabel?: string | undefined;
   /** Draws a button that empties the value and returns focus to the control. */
   clearable?: boolean | undefined;
   /** The clear button's accessible name. Defaults to the provider's. */
   clearLabel?: string | undefined;
+  /**
+   * Draws a button that writes the value to the clipboard, shows a check for
+   * two seconds and announces the outcome. It stays for a read-only value —
+   * a share link, a key — and leaves while the value is empty or disabled.
+   */
+  copyable?: boolean | undefined;
+  /** What a copy that reached the clipboard announces. */
+  copiedLabel?: string | undefined;
+  /** What a copy the clipboard refused announces. */
+  copyFailedLabel?: string | undefined;
+  /** The copy button's accessible name. */
+  copyLabel?: string | undefined;
   /**
    * The limit the count is measured against. Defaults to `maxLength`, and set
    * alone it is a soft limit: the value can pass it, and the counter says so
@@ -99,8 +129,20 @@ export interface TextFieldProps extends Omit<
    * `data-invalid` on the frame.
    */
   invalid?: boolean | undefined;
+  /**
+   * Draws the shared ring before the buttons while something about the value
+   * is being checked, and marks the control `aria-busy`. The value stays
+   * editable. Stating it at all — `false` included — keeps the ring's place in
+   * the frame, so it can leave as well as arrive.
+   */
+  loading?: boolean | undefined;
   /** Sets the value in the monospaced family, for identifiers, hashes and keys. */
   mono?: boolean | undefined;
+  /**
+   * Called once the copy button has asked the clipboard, with the outcome.
+   * `onCopy` is the input's native clipboard event and still reaches it.
+   */
+  onValueCopy?: ((detail: TextFieldCopyDetail) => void) | undefined;
   /** Called before the value moves, with the request that carries the reason. */
   onValueChange?: ((value: string, request: ChangeRequest<string>) => void) | undefined;
   /** Called before the password toggle moves. */
@@ -126,4 +168,20 @@ export interface TextFieldProps extends Omit<
   value?: string | undefined;
   /** Defaults to the provider, then to `outline`. */
   variant?: TextFieldVariant | undefined;
+}
+
+/**
+ * A button of the consumer's inside the frame, placed in `start` or `end`: a
+ * submit, a menu trigger naming a country, a tooltip on an information mark.
+ * Named by `aria-label` it is drawn square, like the family's own buttons;
+ * named by its text it takes a step of air a side.
+ */
+export interface TextFieldActionProps extends ComponentPropsWithRef<'button'> {
+  /** Renders the button into another element, keeping the part and the type. */
+  render?: ((props: TextFieldActionRootProps) => ReactNode) | undefined;
+}
+
+/** What `render` receives for an action. */
+export interface TextFieldActionRootProps extends ComponentPropsWithRef<'button'> {
+  'data-part': 'action';
 }

@@ -1,21 +1,31 @@
 import '@slotted/styles/text-field/text-field.css';
 
+import { writeToClipboard } from '@slotted/core/clipboard';
+import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason } from '@slotted/core/state';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { ChangeEvent, MouseEvent, ReactNode } from 'react';
+import type { ChangeEvent, FocusEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
 import { Glyph, Icon } from '../icon';
 import { useTextFieldDefaults } from './text-field-defaults';
-import type { TextFieldProps, TextFieldRootProps } from './text-field.types';
+import type {
+  TextFieldActionProps,
+  TextFieldActionRootProps,
+  TextFieldProps,
+  TextFieldRootProps,
+} from './text-field.types';
+
+/** How long the check stays in place of the copy mark: `code-block`'s number. */
+const COPIED_FOR = 2000;
 
 /**
  * A native button fires the same `click` for a pointer, for Space and for
  * Enter. A click synthesised by the keyboard reports no detail; a real one
  * reports the click count — the rule `button` and `tag` both write.
  */
-function activationReason(event: MouseEvent): ChangeReason {
+function activationReason(event: MouseEvent): Extract<ChangeReason, 'pointer' | 'keyboard'> {
   return event.detail === 0 ? 'keyboard' : 'pointer';
 }
 
@@ -44,9 +54,14 @@ export function TextField({
   'aria-describedby': describedBy,
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
+  capsLockLabel,
   className,
   clearable = false,
   clearLabel,
+  copiedLabel,
+  copyable = false,
+  copyFailedLabel,
+  copyLabel,
   countMax,
   defaultRevealed = false,
   defaultValue,
@@ -54,11 +69,16 @@ export function TextField({
   end,
   id,
   invalid,
+  loading,
   maxLength,
   mono,
+  onBlur,
   onChange,
+  onKeyDown,
+  onKeyUp,
   onRevealedChange,
   onValueChange,
+  onValueCopy,
   readOnly,
   ref,
   render,
@@ -86,6 +106,10 @@ export function TextField({
    */
   const [mirrored, setMirrored] = useState(defaultValue ?? '');
   const [ownRevealed, setOwnRevealed] = useState(defaultRevealed);
+  const [copied, setCopied] = useState(false);
+  const [capsLock, setCapsLock] = useState(false);
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(copiedTimer.current), []);
   const current = value ?? mirrored;
   const isRevealed = revealed ?? ownRevealed;
 
@@ -169,14 +193,47 @@ export function TextField({
     if (state.request(!isRevealed, activationReason(event), event)) setOwnRevealed(!isRevealed);
   };
 
+  const announce = (message: string) =>
+    getLiveAnnouncer(inputRef.current?.ownerDocument).announce(message);
+
+  const copy = async (event: MouseEvent<HTMLButtonElement>) => {
+    const reason = activationReason(event);
+    const done = (await writeToClipboard(current)) !== 'refused';
+    if (done) {
+      setCopied(true);
+      clearTimeout(copiedTimer.current);
+      copiedTimer.current = setTimeout(() => setCopied(false), COPIED_FOR);
+    }
+    announce(
+      done ? (copiedLabel ?? defaults.copiedLabel) : (copyFailedLabel ?? defaults.copyFailedLabel),
+    );
+    onValueCopy?.({ copied: done, reason, source: event, value: current });
+  };
+
   const isPassword = type === 'password';
+
+  /**
+   * Caps Lock is read from the key events the control already receives, and
+   * only while it has focus: the platform exposes the modifier on an event and
+   * nowhere else, and a warning about the next thing typed means nothing to a
+   * control nobody is typing into. It is announced once as it turns on.
+   */
+  const readCapsLock = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (!isPassword || typeof event.getModifierState !== 'function') return;
+    const on = event.getModifierState('CapsLock');
+    if (on && !capsLock) announce(capsLockLabel ?? defaults.capsLockLabel);
+    if (on !== capsLock) setCapsLock(on);
+  };
+
   const showClear =
     clearable && current !== '' && resolvedDisabled !== true && resolvedReadOnly !== true;
+  const showCopy = copyable && current !== '' && resolvedDisabled !== true;
   const showReveal = revealable && isPassword && resolvedDisabled !== true;
 
   const control = (
     <input
       {...nativeProps}
+      aria-busy={loading === true ? true : undefined}
       aria-describedby={[describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined}
       aria-invalid={ariaInvalid ?? (resolvedInvalid === true ? true : undefined)}
       aria-required={ariaRequired ?? (field?.required === true ? true : undefined)}
@@ -184,6 +241,18 @@ export function TextField({
       disabled={resolvedDisabled}
       id={id ?? field?.ids.control}
       maxLength={maxLength}
+      onBlur={(event: FocusEvent<HTMLInputElement>) => {
+        onBlur?.(event);
+        setCapsLock(false);
+      }}
+      onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
+        onKeyDown?.(event);
+        readCapsLock(event);
+      }}
+      onKeyUp={(event: KeyboardEvent<HTMLInputElement>) => {
+        onKeyUp?.(event);
+        readCapsLock(event);
+      }}
       onChange={(event: ChangeEvent<HTMLInputElement>) => {
         /* The consumer's handler first, and it always runs: the family composes
            with it rather than replacing it. */
@@ -205,15 +274,44 @@ export function TextField({
     <>
       {start === undefined ? null : <span data-part="start">{start}</span>}
       {control}
-      {showClear ? (
+      {/* The ring, the mark and the two buttons below stay rendered for as
+          long as their capability is on, and leave through `hidden`, so the
+          stylesheet can take them out as well as bring them in. */}
+      {loading === undefined ? null : (
+        <span aria-hidden="true" data-part="busy" data-ui="spinner" hidden={!loading} />
+      )}
+      {isPassword ? (
+        <span aria-hidden="true" data-part="caps-lock" hidden={!capsLock}>
+          <Icon>
+            <Glyph name="caps-lock" />
+          </Icon>
+        </span>
+      ) : null}
+      {clearable ? (
         <button
           aria-label={clearLabel ?? defaults.clearLabel}
           data-part="clear"
+          hidden={!showClear}
           onClick={clear}
           type="button"
         >
           <Icon>
             <Glyph name="x" />
+          </Icon>
+        </button>
+      ) : null}
+      {copyable ? (
+        <button
+          aria-label={copyLabel ?? defaults.copyLabel}
+          data-part="copy"
+          hidden={!showCopy}
+          onClick={(event) => void copy(event)}
+          type="button"
+          {...(copied ? { 'data-complete': '' } : {})}
+        >
+          {/* Keyed by the mark, so the check is a new element and arrives. */}
+          <Icon key={copied ? 'check' : 'copy'}>
+            <Glyph name={copied ? 'check' : 'copy'} />
           </Icon>
         </button>
       ) : null}
@@ -227,7 +325,7 @@ export function TextField({
         >
           {/* The button announces what pressing it does: a revealed value is
               one a press will hide, so it shows the crossed eye. */}
-          <Icon>
+          <Icon key={isRevealed ? 'eye-off' : 'eye'}>
             <Glyph name={isRevealed ? 'eye-off' : 'eye'} />
           </Icon>
         </button>
@@ -242,6 +340,7 @@ export function TextField({
     style,
     ...(resolvedDisabled === true ? { 'data-disabled': '' } : {}),
     ...(resolvedInvalid === true ? { 'data-invalid': '' } : {}),
+    ...(loading === true ? { 'data-loading': '' } : {}),
     ...(resolvedMono ? { 'data-mono': '' } : {}),
     ...(resolvedReadOnly === true ? { 'data-readonly': '' } : {}),
     'data-part': 'root',
@@ -251,4 +350,19 @@ export function TextField({
   };
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
+}
+
+/**
+ * A button of the consumer's inside the frame. It is a real `button`, typed
+ * `button` unless stated, so a submit inside a form never submits by accident;
+ * everything else — its name, its handlers, the wiring a menu trigger hands it
+ * through `render` — reaches the element untouched.
+ *
+ * ```tsx
+ * <MenuTrigger render={(props) => <TextFieldAction {...props}>+55 …</TextFieldAction>} />
+ * ```
+ */
+export function TextFieldAction({ render, type = 'button', ...nativeProps }: TextFieldActionProps) {
+  const props: TextFieldActionRootProps = { ...nativeProps, 'data-part': 'action', type };
+  return render === undefined ? <button {...props} /> : render(props);
 }

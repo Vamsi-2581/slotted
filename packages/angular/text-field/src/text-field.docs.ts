@@ -25,7 +25,7 @@ export const ANGULAR_TEXT_FIELD_TOKENS = textFieldTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import {\n  provideTextFieldDefaults,\n  SlTextField,\n  SlTextFieldEnd,\n  SlTextFieldInput,\n  SlTextFieldStart,\n} from '@slotted/angular/text-field';",
+    "import {\n  provideTextFieldDefaults,\n  SlTextField,\n  SlTextFieldAction,\n  SlTextFieldEnd,\n  SlTextFieldInput,\n  SlTextFieldStart,\n} from '@slotted/angular/text-field';",
   selector: '[slTextField]',
   exportAs: 'slTextField',
 };
@@ -36,7 +36,7 @@ const anatomy: AnatomyRow[] = [
     element: 'the element carrying slTextField',
     required: true,
     purpose:
-      'The frame. Carries data-ui="text-field", the two axes, and data-disabled, data-invalid and data-readonly. It has no role: a textbox may hold only non-interactive children, so the two buttons are the control’s siblings and the box around them announces nothing.',
+      'The frame. Carries data-ui="text-field", the two axes, and data-disabled, data-invalid, data-readonly and data-loading. It has no role: a textbox may hold only non-interactive children, so the two buttons are the control’s siblings and the box around them announces nothing.',
   },
   {
     part: 'input',
@@ -59,11 +59,39 @@ const anatomy: AnatomyRow[] = [
     purpose: 'An adornment after the value in the reading direction: a unit, a domain, a suffix.',
   },
   {
+    part: 'action',
+    element: 'button[slTextFieldAction], inside slTextFieldStart or slTextFieldEnd',
+    required: false,
+    purpose:
+      'A button of the consumer’s inside the frame: a submit, a menu trigger naming a country, a tooltip on an information mark. Square when named by aria-label, padded when named by its text; aria-expanded="true" keeps it pressed while its menu is open. slMenuTriggerFor may sit on the same element.',
+  },
+  {
+    part: 'busy',
+    element: 'span[data-ui="spinner"], rendered by the frame',
+    required: false,
+    purpose:
+      'The shared ring, before the buttons, while [loading] is true. Rendered whenever loading is bound and hidden while it is false, so it leaves as well as arrives. Hidden from assistive technology: aria-busy on the input says it.',
+  },
+  {
+    part: 'caps-lock',
+    element: 'span, rendered by the frame',
+    required: false,
+    purpose:
+      'A mark in a password while Caps Lock is on and the control has focus. Hidden from assistive technology; capsLockLabel is announced once as it turns on.',
+  },
+  {
     part: 'clear',
     element: 'button, rendered by the frame',
     required: false,
     purpose:
-      'Empties the value with reason "clear" and returns focus to the control. Drawn only when there is something to clear and the reader may change it, and never smaller than 24 CSS pixels.',
+      'Empties the value with reason "clear" and returns focus to the control. Rendered while clearable, hidden while there is nothing to clear or the reader may not change it, and never smaller than 24 CSS pixels.',
+  },
+  {
+    part: 'copy',
+    element: 'button, rendered by the frame',
+    required: false,
+    purpose:
+      'Writes the value to the clipboard, turns to a check with data-complete for two seconds and announces the outcome. Stays for a read-only value; hidden while the value is empty or disabled.',
   },
   {
     part: 'reveal',
@@ -156,6 +184,72 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'menu',
+    title: 'A button of your own inside the frame',
+    note: 'A country code that opens a menu, a category beside a search, a submit named in words, an overflow mark: each is a real button in start or end. Open one — it stays pressed while its menu is open, and the value keeps its place beside it.',
+    snippet: defineSnippet({
+      id: 'text-field-angular-menu',
+      language: 'angular',
+      label: 'A menu trigger on an action',
+      source: `<div slTextField>
+  <span slTextFieldStart>
+    <button slTextFieldAction [slMenuTriggerFor]="countries">
+      {{ country() }}
+      <span slIcon><svg slGlyph name="chevron-down"></svg></span>
+    </button>
+  </span>
+  <input slTextFieldInput type="tel" autocomplete="tel-national" />
+</div>
+<sl-menu #countries>
+  <sl-menu-radio-group [(value)]="country">
+    <button slMenuRadioItem value="+55">Brasil +55</button>
+    <button slMenuRadioItem value="+351">Portugal +351</button>
+  </sl-menu-radio-group>
+</sl-menu>`,
+    }),
+  },
+  {
+    id: 'copy',
+    title: 'Copying a value somebody has to paste elsewhere',
+    note: 'Press the copy button: the mark turns to a check in the success ink for two seconds and the outcome is announced. A clipboard that refuses — an insecure page, a denied permission — is announced as a failure and shows no check.',
+    snippet: defineSnippet({
+      id: 'text-field-angular-copy',
+      language: 'angular',
+      label: 'A read-only link',
+      source: `<div slTextField copyable (valueCopy)="$event.copied && track('invite-copied')">
+  <input slTextFieldInput readonly defaultValue="https://nexora.app/convite/8f3a" />
+</div>`,
+    }),
+  },
+  {
+    id: 'password',
+    title: 'A password: showing it, and warning about Caps Lock',
+    note: 'Focus the password and turn Caps Lock on: the warning mark appears before the eye and is announced once. The eye swaps to a crossed eye and back, and the caret stays where it was.',
+    snippet: defineSnippet({
+      id: 'text-field-angular-password',
+      language: 'angular',
+      label: 'Reveal, and the Caps Lock mark every password gets',
+      source: `<div slTextField revealable>
+  <span slTextFieldStart><span slIcon><svg slGlyph name="lock"></svg></span></span>
+  <input slTextFieldInput type="password" autocomplete="current-password" />
+</div>`,
+    }),
+  },
+  {
+    id: 'loading',
+    title: 'Checking the value while the reader keeps typing',
+    note: 'A user name checked against the server: the ring stands before the buttons and the input is aria-busy, but it stays editable. Turn loading off and the ring shrinks out rather than vanishing.',
+    snippet: defineSnippet({
+      id: 'text-field-angular-loading',
+      language: 'angular',
+      label: 'An asynchronous check',
+      source: `<div slTextField clearable [loading]="checking()">
+  <span slTextFieldStart>@</span>
+  <input slTextFieldInput [formControl]="handle" />
+</div>`,
+    }),
+  },
+  {
     id: 'states',
     title: 'The four states the frame paints',
     note: 'Read-only keeps full-strength ink and only its ground changes, because the value is real and still submitted; disabled is muted to a measured colour rather than faded, so a disabled form still says what it holds.',
@@ -238,7 +332,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Setting it once, and reaching past it',
-    note: 'provideTextFieldDefaults carries the five decisions an application takes once; exportAs reaches the instance, and inputElement is the native element with focus, select and setSelectionRange already on it.',
+    note: 'provideTextFieldDefaults carries the decisions an application takes once; exportAs reaches the instance, and inputElement is the native element with focus, select and setSelectionRange already on it.',
     snippet: defineSnippet({
       id: 'text-field-angular-composition',
       language: 'angular',
@@ -282,6 +376,11 @@ const events: EventRow[] = [
     name: '(revealedChange)',
     payload: 'ChangeRequest<boolean>',
     when: 'Before the password toggle moves, with reason "pointer" or "keyboard" recovered from the click. A form that hides the password again on blur owns this bit.',
+  },
+  {
+    name: '(valueCopy)',
+    payload: 'TextFieldCopyDetail — { copied, reason, source, value }',
+    when: 'On slTextField, once the copy button has asked the clipboard. copied is false when the clipboard refused; reason is "pointer" or "keyboard".',
   },
   {
     name: 'ControlValueAccessor',
@@ -417,6 +516,34 @@ export const ANGULAR_TEXT_FIELD_DOCS = {
         'The element’s own type, read before the host binding computes so the reveal toggle can swap it without losing what the consumer wrote',
       ],
       [
+        'copyable',
+        'boolean',
+        'false',
+        'slTextField',
+        'Draws a button that writes the value to the clipboard, shows a check for two seconds and announces the outcome. Hidden while the value is empty or disabled',
+      ],
+      [
+        'loading',
+        'boolean',
+        'false',
+        'slTextField',
+        'Draws the shared ring before the buttons and marks the input aria-busy; the value stays editable. Bound at all, false included, the ring keeps its place so it can leave with motion',
+      ],
+      [
+        'copyLabel / copiedLabel / copyFailedLabel',
+        'string',
+        'Copy / Copied / Copy failed',
+        'slTextField, provideTextFieldDefaults',
+        'The copy button’s name, and the two announcements of its outcome',
+      ],
+      [
+        'capsLockLabel',
+        'string',
+        'Caps Lock is on',
+        'slTextField, provideTextFieldDefaults',
+        'What a password announces once as Caps Lock turns on while it has focus',
+      ],
+      [
         'clearLabel / revealLabel',
         'string',
         'Clear / Show password',
@@ -425,6 +552,13 @@ export const ANGULAR_TEXT_FIELD_DOCS = {
       ],
     ]),
     composition: apiRows([
+      [
+        'button[slTextFieldAction]',
+        'directive',
+        'type="button"',
+        'inside slTextFieldStart or slTextFieldEnd',
+        'A button of the consumer’s inside the frame. slMenuTriggerFor, slTooltipTrigger or a popover trigger sit on the same element; the part is written back after the first render, because slMenuTriggerFor binds data-part to null. exportAs slTextFieldAction',
+      ],
       [
         'the directives themselves',
         'slTextField, slTextFieldInput, slTextFieldStart, slTextFieldEnd',
@@ -441,10 +575,10 @@ export const ANGULAR_TEXT_FIELD_DOCS = {
       ],
       [
         'provideTextFieldDefaults()',
-        '{ size, variant, mono, clearLabel, revealLabel }',
+        '{ size, variant, mono, clearLabel, revealLabel, copyLabel, copiedLabel, copyFailedLabel, capsLockLabel }',
         '—',
         'an injector',
-        'The five decisions an application takes once. size is the one a field outranks, so a control inside a field takes the field’s step',
+        'The decisions an application takes once. size is the one a field outranks, so a control inside a field takes the field’s step',
       ],
       [
         'ControlValueAccessor',
@@ -460,6 +594,9 @@ export const ANGULAR_TEXT_FIELD_DOCS = {
       'The control takes its name from the field’s label, through for pointing at the identifier the field derived. The APG’s naming practice records that the implicit form — wrapping the control in the label — is one some combinations of assistive technology and browser fail to treat as a name at all.',
       'aria-required, never the native required. A host binding beats a static attribute in Angular, so every value the consumer wrote — id, aria-describedby, aria-invalid, aria-required, readonly, type — is read before the binding computes and is never written over.',
       'Both buttons are real buttons with names an application translates once, and both are at least 24 CSS pixels wide — WCAG 2.2 SC 2.5.8 — at every step and every density. The reveal toggle keeps one label and carries its state in aria-pressed, which is the APG’s rule for a toggle.',
+      'The copy button announces its outcome through the shared live announcer — Copied, or Copy failed — because the check that replaces the mark is seen and not heard. The Caps Lock mark is hidden from assistive technology and its label is announced once as it turns on, while the password has focus.',
+      'loading writes aria-busy on the input and leaves it enabled: an asynchronous check of a user name must not take the keyboard away. The ring is hidden from assistive technology.',
+      'A menu inside the frame is the APG Menu Button pattern (w3.org/WAI/ARIA/apg/patterns/menu-button/), supplied by slMenuTriggerFor on the action: aria-haspopup, aria-expanded, and Enter, Space and ArrowDown to open.',
       'Nothing is bound to Escape. Some user agents clear a search input on the key; a control that swallowed it inside a dialog would be a control a keyboard user cannot leave, and WCAG 2.1.4 exists for the class of defect single-key shortcuts produce.',
     ],
     snippets: [

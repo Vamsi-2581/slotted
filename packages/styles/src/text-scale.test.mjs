@@ -37,6 +37,14 @@ const DECORATIVE = new Map([
   ],
   ['slider/thumb', 'the thumb: an empty control the press grows under the finger'],
   [
+    'icon/(root)',
+    'a glyph box: one aria-hidden svg and never text — text-field grows the new mark in from 0.8 when copy turns to a check and an eye to a crossed eye',
+  ],
+  [
+    'text-field/busy',
+    'the ring, the Caps Lock mark, the clear and the copy buttons inside the frame: glyph boxes with no text, grown in from 0.8 as they arrive and shrunk as they leave',
+  ],
+  [
     'rating/symbol',
     'the star and its lit copy: two glyph boxes with no text, lifted under the pointer and settled under the press',
   ],

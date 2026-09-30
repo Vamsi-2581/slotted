@@ -2,13 +2,13 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SlField, SlFieldCounter, SlFieldError, SlFieldLabel } from '@slotted/angular/field';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/text-field/contract.json';
 import { SlTextField } from './text-field';
 import { provideTextFieldDefaults } from './text-field-defaults';
 import { SlTextFieldInput } from './text-field-input';
-import { SlTextFieldEnd, SlTextFieldStart } from './text-field-parts';
+import { SlTextFieldAction, SlTextFieldEnd, SlTextFieldStart } from './text-field-parts';
 
 @Component({
   standalone: true,
@@ -19,6 +19,7 @@ import { SlTextFieldEnd, SlTextFieldStart } from './text-field-parts';
     SlFieldError,
     SlFieldLabel,
     SlTextField,
+    SlTextFieldAction,
     SlTextFieldEnd,
     SlTextFieldInput,
     SlTextFieldStart,
@@ -27,6 +28,9 @@ import { SlTextFieldEnd, SlTextFieldStart } from './text-field-parts';
 })
 class Host {
   readonly value = signal<string | undefined>(undefined);
+  readonly loading = signal<boolean | undefined>(true);
+  readonly copies: unknown[] = [];
+  readonly clicks: unknown[] = [];
   readonly control = new FormControl('Ada');
 }
 
@@ -182,14 +186,14 @@ describe('SlTextField', () => {
 
     expect(input(fixture).value).toBe('');
     expect(document.activeElement).toBe(input(fixture));
-    expect(query(fixture, '[data-part="clear"]')).toBeNull();
+    expect(query(fixture, '[data-part="clear"]').hidden).toBe(true);
   });
 
   it('draws no clear button for a control the reader cannot change', () => {
     const fixture = renderTemplate(
       `<div slTextField clearable><input slTextFieldInput defaultValue="Ada" readonly /></div>`,
     );
-    expect(query(fixture, '[data-part="clear"]')).toBeNull();
+    expect(query(fixture, '[data-part="clear"]').hidden).toBe(true);
   });
 
   /* ------------------------------------------------------------ reveal - */
@@ -316,5 +320,115 @@ describe('SlTextField', () => {
     );
 
     expect(query(fixture, '[data-part="clear"]').getAttribute('aria-label')).toBe('Limpar');
+  });
+
+  /* -------------------------------------------------- inside the frame - */
+
+  it('copies the value, shows a check and reports whether the clipboard took it', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', { ...globalThis.navigator, clipboard: { writeText } });
+    try {
+      const fixture = renderTemplate(
+        `<div slTextField copyable (valueCopy)="copies.push($event)">
+           <input slTextFieldInput readonly defaultValue="https://slotted.dev/x" />
+         </div>`,
+      );
+      const button = query(fixture, '[data-part="copy"]');
+      expect(button.hidden).toBe(false);
+      expect(button.getAttribute('aria-label')).toBe('Copy');
+      button.dispatchEvent(new MouseEvent('click', { detail: 1 }));
+      await vi.waitFor(() => expect(fixture.componentInstance.copies).toHaveLength(1));
+      fixture.detectChanges();
+      expect(writeText).toHaveBeenCalledWith('https://slotted.dev/x');
+      expect(fixture.componentInstance.copies[0]).toMatchObject({
+        copied: true,
+        reason: 'pointer',
+        value: 'https://slotted.dev/x',
+      });
+      expect(button.hasAttribute('data-complete')).toBe(true);
+      expect(button.querySelector('svg')?.getAttribute('data-glyph')).toBe('check');
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('hides the copy button while there is nothing to copy', () => {
+    const fixture = renderTemplate(`<div slTextField copyable><input slTextFieldInput /></div>`);
+    expect(query(fixture, '[data-part="copy"]').hidden).toBe(true);
+    type(input(fixture), 'a');
+    fixture.detectChanges();
+    expect(query(fixture, '[data-part="copy"]').hidden).toBe(false);
+  });
+
+  it('marks the control busy and keeps it editable while loading', () => {
+    const fixture = renderTemplate(
+      `<div slTextField [loading]="loading()"><input slTextFieldInput /></div>`,
+    );
+    const root = query(fixture, '[data-ui="text-field"]');
+    expect(input(fixture).getAttribute('aria-busy')).toBe('true');
+    expect(input(fixture).disabled).toBe(false);
+    expect(root.hasAttribute('data-loading')).toBe(true);
+    expect(query(fixture, '[data-part="busy"][data-ui="spinner"]').hidden).toBe(false);
+
+    fixture.componentInstance.loading.set(false);
+    fixture.detectChanges();
+    expect(input(fixture).hasAttribute('aria-busy')).toBe(false);
+    expect(root.hasAttribute('data-loading')).toBe(false);
+    expect(query(fixture, '[data-part="busy"]').hidden).toBe(true);
+
+    fixture.componentInstance.loading.set(undefined);
+    fixture.detectChanges();
+    expect(query(fixture, '[data-part="busy"]')).toBeNull();
+  });
+
+  it('warns about Caps Lock in a focused password and forgets it on blur', () => {
+    const fixture = renderTemplate(
+      `<div slTextField><input slTextFieldInput type="password" /></div>`,
+    );
+    const mark = () => query(fixture, '[data-part="caps-lock"]');
+    expect(mark().hidden).toBe(true);
+
+    input(fixture).dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'a', modifierCapsLock: true } as KeyboardEventInit),
+    );
+    fixture.detectChanges();
+    expect(mark().hidden).toBe(false);
+    expect(mark().querySelector('svg')?.getAttribute('data-glyph')).toBe('caps-lock');
+
+    input(fixture).dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+    expect(mark().hidden).toBe(true);
+  });
+
+  it('draws no Caps Lock mark outside a password', () => {
+    const fixture = renderTemplate(`<div slTextField><input slTextFieldInput /></div>`);
+    expect(query(fixture, '[data-part="caps-lock"]')).toBeNull();
+  });
+
+  it('puts the consumer’s own button inside the frame as a real button', () => {
+    const fixture = renderTemplate(
+      `<div slTextField>
+         <input slTextFieldInput />
+         <span slTextFieldEnd><button slTextFieldAction aria-label="More" (click)="clicks.push($event)">…</button></span>
+       </div>`,
+    );
+    const action = query(fixture, 'button[aria-label="More"]');
+    expect(action.getAttribute('data-part')).toBe('action');
+    expect(action.getAttribute('type')).toBe('button');
+    expect(action.parentElement?.getAttribute('data-part')).toBe('end');
+    action.click();
+    expect(fixture.componentInstance.clicks).toHaveLength(1);
+  });
+
+  it('keeps the frame’s buttons in the order the stylesheet insets', () => {
+    const fixture = renderTemplate(
+      `<div slTextField clearable copyable revealable [loading]="true">
+         <input slTextFieldInput type="password" defaultValue="a" />
+       </div>`,
+    );
+    const parts = [...query(fixture, '[data-ui="text-field"]').children].map((child) =>
+      child.getAttribute('data-part'),
+    );
+    expect(parts).toEqual(['input', 'busy', 'caps-lock', 'clear', 'copy', 'reveal']);
   });
 });

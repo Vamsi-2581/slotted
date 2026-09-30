@@ -3,7 +3,7 @@ import { createContext, useContext } from 'react';
 import type { TextFieldDefaults, TextFieldDefaultsProviderProps } from './text-field.types';
 
 /**
- * The two words the family's own buttons announce. They are constants rather
+ * The words the family's own buttons and marks announce. They are constants rather
  * than strings built inside the component, because the only translation layer
  * this library has is the consumer's — a provider at the top of the
  * application, or a prop on the control.
@@ -15,9 +15,17 @@ import type { TextFieldDefaults, TextFieldDefaultsProviderProps } from './text-f
  */
 export const TEXT_FIELD_CLEAR_LABEL = 'Clear';
 export const TEXT_FIELD_REVEAL_LABEL = 'Show password';
+export const TEXT_FIELD_COPY_LABEL = 'Copy';
+export const TEXT_FIELD_COPIED_LABEL = 'Copied';
+export const TEXT_FIELD_COPY_FAILED_LABEL = 'Copy failed';
+export const TEXT_FIELD_CAPS_LOCK_LABEL = 'Caps Lock is on';
 
 const FALLBACK: TextFieldDefaults = {
+  capsLockLabel: TEXT_FIELD_CAPS_LOCK_LABEL,
   clearLabel: TEXT_FIELD_CLEAR_LABEL,
+  copiedLabel: TEXT_FIELD_COPIED_LABEL,
+  copyFailedLabel: TEXT_FIELD_COPY_FAILED_LABEL,
+  copyLabel: TEXT_FIELD_COPY_LABEL,
   mono: false,
   revealLabel: TEXT_FIELD_REVEAL_LABEL,
   size: 'md',
@@ -51,7 +59,11 @@ export function TextFieldDefaultsProvider({
   return (
     <TextFieldDefaultsContext.Provider
       value={{
+        capsLockLabel: defaults.capsLockLabel ?? inherited.capsLockLabel,
         clearLabel: defaults.clearLabel ?? inherited.clearLabel,
+        copiedLabel: defaults.copiedLabel ?? inherited.copiedLabel,
+        copyFailedLabel: defaults.copyFailedLabel ?? inherited.copyFailedLabel,
+        copyLabel: defaults.copyLabel ?? inherited.copyLabel,
         mono: defaults.mono ?? inherited.mono,
         revealLabel: defaults.revealLabel ?? inherited.revealLabel,
         size: defaults.size ?? inherited.size,

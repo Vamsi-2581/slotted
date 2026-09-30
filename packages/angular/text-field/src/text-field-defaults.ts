@@ -20,7 +20,7 @@ export type TextFieldVariant = 'outline' | 'subtle' | 'plain';
 export type TextFieldType = 'text' | 'search' | 'email' | 'url' | 'tel' | 'password';
 
 /**
- * The two words the family's own buttons announce.
+ * The words the family's own buttons and marks announce.
  *
  * The reveal label does not change with the state. That is the APG's rule for a
  * toggle: `aria-pressed` says whether the password is showing, and a label that
@@ -29,9 +29,17 @@ export type TextFieldType = 'text' | 'search' | 'email' | 'url' | 'tel' | 'passw
  */
 export const TEXT_FIELD_CLEAR_LABEL = 'Clear';
 export const TEXT_FIELD_REVEAL_LABEL = 'Show password';
+export const TEXT_FIELD_COPY_LABEL = 'Copy';
+export const TEXT_FIELD_COPIED_LABEL = 'Copied';
+export const TEXT_FIELD_COPY_FAILED_LABEL = 'Copy failed';
+export const TEXT_FIELD_CAPS_LOCK_LABEL = 'Caps Lock is on';
 
 export interface TextFieldDefaults {
+  capsLockLabel: string;
   clearLabel: string;
+  copiedLabel: string;
+  copyFailedLabel: string;
+  copyLabel: string;
   mono: boolean;
   revealLabel: string;
   size: TextFieldSize;
@@ -39,7 +47,11 @@ export interface TextFieldDefaults {
 }
 
 const FALLBACK: TextFieldDefaults = {
+  capsLockLabel: TEXT_FIELD_CAPS_LOCK_LABEL,
   clearLabel: TEXT_FIELD_CLEAR_LABEL,
+  copiedLabel: TEXT_FIELD_COPIED_LABEL,
+  copyFailedLabel: TEXT_FIELD_COPY_FAILED_LABEL,
+  copyLabel: TEXT_FIELD_COPY_LABEL,
   mono: false,
   revealLabel: TEXT_FIELD_REVEAL_LABEL,
   size: 'md',
@@ -89,6 +101,10 @@ export abstract class SlTextFieldControl {
   abstract readonly password: Signal<boolean>;
   /** Whether the password is currently showing. */
   abstract readonly revealed: Signal<boolean>;
+  /** Whether Caps Lock is on while a password has focus. */
+  abstract readonly capsLock: Signal<boolean>;
+  /** What the element shows, for the copy button. */
+  abstract readonly currentValue: Signal<string>;
   abstract readonly resolvedDisabled: Signal<boolean | undefined>;
   abstract readonly resolvedReadOnly: Signal<boolean | undefined>;
   abstract readonly resolvedInvalid: Signal<boolean | undefined>;
@@ -96,4 +112,12 @@ export abstract class SlTextFieldControl {
   abstract clear(source: Event): void;
   /** Turns the password from dots into characters, and holds the caret. */
   abstract toggleReveal(source: Event): void;
+}
+
+/** What a finished copy reports: whether the clipboard took it, and why it was asked. */
+export interface TextFieldCopyDetail {
+  copied: boolean;
+  reason: 'pointer' | 'keyboard';
+  source: Event;
+  value: string;
 }

@@ -86,6 +86,8 @@ export interface EventCalendarLabels {
   offsetChange: (minutes: number, at: string) => string;
   offsetChangeShort: (minutes: number, at: string) => string;
   selected: (text: string) => string;
+  /** Said when a key press finds no destination `canDrop` allows. */
+  dropInvalid: (title: string) => string;
   eventDetail: string;
   dayEvents: (day: string) => string;
 }
@@ -131,6 +133,7 @@ export const EVENT_CALENDAR_LABELS: EventCalendarLabels = {
     `Clocks go ${minutes > 0 ? 'forward' : 'back'} ${hours(minutes)} ${hours(minutes) === 1 ? 'hour' : 'hours'} at ${at}`,
   offsetChangeShort: (minutes, at) => `${minutes > 0 ? '+' : '−'}${hours(minutes)} h at ${at}`,
   selected: (text) => `Selected ${text}`,
+  dropInvalid: (title) => `${title} cannot move there`,
   eventDetail: 'Event',
   dayEvents: (day) => `Events on ${day}`,
 };

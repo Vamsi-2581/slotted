@@ -263,13 +263,13 @@
     },
     {
       "key": "Alt+Arrow",
-      "effect": "on an editable event: moves it — Left and Right a day, mirrored in RTL; Up and Down a slot in the hours, a week in the month",
+      "effect": "on an editable event: moves it — Left and Right a day, mirrored in RTL; Up and Down a slot in the hours, a week in the month; a destination canDrop refused is passed over for the next allowed one",
       "focus": "stays on the event, which is found again by its key where it lands",
       "source": "the family; the alternative to dragging that §2.8 of the feature guide asks for"
     },
     {
       "key": "Alt+Shift+Arrow",
-      "effect": "on an editable event: moves its end — a slot in the hours, a day on a bar",
+      "effect": "on an editable event: moves its end — a slot in the hours, a day on a bar; a refused end is passed over as a move is",
       "focus": "stays on the event",
       "source": "the family; the alternative to the resize handle"
     },
@@ -416,7 +416,8 @@
     "cancelled",
     "weekNumber",
     "offsetChange",
-    "selected"
+    "selected",
+    "dropInvalid"
   ],
   "axes": {
     "view": ["month", "week", "day", "list"],
@@ -475,7 +476,7 @@
   "literals": {
     "hourSize": "two small control heights: a thirty-minute slot is one small control tall, so density shrinks the grid as it shrinks a control; arithmetic over tokens",
     "tint": "14%: the share of a calendar's slot mixed into the surface under an event, the smallest share that separates the eight slots from each other on a white page; a data slot has no surface role to read, which is the reason --slotted-highlight-tint-opacity documents",
-    "tintHover": "22% and 28%: hover and press, the same steps apart as the surface's own hover and press",
+    "tintHover": "21% and 27%: hover and press, seven and thirteen points over the rest; the edge takes 34% at rest and 50% on hover, and the dark scheme takes 24, 32, 38 and 44, 60 through light-dark()",
     "scrollerSize": "40rem: the hours' block size when the root is given none, ten comfortable hours; a root with a definite height gives the scroller the rest of it",
     "columnCounts": "7 and the day count are the shape of a week, not a value a theme retunes"
   },
@@ -507,6 +508,7 @@
     "data-slot-duration": "on the root: the minutes between the column’s lighter rules, 5 to 120",
     "data-editable": "an event the reader can move and resize in a grid",
     "data-dragging": "the event a pointer is moving, drawn where it would land",
+    "data-drop-invalid": "on the event being dragged, while canDrop refuses where it would land",
     "data-past": "on an event that ended before now: drawn a step back",
     "data-context": "on the event a context menu is open on: drawn as the solid slot, as the open event is"
   },
@@ -687,6 +689,8 @@
     "preview": "the occurrence is laid out where it would land, with withPlacement, and marked data-dragging; Escape during the drag puts it back and asks for nothing",
     "shortest": "a resize never makes an event shorter than one slot, or one day for an all-day event",
     "recurring": "an occurrence of a series is asked for with its original date in occurrence; whether the move applies to the occurrence or to the series is the application's",
-    "announce": "an accepted request is announced once: the title and its new range"
+    "announce": "an accepted request is announced once: the title and its new range",
+    "canDrop": "canDrop(change) returns whether a destination is allowed, and reads the change onEventChange would receive; the pointer asks it at every step of a drag, and a refused destination marks the event data-drop-invalid and the root's cursor not-allowed, where letting go puts the event back and asks for nothing; Alt+Arrow asks each step with nextAllowedPlacement from @slotted/core/event-calendar and lands on the first allowed one, and with none in reach the event stays and dropInvalid is announced; absent, every destination is allowed",
+    "canDropShape": "one object for both questions: ReUI asks canDropEvent while dragging and onEventUpdate after, with two shapes; here the change that canDrop allowed is the change onEventChange receives"
   }
 }

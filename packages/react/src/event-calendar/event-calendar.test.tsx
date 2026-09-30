@@ -1,4 +1,5 @@
 import { plainDate } from '@slotted/core/date';
+import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import type { PlainDate, PlainDateTime } from '@slotted/core/date';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -788,5 +789,77 @@ describe('editing', () => {
     expect(changes).toHaveLength(1);
     expect(changes[0]).toMatchObject({ kind: 'move', start: day(9), end: day(11) });
     expect(document.querySelector("[data-key='offsite']")).not.toHaveAttribute('data-dragging');
+  });
+
+  it('draws a destination canDrop refuses, and asks nothing when let go there', () => {
+    const changes: EventCalendarEventChange[] = [];
+    const asked: EventCalendarEventChange[] = [];
+    render(
+      <EventCalendar
+        canDrop={(change) => {
+          asked.push(change);
+          return (change.start as PlainDate).day !== 9;
+        }}
+        defaultDate={day(8)}
+        editable
+        events={events}
+        onEventChange={(change) => changes.push(change)}
+        timeZone="UTC"
+      />,
+    );
+    const place = (iso: string, left: number) => {
+      cell(iso).getBoundingClientRect = () =>
+        ({ left, right: left + 100, top: 0, bottom: 100, width: 100, height: 100 }) as DOMRect;
+    };
+    place('2026-09-08', 0);
+    place('2026-09-09', 100);
+    const offsite = document.querySelector("[data-key='offsite']") as HTMLElement;
+    fireEvent.pointerDown(offsite, { button: 0, clientX: 50, clientY: 50 });
+    fireEvent.pointerMove(document, { clientX: 150, clientY: 50 });
+    const dragged = document.querySelector("[data-key='offsite']");
+    expect(dragged).toHaveAttribute('data-dragging');
+    expect(dragged).toHaveAttribute('data-drop-invalid');
+    expect(asked.at(-1)).toMatchObject({ key: 'offsite', kind: 'move', start: day(9) });
+    fireEvent.pointerUp(document, { clientX: 150, clientY: 50 });
+    expect(changes).toHaveLength(0);
+    expect(document.querySelector("[data-key='offsite']")).not.toHaveAttribute('data-drop-invalid');
+  });
+
+  it('passes over refused destinations with Alt and the arrows', () => {
+    const changes: EventCalendarEventChange[] = [];
+    render(
+      <EventCalendar
+        canDrop={(change) => ![9, 10].includes((change.start as PlainDate).day)}
+        defaultDate={day(8)}
+        editable
+        events={events}
+        onEventChange={(change) => changes.push(change)}
+        timeZone="UTC"
+      />,
+    );
+    const offsite = document.querySelector("[data-key='offsite']") as HTMLElement;
+    offsite.focus();
+    fireEvent.keyDown(offsite, { key: 'ArrowRight', altKey: true });
+    expect(changes.at(-1)).toMatchObject({ kind: 'move', start: day(11), end: day(13) });
+  });
+
+  it('keeps the event where it is when no destination in reach is allowed', () => {
+    const announce = vi.spyOn(getLiveAnnouncer(document), 'announce');
+    const changes: EventCalendarEventChange[] = [];
+    render(
+      <EventCalendar
+        canDrop={() => false}
+        defaultDate={day(8)}
+        editable
+        events={events}
+        onEventChange={(change) => changes.push(change)}
+        timeZone="UTC"
+      />,
+    );
+    const offsite = document.querySelector("[data-key='offsite']") as HTMLElement;
+    offsite.focus();
+    fireEvent.keyDown(offsite, { key: 'ArrowRight', altKey: true });
+    expect(changes).toHaveLength(0);
+    expect(announce).toHaveBeenCalledWith('Offsite cannot move there');
   });
 });

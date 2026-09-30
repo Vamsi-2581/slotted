@@ -170,6 +170,22 @@ test('asks to move and resize an event, by pointer and by key', () => {
   assert.equal(member.defaults.editable, false);
 });
 
+/**
+ * The application can refuse a destination while the event is still moving:
+ * the same change it would be asked for, asked before, so a reader sees the
+ * refusal where the event is and not after letting go.
+ */
+test('asks canDrop about each destination before it asks to move', () => {
+  assert.match(contract.editing.canDrop, /canDrop\(change\)/);
+  assert.match(contract.editing.canDrop, /data-drop-invalid/);
+  assert.match(contract.editing.canDrop, /asks for nothing/);
+  assert.match(contract.editing.canDrop, /nextAllowedPlacement/);
+  assert.ok(contract.dataAttributes['data-drop-invalid'].length > 0);
+  assert.ok(contract.labels.includes('dropInvalid'));
+  const alt = contract.keyboard.find((entry) => entry.key === 'Alt+Arrow');
+  assert.match(alt.effect, /refused/);
+});
+
 test('declares one overlap policy and where the excess goes', () => {
   assert.match(contract.layout.overlap, /columns/);
   assert.match(contract.layout.overflow, /maxColumns/);

@@ -798,6 +798,42 @@ export function resizePlacement(
   return { ...placement, end: compareDateTime(end, shortest) < 0 ? shortest : end };
 }
 
+export interface AllowedPlacementOptions {
+  /** Minutes between the grid's lighter rules: the step and the shortest resize. */
+  slot: number;
+  /** The visible hours, `[start, end]`: how far a step of minutes may travel. */
+  hours: readonly [number, number];
+  /** The application's `canDrop`, asked about the placement it would be asked for. */
+  allowed: (placement: EventPlacement) => boolean;
+}
+
+/**
+ * The placement one key press lands on when some destinations are refused:
+ * the first of `shift`, twice `shift`, three times… that `allowed` accepts,
+ * moved or resized as `kind` says. A step of minutes travels at most the
+ * visible hours and a step of days six weeks, the size of a month; past that
+ * nothing is allowed and the answer is `null`, so the event stays.
+ */
+export function nextAllowedPlacement(
+  from: EventPlacement,
+  shift: EventShift,
+  kind: 'move' | 'resize',
+  options: AllowedPlacementOptions,
+): EventPlacement | null {
+  const [startHour, endHour] = options.hours;
+  const steps =
+    shift.minutes !== 0
+      ? Math.max(1, Math.floor(((endHour - startHour) * 60) / Math.abs(shift.minutes)))
+      : Math.max(1, Math.floor(42 / Math.max(1, Math.abs(shift.days))));
+  for (let step = 1; step <= steps; step += 1) {
+    const reach = { days: shift.days * step, minutes: shift.minutes * step };
+    const placement =
+      kind === 'move' ? movePlacement(from, reach) : resizePlacement(from, reach, options.slot);
+    if (options.allowed(placement)) return placement;
+  }
+  return null;
+}
+
 /**
  * A placement written back in the kind the event holds: dates with the last
  * day inclusive for an all-day event, date-times with the end exclusive for a

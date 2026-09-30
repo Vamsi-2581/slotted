@@ -16,12 +16,13 @@
  * element.
  */
 import { createHash } from 'node:crypto';
+import { existsSync, readFileSync } from 'node:fs';
 import { chmod, mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { DENSITIES, DIRECTIONS, SCHEMES, WIDTHS } from './build.mjs';
+import { DENSITIES, DIRECTIONS, SCHEMES, WIDTHS, parseScenes } from './build.mjs';
 import { READY_EXPRESSION, captureUrl, launch } from './shoot.mjs';
 
 const OUT = fileURLToPath(new URL('out/specimen/', import.meta.url));
@@ -160,8 +161,9 @@ export function parseSpecimenArguments(argv) {
 
   if (options.family) {
     options.width ??= '420';
-    if (!WIDTHS.includes(Number(options.width))) {
-      throw new Error(`--family needs --width in ${WIDTHS.join(', ')}, received ${options.width}`);
+    const widths = stageWidths(options.family);
+    if (!widths.includes(Number(options.width))) {
+      throw new Error(`--family needs --width in ${widths.join(', ')}, received ${options.width}`);
     }
   } else {
     options.width ??= '1280';
@@ -174,6 +176,22 @@ export function parseSpecimenArguments(argv) {
   }
 
   return options;
+}
+
+/**
+ * The widths the harness page draws a stage at: the three every page ships and
+ * those a scene of the family declares with `data-widths` (`build.mjs`). The
+ * grid scenes of `event-calendar` exist only at 1024, so a list closed to the
+ * three left them without a specimen.
+ */
+function stageWidths(family) {
+  const fragment = fileURLToPath(
+    new URL(`../../packages/styles/src/${family}/${family}.harness.html`, import.meta.url),
+  );
+  const declared = existsSync(fragment)
+    ? parseScenes(readFileSync(fragment, 'utf8')).flatMap((scene) => scene.widths ?? [])
+    : [];
+  return [...new Set([...WIDTHS, ...declared])].sort((a, b) => a - b);
 }
 
 /** Every axis away from its default enters the name, so two runs never overwrite each other. */

@@ -631,12 +631,15 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'editing',
     title: 'Moving and resizing',
-    note: 'With editable, a press that travels four pixels picks an event up and lays it out where it would land; its end pulls to resize. Release asks with onEventChange; Escape puts it back. Alt with the arrows does the same from the keyboard. A series asks with the occurrence’s own date.',
+    note: 'With editable, a press that travels four pixels picks an event up and lays it out where it would land; its end pulls to resize. Release asks with onEventChange; Escape puts it back. Alt with the arrows does the same from the keyboard. A series asks with the occurrence’s own date. canDrop is asked about every destination with the same change: a refused one is drawn with a dashed danger edge, letting go there asks nothing, and Alt with an arrow passes over it to the next allowed one.',
     snippet: defineSnippet({
       id: 'event-calendar-react-editing',
       language: 'tsx',
       label: 'The application writes the move back',
       source: `<EventCalendar
+  canDrop={(change) =>
+    dayOfWeek('date' in change.start ? change.start.date : change.start) % 6 !== 0
+  }
   editable
   events={events}
   onEventChange={(change) =>
@@ -933,6 +936,13 @@ export const REACT_EVENT_CALENDAR_DOCS = {
         'Events move and resize, by dragging or by Alt and the arrows',
       ],
       [
+        'canDrop',
+        '(change) => boolean',
+        '—',
+        'EventCalendar',
+        'Whether a destination is allowed, asked with the change onEventChange would receive',
+      ],
+      [
         'workingHours',
         'readonly WorkingHours[]',
         '[]',
@@ -1103,7 +1113,7 @@ export const REACT_EVENT_CALENDAR_DOCS = {
       'Every event is named by its own content — its time, its title — and a visually hidden continuation of the whole range, its calendar, its status and whether it repeats. Position and colour state nothing the words do not; a multi-day bar is heard as continuing on each day it crosses.',
       'The title is a polite live region, so paging by key announces the new period; a chosen stretch is announced once through the shared live announcer, and a wait once when its indicator appears.',
       'The list is not a grid: each day is a section named by its heading and every event is in the tab order, because a list read top to bottom has no second axis. Below 600 pixels the month and the week become that list, and the view the reader chose does not change.',
-      'Every move a pointer makes has a key: with an editable event focused, Alt and the arrows move it a slot or a day, and Alt with Shift moves its end. The request is announced once with the title and the new range, and focus stays on the event where it lands.',
+      'Every move a pointer makes has a key: with an editable event focused, Alt and the arrows move it a slot or a day, and Alt with Shift moves its end. The request is announced once with the title and the new range, and focus stays on the event where it lands. A destination canDrop refuses is passed over for the next allowed one; with none in reach the event stays and the refusal is announced.',
       'With renderContextMenu, Shift+F10 and the ContextMenu key open the menu on the focused event, or on the selection or the day of the focused cell; the menu is named by the event’s title or the stretch in words, and closing it returns focus to where it was.',
       'No single-letter shortcut is bound: a calendar lives in a page with shortcuts of its own, and a bare letter in a grid collides with a screen reader’s quick navigation.',
     ],

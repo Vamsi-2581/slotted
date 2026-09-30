@@ -9,7 +9,7 @@ import {
   SlDescriptionListTerm,
 } from '@slotted/angular/description-list';
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
-import { plainDate, toISODate, wallClockIn } from '@slotted/core/date';
+import { dayOfWeek, plainDate, toISODate, wallClockIn } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
 import type { ChangeRequest } from '@slotted/core/state';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
@@ -158,6 +158,7 @@ class Playground$ {
       [defaultDate]="today"
       [defaultView]="view()"
       [editable]="editable"
+      [canDrop]="notAtWeekends"
       [events]="events()"
       locale="en-US"
       timeZone="America/Sao_Paulo"
@@ -172,8 +173,13 @@ class Editing$ {
   readonly hours = STUDIO_HOURS;
   readonly today = TODAY;
   readonly view = input<'week' | 'month'>('week');
-  readonly log = signal('Drag an event, pull its end, or focus it and press Alt with the arrows.');
+  readonly log = signal(
+    'Drag an event, pull its end, or focus it and press Alt with the arrows. The studio is closed at weekends.',
+  );
   readonly editable = (occurrence: EventOccurrence) => occurrence.event.status !== 'cancelled';
+  /** The studio is closed at weekends: Saturday and Sunday are refused while an event moves. */
+  readonly notAtWeekends = (change: EventCalendarEventChange) =>
+    dayOfWeek('date' in change.start ? change.start.date : change.start) % 6 !== 0;
   change(request: ChangeRequest<EventCalendarEventChange>) {
     const { value } = request;
     this.events.update((held) => applyChange(held, value as never));

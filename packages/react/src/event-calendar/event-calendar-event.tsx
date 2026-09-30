@@ -131,6 +131,7 @@ export function EventItem({
     'data-key': key,
     'data-editable': editable && inGrid ? '' : undefined,
     'data-dragging': model.draggingKey === key ? '' : undefined,
+    'data-drop-invalid': model.draggingKey === key && model.dropInvalid ? '' : undefined,
     'data-context': model.contextKey === key ? '' : undefined,
     'data-all-day': occurrence.allDay ? '' : undefined,
     'data-bar': bar ? '' : undefined,

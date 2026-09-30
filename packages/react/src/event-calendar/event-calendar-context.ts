@@ -61,6 +61,8 @@ export interface EventCalendarModel {
   canEdit(occurrence: EventOccurrence<CalendarEvent>): boolean;
   /** The occurrence a pointer is moving, drawn where it would land. */
   readonly draggingKey: string | null;
+  /** Whether `canDrop` refuses where the dragged occurrence would land. */
+  readonly dropInvalid: boolean;
   /** The event a context menu is open on. */
   readonly contextKey: string | null;
   activate(

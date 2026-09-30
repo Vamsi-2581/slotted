@@ -29,6 +29,10 @@
   "--slotted-data-6",
   "--slotted-data-7",
   "--slotted-data-8",
+  "--slotted-duration-instant",
+  "--slotted-duration-short",
+  "--slotted-easing-enter",
+  "--slotted-easing-exit",
   "--slotted-event-calendar-background",
   "--slotted-event-calendar-event-radius",
   "--slotted-event-calendar-hour-size",
@@ -67,6 +71,7 @@
   "--slotted-space-6",
   "--slotted-space-9",
   "--slotted-surface",
+  "--slotted-target-min",
   "--slotted-text",
   "--slotted-text-muted",
   "--slotted-tone-accent-border",
@@ -74,6 +79,7 @@
   "--slotted-tone-accent-solid",
   "--slotted-tone-accent-surface",
   "--slotted-tone-accent-text",
+  "--slotted-tone-danger-border",
   "--slotted-tone-secondary-subtle-active",
   "--slotted-tone-secondary-subtle-hover"
 ]

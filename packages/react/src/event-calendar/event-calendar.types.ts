@@ -96,6 +96,8 @@ export interface EventCalendarLabels {
   offsetChange: (minutes: number, at: string) => string;
   offsetChangeShort: (minutes: number, at: string) => string;
   selected: (text: string) => string;
+  /** Said when a key press finds no destination `canDrop` allows. */
+  dropInvalid: (title: string) => string;
   eventDetail: string;
   dayEvents: (day: string) => string;
 }
@@ -254,6 +256,13 @@ export interface EventCalendarProps<E extends CalendarEvent = CalendarEvent> ext
         request: ChangeRequest<EventCalendarEventChange<E>>,
       ) => void)
     | undefined;
+  /**
+   * Whether an event may land where it is being moved, asked with the change
+   * `onEventChange` would receive: at every step of a drag, and at every step
+   * Alt and an arrow try. A refused destination is drawn as refused, and
+   * letting go there puts the event back and asks for nothing.
+   */
+  canDrop?: ((change: EventCalendarEventChange<E>) => boolean) | undefined;
   /** Keeps an occurrence when it returns true — a search, a `filter-bar` predicate. */
   filter?: ((occurrence: EventOccurrence<E>) => boolean) | undefined;
   renderEvent?:

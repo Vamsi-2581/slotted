@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { SlMenuItem } from '@slotted/angular/menu';
 import { plainDate } from '@slotted/core/date';
+import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import type { PlainDate, PlainDateTime } from '@slotted/core/date';
 import type { ChangeRequest } from '@slotted/core/state';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -76,6 +77,14 @@ class Host {
     { id: 'later', title: 'Later', start: at(25, 9), end: at(25, 10) },
   ];
   readonly onlyOffsite = (occurrence: EventOccurrence) => occurrence.event.id === 'offsite';
+  readonly asked: EventCalendarEventChange[] = [];
+  readonly notTheNinth = (change: EventCalendarEventChange) => {
+    this.asked.push(change);
+    return (change.start as PlainDate).day !== 9;
+  };
+  readonly notTheNinthOrTenth = (change: EventCalendarEventChange) =>
+    ![9, 10].includes((change.start as PlainDate).day);
+  readonly nowhere = () => false;
   readonly notTheTwentyFifth = (target: EventCalendarContextTarget) =>
     target.kind === 'event' ||
     ('time' in target.slot.start ? target.slot.start.date : target.slot.start).day !== 25;
@@ -485,5 +494,59 @@ describe('SlEventCalendar', () => {
     expect(changes).toHaveLength(1);
     expect(changes[0]).toMatchObject({ kind: 'move', start: day(9), end: day(11) });
     expect(query(fixture, "[data-key='offsite']").hasAttribute('data-dragging')).toBe(false);
+  });
+
+  it('draws a destination canDrop refuses, and asks nothing when let go there', () => {
+    const fixture = renderTemplate(
+      `<div slEventCalendar editable [canDrop]="notTheNinth" [events]="events" [defaultDate]="eighth" timeZone="UTC" (eventChangeRequest)="onChange($event)"></div>`,
+    );
+    const { changes, asked } = fixture.componentInstance;
+    const place = (iso: string, left: number) => {
+      cell(fixture, iso).getBoundingClientRect = () =>
+        ({ left, right: left + 100, top: 0, bottom: 100, width: 100, height: 100 }) as DOMRect;
+    };
+    place('2026-09-08', 0);
+    place('2026-09-09', 100);
+    const pointer = (type: string, on: EventTarget, x: number, y: number) => {
+      on.dispatchEvent(
+        new MouseEvent(type, { bubbles: true, button: 0, clientX: x, clientY: y }) as PointerEvent,
+      );
+      fixture.detectChanges();
+    };
+    pointer('pointerdown', query(fixture, "[data-key='offsite']"), 50, 50);
+    pointer('pointermove', document, 150, 50);
+    const dragged = query(fixture, "[data-key='offsite']");
+    expect(dragged.hasAttribute('data-dragging')).toBe(true);
+    expect(dragged.hasAttribute('data-drop-invalid')).toBe(true);
+    expect(asked.at(-1)).toMatchObject({ key: 'offsite', kind: 'move', start: day(9) });
+    pointer('pointerup', document, 150, 50);
+    expect(changes).toHaveLength(0);
+    expect(query(fixture, "[data-key='offsite']").hasAttribute('data-drop-invalid')).toBe(false);
+  });
+
+  it('passes over refused destinations with Alt and the arrows', () => {
+    const fixture = renderTemplate(
+      `<div slEventCalendar editable [canDrop]="notTheNinthOrTenth" [events]="events" [defaultDate]="eighth" timeZone="UTC" (eventChangeRequest)="onChange($event)"></div>`,
+    );
+    const offsite = query(fixture, "[data-key='offsite']");
+    offsite.focus();
+    key(fixture, offsite, 'ArrowRight', { altKey: true });
+    expect(fixture.componentInstance.changes.at(-1)).toMatchObject({
+      kind: 'move',
+      start: day(11),
+      end: day(13),
+    });
+  });
+
+  it('keeps the event where it is when no destination in reach is allowed', () => {
+    const announce = vi.spyOn(getLiveAnnouncer(document), 'announce');
+    const fixture = renderTemplate(
+      `<div slEventCalendar editable [canDrop]="nowhere" [events]="events" [defaultDate]="eighth" timeZone="UTC" (eventChangeRequest)="onChange($event)"></div>`,
+    );
+    const offsite = query(fixture, "[data-key='offsite']");
+    offsite.focus();
+    key(fixture, offsite, 'ArrowRight', { altKey: true });
+    expect(fixture.componentInstance.changes).toHaveLength(0);
+    expect(announce).toHaveBeenCalledWith('Offsite cannot move there');
   });
 });

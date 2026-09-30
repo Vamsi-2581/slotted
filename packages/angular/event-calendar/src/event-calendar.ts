@@ -48,6 +48,7 @@ import {
   formatTimeRange,
   moveDate,
   movePlacement,
+  nextAllowedPlacement,
   occurrencesIn,
   occurrencesOn,
   placementOf,
@@ -835,6 +836,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
           [attr.data-editable]="view.editable ? '' : null"
           [attr.data-past]="view.past ? '' : null"
           [attr.data-dragging]="view.dragging ? '' : null"
+          [attr.data-drop-invalid]="view.dropInvalid ? '' : null"
           [attr.data-context]="view.context ? '' : null"
           [style]="view.style"
           ><ng-container *ngTemplateOutlet="eventContent; context: { $implicit: view }"
@@ -858,6 +860,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
           [attr.data-editable]="view.editable ? '' : null"
           [attr.data-past]="view.past ? '' : null"
           [attr.data-dragging]="view.dragging ? '' : null"
+          [attr.data-drop-invalid]="view.dropInvalid ? '' : null"
           [attr.data-context]="view.context ? '' : null"
           [attr.aria-expanded]="hostsDetail() || currentOpen() !== null ? view.open : null"
           [attr.aria-haspopup]="hostsDetail() ? 'dialog' : null"
@@ -992,6 +995,13 @@ export class SlEventCalendar implements OnInit {
    * event, and the application answers by changing `events`.
    */
   readonly eventChangeRequest = output<ChangeRequest<EventCalendarEventChange>>();
+  /**
+   * Whether an event may land where it is being moved, asked with the change
+   * `eventChangeRequest` would carry: at every step of a drag, and at every
+   * step Alt and an arrow try. A refused destination is drawn as refused, and
+   * letting go there puts the event back and asks for nothing.
+   */
+  readonly canDrop = input<((change: EventCalendarEventChange) => boolean) | undefined>(undefined);
   /** A fact, after the period in view changes: fetch it. */
   readonly rangeChange = output<EventCalendarRange>();
 
@@ -1155,7 +1165,11 @@ export class SlEventCalendar implements OnInit {
    * lay the proposal out like any other placement, so a moved block takes its
    * columns and pushes its neighbours as it will once the application agrees.
    */
-  private readonly editing = signal<{ key: string; placement: EventPlacement } | null>(null);
+  private readonly editing = signal<{
+    key: string;
+    placement: EventPlacement;
+    invalid: boolean;
+  } | null>(null);
   private readonly laidOut = computed(() => {
     const editing = this.editing();
     const occurrences = this.occurrences();
@@ -1192,6 +1206,7 @@ export class SlEventCalendar implements OnInit {
     row: this.row(),
     canEdit: this.canEdit(),
     draggingKey: this.editing()?.key ?? null,
+    dropInvalid: this.editing()?.invalid ?? false,
     contextKey: this.contextKey(),
   }));
 
@@ -1246,6 +1261,7 @@ export class SlEventCalendar implements OnInit {
     y: number;
     started: boolean;
     placement: EventPlacement;
+    invalid: boolean;
   } | null = null;
   /** A drag ends in a click on the event it moved; that click opens nothing. */
   private swallowClick = false;
@@ -1461,6 +1477,27 @@ export class SlEventCalendar implements OnInit {
     return accepted;
   }
 
+  /** The change the family would ask for: `canDrop` and `eventChangeRequest` read the same one. */
+  private changeFor(
+    occurrence: EventOccurrence,
+    placement: EventPlacement,
+    kind: 'move' | 'resize',
+  ): EventCalendarEventChange {
+    return {
+      key: occurrence.key,
+      event: occurrence.event,
+      occurrence: occurrence.start.date,
+      recurring: occurrence.recurring,
+      kind,
+      ...placeOccurrence(placement),
+    } as EventCalendarEventChange;
+  }
+
+  private allows(occurrence: EventOccurrence, placement: EventPlacement, kind: 'move' | 'resize') {
+    const canDrop = this.canDrop();
+    return canDrop === undefined || canDrop(this.changeFor(occurrence, placement, kind));
+  }
+
   /** Asks the application to put an occurrence somewhere else; the family holds no event. */
   requestEventChange(
     occurrence: EventOccurrence,
@@ -1469,15 +1506,7 @@ export class SlEventCalendar implements OnInit {
     reason: ChangeReason,
     source?: unknown,
   ): boolean {
-    const change = (value: EventPlacement) =>
-      ({
-        key: occurrence.key,
-        event: occurrence.event,
-        occurrence: occurrence.start.date,
-        recurring: occurrence.recurring,
-        kind,
-        ...placeOccurrence(value),
-      }) as EventCalendarEventChange;
+    const change = (value: EventPlacement) => this.changeFor(occurrence, value, kind);
     const accepted = ask(
       change(placementOf(occurrence)),
       change(placement),
@@ -1786,6 +1815,7 @@ export class SlEventCalendar implements OnInit {
       y: event.clientY,
       started: false,
       placement: placementOf(occurrence),
+      invalid: false,
     };
     const hourSize = () =>
       Math.max(1, cell.getBoundingClientRect().height / Math.max(1, endHour - startHour));
@@ -1807,7 +1837,12 @@ export class SlEventCalendar implements OnInit {
         state.kind === 'move'
           ? movePlacement(placementOf(state.occurrence), shift)
           : resizePlacement(placementOf(state.occurrence), shift, slot);
-      this.editing.set({ key: state.occurrence.key, placement: state.placement });
+      state.invalid = !this.allows(state.occurrence, state.placement, state.kind);
+      this.editing.set({
+        key: state.occurrence.key,
+        placement: state.placement,
+        invalid: state.invalid,
+      });
     };
     const finish = (ended: Event, commit: boolean) => {
       const state = this.edit;
@@ -1818,7 +1853,8 @@ export class SlEventCalendar implements OnInit {
       this.editing.set(null);
       if (state === null || !state.started) return;
       this.swallowClick = true;
-      if (commit) {
+      /* Let go over a refused destination: the event goes back, and nothing is asked. */
+      if (commit && !state.invalid) {
         this.requestEventChange(state.occurrence, state.placement, state.kind, 'pointer', ended);
       }
     };
@@ -1919,10 +1955,17 @@ export class SlEventCalendar implements OnInit {
         : { days: row === 'day' ? step * 7 : 0, minutes: 0 };
     if (shift.days === 0 && shift.minutes === 0) return;
     const kind = event.shiftKey ? 'resize' : 'move';
-    const placement =
-      kind === 'move'
-        ? movePlacement(placementOf(occurrence), shift)
-        : resizePlacement(placementOf(occurrence), shift, slot);
+    /* A refused destination is passed over for the next one allowed; with
+       none in reach the event stays, and the reader is told why. */
+    const placement = nextAllowedPlacement(placementOf(occurrence), shift, kind, {
+      slot,
+      hours: this.hoursValue(),
+      allowed: (candidate) => this.allows(occurrence, candidate, kind),
+    });
+    if (placement === null) {
+      getLiveAnnouncer().announce(this.words().dropInvalid(occurrence.event.title));
+      return;
+    }
     if (!this.requestEventChange(occurrence, placement, kind, 'keyboard', event)) return;
     /* Focus stays on the event where it lands, once the application has moved it. */
     afterNextRender(() => this.eventElement(occurrence.key)?.focus(), {

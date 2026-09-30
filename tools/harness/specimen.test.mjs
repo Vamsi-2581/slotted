@@ -24,6 +24,17 @@ test('a family page is read at a stage width the harness draws', () => {
   assert.equal(parseSpecimenArguments(['--family', 'badge']).width, '420');
 });
 
+test('a family page is also read at a width one of its scenes declares', () => {
+  assert.equal(
+    parseSpecimenArguments(['--family', 'event-calendar', '--width', '1024']).width,
+    '1024',
+  );
+  assert.throws(
+    () => parseSpecimenArguments(['--family', 'badge', '--width', '1024']),
+    /240, 420, 720/,
+  );
+});
+
 test('a reference is an http page, read at 1280 pixels unless told otherwise', () => {
   assert.throws(() => parseSpecimenArguments(['--url', 'file:///tmp/x.html']), /http/);
   const options = parseSpecimenArguments(['--url', 'https://reui.io/preview/base/list-6']);

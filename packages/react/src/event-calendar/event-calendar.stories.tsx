@@ -1,4 +1,4 @@
-import { plainDate, toISODate, wallClockIn } from '@slotted/core/date';
+import { dayOfWeek, plainDate, toISODate, wallClockIn } from '@slotted/core/date';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -129,7 +129,7 @@ function PlaygroundCalendar() {
 function EditingCalendar({ view }: { view: 'week' | 'month' }) {
   const [events, setEvents] = useState<StudioEvent[]>(STUDIO_EVENTS);
   const [log, setLog] = useState(
-    'Drag an event, pull its end, or focus it and press Alt with the arrows.',
+    'Drag an event, pull its end, or focus it and press Alt with the arrows. The studio is closed at weekends.',
   );
   return (
     <>
@@ -137,6 +137,9 @@ function EditingCalendar({ view }: { view: 'week' | 'month' }) {
         {...STUDIO}
         defaultView={view}
         editable={(occurrence) => occurrence.event.status !== 'cancelled'}
+        canDrop={(change) =>
+          dayOfWeek('date' in change.start ? change.start.date : change.start) % 6 !== 0
+        }
         events={events}
         workingHours={STUDIO_HOURS}
         onEventChange={(change, request) => {

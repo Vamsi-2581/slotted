@@ -9,6 +9,7 @@ import {
   formatHour,
   formatTimeRange,
   movePlacement,
+  nextAllowedPlacement,
   placeOccurrence,
   placementOf,
   resizePlacement,
@@ -588,6 +589,61 @@ describe('editing', () => {
       '2026-09-23T09:00:00',
     ]);
     expect(withPlacement(list, 'nothing', placementOf(timed))).toBe(list);
+  });
+
+  describe('nextAllowedPlacement', () => {
+    const hours = [0, 24] as const;
+    const startsAt = (placement: { start: PlainDateTime }) => toISODateTime(placement.start);
+
+    it('takes the first step when the destination is allowed', () => {
+      const next = nextAllowedPlacement(placementOf(timed), { days: 0, minutes: 30 }, 'move', {
+        slot: 30,
+        hours,
+        allowed: () => true,
+      });
+      expect(next && startsAt(next)).toBe('2026-09-23T13:30:00');
+    });
+
+    it('passes over refused destinations to the next allowed one, one step at a time', () => {
+      const refused = new Set(['2026-09-23T13:30:00', '2026-09-23T14:00:00']);
+      const next = nextAllowedPlacement(placementOf(timed), { days: 0, minutes: 30 }, 'move', {
+        slot: 30,
+        hours,
+        allowed: (placement) => !refused.has(startsAt(placement)),
+      });
+      expect(next && startsAt(next)).toBe('2026-09-23T14:30:00');
+    });
+
+    it('resizes past a refused end the same way', () => {
+      const next = nextAllowedPlacement(placementOf(timed), { days: 0, minutes: 30 }, 'resize', {
+        slot: 30,
+        hours,
+        allowed: (placement) => toISODateTime(placement.end) !== '2026-09-23T15:00:00',
+      });
+      expect(next && toISODateTime(next.end)).toBe('2026-09-23T15:30:00');
+    });
+
+    it('gives up after the visible hours, or six weeks of days, and answers null', () => {
+      let asked = 0;
+      const never = () => {
+        asked += 1;
+        return false;
+      };
+      const byMinutes = { slot: 30, hours: [8, 18] as const, allowed: never };
+      expect(
+        nextAllowedPlacement(placementOf(timed), { days: 0, minutes: 30 }, 'move', byMinutes),
+      ).toBeNull();
+      expect(asked).toBe(20);
+      asked = 0;
+      expect(
+        nextAllowedPlacement(placementOf(allDay), { days: 7, minutes: 0 }, 'move', {
+          slot: 30,
+          hours,
+          allowed: never,
+        }),
+      ).toBeNull();
+      expect(asked).toBe(6);
+    });
   });
 });
 

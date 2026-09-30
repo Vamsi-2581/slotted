@@ -71,6 +71,8 @@ export interface DrawingInput {
   readonly row: 'header' | 'all-day' | 'timed';
   readonly canEdit: (occurrence: EventOccurrence) => boolean;
   readonly draggingKey: string | null;
+  /** Whether `canDrop` refuses where the dragged occurrence would land. */
+  readonly dropInvalid: boolean;
   /** The event a context menu is open on. */
   readonly contextKey: string | null;
 }
@@ -93,11 +95,13 @@ export interface EventView {
   readonly clippedStart: boolean;
   readonly clippedEnd: boolean;
   readonly short: boolean;
-  /** Moves and resizes: `editable` said so and it is drawn in the grid, not a list. */
   /** It ended before now: drawn a step back. */
   readonly past: boolean;
+  /** Moves and resizes: `editable` said so and it is drawn in the grid, not a list. */
   readonly editable: boolean;
   readonly dragging: boolean;
+  /** Being dragged over a destination `canDrop` refuses. */
+  readonly dropInvalid: boolean;
   readonly context: boolean;
   /** The end an edit can pull, only where the event ends in this drawing. */
   readonly resizable: boolean;
@@ -201,6 +205,7 @@ export function eventView(
     past: input.now !== null && compareDateTime(occurrence.end, input.now) <= 0,
     editable,
     dragging: input.draggingKey === occurrence.key,
+    dropInvalid: input.draggingKey === occurrence.key && input.dropInvalid,
     context: input.contextKey === occurrence.key,
     resizable,
     time,

@@ -29,8 +29,17 @@
       --slotted-event-calendar-hour-size,
       calc(var(--slotted-control-height-sm, 30px) * 2)
     );
-    /** An event line is the inside of a small control; lanes are that far apart plus the air. */
-    --_event-size: var(--slotted-control-inner-size-sm, 22px);
+    /**
+     * An event line is the inside of a small control; lanes are that far
+     * apart plus the air. It never goes below the minimum target less the
+     * air, so two lanes stand at least a minimum target apart: at `dense`
+     * the inside of a small control is 16, a pitch of 20, and the 12-pixel
+     * type filled the line to its edges.
+     */
+    --_event-size: max(
+      var(--slotted-control-inner-size-sm, 22px),
+      calc(var(--slotted-target-min, 24px) - var(--_air))
+    );
     --_event-font-size: var(--slotted-control-font-size-sm, 12px);
     --_event-radius: var(--slotted-event-calendar-event-radius, var(--slotted-radius-sm, 4px));
     /**
@@ -64,6 +73,14 @@
     /** The gutter holds the longest hour label of a 12-hour locale, "12 PM". */
     --_gutter: calc(var(--slotted-space-11, 3rem) + var(--slotted-space-4, 0.5rem));
     --_gap: var(--slotted-control-gap-md, 8px);
+    /**
+     * The line box of the two small texts, rounded to a whole pixel against
+     * the element's own size. 1.4 × 12 is 16.8 and 1.45 × 13 is 18.85: a
+     * weekday header, a column header and a list day stack those lines under
+     * a rule, and every rule below them landed on a fraction of a pixel.
+     */
+    --_line-xs: round(nearest, calc(1em * var(--slotted-line-height-xs, 1.4)), 1px);
+    --_line-sm: round(nearest, calc(1em * var(--slotted-line-height-sm, 1.45)), 1px);
 
     background-color: var(--slotted-event-calendar-background, var(--slotted-surface, #ffffff));
     box-sizing: border-box;
@@ -204,6 +221,7 @@
   [data-ui='event-calendar'] [data-part='next']:active:not([data-disabled]),
   [data-ui='event-calendar'] [data-part='filter'][aria-expanded='true'] {
     background-color: var(--slotted-tone-secondary-subtle-active, #e2e8f0);
+    transition-duration: var(--slotted-duration-instant);
   }
 
   /**
@@ -352,7 +370,7 @@
     color: var(--slotted-text-muted, #5b6b7f);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     font-weight: var(--slotted-font-weight-medium, 500);
-    line-height: var(--slotted-line-height-xs, 1.4);
+    line-height: var(--_line-xs);
     overflow: hidden;
     padding-block: var(--slotted-space-3, 0.375rem);
     padding-inline: var(--slotted-space-3, 0.375rem);
@@ -466,7 +484,7 @@
   [data-ui='event-calendar'] [data-part='day-content'] {
     color: var(--slotted-text-muted, #5b6b7f);
     font-size: var(--slotted-font-size-xs, 0.75rem);
-    line-height: var(--slotted-line-height-xs, 1.4);
+    line-height: var(--_line-xs);
     min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -503,6 +521,11 @@
 
   [data-ui='event-calendar'] [data-part='day-number']:hover:not([data-disabled]) {
     background-color: var(--slotted-tone-secondary-subtle-hover, #eef1f5);
+  }
+
+  [data-ui='event-calendar'] [data-part='day-number']:active:not([data-disabled]) {
+    background-color: var(--slotted-tone-secondary-subtle-active, #e2e8f0);
+    transition-duration: var(--slotted-duration-instant);
   }
 
   [data-ui='event-calendar'] [data-part='day'][data-outside-month] [data-part='day-number'] {
@@ -574,7 +597,7 @@
     font: inherit;
     font-size: var(--_event-font-size);
     gap: var(--slotted-space-2, 0.25rem);
-    line-height: var(--slotted-line-height-xs, 1.4);
+    line-height: var(--_line-xs);
     margin: 0;
     min-inline-size: 0;
     overflow: hidden;
@@ -707,6 +730,13 @@
 
   [data-ui='event-calendar']
     [data-part='day-events']
+    > [data-part='event']:not([data-bar]):active:not([data-disabled], [data-open]) {
+    background-color: var(--slotted-tone-secondary-subtle-active, #e2e8f0);
+    transition-duration: var(--slotted-duration-instant);
+  }
+
+  [data-ui='event-calendar']
+    [data-part='day-events']
     > [data-part='event']:not([data-bar])[data-open] {
     background-color: light-dark(
       color-mix(in oklab, var(--_hue) var(--_tint), var(--slotted-surface, #ffffff)),
@@ -787,6 +817,8 @@
       color-mix(in oklab, var(--_hue) var(--_tint-active), var(--slotted-surface, #ffffff)),
       color-mix(in oklab, var(--_hue) var(--_tint-active-dark), var(--slotted-surface, #ffffff))
     );
+
+    transition-duration: var(--slotted-duration-instant);
   }
 
   /**
@@ -808,12 +840,47 @@
     border-color: var(--_ground);
   }
 
+  /**
+   * A destination `canDrop` refuses: the event in hand leaves the solid slot
+   * for its resting tint inside the danger edge, dashed — the outline of an
+   * event that will not land there — and the pointer says it cannot drop.
+   * Letting go puts it back where it was.
+   */
+  [data-ui='event-calendar'] [data-part='event'][data-bar][data-dragging][data-drop-invalid],
+  [data-ui='event-calendar']
+    [data-part='column']
+    > [data-part='event'][data-dragging][data-drop-invalid] {
+    --_ground: light-dark(
+      color-mix(in oklab, var(--_hue) var(--_tint), var(--slotted-surface, #ffffff)),
+      color-mix(in oklab, var(--_hue) var(--_tint-dark), var(--slotted-surface, #ffffff))
+    );
+    --_ink: color-mix(in oklab, var(--_hue) var(--_ink-mix), var(--slotted-text, #0f172a));
+
+    border-color: var(--slotted-tone-danger-border, #dc2626);
+    border-style: dashed;
+  }
+
+  [data-ui='event-calendar']:has([data-part='event'][data-drop-invalid]),
+  [data-ui='event-calendar']:has([data-part='event'][data-drop-invalid]) * {
+    cursor: not-allowed;
+  }
+
   /* The solid slot answers the pointer by darkening, never by going back to the tint. */
   [data-ui='event-calendar'] [data-part='event'][data-bar][data-open]:hover:not([data-disabled]),
   [data-ui='event-calendar']
     [data-part='column']
     > [data-part='event'][data-open]:hover:not([data-disabled]) {
     --_ground: color-mix(in oklab, var(--_hue) 70%, #000000);
+  }
+
+  /* And the press one step further down the same line: 80, 70, 60. */
+  [data-ui='event-calendar'] [data-part='event'][data-bar][data-open]:active:not([data-disabled]),
+  [data-ui='event-calendar']
+    [data-part='column']
+    > [data-part='event'][data-open]:active:not([data-disabled]) {
+    --_ground: color-mix(in oklab, var(--_hue) 60%, #000000);
+
+    transition-duration: var(--slotted-duration-instant);
   }
 
   /**
@@ -1021,8 +1088,8 @@
     content: '';
     inline-size: var(--slotted-space-6, 1rem);
     opacity: 0;
-    transition: opacity var(--slotted-control-transition-duration)
-      var(--slotted-control-transition-easing);
+    /* The grip leaves on the exit curve and arrives, below, on the enter one. */
+    transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
   [data-ui='event-calendar'] [data-part='event'][data-bar] > [data-part='resize-handle']::before {
@@ -1040,6 +1107,7 @@
     [data-part='event'][data-dragging]
     > [data-part='resize-handle']::before {
     opacity: 1;
+    transition-timing-function: var(--slotted-easing-enter);
   }
 
   /** "+N": a quiet line under the lanes, or a block in the last column. */
@@ -1063,6 +1131,12 @@
     overflow: hidden;
     padding-block: 0;
     padding-inline: var(--slotted-space-2, 0.25rem);
+    transition:
+      background-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      border-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
     white-space: nowrap;
   }
 
@@ -1070,6 +1144,11 @@
   [data-ui='event-calendar'] [data-part='more'][aria-expanded='true'] {
     background-color: var(--slotted-tone-secondary-subtle-hover, #eef1f5);
     color: var(--slotted-text, #0f172a);
+  }
+
+  [data-ui='event-calendar'] [data-part='more']:active:not([data-disabled]) {
+    background-color: var(--slotted-tone-secondary-subtle-active, #e2e8f0);
+    transition-duration: var(--slotted-duration-instant);
   }
 
   /**
@@ -1169,7 +1248,7 @@
     color: var(--slotted-text-muted, #5b6b7f);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     font-variant-numeric: tabular-nums;
-    line-height: var(--slotted-line-height-xs, 1.4);
+    line-height: var(--_line-xs);
     overflow: hidden;
     padding-block: var(--slotted-space-3, 0.375rem);
     padding-inline: var(--slotted-space-2, 0.25rem) var(--slotted-space-3, 0.375rem);
@@ -1215,7 +1294,7 @@
   [data-ui='event-calendar'] [data-part='offset-change'] {
     color: var(--slotted-text-muted, #5b6b7f);
     font-size: var(--slotted-font-size-xs, 0.75rem);
-    line-height: var(--slotted-line-height-xs, 1.4);
+    line-height: var(--_line-xs);
     max-inline-size: 100%;
     overflow: hidden;
     text-align: center;
@@ -1229,7 +1308,7 @@
     color: var(--slotted-text-muted, #5b6b7f);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     hyphens: auto;
-    line-height: var(--slotted-line-height-xs, 1.4);
+    line-height: var(--_line-xs);
     overflow-wrap: break-word;
     padding-block: calc(var(--_air) + (var(--_event-size) - 1lh) / 2);
     padding-inline: var(--slotted-space-2, 0.25rem) var(--slotted-space-3, 0.375rem);
@@ -1271,12 +1350,12 @@
     flex: 0 0 auto;
     font-size: var(--slotted-font-size-xs, 0.75rem);
     font-variant-numeric: tabular-nums;
-    line-height: var(--slotted-line-height-xs, 1.4);
+    line-height: var(--_line-xs);
     overflow: hidden;
     padding-inline-end: var(--slotted-space-3, 0.375rem);
     text-align: end;
     text-overflow: ellipsis;
-    translate: 0 calc(var(--slotted-line-height-xs, 1.4) * -0.5em);
+    translate: 0 calc(var(--_line-xs) / -2);
     white-space: nowrap;
   }
 
@@ -1441,7 +1520,10 @@
   }
 
   /* A step of muted ink over the page, not the sunken surface: in the dark
-     scheme that surface lies below the page, and the "+N" read as a hole. */
+     scheme that surface lies below the page, and the "+N" read as a hole.
+     Hover and press take six more points of the same ink each, 9, 15 and
+     21: the surface's own hover landed within a hundredth of the rest in
+     every scheme, lighter than the chip in the light one. */
   [data-ui='event-calendar'] [data-part='column'] > [data-part='more'] {
     align-items: start;
     container: slotted-event-calendar-event / inline-size;
@@ -1457,6 +1539,23 @@
     );
     padding-block: var(--slotted-space-1, 0.125rem);
     z-index: 1;
+  }
+
+  [data-ui='event-calendar'] [data-part='column'] > [data-part='more']:hover:not([data-disabled]),
+  [data-ui='event-calendar'] [data-part='column'] > [data-part='more'][aria-expanded='true'] {
+    background-color: color-mix(
+      in oklab,
+      var(--slotted-text-muted, #5b6b7f) 15%,
+      var(--slotted-surface, #ffffff)
+    );
+  }
+
+  [data-ui='event-calendar'] [data-part='column'] > [data-part='more']:active:not([data-disabled]) {
+    background-color: color-mix(
+      in oklab,
+      var(--slotted-text-muted, #5b6b7f) 21%,
+      var(--slotted-surface, #ffffff)
+    );
   }
 
   /**
@@ -1481,7 +1580,7 @@
         var(--_air)
     );
     inset-inline: auto var(--slotted-space-4, 0.5rem);
-    line-height: var(--slotted-line-height-xs, 1.4);
+    line-height: var(--_line-xs);
     translate: 0 -100%;
     padding-block: 0;
     padding-inline: var(--slotted-space-3, 0.375rem);
@@ -1509,7 +1608,7 @@
     font-weight: var(--slotted-font-weight-medium, 500);
     inline-size: calc(var(--_room) - var(--_air));
     inset-inline-start: var(--_air);
-    line-height: var(--slotted-line-height-xs, 1.4);
+    line-height: var(--_line-xs);
     overflow: hidden;
     padding-block: var(--slotted-space-1, 0.125rem);
     padding-inline: var(--slotted-space-3, 0.375rem);
@@ -1609,13 +1708,13 @@
     color: var(--slotted-text-muted, #5b6b7f);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     font-weight: var(--slotted-font-weight-medium, 500);
-    line-height: var(--slotted-line-height-xs, 1.4);
+    line-height: var(--_line-xs);
   }
 
   [data-ui='event-calendar'] [data-part='list-date'] {
     font-size: var(--slotted-font-size-sm, 0.8125rem);
     font-weight: var(--slotted-font-weight-semibold, 600);
-    line-height: var(--slotted-line-height-sm, 1.45);
+    line-height: var(--_line-sm);
   }
 
   [data-ui='event-calendar'] [data-part='list-day'][data-today] [data-part='list-day-heading'],
@@ -1645,7 +1744,7 @@
     /* Wide enough for "11:00 AM – 12:00 PM" on one line at the list's size. */
     grid-template-columns: calc(var(--slotted-space-12, 4rem) * 2.5) auto minmax(0, 1fr);
     inline-size: 100%;
-    line-height: var(--slotted-line-height-sm, 1.45);
+    line-height: var(--_line-sm);
     min-block-size: var(--slotted-control-height-md, 34px);
     padding-block: var(--slotted-space-3, 0.375rem);
     padding-inline: var(--slotted-space-3, 0.375rem);
@@ -1675,6 +1774,7 @@
   [data-ui='event-calendar'] [data-part='list-events'] [data-part='event-location'] {
     font-size: var(--slotted-font-size-xs, 0.75rem);
     grid-column: 3;
+    line-height: var(--_line-xs);
     grid-row: 2;
     overflow-wrap: break-word;
     white-space: normal;
@@ -1684,6 +1784,13 @@
     [data-part='list-events']
     [data-part='event']:hover:not([data-disabled]) {
     background-color: var(--slotted-tone-secondary-subtle-hover, #eef1f5);
+  }
+
+  [data-ui='event-calendar']
+    [data-part='list-events']
+    [data-part='event']:active:not([data-disabled], [data-open], [data-context]) {
+    background-color: var(--slotted-tone-secondary-subtle-active, #e2e8f0);
+    transition-duration: var(--slotted-duration-instant);
   }
 
   [data-ui='event-calendar'] [data-part='list-events'] [data-part='event'][data-open],
@@ -1746,6 +1853,7 @@
     font-size: var(--slotted-font-size-xs, 0.75rem);
     grid-column: 2;
     grid-row: 2;
+    line-height: var(--_line-xs);
   }
 
   [data-ui='event-calendar']
@@ -1841,6 +1949,7 @@
       font-size: var(--slotted-font-size-xs, 0.75rem);
       grid-column: 2;
       grid-row: 2;
+      line-height: var(--_line-xs);
     }
 
     [data-ui='event-calendar'] [data-part='list-events'] [data-part='event-location'] {
@@ -1934,7 +2043,7 @@
     [data-ui='event-calendar'] [data-part='month'] [data-part='more'] {
       block-size: auto;
       font-size: var(--slotted-font-size-xs, 0.75rem);
-      line-height: var(--slotted-line-height-xs, 1.4);
+      line-height: var(--_line-xs);
       padding: 0;
       pointer-events: none;
     }
@@ -2021,6 +2130,23 @@
     [data-ui='event-calendar'] [data-part='event'][data-bar],
     [data-ui='event-calendar'] [data-part='column'] > [data-part='event'] {
       border-color: currentcolor;
+    }
+
+    /* A timed line of the month and a row of the list have no edge: the
+       transparent one they keep for geometry would be painted in the text
+       colour, and the line would read as a bar. */
+    [data-ui='event-calendar'] [data-part='day-events'] > [data-part='event']:not([data-bar]),
+    [data-ui='event-calendar'] [data-part='list-events'] [data-part='event'] {
+      border-color: Canvas;
+    }
+
+    /* Today is the one filled mark: the system's own highlight pair, kept
+       whole, where the replaced palette left a ring round an empty square. */
+    [data-ui='event-calendar'] [data-today] > [data-part='day-header'] [data-part='day-number'],
+    [data-ui='event-calendar'] [data-part='column-header'][data-today] [data-part='day-number'] {
+      background-color: Highlight;
+      color: HighlightText;
+      forced-color-adjust: none;
     }
   }
 }

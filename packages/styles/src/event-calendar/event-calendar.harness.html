@@ -2213,6 +2213,28 @@
                 aria-hidden="true"
                 style="--slotted-event-start: 0; --slotted-event-length: 600"
               ></div>
+              <!-- canDrop refuses the weekend: the event in hand, over Saturday. -->
+              <button
+                type="button"
+                data-part="event"
+                tabindex="-1"
+                data-color="5"
+                data-editable=""
+                data-dragging=""
+                data-drop-invalid=""
+                style="
+                  --slotted-event-start: 300;
+                  --slotted-event-length: 90;
+                  --slotted-event-column: 0;
+                  --slotted-event-columns: 1;
+                  --slotted-event-span: 1;
+                "
+              >
+                <span data-part="event-time">1:00 – 2:30 PM</span
+                ><span data-part="event-title">Design critique</span
+                ><span data-part="event-meta">, 1:00 – 2:30 PM, Design</span
+                ><span aria-hidden="true" data-part="resize-handle"></span>
+              </button>
             </div>
             <div data-part="column" role="gridcell" tabindex="-1">
               <div

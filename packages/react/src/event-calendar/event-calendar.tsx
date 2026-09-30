@@ -26,6 +26,7 @@ import {
   formatTimeRange,
   moveDate,
   movePlacement,
+  nextAllowedPlacement,
   placeOccurrence,
   placementOf,
   resizePlacement,
@@ -278,6 +279,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
   maxEvents,
   onDateChange,
   onEventChange,
+  canDrop,
   onOpenEventChange,
   onRangeChange,
   onSelectionChange,
@@ -494,7 +496,11 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
    * lay the proposal out like any other placement, so a moved block takes its
    * columns and pushes its neighbours as it will once the application agrees.
    */
-  const [editing, setEditing] = useState<{ key: string; placement: EventPlacement } | null>(null);
+  const [editing, setEditing] = useState<{
+    key: string;
+    placement: EventPlacement;
+    invalid: boolean;
+  } | null>(null);
   const laidOut = useMemo(
     () =>
       editing === null ? occurrences : withPlacement(occurrences, editing.key, editing.placement),
@@ -511,6 +517,29 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
       ?.focus();
   });
 
+  /** The change the family would ask for: `canDrop` and `onEventChange` read the same one. */
+  const changeFor = useCallback(
+    (
+      occurrence: EventOccurrence,
+      placement: EventPlacement,
+      kind: 'move' | 'resize',
+    ): EventCalendarEventChange<E> => ({
+      key: occurrence.key,
+      event: occurrence.event as E,
+      occurrence: occurrence.start.date,
+      recurring: occurrence.recurring,
+      kind,
+      ...placeOccurrence(placement),
+    }),
+    [],
+  );
+
+  const allows = useCallback(
+    (occurrence: EventOccurrence, placement: EventPlacement, kind: 'move' | 'resize') =>
+      canDrop === undefined || canDrop(changeFor(occurrence, placement, kind)),
+    [canDrop, changeFor],
+  );
+
   /** Asks the application to put an occurrence somewhere else; the family holds no event. */
   const requestEventChange = useCallback(
     (
@@ -520,14 +549,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
       reason: ChangeReason,
       source: unknown,
     ) => {
-      const change = (value: EventPlacement): EventCalendarEventChange<E> => ({
-        key: occurrence.key,
-        event: occurrence.event as E,
-        occurrence: occurrence.start.date,
-        recurring: occurrence.recurring,
-        kind,
-        ...placeOccurrence(value),
-      });
+      const change = (value: EventPlacement) => changeFor(occurrence, value, kind);
       const same = (a: EventCalendarEventChange<E>, b: EventCalendarEventChange<E>) =>
         JSON.stringify([a.start, a.end]) === JSON.stringify([b.start, b.end]);
       const accepted = ask(
@@ -548,7 +570,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
       }
       return accepted;
     },
-    [onEventChange, resolvedCycle, resolvedLocale],
+    [changeFor, onEventChange, resolvedCycle, resolvedLocale],
   );
 
   const title = viewTitle(currentView, range, currentDate, {
@@ -696,6 +718,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
     y: number;
     started: boolean;
     placement: EventPlacement;
+    invalid: boolean;
   } | null>(null);
   const swallowClick = useRef(false);
 
@@ -721,6 +744,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
       y: event.clientY,
       started: false,
       placement: placementOf(occurrence),
+      invalid: false,
     };
     const hourSize = () =>
       Math.max(1, cell.getBoundingClientRect().height / Math.max(1, endHour - startHour));
@@ -742,7 +766,12 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
         state.kind === 'move'
           ? movePlacement(placementOf(state.occurrence), shift)
           : resizePlacement(placementOf(state.occurrence), shift, resolvedSlot);
-      setEditing({ key: state.occurrence.key, placement: state.placement });
+      state.invalid = !allows(state.occurrence, state.placement, state.kind);
+      setEditing({
+        key: state.occurrence.key,
+        placement: state.placement,
+        invalid: state.invalid,
+      });
     };
     const finish = (ended: Event, commit: boolean) => {
       const state = edit.current;
@@ -753,7 +782,8 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
       setEditing(null);
       if (state === null || !state.started) return;
       swallowClick.current = true;
-      if (commit)
+      /* Let go over a refused destination: the event goes back, and nothing is asked. */
+      if (commit && !state.invalid)
         requestEventChange(state.occurrence, state.placement, state.kind, 'pointer', ended);
     };
     const up = (ended: PointerEvent) => finish(ended, true);
@@ -907,10 +937,17 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
             : { days: cellRow === 'day' ? step * 7 : 0, minutes: 0 };
         if (shift.days === 0 && shift.minutes === 0) return;
         const kind = event.shiftKey ? 'resize' : 'move';
-        const placement =
-          kind === 'move'
-            ? movePlacement(placementOf(occurrence), shift)
-            : resizePlacement(placementOf(occurrence), shift, resolvedSlot);
+        /* A refused destination is passed over for the next one allowed; with
+           none in reach the event stays, and the reader is told why. */
+        const placement = nextAllowedPlacement(placementOf(occurrence), shift, kind, {
+          slot: resolvedSlot,
+          hours: resolvedHours,
+          allowed: (candidate) => allows(occurrence, candidate, kind),
+        });
+        if (placement === null) {
+          getLiveAnnouncer().announce(words.dropInvalid(occurrence.event.title));
+          return;
+        }
         pendingEventFocus.current = occurrence.key;
         requestEventChange(occurrence, placement, kind, 'keyboard', event);
         return;
@@ -1164,6 +1201,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
     renderEvent: renderEvent as EventCalendarModel['renderEvent'],
     canEdit,
     draggingKey: editing?.key ?? null,
+    dropInvalid: editing?.invalid ?? false,
     contextKey: context?.target.kind === 'event' ? context.target.occurrence.key : null,
     renderDayContent,
     activate(occurrence, element, reason, event) {

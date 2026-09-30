@@ -69,3 +69,7 @@ e de evento por toque, alvo da célula no mês estreito) e ecrã de 400% de zoom
 vence a regra `[hidden]`, e uma barra linear com `hidden` continua pintada. Esta
 família monta o indicador só durante a espera; a correção pertence a
 `packages/styles/src/progress-indicator/`.
+
+## 5. Reabertura ReUI de 2026-09-29
+
+Os doze critérios do craft bar, com os números antes e depois, estão em `2026-09-29-event-calendar-reui-dossier.md` § 7 e na recaptura do § 8. A capacidade `canDrop` entrou pelo portão desse dossiê; o toque real sobre um destino recusado junta-se aos casos do § 3.

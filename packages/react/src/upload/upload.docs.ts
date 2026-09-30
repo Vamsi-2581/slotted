@@ -573,13 +573,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'defaults',
     title: 'Deciding once for the whole application',
-    note: 'Where files go, how many run at once, what every control is called and what a refusal says — set once at the root rather than repeated on every form, which is how one of them ends up pointing somewhere else. An upload that states any of them itself still wins.',
+    note: 'Where files go, how many run at once, what every control is called, what a refusal says and how the queue counts itself — set once at the root rather than repeated on every form, which is how one of them ends up pointing somewhere else. An upload that states any of them itself still wins.',
     snippet: defineSnippet({
       id: 'upload-react-defaults',
       language: 'tsx',
-      label: 'Every label, and the sentence a refusal carries',
+      label: 'Every label, the sentence a refusal carries, and the counts',
       source:
-        "<UploadDefaultsProvider\n  adapter={adapter}\n  concurrency={3}\n  describeRejection={(file, { bytes }) =>\n    file.reason === 'size'\n      ? `Máximo de ${bytes(10 * 1024 * 1024)} por ficheiro.`\n      : 'Ficheiro recusado.'\n  }\n  labels={{ trigger: 'Escolher ficheiros', dropzone: 'Largue os ficheiros aqui' }}\n  locale=\"pt-BR\"\n>\n  <App />\n</UploadDefaultsProvider>;",
+        "<UploadDefaultsProvider\n  adapter={adapter}\n  concurrency={3}\n  describeRejection={(file, { bytes }) =>\n    file.reason === 'size'\n      ? `Máximo de ${bytes(10 * 1024 * 1024)} por ficheiro.`\n      : 'Ficheiro recusado.'\n  }\n  describeQueue={(message) =>\n    message.kind === 'summary'\n      ? `${message.uploaded} de ${message.total} enviados`\n      : message.kind === 'finished'\n        ? `${message.uploaded} de ${message.total} ficheiros enviados`\n        : `${message.count} ficheiros`\n  }\n  labels={{ trigger: 'Escolher ficheiros', dropzone: 'Largue os ficheiros aqui' }}\n  locale=\"pt-BR\"\n>\n  <App />\n</UploadDefaultsProvider>;",
     }),
   },
   {
@@ -887,6 +887,13 @@ export const REACT_UPLOAD_DOCS = {
         'the English default',
         'Upload',
         'The sentence a refused file carries',
+      ],
+      [
+        'describeQueue',
+        '(message, formatters) => string',
+        'the English default',
+        'Upload',
+        'Every sentence about the queue as a whole: the summary line, the count the field shape shows, and the announcements that files arrived and that the queue finished',
       ],
       [
         'render',

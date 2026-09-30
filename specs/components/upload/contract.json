@@ -508,8 +508,20 @@
       "locale",
       "fileKey",
       "describeRejection",
+      "describeQueue",
       "labels"
     ]
+  },
+  "queueMessage": {
+    "owner": "describeQueue",
+    "kinds": ["summary", "selection", "added", "finished"],
+    "reason": "Every sentence about the queue as a whole — the summary line, the count the field shape shows, the announcement that files arrived and the announcement that the queue finished — is one function on the defaults provider, beside describeRejection. They carry numbers, so they cannot be labels; they are four sentences of one subject, so they are one function with a kind rather than four props. They were English written into both bindings, against labels.reason, and a translated application still said \"2 of 3 uploaded\"."
+  },
+  "dataAttributes": {
+    "data-browsable": "on the dropzone while clickToBrowse is on and the family accepts files, which is when a click anywhere in the region opens the picker",
+    "data-status": "on an item, its status",
+    "data-kind": "on a preview, the file kind",
+    "data-extension": "on a preview, the extension in capitals, which the grid layout prints on a tile without a picture"
   },
   "stateAttributes": {
     "disabled": "data-disabled",

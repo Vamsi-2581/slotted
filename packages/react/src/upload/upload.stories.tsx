@@ -579,6 +579,13 @@ export const Defaults: Story = {
             ? `Este ficheiro tem ${bytes(file.size)} e o limite é ${bytes(2 * 1024 * 1024)}.`
             : 'Ficheiro recusado.'
         }
+        describeQueue={(message) =>
+          message.kind === 'summary'
+            ? `${message.uploaded} de ${message.total} enviados`
+            : message.kind === 'finished'
+              ? `${message.uploaded} de ${message.total} ficheiros enviados`
+              : `${message.count} ficheiros`
+        }
         labels={{
           clear: 'Remover todos',
           dropzone: 'Largue os ficheiros aqui',

@@ -33,6 +33,9 @@
   "--slotted-disabled-background",
   "--slotted-disabled-border",
   "--slotted-disabled-foreground",
+  "--slotted-duration-instant",
+  "--slotted-duration-medium",
+  "--slotted-easing-enter",
   "--slotted-focus-ring-color",
   "--slotted-focus-ring-color-invalid",
   "--slotted-focus-ring-offset",
@@ -96,6 +99,7 @@
   "--slotted-upload-kind-video",
   "--slotted-upload-label-font-weight",
   "--slotted-upload-line-gap",
+  "--slotted-upload-name-font-weight",
   "--slotted-upload-preview-radius",
   "--slotted-upload-preview-size",
   "--slotted-upload-radius",
@@ -112,5 +116,7 @@
   "--slotted-upload-zone-border-width",
   "--slotted-upload-zone-icon-size",
   "--slotted-upload-zone-padding-block",
-  "--slotted-upload-zone-padding-inline"
+  "--slotted-upload-zone-padding-inline",
+  "--slotted-upload-zone-state-layer-active",
+  "--slotted-upload-zone-state-layer-hover"
 ]

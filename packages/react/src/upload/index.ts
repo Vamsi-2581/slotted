@@ -1,5 +1,6 @@
 export { Upload } from './upload';
 export {
+  describeQueue,
   describeRejection,
   UPLOAD_KIND_LABELS,
   UPLOAD_LABELS,
@@ -8,6 +9,7 @@ export {
   useUploadDefaults,
 } from './upload-defaults';
 export type {
+  DescribeQueue,
   DescribeRejection,
   DuplicatePolicy,
   FileKind,
@@ -21,6 +23,7 @@ export type {
   UploadLayout,
   UploadPreview,
   UploadProps,
+  UploadQueueMessage,
   UploadRejectionReason,
   UploadRootProps,
   UploadKindLabels,

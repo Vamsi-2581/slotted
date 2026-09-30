@@ -5,6 +5,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { UploadAdapterLike, UploadFile } from '@slotted/core/upload';
+import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { SlUpload } from './upload';
 import { provideUploadDefaults } from './upload-defaults';
 
@@ -301,6 +302,27 @@ describe('SlUpload', () => {
       expect(part('pause')).not.toBeNull();
     });
 
+    it('announces arrivals, failures and the end of the queue', async () => {
+      const announce = vi.spyOn(getLiveAnnouncer(document)!, 'announce');
+      fixture.componentInstance.adapter.set(async (file: File) => {
+        if (file.name === 'b.png') throw new Error('nope');
+      });
+      fixture.componentInstance.multiple.set(true);
+      fixture.detectChanges();
+
+      choose([
+        makeFile('a.png', { type: 'image/png' }),
+        makeFile('b.png', { type: 'image/png', lastModified: 2 }),
+      ]);
+      await settle();
+      await settle();
+
+      const said = announce.mock.calls.map(([message]) => message);
+      expect(said).toContain('2 files added');
+      expect(said).toContain('b.png: Failed');
+      announce.mockRestore();
+    });
+
     it('takes a row out of the list, and out of the transfer with it', async () => {
       fixture.componentInstance.adapter.set(async () => undefined);
       fixture.detectChanges();
@@ -384,6 +406,56 @@ describe('SlUpload defaults', () => {
     expect((roots[0] as HTMLElement).querySelector('[data-part="trigger"]')?.textContent).toContain(
       'Anexar',
     );
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlUpload],
+  template: `<div
+    [clickToBrowse]="browse()"
+    [files]="files"
+    multiple
+    slUpload
+    variant="field"
+  ></div>`,
+})
+class Queue {
+  readonly browse = signal(true);
+  readonly files: readonly UploadFile[] = [stored('a.pdf', 'success'), stored('b.pdf', 'ready')];
+}
+
+/** A file that is already in the list, as a server-side record is. */
+function stored(name: string, status: UploadFile['status']): UploadFile {
+  return { key: name, name, size: 1, type: '', kind: 'pdf', status, loaded: 0, attempts: 0 };
+}
+
+describe('SlUpload queue sentences', () => {
+  it('marks the region only while a click inside it opens the picker', async () => {
+    await TestBed.configureTestingModule({ imports: [Queue] }).compileComponents();
+    const fixture = TestBed.createComponent(Queue);
+    fixture.detectChanges();
+    const zone = () => fixture.nativeElement.querySelector('[data-part="dropzone"]') as HTMLElement;
+
+    expect(zone().hasAttribute('data-browsable')).toBe(true);
+    fixture.componentInstance.browse.set(false);
+    fixture.detectChanges();
+    expect(zone().hasAttribute('data-browsable')).toBe(false);
+  });
+
+  it('writes the summary and the field count through the provider', async () => {
+    await TestBed.configureTestingModule({
+      imports: [Queue],
+      providers: [provideUploadDefaults({ describeQueue: (message) => `queue:${message.kind}` })],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(Queue);
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(element.querySelector('[data-part="summary"]')?.textContent).toContain('queue:summary');
+    expect(
+      element.querySelector('[data-part="dropzone"] [data-part="meta"]')?.textContent,
+    ).toContain('queue:selection');
   });
 });
 

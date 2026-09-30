@@ -1,5 +1,10 @@
-import { formatBytes } from '@slotted/core/upload';
-import type { DuplicatePolicy, UploadAdapterLike, UploadFile } from '@slotted/core/upload';
+import { formatBytes, formatDuration } from '@slotted/core/upload';
+import type {
+  DuplicatePolicy,
+  UploadAdapterLike,
+  UploadFile,
+  UploadQueueMessage,
+} from '@slotted/core/upload';
 import { inject, InjectionToken } from '@angular/core';
 
 /** Which of the three shapes the consolidation names is drawn. */
@@ -20,7 +25,17 @@ export type UploadViewingReason =
 
 export interface UploadFormatters {
   bytes(value: number): string;
+  duration(seconds: number): string;
 }
+
+export type { UploadQueueMessage };
+
+/**
+ * A sentence about the queue as a whole. It carries numbers, so it is a
+ * function rather than a label, and the four sentences share one subject, so
+ * they are one function with a `kind` rather than four.
+ */
+export type DescribeQueue = (message: UploadQueueMessage, formatters: UploadFormatters) => string;
 
 /**
  * The sentence a refused file carries. The reason is the family's and the
@@ -128,6 +143,25 @@ export const describeRejection: DescribeRejection = (file, formatters) => {
   }
 };
 
+/**
+ * The English default for every sentence about the queue as a whole. An
+ * application that translates its labels replaces this beside them.
+ */
+export const describeQueue: DescribeQueue = (message, formatters) => {
+  switch (message.kind) {
+    case 'summary':
+      return message.secondsLeft === null
+        ? `${message.uploaded} of ${message.total} uploaded`
+        : `${message.uploaded} of ${message.total} uploaded · about ${formatters.duration(message.secondsLeft)} left`;
+    case 'selection':
+      return `${message.count} files`;
+    case 'added':
+      return `${message.count} ${message.count === 1 ? 'file' : 'files'} added`;
+    case 'finished':
+      return `${message.uploaded} of ${message.total} files uploaded`;
+  }
+};
+
 export interface UploadDefaults {
   variant: UploadVariant;
   layout: UploadLayout;
@@ -150,6 +184,7 @@ export interface UploadDefaults {
   locale: string | undefined;
   fileKey: ((file: File) => string) | undefined;
   describeRejection: DescribeRejection;
+  describeQueue: DescribeQueue;
   labels: UploadLabels;
   statusLabels: UploadStatusLabels;
   kindLabels: UploadKindLabels;
@@ -177,6 +212,7 @@ const FALLBACK: UploadDefaults = {
   locale: undefined,
   fileKey: undefined,
   describeRejection,
+  describeQueue,
   labels: UPLOAD_LABELS,
   statusLabels: UPLOAD_STATUS_LABELS,
   kindLabels: UPLOAD_KIND_LABELS,
@@ -222,7 +258,10 @@ export function injectUploadDefaults(): UploadDefaults {
   return inject(UPLOAD_DEFAULTS);
 }
 
-/** The formatter a row and a summary read, bound to one locale. */
+/** The two formatters a row and a summary read, bound to one locale. */
 export function uploadFormatters(locale: string | undefined): UploadFormatters {
-  return { bytes: (value: number) => formatBytes(value, locale) };
+  return {
+    bytes: (value: number) => formatBytes(value, locale),
+    duration: (seconds: number) => formatDuration(seconds, locale),
+  };
 }

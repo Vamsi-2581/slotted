@@ -2,6 +2,7 @@ export { SlUpload } from './upload';
 export { SlUploadViewer } from './upload-viewer';
 export type { UploadViewingRequest } from './upload-viewer';
 export {
+  describeQueue,
   describeRejection,
   injectUploadDefaults,
   provideUploadDefaults,
@@ -12,6 +13,7 @@ export {
   uploadFormatters,
 } from './upload-defaults';
 export type {
+  DescribeQueue,
   DescribeRejection,
   UploadDefaults,
   UploadDefaultsInput,
@@ -20,6 +22,7 @@ export type {
   UploadLabels,
   UploadLayout,
   UploadPreview,
+  UploadQueueMessage,
   UploadSize,
   UploadKindLabels,
   UploadStatusLabels,

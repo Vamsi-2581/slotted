@@ -14,7 +14,7 @@
     <p data-part="description">
       PDF, JPEG or PNG, up to 10 MB each. Ten files at most; the rest are refused with a reason.
     </p>
-    <div data-part="dropzone">
+    <div data-part="dropzone" data-browsable>
       <span data-ui="icon" data-part="root" aria-hidden="true"
         ><svg data-part="glyph" data-glyph="upload"></svg
       ></span>
@@ -25,7 +25,7 @@
       </label>
     </div>
     <div data-part="summary">
-      <span>2 of 3 uploaded · 1 remaining · about 12 seconds left</span>
+      <span>2 of 3 uploaded · about 12 sec left</span>
       <button data-part="clear" type="button">Remove all</button>
     </div>
     <ul data-part="list" style="--slotted-upload-visible-rows: 6">
@@ -437,7 +437,7 @@
   <div style="display: flex; flex-direction: column; gap: var(--slotted-space-8)">
     <div data-part="root" data-ui="upload" data-variant="dropzone" data-size="md" data-dragging>
       <span data-part="label">A drag is over the page</span>
-      <div data-part="dropzone" data-drop-target>
+      <div data-part="dropzone" data-browsable data-drop-target>
         <span data-ui="icon" data-part="root" aria-hidden="true"
           ><svg data-part="glyph" data-glyph="upload"></svg
         ></span>
@@ -450,7 +450,7 @@
     </div>
     <div data-part="root" data-ui="upload" data-variant="dropzone" data-size="md" data-dragging>
       <span data-part="label">Two of these will be refused</span>
-      <div data-part="dropzone" data-drop-invalid>
+      <div data-part="dropzone" data-browsable data-drop-invalid>
         <span data-ui="icon" data-part="root" aria-hidden="true"
           ><svg data-part="glyph" data-glyph="upload"></svg
         ></span>
@@ -495,7 +495,7 @@
       data-required
     >
       <span data-part="label">Invalid and required</span>
-      <div data-part="dropzone">
+      <div data-part="dropzone" data-browsable>
         <span data-ui="icon" data-part="root" aria-hidden="true"
           ><svg data-part="glyph" data-glyph="upload"></svg
         ></span>
@@ -539,7 +539,7 @@
     <div data-part="root" data-ui="upload" data-variant="button" data-size="md" data-loading>
       <span data-part="label">A transfer is running</span>
       <div data-part="summary">
-        <span>1 of 4 uploaded · about 40 seconds left</span>
+        <span>1 of 4 uploaded · about 40 sec left</span>
         <button data-part="clear" type="button">Remove all</button>
       </div>
     </div>
@@ -583,7 +583,7 @@
     </div>
     <div data-part="root" data-ui="upload" data-variant="field" data-size="md">
       <span data-part="label">Proof of ownership</span>
-      <div data-part="dropzone">
+      <div data-part="dropzone" data-browsable>
         <label data-part="trigger">
           <span data-ui="icon" data-part="root" aria-hidden="true">
             <svg data-part="glyph" data-glyph="upload"></svg>
@@ -596,7 +596,7 @@
     </div>
     <div data-part="root" data-ui="upload" data-variant="field" data-size="md">
       <span data-part="label">Proof of ownership</span>
-      <div data-part="dropzone">
+      <div data-part="dropzone" data-browsable>
         <label data-part="trigger">
           <span data-ui="icon" data-part="root" aria-hidden="true">
             <svg data-part="glyph" data-glyph="upload"></svg>
@@ -1113,7 +1113,7 @@
       >
         <span data-part="label">Proof of ownership</span>
         <p data-part="description">This one is drawn by the field above.</p>
-        <div data-part="dropzone">
+        <div data-part="dropzone" data-browsable>
           <label data-part="trigger">
             <span data-ui="icon" data-part="root" aria-hidden="true">
               <svg data-part="glyph" data-glyph="upload"></svg>
@@ -1149,7 +1149,7 @@
         data-size="md"
         style="margin-block-start: var(--slotted-space-2)"
       >
-        <div data-part="dropzone">
+        <div data-part="dropzone" data-browsable>
           <span data-ui="icon" data-part="root" aria-hidden="true"
             ><svg data-part="glyph" data-glyph="upload"></svg
           ></span>
@@ -1563,7 +1563,7 @@
     <div data-part="root" data-ui="upload" data-variant="dropzone" data-size="md">
       <span data-part="label">Supporting documents</span>
       <p data-part="description">PDF, JPEG or PNG, up to 10 MB each.</p>
-      <div data-part="dropzone">
+      <div data-part="dropzone" data-browsable>
         <span data-ui="icon" data-part="root" aria-hidden="true"
           ><svg data-part="glyph" data-glyph="upload"></svg
         ></span>

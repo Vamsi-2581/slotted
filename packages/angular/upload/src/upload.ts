@@ -34,6 +34,7 @@ import {
   numberAttribute,
   output,
   signal,
+  untracked,
   ViewEncapsulation,
 } from '@angular/core';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -44,8 +45,10 @@ import { SlProgressBar } from '@slotted/angular/progress-indicator';
 import {
   injectUploadDefaults,
   uploadFormatters,
+  type DescribeQueue,
   type DescribeRejection,
   type UploadLabels,
+  type UploadQueueMessage,
   type UploadLayout,
   type UploadPreview,
   type UploadSize,
@@ -119,6 +122,7 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
         (click)="onZoneClick($event)"
         [attr.data-drop-target]="verdict() === 'target' ? '' : null"
         [attr.data-drop-invalid]="verdict() === 'invalid' ? '' : null"
+        [attr.data-browsable]="browsable() ? '' : null"
         data-part="dropzone"
       >
         <!-- The region carries the mark, so the trigger inside it does not. -->
@@ -341,6 +345,7 @@ export class SlUpload implements ControlValueAccessor, Validator {
   readonly locale = input<string | undefined>(undefined);
   readonly fileKey = input<((file: File) => string) | undefined>(undefined);
   readonly describeRejection = input<DescribeRejection | undefined>(undefined);
+  readonly describeQueue = input<DescribeQueue | undefined>(undefined);
   readonly labelsInput = input<Partial<UploadLabels> | undefined>(undefined, { alias: 'labels' });
   readonly statusLabelsInput = input<Partial<UploadStatusLabels> | undefined>(undefined, {
     alias: 'statusLabels',
@@ -366,6 +371,9 @@ export class SlUpload implements ControlValueAccessor, Validator {
   private readonly samples = signal<Array<{ at: number; loaded: number }>>([]);
   private depth = 0;
   private runner: UploadRunner | null = null;
+  private statuses: ReadonlyMap<string, UploadFile['status']> = new Map();
+  /** `null` until the first run, which records the initial list without saying it. */
+  private finished: boolean | null = null;
   private onChangeFn: (value: readonly UploadFile[]) => void = () => undefined;
   private onTouchedFn: () => void = () => undefined;
   private onValidatorChange: () => void = () => undefined;
@@ -407,15 +415,24 @@ export class SlUpload implements ControlValueAccessor, Validator {
     if (list.length === 1 && first !== undefined) {
       return `${first.name} · ${this.formatters().bytes(first.size)}`;
     }
-    return `${list.length} files`;
+    return this.queueText({ kind: 'selection', count: list.length });
   });
 
   readonly summaryText = computed(() => {
     const summary = this.summary();
     const remaining = summary.pending ? estimateRemaining(this.samples(), summary) : null;
-    const left = remaining === null ? '' : ` · about ${Math.round(remaining)} seconds left`;
-    return `${summary.counts.success} of ${summary.total} uploaded${left}`;
+    return this.queueText({
+      kind: 'summary',
+      uploaded: summary.counts.success,
+      total: summary.total,
+      secondsLeft: remaining,
+    });
   });
+
+  /** Whether a click anywhere in the region opens the picker, which is when it answers a pointer. */
+  protected readonly browsable = computed(
+    () => (this.clickToBrowse() ?? this.defaults.clickToBrowse) && this.accepting(),
+  );
 
   protected readonly describedBy = computed(() => {
     const parts = [this.description() === undefined ? undefined : this.descriptionId].filter(
@@ -446,6 +463,42 @@ export class SlUpload implements ControlValueAccessor, Validator {
       this.runner = runner;
       this.pausable.set(runner.pausable);
       onCleanup(() => runner.destroy());
+    });
+
+    /*
+     * The status changes the reader did not necessarily cause and may not be
+     * looking at are said: a transfer that failed, one that was stopped, and
+     * the queue finishing. The previous status of every row is kept so each is
+     * said once; a row seen for the first time is the list's initial content,
+     * which the contract keeps silent.
+     */
+    effect(() => {
+      const list = this.files();
+      const summary = this.summary();
+      const statusLabels = this.statusLabels();
+      untracked(() => {
+        const announcer = getLiveAnnouncer();
+        for (const file of list) {
+          const before = this.statuses.get(file.key);
+          if (before === undefined || before === file.status) continue;
+          if (file.status === 'error' || file.status === 'canceled') {
+            announcer?.announce(`${file.name}: ${statusLabels[file.status]}`);
+          }
+        }
+        this.statuses = new Map(list.map((file) => [file.key, file.status]));
+
+        const finished = summary.complete && summary.total > 0;
+        if (finished && this.finished === false) {
+          announcer?.announce(
+            this.queueText({
+              kind: 'finished',
+              uploaded: summary.counts.success,
+              total: summary.total,
+            }),
+          );
+        }
+        this.finished = finished;
+      });
     });
 
     /*
@@ -643,8 +696,8 @@ export class SlUpload implements ControlValueAccessor, Validator {
     const transform = this.transform();
     const prepared = transform === undefined ? [...incoming] : await transform([...incoming]);
 
-    const before = this.files().length;
-    const outcome = selectFiles(prepared, this.files(), {
+    const existing = this.files();
+    const outcome = selectFiles(prepared, existing, {
       accept: this.accept(),
       multiple: this.multiple(),
       directory: this.directory(),
@@ -659,9 +712,12 @@ export class SlUpload implements ControlValueAccessor, Validator {
 
     this.request(outcome.files, reason, source);
 
-    const kept = outcome.files.length - before + outcome.rejected.length;
+    /* A refused file joins the list too, and is announced below with its reason. */
+    const kept = outcome.files.filter(
+      (file) => file.status !== 'rejected' && !existing.includes(file),
+    ).length;
     const announcer = getLiveAnnouncer();
-    if (kept > 0) announcer?.announce(`${kept} ${kept === 1 ? 'file' : 'files'} added`);
+    if (kept > 0) announcer?.announce(this.queueText({ kind: 'added', count: kept }));
     if (outcome.rejected.length > 0) {
       this.reject.emit(outcome.rejected);
       for (const file of outcome.rejected) {
@@ -783,6 +839,11 @@ export class SlUpload implements ControlValueAccessor, Validator {
     const word = this.statusLabels()[file.status];
     const percent = this.percent(file);
     return this.showBar(file) && percent !== null ? `${word} · ${Math.round(percent)}%` : word;
+  }
+
+  private queueText(message: UploadQueueMessage) {
+    const describe = this.describeQueue() ?? this.defaults.describeQueue;
+    return describe(message, this.formatters());
   }
 
   protected messageText(file: UploadFile) {

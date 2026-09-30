@@ -575,3 +575,29 @@ test('lays a row out so its marks are centred on the block they are about', () =
   assert.ok(member.parts.includes('detail'));
   assert.ok(!member.parts.includes('heading'));
 });
+
+/**
+ * A region that forwards a click is a target, and a target answers a pointer.
+ * `clickToBrowse` is a prop the stylesheet cannot read, so the binding marks
+ * the region while the forward is live — and only then, because a hover on a
+ * region that does nothing when pressed is a promise the family breaks.
+ */
+test('marks the region while a click inside it opens the picker', () => {
+  assert.match(contract.dataAttributes['data-browsable'], /dropzone/);
+  assert.match(contract.dataAttributes['data-browsable'], /clickToBrowse/);
+  assert.ok(contract.parts.dropzone.purpose.includes('click forward'));
+});
+
+/**
+ * Every visible and spoken sentence about the queue is the provider's, as the
+ * labels are. The counts were English written into both bindings, against the
+ * contract's own `labels.reason`, and Angular never said the queue had
+ * finished at all.
+ */
+test('says every count through the provider', () => {
+  assert.ok(contract.provides.uploadDefaults.includes('describeQueue'));
+  assert.deepEqual(contract.queueMessage.kinds, ['summary', 'selection', 'added', 'finished']);
+  assert.equal(contract.queueMessage.owner, 'describeQueue');
+  assert.ok(contract.announcement.announces.includes('queue finished'));
+  assert.ok(contract.queueMessage.reason.length > 0);
+});

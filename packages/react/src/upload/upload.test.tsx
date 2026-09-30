@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createRef } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -6,12 +7,17 @@ import contract from '../../../../specs/components/upload/contract.json';
 import { Field, FieldLabel } from '../field';
 import { Upload } from './upload';
 import { UploadDefaultsProvider } from './upload-defaults';
-import type { UploadHandle } from './upload.types';
+import type { UploadFile, UploadHandle, UploadQueueMessage } from './upload.types';
 
 function makeFile(name: string, { size = 100, type = '', lastModified = 1 } = {}): File {
   const file = new File(['x'], name, { type, lastModified });
   Object.defineProperty(file, 'size', { value: size });
   return file;
+}
+
+/** A file that is already in the list, as a server-side record is. */
+function stored(name: string, status: UploadFile['status']): UploadFile {
+  return { key: name, name, size: 1, type: '', kind: 'pdf', status, loaded: 0, attempts: 0 };
 }
 
 const root = () => document.querySelector('[data-ui="upload"]') as HTMLElement;
@@ -272,6 +278,58 @@ describe('Upload', () => {
 
       fireEvent.click(part('remove') as HTMLElement);
       expect(parts('item')).toHaveLength(0);
+    });
+  });
+
+  describe('what the queue says', () => {
+    it('marks the region only while a click inside it opens the picker', () => {
+      const { rerender } = render(<Upload />);
+      expect(part('dropzone')).toHaveAttribute('data-browsable');
+
+      rerender(<Upload clickToBrowse={false} />);
+      expect(part('dropzone')).not.toHaveAttribute('data-browsable');
+
+      rerender(<Upload disabled />);
+      expect(part('dropzone')).not.toHaveAttribute('data-browsable');
+    });
+
+    it('writes the summary and the field count through the provider', () => {
+      const describeQueue = vi.fn((message: UploadQueueMessage) => `queue:${message.kind}`);
+      render(
+        <UploadDefaultsProvider describeQueue={describeQueue}>
+          <Upload
+            defaultFiles={[stored('a.pdf', 'success'), stored('b.pdf', 'ready')]}
+            multiple
+            variant="field"
+          />
+        </UploadDefaultsProvider>,
+      );
+
+      expect(part('summary')).toHaveTextContent('queue:summary');
+      expect(part('meta')).toHaveTextContent('queue:selection');
+    });
+
+    it('announces arrivals, failures and the end of the queue, in the provider’s words', async () => {
+      const announce = vi.spyOn(getLiveAnnouncer(document), 'announce');
+      render(
+        <Upload
+          adapter={async (file) => {
+            if (file.name === 'b.png') throw new Error('nope');
+          }}
+          multiple
+        />,
+      );
+
+      choose([
+        makeFile('a.png', { type: 'image/png' }),
+        makeFile('b.png', { type: 'image/png', lastModified: 2 }),
+      ]);
+
+      await waitFor(() => expect(parts('item')[1]).toHaveAttribute('data-status', 'error'));
+      const said = announce.mock.calls.map(([message]) => message);
+      expect(said).toContain('2 files added');
+      expect(said).toContain('b.png: Failed');
+      announce.mockRestore();
     });
   });
 

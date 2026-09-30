@@ -58,6 +58,7 @@ export function Upload({
   concurrency: concurrencyProp,
   defaultFiles,
   defaultViewing = null,
+  describeQueue: describeQueueProp,
   describeRejection: describeProp,
   description,
   directory = false,
@@ -131,6 +132,7 @@ export function Upload({
   const maxRows = maxRowsProp ?? defaults.maxRows;
   const locale = localeProp ?? defaults.locale;
   const describe = describeProp ?? defaults.describeRejection;
+  const describeQueue = describeQueueProp ?? defaults.describeQueue;
   const labels = useMemo(
     () => ({ ...defaults.labels, ...labelsProp }),
     [defaults.labels, labelsProp],
@@ -274,7 +276,8 @@ export function Upload({
     if (!accepting || incoming.length === 0) return;
     const prepared = transform === undefined ? [...incoming] : await transform([...incoming]);
 
-    const outcome = selectFiles(prepared, listRef.current, {
+    const existing = listRef.current;
+    const outcome = selectFiles(prepared, existing, {
       accept,
       multiple,
       directory,
@@ -289,8 +292,11 @@ export function Upload({
 
     request(outcome.files, reason, source);
 
-    const kept = outcome.files.length - listRef.current.length + outcome.rejected.length;
-    if (kept > 0) announce(`${kept} ${kept === 1 ? 'file' : 'files'} added`);
+    /* A refused file joins the list too, and is announced below with its reason. */
+    const kept = outcome.files.filter(
+      (file) => file.status !== 'rejected' && !existing.includes(file),
+    ).length;
+    if (kept > 0) announce(describeQueue({ kind: 'added', count: kept }, formatters));
     if (outcome.rejected.length > 0) {
       onReject?.(outcome.rejected);
       for (const file of outcome.rejected) announce(`${file.name}: ${describe(file, formatters)}`);
@@ -432,10 +438,44 @@ export function Upload({
     element.setCustomValidity(blocked ? labels.pending : short ? labels.pending : '');
   }, [labels.pending, minFiles, pendingBlocksSubmit, summary.counts.success, summary.pending]);
 
+  /*
+   * Said when the queue becomes finished, not whenever it is: a list that
+   * mounts with every file already stored is the initial content, which the
+   * contract keeps silent.
+   */
+  const finished = summary.complete && summary.total > 0;
+  const finishedRef = useRef(finished);
   useEffect(() => {
-    if (!summary.complete || summary.total === 0) return;
-    announce(`${summary.counts.success} of ${summary.total} files uploaded`);
-  }, [summary.complete, summary.counts.success, summary.total]);
+    const was = finishedRef.current;
+    finishedRef.current = finished;
+    if (!finished || was) return;
+    announce(
+      describeQueue(
+        { kind: 'finished', uploaded: summary.counts.success, total: summary.total },
+        formatters,
+      ),
+    );
+  }, [finished, summary.counts.success, summary.total]);
+
+  /*
+   * A transfer that fails or is stopped is a status change the reader did not
+   * necessarily cause and may not be looking at, so it is said. The previous
+   * status of every row is kept to announce the change once rather than on
+   * every render that still shows it; a row seen for the first time is the
+   * list's initial content, which the contract keeps silent.
+   */
+  const statusesRef = useRef<ReadonlyMap<string, UploadFile['status']>>(new Map());
+  useEffect(() => {
+    const previous = statusesRef.current;
+    for (const file of current) {
+      const before = previous.get(file.key);
+      if (before === undefined || before === file.status) continue;
+      if (file.status === 'error' || file.status === 'canceled') {
+        announce(`${file.name}: ${statusLabels[file.status]}`);
+      }
+    }
+    statusesRef.current = new Map(current.map((file) => [file.key, file.status]));
+  }, [current, statusLabels]);
 
   /* ── What the reader can do to one row ─────────────────────────────── */
 
@@ -652,6 +692,7 @@ export function Upload({
         ) : (
           <div
             data-part="dropzone"
+            {...(clickToBrowse && accepting ? { 'data-browsable': '' } : {})}
             {...(verdict === 'target' ? { 'data-drop-target': '' } : {})}
             {...(verdict === 'invalid' ? { 'data-drop-invalid': '' } : {})}
             onClick={(event) => {
@@ -681,7 +722,7 @@ export function Upload({
                   ? '—'
                   : current.length === 1
                     ? `${current[0]?.name} · ${formatters.bytes(current[0]?.size ?? 0)}`
-                    : `${current.length} files`}
+                    : describeQueue({ kind: 'selection', count: current.length }, formatters)}
               </span>
             ) : null}
           </div>
@@ -690,8 +731,15 @@ export function Upload({
         {current.length > 1 ? (
           <div data-part="summary">
             <span>
-              {summary.counts.success} of {summary.total} uploaded
-              {remaining === null ? '' : ` · about ${Math.round(remaining)} seconds left`}
+              {describeQueue(
+                {
+                  kind: 'summary',
+                  uploaded: summary.counts.success,
+                  total: summary.total,
+                  secondsLeft: remaining,
+                },
+                formatters,
+              )}
             </span>
             {resolvedReadOnly === true ? null : (
               <button

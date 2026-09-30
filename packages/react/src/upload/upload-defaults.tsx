@@ -1,7 +1,8 @@
-import { formatBytes } from '@slotted/core/upload';
+import { formatBytes, formatDuration } from '@slotted/core/upload';
 import { createContext, useContext } from 'react';
 
 import type {
+  DescribeQueue,
   DescribeRejection,
   UploadDefaults,
   UploadDefaultsProviderProps,
@@ -91,6 +92,25 @@ export const describeRejection: DescribeRejection = (file, formatters) => {
   }
 };
 
+/**
+ * The English default for every sentence about the queue as a whole. An
+ * application that translates its labels replaces this beside them.
+ */
+export const describeQueue: DescribeQueue = (message, formatters) => {
+  switch (message.kind) {
+    case 'summary':
+      return message.secondsLeft === null
+        ? `${message.uploaded} of ${message.total} uploaded`
+        : `${message.uploaded} of ${message.total} uploaded · about ${formatters.duration(message.secondsLeft)} left`;
+    case 'selection':
+      return `${message.count} files`;
+    case 'added':
+      return `${message.count} ${message.count === 1 ? 'file' : 'files'} added`;
+    case 'finished':
+      return `${message.uploaded} of ${message.total} files uploaded`;
+  }
+};
+
 const FALLBACK: UploadDefaults = {
   variant: 'dropzone',
   layout: 'list',
@@ -113,6 +133,7 @@ const FALLBACK: UploadDefaults = {
   locale: undefined,
   fileKey: undefined,
   describeRejection,
+  describeQueue,
   labels: UPLOAD_LABELS,
   statusLabels: UPLOAD_STATUS_LABELS,
   kindLabels: UPLOAD_KIND_LABELS,
@@ -164,6 +185,6 @@ export function UploadDefaultsProvider({
 export function useUploadFormatters(locale: string | undefined) {
   return {
     bytes: (value: number) => formatBytes(value, locale),
-    duration: (seconds: number) => `${Math.round(seconds)}`,
+    duration: (seconds: number) => formatDuration(seconds, locale),
   };
 }

@@ -3,6 +3,7 @@ import type {
   FileKind,
   UploadAdapterLike,
   UploadFile,
+  UploadQueueMessage,
   UploadRejectionReason,
 } from '@slotted/core/upload';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -20,7 +21,7 @@ export type UploadSize = 'sm' | 'md' | 'lg';
 export type UploadPreview = 'auto' | 'none';
 export type UploadView = 'auto' | 'none';
 
-export type { DuplicatePolicy, FileKind, UploadFile, UploadRejectionReason };
+export type { DuplicatePolicy, FileKind, UploadFile, UploadQueueMessage, UploadRejectionReason };
 
 export type UploadFilesReason =
   'select' | 'pointer' | 'keyboard' | 'remove' | 'clear' | 'programmatic';
@@ -34,6 +35,13 @@ export type UploadViewingReason =
  * policy, a plan or a bug — so this is the English default they replace.
  */
 export type DescribeRejection = (file: UploadFile, formatters: UploadFormatters) => string;
+
+/**
+ * A sentence about the queue as a whole. It carries numbers, so it is a
+ * function rather than a label, and the four sentences share one subject, so
+ * they are one function with a `kind` rather than four.
+ */
+export type DescribeQueue = (message: UploadQueueMessage, formatters: UploadFormatters) => string;
 
 export interface UploadFormatters {
   bytes(value: number): string;
@@ -92,6 +100,7 @@ export interface UploadDefaults {
   locale: string | undefined;
   fileKey: ((file: File) => string) | undefined;
   describeRejection: DescribeRejection;
+  describeQueue: DescribeQueue;
   labels: UploadLabels;
   statusLabels: UploadStatusLabels;
   kindLabels: UploadKindLabels;
@@ -199,6 +208,7 @@ export interface UploadProps extends Omit<
   locale?: string | undefined;
   fileKey?: ((file: File) => string) | undefined;
   describeRejection?: DescribeRejection | undefined;
+  describeQueue?: DescribeQueue | undefined;
   labels?: Partial<UploadLabels> | undefined;
   statusLabels?: Partial<UploadStatusLabels> | undefined;
   kindLabels?: Partial<UploadKindLabels> | undefined;

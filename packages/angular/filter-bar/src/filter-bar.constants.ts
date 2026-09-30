@@ -1,4 +1,5 @@
 import { InjectionToken, inject } from '@angular/core';
+import type { TemplateRef } from '@angular/core';
 import type {
   FilterDescriptor,
   FilterGroup,
@@ -32,11 +33,19 @@ export interface FilterBarField {
   key: string;
   label: string;
   kind: FilterKind;
+  /**
+   * Drawn before the field's name on its chip and in the add menu: a glyph
+   * name from `@slotted/core/glyph`, or a template of the consumer's.
+   */
+  icon?: string | TemplateRef<unknown>;
   /** Narrows the operators the kind offers. */
   operators?: readonly string[];
   /** The operator a new rule starts with. Defaults to the kind's. */
   defaultOperator?: string;
-  /** Drawn as a pill in the bar whether or not it holds a rule. */
+  /**
+   * Always in sight: a dashed pill while it holds no condition, a chip in the
+   * same place once it does.
+   */
   pinned?: boolean;
   /**
    * A field that always holds a rule: Clear returns it to `defaultValue`
@@ -67,7 +76,6 @@ export interface FilterBarPreset {
 export interface FilterBarLabels {
   bar: string;
   filters: string;
-  applied: string;
   builder: string;
   search: string;
   add: string;
@@ -110,6 +118,14 @@ export interface FilterBarLabels {
   unknownField: (field: string) => string;
   /** The word before a chip's own label on its remove control. */
   remove: string;
+  /** The value segment of a condition still waiting for its value. */
+  noValue: string;
+  /** Appended to a chip's name while its condition is incomplete. */
+  incomplete: string;
+  /** After the first two values of a longer list; `count` is the rest. */
+  moreValues: (count: number) => string;
+  /** Said by the toolbar of a read-only bar. */
+  readOnly: string;
   appliedCount: (count: number) => string;
   operators: Partial<Record<FilterOperator, string>>;
 }
@@ -118,7 +134,6 @@ export const FILTER_BAR_DEFAULT_LABELS: FilterBarLabels = {
   add: 'Add filter',
   addGroup: 'Add group',
   addRule: 'Add rule',
-  applied: 'Applied filters',
   appliedCount: (count) => `${count} filters applied`,
   apply: 'Apply',
   bar: 'Filter',
@@ -132,6 +147,7 @@ export const FILTER_BAR_DEFAULT_LABELS: FilterBarLabels = {
   field: 'Field',
   filters: 'Filters',
   from: 'From',
+  incomplete: 'incomplete',
   joins: { and: 'and', or: 'or' },
   less: 'Show less',
   match: 'Match',
@@ -139,6 +155,8 @@ export const FILTER_BAR_DEFAULT_LABELS: FilterBarLabels = {
   matchAny: 'Any',
   matches: 'of the following',
   more: (count) => `+${count} more`,
+  moreValues: (count) => `+${count}`,
+  noValue: 'Select value',
   operator: 'Operator',
   operators: {
     after: 'after',
@@ -163,6 +181,7 @@ export const FILTER_BAR_DEFAULT_LABELS: FilterBarLabels = {
   } as FilterBarLabels['operators'],
   preset: 'Saved view',
   presetNone: 'No saved view',
+  readOnly: 'Read only',
   remove: 'Remove',
   removeGroup: 'Remove group',
   removeRule: 'Remove rule',

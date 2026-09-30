@@ -142,12 +142,12 @@ const CHANNELS = [
 ];
 
 const FIELDS: FilterBarField[] = [
-  { key: 'status', kind: 'set', label: 'Status', options: STATUSES, pinned: true },
-  { key: 'customer', kind: 'text', label: 'Customer', pinned: true },
+  { icon: 'circle', key: 'status', kind: 'set', label: 'Status', options: STATUSES, pinned: true },
+  { icon: 'person', key: 'customer', kind: 'text', label: 'Customer', pinned: true },
   { key: 'amount', kind: 'number', label: 'Amount', min: 0, step: 0.01 },
   { key: 'channel', kind: 'set', label: 'Channel', options: CHANNELS },
-  { key: 'created', kind: 'date', label: 'Created', section: 'Dates' },
-  { key: 'priority', kind: 'boolean', label: 'Priority' },
+  { icon: 'calendar', key: 'created', kind: 'date', label: 'Created', section: 'Dates' },
+  { icon: 'star', key: 'priority', kind: 'boolean', label: 'Priority' },
 ];
 
 const COMPANY: FilterBarField = {
@@ -316,6 +316,7 @@ const themeRootOf = (host: ElementRef<HTMLElement>) =>
     [fields]="fields()"
     [loading]="loading()"
     [locale]="locale()"
+    [readOnly]="readOnly()"
     [total]="total()"
     [value]="value()"
   ></div>`,
@@ -329,6 +330,7 @@ class ThemedBar {
   readonly locale = input<string | undefined>(undefined);
   readonly disabled = input(false);
   readonly loading = input(false);
+  readonly readOnly = input(false);
   readonly themeRoot = themeRootOf(inject<ElementRef<HTMLElement>>(ElementRef));
 }
 
@@ -461,6 +463,7 @@ class Orders implements OnInit {
   readonly sticky = input(false);
   readonly withTable = input(false);
   readonly withParams = input(false);
+  readonly initialOpen = input(false);
 
   readonly orders = ORDERS;
   /**
@@ -495,6 +498,7 @@ class Orders implements OnInit {
     this.filter.set(this.initial());
     this.query.set(this.initialQuery());
     this.preset.set(this.initialPreset());
+    this.open.set(this.initialOpen());
   }
 
   json(tree: FilterGroup) {
@@ -673,7 +677,7 @@ export const Builder: Story = {
     props: DATA,
     template: one(
       'O construtor',
-      'Add filter escolhe um campo e abre a sua regra; o chip abre a mesma; Filters (n), abaixo de 36rem, e openBuilder() abrem a árvore inteira no drawer. Numa aplicação o drawer cobre a página; aqui, a caixa tracejada.',
+      'Filters (n), abaixo de 36rem, um chip de grupo e o handle abrem a árvore inteira no drawer: uma linha por regra, o grupo aninhado numa caixa. Numa aplicação o drawer cobre a página; aqui, a caixa tracejada.',
       `<div class="slotted-demo-viewport" data-size="tall" #box>
         <div class="slotted-demo-stack">
           <sl-filter-bar-orders #orders [container]="box" [withTable]="true" />
@@ -783,11 +787,26 @@ export const Narrow: Story = {
   parameters: scenario('narrow'),
   render: () => ({
     props: DATA,
-    template: one(
-      'A mesma barra a 22rem',
-      'Abaixo de 36rem os pills e os chips dobram atrás de Filters (4); a busca ocupa a linha inteira e a contagem a última. Redimensione o palco para ver a composição média e a larga.',
-      `<div class="slotted-demo-measure"><sl-filter-bar-orders [initial]="applied" /></div>`,
-    ),
+    template: `<div class="slotted-demo-grid" data-columns="1">
+      ${scene(
+        'A barra num telefone',
+        'Numa sala de 375px a barra é uma linha que desliza: Filters (n), os chips — cada um com o campo, o valor com as palavras do operador e o X — e os pills vazios. O chip cortado na borda diz que a linha continua; tocar num valor abre o construtor com o cartão dessa regra aberto.',
+        `<div class="slotted-demo-room" data-room="phone">
+          <div class="slotted-demo-viewport" data-scroll data-size="tall">
+            <sl-filter-bar-orders [initial]="applied" [withTable]="true" />
+          </div>
+        </div>`,
+      )}
+      ${scene(
+        'O construtor num telefone',
+        'Com menos de 30rem o construtor lista cartões: a frase de cada regra e o X; tocar na frase abre o cartão e empilha campo, operador e valor a toda a largura, um de cada vez. Um grupo aninhado é um trilho na aresta, não uma caixa.',
+        `<div class="slotted-demo-room" data-room="phone">
+          <div class="slotted-demo-viewport" data-size="screen" #phone>
+            <sl-filter-bar-orders [container]="phone" [initial]="nested" [initialOpen]="true" />
+          </div>
+        </div>`,
+      )}
+    </div>`,
   }),
 };
 
@@ -824,8 +843,13 @@ export const States: Story = {
         `<sl-filter-bar-themed [count]="128" [fields]="fields" [loading]="true" [total]="3412" [value]="paidOver100" />`,
       )}
       ${scene(
+        'readOnly',
+        'Cada condição alcançável pelas setas e legível; nenhuma se altera. Sem X, add, clear nem pills vazios; os segmentos levam aria-disabled e a toolbar diz Read only.',
+        `<sl-filter-bar-themed [count]="128" [fields]="fields" [readOnly]="true" [total]="3412" [value]="paidOver100" />`,
+      )}
+      ${scene(
         'Obrigatório sem valor',
-        'Pressione Apply: o pill Company sem valor recusa, leva data-invalid e a borda de danger, e o foco vai para ele.',
+        'Company, obrigatório, é um chip tracejado sem X enquanto não tem valor; pressione Apply e ele recusa, leva data-invalid e a aresta de danger, e a recusa é anunciada.',
         `<sl-filter-bar-themed apply="manual" [fields]="companyEmptyFields" [value]="companyEmpty" />`,
       )}
     </div>`,

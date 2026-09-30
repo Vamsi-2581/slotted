@@ -15,6 +15,7 @@ import {
   forwardRef,
   HostAttributeToken,
   inject,
+  Injector,
   input,
   model,
   numberAttribute,
@@ -52,6 +53,7 @@ import {
   removeNodeAt,
   ruleFor,
   serializeFilterGroup,
+  spokenOperator,
   updateNodeAt,
   withCondition,
   withGroupJoin,
@@ -72,7 +74,7 @@ import { createRemovalFocus, createRovingTabindex } from '@slotted/core/focus';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
-import { SlButton, SlButtonStart } from '@slotted/angular/button';
+import { SlButton, SlButtonStart, SlIconButton } from '@slotted/angular/button';
 import { SlDatePicker } from '@slotted/angular/date-picker';
 import { SlDateTimePicker } from '@slotted/angular/datetime-picker';
 import {
@@ -85,7 +87,14 @@ import {
 } from '@slotted/angular/drawer';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlKbd } from '@slotted/angular/kbd';
-import { SlMenu, SlMenuGroup, SlMenuItem, SlMenuTrigger } from '@slotted/angular/menu';
+import {
+  SlMenu,
+  SlMenuGroup,
+  SlMenuItem,
+  SlMenuItemIcon,
+  SlMenuRadioGroup,
+  SlMenuTrigger,
+} from '@slotted/angular/menu';
 import { SlMultiSelect, SlMultiSelectItem } from '@slotted/angular/multi-select';
 import { SlNumberField, SlNumberFieldInput } from '@slotted/angular/number-field';
 import {
@@ -97,7 +106,6 @@ import {
 } from '@slotted/angular/popover';
 import { SlSegment, SlSegmentedControl } from '@slotted/angular/segmented-control';
 import { SlSelect, SlSelectItem } from '@slotted/angular/select';
-import { SlTag, SlTagBody, SlTagRemove } from '@slotted/angular/tag';
 import {
   SlTextField,
   SlTextFieldEnd,
@@ -127,47 +135,117 @@ import {
 
 type Condition = FilterCondition<string, unknown>;
 
-const BAR_ITEMS =
-  "[data-part='pill'], [data-part='add'], [data-part='clear'], [data-part='apply'], [data-part='reset'], [data-part='summary']";
-const CHIP_ITEMS = "[data-part='chip'] [data-part='body']";
+/**
+ * Every stop of the one toolbar, in DOM order: the arrows walk the pills, each
+ * segment of each chip, more, add, clear and the actions, line after line. A
+ * stop the stylesheet hides at this width is skipped by its visibility.
+ */
+const BAR_ITEMS = [
+  'summary',
+  'pill',
+  'chip-operator',
+  'chip-value',
+  'chip-remove',
+  'more',
+  'add',
+  'clear',
+  'reset',
+  'apply',
+]
+  .map((part) => `[data-part='${part}']`)
+  .join(', ');
+
+const SEGMENTS = "[data-part='chip-operator'], [data-part='chip-value'], [data-part='chip-remove']";
+
+/** The bar's narrow breakpoint and the builder's sheet breakpoint, in rems — the stylesheet's. */
+const NARROW_REM = 36;
+
+const STICKY_TOP = '--slotted-page-sticky-top';
 
 let counter = 0;
+
+function remToPx(element: Element, rem: number) {
+  const size = parseFloat(
+    element.ownerDocument.defaultView?.getComputedStyle(element.ownerDocument.documentElement)
+      .fontSize ?? '16',
+  );
+  return rem * (Number.isFinite(size) ? size : 16);
+}
 
 function sameGroup(a: FilterGroup | null, b: FilterGroup | null) {
   return serializeFilterGroup(a) === serializeFilterGroup(b);
 }
 
+function fieldByKey(fields: readonly FilterBarField[], key: string) {
+  return fields.find((field) => field.key === key);
+}
+
+function operatorName(labels: FilterBarLabels, operator: string) {
+  return labels.operators[operator as FilterOperator] ?? operator;
+}
+
+/** The rule a field starts with: its default, else one empty condition on its default operator. */
 function blankRule(field: FilterBarField): FilterDescriptor {
   if (field.defaultValue) return field.defaultValue;
   const operator = field.defaultOperator ?? kindDefaultOperator(field.kind);
   return emptyFilter(field.kind, operator as never) as FilterDescriptor;
 }
 
-const STICKY_TOP = '--slotted-page-sticky-top';
-
-const BAR_WRAPPED = 'data-bar-wrapped';
-
 /**
- * Marks the root when the bar's controls take more than one line in the
- * composition the root's width selects. The attribute comes off before the
- * read, so the answer is the same whether the fallback it draws is in place
- * or not: read in the fallback, where the bar has a line of its own, the
- * answer would be "fits", and the next read would wrap it again. A control
- * starts a second line when its top is at or below another control's bottom,
- * because controls on one line share its middle. A control without a box —
- * hidden in this composition, or never laid out — is not counted.
+ * A condition in the words a chip and a rule card write it with: the operator
+ * as the sentence reads it, and the value — a list of more than two written as
+ * its first two and a count, the whole list kept in `full` for the name and the
+ * title.
  */
-function measureBarWrap(root: HTMLElement, bar: HTMLElement) {
-  root.removeAttribute(BAR_WRAPPED);
-  let top = -Infinity;
-  let bottom = Infinity;
-  for (const control of bar.children) {
-    const box = control.getBoundingClientRect();
-    if (!(box.width > 0 && box.height > 0)) continue;
-    top = Math.max(top, box.top);
-    bottom = Math.min(bottom, box.bottom);
+function ruleWords(
+  labels: FilterBarLabels,
+  field: FilterBarField | undefined,
+  filter: FilterDescriptor | null | undefined,
+): { operator: string; value: string; full: string; operands: number } {
+  const kind = filter?.kind ?? field?.kind ?? 'text';
+  const condition: Condition = (filter?.conditions[0] as Condition | undefined) ?? {
+    operator: field ? (field.defaultOperator ?? kindDefaultOperator(field.kind)) : 'contains',
+  };
+  const operands = operandCount(condition.operator as FilterOperator);
+  const operator = operatorName(labels, spokenOperator(kind, condition));
+  const write = (value: unknown) =>
+    field?.options?.find((option) => option.value === value)?.label ?? String(value);
+  const present = (value: unknown) =>
+    value !== undefined &&
+    value !== null &&
+    value !== '' &&
+    !(Array.isArray(value) && value.length === 0);
+  if (operands === 0) return { operator, value: '', full: '', operands };
+  if (kind === 'set') {
+    const values = ((condition.value as readonly unknown[] | undefined) ?? []).map(write);
+    const full = values.join(', ');
+    const value =
+      values.length > 2
+        ? `${values.slice(0, 2).join(', ')} ${labels.moreValues(values.length - 2)}`
+        : full;
+    return { operator, value, full, operands };
   }
-  root.toggleAttribute(BAR_WRAPPED, top >= bottom);
+  if (operands === 2) {
+    if (!present(condition.value) || !present(condition.end)) {
+      return { operator, value: '', full: '', operands };
+    }
+    const range = `${write(condition.value)} – ${write(condition.end)}`;
+    return { operator, value: range, full: range, operands };
+  }
+  const value = present(condition.value) ? write(condition.value) : '';
+  return { operator, value, full: value, operands };
+}
+
+function countActive(group: FilterGroup | null): number {
+  const active = normalizeFilterGroup(group);
+  if (!active) return 0;
+  let count = 0;
+  const walk = (node: FilterNode) => {
+    if (isFilterGroup(node)) node.rules.forEach(walk);
+    else count += 1;
+  };
+  walk(active);
+  return count;
 }
 
 function isEditable(element: Element | null) {
@@ -207,10 +285,11 @@ export class SlFilterBarOperand {
 
 /**
  * Writes this family's part name on a control another family's directive
- * owns. `slButton`, `slTagBody` and `slPopoverTrigger` each write `data-part`
- * as a static host attribute, which erases the one the template wrote — the rule the
- * briefing records for `toolbar`'s overflow control — so the part is written
- * back after the first render, where nothing writes over it again.
+ * owns. `slButton`, `slIconButton` and `slMenuTriggerFor` each write
+ * `data-part` from their host metadata, which erases the one the template
+ * wrote — the rule the briefing records for `toolbar`'s overflow control — so
+ * the part is written back after the first render, where nothing writes over
+ * it again.
  */
 @Directive({ selector: '[slFilterBarPart]', standalone: true })
 export class SlFilterBarPart {
@@ -257,21 +336,23 @@ export interface FilterBarEnvironment {
     SlTimePicker,
   ],
   template: `
-    <div data-part="operator">
-      <sl-select
-        [size]="size()"
-        [fullWidth]="true"
-        [items]="operatorItems()"
-        [attr.aria-label]="labels().operator"
-        [value]="condition().operator"
-        (valueChange)="setOperator($any($event))"
-      >
-        @for (operator of operators(); track operator) {
-          <sl-select-item [value]="operator">{{ operatorName(operator) }}</sl-select-item>
-        }
-      </sl-select>
-    </div>
-    <div data-part="operand">
+    @if (withOperator()) {
+      <div data-part="operator" [attr.id]="ids()?.operator ?? null">
+        <sl-select
+          [size]="size()"
+          [fullWidth]="true"
+          [items]="operatorItems()"
+          [attr.aria-label]="labels().operator"
+          [value]="condition().operator"
+          (valueChange)="setOperator($any($event))"
+        >
+          @for (operator of operators(); track operator) {
+            <sl-select-item [value]="operator">{{ operatorName(operator) }}</sl-select-item>
+          }
+        </sl-select>
+      </div>
+    }
+    <div data-part="operand" [attr.id]="ids()?.operand ?? null">
       @for (slot of slots(); track slot) {
         @if (customTemplate(); as custom) {
           <ng-container
@@ -381,6 +462,10 @@ export class SlFilterBarCondition {
   readonly labels = input.required<FilterBarLabels>();
   readonly size = input.required<FilterBarSize>();
   readonly operandTemplates = input<readonly SlFilterBarOperand[]>([]);
+  /** Draws the operator control. A chip's value popover leaves it to the chip's operator segment. */
+  readonly withOperator = input(true, { transform: booleanAttribute });
+  /** Ids for the two parts, which a rule card's sentence names in `aria-controls`. */
+  readonly ids = input<{ operator: string; operand: string } | undefined>(undefined);
   readonly applyRequest = output<void>();
   readonly conditionChange = output<Condition>();
 
@@ -409,7 +494,7 @@ export class SlFilterBarCondition {
   });
 
   operatorName(operator: string) {
-    return this.labels().operators[operator as FilterOperator] ?? operator;
+    return operatorName(this.labels(), operator);
   }
 
   protected operandLabel(slot: 0 | 1) {
@@ -472,13 +557,33 @@ export class SlFilterBarCondition {
   }
 }
 
-/** One rule row in the builder: field, operator, operand, remove. */
+/**
+ * One rule row in the builder: its sentence, field, operator, operand, remove.
+ * The sentence heads the card the stylesheet draws while the builder is
+ * narrow, and pressing it expands the card.
+ */
 @Component({
   selector: '[slFilterBarRule]',
   standalone: true,
   imports: [SlFilterBarCondition, SlGlyph, SlIcon, SlSelect, SlSelectItem],
   template: `
-    <div data-part="field">
+    <button
+      data-part="rule-summary"
+      type="button"
+      [attr.aria-expanded]="isExpanded()"
+      [attr.aria-controls]="id + '-field ' + id + '-operator ' + id + '-operand'"
+      (click)="expandedChange.emit(isExpanded() ? null : key())"
+    >
+      <span data-sentence
+        ><span data-field>{{ label() }}</span
+        >&ngsp;<span data-operator>{{ words().operator }}</span>
+        @if (words().operands > 0) {
+          &ngsp;<span data-value>{{ words().value || labels().noValue }}</span>
+        }
+      </span>
+      <span slIcon><svg slGlyph name="chevron-down"></svg></span>
+    </button>
+    <div data-part="field" [id]="id + '-field'">
       <sl-select
         [size]="size()"
         [fullWidth]="true"
@@ -500,12 +605,13 @@ export class SlFilterBarCondition {
         [labels]="labels()"
         [size]="size()"
         [operandTemplates]="operandTemplates()"
+        [ids]="{ operator: id + '-operator', operand: id + '-operand' }"
         (conditionChange)="changeCondition($event)"
         (applyRequest)="applyRequest.emit()"
       ></div>
     } @else {
-      <div data-part="operator"></div>
-      <div data-part="operand"></div>
+      <div data-part="operator" [id]="id + '-operator'"></div>
+      <div data-part="operand" [id]="id + '-operand'"></div>
     }
     @if (removable()) {
       <button
@@ -527,6 +633,7 @@ export class SlFilterBarCondition {
     '[attr.data-kind]': 'field()?.kind ?? null',
     '[attr.data-operands]': 'operands()',
     '[attr.data-invalid]': 'invalid() || !field() ? "" : null',
+    '[attr.data-expanded]': 'isExpanded() ? "" : null',
   },
 })
 export class SlFilterBarRule {
@@ -537,13 +644,19 @@ export class SlFilterBarRule {
   readonly operandTemplates = input<readonly SlFilterBarOperand[]>([]);
   readonly removable = input(true, { transform: booleanAttribute });
   readonly invalid = input(false, { transform: booleanAttribute });
+  /** The rule's path inside the root, which names its card. */
+  readonly path = input<FilterPath>([]);
+  /** The one card open in the builder, by its path joined with dots. */
+  readonly expanded = input<string | null>(null);
   readonly ruleChange = output<FilterRule>();
   readonly removeRequest = output<void>();
   readonly applyRequest = output<void>();
+  readonly expandedChange = output<string | null>();
 
-  protected readonly field = computed(() =>
-    this.fields().find((entry) => entry.key === this.rule().field),
-  );
+  protected readonly id = `slotted-filter-bar-rule-${(counter += 1)}`;
+  protected readonly key = computed(() => this.path().join('.'));
+  protected readonly isExpanded = computed(() => this.expanded() === this.key());
+  protected readonly field = computed(() => fieldByKey(this.fields(), this.rule().field));
   protected readonly condition = computed<Condition>(() => {
     const field = this.field();
     return (
@@ -558,9 +671,15 @@ export class SlFilterBarRule {
   protected readonly fieldItems = computed(() =>
     this.fields().map((entry) => ({ label: entry.label, value: entry.key })),
   );
+  protected readonly words = computed(() =>
+    ruleWords(this.labels(), this.field(), this.rule().filter),
+  );
+  protected readonly label = computed(
+    () => this.field()?.label ?? this.labels().unknownField(this.rule().field),
+  );
 
   protected changeField(key: string) {
-    const next = this.fields().find((entry) => entry.key === key);
+    const next = fieldByKey(this.fields(), key);
     if (!next) return;
     this.ruleChange.emit({ field: key, filter: blankRule(next) });
   }
@@ -590,6 +709,7 @@ export class SlFilterBarRule {
     SlFilterBarRule,
     SlGlyph,
     SlIcon,
+    SlIconButton,
     SlSegment,
     SlSegmentedControl,
   ],
@@ -610,15 +730,17 @@ export class SlFilterBarRule {
       <span>{{ labels().matches }}</span>
       @if (path().length > 0) {
         <button
-          slButton
+          slIconButton
           slFilterBarPart="remove-group"
           type="button"
           tone="secondary"
           variant="ghost"
           [size]="buttonSize()"
+          [attr.aria-label]="labels().removeGroup"
+          [attr.title]="labels().removeGroup"
           (click)="rootChange.emit(removeNodeAt(root(), path()))"
         >
-          {{ labels().removeGroup }}
+          <span slIcon><svg slGlyph name="trash"></svg></span>
         </button>
       }
     </div>
@@ -630,13 +752,15 @@ export class SlFilterBarRule {
         @if (isGroup(node)) {
           <fieldset
             slFilterBarGroup
-            [group]="node"
+            [group]="$any(node)"
             [path]="childPath($index)"
             [root]="root()"
             [fields]="fields()"
             [labels]="labels()"
             [size]="size()"
             [operandTemplates]="operandTemplates()"
+            [expanded]="expanded()"
+            (expandedChange)="expandedChange.emit($event)"
             (rootChange)="rootChange.emit($event)"
             (applyRequest)="applyRequest.emit()"
           ></fieldset>
@@ -644,11 +768,14 @@ export class SlFilterBarRule {
           <div
             slFilterBarRule
             [rule]="$any(node)"
+            [path]="childPath($index)"
             [fields]="fields()"
             [labels]="labels()"
             [size]="size()"
             [operandTemplates]="operandTemplates()"
             [removable]="!isRequired($any(node))"
+            [expanded]="expanded()"
+            (expandedChange)="expandedChange.emit($event)"
             (ruleChange)="replace($index, $event)"
             (removeRequest)="remove($index)"
             (applyRequest)="applyRequest.emit()"
@@ -662,7 +789,7 @@ export class SlFilterBarRule {
         slFilterBarPart="add-rule"
         type="button"
         tone="secondary"
-        variant="ghost"
+        [variant]="path().length === 0 ? 'outline' : 'ghost'"
         [size]="buttonSize()"
         [disabled]="!firstField()"
         (click)="addRule()"
@@ -677,7 +804,7 @@ export class SlFilterBarRule {
         slFilterBarPart="add-group"
         type="button"
         tone="secondary"
-        variant="ghost"
+        [variant]="path().length === 0 ? 'outline' : 'ghost'"
         [size]="buttonSize()"
         [disabled]="!firstField()"
         (click)="addGroup()"
@@ -705,14 +832,17 @@ export class SlFilterBarGroup {
   readonly root = input.required<FilterGroup>();
   readonly fields = input.required<readonly FilterBarField[]>();
   readonly labels = input.required<FilterBarLabels>();
+  readonly size = input.required<FilterBarSize>();
+  readonly operandTemplates = input<readonly SlFilterBarOperand[]>([]);
+  /** The one rule card open in the builder, by its path joined with dots. */
+  readonly expanded = input<string | null>(null);
+  readonly rootChange = output<FilterGroup>();
+  readonly applyRequest = output<void>();
+  readonly expandedChange = output<string | null>();
+
   protected readonly joinWord = computed(() =>
     this.group().join === 'and' ? this.labels().matchAll : this.labels().matchAny,
   );
-  readonly size = input.required<FilterBarSize>();
-  readonly operandTemplates = input<readonly SlFilterBarOperand[]>([]);
-  readonly rootChange = output<FilterGroup>();
-  readonly applyRequest = output<void>();
-
   protected readonly removeNodeAt = removeNodeAt;
   protected readonly firstField = computed(() => this.fields()[0]);
   protected readonly buttonSize = computed(() => (this.size() === 'lg' ? 'md' : 'sm'));
@@ -721,7 +851,7 @@ export class SlFilterBarGroup {
     return isFilterGroup(node);
   }
   protected isRequired(rule: FilterRule) {
-    return this.fields().find((entry) => entry.key === rule.field)?.required === true;
+    return fieldByKey(this.fields(), rule.field)?.required === true;
   }
   protected childPath(index: number): FilterPath {
     return [...this.path(), index];
@@ -735,22 +865,27 @@ export class SlFilterBarGroup {
   protected remove(index: number) {
     this.rootChange.emit(removeNodeAt(this.root(), this.childPath(index)));
   }
+  /* A rule just added opens as an expanded card, where its three controls are. */
   protected addRule() {
     const field = this.firstField();
     if (!field) return;
+    const at = this.group().rules.length;
     this.rootChange.emit(
       insertNodeAt(this.root(), this.path(), { field: field.key, filter: blankRule(field) }),
     );
+    this.expandedChange.emit([...this.path(), at].join('.'));
   }
   protected addGroup() {
     const field = this.firstField();
     if (!field) return;
+    const at = this.group().rules.length;
     this.rootChange.emit(
       insertNodeAt(this.root(), this.path(), {
         join: this.group().join === 'and' ? 'or' : 'and',
         rules: [{ field: field.key, filter: blankRule(field) }],
       }),
     );
+    this.expandedChange.emit([...this.path(), at, 0].join('.'));
   }
 }
 
@@ -772,6 +907,7 @@ export class SlFilterBarGroup {
       [labels]="labels()"
       [size]="size()"
       [operandTemplates]="operandTemplates()"
+      [withOperator]="withOperator()"
       (conditionChange)="change($event)"
       (applyRequest)="done()"
     ></div>
@@ -807,6 +943,8 @@ export class SlFilterBarRuleEditor {
   readonly operandTemplates = input<readonly SlFilterBarOperand[]>([]);
   readonly queryDelay = input(0);
   readonly invalid = input(false, { transform: booleanAttribute });
+  /** Draws the operator control: a chip's value popover leaves it to the chip. */
+  readonly withOperator = input(true, { transform: booleanAttribute });
   readonly ruleChange = output<FilterDescriptor | null>();
   readonly doneRequest = output<void>();
 
@@ -825,6 +963,14 @@ export class SlFilterBarRuleEditor {
   );
 
   constructor() {
+    /* A change made elsewhere — the chip's operator segment — reaches the
+       editor unless a keystroke is still waiting. */
+    effect(() => {
+      this.current();
+      untracked(() => {
+        if (this.timer === undefined) this.local.set(null);
+      });
+    });
     this.destroyRef.onDestroy(() => clearTimeout(this.timer));
   }
 
@@ -832,6 +978,7 @@ export class SlFilterBarRuleEditor {
     const next = { ...this.draft(), conditions: [condition] } as FilterDescriptor;
     this.local.set(next);
     clearTimeout(this.timer);
+    this.timer = undefined;
     const kind = this.field().kind;
     const debounced = (kind === 'text' || kind === 'number') && this.queryDelay() > 0;
     if (!debounced) {
@@ -862,11 +1009,70 @@ export class SlFilterBarRuleEditor {
   }
 }
 
+/** One field's condition in the bar, as its chip draws it. */
+interface BarChip {
+  readonly kind: 'chip';
+  readonly id: string;
+  readonly key: string;
+  readonly field: FilterBarField | undefined;
+  readonly filter: FilterDescriptor;
+  readonly label: string;
+  /** The group's name: the field and its sentence, and whether it is incomplete. */
+  readonly name: string;
+  /** The operator as the sentence reads it. */
+  readonly operator: string;
+  /** The condition's own operator, which the operator menu checks. */
+  readonly condition: string;
+  readonly operators: readonly string[];
+  readonly operands: number;
+  readonly value: string;
+  readonly valueName: string;
+  readonly valueTitle: string | null;
+  readonly hasValue: boolean;
+  readonly pinned: boolean;
+  readonly incomplete: boolean;
+  readonly folded: boolean;
+  readonly unknown: boolean;
+  readonly removable: boolean;
+}
+
+/** A pinned field without a condition. */
+interface BarPill {
+  readonly kind: 'pill';
+  readonly id: string;
+  readonly field: FilterBarField;
+}
+
+/** A group at the first level, written as one sentence that opens the builder. */
+interface BarGroup {
+  readonly kind: 'group';
+  readonly id: string;
+  readonly path: FilterPath;
+  readonly words: string;
+  readonly folded: boolean;
+}
+
+type BarMember = BarChip | BarPill | BarGroup;
+
+/**
+ * A condition the reader started — from `add` or from a pinned field's pill —
+ * and whose operand is not there yet. It is the bar's own and not the value's:
+ * the engine would drop it as inactive anyway, so it is drawn as an incomplete
+ * chip and enters the value the moment it is complete.
+ */
+interface PendingRule {
+  key: string;
+  filter: FilterDescriptor;
+  /** Where an applied rule stood before it lost its operand, so its chip keeps its place. */
+  at?: number;
+}
+
 /**
  * A bar above a listing that edits one value: a tree of conditions over the
  * listing's fields, whose leaves are the descriptor `table` edits in a column
  * header. The bar draws the first level — a search field, a pill per pinned
- * field, a chip per applied rule — and opens a drawer on the whole tree.
+ * field without a condition, a chip of segments per condition — and opens a
+ * drawer on the whole tree.
  *
  * The family applies nothing. It reports the tree and the query, and
  * `createFilterGroupPredicate` and `createSearchPredicate` in
@@ -876,6 +1082,7 @@ export class SlFilterBarRuleEditor {
   selector: '[slFilterBar]',
   standalone: true,
   imports: [
+    NgTemplateOutlet,
     SlButton,
     SlButtonStart,
     SlDrawer,
@@ -889,10 +1096,13 @@ export class SlFilterBarRuleEditor {
     SlFilterBarRuleEditor,
     SlGlyph,
     SlIcon,
+    SlIconButton,
     SlKbd,
     SlMenu,
     SlMenuGroup,
     SlMenuItem,
+    SlMenuItemIcon,
+    SlMenuRadioGroup,
     SlMenuTrigger,
     SlPopover,
     SlPopoverContent,
@@ -901,15 +1111,20 @@ export class SlFilterBarRuleEditor {
     SlPopoverTrigger,
     SlSelect,
     SlSelectItem,
-    SlTag,
-    SlTagBody,
-    SlTagRemove,
     SlTextField,
     SlTextFieldEnd,
     SlTextFieldStart,
     SlTextFieldInput,
   ],
   template: `
+    <ng-template #fieldIcon let-icon>
+      @if (isTemplate(icon)) {
+        <span slIcon><ng-container [ngTemplateOutlet]="icon" /></span>
+      } @else if (icon) {
+        <span slIcon><svg slGlyph [name]="icon"></svg></span>
+      }
+    </ng-template>
+
     <div data-part="frame">
       <div data-part="search">
         <div slTextField [size]="sizeValue()" [clearable]="true">
@@ -935,84 +1150,286 @@ export class SlFilterBarRuleEditor {
         </div>
       </div>
 
-      <div #barRow data-part="bar" role="toolbar" [attr.aria-label]="labelSet().filters">
-        @for (field of pinned(); track field.key) {
-          <ng-container
-            slPopover
-            [open]="openPill() === field.key"
-            (openChange)="togglePill(field, $event)"
-          >
-            <button
-              slPopoverTrigger
-              type="button"
-              slFilterBarPart="pill"
-              aria-haspopup="dialog"
-              [attr.data-field]="field.key"
-              [attr.data-filtered]="isActive(field.key) ? '' : null"
-              [attr.data-invalid]="invalid() === field.key ? '' : null"
-              [attr.aria-invalid]="invalid() === field.key ? 'true' : null"
-              [disabled]="disabled()"
-            >
-              <span>{{ field.label }}</span>
-              @if (isActive(field.key)) {
-                <span>{{ sentence(field) }}</span>
-              }
-              <span slIcon><svg slGlyph name="chevron-down"></svg></span>
-            </button>
-            <ng-template slPopoverLayer>
-              <div slPopoverContent [attr.aria-label]="field.label">
-                <div slPopoverBody>
-                  <div
-                    slFilterBarRuleEditor
-                    [field]="field"
-                    [current]="ruleOf(field.key)"
-                    [labels]="labelSet()"
-                    [size]="sizeValue()"
-                    [operandTemplates]="operandTemplates()"
-                    [queryDelay]="applyValue() === 'live' ? queryDelayValue() : 0"
-                    [invalid]="invalid() === field.key"
-                    (ruleChange)="editRule(field, $event)"
-                    (doneRequest)="finishRule(field)"
-                  ></div>
-                </div>
-              </div>
-            </ng-template>
-          </ng-container>
-        }
-
+      <div
+        #barRow
+        data-part="bar"
+        role="toolbar"
+        [attr.aria-label]="labelSet().filters"
+        [attr.aria-description]="readOnly() ? labelSet().readOnly : null"
+        [attr.data-revealed]="isRevealed() ? '' : null"
+      >
         <button
           slButton
-          slFilterBarPart="add"
+          slFilterBarPart="summary"
           type="button"
           tone="secondary"
-          variant="ghost"
+          variant="outline"
+          aria-haspopup="dialog"
           [size]="sizeValue()"
-          [disabled]="disabled() || unfiltered().length === 0"
-          [slMenuTriggerFor]="addMenu"
+          [disabled]="disabled()"
+          (click)="openBuilderAt('pointer', $event)"
         >
-          <!-- The glyph stands in the button's own box; bare in the label it has no size. -->
           <span slButtonStart
-            ><span slIcon><svg slGlyph name="plus"></svg></span
+            ><span slIcon><svg slGlyph name="funnel"></svg></span
           ></span>
-          {{ labelSet().add }}
+          <span>{{ summaryWord() }}</span
+          >&ngsp;<span>{{ summaryCount() }}</span>
         </button>
-        <sl-menu #addMenu [attr.aria-label]="labelSet().add">
-          @for (section of sections(); track section.name ?? '') {
-            @if (section.name === undefined) {
-              @for (field of section.fields; track field.key) {
-                <button slMenuItem (select)="startPending(field)">{{ field.label }}</button>
-              }
-            } @else {
-              <sl-menu-group [label]="section.name">
-                @for (field of section.fields; track field.key) {
-                  <button slMenuItem (select)="startPending(field)">{{ field.label }}</button>
-                }
-              </sl-menu-group>
-            }
-          }
-        </sl-menu>
 
-        @if (activeCount() > 0 || shownQuery() !== '') {
+        @for (member of members(); track member.id) {
+          @if (pillOf(member); as pill) {
+            <button
+              data-part="pill"
+              type="button"
+              aria-haspopup="dialog"
+              [attr.data-field]="pill.field.key"
+              [attr.data-invalid]="invalid() === pill.field.key ? '' : null"
+              [attr.aria-invalid]="invalid() === pill.field.key ? 'true' : null"
+              [disabled]="disabled()"
+              (click)="start(pill.field.key, $event)"
+            >
+              <span slIcon><svg slGlyph name="plus"></svg></span><span>{{ pill.field.label }}</span>
+            </button>
+          }
+          @if (chipOf(member); as chip) {
+            <div
+              data-part="chip"
+              role="group"
+              [attr.aria-label]="chip.name"
+              [attr.data-field]="chip.key"
+              [attr.data-operands]="chip.operands"
+              [attr.data-pinned]="chip.pinned ? '' : null"
+              [attr.data-incomplete]="chip.incomplete ? '' : null"
+              [attr.data-folded]="chip.folded ? '' : null"
+              [attr.data-invalid]="chip.unknown || invalid() === chip.key ? '' : null"
+              (keydown)="onChipKeyDown($event, chip.key)"
+            >
+              <span data-part="chip-field"
+                ><ng-container
+                  [ngTemplateOutlet]="fieldIcon"
+                  [ngTemplateOutletContext]="{ $implicit: chip.field?.icon }"
+                /><span>{{ chip.label }}</span></span
+              >
+              @if (readOnly() || chip.unknown) {
+                <button
+                  data-part="chip-operator"
+                  type="button"
+                  aria-disabled="true"
+                  [disabled]="disabled()"
+                >
+                  {{ chip.operator }}
+                </button>
+              } @else {
+                <button
+                  data-part="chip-operator"
+                  slFilterBarPart="chip-operator"
+                  type="button"
+                  [disabled]="disabled()"
+                  [slMenuTriggerFor]="operatorMenu"
+                >
+                  {{ chip.operator }}
+                </button>
+                <sl-menu #operatorMenu [aria-label]="labelSet().operator">
+                  <sl-menu-radio-group
+                    [value]="chip.condition"
+                    (valueChangeRequest)="setOperator(chip.key, chip.filter, $event.value)"
+                  >
+                    @for (operator of chip.operators; track operator) {
+                      <button slMenuRadioItem [value]="operator" [closeOnSelect]="true">
+                        {{ operatorWords(operator) }}
+                      </button>
+                    }
+                  </sl-menu-radio-group>
+                </sl-menu>
+              }
+              @if (chip.hasValue) {
+                @if (readOnly() || chip.unknown || narrow()) {
+                  <button
+                    data-part="chip-value"
+                    type="button"
+                    [attr.aria-haspopup]="readOnly() || chip.unknown ? null : 'dialog'"
+                    [attr.aria-disabled]="readOnly() || chip.unknown ? 'true' : null"
+                    [attr.aria-label]="chip.valueName"
+                    [attr.title]="chip.valueTitle"
+                    [disabled]="disabled()"
+                    (click)="onValueSegment(chip, $event)"
+                  >
+                    <span data-operator>{{ chip.operator }}</span
+                    ><span data-value>{{ chip.value }}</span>
+                  </button>
+                } @else if (chip.field; as field) {
+                  <ng-container
+                    slPopover
+                    [open]="valueOpen() === chip.key"
+                    (openChange)="toggleValue(chip.key, $event)"
+                  >
+                    <button
+                      slPopoverTrigger
+                      data-part="chip-value"
+                      type="button"
+                      aria-haspopup="dialog"
+                      [attr.aria-label]="chip.valueName"
+                      [attr.title]="chip.valueTitle"
+                      [disabled]="disabled()"
+                    >
+                      <span data-operator>{{ chip.operator }}</span
+                      ><span data-value>{{ chip.value }}</span>
+                    </button>
+                    <ng-template slPopoverLayer>
+                      <div slPopoverContent [attr.aria-label]="chip.label">
+                        <div slPopoverBody>
+                          <div
+                            slFilterBarRuleEditor
+                            [field]="field"
+                            [current]="chip.filter"
+                            [labels]="labelSet()"
+                            [size]="sizeValue()"
+                            [operandTemplates]="operandTemplates()"
+                            [queryDelay]="applyValue() === 'live' ? queryDelayValue() : 0"
+                            [invalid]="invalid() === chip.key"
+                            [withOperator]="false"
+                            (ruleChange)="changeRule(chip.key, $event, 'keyboard')"
+                            (doneRequest)="finishValue(chip.key)"
+                          ></div>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </ng-container>
+                }
+              }
+              @if (chip.removable) {
+                <button
+                  data-part="chip-remove"
+                  type="button"
+                  [attr.aria-label]="labelSet().remove + ' ' + chip.label"
+                  [disabled]="disabled()"
+                  (click)="removeField(chip.key, $event)"
+                >
+                  <span slIcon><svg slGlyph name="x"></svg></span>
+                </button>
+              }
+            </div>
+          }
+          @if (groupOf(member); as group) {
+            <div
+              data-part="chip"
+              role="group"
+              data-operands="1"
+              [attr.aria-label]="group.words"
+              [attr.data-folded]="group.folded ? '' : null"
+              (keydown)="onGroupKeyDown($event, group.path)"
+            >
+              <button
+                data-part="chip-value"
+                type="button"
+                aria-haspopup="dialog"
+                [attr.aria-disabled]="readOnly() ? 'true' : null"
+                [attr.title]="group.words"
+                [disabled]="disabled()"
+                (click)="readOnly() ? null : openBuilderAt('pointer', $event, { path: group.path })"
+              >
+                <span data-value>{{ group.words }}</span>
+              </button>
+              @if (!readOnly()) {
+                <button
+                  data-part="chip-remove"
+                  type="button"
+                  [attr.aria-label]="labelSet().remove + ' ' + group.words"
+                  [disabled]="disabled()"
+                  (click)="removeNode(group.path, $event)"
+                >
+                  <span slIcon><svg slGlyph name="x"></svg></span>
+                </button>
+              }
+            </div>
+          }
+        }
+
+        @if (folded() > 0) {
+          <button
+            data-part="more"
+            type="button"
+            [attr.aria-expanded]="isRevealed()"
+            [disabled]="disabled()"
+            (click)="requestRevealed(!isRevealed(), 'pointer', $event)"
+          >
+            {{ isRevealed() ? labelSet().less : labelSet().more(folded()) }}
+          </button>
+        }
+
+        @if (!readOnly()) {
+          @if (chipCount() > 0) {
+            <!-- With a chip in the bar, add is its glyph alone, in the chips' shape; the label stays its name. -->
+            <button
+              slIconButton
+              slFilterBarPart="add"
+              data-compact
+              type="button"
+              shape="circle"
+              tone="secondary"
+              variant="outline"
+              [size]="sizeValue()"
+              [attr.aria-label]="labelSet().add"
+              [attr.title]="labelSet().add"
+              [disabled]="disabled() || unfiltered().length === 0"
+              [slMenuTriggerFor]="addMenu"
+            >
+              <span slIcon><svg slGlyph name="plus"></svg></span>
+            </button>
+          } @else {
+            <button
+              slButton
+              slFilterBarPart="add"
+              type="button"
+              tone="secondary"
+              variant="ghost"
+              [size]="sizeValue()"
+              [disabled]="disabled() || unfiltered().length === 0"
+              [slMenuTriggerFor]="addMenu"
+            >
+              <!-- The glyph stands in the button's own box; bare in the label it has no size. -->
+              <span slButtonStart
+                ><span slIcon><svg slGlyph name="plus"></svg></span
+              ></span>
+              {{ labelSet().add }}
+            </button>
+          }
+          <sl-menu #addMenu [aria-label]="labelSet().add">
+            @for (section of sections(); track section.name ?? '') {
+              @if (section.name === undefined) {
+                @for (field of section.fields; track field.key) {
+                  <button slMenuItem (select)="start(field.key, $event.source)">
+                    @if (field.icon) {
+                      <span slMenuItemIcon
+                        ><ng-container
+                          [ngTemplateOutlet]="fieldIcon"
+                          [ngTemplateOutletContext]="{ $implicit: field.icon }"
+                      /></span>
+                    }
+                    {{ field.label }}
+                  </button>
+                }
+              } @else {
+                <sl-menu-group [label]="section.name">
+                  @for (field of section.fields; track field.key) {
+                    <button slMenuItem (select)="start(field.key, $event.source)">
+                      @if (field.icon) {
+                        <span slMenuItemIcon
+                          ><ng-container
+                            [ngTemplateOutlet]="fieldIcon"
+                            [ngTemplateOutletContext]="{ $implicit: field.icon }"
+                        /></span>
+                      }
+                      {{ field.label }}
+                    </button>
+                  }
+                </sl-menu-group>
+              }
+            }
+          </sl-menu>
+        }
+
+        @if (!readOnly() && (activeCount() > 0 || shownQuery() !== '' || pending())) {
           <button
             slButton
             slFilterBarPart="clear"
@@ -1027,7 +1444,7 @@ export class SlFilterBarRuleEditor {
           </button>
         }
 
-        @if (applyValue() === 'manual') {
+        @if (applyValue() === 'manual' && !readOnly()) {
           <div data-part="actions">
             <button
               slButton
@@ -1053,21 +1470,6 @@ export class SlFilterBarRuleEditor {
             </button>
           </div>
         }
-
-        <button
-          slButton
-          slFilterBarPart="summary"
-          type="button"
-          tone="secondary"
-          variant="outline"
-          aria-haspopup="dialog"
-          [size]="sizeValue()"
-          [disabled]="disabled()"
-          (click)="requestOpen(true, 'pointer', $event)"
-        >
-          <span>{{ summaryWord() }}</span
-          >&ngsp;<span>{{ summaryCount() }}</span>
-        </button>
       </div>
 
       <div data-part="end">
@@ -1079,7 +1481,7 @@ export class SlFilterBarRuleEditor {
               <sl-select
                 clearable
                 [size]="sizeValue()"
-                [disabled]="disabled()"
+                [disabled]="disabled() || readOnly()"
                 [items]="presetItems()"
                 [attr.aria-label]="labelSet().preset"
                 [placeholder]="labelSet().presetNone"
@@ -1110,158 +1512,11 @@ export class SlFilterBarRuleEditor {
           {{ countText() }}
         </p>
       }
-
-      <div
-        #chipsGrid
-        data-part="chips"
-        role="grid"
-        [attr.aria-label]="labelSet().applied"
-        [attr.data-revealed]="isRevealed() ? '' : null"
-      >
-        <div role="row" style="display: contents">
-          @for (chip of chips(); track chip.key) {
-            <div
-              data-part="chip"
-              role="gridcell"
-              [attr.data-folded]="$index >= chipLimitValue() ? '' : null"
-              [attr.data-invalid]="chip.unknown || invalid() === chip.key ? '' : null"
-            >
-              @if (chip.group) {
-                <span
-                  slTag
-                  size="sm"
-                  [removable]="true"
-                  [removeLabel]="labelSet().remove"
-                  (remove)="removeNode(chip.path, $event)"
-                >
-                  <button
-                    slTagBody
-                    type="button"
-                    [attr.title]="chip.sentence"
-                    (click)="requestOpen(true, 'pointer', $event)"
-                  >
-                    <span>({{ chip.sentence }})</span>
-                  </button>
-                  <button slTagRemove></button>
-                </span>
-              } @else if (chip.unknown || !chip.field) {
-                <span
-                  slTag
-                  size="sm"
-                  [removable]="true"
-                  [removeLabel]="labelSet().remove"
-                  (remove)="removeField(chip.key, $event)"
-                >
-                  <button
-                    slTagBody
-                    type="button"
-                    [attr.aria-label]="labelSet().unknownField(chip.key) + ': ' + chip.sentence"
-                    [attr.title]="chip.sentence"
-                  >
-                    <span>{{ chip.label }}</span
-                    >&ngsp;<span>{{ chip.sentence }}</span>
-                  </button>
-                  <button slTagRemove></button>
-                </span>
-              } @else {
-                <ng-container
-                  slPopover
-                  [open]="openPill() === chip.key"
-                  (openChange)="togglePill(chip.field, $event)"
-                >
-                  <span
-                    slTag
-                    size="sm"
-                    [removable]="true"
-                    [removeLabel]="labelSet().remove"
-                    (remove)="removeField(chip.key, $event)"
-                  >
-                    <button
-                      slTagBody
-                      slPopoverTrigger
-                      type="button"
-                      aria-haspopup="dialog"
-                      [attr.aria-label]="chip.label + ': ' + chip.sentence"
-                      [attr.title]="chip.label + ': ' + chip.sentence"
-                    >
-                      <span>{{ chip.label }}</span
-                      >&ngsp;<span>{{ chip.sentence }}</span>
-                    </button>
-                    <button slTagRemove></button>
-                  </span>
-                  <ng-template slPopoverLayer>
-                    <div slPopoverContent [attr.aria-label]="chip.label">
-                      <div slPopoverBody>
-                        <div
-                          slFilterBarRuleEditor
-                          [field]="chip.field"
-                          [current]="ruleOf(chip.key)"
-                          [labels]="labelSet()"
-                          [size]="sizeValue()"
-                          [operandTemplates]="operandTemplates()"
-                          [queryDelay]="applyValue() === 'live' ? queryDelayValue() : 0"
-                          [invalid]="invalid() === chip.key"
-                          (ruleChange)="editRule(chip.field, $event)"
-                          (doneRequest)="finishRule(chip.field)"
-                        ></div>
-                      </div>
-                    </div>
-                  </ng-template>
-                </ng-container>
-              }
-            </div>
-          }
-          @if (pendingField(); as field) {
-            <div data-part="chip" role="gridcell">
-              <ng-container slPopover [open]="true" (openChange)="togglePending(field, $event)">
-                <span slTag size="sm">
-                  <button
-                    slTagBody
-                    slPopoverTrigger
-                    slFilterBarPart="body"
-                    type="button"
-                    [attr.aria-label]="field.label"
-                  >
-                    <span>{{ field.label }}</span>
-                  </button>
-                </span>
-                <ng-template slPopoverLayer>
-                  <div slPopoverContent [attr.aria-label]="field.label">
-                    <div slPopoverBody>
-                      <div
-                        slFilterBarRuleEditor
-                        [field]="field"
-                        [current]="ruleOf(field.key)"
-                        [labels]="labelSet()"
-                        [size]="sizeValue()"
-                        [operandTemplates]="operandTemplates()"
-                        [queryDelay]="applyValue() === 'live' ? queryDelayValue() : 0"
-                        (ruleChange)="editRule(field, $event)"
-                        (doneRequest)="finishRule(field)"
-                      ></div>
-                    </div>
-                  </div>
-                </ng-template>
-              </ng-container>
-            </div>
-          }
-          @if (folded() > 0) {
-            <button
-              data-part="more"
-              type="button"
-              [attr.aria-expanded]="isRevealed()"
-              (click)="requestRevealed(!isRevealed(), 'pointer', $event)"
-            >
-              {{ isRevealed() ? labelSet().less : labelSet().more(folded()) }}
-            </button>
-          }
-        </div>
-      </div>
     </div>
 
     <sl-drawer
-      side="end"
-      size="xl"
+      [side]="sheet() ? 'bottom' : 'end'"
+      [size]="sheet() ? 'content' : 'xl'"
       [container]="container()"
       [open]="isOpen()"
       (openChangeRequest)="onDrawerRequest($event)"
@@ -1280,9 +1535,24 @@ export class SlFilterBarRuleEditor {
             [labels]="labelSet()"
             [size]="sizeValue()"
             [operandTemplates]="operandTemplates()"
+            [expanded]="expanded()"
+            (expandedChange)="expanded.set($event)"
             (rootChange)="drawerDraft.set($event)"
             (applyRequest)="commitDrawer()"
           >
+            @if (draftActive() > 0) {
+              <button
+                slButton
+                slFilterBarPart="clear"
+                type="button"
+                size="sm"
+                tone="secondary"
+                variant="ghost"
+                (click)="drawerDraft.set(baseline())"
+              >
+                {{ labelSet().clear }}
+              </button>
+            }
             @if (savePresetEnabled()) {
               <button
                 slButton
@@ -1328,6 +1598,7 @@ export class SlFilterBarRuleEditor {
     '[attr.data-apply]': 'applyValue()',
     '[attr.data-size]': 'sizeValue()',
     '[attr.data-disabled]': 'disabled() ? "" : null',
+    '[attr.data-readonly]': 'readOnly() ? "" : null',
     '[attr.data-loading]': 'loading() ? "" : null',
     '[attr.data-dirty]': 'dirty() || presetDirty() ? "" : null',
     '[attr.data-open]': 'isOpen() ? "" : null',
@@ -1373,6 +1644,8 @@ export class SlFilterBar {
   });
   readonly shortcut = input<string | null | undefined>(undefined);
   readonly disabled = input(false, { transform: booleanAttribute });
+  /** The conditions can be read and reached, and nothing changes them. */
+  readonly readOnly = input(false, { transform: booleanAttribute });
   readonly loading = input(false, { transform: booleanAttribute });
   /** BCP 47, for the figures in the count. */
   readonly locale = input<string | undefined>(undefined);
@@ -1397,11 +1670,11 @@ export class SlFilterBar {
 
   private readonly defaults = injectFilterBarDefaults();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly ariaLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
   private readonly searchInput = viewChild.required<ElementRef<HTMLInputElement>>('search');
   private readonly barElement = viewChild.required<ElementRef<HTMLDivElement>>('barRow');
-  private readonly chipsElement = viewChild.required<ElementRef<HTMLDivElement>>('chipsGrid');
   protected readonly operandTemplates = contentChildren(SlFilterBarOperand);
   protected readonly endSlot = contentChild(SlFilterBarEnd);
 
@@ -1427,15 +1700,25 @@ export class SlFilterBar {
     const own = this.shortcut();
     return own === undefined ? (this.defaults.shortcut ?? null) : own;
   });
+  private readonly locked = computed(() => this.disabled() || this.readOnly());
 
-  /* ── The draft under manual ────────────────────────────────────────── */
+  /* ── State the bar owns ────────────────────────────────────────────── */
 
   private readonly draft = signal<{ value: FilterGroup | null; query: string } | null>(null);
   protected readonly invalid = signal<string | null>(null);
-  protected readonly openPill = signal<string | null>(null);
-  protected readonly pendingField = signal<FilterBarField | undefined>(undefined);
+  protected readonly pending = signal<PendingRule | null>(null);
+  /** Which chip's value popover is open, by its field key. */
+  protected readonly valueOpen = signal<string | null>(null);
+  /** The one rule card open in the builder's card form, by its path. */
+  protected readonly expanded = signal<string | null>(null);
   protected readonly drawerDraft = signal<FilterGroup | null>(null);
+  /** Whether the bar is under its narrow breakpoint: an edit then goes to the builder. */
+  protected readonly narrow = signal(false);
+  /** Whether the viewport is under the sheet breakpoint: the builder then comes up from the bottom. */
+  protected readonly sheet = signal(false);
   private readonly typed = signal<string | null>(null);
+  /** A tree the builder opens on instead of the shown one: a rule the reader just started. */
+  private seed: FilterGroup | null = null;
   private timer: ReturnType<typeof setTimeout> | undefined;
 
   protected readonly shown = computed(() => {
@@ -1467,9 +1750,9 @@ export class SlFilterBar {
     const labels = this.labelSet();
     const fields = this.fields();
     return {
-      field: (key: string) => fields.find((entry) => entry.key === key)?.label ?? key,
+      field: (key: string) => fieldByKey(fields, key)?.label ?? key,
       join: (join: FilterJoin) => labels.joins[join],
-      operator: (operator: string) => labels.operators[operator as FilterOperator] ?? operator,
+      operator: (operator: string) => operatorName(labels, operator),
     };
   });
 
@@ -1479,8 +1762,9 @@ export class SlFilterBar {
   );
   private readonly pinnedKeys = computed(() => new Set(this.pinned().map((field) => field.key)));
   protected readonly activeCount = computed(() => countActive(this.shown()));
+  protected readonly draftActive = computed(() => countActive(this.drawerDraft()));
   protected readonly unfiltered = computed(() => {
-    const pending = this.pendingField()?.key;
+    const pending = this.pending()?.key;
     return this.fields().filter(
       (field) =>
         !this.pinnedKeys().has(field.key) &&
@@ -1500,50 +1784,70 @@ export class SlFilterBar {
   protected readonly presetItems = computed(
     () => this.presets()?.map((entry) => ({ label: entry.label, value: entry.key })) ?? [],
   );
-  protected readonly chips = computed(() => {
+
+  /**
+   * The bar's members in order: pinned fields as declared — a chip, or a pill
+   * while they hold no condition — then the other first-level conditions, then
+   * the one pending, which keeps the place an applied rule had when it lost its
+   * operand.
+   */
+  protected readonly members = computed<readonly BarMember[]>(() => {
     const shown = this.shown();
-    const fields = this.fields();
+    const pending = this.pending();
+    const pinnedKeys = this.pinnedKeys();
+    const limit = this.chipLimitValue();
+    const readOnly = this.readOnly();
     const format = this.format();
-    const list: {
-      key: string;
-      label: string;
-      sentence: string;
-      field: FilterBarField | undefined;
-      unknown: boolean;
-      group: boolean;
-      path: FilterPath;
-    }[] = [];
-    (shown?.rules ?? []).forEach((node, index) => {
-      if (isFilterGroup(node)) {
-        const sentence = describeFilterGroup(node, format);
-        list.push({
-          field: undefined,
-          group: true,
-          key: `group-${index}`,
-          label: sentence,
-          path: [index],
-          sentence,
-          unknown: false,
-        });
-        return;
+    const members: BarMember[] = [];
+    let index = 0;
+    const nextFolded = () => index++ >= limit;
+    for (const field of this.pinned()) {
+      const rule = ruleFor(shown, field.key);
+      if (rule !== undefined) {
+        members.push(this.describeChip(field.key, rule, { folded: nextFolded(), pinned: true }));
+      } else if (pending?.key === field.key) {
+        members.push(
+          this.describeChip(field.key, pending.filter, {
+            folded: nextFolded(),
+            incomplete: true,
+            pinned: true,
+          }),
+        );
+      } else if (!readOnly) {
+        members.push({ field, id: `pill:${field.key}`, kind: 'pill' });
       }
-      if (this.pinnedKeys().has(node.field)) return;
-      const field = fields.find((entry) => entry.key === node.field);
-      list.push({
-        field,
-        group: false,
-        key: node.field,
-        label: field?.label ?? node.field,
-        path: [index],
-        sentence: this.sentenceOf(field, node.filter),
-        unknown: field === undefined,
-      });
+    }
+    const floating =
+      pending && !pinnedKeys.has(pending.key) && ruleFor(shown, pending.key) === undefined
+        ? pending
+        : null;
+    const pendingChip = (rule: PendingRule) =>
+      this.describeChip(rule.key, rule.filter, { folded: nextFolded(), incomplete: true });
+    let placed = false;
+    (shown?.rules ?? []).forEach((node, at) => {
+      if (floating && floating.at === at) {
+        members.push(pendingChip(floating));
+        placed = true;
+      }
+      if (isFilterGroup(node)) {
+        members.push({
+          folded: nextFolded(),
+          id: `group:${at}`,
+          kind: 'group',
+          path: [at],
+          words: `(${describeFilterGroup(node, format)})`,
+        });
+      } else if (!pinnedKeys.has(node.field)) {
+        members.push(this.describeChip(node.field, node.filter, { folded: nextFolded() }));
+      }
     });
-    return list;
+    if (floating && !placed) members.push(pendingChip(floating));
+    return members;
   });
-  protected readonly folded = computed(() =>
-    Math.max(0, this.chips().length - this.chipLimitValue()),
+  protected readonly chipCount = computed(
+    () => this.members().filter((member) => member.kind !== 'pill').length,
   );
+  protected readonly folded = computed(() => Math.max(0, this.chipCount() - this.chipLimitValue()));
   protected readonly countText = computed(() => {
     const count = this.count();
     if (count === undefined) return null;
@@ -1566,7 +1870,7 @@ export class SlFilterBar {
   );
 
   constructor() {
-    /* A controlled value that changes from outside replaces the draft. */
+    /* A controlled value that changes from outside replaces the draft: the application's value wins. */
     let last = untracked(this.currentValue);
     effect(() => {
       const value = this.currentValue();
@@ -1576,37 +1880,67 @@ export class SlFilterBar {
       }
     });
 
-    /* The draft the drawer edits, taken from the tree each time it opens. */
+    /* The draft the drawer edits, taken each time it opens from the tree — or
+       from the seed a chip left, when the reader started a rule on a phone and
+       the builder is where it is finished. */
     let wasOpen = false;
     effect(() => {
       const open = this.isOpen();
-      if (open && !wasOpen) untracked(() => this.drawerDraft.set(this.shown()));
+      if (open && !wasOpen) {
+        untracked(() => {
+          this.drawerDraft.set(this.seed ?? this.shown());
+          this.seed = null;
+        });
+      }
       wasOpen = open;
     });
 
-    /* The rings: one tab stop for the bar, one for the chips, arrows inside. After render, because the items are the template's. */
+    /* The ring: one tab stop for the bar, arrows over every control and every
+       chip segment. After render, because the items are the template's. */
     afterRenderEffect((onCleanup) => {
       const bar = this.barElement().nativeElement;
-      const chips = this.chipsElement().nativeElement;
-      const barRing = createRovingTabindex(bar, { itemSelector: BAR_ITEMS });
-      const chipRing = createRovingTabindex(chips, { itemSelector: CHIP_ITEMS });
-      const removal = createRemovalFocus(chips, {
+      const ring = createRovingTabindex(bar, {
+        includeAriaDisabled: true,
+        itemSelector: BAR_ITEMS,
+      });
+      /* A chip removed by the pointer: focus goes to the stop that took its place. */
+      const removal = createRemovalFocus(bar, {
         fallback: () => bar.querySelector<HTMLElement>("[data-part='add']") ?? null,
-        itemSelector: CHIP_ITEMS,
+        itemSelector: BAR_ITEMS,
       });
       /* Read the DOM again after a chip, a pill or a control came or went. */
-      const observer = new MutationObserver(() => {
-        barRing.refresh();
-        chipRing.refresh();
-      });
+      const observer = new MutationObserver(() => ring.refresh());
       observer.observe(bar, { childList: true, subtree: true });
-      observer.observe(chips, { childList: true, subtree: true });
       onCleanup(() => {
         observer.disconnect();
-        barRing.destroy();
-        chipRing.destroy();
+        ring.destroy();
         removal.destroy();
       });
+    });
+
+    /* The narrow breakpoint, read from the root's own width, and the sheet
+       breakpoint, read from the viewport — the side a drawer opens from is the
+       viewport's question. A root with no box is not measured. */
+    afterNextRender(() => {
+      const element = this.host.nativeElement;
+      const view = element.ownerDocument.defaultView;
+      if (typeof ResizeObserver !== 'undefined') {
+        const read = () => {
+          const width = element.getBoundingClientRect().width;
+          this.narrow.set(width > 0 && width < remToPx(element, NARROW_REM));
+        };
+        const observer = new ResizeObserver(read);
+        observer.observe(element);
+        read();
+        this.destroyRef.onDestroy(() => observer.disconnect());
+      }
+      if (view?.matchMedia) {
+        const query = view.matchMedia(`(max-width: ${NARROW_REM}rem)`);
+        const read = () => this.sheet.set(query.matches);
+        read();
+        query.addEventListener?.('change', read);
+        this.destroyRef.onDestroy(() => query.removeEventListener?.('change', read));
+      }
     });
 
     /* The document key that reaches the search, unless the reader is typing. */
@@ -1622,39 +1956,6 @@ export class SlFilterBar {
       };
       doc.addEventListener('keydown', listener);
       onCleanup(() => doc.removeEventListener('keydown', listener));
-    });
-
-    /**
-     * The bar's own line. After the first render, and on the microtask after
-     * anything in the frame comes, goes or changes its text. A resize is read
-     * on the next frame instead: the attribute changes the root's height, and
-     * a change made inside the observer's own callback to a box it observes
-     * ends the browser's loop with an error.
-     */
-    afterRenderEffect((onCleanup) => {
-      const root = this.host.nativeElement;
-      const bar = this.barElement().nativeElement;
-      const frame = bar.parentElement;
-      if (!frame) return;
-      const measure = () => measureBarWrap(root, bar);
-      let pending = 0;
-      const sizes =
-        typeof ResizeObserver === 'undefined'
-          ? undefined
-          : new ResizeObserver(() => {
-              cancelAnimationFrame(pending);
-              pending = requestAnimationFrame(measure);
-            });
-      sizes?.observe(root);
-      sizes?.observe(bar);
-      const contents = new MutationObserver(measure);
-      contents.observe(frame, { characterData: true, childList: true, subtree: true });
-      measure();
-      onCleanup(() => {
-        sizes?.disconnect();
-        contents.disconnect();
-        cancelAnimationFrame(pending);
-      });
     });
 
     /* Sticky: the bar reads the page property and adds its own height for what follows. */
@@ -1693,12 +1994,68 @@ export class SlFilterBar {
 
   /* ── Helpers the template reads ─────────────────────────────────────── */
 
-  protected ruleOf(key: string) {
-    return ruleFor(this.shown(), key);
+  protected pillOf(member: BarMember) {
+    return member.kind === 'pill' ? member : null;
   }
 
-  protected isActive(key: string) {
-    return isFilterActive(this.ruleOf(key) ?? null);
+  protected chipOf(member: BarMember) {
+    return member.kind === 'chip' ? member : null;
+  }
+
+  protected groupOf(member: BarMember) {
+    return member.kind === 'group' ? member : null;
+  }
+
+  protected isTemplate(icon: unknown): icon is TemplateRef<unknown> {
+    return icon instanceof TemplateRef;
+  }
+
+  protected operatorWords(operator: string) {
+    return operatorName(this.labelSet(), operator);
+  }
+
+  protected normalized(group: FilterGroup | null) {
+    return normalizeFilterGroup(group);
+  }
+
+  /** One field's condition as its chip draws it. */
+  private describeChip(
+    key: string,
+    filter: FilterDescriptor,
+    flags: { pinned?: boolean; incomplete?: boolean; folded: boolean },
+  ): BarChip {
+    const labels = this.labelSet();
+    const field = fieldByKey(this.fields(), key);
+    const unknown = field === undefined;
+    const label = field?.label ?? key;
+    const words = ruleWords(labels, field, filter);
+    const incomplete = flags.incomplete === true || !isFilterActive(filter);
+    const value = words.value || labels.noValue;
+    return {
+      condition: filter.conditions[0]?.operator ?? '',
+      field,
+      filter,
+      folded: flags.folded,
+      hasValue: words.operands > 0 || incomplete,
+      id: `chip:${key}`,
+      incomplete,
+      key,
+      kind: 'chip',
+      label,
+      name:
+        (unknown ? labels.unknownField(key) : label) +
+        `: ${words.operator}${words.operands > 0 ? ` ${value}` : ''}` +
+        (incomplete ? `, ${labels.incomplete}` : ''),
+      operands: words.operands,
+      operator: words.operator,
+      operators: field?.operators ?? (field ? (operatorsFor(field.kind) as readonly string[]) : []),
+      pinned: flags.pinned === true,
+      removable: field?.required !== true && !this.readOnly(),
+      unknown,
+      value,
+      valueName: `${words.operator} ${words.full || value}`,
+      valueTitle: words.full && words.full !== words.value ? words.full : null,
+    };
   }
 
   private sentenceOf(
@@ -1710,14 +2067,6 @@ export class SlFilterBar {
       value: (value) =>
         field?.options?.find((option) => option.value === value)?.label ?? String(value),
     });
-  }
-
-  protected sentence(field: FilterBarField) {
-    return this.sentenceOf(field, this.ruleOf(field.key));
-  }
-
-  protected normalized(group: FilterGroup | null) {
-    return normalizeFilterGroup(group);
   }
 
   private announce(message: string) {
@@ -1770,6 +2119,10 @@ export class SlFilterBar {
 
   /* ── Edits ─────────────────────────────────────────────────────────── */
 
+  /**
+   * Every edit of the tree goes through here: under `live` it is requested at
+   * once, under `manual` it goes to the draft and Apply requests it.
+   */
   private edit(next: FilterGroup | null, reason: FilterBarValueReason, source?: unknown) {
     if (this.applyValue() === 'manual') {
       this.draft.set({ query: this.shownQuery(), value: next });
@@ -1778,7 +2131,8 @@ export class SlFilterBar {
     this.requestValue(next, reason, source);
   }
 
-  private baseline(): FilterGroup | null {
+  /** The tree with every required field at its default, which is what Clear returns to. */
+  protected baseline(): FilterGroup | null {
     let next: FilterGroup | null = null;
     for (const field of this.required()) {
       if (field.defaultValue) next = withRuleFor(next, field.key, field.defaultValue);
@@ -1790,57 +2144,110 @@ export class SlFilterBar {
     return this.required().filter((field) => !isFilterActive(ruleFor(tree, field.key) ?? null));
   }
 
-  private refuse(field: FilterBarField) {
+  /** A required field refuses: data-invalid on its chip or pill, its message said, and focus on it when asked. */
+  private refuse(field: FilterBarField, focus: boolean) {
     this.invalid.set(field.key);
     this.announce(this.labelSet().required(field.label));
-    this.host.nativeElement
-      .querySelector<HTMLElement>(`[data-part='pill'][data-field='${CSS.escape(field.key)}']`)
-      ?.focus();
+    if (!focus) return;
+    const member = this.barElement().nativeElement.querySelector<HTMLElement>(
+      `[data-field='${CSS.escape(field.key)}']`,
+    );
+    (member?.matches('button') ? member : member?.querySelector<HTMLElement>(SEGMENTS))?.focus();
   }
 
-  protected editRule(field: FilterBarField, next: FilterDescriptor | null) {
+  /** A field chosen from `add` or pressed as a pill: its chip, incomplete, with the value popover open. */
+  protected start(key: string, source?: unknown) {
+    const field = fieldByKey(this.fields(), key);
+    if (!field || this.locked()) return;
+    if (this.narrow()) {
+      this.openBuilderOn(key, source);
+      return;
+    }
+    const filter = blankRule(field);
+    if (isFilterActive(filter)) {
+      this.edit(withRuleFor(this.shown(), key, filter), 'pointer', source);
+    } else {
+      this.pending.set({ filter, key });
+    }
+    this.valueOpen.set(key);
+  }
+
+  /** Every change to one field's rule from a chip: pending until active, then the value's. */
+  protected changeRule(key: string, next: FilterDescriptor | null, reason: FilterBarValueReason) {
+    const field = fieldByKey(this.fields(), key);
+    const shown = this.shown();
     if (next === null) {
-      if (field.required) {
-        this.refuse(field);
+      if (field?.required) {
+        this.refuse(field, false);
         return;
       }
-      this.edit(withoutRuleFor(this.shown(), field.key), 'clear');
+      if (this.pending()?.key === key) this.pending.set(null);
+      this.edit(withoutRuleFor(shown, key), 'clear');
       return;
     }
     this.invalid.set(null);
-    this.edit(withRuleFor(this.shown(), field.key, next), 'keyboard');
-    if (this.pendingField()?.key === field.key && isFilterActive(next))
-      this.pendingField.set(undefined);
+    if (!isFilterActive(next)) {
+      /* A draft holds an unfinished rule as it stands; the value never does. */
+      if (this.applyValue() === 'manual') {
+        this.edit(withRuleFor(shown, key, next), reason);
+        return;
+      }
+      const at = shown
+        ? shown.rules.findIndex((node) => !isFilterGroup(node) && node.field === key)
+        : -1;
+      this.pending.set({ filter: next, key, ...(at === -1 ? {} : { at }) });
+      if (at !== -1) this.edit(withoutRuleFor(shown, key), reason);
+      return;
+    }
+    if (this.pending()?.key === key) this.pending.set(null);
+    this.edit(withRuleFor(shown, key, next), reason);
   }
 
-  protected finishRule(field: FilterBarField) {
-    const rule = this.ruleOf(field.key);
+  protected setOperator(key: string, filter: FilterDescriptor, operator: string) {
+    const condition = (filter.conditions[0] ?? { operator }) as Condition;
+    const before = operandCount(condition.operator as FilterOperator);
+    const after = operandCount(operator as FilterOperator);
+    const next = withCondition(filter, 0, {
+      operator,
+      ...(after >= 1 && before >= 1 ? { value: condition.value } : {}),
+      ...(after === 2 && before === 2 ? { end: condition.end } : {}),
+    } as never);
+    this.changeRule(key, next, 'pointer');
+    /* An operator that wants an operand the rule lacks moves on to the value. */
+    if (after > 0 && !isFilterActive(next)) this.valueOpen.set(key);
+  }
+
+  protected toggleValue(key: string, open: boolean) {
+    const current = this.valueOpen();
+    this.valueOpen.set(open ? key : current === key ? null : current);
+  }
+
+  /** Done in a chip's value popover: the condition is said, and the popover closes. */
+  protected finishValue(key: string) {
+    const field = fieldByKey(this.fields(), key);
+    const rule = ruleFor(this.shown(), key);
     if (rule && isFilterActive(rule)) {
-      this.announce(`${field.label}: ${this.sentenceOf(field, rule)}`);
+      this.announce(`${field?.label ?? key}: ${this.sentenceOf(field, rule)}`);
     }
-    this.openPill.set(null);
-    if (this.pendingField()?.key === field.key && !(rule && isFilterActive(rule))) {
-      this.pendingField.set(undefined);
-    }
+    if (this.valueOpen() === key) this.valueOpen.set(null);
   }
 
-  protected togglePill(field: FilterBarField, open: boolean) {
-    this.openPill.set(open ? field.key : null);
-  }
-
-  protected startPending(field: FilterBarField) {
-    this.pendingField.set(field);
-  }
-
-  protected togglePending(field: FilterBarField, open: boolean) {
-    if (!open && !this.isActive(field.key)) this.pendingField.set(undefined);
+  /** The value segment drawn without its popover: under the narrow breakpoint it opens the builder. */
+  protected onValueSegment(chip: BarChip, event: Event) {
+    if (this.readOnly() || chip.unknown || !this.narrow()) return;
+    this.openBuilderOn(chip.key, event);
   }
 
   protected removeField(key: string, source?: unknown) {
-    const field = this.fields().find((entry) => entry.key === key);
+    const field = fieldByKey(this.fields(), key);
     if (field?.required) {
-      this.refuse(field);
+      this.refuse(field, false);
       return;
+    }
+    const pending = this.pending();
+    if (pending?.key === key) {
+      this.pending.set(null);
+      if (ruleFor(this.shown(), key) === undefined) return;
     }
     this.edit(withoutRuleFor(this.shown(), key), 'remove', source);
     this.announce(this.labelSet().removed(field?.label ?? key));
@@ -1852,9 +2259,62 @@ export class SlFilterBar {
     this.edit(removeNodeAt(shown, path), 'remove', source);
   }
 
+  /**
+   * `Delete` and `Backspace` on a segment remove the condition. The keyboard
+   * goes to the segment of the same role on the chip that followed, else on
+   * the one before, else to `add` — chosen before the removal, while both
+   * neighbours are still in the DOM, and focused after the render.
+   */
+  protected onChipKeyDown(event: KeyboardEvent, key: string) {
+    if (event.key !== 'Delete' && event.key !== 'Backspace') return;
+    const segment = (event.target as HTMLElement).closest<HTMLElement>(SEGMENTS);
+    if (!segment || this.locked() || event.defaultPrevented) return;
+    event.preventDefault();
+    if (fieldByKey(this.fields(), key)?.required) {
+      this.removeField(key, event);
+      return;
+    }
+    const bar = this.barElement().nativeElement;
+    const chips = [...bar.querySelectorAll<HTMLElement>("[data-part='chip']")].filter(
+      (chip) => chip.checkVisibility?.() ?? true,
+    );
+    const here = segment.closest<HTMLElement>("[data-part='chip']");
+    const index = here ? chips.indexOf(here) : -1;
+    const role = segment.getAttribute('data-part');
+    const neighbour = chips[index + 1] ?? chips[index - 1];
+    const target =
+      neighbour?.querySelector<HTMLElement>(`[data-part='${role}']`) ??
+      neighbour?.querySelector<HTMLElement>('button') ??
+      null;
+    this.focusAfterRender(target);
+    this.removeField(key, event);
+  }
+
+  protected onGroupKeyDown(event: KeyboardEvent, path: FilterPath) {
+    if ((event.key !== 'Delete' && event.key !== 'Backspace') || this.locked()) return;
+    event.preventDefault();
+    this.removeNode(path, event);
+  }
+
+  private focusAfterRender(target: HTMLElement | null) {
+    afterNextRender(
+      {
+        write: () => {
+          const bar = this.barElement().nativeElement;
+          (target?.isConnected
+            ? target
+            : bar.querySelector<HTMLElement>("[data-part='add']")
+          )?.focus();
+        },
+      },
+      { injector: this.injector },
+    );
+  }
+
   protected clearAll(source?: unknown) {
     const next = this.baseline();
     this.invalid.set(null);
+    this.pending.set(null);
     if (this.applyValue() === 'manual') {
       this.draft.set({ query: '', value: next });
     } else {
@@ -1872,7 +2332,7 @@ export class SlFilterBar {
     if (!draft) return;
     const lacking = this.missing(draft.value);
     if (lacking[0]) {
-      this.refuse(lacking[0]);
+      this.refuse(lacking[0], true);
       return;
     }
     this.invalid.set(null);
@@ -1903,11 +2363,46 @@ export class SlFilterBar {
     }
   }
 
+  /* ── The builder ───────────────────────────────────────────────────── */
+
+  /** Opens the builder, with the card at `at.path` expanded, on `at.tree` when given. */
+  protected openBuilderAt(
+    reason: FilterBarOpenReason,
+    source?: unknown,
+    at?: { tree?: FilterGroup | null; path: FilterPath },
+  ) {
+    if (at?.tree !== undefined) this.seed = at.tree;
+    this.expanded.set(at ? at.path.join('.') : null);
+    this.requestOpen(true, reason, source);
+  }
+
+  /** The builder open on one field's rule: the applied one, the pending one, or a fresh one. */
+  private openBuilderOn(key: string, source?: unknown) {
+    const field = fieldByKey(this.fields(), key);
+    const shown = this.shown();
+    const pending = this.pending();
+    const applied = shown
+      ? shown.rules.findIndex((node) => !isFilterGroup(node) && node.field === key)
+      : -1;
+    if (applied !== -1 && pending?.key !== key) {
+      this.openBuilderAt('pointer', source, { path: [applied] });
+      return;
+    }
+    const filter = pending?.key === key ? pending.filter : field ? blankRule(field) : null;
+    if (!filter) return;
+    const tree = withRuleFor(shown, key, filter);
+    this.pending.set(null);
+    this.openBuilderAt('pointer', source, {
+      path: [tree.rules.findIndex((node) => !isFilterGroup(node) && node.field === key)],
+      tree,
+    });
+  }
+
   protected commitDrawer() {
     const next = this.drawerDraft();
     const lacking = this.missing(next);
     if (lacking[0]) {
-      this.refuse(lacking[0]);
+      this.refuse(lacking[0], false);
       return;
     }
     this.invalid.set(null);
@@ -1972,20 +2467,12 @@ export class SlFilterBar {
     this.searchInput().nativeElement.focus();
   }
 
-  /** Opens the builder. */
-  openBuilder() {
-    this.requestOpen(true, 'programmatic');
+  /**
+   * Opens the builder. With a path, the rule at that path opens as the
+   * expanded card. `open` is the model's name here, so the handle's `open(path)`
+   * is `openBuilder(path)`.
+   */
+  openBuilder(path?: FilterPath) {
+    this.openBuilderAt('programmatic', undefined, path ? { path } : undefined);
   }
-}
-
-function countActive(group: FilterGroup | null): number {
-  const active = normalizeFilterGroup(group);
-  if (!active) return 0;
-  let count = 0;
-  const walk = (node: FilterNode) => {
-    if (isFilterGroup(node)) node.rules.forEach(walk);
-    else count += 1;
-  };
-  walk(active);
-  return count;
 }

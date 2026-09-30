@@ -41,3 +41,27 @@
 [data-ui='app-shell'][data-nav-mode='inline']:not([data-open]) app-connection-status {
   display: none;
 }
+
+/*
+ * A painted region: the ground restated on the region, so it resolves in the
+ * scheme the region carries rather than in the page's.
+ */
+.painted {
+  --slotted-app-shell-banner-surface: var(--slotted-surface);
+  --slotted-app-shell-nav-surface: var(--slotted-surface);
+}
+
+/* A wash behind the frame: two pools of the accent tone, through the family's own token. */
+.frame-wash {
+  --slotted-app-shell-frame-image:
+    radial-gradient(
+      60% 80% at 0% 0%,
+      color-mix(in oklab, var(--slotted-tone-accent-surface) 90%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      50% 70% at 100% 100%,
+      color-mix(in oklab, var(--slotted-tone-accent-surface) 70%, transparent),
+      transparent
+    );
+}

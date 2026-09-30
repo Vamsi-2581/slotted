@@ -11,18 +11,94 @@
   @default {
     <div
       slAppShell
-      primary="banner"
-      [canvas]="canvas()"
+      [primary]="preset().primary"
+      [canvas]="preset().canvas"
+      [separation]="preset().separation"
+      [class.frame-wash]="preset().wash"
       navMode="auto"
       collapsedTo="rail"
       scroll="content"
       [(navOpen)]="navOpen"
     >
-      <header slAppShellBanner>
+      <!-- A dark region is the scheme on the region, and its ground restated there. -->
+      <header
+        slAppShellBanner
+        [attr.data-slotted-scheme]="preset().darkBanner ? 'dark' : null"
+        [class.painted]="preset().darkBanner"
+      >
         <app-banner />
       </header>
 
-      <nav slAppShellNav>
+      <nav
+        slAppShellNav
+        [attr.data-slotted-scheme]="preset().darkNav ? 'dark' : null"
+        [class.painted]="preset().darkNav"
+      >
+        @if (preset().twoLevel) {
+          <!-- Two levels: the modules in a strip of the rail's own, one module in the column. -->
+          <div slAppShellNavRail aria-label="Modules">
+            @if (organization(); as org) {
+              <span
+                slAvatar
+                shape="square"
+                size="sm"
+                tone="accent"
+                variant="solid"
+                [name]="org.displayName"
+              ></span>
+            }
+            @for (m of modules(); track m.id) {
+              <button
+                slIconButton
+                type="button"
+                size="md"
+                tone="secondary"
+                [variant]="m.id === railModule()?.id ? 'solid' : 'ghost'"
+                [attr.aria-current]="m.id === railModule()?.id ? 'true' : null"
+                [attr.aria-label]="m.label"
+                (click)="pickModule(m)"
+              >
+                <ng-icon [name]="m.icon" />
+              </button>
+            }
+          </div>
+          <div slAppShellNavHeader class="nav-row">
+            <span class="workspace">
+              <span class="workspace-name">{{ railModule()?.label }}</span>
+              <span class="workspace-scope">{{ organization()?.displayName }}</span>
+            </span>
+          </div>
+          <div slAppShellNavBody>
+            @if (session.session() && railModule(); as module) {
+              <div
+                slSideNavigation
+                [attr.aria-busy]="session.status() === 'loading' || null"
+                [value]="current()"
+                (valueChangeRequest)="navigate($event)"
+              >
+                <ul slSideNavigationList>
+                  @for (x of module.destinations; track x.id) {
+                    <li slSideNavigationItem [value]="x.id">
+                      <a slSideNavigationLink [routerLink]="x.path">
+                        <span slSideNavigationLabel>{{ x.label }}</span>
+                        @if (countFor(x); as count) {
+                          <span slSideNavigationCount>{{ count }}</span>
+                        }
+                      </a>
+                    </li>
+                  } @empty {
+                    <li slSideNavigationItem [value]="module.id">
+                      <a slSideNavigationLink [routerLink]="module.path">
+                        <span slSideNavigationIcon><ng-icon [name]="module.icon" /></span>
+                        <span slSideNavigationLabel>{{ module.label }}</span>
+                      </a>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+        } @else {
         <div slAppShellNavHeader class="nav-row">
           <span class="nav-mark">
             @if (organization(); as org) {
@@ -95,6 +171,7 @@
             </div>
           }
         </div>
+        }
         @if (health.degraded()) {
           <div slAppShellNavFooter class="nav-row">
             <app-connection-status />

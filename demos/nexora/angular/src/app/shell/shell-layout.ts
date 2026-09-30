@@ -5,6 +5,7 @@ import {
   effect,
   inject,
   signal,
+  untracked,
   viewChild,
   type OnInit,
 } from '@angular/core';
@@ -19,10 +20,11 @@ import {
   SlAppShellNavBody,
   SlAppShellNavFooter,
   SlAppShellNavHeader,
+  SlAppShellNavRail,
   SlAppShellNavToggle,
 } from '@slotted/angular/app-shell';
 import { SlAvatar } from '@slotted/angular/avatar';
-import { SlButton } from '@slotted/angular/button';
+import { SlButton, SlIconButton } from '@slotted/angular/button';
 import {
   SlResultState,
   SlResultStateActions,
@@ -60,6 +62,7 @@ import {
 } from '../core/nav/nav.model';
 import { PreferencesStore } from '../core/session/preferences.store';
 import { SessionStore } from '../core/session/session.store';
+import { shellPreset } from '../core/shell/shell-presets';
 import { ShortcutsService } from '../core/shortcuts/shortcuts.service';
 import { Banner } from './banner/banner';
 import { ShortcutsDialog } from './shortcuts/shortcuts-dialog';
@@ -87,9 +90,11 @@ interface Section {
     SlAppShellNavBody,
     SlAppShellNavFooter,
     SlAppShellNavHeader,
+    SlAppShellNavRail,
     SlAppShellNavToggle,
     SlAvatar,
     SlButton,
+    SlIconButton,
     SlResultState,
     SlResultStateActions,
     SlResultStateContent,
@@ -124,8 +129,10 @@ export class ShellLayout implements OnInit {
   readonly health = inject(TransportHealth);
 
   readonly navOpen = signal(this.readNavOpen());
-  /** The plane the reader chose in their preferences; `inset` before they choose. */
-  readonly canvas = computed(() => this.preferences.preferences().canvas);
+  /** The arrangement the reader chose in their preferences; `inset` before they choose. */
+  readonly preset = computed(() => shellPreset(this.preferences.preferences().shell));
+  /** The module the reader pressed in the strip, until the next navigation. */
+  private readonly pickedModule = signal<string | null>(null);
   readonly url = toSignal(
     this.router.events.pipe(
       filter((e) => e instanceof NavigationEnd),
@@ -155,6 +162,16 @@ export class ShellLayout implements OnInit {
     const m = moduleFor(this.url());
     return m === undefined ? [] : [m.id];
   });
+  /**
+   * The module the two-level column shows: the one the reader pressed, or the
+   * one the route is in, or the first. It is the product's state; the shell
+   * holds only whether the region is open.
+   */
+  readonly railModule = computed(() => {
+    const modules = this.modules();
+    const picked = modules.find((m) => m.id === this.pickedModule());
+    return picked ?? moduleFor(this.url()) ?? modules[0] ?? null;
+  });
   readonly organization = computed(() => this.session.session()?.organization ?? null);
   /** What the session is scoped to: every warehouse, or the ones the operator can see. */
   readonly scope = computed(() => {
@@ -169,6 +186,11 @@ export class ShellLayout implements OnInit {
 
   constructor() {
     this.shortcuts.install();
+    // A navigation settles which module the column shows: the route's.
+    effect(() => {
+      this.url();
+      untracked(() => this.pickedModule.set(null));
+    });
     effect(() => {
       if (this.shortcuts.demoRequested() > 0) this.banner()?.demo().openAt();
     });
@@ -202,6 +224,19 @@ export class ShellLayout implements OnInit {
     if (target !== undefined && this.router.url !== target.path) {
       void this.router.navigateByUrl(target.path);
     }
+  }
+
+  /**
+   * A module with destinations shows them in the column, opening the region
+   * when it is closed to its strip; one without is a destination itself.
+   */
+  pickModule(module: NavModule): void {
+    if (module.destinations.length === 0) {
+      void this.router.navigateByUrl(module.path);
+      return;
+    }
+    this.pickedModule.set(module.id);
+    this.navOpen.set(true);
   }
 
   countFor(destination: NavDestination): number | null {

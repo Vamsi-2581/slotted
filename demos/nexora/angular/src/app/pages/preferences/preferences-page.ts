@@ -14,13 +14,15 @@ import {
   SlPageHeaderTitleArea,
   SlPageHeaderTitleRow,
 } from '@slotted/angular/page-header';
-import { SlRadio, SlRadioGroup } from '@slotted/angular/radio-group';
+import { SlRadio, SlRadioDescription, SlRadioGroup } from '@slotted/angular/radio-group';
 import { SlSelect, SlSelectItem } from '@slotted/angular/select';
 import { SlToastService } from '@slotted/angular/toast';
 
 import { visibleModules } from '../../core/nav/nav.model';
 import { PreferencesStore, type UserPreferences } from '../../core/session/preferences.store';
+import { SHELL_PRESETS } from '../../core/shell/shell-presets';
 import { SessionStore } from '../../core/session/session.store';
+import { ShellPreview } from './shell-preview';
 
 @Component({
   selector: 'app-preferences-page',
@@ -43,7 +45,9 @@ import { SessionStore } from '../../core/session/session.store';
     SlPageHeaderTitleArea,
     SlPageHeaderTitleRow,
     SlRadio,
+    SlRadioDescription,
     SlRadioGroup,
+    ShellPreview,
     SlSelect,
     SlSelectItem,
   ],
@@ -56,6 +60,16 @@ import { SessionStore } from '../../core/session/session.store';
     .checks {
       display: grid;
       gap: var(--slotted-space-2);
+    }
+    /* The arrangements, as a grid of framed choices of equal width. */
+    .shells {
+      display: grid;
+      gap: var(--slotted-space-4);
+      grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    }
+    .shell-option {
+      display: grid;
+      gap: var(--slotted-space-3);
     }
   `,
   template: `
@@ -101,19 +115,30 @@ import { SessionStore } from '../../core/session/session.store';
             </div>
           </div>
           <div slField>
-            <label slFieldLabel>Shell canvas</label>
+            <label slFieldLabel>Shell layout</label>
+            <span slFieldDescription>
+              How the bar, the navigation and the page are arranged. Every layout keeps the same
+              destinations, the same keyboard order and the same shortcuts.
+            </span>
             <div
               slRadioGroup
-              [value]="draft().canvas"
-              (valueChange)="patch({ canvas: $any($event.value) })"
+              name="shell"
+              variant="tile"
+              [value]="draft().shell"
+              (valueChange)="patch({ shell: $any($event.value) })"
             >
-              <div slRadio value="inset">Inset</div>
-              <div slRadio value="flush">Flush</div>
+              <div class="shells">
+                @for (preset of presets; track preset.id) {
+                  <div slRadio [value]="preset.id">
+                    <span class="shell-option">
+                      <app-shell-preview [preset]="preset" />
+                      {{ preset.label }}
+                    </span>
+                    <p slRadioDescription>{{ preset.description }}</p>
+                  </div>
+                }
+              </div>
             </div>
-            <span slFieldDescription>
-              Inset sinks the frame and raises the content as a card. Flush runs the content to the
-              edge of the window and separates it with a rule.
-            </span>
           </div>
           <div slField>
             <label slFieldLabel>Start page</label>
@@ -165,6 +190,7 @@ export class PreferencesPage {
   private readonly preferences = inject(PreferencesStore);
   private readonly session = inject(SessionStore);
   private readonly toasts = inject(SlToastService);
+  readonly presets = SHELL_PRESETS;
   readonly draft = signal<UserPreferences>(structuredClone(this.preferences.preferences()));
   readonly dirty = computed(
     () => JSON.stringify(this.draft()) !== JSON.stringify(this.preferences.preferences()),

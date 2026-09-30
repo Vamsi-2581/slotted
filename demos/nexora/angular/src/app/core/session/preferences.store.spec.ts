@@ -26,20 +26,29 @@ describe('PreferencesStore', () => {
   });
 
   /**
-   * The canvas is not written onto `html`: it is an input of one shell, so the
-   * store only has to keep it and give it back.
+   * The shell arrangement is not written onto `html`: it is an input of one
+   * shell, so the store only has to keep it and give it back.
    */
-  it('keeps the shell canvas per user, inset until the reader says otherwise', () => {
+  it('keeps the shell arrangement per user, inset until the reader says otherwise', () => {
     const prefs = TestBed.inject(PreferencesStore);
-    expect(prefs.preferences().canvas).toBe('inset');
+    expect(prefs.preferences().shell).toBe('inset');
 
-    prefs.update({ canvas: 'flush' });
+    prefs.update({ shell: 'floating' });
 
-    expect(prefs.preferences().canvas).toBe('flush');
+    expect(prefs.preferences().shell).toBe('floating');
     const userId = TestBed.inject(SessionStore).user()!.id;
     const stored = JSON.parse(localStorage.getItem(`nexora:preferences:${userId}`) ?? '{}') as {
-      canvas: string;
+      shell: string;
     };
-    expect(stored.canvas).toBe('flush');
+    expect(stored.shell).toBe('floating');
+  });
+
+  /** A stored arrangement the catalogue no longer has falls back to the default. */
+  it('reads an arrangement it does not know as the default', () => {
+    const prefs = TestBed.inject(PreferencesStore);
+    const userId = TestBed.inject(SessionStore).user()!.id;
+    localStorage.setItem(`nexora:preferences:${userId}`, JSON.stringify({ shell: 'retired' }));
+    prefs.update({});
+    expect(prefs.preferences().shell).toBe('inset');
   });
 });

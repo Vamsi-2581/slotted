@@ -1,16 +1,13 @@
 import { computed, DOCUMENT, effect, inject, Injectable, signal } from '@angular/core';
 
+import { DEFAULT_SHELL_PRESET, shellPreset, type ShellPresetId } from '../shell/shell-presets';
 import { SessionStore } from './session.store';
 
 export interface UserPreferences {
   scheme: 'light' | 'dark' | 'system';
   density: 'comfortable' | 'compact' | 'dense';
-  /**
-   * Which surface carries which plane in the shell, in the family's own words:
-   * `inset` sinks the frame and raises the content as a card, `flush` runs the
-   * content to the edge and separates it with a rule.
-   */
-  canvas: 'inset' | 'flush';
+  /** The arrangement of the shell, one of the catalogue in `core/shell/shell-presets.ts`. */
+  shell: ShellPresetId;
   startRoute: string;
   notifications: { emailApprovals: boolean; emailMentions: boolean; inAppOperationalAlerts: boolean };
 }
@@ -18,7 +15,7 @@ export interface UserPreferences {
 export const DEFAULT_PREFERENCES: UserPreferences = {
   scheme: 'system',
   density: 'comfortable',
-  canvas: 'inset',
+  shell: DEFAULT_SHELL_PRESET,
   startRoute: '/dashboard',
   notifications: { emailApprovals: true, emailMentions: true, inAppOperationalAlerts: true },
 };
@@ -28,7 +25,7 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
  * user preferences, and the scheme has to apply before the backend has seeded.
  *
  * The scheme and the density are written onto `html`, because everything under
- * it answers them. The canvas is an input of one shell, so the shell reads it
+ * it answers them. The arrangement is an input of one shell, so the shell reads it
  * here instead.
  */
 @Injectable({ providedIn: 'root' })
@@ -92,6 +89,7 @@ export class PreferencesStore {
       return {
         ...DEFAULT_PREFERENCES,
         ...stored,
+        shell: shellPreset(stored.shell).id,
         notifications: { ...DEFAULT_PREFERENCES.notifications, ...(stored.notifications ?? {}) },
       };
     } catch {

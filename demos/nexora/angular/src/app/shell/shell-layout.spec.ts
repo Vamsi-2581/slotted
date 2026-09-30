@@ -38,20 +38,58 @@ describe('ShellLayout', () => {
   });
 
   /**
-   * The shell draws the plane the reader chose. `inset` is what the preference
-   * starts at, so a reader who has chosen nothing sees the shell the demo has
-   * always drawn.
+   * The shell draws the arrangement the reader chose. `inset` is what the
+   * preference starts at, so a reader who has chosen nothing sees the shell the
+   * demo has always drawn.
    */
-  it('draws the canvas the reader chose in their preferences', async () => {
+  it('draws the arrangement the reader chose in their preferences', async () => {
     const harness = await RouterTestingHarness.create('/dashboard');
     const shell = () =>
       harness.fixture.nativeElement.querySelector('[data-ui="app-shell"]') as HTMLElement;
     expect(shell().getAttribute('data-canvas')).toBe('inset');
+    expect(shell().getAttribute('data-primary')).toBe('banner');
+    expect(shell().getAttribute('data-separation')).toBe('rule');
 
-    TestBed.inject(PreferencesStore).update({ canvas: 'flush' });
+    TestBed.inject(PreferencesStore).update({ shell: 'tones' });
     harness.fixture.detectChanges();
 
     expect(shell().getAttribute('data-canvas')).toBe('flush');
+    expect(shell().getAttribute('data-primary')).toBe('main');
+    expect(shell().getAttribute('data-separation')).toBe('tone');
+  });
+
+  /** A dark region is the scheme on the region, and its ground restated there. */
+  it('paints the column dark when the arrangement says so', async () => {
+    const harness = await RouterTestingHarness.create('/dashboard');
+    TestBed.inject(PreferencesStore).update({ shell: 'dark-column' });
+    harness.fixture.detectChanges();
+
+    const nav = harness.fixture.nativeElement.querySelector('[data-part="nav"]') as HTMLElement;
+    expect(nav.getAttribute('data-slotted-scheme')).toBe('dark');
+  });
+
+  /**
+   * The two-level arrangement puts the modules in a strip of the rail's own and
+   * the destinations of one module in the column. The module shown follows the
+   * route, and pressing another shows its destinations.
+   */
+  it('shows the modules in a strip and one module in the column', async () => {
+    const harness = await RouterTestingHarness.create('/dashboard');
+    TestBed.inject(PreferencesStore).update({ shell: 'two-level' });
+    harness.fixture.detectChanges();
+    const root = harness.fixture.nativeElement as HTMLElement;
+
+    const rail = root.querySelector('[data-part="nav-rail"]') as HTMLElement;
+    expect(rail).not.toBeNull();
+    const sales = rail.querySelector('button[aria-label="Sales"]') as HTMLButtonElement;
+    expect(sales).not.toBeNull();
+    expect(root.querySelectorAll('nav').length).toBeGreaterThanOrEqual(1);
+
+    sales.click();
+    harness.fixture.detectChanges();
+    expect(sales.getAttribute('aria-current')).toBe('true');
+    const column = root.querySelector('[data-part="nav-body"]') as HTMLElement;
+    expect(column.textContent).toContain('Quotes');
   });
 
   /**

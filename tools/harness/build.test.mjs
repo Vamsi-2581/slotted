@@ -114,6 +114,18 @@ test('lets no cell leave the page ground showing beside it', () => {
 });
 
 /**
+ * The page lays its cells out on its own `main`, and a family that renders a
+ * `main` of its own — `app-shell` — sits inside a cell. An unscoped `main`
+ * rule made the shell's content region a wrapping flex row, and every scene's
+ * page shrank to the width of its widest line.
+ */
+test('lays out its own main and no main a family renders', () => {
+  const html = render();
+  assert.match(html, /body > main \{ display: flex; flex-wrap: wrap \}/);
+  assert.doesNotMatch(html, /\n\s*main \{/);
+});
+
+/**
  * Grouped scheme-major the three stage widths alternated at every step, so no
  * two neighbouring cells were the same size. Width-major puts the three schemes
  * of one scene at one size side by side, which is both tidier and the

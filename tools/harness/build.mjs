@@ -260,7 +260,7 @@ export function renderHarness({
      The separator is an edge on the cell rather than a gap over a coloured
      ground, for the same reason: an edge belongs to the box it separates and
      has nothing to leak through. */
-  main { display: flex; flex-wrap: wrap }
+  body > main { display: flex; flex-wrap: wrap }
   /* Grows to fill its line and never shrinks. A basis that did not grow left
      the ground of the page showing to the right of every short line: a
      720-pixel stage is one cell on a 1440-pixel window, and the other seven

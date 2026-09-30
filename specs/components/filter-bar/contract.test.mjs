@@ -34,26 +34,70 @@ test('holds a FilterGroup whose leaves are the column descriptor, unchanged', ()
 });
 
 /**
- * Three tab stops however many fields a product declares. The root is a
- * search landmark rather than a toolbar because the APG toolbar pattern asks a
+ * Two tab stops however many fields a product declares. The root is a search
+ * landmark rather than a toolbar because the APG toolbar pattern asks a
  * toolbar to avoid controls that need the arrow keys, and the search field is
- * one; the bar and the chips each carry one stop with arrows inside.
+ * one. Every other control — a pill, each segment of each chip, add, clear —
+ * is one roving set, which the pattern's note on toolbars of several rows
+ * allows.
  */
-test('is a search landmark holding a toolbar and a grid', () => {
+test('is a search landmark holding one toolbar whose chips are groups', () => {
   assert.equal(contract.rootRole, 'search');
   assert.match(contract.pattern.url, /patterns\/toolbar/);
-  assert.match(contract.pattern.chips, /patterns\/grid/);
+  assert.match(contract.pattern.rows, /wrap from row to row/);
+  assert.equal(contract.pattern.chips, undefined);
+  assert.equal(contract.wiring.chips, undefined);
   assert.match(contract.wiring.bar, /role=toolbar/);
-  assert.match(contract.wiring.chips, /role=grid/);
+  assert.match(contract.wiring.bar, /chip segment/);
+  assert.match(contract.wiring.chip, /role=group/);
   assert.match(contract.wiring.pill, /aria-haspopup=dialog/);
   assert.match(contract.wiring.count, /aria-live=polite/);
+});
+
+/**
+ * A chip is its condition written in segments, each answering one question:
+ * the field is fixed and only read, the operator opens a menu, the value a
+ * popover, and the cross removes. The one-target chip it replaces reopened the
+ * operand to change the operator.
+ */
+test('writes a chip as field, operator, value and remove', () => {
+  const segments = ['chip-field', 'chip-operator', 'chip-value', 'chip-remove'];
+  const at = filterBar.parts.indexOf('chip');
+  assert.deepEqual(filterBar.parts.slice(at + 1, at + 5), segments);
+  assert.match(contract.wiring.chipSegments, /chip-field is a span and never focusable/);
+  assert.match(contract.wiring.chipSegments, /chip-operator a button with aria-haspopup=menu/);
+  assert.match(contract.wiring.chipSegments, /chip-value a button with aria-haspopup=dialog/);
+  assert.match(contract.wiring.chipSegments, /absent on a required field/);
+  assert.match(contract.surfaces.chip, /moves on to the value popover/);
+});
+
+/**
+ * An unfinished condition is drawn, never applied: the engine already keeps an
+ * inactive rule out, so the chip is the bar's own until it completes.
+ */
+test('draws an incomplete condition without emitting it', () => {
+  assert.match(contract.incomplete.rule, /data-incomplete/);
+  assert.match(contract.incomplete.ownership, /onValueChange does not emit it/);
+  assert.match(contract.surfaces.add, /incomplete/);
+  assert.ok(contract.dataAttributes['data-incomplete']);
+  assert.ok(contract.dataAttributes['data-pinned']);
+  assert.ok(contract.dataAttributes['data-compact']);
+  assert.equal(contract.dataAttributes['data-filtered'], undefined);
+  assert.equal(contract.dataAttributes['data-bar-wrapped'], undefined);
+});
+
+test('reads without writing under readOnly', () => {
+  assert.ok(filterBar.capabilities.includes('readOnly'));
+  assert.ok(filterBar.states.includes('readonly'));
+  assert.equal(contract.stateAttributes.readonly, 'data-readonly');
+  assert.equal(filterBar.defaults.readOnly, false);
 });
 
 /**
  * The APG pattern, key by key, so the keyboard table can be audited against
  * the source rather than remembered.
  */
-test('transcribes the toolbar and grid keyboard, and the two keys of its own', () => {
+test('transcribes the toolbar keyboard, and the keys of its own', () => {
   const keys = contract.keyboard.map((entry) => entry.key);
   assert.deepEqual(keys, [
     'Tab / Shift+Tab',
@@ -72,7 +116,7 @@ test('transcribes the toolbar and grid keyboard, and the two keys of its own', (
     }
   }
   const remove = contract.keyboard.find((entry) => entry.key === 'Delete / Backspace');
-  assert.match(remove.focus, /next chip, else the previous, else add/);
+  assert.match(remove.focus, /same role on the next chip, else on the previous, else add/);
   assert.match(remove.effect, /reason remove/);
 });
 
@@ -130,7 +174,8 @@ test('folds behind one button below the narrow breakpoint, and the builder is a 
     /^filter-bar, inline-size, on the root; the grid is on frame/,
   );
   assert.match(contract.responsive.narrow, /36rem/);
-  assert.match(contract.responsive.wide, /64rem/);
+  assert.equal(contract.responsive.wide, undefined);
+  assert.match(contract.responsive.lines, /the bar on the second/);
   assert.ok(filterBar.parts.includes('frame'));
   assert.match(contract.surfaces.builder, /drawer/);
   assert.match(contract.surfaces.summary, /Filters \(n\)/);
@@ -152,21 +197,20 @@ test('names the owner of every declined capability', () => {
   for (const [capability, reason] of Object.entries(contract.declined)) {
     assert.match(
       reason,
-      /table|data-grid|column-manager|end slot|consumer|application|builder/,
+      /table|data-grid|column-manager|end slot|consumer|application|builder|join|engine/,
       `${capability} declines without naming an owner`,
     );
   }
 });
 
-test('names the thirty-one parts a filter bar is made of', () => {
-  assert.equal(filterBar.parts.length, 31);
+test('names the thirty-five parts a filter bar is made of', () => {
+  assert.equal(filterBar.parts.length, 35);
   for (const part of [
     'search',
     'bar',
     'pill',
     'add',
     'clear',
-    'chips',
     'chip',
     'count',
     'builder',
@@ -214,4 +258,23 @@ test('declares a scenario for every capability the page has to show', () => {
   ]) {
     assert.ok(contract.scenarios.filterBar.includes(scenario), scenario);
   }
+});
+
+/**
+ * A phone gets one surface for every edit and a builder it can use: the bar
+ * becomes one row that scrolls sideways, every edit opens the builder as a
+ * bottom sheet, and the builder lists each rule as a card that expands in
+ * place, with nesting drawn as a rail rather than a gutter.
+ */
+test('serves a phone with one scrolling row, a sheet and rule cards', () => {
+  assert.match(contract.responsive.narrow, /scrolls sideways/);
+  assert.match(contract.surfaces.builder, /from the bottom as a sheet/);
+  assert.match(contract.surfaces.narrow, /open the builder, with the rule they name expanded/);
+  assert.match(contract.builderCards.when, /builder's own width under 30rem/);
+  assert.match(contract.builderCards.rule, /rule-summary/);
+  assert.match(contract.builderCards.rule, /data-expanded/);
+  assert.match(contract.builderCards.nesting, /rail/);
+  assert.ok(filterBar.parts.includes('rule-summary'));
+  assert.ok(filterBar.states.includes('expanded'));
+  assert.equal(contract.stateAttributes.expanded, 'data-expanded');
 });

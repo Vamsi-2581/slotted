@@ -51,9 +51,10 @@ test('styles or wears every part the contract declares', () => {
 });
 
 /**
- * The root measures and the frame lays out, because a container query cannot
- * restyle the element it measures. Three compositions, at the two literal
- * breakpoints the contract records.
+ * Two lines from 36rem up — the search, the consumer's controls and the
+ * count, then the toolbar — and the fold under 36rem. The wide composition
+ * that put the toolbar beside the search is gone with the measurement it
+ * needed.
  */
 test('composes by container query with the container on the root and the grid on the frame', () => {
   assert.ok(
@@ -63,12 +64,12 @@ test('composes by container query with the container on the root and the grid on
   );
   assert.ok(
     normalized.includes(
-      "[data-part='frame']{align-items:start;column-gap:var(--_gap);display:grid;",
+      "[data-part='frame']{align-items:start;column-gap:var(--_gap);display:grid;grid-template-areas:'searchendcount''barbarbar';",
     ),
   );
-  assert.match(declarations, /@container slotted-filter-bar \(min-width: 64rem\)/);
+  assert.doesNotMatch(declarations, /min-width: 64rem/);
+  assert.doesNotMatch(declarations, /data-bar-wrapped/);
   assert.match(declarations, /@container slotted-filter-bar \(max-width: 36rem\)/);
-  assert.match(contract.responsive.wide, /64rem/);
   assert.match(contract.responsive.narrow, /36rem/);
   /* The builder is portaled and measures itself. */
   assert.match(declarations, /@container slotted-filter-bar-builder \(max-width: 30rem\)/);
@@ -96,18 +97,49 @@ test('lays the popover editor out as a column at its own width, outside the root
 });
 
 /**
- * Below the breakpoint the pills and the chips give way to one control. They
- * leave the focus order as well as the picture: `visibility: hidden` is what
- * `createArrowNavigation` reads to skip a stop nothing can stand on, and
- * `display: none` alone leaves the computed visibility at `visible`.
+ * Under 36rem the bar is one row that scrolls sideways: the summary, every
+ * chip — the folded ones too — and the empty pills, none of them shrinking.
+ * What a phone does not draw leaves the focus order as well as the picture:
+ * `visibility: hidden` is what `createArrowNavigation` reads to skip a stop,
+ * and `display: none` alone leaves the computed visibility at `visible`. The
+ * selector goes through the frame, so it outranks the rule that lays the
+ * manual actions out.
  */
-test('folds the pills and the chips behind the summary, and out of the roving ring', () => {
-  const narrow = declarations.slice(declarations.indexOf('(max-width: 36rem)'));
-  assert.match(narrow, /\[data-part='chips'\]\s*\{\s*display: none;\s*visibility: hidden;/);
-  assert.match(
-    narrow,
-    /\[data-part='summary'\]\s*\{\s*display: inline-flex;\s*visibility: visible;/,
+test('keeps every condition on one sideways row on a phone, and drops what it does not draw from the roving ring', () => {
+  const narrow = normalized.slice(normalized.indexOf('(max-width:36rem)'));
+  const row =
+    narrow
+      .split("[data-ui='filter-bar']>[data-part='frame']>[data-part='bar']{")[1]
+      ?.split('}')[0] ?? '';
+  assert.match(row, /flex-wrap:nowrap;/);
+  assert.match(row, /overflow-x:auto;/);
+  assert.doesNotMatch(row, /margin|padding/);
+  assert.ok(
+    narrow.includes(
+      "[data-ui='filter-bar']>[data-part='frame']>[data-part='bar']>:is([data-part='summary'],[data-part='pill']):focus-visible{outline-offset:calc(var(--slotted-focus-ring-width,2px)*-1);}",
+    ),
   );
+  assert.ok(
+    narrow.includes(
+      "[data-ui='filter-bar']>[data-part='frame']>[data-part='bar']>:is([data-part='summary'],[data-part='chip'],[data-part='pill']){flex:none;}",
+    ),
+  );
+  assert.ok(
+    narrow.includes(
+      "[data-ui='filter-bar']>[data-part='frame']>[data-part='bar']>:is([data-part='more'],[data-part='add'],[data-part='clear'],[data-part='actions']),[data-ui='filter-bar'][data-part='chip']>[data-part='chip-operator']{display:none;visibility:hidden;}",
+    ),
+  );
+  assert.ok(
+    narrow.includes(
+      "[data-ui='filter-bar']>[data-part='frame']>[data-part='bar']>[data-part='chip'][data-folded]{display:inline-flex;visibility:visible;}",
+    ),
+  );
+  assert.ok(
+    narrow.includes(
+      "[data-ui='filter-bar'][data-part='chip-value']>[data-operator]{display:inline;}",
+    ),
+  );
+  assert.ok(narrow.includes("[data-part='summary']{display:inline-flex;visibility:visible;}"));
   assert.ok(normalized.includes("[data-part='summary']{display:none;visibility:hidden;}"));
   assert.ok(
     normalized.includes("[data-part='chip'][data-folded]{display:none;visibility:hidden;}"),
@@ -129,61 +161,121 @@ test('hides the shortcut legend where the primary input is a touch screen', () =
 });
 
 /**
- * Below 30rem the rule stacks: the field, then the operator and the operand
- * across both columns, the remove control in the second. A second track of
- * `auto` took the spanning operand's whole width — a spanning item hands its
- * size to the non-flexible track first — and left the field 34 pixels wide,
- * a chevron with no name. The track is the remove control's own width.
+ * A nested group narrower than 30rem inside a wide builder stacks its row:
+ * the field, then the operator and the operand across both columns, the
+ * remove control in the second. A second track of `auto` took the spanning
+ * operand's whole width — a spanning item hands its size to the non-flexible
+ * track first — and left the field 34 pixels wide. The query reads the
+ * group's own container, so the card form stays the builder's decision.
  */
 test('stacks a builder rule on a fixed remove track so the spanning operand cannot widen it', () => {
   const narrow = declarations.slice(
-    declarations.indexOf('slotted-filter-bar-builder (max-width: 30rem)'),
+    declarations.indexOf('slotted-filter-bar-group (max-width: 30rem)'),
   );
   const block = narrow.slice(0, narrow.indexOf('}') + 1);
   assert.match(block, /grid-template-columns: minmax\(0, 1fr\) var\(--slotted-target-min, 24px\);/);
   assert.doesNotMatch(block, /minmax\(0, 1fr\) auto/);
+  assert.ok(normalized.includes('container-name:slotted-filter-bar-group;'));
 });
 
 /**
- * A pill holding a rule is a chosen state, carried as the pair the foundation
- * asks for — the accent border and the accent surface — and its chevron is
- * the `icon` the binding draws, turned here and painted by no mask.
+ * Under 30rem of the builder every rule is a card: its sentence, a button
+ * that expands it, and its remove control on the sentence's first line; the
+ * controls leave the picture and the tab order until the card is expanded.
+ * A nested group is a rail, and the first "Where" is not drawn.
  */
-test('fills a pill from the accent pair and turns the chevron it borrows', () => {
+test('lists rules as cards that expand in place when the builder is narrow', () => {
+  const at = normalized.indexOf('@containerslotted-filter-bar-builder(max-width:30rem){');
+  assert.notEqual(at, -1, 'a card form on the builder container');
+  const cards = normalized.slice(at);
+  assert.match(
+    cards,
+    /\[data-part='rule'\],\[data-ui='filter-bar'\]\[data-part='builder'\]\[data-part='rule'\]\[data-operands='0'\]\{background-color:var\(--_surface\);border:var\(--_border-width\)solidvar\(--_edge\);/,
+  );
   assert.ok(
-    normalized.includes(
-      "[data-part='pill'][data-filtered]{background-color:var(--_filtered-surface);border-color:var(--_filtered-edge);color:var(--_filtered-ink);}",
+    cards.includes(
+      "[data-part='rule']:not([data-expanded]):is([data-part='field'],[data-part='operator'],[data-part='operand']){display:none;visibility:hidden;}",
     ),
   );
-  assert.ok(normalized.includes('--_filtered-edge:var(--slotted-tone-accent-border,Highlight)'));
-  assert.ok(normalized.includes('--_filtered-surface:var(--slotted-tone-accent-surface,Canvas)'));
+  assert.match(
+    cards,
+    /border-inline-start:var\(--slotted-border-width-medium,2px\)solidvar\(--_edge\);/,
+  );
+  assert.ok(
+    cards.includes("[data-part='rules']>[data-part='conjunction']:first-child{display:none;}"),
+  );
+  assert.ok(
+    normalized.includes(
+      "[data-ui='filter-bar'][data-part='builder'][data-part='rule-summary']{display:none;visibility:hidden;}",
+    ),
+  );
+});
+
+/**
+ * A pinned field with no condition is a slot: a dashed edge, no ground, no
+ * lift, the muted ink and a plus. The accent pair it wore when filled is gone
+ * with the filled state — a pinned field with a condition is a chip.
+ */
+test('draws an empty pinned field as a dashed slot, and no accent', () => {
+  const pill =
+    normalized.split("[data-ui='filter-bar'][data-part='pill']{")[1]?.split('}')[0] ?? '';
+  assert.match(pill, /background-color:transparent;/);
+  assert.match(pill, /border:var\(--_border-width\)dashedvar\(--_edge\);/);
+  assert.match(pill, /color:var\(--_muted\);/);
+  assert.doesNotMatch(pill, /box-shadow/);
+  assert.doesNotMatch(normalized, /data-filtered|--_filtered/);
   assert.ok(
     normalized.includes("[data-part='pill']>[data-ui='icon']{--slotted-icon-size:var(--_icon);"),
-  );
-  assert.ok(
-    normalized.includes(
-      "[data-part='pill'][aria-expanded='true']>[data-ui='icon']{transform:rotate(180deg);}",
-    ),
   );
   assert.doesNotMatch(declarations, /mask-image/);
 });
 
 /**
- * The chip is `tag`'s, and its remove control is `tag`'s: this sheet draws a
- * remove of its own only on a rule inside the builder. The first capture of
- * the family showed two crosses on every chip, one per sheet.
+ * A chip is one capsule of segments: the capsule owns the edge, the ground
+ * and the lift; each segment owns its hover and press; the seam divides; the
+ * end segments take the capsule's corners so a ground or a ring follows the
+ * curve. A segment's ring is drawn inward, as every inner control's is.
  */
-test('leaves the chip’s remove control to tag and sizes its own only on a rule', () => {
-  assert.doesNotMatch(declarations, /\[data-ui='filter-bar'\]\s+\[data-part='remove'\]/);
+test('writes a chip as one capsule of segments with inward rings', () => {
+  const chip =
+    normalized.split("[data-ui='filter-bar'][data-part='chip']{")[1]?.split('}')[0] ?? '';
+  assert.match(chip, /block-size:var\(--_height\);/);
+  assert.match(chip, /border:var\(--_border-width\)solidvar\(--_edge\);/);
+  assert.match(chip, /border-radius:var\(--_radius\);/);
+  assert.match(chip, /box-shadow:var\(--slotted-control-shadow,none\);/);
+  assert.doesNotMatch(chip, /overflow/);
+  assert.ok(
+    normalized.includes(
+      "[data-ui='filter-bar'][data-part='chip']>*+*{border-inline-start:var(--_border-width)solidvar(--_seam);}",
+    ),
+  );
+  assert.ok(
+    normalized.includes(
+      "[data-ui='filter-bar'][data-part='chip']>:focus-visible{outline:var(--slotted-focus-ring-width,2px)solidvar(--slotted-focus-ring-color,Highlight);outline-offset:calc(var(--slotted-focus-ring-width,2px)*-1);}",
+    ),
+  );
+  assert.ok(normalized.includes("[data-part='chip'][data-incomplete]{border-style:dashed;"));
+  assert.match(
+    normalized,
+    /\[data-part='chip'\]>:first-child\{border-end-start-radius:var\(--_radius\);/,
+  );
+  assert.match(
+    normalized,
+    /\[data-part='chip'\]>:last-child\{border-end-end-radius:var\(--_radius\);/,
+  );
+});
+
+/** The builder row's remove is this sheet's; the chip's is its own segment. Neither is painted by a pseudo-element. */
+test('sizes a builder row’s remove and draws no cross in CSS', () => {
   assert.ok(
     normalized.includes(
       "[data-part='rule']>[data-part='remove']>[data-ui='icon']{--slotted-icon-size:var(--_icon);}",
     ),
   );
-  assert.doesNotMatch(declarations, /\[data-part='remove'\]::after/);
+  assert.doesNotMatch(declarations, /\[data-part='(chip-)?remove'\]::after/);
 });
 
-/** A field's name and its sentence are two isolated runs, so a right-to-left name beside an ISO date reorders nothing. */
+/** The field's name, the operator and the value are isolated runs, so a right-to-left name beside an ISO date reorders nothing. */
 test('isolates the field name from its sentence', () => {
   assert.ok(
     normalized.includes(
@@ -191,7 +283,9 @@ test('isolates the field name from its sentence', () => {
     ),
   );
   assert.ok(
-    normalized.includes("[data-part='chip'][data-part='label']>span{unicode-bidi:isolate;}"),
+    normalized.includes(
+      "[data-ui='filter-bar'][data-part='chip']>*>span:not([data-ui]),[data-ui='filter-bar'][data-part='chip-operator']{unicode-bidi:isolate;}",
+    ),
   );
 });
 
@@ -209,10 +303,9 @@ test('reads the page property for sticky', () => {
 test('borrows the ring for every control of its own', () => {
   for (const part of ['pill', 'more']) {
     assert.ok(
-      normalized.includes(`[data-part='${part}']`) &&
-        normalized.includes(
-          ':focus-visible{outline:var(--slotted-focus-ring-width,2px)solidvar(--slotted-focus-ring-color,Highlight);outline-offset:var(--slotted-focus-ring-offset,2px);}',
-        ),
+      normalized.includes(
+        `[data-part='${part}']:focus-visible{outline:var(--slotted-focus-ring-width,2px)solidvar(--slotted-focus-ring-color,Highlight);outline-offset:var(--slotted-focus-ring-offset,2px);}`,
+      ),
       `${part} draws the shared ring`,
     );
   }
@@ -226,7 +319,11 @@ test('renders every part and every state in the harness fragment', () => {
     assert.ok(fragment.includes(state), `harness exercises no ${state}`);
   }
   for (const attribute of [
-    'data-filtered',
+    'data-pinned',
+    'data-incomplete',
+    'data-compact',
+    'data-expanded',
+    'data-operator',
     'data-dirty',
     'data-folded',
     'data-apply="manual"',
@@ -238,7 +335,8 @@ test('renders every part and every state in the harness fragment', () => {
   }
   assert.ok(fragment.includes('role="search"'));
   assert.ok(fragment.includes('role="toolbar"'));
-  assert.ok(fragment.includes('role="grid"'));
+  assert.ok(fragment.includes('role="group"'));
+  assert.ok(!fragment.includes('role="grid"'));
 });
 
 /**
@@ -265,37 +363,19 @@ test('reaches the operator and the operand through a display-contents wrapper', 
 });
 
 /**
- * Below 36rem the consumer's `end` controls take a line of their own. Sharing
- * the summary's line, an `auto` track for them took every pixel a toolbar of
- * three controls asked for and folded the summary to one letter per line
- * (Nexora, 390 pixels); a shrinking track folded their own buttons instead.
- * A bar with no `end` keeps the two-column line.
+ * Below 36rem the consumer's `end` controls take a line of their own under
+ * the row: sharing a line, an `auto` track for them took every pixel a
+ * toolbar of three controls asked for (Nexora, 390 pixels).
  */
 test("gives a narrow bar's end controls a line of their own", () => {
   const narrow = normalized.slice(normalized.indexOf('(max-width:36rem)'));
-  assert.match(narrow, /grid-template-columns:minmax\(0,1fr\)auto;/);
   assert.match(
     narrow,
-    /\[data-ui='filter-bar'\]>\[data-part='frame'\]:has\(>\[data-part='end'\]:not\(:empty\)\)\{grid-template-areas:'searchsearch''barbar''endend''countcount';\}/,
-  );
-});
-
-/**
- * The width alone does not say the toolbar fits beside the search: at 1440
- * pixels (Nexora, /sales/orders) the consumer's three controls left the
- * toolbar 364 pixels, its pills wrapped onto a second line, and the search
- * and the controls stood in the middle of the two. A root the binding marks
- * `data-bar-wrapped` takes the medium composition inside the wide query, the
- * toolbar on a line of its own.
- */
-test('gives a wrapping toolbar a line of its own inside the wide composition', () => {
-  const wide = normalized.slice(
-    normalized.indexOf('@containerslotted-filter-bar(min-width:64rem){'),
-    normalized.indexOf("[data-ui='filter-bar'][data-size='sm']"),
+    /grid-template-areas:'search''bar''count';grid-template-columns:minmax\(0,1fr\);/,
   );
   assert.match(
-    wide,
-    /\[data-ui='filter-bar'\]\[data-bar-wrapped\]>\[data-part='frame'\]\{grid-template-areas:'searchendcount''barbarbar''chipschipschips';grid-template-columns:minmax\(0,1fr\)autoauto;\}/,
+    narrow,
+    /\[data-ui='filter-bar'\]>\[data-part='frame'\]:has\(>\[data-part='end'\]:not\(:empty\)\)\{grid-template-areas:'search''bar''end''count';\}/,
   );
 });
 
@@ -345,13 +425,12 @@ test('keeps a line of its type for the count while the first answer is on its wa
 });
 
 /**
- * The rule's remove control and the chips' more stood a target minimum on a
- * touch screen, 24 pixels in a row of 44-pixel fields. They reach the
- * comfortable target by a transparent `::before` centred on the box, and the
- * box keeps its 24 pixels: a block padding with a clipped ground left the
- * remove's border box, and its focus ring, 24 wide and 44 tall.
+ * The builder row's remove control stood a target minimum on a touch screen,
+ * 24 pixels in a row of 44-pixel fields. It reaches the comfortable target by
+ * a transparent `::before` centred on the box, and the box keeps its 24
+ * pixels. The chip's segments and `more` already take the control height.
  */
-test('makes the rule’s remove and the chips’ more full touch targets on a coarse pointer', () => {
+test('makes the builder row’s remove and more full touch targets on a coarse pointer', () => {
   const at = normalized.indexOf('@media(pointer:coarse){');
   assert.notEqual(at, -1, 'a coarse-pointer block');
   const coarse = normalized.slice(at);
@@ -364,4 +443,9 @@ test('makes the rule’s remove and the chips’ more full touch targets on a co
   );
   const box = coarse.split(`${selector}{`)[1]?.split('}')[0] ?? '';
   assert.doesNotMatch(box, /background-clip|padding-block|margin-block/);
+  assert.ok(
+    normalized.includes(
+      "[data-ui='filter-bar'][data-part='more']{align-items:center;appearance:none;background:none;block-size:var(--_height);",
+    ),
+  );
 });

@@ -21,27 +21,31 @@
   "pattern": {
     "url": "https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/",
     "title": "Toolbar Pattern",
-    "readOn": "2026-09-14",
-    "chips": "https://www.w3.org/WAI/ARIA/apg/patterns/grid/",
-    "chipsTitle": "Grid Pattern, the layout grid half",
+    "readOn": "2026-09-30",
     "root": "role=search rather than role=toolbar, because the pattern asks a toolbar to avoid controls whose operation requires the pair of arrow keys used for toolbar navigation, and a text box is one",
-    "departure": "the optional 'focus is set on the control that last had focus' is taken for the bar and the chips; the grid pattern's in-place Enter editing is not a chip's — Enter opens the same popover a pointer gets"
+    "rows": "the pattern's note for toolbars with multiple rows: Left Arrow and Right Arrow wrap from row to row, so the pills, every chip's segments, add, clear and the actions are one roving set however many lines the bar takes",
+    "departure": "the optional 'focus is set on the control that last had focus' is taken; Delete and Backspace on a chip segment remove its condition, which the pattern does not describe and a chip row in tags-input already does"
   },
   "wiring": {
     "root": "role=search with aria-label from labels.bar unless the consumer wrote one",
-    "bar": "role=toolbar, aria-label labels.filters, one tab stop, roving tabindex from @slotted/core/focus",
-    "chips": "role=grid with one role=row and a role=gridcell per chip, aria-label labels.applied, one tab stop",
-    "pill": "button, aria-haspopup=dialog, aria-expanded, data-filtered while the field holds a rule",
-    "chip": "tag worn as data-ui; accessible name '<field label>: <sentence>'; the remove control is tag's",
+    "bar": "role=toolbar, aria-label labels.filters, one tab stop, roving tabindex from @slotted/core/focus over the pills, every chip segment that is a button, more, add, clear and the actions",
+    "pill": "button, a pinned field with no condition; aria-haspopup=dialog, because pressing it opens the value popover of the chip that takes its place",
+    "chip": "role=group inside the toolbar, aria-label '<field label>: <sentence>', with ', incomplete' appended while its condition is inactive",
     "count": "aria-live=polite on the part itself",
-    "builder": "drawer worn as data-ui, titled labels.builder"
+    "builder": "drawer worn as data-ui, titled labels.builder",
+    "chipSegments": "chip-field is a span and never focusable; chip-operator a button with aria-haspopup=menu opening the operators of the field's kind; chip-value a button with aria-haspopup=dialog opening the operand in a popover, absent while the operator takes no operand, named by the whole list; chip-remove a button named labels.remove(field), absent on a required field; chip-value holds the operator's words in a span with data-operator, drawn only under 36rem where the operator segment is not",
+    "add": "menu trigger listing the fields; with a chip in the bar it draws only its glyph, data-compact, and keeps labels.add as its accessible name and title",
+    "ruleSummary": "a button with aria-expanded and aria-controls naming the rule's controls; one span with data-sentence holds three spans with data-field, data-operator and data-value, and the chevron follows it; drawn only in the card form",
+    "summary": "button, first in the bar's DOM order so the arrows reach it first where it is drawn; 'Filters (n)'"
   },
   "surfaces": {
-    "pill": "popover editing one first-level rule",
-    "chip": "the same popover, opened from the chip",
-    "builder": "drawer editing the whole tree, on every width; below 30rem of the builder a rule stacks — the field, then the operator and the operand across the row, the remove control in a track of its own width — so the field keeps its name",
+    "pill": "none of its own: pressing a pill draws the field's chip in the same place, incomplete, with the value popover open — the path add takes — so the popover is never anchored to an element that is about to become another",
+    "chip": "chip-operator opens a menu of operators; chip-value opens a popover holding the operand alone. Choosing an operator whose operands the rule lacks moves on to the value popover",
+    "builder": "a drawer on every width: from the inline end while the viewport is 36rem wide or more, from the bottom as a sheet sized to its content below that — a sheet is where a phone keeps a thumb, and the side a drawer opens from is the viewport's question, not the bar's. Below 30rem of its own width the builder lists each rule as a card (see builderCards)",
     "summary": "below the narrow breakpoint the pills and the chips fold behind one button, 'Filters (n)', which opens the builder",
-    "reason": "a tree with a nested group needs a column; a popover anchored to a pill has neither the height nor the anchor for it"
+    "reason": "a tree with a nested group needs a column; a popover anchored to a pill has neither the height nor the anchor for it",
+    "add": "a menu of the fields not yet filtered; choosing one draws its chip at once, incomplete, with the field's defaultOperator, and opens the value popover on it",
+    "narrow": "under 36rem of the bar a chip's value segment, a pill and the summary all open the builder, with the rule they name expanded — a popover anchored to a chip in a scrolling row has no room on a phone, and one surface for every edit is the one a thumb learns"
   },
   "apply": {
     "live": "a popover commits every change and the engine's inactive rule keeps a half-typed condition out; the builder commits on Apply; removing a chip, Clear and choosing a preset commit at once",
@@ -61,11 +65,9 @@
   },
   "responsive": {
     "container": "filter-bar, inline-size, on the root; the grid is on frame, one element in, because a container query cannot restyle the element it measures",
-    "wide": "64rem and up: search, toolbar, the consumer's controls and the count on one line, the chips under it; when the toolbar would take two lines on that line the root carries data-bar-wrapped and takes the medium composition instead",
-    "medium": "36rem to 64rem: the search shares its line with the consumer's controls and the count; the toolbar takes a line of its own; the chips under both",
-    "narrow": "36rem, literal by rule 4 of the token foundation: the search alone, then the summary, then the consumer's controls on a line of their own, then the count; pills and chips hidden",
-    "alignment": "every member of the frame starts at the top of its line and is a control tall — the count centres its line in a control height beside the search, and keeps its type's height on a line of its own when narrow — so a line stays aligned with the first line of pills while they wrap",
-    "fallback": "the binding reads the toolbar in the composition the root's width selects, with data-bar-wrapped removed for the read, so the answer does not depend on the fallback it draws: a control whose top is at or below another control's bottom is on a second line. It reads before paint on mount and on the microtask after the frame's contents change, and a resize on the next frame, because the attribute changes the root's height and a change inside a ResizeObserver callback to a box it observes ends the loop with an error"
+    "narrow": "under 36rem, literal by rule 4 of the token foundation: the search; then the bar as one row that scrolls sideways — the summary first, then every chip including the folded ones, then the empty pills; the consumer's controls; the count. A chip there draws its field, its value with the operator's words inside it, and its remove control; the operator segment, more, add, clear and the actions are not drawn",
+    "alignment": "every member of the first line starts at its top and is a control tall — the count centres its line in a control height beside the search, and keeps its type's height on a line of its own when narrow",
+    "lines": "36rem and up: the search, the consumer's controls and the count on the first line; the bar on the second, wrapping"
   },
   "sticky": {
     "axis": "sticky, off by default",
@@ -82,15 +84,15 @@
   "keyboard": [
     {
       "key": "Tab / Shift+Tab",
-      "effect": "search, then the bar, then the chips, then what follows",
-      "focus": "into the bar or the chips: the last-focused control, else the first enabled",
-      "source": "toolbar pattern; grid pattern"
+      "effect": "search, then the bar, then what follows",
+      "focus": "into the bar: the last-focused control, else the first enabled",
+      "source": "toolbar pattern"
     },
     {
       "key": "ArrowLeft / ArrowRight",
-      "effect": "previous / next control in the bar, previous / next chip; wraps; mirrored under dir=rtl",
+      "effect": "previous / next control of the bar — a pill, a chip segment, more, add, clear, an action — wrapping from line to line and from the last to the first; mirrored under dir=rtl",
       "focus": "the neighbour",
-      "source": "toolbar pattern, loop"
+      "source": "toolbar pattern, multiple rows"
     },
     {
       "key": "ArrowUp / ArrowDown",
@@ -100,21 +102,21 @@
     },
     {
       "key": "Home / End",
-      "effect": "first / last control in the bar or the chips",
+      "effect": "first / last control of the bar",
       "focus": "the first / the last",
-      "source": "toolbar pattern (optional); grid pattern"
+      "source": "toolbar pattern (optional)"
     },
     {
       "key": "Enter / Space",
-      "effect": "on a pill, a chip or add: opens the editor",
+      "effect": "on a pill: opens its editor. On chip-operator: opens the operator menu. On chip-value: opens the operand popover. On chip-remove: removes the condition. On add: opens the field menu",
       "focus": "the first control inside the surface",
       "source": "button"
     },
     {
       "key": "Delete / Backspace",
-      "effect": "on a chip: removes the rule, reason remove; a required field's chip refuses and takes data-invalid",
-      "focus": "the next chip, else the previous, else add",
-      "source": "grid pattern; createRemovalFocus"
+      "effect": "on any segment of a chip: removes the condition, reason remove; a required field's chip refuses and takes data-invalid",
+      "focus": "the segment of the same role on the next chip, else on the previous, else add",
+      "source": "tags-input; createRemovalFocus"
     },
     {
       "key": "Escape",
@@ -140,7 +142,10 @@
     "columnChooser": "column-manager, docs/component-features.md §12; its trigger goes in the end slot",
     "queryLanguage": "EUI and AG Grid both build a parser and an autocompleter over field names; the tree is the value here and the builder its editor. A product that wants the expression form parses to FilterGroup and passes value",
     "applyingRows": "the consumer, or data-grid — createFilterGroupPredicate and createSearchPredicate are what it applies",
-    "presetLifecycle": "saving, renaming and deleting a preset are the application's; onPresetSave is the one request"
+    "presetLifecycle": "saving, renaming and deleting a preset are the application's; onPresetSave is the one request",
+    "reorder": "Alt with the arrows moving a chip, which ReUI ships: under join and the order of the conditions changes nothing a reader can see, and pinned fields keep their declared order",
+    "rowMenu": "duplicate, negate and wrap-in-group per builder row, which ReUI ships: the engine's operators already carry the negations and Add group composes the wrap; reopening recorded in docs/process/build-order.md",
+    "veto": "a veto before the change (ReUI onBeforeQueryChange): the controlled pair is the veto — a consumer that does not apply the request refuses it"
   },
   "provides": {
     "filterBarDefaults": ["labels", "apply", "queryDelay", "chipLimit", "shortcut"]
@@ -148,7 +153,6 @@
   "labels": [
     "bar",
     "filters",
-    "applied",
     "builder",
     "search",
     "add",
@@ -182,7 +186,11 @@
     "cleared",
     "required",
     "unknownField",
-    "operators"
+    "operators",
+    "noValue",
+    "incomplete",
+    "moreValues",
+    "readOnly"
   ],
   "imperative": ["focusSearch()", "open(path?)"],
   "axes": {
@@ -202,17 +210,21 @@
     "loading": "data-loading",
     "open": "data-open",
     "invalid": "data-invalid",
-    "revealed": "data-revealed"
+    "revealed": "data-revealed",
+    "readonly": "data-readonly",
+    "expanded": "data-expanded"
   },
   "dataAttributes": {
-    "data-filtered": "on a pill while its field holds an active rule",
     "data-dirty": "on the root while the draft, or the value against the current preset, differs",
     "data-apply": "live or manual, on the root",
     "data-sticky": "on the root while sticky",
-    "data-bar-wrapped": "on the root while the toolbar takes more than one line in the composition the root's width selects; the wide composition then draws the medium one",
     "data-kind": "on a rule, the field's kind",
-    "data-operands": "on a rule, 0, 1 or 2",
-    "data-depth": "on a group, its nesting depth from 0"
+    "data-operands": "on a rule and on a chip, 0, 1 or 2",
+    "data-depth": "on a group, its nesting depth from 0",
+    "data-pinned": "on a chip whose field is pinned; removing its condition draws the field's pill in its place",
+    "data-incomplete": "on a chip while its condition lacks an operand",
+    "data-compact": "on add while a chip is in the bar: the glyph alone",
+    "data-operator": "on the span inside chip-value and rule-summary that holds the operator's words"
   },
   "stateModel": {
     "filter": {
@@ -255,9 +267,11 @@
     }
   },
   "literals": {
-    "--slotted-filter-bar-chip-max": "18rem: no scale holds a measure, and container owns the page's",
     "--slotted-filter-bar-editor-size": "18rem: the width of the rule a pill opens, because a popover shrink-wraps",
-    "narrow breakpoint": "36rem, inside @container, where a custom property is invalid"
+    "narrow breakpoint": "36rem, inside @container, where a custom property is invalid",
+    "--slotted-filter-bar-value-max": "12rem: the value segment truncates there and carries the whole list in its title and name; no scale holds a measure, and container owns the page's",
+    "builder cards": "30rem, the builder's own width, inside @container, where a custom property is invalid",
+    "--slotted-filter-bar-value-max-narrow": "9rem: the value segment's measure on a phone, where one chip and the start of the next should share 375 pixels"
   },
   "members": {
     "filterBar": {
@@ -273,7 +287,8 @@
         "loading": false,
         "defaultQuery": "",
         "defaultOpen": false,
-        "defaultRevealed": false
+        "defaultRevealed": false,
+        "readOnly": false
       },
       "capabilities": [
         "filter",
@@ -283,6 +298,7 @@
         "revealed",
         "size",
         "disabled",
+        "readOnly",
         "loading",
         "wiring"
       ],
@@ -293,7 +309,9 @@
         "focus-visible",
         "disabled",
         "loading",
+        "readonly",
         "open",
+        "expanded",
         "invalid",
         "revealed"
       ],
@@ -311,8 +329,11 @@
         "reset",
         "summary",
         "end",
-        "chips",
         "chip",
+        "chip-field",
+        "chip-operator",
+        "chip-value",
+        "chip-remove",
         "more",
         "count",
         "builder",
@@ -321,6 +342,7 @@
         "rules",
         "conjunction",
         "rule",
+        "rule-summary",
         "field",
         "operator",
         "operand",
@@ -352,5 +374,15 @@
       "content",
       "keyboard"
     ]
+  },
+  "incomplete": {
+    "rule": "a chip whose condition lacks an operand its operator needs carries data-incomplete: a dashed edge, and labels.noValue in the value segment",
+    "ownership": "the incomplete condition is the bar's own state and not the value's: the engine's inactive rule already keeps it out, onValueChange does not emit it, Escape closes its popover without deleting it; it goes when removed, when completed — it then enters the value — or when a controlled value replaces it from outside"
+  },
+  "builderCards": {
+    "when": "the builder's own width under 30rem — the builder is the container, so every group in it takes the same form; a nested group narrower than 30rem inside a wider builder only stacks its row",
+    "rule": "a card: rule-summary — the field, the operator and the value as one sentence, a button with aria-expanded — and the rule's remove control beside it. Pressing the sentence expands the card, data-expanded, and the field, the operator and the operand stack under it at the card's full width; pressing it again collapses it. One card is expanded at a time, and a rule just added opens expanded",
+    "nesting": "a nested group is a rail — a line on its inline-start edge and one step of inset — instead of a box with a gutter, so a level costs about ten pixels rather than eighty; the joining word stands on a line of its own between two cards, and the first row's 'Where' is not drawn",
+    "actions": "Add rule and Add group share a line in two equal columns; Clear all and Save as view take the line under them"
   }
 }

@@ -61,11 +61,19 @@ export interface FilterBarField {
   key: string;
   label: string;
   kind: FilterKind;
+  /**
+   * Drawn before the field's name on its chip: a glyph name from
+   * `@slotted/core/glyph`, or a node of the consumer's.
+   */
+  icon?: string | ReactNode | undefined;
   /** Narrows the operators the kind offers. AG Grid's `filterOptions`. */
   operators?: readonly string[] | undefined;
   /** The operator a new rule starts with. Defaults to the kind's. */
   defaultOperator?: string | undefined;
-  /** Drawn as a pill in the bar whether or not it holds a rule. Polaris's `pinned`. */
+  /**
+   * Always in sight: a dashed pill while it holds no condition, a chip in the
+   * same place once it does. Polaris's `pinned`.
+   */
   pinned?: boolean | undefined;
   /**
    * A field that always holds a rule: Clear returns it to `defaultValue`
@@ -100,8 +108,6 @@ export interface FilterBarLabels {
   bar: string;
   /** The toolbar's name. */
   filters: string;
-  /** The chip grid's name. */
-  applied: string;
   /** The drawer's title. */
   builder: string;
   search: string;
@@ -151,6 +157,14 @@ export interface FilterBarLabels {
   unknownField: string;
   /** The word before a chip's own label on its remove control. */
   remove: string;
+  /** The value segment of a condition still waiting for its value. */
+  noValue: string;
+  /** Appended to a chip's name while its condition is incomplete. */
+  incomplete: string;
+  /** After the first two values of a longer list. `{count}` is the rest. */
+  moreValues: string;
+  /** Said by the toolbar of a read-only bar. */
+  readOnly: string;
   /** `{count}` */
   appliedCount: string;
   operators: Partial<Record<FilterOperator, string>>;
@@ -239,6 +253,8 @@ export interface FilterBarProps extends Omit<
   /** A document key that focuses the search. `null` binds none. */
   shortcut?: string | null | undefined;
   disabled?: boolean | undefined;
+  /** The conditions can be read and reached, and nothing changes them. */
+  readOnly?: boolean | undefined;
   loading?: boolean | undefined;
   /** BCP 47, for the figures in the count. Defaults to the runtime's. */
   locale?: string | undefined;

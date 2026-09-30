@@ -8,13 +8,22 @@ import {
   isFilterActive,
   isFilterGroup,
   normalizeFilterGroup,
+  operandCount,
+  operatorsFor,
   removeNodeAt,
   ruleFor,
   serializeFilterGroup,
+  withCondition,
   withoutRuleFor,
   withRuleFor,
 } from '@slotted/core/filter';
-import type { FilterDescriptor, FilterGroup, FilterNode, FilterPath } from '@slotted/core/filter';
+import type {
+  FilterDescriptor,
+  FilterGroup,
+  FilterNode,
+  FilterOperator,
+  FilterPath,
+} from '@slotted/core/filter';
 import { createRemovalFocus, createRovingTabindex } from '@slotted/core/focus';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
@@ -28,9 +37,9 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { KeyboardEvent } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 
-import { Button } from '../button';
+import { Button, IconButton } from '../button';
 import {
   Drawer,
   DrawerBody,
@@ -42,7 +51,17 @@ import {
 } from '../drawer';
 import { Glyph, Icon } from '../icon';
 import { Kbd } from '../kbd';
-import { Menu, MenuContent, MenuGroup, MenuItem, MenuTrigger } from '../menu';
+import {
+  Menu,
+  MenuContent,
+  MenuGroup,
+  MenuItem,
+  MenuItemIcon,
+  MenuItemLabel,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuTrigger,
+} from '../menu';
 import {
   Popover,
   PopoverBody,
@@ -52,15 +71,16 @@ import {
   usePopover,
 } from '../popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
-import { TagButton } from '../tag';
 import { TextField } from '../text-field';
 import { fill, resolveFilterBarLabels, useFilterBarDefaults } from './filter-bar-defaults';
 import {
   blankRule,
   ConditionEditor,
+  FieldIcon,
   fieldByKey,
   GroupEditor,
   operatorName,
+  ruleWords,
 } from './filter-bar-rules';
 import type { RuleEnvironment } from './filter-bar-rules';
 import type {
@@ -82,9 +102,36 @@ export const FILTER_BAR_FALLBACK = {
   size: 'md',
 } as const;
 
-const BAR_ITEMS =
-  "[data-part='pill'], [data-part='add'], [data-part='clear'], [data-part='apply'], [data-part='reset'], [data-part='summary']";
-const CHIP_ITEMS = "[data-part='chip'] [data-part='body']";
+/**
+ * Every stop of the one toolbar, in DOM order: the arrows walk the pills, each
+ * segment of each chip, more, add, clear and the actions, line after line. A
+ * stop the stylesheet hides at this width is skipped by its visibility.
+ */
+const BAR_ITEMS = [
+  'summary',
+  'pill',
+  'chip-operator',
+  'chip-value',
+  'chip-remove',
+  'more',
+  'add',
+  'clear',
+  'reset',
+  'apply',
+]
+  .map((part) => `[data-part='${part}']`)
+  .join(', ');
+
+/** The bar's narrow breakpoint and the builder's sheet breakpoint, in rems — the stylesheet's. */
+const NARROW_REM = 36;
+
+function remToPx(element: Element, rem: number) {
+  const size = parseFloat(
+    element.ownerDocument.defaultView?.getComputedStyle(element.ownerDocument.documentElement)
+      .fontSize ?? '16',
+  );
+  return rem * (Number.isFinite(size) ? size : 16);
+}
 
 function sameGroup(a: FilterGroup | null, b: FilterGroup | null) {
   return serializeFilterGroup(a) === serializeFilterGroup(b);
@@ -113,31 +160,48 @@ function isEditable(element: Element | null) {
  */
 const STICKY_TOP = '--slotted-page-sticky-top';
 
-const BAR_WRAPPED = 'data-bar-wrapped';
-
 const useIsomorphicLayoutEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
 
 /**
- * Marks the root when the bar's controls take more than one line in the
- * composition the root's width selects. The attribute comes off before the
- * read, so the answer is the same whether the fallback it draws is in place
- * or not: read in the fallback, where the bar has a line of its own, the
- * answer would be "fits", and the next read would wrap it again. A control
- * starts a second line when its top is at or below another control's bottom,
- * because controls on one line share its middle. A control without a box —
- * hidden in this composition, or never laid out — is not counted.
+ * Whether the bar is under its narrow breakpoint. The stylesheet draws the
+ * phone's row from the same width with a container query; the binding reads it
+ * to send an edit to the builder instead of a popover.
  */
-function measureBarWrap(element: HTMLElement, barNode: HTMLElement) {
-  element.removeAttribute(BAR_WRAPPED);
-  let top = -Infinity;
-  let bottom = Infinity;
-  for (const control of barNode.children) {
-    const box = control.getBoundingClientRect();
-    if (!(box.width > 0 && box.height > 0)) continue;
-    top = Math.max(top, box.top);
-    bottom = Math.min(bottom, box.bottom);
-  }
-  element.toggleAttribute(BAR_WRAPPED, top >= bottom);
+function useNarrow(root: { current: HTMLElement | null }) {
+  const [narrow, setNarrow] = useState(false);
+  useIsomorphicLayoutEffect(() => {
+    const element = root.current;
+    if (!element || typeof ResizeObserver === 'undefined') return;
+    /* A bar with no width has not been laid out, and is not narrow. */
+    const read = () => {
+      const width = element.getBoundingClientRect().width;
+      setNarrow(width > 0 && width < remToPx(element, NARROW_REM));
+    };
+    const observer = new ResizeObserver(read);
+    observer.observe(element);
+    read();
+    return () => observer.disconnect();
+  }, []);
+  return narrow;
+}
+
+/**
+ * Whether the viewport is under the sheet breakpoint. The side a drawer opens
+ * from is the viewport's question: the builder comes up from the bottom as a
+ * sheet on a phone and from the inline end everywhere else.
+ */
+function useSheet() {
+  const [sheet, setSheet] = useState(false);
+  useEffect(() => {
+    const view = typeof window === 'undefined' ? undefined : window;
+    if (!view?.matchMedia) return;
+    const query = view.matchMedia(`(max-width: ${NARROW_REM}rem)`);
+    const read = () => setSheet(query.matches);
+    read();
+    query.addEventListener?.('change', read);
+    return () => query.removeEventListener?.('change', read);
+  }, []);
+  return sheet;
 }
 
 export function FilterBar({
@@ -166,6 +230,7 @@ export function FilterBar({
   presets,
   query: queryProp,
   queryDelay: queryDelayProp,
+  readOnly = false,
   ref,
   renderOperand,
   revealed: revealedProp,
@@ -193,7 +258,8 @@ export function FilterBar({
   const root = useRef<HTMLDivElement | null>(null);
   const search = useRef<HTMLInputElement | null>(null);
   const bar = useRef<HTMLDivElement | null>(null);
-  const chips = useRef<HTMLDivElement | null>(null);
+  const narrow = useNarrow(root);
+  const sheet = useSheet();
 
   /* ── The five values ─────────────────────────────────────────────────── */
 
@@ -379,6 +445,7 @@ export function FilterBar({
   function clearAll(source?: unknown) {
     const next = baseline();
     setInvalid(null);
+    setPending(null);
     if (apply === 'manual') {
       setDraft({ value: next, query: '' });
     } else {
@@ -394,6 +461,10 @@ export function FilterBar({
       setInvalid(key);
       announce(fill(labels.required, { field: field.label }));
       return;
+    }
+    if (pending?.key === key) {
+      setPending(null);
+      if (ruleFor(shown, key) === undefined) return;
     }
     edit(withoutRuleFor(shown, key), 'remove', source);
     announce(fill(labels.removed, { field: field?.label ?? key }));
@@ -415,6 +486,19 @@ export function FilterBar({
   }
 
   const [invalid, setInvalid] = useState<string | null>(null);
+
+  /**
+   * A condition the reader started — from `add` or from a pinned field's pill
+   * — and whose operand is not there yet. It is the bar's own and not the
+   * value's: the engine would drop it as inactive anyway, so it is drawn as an
+   * incomplete chip and enters the value the moment it is complete.
+   */
+  const [pending, setPending] = useState<{
+    key: string;
+    filter: FilterDescriptor;
+    /** Where an applied rule stood before it lost its operand, so its chip keeps its place. */
+    at?: number;
+  } | null>(null);
 
   /* ── The query ───────────────────────────────────────────────────────── */
 
@@ -471,69 +555,51 @@ export function FilterBar({
     return () => doc.removeEventListener('keydown', listener);
   }, [disabled, shortcut]);
 
-  /* ── The roving rings ────────────────────────────────────────────────── */
+  /* ── The roving ring ─────────────────────────────────────────────────── */
 
-  const firstLevel = useMemo(() => (shown ? shown.rules : []), [shown]);
-
-  const rings = useRef<{ refresh: () => void }[]>([]);
+  const ring = useRef<{ refresh: () => void } | null>(null);
   useEffect(() => {
     const barNode = bar.current;
-    const chipsNode = chips.current;
-    if (!barNode || !chipsNode) return;
-    const barRing = createRovingTabindex(barNode, { itemSelector: BAR_ITEMS });
-    const chipRing = createRovingTabindex(chipsNode, { itemSelector: CHIP_ITEMS });
-    const removal = createRemovalFocus(chipsNode, {
-      fallback: () => barNode.querySelector<HTMLElement>("[data-part='add']") ?? null,
-      itemSelector: CHIP_ITEMS,
+    if (!barNode) return;
+    /* A read-only segment keeps its stop: aria-disabled says it will not open, not that it is out of reach. */
+    const roving = createRovingTabindex(barNode, {
+      includeAriaDisabled: true,
+      itemSelector: BAR_ITEMS,
     });
-    rings.current = [barRing, chipRing];
+    /* A chip removed by the pointer: focus goes to the stop that took its place. */
+    const removal = createRemovalFocus(barNode, {
+      fallback: () => barNode.querySelector<HTMLElement>("[data-part='add']") ?? null,
+      itemSelector: BAR_ITEMS,
+    });
+    ring.current = roving;
     return () => {
-      barRing.destroy();
-      chipRing.destroy();
+      roving.destroy();
       removal.destroy();
-      rings.current = [];
+      ring.current = null;
     };
   }, []);
 
-  /* The rings read the DOM again after a chip, a pill or a control came or went. */
+  /* The ring reads the DOM again after a chip, a pill or a control came or went. */
   useEffect(() => {
-    for (const ring of rings.current) ring.refresh();
+    ring.current?.refresh();
   });
 
-  /* ── The bar's own line ──────────────────────────────────────────────── */
-
   /**
-   * Before paint on mount, and on the microtask after anything in the frame
-   * comes, goes or changes its text. A resize is read on the next frame instead:
-   * the attribute changes the root's height, and a change made inside the
-   * observer's own callback to a box it observes ends the browser's loop with
-   * an error.
+   * Where the keyboard goes after `Delete` removed a chip: the segment of the
+   * same role on the chip that followed, else on the one before, else `add`.
+   * Chosen before the removal, while both neighbours are still in the DOM, and
+   * focused before paint.
    */
+  const focusAfter = useRef<HTMLElement | null>(null);
   useIsomorphicLayoutEffect(() => {
-    const element = root.current;
-    const barNode = bar.current;
-    const frame = barNode?.parentElement;
-    if (!element || !barNode || !frame) return;
-    const measure = () => measureBarWrap(element, barNode);
-    let pending = 0;
-    const sizes =
-      typeof ResizeObserver === 'undefined'
-        ? undefined
-        : new ResizeObserver(() => {
-            cancelAnimationFrame(pending);
-            pending = requestAnimationFrame(measure);
-          });
-    sizes?.observe(element);
-    sizes?.observe(barNode);
-    const contents = new MutationObserver(measure);
-    contents.observe(frame, { characterData: true, childList: true, subtree: true });
-    measure();
-    return () => {
-      sizes?.disconnect();
-      contents.disconnect();
-      cancelAnimationFrame(pending);
-    };
-  }, []);
+    const target = focusAfter.current;
+    if (!target) return;
+    focusAfter.current = null;
+    (target.isConnected
+      ? target
+      : bar.current?.querySelector<HTMLElement>("[data-part='add']")
+    )?.focus();
+  });
 
   /* ── Sticky ──────────────────────────────────────────────────────────── */
 
@@ -577,14 +643,50 @@ export function FilterBar({
         ? fill(labels.countOnly, { count: figure(count) })
         : fill(labels.count, { count: figure(count), total: figure(total) });
 
+  /* ── The builder ─────────────────────────────────────────────────────── */
+
+  /** The one rule card open in the builder's card form, by its path. */
+  const [expanded, setExpanded] = useState<string | null>(null);
+  /** A tree the builder opens on instead of the shown one: a rule the reader just started. */
+  const seed = useRef<FilterGroup | null>(null);
+  const drawerDraft = useDrawerDraft(open, shown, seed);
+
+  function openBuilder(
+    reason: FilterBarOpenReason,
+    source?: unknown,
+    at?: { tree?: FilterGroup | null; path: FilterPath },
+  ) {
+    if (at?.tree !== undefined) seed.current = at.tree;
+    setExpanded(at ? at.path.join('.') : null);
+    requestOpen(true, reason, source);
+  }
+
+  /** The builder open on one field's rule: the applied one, the pending one, or a fresh one. */
+  function openBuilderOn(key: string, source?: unknown) {
+    const field = fieldByKey(fields, key);
+    const applied = shown
+      ? shown.rules.findIndex((node) => !isFilterGroup(node) && node.field === key)
+      : -1;
+    if (applied !== -1 && pending?.key !== key) {
+      openBuilder('pointer', source, { path: [applied] });
+      return;
+    }
+    const filter = pending?.key === key ? pending.filter : field ? blankRule(field) : null;
+    if (!filter) return;
+    const tree = withRuleFor(shown, key, filter);
+    setPending(null);
+    openBuilder('pointer', source, {
+      path: [tree.rules.findIndex((node) => !isFilterGroup(node) && node.field === key)],
+      tree,
+    });
+  }
+
   useImperativeHandle(
     ref as never,
     () => ({
       focusSearch: () => search.current?.focus(),
-      open: (path?: FilterPath) => {
-        void path;
-        requestOpen(true, 'programmatic');
-      },
+      open: (path?: FilterPath) =>
+        openBuilder('programmatic', undefined, path ? { path } : undefined),
       get root() {
         return root.current;
       },
@@ -602,24 +704,19 @@ export function FilterBar({
     size,
   };
 
+  const locked = disabled || readOnly;
   const pinned = fields.filter((field) => field.pinned || field.required);
   const pinnedKeys = new Set(pinned.map((field) => field.key));
   const activeCount = shown ? countActive(shown) : 0;
 
-  /* A field the add menu chose and whose rule is not active yet: a chip with its editor open. */
-  const [pending, setPending] = useState<string | null>(null);
+  /** Which chip's value popover is open, by its field key. */
+  const [valueOpen, setValueOpen] = useState<string | null>(null);
 
-  const chipNodes: { node: FilterNode; path: FilterPath }[] = [];
-  firstLevel.forEach((node, index) => {
-    if (isFilterGroup(node)) chipNodes.push({ node, path: [index] });
-    else if (!pinnedKeys.has(node.field)) chipNodes.push({ node, path: [index] });
-  });
-  const pendingField = pending ? fieldByKey(fields, pending) : undefined;
   const unfiltered = fields.filter(
     (field) =>
       !pinnedKeys.has(field.key) &&
       ruleFor(shown, field.key) === undefined &&
-      field.key !== pending,
+      field.key !== pending?.key,
   );
   const sections = new Map<string | undefined, FilterBarField[]>();
   for (const field of unfiltered) {
@@ -628,42 +725,371 @@ export function FilterBar({
     sections.set(field.section, list);
   }
 
-  const folded = Math.max(0, chipNodes.length - chipLimit);
+  /** A field chosen from `add` or pressed as a pill: its chip, incomplete, with the value popover open. */
+  function start(key: string, source?: unknown) {
+    const field = fieldByKey(fields, key);
+    if (!field || locked) return;
+    if (narrow) {
+      openBuilderOn(key, source);
+      return;
+    }
+    const filter = blankRule(field);
+    if (isFilterActive(filter)) {
+      edit(withRuleFor(shown, key, filter), 'pointer', source);
+    } else {
+      setPending({ key, filter });
+    }
+    setValueOpen(key);
+  }
 
-  const editorFor = (field: FilterBarField, current: FilterDescriptor | undefined) => (
-    <RuleEditorPopoverBody
-      apply={apply}
-      current={current}
-      environment={environment}
-      field={field}
-      invalid={invalid === field.key}
-      labels={labels}
-      onChange={(next) => {
-        if (next === null) {
-          if (field.required) {
-            setInvalid(field.key);
-            announce(fill(labels.required, { field: field.label }));
-            return;
+  /** Every change to one field's rule from a chip: pending until active, then the value's. */
+  function changeRule(key: string, next: FilterDescriptor | null, reason: FilterBarValueReason) {
+    const field = fieldByKey(fields, key);
+    if (next === null) {
+      if (field?.required) {
+        setInvalid(key);
+        announce(fill(labels.required, { field: field.label }));
+        return;
+      }
+      if (pending?.key === key) setPending(null);
+      edit(withoutRuleFor(shown, key), 'clear');
+      return;
+    }
+    setInvalid(null);
+    if (!isFilterActive(next)) {
+      /* A draft holds an unfinished rule as it stands; the value never does. */
+      if (apply === 'manual') {
+        edit(withRuleFor(shown, key, next), reason);
+        return;
+      }
+      const at = shown
+        ? shown.rules.findIndex((node) => !isFilterGroup(node) && node.field === key)
+        : -1;
+      setPending({ key, filter: next, ...(at === -1 ? {} : { at }) });
+      if (at !== -1) edit(withoutRuleFor(shown, key), reason);
+      return;
+    }
+    if (pending?.key === key) setPending(null);
+    edit(withRuleFor(shown, key, next), reason);
+  }
+
+  function setOperator(key: string, filter: FilterDescriptor, operator: string, source?: unknown) {
+    const condition = (filter.conditions[0] ?? { operator }) as {
+      operator: string;
+      value?: unknown;
+      end?: unknown;
+    };
+    const before = operandCount(condition.operator as FilterOperator);
+    const after = operandCount(operator as FilterOperator);
+    const next = withCondition(filter, 0, {
+      operator,
+      ...(after >= 1 && before >= 1 ? { value: condition.value } : {}),
+      ...(after === 2 && before === 2 ? { end: condition.end } : {}),
+    } as never);
+    changeRule(key, next, 'pointer');
+    void source;
+    /* An operator that wants an operand the rule lacks moves on to the value. */
+    if (after > 0 && !isFilterActive(next)) setValueOpen(key);
+  }
+
+  function onChipKeyDown(event: KeyboardEvent<HTMLDivElement>, key: string) {
+    if (event.key !== 'Delete' && event.key !== 'Backspace') return;
+    const segment = (event.target as HTMLElement).closest<HTMLElement>(
+      "[data-part='chip-operator'], [data-part='chip-value'], [data-part='chip-remove']",
+    );
+    if (!segment || locked || event.defaultPrevented) return;
+    event.preventDefault();
+    const field = fieldByKey(fields, key);
+    if (field?.required) {
+      removeField(key, event);
+      return;
+    }
+    const chipsNow = [
+      ...(bar.current?.querySelectorAll<HTMLElement>("[data-part='chip']") ?? []),
+    ].filter((chip) => chip.checkVisibility?.() ?? true);
+    const here = segment.closest<HTMLElement>("[data-part='chip']");
+    const index = here ? chipsNow.indexOf(here) : -1;
+    const role = segment.getAttribute('data-part');
+    const neighbour = chipsNow[index + 1] ?? chipsNow[index - 1];
+    focusAfter.current =
+      neighbour?.querySelector<HTMLElement>(`[data-part='${role}']`) ??
+      neighbour?.querySelector<HTMLElement>('button') ??
+      bar.current?.querySelector<HTMLElement>("[data-part='add']") ??
+      null;
+    removeField(key, event);
+  }
+
+  /** One field's condition as a chip: the field, the operator, the value, the remove control. */
+  function chip(
+    key: string,
+    filter: FilterDescriptor,
+    flags: { pinned?: boolean; incomplete?: boolean; folded?: boolean },
+  ): ReactNode {
+    const field = fieldByKey(fields, key);
+    const unknown = field === undefined;
+    const label = field?.label ?? key;
+    const words = ruleWords(labels, field, filter);
+    const incomplete = flags.incomplete === true || !isFilterActive(filter);
+    const shownValue = words.value || labels.noValue;
+    const name =
+      (unknown ? fill(labels.unknownField, { field: key }) : label) +
+      `: ${words.operator}${words.operands > 0 ? ` ${words.value || labels.noValue}` : ''}` +
+      (incomplete ? `, ${labels.incomplete}` : '');
+    const condition = filter.conditions[0];
+    const operators =
+      field?.operators ?? (field ? (operatorsFor(field.kind) as readonly string[]) : []);
+    const lockProps = readOnly ? { 'aria-disabled': true as const } : {};
+    const segmentDisabled = disabled || unknown;
+
+    const operatorSegment =
+      readOnly || unknown ? (
+        <button
+          data-part="chip-operator"
+          disabled={disabled}
+          type="button"
+          {...(unknown ? { 'aria-disabled': true as const } : lockProps)}
+        >
+          {words.operator}
+        </button>
+      ) : (
+        <Menu>
+          <MenuTrigger
+            render={(props) => (
+              <button
+                {...(props as object)}
+                data-part="chip-operator"
+                disabled={segmentDisabled}
+                type="button"
+              >
+                {words.operator}
+              </button>
+            )}
+          />
+          <MenuContent aria-label={labels.operator}>
+            <MenuRadioGroup
+              onValueChange={(next, request) => setOperator(key, filter, next, request.source)}
+              value={condition?.operator ?? ''}
+            >
+              {operators.map((operator) => (
+                <MenuRadioItem key={operator} value={operator}>
+                  {operatorName(labels, operator)}
+                </MenuRadioItem>
+              ))}
+            </MenuRadioGroup>
+          </MenuContent>
+        </Menu>
+      );
+
+    const valueContent = (
+      <>
+        <span data-operator="">{words.operator}</span>
+        <span data-value="">{shownValue}</span>
+      </>
+    );
+    const valueName = `${words.operator} ${words.full || shownValue}`;
+    const valueTitle = words.full && words.full !== words.value ? words.full : undefined;
+
+    let valueSegment: ReactNode = null;
+    if (words.operands > 0 || incomplete) {
+      valueSegment =
+        readOnly || !field || narrow ? (
+          <button
+            aria-haspopup={narrow && !readOnly && !unknown ? 'dialog' : undefined}
+            aria-label={valueName}
+            data-part="chip-value"
+            disabled={disabled}
+            onClick={(event) =>
+              narrow && !readOnly && !unknown ? openBuilderOn(key, event) : undefined
+            }
+            title={valueTitle}
+            type="button"
+            {...(readOnly || unknown ? { 'aria-disabled': true as const } : {})}
+          >
+            {valueContent}
+          </button>
+        ) : (
+          <Popover
+            onOpenChange={(next) => setValueOpen(next ? key : valueOpen === key ? null : valueOpen)}
+            open={valueOpen === key}
+          >
+            <PopoverTrigger
+              render={(props) => (
+                <button
+                  {...(props as object)}
+                  aria-haspopup="dialog"
+                  aria-label={valueName}
+                  data-part="chip-value"
+                  disabled={disabled}
+                  title={valueTitle}
+                  type="button"
+                >
+                  {valueContent}
+                </button>
+              )}
+            />
+            <PopoverLayer>
+              <PopoverContent aria-label={label}>
+                <PopoverBody>
+                  <RuleEditorPopoverBody
+                    apply={apply}
+                    current={filter}
+                    environment={environment}
+                    field={field}
+                    invalid={invalid === key}
+                    labels={labels}
+                    onChange={(next) => changeRule(key, next, 'keyboard')}
+                    onDone={() => {
+                      const rule = ruleFor(shown, key);
+                      if (rule && isFilterActive(rule)) {
+                        announce(`${label}: ${sentence(field, rule)}`);
+                      }
+                    }}
+                    queryDelay={queryDelay}
+                    withOperator={false}
+                  />
+                </PopoverBody>
+              </PopoverContent>
+            </PopoverLayer>
+          </Popover>
+        );
+    }
+
+    return (
+      <div
+        aria-label={name}
+        data-field={key}
+        data-operands={words.operands}
+        data-part="chip"
+        key={key}
+        onKeyDown={(event) => onChipKeyDown(event, key)}
+        role="group"
+        {...(flags.pinned ? { 'data-pinned': '' } : {})}
+        {...(incomplete ? { 'data-incomplete': '' } : {})}
+        {...(flags.folded ? { 'data-folded': '' } : {})}
+        {...(unknown || invalid === key ? { 'data-invalid': '' } : {})}
+      >
+        <span data-part="chip-field">
+          <FieldIcon icon={field?.icon} />
+          <span>{label}</span>
+        </span>
+        {operatorSegment}
+        {valueSegment}
+        {field?.required || readOnly ? null : (
+          <button
+            aria-label={`${labels.remove} ${label}`}
+            data-part="chip-remove"
+            disabled={disabled}
+            onClick={(event) => removeField(key, event)}
+            type="button"
+          >
+            <Icon>
+              <Glyph name="x" />
+            </Icon>
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  /** A group at the first level, written in the builder: one sentence that opens it, and its remove control. */
+  function groupChip(node: FilterGroup, path: FilterPath, folded: boolean): ReactNode {
+    const words = `(${describeFilterGroup(node, format)})`;
+    return (
+      <div
+        aria-label={words}
+        data-operands={1}
+        data-part="chip"
+        key={`group-${path.join('.')}`}
+        onKeyDown={(event) => {
+          if ((event.key === 'Delete' || event.key === 'Backspace') && !locked) {
+            event.preventDefault();
+            removeNode(path, event);
           }
-          edit(withoutRuleFor(shown, field.key), 'clear');
-          return;
-        }
-        setInvalid(null);
-        const nextTree = withRuleFor(shown, field.key, next);
-        edit(nextTree, 'keyboard');
-        if (pending === field.key && isFilterActive(next)) setPending(null);
-      }}
-      onDone={() => {
-        const rule = ruleFor(shown, field.key);
-        if (rule && isFilterActive(rule)) {
-          announce(`${field.label}: ${sentence(field, rule)}`);
-        }
-      }}
-      queryDelay={queryDelay}
-    />
-  );
+        }}
+        role="group"
+        {...(folded ? { 'data-folded': '' } : {})}
+      >
+        <button
+          aria-haspopup="dialog"
+          data-part="chip-value"
+          disabled={disabled}
+          onClick={(event) => (readOnly ? undefined : openBuilder('pointer', event, { path }))}
+          title={words}
+          type="button"
+          {...(readOnly ? { 'aria-disabled': true as const } : {})}
+        >
+          <span data-value="">{words}</span>
+        </button>
+        {readOnly ? null : (
+          <button
+            aria-label={`${labels.remove} ${words}`}
+            data-part="chip-remove"
+            disabled={disabled}
+            onClick={(event) => removeNode(path, event)}
+            type="button"
+          >
+            <Icon>
+              <Glyph name="x" />
+            </Icon>
+          </button>
+        )}
+      </div>
+    );
+  }
 
-  const drawerDraft = useDrawerDraft(open, shown);
+  /* The bar's members in order: pinned fields as declared, then the other conditions, then the one pending. */
+  const members: ReactNode[] = [];
+  let chipIndex = 0;
+  const nextFolded = () => chipIndex++ >= chipLimit;
+  for (const field of pinned) {
+    const rule = ruleFor(shown, field.key);
+    if (rule !== undefined) {
+      members.push(chip(field.key, rule, { pinned: true, folded: nextFolded() }));
+    } else if (pending?.key === field.key) {
+      members.push(
+        chip(field.key, pending.filter, { pinned: true, incomplete: true, folded: nextFolded() }),
+      );
+    } else if (!readOnly) {
+      members.push(
+        <button
+          aria-haspopup="dialog"
+          data-field={field.key}
+          data-part="pill"
+          disabled={disabled}
+          key={field.key}
+          onClick={(event) => start(field.key, event)}
+          type="button"
+          {...(invalid === field.key ? { 'data-invalid': '', 'aria-invalid': true } : {})}
+        >
+          <Icon>
+            <Glyph name="plus" />
+          </Icon>
+          <span>{field.label}</span>
+        </button>,
+      );
+    }
+  }
+  const floating =
+    pending && !pinnedKeys.has(pending.key) && ruleFor(shown, pending.key) === undefined
+      ? pending
+      : null;
+  const pendingChip = () =>
+    floating
+      ? chip(floating.key, floating.filter, { incomplete: true, folded: nextFolded() })
+      : null;
+  let placed = false;
+  (shown?.rules ?? []).forEach((node, index) => {
+    if (floating?.at === index) {
+      members.push(pendingChip());
+      placed = true;
+    }
+    if (isFilterGroup(node)) members.push(groupChip(node, [index], nextFolded()));
+    else if (!pinnedKeys.has(node.field))
+      members.push(chip(node.field, node.filter, { folded: nextFolded() }));
+  });
+  if (floating && !placed) members.push(pendingChip());
+  const chipCount = chipIndex;
+  const folded = Math.max(0, chipCount - chipLimit);
 
   return (
     <div
@@ -676,6 +1102,7 @@ export function FilterBar({
       data-ui="filter-bar"
       ref={root}
       {...(disabled ? { 'data-disabled': '' } : {})}
+      {...(readOnly ? { 'data-readonly': '' } : {})}
       {...(loading ? { 'data-loading': '' } : {})}
       {...(dirty || presetDirty ? { 'data-dirty': '' } : {})}
       {...(open ? { 'data-open': '' } : {})}
@@ -705,85 +1132,111 @@ export function FilterBar({
           />
         </div>
 
-        <div aria-label={labels.filters} data-part="bar" ref={bar} role="toolbar">
-          {pinned.map((field) => {
-            const rule = ruleFor(shown, field.key);
-            const active = rule !== undefined && isFilterActive(rule);
-            return (
-              <Popover key={field.key}>
-                <PopoverTrigger
-                  render={(props) => (
-                    <button
-                      {...props}
-                      aria-haspopup="dialog"
-                      data-field={field.key}
-                      data-part="pill"
-                      disabled={disabled}
-                      type="button"
-                      {...(active ? { 'data-filtered': '' } : {})}
-                      {...(invalid === field.key
-                        ? { 'data-invalid': '', 'aria-invalid': true }
-                        : {})}
+        <div
+          aria-label={labels.filters}
+          data-part="bar"
+          ref={bar}
+          role="toolbar"
+          {...(readOnly ? { 'aria-description': labels.readOnly } : {})}
+          {...(revealed ? { 'data-revealed': '' } : {})}
+        >
+          <Button
+            aria-haspopup="dialog"
+            disabled={disabled}
+            onClick={(event) => openBuilder('pointer', event)}
+            render={(props) => <button {...props} data-part="summary" />}
+            size={size}
+            start={
+              <Icon>
+                <Glyph name="funnel" />
+              </Icon>
+            }
+            tone="secondary"
+            variant="outline"
+          >
+            <span>{fill(labels.summary, { count: activeCount }).replace(/\s*\(.*$/, '')}</span>{' '}
+            <span>{fill(labels.summary, { count: activeCount }).replace(/^[^(]*/, '')}</span>
+          </Button>
+
+          {members}
+
+          {folded > 0 ? (
+            <button
+              aria-expanded={revealed}
+              data-part="more"
+              disabled={disabled}
+              onClick={(event) => requestRevealed(!revealed, 'pointer', event)}
+              type="button"
+            >
+              {revealed ? labels.less : fill(labels.more, { count: folded })}
+            </button>
+          ) : null}
+
+          {readOnly ? null : (
+            <Menu>
+              <MenuTrigger
+                render={(props) =>
+                  chipCount > 0 ? (
+                    /* With a chip in the bar, add is its glyph alone, in the chips' shape; the label stays its name. */
+                    <IconButton
+                      {...(props as object)}
+                      aria-label={labels.add}
+                      disabled={disabled || unfiltered.length === 0}
+                      render={(inner) => <button {...inner} data-compact="" data-part="add" />}
+                      shape="circle"
+                      size={size}
+                      title={labels.add}
+                      tone="secondary"
+                      variant="outline"
                     >
-                      <span>{field.label}</span>
-                      {active ? <span>{sentence(field, rule)}</span> : null}
                       <Icon>
-                        <Glyph name="chevron-down" />
+                        <Glyph name="plus" />
                       </Icon>
-                    </button>
-                  )}
-                />
-                <PopoverLayer>
-                  <PopoverContent aria-label={field.label}>
-                    <PopoverBody>{editorFor(field, rule)}</PopoverBody>
-                  </PopoverContent>
-                </PopoverLayer>
-              </Popover>
-            );
-          })}
-
-          <Menu>
-            <MenuTrigger
-              render={(props) => (
-                <Button
-                  {...(props as object)}
-                  disabled={disabled || unfiltered.length === 0}
-                  render={(inner) => <button {...inner} data-part="add" />}
-                  size={size}
-                  start={
-                    <Icon>
-                      <Glyph name="plus" />
-                    </Icon>
-                  }
-                  tone="secondary"
-                  variant="ghost"
-                >
-                  {labels.add}
-                </Button>
-              )}
-            />
-            <MenuContent aria-label={labels.add}>
-              {[...sections.entries()].map(([section, list]) =>
-                section === undefined ? (
-                  list.map((field) => (
-                    <MenuItem key={field.key} onSelect={() => setPending(field.key)}>
-                      {field.label}
+                    </IconButton>
+                  ) : (
+                    <Button
+                      {...(props as object)}
+                      disabled={disabled || unfiltered.length === 0}
+                      render={(inner) => <button {...inner} data-part="add" />}
+                      size={size}
+                      start={
+                        <Icon>
+                          <Glyph name="plus" />
+                        </Icon>
+                      }
+                      tone="secondary"
+                      variant="ghost"
+                    >
+                      {labels.add}
+                    </Button>
+                  )
+                }
+              />
+              <MenuContent aria-label={labels.add}>
+                {[...sections.entries()].map(([section, list]) => {
+                  const items = list.map((field) => (
+                    <MenuItem key={field.key} onSelect={(event) => start(field.key, event)}>
+                      {field.icon ? (
+                        <MenuItemIcon>
+                          <FieldIcon icon={field.icon} />
+                        </MenuItemIcon>
+                      ) : null}
+                      <MenuItemLabel>{field.label}</MenuItemLabel>
                     </MenuItem>
-                  ))
-                ) : (
-                  <MenuGroup key={section} label={section}>
-                    {list.map((field) => (
-                      <MenuItem key={field.key} onSelect={() => setPending(field.key)}>
-                        {field.label}
-                      </MenuItem>
-                    ))}
-                  </MenuGroup>
-                ),
-              )}
-            </MenuContent>
-          </Menu>
+                  ));
+                  return section === undefined ? (
+                    items
+                  ) : (
+                    <MenuGroup key={section} label={section}>
+                      {items}
+                    </MenuGroup>
+                  );
+                })}
+              </MenuContent>
+            </Menu>
+          )}
 
-          {activeCount > 0 || shownQuery !== '' ? (
+          {!readOnly && (activeCount > 0 || shownQuery !== '' || pending) ? (
             <Button
               disabled={disabled}
               onClick={(event) => clearAll(event)}
@@ -796,7 +1249,7 @@ export function FilterBar({
             </Button>
           ) : null}
 
-          {apply === 'manual' ? (
+          {apply === 'manual' && !readOnly ? (
             <div data-part="actions">
               <Button
                 disabled={disabled || !dirty}
@@ -818,19 +1271,6 @@ export function FilterBar({
               </Button>
             </div>
           ) : null}
-
-          <Button
-            aria-haspopup="dialog"
-            disabled={disabled}
-            onClick={(event) => requestOpen(true, 'pointer', event)}
-            render={(props) => <button {...props} data-part="summary" />}
-            size={size}
-            tone="secondary"
-            variant="outline"
-          >
-            <span>{fill(labels.summary, { count: activeCount }).replace(/\s*\(.*$/, '')}</span>{' '}
-            <span>{fill(labels.summary, { count: activeCount }).replace(/^[^(]*/, '')}</span>
-          </Button>
         </div>
 
         <div data-part="end">
@@ -840,7 +1280,7 @@ export function FilterBar({
             <div data-part="preset">
               <Select
                 clearable
-                disabled={disabled}
+                disabled={disabled || readOnly}
                 items={presets.map((entry) => ({ label: entry.label, value: entry.key }))}
                 onValueChange={(next, request) =>
                   choosePreset((next as string | null) ?? null, request.source)
@@ -878,127 +1318,6 @@ export function FilterBar({
             {countText}
           </p>
         ) : null}
-
-        <div
-          aria-label={labels.applied}
-          data-part="chips"
-          ref={chips}
-          role="grid"
-          {...(revealed ? { 'data-revealed': '' } : {})}
-        >
-          <div role="row" style={{ display: 'contents' }}>
-            {chipNodes.map(({ node, path }, index) => {
-              const foldedChip = index >= chipLimit;
-              if (isFilterGroup(node)) {
-                const sentence = describeFilterGroup(node, format);
-                return (
-                  <div
-                    data-part="chip"
-                    key={`group-${path.join('.')}`}
-                    role="gridcell"
-                    {...(foldedChip ? { 'data-folded': '' } : {})}
-                  >
-                    <TagButton
-                      onClick={(event) => requestOpen(true, 'pointer', event)}
-                      onRemove={(request) => removeNode(path, request.source)}
-                      removeLabel={labels.remove}
-                      size="sm"
-                      title={sentence}
-                    >
-                      <span>({sentence})</span>
-                    </TagButton>
-                  </div>
-                );
-              }
-              const field = fieldByKey(fields, node.field);
-              const label = field?.label ?? node.field;
-              const words = sentence(field, node.filter);
-              const unknown = field === undefined;
-              return (
-                <div
-                  data-part="chip"
-                  key={node.field}
-                  role="gridcell"
-                  {...(foldedChip ? { 'data-folded': '' } : {})}
-                  {...(unknown || invalid === node.field ? { 'data-invalid': '' } : {})}
-                >
-                  {unknown ? (
-                    <TagButton
-                      aria-label={`${fill(labels.unknownField, { field: node.field })}: ${words}`}
-                      onRemove={(request) => removeField(node.field, request.source)}
-                      removeLabel={labels.remove}
-                      size="sm"
-                      title={words}
-                    >
-                      <span>{label}</span> <span>{words}</span>
-                    </TagButton>
-                  ) : (
-                    <Popover>
-                      <PopoverTrigger
-                        render={(props) => (
-                          <TagButton
-                            {...(props as object)}
-                            aria-label={`${label}: ${words}`}
-                            onRemove={(request) => removeField(node.field, request.source)}
-                            removeLabel={labels.remove}
-                            size="sm"
-                            title={`${label}: ${words}`}
-                          >
-                            <span>{label}</span> <span>{words}</span>
-                          </TagButton>
-                        )}
-                      />
-                      <PopoverLayer>
-                        <PopoverContent aria-label={label}>
-                          <PopoverBody>{editorFor(field, node.filter)}</PopoverBody>
-                        </PopoverContent>
-                      </PopoverLayer>
-                    </Popover>
-                  )}
-                </div>
-              );
-            })}
-            {pendingField ? (
-              <div data-part="chip" key={`pending-${pendingField.key}`} role="gridcell">
-                <Popover
-                  defaultOpen
-                  onOpenChange={(next) => {
-                    if (!next && !isFilterActive(ruleFor(shown, pendingField.key) ?? null))
-                      setPending(null);
-                  }}
-                >
-                  <PopoverTrigger
-                    render={(props) => (
-                      <TagButton {...(props as object)} aria-label={pendingField.label} size="sm">
-                        <span>{pendingField.label}</span>
-                      </TagButton>
-                    )}
-                  />
-                  <PopoverLayer>
-                    <PopoverContent aria-label={pendingField.label}>
-                      <PopoverBody>
-                        {editorFor(
-                          pendingField,
-                          ruleFor(shown, pendingField.key) ?? blankRule(pendingField),
-                        )}
-                      </PopoverBody>
-                    </PopoverContent>
-                  </PopoverLayer>
-                </Popover>
-              </div>
-            ) : null}
-            {folded > 0 ? (
-              <button
-                aria-expanded={revealed}
-                data-part="more"
-                onClick={(event) => requestRevealed(!revealed, 'pointer', event)}
-                type="button"
-              >
-                {revealed ? labels.less : fill(labels.more, { count: folded })}
-              </button>
-            ) : null}
-          </div>
-        </div>
       </div>
 
       <Drawer
@@ -1007,8 +1326,8 @@ export function FilterBar({
           requestOpen(next, request.reason as FilterBarOpenReason, request.source);
         }}
         open={open}
-        side="end"
-        size="xl"
+        side={sheet ? 'bottom' : 'end'}
+        size={sheet ? 'content' : 'xl'}
       >
         <DrawerPanel>
           <DrawerHeader>
@@ -1018,19 +1337,37 @@ export function FilterBar({
           <DrawerBody>
             <div data-part="builder" data-ui="filter-bar" id={`${base}builder`}>
               <GroupEditor
-                environment={{ ...environment, apply: () => commitDrawer() }}
+                environment={{
+                  ...environment,
+                  apply: () => commitDrawer(),
+                  expanded,
+                  onExpandedChange: setExpanded,
+                }}
                 extra={
-                  onPresetSave ? (
-                    <Button
-                      onClick={() => onPresetSave(normalizeFilterGroup(drawerDraft.value))}
-                      render={(props) => <button {...props} data-part="save-preset" />}
-                      size="sm"
-                      tone="secondary"
-                      variant="ghost"
-                    >
-                      {labels.savePreset}
-                    </Button>
-                  ) : null
+                  <>
+                    {drawerDraft.value && countActive(drawerDraft.value) > 0 ? (
+                      <Button
+                        onClick={() => drawerDraft.set(baseline())}
+                        render={(props) => <button {...props} data-part="clear" />}
+                        size="sm"
+                        tone="secondary"
+                        variant="ghost"
+                      >
+                        {labels.clear}
+                      </Button>
+                    ) : null}
+                    {onPresetSave ? (
+                      <Button
+                        onClick={() => onPresetSave(normalizeFilterGroup(drawerDraft.value))}
+                        render={(props) => <button {...props} data-part="save-preset" />}
+                        size="sm"
+                        tone="secondary"
+                        variant="ghost"
+                      >
+                        {labels.savePreset}
+                      </Button>
+                    ) : null}
+                  </>
                 }
                 firstField={fields[0]}
                 group={drawerDraft.value ?? emptyFilterGroup()}
@@ -1081,14 +1418,25 @@ export function FilterBar({
   }
 }
 
-/** The draft the drawer edits, taken from the tree each time it opens. */
-function useDrawerDraft(open: boolean, shown: FilterGroup | null) {
+/**
+ * The draft the drawer edits, taken each time it opens from the tree — or from
+ * the seed a chip left, when the reader started a rule on a phone and the
+ * builder is where it is finished.
+ */
+function useDrawerDraft(
+  open: boolean,
+  shown: FilterGroup | null,
+  seed: { current: FilterGroup | null },
+) {
   const [value, set] = useState<FilterGroup | null>(shown);
   const wasOpen = useRef(false);
   useEffect(() => {
-    if (open && !wasOpen.current) set(shown);
+    if (open && !wasOpen.current) {
+      set(seed.current ?? shown);
+      seed.current = null;
+    }
     wasOpen.current = open;
-  }, [open, shown]);
+  }, [open, seed, shown]);
   return { set, value };
 }
 
@@ -1114,6 +1462,8 @@ interface RuleEditorPopoverBodyProps {
   onChange: (next: FilterDescriptor | null) => void;
   onDone: () => void;
   queryDelay: number;
+  /** Draws the operator control: a pill's editor does, a chip's value popover leaves it to the chip. */
+  withOperator?: boolean | undefined;
 }
 
 /**
@@ -1131,11 +1481,17 @@ function RuleEditorPopoverBody({
   onChange,
   onDone,
   queryDelay,
+  withOperator = true,
 }: RuleEditorPopoverBodyProps) {
   const popover = usePopover();
   const close = () => popover.toggle(false, 'dismiss');
   const [local, setLocal] = useState<FilterDescriptor>(current ?? blankRule(field));
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /* A change made elsewhere — the chip's operator segment — reaches the editor unless a keystroke is still waiting. */
+  const incoming = JSON.stringify(current ?? null);
+  useEffect(() => {
+    if (!timer.current && current) setLocal(current);
+  }, [incoming]);
   useEffect(
     () => () => {
       if (timer.current) clearTimeout(timer.current);
@@ -1180,6 +1536,7 @@ function RuleEditorPopoverBody({
         condition={condition}
         environment={{ ...environment, apply: done }}
         field={field}
+        withOperator={withOperator}
         onConditionChange={(next) => change({ ...local, conditions: [next] } as FilterDescriptor)}
       />
       <div data-part="actions">

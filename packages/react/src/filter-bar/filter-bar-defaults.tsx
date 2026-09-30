@@ -13,7 +13,6 @@ import type {
 export const FILTER_BAR_LABELS: FilterBarLabels = {
   bar: 'Filter',
   filters: 'Filters',
-  applied: 'Applied filters',
   builder: 'Filters',
   search: 'Search',
   add: 'Add filter',
@@ -50,6 +49,10 @@ export const FILTER_BAR_LABELS: FilterBarLabels = {
   required: '{field} needs a value',
   unknownField: 'Unknown field {field}',
   remove: 'Remove',
+  noValue: 'Select value',
+  incomplete: 'incomplete',
+  moreValues: '+{count}',
+  readOnly: 'Read only',
   appliedCount: '{count} filters applied',
   operators: {
     contains: 'contains',

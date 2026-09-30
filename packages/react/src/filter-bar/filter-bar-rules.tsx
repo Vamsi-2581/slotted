@@ -6,6 +6,7 @@ import {
   operandCount,
   operatorsFor,
   removeNodeAt,
+  spokenOperator,
   updateNodeAt,
   withCondition,
   withGroupJoin,
@@ -32,10 +33,10 @@ import {
   toISOTime,
 } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
-import { Fragment } from 'react';
+import { Fragment, useId } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 
-import { Button } from '../button';
+import { Button, IconButton } from '../button';
 import { DatePicker } from '../date-picker';
 import { DateTimePicker } from '../datetime-picker';
 import { Glyph, Icon } from '../icon';
@@ -68,6 +69,9 @@ export interface RuleEnvironment {
   renderOperand: ((props: FilterBarOperandProps) => ReactNode) | undefined;
   /** What `Enter` in an operand does in the surface the rule is drawn in. */
   apply: () => void;
+  /** The one rule card open in the builder's card form, by its path joined with dots. */
+  expanded?: string | null | undefined;
+  onExpandedChange?: ((path: string | null) => void) | undefined;
 }
 
 export function fieldByKey(fields: readonly FilterBarField[], key: string) {
@@ -83,6 +87,57 @@ export function blankRule(field: FilterBarField): FilterDescriptor {
   if (field.defaultValue) return field.defaultValue;
   const operator = field.defaultOperator ?? kindDefaultOperator(field.kind);
   return emptyFilter(field.kind, operator as never) as FilterDescriptor;
+}
+
+/**
+ * A condition in the words a chip and a rule card write it with: the operator
+ * as the sentence reads it, and the value — a list of more than two written as
+ * its first two and a count, the whole list kept in `full` for the name and the
+ * title.
+ */
+export function ruleWords(
+  labels: FilterBarLabels,
+  field: FilterBarField | undefined,
+  filter: FilterDescriptor | null | undefined,
+): { operator: string; value: string; full: string; operands: number } {
+  const kind = filter?.kind ?? field?.kind ?? 'text';
+  const condition: Condition = (filter?.conditions[0] as Condition | undefined) ?? {
+    operator: field ? (field.defaultOperator ?? kindDefaultOperator(field.kind)) : 'contains',
+  };
+  const operands = operandCount(condition.operator as FilterOperator);
+  const operator = operatorName(labels, spokenOperator(kind, condition));
+  const write = (value: unknown) =>
+    field?.options?.find((option) => option.value === value)?.label ?? String(value);
+  const present = (value: unknown) =>
+    value !== undefined &&
+    value !== null &&
+    value !== '' &&
+    !(Array.isArray(value) && value.length === 0);
+  if (operands === 0) return { operator, value: '', full: '', operands };
+  if (kind === 'set') {
+    const values = ((condition.value as readonly unknown[] | undefined) ?? []).map(write);
+    const full = values.join(', ');
+    const value =
+      values.length > 2
+        ? `${values.slice(0, 2).join(', ')} ${fill(labels.moreValues, { count: values.length - 2 })}`
+        : full;
+    return { operator, value, full, operands };
+  }
+  if (operands === 2) {
+    if (!present(condition.value) || !present(condition.end)) {
+      return { operator, value: '', full: '', operands };
+    }
+    const range = `${write(condition.value)} – ${write(condition.end)}`;
+    return { operator, value: range, full: range, operands };
+  }
+  const value = present(condition.value) ? write(condition.value) : '';
+  return { operator, value, full: value, operands };
+}
+
+/** A field's glyph: a name from the glyph set, or the consumer's own node. */
+export function FieldIcon({ icon }: { icon: FilterBarField['icon'] }) {
+  if (icon === undefined || icon === null || icon === false) return null;
+  return <Icon>{typeof icon === 'string' ? <Glyph name={icon as never} /> : icon}</Icon>;
 }
 
 /** `Enter` applies, and the consumer's own handler ran first. */
@@ -225,6 +280,10 @@ export interface ConditionEditorProps {
   field: FilterBarField;
   condition: Condition;
   onConditionChange: (condition: Condition) => void;
+  /** Draws the operator control. A chip's value popover leaves it to the chip's operator segment. */
+  withOperator?: boolean | undefined;
+  /** Ids for the two parts, which a rule card's sentence names in `aria-controls`. */
+  ids?: { operator: string; operand: string } | undefined;
 }
 
 /**
@@ -235,7 +294,9 @@ export function ConditionEditor({
   condition,
   environment,
   field,
+  ids,
   onConditionChange,
+  withOperator = true,
 }: ConditionEditorProps) {
   const { apply, labels, renderOperand, size } = environment;
   const operators = field.operators ?? (operatorsFor(field.kind) as readonly string[]);
@@ -267,30 +328,32 @@ export function ConditionEditor({
 
   return (
     <>
-      <div data-part="operator">
-        <Select
-          fullWidth
-          items={operators.map((operator) => ({
-            label: operatorName(labels, operator),
-            value: operator,
-          }))}
-          onValueChange={(next) => setOperator(next as string)}
-          size={size}
-          value={condition.operator}
-        >
-          <SelectTrigger aria-label={labels.operator}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {operators.map((operator) => (
-              <SelectItem key={operator} value={operator}>
-                {operatorName(labels, operator)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div data-part="operand">
+      {withOperator ? (
+        <div data-part="operator" id={ids?.operator}>
+          <Select
+            fullWidth
+            items={operators.map((operator) => ({
+              label: operatorName(labels, operator),
+              value: operator,
+            }))}
+            onValueChange={(next) => setOperator(next as string)}
+            size={size}
+            value={condition.operator}
+          >
+            <SelectTrigger aria-label={labels.operator}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {operators.map((operator) => (
+                <SelectItem key={operator} value={operator}>
+                  {operatorName(labels, operator)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      ) : null}
+      <div data-part="operand" id={ids?.operand}>
         {Array.from({ length: operands }, (_, slot) => (
           <Operand key={slot} render={renderOperand} {...operandProps(slot as 0 | 1)} />
         ))}
@@ -302,6 +365,8 @@ export function ConditionEditor({
 export interface RuleEditorProps {
   environment: RuleEnvironment;
   rule: FilterRule;
+  /** The rule's path inside the root, which names its card. */
+  path: FilterPath;
   /** Which fields the field chooser lists. Defaults to every field. */
   choices?: readonly FilterBarField[] | undefined;
   onRuleChange: (rule: FilterRule) => void;
@@ -316,9 +381,13 @@ export function RuleEditor({
   invalid,
   onRemove,
   onRuleChange,
+  path,
   rule,
 }: RuleEditorProps) {
   const { fields, labels, size } = environment;
+  const id = useId();
+  const key = path.join('.');
+  const expanded = environment.expanded === key;
   const field = fieldByKey(fields, rule.field);
   const condition: Condition = rule.filter.conditions[0] ?? {
     operator: field ? (field.defaultOperator ?? kindDefaultOperator(field.kind)) : 'contains',
@@ -332,14 +401,39 @@ export function RuleEditor({
     onRuleChange({ field: key, filter: blankRule(next) });
   }
 
+  const words = ruleWords(labels, field, rule.filter);
+  const label = field?.label ?? fill(labels.unknownField, { field: rule.field });
+
   return (
     <div
       data-kind={field?.kind}
       data-operands={operands}
       data-part="rule"
       {...(invalid || !field ? { 'data-invalid': '' } : {})}
+      {...(expanded ? { 'data-expanded': '' } : {})}
     >
-      <div data-part="field">
+      {/* The card form's header: drawn by the stylesheet only while the builder is narrow. */}
+      <button
+        aria-controls={`${id}field ${id}operator ${id}operand`}
+        aria-expanded={expanded}
+        data-part="rule-summary"
+        onClick={() => environment.onExpandedChange?.(expanded ? null : key)}
+        type="button"
+      >
+        <span data-sentence="">
+          <span data-field="">{label}</span> <span data-operator="">{words.operator}</span>
+          {words.operands > 0 ? (
+            <>
+              {' '}
+              <span data-value="">{words.value || labels.noValue}</span>
+            </>
+          ) : null}
+        </span>
+        <Icon>
+          <Glyph name="chevron-down" />
+        </Icon>
+      </button>
+      <div data-part="field" id={`${id}field`}>
         <Select
           fullWidth
           items={list.map((entry) => ({ label: entry.label, value: entry.key }))}
@@ -366,6 +460,7 @@ export function RuleEditor({
           condition={condition}
           environment={environment}
           field={field}
+          ids={{ operand: `${id}operand`, operator: `${id}operator` }}
           onConditionChange={(next) =>
             onRuleChange({
               field: rule.field,
@@ -375,8 +470,8 @@ export function RuleEditor({
         />
       ) : (
         <>
-          <div data-part="operator" />
-          <div data-part="operand" />
+          <div data-part="operator" id={`${id}operator`} />
+          <div data-part="operand" id={`${id}operand`} />
         </>
       )}
       {onRemove ? (
@@ -436,22 +531,28 @@ export function GroupEditor({
   const joinWord = group.join === 'and' ? labels.matchAll : labels.matchAny;
   const removeGroup =
     depth > 0 ? (
-      <Button
+      <IconButton
+        aria-label={labels.removeGroup}
         onClick={() => onRootChange(removeNodeAt(root, path))}
         render={(props) => <button {...props} data-part="remove-group" />}
         size={size === 'lg' ? 'md' : 'sm'}
+        title={labels.removeGroup}
         tone="secondary"
         variant="ghost"
       >
-        {labels.removeGroup}
-      </Button>
+        <Icon>
+          <Glyph name="trash" />
+        </Icon>
+      </IconButton>
     ) : null;
 
+  /* A rule just added opens as an expanded card, where its three controls are. */
   function addRule() {
     if (!firstField) return;
     onRootChange(
       insertNodeAt(root, path, { field: firstField.key, filter: blankRule(firstField) }),
     );
+    environment.onExpandedChange?.([...path, group.rules.length].join('.'));
   }
   function addGroup() {
     if (!firstField) return;
@@ -461,6 +562,7 @@ export function GroupEditor({
         rules: [{ field: firstField.key, filter: blankRule(firstField) }],
       }),
     );
+    environment.onExpandedChange?.([...path, group.rules.length, 0].join('.'));
   }
 
   return (
@@ -502,6 +604,7 @@ export function GroupEditor({
               {conjunction}
               <RuleEditor
                 environment={environment}
+                path={childPath}
                 onRemove={
                   field?.required ? undefined : () => onRootChange(removeNodeAt(root, childPath))
                 }
@@ -524,7 +627,7 @@ export function GroupEditor({
             </Icon>
           }
           tone="secondary"
-          variant="ghost"
+          variant={depth === 0 ? 'outline' : 'ghost'}
         >
           {labels.addRule}
         </Button>
@@ -539,7 +642,7 @@ export function GroupEditor({
             </Icon>
           }
           tone="secondary"
-          variant="ghost"
+          variant={depth === 0 ? 'outline' : 'ghost'}
         >
           {labels.addGroup}
         </Button>

@@ -19,6 +19,7 @@ const FIELDS: FilterBarField[] = [
       { label: 'Refunded', value: 'refunded' },
       { label: 'Draft', value: 'draft' },
     ],
+    icon: 'circle',
     pinned: true,
   },
   { key: 'owner', kind: 'text', label: 'Owner', pinned: true },
@@ -75,71 +76,85 @@ const parts = (name: string) =>
   [...root().querySelectorAll(`[data-part="${name}"]`)] as HTMLElement[];
 
 describe('FilterBar', () => {
-  it('is selected in public by the family identifier, and is a search landmark holding a toolbar and a grid', () => {
+  it('is selected in public by the family identifier, and is a search landmark holding one toolbar of chips', () => {
     render(<Orders defaultValue={TREE} />);
     expect(root().dataset['ui']).toBe(contract.ui);
     expect(screen.getByRole('search', { name: 'Filter' })).toBe(root());
     expect(screen.getByRole('toolbar', { name: 'Filters' })).toBe(part('bar'));
-    expect(screen.getByRole('grid', { name: 'Applied filters' })).toBe(part('chips'));
+    expect(screen.queryByRole('grid')).toBeNull();
     for (const name of [
       'frame',
       'search',
       'pill',
       'add',
       'clear',
-      'chips',
       'chip',
+      'chip-field',
+      'chip-operator',
+      'chip-value',
+      'chip-remove',
       'count',
       'summary',
     ]) {
       expect(part(name)).not.toBeNull();
     }
+    for (const chip of parts('chip')) expect(chip.parentElement).toBe(part('bar'));
   });
 
-  it('draws a pinned field as a pill, filled while it holds a rule, and an unpinned one as a chip', () => {
+  it('writes a condition as a chip of segments, and a pinned field without one as a pill', () => {
     render(<Orders defaultValue={TREE} />);
+    const [status, amount] = parts('chip');
+    expect(status!.getAttribute('role')).toBe('group');
+    expect(status!.hasAttribute('data-pinned')).toBe(true);
+    expect(amount!.hasAttribute('data-pinned')).toBe(false);
+    expect(screen.getByRole('group', { name: 'Amount: greater than 100' })).toBe(amount);
+    expect(amount!.querySelector('[data-part="chip-field"]')?.textContent).toBe('Amount');
+    expect(amount!.querySelector('[data-part="chip-operator"]')?.textContent).toBe('greater than');
+    expect(
+      amount!.querySelector('[data-part="chip-operator"]')?.getAttribute('aria-haspopup'),
+    ).toBe('menu');
+    const value = amount!.querySelector('[data-part="chip-value"]') as HTMLElement;
+    expect(value.getAttribute('aria-haspopup')).toBe('dialog');
+    expect(value.getAttribute('aria-label')).toBe('greater than 100');
+    expect(value.querySelector('[data-value]')?.textContent).toBe('100');
+    expect(screen.getByRole('button', { name: 'Remove Amount' })).not.toBeNull();
+    /* The field's glyph stands before its name. */
+    expect(
+      status!.querySelector('[data-part="chip-field"] svg[data-glyph]')?.getAttribute('data-glyph'),
+    ).toBe('circle');
     const pills = parts('pill');
-    expect(pills.map((pill) => pill.textContent)).toEqual(['Statusis Paid', 'Owner']);
-    expect(pills[0]!.hasAttribute('data-filtered')).toBe(true);
-    expect(pills[1]!.hasAttribute('data-filtered')).toBe(false);
+    expect(pills.map((pill) => pill.textContent)).toEqual(['Owner']);
     expect(pills[0]!.getAttribute('aria-haspopup')).toBe('dialog');
-    const chips = parts('chip');
-    expect(chips).toHaveLength(2);
-    expect(chips[0]!.getAttribute('role')).toBe('gridcell');
-    expect(screen.getByRole('button', { name: 'Amount: greater than 100' })).not.toBeNull();
-    /* The name and the sentence are two runs with a space between them. The
-       space is a text node rather than a gap, because it separates the words of
-       the chip's own accessible name as well as the words on the screen. */
-    expect(chips[0]!.querySelector('[data-part="label"]')?.textContent).toBe(
-      'Amount greater than 100',
-    );
-    expect(screen.getByRole('button', { name: 'Remove Amount greater than 100' })).not.toBeNull();
   });
 
-  it('holds one tab stop for the bar and one for the chips, with arrows between', () => {
+  it('holds one tab stop for the whole bar, and walks every segment with the arrows', () => {
     render(<Orders defaultValue={TREE} />);
-    const [status, owner] = parts('pill');
-    const add = part('add');
-    expect(status!.getAttribute('tabindex')).toBe('0');
-    expect(owner!.getAttribute('tabindex')).toBe('-1');
-    expect(add.getAttribute('tabindex')).toBe('-1');
-    status!.focus();
-    fireEvent.keyDown(status!, { key: 'ArrowRight' });
-    expect(document.activeElement).toBe(owner);
-    fireEvent.keyDown(owner!, { key: 'End' });
-    expect(document.activeElement?.getAttribute('data-part')).toBe('summary');
-
-    const bodies = [...part('chips').querySelectorAll('[data-part="body"]')] as HTMLElement[];
-    expect(bodies[0]!.getAttribute('tabindex')).toBe('0');
-    expect(bodies[1]!.getAttribute('tabindex')).toBe('-1');
+    const stops = () => [...part('bar').querySelectorAll<HTMLElement>('[tabindex]')];
+    expect(stops().filter((stop) => stop.getAttribute('tabindex') === '0')).toHaveLength(1);
+    const first = stops().find((stop) => stop.getAttribute('tabindex') === '0')!;
+    first.focus();
+    const walked = [first.getAttribute('data-part')];
+    for (let step = 0; step < 5; step += 1) {
+      fireEvent.keyDown(document.activeElement!, { key: 'ArrowRight' });
+      walked.push(document.activeElement!.getAttribute('data-part'));
+    }
+    expect(walked).toEqual([
+      'summary',
+      'chip-operator',
+      'chip-value',
+      'chip-remove',
+      'pill',
+      'chip-operator',
+    ]);
   });
 
-  it('removes a chip with Delete, carries the reason, and moves focus to the next chip', async () => {
+  it('removes a condition with Delete on any segment, and moves focus to the same segment of the next chip', async () => {
     const onValueChange = vi.fn();
     render(<Orders defaultValue={TREE} onValueChange={onValueChange} />);
-    const bodies = [...part('chips').querySelectorAll('[data-part="body"]')] as HTMLElement[];
-    bodies[0]!.focus();
-    fireEvent.keyDown(bodies[0]!, { key: 'Delete' });
+    const amount = screen.getByRole('group', { name: 'Amount: greater than 100' });
+    const value = amount.querySelector('[data-part="chip-value"]') as HTMLElement;
+    value.focus();
+    fireEvent.keyDown(value, { key: 'Delete' });
     await act(() => Promise.resolve());
     expect(onValueChange).toHaveBeenCalledTimes(1);
     const [next, request] = onValueChange.mock.calls[0]!;
@@ -147,16 +162,18 @@ describe('FilterBar', () => {
     expect(
       (next as FilterGroup).rules.map((rule) => ('field' in rule ? rule.field : 'group')),
     ).toEqual(['status', 'customer']);
-    expect(parts('chip')).toHaveLength(1);
-    expect(document.activeElement?.getAttribute('data-part')).toBe('body');
+    expect(document.activeElement?.getAttribute('data-part')).toBe('chip-value');
+    expect(document.activeElement?.closest('[data-part="chip"]')?.getAttribute('data-field')).toBe(
+      'customer',
+    );
   });
 
   it('keeps the value where the consumer owns it, and asks', () => {
     const onValueChange = vi.fn();
     render(<Orders onValueChange={onValueChange} value={TREE} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Remove Amount greater than 100' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Amount' }));
     expect(onValueChange).toHaveBeenCalledTimes(1);
-    expect(parts('chip')).toHaveLength(2);
+    expect(parts('chip')).toHaveLength(3);
   });
 
   it('clears everything back to the required defaults, and says so', () => {
@@ -176,18 +193,17 @@ describe('FilterBar', () => {
       },
     ];
     render(<FilterBar defaultValue={TREE} fields={fields} onValueChange={onValueChange} />);
-    fireEvent.click(part('clear'));
+    fireEvent.click(part('bar').querySelector('[data-part="clear"]') as HTMLElement);
     const [next, request] = onValueChange.mock.calls[0]!;
     expect(request.reason).toBe('clear');
     expect(serializeFilterGroup(next as FilterGroup)).toBe('and(company~text~and~equals:acme)');
-    /* A required field is pinned whether or not it says so. */
-    expect(parts('pill').map((pill) => (pill as HTMLElement).dataset['field'])).toContain(
-      'company',
-    );
+    /* A required field is pinned whether or not it says so, and its chip has no remove control. */
+    const company = parts('chip').find((chip) => chip.dataset['field'] === 'company')!;
+    expect(company.hasAttribute('data-pinned')).toBe(true);
+    expect(company.querySelector('[data-part="chip-remove"]')).toBeNull();
   });
 
-  it('refuses to remove a required field’s rule and marks it', () => {
-    const onValueChange = vi.fn();
+  it('draws a required field without its value as incomplete, and refuses to apply it', () => {
     const fields: FilterBarField[] = [
       { key: 'company', kind: 'text', label: 'Company', required: true },
     ];
@@ -200,16 +216,64 @@ describe('FilterBar', () => {
         },
       ],
     };
-    render(
-      <FilterBar
-        apply="manual"
-        defaultValue={value}
-        fields={fields}
-        onValueChange={onValueChange}
-      />,
-    );
-    expect(parts('pill')[0]!.hasAttribute('data-filtered')).toBe(false);
+    render(<FilterBar apply="manual" defaultValue={value} fields={fields} />);
+    const chip = part('chip');
+    expect(chip.hasAttribute('data-incomplete')).toBe(true);
+    expect(chip.getAttribute('aria-label')).toBe('Company: contains Select value, incomplete');
+    expect(chip.querySelector('[data-part="chip-remove"]')).toBeNull();
     expect(part('apply').hasAttribute('disabled')).toBe(true);
+  });
+
+  it('starts a condition from add as an incomplete chip with its value open, and keeps it out of the value', () => {
+    const onValueChange = vi.fn();
+    render(<Orders defaultValue={TREE} onValueChange={onValueChange} />);
+    fireEvent.click(part('add'));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Has note' }));
+    const chip = parts('chip').find((entry) => entry.dataset['field'] === 'note')!;
+    expect(chip.hasAttribute('data-incomplete')).toBe(true);
+    expect(chip.querySelector('[data-part="chip-value"]')?.getAttribute('aria-expanded')).toBe(
+      'true',
+    );
+    expect(onValueChange).not.toHaveBeenCalled();
+    /* Removing it takes nothing out of the value, because it was never in it. */
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Has note' }));
+    expect(parts('chip').some((entry) => entry.dataset['field'] === 'note')).toBe(false);
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  it('turns a pinned field’s pill into its chip, in the same place, when pressed', () => {
+    render(<Orders defaultValue={TREE} />);
+    fireEvent.click(parts('pill')[0]!);
+    const chips = parts('chip');
+    expect(chips[1]!.dataset['field']).toBe('owner');
+    expect(chips[1]!.hasAttribute('data-pinned')).toBe(true);
+    expect(chips[1]!.hasAttribute('data-incomplete')).toBe(true);
+    expect(parts('pill')).toHaveLength(0);
+  });
+
+  it('changes the operator from its own segment, and keeps a rule that lost its operand in place as incomplete', () => {
+    const onValueChange = vi.fn();
+    render(<Orders defaultValue={TREE} onValueChange={onValueChange} />);
+    const amount = () => parts('chip').find((chip) => chip.dataset['field'] === 'amount')!;
+    fireEvent.click(amount().querySelector('[data-part="chip-operator"]') as HTMLElement);
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'less than' }));
+    expect(onValueChange.mock.calls[0]![0].rules[1].filter.conditions[0]).toEqual({
+      operator: 'lessThan',
+      value: 100,
+    });
+    fireEvent.click(amount().querySelector('[data-part="chip-operator"]') as HTMLElement);
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'between' }));
+    /* Between needs an end the rule lacks: the value loses it, the chip keeps its place. */
+    const [next] = onValueChange.mock.calls.at(-1)!;
+    expect(
+      (next as FilterGroup).rules.some((rule) => 'field' in rule && rule.field === 'amount'),
+    ).toBe(false);
+    expect(parts('chip').map((chip) => chip.dataset['field'])).toEqual([
+      'status',
+      'amount',
+      'customer',
+    ]);
+    expect(amount().hasAttribute('data-incomplete')).toBe(true);
   });
 
   it('debounces the query under live and clears it with Escape, each with its reason', () => {
@@ -248,10 +312,10 @@ describe('FilterBar', () => {
     );
     expect(root().dataset['apply']).toBe('manual');
     expect(root().hasAttribute('data-dirty')).toBe(false);
-    fireEvent.click(screen.getByRole('button', { name: 'Remove Amount greater than 100' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Amount' }));
     expect(onValueChange).not.toHaveBeenCalled();
     expect(root().hasAttribute('data-dirty')).toBe(true);
-    expect(parts('chip')).toHaveLength(1);
+    expect(parts('chip')).toHaveLength(2);
     fireEvent.click(part('apply'));
     expect(onValueChange).toHaveBeenCalledTimes(1);
     expect(onValueChange.mock.calls[0]![1].reason).toBe('submit');
@@ -260,10 +324,10 @@ describe('FilterBar', () => {
 
   it('under manual, Reset discards the draft', () => {
     render(<Orders apply="manual" defaultValue={TREE} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Remove Amount greater than 100' }));
-    expect(parts('chip')).toHaveLength(1);
-    fireEvent.click(part('reset'));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Amount' }));
     expect(parts('chip')).toHaveLength(2);
+    fireEvent.click(part('reset'));
+    expect(parts('chip')).toHaveLength(3);
     expect(root().hasAttribute('data-dirty')).toBe(false);
   });
 
@@ -292,7 +356,7 @@ describe('FilterBar', () => {
     expect(onPresetChange.mock.calls[0]![1].reason).toBe('select');
     expect(onValueChange.mock.calls[0]![1].reason).toBe('select');
     expect(root().hasAttribute('data-dirty')).toBe(false);
-    fireEvent.click(screen.getByRole('button', { name: 'Remove Amount greater than 100' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Amount' }));
     expect(root().hasAttribute('data-dirty')).toBe(true);
   });
 
@@ -303,10 +367,10 @@ describe('FilterBar', () => {
     expect(chips[0]!.hasAttribute('data-folded')).toBe(false);
     expect(chips[1]!.hasAttribute('data-folded')).toBe(true);
     const more = part('more');
-    expect(more.textContent).toBe('+1 more');
+    expect(more.textContent).toBe('+2 more');
     fireEvent.click(more);
     expect(onRevealedChange.mock.calls[0]![0]).toBe(true);
-    expect(part('chips').hasAttribute('data-revealed')).toBe(true);
+    expect(part('bar').hasAttribute('data-revealed')).toBe(true);
     expect(part('more').textContent).toBe('Show less');
   });
 
@@ -326,10 +390,10 @@ describe('FilterBar', () => {
       ],
     };
     render(<Orders defaultValue={value} onValueChange={onValueChange} />);
-    const chip = part('chip');
+    const chip = parts('chip').find((entry) => entry.dataset['field'] === 'region')!;
     expect(chip.hasAttribute('data-invalid')).toBe(true);
-    expect(screen.getByRole('button', { name: 'Unknown field region: is south' })).not.toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Remove region is south' }));
+    expect(chip.getAttribute('aria-label')).toBe('Unknown field region: is south');
+    fireEvent.click(screen.getByRole('button', { name: 'Remove region' }));
     expect(onValueChange.mock.calls[0]![0]).toBeNull();
   });
 
@@ -348,14 +412,38 @@ describe('FilterBar', () => {
     expect(builder.querySelector('[data-part="group"]')?.getAttribute('data-depth')).toBe('0');
   });
 
+  /**
+   * A rule's sentence heads its card in the builder's narrow form, and pressing
+   * it expands the card; one card is expanded at a time.
+   */
+  it('expands one rule card at a time from its sentence', () => {
+    render(<Orders defaultOpen defaultValue={TREE} />);
+    const builder = document.querySelector(
+      '[data-ui="filter-bar"][data-part="builder"]',
+    ) as HTMLElement;
+    const [first, second] = [
+      ...builder.querySelectorAll<HTMLElement>('[data-part="rule-summary"]'),
+    ];
+    expect(first!.querySelector('[data-field]')?.textContent).toBe('Status');
+    expect(first!.querySelector('[data-operator]')?.textContent).toBe('is');
+    expect(first!.querySelector('[data-value]')?.textContent).toBe('Paid');
+    fireEvent.click(first!);
+    expect(first!.getAttribute('aria-expanded')).toBe('true');
+    expect(first!.closest('[data-part="rule"]')!.hasAttribute('data-expanded')).toBe(true);
+    fireEvent.click(second!);
+    expect(first!.getAttribute('aria-expanded')).toBe('false');
+    expect(second!.closest('[data-part="rule"]')!.hasAttribute('data-expanded')).toBe(true);
+  });
+
   /* No stylesheet paints a glyph: each one is an `icon` holding the library's `Glyph`. */
-  it('draws its glyphs as elements: magnifier, chevrons, plus, and a cross on each rule', () => {
+  it('draws its glyphs as elements: magnifier, plus, crosses, and a bin on a group', () => {
     render(<Orders defaultOpen defaultValue={TREE} />);
     const glyph = (host: Element | null) =>
       host?.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
     expect(glyph(part('search'))).toBe('search');
-    expect(parts('pill').map(glyph)).toEqual(['chevron-down', 'chevron-down']);
+    expect(parts('pill').map(glyph)).toEqual(['plus']);
     expect(glyph(part('add'))).toBe('plus');
+    expect(parts('chip-remove').map(glyph)).toEqual(['x', 'x', 'x']);
     const builder = document.querySelector(
       '[data-ui="filter-bar"][data-part="builder"]',
     ) as HTMLElement;
@@ -363,7 +451,8 @@ describe('FilterBar', () => {
     expect(removes).toHaveLength(3);
     expect(removes.map(glyph)).toEqual(['x', 'x', 'x']);
     expect(glyph(builder.querySelector('[data-part="add-rule"]'))).toBe('plus');
-    expect(glyph(builder.querySelector('[data-part="add-group"]'))).toBe('plus');
+    fireEvent.click(builder.querySelector('[data-part="add-group"]') as HTMLElement);
+    expect(glyph(builder.querySelector('[data-part="remove-group"]'))).toBe('trash');
   });
 
   it('lets the builder add a group and applies the tree with submit', () => {
@@ -377,10 +466,59 @@ describe('FilterBar', () => {
     expect(builder.querySelectorAll('[data-part="group"]')[1]!.getAttribute('data-depth')).toBe(
       '1',
     );
+    /* The rule the new group starts with opens as the expanded card. */
+    expect(builder.querySelectorAll('[data-part="rule"][data-expanded]')).toHaveLength(1);
     fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
     /* The new group holds an unfinished rule, so the tree applied is the one it started with. */
     expect(onValueChange).not.toHaveBeenCalled();
     expect(root().hasAttribute('data-open')).toBe(false);
+  });
+
+  it('under the narrow breakpoint sends an edit to the builder, with the rule’s card expanded', () => {
+    class Observer {
+      constructor(private readonly callback: () => void) {}
+      observe() {
+        this.callback();
+      }
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', Observer);
+    const width = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockReturnValue({ height: 34, width: 320 } as DOMRect);
+    try {
+      render(<Orders defaultValue={TREE} />);
+      const amount = screen.getByRole('group', { name: 'Amount: greater than 100' });
+      fireEvent.click(amount.querySelector('[data-part="chip-value"]') as HTMLElement);
+      expect(root().hasAttribute('data-open')).toBe(true);
+      const builder = document.querySelector(
+        '[data-ui="filter-bar"][data-part="builder"]',
+      ) as HTMLElement;
+      const expanded = builder.querySelector('[data-part="rule"][data-expanded]');
+      expect(expanded?.querySelector('[data-field]')?.textContent).toBe('Amount');
+    } finally {
+      width.mockRestore();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('under readOnly lets every condition be reached and none be changed', () => {
+    render(<Orders defaultValue={TREE} readOnly />);
+    expect(root().hasAttribute('data-readonly')).toBe(true);
+    expect(part('bar').getAttribute('aria-description')).toBe('Read only');
+    for (const name of ['add', 'clear', 'pill', 'chip-remove']) {
+      expect(part('bar').querySelector(`[data-part="${name}"]`)).toBeNull();
+    }
+    for (const segment of [...parts('chip-operator'), ...parts('chip-value')]) {
+      expect(segment.getAttribute('aria-disabled')).toBe('true');
+    }
+    fireEvent.click(parts('chip-operator')[0]!);
+    expect(screen.queryByRole('menu')).toBeNull();
+    /* The arrows still reach a read-only segment. */
+    const first = parts('chip-operator')[0]!;
+    first.focus();
+    fireEvent.keyDown(first, { key: 'ArrowRight' });
+    expect(document.activeElement?.getAttribute('data-part')).toBe('chip-value');
   });
 
   it('draws the count as a polite live region and a spinner while loading', () => {
@@ -413,8 +551,16 @@ describe('FilterBar', () => {
       </FilterBarDefaultsProvider>,
     );
     expect(root().dataset['apply']).toBe('manual');
-    expect(part('add').textContent).toBe('Adicionar filtro');
+    /* With chips in the bar, add is its glyph alone and keeps the label as its name. */
+    expect(part('add').getAttribute('aria-label')).toBe('Adicionar filtro');
+    expect(part('add').hasAttribute('data-compact')).toBe(true);
     expect(part('more')).not.toBeNull();
+  });
+
+  it('keeps add’s label while no chip is in the bar', () => {
+    render(<Orders />);
+    expect(part('add').textContent).toBe('Add filter');
+    expect(part('add').hasAttribute('data-compact')).toBe(false);
   });
 
   it('passes native props through to the root and composes a consumer handler', () => {
@@ -434,22 +580,42 @@ describe('FilterBar', () => {
     expect(root().hasAttribute('data-open')).toBe(true);
   });
 
-  it('writes the applied sentence on a pinned pill from the same words the chips use', () => {
-    render(<Orders defaultValue={TWO_VALUES} labels={{ operators: { anyOf: 'is one of' } }} />);
-    expect(parts('pill')[0]!.textContent).toBe('Statusis one of Paid, Refunded');
+  it('writes a chip from the same words the sentence uses, a long list as two values and a count', () => {
+    const many: FilterGroup = {
+      join: 'and',
+      rules: [
+        {
+          field: 'status',
+          filter: {
+            kind: 'set',
+            join: 'and',
+            conditions: [{ operator: 'anyOf', value: ['paid', 'refunded', 'draft'] }],
+          },
+        },
+      ],
+    };
+    render(<Orders defaultValue={many} labels={{ operators: { anyOf: 'is one of' } }} />);
+    const status = part('chip');
+    expect(status.querySelector('[data-part="chip-operator"]')?.textContent).toBe('is one of');
+    const value = status.querySelector('[data-part="chip-value"]') as HTMLElement;
+    expect(value.querySelector('[data-value]')?.textContent).toBe('Paid, Refunded +1');
+    expect(value.getAttribute('title')).toBe('Paid, Refunded, Draft');
+    expect(value.getAttribute('aria-label')).toBe('is one of Paid, Refunded, Draft');
   });
 
   /**
-   * A list of one is the equality of that value, so the sentence says so; the
+   * A list of one is the equality of that value, so the chip says so; the
    * condition is still `anyOf`, and a second value returns the list form.
    */
   it('reads a set of one as an equality and a set of two as a list', () => {
     const one = render(<Orders defaultValue={TREE} />);
-    expect(parts('pill')[0]!.textContent).toBe('Statusis Paid');
+    expect(part('chip-operator').textContent).toBe('is');
     one.unmount();
     render(<Orders defaultValue={TWO_VALUES} />);
-    expect(parts('pill')[0]!.textContent).toBe('Statusany of Paid, Refunded');
+    expect(part('chip-operator').textContent).toBe('any of');
+    expect(part('chip-value').querySelector('[data-value]')?.textContent).toBe('Paid, Refunded');
   });
+
   it('under sticky reads the page offset for itself and publishes the sum for what follows, once', () => {
     let notify: (() => void) | undefined;
     class Observer {
@@ -479,85 +645,6 @@ describe('FilterBar', () => {
       expect(parent.style.getPropertyValue('--slotted-page-sticky-top')).toBe('56px');
     } finally {
       height.mockRestore();
-      vi.unstubAllGlobals();
-    }
-  });
-
-  /**
-   * A stand-in for the layout jsdom does not do. Without `data-bar-wrapped`
-   * on the root the bar is drawn in the wide composition, and when `wraps` is
-   * true every control after the second starts a second line there; with the
-   * attribute the bar has a line of its own and every control fits on it.
-   */
-  function stubBarLayout(wraps: { current: boolean }) {
-    return vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
-      this: HTMLElement,
-    ) {
-      const bar = this.parentElement;
-      if (bar?.getAttribute('data-part') !== 'bar') return { height: 0, width: 0 } as DOMRect;
-      const wide = !bar.closest('[data-ui="filter-bar"]')?.hasAttribute('data-bar-wrapped');
-      const second = wide && wraps.current && [...bar.children].indexOf(this) > 1;
-      const top = second ? 42 : 0;
-      return { bottom: top + 34, height: 34, top, width: 80 } as DOMRect;
-    });
-  }
-
-  it('gives the bar a line of its own when its controls would wrap beside the search', () => {
-    const wraps = { current: true };
-    const layout = stubBarLayout(wraps);
-    try {
-      render(<FilterBar fields={FIELDS} />);
-      expect(screen.getByRole('search').hasAttribute('data-bar-wrapped')).toBe(true);
-    } finally {
-      layout.mockRestore();
-    }
-  });
-
-  it('keeps the one-line composition while the controls fit beside the search', () => {
-    const layout = stubBarLayout({ current: false });
-    try {
-      render(<FilterBar fields={FIELDS} />);
-      expect(screen.getByRole('search').hasAttribute('data-bar-wrapped')).toBe(false);
-    } finally {
-      layout.mockRestore();
-    }
-  });
-
-  /**
-   * The bar fits on its own line, and it would wrap beside the search: the
-   * decision is read in the one-line composition whichever one is drawn, so a
-   * resize that finds the fallback in place keeps it, and only a bar that
-   * fits beside the search again gives it up.
-   */
-  it('decides from the one-line composition, so the fallback holds until the bar fits there', () => {
-    const notify: (() => void)[] = [];
-    class Observer {
-      constructor(callback: () => void) {
-        notify.push(callback);
-      }
-      observe() {}
-      disconnect() {}
-    }
-    vi.stubGlobal('ResizeObserver', Observer);
-    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
-      callback(0);
-      return 0;
-    });
-    vi.stubGlobal('cancelAnimationFrame', () => {});
-    const wraps = { current: true };
-    const layout = stubBarLayout(wraps);
-    try {
-      render(<FilterBar fields={FIELDS} />);
-      const root = screen.getByRole('search');
-      for (let frame = 0; frame < 3; frame += 1) {
-        act(() => notify.forEach((callback) => callback()));
-        expect(root.hasAttribute('data-bar-wrapped')).toBe(true);
-      }
-      wraps.current = false;
-      act(() => notify.forEach((callback) => callback()));
-      expect(root.hasAttribute('data-bar-wrapped')).toBe(false);
-    } finally {
-      layout.mockRestore();
       vi.unstubAllGlobals();
     }
   });

@@ -15,7 +15,7 @@ import { Badge } from '../badge';
 import { Button } from '../button';
 import { Layer } from '../drawer/drawer-demo';
 import { CodeBlock } from '../code-block';
-import { Grid, Measure, Scene } from '../field/field-demo';
+import { Grid, Scene } from '../field/field-demo';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
 import {
   Table,
@@ -142,12 +142,12 @@ const CHANNELS = [
 ];
 
 const FIELDS: FilterBarField[] = [
-  { key: 'status', kind: 'set', label: 'Status', options: STATUSES, pinned: true },
-  { key: 'customer', kind: 'text', label: 'Customer', pinned: true },
+  { icon: 'circle', key: 'status', kind: 'set', label: 'Status', options: STATUSES, pinned: true },
+  { icon: 'person', key: 'customer', kind: 'text', label: 'Customer', pinned: true },
   { key: 'amount', kind: 'number', label: 'Amount', min: 0, step: 0.01 },
   { key: 'channel', kind: 'set', label: 'Channel', options: CHANNELS },
-  { key: 'created', kind: 'date', label: 'Created', section: 'Dates' },
-  { key: 'priority', kind: 'boolean', label: 'Priority' },
+  { icon: 'calendar', key: 'created', kind: 'date', label: 'Created', section: 'Dates' },
+  { icon: 'star', key: 'priority', kind: 'boolean', label: 'Priority' },
 ];
 
 const PAID_OVER_100: FilterGroup = {
@@ -391,8 +391,8 @@ export const Pinned: Story = {
   render: () => (
     <Grid columns={1}>
       <Scene
-        label="pinned: Status cheio, Customer vazio"
-        note="O pill cheio leva a borda e o fundo de acento com a frase; o vazio é um contorno. Amount, não fixado, é um chip."
+        label="pinned: Status com condição, Customer vazio"
+        note="Status, fixado e com condição, é um chip no seu lugar; Customer, fixado e vazio, é um pill tracejado — prima-o e ele passa a chip, com o valor aberto. Amount, não fixado, é um chip depois dos fixados."
       >
         <Orders />
       </Scene>
@@ -405,8 +405,8 @@ export const Chips: Story = {
   render: () => (
     <Grid columns={1}>
       <Scene
-        label="chipLimit={2} com quatro regras aplicadas"
-        note="Dois chips à vista, os outros dois atrás de +2 more; um chip de um campo que a aplicação não declara fica inválido e removível."
+        label="chipLimit={2} com quatro condições aplicadas"
+        note="Cada chip em segmentos: o operador abre um menu, o valor um popover só com o operando, o X remove. Dois chips à vista e os outros atrás de +2 more; um campo que a aplicação não declara fica inválido e removível. Add filter cria um chip tracejado até ter valor."
       >
         <Orders
           chipLimit={2}
@@ -448,7 +448,7 @@ export const Builder: Story = {
     <Grid columns={1}>
       <Scene
         label="O construtor"
-        note="Add filter escolhe um campo e abre a sua regra; o chip abre a mesma; Filters (n), abaixo de 36rem, e o handle abrem a árvore inteira no drawer. Numa aplicação o drawer cobre a página; aqui, a caixa tracejada."
+        note="Filters (n), abaixo de 36rem, um chip de grupo e o handle abrem a árvore inteira no drawer: uma linha por regra, o grupo aninhado numa caixa. Numa aplicação o drawer cobre a página; aqui, a caixa tracejada."
       >
         <Layer>{(container) => <BuilderDemo container={container} />}</Layer>
       </Scene>
@@ -641,12 +641,24 @@ export const Narrow: Story = {
   render: () => (
     <Grid columns={1}>
       <Scene
-        label="A mesma barra a 22rem"
-        note="Abaixo de 36rem os pills e os chips dobram atrás de Filters (4); a busca ocupa a linha inteira e a contagem a última. Redimensione o palco para ver a composição média e a larga."
+        label="A barra num telefone"
+        note="Numa sala de 375px a barra é uma linha que desliza: Filters (n), os chips — cada um com o campo, o valor com as palavras do operador e o X — e os pills vazios. O chip cortado na borda diz que a linha continua; tocar num valor abre o construtor com o cartão dessa regra aberto."
       >
-        <Measure>
-          <Orders initial={APPLIED} />
-        </Measure>
+        <div className="slotted-demo-room" data-room="phone">
+          <div className="slotted-demo-viewport" data-scroll data-size="tall">
+            <Orders initial={APPLIED} withTable />
+          </div>
+        </div>
+      </Scene>
+      <Scene
+        label="O construtor num telefone"
+        note="Com menos de 30rem o construtor lista cartões: a frase de cada regra e o X; tocar na frase abre o cartão e empilha campo, operador e valor a toda a largura, um de cada vez. Um grupo aninhado é um trilho na aresta, não uma caixa."
+      >
+        <div className="slotted-demo-room" data-room="phone">
+          <Layer size="screen">
+            {(container) => <Orders container={container} defaultOpen initial={NESTED} />}
+          </Layer>
+        </div>
       </Scene>
     </Grid>
   ),
@@ -692,8 +704,14 @@ export const States: Story = {
         <ThemedFilterBar count={128} fields={FIELDS} loading total={3412} value={PAID_OVER_100} />
       </Scene>
       <Scene
+        label="readOnly"
+        note="Cada condição alcançável pelas setas e legível; nenhuma se altera. Sem X, add, clear nem pills vazios; os segmentos levam aria-disabled e a toolbar diz Read only."
+      >
+        <ThemedFilterBar count={128} fields={FIELDS} readOnly total={3412} value={PAID_OVER_100} />
+      </Scene>
+      <Scene
         label="Obrigatório sem valor"
-        note="Pressione Apply: o pill Company sem valor recusa, leva data-invalid e a borda de danger, e o foco vai para ele."
+        note="Company, obrigatório, é um chip tracejado sem X enquanto não tem valor; pressione Apply e ele recusa, leva data-invalid e a aresta de danger, e a recusa é anunciada."
       >
         <ThemedFilterBar
           apply="manual"
@@ -757,7 +775,7 @@ export const Content: Story = {
     <Grid columns={1}>
       <Scene
         label="Uma frase de onze valores, e um campo desconhecido"
-        note="O chip de Tags trunca em 18rem e leva a frase inteira no title; o chip de region, um campo que a aplicação não declara, fica inválido e removível."
+        note="O chip de Tags escreve dois valores e +9, e leva a lista inteira no title e no nome; o chip de region, um campo que a aplicação não declara, fica inválido e removível."
       >
         <ThemedFilterBar fields={[...FIELDS, TAGS]} value={LONG_AND_UNKNOWN} />
       </Scene>

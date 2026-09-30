@@ -34,14 +34,14 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: true,
     purpose:
-      'O landmark role="search" com o nome da família. Carrega data-ui="filter-bar", data-apply, data-size, data-dirty, data-open, data-sticky, data-bar-wrapped. É o contentor de query; nada nele muda de grelha.',
+      'O landmark role="search" com o nome da família. Carrega data-ui="filter-bar", data-apply, data-size, data-dirty, data-open, data-sticky, data-readonly, data-disabled, data-loading. É o contentor de query; nada nele muda de grelha.',
   },
   {
     part: 'frame',
     element: 'div',
     required: true,
     purpose:
-      'A grelha, um elemento dentro da raiz, porque uma container query não restyla o elemento que mede. Três composições: larga, média e estreita. Cada membro começa no topo da sua linha e tem a altura de um controle, por isso a busca e a contagem alinham com a primeira linha de pills.',
+      'A grelha, um elemento dentro da raiz, porque uma container query não restyla o elemento que mede. Acima de 36rem duas linhas: a busca, os controles do consumidor e a contagem; depois a barra, que quebra. Abaixo, a busca, a barra como uma linha que desliza, e a contagem.',
   },
   {
     part: 'search',
@@ -55,20 +55,21 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: true,
     purpose:
-      'O role="toolbar": uma parada de tabulação, setas entre os pills, o add, o clear, as ações e o summary.',
+      'O role="toolbar" que segura tudo o que não é a busca: uma parada de tabulação, e as setas percorrem o summary, os pills, cada segmento de cada chip, more, add, clear e as ações, de linha em linha. data-revealed quando os chips dobrados estão à vista.',
   },
   {
     part: 'pill',
     element: 'button',
     required: false,
     purpose:
-      'Um campo fixado, com ou sem regra. data-filtered enquanto segura uma regra ativa; abre um popover com o editor da regra. aria-haspopup="dialog".',
+      'Um campo fixado sem condição: aresta tracejada, glifo plus, o nome. Premido, dá lugar ao chip do campo, incompleto, com o popover do valor aberto; num telefone abre o construtor com o cartão da regra.',
   },
   {
     part: 'add',
     element: 'button',
     required: true,
-    purpose: 'O gatilho do menu com os campos ainda sem regra, agrupados por section.',
+    purpose:
+      'O gatilho do menu com os campos ainda sem regra, agrupados por section e com o glifo de cada um. Com um chip na barra desenha só o glifo, num círculo, data-compact; o rótulo fica como nome e title.',
   },
   {
     part: 'clear',
@@ -104,7 +105,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: true,
     purpose:
-      'Só abaixo de 36rem: "Filters (n)", que abre o construtor. Fora da largura estreita está escondido e fora do anel de foco.',
+      'Primeiro na barra, desenhado só abaixo de 36rem: "Filters (n)", que abre o construtor. Fora da largura estreita está escondido e fora do anel de foco.',
   },
   {
     part: 'end',
@@ -114,18 +115,37 @@ const anatomy: AnatomyRow[] = [
       'Os controles do consumidor — uma ordenação, um seletor de colunas — projetados como children.',
   },
   {
-    part: 'chips',
-    element: 'div',
-    required: true,
-    purpose:
-      'O role="grid" com uma linha: uma parada de tabulação, setas entre os chips, Delete remove. data-revealed quando os dobrados estão à vista.',
-  },
-  {
     part: 'chip',
     element: 'div',
     required: false,
     purpose:
-      'Uma gridcell com um tag: o nome do campo e a frase da regra, um botão que abre o editor, o remove do tag. data-folded além de chipLimit; data-invalid num campo desconhecido ou obrigatório sem valor.',
+      'Uma condição escrita em segmentos, role="group" com o nome "<campo>: <frase>". data-pinned num campo fixado, data-incomplete enquanto falta o operando, data-folded além de chipLimit, data-invalid num campo desconhecido ou obrigatório sem valor. Delete em qualquer segmento remove a condição.',
+  },
+  {
+    part: 'chip-field',
+    element: 'span',
+    required: false,
+    purpose: 'O glifo do campo e o seu nome. Só se lê: o campo de uma condição é fixo.',
+  },
+  {
+    part: 'chip-operator',
+    element: 'button',
+    required: false,
+    purpose:
+      'O operador, mais leve que as pontas. Abre um menu com os operadores da espécie; um operador que pede um operando em falta passa ao valor.',
+  },
+  {
+    part: 'chip-value',
+    element: 'button',
+    required: false,
+    purpose:
+      'O valor: dois itens e o resto em número, a lista inteira no nome e no title. Abre um popover só com o operando; num telefone leva também as palavras do operador e abre o construtor.',
+  },
+  {
+    part: 'chip-remove',
+    element: 'button',
+    required: false,
+    purpose: 'Remove a condição com a razão remove. Ausente num campo obrigatório e sob readOnly.',
   },
   {
     part: 'more',
@@ -180,7 +200,14 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'Uma regra: campo, operador, operando, remover. data-kind e data-operands para a grelha; data-invalid num campo desconhecido.',
+      'Uma regra: campo, operador, operando, remover. data-kind e data-operands para a grelha; data-invalid num campo desconhecido; data-expanded no cartão aberto da forma estreita.',
+  },
+  {
+    part: 'rule-summary',
+    element: 'button',
+    required: false,
+    purpose:
+      'A frase da regra, cabeçalho do cartão quando o construtor tem menos de 30rem. Premida, abre ou fecha o cartão, um de cada vez; aria-expanded e aria-controls nos três controles.',
   },
   { part: 'field', element: 'div', required: false, purpose: 'O select do campo, embrulhado.' },
   {
@@ -218,7 +245,8 @@ const anatomy: AnatomyRow[] = [
     part: 'remove-group',
     element: 'button',
     required: false,
-    purpose: 'Remove um grupo aninhado com tudo o que tem dentro. A raiz não se remove.',
+    purpose:
+      'O glifo do caixote, nomeado Remove group: remove um grupo aninhado com tudo o que tem dentro. A raiz não se remove.',
   },
   {
     part: 'save-preset',
@@ -245,7 +273,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'listing',
     title: 'A barra sobre a tabela, e a mesma regra nos dois sítios',
-    note: 'A árvore é aplicada pelo consumidor com createFilterGroupPredicate e createSearchPredicate; a tabela abaixo encolhe e a contagem diz quanto. O filtro de coluna de Status no cabeçalho edita o mesmo objeto que o pill da barra.',
+    note: 'A árvore é aplicada pelo consumidor com createFilterGroupPredicate e createSearchPredicate; a tabela abaixo encolhe e a contagem diz quanto. O filtro de coluna de Status no cabeçalho edita o mesmo objeto que o chip de Status da barra.',
     snippet: defineSnippet({
       id: 'filter-bar-react-listing',
       language: 'tsx',
@@ -256,20 +284,20 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'pinned',
-    title: 'Campos fixados como pills',
-    note: 'pinned desenha o campo na barra esteja ou não filtrado: vazio é um contorno com chevron, cheio leva a borda e o fundo de acento com a frase da regra. Um clique abre o popover; Done fecha e Clear devolve o pill ao vazio.',
+    title: 'Campos fixados: um lugar tracejado que vira chip',
+    note: 'pinned deixa o campo sempre à vista. Sem condição é um pill tracejado com + e o nome — um lugar à espera de ser preenchido; premido, dá lugar ao chip do campo, no mesmo sítio, incompleto e com o popover do valor aberto. Remover a condição devolve o pill.',
     snippet: defineSnippet({
       id: 'filter-bar-react-pinned',
       language: 'tsx',
       label: 'Dois campos sempre à vista',
       source:
-        "const FIELDS = [\n  {\n    key: 'status',\n    kind: 'set',\n    label: 'Status',\n    options: STATUSES,\n    pinned: true,\n  },\n  { key: 'customer', kind: 'text', label: 'Customer', pinned: true },\n  { key: 'amount', kind: 'number', label: 'Amount' },\n];",
+        "const FIELDS = [\n  {\n    icon: 'circle',\n    key: 'status',\n    kind: 'set',\n    label: 'Status',\n    options: STATUSES,\n    pinned: true,\n  },\n  { key: 'customer', kind: 'text', label: 'Customer', pinned: true },\n  { key: 'amount', kind: 'number', label: 'Amount' },\n];",
     }),
   },
   {
     id: 'chips',
-    title: 'As regras aplicadas como chips',
-    note: 'Um chip por regra de primeiro nível de um campo não fixado: o nome do campo em medium, a frase de describeFilter a seguir, o X do tag. Uma lista de um valor lê-se como igualdade — "Status is Paid" em vez de "Status any of Paid" — e volta à forma de lista no segundo valor; a condição continua a ser anyOf. Além de chipLimit os chips dobram atrás de "+n more"; um campo que a aplicação já não declara fica à vista, inválido e removível.',
+    title: 'Cada condição escrita em segmentos',
+    note: 'Um chip é a frase da condição em segmentos: o campo com o seu glifo, o operador mais leve, o valor, e o X. O operador abre um menu, o valor um popover só com o operando — mudar a comparação não reabre os valores. Uma lista longa escreve dois valores e o resto em número (Paid, Refunded +2), inteira no nome e no title; uma lista de um lê-se como igualdade. Add filter cria o chip de imediato, tracejado até ter valor, e fora do valor emitido até lá. Além de chipLimit os chips dobram atrás de +n more.',
     snippet: defineSnippet({
       id: 'filter-bar-react-chips',
       language: 'tsx',
@@ -280,7 +308,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'builder',
     title: 'O construtor num drawer',
-    note: 'Add filter, um chip ou "Filters (n)" abrem a árvore inteira num drawer: cada regra é campo, operador, operando e remover numa linha; Apply pede a árvore com a razão submit, Cancel e Escape descartam.',
+    note: 'Add filter, um chip de grupo ou Filters (n) abrem a árvore inteira num drawer; num telefone o drawer sobe de baixo como uma folha. Com mais de 30rem cada regra é uma linha de campo, operador, operando e X; com menos, um cartão com a frase que se expande no lugar, um de cada vez. Apply pede a árvore com a razão submit, Cancel e Escape descartam.',
     snippet: defineSnippet({
       id: 'filter-bar-react-builder',
       language: 'tsx',
@@ -292,7 +320,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'groups',
     title: 'Grupos E/OU aninhados',
-    note: 'Um grupo dentro de um grupo é uma caixa sobre a superfície afundada, com a junção oposta e o seu próprio Remove group; na barra aparece como um chip só, com a frase entre parênteses, que abre o construtor. É o que AG Grid e react-querybuilder entregam e que table adiou para aqui.',
+    note: 'Um grupo dentro de um grupo é uma caixa sobre a superfície afundada, com a junção oposta e o caixote que o remove; num construtor estreito passa a um trilho na aresta inicial, que custa dez pixels por nível em vez de oitenta. Na barra aparece como um chip só, com a frase entre parênteses, que abre o construtor.',
     snippet: defineSnippet({
       id: 'filter-bar-react-groups',
       language: 'tsx',
@@ -316,7 +344,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'required',
     title: 'Um campo obrigatório com default',
-    note: 'required fixa o campo e dá-lhe um defaultValue: Clear devolve-o ao default em vez de o apagar, o chip não se remove, e um Apply com o campo vazio é recusado com data-invalid, a mensagem anunciada e o foco no pill.',
+    note: 'required fixa o campo e dá-lhe um defaultValue: Clear devolve-o ao default em vez de o apagar, o chip não tem X, e um Apply com o campo sem valor é recusado — o chip fica tracejado e data-invalid, a mensagem é anunciada.',
     snippet: defineSnippet({
       id: 'filter-bar-react-required',
       language: 'tsx',
@@ -375,12 +403,12 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'narrow',
-    title: 'Três composições pela largura da barra',
-    note: 'Larga, uma linha — enquanto a toolbar cabe nela: quando os pills iriam para uma segunda linha ao lado da busca, a raiz leva data-bar-wrapped e desenha a composição média. A medida é lida na composição larga, com o atributo retirado para a leitura, e por isso não oscila. Média, a busca com os controles e a contagem, a toolbar numa linha própria. Estreita, abaixo de 36rem: os pills e os chips dobram atrás de "Filters (n)", que abre o construtor. Redimensione o palco.',
+    title: 'Num telefone: uma linha que desliza e uma folha',
+    note: 'Abaixo de 36rem a busca fica em cima e a barra passa a uma linha que desliza: Filters (n) primeiro, todos os chips — também os dobrados —, depois os pills vazios; o chip cortado na borda diz que a linha continua. Cada chip tem três alvos: o campo, o valor com as palavras do operador, o X. Tocar num valor, num pill ou em Filters abre o construtor como folha, com o cartão da regra aberto. Redimensione o palco.',
     snippet: defineSnippet({
       id: 'filter-bar-react-narrow',
       language: 'tsx',
-      label: 'A mesma barra em três larguras',
+      label: 'A barra num contentor de telefone',
       source:
         "<div style={{ inlineSize: '22rem' }}>\n  <FilterBar fields={FIELDS} value={filter} />\n</div>;",
     }),
@@ -399,20 +427,20 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'states',
-    title: 'Desabilitada, a carregar, inválida',
-    note: 'disabled desliga todos os controles e mantém a largura; loading mantém os controles, desliga Apply e põe o spinner no lugar da contagem; um pill obrigatório sem valor recusa Apply e leva data-invalid e a borda de danger.',
+    title: 'Desabilitada, a carregar, só leitura',
+    note: 'disabled desliga todos os controles e mantém a largura; loading mantém os controles, desliga Apply e põe o spinner no lugar da contagem; readOnly deixa cada condição alcançável e legível — os segmentos guardam a paragem com aria-disabled — e não desenha X, add, clear nem pills vazios.',
     snippet: defineSnippet({
       id: 'filter-bar-react-states',
       language: 'tsx',
       label: 'Os três estados da barra inteira',
       source:
-        '<>\n  <FilterBar disabled fields={FIELDS} />\n  <FilterBar fields={FIELDS} loading />\n</>;',
+        '<>\n  <FilterBar disabled fields={FIELDS} />\n  <FilterBar fields={FIELDS} loading />\n  <FilterBar fields={FIELDS} readOnly value={filter} />\n</>;',
     }),
   },
   {
     id: 'content',
     title: 'Conteúdo que a família não escolheu',
-    note: 'Uma frase de onze valores trunca no chip e fica inteira no title e no nome acessível; um rótulo árabe ao lado de uma data ISO não reordena a data, porque nome e frase são duas corridas isoladas; um campo desconhecido é um chip inválido.',
+    note: 'Um valor de onze itens escreve dois e o resto em número, inteiro no title e no nome acessível; um valor longo trunca a 12rem; um rótulo árabe ao lado de uma data ISO não reordena a data, porque campo, operador e valor são corridas isoladas; um campo desconhecido é um chip inválido, removível.',
     snippet: defineSnippet({
       id: 'filter-bar-react-content',
       language: 'tsx',
@@ -424,7 +452,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'keyboard',
     title: 'Teclado',
-    note: 'Tab: busca, toolbar, chips. Setas entre pills e entre chips, Home e End nas pontas, espelhadas em RTL. Enter ou Space abre o editor; Delete num chip remove com a razão remove e o foco vai ao chip seguinte; Escape limpa a busca ou fecha a superfície.',
+    note: 'Tab: a busca, depois a barra — duas paragens. As setas percorrem cada controle da barra, segmento a segmento, de linha em linha e espelhadas em RTL; Home e End nas pontas. Enter no operador abre o menu, no valor o popover; Delete em qualquer segmento remove a condição com a razão remove e o foco vai ao mesmo segmento do chip seguinte; Escape limpa a busca ou fecha a superfície.',
     snippet: defineSnippet({
       id: 'filter-bar-react-keyboard',
       language: 'tsx',
@@ -480,7 +508,7 @@ export const REACT_FILTER_BAR_DOCS = {
         'FilterBarField[]',
         '—',
         'FilterBar',
-        'Os campos filtráveis: key, label, kind, operators, pinned, required, defaultValue, section, options, searchable',
+        'Os campos filtráveis: key, label, kind, icon (nome de glifo ou nó), operators, pinned, required, defaultValue, section, options, searchable',
       ],
       [
         'value',
@@ -550,6 +578,13 @@ export const REACT_FILTER_BAR_DOCS = {
       ],
       ['disabled', 'boolean', 'false', 'FilterBar', 'Desliga todos os controles'],
       [
+        'readOnly',
+        'boolean',
+        'false',
+        'FilterBar',
+        'Cada condição alcançável e legível, nenhuma alterável: sem X, add, clear nem pills vazios',
+      ],
+      [
         'loading',
         'boolean',
         'false',
@@ -613,12 +648,12 @@ export const REACT_FILTER_BAR_DOCS = {
       ],
     ]),
     accessibility: [
-      'A raiz é role="search", não role="toolbar": o padrão Toolbar do APG pede que uma toolbar evite controles que precisam das setas, e o campo de busca é um. A busca é a primeira parada de tabulação, a toolbar a segunda com setas entre os pills, a grelha de chips a terceira — três paradas sejam quantos forem os campos.',
-      'Um chip é uma gridcell com o tag por dentro: o nome acessível do corpo é "<campo>: <frase>", a mesma frase que describeFilter dá ao anúncio de table e ao nome do gatilho filtrado, e o remove do tag anuncia "Remove <frase>". Delete e Backspace no chip removem com a razão remove e createRemovalFocus leva o foco ao chip seguinte, ao anterior, ou ao Add filter.',
-      'Um pill tem aria-haspopup="dialog" e aria-expanded; um pill obrigatório sem valor recusa Apply, leva aria-invalid e data-invalid, e a recusa é anunciada em polite com o foco movido para ele.',
+      'A raiz é role="search", não role="toolbar": o padrão Toolbar do APG pede que uma toolbar evite controles que precisam das setas, e o campo de busca é um. A busca é a primeira parada de tabulação e a toolbar a segunda — duas paradas sejam quantos forem os campos; a nota do APG para toolbars de várias linhas deixa as setas passar de linha em linha.',
+      'Um chip é role="group" com o nome "<campo>: <frase>", a mesma frase que describeFilter dá ao anúncio de table, e ", incomplete" enquanto falta o valor. O operador tem aria-haspopup="menu", o valor aria-haspopup="dialog" e o nome com a lista inteira, o X "Remove <campo>". Delete e Backspace em qualquer segmento removem com a razão remove e o foco vai ao segmento do mesmo papel no chip seguinte, ao anterior, ou ao Add filter.',
+      'Um pill tem aria-haspopup="dialog"; sob readOnly a toolbar leva aria-description="Read only" e os segmentos guardam a paragem com aria-disabled, e um valor bloqueado nomeia a lista inteira que o popover já não mostra.',
       'A contagem é a própria região viva, em polite, por isso o efeito de um filtro é ouvido; aplicar, limpar, remover um chip e escolher uma vista são anunciados pelo live-announcer partilhado.',
       'O construtor é um drawer: modal, Escape fecha e descarta, o foco volta ao gatilho. Cada grupo é um fieldset com legend, cada regra três controles nomeados — Field, Operator, Value ou From e To.',
-      'Abaixo de 36rem os pills e os chips saem do anel de foco com visibility hidden, não só do desenho: uma parada onde nada se vê é uma parada que não existe.',
+      'Abaixo de 36rem o operador, more, add e clear saem do anel de foco com visibility hidden, não só do desenho: uma parada onde nada se vê é uma parada que não existe. Os cartões fechados do construtor tiram os três controles do anel da mesma forma; a frase do cartão tem aria-expanded e aria-controls.',
     ],
     snippets: [
       defineSnippet({
@@ -626,14 +661,14 @@ export const REACT_FILTER_BAR_DOCS = {
         language: 'tsx',
         label: 'Anatomia, como chega ao DOM',
         source:
-          '<div\n  aria-label="Filter"\n  data-apply="live"\n  data-part="root"\n  data-size="md"\n  data-ui="filter-bar"\n  role="search"\n>\n  <div data-part="frame">\n    <div data-part="search">…</div>\n    <div aria-label="Filters" data-part="bar" role="toolbar">\n      <button aria-haspopup="dialog" data-filtered="" data-part="pill">\n        <span>Status</span>\n        <span>any of Paid</span>\n      </button>\n      <button data-part="add" data-ui="button">\n        Add filter\n      </button>\n    </div>\n    <p aria-live="polite" data-part="count">\n      128 of 3,412\n    </p>\n    <div aria-label="Applied filters" data-part="chips" role="grid">\n      …\n    </div>\n  </div>\n</div>;',
+          '<div\n  aria-label="Filter"\n  data-apply="live"\n  data-part="root"\n  data-size="md"\n  data-ui="filter-bar"\n  role="search"\n>\n  <div data-part="frame">\n    <div data-part="search">…</div>\n    <div aria-label="Filters" data-part="bar" role="toolbar">\n      <button data-part="summary">Filters (2)</button>\n      <div aria-label="Status: any of Paid, Refunded" data-part="chip" role="group">\n        <span data-part="chip-field">Status</span>\n        <button aria-haspopup="menu" data-part="chip-operator">\n          any of\n        </button>\n        <button aria-haspopup="dialog" data-part="chip-value">\n          Paid, Refunded\n        </button>\n        <button aria-label="Remove Status" data-part="chip-remove" />\n      </div>\n      <button aria-haspopup="dialog" data-part="pill">\n        Owner\n      </button>\n      <button aria-label="Add filter" data-compact="" data-part="add" />\n    </div>\n    <p aria-live="polite" data-part="count">\n      128 of 3,412\n    </p>\n  </div>\n</div>;',
       }),
       defineSnippet({
         id: 'filter-bar-theming',
         language: 'css',
         label: 'Retunar a família para uma aplicação',
         source:
-          "[data-ui='filter-bar'] {\n  --slotted-filter-bar-pill-radius: var(--slotted-radius-md);\n  --slotted-filter-bar-chip-max: 24rem;\n  --slotted-filter-bar-search-max: 36rem;\n}",
+          "[data-ui='filter-bar'] {\n  --slotted-filter-bar-pill-radius: var(--slotted-radius-md);\n  --slotted-filter-bar-value-max: 16rem;\n  --slotted-filter-bar-search-max: 36rem;\n}",
       }),
     ],
   },

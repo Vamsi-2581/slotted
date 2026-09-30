@@ -3,17 +3,29 @@ import { inject, InjectionToken } from '@angular/core';
 /**
  * Which region reaches the corner of the screen. `banner` spans the full width
  * and the navigation starts below it; `nav` spans the full height and the
- * banner starts beside it. The grid changes where a region is drawn and never
- * where it is written, so the focus order is the same under both.
+ * banner starts beside it; `main` spans the navigation the full height as well
+ * and puts the banner in the plane of the content, inside the card that holds
+ * it. The grid changes where a region is drawn and never where it is written,
+ * so the focus order is the same under all three.
  */
-export type AppShellPrimary = 'banner' | 'nav';
+export type AppShellPrimary = 'banner' | 'nav' | 'main';
 
 /**
- * Which surface carries which plane. `inset` paints the frame with the sunken
- * ground and makes the content a raised card; `flush` is the other way round,
- * edge to edge, separated by a rule.
+ * Which surface carries which plane, for every region at once. `inset` paints
+ * the frame with the sunken ground and makes the content a raised card;
+ * `flush` runs every region edge to edge, separated at its seams; `floating`
+ * makes the navigation a card as well as the content; `panel` holds the
+ * navigation, the content and the pane in one card, the banner on the frame
+ * above it.
  */
-export type AppShellCanvas = 'inset' | 'flush';
+export type AppShellCanvas = 'inset' | 'flush' | 'floating' | 'panel';
+
+/**
+ * What draws a seam where two regions touch without a gutter. `rule` is a
+ * line; `tone` is a ground of its own on the chrome regions, 0.036 OKLab L
+ * from the surface, with the subtle tones inside them recomputed from it.
+ */
+export type AppShellSeparation = 'rule' | 'tone';
 
 /**
  * How the navigation region occupies space. `auto` is `inline` at or above the
@@ -82,7 +94,6 @@ export interface AppShellDefaults {
   canvas: AppShellCanvas;
   closeOnNavigate: boolean;
   collapsedTo: AppShellCollapsedTo;
-  dividers: boolean;
   escape: AppShellDismissPolicy;
   /** The platform's way back — a phone's gesture, a browser's button — closes a modal layer. */
   back: AppShellDismissPolicy;
@@ -94,6 +105,7 @@ export interface AppShellDefaults {
   outsidePress: AppShellDismissPolicy;
   primary: AppShellPrimary;
   scroll: AppShellScroll;
+  separation: AppShellSeparation;
 }
 
 /** The strings the family says before an application says otherwise. */
@@ -115,7 +127,6 @@ const FALLBACK: AppShellDefaults = {
   canvas: 'inset',
   closeOnNavigate: true,
   collapsedTo: 'rail',
-  dividers: true,
   escape: 'close',
   back: 'close',
   messages: DEFAULT_APP_SHELL_MESSAGES,
@@ -126,6 +137,7 @@ const FALLBACK: AppShellDefaults = {
   outsidePress: 'close',
   primary: 'banner',
   scroll: 'content',
+  separation: 'rule',
 };
 
 export const APP_SHELL_DEFAULTS = new InjectionToken<AppShellDefaults>(

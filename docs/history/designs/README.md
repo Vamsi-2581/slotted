@@ -64,6 +64,7 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `app-shell` | [2026-09-13](2026-09-13-app-shell-capability-inventory.md) | [2026-09-13](2026-09-13-app-shell-design.md) | [2026-09-14](2026-09-14-app-shell-self-assessment.md) |
 | `scroll-area` | [2026-09-13](2026-09-13-scroll-area-capability-inventory.md) | [2026-09-13](2026-09-13-scroll-area-design.md) | [2026-09-13](2026-09-13-scroll-area-self-assessment.md) |
 | `app-shell-redesign` | — | [2026-09-14](2026-09-14-app-shell-redesign-design.md) | — |
+| `app-shell-arrangements` | — | [2026-09-29](2026-09-29-app-shell-arrangements-design.md) | [2026-09-29](2026-09-29-app-shell-arrangements-self-assessment.md) |
 | `code-block` | [2026-09-14](2026-09-14-code-block-capability-inventory.md) | [2026-09-14](2026-09-14-code-block-design.md) | [2026-09-14](2026-09-14-code-block-self-assessment.md) |
 | `date-range-picker` | [2026-09-14](2026-09-14-date-range-picker-capability-inventory.md) | [2026-09-14](2026-09-14-date-range-picker-design.md) | [2026-09-14](2026-09-14-date-range-picker-self-assessment.md) |
 | `filter-bar` | [2026-09-14](2026-09-14-filter-bar-capability-inventory.md) | [2026-09-14](2026-09-14-filter-bar-design.md) | [2026-09-14](2026-09-14-filter-bar-self-assessment.md) |
@@ -118,5 +119,6 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 - [2026-09-29-alert-dialog-reui-dossier.md](2026-09-29-alert-dialog-reui-dossier.md)
 - [2026-09-29-avatar-reui-dossier.md](2026-09-29-avatar-reui-dossier.md)
 - [2026-09-29-breadcrumb-reui-dossier.md](2026-09-29-breadcrumb-reui-dossier.md)
+- [2026-09-29-app-shell-reui-dossier.md](2026-09-29-app-shell-reui-dossier.md)
 - [2026-09-29-toast-reui-dossier.md](2026-09-29-toast-reui-dossier.md)
 - [2026-09-29-timeline-reui-dossier.md](2026-09-29-timeline-reui-dossier.md)

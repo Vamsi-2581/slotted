@@ -21,6 +21,7 @@ import {
   AtrioPane,
   Aurora,
   AuroraBanner,
+  AuroraRail,
   AuroraContent,
   AuroraFooter,
   AuroraNav,
@@ -44,9 +45,11 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     regions: Regions,
     banner: BannerScene,
     canvas: Canvas,
+    separation: Separation,
     theming: Theming,
     navModes: NavModes,
     rail: Rail,
+    navRail: NavRail,
     aside: Aside,
     overlay: Overlay,
     primary: Primary,
@@ -92,7 +95,6 @@ export const Playground: Story = {
     collapsedTo: 'rail',
     defaultAsideOpen: true,
     defaultNavOpen: true,
-    dividers: true,
     escape: 'close',
     modal: true,
     navMode: 'auto',
@@ -101,6 +103,7 @@ export const Playground: Story = {
     outsidePress: 'close',
     primary: 'banner',
     scroll: 'content',
+    separation: 'rule',
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
   render: (args) => <Aurora footer shell={args as Partial<AppShellProps>} />,
@@ -197,20 +200,63 @@ export const Canvas: Story = {
         label="canvas='inset', the default"
         note="The frame takes the sunken ground and carries no surface of its own; the content and the pane are cards with a radius, an edge and a shadow, and the gutter between them is what separates the regions. No rule is drawn anywhere."
       >
-        <Aurora shell={{ asideMode: 'inline', canvas: 'inset', navMode: 'inline' }} />
+        <Aurora footer shell={{ asideMode: 'inline', canvas: 'inset', navMode: 'inline' }} />
       </Scene>
       <Scene
         label="canvas='flush'"
-        note="What every surveyed implementation ships: the regions carry the surface, the content carries the ground, and a hairline does the separating — between the regions, and between the pane's head, body and foot. The same product as above."
+        note="Every region runs edge to edge and each seam is drawn — between the regions, and between the pane's head, body and foot. The rows of the column stand one inset from the screen's edge and from the seam on both sides, so the closed strip stays centred."
+      >
+        <Aurora footer shell={{ asideMode: 'inline', canvas: 'flush', navMode: 'inline' }} />
+      </Scene>
+      <Scene
+        label="canvas='floating'"
+        note="The column is a card as well as the content: two cards and the pane on the sunken ground, a gutter apart. The control in the bar stands over the marks in the card, because the bar's inset counts the card's edge."
+      >
+        <Aurora footer shell={{ asideMode: 'inline', canvas: 'floating', navMode: 'inline' }} />
+      </Scene>
+      <Scene
+        label="canvas='panel'"
+        note="One card holds the column, the content and the pane, with the bar and the footer on the frame outside it. Inside the card the regions meet at seams, and separation decides how those are drawn. The card is one box — the root's own pseudo-element — so no shadow falls across a seam."
+      >
+        <Aurora footer shell={{ asideMode: 'inline', canvas: 'panel', navMode: 'inline' }} />
+      </Scene>
+    </Grid>
+  ),
+};
+
+/* ── Separation ─────────────────────────────────────────────────────────── */
+
+export const Separation: Story = {
+  parameters: scenario('separation'),
+  render: () => (
+    <Grid columns={1}>
+      <Scene
+        label="separation='rule' on flush, the default"
+        note="A line of the thin border width at every seam where two regions touch without a gutter."
       >
         <Aurora shell={{ asideMode: 'inline', canvas: 'flush', navMode: 'inline' }} />
       </Scene>
       <Scene
-        label="canvas='flush' with dividers={false}"
-        note="The rules off, for a shell whose regions are already separated by what is inside them. Under inset the axis changes nothing, because there was no rule to remove."
+        label="separation='tone' on flush"
+        note="No line: the bar, the column and the pane take a ground of their own, 0.036 OKLab L from the surface in light and in dark, and the content keeps the surface. Hover a destination — the subtle tones inside a toned region are recomputed from its ground, so the row still answers."
       >
         <Aurora
-          shell={{ asideMode: 'inline', canvas: 'flush', dividers: false, navMode: 'inline' }}
+          shell={{ asideMode: 'inline', canvas: 'flush', navMode: 'inline', separation: 'tone' }}
+        />
+      </Scene>
+      <Scene
+        label="separation='tone' on panel, primary='main'"
+        note="Inside the one card the column and the pane are toned and the bar belongs to the content, so the only seam left is none at all. Under forced colours every ground is Canvas and the rule comes back whatever this axis says."
+      >
+        <Aurora
+          shell={{
+            asideMode: 'inline',
+            canvas: 'panel',
+            navMode: 'inline',
+            primary: 'main',
+            separation: 'tone',
+          }}
+          toggleInFooter
         />
       </Scene>
     </Grid>
@@ -235,6 +281,21 @@ export const Theming: Story = {
       >
         <Aurora shell={{ asideMode: 'inline', navMode: 'inline' }} />
       </Scene>
+      <Scene
+        label="A wash behind the frame — --slotted-app-shell-frame-image"
+        note="One theme token, a background-image layer over the frame's colour: two pools of the accent tone behind floating cards. The cards keep their own surface, so everything a reader reads stays on the ground it was calibrated for."
+      >
+        <Aurora
+          shell={{
+            asideMode: 'inline',
+            canvas: 'floating',
+            className: 'slotted-demo-frame-wash',
+            navMode: 'inline',
+            primary: 'main',
+          }}
+          toggleInFooter
+        />
+      </Scene>
     </Grid>
   ),
 };
@@ -256,7 +317,7 @@ export const NavModes: Story = {
         note="The shell answers its own inline size and not the window's: this frame is 420 pixels wide inside a page that is not, and both regions have already left the grid. Press the control — the panel comes in over the content and the veil covers what is behind it."
       >
         <div className="slotted-demo-measure">
-          <Aurora size="tall" shell={{ defaultAsideOpen: false }} />
+          <Aurora room={false} size="tall" shell={{ defaultAsideOpen: false }} />
         </div>
       </Scene>
       <Scene
@@ -325,6 +386,40 @@ export const Rail: Story = {
   ),
 };
 
+/* ── A rail of its own ─────────────────────────────────────────────────── */
+
+export const NavRail: Story = {
+  parameters: scenario('navRail'),
+  render: () => (
+    <Grid columns={1}>
+      <Scene
+        label="AppShellNavRail — open"
+        note="A two-level navigation inside one nav landmark: the modules in a strip of marks, the destinations of the chosen module in the column beside it. Press a module: the column changes, and the region's width does not. The module is the product's state; the shell holds only whether the region is open."
+      >
+        <AuroraRail />
+      </Scene>
+      <Scene
+        label="AppShellNavRail — closed to its strip"
+        note="collapsedTo='rail' with a strip of the rail's own keeps the strip and lets the column go: cut by the region while the width moves, then out of the tab order and the accessibility tree. The control at the foot of the strip brings the column back."
+      >
+        <AuroraRail shell={{ defaultNavOpen: false }} />
+      </Scene>
+      <Scene
+        label="AppShellNavRail on flush, separation='tone', primary='banner'"
+        note="The strip on the tone, the column and the bar on the tone beside it, the content on the surface — no line anywhere."
+      >
+        <AuroraRail shell={{ canvas: 'flush', primary: 'banner', separation: 'tone' }} />
+      </Scene>
+      <Scene
+        label="AppShellNavRail on floating, with the pane"
+        note="The strip and the column share one card; the seam between them is the axis's, here a rule."
+      >
+        <AuroraRail aside shell={{ canvas: 'floating' }} />
+      </Scene>
+    </Grid>
+  ),
+};
+
 /* ── Aside ──────────────────────────────────────────────────────────────── */
 
 export const Aside: Story = {
@@ -343,6 +438,7 @@ export const Aside: Story = {
       >
         <div className="slotted-demo-measure">
           <Aurora
+            room={false}
             size="tall"
             shell={{ asideMode: 'inline', defaultNavOpen: false, navMode: 'inline' }}
           />
@@ -436,6 +532,15 @@ export const Primary: Story = {
         note="The navigation reaches the corner and the bar starts beside it. The column's own head grows to the bar's height so the workspace and the trail sit on one line, and the control that moves the column stands in that head — and Tab still goes skip, banner, control, navigation, content, because the grid moved the drawing and not the writing."
       >
         <Cadence shell={{ navMode: 'inline' }} />
+      </Scene>
+      <Scene
+        label="primary='main' — Aurora"
+        note="The column reaches both corners and the bar belongs to the content: it stands inside the card that holds the page, over the content's column alone, and the pane beside it spans the bar's row. The control moves to the column's foot. The focus order is still skip, banner, navigation, content."
+      >
+        <Aurora
+          shell={{ asideMode: 'inline', navMode: 'inline', primary: 'main' }}
+          toggleInFooter
+        />
       </Scene>
     </Grid>
   ),

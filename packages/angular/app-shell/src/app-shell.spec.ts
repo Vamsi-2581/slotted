@@ -16,10 +16,16 @@ import {
   SlAppShellMain,
   SlAppShellNav,
   SlAppShellNavBody,
+  SlAppShellNavRail,
   SlAppShellNavToggle,
 } from './app-shell';
 import { provideAppShellDefaults } from './app-shell-defaults';
-import type { AppShellOpenRequest } from './app-shell-defaults';
+import type {
+  AppShellCanvas,
+  AppShellOpenRequest,
+  AppShellPrimary,
+  AppShellSeparation,
+} from './app-shell-defaults';
 
 const PARTS = [
   SlAppShell,
@@ -34,6 +40,7 @@ const PARTS = [
   SlAppShellMain,
   SlAppShellNav,
   SlAppShellNavBody,
+  SlAppShellNavRail,
   SlAppShellNavToggle,
 ];
 
@@ -48,6 +55,8 @@ const PARTS = [
     [(navOpen)]="open"
     [(asideOpen)]="asideOpen"
     [canvas]="canvas()"
+    [primary]="primary()"
+    [separation]="separation()"
     (navOpenChangeRequest)="requests.push($event)"
     (asideOpenChangeRequest)="asideRequests.push($event)"
   >
@@ -56,6 +65,7 @@ const PARTS = [
       <div slAppShellActions><button type="button">Conta</button></div>
     </header>
     <nav slAppShellNav>
+      <div slAppShellNavRail class="rail" aria-label="Secções"><a href="#vendas">Vendas</a></div>
       <div slAppShellNavBody><a href="#painel">Painel</a></div>
     </nav>
     <main slAppShellMain>Encomendas</main>
@@ -70,7 +80,9 @@ class Host {
   readonly open = signal(true);
   readonly asideOpen = signal(true);
   readonly asideRequests: AppShellOpenRequest[] = [];
-  readonly canvas = signal<'inset' | 'flush'>('inset');
+  readonly canvas = signal<AppShellCanvas>('inset');
+  readonly primary = signal<AppShellPrimary | undefined>(undefined);
+  readonly separation = signal<AppShellSeparation | undefined>(undefined);
   readonly requests: AppShellOpenRequest[] = [];
 }
 
@@ -270,12 +282,50 @@ describe('SlAppShell', () => {
     expect(root.getAttribute('data-aside-size')).toBe('md');
     expect(root.getAttribute('data-collapsed-to')).toBe('rail');
     expect(root.getAttribute('data-scroll')).toBe('content');
-    expect(root.hasAttribute('data-dividers')).toBe(true);
+    expect(root.getAttribute('data-separation')).toBe('rule');
+    expect(root.hasAttribute('data-dividers')).toBe(false);
     expect(root.hasAttribute('data-open')).toBe(true);
 
     fixture.componentInstance.canvas.set('flush');
     fixture.detectChanges();
     expect(root.getAttribute('data-canvas')).toBe('flush');
+  });
+
+  it('draws every canvas, every primary region and both separations it declares', () => {
+    const fixture = setup();
+    const root = query(fixture, '[data-ui="app-shell"]');
+
+    fixture.componentInstance.canvas.set('floating');
+    fixture.componentInstance.primary.set('main');
+    fixture.componentInstance.separation.set('tone');
+    fixture.detectChanges();
+    expect(root.getAttribute('data-canvas')).toBe('floating');
+    expect(root.getAttribute('data-primary')).toBe('main');
+    expect(root.getAttribute('data-separation')).toBe('tone');
+
+    fixture.componentInstance.canvas.set('panel');
+    fixture.detectChanges();
+    expect(root.getAttribute('data-canvas')).toBe('panel');
+  });
+
+  it('takes the separation from the provider, and an instance overrules it', () => {
+    const fixture = setup([provideAppShellDefaults({ separation: 'tone' })]);
+    const root = query(fixture, '[data-ui="app-shell"]');
+    expect(root.getAttribute('data-separation')).toBe('tone');
+
+    fixture.componentInstance.separation.set('rule');
+    fixture.detectChanges();
+    expect(root.getAttribute('data-separation')).toBe('rule');
+  });
+
+  it('renders a rail of its own inside the one navigation landmark', () => {
+    const fixture = setup();
+    const rail = query(fixture, '.rail');
+
+    expect(rail.getAttribute('data-part')).toBe('nav-rail');
+    expect(rail.getAttribute('aria-label')).toBe('Secções');
+    expect(rail.parentElement?.getAttribute('data-part')).toBe('nav');
+    expect(fixture.nativeElement.querySelectorAll('nav').length).toBe(1);
   });
 
   it('lets an application state the axes once, and an instance overrule any of them', () => {

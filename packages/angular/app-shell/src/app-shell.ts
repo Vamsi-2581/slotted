@@ -41,6 +41,7 @@ import type {
   AppShellOpenRequest,
   AppShellPrimary,
   AppShellScroll,
+  AppShellSeparation,
   AppShellSize,
 } from './app-shell-defaults';
 
@@ -58,6 +59,7 @@ export type {
   AppShellOpenRequest,
   AppShellPrimary,
   AppShellScroll,
+  AppShellSeparation,
   AppShellSize,
 } from './app-shell-defaults';
 
@@ -118,7 +120,7 @@ let nextId = 0;
     '[attr.data-aside-size]': 'resolvedAsideSize()',
     '[attr.data-collapsed-to]': 'resolvedCollapsedTo()',
     '[attr.data-scroll]': 'resolvedScroll()',
-    '[attr.data-dividers]': "resolvedDividers() ? '' : null",
+    '[attr.data-separation]': 'resolvedSeparation()',
     '[attr.data-open]': "navOpen() ? '' : null",
     '(click)': 'onClick($event)',
   },
@@ -147,8 +149,8 @@ export class SlAppShell {
   readonly collapsedTo = input<AppShellCollapsedTo | undefined>(undefined);
   /** Defaults to the provider, then `content`. */
   readonly scroll = input<AppShellScroll | undefined>(undefined);
-  /** Defaults to the provider, then `true`. */
-  readonly dividers = input<boolean | undefined>(undefined, { transform: optionalBoolean });
+  /** What draws a seam where two regions touch without a gutter. Defaults to the provider, then `rule`. */
+  readonly separation = input<AppShellSeparation | undefined>(undefined);
   /** Defaults to the provider, then `true`. */
   readonly modal = input<boolean | undefined>(undefined, { transform: optionalBoolean });
   /** Defaults to the provider, then `close`. */
@@ -234,7 +236,7 @@ export class SlAppShell {
   );
   readonly resolvedCollapsedTo = computed(() => this.collapsedTo() ?? this.defaults.collapsedTo);
   readonly resolvedScroll = computed(() => this.scroll() ?? this.defaults.scroll);
-  readonly resolvedDividers = computed(() => this.dividers() ?? this.defaults.dividers);
+  readonly resolvedSeparation = computed(() => this.separation() ?? this.defaults.separation);
   readonly resolvedModal = computed(() => this.modal() ?? this.defaults.modal);
   readonly resolvedEscape = computed(() => this.escape() ?? this.defaults.escape);
   readonly resolvedBack = computed(() => this.back() ?? this.defaults.back);
@@ -645,6 +647,19 @@ export class SlAppShellNav {
     inject(DestroyRef).onDestroy(remove);
   }
 }
+
+/**
+ * A strip of marks before the column: the first level of a two-level
+ * navigation, inside the one navigation landmark and under its one open state.
+ * Closed to `rail`, the region keeps this strip and lets the column go.
+ */
+@Directive({
+  selector: '[slAppShellNavRail]',
+  standalone: true,
+  exportAs: 'slAppShellNavRail',
+  host: { 'data-part': 'nav-rail' },
+})
+export class SlAppShellNavRail {}
 
 /** The pinned top of the navigation column. */
 @Directive({

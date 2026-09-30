@@ -143,11 +143,15 @@ test('clips its own inline axis, so a closed layer moves no scroll', () => {
  * writes the same inset, keeps standing over them.
  */
 test('insets the rows of the overlay card on the inset plane', () => {
-  const card = rule("[data-canvas='inset'][data-nav-mode='overlay'] > [data-part='nav'] {");
-  assert.match(card.body, /padding-inline:\s*var\(--_row-inset\)/);
-  /* The sheet on the flush plane meets the frame's edge as the column does. */
-  const sheet = rule("[data-nav-mode='overlay'] > [data-part='nav'] {").body;
-  assert.match(sheet, /padding-inline:\s*0/);
+  /* The card and the sheet alike: every layer has an edge, and the parts read
+     the inset the layer states. */
+  const layer = rule("[data-nav-mode='overlay'] > [data-part='nav'] {").body;
+  assert.match(layer, /--_nav-inset:\s*var\(--_row-inset\)/);
+  assert.match(layer, /padding-inline:\s*0/);
+  const parts = rule(
+    "> [data-part='nav']\n    > :is([data-part='nav-header'], [data-part='nav-body'], [data-part='nav-footer']) {",
+  ).body;
+  assert.match(parts, /padding-inline:\s*var\(--_nav-inset\)/);
 });
 
 /**
@@ -230,17 +234,23 @@ test('separates the inset canvas with a gutter and not with a rule', () => {
       assert.match(body, /border-radius:/, 'a closed outline without a radius is a rule');
     }
   }
-  /* Every rule the family draws between two regions is under `flush`. The
-     whole selector is read, not the fragment from `[data-dividers]` on: a
-     selector list spans lines and the canvas is written before the axis. */
-  for (const hit of [...css.matchAll(/\[data-dividers\]/g)]) {
-    const start = Math.max(css.lastIndexOf('}', hit.index), css.lastIndexOf('{', hit.index)) + 1;
-    const selector = css.slice(start, css.indexOf('{', hit.index));
+  /* Every seam the family draws is where two regions touch without a gutter:
+     under `flush`, inside the `panel` card, under the banner in the content's
+     card, or beside a rail of its own. The whole selector is read: a selector
+     list spans lines and the canvas is written before the part. */
+  const seams = [...css.matchAll(/var\(--_seam\)/g)];
+  assert.ok(seams.length >= 10, 'the seams read the one property');
+  for (const hit of seams) {
+    const open = css.lastIndexOf('{', hit.index);
+    const start = Math.max(css.lastIndexOf('}', open), css.lastIndexOf('*/', open)) + 1;
+    const selector = css.slice(start, open);
+    if (/--_seam:/.test(css.slice(open, hit.index))) continue;
     assert.match(
       selector,
-      /data-canvas='flush'/,
-      `${selector.trim().replace(/\s+/g, ' ')} draws a rule outside flush`,
+      /data-canvas='flush'|data-canvas='panel'|data-primary='main'|data-part='nav-rail'/,
+      `${selector.trim().replace(/\s+/g, ' ')} draws a seam where a gutter separates`,
     );
+    assert.doesNotMatch(selector, /data-canvas='(inset|floating)'/);
   }
   assert.match(css, /border-radius:\s*var\(--_radius\)/);
   assert.match(css, /box-shadow:\s*var\(--_elevation\)/);
@@ -303,8 +313,17 @@ test('gives every region a ground and an ink of its own', () => {
 test('adds nothing to one side of the region under either plane', () => {
   const inset = rule("[data-canvas='inset'] > [data-part='nav'] {");
   assert.equal(/padding-inline/.test(inset.body), false, 'inset pads the region on one side');
-  const flush = rule("[data-canvas='flush'] > [data-part='nav'] {");
-  assert.equal(/padding-inline/.test(flush.body), false, 'flush pads the region on one side');
+  /* Every inline padding the region takes is the one symmetric inset, and the
+     closed width counts it on both sides. */
+  const onOneSide = /padding-inline-(start|end)/;
+  for (const [, body] of css.matchAll(/> \[data-part='nav'\] \{([^}]*)\}/g)) {
+    assert.equal(onOneSide.test(body), false, 'a rule pads the region on one side');
+  }
+  assert.match(
+    rule("[data-nav-mode='inline'] > [data-part='nav'] {").body,
+    /inline-size:\s*calc\(var\(--_rail-size\) \+ 2 \* var\(--_nav-inset\) \+ var\(--_nav-edges\)\)/,
+  );
+  assert.match(rule("[data-canvas='flush'] {").body, /--_nav-inset:\s*var\(--_row-inset\)/);
 });
 
 /**
@@ -444,4 +463,57 @@ test('draws the pane control as the navigation control turned', () => {
     css,
     /:not\(\[data-nav-side='end'\]\)\s+\[data-part='aside-toggle'\]\s*>\s*\[data-ui='icon'\]/,
   );
+});
+
+/**
+ * Without a rule the two page surfaces were two per cent apart. The tone is a
+ * ground of its own, and the subtle pair the controls inside it read is
+ * recomputed from that ground, or a hover on it paints the ground itself.
+ */
+test('separates by a tone that recalibrates the controls standing on it', () => {
+  assert.match(rule("[data-separation='tone'] {").body, /--_seam:\s*none/);
+  assert.match(
+    css,
+    /--slotted-app-shell-tone-surface,\s*color-mix\(in oklab, var\(--slotted-surface\), var\(--slotted-text\) 4\.5%\)/,
+  );
+  const toned = css.slice(
+    css.indexOf('/* ── Separation by tone'),
+    css.indexOf('/* ── A rail of its own'),
+  );
+  assert.match(
+    toned,
+    /--slotted-tone-secondary-subtle-hover:\s*color-mix\(\s*in oklab,\s*var\(--_ground\),\s*var\(--slotted-text\) 4%/,
+  );
+  assert.match(
+    toned,
+    /--slotted-tone-secondary-subtle-active:\s*color-mix\(\s*in oklab,\s*var\(--_ground\),\s*var\(--slotted-text\) 7%/,
+  );
+  /* A tone separates nothing where every ground is Canvas. */
+  const forced = css.slice(css.indexOf('@media (forced-colors: active)'));
+  assert.match(
+    forced,
+    /\[data-separation='tone'\] \{\s*--_seam: var\(--_rule-width\) solid CanvasText/,
+  );
+});
+
+/** One box for a card over two regions, and none once the navigation is a layer. */
+test('paints a card over several regions as the root pseudo-element', () => {
+  const card = rule("[data-ui='app-shell'][data-canvas='panel']::before {");
+  assert.match(css, /content: '';\s*grid-area: 1 \/ 2 \/ 3 \/ 3;/);
+  assert.ok(card.at > 0);
+  assert.match(rule("[data-nav-mode='overlay'][data-canvas]::before {").body, /content:\s*none/);
+});
+
+/** Closing to the rail keeps the strip and takes the column out after the move. */
+test('closes a two-level navigation to its own strip', () => {
+  const grid = rule("> [data-part='nav']:has(> [data-part='nav-rail']) {");
+  assert.match(
+    grid.body,
+    /grid-template-columns:\s*var\(--_rail-size\) minmax\(var\(--_nav-size\), 1fr\)/,
+  );
+  const closed = css.slice(
+    css.indexOf("[data-nav-mode='inline']:not([data-open])\n    > [data-part='nav']:has"),
+  );
+  assert.match(closed, /transition: visibility var\(--_duration\) step-end;\s*visibility: hidden;/);
+  assert.match(css, /background-image: var\(--slotted-app-shell-frame-image, none\)/);
 });

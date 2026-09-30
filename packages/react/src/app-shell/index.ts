@@ -15,6 +15,7 @@ export {
   AppShellNavBody,
   AppShellNavFooter,
   AppShellNavHeader,
+  AppShellNavRail,
   AppShellNavToggle,
 } from './app-shell-parts';
 export {
@@ -54,5 +55,6 @@ export type {
   AppShellProps,
   AppShellRootProps,
   AppShellScroll,
+  AppShellSeparation,
   AppShellSize,
 } from './app-shell.types';

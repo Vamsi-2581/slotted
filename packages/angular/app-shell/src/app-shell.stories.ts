@@ -1,5 +1,7 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  lucideBadgeCheck,
+  lucideBanknote,
   lucideBell,
   lucideCalendarDays,
   lucideChartNoAxesColumn,
@@ -10,6 +12,7 @@ import {
   lucideFileText,
   lucideFilter,
   lucideFolderKanban,
+  lucideHandshake,
   lucideInbox,
   lucideKanban,
   lucideLayoutDashboard,
@@ -23,7 +26,9 @@ import {
   lucideSettings,
   lucideStethoscope,
   lucideTruck,
+  lucideUndo2,
   lucideUsers,
+  lucideWallet,
   lucideWarehouse,
 } from '@ng-icons/lucide';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
@@ -105,6 +110,7 @@ import {
   SlAppShellNavBody,
   SlAppShellNavFooter,
   SlAppShellNavHeader,
+  SlAppShellNavRail,
   SlAppShellNavToggle,
 } from './app-shell';
 import { provideAppShellDefaults } from './app-shell-defaults';
@@ -178,8 +184,17 @@ const section = (label: string | null, source: string) =>
 const column = (...sections: string[]) =>
   `<div slSideNavigation [value]="current()">${sections.join('')}</div>`;
 
-const viewport = (body: string, size = 'screen') =>
-  `<div class="slotted-demo-viewport" data-frame="window" data-layout="page" data-size="${size}">${body}</div>`;
+/**
+ * A shell owns a screen, so every scene stands in a window the height of one,
+ * and in a room the width of one: the docs column is 676 pixels at 1280, and a
+ * column, a content card and a pane squeezed into it drew a content column a
+ * few dozen pixels wide. `room = ''` is for the frame a scene measures narrow
+ * on purpose.
+ */
+const viewport = (body: string, size = 'screen', room = 'desktop') => {
+  const frame = `<div class="slotted-demo-viewport" data-frame="window" data-layout="page" data-size="${size}">${body}</div>`;
+  return room === '' ? frame : `<div class="slotted-demo-room" data-room="${room}">${frame}</div>`;
+};
 
 const scene = (label: string, note: string, body: string) => `<section class="slotted-demo-scene">
   <header class="slotted-demo-scene__header">
@@ -395,6 +410,7 @@ const aurora = (
     content = AURORA_CONTENT(),
     footer = false,
     nav = AURORA_NAV(),
+    room = 'desktop',
     size = 'screen',
     toggle = true,
   } = {},
@@ -408,6 +424,167 @@ const aurora = (
   ${footer ? AURORA_FOOTER : ''}
 </div>`,
     size,
+    room,
+  );
+
+/* ── Aurora with a navigation of two levels ───────────────────────────────── */
+
+interface NavGroup {
+  readonly label: string | null;
+  readonly items: readonly Destination[];
+}
+
+interface Module {
+  readonly id: string;
+  readonly label: string;
+  readonly icon: string;
+  readonly current: string;
+  readonly groups: readonly NavGroup[];
+}
+
+const MODULES: readonly Module[] = [
+  {
+    id: 'operacao',
+    label: 'Operação',
+    icon: 'lucideTruck',
+    current: 'encomendas',
+    groups: [
+      {
+        label: null,
+        items: [
+          item('painel', 'Painel', 'lucideLayoutDashboard'),
+          item('expedicoes', 'Expedições', 'lucideTruck', 19),
+          item('encomendas', 'Encomendas', 'lucidePackage', 412),
+        ],
+      },
+      {
+        label: 'Armazém',
+        items: [
+          item('armazens', 'Armazéns', 'lucideWarehouse'),
+          item('devolucoes', 'Devoluções', 'lucideUndo2', 4, 'accent'),
+          item('inventario', 'Inventário', 'lucideClipboardList'),
+        ],
+      },
+    ],
+  },
+  {
+    id: 'financas',
+    label: 'Finanças',
+    icon: 'lucideWallet',
+    current: 'faturacao',
+    groups: [
+      {
+        label: null,
+        items: [
+          item('faturacao', 'Faturação', 'lucideFileText', 7),
+          item('recebimentos', 'Recebimentos', 'lucideBanknote'),
+          item('despesas', 'Despesas', 'lucideWallet'),
+        ],
+      },
+    ],
+  },
+  {
+    id: 'clientes',
+    label: 'Clientes',
+    icon: 'lucideUsers',
+    current: 'contas',
+    groups: [
+      {
+        label: null,
+        items: [
+          item('contas', 'Contas', 'lucideUsers', 86),
+          item('contratos', 'Contratos', 'lucideHandshake'),
+          item('qualidade', 'Qualidade', 'lucideBadgeCheck'),
+        ],
+      },
+    ],
+  },
+  {
+    id: 'relatorios',
+    label: 'Relatórios',
+    icon: 'lucideChartNoAxesColumn',
+    current: 'desempenho',
+    groups: [
+      {
+        label: null,
+        items: [
+          item('desempenho', 'Desempenho', 'lucideChartNoAxesColumn'),
+          item('margens', 'Margens', 'lucideWallet'),
+        ],
+      },
+    ],
+  },
+];
+
+/**
+ * The region of a two-level navigation: the modules in a strip of marks, the
+ * destinations of the chosen module in the column. The control that moves the
+ * region stands at the foot of the strip, the part that survives closing it.
+ */
+const RAIL_NAV = `<nav slAppShellNav class="slotted-demo-nav">
+  <div slAppShellNavRail aria-label="Módulos">
+    <span slAvatar shape="square" size="sm" tone="accent" variant="solid"><span slAvatarFallback>AL</span></span>
+    @for (module of modules; track module.id) {
+      <button
+        slIconButton
+        type="button"
+        size="md"
+        tone="secondary"
+        [variant]="module.id === moduleId() ? 'solid' : 'ghost'"
+        [attr.aria-current]="module.id === moduleId() ? 'true' : null"
+        [attr.aria-label]="module.label"
+        (click)="moduleId.set(module.id)"
+      ><ng-icon [name]="module.icon" size="16" /></button>
+    }
+    <span class="slotted-demo-rail-end">
+      <button slIconButton type="button" size="md" tone="secondary" variant="ghost" aria-label="Definições"><ng-icon name="lucideSettings" size="16" /></button>
+      <button slAppShellNavToggle></button>
+    </span>
+  </div>
+  <div slAppShellNavHeader>
+    <span class="slotted-demo-rail-title">
+      <span slText size="sm" weight="semibold">{{ module().label }}</span>
+      <span slText size="xs" tone="muted">Aurora Logística · Porto</span>
+    </span>
+  </div>
+  <div slAppShellNavBody>
+    <div slSideNavigation [value]="module().current">
+      @for (group of module().groups; track $index) {
+        @if (group.label === null) {
+          ${section(null, 'group.items')}
+        } @else {
+          ${section('{{ group.label }}', 'group.items')}
+        }
+      }
+    </div>
+  </div>
+  <div slAppShellNavFooter>
+    ${account('Ana Beltrão — abrir menu da conta', 'AB', 'Ana Beltrão', 'Coordenadora')}
+  </div>
+</nav>`;
+
+const auroraRail = (attributes = '', { aside = false, wordmark = false } = {}) =>
+  viewport(
+    `<div slAppShell asideMode="inline" navMode="inline" ${attributes}>
+  <header slAppShellBanner>
+    <div slAppShellBrand>${wordmark ? '<span class="slotted-demo-bar-wordmark">Aurora</span>' : ''}</div>
+    <div slAppShellCentre>
+      <nav slBreadcrumb aria-label="Trilho">
+        <ol slBreadcrumbList>
+          <li slBreadcrumbItem><a slBreadcrumbLink href="#modulo">{{ module().label }}</a></li>
+          <li slBreadcrumbItem><span slBreadcrumbPage>Encomendas</span></li>
+        </ol>
+      </nav>
+    </div>
+    <div slAppShellActions>
+      <button slIconButton type="button" size="sm" tone="secondary" variant="ghost" aria-label="Notificações — 3 por ler"><ng-icon name="lucideBell" size="16" /></button>
+      <span slAvatar size="sm" tone="accent" variant="soft"><span slAvatarFallback>AB</span></span>
+    </div>
+  </header>
+  ${RAIL_NAV}
+  <main slAppShellMain>${AURORA_CONTENT()}</main>
+  ${aside ? AURORA_PANE : ''}
+</div>`,
   );
 
 /* ── Cadence: the product tracker ─────────────────────────────────────────── */
@@ -703,6 +880,7 @@ const DIRECTIVES = [
   SlAppShellNavBody,
   SlAppShellNavFooter,
   SlAppShellNavHeader,
+  SlAppShellNavRail,
   SlAppShellNavToggle,
   SlAvatar,
   SlAvatarFallback,
@@ -775,6 +953,12 @@ class Data {
   readonly agenda = AGENDA;
   readonly money = MONEY;
   readonly current = signal('encomendas');
+  readonly modules = MODULES;
+  /** The module the reader is in: the product's state, not the shell's. */
+  readonly moduleId = signal('operacao');
+  readonly module = computed(
+    () => MODULES.find((entry) => entry.id === this.moduleId()) ?? MODULES[0]!,
+  );
   /** The row the pane shows; a table selection moves it. */
   readonly selected = signal<string | undefined>('ENC-4521');
   readonly selectedKeys = computed(() => (this.selected() === undefined ? [] : [this.selected()!]));
@@ -800,9 +984,11 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     regions: Regions,
     banner: BannerScene,
     canvas: Canvas,
+    separation: Separation,
     theming: Theming,
     navModes: NavModes,
     rail: Rail,
+    navRail: NavRail,
     aside: Aside,
     overlay: Overlay,
     primary: Primary,
@@ -822,6 +1008,8 @@ const meta: Meta<Data> = {
       imports: DIRECTIVES,
       providers: [
         provideIcons({
+          lucideBadgeCheck,
+          lucideBanknote,
           lucideBell,
           lucideCalendarDays,
           lucideChartNoAxesColumn,
@@ -832,6 +1020,7 @@ const meta: Meta<Data> = {
           lucideFileText,
           lucideFilter,
           lucideFolderKanban,
+          lucideHandshake,
           lucideInbox,
           lucideKanban,
           lucideLayoutDashboard,
@@ -845,7 +1034,9 @@ const meta: Meta<Data> = {
           lucideSettings,
           lucideStethoscope,
           lucideTruck,
+          lucideUndo2,
           lucideUsers,
+          lucideWallet,
           lucideWarehouse,
         }),
       ],
@@ -934,21 +1125,55 @@ export const Canvas: StoryObj<Data> = {
       scene(
         "canvas='inset', the default",
         'The frame takes the sunken ground and carries no surface of its own; the content and the pane are cards with a radius, an edge and a shadow, and the gutter between them is what separates the regions. No rule is drawn anywhere.',
-        aurora('asideMode="inline" canvas="inset" navMode="inline"'),
+        aurora('asideMode="inline" canvas="inset" navMode="inline"', { footer: true }),
       ),
       scene(
         "canvas='flush'",
-        "What every surveyed implementation ships: the regions carry the surface, the content carries the ground, and a hairline does the separating — between the regions, and between the pane's head, body and foot. The same product as above.",
-        aurora('asideMode="inline" canvas="flush" navMode="inline"'),
+        "Every region runs edge to edge and each seam is drawn — between the regions, and between the pane's head, body and foot. The rows of the column stand one inset from the screen's edge and from the seam on both sides, so the closed strip stays centred.",
+        aurora('asideMode="inline" canvas="flush" navMode="inline"', { footer: true }),
       ),
       scene(
-        'canvas=\'flush\' with dividers="false"',
-        'The rules off, for a shell whose regions are already separated by what is inside them. Under inset the axis changes nothing, because there was no rule to remove.',
-        aurora('asideMode="inline" canvas="flush" dividers="false" navMode="inline"'),
+        "canvas='floating'",
+        "The column is a card as well as the content: two cards and the pane on the sunken ground, a gutter apart. The control in the bar stands over the marks in the card, because the bar's inset counts the card's edge.",
+        aurora('asideMode="inline" canvas="floating" navMode="inline"', { footer: true }),
+      ),
+      scene(
+        "canvas='panel'",
+        "One card holds the column, the content and the pane, with the bar and the footer on the frame outside it. Inside the card the regions meet at seams, and separation decides how those are drawn. The card is one box — the root's own pseudo-element — so no shadow falls across a seam.",
+        aurora('asideMode="inline" canvas="panel" navMode="inline"', { footer: true }),
       ),
     ),
   ),
   parameters: scenario('canvas'),
+};
+
+export const Separation: StoryObj<Data> = {
+  ...story(
+    grid(
+      scene(
+        "separation='rule' on flush, the default",
+        'A line of the thin border width at every seam where two regions touch without a gutter.',
+        aurora('asideMode="inline" canvas="flush" navMode="inline"'),
+      ),
+      scene(
+        "separation='tone' on flush",
+        'No line: the bar, the column and the pane take a ground of their own, 0.036 OKLab L from the surface in light and in dark, and the content keeps the surface. Hover a destination — the subtle tones inside a toned region are recomputed from its ground, so the row still answers.',
+        aurora('asideMode="inline" canvas="flush" navMode="inline" separation="tone"'),
+      ),
+      scene(
+        "separation='tone' on panel, primary='main'",
+        'Inside the one card the column and the pane are toned and the bar belongs to the content, so the only seam left is none at all. Under forced colours every ground is Canvas and the rule comes back whatever this axis says.',
+        aurora(
+          'asideMode="inline" canvas="panel" navMode="inline" primary="main" separation="tone"',
+          {
+            nav: AURORA_NAV('destinations', true),
+            toggle: false,
+          },
+        ),
+      ),
+    ),
+  ),
+  parameters: scenario('separation'),
 };
 
 export const Theming: StoryObj<Data> = {
@@ -963,6 +1188,14 @@ export const Theming: StoryObj<Data> = {
         'The same frame, unpainted — Aurora',
         "What the family ships, and what Aurora keeps. Each region has its own ground and its own ink, each falling back to the plane's, so a product states only what differs — and the parts are addressable by data-part, so anything the properties do not reach is still one selector away.",
         aurora('asideMode="inline" navMode="inline"'),
+      ),
+      scene(
+        'A wash behind the frame — --slotted-app-shell-frame-image',
+        "One theme token, a background-image layer over the frame's colour: two pools of the accent tone behind floating cards. The cards keep their own surface, so everything a reader reads stays on the ground it was calibrated for.",
+        aurora(
+          'asideMode="inline" canvas="floating" class="slotted-demo-frame-wash" navMode="inline" primary="main"',
+          { nav: AURORA_NAV('destinations', true), toggle: false },
+        ),
       ),
     ),
   ),
@@ -980,7 +1213,7 @@ export const NavModes: StoryObj<Data> = {
       scene(
         "navMode='auto' — the same shell, in a frame narrower than 600 pixels",
         "The shell answers its own inline size and not the window's: this frame is 420 pixels wide inside a page that is not, and both regions have already left the grid. Press the control — the panel comes in over the content and the veil covers what is behind it.",
-        `<div class="slotted-demo-measure">${aurora('[asideOpen]="false"', { size: 'tall' })}</div>`,
+        `<div class="slotted-demo-measure">${aurora('[asideOpen]="false"', { room: '', size: 'tall' })}</div>`,
       ),
       scene(
         "navMode='overlay' at any width — Átrio",
@@ -1023,6 +1256,34 @@ export const Rail: StoryObj<Data> = {
   parameters: scenario('rail'),
 };
 
+export const NavRail: StoryObj<Data> = {
+  ...story(
+    grid(
+      scene(
+        'slAppShellNavRail — open',
+        "A two-level navigation inside one nav landmark: the modules in a strip of marks, the destinations of the chosen module in the column beside it. Press a module: the column changes, and the region's width does not. The module is the product's state; the shell holds only whether the region is open.",
+        auroraRail('primary="main"'),
+      ),
+      scene(
+        'slAppShellNavRail — closed to its strip',
+        "collapsedTo='rail' with a strip of the rail's own keeps the strip and lets the column go: cut by the region while the width moves, then out of the tab order and the accessibility tree. The control at the foot of the strip brings the column back.",
+        auroraRail('primary="main" [navOpen]="false"'),
+      ),
+      scene(
+        "slAppShellNavRail on flush, separation='tone', primary='banner'",
+        'The strip on the tone, the column and the bar on the tone beside it, the content on the surface — no line anywhere.',
+        auroraRail('canvas="flush" primary="banner" separation="tone"', { wordmark: true }),
+      ),
+      scene(
+        'slAppShellNavRail on floating, with the pane',
+        "The strip and the column share one card; the seam between them is the axis's, here a rule.",
+        auroraRail('canvas="floating" primary="main"', { aside: true }),
+      ),
+    ),
+  ),
+  parameters: scenario('navRail'),
+};
+
 export const Aside: StoryObj<Data> = {
   ...story(
     grid(
@@ -1039,7 +1300,7 @@ export const Aside: StoryObj<Data> = {
       scene(
         "asideMode='inline' in a frame narrower than 600 pixels",
         'No room beside the content, so the inline pane drops under it as a row of its own, taking at most half the shell. The head, the body and the foot hold: the body is what scrolls.',
-        `<div class="slotted-demo-measure">${aurora('asideMode="inline" [navOpen]="false" navMode="inline"', { size: 'tall' })}</div>`,
+        `<div class="slotted-demo-measure">${aurora('asideMode="inline" [navOpen]="false" navMode="inline"', { room: '', size: 'tall' })}</div>`,
       ),
       scene(
         "asideMode='overlay' — the pane as a layer, from the other end",
@@ -1097,6 +1358,14 @@ export const Primary: StoryObj<Data> = {
         "primary='nav' — Cadence",
         "The navigation reaches the corner and the bar starts beside it. The column's own head grows to the bar's height so the workspace and the trail sit on one line, and the control that moves the column stands in that head — and Tab still goes skip, banner, control, navigation, content, because the grid moved the drawing and not the writing.",
         cadence('navMode="inline"'),
+      ),
+      scene(
+        "primary='main' — Aurora",
+        "The column reaches both corners and the bar belongs to the content: it stands inside the card that holds the page, over the content's column alone, and the pane beside it spans the bar's row. The control moves to the column's foot. The focus order is still skip, banner, navigation, content.",
+        aurora('asideMode="inline" navMode="inline" primary="main"', {
+          nav: AURORA_NAV('destinations', true),
+          toggle: false,
+        }),
       ),
     ),
   ),

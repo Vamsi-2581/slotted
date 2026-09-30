@@ -48,17 +48,32 @@ export const MONEY = new Intl.NumberFormat('pt-BR', { style: 'currency', currenc
 
 export type Glyph = ComponentType<{ size?: number | string; 'aria-hidden'?: boolean }>;
 
-/** A shell owns a screen, so every scene stands in a window the height of one. */
+/**
+ * A shell owns a screen, so every scene stands in a window the height of one,
+ * and in a room the width of one: the docs column is 676 pixels at 1280, and a
+ * column, a content card and a pane squeezed into it drew a content column a
+ * few dozen pixels wide. `room={false}` is for the frame a scene measures
+ * narrow on purpose.
+ */
 export function Viewport({
   children,
+  room = 'desktop',
   size = 'screen',
 }: {
   children: ReactNode;
+  room?: 'desktop' | 'wide' | false | undefined;
   size?: 'screen' | 'tall' | undefined;
 }) {
-  return (
+  const frame = (
     <div className="slotted-demo-viewport" data-frame="window" data-layout="page" data-size={size}>
       {children}
+    </div>
+  );
+  return room === false ? (
+    frame
+  ) : (
+    <div className="slotted-demo-room" data-room={room}>
+      {frame}
     </div>
   );
 }

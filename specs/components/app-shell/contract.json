@@ -4,7 +4,7 @@
   "ui": "app-shell",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/",
   "control": "https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/",
-  "design": "docs/history/designs/2026-09-14-app-shell-redesign-design.md",
+  "design": "docs/history/designs/2026-09-29-app-shell-arrangements-design.md",
   "inventory": "docs/history/designs/2026-09-13-app-shell-capability-inventory.md",
   "composes": ["presence", "dismissable-layer", "focus", "portal", "measure"],
   "anatomy": {
@@ -16,6 +16,7 @@
     "actions": "the end cluster of the banner, pushed there by the space it takes so an empty one costs nothing: search, notifications, help, account. top-navigation fills it in wave 8, and until then a consumer puts a toolbar, a menu and an avatar there itself",
     "nav-toggle": "the disclosure control for the navigation region. Rendered inside the banner by default and placeable anywhere, because it takes its id, its aria-expanded, its aria-controls and its handler from the family's context",
     "nav": "a nav, so it is the navigation landmark. One element across all three modes: the rail is the same region at another width, which is what keeps focus and scroll position where they were",
+    "nav-rail": "a strip of marks inside the navigation region, before its header: the first column of a two-level navigation. It is one navigation landmark and one open state, where the ReUI shape is two sidebars with a state each. Closed to rail, the navigation keeps this strip and lets its column go",
     "nav-header": "the top of the navigation column, pinned. The brand, the workspace switcher",
     "nav-body": "the middle of the navigation column, and the only part of it that scrolls",
     "nav-footer": "the bottom of the navigation column, pinned. The account, the collapse control",
@@ -47,7 +48,7 @@
     "firstPaint": "data-nav-mode exists only once the script has decided. Below overlayAt the stylesheet shows the panel under [data-nav-mode=overlay][data-open] alone, so a server render and the frame before hydration draw the narrow shell closed, which is the safe default. Above it the container query alone puts the navigation in its column, waiting for no script"
   },
   "collapsedTo": {
-    "rail": "a strip the width of a target, holding each destination's mark. The region stays in the tab order, which is what a rail is for",
+    "rail": "a strip the width of a target, holding each destination's mark. The region stays in the tab order, which is what a rail is for. With a nav-rail part the strip is that part and the column beside it leaves; without one it is the column itself at another width",
     "hidden": "the region leaves the layout, the tab order and the accessibility tree, by display: none. Mantine and Ant leave a zero-width navbar behind and Tab still crosses it — and a region at nought pixels that still lays its children out puts content outside the box that owns it, which tools/harness/audit.mjs reports and a screenshot cannot show",
     "default": "rail",
     "reason": "Ant collapsedWidth defaults to 80 and Carbon ships a rail; Mantine and PatternFly have neither. A boolean that only says the navigation exists loses six destinations the moment the reader collapses it",
@@ -56,6 +57,7 @@
   "primary": {
     "banner": "the banner spans the full width and the navigation starts below it",
     "nav": "the navigation spans the full height and the banner starts beside it",
+    "main": "the navigation spans the full height, and the banner belongs to the plane of the content: it stands over the content's column and the card that holds the content holds it too, the arrangement where a breadcrumb and the route's actions sit inside the page rather than above it. The pane, as a column, spans the banner's row as well",
     "default": "banner",
     "reason": "Mantine layout=default|alt and Vaadin primarySection answer the same question, and the answer moves where the brand lives. The grid changes where a region is drawn and never where it is written, so the focus order is the same under both"
   },
@@ -143,8 +145,8 @@
     }
   },
   "axes": {
-    "primary": ["banner", "nav"],
-    "canvas": ["inset", "flush"],
+    "primary": ["banner", "nav", "main"],
+    "canvas": ["inset", "flush", "floating", "panel"],
     "navMode": ["inline", "overlay", "auto"],
     "navSide": ["start", "end"],
     "navSize": ["sm", "md", "lg"],
@@ -152,7 +154,7 @@
     "asideMode": ["inline", "overlay", "auto"],
     "asideSize": ["sm", "md", "lg"],
     "scroll": ["content", "document"],
-    "dividers": [true, false],
+    "separation": ["rule", "tone"],
     "modal": [true, false],
     "escape": ["close", "none"],
     "outsidePress": ["close", "none"],
@@ -169,7 +171,7 @@
     "asideMode": ["prop", "defaults", "auto"],
     "asideSize": ["prop", "defaults", "md"],
     "scroll": ["prop", "defaults", "content"],
-    "dividers": ["prop", "defaults", true],
+    "separation": ["prop", "defaults", "rule"],
     "modal": ["prop", "defaults", true],
     "escape": ["prop", "defaults", "close"],
     "outsidePress": ["prop", "defaults", "close"],
@@ -187,7 +189,7 @@
       "asideMode",
       "asideSize",
       "scroll",
-      "dividers",
+      "separation",
       "modal",
       "escape",
       "outsidePress",
@@ -248,7 +250,7 @@
         "asideMode": "auto",
         "asideSize": "md",
         "scroll": "content",
-        "dividers": true,
+        "separation": "rule",
         "modal": true,
         "escape": "close",
         "outsidePress": "close",
@@ -266,6 +268,7 @@
         "actions",
         "nav-toggle",
         "nav",
+        "nav-rail",
         "nav-header",
         "nav-body",
         "nav-footer",
@@ -289,9 +292,11 @@
       "regions",
       "banner",
       "canvas",
+      "separation",
       "theming",
       "navModes",
       "rail",
+      "navRail",
       "aside",
       "overlay",
       "primary",
@@ -307,8 +312,13 @@
   "canvas": {
     "inset": "the frame — banner, navigation, footer — is painted the sunken ground and carries no surface of its own, and the content is a raised card inset from it with a radius and an edge. The gutter does the separating, so no rule is drawn between two regions. Once the navigation is a layer — navMode overlay, or a shell not yet measured below overlayAt — the card gives up its gutter, its radius and its elevation and meets the frame's edges, keeping one rule under the banner: a column of content on a phone has no room for a frame around it",
     "flush": "the regions carry the surface and the content carries the ground, edge to edge, separated by a rule. It is the arrangement every surveyed implementation ships, and it is what a grid or a table that owns the whole column wants",
+    "floating": "the navigation is a card as well as the content: two cards standing on the sunken ground a gutter apart, each with the border, the radius and the elevation. The rows inside the navigation card keep the row inset from its edge",
+    "panel": "one card holds the navigation, the content and the pane, on the sunken ground a gutter from the frame's edges; the banner and the footer stand on the frame outside it. Under primary nav or main the card holds the banner too. The seams inside the card are drawn by separation",
     "default": "inset",
-    "reason": "The first arrangement this family had was flush, and the reviewer read it as a wireframe: in the light scheme --slotted-surface-sunken is two per cent away from --slotted-surface, so every boundary was carried by a one-pixel rule and nothing on the screen had a plane. An inset card gives the content an elevation the two near-identical surfaces cannot. flush stays an axis because an edge-to-edge table wants no gutter around it"
+    "reason": "The first arrangement this family had was flush, and the reviewer read it as a wireframe: in the light scheme --slotted-surface-sunken is two per cent away from --slotted-surface, so every boundary was carried by a one-pixel rule and nothing on the screen had a plane. An inset card gives the content an elevation the two near-identical surfaces cannot. flush stays an axis because an edge-to-edge table wants no gutter around it",
+    "regionPlanes": "Each value of canvas decides the plane of every region at once, and there is no per-region plane axis: a per-region axis is three planes to the power of four regions, most of them unlooked-at, and the family ships no combination without a design of its own. Every value crossed with every primary and both separations is a scene of the harness",
+    "spanningCard": "A card that covers two regions — banner and main under primary main, every region under panel — is the ::before of the root, placed on the grid area the regions share. Two boxes with half a card each draw the shadow of one over the other at the seam. The pseudo-element is the grid's first item and paints under the regions, which stay transparent; main keeps the radius on the corners it shares with the card, so what scrolls is cut by it",
+    "frameImage": "--slotted-app-shell-frame-image is a background-image layer over the frame's colour, none by default. A wash or a photograph behind the frame is a theme's decision and not a prop"
   },
   "mark": {
     "open": "panel-open",
@@ -317,7 +327,10 @@
     "mirrored": "the artwork is direction-sensitive, so the family turns it whole wherever the region is not at the start of the line: navSide=end, a right-to-left document, or either but not both",
     "aside": "the aside-toggle draws the same pair mirrored: the pane is on the end of the line the navigation is not on, so the artwork the navigation turns for navSide=end is the pane artwork at rest, and it turns back where the pane is at the start"
   },
-  "designHistory": ["docs/history/designs/2026-09-13-app-shell-design.md"],
+  "designHistory": [
+    "docs/history/designs/2026-09-13-app-shell-design.md",
+    "docs/history/designs/2026-09-14-app-shell-redesign-design.md"
+  ],
   "asideMode": {
     "inline": "the pane is a column of the grid beside the content, at or above overlayAt, and a row under the content below it. Closed, it leaves the layout by display: none — a pane has no rail, and a region at nought pixels that still lays its children out puts content outside the box that owns it",
     "overlay": "the pane is out of the grid and over the content as a dismissable layer, from the end of the line the navigation is not on. Composed from the same three modules the navigation layer is",
@@ -335,5 +348,20 @@
     "--slotted-app-shell-row-font-size": "the type size of a row label. A list of destinations is text and not a control, so it composes the type scale and not the control scale",
     "--slotted-app-shell-row-line-height": "the line height of a row label, from the scale: normal varies by font and a two-line row needs the number",
     "reason": "The rows inside the regions are not this family — side-navigation and top-navigation, wave 8 — and a consumer who brings its own list has nothing to align to unless the shell says what a row is. Six numbers, and every left edge, every row height and every label in the frame is one of them. No surveyed implementation publishes its row geometry."
+  },
+  "separation": {
+    "rule": "a line of --slotted-border-width-thin in --slotted-app-shell-border-color at every seam",
+    "tone": "no line. The chrome regions — banner and nav under flush, nav and aside under panel, nav-rail wherever it stands — take --slotted-app-shell-tone-surface, by default color-mix(in oklab, var(--slotted-surface), var(--slotted-text) 4.5%), 0.036 OKLab L from --slotted-surface in light and in dark. A ground swapped without its tones leaves every control calibrated against a page it is not on, so inside a toned region the family recomputes --slotted-tone-secondary-subtle-hover and subtle-active from the tone, at 4 and 7 per cent of --slotted-text",
+    "seams": "Separation acts only where two regions touch without a gutter: every seam under flush; nav, main and aside, and banner over main, inside the panel card; banner over main inside the card primary main draws. Where a gutter separates two regions it draws nothing",
+    "forcedColors": "Under forced-colors every ground is Canvas and a tone separates nothing, so the family draws the rule there whatever separation says: a boundary the theme cannot reach, which is the case the briefing allows a family its own forced-colors rule for",
+    "default": "rule",
+    "reason": "dividers was a boolean whose false half drew flush with nothing at all between the regions: #f7f8fa against #ffffff, two per cent, and no elevation. Measured against ReUI app-shell-16, which separates three columns by tone alone at 0.015 and 0.03"
+  },
+  "navRail": {
+    "layout": "With a nav-rail, the navigation is a grid of two columns: --slotted-app-shell-rail-size for the strip and the navigation size for header, body and footer. Open, it is the sum of both",
+    "closed": "Closed to rail, the navigation narrows to the strip; its column is cut by the region's overflow while the width transitions and leaves the tab order and the accessibility tree by visibility: hidden at the end of it, step-end on close and step-start on open. Closed to hidden, the whole region leaves, strip included",
+    "overlay": "As a layer the navigation holds the strip and the column, at --slotted-app-shell-nav-overlay-size",
+    "seam": "Between strip and column, separation decides: a rule, or the strip on the tone",
+    "detection": "The stylesheet recognises the part by :has(> [data-part='nav-rail']), so no script writes an attribute for it and a server render has the right grid on its first paint"
   }
 }

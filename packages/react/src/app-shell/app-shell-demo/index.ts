@@ -11,6 +11,7 @@ export {
   SHIPMENTS,
   Shipments,
 } from './aurora';
+export { AuroraRail, RailNav } from './rail';
 export { Cadence, CadenceBanner, CadenceContent, CadenceNav } from './cadence';
 export {
   Anatomy,

@@ -437,6 +437,7 @@ export function Aurora({
   children,
   footer = false,
   longLabels = false,
+  room = 'desktop',
   shell,
   size = 'screen',
   title,
@@ -447,13 +448,15 @@ export function Aurora({
   children?: ReactNode | undefined;
   footer?: boolean | undefined;
   longLabels?: boolean | undefined;
+  /** The room the window stands in; `false` for a frame measured narrow on purpose. */
+  room?: 'desktop' | 'wide' | false | undefined;
   shell?: Partial<AppShellProps> | undefined;
   size?: 'screen' | 'tall' | undefined;
   title?: string | undefined;
   toggleInFooter?: boolean | undefined;
 }) {
   return (
-    <Viewport size={size}>
+    <Viewport room={room} size={size}>
       <AppShell {...shell}>
         <AuroraBanner centre={centre} toggle={!toggleInFooter} />
         <AuroraNav longLabels={longLabels} toggleInFooter={toggleInFooter} />

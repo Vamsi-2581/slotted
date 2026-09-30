@@ -92,7 +92,6 @@ export function AppShell({
   collapsedTo,
   defaultAsideOpen,
   defaultNavOpen,
-  dividers,
   escape,
   back,
   messages,
@@ -108,6 +107,7 @@ export function AppShell({
   ref,
   render,
   scroll,
+  separation,
   style,
   ...nativeProps
 }: AppShellProps) {
@@ -124,7 +124,7 @@ export function AppShell({
   const resolvedCanvas = canvas ?? defaults.canvas;
   const resolvedCloseOnNavigate = closeOnNavigate ?? defaults.closeOnNavigate;
   const resolvedCollapsedTo = collapsedTo ?? defaults.collapsedTo;
-  const resolvedDividers = dividers ?? defaults.dividers;
+  const resolvedSeparation = separation ?? defaults.separation;
   const resolvedEscape = escape ?? defaults.escape;
   const resolvedBack = back ?? defaults.back;
   const resolvedModal = modal ?? defaults.modal;
@@ -476,7 +476,6 @@ export function AppShell({
       canvas: resolvedCanvas,
       closeOnNavigate: resolvedCloseOnNavigate,
       collapsedTo: resolvedCollapsedTo,
-      dividers: resolvedDividers,
       escape: resolvedEscape,
       back: resolvedBack,
       mainId,
@@ -492,6 +491,7 @@ export function AppShell({
       primary: resolvedPrimary,
       register,
       scroll: resolvedScroll,
+      separation: resolvedSeparation,
       setAsideOpen,
       setOpen,
       toggleId: `${baseId}toggle`,
@@ -509,7 +509,6 @@ export function AppShell({
       resolvedCanvas,
       resolvedCloseOnNavigate,
       resolvedCollapsedTo,
-      resolvedDividers,
       resolvedBack,
       resolvedEscape,
       resolvedMessages,
@@ -520,6 +519,7 @@ export function AppShell({
       resolvedOutsidePress,
       resolvedPrimary,
       resolvedScroll,
+      resolvedSeparation,
       setAsideOpen,
       setOpen,
     ],
@@ -571,7 +571,6 @@ export function AppShell({
     'data-aside-size': resolvedAsideSize,
     'data-canvas': resolvedCanvas,
     'data-collapsed-to': resolvedCollapsedTo,
-    ...(resolvedDividers ? { 'data-dividers': '' as const } : {}),
     ...(resolvedMode === undefined ? {} : { 'data-nav-mode': resolvedMode }),
     'data-nav-side': resolvedNavSide,
     'data-nav-size': resolvedNavSize,
@@ -579,6 +578,7 @@ export function AppShell({
     'data-part': 'root',
     'data-primary': resolvedPrimary,
     'data-scroll': resolvedScroll,
+    'data-separation': resolvedSeparation,
     'data-ui': 'app-shell',
     onClick: onRootClick,
     style,

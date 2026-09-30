@@ -4,19 +4,29 @@ import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, RefObject } from
 /**
  * Which region reaches the corner of the screen. `banner` spans the full width
  * and the navigation starts below it; `nav` spans the full height and the
- * banner starts beside it. The grid changes where a region is drawn and never
- * where it is written, so the focus order is the same under both.
+ * banner starts beside it; `main` spans the navigation the full height as well
+ * and puts the banner in the plane of the content, inside the card that holds
+ * it. The grid changes where a region is drawn and never where it is written,
+ * so the focus order is the same under all three.
  */
-export type AppShellPrimary = 'banner' | 'nav';
+export type AppShellPrimary = 'banner' | 'nav' | 'main';
 
 /**
- * Which surface carries which plane. `inset` paints the frame — banner,
- * navigation, footer — with the sunken ground and makes the content a raised
- * card with a radius and an edge; `flush` is the other way round, edge to edge,
- * separated by a rule. `flush` is what every surveyed implementation ships, and
- * it is the arrangement a grid or a table that owns the whole column wants.
+ * Which surface carries which plane, for every region at once. `inset` paints
+ * the frame with the sunken ground and makes the content a raised card;
+ * `flush` runs every region edge to edge, separated at its seams; `floating`
+ * makes the navigation a card as well as the content; `panel` holds the
+ * navigation, the content and the pane in one card, the banner on the frame
+ * above it.
  */
-export type AppShellCanvas = 'inset' | 'flush';
+export type AppShellCanvas = 'inset' | 'flush' | 'floating' | 'panel';
+
+/**
+ * What draws a seam where two regions touch without a gutter. `rule` is a
+ * line; `tone` is a ground of its own on the chrome regions, 0.036 OKLab L
+ * from the surface, with the subtle tones inside them recomputed from it.
+ */
+export type AppShellSeparation = 'rule' | 'tone';
 
 /**
  * How the navigation region occupies space. `inline` makes it a column of the
@@ -98,7 +108,7 @@ export interface AppShellDefaults {
   canvas: AppShellCanvas;
   closeOnNavigate: boolean;
   collapsedTo: AppShellCollapsedTo;
-  dividers: boolean;
+  separation: AppShellSeparation;
   escape: AppShellDismissPolicy;
   /** The platform's way back — a phone's gesture, a browser's button — closes a modal layer. */
   back: AppShellDismissPolicy;
@@ -156,7 +166,7 @@ export interface AppShellContextValue {
   canvas: AppShellCanvas;
   closeOnNavigate: boolean;
   collapsedTo: AppShellCollapsedTo;
-  dividers: boolean;
+  separation: AppShellSeparation;
   escape: AppShellDismissPolicy;
   /** The platform's way back — a phone's gesture, a browser's button — closes a modal layer. */
   back: AppShellDismissPolicy;
@@ -200,7 +210,6 @@ export interface AppShellRootProps extends HTMLAttributes<HTMLElement> {
   'data-aside-size': AppShellSize;
   'data-canvas': AppShellCanvas;
   'data-collapsed-to': AppShellCollapsedTo;
-  'data-dividers'?: '' | undefined;
   'data-nav-mode'?: 'inline' | 'overlay' | undefined;
   'data-nav-side': AppShellNavSide;
   'data-nav-size': AppShellSize;
@@ -208,6 +217,7 @@ export interface AppShellRootProps extends HTMLAttributes<HTMLElement> {
   'data-part': string;
   'data-primary': AppShellPrimary;
   'data-scroll': AppShellScroll;
+  'data-separation': AppShellSeparation;
   'data-ui': 'app-shell';
 }
 
@@ -235,7 +245,6 @@ export interface AppShellProps extends Omit<Native<'div'>, 'ref'>, Common {
   defaultAsideOpen?: boolean | undefined;
   /** The uncontrolled starting value, read once. */
   defaultNavOpen?: boolean | undefined;
-  dividers?: boolean | undefined;
   escape?: AppShellDismissPolicy | undefined;
   /**
    * The platform's way back — a phone's gesture, a browser's button — closes
@@ -259,6 +268,8 @@ export interface AppShellProps extends Omit<Native<'div'>, 'ref'>, Common {
   /** Substitutes the rendered element, keeping every attribute and listener. */
   render?: ((props: AppShellRootProps) => ReactNode) | undefined;
   scroll?: AppShellScroll | undefined;
+  /** What draws a seam where two regions touch without a gutter. Defaults to the provider, then `rule`. */
+  separation?: AppShellSeparation | undefined;
 }
 
 export interface AppShellBannerProps extends Native<'header'>, Common {

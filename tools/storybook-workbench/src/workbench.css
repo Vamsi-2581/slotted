@@ -1814,6 +1814,46 @@ button.slotted-demo-nav-account,
   place-items: center;
 }
 
+/**
+ * A strip of module marks — the shell's `nav-rail` — ends with what is not a
+ * module: the settings and the control that moves the region, pushed to the
+ * foot of the strip by the room they take.
+ */
+.slotted-demo-rail-end {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--slotted-space-1);
+  margin-block-start: auto;
+}
+
+/** The column beside the strip is titled by the module it holds. */
+.slotted-demo-rail-title {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-inline-size: 0;
+  padding-inline-start: var(--slotted-demo-nav-inset, var(--slotted-space-4));
+}
+
+/**
+ * A wash behind the frame, stated once through the family's own token: two
+ * soft pools of the accent tone, which the scheme retunes with the tone.
+ */
+.slotted-demo-frame-wash {
+  --slotted-app-shell-frame-image:
+    radial-gradient(
+      60% 80% at 0% 0%,
+      color-mix(in oklab, var(--slotted-tone-accent-surface) 90%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      50% 70% at 100% 100%,
+      color-mix(in oklab, var(--slotted-tone-accent-surface) 70%, transparent),
+      transparent
+    );
+}
+
 /** The heading over a run of destinations, on the label column. */
 .slotted-demo-nav-group {
   color: var(--slotted-text-muted);

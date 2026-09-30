@@ -41,13 +41,14 @@ const imports: ReferenceImport = {
   SlAppShellNavBody,
   SlAppShellNavFooter,
   SlAppShellNavHeader,
+  SlAppShellNavRail,
   SlAppShellNavToggle,
   provideAppShellDefaults,
 } from '@slotted/angular/app-shell';`,
   selector:
-    '[slAppShell] on the frame; header[slAppShellBanner], nav[slAppShellNav], main[slAppShellMain], aside[slAppShellAside], footer[slAppShellFooter] on the regions; [slAppShellBrand], [slAppShellCentre], [slAppShellActions], [slAppShellNavHeader], [slAppShellNavBody], [slAppShellNavFooter], [slAppShellAsideHeader], [slAppShellAsideBody], [slAppShellAsideFooter] on their parts; button[slAppShellNavToggle] and button[slAppShellAsideToggle] on the controls',
+    '[slAppShell] on the frame; header[slAppShellBanner], nav[slAppShellNav], main[slAppShellMain], aside[slAppShellAside], footer[slAppShellFooter] on the regions; [slAppShellBrand], [slAppShellCentre], [slAppShellActions], [slAppShellNavRail], [slAppShellNavHeader], [slAppShellNavBody], [slAppShellNavFooter], [slAppShellAsideHeader], [slAppShellAsideBody], [slAppShellAsideFooter] on their parts; button[slAppShellNavToggle] and button[slAppShellAsideToggle] on the controls',
   exportAs:
-    'slAppShell, slAppShellBanner, slAppShellBrand, slAppShellCentre, slAppShellActions, slAppShellNav, slAppShellNavHeader, slAppShellNavBody, slAppShellNavFooter, slAppShellMain, slAppShellAside, slAppShellAsideHeader, slAppShellAsideBody, slAppShellAsideFooter, slAppShellFooter, slAppShellNavToggle, slAppShellAsideToggle',
+    'slAppShell, slAppShellBanner, slAppShellBrand, slAppShellCentre, slAppShellActions, slAppShellNav, slAppShellNavRail, slAppShellNavHeader, slAppShellNavBody, slAppShellNavFooter, slAppShellMain, slAppShellAside, slAppShellAsideHeader, slAppShellAsideBody, slAppShellAsideFooter, slAppShellFooter, slAppShellNavToggle, slAppShellAsideToggle',
 };
 
 const anatomy: AnatomyRow[] = [
@@ -106,6 +107,13 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'The navigation landmark, and one element across all three modes: the rail is this nav at another inline size, which keeps the focus and the scroll position where the reader left them. A query container of its own, named slotted-app-shell-nav, so the rows inside answer the rail without the shell telling them anything.',
+  },
+  {
+    part: 'nav-rail',
+    element: 'div, or any element the directive is placed on',
+    required: false,
+    purpose:
+      'A strip of marks before the column: the first level of a two-level navigation, inside the one navigation landmark and under its one open state. With it the region is two columns; closed to rail it keeps the strip and lets the column go. Recognised by :has(), so no attribute is written and a server render has the grid on its first paint.',
   },
   {
     part: 'nav-header',
@@ -286,14 +294,29 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'canvas',
-    title: 'The plane the content sits on',
-    note: 'inset paints the frame with the sunken ground and lifts the content and the pane onto cards with a radius, an edge and the gutter doing the separating. flush is what the field ships — regions on the surface, content on the ground, a hairline between them — and it is what a table that owns the whole column wants. The same product, on both planes.',
+    title: 'The plane every region sits on',
+    note: 'One input decides the plane of every region at once, and each of its four values is drawn and tested in every primary and both separations. inset lifts the content and the pane onto cards over a sunken frame; flush runs every region edge to edge and draws its seams; floating lifts the column onto a card of its own as well; panel holds the column, the content and the pane in one card with the bar on the frame above it. The same product on all four.',
     snippet: defineSnippet({
       id: 'app-shell-angular-canvas',
       language: 'angular',
-      label: 'Two planes, one frame',
+      label: 'Four planes, one frame',
       source: `<div slAppShell canvas="inset">…</div>
-<div slAppShell canvas="flush">…</div>`,
+<div slAppShell canvas="flush">…</div>
+<div slAppShell canvas="floating">…</div>
+<div slAppShell canvas="panel">…</div>`,
+    }),
+  },
+  {
+    id: 'separation',
+    title: 'A rule, or a tone',
+    note: 'Where two regions touch without a gutter — every seam of flush, the seams inside the panel card, the bar over the content under primary="main" — separation decides what is drawn. rule is a line. tone is no line: the chrome regions take a ground 0.036 OKLab L from the surface, and the subtle tones inside them are recomputed from that ground so a hover still answers. Under forced colours a tone separates nothing, and the rule is drawn whatever the input says.',
+    snippet: defineSnippet({
+      id: 'app-shell-angular-separation',
+      language: 'angular',
+      label: 'The two ways a seam is drawn',
+      source: `<div slAppShell canvas="flush" separation="rule">…</div>
+<div slAppShell canvas="flush" separation="tone">…</div>
+<div slAppShell canvas="panel" primary="main" separation="tone">…</div>`,
     }),
   },
   {
@@ -334,6 +357,42 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'The two answers to a closed region',
       source: `<div slAppShell collapsedTo="rail" [navOpen]="false">…</div>
 <div slAppShell collapsedTo="hidden" [navOpen]="false">…</div>`,
+    }),
+  },
+  {
+    id: 'navRail',
+    title: 'Two levels, one region',
+    note: 'slAppShellNavRail puts a strip of marks before the column: the modules in the strip, the destinations of the chosen module in the column. It is one nav landmark and one open state, where the field ships two sidebars with a state each. Closed to rail, the strip stays and the column goes — cut while the width moves, then out of the tab order. The control that moves the region stands at the foot of the strip, the part that survives. The module is the product’s state, held here in a signal.',
+    snippet: defineSnippet({
+      id: 'app-shell-angular-nav-rail',
+      language: 'angular',
+      label: 'A strip of modules and the column of one',
+      source: `<div slAppShell primary="main">
+  <header slAppShellBanner>…</header>
+  <nav slAppShellNav>
+    <div slAppShellNavRail aria-label="Módulos">
+      @for (module of modules; track module.id) {
+        <button
+          slIconButton
+          type="button"
+          tone="secondary"
+          [variant]="module.id === moduleId() ? 'solid' : 'ghost'"
+          [attr.aria-current]="module.id === moduleId() ? 'true' : null"
+          [attr.aria-label]="module.label"
+          (click)="moduleId.set(module.id)"
+        >
+          <ng-icon [name]="module.icon" />
+        </button>
+      }
+      <button slAppShellNavToggle></button>
+    </div>
+    <div slAppShellNavHeader>{{ module().label }}</div>
+    <div slAppShellNavBody>
+      <div slSideNavigation [value]="module().current">…</div>
+    </div>
+  </nav>
+  <main slAppShellMain>…</main>
+</div>`,
     }),
   },
   {
@@ -380,13 +439,14 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'primary',
     title: 'Which region reaches the corner',
-    note: 'banner spans the full width and the navigation starts below it, which is Aurora. nav spans the full height and the banner starts beside it, which is Cadence: the workspace and the bar sit on one line, and the control that moves the column stands in the column’s own head. The grid changes where a region is drawn and never where it is written, so the focus order is the same under both.',
+    note: 'banner spans the full width and the navigation starts below it, which is Aurora. nav spans the full height and the banner starts beside it, which is Cadence: the workspace and the bar sit on one line, and the control that moves the column stands in the column’s own head. main spans the column the full height as well and puts the bar in the plane of the content, inside the card that holds the page. The grid changes where a region is drawn and never where it is written, so the focus order is the same under all three.',
     snippet: defineSnippet({
       id: 'app-shell-angular-primary',
       language: 'angular',
-      label: 'Two arrangements, one focus order',
+      label: 'Three arrangements, one focus order',
       source: `<div slAppShell primary="banner">…</div>
-<div slAppShell primary="nav">…</div>`,
+<div slAppShell primary="nav">…</div>
+<div slAppShell primary="main">…</div>`,
     }),
   },
   {
@@ -524,17 +584,17 @@ export const ANGULAR_APP_SHELL_DOCS = {
       ],
       [
         'primary',
-        "'banner' | 'nav'",
+        "'banner' | 'nav' | 'main'",
         'banner',
         'slAppShell, provideAppShellDefaults',
-        'Which region reaches the corner. Under nav the navigation spans every row and its head takes the banner’s height so the two marks sit on one line',
+        'Which region reaches the corner. Under nav the navigation spans every row and its head takes the banner’s height so the two marks sit on one line; under main it does too, and the banner stands inside the card that holds the content',
       ],
       [
         'canvas',
-        "'inset' | 'flush'",
+        "'inset' | 'flush' | 'floating' | 'panel'",
         'inset',
         'slAppShell, provideAppShellDefaults',
-        'inset paints the frame with the sunken ground and makes the content and the pane raised cards; flush is edge to edge with a rule between the regions',
+        'The plane of every region at once. inset: content and pane as cards over a sunken frame. flush: every region edge to edge, seams drawn. floating: the column a card as well. panel: column, content and pane in one card, the bar and the footer on the frame',
       ],
       [
         'navMode',
@@ -586,11 +646,11 @@ export const ANGULAR_APP_SHELL_DOCS = {
         'content makes the shell the height it was given, capped at 100dvh, and only the content column and the pane’s body scroll; document lets the shell grow and the banner travel with it',
       ],
       [
-        'dividers',
-        'boolean',
-        'true',
+        'separation',
+        "'rule' | 'tone'",
+        'rule',
         'slAppShell, provideAppShellDefaults',
-        'Whether flush draws a rule between the regions, and between the pane’s head, body and foot. Under inset the gutter separates them and no rule is drawn either way',
+        'What draws a seam where two regions touch without a gutter. rule is a line; tone is a ground of its own on the chrome regions, with the subtle tones inside them recomputed from it. Where a gutter separates, it draws nothing either way',
       ],
       [
         'modal',
@@ -746,7 +806,7 @@ export const ANGULAR_APP_SHELL_DOCS = {
   data-aside-size="md"
   data-collapsed-to="rail"
   data-scroll="content"
-  data-dividers
+  data-separation="rule"
   data-open
 >
   <div data-part="skip">
@@ -760,6 +820,7 @@ export const ANGULAR_APP_SHELL_DOCS = {
     <div data-part="actions">…</div>
   </header>
   <nav data-part="nav" id="…-nav" aria-label="Navegação principal">
+    <div data-part="nav-rail">…</div>
     <div data-part="nav-header">…</div>
     <div data-part="nav-body">…</div>
     <div data-part="nav-footer">…</div>
@@ -796,6 +857,14 @@ export const ANGULAR_APP_SHELL_DOCS = {
   --slotted-app-shell-radius: var(--slotted-radius-md);
   --slotted-app-shell-elevation: var(--slotted-shadow-sm);
   --slotted-app-shell-border-color: var(--slotted-border-subtle);
+  /* The ground separation="tone" gives the chrome regions. */
+  --slotted-app-shell-tone-surface: var(--slotted-tone-secondary-subtle-hover);
+  /* A background-image layer over the frame's colour: a wash, a photograph. */
+  --slotted-app-shell-frame-image: radial-gradient(
+    60% 80% at 0% 0%,
+    var(--slotted-tone-accent-surface),
+    transparent
+  );
 }
 
 /* The six the shell publishes, for the rows a product brings. Read them; do

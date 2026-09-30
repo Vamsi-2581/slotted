@@ -94,12 +94,50 @@ test('names what a closed inline navigation leaves behind', () => {
  * the two page surfaces are two per cent apart, so every boundary was a
  * one-pixel rule and nothing had a plane.
  */
-test('gives the content a plane instead of a hairline, and keeps the other answer', () => {
-  assert.deepEqual(contract.axes.canvas, ['inset', 'flush']);
+test('gives the content a plane instead of a hairline, and keeps the other answers', () => {
+  assert.deepEqual(contract.axes.canvas, ['inset', 'flush', 'floating', 'panel']);
   assert.equal(contract.canvas.default, 'inset');
   assert.equal(member.defaults.canvas, 'inset');
   assert.match(contract.canvas.reason, /two per cent/);
   assert.match(contract.canvas.inset, /no rule is drawn between two regions/);
+  assert.match(contract.canvas.floating, /the navigation is a card/);
+  assert.match(contract.canvas.panel, /one card/);
+  assert.match(contract.canvas.regionPlanes, /no combination without a design of its own/);
+});
+
+/**
+ * A card over two regions is one box. Two boxes with half a card each draw the
+ * shadow of one over the other at the seam.
+ */
+test('paints a card that spans two regions as one box', () => {
+  assert.match(contract.canvas.spanningCard, /::before/);
+  assert.match(contract.canvas.frameImage, /--slotted-app-shell-frame-image/);
+});
+
+/**
+ * Without a rule the two page surfaces were two per cent apart and the
+ * arrangement read as nothing. The tone is measured, and the controls inside a
+ * toned region are recalibrated to it.
+ */
+test('separates regions that touch by a rule or by a measured tone', () => {
+  assert.deepEqual(contract.axes.separation, ['rule', 'tone']);
+  assert.equal(member.defaults.separation, 'rule');
+  assert.equal('dividers' in contract.axes, false);
+  assert.match(contract.separation.tone, /0\.036/);
+  assert.match(contract.separation.tone, /subtle-hover/);
+  assert.match(contract.separation.forcedColors, /forced-colors/);
+  assert.match(contract.separation.seams, /without a gutter/);
+});
+
+/** Two columns, one landmark and one open state: the ReUI shape is two of each. */
+test('holds a rail of its own inside the one navigation region', () => {
+  const parts = member.parts;
+  assert.equal(parts.indexOf('nav-rail'), parts.indexOf('nav') + 1);
+  assert.equal(parts.indexOf('nav-header'), parts.indexOf('nav-rail') + 1);
+  assert.match(contract.anatomy['nav-rail'], /one navigation landmark/);
+  assert.match(contract.collapsedTo.rail, /nav-rail/);
+  assert.match(contract.navRail.closed, /visibility: hidden/);
+  assert.match(contract.navRail.detection, /:has/);
 });
 
 /** A top bar is two clusters and the space between them, and the shell owns only that. */
@@ -119,8 +157,9 @@ test('draws the control from the pair that depicts the region it toggles', () =>
 });
 
 /** The grid moves where a region is drawn, never where it is written. */
-test('keeps one focus order under both primary regions', () => {
-  assert.deepEqual(contract.axes.primary, ['banner', 'nav']);
+test('keeps one focus order under every primary region', () => {
+  assert.deepEqual(contract.axes.primary, ['banner', 'nav', 'main']);
+  assert.match(contract.primary.main, /plane of the content/);
   assert.equal(member.defaults.primary, 'banner');
   assert.deepEqual(contract.focusOrder, [
     'skip',
@@ -310,9 +349,11 @@ test('lists every scenario the reference pages have to show', () => {
     'regions',
     'banner',
     'canvas',
+    'separation',
     'theming',
     'navModes',
     'rail',
+    'navRail',
     'aside',
     'overlay',
     'primary',

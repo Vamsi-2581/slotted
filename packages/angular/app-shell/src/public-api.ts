@@ -16,6 +16,7 @@ export {
   SlAppShellNavBody,
   SlAppShellNavFooter,
   SlAppShellNavHeader,
+  SlAppShellNavRail,
   SlAppShellNavToggle,
 } from './app-shell';
 export {
@@ -38,5 +39,6 @@ export type {
   AppShellOpenRequest,
   AppShellPrimary,
   AppShellScroll,
+  AppShellSeparation,
   AppShellSize,
 } from './app-shell-defaults';

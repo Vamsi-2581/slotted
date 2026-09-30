@@ -147,6 +147,23 @@ export function AppShellNav({
   return part(rootProps, render) ?? <nav {...rootProps} ref={attach} />;
 }
 
+/**
+ * A strip of marks before the column: the first level of a two-level
+ * navigation, inside the one navigation landmark and under its one open state.
+ * Closed to `rail`, the region keeps this strip and lets the column go.
+ */
+export function AppShellNavRail({
+  children,
+  className,
+  ref,
+  render,
+  style,
+  ...nativeProps
+}: AppShellNavSectionProps) {
+  const rootProps = { ...nativeProps, children, className, 'data-part': 'nav-rail', style };
+  return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
+}
+
 /** The pinned top of the navigation column. */
 export function AppShellNavHeader({
   children,

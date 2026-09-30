@@ -16,6 +16,7 @@ import {
   AppShellMain,
   AppShellNav,
   AppShellNavBody,
+  AppShellNavRail,
   AppShellNavToggle,
 } from './app-shell-parts';
 import type { AppShellHandle, AppShellOpenReason, AppShellProps } from './app-shell.types';
@@ -231,11 +232,11 @@ describe('AppShell', () => {
         asideSize="lg"
         canvas="flush"
         collapsedTo="hidden"
-        dividers={false}
         navSide="end"
         navSize="sm"
         primary="nav"
         scroll="document"
+        separation="tone"
       />,
     );
     const root = container.querySelector('[data-ui="app-shell"]');
@@ -249,7 +250,77 @@ describe('AppShell', () => {
     expect(root).toHaveAttribute('data-scroll', 'document');
     expect(root).toHaveAttribute('data-nav-mode', 'inline');
     expect(root).toHaveAttribute('data-open', '');
+    expect(root).toHaveAttribute('data-separation', 'tone');
     expect(root).not.toHaveAttribute('data-dividers');
+  });
+
+  it('draws every canvas and every primary region it declares, and a rule by default', () => {
+    const { container, rerender } = render(<Shell canvas="floating" primary="main" />);
+    const root = container.querySelector('[data-ui="app-shell"]');
+
+    expect(root).toHaveAttribute('data-canvas', 'floating');
+    expect(root).toHaveAttribute('data-primary', 'main');
+    expect(root).toHaveAttribute('data-separation', 'rule');
+
+    rerender(<Shell canvas="panel" primary="nav" separation="tone" />);
+    expect(root).toHaveAttribute('data-canvas', 'panel');
+    expect(root).toHaveAttribute('data-separation', 'tone');
+  });
+
+  it('takes the separation from the provider, and a shell overrules it', () => {
+    const { container, rerender } = render(
+      <AppShellDefaultsProvider separation="tone">
+        <Shell />
+      </AppShellDefaultsProvider>,
+    );
+    const root = container.querySelector('[data-ui="app-shell"]');
+    expect(root).toHaveAttribute('data-separation', 'tone');
+
+    rerender(
+      <AppShellDefaultsProvider separation="tone">
+        <Shell separation="rule" />
+      </AppShellDefaultsProvider>,
+    );
+    expect(root).toHaveAttribute('data-separation', 'rule');
+  });
+
+  it('renders a rail of its own inside the one navigation landmark', () => {
+    render(
+      <AppShell navMode="inline">
+        <AppShellNav>
+          <AppShellNavRail aria-label="Secções" className="rail" data-testid="rail">
+            <a href="#vendas">Vendas</a>
+          </AppShellNavRail>
+          <AppShellNavBody>
+            <a href="#pedidos">Pedidos</a>
+          </AppShellNavBody>
+        </AppShellNav>
+        <AppShellMain>
+          <p>…</p>
+        </AppShellMain>
+      </AppShell>,
+    );
+    const rail = screen.getByTestId('rail');
+
+    expect(rail).toHaveAttribute('data-part', 'nav-rail');
+    expect(rail).toHaveClass('rail');
+    expect(rail).toHaveAttribute('aria-label', 'Secções');
+    expect(rail.parentElement).toHaveAttribute('data-part', 'nav');
+    expect(screen.getAllByRole('navigation')).toHaveLength(1);
+  });
+
+  it('lets a consumer substitute the rail element', () => {
+    render(
+      <AppShell navMode="inline">
+        <AppShellNav>
+          <AppShellNavRail render={(props) => <section {...props} data-testid="rail" />} />
+        </AppShellNav>
+        <AppShellMain />
+      </AppShell>,
+    );
+    const rail = screen.getByTestId('rail');
+    expect(rail.tagName).toBe('SECTION');
+    expect(rail).toHaveAttribute('data-part', 'nav-rail');
   });
 
   it('lets an application state the thirteen axes once, and a shell overrule any of them', () => {

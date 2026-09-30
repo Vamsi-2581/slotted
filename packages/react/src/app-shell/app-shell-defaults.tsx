@@ -25,7 +25,6 @@ const FALLBACK: AppShellDefaults = {
   canvas: 'inset',
   closeOnNavigate: true,
   collapsedTo: 'rail',
-  dividers: true,
   escape: 'close',
   back: 'close',
   messages: DEFAULT_APP_SHELL_MESSAGES,
@@ -36,6 +35,7 @@ const FALLBACK: AppShellDefaults = {
   outsidePress: 'close',
   primary: 'banner',
   scroll: 'content',
+  separation: 'rule',
 };
 
 const AppShellDefaultsContext = createContext<AppShellDefaults>(FALLBACK);
@@ -66,7 +66,6 @@ export function AppShellDefaultsProvider({
         canvas: defaults.canvas ?? inherited.canvas,
         closeOnNavigate: defaults.closeOnNavigate ?? inherited.closeOnNavigate,
         collapsedTo: defaults.collapsedTo ?? inherited.collapsedTo,
-        dividers: defaults.dividers ?? inherited.dividers,
         escape: defaults.escape ?? inherited.escape,
         back: defaults.back ?? inherited.back,
         messages: { ...inherited.messages, ...messages },
@@ -77,6 +76,7 @@ export function AppShellDefaultsProvider({
         outsidePress: defaults.outsidePress ?? inherited.outsidePress,
         primary: defaults.primary ?? inherited.primary,
         scroll: defaults.scroll ?? inherited.scroll,
+        separation: defaults.separation ?? inherited.separation,
       }}
     >
       {children}

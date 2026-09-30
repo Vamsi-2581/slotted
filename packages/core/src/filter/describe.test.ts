@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { describeFilter } from './describe';
+import { describeFilter, spokenOperator } from './describe';
 import { emptyFilter, setFilter } from './descriptor';
 
 const en = {
@@ -87,5 +87,14 @@ describe('describeFilter', () => {
         { ...en, value: (value) => `10 September 2026 (${String(value)})` },
       ),
     ).toBe('is 10 September 2026 (2026-09-10)');
+  });
+});
+
+describe('spokenOperator', () => {
+  it('reads a set of one as its equality, and leaves every other condition alone', () => {
+    expect(spokenOperator('set', { operator: 'anyOf', value: ['paid'] })).toBe('is');
+    expect(spokenOperator('set', { operator: 'noneOf', value: ['paid'] })).toBe('isNot');
+    expect(spokenOperator('set', { operator: 'anyOf', value: ['paid', 'refunded'] })).toBe('anyOf');
+    expect(spokenOperator('number', { operator: 'greaterThan', value: 1 })).toBe('greaterThan');
   });
 });

@@ -1,4 +1,4 @@
-export { describeFilter } from './describe';
+export { describeFilter, spokenOperator } from './describe';
 export type { FilterDescriptionFormat } from './describe';
 export {
   activeConditions,

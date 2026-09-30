@@ -39,6 +39,21 @@ const SINGULAR: Partial<Record<FilterOperator, FilterOperator>> = {
   noneOf: 'isNot',
 };
 
+/**
+ * The operator a condition is read as: the equality of its one value for a set
+ * of one, the condition's own operator otherwise. A chip that writes the
+ * operator apart from its value reads the same word the sentence does.
+ */
+export function spokenOperator(
+  kind: FilterKind,
+  condition: { readonly operator: string; readonly value?: unknown },
+): FilterOperator {
+  const operator = condition.operator as FilterOperator;
+  if (kind !== 'set') return operator;
+  const values = (condition.value as readonly unknown[] | undefined) ?? [];
+  return values.length === 1 ? (SINGULAR[operator] ?? operator) : operator;
+}
+
 export function describeFilter(
   filter: FilterDescriptor | null | undefined,
   format: FilterDescriptionFormat,
@@ -56,8 +71,7 @@ export function describeFilter(
       filter.kind === 'set'
         ? ((condition.value as readonly string[] | undefined) ?? [])
         : undefined;
-    const read = values?.length === 1 ? (SINGULAR[operator] ?? operator) : operator;
-    const name = format.operator(read, filter.kind);
+    const name = format.operator(spokenOperator(filter.kind, condition), filter.kind);
 
     if (operands === 0) return name;
     if (values) return `${name} ${values.map((value) => write(value)).join(', ')}`;

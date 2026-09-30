@@ -1,24 +1,16 @@
-# Checkpoint — `text-field` (reconstrução ReUI, fila de entradas 1/4)
+# Checkpoint — fila das entradas (1/4 concluída)
 
-- Plano: `docs/history/designs/2026-09-30-text-field-rebuild-design.md`; dossiê `2026-09-30-text-field-reui-dossier.md`; autoavaliação `2026-09-30-text-field-self-assessment.md`.
-- Ramo `review/implementation-pass-1`. Nada desta família commitado.
+- Ramo `review/implementation-pass-1`. `text-field` entregue: `b7d84ef6` (glifo `caps-lock`), `5b914ec5` (família), `5ecee204` (página Angular).
+- Documentos: `docs/history/designs/2026-09-30-text-field-{rebuild-design,reui-dossier,self-assessment}.md`.
+- `audit.mjs` sem achados nas duas páginas a 1280 e 620 px. Storybook Angular reiniciado nesta sessão (tarefa em segundo plano).
 
-## Concluído
+## Problemas conhecidos, de outras sessões
 
-Passos 1–13. Gate visual aprovado ("ok").
-
-- React `packages/react/src/text-field/`: `TextFieldAction`, `busy`, `caps-lock`, `copy`, `loading`, `onValueCopy`, rótulos novos; 36/36.
-- Angular `packages/angular/text-field/src/`: `SlTextFieldAction`, `[loading]`, `copyable`, `(valueCopy)`, Caps Lock no input; as specs de comportamento passaram antes da edição das histórias.
-- Glifo `caps-lock`: `packages/theme-default/src/glyphs.json`, `theme.json` (só o bloco `caps-lock`), `packages/core/src/glyph/glyphs.ts`, `packages/tokens/src/contract.json`, `docs/token-foundation.md` (linha e contagem 116), `scripts/verify-token-foundation.test.mjs`.
-- Testes partilhados: `text-scale.test.mjs`, `touch-target.test.mjs`.
-- `audit.mjs` React 1280/620 sem achados.
-
-## Bloqueios externos
-
-- Storybook Angular 6007 não carrega as histórias novas: precisa de reinício (pedir autorização).
-- `ng test` e `pnpm typecheck` falham em `field.spec.ts`/`field-group.spec.ts`/`field.test.tsx` (`requiredMark`, outra sessão).
-- `prettier --check` falha em `filter-bar` e `menu.css` (outras sessões); `field-surface.test.mjs` falha em `kbd` (commit `2e39b9d4`, outra sessão).
+- `pnpm typecheck` e `ng test`: `requiredMark` em `field.spec.ts`, `field-group.spec.ts`, `field.test.tsx`, `field-group.test.tsx`.
+- `prettier --check`: `filter-bar.spec.ts`, `filter-bar.ts`, `menu.css`.
+- `field-surface.test.mjs`: `kbd` (commit `2e39b9d4`).
+- Specs Angular de `text-field` não correram depois das histórias por causa do primeiro item.
 
 ## Próxima ação
 
-Gate de lançamento (passo 14). Depois da aprovação: commits do passo 15 — primeiro o glifo (ficheiros de glifo e tokens), depois a família, com caminhos explícitos e `git apply --cached` para o bloco `caps-lock` de `theme.json`, de `docs/token-foundation.md` e de `docs/history/designs/README.md`.
+`/component textarea` + `prompt-composer` (fila, item 2): ler `specs/components/textarea/contract.json` e `docs/process/build-order.md` › `prompt-composer`, depois o inventário (faixas `block-start`/`block-end` do ReUI `c-input-group-17..19, 26, 33, 34`).

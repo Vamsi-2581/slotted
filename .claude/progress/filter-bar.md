@@ -41,6 +41,10 @@ Alterados por esta sessão: `specs/components/filter-bar/contract.{json,test.mjs
 - `22b71a29` binding React, testes, docs e histórias.
 - `0a710137` binding Angular, spec, docs e histórias.
 
+## Demo
+
+`pnpm demo:refresh` corrido; `ng build --configuration development` da Nexora passa com a barra nova.
+
 ## Próxima ação
 
-`pnpm demo:refresh`, com a aprovação do revisor, para a Nexora receber a barra nova; depois reiniciar o Storybook Angular e correr `node tools/harness/audit.mjs "http://localhost:6007/iframe.html?viewMode=docs&id=components-filterbar--reference"` a 1280 e 620.
+Reiniciar o Storybook Angular (6007), com a aprovação do revisor, e correr `node tools/harness/audit.mjs "http://localhost:6007/iframe.html?viewMode=docs&id=components-filterbar--reference"` a 1280 e com `--width 620`.

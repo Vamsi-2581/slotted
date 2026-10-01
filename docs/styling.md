@@ -38,7 +38,7 @@ which is why it belongs at the top of the application's own entry CSS.
 | `tokens`      | —                 | reserved, empty                            |
 | `theme`       | `@slotted/themes` | token values per theme, scheme and density |
 | `components`  | `@slotted/styles` | every family stylesheet                    |
-| `theme-rules` | um tema           | regras CSS do tema, com o escopo do tema   |
+| `theme-rules` | a theme           | the theme's own CSS rules, scoped to it    |
 
 `reset` and `tokens` carry no rule today. They are declared because a name
 inserted later would reorder what already shipped.
@@ -85,6 +85,54 @@ layer defines, use `revert-layer`:
   }
 }
 ```
+
+## Themes
+
+A theme is a module, not a value file. `defineTheme` (`@slotted/theme`) takes
+seeds, a recipe, token values, component tokens, fonts and CSS rules;
+`extendTheme` builds one theme on another. `slotted-build-theme` compiles a
+theme module to CSS at build time; `applyTheme` compiles and applies one at
+runtime.
+
+Extending the shipped theme for one new accent:
+
+```js
+import { extendTheme } from '@slotted/theme';
+import defaultTheme from '@slotted/themes/default';
+
+export default extendTheme(defaultTheme, { seeds: { accent: '#e11d48' } }, { name: 'rose' });
+```
+
+Setting a seed on the document recolours every token derived from it, with no
+build:
+
+```js
+document.documentElement.style.setProperty('--slotted-seed-accent', '#e11d48');
+```
+
+A theme rule is CSS passed in `rules`, as a string or the URL of a `.css` file
+the build reads:
+
+```js
+export default extendTheme(
+  defaultTheme,
+  { rules: [new URL('./rules.css', import.meta.url)] },
+  {
+    name: 'rose',
+  },
+);
+```
+
+```css
+/* rules.css */
+[data-ui='button'][data-variant='solid'] {
+  border-radius: var(--slotted-radius-none);
+}
+```
+
+A theme rule lives in `slotted.theme-rules` and may select only `data-ui`,
+`data-part` and the public attributes, reading only tokens. An application
+rule stays outside `slotted`, in its own layer or unlayered.
 
 ## Angular
 

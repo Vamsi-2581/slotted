@@ -1342,6 +1342,11 @@ The policy should prioritize modern browsers and allow the use of recent platfor
 
 Support should not indefinitely prevent the use of modern capabilities because of obsolete browsers.
 
+The minimum matrix is Chrome 119, Safari 18, Firefox 146, set by the theming
+architecture's dependency on four platform primitives: relative color syntax
+(`oklch(from ...)`), `@scope` with a lower bound, `@property`, and
+`color-mix()`.
+
 ---
 
 # 34. Versioning

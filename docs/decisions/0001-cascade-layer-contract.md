@@ -1,6 +1,7 @@
 # 0001 — One top-level cascade layer, `slotted`
 
 Status: accepted, 2026-08-31.
+Sublayer order superseded by `0004-theming-architecture.md`.
 
 ## Context
 

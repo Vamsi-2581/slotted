@@ -41,12 +41,14 @@ to source is left to a build, and that is the table below.
 Two artefacts are generated from something else, and a change to their input is
 invisible until they are:
 
-| Changed                                              | Build                       | Because                                                                         |
-| ---------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------- |
-| `packages/theme/src/contract.json`                   | `pnpm build:tokens`         | the token stylesheet and the layer order are emitted from the contract          |
-| `packages/themes/src/default/values.json`            | `pnpm build:tokens`         | the theme stylesheet is emitted from the theme                                  |
-| `packages/core/src/**`                               | none for Storybook or tests | aliased to source by `scripts/source-aliases.mjs`; build only before publishing |
-| `packages/react/src/**`, `packages/angular/*/src/**` | none for Storybook          | `pnpm build` before publishing or before reading `dist`; the servers use source |
+| Changed                                              | Build                                        | Because                                                                                      |
+| ---------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `packages/theme/src/contract.json`                   | `pnpm build:tokens`                          | the token stylesheet and the layer order are emitted from the contract                       |
+| `packages/themes/src/default/values.json`            | `pnpm build:tokens`                          | the glyphs are drawn into it from `glyphs.json`, and the theme stylesheet is emitted from it |
+| `packages/theme/src/generated/*`                     | `pnpm --filter @slotted/theme generate`      | the contract and the public hooks are generated from a family's `tokens.json`                |
+| `packages/theme/src/recipes/standard.ts`             | `node scripts/calibrate-standard-recipe.mjs` | generated from `reference.json`; run after `pnpm --filter @slotted/theme build`              |
+| `packages/core/src/**`                               | none for Storybook or tests                  | aliased to source by `scripts/source-aliases.mjs`; build only before publishing              |
+| `packages/react/src/**`, `packages/angular/*/src/**` | none for Storybook                           | `pnpm build` before publishing or before reading `dist`; the servers use source              |
 
 `pnpm build` covers all of them and is the answer whenever the table is more
 trouble than the wait.
@@ -68,7 +70,7 @@ not need. That import is gone; the Angular preview never had one. Do not add a
 ```
 apps/       storybook-react, storybook-angular
 demos/      nexora/{angular,backend,domain.md}; .registry/ (beta tarballs, ignored)
-packages/   core, react, angular, styles, tokens, theme-default — the published set
+packages/   core, react, angular, styles, theme, themes — the published set
 tools/      harness, storybook-workbench — workspace packages, never published
 specs/      one contract.json and its test per family
 scripts/    repository scripts, flat, named by verb

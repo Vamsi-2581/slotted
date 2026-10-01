@@ -1,4 +1,4 @@
-export { NumberField } from './number-field';
+export { NumberField, NumberFieldScrub } from './number-field';
 export {
   NUMBER_FIELD_DECREMENT_LABEL,
   NUMBER_FIELD_INCREMENT_LABEL,
@@ -12,6 +12,7 @@ export type {
   NumberFieldHandle,
   NumberFieldProps,
   NumberFieldRootProps,
+  NumberFieldScrubProps,
   NumberFieldSize,
   NumberFieldStepper,
   NumberFieldValueReason,

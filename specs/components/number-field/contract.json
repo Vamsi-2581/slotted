@@ -82,7 +82,7 @@
   "stepperNames": ["incrementLabel", "decrementLabel"],
   "stepperDisabledAtBound": true,
   "parseOn": "input",
-  "commitOn": ["blur", "enter", "step", "wheel"],
+  "commitOn": ["blur", "enter", "step", "wheel", "scrub"],
   "range": {
     "min": "min",
     "max": "max",
@@ -95,6 +95,20 @@
     "largeStep": "step * 10",
     "smallStep": "step / 10",
     "stepFrom": "min, or 0"
+  },
+  "scrub": {
+    "part": "scrub",
+    "placedIn": ["start", "end"],
+    "gesture": "horizontal drag with pointer capture",
+    "perStep": "sensitivity pixels, default 2",
+    "modifiers": {
+      "Shift": "largeStep",
+      "Alt": "smallStep"
+    },
+    "direction": "towards the inline end steps up; rtl mirrors it",
+    "reason": "pointer",
+    "focus": "a press focuses the input",
+    "keyboard": "none: the input's arrow keys are the equivalent"
   },
   "format": {
     "options": "Intl.NumberFormatOptions",
@@ -139,6 +153,9 @@
     "invalid": "data-invalid",
     "readonly": "data-readonly"
   },
+  "dataAttributes": {
+    "data-scrubbing": "a scrub part is being dragged, on the root and on the part"
+  },
   "stateModel": {
     "value": {
       "controlled": "value",
@@ -175,7 +192,7 @@
         "wiring"
       ],
       "states": ["default", "hover", "active", "focus-visible", "disabled", "invalid", "readonly"],
-      "parts": ["root", "input", "start", "end", "stepper", "decrement", "increment"]
+      "parts": ["root", "input", "start", "end", "scrub", "stepper", "decrement", "increment"]
     }
   },
   "scenarios": {
@@ -189,6 +206,7 @@
       "formatOn",
       "locale",
       "adornments",
+      "scrub",
       "states",
       "content",
       "composition",

@@ -25,7 +25,7 @@ export const ANGULAR_NUMBER_FIELD_TOKENS = numberFieldTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import {\n  provideNumberFieldDefaults,\n  SlNumberField,\n  SlNumberFieldEnd,\n  SlNumberFieldInput,\n  SlNumberFieldStart,\n} from '@slotted/angular/number-field';",
+    "import {\n  provideNumberFieldDefaults,\n  SlNumberField,\n  SlNumberFieldEnd,\n  SlNumberFieldInput,\n  SlNumberFieldScrub,\n  SlNumberFieldStart,\n} from '@slotted/angular/number-field';",
   selector: '[slNumberField]',
   exportAs: 'slNumberField',
 };
@@ -59,11 +59,18 @@ const anatomy: AnatomyRow[] = [
     purpose: 'An adornment after the value in the reading direction: a unit, a currency code.',
   },
   {
+    part: 'scrub',
+    element: 'any element carrying slNumberFieldScrub, inside an adornment',
+    required: false,
+    purpose:
+      'A mark that moves the number when it is dragged sideways: one step per sensitivity pixels towards the inline end, the large step with Shift, the small one with Alt. It carries data-scrubbing while dragged, as the frame does, and is hidden from assistive technology because the arrow keys on the input are the same movement.',
+  },
+  {
     part: 'stepper',
     element: 'span, rendered by the frame',
     required: false,
     purpose:
-      'The column the two buttons share under stepper="stacked", with a hairline between the halves and one against the value. It is not rendered at all under split, where the buttons are direct children of the frame.',
+      'The column the two buttons share under stepper="stacked", inset one step from the frame with no rule of its own; each half gives that inset back to the pointer. It is not rendered at all under split, where the buttons are direct children of the frame.',
   },
   {
     part: 'decrement',
@@ -254,6 +261,27 @@ bootstrapApplication(App, {
 <div slNumberField>
   <input slNumberFieldInput defaultValue="240" min="0" />
   <span slNumberFieldEnd>un</span>
+</div>`,
+    }),
+  },
+  {
+    id: 'scrub',
+    title: 'Drag the mark to move the number',
+    note: 'The design tools’ gesture. Press the mark and drag sideways: two pixels per step, Shift for the large step, Alt for the small one. A right-to-left document steps up towards the left, the inline end.',
+    snippet: defineSnippet({
+      id: 'number-field-angular-scrub',
+      language: 'angular',
+      label: 'A width and an angle, each with its mark',
+      source: `<div slNumberField>
+  <span slNumberFieldStart><span slNumberFieldScrub>L</span></span>
+  <input slNumberFieldInput aria-label="Largura" defaultValue="320" min="0" />
+  <span slNumberFieldEnd>px</span>
+</div>
+
+<div slNumberField>
+  <span slNumberFieldStart><span slNumberFieldScrub [sensitivity]="4">A</span></span>
+  <input slNumberFieldInput aria-label="Ângulo" defaultValue="45" min="0" max="360" />
+  <span slNumberFieldEnd>°</span>
 </div>`,
     }),
   },
@@ -504,6 +532,13 @@ export const ANGULAR_NUMBER_FIELD_DOCS = {
         'An adornment after the value in the reading direction',
       ],
       [
+        'sensitivity',
+        'number',
+        '2',
+        'slNumberFieldScrub',
+        'Pixels of horizontal travel per step. A wide range wants fewer pixels per step; a fine one, more',
+      ],
+      [
         'disabled',
         'boolean',
         'from the field, or false',
@@ -631,7 +666,7 @@ export const ANGULAR_NUMBER_FIELD_DOCS = {
         source: `[data-ui='number-field'] {
   --slotted-number-field-border-color: var(--slotted-tone-secondary-border);
   --slotted-number-field-hover-border-color: var(--slotted-tone-accent-solid);
-  --slotted-number-field-stepper-border-color: var(--slotted-border-subtle);
+  --slotted-number-field-scrub-active-color: var(--slotted-tone-accent-text);
   --slotted-number-field-radius: var(--slotted-radius-md);
 }`,
       }),

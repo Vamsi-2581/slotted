@@ -7,7 +7,7 @@ import { useRef, useState } from 'react';
 import { Button } from '../button';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../field';
 import { Icon } from '../icon';
-import { NumberField } from './number-field';
+import { NumberField, NumberFieldScrub } from './number-field';
 import { NumberFieldDefaultsProvider } from './number-field-defaults';
 import { Grid, Measure, Scene } from './number-field-demo';
 import { REACT_NUMBER_FIELD_DOCS, REACT_NUMBER_FIELD_TOKENS } from './number-field.docs';
@@ -24,6 +24,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     formatOn: FormatOn,
     locale: Locale,
     adornments: Adornments,
+    scrub: Scrub,
     states: States,
     content: Content,
     composition: Composition,
@@ -331,6 +332,62 @@ export const Adornments: Story = {
   ),
 };
 
+export const Scrub: Story = {
+  parameters: scenario('scrub'),
+  render: () => (
+    <Grid columns={2}>
+      <Scene
+        label="A layer’s geometry, as a design tool edits it"
+        layout="stack"
+        note="Press a mark and drag sideways: two pixels per step, Shift for ten. The mark lifts to the value’s ink under the pointer, and the frame carries data-scrubbing while the drag lasts."
+      >
+        <NumberField
+          aria-label="Largura"
+          defaultValue={320}
+          end="px"
+          min={0}
+          start={<NumberFieldScrub>L</NumberFieldScrub>}
+        />
+        <NumberField
+          aria-label="Altura"
+          defaultValue={180}
+          end="px"
+          min={0}
+          start={<NumberFieldScrub>H</NumberFieldScrub>}
+        />
+      </Scene>
+      <Scene
+        label="A coarser and a finer drag"
+        layout="stack"
+        note="sensitivity is pixels per step: the angle takes four, so a full turn is a long but steady drag; the opacity stops at its bounds whatever the pointer does."
+      >
+        <NumberField
+          aria-label="Ângulo"
+          defaultValue={45}
+          end="°"
+          max={360}
+          min={0}
+          start={<NumberFieldScrub sensitivity={4}>A</NumberFieldScrub>}
+        />
+        <NumberField
+          aria-label="Opacidade"
+          defaultValue={100}
+          end="%"
+          max={100}
+          min={0}
+          start={
+            <NumberFieldScrub>
+              <Icon>
+                <Percent />
+              </Icon>
+            </NumberFieldScrub>
+          }
+        />
+      </Scene>
+    </Grid>
+  ),
+};
+
 export const States: Story = {
   parameters: scenario('states'),
   render: () => (
@@ -413,10 +470,12 @@ function CompositionScenes() {
         layout="stack"
         note="handle is increment() and decrement() — what a keyboard shortcut elsewhere on the page would call. Submit the form: the hidden input carries 1480, never the formatted string."
       >
-        <NumberField defaultValue={3} handle={handle} max={99} min={1} />
-        <Button onClick={() => handle.current?.increment()} variant="outline">
-          Mais um
-        </Button>
+        <div className="slotted-demo-row">
+          <NumberField defaultValue={3} handle={handle} max={99} min={1} />
+          <Button onClick={() => handle.current?.increment()} variant="outline">
+            Mais um
+          </Button>
+        </div>
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -429,10 +488,10 @@ function CompositionScenes() {
             locale="pt-BR"
             name="amount"
           />
+          <FieldDescription>
+            {submitted === '' ? 'Nada enviado.' : `Enviado: ${submitted}`}
+          </FieldDescription>
         </form>
-        <FieldDescription>
-          {submitted === '' ? 'Nada enviado.' : `Enviado: ${submitted}`}
-        </FieldDescription>
       </Scene>
     </Grid>
   );

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/number-field/contract.json';
 import { Field, FieldError, FieldLabel } from '../field';
-import { NumberField } from './number-field';
+import { NumberField, NumberFieldScrub } from './number-field';
 import { NumberFieldDefaultsProvider } from './number-field-defaults';
 import type { NumberFieldHandle } from './number-field.types';
 
@@ -656,5 +656,96 @@ describe('NumberField', () => {
       render(<NumberField inputMode="numeric" />);
       expect(control()).toHaveAttribute('inputmode', 'numeric');
     });
+  });
+});
+
+describe('NumberFieldScrub', () => {
+  const scrubPart = () => document.querySelector('[data-part="scrub"]') as HTMLElement;
+  const drag = (from: number, ...moves: { clientX: number; shiftKey?: boolean }[]) => {
+    fireEvent.pointerDown(scrubPart(), { button: 0, clientX: from, pointerId: 1 });
+    for (const move of moves) fireEvent.pointerMove(scrubPart(), { pointerId: 1, ...move });
+    fireEvent.pointerUp(scrubPart(), { pointerId: 1 });
+  };
+
+  it('moves the number one step per two pixels towards the inline end', () => {
+    const onValueChange = vi.fn();
+    render(
+      <NumberField
+        aria-label="Largura"
+        defaultValue={10}
+        onValueChange={onValueChange}
+        start={<NumberFieldScrub>L</NumberFieldScrub>}
+      />,
+    );
+    drag(100, { clientX: 101 }, { clientX: 106 }, { clientX: 104 });
+    expect(control().value).toBe('12');
+    expect(onValueChange.mock.calls.map(([value, request]) => [value, request.reason])).toEqual([
+      [13, 'pointer'],
+      [12, 'pointer'],
+    ]);
+  });
+
+  it('counts every move even when they arrive before a render', () => {
+    render(
+      <NumberField
+        aria-label="Largura"
+        defaultValue={0}
+        start={<NumberFieldScrub sensitivity={1}>L</NumberFieldScrub>}
+      />,
+    );
+    drag(0, { clientX: 1 }, { clientX: 2 }, { clientX: 3 });
+    expect(control().value).toBe('3');
+  });
+
+  it('moves by the large step under Shift and stays inside the range', () => {
+    render(
+      <NumberField
+        aria-label="Opacidade"
+        defaultValue={50}
+        max={100}
+        start={<NumberFieldScrub>O</NumberFieldScrub>}
+      />,
+    );
+    drag(0, { clientX: 2, shiftKey: true }, { clientX: 20, shiftKey: true });
+    expect(control().value).toBe('100');
+  });
+
+  it('marks the drag on the frame and on the part, and focuses the value', () => {
+    render(<NumberField aria-label="Ângulo" start={<NumberFieldScrub>A</NumberFieldScrub>} />);
+    fireEvent.pointerDown(scrubPart(), { button: 0, clientX: 0, pointerId: 1 });
+    expect(frameOf(control())).toHaveAttribute('data-scrubbing');
+    expect(scrubPart()).toHaveAttribute('data-scrubbing');
+    expect(control()).toHaveFocus();
+    fireEvent.pointerUp(scrubPart(), { pointerId: 1 });
+    expect(frameOf(control())).not.toHaveAttribute('data-scrubbing');
+  });
+
+  it('does nothing on a read-only or disabled control', () => {
+    render(
+      <NumberField
+        aria-label="Largura"
+        defaultValue={5}
+        readOnly
+        start={<NumberFieldScrub>L</NumberFieldScrub>}
+      />,
+    );
+    drag(0, { clientX: 40 });
+    expect(control().value).toBe('5');
+  });
+
+  it('is hidden from assistive technology and keeps native props', () => {
+    render(
+      <NumberField
+        aria-label="Largura"
+        start={
+          <NumberFieldScrub className="mark" title="Arraste">
+            L
+          </NumberFieldScrub>
+        }
+      />,
+    );
+    expect(scrubPart()).toHaveAttribute('aria-hidden', 'true');
+    expect(scrubPart()).toHaveClass('mark');
+    expect(scrubPart()).toHaveAttribute('title', 'Arraste');
   });
 });

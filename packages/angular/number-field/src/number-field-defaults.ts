@@ -122,4 +122,11 @@ export abstract class SlNumberFieldControl {
   abstract readonly resolvedInvalid: Signal<boolean | undefined>;
   /** Moves the value by one step and returns focus to it. */
   abstract stepBy(direction: 1 | -1, source: Event | undefined): void;
+  /**
+   * Moves the value by whole steps a `scrub` drag travelled, signed, by the
+   * large step under `Shift` and the small one under `Alt`.
+   */
+  abstract scrubBy(steps: number, source: PointerEvent): void;
+  /** The native element, which a scrub focuses and reads the direction from. */
+  abstract readonly inputElement: HTMLInputElement;
 }

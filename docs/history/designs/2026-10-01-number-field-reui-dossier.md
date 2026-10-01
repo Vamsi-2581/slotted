@@ -74,7 +74,7 @@ ReUI: `transition-property` cor, fundo, borda; 150 ms, `cubic-bezier(0.4, 0, 0.2
 
 | Capacidade | Onde aparece no ReUI | Forma no ReUI | Forma no Slotted | Em que a forma Slotted é melhor | Veredicto | Família dona, se não esta |
 | ---------- | -------------------- | ------------- | ---------------- | ------------------------------- | --------- | ------------------------- |
-| Arrastar o rótulo para mudar o valor | `c-number-field-1` a `-5` | `NumberFieldScrubArea label` envolve o rótulo; `cursor: ew-resize`; arrasto com bloqueio do ponteiro | — | — | adiar: a gate seguiu sem decidir; a parte entra numa corrida `build` própria, com contrato e as duas ligações | — |
+| Arrastar o rótulo para mudar o valor | `c-number-field-1` a `-5` | `NumberFieldScrubArea label` envolve o rótulo; `cursor: ew-resize`; arrasto com bloqueio do ponteiro | — | — | adotar (corrida `build`, ver § Parte `scrub`) | — |
 | Repetir ao manter premido | Base UI | interno ao primitivo | `STEP_REPEAT_DELAY`, `STEP_REPEAT_INTERVAL`, atraso maior em toque | atraso próprio para toque | igual | — |
 | Botões juntos na ponta final | `c-number-field-4` | `className` nos filhos | `stepper="stacked"` | eixo declarado no contrato, não classes | igual | — |
 
@@ -101,7 +101,7 @@ ReUI: `transition-property` cor, fundo, borda; 150 ms, `cubic-bezier(0.4, 0, 0.2
 | 3 | idem | `stacked`: coluna com `padding` de `--slotted-space-1` em bloco e na ponta final, sem separadores; metades com raio concêntrico; `::after` de cada metade estende o alvo até à moldura | § 3 coluna, § 7 linhas 1, 3 e 5 | specimen `stacked` claro e `dense` |
 | 4 | idem | estado no limite e foco desenhados sobre o chão inset (sem alteração de seletor) | § 4 | captura `stepper` |
 | 5 | `packages/styles/src/currency-field/currency-field.css` | o mesmo delta, sobre a moldura que a família copiou | § 3 | outra família |
-| 6 | `specs/components/number-field/contract.json` | parte `scrub` | § 6 linha 1 | contrato; adiada |
+| 6 | `specs/components/number-field/contract.json` | parte `scrub` | § 6 linha 1 | contrato; aplicada |
 
 ## Resultado
 
@@ -116,3 +116,16 @@ ReUI: `transition-property` cor, fundo, borda; 150 ms, `cubic-bezier(0.4, 0, 0.2
 Lido também em escuro, alto contraste e rtl (`/tmp/number-field-{dark-comfortable-ltr,light-comfortable-rtl}-420.png`). Em escuro, o chão de desativado de uma metade no limite fica a um passo do chão do campo: a tinta continua a distinguir o estado, como antes desta passagem.
 
 Linha 5 (`currency-field`) por aplicar: `/reui currency-field polish`.
+
+## Parte `scrub`
+
+Decisão do revisor depois da gate: adotar. A corrida passa a `build` para esta linha.
+
+- **Onde vive.** Dentro de `start` ou `end`, não no rótulo do `field`. O ReUI envolve o rótulo, que fica fora do grupo. No Slotted, o rótulo pertence ao `field` e a moldura à família. Uma parte dentro da moldura é da família, chega ao controlo sem referência cruzada e segue a convenção das ferramentas de desenho (letra ou ícone dentro do campo).
+- **Forma.** React `NumberFieldScrub` (um `span` com todas as props nativas e `sensitivity`), ligado por contexto ao `NumberField` que o desenha. Angular `[slNumberFieldScrub]`, que injeta o `SlNumberField` antepassado.
+- **Gesto.** Captura do ponteiro, `sensitivity` píxeis por passo (2 por omissão, `SCRUB_SENSITIVITY` em `@slotted/core/number`), `Shift` para `largeStep`, `Alt` para `smallStep`, razão `pointer`, um commit por passo inteiro. A aritmética vive em `createScrub`, partilhada pelas duas ligações.
+- **Em que supera o ReUI.** Em rtl, o passo para cima segue a ponta final (o Base UI ignora a direção). O valor percorrido fica numa referência, de modo que movimentos chegados antes de um render não se perdem (teste `counts every move even when they arrive before a render`).
+- **Acessibilidade.** `aria-hidden` por omissão e sem foco: as setas do `input` são o equivalente de teclado. Uma pressão foca o `input`.
+- **Estado.** `data-scrubbing` na raiz e na parte durante o arrasto. A tinta sobe de `--slotted-text-muted` para `--slotted-text` em hover e durante o arrasto. Em `disabled` e `readonly`, cursor `default` e nenhum efeito.
+- **Custo registado.** Sem bloqueio do ponteiro (`requestPointerLock`): o arrasto termina no limite do ecrã. O bloqueio esconde o cursor e exige um cursor virtual.
+- **Mudança de contrato.** Parte `scrub`, bloco `scrub`, `commitOn` com `scrub`, `dataAttributes` com `data-scrubbing`, cenário `scrub`. Nenhum consumidor a migrar.

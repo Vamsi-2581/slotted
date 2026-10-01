@@ -308,6 +308,18 @@ export class SlNumberFieldInput implements ControlValueAccessor, OnInit, SlNumbe
     this.move(-1, this.step(), 'programmatic', undefined);
   }
 
+  /** What a `slNumberFieldScrub` drag calls, once per whole step travelled. */
+  scrubBy(steps: number, source: PointerEvent) {
+    if (steps === 0) return;
+    const step = this.step();
+    const amount = source.shiftKey
+      ? (this.largeStep() ?? step * 10)
+      : source.altKey
+        ? (this.smallStep() ?? step / 10)
+        : step;
+    this.move(steps > 0 ? 1 : -1, amount * Math.abs(steps), 'pointer', source);
+  }
+
   /** What the frame's two buttons call. Focus returns to the value. */
   stepBy(direction: 1 | -1, source: Event | undefined) {
     this.element.focus();

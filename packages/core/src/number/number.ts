@@ -100,6 +100,48 @@ export const STEP_REPEAT_DELAY_COARSE = 600;
 export const STEP_REPEAT_INTERVAL = 60;
 
 /**
+ * Pixels of horizontal travel per step while a `scrub` part is dragged.
+ * Base UI's `pixelSensitivity` default, the one figure in the surveyed field.
+ */
+export const SCRUB_SENSITIVITY = 2;
+
+export interface Scrub {
+  /**
+   * Whole steps travelled since the last call, signed: positive towards the
+   * inline end. The remainder under one step is kept, so slow travel still
+   * adds up instead of being rounded away on every event.
+   */
+  steps(clientX: number): number;
+}
+
+/**
+ * The arithmetic of a horizontal drag that moves a number. Both bindings feed
+ * it pointer coordinates and turn its answer into steps; the direction is the
+ * reading direction's, so in a right-to-left document a drag towards the left
+ * edge — the inline end — is a step up.
+ */
+export function createScrub({
+  clientX,
+  sensitivity = SCRUB_SENSITIVITY,
+  rtl = false,
+}: {
+  clientX: number;
+  sensitivity?: number;
+  rtl?: boolean;
+}): Scrub {
+  const per = sensitivity > 0 ? sensitivity : SCRUB_SENSITIVITY;
+  let origin = clientX;
+  return {
+    steps(next) {
+      const travelled = (rtl ? origin - next : next - origin) / per;
+      const whole = Math.trunc(travelled);
+      if (whole !== 0) origin += (rtl ? -whole : whole) * per;
+      return whole;
+    },
+  };
+}
+
+/**
  * The ten digits this locale writes, in order. A numbering system is part of
  * the locale rather than an option, so `ar-EG` writes `١٤٨٠` and the parser has
  * to read it back; Latin digits are accepted everywhere as well, because a

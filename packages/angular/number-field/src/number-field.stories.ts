@@ -13,7 +13,7 @@ import type {
   NumberFieldVariant,
 } from './number-field-defaults';
 import { SlNumberFieldInput } from './number-field-input';
-import { SlNumberFieldEnd, SlNumberFieldStart } from './number-field-parts';
+import { SlNumberFieldEnd, SlNumberFieldScrub, SlNumberFieldStart } from './number-field-parts';
 import { ANGULAR_NUMBER_FIELD_DOCS, ANGULAR_NUMBER_FIELD_TOKENS } from './number-field.docs';
 
 interface NumberFieldStoryArgs {
@@ -35,6 +35,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     formatOn: FormatOn,
     locale: Locale,
     adornments: Adornments,
+    scrub: Scrub,
     states: States,
     content: Content,
     composition: Composition,
@@ -50,6 +51,7 @@ const DIRECTIVES = [
   SlNumberField,
   SlNumberFieldEnd,
   SlNumberFieldInput,
+  SlNumberFieldScrub,
   SlNumberFieldStart,
 ];
 
@@ -427,6 +429,43 @@ export const Adornments: Story = {
   }),
 };
 
+export const Scrub: Story = {
+  parameters: scenario('scrub'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'A layer’s geometry, as a design tool edits it',
+        'Press a mark and drag sideways: two pixels per step, Shift for ten. The mark lifts to the value’s ink under the pointer, and the frame carries data-scrubbing while the drag lasts.',
+        `<div slNumberField>
+           <span slNumberFieldStart><span slNumberFieldScrub>L</span></span>
+           <input slNumberFieldInput aria-label="Largura" defaultValue="320" min="0" />
+           <span slNumberFieldEnd>px</span>
+         </div>
+         <div slNumberField>
+           <span slNumberFieldStart><span slNumberFieldScrub>H</span></span>
+           <input slNumberFieldInput aria-label="Altura" defaultValue="180" min="0" />
+           <span slNumberFieldEnd>px</span>
+         </div>`,
+      ) +
+        scene(
+          'A coarser and a finer drag',
+          'sensitivity is pixels per step: the angle takes four, so a full turn is a long but steady drag; the opacity stops at its bounds whatever the pointer does.',
+          `<div slNumberField>
+             <span slNumberFieldStart><span slNumberFieldScrub [sensitivity]="4">A</span></span>
+             <input slNumberFieldInput aria-label="Ângulo" defaultValue="45" min="0" max="360" />
+             <span slNumberFieldEnd>°</span>
+           </div>
+           <div slNumberField>
+             <span slNumberFieldStart><span slNumberFieldScrub>O</span></span>
+             <input slNumberFieldInput aria-label="Opacidade" defaultValue="100" min="0" max="100" />
+             <span slNumberFieldEnd>%</span>
+           </div>`,
+        ),
+    ),
+  }),
+};
+
 export const States: Story = {
   parameters: scenario('states'),
   render: () => ({
@@ -515,10 +554,12 @@ export const Composition: Story = {
         scene(
           'Reaching the instance, and submitting the raw number',
           'exportAs hands the template the directive, which carries increment(), decrement() and inputElement. The hidden input beside the visible one carries 1480, never the formatted string.',
-          `<div slNumberField>
-             <input slNumberFieldInput #campo="slNumberFieldInput" defaultValue="3" max="99" />
+          `<div class="slotted-demo-row">
+             <div slNumberField>
+               <input slNumberFieldInput #campo="slNumberFieldInput" defaultValue="3" max="99" />
+             </div>
+             <button type="button" (click)="campo.increment()">Mais um</button>
            </div>
-           <button type="button" (click)="campo.increment()">Mais um</button>
            <div slNumberField>
              <input
                slNumberFieldInput

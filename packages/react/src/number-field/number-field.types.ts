@@ -182,3 +182,12 @@ export interface NumberFieldProps extends Omit<
    */
   wheel?: boolean | undefined;
 }
+
+/**
+ * A mark in `start` or `end` that moves the number when it is dragged
+ * sideways. A native `span`: every prop reaches it.
+ */
+export interface NumberFieldScrubProps extends ComponentPropsWithRef<'span'> {
+  /** Pixels of horizontal travel per step. Defaults to 2. */
+  sensitivity?: number | undefined;
+}

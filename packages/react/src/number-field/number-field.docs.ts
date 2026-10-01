@@ -24,7 +24,8 @@ export const REACT_NUMBER_FIELD_TOKENS = numberFieldTokens.map((name) => ({
 }));
 
 const imports: ReferenceImport = {
-  source: "import { NumberField, NumberFieldDefaultsProvider } from '@slotted/react';",
+  source:
+    "import { NumberField, NumberFieldDefaultsProvider, NumberFieldScrub } from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -56,11 +57,18 @@ const anatomy: AnatomyRow[] = [
     purpose: 'An adornment after the value in the reading direction: a unit, a currency code.',
   },
   {
+    part: 'scrub',
+    element: 'span (NumberFieldScrub)',
+    required: false,
+    purpose:
+      'A mark in start or end that moves the number when it is dragged sideways: one step per sensitivity pixels towards the inline end, largeStep with Shift, smallStep with Alt. It carries data-scrubbing while dragged, as the frame does, and is hidden from assistive technology because the arrow keys on the input are the same movement.',
+  },
+  {
     part: 'stepper',
     element: 'span',
     required: false,
     purpose:
-      'The column the two buttons share under stepper="stacked", with a hairline between the halves and one against the value. It is not rendered at all under split, where the buttons are direct children of the frame.',
+      'The column the two buttons share under stepper="stacked", inset one step from the frame with no rule of its own; each half gives that inset back to the pointer. It is not rendered at all under split, where the buttons are direct children of the frame.',
   },
   {
     part: 'decrement',
@@ -239,6 +247,25 @@ const scenes: ReferenceSceneMeta[] = [
       <Package />
     </Icon>
   }
+/>;`,
+    }),
+  },
+  {
+    id: 'scrub',
+    title: 'Drag the mark to move the number',
+    note: 'The design tools’ gesture. Press the mark and drag sideways: two pixels per step, Shift for the large step, Alt for the small one. A right-to-left document steps up towards the left, the inline end.',
+    snippet: defineSnippet({
+      id: 'number-field-react-scrub',
+      language: 'tsx',
+      label: 'A width, an angle and an opacity, each with its mark',
+      source: `<NumberField defaultValue={320} end="px" min={0} start={<NumberFieldScrub>L</NumberFieldScrub>} />;
+
+<NumberField
+  defaultValue={45}
+  end="°"
+  max={360}
+  min={0}
+  start={<NumberFieldScrub sensitivity={4}>A</NumberFieldScrub>}
 />;`,
     }),
   },
@@ -455,6 +482,13 @@ export const REACT_NUMBER_FIELD_DOCS = {
         'An adornment after the value in the reading direction',
       ],
       [
+        'NumberFieldScrub sensitivity',
+        'number',
+        '2',
+        'NumberFieldScrub',
+        'Pixels of horizontal travel per step. A wide range wants fewer pixels per step; a fine one, more',
+      ],
+      [
         'disabled',
         'boolean',
         'from the field, or false',
@@ -590,7 +624,7 @@ export const REACT_NUMBER_FIELD_DOCS = {
         source: `[data-ui='number-field'] {
   --slotted-number-field-border-color: var(--slotted-tone-secondary-border);
   --slotted-number-field-hover-border-color: var(--slotted-tone-accent-solid);
-  --slotted-number-field-stepper-border-color: var(--slotted-border-subtle);
+  --slotted-number-field-scrub-active-color: var(--slotted-tone-accent-text);
   --slotted-number-field-radius: var(--slotted-radius-md);
 }`,
       }),

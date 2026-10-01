@@ -51,6 +51,7 @@
   "--slotted-number-field-radius",
   "--slotted-number-field-readonly-background",
   "--slotted-number-field-readonly-border-color",
+  "--slotted-number-field-scrub-active-color",
   "--slotted-number-field-shadow",
   "--slotted-number-field-stepper-active-background",
   "--slotted-number-field-stepper-color",

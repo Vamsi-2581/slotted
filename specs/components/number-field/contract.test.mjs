@@ -40,6 +40,7 @@ test('draws a frame holding the control, its adornments and its two steppers', (
     'input',
     'start',
     'end',
+    'scrub',
     'stepper',
     'decrement',
     'increment',
@@ -167,7 +168,7 @@ test('says when the text is rewritten and when the number moves', () => {
   assert.deepEqual(contract.resolution.formatOn, ['prop', 'defaults', 'change']);
   assert.equal(contract.members.numberField.defaults.formatOn, 'change');
   assert.ok(contract.provides.numberFieldDefaults.includes('formatOn'));
-  assert.deepEqual(contract.commitOn, ['blur', 'enter', 'step', 'wheel']);
+  assert.deepEqual(contract.commitOn, ['blur', 'enter', 'step', 'wheel', 'scrub']);
 });
 
 test('states the range, the three steps and the policies over them', () => {
@@ -285,9 +286,26 @@ test('declares one scenario per demonstration the reference page owes', () => {
     'formatOn',
     'locale',
     'adornments',
+    'scrub',
     'states',
     'content',
     'composition',
     'keyboard',
   ]);
+});
+
+/**
+ * The design tools' gesture, which ReUI ships as Base UI's scrub area: a
+ * horizontal drag over a mark in an adornment moves the number. It lives in
+ * the frame rather than on the field's label, so the part is the family's own
+ * and the gesture lands on the control it changes. The input's arrow keys are
+ * the keyboard equivalent, so the part takes no focus and no role.
+ */
+test('moves the number by a horizontal drag over a scrub part', () => {
+  assert.deepEqual(contract.scrub.placedIn, ['start', 'end']);
+  assert.equal(contract.scrub.perStep, 'sensitivity pixels, default 2');
+  assert.deepEqual(contract.scrub.modifiers, { Shift: 'largeStep', Alt: 'smallStep' });
+  assert.match(contract.scrub.direction, /rtl/);
+  assert.ok(contract.stateModel.value.reasons.includes(contract.scrub.reason));
+  assert.ok('data-scrubbing' in contract.dataAttributes);
 });

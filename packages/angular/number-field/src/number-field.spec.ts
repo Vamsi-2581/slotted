@@ -9,7 +9,7 @@ import contract from '../../../../specs/components/number-field/contract.json';
 import { SlNumberField } from './number-field';
 import { provideNumberFieldDefaults } from './number-field-defaults';
 import { SlNumberFieldInput } from './number-field-input';
-import { SlNumberFieldEnd, SlNumberFieldStart } from './number-field-parts';
+import { SlNumberFieldEnd, SlNumberFieldScrub, SlNumberFieldStart } from './number-field-parts';
 
 @Component({
   standalone: true,
@@ -21,6 +21,7 @@ import { SlNumberFieldEnd, SlNumberFieldStart } from './number-field-parts';
     SlNumberField,
     SlNumberFieldEnd,
     SlNumberFieldInput,
+    SlNumberFieldScrub,
     SlNumberFieldStart,
   ],
   template: `<div slNumberField></div>`,
@@ -712,5 +713,60 @@ describe('SlNumberField', () => {
     expect(input(fixture).getAttribute('autocomplete')).toBe('off');
     expect(input(fixture).getAttribute('autocorrect')).toBe('off');
     expect(input(fixture).getAttribute('spellcheck')).toBe('false');
+  });
+});
+
+describe('slNumberFieldScrub', () => {
+  const scrubTemplate = (attributes = '', sensitivity = '') =>
+    `<div slNumberField>
+       <span slNumberFieldStart><span slNumberFieldScrub ${sensitivity}>L</span></span>
+       <input slNumberFieldInput aria-label="Largura" ${attributes} (valueChange)="record($event)" />
+     </div>`;
+  const pointer = (type: string, init: PointerEventInit = {}) =>
+    new PointerEvent(type, { bubbles: true, cancelable: true, button: 0, pointerId: 1, ...init });
+  const drag = (fixture: Fixture, from: number, ...moves: PointerEventInit[]) => {
+    const part = query(fixture, '[data-part="scrub"]');
+    part.dispatchEvent(pointer('pointerdown', { clientX: from }));
+    for (const move of moves) part.dispatchEvent(pointer('pointermove', move));
+    part.dispatchEvent(pointer('pointerup'));
+    fixture.detectChanges();
+  };
+
+  it('moves the number one step per two pixels towards the inline end', () => {
+    const fixture = renderTemplate(scrubTemplate('[defaultValue]="10"'));
+    drag(fixture, 100, { clientX: 101 }, { clientX: 106 }, { clientX: 104 });
+    expect(input(fixture).value).toBe('12');
+    expect(fixture.componentInstance.seen().map(({ value, reason }) => [value, reason])).toEqual([
+      [13, 'pointer'],
+      [12, 'pointer'],
+    ]);
+  });
+
+  it('takes its sensitivity and the large step under Shift', () => {
+    const fixture = renderTemplate(
+      scrubTemplate('[defaultValue]="0" [max]="100"', '[sensitivity]="10"'),
+    );
+    drag(fixture, 0, { clientX: 10, shiftKey: true }, { clientX: 200, shiftKey: true });
+    expect(input(fixture).value).toBe('100');
+  });
+
+  it('marks the drag on the frame and on the part, and focuses the value', () => {
+    const fixture = renderTemplate(scrubTemplate());
+    const part = query(fixture, '[data-part="scrub"]');
+    part.dispatchEvent(pointer('pointerdown', { clientX: 0 }));
+    fixture.detectChanges();
+    expect(query(fixture, '[data-ui="number-field"]').hasAttribute('data-scrubbing')).toBe(true);
+    expect(part.hasAttribute('data-scrubbing')).toBe(true);
+    expect(document.activeElement).toBe(input(fixture));
+    part.dispatchEvent(pointer('pointerup'));
+    fixture.detectChanges();
+    expect(query(fixture, '[data-ui="number-field"]').hasAttribute('data-scrubbing')).toBe(false);
+    expect(part.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('does nothing on a read-only control', () => {
+    const fixture = renderTemplate(scrubTemplate('[defaultValue]="5" readOnly'));
+    drag(fixture, 0, { clientX: 40 });
+    expect(input(fixture).value).toBe('5');
   });
 });

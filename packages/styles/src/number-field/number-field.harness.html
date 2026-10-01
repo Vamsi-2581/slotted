@@ -428,6 +428,84 @@
   </div>
 </section>
 
+<section data-scene="scrub">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div
+      data-ui="number-field"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-stepper="stacked"
+    >
+      <span data-part="start"><span data-part="scrub" aria-hidden="true">L</span></span>
+      <input data-part="input" type="text" role="spinbutton" value="320" />
+      <span data-part="end" aria-hidden="true">px</span>
+      <span data-part="stepper">
+        <button data-part="increment" type="button" tabindex="-1" aria-label="Aumentar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span>
+        </button>
+        <button data-part="decrement" type="button" tabindex="-1" aria-label="Diminuir">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span>
+        </button>
+      </span>
+    </div>
+    <div
+      data-ui="number-field"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-stepper="stacked"
+      data-scrubbing=""
+    >
+      <span data-part="start"
+        ><span data-part="scrub" aria-hidden="true" data-scrubbing="">A</span></span
+      >
+      <input data-part="input" type="text" role="spinbutton" value="45" />
+      <span data-part="end" aria-hidden="true">°</span>
+      <span data-part="stepper">
+        <button data-part="increment" type="button" tabindex="-1" aria-label="Aumentar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span>
+        </button>
+        <button data-part="decrement" type="button" tabindex="-1" aria-label="Diminuir">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span>
+        </button>
+      </span>
+    </div>
+    <div
+      data-ui="number-field"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-stepper="stacked"
+      data-disabled=""
+    >
+      <span data-part="start"><span data-part="scrub" aria-hidden="true">O</span></span>
+      <input data-part="input" type="text" role="spinbutton" value="100" disabled />
+      <span data-part="end" aria-hidden="true">%</span>
+      <span data-part="stepper">
+        <button data-part="increment" type="button" tabindex="-1" aria-label="Aumentar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span>
+        </button>
+        <button data-part="decrement" type="button" tabindex="-1" aria-label="Diminuir">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span>
+        </button>
+      </span>
+    </div>
+  </div>
+</section>
+
 <section data-scene="states">
   <div data-ui="stack" data-part="root" data-gap="6">
     <div

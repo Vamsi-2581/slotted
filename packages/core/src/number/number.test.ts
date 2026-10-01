@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createNumberFormat, decimalsOf, snapToStep, stepNumber } from './index';
+import { createNumberFormat, createScrub, decimalsOf, snapToStep, stepNumber } from './index';
 
 describe('createNumberFormat', () => {
   it('writes the digits, the group and the decimal the locale writes', () => {
@@ -405,5 +405,27 @@ describe('decimalsOf', () => {
   it('counts them through exponent notation', () => {
     expect(decimalsOf(1e-7)).toBe(7);
     expect(decimalsOf(1e21)).toBe(0);
+  });
+});
+
+describe('createScrub', () => {
+  it('counts whole steps of travel and keeps the remainder', () => {
+    const scrub = createScrub({ clientX: 100 });
+    expect(scrub.steps(101)).toBe(0);
+    expect(scrub.steps(103)).toBe(1);
+    expect(scrub.steps(104)).toBe(1);
+    expect(scrub.steps(98)).toBe(-3);
+  });
+
+  it('takes its sensitivity in pixels per step', () => {
+    const scrub = createScrub({ clientX: 0, sensitivity: 10 });
+    expect(scrub.steps(25)).toBe(2);
+    expect(scrub.steps(30)).toBe(1);
+  });
+
+  it('steps up towards the inline end in a right-to-left document', () => {
+    const scrub = createScrub({ clientX: 100, rtl: true });
+    expect(scrub.steps(96)).toBe(2);
+    expect(scrub.steps(100)).toBe(-2);
   });
 });

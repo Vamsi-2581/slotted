@@ -299,6 +299,44 @@
     padding-inline: calc(var(--_icon-size) / 8);
   }
 
+  /**
+   * A mark that moves the number when it is dragged sideways — the design
+   * tools' gesture. The adornment holding it stands the frame's full height,
+   * so the target is the frame's height rather than the mark's.
+   *
+   * Hover lifts the mark from the adornments' quiet ink to the value's: the
+   * mark is not a button, it has no ground to change, and the cursor alone
+   * said nothing a reader would look at.
+   */
+  [data-ui='number-field']
+    > :is([data-part='start'], [data-part='end']):has(> [data-part='scrub']) {
+    align-self: stretch;
+  }
+
+  [data-ui='number-field'] [data-part='scrub'] {
+    align-items: center;
+    align-self: stretch;
+    cursor: ew-resize;
+    display: inline-flex;
+    gap: var(--slotted-space-2, 0.25rem);
+    /* The drag is the gesture; a pan or a text selection would take it. */
+    touch-action: none;
+    transition: color var(--slotted-control-transition-duration)
+      var(--slotted-control-transition-easing);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  [data-ui='number-field']:not([data-disabled]):not([data-readonly])
+    [data-part='scrub']:is(:hover, [data-scrubbing]) {
+    color: var(--slotted-number-field-scrub-active-color, var(--slotted-text, CanvasText));
+  }
+
+  [data-ui='number-field']:is([data-disabled], [data-readonly]) [data-part='scrub'] {
+    cursor: default;
+    touch-action: auto;
+  }
+
   /* ── The two steppers ─────────────────────────────────────────────────
    *
    * Real buttons, out of the tab order — the APG's "the text field is usually

@@ -16,4 +16,4 @@ export type {
   NumberFieldVariant,
 } from './number-field-defaults';
 export { SlNumberFieldInput } from './number-field-input';
-export { SlNumberFieldEnd, SlNumberFieldStart } from './number-field-parts';
+export { SlNumberFieldEnd, SlNumberFieldScrub, SlNumberFieldStart } from './number-field-parts';

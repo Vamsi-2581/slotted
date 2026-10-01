@@ -60,3 +60,19 @@ test('names the selector of the enclosing rule for a var() error, not only the f
   assert.match(errors[0], /^rules\.css:\d+ /, errors[0]);
   assert.ok(errors[0].includes("[data-ui='card']"), errors[0]);
 });
+
+test('attributes a var() after a nested rule to the outer rule that directly contains it, not the nested one', () => {
+  const errors = validateRules(
+    `[data-ui='card'] {\n  & [data-part='label'] { color: red; }\n  background: var(--_ink);\n}`,
+    'order.css',
+  );
+  assert.equal(errors.length, 1, errors.join('\n'));
+  // The declaration sits on line 3, directly inside the outer `[data-ui='card']` rule
+  // (lightningcss models the trailing declaration as its own `nested-declarations`
+  // block once a sibling rule is nested before it, so the line moves off the outer
+  // rule's own opening line, but the selector it reports stays the outer one's).
+  assert.match(errors[0], /^order\.css:3 /, errors[0]);
+  assert.ok(errors[0].includes("[data-ui='card']"), errors[0]);
+  assert.ok(!errors[0].includes("[data-part='label']"), errors[0]);
+  assert.ok(errors[0].includes('var(--_ink) reads a private property of a family'), errors[0]);
+});

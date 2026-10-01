@@ -62,6 +62,9 @@ function selectorText(components) {
         text +=
           { child: ' > ', 'next-sibling': ' + ', 'later-sibling': ' ~ ' }[component.value] ?? ' ';
         break;
+      case 'nesting':
+        text += '&';
+        break;
       default:
         break;
     }
@@ -104,32 +107,48 @@ function checkSelector(components, report) {
 
 export function validateRules(css, filename) {
   const errors = [];
-  let ruleContext = null;
+  // A stack, not a single slot: CSS nesting (`&`) lets a rule directly contain
+  // another rule, and a `var()` after the nested rule belongs to an implicit
+  // `nested-declarations` block lightningcss inserts for it — its own line,
+  // its own place in the tree, but no selector of its own, so it inherits the
+  // nearest enclosing style rule's. The top of the stack is always the rule
+  // that directly contains whatever the visitor is looking at right now.
+  const context = [];
   try {
     transform({
       filename,
       code: Buffer.from(css),
       errorRecovery: false,
       visitor: {
-        Rule: {
-          style(rule) {
+        // The generic (unkeyed) Rule/RuleExit hooks, not `Rule: { style(rule) {} }`:
+        // lightningcss 1.33 never calls a type-keyed RuleExit for a style rule, so a
+        // keyed Rule visitor has no matching exit to pop the stack with.
+        Rule(rule) {
+          if (rule.type === 'style') {
             const where = atLine(filename, rule.value.loc);
             const text = rule.value.selectors.map((selector) => selectorText(selector)).join(', ');
-            ruleContext = { where, text };
+            context.push({ where, text });
             for (const selector of rule.value.selectors) {
               const selectorOwnText = selectorText(selector);
               checkSelector(selector, (message) =>
                 errors.push(`${where} ${selectorOwnText}: ${message}`),
               );
             }
-            // No return: lightningcss round-trips a returned rule back into its Rust
-            // AST, which fails to deserialize a value's `var()` once it has passed
-            // through JS. The visitor only inspects the rule, so it stays unmodified.
-          },
+          } else {
+            const parent = context[context.length - 1];
+            context.push({ where: atLine(filename, rule.value?.loc), text: parent?.text ?? '' });
+          }
+          // No return, from either branch: lightningcss round-trips a returned rule
+          // back into its Rust AST, which fails to deserialize a value's `var()`
+          // once it has passed through JS. The visitor only inspects the rule.
+        },
+        RuleExit() {
+          context.pop();
         },
         Variable(variable) {
           const name = variable.name.ident;
-          const where = ruleContext ? `${ruleContext.where} ${ruleContext.text}:` : filename;
+          const top = context[context.length - 1];
+          const where = top ? `${top.where} ${top.text}:` : filename;
           if (name.startsWith('--_'))
             errors.push(`${where} var(${name}) reads a private property of a family`);
           else if (name.startsWith('--slotted-') && !TOKENS.has(name))

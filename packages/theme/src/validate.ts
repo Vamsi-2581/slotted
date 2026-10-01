@@ -1,4 +1,5 @@
 import type { TokenContract, TokenDefinition } from './contract-types';
+import { scanCssText } from './css-scan';
 import { resolveTokens } from './resolve';
 
 /**
@@ -115,31 +116,28 @@ function references(value: unknown): string[] {
 /**
  * A token value, a component value or a font field is interpolated into CSS
  * text verbatim (`render.ts` writes `${name}: ${value};` and the like). An
- * unquoted `;`, `{` or `}` inside it would close the declaration, the rule or
- * the `@layer`/`@scope` it is written into — `url("a;b.woff2")` and `"Inter",
- * sans-serif` stay legitimate because the structural characters there are
- * never reached while a quote is open.
+ * unquoted, uncommented `;`, `{` or `}` inside it would close the
+ * declaration, the rule or the `@layer`/`@scope` it is written into, and a
+ * string or comment the value leaves open would do the same to whatever
+ * follows it in the stylesheet — so both are rejected here. `url("a;b.woff2")`
+ * and `"1px /* comment *\/"` stay legitimate: the scan this shares with
+ * `splitTopLevel` skips a structural character inside either.
  */
 export function hasUnsafeStructuralChar(value: string): boolean {
-  let quote: string | null = null;
-  for (let index = 0; index < value.length; index += 1) {
-    const char = value[index]!;
-    if (quote) {
-      if (char === '\\') index += 1;
-      else if (char === quote) quote = null;
-      continue;
-    }
-    if (char === '"' || char === "'") quote = char;
-    else if (char === ';' || char === '{' || char === '}') return true;
-  }
-  return false;
+  let unsafe = false;
+  const end = scanCssText(value, {
+    onCodeChar(char) {
+      if (char === ';' || char === '{' || char === '}') unsafe = true;
+    },
+  });
+  return unsafe || end.openQuote !== null || end.openCommentAt !== null;
 }
 
 function checkStructuralSafety(errors: string[], label: string, values: unknown): void {
   for (const [name, value] of Object.entries(asMap(values))) {
     if (hasUnsafeStructuralChar(value)) {
       errors.push(
-        `${label} ${name} is ${JSON.stringify(value)}, which contains an unquoted ;, { or }`,
+        `${label} ${name} is ${JSON.stringify(value)}, which contains an unquoted ;, { or }, or leaves a string or comment open`,
       );
     }
   }

@@ -115,7 +115,7 @@ export function defineTheme(definition: ThemeDefinition): Theme {
     if (!components.has(name)) errors.push(`components contains ${name}, which no family reads`);
     if (hasUnsafeStructuralChar(value as string)) {
       errors.push(
-        `components ${name} is ${JSON.stringify(value)}, which contains an unquoted ;, { or }`,
+        `components ${name} is ${JSON.stringify(value)}, which contains an unquoted ;, { or }, or leaves a string or comment open`,
       );
     }
   }
@@ -139,7 +139,7 @@ export function defineTheme(definition: ThemeDefinition): Theme {
       const value = font[field];
       if (value !== undefined && hasUnsafeStructuralChar(value)) {
         errors.push(
-          `fonts[${index}].${field} is ${JSON.stringify(value)}, which contains an unquoted ;, { or }`,
+          `fonts[${index}].${field} is ${JSON.stringify(value)}, which contains an unquoted ;, { or }, or leaves a string or comment open`,
         );
       }
     }

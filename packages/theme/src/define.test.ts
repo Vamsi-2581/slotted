@@ -93,6 +93,29 @@ describe('defineTheme', () => {
       ),
     ).not.toThrow();
   });
+
+  it('accepts a value whose comment hides a structural character', () => {
+    expect(() =>
+      defineTheme(definition({ components: { '--slotted-card-radius': '1px /* } */ solid red' } })),
+    ).not.toThrow();
+    expect(() =>
+      defineTheme(
+        definition({ components: { '--slotted-card-radius': 'url(a.woff2) /* cache;v2 */' } }),
+      ),
+    ).not.toThrow();
+  });
+
+  it('refuses a value that leaves a string open', () => {
+    expect(() =>
+      defineTheme(definition({ components: { '--slotted-card-radius': '0px "' } })),
+    ).toThrow(/components --slotted-card-radius is .* leaves a string or comment open/);
+  });
+
+  it('refuses a value that leaves a comment open', () => {
+    expect(() =>
+      defineTheme(definition({ components: { '--slotted-card-radius': '0px /*' } })),
+    ).toThrow(/components --slotted-card-radius is .* leaves a string or comment open/);
+  });
 });
 
 describe('flattenTheme', () => {

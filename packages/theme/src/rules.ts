@@ -1,3 +1,5 @@
+import { scanCssText } from './css-scan';
+
 /**
  * Splits CSS into its top-level statements: a block ends at the brace that
  * returns to depth 0, an at-statement at the semicolon. Strings and comments
@@ -14,45 +16,40 @@ export function splitTopLevel(css: string): string[] {
   const statements: string[] = [];
   let depth = 0;
   let start = 0;
-  let quote: string | null = null;
-  for (let index = 0; index < css.length; index += 1) {
-    const char = css[index]!;
-    if (quote) {
-      if (char === '\\') index += 1;
-      else if (char === quote) quote = null;
-      continue;
-    }
-    if (char === '/' && css[index + 1] === '*') {
-      const end = css.indexOf('*/', index + 2);
-      if (end === -1) {
-        throw new Error(`theme rule has an unterminated comment: ${css.slice(index, index + 40)}`);
-      }
+
+  const end = scanCssText(css, {
+    onComment(commentStart, commentEnd) {
       if (depth === 0) {
-        statements.push(css.slice(start, index));
-        start = end + 2;
+        statements.push(css.slice(start, commentStart));
+        start = commentEnd;
       }
-      index = end + 1;
-      continue;
-    }
-    if (char === '"' || char === "'") quote = char;
-    else if (char === '{') depth += 1;
-    else if (char === '}') {
-      depth -= 1;
-      if (depth < 0) {
-        throw new Error(
-          `theme rule has an unbalanced \`}\`: ${css.slice(Math.max(0, index - 30), index + 1)}`,
-        );
-      }
-      if (depth === 0) {
+    },
+    onCodeChar(char, index) {
+      if (char === '{') depth += 1;
+      else if (char === '}') {
+        depth -= 1;
+        if (depth < 0) {
+          throw new Error(
+            `theme rule has an unbalanced \`}\`: ${css.slice(Math.max(0, index - 30), index + 1)}`,
+          );
+        }
+        if (depth === 0) {
+          statements.push(css.slice(start, index + 1));
+          start = index + 1;
+        }
+      } else if (char === ';' && depth === 0) {
         statements.push(css.slice(start, index + 1));
         start = index + 1;
       }
-    } else if (char === ';' && depth === 0) {
-      statements.push(css.slice(start, index + 1));
-      start = index + 1;
-    }
+    },
+  });
+
+  if (end.openCommentAt !== null) {
+    throw new Error(
+      `theme rule has an unterminated comment: ${css.slice(end.openCommentAt, end.openCommentAt + 40)}`,
+    );
   }
-  if (quote !== null) {
+  if (end.openQuote !== null) {
     throw new Error(`theme rule has an unterminated string: ${css.slice(start)}`);
   }
   if (depth !== 0) {

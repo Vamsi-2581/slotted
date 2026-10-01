@@ -101,4 +101,16 @@ describe('renderTheme', () => {
     });
     expect(() => renderTheme(malformed)).toThrow(/unbalanced `\}`/);
   });
+
+  it('keeps a rule whose comment hides a structural character, and still scopes it', () => {
+    const commented = defineTheme({
+      ...theme,
+      name: 'commented',
+      rules: [`[data-ui='card'] { color: red; /* ; */ }`],
+    });
+    const css = renderTheme(commented);
+    expect(css).toContain(
+      '@layer slotted.theme-rules {\n  @scope ([data-slotted-theme="commented"]) to ([data-slotted-theme]:not([data-slotted-theme="commented"])) {\n    [data-ui=\'card\'] { color: red; /* ; */ }\n  }\n}',
+    );
+  });
 });

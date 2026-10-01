@@ -10,7 +10,7 @@ import { drawGlyph, GLYPH_PREFIX } from '../../scripts/generate-icon-glyphs.mjs'
  * carries geometry of its own, so none can drift from `@slotted/core/glyph`.
  */
 const manifest = JSON.parse(
-  readFileSync(new URL('../../packages/theme-default/src/glyphs.json', import.meta.url), 'utf8'),
+  readFileSync(new URL('../../packages/themes/src/default/glyphs.json', import.meta.url), 'utf8'),
 );
 
 const EMPTY_GLYPH = /<svg\b([^>]*\bdata-glyph="([a-z0-9-]+)"[^>]*)>\s*<\/svg\s*>/g;

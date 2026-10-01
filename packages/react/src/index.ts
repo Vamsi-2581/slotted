@@ -5,6 +5,8 @@ export * from './alert';
 export * from './app-shell';
 export * from './aspect-ratio';
 export * from './attachment';
+export * from './message';
+export * from './message-scroller';
 export * from './avatar';
 export * from './avatar-group';
 export * from './badge';

@@ -14,6 +14,8 @@ export default defineConfig({
         'app-shell': resolve(import.meta.dirname, 'src/app-shell/index.ts'),
         'aspect-ratio': resolve(import.meta.dirname, 'src/aspect-ratio/index.ts'),
         attachment: resolve(import.meta.dirname, 'src/attachment/index.ts'),
+        message: resolve(import.meta.dirname, 'src/message/index.ts'),
+        'message-scroller': resolve(import.meta.dirname, 'src/message-scroller/index.ts'),
         avatar: resolve(import.meta.dirname, 'src/avatar/index.ts'),
         'avatar-group': resolve(import.meta.dirname, 'src/avatar-group/index.ts'),
         badge: resolve(import.meta.dirname, 'src/badge/index.ts'),

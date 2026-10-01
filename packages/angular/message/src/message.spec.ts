@@ -1,0 +1,238 @@
+import { Component, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import type { ChangeRequest } from '@slotted/core/state';
+import { describe, expect, it, vi } from 'vitest';
+
+import contract from '../../../../specs/components/message/contract.json';
+
+import {
+  SlBubble,
+  SlBubbleCaret,
+  SlBubbleContent,
+  SlBubbleQuote,
+  SlBubbleReaction,
+  SlBubbleReactions,
+  SlBubbleRetry,
+  SlBubbleTyping,
+} from './bubble';
+import { SlMessage, SlMessageGroup } from './message';
+import type { MessageRetryRequest, MessageStatus } from './message-defaults';
+import { provideMessageDefaults } from './message-defaults';
+import {
+  SlBubbleMeta,
+  SlMessageActions,
+  SlMessageActivity,
+  SlMessageActivityStep,
+  SlMessageAuthor,
+  SlMessageAvatar,
+  SlMessageBody,
+  SlMessageFooter,
+  SlMessageHeader,
+  SlMessageReceipt,
+  SlMessageTime,
+  SlMessageVersions,
+} from './message-parts';
+
+const ALL = [
+  SlBubble,
+  SlBubbleCaret,
+  SlBubbleContent,
+  SlBubbleMeta,
+  SlBubbleQuote,
+  SlBubbleReaction,
+  SlBubbleReactions,
+  SlBubbleRetry,
+  SlBubbleTyping,
+  SlMessage,
+  SlMessageActions,
+  SlMessageActivity,
+  SlMessageActivityStep,
+  SlMessageAuthor,
+  SlMessageAvatar,
+  SlMessageBody,
+  SlMessageFooter,
+  SlMessageGroup,
+  SlMessageHeader,
+  SlMessageReceipt,
+  SlMessageTime,
+  SlMessageVersions,
+];
+
+@Component({
+  imports: ALL,
+  template: `
+    <div slMessageGroup>
+      <article
+        slMessage
+        id="row"
+        [status]="status()"
+        [versionCount]="3"
+        [(version)]="version"
+        (versionChangeRequest)="versionAsked($event)"
+        (retry)="retried($event)"
+      >
+        <div slMessageAvatar></div>
+        <div slMessageBody>
+          <div slMessageHeader>
+            <span slMessageAuthor>Marta Silva</span>
+            <time slMessageTime datetime="2026-09-30T09:38">09:38</time>
+          </div>
+          <div slMessageActivity>
+            <div slMessageActivityStep status="complete">Li o registo</div>
+            <div slMessageActivityStep id="now">A procurar</div>
+          </div>
+          <div slBubble id="bubble" [maxLines]="3">
+            <div slBubbleContent>
+              <div slBubbleQuote author="Tiago">A conta não existe.</div>
+              Chega hoje à tarde.
+              <span slBubbleCaret></span>
+              <span slBubbleTyping></span>
+              <span slBubbleMeta>
+                <time slMessageTime datetime="2026-09-30T09:41">09:41</time>
+                <span slMessageReceipt id="inside"></span>
+              </span>
+            </div>
+            <button slBubbleRetry></button>
+            <div slBubbleReactions>
+              <button slBubbleReaction id="reaction" [count]="2" [(pressed)]="pressed">👍</button>
+            </div>
+          </div>
+          <div slMessageFooter>
+            <span slMessageReceipt id="outside" status="failed"></span>
+            <div slMessageVersions></div>
+            <div slMessageActions><button type="button">Copiar</button></div>
+          </div>
+        </div>
+      </article>
+    </div>
+    <article slMessage align="end">
+      <div slBubble id="own"><div slBubbleContent>a</div></div>
+    </article>
+    <article slMessage layout="thread">
+      <div slBubble id="thread"><div slBubbleContent>b</div></div>
+    </article>
+  `,
+})
+class Everything {
+  readonly status = signal<MessageStatus>('read');
+  version = 0;
+  pressed = false;
+  readonly versionAsked = vi.fn<(request: ChangeRequest<number>) => void>();
+  readonly retried = vi.fn<(request: MessageRetryRequest) => void>();
+}
+
+function mount() {
+  const fixture = TestBed.createComponent(Everything);
+  fixture.detectChanges();
+  return { fixture, root: fixture.nativeElement as HTMLElement };
+}
+
+describe('slMessage', () => {
+  it('writes the family identifier and every contract part', () => {
+    const { root } = mount();
+    const row = root.querySelector('#row') as HTMLElement;
+    expect(row.getAttribute('data-ui')).toBe(contract.ui);
+    expect(row.tagName).toBe('ARTICLE');
+    const parts = [...contract.members.message.parts, ...contract.members.bubble.parts].filter(
+      (part) => part !== 'root' && part !== 'more',
+    );
+    for (const part of parts) {
+      expect(root.querySelector(`[data-part="${part}"]`), part).not.toBeNull();
+    }
+    expect(root.querySelector('#bubble')?.getAttribute('data-part')).toBe(contract.rootPart.bubble);
+  });
+
+  it('names the article by its author', () => {
+    const { root } = mount();
+    const row = root.querySelector('#row') as HTMLElement;
+    const author = root.querySelector('[data-part="author"]') as HTMLElement;
+    expect(row.getAttribute('aria-labelledby')).toBe(author.id);
+  });
+
+  it('writes the delivery state as the shared state attributes', () => {
+    const { fixture, root } = mount();
+    const row = root.querySelector('#row') as HTMLElement;
+    expect(row.hasAttribute('data-read')).toBe(true);
+    fixture.componentInstance.status.set('sending');
+    fixture.detectChanges();
+    expect(row.getAttribute('aria-busy')).toBe('true');
+    expect(row.hasAttribute('data-loading')).toBe(true);
+    fixture.componentInstance.status.set('failed');
+    fixture.detectChanges();
+    expect(row.hasAttribute('data-invalid')).toBe(true);
+  });
+
+  it('paints the reader’s own bubble in the accent’s fill and a thread with no box', () => {
+    const { root } = mount();
+    expect(root.querySelector('#own')?.getAttribute('data-variant')).toBe('solid');
+    expect(root.querySelector('#own')?.getAttribute('data-tone')).toBe('accent');
+    expect(root.querySelector('#thread')?.getAttribute('data-variant')).toBe('plain');
+  });
+
+  it('draws the receipt as a mark with a hidden word inside the meta, and as the word alone outside', () => {
+    const { root } = mount();
+    const inside = root.querySelector('#inside') as HTMLElement;
+    expect(inside.querySelector('svg')).not.toBeNull();
+    expect(inside.textContent).toContain(contract.messages.read);
+    const outside = root.querySelector('#outside') as HTMLElement;
+    expect(outside.querySelector('svg')).toBeNull();
+    expect(outside.textContent?.trim()).toBe(contract.messages.failed);
+  });
+
+  it('pages versions without wrapping, asking first, by pointer and by arrow', () => {
+    const { fixture, root } = mount();
+    const next = root.querySelector('[data-part="version-next"]') as HTMLButtonElement;
+    const previous = root.querySelector('[data-part="version-previous"]') as HTMLButtonElement;
+    expect(previous.disabled).toBe(true);
+    next.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.version).toBe(1);
+    expect(fixture.componentInstance.versionAsked).toHaveBeenLastCalledWith(
+      expect.objectContaining({ value: 1, reason: 'pointer' }),
+    );
+    next.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowRight' }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.version).toBe(2);
+    expect(root.querySelector('[data-part="version-label"]')?.textContent?.trim()).toBe('3 de 3');
+    expect(next.disabled).toBe(true);
+  });
+
+  it('asks the row to send a failed message again', () => {
+    const { fixture, root } = mount();
+    const retry = root.querySelector('[data-part="retry"]') as HTMLButtonElement;
+    expect(retry.getAttribute('aria-label')).toBe(contract.messages.retry);
+    retry.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    expect(fixture.componentInstance.retried).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+
+  it('toggles a reaction the reader gives, two-way', () => {
+    const { fixture, root } = mount();
+    const reaction = root.querySelector('#reaction') as HTMLButtonElement;
+    expect(reaction.getAttribute('aria-pressed')).toBe('false');
+    reaction.click();
+    fixture.detectChanges();
+    expect(reaction.getAttribute('aria-pressed')).toBe('true');
+    expect(reaction.hasAttribute('data-pressed')).toBe(true);
+    expect(fixture.componentInstance.pressed).toBe(true);
+    expect(reaction.textContent).toContain('2');
+  });
+
+  it('marks the activity steps with the shared states', () => {
+    const { root } = mount();
+    const now = root.querySelector('#now') as HTMLElement;
+    expect(now.hasAttribute('data-current')).toBe(true);
+    expect(now.getAttribute('aria-current')).toBe('step');
+    expect(root.querySelector('[data-complete]')).not.toBeNull();
+  });
+
+  it('lets an application set the words once', () => {
+    TestBed.configureTestingModule({
+      providers: [provideMessageDefaults({ messages: { actions: 'Actions' }, layout: 'thread' })],
+    });
+    const { root } = mount();
+    expect(root.querySelector('[data-part="actions"]')?.getAttribute('aria-label')).toBe('Actions');
+    expect(root.querySelector('#row')?.getAttribute('data-layout')).toBe('thread');
+  });
+});

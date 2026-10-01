@@ -132,6 +132,10 @@
       "types": "./dist/types/measure/index.d.ts",
       "import": "./dist/measure.js"
     },
+    "./message-scroller": {
+      "types": "./dist/types/message-scroller/index.d.ts",
+      "import": "./dist/message-scroller.js"
+    },
     "./outline": {
       "types": "./dist/types/outline/index.d.ts",
       "import": "./dist/outline.js"

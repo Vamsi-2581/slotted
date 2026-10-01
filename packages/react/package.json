@@ -38,6 +38,14 @@
       "types": "./dist/types/attachment/index.d.ts",
       "import": "./dist/attachment.js"
     },
+    "./message": {
+      "types": "./dist/types/message/index.d.ts",
+      "import": "./dist/message.js"
+    },
+    "./message-scroller": {
+      "types": "./dist/types/message-scroller/index.d.ts",
+      "import": "./dist/message-scroller.js"
+    },
     "./avatar": {
       "types": "./dist/types/avatar/index.d.ts",
       "import": "./dist/avatar.js"

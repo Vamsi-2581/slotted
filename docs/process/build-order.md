@@ -869,6 +869,31 @@ e redimensionamento de `dialog`) e `gauge` (arco de `progress-indicator`).
   `docs/history/designs/2026-09-30-attachment-self-assessment.md`. Saída animada de um anexo
   removido fica aberta, como a da linha do `upload`.
 
+- `message` — invocada em 2026-09-30 pelo `/reui build` de mensagem, bolha e scroller. Dois membros
+  sob `data-ui="message"`: `message` (`article` com `group`, `avatar`, `body`, `header`, `author`,
+  `time`, `footer`, `receipt`, `actions`, `activity`, `activity-step`, `versions`) e `bubble` (raiz
+  `data-part="bubble"`, com `content`, `meta`, `quote`, `more`, `caret`, `typing`, `retry`,
+  `reactions`, `reaction`). `align` `start`/`end`, `layout` `bubble`/`thread`, `status`
+  `sending`/`sent`/`delivered`/`read`/`failed`/`streaming`; `variant` `solid`/`soft`/`outline`/`plain`
+  × `tone`, inferida pela linha quando omitida. Estados `current` (versões), `pressed` (reação),
+  `revealed` (`maxLines`), com razão. Glifo `check-check` acrescentado à escala. React `Message`,
+  `MessageGroup`, `Bubble` e partes, `MessageDefaultsProvider`; Angular `[slMessage]`,
+  `[slMessageGroup]`, `[slBubble]` e partes, `provideMessageDefaults()`. Desenho em
+  `docs/history/designs/2026-09-30-message-design.md`, dossiê em
+  `docs/history/designs/2026-09-30-message-reui-dossier.md`, autoavaliação em
+  `docs/history/designs/2026-09-30-message-self-assessment.md`. Saída animada de uma mensagem
+  removida fica aberta.
+
+- `message-scroller` — invocada com `message`. Região focável à volta de um `log`: `root`,
+  `viewport`, `content`, `item`, `separator` (fixo enquanto o dia está à vista), `unread`, `loader`,
+  `jump`, `jump-count`. Sem valor mutável: eventos `reachStart`, `anchorChange`, `scrollableChange`
+  com razão; comandos `scrollToMessage` (com destaque `data-current`), `scrollToEnd`,
+  `scrollToStart`, `focus`. `follow`, `defaultPosition` `start`/`end`/`last-anchor`, `peek`,
+  `scrollMargin`, `preserveOnPrepend`, `busy` anunciado pelo `live-announcer`. Motor em
+  `@slotted/core/message-scroller` com `overflow-anchor: none` e referência restaurada pelo próprio
+  motor. React `MessageScroller` com `ref` e partes; Angular `[slMessageScroller]` com `exportAs`.
+  Desenho e autoavaliação partilhados com `message`.
+
 ## Regra de commit
 
 Uma família por commit, `pnpm check` por família e `pnpm check:full` por onda.

@@ -112,6 +112,39 @@ function references(value: unknown): string[] {
   return [...String(value).matchAll(REFERENCE)].map(([, name]) => name!);
 }
 
+/**
+ * A token value, a component value or a font field is interpolated into CSS
+ * text verbatim (`render.ts` writes `${name}: ${value};` and the like). An
+ * unquoted `;`, `{` or `}` inside it would close the declaration, the rule or
+ * the `@layer`/`@scope` it is written into — `url("a;b.woff2")` and `"Inter",
+ * sans-serif` stay legitimate because the structural characters there are
+ * never reached while a quote is open.
+ */
+export function hasUnsafeStructuralChar(value: string): boolean {
+  let quote: string | null = null;
+  for (let index = 0; index < value.length; index += 1) {
+    const char = value[index]!;
+    if (quote) {
+      if (char === '\\') index += 1;
+      else if (char === quote) quote = null;
+      continue;
+    }
+    if (char === '"' || char === "'") quote = char;
+    else if (char === ';' || char === '{' || char === '}') return true;
+  }
+  return false;
+}
+
+function checkStructuralSafety(errors: string[], label: string, values: unknown): void {
+  for (const [name, value] of Object.entries(asMap(values))) {
+    if (hasUnsafeStructuralChar(value)) {
+      errors.push(
+        `${label} ${name} is ${JSON.stringify(value)}, which contains an unquoted ;, { or }`,
+      );
+    }
+  }
+}
+
 function checkComposition(
   errors: string[],
   index: Map<string, TokenDefinition>,
@@ -228,6 +261,15 @@ export function validateTheme(contract: TokenContract, theme: Partial<FlatTheme>
   for (const [density, values] of Object.entries(asMap(theme.densities))) {
     checkComposition(errors, index, `density ${density}`, values);
   }
+
+  checkStructuralSafety(errors, 'base', theme.base);
+  for (const [scheme, values] of Object.entries(asMap(theme.schemes))) {
+    checkStructuralSafety(errors, `scheme ${scheme}`, values);
+  }
+  for (const [density, values] of Object.entries(asMap(theme.densities))) {
+    checkStructuralSafety(errors, `density ${density}`, values);
+  }
+  checkStructuralSafety(errors, 'reducedMotion', theme.reducedMotion);
 
   checkTargets(errors, theme);
 

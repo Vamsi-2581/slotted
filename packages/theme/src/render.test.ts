@@ -92,4 +92,13 @@ describe('renderTheme', () => {
     const unbuilt = defineTheme({ ...theme, name: 'unbuilt', rules: [new URL('file:///x.css')] });
     expect(() => renderTheme(unbuilt)).toThrow('unbuilt: a rule is still a URL (file:///x.css)');
   });
+
+  it('refuses a rule whose unbalanced brace would escape the @scope it is compiled into', () => {
+    const malformed = defineTheme({
+      ...theme,
+      name: 'malformed',
+      rules: ['.a { color: red; } } .evil { color: blue; }'],
+    });
+    expect(() => renderTheme(malformed)).toThrow(/unbalanced `\}`/);
+  });
 });

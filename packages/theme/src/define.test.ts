@@ -66,6 +66,33 @@ describe('defineTheme', () => {
     const { ['--slotted-space-1']: _dropped, ...base } = values.base as Record<string, string>;
     expect(() => defineTheme(definition({ base }))).toThrow('base is missing --slotted-space-1');
   });
+
+  it('refuses a component value that could close the rule it is written into', () => {
+    expect(() =>
+      defineTheme(
+        definition({
+          components: { '--slotted-card-radius': '0px; } .evil { color: red' },
+        }),
+      ),
+    ).toThrow(
+      'components --slotted-card-radius is "0px; } .evil { color: red", which contains an unquoted ;, { or }',
+    );
+  });
+
+  it('refuses a font field that could close the rule it is written into, and keeps a legitimate one', () => {
+    expect(() =>
+      defineTheme(definition({ fonts: [{ family: 'X', src: 'url(a); } .evil { color: red' }] })),
+    ).toThrow(
+      'fonts[0].src is "url(a); } .evil { color: red", which contains an unquoted ;, { or }',
+    );
+    expect(() =>
+      defineTheme(
+        definition({
+          fonts: [{ family: 'X', src: 'url("a;b.woff2") format("woff2")', weight: '100 900' }],
+        }),
+      ),
+    ).not.toThrow();
+  });
 });
 
 describe('flattenTheme', () => {

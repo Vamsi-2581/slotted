@@ -16,7 +16,7 @@ import {
   type Scheme,
   type SeedName,
 } from './recipe';
-import { validateTheme, type FlatTheme } from './validate';
+import { hasUnsafeStructuralChar, validateTheme, type FlatTheme } from './validate';
 
 export const DENSITIES = ['comfortable', 'compact', 'dense'] as const;
 export type Density = (typeof DENSITIES)[number];
@@ -111,8 +111,13 @@ export function defineTheme(definition: ThemeDefinition): Theme {
     }
   }
   const components = new Set<string>(COMPONENT_TOKENS);
-  for (const name of Object.keys(definition.components ?? {})) {
+  for (const [name, value] of Object.entries(definition.components ?? {})) {
     if (!components.has(name)) errors.push(`components contains ${name}, which no family reads`);
+    if (hasUnsafeStructuralChar(value as string)) {
+      errors.push(
+        `components ${name} is ${JSON.stringify(value)}, which contains an unquoted ;, { or }`,
+      );
+    }
   }
   const schemeTokens = new Set(
     contract.tokens.filter((token) => token.axis === 'scheme').map((token) => token.name),
@@ -126,6 +131,18 @@ export function defineTheme(definition: ThemeDefinition): Theme {
   for (const rule of definition.rules ?? []) {
     if (typeof rule !== 'string' && !(rule instanceof URL))
       errors.push('a rule is neither CSS text nor a URL');
+  }
+  // `family` is written through `JSON.stringify` and stays a quoted CSS string whatever
+  // it contains; the other fields are interpolated into `@font-face` verbatim.
+  for (const [index, font] of (definition.fonts ?? []).entries()) {
+    for (const field of ['src', 'weight', 'style', 'display'] as const) {
+      const value = font[field];
+      if (value !== undefined && hasUnsafeStructuralChar(value)) {
+        errors.push(
+          `fonts[${index}].${field} is ${JSON.stringify(value)}, which contains an unquoted ;, { or }`,
+        );
+      }
+    }
   }
   if (errors.length === 0) {
     try {

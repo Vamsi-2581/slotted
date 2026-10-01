@@ -2,6 +2,13 @@
  * Splits CSS into its top-level statements: a block ends at the brace that
  * returns to depth 0, an at-statement at the semicolon. Strings and comments
  * are skipped, so a brace inside `content: "}"` does not end a rule.
+ *
+ * A theme rule is text a theme author wrote, concatenated with every other
+ * rule into one `@layer`, so an unbalanced `}` here would close that layer
+ * (or the `@scope` around it) early and let the rest of the input escape its
+ * boundary. The four malformed shapes below are refused rather than silently
+ * reinterpreted: a closing brace with nothing open, braces still open at the
+ * end, a string never closed, and a comment never closed.
  */
 export function splitTopLevel(css: string): string[] {
   const statements: string[] = [];
@@ -17,18 +24,25 @@ export function splitTopLevel(css: string): string[] {
     }
     if (char === '/' && css[index + 1] === '*') {
       const end = css.indexOf('*/', index + 2);
-      const stop = end === -1 ? css.length : end + 2;
+      if (end === -1) {
+        throw new Error(`theme rule has an unterminated comment: ${css.slice(index, index + 40)}`);
+      }
       if (depth === 0) {
         statements.push(css.slice(start, index));
-        start = stop;
+        start = end + 2;
       }
-      index = stop - 1;
+      index = end + 1;
       continue;
     }
     if (char === '"' || char === "'") quote = char;
     else if (char === '{') depth += 1;
     else if (char === '}') {
       depth -= 1;
+      if (depth < 0) {
+        throw new Error(
+          `theme rule has an unbalanced \`}\`: ${css.slice(Math.max(0, index - 30), index + 1)}`,
+        );
+      }
       if (depth === 0) {
         statements.push(css.slice(start, index + 1));
         start = index + 1;
@@ -37,6 +51,12 @@ export function splitTopLevel(css: string): string[] {
       statements.push(css.slice(start, index + 1));
       start = index + 1;
     }
+  }
+  if (quote !== null) {
+    throw new Error(`theme rule has an unterminated string: ${css.slice(start)}`);
+  }
+  if (depth !== 0) {
+    throw new Error(`theme rule has an unclosed \`{\`: ${css.slice(start)}`);
   }
   statements.push(css.slice(start));
   return statements.map((statement) => statement.trim()).filter(Boolean);

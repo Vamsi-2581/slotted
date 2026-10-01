@@ -10,6 +10,26 @@ describe('splitTopLevel', () => {
       `@media (width > 1px) { [data-ui='card'] { gap: 0; } }`,
     ]);
   });
+
+  it('refuses a closing brace with nothing open, so it cannot close the @scope around it', () => {
+    expect(() => splitTopLevel('.a { color: red; } } .evil { color: blue; }')).toThrow(
+      /unbalanced `\}`/,
+    );
+  });
+
+  it('refuses a rule left with an open brace at the end', () => {
+    expect(() => splitTopLevel('.a { color: red;')).toThrow(/unclosed `\{`/);
+  });
+
+  it('refuses a rule left with an open string at the end', () => {
+    expect(() => splitTopLevel('.a { content: "x; } .b { }')).toThrow(/unterminated string/);
+  });
+
+  it('refuses a rule left with an open comment at the end', () => {
+    expect(() => splitTopLevel('.a { color: red; } /* unterminated')).toThrow(
+      /unterminated comment/,
+    );
+  });
 });
 
 describe('processRules', () => {

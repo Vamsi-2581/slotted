@@ -35,6 +35,7 @@
   "--slotted-icon-arrow-up": { "icon": "arrow-up" },
   "--slotted-icon-stop": { "icon": "square", "paint": "fill" },
   "--slotted-icon-paperclip": { "icon": "paperclip" },
+  "--slotted-icon-pipette": { "icon": "pipette" },
   "--slotted-icon-cloud-off": { "icon": "cloud-off" },
   "--slotted-icon-loader-circle": { "icon": "loader-circle", "stroke-width": 3.5 },
   "--slotted-icon-maximize": { "icon": "maximize" },

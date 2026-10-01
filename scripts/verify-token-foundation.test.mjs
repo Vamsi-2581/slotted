@@ -228,6 +228,7 @@ test('centres the ink of every glyph in the box the mask is drawn in', () => {
       '--slotted-icon-triangle-alert',
       '--slotted-icon-caps-lock',
       '--slotted-icon-paperclip',
+      '--slotted-icon-pipette',
       '--slotted-icon-play',
       '--slotted-icon-file-audio',
       '--slotted-icon-text-wrap',

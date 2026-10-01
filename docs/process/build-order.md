@@ -848,6 +848,22 @@ decisão de produto, uma por vez, com escopo escrito aqui antes da invocação.
 Duas já têm capacidade adiada para elas por escrito: `floating-window` (arrasto
 e redimensionamento de `dialog`) e `gauge` (arco de `progress-indicator`).
 
+- `carousel` — invocada em 2026-10-01 com "e coisas do tipo": slideshow, trilho de cartões, galeria
+  com miniaturas e rotação são uma família com um membro, `data-ui="carousel"`. Viewport nativo com
+  scroll-snap (toque, trackpad e teclado do browser), páginas medidas das caixas dos slides
+  (`slidesPerView` escreve `--slotted-carousel-slides-per-view`, `slidesPerMove` número ou `page`,
+  piso `--slotted-carousel-slide-min-size`), `align` `start`/`center`, `orientation`,
+  `transition` `slide`/`fade`, `arrows` `inset`/`outside`, `size`; `loop` sem clones; arrasto com
+  rato; clique num slide que espreita. Partes `viewport`, `slide`, `previous`, `next`, `controls`
+  (`below`/`overlay`), `autoplay`, `indicators` (`dots`/`line`/`thumbnails`, pontos adaptativos a partir
+  de oito páginas), `indicator`, `counter`. Estados `page`/`defaultPage`/`onPageChange` e
+  `playing`/`defaultPlaying`/`onPlayingChange` (capacidade nova `playback`); rotação do APG: nunca por
+  omissão, não arranca com movimento reduzido, pausa no hover e com o separador escondido, pára no
+  foco de teclado, tempo no indicador atual por `--slotted-carousel-autoplay-delay`. Comportamento em
+  `@slotted/core/carousel`. React `Carousel` e partes, `CarouselDefaultsProvider`, `handleRef`;
+  Angular `section[slCarousel]` com `[(page)]`, `[(playing)]`, `exportAs`, `slCarouselIndicatorTemplate`,
+  `provideCarouselDefaults()`. `marquee` recusado (movimento decorativo). Desenho em
+  `docs/history/designs/2026-10-01-carousel-design.md`.
 - `rating` — invocada em 2026-09-25, revista em 2026-09-28. Três membros sob `data-ui="rating"`:
   `rating`, um `radiogroup` de rádios nativos (um por valor, dois por símbolo com `step` 0,5), com
   `value`/`defaultValue`/`onValueChange` e razões `pointer`, `keyboard`, `clear`, `clearable`,

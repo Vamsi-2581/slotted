@@ -39,6 +39,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit --pretty false",
     "verify": "pnpm build && pnpm test && pnpm typecheck"
   },
+  "dependencies": {
+    "lightningcss": "1.33.0"
+  },
   "devDependencies": {
     "@types/node": "24.13.3",
     "jsdom": "30.0.1",

@@ -12,7 +12,7 @@
  * The hot path stays out of the frameworks. The engine writes the attributes
  * that change on every scroll or resize on the elements themselves —
  * `data-snap`, `data-inview`, `inert`, `data-current` and the default name on
- * each slide, `data-animating` on the viewport — and reports pages, the page
+ * each slide, `data-moving` and `--slotted-carousel-overscroll` on the viewport — and reports pages, the page
  * under the reader and the end of a gesture through callbacks. The page a
  * consumer owns is the binding's.
  *
@@ -65,6 +65,9 @@ export const ADAPTIVE_FROM = 8;
 
 /** Pixels a mouse moves along the axis before a press becomes a drag. */
 export const DRAG_THRESHOLD = 4;
+
+/** Pixels a millisecond a released drag must still move to count as a flick to the next page. */
+export const FLICK_SPEED = 0.25;
 
 /** Pixels a finger moves along the axis before a swipe between stacked slides counts. */
 export const SWIPE_THRESHOLD = 40;
@@ -278,75 +281,6 @@ export function parseCssTime(value: string): number {
   return match[2] === 's' ? amount * 1000 : amount;
 }
 
-/**
- * A cubic Bézier timing function, solved for x by Newton's method with a
- * bisection fallback — the same curve a `transition` with that easing draws.
- */
-export function cubicBezier(x1: number, y1: number, x2: number, y2: number): (t: number) => number {
-  const cx = 3 * x1;
-  const bx = 3 * (x2 - x1) - cx;
-  const ax = 1 - cx - bx;
-  const cy = 3 * y1;
-  const by = 3 * (y2 - y1) - cy;
-  const ay = 1 - cy - by;
-  const x = (t: number) => ((ax * t + bx) * t + cx) * t;
-  const y = (t: number) => ((ay * t + by) * t + cy) * t;
-  const dx = (t: number) => (3 * ax * t + 2 * bx) * t + cx;
-
-  function solve(target: number): number {
-    let t = target;
-    for (let step = 0; step < 8; step += 1) {
-      const error = x(t) - target;
-      if (Math.abs(error) < 1e-6) return t;
-      const slope = dx(t);
-      if (Math.abs(slope) < 1e-6) break;
-      t -= error / slope;
-    }
-    let low = 0;
-    let high = 1;
-    t = target;
-    while (low < high) {
-      const value = x(t);
-      if (Math.abs(value - target) < 1e-6) return t;
-      if (target > value) low = t;
-      else high = t;
-      if (high - low < 1e-7) break;
-      t = (high + low) / 2;
-    }
-    return t;
-  }
-
-  return (t: number) => {
-    if (t <= 0) return 0;
-    if (t >= 1) return 1;
-    return y(solve(t));
-  };
-}
-
-/** A CSS easing — `cubic-bezier(…)`, `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`. */
-export function parseCssEasing(value: string): (t: number) => number {
-  const text = value.trim();
-  const match = /^cubic-bezier\(\s*([^,]+),([^,]+),([^,]+),([^)]+)\)$/.exec(text);
-  if (match !== null) {
-    const [x1, y1, x2, y2] = match.slice(1, 5).map(Number);
-    if ([x1, y1, x2, y2].every((part) => Number.isFinite(part))) {
-      return cubicBezier(x1 as number, y1 as number, x2 as number, y2 as number);
-    }
-  }
-  switch (text) {
-    case 'linear':
-      return (t) => t;
-    case 'ease-in':
-      return cubicBezier(0.42, 0, 1, 1);
-    case 'ease-out':
-      return cubicBezier(0, 0, 0.58, 1);
-    case 'ease-in-out':
-      return cubicBezier(0.42, 0, 0.58, 1);
-    default:
-      return cubicBezier(0.25, 0.1, 0.25, 1);
-  }
-}
-
 /** What the family says, in Portuguese until a provider or an instance says otherwise. */
 export interface CarouselMessages {
   /** What the root is, said by a screen reader in place of "region". */
@@ -417,6 +351,60 @@ export function revealInStrip(strip: HTMLElement, item: HTMLElement, margin = 8)
     else if (inner.bottom > outer.bottom - margin)
       strip.scrollTop += inner.bottom - (outer.bottom - margin);
   }
+}
+
+/**
+ * How stiff the spring the scroll runs on is, against the theme's long
+ * duration: the stiffness is this many over the duration, so at the duration
+ * 0.3 per cent of the distance is left. Seven left twelve pixels of a page to
+ * crawl through for a further 150 ms, which read as a stall.
+ */
+export const SPRING_STIFFNESS = 8;
+
+/** Where a critically damped spring stands, and how fast it moves, `t` milliseconds in. */
+export function springAt(
+  from: number,
+  target: number,
+  velocity: number,
+  omega: number,
+  t: number,
+): { position: number; velocity: number } {
+  const displacement = from - target;
+  const b = velocity + omega * displacement;
+  const decay = Math.exp(-omega * t);
+  return {
+    position: target + (displacement + b * t) * decay,
+    velocity: (b - omega * (displacement + b * t)) * decay,
+  };
+}
+
+/**
+ * The speed a spring may start with toward its target without passing it.
+ * A faster flick is held to it: the scroller cannot draw past its ends, and in
+ * the middle a page that overshoots and returns reads as a bounce.
+ */
+export function springLaunch(
+  from: number,
+  target: number,
+  velocity: number,
+  omega: number,
+): number {
+  const distance = target - from;
+  if (distance === 0 || Math.sign(velocity) !== Math.sign(distance)) return velocity;
+  const limit = omega * Math.abs(distance);
+  return Math.sign(velocity) * Math.min(Math.abs(velocity), limit);
+}
+
+/**
+ * How far content follows a pointer that has pulled it past an end: the pull
+ * less and less as it lengthens, never more than the viewport. The curve is
+ * the one the platform scroll views draw, with their constant.
+ */
+export function rubberBand(distance: number, dimension: number, constant = 0.55): number {
+  if (dimension <= 0) return 0;
+  return (
+    (1 - 1 / ((Math.abs(distance) * constant) / dimension + 1)) * dimension * Math.sign(distance)
+  );
 }
 
 /* ── The rotation ─────────────────────────────────────────────────────── */
@@ -601,6 +589,18 @@ export function createCarouselEngine(
   };
   let pages: CarouselPages = EMPTY_PAGES;
   let animation: number | null = null;
+  /** The spring in flight: where it set off, its target, its launch speed, its stiffness and when. */
+  let spring: {
+    from: number;
+    target: number;
+    velocity: number;
+    omega: number;
+    begin: number;
+    overscroll: number;
+    overscrollVelocity: number;
+  } | null = null;
+  /** How far content is pulled past an end, logical pixels, positive toward the inline end. */
+  let overscroll = 0;
   let programmatic = false;
   let programmaticTimer: ReturnType<typeof setTimeout> | null = null;
   let settleTimer: ReturnType<typeof setTimeout> | null = null;
@@ -712,10 +712,35 @@ export function createCarouselEngine(
     return pages;
   }
 
+  /**
+   * Snap is off while the engine or a hand moves the scroller: a snapping
+   * scroller pulls every intermediate position back to a page. The engine
+   * writes the attribute itself, in the same task as the movement, because a
+   * framework's render arrives a frame late and the first frames of a drag
+   * were snapped back under the pointer.
+   */
+  function setMoving(moving: boolean) {
+    viewport.toggleAttribute('data-moving', moving);
+  }
+
+  function writeOverscroll(value: number) {
+    overscroll = Math.abs(value) < 0.25 ? 0 : value;
+    if (overscroll === 0) {
+      viewport.style.removeProperty('--slotted-carousel-overscroll');
+      return;
+    }
+    const physical = !vertical() && directionOf(viewport) === 'rtl' ? -overscroll : overscroll;
+    viewport.style.setProperty(
+      '--slotted-carousel-overscroll',
+      vertical() ? `0 ${physical.toFixed(2)}px` : `${physical.toFixed(2)}px 0`,
+    );
+  }
+
   function cancelAnimation() {
     if (animation !== null) view?.cancelAnimationFrame(animation);
     animation = null;
-    viewport.removeAttribute('data-animating');
+    spring = null;
+    setMoving(dragging);
   }
 
   function markProgrammatic() {
@@ -728,45 +753,92 @@ export function createCarouselEngine(
     }, 120);
   }
 
-  function motion(): { duration: number; easing: (t: number) => number } {
+  /** The spring's stiffness from the theme's long duration; `0` when motion is reduced. */
+  function stiffness(): number {
     const style = view?.getComputedStyle(viewport);
+    const duration = parseCssTime(style?.getPropertyValue('--_scroll-duration') ?? '');
+    return duration <= 1 ? 0 : SPRING_STIFFNESS / duration;
+  }
+
+  /** Where the spring in flight stands now, and how fast it moves. */
+  function inFlight(now: number) {
+    if (spring === null)
+      return { position: offset(), velocity: 0, overscroll, overscrollVelocity: 0 };
+    const t = now - spring.begin;
+    const main = springAt(spring.from, spring.target, spring.velocity, spring.omega, t);
+    const pull = springAt(spring.overscroll, 0, spring.overscrollVelocity, spring.omega, t);
     return {
-      duration: parseCssTime(style?.getPropertyValue('--_scroll-duration') ?? ''),
-      easing: parseCssEasing(style?.getPropertyValue('--_scroll-easing') ?? ''),
+      position: main.position,
+      velocity: main.velocity,
+      overscroll: pull.position,
+      overscrollVelocity: pull.velocity,
     };
   }
 
-  function scrollToPage(page: number, scrollOptions: { animate?: boolean } = {}) {
+  /**
+   * Moves to a page on a critically damped spring. The spring starts at the
+   * speed the scroller already has — the speed of the hand that let go, or of
+   * a movement this one interrupts — so there is no stop between a drag and
+   * its landing, and pressing next twice carries the first press into the
+   * second. Asked for the page it is already heading to, it keeps going.
+   */
+  function scrollToPage(
+    page: number,
+    scrollOptions: { animate?: boolean; velocity?: number } = {},
+  ) {
     if (options.transition() === 'fade') return;
     const target = pages.positions[page];
     if (target === undefined) return;
     visual = page;
-    cancelAnimation();
-    const from = offset();
-    const { duration, easing } = motion();
-    if (
-      scrollOptions.animate === false ||
-      duration <= 1 ||
-      Math.abs(target - from) < EPSILON ||
-      view === null
-    ) {
+    if (spring !== null && Math.abs(spring.target - target) < EPSILON) return;
+
+    const now = view?.performance.now() ?? 0;
+    const state = inFlight(now);
+    const omega = stiffness();
+    if (animation !== null) view?.cancelAnimationFrame(animation);
+    animation = null;
+    spring = null;
+
+    const settled = Math.abs(target - state.position) < EPSILON && overscroll === 0;
+    if (scrollOptions.animate === false || omega === 0 || settled || view === null) {
       markProgrammatic();
+      writeOverscroll(0);
       setOffset(target);
+      setMoving(dragging);
       writeInView();
       return;
     }
+
     programmatic = true;
-    viewport.setAttribute('data-animating', '');
-    const begin = view.performance.now();
+    setMoving(true);
+    const from = state.position;
+    spring = {
+      from,
+      target,
+      velocity: springLaunch(from, target, scrollOptions.velocity ?? state.velocity, omega),
+      omega,
+      begin: now,
+      overscroll: state.overscroll,
+      overscrollVelocity: state.overscrollVelocity,
+    };
     const frame = (time: number) => {
-      const progress = Math.min(1, (time - begin) / duration);
-      setOffset(from + (target - from) * easing(progress));
-      if (progress < 1) {
+      const current = inFlight(time);
+      writeOverscroll(current.overscroll);
+      /* Under a pixel and barely moving the rest is a crawl the eye reads as a stall; it lands. */
+      const done =
+        Math.abs(current.position - target) < 1.5 &&
+        Math.abs(current.velocity) < 0.08 &&
+        Math.abs(current.overscroll) < 1;
+      if (!done) {
+        setOffset(current.position);
         animation = view.requestAnimationFrame(frame);
         return;
       }
+      setOffset(target);
+      writeOverscroll(0);
       animation = null;
-      viewport.removeAttribute('data-animating');
+      spring = null;
+      setMoving(dragging);
       markProgrammatic();
       writeInView();
     };
@@ -809,7 +881,8 @@ export function createCarouselEngine(
 
   /** A reader's own gesture interrupts the engine's movement. */
   const onInterrupt = () => {
-    if (animation === null) return;
+    /* A pulled edge always springs home; only a page movement is the reader's to interrupt. */
+    if (animation === null || overscroll !== 0) return;
     cancelAnimation();
     programmatic = false;
   };
@@ -848,12 +921,16 @@ export function createCarouselEngine(
     }
     /* A press on a link or a button inside a slide drags too; the click after a drag is cancelled. */
     if (event.pointerType !== 'mouse' || !options.draggable()) return;
-    onInterrupt();
+    /* A hand that catches the track mid-flight holds it where it is, pulled edge and all. */
+    const caught = inFlight(view?.performance.now() ?? 0);
+    cancelAnimation();
+    programmatic = false;
+    writeOverscroll(caught.overscroll);
     press = {
       pointer: event.pointerId,
       x: event.clientX,
       y: event.clientY,
-      offset: offset(),
+      offset: offset() - overscroll,
       moved: false,
       samples: [{ at: event.timeStamp, value: 0 }],
     };
@@ -867,14 +944,21 @@ export function createCarouselEngine(
       if (Math.abs(delta) < DRAG_THRESHOLD) return;
       press.moved = true;
       dragging = true;
+      setMoving(true);
       viewport.setPointerCapture?.(event.pointerId);
       options.onDraggingChange?.(true);
     }
     event.preventDefault();
-    const next = Math.min(Math.max(press.offset - delta, 0), metrics.maxScroll);
+    /* Past an end the scroller cannot go, so the slides are pulled instead, less the further they go. */
+    const raw = press.offset - delta;
+    const next = Math.min(Math.max(raw, 0), metrics.maxScroll);
     setOffset(next);
+    writeOverscroll(rubberBand(next - raw, metrics.viewport));
     press.samples.push({ at: event.timeStamp, value: delta });
-    if (press.samples.length > 6) press.samples.shift();
+    /* The release speed is read over the last tenth of a second, so a hand that stopped before letting go lands where it stopped. */
+    while (press.samples.length > 2 && event.timeStamp - (press.samples[0]?.at ?? 0) > 100) {
+      press.samples.shift();
+    }
     const page = nearestPage(pages.positions, next);
     if (page !== visual && page !== -1) {
       visual = page;
@@ -905,20 +989,32 @@ export function createCarouselEngine(
     viewport.releasePointerCapture?.(event.pointerId);
     options.onDraggingChange?.(false);
 
-    /* The direction of release decides where a short flick goes; a long drag lands on the nearest page. */
+    /**
+     * Where the hand was taking the track decides the page. A release still
+     * moving faster than a quarter of a pixel a millisecond goes one page in
+     * the way it moves — the flick a reader means as "next" — and a slower one
+     * lands on the page nearest where it would coast in a fifth of a second;
+     * either way no further than one page from where the drag began. The
+     * spring then sets off at the release speed, so the track never stops
+     * between the hand and the landing.
+     */
     const first = current.samples[0];
     const last = current.samples.at(-1);
-    const velocity =
-      first !== undefined && last !== undefined && last.at > first.at
+    const pointerSpeed =
+      first !== undefined &&
+      last !== undefined &&
+      last.at > first.at &&
+      event.timeStamp - last.at < 60
         ? (last.value - first.value) / (last.at - first.at)
         : 0;
+    const velocity = -pointerSpeed;
+    const count = pages.positions.length;
     const start = nearestPage(pages.positions, current.offset);
-    let page = nearestPage(pages.positions, offset());
-    if (page === start && Math.abs(velocity) > 0.3) {
-      page = stepPage(start, velocity < 0 ? 1 : -1, pages.positions.length, false);
-    }
-    scrollToPage(page, { animate: true });
-    options.onSettle?.(page, 'pointer', event);
+    const projected = nearestPage(pages.positions, offset() - overscroll + velocity * 200);
+    const flicked = Math.abs(velocity) > FLICK_SPEED ? start + Math.sign(velocity) : projected;
+    const page = Math.min(Math.max(flicked, start - 1), start + 1, count - 1);
+    scrollToPage(Math.max(page, 0), { animate: true, velocity });
+    options.onSettle?.(Math.max(page, 0), 'pointer', event);
   };
 
   const onClickCapture = (event: MouseEvent) => {

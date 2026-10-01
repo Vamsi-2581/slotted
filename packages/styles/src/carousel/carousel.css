@@ -29,12 +29,14 @@
      */
     --_inset: var(--slotted-space-5, 0.75rem);
     /**
-     * The scroll the engine animates reads these two from the viewport's
-     * computed style, so the theme's motion scale — and its collapse under
-     * reduced motion — reaches a movement no `transition` describes.
+     * The scroll the engine animates runs on a critically damped spring whose
+     * stiffness is read from this duration in the viewport's computed style,
+     * so the theme's motion scale — and its collapse to an instant under
+     * reduced motion — reaches a movement no `transition` describes. At this
+     * duration less than one per cent of the way is left; the spring carries
+     * the speed of the hand that let go, which no easing curve can.
      */
     --_scroll-duration: var(--slotted-carousel-duration, var(--slotted-duration-long));
-    --_scroll-easing: var(--slotted-carousel-easing, var(--slotted-easing-standard, ease));
     /**
      * A dot, and the bar the current dot stretches into. The bar is three dots
      * long so it reads as a different shape, not a bigger dot: shape, not
@@ -134,13 +136,15 @@
   }
 
   /**
-   * While the engine animates the scroll, and while a mouse drags it, snap
-   * is off: a snapping scroller pulls every intermediate position back to the
-   * nearest page, and the movement would stutter on each frame. The engine
-   * ends both exactly on a page, so turning snap back on moves nothing.
+   * While the engine moves the scroll, and while a mouse drags it, snap is
+   * off: a snapping scroller pulls every intermediate position back to the
+   * nearest page. The engine writes `data-moving` in the same task as the
+   * movement — the root's `data-dragging` comes from a framework render a
+   * frame later, and the first frames of a drag were snapped back under the
+   * pointer. Both movements end exactly on a page, so snap returns without
+   * moving anything.
    */
-  [data-ui='carousel'] > [data-part='viewport'][data-animating],
-  [data-ui='carousel'][data-dragging] > [data-part='viewport'] {
+  [data-ui='carousel'] > [data-part='viewport'][data-moving] {
     scroll-snap-type: none;
   }
 
@@ -187,11 +191,18 @@
 
   /* ── The slides ───────────────────────────────────────────────────────── */
 
+  /**
+   * A scroller cannot go past its ends, so a drag that pulls past one moves
+   * the slides instead, by the distance the engine writes as
+   * `--slotted-carousel-overscroll` — less and less the further the hand
+   * goes — and springs it back to nothing on release.
+   */
   [data-ui='carousel'] > [data-part='viewport'] > [data-part='slide'] {
     min-block-size: 0;
     min-inline-size: 0;
     position: relative;
     scroll-snap-align: start;
+    translate: var(--slotted-carousel-overscroll, none);
   }
 
   [data-ui='carousel'][data-align='center'] > [data-part='viewport'] > [data-part='slide'] {

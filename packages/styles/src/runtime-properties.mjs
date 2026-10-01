@@ -275,6 +275,13 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-carousel-slides-per-view',
   '--slotted-carousel-autoplay-delay',
   /**
+   * `carousel` — how far a drag has pulled the slides past an end, written on
+   * the viewport by `@slotted/core/carousel` frame by frame as a translate
+   * value, and sprung back to nothing on release. A scroller cannot draw past
+   * its ends, so the pull is the slides' own `translate`.
+   */
+  '--slotted-carousel-overscroll',
+  /**
    * `color-picker` — the colour this instance holds, with and without its
    * alpha, the hue it remembers when the colour has none, where the area's
    * thumb stands (saturation and brightness, 0 to 1), how opaque the colour

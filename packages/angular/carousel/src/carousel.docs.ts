@@ -145,7 +145,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'transition',
     title: 'Slide or fade',
-    note: 'slide moves the track on the theme’s long duration and standard curve; fade stacks the slides and crossfades them — the arriving one on the enter curve, the leaving one faster on the exit curve. Under reduced motion both change at once.',
+    note: 'slide moves the track on a spring timed by the theme’s long duration, which keeps the speed of a hand that lets go or of a movement it interrupts; fade stacks the slides and crossfades them — the arriving one on the enter curve, the leaving one faster on the exit curve. Under reduced motion both change at once.',
     snippet: defineSnippet({
       id: 'carousel-angular-transition',
       language: 'angular',

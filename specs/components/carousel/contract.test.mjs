@@ -173,7 +173,21 @@ test('states the runtime properties the stylesheet reads', () => {
   assert.deepEqual(contract.runtimeProperties, [
     '--slotted-carousel-slides-per-view',
     '--slotted-carousel-autoplay-delay',
+    '--slotted-carousel-overscroll',
   ]);
+});
+
+/**
+ * Embla, under shadcn and ReUI, runs an attraction simulation and says "drag
+ * interactions are not affected because duration is then determined by the
+ * drag force". An easing curve starts every movement from rest, so a drag
+ * that let go at speed stopped and set off again.
+ */
+test('moves the scroll on a spring that keeps the speed it is given', () => {
+  assert.match(contract.motion.scroll, /critically damped spring/);
+  assert.match(contract.motion.scroll, /speed the scroller already has/);
+  assert.match(contract.pointer.release, /release speed/);
+  assert.match(contract.pointer.edges, /rubber band/);
 });
 
 test('declares a scenario for every axis and for the gaps the inventory names', () => {

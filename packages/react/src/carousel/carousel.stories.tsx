@@ -204,7 +204,7 @@ export const Transition: Story = {
     <Grid columns={2}>
       <Scene
         label="slide"
-        note="The track moves on the long duration and the standard curve, from wherever it is."
+        note="The track moves on a spring timed by the long duration, and a second press carries the first one’s speed."
       >
         <Notices transition="slide" />
       </Scene>

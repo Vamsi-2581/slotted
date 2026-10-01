@@ -6,14 +6,15 @@ import {
   carouselPages,
   createCarouselEngine,
   createCarouselRotation,
-  cubicBezier,
   formatCarouselMessage,
   indicatorDistance,
   intentPage,
   nearestPage,
-  parseCssEasing,
   parseCssTime,
+  rubberBand,
   slidesInView,
+  springAt,
+  springLaunch,
   stepPage,
 } from './carousel';
 import type { CarouselMetrics } from './carousel';
@@ -135,15 +136,45 @@ describe('motion parsing', () => {
     expect(parseCssTime(' 0.2s ')).toBe(200);
     expect(parseCssTime('')).toBe(0);
   });
+});
 
-  it('draws the curve a transition draws', () => {
-    const linear = cubicBezier(0, 0, 1, 1);
-    expect(linear(0.5)).toBeCloseTo(0.5, 4);
-    const standard = parseCssEasing('cubic-bezier(0.2, 0, 0, 1)');
-    expect(standard(0)).toBe(0);
-    expect(standard(1)).toBe(1);
-    expect(standard(0.5)).toBeGreaterThan(0.5);
-    expect(parseCssEasing('linear')(0.3)).toBe(0.3);
+describe('the spring', () => {
+  const omega = 8 / 320;
+
+  it('starts where it is and at the speed it is given', () => {
+    const start = springAt(0, 830, 2, omega, 0);
+    expect(start.position).toBe(0);
+    expect(start.velocity).toBeCloseTo(2, 6);
+  });
+
+  it('leaves under half a per cent of the way at the theme’s long duration and never passes the target', () => {
+    let previous = 0;
+    for (let t = 0; t <= 600; t += 8) {
+      const { position } = springAt(0, 830, 0, omega, t);
+      expect(position).toBeGreaterThanOrEqual(previous - 1e-9);
+      expect(position).toBeLessThanOrEqual(830 + 1e-9);
+      previous = position;
+    }
+    expect(830 - springAt(0, 830, 0, omega, 320).position).toBeLessThan(4.15);
+  });
+
+  it('moves at once rather than easing in', () => {
+    expect(springAt(0, 830, 0, omega, 16).position).toBeGreaterThan(40);
+  });
+
+  it('holds a flick to the speed that lands without passing', () => {
+    expect(springLaunch(0, 100, 50, omega)).toBeCloseTo(omega * 100, 9);
+    expect(springLaunch(0, 100, 1, omega)).toBe(1);
+    expect(springLaunch(0, 100, -3, omega)).toBe(-3);
+  });
+
+  it('pulls less the further an edge is dragged, and never past the viewport', () => {
+    const near = rubberBand(40, 400);
+    const far = rubberBand(400, 400);
+    expect(near).toBeLessThan(40);
+    expect(far / 400).toBeLessThan(near / 40);
+    expect(rubberBand(1e6, 400)).toBeLessThan(400);
+    expect(rubberBand(-40, 400)).toBeCloseTo(-near, 9);
   });
 });
 

@@ -143,6 +143,7 @@ test('names every runtime prefix once, where a family can find the reason', () =
     '--slotted-cascader-depth',
     '--slotted-carousel-slides-per-view',
     '--slotted-carousel-autoplay-delay',
+    '--slotted-carousel-overscroll',
     '--slotted-color-picker-color',
     '--slotted-color-picker-opaque',
     '--slotted-color-picker-hue',

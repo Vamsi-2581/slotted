@@ -157,7 +157,7 @@ Assimetria: nenhuma além dos idiomas.
 
 ## 9. Motor
 
-`@slotted/core/carousel` contém o que os dois bindings fariam igual: as posições de snap medidas, a página mais próxima, o passo com e sem loop, a tecla para intenção, os slides à vista, a animação do scroll com a duração e a curva lidas dos tokens, o arrasto com rato, o swipe de `fade` e o relógio da rotação com pausas por motivo. Os bindings são donos do estado e dos atributos.
+`@slotted/core/carousel` contém o que os dois bindings fariam igual: as posições de snap medidas, a página mais próxima, o passo com e sem loop, a tecla para intenção, os slides à vista, o scroll numa mola criticamente amortecida com a rigidez lida da duração longa do tema, o arrasto com rato com resistência elástica nas pontas, o swipe de `fade` e o relógio da rotação com pausas por motivo. A mola substituiu uma curva `standard` no passe ReUI de movimento (`2026-10-01-carousel-motion-reui-dossier.md`). Os bindings são donos do estado e dos atributos.
 
 ## 10. Gate visual (passo 9)
 

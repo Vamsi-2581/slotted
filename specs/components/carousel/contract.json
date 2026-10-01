@@ -169,6 +169,10 @@
     }
   ],
   "repeatedKeysAnimate": false,
+  "motion": {
+    "scroll": "a critically damped spring, stiffness 8 over --_scroll-duration (the theme's long duration), launched at the speed the scroller already has; a request for the page already in flight keeps the flight",
+    "reducedMotion": "the duration collapses and the scroll lands at once"
+  },
   "indicators": {
     "activation": "automatic",
     "loop": false,
@@ -178,7 +182,9 @@
   "pointer": {
     "mouseDrag": "draggable, from a threshold of four pixels along the axis; the click after a drag is cancelled",
     "touch": "the platform's own scroll, with snap",
-    "fadeSwipe": "a swipe of forty pixels in fade asks for the neighbour page"
+    "fadeSwipe": "a swipe of forty pixels in fade asks for the neighbour page",
+    "release": "one page in the way the hand moves when the release speed passes 0.25 px/ms, otherwise the page the release speed coasts to in 200 ms; never more than one page from where the drag began; the spring sets off at the release speed",
+    "edges": "past an end the slides follow the pointer less and less (rubber band, constant 0.55 of the viewport) and spring back on release"
   },
   "declined": {
     "clones": {
@@ -226,13 +232,18 @@
     ]
   },
   "imperative": ["scrollTo", "scrollToSlide", "refresh"],
-  "runtimeProperties": ["--slotted-carousel-slides-per-view", "--slotted-carousel-autoplay-delay"],
+  "runtimeProperties": [
+    "--slotted-carousel-slides-per-view",
+    "--slotted-carousel-autoplay-delay",
+    "--slotted-carousel-overscroll"
+  ],
   "familyAttributes": {
     "data-playing": "root, while the rotation is on",
     "data-paused": "root, while hover or a hidden document holds the rotation",
     "data-inview": "slide, while half of it or more is in the viewport",
     "data-snap": "slide, when a page starts at it",
-    "data-measured": "root, once the pages have been read from the layout"
+    "data-measured": "root, once the pages have been read from the layout",
+    "data-moving": "viewport, while the engine moves the scroll or a mouse drags it; written in the same task as the movement"
   },
   "messages": {
     "roleDescription": "carrossel",

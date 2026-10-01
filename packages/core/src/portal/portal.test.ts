@@ -172,6 +172,36 @@ describe('createPortalRoot', () => {
       for (const attribute of MIRRORED_ATTRIBUTES) {
         expect(portal.container?.hasAttribute(attribute)).toBe(false);
       }
+      expect(portal.container?.hasAttribute('data-slotted-seeds')).toBe(false);
+      portal.release();
+    });
+
+    it('carries the seeds of the region onto the layer and marks it to derive from them', () => {
+      document.body.innerHTML = `
+        <div data-slotted-theme="default" data-slotted-scheme="dark">
+          <span id="trigger" style="--slotted-seed-accent: #e11d48"></span>
+        </div>`;
+      const portal = createPortalRoot({
+        origin: document.getElementById('trigger') as HTMLElement,
+      });
+      const layer = portal.container as HTMLElement;
+
+      expect(layer.style.getPropertyValue('--slotted-seed-accent')).toBe('#e11d48');
+      expect(layer.hasAttribute('data-slotted-seeds')).toBe(true);
+      portal.release();
+    });
+
+    it('follows a seed the application changes while the layer is open', async () => {
+      document.body.innerHTML = `<span id="trigger" style="--slotted-seed-accent: #e11d48"></span>`;
+      const trigger = document.getElementById('trigger') as HTMLElement;
+      const portal = createPortalRoot({ origin: trigger });
+
+      trigger.style.setProperty('--slotted-seed-accent', '#16a34a');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(
+        (portal.container as HTMLElement).style.getPropertyValue('--slotted-seed-accent'),
+      ).toBe('#16a34a');
       portal.release();
     });
 

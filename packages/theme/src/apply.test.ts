@@ -1,0 +1,75 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { afterEach, describe, expect, it } from 'vitest';
+
+import { applyTheme, seedStyle, THEME_CHANGE_EVENT, type ThemeChangeDetail } from './apply';
+import { defineTheme, type ThemeDefinition } from './define';
+import { recipes } from './recipes';
+
+// jsdom's `URL` (the test environment's global) rejects a `file:` base, so this
+// resolves the path with `node:path` rather than `new URL(..., import.meta.url)`.
+const values = JSON.parse(
+  readFileSync(join(import.meta.dirname, '../../themes/src/default/values.json'), 'utf8'),
+) as Omit<ThemeDefinition, 'name' | 'seeds' | 'recipe'>;
+const SEEDS = {
+  accent: '#1d4ed8',
+  neutral: '#64748b',
+  success: '#15803d',
+  warning: '#facc15',
+  danger: '#dc2626',
+};
+const theme = (accent: string) =>
+  defineTheme({ ...values, name: 'live', seeds: { ...SEEDS, accent }, recipe: recipes.standard });
+
+afterEach(() => {
+  document.head.innerHTML = '';
+});
+
+describe('applyTheme', () => {
+  it('keeps one stylesheet per theme name and replaces its content', () => {
+    applyTheme(theme('#1d4ed8'));
+    applyTheme(theme('#e11d48'));
+    const sheets = document.head.querySelectorAll('style[data-slotted-theme-sheet="live"]');
+    expect(sheets).toHaveLength(1);
+    expect(sheets[0]!.textContent).toContain('--slotted-seed-accent: #e11d48;');
+  });
+
+  it('announces the change, and the removal', () => {
+    const seen: ThemeChangeDetail[] = [];
+    const listener = (event: Event) => seen.push((event as CustomEvent<ThemeChangeDetail>).detail);
+    document.addEventListener(THEME_CHANGE_EVENT, listener);
+    const dispose = applyTheme(theme('#1d4ed8'));
+    dispose();
+    dispose();
+    document.removeEventListener(THEME_CHANGE_EVENT, listener);
+    expect(seen).toEqual([
+      { name: 'live', applied: true },
+      { name: 'live', applied: false },
+    ]);
+    expect(document.head.querySelector('style[data-slotted-theme-sheet]')).toBeNull();
+  });
+});
+
+describe('seedStyle', () => {
+  it('names each seed as its custom property', () => {
+    expect(seedStyle({ accent: '#e11d48', neutral: 'oklch(0.5 0.02 60)' })).toEqual({
+      '--slotted-seed-accent': '#e11d48',
+      '--slotted-seed-neutral': 'oklch(0.5 0.02 60)',
+    });
+  });
+
+  it('refuses a value that is not a seed', () => {
+    expect(() => seedStyle({ accent: 'banana' })).toThrow(
+      'seed accent "banana" is neither #rrggbb nor oklch(L C H)',
+    );
+  });
+
+  it('refuses a named colour and a functional notation this library does not parse', () => {
+    expect(() => seedStyle({ accent: 'red' })).toThrow(
+      'seed accent "red" is neither #rrggbb nor oklch(L C H)',
+    );
+    expect(() => seedStyle({ neutral: 'rgb(0 0 0)' })).toThrow(
+      'seed neutral "rgb(0 0 0)" is neither #rrggbb nor oklch(L C H)',
+    );
+  });
+});

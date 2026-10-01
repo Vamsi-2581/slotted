@@ -34,6 +34,21 @@ export const MIRRORED_ATTRIBUTES = [
   'data-slotted-density',
 ] as const;
 
+/**
+ * The seeds a theme derives its colours from. They are custom properties, so a
+ * layer moved to the end of the body loses them with its ancestors; the layer
+ * carries their computed values in its own `style`, and `data-slotted-seeds`
+ * makes it derive every colour from them. `@slotted/theme` › `SEED_NAMES`
+ * holds the same five names.
+ */
+export const MIRRORED_PROPERTIES = [
+  '--slotted-seed-accent',
+  '--slotted-seed-neutral',
+  '--slotted-seed-success',
+  '--slotted-seed-warning',
+  '--slotted-seed-danger',
+] as const;
+
 export interface PortalRootOptions {
   /**
    * The node the layer was written beside. Its theme and direction are what the
@@ -137,6 +152,28 @@ function mirror(layer: Element, origin: Element | null) {
     if (value === null) layer.removeAttribute(attribute);
     else layer.setAttribute(attribute, value);
   }
+  mirrorSeeds(layer, origin);
+}
+
+function mirrorSeeds(layer: Element, origin: Element | null) {
+  const view = layer.ownerDocument.defaultView;
+  const style = (layer as HTMLElement).style as CSSStyleDeclaration | undefined;
+  if (!view || !style) return;
+  const computed = origin ? view.getComputedStyle(origin) : null;
+  let carried = false;
+  for (const property of MIRRORED_PROPERTIES) {
+    const value = computed?.getPropertyValue(property).trim() ?? '';
+    if (value) {
+      carried = true;
+      if (style.getPropertyValue(property) !== value) style.setProperty(property, value);
+    } else if (style.getPropertyValue(property)) {
+      style.removeProperty(property);
+    }
+  }
+  if (carried && !layer.hasAttribute('data-slotted-seeds'))
+    layer.setAttribute('data-slotted-seeds', '');
+  if (!carried && layer.hasAttribute('data-slotted-seeds'))
+    layer.removeAttribute('data-slotted-seeds');
 }
 
 function documentPortals(doc: Document): DocumentPortals {
@@ -167,17 +204,27 @@ function documentPortals(doc: Document): DocumentPortals {
   if (view && typeof view.MutationObserver === 'function') {
     state.observer = new view.MutationObserver((records) => {
       /**
-       * A layer's own attribute is the answer, not the question. Re-resolving
-       * on it would answer the write this observer just caused, and the two
-       * would take turns for the life of the page.
+       * A layer's own attribute is the answer, not the question. A `style`
+       * change matters only on an element that contains the origin of a layer:
+       * every other inline style — a popup placed by the positioner, a chart's
+       * tooltip — would otherwise re-resolve every layer on every frame.
        */
-      if (records.every((record) => state.layers.has(record.target as Element))) return;
+      const relevant = records.some((record) => {
+        const target = record.target as Element;
+        if (state.layers.has(target)) return false;
+        if (record.attributeName !== 'style' && record.attributeName !== 'data-slotted-seeds')
+          return true;
+        for (const origin of state.layers.values())
+          if (origin && target.contains(origin)) return true;
+        return false;
+      });
+      if (!relevant) return;
       for (const [layer, origin] of state.layers) mirror(layer, origin);
     });
     state.observer.observe(doc.documentElement, {
       attributes: true,
       subtree: true,
-      attributeFilter: [...MIRRORED_ATTRIBUTES],
+      attributeFilter: [...MIRRORED_ATTRIBUTES, 'style', 'data-slotted-seeds'],
     });
   }
 

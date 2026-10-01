@@ -447,6 +447,36 @@
   }
 
   /**
+   * Words and a mark in one button — a country code over its chevron, a model
+   * name, a notation. The mark is centred on the band the letters occupy, not
+   * on the line box: the line box keeps room under the baseline for
+   * descenders, so a box centred in it sits low beside the letters — every
+   * chevron in these buttons did. The rule is the briefing's (_A mark beside a
+   * line of text is aligned to the text_), here in a grid: items share the
+   * baseline, the mark's synthesized baseline is its bottom edge, a negative
+   * start margin takes back the height it would add above the letters, and a
+   * translate puts its centre at `(1cap + 1ex) / 4` above the baseline — the
+   * midpoint of the capitals' and the lowercase letters' own centres.
+   */
+  [data-ui='text-field']
+    > :is([data-part='start'], [data-part='end'])
+    > [data-part='action']:not([aria-label], [aria-labelledby]) {
+    align-content: center;
+    align-items: baseline;
+    display: inline-grid;
+    grid-auto-flow: column;
+    justify-content: center;
+  }
+
+  [data-ui='text-field']
+    > :is([data-part='start'], [data-part='end'])
+    > [data-part='action']:not([aria-label], [aria-labelledby])
+    > [data-ui='icon'] {
+    margin-block-start: calc((1cap + 1ex) / 4 - var(--_icon-size) / 2);
+    translate: 0 calc(var(--_icon-size) / 2 - (1cap + 1ex) / 4);
+  }
+
+  /**
    * An adornment holding a button is not quiet text any more: its gap is the
    * one between two buttons, and it does not pad a glyph that is not there.
    */

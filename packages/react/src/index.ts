@@ -15,6 +15,7 @@ export * from './button';
 export * from './button-group';
 export * from './calendar';
 export * from './card';
+export * from './carousel';
 export * from './cascader';
 export * from './chart';
 export * from './checkbox';

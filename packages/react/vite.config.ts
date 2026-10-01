@@ -73,6 +73,7 @@ export default defineConfig({
         'saved-views': resolve(import.meta.dirname, 'src/saved-views/index.ts'),
         'scroll-area': resolve(import.meta.dirname, 'src/scroll-area/index.ts'),
         section: resolve(import.meta.dirname, 'src/section/index.ts'),
+        carousel: resolve(import.meta.dirname, 'src/carousel/index.ts'),
         cascader: resolve(import.meta.dirname, 'src/cascader/index.ts'),
         select: resolve(import.meta.dirname, 'src/select/index.ts'),
         'side-navigation': resolve(import.meta.dirname, 'src/side-navigation/index.ts'),

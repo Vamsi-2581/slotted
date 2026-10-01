@@ -295,6 +295,10 @@
       "types": "./dist/types/section/index.d.ts",
       "import": "./dist/section.js"
     },
+    "./carousel": {
+      "types": "./dist/types/carousel/index.d.ts",
+      "import": "./dist/carousel.js"
+    },
     "./cascader": {
       "types": "./dist/types/cascader/index.d.ts",
       "import": "./dist/cascader.js"

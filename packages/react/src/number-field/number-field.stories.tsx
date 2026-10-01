@@ -375,13 +375,7 @@ export const Scrub: Story = {
           end="%"
           max={100}
           min={0}
-          start={
-            <NumberFieldScrub>
-              <Icon>
-                <Percent />
-              </Icon>
-            </NumberFieldScrub>
-          }
+          start={<NumberFieldScrub>O</NumberFieldScrub>}
         />
       </Scene>
     </Grid>

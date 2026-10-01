@@ -1,20 +1,12 @@
-# Checkpoint — fila das entradas (item 3: `color-picker`)
+# Checkpoint — fila das entradas
 
-- Itens 1 e 2 entregues; correção de alinhamento `03a02542`.
-- Item 3 completo até ao passo 13; nada commitado.
-
-## Ficheiros do item 3
-
-- Núcleo: `packages/core/src/color/` (10/10), registo em `packages/core/package.json` e `vite.config.ts`.
-- Contrato: `specs/components/color-picker/` (8/8); capacidade `format` em `specs/contract.schema.mjs`.
-- Glifo `pipette`: `glyphs.json`, `glyphs.ts`, `theme.json`, `tokens/contract.json` (121), `token-foundation.md`, `verify-token-foundation.test.mjs`.
-- Estilos: `packages/styles/src/color-picker/` (7/7), export em `packages/styles/package.json`; `runtime-properties.mjs`, `tokens.test.mjs`, `text-scale.test.mjs`.
-- React: `packages/react/src/color-picker/` (19/19), export em `packages/react/src/index.ts`.
-- Angular: `packages/angular/color-picker/` (13/13).
-- Documentos: `docs/history/designs/2026-10-01-color-picker-{design,reui-dossier,self-assessment}.md`.
-
-Ficheiros partilhados com linhas de outras sessões: construir o índice a partir de HEAD; nunca `git commit -- <paths>`.
+- Plano: fila do pedido `/component` + `/reui` (entradas): 1 `text-field`, 2 `textarea` + `prompt-composer`, 3 `color-picker`, 4 `number-field` / `currency-field`.
+- Entregues: itens 1 a 3; item 4 `number-field` (`a75b0df9` steppers concêntricos, `8b7cbdee` parte `scrub`, commit seguinte com a história React).
+- Branch `review/implementation-pass-1`. Árvore com alterações de outras sessões; ficheiros partilhados indexados a partir de HEAD, nunca `git commit -- <paths>`.
+- Testes `number-field`: núcleo 43/43, React 64/64, Angular 53/53, contrato 22/22; `audit.mjs` React e Angular a 1280 e 620 sem achados.
+- Problemas conhecidos (outras sessões): `field-surface.test.mjs` falha em `kbd`; `pnpm check:affected` falha no lint de `packages/react/src/message/message-demo.tsx` (`react-hooks/exhaustive-deps` sem definição).
+- Dossiê: `docs/history/designs/2026-10-01-number-field-reui-dossier.md` (linha 5 do delta por aplicar).
 
 ## Próxima ação
 
-Gate de lançamento; depois commits: glifo `pipette`, esquema `format`, núcleo `color`, família.
+`/reui currency-field polish`: aplicar a `packages/styles/src/currency-field/currency-field.css` o delta das linhas 1 a 4 do dossiê de `number-field` e a parte `scrub` (contrato, ligações, páginas).

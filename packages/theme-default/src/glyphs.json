@@ -57,5 +57,6 @@
   "--slotted-icon-funnel": { "icon": "funnel" },
   "--slotted-icon-grip-vertical": { "icon": "grip-vertical" },
   "--slotted-icon-grip-horizontal": { "icon": "grip-horizontal" },
-  "--slotted-icon-star": { "icon": "star" }
+  "--slotted-icon-star": { "icon": "star" },
+  "--slotted-icon-check-check": { "icon": "check-check" }
 }

@@ -20,7 +20,7 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 116    |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 117    |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 112    |
 | `component` | One family adjusting a semantic value for itself.              | 28     |
 
@@ -299,6 +299,7 @@ otherwise; `fill` is the same geometry painted solid, with no stroke.
 | `--slotted-icon-grip-vertical`    | `grip-vertical`        | stroke 2   |
 | `--slotted-icon-grip-horizontal`  | `grip-horizontal`      | stroke 2   |
 | `--slotted-icon-star`             | `star`                 | stroke 2   |
+| `--slotted-icon-check-check`      | `check-check`          | stroke 2   |
 
 A component-owned icon is the `Glyph` element; a character is never an icon, and
 a glyph token painted from CSS survives only in the families `PENDING` still
@@ -439,6 +440,14 @@ Lucide's `image-off` is the one drawing that says _a picture, and not here_,
 which is the same construction `eye-off` and `cloud-off` already use in this
 scale. It is drawn once, on the fallback part, after `fallbackSrc` has had its
 turn.
+
+`--slotted-icon-check-check` is two ticks, the mark a message carries once it
+has reached the other side, and it was added for `message`. `check` alone says
+_sent_; the pair says _delivered_ and, painted in the accent with the word
+beside it, _read_ — the convention WhatsApp, Telegram and Messenger taught the
+reader. Drawing `check` twice from the family would decide the overlap of the
+two strokes again, differently, which is the argument `chevrons-right` already
+made.
 
 `--slotted-icon-person` is the only glyph drawn as a filled silhouette rather
 than as strokes, because it is the only one that stands in for a photograph

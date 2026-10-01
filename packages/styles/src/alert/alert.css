@@ -298,7 +298,7 @@
   /* ── Variant: the three ways one tone is painted ───────────────────────
    *
    * The words take the tone's own `text` role in all three, because that is
-   * the one pair `packages/theme-default/test/contrast.test.mjs` measures
+   * the one pair `packages/themes/test/default-theme.test.mjs` measures
    * against these grounds: the tone's text on the tone's surface, and the
    * tone's text on each of the three neutral surfaces. Painting a tinted
    * ground with `--slotted-text` would be an unheld ratio, and the theme's own

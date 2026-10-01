@@ -23,8 +23,8 @@ test('a package is published when it declares a published surface', () => {
 
 test('the tarball is named the way pnpm pack names it', () => {
   assert.equal(
-    tarballName({ name: '@slotted/theme-default', version: '0.1.0-beta.3' }),
-    'slotted-theme-default-0.1.0-beta.3.tgz',
+    tarballName({ name: '@slotted/themes', version: '0.1.0-beta.3' }),
+    'slotted-themes-0.1.0-beta.3.tgz',
   );
 });
 
@@ -39,8 +39,8 @@ test('every consumer-facing package is published and the workbench is not', () =
     '@slotted/core',
     '@slotted/react',
     '@slotted/styles',
-    '@slotted/theme-default',
-    '@slotted/tokens',
+    '@slotted/theme',
+    '@slotted/themes',
   ]);
 });
 

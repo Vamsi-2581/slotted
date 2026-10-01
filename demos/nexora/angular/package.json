@@ -21,7 +21,7 @@
     "@slotted/angular": "file:../../.registry/slotted-angular-0.1.0-beta.0.tgz",
     "@slotted/core": "file:../../.registry/slotted-core-0.1.0-beta.0.tgz",
     "@slotted/demo-nexora-backend": "workspace:*",
-    "@slotted/theme-default": "file:../../.registry/slotted-theme-default-0.1.0-beta.0.tgz",
+    "@slotted/themes": "file:../../.registry/slotted-themes-0.1.0-beta.0.tgz",
     "echarts": "6.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"

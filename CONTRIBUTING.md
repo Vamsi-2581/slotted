@@ -43,8 +43,8 @@ invisible until they are:
 
 | Changed                                              | Build                       | Because                                                                         |
 | ---------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------- |
-| `packages/tokens/src/contract.json`                  | `pnpm build:tokens`         | the token stylesheet and the layer order are emitted from the contract          |
-| `packages/theme-default/src/theme.json`              | `pnpm build:tokens`         | the theme stylesheet is emitted from the theme                                  |
+| `packages/theme/src/contract.json`                   | `pnpm build:tokens`         | the token stylesheet and the layer order are emitted from the contract          |
+| `packages/themes/src/default/values.json`            | `pnpm build:tokens`         | the theme stylesheet is emitted from the theme                                  |
 | `packages/core/src/**`                               | none for Storybook or tests | aliased to source by `scripts/source-aliases.mjs`; build only before publishing |
 | `packages/react/src/**`, `packages/angular/*/src/**` | none for Storybook          | `pnpm build` before publishing or before reading `dist`; the servers use source |
 
@@ -61,7 +61,7 @@ every rule, loaded later and winning the cascade. A stylesheet fixed in source
 stayed broken on the page until somebody rebuilt a package the dev server does
 not need. That import is gone; the Angular preview never had one. Do not add a
 `dist` stylesheet to a preview: the layer order comes from
-`@slotted/tokens/styles.css`, which is imported first.
+`@slotted/theme/styles.css`, which is imported first.
 
 ## Repository layout
 
@@ -92,7 +92,7 @@ directory is not committed; it is written by:
   `0.x.y-beta.N`, then does the above.
 
 - `pnpm demo:refresh`: the loop after one library change — builds
-  `@slotted/angular`, `@slotted/core` and `@slotted/theme-default`, repacks only
+  `@slotted/angular`, `@slotted/core` and `@slotted/themes`, repacks only
   those three at the current version and reinstalls, so
   `demos/nexora/angular` sees the change on its next `pnpm start` (a
   running dev server is restarted).

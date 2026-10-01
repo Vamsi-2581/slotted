@@ -1,5 +1,5 @@
 {
-  "name": "@slotted/theme-default",
+  "name": "@slotted/themes",
   "version": "0.1.0-beta.0",
   "private": true,
   "type": "module",
@@ -7,15 +7,15 @@
     "dist"
   ],
   "exports": {
-    "./styles.css": "./dist/styles.css"
+    "./default.css": "./dist/default.css"
   },
   "scripts": {
-    "build": "node ../../scripts/generate-icon-glyphs.mjs --theme . && slotted-build-theme",
+    "build": "node ../../scripts/generate-icon-glyphs.mjs --theme src/default && slotted-build-theme src/default/values.json dist/default.css",
     "test": "node --test test/*.test.mjs",
     "typecheck": "node --check test/theme.test.mjs && node --check test/default-theme.test.mjs",
     "verify": "pnpm build && pnpm test && pnpm typecheck"
   },
   "devDependencies": {
-    "@slotted/tokens": "workspace:*"
+    "@slotted/theme": "workspace:*"
   }
 }

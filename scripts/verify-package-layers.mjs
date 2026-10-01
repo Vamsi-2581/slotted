@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 export const LAYERS = {
   // Tens digit is the architectural layer; ones digit orders packages inside it.
-  '@slotted/tokens': 10,
+  '@slotted/theme': 10,
   '@slotted/styles': 10,
   '@slotted/core': 20,
   '@slotted/react': 30,
@@ -24,7 +24,7 @@ const DEPENDENCY_KINDS = ['dependencies', 'devDependencies', 'peerDependencies']
  */
 export function rankOf(name) {
   if (name in LAYERS) return LAYERS[name];
-  return name.startsWith('@slotted/theme-') ? THEME_LAYER : undefined;
+  return name === '@slotted/themes' || name.startsWith('@slotted/theme-') ? THEME_LAYER : undefined;
 }
 
 export function layerViolations(manifests) {

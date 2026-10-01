@@ -53,7 +53,7 @@ Scope discipline: change only what the item requires. No drive-by refactors, no 
 For each item:
 
 1. **Reproduce.** Before changing anything, prove the symptom: a failing test in the relevant `*.test.ts`/`*.spec.ts`/`*.styles.test.mjs`, or a harness capture under `tools/harness/out/` that shows it. An item without a reproduction cannot be closed.
-2. **Fix at the origin.** `(MAOC)` items and rule items are fixed in `packages/core`, `packages/styles`, `packages/tokens` or `packages/themes`, never by a local override. A prop change starts in `specs/components/<family>/contract.json` and its `contract.test.mjs`, then styles, then React, then Angular, then stories and docs.
+2. **Fix at the origin.** `(MAOC)` items and rule items are fixed in `packages/core`, `packages/styles`, `packages/theme` or `packages/themes`, never by a local override. A prop change starts in `specs/components/<family>/contract.json` and its `contract.test.mjs`, then styles, then React, then Angular, then stories and docs.
 3. **Verify the acceptance criterion** stated in the item. It is the definition of done. If the criterion names a measurement (px, ratio, fps, count), measure it and write the number in the log.
 4. **Run the gates:**
    ```

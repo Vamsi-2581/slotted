@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
  * same convention, applied to the one package both bindings depend on.
  *
  * `@slotted/styles` needs nothing of the kind — it publishes its source — and
- * `@slotted/tokens/styles.css` and `@slotted/theme-default/styles.css` cannot
+ * `@slotted/theme/styles.css` and `@slotted/themes/default.css` cannot
  * have it: they are generated from JSON and have no source stylesheet to point
  * at. Those two are what `pnpm build:tokens` exists for.
  */

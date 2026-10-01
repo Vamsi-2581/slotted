@@ -5,7 +5,7 @@ import test from 'node:test';
 import { resolveTokens } from '../src/resolve.mjs';
 
 const theme = JSON.parse(
-  await readFile(new URL('../../theme-default/src/theme.json', import.meta.url), 'utf8'),
+  await readFile(new URL('../../themes/src/default/values.json', import.meta.url), 'utf8'),
 );
 
 /**

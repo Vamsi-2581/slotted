@@ -25,7 +25,7 @@ pnpm build:demo
 | ------------------------------------ | ------------------------------------------------------------------------------------------- |
 | `@slotted/angular`                   | components, one secondary entry point per family; CSS inlined per component                 |
 | `@slotted/core`                      | peer dependency of `@slotted/angular`, installed explicitly                                 |
-| `@slotted/theme-default`             | token values per theme, scheme and density; the only stylesheet imported                    |
+| `@slotted/themes`             | token values per theme, scheme and density; the only stylesheet imported                    |
 | `@slotted/demo-nexora-backend`    | the simulated backend, by workspace link; `scale: 'light'` by default, `?scale=demo` in the URL |
 | `@fontsource-variable/geist`, `-mono`| the faces the theme names; the theme ships no font                                          |
 | `@ng-icons/core`, `@ng-icons/lucide` | the glyphs; the library ships no icon catalogue                                             |

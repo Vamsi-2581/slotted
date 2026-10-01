@@ -79,7 +79,7 @@
   /* ── Tone: what the message is about ──────────────────────────────────
    *
    * Four severities and one absence of severity. Each severity takes its own
-   * `text` role, which is the pair `packages/theme-default/test/contrast.test.mjs`
+   * `text` role, which is the pair `packages/themes/test/default-theme.test.mjs`
    * measures against the three neutral surfaces — this family paints on the
    * page's own surface, so that is the pair that applies.
    *

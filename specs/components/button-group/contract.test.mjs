@@ -9,7 +9,7 @@ const buttonContract = JSON.parse(
   await readFile(new URL('../button/contract.json', import.meta.url), 'utf8'),
 );
 const tokenContract = JSON.parse(
-  await readFile(new URL('../../../packages/tokens/src/contract.json', import.meta.url), 'utf8'),
+  await readFile(new URL('../../../packages/theme/src/contract.json', import.meta.url), 'utf8'),
 );
 
 test('satisfies the shared contract schema', () => {

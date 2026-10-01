@@ -8,7 +8,7 @@ const contract = JSON.parse(await readFile(new URL('./contract.json', import.met
 const statusIndicator = contract.members.statusIndicator;
 const glyphs = JSON.parse(
   await readFile(
-    new URL('../../../packages/theme-default/src/glyphs.json', import.meta.url),
+    new URL('../../../packages/themes/src/default/glyphs.json', import.meta.url),
     'utf8',
   ),
 );

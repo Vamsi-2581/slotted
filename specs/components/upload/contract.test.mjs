@@ -16,7 +16,7 @@ const GLYPH_NAMES = new Set(
   Object.keys(
     JSON.parse(
       await readFile(
-        new URL('../../../packages/theme-default/src/glyphs.json', import.meta.url),
+        new URL('../../../packages/themes/src/default/glyphs.json', import.meta.url),
         'utf8',
       ),
     ),

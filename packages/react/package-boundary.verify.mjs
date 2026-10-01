@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, relative } from 'node:path';
 
-import { LAYER_ORDER_STATEMENT } from '@slotted/tokens/layer-order';
+import { LAYER_ORDER_STATEMENT } from '@slotted/theme/layer-order';
 
 const packageDirectory = fileURLToPath(new URL('.', import.meta.url));
 const distDirectory = join(packageDirectory, 'dist');

@@ -10,7 +10,7 @@ Build `tools/harness/out/<family>.html`:
 node tools/harness/build.mjs <family>
 ```
 
-If the default theme has not been built, run `pnpm --filter @slotted/theme-default build` once and rebuild the harness.
+If the default theme has not been built, run `pnpm --filter @slotted/themes build` once and rebuild the harness.
 
 Capture one combination at twice the device scale. Every axis is named, and each defaults to the first value listed:
 

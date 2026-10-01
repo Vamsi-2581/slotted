@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 
-import { LAYER_ORDER_STATEMENT } from '@slotted/tokens/layer-order';
+import { LAYER_ORDER_STATEMENT } from '@slotted/theme/layer-order';
 
 /**
  * Vite emits the bundled stylesheet without the order statement, and a React

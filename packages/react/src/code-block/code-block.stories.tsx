@@ -38,7 +38,7 @@ const DIFF_CSS = [
 ].join('\n');
 
 const DEPLOY_SH = [
-  'pnpm --filter @slotted/core build && pnpm --filter @slotted/theme-default build && node tools/harness/build.mjs code-block && node tools/harness/shoot.mjs code-block --scheme dark',
+  'pnpm --filter @slotted/core build && pnpm --filter @slotted/themes build && node tools/harness/build.mjs code-block && node tools/harness/shoot.mjs code-block --scheme dark',
   '    --width 420 --density dense --dir rtl --out /tmp/claude-1000/-home-dreco-dev-slotted/scratchpad/shots/code-block-wrapped-continuation-keeps-the-indent.png',
   'rm -rf tools/harness/out # refused: the harness output is shared',
   'git add -A # another lane writes here',

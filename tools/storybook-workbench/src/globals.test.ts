@@ -33,11 +33,20 @@ function packagesRoot() {
 function publishedThemeNames() {
   const root = packagesRoot();
 
-  return readdirSync(root, { withFileTypes: true })
+  const fromThemePackages = readdirSync(root, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && entry.name.startsWith('theme-'))
     .map(
       (entry) => JSON.parse(readFileSync(join(root, entry.name, 'src', 'theme.json'), 'utf8')).name,
     );
+
+  const themesSrc = join(root, 'themes', 'src');
+  const fromThemesPackage = readdirSync(themesSrc, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map(
+      (entry) => JSON.parse(readFileSync(join(themesSrc, entry.name, 'values.json'), 'utf8')).name,
+    );
+
+  return [...fromThemePackages, ...fromThemesPackage];
 }
 
 describe('resolveWorkbenchGlobals', () => {

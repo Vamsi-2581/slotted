@@ -105,8 +105,8 @@ família sem veredito não recebe itens.
 | ------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | Contrato      | `specs/components/<componente>/contract.json`                                          | Props, partes, estados. Toda remoção ou adição de prop começa aqui.                          |
 | Estilo        | `packages/styles/src/<componente>/<componente>.css` + `.tokens.json` + `.harness.html` | Fonte única de estilo para React e Angular.                                                  |
-| Tema          | `packages/theme-default/src/theme.json`                                                | Valores por esquema (`light`, `dark`, `high-contrast`), incluindo glifos `--slotted-icon-*`. |
-| Tokens        | `packages/tokens/src/contract.json`                                                    | Declaração dos tokens.                                                                       |
+| Tema          | `packages/themes/src/default/values.json`                                              | Valores por esquema (`light`, `dark`, `high-contrast`), incluindo glifos `--slotted-icon-*`. |
+| Tokens        | `packages/theme/src/contract.json`                                                     | Declaração dos tokens.                                                                       |
 | Comportamento | `packages/core/src/<módulo>`                                                           | Módulos listados em `docs/process/build-order.md`, "Passe 1 — entregue".                     |
 | React         | `packages/react/src/<componente>`                                                      | Componente, stories, testes.                                                                 |
 | Angular       | `packages/angular/<componente>/src`                                                    | Componente, stories, testes.                                                                 |
@@ -156,7 +156,7 @@ Critério de aceite: em `dark`, `getComputedStyle(el).outlineColor` de um botão
 
 ### R4 — Ícones vêm de um conjunto publicado, não de paths escritos à mão
 
-Fato verificado: `packages/theme-default/src/theme.json` define `--slotted-icon-circle-info`, `--slotted-icon-circle`, `--slotted-icon-circle-check`, `--slotted-icon-triangle-alert`, `--slotted-icon-circle-alert` e outros como `data:image/svg+xml` inline com `stroke-width='1.8'`. Estes glifos são usados por `Alert`, `Toast`, `ResultState`, `Field`, `InlineMessage` via `mask-image`. As dependências `lucide-react@1.24.0` e `@ng-icons/lucide@35.0.1` já existem no repositório.
+Fato verificado: `packages/themes/src/default/values.json` define `--slotted-icon-circle-info`, `--slotted-icon-circle`, `--slotted-icon-circle-check`, `--slotted-icon-triangle-alert`, `--slotted-icon-circle-alert` e outros como `data:image/svg+xml` inline com `stroke-width='1.8'`. Estes glifos são usados por `Alert`, `Toast`, `ResultState`, `Field`, `InlineMessage` via `mask-image`. As dependências `lucide-react@1.24.0` e `@ng-icons/lucide@35.0.1` já existem no repositório.
 
 Decisão: todo glifo em `theme.json` deve ser gerado a partir do SVG oficial do Lucide correspondente (`info`, `circle`, `circle-check`, `triangle-alert`, `circle-alert`, `x`, `chevron-down`, `check`, `search`, etc.), com `stroke-width` 2 e `viewBox 0 0 24 24`. Um script em `scripts/` deve gerar os data URIs a partir do pacote `lucide` para impedir divergência manual. Ícones usados nas stories devem vir de `lucide-react`/`@ng-icons/lucide`, nunca de SVG inline nas stories.
 

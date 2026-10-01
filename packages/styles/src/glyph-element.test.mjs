@@ -20,7 +20,7 @@ const PENDING = [];
 const source = new URL('.', import.meta.url).pathname;
 const root = new URL('../../../', import.meta.url).pathname;
 const glyphTokens = Object.keys(
-  JSON.parse(readFileSync(join(root, 'packages/theme-default/src/glyphs.json'), 'utf8')),
+  JSON.parse(readFileSync(join(root, 'packages/themes/src/default/glyphs.json'), 'utf8')),
 );
 const GLYPH = new RegExp(
   `var\\(\\s*(${glyphTokens.map((token) => token.replace(/-/g, '\\-')).join('|')})\\s*[,)]`,

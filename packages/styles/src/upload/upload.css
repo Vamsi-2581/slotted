@@ -711,7 +711,7 @@
    *
    * One ratio answers both questions the pair raises, because the mark is the
    * tile's own foreground: the tile against the page, and the mark against the
-   * tile. `packages/theme-default/test/default-theme.test.mjs` measures all
+   * tile. `packages/themes/test/default-theme.test.mjs` measures all
    * twenty-seven.
    */
   [data-ui='upload'] [data-part='preview'] {
@@ -782,7 +782,7 @@
    * and its sentence. The tile is about the file. Measured rather than assumed,
    * every kind clears 4.03 : 1 against a failed row's ground in `light`,
    * 6.46 : 1 in `dark` and 8.31 : 1 in `high-contrast`, against a 3 : 1 floor —
-   * held by `packages/theme-default/test/default-theme.test.mjs`.
+   * held by `packages/themes/test/default-theme.test.mjs`.
    */
 
   /* ── What the row says ─────────────────────────────────────────────────

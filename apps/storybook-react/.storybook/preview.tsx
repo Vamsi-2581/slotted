@@ -11,18 +11,18 @@
  * The Angular preview never imported its own bundle, which is why only this one
  * had the problem.
  *
- * The layer order still arrives first: `@slotted/tokens/styles.css` begins with
+ * The layer order still arrives first: `@slotted/theme/styles.css` begins with
  * the `@layer` statement, which is the only thing the bundle contributed that
  * the source files do not.
  */
-import '@slotted/tokens/styles.css';
+import '@slotted/theme/styles.css';
 /**
  * Every theme the toolbar offers is loaded here. Two themes are two disjoint
  * selector sets, so loading both costs nothing at render time and lets the
  * `data-slotted-theme` attribute switch between them without a reload. A theme
  * offered by the toolbar and missing from this list paints nothing at all.
  */
-import '@slotted/theme-default/styles.css';
+import '@slotted/themes/default.css';
 import '@slotted/storybook-workbench/styles.css';
 
 import './preview.css';

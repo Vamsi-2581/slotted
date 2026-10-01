@@ -32,18 +32,18 @@ which is why it belongs at the top of the application's own entry CSS.
 @layer slotted.reset, slotted.tokens, slotted.theme, slotted.components;
 ```
 
-| Sublayer     | Written by               | Content                                    |
-| ------------ | ------------------------ | ------------------------------------------ |
-| `reset`      | —                        | reserved, empty                            |
-| `tokens`     | —                        | reserved, empty                            |
-| `theme`      | `@slotted/theme-default` | token values per theme, scheme and density |
-| `components` | `@slotted/styles`        | every family stylesheet                    |
+| Sublayer     | Written by        | Content                                    |
+| ------------ | ----------------- | ------------------------------------------ |
+| `reset`      | —                 | reserved, empty                            |
+| `tokens`     | —                 | reserved, empty                            |
+| `theme`      | `@slotted/themes` | token values per theme, scheme and density |
+| `components` | `@slotted/styles` | every family stylesheet                    |
 
 `reset` and `tokens` carry no rule today. They are declared because a name
 inserted later would reorder what already shipped.
 
-The statement opens every distributed stylesheet — `@slotted/tokens/styles.css`,
-`@slotted/theme-default/styles.css` and `@slotted/react/styles.css` — so a
+The statement opens every distributed stylesheet — `@slotted/theme/styles.css`,
+`@slotted/themes/default.css` and `@slotted/react/styles.css` — so a
 single import establishes the internal order. Restating it is inert: the order
 is fixed at the first mention.
 
@@ -90,5 +90,5 @@ layer defines, use `revert-layer`:
 Angular components inline their stylesheet and render it with
 `ViewEncapsulation.None`, so the CSS is injected into the document when a
 component first renders — after the application's own stylesheets. The layer
-order still holds, because `@slotted/theme-default/styles.css` is a required
+order still holds, because `@slotted/themes/default.css` is a required
 import and carries the statement.

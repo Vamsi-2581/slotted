@@ -6,7 +6,7 @@
       "outputs": ["dist/**"]
     },
     "dev": {
-      "dependsOn": ["@slotted/tokens#build", "@slotted/theme-default#build"],
+      "dependsOn": ["@slotted/theme#build", "@slotted/themes#build"],
       "cache": false,
       "persistent": true
     },

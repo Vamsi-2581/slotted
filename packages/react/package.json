@@ -470,7 +470,7 @@
     "@slotted/core": "workspace:*",
     "@slotted/storybook-workbench": "workspace:*",
     "@slotted/styles": "workspace:*",
-    "@slotted/tokens": "workspace:*",
+    "@slotted/theme": "workspace:*",
     "@storybook/react-vite": "10.5.10",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",

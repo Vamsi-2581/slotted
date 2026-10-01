@@ -172,7 +172,7 @@ other families stand on. Justify it at the gate before writing it.
   under the name that says so.** `--slotted-positioner-*` for the anchor size,
   the space that is left, the transform origin and the arrow, and
   `--slotted-layer-depth` for the single overlay stack. They are runtime values,
-  not design tokens, and they are not in `packages/tokens/src/contract.json`.
+  not design tokens, and they are not in `packages/theme/src/contract.json`.
 - **A mark beside a line of text is aligned to the text, not to the line box.**
   A box one line tall with its artwork centred in it lands on the centre of the
   line box, which is not where the words are. Measured on the default theme at

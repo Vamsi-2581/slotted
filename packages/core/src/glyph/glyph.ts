@@ -1,6 +1,6 @@
 /**
  * The geometry of one of the library's own icons, drawn from the Lucide icon
- * `packages/theme-default/src/glyphs.json` names for it. A binding renders it
+ * `packages/themes/src/default/glyphs.json` names for it. A binding renders it
  * as a real `<svg>`: every family draws its own icons through that one element,
  * never through a pseudo-element or a mask of its own.
  */

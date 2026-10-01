@@ -2,17 +2,19 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { contract } from '@slotted/tokens/contract';
-import { contrast, TEXT_RATIO } from '@slotted/tokens/theme-conformance';
-import { HOVER_SHARE, hoverOf, shareOf } from '@slotted/tokens/tone-hover';
+import { contract } from '@slotted/theme/contract';
+import { contrast, TEXT_RATIO } from '@slotted/theme/theme-conformance';
+import { HOVER_SHARE, hoverOf, shareOf } from '@slotted/theme/tone-hover';
 
 /**
  * What this theme chose, as opposed to what every theme must meet. The rules
- * live in `@slotted/tokens/theme-conformance`; the values below are the
+ * live in `@slotted/theme/theme-conformance`; the values below are the
  * default theme's identity, and another theme is free to disagree with all of
  * them.
  */
-const theme = JSON.parse(await readFile(new URL('../src/theme.json', import.meta.url), 'utf8'));
+const theme = JSON.parse(
+  await readFile(new URL('../src/default/values.json', import.meta.url), 'utf8'),
+);
 
 /** A colour laid over another at `alpha`, as a browser composites it. */
 function over(ink, ground, alpha) {

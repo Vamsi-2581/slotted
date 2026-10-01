@@ -8,7 +8,7 @@
  * left, where the arrow ended up, how deep in the layer stack a layer sits.
  *
  * They are not design tokens. They are absent from
- * `packages/tokens/src/contract.json`, they have no foundation fallback because
+ * `packages/theme/src/contract.json`, they have no foundation fallback because
  * no foundation value could answer "where is the arrow", and a reference page
  * that printed them under "Theme-owned decisions" would be telling a consumer
  * to retune something no theme can reach.

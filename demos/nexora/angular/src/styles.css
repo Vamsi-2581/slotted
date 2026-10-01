@@ -6,7 +6,7 @@
 
 @import '@fontsource-variable/geist/index.css';
 @import '@fontsource-variable/geist-mono/index.css';
-@import '@slotted/theme-default/styles.css';
+@import '@slotted/themes/default.css';
 
 @layer app {
   /*

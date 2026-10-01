@@ -7,7 +7,7 @@ const dependency = (name, kind = 'dependencies') => ({ name, kind });
 
 test('assigns every workspace package to a layer', () => {
   assert.deepEqual(LAYERS, {
-    '@slotted/tokens': 10,
+    '@slotted/theme': 10,
     '@slotted/styles': 10,
     '@slotted/core': 20,
     '@slotted/react': 30,
@@ -18,7 +18,7 @@ test('assigns every workspace package to a layer', () => {
 });
 
 test('ranks every theme from its name rather than from the map', () => {
-  assert.equal(rankOf('@slotted/theme-default'), 11);
+  assert.equal(rankOf('@slotted/themes'), 11);
   assert.equal(rankOf('@slotted/theme-anything-added-later'), 11);
   assert.equal(rankOf('@slotted/core'), 20);
   assert.equal(rankOf('react'), undefined);
@@ -29,10 +29,10 @@ test('rejects a theme depending on another theme', () => {
     layerViolations([
       {
         name: '@slotted/theme-second',
-        dependencies: [dependency('@slotted/theme-default')],
+        dependencies: [dependency('@slotted/themes')],
       },
     ]),
-    ['@slotted/theme-second (rank 11) must not depend on @slotted/theme-default (rank 11)'],
+    ['@slotted/theme-second (rank 11) must not depend on @slotted/themes (rank 11)'],
   );
 });
 
@@ -96,19 +96,15 @@ test('ignores packages outside the layer map, such as apps', () => {
 
 test('allows a theme to depend on the token contract inside layer 1', () => {
   assert.deepEqual(
-    layerViolations([
-      { name: '@slotted/theme-default', dependencies: [dependency('@slotted/tokens')] },
-    ]),
+    layerViolations([{ name: '@slotted/themes', dependencies: [dependency('@slotted/theme')] }]),
     [],
   );
 });
 
 test('rejects the token contract depending on a theme', () => {
   assert.deepEqual(
-    layerViolations([
-      { name: '@slotted/tokens', dependencies: [dependency('@slotted/theme-default')] },
-    ]),
-    ['@slotted/tokens (rank 10) must not depend on @slotted/theme-default (rank 11)'],
+    layerViolations([{ name: '@slotted/theme', dependencies: [dependency('@slotted/themes')] }]),
+    ['@slotted/theme (rank 10) must not depend on @slotted/themes (rank 11)'],
   );
 });
 

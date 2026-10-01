@@ -256,6 +256,14 @@ export const RUNTIME_PROPERTY_PREFIXES = [
    * and it shrinks to nothing as the reply grows.
    */
   '--slotted-message-scroller-room',
+  /**
+   * `cascader` — how deep a node sits under `layout="tree"`, counted from 0 at
+   * the roots, written on each node by the binding from the collection. The
+   * tree layout renders the visible nodes as one flat run with `aria-level`,
+   * so the indent is this number times `--slotted-cascader-indent`, the token.
+   * Named on its own for the reason `tree-depth` is.
+   */
+  '--slotted-cascader-depth',
 ];
 
 /** Whether a custom property is written by script rather than by a theme. */

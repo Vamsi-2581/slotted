@@ -45,6 +45,10 @@ const DECORATIVE = new Map([
     'the streaming dot: an aria-hidden empty span and never text, grown in from 0 and breathing to 0.72',
   ],
   [
+    'cascader/indicator',
+    'the check of a single-selection node: one aria-hidden Glyph and never text, grown in from 0.8 as the node is chosen',
+  ],
+  [
     'menu/indicator',
     'the check or the dot of a menu item: one aria-hidden Glyph and never text, grown in from 0.8 as the item is checked',
   ],

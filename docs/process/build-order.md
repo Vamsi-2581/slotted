@@ -613,6 +613,14 @@ de outra da mesma onda.
   `select`. Nós com `id`, `parent`/`children`, carregamento preguiçoso, seleção
   de folha ou ancestral, caminho visível e busca. TreeSelect e Cascader são dois
   recipes do mesmo núcleo. Em tela estreita navega por níveis.
+
+  Entregue em 2026-10-01 como `cascader`, que cumpre este âmbito inteiro: o eixo
+  `layout` (`auto`, `columns`, `drill`, `tree`) é o recipe e o núcleo
+  `@slotted/core/cascader` é um só. Inventário e decisões em
+  `docs/history/designs/2026-09-30-cascader-design.md`, autoavaliação em
+  `docs/history/designs/2026-10-01-cascader-self-assessment.md`. React `Cascader` e
+  `CascaderPanel`; Angular `sl-cascader` (`ControlValueAccessor` + `Validator`) e
+  `sl-cascader-panel`.
 - `master-detail` — coordena lista ou grelha e detalhe: seleção por URL ou ID,
   estado vazio e retorno de foco. Desktop usa painéis (`splitter`); tela
   estreita usa navegação ou `drawer` com retorno previsível. O detalhe preserva

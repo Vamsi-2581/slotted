@@ -61,6 +61,7 @@ export default defineConfig({
         timeline: resolve(import.meta.dirname, 'src/timeline/index.ts'),
         toast: resolve(import.meta.dirname, 'src/toast/index.ts'),
         transfer: resolve(import.meta.dirname, 'src/transfer/index.ts'),
+        cascader: resolve(import.meta.dirname, 'src/cascader/index.ts'),
         'dashboard-grid': resolve(import.meta.dirname, 'src/dashboard-grid/index.ts'),
         'import-export-center': resolve(import.meta.dirname, 'src/import-export-center/index.ts'),
         tour: resolve(import.meta.dirname, 'src/tour/index.ts'),

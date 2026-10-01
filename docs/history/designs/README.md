@@ -85,6 +85,7 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `wizard` | [2026-09-25 §1](2026-09-25-wizard-design.md) | [2026-09-25](2026-09-25-wizard-design.md) | [2026-09-25](2026-09-25-wizard-self-assessment.md) |
 | `import-export-center` | [2026-09-25 §1](2026-09-25-import-export-center-design.md) | [2026-09-25](2026-09-25-import-export-center-design.md) | [2026-09-25](2026-09-25-import-export-center-self-assessment.md) |
 | `rating` | [2026-09-25 §1](2026-09-25-rating-design.md) | [2026-09-25](2026-09-25-rating-design.md) | [2026-09-29](2026-09-29-rating-self-assessment.md) |
+| `cascader` | [2026-09-30 §1–4](2026-09-30-cascader-design.md) | [2026-09-30 §5–9](2026-09-30-cascader-design.md) | [2026-10-01](2026-10-01-cascader-self-assessment.md) |
 | `text-field` (passo ReUI) | [2026-09-30 §1](2026-09-30-text-field-rebuild-design.md) | [2026-09-30](2026-09-30-text-field-rebuild-design.md) | [2026-09-30](2026-09-30-text-field-self-assessment.md) |
 | `field-label-row` | [2026-09-30 §1](2026-09-30-field-label-row-design.md) | [2026-09-30](2026-09-30-field-label-row-design.md) | [2026-09-30](2026-09-30-field-self-assessment.md) |
 | `message`, `message-scroller` | [2026-09-30 §2](2026-09-30-message-design.md) | [2026-09-30](2026-09-30-message-design.md) | [2026-09-30](2026-09-30-message-self-assessment.md) |

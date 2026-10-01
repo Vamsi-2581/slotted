@@ -50,6 +50,8 @@
     "./chart/tokens.json": "./src/chart/chart.tokens.json",
     "./checkbox-group/checkbox-group.css": "./src/checkbox-group/checkbox-group.css",
     "./checkbox-group/tokens.json": "./src/checkbox-group/checkbox-group.tokens.json",
+    "./cascader/cascader.css": "./src/cascader/cascader.css",
+    "./cascader/tokens.json": "./src/cascader/cascader.tokens.json",
     "./checkbox/checkbox.css": "./src/checkbox/checkbox.css",
     "./checkbox/tokens.json": "./src/checkbox/checkbox.tokens.json",
     "./code-block/code-block.css": "./src/code-block/code-block.css",

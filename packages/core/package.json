@@ -232,6 +232,10 @@
       "types": "./dist/types/transfer/index.d.ts",
       "import": "./dist/transfer.js"
     },
+    "./cascader": {
+      "types": "./dist/types/cascader/index.d.ts",
+      "import": "./dist/cascader.js"
+    },
     "./dashboard-grid": {
       "types": "./dist/types/dashboard-grid/index.d.ts",
       "import": "./dist/dashboard-grid.js"

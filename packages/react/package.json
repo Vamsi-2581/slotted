@@ -295,6 +295,10 @@
       "types": "./dist/types/section/index.d.ts",
       "import": "./dist/section.js"
     },
+    "./cascader": {
+      "types": "./dist/types/cascader/index.d.ts",
+      "import": "./dist/cascader.js"
+    },
     "./select": {
       "types": "./dist/types/select/index.d.ts",
       "import": "./dist/select.js"

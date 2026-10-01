@@ -28,6 +28,10 @@
       "types": "./dist/types/code/index.d.ts",
       "import": "./dist/code.js"
     },
+    "./color": {
+      "types": "./dist/types/color/index.d.ts",
+      "import": "./dist/color.js"
+    },
     "./collection": {
       "types": "./dist/types/collection/index.d.ts",
       "import": "./dist/collection.js"

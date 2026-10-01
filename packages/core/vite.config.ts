@@ -10,6 +10,7 @@ export default defineConfig({
         'chart-echarts': resolve(import.meta.dirname, 'src/chart-echarts/index.ts'),
         clipboard: resolve(import.meta.dirname, 'src/clipboard/index.ts'),
         code: resolve(import.meta.dirname, 'src/code/index.ts'),
+        color: resolve(import.meta.dirname, 'src/color/index.ts'),
         collection: resolve(import.meta.dirname, 'src/collection/index.ts'),
         commands: resolve(import.meta.dirname, 'src/commands/index.ts'),
         count: resolve(import.meta.dirname, 'src/count/index.ts'),

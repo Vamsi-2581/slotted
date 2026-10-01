@@ -243,6 +243,19 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-rating-mean',
   '--slotted-rating-low',
   '--slotted-rating-high',
+  /**
+   * `message` — how many lines a bubble shows before it is clamped, written on
+   * the bubble by the binding from `maxLines`. It is a fact about this
+   * instance's content, stated per bubble, which no theme can hold.
+   */
+  '--slotted-message-max-lines',
+  /**
+   * `message-scroller` — the room the engine keeps below the last row so an
+   * anchored turn can stand at the top of the viewport while its reply is still
+   * short. It is the viewport's height less what follows the anchor, measured,
+   * and it shrinks to nothing as the reply grows.
+   */
+  '--slotted-message-scroller-room',
 ];
 
 /** Whether a custom property is written by script rather than by a theme. */

@@ -138,6 +138,8 @@ test('names every runtime prefix once, where a family can find the reason', () =
     '--slotted-rating-mean',
     '--slotted-rating-low',
     '--slotted-rating-high',
+    '--slotted-message-max-lines',
+    '--slotted-message-scroller-room',
   ]);
   assert.equal(isRuntimeProperty('--slotted-positioner-arrow-x'), true);
   assert.equal(isRuntimeProperty('--slotted-space-4'), false);

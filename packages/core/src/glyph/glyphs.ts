@@ -231,6 +231,26 @@ export const GLYPHS = {
       'M9 20h6',
     ],
   },
+  'arrow-up': {
+    paint: 'stroke',
+    strokeWidth: 2,
+    offset: [0, 0],
+    paths: ['m5 12 7-7 7 7', 'M12 19V5'],
+  },
+  stop: {
+    paint: 'fill',
+    strokeWidth: 0,
+    offset: [0, 0],
+    paths: ['M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2Z'],
+  },
+  paperclip: {
+    paint: 'stroke',
+    strokeWidth: 2,
+    offset: [-0.329, 0],
+    paths: [
+      'm16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551',
+    ],
+  },
   'cloud-off': {
     paint: 'stroke',
     strokeWidth: 2,

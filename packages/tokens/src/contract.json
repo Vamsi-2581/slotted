@@ -640,6 +640,27 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-arrow-up",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-stop",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-paperclip",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-icon-cloud-off",
       "layer": "primitive",
       "axis": "base",

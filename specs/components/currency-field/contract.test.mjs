@@ -224,7 +224,7 @@ test('says when the text is rewritten and when the number moves', () => {
   assert.deepEqual(contract.axes.formatOn, numberField.axes.formatOn);
   assert.deepEqual(contract.resolution.formatOn, numberField.resolution.formatOn);
   assert.equal(contract.members.currencyField.defaults.formatOn, 'change');
-  assert.deepEqual(contract.commitOn, ['blur', 'enter', 'step', 'wheel']);
+  assert.deepEqual(contract.commitOn, numberField.commitOn);
 });
 
 test('states the range, the three steps and the policies over them', () => {
@@ -372,9 +372,22 @@ test('declares one scenario per demonstration the reference page owes', () => {
     'range',
     'stepper',
     'adornments',
+    'scrub',
     'states',
     'content',
     'composition',
     'keyboard',
   ]);
+});
+
+/**
+ * The sibling's drag, taken whole: the part is in the anatomy the two
+ * families share, so the gesture is too. One step is the field's `step` —
+ * a whole unit of the currency by default — and the minor units the request
+ * carries are the moved amount's, never the drag's distance.
+ */
+test('moves the amount by a horizontal drag over a scrub part, as the sibling does', () => {
+  assert.deepEqual(contract.scrub, numberField.scrub);
+  assert.ok(contract.stateModel.value.reasons.includes(contract.scrub.reason));
+  assert.deepEqual(contract.dataAttributes, numberField.dataAttributes);
 });

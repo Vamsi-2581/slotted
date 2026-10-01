@@ -15,7 +15,11 @@ import type {
   CurrencyFieldVariant,
 } from './currency-field-defaults';
 import { SlCurrencyFieldInput } from './currency-field-input';
-import { SlCurrencyFieldEnd, SlCurrencyFieldStart } from './currency-field-parts';
+import {
+  SlCurrencyFieldEnd,
+  SlCurrencyFieldScrub,
+  SlCurrencyFieldStart,
+} from './currency-field-parts';
 import { ANGULAR_CURRENCY_FIELD_DOCS, ANGULAR_CURRENCY_FIELD_TOKENS } from './currency-field.docs';
 
 interface CurrencyFieldStoryArgs {
@@ -40,6 +44,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     range: Range,
     stepper: Stepper,
     adornments: Adornments,
+    scrub: Scrub,
     states: States,
     content: Content,
     composition: Composition,
@@ -51,6 +56,7 @@ const DIRECTIVES = [
   SlCurrencyField,
   SlCurrencyFieldEnd,
   SlCurrencyFieldInput,
+  SlCurrencyFieldScrub,
   SlCurrencyFieldStart,
   SlField,
   SlFieldDescription,
@@ -489,6 +495,49 @@ export const Adornments: Story = {
                currencyDisplay="none"
              />
              <span slCurrencyFieldEnd>por mês</span>
+           </div>`,
+        ),
+    ),
+  }),
+};
+
+export const Scrub: Story = {
+  parameters: scenario('scrub'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'The symbol as the drag mark',
+        'Press R$ and drag sideways: two pixels per real, Shift for ten. The mark lifts to the amount’s ink under the pointer, and the frame carries data-scrubbing while the drag lasts.',
+        `<div slCurrencyField>
+           <span slCurrencyFieldStart><span slCurrencyFieldScrub>R$</span></span>
+           <input
+             slCurrencyFieldInput
+             aria-label="Preço"
+             currency="BRL"
+             currencyDisplay="none"
+             locale="pt-BR"
+             defaultValue="1480"
+             min="0"
+           />
+         </div>`,
+      ) +
+        scene(
+          'A coarser step, a bounded range',
+          'step is ten reais and sensitivity four pixels, so the drag is slow and lands on round amounts; the budget stops at its bounds whatever the pointer does.',
+          `<div slCurrencyField>
+             <span slCurrencyFieldStart><span slCurrencyFieldScrub [sensitivity]="4">R$</span></span>
+             <input
+               slCurrencyFieldInput
+               aria-label="Orçamento"
+               currency="BRL"
+               currencyDisplay="none"
+               locale="pt-BR"
+               defaultValue="250"
+               min="0"
+               max="1000"
+               step="10"
+             />
            </div>`,
         ),
     ),

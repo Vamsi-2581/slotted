@@ -24,7 +24,8 @@ export const REACT_CURRENCY_FIELD_TOKENS = currencyFieldTokens.map((name) => ({
 }));
 
 const imports: ReferenceImport = {
-  source: "import { CurrencyField, CurrencyFieldDefaultsProvider } from '@slotted/react';",
+  source:
+    "import { CurrencyField, CurrencyFieldDefaultsProvider, CurrencyFieldScrub } from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -55,6 +56,13 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'An adornment after the amount: a currency code, a period, or a consumer’s own currency picker until the select family exists.',
+  },
+  {
+    part: 'scrub',
+    element: 'span (CurrencyFieldScrub)',
+    required: false,
+    purpose:
+      'A mark in start or end that moves the amount when it is dragged sideways: one step per sensitivity pixels towards the inline end, largeStep with Shift, smallStep with Alt. It carries data-scrubbing while dragged, as the frame does, and is hidden from assistive technology because the arrow keys on the input are the same movement.',
   },
   {
     part: 'stepper',
@@ -251,6 +259,35 @@ const scenes: ReferenceSceneMeta[] = [
   end="por mês"
   locale="pt-BR"
   start="R$"
+/>;`,
+    }),
+  },
+  {
+    id: 'scrub',
+    title: 'Drag the symbol to move the amount',
+    note: 'The sibling’s gesture on a currency mark. Press R$ and drag sideways: two pixels per step of one real, Shift for ten, Alt for ten centavos. A right-to-left document steps up towards the left, the inline end.',
+    snippet: defineSnippet({
+      id: 'currency-field-react-scrub',
+      language: 'tsx',
+      label: 'The symbol beside the amount, as the drag mark',
+      source: `<CurrencyField
+  currency="BRL"
+  currencyDisplay="none"
+  defaultValue={1480}
+  locale="pt-BR"
+  min={0}
+  start={<CurrencyFieldScrub>R$</CurrencyFieldScrub>}
+/>;
+
+<CurrencyField
+  currency="BRL"
+  currencyDisplay="none"
+  defaultValue={250}
+  locale="pt-BR"
+  max={1000}
+  min={0}
+  start={<CurrencyFieldScrub sensitivity={4}>R$</CurrencyFieldScrub>}
+  step={10}
 />;`,
     }),
   },
@@ -517,6 +554,13 @@ export const REACT_CURRENCY_FIELD_DOCS = {
         '—',
         'CurrencyField',
         'An adornment after the amount: a currency code, a period, or a consumer’s own currency picker',
+      ],
+      [
+        'CurrencyFieldScrub sensitivity',
+        'number',
+        '2',
+        'CurrencyFieldScrub',
+        'Pixels of horizontal travel per step. A wide range wants fewer pixels per step; a fine one, more',
       ],
       [
         'disabled',

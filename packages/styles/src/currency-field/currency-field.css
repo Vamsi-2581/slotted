@@ -307,6 +307,48 @@
     padding-inline: calc(var(--_icon-size) / 8);
   }
 
+  /**
+   * A mark that moves the amount when it is dragged sideways — the sibling's
+   * gesture, drawn as the sibling draws it. The adornment holding it stands
+   * the frame's full height, so the target is the frame's height rather than
+   * the mark's.
+   *
+   * Hover lifts the mark from the adornments' quiet ink to the value's: the
+   * mark is not a button, it has no ground to change, and the cursor alone
+   * said nothing a reader would look at.
+   */
+  [data-ui='currency-field']
+    > :is([data-part='start'], [data-part='end']):has(> [data-part='scrub']) {
+    align-self: stretch;
+  }
+
+  [data-ui='currency-field'] [data-part='scrub'] {
+    align-items: center;
+    align-self: stretch;
+    cursor: ew-resize;
+    display: inline-flex;
+    gap: var(--slotted-space-2, 0.25rem);
+    /* The drag is the gesture; a pan or a text selection would take it. */
+    touch-action: none;
+    transition: color var(--slotted-control-transition-duration)
+      var(--slotted-control-transition-easing);
+    /* Its own bidi run, like the adornment around it: as a flex container its
+       text is a new block, and `R$` in a right-to-left document read `$R`. */
+    unicode-bidi: plaintext;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  [data-ui='currency-field']:not([data-disabled]):not([data-readonly])
+    [data-part='scrub']:is(:hover, [data-scrubbing]) {
+    color: var(--slotted-currency-field-scrub-active-color, var(--slotted-text, CanvasText));
+  }
+
+  [data-ui='currency-field']:is([data-disabled], [data-readonly]) [data-part='scrub'] {
+    cursor: default;
+    touch-action: auto;
+  }
+
   /* ── The two steppers ─────────────────────────────────────────────────
    *
    * Withdrawn by default on this family — an invoice total is typed, not

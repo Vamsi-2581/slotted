@@ -231,3 +231,12 @@ export interface CurrencyFieldProps extends Omit<
    */
   wheel?: boolean | undefined;
 }
+
+/**
+ * A mark in `start` or `end` that moves the amount when it is dragged
+ * sideways. A native `span`: every prop reaches it.
+ */
+export interface CurrencyFieldScrubProps extends ComponentPropsWithRef<'span'> {
+  /** Pixels of horizontal travel per step. Defaults to 2. */
+  sensitivity?: number | undefined;
+}

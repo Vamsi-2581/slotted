@@ -6,6 +6,7 @@ import {
   DestroyRef,
   inject,
   input,
+  signal,
   ViewEncapsulation,
 } from '@angular/core';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
@@ -148,6 +149,7 @@ export type {
     '[attr.data-disabled]': "control()?.resolvedDisabled() === true ? '' : null",
     '[attr.data-invalid]': "control()?.resolvedInvalid() === true ? '' : null",
     '[attr.data-readonly]': "control()?.resolvedReadOnly() === true ? '' : null",
+    '[attr.data-scrubbing]': "scrubbing() ? '' : null",
   },
 })
 export class SlCurrencyField {
@@ -194,8 +196,11 @@ export class SlCurrencyField {
     () => this.decrementLabel() ?? this.defaults.decrementLabel,
   );
 
+  /** Whether a `slCurrencyFieldScrub` inside is being dragged. */
+  readonly scrubbing = signal(false);
+
   /** A control nobody can change has two buttons that would lie about it. */
-  private readonly inert = computed(() => {
+  readonly inert = computed(() => {
     const control = this.control();
     return control?.resolvedDisabled() === true || control?.resolvedReadOnly() === true;
   });

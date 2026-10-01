@@ -1,4 +1,4 @@
-export { CurrencyField } from './currency-field';
+export { CurrencyField, CurrencyFieldScrub } from './currency-field';
 export {
   CURRENCY_FIELD_DECREMENT_LABEL,
   CURRENCY_FIELD_INCREMENT_LABEL,
@@ -15,6 +15,7 @@ export type {
   CurrencyFieldHandle,
   CurrencyFieldProps,
   CurrencyFieldRootProps,
+  CurrencyFieldScrubProps,
   CurrencyFieldSize,
   CurrencyFieldStepper,
   CurrencyFieldVariant,

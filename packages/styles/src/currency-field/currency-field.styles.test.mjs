@@ -319,3 +319,19 @@ test('renders the amounts the family exists to hold', () => {
   assert.match(fragment, /\(\$1,234\.56\)/, 'no scene shows an accounting negative');
   assert.match(fragment, /Reais brasileiros/, 'no scene shows the currency written as a name');
 });
+
+/**
+ * The sibling's drag mark, with one rule the sibling's single letters never
+ * needed: the mark is a bidi run of its own, so `R$` stays `R$` in rtl.
+ */
+test('draws the scrub mark as a horizontal drag that keeps its own reading order', () => {
+  const mark = rule(`${ui} [data-part='scrub']`);
+  assert.match(mark, /cursor:ew-resize/);
+  assert.match(mark, /touch-action:none/);
+  assert.match(mark, /unicode-bidi:plaintext/);
+  assert.match(mark, /user-select:none/);
+  assert.match(
+    rule(`${ui}:is([data-disabled],[data-readonly]) [data-part='scrub']`),
+    /cursor:default/,
+  );
+});

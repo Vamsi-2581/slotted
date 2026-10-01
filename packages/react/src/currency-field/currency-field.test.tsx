@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/currency-field/contract.json';
 import { Field, FieldError, FieldLabel } from '../field';
-import { CurrencyField } from './currency-field';
+import { CurrencyField, CurrencyFieldScrub } from './currency-field';
 import { CurrencyFieldDefaultsProvider } from './currency-field-defaults';
 import type { CurrencyFieldHandle } from './currency-field.types';
 
@@ -831,5 +831,117 @@ describe('an application that decides once', () => {
     expect(first).toHaveAttribute('data-stepper', 'split');
     expect(first).toHaveAttribute('data-variant', 'subtle');
     expect(second).toHaveAttribute('data-align', 'end');
+  });
+});
+
+describe('CurrencyFieldScrub', () => {
+  const scrubPart = () => document.querySelector('[data-part="scrub"]') as HTMLElement;
+  const drag = (from: number, ...moves: { clientX: number; shiftKey?: boolean }[]) => {
+    fireEvent.pointerDown(scrubPart(), { button: 0, clientX: from, pointerId: 1 });
+    for (const move of moves) fireEvent.pointerMove(scrubPart(), { pointerId: 1, ...move });
+    fireEvent.pointerUp(scrubPart(), { pointerId: 1 });
+  };
+  const mark = <CurrencyFieldScrub>R$</CurrencyFieldScrub>;
+
+  it('moves the amount one step per two pixels and carries its minor units', () => {
+    const onValueChange = vi.fn();
+    render(
+      <CurrencyField
+        aria-label="Valor"
+        currency="BRL"
+        currencyDisplay="none"
+        defaultValue={10}
+        locale="pt-BR"
+        onValueChange={onValueChange}
+        start={mark}
+      />,
+    );
+    drag(100, { clientX: 101 }, { clientX: 106 }, { clientX: 104 });
+    expect(control().value).toBe('12,00');
+    expect(
+      onValueChange.mock.calls.map(([value, request]) => [
+        value,
+        request.reason,
+        request.minorUnits,
+      ]),
+    ).toEqual([
+      [13, 'pointer', 1300],
+      [12, 'pointer', 1200],
+    ]);
+  });
+
+  it('counts every move even when they arrive before a render', () => {
+    render(
+      <CurrencyField
+        aria-label="Valor"
+        currency="BRL"
+        currencyDisplay="none"
+        defaultValue={0}
+        locale="pt-BR"
+        start={<CurrencyFieldScrub sensitivity={1}>R$</CurrencyFieldScrub>}
+      />,
+    );
+    drag(0, { clientX: 1 }, { clientX: 2 }, { clientX: 3 });
+    expect(control().value).toBe('3,00');
+  });
+
+  it('moves by the large step under Shift and stays inside the range', () => {
+    render(
+      <CurrencyField
+        aria-label="Valor"
+        currency="BRL"
+        currencyDisplay="none"
+        defaultValue={50}
+        locale="pt-BR"
+        max={100}
+        start={mark}
+      />,
+    );
+    drag(0, { clientX: 2, shiftKey: true }, { clientX: 20, shiftKey: true });
+    expect(control().value).toBe('100,00');
+  });
+
+  it('marks the drag on the frame and on the part, and focuses the amount', () => {
+    render(<CurrencyField aria-label="Valor" currency="BRL" locale="pt-BR" start={mark} />);
+    fireEvent.pointerDown(scrubPart(), { button: 0, clientX: 0, pointerId: 1 });
+    expect(frameOf(control())).toHaveAttribute('data-scrubbing');
+    expect(scrubPart()).toHaveAttribute('data-scrubbing');
+    expect(control()).toHaveFocus();
+    fireEvent.pointerUp(scrubPart(), { pointerId: 1 });
+    expect(frameOf(control())).not.toHaveAttribute('data-scrubbing');
+  });
+
+  it('does nothing on a read-only control', () => {
+    render(
+      <CurrencyField
+        aria-label="Valor"
+        currency="BRL"
+        currencyDisplay="none"
+        defaultValue={5}
+        locale="pt-BR"
+        readOnly
+        start={mark}
+      />,
+    );
+    drag(0, { clientX: 40 });
+    expect(control().value).toBe('5,00');
+  });
+
+  it('is hidden from assistive technology and keeps native props', () => {
+    render(
+      <CurrencyField
+        aria-label="Valor"
+        currency="BRL"
+        locale="pt-BR"
+        start={
+          <CurrencyFieldScrub className="mark" title="Arraste">
+            R$
+          </CurrencyFieldScrub>
+        }
+      />,
+    );
+    expect(scrubPart()).toHaveAttribute('aria-hidden', 'true');
+    expect(scrubPart()).toHaveClass('mark');
+    expect(scrubPart()).toHaveAttribute('title', 'Arraste');
   });
 });

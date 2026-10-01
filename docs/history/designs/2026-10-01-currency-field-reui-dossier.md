@@ -123,3 +123,40 @@ Só `polish`: delta 1–5 aplicado; linha 6 (montante de destaque) adiada, sem c
 | hover, active, foco | — | deltas iguais aos de antes em claro, escuro e alto contraste (§ 4) | specimens `slotted-{light,dark,high-contrast}-720-…-291883.json` |
 
 Em escuro, o chão de desativado de uma metade no limite (`rgb(34 34 37)` contra o campo `rgb(19 19 22)`) fica a um passo do chão do campo; a tinta continua a distinguir o estado, como em `number-field`.
+
+## Parte `scrub`
+
+Corrida `build` aberta depois do commit `8b7cbdee`, que deu a `number-field` a parte `scrub`. O teste de contrato `draws the same frame the sibling numeric control draws` exige a mesma anatomia nas duas famílias.
+
+**Inventário.**
+
+- **Surveyed.** Base UI `NumberField.ScrubArea` (através de `c-number-field-1` a `-5`); `number-field` desta biblioteca.
+- **Table stakes.** Arrasto horizontal, sensibilidade em píxeis por passo, modificadores de passo.
+- **Differentiators.** Direção rtl; valor percorrido guardado numa referência.
+- **Gaps.** Bloqueio do ponteiro, já recusado em `number-field` pelo mesmo custo.
+
+**Decisão.** Adotar, com o bloco `scrub` de `number-field` sem alterações (o teste compara os dois blocos). Cada passo vale `step`, uma unidade inteira da moeda por omissão. `Shift` move `largeStep` e `Alt` move `smallStep`. O pedido carrega `minorUnits` do montante movido, calculado a partir do número e não da distância. A marca natural é o símbolo em `start` com `currencyDisplay="none"`: arrastar `R$` move o montante.
+
+**Custo.** O contrato ganha a parte, o bloco `scrub`, `commitOn` com `scrub`, `dataAttributes` com `data-scrubbing` e o cenário `scrub`. Não há consumidor a migrar.
+
+**Autoavaliação da parte `scrub`.** Specimen `specimen/currency-field/slotted-light-720-data-ui-currency-field-d-d9eb6d.json`, capturas `/tmp/currency-field-scrub-*.png`.
+
+| Critério | Resultado | Número |
+| -------- | --------- | ------ |
+| Grelha de píxeis | passa | marca 17,31 × 32, altura inteira; `start` estica até à moldura |
+| Hover | passa | `color` `rgb(91 107 127)` → `rgb(15 23 42)` |
+| Pressão | igual ao hover na própria marca | a pressão foca o `input` e acende o anel da moldura; `number-field` tem o mesmo delta |
+| Foco | não aplicável | `aria-hidden`, sem foco; as setas do `input` são o equivalente |
+| Transição | passa | `transition-property: color`, 120 ms em `--slotted-control-transition-duration` |
+| Movimento reduzido | passa | duração colapsada pelo tema |
+| Desativado | passa | tinta `rgb(100 116 139)` (`--slotted-disabled-foreground`), `cursor: default`, sem opacidade |
+| Esquemas | passa | alto contraste: marca a preto sob arrasto e no hover |
+| Densidade e RTL | passa depois da correção | rtl lia `$R`; `unicode-bidi: plaintext` repõe `R$` |
+| Alvo | passa | 32 de altura (a moldura menos a borda) |
+| Intenção | passa | um token novo, `--slotted-currency-field-scrub-active-color` |
+
+Testes: React 72/72 (`currency-field.test.tsx`, seis casos `CurrencyFieldScrub`), Angular 51/51 (quatro casos `slCurrencyFieldScrub`), contrato 31/31, estilos da família 26/26, `test:contracts` 2157/2157, `test:docs`, `typecheck` e `eslint` sem erros. O `minorUnits` do pedido segue o montante movido: 13 → 1300, 12 → 1200.
+
+Página de referência Angular (6007) auditada a 1280 px: 29 palcos, sem achados. A página React (6006) não desenha nenhuma demonstração, nem as de `button` e `number-field`: é o servidor, não a família.
+
+Auditoria Angular a 620 px: 29 palcos, sem achados. A página React continua sem leitura depois do reinício da 6006: os módulos respondem 200, mas o preview não inicializa (`body` sem classe, `#storybook-root` vazio), também em `button`.

@@ -25,7 +25,7 @@ export const ANGULAR_CURRENCY_FIELD_TOKENS = currencyFieldTokens.map((name) => (
 
 const imports: ReferenceImport = {
   source:
-    "import {\n  provideCurrencyFieldDefaults,\n  SlCurrencyField,\n  SlCurrencyFieldEnd,\n  SlCurrencyFieldInput,\n  SlCurrencyFieldStart,\n} from '@slotted/angular/currency-field';",
+    "import {\n  provideCurrencyFieldDefaults,\n  SlCurrencyField,\n  SlCurrencyFieldEnd,\n  SlCurrencyFieldInput,\n  SlCurrencyFieldScrub,\n  SlCurrencyFieldStart,\n} from '@slotted/angular/currency-field';",
   selector: '[slCurrencyField]',
   exportAs: 'slCurrencyField',
 };
@@ -58,6 +58,13 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'An adornment after the amount: a currency code, a period, or a consumer’s own currency picker until the select family exists.',
+  },
+  {
+    part: 'scrub',
+    element: 'any element carrying slCurrencyFieldScrub, inside an adornment',
+    required: false,
+    purpose:
+      'A mark that moves the amount when it is dragged sideways: one step per sensitivity pixels towards the inline end, the large step with Shift, the small one with Alt. It carries data-scrubbing while dragged, as the frame does, and is hidden from assistive technology because the arrow keys on the input are the same movement.',
   },
   {
     part: 'stepper',
@@ -284,6 +291,43 @@ const scenes: ReferenceSceneMeta[] = [
     currencyDisplay="none"
   />
   <span slCurrencyFieldEnd>por mês</span>
+</div>`,
+    }),
+  },
+  {
+    id: 'scrub',
+    title: 'Drag the symbol to move the amount',
+    note: 'The sibling’s gesture on a currency mark. Press R$ and drag sideways: two pixels per step of one real, Shift for ten, Alt for ten centavos. A right-to-left document steps up towards the left, the inline end.',
+    snippet: defineSnippet({
+      id: 'currency-field-angular-scrub',
+      language: 'angular',
+      label: 'The symbol beside the amount, as the drag mark',
+      source: `<div slCurrencyField>
+  <span slCurrencyFieldStart><span slCurrencyFieldScrub>R$</span></span>
+  <input
+    slCurrencyFieldInput
+    aria-label="Preço"
+    currency="BRL"
+    currencyDisplay="none"
+    locale="pt-BR"
+    defaultValue="1480"
+    min="0"
+  />
+</div>
+
+<div slCurrencyField>
+  <span slCurrencyFieldStart><span slCurrencyFieldScrub [sensitivity]="4">R$</span></span>
+  <input
+    slCurrencyFieldInput
+    aria-label="Orçamento"
+    currency="BRL"
+    currencyDisplay="none"
+    locale="pt-BR"
+    defaultValue="250"
+    min="0"
+    max="1000"
+    step="10"
+  />
 </div>`,
     }),
   },
@@ -577,6 +621,13 @@ export const ANGULAR_CURRENCY_FIELD_DOCS = {
         '—',
         'projected content',
         'An adornment after the amount: a currency code, a period, or a consumer’s own currency picker',
+      ],
+      [
+        'sensitivity',
+        'number',
+        '2',
+        'slCurrencyFieldScrub',
+        'Pixels of horizontal travel per step. A wide range wants fewer pixels per step; a fine one, more',
       ],
       [
         'disabled',

@@ -19,4 +19,8 @@ export type {
   CurrencyFieldVariant,
 } from './currency-field-defaults';
 export { SlCurrencyFieldInput } from './currency-field-input';
-export { SlCurrencyFieldEnd, SlCurrencyFieldStart } from './currency-field-parts';
+export {
+  SlCurrencyFieldEnd,
+  SlCurrencyFieldScrub,
+  SlCurrencyFieldStart,
+} from './currency-field-parts';

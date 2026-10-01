@@ -44,6 +44,7 @@
   "--slotted-currency-field-radius",
   "--slotted-currency-field-readonly-background",
   "--slotted-currency-field-readonly-border-color",
+  "--slotted-currency-field-scrub-active-color",
   "--slotted-currency-field-shadow",
   "--slotted-currency-field-stepper-active-background",
   "--slotted-currency-field-stepper-color",

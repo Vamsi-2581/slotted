@@ -3,6 +3,7 @@ import '@slotted/styles/currency-field/currency-field.css';
 import { createCurrencyFormat, MAX_AMOUNT_DIGITS, withAmount } from '@slotted/core/currency';
 import { clamp as clampNumber } from '@slotted/core/measure';
 import {
+  createScrub,
   STEP_REPEAT_DELAY,
   STEP_REPEAT_DELAY_COARSE,
   STEP_REPEAT_INTERVAL,
@@ -11,7 +12,9 @@ import {
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason } from '@slotted/core/state';
 import {
+  createContext,
   useCallback,
+  useContext,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
@@ -19,12 +22,26 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { KeyboardEvent, PointerEvent, ReactNode } from 'react';
+import type { KeyboardEvent, PointerEvent, PointerEventHandler, ReactNode } from 'react';
 
 import { useField } from '../field';
 import { Glyph, Icon } from '../icon';
 import { useCurrencyFieldDefaults } from './currency-field-defaults';
-import type { CurrencyFieldProps, CurrencyFieldRootProps } from './currency-field.types';
+import type {
+  CurrencyFieldProps,
+  CurrencyFieldRootProps,
+  CurrencyFieldScrubProps,
+} from './currency-field.types';
+
+/** What a `CurrencyFieldScrub` inside the frame asks of the field around it. */
+interface ScrubContext {
+  inert: boolean;
+  begin: (event: PointerEvent<HTMLElement>, sensitivity: number | undefined) => void;
+  drag: (event: PointerEvent<HTMLElement>) => void;
+  end: () => void;
+}
+
+const CurrencyFieldScrubContext = createContext<ScrubContext | null>(null);
 
 /**
  * A native button fires the same `click` for a pointer, for Space and for
@@ -250,9 +267,15 @@ export function CurrencyField({
   );
 
   const move = useCallback(
-    (direction: 1 | -1, amount: number, reason: ChangeReason, source: unknown) => {
+    (
+      direction: 1 | -1,
+      amount: number,
+      reason: ChangeReason,
+      source: unknown,
+      from: number | null = formatter.parse(text),
+    ) => {
       const next = stepNumber({
-        value: formatter.parse(text),
+        value: from,
         direction,
         step: amount,
         ...(min === undefined ? {} : { min }),
@@ -260,6 +283,7 @@ export function CurrencyField({
         ...(stepFrom === undefined ? {} : { stepFrom }),
       });
       settle(next, request(next, reason, source));
+      return next;
     },
     [formatter, max, min, request, settle, stepFrom, text],
   );
@@ -485,6 +509,56 @@ export function CurrencyField({
     }, delay);
   };
 
+  /**
+   * A drag over a `scrub` part. The amount it moves from is carried in a ref
+   * rather than read from the text: pointer moves arrive faster than renders,
+   * and two moves read against one stale text would count as one.
+   */
+  const [scrubbing, setScrubbing] = useState(false);
+  const scrub = useRef<{
+    travel: ReturnType<typeof createScrub>;
+    from: number | null;
+  } | null>(null);
+  const scrubContext: ScrubContext = {
+    inert,
+    begin: (event, sensitivity) => {
+      if (event.button !== 0 || inert) return;
+      /* No text selection, and the caret stays in the amount the drag moves. */
+      event.preventDefault();
+      inputRef.current?.focus();
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+      const element = inputRef.current;
+      scrub.current = {
+        travel: createScrub({
+          clientX: event.clientX,
+          ...(sensitivity === undefined ? {} : { sensitivity }),
+          rtl: element !== null && getComputedStyle(element).direction === 'rtl',
+        }),
+        from: formatter.parse(text),
+      };
+      setScrubbing(true);
+    },
+    drag: (event) => {
+      const active = scrub.current;
+      if (active === null) return;
+      const steps = active.travel.steps(event.clientX);
+      if (steps === 0) return;
+      const amount = event.shiftKey ? largeAmount : event.altKey ? smallAmount : step;
+      active.from = move(
+        steps > 0 ? 1 : -1,
+        amount * Math.abs(steps),
+        'pointer',
+        event,
+        active.from,
+      );
+    },
+    end: () => {
+      if (scrub.current === null) return;
+      scrub.current = null;
+      setScrubbing(false);
+    },
+  };
+
   const keyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     onKeyDown?.(event);
     if (event.defaultPrevented || inert) return;
@@ -688,7 +762,7 @@ export function CurrencyField({
    * order and the painted order are the same one.
    */
   const children: ReactNode = (
-    <>
+    <CurrencyFieldScrubContext.Provider value={scrubContext}>
       {resolvedStepper === 'split' ? steppers?.[0] : null}
       {start === undefined ? null : <span data-part="start">{start}</span>}
       {control}
@@ -704,7 +778,7 @@ export function CurrencyField({
           value={settled(current) === null ? '' : String(settled(current))}
         />
       )}
-    </>
+    </CurrencyFieldScrubContext.Provider>
   );
 
   const rootProps: CurrencyFieldRootProps = {
@@ -714,6 +788,7 @@ export function CurrencyField({
     ...(resolvedDisabled === true ? { 'data-disabled': '' } : {}),
     ...(resolvedInvalid === true ? { 'data-invalid': '' } : {}),
     ...(resolvedReadOnly === true ? { 'data-readonly': '' } : {}),
+    ...(scrubbing ? { 'data-scrubbing': '' } : {}),
     'data-align': resolvedAlign,
     'data-entry': resolvedEntry,
     'data-part': 'root',
@@ -724,4 +799,65 @@ export function CurrencyField({
   };
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
+}
+
+/**
+ * A mark that moves the amount when it is dragged sideways — the design
+ * tools' gesture, shared with `NumberFieldScrub`. Placed in `start` or `end`,
+ * where the field it belongs to is the frame around it; the currency symbol,
+ * with `currencyDisplay="none"` on the field, is the natural mark:
+ *
+ * ```tsx
+ * <CurrencyField currencyDisplay="none" start={<CurrencyFieldScrub>R$</CurrencyFieldScrub>} />
+ * ```
+ *
+ * Each `sensitivity` pixels towards the inline end is one `step` up; `Shift`
+ * moves by `largeStep` and `Alt` by `smallStep`, as on the keyboard. It is
+ * hidden from assistive technology by default and takes no focus: the
+ * input's arrow keys are the same movement.
+ */
+export function CurrencyFieldScrub({
+  'aria-hidden': ariaHidden = true,
+  onLostPointerCapture,
+  onPointerCancel,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+  sensitivity,
+  ...props
+}: CurrencyFieldScrubProps) {
+  const context = useContext(CurrencyFieldScrubContext);
+  if (context === null) {
+    throw new Error('CurrencyFieldScrub belongs in the start or end of a CurrencyField.');
+  }
+  const [active, setActive] = useState(false);
+  const finish =
+    (handler: PointerEventHandler<HTMLSpanElement> | undefined) =>
+    (event: PointerEvent<HTMLSpanElement>) => {
+      handler?.(event);
+      setActive(false);
+      context.end();
+    };
+
+  return (
+    <span
+      {...props}
+      aria-hidden={ariaHidden}
+      data-part="scrub"
+      data-scrubbing={active ? '' : undefined}
+      onLostPointerCapture={finish(onLostPointerCapture)}
+      onPointerCancel={finish(onPointerCancel)}
+      onPointerDown={(event) => {
+        onPointerDown?.(event);
+        if (event.defaultPrevented || context.inert || event.button !== 0) return;
+        context.begin(event, sensitivity);
+        setActive(true);
+      }}
+      onPointerMove={(event) => {
+        onPointerMove?.(event);
+        context.drag(event);
+      }}
+      onPointerUp={finish(onPointerUp)}
+    />
+  );
 }

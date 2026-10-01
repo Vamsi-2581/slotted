@@ -9,7 +9,11 @@ import contract from '../../../../specs/components/currency-field/contract.json'
 import { SlCurrencyField } from './currency-field';
 import { provideCurrencyFieldDefaults } from './currency-field-defaults';
 import { SlCurrencyFieldInput } from './currency-field-input';
-import { SlCurrencyFieldEnd, SlCurrencyFieldStart } from './currency-field-parts';
+import {
+  SlCurrencyFieldEnd,
+  SlCurrencyFieldScrub,
+  SlCurrencyFieldStart,
+} from './currency-field-parts';
 
 @Component({
   standalone: true,
@@ -18,6 +22,7 @@ import { SlCurrencyFieldEnd, SlCurrencyFieldStart } from './currency-field-parts
     SlCurrencyField,
     SlCurrencyFieldEnd,
     SlCurrencyFieldInput,
+    SlCurrencyFieldScrub,
     SlCurrencyFieldStart,
     SlField,
     SlFieldError,
@@ -796,5 +801,72 @@ describe('forms and escape hatches', () => {
     fixture.detectChanges();
 
     expect(input(fixture).getAttribute('aria-valuenow')).toBe('105');
+  });
+});
+
+describe('slCurrencyFieldScrub', () => {
+  const scrubTemplate = (attributes = '', sensitivity = '') =>
+    `<div slCurrencyField>
+       <span slCurrencyFieldStart><span slCurrencyFieldScrub ${sensitivity}>R$</span></span>
+       <input
+         slCurrencyFieldInput
+         aria-label="Valor"
+         currency="BRL"
+         currencyDisplay="none"
+         locale="pt-BR"
+         ${attributes}
+         (valueChange)="record($event)"
+       />
+     </div>`;
+  const pointer = (type: string, init: PointerEventInit = {}) =>
+    new PointerEvent(type, { bubbles: true, cancelable: true, button: 0, pointerId: 1, ...init });
+  const drag = (fixture: Fixture, from: number, ...moves: PointerEventInit[]) => {
+    const part = query(fixture, '[data-part="scrub"]');
+    part.dispatchEvent(pointer('pointerdown', { clientX: from }));
+    for (const move of moves) part.dispatchEvent(pointer('pointermove', move));
+    part.dispatchEvent(pointer('pointerup'));
+    fixture.detectChanges();
+  };
+
+  it('moves the amount one step per two pixels and carries its minor units', () => {
+    const fixture = renderTemplate(scrubTemplate('[defaultValue]="10"'));
+    drag(fixture, 100, { clientX: 101 }, { clientX: 106 }, { clientX: 104 });
+    expect(input(fixture).value).toBe('12,00');
+    expect(
+      fixture.componentInstance
+        .seen()
+        .map(({ value, reason, minorUnits }) => [value, reason, minorUnits]),
+    ).toEqual([
+      [13, 'pointer', 1300],
+      [12, 'pointer', 1200],
+    ]);
+  });
+
+  it('takes its sensitivity and the large step under Shift', () => {
+    const fixture = renderTemplate(
+      scrubTemplate('[defaultValue]="0" [max]="100"', '[sensitivity]="10"'),
+    );
+    drag(fixture, 0, { clientX: 10, shiftKey: true }, { clientX: 200, shiftKey: true });
+    expect(input(fixture).value).toBe('100,00');
+  });
+
+  it('marks the drag on the frame and on the part, and focuses the amount', () => {
+    const fixture = renderTemplate(scrubTemplate());
+    const part = query(fixture, '[data-part="scrub"]');
+    part.dispatchEvent(pointer('pointerdown', { clientX: 0 }));
+    fixture.detectChanges();
+    expect(query(fixture, '[data-ui="currency-field"]').hasAttribute('data-scrubbing')).toBe(true);
+    expect(part.hasAttribute('data-scrubbing')).toBe(true);
+    expect(document.activeElement).toBe(input(fixture));
+    part.dispatchEvent(pointer('pointerup'));
+    fixture.detectChanges();
+    expect(query(fixture, '[data-ui="currency-field"]').hasAttribute('data-scrubbing')).toBe(false);
+    expect(part.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('does nothing on a read-only control', () => {
+    const fixture = renderTemplate(scrubTemplate('[defaultValue]="5" readOnly'));
+    drag(fixture, 0, { clientX: 40 });
+    expect(input(fixture).value).toBe('5,00');
   });
 });

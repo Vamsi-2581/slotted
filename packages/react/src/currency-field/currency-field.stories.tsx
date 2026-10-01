@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 
 import { Field, FieldDescription, FieldError, FieldLabel } from '../field';
-import { CurrencyField } from './currency-field';
+import { CurrencyField, CurrencyFieldScrub } from './currency-field';
 import { CurrencyFieldDefaultsProvider } from './currency-field-defaults';
 import { Grid, Measure, Scene } from './currency-field-demo';
 import { REACT_CURRENCY_FIELD_DOCS, REACT_CURRENCY_FIELD_TOKENS } from './currency-field.docs';
@@ -21,6 +21,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     range: Range,
     stepper: Stepper,
     adornments: Adornments,
+    scrub: Scrub,
     states: States,
     content: Content,
     composition: Composition,
@@ -343,6 +344,46 @@ export const Adornments: Story = {
           end="por mês"
           locale="pt-BR"
           start="R$"
+        />
+      </Scene>
+    </Grid>
+  ),
+};
+
+export const Scrub: Story = {
+  parameters: scenario('scrub'),
+  render: () => (
+    <Grid columns={2}>
+      <Scene
+        label="The symbol as the drag mark"
+        layout="stack"
+        note="Press R$ and drag sideways: two pixels per real, Shift for ten. The mark lifts to the amount’s ink under the pointer, and the frame carries data-scrubbing while the drag lasts."
+      >
+        <CurrencyField
+          aria-label="Preço"
+          currency="BRL"
+          currencyDisplay="none"
+          defaultValue={1480}
+          locale="pt-BR"
+          min={0}
+          start={<CurrencyFieldScrub>R$</CurrencyFieldScrub>}
+        />
+      </Scene>
+      <Scene
+        label="A coarser step, a bounded range"
+        layout="stack"
+        note="step is ten reais and sensitivity four pixels, so the drag is slow and lands on round amounts; the budget stops at its bounds whatever the pointer does."
+      >
+        <CurrencyField
+          aria-label="Orçamento"
+          currency="BRL"
+          currencyDisplay="none"
+          defaultValue={250}
+          locale="pt-BR"
+          max={1000}
+          min={0}
+          start={<CurrencyFieldScrub sensitivity={4}>R$</CurrencyFieldScrub>}
+          step={10}
         />
       </Scene>
     </Grid>

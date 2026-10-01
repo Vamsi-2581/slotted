@@ -391,6 +391,51 @@
   </div>
 </section>
 
+<section data-scene="scrub">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div
+      data-ui="currency-field"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-align="end"
+      data-entry="cents"
+      data-stepper="none"
+    >
+      <span data-part="start"><span data-part="scrub" aria-hidden="true">R$</span></span>
+      <input data-part="input" type="text" role="spinbutton" value="1.480,00" />
+    </div>
+    <div
+      data-ui="currency-field"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-align="end"
+      data-entry="cents"
+      data-stepper="none"
+      data-scrubbing=""
+    >
+      <span data-part="start"
+        ><span data-part="scrub" aria-hidden="true" data-scrubbing="">R$</span></span
+      >
+      <input data-part="input" type="text" role="spinbutton" value="1.512,00" />
+    </div>
+    <div
+      data-ui="currency-field"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-align="end"
+      data-entry="cents"
+      data-stepper="none"
+      data-disabled=""
+    >
+      <span data-part="start"><span data-part="scrub" aria-hidden="true">R$</span></span>
+      <input data-part="input" type="text" role="spinbutton" value="1.480,00" disabled />
+    </div>
+  </div>
+</section>
+
 <section data-scene="states">
   <div data-ui="stack" data-part="root" data-gap="6">
     <div

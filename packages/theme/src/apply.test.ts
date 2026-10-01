@@ -48,6 +48,39 @@ describe('applyTheme', () => {
     ]);
     expect(document.head.querySelector('style[data-slotted-theme-sheet]')).toBeNull();
   });
+
+  it('leaves a later call in place when an earlier call for the same name disposes', () => {
+    const seen: ThemeChangeDetail[] = [];
+    const listener = (event: Event) => seen.push((event as CustomEvent<ThemeChangeDetail>).detail);
+    document.addEventListener(THEME_CHANGE_EVENT, listener);
+
+    const disposeFirst = applyTheme(theme('#1d4ed8'));
+    const disposeSecond = applyTheme(theme('#e11d48'));
+
+    disposeFirst();
+    const sheet = document.head.querySelector('style[data-slotted-theme-sheet="live"]');
+    expect(sheet).not.toBeNull();
+    expect(sheet!.textContent).toContain('--slotted-seed-accent: #e11d48;');
+    expect(seen).toEqual([
+      { name: 'live', applied: true },
+      { name: 'live', applied: true },
+    ]);
+
+    disposeFirst();
+    expect(document.head.querySelector('style[data-slotted-theme-sheet="live"]')).not.toBeNull();
+    expect(seen).toHaveLength(2);
+
+    disposeSecond();
+    expect(document.head.querySelector('style[data-slotted-theme-sheet="live"]')).toBeNull();
+    expect(seen).toEqual([
+      { name: 'live', applied: true },
+      { name: 'live', applied: true },
+      { name: 'live', applied: false },
+    ]);
+
+    disposeSecond();
+    expect(seen).toHaveLength(3);
+  });
 });
 
 describe('seedStyle', () => {

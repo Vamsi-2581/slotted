@@ -232,6 +232,10 @@
       "types": "./dist/types/transfer/index.d.ts",
       "import": "./dist/transfer.js"
     },
+    "./carousel": {
+      "types": "./dist/types/carousel/index.d.ts",
+      "import": "./dist/carousel.js"
+    },
     "./cascader": {
       "types": "./dist/types/cascader/index.d.ts",
       "import": "./dist/cascader.js"

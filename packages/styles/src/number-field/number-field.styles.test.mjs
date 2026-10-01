@@ -126,25 +126,46 @@ test('floors the stepper at the target minimum and bounds it by the frame', () =
 });
 
 /**
- * Flush against the frame's edge rather than inset: every pixel the column
- * gives back is a pixel off the smallest target in the library.
+ * The column stands one step inside the frame's edge with no rule of its own,
+ * and each half gives the inset back to the pointer up to the frame.
  */
-test('gives the end of the frame to a stacked stepper', () => {
+test('insets a stacked stepper and returns the inset to the pointer', () => {
   assert.match(rule(`${root}[data-stepper='stacked']`), /padding-inline-end:0/);
 
   const column = rule(`${ui}>[data-part='stepper']`);
   assert.match(column, /align-self:stretch/);
   assert.match(column, /flex-direction:column/);
   assert.match(column, /inline-size:var\(--_stepper-size\)/);
-  assert.match(column, /border-inline-start:var\(--slotted-control-border-width/);
+  assert.match(column, /padding-block:var\(--_column-inset\)/);
+  assert.match(column, /padding-inline-end:var\(--_column-inset\)/);
+  assert.doesNotMatch(column, /border/);
+
+  assert.match(
+    rule(`${ui}>[data-part='stepper']>[data-part='increment']::after`),
+    /inset-block:calc\(var\(--_column-inset\) \* -1\) 0/,
+  );
+  assert.match(
+    rule(`${ui}>[data-part='stepper']>[data-part='decrement']::after`),
+    /inset-block:0 calc\(var\(--_column-inset\) \* -1\)/,
+  );
 });
 
-test('splits the column into two halves with a line between them', () => {
-  assert.match(rule(`${ui}>[data-part='stepper']>button`), /block-size:50%/);
-  assert.match(
-    rule(`${ui}>[data-part='stepper']>[data-part='decrement']`),
-    /border-block-start:var\(--slotted-control-border-width/,
+test('splits the column into two concentric halves with no line between them', () => {
+  const half = rule(`${ui}>[data-part='stepper']>button`);
+  assert.match(half, /block-size:50%/);
+  assert.match(half, /border-radius:var\(--_column-radius\)/);
+  assert.doesNotMatch(declarations, /--slotted-number-field-stepper-border-color/);
+});
+
+/** The split buttons are `text-field`'s inner controls: square, inset, concentric. */
+test('insets the split buttons concentrically', () => {
+  assert.match(rule(`${root}[data-stepper='split']`), /padding-inline:var\(--_inset\)/);
+  const button = rule(
+    `${ui}[data-stepper='split']>[data-part='decrement'],${ui}[data-stepper='split']>[data-part='increment']`,
   );
+  assert.match(button, /block-size:var\(--_action-size\)/);
+  assert.match(button, /inline-size:var\(--_action-size\)/);
+  assert.match(button, /border-radius:var\(--_action-radius\)/);
 });
 
 /**

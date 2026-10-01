@@ -50,12 +50,38 @@
       )
     );
 
-    /* The radius of anything drawn against the inside of the frame's edge. */
-    --_inner-radius: max(
+    /**
+     * The split buttons are the inner controls `text-field` draws: the glyph
+     * plus a step of air, capped at the inner size, inset concentrically — the
+     * air beside a button equals the air above and below it, and its corner is
+     * the frame's less that air (docs/history/designs/2026-10-01-number-field-reui-dossier.md § 3).
+     */
+    --_action-size: var(
+      --slotted-number-field-action-size,
+      min(calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)), var(--_inner-size))
+    );
+    --_inset: max(
       0px,
       calc(
+        (var(--_height) - 2 * var(--slotted-control-border-width, 1px) - var(--_action-size)) / 2
+      )
+    );
+    --_action-radius: max(
+      var(--slotted-radius-xs, 2px),
+      calc(var(--slotted-number-field-radius, var(--slotted-control-radius, 4px)) - var(--_inset))
+    );
+
+    /**
+     * The stacked column is inset by the smallest step rather than by
+     * `--_inset`: two halves share the frame's height, and the larger air
+     * left each half 12 pixels tall at `md`.
+     */
+    --_column-inset: var(--slotted-space-1, 2px);
+    --_column-radius: max(
+      var(--slotted-radius-xs, 2px),
+      calc(
         var(--slotted-number-field-radius, var(--slotted-control-radius, 4px)) -
-          var(--slotted-control-border-width, 1px)
+          var(--_column-inset)
       )
     );
 
@@ -328,10 +354,13 @@
 
   /* ── Stacked: one column at the inline end ────────────────────────────
    *
-   * The column is flush against the frame's edge rather than inset, because
-   * every pixel it gives back is a pixel off the smallest target in the
-   * library. The frame gives up its end padding to it, and the column's own
-   * inline-start edge becomes the line between the value and the buttons.
+   * The column stands `--_column-inset` inside the frame's edge, in the block
+   * axis and at the inline end, with no rule of its own: each half paints a
+   * ground concentric with the frame when it is hovered, pressed or at its
+   * bound, and that ground is the only edge a half needs. The two lines the
+   * column drew before separated nothing — the value, the column and its
+   * halves are one surface. The paint gives the inset back to the pointer:
+   * each half's hit area reaches the frame below.
    */
   [data-ui='number-field'][data-part='root'][data-stepper='stacked'] {
     padding-inline-end: 0;
@@ -339,28 +368,36 @@
 
   [data-ui='number-field'] > [data-part='stepper'] {
     align-self: stretch;
-    border-inline-start: var(--slotted-control-border-width, 1px) solid
-      var(--slotted-number-field-stepper-border-color, var(--slotted-border-subtle, ButtonBorder));
+    box-sizing: content-box;
     display: flex;
     flex: 0 0 auto;
     flex-direction: column;
     inline-size: var(--_stepper-size);
+    padding-block: var(--_column-inset);
+    padding-inline-end: var(--_column-inset);
   }
 
   [data-ui='number-field'] > [data-part='stepper'] > button {
     /* Two halves of the column, whatever the frame's height turns out to be. */
     block-size: 50%;
+    border-radius: var(--_column-radius);
     inline-size: 100%;
   }
 
-  [data-ui='number-field'] > [data-part='stepper'] > [data-part='increment'] {
-    border-start-end-radius: var(--_inner-radius);
+  [data-ui='number-field']
+    > [data-part='stepper']
+    > :is([data-part='increment'], [data-part='decrement'])::after {
+    content: '';
+    inset-inline: 0 calc(var(--_column-inset) * -1);
+    position: absolute;
   }
 
-  [data-ui='number-field'] > [data-part='stepper'] > [data-part='decrement'] {
-    border-block-start: var(--slotted-control-border-width, 1px) solid
-      var(--slotted-number-field-stepper-border-color, var(--slotted-border-subtle, ButtonBorder));
-    border-end-end-radius: var(--_inner-radius);
+  [data-ui='number-field'] > [data-part='stepper'] > [data-part='increment']::after {
+    inset-block: calc(var(--_column-inset) * -1) 0;
+  }
+
+  [data-ui='number-field'] > [data-part='stepper'] > [data-part='decrement']::after {
+    inset-block: 0 calc(var(--_column-inset) * -1);
   }
 
   /**
@@ -385,34 +422,22 @@
 
   /* ── Split: one button at each end ────────────────────────────────────
    *
-   * The quantity picker's arrangement, and the only one whose targets clear
-   * the WCAG 2.2 minimum in both axes. The frame gives up its padding on both
+   * The quantity picker's arrangement. Each button is a square inner control
+   * inset concentrically, and the frame's padding is that inset on both
    * sides; the value takes the gap as its own inset and sits centred between
-   * the two buttons, which is where a quantity belongs.
+   * the two buttons, which is where a quantity belongs. No rule divides a
+   * button from the value: the ground it paints is its edge.
    */
   [data-ui='number-field'][data-part='root'][data-stepper='split'] {
     gap: 0;
-    padding-inline: 0;
+    padding-inline: var(--_inset);
   }
 
   [data-ui='number-field'][data-stepper='split'] > [data-part='decrement'],
   [data-ui='number-field'][data-stepper='split'] > [data-part='increment'] {
-    align-self: stretch;
-    inline-size: var(--_stepper-size);
-  }
-
-  [data-ui='number-field'][data-stepper='split'] > [data-part='decrement'] {
-    border-end-start-radius: var(--_inner-radius);
-    border-inline-end: var(--slotted-control-border-width, 1px) solid
-      var(--slotted-number-field-stepper-border-color, var(--slotted-border-subtle, ButtonBorder));
-    border-start-start-radius: var(--_inner-radius);
-  }
-
-  [data-ui='number-field'][data-stepper='split'] > [data-part='increment'] {
-    border-end-end-radius: var(--_inner-radius);
-    border-inline-start: var(--slotted-control-border-width, 1px) solid
-      var(--slotted-number-field-stepper-border-color, var(--slotted-border-subtle, ButtonBorder));
-    border-start-end-radius: var(--_inner-radius);
+    block-size: var(--_action-size);
+    border-radius: var(--_action-radius);
+    inline-size: var(--_action-size);
   }
 
   [data-ui='number-field'][data-stepper='split'] > [data-part='input'] {
@@ -448,25 +473,17 @@
   }
 
   /**
-   * On a finger the target is the comfortable size and nothing drawn stands
-   * taller than it is wide.
+   * On a finger the target is the comfortable size. The paint stays the inset
+   * square a mouse sees; only the hit area grows.
    *
-   * Split, each button is as wide as the frame is tall inside its border: the
-   * segment is square, and a 44-pixel frame no longer holds a strip 24 wide
-   * and 42 tall. Its hit area reaches 44 in both axes.
+   * Split, each button's hit area reaches 44 in both axes.
    *
    * Stacked, the two halves of one column cannot each be 44 tall inside a
    * 44-pixel frame. Each keeps its own half of the column in the block axis —
-   * what the column physically holds — and reaches 44 in the inline axis,
-   * over the value's edge and past the frame's. The column keeps the width a
-   * mouse sees, and each half is wider than it is tall.
+   * reaching the frame's edge, as on a fine pointer — and reaches 44 in the
+   * inline axis, over the value's edge and past the frame's.
    */
   @media (pointer: coarse) {
-    [data-ui='number-field'][data-stepper='split']
-      > :is([data-part='decrement'], [data-part='increment']) {
-      inline-size: calc(var(--_height) - 2 * var(--slotted-control-border-width, 1px));
-    }
-
     [data-ui='number-field'][data-stepper='split']
       > :is([data-part='decrement'], [data-part='increment'])::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
@@ -475,10 +492,7 @@
     [data-ui='number-field']
       > [data-part='stepper']
       > :is([data-part='increment'], [data-part='decrement'])::after {
-      content: '';
-      inset-block: 0;
       inset-inline: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
-      position: absolute;
     }
   }
 

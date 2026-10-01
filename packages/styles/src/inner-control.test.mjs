@@ -410,12 +410,15 @@ function coarseAudit(family, part) {
       !PSEUDO.test(selector) && /^(?:relative|absolute)$/.test(declarations.position ?? ''),
   );
   const both = halos.some(({ declarations }) => reads(declarations, 'inset'));
+  /* A stacked half reaches the comfortable size in the inline axis only; its
+     block axis is its share of the column, set outside the coarse query, and
+     no coarse rule grows it into the other half. */
   const stacked =
     STACKED.has(family) &&
     halos.some(
       ({ selector, declarations }) =>
         selector.includes("[data-part='stepper']") &&
-        declarations['inset-block'] === '0' &&
+        (declarations['inset-block'] ?? '0') === '0' &&
         reads(declarations, 'inset-inline'),
     );
   const haloReaches = drawn && contained && both && (!STACKED.has(family) || stacked);

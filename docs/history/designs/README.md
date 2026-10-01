@@ -143,3 +143,4 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 - [2026-10-01-carousel-reui-dossier.md](2026-10-01-carousel-reui-dossier.md)
 - [2026-10-01-carousel-motion-reui-dossier.md](2026-10-01-carousel-motion-reui-dossier.md)
 - [2026-10-01-color-picker-reui-dossier.md](2026-10-01-color-picker-reui-dossier.md)
+- [2026-10-01-number-field-reui-dossier.md](2026-10-01-number-field-reui-dossier.md)

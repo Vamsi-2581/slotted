@@ -457,6 +457,14 @@ export const KNOWN_CAPABILITIES = [
    */
   'editing',
   /**
+   * The notation a value is written in, when the family lets the reader
+   * switch it: `color-picker` writes the same colour as hex, rgb, hsl or
+   * oklch, and the string it hands back is in the notation shown. It is state
+   * a consumer may own — a design tool remembers the last notation — so it
+   * carries its own model beside the value's.
+   */
+  'format',
+  /**
    * Whether a component that advances on a timer of its own is advancing. It
    * is mutable and a consumer can own it: the reader stops the rotation with
    * a control, focus entering by keyboard stops it, and a product that
@@ -493,6 +501,7 @@ export const MUTABLE_CAPABILITIES = [
   'views',
   'layout',
   'editing',
+  'format',
   'playback',
 ];
 

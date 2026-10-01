@@ -249,6 +249,10 @@ test('workbench CSS offers a column whose children fill it', () => {
   );
 });
 
+test('workbench CSS offers a stack whose children take its width', () => {
+  assert.match(css, /\.slotted-demo-stack\[data-stretch\]\s*\{[\s\S]*?justify-items:\s*stretch/);
+});
+
 test('workbench CSS offers a scheme-bearing ground, and a ground that stacks', () => {
   assert.match(
     css,

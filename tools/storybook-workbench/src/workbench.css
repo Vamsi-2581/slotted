@@ -609,6 +609,17 @@
 }
 
 /**
+ * A column whose children take its width, inside a component of the story's
+ * own. A stage's block layout stretches its children, but a demonstration
+ * component is one child of the stage, and what it renders inside it had only
+ * the stack, which keeps each child at its own width: `message-scroller`'s
+ * frame and every row of a conversation were squeezed to their words.
+ */
+.slotted-demo-stack[data-stretch] {
+  justify-items: stretch;
+}
+
+/**
  * A column of examples that is a real list. A set of choices is a list, and a
  * family whose root can be substituted for a `li` needs somewhere valid to put
  * it — but a `ul` brings a marker and an inset with it, and a stray bullet in a

@@ -456,6 +456,18 @@ export const KNOWN_CAPABILITIES = [
    * `dashboard-grid` found the gap.
    */
   'editing',
+  /**
+   * Whether a component that advances on a timer of its own is advancing. It
+   * is mutable and a consumer can own it: the reader stops the rotation with
+   * a control, focus entering by keyboard stops it, and a product that
+   * remembers the reader's choice sets it back.
+   *
+   * It is not `pressed`, which is the state of a toggle the reader holds down:
+   * the APG gives the rotation control a label that changes with the action
+   * and no pressed state. It is not `open` or `current`. `carousel` found the
+   * gap; `media-player` holds the same value for its own playback.
+   */
+  'playback',
 ];
 
 /** Capabilities that hold state a consumer can own, and therefore need a model. */
@@ -481,6 +493,7 @@ export const MUTABLE_CAPABILITIES = [
   'views',
   'layout',
   'editing',
+  'playback',
 ];
 
 export function strongestState(states) {

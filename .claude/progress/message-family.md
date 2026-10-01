@@ -9,6 +9,7 @@
   | `7782382f` | propriedades de runtime |
   | `73de3e59` | primitivo do workbench |
   | `83224f64` | as duas famílias |
+  | `fa06a98f` | streaming palavra a palavra (`@slotted/core/text-stream`, parte `stream`) |
 
 - Testes da família a passar. `turbo verify --affected` falha só fora destas famílias:
 

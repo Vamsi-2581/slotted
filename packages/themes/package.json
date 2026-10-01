@@ -7,13 +7,25 @@
     "dist"
   ],
   "exports": {
-    "./default.css": "./dist/default.css"
+    "./default.css": "./dist/default.css",
+    "./default": {
+      "types": "./dist/default.d.ts",
+      "import": "./dist/default.js"
+    }
   },
   "scripts": {
-    "build": "node ../../scripts/generate-icon-glyphs.mjs --theme src/default && slotted-build-theme src/default/values.json dist/default.css",
+    "build": "node ../../scripts/generate-icon-glyphs.mjs --theme src/default && slotted-build-theme src/default/theme.mjs --out dist",
     "test": "node --test test/*.test.mjs",
-    "typecheck": "node --check test/theme.test.mjs && node --check test/default-theme.test.mjs",
+    "typecheck": "node --check src/default/theme.mjs && node --check test/theme.test.mjs && node --check test/default-theme.test.mjs && node --check test/reproduction.test.mjs && node --check test/resolve.test.mjs && node --check test/foundation-doc.test.mjs",
     "verify": "pnpm build && pnpm test && pnpm typecheck"
+  },
+  "peerDependencies": {
+    "@slotted/theme": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@slotted/theme": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@slotted/theme": "workspace:*"

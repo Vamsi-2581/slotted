@@ -13,21 +13,8 @@ const values = JSON.parse(
   readFileSync(join(import.meta.dirname, '../../themes/src/default/values.json'), 'utf8'),
 ) as Omit<ThemeDefinition, 'name' | 'seeds' | 'recipe'>;
 
-/** `values.json` keeps the derived colours as literals until Task 8; the recipe has to own them here. */
-const schemes = Object.fromEntries(
-  Object.entries(values.schemes ?? {}).map(([scheme, tokens]) => [
-    scheme,
-    Object.fromEntries(
-      Object.entries(tokens ?? {}).filter(
-        ([token]) => !(token in recipes.standard[scheme as keyof typeof recipes.standard]),
-      ),
-    ),
-  ]),
-) as NonNullable<ThemeDefinition['schemes']>;
-
 const theme = defineTheme({
   ...values,
-  schemes,
   name: 'test',
   seeds: {
     accent: '#1d4ed8',

@@ -1,14 +1,12 @@
 import { readFile } from 'node:fs/promises';
 
-import { contract } from '@slotted/theme/contract';
-import { themeConformance } from '@slotted/theme/theme-conformance';
+import { contract, flattenTheme } from '@slotted/theme';
+import { themeConformance } from '@slotted/theme/conformance';
 
-const theme = JSON.parse(
-  await readFile(new URL('../src/default/values.json', import.meta.url), 'utf8'),
-);
+import theme from '../src/default/theme.mjs';
 
 themeConformance({
   contract,
-  theme,
-  distUrl: new URL('../dist/default.css', import.meta.url),
+  theme: flattenTheme(theme),
+  css: await readFile(new URL('../dist/default.css', import.meta.url), 'utf8'),
 });

@@ -36,7 +36,7 @@ export const DEFAULT_SEEDS = {
   danger: '#dc2626',
 };
 
-/** The share the hover moves toward white, per scheme — the rule of the retired `tone-hover.mjs`. */
+/** The share the hover moves toward white, per scheme — the rule the JSON pipeline applied before the recipe. */
 const HOVER_SHARE = { light: 0.06, dark: 0.08, 'high-contrast': 0.06 };
 const REQUIREMENT = { light: 4.5, dark: 4.5, 'high-contrast': 7 };
 const TONE = /^--slotted-tone-(accent|secondary|success|warning|danger)-/;

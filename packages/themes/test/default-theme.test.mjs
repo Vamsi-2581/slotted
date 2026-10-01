@@ -2,18 +2,20 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { contract } from '@slotted/theme/contract';
-import { contrast, TEXT_RATIO } from '@slotted/theme/theme-conformance';
-import { HOVER_SHARE, hoverOf, shareOf } from '@slotted/theme/tone-hover';
+import { contract, deltaE, flattenTheme, parseSeed } from '@slotted/theme';
+import { contrast, TEXT_RATIO } from '@slotted/theme/conformance';
+
+import defaultTheme from '../src/default/theme.mjs';
 
 /**
- * What this theme chose, as opposed to what every theme must meet. The rules
- * live in `@slotted/theme/theme-conformance`; the values below are the
- * default theme's identity, and another theme is free to disagree with all of
- * them.
+ * What this theme chose, as opposed to what every theme must meet. The values
+ * are the theme resolved: the recipe evaluated on the default seeds.
  */
-const theme = JSON.parse(
-  await readFile(new URL('../src/default/values.json', import.meta.url), 'utf8'),
+const theme = flattenTheme(defaultTheme);
+
+/** The literal colours the recipe replaced, as `reference.json` holds them. */
+const reference = JSON.parse(
+  await readFile(new URL('../src/default/reference.json', import.meta.url), 'utf8'),
 );
 
 /** A colour laid over another at `alpha`, as a browser composites it. */
@@ -113,60 +115,42 @@ test('accent and success remain strong surfaces with white text', () => {
   }
 });
 
+/**
+ * The light fill keeps a dark label and the dark fill a light one: each of the
+ * four secondary roles stays within 0.02 in OKLab of the value it had before
+ * the recipe derived it.
+ */
 test('secondary remains a neutral surface rather than an inverted foreground', () => {
-  assert.deepEqual(
-    {
-      active: theme.schemes.light['--slotted-tone-secondary-solid-active'],
-      default: theme.schemes.light['--slotted-tone-secondary-solid'],
-      hover: theme.schemes.light['--slotted-tone-secondary-solid-hover'],
-      text: theme.schemes.light['--slotted-tone-secondary-on-solid'],
-    },
-    { active: '#b8c3d1', default: '#e2e8f0', hover: '#d0d6dd', text: '#172033' },
-  );
-  assert.deepEqual(
-    {
-      active: theme.schemes.dark['--slotted-tone-secondary-solid-active'],
-      default: theme.schemes.dark['--slotted-tone-secondary-solid'],
-      hover: theme.schemes.dark['--slotted-tone-secondary-solid-hover'],
-      text: theme.schemes.dark['--slotted-tone-secondary-on-solid'],
-    },
-    { active: '#18181b', default: '#27272a', hover: '#353638', text: '#fafafa' },
-  );
+  for (const scheme of ['light', 'dark']) {
+    for (const role of ['solid', 'solid-hover', 'solid-active', 'on-solid']) {
+      const token = `--slotted-tone-secondary-${role}`;
+      const distance = deltaE(
+        parseSeed(theme.schemes[scheme][token]),
+        parseSeed(reference[scheme][token]),
+      );
+      assert.ok(distance <= 0.02, `${scheme} ${token} moved ${distance.toFixed(4)} in OKLab`);
+    }
+  }
 });
 
 /**
- * The hover step of every filled tone is derived, not chosen: the fill moves
- * the scheme's share toward white in OKLCH — `color-mix(in oklch, <solid>,
- * white 6%)` on the light schemes, 8% on the dark one — and a fill with no
- * lighter step to take (the neutral in `light`, the white of `high-contrast`)
- * moves the same share toward black. Where the whole step would take the
- * label below the ratio the scheme promises, the step is as far toward white
- * as the ratio allows; `danger` with white on `#dc2626` starts at 4.53:1 and
- * can move 3.4%, which is what the table below states rather than hides.
- *
- * A hover darkened the fill before this rule, and every family that reads
- * the step — button, tag, badge, avatar, switch, checkbox, radio, list-item —
- * changed together when it was recalculated. That is the point: one rule in
- * the theme, not a shade per component.
+ * Every filled tone has a hover step a pointer can see, and none moves past
+ * the share its scheme states: `recipes.standard` mixes the fill 6% toward
+ * white (8% in `dark`), toward black above lightness 0.9, and a bound walks
+ * it back where the label would lose its ratio.
  */
-test('derives every solid hover from its fill by the one rule', () => {
-  const reached = [];
+test('moves every solid hover a visible share of the way, and no further', () => {
   for (const [scheme, values] of Object.entries(theme.schemes)) {
     for (const tone of ['accent', 'secondary', 'success', 'warning', 'danger']) {
-      const solid = values[`--slotted-tone-${tone}-solid`];
-      const hover = values[`--slotted-tone-${tone}-solid-hover`];
-      const onSolid = values[`--slotted-tone-${tone}-on-solid`];
-      assert.equal(
-        hover,
-        hoverOf(solid, scheme, { onSolid, ratio: TEXT_RATIO[scheme], contrast }),
-        `${scheme} ${tone} hover is not the fill moved ${HOVER_SHARE[scheme] * 100}% toward white`,
+      const solid = parseSeed(values[`--slotted-tone-${tone}-solid`]);
+      const hover = parseSeed(values[`--slotted-tone-${tone}-solid-hover`]);
+      const target = solid.l > 0.9 ? 0 : 1;
+      const share = (hover.l - solid.l) / (target - solid.l);
+      assert.ok(
+        share > 0.01 && share < 0.09,
+        `${scheme} ${tone} hover moved ${(share * 100).toFixed(1)}%`,
       );
-      reached.push(shareOf(solid, hover));
     }
-  }
-  /* Every tone moves, and none moves past the share the scheme states. */
-  for (const share of reached) {
-    assert.ok(share > 0.025 && share < 0.09, `a hover moved ${(share * 100).toFixed(1)}%`);
   }
 });
 

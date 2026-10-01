@@ -5,14 +5,13 @@
   "type": "module",
   "files": [
     "dist",
-    "src",
-    "!src/**/*.test.*",
+    "src/contract.json",
+    "src/generated/hooks.json",
     "cli",
-    "conformance",
-    "scripts/build-theme-cli.mjs"
+    "conformance"
   ],
   "bin": {
-    "slotted-build-theme": "./scripts/build-theme-cli.mjs"
+    "slotted-build-theme": "./cli/build-theme.mjs"
   },
   "exports": {
     ".": {
@@ -24,12 +23,7 @@
       "import": "./dist/layer-order.js"
     },
     "./contract.json": "./src/contract.json",
-    "./contract": "./src/contract.mjs",
-    "./render-theme": "./src/render-theme.mjs",
-    "./theme-conformance": "./src/theme-conformance.mjs",
     "./conformance": "./conformance/theme-conformance.mjs",
-    "./tone-hover": "./src/tone-hover.mjs",
-    "./validate-theme": "./src/validate-theme.mjs",
     "./styles.css": "./dist/styles.css"
   },
   "scripts": {

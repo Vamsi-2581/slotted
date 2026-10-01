@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { resolveTokens } from '../dist/index.js';
+import { resolveTokens } from '@slotted/theme';
 
 const theme = JSON.parse(
-  await readFile(new URL('../../themes/src/default/values.json', import.meta.url), 'utf8'),
+  await readFile(new URL('../src/default/values.json', import.meta.url), 'utf8'),
 );
 
 /**

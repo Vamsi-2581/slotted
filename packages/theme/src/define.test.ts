@@ -9,7 +9,7 @@ import { recipes } from './recipes';
 // resolves the path with `node:path` rather than `new URL(..., import.meta.url)`.
 const values = JSON.parse(
   readFileSync(join(import.meta.dirname, '../../themes/src/default/values.json'), 'utf8'),
-) as Omit<ThemeDefinition, 'name' | 'seeds' | 'recipe'> & { name?: string };
+) as Omit<ThemeDefinition, 'name' | 'seeds' | 'recipe'>;
 
 const SEEDS = {
   accent: '#1d4ed8',

@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import test from 'node:test';
 
+import { contract, flattenTheme } from '@slotted/theme';
+
 import {
   DEFAULT_STROKE_WIDTH,
   generateModule,
@@ -10,14 +12,12 @@ import {
   lucideIcon,
   pathOf,
   renderGlyph,
-} from './generate-icon-glyphs.mjs';
-import { centringOffset, inkBox, VIEW_BOX } from './glyph-ink.mjs';
+} from '../../../scripts/generate-icon-glyphs.mjs';
+import { centringOffset, inkBox, VIEW_BOX } from '../../../scripts/glyph-ink.mjs';
+import defaultTheme from '../src/default/theme.mjs';
 
-const ROOT = new URL('..', import.meta.url).pathname;
-const contract = JSON.parse(readFileSync(join(ROOT, 'packages/theme/src/contract.json'), 'utf8'));
-const theme = JSON.parse(
-  readFileSync(join(ROOT, 'packages/themes/src/default/values.json'), 'utf8'),
-);
+const ROOT = new URL('../../../', import.meta.url).pathname;
+const theme = flattenTheme(defaultTheme);
 const glyphs = JSON.parse(
   readFileSync(join(ROOT, 'packages/themes/src/default/glyphs.json'), 'utf8'),
 );

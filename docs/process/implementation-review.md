@@ -160,7 +160,7 @@ Fato verificado: `packages/themes/src/default/values.json` define `--slotted-ico
 
 Decisão: todo glifo em `theme.json` deve ser gerado a partir do SVG oficial do Lucide correspondente (`info`, `circle`, `circle-check`, `triangle-alert`, `circle-alert`, `x`, `chevron-down`, `check`, `search`, etc.), com `stroke-width` 2 e `viewBox 0 0 24 24`. Um script em `scripts/` deve gerar os data URIs a partir do pacote `lucide` para impedir divergência manual. Ícones usados nas stories devem vir de `lucide-react`/`@ng-icons/lucide`, nunca de SVG inline nas stories.
 
-Critério de aceite: `scripts/generate-icon-glyphs.mjs` (ou equivalente) existe, é chamado no build de tokens e o teste `scripts/verify-token-foundation.test.mjs` compara cada glifo com a fonte Lucide.
+Critério de aceite: `scripts/generate-icon-glyphs.mjs` (ou equivalente) existe, é chamado no build de tokens e o teste `packages/themes/test/foundation-doc.test.mjs` compara cada glifo com a fonte Lucide.
 
 ### R5 — Ícone de status não fica solto na superfície
 

@@ -274,6 +274,23 @@ export const RUNTIME_PROPERTY_PREFIXES = [
    */
   '--slotted-carousel-slides-per-view',
   '--slotted-carousel-autoplay-delay',
+  /**
+   * `color-picker` — the colour this instance holds, with and without its
+   * alpha, the hue it remembers when the colour has none, where the area's
+   * thumb stands (saturation and brightness, 0 to 1), how opaque the colour
+   * is (0 to 1), and the colour the panel opened with. Each is written on the
+   * root by the binding from the value `@slotted/core/color` parsed; a colour
+   * the reader picked is a fact about this instance, which no theme can hold.
+   */
+  '--slotted-color-picker-color',
+  '--slotted-color-picker-opaque',
+  '--slotted-color-picker-hue',
+  '--slotted-color-picker-x',
+  '--slotted-color-picker-y',
+  '--slotted-color-picker-alpha',
+  '--slotted-color-picker-previous',
+  '--slotted-color-picker-preset',
+  '--slotted-color-picker-contrast-with',
 ];
 
 /** Whether a custom property is written by script rather than by a theme. */

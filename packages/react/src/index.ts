@@ -22,6 +22,7 @@ export * from './checkbox';
 export * from './checkbox-group';
 export * from './code-block';
 export * from './collapsible';
+export * from './color-picker';
 export * from './combobox';
 export * from './column-manager';
 export * from './command-palette';

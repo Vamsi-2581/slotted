@@ -932,6 +932,17 @@ e redimensionamento de `dialog`) e `gauge` (arco de `progress-indicator`).
   `textarea[slPromptComposerInput]` com `ControlValueAccessor`, `providePromptComposerDefaults()`.
   Desenho em `docs/history/designs/2026-09-30-prompt-composer-design.md`.
 
+- `color-picker` — invocada em 2026-10-01 pelo pedido das entradas (fila, item 3). Dois membros
+  sob `data-ui="color-picker"`: `colorPicker` (área de saturação e brilho, canais `hue` e `alpha`,
+  `swatch` e `previous`, texto do valor numa moldura de `text-field`, `format` por `menu`,
+  `eyedropper` onde existe `EyeDropper`, `presets` em `radiogroup`, `contrast` contra
+  `contrastWith`, `gamut`) e `colorField` (`text-field` com a amostra em `start` a abrir o painel
+  num `popover`). Valor em string no formato atual (`hex`/`rgb`/`hsl`/`oklch`) com razões
+  `pointer`, `keyboard`, `select`, `programmatic`; `format` com par próprio. Núcleo
+  `@slotted/core/color`. React `ColorPicker` (partes por filhos) e `ColorField`; Angular
+  `div[slColorPicker]` e `div[slColorField]` com `ControlValueAccessor`. Desenho em
+  `docs/history/designs/2026-10-01-color-picker-design.md`.
+
 ## Regra de commit
 
 Uma família por commit, `pnpm check` por família e `pnpm check:full` por onda.

@@ -49,12 +49,20 @@ const DECORATIVE = new Map([
     'the round rotation control: one aria-hidden Glyph named by aria-label, settled to 0.94 under the press',
   ],
   [
-    'prompt-composer/submit',
-    'the round send: a glyph box named by aria-label, settled to 0.9 under the press — the padded send that holds words is excluded by its selector',
+    'color-picker/area-thumb',
+    'the thumbs of the area and the channels: discs of colour with no text, grown to 1.15 while the pointer drags them',
+  ],
+  [
+    'color-picker/preset',
+    'a preset swatch: a square of colour with no text, its name in aria-label, lifted to 1.08 under the pointer and settled to 0.94 under the press',
   ],
   [
     'message/caret',
     'the streaming dot: an aria-hidden empty span and never text, grown in from 0 and breathing to 0.72',
+  ],
+  [
+    'prompt-composer/submit',
+    'the round send: a glyph box named by aria-label, settled to 0.9 under the press — the padded send that holds words is excluded by its selector',
   ],
   [
     'cascader/indicator',

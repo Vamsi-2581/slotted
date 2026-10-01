@@ -60,6 +60,8 @@
     "./code-block/tokens.json": "./src/code-block/code-block.tokens.json",
     "./collapsible/collapsible.css": "./src/collapsible/collapsible.css",
     "./collapsible/tokens.json": "./src/collapsible/collapsible.tokens.json",
+    "./color-picker/color-picker.css": "./src/color-picker/color-picker.css",
+    "./color-picker/tokens.json": "./src/color-picker/color-picker.tokens.json",
     "./combobox/combobox.css": "./src/combobox/combobox.css",
     "./combobox/tokens.json": "./src/combobox/combobox.tokens.json",
     "./column-manager/column-manager.css": "./src/column-manager/column-manager.css",

@@ -91,6 +91,7 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `message`, `message-scroller` | [2026-09-30 §2](2026-09-30-message-design.md) | [2026-09-30](2026-09-30-message-design.md) | [2026-09-30](2026-09-30-message-self-assessment.md) |
 | `prompt-composer` | [2026-09-30 §1](2026-09-30-prompt-composer-design.md) | [2026-09-30](2026-09-30-prompt-composer-design.md) | [2026-09-30](2026-09-30-prompt-composer-self-assessment.md) |
 | `carousel` | [2026-10-01 §1–4](2026-10-01-carousel-design.md) | [2026-10-01 §5–10](2026-10-01-carousel-design.md) | [2026-10-01](2026-10-01-carousel-self-assessment.md) |
+| `color-picker` | [2026-10-01 §1](2026-10-01-color-picker-design.md) | [2026-10-01](2026-10-01-color-picker-design.md) | [2026-10-01](2026-10-01-color-picker-self-assessment.md) |
 
 ## Fundação
 
@@ -140,3 +141,4 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 - [2026-09-30-message-reui-dossier.md](2026-09-30-message-reui-dossier.md)
 - [2026-09-30-prompt-composer-reui-dossier.md](2026-09-30-prompt-composer-reui-dossier.md)
 - [2026-10-01-carousel-reui-dossier.md](2026-10-01-carousel-reui-dossier.md)
+- [2026-10-01-color-picker-reui-dossier.md](2026-10-01-color-picker-reui-dossier.md)

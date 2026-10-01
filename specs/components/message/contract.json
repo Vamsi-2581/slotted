@@ -94,9 +94,17 @@
     "reason": "ReUI's `c-message-7` draws one muted line that pulses. A log of steps says what has been done, not only that something is being done; a single step is the same card with one line."
   },
   "streaming": {
+    "text": "stream",
+    "chunk": "stream-chunk",
     "caret": "caret",
+    "engine": "@slotted/core/text-stream",
+    "arrival": "each arrival is split into words; every word is in the DOM at once and its paint enters after a delay of 28 ms per word, compressed so no word waits more than 320 ms",
+    "entrance": "opacity 0 to 1 by 45 %, blur 0.25em to 0, over --slotted-duration-long",
+    "caretShape": "a dot of round(0.6em, 2px), breathing between scale 1 and 0.72 over --slotted-duration-loop",
+    "replacement": "text that does not extend the previous replaces it at once",
+    "reducedMotion": "every arrival lands settled; the dot stands lit",
     "busy": "aria-busy on the root while sending or streaming",
-    "reason": "The words arrive from the transport; the family shows what it has received and a caret at its end. It does not replay text at a pace of its own."
+    "reason": "A transport serves a reply in bursts: a word, a pause, forty words. Painted as received, the burst lands as a block and the eye reads blocks. The family paints each burst as a short wave without holding any received word back from the DOM; the wave never trails the transport by more than 320 ms. The reviewer rejected the blinking bar and the block landing."
   },
   "group": {
     "part": "group",
@@ -336,6 +344,8 @@
         "quote",
         "quote-author",
         "more",
+        "stream",
+        "stream-chunk",
         "caret",
         "typing",
         "retry",

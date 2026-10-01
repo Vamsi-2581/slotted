@@ -872,7 +872,8 @@ e redimensionamento de `dialog`) e `gauge` (arco de `progress-indicator`).
 - `message` — invocada em 2026-09-30 pelo `/reui build` de mensagem, bolha e scroller. Dois membros
   sob `data-ui="message"`: `message` (`article` com `group`, `avatar`, `body`, `header`, `author`,
   `time`, `footer`, `receipt`, `actions`, `activity`, `activity-step`, `versions`) e `bubble` (raiz
-  `data-part="bubble"`, com `content`, `meta`, `quote`, `more`, `caret`, `typing`, `retry`,
+  `data-part="bubble"`, com `content`, `meta`, `quote`, `more`, `stream`, `stream-chunk`, `caret`,
+  `typing`, `retry`,
   `reactions`, `reaction`). `align` `start`/`end`, `layout` `bubble`/`thread`, `status`
   `sending`/`sent`/`delivered`/`read`/`failed`/`streaming`; `variant` `solid`/`soft`/`outline`/`plain`
   × `tone`, inferida pela linha quando omitida. Estados `current` (versões), `pressed` (reação),
@@ -882,7 +883,8 @@ e redimensionamento de `dialog`) e `gauge` (arco de `progress-indicator`).
   `docs/history/designs/2026-09-30-message-design.md`, dossiê em
   `docs/history/designs/2026-09-30-message-reui-dossier.md`, autoavaliação em
   `docs/history/designs/2026-09-30-message-self-assessment.md`. Saída animada de uma mensagem
-  removida fica aberta.
+  removida fica aberta. Texto em streaming entra palavra a palavra por `@slotted/core/text-stream`
+  (revisão de 2026-10-01).
 
 - `message-scroller` — invocada com `message`. Região focável à volta de um `log`: `root`,
   `viewport`, `content`, `item`, `separator` (fixo enquanto o dia está à vista), `unread`, `loader`,

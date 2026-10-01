@@ -59,7 +59,7 @@ Referência medida: ReUI `c-bubble-2`, `c-bubble-6`, `c-message-4`, `c-message-s
 | Mensagem de sistema | Ant X (`Bubble.System`) | `decline` | um `item` com `separator` ou `activity` sem mensagem: `<MessageScrollerItem><MessageScrollerSeparator>Ana entrou</MessageScrollerSeparator></MessageScrollerItem>` |
 | Estado vazio | AI Elements, Nebular | `defer to result-state` | `{messages.length ? <MessageScroller>…</MessageScroller> : <ResultState status="empty" … />}` |
 | Animação de entrada de linha | Nebular (`flyInOut`), shadcn (documentação) | `adopt` | `item` novo entra por `@starting-style` com `opacity` e `translate` |
-| Efeito de máquina de escrever | Ant X (`typing`) | `decline` | a revelação é do transporte; a família mostra o texto que recebe e o `caret`; um efeito a atrasar texto já recebido mostra menos do que existe |
+| Efeito de máquina de escrever | Ant X (`typing`) | `decline` | um ritmo próprio a atrasar texto já recebido mostra menos do que existe; a entrada por palavra de `stream` (§8, terceira revisão) põe cada palavra no DOM ao chegar e só escalona a pintura, no máximo 320 ms |
 
 ### 2.3 Differentiators
 
@@ -123,7 +123,9 @@ Raiz `div`, `data-ui="message"`, `data-part="bubble"`. Um `bubble` fora de uma `
 | `content` | `div`, `button` ou `a` | a superfície pintada |
 | `quote` | `div`, ou `button` quando salta | mensagem citada, com `quote-author` |
 | `more` | `button` | "Mostrar mais" / "Mostrar menos" quando o texto excede `maxLines` |
-| `caret` | `span` `aria-hidden` | cursor no fim do texto em streaming |
+| `stream` | `span` | o texto de uma resposta em streaming; cada chegada entra palavra a palavra |
+| `stream-chunk` | `span` | uma palavra ainda a entrar; volta a texto simples quando a entrada acaba |
+| `caret` | `span` `aria-hidden` | ponto no fim do texto em streaming |
 | `typing` | `span` `role="img"` | três pontos com rótulo, em onda |
 | `retry` | `button` | ao lado da superfície de uma mensagem que falhou; reenvia |
 | `reactions` | `div` `role="group"` | fila de reações sobre a aresta inferior |
@@ -249,8 +251,17 @@ Segunda revisão: o revisor recusou as notas "glifo + texto" por baixo das bolha
 - Falha: só a palavra, no tom de perigo, alinhada à aresta da bolha, sem glifo; o `retry` ao lado diz o resto.
 - Escrita: rasto de dois círculos no pé da bolha, do lado do remetente, no preenchimento e na aresta da própria bolha; entrada por `@starting-style`; rótulo "Marta está a escrever" no rodapé, fora da árvore de acessibilidade (o `typing` já tem o nome).
 
+Terceira revisão (2026-10-01): o revisor recusou a animação do texto em streaming: três caracteres a cada 45 ms e uma barra a piscar em dois passos.
+
+- Chegada: parte nova `bubble` › `stream` (React `BubbleStream`, Angular `span[slBubbleStream]`) com `text`, o texto inteiro recebido até agora. O estado é de `@slotted/core/text-stream`. Cada chegada é partida em palavras por `Intl.Segmenter`. Cada palavra entra no DOM no mesmo instante, como `stream-chunk`, com atraso de 28 ms em relação à anterior. Uma rajada grande comprime-se para nenhuma palavra esperar mais de 320 ms, e uma rajada começa depois da anterior, por isso as palavras nunca se ultrapassam. Uma palavra que acabou de entrar volta a texto simples.
+- Entrada: opacidade 0 → 1 e desfoque 0.16em → 0 juntos, em `--slotted-duration-long` com `--slotted-easing-standard`. A primeira versão, com tinta plena aos 45 % e desfoque de 0.25em, deixava cinco palavras opacas e borradas lado a lado (fotograma `react-1300`), lidas como uma linha manchada.
+- Ponto: o `caret` passa a ser um ponto de `round(0.6em, 2px)` (8 px a comfortable), centrado no meio da altura-x, que respira entre escala 1 e 0.72. Enquanto há palavras a entrar, o ponto sai com `filter: opacity(0)`. Uma palavra ainda invisível já ocupa o seu lugar na linha, e o ponto depois dela ficava solto a meio da linha seguinte (fotograma `react-2700` da primeira versão). Volta quando o transporte fica parado.
+- Demo: o transporte simulado chega em rajadas fixas, com pausas de 30 a 380 ms e rajadas de 1 a 12 palavras.
+- Movimento reduzido: todas as chegadas assentam de imediato e o ponto fica aceso.
+- Cenário verificado nos dois Storybooks: palavras a entrar com atrasos ≤ 320 ms; ponto de 8 × 8; nenhum `stream-chunk` e nenhum ponto depois do fim; nenhum `stream-chunk` sob `prefers-reduced-motion: reduce`.
+
 ## 9. Custo
 
 - Um glifo novo na escala partilhada (`check-check`), com a entrada em `docs/token-foundation.md`.
-- Um módulo novo em `packages/core` com observadores; o scroller depende de `ResizeObserver`, `MutationObserver` e `scrollend` (com recurso a temporizador onde falta).
+- Dois módulos novos em `packages/core`: `text-stream`, puro, e `message-scroller`, com observadores; o scroller depende de `ResizeObserver`, `MutationObserver` e `scrollend` (com recurso a temporizador onde falta).
 - A inferência de pintura pela linha (`align="end"` → `solid accent`) acopla o binding de `bubble` ao de `message`; uma bolha fora de uma mensagem cai nos defaults.

@@ -5,6 +5,7 @@ import {
   computed,
   DestroyRef,
   Directive,
+  effect,
   ElementRef,
   HostAttributeToken,
   inject,
@@ -12,10 +13,17 @@ import {
   model,
   output,
   signal,
+  untracked,
   ViewEncapsulation,
 } from '@angular/core';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { createControllable } from '@slotted/core/state';
+import {
+  advanceStream,
+  initialStream,
+  prefersReducedMotion,
+  settleStream,
+} from '@slotted/core/text-stream';
 import type { ChangeRequest } from '@slotted/core/state';
 
 import { SlMessage } from './message';
@@ -165,6 +173,71 @@ export class SlBubbleContent {
 })
 export class SlBubbleQuote {
   readonly author = input<string | undefined>(undefined);
+}
+
+/**
+ * The words of a streamed reply, entering as they arrive, on the `span` the
+ * page wrote.
+ *
+ * `text` is everything received so far. What extends the previous text is
+ * split into words by `@slotted/core/text-stream`; each word is in the DOM at
+ * once and enters as a `stream-chunk` after a delay of at most 320 ms, so a
+ * burst from the transport reads as a wave rather than a block. A chunk that
+ * has entered is folded back into plain text. Text that does not extend the
+ * previous — a regenerated reply — replaces it at once, and so does every
+ * arrival under reduced motion.
+ *
+ * Arrivals animate while the row is `streaming`, and the arrival that ends
+ * the stream with it; `animate` states it outright.
+ */
+@Component({
+  selector: 'span[slBubbleStream]',
+  standalone: true,
+  /* One line: a space or a line break between the text and the chunks would be painted. */
+  // prettier-ignore
+  template: `{{ stream().settled }}@for (chunk of stream().chunks; track chunk.key) {<span data-part="stream-chunk" [style.animation-delay.ms]="chunk.delay" (animationend)="settle(chunk.key)">{{ chunk.text }}</span>}`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  host: { 'data-part': 'stream' },
+})
+export class SlBubbleStream {
+  private readonly row = inject(SlMessage, { optional: true });
+  private readonly view = inject(ElementRef<HTMLElement>).nativeElement.ownerDocument.defaultView;
+
+  /** The whole reply received so far. Text that extends it enters word by word. */
+  readonly text = input.required<string>();
+  /** Let arrivals enter. Falls back to whether the row is `streaming`. */
+  readonly animate = input<boolean | undefined>(undefined);
+
+  private readonly streaming = computed(() => this.animate() ?? this.row?.status() === 'streaming');
+  protected readonly stream = signal(initialStream(''));
+  private started = false;
+  private wasStreaming = false;
+
+  constructor() {
+    effect(() => {
+      const text = this.text();
+      const streaming = this.streaming();
+      untracked(() => {
+        if (!this.started) {
+          this.started = true;
+          this.stream.set(initialStream(text));
+        } else {
+          this.stream.update((stream) =>
+            advanceStream(stream, text, {
+              animate: (streaming || this.wasStreaming) && !prefersReducedMotion(this.view),
+              now: typeof performance === 'undefined' ? 0 : performance.now(),
+            }),
+          );
+        }
+        this.wasStreaming = streaming;
+      });
+    });
+  }
+
+  protected settle(key: number) {
+    this.stream.update((stream) => settleStream(stream, key));
+  }
 }
 
 /** The caret at the end of the words that have arrived while a reply streams. */

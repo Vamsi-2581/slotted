@@ -1,4 +1,11 @@
 import { createControllable } from '@slotted/core/state';
+import {
+  advanceStream,
+  initialStream,
+  prefersReducedMotion,
+  settleStream,
+} from '@slotted/core/text-stream';
+import type { StreamState } from '@slotted/core/text-stream';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { ButtonHTMLAttributes, CSSProperties, MouseEvent, Ref, SyntheticEvent } from 'react';
 
@@ -13,6 +20,7 @@ import type {
   BubbleQuoteProps,
   BubbleReactionProps,
   BubbleRetryProps,
+  BubbleStreamProps,
   BubbleTypingProps,
   MessageChangeReason,
   MessagePartProps,
@@ -217,6 +225,64 @@ export function BubbleQuote({
     );
   }
   return <div {...rootProps} />;
+}
+
+/**
+ * The words of a streamed reply, entering as they arrive.
+ *
+ * `text` is everything received so far. What extends the previous text is
+ * split into words by `@slotted/core/text-stream`; each word is in the DOM at
+ * once and enters as a `stream-chunk` after a delay of at most 320 ms, so a
+ * burst from the transport reads as a wave rather than a block. A chunk that
+ * has entered is folded back into plain text. Text that does not extend the
+ * previous — a regenerated reply — replaces it at once, and so does every
+ * arrival under reduced motion.
+ *
+ * Arrivals animate while the row is `streaming`, and the arrival that ends
+ * the stream with it; `animate` states it outright.
+ */
+export function BubbleStream({ text, animate, render, ...nativeProps }: BubbleStreamProps) {
+  const message = useOptionalMessage();
+  const streaming = animate ?? message?.status === 'streaming';
+  const [current, setCurrent] = useState<{ stream: StreamState; streaming: boolean }>(() => ({
+    stream: initialStream(text),
+    streaming,
+  }));
+  /* Derived from the previous render, during render, so no frame paints the old text. */
+  let { stream } = current;
+  if (stream.text !== text || current.streaming !== streaming) {
+    const view = typeof window === 'undefined' ? null : window;
+    stream = advanceStream(stream, text, {
+      animate: (streaming || current.streaming) && !prefersReducedMotion(view),
+      now: typeof performance === 'undefined' ? 0 : performance.now(),
+    });
+    setCurrent({ stream, streaming });
+  }
+  const rootProps: MessageRootProps = {
+    ...nativeProps,
+    'data-part': 'stream',
+    children: (
+      <>
+        {stream.settled}
+        {stream.chunks.map((chunk) => (
+          <span
+            data-part="stream-chunk"
+            key={chunk.key}
+            onAnimationEnd={() =>
+              setCurrent((previous) => ({
+                ...previous,
+                stream: settleStream(previous.stream, chunk.key),
+              }))
+            }
+            style={{ animationDelay: `${chunk.delay}ms` }}
+          >
+            {chunk.text}
+          </span>
+        ))}
+      </>
+    ),
+  };
+  return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }
 
 /** The caret at the end of the words that have arrived while a reply streams. */

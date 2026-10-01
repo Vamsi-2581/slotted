@@ -37,6 +37,10 @@ const DECORATIVE = new Map([
   ],
   ['slider/thumb', 'the thumb: an empty control the press grows under the finger'],
   [
+    'message/caret',
+    'the streaming dot: an aria-hidden empty span and never text, grown in from 0 and breathing to 0.72',
+  ],
+  [
     'menu/indicator',
     'the check or the dot of a menu item: one aria-hidden Glyph and never text, grown in from 0.8 as the item is checked',
   ],

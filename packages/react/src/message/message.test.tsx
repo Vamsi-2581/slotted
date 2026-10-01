@@ -13,6 +13,7 @@ import {
   BubbleReaction,
   BubbleReactions,
   BubbleRetry,
+  BubbleStream,
   BubbleTyping,
   Message,
   MessageActions,
@@ -48,7 +49,7 @@ const everything = () => (
         <Bubble data-testid="bubble" maxLines={3}>
           <BubbleContent>
             <BubbleQuote author="Tiago">A conta não existe.</BubbleQuote>
-            Chega hoje à tarde.
+            <BubbleStream text="Chega hoje à tarde." />
             <BubbleCaret />
             <BubbleTyping />
             <BubbleMeta>
@@ -79,7 +80,8 @@ describe('Message', () => {
     expect(row).toHaveAttribute('data-ui', contract.ui);
     expect(row.tagName).toBe('ARTICLE');
     const parts = [...contract.members.message.parts, ...contract.members.bubble.parts].filter(
-      (part) => part !== 'root' && part !== 'more',
+      /* `more` draws only on overflow, `stream-chunk` only while a word enters: both have tests of their own. */
+      (part) => part !== 'root' && part !== 'more' && part !== 'stream-chunk',
     );
     for (const part of parts) {
       expect(document.querySelector(`[data-part="${part}"]`), part).not.toBeNull();
@@ -330,5 +332,57 @@ describe('Message', () => {
     );
     await act(async () => {});
     expect(screen.getByRole('article', { name: 'Mensagem de sistema' })).toBeInTheDocument();
+  });
+});
+
+describe('BubbleStream', () => {
+  const reply = (text: string, status?: 'streaming') => (
+    <Message aria-label="Assistente" {...(status === undefined ? {} : { status })}>
+      <MessageBody>
+        <Bubble>
+          <BubbleContent>
+            <BubbleStream data-testid="stream" text={text} />
+          </BubbleContent>
+        </Bubble>
+      </MessageBody>
+    </Message>
+  );
+
+  it('paints a finished reply as plain text, with nothing entering', () => {
+    render(reply('O p95 voltou a 260 ms.'));
+    const stream = screen.getByTestId('stream');
+    expect(stream).toHaveTextContent('O p95 voltou a 260 ms.');
+    expect(stream.querySelector('[data-part="stream-chunk"]')).toBeNull();
+  });
+
+  it('puts every word that arrives in the DOM at once, each entering after its delay', () => {
+    const { rerender } = render(reply('O ', 'streaming'));
+    rerender(reply('O serviço de impostos', 'streaming'));
+    const stream = screen.getByTestId('stream');
+    expect(stream).toHaveTextContent('O serviço de impostos');
+    const chunks = [...stream.querySelectorAll<HTMLElement>('[data-part="stream-chunk"]')];
+    expect(chunks.map((chunk) => chunk.textContent)).toEqual(['serviço ', 'de ', 'impostos']);
+    const delays = chunks.map((chunk) => Number.parseFloat(chunk.style.animationDelay));
+    expect(delays.slice(1).every((delay, index) => delay > (delays[index] ?? 0))).toBe(true);
+  });
+
+  it('folds a word back into the text once it has entered', () => {
+    const { rerender } = render(reply('', 'streaming'));
+    rerender(reply('um dois', 'streaming'));
+    const stream = screen.getByTestId('stream');
+    const last = [...stream.querySelectorAll('[data-part="stream-chunk"]')].at(-1);
+    if (last === undefined) throw new Error('no chunk entering');
+    /* jsdom has no AnimationEvent, so React listens for the prefixed name there. */
+    fireEvent(last, new Event('webkitAnimationEnd', { bubbles: true }));
+    expect(stream.querySelector('[data-part="stream-chunk"]')).toBeNull();
+    expect(stream).toHaveTextContent('um dois');
+  });
+
+  it('replaces a reply that does not extend the one received, at once', () => {
+    const { rerender } = render(reply('Primeira versão', 'streaming'));
+    rerender(reply('Outra', 'streaming'));
+    const stream = screen.getByTestId('stream');
+    expect(stream).toHaveTextContent(/^Outra$/);
+    expect(stream.querySelector('[data-part="stream-chunk"]')).toBeNull();
   });
 });

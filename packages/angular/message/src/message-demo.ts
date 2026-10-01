@@ -1,11 +1,13 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, input, signal } from '@angular/core';
 import { SlAvatar } from '@slotted/angular/avatar';
 import { SlButton, SlIconButton } from '@slotted/angular/button';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import { splitWords } from '@slotted/core/text-stream';
 
 import {
   SlBubble,
   SlBubbleCaret,
+  SlBubbleStream,
   SlBubbleContent,
   SlBubbleReaction,
   SlBubbleReactions,
@@ -41,6 +43,7 @@ export const MESSAGE_DEMO_PARTS = [
   SlAvatar,
   SlBubble,
   SlBubbleCaret,
+  SlBubbleStream,
   SlBubbleContent,
   SlBubbleMeta,
   SlBubbleReaction,
@@ -136,9 +139,18 @@ export class MessageVersionsDemo {
 }
 
 const STREAM =
-  'O serviço de impostos começou a repetir cada confirmação às 14:05, duas vezes a 400 ms cada, por isso o p95 de POST /api/checkout/confirm passou de 240 ms para 3,1 s. A base de dados nunca foi o gargalo.';
+  'O serviço de impostos começou a repetir cada confirmação às 14:05, duas vezes a 400 ms cada, por isso o p95 de POST /api/checkout/confirm passou de 240 ms para 3,1 s.\n\nA base de dados nunca foi o gargalo: as ligações ficaram abaixo de 40 % durante todo o incidente. Desliguei as repetições no cliente do serviço e o p95 voltou a 260 ms em dois minutos.';
 
-/** A reply that streams in, with its caret, and can be replayed. */
+/**
+ * A transport as a model serves one: mostly a word every few tens of
+ * milliseconds, now and then a pause and a burst of several words at once.
+ * The pattern is fixed, so every replay arrives the same way.
+ */
+const BURSTS = [1, 1, 2, 1, 1, 3, 1, 7, 1, 2, 1, 1, 1, 12, 2, 1, 1, 4, 1, 1, 2, 9];
+const PAUSES = [45, 30, 60, 35, 40, 50, 30, 240, 40, 35, 55, 30, 45, 380, 40, 30, 50, 120];
+const WORDS = splitWords(STREAM);
+
+/** A reply that streams in bursts, with its caret, and can be replayed. */
 @Component({
   selector: 'sl-message-stream-demo',
   imports: MESSAGE_DEMO_PARTS,
@@ -147,7 +159,7 @@ const STREAM =
       <div slMessageBody>
         <div slBubble variant="plain">
           <div slBubbleContent>
-            {{ text() }}
+            <span slBubbleStream [text]="text()"></span>
             @if (!done()) {
               <span slBubbleCaret></span>
             }
@@ -161,27 +173,30 @@ const STREAM =
   `,
 })
 export class MessageStreamDemo {
-  private readonly length = signal(0);
-  readonly text = computed(() => STREAM.slice(0, this.length()));
-  readonly done = computed(() => this.length() >= STREAM.length);
+  private readonly received = signal(0);
+  readonly text = computed(() => WORDS.slice(0, this.received()).join(''));
+  readonly done = computed(() => this.received() >= WORDS.length);
   private timer = 0;
+  private tick = 0;
 
   constructor() {
-    this.tick();
+    inject(DestroyRef).onDestroy(() => window.clearTimeout(this.timer));
+    this.replay();
   }
 
   replay() {
-    this.length.set(0);
-    this.tick();
+    window.clearTimeout(this.timer);
+    this.received.set(0);
+    this.tick = 0;
+    this.timer = window.setTimeout(() => this.next(), 400);
   }
 
-  private tick() {
-    window.clearTimeout(this.timer);
+  private next() {
+    const burst = BURSTS[this.tick % BURSTS.length] ?? 1;
+    this.received.update((value) => Math.min(WORDS.length, value + burst));
     if (this.done()) return;
-    this.timer = window.setTimeout(() => {
-      this.length.update((value) => value + 3);
-      this.tick();
-    }, 45);
+    this.timer = window.setTimeout(() => this.next(), PAUSES[this.tick % PAUSES.length] ?? 40);
+    this.tick += 1;
   }
 }
 

@@ -8,6 +8,7 @@ import contract from '../../../../specs/components/message/contract.json';
 import {
   SlBubble,
   SlBubbleCaret,
+  SlBubbleStream,
   SlBubbleContent,
   SlBubbleQuote,
   SlBubbleReaction,
@@ -36,6 +37,7 @@ import {
 const ALL = [
   SlBubble,
   SlBubbleCaret,
+  SlBubbleStream,
   SlBubbleContent,
   SlBubbleMeta,
   SlBubbleQuote,
@@ -84,7 +86,7 @@ const ALL = [
           <div slBubble id="bubble" [maxLines]="3">
             <div slBubbleContent>
               <div slBubbleQuote author="Tiago">A conta não existe.</div>
-              Chega hoje à tarde.
+              <span slBubbleStream text="Chega hoje à tarde."></span>
               <span slBubbleCaret></span>
               <span slBubbleTyping></span>
               <span slBubbleMeta>
@@ -134,7 +136,8 @@ describe('slMessage', () => {
     expect(row.getAttribute('data-ui')).toBe(contract.ui);
     expect(row.tagName).toBe('ARTICLE');
     const parts = [...contract.members.message.parts, ...contract.members.bubble.parts].filter(
-      (part) => part !== 'root' && part !== 'more',
+      /* `more` draws only on overflow, `stream-chunk` only while a word enters: both have tests of their own. */
+      (part) => part !== 'root' && part !== 'more' && part !== 'stream-chunk',
     );
     for (const part of parts) {
       expect(root.querySelector(`[data-part="${part}"]`), part).not.toBeNull();
@@ -234,5 +237,68 @@ describe('slMessage', () => {
     const { root } = mount();
     expect(root.querySelector('[data-part="actions"]')?.getAttribute('aria-label')).toBe('Actions');
     expect(root.querySelector('#row')?.getAttribute('data-layout')).toBe('thread');
+  });
+});
+
+@Component({
+  imports: [SlMessage, SlMessageBody, SlBubble, SlBubbleContent, SlBubbleStream],
+  template: `
+    <article slMessage aria-label="Assistente" [status]="status()">
+      <div slMessageBody>
+        <div slBubble>
+          <div slBubbleContent><span slBubbleStream id="stream" [text]="text()"></span></div>
+        </div>
+      </div>
+    </article>
+  `,
+})
+class StreamReply {
+  readonly text = signal('');
+  readonly status = signal<MessageStatus | undefined>('streaming');
+}
+
+function mountStream(text: string, status: MessageStatus | undefined) {
+  const fixture = TestBed.createComponent(StreamReply);
+  fixture.componentInstance.text.set(text);
+  fixture.componentInstance.status.set(status);
+  fixture.detectChanges();
+  const stream = fixture.nativeElement.querySelector('#stream') as HTMLElement;
+  const chunks = () => [...stream.querySelectorAll<HTMLElement>('[data-part="stream-chunk"]')];
+  return { fixture, stream, chunks };
+}
+
+describe('slBubbleStream', () => {
+  it('paints a finished reply as plain text, with nothing entering', () => {
+    const { stream, chunks } = mountStream('O p95 voltou a 260 ms.', undefined);
+    expect(stream.textContent).toBe('O p95 voltou a 260 ms.');
+    expect(chunks()).toEqual([]);
+  });
+
+  it('puts every word that arrives in the DOM at once, each entering after its delay', () => {
+    const { fixture, stream, chunks } = mountStream('O ', 'streaming');
+    fixture.componentInstance.text.set('O serviço de impostos');
+    fixture.detectChanges();
+    expect(stream.textContent).toBe('O serviço de impostos');
+    expect(chunks().map((chunk) => chunk.textContent)).toEqual(['serviço ', 'de ', 'impostos']);
+    const delays = chunks().map((chunk) => Number.parseFloat(chunk.style.animationDelay));
+    expect(delays.slice(1).every((delay, index) => delay > (delays[index] ?? 0))).toBe(true);
+  });
+
+  it('folds a word back into the text once it has entered', () => {
+    const { fixture, stream, chunks } = mountStream('', 'streaming');
+    fixture.componentInstance.text.set('um dois');
+    fixture.detectChanges();
+    chunks().at(-1)?.dispatchEvent(new Event('animationend'));
+    fixture.detectChanges();
+    expect(chunks()).toEqual([]);
+    expect(stream.textContent).toBe('um dois');
+  });
+
+  it('replaces a reply that does not extend the one received, at once', () => {
+    const { fixture, stream, chunks } = mountStream('Primeira versão', 'streaming');
+    fixture.componentInstance.text.set('Outra');
+    fixture.detectChanges();
+    expect(stream.textContent).toBe('Outra');
+    expect(chunks()).toEqual([]);
   });
 });

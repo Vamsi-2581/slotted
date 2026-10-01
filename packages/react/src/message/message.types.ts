@@ -121,6 +121,14 @@ export interface MessageSpanProps extends ComponentPropsWithRef<'span'> {
   render?: RenderProp;
 }
 
+export interface BubbleStreamProps extends Omit<ComponentPropsWithRef<'span'>, 'children'> {
+  /** The whole reply received so far. Text that extends it enters word by word. */
+  text: string;
+  /** Let arrivals enter. Falls back to whether the row is `streaming`. */
+  animate?: boolean | undefined;
+  render?: RenderProp;
+}
+
 export interface MessageTimeProps extends ComponentPropsWithRef<'time'> {
   render?: RenderProp;
 }

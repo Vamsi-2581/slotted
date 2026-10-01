@@ -25,7 +25,7 @@ export const REACT_MESSAGE_TOKENS = messageTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { Bubble, BubbleCaret, BubbleContent, BubbleMeta, BubbleQuote, BubbleReaction, BubbleReactions, BubbleRetry, BubbleTyping, Message, MessageActions, MessageActivity, MessageActivityStep, MessageAuthor, MessageAvatar, MessageBody, MessageDefaultsProvider, MessageFooter, MessageGroup, MessageHeader, MessageReceipt, MessageTime, MessageVersions } from '@slotted/react';",
+    "import { Bubble, BubbleCaret, BubbleContent, BubbleMeta, BubbleQuote, BubbleReaction, BubbleReactions, BubbleRetry, BubbleStream, BubbleTyping, Message, MessageActions, MessageActivity, MessageActivityStep, MessageAuthor, MessageAvatar, MessageBody, MessageDefaultsProvider, MessageFooter, MessageGroup, MessageHeader, MessageReceipt, MessageTime, MessageVersions } from '@slotted/react';",
 };
 
 const messageAnatomy: AnatomyRow[] = [
@@ -178,10 +178,25 @@ const bubbleAnatomy: AnatomyRow[] = [
       '“Mostrar mais” under a clamped text, drawn only while it overflows; aria-expanded and aria-controls.',
   },
   {
+    part: 'stream',
+    element: 'span',
+    required: false,
+    purpose:
+      'The words of a streamed reply. Each arrival is split into words that enter as a wave of at most 320 ms; the text is whole in the DOM at once.',
+  },
+  {
+    part: 'stream-chunk',
+    element: 'span',
+    required: false,
+    purpose:
+      'One word still entering, out of a blur, after its delay; folded back into the text once it has entered.',
+  },
+  {
     part: 'caret',
     element: 'span',
     required: false,
-    purpose: 'The caret at the end of a streaming reply; hidden from assistive technology.',
+    purpose:
+      'A dot after the last word of a streaming reply, breathing; hidden from assistive technology.',
   },
   {
     part: 'typing',
@@ -513,7 +528,7 @@ const bubbleScenes: ReferenceSceneMeta[] = [
   {
     id: 'streaming',
     title: 'A reply while it streams',
-    note: 'The caret stands at the end of the words that have arrived and blinks in two steps; the row is aria-busy, so the words are not read as they land. Under reduced motion the caret stands lit.',
+    note: 'Words arrive in bursts. BubbleStream splits each arrival into words, and a burst enters as a wave of at most 320 ms, each word out of a blur; nothing is held back from the DOM. The dot breathes after the last word. The row is aria-busy, so the words are not read as they land. Under reduced motion every word lands settled and the dot stands lit.',
     snippet: defineSnippet({
       id: 'message-react-streaming',
       language: 'tsx',
@@ -522,7 +537,7 @@ const bubbleScenes: ReferenceSceneMeta[] = [
   <MessageBody>
     <Bubble>
       <BubbleContent>
-        {partial}
+        <BubbleStream text={received} />
         <BubbleCaret />
       </BubbleContent>
     </Bubble>
@@ -808,6 +823,20 @@ export const REACT_MESSAGE_DOCS = {
       ],
       ['count', 'number', '—', 'BubbleReaction', 'The count the consumer’s store holds'],
       [
+        'text',
+        'string',
+        '—',
+        'BubbleStream',
+        'The whole reply received so far; text that extends it enters word by word',
+      ],
+      [
+        'animate',
+        'boolean',
+        'the row is streaming',
+        'BubbleStream',
+        'Let arrivals enter; the arrival that ends the stream enters too',
+      ],
+      [
         'disabled',
         'boolean',
         'false',
@@ -827,7 +856,7 @@ export const REACT_MESSAGE_DOCS = {
         'render',
         '(props) => ReactNode',
         '—',
-        'Bubble, BubbleContent, BubbleMeta, BubbleQuote, BubbleCaret, BubbleRetry, BubbleReactions',
+        'Bubble, BubbleContent, BubbleMeta, BubbleQuote, BubbleStream, BubbleCaret, BubbleRetry, BubbleReactions',
         'Renders the wiring into another element — the surface as a button or a link',
       ],
     ]),

@@ -53,6 +53,8 @@ test('is a row and a surface, and the surface is told apart from the row in the 
     'quote',
     'quote-author',
     'more',
+    'stream',
+    'stream-chunk',
     'caret',
     'typing',
     'retry',
@@ -212,4 +214,18 @@ test('declines what another family or two lines of consumer code already do', ()
 
 test('has a reference page for each member and an overview', () => {
   assert.deepEqual(Object.keys(contract.scenarios), ['overview', 'message', 'bubble']);
+});
+
+/**
+ * A burst from the transport enters as a wave, and the wave is bounded: the
+ * paint never trails what was received by more than one long transition.
+ */
+test('lets streamed words enter as a bounded wave without holding any back', () => {
+  const streaming = contract.streaming;
+  assert.equal(streaming.text, 'stream');
+  assert.equal(streaming.chunk, 'stream-chunk');
+  assert.equal(streaming.engine, '@slotted/core/text-stream');
+  assert.match(streaming.arrival, /in the DOM at once/);
+  assert.match(streaming.arrival, /320 ms/);
+  assert.match(streaming.reducedMotion, /settled/);
 });

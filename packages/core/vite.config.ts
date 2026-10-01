@@ -57,6 +57,7 @@ export default defineConfig({
         steps: resolve(import.meta.dirname, 'src/steps/index.ts'),
         tags: resolve(import.meta.dirname, 'src/tags/index.ts'),
         text: resolve(import.meta.dirname, 'src/text/index.ts'),
+        'text-stream': resolve(import.meta.dirname, 'src/text-stream/index.ts'),
         timeline: resolve(import.meta.dirname, 'src/timeline/index.ts'),
         toast: resolve(import.meta.dirname, 'src/toast/index.ts'),
         transfer: resolve(import.meta.dirname, 'src/transfer/index.ts'),

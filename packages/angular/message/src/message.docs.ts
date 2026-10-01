@@ -25,7 +25,7 @@ export const ANGULAR_MESSAGE_TOKENS = messageTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { provideMessageDefaults, SlBubble, SlBubbleCaret, SlBubbleContent, SlBubbleMeta, SlBubbleQuote, SlBubbleReaction, SlBubbleReactions, SlBubbleRetry, SlBubbleTyping, SlMessage, SlMessageActions, SlMessageActivity, SlMessageActivityStep, SlMessageAuthor, SlMessageAvatar, SlMessageBody, SlMessageFooter, SlMessageGroup, SlMessageHeader, SlMessageReceipt, SlMessageTime, SlMessageVersions } from '@slotted/angular/message';",
+    "import { provideMessageDefaults, SlBubble, SlBubbleCaret, SlBubbleContent, SlBubbleMeta, SlBubbleQuote, SlBubbleReaction, SlBubbleReactions, SlBubbleRetry, SlBubbleStream, SlBubbleTyping, SlMessage, SlMessageActions, SlMessageActivity, SlMessageActivityStep, SlMessageAuthor, SlMessageAvatar, SlMessageBody, SlMessageFooter, SlMessageGroup, SlMessageHeader, SlMessageReceipt, SlMessageTime, SlMessageVersions } from '@slotted/angular/message';",
   selector:
     '[slMessage], [slMessageGroup], [slMessageAvatar], [slMessageBody], [slMessageHeader], [slMessageAuthor], time[slMessageTime], [slMessageFooter], [slMessageReceipt], [slMessageActions], [slMessageActivity], [slMessageActivityStep], [slMessageVersions], [slBubble], [slBubbleContent], [slBubbleMeta], [slBubbleQuote], [slBubbleCaret], [slBubbleTyping], button[slBubbleRetry], [slBubbleReactions], button[slBubbleReaction]',
   exportAs: 'slMessage, slMessageGroup, slBubble',
@@ -181,10 +181,25 @@ const bubbleAnatomy: AnatomyRow[] = [
       '“Mostrar mais” under a clamped text, drawn only while it overflows; aria-expanded and aria-controls.',
   },
   {
+    part: 'stream',
+    element: 'span',
+    required: false,
+    purpose:
+      'The words of a streamed reply. Each arrival is split into words that enter as a wave of at most 320 ms; the text is whole in the DOM at once.',
+  },
+  {
+    part: 'stream-chunk',
+    element: 'span',
+    required: false,
+    purpose:
+      'One word still entering, out of a blur, after its delay; folded back into the text once it has entered.',
+  },
+  {
     part: 'caret',
     element: 'span',
     required: false,
-    purpose: 'The caret at the end of a streaming reply; hidden from assistive technology.',
+    purpose:
+      'A dot after the last word of a streaming reply, breathing; hidden from assistive technology.',
   },
   {
     part: 'typing',
@@ -512,7 +527,7 @@ const bubbleScenes: ReferenceSceneMeta[] = [
   {
     id: 'streaming',
     title: 'A reply while it streams',
-    note: 'The caret stands at the end of the words that have arrived and blinks in two steps; the row is aria-busy, so the words are not read as they land. Under reduced motion the caret stands lit.',
+    note: 'Words arrive in bursts. slBubbleStream splits each arrival into words, and a burst enters as a wave of at most 320 ms, each word out of a blur; nothing is held back from the DOM. The dot breathes after the last word. The row is aria-busy, so the words are not read as they land. Under reduced motion every word lands settled and the dot stands lit.',
     snippet: defineSnippet({
       id: 'message-angular-streaming',
       language: 'angular',
@@ -520,7 +535,9 @@ const bubbleScenes: ReferenceSceneMeta[] = [
       source: `<article slMessage status="streaming">
   <div slMessageBody>
     <div slBubble>
-      <div slBubbleContent>{{ partial }}<span slBubbleCaret></span></div>
+      <div slBubbleContent>
+        <span slBubbleStream [text]="received"></span><span slBubbleCaret></span>
+      </div>
     </div>
   </div>
 </article>`,
@@ -809,6 +826,20 @@ export const ANGULAR_MESSAGE_DOCS = {
         'An unbound [pressed] is the starting state; the component then holds it',
       ],
       ['count', 'number', '—', 'slBubbleReaction', 'The count the page’s store holds'],
+      [
+        'text',
+        'string',
+        '—',
+        'slBubbleStream',
+        'The whole reply received so far; text that extends it enters word by word',
+      ],
+      [
+        'animate',
+        'boolean',
+        'the row is streaming',
+        'slBubbleStream',
+        'Let arrivals enter; the arrival that ends the stream enters too',
+      ],
       [
         'disabled',
         'boolean',

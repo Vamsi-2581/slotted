@@ -1,3 +1,5 @@
+import { splitWords } from '@slotted/core/text-stream';
+import { useCallback, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { Avatar } from '../avatar';
@@ -117,4 +119,42 @@ export function ReplyActions() {
       </IconButton>
     </MessageActions>
   );
+}
+
+export const STREAM =
+  'O serviço de impostos começou a repetir cada confirmação às 14:05, duas vezes a 400 ms cada, por isso o p95 de POST /api/checkout/confirm passou de 240 ms para 3,1 s.\n\nA base de dados nunca foi o gargalo: as ligações ficaram abaixo de 40 % durante todo o incidente. Desliguei as repetições no cliente do serviço e o p95 voltou a 260 ms em dois minutos.';
+
+/**
+ * A transport as a model serves one: mostly a word every few tens of
+ * milliseconds, now and then a pause and a burst of several words at once.
+ * The pattern is fixed, so every replay arrives the same way.
+ */
+const BURSTS = [1, 1, 2, 1, 1, 3, 1, 7, 1, 2, 1, 1, 1, 12, 2, 1, 1, 4, 1, 1, 2, 9];
+const PAUSES = [45, 30, 60, 35, 40, 50, 30, 240, 40, 35, 55, 30, 45, 380, 40, 30, 50, 120];
+
+/** The text of `STREAM` received so far, arriving in bursts, and a way to start again. */
+export function useSimulatedStream(text: string = STREAM) {
+  const [received, setReceived] = useState(0);
+  const [run, setRun] = useState(0);
+  const words = splitWords(text);
+  useEffect(() => {
+    setReceived(0);
+    let index = 0;
+    let tick = 0;
+    let timer = 0;
+    const next = () => {
+      index = Math.min(words.length, index + (BURSTS[tick % BURSTS.length] ?? 1));
+      setReceived(index);
+      if (index < words.length) {
+        timer = window.setTimeout(next, PAUSES[tick % PAUSES.length] ?? 40);
+        tick += 1;
+      }
+    };
+    timer = window.setTimeout(next, 400);
+    return () => window.clearTimeout(timer);
+    // The words are derived from `text`; a new run restarts the same text.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text, run]);
+  const replay = useCallback(() => setRun((value) => value + 1), []);
+  return { text: words.slice(0, received).join(''), done: received >= words.length, replay };
 }

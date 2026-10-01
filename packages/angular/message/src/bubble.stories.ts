@@ -248,7 +248,7 @@ export const Streaming: Story = {
     template: page(
       scene(
         'Words arriving',
-        'The caret stands after the last word that has arrived; the row is aria-busy until the reply is whole, then the caret leaves.',
+        'Words arrive in bursts, as a model serves them; each burst enters as a wave of at most 320 ms, every word out of a blur. The dot breathes after the last word while the row is aria-busy, and leaves with the last word.',
         '<sl-message-stream-demo></sl-message-stream-demo>',
       ),
     ),

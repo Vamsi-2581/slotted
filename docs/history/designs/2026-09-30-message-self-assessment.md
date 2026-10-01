@@ -11,13 +11,13 @@ Famílias novas. O inventário e as decisões estão em `2026-09-30-message-desi
 | Press | `retry`: `solid-active` `#991b1b`, diferente da mistura do hover. `jump`: 0.905 contra 0.952 do hover, com `translate` de 2 px. Reação premida: mistura de 12 % contra 6 % | os mesmos | passa; ReUI falha (press igual ao hover) |
 | Focus | Anel de 2 px em `--slotted-focus-ring-color`, com `outline-offset` de 2 px. `#2563eb` sobre branco dá 5.2:1 e `#60a5fa` sobre `rgb(23,23,25)` dá 7.0:1; em `high-contrast` o anel é preto sobre branco | `…-jump-…-6bd427.json` nos três esquemas; `…-content-is-but-7e4f01-*-focus.png` | passa |
 | Transition | `background-color`, `border-color`, `color`, `opacity`, `translate` e `scale` listados, sem `all`; as durações são tokens (`motion.test.mjs`) | `message.css`, `message-scroller.css` | passa |
-| Motion | `jump` entra em `medium`/`enter` e sai em `short`/`exit`. `item` novo e rasto de `typing` entram por `@starting-style`. Destaque `current` apaga-se em `long` | `message-scroller.css`; cenário `tools/harness/scenarios/message-scroller-live.mjs` | falha parcial: saída de uma mensagem removida não animada (secção 5) |
-| Reduced motion | Pontos de `typing`, `caret`, relógio de `sending`, faixa do passo corrente e entrada de linha param; `scrollToMessage` passa de `smooth` a `auto` (`resolveBehavior`) | `message/slotted-light-720-motion-reduce.json`; teste `resolveBehavior` em `message-scroller.test.ts` | passa |
+| Motion | `jump` entra em `medium`/`enter` e sai em `short`/`exit`. `item` novo e rasto de `typing` entram por `@starting-style`. Destaque `current` apaga-se em `long`. Palavras em streaming entram com opacidade e desfoque em `long`, escalonadas 28 ms e no máximo 320 ms; o ponto entra de escala 0 em `medium`/`enter` | `message-scroller.css`; cenário `tools/harness/scenarios/message-scroller-live.mjs`; cena `streaming` da harness (onda congelada) | falha parcial: saída de uma mensagem removida não animada (secção 5) |
+| Reduced motion | Pontos de `typing`, o ponto de `caret`, a entrada de `stream-chunk` (o binding assenta cada chegada), relógio de `sending`, faixa do passo corrente e entrada de linha param; `scrollToMessage` passa de `smooth` a `auto` (`resolveBehavior`) | `message/slotted-light-720-motion-reduce.json`; teste `resolveBehavior` em `message-scroller.test.ts` | passa |
 | Disabled | Reação desativada em `--slotted-disabled-foreground`, sem `opacity` | cena `reactions` | passa |
 | Schemes | `soft` com aresta em `high-contrast`; `meta` a 8.39:1; em forced-colors as bolhas ganham aresta `CanvasText` e a reação premida fica em `Highlight` | `message/slotted-light-720-forced.json`, `…-high-contrast-720-…-7e4f01.json` | passa |
 | Density e RTL | Padding da bolha 8/6/4, raio 16/12/8, avatar 28/26/24, gap do scroller 20/15/10. Em RTL o lado, os cantos da corrida, os chevrons de versões, o `retry` e o `translate` do `jump` espelham; citação em `unicode-bidi: plaintext` | `message/slotted-light-720-dense.json`; capturas `rtl` da harness | passa |
 | Target size | Reação, `more`, versões e `retry` ≥ 24 (`--slotted-target-min`); `jump` 34 | rects nos specimens acima | passa |
-| Intent | Literais com razão escrita ao lado: 6 %/12 % dos state layers, 14 % no hover de `retry`, 90 % da tinta de `meta` (4.50:1 no accent escuro), rotação de -45deg, 80 % de largura máxima, 1600 ms de `data-current` (motor, não CSS) | `message.css`, `message-scroller.css`, desenho §7 e §8 | passa |
+| Intent | Literais com razão escrita ao lado: 6 %/12 % dos state layers, 14 % no hover de `retry`, 90 % da tinta de `meta` (4.50:1 no accent escuro), rotação de -45deg, desfoque 0.16em, ponto `round(0.6em, 2px)` a respirar até 0.72 (5.76 px, acima do ponto final), 28 ms e 320 ms do escalonamento (`text-stream.ts`), 80 % de largura máxima, 1600 ms de `data-current` (motor, não CSS) | `message.css`, `message-scroller.css`, desenho §7 e §8 | passa |
 
 ## 2. Onze dimensões
 
@@ -50,14 +50,14 @@ Famílias novas. O inventário e as decisões estão em `2026-09-30-message-desi
 
 ## 4. Secção 18
 
-- **Anatomia:** `message` tem dezasseis partes, `bubble` doze e `message-scroller` nove. As tabelas estão nos contratos e nas páginas.
+- **Anatomia:** `message` tem dezasseis partes, `bubble` catorze e `message-scroller` nove. As tabelas estão nos contratos e nas páginas.
 - **Controlado/não controlado:**
   - `current` (`version`/`defaultVersion`/`onVersionChange`), `pressed` e `revealed`, com razão, por `createControllable`.
   - `message-scroller` não tem valor mutável: reporta `reachStart`, `anchorChange` e `scrollableChange` com razão e obedece a comandos imperativos.
 - **Matriz de estados:**
   - `status` `sending`/`sent`/`delivered`/`read`/`failed`/`streaming` em `data-status`.
   - `failed` junta `data-invalid`, palavra de perigo e `retry`.
-  - `streaming` junta `caret` ou `activity`.
+  - `streaming` junta `stream`, `caret` ou `activity`.
   - Reação `pressed` e `disabled`.
   - Scroller: `data-scrollable`, `data-following`, `data-pending`; `jump` `data-active`; `item` `data-current`.
 - **Densidade e direção:** escalas de controlo e de avatar; propriedades lógicas; `align` espelha em RTL.
@@ -70,16 +70,16 @@ Famílias novas. O inventário e as decisões estão em `2026-09-30-message-desi
 
   | Suite | Testes |
   | --- | --- |
-  | Contrato | 13 + 10 |
-  | Motor | 15 |
+  | Contrato | 14 + 10 |
+  | Motor | 15 (`message-scroller`) + 12 (`text-stream`) |
   | Estilos | 13 |
-  | React | 30 |
-  | Angular | 24 |
+  | React | 34 |
+  | Angular | 28 |
   | Harness | cenário `message-scroller-live` |
 
 ## 5. Limitações abertas
 
 - Saída animada de uma mensagem removida.
 - O Storybook React em 6006 não mostra as entradas novas sem reinício. As páginas foram lidas em 6016 (React) e 6007 (Angular).
-- A revelação de texto em `streaming` pertence ao consumidor; a família dá o `caret` e o estado.
+- A entrada por palavra trata texto simples. Markdown em streaming é composição do consumidor: `stream` não analisa marcação.
 - A tabela de anatomia e props corta à direita a 620. A mesma ocorrência existe em `attachment`: é do workbench.

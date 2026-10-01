@@ -41,5 +41,6 @@ export {
   SlBubbleReaction,
   SlBubbleReactions,
   SlBubbleRetry,
+  SlBubbleStream,
   SlBubbleTyping,
 } from './bubble';

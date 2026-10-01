@@ -371,8 +371,41 @@
           data-loading
         >
           <div data-part="content">
-            O serviço de impostos começou a repetir cada confirmação às 14:05, duas vezes a 400 ms
-            cada, por isso o p95<span data-part="caret" aria-hidden="true"></span>
+            <!-- prettier-ignore -->
+            <span data-part="stream">O serviço de impostos começou a repetir cada confirmação às 14:05, duas vezes a 400 ms cada, por isso o p95 </span
+            ><span data-part="caret" aria-hidden="true"></span>
+          </div>
+        </div>
+      </div>
+    </article>
+    <!--
+      A wave held still: each chunk is frozen at its own moment of the
+      entrance, 60 ms apart, so the picture shows what a burst looks like
+      mid-way. The caret steps aside while chunks are entering.
+    -->
+    <article
+      data-ui="message"
+      data-part="root"
+      data-align="start"
+      data-layout="bubble"
+      data-actions="hover"
+      data-status="streaming"
+      data-loading
+      aria-busy="true"
+      aria-label="Assistente"
+    >
+      <div data-part="body">
+        <div
+          data-ui="message"
+          data-part="bubble"
+          data-variant="plain"
+          data-tone="secondary"
+          data-loading
+        >
+          <div data-part="content">
+            <!-- prettier-ignore -->
+            <span data-part="stream">A base de dados nunca foi o gargalo: as ligações ficaram <span data-part="stream-chunk" style="animation-delay: -300ms; animation-play-state: paused">abaixo </span><span data-part="stream-chunk" style="animation-delay: -240ms; animation-play-state: paused">de </span><span data-part="stream-chunk" style="animation-delay: -180ms; animation-play-state: paused">40 % </span><span data-part="stream-chunk" style="animation-delay: -120ms; animation-play-state: paused">durante </span><span data-part="stream-chunk" style="animation-delay: -60ms; animation-play-state: paused">todo </span><span data-part="stream-chunk" style="animation-delay: 0ms; animation-play-state: paused">o</span></span
+            ><span data-part="caret" aria-hidden="true"></span>
           </div>
         </div>
       </div>

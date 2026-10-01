@@ -963,32 +963,93 @@
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
-  /* ── Streaming caret and typing ─────────────────────────────────────────
+  /* ── Streaming text, caret and typing ──────────────────────────────────
    *
-   * The caret stands at the end of the words that have arrived, the width of
-   * a thick rule and the height of the letters, blinking in two steps. The
-   * typing dots are three, each a quarter of the loop behind the one before.
-   * Both stop under reduced motion: the caret stands lit and the dots stand
-   * at three strengths, so the state is still drawn.
+   * A streamed reply enters word by word. `stream` holds the settled words as
+   * plain text and each word still entering as a `stream-chunk`, whose delay
+   * the binding writes from `@slotted/core/text-stream`: a burst of forty
+   * words enters as a wave of at most 320 ms instead of landing as a block.
+   * A word comes out of a blur of a sixth of its own size, at nothing, and
+   * the ink and the edge arrive together: a word that is opaque while still
+   * blurred reads as a smudge, and five of them in a row as a smeared line.
+   *
+   * The caret is a dot after the last word, centred on the middle of the
+   * x-height, breathing between full and 72 % while the reply is open. A bar
+   * blinking in two steps read as a text field waiting for input; the reply is
+   * not waiting for the reader, it is still being written. While words are
+   * entering, the wave is the leading edge and the dot steps aside: a word
+   * still invisible already holds its place in the line, and a dot after it
+   * would stand apart from the last word painted. It returns once the wave has
+   * landed and the transport has been quiet for a long transition.
+   *
+   * Under reduced motion the binding settles every word on arrival, the caret
+   * stands lit and the typing dots stand at three strengths, so the state is
+   * still drawn.
    */
-  [data-ui='message'][data-part='bubble'] [data-part='caret'] {
-    display: inline-block;
-    inline-size: var(--slotted-border-width-thick, 2px);
-    block-size: round(up, 1.1em, 1px);
-    margin-inline-start: var(--slotted-space-1, 0.125rem);
-    border-radius: var(--slotted-radius-xs, 2px);
-    background-color: currentColor;
-    vertical-align: text-bottom;
-    animation: slotted-message-blink var(--slotted-duration-loop) steps(2, jump-none) infinite;
+  [data-ui='message'][data-part='bubble'] [data-part='stream'] {
+    white-space: pre-wrap;
   }
 
-  @keyframes slotted-message-blink {
+  [data-ui='message'][data-part='bubble'] [data-part='stream-chunk'] {
+    animation: slotted-message-word var(--slotted-duration-long) var(--slotted-easing-standard) both;
+  }
+
+  @keyframes slotted-message-word {
     from {
-      opacity: 1;
+      opacity: 0;
+      filter: blur(0.16em);
     }
 
     to {
+      opacity: 1;
+      filter: blur(0);
+    }
+  }
+
+  [data-ui='message'][data-part='bubble'] [data-part='caret'] {
+    --_dot: round(nearest, 0.6em, 2px);
+
+    display: inline-block;
+    inline-size: var(--_dot);
+    block-size: var(--_dot);
+    /* A streamed word carries its own space; the margin only parts the dot from a word cut mid-way. */
+    margin-inline-start: var(--slotted-space-1, 0.125rem);
+    border-radius: var(--slotted-radius-full, 9999px);
+    background-color: currentColor;
+    vertical-align: middle;
+    transition: filter var(--slotted-duration-medium) var(--slotted-easing-enter)
+      var(--slotted-duration-long);
+    animation:
+      slotted-message-dot-in var(--slotted-duration-medium) var(--slotted-easing-enter),
+      slotted-message-breathe var(--slotted-duration-loop) var(--slotted-easing-standard)
+        var(--slotted-duration-medium) infinite alternate;
+  }
+
+  /* `filter`, not `opacity`: the breath animates opacity, and an animation outranks the rule. */
+  [data-ui='message'][data-part='bubble']
+    [data-part='stream']:has(> [data-part='stream-chunk'])
+    + [data-part='caret'] {
+    filter: opacity(0);
+    transition: filter var(--slotted-duration-short) var(--slotted-easing-exit);
+  }
+
+  @keyframes slotted-message-dot-in {
+    from {
       opacity: 0;
+      scale: 0;
+    }
+  }
+
+  /* 0.72 of 8 px is 5.76: the breath is seen, and the dot never shrinks to a full stop's 2 px. */
+  @keyframes slotted-message-breathe {
+    from {
+      opacity: 1;
+      scale: 1;
+    }
+
+    to {
+      opacity: 0.5;
+      scale: 0.72;
     }
   }
 
@@ -1189,6 +1250,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     [data-ui='message'][data-part='bubble'] [data-part='caret'],
+    [data-ui='message'][data-part='bubble'] [data-part='stream-chunk'],
     [data-ui='message'][data-part='bubble'] [data-part='typing'] > span,
     [data-ui='message'][data-part='bubble']
       > [data-part='content']:has(> [data-part='typing'])::before,
@@ -1365,6 +1427,12 @@
   @media (forced-colors: active) {
     [data-ui='message'][data-part='bubble'] > [data-part='content'] {
       border-color: CanvasText;
+    }
+
+    /* A background is the system's to repaint; the dot is ink, so it keeps the text's colour. */
+    [data-ui='message'][data-part='bubble'] [data-part='caret'] {
+      forced-color-adjust: none;
+      background-color: CanvasText;
     }
 
     [data-ui='message'][data-part='bubble'][data-variant='plain'] > [data-part='content'] {

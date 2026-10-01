@@ -1,7 +1,7 @@
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Avatar } from '../avatar';
 import { Button } from '../button';
@@ -10,6 +10,7 @@ import { Glyph, Icon } from '../icon';
 import {
   Bubble,
   BubbleCaret,
+  BubbleStream,
   BubbleContent,
   BubbleQuote,
   BubbleReaction,
@@ -20,7 +21,7 @@ import {
   MessageBody,
   MessageFooter,
 } from './index';
-import { LONG_ANSWER, MARTA, Stack } from './message-demo';
+import { LONG_ANSWER, MARTA, Stack, useSimulatedStream } from './message-demo';
 import { REACT_MESSAGE_DOCS, REACT_MESSAGE_TOKENS } from './message.docs';
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
@@ -268,28 +269,19 @@ export const Clamp: Story = {
   ),
 };
 
-const STREAM =
-  'O serviço de impostos começou a repetir cada confirmação às 14:05, duas vezes a 400 ms cada, por isso o p95 de POST /api/checkout/confirm passou de 240 ms para 3,1 s. A base de dados nunca foi o gargalo.';
-
 function StreamingReply() {
-  const [length, setLength] = useState(0);
-  useEffect(() => {
-    if (length >= STREAM.length) return undefined;
-    const timer = window.setTimeout(() => setLength((value) => value + 3), 45);
-    return () => window.clearTimeout(timer);
-  }, [length]);
-  const done = length >= STREAM.length;
+  const { done, replay, text } = useSimulatedStream();
   return (
     <Message aria-label="Assistente" {...(done ? {} : { status: 'streaming' as const })}>
       <MessageBody>
         <Bubble variant="plain">
           <BubbleContent>
-            {STREAM.slice(0, length)}
+            <BubbleStream text={text} />
             {done ? null : <BubbleCaret />}
           </BubbleContent>
         </Bubble>
         <MessageFooter>
-          <Button onClick={() => setLength(0)} size="sm" variant="ghost">
+          <Button onClick={replay} size="sm" variant="ghost">
             Repetir
           </Button>
         </MessageFooter>
@@ -304,7 +296,7 @@ export const Streaming: Story = {
     <Grid columns={1}>
       <Scene
         label="Words arriving"
-        note="The caret stands after the last word that has arrived; the row is aria-busy until the reply is whole, then the caret leaves."
+        note="Words arrive in bursts, as a model serves them; each burst enters as a wave of at most 320 ms, every word out of a blur. The dot breathes after the last word while the row is aria-busy, and leaves with the last word."
       >
         <StreamingReply />
       </Scene>

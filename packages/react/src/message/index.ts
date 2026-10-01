@@ -22,6 +22,7 @@ export {
   BubbleReaction,
   BubbleReactions,
   BubbleRetry,
+  BubbleStream,
   BubbleTyping,
 } from './bubble';
 export { useBubble } from './bubble-context';

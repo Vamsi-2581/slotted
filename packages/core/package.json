@@ -212,6 +212,10 @@
       "types": "./dist/types/tags/index.d.ts",
       "import": "./dist/tags.js"
     },
+    "./text-stream": {
+      "types": "./dist/types/text-stream/index.d.ts",
+      "import": "./dist/text-stream.js"
+    },
     "./text": {
       "types": "./dist/types/text/index.d.ts",
       "import": "./dist/text.js"

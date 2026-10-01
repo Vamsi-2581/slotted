@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 5,
+  "family": "prompt-composer",
+  "ui": "prompt-composer",
+  "controlPart": "input",
+  "rootRole": null,
+  "stateSource": "field",
+  "mirrorsState": true,
+  "requiredAttribute": "aria-required",
+  "disabledAttribute": "disabled",
+  "wiring": {
+    "id": "always",
+    "aria-describedby": "merged",
+    "aria-invalid": "invalid",
+    "aria-required": "required",
+    "disabled": "disabled",
+    "readonly": "readOnly"
+  },
+  "counter": {
+    "unit": "utf-16",
+    "placedBy": "field",
+    "limitFrom": "maxLength"
+  },
+  "autoSizeMechanism": "field-sizing",
+  "autoSizeFloor": "rows",
+  "autoSizeCeiling": "maxRows",
+  "keyboard": [
+    {
+      "key": "Enter",
+      "when": "submitOn is enter and no composition is in progress",
+      "effect": "requests a submit with reason keyboard"
+    },
+    {
+      "key": "Shift+Enter",
+      "when": "always",
+      "effect": "inserts a line break, the platform's behaviour"
+    },
+    {
+      "key": "Mod+Enter",
+      "when": "always",
+      "effect": "requests a submit with reason keyboard"
+    }
+  ],
+  "imeGuard": ["KeyboardEvent.isComposing", "keyCode 229"],
+  "escapeBound": false,
+  "axes": {
+    "size": ["sm", "md", "lg"],
+    "variant": ["raised", "outline", "subtle"],
+    "submitOn": ["enter", "mod-enter"],
+    "status": ["ready", "submitted", "streaming", "error"]
+  },
+  "resolution": {
+    "size": ["prop", "field", "defaults", "md"],
+    "variant": ["prop", "defaults", "raised"],
+    "submitOn": ["prop", "defaults", "enter"]
+  },
+  "provides": {
+    "promptComposerDefaults": [
+      "size",
+      "variant",
+      "submitOn",
+      "sendLabel",
+      "stopLabel",
+      "retryLabel",
+      "attachLabel",
+      "sendingLabel",
+      "stoppedLabel"
+    ]
+  },
+  "stateAttributes": {
+    "disabled": "data-disabled",
+    "invalid": "data-invalid",
+    "readonly": "data-readonly",
+    "loading": "data-loading",
+    "drop-target": "data-drop-target"
+  },
+  "stateModel": {
+    "value": {
+      "controlled": "value",
+      "uncontrolled": "defaultValue",
+      "request": "onValueChange",
+      "reasons": ["keyboard", "submit"]
+    }
+  },
+  "submit": {
+    "part": "submit",
+    "request": "onValueSubmit",
+    "cancelable": true,
+    "reasons": ["keyboard", "pointer"],
+    "clearsOn": "accepted",
+    "emptyRule": "value.trim() is empty, unless canSubmit",
+    "busyWhile": ["submitted"],
+    "stopWhile": ["streaming"],
+    "stop": "onStop",
+    "glyphs": {
+      "send": "arrow-up",
+      "stop": "stop",
+      "retry": "rotate-ccw"
+    },
+    "announces": ["sendingLabel", "stoppedLabel"],
+    "retryWhile": ["error"]
+  },
+  "attach": {
+    "part": "attach",
+    "sources": ["pointer", "paste", "drop"],
+    "rules": "@slotted/core/upload selectFiles",
+    "output": "onAttach",
+    "detail": ["reason", "rejected"],
+    "dropAttribute": "data-drop-target",
+    "glyph": "paperclip"
+  },
+  "members": {
+    "promptComposer": {
+      "nativeElement": "form",
+      "defaults": {
+        "size": "md",
+        "variant": "raised",
+        "submitOn": "enter",
+        "status": "ready",
+        "rows": 1,
+        "maxRows": 8,
+        "showCount": false
+      },
+      "capabilities": [
+        "value",
+        "appearance",
+        "size",
+        "status",
+        "loading",
+        "content",
+        "disabled",
+        "invalid",
+        "required",
+        "readOnly",
+        "wiring"
+      ],
+      "states": [
+        "default",
+        "hover",
+        "active",
+        "focus-visible",
+        "disabled",
+        "invalid",
+        "readonly",
+        "loading",
+        "drop-target"
+      ],
+      "parts": ["root", "header", "input", "footer", "action", "attach", "submit"]
+    }
+  },
+  "scenarios": {
+    "promptComposer": [
+      "playground",
+      "chat",
+      "comment",
+      "attachments",
+      "status",
+      "sizes",
+      "states",
+      "content",
+      "composition",
+      "keyboard"
+    ]
+  }
+}

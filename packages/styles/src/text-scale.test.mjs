@@ -37,6 +37,10 @@ const DECORATIVE = new Map([
   ],
   ['slider/thumb', 'the thumb: an empty control the press grows under the finger'],
   [
+    'prompt-composer/submit',
+    'the round send: a glyph box named by aria-label, settled to 0.9 under the press — the padded send that holds words is excluded by its selector',
+  ],
+  [
     'message/caret',
     'the streaming dot: an aria-hidden empty span and never text, grown in from 0 and breathing to 0.72',
   ],

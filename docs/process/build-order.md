@@ -896,6 +896,18 @@ e redimensionamento de `dialog`) e `gauge` (arco de `progress-indicator`).
   motor. React `MessageScroller` com `ref` e partes; Angular `[slMessageScroller]` com `exportAs`.
   Desenho e autoavaliação partilhados com `message`.
 
+- `prompt-composer` — invocada em 2026-09-30 pelo pedido das entradas (fila, item 2). Moldura de
+  várias linhas sob `data-ui="prompt-composer"`: `root` (`form`), `header`, `input` (`textarea`
+  com `field-sizing: content`, `rows` piso e `maxRows` teto), `footer`, `action`, `attach`,
+  `submit`. `value`/`defaultValue`/`onValueChange` com razões `keyboard` e `submit`;
+  `onValueSubmit` cancelável; `submitOn` `enter`/`mod-enter` com guarda IME; `status`
+  `ready`/`submitted`/`streaming`/`error` do consumidor, com envio a virar parar e `onStop`;
+  `onAttach` por botão, colar e largar, validado por `selectFiles` de `@slotted/core/upload`;
+  anexos desenhados pelo consumidor com `attachment`. React `PromptComposer` e partes,
+  `PromptComposerDefaultsProvider`; Angular `form[slPromptComposer]`,
+  `textarea[slPromptComposerInput]` com `ControlValueAccessor`, `providePromptComposerDefaults()`.
+  Desenho em `docs/history/designs/2026-09-30-prompt-composer-design.md`.
+
 ## Regra de commit
 
 Uma família por commit, `pnpm check` por família e `pnpm check:full` por onda.

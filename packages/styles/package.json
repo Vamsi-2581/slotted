@@ -160,6 +160,8 @@
     "./popover/tokens.json": "./src/popover/popover.tokens.json",
     "./progress-indicator/progress-indicator.css": "./src/progress-indicator/progress-indicator.css",
     "./progress-indicator/tokens.json": "./src/progress-indicator/progress-indicator.tokens.json",
+    "./prompt-composer/prompt-composer.css": "./src/prompt-composer/prompt-composer.css",
+    "./prompt-composer/tokens.json": "./src/prompt-composer/prompt-composer.tokens.json",
     "./prose/prose.css": "./src/prose/prose.css",
     "./prose/tokens.json": "./src/prose/prose.tokens.json",
     "./radio-group/radio-group.css": "./src/radio-group/radio-group.css",

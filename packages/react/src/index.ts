@@ -72,6 +72,7 @@ export * from './page-header';
 export * from './pagination';
 export * from './popover';
 export * from './progress-indicator';
+export * from './prompt-composer';
 export * from './prose';
 export * from './radio-group';
 export * from './rating';

@@ -1,16 +1,21 @@
-# Checkpoint — fila das entradas (1/4 concluída)
+# Checkpoint — fila das entradas (item 2: `textarea` + `prompt-composer`)
 
-- Ramo `review/implementation-pass-1`. `text-field` entregue: `b7d84ef6` (glifo `caps-lock`), `5b914ec5` (família), `5ecee204` (página Angular).
-- Documentos: `docs/history/designs/2026-09-30-text-field-{rebuild-design,reui-dossier,self-assessment}.md`.
-- `audit.mjs` sem achados nas duas páginas a 1280 e 620 px. Storybook Angular reiniciado nesta sessão (tarefa em segundo plano).
+- Item 1 `text-field` entregue (`b7d84ef6`, `5b914ec5`, `5ecee204`).
+- Item 2: desenho, dossiê e autoavaliação em `docs/history/designs/2026-09-30-prompt-composer-*.md`; escopo em `docs/process/build-order.md` (Specialized). Nada commitado.
 
-## Problemas conhecidos, de outras sessões
+## Concluído (passos 1–13)
 
-- `pnpm typecheck` e `ng test`: `requiredMark` em `field.spec.ts`, `field-group.spec.ts`, `field.test.tsx`, `field-group.test.tsx`.
-- `prettier --check`: `filter-bar.spec.ts`, `filter-bar.ts`, `menu.css`.
-- `field-surface.test.mjs`: `kbd` (commit `2e39b9d4`).
-- Specs Angular de `text-field` não correram depois das histórias por causa do primeiro item.
+- Contrato `specs/components/prompt-composer/` 11/11.
+- Estilos `packages/styles/src/prompt-composer/` (8/8) e export em `packages/styles/package.json`; exceção R7 `prompt-composer/submit` em `packages/styles/src/text-scale.test.mjs`.
+- Glifos `arrow-up`, `stop`, `paperclip`: `glyphs.json`, `glyphs.ts`, `theme.json`, `tokens/contract.json` (primitivos 120), `token-foundation.md`, `verify-token-foundation.test.mjs`. Ficheiros partilhados misturados com outras sessões: construir o índice a partir de HEAD; nunca `git commit -- <paths>`.
+- React `packages/react/src/prompt-composer/` 21/21; export em `packages/react/src/index.ts`.
+- Angular `packages/angular/prompt-composer/` 14/14.
+- `audit.mjs` React 1280/620 sem achados. `typecheck`, `test:docs`, `test:contracts` verdes; `lint` falha em `message-demo.tsx` (outra sessão); `field-surface.test.mjs` falha em `kbd` (outra sessão).
+
+## Bloqueio
+
+Storybook Angular (6007, de outra sessão) arrancou antes de `packages/angular/prompt-composer` existir e serve os ficheiros sem compilar decoradores. Reinício pedido no gate.
 
 ## Próxima ação
 
-`/component textarea` + `prompt-composer` (fila, item 2): ler `specs/components/textarea/contract.json` e `docs/process/build-order.md` › `prompt-composer`, depois o inventário (faixas `block-start`/`block-end` do ReUI `c-input-group-17..19, 26, 33, 34`).
+Gate de lançamento (passo 14). Depois: commit dos glifos (índice construído), depois a família, depois `docs/history/designs/README.md` e `build-order.md` só com as minhas linhas.

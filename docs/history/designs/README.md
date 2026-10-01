@@ -88,6 +88,7 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `text-field` (passo ReUI) | [2026-09-30 §1](2026-09-30-text-field-rebuild-design.md) | [2026-09-30](2026-09-30-text-field-rebuild-design.md) | [2026-09-30](2026-09-30-text-field-self-assessment.md) |
 | `field-label-row` | [2026-09-30 §1](2026-09-30-field-label-row-design.md) | [2026-09-30](2026-09-30-field-label-row-design.md) | [2026-09-30](2026-09-30-field-self-assessment.md) |
 | `message`, `message-scroller` | [2026-09-30 §2](2026-09-30-message-design.md) | [2026-09-30](2026-09-30-message-design.md) | [2026-09-30](2026-09-30-message-self-assessment.md) |
+| `prompt-composer` | [2026-09-30 §1](2026-09-30-prompt-composer-design.md) | [2026-09-30](2026-09-30-prompt-composer-design.md) | [2026-09-30](2026-09-30-prompt-composer-self-assessment.md) |
 
 ## Fundação
 
@@ -135,3 +136,4 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 - [2026-09-30-field-reui-dossier.md](2026-09-30-field-reui-dossier.md)
 - [2026-09-30-kbd-reui-dossier.md](2026-09-30-kbd-reui-dossier.md)
 - [2026-09-30-message-reui-dossier.md](2026-09-30-message-reui-dossier.md)
+- [2026-09-30-prompt-composer-reui-dossier.md](2026-09-30-prompt-composer-reui-dossier.md)

@@ -264,6 +264,16 @@ export const RUNTIME_PROPERTY_PREFIXES = [
    * Named on its own for the reason `tree-depth` is.
    */
   '--slotted-cascader-depth',
+  /**
+   * `carousel` — how many slides one view holds, written on the root by the
+   * binding from `slidesPerView`, and how long the rotation waits on a page,
+   * written from `autoplay`. The first is read by the track sizing and the
+   * second by the fill of the current indicator, so the picture and the timer
+   * are one number. A consumer may still write the first in its own container
+   * query when it passes no prop; neither is a value a theme can hold.
+   */
+  '--slotted-carousel-slides-per-view',
+  '--slotted-carousel-autoplay-delay',
 ];
 
 /** Whether a custom property is written by script rather than by a theme. */

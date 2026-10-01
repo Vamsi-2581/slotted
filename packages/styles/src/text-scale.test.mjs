@@ -37,6 +37,18 @@ const DECORATIVE = new Map([
   ],
   ['slider/thumb', 'the thumb: an empty control the press grows under the finger'],
   [
+    'carousel/previous',
+    'the round previous control: one aria-hidden Glyph named by aria-label, settled to 0.94 under the press',
+  ],
+  [
+    'carousel/next',
+    'the round next control: one aria-hidden Glyph named by aria-label, settled to 0.94 under the press',
+  ],
+  [
+    'carousel/autoplay',
+    'the round rotation control: one aria-hidden Glyph named by aria-label, settled to 0.94 under the press',
+  ],
+  [
     'prompt-composer/submit',
     'the round send: a glyph box named by aria-label, settled to 0.9 under the press — the padded send that holds words is excluded by its selector',
   ],

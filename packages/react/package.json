@@ -199,6 +199,10 @@
       "types": "./dist/types/highlight/index.d.ts",
       "import": "./dist/highlight.js"
     },
+    "./theme": {
+      "types": "./dist/types/theme/index.d.ts",
+      "import": "./dist/theme.js"
+    },
     "./icon": {
       "types": "./dist/types/icon/index.d.ts",
       "import": "./dist/icon.js"

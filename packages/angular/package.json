@@ -19,6 +19,9 @@
     "@angular/forms": ">=22.1.0 <23",
     "@slotted/core": "workspace:*"
   },
+  "dependencies": {
+    "@slotted/theme": "workspace:*"
+  },
   "devDependencies": {
     "@angular/router": "22.1.7",
     "@ng-icons/core": "35.0.1",

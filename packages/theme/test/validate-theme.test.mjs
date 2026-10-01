@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { validateTheme } from '../src/validate-theme.mjs';
+import { validateTheme } from '../dist/index.js';
 
 function token(name, overrides = {}) {
   return { name, layer: 'primitive', axis: 'base', type: 'length', root: true, ...overrides };

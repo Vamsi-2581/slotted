@@ -32,6 +32,7 @@
     "./styles.css": "./dist/styles.css"
   },
   "scripts": {
+    "generate": "node scripts/generate-sources.mjs",
     "build": "vite build && tsc -p tsconfig.build.json && node scripts/write-styles.mjs",
     "test": "vitest run && node --test test/*.test.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit --pretty false",

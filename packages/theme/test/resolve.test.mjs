@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { resolveTokens } from '../src/resolve.mjs';
+import { resolveTokens } from '../dist/index.js';
 
 const theme = JSON.parse(
   await readFile(new URL('../../themes/src/default/values.json', import.meta.url), 'utf8'),

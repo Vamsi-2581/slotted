@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
 import { LAYER_ORDER_STATEMENT } from '../dist/layer-order.js';
-import { validateContract } from '../src/validate-theme.mjs';
+import { validateContract } from '../dist/index.js';
 
 const contract = JSON.parse(
   await readFile(new URL('../src/contract.json', import.meta.url), 'utf8'),

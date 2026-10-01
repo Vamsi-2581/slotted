@@ -1705,27 +1705,6 @@ export const contract: TokenContract = {
       "root": true
     },
     {
-      "name": "--slotted-control-label-gap-sm",
-      "layer": "semantic",
-      "axis": "density",
-      "type": "length",
-      "root": true
-    },
-    {
-      "name": "--slotted-control-label-gap-md",
-      "layer": "semantic",
-      "axis": "density",
-      "type": "length",
-      "root": true
-    },
-    {
-      "name": "--slotted-control-label-gap-lg",
-      "layer": "semantic",
-      "axis": "density",
-      "type": "length",
-      "root": true
-    },
-    {
       "name": "--slotted-control-inner-size-sm",
       "layer": "semantic",
       "axis": "density",
@@ -2226,9 +2205,6 @@ export type DensityToken =
   | '--slotted-control-gap-sm'
   | '--slotted-control-gap-md'
   | '--slotted-control-gap-lg'
-  | '--slotted-control-label-gap-sm'
-  | '--slotted-control-label-gap-md'
-  | '--slotted-control-label-gap-lg'
   | '--slotted-control-inner-size-sm'
   | '--slotted-control-inner-size-md'
   | '--slotted-control-inner-size-lg'
@@ -3463,21 +3439,6 @@ export type ComponentToken =
   | '--slotted-multi-select-subtle-border-color'
   | '--slotted-multi-select-subtle-hover-background'
   | '--slotted-multi-select-surface'
-  | '--slotted-navigation-menu-active-background'
-  | '--slotted-navigation-menu-border-color'
-  | '--slotted-navigation-menu-color'
-  | '--slotted-navigation-menu-column-size'
-  | '--slotted-navigation-menu-current-background'
-  | '--slotted-navigation-menu-current-color'
-  | '--slotted-navigation-menu-current-edge'
-  | '--slotted-navigation-menu-hover-background'
-  | '--slotted-navigation-menu-muted-color'
-  | '--slotted-navigation-menu-nested-list-size'
-  | '--slotted-navigation-menu-offset'
-  | '--slotted-navigation-menu-radius'
-  | '--slotted-navigation-menu-shadow'
-  | '--slotted-navigation-menu-surface'
-  | '--slotted-navigation-menu-viewport-radius'
   | '--slotted-notification-center-background'
   | '--slotted-notification-center-border'
   | '--slotted-notification-center-description-clamp'
@@ -5603,21 +5564,6 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-multi-select-subtle-border-color",
   "--slotted-multi-select-subtle-hover-background",
   "--slotted-multi-select-surface",
-  "--slotted-navigation-menu-active-background",
-  "--slotted-navigation-menu-border-color",
-  "--slotted-navigation-menu-color",
-  "--slotted-navigation-menu-column-size",
-  "--slotted-navigation-menu-current-background",
-  "--slotted-navigation-menu-current-color",
-  "--slotted-navigation-menu-current-edge",
-  "--slotted-navigation-menu-hover-background",
-  "--slotted-navigation-menu-muted-color",
-  "--slotted-navigation-menu-nested-list-size",
-  "--slotted-navigation-menu-offset",
-  "--slotted-navigation-menu-radius",
-  "--slotted-navigation-menu-shadow",
-  "--slotted-navigation-menu-surface",
-  "--slotted-navigation-menu-viewport-radius",
   "--slotted-notification-center-background",
   "--slotted-notification-center-border",
   "--slotted-notification-center-description-clamp",

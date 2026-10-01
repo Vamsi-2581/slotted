@@ -1,4 +1,4 @@
-import { LAYER_ORDER_STATEMENT } from './layer-order.mjs';
+import { LAYER_ORDER_STATEMENT } from '../dist/layer-order.js';
 
 /**
  * Every list this renderer emits is derived from the contract it is handed, so

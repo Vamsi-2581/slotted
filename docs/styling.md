@@ -29,15 +29,16 @@ which is why it belongs at the top of the application's own entry CSS.
 ## The order the library publishes
 
 ```css
-@layer slotted.reset, slotted.tokens, slotted.theme, slotted.components;
+@layer slotted.reset, slotted.tokens, slotted.theme, slotted.components, slotted.theme-rules;
 ```
 
-| Sublayer     | Written by        | Content                                    |
-| ------------ | ----------------- | ------------------------------------------ |
-| `reset`      | —                 | reserved, empty                            |
-| `tokens`     | —                 | reserved, empty                            |
-| `theme`      | `@slotted/themes` | token values per theme, scheme and density |
-| `components` | `@slotted/styles` | every family stylesheet                    |
+| Sublayer      | Written by        | Content                                    |
+| ------------- | ----------------- | ------------------------------------------ |
+| `reset`       | —                 | reserved, empty                            |
+| `tokens`      | —                 | reserved, empty                            |
+| `theme`       | `@slotted/themes` | token values per theme, scheme and density |
+| `components`  | `@slotted/styles` | every family stylesheet                    |
+| `theme-rules` | um tema           | regras CSS do tema, com o escopo do tema   |
 
 `reset` and `tokens` carry no rule today. They are declared because a name
 inserted later would reorder what already shipped.

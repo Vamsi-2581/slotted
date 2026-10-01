@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { LAYER_ORDER_STATEMENT } from './layer-order.mjs';
+import { LAYER_ORDER_STATEMENT } from '../dist/layer-order.js';
 import { renderThemeCss } from './render-theme.mjs';
 import { toOklab } from './tone-hover.mjs';
 

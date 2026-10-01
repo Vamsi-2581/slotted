@@ -27,6 +27,7 @@
     "./contract": "./src/contract.mjs",
     "./render-theme": "./src/render-theme.mjs",
     "./theme-conformance": "./src/theme-conformance.mjs",
+    "./conformance": "./conformance/theme-conformance.mjs",
     "./tone-hover": "./src/tone-hover.mjs",
     "./validate-theme": "./src/validate-theme.mjs",
     "./styles.css": "./dist/styles.css"

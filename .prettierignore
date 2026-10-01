@@ -13,3 +13,4 @@ pnpm-lock.yaml
 docs/product/prd.md
 packages/theme/src/generated/
 packages/theme/src/recipes/standard.ts
+packages/theme/test/fixtures/proof/proof.css

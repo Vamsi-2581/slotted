@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { SlBadge } from '@slotted/angular/badge';
 import { SlInline } from '@slotted/angular/inline';
+import { SlSkeleton } from '@slotted/angular/skeleton';
 import {
   SlTable,
   SlTableBody,
@@ -13,14 +14,19 @@ import {
   SlTableRowHeader,
 } from '@slotted/angular/table';
 import { SlText } from '@slotted/angular/typography';
+import type { Scheme } from '@slotted/theme';
 
+import { CONTRAST_PAIRS } from '../../core/theming/contrast-pairs';
 import type { ContrastReading } from '../../core/theming/contrast-reading';
 
 const SCHEME_NAMES = { light: 'Light', dark: 'Dark', 'high-contrast': 'High contrast' } as const;
+const SCHEMES = Object.keys(SCHEME_NAMES) as Scheme[];
 
 /**
  * The contrast readings of a candidate appearance: one row per pair, one
- * column per scheme, each ratio beside the floor it is held to.
+ * column per scheme, each ratio beside the floor it is held to. With no
+ * readings yet the rows and the columns stand, and each cell holds a
+ * placeholder of a ratio and its mark, which an enclosing skeleton region paints.
  */
 @Component({
   selector: 'app-contrast-table',
@@ -36,8 +42,14 @@ const SCHEME_NAMES = { light: 'Light', dark: 'Dark', 'high-contrast': 'High cont
     SlTableHead,
     SlTableRow,
     SlTableRowHeader,
+    SlSkeleton,
     SlText,
   ],
+  styles: `
+    .pending {
+      inline-size: 11ch;
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div slTable variant="framed" [columns]="4" data-contrast>
@@ -48,8 +60,8 @@ const SCHEME_NAMES = { light: 'Light', dark: 'Dark', 'high-contrast': 'High cont
         <thead slTableHead>
           <tr slTableRow>
             <th slTableColumnHeader>Pair</th>
-            @for (reading of readings(); track reading.scheme) {
-              <th slTableColumnHeader>{{ schemeNames[reading.scheme] }}</th>
+            @for (scheme of schemes; track scheme) {
+              <th slTableColumnHeader>{{ schemeNames[scheme] }}</th>
             }
           </tr>
         </thead>
@@ -59,16 +71,20 @@ const SCHEME_NAMES = { light: 'Light', dark: 'Dark', 'high-contrast': 'High cont
               <th slTableRowHeader>{{ row.label }}</th>
               @for (cell of row.cells; track cell.scheme) {
                 <td slTableCell [attr.data-pair]="row.id" [attr.data-scheme]="cell.scheme">
-                  <span slInline [gap]="2">
-                    <span slText size="sm" numeric="tabular" data-ratio>{{ cell.ratio }}</span>
-                    <span
-                      slBadge
-                      size="sm"
-                      variant="soft"
-                      [tone]="cell.passes ? 'success' : 'danger'"
-                      >{{ cell.passes ? 'Meets' : 'Below' }} {{ cell.floor }}:1</span
-                    >
-                  </span>
+                  @if (cell.reading; as reading) {
+                    <span slInline [gap]="2">
+                      <span slText size="sm" numeric="tabular" data-ratio>{{ reading.ratio }}</span>
+                      <span
+                        slBadge
+                        size="sm"
+                        variant="soft"
+                        [tone]="reading.passes ? 'success' : 'danger'"
+                        >{{ reading.passes ? 'Meets' : 'Below' }} {{ reading.floor }}:1</span
+                      >
+                    </span>
+                  } @else {
+                    <span class="pending" slSkeleton shape="text"></span>
+                  }
                 </td>
               }
             </tr>
@@ -79,21 +95,32 @@ const SCHEME_NAMES = { light: 'Light', dark: 'Dark', 'high-contrast': 'High cont
   `,
 })
 export class ContrastTable {
-  readonly readings = input.required<readonly ContrastReading[]>();
+  /** `null` while the readings' module loads. */
+  readonly readings = input.required<readonly ContrastReading[] | null>();
 
+  protected readonly schemes = SCHEMES;
   protected readonly schemeNames = SCHEME_NAMES;
-  /** The readings turned to the table's rows: one pair, its ratio in each scheme. */
+  /** One row per pair, one cell per scheme; a cell's reading is `null` until the readings arrive. */
   protected readonly rows = computed(() => {
     const readings = this.readings();
-    return (readings[0]?.pairs ?? []).map((pair, index) => ({
+    return CONTRAST_PAIRS.map((pair) => ({
       id: pair.id,
       label: pair.label,
-      cells: readings.map((reading) => ({
-        scheme: reading.scheme,
-        ratio: `${reading.pairs[index]!.ratio.toFixed(2)}:1`,
-        floor: reading.pairs[index]!.floor,
-        passes: reading.pairs[index]!.passes,
-      })),
+      cells: SCHEMES.map((scheme) => {
+        const reading = readings
+          ?.find((entry) => entry.scheme === scheme)
+          ?.pairs.find((entry) => entry.id === pair.id);
+        return {
+          scheme,
+          reading: reading
+            ? {
+                ratio: `${reading.ratio.toFixed(2)}:1`,
+                floor: reading.floor,
+                passes: reading.passes,
+              }
+            : null,
+        };
+      }),
     }));
   });
 }

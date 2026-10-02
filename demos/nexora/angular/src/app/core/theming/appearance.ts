@@ -68,7 +68,8 @@ export function readBrand(value: unknown): BrandPreference {
   return preset === 'custom' && color !== null ? { preset, custom: color } : DEFAULT_BRAND;
 }
 
-function isSeed(value: unknown): value is string {
+/** Whether `seedStyle` takes `value` as a seed: `#rgb`, `#rrggbb` or `oklch(L C H)`. */
+export function isSeed(value: unknown): value is string {
   if (typeof value !== 'string') return false;
   try {
     seedStyle({ accent: value });

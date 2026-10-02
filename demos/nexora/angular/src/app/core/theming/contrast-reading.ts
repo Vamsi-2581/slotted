@@ -10,41 +10,11 @@ import {
   type SeedName,
 } from '@slotted/theme';
 
+import { CONTRAST_PAIRS as PAIRS, type ContrastPairId } from './contrast-pairs';
 import { nexoraTheme } from './nexora-themes';
 
 /** recipe-checks' floor for a mark that is not text: a border, a focus ring. */
 const NON_TEXT = 3;
-
-const PAIRS = [
-  {
-    id: 'text',
-    label: 'Muted text',
-    fore: '--slotted-text-muted',
-    ground: '--slotted-surface',
-    text: true,
-  },
-  {
-    id: 'accent-text',
-    label: 'Accent text',
-    fore: '--slotted-tone-accent-text',
-    ground: '--slotted-surface',
-    text: true,
-  },
-  {
-    id: 'accent-border',
-    label: 'Accent border',
-    fore: '--slotted-tone-accent-border',
-    ground: '--slotted-surface',
-    text: false,
-  },
-  {
-    id: 'on-solid',
-    label: 'Text on solid',
-    fore: '--slotted-tone-accent-on-solid',
-    ground: '--slotted-tone-accent-solid',
-    text: true,
-  },
-] as const;
 
 /**
  * The tokens the readings take from the recipe. A theme that declares one of
@@ -56,7 +26,7 @@ export const CONTRAST_TOKENS: readonly string[] = [
 ];
 
 export interface ContrastPair {
-  readonly id: (typeof PAIRS)[number]['id'];
+  readonly id: ContrastPairId;
   readonly label: string;
   readonly ratio: number;
   readonly floor: number;

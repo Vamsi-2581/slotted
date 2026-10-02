@@ -32,17 +32,18 @@ import { SlSkeleton, SlSkeletonRegion } from '@slotted/angular/skeleton';
 import { SlStack } from '@slotted/angular/stack';
 import { SlThemeScope } from '@slotted/angular/theme';
 import { SlHeading, SlHeadingLevel } from '@slotted/angular/typography';
-import { parseSeed, SCHEMES } from '@slotted/theme';
+import type { Scheme } from '@slotted/theme';
 
 import { PreferencesStore, type UserPreferences } from '../../core/session/preferences.store';
 import {
   appearanceSeeds,
   BRAND_PRESETS,
   isNeutralPreset,
+  isSeed,
   NEUTRAL_PRESETS,
   type BrandPresetId,
 } from '../../core/theming/appearance';
-import { contrastReadings } from '../../core/theming/contrast-reading';
+import type * as ContrastReadingModule from '../../core/theming/contrast-reading';
 import {
   DEFAULT_THEME_ID,
   RUNTIME_THEME_IDS,
@@ -61,10 +62,16 @@ import { ContrastTable } from './contrast-table';
  * the page wrote. The preview repeats the candidate in the three schemes, and
  * the contrast table reads the same recipe's numbers.
  *
- * The runtime themes' sheets are compiled when the section opens. Until they
- * are on the page the samples and the preview are drawn in `default` under
- * their placeholders, one skeleton region for the one wait; a load that fails
- * leaves the themes without a sheet out of the choice and offers a retry.
+ * The runtime themes' definitions and the contrast arithmetic load by
+ * `import()` when the section opens, and the sheets are compiled then: one
+ * wait, one skeleton region. It follows the loading-states skill §4 — a
+ * 200 ms delay and a 400 ms minimum — so a load that settles first draws no
+ * placeholder; until then a sample whose sheet is missing is reserved and not
+ * drawn, since in `default` it would show another theme. AF-05 and AF-06 keep
+ * placeholders undelayed for a region waiting on the backend (AF-01); this
+ * wait is code, and every control of the section is on screen from the first
+ * frame. A load that fails leaves the themes without a sheet out of the
+ * choice, hides the contrast table and offers a retry.
  */
 @Component({
   selector: 'app-appearance-section',
@@ -153,6 +160,10 @@ import { ContrastTable } from './contrast-table';
     .swatch[data-neutral] {
       background: var(--slotted-text-muted);
     }
+    /* A sample whose theme's sheet is not on the page keeps its box and draws nothing. */
+    .reserved {
+      visibility: hidden;
+    }
     /* CP-03: the regions hold tables; a track's minimum is stated, never the table's width. */
     .previews {
       display: grid;
@@ -174,7 +185,10 @@ import { ContrastTable } from './contrast-table';
       <div slSectionBody>
         <div
           slSkeletonRegion
+          #wait="slSkeletonRegion"
           [loading]="pending()"
+          [delay]="200"
+          [minDuration]="400"
           [messages]="{ label: 'Loading the themes' }"
           data-appearance
         >
@@ -184,8 +198,8 @@ import { ContrastTable } from './contrast-table';
                 <div slAlertContent>
                   <div slAlertTitle>The themes did not load</div>
                   <p slAlertDescription>
-                    Standard stays available. The other themes need their definitions, which did not
-                    arrive.
+                    Standard stays available. The other themes and the contrast readings need
+                    definitions that did not arrive.
                   </p>
                 </div>
                 <div slAlertActions>
@@ -213,6 +227,7 @@ import { ContrastTable } from './contrast-table';
                           <span
                             class="sample"
                             aria-hidden="true"
+                            [class.reserved]="reserved(entry.id, wait.painted())"
                             slThemeScope
                             [attr.data-theme-sample]="entry.id"
                             [theme]="drawn(entry.id)"
@@ -256,6 +271,7 @@ import { ContrastTable } from './contrast-table';
                         <span slSkeleton
                           ><span
                             class="swatch"
+                            [class.reserved]="reserved(draft().theme, wait.painted())"
                             slThemeScope
                             [theme]="drawn(draft().theme)"
                             [scheme]="draft().scheme"
@@ -271,6 +287,7 @@ import { ContrastTable } from './contrast-table';
                       <span slSkeleton
                         ><span
                           class="swatch"
+                          [class.reserved]="reserved(draft().theme, wait.painted())"
                           slThemeScope
                           [theme]="drawn(draft().theme)"
                           [scheme]="draft().scheme"
@@ -315,6 +332,7 @@ import { ContrastTable } from './contrast-table';
                         ><span
                           class="swatch"
                           data-neutral
+                          [class.reserved]="reserved(draft().theme, wait.painted())"
                           slThemeScope
                           [theme]="drawn(draft().theme)"
                           [scheme]="draft().scheme"
@@ -361,6 +379,7 @@ import { ContrastTable } from './contrast-table';
               <div class="previews">
                 @for (scheme of schemes; track scheme) {
                   <app-appearance-preview
+                    [class.reserved]="reserved(draft().theme, wait.painted())"
                     [theme]="drawn(draft().theme)"
                     [scheme]="scheme"
                     [density]="draft().density"
@@ -370,7 +389,9 @@ import { ContrastTable } from './contrast-table';
               </div>
             </div>
 
-            <app-contrast-table [readings]="readings()" />
+            @if (!failed() || readings() !== null) {
+              <app-contrast-table [readings]="readings()" />
+            }
           </div>
         </div>
       </div>
@@ -386,14 +407,18 @@ export class AppearanceSection {
   protected readonly themes = THEME_CATALOGUE;
   protected readonly brands = BRAND_PRESETS;
   protected readonly neutrals = NEUTRAL_PRESETS;
-  protected readonly schemes = SCHEMES;
+  protected readonly schemes: readonly Scheme[] = ['light', 'dark', 'high-contrast'];
   protected readonly presetColors = BRAND_PRESETS.map((preset) => preset.color);
 
   /** The last load of the runtime sheets failed, and nothing has been tried since. */
   protected readonly failed = signal(false);
-  /** Some runtime sheet is still on its way. */
+  /** The contrast arithmetic, once its module has loaded. */
+  private readonly contrast = signal<typeof ContrastReadingModule | null>(null);
+  /** Some runtime sheet, or the contrast arithmetic, is still on its way. */
   protected readonly pending = computed(
-    () => !this.failed() && RUNTIME_THEME_IDS.some((id) => !this.store.hasSheet(id)),
+    () =>
+      !this.failed() &&
+      (this.contrast() === null || RUNTIME_THEME_IDS.some((id) => !this.store.hasSheet(id))),
   );
 
   constructor() {
@@ -404,17 +429,31 @@ export class AppearanceSection {
   protected readonly seeds = computed(() =>
     appearanceSeeds(this.draft().brand, this.draft().neutral),
   );
-  protected readonly readings = computed(() => contrastReadings(this.draft().theme, this.seeds()));
+  protected readonly readings = computed(
+    () => this.contrast()?.contrastReadings(this.draft().theme, this.seeds()) ?? null,
+  );
 
-  /** Puts every runtime sheet on the page; the cards and the preview wait for it. */
+  /** Puts every runtime sheet on the page and loads the contrast arithmetic; the samples wait for both. */
   protected load(): void {
     this.failed.set(false);
-    this.store.useThemes().catch(() => this.failed.set(true));
+    Promise.all([this.store.useThemes(), import('../../core/theming/contrast-reading')]).then(
+      ([, contrast]) => this.contrast.set(contrast),
+      () => this.failed.set(true),
+    );
   }
 
-  /** The theme a region names: `theme` once its sheet is on the page, `default` under the placeholders until then. */
+  /** The theme a region names: `theme` once its sheet is on the page, `default` until then. */
   protected drawn(theme: string): string {
     return this.store.hasSheet(theme) ? theme : DEFAULT_THEME_ID;
+  }
+
+  /**
+   * A sample drawn in `default` for a theme whose sheet is missing would show
+   * another theme: it keeps its box and draws nothing until the placeholders
+   * are painted over it or the sheet arrives.
+   */
+  protected reserved(theme: string, painted: boolean): boolean {
+    return !painted && !this.store.hasSheet(theme);
   }
 
   /** A theme whose sheet failed to load cannot be drawn, so it cannot be chosen. */
@@ -435,7 +474,7 @@ export class AppearanceSection {
    * The field writes hex in capitals; the store keeps it in lower case.
    */
   protected chooseCustom(value: string): void {
-    if (parseSeed(value) === null) return;
+    if (!isSeed(value)) return;
     const color = value.toLowerCase();
     const preset = BRAND_PRESETS.find((entry) => entry.color === color);
     this.patch.emit({

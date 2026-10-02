@@ -17,13 +17,32 @@ describe('PreferencesPage › Appearance', () => {
     await TestBed.inject(SessionStore).load();
   });
 
-  /** Opens the page and waits for the runtime sheets the section asks for. */
+  /** Polls `ready`, running change detection between reads; fails after `ms`. */
+  async function until(
+    harness: RouterTestingHarness,
+    ready: () => boolean,
+    ms = 5000,
+  ): Promise<void> {
+    const end = Date.now() + ms;
+    for (;;) {
+      harness.detectChanges();
+      if (ready()) return;
+      if (Date.now() > end) throw new Error('the condition did not hold in time');
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+  }
+
+  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const ratios = (root: HTMLElement) =>
+    root.querySelectorAll('[data-contrast] [data-ratio]').length;
+
+  /** Opens the page and waits for the runtime sheets and the contrast readings the section asks for. */
   async function open(): Promise<{ harness: RouterTestingHarness; root: HTMLElement }> {
     const harness = await RouterTestingHarness.create('/settings/preferences');
-    harness.detectChanges();
+    const root = harness.fixture.nativeElement as HTMLElement;
     await TestBed.inject(PreferencesStore).useThemes();
-    harness.detectChanges();
-    return { harness, root: harness.fixture.nativeElement as HTMLElement };
+    await until(harness, () => ratios(root) === 12);
+    return { harness, root };
   }
 
   const choose = (root: HTMLElement, name: string, value: string) => {
@@ -76,41 +95,100 @@ describe('PreferencesPage › Appearance', () => {
     expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('#7c3aed');
   });
 
-  /**
-   * The cards and the preview draw every theme, so the section puts every
-   * runtime sheet on the page. Until the sheets are there the section is one
-   * busy skeleton region, and every sample is drawn in `default` under it.
-   */
-  it('waits for the runtime sheets under one skeleton region', async () => {
-    const harness = await RouterTestingHarness.create('/settings/preferences');
-    harness.detectChanges();
-    const root = harness.fixture.nativeElement as HTMLElement;
-    const doc = TestBed.inject(DOCUMENT);
-    const region = () => root.querySelector<HTMLElement>('[data-appearance]')!;
-    const samples = () =>
-      [...root.querySelectorAll<HTMLElement>('[data-theme-sample]')].map((sample) =>
-        sample.getAttribute('data-slotted-theme'),
-      );
+  const samples = (root: HTMLElement) =>
+    [...root.querySelectorAll<HTMLElement>('[data-theme-sample]')].map((sample) => ({
+      theme: sample.getAttribute('data-slotted-theme'),
+      reserved: sample.classList.contains('reserved'),
+    }));
+  const painted = (root: HTMLElement) =>
+    root.querySelectorAll('[data-appearance] [data-ui=skeleton][data-loading]').length;
 
-    expect(doc.head.querySelectorAll('style[data-slotted-theme-sheet]')).toHaveLength(0);
-    expect(region().getAttribute('aria-busy')).toBe('true');
-    expect(samples()).toEqual(['default', 'default', 'default', 'default']);
-    expect(
-      root.querySelectorAll('[data-theme-sample] [data-ui=skeleton][data-loading]').length,
-    ).toBeGreaterThan(0);
+  /**
+   * The loading-states skill, §4: a wait that settles inside the region's
+   * 200 ms delay draws no placeholder. Until it settles, a sample whose sheet
+   * is missing keeps its box and draws nothing rather than another theme.
+   */
+  it('draws no placeholder when the definitions arrive inside the delay', async () => {
+    await TestBed.inject(PreferencesStore).useThemes(['nexora-soft']);
+    await import('../../core/theming/contrast-reading');
+    const harness = await RouterTestingHarness.create('/settings/preferences');
+    const root = harness.fixture.nativeElement as HTMLElement;
+    const region = root.querySelector<HTMLElement>('[data-appearance]')!;
+    const marks: string[] = [];
+    new MutationObserver((records) =>
+      records.forEach((record) => {
+        if (region.hasAttribute(record.attributeName!)) marks.push(record.attributeName!);
+      }),
+    ).observe(region, { attributes: true, attributeFilter: ['aria-busy', 'data-loading'] });
+    harness.detectChanges();
+
+    expect(region.hasAttribute('aria-busy')).toBe(false);
+    expect(samples(root).map((sample) => sample.reserved)).toEqual([false, false, true, true]);
 
     await TestBed.inject(PreferencesStore).useThemes();
+    await until(harness, () => ratios(root) === 12);
+    await wait(250);
     harness.detectChanges();
 
-    const names = [...doc.head.querySelectorAll('style[data-slotted-theme-sheet]')].map((sheet) =>
-      sheet.getAttribute('data-slotted-theme-sheet'),
+    expect(marks).toEqual([]);
+    expect(painted(root)).toBe(0);
+    expect(samples(root)).toEqual(
+      ['default', 'nexora-soft', 'nexora-sharp', 'nexora-editorial'].map((theme) => ({
+        theme,
+        reserved: false,
+      })),
     );
-    expect(names.sort()).toEqual(['nexora-editorial', 'nexora-sharp', 'nexora-soft']);
+  });
+
+  /**
+   * A wait past the delay is one busy skeleton region: the samples are drawn
+   * in `default` under their placeholders, and the contrast cells hold theirs.
+   * It holds them for the minimum, then the themes land.
+   */
+  it('paints one skeleton region when the definitions outlast the delay', async () => {
+    const store = TestBed.inject(PreferencesStore);
+    const load = store.useThemes.bind(store);
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    const held = vi
+      .spyOn(store, 'useThemes')
+      .mockImplementation((ids) => gate.then(() => load(ids)));
+    const harness = await RouterTestingHarness.create('/settings/preferences');
+    const root = harness.fixture.nativeElement as HTMLElement;
+    const region = () => root.querySelector<HTMLElement>('[data-appearance]')!;
+
+    harness.detectChanges();
     expect(region().hasAttribute('aria-busy')).toBe(false);
-    expect(samples()).toEqual(['default', 'nexora-soft', 'nexora-sharp', 'nexora-editorial']);
     expect(
-      root.querySelectorAll('[data-appearance] [data-ui=skeleton][data-loading]'),
+      TestBed.inject(DOCUMENT).head.querySelectorAll('style[data-slotted-theme-sheet]'),
     ).toHaveLength(0);
+
+    await wait(260);
+    harness.detectChanges();
+    expect(region().getAttribute('aria-busy')).toBe('true');
+    expect(samples(root).map((sample) => sample.theme)).toEqual([
+      'default',
+      'default',
+      'default',
+      'default',
+    ]);
+    expect(samples(root).some((sample) => sample.reserved)).toBe(false);
+    expect(root.querySelectorAll('[data-contrast] [data-ui=skeleton][data-loading]')).toHaveLength(
+      12,
+    );
+
+    release();
+    await until(harness, () => !region().hasAttribute('aria-busy'), 2000);
+    held.mockRestore();
+
+    expect(painted(root)).toBe(0);
+    expect(ratios(root)).toBe(12);
+    expect(samples(root).map((sample) => sample.theme)).toEqual([
+      'default',
+      'nexora-soft',
+      'nexora-sharp',
+      'nexora-editorial',
+    ]);
   });
 
   /** A load that fails is said once, with a way to try again; the themes it could not draw cannot be chosen. */
@@ -118,11 +196,10 @@ describe('PreferencesPage › Appearance', () => {
     const store = TestBed.inject(PreferencesStore);
     const load = vi.spyOn(store, 'useThemes').mockRejectedValueOnce(new Error('chunk'));
     const harness = await RouterTestingHarness.create('/settings/preferences');
-    await new Promise((resolve) => setTimeout(resolve));
-    harness.detectChanges();
     const root = harness.fixture.nativeElement as HTMLElement;
+    await until(harness, () => root.querySelector('[data-themes-failed]') !== null);
 
-    expect(root.querySelector('[data-themes-failed]')).not.toBeNull();
+    expect(root.querySelector('[data-contrast]')).toBeNull();
     expect(root.querySelector('[data-appearance]')!.hasAttribute('aria-busy')).toBe(false);
     const disabled = [...root.querySelectorAll<HTMLInputElement>('input[name="theme"]')]
       .filter((input) => input.disabled)
@@ -134,8 +211,7 @@ describe('PreferencesPage › Appearance', () => {
       (button) => button.textContent?.trim() === 'Try again',
     );
     retry!.click();
-    await store.useThemes();
-    harness.detectChanges();
+    await until(harness, () => ratios(root) === 12);
 
     expect(root.querySelector('[data-themes-failed]')).toBeNull();
     expect(

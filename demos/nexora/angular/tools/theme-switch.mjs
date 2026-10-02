@@ -17,7 +17,9 @@
 // default's violet, 4px corner and lower case, and the page title its sans face — read as absolute
 // values before the first choice and after every theme. Save then moves `html` and that button,
 // which proves the outside probe can see a change.
-// Prints one PASS or FAIL per check and exits non-zero on a failure.
+// Prints one PASS or FAIL per check and exits non-zero on a failure. A Chrome that cannot start, or
+// that exits during the run, fails the scenario through the same cleanup. CHROME names the binary
+// (default `google-chrome`).
 import { spawn } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
@@ -63,7 +65,18 @@ const server = createServer((request, response) => {
 });
 
 const profile = mkdtempSync(join(tmpdir(), 'slotted-theme-'));
+const BROWSER = process.env.CHROME ?? 'google-chrome';
 let chrome = null;
+const running = (child) => child.pid !== undefined && child.exitCode === null && child.signalCode === null;
+/** Ends Chrome: SIGTERM, then SIGKILL after 5 s; never waits on a process that already ended. */
+const stopChrome = async () => {
+  if (chrome === null || !running(chrome)) return;
+  const exited = new Promise((resolve) => chrome.once('exit', resolve));
+  chrome.kill();
+  if ((await Promise.race([exited.then(() => 'exited'), wait(5000).then(() => 'timeout')])) === 'exited') return;
+  chrome.kill('SIGKILL');
+  await Promise.race([exited, wait(2000)]);
+};
 let ws = null;
 let id = 0;
 const pending = new Map();
@@ -219,10 +232,17 @@ try {
     await new Promise((resolve) => server.listen(Number(process.env.PORT ?? 0), '127.0.0.1', resolve));
   }
   const ORIGIN = SERVED ?? `http://127.0.0.1:${server.address().port}`;
-  chrome = spawn('google-chrome', ['--headless=new', '--no-sandbox', '--disable-gpu', `--user-data-dir=${profile}`, '--remote-debugging-port=0', 'about:blank'], { stdio: 'ignore' });
+  chrome = spawn(BROWSER, ['--headless=new', '--no-sandbox', '--disable-gpu', `--user-data-dir=${profile}`, '--remote-debugging-port=0', 'about:blank'], { stdio: 'ignore' });
+  /* 'error' without a listener would end the process before `finally`; it fails the run instead. */
+  await new Promise((resolve, reject) => {
+    chrome.once('spawn', resolve);
+    chrome.once('error', (error) => reject(new Error(`Chrome did not start (${BROWSER}): ${error.message}`)));
+  });
+  chrome.on('error', (error) => console.log(`FAIL Chrome: ${error.message}`));
   let targets = null;
   for (let i = 0; i < 30 && targets === null; i++) {
     await wait(500);
+    if (!running(chrome)) throw new Error(`Chrome exited before it exposed a page (${chrome.exitCode ?? chrome.signalCode})`);
     try {
       const port = Number(readFileSync(join(profile, 'DevToolsActivePort'), 'utf8').split('\n')[0]);
       targets = await (await fetch(`http://127.0.0.1:${port}/json`)).json();
@@ -328,8 +348,7 @@ try {
   console.log(`FAIL ${error.message}`);
 } finally {
   ws?.close();
-  chrome?.kill();
-  if (chrome) await new Promise((resolve) => (chrome.exitCode === null ? chrome.once('exit', resolve) : resolve()));
+  await stopChrome();
   if (server.listening) server.close();
   rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
 }

@@ -1,8 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { SEED_NAMES, THEME_CHANGE_EVENT as THEME_PACKAGE_EVENT } from '@slotted/theme';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   MIRRORED_ATTRIBUTES,
+  MIRRORED_PROPERTIES,
   PORTAL_ROOT_ATTRIBUTE,
+  THEME_CHANGE_EVENT,
   createPortalRoot,
   getPortalContainer,
   setPortalContainer,
@@ -11,6 +14,21 @@ import {
 function roots(scope: Document = document) {
   return [...scope.querySelectorAll(`[${PORTAL_ROOT_ATTRIBUTE}]`)];
 }
+
+/**
+ * Core does not import `@slotted/theme` at runtime; it restates the seed
+ * names and the event name, and these two assertions hold the copies to the
+ * package that defines them.
+ */
+describe('the names core shares with @slotted/theme', () => {
+  it('mirrors one custom property per seed the theme package declares', () => {
+    expect(MIRRORED_PROPERTIES).toEqual(SEED_NAMES.map((name) => `--slotted-seed-${name}`));
+  });
+
+  it('listens for the event applyTheme dispatches', () => {
+    expect(THEME_CHANGE_EVENT).toBe(THEME_PACKAGE_EVENT);
+  });
+});
 
 describe('createPortalRoot', () => {
   beforeEach(() => {
@@ -203,6 +221,38 @@ describe('createPortalRoot', () => {
         (portal.container as HTMLElement).style.getPropertyValue('--slotted-seed-accent'),
       ).toBe('#16a34a');
       portal.release();
+    });
+
+    /**
+     * `applyTheme` replaces the stylesheet of a theme already on the page: the
+     * seeds change and no attribute does, so only the event it dispatches
+     * tells the open layers to read them again.
+     */
+    it('follows the seeds of a theme stylesheet applied again while the layer is open', () => {
+      const sheet = document.createElement('style');
+      sheet.textContent = '[data-slotted-theme="brand"] { --slotted-seed-accent: #e11d48; }';
+      document.head.append(sheet);
+      document.body.innerHTML = `<div data-slotted-theme="brand"><span id="trigger"></span></div>`;
+      const portal = createPortalRoot({ origin: document.getElementById('trigger') });
+      const layer = portal.container as HTMLElement;
+      expect(layer.style.getPropertyValue('--slotted-seed-accent')).toBe('#e11d48');
+
+      sheet.textContent = '[data-slotted-theme="brand"] { --slotted-seed-accent: #16a34a; }';
+      document.dispatchEvent(
+        new CustomEvent(THEME_CHANGE_EVENT, { detail: { name: 'brand', applied: true } }),
+      );
+
+      expect(layer.style.getPropertyValue('--slotted-seed-accent')).toBe('#16a34a');
+      portal.release();
+      sheet.remove();
+    });
+
+    it('stops listening for theme changes once the last layer is released', () => {
+      const spy = vi.spyOn(document, 'removeEventListener');
+      const portal = createPortalRoot({ origin: document.body });
+      portal.release();
+      expect(spy.mock.calls.map(([type]) => type)).toContain(THEME_CHANGE_EVENT);
+      spy.mockRestore();
     });
 
     it('follows a scheme the application changes while the layer is open', async () => {

@@ -1,3 +1,4 @@
+import { THEME_CHANGE_EVENT } from '../portal/portal';
 import type { ChartColor, ChartSlot, ChartTone } from './types';
 
 /**
@@ -217,8 +218,8 @@ export function observeChartTheme(element: Element, onChange: () => void): () =>
     .map((query) => view?.matchMedia?.(query))
     .filter((query): query is MediaQueryList => Boolean(query));
   for (const query of queries) query.addEventListener('change', schedule);
-  /* A theme applied at runtime changes no attribute: its stylesheet announces itself (`@slotted/theme` › `THEME_CHANGE_EVENT`). */
-  document.addEventListener('slotted-themechange', schedule);
+  /* A theme applied at runtime changes no attribute: its stylesheet announces itself. */
+  document.addEventListener(THEME_CHANGE_EVENT, schedule);
   const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
   let live = true;
   fonts?.ready.then(() => live && schedule());
@@ -227,7 +228,7 @@ export function observeChartTheme(element: Element, onChange: () => void): () =>
     live = false;
     observer.disconnect();
     for (const query of queries) query.removeEventListener('change', schedule);
-    document.removeEventListener('slotted-themechange', schedule);
+    document.removeEventListener(THEME_CHANGE_EVENT, schedule);
     if (frame) view?.cancelAnimationFrame(frame);
   };
 }

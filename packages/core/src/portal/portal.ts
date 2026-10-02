@@ -13,7 +13,9 @@
  * ancestor. In a library with one theme that is invisible; this one has three
  * schemes, three densities, a theme axis and two directions, so it is a defect
  * you can see. The layer element carries the four attributes of the region it
- * came from, and one observer keeps them current while the layer is open.
+ * came from, and one observer keeps them current while the layer is open; the
+ * event a theme stylesheet dispatches when it is replaced does the same for the
+ * seeds it changes without touching an attribute.
  *
  * Nothing here reads `document` at import time, so a server can load the module
  * and a layer can ask for a container that does not exist yet and be told so.
@@ -49,6 +51,13 @@ export const MIRRORED_PROPERTIES = [
   '--slotted-seed-danger',
 ] as const;
 
+/**
+ * The event `applyTheme` dispatches on the document when it writes or removes
+ * a theme stylesheet (`@slotted/theme` › `THEME_CHANGE_EVENT`). A stylesheet
+ * replaced in place changes the seeds without changing any attribute.
+ */
+export const THEME_CHANGE_EVENT = 'slotted-themechange';
+
 export interface PortalRootOptions {
   /**
    * The node the layer was written beside. Its theme and direction are what the
@@ -80,6 +89,8 @@ interface DocumentPortals {
   observer: MutationObserver | null;
   /** Moves the shared root in and out of the element the page made full screen. */
   onFullscreen: (() => void) | null;
+  /** Reads the seeds of every open layer again after a theme stylesheet changed. */
+  onThemeChange: (() => void) | null;
 }
 
 const FULLSCREEN_EVENTS = ['fullscreenchange', 'webkitfullscreenchange'] as const;
@@ -186,6 +197,7 @@ function documentPortals(doc: Document): DocumentPortals {
     layers: new Map(),
     observer: null,
     onFullscreen: null,
+    onThemeChange: null,
   };
 
   /* A move, not a re-creation: every open layer keeps its node and its state. */
@@ -195,6 +207,11 @@ function documentPortals(doc: Document): DocumentPortals {
     if (parent && state.root.parentElement !== parent) parent.append(state.root);
   };
   for (const type of FULLSCREEN_EVENTS) doc.addEventListener(type, state.onFullscreen);
+
+  state.onThemeChange = () => {
+    for (const [layer, origin] of state.layers) mirror(layer, origin);
+  };
+  doc.addEventListener(THEME_CHANGE_EVENT, state.onThemeChange);
 
   /**
    * Attributes only, which is what a theme switch is. Watching the tree for
@@ -262,6 +279,7 @@ function release(doc: Document, layer: Element, wasShared: boolean) {
   if (state.onFullscreen) {
     for (const type of FULLSCREEN_EVENTS) doc.removeEventListener(type, state.onFullscreen);
   }
+  if (state.onThemeChange) doc.removeEventListener(THEME_CHANGE_EVENT, state.onThemeChange);
   portals.delete(doc);
 }
 

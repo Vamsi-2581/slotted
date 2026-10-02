@@ -288,6 +288,7 @@
     "verify": "pnpm test && pnpm typecheck && pnpm build"
   },
   "devDependencies": {
+    "@slotted/theme": "workspace:*",
     "@types/node": "24.13.3",
     "echarts": "6.1.0",
     "jsdom": "30.0.1",

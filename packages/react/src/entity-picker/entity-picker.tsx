@@ -11,7 +11,6 @@ import {
   createEntitySearch,
   entityOptions,
   entitySections,
-  formatEntityLabel,
   localEntitySource,
   offersCreation,
 } from '@slotted/core/entity-picker';
@@ -25,6 +24,11 @@ import type {
   EntitySections,
   EntitySource,
 } from '@slotted/core/entity-picker';
+import {
+  entityPickerMessages,
+  type EntityPickerMessages,
+  type FamilyTranslator,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason } from '@slotted/core/state';
@@ -42,14 +46,15 @@ import {
 import type { MutableRefObject } from 'react';
 
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { useEntityPickerDefaults } from './entity-picker-defaults';
 import { EntityPickerControl } from './entity-picker-control';
 import { EntityPickerPopup } from './entity-picker-popup';
 import type {
   EntityPickerHighlightReason,
   EntityPickerInputReason,
-  EntityPickerLabels,
   EntityPickerMedia,
+  EntityPickerOpenOn,
   EntityPickerOpenReason,
   EntityPickerOverflow,
   EntityPickerProps,
@@ -83,8 +88,10 @@ export interface EntityPickerContextValue {
   inputNode: HTMLInputElement | null;
   inputValue: string;
   invalid: boolean;
-  labels: EntityPickerLabels;
-  locale: string | undefined;
+  /** The family's words in the language in force, with this picker's `messages` laid over them. */
+  t: FamilyTranslator<EntityPickerMessages>;
+  /** The locale the local filter and the mark compare in: the `locale` prop, or the language in force. */
+  locale: string;
   loop: boolean;
   max: number | null;
   media: EntityPickerMedia;
@@ -127,7 +134,7 @@ export interface EntityPickerContextValue {
   version: number;
   width: EntityPickerWidth;
   fullWidth: boolean;
-  openOn: 'input' | 'focus';
+  openOn: EntityPickerOpenOn;
 }
 
 const EntityPickerContext = createContext<EntityPickerContextValue | undefined>(undefined);
@@ -206,8 +213,8 @@ export function EntityPicker(props: EntityPickerProps) {
     inputValue,
     invalid,
     items,
-    labels: labelsProp,
-    locale,
+    locale: localeProp,
+    messages,
     loop,
     max,
     media,
@@ -241,10 +248,9 @@ export function EntityPicker(props: EntityPickerProps) {
     [generated],
   );
 
-  const labels = useMemo(
-    () => ({ ...defaults.labels, ...labelsProp }),
-    [defaults.labels, labelsProp],
-  );
+  const t = useMessages(entityPickerMessages, messages);
+  const inForce = useLocale();
+  const locale = localeProp ?? inForce;
 
   const resolvedDisabled = disabled ?? field?.disabled ?? defaults.disabled;
   const resolvedReadOnly = readOnly ?? field?.readOnly ?? defaults.readOnly;
@@ -501,21 +507,21 @@ export function EntityPicker(props: EntityPickerProps) {
       if (chosen.includes(id)) {
         const next = chosen.filter((item) => item !== id);
         if (requestIds(next, reason === 'remove' ? 'remove' : reason, source)) {
-          announce(formatEntityLabel(labels.removed, { label: name, count: next.length }));
+          announce(t('removed', { label: name, count: next.length }));
         }
       } else {
         if (maxResolved !== null && chosen.length >= maxResolved) return;
         const next = [...chosen, id];
         if (requestIds(next, reason, source)) {
-          announce(formatEntityLabel(labels.added, { label: name, count: next.length }));
+          announce(t('added', { label: name, count: next.length }));
           if (maxResolved !== null && next.length === maxResolved) {
-            announce(formatEntityLabel(labels.complete, { max: maxResolved }));
+            announce(t('complete', { max: maxResolved }));
           }
         }
       }
       setInput('', 'select', source);
     },
-    [announce, labels, maxResolved, requestIds, setInput],
+    [announce, maxResolved, requestIds, setInput, t],
   );
 
   const remove = useCallback(
@@ -524,14 +530,14 @@ export function EntityPicker(props: EntityPickerProps) {
       const next = state.currentIds.filter((item) => item !== id);
       if (requestIds(next, 'remove', source)) {
         announce(
-          formatEntityLabel(labels.removed, {
-            label: labelOf(id) || labels.unresolved,
+          t('removed', {
+            label: labelOf(id) || t('unresolved'),
             count: next.length,
           }),
         );
       }
     },
-    [announce, labels, requestIds],
+    [announce, requestIds, t],
   );
 
   const clear = useCallback(
@@ -560,9 +566,7 @@ export function EntityPicker(props: EntityPickerProps) {
           const chosen = latest.current.currentIds;
           if (!chosen.includes(made.id)) {
             requestIds([...chosen, made.id], 'submit', source);
-            announce(
-              formatEntityLabel(labels.added, { label: made.label, count: chosen.length + 1 }),
-            );
+            announce(t('added', { label: made.label, count: chosen.length + 1 }));
           }
           setInput('', 'select', source);
         } else {
@@ -580,7 +584,7 @@ export function EntityPicker(props: EntityPickerProps) {
       }
       void reason;
     },
-    [announce, bump, cache, labels, multiple, requestIds, setInput],
+    [announce, bump, cache, multiple, requestIds, setInput, t],
   );
 
   const activate = useCallback(
@@ -693,7 +697,12 @@ export function EntityPicker(props: EntityPickerProps) {
     recent,
     results: search.status === 'error' || search.status === 'short' ? search.items : results,
     searchedEmpty: resolvedMinQuery === 0,
-    labels,
+    labels: {
+      chosen: t('chosen'),
+      favorites: t('favorites'),
+      recent: t('recent'),
+      results: t('results'),
+    },
   });
   const offerCreate =
     !creating &&
@@ -747,7 +756,6 @@ export function EntityPicker(props: EntityPickerProps) {
     inputNode,
     inputValue: currentInput,
     invalid: invalid ?? field?.invalid ?? defaults.invalid,
-    labels,
     locale,
     loop: loop ?? defaults.loop,
     max: maxResolved,
@@ -782,6 +790,7 @@ export function EntityPicker(props: EntityPickerProps) {
     side: side ?? defaults.side,
     size: size ?? field?.size ?? defaults.size,
     strategy: strategy ?? defaults.strategy,
+    t,
     variant: variant ?? defaults.variant,
     version,
     width: width ?? defaults.width,

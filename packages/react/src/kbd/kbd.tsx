@@ -1,7 +1,9 @@
 import '@slotted/styles/kbd/kbd.css';
 
+import { keysMessages } from '@slotted/core/i18n';
 import { resolveKey } from '@slotted/core/keys';
 
+import { useMessages } from '../i18n';
 import { KeyElement } from './key-element';
 import { useKbdDefaults, useKbdGroup, useResolvedPlatform } from './kbd-defaults';
 import type { KbdProps } from './kbd.types';
@@ -23,6 +25,7 @@ export function Kbd({
   children,
   disabled,
   keyName,
+  messages,
   platform,
   render,
   size,
@@ -32,12 +35,14 @@ export function Kbd({
   const defaults = useKbdDefaults();
   const group = useKbdGroup();
   const resolvedPlatform = useResolvedPlatform(platform ?? group?.platform);
+  const t = useMessages(keysMessages, messages);
 
   const resolved =
     keyName === undefined
       ? undefined
       : resolveKey(keyName, {
           platform: resolvedPlatform,
+          t,
           legends: defaults.legends,
           names: defaults.names,
         });

@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import {
   SlCommandPalette,
+  SlCommandPaletteEmpty,
   SlCommandPaletteItem,
   type CommandPaletteItem,
   type CommandPaletteSelectRequest,
@@ -73,7 +74,7 @@ const ENTITY_ICON: Record<SearchHit['type'], string> = {
 
 @Component({
   selector: 'app-command-palette',
-  imports: [NgIcon, SlCommandPalette, SlCommandPaletteItem, SlHighlight],
+  imports: [NgIcon, SlCommandPalette, SlCommandPaletteEmpty, SlCommandPaletteItem, SlHighlight],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <sl-command-palette
@@ -84,14 +85,10 @@ const ENTITY_ICON: Record<SearchHit['type'], string> = {
       [(query)]="query"
       [(open)]="open"
       hotkey="mod+k"
-      label="Search or jump to"
-      placeholder="Search customers, orders, invoices… or type a command"
-      [emptyLabel]="emptyLabel()"
-      hintNavigate="navigate"
-      hintSelect="open"
-      hintClose="close"
+      [messages]="messages"
       (select)="run($event)"
     >
+      <ng-template slCommandPaletteEmpty>{{ emptyLabel() }}</ng-template>
       <ng-template slCommandPaletteItem let-item let-query="query">
         @let row = asRow(item);
         <span data-part="icon"><ng-icon [name]="row.icon ?? 'lucideCornerDownRight'" /></span>
@@ -208,6 +205,15 @@ export class CommandPalette {
   });
 
   readonly emptyLabel = computed(() => `Nothing matches “${this.query()}”`);
+
+  /** The palette's own words, in the shell's voice. */
+  readonly messages = {
+    label: 'Search or jump to',
+    placeholder: 'Search customers, orders, invoices… or type a command',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    hintClose: 'close',
+  };
 
   /** Hits are already ranked by the backend; commands match on label and keywords. */
   readonly rank = (item: PaletteItem, query: string): number | null => {

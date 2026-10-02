@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "listbox",
   "ui": "listbox",
+  "catalog": {
+    "group": "Forms",
+    "summary": "List of options for single or multiple choice."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/listbox/",
   "patternStatus": "Read on 2026-09-04 from the rendered page and from content/patterns/listbox/listbox-pattern.html in w3c/aria-practices, so the optional and alternative keyboard models are transcribed from the source rather than from the page's summary. The keyboard table, the roles and the properties are below, and the itemised comparison is in docs/history/designs/2026-09-04-listbox-design.md §4.",
   "roles": {

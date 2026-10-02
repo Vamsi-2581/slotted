@@ -1,6 +1,8 @@
 import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ChangeRequest } from '@slotted/core/state';
@@ -427,15 +429,32 @@ describe('SlCommandPalette with a template and defaults', () => {
   it('takes its defaults from the provider', async () => {
     await TestBed.configureTestingModule({
       imports: [InlineHost],
-      providers: [provideCommandPaletteDefaults({ size: 'lg', placeholder: 'Buscar…' })],
+      providers: [provideCommandPaletteDefaults({ size: 'lg' })],
     }).compileComponents();
     const fixture = TestBed.createComponent(InlineHost);
     fixture.detectChanges();
     expect(
       fixture.nativeElement.querySelector('[data-ui="command-palette"]').getAttribute('data-size'),
     ).toBe('lg');
-    expect(
-      fixture.nativeElement.querySelector('[role="combobox"]').getAttribute('placeholder'),
-    ).toBe('Buscar…');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', async () => {
+    const locale = signal('pt-BR');
+    await TestBed.configureTestingModule({
+      imports: [InlineHost],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(InlineHost);
+    fixture.detectChanges();
+    const field = () => fixture.nativeElement.querySelector('[role="combobox"]') as HTMLElement;
+    const footer = () =>
+      (fixture.nativeElement.querySelector('[data-part="footer"]') as HTMLElement).textContent;
+    expect(field().getAttribute('placeholder')).toBe('Digite um comando ou pesquise…');
+    expect(footer()).toContain('Navegar');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(field().getAttribute('aria-label')).toBe('Search commands');
+    expect(footer()).toContain('Navigate');
   });
 });

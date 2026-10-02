@@ -1,6 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it } from 'vitest';
 
 import { SlColorField } from './color-field';
@@ -93,7 +95,7 @@ describe('SlColorPicker', () => {
       `<div slColorPicker defaultValue="#2563EB" (valueChange)="changes.push($event)"></div>`,
     );
     const input = fixture.nativeElement.querySelector(
-      'input[aria-label="Colour"]',
+      'input[aria-label="Color"]',
     ) as HTMLInputElement;
     input.value = 'rgb(220 38';
     input.dispatchEvent(new Event('input'));
@@ -133,11 +135,31 @@ describe('SlColorPicker', () => {
     expect(root(fixture).hasAttribute('data-disabled')).toBe(true);
   });
 
-  it('takes its words from the provider', () => {
+  it('takes its palette from the provider', () => {
     const fixture = renderTemplate(`<div slColorPicker defaultValue="#2563EB"></div>`, [
-      provideColorPickerDefaults({ hueLabel: 'Matiz' }),
+      provideColorPickerDefaults({ presets: ['#16A34A'] }),
     ]);
+    expect(fixture.nativeElement.querySelector('[data-part="preset"]')).not.toBeNull();
+  });
+
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(
+      `<div slColorPicker defaultValue="#FFFF00" contrastWith="#FFFFFF"></div>`,
+      [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    );
+    const level = () =>
+      fixture.nativeElement.querySelector('[data-part="contrast-level"]').textContent.trim();
     expect(slider(fixture, 'Matiz')).not.toBeNull();
+    expect(slider(fixture, 'Saturação e brilho').getAttribute('aria-roledescription')).toBe(
+      'controle deslizante 2D',
+    );
+    expect(level()).toBe('Insuficiente');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(slider(fixture, 'Hue')).not.toBeNull();
+    expect(level()).toBe('Fail');
   });
 });
 

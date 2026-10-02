@@ -3,6 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { describe, expect, it } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/prose/contract.json';
 import { SlProse } from './prose';
 import type { ProseFlow, ProseSize } from './prose';
@@ -30,13 +33,13 @@ const defaults = contract.members.prose.defaults;
     </article>
 
     <div slProse id="stated" [size]="size()" [flow]="flow()"></div>
-    <div slProseScroll id="named" [labelledBy]="labelledBy()" [label]="label()"></div>
+    <div slProseScroll id="named" [labelledBy]="labelledBy()" [messages]="messages()"></div>
   `,
 })
 class Host {
   readonly size = signal<ProseSize | undefined>(undefined);
   readonly flow = signal<ProseFlow | undefined>(undefined);
-  readonly label = signal<string | undefined>(undefined);
+  readonly messages = signal<{ scroll?: string } | undefined>(undefined);
   readonly labelledBy = signal<string | undefined>(undefined);
 }
 
@@ -143,7 +146,7 @@ describe('SlProseScroll', () => {
 
     expect(scroll.getAttribute('role')).toBe('region');
     expect(scroll.getAttribute('tabindex')).toBe('0');
-    expect(scroll.getAttribute('aria-label')).toBe(defaults.scrollLabel);
+    expect(scroll.getAttribute('aria-label')).toBe('Scrollable content');
     expect(directive.isOverflowing()).toBe(true);
   });
 
@@ -154,7 +157,7 @@ describe('SlProseScroll', () => {
       .queryAll(By.directive(SlProseScroll))
       .map((node) => node.injector.get(SlProseScroll))[1]!;
 
-    fixture.componentInstance.label.set('ignored');
+    fixture.componentInstance.messages.set({ scroll: 'ignored' });
     fixture.componentInstance.labelledBy.set('caption');
     measure(named, { client: 320, scroll: 900 });
     directive.refresh();
@@ -164,9 +167,10 @@ describe('SlProseScroll', () => {
     expect(named.getAttribute('aria-label')).toBeNull();
   });
 
-  it("takes the application's own word for a scrolling region", () => {
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
     TestBed.configureTestingModule({
-      providers: [provideProseDefaults({ scrollLabel: 'Região rolável' })],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
     });
     const { byId, fixture } = mount();
     const scroll = byId('scroll');
@@ -177,7 +181,10 @@ describe('SlProseScroll', () => {
     measure(scroll, { client: 320, scroll: 900 });
     directive.refresh();
     fixture.detectChanges();
+    expect(scroll.getAttribute('aria-label')).toBe('Conteúdo rolável');
 
-    expect(scroll.getAttribute('aria-label')).toBe('Região rolável');
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(scroll.getAttribute('aria-label')).toBe('Scrollable content');
   });
 });

@@ -1,11 +1,13 @@
 import { plainDate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 
 import { Button } from '../button';
+import { SlottedProvider } from '../i18n';
 import { Calendar } from './calendar';
 import { CalendarDefaultsProvider } from './calendar-defaults';
 import { Grid, Measure, Scene } from './calendar-demo';
@@ -366,11 +368,13 @@ export const Composition: Story = {
       <Grid columns={1}>
         <Scene
           label="Set once for the application"
-          note="The provider decides the locale, the week’s first day and the fixed grid for everything under it, so a product does not repeat four props on every calendar."
+          note="The provider decides the week’s first day and the fixed grid for everything under it, and SlottedProvider the language, so a product does not repeat three props on every calendar."
         >
-          <CalendarDefaultsProvider firstDayOfWeek={1} fixedWeeks locale="pt-BR">
-            <Calendar aria-label="Herdado" defaultFocusedDate={NINTH} />
-          </CalendarDefaultsProvider>
+          <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+            <CalendarDefaultsProvider firstDayOfWeek={1} fixedWeeks>
+              <Calendar aria-label="Herdado" defaultFocusedDate={NINTH} />
+            </CalendarDefaultsProvider>
+          </SlottedProvider>
         </Scene>
         <Scene
           label="The date the reader is on, owned outside"

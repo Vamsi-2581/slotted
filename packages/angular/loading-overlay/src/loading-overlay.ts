@@ -1,6 +1,11 @@
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createFocusScope } from '@slotted/core/focus';
+import {
+  loadingOverlayMessages,
+  type LoadingOverlayMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { initialLoadingVisibility, nextLoadingVisibility } from '@slotted/core/loading';
 import type { LoadingVisibilityState } from '@slotted/core/loading';
 import { createPortalRoot } from '@slotted/core/portal';
@@ -26,12 +31,11 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlLoader } from '@slotted/angular/progress-indicator';
 
 import { injectLoadingOverlayDefaults } from './loading-overlay-defaults';
 import {
-  LOADING_OVERLAY_DEFAULT_CANCEL_LABEL,
-  LOADING_OVERLAY_DEFAULT_LABEL,
   LOADING_OVERLAY_DEFAULT_LIVE,
   LOADING_OVERLAY_DEFAULT_SIZE,
   LOADING_OVERLAY_DEFAULT_VEIL,
@@ -112,7 +116,7 @@ export class SlLoadingOverlayIndicator {}
           @if (cancellable()) {
             <ng-content select="[slLoadingOverlayCancel]">
               <button data-part="cancel" type="button" (click)="requestCancel($event)">
-                {{ cancelLabelValue() }}
+                {{ t('cancel') }}
               </button>
             </ng-content>
           }
@@ -155,11 +159,15 @@ export class SlLoadingOverlay {
   readonly veil = input<LoadingOverlayVeil | undefined>(undefined);
   readonly size = input<LoadingOverlaySize | undefined>(undefined);
   readonly live = input<LoadingOverlayLive | undefined>(undefined);
-  readonly label = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * short line (`label`), painted in the panel and announced once, and the
+   * cancel control's words (`cancel`).
+   */
+  readonly messages = input<PartialMessages<LoadingOverlayMessages> | undefined>(undefined);
   readonly loadedLabel = input<string | undefined>(undefined);
   readonly description = input<string | undefined>(undefined);
   readonly cancellable = input(false, { transform: booleanAttribute });
-  readonly cancelLabel = input<string | undefined>(undefined);
   readonly delay = input<number | undefined, unknown>(undefined, { transform: optionalNumber });
   readonly minDuration = input<number | undefined, unknown>(undefined, {
     transform: optionalNumber,
@@ -180,6 +188,8 @@ export class SlLoadingOverlay {
   readonly reveal = output<void>();
 
   private readonly defaults = injectLoadingOverlayDefaults();
+  /** The family's words in the language in force, with this overlay's `messages` laid over them. */
+  readonly t = injectMessages(loadingOverlayMessages, this.messages);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   /**
@@ -204,12 +214,7 @@ export class SlLoadingOverlay {
   readonly liveValue = computed(
     () => this.live() ?? this.defaults.live ?? LOADING_OVERLAY_DEFAULT_LIVE,
   );
-  readonly labelValue = computed(
-    () => this.label() ?? this.defaults.label ?? LOADING_OVERLAY_DEFAULT_LABEL,
-  );
-  readonly cancelLabelValue = computed(
-    () => this.cancelLabel() ?? this.defaults.cancelLabel ?? LOADING_OVERLAY_DEFAULT_CANCEL_LABEL,
-  );
+  readonly labelValue = computed(() => this.t('label'));
   private readonly delayValue = computed(() => this.delay() ?? this.defaults.delay ?? 0);
   private readonly holdValue = computed(() => this.minDuration() ?? this.defaults.minDuration ?? 0);
 

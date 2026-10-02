@@ -166,7 +166,7 @@ test('says what it does while an answer is still travelling', () => {
   );
   assert.match(contract.async.count, /live region/);
   assert.ok(member.parts.includes('status'));
-  assert.ok('countLabel' in member.defaults);
+  assert.ok(contract.messages.includes('count'));
 });
 
 test('keeps the trigger button out of the page tab sequence, as the pattern asks', () => {
@@ -250,13 +250,12 @@ test('resolves every axis in the same order, and holds a default for each', () =
   }
 });
 
-test('lets an application set every axis and every word it speaks once', () => {
+test('lets an application set every axis once, and takes every word from the catalog', () => {
   for (const axis of Object.keys(contract.axes)) {
     assert.ok(contract.provides.comboboxDefaults.includes(axis), `${axis} is not in the provider`);
   }
-  for (const word of ['clearLabel', 'emptyLabel', 'loadingLabel', 'triggerLabel', 'countLabel']) {
-    assert.ok(contract.provides.comboboxDefaults.includes(word), `${word} is not in the provider`);
-    assert.ok(word in member.defaults, `${word} has no default`);
+  for (const word of ['clear', 'empty', 'loading', 'trigger', 'count', 'create']) {
+    assert.ok(contract.messages.includes(word), `${word} is not a message`);
   }
 });
 
@@ -299,4 +298,24 @@ test('declares a scenario for every capability a reference page has to prove', (
     'form',
     'composition',
   ]);
+});
+
+/**
+ * A reader tabbing through a form passes this control on the way to the next
+ * field, and a popup that opens on every Tab is a list announced and dismissed
+ * for nothing. A press on the input is the other gesture: the reader aimed at
+ * this control, and a press that only places the caret leaves them hunting for
+ * the chevron. combobox, multi-select and entity-picker answer both alike.
+ */
+test('opens on typing and on a press on the input, and never on a Tab into it', () => {
+  assert.deepEqual(contract.axes.openOn, ['input', 'focus', 'manual']);
+  assert.equal(member.defaults.openOn, 'input');
+  assert.deepEqual(contract.resolution.openOn, ['prop', 'defaults', 'input']);
+  assert.match(contract.opening.input, /typing/);
+  assert.match(contract.opening.input, /Tab/);
+  assert.match(contract.opening.focus, /every focus/);
+  assert.match(contract.opening.manual, /trigger/);
+  assert.match(contract.opening.press, /pointer/);
+  assert.match(contract.opening.press, /never closes/);
+  assert.match(contract.opening.press, /manual/);
 });

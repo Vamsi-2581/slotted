@@ -658,6 +658,13 @@ export const ANGULAR_DRAWER_DOCS = {
       'The body carries aria-busy and keeps a floor so the panel does not jump to size when the content lands. Nothing is disabled: a drawer a reader cannot leave is the worse failure',
     ],
     [
+      'messages',
+      'Partial<DrawerMessages>',
+      '—',
+      '<sl-drawer>',
+      'Words laid over the language in force, key by key: the close control’s name (close). A native aria-label on slDrawerClose still wins',
+    ],
+    [
       'initialFocus',
       "'first' | 'container' | HTMLElement | false",
       'first',

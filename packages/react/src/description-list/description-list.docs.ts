@@ -230,13 +230,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Inside a card, and beside the families it sits with',
-    note: 'Card owns the title and the header actions, so this family ships neither. The value slot takes a tag, a status indicator or a skeleton, and the defaults provider decides the arrangement and the words for a whole application.',
+    note: 'Card owns the title and the header actions, so this family ships neither. The value slot takes a tag, a status indicator or a skeleton, and the defaults provider decides the arrangement for a whole application; the words come from the language in force.',
     snippet: defineSnippet({
       id: 'description-list-react-composition',
       language: 'tsx',
       label: 'A titled panel, and defaults for the application',
       source:
-        "<Card>\n  <CardHeader>Billing</CardHeader>\n  <CardBody>\n    <DescriptionList>{pairs}</DescriptionList>\n  </CardBody>\n</Card>;\n\n<DescriptionListDefaultsProvider labels={{ copy: 'Copiar', reveal: 'Ver mais' }} variant=\"ruled\">\n  <App />\n</DescriptionListDefaultsProvider>;",
+        '<Card>\n  <CardHeader>Billing</CardHeader>\n  <CardBody>\n    <DescriptionList>{pairs}</DescriptionList>\n  </CardBody>\n</Card>;\n\n<DescriptionListDefaultsProvider variant="ruled">\n  <App />\n</DescriptionListDefaultsProvider>;',
     }),
   },
   {
@@ -308,11 +308,11 @@ export const REACT_DESCRIPTION_LIST_DOCS = {
         'The maximum width of the term column; the terms share one track sized to the widest of them, up to this',
       ],
       [
-        'labels',
-        'DescriptionListLabels',
+        'messages',
+        'PartialMessages<DescriptionListMessages>',
         '—',
         'DescriptionList',
-        'The six words the family says: copy, copied, copyBlocked, reveal, collapse, placeholder',
+        'Words laid over the language in force, key by key: copy, copied, copyBlocked, reveal, collapse, placeholder',
       ],
       [
         'span',
@@ -354,7 +354,7 @@ export const REACT_DESCRIPTION_LIST_DOCS = {
         'ReactNode',
         '—',
         'DescriptionListDescription',
-        'Words shown in place of a value that is missing. Unset, the mark is drawn and the labels answer what is read instead',
+        'Words shown in place of a value that is missing. Unset, the mark is drawn and the placeholder message is read instead',
       ],
       [
         'revealed',
@@ -385,14 +385,14 @@ export const REACT_DESCRIPTION_LIST_DOCS = {
         '() => DescriptionListContextValue',
         '—',
         'inside a DescriptionList',
-        'The arrangement and the resolved words, for a part of your own',
+        'The arrangement and the translator t, for a part of your own',
       ],
       [
         'DescriptionListDefaultsProvider',
-        'layout | columns | variant | termWidth | labels',
+        'layout | columns | variant | termWidth',
         '—',
         'Application',
-        'Sets those five once for everything below it; a prop on the list still wins',
+        'Sets those four once for everything below it; a prop on the list still wins',
       ],
       [
         'children',

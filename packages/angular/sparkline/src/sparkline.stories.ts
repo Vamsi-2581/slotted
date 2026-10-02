@@ -1,6 +1,7 @@
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import { SlGrid } from '@slotted/angular/grid';
+import { provideSlotted } from '@slotted/angular/i18n';
 import {
   SlTable,
   SlTableBody,
@@ -12,11 +13,11 @@ import {
   SlTableRow,
   SlTableRowHeader,
 } from '@slotted/angular/table';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { applicationConfig, moduleMetadata } from '@storybook/angular-vite';
 
 import { SlSparkline } from './sparkline';
-import { provideSparklineDefaults } from './sparkline-defaults';
 import type { SparklineCurve, SparklineSize, SparklineType } from './sparkline.constants';
 import { ANGULAR_SPARKLINE_DOCS, ANGULAR_SPARKLINE_TOKENS } from './sparkline.docs';
 
@@ -315,17 +316,7 @@ export const InTable: Story = {
 export const Accessibility: Story = {
   decorators: [
     applicationConfig({
-      providers: [
-        provideSparklineDefaults({
-          locale: 'pt-BR',
-          messages: {
-            up: '{last}, subiu {change} desde {first}',
-            down: '{last}, caiu {change} desde {first}',
-            flat: '{last}, sem variação desde {first}',
-            noData: 'sem dados',
-          },
-        }),
-      ],
+      providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
     }),
   ],
   parameters: scenario('accessibility'),
@@ -333,7 +324,7 @@ export const Accessibility: Story = {
     props: DATA,
     template: `
 <div slGrid [columns]="2" [gap]="6">
-  ${scene('the generated name', 'Inspect the root: “Taxa de atendimento: 96,1%, subiu 3,2% desde 92,9%”, with every number in the percent format given and the sentences the provider set.', `<span slSparkline [data]="fillRate" [formatOptions]="percent" label="Taxa de atendimento" area></span>`)}
+  ${scene('the generated name', 'Inspect the root: “Taxa de atendimento: 96,1%, alta de 3,2% desde 92,9%”, with every number in the percent format given and the sentences of the language in force.', `<span slSparkline [data]="fillRate" [formatOptions]="percent" label="Taxa de atendimento" area></span>`)}
   ${scene('a description of your own', 'description replaces the whole sentence; an aria-label written on the element itself wins over both.', `<span slSparkline [data]="fillRate" description="Twelve weeks of fill rate, rising" area></span>`)}
 </div>`,
   }),

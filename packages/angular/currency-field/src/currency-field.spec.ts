@@ -2,7 +2,9 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SlField, SlFieldError, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
 import type { CurrencyChangeRequest } from '@slotted/core/currency';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/currency-field/contract.json';
@@ -195,10 +197,28 @@ describe('SlCurrencyField', () => {
       `<div slCurrencyField>
         <input slCurrencyFieldInput defaultValue="1480" />
       </div>`,
-      [provideCurrencyFieldDefaults({ currency: 'JPY', locale: 'ja-JP' })],
+      [provideSlotted({ locale: 'ja-JP' }), provideCurrencyFieldDefaults({ currency: 'JPY' })],
     );
 
     expect(input(fixture).value).toBe('￥1,480');
+  });
+
+  it('writes and speaks in the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(
+      `<div slCurrencyField stepper="split">
+        <input slCurrencyFieldInput currency="BRL" defaultValue="1480" />
+      </div>`,
+      [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    );
+
+    expect(plain(input(fixture).value)).toBe('R$ 1.480,00');
+    expect(stepper(fixture, 'increment').getAttribute('aria-label')).toBe('Aumentar');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(stepper(fixture, 'increment').getAttribute('aria-label')).toBe('Increase');
+    expect(stepper(fixture, 'decrement').getAttribute('aria-label')).toBe('Decrease');
   });
 });
 
@@ -626,7 +646,7 @@ describe('the two steppers', () => {
 
   it('step the amount, stay out of the tab order and announce themselves', () => {
     const fixture = renderTemplate(`
-      <div slCurrencyField stepper="stacked" incrementLabel="Mais" decrementLabel="Menos">
+      <div slCurrencyField stepper="stacked" [messages]="{ increment: 'Mais', decrement: 'Menos' }">
         <input
           slCurrencyFieldInput
           id="total"

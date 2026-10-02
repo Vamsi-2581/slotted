@@ -141,7 +141,12 @@ function SignInStep({
         <Button disabled={seconds > 0 || verified} onClick={restart} variant="ghost">
           {seconds > 0 ? `Reenviar código em 0:${pad(seconds)}` : 'Reenviar código'}
         </Button>
-        <Button disabled={verified} loading={verifying} loadingLabel="A verificar" type="button">
+        <Button
+          disabled={verified}
+          loading={verifying}
+          messages={{ loading: 'A verificar' }}
+          type="button"
+        >
           Confirmar
         </Button>
       </CardFooter>
@@ -452,7 +457,7 @@ export const States: Story = {
           <OtpInput defaultValue="482915" groups={[3, 3]} />
         </Field>
         <div className="slotted-demo-row">
-          <Button loading loadingLabel="A verificar">
+          <Button loading messages={{ loading: 'A verificar' }}>
             Confirmar
           </Button>
         </div>

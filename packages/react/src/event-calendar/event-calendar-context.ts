@@ -6,13 +6,13 @@ import type {
   EventOccurrence,
   WorkingHours,
 } from '@slotted/core/event-calendar';
+import type { EventCalendarMessages, FamilyTranslator } from '@slotted/core/i18n';
 import { createContext, useContext } from 'react';
 import type { ReactNode, SyntheticEvent } from 'react';
 
 import type {
   DayContentContext,
   EventCalendarHourCycle,
-  EventCalendarLabels,
   EventCalendarSelection,
   EventCalendarSelectionMode,
   EventRenderContext,
@@ -28,8 +28,9 @@ export type GridRow = 'header' | 'all-day' | 'timed';
  */
 export interface EventCalendarModel {
   readonly id: string;
-  readonly labels: EventCalendarLabels;
-  readonly locale: string | undefined;
+  /** The family's words in the language in force, with this calendar's `messages` laid over them. */
+  readonly t: FamilyTranslator<EventCalendarMessages>;
+  readonly locale: string;
   readonly hourCycle: EventCalendarHourCycle | undefined;
   readonly timeZone: string | undefined;
   readonly view: EventCalendarView;

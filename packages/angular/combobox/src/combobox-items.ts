@@ -109,7 +109,7 @@ export class SlComboboxItem {
   readonly ranges = computed(() => {
     const query = this.combobox.query();
     if (!this.combobox.resolvedHighlightMatch() || query === '') return [];
-    return matchRanges(this.label(), query, { locale: this.combobox.locale() });
+    return matchRanges(this.label(), query, { locale: this.combobox.resolvedLocale() });
   });
 
   constructor() {

@@ -71,7 +71,7 @@ const anatomy: AnatomyRow[] = [
     part: 'title',
     element: 'span',
     required: true,
-    purpose: 'labels.source or labels.target; names the pane and its list.',
+    purpose: 'messages.source or messages.target; names the pane and its list.',
   },
   {
     part: 'count',
@@ -105,7 +105,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div inside the Listbox’s own empty part',
     required: false,
     purpose:
-      'labels.empty, or labels.noResults with data-query while a query is typed, over an inbox or a search mark.',
+      'messages.empty, or messages.noResults with data-query while a query is typed, over an inbox or a search mark.',
   },
   {
     part: 'drop-indicator',
@@ -125,7 +125,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: true,
     purpose:
-      'role="group" named labels.actions: the four moves, then reorder. In steps it stands under the source or over the target and shows that pane’s two moves.',
+      'role="group" named messages.actions: the four moves, then reorder. In steps it stands under the source or over the target and shows that pane’s two moves.',
   },
   {
     part: 'move-to-target',
@@ -156,7 +156,7 @@ const anatomy: AnatomyRow[] = [
     part: 'reorder',
     element: 'div',
     required: false,
-    purpose: 'role="group" named labels.reorder, under reorderable.',
+    purpose: 'role="group" named messages.reorder, under reorderable.',
   },
   {
     part: 'move-up',
@@ -226,11 +226,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'transfer-react-order',
       language: 'tsx',
       label: 'Dashboard widgets, in the order they are drawn',
-      source: `<Transfer
-  items={widgets}
-  labels={{ source: 'Available', target: 'On the dashboard' }}
-  reorderable
-/>;`,
+      source: `<Transfer items={widgets} messages={{ target: 'On the dashboard' }} reorderable />;`,
     }),
   },
   {
@@ -332,21 +328,17 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'labels',
     title: 'Words for another product',
-    note: 'Every word is a label: the titles, the four moves, the counts and the announcements. A provider sets them once; an instance overrides one.',
+    note: 'Every word is a message: the titles, the four moves, the counts and the announcements. The language in force sets them once; an instance lays its own over them.',
     snippet: defineSnippet({
       id: 'transfer-react-labels',
       language: 'tsx',
       label: 'Permissions in Portuguese',
-      source: `<TransferDefaultsProvider
-  labels={{
-    source: 'Disponíveis',
-    target: 'Concedidas',
-    moveToTarget: 'Conceder',
-    moveToSource: 'Revogar',
-  }}
->
-  <App />
-</TransferDefaultsProvider>;`,
+      source: `<SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+  <Transfer
+    items={permissions}
+    messages={{ target: 'Concedidas', moveToTarget: 'Conceder', moveToSource: 'Revogar' }}
+  />
+</SlottedProvider>;`,
     }),
   },
   {
@@ -367,8 +359,8 @@ const scenes: ReferenceSceneMeta[] = [
     snippet: defineSnippet({
       id: 'transfer-react-accessibility',
       language: 'tsx',
-      label: 'The announcement is a label',
-      source: `<Transfer items={people} labels={{ moved: '{count} added to {pane}' }} />;`,
+      label: 'The announcement is a message',
+      source: `<Transfer items={people} messages={{ moved: '{count} added to {pane}' }} />;`,
     }),
   },
 ];
@@ -610,11 +602,11 @@ export const REACT_TRANSFER_DOCS = {
       ],
       ['name', 'string', '—', 'Transfer', 'Submits one hidden input per target key'],
       [
-        'labels',
-        'Partial<TransferLabels>',
-        'English',
-        'Transfer, TransferDefaultsProvider',
-        'source, target, search, selectAll, count, countSelected, countFiltered, paneCount, panes, empty, noResults, loading, actions, moveToTarget, moveAllToTarget, moveToSource, moveAllToSource, reorder, moveUp, moveDown, moved, movedOne, reordered; {slot}s are filled',
+        'messages',
+        'Partial<TransferMessages>',
+        '—',
+        'Transfer',
+        'Words laid over the language in force, key by key: source, target, search, selectAll, count, countSelected, countFiltered, paneCount, panes, empty, noResults, loading, actions, moveToTarget, moveAllToTarget, moveToSource, moveAllToSource, reorder, moveUp, moveDown, moved, movedOne, reordered; {slot}s are filled',
       ],
       ['renderFooter', '(side) => ReactNode', '—', 'Transfer', 'Content under a pane’s list'],
       [
@@ -640,7 +632,7 @@ export const REACT_TRANSFER_DOCS = {
       ],
       [
         'TransferDefaultsProvider',
-        '{ size, layout, searchable, selectAll, reorderable, rows, labels }',
+        '{ size, layout, searchable, selectAll, reorderable, rows }',
         '—',
         'a subtree',
         'The decisions an application takes once; an instance that states any of them wins',

@@ -68,7 +68,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'Dentro do heading de um grupo collapsible: aria-expanded, aria-controls para a lista, e o nome do período seguido de "Show events" ou "Hide events".',
+      'Dentro do heading de um grupo collapsible: aria-expanded, aria-controls para a lista, e o nome do período seguido de ", Show events" ou ", Hide events" (as mensagens expand e collapse, com o seu próprio separador).',
   },
   {
     part: 'group-indicator',
@@ -303,7 +303,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'O mesmo instante em dois fusos, e um relativo',
       source:
-        '<TimelineDefaultsProvider locale="pt-BR" now={Date.now()} timeZone="America/Sao_Paulo">\n  <Timeline timeFormat="relative">\n    <TimelineItem time="2026-09-14T10:32:00Z" title="Paga" />\n  </Timeline>\n</TimelineDefaultsProvider>;',
+        '<SlottedProvider locale="pt-BR">\n  <TimelineDefaultsProvider now={Date.now()} timeZone="America/Sao_Paulo">\n    <Timeline timeFormat="relative">\n      <TimelineItem time="2026-09-14T10:32:00Z" title="Paga" />\n    </Timeline>\n  </TimelineDefaultsProvider>\n</SlottedProvider>;',
     }),
   },
   {
@@ -437,7 +437,13 @@ export const REACT_TIMELINE_DOCS = {
         'Timeline',
         'Como a hora é escrita; relative guarda o absoluto em title',
       ],
-      ['locale', 'string', '—', 'Timeline', 'BCP 47 para as horas; sem ele, o do runtime'],
+      [
+        'locale',
+        'string',
+        '—',
+        'Timeline',
+        'BCP 47 para as horas; sem ele, o da língua em vigor (SlottedProvider)',
+      ],
       [
         'timeZone',
         'string',
@@ -487,10 +493,10 @@ export const REACT_TIMELINE_DOCS = {
       ['empty', 'ReactNode', '—', 'Timeline', 'O que fica no lugar da lista vazia'],
       [
         'messages',
-        'Partial<TimelineMessages>',
+        'PartialMessages<TimelineMessages>',
         '—',
         'Timeline',
-        'As sete mensagens da família, fundidas com as omissões',
+        'Palavras sobre o catálogo da língua em vigor, chave a chave: as sete mensagens da família',
       ],
       ['label', 'ReactNode', '—', 'TimelineGroup', 'O nome do período, como heading'],
       [
@@ -587,7 +593,7 @@ export const REACT_TIMELINE_DOCS = {
       ],
       [
         'TimelineDefaultsProvider',
-        'mode | orientation | placement | order | variant | tone | size | growing | timeFormat | locale | timeZone | now | level | messages',
+        'mode | orientation | placement | order | variant | tone | size | growing | timeFormat | timeZone | now | level',
         '—',
         'Aplicação',
         'Decide os catorze uma vez para tudo por baixo; uma prop na linha do tempo ganha',
@@ -596,8 +602,8 @@ export const REACT_TIMELINE_DOCS = {
     accessibility: [
       'Em list a lista é uma ol e cada evento um li: a sequência e o tamanho do conjunto vêm da plataforma sem uma linha de ARIA, e o teclado é o dos links e botões que o consumidor escrever. Não há papel inventado numa lista que não cresce.',
       'Em feed a lista é role="feed" e cada evento um article com tabindex="0", aria-posinset, aria-setsize — o total declarado, o carregado quando não cresce, -1 quando pode crescer — aria-labelledby com título, ator e hora por esta ordem, e aria-describedby com a descrição. É o padrão Feed do APG item a item, e um li não admite o papel article: por isso o elemento muda com o modo.',
-      'O evento atual leva aria-current="true" e uma visually-hidden ", current" a seguir ao título, porque nem todo leitor de ecrã diz aria-current dentro de um artigo. Concluído e a carregar são formas — um disco com check, o anel do spinner — e não só cores.',
-      'Um grupo collapsible é o padrão Disclosure: o heading contém um button com aria-expanded e aria-controls, e a lista fechada recebe hidden sem sair do DOM. O nome do botão é o período seguido de "Show events" ou "Hide events".',
+      'O evento atual leva aria-current="true" e uma visually-hidden com a mensagem current a seguir ao título, porque nem todo leitor de ecrã diz aria-current dentro de um artigo. Concluído e a carregar são formas — um disco com check, o anel do spinner — e não só cores.',
+      'Um grupo collapsible é o padrão Disclosure: o heading contém um button com aria-expanded e aria-controls, e a lista fechada recebe hidden sem sair do DOM. O nome do botão é o período seguido de ", Show events" ou ", Hide events": as mensagens expand e collapse trazem o seu próprio separador.',
       'A hora é sempre um elemento time com datetime, o valor que o leitor de ecrã e o motor de busca leem; o texto é do locale e do fuso declarados, e uma leitura relativa deixa a absoluta em title.',
       'Os eventos novos são anunciados em polite uma vez por mudança de contagem, e ficam atrás de um botão até o leitor os pedir, para nada se mover debaixo do que está a ser lido.',
     ],

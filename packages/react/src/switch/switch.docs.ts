@@ -185,7 +185,7 @@ const [saving, setSaving] = useState(false);
 <Switch
   checked={on}
   loading={saving}
-  loadingLabel="Salvando a preferência"
+  messages={{ loading: 'Salvando a preferência' }}
   onCheckedChange={async (next) => {
     setSaving(true);
     await save(next).then(() => setOn(next));
@@ -342,11 +342,11 @@ export const REACT_SWITCH_DOCS = {
         'The value is not settled yet. Activation is refused, the geometry does not change, aria-busy is set, and the pending label is announced politely two seconds in',
       ],
       [
-        'loadingLabel',
-        'string',
-        'Saving',
-        'Switch, SwitchDefaultsProvider',
-        'What a reader hears while the switch is pending. It reaches a live region rather than the control’s name, which never changes with the state',
+        'messages',
+        'Partial<SwitchMessages>',
+        '—',
+        'Switch',
+        'Words laid over the language in force, key by key: loading is what a reader hears while the switch is pending. It reaches a live region rather than the control’s name, which never changes with the state',
       ],
       [
         'disabled',
@@ -408,10 +408,10 @@ export const REACT_SWITCH_DOCS = {
       ],
       [
         'SwitchDefaultsProvider',
-        '{ size, indicator, labelPlacement, loadingLabel }',
+        '{ size, indicator, labelPlacement }',
         '—',
         'a subtree',
-        'The four decisions an application takes once. size is the one a field outranks, so a switch inside a field takes the field’s step',
+        'The three decisions an application takes once. size is the one a field outranks, so a switch inside a field takes the field’s step',
       ],
       [
         'useField()',

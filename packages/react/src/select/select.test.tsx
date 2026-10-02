@@ -1,9 +1,11 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/select/contract.json';
 import { Field, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { Select } from './select';
 import { SelectDefaultsProvider } from './select-defaults';
@@ -516,6 +518,22 @@ describe('Select', () => {
     expect(native).not.toBeNull();
     expect(native?.value).toBe('apple');
     expect(native).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('speaks the language in force, and lays its own messages over it', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Basic
+          clearable
+          defaultValue={['apple', 'cherry']}
+          messages={{ clear: 'Esvaziar' }}
+          multiple
+        />
+      </SlottedProvider>,
+    );
+    expect(trigger()).toHaveTextContent('2 selecionados');
+    expect(screen.getByRole('button', { name: 'Remover apple' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Esvaziar' })).toBeInTheDocument();
   });
 
   it('lets an application set its defaults once', async () => {

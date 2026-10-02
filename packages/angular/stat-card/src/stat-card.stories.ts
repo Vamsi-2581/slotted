@@ -3,8 +3,10 @@ import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import { SlBadge } from '@slotted/angular/badge';
 import { SlCard, SlCardBody } from '@slotted/angular/card';
 import { SlGrid } from '@slotted/angular/grid';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlLink } from '@slotted/angular/link';
 import { SlSparkline } from '@slotted/angular/sparkline';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { applicationConfig, moduleMetadata } from '@storybook/angular-vite';
 
@@ -23,7 +25,6 @@ import {
   SlStatCardUnit,
 } from './stat-card-parts';
 import { SlStatCardValue } from './stat-card-value';
-import { provideStatCardDefaults } from './stat-card-defaults';
 import type {
   StatCardFill,
   StatCardGoodWhen,
@@ -422,12 +423,7 @@ export const Content: Story = {
 export const Accessibility: Story = {
   decorators: [
     applicationConfig({
-      providers: [
-        provideStatCardDefaults({
-          locale: 'pt-BR',
-          messages: { up: 'subiu', down: 'caiu', flat: 'sem variação', empty: '—' },
-        }),
-      ],
+      providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
     }),
   ],
   parameters: scenario('accessibility'),
@@ -437,7 +433,7 @@ export const Accessibility: Story = {
 <div slGrid [columns]="2" [gap]="5">
   ${scene(
     'the group and its name',
-    'Tab to the link: a screen reader says “Details, link, Fill rate, group”. The delta reads “subiu +3,2%”; the sparkline is an image described in the same numbers.',
+    'Tab to the link: a screen reader says “Details, link, Fill rate, group”. The delta reads “alta +3,2%”; the sparkline is an image described in the same numbers.',
     `<div slStatCard [delta]="0.032">
       <div slStatCardHeader>
         <span slStatCardLabel>Fill rate</span>
@@ -452,7 +448,7 @@ export const Accessibility: Story = {
   )}
   ${scene(
     'translated once',
-    'provideStatCardDefaults sets the locale and the words a reader hears for every card in the application; a missing value says “—” in whatever the product calls one.',
+    'provideSlotted sets the locale and the words a reader hears for every card in the application; a missing value says “—” in whatever the product calls one.',
     `<div slStatCard status="empty">
       <div slStatCardHeader><span slStatCardLabel>Taxa de atendimento</span></div>
       <div slStatCardFigure><span slStatCardValue></span></div>

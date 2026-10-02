@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "list-item",
   "ui": "list-item",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Row with media, text, metadata and actions."
+  },
   "pattern": null,
   "patternAbsent": {
     "index": "https://www.w3.org/WAI/ARIA/apg/patterns/",

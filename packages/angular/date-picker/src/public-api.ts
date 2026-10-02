@@ -1,7 +1,5 @@
 export { SlDatePicker } from './date-picker';
 export {
-  DATE_PICKER_CHANGE_LABEL,
-  DATE_PICKER_CHOOSE_LABEL,
   DATE_PICKER_DEFAULTS,
   injectDatePickerDefaults,
   provideDatePickerDefaults,

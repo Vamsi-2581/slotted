@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/prose/contract.json';
+import { SlottedProvider } from '../i18n';
 import {
   Prose,
   ProseAnchor,
@@ -158,7 +160,7 @@ describe('ProseScroll', () => {
 
     expect(scroll).toHaveAttribute('role', 'region');
     expect(scroll).toHaveAttribute('tabindex', '0');
-    expect(scroll).toHaveAccessibleName(defaults.scrollLabel);
+    expect(scroll).toHaveAccessibleName('Scrollable content');
     expect(handle.current?.overflowing()).toBe(true);
   });
 
@@ -167,7 +169,12 @@ describe('ProseScroll', () => {
     render(
       <>
         <span id="caption">Environments and their gates</span>
-        <ProseScroll data-testid="scroll" handleRef={handle} labelledBy="caption" label="ignored" />
+        <ProseScroll
+          aria-label="ignored"
+          data-testid="scroll"
+          handleRef={handle}
+          labelledBy="caption"
+        />
       </>,
     );
 
@@ -178,19 +185,29 @@ describe('ProseScroll', () => {
     expect(scroll).toHaveAccessibleName('Environments and their gates');
   });
 
-  it("takes the application's own word for a scrolling region", () => {
+  it('speaks the language in force, and lays its own messages over it', () => {
     const handle = createRef<ProseScrollHandle>();
-    render(
-      <ProseDefaultsProvider scrollLabel="Região rolável">
+    const { rerender } = render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
         <ProseScroll data-testid="scroll" handleRef={handle} />
-      </ProseDefaultsProvider>,
+      </SlottedProvider>,
     );
 
     const scroll = screen.getByTestId('scroll');
     measure(scroll, { client: 320, scroll: 900 });
     act(() => handle.current?.refresh());
+    expect(scroll).toHaveAccessibleName('Conteúdo rolável');
 
-    expect(scroll).toHaveAccessibleName('Região rolável');
+    rerender(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <ProseScroll
+          data-testid="scroll"
+          handleRef={handle}
+          messages={{ scroll: 'Tabela larga' }}
+        />
+      </SlottedProvider>,
+    );
+    expect(scroll).toHaveAccessibleName('Tabela larga');
   });
 
   it("answers the consumer's ref and the family's observer from one element", () => {

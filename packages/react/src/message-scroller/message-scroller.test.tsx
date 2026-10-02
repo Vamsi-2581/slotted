@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/message-scroller/contract.json';
+import { SlottedProvider } from '../i18n';
 import {
   MessageScroller,
   MessageScrollerContent,
@@ -81,7 +83,7 @@ describe('MessageScroller', () => {
         </MessageScrollerViewport>
       </MessageScroller>,
     );
-    const region = screen.getByRole('region', { name: contract.messages.label });
+    const region = screen.getByRole('region', { name: 'Messages' });
     expect(region).toHaveAttribute('tabindex', '0');
     const log = screen.getByRole('log');
     expect(log).toHaveAttribute('aria-relevant', 'additions');
@@ -133,7 +135,7 @@ describe('MessageScroller', () => {
     });
     expect(jump).toHaveAttribute('data-active', 'true');
     expect(jump).toHaveAttribute('tabindex', '0');
-    expect(jump).toHaveAccessibleName(contract.messages.jumpToEnd);
+    expect(jump).toHaveAccessibleName('Go to the latest');
 
     fireEvent.click(jump);
     expect(viewport.scrollTop).toBe(600);
@@ -176,10 +178,10 @@ describe('MessageScroller', () => {
     expect(screen.getByRole('region')).toHaveFocus();
   });
 
-  it('lets an application set its words once', () => {
+  it('lays its own words over the language in force', () => {
     render(
-      <MessageScrollerDefaultsProvider messages={{ label: 'Conversa', unread: 'Por ler' }}>
-        <MessageScroller>
+      <MessageScrollerDefaultsProvider follow>
+        <MessageScroller messages={{ label: 'Conversa', unread: 'Por ler' }}>
           <MessageScrollerViewport>
             <MessageScrollerContent>
               <MessageScrollerItem>
@@ -192,5 +194,23 @@ describe('MessageScroller', () => {
     );
     expect(screen.getByRole('region', { name: 'Conversa' })).toBeInTheDocument();
     expect(screen.getByText('Por ler')).toBeInTheDocument();
+  });
+
+  it('speaks the language in force', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <MessageScroller>
+          <MessageScrollerViewport>
+            <MessageScrollerContent>
+              <MessageScrollerLoader />
+            </MessageScrollerContent>
+          </MessageScrollerViewport>
+          <MessageScrollerJump data-testid="jump" />
+        </MessageScroller>
+      </SlottedProvider>,
+    );
+    expect(screen.getByRole('region', { name: 'Mensagens' })).toBeInTheDocument();
+    expect(screen.getByText('Carregando mensagens anteriores')).toBeInTheDocument();
+    expect(screen.getByTestId('jump')).toHaveAccessibleName('Ir para a mais recente');
   });
 });

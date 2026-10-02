@@ -620,3 +620,10 @@ test('draws every mark it owns with the Glyph element, never a mask', () => {
     );
   }
 });
+
+test('stands on the ground its container publishes before the page surface', () => {
+  assert.match(
+    normalized,
+    /--_surface:var\(--slotted-data-grid-surface,var\(--slotted-ground,var\(--slotted-surface,Canvas\)\)\)/,
+  );
+});

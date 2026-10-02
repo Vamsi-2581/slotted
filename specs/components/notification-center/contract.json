@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "notification-center",
   "ui": "notification-center",
+  "catalog": {
+    "group": "Feedback",
+    "summary": "Read and unread notifications with actions."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/feed/",
   "design": "docs/history/designs/2026-09-17-notification-center-design.md",
   "inventory": "docs/history/designs/2026-09-17-notification-center-capability-inventory.md",
@@ -9,7 +13,7 @@
   "composes": ["tabs", "button", "skeleton", "result-state"],
   "engine": "@slotted/core/timeline — feedFocusTarget for the Feed keyboard, formatTimestamp and setSizeOf for the items",
   "rootElement": "section",
-  "rootRole": "region, named by messages.title or the consumer's aria-label",
+  "rootRole": "region, named by the title message or the consumer's aria-label",
   "roles": {
     "feed": "feed",
     "item": "article",
@@ -36,10 +40,10 @@
     "description": "the body of the notification, clamped at three lines",
     "time": "a time element with datetime, written relative or absolute",
     "controls": "the family's two controls at the inline end, muted at rest and in the text ink on the row under the pointer or holding focus; each opens a tooltip with its name on hover, keyboard focus and a held touch, and grows to the comfortable target under a coarse pointer; which of the two exist is the controls axis",
-    "read-toggle": "an icon button: the check glyph while unread (mark read), the dot glyph while read (mark unread); named by messages",
-    "dismiss": "an icon button with the x glyph that asks to remove the item; named by messages.dismiss",
+    "read-toggle": "an icon button: the check glyph while unread (mark read), the dot glyph while read (mark unread); named by the markRead and markUnread messages",
+    "dismiss": "an icon button with the x glyph that asks to remove the item; named by the dismiss message",
     "more": "under growing=button a button asking for the next page; under growing=scroll the sentinel an IntersectionObserver watches; absent under none",
-    "empty": "in place of the feed when it holds nothing: the consumer's result-state, or messages.empty (messages.caughtUp under the unread view)",
+    "empty": "in place of the feed when it holds nothing: the consumer's result-state, or the empty message (caughtUp under the unread view)",
     "footer": "the consumer's link from the popover to the page; absent when not written",
     "count": "a chip beside words, in tabular figures on the sunken surface: the unread total after the header's title, in the accent pair; a view's count in its tab"
   },
@@ -99,7 +103,7 @@
   },
   "time": {
     "value": "PlainDateTime or an ISO instant, as @slotted/core/timeline reads it",
-    "format": "formatTimestamp with locale, timeZone, now and timeFormat",
+    "format": "formatTimestamp with locale (the language in force unless stated), timeZone, now and timeFormat",
     "reason": "one formatter for two families that write a when"
   },
   "clamp": {
@@ -157,22 +161,22 @@
       "source": "tabs"
     }
   ],
-  "messages": {
-    "title": "Notificações",
-    "markAll": "Marcar tudo como lido",
-    "markRead": "Marcar como lida",
-    "markUnread": "Marcar como não lida",
-    "dismiss": "Dispensar",
-    "fresh": "(count) => `${count} novas notificações`",
-    "unread": "(count) => `${count} não lidas`",
-    "loadMore": "Carregar mais",
-    "loading": "A carregar notificações",
-    "empty": "Nenhuma notificação",
-    "caughtUp": "Tudo lido",
-    "all": "Todas",
-    "unreadView": "Não lidas",
-    "views": "Vistas"
-  },
+  "messages": [
+    "all",
+    "caughtUp",
+    "dismiss",
+    "empty",
+    "fresh",
+    "loading",
+    "loadMore",
+    "markAll",
+    "markRead",
+    "markUnread",
+    "title",
+    "unread",
+    "unreadView",
+    "views"
+  ],
   "declined": {
     "showMore": {
       "reason": "UI5's wrappingType with a Show more link; the clamp keeps the whole text in the DOM and the item opens the thing"
@@ -227,9 +231,7 @@
       "controls",
       "arrivals",
       "timeFormat",
-      "locale",
-      "timeZone",
-      "messages"
+      "timeZone"
     ]
   },
   "stateAttributes": {

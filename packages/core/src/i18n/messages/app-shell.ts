@@ -9,6 +9,7 @@ export interface AppShellMessages {
   readonly nav: Message;
   readonly open: Message;
   readonly openAside: Message;
+  readonly resizeAside: Message;
   readonly skipToAside: Message;
   readonly skipToMain: Message;
   readonly skipToNav: Message;
@@ -21,6 +22,7 @@ export const en: AppShellMessages = {
   nav: 'Main navigation',
   open: 'Open navigation',
   openAside: 'Open side panel',
+  resizeAside: 'Resize panel',
   skipToAside: 'Skip to side panel',
   skipToMain: 'Skip to content',
   skipToNav: 'Skip to navigation',

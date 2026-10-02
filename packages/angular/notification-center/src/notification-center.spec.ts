@@ -4,6 +4,9 @@ import type { ComponentFixture } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ChangeRequest } from '@slotted/core/state';
+import { provideSlotted } from '@slotted/angular/i18n';
+import type { NotificationCenterMessages, PartialMessages } from '@slotted/core/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import contract from '../../../../specs/components/notification-center/contract.json';
 import {
   SlNotificationActions,
@@ -95,6 +98,7 @@ const ITEMS: NotificationItem[] = [
       [count]="count()"
       [groupBy]="groupBy()"
       [now]="now"
+      [messages]="words()"
       [(view)]="view"
       (viewRequest)="viewRequests.push($event); onView($event)"
       (readRequest)="readRequests.push($event)"
@@ -144,6 +148,7 @@ class Host {
   readonly count = signal<number | undefined>(undefined);
   readonly groupBy = signal<((item: NotificationItem) => string) | undefined>(undefined);
   readonly view = signal<string | undefined>(undefined);
+  readonly words = signal<PartialMessages<NotificationCenterMessages> | undefined>(undefined);
   readonly now = NOW;
   readonly withActions = signal(false);
   readonly withVisual = signal(true);
@@ -224,7 +229,7 @@ describe('SlNotificationCenter', () => {
 
   it('renders the region, the feed and one article per item with the pattern wiring', () => {
     expect(root().getAttribute('aria-labelledby')).toBe(heading().id);
-    expect(heading().textContent).toContain('Notificações');
+    expect(heading().textContent).toContain('Notifications');
     expect(feed().getAttribute('aria-labelledby')).toBe(heading().id);
     expect(articles()).toHaveLength(3);
     expect(article(0).getAttribute('tabindex')).toBe('0');
@@ -308,18 +313,18 @@ describe('SlNotificationCenter', () => {
   });
 
   it('asks to mark read and never marks itself', () => {
-    click(button('Marcar como lida'));
+    click(button('Mark as read'));
     expect(host.readRequests.at(-1)).toMatchObject({ keys: ['n1'], read: true, reason: 'pointer' });
     expect(article(0).hasAttribute('data-read')).toBe(false);
 
-    click(button('Marcar como não lida'), 0);
+    click(button('Mark as unread'), 0);
     expect(host.readRequests.at(-1)).toMatchObject({
       keys: ['n3'],
       read: false,
       reason: 'keyboard',
     });
 
-    click(button('Marcar tudo como lido'));
+    click(button('Mark all as read'));
     expect(host.readRequests.at(-1)).toMatchObject({ keys: ['n1', 'n2'], read: true });
 
     host.centre().markAllRead();
@@ -334,38 +339,38 @@ describe('SlNotificationCenter', () => {
   it('names its own controls with a tooltip as well as with aria-label', async () => {
     /* A key first: jsdom, like a browser, shows focus only after the keyboard was the last thing used. */
     document.body.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Tab' }));
-    const read = button('Marcar como lida');
+    const read = button('Mark as read');
     read.focus();
     read.dispatchEvent(new FocusEvent('focus'));
     await settle();
     await new Promise((resolve) => setTimeout(resolve, 0));
     await settle();
     const hint = document.querySelector('[role="tooltip"]');
-    expect(hint?.textContent?.trim()).toBe('Marcar como lida');
+    expect(hint?.textContent?.trim()).toBe('Mark as read');
     expect(read.getAttribute('aria-describedby')).toBe(hint?.id);
 
     read.dispatchEvent(new FocusEvent('blur'));
     await settle();
     expect(read.getAttribute('aria-describedby')).toBeNull();
 
-    const dismiss = button('Dispensar');
+    const dismiss = button('Dismiss');
     dismiss.focus();
     dismiss.dispatchEvent(new FocusEvent('focus'));
     await settle();
     await new Promise((resolve) => setTimeout(resolve, 0));
     await settle();
-    expect(document.querySelector('[role="tooltip"]')?.textContent?.trim()).toBe('Dispensar');
+    expect(document.querySelector('[role="tooltip"]')?.textContent?.trim()).toBe('Dismiss');
   });
 
   it('counts the unread in the heading, disables mark-all at zero and reports the count', async () => {
     expect(heading().querySelector('[data-part="count"]')?.textContent).toBe('2');
-    expect((button('Marcar tudo como lido') as HTMLButtonElement).disabled).toBe(false);
+    expect((button('Mark all as read') as HTMLButtonElement).disabled).toBe(false);
     expect(host.unreadCounts).toEqual([2]);
 
     host.items.set(ITEMS.map((item) => ({ ...item, read: true })));
     await settle();
     expect(heading().querySelector('[data-part="count"]')).toBeNull();
-    expect((button('Marcar tudo como lido') as HTMLButtonElement).disabled).toBe(true);
+    expect((button('Mark all as read') as HTMLButtonElement).disabled).toBe(true);
     expect(host.unreadCounts).toEqual([2, 0]);
   });
 
@@ -467,7 +472,7 @@ describe('SlNotificationCenter', () => {
     await settle();
     expect(articles()).toHaveLength(3);
     const fresh = query('[data-part="fresh"]') as HTMLElement;
-    expect(fresh.textContent?.trim()).toBe('1 novas notificações');
+    expect(fresh.textContent?.trim()).toBe('1 new notification');
 
     press(article(0), 'PageUp');
     expect(document.activeElement).toBe(fresh);
@@ -526,7 +531,7 @@ describe('SlNotificationCenter', () => {
   it('loads a page from the button, from the sentinel, and says so while waiting', async () => {
     host.growing.set('button');
     await settle();
-    click(button('Carregar mais'));
+    click(button('Load more'));
     expect(host.loadRequests.at(-1)).toMatchObject({ reason: 'pointer' });
     expect(article(0).getAttribute('aria-setsize')).toBe('-1');
 
@@ -545,7 +550,7 @@ describe('SlNotificationCenter', () => {
     await settle();
     expect(feed().getAttribute('aria-busy')).toBe('true');
     expect(root().hasAttribute('data-loading')).toBe(true);
-    expect(query('[data-part="more"]')?.textContent).toContain('A carregar notificações');
+    expect(query('[data-part="more"]')?.textContent).toContain('Loading notifications');
     expect(article(0).getAttribute('aria-setsize')).toBe('40');
   });
 
@@ -560,12 +565,12 @@ describe('SlNotificationCenter', () => {
 
     host.loading.set(false);
     await settle();
-    expect(query('[data-part="empty"]')?.textContent?.trim()).toBe('Nenhuma notificação');
+    expect(query('[data-part="empty"]')?.textContent?.trim()).toBe('No notifications');
 
     host.items.set(ITEMS.map((item) => ({ ...item, read: true })));
     host.view.set('unread');
     await settle();
-    expect(query('[data-part="empty"]')?.textContent?.trim()).toBe('Tudo lido');
+    expect(query('[data-part="empty"]')?.textContent?.trim()).toBe('All caught up');
 
     const own = TestBed.createComponent(EmptyHost);
     own.autoDetectChanges();
@@ -604,17 +609,13 @@ describe('SlNotificationCenter', () => {
     TestBed.configureTestingModule({
       imports: [Host],
       providers: [
-        provideNotificationCenterDefaults({
-          controls: 'none',
-          growing: 'button',
-          messages: { title: 'Avisos' },
-          size: 'sm',
-        }),
+        provideNotificationCenterDefaults({ controls: 'none', growing: 'button', size: 'sm' }),
       ],
     });
     fixture = TestBed.createComponent(Host);
     host = fixture.componentInstance;
     host.level.set('4');
+    host.words.set({ title: 'Avisos' });
     fixture.autoDetectChanges();
     await fixture.whenStable();
 
@@ -624,6 +625,27 @@ describe('SlNotificationCenter', () => {
     expect(root().getAttribute('data-level')).toBe('4');
     expect(heading().tagName).toBe('H4');
     expect(heading().textContent).toContain('Avisos');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', async () => {
+    const locale = signal('pt-BR');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    fixture = TestBed.createComponent(Host);
+    host = fixture.componentInstance;
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+
+    expect(heading().textContent).toContain('Notificações');
+    expect(button('Marcar tudo como lido')).toBeTruthy();
+
+    locale.set('en-US');
+    await settle();
+    expect(heading().textContent).toContain('Notifications');
+    expect(button('Mark all as read')).toBeTruthy();
   });
 
   it('exposes focus and reveal on the instance', async () => {

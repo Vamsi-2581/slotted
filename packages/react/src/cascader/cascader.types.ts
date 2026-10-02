@@ -1,3 +1,4 @@
+import type { CascaderMessages, PartialMessages } from '@slotted/core/i18n';
 import type {
   CascaderCheckedStrategy,
   CascaderLayoutAxis,
@@ -32,32 +33,6 @@ export interface CascaderLoadRequest {
   readonly signal: AbortSignal;
 }
 
-/** Every string the family prints or announces. */
-export interface CascaderLabels {
-  placeholder: string;
-  clear: string;
-  remove: string;
-  /** `{count}` is replaced. */
-  summary: string;
-  search: string;
-  searchPlaceholder: string;
-  /** The first crumb: the level of the roots. */
-  root: string;
-  /** The fold in a long breadcrumb. */
-  back: string;
-  breadcrumb: string;
-  empty: string;
-  /** `{query}` is replaced. */
-  noResults: string;
-  /** `{count}` is replaced; `result` is the singular. */
-  result: string;
-  results: string;
-  loading: string;
-  /** `{label}` is replaced. */
-  failed: string;
-  retry: string;
-}
-
 /** Every decision an application takes once rather than per instance. */
 export interface CascaderDefaults {
   size: CascaderSize;
@@ -80,12 +55,10 @@ export interface CascaderDefaults {
   hoverDelay: number;
   maxColumns: number;
   maxCrumbs: number;
-  labels: CascaderLabels;
 }
 
-export interface CascaderDefaultsProviderProps extends Partial<Omit<CascaderDefaults, 'labels'>> {
+export interface CascaderDefaultsProviderProps extends Partial<CascaderDefaults> {
   children?: ReactNode;
-  labels?: Partial<CascaderLabels> | undefined;
 }
 
 /** The hierarchy and how to read it, shared by the control and the panel. */
@@ -118,6 +91,7 @@ export interface CascaderDataProps<T> {
   onRetry?: ((key: string) => void) | undefined;
   /** Replaces the locale-aware substring test. */
   filter?: ((node: T, query: string) => boolean) | undefined;
+  /** BCP 47, for the substring test and its marks. The language in force when absent. */
   locale?: string | undefined;
 }
 
@@ -156,7 +130,12 @@ export interface CascaderStateProps<T> {
   hoverDelay?: number | undefined;
   disabled?: boolean | undefined;
   readOnly?: boolean | undefined;
-  labels?: Partial<CascaderLabels> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * placeholder, the buttons, the search field, the breadcrumb, and the
+   * sentences a level and a search say.
+   */
+  messages?: PartialMessages<CascaderMessages> | undefined;
 }
 
 /** The imperative actions a consumer cannot express declaratively. */
@@ -185,7 +164,6 @@ export interface CascaderProps<T = unknown>
   required?: boolean | undefined;
   invalid?: boolean | undefined;
   separator?: string | undefined;
-  placeholder?: string | undefined;
   /** The value's path as the control prints it, replacing the segments. */
   renderValue?: ((path: readonly T[]) => ReactNode) | undefined;
 

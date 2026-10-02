@@ -408,7 +408,6 @@ test('draws the pane layer from the mode, and the pane column from the width', (
 
 /** The pane pins its ends and scrolls its middle, as the column does. */
 test('gives the pane a pinned head, a scrolling body and a pinned foot', () => {
-  assert.match(rule("> [data-part='aside'] > [data-part='aside-body'] {").body, /overflow:\s*auto/);
   assert.match(rule("> [data-part='aside'] > [data-part='aside-body'] {").body, /flex:\s*1 1 auto/);
   const ends = rule("> [data-part='aside'] > [data-part='aside-header'],").body;
   assert.match(ends, /flex:\s*0 0 auto/);
@@ -516,4 +515,99 @@ test('closes a two-level navigation to its own strip', () => {
   );
   assert.match(closed, /transition: visibility var\(--_duration\) step-end;\s*visibility: hidden;/);
   assert.match(css, /background-image: var\(--slotted-app-shell-frame-image, none\)/);
+});
+
+/**
+ * The body stands on the inset the head and the foot stand on, so what a pane
+ * holds lines up with its title and no consumer pads it by hand; content that
+ * brings its own inset says so with the word `drawer` uses.
+ */
+test('stands the pane body on the row inset, and drops it under data-inset none', () => {
+  const body = rule("> [data-part='aside'] > [data-part='aside-body'] {").body;
+  assert.match(body, /padding-block:\s*var\(--slotted-space-5, 0\.75rem\)/);
+  assert.match(body, /padding-inline:\s*calc\(var\(--_row-inset\) \+ var\(--_row-gap\)\)/);
+  const bare = rule("> [data-part='aside'] > [data-part='aside-body'][data-inset='none'] {").body;
+  assert.match(bare, /padding:\s*0/);
+});
+
+/**
+ * The edge the reader moves is the column's alone: a layer keeps its size step
+ * and a row under the content has no inline edge to move. It is drawn nowhere
+ * by default and shown only by the wide query, under a mode that is not the
+ * layer's.
+ */
+test('draws the pane edge on the column and never on the layer', () => {
+  const edge = rule("[data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-resizer'] {");
+  assert.match(edge.body, /display:\s*none/);
+  assert.match(edge.body, /cursor:\s*col-resize/);
+  assert.match(edge.body, /touch-action:\s*none/);
+  assert.match(edge.body, /position:\s*absolute/);
+
+  const wide = css.slice(css.indexOf('@container slotted-app-shell (inline-size >= 600px)'));
+  const column = wide.slice(0, wide.indexOf('@container slotted-app-shell (inline-size < 600px)'));
+  assert.ok(
+    column
+      .replace(/\s+/g, ' ')
+      .includes(
+        ":not([data-aside-mode='overlay']) > [data-part='aside'] > [data-part='aside-resizer']:not([hidden]) { display: block;",
+      ),
+    'the wide query shows no edge on the column',
+  );
+  const positive = css.replaceAll(":not([data-aside-mode='overlay'])", '');
+  for (const hit of positive.matchAll(
+    /\[data-aside-mode='overlay'\][^{,]*\[data-part='aside-resizer'\]/g,
+  )) {
+    assert.fail(`${hit[0]} draws the edge on the layer`);
+  }
+
+  /* On the inner edge: the start of an end pane, the end of a start pane. */
+  assert.match(edge.body, /inset-inline-start:\s*0/);
+  const start = rule("[data-nav-side='end'] > [data-part='aside'] > [data-part='aside-resizer'] {");
+  assert.match(start.body, /inset-inline-end:\s*0/);
+  assert.match(start.body, /inset-inline-start:\s*auto/);
+});
+
+/** A line under the hand, under the drag and under the keyboard; the ring for the keyboard. */
+test('draws the pane edge as a line under the hand and a ring under the keyboard', () => {
+  const lit = css.indexOf("> [data-part='aside-resizer']:not([data-disabled]):hover,");
+  assert.notEqual(lit, -1, 'the edge answers no hover');
+  const selector = css.slice(lit, css.indexOf('{', lit));
+  assert.match(selector, /aside-resizer'\]:focus-visible/);
+  assert.match(
+    selector,
+    /\[data-dragging\] > \[data-part='aside'\] > \[data-part='aside-resizer'\]/,
+  );
+  const ring = rule("> [data-part='aside'] > [data-part='aside-resizer']:focus-visible {").body;
+  assert.match(ring, /outline:\s*var\(--slotted-focus-ring-width, 2px\) solid/);
+  /* The reach is a transparent box, so the target holds the floor while the line stays thin. */
+  const reach = rule("> [data-part='aside'] > [data-part='aside-resizer']::before {").body;
+  assert.match(reach, /var\(--_resizer-reach\)/);
+  assert.match(
+    rule("[data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-resizer'] {").body,
+    /--_resizer-reach:\s*var\(--slotted-target-min, 24px\)/,
+  );
+});
+
+/**
+ * The extent is a fraction of the shell, written as `cqi`: the root is the
+ * query container, so the unit resolves against the shell's own inline size
+ * from inside the pane's `auto` track, where a percentage would resolve against
+ * the track the pane itself sizes.
+ */
+test('turns the extent into the width of the column and leaves the layer on its step', () => {
+  const wide = css.slice(css.indexOf('@container slotted-app-shell (inline-size >= 600px)'));
+  const column = wide.indexOf(":not([data-aside-mode='overlay']) > [data-part='aside'] {");
+  assert.notEqual(column, -1);
+  assert.match(
+    wide.slice(column, wide.indexOf('}', column)),
+    /inline-size:\s*var\(--slotted-app-shell-aside-extent, var\(--_aside-size\)\)/,
+  );
+  assert.match(
+    rule("[data-ui='app-shell'][data-aside-mode='overlay'] > [data-part='aside'] {").body,
+    /inline-size:\s*var\(--_aside-size\);/,
+  );
+  const tokens = JSON.parse(
+    readFileSync(new URL('./app-shell.tokens.json', import.meta.url), 'utf8'),
+  );
+  assert.ok(tokens.includes('--slotted-app-shell-aside-extent'));
 });

@@ -163,7 +163,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'One decision for the application, a link, and a corner mark',
       source:
-        '<StatusIndicatorDefaultsProvider labels={{ danger: \'Fehler\' }} mark="icon" size="sm">\n  <App />\n</StatusIndicatorDefaultsProvider>;\n\n<StatusIndicator render={(props) => <a href="/builds/4821" {...props} />} status="danger">\n  Build 4821 failed\n</StatusIndicator>;\n\n<BadgeAnchor overlap="circle">\n  <Avatar name="Ada Lovelace" />\n  <Badge shape="dot" tone="success">\n    <VisuallyHidden>Online</VisuallyHidden>\n  </Badge>\n</BadgeAnchor>;',
+        '<StatusIndicatorDefaultsProvider mark="icon" size="sm">\n  <App />\n</StatusIndicatorDefaultsProvider>;\n\n<StatusIndicator render={(props) => <a href="/builds/4821" {...props} />} status="danger">\n  Build 4821 failed\n</StatusIndicator>;\n\n<BadgeAnchor overlap="circle">\n  <Avatar name="Ada Lovelace" />\n  <Badge shape="dot" tone="success">\n    <VisuallyHidden>Online</VisuallyHidden>\n  </Badge>\n</BadgeAnchor>;',
     }),
   },
   {
@@ -226,7 +226,14 @@ export const REACT_STATUS_INDICATOR_DOCS = {
         'string',
         '—',
         'StatusIndicator',
-        'What a reader hears when there are no visible words. Ignored when there are. Falls back to the provider’s table, then to the family’s own',
+        'What a reader hears when there are no visible words. Ignored when there are. Falls back to the status’s word in the catalog',
+      ],
+      [
+        'messages',
+        'Partial<StatusIndicatorMessages>',
+        '—',
+        'StatusIndicator',
+        'Words laid over the language in force, key by key: the word each status is heard as when there are no visible words (neutral, info, success, warning, danger, unknown)',
       ],
     ]),
     composition: apiRows([
@@ -253,10 +260,10 @@ export const REACT_STATUS_INDICATOR_DOCS = {
       ],
       [
         'StatusIndicatorDefaultsProvider',
-        '{ mark, size, live, labels }',
+        '{ mark, size, live }',
         '—',
         'a subtree',
-        'Sets the four once for everything below it, and merges nested label tables. An explicit prop still wins',
+        'Sets the three once for everything below it. An explicit prop still wins',
       ],
       [
         'events',

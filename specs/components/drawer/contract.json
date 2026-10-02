@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "drawer",
   "ui": "drawer",
+  "catalog": {
+    "group": "Overlays",
+    "summary": "Panel that slides in from an edge."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
   "resizePattern": "https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/",
   "composes": ["portal", "dismissable-layer", "presence", "focus", "extent", "measure"],
@@ -226,6 +230,7 @@
       "drag"
     ]
   },
+  "messages": ["close"],
   "declined": {
     "dialogElement": {
       "reason": "The same decision dialog took, for the same reason: an element promoted to the top layer paints above every element in the document regardless of z-index, and every other overlay in this library is portalled and stacked with --slotted-z-index-overlay plus --slotted-layer-depth. A select opened inside a drawer would paint behind the drawer it belongs to",

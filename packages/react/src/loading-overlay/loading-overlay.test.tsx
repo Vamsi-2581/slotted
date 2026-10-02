@@ -1,6 +1,8 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { SlottedProvider } from '../i18n';
 import { LoadingOverlay, LoadingOverlayDefaultsProvider } from './index';
 
 const root = () => document.querySelector('[data-ui="loading-overlay"][data-part="root"]')!;
@@ -79,13 +81,15 @@ describe('LoadingOverlay', () => {
   });
 
   it('announces the wait once, and empties the region rather than replacing it', () => {
-    const { rerender } = render(<LoadingOverlay label="Saving changes">rows</LoadingOverlay>);
+    const { rerender } = render(
+      <LoadingOverlay messages={{ label: 'Saving changes' }}>rows</LoadingOverlay>,
+    );
 
     expect(announcement()).toHaveAttribute('role', 'status');
     expect(announcement()).toHaveTextContent('Saving changes');
 
     rerender(
-      <LoadingOverlay loading={false} label="Saving changes">
+      <LoadingOverlay loading={false} messages={{ label: 'Saving changes' }}>
         rows
       </LoadingOverlay>,
     );
@@ -95,7 +99,11 @@ describe('LoadingOverlay', () => {
 
   it('says a second thing only when asked to', () => {
     render(
-      <LoadingOverlay loading={false} label="Saving changes" loadedLabel="Changes saved">
+      <LoadingOverlay
+        loading={false}
+        messages={{ label: 'Saving changes' }}
+        loadedLabel="Changes saved"
+      >
         rows
       </LoadingOverlay>,
     );
@@ -105,7 +113,7 @@ describe('LoadingOverlay', () => {
 
   it('renders no live region at all when the page announces the wait elsewhere', () => {
     render(
-      <LoadingOverlay live="off" label="Saving changes">
+      <LoadingOverlay live="off" messages={{ label: 'Saving changes' }}>
         rows
       </LoadingOverlay>,
     );
@@ -116,7 +124,7 @@ describe('LoadingOverlay', () => {
   /** The same sentence twice is a screen reader saying it twice. */
   it('paints the two lines and hides them from the tree', () => {
     render(
-      <LoadingOverlay label="Saving changes" description="About a minute left.">
+      <LoadingOverlay messages={{ label: 'Saving changes' }} description="About a minute left.">
         rows
       </LoadingOverlay>,
     );
@@ -300,7 +308,7 @@ describe('LoadingOverlay', () => {
 
   describe('page scope', () => {
     it('portals the layer, covers no region of its own, and claims no busy region', () => {
-      render(<LoadingOverlay scope="page" label="Closing the period" />);
+      render(<LoadingOverlay scope="page" messages={{ label: 'Closing the period' }} />);
 
       expect(root().parentElement).not.toBe(document.body.firstElementChild);
       expect(document.querySelector('[data-part="content"]')).toBeNull();
@@ -324,7 +332,10 @@ describe('LoadingOverlay', () => {
   describe('composition', () => {
     it('substitutes the region’s element and hands it every attribute', () => {
       render(
-        <LoadingOverlay label="Reconciling" render={(props) => <section {...props} />}>
+        <LoadingOverlay
+          messages={{ label: 'Reconciling' }}
+          render={(props) => <section {...props} />}
+        >
           rows
         </LoadingOverlay>,
       );
@@ -353,7 +364,7 @@ describe('LoadingOverlay', () => {
 
     it('lets an application decide once, and a prop still win', () => {
       render(
-        <LoadingOverlayDefaultsProvider size="sm" veil="blur" label="Aguarde">
+        <LoadingOverlayDefaultsProvider size="sm" veil="blur">
           <LoadingOverlay />
           <LoadingOverlay veil="none" />
         </LoadingOverlayDefaultsProvider>,
@@ -363,14 +374,28 @@ describe('LoadingOverlay', () => {
       expect(roots[0]).toHaveAttribute('data-veil', 'blur');
       expect(roots[0]).toHaveAttribute('data-size', 'sm');
       expect(roots[1]).toHaveAttribute('data-veil', 'none');
-      expect(document.querySelectorAll('[data-part="announcement"]')[0]).toHaveTextContent(
-        'Aguarde',
+    });
+
+    it('speaks the language in force, and lays its own messages over it', () => {
+      render(
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+          <LoadingOverlay cancellable />
+          <LoadingOverlay messages={{ label: 'Aguarde' }} />
+        </SlottedProvider>,
       );
+
+      const announcements = document.querySelectorAll('[data-part="announcement"]');
+      expect(announcements[0]).toHaveTextContent('Carregando…');
+      expect(announcements[1]).toHaveTextContent('Aguarde');
+      expect(document.querySelector('[data-part="cancel"]')).toHaveTextContent('Cancelar');
     });
 
     it('replaces the mark without replacing anything else', () => {
       render(
-        <LoadingOverlay indicator={<span data-testid="own-mark" />} label="Uploading">
+        <LoadingOverlay
+          indicator={<span data-testid="own-mark" />}
+          messages={{ label: 'Uploading' }}
+        >
           rows
         </LoadingOverlay>,
       );

@@ -1,6 +1,7 @@
 import '@slotted/styles/text-field/text-field.css';
 
 import { writeToClipboard } from '@slotted/core/clipboard';
+import { textFieldMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason } from '@slotted/core/state';
@@ -8,6 +9,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ChangeEvent, FocusEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useTextFieldDefaults } from './text-field-defaults';
 import type {
@@ -54,14 +56,9 @@ export function TextField({
   'aria-describedby': describedBy,
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
-  capsLockLabel,
   className,
   clearable = false,
-  clearLabel,
-  copiedLabel,
   copyable = false,
-  copyFailedLabel,
-  copyLabel,
   countMax,
   defaultRevealed = false,
   defaultValue,
@@ -71,6 +68,7 @@ export function TextField({
   invalid,
   loading,
   maxLength,
+  messages,
   mono,
   onBlur,
   onChange,
@@ -84,7 +82,6 @@ export function TextField({
   render,
   revealable = false,
   revealed,
-  revealLabel,
   showCount = false,
   size,
   start,
@@ -96,6 +93,7 @@ export function TextField({
 }: TextFieldProps) {
   const field = useField();
   const defaults = useTextFieldDefaults();
+  const t = useMessages(textFieldMessages, messages);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   /**
@@ -204,9 +202,7 @@ export function TextField({
       clearTimeout(copiedTimer.current);
       copiedTimer.current = setTimeout(() => setCopied(false), COPIED_FOR);
     }
-    announce(
-      done ? (copiedLabel ?? defaults.copiedLabel) : (copyFailedLabel ?? defaults.copyFailedLabel),
-    );
+    announce(done ? t('copied') : t('copyFailed'));
     onValueCopy?.({ copied: done, reason, source: event, value: current });
   };
 
@@ -221,7 +217,7 @@ export function TextField({
   const readCapsLock = (event: KeyboardEvent<HTMLInputElement>) => {
     if (!isPassword || typeof event.getModifierState !== 'function') return;
     const on = event.getModifierState('CapsLock');
-    if (on && !capsLock) announce(capsLockLabel ?? defaults.capsLockLabel);
+    if (on && !capsLock) announce(t('capsLock'));
     if (on !== capsLock) setCapsLock(on);
   };
 
@@ -289,7 +285,7 @@ export function TextField({
       ) : null}
       {clearable ? (
         <button
-          aria-label={clearLabel ?? defaults.clearLabel}
+          aria-label={t('clear')}
           data-part="clear"
           hidden={!showClear}
           onClick={clear}
@@ -302,7 +298,7 @@ export function TextField({
       ) : null}
       {copyable ? (
         <button
-          aria-label={copyLabel ?? defaults.copyLabel}
+          aria-label={t('copy')}
           data-part="copy"
           hidden={!showCopy}
           onClick={(event) => void copy(event)}
@@ -317,7 +313,7 @@ export function TextField({
       ) : null}
       {showReveal ? (
         <button
-          aria-label={revealLabel ?? defaults.revealLabel}
+          aria-label={t('reveal')}
           aria-pressed={isRevealed}
           data-part="reveal"
           onClick={toggleReveal}

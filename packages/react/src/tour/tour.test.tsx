@@ -1,11 +1,12 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 
 import contract from '../../../../specs/components/tour/contract.json';
 import { Dialog, DialogBody, DialogContent, DialogTitle } from '../dialog';
+import { SlottedProvider } from '../i18n';
 import { Tour, useTour } from './tour';
-import { TourDefaultsProvider } from './tour-defaults';
 import { TourContent, TourFooter, TourNext, TourTitle } from './tour-parts';
 import type { TourHandle, TourProps, TourStep } from './tour.types';
 
@@ -309,20 +310,21 @@ describe('Tour', () => {
     await waitFor(() => expect(title()).toBe('Welcome to Reports'));
   });
 
-  it('takes its labels from the provider, and a step overrides them', async () => {
+  it('speaks the language in force, under the tour’s messages and a step’s own', async () => {
     const labelled = [
-      { id: 'a', title: 'First', labels: { next: 'Start tour' } },
+      { id: 'a', title: 'First', messages: { next: 'Start tour' } },
       { id: 'b', title: 'Second' },
     ];
     render(
-      <TourDefaultsProvider labels={{ progress: (p, t) => `Passo ${p} de ${t}`, skip: 'Pular' }}>
-        <Tour defaultOpen steps={labelled} />
-      </TourDefaultsProvider>,
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Tour defaultOpen messages={{ skip: 'Agora não' }} steps={labelled} />
+      </SlottedProvider>,
     );
     await waitFor(() => expect(card()).not.toBeNull());
-    expect(part('progress')).toHaveTextContent('Passo 1 de 2');
-    expect(part('skip')).toHaveTextContent('Pular');
+    expect(part('progress')).toHaveTextContent('1 de 2');
+    expect(part('skip')).toHaveTextContent('Agora não');
     expect(part('next')).toHaveTextContent('Start tour');
+    expect(part('close')).toHaveAttribute('aria-label', 'Fechar tour');
   });
 
   it('lets a consumer compose the card from the parts and the hook', async () => {

@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "loading-overlay",
   "ui": "loading-overlay",
+  "catalog": {
+    "group": "Feedback",
+    "summary": "Veil and indicator over a loading region."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/",
   "patternNote": "The APG pattern index publishes no pattern for a loading overlay, a busy region or a blocking layer, read on 2026-09-10. Recorded rather than approximated: claiming the Dialog pattern would import focus containment, aria-modal and a close affordance into a component that is not a dialog and holds no reader-owned open state. The normative guidance the family follows instead is WAI-ARIA 1.2 progressbar, status and aria-modal, plus the HTML inert attribute",
   "guidance": {
@@ -123,6 +127,7 @@
     "loading": "data-loading",
     "disabled": "data-disabled"
   },
+  "messages": ["label", "cancel"],
   "members": {
     "loadingOverlay": {
       "nativeElement": "div",
@@ -132,9 +137,7 @@
         "size": "md",
         "live": "polite",
         "loading": true,
-        "label": "Loading…",
         "cancellable": false,
-        "cancelLabel": "Cancel",
         "delay": 0,
         "minDuration": 0
       },

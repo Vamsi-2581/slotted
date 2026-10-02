@@ -18,8 +18,6 @@ export type ProseFlow = 'tight' | 'normal' | 'loose';
 export interface ProseDefaults {
   flow: ProseFlow;
   size: ProseSize;
-  /** The last resort name of a scrolling block, when nothing else names it. */
-  scrollLabel: string;
 }
 
 /**
@@ -28,13 +26,12 @@ export interface ProseDefaults {
  * documentation rhythm, which is what a region of rendered Markdown is in
  * unless the application says otherwise.
  *
- * The scrolling region's name is a default rather than a required input
- * because a Markdown renderer's component map cannot supply one per table. An
- * application with a locale of its own replaces it here, once.
+ * The scrolling region's name comes from the catalog rather than a required
+ * input because a Markdown renderer's component map cannot supply one per
+ * table.
  */
 const FALLBACK: ProseDefaults = {
   flow: 'normal',
-  scrollLabel: 'Scrollable content',
   size: 'lg',
 };
 
@@ -53,7 +50,6 @@ export function provideProseDefaults(defaults: Partial<ProseDefaults>) {
     provide: PROSE_DEFAULTS,
     useFactory: (): ProseDefaults => ({
       flow: defaults.flow ?? FALLBACK.flow,
-      scrollLabel: defaults.scrollLabel ?? FALLBACK.scrollLabel,
       size: defaults.size ?? FALLBACK.size,
     }),
   };

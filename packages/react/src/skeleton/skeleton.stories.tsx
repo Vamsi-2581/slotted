@@ -247,7 +247,7 @@ export const Region: Story = {
           label="One region, one wait"
           note="Every placeholder reads the region rather than its own prop, the whole subtree leaves the tab order, and the status message is said once instead of six times."
         >
-          <SkeletonRegion label="Loading members" loading={pending}>
+          <SkeletonRegion messages={{ label: 'Loading members' }} loading={pending}>
             <div className="slotted-demo-stack">
               {['Ada Lovelace', 'Grace Hopper', 'Katherine Johnson'].map((name) => (
                 <div className="slotted-demo-row" key={name}>
@@ -277,7 +277,7 @@ export const Timing: Story = {
           label="No timing"
           note="A load that finishes every nine hundred milliseconds. The placeholder appears and vanishes with it, and the row never settles — that churn is the flash."
         >
-          <SkeletonRegion label="Loading member" loading={pending}>
+          <SkeletonRegion messages={{ label: 'Loading member' }} loading={pending}>
             <div className="slotted-demo-row">
               <Skeleton shape="circle" size="md">
                 <Avatar name="Ada Lovelace" size="md" />
@@ -290,7 +290,12 @@ export const Timing: Story = {
           label="delay={600} minDuration={600}"
           note="The same load beside it. Nothing is painted until the wait has lasted six hundred milliseconds, and anything painted stays for six hundred more, so the row changes half as often."
         >
-          <SkeletonRegion delay={600} label="Loading member" loading={pending} minDuration={600}>
+          <SkeletonRegion
+            delay={600}
+            messages={{ label: 'Loading member' }}
+            loading={pending}
+            minDuration={600}
+          >
             <div className="slotted-demo-row">
               <Skeleton shape="circle" size="md">
                 <Avatar name="Grace Hopper" size="md" />
@@ -343,7 +348,7 @@ export const Composition: Story = {
           label="A member row"
           note="Each placeholder reserves the box its own family will occupy — an avatar disc, two lines of type, a chip — so the row does not move when the data lands."
         >
-          <SkeletonRegion label="Loading members" loading={pending}>
+          <SkeletonRegion messages={{ label: 'Loading members' }} loading={pending}>
             <div className="slotted-demo-row">
               <Skeleton shape="circle" size="md">
                 <Avatar name="Grace Hopper" size="md" />
@@ -362,9 +367,9 @@ export const Composition: Story = {
         </Scene>
         <Scene
           label="Defaults for a whole application"
-          note="The provider decides the animation, the wording and the timing once. A region or a box that states its own still wins over it."
+          note="The provider decides the animation, the measure and the timing once. A region or a box that states its own still wins over it."
         >
-          <SkeletonDefaultsProvider animation="pulse" label="A carregar…" lastLineSize="45%">
+          <SkeletonDefaultsProvider animation="pulse" lastLineSize="45%">
             <SkeletonRegion>
               <SkeletonText lines={3} />
             </SkeletonRegion>
@@ -420,7 +425,7 @@ export const Accessibility: Story = {
           note="Tab from the button above and focus reaches the one below it, skipping the covered button entirely — it is inert, not merely hidden."
         >
           <Button variant="outline">Before</Button>
-          <SkeletonRegion label="Loading actions" loading={pending}>
+          <SkeletonRegion messages={{ label: 'Loading actions' }} loading={pending}>
             <Skeleton shape="block">
               <Button tone="accent">Approve invoice</Button>
             </Skeleton>

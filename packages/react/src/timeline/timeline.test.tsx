@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/timeline/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Timeline } from './timeline';
 import { TimelineDefaultsProvider } from './timeline-defaults';
 import { TimelineGroup, TimelineItem, TimelineTime } from './timeline-parts';
@@ -517,15 +519,8 @@ describe('TimelineGroup', () => {
 describe('TimelineDefaultsProvider', () => {
   it('sets the family defaults once, and an explicit prop still wins', () => {
     render(
-      <TimelineDefaultsProvider
-        locale="en"
-        messages={{ loadMore: 'Mais' }}
-        mode="feed"
-        placement="start"
-        timeFormat="relative"
-        variant="solid"
-      >
-        <Invoice growing="button" placement="alternate" />
+      <TimelineDefaultsProvider mode="feed" placement="start" timeFormat="relative" variant="solid">
+        <Invoice growing="button" messages={{ loadMore: 'Mais' }} placement="alternate" />
       </TimelineDefaultsProvider>,
     );
     expect(root().dataset['mode']).toBe('feed');
@@ -533,6 +528,20 @@ describe('TimelineDefaultsProvider', () => {
     expect(root().dataset['variant']).toBe('solid');
     expect(part(item(2), 'time').textContent).toBe('2 hours ago');
     expect(screen.getByRole('button', { name: 'Mais' })).not.toBeNull();
+  });
+});
+
+describe('language', () => {
+  it('speaks the language in force, a count in its plural', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Timeline freshCount={1} label="Atividade">
+          <TimelineItem current time="2026-09-14T10:32:00Z" title="Paga" />
+        </Timeline>
+      </SlottedProvider>,
+    );
+    expect(screen.getByRole('button', { name: '1 novo evento' })).not.toBeNull();
+    expect(document.querySelector('[data-part="title"]')?.textContent).toBe('Paga, atual');
   });
 });
 

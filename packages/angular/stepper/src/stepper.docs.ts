@@ -235,7 +235,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'What each header announces',
       source:
-        '<!-- "Cart, Step 1 of 4, completed" — the marker is hidden and the\n     status part says the position and the state in words. -->\n<div slStepper label="Checkout" [defaultStep]="1">\n  <ol slStepperList>\n    …\n  </ol>\n</div>',
+        '<!-- "Cart, Step 1 of 4, completed" — the marker is hidden and the\n     status part says the position and the state in words. -->\n<div slStepper [messages]="{ label: \'Checkout\' }" [defaultStep]="1">\n  <ol slStepperList>\n    …\n  </ol>\n</div>',
     }),
   },
 ];
@@ -268,13 +268,6 @@ export const ANGULAR_STEPPER_DOCS = {
         '0',
         'slStepper',
         'What an uncontrolled stepper starts from, read once, and where reset() returns to',
-      ],
-      [
-        'label',
-        'string',
-        'Progress',
-        'slStepper',
-        'The name of the sequence, announced on the list',
       ],
       [
         'orientation',
@@ -312,11 +305,11 @@ export const ANGULAR_STEPPER_DOCS = {
         'Treats every step before the current one as complete. Off, because walking past a step is not finishing it.',
       ],
       [
-        'labels',
-        'Partial<StepperLabels>',
+        'messages',
+        'PartialMessages<StepperMessages>',
         '—',
         'slStepper',
-        'The six words a step announces, merged over the defaults so translating one keeps the other five',
+        'Words laid over the language in force, key by key: the name of the sequence announced on the list (label), the position, and the five statuses a step announces',
       ],
       [
         'complete',
@@ -358,7 +351,7 @@ export const ANGULAR_STEPPER_DOCS = {
     composition: apiRows([
       [
         'provideStepperDefaults',
-        'label | labelPlacement | labels | linear | navigation | orientation',
+        'labelPlacement | linear | navigation | orientation',
         '—',
         'Application',
         'Sets those six once for the whole injector; an input on the stepper still wins',

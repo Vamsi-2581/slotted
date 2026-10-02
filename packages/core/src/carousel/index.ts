@@ -1,6 +1,5 @@
 export {
   ADAPTIVE_FROM,
-  CAROUSEL_MESSAGES,
   canStep,
   carouselKeyIntent,
   carouselPages,
@@ -10,7 +9,6 @@ export {
   DRAG_THRESHOLD,
   EMPTY_PAGES,
   FLICK_SPEED,
-  formatCarouselMessage,
   IN_VIEW_THRESHOLD,
   indicatorDistance,
   intentPage,
@@ -33,7 +31,6 @@ export type {
   CarouselHold,
   CarouselIndicatorDistance,
   CarouselIntent,
-  CarouselMessages,
   CarouselMetrics,
   CarouselOrientation,
   CarouselPages,

@@ -11,8 +11,8 @@ import {
   input,
   signal,
 } from '@angular/core';
-
-import { injectProseDefaults } from './prose-defaults';
+import { injectMessages } from '@slotted/angular/i18n';
+import { proseMessages, type PartialMessages, type ProseMessages } from '@slotted/core/i18n';
 
 /**
  * A wide block — a table, a fence — that scrolls sideways instead of pushing
@@ -51,13 +51,17 @@ import { injectProseDefaults } from './prose-defaults';
   },
 })
 export class SlProseScroll {
-  /** Names the region when it becomes focusable. Overrides `scrollLabel`. */
-  readonly label = input<string>();
+  /**
+   * Words laid over the catalog of the language in force: the last resort name
+   * of the region (`scroll`). A static `aria-label` still wins.
+   */
+  readonly messages = input<PartialMessages<ProseMessages> | undefined>(undefined);
   /** Names it from an element already on the page — a table's own caption. */
   readonly labelledBy = input<string>();
 
   private readonly host = inject(ElementRef<HTMLElement>);
-  private readonly defaults = injectProseDefaults();
+  /** The family's words in the language in force, with this block's `messages` laid over them. */
+  readonly t = injectMessages(proseMessages, this.messages);
   private readonly overflowing = signal(false);
   private affordance: ScrollAffordanceHandle | null = null;
 
@@ -83,7 +87,7 @@ export class SlProseScroll {
   protected readonly resolvedLabel = computed(() => {
     if (!this.overflowing() || this.labelledBy() !== undefined) return null;
     if (this.writtenLabel !== null) return this.writtenLabel;
-    return this.label() ?? this.defaults.scrollLabel;
+    return this.t('scroll');
   });
 
   constructor() {

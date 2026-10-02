@@ -16,6 +16,7 @@ import {
 } from '../description-list';
 import { Field, FieldDescription, FieldLabel } from '../field';
 import { Grid, Scene } from '../field/field-demo';
+import { SlottedProvider } from '../i18n';
 import { Radio, RadioGroup } from '../radio-group';
 import {
   ResultState,
@@ -28,7 +29,6 @@ import { TextField } from '../text-field';
 import { Text } from '../typography';
 import { Wizard } from './wizard';
 import { useWizard, useWizardStep } from './wizard-context';
-import { WizardDefaultsProvider } from './wizard-defaults';
 import { WizardComplete, WizardEdit, WizardStep } from './wizard-parts';
 import { REACT_WIZARD_DOCS, REACT_WIZARD_TOKENS } from './wizard.docs';
 import type { WizardFailure, WizardProgress, WizardProps, WizardValue } from './wizard.types';
@@ -163,7 +163,12 @@ function Opening({
   ...props
 }: Partial<WizardProps> & { company?: boolean; invite?: boolean }) {
   return (
-    <Wizard label="Account opening" onCancel={() => undefined} onSubmit={onSubmit} {...props}>
+    <Wizard
+      onCancel={() => undefined}
+      onSubmit={onSubmit}
+      {...props}
+      messages={{ progress: 'Account opening', ...props.messages }}
+    >
       <WizardStep
         description="The person who signs for the company."
         label="Account"
@@ -334,7 +339,7 @@ export const Validation: Story = {
       note="Press Next with the fields empty, then try taken@acme.example: validate waits 900 ms, and the answer lands in the summary and beside the field."
     >
       <Room>
-        <Wizard label="Account opening" progress="top">
+        <Wizard messages={{ progress: 'Account opening' }} progress="top">
           <WizardStep
             label="Account"
             name="account"
@@ -380,7 +385,7 @@ function AcceptedBranch() {
   const [value, setValue] = useState<WizardValue>({});
   const business = value['account']?.['type'] === 'business';
   return (
-    <Wizard label="Account opening" onValueChange={setValue} value={value}>
+    <Wizard messages={{ progress: 'Account opening' }} onValueChange={setValue} value={value}>
       <WizardStep label="Account" name="account">
         <AccountType />
       </WizardStep>
@@ -399,7 +404,7 @@ function AcceptedBranch() {
 function LiveBranch() {
   const [business, setBusiness] = useState(false);
   return (
-    <Wizard label="Account opening">
+    <Wizard messages={{ progress: 'Account opening' }}>
       <WizardStep label="Account" name="account">
         <Stack gap={6}>
           <Answer label="Full name" name="name" required />
@@ -664,28 +669,25 @@ export const Content: Story = {
       note="The fourth step’s name takes two lines in the column and in the heading; the row of actions wraps before it squeezes a button."
     >
       <Room>
-        <WizardDefaultsProvider
-          labels={{
+        <Wizard
+          defaultStep="zahlung"
+          defaultValue={{ konto: {}, lieferung: {}, person: {} }}
+          messages={{
             next: 'Weiter',
-            position: (index, count) => `Schritt ${index} von ${count}`,
+            position: 'Schritt {index} von {count}',
             previous: 'Zurück',
             progress: 'Fortschritt',
             saveDraft: 'Entwurf speichern',
             submit: 'Absenden',
           }}
+          onSaveDraft={() => undefined}
         >
-          <Wizard
-            defaultStep="zahlung"
-            defaultValue={{ konto: {}, lieferung: {}, person: {} }}
-            onSaveDraft={() => undefined}
-          >
-            {GERMAN.map(([name, label]) => (
-              <WizardStep key={name} label={label} name={name}>
-                <Answer label="IBAN" name="iban" />
-              </WizardStep>
-            ))}
-          </Wizard>
-        </WizardDefaultsProvider>
+          {GERMAN.map(([name, label]) => (
+            <WizardStep key={name} label={label} name={name}>
+              <Answer label="IBAN" name="iban" />
+            </WizardStep>
+          ))}
+        </Wizard>
       </Room>
     </One>
   ),
@@ -696,7 +698,7 @@ function TypedPlan() {
   const [accepted, setAccepted] = useState<WizardValue>({});
   return (
     <Stack gap={4}>
-      <Wizard label="Plan" onValueChange={setAccepted} progress="top">
+      <Wizard messages={{ progress: 'Plan' }} onValueChange={setAccepted} progress="top">
         <WizardStep label="Seats" name="plan" values={{ annual: true, seats }}>
           <Stack gap={4}>
             <Text size="sm">Seats: {seats}</Text>
@@ -735,21 +737,16 @@ export const Labels: Story = {
   render: () => (
     <One
       label="Abertura de conta, em português"
-      note="The provider says Etapa 2 de 4, Voltar, Continuar and Abrir conta once; the draft status and the failure follow."
+      note="The language in force says Etapa 2 de 4, Voltar and Cancelar; this wizard's messages say Continuar and Abrir conta, and the draft status and the failure follow."
     >
       <Room>
-        <WizardDefaultsProvider
-          labels={{
-            cancel: 'Cancelar',
-            next: 'Continuar',
-            position: (index, count) => `Etapa ${index} de ${count}`,
-            previous: 'Voltar',
-            progress: 'Progresso',
-            submit: 'Abrir conta',
-          }}
-        >
-          <Opening defaultStep="company" defaultValue={{ account: FILLED['account']! }} />
-        </WizardDefaultsProvider>
+        <SlottedProvider locale="pt-BR">
+          <Opening
+            defaultStep="company"
+            defaultValue={{ account: FILLED['account']! }}
+            messages={{ next: 'Continuar', submit: 'Abrir conta' }}
+          />
+        </SlottedProvider>
       </Room>
     </One>
   ),

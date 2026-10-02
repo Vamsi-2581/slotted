@@ -1,4 +1,3 @@
-import type { DataListLabels, DataListMessage } from '@slotted/core/data-list';
 import type {
   GridColumn,
   GridColumnState,
@@ -6,6 +5,7 @@ import type {
   GridQueryChange,
   SortDirection,
 } from '@slotted/core/grid';
+import type { DataListMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from 'react';
 
@@ -73,14 +73,10 @@ export interface DataListDefaults {
   skeletonRows: number;
   loadingDelay: number;
   loadingMinDuration: number;
-  locale: string | undefined;
-  labels: DataListLabels;
 }
 
-export interface DataListDefaultsProviderProps extends Partial<Omit<DataListDefaults, 'labels'>> {
+export interface DataListDefaultsProviderProps extends Partial<DataListDefaults> {
   children?: ReactNode;
-  /** Word by word: a key left out keeps the word above it. */
-  labels?: Partial<DataListLabels> | undefined;
 }
 
 export interface DataListProps<Row> extends Omit<
@@ -144,7 +140,9 @@ export interface DataListProps<Row> extends Omit<
 
   variant?: DataListVariant | undefined;
   size?: DataListSize | undefined;
-  labels?: Partial<Record<keyof DataListLabels, DataListMessage>> | undefined;
+  /** Words laid over the catalog of the language in force, key by key. */
+  messages?: PartialMessages<DataListMessages> | undefined;
+  /** Formats the fields and counts; the provider's locale otherwise. */
   locale?: string | undefined;
   skeletonRows?: number | undefined;
   loadingDelay?: number | undefined;

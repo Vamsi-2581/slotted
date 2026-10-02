@@ -237,7 +237,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition',
-    note: 'providePaginationDefaults decides the labels and the row width for a whole injector, and exportAs reaches the instance for goToPage, next, previous and reset.',
+    note: 'providePaginationDefaults decides the row width for a whole injector, provideSlotted the language, and exportAs reaches the instance for goToPage, next, previous and reset.',
     snippet: defineSnippet({
       id: 'pagination-angular-composition',
       language: 'angular',
@@ -255,7 +255,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'What each control announces',
       source:
-        '<!-- The landmark is named, each trigger says which page it moves to,\n     and the range announces the new page once it settles. -->\n<nav slPagination label="Invoices" [count]="482">\n  <button slPaginationPrevious type="button"></button>\n  <sl-pagination-items />\n  <button slPaginationNext type="button"></button>\n  <p slPaginationStatus></p>\n</nav>',
+        '<!-- The landmark is named, each trigger says which page it moves to,\n     and the range announces the new page once it settles. -->\n<nav slPagination aria-label="Invoices" [count]="482">\n  <button slPaginationPrevious type="button"></button>\n  <sl-pagination-items />\n  <button slPaginationNext type="button"></button>\n  <p slPaginationStatus></p>\n</nav>',
     }),
   },
 ];
@@ -280,7 +280,6 @@ export const ANGULAR_PAGINATION_DOCS = {
     scenes,
     events,
     api: apiRows([
-      ['label', 'string', 'Pagination', 'slPagination', 'The landmark’s own name'],
       [
         'count',
         'number',
@@ -333,11 +332,11 @@ export const ANGULAR_PAGINATION_DOCS = {
         'Turns every page and every trigger into an anchor with a real destination',
       ],
       [
-        'labels',
-        'Partial<PaginationLabels>',
+        'messages',
+        'Partial<PaginationMessages>',
         '—',
         'slPagination',
-        'The wording of every control and both sentences. Merged with the defaults, so translating one keeps the other seven',
+        'Words laid over the language in force, key by key: the landmark’s name (label), every control and both sentences',
       ],
       [
         'live',
@@ -371,10 +370,10 @@ export const ANGULAR_PAGINATION_DOCS = {
       ],
       [
         'providePaginationDefaults',
-        'label | labels | siblingCount | boundaryCount | defaultPageSize | pageSizeOptions | live',
+        'siblingCount | boundaryCount | defaultPageSize | pageSizeOptions | live',
         '—',
         'Application',
-        'Sets those seven once for the whole injector; an input on the paginator still wins',
+        'Sets those five once for the whole injector; an input on the paginator still wins',
       ],
       [
         'aria-label',
@@ -412,8 +411,7 @@ export const ANGULAR_PAGINATION_DOCS = {
         id: 'pagination-angular-defaults',
         language: 'ts',
         label: 'Defaults for the whole application',
-        source:
-          "providePaginationDefaults({\n  labels: { next: 'Próxima página', previous: 'Página anterior' },\n  siblingCount: 2,\n});",
+        source: 'providePaginationDefaults({ siblingCount: 2 });',
       }),
       defineSnippet({
         id: 'pagination-theming',

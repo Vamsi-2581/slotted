@@ -1,4 +1,9 @@
 import type {
+  FamilyTranslator,
+  MessageScrollerMessages,
+  PartialMessages,
+} from '@slotted/core/i18n';
+import type {
   MessageScrollerEdges,
   MessageScrollerPosition,
   MessageScrollerState,
@@ -21,32 +26,14 @@ export type {
   ScrollToMessageOptions,
 };
 
-export interface MessageScrollerMessages {
-  label: string;
-  jumpToEnd: string;
-  jumpToStart: string;
-  /** ICU plural with `count`. */
-  jumpCount: string;
-  loader: string;
-  unread: string;
-  busy: string;
-  idle: string;
-}
-
 export interface MessageScrollerDefaults {
   follow: boolean;
   defaultPosition: MessageScrollerPosition;
   peek: number;
   scrollMargin: number;
-  /** BCP 47, for the count on the jump control. Absent, the runtime's own. */
-  locale: string | undefined;
-  messages: MessageScrollerMessages;
 }
 
-export interface MessageScrollerDefaultsProviderProps extends Partial<
-  Omit<MessageScrollerDefaults, 'messages'>
-> {
-  messages?: Partial<MessageScrollerMessages> | undefined;
+export interface MessageScrollerDefaultsProviderProps extends Partial<MessageScrollerDefaults> {
   children?: ReactNode | undefined;
 }
 
@@ -62,8 +49,8 @@ export interface MessageScrollerHandle {
 
 export interface MessageScrollerContextValue extends Omit<MessageScrollerHandle, 'root' | 'focus'> {
   state: MessageScrollerState;
-  messages: MessageScrollerMessages;
-  locale: string | undefined;
+  /** The family's words in the language in force, with this scroller's `messages` laid over them. */
+  t: FamilyTranslator<MessageScrollerMessages>;
   defaultPosition: MessageScrollerPosition;
   busy: boolean;
   registerViewport: (node: HTMLElement | null) => void;
@@ -95,6 +82,12 @@ export interface MessageScrollerProps extends Omit<ComponentPropsWithRef<'div'>,
    * as they arrive, and the change is announced once in each direction.
    */
   busy?: boolean | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * region's name, the jump controls, the unread line, the loader and the
+   * two announcements of a streaming reply.
+   */
+  messages?: PartialMessages<MessageScrollerMessages> | undefined;
   /** The reader reached the top — the moment to ask for older messages. */
   onReachStart?: ((reason: 'scroll') => void) | undefined;
   /** The anchored turn the reader is at changed. */

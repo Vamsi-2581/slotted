@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "tooltip",
   "ui": "tooltip",
+  "catalog": {
+    "group": "Overlays",
+    "summary": "Short label shown on hover or focus."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/",
   "patternStatus": "The APG page carries its own notice: this pattern is work in progress and does not yet have task force consensus, tracked in w3c/aria-practices#128. The settled requirement for the same behaviour is WCAG 2.2 SC 1.4.13, cited below, and where the two could disagree the criterion wins.",
   "criterion": {

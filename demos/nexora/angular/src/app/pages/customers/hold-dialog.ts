@@ -69,7 +69,7 @@ import { SlTextarea } from '@slotted/angular/textarea';
           slButton
           type="button"
           [loading]="busy()"
-          loadingLabel="Placing on hold"
+          [messages]="{ loading: 'Placing on hold' }"
           (click)="submit()"
         >
           Place on hold

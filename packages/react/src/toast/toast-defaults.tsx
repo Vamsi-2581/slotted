@@ -11,10 +11,6 @@ import type {
   ToastPromiseInput,
 } from './toast.types';
 
-/** The word the close control announces, before any application translates it. */
-export const TOAST_CLOSE_LABEL = 'Close';
-/** The name a reader finds the region by in the landmark list. */
-export const TOAST_LABEL = 'Notifications';
 /**
  * The key that moves focus into the region.
  *
@@ -41,8 +37,6 @@ const FALLBACK: ToastDefaults = {
   duration: 5000,
   swipeThreshold: 48,
   hotkey: TOAST_HOTKEY,
-  label: TOAST_LABEL,
-  closeLabel: TOAST_CLOSE_LABEL,
 };
 
 const ToastDefaultsContext = createContext<ToastDefaults>(FALLBACK);
@@ -53,11 +47,11 @@ export function useToastDefaults(): ToastDefaults {
 }
 
 /**
- * An application decides once where its messages appear, how long they stay,
- * how they are painted and what their close controls are called, rather than
- * repeating the same props on every region and every call. A region or a
- * message that states any of them still wins: an explicit value is never
- * overridden by context.
+ * An application decides once where its messages appear, how long they stay
+ * and how they are painted, rather than repeating the same props on every
+ * region and every call. A region or a message that states any of them still
+ * wins: an explicit value is never overridden by context. The region's name
+ * and the close control's come from the language in force (`SlottedProvider`).
  */
 export function ToastDefaultsProvider({ children, ...defaults }: ToastDefaultsProviderProps) {
   const inherited = useToastDefaults();
@@ -80,8 +74,6 @@ export function ToastDefaultsProvider({ children, ...defaults }: ToastDefaultsPr
         duration: defaults.duration ?? inherited.duration,
         swipeThreshold: defaults.swipeThreshold ?? inherited.swipeThreshold,
         hotkey: defaults.hotkey ?? inherited.hotkey,
-        label: defaults.label ?? inherited.label,
-        closeLabel: defaults.closeLabel ?? inherited.closeLabel,
       }}
     >
       {children}

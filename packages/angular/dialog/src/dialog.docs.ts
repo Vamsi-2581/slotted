@@ -178,19 +178,19 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'dialog-angular-playground',
       language: 'angular',
       label: 'A trigger, a panel and the actions',
-      source: `<button slButton [slDialogTrigger]="d">Editar projeto</button>
+      source: `<button slButton [slDialogTrigger]="d">Edit project</button>
 <sl-dialog #d="slDialog" [(open)]="open">
   <header slDialogHeader>
-    <h2 slDialogTitle>Editar projeto</h2>
-    <p slDialogDescription>O nome é visível para todo o espaço.</p>
+    <h2 slDialogTitle>Edit project</h2>
+    <p slDialogDescription>The name is visible to the whole space.</p>
     <button slDialogClose></button>
   </header>
   <div slDialogBody>
-    <input slTextField aria-label="Nome" value="Redesign da home" />
+    <input slTextField aria-label="Name" value="Home page redesign" />
   </div>
   <footer slDialogFooter>
-    <button slButton variant="ghost" tone="secondary">Cancelar</button>
-    <button slButton>Salvar</button>
+    <button slButton variant="ghost" tone="secondary">Cancel</button>
+    <button slButton>Save</button>
   </footer>
 </sl-dialog>`,
     }),
@@ -226,9 +226,9 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'The body scrolls; the footer stays',
       source: `<sl-dialog scroll="content" [(open)]="open">
-  <header slDialogHeader><h2 slDialogTitle>Termos de uso</h2></header>
+  <header slDialogHeader><h2 slDialogTitle>Terms of use</h2></header>
   <div slDialogBody>{{ longText }}</div>
-  <footer slDialogFooter><button slButton>Aceitar</button></footer>
+  <footer slDialogFooter><button slButton>Accept</button></footer>
 </sl-dialog>`,
     }),
   },
@@ -242,8 +242,8 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'A card as the whole panel',
       source: `<sl-dialog surface="plain" [(open)]="open">
   <div slCard fill="elevated">
-    <h2 slDialogTitle>Um card, dentro da layer</h2>
-    <p slDialogDescription>A família não pinta nada aqui.</p>
+    <h2 slDialogTitle>A card, inside the layer</h2>
+    <p slDialogDescription>The family paints nothing here.</p>
   </div>
 </sl-dialog>`,
     }),
@@ -291,7 +291,7 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'Naming the element focus lands on',
       source: `<sl-dialog [initialFocus]="email" [(open)]="open">
   <div slDialogBody>
-    <input #email slTextField aria-label="E-mail" />
+    <input #email slTextField aria-label="Email" />
   </div>
 </sl-dialog>`,
     }),
@@ -306,7 +306,7 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'Busy, and still closable',
       source: `<sl-dialog [loading]="invoice() === undefined" [(open)]="open">
   <header slDialogHeader>
-    <h2 slDialogTitle>Fatura 4471</h2>
+    <h2 slDialogTitle>Invoice 4471</h2>
     <button slDialogClose></button>
   </header>
   <div slDialogBody><span slSkeleton shape="text"></span></div>
@@ -323,7 +323,7 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'A confirmation over a dialog',
       source: `<sl-dialog #outer="slDialog" [(open)]="open">
   <div slDialogBody>
-    <button [slDialogTrigger]="inner">Cancelar assinatura</button>
+    <button [slDialogTrigger]="inner">Cancel subscription</button>
     <sl-alert-dialog #inner="slAlertDialog">…</sl-alert-dialog>
   </div>
 </sl-dialog>`,
@@ -348,7 +348,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'dialog-angular-composition',
       language: 'angular',
       label: 'The trigger is the consumer’s own button',
-      source: `<button slButton variant="outline" [slDialogTrigger]="d">Editar projeto</button>`,
+      source: `<button slButton variant="outline" [slDialogTrigger]="d">Edit project</button>`,
     }),
   },
   {
@@ -388,18 +388,18 @@ const alertScenes: ReferenceSceneMeta[] = [
       id: 'alert-dialog-angular-playground',
       language: 'angular',
       label: 'A question and two answers',
-      source: `<button slButton tone="danger" variant="outline" [slDialogTrigger]="d">Excluir projeto</button>
+      source: `<button slButton tone="danger" variant="outline" [slDialogTrigger]="d">Delete project</button>
 <sl-alert-dialog #d="slAlertDialog" [(open)]="open">
   <header slDialogHeader>
     <span slAlertDialogIcon></span>
-    <h2 slDialogTitle>Excluir este projeto?</h2>
+    <h2 slDialogTitle>Delete this project?</h2>
     <p slDialogDescription>
-      O projeto e seus 42 documentos saem para todo mundo. Isso não pode ser desfeito.
+      The project and its 42 documents leave for everyone. This cannot be undone.
     </p>
   </header>
   <footer slDialogFooter>
-    <button slButton variant="outline" tone="secondary" slAlertDialogCancel>Manter projeto</button>
-    <button slButton tone="danger" slAlertDialogAction>Excluir projeto</button>
+    <button slButton variant="outline" tone="secondary" slAlertDialogCancel>Keep project</button>
+    <button slButton tone="danger" slAlertDialogAction>Delete project</button>
   </footer>
 </sl-alert-dialog>`,
     }),
@@ -424,8 +424,8 @@ const alertScenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'Concrete labels, and the result each carries',
       source: `<footer slDialogFooter>
-  <button slButton slAlertDialogCancel>Manter projeto</button>
-  <button slButton slAlertDialogAction value="deleted">Excluir projeto</button>
+  <button slButton slAlertDialogCancel>Keep project</button>
+  <button slButton slAlertDialogAction value="deleted">Delete project</button>
 </footer>`,
     }),
   },
@@ -461,8 +461,8 @@ const alertScenes: ReferenceSceneMeta[] = [
       label: 'Description, then the detail',
       source: `<header slDialogHeader>
   <span slAlertDialogIcon></span>
-  <h2 slDialogTitle>Excluir 3 documentos?</h2>
-  <p slDialogDescription>Isso não pode ser desfeito.</p>
+  <h2 slDialogTitle>Delete 3 documents?</h2>
+  <p slDialogDescription>This cannot be undone.</p>
 </header>`,
     }),
   },
@@ -474,7 +474,7 @@ const alertScenes: ReferenceSceneMeta[] = [
       id: 'alert-dialog-angular-composition',
       language: 'angular',
       label: 'A Button that also closes the layer',
-      source: `<button slButton tone="danger" slAlertDialogAction>Excluir projeto</button>`,
+      source: `<button slButton tone="danger" slAlertDialogAction>Delete project</button>`,
     }),
   },
   {
@@ -485,7 +485,7 @@ const alertScenes: ReferenceSceneMeta[] = [
       id: 'alert-dialog-angular-accessibility',
       language: 'angular',
       label: 'The description the pattern requires',
-      source: `<p slDialogDescription>O projeto e seus 42 documentos saem para todo mundo.</p>`,
+      source: `<p slDialogDescription>The project and its 42 documents leave for everyone.</p>`,
     }),
   },
 ];
@@ -609,8 +609,8 @@ const snippets = [
       aria-describedby="d-d"
     >
       <header data-part="header">
-        <h2 data-part="title" id="d-t">Editar projeto</h2>
-        <p data-part="description" id="d-d">O nome é visível para todo o espaço.</p>
+        <h2 data-part="title" id="d-t">Edit project</h2>
+        <p data-part="description" id="d-d">The name is visible to the whole space.</p>
         <button data-part="close" type="button" aria-label="Close"></button>
       </header>
       <div data-part="body">…</div>
@@ -690,6 +690,13 @@ const sharedApi: ApiTuple[] = [
     'false',
     'sl-dialog, sl-alert-dialog',
     'The body carries aria-busy and keeps a floor so the panel does not jump to size when the content lands. Nothing is disabled: a dialog a reader cannot leave is the worse failure',
+  ],
+  [
+    'messages',
+    'Partial<DialogMessages>',
+    '—',
+    'sl-dialog, sl-alert-dialog',
+    'Words laid over the language in force, key by key: the names of the corner controls (close, fullScreen). A native aria-label on slDialogClose still wins',
   ],
   [
     'initialFocus',
@@ -878,12 +885,12 @@ export const ANGULAR_DIALOG_DOCS = {
     >
       <header data-part="header">
         <span data-part="icon" aria-hidden="true"></span>
-        <h2 data-part="title" id="a-t">Excluir este projeto?</h2>
-        <p data-part="description" id="a-d">Isso não pode ser desfeito.</p>
+        <h2 data-part="title" id="a-t">Delete this project?</h2>
+        <p data-part="description" id="a-d">This cannot be undone.</p>
       </header>
       <footer data-part="footer">
-        <button data-part="cancel" type="button">Manter projeto</button>
-        <button data-part="action" type="button">Excluir projeto</button>
+        <button data-part="cancel" type="button">Keep project</button>
+        <button data-part="action" type="button">Delete project</button>
       </footer>
     </div>
   </div>

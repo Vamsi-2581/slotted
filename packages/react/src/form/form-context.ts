@@ -2,16 +2,12 @@ import { createContext, useContext } from 'react';
 
 import type { FormContextValue, FormDefaults } from './form.types';
 
-/** The words the family's own summary announces, before an application says otherwise. */
-export const FORM_SUMMARY_TITLE = 'There is a problem';
-
 export const FORM_DEFAULTS: FormDefaults = {
   align: 'end',
   errorFocus: 'summary',
   nativeValidation: false,
   summary: 'auto',
   summaryDescription: undefined,
-  summaryTitle: FORM_SUMMARY_TITLE,
   validate: 'submit',
 };
 

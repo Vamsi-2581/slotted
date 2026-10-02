@@ -109,18 +109,8 @@ test('offers a raised surface by default and the two control frames beside it', 
   assert.equal(contract.members.promptComposer.defaults.variant, 'raised');
 });
 
-test('lets an application decide once how its composers look and what they say', () => {
-  assert.deepEqual(contract.provides.promptComposerDefaults, [
-    'size',
-    'variant',
-    'submitOn',
-    'sendLabel',
-    'stopLabel',
-    'retryLabel',
-    'attachLabel',
-    'sendingLabel',
-    'stoppedLabel',
-  ]);
+test('lets an application decide once how its composers look', () => {
+  assert.deepEqual(contract.provides.promptComposerDefaults, ['size', 'variant', 'submitOn']);
 });
 
 test('declares one scenario per demonstration the reference page owes', () => {

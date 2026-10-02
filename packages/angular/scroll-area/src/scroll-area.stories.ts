@@ -1,15 +1,16 @@
 import { SlButton } from '@slotted/angular/button';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlInline } from '@slotted/angular/inline';
 import { SlLink } from '@slotted/angular/link';
 import { SlStack } from '@slotted/angular/stack';
 import { SlText } from '@slotted/angular/typography';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
 
 import { SlScrollArea, SlScrollAreaContent } from './scroll-area';
-import { provideScrollAreaDefaults } from './scroll-area-defaults';
 import { ANGULAR_SCROLL_AREA_DOCS, ANGULAR_SCROLL_AREA_TOKENS } from './scroll-area.docs';
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
@@ -176,7 +177,7 @@ export const Playground: Story = {
       scene(
         'Notas de versão · block · auto · both',
         'A configuração por omissão: um eixo, a barra da plataforma, o véu nas duas pontas. Role até ao fim e o véu de baixo levanta; volte ao início e o de cima desaparece.',
-        framed('label="Notas de versão"', notes()),
+        framed(`[messages]="{ label: 'Notas de versão' }"`, notes()),
       ),
     ),
   }),
@@ -190,12 +191,12 @@ export const Axis: Story = {
       scene(
         'block — o eixo por omissão',
         'Só o eixo de bloco rola. O eixo em linha fica preso, por isso uma linha comprida quebra em vez de fugir para o lado.',
-        framed('label="Notas de versão"', notes()),
+        framed(`[messages]="{ label: 'Notas de versão' }"`, notes()),
       ) +
         scene(
           'inline — uma fila que passa da caixa',
           'O véu cai na ponta que o leitor ainda não alcançou, e espelha com o documento: em RTL fica à esquerda. A barra horizontal é a da plataforma.',
-          `<div slScrollArea axis="inline" class="slotted-demo-frame" label="Regiões">
+          `<div slScrollArea axis="inline" class="slotted-demo-frame" [messages]="{ label: 'Regiões' }">
             <div slScrollAreaContent>${regions}</div>
           </div>`,
         ) +
@@ -203,7 +204,7 @@ export const Axis: Story = {
           'both — um registo mais largo e mais alto do que a caixa',
           'Quatro véus, e as duas máscaras multiplicam-se nos cantos. O quadrado entre as duas barras é desenhado pelo sistema. Use os botões para o levar ao meio.',
           `<div slStack gap="4">
-            ${framed('axis="both" #both="slScrollArea" label="Registo de exportações"', log)}
+            ${framed(`axis="both" #both="slScrollArea" [messages]="{ label: 'Registo de exportações' }"`, log)}
             <div slInline gap="3">
               <button slButton size="sm" variant="outline" (click)="both.scrollTo({ block: 40, inline: 60 })">Ao meio</button>
               <button slButton size="sm" variant="outline" (click)="both.scrollToEdge('block-start'); both.scrollToEdge('inline-start')">Ao início</button>
@@ -222,22 +223,22 @@ export const Scrollbars: Story = {
       scene(
         'auto',
         'A barra aparece quando há o que rolar e reserva o seu espaço desde o início, para nada se mexer quando aparece.',
-        framed('label="Notas de versão"', notes()),
+        framed(`[messages]="{ label: 'Notas de versão' }"`, notes()),
       ) +
         scene(
           'always',
           'A calha fica reservada e desenhada mesmo em conteúdo que cabe inteiro. É overflow: scroll, a forma da plataforma dizer o mesmo.',
-          framed('label="Notas de versão" scrollbars="always"', notes(2)),
+          framed(`[messages]="{ label: 'Notas de versão' }" scrollbars="always"`, notes(2)),
         ) +
         scene(
           'hover',
           'A calha fica, a barra não se pinta até um ponteiro ou o teclado estarem lá dentro. É a metade em CSS daquilo em que o Radix e o Mantine gastam um temporizador.',
-          framed('label="Notas de versão" scrollbars="hover"', notes()),
+          framed(`[messages]="{ label: 'Notas de versão' }" scrollbars="hover"`, notes()),
         ) +
         scene(
           'none',
           'Sem barra e sem calha. O conteúdo continua a rolar por roda, toque, teclado e scrollTo, e o véu passa a ser a única coisa a dizer que há mais.',
-          framed('label="Notas de versão" scrollbars="none"', notes()),
+          framed(`[messages]="{ label: 'Notas de versão' }" scrollbars="none"`, notes()),
         ),
     ),
   }),
@@ -251,17 +252,17 @@ export const Fade: Story = {
       scene(
         'both',
         'Escurece o que o leitor já passou e o que ainda tem pela frente. As duas pontas leem-se como uma ideia só. Role um pouco para ver as duas.',
-        framed('label="Notas de versão"', notes()),
+        framed(`[messages]="{ label: 'Notas de versão' }"`, notes()),
       ) +
         scene(
           'end',
           'Só a ponta para onde há mais conteúdo. O início da lista fica nítido, para quem prefere não escurecer o que já foi lido.',
-          framed('fade="end" label="Notas de versão"', notes()),
+          framed(`fade="end" [messages]="{ label: 'Notas de versão' }"`, notes()),
         ) +
         scene(
           'none',
           'Nenhum véu, e nenhuma máscara: a barra fica sozinha a dizer que há mais, e a área não paga uma camada de composição.',
-          framed('fade="none" label="Notas de versão"', notes()),
+          framed(`fade="none" [messages]="{ label: 'Notas de versão' }"`, notes()),
         ),
     ),
   }),
@@ -275,17 +276,17 @@ export const Gutter: Story = {
       scene(
         'auto',
         'O recuo chega até à moldura. No momento em que o conteúdo crescer para lá da caixa, a barra aparece e empurra o texto para a esquerda.',
-        framed('gutter="auto" label="Notas de versão"', fits),
+        framed(`gutter="auto" [messages]="{ label: 'Notas de versão' }"`, fits),
       ) +
         scene(
           'stable — por omissão',
           'Uma largura de barra fica guardada à direita desde o início, por isso nada se mexe quando ela aparece.',
-          framed('label="Notas de versão"', fits),
+          framed(`[messages]="{ label: 'Notas de versão' }"`, fits),
         ) +
         scene(
           'both-edges',
           'A mesma largura dos dois lados, para uma coluna centrada continuar centrada quer a barra esteja quer não.',
-          framed('gutter="both-edges" label="Notas de versão"', fits),
+          framed(`gutter="both-edges" [messages]="{ label: 'Notas de versão' }"`, fits),
         ),
     ),
   }),
@@ -319,7 +320,7 @@ export const Overscroll: Story = {
         'contain — por omissão',
         'Chegue ao fim da área e continue a rolar: a página por trás fica quieta. Uma região limitada cujo último centímetro move a página é o defeito que a propriedade veio resolver.',
         page(
-          `<div slScrollArea class="slotted-demo-frame" label="Notas de versão" maxBlockSize="7rem">
+          `<div slScrollArea class="slotted-demo-frame" [messages]="{ label: 'Notas de versão' }" maxBlockSize="7rem">
             <div slScrollAreaContent>${notes(2)}</div>
           </div>`,
         ),
@@ -328,7 +329,7 @@ export const Overscroll: Story = {
           'auto',
           'O mesmo gesto encadeia para a página, que é o que o navegador faz por omissão. Um consumidor que queira isso di-lo.',
           page(
-            `<div slScrollArea class="slotted-demo-frame" label="Notas de versão" maxBlockSize="7rem" overscroll="auto">
+            `<div slScrollArea class="slotted-demo-frame" [messages]="{ label: 'Notas de versão' }" maxBlockSize="7rem" overscroll="auto">
               <div slScrollAreaContent>${notes(2)}</div>
             </div>`,
           ),
@@ -347,7 +348,7 @@ export const Maximum: Story = {
         'maxBlockSize — 12rem',
         'Com duas notas a área tem a altura das duas e não rola. Acrescente notas: cresce até aos doze rem e passa a rolar, e a região com nome e ponto de tabulação aparece no mesmo instante em que o transbordo aparece.',
         `<div slStack gap="4">
-          <div slScrollArea class="slotted-demo-frame" label="Notas de versão" maxBlockSize="12rem">
+          <div slScrollArea class="slotted-demo-frame" [messages]="{ label: 'Notas de versão' }" maxBlockSize="12rem">
             <div slScrollAreaContent>
               <div slStack gap="4">
                 @for (release of releases.slice(0, count); track release[0]) {
@@ -377,13 +378,13 @@ export const Keyboard: Story = {
       scene(
         'Tab chega à região; o resto é da plataforma',
         'Prima Tab até à área e depois as setas, PageDown, End e Home. A família não escreve nenhuma destas teclas — escreve só o ponto de tabulação que as torna alcançáveis.',
-        framed('label="Notas de versão"', notes()),
+        framed(`[messages]="{ label: 'Notas de versão' }"`, notes()),
       ) +
         scene(
           '[tabbable]="false" — um filho já recebe o foco',
           'A ligação lá dentro já é um ponto de tabulação, e um segundo na porta de rolagem seria um que não faz nada. O Tab vai direto à ligação; o ponteiro continua a poder focar a área.',
           framed(
-            'label="Notas de versão" [tabbable]="false"',
+            `[messages]="{ label: 'Notas de versão' }" [tabbable]="false"`,
             `<div slStack gap="4">
               <p slText size="sm" tone="muted">A nota completa está em <a slLink href="#notas-de-versao">notas de versão 2026.9</a>, que abre na mesma página.</p>
               ${notes()}
@@ -402,17 +403,17 @@ export const Content: Story = {
       scene(
         'Três caminhos sem quebra',
         'Um token que não quebra rola no eixo em linha e é velado onde sai da caixa. A barra horizontal aparece por baixo dos três.',
-        framed('axis="both" label="Ficheiros exportados"', paths),
+        framed(`axis="both" [messages]="{ label: 'Ficheiros exportados' }"`, paths),
       ) +
         scene(
           'Uma tradução com o dobro do comprimento',
           'Quebra e rola no eixo de bloco, como qualquer texto. O véu cai sobre a palavra que está a sair, não sobre um recuo.',
-          framed('label="Änderungsprotokoll"', translated),
+          framed(`[messages]="{ label: 'Änderungsprotokoll' }"`, translated),
         ) +
         scene(
           'Três linhas que cabem',
           'Nada transborda, por isso a área é uma caixa como outra qualquer: sem véu, sem barra, sem ponto de tabulação e sem papel.',
-          framed('label="Notas de versão"', fits),
+          framed(`[messages]="{ label: 'Notas de versão' }"`, fits),
         ),
     ),
   }),
@@ -428,7 +429,7 @@ export const Composition: Story = {
         'exportAs, scrollChange e o elemento do consumidor',
         'Os botões movem a área pela instância e nada em volta dela se mexe — reveal move o contentor sozinho, ao contrário de scrollIntoView. A posição é emitida em cada rolagem, e a moldura é uma section do próprio consumidor.',
         `<div slStack gap="4">
-          <section slScrollArea #area="slScrollArea" class="slotted-demo-bound slotted-demo-frame" label="Notas de versão" (scrollChange)="block = $event.position.block">
+          <section slScrollArea #area="slScrollArea" class="slotted-demo-bound slotted-demo-frame" [messages]="{ label: 'Notas de versão' }" (scrollChange)="block = $event.position.block">
             <div slScrollAreaContent>
               <div slStack gap="4">
                 ${notes(4)}
@@ -456,7 +457,7 @@ export const Print: Story = {
       scene(
         'No papel, tudo',
         'Abra a pré-visualização de impressão desta página: a área larga o máximo e o recorte na consulta de impressão e imprime as seis notas, não as duas que estavam à vista. Nenhuma das cinco implementações pesquisadas o faz.',
-        framed('label="Notas de versão"', notes()),
+        framed(`[messages]="{ label: 'Notas de versão' }"`, notes()),
       ),
     ),
   }),
@@ -465,14 +466,16 @@ export const Print: Story = {
 export const Accessibility: Story = {
   parameters: scenario('accessibility'),
   decorators: [
-    moduleMetadata({ providers: [provideScrollAreaDefaults({ label: 'Conteúdo com rolagem' })] }),
+    moduleMetadata({
+      providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
+    }),
   ],
   render: () => ({
     template: grid(
       3,
       scene(
         'Transborda — uma região com nome',
-        'role=region, tabindex=0 e o nome do fornecedor: «Conteúdo com rolagem». Um leitor de ecrã ouve o nome ao entrar e usa as setas do próprio navegador.',
+        'role=region, tabindex=0 e o nome do catálogo pt-BR: «Conteúdo rolável». Um leitor de ecrã ouve o nome ao entrar e usa as setas do próprio navegador.',
         framed('', notes()),
       ) +
         scene(
@@ -482,7 +485,7 @@ export const Accessibility: Story = {
         ) +
         scene(
           'Nomeada pelo título — labelledBy',
-          'O título por cima é o nome da região, na ordem em que o nome se resolve: labelledBy, depois label, depois o fornecedor.',
+          'O título por cima é o nome da região, na ordem em que o nome se resolve: labelledBy, depois messages.label, depois o catálogo.',
           `<div slStack gap="3">
             <p slText id="notas-titulo" size="sm" weight="semibold">Notas de versão</p>
             ${framed('labelledBy="notas-titulo"', notes())}

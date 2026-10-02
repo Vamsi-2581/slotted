@@ -37,8 +37,8 @@ export interface ChipRowProps {
   values: readonly SelectOptionValue[];
   /** The label for a value, when the collection could resolve one. */
   labelFor: (value: SelectOptionValue) => string | undefined;
-  /** `Remove {label}`, with the value's own label in it. */
-  removeLabel: string;
+  /** The accessible name of a chip's remove control, given the value's own label. */
+  removeLabel: (label: string) => string;
   /** Takes a value out of the selection. */
   onRemove: (value: SelectOptionValue, event: MouseEvent<HTMLButtonElement>) => void;
   /** The frame whose width decides whether a chip is the right answer at all. */
@@ -112,7 +112,7 @@ export function ChipRow({
               <span data-part="label">{label}</span>
             </span>
             <button
-              aria-label={removeLabel.replace('{label}', label)}
+              aria-label={removeLabel(label)}
               data-part="remove"
               disabled={disabled}
               onClick={(event) => onRemove(value, event)}

@@ -19,35 +19,25 @@ export type SwitchIndicator = 'mark' | 'none';
 export type SwitchLabelPlacement = 'end' | 'start';
 
 /**
- * What a pending switch announces. It is a constant rather than a string built
- * inside the component, because the only translation layer this library has is
- * the consumer's — a provider at the top of the application, or an input on
- * the control.
- */
-export const SWITCH_LOADING_LABEL = 'Saving';
-
-/**
  * How long a pending switch stays silent. A save that returns in two hundred
  * milliseconds should say nothing at all, and a live region that spoke on
  * every toggle would make a settings page unusable with a screen reader.
  * Primer measured the same number against the same problem.
  *
  * It is a constant of the family rather than an input: an application that
- * needs longer sets a `loadingLabel` a reader can wait for.
+ * needs longer sets a `loading` message a reader can wait for.
  */
 export const SWITCH_LOADING_ANNOUNCE_DELAY = 2000;
 
 export interface SwitchDefaults {
   indicator: SwitchIndicator;
   labelPlacement: SwitchLabelPlacement;
-  loadingLabel: string;
   size: SwitchSize;
 }
 
 const FALLBACK: SwitchDefaults = {
   indicator: 'mark',
   labelPlacement: 'end',
-  loadingLabel: SWITCH_LOADING_LABEL,
   size: 'md',
 };
 
@@ -59,7 +49,8 @@ export const SWITCH_DEFAULTS = new InjectionToken<SwitchDefaults>('slotted switc
 /**
  * An application decides once what its switches look like, rather than
  * repeating the same inputs on every row of a settings page. A switch that
- * states any of them itself still wins.
+ * states any of them itself still wins. What a pending switch announces comes
+ * from the language in force (`provideSlotted`).
  *
  * `size` is the one the field outranks: a `size="sm"` field holding an `md`
  * control is a field and a control disagreeing about one row, so a switch

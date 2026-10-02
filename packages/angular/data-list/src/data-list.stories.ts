@@ -13,6 +13,7 @@ import { lucideEllipsis } from '@ng-icons/lucide';
 import { SlAvatar } from '@slotted/angular/avatar';
 import { SlBadge } from '@slotted/angular/badge';
 import { SlButton, SlIconButton } from '@slotted/angular/button';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlSegment, SlSegmentedControl } from '@slotted/angular/segmented-control';
 import {
   SlTable,
@@ -29,6 +30,7 @@ import {
 } from '@slotted/angular/table';
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
 import { emptyQuery, type GridColumn, type GridQuery } from '@slotted/core/grid';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { COMPACT_BELOW, createWidthGate } from '@slotted/core/measure';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
@@ -37,7 +39,6 @@ import { applicationConfig, moduleMetadata } from '@storybook/angular-vite';
 
 import { SlDataList, SlDataListFooter } from './data-list';
 import {
-  provideDataListDefaults,
   type DataListQueryRequest,
   type DataListSelection,
   type DataListSelectionMode,
@@ -772,14 +773,7 @@ export const Content: Story = {
   parameters: scenario('content'),
   decorators: [
     applicationConfig({
-      providers: [
-        provideDataListDefaults({
-          labels: {
-            count: ({ count }) => (count === 1 ? '1 conta' : `${count} contas`),
-            empty: 'Sem valor',
-          },
-        }),
-      ],
+      providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
     }),
   ],
   render: () => ({

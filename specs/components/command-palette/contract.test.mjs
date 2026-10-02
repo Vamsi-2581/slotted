@@ -179,7 +179,7 @@ test('opens on a hotkey the consumer can turn off, and matches it with the core 
 
 test('holds a recent group the product persists, cut at a limit', () => {
   assert.equal(member.defaults.recentLimit, 5);
-  assert.equal(member.defaults.recentLabel, 'Recent');
+  assert.ok(contract.messages.includes('recent'));
   assert.match(contract.recent.updated, /moved to the front/);
   assert.match(contract.recent.unknown, /kept in the array/);
 });
@@ -226,7 +226,7 @@ test('declares every part the anatomy draws, and no more', () => {
 });
 
 /** Every default a reference page has to print, and every axis a provider sets once. */
-test('lets an application set every axis and every label once', () => {
+test('lets an application set every axis once, and reads every word from the catalog', () => {
   for (const axis of Object.keys(contract.axes)) {
     if (axis === 'loading' || axis === 'disabled') continue;
     assert.ok(
@@ -234,27 +234,24 @@ test('lets an application set every axis and every label once', () => {
       `${axis} is not in defaults`,
     );
   }
-  for (const label of [
+  for (const key of [
     'label',
-    'inputLabel',
+    'input',
     'placeholder',
-    'emptyLabel',
-    'loadingLabel',
-    'errorLabel',
-    'countLabel',
-    'recentLabel',
-    'clearLabel',
-    'backLabel',
+    'empty',
+    'loading',
+    'error',
+    'count',
+    'recent',
+    'clear',
+    'close',
+    'back',
     'hintNavigate',
     'hintSelect',
     'hintClose',
     'hintBack',
   ]) {
-    assert.ok(label in member.defaults, `${label} has no default`);
-    assert.ok(
-      contract.provides.commandPaletteDefaults.includes(label),
-      `${label} is not in defaults`,
-    );
+    assert.ok(contract.messages.includes(key), `${key} is not a message`);
   }
   for (const [axis, [source, fallback, value]] of Object.entries(contract.resolution)) {
     assert.deepEqual([source, fallback], ['prop', 'defaults'], axis);

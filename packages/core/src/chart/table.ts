@@ -1,5 +1,4 @@
-import type { ChartMessages } from './describe';
-import { CHART_MESSAGES } from './describe';
+import type { ChartTranslator } from './describe';
 import type { ChartModel } from './model';
 
 /**
@@ -30,20 +29,19 @@ export interface ChartTable {
 
 export function chartTable(
   model: ChartModel,
+  t: ChartTranslator,
   options: {
     readonly limit?: number;
-    readonly messages?: ChartMessages;
     /** Lists hidden series too. */
     readonly includeHidden?: boolean;
   } = {},
 ): ChartTable {
   const listed = model.series.filter((series) => options.includeHidden || series.visible);
-  const messages = options.messages ?? CHART_MESSAGES;
   const limit = options.limit ?? 100;
   const columns: ChartTableColumn[] = [
     {
       key: '__category',
-      label: model.x.label ?? messages.category,
+      label: model.x.label ?? t('category'),
       numeric: model.xType !== 'category',
     },
     ...listed.flatMap((series) => {
@@ -86,11 +84,8 @@ function csvField(value: string) {
  * Every row, with numbers as the consumer wrote them rather than formatted,
  * because a CSV is read by a program as often as by a person.
  */
-export function chartToCsv(model: ChartModel, messages: ChartMessages = CHART_MESSAGES): string {
-  const header = [
-    model.x.label ?? messages.category,
-    ...model.series.map((series) => series.label),
-  ];
+export function chartToCsv(model: ChartModel, t: ChartTranslator): string {
+  const header = [model.x.label ?? t('category'), ...model.series.map((series) => series.label)];
   const lines = model.categories.map((category) => [
     model.xType === 'category' ? String(category.x) : category.label,
     ...model.series.map((series) => {

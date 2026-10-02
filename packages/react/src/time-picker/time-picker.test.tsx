@@ -1,10 +1,12 @@
 import { plainTime, toISOTime } from '@slotted/core/date';
 import type { PlainTime } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/time-picker/contract.json';
+import { SlottedProvider } from '../i18n';
 import { TimePicker, TimePickerDefaultsProvider } from './index';
 import type { TimePickerHandle } from './index';
 
@@ -412,14 +414,40 @@ describe('the three mutable values', () => {
 });
 
 describe('what the consumer sets once', () => {
-  it('lets an application state the step and the labels once', () => {
+  it('lets an application state the step once', () => {
     render(
-      <TimePickerDefaultsProvider nowLabel="Agora" step={3600}>
+      <TimePickerDefaultsProvider step={3600}>
         <TimePicker {...base} defaultOpen />
       </TimePickerDefaultsProvider>,
     );
 
     expect(labels()).toEqual(['09:00', '10:00', '11:00']);
+  });
+
+  it('changes its words and its time format together with the language in force', () => {
+    const inLocale = (locale: string) => (
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale={locale}>
+        <TimePicker
+          defaultValue={TEN}
+          max={plainTime(11, 0)}
+          min={plainTime(9, 0)}
+          referenceTime={NOON}
+        />
+      </SlottedProvider>
+    );
+    const { rerender } = render(inLocale('pt-BR'));
+
+    expect(trigger()).toHaveAccessibleName(/^Alterar horário, /);
+    expect(trigger().getAttribute('aria-label')).toContain('10:00');
+
+    rerender(inLocale('en-US'));
+    expect(trigger()).toHaveAccessibleName(/^Change time, /);
+    expect(trigger().getAttribute('aria-label')).toMatch(/10:00\sAM/);
+  });
+
+  it('lays its own messages over the language in force', () => {
+    render(<TimePicker {...base} defaultOpen messages={{ now: 'Agora' }} />);
+
     expect(document.querySelector('[data-part="now"]')).toHaveTextContent('Agora');
   });
 

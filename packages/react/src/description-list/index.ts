@@ -1,7 +1,6 @@
 export { DescriptionList, useDescriptionList, useDescriptionListItem } from './description-list';
 export { copyToClipboard } from './description-list-clipboard';
 export {
-  DEFAULT_DESCRIPTION_LIST_LABELS,
   DescriptionListDefaultsProvider,
   useDescriptionListDefaults,
 } from './description-list-defaults';
@@ -32,7 +31,6 @@ export type {
   DescriptionListItemContextValue,
   DescriptionListItemProps,
   DescriptionListItemRootProps,
-  DescriptionListLabels,
   DescriptionListLayout,
   DescriptionListProps,
   DescriptionListRevealReason,

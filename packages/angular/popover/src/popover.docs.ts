@@ -199,11 +199,11 @@ const api = apiRows([
     'The popover never opens. The trigger’s own disabled is the consumer’s.',
   ],
   [
-    'closeLabel',
-    'string',
-    'Close',
+    'messages',
+    'Partial<PopoverMessages>',
+    '—',
     'slPopover',
-    'The close control’s accessible name. The provider is where an application translates it once.',
+    'Words laid over the language in force, key by key: the close control’s accessible name (close). A native aria-label on slPopoverClose still wins.',
   ],
   [
     'sideOffset',
@@ -315,7 +315,7 @@ const snippets = [
     language: 'ts',
     source: `
 bootstrapApplication(App, {
-  providers: [providePopoverDefaults({ closeLabel: 'Fechar', size: 'lg' })],
+  providers: [providePopoverDefaults({ size: 'lg' })],
 });
 `,
   }),

@@ -2,7 +2,6 @@ import { useContext, useEffect } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactElement } from 'react';
 
 import { Glyph, Icon } from '../icon';
-import { formatMessage } from './message-defaults';
 import { reasonOf, useMessage } from './message';
 import { BubbleMetaContext } from './bubble-context';
 import type {
@@ -80,7 +79,7 @@ export function MessageReceipt({ children, render, status, ...nativeProps }: Mes
   const inMeta = useContext(BubbleMetaContext);
   const resolved =
     status ?? (message.status === 'streaming' ? undefined : message.status) ?? 'sent';
-  const word = message.messages[resolved];
+  const word = message.t(resolved);
   const glyph = resolved === 'failed' ? undefined : RECEIPT_GLYPH[resolved];
 
   const rootProps: MessageRootProps = {
@@ -105,9 +104,9 @@ export function MessageReceipt({ children, render, status, ...nativeProps }: Mes
 
 /** The message's own actions — copy, reply, rate — as a toolbar the row reveals. */
 export function MessageActions({ render, ...nativeProps }: MessagePartProps) {
-  const { messages } = useMessage();
+  const { t } = useMessage();
   const rootProps: MessageRootProps = {
-    'aria-label': messages.actions,
+    'aria-label': t('actions'),
     role: 'toolbar',
     ...nativeProps,
     'data-part': 'actions',
@@ -172,20 +171,20 @@ export function MessageVersions({
   ...nativeProps
 }: MessageVersionsProps) {
   const message = useMessage();
-  const { messages, requestVersion, version, versionCount } = message;
+  const { requestVersion, t, version, versionCount } = message;
   if (versionCount < 2) return null;
 
   const step = (delta: number) => (event: MouseEvent<HTMLButtonElement>) =>
     requestVersion(version + delta, reasonOf(event), event);
 
   const rootProps: MessageRootProps = {
-    'aria-label': messages.versions,
+    'aria-label': t('versions'),
     role: 'group',
     ...nativeProps,
     children: children ?? (
       <>
         <button
-          aria-label={messages.previousVersion}
+          aria-label={t('previousVersion')}
           data-part="version-previous"
           disabled={version <= 0}
           onClick={step(-1)}
@@ -196,10 +195,10 @@ export function MessageVersions({
           </Icon>
         </button>
         <span aria-live="polite" data-part="version-label">
-          {formatMessage(messages.versionLabel, { current: version + 1, total: versionCount })}
+          {t('versionLabel', { current: version + 1, total: versionCount })}
         </span>
         <button
-          aria-label={messages.nextVersion}
+          aria-label={t('nextVersion')}
           data-part="version-next"
           disabled={version >= versionCount - 1}
           onClick={step(1)}

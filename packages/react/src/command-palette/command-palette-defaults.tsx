@@ -35,21 +35,6 @@ export const COMMAND_PALETTE_FALLBACK: CommandPaletteDefaults = {
   highlightMatch: true,
   hotkey: 'mod+k',
   recentLimit: 5,
-  label: 'Command palette',
-  inputLabel: 'Search commands',
-  placeholder: 'Type a command or search…',
-  emptyLabel: 'No results',
-  loadingLabel: 'Loading…',
-  errorLabel: 'The command failed: {message}',
-  countLabel: '{count} results',
-  recentLabel: 'Recent',
-  clearLabel: 'Clear',
-  closeLabel: 'Close',
-  backLabel: 'Back',
-  hintNavigate: 'Navigate',
-  hintSelect: 'Select',
-  hintClose: 'Close',
-  hintBack: 'Back',
 };
 
 const CommandPaletteDefaultsContext =
@@ -61,9 +46,9 @@ export function useCommandPaletteDefaults(): CommandPaletteDefaults {
 }
 
 /**
- * The decisions an application takes once — the hotkey, the measure, and the
- * fourteen sentences the family speaks, which is where an application
- * translates them.
+ * The decisions an application takes once — the hotkey, the measure and the
+ * behaviour. The sentences the family speaks come from the language in force
+ * (`SlottedProvider`).
  */
 export function CommandPaletteDefaultsProvider({
   children,

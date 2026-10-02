@@ -206,7 +206,7 @@ type View = 'stock' | 'prices' | 'supply' | 'movements';
                 slBreadcrumb
                 slPageHeaderBreadcrumbs
                 [maxItems]="phone() ? 3 : 8"
-                label="Where this SKU is filed"
+                aria-label="Where this SKU is filed"
               >
                 <ol slBreadcrumbList>
                   <li slBreadcrumbItem>
@@ -259,7 +259,7 @@ type View = 'stock' | 'prices' | 'supply' | 'movements';
                 slBreadcrumb
                 slPageHeaderBreadcrumbs
                 [maxItems]="phone() ? 3 : 8"
-                label="Where this SKU is filed"
+                aria-label="Where this SKU is filed"
               >
                 <ol slBreadcrumbList>
                   <li slBreadcrumbItem>
@@ -406,7 +406,7 @@ type View = 'stock' | 'prices' | 'supply' | 'movements';
                 messages some SKUs carry stand under the tabs' content, so
                 nothing measured moves when they arrive.
               -->
-              <div slSkeletonRegion label="Reading the SKU" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the SKU' }" [loading]="true">
                 <div slGrid [columns]="phone() ? 2 : cardColumns()" minItemWidth="xs" [gap]="4">
                   @for (figure of figureLabels(); track figure) {
                     <div slStatCard size="sm" loading>

@@ -189,9 +189,9 @@ export function lateFilter(): FilterGroup {
             (valueChangeRequest)="store.setFilter($event.value)"
             [query]="store.search()"
             (queryChangeRequest)="store.setSearch($event.value)"
-            [labels]="{ count: countLabel }"
+            [messages]="countMessages"
             [count]="store.total() ?? undefined"
-            [total]="store.grandTotal() ?? undefined"
+            [total]="store.total() === store.grandTotal() ? undefined : (store.grandTotal() ?? undefined)"
             [loading]="store.loading()"
           >
             <app-list-view-tools
@@ -205,7 +205,7 @@ export function lateFilter(): FilterGroup {
           </div>
           <sl-data-grid
             #grid="slDataGrid"
-            label="Purchase orders"
+            aria-label="Purchase orders"
             rowKey="id"
             variant="framed"
             activatable
@@ -253,8 +253,8 @@ export function lateFilter(): FilterGroup {
             <nav
               slDataGridFooter
               slPagination
-              label="Purchase order pages"
-              [labels]="pagerLabels"
+              aria-label="Purchase order pages"
+              [messages]="pagerMessages"
               [count]="store.total() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
@@ -316,14 +316,11 @@ export class PurchaseOrdersPage {
     return `${place}${cost}`;
   });
 
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total
-      ? `${count} purchase orders`
-      : `${count} of ${total} purchase orders`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} purchase orders', countOnly: '{count} purchase orders' };
 
-  readonly pagerLabels = {
-    range: (start: number, end: number, count: number) =>
-      `Purchase orders ${start}–${end} of ${count.toLocaleString('en-US')}`,
+  readonly pagerMessages = {
+    range: 'Purchase orders {start}–{end} of {count}',
     pageSize: 'Purchase orders per page',
   };
 

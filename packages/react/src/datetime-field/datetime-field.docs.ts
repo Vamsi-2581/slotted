@@ -209,7 +209,6 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'The expression',
       language: 'tsx',
       source: `<DateTimeField
-  durationLabel="Data e hora como duração a partir de agora"
   locale="pt-BR"
   referenceDateTime={{
     date: { year: 2026, month: 9, day: 10 },
@@ -331,7 +330,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'datetime-field-react-clear',
       label: 'The clear control',
       language: 'tsx',
-      source: `<DateTimeField clearable clearLabel="Limpar" locale="pt-BR" />;`,
+      source: `<DateTimeField clearable locale="pt-BR" messages={{ clear: 'Limpar' }} />;`,
     }),
   },
   {
@@ -388,12 +387,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition and escape hatches',
-    note: 'The provider sets the locale, the clock and every label once for the whole application; render substitutes the frame’s element and hands the ref back; and the handle reaches focus(), clear() and the segment the reader is on. A control that states any default itself still wins over the provider.',
+    note: 'The provider sets the clock and the zone once for the whole application, SlottedProvider the language; render substitutes the frame’s element and hands the ref back; and the handle reaches focus(), clear() and the segment the reader is on. A control that states any default itself still wins over the provider.',
     snippet: defineSnippet({
       id: 'datetime-field-react-composition',
       label: 'Defaults once, and a handle',
       language: 'tsx',
-      source: `<DateTimeFieldDefaultsProvider hourCycle={24} locale="pt-BR" timeZone="America/Sao_Paulo">
+      source: `<DateTimeFieldDefaultsProvider hourCycle={24} timeZone="America/Sao_Paulo">
   <DateTimeField ref={handle} />
 </DateTimeFieldDefaultsProvider>;`,
     }),
@@ -470,7 +469,7 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    'the runtime’s',
+    'the language in force',
     'DateTimeField',
     'BCP 47. Decides the order of both halves, the separators, the boundary literal and the placeholders.',
   ],
@@ -566,7 +565,6 @@ const api: ApiRow[] = apiRows([
     'DateTimeField',
     'Draws a button that empties both halves and returns focus to the first segment.',
   ],
-  ['clearLabel', 'string', "'Clear'", 'DateTimeField', 'The clear button’s accessible name.'],
   [
     'relative',
     'boolean',
@@ -575,11 +573,11 @@ const api: ApiRow[] = apiRows([
     'Whether +, - and = open the duration expression. Every value it can write is reachable by typing and by the arrows.',
   ],
   [
-    'durationLabel',
-    'string',
-    "'Date and time as a duration from now'",
+    'messages',
+    'Partial<DatetimeFieldMessages>',
+    '—',
     'DateTimeField',
-    'The expression region’s accessible name.',
+    'Words laid over the language in force, key by key: the clear button’s accessible name (clear) and the expression region’s (duration).',
   ],
   [
     'name',
@@ -618,7 +616,7 @@ const composition: ApiRow[] = apiRows([
     'component',
     '—',
     'application',
-    'Sets locale, timeZone, hourCycle, granularity, calendar, firstDayOfWeek, yearPivot, relative, size, variant and every label once for everything under it. A control that states any of them itself still wins.',
+    'Sets timeZone, hourCycle, granularity, calendar, firstDayOfWeek, yearPivot, relative, size and variant once for everything under it. A control that states any of them itself still wins.',
   ],
   [
     'render',

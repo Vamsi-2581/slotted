@@ -3,6 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import type { ChangeRequest } from '@slotted/core/state';
 import { SlAppShell, SlAppShellNav, SlAppShellNavBody } from '@slotted/angular/app-shell';
 import contract from '../../../../specs/components/side-navigation/contract.json';
@@ -182,7 +185,7 @@ describe('SlSideNavigation', () => {
       if (part === 'flyout') continue;
       expect(fixture.nativeElement.querySelector(`[data-part="${part}"]`), part).not.toBeNull();
     }
-    expect(root().getAttribute('aria-label')).toBe('Navegação');
+    expect(root().getAttribute('aria-label')).toBe('Navigation');
     expect(root().getAttribute('data-mode')).toBe('auto');
     expect(root().getAttribute('data-truncate')).toBe('end');
   });
@@ -327,6 +330,23 @@ describe('SlSideNavigation', () => {
     expect(root().getAttribute('data-size')).toBe('lg');
     expect(root().getAttribute('data-truncate')).toBe('none');
     expect(root().hasAttribute('data-guides')).toBe(false);
+  });
+
+  it('speaks the language in force, and follows a change of it in place', async () => {
+    const locale = signal('pt-BR');
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    }).compileComponents();
+    fixture = TestBed.createComponent(Host);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+    expect(root().getAttribute('aria-label')).toBe('Navegação');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(root().getAttribute('aria-label')).toBe('Navigation');
   });
 
   describe('measuring the room', () => {

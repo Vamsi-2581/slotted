@@ -1,3 +1,4 @@
+import type { FamilyTranslator, MessageMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import type {
   ComponentPropsWithRef,
@@ -18,38 +19,15 @@ export type MessageActivityStepStatus = 'complete' | 'current' | 'pending';
 /** Why a version, a reaction or a clamp moved: the reader's pointer or keyboard. */
 export type MessageChangeReason = Extract<ChangeReason, 'pointer' | 'keyboard'>;
 
-/** The words the family writes, set once by the application. */
-export interface MessageMessages {
-  actions: string;
-  versions: string;
-  /** `{current}` and `{total}`. */
-  versionLabel: string;
-  previousVersion: string;
-  nextVersion: string;
-  reactions: string;
-  typing: string;
-  more: string;
-  less: string;
-  retry: string;
-  sending: string;
-  sent: string;
-  delivered: string;
-  read: string;
-  failed: string;
-  streaming: string;
-}
-
 export interface MessageDefaults {
   layout: MessageLayout;
   actionsVisibility: MessageActionsVisibility;
   /** The painting of a bubble that states none and whose row infers none. */
   variant: BubbleVariant;
   tone: BubbleTone;
-  messages: MessageMessages;
 }
 
-export interface MessageDefaultsProviderProps extends Partial<Omit<MessageDefaults, 'messages'>> {
-  messages?: Partial<MessageMessages> | undefined;
+export interface MessageDefaultsProviderProps extends Partial<MessageDefaults> {
   children?: ReactNode | undefined;
 }
 
@@ -64,7 +42,8 @@ export interface MessageContextValue {
   align: MessageAlign;
   layout: MessageLayout;
   status: MessageStatus | undefined;
-  messages: MessageMessages;
+  /** The family's words in the language in force, with this row's `messages` laid over them. */
+  t: FamilyTranslator<MessageMessages>;
   authorId: string;
   registerAuthor: (present: boolean) => void;
   version: number;
@@ -104,6 +83,11 @@ export interface MessageProps extends ComponentPropsWithRef<'article'> {
   onVersionChange?: ((version: number, request: ChangeRequest<number>) => void) | undefined;
   /** Asks to send the message again. `BubbleRetry` calls it. */
   onRetry?: ((request: MessageRetryRequest) => void) | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key, for
+   * this row and every part and bubble inside it.
+   */
+  messages?: PartialMessages<MessageMessages> | undefined;
   render?: RenderProp;
 }
 
@@ -156,7 +140,6 @@ export interface BubbleContextValue {
   setOverflowing: (value: boolean) => void;
   requestRevealed: (next: boolean, reason: MessageChangeReason, source: SyntheticEvent) => void;
   variant: BubbleVariant;
-  messages: MessageMessages;
 }
 
 export interface BubbleProps extends ComponentPropsWithRef<'div'> {
@@ -185,10 +168,8 @@ export interface BubbleQuoteProps extends ComponentPropsWithRef<'div'> {
   render?: RenderProp;
 }
 
-export interface BubbleTypingProps extends ComponentPropsWithRef<'span'> {
-  /** The accessible name. Falls back to the provider's `typing`. */
-  label?: string | undefined;
-}
+/** The accessible name is the `typing` message; a consumer's `aria-label` wins. */
+export type BubbleTypingProps = ComponentPropsWithRef<'span'>;
 
 export interface BubbleRetryProps extends ComponentPropsWithRef<'button'> {
   render?: RenderProp;

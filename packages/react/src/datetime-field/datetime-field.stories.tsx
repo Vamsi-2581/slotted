@@ -1,5 +1,6 @@
 import { plainDate, plainDateTime, plainTime } from '@slotted/core/date';
 import type { PlainDate, PlainTime } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -8,6 +9,7 @@ import { useRef, useState } from 'react';
 
 import { Button } from '../button';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { Icon } from '../icon';
 import { DateTimeField } from './datetime-field';
 import { DateTimeFieldDefaultsProvider } from './datetime-field-defaults';
@@ -267,8 +269,8 @@ export const Relative: Story = {
       >
         <DateTimeField
           aria-label="Pré-visualização"
-          durationLabel="Data e hora como duração a partir de agora"
           locale="pt-BR"
+          messages={{ duration: 'Data e hora como duração a partir de agora' }}
           referenceDateTime={REFERENCE}
         />
       </Scene>
@@ -575,9 +577,9 @@ export const Clear: Story = {
         <DateTimeField
           aria-label="Com valor"
           clearable
-          clearLabel="Limpar"
           defaultValue={CONSULTATION}
           locale="pt-BR"
+          messages={{ clear: 'Limpar' }}
         />
       </Scene>
       <Scene
@@ -737,16 +739,18 @@ export const Composition: Story = {
     <Grid columns={2}>
       <Scene
         label="Uma decisão, uma vez"
-        note="O provider fixa o locale, o relógio, o fuso e cada rótulo para tudo o que está por baixo. Um controlo que declare qualquer um deles continua a ganhar — é a segunda linha aqui."
+        note="O provider fixa o relógio e o fuso para tudo o que está por baixo, e o SlottedProvider a língua e cada rótulo. Um controlo que declare qualquer um deles continua a ganhar — é a segunda linha aqui."
       >
-        <DateTimeFieldDefaultsProvider hourCycle={24} locale="pt-BR" timeZone="America/Sao_Paulo">
-          <DateTimeField aria-label="Do provider" defaultValue={CONSULTATION} />
-          <DateTimeField
-            aria-label="Com locale próprio"
-            defaultValue={CONSULTATION}
-            locale="en-US"
-          />
-        </DateTimeFieldDefaultsProvider>
+        <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+          <DateTimeFieldDefaultsProvider hourCycle={24} timeZone="America/Sao_Paulo">
+            <DateTimeField aria-label="Do provider" clearable defaultValue={CONSULTATION} />
+            <DateTimeField
+              aria-label="Com locale próprio"
+              defaultValue={CONSULTATION}
+              locale="en-US"
+            />
+          </DateTimeFieldDefaultsProvider>
+        </SlottedProvider>
       </Scene>
       <Scene
         label="As acções que não se declaram"

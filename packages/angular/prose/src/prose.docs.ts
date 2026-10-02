@@ -242,18 +242,11 @@ export const ANGULAR_PROSE_DOCS = {
         'The space between blocks, from which every other distance derives — the gap above a heading, between list rows, and around a rule. tight is a chat message, loose an article',
       ],
       [
-        'scrollLabel',
-        'string',
-        'Scrollable content',
-        'provideProseDefaults',
-        'The last resort name of a scrolling block, used when neither labelledBy nor label names one. It is a provided default rather than a required input because a renderer’s component map cannot supply one per table',
-      ],
-      [
-        'label',
-        'string',
+        'messages',
+        'Partial<ProseMessages>',
         '—',
         'slProseScroll',
-        'Names the region once it becomes focusable. Loses to labelledBy, and wins over the provided scrollLabel',
+        'Words laid over the language in force: the last resort name of a scrolling block (scroll), used when neither labelledBy nor aria-label names one. It comes from the catalog rather than a required input because a renderer’s component map cannot supply one per table',
       ],
       [
         'labelledBy',
@@ -280,10 +273,10 @@ export const ANGULAR_PROSE_DOCS = {
       ],
       [
         'provideProseDefaults',
-        '{ size, flow, scrollLabel }',
+        '{ size, flow }',
         '—',
         'a route or the application',
-        'Sets all three once for every region under it — Typeset’s presets, typed. An explicit input on one region still wins, and providing again on a route narrows the decision for part of an application',
+        'Sets both once for every region under it — Typeset’s presets, typed. An explicit input on one region still wins, and providing again on a route narrows the decision for part of an application',
       ],
       [
         'role, aria-label',
@@ -329,7 +322,7 @@ export const ANGULAR_PROSE_DOCS = {
         language: 'ts',
         label: 'Setting the reading rhythm once for an application',
         source:
-          "import { provideProseDefaults } from '@slotted/angular/prose';\n\nbootstrapApplication(App, {\n  providers: [provideProseDefaults({ flow: 'loose', scrollLabel: 'Região rolável' })],\n});",
+          "import { provideProseDefaults } from '@slotted/angular/prose';\n\nbootstrapApplication(App, {\n  providers: [provideProseDefaults({ flow: 'loose' })],\n});",
       }),
       defineSnippet({
         id: 'prose-theming',

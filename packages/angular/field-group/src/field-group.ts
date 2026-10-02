@@ -18,11 +18,12 @@ import {
 import type {
   FieldDefaults,
   FieldLabelPlacement,
-  FieldNecessityWords,
   FieldNecessity,
   FieldSize,
 } from '@slotted/angular/field';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlInlineMessage } from '@slotted/angular/inline-message';
+import { fieldMessages, type FieldMessages, type PartialMessages } from '@slotted/core/i18n';
 
 import { SlFieldGroupDescription, SlFieldGroupError } from './field-group-parts';
 
@@ -119,10 +120,12 @@ export class SlFieldGroup extends SlFieldDefaultsSource {
   readonly orientation = input<FieldGroupOrientation>('vertical');
   /** Provided to every field inside. Defaults to the token, then to `mark`. */
   readonly necessity = input<FieldNecessity | undefined>(undefined);
-  /** Provided to every field inside: the accessible name of its help controls. */
-  readonly helpLabel = input<string | undefined>(undefined);
-  /** Merged over the token's pair, and provided to every field inside. */
-  readonly necessityWords = input<Partial<FieldNecessityWords> | undefined>(undefined);
+  /**
+   * Words laid over the field catalog of the language in force for the
+   * legend's own necessity word (`optional`, `required`). A field inside
+   * states its own `messages`.
+   */
+  readonly messages = input<PartialMessages<FieldMessages> | undefined>(undefined);
   /** Provided to every field inside, unless the field states its own. */
   readonly labelPlacement = input<FieldLabelPlacement | undefined>(undefined);
 
@@ -179,10 +182,8 @@ export class SlFieldGroup extends SlFieldDefaultsSource {
 
   readonly resolvedSize = computed(() => this.size() ?? this.inherited().size);
   readonly resolvedNecessity = computed(() => this.necessity() ?? this.inherited().necessity);
-  readonly resolvedWords = computed<FieldNecessityWords>(() => ({
-    ...this.inherited().necessityWords,
-    ...this.necessityWords(),
-  }));
+  /** The field family's words in the language in force, with the group's `messages` laid over them. */
+  readonly t = injectMessages(fieldMessages, this.messages);
 
   /**
    * One step louder than a field's own. `inline-message` defines `md` as the
@@ -214,10 +215,8 @@ export class SlFieldGroup extends SlFieldDefaultsSource {
   fieldDefaults(): FieldDefaults {
     return {
       disabled: this.disabled() ?? this.inherited().disabled,
-      helpLabel: this.helpLabel() ?? this.inherited().helpLabel,
       labelPlacement: this.labelPlacement() ?? this.inherited().labelPlacement,
       necessity: this.resolvedNecessity(),
-      necessityWords: this.resolvedWords(),
       readOnly: this.readOnly() ?? this.inherited().readOnly,
       size: this.resolvedSize(),
     };

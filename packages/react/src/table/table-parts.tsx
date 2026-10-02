@@ -385,7 +385,7 @@ export function TableSelect({
       ref={ref}
     >
       <Checkbox
-        aria-label={`${table.labels.selectRow}${key === undefined ? '' : ` ${key}`}`}
+        aria-label={table.t('selectRow', { row: key ?? '' }).trim()}
         checked={key !== undefined && table.isSelected(key)}
         disabled={row.disabled}
         onCheckedChange={(_checked, request) => {
@@ -427,7 +427,7 @@ export function TableSelectAll({
       scope="col"
     >
       <Checkbox
-        aria-label={`${table.labels.selectAll}${selected === 0 ? '' : ` (${selected} selected)`}`}
+        aria-label={table.t('selectAll', { count: selected })}
         checked={selected > 0 && selected === table.rows().length}
         indeterminate={selected > 0 && selected < table.rows().length}
         onCheckedChange={(_checked, request) => table.toggleSelectAll(request.source)}
@@ -457,7 +457,7 @@ export function TableExpander({ onClick, ref, value, ...nativeProps }: TableExpa
       {...nativeProps}
       aria-controls={row.detailId}
       aria-expanded={open}
-      aria-label={nativeProps['aria-label'] ?? (open ? table.labels.collapse : table.labels.expand)}
+      aria-label={nativeProps['aria-label'] ?? (open ? table.t('collapse') : table.t('expand'))}
       /* The chevron is drawn unless the consumer wrote content of their own. */
       children={
         nativeProps.children ?? (

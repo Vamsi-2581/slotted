@@ -39,7 +39,6 @@ import { Text } from '../typography';
 import { TextField } from '../text-field';
 import { createToaster, ToasterProvider, ToastRegion } from '../toast';
 import { DataGrid } from './data-grid';
-import { DataGridDefaultsProvider } from './data-grid-defaults';
 import { usePersistedGridView } from './use-persisted-grid-view';
 import { REACT_DATA_GRID_DOCS, REACT_DATA_GRID_TOKENS } from './data-grid.docs';
 import type {
@@ -192,6 +191,9 @@ const withStatusBadges = {
 
 /* ── Scaffolding ───────────────────────────────────────────────────────── */
 
+/** What the stories' mock server writes for a boolean when it searches: its own words, not the grid's. */
+const SERVER_BOOLEANS = { true: 'Yes', false: 'No' };
+
 const Scene = ({ children, label, note }: { children: ReactNode; label: string; note: string }) => (
   <section className="slotted-demo-scene">
     <header className="slotted-demo-scene__header">
@@ -237,7 +239,7 @@ const Shipments = (props: Partial<DataGridProps<Shipment>>) => (
     cellRenderers={withStatusBadges}
     columns={columns}
     height="100%"
-    label="Shipments"
+    aria-label="Shipments"
     rowKey="id"
     rows={FIFTY}
     variant="framed"
@@ -1002,7 +1004,10 @@ function useShipmentServer(size: number) {
         setPending(false);
         return;
       }
-      const applied = applyQuery(TEN_THOUSAND, columns, query, { rowKey: (row) => row.id });
+      const applied = applyQuery(TEN_THOUSAND, columns, query, {
+        rowKey: (row) => row.id,
+        booleans: SERVER_BOOLEANS,
+      });
       setPage({
         rows: applied.nodes.flatMap((node) => (node.kind === 'row' ? [node.row] : [])),
         total: applied.total,
@@ -1056,7 +1061,10 @@ const shipmentSource: DataGridDataSource<Shipment> = {
     if (query.search.trim().toLowerCase() === 'fail')
       throw new Error('The shipments service timed out');
     const { applyQuery } = await import('@slotted/core/grid');
-    const applied = applyQuery(TEN_THOUSAND, columns, query, { rowKey: (row) => row.id });
+    const applied = applyQuery(TEN_THOUSAND, columns, query, {
+      rowKey: (row) => row.id,
+      booleans: SERVER_BOOLEANS,
+    });
     return {
       rows: applied.nodes.flatMap((node) => (node.kind === 'row' ? [node.row] : [])),
       total: applied.total,
@@ -1627,7 +1635,7 @@ const TreeDemo = () => {
         defaultCurrent={{ row: 'pt', column: 'name' }}
         defaultExpanded={['es']}
         height="100%"
-        label="Sites"
+        aria-label="Sites"
         onLoadChildren={({ key }) => {
           setLoads((count) => count + 1);
           setTimeout(() => setRows((current) => [...current, ...PORTO_ZONES]), 700);
@@ -1831,24 +1839,25 @@ export const Keyboard: Story = { parameters: scenario('keyboard'), render: () =>
 export const Accessibility: Story = {
   parameters: scenario('accessibility'),
   render: () => (
-    <DataGridDefaultsProvider
-      labels={{ selectAllFiltered: 'Select all {count} shipments', grid: 'Shipments' }}
-    >
-      <Screen size="tall">
-        <Shipments
-          defaultQuery={{
-            ...emptyQuery(),
-            sort: [
-              { column: 'carrier', direction: 'ascending' },
-              { column: 'cost', direction: 'descending' },
-            ],
-          }}
-          defaultValue={['SHP-20482']}
-          label={undefined}
-          rows={FIFTY.slice(0, 8)}
-          selectionMode="multiple"
-        />
-      </Screen>
-    </DataGridDefaultsProvider>
+    <Screen size="tall">
+      <Shipments
+        aria-label={undefined}
+        defaultQuery={{
+          ...emptyQuery(),
+          sort: [
+            { column: 'carrier', direction: 'ascending' },
+            { column: 'cost', direction: 'descending' },
+          ],
+        }}
+        defaultValue={['SHP-20482']}
+        messages={{
+          grid: 'Shipments',
+          selectAllFiltered:
+            '{count, plural, one {Select the # shipment} other {Select all # shipments}}',
+        }}
+        rows={FIFTY.slice(0, 8)}
+        selectionMode="multiple"
+      />
+    </Screen>
   ),
 };

@@ -42,18 +42,19 @@ const anatomy: AnatomyRow[] = [
     required: true,
     purpose: 'The title and the summary on one line.',
   },
-  { part: 'title', element: 'h2', required: true, purpose: 'labels.title; names the root.' },
+  { part: 'title', element: 'h2', required: true, purpose: 'messages.title; names the root.' },
   {
     part: 'summary',
     element: 'span',
     required: true,
-    purpose: 'labels.visibleCount — “7 of 9 shown”, in tabular figures.',
+    purpose: 'messages.visibleCount — “7 of 9 shown”, in tabular figures.',
   },
   {
     part: 'search',
     element: 'div around a TextField',
     required: true,
-    purpose: 'type="search" at size sm, named by labels.search; filters by label and description.',
+    purpose:
+      'type="search" at size sm, named by messages.search; filters by label and description.',
   },
   {
     part: 'list',
@@ -115,7 +116,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button, a MenuTrigger',
     required: false,
     purpose:
-      'Opens Pin to start, Pin to end and Unpin. Named labels.pin; data-pinned and the accent ink while the column is pinned.',
+      'Opens Pin to start, Pin to end and Unpin. Named messages.pin; data-pinned and the accent ink while the column is pinned.',
   },
   {
     part: 'drop-indicator',
@@ -129,7 +130,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'role="status" with labels.noResults in place of the sections when the search finds nothing.',
+      'role="status" with messages.noResults in place of the sections when the search finds nothing.',
   },
   {
     part: 'footer',
@@ -400,11 +401,9 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'column-manager-react-accessibility',
       language: 'tsx',
       label: 'Words for another language',
-      source: `<ColumnManagerProvider
-  labels={{ title: 'Colunas', moved: '{column} movida para a posição {position}' }}
->
+      source: `<SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
   <App />
-</ColumnManagerProvider>;`,
+</SlottedProvider>;`,
     }),
   },
 ];
@@ -492,11 +491,11 @@ export const REACT_COLUMN_MANAGER_DOCS = {
         'Whether an uncontrolled layer starts open, read once',
       ],
       [
-        'labels',
-        'Partial<ColumnManagerLabels>',
-        'English',
-        'ColumnManager, ColumnManagerProvider',
-        'title, search, noResults, showAll, reset, apply, cancel, pinnedStart, unpinned, pinnedEnd, pin, pinStart, pinEnd, unpin, reorder, moved, required, hiddenBySpace, inRow, hiddenCountOne, hiddenCountOther, visibleCount; {slot}s are filled',
+        'messages',
+        'Partial<ColumnManagerMessages>',
+        '—',
+        'ColumnManager',
+        'Words laid over the language in force, key by key: title, search, noResults, showAll, reset, apply, cancel, pinnedStart, unpinned, pinnedEnd, pin, pinStart, pinEnd, unpin, reorder, moved, required, hiddenBySpace, inRow, hiddenCount, visibleCount',
       ],
       [
         'ref',
@@ -535,10 +534,10 @@ export const REACT_COLUMN_MANAGER_DOCS = {
       ],
       [
         'ColumnManagerProvider',
-        '{ presentation, apply, labels }',
+        '{ presentation, apply }',
         '—',
         'a subtree',
-        'The decisions an application takes once. A manager that states any of them itself still wins',
+        'The decisions an application takes once. A manager that states either itself still wins; the words come from the language in force (SlottedProvider)',
       ],
     ]),
     accessibility: [

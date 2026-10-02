@@ -337,16 +337,6 @@ export function entityInitials(entity: Pick<Entity, 'label' | 'avatar'>): string
   return letter(first) + (last === undefined ? '' : letter(last));
 }
 
-/** Fills `{name}` placeholders from `values`. */
-export function formatEntityLabel(
-  template: string,
-  values: Readonly<Record<string, string | number>>,
-): string {
-  return template.replace(/\{(\w+)\}/g, (match, name: string) =>
-    name in values ? String(values[name]) : match,
-  );
-}
-
 // ── Recent ──────────────────────────────────────────────────────────────────
 
 /**

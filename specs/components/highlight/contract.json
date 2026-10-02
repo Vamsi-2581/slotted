@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "highlight",
   "ui": "highlight",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Marks matches of a query inside text."
+  },
   "axes": {
     "occurrences": ["all", "first"],
     "sensitivity": ["base", "accent", "case", "variant"]

@@ -12,11 +12,12 @@ import {
   Renderer2,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import { linkMessages, type LinkMessages, type PartialMessages } from '@slotted/core/i18n';
 
 import { injectLinkDefaults } from './link-defaults';
 import {
-  LINK_DEFAULT_EXTERNAL_HINT,
   LINK_DEFAULT_UNDERLINE,
   LINK_DEFAULT_VARIANT,
   type LinkUnderline,
@@ -77,7 +78,11 @@ import {
 export class SlLink {
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly external = input(false, { transform: booleanAttribute });
-  readonly externalHint = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force: the warning a link
+   * to a new tab announces (`externalHint`).
+   */
+  readonly messages = input<PartialMessages<LinkMessages> | undefined>(undefined);
   readonly underline = input<LinkUnderline | undefined>(undefined);
   readonly variant = input<LinkVariant | undefined>(undefined);
   readonly visited = input<boolean | undefined, boolean | string | undefined>(undefined, {
@@ -85,6 +90,8 @@ export class SlLink {
   });
 
   private readonly defaults = injectLinkDefaults();
+  /** The family's words in the language in force, with this link's `messages` laid over them. */
+  readonly t = injectMessages(linkMessages, this.messages);
   private readonly element = inject(ElementRef<HTMLAnchorElement>).nativeElement;
   private readonly renderer = inject(Renderer2);
 
@@ -113,9 +120,7 @@ export class SlLink {
    * the consumer already pointed at a new tab has stated the same thing.
    */
   readonly newTab = computed(() => this.external() || this.ownTarget === '_blank');
-  readonly hint = computed(
-    () => ` ${this.externalHint() ?? this.defaults.externalHint ?? LINK_DEFAULT_EXTERNAL_HINT}`,
-  );
+  readonly hint = computed(() => ` ${this.t('externalHint')}`);
 
   /**
    * A disabled link keeps its place in the tab sequence: without an `href` the

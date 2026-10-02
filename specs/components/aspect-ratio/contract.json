@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "aspect-ratio",
   "ui": "aspect-ratio",
+  "catalog": {
+    "group": "Layout",
+    "summary": "Box that keeps its content at a fixed ratio."
+  },
   "namedRatios": {
     "square": [1, 1],
     "landscape": [4, 3],

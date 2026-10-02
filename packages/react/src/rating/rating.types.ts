@@ -1,3 +1,4 @@
+import type { PartialMessages, RatingMessages } from '@slotted/core/i18n';
 import type { RatingInsight, RatingInsightThresholds } from '@slotted/core/rating';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
@@ -32,51 +33,13 @@ export type RatingChangeRequest = ChangeRequest<number | null>;
 /** The request the summary emits when a level is pressed. */
 export type RatingLevelsChangeRequest = ChangeRequest<readonly number[]>;
 
-/**
- * Every string the family writes. Each is a template: `{value}`, `{max}`,
- * `{count}`, `{level}`, `{share}`, `{margin}`, `{low}` and `{high}` are
- * replaced by numbers in the locale's digits.
- */
-export interface RatingMessages {
-  /** The accessible name of each radio. */
-  itemLabel: string;
-  /** The accessible name of a display without a count. */
-  displayLabel: string;
-  /** The accessible name of a display with a count. */
-  displayLabelWithCount: string;
-  /** The scale beside the summary's figure. */
-  scale: string;
-  /** The summary's count, in the `bars` variant. */
-  summaryCount: string;
-  /** The summary's count when nothing has been rated. */
-  summaryEmpty: string;
-  /** The spectrum's count, with the margin of the mean. */
-  spectrumCount: string;
-  /** The spectrum's count when the margin is at least half a star. */
-  spectrumUncertain: string;
-  /** The accessible name of one level or column. */
-  levelLabel: string;
-  /** The accessible name of the list of levels. */
-  distributionLabel: string;
-  positive: string;
-  neutral: string;
-  negative: string;
-  divided: string;
-  few: string;
-  consensus: string;
-  mixed: string;
-}
-
 /** What an application sets once for every rating under it. */
 export interface RatingDefaults {
   size: RatingSize;
   tone: RatingTone;
   max: number;
   clearable: boolean;
-  messages: RatingMessages;
   insightThresholds: RatingInsightThresholds;
-  /** The locale numbers are written in. Unset, the runtime's own. */
-  locale: string | undefined;
 }
 
 export interface RatingProviderProps {
@@ -85,11 +48,8 @@ export interface RatingProviderProps {
   tone?: RatingTone | undefined;
   max?: number | undefined;
   clearable?: boolean | undefined;
-  /** Merged over the inherited messages, key by key. */
-  messages?: Partial<RatingMessages> | undefined;
   /** Merged over the inherited thresholds, key by key. */
   insightThresholds?: Partial<RatingInsightThresholds> | undefined;
-  locale?: string | undefined;
 }
 
 /** What `renderSymbol` receives for each symbol. */
@@ -150,12 +110,12 @@ export interface RatingProps extends Omit<
   handle?: Ref<RatingHandle> | undefined;
   /** Unstated rather than `false`. Writes `aria-invalid` and `data-invalid`. */
   invalid?: boolean | undefined;
-  /** The locale numbers are written in. Unstated, the provider's, then the runtime's. */
+  /** The locale numbers are written in. Unstated, the language in force. */
   locale?: string | undefined;
   /** How many symbols. Unstated, the provider's, then 5. */
   max?: number | undefined;
-  /** Merged over the provider's messages, key by key. */
-  messages?: Partial<RatingMessages> | undefined;
+  /** Words laid over the catalog of the language in force, key by key. */
+  messages?: PartialMessages<RatingMessages> | undefined;
   /** The submission name the radios share. Generated when it is not written. */
   name?: string | undefined;
   /** The value under the pointer, or `null` when the pointer leaves. Changes nothing. */
@@ -188,7 +148,8 @@ export interface RatingDisplayProps extends Omit<ComponentPropsWithRef<'div'>, '
   locale?: string | undefined;
   /** How many symbols the scale has. Unstated, the provider's, then 5. */
   max?: number | undefined;
-  messages?: Partial<RatingMessages> | undefined;
+  /** Words laid over the catalog of the language in force, key by key. */
+  messages?: PartialMessages<RatingMessages> | undefined;
   /** Renders the root into another element. */
   render?: ((props: RatingRootProps) => ReactNode) | undefined;
   /** Replaces the star drawn in each symbol and in its fill. */
@@ -215,7 +176,8 @@ export interface RatingSummaryProps extends Omit<ComponentPropsWithRef<'section'
   locale?: string | undefined;
   /** How many levels the scale has. Unstated, the provider's, then 5. */
   max?: number | undefined;
-  messages?: Partial<RatingMessages> | undefined;
+  /** Words laid over the catalog of the language in force, key by key. */
+  messages?: PartialMessages<RatingMessages> | undefined;
   /** Called before the pressed levels move, with the request that carries the reason. */
   onSelectedLevelsChange?:
     ((levels: readonly number[], request: RatingLevelsChangeRequest) => void) | undefined;

@@ -135,6 +135,39 @@ describe('buildChartOption', () => {
   });
 });
 
+describe('the category axis labels', () => {
+  const labelsAt = (categories: string[], width: number) => {
+    const model = createChartModel({
+      x: { field: 'k' },
+      data: categories.map((k, index) => ({ k, v: 1000 + index * 37 })),
+      series: [{ kind: 'bar', field: 'v' }],
+    });
+    const { option } = buildChartOption({ model, theme }, width);
+    return (option['xAxis'] as { axisLabel: Record<string, unknown> }[])[0]!.axisLabel;
+  };
+
+  it('thins thirty dates the plot cannot hold, rather than cutting each one', () => {
+    const days = Array.from({ length: 30 }, (_, i) => `09-${String(i + 1).padStart(2, '0')}`);
+    const label = labelsAt(days, 800);
+    expect(label['interval']).toBeUndefined();
+    expect(label['width']).toBeUndefined();
+    expect(label['overflow']).toBeUndefined();
+    expect(label['hideOverlap']).toBe(true);
+  });
+
+  it('keeps every label when each one fits its band', () => {
+    const label = labelsAt(['Jan', 'Feb', 'Mar', 'Apr'], 800);
+    expect(label['interval']).toBe(0);
+  });
+
+  it('measures the band on the plot, so long names in a narrow card do not touch', () => {
+    const label = labelsAt(['Web store', 'Mobile app', 'Marketplace', 'Wholesale'], 330);
+    expect(label['interval']).toBeUndefined();
+    expect(label['width']).toBeUndefined();
+    expect(label['hideOverlap']).toBe(true);
+  });
+});
+
 /**
  * The option is also held against ECharts itself: rendered to an SVG string
  * in node, through the same chunks the browser loads. An option ECharts

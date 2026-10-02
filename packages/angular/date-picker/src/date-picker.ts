@@ -25,7 +25,13 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import type { OnInit } from '@angular/core';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  datePickerMessages,
+  type DatePickerMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { SlCalendar, asDates } from '@slotted/angular/calendar';
 import type { CalendarSelectionMode, CalendarValue, CalendarView } from '@slotted/angular/calendar';
 import { SlDateField, SlDateFieldEnd } from '@slotted/angular/date-field';
@@ -192,6 +198,7 @@ export class SlDatePicker implements OnInit {
    */
   readonly fixedWeeks = input(true, { transform: booleanAttribute });
 
+  /** BCP 47. Writes the field, the grid and the trigger's date. Unset, the language in force decides. */
   readonly locale = input<string | undefined>(undefined);
   readonly timeZone = input<string | undefined>(undefined);
   readonly calendar = input<DatePickerCalendar | undefined>(undefined);
@@ -216,8 +223,11 @@ export class SlDatePicker implements OnInit {
 
   readonly clearable = input(false, { transform: booleanAttribute });
   readonly name = input<string | undefined>(undefined);
-  readonly chooseLabel = input<string | undefined>(undefined);
-  readonly changeLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * trigger's name before (`choose`) and after (`change`) a date is chosen.
+   */
+  readonly messages = input<PartialMessages<DatePickerMessages> | undefined>(undefined);
 
   readonly valueChange = output<ChangeRequest<CalendarValue>>();
   readonly openChange = output<ChangeRequest<boolean>>();
@@ -228,6 +238,9 @@ export class SlDatePicker implements OnInit {
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly defaults = injectDatePickerDefaults();
+  private readonly appLocale = injectLocale();
+  /** The family's words in the language in force, with this picker's `messages` laid over them. */
+  readonly t = injectMessages(datePickerMessages, this.messages);
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   private readonly enclosing = inject(SlField, { optional: true });
@@ -246,7 +259,7 @@ export class SlDatePicker implements OnInit {
   protected readonly isOpen = computed(() => this.open() ?? this.ownOpen());
   protected readonly held = computed(() => this.value() ?? this.ownValue());
 
-  protected readonly resolvedLocale = computed(() => this.locale() ?? this.defaults.locale);
+  protected readonly resolvedLocale = computed(() => this.locale() ?? this.appLocale());
   protected readonly resolvedTimeZone = computed(() => this.timeZone() ?? this.defaults.timeZone);
   protected readonly resolvedCalendar = computed(() => this.calendar() ?? this.defaults.calendar);
   protected readonly resolvedSize = computed(
@@ -297,10 +310,9 @@ export class SlDatePicker implements OnInit {
    */
   protected readonly triggerLabel = computed(() => {
     const chosen = asDates(this.held());
-    if (chosen.length === 0) return this.chooseLabel() ?? this.defaults.chooseLabel;
+    if (chosen.length === 0) return this.t('choose');
     const format = createDateFormat({ locale: this.resolvedLocale() });
-    const change = this.changeLabel() ?? this.defaults.changeLabel;
-    return `${change}, ${chosen.map((date) => format.describe(date)).join(' – ')}`;
+    return this.t('change', { date: chosen.map((date) => format.describe(date)).join(' – ') });
   });
 
   private readonly closesOnSelect = computed(() => {

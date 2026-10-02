@@ -21,7 +21,7 @@ A top-level directory holds one type of content, and a path names what it is.
 | ----------- | ----------------------------------------------------------------------------------------------- |
 | `packages/` | Published packages only. A theme is `packages/theme-<name>`; its manifest name matches.         |
 | `tools/`    | Workspace packages that are never published: the visual harness, the Storybook workbench.       |
-| `apps/`     | The two Storybook workbenches.                                                                  |
+| `apps/`     | The two Storybook workbenches and the documentation site (`apps/docs`).                         |
 | `demos/`    | Consumer applications, one directory per product: `demos/<product>/{<binding>,backend,domain}`. |
 | `specs/`    | The public contract of each family and the test that verifies it.                               |
 | `scripts/`  | Repository scripts, flat, named by verb (`verify-`, `pack-`, `generate-`).                      |

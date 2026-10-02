@@ -121,7 +121,7 @@ export class SlMultiSelectItem {
   readonly ranges = computed(() => {
     const query = this.multiSelect.query();
     if (!this.multiSelect.resolvedHighlightMatch() || query === '') return [];
-    return matchRanges(this.label(), query, { locale: this.multiSelect.locale() });
+    return matchRanges(this.label(), query, { locale: this.multiSelect.resolvedLocale() });
   });
 
   constructor() {

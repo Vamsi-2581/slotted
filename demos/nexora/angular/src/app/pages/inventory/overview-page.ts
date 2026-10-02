@@ -519,7 +519,7 @@ const FIGURES: readonly {
                       </tr>
                     </tbody>
                   } @else {
-                    <tbody slTableBody slSkeletonRegion label="Reading the positions">
+                    <tbody slTableBody slSkeletonRegion [messages]="{ label: 'Reading the positions' }">
                       @for (row of placeholderRows; track row) {
                         <tr slTableRow>
                           <th slTableRowHeader>
@@ -663,7 +663,7 @@ const FIGURES: readonly {
                       </tbody>
                     }
                   } @else {
-                    <tbody slTableBody slSkeletonRegion label="Reading the transfers">
+                    <tbody slTableBody slSkeletonRegion [messages]="{ label: 'Reading the transfers' }">
                       <tr slTableRow>
                         <th slTableRowHeader>
                           <span slSkeleton shape="text" inlineSize="70%"></span>
@@ -776,7 +776,7 @@ const FIGURES: readonly {
                       }
                     </tbody>
                   } @else {
-                    <tbody slTableBody slSkeletonRegion label="Reading the movements">
+                    <tbody slTableBody slSkeletonRegion [messages]="{ label: 'Reading the movements' }">
                       @for (row of placeholderRows; track row) {
                         <tr slTableRow>
                           <th slTableRowHeader>

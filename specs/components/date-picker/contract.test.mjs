@@ -72,7 +72,7 @@ test('carries the same dialog role the surveyed field and the APG carry', () => 
  * accessibility feature of its own example.
  */
 test('puts the chosen date in the name focus returns to', () => {
-  assert.equal(contract.triggerName.empty, 'chooseLabel');
+  assert.match(contract.triggerName.empty, /choose message/);
   assert.match(contract.triggerName.chosen, /whole date in words/);
   assert.match(contract.triggerName.why, /Focus returns/);
 });

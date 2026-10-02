@@ -1,3 +1,4 @@
+import type { AttachmentMessages, FamilyTranslator, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeReason } from '@slotted/core/state';
 import type { FileKind } from '@slotted/core/upload';
 import type {
@@ -43,11 +44,7 @@ export interface AttachmentRemoveRequest {
 /** What an application sets once for every attachment under it. */
 export interface AttachmentDefaults {
   layout: AttachmentLayout;
-  /** BCP 47, for the size the detail line writes. Absent, the runtime's own. */
-  locale: string | undefined;
   orientation: AttachmentOrientation;
-  /** The word the remove control says before the file name. */
-  removeLabel: string;
   size: AttachmentSize;
 }
 
@@ -64,7 +61,8 @@ export interface AttachmentContextValue {
   invalid: boolean;
   kind: FileKind;
   loading: boolean;
-  locale: string | undefined;
+  /** The language in force, which writes the size the detail line shows. */
+  locale: string;
   /**
    * Records the id a describing part carries while it is on the page — the
    * page's own when it passed one — so the trigger names only what exists.
@@ -73,9 +71,10 @@ export interface AttachmentContextValue {
   described: { detail: string | null; message: string | null };
   orientation: AttachmentOrientation;
   removable: boolean;
-  removeLabel: string;
   request: (reason: AttachmentRemoveReason, source: SyntheticEvent) => void;
   stem: string;
+  /** The family's words in the language in force, with this attachment's `messages` laid over them. */
+  t: FamilyTranslator<AttachmentMessages>;
 }
 
 export interface AttachmentRootProps extends HTMLAttributes<HTMLElement> {
@@ -116,8 +115,12 @@ export interface AttachmentProps extends ComponentPropsWithRef<'li'> {
    * `Delete` answer.
    */
   onRemove?: ((request: AttachmentRemoveRequest) => void) | undefined;
-  /** The word the remove control says before the file name. Falls back to the provider. */
-  removeLabel?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * remove control's name (`remove`, with the file's `{name}`) and the tile's
+   * word for a file without an extension.
+   */
+  messages?: PartialMessages<AttachmentMessages> | undefined;
   render?: ((props: AttachmentRootProps) => ReactNode) | undefined;
 }
 

@@ -8,13 +8,11 @@ import type { ProseDefaults, ProseDefaultsProviderProps } from './prose.types';
  * documentation rhythm, which is the case a region of rendered Markdown is in
  * unless the application says otherwise.
  *
- * The scrolling region's name is a default rather than a required prop because
- * a renderer's component map cannot supply one per table. An application with
- * a locale of its own replaces it here, once.
+ * The scrolling region's name comes from the catalog rather than a required
+ * prop because a renderer's component map cannot supply one per table.
  */
 const FALLBACK: ProseDefaults = {
   flow: 'normal',
-  scrollLabel: 'Scrollable content',
   size: 'lg',
 };
 
@@ -38,7 +36,6 @@ export function ProseDefaultsProvider({ children, ...defaults }: ProseDefaultsPr
     <ProseDefaultsContext.Provider
       value={{
         flow: defaults.flow ?? inherited.flow,
-        scrollLabel: defaults.scrollLabel ?? inherited.scrollLabel,
         size: defaults.size ?? inherited.size,
       }}
     >

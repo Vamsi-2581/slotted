@@ -285,7 +285,7 @@ import { leaveForm } from './leave-form';
                           type="button"
                           data-testid="mark-ready"
                           [loading]="store.busy() === 'ready'"
-                          loadingLabel="Marking ready"
+                          [messages]="{ loading: 'Marking ready' }"
                           (click)="markReady()"
                         >
                           Mark ready
@@ -299,7 +299,7 @@ import { leaveForm } from './leave-form';
                           type="button"
                           data-testid="ship"
                           [loading]="store.busy() === 'ship'"
-                          loadingLabel="Shipping"
+                          [messages]="{ loading: 'Shipping' }"
                           (click)="ship()"
                         >
                           Ship
@@ -417,7 +417,7 @@ import { leaveForm } from './leave-form';
                 </div>
               </section>
             } @else {
-              <div slSkeletonRegion label="Reading the transfer" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the transfer' }" [loading]="true">
                 <div slStack [gap]="6">
                   <div slGrid [columns]="phone() ? 2 : 4" minItemWidth="xs" [gap]="4">
                     @for (figure of figureLabels; track figure) {
@@ -472,7 +472,7 @@ import { leaveForm } from './leave-form';
                   <form
                     slForm
                     data-testid="receive-form"
-                    summaryTitle="Nothing was received"
+                    [messages]="{ summaryTitle: 'Nothing was received' }"
                     [errors]="store.receiptErrors()"
                     (errorsChange)="store.receiptErrors.set($event.value)"
                     [loading]="store.busy() === 'receive'"
@@ -590,7 +590,7 @@ import { leaveForm } from './leave-form';
                         type="submit"
                         data-testid="receive-submit"
                         [loading]="store.busy() === 'receive'"
-                        loadingLabel="Receiving"
+                        [messages]="{ loading: 'Receiving' }"
                       >
                         Receive
                       </button>

@@ -238,6 +238,16 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
     combobox.setOpen(true, 'keyboard');
   };
 
+  /* A press on the input opens a closed popup and never closes an open one,
+     because the same press places the caret. Under `focus` the press has
+     already opened it through focus, so this finds it open. */
+  const onClick = (event: MouseEvent<HTMLInputElement>) => {
+    if (combobox.openOn === 'manual' || combobox.open) return;
+    if (combobox.disabled || combobox.readOnly) return;
+    combobox.entry.current = 'selected';
+    combobox.setOpen(true, 'pointer', event.nativeEvent);
+  };
+
   const onBlur = (event: { relatedTarget: EventTarget | null }) => {
     const next = event.relatedTarget;
     if (next instanceof Node && combobox.contentNode?.contains(next) === true) return;
@@ -314,6 +324,7 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
         id={nativeProps.id ?? field?.ids.control ?? combobox.inputId}
         onBlur={compose(nativeProps.onBlur, onBlur)}
         onChange={compose(nativeProps.onChange, onChange)}
+        onClick={compose(nativeProps.onClick, onClick)}
         onFocus={compose(nativeProps.onFocus, onFocus)}
         onKeyDown={compose(nativeProps.onKeyDown, onKeyDown)}
         readOnly={combobox.readOnly}
@@ -324,14 +335,14 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
         value={combobox.completion ?? combobox.inputValue}
       />
       {showClear ? (
-        <button aria-label={combobox.clearLabel} data-part="clear" onClick={clear} type="button">
+        <button aria-label={combobox.t('clear')} data-part="clear" onClick={clear} type="button">
           <Icon>
             <Glyph name="x" />
           </Icon>
         </button>
       ) : null}
       <button
-        aria-label={combobox.triggerLabel}
+        aria-label={combobox.t('trigger')}
         data-part="trigger"
         disabled={combobox.disabled}
         onClick={toggle}
@@ -622,9 +633,9 @@ export function ComboboxContent({
 
   const message = (() => {
     if (statusMessage !== undefined) return statusMessage;
-    if (combobox.loading) return combobox.loadingLabel;
+    if (combobox.loading) return combobox.t('loading');
     if (count === 0) return null;
-    return combobox.countLabel.replace('{count}', String(count));
+    return combobox.t('count', { count });
   })();
 
   const element = (
@@ -677,11 +688,11 @@ export function ComboboxContent({
             role="option"
             {...(combobox.highlighted === combobox.query ? { 'data-current': '' } : {})}
           >
-            <span data-part="label">{combobox.createLabel.replace('{query}', combobox.query)}</span>
+            <span data-part="label">{combobox.t('create', { query: combobox.query })}</span>
           </div>
         ) : null}
         {!combobox.loading && count === 0 && !(combobox.canCreate && combobox.query !== '') ? (
-          <div data-part="empty">{empty ?? combobox.emptyLabel}</div>
+          <div data-part="empty">{empty ?? combobox.t('empty')}</div>
         ) : null}
         {combobox.loading ? (
           /*

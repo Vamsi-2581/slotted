@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SlTagsInput } from './tags-input';
@@ -103,7 +105,7 @@ describe('SlTagsInput', () => {
     expect(field().hasAttribute('role')).toBe(false);
     expect(field().hasAttribute('aria-expanded')).toBe(false);
     expect(document.querySelector("[data-part='control']")?.getAttribute('aria-label')).toBe(
-      'To, 1 values',
+      'To, 1 value',
     );
     expect(document.querySelector("[data-part='chips']")?.getAttribute('role')).toBe('row');
     for (const chip of chips()) expect(chip.getAttribute('tabindex')).toBe('-1');
@@ -339,19 +341,34 @@ describe('SlTagsInput', () => {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [Host],
-      providers: [provideTagsInputDefaults({ delimiters: [';'], removeLabel: 'Drop {label}' })],
+      providers: [provideTagsInputDefaults({ delimiters: [';'] })],
     }).compileComponents();
     const own = TestBed.createComponent(Host);
     own.componentInstance.defaultValue.set(['a']);
     await settle(own);
-    expect(document.querySelector("[data-part='remove']")?.getAttribute('aria-label')).toBe(
-      'Drop a',
-    );
     field().focus();
     type(own, 'b');
     press(field(), ';');
     await settle(own);
     expect(chipValues()).toEqual(['a', 'b']);
+  });
+
+  it('speaks the language in force, and follows a change of it in place', async () => {
+    TestBed.resetTestingModule();
+    const locale = signal('pt-BR');
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    }).compileComponents();
+    const own = TestBed.createComponent(Host);
+    own.componentInstance.defaultValue.set(['a']);
+    await settle(own);
+    const remove = () => document.querySelector("[data-part='remove']")?.getAttribute('aria-label');
+    expect(remove()).toBe('Remover a');
+
+    locale.set('en-US');
+    await settle(own);
+    expect(remove()).toBe('Remove a');
   });
 
   it('belongs in a Reactive Form, and reports the values that failed by name', async () => {

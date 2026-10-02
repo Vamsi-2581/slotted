@@ -2,7 +2,6 @@ export { SlTour } from './tour';
 export { SL_TOUR } from './tour-context';
 export type { TourContext } from './tour-context';
 export {
-  DEFAULT_TOUR_LABELS,
   injectTourDefaults,
   provideTourDefaults,
   SlTourIdFactory,
@@ -13,7 +12,7 @@ export type {
   TourAlign,
   TourDefaults,
   TourFocusTarget,
-  TourLabels,
+  TourStepMessages,
   TourLayout,
   TourMissing,
   TourOpenReason,

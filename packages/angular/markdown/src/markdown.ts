@@ -32,6 +32,8 @@ import type {
   MarkdownUrlKind,
 } from '@slotted/core/markdown';
 import type { ChangeRequest } from '@slotted/core/state';
+import { injectMessages } from '@slotted/angular/i18n';
+import { markdownMessages, type MarkdownMessages, type PartialMessages } from '@slotted/core/i18n';
 import { SlAlert, SlAlertContent, SlAlertDescription, SlAlertTitle } from '@slotted/angular/alert';
 import { SlButton } from '@slotted/angular/button';
 import { SlCheckbox } from '@slotted/angular/checkbox';
@@ -53,12 +55,7 @@ import {
 } from '@slotted/angular/skeleton';
 import { SlVisuallyHidden } from '@slotted/angular/visually-hidden';
 
-import {
-  injectMarkdownDefaults,
-  MARKDOWN_LABELS,
-  type MarkdownExternal,
-  type MarkdownLabels,
-} from './markdown-defaults';
+import { injectMarkdownDefaults, type MarkdownExternal } from './markdown-defaults';
 
 /** Whether the source arrived. `loading` is separate, because a refresh keeps what is on screen. */
 export type MarkdownStatus = 'ready' | 'error';
@@ -115,7 +112,7 @@ export class SlMarkdownNode {
   }
 }
 
-/** The empty part's content, projected in place of `labels.empty`. */
+/** The empty part's content, projected in place of `messages.empty`. */
 @Directive({ selector: '[slMarkdownEmpty]', standalone: true })
 export class SlMarkdownEmpty {}
 
@@ -182,7 +179,7 @@ const KINDS = new Set<string>([
   template: `
     @if (status() === 'error') {
       <div data-part="error">
-        <p slInlineMessage tone="danger">{{ resolvedLabels().error }}</p>
+        <p slInlineMessage tone="danger">{{ t('error') }}</p>
         @if (retryable()) {
           <button
             slButton
@@ -192,12 +189,12 @@ const KINDS = new Set<string>([
             variant="outline"
             (click)="retry.emit($event.detail === 0 ? 'keyboard' : 'pointer')"
           >
-            {{ resolvedLabels().retry }}
+            {{ t('retry') }}
           </button>
         }
       </div>
     } @else if (painted()) {
-      <div slSkeletonRegion [delay]="0" [minDuration]="0" [label]="resolvedLabels().loading">
+      <div slSkeletonRegion [delay]="0" [minDuration]="0" [messages]="{ label: t('loading') }">
         <div slProse [flow]="resolvedFlow()" [size]="size()">
           <div slSkeletonText lastLineSize="62%" [lines]="3"></div>
         </div>
@@ -205,7 +202,7 @@ const KINDS = new Set<string>([
     } @else if (document().empty) {
       @if (!loading()) {
         <p data-part="empty">
-          <ng-content select="[slMarkdownEmpty]">{{ resolvedLabels().empty }}</ng-content>
+          <ng-content select="[slMarkdownEmpty]">{{ t('empty') }}</ng-content>
         </p>
       }
     } @else {
@@ -214,7 +211,7 @@ const KINDS = new Set<string>([
         @if (document().footnotes.length > 0) {
           <section slProseFootnotes>
             <h2 slVisuallyHidden [id]="document().footnoteLabelId">
-              {{ resolvedLabels().footnotes }}
+              {{ t('footnotes') }}
             </h2>
             <ol>
               @for (footnote of document().footnotes; track footnote.key) {
@@ -246,7 +243,7 @@ const KINDS = new Set<string>([
         <a
           data-part="backref"
           [href]="'#' + reference"
-          [attr.aria-label]="resolvedLabels().backReference(footnote.number, index + 1)"
+          [attr.aria-label]="t('backReference', { number: footnote.number, occurrence: index + 1 })"
           ><span slIcon><svg slGlyph name="arrow-left"></svg></span
         ></a>
       }
@@ -481,7 +478,7 @@ const KINDS = new Set<string>([
         <a
           slProseAnchor
           [href]="'#' + element.id"
-          [attr.aria-label]="resolvedLabels().anchor(element.text)"
+          [attr.aria-label]="t('anchor', { heading: element.text })"
           >#</a
         >
       }
@@ -524,7 +521,12 @@ export class SlMarkdown {
     ((url: string, kind: MarkdownUrlKind, node: MarkdownNode) => string | null) | undefined
   >(undefined);
   readonly isExternal = input<((href: string) => boolean) | undefined>(undefined);
-  readonly labels = input<Partial<MarkdownLabels> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * empty, error, retry and loading texts, the footnotes heading, the back
+   * link, the heading permalink, and each alert's title (`alerts.note`).
+   */
+  readonly messages = input<PartialMessages<MarkdownMessages> | undefined>(undefined);
   /**
    * Enables the task checkboxes. React reads the presence of its handler; an
    * Angular output cannot tell whether anyone listens, so the template says so.
@@ -551,15 +553,8 @@ export class SlMarkdown {
   protected readonly resolvedHeadingAnchors = computed(
     () => this.headingAnchors() ?? this.defaults.headingAnchors ?? false,
   );
-  protected readonly resolvedLabels = computed<MarkdownLabels>(() => {
-    const own = this.labels();
-    return {
-      ...MARKDOWN_LABELS,
-      ...this.defaults.labels,
-      ...own,
-      alerts: { ...MARKDOWN_LABELS.alerts, ...this.defaults.labels?.alerts, ...own?.alerts },
-    };
-  });
+  /** The family's words in the language in force, with this document's `messages` laid over them. */
+  readonly t = injectMessages(markdownMessages, this.messages);
 
   private readonly templateMap = computed(() => {
     const map = new Map<string, TemplateRef<MarkdownNodeContext>>();
@@ -604,7 +599,7 @@ export class SlMarkdown {
   }
 
   protected alertTitle(element: MarkdownAlertElement): string {
-    return this.resolvedLabels().alerts[element.type];
+    return this.t(`alerts.${element.type}`);
   }
 
   protected templateFor(element: MarkdownElement): TemplateRef<MarkdownNodeContext> | undefined {

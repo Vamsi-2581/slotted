@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "divider",
   "ui": "divider",
+  "catalog": {
+    "group": "Layout",
+    "summary": "Line that separates content."
+  },
   "labelledElement": "div",
   "axes": {
     "orientation": ["horizontal", "vertical"],

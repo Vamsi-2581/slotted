@@ -1,9 +1,9 @@
 import type {
   DashboardColumnsInput,
-  DashboardGridLabels,
   DashboardLayout,
   DashboardLayoutChange,
 } from '@slotted/core/dashboard-grid';
+import type { DashboardGridMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, MouseEvent, ReactElement, ReactNode, Ref } from 'react';
 
@@ -11,7 +11,6 @@ import type { CardFill, CardSize } from '../card';
 
 export type {
   DashboardColumnsInput,
-  DashboardGridLabels,
   DashboardLayout,
   DashboardLayoutChange,
   DashboardLayoutItem,
@@ -34,14 +33,10 @@ export interface DashboardGridDefaults {
   columns: DashboardColumnsInput;
   editBar: boolean;
   headingLevel: DashboardHeadingLevel;
-  labels: DashboardGridLabels;
 }
 
-export interface DashboardGridDefaultsProviderProps extends Partial<
-  Omit<DashboardGridDefaults, 'labels'>
-> {
+export interface DashboardGridDefaultsProviderProps extends Partial<DashboardGridDefaults> {
   children?: ReactNode;
-  labels?: Partial<DashboardGridLabels>;
 }
 
 /** The imperative actions a consumer cannot express declaratively. */
@@ -82,7 +77,8 @@ export interface DashboardGridProps extends Omit<
   editBar?: boolean | undefined;
   /** The level of every widget's title. Default 3. */
   headingLevel?: DashboardHeadingLevel | undefined;
-  labels?: Partial<DashboardGridLabels> | undefined;
+  /** Words laid over the catalog of the language in force, key by key. */
+  messages?: PartialMessages<DashboardGridMessages> | undefined;
   /** Replaces the root `div`. */
   render?: ((props: DashboardGridRootProps) => ReactElement) | undefined;
   ref?: Ref<DashboardGridHandle>;

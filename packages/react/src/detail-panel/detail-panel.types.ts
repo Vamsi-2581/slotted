@@ -1,3 +1,4 @@
+import type { DetailPanelMessages, FamilyTranslator, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -31,30 +32,18 @@ export type DetailPanelSectionReason = Extract<
 /** The request a section change carries. */
 export type DetailPanelChangeRequest = ChangeRequest<string | undefined>;
 
-/** The strings the family says on the reader's behalf. */
-export interface DetailPanelMessages {
-  /** The aside's accessible name. */
-  aside: string;
-  /** What the root is called while loading and the heading has no words yet. */
-  loading: string;
-}
-
 /** What an application sets once for every detail panel under it. */
 export interface DetailPanelDefaults {
   aside: DetailPanelAside;
   layout: DetailPanelLayout;
   level: DetailPanelLevel;
-  messages: DetailPanelMessages;
   mount: DetailPanelMount;
   scroll: DetailPanelScroll;
   size: DetailPanelSize;
 }
 
-export interface DetailPanelDefaultsProviderProps extends Partial<
-  Omit<DetailPanelDefaults, 'messages'>
-> {
+export interface DetailPanelDefaultsProviderProps extends Partial<DetailPanelDefaults> {
   children?: ReactNode | undefined;
-  messages?: Partial<DetailPanelMessages> | undefined;
 }
 
 /** What one section tells the root about itself. */
@@ -83,7 +72,6 @@ export interface DetailPanelContextValue {
   layout: DetailPanelLayout;
   level: DetailPanelLevel;
   loading: boolean;
-  messages: DetailPanelMessages;
   mount: DetailPanelMount;
   /** Whether a section has been current at least once, which is what `lazy` reads. */
   seen: (name: string) => boolean;
@@ -96,6 +84,8 @@ export interface DetailPanelContextValue {
   attachIdentify: (identify: ((name: string) => DetailPanelIdentity) | undefined) => void;
   size: DetailPanelSize;
   status: DetailPanelStatus;
+  /** The family's words in the language in force, with this panel's `messages` laid over them. */
+  t: FamilyTranslator<DetailPanelMessages>;
 }
 
 /** What `render` receives for the root. */
@@ -143,8 +133,11 @@ export interface DetailPanelProps extends Omit<
   level?: DetailPanelLevel | undefined;
   /** The record has not arrived: `aria-busy`, and skeleton lines in every section. */
   loading?: boolean | undefined;
-  /** Strings for this instance alone, over the provider's. */
-  messages?: Partial<DetailPanelMessages> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * aside's name (`aside`) and the root's name while loading (`loading`).
+   */
+  messages?: PartialMessages<DetailPanelMessages> | undefined;
   /** Defaults to the provider, then `active`. */
   mount?: DetailPanelMount | undefined;
   /** Called before the current section moves, with the request that carries the reason. */

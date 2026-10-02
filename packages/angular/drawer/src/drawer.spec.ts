@@ -3,6 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/drawer/contract.json';
 import { SlDrawer } from './drawer';
 import { provideDrawerDefaults } from './drawer-defaults';
@@ -775,5 +778,26 @@ describe('SlDrawer', () => {
     host.scrimFrom.set(0.5);
     openSheet();
     expect(layer()?.hasAttribute('data-undimmed')).toBe(true);
+  });
+});
+
+describe('SlDrawer words', () => {
+  it('names the close in the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    TestBed.configureTestingModule({
+      imports: [DrawerHost],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const fixture = TestBed.createComponent(DrawerHost);
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+    const close = () => document.querySelector('[data-part="close"]');
+
+    expect(close()?.getAttribute('aria-label')).toBe('Fechar');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(close()?.getAttribute('aria-label')).toBe('Close');
+    fixture.destroy();
   });
 });

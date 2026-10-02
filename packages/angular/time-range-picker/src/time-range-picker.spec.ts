@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { plainTime } from '@slotted/core/date';
 import type { PlainTime } from '@slotted/core/date';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -165,7 +167,7 @@ describe('what it is made of', () => {
 
   it('carries the dialog role, and names the list by the current tab', () => {
     const fixture = renderTemplate(
-      `<div ${BASE} defaultOpen startLabel="Início" endLabel="Fim"></div>`,
+      `<div ${BASE} defaultOpen [messages]="{ start: 'Início', end: 'Fim' }"></div>`,
     );
     expect(surface(fixture)?.getAttribute('role')).toBe('dialog');
     expect(trigger(fixture).getAttribute('aria-haspopup')).toBe('dialog');
@@ -186,7 +188,7 @@ describe('what it is made of', () => {
 
   it('says what to choose, and what is wrong', () => {
     const empty = renderTemplate(
-      `<div ${BASE} defaultOpen startLabel="Início" endLabel="Fim"></div>`,
+      `<div ${BASE} defaultOpen [messages]="{ start: 'Início', end: 'Fim' }"></div>`,
     );
     expect(text(empty, 'hint')).toBe('Início: choose a time');
     expect(list(empty, 'start').getAttribute('aria-describedby')).toBe(part(empty, 'hint').id);
@@ -234,7 +236,9 @@ describe('what it is made of', () => {
 
 describe('what the frame says', () => {
   it('shows the placeholder and names itself for choosing while nothing is chosen', () => {
-    const fixture = renderTemplate(`<div ${BASE} chooseLabel="Escolher horário"></div>`);
+    const fixture = renderTemplate(
+      `<div ${BASE} [messages]="{ choose: 'Escolher horário' }"></div>`,
+    );
     expect(trigger(fixture).getAttribute('aria-label')).toBe('Escolher horário');
     expect(part(fixture, 'summary').hasAttribute('data-placeholder')).toBe(true);
     expect(text(fixture, 'summary')).toBe('Escolher horário');
@@ -242,10 +246,10 @@ describe('what the frame says', () => {
 
   it('carries both ends and the duration once the run is whole', () => {
     const fixture = renderTemplate(
-      `<div ${BASE} changeLabel="Alterar horário" [defaultValue]="run"></div>`,
+      `<div ${BASE} [messages]="{ change: 'Alterar horário, {start} – {end}, {length}' }" [defaultValue]="run"></div>`,
     );
     const name = trigger(fixture).getAttribute('aria-label') ?? '';
-    expect(name).toContain('Alterar horário');
+    expect(name).toMatch(/^Alterar horário, /);
     expect(name).toContain('2 hr 30 min');
   });
 });
@@ -315,7 +319,7 @@ describe('what each list refuses', () => {
 
   it('draws the empty state when an end has no time at all', () => {
     const fixture = renderTemplate(
-      `<div ${BASE} defaultOpen [defaultValue]="late" [max]="five" [minLength]="900" unavailableOptions="hide" emptyLabel="Nada depois"></div>`,
+      `<div ${BASE} defaultOpen [defaultValue]="late" [max]="five" [minLength]="900" unavailableOptions="hide" [messages]="{ empty: 'Nada depois' }"></div>`,
     );
     expect(panel(fixture, 'end').querySelector('[data-part="empty"]')?.textContent?.trim()).toBe(
       'Nada depois',
@@ -532,12 +536,33 @@ describe('forms and ownership', () => {
 
   it('reads the defaults an application provided once', () => {
     const fixture = renderTemplate(`<div ${BASE} defaultOpen></div>`, [
-      provideTimeRangePickerDefaults({ chooseLabel: 'Escolher', nowLabel: 'Já', step: 1800 }),
+      provideTimeRangePickerDefaults({ step: 1800 }),
     ]);
-    expect(trigger(fixture).getAttribute('aria-label')).toBe('Escolher');
-    expect(text(fixture, 'now')).toBe('Já');
     expect(optionFor(fixture, 'start', '00:15')).toBeUndefined();
     expect(optionFor(fixture, 'start', '00:30')).toBeDefined();
+  });
+
+  it('changes its words and its time format together with the language in force', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(`<div slTimeRangePicker [defaultValue]="run"></div>`, [
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+
+    expect(trigger(fixture).getAttribute('aria-label')).toMatch(/^Alterar período, /);
+    expect(text(fixture, 'summary')).toBe('14:00 – 16:30');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(trigger(fixture).getAttribute('aria-label')).toMatch(/^Change range, /);
+    expect(text(fixture, 'summary')).toMatch(/0?2:00\sPM – 0?4:30\sPM/);
+  });
+
+  it('names the limit in the language in force', () => {
+    const fixture = renderTemplate(
+      `<div slTimeRangePicker defaultOpen [minLength]="1800" [maxLength]="14400"></div>`,
+      [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
+    );
+    expect(text(fixture, 'limit')).toMatch(/^de 30 min a 4 h/);
   });
 
   it('mutes, locks and marks the frame', () => {

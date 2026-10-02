@@ -10,9 +10,9 @@ export function useLinkDefaults(): LinkDefaults {
 
 /**
  * An application decides once whether its links are underlined, how they are
- * painted, whether a followed destination is marked, and what a new tab is
- * called in the language it ships. A link that states any of those itself
- * still wins: an explicit prop is never overridden by context.
+ * painted, and whether a followed destination is marked. A link that states
+ * any of those itself still wins: an explicit prop is never overridden by
+ * context. Its words come from the language in force (`SlottedProvider`).
  */
 export function LinkDefaultsProvider({ children, ...defaults }: LinkDefaultsProviderProps) {
   const inherited = useLinkDefaults();
@@ -20,7 +20,6 @@ export function LinkDefaultsProvider({ children, ...defaults }: LinkDefaultsProv
   return (
     <LinkDefaultsContext.Provider
       value={{
-        externalHint: defaults.externalHint ?? inherited.externalHint,
         underline: defaults.underline ?? inherited.underline,
         variant: defaults.variant ?? inherited.variant,
         visited: defaults.visited ?? inherited.visited,

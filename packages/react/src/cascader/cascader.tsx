@@ -127,7 +127,7 @@ export function Cascader<T>(props: CascaderProps<T>) {
     hoverDelay,
     disabled,
     readOnly,
-    labels,
+    messages,
     open,
     defaultOpen,
     onOpenChange,
@@ -139,7 +139,6 @@ export function Cascader<T>(props: CascaderProps<T>) {
     required,
     invalid,
     separator,
-    placeholder,
     renderValue,
     name,
     form,
@@ -257,7 +256,7 @@ export function Cascader<T>(props: CascaderProps<T>) {
     hoverDelay,
     disabled: resolvedDisabled,
     readOnly: resolvedReadOnly,
-    labels,
+    messages,
     defaults,
     showing: currentOpen,
     available: room.available,
@@ -457,13 +456,11 @@ export function Cascader<T>(props: CascaderProps<T>) {
   const valueContent: ReactNode = state.multiple ? (
     <span data-part="value">
       <span data-part="summary">
-        {state.emitted.length === 0
-          ? ''
-          : state.labels.summary.replace('{count}', String(state.emitted.length))}
+        {state.emitted.length === 0 ? '' : state.t('summary', { count: state.emitted.length })}
       </span>
     </span>
   ) : state.emitted.length === 0 ? (
-    <span data-part="placeholder">{placeholder ?? state.labels.placeholder}</span>
+    <span data-part="placeholder">{state.t('placeholder')}</span>
   ) : renderValue !== undefined ? (
     <span data-part="value">{renderValue(pathItems)}</span>
   ) : (
@@ -507,7 +504,7 @@ export function Cascader<T>(props: CascaderProps<T>) {
 
   const content = (
     <div
-      aria-label={resolvedSearch ? (ariaLabel ?? state.labels.search) : undefined}
+      aria-label={resolvedSearch ? (ariaLabel ?? state.t('search')) : undefined}
       data-part="content"
       id={contentId}
       ref={setSurfaceNode}
@@ -525,11 +522,11 @@ export function Cascader<T>(props: CascaderProps<T>) {
             aria-autocomplete="list"
             aria-controls={treeId}
             aria-expanded
-            aria-label={state.labels.search}
+            aria-label={state.t('search')}
             data-part="search-input"
             onChange={(event) => state.setQuery(event.target.value, 'keyboard', event.nativeEvent)}
             onKeyDown={(event) => onKey(event, true)}
-            placeholder={state.labels.searchPlaceholder}
+            placeholder={state.t('searchPlaceholder')}
             ref={setSearchNode}
             role="combobox"
             value={state.query}
@@ -620,13 +617,13 @@ export function Cascader<T>(props: CascaderProps<T>) {
             state.remove(key, event.nativeEvent);
             trigger?.focus({ preventScroll: true });
           }}
-          removeLabel={state.labels.remove}
+          removeLabel={(label) => state.t('remove', { label })}
           values={state.emitted}
         />
       ) : null}
       {showClear ? (
         <button
-          aria-label={state.labels.clear}
+          aria-label={state.t('clear')}
           data-part="clear"
           onClick={(event) => {
             state.clear(event.nativeEvent);
@@ -710,7 +707,7 @@ export function CascaderPanel<T>(props: CascaderPanelProps<T>) {
     hoverDelay,
     disabled,
     readOnly,
-    labels,
+    messages,
     ref,
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
@@ -788,7 +785,7 @@ export function CascaderPanel<T>(props: CascaderPanelProps<T>) {
     hoverDelay,
     disabled,
     readOnly,
-    labels,
+    messages,
     defaults,
     showing: true,
     available: room.available,

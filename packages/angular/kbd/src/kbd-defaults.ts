@@ -30,8 +30,6 @@ export interface KbdDefaults {
   variant: KbdVariant;
   /** Between two simultaneous keys. A Mac joins with nothing whatever this says. */
   separator: string;
-  /** Between two steps of a sequence — `G then I`. */
-  thenLabel: string;
   /** Replaces what the eye sees, per key token: `{ ctrl: 'Strg' }`. */
   legends: Readonly<Record<string, string>> | undefined;
   /** Replaces what a reader hears, per key token: `{ ctrl: 'Steuerung' }`. */
@@ -43,7 +41,6 @@ const FALLBACK: KbdDefaults = {
   size: 'md',
   variant: 'raised',
   separator: '+',
-  thenLabel: 'then',
   legends: undefined,
   names: undefined,
 };
@@ -55,9 +52,10 @@ export const KBD_DEFAULTS = new InjectionToken<KbdDefaults>('slotted kbd default
 
 /**
  * An application decides once which platform its shortcuts are written for, how
- * its keys are painted, and — the two that matter most — what its keys are
- * called in the reader's language. A key that states any of them itself still
- * wins: an explicit input is never overridden by the token.
+ * its keys are painted, and which legends and names it writes in place of the
+ * catalog's for particular keys. A key that states any of them itself still
+ * wins: an explicit input is never overridden by the token. The words come from
+ * the `keys` catalog of the language in force (`provideSlotted`).
  */
 export function provideKbdDefaults(defaults: Partial<KbdDefaults>) {
   return {
@@ -67,7 +65,6 @@ export function provideKbdDefaults(defaults: Partial<KbdDefaults>) {
       size: defaults.size ?? FALLBACK.size,
       variant: defaults.variant ?? FALLBACK.variant,
       separator: defaults.separator ?? FALLBACK.separator,
-      thenLabel: defaults.thenLabel ?? FALLBACK.thenLabel,
       legends: defaults.legends ?? FALLBACK.legends,
       names: defaults.names ?? FALLBACK.names,
     }),

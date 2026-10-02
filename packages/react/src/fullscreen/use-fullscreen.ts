@@ -5,9 +5,11 @@ import type {
   FullscreenMode,
   FullscreenOptions,
 } from '@slotted/core/fullscreen';
+import { fullscreenMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
+import { useMessages } from '../i18n';
 import { useFullscreenDefaults } from './fullscreen-defaults';
 import type {
   FullscreenHandle,
@@ -43,11 +45,11 @@ export function useFullscreen(
     onFullscreenError,
     mode: policy,
     navigationUI,
-    messages: ownMessages,
+    messages,
   }: UseFullscreenOptions = {},
 ): FullscreenHandle {
   const defaults = useFullscreenDefaults();
-  const messages = { ...defaults.messages, ...ownMessages };
+  const t = useMessages(fullscreenMessages, messages);
   const [own, setOwn] = useState(defaultFullscreen);
   const [mode, setMode] = useState<FullscreenMode | null>(null);
   const [error, setError] = useState<FullscreenError | null>(null);
@@ -67,8 +69,8 @@ export function useFullscreen(
 
   /* The latest of everything a controller callback reads, so the controller
      is made once per element rather than once per render. */
-  const latest = useRef({ state, onFullscreenError, messages, policy, navigationUI, defaults });
-  latest.current = { state, onFullscreenError, messages, policy, navigationUI, defaults };
+  const latest = useRef({ state, onFullscreenError, t, policy, navigationUI, defaults });
+  latest.current = { state, onFullscreenError, t, policy, navigationUI, defaults };
 
   const request = (next: boolean, reason: FullscreenReason, source?: unknown) => {
     const current = latest.current.state;
@@ -87,7 +89,7 @@ export function useFullscreen(
   const controllerOptions = (): FullscreenOptions => ({
     policy: latest.current.policy ?? latest.current.defaults.mode,
     navigationUI: latest.current.navigationUI ?? latest.current.defaults.navigationUI,
-    messages: latest.current.messages,
+    t: latest.current.t,
     onModeChange: setMode,
     onError: (failure) => {
       setError(failure);
@@ -141,7 +143,7 @@ export function useFullscreen(
     mode,
     supported,
     error,
-    messages,
+    t,
     enter: (reason = 'programmatic', source) => request(true, reason, source),
     exit: (reason = 'programmatic', source) => request(false, reason, source),
     toggle: (reason = 'programmatic', source) => request(!state.value, reason, source),

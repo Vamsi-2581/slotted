@@ -155,12 +155,7 @@ test('resolves every axis from the prop, then the field, then the application', 
 });
 
 test('lets an application decide once what its switches look like', () => {
-  assert.deepEqual(contract.provides.switchDefaults, [
-    'size',
-    'indicator',
-    'labelPlacement',
-    'loadingLabel',
-  ]);
+  assert.deepEqual(contract.provides.switchDefaults, ['size', 'indicator', 'labelPlacement']);
 });
 
 /**

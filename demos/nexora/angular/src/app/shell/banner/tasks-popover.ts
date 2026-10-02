@@ -70,7 +70,7 @@ import { ClockService } from '../../core/session/clock.service';
           <div slPopoverBody>
             @if (store.items().length === 0 && store.loading()) {
               <!-- The first answer is on its way: the rows' own boxes, so the wait reads as a wait and not as nothing. -->
-              <div slSkeletonRegion label="Loading tasks" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Loading tasks' }" [loading]="true">
                 <ul slList>
                   @for (i of placeholders; track i) {
                     <li slListItem size="sm">

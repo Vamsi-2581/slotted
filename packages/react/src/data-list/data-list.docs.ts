@@ -55,7 +55,7 @@ export const DATA_LIST_ANATOMY: AnatomyRow[] = [
     element: 'output aria-live="polite"',
     required: true,
     purpose:
-      'labels.count, or labels.selectedCount while a selection exists; empty during the first load.',
+      'messages.count, or messages.selectedCount while a selection exists; empty during the first load.',
   },
   {
     part: 'sort',
@@ -109,7 +109,7 @@ export const DATA_LIST_ANATOMY: AnatomyRow[] = [
     part: 'field-empty',
     element: 'span',
     required: false,
-    purpose: 'An absent value: an em dash for the eye and labels.empty for a screen reader.',
+    purpose: 'An absent value: an em dash for the eye and messages.empty for a screen reader.',
   },
   {
     part: 'more',
@@ -370,12 +370,10 @@ return (
     snippet: defineSnippet({
       id: 'data-list-react-content',
       language: 'tsx',
-      label: 'Labels and plurals in the application’s language',
-      source: `<DataListDefaultsProvider
-  labels={{ count: ({ count }) => (count === 1 ? '1 conta' : \`\${count} contas\`) }}
->
-  <DataList {...list} />
-</DataListDefaultsProvider>;`,
+      label: 'Words and plurals in the application’s language',
+      source: `<SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+  <DataList {...list} messages={{ count: '{count, plural, one {# conta} other {# contas}}' }} />
+</SlottedProvider>;`,
     }),
   },
   {
@@ -575,7 +573,7 @@ export const REACT_DATA_LIST_DOCS = {
         'boolean | string | null',
         '—',
         'DataList',
-        'The error state; a string replaces labels.errorTitle',
+        'The error state; a string replaces messages.errorTitle',
       ],
       ['hasMore', 'boolean', 'false', 'DataList', 'Shows load-more in the footer'],
       [
@@ -614,18 +612,18 @@ export const REACT_DATA_LIST_DOCS = {
         'Milliseconds the skeleton stays once drawn',
       ],
       [
-        'labels',
-        'Partial<DataListLabels>',
-        'English',
-        'DataList, DataListDefaultsProvider',
-        'Every word; a count-bearing one also takes (slots, locale) => string',
+        'messages',
+        'Partial<DataListMessages>',
+        '—',
+        'DataList',
+        'Words laid over the language in force, key by key; count and selectAll are plural messages',
       ],
       [
         'locale',
         'string',
-        '—',
-        'DataList, DataListDefaultsProvider',
-        'Formats values, numbers in messages and the sort',
+        'the provider’s',
+        'DataList',
+        'Formats values, group counts and the sort',
       ],
       [
         'renderCell',
@@ -674,7 +672,7 @@ export const REACT_DATA_LIST_DOCS = {
       'No Authoring Practices pattern covers a list of records, so the family is list’s role="list" of list items, named by label or labelledBy, and every control in it is native: a checkbox, a link or a button, the disclosure pattern for more and the menu button pattern for sort.',
       'The title is the record’s link or button and its name is the title alone; the fields sit outside it as a dl, because a dl may not sit inside a button and a link named by every field is a sentence. The checkbox is named “Select {title}” and announces the selection the row paints — aria-selected is not valid on listitem.',
       'No arrow key is bound: role="list" admits none and the scope refuses grid navigation. Tab reaches each control in reading order; data-grid is the family for a cell cursor. When the focused record is removed, focus moves to the next record, the previous one, or the empty state.',
-      'The count is an output announced politely; a sort announces the whole order through the shared live announcer. The first load is a skeleton region with one polite announcement and aria-busy, and an absent value reads labels.empty beside the dash a sighted reader sees.',
+      'The count is an output announced politely; a sort announces the whole order through the shared live announcer. The first load is a skeleton region with one polite announcement and aria-busy, and an absent value reads messages.empty beside the dash a sighted reader sees.',
     ],
     snippets: [
       defineSnippet({

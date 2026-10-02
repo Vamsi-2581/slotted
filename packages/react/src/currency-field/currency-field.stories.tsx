@@ -468,9 +468,9 @@ export const Composition: Story = {
         <Scene
           label="An application that decides once"
           layout="stack"
-          note="The provider carries the currency, the locale and the axes, so a form of twenty amounts states none of them. A control that states one still wins."
+          note="The provider carries the currency and the axes, so a form of twenty amounts states none of them; the locale comes from the language in force. A control that states one still wins."
         >
-          <CurrencyFieldDefaultsProvider currency="BRL" locale="pt-BR">
+          <CurrencyFieldDefaultsProvider currency="BRL">
             <Field>
               <FieldLabel>Assinatura</FieldLabel>
               <CurrencyField defaultValue={89.9} name="subscription" />

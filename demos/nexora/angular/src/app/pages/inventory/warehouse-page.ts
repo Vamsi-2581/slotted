@@ -656,7 +656,7 @@ type View = 'stock' | 'locations' | 'movements' | 'counts' | 'transfers';
                 }
               }
             } @else {
-              <div slSkeletonRegion label="Reading the warehouse" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the warehouse' }" [loading]="true">
                 <div slStack [gap]="6">
                   <div slGrid [columns]="phone() ? 2 : 4" minItemWidth="xs" [gap]="4">
                     @for (figure of figureLabels; track figure) {

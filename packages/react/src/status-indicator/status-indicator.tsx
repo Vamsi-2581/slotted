@@ -1,12 +1,14 @@
 import '@slotted/styles/status-indicator/status-indicator.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
+import { statusIndicatorMessages } from '@slotted/core/i18n';
+
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useStatusIndicatorDefaults } from './status-indicator-defaults';
 import {
   STATUS_INDICATOR_DEFAULT_STATUS,
   STATUS_INDICATOR_GLYPHS,
-  STATUS_INDICATOR_LABELS,
 } from './status-indicator.constants';
 import type { StatusIndicatorProps, StatusIndicatorRootProps } from './status-indicator.types';
 
@@ -38,6 +40,7 @@ export function StatusIndicator({
   label,
   live,
   mark,
+  messages,
   pulse = false,
   render,
   role,
@@ -46,13 +49,14 @@ export function StatusIndicator({
   ...nativeProps
 }: StatusIndicatorProps) {
   const defaults = useStatusIndicatorDefaults();
+  const t = useMessages(statusIndicatorMessages, messages);
   const resolved = {
     live: live ?? defaults.live ?? 'off',
     mark: mark ?? defaults.mark ?? 'dot',
     size: size ?? defaults.size ?? 'md',
   };
 
-  const name = label ?? defaults.labels?.[status] ?? STATUS_INDICATOR_LABELS[status];
+  const name = label ?? t(status);
 
   const rootProps: StatusIndicatorRootProps = {
     ...nativeProps,

@@ -29,6 +29,7 @@ import { createDismissableLayer, createScrollLock } from '../dismissable-layer';
 import type { DismissableLayerHandle, ScrollLockHandle } from '../dismissable-layer';
 import { createFocusScope } from '../focus';
 import type { FocusScopeHandle } from '../focus';
+import type { FamilyTranslator, FullscreenMessages } from '../i18n';
 import { getLiveAnnouncer } from '../live-announcer';
 
 /** Which way answered. */
@@ -46,28 +47,14 @@ export interface FullscreenError {
   readonly cause?: unknown;
 }
 
-export interface FullscreenMessages {
-  /** The control's label while the region is not full screen. */
-  readonly enter: string;
-  /** The control's label while it is. */
-  readonly exit: string;
-  /** Announced on entry. Says how to leave. */
-  readonly entered: string;
-  /** Announced on the way out. */
-  readonly exited: string;
-}
-
-export const FULLSCREEN_MESSAGES: FullscreenMessages = {
-  enter: 'Full screen',
-  exit: 'Exit full screen',
-  entered: 'Full screen. Press Escape to exit.',
-  exited: 'Exited full screen',
-};
-
 export interface FullscreenOptions {
   policy?: FullscreenPolicy;
   navigationUI?: FullscreenNavigationUI;
-  messages?: FullscreenMessages;
+  /**
+   * The family's words in the binding's language: `entered` is announced on
+   * entry and `exited` on the way out. Absent, nothing is announced.
+   */
+  t?: FamilyTranslator<FullscreenMessages>;
   /**
    * The reader left without the application asking: `Escape` in `layout`, or
    * the agent's own exit in `native`. The region has already left in `native`,
@@ -247,8 +234,6 @@ export function createFullscreen(
   let lock: ScrollLockHandle | null = null;
   let scope: FocusScopeHandle | null = null;
 
-  const messages = () => options.messages ?? FULLSCREEN_MESSAGES;
-
   function setMode(next: FullscreenMode | null) {
     if (mode === next) return;
     mode = next;
@@ -271,7 +256,7 @@ export function createFullscreen(
       });
     }
     setMode(next);
-    getLiveAnnouncer(doc).announce(messages().entered);
+    if (options.t) getLiveAnnouncer(doc).announce(options.t('entered'));
   }
 
   function stop(announce: boolean) {
@@ -285,7 +270,7 @@ export function createFullscreen(
     setMode(null);
     if (context) restoreContext(element, context);
     context = null;
-    if (was !== null && announce) getLiveAnnouncer(doc).announce(messages().exited);
+    if (was !== null && announce && options.t) getLiveAnnouncer(doc).announce(options.t('exited'));
   }
 
   /* The agent left: `Escape`, F11, its own interface, another page. */

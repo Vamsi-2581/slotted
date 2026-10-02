@@ -1,9 +1,4 @@
-import {
-  entityInitials,
-  entityName,
-  entityPickerKey,
-  formatEntityLabel,
-} from '@slotted/core/entity-picker';
+import { entityInitials, entityName, entityPickerKey } from '@slotted/core/entity-picker';
 import type { Entity } from '@slotted/core/entity-picker';
 import { moveIndex } from '@slotted/core/collection';
 import { pressOrigin } from '@slotted/core/dismissable-layer';
@@ -84,6 +79,7 @@ export function EntityPickerControl() {
     id,
     name,
     onBlur,
+    onClick,
     onFocus,
     onKeyDown,
     placeholder,
@@ -112,14 +108,14 @@ export function EntityPickerControl() {
     renderOption: _renderOption,
     renderChip,
     handleRef: _handleRef,
-    locale,
+    locale: _locale,
     max: _max,
     clearable: _clearable,
     disabled: _disabled,
     fullWidth: _fullWidth,
     highlightMatch: _highlightMatch,
     invalid: _invalid,
-    labels: _labels,
+    messages: _messages,
     loop: _loop,
     media: _media,
     minQueryLength: _minQueryLength,
@@ -141,7 +137,7 @@ export function EntityPickerControl() {
     ...nativeProps
   } = props;
 
-  const { labels, multiple } = picker;
+  const { t, multiple } = picker;
   const chosen = picker.chosen;
   const chips = useRef<HTMLDivElement | null>(null);
   const count = useRef<HTMLSpanElement | null>(null);
@@ -233,7 +229,7 @@ export function EntityPickerControl() {
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     picker.setTyped(event.currentTarget.value, event.nativeEvent);
-    if (!picker.open && !picker.readOnly) {
+    if (!picker.open && !picker.readOnly && picker.openOn !== 'manual') {
       picker.entry.current = 'keep';
       picker.setOpen(true, 'keyboard', event.nativeEvent);
     }
@@ -243,6 +239,12 @@ export function EntityPickerControl() {
     if (picker.openOn !== 'focus' || picker.readOnly || picker.open) return;
     picker.entry.current = multiple ? 'keep' : 'selected';
     picker.setOpen(true, 'keyboard');
+  };
+
+  const handleClick = (event: MouseEvent<HTMLInputElement>) => {
+    if (picker.openOn === 'manual' || picker.disabled || picker.readOnly || picker.open) return;
+    picker.entry.current = multiple ? 'keep' : 'selected';
+    picker.setOpen(true, 'pointer', event.nativeEvent);
   };
 
   const handleBlur = (event: { relatedTarget: EventTarget | null }) => {
@@ -359,6 +361,7 @@ export function EntityPickerControl() {
       id={inputId}
       onBlur={compose(onBlur, handleBlur)}
       onChange={onChange}
+      onClick={compose(onClick, handleClick)}
       onFocus={compose(onFocus, handleFocus)}
       onKeyDown={compose(onKeyDown, handleKey)}
       placeholder={placeholder}
@@ -401,7 +404,7 @@ export function EntityPickerControl() {
       : {}),
   };
 
-  const chipLabel = formatEntityLabel(labels.chips, {
+  const chipLabel = t('chips', {
     label: ariaLabel ?? '',
     count: chosen.length,
   }).replace(/^, /, '');
@@ -426,7 +429,7 @@ export function EntityPickerControl() {
             value={picker.scope}
             variant={picker.variant === 'plain' ? 'plain' : picker.variant}
           >
-            <SelectTrigger aria-label={labels.scope}>
+            <SelectTrigger aria-label={t('scope')}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -446,7 +449,7 @@ export function EntityPickerControl() {
         picker.media === 'avatar' &&
         picker.inputValue === chosenEntity.label ? (
           <span aria-hidden="true" data-part="selection">
-            <EntityFace entity={chosenEntity} locale={locale} />
+            <EntityFace entity={chosenEntity} locale={picker.locale} />
           </span>
         ) : null}
         {multiple ? (
@@ -457,7 +460,7 @@ export function EntityPickerControl() {
               ))}
               {collapsing ? (
                 <span
-                  aria-label={formatEntityLabel(labels.moreLabel, {
+                  aria-label={t('moreLabel', {
                     count: Math.max(collapsed, 1),
                   })}
                   data-count=""
@@ -478,9 +481,7 @@ export function EntityPickerControl() {
                   tabIndex={-1}
                 >
                   <span data-part="body">
-                    <span data-part="label">
-                      {formatEntityLabel(labels.more, { count: Math.max(collapsed, 1) })}
-                    </span>
+                    <span data-part="label">{t('more', { count: Math.max(collapsed, 1) })}</span>
                   </span>
                 </span>
               ) : null}
@@ -493,14 +494,14 @@ export function EntityPickerControl() {
           input
         )}
         {showClear ? (
-          <button aria-label={labels.clear} data-part="clear" onClick={onClear} type="button">
+          <button aria-label={t('clear')} data-part="clear" onClick={onClear} type="button">
             <Icon>
               <Glyph name="x" />
             </Icon>
           </button>
         ) : null}
         <button
-          aria-label={labels.trigger}
+          aria-label={t('trigger')}
           data-part="trigger"
           disabled={picker.disabled}
           onClick={toggle}
@@ -555,7 +556,7 @@ function Chip({
   renderChip: ((entity: Entity) => ReactNode) | undefined;
 }) {
   const picker = useEntityPicker();
-  const { labels } = picker;
+  const { t } = picker;
   const entity = picker.cache.get(id);
   const status = picker.resolver.status(id);
   const pending = entity === undefined && status === 'pending';
@@ -566,9 +567,9 @@ function Chip({
     entity !== undefined
       ? entityName(entity)
       : missing
-        ? `${labels.unresolved}, ${id}`
-        : `${labels.loading}, ${id}`;
-  const shown = entity?.label ?? (missing ? labels.unresolved : id);
+        ? t('unresolvedChip', { id })
+        : t('loadingChip', { id });
+  const shown = entity?.label ?? (missing ? t('unresolved') : id);
 
   const onKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
     if (event.defaultPrevented) return;
@@ -652,7 +653,7 @@ function Chip({
       </span>
       {frozen ? null : (
         <button
-          aria-label={formatEntityLabel(labels.remove, { label: entity?.label ?? shown })}
+          aria-label={t('remove', { label: entity?.label ?? shown })}
           data-part="remove"
           onClick={onRemove}
           tabIndex={-1}

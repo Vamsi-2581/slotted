@@ -24,6 +24,7 @@ import {
   AppShellAsideBody,
   AppShellAsideFooter,
   AppShellAsideHeader,
+  AppShellAsideResizer,
   AppShellAsideToggle,
   AppShellBanner,
   AppShellBrand,
@@ -265,6 +266,7 @@ export function Anatomy() {
           <Slot note="a rota" part="main" />
         </AppShellMain>
         <AppShellAside>
+          <AppShellAsideResizer />
           <AppShellAsideHeader>
             <Slot fill={false} note="o título do painel" part="aside-header" />
             <AppShellAsideToggle />

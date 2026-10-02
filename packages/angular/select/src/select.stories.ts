@@ -297,14 +297,14 @@ export const LoadingAndEmpty: Story = {
           'Loading',
           "The row keeps the popup's measure, so nothing jumps when the options finally land in it.",
           viewport(
-            `<sl-select aria-label="Teams" placeholder="Choose a team" loadingLabel="Fetching teams…" [loading]="true" [open]="pictured" [portal]="false"></sl-select>`,
+            `<sl-select aria-label="Teams" placeholder="Choose a team" [messages]="{ loading: 'Fetching teams…' }" [loading]="true" [open]="pictured" [portal]="false"></sl-select>`,
           ),
         )}
         ${scene(
           'Empty',
           'The popup opens onto a sentence rather than onto a two-pixel box the reader cannot read.',
           viewport(
-            `<sl-select aria-label="Teams" placeholder="Choose a team" emptyLabel="No teams yet" [open]="pictured" [portal]="false"></sl-select>`,
+            `<sl-select aria-label="Teams" placeholder="Choose a team" [messages]="{ empty: 'No teams yet' }" [open]="pictured" [portal]="false"></sl-select>`,
           ),
         )}
       </div>
@@ -367,7 +367,7 @@ export const Search: Story = {
         'The query filters the list, the span it matched is marked, and the count is announced. Escape clears the query before it closes the popup; Tab commits and leaves the control.',
         viewport(
           `
-      <sl-select search aria-label="Country" placeholder="Choose a country" [open]="pictured" [portal]="false" searchPlaceholder="Filter countries">
+      <sl-select search aria-label="Country" placeholder="Choose a country" [open]="pictured" [portal]="false" [messages]="{ searchPlaceholder: 'Filter countries' }">
         ${countryOptions()}
       </sl-select>
     `,
@@ -379,7 +379,7 @@ export const Search: Story = {
         'A null filter turns the family&#39;s own comparison off, so it renders exactly the window it was given and decides nothing. The mark is off with it: nothing here claims to know what matched.',
         viewport(
           `
-      <sl-select search aria-label="Remote" placeholder="Choose a country" [portal]="false" [filter]="null" [highlightMatch]="false" searchPlaceholder="Search the server">
+      <sl-select search aria-label="Remote" placeholder="Choose a country" [portal]="false" [filter]="null" [highlightMatch]="false" [messages]="{ searchPlaceholder: 'Search the server' }">
         ${countryOptions(COUNTRIES.slice(0, 4))}
       </sl-select>
     `,

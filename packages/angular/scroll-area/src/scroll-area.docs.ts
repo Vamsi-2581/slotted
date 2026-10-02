@@ -64,7 +64,7 @@ const events: EventRow[] = [
 export const ANGULAR_SCROLL_AREA_DOCS = {
   accessibility: [
     'There is no APG pattern for a scroll container; what governs is WCAG 2.1.1, tested by the scrollable-region-focusable rule, and 4.1.2, which is what a tab stop then owes. The viewport is role="region" with tabindex="0" and a name, written only while the content overflows — a tab stop on content that fits is a tab stop that does nothing.',
-    'The name resolves in one order: labelledBy, then label, then the label provideScrollAreaDefaults sets, so a product with fifty areas names them once. Base UI and Zag write role="presentation" beside their tab stop, which answers the rule that is tested and breaks the one that is not.',
+    'The name resolves in one order: labelledBy, then messages.label, then the catalog of the language in force, so a product with fifty areas names them once. Base UI and Zag write role="presentation" beside their tab stop, which answers the rule that is tested and breaks the one that is not.',
     'Nine keys are the platform’s on a focused scrollport — the arrows, PageUp and PageDown, Home, End and Space — and the family binds none of them. The one key it owns is Tab, and [tabbable]="false" gives that back when a consumer knows the content is reachable another way.',
     'The scrollbar is the platform’s, themed through scrollbar-color and scrollbar-width. The trough click, the scrollbar context menu, the system’s own overlay behaviour and the bar before hydration all survive; a drawn thumb loses every one of them.',
     'The veil is a mask and is removed under forced-colors, where the system owns the palette and a veil over system text loses legibility for nothing. The scrollbar goes back to the system’s own there too.',
@@ -122,18 +122,18 @@ export const ANGULAR_SCROLL_AREA_DOCS = {
       'Whether the scrollport joins the tab sequence while it overflows. Off only when the content is reachable another way',
     ],
     [
-      'label',
-      'string',
-      'Scrollable content',
+      'messages',
+      'Partial<ScrollAreaMessages>',
+      '—',
       '[slScrollArea]',
-      'The name the region is announced by, when nothing points at a heading',
+      'Words laid over the language in force: the name the region is announced by (label), when nothing points at a heading',
     ],
     [
       'labelledBy',
       'string',
       '—',
       '[slScrollArea]',
-      'The id of the element that names the region. Wins over label',
+      'The id of the element that names the region. Wins over messages.label',
     ],
   ]),
   composition: apiRows([
@@ -142,7 +142,7 @@ export const ANGULAR_SCROLL_AREA_DOCS = {
       'Partial<ScrollAreaDefaults>',
       '—',
       'a provider',
-      'An application decides once what its scroll areas look like and what a region is called in this language',
+      'An application decides once what its scroll areas look like; the region’s name comes from the language in force',
     ],
     [
       'exportAs',
@@ -192,7 +192,7 @@ export const ANGULAR_SCROLL_AREA_DOCS = {
         language: 'angular',
         label: 'The whole of the common case',
         source:
-          '<div slScrollArea class="notes" label="Notas de versão">\n  <div slScrollAreaContent>…</div>\n</div>',
+          '<div slScrollArea class="notes" [messages]="{ label: \'Notas de versão\' }">\n  <div slScrollAreaContent>…</div>\n</div>',
       }),
     },
     {

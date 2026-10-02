@@ -1,4 +1,5 @@
 import type { CurrencyChangeRequest } from '@slotted/core/currency';
+import type { CurrencyFieldMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
 /** The type step the control sits at, matching the field around it. */
@@ -86,11 +87,8 @@ export interface CurrencyFieldDefaults {
   /** The currency every field under the provider is in, unless it says otherwise. */
   currency: string | undefined;
   currencyDisplay: CurrencyFieldDisplay;
-  decrementLabel: string;
   entry: CurrencyFieldEntry;
   formatOn: CurrencyFieldFormatOn;
-  incrementLabel: string;
-  locale: string | undefined;
   size: CurrencyFieldSize;
   stepper: CurrencyFieldStepper;
   variant: CurrencyFieldVariant;
@@ -154,8 +152,6 @@ export interface CurrencyFieldProps extends Omit<
   currency?: string | undefined;
   /** How the currency is written. Defaults to the provider, then `symbol`. */
   currencyDisplay?: CurrencyFieldDisplay | undefined;
-  /** The decrement button's accessible name. Defaults to the provider's. */
-  decrementLabel?: string | undefined;
   /** The amount an uncontrolled control starts from, read once. `null` is empty. */
   defaultValue?: number | null | undefined;
   /**
@@ -184,8 +180,6 @@ export interface CurrencyFieldProps extends Omit<
   fractionDigits?: number | undefined;
   /** Reaches `increment()` and `decrement()`. `ref` reaches the input itself. */
   handle?: Ref<CurrencyFieldHandle> | undefined;
-  /** The increment button's accessible name. Defaults to the provider's. */
-  incrementLabel?: string | undefined;
   /**
    * Unstated rather than `false`. Writes `aria-invalid` on the control and
    * `data-invalid` on the frame.
@@ -193,8 +187,16 @@ export interface CurrencyFieldProps extends Omit<
   invalid?: boolean | undefined;
   /** The amount `Shift` and the page keys move by. Defaults to `step * 10`. */
   largeStep?: number | undefined;
-  /** BCP 47. Decides the separators and the numbering system, never the symbol. */
+  /**
+   * BCP 47. Decides the separators and the numbering system, never the symbol.
+   * Defaults to the language in force (`SlottedProvider`).
+   */
   locale?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * `increment` and `decrement` buttons' accessible names.
+   */
+  messages?: PartialMessages<CurrencyFieldMessages> | undefined;
   /** The largest amount the control holds, in major units. `End` goes here. */
   max?: number | undefined;
   /** The smallest amount the control holds. `Home` goes here, and it is what refuses a negative. */

@@ -108,7 +108,6 @@ export const Playground: Story = {
     defaultPage: 7,
     defaultPageSize: 20,
     disabled: false,
-    label: 'Pagination',
     live: 'polite',
     loading: false,
     siblingCount: 1,
@@ -189,13 +188,10 @@ export const Range: Story = {
       </Scene>
       <Scene
         layout="block"
-        label="labels.range"
-        note="The wording is a function of the three numbers, so a translated application replaces the sentence rather than reordering strings."
+        label="messages.range"
+        note="The sentence is a message with three numbers in it, so a translated application writes its own order of words rather than reordering strings."
       >
-        <Bar
-          defaultPage={7}
-          labels={{ range: (start, end, count) => `${start}–${end} de ${count}` }}
-        />
+        <Bar defaultPage={7} messages={{ range: '{start}–{end} de {count}' }} />
       </Scene>
       <Scene
         layout="block"
@@ -362,12 +358,9 @@ export const Composition: Story = {
       <Scene
         layout="block"
         label="PaginationDefaultsProvider"
-        note="One decision for every paginator below it: the wording, how wide the row is, and how many rows a page holds by default."
+        note="One decision for every paginator below it: how wide the row is, and how many rows a page holds by default. The words come from the language in force."
       >
-        <PaginationDefaultsProvider
-          labels={{ next: 'Próxima página', previous: 'Página anterior' }}
-          siblingCount={2}
-        >
+        <PaginationDefaultsProvider siblingCount={2}>
           <Row defaultPage={12} />
         </PaginationDefaultsProvider>
       </Scene>

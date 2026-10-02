@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { plainTime } from '@slotted/core/date';
 import type { PlainTime } from '@slotted/core/date';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -316,12 +318,36 @@ describe('the keyboard the pattern lists', () => {
 });
 
 describe('what the consumer sets once', () => {
-  it('lets an application state the step and the labels once', () => {
+  it('lets an application state the step once', () => {
     const fixture = renderTemplate(`<div slTimePicker ${BOUNDS} defaultOpen></div>`, [
-      provideTimePickerDefaults({ nowLabel: 'Agora', step: 3600 }),
+      provideTimePickerDefaults({ step: 3600 }),
     ]);
 
     expect(labels(fixture)).toEqual(['09:00', '10:00', '11:00']);
+  });
+
+  it('changes its words and its time format together with the language in force', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(
+      `<div slTimePicker [referenceTime]="noon" [min]="nine" [max]="eleven" [defaultValue]="ten"></div>`,
+      [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    );
+    const name = () => trigger(fixture).getAttribute('aria-label') ?? '';
+
+    expect(name()).toMatch(/^Alterar horário, /);
+    expect(name()).toContain('10:00');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(name()).toMatch(/^Change time, /);
+    expect(name()).toMatch(/10:00\sAM/);
+  });
+
+  it('lays its own messages over the language in force', () => {
+    const fixture = renderTemplate(
+      `<div slTimePicker ${BOUNDS} defaultOpen [messages]="{ now: 'Agora' }"></div>`,
+    );
+
     expect(
       (fixture.nativeElement.querySelector('[data-part="now"]').textContent ?? '').trim(),
     ).toBe('Agora');

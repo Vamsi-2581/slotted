@@ -1,6 +1,7 @@
 import { Component, computed, inject, Injector, input, signal, type OnInit } from '@angular/core';
 import { SlButton } from '@slotted/angular/button';
 import { SlChart } from '@slotted/angular/chart';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlInline } from '@slotted/angular/inline';
 import { SlSkeletonText } from '@slotted/angular/skeleton';
 import { SlSparkline } from '@slotted/angular/sparkline';
@@ -23,6 +24,7 @@ import {
   SlTableRowHeader,
 } from '@slotted/angular/table';
 import { SlText } from '@slotted/angular/typography';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
@@ -69,30 +71,6 @@ const PRODUCTS = [
 /** Which story the sales overview is drawn for: each changes only what it shows. */
 type Mode =
   'default' | 'anatomy' | 'constraints' | 'states' | 'labels' | 'accessibility' | 'persistence';
-
-const PORTUGUESE = {
-  editStatus:
-    'Arraste um widget para o mover e puxe as arestas para o redimensionar. Pelo teclado, foque a pega: Alt com uma seta move-o, Shift com uma seta redimensiona-o.',
-  add: 'Adicionar widget',
-  reset: 'Repor layout',
-  cancel: 'Cancelar',
-  done: 'Concluir',
-  handle: 'Reorganizar {title}',
-  detail: 'Abrir {title}',
-  moveUp: 'Mover para cima',
-  moveDown: 'Mover para baixo',
-  moveStart: 'Mover para a esquerda',
-  moveEnd: 'Mover para a direita',
-  wider: 'Mais largo',
-  narrower: 'Mais estreito',
-  taller: 'Mais alto',
-  shorter: 'Mais baixo',
-  hide: 'Esconder',
-  moved: '{title} movido para a linha {row}, coluna {column}',
-  movedInOrder: '{title} movido para a posição {position} de {total}',
-  resized: '{title} tem {columns} colunas por {rows} linhas',
-  hidden: '{title} escondido',
-};
 
 /**
  * The sales overview over a layout and a mode this story owns, with the
@@ -407,7 +385,10 @@ const one = (label: string, note: string, body: string) => ({
   selector: 'sl-dashboard-labels-demo',
   standalone: true,
   imports: [SalesDemo],
-  providers: [provideDashboardGridDefaults({ headingLevel: 2, labels: PORTUGUESE })],
+  providers: [
+    provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }),
+    provideDashboardGridDefaults({ headingLevel: 2 }),
+  ],
   template: `<sl-dashboard-sales-demo mode="labels" [startEditing]="true" />`,
 })
 class LabelsDemo {}
@@ -560,7 +541,7 @@ export const Labels: Story = {
   render: () =>
     one(
       'O painel de vendas, em português',
-      'The provider sets the bar, the handle’s name, the menu and the announcements once, and the titles become h2.',
+      'The language in force sets the bar, the handle’s name, the menu and the announcements once; the defaults provider makes the titles h2.',
       `<sl-dashboard-labels-demo />`,
     ),
 };

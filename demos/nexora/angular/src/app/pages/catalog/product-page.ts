@@ -189,7 +189,7 @@ import { SessionStore } from '../../core/session/session.store';
                 slBreadcrumb
                 slPageHeaderBreadcrumbs
                 [maxItems]="phone() ? 3 : 8"
-                label="Where this product is filed"
+                aria-label="Where this product is filed"
               >
                 <ol slBreadcrumbList>
                   <li slBreadcrumbItem>
@@ -240,7 +240,7 @@ import { SessionStore } from '../../core/session/session.store';
                 slBreadcrumb
                 slPageHeaderBreadcrumbs
                 [maxItems]="phone() ? 3 : 8"
-                label="Where this product is filed"
+                aria-label="Where this product is filed"
               >
                 <ol slBreadcrumbList>
                   <li slBreadcrumbItem>
@@ -372,7 +372,7 @@ import { SessionStore } from '../../core/session/session.store';
                 The wait reserves the four figures and the section that always
                 arrives, in the boxes they will occupy.
               -->
-              <div slSkeletonRegion label="Reading the product" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the product' }" [loading]="true">
                 <div slStack [gap]="6">
                   <div slGrid [columns]="phone() ? 2 : 4" minItemWidth="xs" [gap]="4">
                     @for (figure of figureLabels; track figure) {

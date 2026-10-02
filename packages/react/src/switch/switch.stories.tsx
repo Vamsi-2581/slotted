@@ -230,7 +230,7 @@ function PessimisticSwitch() {
     <Switch
       checked={on}
       loading={saving}
-      loadingLabel="Salvando a preferência"
+      messages={{ loading: 'Salvando a preferência' }}
       onCheckedChange={(next) => {
         setSaving(true);
         setTimeout(() => {

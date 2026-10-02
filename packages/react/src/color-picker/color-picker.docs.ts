@@ -244,12 +244,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Setting it once',
-    note: 'The provider carries the notation, the palette and every label an application translates once.',
+    note: 'The provider carries the notation and the palette; the words come from the language in force.',
     snippet: defineSnippet({
       id: 'color-picker-react-composition',
       language: 'tsx',
       label: 'A provider',
-      source: `<ColorPickerDefaultsProvider format="hsl" hueLabel="Matiz" alphaLabel="Opacidade">
+      source: `<ColorPickerDefaultsProvider format="hsl">
   <App />
 </ColorPickerDefaultsProvider>;`,
     }),
@@ -384,11 +384,11 @@ export const REACT_COLOR_PICKER_DOCS = {
         'Present means the consumer owns whether the panel is open; defaultOpen is the uncontrolled half',
       ],
       [
-        'labels',
-        'areaLabel, hueLabel, alphaLabel, inputLabel, formatLabel, eyedropperLabel, previousLabel, presetsLabel, gamutLabel, triggerLabel',
-        'English',
-        'ColorPickerDefaultsProvider',
-        'What each control is called, translated once',
+        'messages',
+        'Partial<ColorPickerMessages>',
+        '—',
+        'ColorPicker, ColorField',
+        'Words laid over the language in force, key by key: what each control is called, the gamut sentence and the contrast levels',
       ],
     ]),
     composition: apiRows([
@@ -408,7 +408,7 @@ export const REACT_COLOR_PICKER_DOCS = {
       ],
       [
         'ColorPickerDefaultsProvider',
-        '{ size, format, presets, labels }',
+        '{ size, format, presets }',
         '—',
         'a subtree',
         'The decisions an application takes once',

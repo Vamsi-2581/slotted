@@ -1,10 +1,11 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/carousel/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Carousel } from './carousel';
-import { CarouselDefaultsProvider } from './carousel-defaults';
 import {
   CarouselAutoplay,
   CarouselControls,
@@ -103,11 +104,11 @@ describe('Carousel', () => {
     const { container } = render(<Basic />);
     const root = container.querySelector('[data-ui="carousel"]');
     expect(root?.tagName).toBe('SECTION');
-    expect(root).toHaveAttribute('aria-roledescription', 'carrossel');
+    expect(root).toHaveAttribute('aria-roledescription', 'carousel');
     expect(root).toHaveAttribute('aria-label', 'Coleção Outono');
     expect(slides(container)[0]).toHaveAttribute('aria-roledescription', 'slide');
-    expect(slides(container)[0]).toHaveAttribute('aria-label', '1 de 3');
-    expect(screen.getByRole('tablist')).toHaveAttribute('aria-label', 'Escolher slide');
+    expect(slides(container)[0]).toHaveAttribute('aria-label', '1 of 3');
+    expect(screen.getByRole('tablist')).toHaveAttribute('aria-label', 'Choose slide');
     expect(tabs()).toHaveLength(3);
     expect(tabs()[0]).toHaveAttribute('aria-selected', 'true');
     expect(tabs()[0]).toHaveAttribute('aria-controls', slides(container)[0]?.id);
@@ -130,7 +131,7 @@ describe('Carousel', () => {
   it('asks for the next page with the reason, and moves an uncontrolled carousel', () => {
     const onPageChange = vi.fn();
     const { container } = render(<Basic onPageChange={onPageChange} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Slide seguinte' }), { detail: 1 });
+    fireEvent.click(screen.getByRole('button', { name: 'Next slide' }), { detail: 1 });
     expect(onPageChange).toHaveBeenCalledWith(
       1,
       expect.objectContaining({ reason: 'pointer', previous: 0 }),
@@ -142,7 +143,7 @@ describe('Carousel', () => {
 
   it('keeps focus on a control at the end and says it has nowhere to go', () => {
     render(<Basic />);
-    const previous = screen.getByRole('button', { name: 'Slide anterior' });
+    const previous = screen.getByRole('button', { name: 'Previous slide' });
     expect(previous).toHaveAttribute('aria-disabled', 'true');
     expect(previous).not.toBeDisabled();
     previous.focus();
@@ -154,7 +155,7 @@ describe('Carousel', () => {
   it('wraps past the ends with a loop', () => {
     const onPageChange = vi.fn();
     render(<Basic loop onPageChange={onPageChange} />);
-    const previous = screen.getByRole('button', { name: 'Slide anterior' });
+    const previous = screen.getByRole('button', { name: 'Previous slide' });
     expect(previous).not.toHaveAttribute('aria-disabled');
     fireEvent.click(previous, { detail: 0 });
     expect(onPageChange).toHaveBeenCalledWith(2, expect.objectContaining({ reason: 'keyboard' }));
@@ -166,17 +167,17 @@ describe('Carousel', () => {
       return <Basic page={page} onPageChange={(next) => accept && setPage(next)} />;
     }
     const { unmount } = render(<Controlled accept={false} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Slide seguinte' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next slide' }));
     expect(tabs()[0]).toHaveAttribute('aria-selected', 'true');
     unmount();
     render(<Controlled accept />);
-    fireEvent.click(screen.getByRole('button', { name: 'Slide seguinte' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next slide' }));
     expect(tabs()[1]).toHaveAttribute('aria-selected', 'true');
   });
 
   it('commits nothing when the request is cancelled', () => {
     render(<Basic onPageChange={(_page, request) => request.cancel()} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Slide seguinte' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next slide' }));
     expect(tabs()[0]).toHaveAttribute('aria-selected', 'true');
   });
 
@@ -232,7 +233,7 @@ describe('Carousel', () => {
       </Carousel>,
     );
     expect(slides(container)[0]).toHaveAttribute('aria-label', 'Jarro Mel, vista de frente');
-    expect(slides(container)[1]).toHaveAttribute('aria-label', '2 de 2');
+    expect(slides(container)[1]).toHaveAttribute('aria-label', '2 of 2');
   });
 
   it('draws thumbnails from a function child', () => {
@@ -259,14 +260,15 @@ describe('Carousel', () => {
     );
   });
 
-  it('takes its words from the provider', () => {
-    render(
-      <CarouselDefaultsProvider messages={{ next: 'Next slide' }}>
-        <Basic />
-      </CarouselDefaultsProvider>,
+  it('speaks the language in force, and lays its own messages over it', () => {
+    const { container } = render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Basic messages={{ previous: 'Voltar' }} />
+      </SlottedProvider>,
     );
-    expect(screen.getByRole('button', { name: 'Next slide' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Slide anterior' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Próximo slide' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Voltar' })).toBeInTheDocument();
+    expect(slides(container)[0]).toHaveAttribute('aria-label', '1 de 3');
   });
 
   it('writes the slides per view as the runtime property the stylesheet reads', () => {
@@ -279,7 +281,7 @@ describe('Carousel', () => {
 describe('Carousel rotation', () => {
   it('never rotates unless asked, and draws no rotation control', () => {
     render(<Basic />);
-    expect(screen.queryByRole('button', { name: /rotação/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /rotation/ })).toBeNull();
   });
 
   it('advances on the timer with the reason timeout, and names its control by the action', () => {
@@ -287,7 +289,7 @@ describe('Carousel rotation', () => {
     const onPageChange = vi.fn();
     const { container } = render(<Basic autoplay={1000} loop onPageChange={onPageChange} />);
     expect(container.querySelector('[data-ui="carousel"]')).toHaveAttribute('data-playing');
-    expect(screen.getByRole('button', { name: 'Parar a rotação' })).not.toHaveAttribute(
+    expect(screen.getByRole('button', { name: 'Stop rotation' })).not.toHaveAttribute(
       'aria-pressed',
     );
     act(() => {
@@ -320,7 +322,7 @@ describe('Carousel rotation', () => {
       false,
       expect.objectContaining({ reason: 'keyboard' }),
     );
-    const control = screen.getByRole('button', { name: 'Retomar a rotação' });
+    const control = screen.getByRole('button', { name: 'Resume rotation' });
     fireEvent.click(control, { detail: 1 });
     expect(onPlayingChange).toHaveBeenLastCalledWith(
       true,
@@ -370,7 +372,7 @@ describe('Carousel rotation', () => {
     Object.defineProperty(window, 'matchMedia', { configurable: true, value: matchMedia });
     const { container } = render(<Basic autoplay />);
     expect(container.querySelector('[data-ui="carousel"]')).not.toHaveAttribute('data-playing');
-    expect(screen.getByRole('button', { name: 'Retomar a rotação' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Resume rotation' })).toBeInTheDocument();
     vi.unstubAllGlobals();
   });
 });

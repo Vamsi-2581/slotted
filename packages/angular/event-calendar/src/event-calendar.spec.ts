@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlMenuItem } from '@slotted/angular/menu';
 import { plainDate } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import type { PlainDate, PlainDateTime } from '@slotted/core/date';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -269,12 +271,44 @@ describe('SlEventCalendar', () => {
          <ng-template slEventCalendarDayContent let-date>{{ date.day === 25 ? 'Payroll' : '' }}</ng-template>
          <button slEventCalendarActions type="button">New event</button>
        </div>`,
-      [provideEventCalendarDefaults({ locale: 'pt-BR', labels: { today: 'Hoje' } })],
+      [
+        provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }),
+        provideEventCalendarDefaults({ weekNumbers: true }),
+      ],
     );
     expect(cell(fixture, '2026-09-25').textContent).toContain('Payroll');
     expect(query(fixture, "[data-part='actions']").textContent).toContain('New event');
     expect(query(fixture, "[data-part='today']").textContent?.trim()).toBe('Hoje');
     expect(query(fixture, "[data-part='title']").textContent?.trim()).toBe('setembro de 2026');
+    expect(query(fixture, "[data-part='week-number']")).not.toBeNull();
+  });
+
+  it('changes its words and its date format together with the language in force', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(
+      `<div slEventCalendar [events]="[]" [defaultDate]="twentyFourth" timeZone="UTC"></div>`,
+      [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    );
+    const today = () => query(fixture, "[data-part='today']").textContent?.trim();
+    const title = () => query(fixture, "[data-part='title']").textContent?.trim();
+
+    expect(today()).toBe('Hoje');
+    expect(title()).toBe('setembro de 2026');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(today()).toBe('Today');
+    expect(title()).toBe('September 2026');
+  });
+
+  it('lays its own messages over the language in force', () => {
+    const fixture = renderTemplate(
+      `<div slEventCalendar [events]="[]" [defaultDate]="twentyFourth" timeZone="UTC" locale="en-US" [messages]="{ next: { month: 'Following month' } }"></div>`,
+    );
+    expect(query(fixture, "[data-part='next']").getAttribute('aria-label')).toBe('Following month');
+    expect(query(fixture, "[data-part='previous']").getAttribute('aria-label')).toBe(
+      'Previous month',
+    );
   });
 
   it('draws a list with a heading per day, and its empty state', () => {

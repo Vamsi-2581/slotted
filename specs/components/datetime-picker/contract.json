@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "datetime-picker",
   "ui": "datetime-picker",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Date and time field with a picker popover."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-datepicker/",
   "patternStatus": "Read on 2026-09-10, together with the listbox and grid patterns it links, and transcribed into docs/history/designs/2026-09-10-datetime-design.md §3. The example gives its popup role=dialog and its trigger aria-haspopup=dialog, returns focus to the trigger on Escape, and states the Tab rule this family needs twice over: only one element of a calendar grid is in the Tab sequence, so a dialog holding a grid and a listbox is two Tab stops rather than forty-three.",
   "controlPart": "control",
@@ -85,8 +89,8 @@
     "listName": "the listbox carries aria-label. A dialog holding two widgets gives neither of them a name by position, and the name is written rather than drawn — a visible label over a column of times repeats what the column says."
   },
   "triggerName": {
-    "empty": "chooseLabel",
-    "chosen": "changeLabel, with the whole datetime in words",
+    "empty": "the choose message",
+    "chosen": "the change message, with the whole datetime in words in its date slot",
     "why": "Focus returns to the trigger when the popup closes, so the name is where the reader is told what was chosen. The APG's own example names this as an accessibility feature, and both sibling pickers already take it."
   },
   "tabSequence": {
@@ -298,7 +302,7 @@
     "closeOnSelect": ["prop", "defaults", "auto"],
     "step": ["prop", "defaults", "900"],
     "unavailableOptions": ["prop", "defaults", "disable"],
-    "locale": ["prop", "defaults", "runtime"],
+    "locale": ["prop", "slotted", "en-US"],
     "timeZone": ["prop", "defaults", "runtime"],
     "hourCycle": ["prop", "defaults", "locale"],
     "granularity": ["prop", "defaults", "minute"],
@@ -308,27 +312,20 @@
   "provides": {
     "dateTimePickerDefaults": [
       "calendar",
-      "changeLabel",
-      "chooseLabel",
       "closeOnSelect",
-      "dateLabel",
-      "emptyLabel",
       "granularity",
       "hourCycle",
-      "locale",
       "maxOptions",
-      "nowLabel",
       "openTo",
       "placement",
       "size",
       "step",
-      "timeLabel",
       "timeZone",
-      "truncatedLabel",
       "unavailableOptions",
       "variant"
     ]
   },
+  "messages": ["change", "choose", "empty", "now", "truncated"],
   "imperative": ["focus", "open", "close"],
   "stateAttributes": {
     "disabled": "data-disabled",

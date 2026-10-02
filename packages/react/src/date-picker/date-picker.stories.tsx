@@ -1,5 +1,6 @@
 import { plainDate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -8,6 +9,7 @@ import { useRef, useState } from 'react';
 import { Button } from '../button';
 import type { CalendarValue } from '../calendar';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { DatePicker } from './date-picker';
 import { DatePickerDefaultsProvider } from './date-picker-defaults';
 import { Grid, Measure, Scene } from './date-picker-demo';
@@ -312,16 +314,13 @@ export const Composition: Story = {
       <Grid columns={1}>
         <Scene
           label="Set once for the application"
-          note="One provider decides the locale, the zone and both trigger names for every picker under it, so a product does not repeat four props on each form."
+          note="One provider decides the zone for every picker under it, and SlottedProvider the language that writes the date and names the trigger, so a product does not repeat them on each form."
         >
-          <DatePickerDefaultsProvider
-            changeLabel="Alterar data"
-            chooseLabel="Escolher data"
-            locale="pt-BR"
-            timeZone="America/Sao_Paulo"
-          >
-            <DatePicker aria-label="Herdado" defaultValue={NINTH} />
-          </DatePickerDefaultsProvider>
+          <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+            <DatePickerDefaultsProvider timeZone="America/Sao_Paulo">
+              <DatePicker aria-label="Herdado" defaultValue={NINTH} />
+            </DatePickerDefaultsProvider>
+          </SlottedProvider>
         </Scene>
         <Scene
           label="The imperative handle"

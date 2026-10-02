@@ -12,7 +12,7 @@ import type { ButtonHTMLAttributes, CSSProperties, MouseEvent, Ref, SyntheticEve
 import { Glyph, Icon } from '../icon';
 import { BubbleContext, BubbleMetaContext, useBubble } from './bubble-context';
 import { useMessageDefaults } from './message-defaults';
-import { reasonOf, useOptionalMessage } from './message';
+import { reasonOf, useMessageWords, useOptionalMessage } from './message';
 import type {
   BubbleContentProps,
   BubbleContextValue,
@@ -61,6 +61,7 @@ export function Bubble({
 }: BubbleProps) {
   const defaults = useMessageDefaults();
   const message = useOptionalMessage();
+  const t = useMessageWords();
   const contentId = useId();
   const [ownRevealed, setOwnRevealed] = useState(defaultRevealed);
   const [overflowing, setOverflowing] = useState(false);
@@ -89,7 +90,6 @@ export function Bubble({
   const context: BubbleContextValue = {
     clamped,
     contentId,
-    messages: defaults.messages,
     overflowing,
     requestRevealed,
     revealed: shown,
@@ -108,7 +108,7 @@ export function Bubble({
         }
         type="button"
       >
-        {shown ? defaults.messages.less : defaults.messages.more}
+        {shown ? t('less') : t('more')}
         <Icon>
           <Glyph name="chevron-down" />
         </Icon>
@@ -293,10 +293,10 @@ export function BubbleCaret(props: MessageSpanProps) {
 }
 
 /** Three dots in the bubble of someone writing, named for assistive technology. */
-export function BubbleTyping({ label, ...nativeProps }: BubbleTypingProps) {
-  const { messages } = useMessageDefaults();
+export function BubbleTyping(props: BubbleTypingProps) {
+  const t = useMessageWords();
   return (
-    <span aria-label={label ?? messages.typing} role="img" {...nativeProps} data-part="typing">
+    <span aria-label={t('typing')} role="img" {...props} data-part="typing">
       <span />
       <span />
       <span />
@@ -311,9 +311,9 @@ export function BubbleTyping({ label, ...nativeProps }: BubbleTypingProps) {
  */
 export function BubbleRetry({ children, onClick, render, ...nativeProps }: BubbleRetryProps) {
   const message = useOptionalMessage();
-  const { messages } = useMessageDefaults();
+  const t = useMessageWords();
   const rootProps = {
-    'aria-label': messages.retry,
+    'aria-label': t('retry'),
     type: 'button',
     ...nativeProps,
     children: children ?? (
@@ -337,9 +337,9 @@ export function BubbleRetry({ children, onClick, render, ...nativeProps }: Bubbl
 
 /** The row of reactions straddling the surface's lower edge; in a thread, a row under the words. */
 export function BubbleReactions({ render, ...nativeProps }: MessagePartProps) {
-  const { messages } = useBubble();
+  const t = useMessageWords();
   const rootProps: MessageRootProps = {
-    'aria-label': messages.reactions,
+    'aria-label': t('reactions'),
     role: 'group',
     ...nativeProps,
     'data-part': 'reactions',

@@ -1,7 +1,8 @@
 import '@slotted/styles/rating/rating.css';
 
+import { ratingMessages } from '@slotted/core/i18n';
 import {
-  formatRatingMessage,
+  formatRatingValue,
   normaliseRating,
   ratingAtPoint,
   ratingFills,
@@ -12,6 +13,7 @@ import { useEffect, useId, useImperativeHandle, useRef, useState } from 'react';
 import type { KeyboardEvent, MouseEvent, PointerEvent } from 'react';
 
 import { useField, useFieldDefaults } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { useRatingDefaults } from './rating-defaults';
 import { RatingSymbolLayers } from './rating-display';
 import type { RatingChangeReason, RatingProps, RatingRootProps } from './rating.types';
@@ -97,6 +99,8 @@ export function Rating({
   const field = useField();
   const fieldDefaults = useFieldDefaults();
   const defaults = useRatingDefaults();
+  const t = useMessages(ratingMessages, messages);
+  const appLocale = useLocale();
   const generatedName = useId();
 
   const resolvedMax = Math.max(1, Math.floor(max ?? defaults.max));
@@ -105,8 +109,7 @@ export function Rating({
   const resolvedSize = size ?? field?.size ?? defaults.size;
   const resolvedTone = tone ?? defaults.tone;
   const resolvedClearable = clearable ?? defaults.clearable;
-  const resolvedLocale = locale ?? defaults.locale;
-  const resolvedMessages = { ...defaults.messages, ...messages };
+  const resolvedLocale = locale ?? appLocale;
   const resolvedDisabled = disabled ?? field?.disabled ?? fieldDefaults.disabled;
   const resolvedReadOnly = readOnly ?? field?.readOnly ?? fieldDefaults.readOnly;
   const resolvedInvalid = invalid ?? field?.invalid;
@@ -262,11 +265,10 @@ export function Rating({
               <span data-part="item" key={whole} {...(checked ? { 'data-checked': '' } : {})}>
                 {values.map((itemValue) => (
                   <input
-                    aria-label={formatRatingMessage(
-                      resolvedMessages.itemLabel,
-                      { value: itemValue, max: resolvedMax },
-                      resolvedLocale,
-                    )}
+                    aria-label={t('itemLabel', {
+                      value: formatRatingValue(itemValue, resolvedLocale),
+                      max: resolvedMax,
+                    })}
                     checked={itemValue === current}
                     data-part="input"
                     disabled={resolvedDisabled}

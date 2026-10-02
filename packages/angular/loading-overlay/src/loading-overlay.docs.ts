@@ -105,7 +105,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'One covered region',
       source:
-        '<section slLoadingOverlay [loading]="saving()" label="Saving changes">\n  <app-billing-form />\n</section>',
+        '<section slLoadingOverlay [loading]="saving()" [messages]="{ label: \'Saving changes\' }">\n  <app-billing-form />\n</section>',
     }),
   },
   {
@@ -117,7 +117,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'Covering a card',
       source:
-        '<div slLoadingOverlay [loading]="saving()" label="Saving changes">\n  <div slCard>\n    <div slCardBody>…</div>\n  </div>\n</div>',
+        '<div slLoadingOverlay [loading]="saving()" [messages]="{ label: \'Saving changes\' }">\n  <div slCard>\n    <div slCardBody>…</div>\n  </div>\n</div>',
     }),
   },
   {
@@ -129,7 +129,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'Blocking the page',
       source:
-        '<div\n  slLoadingOverlay\n  scope="page"\n  [loading]="closing()"\n  label="Closing the accounting period"\n  description="Do not close this tab."\n></div>',
+        '<div\n  slLoadingOverlay\n  scope="page"\n  [loading]="closing()"\n  [messages]="{ label: \'Closing the accounting period\' }"\n  description="Do not close this tab."\n></div>',
     }),
   },
   {
@@ -153,7 +153,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'The size axis',
       source:
-        '<div slLoadingOverlay size="sm" label="Reconciling">…</div>\n<div slLoadingOverlay size="md" label="Reconciling">…</div>\n<div slLoadingOverlay size="lg" label="Reconciling">…</div>',
+        '<div slLoadingOverlay size="sm" [messages]="{ label: \'Reconciling\' }">…</div>\n<div slLoadingOverlay size="md" [messages]="{ label: \'Reconciling\' }">…</div>\n<div slLoadingOverlay size="lg" [messages]="{ label: \'Reconciling\' }">…</div>',
     }),
   },
   {
@@ -164,7 +164,8 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'loading-overlay-angular-shapes',
       language: 'angular',
       label: 'One overlay, three regions',
-      source: '<tr slLoadingOverlay label="Updating the row" cancellable>\n  …\n</tr>',
+      source:
+        '<tr slLoadingOverlay [messages]="{ label: \'Updating the row\' }" cancellable>\n  …\n</tr>',
     }),
   },
   {
@@ -188,7 +189,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'Asking to stop',
       source:
-        '<div\n  slLoadingOverlay\n  [loading]="importing()"\n  cancellable\n  label="Importing 4 812 rows"\n  (cancel)="abort($event.reason)"\n>\n  …\n</div>',
+        '<div\n  slLoadingOverlay\n  [loading]="importing()"\n  cancellable\n  [messages]="{ label: \'Importing 4 812 rows\' }"\n  (cancel)="abort($event.reason)"\n>\n  …\n</div>',
     }),
   },
   {
@@ -212,7 +213,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'Composing progress-indicator',
       source:
-        '<div slLoadingOverlay label="Uploading contrato.pdf">\n  <div slLoadingOverlayIndicator slProgressBar [value]="62" label="Uploaded" hideLabel></div>\n  …\n</div>',
+        '<div slLoadingOverlay [messages]="{ label: \'Uploading contrato.pdf\' }">\n  <div slLoadingOverlayIndicator slProgressBar [value]="62" label="Uploaded" hideLabel></div>\n  …\n</div>',
     }),
   },
   {
@@ -224,7 +225,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'A long label',
       source:
-        '<div\n  slLoadingOverlay\n  label="A reconciliar os lançamentos do período com o extrato bancário"\n  description="Interromper agora deixaria metade do período conciliado."\n></div>',
+        '<div\n  slLoadingOverlay\n  [messages]="{ label: \'A reconciliar os lançamentos do período com o extrato bancário\' }"\n  description="Interromper agora deixaria metade do período conciliado."\n></div>',
     }),
   },
   {
@@ -247,7 +248,8 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'loading-overlay-angular-accessibility',
       language: 'angular',
       label: 'One wait, one announcement',
-      source: '<div slLoadingOverlay label="Saving changes" loadedLabel="Changes saved">…</div>',
+      source:
+        '<div slLoadingOverlay [messages]="{ label: \'Saving changes\' }" loadedLabel="Changes saved">…</div>',
     }),
   },
 ];
@@ -294,11 +296,11 @@ export const ANGULAR_LOADING_OVERLAY_DOCS = {
         'Whether the overlay announces the wait at all. off is for a page that already says it elsewhere',
       ],
       [
-        'label',
-        'string',
-        'Loading…',
+        'messages',
+        'Partial<LoadingOverlayMessages>',
+        '—',
         'SlLoadingOverlay',
-        'The short line. Painted in the panel and announced once, which is why it is a string',
+        'Words laid over the language in force, key by key: the short line (label), painted in the panel and announced once, and the cancel control’s words (cancel)',
       ],
       [
         'loadedLabel',
@@ -320,13 +322,6 @@ export const ANGULAR_LOADING_OVERLAY_DOCS = {
         'false',
         'SlLoadingOverlay',
         'Renders the control that asks to stop, and binds Escape to it',
-      ],
-      [
-        'cancelLabel',
-        'string',
-        'Cancel',
-        'SlLoadingOverlay',
-        'What that control says. Falls back to the provider, then to Cancel',
       ],
       [
         'delay',
@@ -403,7 +398,7 @@ export const ANGULAR_LOADING_OVERLAY_DOCS = {
         'LoadingOverlayDefaults',
         '—',
         'Application',
-        'Sets veil, size, live, label, loadedLabel, cancelLabel, delay and minDuration once for the whole injector; an input still wins',
+        'Sets veil, size, live, loadedLabel, delay and minDuration once for the whole injector; an input still wins',
       ],
     ]),
     accessibility: [

@@ -1,4 +1,5 @@
 import type { DateFieldName, PlainDate, SegmentState } from '@slotted/core/date';
+import type { DateFieldMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -41,11 +42,8 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
 /** What an application sets once for every date field under it. */
 export interface DateFieldDefaults {
   calendar: DateFieldCalendar;
-  clearLabel: string;
   /** `0` is Sunday. Unset means the locale decides. */
   firstDayOfWeek: number | undefined;
-  /** BCP 47. Unset means the runtime decides. */
-  locale: string | undefined;
   size: DateFieldSize;
   /** Which zone answers "what is today". Unset means the runtime's own. */
   timeZone: string | undefined;
@@ -109,7 +107,10 @@ export interface DateFieldProps extends Omit<
   /** Refuses particular dates — a weekend, a holiday, a booked day. */
   isDateUnavailable?: ((date: PlainDate) => boolean) | undefined;
 
-  /** BCP 47. Decides the field order, the separators and the placeholder. */
+  /**
+   * BCP 47. Decides the field order, the separators and the placeholder.
+   * Unset, the language in force decides.
+   */
   locale?: string | undefined;
   /** Which zone answers "what is today", and nothing else. */
   timeZone?: string | undefined;
@@ -130,7 +131,8 @@ export interface DateFieldProps extends Omit<
 
   /** Draws a button that empties the value and returns focus to the control. */
   clearable?: boolean | undefined;
-  clearLabel?: string | undefined;
+  /** Words laid over the catalog of the language in force, key by key: the clear button's name. */
+  messages?: PartialMessages<DateFieldMessages> | undefined;
 
   /** The name a plain form post carries the ISO string under. */
   name?: string | undefined;

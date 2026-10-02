@@ -1,6 +1,7 @@
 import '@slotted/styles/combobox/combobox.css';
 
 import { createFilter } from '@slotted/core/collection';
+import { comboboxMessages, type ComboboxMessages, type FamilyTranslator } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import {
   createContext,
@@ -15,6 +16,7 @@ import {
 import type { MutableRefObject } from 'react';
 
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { useComboboxDefaults } from './combobox-defaults';
 import type {
   ComboboxAlign,
@@ -48,7 +50,6 @@ export interface ComboboxContextValue {
   autoHighlight: boolean;
   clear: (reason: ComboboxValueReason, source?: unknown) => void;
   clearable: boolean;
-  clearLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   closeOnSelect: boolean;
@@ -63,9 +64,7 @@ export interface ComboboxContextValue {
   completion: string | null;
   contentId: string;
   contentNode: HTMLElement | null;
-  countLabel: string;
   disabled: boolean;
-  emptyLabel: string;
   entry: MutableRefObject<ComboboxEntry>;
   flip: boolean;
   form: string | undefined;
@@ -79,14 +78,13 @@ export interface ComboboxContextValue {
   labelFor: (value: ComboboxOptionValue) => string | undefined;
   /** Whether the consumer will take a value the collection does not hold (CB8). */
   canCreate: boolean;
-  createLabel: string;
   /** Reports the query the reader asked to add. The collection is the consumer's. */
   create: (query: string, reason: ComboboxValueReason, source?: unknown) => void;
   /** Settles the typed text against the collection, which `blur` is the moment for. */
   settleInput: (source?: unknown) => void;
   loading: boolean;
-  loadingLabel: string;
-  locale: string | undefined;
+  /** The locale the default filter compares in: the `locale` prop, or the language in force. */
+  locale: string;
   loop: boolean;
   matches: (label: string) => boolean;
   mount: ComboboxMount;
@@ -122,8 +120,9 @@ export interface ComboboxContextValue {
   sideOffset: number;
   size: ComboboxSize;
   strategy: ComboboxStrategy;
+  /** The family's words in the language in force, with this combobox's `messages` laid over them. */
+  t: FamilyTranslator<ComboboxMessages>;
   total: number | undefined;
-  triggerLabel: string;
   inputNode: HTMLInputElement | null;
   value: ComboboxOptionValue | null;
   variant: ComboboxVariant;
@@ -175,20 +174,16 @@ export function Combobox({
   autoHighlight,
   children,
   clearable,
-  clearLabel,
   closeOnEscape,
   closeOnOutsidePress,
   closeOnSelect,
   collisionPadding,
-  countLabel,
-  createLabel,
   onCreate,
   defaultHighlightedValue = null,
   defaultInputValue = '',
   defaultOpen = false,
   defaultValue = null,
   disabled,
-  emptyLabel,
   filter,
   flip,
   form,
@@ -200,9 +195,9 @@ export function Combobox({
   invalid,
   items,
   loading,
-  loadingLabel,
-  locale,
+  locale: localeProp,
   loop,
+  messages,
   mount,
   name,
   onHighlightedValueChange,
@@ -223,13 +218,15 @@ export function Combobox({
   size,
   strategy,
   total,
-  triggerLabel,
   value,
   variant,
   width,
 }: ComboboxProps) {
   const defaults = useComboboxDefaults();
   const field = useField();
+  const t = useMessages(comboboxMessages, messages);
+  const inForce = useLocale();
+  const locale = localeProp ?? inForce;
 
   const generated = useId();
   const contentId = `${generated}listbox`;
@@ -539,7 +536,6 @@ export function Combobox({
     autoHighlight: autoHighlight ?? defaults.autoHighlight,
     clear,
     clearable: clearable ?? defaults.clearable,
-    clearLabel: clearLabel ?? defaults.clearLabel,
     closeOnEscape: closeOnEscape ?? defaults.closeOnEscape,
     closeOnOutsidePress: closeOnOutsidePress ?? defaults.closeOnOutsidePress,
     closeOnSelect: closeOnSelect ?? defaults.closeOnSelect,
@@ -547,12 +543,9 @@ export function Combobox({
     completion,
     contentId,
     contentNode,
-    countLabel: countLabel ?? defaults.countLabel,
     canCreate: onCreate !== undefined,
     create,
-    createLabel: createLabel ?? defaults.createLabel,
     disabled: resolvedDisabled,
-    emptyLabel: emptyLabel ?? defaults.emptyLabel,
     entry,
     flip: flip ?? defaults.flip,
     form,
@@ -566,7 +559,6 @@ export function Combobox({
     invalid: invalid ?? field?.invalid ?? defaults.invalid,
     labelFor,
     loading: loading ?? defaults.loading,
-    loadingLabel: loadingLabel ?? defaults.loadingLabel,
     locale,
     loop: loop ?? defaults.loop,
     matches,
@@ -595,8 +587,8 @@ export function Combobox({
     sideOffset: sideOffset ?? defaults.sideOffset,
     size: size ?? field?.size ?? defaults.size,
     strategy: strategy ?? defaults.strategy,
+    t,
     total,
-    triggerLabel: triggerLabel ?? defaults.triggerLabel,
     value: currentValue,
     variant: variant ?? defaults.variant,
     wantsCompletion,

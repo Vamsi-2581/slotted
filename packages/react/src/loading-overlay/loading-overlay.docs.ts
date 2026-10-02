@@ -102,7 +102,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'One covered region',
       source:
-        '<LoadingOverlay loading={saving} label="Saving changes">\n  <BillingForm />\n</LoadingOverlay>;',
+        "<LoadingOverlay loading={saving} messages={{ label: 'Saving changes' }}>\n  <BillingForm />\n</LoadingOverlay>;",
     }),
   },
   {
@@ -114,7 +114,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Covering a card',
       source:
-        '<LoadingOverlay loading={saving} label="Saving changes">\n  <Card>\n    <CardBody>{fields}</CardBody>\n  </Card>\n</LoadingOverlay>;',
+        "<LoadingOverlay loading={saving} messages={{ label: 'Saving changes' }}>\n  <Card>\n    <CardBody>{fields}</CardBody>\n  </Card>\n</LoadingOverlay>;",
     }),
   },
   {
@@ -126,7 +126,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Blocking the page',
       source:
-        '<LoadingOverlay\n  scope="page"\n  loading={closing}\n  label="Closing the accounting period"\n  description="Do not close this tab."\n/>;',
+        '<LoadingOverlay\n  scope="page"\n  loading={closing}\n  messages={{ label: \'Closing the accounting period\' }}\n  description="Do not close this tab."\n/>;',
     }),
   },
   {
@@ -150,7 +150,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'The size axis',
       source:
-        '<LoadingOverlay size="sm" label="Reconciling" />;\n<LoadingOverlay size="md" label="Reconciling" />;\n<LoadingOverlay size="lg" label="Reconciling" />;',
+        '<LoadingOverlay size="sm" messages={{ label: \'Reconciling\' }} />;\n<LoadingOverlay size="md" messages={{ label: \'Reconciling\' }} />;\n<LoadingOverlay size="lg" messages={{ label: \'Reconciling\' }} />;',
     }),
   },
   {
@@ -162,7 +162,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'One overlay, three regions',
       source:
-        '<LoadingOverlay label="Updating the row" cancellable>\n  <TableRow />\n</LoadingOverlay>;',
+        "<LoadingOverlay messages={{ label: 'Updating the row' }} cancellable>\n  <TableRow />\n</LoadingOverlay>;",
     }),
   },
   {
@@ -186,7 +186,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Asking to stop',
       source:
-        '<LoadingOverlay\n  loading={importing}\n  cancellable\n  label="Importing 4 812 rows"\n  onCancel={(request) => abort(request.reason)}\n>\n  {rows}\n</LoadingOverlay>;',
+        "<LoadingOverlay\n  loading={importing}\n  cancellable\n  messages={{ label: 'Importing 4 812 rows' }}\n  onCancel={(request) => abort(request.reason)}\n>\n  {rows}\n</LoadingOverlay>;",
     }),
   },
   {
@@ -210,7 +210,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Composing progress-indicator',
       source:
-        '<LoadingOverlay\n  label="Uploading contrato.pdf"\n  indicator={<ProgressBar value={62} label="Uploaded" hideLabel />}\n/>;',
+        '<LoadingOverlay\n  messages={{ label: \'Uploading contrato.pdf\' }}\n  indicator={<ProgressBar value={62} label="Uploaded" hideLabel />}\n/>;',
     }),
   },
   {
@@ -222,7 +222,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A long label',
       source:
-        '<LoadingOverlay\n  label="A reconciliar os lançamentos do período com o extrato bancário"\n  description="Interromper agora deixaria metade do período conciliado."\n/>;',
+        '<LoadingOverlay\n  messages={{ label: \'A reconciliar os lançamentos do período com o extrato bancário\' }}\n  description="Interromper agora deixaria metade do período conciliado."\n/>;',
     }),
   },
   {
@@ -246,7 +246,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'One wait, one announcement',
       source:
-        '<LoadingOverlay label="Saving changes" loadedLabel="Changes saved">\n  {fields}\n</LoadingOverlay>;',
+        '<LoadingOverlay messages={{ label: \'Saving changes\' }} loadedLabel="Changes saved">\n  {fields}\n</LoadingOverlay>;',
     }),
   },
 ];
@@ -293,11 +293,11 @@ export const REACT_LOADING_OVERLAY_DOCS = {
         'Whether the overlay announces the wait at all. off is for a page that already says it elsewhere',
       ],
       [
-        'label',
-        'string',
-        'Loading…',
+        'messages',
+        'Partial<LoadingOverlayMessages>',
+        '—',
         'LoadingOverlay',
-        'The short line. Painted in the panel and announced once, which is why it is a string',
+        'Words laid over the language in force, key by key: the short line (label), painted in the panel and announced once, and the cancel control’s words (cancel)',
       ],
       [
         'loadedLabel',
@@ -323,9 +323,9 @@ export const REACT_LOADING_OVERLAY_DOCS = {
       [
         'cancelLabel',
         'ReactNode',
-        'Cancel',
+        '—',
         'LoadingOverlay',
-        'What that control says. Falls back to the provider, then to Cancel',
+        'What that control says, in place of the catalog’s cancel',
       ],
       [
         'delay',
@@ -402,7 +402,7 @@ export const REACT_LOADING_OVERLAY_DOCS = {
         'LoadingOverlayDefaults',
         '—',
         'Application',
-        'Sets veil, size, live, label, loadedLabel, cancelLabel, delay and minDuration once for everything below it; a prop still wins',
+        'Sets veil, size, live, loadedLabel, delay and minDuration once for everything below it; a prop still wins',
       ],
     ]),
     accessibility: [

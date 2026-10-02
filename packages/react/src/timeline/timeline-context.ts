@@ -4,7 +4,6 @@ import type {
   TimelineContextValue,
   TimelineItemContextValue,
   TimelineListContextValue,
-  TimelineMessages,
 } from './timeline.types';
 
 export const TimelineContext = createContext<TimelineContextValue | undefined>(undefined);
@@ -33,13 +32,3 @@ export function useTimelineList(): TimelineListContextValue {
 export function useTimelineItem(): TimelineItemContextValue | undefined {
   return useContext(TimelineItemContext);
 }
-
-export const DEFAULT_TIMELINE_MESSAGES: TimelineMessages = {
-  collapse: 'Hide events',
-  current: 'current',
-  empty: 'No events yet',
-  expand: 'Show events',
-  freshItems: (count) => `${count} new events`,
-  loadMore: 'Load more',
-  loading: 'Loading more events',
-};

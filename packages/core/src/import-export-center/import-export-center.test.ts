@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
+import { createTranslator, importExportCenterMessages } from '../i18n';
+import { PT_BR } from '../i18n/locales/pt-BR';
 import {
   activeJobCount,
-  DEFAULT_IMPORT_EXPORT_MESSAGES as messages,
   estimateFinish,
   failedRows,
   fileAvailability,
@@ -25,6 +26,12 @@ import {
 import type { ImportExportJob } from './index';
 
 const NOW = Date.parse('2026-09-25T14:00:00Z');
+
+/** The family's words in Brazilian Portuguese, whose digits group with a dot. */
+const t = createTranslator({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }).family(
+  importExportCenterMessages,
+);
+const en = createTranslator({ locale: 'en-US' }).family(importExportCenterMessages);
 
 function job(patch: Partial<ImportExportJob> = {}): ImportExportJob {
   return { key: 'j', direction: 'import', title: 'Contatos', status: 'running', ...patch };
@@ -252,7 +259,7 @@ describe('jobProgressText', () => {
     expect(
       jobProgressText(job({ progress: { value: 1204, max: 5000 } }), {
         locale: 'pt-BR',
-        messages,
+        t,
         remaining: 170,
       }),
     ).toEqual(['1.204 de 5.000 linhas', '24%', 'cerca de 2 min 50 s restantes']);
@@ -262,20 +269,20 @@ describe('jobProgressText', () => {
     expect(
       jobProgressText(job({ progress: { value: 2_500_000, max: 10_000_000, unit: 'bytes' } }), {
         locale: 'pt-BR',
-        messages,
+        t,
       }),
     ).toEqual(['2,5 MB de 10 MB', '25%']);
     expect(
       jobProgressText(job({ progress: { value: 40, max: 100, unit: 'percent' } }), {
         locale: 'pt-BR',
-        messages,
+        t,
       }),
     ).toEqual(['40%']);
   });
 
   it('writes nothing for an indeterminate job', () => {
-    expect(jobProgressText(job({ progress: {} }), { locale: 'pt-BR', messages })).toEqual([]);
-    expect(jobProgressText(job(), { locale: 'pt-BR', messages })).toEqual([]);
+    expect(jobProgressText(job({ progress: {} }), { locale: 'pt-BR', t })).toEqual([]);
+    expect(jobProgressText(job(), { locale: 'pt-BR', t })).toEqual([]);
   });
 });
 
@@ -287,13 +294,13 @@ describe('jobSummaryText', () => {
           status: 'succeeded',
           counts: { total: 3000, processed: 2988, created: 2210, updated: 778 },
         }),
-        { locale: 'pt-BR', messages },
+        { locale: 'pt-BR', t },
       ),
     ).toEqual(['2.988 de 3.000 linhas', '2.210 criadas', '778 atualizadas']);
     expect(
       jobSummaryText(job({ status: 'running', counts: { total: 3 } }), {
         locale: 'pt-BR',
-        messages,
+        t,
       }),
     ).toEqual([]);
   });
@@ -323,8 +330,8 @@ describe('jobTransition', () => {
 
 describe('jobNotice and jobAnnouncement', () => {
   it('points the toast at the job under the job key, and updates it in place', () => {
-    const started = jobNotice(undefined, job({ status: 'running' }), messages);
-    const done = jobNotice(job({ status: 'running' }), job({ status: 'succeeded' }), messages);
+    const started = jobNotice(undefined, job({ status: 'running' }), t);
+    const done = jobNotice(job({ status: 'running' }), job({ status: 'succeeded' }), t);
     expect(started?.id).toBe('import-export-center:j');
     expect(done?.id).toBe(started?.id);
     expect(started).toMatchObject({ tone: 'accent', loading: true, key: 'j' });
@@ -337,16 +344,19 @@ describe('jobNotice and jobAnnouncement', () => {
   });
 
   it('gives a cancelled job no notice: the reader asked for it', () => {
-    expect(jobNotice(job({ status: 'running' }), job({ status: 'canceled' }), messages)).toBeNull();
+    expect(jobNotice(job({ status: 'running' }), job({ status: 'canceled' }), t)).toBeNull();
   });
 
   it('announces in words that name the direction, the job and the outcome', () => {
-    expect(
-      jobAnnouncement('success', job({ direction: 'export', title: 'Faturas' }), messages),
-    ).toBe('Exportação Faturas concluída');
-    expect(
-      jobAnnouncement('partial', job({ title: 'Catálogo', counts: { failed: 12 } }), messages),
-    ).toBe('Importação Catálogo concluída com 12 erros');
+    expect(jobAnnouncement('success', job({ direction: 'export', title: 'Faturas' }), t)).toBe(
+      'Exportação Faturas concluída',
+    );
+    expect(jobAnnouncement('partial', job({ title: 'Catálogo', counts: { failed: 12 } }), t)).toBe(
+      'Importação Catálogo concluída com 12 erros',
+    );
+    expect(jobAnnouncement('partial', job({ title: 'Catalog', counts: { failed: 1 } }), en)).toBe(
+      'Import Catalog completed with 1 error',
+    );
   });
 });
 

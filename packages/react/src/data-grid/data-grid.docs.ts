@@ -234,7 +234,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div[role="columnheader"]',
     required: false,
     purpose:
-      'The pop-in’s column, last in the header row while columns are out of space: labels.popinHeader, visually hidden, with no track.',
+      'The pop-in’s column, last in the header row while columns are out of space: messages.popinHeader, visually hidden, with no track.',
   },
   {
     part: 'popin',
@@ -984,12 +984,18 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'accessibility',
     title: 'What a reader hears',
-    note: 'A grid named by label; every row with its index in the whole set and every cell with its column index; aria-sort on the first key and the rest announced; the selection’s size in the header checkbox’s name; a resize as a width; a filter as its sentence. Inspect the tree with a screen reader.',
+    note: 'A grid named by aria-label; every row with its index in the whole set and every cell with its column index; aria-sort on the first key and the rest announced; the selection’s size in the header checkbox’s name; a resize as a width; a filter as its sentence. Inspect the tree with a screen reader.',
     snippet: defineSnippet({
       id: 'data-grid-react-accessibility',
       language: 'tsx',
       label: 'Name, counts and announcements',
-      source: `<DataGrid label="Shipments" labels={{ selectAllFiltered: 'Select all {count} shipments' }} />;`,
+      source: `<DataGrid
+  aria-label="Shipments"
+  messages={{
+    selectAllFiltered:
+      '{count, plural, one {Select the # shipment} other {Select all # shipments}}',
+  }}
+/>;`,
     }),
   },
 ];
@@ -1418,19 +1424,24 @@ const api = apiRows([
     'DataGrid',
     'The frame’s height; without one the grid grows to its rows.',
   ],
-  ['label', 'string', 'Data grid', 'DataGrid', 'The accessible name.'],
-  ['labelledBy', 'string', '—', 'DataGrid', 'The id of the element that names the grid.'],
   [
-    'labels',
-    'DataGridLabels',
+    'labelledBy',
+    'string',
     '—',
     'DataGrid',
-    'Every word the family says, replaceable one by one; the operator names and symbols are maps.',
+    'The id of the element that names the grid; a native aria-label names it directly, and with neither the grid is named by messages.grid.',
+  ],
+  [
+    'messages',
+    'Partial<DataGridMessages>',
+    '—',
+    'DataGrid',
+    'Words laid over the language in force, key by key: every control, state and announcement, the grid’s name (grid), and filterYes and filterNo for a boolean cell. The operator names and symbols are the groups filterOperators and filterSymbols.',
   ],
   [
     'locale',
     'string',
-    '—',
+    'the language in force',
     'DataGrid',
     'BCP 47, for the collator, the number and the date formats.',
   ],
@@ -1580,7 +1591,7 @@ const composition = apiRows([
     'component',
     '—',
     'Application',
-    'Sets variant, striped, stickyHeader, stickyTo, selectionMode, editMode, filterRow, virtualize, rowHeight, columnOverflow, overscan, pageSizes, filterDebounce, loadMoreThreshold, skeletonRows, locale and labels once for a subtree. A grid that states one itself still wins.',
+    'Sets variant, striped, stickyHeader, stickyTo, selectionMode, editMode, filterRow, virtualize, rowHeight, columnOverflow, overscan, pageSizes, filterDebounce, loadMoreThreshold and skeletonRows once for a subtree. A grid that states one itself still wins. Its words and its locale come from the language in force (SlottedProvider).',
   ],
   [
     '@slotted/core/grid',

@@ -254,11 +254,11 @@ export const ANGULAR_KBD_DOCS = {
         'Between two simultaneous keys. A Mac joins with nothing whatever this says',
       ],
       [
-        'thenLabel',
-        'string',
-        'then',
-        'slShortcut',
-        'Between two steps of a sequence. It is read aloud, so it belongs in the reader’s language',
+        'messages',
+        'PartialMessages<KeysMessages>',
+        '—',
+        'slKbd, slShortcut',
+        'Words laid over the keys catalog of the language in force, key by key: legends.*, names.*, and then — the word between two steps of a sequence, read aloud',
       ],
       [
         'legends',
@@ -306,10 +306,10 @@ export const ANGULAR_KBD_DOCS = {
       ],
       [
         'provideKbdDefaults',
-        '{ platform, size, variant, separator, thenLabel, legends, names }',
+        '{ platform, size, variant, separator, legends, names }',
         '—',
         'an injector',
-        'Sets all seven once for everything under it; an explicit input on a key still wins',
+        'Sets all six once for everything under it; an explicit input on a key still wins',
       ],
     ]),
     accessibility: [

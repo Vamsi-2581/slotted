@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "data-list",
   "ui": "data-list",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Records as stacked label and value items."
+  },
   "pattern": null,
   "patternAbsent": {
     "index": "https://www.w3.org/WAI/ARIA/apg/patterns/",
@@ -22,7 +26,7 @@
     "root": "div[data-ui=data-list], the query container slotted-data-list; carries data-loading and aria-busy while rows are refreshed",
     "header": "div above the list: select-all, count and sort, in that order",
     "select-all": "span holding checkbox's DOM; present in selectionMode multiple",
-    "count": "output with aria-live polite: labels.count without a selection, labels.selectedCount with one",
+    "count": "output with aria-live polite: messages.count without a selection, messages.selectedCount with one",
     "sort": "span holding button's DOM, the menu's trigger; carries data-direction for the first key; present when a column is sortable",
     "selection": "span in list-item's start holding the record's checkbox",
     "media": "span in list-item's start holding renderMedia or ng-template[slDataListMedia]",
@@ -31,7 +35,7 @@
     "field": "div holding one pair, the grouping HTML allows inside a dl",
     "field-label": "dt, the column's label",
     "field-value": "dd, drawn by the column's cell template with { column, row, value, text }",
-    "field-empty": "span in an empty field-value: a drawn rule and labels.empty, visually hidden",
+    "field-empty": "span in an empty field-value: a drawn rule and messages.empty, visually hidden",
     "more": "button after fields, in the same grid placement, toggling the fields past fields; aria-expanded, aria-controls the dl",
     "trailing": "span in list-item's end holding the trailing column's value",
     "empty": "div holding result-state: empty, no-results or error",
@@ -75,9 +79,9 @@
     "attribute": "list-item's data-current"
   },
   "sort": {
-    "control": "menu with two radio groups: the column — every sortable visible column and labels.sortNone — and the direction, disabled without a column",
+    "control": "menu with two radio groups: the column — every sortable visible column and messages.sortNone — and the direction, disabled without a column",
     "writes": "choosing a column replaces query.sort with [{ column, direction }], keeping the direction or ascending; choosing a direction rewrites the first key; sortNone empties query.sort",
-    "reads": "every key; the trigger shows the first key's column and labels.sortMore for the rest",
+    "reads": "every key; the trigger shows the first key's column and messages.sortMore for the rest",
     "announce": "the whole order, politely, through @slotted/core/live-announcer",
     "indicator": "a mask from --slotted-icon-chevron-down, turned a half turn for ascending, table's own indicator"
   },
@@ -111,7 +115,7 @@
       "when": "loading with no rows",
       "composes": "skeleton",
       "draws": "skeletonRows records with the item's anatomy: the title line, the subtitle line when a subtitle column is named, the trailing value when one is named, and fields pairs whose labels are real",
-      "region": "skeleton's region: aria-busy and one polite announcement of labels.loading"
+      "region": "skeleton's region: aria-busy and one polite announcement of messages.loading"
     },
     "refresh": "loading over rows already shown: aria-busy and data-loading on the root, the rows dimmed and kept; nothing moves",
     "more": "load-more takes button's loading while loading is true over rows",
@@ -123,8 +127,8 @@
     "composes": "result-state",
     "states": {
       "empty": "no rows at all",
-      "no-results": "the query left nothing; offers labels.clearFilters, which empties query.filter and query.search in one change with reason clear",
-      "error": "error is set; offers labels.retry, which emits retry. Over rows already shown the rows stay and the message stands above them."
+      "no-results": "the query left nothing; offers messages.clearFilters, which empties query.filter and query.search in one change with reason clear",
+      "error": "error is set; offers messages.retry, which emits retry. Over rows already shown the rows stay and the message stands above them."
     }
   },
   "focus": {
@@ -137,7 +141,7 @@
     "aria-current": "on the current record's li, written by list-item: page with href, true otherwise",
     "aria-expanded": "on more",
     "aria-controls": "more names its record's fields",
-    "aria-describedby": "a checkbox's name comes from labels.selectRow with the title; nothing else is described"
+    "aria-describedby": "a checkbox's name comes from messages.selectRow with the title; nothing else is described"
   },
   "keyboard": [
     {
@@ -212,35 +216,38 @@
       "reason": "the menu edits the first key; the other keys are read and announced"
     }
   },
-  "labels": {
-    "count": "{count} items",
-    "selectedCount": "{selected} of {count} selected",
-    "selectAll": "Select all {count} items",
-    "selectRow": "Select {title}",
-    "sort": "Sort",
-    "sortMore": "+{count}",
-    "sortNone": "No sorting",
-    "sortColumn": "Sort by",
-    "sortDirection": "Direction",
-    "ascending": "Ascending",
-    "descending": "Descending",
-    "sortedBy": "Sorted by {order}",
-    "sortedByAscending": "{column} ascending",
-    "sortedByDescending": "{column} descending",
-    "sortCleared": "Sorting removed",
-    "more": "Show {count} more",
-    "less": "Show less",
-    "empty": "Empty",
-    "loading": "Loading items",
-    "loadMore": "Load more",
-    "clearFilters": "Clear filters",
-    "retry": "Try again",
-    "noResultsTitle": "No items match",
-    "emptyTitle": "No items yet",
-    "errorTitle": "Items could not be loaded"
-  },
-  "pluralLabels": ["count", "selectedCount", "selectAll", "more"],
-  "labelsReason": "The words the family says, in one input. The four that carry a count take a function of their slots as well as a string, so an application states its plural forms — `1 items` is what a string alone produces.",
+  "messages": [
+    "count",
+    "selectAll",
+    "ascending",
+    "clearFilters",
+    "descending",
+    "empty",
+    "emptyTitle",
+    "errorTitle",
+    "false",
+    "less",
+    "loading",
+    "loadMore",
+    "more",
+    "noResultsTitle",
+    "retry",
+    "selectedCount",
+    "selectRow",
+    "sort",
+    "sortCleared",
+    "sortColumn",
+    "sortDirection",
+    "sortedBy",
+    "sortedByAscending",
+    "sortedByDescending",
+    "sortNamed",
+    "sortSummary",
+    "sortNone",
+    "true"
+  ],
+  "pluralMessages": ["count", "selectAll", "sortSummary"],
+  "messagesReason": "The words the family says come from the dataList catalog of the language in force, laid over by one messages input. The two whose wording turns on a count, count and selectAll, are plural messages, so each language states its own forms.",
   "literals": {
     "--_field-min": "9rem, the pop-in's field floor: two fields side by side from 18rem",
     "--_field-label-inline": "7.5rem, the pop-in's label track when one field fills the row"
@@ -268,9 +275,7 @@
       "selectionMode",
       "skeletonRows",
       "loadingDelay",
-      "loadingMinDuration",
-      "locale",
-      "labels"
+      "loadingMinDuration"
     ]
   },
   "stateAttributes": {

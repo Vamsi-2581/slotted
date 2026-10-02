@@ -1,0 +1,55 @@
+---
+title: Field
+description: Names a control, says whether it is required, and carries the description and the error a reader hears with it.
+---
+
+<Example name="basic" />
+
+## Installation
+
+<FrameworkCode
+  react={`import { Field, FieldDescription, FieldError, FieldLabel, TextField } from '@slotted/react';`}
+  angular={`import { SlField, SlFieldDescription, SlFieldError, SlFieldLabel } from '@slotted/angular/field';\nimport { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';`}
+/>
+
+## Necessity
+
+The asterisk is the convention. A form where most fields are required marks the exception instead: `optional` writes _(optional)_ on the fields a reader may skip, and `words` writes both. The glyph is hidden from assistive technology because `aria-required` on the control already says it once.
+
+<Example name="necessity" />
+
+## Label placement
+
+A side label sits beside its control and stacks below 320 pixels of the field's own width, so the same field reflows inside a drawer and stays aligned in a page grid. The field is its own container; the window width plays no part.
+
+<Example name="placement" />
+
+## Sizes
+
+Three steps that match the control the field wraps. Every step reads the control type scale, so the label, the message and the counter follow the density the application sets.
+
+<Example name="sizes" />
+
+## States
+
+`invalid` sets `aria-invalid` on the control and joins the error to its description. `disabled` and `readOnly` are the native attributes; `required` is `aria-required`.
+
+<Example name="states" />
+
+## Messages
+
+A description and an error share one slot below the control. `reserve` holds the line open so the layout does not move when an error appears, and a warning that does not block submission is the same part in another tone.
+
+<Example name="messages" />
+
+## Counter
+
+The page owns the number and the field owns where it sits: the counter joins the label row and the control's description.
+
+<Example name="counter" />
+
+## Label row
+
+When the label has company, a header aligns it with a help button, an indicator and an action on the label's first baseline, and wraps when it runs out of room.
+
+<Example name="header" />

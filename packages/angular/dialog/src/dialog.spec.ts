@@ -3,6 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/dialog/contract.json';
 import { SlAlertDialog, SlDialog } from './dialog';
 import { provideDialogDefaults } from './dialog-defaults';
@@ -697,5 +700,28 @@ describe('SlAlertDialog', () => {
     expect(() => TestBed.createComponent(WithoutDescription).detectChanges()).toThrow(
       /slDialogDescription|aria-describedby/i,
     );
+  });
+});
+
+describe('SlDialog words', () => {
+  it('names the corner controls in the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    TestBed.configureTestingModule({
+      imports: [DialogHost],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const fixture = TestBed.createComponent(DialogHost);
+    fixture.componentInstance.fullscreenToggle.set(true);
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+
+    expect(part('fullscreen').getAttribute('aria-label')).toBe('Tela cheia');
+    expect(part('close').getAttribute('aria-label')).toBe('Fechar');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(part('fullscreen').getAttribute('aria-label')).toBe('Full screen');
+    expect(part('close').getAttribute('aria-label')).toBe('Close');
+    fixture.destroy();
   });
 });

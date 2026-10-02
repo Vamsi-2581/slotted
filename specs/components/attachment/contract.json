@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "attachment",
   "ui": "attachment",
+  "catalog": {
+    "group": "Data display",
+    "summary": "File that belongs to a message or record."
+  },
   "pattern": null,
   "patternAbsent": {
     "index": "https://www.w3.org/WAI/ARIA/apg/patterns/",
@@ -176,13 +180,11 @@
     "layout": ["prop", "defaults", "list"]
   },
   "provides": {
-    "attachmentDefaults": ["size", "orientation", "layout", "locale", "removeLabel"],
+    "attachmentDefaults": ["size", "orientation", "layout"],
     "toParts": ["file", "disabled", "loading", "invalid", "removable"]
   },
-  "labels": {
-    "removeLabel": "Remove",
-    "reason": "The remove control's name is the word and the file name, `Remove claim-form.pdf`; the word is the application's to translate."
-  },
+  "messages": ["noExtension", "remove"],
+  "messagesReason": "The remove control's name is one message with the file name in it, `Remove claim-form.pdf`, so a language that puts the file first writes its own order; it and the tile's word for a file without an extension come from the catalog of the language in force, laid over by the attachment's `messages`.",
   "dataAttributes": {
     "root": ["data-kind", "data-size", "data-orientation"],
     "group": ["data-layout", "data-size", "data-orientation"],

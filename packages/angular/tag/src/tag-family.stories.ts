@@ -215,11 +215,11 @@ export const Composition: Story = {
   parameters: scenario('composition'),
   decorators: [moduleMetadata({ imports: IMPORTS, providers: [] })],
   render: () => ({
-    applicationConfig: { providers: [provideTagDefaults({ removeLabel: 'Remover', size: 'sm' })] },
+    applicationConfig: { providers: [provideTagDefaults({ size: 'sm' })] },
     template: `<div class="slotted-demo-grid" data-columns="1">
       ${scene(
         'defaults',
-        'An application decides once how its tags are painted, how large they are, and what its remove controls are called. An explicit input still wins.',
+        'An application decides once how its tags are painted and how large they are. An explicit input still wins; the remove word comes from the language in force.',
         `<div slTagGroup aria-label="Com padrões">
           <span slTag removable><span slTagBody>Herda tudo</span><button slTagRemove></button></span>
           <span slTag tone="danger" removable><span slTagBody>Sobrescreve o tom</span><button slTagRemove></button></span>
@@ -250,8 +250,8 @@ export const Accessibility: Story = {
         'the remove control’s name',
         'Composed, not repeated: a hidden word joined to the tag’s own label by aria-labelledby, so it announces “Remover Ana Reis” rather than “Remover”.',
         `<div slTagGroup aria-label="Participantes">
-          <span slTag removable removeLabel="Remover"><span slTagBody>Ana Reis</span><button slTagRemove></button></span>
-          <span slTag removable removeLabel="Remover"><span slTagBody>Bruno Sá</span><button slTagRemove></button></span>
+          <span slTag removable [messages]="{ remove: 'Remover' }"><span slTagBody>Ana Reis</span><button slTagRemove></button></span>
+          <span slTag removable [messages]="{ remove: 'Remover' }"><span slTagBody>Bruno Sá</span><button slTagRemove></button></span>
         </div>`,
       )}
       ${scene(

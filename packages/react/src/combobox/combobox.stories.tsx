@@ -440,15 +440,13 @@ export const InAForm: Story = {
 export const Composition: Story = {
   parameters: scenario('composition'),
   render: (_args, context) => (
-    <ComboboxDefaultsProvider
-      countLabel="{count} pessoas"
-      emptyLabel="Nada encontrado"
-      loadingLabel="Carregando…"
-      size="sm"
-      variant="subtle"
-    >
+    <ComboboxDefaultsProvider size="sm" variant="subtle">
       <Viewport size="tall">
-        <Basic defaultInputValue="zzz" defaultOpen={isolated(context)} />
+        <Basic
+          defaultInputValue="zzz"
+          defaultOpen={isolated(context)}
+          messages={{ empty: 'Nothing grows by that name' }}
+        />
       </Viewport>
     </ComboboxDefaultsProvider>
   ),

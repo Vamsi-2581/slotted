@@ -574,8 +574,8 @@
     visibility: hidden;
   }
 
-  [data-ui='filter-bar'] [data-part='summary'] > [data-part='label'] > span + span {
-    /* The count after the word is a figure, and figures line up. */
+  [data-ui='filter-bar'] [data-part='summary'] > [data-part='label'] > span {
+    /* The count in the summary is a figure, and figures line up. */
     font-variant-numeric: tabular-nums;
   }
 

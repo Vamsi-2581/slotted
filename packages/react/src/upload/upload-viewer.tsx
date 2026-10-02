@@ -1,3 +1,4 @@
+import type { FamilyTranslator, UploadMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import { isViewable } from '@slotted/core/upload';
 import type { FileKind, UploadFile } from '@slotted/core/upload';
@@ -6,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { Dialog, DialogContent } from '../dialog';
 import { Glyph, Icon } from '../icon';
 import type { GlyphName } from '../icon';
-import type { UploadFormatters, UploadLabels } from './upload.types';
+import type { UploadFormatters } from './upload.types';
 
 /**
  * A file, full screen, on a surface of its own.
@@ -26,9 +27,9 @@ export interface UploadViewerProps {
   /** The key of the file being looked at, or `null` when the viewer is shut. */
   viewing: string | null;
   urls: ReadonlyMap<string, string>;
-  labels: UploadLabels;
+  /** The family's words, the same translator the root reads. */
+  t: FamilyTranslator<UploadMessages>;
   formatters: UploadFormatters;
-  kindLabel: (file: UploadFile) => string;
   onViewing: (
     key: string | null,
     reason: 'pointer' | 'keyboard' | 'escape' | 'outsidePress' | 'dismiss',
@@ -41,9 +42,8 @@ export function UploadViewer({
   size,
   viewing,
   urls,
-  labels,
+  t,
   formatters,
-  kindLabel,
   onViewing,
 }: UploadViewerProps) {
   /*
@@ -112,7 +112,6 @@ export function UploadViewer({
   if (current === undefined || container === null) return marker;
 
   const url = urls.get(current.key);
-  const position = index === -1 ? '' : ` · ${index + 1} of ${shown.length}`;
 
   return (
     <>
@@ -153,14 +152,23 @@ export function UploadViewer({
               <div>
                 <h2 data-part="viewerTitle">{current.name}</h2>
                 <span data-part="viewerMeta">
-                  {formatters.bytes(current.size)} · {kindLabel(current)}
-                  {position}
+                  {index === -1
+                    ? t('viewerMeta', {
+                        size: formatters.bytes(current.size),
+                        kind: t(current.kind),
+                      })
+                    : t('viewerMetaPosition', {
+                        size: formatters.bytes(current.size),
+                        kind: t(current.kind),
+                        index: index + 1,
+                        count: shown.length,
+                      })}
                 </span>
               </div>
               <span data-part="viewerActions">
                 {url === undefined ? null : (
                   <button
-                    aria-label={labels.viewerExternal}
+                    aria-label={t('viewerExternal')}
                     data-part="viewerExternal"
                     onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
                     type="button"
@@ -171,7 +179,7 @@ export function UploadViewer({
                   </button>
                 )}
                 <button
-                  aria-label={labels.viewerClose}
+                  aria-label={t('viewerClose')}
                   data-part="viewerClose"
                   onClick={(event) => onViewing(null, 'pointer', event)}
                   type="button"
@@ -186,7 +194,7 @@ export function UploadViewer({
             <div data-part="viewerStage">
               {shown.length > 1 ? (
                 <button
-                  aria-label={labels.viewerPrevious}
+                  aria-label={t('viewerPrevious')}
                   data-part="viewerPrevious"
                   disabled={index <= 0}
                   onClick={(event) => move(-1, event)}
@@ -198,11 +206,11 @@ export function UploadViewer({
                 </button>
               ) : null}
 
-              <UploadStage current={current} labels={labels} url={url} />
+              <UploadStage current={current} t={t} url={url} />
 
               {shown.length > 1 ? (
                 <button
-                  aria-label={labels.viewerNext}
+                  aria-label={t('viewerNext')}
                   data-part="viewerNext"
                   disabled={index === -1 || index >= shown.length - 1}
                   onClick={(event) => move(1, event)}
@@ -223,11 +231,11 @@ export function UploadViewer({
 
 function UploadStage({
   current,
-  labels,
+  t,
   url,
 }: {
   current: UploadFile;
-  labels: UploadLabels;
+  t: FamilyTranslator<UploadMessages>;
   url: string | undefined;
 }) {
   const type = current.type.split(';')[0] ?? '';
@@ -266,7 +274,7 @@ function UploadStage({
   return (
     <>
       <span
-        data-extension={extensionLabel(current.name)}
+        data-extension={extensionLabel(current.name, t('noExtension'))}
         data-kind={current.kind}
         data-part="preview"
       >
@@ -274,7 +282,7 @@ function UploadStage({
           <Glyph name={KIND_GLYPH[current.kind]} />
         </Icon>
       </span>
-      <p>{labels.viewerUnsupported}</p>
+      <p>{t('viewerUnsupported')}</p>
     </>
   );
 }
@@ -296,7 +304,8 @@ export const KIND_GLYPH: Record<FileKind, GlyphName> = {
   video: 'file-video',
 };
 
-function extensionLabel(name: string) {
+/** The extension as the tile prints it, or the catalog's word for a name without one. */
+function extensionLabel(name: string, none: string) {
   const dot = name.lastIndexOf('.');
-  return dot <= 0 ? 'FILE' : name.slice(dot + 1).toUpperCase();
+  return dot <= 0 ? none : name.slice(dot + 1).toUpperCase();
 }

@@ -160,11 +160,10 @@ test('states its container breakpoints as literals', () => {
  * what lets a renderer's component map use the part with no arguments at all.
  */
 test('resolves the scrolling region name in a stated order', () => {
-  assert.deepEqual(contract.scroll.name, ['labelledBy', 'label', 'scrollLabel']);
+  assert.deepEqual(contract.scroll.name, ['labelledBy', 'aria-label', 'messages.scroll']);
   assert.equal(contract.scroll.role, 'region');
   assert.equal(contract.scroll.appliesWhen, 'overflowing');
   assert.equal(contract.scroll.measuredBy, '@slotted/core/overflow');
-  assert.equal(contract.members.prose.defaults.scrollLabel, 'Scrollable content');
 });
 
 /**

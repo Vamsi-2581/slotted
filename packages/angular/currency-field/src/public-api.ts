@@ -1,8 +1,6 @@
 export { SlCurrencyField } from './currency-field';
 export {
-  CURRENCY_FIELD_DECREMENT_LABEL,
   CURRENCY_FIELD_DEFAULTS,
-  CURRENCY_FIELD_INCREMENT_LABEL,
   injectCurrencyFieldDefaults,
   provideCurrencyFieldDefaults,
   SlCurrencyFieldControl,

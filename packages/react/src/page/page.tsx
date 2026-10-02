@@ -1,10 +1,12 @@
 import '@slotted/styles/page/page.css';
 
+import { pageMessages } from '@slotted/core/i18n';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceStatus } from '@slotted/core/presence';
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { Container } from '../container';
+import { useMessages } from '../i18n';
 import { HeadingLevel } from '../typography';
 import { usePageDefaults } from './page-defaults';
 import type {
@@ -55,6 +57,7 @@ export function Page({
   inset,
   landmark,
   loading,
+  messages,
   ref,
   render,
   scroll,
@@ -63,6 +66,7 @@ export function Page({
   ...nativeProps
 }: PageProps) {
   const defaults = usePageDefaults();
+  const t = useMessages(pageMessages, messages);
   const resolvedGround = ground ?? defaults.ground;
   const resolvedInset = inset ?? defaults.inset;
   const resolvedLandmark = landmark ?? defaults.landmark;
@@ -73,8 +77,8 @@ export function Page({
     ground: resolvedGround,
     inset: resolvedInset,
     loading: loading === true,
-    messages: defaults.messages,
     scroll: resolvedScroll,
+    t,
     width: resolvedWidth,
   };
 
@@ -232,10 +236,13 @@ export function PageFooter({
   ...nativeProps
 }: PageFooterProps) {
   const page = usePage();
+  /* A footer outside a page still speaks the language in force. */
+  const own = useMessages(pageMessages);
+  const t = page?.t ?? own;
   const { setNode, status } = useContext(FooterStatusContext);
   const rootProps = {
     ...nativeProps,
-    'aria-label': ariaLabel ?? page?.messages.footer ?? 'Ações da página',
+    'aria-label': ariaLabel ?? t('footer'),
     children: (
       <Container inset={page?.inset} size={page?.width}>
         <div data-part="actions">{children}</div>

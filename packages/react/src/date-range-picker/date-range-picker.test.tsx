@@ -1,9 +1,11 @@
 import { plainDate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/date-range-picker/contract.json';
+import { SlottedProvider } from '../i18n';
 import { DateRangePicker, DateRangePickerDefaultsProvider, DateRangePickerPreset } from './index';
 import type { DateRange, DateRangePickerHandle } from './index';
 
@@ -76,10 +78,9 @@ describe('what it is made of', () => {
     render(
       <DateRangePicker
         defaultValue={RUN}
-        endLabel="Fim"
         endName="fim"
         locale="pt-BR"
-        startLabel="Início"
+        messages={{ end: 'Fim', start: 'Início' }}
         startName="inicio"
       />,
     );
@@ -92,22 +93,22 @@ describe('what it is made of', () => {
 
 describe('what the trigger says', () => {
   it('names itself for choosing while nothing is chosen', () => {
-    render(<DateRangePicker chooseLabel="Escolher período" locale="pt-BR" />);
-    expect(trigger()).toHaveAttribute('aria-label', 'Escolher período');
+    render(<DateRangePicker locale="pt-BR" messages={{ choose: 'Escolher um período' }} />);
+    expect(trigger()).toHaveAttribute('aria-label', 'Escolher um período');
   });
 
   /** Both ends and the length: the name is where the reader is told what was chosen. */
   it('carries both ends and the length once the run is whole', () => {
     render(
       <DateRangePicker
-        changeLabel="Alterar período"
         count="nights"
         defaultValue={RUN}
         locale="pt-BR"
+        messages={{ change: 'Alterar o período, {start} – {end}, {length}' }}
       />,
     );
     const name = trigger().getAttribute('aria-label') ?? '';
-    expect(name).toContain('Alterar período');
+    expect(name).toContain('Alterar o período');
     expect(name).toMatch(/7 de setembro de 2026/);
     expect(name).toMatch(/11 de setembro de 2026/);
     expect(name).toContain('4 nights');
@@ -519,22 +520,49 @@ describe('opening and closing', () => {
 });
 
 describe('what an application sets once', () => {
-  it('takes the unit, the labels and the months from a provider', () => {
+  it('takes the unit and the months from a provider, and its words from the language in force', () => {
     render(
-      <DateRangePickerDefaultsProvider
-        changeLabel="Alterar"
-        count="nights"
-        lengthLabel={(count, unit) => `${String(count)} ${unit === 'nights' ? 'noites' : 'dias'}`}
-        locale="pt-BR"
-        months={1}
-      >
-        <DateRangePicker defaultOpen defaultValue={RUN} />
-      </DateRangePickerDefaultsProvider>,
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+        <DateRangePickerDefaultsProvider count="nights" months={1}>
+          <DateRangePicker defaultOpen defaultValue={RUN} />
+        </DateRangePickerDefaultsProvider>
+      </SlottedProvider>,
     );
     expect(root()).toHaveAttribute('data-count', 'nights');
     expect(part('length')).toHaveTextContent('4 noites');
-    expect(trigger().getAttribute('aria-label')).toContain('Alterar');
+    expect(trigger().getAttribute('aria-label')).toContain('Alterar período');
     expect(document.querySelectorAll('[data-part="grid"]')).toHaveLength(1);
+  });
+
+  it('lays its own messages over the catalog, a counting phrase included', () => {
+    render(
+      <DateRangePicker
+        count="nights"
+        defaultOpen
+        defaultValue={RUN}
+        messages={{ nights: { length: '{count, plural, one {# diária} other {# diárias}}' } }}
+      />,
+    );
+    expect(part('length')).toHaveTextContent('4 diárias');
+    expect(trigger().getAttribute('aria-label')).toContain('Change range');
+  });
+
+  it('changes its words and its dates together with the language in force', () => {
+    const inLocale = (locale: string) => (
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale={locale}>
+        <DateRangePicker count="nights" defaultValue={RUN} />
+      </SlottedProvider>
+    );
+    const { rerender } = render(inLocale('pt-BR'));
+
+    expect(trigger().getAttribute('aria-label')).toMatch(
+      /^Alterar período, .*7 de setembro de 2026 – .*11 de setembro de 2026, 4 noites$/,
+    );
+
+    rerender(inLocale('en-US'));
+    expect(trigger().getAttribute('aria-label')).toMatch(
+      /^Change range, .*September 7, 2026 – .*September 11, 2026, 4 nights$/,
+    );
   });
 });
 

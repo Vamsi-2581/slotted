@@ -222,7 +222,7 @@ export function Toast({ children, index = 0, message, ref, ...nativeProps }: Toa
             </ToastContent>
             {dismissible ? (
               <ToastClose
-                aria-label={content.closeLabel ?? region.defaults.closeLabel}
+                aria-label={region.t('close')}
                 onClick={() => region.store.dismiss(message.id, 'dismiss')}
               />
             ) : null}

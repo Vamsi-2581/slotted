@@ -1,6 +1,8 @@
+import { fieldMessages } from '@slotted/core/i18n';
 import { useEffect, useId, useRef } from 'react';
 import type { FocusEvent, MouseEvent, PointerEvent } from 'react';
 
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { InlineMessage } from '../inline-message';
 import {
@@ -12,7 +14,6 @@ import {
   useTooltip,
 } from '../tooltip';
 import { formatFieldCount, isFieldCountOver, necessityMark, useField } from './field-context';
-import { FIELD_HELP_LABEL, FIELD_NECESSITY_WORDS } from './field-defaults';
 import type {
   FieldActionProps,
   FieldActionRootProps,
@@ -81,11 +82,8 @@ export function FieldLabel({
   ...nativeProps
 }: FieldLabelProps) {
   const field = useField();
-  const mark = necessityMark(
-    field?.necessity ?? 'mark',
-    field?.required === true,
-    field?.necessityWords ?? FIELD_NECESSITY_WORDS,
-  );
+  const own = useMessages(fieldMessages);
+  const mark = necessityMark(field?.necessity ?? 'mark', field?.required === true, field?.t ?? own);
 
   const rootProps: FieldLabelRootProps = {
     ...nativeProps,
@@ -362,6 +360,7 @@ export function FieldHelp({
   ...buttonProps
 }: FieldHelpProps) {
   const field = useField();
+  const own = useMessages(fieldMessages);
   const fallbackId = useId();
   const textId = field?.ids.help ?? `slotted-field-help-${fallbackId}`;
   useRegisterMessage('help', hasContent(children));
@@ -380,7 +379,7 @@ export function FieldHelp({
         <FieldHelpTrigger
           {...buttonProps}
           aria-describedby={buttonProps['aria-describedby'] ?? textId}
-          aria-label={buttonProps['aria-label'] ?? field?.helpLabel ?? FIELD_HELP_LABEL}
+          aria-label={buttonProps['aria-label'] ?? (field?.t ?? own)('help')}
         >
           <span data-part="help-text" hidden id={textId}>
             {children}

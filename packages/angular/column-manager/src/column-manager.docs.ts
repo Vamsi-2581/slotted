@@ -44,18 +44,19 @@ const anatomy: AnatomyRow[] = [
     required: true,
     purpose: 'The title and the summary on one line.',
   },
-  { part: 'title', element: 'h2', required: true, purpose: 'labels.title; names the root.' },
+  { part: 'title', element: 'h2', required: true, purpose: 'messages.title; names the root.' },
   {
     part: 'summary',
     element: 'span',
     required: true,
-    purpose: 'labels.visibleCount — “7 of 9 shown”, in tabular figures.',
+    purpose: 'messages.visibleCount — “7 of 9 shown”, in tabular figures.',
   },
   {
     part: 'search',
     element: 'div around an slTextField',
     required: true,
-    purpose: 'type="search" at size sm, named by labels.search; filters by label and description.',
+    purpose:
+      'type="search" at size sm, named by messages.search; filters by label and description.',
   },
   {
     part: 'list',
@@ -117,7 +118,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button[slMenuTriggerFor]',
     required: false,
     purpose:
-      'Opens Pin to start, Pin to end and Unpin. Named labels.pin; data-pinned and the accent ink while the column is pinned.',
+      'Opens Pin to start, Pin to end and Unpin. Named messages.pin; data-pinned and the accent ink while the column is pinned.',
   },
   {
     part: 'drop-indicator',
@@ -131,7 +132,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'role="status" with labels.noResults in place of the sections when the search finds nothing.',
+      'role="status" with messages.noResults in place of the sections when the search finds nothing.',
   },
   {
     part: 'footer',
@@ -387,11 +388,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'column-manager-angular-accessibility',
       language: 'ts',
       label: 'Words for another language',
-      source: `providers: [
-  provideColumnManagerDefaults({
-    labels: { title: 'Colunas', moved: '{column} movida para a posição {position}' },
-  }),
-];`,
+      source: `providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })];`,
     }),
   },
 ];
@@ -476,11 +473,11 @@ export const ANGULAR_COLUMN_MANAGER_DOCS = {
         'Two-way: whether the layer is open',
       ],
       [
-        'labels',
-        'Partial<ColumnManagerLabels>',
-        'English',
-        'sl-column-manager, provideColumnManagerDefaults',
-        'title, search, noResults, showAll, reset, apply, cancel, pinnedStart, unpinned, pinnedEnd, pin, pinStart, pinEnd, unpin, reorder, moved, required, hiddenBySpace, inRow, hiddenCountOne, hiddenCountOther, visibleCount; {slot}s are filled',
+        'messages',
+        'Partial<ColumnManagerMessages>',
+        '—',
+        'sl-column-manager',
+        'Words laid over the language in force, key by key: title, search, noResults, showAll, reset, apply, cancel, pinnedStart, unpinned, pinnedEnd, pin, pinStart, pinEnd, unpin, reorder, moved, required, hiddenBySpace, inRow, hiddenCount, visibleCount',
       ],
       [
         'show(), hide(), toggleOpen()',
@@ -498,10 +495,10 @@ export const ANGULAR_COLUMN_MANAGER_DOCS = {
       ],
       [
         'provideColumnManagerDefaults',
-        '{ presentation, apply, labels }',
+        '{ presentation, apply }',
         '—',
         'providers',
-        'The decisions an application takes once. A manager that states any of them itself still wins',
+        'The decisions an application takes once. A manager that states either itself still wins; the words come from the language in force (provideSlotted)',
       ],
     ]),
     accessibility: [

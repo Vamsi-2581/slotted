@@ -358,7 +358,7 @@ export class SlTableSelect {
   });
   readonly name = computed(() => {
     const key = this.key();
-    return `${this.table.resolvedLabels().selectRow}${key === undefined ? '' : ` ${key}`}`;
+    return this.table.t('selectRow', { row: key ?? '' }).trim();
   });
 
   press(event: MouseEvent) {
@@ -411,9 +411,7 @@ export class SlTableSelectAll {
   });
 
   readonly name = computed(() => {
-    const chosen = this.table.value().length;
-    const labels = this.table.resolvedLabels();
-    return `${labels.selectAll}${chosen === 0 ? '' : ` (${chosen} selected)`}`;
+    return this.table.t('selectAll', { count: this.table.value().length });
   });
 
   press(event: MouseEvent) {
@@ -451,8 +449,7 @@ export class SlTableExpander {
   readonly row = inject(SlTableRow);
 
   readonly name = computed(() => {
-    const labels = this.table.resolvedLabels();
-    return this.row.expanded() ? labels.collapse : labels.expand;
+    return this.row.expanded() ? this.table.t('collapse') : this.table.t('expand');
   });
 
   press(event: Event) {

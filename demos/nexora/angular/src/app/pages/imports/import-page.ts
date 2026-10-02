@@ -335,7 +335,7 @@ import { IMPORT_TARGETS, IMPORT_TARGETS_READ, ImportStore } from '../../core/crm
                     type="button"
                     [disabled]="!store.ready()"
                     [loading]="store.running()"
-                    loadingLabel="Importing the file"
+                    [messages]="{ loading: 'Importing the file' }"
                     (click)="run()"
                   >
                     {{ runLabel() }}

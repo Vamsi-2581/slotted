@@ -2,7 +2,8 @@ import '@slotted/styles/app-shell/app-shell.css';
 
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createFocusScope } from '@slotted/core/focus';
-import { COMPACT_BELOW, createWidthGate } from '@slotted/core/measure';
+import { appShellMessages } from '@slotted/core/i18n';
+import { clamp, COMPACT_BELOW, createWidthGate } from '@slotted/core/measure';
 import { setPortalContainer } from '@slotted/core/portal';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
@@ -20,8 +21,10 @@ import {
 } from 'react';
 import type { MouseEvent, ReactNode } from 'react';
 
+import { useMessages } from '../i18n';
 import { useAppShellDefaults } from './app-shell-defaults';
 import type {
+  AppShellAsideExtentReason,
   AppShellAsideOpenReason,
   AppShellContextValue,
   AppShellHandle,
@@ -82,6 +85,7 @@ export function useAppShellIfPresent(): AppShellContextValue | undefined {
  * disagree.
  */
 export function AppShell({
+  asideExtent,
   asideMode,
   asideOpen,
   asideSize,
@@ -90,16 +94,20 @@ export function AppShell({
   className,
   closeOnNavigate,
   collapsedTo,
+  defaultAsideExtent,
   defaultAsideOpen,
   defaultNavOpen,
   escape,
   back,
+  maxAsideExtent,
   messages,
+  minAsideExtent,
   modal,
   navMode,
   navOpen,
   navSide,
   navSize,
+  onAsideExtentChange,
   onAsideOpenChange,
   onNavOpenChange,
   outsidePress,
@@ -118,6 +126,11 @@ export function AppShell({
   const currentOpen = navOpen ?? ownOpen;
   const [ownAsideOpen, setOwnAsideOpen] = useState<boolean>(defaultAsideOpen ?? true);
   const currentAsideOpen = asideOpen ?? ownAsideOpen;
+  const [ownAsideExtent, setOwnAsideExtent] = useState<number | undefined>(defaultAsideExtent);
+  const currentAsideExtent = asideExtent ?? ownAsideExtent;
+  const resolvedMinAsideExtent = clamp(minAsideExtent ?? 0.16, 0, 1);
+  const resolvedMaxAsideExtent = clamp(maxAsideExtent ?? 0.6, resolvedMinAsideExtent, 1);
+  const [asideDragging, setAsideDragging] = useState(false);
 
   const resolvedAsideSize = asideSize ?? defaults.asideSize;
   const wantedAsideMode = asideMode ?? defaults.asideMode;
@@ -135,10 +148,7 @@ export function AppShell({
   const resolvedScroll = scroll ?? defaults.scroll;
   const wantedMode = navMode ?? defaults.navMode;
 
-  const resolvedMessages = useMemo(
-    () => ({ ...defaults.messages, ...messages }),
-    [defaults.messages, messages],
-  );
+  const t = useMessages(appShellMessages, messages);
 
   const [root, setRoot] = useState<HTMLElement | null>(null);
   const [narrow, setNarrow] = useState<boolean | undefined>(undefined);
@@ -248,6 +258,51 @@ export function AppShell({
       if (moved) setOwnAsideOpen(next);
     },
     [asideOpen, currentAsideOpen, onAsideOpenChange],
+  );
+
+  /**
+   * The pane's extent, held inside the limits. `undefined` travels whole: it is
+   * the pane back on its size step, and a clamp of it would be a clamp of a
+   * value that is not a fraction.
+   */
+  const setAsideExtent = useCallback(
+    (next: number | undefined, reason: AppShellAsideExtentReason, source?: unknown) => {
+      const wanted =
+        next === undefined
+          ? undefined
+          : clamp(next, resolvedMinAsideExtent, resolvedMaxAsideExtent);
+      if (wanted === currentAsideExtent) return;
+
+      let cancelled = false;
+      const state = createControllable<number | undefined>({
+        controlled: asideExtent,
+        initial: currentAsideExtent,
+        onRequest: (raw) => {
+          cancelled = raw.cancelled;
+          onAsideExtentChange?.(raw.value, {
+            get cancelled() {
+              return raw.cancelled;
+            },
+            cancel: () => raw.cancel(),
+            previous: raw.previous,
+            reason,
+            source: raw.source,
+            value: raw.value,
+          });
+        },
+      });
+
+      const moved = state.request(wanted, reason, source);
+      if (cancelled) return;
+      if (moved) setOwnAsideExtent(wanted);
+    },
+    [
+      asideExtent,
+      currentAsideExtent,
+      onAsideExtentChange,
+      resolvedMaxAsideExtent,
+      resolvedMinAsideExtent,
+    ],
   );
 
   /**
@@ -468,6 +523,8 @@ export function AppShell({
 
   const context = useMemo<AppShellContextValue>(
     () => ({
+      asideDragging,
+      asideExtent: currentAsideExtent,
       asideId,
       asideMode: resolvedAsideMode,
       asideOpen: currentAsideOpen,
@@ -479,7 +536,8 @@ export function AppShell({
       escape: resolvedEscape,
       back: resolvedBack,
       mainId,
-      messages: resolvedMessages,
+      maxAsideExtent: resolvedMaxAsideExtent,
+      minAsideExtent: resolvedMinAsideExtent,
       modal: resolvedModal,
       navId,
       navMode: resolvedMode,
@@ -490,15 +548,21 @@ export function AppShell({
       outsidePress: resolvedOutsidePress,
       primary: resolvedPrimary,
       register,
+      root,
       scroll: resolvedScroll,
       separation: resolvedSeparation,
+      setAsideDragging,
+      setAsideExtent,
       setAsideOpen,
       setOpen,
+      t,
       toggleId: `${baseId}toggle`,
     }),
     [
+      asideDragging,
       asideId,
       baseId,
+      currentAsideExtent,
       currentAsideOpen,
       currentOpen,
       mainId,
@@ -511,7 +575,6 @@ export function AppShell({
       resolvedCollapsedTo,
       resolvedBack,
       resolvedEscape,
-      resolvedMessages,
       resolvedMode,
       resolvedModal,
       resolvedNavSide,
@@ -520,8 +583,13 @@ export function AppShell({
       resolvedPrimary,
       resolvedScroll,
       resolvedSeparation,
+      resolvedMaxAsideExtent,
+      resolvedMinAsideExtent,
+      root,
+      setAsideExtent,
       setAsideOpen,
       setOpen,
+      t,
     ],
   );
 
@@ -534,14 +602,14 @@ export function AppShell({
   if (regions.main) {
     skipLinks.push(
       <a key="main" href={`#${mainId}`}>
-        {resolvedMessages.skipToMain}
+        {t('skipToMain')}
       </a>,
     );
   }
   if (regions.nav) {
     skipLinks.push(
       <a key="nav" href={`#${navId}`}>
-        {resolvedMessages.skipToNav}
+        {t('skipToNav')}
       </a>,
     );
   }
@@ -549,7 +617,7 @@ export function AppShell({
   if (regions.aside && currentAsideOpen) {
     skipLinks.push(
       <a key="aside" href={`#${asideId}`}>
-        {resolvedMessages.skipToAside}
+        {t('skipToAside')}
       </a>,
     );
   }
@@ -571,6 +639,7 @@ export function AppShell({
     'data-aside-size': resolvedAsideSize,
     'data-canvas': resolvedCanvas,
     'data-collapsed-to': resolvedCollapsedTo,
+    ...(asideDragging ? { 'data-dragging': '' as const } : {}),
     ...(resolvedMode === undefined ? {} : { 'data-nav-mode': resolvedMode }),
     'data-nav-side': resolvedNavSide,
     'data-nav-size': resolvedNavSize,

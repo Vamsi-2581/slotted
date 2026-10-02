@@ -23,6 +23,12 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
+import {
+  scrollAreaMessages,
+  type PartialMessages,
+  type ScrollAreaMessages,
+} from '@slotted/core/i18n';
 
 import { injectScrollAreaDefaults } from './scroll-area-defaults';
 import type {
@@ -126,10 +132,11 @@ export class SlScrollArea {
 
   /**
    * The name the region is announced by. Resolved in one order: `labelledBy`,
-   * then `label`, then the label `provideScrollAreaDefaults` set.
+   * then `messages.label`, then the catalog of the language in force.
    */
-  readonly label = input<string | undefined>(undefined);
   readonly labelledBy = input<string | undefined>(undefined);
+  /** Words laid over the catalog of the language in force: the region's name (`label`). */
+  readonly messages = input<PartialMessages<ScrollAreaMessages> | undefined>(undefined);
 
   /**
    * The position, as a distance from each logical start, on every scroll. It
@@ -143,6 +150,8 @@ export class SlScrollArea {
   readonly overflowChange = output<ScrollEdgesState>();
 
   private readonly defaults = injectScrollAreaDefaults();
+  /** The family's words in the language in force, with this area's `messages` laid over them. */
+  readonly t = injectMessages(scrollAreaMessages, this.messages);
   private readonly element = inject(ElementRef<HTMLElement>).nativeElement as HTMLElement;
   private readonly destroyRef = inject(DestroyRef);
   private readonly viewportRef = viewChild.required<ElementRef<HTMLElement>>('viewport');
@@ -180,7 +189,7 @@ export class SlScrollArea {
   );
   protected readonly ariaLabel = computed(() => {
     if (!this.wired() || this.labelledBy() !== undefined) return null;
-    return this.label() ?? this.defaults.label;
+    return this.t('label');
   });
 
   constructor() {

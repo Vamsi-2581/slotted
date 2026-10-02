@@ -10,7 +10,7 @@ import type { StatCardValueProps } from './stat-card.types';
  * The number. A numeric `value` is formatted with the card's locale and
  * `formatOptions` — `notation: 'compact'` is how 12,900 becomes 12.9K — and
  * `children` is the consumer's own rendering, unit and all. A missing or
- * failed value is the dash the messages name; a loading one is a placeholder
+ * failed value is the `empty` message, a dash; a loading one is a placeholder
  * five figures wide, on the value's own line.
  */
 export function StatCardValue({
@@ -30,7 +30,7 @@ export function StatCardValue({
   const content = card.loading ? (
     <Skeleton inlineSize="5ch" />
   ) : card.status !== 'ready' ? (
-    card.messages.empty
+    card.t('empty')
   ) : (
     (children ?? formatted)
   );

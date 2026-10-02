@@ -2,6 +2,8 @@ import { nextSelection } from '@slotted/core/collection';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
+import { injectMessages } from '@slotted/angular/i18n';
+import { tableMessages, type PartialMessages, type TableMessages } from '@slotted/core/i18n';
 import {
   booleanAttribute,
   ChangeDetectionStrategy,
@@ -23,9 +25,7 @@ import type { ControlValueAccessor } from '@angular/forms';
 import {
   injectTableDefaults,
   SlTableIdFactory,
-  TABLE_LABELS,
   type TableAlign,
-  type TableLabels,
   type TableLayout,
   type TableSelectionMode,
   type TableSelectionReason,
@@ -38,7 +38,6 @@ export type {
   TableAlign,
   TableDefaults,
   TableExpandedReason,
-  TableLabels,
   TableLayout,
   TableSelectionMode,
   TableSelectionReason,
@@ -144,7 +143,12 @@ export class SlTable implements ControlValueAccessor {
   });
   /** A refresh over rows already shown: `aria-busy`, and nothing moves. */
   readonly loading = input(false, { transform: booleanAttribute });
-  readonly labels = input<Partial<TableLabels> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * selection, expansion and sort words, the scrolling region's name and every
+   * word of the column filters.
+   */
+  readonly messages = input<PartialMessages<TableMessages> | undefined>(undefined);
 
   /** One output per transition, each carrying the reason and the event. */
   readonly sortChangeRequest = output<ChangeRequest<TableSortDescriptor | null>>();
@@ -170,22 +174,8 @@ export class SlTable implements ControlValueAccessor {
   readonly resolvedStickyFooter = computed(() => this.stickyFooter() ?? this.defaults.stickyFooter);
   readonly resolvedStickyTo = computed(() => this.stickyTo() ?? this.defaults.stickyTo);
   readonly resolvedColumns = computed(() => this.columns() ?? this.defaults.columns);
-  /**
-   * Two of the words are maps — the joins and the operator names — so they are
-   * merged rather than replaced: an application that renames one operator keeps
-   * the other eighteen. A spread alone would leave a panel with one translated
-   * word and a column of raw operator keys beside it.
-   */
-  readonly resolvedLabels = computed<TableLabels>(() => {
-    const sources = [TABLE_LABELS, this.defaults.labels, this.labels() ?? {}];
-    return {
-      ...TABLE_LABELS,
-      ...this.defaults.labels,
-      ...(this.labels() ?? {}),
-      filterJoins: Object.assign({}, ...sources.map((source) => source.filterJoins ?? {})),
-      filterOperators: Object.assign({}, ...sources.map((source) => source.filterOperators ?? {})),
-    };
-  });
+  /** The family's words in the language in force, with this table's `messages` laid over them. */
+  readonly t = injectMessages(tableMessages, this.messages);
 
   isSelected(key: string) {
     return this.value().includes(key);
@@ -233,15 +223,14 @@ export class SlTable implements ControlValueAccessor {
      * `aria-sort` is a property, and a property that changes silently is a
      * change no reader hears. None of the six surveyed implementations says it.
      */
-    const labels = this.resolvedLabels();
     const heading = (source?.currentTarget as HTMLElement | null)?.textContent?.trim() ?? column;
     const said =
       next === null
-        ? labels.sortCleared
+        ? this.t('sortCleared', { column: heading })
         : next.direction === 'ascending'
-          ? labels.sortedAscending
-          : labels.sortedDescending;
-    getLiveAnnouncer(this.host.nativeElement.ownerDocument).announce(`${heading}, ${said}`);
+          ? this.t('sortedAscending', { column: heading })
+          : this.t('sortedDescending', { column: heading });
+    getLiveAnnouncer(this.host.nativeElement.ownerDocument).announce(said);
 
     if (moved) this.sort.set(next);
   }

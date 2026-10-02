@@ -1,5 +1,6 @@
 import type { ChartModel, ChartTooltipContext } from '@slotted/core/chart';
 import { categoryIndex } from '@slotted/core/chart';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -9,8 +10,8 @@ import type { ReactNode } from 'react';
 import { Button } from '../button';
 import { Grid } from '../grid';
 import { Chart } from './chart';
-import { ChartDefaultsProvider } from './chart-defaults';
-import type { ChartMessages, ChartPoint, ChartRecord, ChartSeries } from './index';
+import { SlottedProvider } from '../i18n';
+import type { ChartPoint, ChartRecord, ChartSeries } from './index';
 import { REACT_CHART_DOCS, REACT_CHART_TOKENS } from './chart.docs';
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
@@ -83,48 +84,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /* ── Nexora Comércio, 2026: one product, every scene ─────────────────── */
-
-const PT_BR: Partial<ChartMessages> = {
-  roledescription: 'gráfico',
-  legend: 'Séries',
-  kinds: {
-    line: 'Gráfico de linhas',
-    area: 'Gráfico de área',
-    bar: 'Gráfico de barras',
-    pie: 'Gráfico de pizza',
-    scatter: 'Gráfico de dispersão',
-    mixed: 'Gráfico combinado',
-  },
-  summary: '{kind} com {series} séries e {points} pontos, de {first} a {last}.',
-  seriesRange: '{series}: de {first} a {last}; mínimo {min} em {minAt}, máximo {max} em {maxAt}.',
-  summaryPie: '{kind} com {count} fatias, total {total}.',
-  slice: '{label}: {value}, {share}.',
-  excluded: '{count} valores negativos não são desenhados.',
-  point: '{series}, {category}: {value}.',
-  selected: 'selecionado',
-  shown: '{series} visível.',
-  hidden: '{series} oculta.',
-  zoomed: 'A mostrar de {first} a {last}.',
-  zoomReset: 'A mostrar todos os dados.',
-  resetZoom: 'Repor zoom',
-  toolbar: 'Ações do gráfico',
-  tableView: 'Ver como tabela',
-  fullscreen: 'Tela cheia',
-  exitFullscreen: 'Sair da tela cheia',
-  more: 'Mais ações',
-  downloadCsv: 'Baixar CSV',
-  downloadImage: 'Baixar imagem',
-  help: 'Sobre este gráfico',
-  loading: 'A carregar o gráfico',
-  noData: 'Sem dados para mostrar',
-  allHidden: 'Todas as séries estão ocultas',
-  showAll: 'Mostrar todas',
-  error: 'Não foi possível desenhar o gráfico',
-  retry: 'Tentar de novo',
-  total: 'Total',
-  truncated: 'A mostrar as primeiras {shown} de {count} linhas.',
-  category: 'Categoria',
-};
 
 function random(seed: number) {
   return () => {
@@ -265,11 +224,11 @@ const DAILY_CHART = {
 /** Every scene speaks the product's language, set once as an application would. */
 function Stage({ children }: { children: ReactNode }) {
   return (
-    <ChartDefaultsProvider locale="pt-BR" messages={PT_BR}>
+    <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
       <div className="slotted-demo-stage" data-align="start" data-layout="block">
         {children}
       </div>
-    </ChartDefaultsProvider>
+    </SlottedProvider>
   );
 }
 

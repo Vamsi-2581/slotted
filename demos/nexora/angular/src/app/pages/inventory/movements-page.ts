@@ -201,9 +201,9 @@ import {
             (valueChangeRequest)="store.setFilter($event.value)"
             [query]="store.search()"
             (queryChangeRequest)="store.setSearch($event.value)"
-            [labels]="{ count: countLabel }"
+            [messages]="countMessages"
             [count]="store.total() ?? undefined"
-            [total]="store.grandTotal() ?? undefined"
+            [total]="store.total() === store.grandTotal() ? undefined : (store.grandTotal() ?? undefined)"
             [loading]="store.loading()"
           >
             <app-list-view-tools
@@ -224,7 +224,7 @@ import {
           }
           <sl-data-grid
             #grid="slDataGrid"
-            label="Stock movements"
+            aria-label="Stock movements"
             rowKey="id"
             variant="framed"
             activatable
@@ -297,8 +297,8 @@ import {
             <nav
               slDataGridFooter
               slPagination
-              label="Movement pages"
-              [labels]="pagerLabels"
+              aria-label="Movement pages"
+              [messages]="pagerMessages"
               [count]="store.total() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
@@ -463,14 +463,11 @@ export class MovementsPage {
     return 'The stock ledger: every receipt, shipment, transfer, adjustment and count, newest first. A movement is never edited; a correction is a movement of its own.';
   });
 
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total
-      ? `${count} movements`
-      : `${count} of ${total} movements`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} movements', countOnly: '{count} movements' };
 
-  readonly pagerLabels = {
-    range: (start: number, end: number, count: number) =>
-      `Movements ${start}–${end} of ${count.toLocaleString('en-US')}`,
+  readonly pagerMessages = {
+    range: 'Movements {start}–{end} of {count}',
     pageSize: 'Movements per page',
   };
 

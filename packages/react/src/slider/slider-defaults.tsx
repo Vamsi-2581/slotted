@@ -3,7 +3,6 @@ import { createContext, useContext } from 'react';
 import type { SliderDefaults, SliderDefaultsProviderProps } from './slider.types';
 
 const FALLBACK: SliderDefaults = {
-  locale: undefined,
   orientation: 'horizontal',
   size: 'md',
   valueLabel: 'auto',
@@ -17,9 +16,10 @@ export function useSliderDefaults(): SliderDefaults {
 }
 
 /**
- * An application decides once what its sliders look like and which locale their
- * values are written in, rather than repeating the same props on every scale. A
- * slider that states any of them itself still wins.
+ * An application decides once what its sliders look like, rather than
+ * repeating the same props on every scale. A slider that states any of them
+ * itself still wins. The locale its values are written in comes from the
+ * language in force (`SlottedProvider`).
  *
  * `size` is the one the field outranks: a `size="sm"` field holding an `md`
  * control is a field and a control disagreeing about one row, so a slider inside
@@ -31,7 +31,6 @@ export function SliderDefaultsProvider({ children, ...defaults }: SliderDefaults
   return (
     <SliderDefaultsContext.Provider
       value={{
-        locale: defaults.locale ?? inherited.locale,
         orientation: defaults.orientation ?? inherited.orientation,
         size: defaults.size ?? inherited.size,
         valueLabel: defaults.valueLabel ?? inherited.valueLabel,

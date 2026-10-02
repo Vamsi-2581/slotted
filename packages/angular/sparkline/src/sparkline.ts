@@ -13,6 +13,12 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
+import {
+  type PartialMessages,
+  sparklineMessages,
+  type SparklineMessages,
+} from '@slotted/core/i18n';
 import {
   describeSparkline,
   layoutSparkline,
@@ -20,13 +26,12 @@ import {
   SPARKLINE_STEPS,
   sparklineInset,
 } from '@slotted/core/sparkline';
-import type { SparklineBox, SparklineDatum, SparklineMessages } from '@slotted/core/sparkline';
+import type { SparklineBox, SparklineDatum } from '@slotted/core/sparkline';
 
 import { injectSparklineDefaults } from './sparkline-defaults';
 import {
   SPARKLINE_BAR_GAP,
   SPARKLINE_BAR_RADIUS,
-  SPARKLINE_MESSAGES,
   type SparklineCurve,
   type SparklineSeries,
   type SparklineSize,
@@ -123,8 +128,10 @@ export class SlSparkline {
   readonly description = input<string | undefined>(undefined);
   readonly formatOptions = input<Intl.NumberFormatOptions | undefined>(undefined);
   readonly valueFormatter = input<((value: number) => string) | undefined>(undefined);
+  /** The locale numbers are written in; the language in force when absent. */
   readonly locale = input<string | undefined>(undefined);
-  readonly messages = input<Partial<SparklineMessages> | undefined>(undefined);
+  /** Words laid over the catalog of the language in force, key by key: the description's sentences. */
+  readonly messages = input<PartialMessages<SparklineMessages> | undefined>(undefined);
 
   private readonly defaults = injectSparklineDefaults();
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
@@ -135,11 +142,9 @@ export class SlSparkline {
   readonly resolvedCurve = computed(() => this.curve() ?? this.defaults.curve ?? 'linear');
   readonly resolvedArea = computed(() => this.area() ?? this.defaults.area ?? false);
   readonly resolvedMarker = computed(() => this.marker() ?? this.defaults.marker ?? true);
-  readonly resolvedMessages = computed<SparklineMessages>(() => ({
-    ...SPARKLINE_MESSAGES,
-    ...this.defaults.messages,
-    ...this.messages(),
-  }));
+  /** The family's words in the language in force, with this sparkline's `messages` laid over them. */
+  readonly t = injectMessages(sparklineMessages, this.messages);
+  private readonly appLocale = injectLocale();
 
   readonly width = computed(() => this.box()?.width || SPARKLINE_STEPS[this.size()].width);
   readonly height = computed(() => this.box()?.height || SPARKLINE_STEPS[this.size()].height);
@@ -174,11 +179,11 @@ export class SlSparkline {
     if (description !== undefined) return description;
     const own = this.valueFormatter();
     const formatter = new Intl.NumberFormat(
-      this.locale() ?? this.defaults.locale,
+      this.locale() ?? this.appLocale(),
       this.formatOptions() ?? this.defaults.formatOptions,
     );
     return describeSparkline(this.data(), {
-      messages: this.resolvedMessages(),
+      t: this.t,
       format: own ?? ((value) => formatter.format(value)),
       label: this.label(),
     });

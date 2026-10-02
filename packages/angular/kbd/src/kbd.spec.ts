@@ -1,6 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
+
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
 import { provideKbdDefaults } from './kbd-defaults';
 import { SlKbd } from './kbd';
@@ -234,18 +237,38 @@ describe('SlShortcut', () => {
   });
 });
 
+describe('SlShortcut language', () => {
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(`<kbd slShortcut keys="space g" platform="windows"></kbd>`, [
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+    const shortcut = fixture.nativeElement.querySelector('[data-part="shortcut"]');
+
+    expect(legends(shortcut)).toEqual(['Espaço', 'G']);
+    expect(shortcut.querySelector('[data-separator="then"]').textContent).toBe('depois');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(legends(shortcut)).toEqual(['Space', 'G']);
+    expect(shortcut.querySelector('[data-separator="then"]').textContent).toBe('then');
+  });
+});
+
 describe('provideKbdDefaults', () => {
   it('sets the platform, the painting and the wording once for an application', () => {
-    const fixture = renderTemplate(`<kbd slShortcut keys="ctrl+k ctrl+s"></kbd>`, [
-      provideKbdDefaults({
-        platform: 'windows',
-        size: 'sm',
-        variant: 'soft',
-        thenLabel: 'dann',
-        legends: { ctrl: 'Strg' },
-        names: { ctrl: 'Steuerung' },
-      }),
-    ]);
+    const fixture = renderTemplate(
+      `<kbd slShortcut keys="ctrl+k ctrl+s" [messages]="{ then: 'dann' }"></kbd>`,
+      [
+        provideKbdDefaults({
+          platform: 'windows',
+          size: 'sm',
+          variant: 'soft',
+          legends: { ctrl: 'Strg' },
+          names: { ctrl: 'Steuerung' },
+        }),
+      ],
+    );
     const shortcut = fixture.nativeElement.querySelector('[data-part="shortcut"]');
 
     expect(shortcut.getAttribute('data-size')).toBe('sm');

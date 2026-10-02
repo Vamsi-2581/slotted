@@ -5,7 +5,6 @@ export {
   entityName,
   entityOptions,
   entitySections,
-  formatEntityLabel,
   localEntitySource,
   offersCreation,
   rememberRecent,

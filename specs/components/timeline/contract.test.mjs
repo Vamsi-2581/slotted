@@ -230,19 +230,18 @@ test('draws a subtle marker by default, in the five tones of the theme', () => {
   assert.deepEqual(contract.axes.size, ['sm', 'md', 'lg']);
 });
 
-test('lets an application set its defaults once, messages included', () => {
-  assert.ok(contract.provides.timelineDefaults.includes('locale'));
+test('lets an application set its defaults once, and reads its words from the catalog', () => {
   assert.ok(contract.provides.timelineDefaults.includes('timeZone'));
   assert.ok(contract.provides.timelineDefaults.includes('now'));
-  assert.ok(contract.provides.timelineDefaults.includes('messages'));
-  assert.deepEqual(Object.keys(contract.messages), [
-    'loadMore',
-    'loading',
-    'freshItems',
-    'empty',
-    'current',
-    'expand',
+  assert.ok(!contract.provides.timelineDefaults.includes('messages'));
+  assert.deepEqual(contract.messages, [
     'collapse',
+    'current',
+    'empty',
+    'expand',
+    'freshItems',
+    'loading',
+    'loadMore',
   ]);
 });
 

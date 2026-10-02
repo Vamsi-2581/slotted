@@ -422,7 +422,7 @@ const plainDate = (iso: string): PlainDate | null => {
                           type="button"
                           data-testid="submit"
                           [loading]="store.busy() === 'submit'"
-                          loadingLabel="Submitting"
+                          [messages]="{ loading: 'Submitting' }"
                           (click)="submit()"
                         >
                           {{ submitLabel() }}
@@ -436,7 +436,7 @@ const plainDate = (iso: string): PlainDate | null => {
                           type="button"
                           data-testid="send"
                           [loading]="store.busy() === 'send'"
-                          loadingLabel="Sending"
+                          [messages]="{ loading: 'Sending' }"
                           (click)="send()"
                         >
                           Send to supplier
@@ -482,7 +482,7 @@ const plainDate = (iso: string): PlainDate | null => {
                           aria-label="Refresh"
                           data-testid="refresh"
                           [loading]="store.loading()"
-                          loadingLabel="Refreshing"
+                          [messages]="{ loading: 'Refreshing' }"
                           (click)="store.load()"
                         >
                           <ng-icon name="lucideRefreshCw" />
@@ -639,7 +639,7 @@ const plainDate = (iso: string): PlainDate | null => {
                 </div>
               </section>
             } @else {
-              <div slSkeletonRegion label="Reading the purchase order" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the purchase order' }" [loading]="true">
                 <div slStack [gap]="6">
                   <div slGrid [columns]="phone() ? 2 : 4" minItemWidth="xs" [gap]="4">
                     @for (figure of figureLabels(); track figure) {
@@ -997,7 +997,7 @@ const plainDate = (iso: string): PlainDate | null => {
               <form
                 slForm
                 data-testid="receive-form"
-                summaryTitle="Nothing was received"
+                [messages]="{ summaryTitle: 'Nothing was received' }"
                 [errors]="receipt.errors()"
                 (errorsChange)="receipt.errors.set($event.value)"
                 [loading]="store.busy() === 'receive'"
@@ -1148,7 +1148,7 @@ const plainDate = (iso: string): PlainDate | null => {
                     type="submit"
                     data-testid="receive-submit"
                     [loading]="store.busy() === 'receive'"
-                    loadingLabel="Receiving"
+                    [messages]="{ loading: 'Receiving' }"
                   >
                     Receive
                   </button>
@@ -1171,7 +1171,7 @@ const plainDate = (iso: string): PlainDate | null => {
                 <form
                   slForm
                   data-testid="edit-form"
-                  summaryTitle="The order was not saved"
+                  [messages]="{ summaryTitle: 'The order was not saved' }"
                   [errors]="edit.errors()"
                   (errorsChange)="edit.errors.set($event.value)"
                   [loading]="store.busy() === 'save'"
@@ -1283,7 +1283,7 @@ const plainDate = (iso: string): PlainDate | null => {
                       type="submit"
                       data-testid="save-po"
                       [loading]="store.busy() === 'save'"
-                      loadingLabel="Saving"
+                      [messages]="{ loading: 'Saving' }"
                     >
                       Save
                     </button>
@@ -1396,7 +1396,7 @@ const plainDate = (iso: string): PlainDate | null => {
               type="button"
               data-testid="acknowledge-confirm"
               [loading]="store.busy() === 'acknowledge'"
-              loadingLabel="Recording"
+              [messages]="{ loading: 'Recording' }"
               (click)="acknowledge()"
             >
               Record acknowledgement

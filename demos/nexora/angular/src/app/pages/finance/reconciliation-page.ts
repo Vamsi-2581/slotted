@@ -327,12 +327,12 @@ function storedSplit(): number | null {
                 (valueChangeRequest)="queue.setFilter($event.value)"
                 [query]="queue.search()"
                 (queryChangeRequest)="queue.setSearch($event.value)"
-                [labels]="{ count: countLabel }"
+                [messages]="countMessages"
                 [count]="queue.total() ?? undefined"
-                [total]="queue.grandTotal() ?? undefined"
+                [total]="queue.total() === queue.grandTotal() ? undefined : (queue.grandTotal() ?? undefined)"
                 [loading]="queue.loading()"
               ></div>
-              <div slScrollArea class="rows" label="Bank transactions">
+              <div slScrollArea class="rows" [messages]="{ label: 'Bank transactions' }">
                 <ul
                   slList
                   variant="ruled"
@@ -457,8 +457,8 @@ function storedSplit(): number | null {
               </div>
               <nav
                 slPagination
-                label="Bank transaction pages"
-                [labels]="pagerLabels"
+                aria-label="Bank transaction pages"
+                [messages]="pagerMessages"
                 [count]="queue.total() ?? 0"
                 [page]="queue.page().index + 1"
                 [pageSize]="queue.page().size"
@@ -972,14 +972,11 @@ export class ReconciliationPage {
     },
   ];
 
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total
-      ? `${count} transactions`
-      : `${count} of ${total} transactions`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} transactions', countOnly: '{count} transactions' };
 
-  readonly pagerLabels = {
-    range: (start: number, end: number, count: number) =>
-      `Transactions ${start}–${end} of ${count.toLocaleString('en-US')}`,
+  readonly pagerMessages = {
+    range: 'Transactions {start}–{end} of {count}',
   };
 
   readonly narrowed = computed(

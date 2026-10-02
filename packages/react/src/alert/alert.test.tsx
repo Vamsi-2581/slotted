@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/alert/contract.json';
+import { SlottedProvider } from '../i18n';
 import {
   Alert,
   AlertActions,
@@ -261,16 +263,20 @@ describe('Alert', () => {
       expect(screen.getByTestId('alert')).not.toHaveAttribute('hidden');
     });
 
-    it('takes the word a provider gave every dismiss control', () => {
+    it('speaks the language in force, and lays its own messages over it', () => {
       render(
-        <AlertDefaultsProvider dismissLabel="Dispensar">
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
           <Alert dismissible>
             <AlertContent>Pronto.</AlertContent>
           </Alert>
-        </AlertDefaultsProvider>,
+          <Alert dismissible messages={{ dismiss: 'Fechar aviso' }}>
+            <AlertContent>Pronto.</AlertContent>
+          </Alert>
+        </SlottedProvider>,
       );
 
       expect(screen.getByRole('button', { name: 'Dispensar' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Fechar aviso' })).toBeInTheDocument();
     });
   });
 

@@ -15,6 +15,7 @@ import {
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor } from '@angular/forms';
 import { SlField } from '@slotted/angular/field';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlMenu, SlMenuItem, SlMenuRadioGroup, SlMenuTrigger } from '@slotted/angular/menu';
 import {
@@ -28,12 +29,25 @@ import {
   rgbaToHsva,
   toCss,
 } from '@slotted/core/color';
-import type { ColorFormat, Hsva } from '@slotted/core/color';
+import type { ColorFormat, ContrastLevel, Hsva } from '@slotted/core/color';
+import {
+  colorPickerMessages,
+  type ColorPickerMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 
 import { injectColorPickerDefaults } from './color-picker-defaults';
 import type { ColorPickerSize } from './color-picker-defaults';
+
+/** The catalog key of each WCAG outcome. */
+const CONTRAST_LEVEL_KEYS = {
+  AAA: 'contrastLevels.AAA',
+  AA: 'contrastLevels.AA',
+  'AA-large': 'contrastLevels.AALarge',
+  fail: 'contrastLevels.fail',
+} as const satisfies Record<ContrastLevel, string>;
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -108,8 +122,8 @@ const optionalBoolean = (value: boolean | string | undefined) =>
       <div
         data-part="area-thumb"
         role="slider"
-        aria-roledescription="2D slider"
-        [attr.aria-label]="defaults.areaLabel"
+        [attr.aria-roledescription]="t('areaRoleDescription')"
+        [attr.aria-label]="t('area')"
         [attr.aria-valuetext]="percent(hsva().s) + ', ' + percent(hsva().v)"
         [attr.aria-disabled]="off() || null"
         [attr.tabindex]="resolvedDisabled() ? -1 : 0"
@@ -130,7 +144,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
           data-part="channel-thumb"
           role="slider"
           [attr.data-channel]="channel"
-          [attr.aria-label]="channel === 'hue' ? defaults.hueLabel : defaults.alphaLabel"
+          [attr.aria-label]="channel === 'hue' ? t('hue') : t('alpha')"
           aria-valuemin="0"
           [attr.aria-valuemax]="channel === 'hue' ? 360 : 100"
           [attr.aria-valuenow]="channel === 'hue' ? round(hsva().h) : round(hsva().a * 100)"
@@ -146,7 +160,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
       <button
         data-part="previous"
         type="button"
-        [attr.aria-label]="defaults.previousLabel + ' ' + (previous() ?? current())"
+        [attr.aria-label]="t('previous', { color: previous() ?? current() })"
         [disabled]="off()"
         (click)="request(previous() ?? current(), 'select', $event)"
       >
@@ -167,7 +181,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
           dir="ltr"
           autocomplete="off"
           spellcheck="false"
-          [attr.aria-label]="defaults.inputLabel"
+          [attr.aria-label]="t('input')"
           [attr.aria-invalid]="draftValid() ? null : 'true'"
           [disabled]="resolvedDisabled()"
           [readOnly]="resolvedReadOnly()"
@@ -180,7 +194,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
       <button
         data-part="format"
         type="button"
-        [attr.aria-label]="defaults.formatLabel + ': ' + resolvedFormat()"
+        [attr.aria-label]="t('format', { format: resolvedFormat() })"
         [disabled]="off()"
         [slMenuTriggerFor]="formats"
       >
@@ -200,7 +214,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
         <button
           data-part="eyedropper"
           type="button"
-          [attr.aria-label]="defaults.eyedropperLabel"
+          [attr.aria-label]="t('eyedropper')"
           [disabled]="off()"
           (click)="pick($event)"
         >
@@ -210,11 +224,11 @@ const optionalBoolean = (value: boolean | string | undefined) =>
     </div>
     @if (outOfGamut()) {
       <p data-part="gamut" role="status">
-        <span slIcon><svg slGlyph name="circle-alert"></svg></span>{{ defaults.gamutLabel }}
+        <span slIcon><svg slGlyph name="circle-alert"></svg></span>{{ t('gamut') }}
       </p>
     }
     @if (resolvedPresets().length > 0) {
-      <div data-part="presets" role="radiogroup" [attr.aria-label]="defaults.presetsLabel">
+      <div data-part="presets" role="radiogroup" [attr.aria-label]="t('presets')">
         @for (preset of resolvedPresets(); track preset; let index = $index) {
           <button
             data-part="preset"
@@ -234,9 +248,9 @@ const optionalBoolean = (value: boolean | string | undefined) =>
     }
     @if (contrast(); as measured) {
       <div data-part="contrast" aria-live="polite" [attr.data-level]="measured.level">
-        <span data-part="contrast-sample" aria-hidden="true">Aa</span>
+        <span data-part="contrast-sample" aria-hidden="true">{{ t('contrastSample') }}</span>
         <span data-part="contrast-ratio">{{ measured.ratio }}:1</span>
-        <span data-part="contrast-level">{{ measured.words }}</span>
+        <span data-part="contrast-level">{{ t(measured.key) }}</span>
       </div>
     }
   `,
@@ -286,12 +300,19 @@ export class SlColorPicker implements ControlValueAccessor {
   readonly invalid = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: optionalBoolean,
   });
+  /**
+   * Words laid over the catalog of the language in force, key by key: every
+   * control's name, the gamut sentence and the contrast levels.
+   */
+  readonly messages = input<PartialMessages<ColorPickerMessages> | undefined>(undefined);
 
   /** Before the colour moves: `pointer`, `keyboard`, `select` or `programmatic` (the eyedropper). */
   readonly valueChange = output<ChangeRequest<string>>();
   readonly formatChange = output<ChangeRequest<ColorFormat>>();
 
   protected readonly defaults = injectColorPickerDefaults();
+  /** The family's words in the language in force, with this picker's `messages` laid over them. */
+  readonly t = injectMessages(colorPickerMessages, this.messages);
   protected readonly field = inject(SlField, { optional: true });
   private readonly element: HTMLElement = inject(ElementRef).nativeElement;
   protected readonly formatNames = COLOR_FORMATS;
@@ -369,8 +390,7 @@ export class SlColorPicker implements ControlValueAccessor {
     if (background === null || parsed === null) return null;
     const ratio = contrastRatio(parsed.rgba, background.rgba);
     const level = contrastLevel(ratio);
-    const words = { AAA: 'AAA', AA: 'AA', 'AA-large': 'AA large', fail: 'Fail' }[level];
-    return { level, ratio: ratio.toFixed(2), words };
+    return { level, ratio: ratio.toFixed(2), key: CONTRAST_LEVEL_KEYS[level] };
   });
 
   constructor() {

@@ -8,7 +8,7 @@
   },
   "sideEffects": false,
   "scripts": {
-    "build": "ng build slotted-angular",
+    "build": "ng build slotted-angular && node ../../tools/agent-docs/bin/build.mjs --binding angular --out dist/docs",
     "test": "ng test slotted-angular --watch=false && pnpm build && node --test src/bundle.styles.test.mjs src/bundle.boundaries.test.mjs src/entry-points.source.test.mjs",
     "typecheck": "ng build slotted-angular --configuration development",
     "verify": "pnpm test && pnpm build"
@@ -24,6 +24,7 @@
     "@angular/router": "22.1.7",
     "@ng-icons/core": "35.0.1",
     "@ng-icons/lucide": "35.0.1",
+    "@slotted/agent-docs": "workspace:*",
     "@slotted/core": "workspace:*",
     "@slotted/storybook-workbench": "workspace:*",
     "@slotted/styles": "workspace:*",

@@ -14,9 +14,11 @@ import type {
   GridTree,
 } from '@slotted/core/grid';
 import { emptyQuery, POPIN_COLUMN_ID, withPageIndex } from '@slotted/core/grid';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import type { ChangeRequest } from '@slotted/core/state';
 import { By } from '@angular/platform-browser';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlMenu } from '@slotted/angular/menu';
 import { provideTooltipDefaults } from '@slotted/angular/tooltip';
 import contract from '../../../../specs/components/data-grid/contract.json';
@@ -116,7 +118,7 @@ const COLUMNS: GridColumn<Shipment>[] = [
   template: `
     <sl-data-grid
       id="grid-1"
-      label="Shipments"
+      aria-label="Shipments"
       rowKey="id"
       [rows]="rows()"
       [columns]="columns"
@@ -837,10 +839,35 @@ describe('SlDataGrid', () => {
 @Component({
   standalone: true,
   imports: [SlDataGrid],
-  providers: [provideDataGridDefaults({ variant: 'framed', labels: { empty: 'Nada' } })],
-  template: `<sl-data-grid rowKey="id" [rows]="[]" [columns]="columns" />`,
+  providers: [provideDataGridDefaults({ variant: 'framed' })],
+  template: `<sl-data-grid
+    rowKey="id"
+    [rows]="[]"
+    [columns]="columns"
+    [messages]="{ empty: 'Nada' }"
+  />`,
 })
 class Provided {
+  readonly columns = COLUMNS;
+}
+
+/** The language the grid below speaks, changed in place by the test. */
+const gridLocale = signal('pt-BR');
+
+@Component({
+  standalone: true,
+  imports: [SlDataGrid],
+  providers: [provideSlotted({ locale: gridLocale, catalogs: { 'pt-BR': PT_BR } })],
+  template: `<sl-data-grid
+    aria-label="Shipments"
+    rowKey="id"
+    selectionMode="multiple"
+    [rows]="rows"
+    [columns]="columns"
+  />`,
+})
+class Localized {
+  readonly rows = ROWS;
   readonly columns = COLUMNS;
 }
 
@@ -972,6 +999,25 @@ describe('SlDataGrid, defaults', () => {
     expect(root.getAttribute('data-variant')).toBe('framed');
     expect(root.querySelector('[data-part="empty"]')!.textContent).toContain('Nada');
   });
+
+  it('speaks the language in force, and follows a change of it in place', async () => {
+    gridLocale.set('pt-BR');
+    await TestBed.configureTestingModule({ imports: [Localized] }).compileComponents();
+    const fixture = TestBed.createComponent(Localized);
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector('[role="grid"]') as HTMLElement;
+    const all = () => root.querySelector('[data-part="head"] [data-part="selection"]')!;
+    const priority = (row: string) =>
+      root.querySelector(`[data-row="${row}"] [data-column="priority"]`)!;
+    expect(all().textContent).toContain('Selecionar todas as 4 linhas');
+    expect(priority('S1').textContent).toContain('Sim');
+    expect(priority('S2').textContent).toContain('Não');
+
+    gridLocale.set('en-US');
+    fixture.detectChanges();
+    expect(all().textContent).toContain('Select all 4 rows');
+    expect(priority('S1').textContent).toContain('Yes');
+  });
 });
 
 describe('SlDataGrid, a column name its own box cuts', () => {
@@ -1038,7 +1084,7 @@ describe('SlDataGrid as a tree', () => {
     imports: [SlDataGrid],
     template: `
       <sl-data-grid
-        label="Sites"
+        aria-label="Sites"
         rowKey="id"
         [rows]="rows()"
         [columns]="columns"
@@ -1140,7 +1186,7 @@ describe('SlDataGrid reordering rows', () => {
     imports: [SlDataGrid],
     template: `
       <sl-data-grid
-        label="Shipments"
+        aria-label="Shipments"
         rowKey="id"
         [rows]="rows"
         [columns]="columns"
@@ -1326,7 +1372,7 @@ describe('SlDataGrid with a data source', () => {
     imports: [SlDataGrid],
     template: `
       <sl-data-grid
-        label="Shipments"
+        aria-label="Shipments"
         rowKey="id"
         [columns]="columns"
         [dataSource]="source"
@@ -1441,7 +1487,7 @@ const ACCOUNT_COLUMNS: GridColumn<Account>[] = [
   imports: [SlDataGrid, SlDataGridColumnHelp, SlDataGridCellTemplate],
   template: `
     <sl-data-grid
-      label="Accounts"
+      aria-label="Accounts"
       rowKey="id"
       [rows]="rows"
       [columns]="columns()"
@@ -1489,7 +1535,7 @@ class Accounts {
     <output>{{ grid.outOfSpace().popin.length }}</output>
     <sl-data-grid
       #grid="slDataGrid"
-      label="Accounts"
+      aria-label="Accounts"
       rowKey="id"
       [rows]="rows"
       [columns]="columns"

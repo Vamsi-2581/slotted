@@ -41,11 +41,7 @@ export class SlFieldGroupLegend {
 
   protected readonly legendId = computed(() => this.writtenId ?? this.group.ids().legend);
   private readonly necessity = computed(() =>
-    necessityMark(
-      this.group.resolvedNecessity(),
-      this.group.required() === true,
-      this.group.resolvedWords(),
-    ),
+    necessityMark(this.group.resolvedNecessity(), this.group.required() === true, this.group.t),
   );
   protected readonly markHidden = computed(() => this.necessity()?.hidden === true);
   protected readonly mark = computed(() => this.necessity()?.text ?? null);

@@ -261,14 +261,8 @@ test('composes rather than re-implementing', () => {
 });
 
 test('lets an application set its defaults once', () => {
-  assert.deepEqual(contract.provides.pageHeaderDefaults, ['size', 'level', 'collapse', 'messages']);
-  assert.deepEqual(Object.keys(contract.messages), [
-    'expand',
-    'collapse',
-    'pin',
-    'unpin',
-    'headerArea',
-  ]);
+  assert.deepEqual(contract.provides.pageHeaderDefaults, ['size', 'level', 'collapse']);
+  assert.deepEqual(contract.messages, ['collapse', 'expand', 'headerArea', 'pin', 'unpin']);
 });
 
 test('declines with a reason, never silently', () => {

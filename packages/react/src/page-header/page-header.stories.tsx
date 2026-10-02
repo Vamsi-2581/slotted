@@ -762,26 +762,15 @@ export const Defaults: Story = {
     return (
       <Grid columns={1}>
         <Scene
-          label="Four decisions an application takes once"
-          note="The provider carries collapse, level, size and the strings for every header under it — here in English, and manual. A header that states any of them itself still wins: this one says size='md'."
+          label="Three decisions an application takes once"
+          note="The provider carries collapse, level and size for every header under it — here manual. A header that states any of them itself still wins: this one says size='md'. The words come from the language in force."
         >
-          <PageHeaderDefaultsProvider
-            collapse="manual"
-            level="2"
-            messages={{
-              collapse: 'Collapse header',
-              expand: 'Expand header',
-              headerArea: 'Page header',
-              pin: 'Pin header',
-              unpin: 'Unpin header',
-            }}
-            size="sm"
-          >
+          <PageHeaderDefaultsProvider collapse="manual" level="2" size="sm">
             <Viewport size="tall">
               <Page>
                 <OrderHeader navigation={false} size="md" tabs={false} />
                 <PageBody>
-                  <Text size="sm">Hover the pill: the names are the provider’s.</Text>
+                  <Text size="sm">Hover the pill: the names are the catalog’s.</Text>
                 </PageBody>
               </Page>
             </Viewport>

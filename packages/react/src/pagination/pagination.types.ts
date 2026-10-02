@@ -1,3 +1,4 @@
+import type { FamilyTranslator, PaginationMessages, PartialMessages } from '@slotted/core/i18n';
 import type { PageItem } from '@slotted/core/pagination';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
@@ -8,25 +9,9 @@ export type PaginationPageSizeReason = 'select' | 'programmatic';
 export type PaginationPageRequest = ChangeRequest<number>;
 export type PaginationPageSizeRequest = ChangeRequest<number>;
 
-/** The wording every control carries, so an application translates once. */
-export interface PaginationLabels {
-  first: string;
-  last: string;
-  next: string;
-  page: (page: number) => string;
-  pageSize: string;
-  previous: string;
-  /** "Page 3 of 24", drawn instead of the row below the family's breakpoint. */
-  summary: (page: number, pages: number) => string;
-  /** "21–40 of 482". A consumer who wants another sentence replaces it. */
-  range: (start: number, end: number, count: number) => string;
-}
-
 export interface PaginationDefaults {
   boundaryCount?: number | undefined;
   defaultPageSize?: number | undefined;
-  label?: string | undefined;
-  labels?: Partial<PaginationLabels> | undefined;
   live?: PaginationLive | undefined;
   pageSizeOptions?: readonly number[] | undefined;
   siblingCount?: number | undefined;
@@ -59,9 +44,11 @@ export interface PaginationProps extends ComponentPropsWithRef<'nav'> {
    * Without it they are buttons, and a middle click does nothing.
    */
   itemHref?: ((page: number) => string) | undefined;
-  /** The landmark's own name. */
-  label?: string | undefined;
-  labels?: Partial<PaginationLabels> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * landmark's name (`label`), the controls, and the sentences.
+   */
+  messages?: PartialMessages<PaginationMessages> | undefined;
   /** Whether the range announces a page change. `off` silences it. */
   live?: PaginationLive | undefined;
   /** A page change in flight: the controls refuse, and the row keeps its size. */
@@ -88,7 +75,8 @@ export interface PaginationContextValue {
   /** The row of numbers and ellipses, from `@slotted/core/pagination`. */
   items: readonly PageItem[];
   itemHref: ((page: number) => string) | undefined;
-  labels: PaginationLabels;
+  /** The family's words in the language in force, with this paginator's `messages` laid over them. */
+  t: FamilyTranslator<PaginationMessages>;
   live: PaginationLive;
   loading: boolean;
   page: number;

@@ -18,6 +18,7 @@ import {
   type ReactNode,
 } from 'react';
 
+import { useLocale } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import {
   TimelineContext,
@@ -182,7 +183,7 @@ export function TimelineGroup({
           </span>
           {label}
           <span data-ui="visually-hidden">
-            {`, ${isOpen ? timeline.messages.collapse : timeline.messages.expand}`}
+            {isOpen ? timeline.t('collapse') : timeline.t('expand')}
           </span>
         </button>
       ) : (
@@ -312,9 +313,7 @@ export function TimelineItem({
       {title === undefined ? null : (
         <div data-part="title" id={id('title')}>
           {title}
-          {current ? (
-            <span data-ui="visually-hidden">{`, ${timeline.messages.current}`}</span>
-          ) : null}
+          {current ? <span data-ui="visually-hidden">{timeline.t('current')}</span> : null}
         </div>
       )}
       {time === undefined ? null : (
@@ -394,7 +393,8 @@ export function TimelineItem({
  * machine value always goes to `datetime`; the text is the family's
  * formatting unless the consumer wrote its own, and a relative reading keeps
  * the absolute one in `title`. Outside a timeline it still works, from the
- * runtime's own locale and zone, so a page can put one in a table cell.
+ * locale in force and the runtime's zone, so a page can put one in a table
+ * cell.
  */
 export function TimelineTime({
   children,
@@ -407,9 +407,10 @@ export function TimelineTime({
   ...nativeProps
 }: TimelineTimeProps) {
   const timeline = useContext(TimelineContext);
+  const runtimeLocale = useLocale();
   const formatted = formatTimestamp(value, {
     format: format ?? timeline?.timeFormat,
-    locale: locale ?? timeline?.locale,
+    locale: locale ?? timeline?.locale ?? runtimeLocale,
     now: now ?? timeline?.now,
     timeZone: timeZone ?? timeline?.timeZone,
   });

@@ -527,19 +527,7 @@ class PopoverDemo {
   standalone: true,
   imports: [SlImportExportCenter],
   providers: [
-    provideImportExportCenterDefaults({
-      level: '3',
-      locale: 'en-US',
-      messages: {
-        all: 'All',
-        download: 'Download',
-        exports: 'Exports',
-        imports: 'Imports',
-        title: 'Imports and exports',
-      },
-      size: 'sm',
-      timeFormat: 'absolute',
-    }),
+    provideImportExportCenterDefaults({ level: '3', size: 'sm', timeFormat: 'absolute' }),
   ],
   template: `<section slImportExportCenter [size]="size()" [jobs]="jobs" [now]="now"></section>`,
 })
@@ -829,7 +817,7 @@ export const Defaults: Story = {
     template: grid(
       scene(
         'From the provider',
-        'English words, absolute times and the sm step, set once for the subtree by provideImportExportCenterDefaults.',
+        'Absolute times, the third rank and the sm step, set once for the subtree by provideImportExportCenterDefaults; the words come from the language in force.',
         '<sl-iec-provided></sl-iec-provided>',
       ) +
         scene(

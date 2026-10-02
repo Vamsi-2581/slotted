@@ -497,7 +497,7 @@ export function PopoverClose({ children, ref, render, ...nativeProps }: PopoverC
 
   const rootProps = {
     ...nativeProps,
-    'aria-label': nativeProps['aria-label'] ?? popover.closeLabel,
+    'aria-label': nativeProps['aria-label'] ?? popover.t('close'),
     children: children ?? (
       <Icon size="sm">
         <Glyph name="x" />

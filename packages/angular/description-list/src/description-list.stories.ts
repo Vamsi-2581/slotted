@@ -374,11 +374,7 @@ export const Composition: Story = {
   parameters: scenario('composition'),
   decorators: [
     applicationConfig({
-      providers: [
-        provideDescriptionListDefaults({
-          labels: { copy: 'Copiar', placeholder: 'Não informado' },
-        }),
-      ],
+      providers: [provideDescriptionListDefaults({ termWidth: '8rem', variant: 'framed' })],
     }),
   ],
   render: () => ({
@@ -411,7 +407,7 @@ export const Composition: Story = {
   )}
   ${scene(
     'provideDescriptionListDefaults()',
-    'One decision for every panel below it: here the five words the family says, in Portuguese. An input on the list still wins over all of them.',
+    'One decision for every panel below it: the arrangement and the term width. An input on the list still wins over both. The words come from the language in force.',
     `<div slDescriptionList variant="framed" termWidth="8rem">
       ${pair('Chave', 'sk_live_51N2xQe4Hh8bTqVzL', ' copy')}
       <div slDescriptionListItem>

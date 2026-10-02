@@ -40,11 +40,10 @@ import type { ToastMessage, ToastContent } from '@slotted/angular/toast';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
-import { applicationConfig, moduleMetadata } from '@storybook/angular-vite';
+import { moduleMetadata } from '@storybook/angular-vite';
 
 import { SlDataGrid } from './data-grid';
 import { persistedGridView } from './persisted-grid-view';
-import { provideDataGridDefaults } from './data-grid-defaults';
 import type {
   DataGridColumnStateRequest,
   DataGridDataSource,
@@ -74,6 +73,9 @@ interface Shipment {
   cost: number;
   priority: boolean;
 }
+
+/** What the stories' mock server writes for a boolean when it searches: its own words, not the grid's. */
+const SERVER_BOOLEANS = { true: 'Yes', false: 'No' };
 
 const CUSTOMERS = [
   'Aurora Textiles',
@@ -266,7 +268,7 @@ const STATUS_TEMPLATE = `
 /** One grid of shipments, framed, filling its viewport; `extra` adds bindings. */
 const grid = (extra = '', content = '', options: { grow?: boolean } = {}) => `
     <sl-data-grid
-      label="Shipments"
+      aria-label="Shipments"
       rowKey="id"
       ${options.grow ? '' : 'height="100%"'}
       variant="framed"
@@ -369,7 +371,7 @@ const VIEW_KEY = 'slotted-demo:data-grid-view';
     <div class="slotted-demo-room" data-room="desktop">
       <div class="slotted-demo-viewport" data-size="tall">
         <sl-data-grid
-          label="Shipments"
+          aria-label="Shipments"
           rowKey="id"
           height="100%"
           variant="framed"
@@ -432,7 +434,7 @@ export class SavedViewDemo {
     <div class="slotted-demo-room" data-room="desktop">
       <div class="slotted-demo-viewport" data-size="tall">
         <sl-data-grid
-          label="Shipments"
+          aria-label="Shipments"
           rowKey="id"
           height="100%"
           variant="framed"
@@ -1087,7 +1089,10 @@ function shipmentServer(size: number) {
         pending.set(false);
         return;
       }
-      const applied = applyQuery(TEN_THOUSAND, columns, query(), { rowKey: (row) => row.id });
+      const applied = applyQuery(TEN_THOUSAND, columns, query(), {
+        rowKey: (row) => row.id,
+        booleans: SERVER_BOOLEANS,
+      });
       page.set({
         rows: applied.nodes.flatMap((node) => (node.kind === 'row' ? [node.row] : [])),
         total: applied.total,
@@ -1153,7 +1158,10 @@ export const DataSource: Story = {
         });
         if (asked.search.trim().toLowerCase() === 'fail')
           throw new Error('The shipments service timed out');
-        const applied = applyQuery(TEN_THOUSAND, columns, asked, { rowKey: (row) => row.id });
+        const applied = applyQuery(TEN_THOUSAND, columns, asked, {
+          rowKey: (row) => row.id,
+          booleans: SERVER_BOOLEANS,
+        });
         total.set(applied.total);
         return {
           rows: applied.nodes.flatMap((node) => (node.kind === 'row' ? [node.row] : [])),
@@ -1572,7 +1580,7 @@ export const Tree: Story = {
       template: screen(
         `
     <sl-data-grid
-      label="Sites"
+      aria-label="Sites"
       rowKey="id"
       height="100%"
       variant="framed"
@@ -1751,18 +1759,14 @@ export const Keyboard: Story = {
 
 export const Accessibility: Story = {
   parameters: scenario('accessibility'),
-  decorators: [
-    applicationConfig({
-      providers: [
-        provideDataGridDefaults({
-          labels: { selectAllFiltered: 'Select all {count} shipments', grid: 'Shipments' },
-        }),
-      ],
-    }),
-  ],
   render: () => ({
     props: {
       ...base(),
+      messages: {
+        grid: 'Shipments',
+        selectAllFiltered:
+          '{count, plural, one {Select the # shipment} other {Select all # shipments}}',
+      },
       rows: FIFTY.slice(0, 8),
       value: ['SHP-20482'],
       query: {
@@ -1784,6 +1788,7 @@ export const Accessibility: Story = {
       [rows]="rows"
       [query]="query"
       [value]="value"
+      [messages]="messages"
     >${STATUS_TEMPLATE}
     </sl-data-grid>`,
       { size: 'tall' },

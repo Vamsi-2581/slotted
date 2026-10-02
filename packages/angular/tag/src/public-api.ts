@@ -2,12 +2,7 @@ export { SlTag } from './tag';
 export type { TagRemoveReason, TagRemoveRequest } from './tag';
 export { SlTagBody } from './tag-body';
 export { SlTagEnd, SlTagStart } from './tag-content';
-export {
-  injectTagDefaults,
-  provideTagDefaults,
-  TAG_DEFAULTS,
-  TAG_REMOVE_LABEL,
-} from './tag-defaults';
+export { injectTagDefaults, provideTagDefaults, TAG_DEFAULTS } from './tag-defaults';
 export type {
   TagDefaults,
   TagOrientation,

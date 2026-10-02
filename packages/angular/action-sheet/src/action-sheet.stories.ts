@@ -392,7 +392,7 @@ export const Responsive: Story = {
 export const Defaults: Story = {
   parameters: scenario('defaults'),
   decorators: [
-    moduleMetadata({ providers: [provideActionSheetDefaults({ cancelLabel: 'Fechar' })] }),
+    moduleMetadata({ providers: [provideActionSheetDefaults({ closeOnSelect: false })] }),
   ],
   render: () => ({
     template: layer(`${page()}

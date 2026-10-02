@@ -31,6 +31,7 @@ const imports: ReferenceImport = {
   AppShellAsideBody,
   AppShellAsideFooter,
   AppShellAsideHeader,
+  AppShellAsideResizer,
   AppShellAsideToggle,
   AppShellBanner,
   AppShellBrand,
@@ -153,6 +154,13 @@ const anatomy: AnatomyRow[] = [
       'The complementary landmark, carrying the family’s own label. It opens and closes the way the navigation does — a column beside the content or a layer over it, by asideMode — and carries its own data-open, because the root’s is the navigation’s. Closed, it leaves the layout: a pane has no rail.',
   },
   {
+    part: 'aside-resizer',
+    element: 'div with role="separator", or the element render returns',
+    required: false,
+    purpose:
+      'The pane’s inner edge, from the WAI-ARIA Window Splitter pattern: focusable, aria-controls the pane, its three values the extent as whole percentages of the shell. Placed inside AppShellAside; rendering it is the capability. Drawn on the column alone — under asideMode="overlay" or a closed pane it renders nothing, and a row under the content hides it.',
+  },
+  {
     part: 'aside-header',
     element: 'div',
     required: false,
@@ -163,7 +171,8 @@ const anatomy: AnatomyRow[] = [
     part: 'aside-body',
     element: 'div',
     required: false,
-    purpose: 'The middle, and the only part of the pane that scrolls.',
+    purpose:
+      'The middle, and the only part of the pane that scrolls. It stands on the inset the head and the foot stand on, so its content lines up with the title; inset="none" drops it for content that brings its own — a page, a detail panel, a list to the edges.',
   },
   {
     part: 'aside-footer',
@@ -277,7 +286,7 @@ const scenes: ReferenceSceneMeta[] = [
   </AppShellBrand>
   <AppShellCentre>
     <TextField
-      placeholder="Procurar…"
+      placeholder="Search…"
       start={
         <Icon>
           <Search />
@@ -287,7 +296,7 @@ const scenes: ReferenceSceneMeta[] = [
     />
   </AppShellCentre>
   <AppShellActions>
-    <IconButton aria-label="Notificações">…</IconButton>
+    <IconButton aria-label="Notifications">…</IconButton>
     <Avatar>AB</Avatar>
   </AppShellActions>
 </AppShellBanner>;`,
@@ -383,7 +392,7 @@ const scenes: ReferenceSceneMeta[] = [
       source: `<AppShell primary="main">
   <AppShellBanner>…</AppShellBanner>
   <AppShellNav>
-    <AppShellNavRail aria-label="Módulos">
+    <AppShellNavRail aria-label="Modules">
       {modules.map((module) => (
         <IconButton
           aria-current={module.id === current ? 'true' : undefined}
@@ -410,7 +419,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'aside',
     title: 'The pane opens on a selection, and closes from its own head',
-    note: 'The pane holds the second open state, under the same shape as the navigation’s: asideOpen, defaultAsideOpen, onAsideOpenChange with a reason. Select a row and the product opens the pane; press the control in the pane’s head, or Escape when it is a layer, and it closes — the content takes the room, because a closed pane leaves no rail. The skip link to the pane exists only while it is open.',
+    note: 'The pane holds the second open state, under the same shape as the navigation’s: asideOpen, defaultAsideOpen, onAsideOpenChange with a reason. Select a row and the product opens the pane; press the control in the pane’s head, or Escape when it is a layer, and it closes — the content takes the room, because a closed pane leaves no rail. The skip link to the pane exists only while it is open. Drag the pane’s inner edge, or focus it and press the arrows, Home and End: asideExtent is a fraction of the shell between minAsideExtent and maxAsideExtent, and onAsideExtentChange says which hand moved it.',
     snippet: defineSnippet({
       id: 'app-shell-react-aside',
       language: 'tsx',
@@ -427,6 +436,7 @@ const scenes: ReferenceSceneMeta[] = [
     <Shipments onSelect={setSelected} selected={selected} />
   </AppShellMain>
   <AppShellAside>
+    <AppShellAsideResizer />
     <AppShellAsideHeader>
       <span>{selected}</span>
       <AppShellAsideToggle />
@@ -499,7 +509,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'app-shell-react-skip',
       language: 'tsx',
       label: 'Written from the regions that exist',
-      source: `<AppShell messages={{ skipToMain: 'Pular para o conteúdo' }}>
+      source: `<AppShell messages={{ skipToMain: 'Skip to the order' }}>
   <AppShellMain>…</AppShellMain>
 </AppShell>;`,
     }),
@@ -563,8 +573,8 @@ shell.current?.closeAside();`,
       id: 'app-shell-react-accessibility',
       language: 'tsx',
       label: 'The name the region carries',
-      source: `<AppShellNav aria-label="Navegação principal">…</AppShellNav>;
-<AppShellAside aria-label="Detalhe da encomenda">…</AppShellAside>;`,
+      source: `<AppShellNav aria-label="Main navigation">…</AppShellNav>;
+<AppShellAside aria-label="Order details">…</AppShellAside>;`,
     }),
   },
 ];
@@ -579,6 +589,11 @@ const events: EventRow[] = [
     name: 'onAsideOpenChange',
     payload: '(open: boolean, request: AppShellAsideOpenRequest)',
     when: 'Before the secondary pane moves, with the same shape. The reasons a pane can carry are pointer, keyboard, escape, outsidePress, resize and programmatic — no select, because a pane has no destinations.',
+  },
+  {
+    name: 'onAsideExtentChange',
+    payload: '(extent: number | undefined, request: AppShellAsideExtentRequest)',
+    when: 'Before the pane’s extent moves, already held inside minAsideExtent and maxAsideExtent, with the reason pointer for a drag on the aside-resizer, keyboard for an arrow, Home or End, and programmatic otherwise. undefined is the pane back on its asideSize step.',
   },
 ];
 
@@ -616,6 +631,41 @@ export const REACT_APP_SHELL_DOCS = {
         'true',
         'AppShell',
         'The uncontrolled starting value of the pane. A product that projects a pane wants to see it, so the default is open',
+      ],
+      [
+        'asideExtent',
+        'number | undefined',
+        '—',
+        'AppShell',
+        'The controlled measure of the pane as a column, as a fraction of the shell’s inline size. Unset, asideSize decides. The pane writes it as --slotted-app-shell-aside-extent in cqi, which the stylesheet reads in the column alone: a layer keeps its step',
+      ],
+      [
+        'defaultAsideExtent',
+        'number | undefined',
+        '—',
+        'AppShell',
+        'The uncontrolled starting measure, read once. Unset, the pane starts on its asideSize step',
+      ],
+      [
+        'minAsideExtent',
+        'number',
+        '0.16',
+        'AppShell',
+        'The smallest fraction of the shell the reader may give the pane, and Home’s target. aria-valuemin is this times a hundred',
+      ],
+      [
+        'maxAsideExtent',
+        'number',
+        '0.6',
+        'AppShell',
+        'The largest fraction, and End’s target. aria-valuemax is this times a hundred',
+      ],
+      [
+        'inset',
+        "'none' | undefined",
+        '—',
+        'AppShellAsideBody',
+        'none drops the body’s own padding, for content that brings its own inset. Written as data-inset',
       ],
       [
         'primary',
@@ -724,10 +774,10 @@ export const REACT_APP_SHELL_DOCS = {
       ],
       [
         'messages',
-        '{ nav, open, close, aside, openAside, closeAside, skipToMain, skipToNav, skipToAside }',
+        'Partial<AppShellMessages>',
         '—',
-        'AppShell, AppShellDefaultsProvider',
-        'The nine strings the family says: the two regions’ accessible names, the two controls’ labels in each state, and the three skip links. An aria-label written on the part itself still wins',
+        'AppShell',
+        'Words laid over the language in force, key by key — aside, close, closeAside, nav, open, openAside, resizeAside, skipToAside, skipToMain, skipToNav: the two regions’ accessible names, the two controls’ labels in each state, the pane edge’s name, and the three skip links. An aria-label written on the part itself still wins',
       ],
     ]),
     composition: apiRows([
@@ -778,11 +828,11 @@ export const REACT_APP_SHELL_DOCS = {
         '() => AppShellContextValue',
         '—',
         'inside AppShell',
-        'What a part reads: open, asideOpen, the resolved modes, every axis, the ids, the messages, setOpen(next, reason) and setAsideOpen(next, reason). Throws outside a shell rather than rendering a div that navigates nothing',
+        'What a part reads: open, asideOpen, the resolved modes, every axis, the ids, the translator t, setOpen(next, reason) and setAsideOpen(next, reason). Throws outside a shell rather than rendering a div that navigates nothing',
       ],
       [
         'AppShellDefaultsProvider',
-        '{ …fourteen axes, messages }',
+        '{ …fourteen axes }',
         '—',
         'a subtree',
         'What an application decides once for every route. A shell that states any of them itself still wins',
@@ -812,9 +862,10 @@ export const REACT_APP_SHELL_DOCS = {
     accessibility: [
       'The structure is the WAI-ARIA APG’s Landmark Regions (w3.org/WAI/ARIA/apg/practices/landmark-regions/), and every one of the five is earned from the element rather than written as a role: header in the context of the body is banner, nav is navigation, main is main, aside is complementary, footer is contentinfo. The root is a div for exactly that reason — a main inside a sectioning element stops being a landmark, and the shell has to be placeable anywhere.',
       'Both controls are the APG’s Disclosure pattern (w3.org/WAI/ARIA/apg/patterns/disclosure/): real buttons, so Enter and Space activate them natively, carrying aria-expanded and aria-controls pointing at their region. One departure is written and costed: under collapsedTo="rail" the navigation does not disappear, it narrows — aria-expanded is still true or false about the region’s full form, and the region stays in the tab order because a rail whose destinations cannot be reached is not a rail. The pane has no such departure: closed, it leaves the layout and the tab order.',
-      'A document with more than one navigation or complementary landmark needs a unique label on each, so both regions carry the family’s strings and a consumer may replace either per instance. Each control’s own name changes with the state — “Abrir navegação” and “Fechar navegação”, “Abrir painel lateral” and “Fechar painel lateral” — because a control whose name never changes leaves the reader to infer the state from aria-expanded alone.',
+      'A document with more than one navigation or complementary landmark needs a unique label on each, so both regions carry the family’s strings and a consumer may replace either per instance. Each control’s own name changes with the state — “Open navigation” and “Close navigation”, “Open side panel” and “Close side panel” — because a control whose name never changes leaves the reader to infer the state from aria-expanded alone.',
       'The skip links are written from the regions that rendered and are open, so no link ever points at a target nobody built or the reader closed, and main carries tabindex="-1": without it the browser moves the scroll and leaves the focus behind in Safari and Firefox, which is a link that appears to work and moves nothing a screen reader follows.',
       'While an overlaid region is modal, @slotted/core/focus contains the keyboard inside it and returns it to the control that opened it on close, and every region beside it — the banner included — takes inert, so Tab cannot reach them and a screen reader does not read them. The ways out are Escape, the veil, a destination, and whatever control the product put in the panel. Two layers can be open together only with both modes forced, and @slotted/core/dismissable-layer keeps one stack, so Escape reaches the topmost.',
+      'The pane’s edge is the APG’s Window Splitter (w3.org/WAI/ARIA/apg/patterns/windowsplitter/): a focusable separator with aria-orientation="vertical", aria-controls pointing at the pane and aria-valuemin, aria-valuemax and aria-valuenow as whole percentages of the shell, named “Resize panel”. ArrowLeft and ArrowRight move it sixteen pixels, sixty-four with Shift, by the direction on the screen — so ArrowLeft grows an end pane and shrinks a start one, mirrored in right-to-left — and Home and End go to the limits.',
       'Nothing important depends on hover, the frame answers its own inline size rather than the window’s — which is what makes a 400% zoom behave like a narrow window — and every transition comes from the motion scale, so prefers-reduced-motion collapses all of them at once.',
     ],
     snippets: [
@@ -838,7 +889,7 @@ export const REACT_APP_SHELL_DOCS = {
   data-open
 >
   <div data-part="skip">
-    <a href="#…-main">Saltar para o conteúdo</a>
+    <a href="#…-main">Skip to content</a>
   </div>
   <header data-part="banner">
     <div data-part="brand">
@@ -847,7 +898,7 @@ export const REACT_APP_SHELL_DOCS = {
     <div data-part="centre">…</div>
     <div data-part="actions">…</div>
   </header>
-  <nav data-part="nav" id="…-nav" aria-label="Navegação principal">
+  <nav data-part="nav" id="…-nav" aria-label="Main navigation">
     <div data-part="nav-rail">…</div>
     <div data-part="nav-header">…</div>
     <div data-part="nav-body">…</div>
@@ -856,7 +907,7 @@ export const REACT_APP_SHELL_DOCS = {
   <main data-part="main" id="…-main" tabIndex={-1}>
     …
   </main>
-  <aside data-part="aside" id="…-aside" aria-label="Painel lateral" data-open>
+  <aside data-part="aside" id="…-aside" aria-label="Side panel" data-open>
     <div data-part="aside-header">
       …
       <button data-part="aside-toggle" aria-expanded="true" aria-controls="…-aside" />

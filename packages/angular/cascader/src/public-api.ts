@@ -4,7 +4,6 @@ export type { CascaderNodeContext } from './cascader-body';
 export {
   CASCADER_DEFAULTS,
   CASCADER_FALLBACK,
-  CASCADER_LABELS,
   injectCascaderDefaults,
   provideCascaderDefaults,
 } from './cascader-defaults';
@@ -12,7 +11,6 @@ export type {
   CascaderCheckedStrategy,
   CascaderDefaults,
   CascaderExpandOn,
-  CascaderLabels,
   CascaderLayoutAxis,
   CascaderSelectionMode,
   CascaderSize,

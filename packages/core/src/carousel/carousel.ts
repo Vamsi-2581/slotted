@@ -281,57 +281,6 @@ export function parseCssTime(value: string): number {
   return match[2] === 's' ? amount * 1000 : amount;
 }
 
-/** What the family says, in Portuguese until a provider or an instance says otherwise. */
-export interface CarouselMessages {
-  /** What the root is, said by a screen reader in place of "region". */
-  roleDescription: string;
-  /** What a slide is, said in place of "group". */
-  slideRoleDescription: string;
-  /** The name of a slide: `{index}` and `{count}`. */
-  slide: string;
-  /** The name of the slide picker. */
-  indicators: string;
-  /** The name of one indicator: `{page}` and `{count}`. */
-  indicator: string;
-  previous: string;
-  next: string;
-  /** The rotation control while the rotation runs. */
-  stop: string;
-  /** The rotation control while it does not. */
-  start: string;
-  /** The name of the scroller. */
-  viewport: string;
-  /** What is said when the reader moves to a page: `{page}` and `{count}`. */
-  announce: string;
-}
-
-export const CAROUSEL_MESSAGES: CarouselMessages = {
-  roleDescription: 'carrossel',
-  slideRoleDescription: 'slide',
-  slide: '{index} de {count}',
-  indicators: 'Escolher slide',
-  indicator: 'Slide {page} de {count}',
-  previous: 'Slide anterior',
-  next: 'Slide seguinte',
-  stop: 'Parar a rotação',
-  start: 'Retomar a rotação',
-  viewport: 'Slides',
-  announce: 'Slide {page} de {count}',
-};
-
-/** A message filled from numbers counted from one, as a reader counts. */
-export function formatCarouselMessage(
-  template: string,
-  values: { index?: number; page?: number; count?: number },
-  locale?: string,
-): string {
-  const number = new Intl.NumberFormat(locale);
-  return template
-    .replaceAll('{index}', values.index === undefined ? '' : number.format(values.index))
-    .replaceAll('{page}', values.page === undefined ? '' : number.format(values.page))
-    .replaceAll('{count}', values.count === undefined ? '' : number.format(values.count));
-}
-
 /**
  * Scrolls a strip of indicators — a row of thumbnails — just enough to show
  * one of them whole, and never the page around it: `scrollIntoView` moves

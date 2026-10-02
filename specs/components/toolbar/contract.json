@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "toolbar",
   "ui": "toolbar",
+  "catalog": {
+    "group": "Actions",
+    "summary": "Group of controls with arrow-key navigation."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/",
   "roles": {
     "root": "toolbar",

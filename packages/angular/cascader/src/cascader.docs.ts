@@ -651,11 +651,11 @@ const api = apiRows([
   ],
   ['name', 'string', '—', 'sl-cascader', 'Submits one hidden input per emitted key.'],
   [
-    'labels',
-    'Partial<CascaderLabels>',
+    'messages',
+    'Partial<CascaderMessages>',
     '—',
     'sl-cascader, sl-cascader-panel',
-    'Every string the family prints or announces.',
+    'Words laid over the language in force, key by key: placeholder, clear, remove ({label}), summary ({count}), search, searchPlaceholder, root, back ({label}), breadcrumb, empty, noResults ({query}), results ({count}), loading, failed ({label}), retry',
   ],
   [
     'valueTemplate',
@@ -711,7 +711,7 @@ const composition = apiRows([
     'provider',
     '—',
     'Application',
-    'Sets every axis and every label once, in the bootstrap or on a route. A cascader that states one itself still wins.',
+    'Sets every axis once, in the bootstrap or on a route; the words come from the language in force (provideSlotted). A cascader that states one itself still wins.',
   ],
   [
     'ng-template[slCascaderNode]',

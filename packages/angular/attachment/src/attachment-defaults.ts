@@ -30,17 +30,13 @@ export interface AttachmentRemoveRequest {
 
 export interface AttachmentDefaults {
   layout: AttachmentLayout;
-  locale: string | undefined;
   orientation: AttachmentOrientation;
-  removeLabel: string;
   size: AttachmentSize;
 }
 
 const FALLBACK: AttachmentDefaults = {
   layout: 'list',
-  locale: undefined,
   orientation: 'horizontal',
-  removeLabel: 'Remove',
   size: 'md',
 };
 
@@ -50,18 +46,17 @@ export const ATTACHMENT_DEFAULTS = new InjectionToken<AttachmentDefaults>(
 );
 
 /**
- * An application decides once how large its attachments are, how a set of
- * them is arranged, which locale writes their sizes and what the remove
- * control says. A group or an attachment that states any of them still wins.
+ * An application decides once how large its attachments are and how a set of
+ * them is arranged. A group or an attachment that states either still wins.
+ * Their words and the locale that writes their sizes come from the language
+ * in force (`provideSlotted`).
  */
 export function provideAttachmentDefaults(defaults: Partial<AttachmentDefaults>) {
   return {
     provide: ATTACHMENT_DEFAULTS,
     useFactory: (): AttachmentDefaults => ({
       layout: defaults.layout ?? FALLBACK.layout,
-      locale: defaults.locale ?? FALLBACK.locale,
       orientation: defaults.orientation ?? FALLBACK.orientation,
-      removeLabel: defaults.removeLabel ?? FALLBACK.removeLabel,
       size: defaults.size ?? FALLBACK.size,
     }),
   };

@@ -19,16 +19,12 @@ export type FormSummaryMode = 'auto' | 'none';
 /** How the action row is arranged along the inline axis. */
 export type FormActionsAlign = 'end' | 'start' | 'between' | 'stretch';
 
-/** The words the family's own summary announces, before an application says otherwise. */
-export const FORM_SUMMARY_TITLE = 'There is a problem';
-
 export interface FormDefaults {
   align: FormActionsAlign;
   errorFocus: FormErrorFocus;
   nativeValidation: boolean;
   summary: FormSummaryMode;
   summaryDescription: string | undefined;
-  summaryTitle: string;
   validate: FormValidate;
 }
 
@@ -38,7 +34,6 @@ const FALLBACK: FormDefaults = {
   nativeValidation: false,
   summary: 'auto',
   summaryDescription: undefined,
-  summaryTitle: FORM_SUMMARY_TITLE,
   validate: 'submit',
 };
 
@@ -49,8 +44,9 @@ export const FORM_DEFAULTS = new InjectionToken<FormDefaults>('slotted form defa
 
 /**
  * An application decides once how its forms behave: when they validate, where
- * focus goes after a failed submit, what the summary is called, and how its
- * action row is arranged. A form that states any of them itself still wins.
+ * focus goes after a failed submit, and how its action row is arranged. A form
+ * that states any of them itself still wins. The summary's heading comes from
+ * the language in force (`provideSlotted`).
  */
 export function provideFormDefaults(defaults: Partial<FormDefaults>) {
   return {
@@ -74,43 +70,26 @@ export interface FormErrorMessageContext {
 }
 
 /**
- * How a Reactive Forms validation failure becomes a sentence.
+ * How a Reactive Forms validation failure the application's own validator
+ * reports becomes a sentence.
  *
  * Angular's validators report a key and a shape — `{ required: true }`,
  * `{ minlength: { requiredLength: 8, actualLength: 3 } }` — and never a
- * message, because a message is the application's and its language is the
- * application's too. This is where an application writes them once.
- *
- * The defaults are English and deliberately plain. They are the same words the
- * platform's own `validationMessage` would give in an English locale, so a form
- * that mixes native constraints with Angular validators does not read as two
- * forms.
+ * message. The built-in keys (`required`, `email`, `min`, `max`, `minlength`,
+ * `maxlength`, `pattern`) are written by the `form` catalog's `errors.*`
+ * messages in the language in force; a validator the application adds names
+ * its own message here, and an entry for a built-in key replaces the catalog's.
  */
 export type FormErrorMessages = Record<string, (context: FormErrorMessageContext) => string>;
 
-const DEFAULT_MESSAGES: FormErrorMessages = {
-  required: () => 'Please fill in this field.',
-  email: () => 'Please enter an email address.',
-  min: ({ detail }) => `Please enter a value of ${(detail as { min?: unknown })?.min} or more.`,
-  max: ({ detail }) => `Please enter a value of ${(detail as { max?: unknown })?.max} or less.`,
-  minlength: ({ detail }) =>
-    `Please use at least ${(detail as { requiredLength?: unknown })?.requiredLength} characters.`,
-  maxlength: ({ detail }) =>
-    `Please use ${(detail as { requiredLength?: unknown })?.requiredLength} characters or fewer.`,
-  pattern: () => 'Please match the requested format.',
-};
-
 export const SL_FORM_ERROR_MESSAGES = new InjectionToken<FormErrorMessages>(
   'slotted form error messages',
-  { providedIn: 'root', factory: () => DEFAULT_MESSAGES },
+  { providedIn: 'root', factory: () => ({}) },
 );
 
-/** Replaces or extends the sentences a Reactive Forms failure is written as. */
+/** Names the sentences the application's own validators are written as. */
 export function provideFormErrorMessages(messages: FormErrorMessages) {
-  return {
-    provide: SL_FORM_ERROR_MESSAGES,
-    useFactory: (): FormErrorMessages => ({ ...DEFAULT_MESSAGES, ...messages }),
-  };
+  return { provide: SL_FORM_ERROR_MESSAGES, useValue: messages };
 }
 
 export function injectFormErrorMessages(): FormErrorMessages {

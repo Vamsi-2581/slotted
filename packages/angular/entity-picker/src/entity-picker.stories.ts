@@ -1,6 +1,7 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SlField, SlFieldDescription, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlSelect, SlSelectItem } from '@slotted/angular/select';
 import { SlStack } from '@slotted/angular/stack';
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
@@ -13,7 +14,6 @@ import { moduleMetadata } from '@storybook/angular-vite';
 
 import { SlEntityPicker, SlEntityPickerChip, SlEntityPickerOption } from './entity-picker';
 import {
-  provideEntityPickerDefaults,
   type Entity,
   type EntityPickerMedia,
   type EntityPickerOverflow,
@@ -364,27 +364,13 @@ class CompositionDemo {
   selector: 'sl-entity-picker-provided-demo',
   standalone: true,
   imports: [SlEntityPicker, SlField, SlFieldLabel],
-  providers: [
-    provideEntityPickerDefaults({
-      labels: {
-        chosen: 'Escolhidos',
-        empty: 'Nenhum resultado',
-        error: 'Não foi possível carregar',
-        favorites: 'Favoritos',
-        recent: 'Recentes',
-        results: 'Resultados',
-        count: '{count} resultados',
-        trigger: 'Mostrar resultados',
-        clear: 'Limpar',
-      },
-    }),
-  ],
+  providers: [provideSlotted({ locale: 'pt-BR' })],
   template: `
     <div slField>
       <label slFieldLabel>Responsável</label>
       <sl-entity-picker
         [favorites]="favorites"
-        [labels]="{ retry: 'Tentar de novo' }"
+        [messages]="{ retry: 'Buscar outra vez' }"
         [source]="source"
       />
     </div>
@@ -566,7 +552,7 @@ export const Sections: Story = {
   render: () =>
     one(
       'Before anything is typed',
-      'Focus the field: Favorites, Recent, then Results for the empty query, and no one twice. Choose someone and they move to the top of Recent.',
+      'Press the field: Favorites, Recent, then Results for the empty query, and no one twice. Choose someone and they move to the top of Recent.',
       `<sl-entity-picker-sections-demo />`,
     ),
 };
@@ -613,7 +599,7 @@ export const Async: Story = {
     props: { source: SOURCES['slow'] },
     ...one(
       'A directory that takes 1.4 seconds',
-      'Focus: three skeleton records. Type b: the rows recede until the answer lands. Scroll to the end: the next page comes under one skeleton row.',
+      'Press the field: three skeleton records. Type b: the rows recede until the answer lands. Scroll to the end: the next page comes under one skeleton row.',
       field('Watcher', `<sl-entity-picker [source]="source" />`),
     ),
   }),
@@ -810,7 +796,7 @@ export const Composition: Story = {
       ) +
         scene(
           'Said once, in Portuguese',
-          'provideEntityPickerDefaults sets every sentence for the subtree; the instance keeps its own retry label.',
+          'provideSlotted sets the language for the subtree; the instance keeps its own retry message.',
           `<sl-entity-picker-provided-demo />`,
         ),
     ),

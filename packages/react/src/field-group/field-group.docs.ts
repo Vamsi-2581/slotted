@@ -185,11 +185,11 @@ export const REACT_FIELD_GROUP_DOCS = {
         'How the set’s necessity is said on its legend — an asterisk, (optional) on an optional set only, both words, or nothing — and the style provided to every field inside',
       ],
       [
-        'necessityWords',
-        '{ required?: string; optional?: string }',
-        '(required) / (optional)',
+        'messages',
+        'Partial<FieldMessages>',
+        '—',
         'FieldGroup',
-        'The two words necessity="optional" and necessity="words" write, merged over the inherited pair and provided to every field inside',
+        'Words laid over the language in force for the legend’s necessity word (optional, required); a field inside states its own',
       ],
       [
         'labelPlacement',

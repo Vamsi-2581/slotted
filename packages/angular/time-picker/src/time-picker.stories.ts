@@ -315,7 +315,7 @@ export const Now: Story = {
         'One press for the current time',
         'It is the zero case of the field’s relative expression, drawn as a labelled control so a reader who never discovers that + opens a duration still has the one press.',
         tall(
-          `<div slTimePicker locale="pt-BR" defaultOpen nowLabel="Agora" aria-label="Agora" ${BOUNDS}></div>`,
+          `<div slTimePicker locale="pt-BR" defaultOpen [messages]="{ now: 'Agora' }" aria-label="Agora" ${BOUNDS}></div>`,
         ),
       ),
     ),

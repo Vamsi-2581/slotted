@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "number-field",
   "ui": "number-field",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Number input with steppers and formatting."
+  },
   "controlPart": "input",
   "controlRole": "spinbutton",
   "rootRole": null,
@@ -79,7 +83,7 @@
   "escapeBound": false,
   "enterSubmits": true,
   "stepperTabIndex": -1,
-  "stepperNames": ["incrementLabel", "decrementLabel"],
+  "stepperNames": ["increment", "decrement"],
   "stepperDisabledAtBound": true,
   "parseOn": "input",
   "commitOn": ["blur", "enter", "step", "wheel", "scrub"],
@@ -133,20 +137,12 @@
     "stepper": ["prop", "defaults", "stacked"],
     "clamp": ["prop", "defaults", "blur"],
     "formatOn": ["prop", "defaults", "change"],
-    "locale": ["prop", "defaults", "runtime"]
+    "locale": ["prop", "slotted", "en-US"]
   },
   "provides": {
-    "numberFieldDefaults": [
-      "size",
-      "variant",
-      "stepper",
-      "locale",
-      "formatOn",
-      "clamp",
-      "incrementLabel",
-      "decrementLabel"
-    ]
+    "numberFieldDefaults": ["size", "variant", "stepper", "formatOn", "clamp"]
   },
+  "messages": ["decrement", "increment"],
   "imperative": ["increment", "decrement"],
   "stateAttributes": {
     "disabled": "data-disabled",

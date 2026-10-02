@@ -273,7 +273,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'datetime-picker-react-now',
       label: 'The head control',
       language: 'tsx',
-      source: `<DateTimePicker locale="pt-BR" nowLabel="Agora" />;`,
+      source: `<DateTimePicker locale="pt-BR" messages={{ now: 'Agora' }} />;`,
     }),
   },
   {
@@ -405,12 +405,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition and escape hatches',
-    note: 'The provider sets the locale, the clock, the step and every label once; renderOption draws one row the consumer’s own way; the footer takes their actions; and the handle reaches focus(), open() and close(). A control that states any default itself still wins.',
+    note: 'The provider sets the clock and the step once, SlottedProvider the language and every word; renderOption draws one row the consumer’s own way; the footer takes their actions; and the handle reaches focus(), open() and close(). A control that states any default itself still wins.',
     snippet: defineSnippet({
       id: 'datetime-picker-react-composition',
       label: 'Defaults once, and a row of its own',
       language: 'tsx',
-      source: `<DateTimePickerDefaultsProvider locale="pt-BR" step={1800}>
+      source: `<DateTimePickerDefaultsProvider step={1800}>
   <DateTimePicker
     ref={handle}
     renderOption={({ label, time }) => (
@@ -551,7 +551,7 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    'the runtime’s',
+    'the language in force',
     'DateTimePicker',
     'BCP 47. Reaches the field, the calendar and the list.',
   ],
@@ -684,33 +684,11 @@ const api: ApiRow[] = apiRows([
     'The name a plain form post carries the ISO string under.',
   ],
   [
-    'chooseLabel',
-    'string',
-    "'Choose date and time'",
+    'messages',
+    'Partial<DatetimePickerMessages>',
+    '—',
     'DateTimePicker',
-    'The trigger’s name while nothing is chosen.',
-  ],
-  [
-    'changeLabel',
-    'string',
-    "'Change date and time'",
-    'DateTimePicker',
-    'The trigger’s name once something is, with the value in words after it.',
-  ],
-  ['nowLabel', 'string', "'Now'", 'DateTimePicker', 'The head control’s label.'],
-  [
-    'emptyLabel',
-    'string',
-    "'No time is available on this day.'",
-    'DateTimePicker',
-    'What the panel says when the day the reader is on offers no time at all.',
-  ],
-  [
-    'truncatedLabel',
-    'string',
-    "'The list is cut short…'",
-    'DateTimePicker',
-    'What the panel’s accessible description says when the list has been cut at maxOptions — and it says where the rest of the times are, which is the field.',
+    'Words laid over the language in force, key by key: the trigger’s name while nothing is chosen (choose) and once something is (change, with the value in its {date} slot), the head control (now), what an empty day says (empty), and the accessible description of a list cut at maxOptions (truncated), which says the rest of the times are typed into the field.',
   ],
   [
     'presets',
@@ -753,7 +731,7 @@ const composition: ApiRow[] = apiRows([
     'component',
     '—',
     'application',
-    'Sets locale, timeZone, hourCycle, granularity, step, maxOptions, placement, openTo, closeOnSelect, unavailableOptions, size, variant and every label once for everything under it.',
+    'Sets timeZone, hourCycle, granularity, step, maxOptions, placement, openTo, closeOnSelect, unavailableOptions, size and variant once for everything under it.',
   ],
   [
     'renderOption',

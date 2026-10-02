@@ -194,12 +194,7 @@ test('resolves loading over every other state', () => {
 });
 
 test('lets an application hand the highlighter to every block once', () => {
-  assert.deepEqual(contract.provides.codeBlockDefaults, [
-    'highlight',
-    'lineNumbers',
-    'copy',
-    'labels',
-  ]);
+  assert.deepEqual(contract.provides.codeBlockDefaults, ['highlight', 'lineNumbers', 'copy']);
   assert.deepEqual(contract.resolution.highlight, ['prop', 'defaults', 'none']);
 });
 

@@ -1,7 +1,9 @@
 import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
 import type { ChartPoint, ChartZoom } from '@slotted/core/chart';
 import type { ChartEngineCallbacks, ChartEngineRenderView } from '@slotted/core/chart-echarts';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -290,16 +292,26 @@ describe('SlChart', () => {
 
   it('takes an application’s defaults', async () => {
     const { root, part } = await mount(undefined, [
-      provideChartDefaults({
-        palette: 'sequential',
-        variant: 'card',
-        messages: { roledescription: 'gráfico' },
-      }),
+      provideChartDefaults({ palette: 'sequential', variant: 'card' }),
     ]);
 
     expect(root.getAttribute('data-palette')).toBe('sequential');
     expect(root.getAttribute('data-variant')).toBe('card');
+    expect(part('plot')?.getAttribute('aria-roledescription')).toBe('chart');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', async () => {
+    const locale = signal('pt-BR');
+    const { part, settle } = await mount(undefined, [
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+
     expect(part('plot')?.getAttribute('aria-roledescription')).toBe('gráfico');
+    expect(part('toolbar')?.getAttribute('aria-label')).toBe('Ações do gráfico');
+
+    locale.set('en-US');
+    await settle();
+    expect(part('toolbar')?.getAttribute('aria-label')).toBe('Chart actions');
   });
 
   it('exposes focus, a zoom reset, the drawing and the data through exportAs', async () => {

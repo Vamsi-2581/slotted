@@ -1,5 +1,6 @@
 import { addDays, dayOfWeek, plainDate, plainTime } from '@slotted/core/date';
 import type { PlainDate, PlainDateTime, PlainTime } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -8,6 +9,7 @@ import type React from 'react';
 
 import { Button } from '../button';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { DateTimeRangePicker, DateTimeRangePickerPreset } from './datetime-range-picker';
 import { DateTimeRangePickerDefaultsProvider } from './datetime-range-picker-defaults';
 import { Grid, Measure, Scene } from './datetime-range-picker-demo';
@@ -39,13 +41,12 @@ const isSunday = (date: PlainDate) => dayOfWeek(date) === 0;
 const closesAtNoonOnSaturday = (time: PlainTime, date: PlainDate) =>
   dayOfWeek(date) === 6 && time.hour >= 12;
 
+/* The agency names the two ends after what happens to the car. */
 const common = {
-  endLabel: 'Devolução',
   hourCycle: 24 as const,
   locale: 'pt-BR',
-  nowLabel: 'Agora',
+  messages: { start: 'Retirada', end: 'Devolução' },
   referenceDateTime: NOW,
-  startLabel: 'Retirada',
 };
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
@@ -70,27 +71,14 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     keyboard: Keyboard,
   }) as never;
 
-/* The agency's own words for the hint and the done button, set once for every scene. */
-const WORDS = {
-  doneLabel: 'Concluir',
-  hintLabels: {
-    choose: '{end}: escolha o dia',
-    chooseTime: '{end}: escolha a hora, {day}',
-    order: 'A devolução tem de vir depois da retirada',
-    length: 'Fora da duração permitida',
-    unavailable: 'Passa por um dia ou hora indisponível',
-    bounds: 'Fora do período permitido',
-  },
-};
-
 const meta = {
   title: 'Components/DateTimeRangePicker',
   component: DateTimeRangePicker,
   decorators: [
     (Story) => (
-      <DateTimeRangePickerDefaultsProvider {...WORDS}>
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
         <Story />
-      </DateTimeRangePickerDefaultsProvider>
+      </SlottedProvider>
     ),
   ],
   parameters: {
@@ -511,22 +499,22 @@ export const Composition: Story = {
       <Grid columns={1}>
         <Scene
           label="Set once for the application"
-          note="One provider decides that every rental is in Portuguese, two months at a time, in half-hour slots, with the agency’s own words — so a product does not repeat eight props on each form."
+          note="SlottedProvider decides that every rental is in Portuguese, one defaults provider that it runs two months at a time in half-hour slots, and messages lays the agency’s own words over the catalog — so a product does not repeat eight props on each form."
         >
-          <DateTimeRangePickerDefaultsProvider
-            changeLabel="Alterar aluguel"
-            chooseLabel="Escolher período"
-            doneLabel="Concluir"
-            endLabel="Devolução"
-            hourCycle={24}
-            locale="pt-BR"
-            months={2}
-            nowLabel="Agora"
-            startLabel="Retirada"
-            step={1800}
-          >
-            <DateTimeRangePicker defaultValue={RENTAL} referenceDateTime={NOW} />
-          </DateTimeRangePickerDefaultsProvider>
+          <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+            <DateTimeRangePickerDefaultsProvider hourCycle={24} months={2} step={1800}>
+              <DateTimeRangePicker
+                defaultValue={RENTAL}
+                messages={{
+                  change: 'Alterar aluguel, {start} – {end}, {length}',
+                  done: 'Concluir',
+                  end: 'Devolução',
+                  start: 'Retirada',
+                }}
+                referenceDateTime={NOW}
+              />
+            </DateTimeRangePickerDefaultsProvider>
+          </SlottedProvider>
         </Scene>
         <Scene
           label="What a row draws"

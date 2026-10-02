@@ -217,12 +217,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition and escape hatches',
-    note: 'A provider sets the locale, the zone and the two trigger names once; the ref hands back focus(), open() and close(); and the value is a request a consumer may refuse before anything commits.',
+    note: 'A provider sets the zone and the placement once, SlottedProvider the language and the two trigger names; the ref hands back focus(), open() and close(); and the value is a request a consumer may refuse before anything commits.',
     snippet: defineSnippet({
       id: 'date-picker-react-composition',
       label: 'Provider and handle',
       language: 'tsx',
-      source: `<DatePickerDefaultsProvider locale="pt-BR" timeZone="America/Sao_Paulo">
+      source: `<DatePickerDefaultsProvider timeZone="America/Sao_Paulo">
   <DatePicker ref={handle} onValueChange={(value, request) => request.cancel()} />
 </DatePickerDefaultsProvider>;`,
     }),
@@ -321,7 +321,7 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    'the runtime’s',
+    'the language in force',
     'DatePicker',
     'BCP 47. Reaches both halves: the field’s order and the grid’s month names.',
   ],
@@ -368,18 +368,11 @@ const api: ApiRow[] = apiRows([
   ['clearable', 'boolean', 'false', 'DatePicker', 'Draws the field’s clear button.'],
   ['name', 'string', '—', 'DatePicker', 'The name the hidden input carries the ISO string under.'],
   [
-    'chooseLabel',
-    'string',
-    'Choose date',
+    'messages',
+    'Partial<DatePickerMessages>',
+    '—',
     'DatePicker',
-    'The trigger’s name while nothing is chosen.',
-  ],
-  [
-    'changeLabel',
-    'string',
-    'Change date',
-    'DatePicker',
-    'The trigger’s name once a date is chosen, before the date itself.',
+    'Words laid over the language in force, key by key: the trigger’s name while nothing is chosen (choose), and once a date is (change, with the date in its {date} slot).',
   ],
   ['presets', 'ReactNode', '—', 'DatePicker', 'The consumer’s own shortcuts, beside the grid.'],
   ['footer', 'ReactNode', '—', 'DatePicker', 'The consumer’s own actions, under the surface.'],
@@ -404,7 +397,7 @@ const composition: ApiRow[] = apiRows([
     'component',
     '—',
     'application',
-    'Sets locale, timeZone, placement, closeOnSelect, calendar, size, variant and the two trigger names once for everything under it.',
+    'Sets timeZone, placement, closeOnSelect, calendar, size and variant once for everything under it.',
   ],
   [
     'render',

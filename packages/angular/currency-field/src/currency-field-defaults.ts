@@ -63,21 +63,14 @@ export type CurrencyFieldFormatOn = 'change' | 'commit';
  */
 export type CurrencyFieldDisplay = 'symbol' | 'narrowSymbol' | 'code' | 'name' | 'none';
 
-/** The two words the family's own buttons announce. */
-export const CURRENCY_FIELD_INCREMENT_LABEL = 'Increase';
-export const CURRENCY_FIELD_DECREMENT_LABEL = 'Decrease';
-
 export interface CurrencyFieldDefaults {
   align: CurrencyFieldAlign;
   clamp: CurrencyFieldClamp;
   /** The currency every field under the token is in, unless it says otherwise. */
   currency: string | undefined;
   currencyDisplay: CurrencyFieldDisplay;
-  decrementLabel: string;
   entry: CurrencyFieldEntry;
   formatOn: CurrencyFieldFormatOn;
-  incrementLabel: string;
-  locale: string | undefined;
   size: CurrencyFieldSize;
   stepper: CurrencyFieldStepper;
   variant: CurrencyFieldVariant;
@@ -88,11 +81,8 @@ const FALLBACK: CurrencyFieldDefaults = {
   clamp: 'blur',
   currency: undefined,
   currencyDisplay: 'symbol',
-  decrementLabel: CURRENCY_FIELD_DECREMENT_LABEL,
   entry: 'cents',
   formatOn: 'change',
-  incrementLabel: CURRENCY_FIELD_INCREMENT_LABEL,
-  locale: undefined,
   size: 'md',
   stepper: 'none',
   variant: 'outline',
@@ -104,10 +94,10 @@ export const CURRENCY_FIELD_DEFAULTS = new InjectionToken<CurrencyFieldDefaults>
 );
 
 /**
- * An application decides once which currency it charges in, which locale it
- * writes in and how its amounts are typed, rather than repeating the same
- * inputs on every amount in a form. A control that states any of them itself
- * still wins.
+ * An application decides once which currency it charges in and how its
+ * amounts are typed, rather than repeating the same inputs on every amount in a
+ * form. A control that states any of them itself still wins. The locale and the
+ * two buttons' words come from the language in force (`provideSlotted`).
  *
  * `currency` is the one worth setting first, and the only one a field cannot be
  * built without: a product has one currency in nine screens out of ten, and the

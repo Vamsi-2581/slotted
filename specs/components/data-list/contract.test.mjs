@@ -132,36 +132,39 @@ test('names the three states beside loading', () => {
   assert.equal(member.defaults.loadingMinDuration, 400);
 });
 
-/** Every word the family says, in one input, and the ones that count take a function. */
-test('closes the label set', () => {
-  assert.deepEqual(Object.keys(contract.labels), [
+/** Every word the family says, from its catalog, and the ones that count are plural. */
+test('closes the message set', () => {
+  assert.deepEqual([...contract.messages].sort(), [
+    'ascending',
+    'clearFilters',
     'count',
-    'selectedCount',
+    'descending',
+    'empty',
+    'emptyTitle',
+    'errorTitle',
+    'false',
+    'less',
+    'loadMore',
+    'loading',
+    'more',
+    'noResultsTitle',
+    'retry',
     'selectAll',
     'selectRow',
+    'selectedCount',
     'sort',
-    'sortMore',
-    'sortNone',
+    'sortCleared',
     'sortColumn',
     'sortDirection',
-    'ascending',
-    'descending',
+    'sortNamed',
+    'sortNone',
+    'sortSummary',
     'sortedBy',
     'sortedByAscending',
     'sortedByDescending',
-    'sortCleared',
-    'more',
-    'less',
-    'empty',
-    'loading',
-    'loadMore',
-    'clearFilters',
-    'retry',
-    'noResultsTitle',
-    'emptyTitle',
-    'errorTitle',
+    'true',
   ]);
-  for (const key of contract.pluralLabels) {
-    assert.ok(key in contract.labels, key);
+  for (const key of contract.pluralMessages) {
+    assert.ok(contract.messages.includes(key), key);
   }
 });

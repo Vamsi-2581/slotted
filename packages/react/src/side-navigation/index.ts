@@ -1,6 +1,5 @@
 export { SIDE_NAVIGATION_ROW_SELECTOR, SideNavigation, useSideNavigation } from './side-navigation';
 export {
-  DEFAULT_SIDE_NAVIGATION_MESSAGES,
   SIDE_NAVIGATION_FALLBACK,
   SideNavigationDefaultsProvider,
   useSideNavigationDefaults,
@@ -41,7 +40,6 @@ export type {
   SideNavigationLinkProps,
   SideNavigationLinkRootProps,
   SideNavigationListProps,
-  SideNavigationMessages,
   SideNavigationMode,
   SideNavigationPartProps,
   SideNavigationProps,

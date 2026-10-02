@@ -3,12 +3,7 @@ import { createContext, useContext, useMemo } from 'react';
 import type {
   SideNavigationDefaults,
   SideNavigationDefaultsProviderProps,
-  SideNavigationMessages,
 } from './side-navigation.types';
-
-export const DEFAULT_SIDE_NAVIGATION_MESSAGES: SideNavigationMessages = {
-  navigation: 'Navegação',
-};
 
 /** The contract's defaults, and the width the rail is read at. */
 export const SIDE_NAVIGATION_FALLBACK: SideNavigationDefaults = {
@@ -16,7 +11,6 @@ export const SIDE_NAVIGATION_FALLBACK: SideNavigationDefaults = {
   compactAt: 96,
   guides: true,
   landmark: true,
-  messages: DEFAULT_SIDE_NAVIGATION_MESSAGES,
   mode: 'auto',
   multiple: true,
   size: 'md',
@@ -35,10 +29,10 @@ export function useSideNavigationDefaults(): SideNavigationDefaults {
  * An application decides once how its columns read — the rail's width, the
  * cut, whether groups open one at a time — rather than repeating it on every
  * navigation in a product. A column that states any of them itself still wins.
+ * Its words come from the language in force (`SlottedProvider`).
  */
 export function SideNavigationDefaultsProvider({
   children,
-  messages,
   ...defaults
 }: SideNavigationDefaultsProviderProps) {
   const inherited = useSideNavigationDefaults();
@@ -49,7 +43,6 @@ export function SideNavigationDefaultsProvider({
       compactAt: defaults.compactAt ?? inherited.compactAt,
       guides: defaults.guides ?? inherited.guides,
       landmark: defaults.landmark ?? inherited.landmark,
-      messages: { ...inherited.messages, ...messages },
       mode: defaults.mode ?? inherited.mode,
       multiple: defaults.multiple ?? inherited.multiple,
       size: defaults.size ?? inherited.size,
@@ -65,7 +58,6 @@ export function SideNavigationDefaultsProvider({
       defaults.size,
       defaults.truncate,
       inherited,
-      messages,
     ],
   );
 

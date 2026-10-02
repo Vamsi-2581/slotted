@@ -1,11 +1,13 @@
 import '@slotted/styles/switch/switch.css';
 
+import { switchMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason } from '@slotted/core/state';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { ChangeEvent, MouseEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { VisuallyHidden } from '../visually-hidden';
 import { SWITCH_LOADING_ANNOUNCE_DELAY, useSwitchDefaults } from './switch-defaults';
@@ -70,7 +72,7 @@ export function Switch({
   invalid,
   labelPlacement,
   loading = false,
-  loadingLabel,
+  messages,
   onChange,
   onCheckedChange,
   onClick,
@@ -83,6 +85,7 @@ export function Switch({
 }: SwitchProps) {
   const field = useField();
   const defaults = useSwitchDefaults();
+  const t = useMessages(switchMessages, messages);
   const controlRef = useRef<HTMLInputElement | null>(null);
   const generatedId = useId();
   const pendingId = `${generatedId}-pending`;
@@ -119,7 +122,6 @@ export function Switch({
   const resolvedSize = size ?? field?.size ?? defaults.size;
   const resolvedIndicator = indicator ?? defaults.indicator;
   const resolvedPlacement = labelPlacement ?? defaults.labelPlacement;
-  const resolvedLabel = loadingLabel ?? defaults.loadingLabel;
   const resolvedDisabled = disabled ?? field?.disabled;
   const resolvedReadOnly = readOnly ?? field?.readOnly;
   const resolvedInvalid = invalid ?? field?.invalid;
@@ -261,7 +263,7 @@ export function Switch({
         </p>
       )}
       <VisuallyHidden id={pendingId} role="status">
-        {loading && announced ? resolvedLabel : ''}
+        {loading && announced ? t('loading') : ''}
       </VisuallyHidden>
     </>
   );

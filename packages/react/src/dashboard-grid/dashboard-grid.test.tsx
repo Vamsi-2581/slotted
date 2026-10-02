@@ -1,7 +1,9 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { SlottedProvider } from '../i18n';
 import { DashboardGrid } from './dashboard-grid';
 import { DashboardGridDefaultsProvider } from './dashboard-grid-defaults';
 import { DashboardWidget } from './dashboard-widget';
@@ -123,6 +125,19 @@ describe('DashboardGrid', () => {
     expect(root().style.getPropertyValue('--_dg-columns-expanded')).toBe('8');
     expect(screen.getByRole('heading', { level: 2, name: 'A' })).toBeTruthy();
     expect(screen.getByRole('heading', { level: 4, name: 'B' })).toBeTruthy();
+  });
+
+  it('speaks the language in force, and lays its own messages over it', () => {
+    render(
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+        <DashboardGrid aria-label="Vendas" defaultEditing messages={{ done: 'Pronto' }}>
+          {widgets()}
+        </DashboardGrid>
+      </SlottedProvider>,
+    );
+    expect(handle('revenue')).toHaveAccessibleName('Reorganizar Revenue');
+    expect(screen.getByRole('button', { name: 'Cancelar' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Pronto' })).toBeTruthy();
   });
 
   it('draws no handle and no resize handle outside editing', () => {

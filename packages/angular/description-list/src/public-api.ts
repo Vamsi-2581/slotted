@@ -11,7 +11,6 @@ export {
   copyToClipboard,
   DESCRIPTION_LIST_DEFAULTS_TOKEN,
   DESCRIPTION_LIST_DEFAULT_COLUMNS,
-  DESCRIPTION_LIST_DEFAULT_LABELS,
   DESCRIPTION_LIST_DEFAULT_LAYOUT,
   DESCRIPTION_LIST_DEFAULT_VARIANT,
   injectDescriptionListDefaults,
@@ -25,7 +24,6 @@ export type {
   DescriptionListColumns,
   DescriptionListCopyRequest,
   DescriptionListDefaults,
-  DescriptionListLabels,
   DescriptionListLayout,
   DescriptionListVariant,
 } from './description-list.constants';

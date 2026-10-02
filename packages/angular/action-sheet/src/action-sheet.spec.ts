@@ -3,9 +3,11 @@ import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/action-sheet/contract.json';
 import { SlActionSheet } from './action-sheet';
-import { provideActionSheetDefaults } from './action-sheet-defaults';
 import type { ActionSheetChangeRequest, ActionSheetSelectEvent } from './action-sheet-defaults';
 import { SL_ACTION_SHEET } from './action-sheet-parts';
 
@@ -186,11 +188,17 @@ describe('SlActionSheet', () => {
     expect(loading!.querySelector("[data-part='icon'] [data-ui='spinner']")).not.toBeNull();
   });
 
-  it('closes with dismiss from the cancel, shows cancelLabel, and returns focus', async () => {
-    const fixture = await mount(undefined, [provideActionSheetDefaults({ cancelLabel: 'Fechar' })]);
+  it('closes with dismiss from the cancel, speaks the language in force, and returns focus', async () => {
+    const locale = signal('pt-BR');
+    const fixture = await mount(undefined, [
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
     await openSheet(fixture);
     const cancel = q("[data-part='cancel']")!;
-    expect(cancel.textContent?.trim()).toBe('Fechar');
+    expect(cancel.textContent?.trim()).toBe('Cancelar');
+    locale.set('en-US');
+    await settle(fixture);
+    expect(cancel.textContent?.trim()).toBe('Cancel');
     cancel.click();
     await settle(fixture);
     expect(fixture.componentInstance.requests.at(-1)?.reason).toBe('dismiss');

@@ -2,13 +2,14 @@ import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { SlButton } from '@slotted/angular/button';
+import { provideSlotted } from '@slotted/angular/i18n';
 import type { GridColumn, GridColumnState, GridOutOfSpace } from '@slotted/core/grid';
 import { normalizeColumnState } from '@slotted/core/grid';
-import { describe, expect, it } from 'vitest';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+import { describe, expect, it, vi } from 'vitest';
 
 import { SlColumnManager, SlColumnManagerTrigger } from './column-manager';
 import {
-  provideColumnManagerDefaults,
   type ColumnManagerApply,
   type ColumnManagerPresentation,
   type ColumnManagerRequest,
@@ -184,6 +185,51 @@ describe('SlColumnManager', () => {
     expect(document.activeElement).toBe(handle('customer'));
   });
 
+  it('says where a pointer drop landed, in the words of the drag catalog', async () => {
+    const fixture = await setup();
+    const section = document.querySelector<HTMLElement>(
+      '[data-part="section"][data-zone="middle"]',
+    )!;
+    const rect = (top: number, height: number) =>
+      ({
+        top,
+        bottom: top + height,
+        left: 0,
+        right: 300,
+        width: 300,
+        height,
+        x: 0,
+        y: top,
+        toJSON: () => ({}),
+      }) as DOMRect;
+    const items = [...section.querySelectorAll<HTMLElement>('[data-part="item"]')];
+    items.forEach((node, index) => {
+      node.getBoundingClientRect = () => rect(100 + index * 30, 30);
+    });
+    section.getBoundingClientRect = () => rect(100, items.length * 30);
+    const press = (type: string, y: number) =>
+      new PointerEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        pointerId: 1,
+        pointerType: 'mouse',
+        clientX: 10,
+        clientY: y,
+        button: 0,
+      });
+    handle('customer').dispatchEvent(press('pointerdown', 115));
+    document.dispatchEvent(press('pointermove', 140));
+    document.dispatchEvent(press('pointermove', 170));
+    document.dispatchEvent(press('pointerup', 170));
+    await settle(fixture);
+    expect(fixture.componentInstance.requests.at(-1)!.reason).toBe('pointer');
+    /* The announcer writes after a pause, longer on a loaded runner: wait for the words, not a time. */
+    await vi.waitFor(
+      () => expect(document.body.textContent).toMatch(/Customer dropped, position 2 of \d+\./),
+      { timeout: 3000 },
+    );
+  });
+
   it('never moves a column out of its zone', async () => {
     const fixture = await setup();
     handle('order').dispatchEvent(
@@ -306,11 +352,23 @@ describe('SlColumnManager', () => {
     ).not.toBeNull();
   });
 
-  it('reads the labels an application sets once', async () => {
+  it('speaks the language in force, and follows a change of it in place', async () => {
+    const locale = signal('pt-BR');
     TestBed.configureTestingModule({
-      providers: [provideColumnManagerDefaults({ labels: { showAll: 'Mostrar todas' } })],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
     });
-    await setup();
+    const fixture = await setup();
+    await settle(fixture);
+    const sentence = () =>
+      document.querySelector('[data-column-manager-trigger] [data-ui="visually-hidden"]')
+        ?.textContent;
     expect(button('Mostrar todas')).toBeDefined();
+    expect(sentence()).toBe('1 coluna oculta');
+
+    locale.set('en-US');
+    await settle(fixture);
+    expect(button('Show all')).toBeDefined();
+    expect(button('Mostrar todas')).toBeUndefined();
+    expect(sentence()).toBe('1 hidden column');
   });
 });

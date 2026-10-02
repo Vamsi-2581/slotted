@@ -2,6 +2,8 @@ import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SlForm } from '@slotted/angular/form';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { createSnapshot, storagePersistence } from '@slotted/core/wizard';
 import type { WizardPersistence, WizardValue } from '@slotted/core/wizard';
 import { describe, expect, it, vi } from 'vitest';
@@ -310,16 +312,27 @@ describe('SlWizard', () => {
     expect(document.activeElement).toBe(toggle);
   });
 
-  it('takes its wording and layout from provideWizardDefaults', async () => {
+  it('takes its layout from provideWizardDefaults and its words from the language in force', async () => {
+    const locale = signal('pt-BR');
     TestBed.configureTestingModule({
       imports: [Flow],
-      providers: [provideWizardDefaults({ labels: { next: 'Continuar' }, progress: 'top' })],
+      providers: [
+        provideWizardDefaults({ progress: 'top' }),
+        provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+      ],
     });
     const fixture = TestBed.createComponent(Flow);
     document.body.appendChild(fixture.nativeElement);
     await settle(fixture);
-    expect(next().textContent).toContain('Continuar');
+    expect(next().textContent).toContain('Avançar');
+    expect(q('[data-part="position"]')?.textContent).toBe('Etapa 1 de 3');
+    expect(q('ol')?.getAttribute('aria-label')).toBe('Progresso');
     expect(q('[data-ui="wizard"]')?.getAttribute('data-progress')).toBe('top');
+
+    locale.set('en-US');
+    await settle(fixture);
+    expect(next().textContent).toContain('Next');
+    expect(q('ol')?.getAttribute('aria-label')).toBe('Progress');
   });
 });
 

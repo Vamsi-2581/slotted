@@ -10,6 +10,7 @@ import { createPositioner } from '@slotted/core/positioner';
 import type { PositionerHandle } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
+import { tourMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import {
   cardFits,
@@ -40,6 +41,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
+import { useMessages } from '../i18n';
 import { useTourDefaults } from './tour-defaults';
 import {
   TourBody,
@@ -58,7 +60,6 @@ import {
 import type {
   TourContextValue,
   TourFocusTarget,
-  TourLabels,
   TourOpenReason,
   TourProps,
   TourState,
@@ -144,8 +145,8 @@ export function Tour<Step extends TourStep = TourStep>(props: TourProps<Step>) {
     defaultOpen,
     defaultStep,
     keyboardNavigation,
-    labels: ownLabels,
     layout,
+    messages,
     missing,
     modal,
     onOpenChange,
@@ -197,11 +198,6 @@ export function Tour<Step extends TourStep = TourStep>(props: TourProps<Step>) {
   const compact = layoutNow === 'compact' || (layoutNow === 'auto' && narrow);
   /** The target leaves a card room on some side; when it does not, the card is centred over it. */
   const [fits, setFits] = useState(true);
-
-  const labels: TourLabels = useMemo(
-    () => ({ ...defaults.labels, ...definedOnly(ownLabels ?? {}) }),
-    [defaults.labels, ownLabels],
-  );
 
   const settings = {
     align: staged?.step.align ?? align ?? defaults.align,
@@ -471,6 +467,13 @@ export function Tour<Step extends TourStep = TourStep>(props: TourProps<Step>) {
   if (staged !== null) drawn.current = staged;
   const current = staged ?? drawn.current;
   const mounted = current !== null && (visible || status !== 'unmounted');
+  /** The tour's words, with the tour's own and the drawn step's laid over the catalog. */
+  const stepMessages = current?.step.messages;
+  const override = useMemo(
+    () => (stepMessages === undefined ? messages : { ...messages, ...stepMessages }),
+    [messages, stepMessages],
+  );
+  const t = useMessages(tourMessages, override);
 
   useEffect(() => {
     if (!mounted) {
@@ -769,7 +772,6 @@ export function Tour<Step extends TourStep = TourStep>(props: TourProps<Step>) {
     goTo: (id) => controller.goTo(id, 'programmatic'),
     hasDescription,
     hasTitle,
-    labels,
     last: progress.last,
     missing: current.missing,
     modal: settings.modal,
@@ -784,6 +786,7 @@ export function Tour<Step extends TourStep = TourStep>(props: TourProps<Step>) {
     setHasTitle,
     setTitleNode,
     step: current.step,
+    t,
     target: current.target,
     titleId: `${base}title`,
     total: progress.total,
@@ -870,10 +873,4 @@ function TourAnatomy() {
       </TourFooter>
     </TourContent>
   );
-}
-
-function definedOnly<T extends object>(values: T): Partial<T> {
-  return Object.fromEntries(
-    Object.entries(values).filter(([, value]) => value !== undefined),
-  ) as Partial<T>;
 }

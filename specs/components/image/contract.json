@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "image",
   "ui": "image",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Image with loading, error and fit states."
+  },
   "composes": ["aspect-ratio"],
   "axes": {
     "layout": ["intrinsic", "fill", "framed"],

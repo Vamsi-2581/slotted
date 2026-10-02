@@ -13,21 +13,18 @@ export type BreadcrumbExpandReason = 'pointer' | 'keyboard';
 
 /**
  * What every trail on the page does before it states anything of its own. The
- * label is here because a translated application names its landmarks once, and
- * the three collapse numbers because how deep a trail may get before it folds
- * is a decision about the application rather than about one page.
+ * three collapse numbers are here because how deep a trail may get before it
+ * folds is a decision about the application rather than about one page.
  */
 export interface BreadcrumbDefaults {
   itemsAfterCollapse?: number;
   itemsBeforeCollapse?: number;
-  label?: string;
   maxItems?: number;
   overflow?: BreadcrumbOverflow;
   /** The mark drawn between two crumbs, rendered once per item. */
   separator?: TemplateRef<unknown>;
 }
 
-export const BREADCRUMB_DEFAULT_LABEL = 'Breadcrumb';
 export const BREADCRUMB_DEFAULT_MAX_ITEMS = 8;
 export const BREADCRUMB_DEFAULT_ITEMS_BEFORE = 1;
 export const BREADCRUMB_DEFAULT_ITEMS_AFTER = 2;
@@ -39,10 +36,11 @@ export const BREADCRUMB_DEFAULTS_TOKEN = new InjectionToken<BreadcrumbDefaults>(
 );
 
 /**
- * An application decides once what its trails are called, how deep they may get
- * before they fold, whether they fold for want of width, and what is drawn between two crumbs. A trail that states
- * any of those itself still wins: an explicit input is never overridden by the
- * token.
+ * An application decides once how deep its trails may get before they fold,
+ * whether they fold for want of width, and what is drawn between two crumbs. A
+ * trail that states any of those itself still wins: an explicit input is never
+ * overridden by the token. Its words come from the language in force
+ * (`provideSlotted`).
  */
 export function provideBreadcrumbDefaults(defaults: BreadcrumbDefaults) {
   return { provide: BREADCRUMB_DEFAULTS_TOKEN, useValue: defaults };

@@ -1,4 +1,5 @@
 import type { FormErrorEntry, FormErrorInput, FormErrors } from '@slotted/core/form';
+import type { FormMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, FormEvent, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -56,7 +57,6 @@ export interface FormDefaults {
   nativeValidation: boolean;
   summary: FormSummaryMode;
   summaryDescription: ReactNode | undefined;
-  summaryTitle: ReactNode;
   validate: FormValidate;
 }
 
@@ -118,6 +118,8 @@ export interface FormProps extends Omit<ComponentPropsWithRef<'form'>, 'onSubmit
    * second submit.
    */
   loading?: boolean | undefined;
+  /** Words laid over the catalog of the language in force: the summary's heading (`summaryTitle`). */
+  messages?: PartialMessages<FormMessages> | undefined;
   /**
    * Lets the browser draw its own validation bubble. Off by default, because
    * the `field` around each control already draws the message.
@@ -140,7 +142,7 @@ export interface FormProps extends Omit<ComponentPropsWithRef<'form'>, 'onSubmit
   summary?: FormSummaryMode | undefined;
   /** A sentence under the summary's heading. */
   summaryDescription?: ReactNode | undefined;
-  /** The summary's heading. Defaults to the provider's, then "There is a problem". */
+  /** The summary's heading, replacing the `summaryTitle` message. */
   summaryTitle?: ReactNode | undefined;
   /** When the form checks its controls. Defaults to the provider, then `submit`. */
   validate?: FormValidate | undefined;

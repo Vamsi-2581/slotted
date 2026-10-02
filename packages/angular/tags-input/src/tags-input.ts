@@ -3,6 +3,11 @@ import { createFilter } from '@slotted/core/collection';
 import type { Filter } from '@slotted/core/collection';
 import { createArrowNavigation, createRemovalFocus } from '@slotted/core/focus';
 import type { ArrowNavigationHandle, RemovalFocusHandle } from '@slotted/core/focus';
+import {
+  tagsInputMessages,
+  type PartialMessages,
+  type TagsInputMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createWidthGate } from '@slotted/core/measure';
 import type { WidthGateHandle } from '@slotted/core/measure';
@@ -37,6 +42,7 @@ import {
 import type { OnInit } from '@angular/core';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 
@@ -62,13 +68,6 @@ export const NARROW_WIDTH = 120;
 
 function same(a: readonly string[], b: readonly string[]) {
   return a.length === b.length && a.every((value, index) => value === b[index]);
-}
-
-function fill(template: string, values: Record<string, string | number>) {
-  return Object.entries(values).reduce(
-    (text, [key, value]) => text.replaceAll(`{${key}}`, String(value)),
-    template,
-  );
 }
 
 /** How long the chip that answered a duplicate stays marked: the theme's long step. */
@@ -270,7 +269,7 @@ function longDuration(element: HTMLElement) {
       <button
         type="button"
         data-part="clear"
-        [attr.aria-label]="resolvedClearLabel()"
+        [attr.aria-label]="t('clear')"
         (click)="onClear($event)"
       >
         <span slIcon><svg slGlyph name="x"></svg></span>
@@ -321,6 +320,7 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
   readonly maxLength = input(undefined, { transform: SlTagsInput.count });
   readonly inputMode = input<string | undefined>(undefined);
   readonly autocomplete = input<string | undefined>(undefined);
+  /** BCP 47, for the comparison the duplicate rule makes. The language in force when absent. */
   readonly locale = input<string | undefined>(undefined);
   /** `validateValue` rather than `validate`, which is the Validator's own method. */
   readonly validateValue = input<TagsInputValidator | undefined>(undefined);
@@ -341,18 +341,12 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
   readonly invalidValues = input<TagsInputInvalidValues | undefined>(undefined);
   readonly pendingOnBlur = input<TagsInputPendingOnBlur | undefined>(undefined);
 
-  readonly addedLabel = input<string | undefined>(undefined);
-  readonly clearLabel = input<string | undefined>(undefined);
-  readonly copiedLabel = input<string | undefined>(undefined);
-  readonly countLabel = input<string | undefined>(undefined);
-  readonly counterLabel = input<string | undefined>(undefined);
-  readonly duplicateLabel = input<string | undefined>(undefined);
-  readonly editHintLabel = input<string | undefined>(undefined);
-  readonly hintLabel = input<string | undefined>(undefined);
-  readonly invalidLabel = input<string | undefined>(undefined);
-  readonly removedLabel = input<string | undefined>(undefined);
-  readonly removeLabel = input<string | undefined>(undefined);
-  readonly reorderLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * clear button, the chips, the counter, the hint, and the sentences the
+   * announcer says.
+   */
+  readonly messages = input<PartialMessages<TagsInputMessages> | undefined>(undefined);
 
   readonly addOnPaste = input(undefined, { transform: SlTagsInput.flag });
   readonly allowDuplicates = input(undefined, { transform: SlTagsInput.flag });
@@ -366,6 +360,9 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
   readonly invalid = input(undefined, { transform: SlTagsInput.flag });
 
   private readonly defaults = injectTagsInputDefaults();
+  /** The family's words in the language in force, with this control's `messages` laid over them. */
+  readonly t = injectMessages(tagsInputMessages, this.messages);
+  private readonly inForceLocale = injectLocale();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly controlRef = viewChild.required<{ nativeElement: HTMLInputElement }>('control');
   private readonly rowRef = viewChild.required<{ nativeElement: HTMLElement }>('row');
@@ -418,22 +415,6 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
   );
   readonly resolvedDelimiters = computed(() => this.delimiters() ?? this.defaults.delimiters);
   readonly resolvedMax = computed(() => this.max() ?? this.defaults.max);
-  readonly resolvedAddedLabel = computed(() => this.addedLabel() ?? this.defaults.addedLabel);
-  readonly resolvedClearLabel = computed(() => this.clearLabel() ?? this.defaults.clearLabel);
-  readonly resolvedCopiedLabel = computed(() => this.copiedLabel() ?? this.defaults.copiedLabel);
-  readonly resolvedCountLabel = computed(() => this.countLabel() ?? this.defaults.countLabel);
-  readonly resolvedCounterLabel = computed(() => this.counterLabel() ?? this.defaults.counterLabel);
-  readonly resolvedDuplicateLabel = computed(
-    () => this.duplicateLabel() ?? this.defaults.duplicateLabel,
-  );
-  readonly resolvedEditHintLabel = computed(
-    () => this.editHintLabel() ?? this.defaults.editHintLabel,
-  );
-  readonly resolvedHintLabel = computed(() => this.hintLabel() ?? this.defaults.hintLabel);
-  readonly resolvedInvalidLabel = computed(() => this.invalidLabel() ?? this.defaults.invalidLabel);
-  readonly resolvedRemovedLabel = computed(() => this.removedLabel() ?? this.defaults.removedLabel);
-  readonly resolvedRemoveLabel = computed(() => this.removeLabel() ?? this.defaults.removeLabel);
-  readonly resolvedReorderLabel = computed(() => this.reorderLabel() ?? this.defaults.reorderLabel);
 
   readonly resolvedDisabled = computed(
     () =>
@@ -459,7 +440,9 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
     return limit !== null && this.value().length >= limit;
   });
 
-  private readonly collator = computed<Filter>(() => createFilter({ locale: this.locale() }));
+  private readonly collator = computed<Filter>(() =>
+    createFilter({ locale: this.locale() ?? this.inForceLocale() }),
+  );
 
   /**
    * A detached input carrying the visible one's constraints, rebuilt when they
@@ -495,20 +478,16 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
     );
   });
 
-  readonly countText = computed(() =>
-    fill(this.resolvedCountLabel(), { count: this.value().length }),
-  );
+  readonly countText = computed(() => this.t('count', { count: this.value().length }));
   readonly gridLabel = computed(() => {
     const label = this.ariaLabel();
-    return label === undefined ? null : `${label}, ${this.countText()}`;
+    return label === undefined ? null : this.t('countNamed', { label, count: this.value().length });
   });
   readonly gridLabelledBy = computed(() =>
     this.ariaLabel() === undefined && this.field ? this.field.ids().label : null,
   );
   readonly hintText = computed(() =>
-    this.resolvedEditable()
-      ? `${this.resolvedHintLabel()} ${this.resolvedEditHintLabel()}`
-      : this.resolvedHintLabel(),
+    this.resolvedEditable() ? this.t('editHint') : this.t('hint'),
   );
 
   readonly showClear = computed(
@@ -521,7 +500,7 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
   readonly counterText = computed(() => {
     const limit = this.resolvedMax();
     if (limit !== null) {
-      return fill(this.resolvedCounterLabel(), { count: this.value().length, max: limit });
+      return this.t('counter', { count: this.value().length, max: limit });
     }
     if (this.narrow() && this.value().length > 0) return this.countText();
     return null;
@@ -556,9 +535,9 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
       const message =
         failure === undefined
           ? limit !== null && count > limit
-            ? fill(this.resolvedCounterLabel(), { count, max: limit })
+            ? this.t('counter', { count, max: limit })
             : ''
-          : failure.message || this.resolvedInvalidLabel();
+          : failure.message || this.t('invalid');
       untracked(() => this.controlRef().nativeElement.setCustomValidity(message));
     });
 
@@ -614,16 +593,16 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
   protected messageFor(index: number): string | null {
     const verdict = this.verdicts()[index];
     if (verdict === undefined || verdict.valid) return null;
-    return verdict.message || this.resolvedInvalidLabel();
+    return verdict.message || this.t('invalid');
   }
 
   protected removeLabelFor(value: string) {
-    return fill(this.resolvedRemoveLabel(), { label: this.labelFor(value) });
+    return this.t('remove', { label: this.labelFor(value) });
   }
 
   protected chipLabel(value: string, index: number) {
     if (!this.resolvedReorderable()) return null;
-    return fill(this.resolvedReorderLabel(), {
+    return this.t('reorder', {
       label: this.labelFor(value),
       position: index + 1,
       count: this.value().length,
@@ -692,12 +671,12 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
     if (result.added.length > 0 && this.commit(result.next, 'submit', source)) {
       const last = result.added[result.added.length - 1] as string;
       const verdict = this.judge(last);
-      const said = fill(this.resolvedAddedLabel(), {
-        label: this.labelFor(last),
-        count: result.next.length,
-      });
+      const label = this.labelFor(last);
+      const count = result.next.length;
       this.announce(
-        verdict.valid ? said : `${said}. ${verdict.message || this.resolvedInvalidLabel()}`,
+        verdict.valid
+          ? this.t('added', { label, count })
+          : this.t('addedInvalid', { label, count, reason: verdict.message || this.t('invalid') }),
       );
     }
 
@@ -708,14 +687,14 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
     if (result.existing.length > 0) {
       const existing = result.existing[0] as string;
       this.markCurrent(existing);
-      this.announce(fill(this.resolvedDuplicateLabel(), { label: this.labelFor(existing) }));
+      this.announce(this.t('duplicate', { label: this.labelFor(existing) }));
       queueMicrotask(() => this.focusChip(existing));
     }
     const limit = this.resolvedMax();
     if (result.refused.limit.length > 0 && limit !== null) {
-      this.announce(fill(this.resolvedCounterLabel(), { count: limit, max: limit }));
+      this.announce(this.t('counter', { count: limit, max: limit }));
     }
-    if (result.refused.invalid.length > 0) this.announce(this.resolvedInvalidLabel());
+    if (result.refused.invalid.length > 0) this.announce(this.t('invalid'));
     return result;
   }
 
@@ -735,9 +714,7 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
     if (target === undefined || this.isLocked(target)) return;
     const next = held.filter((_, at) => at !== index);
     if (this.commit(next, 'remove', source)) {
-      this.announce(
-        fill(this.resolvedRemovedLabel(), { label: this.labelFor(target), count: next.length }),
-      );
+      this.announce(this.t('removed', { label: this.labelFor(target), count: next.length }));
     }
   }
 
@@ -759,7 +736,7 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
     next.splice(target, 0, moved as string);
     if (!this.commit(next, 'keyboard', source)) return;
     this.announce(
-      fill(this.resolvedReorderLabel(), {
+      this.t('reorder', {
         label: this.labelFor(moved as string),
         position: target + 1,
         count: next.length,
@@ -781,7 +758,7 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
     );
     this.valueCopy.emit({ values, outcome });
     if (outcome !== 'refused') {
-      this.announce(fill(this.resolvedCopiedLabel(), { count: values.length }));
+      this.announce(this.t('copied', { count: values.length }));
     }
   }
 

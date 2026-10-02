@@ -8,6 +8,7 @@ import type {
   EventOccurrence,
   WorkingHours,
 } from '@slotted/core/event-calendar';
+import type { EventCalendarMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -69,39 +70,6 @@ export interface EventCalendarRange {
   readonly view: EventCalendarView;
 }
 
-/** Every word the family writes. Replace any of them on the provider or the instance. */
-export interface EventCalendarLabels {
-  navigation: string;
-  previous: Record<EventCalendarView, string>;
-  next: Record<EventCalendarView, string>;
-  today: string;
-  views: string;
-  view: Record<EventCalendarView, string>;
-  calendars: string;
-  allDay: string;
-  timed: string;
-  weekNumber: string;
-  /** The word after "+N" in the month; hidden at the compact size class. */
-  more: string;
-  moreEvents: (count: number) => string;
-  events: (count: number) => string;
-  empty: Record<'week' | 'month' | 'day', string>;
-  loading: string;
-  continues: string;
-  recurring: string;
-  tentative: string;
-  cancelled: string;
-  from: (time: string) => string;
-  until: (time: string) => string;
-  offsetChange: (minutes: number, at: string) => string;
-  offsetChangeShort: (minutes: number, at: string) => string;
-  selected: (text: string) => string;
-  /** Said when a key press finds no destination `canDrop` allows. */
-  dropInvalid: (title: string) => string;
-  eventDetail: string;
-  dayEvents: (day: string) => string;
-}
-
 /** What an application sets once for every event calendar under it. */
 export interface EventCalendarDefaults {
   compact: EventCalendarCompact;
@@ -112,11 +80,9 @@ export interface EventCalendarDefaults {
   fixedWeeks: boolean;
   /** Unset means the locale's own clock. */
   hourCycle: EventCalendarHourCycle | undefined;
-  labels: EventCalendarLabels;
   listRange: EventCalendarListRange;
   loadingDelay: number;
   loadingMinDuration: number;
-  locale: string | undefined;
   maxColumns: number;
   maxEvents: number;
   scrollTime: PlainTime;
@@ -128,11 +94,8 @@ export interface EventCalendarDefaults {
   weekNumbers: boolean;
 }
 
-export interface EventCalendarDefaultsProviderProps extends Partial<
-  Omit<EventCalendarDefaults, 'labels'>
-> {
+export interface EventCalendarDefaultsProviderProps extends Partial<EventCalendarDefaults> {
   children?: ReactNode;
-  labels?: Partial<EventCalendarLabels> | undefined;
 }
 
 /** Where an event is being drawn, for `renderEvent`. */
@@ -287,11 +250,17 @@ export interface EventCalendarProps<E extends CalendarEvent = CalendarEvent> ext
   firstDayOfWeek?: number | undefined;
   fixedWeeks?: boolean | undefined;
   hourCycle?: EventCalendarHourCycle | undefined;
-  labels?: Partial<EventCalendarLabels> | undefined;
   listRange?: EventCalendarListRange | undefined;
   loadingDelay?: number | undefined;
   loadingMinDuration?: number | undefined;
+  /** BCP 47. Unset, the language in force (`SlottedProvider`) decides. */
   locale?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * toolbar, the views, the empty and loading states, the counts and the
+   * sentences said aloud.
+   */
+  messages?: PartialMessages<EventCalendarMessages> | undefined;
   maxColumns?: number | undefined;
   maxEvents?: number | undefined;
   scrollTime?: PlainTime | undefined;

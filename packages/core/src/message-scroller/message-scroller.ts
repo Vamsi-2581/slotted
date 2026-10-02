@@ -654,35 +654,3 @@ function stripUndefined<T extends object>(value: T): Partial<T> {
     Object.entries(value).filter(([, entry]) => entry !== undefined),
   ) as Partial<T>;
 }
-
-/**
- * A message of the family, with `{name}` values and the ICU plural form
- * `{count, plural, one {# nova} other {# novas}}`; an exact branch (`=0`) is
- * read before the locale's category, as ICU reads it.
- */
-export function formatScrollerMessage(
-  template: string,
-  values: Readonly<Record<string, number | string>>,
-  locale?: string,
-): string {
-  const number = new Intl.NumberFormat(locale);
-  const plural = new Intl.PluralRules(locale);
-  return template
-    .replace(
-      /\{(\w+), plural,((?:\s*=?\w+ \{[^{}]*\})+)\s*\}/g,
-      (whole, name: string, branches: string) => {
-        const value = values[name];
-        if (typeof value !== 'number') return whole;
-        const forms = new Map(
-          [...branches.matchAll(/(=?\w+) \{([^{}]*)\}/g)].map(([, form, text]) => [form, text]),
-        );
-        const text =
-          forms.get(`=${value}`) ?? forms.get(plural.select(value)) ?? forms.get('other') ?? '';
-        return text.replaceAll('#', number.format(value));
-      },
-    )
-    .replace(/\{(\w+)\}/g, (whole, name: string) => {
-      const value = values[name];
-      return value === undefined ? whole : typeof value === 'number' ? number.format(value) : value;
-    });
-}

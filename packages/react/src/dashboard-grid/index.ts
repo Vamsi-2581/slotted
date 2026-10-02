@@ -13,7 +13,6 @@ export type {
   DashboardGridDefaults,
   DashboardGridDefaultsProviderProps,
   DashboardGridHandle,
-  DashboardGridLabels,
   DashboardGridProps,
   DashboardGridRootProps,
   DashboardHeadingLevel,

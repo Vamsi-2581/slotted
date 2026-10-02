@@ -1,4 +1,5 @@
 export {
+  canonicalKey,
   isEditableTarget,
   KBD_KEYS,
   matchesShortcut,
@@ -11,6 +12,7 @@ export type {
   KbdPlatform,
   KbdPlatformInput,
   KeyOptions,
+  KeysTranslator,
   ResolvedKey,
   ResolvedShortcut,
   ShortcutOptions,

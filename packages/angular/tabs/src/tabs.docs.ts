@@ -105,13 +105,13 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'tabs-angular-playground',
       language: 'angular',
       label: 'A set of views over one panel',
-      source: `<div slTabs defaultValue="resumo">
-  <div slTabList aria-label="Pedido">
-    <div slTab value="resumo">Resumo</div>
-    <div slTab value="itens">Itens</div>
+      source: `<div slTabs defaultValue="summary">
+  <div slTabList aria-label="Order">
+    <div slTab value="summary">Summary</div>
+    <div slTab value="items">Items</div>
   </div>
-  <div slTabPanel value="resumo">Entrega prevista para 12 de setembro.</div>
-  <div slTabPanel value="itens">Três itens.</div>
+  <div slTabPanel value="summary">Delivery expected on September 12.</div>
+  <div slTabPanel value="items">Three items.</div>
 </div>`,
     }),
   },
@@ -136,12 +136,12 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'A row of views, and a column of them',
       source: `<div slTabs defaultValue="a" orientation="vertical">
-  <div slTabList aria-label="Configurações">
-    <div slTab value="a">Perfil</div>
-    <div slTab value="b">Notificações</div>
+  <div slTabList aria-label="Settings">
+    <div slTab value="a">Profile</div>
+    <div slTab value="b">Notifications</div>
   </div>
-  <div slTabPanel value="a">Nome e foto.</div>
-  <div slTabPanel value="b">Avisos por e-mail.</div>
+  <div slTabPanel value="a">Name and photo.</div>
+  <div slTabPanel value="b">Email notices.</div>
 </div>`,
     }),
   },
@@ -194,9 +194,9 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'One tab out of reach, and a whole family',
       source: `<div slTabs defaultValue="a">
-  <div slTabList aria-label="Documento">
-    <div slTab value="a">Disponível</div>
-    <div slTab value="b" disabled>Indisponível</div>
+  <div slTabList aria-label="Document">
+    <div slTab value="a">Available</div>
+    <div slTab value="b" disabled>Unavailable</div>
   </div>
   <div slTabPanel value="a">…</div>
 </div>
@@ -231,9 +231,9 @@ const scenes: ReferenceSceneMeta[] = [
   (valueChange)="active.set($event.value)"
   (tabDismiss)="queries.set(queries().filter(close($event.value)))"
 >
-  <div slTabList aria-label="Consultas">
+  <div slTabList aria-label="Queries">
     @for (query of queries(); track query) {
-      <div slTab [value]="query" dismissible [dismissLabel]="'Fechar ' + query">{{ query }}</div>
+      <div slTab [value]="query" dismissible [dismissLabel]="'Close ' + query">{{ query }}</div>
     }
   </div>
 </div>`,
@@ -250,7 +250,7 @@ const scenes: ReferenceSceneMeta[] = [
       source: `<!-- Nothing to write: the list scrolls, the paging controls appear when they
      are needed, and the selected tab is brought into view on every change. -->
 <div slTabs defaultValue="v1">
-  <div slTabList aria-label="Versões">
+  <div slTabList aria-label="Versions">
     @for (version of versions(); track version) {
       <div slTab [value]="version">{{ version }}</div>
     }
@@ -267,9 +267,9 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'Selection and navigation in one control',
       source: `<div slTabs [value]="view()" (valueChange)="navigate($event.value)">
-  <div slTabList aria-label="Pedido">
-    <div slTab value="resumo" href="/pedido/resumo">Resumo</div>
-    <div slTab value="itens" href="/pedido/itens">Itens</div>
+  <div slTabList aria-label="Order">
+    <div slTab value="summary" href="/order/summary">Summary</div>
+    <div slTab value="items" href="/order/items">Items</div>
   </div>
 </div>`,
     }),
@@ -283,7 +283,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'Long, unbroken and right-to-left',
       source: `<div slTabs defaultValue="a">
-  <div slTabList aria-label="Conteúdo extremo">
+  <div slTabList aria-label="Extreme content">
     <div slTab value="a">sha256:9f86d081884c7d659a2feaa0c55ad015</div>
     <div slTab value="b">بيانات التسليم</div>
   </div>
@@ -304,7 +304,7 @@ bootstrapApplication(App, {
 });
 
 // And in a template, the slot beside the list is where a toolbar goes:
-// <div slTabActions><div slToolbar aria-label="Ações">…</div></div>`,
+// <div slTabActions><div slToolbar aria-label="Actions">…</div></div>`,
     }),
   },
   {
@@ -455,7 +455,7 @@ export const ANGULAR_TABS_DOCS = {
         'string',
         '—',
         'slTab',
-        'The accessible name of that control. Required whenever it is drawn: “Fechar clientes.sql” says what closes, where “Fechar” alone says only that something does',
+        'The accessible name of that control. Required whenever it is drawn: “Close customers.sql” says what closes, where “Close” alone says only that something does',
       ],
       [
         'href',
@@ -532,12 +532,12 @@ export const ANGULAR_TABS_DOCS = {
   data-fit="auto"
   data-activation-direction="forward"
 >
-  <div data-part="list" role="tablist" aria-label="Pedido" tabindex="-1">
+  <div data-part="list" role="tablist" aria-label="Order" tabindex="-1">
     <div data-part="item" role="presentation" data-selected>
       <button data-part="tab" role="tab" id="t-a" aria-controls="p-a" aria-selected="true">
-        <span data-part="label">Resumo</span>
+        <span data-part="label">Summary</span>
       </button>
-      <button data-part="dismiss" tabindex="-1" aria-label="Fechar Resumo"></button>
+      <button data-part="dismiss" tabindex="-1" aria-label="Close Summary"></button>
     </div>
   </div>
   <div data-part="actions">…</div>

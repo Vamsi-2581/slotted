@@ -3,13 +3,11 @@ export {
   provideTableDefaults,
   SlTableIdFactory,
   TABLE_DEFAULTS,
-  TABLE_LABELS,
 } from './table-defaults';
 export type {
   TableAlign,
   TableDefaults,
   TableExpandedReason,
-  TableLabels,
   TableLayout,
   TableSelectionMode,
   TableSelectionReason,

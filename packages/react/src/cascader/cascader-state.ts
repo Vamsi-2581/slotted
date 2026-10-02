@@ -11,14 +11,16 @@ import {
   pathTo,
 } from '@slotted/core/cascader';
 import type { CascaderKeyAction, CascaderLayout, CascaderView } from '@slotted/core/cascader';
+import { cascaderMessages, type CascaderMessages, type FamilyTranslator } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason } from '@slotted/core/state';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 
+import { useLocale, useMessages } from '../i18n';
+
 import type {
   CascaderDataProps,
   CascaderDefaults,
-  CascaderLabels,
   CascaderStateProps,
   CascaderValue,
 } from './cascader.types';
@@ -88,7 +90,10 @@ export interface CascaderState<T> {
   baseId: string;
   collection: TreeCollection<T>;
   itemFor: (key: string) => T | undefined;
-  labels: CascaderLabels;
+  /** The family's words in the language in force, with this instance's `messages` laid over them. */
+  t: FamilyTranslator<CascaderMessages>;
+  /** The locale the search compares and marks in: the `locale` prop, or the language in force. */
+  locale: string;
   layout: CascaderLayout;
   multiple: boolean;
   disabled: boolean;
@@ -126,10 +131,9 @@ export interface CascaderState<T> {
 export function useCascaderState<T>(options: CascaderStateOptions<T>): CascaderState<T> {
   const { defaults, getKey, getLabel, getChildren, getParent, hasChildren, getChildrenCount } =
     options;
-  const labels = useMemo(
-    () => ({ ...defaults.labels, ...options.labels }),
-    [defaults.labels, options.labels],
-  );
+  const t = useMessages(cascaderMessages, options.messages);
+  const inForce = useLocale();
+  const locale = options.locale ?? inForce;
   const baseId = useId();
 
   const collection = useMemo(() => {
@@ -264,7 +268,7 @@ export function useCascaderState<T>(options: CascaderStateOptions<T>): CascaderS
                 const item = collection.nodeFor(key)?.item;
                 return item !== undefined && filter(item, text);
               },
-        locale: options.locale,
+        locale,
       }),
     [
       activeKey,
@@ -278,7 +282,7 @@ export function useCascaderState<T>(options: CascaderStateOptions<T>): CascaderS
       multiple,
       options.isNodeFailed,
       options.isNodeLoading,
-      options.locale,
+      locale,
       options.maxCrumbs,
       path,
       query,
@@ -558,7 +562,8 @@ export function useCascaderState<T>(options: CascaderStateOptions<T>): CascaderS
     baseId,
     collection,
     itemFor,
-    labels,
+    t,
+    locale,
     layout,
     multiple,
     disabled,

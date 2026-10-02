@@ -24,35 +24,19 @@ export type DetailPanelStatus = 'ready' | 'not-found' | 'error';
 /** Why the current section moved. */
 export type DetailPanelSectionReason = 'pointer' | 'keyboard' | 'programmatic';
 
-/** The strings the family says on the reader's behalf. */
-export interface DetailPanelMessages {
-  /** The aside's accessible name. */
-  aside: string;
-  /** What the root is called while loading and the heading has no words yet. */
-  loading: string;
-}
-
 export interface DetailPanelDefaults {
   aside: DetailPanelAside;
   layout: DetailPanelLayout;
   level: DetailPanelLevel;
-  messages: DetailPanelMessages;
   mount: DetailPanelMount;
   scroll: DetailPanelScroll;
   size: DetailPanelSize;
 }
 
-/** The strings the family says before an application says otherwise. */
-export const DEFAULT_DETAIL_PANEL_MESSAGES: DetailPanelMessages = {
-  aside: 'Detalhes',
-  loading: 'A carregar o registo',
-};
-
 const FALLBACK: DetailPanelDefaults = {
   aside: 'end',
   layout: 'stacked',
   level: '2',
-  messages: DEFAULT_DETAIL_PANEL_MESSAGES,
   mount: 'active',
   scroll: 'ancestor',
   size: 'md',
@@ -66,20 +50,13 @@ export const DETAIL_PANEL_DEFAULTS = new InjectionToken<DetailPanelDefaults>(
 /**
  * An application decides once how its records read — stacked or tabbed, the
  * aside's side, the rank, the size, who scrolls — rather than repeating them
- * on every screen. A panel that states any of them itself still wins.
+ * on every screen. A panel that states any of them itself still wins. Its
+ * words come from the language in force (`provideSlotted`).
  */
-export function provideDetailPanelDefaults(
-  defaults: Partial<Omit<DetailPanelDefaults, 'messages'>> & {
-    messages?: Partial<DetailPanelMessages>;
-  },
-) {
+export function provideDetailPanelDefaults(defaults: Partial<DetailPanelDefaults>) {
   return {
     provide: DETAIL_PANEL_DEFAULTS,
-    useFactory: (): DetailPanelDefaults => ({
-      ...FALLBACK,
-      ...defaults,
-      messages: { ...FALLBACK.messages, ...defaults.messages },
-    }),
+    useFactory: (): DetailPanelDefaults => ({ ...FALLBACK, ...defaults }),
   };
 }
 

@@ -5,6 +5,7 @@ export {
   AppShellAsideBody,
   AppShellAsideFooter,
   AppShellAsideHeader,
+  AppShellAsideResizer,
   AppShellAsideToggle,
   AppShellBanner,
   AppShellBrand,
@@ -18,17 +19,17 @@ export {
   AppShellNavRail,
   AppShellNavToggle,
 } from './app-shell-parts';
-export {
-  AppShellDefaultsProvider,
-  DEFAULT_APP_SHELL_MESSAGES,
-  useAppShellDefaults,
-} from './app-shell-defaults';
+export { AppShellDefaultsProvider, useAppShellDefaults } from './app-shell-defaults';
 export type {
   AppShellActionsProps,
+  AppShellAsideBodyProps,
+  AppShellAsideExtentReason,
+  AppShellAsideExtentRequest,
   AppShellAsideMode,
   AppShellAsideOpenReason,
   AppShellAsideOpenRequest,
   AppShellAsideProps,
+  AppShellAsideResizerProps,
   AppShellAsideSectionProps,
   AppShellAsideToggleProps,
   AppShellBannerProps,
@@ -43,7 +44,6 @@ export type {
   AppShellFooterProps,
   AppShellHandle,
   AppShellMainProps,
-  AppShellMessages,
   AppShellNavMode,
   AppShellNavProps,
   AppShellNavSectionProps,

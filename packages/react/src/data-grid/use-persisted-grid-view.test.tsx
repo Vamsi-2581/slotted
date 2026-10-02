@@ -63,7 +63,7 @@ function Items({
       >
         apply view
       </button>
-      <DataGrid<Item> {...view} columns={COLUMNS} label="Items" rowKey="id" rows={ROWS} />
+      <DataGrid<Item> {...view} columns={COLUMNS} aria-label="Items" rowKey="id" rows={ROWS} />
     </>
   );
 }

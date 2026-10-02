@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState, type Ref } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/breadcrumb/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Breadcrumb } from './breadcrumb';
 import { BreadcrumbDefaultsProvider } from './breadcrumb-defaults';
 import {
@@ -57,8 +59,22 @@ describe('Breadcrumb', () => {
     const { rerender } = render(<Trail maxItems={0} />);
     expect(trail()).toHaveAttribute('aria-label', 'Breadcrumb');
 
-    rerender(<Trail label="Fatura" maxItems={0} />);
+    rerender(<Trail aria-label="Fatura" maxItems={0} />);
     expect(trail()).toHaveAttribute('aria-label', 'Fatura');
+
+    rerender(<Trail maxItems={0} messages={{ label: 'Trilha' }} />);
+    expect(trail()).toHaveAttribute('aria-label', 'Trilha');
+  });
+
+  it('speaks the language in force', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Trail maxItems={4} />
+      </SlottedProvider>,
+    );
+
+    expect(trail()).toHaveAttribute('aria-label', 'Trilha de navegação');
+    expect(ellipsis()).toHaveAccessibleName('Mostrar 3 níveis ocultos');
   });
 
   /**
@@ -218,19 +234,18 @@ describe('Breadcrumb', () => {
 
     it('takes the application defaults, and yields to an explicit prop', () => {
       const { rerender } = render(
-        <BreadcrumbDefaultsProvider label="Trilha" separator="·">
+        <BreadcrumbDefaultsProvider separator="·">
           <Trail levels={['A']} maxItems={0} />
         </BreadcrumbDefaultsProvider>,
       );
-      expect(trail()).toHaveAttribute('aria-label', 'Trilha');
       expect(trail().querySelector('[data-part="separator"]')).toHaveTextContent('·');
 
       rerender(
-        <BreadcrumbDefaultsProvider label="Trilha" separator="·">
-          <Trail label="Fatura" levels={['A']} maxItems={0} />
+        <BreadcrumbDefaultsProvider separator="·">
+          <Trail levels={['A']} maxItems={0} separator="›" />
         </BreadcrumbDefaultsProvider>,
       );
-      expect(trail()).toHaveAttribute('aria-label', 'Fatura');
+      expect(trail().querySelector('[data-part="separator"]')).toHaveTextContent('›');
     });
 
     it('passes every native attribute to the element that owns it', () => {

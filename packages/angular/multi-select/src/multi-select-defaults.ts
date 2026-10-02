@@ -8,6 +8,8 @@ export type MultiSelectAlign = 'start' | 'center' | 'end';
 export type MultiSelectWidth = 'anchor' | 'content';
 export type MultiSelectMount = 'active' | 'lazy' | 'eager';
 export type MultiSelectStrategy = 'absolute' | 'fixed';
+/** Which gestures open the popup besides the trigger and the arrows. */
+export type MultiSelectOpenOn = 'input' | 'focus' | 'manual';
 
 /** What the row does with more chips than fit on one line. */
 export type MultiSelectOverflow = 'wrap' | 'collapse';
@@ -72,48 +74,39 @@ export interface MultiSelectDefaults {
   align: MultiSelectAlign;
   alignOffset: number;
   allowDuplicates: boolean;
-  chosenLabel: string;
   chosenOptions: MultiSelectChosenOptions;
   clearable: boolean;
-  clearLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   closeOnSelect: boolean;
   collisionPadding: number;
   commitOnBlur: boolean;
-  countLabel: string;
-  counterLabel: string;
   creatable: boolean;
-  createLabel: string;
   /** The characters that commit the typed text, and split a paste. */
   delimiters: readonly string[];
   disabled: boolean;
   editable: boolean;
-  emptyLabel: string;
   flip: boolean;
   fullWidth: boolean;
   hideWhenDetached: boolean;
   highlightMatch: boolean;
   invalid: boolean;
   loading: boolean;
-  loadingLabel: string;
   loop: boolean;
   /** The most values the set may hold, or `null` for no limit. */
   max: number | null;
   mount: MultiSelectMount;
+  openOn: MultiSelectOpenOn;
   overflow: MultiSelectOverflow;
   portal: boolean;
   readOnly: boolean;
-  removeLabel: string;
   reorderable: boolean;
-  reorderLabel: string;
   required: boolean;
   shift: boolean;
   side: MultiSelectSide;
   sideOffset: number;
   size: MultiSelectSize;
   strategy: MultiSelectStrategy;
-  triggerLabel: string;
   variant: MultiSelectVariant;
   width: MultiSelectWidth;
 }
@@ -129,46 +122,37 @@ export const MULTI_SELECT_FALLBACK: MultiSelectDefaults = {
   align: 'start',
   alignOffset: 0,
   allowDuplicates: false,
-  chosenLabel: '{count} chosen',
   chosenOptions: 'show',
   clearable: true,
-  clearLabel: 'Clear',
   closeOnEscape: true,
   closeOnOutsidePress: true,
   closeOnSelect: false,
   collisionPadding: 8,
   commitOnBlur: true,
-  countLabel: '{count} results',
-  counterLabel: '{count} of {max}',
   creatable: false,
-  createLabel: 'Add “{query}”',
   delimiters: [','],
   disabled: false,
   editable: false,
-  emptyLabel: 'No matches',
   flip: true,
   fullWidth: true,
   hideWhenDetached: true,
   highlightMatch: true,
   invalid: false,
   loading: false,
-  loadingLabel: 'Loading…',
   loop: false,
   max: null,
   mount: 'active',
+  openOn: 'input',
   overflow: 'wrap',
   portal: true,
   readOnly: false,
-  removeLabel: 'Remove {label}',
   reorderable: false,
-  reorderLabel: '{label}, position {position} of {count}',
   required: false,
   shift: true,
   side: 'bottom',
   sideOffset: 4,
   size: 'md',
   strategy: 'absolute',
-  triggerLabel: 'Show options',
   variant: 'outline',
   width: 'anchor',
 };
@@ -178,7 +162,10 @@ export const MULTI_SELECT_DEFAULTS = new InjectionToken<MultiSelectDefaults>(
   { providedIn: 'root', factory: () => MULTI_SELECT_FALLBACK },
 );
 
-/** The decisions an application takes once, including the eight sentences. */
+/**
+ * The decisions an application takes once. Its words come from the language in
+ * force (`provideSlotted`).
+ */
 export function provideMultiSelectDefaults(defaults: Partial<MultiSelectDefaults>): Provider {
   return { provide: MULTI_SELECT_DEFAULTS, useValue: { ...MULTI_SELECT_FALLBACK, ...defaults } };
 }

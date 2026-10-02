@@ -1,8 +1,10 @@
 import '@slotted/styles/tag/tag.css';
 
+import { tagMessages } from '@slotted/core/i18n';
 import { createContext, useContext } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode, SyntheticEvent } from 'react';
 
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useTagDefaults } from './tag-defaults';
 import type {
@@ -111,19 +113,20 @@ export interface Removal {
   removable: boolean;
   /** The control's own disabled state, which the chip's own also forces. */
   removeDisabled: boolean;
+  /** The word announced before the tag's own label, in the language in force. */
   removeLabel: string;
   request: (reason: TagRemoveReason, source: SyntheticEvent) => void;
 }
 
 export function useRemoval(props: TagRemovableProps & { disabled?: boolean }): Removal {
-  const defaults = useTagDefaults();
+  const t = useMessages(tagMessages, props.messages);
   const disabled = props.disabled === true;
   const removeDisabled = disabled || props.removeDisabled === true;
 
   return {
     removable: props.onRemove !== undefined,
     removeDisabled,
-    removeLabel: props.removeLabel ?? defaults.removeLabel,
+    removeLabel: t('remove'),
     request(reason, source) {
       if (removeDisabled) return;
       props.onRemove?.(createRequest(reason, source));

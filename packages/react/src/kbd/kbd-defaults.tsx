@@ -10,7 +10,6 @@ const FALLBACK: KbdDefaults = {
   size: 'md',
   variant: 'raised',
   separator: '+',
-  thenLabel: 'then',
   legends: undefined,
   names: undefined,
 };
@@ -24,9 +23,10 @@ export function useKbdDefaults(): KbdDefaults {
 
 /**
  * An application decides once which platform its shortcuts are written for,
- * how its keys are painted, and — the two that matter most — what its keys are
- * called in the reader's language. A key that states any of them itself still
- * wins: an explicit prop is never overridden by context.
+ * how its keys are painted, and which legends and names it writes in place of
+ * the catalog's for particular keys. A key that states any of them itself still
+ * wins: an explicit prop is never overridden by context. The words come from
+ * the `keys` catalog of the language in force (`SlottedProvider`).
  *
  * Nuxt's `useKbd` is the nearest surveyed equivalent and its map is a module
  * constant, so `Strg` and `Échap` cannot be reached from an application at all.
@@ -41,7 +41,6 @@ export function KbdDefaultsProvider({ children, ...defaults }: KbdDefaultsProvid
         size: defaults.size ?? inherited.size,
         variant: defaults.variant ?? inherited.variant,
         separator: defaults.separator ?? inherited.separator,
-        thenLabel: defaults.thenLabel ?? inherited.thenLabel,
         legends: defaults.legends ?? inherited.legends,
         names: defaults.names ?? inherited.names,
       }}

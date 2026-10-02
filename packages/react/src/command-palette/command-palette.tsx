@@ -4,8 +4,9 @@ import '@slotted/styles/spinner/spinner.css';
 
 import { moveIndex } from '@slotted/core/collection';
 import { createCommandRanker, pushRecent, resolveCommands } from '@slotted/core/commands';
+import { commandPaletteMessages } from '@slotted/core/i18n';
 import type { CommandRanker, CommandSection } from '@slotted/core/commands';
-import { isEditableTarget, matchesShortcut, parseShortcut, resolveKey } from '@slotted/core/keys';
+import { canonicalKey, isEditableTarget, matchesShortcut, parseShortcut } from '@slotted/core/keys';
 import type { KbdPlatform } from '@slotted/core/keys';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createPortalRoot } from '@slotted/core/portal';
@@ -26,6 +27,7 @@ import type { KeyboardEvent, MouseEvent, PointerEvent, ReactNode } from 'react';
 import { Dialog, DialogContent, DialogTrigger } from '../dialog';
 import type { DialogChangeRequest } from '../dialog';
 import { Highlight } from '../highlight';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { Shortcut } from '../kbd';
 import { useResolvedPlatform } from '../kbd/kbd-defaults';
@@ -75,27 +77,24 @@ function compose<E extends { defaultPrevented: boolean }>(
   };
 }
 
-const ARIA_MODIFIERS: Record<string, string> = {
-  alt: 'Alt',
-  ctrl: 'Control',
-  meta: 'Meta',
-  shift: 'Shift',
-};
-
 /**
  * The shortcut as `aria-keyshortcuts` states it, as `menu` writes it. A
  * sequence has no syntax in the attribute and is drawn only.
+ *
+ * The attribute's grammar is the UI Events `key` values — `Control`, `Alt`,
+ * `Meta`, `Shift` — which a screen reader parses and speaks in its own
+ * language. They are tokens rather than words, so they stay out of the
+ * catalog: a translated or platform-named modifier (`Option`, `Command`) is
+ * not a value the attribute accepts.
  */
 function announceShortcut(keys: string, platform: KbdPlatform): string | undefined {
   const steps = parseShortcut(keys);
   if (steps.length !== 1) return undefined;
   return steps[0]
     ?.map((token) => {
-      const canonical = resolveKey(token, { platform }).token;
+      const canonical = canonicalKey(token);
       if (canonical === 'mod') return platform === 'mac' ? 'Meta' : 'Control';
-      if (canonical !== undefined && canonical in ARIA_MODIFIERS) {
-        return ARIA_MODIFIERS[canonical] as string;
-      }
+      if (canonical === 'ctrl') return 'Control';
       const word = canonical ?? token;
       return word.length === 1 ? word.toUpperCase() : `${word[0]?.toUpperCase()}${word.slice(1)}`;
     })
@@ -107,23 +106,13 @@ function domId(base: string, id: string) {
   return `${base}-${id.replace(/[^\w-]/g, (character) => `_${character.charCodeAt(0).toString(16)}`)}`;
 }
 
-function fill(template: string, values: Record<string, string | number>) {
-  return template.replace(/\{(\w+)\}/g, (match, key: string) =>
-    key in values ? String(values[key]) : match,
-  );
-}
-
 export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteItem>({
   autoHighlight,
-  backLabel,
   children,
   className,
-  clearLabel,
-  closeLabel,
   clearOnClose,
   closeOnSelect,
   container,
-  countLabel,
   defaultHighlightedId,
   defaultOpen,
   defaultPages,
@@ -131,26 +120,18 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
   defaultRecent,
   disabled,
   empty,
-  emptyLabel,
-  errorLabel,
   footer,
   groups,
   highlightMatch,
   highlightedId,
-  hintBack,
-  hintClose,
-  hintNavigate,
-  hintSelect,
   hotkey,
-  inputLabel,
   inputProps,
   items,
-  label,
   limit,
   loading,
-  loadingLabel,
   locale,
   loop,
+  messages,
   onHighlightedIdChange,
   onOpenChange,
   onPagesChange,
@@ -160,12 +141,10 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
   open,
   outsidePress,
   pages,
-  placeholder,
   presentation,
   query,
   rank,
   recent,
-  recentLabel,
   recentLimit,
   ref,
   renderItem,
@@ -187,22 +166,10 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
     recentLimit: recentLimit ?? defaults.recentLimit,
     loading: loading ?? false,
     disabled: disabled ?? false,
-    label: label ?? defaults.label,
-    inputLabel: inputLabel ?? defaults.inputLabel,
-    placeholder: placeholder ?? defaults.placeholder,
-    emptyLabel: emptyLabel ?? defaults.emptyLabel,
-    loadingLabel: loadingLabel ?? defaults.loadingLabel,
-    errorLabel: errorLabel ?? defaults.errorLabel,
-    countLabel: countLabel ?? defaults.countLabel,
-    recentLabel: recentLabel ?? defaults.recentLabel,
-    clearLabel: clearLabel ?? defaults.clearLabel,
-    closeLabel: closeLabel ?? defaults.closeLabel,
-    backLabel: backLabel ?? defaults.backLabel,
-    hintNavigate: hintNavigate ?? defaults.hintNavigate,
-    hintSelect: hintSelect ?? defaults.hintSelect,
-    hintClose: hintClose ?? defaults.hintClose,
-    hintBack: hintBack ?? defaults.hintBack,
   };
+  const t = useMessages(commandPaletteMessages, messages);
+  const appLocale = useLocale();
+  const resolvedLocale = locale ?? appLocale;
   const inline = resolved.presentation === 'inline';
   const platform = useResolvedPlatform(undefined);
 
@@ -349,8 +316,8 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
   /* ── The rows ─────────────────────────────────────────────────────────── */
 
   const ranker = useMemo<CommandRanker<Item> | null>(
-    () => (rank === undefined ? createCommandRanker<Item>({ locale }) : rank),
-    [locale, rank],
+    () => (rank === undefined ? createCommandRanker<Item>({ locale: resolvedLocale }) : rank),
+    [resolvedLocale, rank],
   );
 
   const model = useMemo(
@@ -593,8 +560,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
     const keys = resolved.hotkey;
     if (keys === null || inline || resolved.disabled) return;
     const bare = parseShortcut(keys)[0]?.every(
-      (token) =>
-        !['mod', 'meta', 'ctrl', 'alt'].includes(resolveKey(token, { platform }).token ?? ''),
+      (token) => !['mod', 'meta', 'ctrl', 'alt'].includes(canonicalKey(token) ?? ''),
     );
     const onKey = (event: globalThis.KeyboardEvent) => {
       if (!matchesShortcut(event, keys, platform)) return;
@@ -613,10 +579,10 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
   /* ── Announcing ───────────────────────────────────────────────────────── */
 
   const status = resolved.loading
-    ? resolved.loadingLabel
+    ? t('loading')
     : error !== null
-      ? fill(resolved.errorLabel, { message: error })
-      : fill(resolved.countLabel, { count: model.count });
+      ? t('error', { message: error })
+      : t('count', { count: model.count });
 
   useEffect(() => {
     if (!currentOpen) return;
@@ -677,7 +643,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
        drawn by the `highlight` family inside this family's label. */
     const labelNode =
       resolved.highlightMatch && currentQuery.trim() !== '' ? (
-        <Highlight locale={locale} query={currentQuery} text={item.label} />
+        <Highlight locale={resolvedLocale} query={currentQuery} text={item.label} />
       ) : (
         item.label
       );
@@ -765,7 +731,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
   };
 
   const renderSection = (section: CommandSection<Item>, index: number) => {
-    const heading = section.recent ? resolved.recentLabel : section.label;
+    const heading = section.recent ? t('recent') : section.label;
     const rows = section.items.map(renderRow);
     const separator =
       index === 0 ? null : <div data-part="separator" key={`sep-${index}`} role="separator" />;
@@ -794,22 +760,22 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
             <span data-part="hint">
               <Shortcut keys="up" separator="" size="inherit" variant="outline" />
               <Shortcut keys="down" separator="" size="inherit" variant="outline" />
-              <span>{resolved.hintNavigate}</span>
+              <span>{t('hintNavigate')}</span>
             </span>
             <span data-part="hint">
               <Shortcut keys="enter" separator="" size="inherit" variant="outline" />
-              <span>{resolved.hintSelect}</span>
+              <span>{t('hintSelect')}</span>
             </span>
             {currentPages.length === 0 ? null : (
               <span data-part="hint">
                 <Shortcut keys="backspace" separator="" size="inherit" variant="outline" />
-                <span>{resolved.hintBack}</span>
+                <span>{t('hintBack')}</span>
               </span>
             )}
             {inline ? null : (
               <span data-part="hint">
                 <Shortcut keys="escape" separator="" size="inherit" variant="outline" />
-                <span>{resolved.hintClose}</span>
+                <span>{t('hintClose')}</span>
               </span>
             )}
           </>
@@ -852,7 +818,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
           </span>
         )}
         {model.trail.length === 0 ? null : (
-          <ol aria-label={resolved.backLabel} data-part="pages">
+          <ol aria-label={t('back')} data-part="pages">
             {model.trail.map((entry, index) => (
               <li key={entry.id}>
                 {/* The chevron between two pages, mirrored in a right-to-left document. */}
@@ -880,7 +846,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
           aria-autocomplete="list"
           aria-controls={listId}
           aria-expanded="true"
-          aria-label={restInput['aria-label'] ?? resolved.inputLabel}
+          aria-label={restInput['aria-label'] ?? t('input')}
           autoComplete="off"
           data-part="input"
           disabled={resolved.disabled}
@@ -888,7 +854,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
             setQuery(event.target.value, 'keyboard', event),
           )}
           onKeyDown={compose(theirOnKeyDown, onInputKeyDown)}
-          placeholder={resolved.placeholder}
+          placeholder={restInput.placeholder ?? t('placeholder')}
           ref={(node) => {
             inputRef.current = node;
             if (typeof theirInputRef === 'function') theirInputRef(node);
@@ -902,7 +868,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
           value={currentQuery}
         />
         <button
-          aria-label={resolved.clearLabel}
+          aria-label={t('clear')}
           data-part="clear"
           onClick={(event) => {
             setQuery('', 'clear', event);
@@ -923,13 +889,13 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
             onClick={(event) => setOpen(false, 'dismiss', event)}
             type="button"
           >
-            {resolved.closeLabel}
+            {t('close')}
           </button>
         )}
       </div>
       <div
         aria-busy={resolved.loading ? true : undefined}
-        aria-label={resolved.inputLabel}
+        aria-label={t('input')}
         data-part="list"
         {...(resolved.loading ? { 'data-loading': '' } : {})}
         id={listId}
@@ -945,7 +911,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
             ))}
           </div>
         ) : null}
-        {isEmpty ? <div data-part="empty">{empty ?? resolved.emptyLabel}</div> : null}
+        {isEmpty ? <div data-part="empty">{empty ?? t('empty')}</div> : null}
         {model.sections.flatMap(renderSection)}
       </div>
       <div data-part="status" role="status">
@@ -1006,7 +972,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
         surface="plain"
       >
         {children}
-        <DialogContent aria-label={resolved.label}>{panel}</DialogContent>
+        <DialogContent aria-label={t('label')}>{panel}</DialogContent>
       </Dialog>
     </CommandPaletteContext.Provider>
   );

@@ -6,6 +6,7 @@ import type {
   GridQuery,
 } from '@slotted/core/grid';
 import { emptyQuery, POPIN_COLUMN_ID, withPageIndex } from '@slotted/core/grid';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { useRef, useState } from 'react';
@@ -16,6 +17,7 @@ import { DataGrid } from './data-grid';
 import { SELECTION_COLUMN } from './data-grid-constants';
 import { TooltipDefaultsProvider } from '../tooltip/tooltip-defaults';
 import { DataGridDefaultsProvider } from './data-grid-defaults';
+import { SlottedProvider } from '../i18n';
 import type {
   DataGridCellContext,
   DataGridColumn,
@@ -96,7 +98,13 @@ const COLUMNS: GridColumn<Shipment>[] = [
 
 function Shipments(props: Partial<DataGridProps<Shipment>>) {
   return (
-    <DataGrid<Shipment> columns={COLUMNS} label="Shipments" rowKey="id" rows={ROWS} {...props} />
+    <DataGrid<Shipment>
+      columns={COLUMNS}
+      aria-label="Shipments"
+      rowKey="id"
+      rows={ROWS}
+      {...props}
+    />
   );
 }
 
@@ -941,12 +949,32 @@ describe('DataGrid, the rest', () => {
 
   it('reads defaults from the provider, an explicit prop winning', () => {
     render(
-      <DataGridDefaultsProvider labels={{ empty: 'Nada' }} variant="framed">
-        <Shipments rows={[]} />
+      <DataGridDefaultsProvider variant="framed">
+        <Shipments rows={[]} messages={{ empty: 'Nada' }} />
       </DataGridDefaultsProvider>,
     );
     expect(grid()).toHaveAttribute('data-variant', 'framed');
     expect(grid().querySelector('[data-part="empty"]')).toHaveTextContent('Nada');
+  });
+
+  it('speaks the language in force: its words, its plurals and its booleans', () => {
+    const { rerender } = render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Shipments selectionMode="multiple" />
+      </SlottedProvider>,
+    );
+    const all = within(
+      grid().querySelector<HTMLElement>('[data-part="head"] [data-part="selection"]')!,
+    ).getByRole('checkbox');
+    expect(all).toHaveAccessibleName('Selecionar todas as 4 linhas');
+    expect(cell('S1', 'priority')).toHaveTextContent('Sim');
+    expect(cell('S2', 'priority')).toHaveTextContent('Não');
+    rerender(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Shipments rows={[]} />
+      </SlottedProvider>,
+    );
+    expect(grid().querySelector('[data-part="empty"]')).toHaveTextContent('Nenhuma linha');
   });
 
   it('runs the consumer’s own handler first and stops when it was prevented', () => {
@@ -1206,7 +1234,7 @@ describe('DataGrid, the rest', () => {
       expect(onRowsReorder).toHaveBeenCalledTimes(2);
     });
 
-    it('drags a row by its handle to a gap, and reports the move', () => {
+    it('drags a row by its handle to a gap, and reports the move', async () => {
       const onRowsReorder = vi.fn();
       render(<Shipments onRowsReorder={onRowsReorder} rowsReorderable />);
       const rows = [
@@ -1262,6 +1290,9 @@ describe('DataGrid, the rest', () => {
       expect(onRowsReorder).toHaveBeenCalledWith(
         expect.objectContaining({ key: 'S1', from: 0, to: 3, reason: 'pointer' }),
       );
+      await waitFor(() =>
+        expect(document.body.textContent).toMatch(/dropped, position 4 of \d+ in rows\./),
+      );
     });
   });
 
@@ -1287,7 +1318,7 @@ describe('DataGrid, the rest', () => {
       return (
         <DataGrid<Site>
           columns={SITE_COLUMNS}
-          label="Sites"
+          aria-label="Sites"
           rowKey="id"
           rows={SITES}
           tree={{ parentKey: (row: Site) => row.parent }}
@@ -1467,7 +1498,7 @@ describe('DataGrid, explaining and arranging columns', () => {
     return (
       <DataGrid<Account>
         columns={ACCOUNT_COLUMNS}
-        label="Accounts"
+        aria-label="Accounts"
         rowKey="id"
         rows={ACCOUNTS}
         {...props}

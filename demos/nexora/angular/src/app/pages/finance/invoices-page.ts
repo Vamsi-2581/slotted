@@ -211,9 +211,9 @@ function doorSort(params: { get(name: string): string | null }): SortKey[] {
             (valueChangeRequest)="store.setFilter($event.value)"
             [query]="store.search()"
             (queryChangeRequest)="store.setSearch($event.value)"
-            [labels]="{ count: countLabel }"
+            [messages]="countMessages"
             [count]="store.total() ?? undefined"
-            [total]="store.grandTotal() ?? undefined"
+            [total]="store.total() === store.grandTotal() ? undefined : (store.grandTotal() ?? undefined)"
             [loading]="store.loading()"
           >
             <app-list-view-tools
@@ -227,7 +227,7 @@ function doorSort(params: { get(name: string): string | null }): SortKey[] {
           </div>
           <sl-data-grid
             #grid="slDataGrid"
-            label="Invoices"
+            aria-label="Invoices"
             rowKey="id"
             variant="framed"
             activatable
@@ -291,8 +291,8 @@ function doorSort(params: { get(name: string): string | null }): SortKey[] {
             <nav
               slDataGridFooter
               slPagination
-              label="Invoice pages"
-              [labels]="pagerLabels"
+              aria-label="Invoice pages"
+              [messages]="pagerMessages"
               [count]="store.total() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
@@ -342,12 +342,11 @@ export class InvoicesPage {
   readonly canReadCredits = computed(() => this.can('credit_memos.view'));
   readonly columns = computed(() => invoiceColumns(this.can, this.today()));
 
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total ? `${count} invoices` : `${count} of ${total} invoices`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} invoices', countOnly: '{count} invoices' };
 
-  readonly pagerLabels = {
-    range: (start: number, end: number, count: number) =>
-      `Invoices ${start}–${end} of ${count.toLocaleString('en-US')}`,
+  readonly pagerMessages = {
+    range: 'Invoices {start}–{end} of {count}',
     pageSize: 'Invoices per page',
   };
 

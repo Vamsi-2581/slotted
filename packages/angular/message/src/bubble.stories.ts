@@ -232,7 +232,7 @@ export const Clamp: Story = {
     template: page(
       scene(
         'Three lines, then the rest',
-        'The clamp ends in an ellipsis and the inset under it stays clean; press Mostrar mais and the chevron turns. A short text under the same clamp draws no control.',
+        'The clamp ends in an ellipsis and the inset under it stays clean; press Show more and the chevron turns. A short text under the same clamp draws no control.',
         stack(
           `<article slMessage aria-label="Assistente"><div slMessageBody>${bubble('[maxLines]="3"', LONG_ANSWER)}</div></article>` +
             `<article slMessage aria-label="Assistente"><div slMessageBody>${bubble('[maxLines]="3"', 'O p95 voltou a menos de 400 ms.')}</div></article>`,
@@ -266,7 +266,7 @@ export const Typing: Story = {
           <div slMessageAvatar><span slAvatar name="Marta Silva" size="sm"></span></div>
           <div slMessageBody>
             <div slBubble>
-              <div slBubbleContent><span slBubbleTyping label="Marta Silva está a escrever"></span></div>
+              <div slBubbleContent><span slBubbleTyping aria-label="Marta Silva está a escrever"></span></div>
             </div>
             <div slMessageFooter aria-hidden="true">Marta está a escrever</div>
           </div>

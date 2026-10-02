@@ -14,6 +14,7 @@ export type {
   MultiSelectInputReason,
   MultiSelectItems,
   MultiSelectMount,
+  MultiSelectOpenOn,
   MultiSelectOpenReason,
   MultiSelectOption,
   MultiSelectOptionGroup,

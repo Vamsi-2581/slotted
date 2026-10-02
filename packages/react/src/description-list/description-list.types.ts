@@ -1,3 +1,8 @@
+import type {
+  DescriptionListMessages,
+  FamilyTranslator,
+  PartialMessages,
+} from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
@@ -35,33 +40,8 @@ export interface DescriptionListCopyRequest {
   readonly source?: unknown;
 }
 
-/**
- * The words the family says. They are here rather than inside the components
- * because an application translates them once, and a reader of a Portuguese
- * page should not meet "Show more" in the one place a family forgot.
- */
-export interface DescriptionListLabels {
-  /** The accessible name of the copy control. */
-  copy?: string | undefined;
-  /** Announced, politely, once a value has reached the clipboard. */
-  copied?: string | undefined;
-  /** The control that shows the rest of a clamped value. */
-  reveal?: string | undefined;
-  /** The same control, once the value is whole. */
-  collapse?: string | undefined;
-  /** What a screen reader reads in place of a value that is missing. */
-  placeholder?: string | undefined;
-  /**
-   * Announced when the platform refuses the clipboard and the family selects
-   * the value instead. A browser blocks `writeText` where the document is not
-   * focused, and inside an iframe that carries no `clipboard-write` permission.
-   */
-  copyBlocked?: string | undefined;
-}
-
 export interface DescriptionListDefaults {
   columns?: DescriptionListColumns | undefined;
-  labels?: DescriptionListLabels | undefined;
   layout?: DescriptionListLayout | undefined;
   /** The maximum width of the term column, as a CSS length. */
   termWidth?: string | undefined;
@@ -72,15 +52,11 @@ export interface DescriptionListDefaultsProviderProps extends DescriptionListDef
   children?: ReactNode;
 }
 
-/** Every label answered, after the prop, the provider and the default. */
-export type DescriptionListResolvedLabels = {
-  [K in keyof DescriptionListLabels]-?: NonNullable<DescriptionListLabels[K]>;
-};
-
 export interface DescriptionListContextValue {
   columns: DescriptionListColumns;
-  labels: DescriptionListResolvedLabels;
   layout: DescriptionListLayout;
+  /** The family's words in the language in force, with this list's `messages` laid over them. */
+  t: FamilyTranslator<DescriptionListMessages>;
   variant: DescriptionListVariant;
 }
 
@@ -99,8 +75,13 @@ export interface DescriptionListRootProps extends ComponentPropsWithRef<'div'> {
 
 export interface DescriptionListProps extends ComponentPropsWithRef<'div'> {
   columns?: DescriptionListColumns | undefined;
-  labels?: DescriptionListLabels | undefined;
   layout?: DescriptionListLayout | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * copy control and its announcements, the reveal control, and the sentence
+   * read in place of a missing value.
+   */
+  messages?: PartialMessages<DescriptionListMessages> | undefined;
   render?: ((props: DescriptionListRootProps) => ReactNode) | undefined;
   /** The maximum width of the term column, as a CSS length. */
   termWidth?: string | undefined;

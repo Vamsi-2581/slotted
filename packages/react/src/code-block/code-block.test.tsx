@@ -1,9 +1,11 @@
 import { fromPrismTokens } from '@slotted/core/code';
 import type { CodeLine } from '@slotted/core/code';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/code-block/contract.json';
+import { SlottedProvider } from '../i18n';
 import { CodeBlock } from './code-block';
 import { CodeBlockDefaultsProvider } from './code-block-defaults';
 
@@ -186,6 +188,16 @@ describe('CodeBlock', () => {
     expect(root().hasAttribute('data-revealed')).toBe(false);
   });
 
+  it('speaks the language in force, and lays its own messages over it', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <CodeBlock code={CODE} collapseAfter={3} messages={{ copy: 'Copiar' }} />
+      </SlottedProvider>,
+    );
+    expect(screen.getByRole('button', { name: 'Mostrar mais 1 linha' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copiar' })).toBeInTheDocument();
+  });
+
   it('keeps a controlled value where the consumer put it', () => {
     render(<CodeBlock code={CODE} collapseAfter={1} revealed={false} />);
     fireEvent.click(screen.getByRole('button', { name: 'Show 3 more lines' }));
@@ -197,6 +209,18 @@ describe('CodeBlock', () => {
     expect(root().style.getPropertyValue('--slotted-code-block-max-lines')).toBe('2');
     expect(part('body').hasAttribute('data-max-lines')).toBe(true);
     expect(part('body').dataset['ui']).toBe('scroll-area');
+  });
+
+  /*
+   * A block with no height of its own scrolls only along the line: a body
+   * that scrolled both ways was a vertical scroll container with nothing to
+   * scroll, and with the scroll-area's `contain` it kept the page's wheel.
+   */
+  it('scrolls only inline unless maxLines bounds it, so the page keeps its wheel', () => {
+    const { rerender } = render(<CodeBlock code={CODE} />);
+    expect(part('body').dataset['axis']).toBe('inline');
+    rerender(<CodeBlock code={CODE} maxLines={2} />);
+    expect(part('body').dataset['axis']).toBe('both');
   });
 
   it('draws skeleton lines while loading and one empty line for an empty string', () => {

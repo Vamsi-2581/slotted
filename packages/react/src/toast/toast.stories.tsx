@@ -13,11 +13,11 @@ import type { ToastTone } from './toast.types';
 const DIGEST = 'sha256:9f2c4be7d1a05e83bb47c6f0e19d3a7c58e2b41d6f90ac3e7215b8d40c6ea915';
 
 const TONES: readonly { tone: ToastTone; title: string }[] = [
-  { tone: 'accent', title: 'Duas pessoas entraram' },
-  { tone: 'secondary', title: 'Filtros limpos' },
-  { tone: 'success', title: 'Fatura enviada' },
-  { tone: 'warning', title: 'A licença expira em 3 dias' },
-  { tone: 'danger', title: 'Não foi possível enviar' },
+  { tone: 'accent', title: 'Two people joined' },
+  { tone: 'secondary', title: 'Filters cleared' },
+  { tone: 'success', title: 'Invoice sent' },
+  { tone: 'warning', title: 'The license expires in 3 days' },
+  { tone: 'danger', title: 'Could not send' },
 ];
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
@@ -73,8 +73,8 @@ export const Playground: Story = {
         {...args}
         seed={[
           {
-            title: 'Rascunho salvo',
-            description: 'Tudo desde as 14h02 está guardado.',
+            title: 'Draft saved',
+            description: 'Everything since 2:02 PM is saved.',
             tone: 'accent',
           },
         ]}
@@ -83,14 +83,14 @@ export const Playground: Story = {
           <Button
             onClick={() =>
               toaster.show({
-                title: 'Rascunho salvo',
-                description: 'Tudo desde as 14h02 está guardado.',
+                title: 'Draft saved',
+                description: 'Everything since 2:02 PM is saved.',
                 duration: 0,
               })
             }
             size="sm"
           >
-            Mostrar mais uma
+            Show one more
           </Button>
         )}
       />
@@ -114,16 +114,20 @@ export const Variants: Story = {
       <DemoRegion
         limit={3}
         seed={[
-          { title: 'raised', description: 'O tom está na marca e em mais nada.', tone: 'success' },
+          {
+            title: 'raised',
+            description: 'The tone is in the mark and nowhere else.',
+            tone: 'success',
+          },
           {
             title: 'soft',
-            description: 'A superfície do tom, e a tinta do tom.',
+            description: 'The tone’s surface, and the tone’s ink.',
             tone: 'success',
             variant: 'soft',
           },
           {
             title: 'solid',
-            description: 'O preenchimento, e a única tinta medida contra ele.',
+            description: 'The fill, and the one ink measured against it.',
             tone: 'danger',
             variant: 'solid',
           },
@@ -143,7 +147,7 @@ export const Placement: Story = {
         seed={[{ title: 'top-start', tone: 'accent' }]}
         size="layer"
       />
-      <DemoRegion placement="bottom" seed={[{ title: 'bottom, centrado' }]} size="layer" />
+      <DemoRegion placement="bottom" seed={[{ title: 'bottom, centered' }]} size="layer" />
     </div>
   ),
 };
@@ -156,13 +160,13 @@ export const Timing: Story = {
         limit={2}
         seed={[
           {
-            title: 'Exportadas 1.204 linhas',
-            description: 'O ficheiro está nas transferências.',
+            title: 'Exported 1,204 rows',
+            description: 'The file is in your downloads.',
             tone: 'success',
             duration: 8000,
             progress: true,
           },
-          { title: 'Sessão expirada', tone: 'danger', duration: 0 },
+          { title: 'Session expired', tone: 'danger', duration: 0 },
         ]}
         size="layer"
       />
@@ -181,8 +185,8 @@ export const Actions: Story = {
           <Button
             onClick={() => {
               const id = toaster.show({
-                title: 'Mensagem arquivada',
-                description: 'Saiu da caixa de entrada e continua na conta.',
+                title: 'Message archived',
+                description: 'It left the inbox and stays in the account.',
                 tone: 'secondary',
                 actions: (
                   <Button
@@ -190,7 +194,7 @@ export const Actions: Story = {
                     size="sm"
                     variant="outline"
                   >
-                    Desfazer
+                    Undo
                   </Button>
                 ),
               });
@@ -217,13 +221,17 @@ export const PromiseScene: Story = {
             onClick={() =>
               toaster
                 .promise(new Promise<string>((resolve) => setTimeout(() => resolve('4.2'), 1600)), {
-                  loading: { id: 'publish', title: 'A publicar', description: 'Demora um minuto.' },
+                  loading: {
+                    id: 'publish',
+                    title: 'Publishing',
+                    description: 'It takes a minute.',
+                  },
                   success: (version) => ({
-                    title: `Versão ${version} no ar`,
+                    title: `Version ${version} is live`,
                     tone: 'success',
                     duration: 0,
                   }),
-                  error: { title: 'Falha ao publicar', tone: 'danger', duration: 0 },
+                  error: { title: 'Publishing failed', tone: 'danger', duration: 0 },
                 })
                 .catch(() => undefined)
             }
@@ -244,16 +252,16 @@ export const Queue: Story = {
       <DemoRegion
         limit={2}
         seed={[
-          { title: 'Primeira', description: 'Chegou antes das outras.' },
-          { title: 'Segunda', tone: 'secondary' },
-          { title: 'Terceira', tone: 'success' },
-          { title: 'Quarta', tone: 'warning' },
+          { title: 'First', description: 'It arrived before the others.' },
+          { title: 'Second', tone: 'secondary' },
+          { title: 'Third', tone: 'success' },
+          { title: 'Fourth', tone: 'warning' },
         ]}
         size="layer"
       />
       <Text size="sm" tone="muted">
-        Duas na tela, duas à espera. Feche uma e a seguinte aparece — e só então o relógio dela
-        começa.
+        Two on screen, two waiting. Close one and the next appears — and only then does its clock
+        start.
       </Text>
     </div>
   ),
@@ -266,11 +274,11 @@ export const Stacking: Story = {
       <DemoRegion
         limit={3}
         seed={[
-          { title: 'Filtros limpos', tone: 'secondary' },
-          { title: 'Rascunho salvo', tone: 'accent' },
+          { title: 'Filters cleared', tone: 'secondary' },
+          { title: 'Draft saved', tone: 'accent' },
           {
-            title: 'Fatura enviada',
-            description: 'Uma cópia foi para o financeiro.',
+            title: 'Invoice sent',
+            description: 'A copy went to finance.',
             tone: 'success',
           },
         ]}
@@ -289,11 +297,11 @@ export const Dismissal: Story = {
         limit={3}
         seed={[
           {
-            title: 'Com controlo de fecho',
-            description: 'Carregue no ✕, ou arraste para a borda.',
+            title: 'With a close control',
+            description: 'Press the ✕, or drag it to the edge.',
           },
-          { title: 'Sem controlo', dismissible: false, tone: 'secondary' },
-          { title: 'Com relógio', duration: 12000, progress: true, tone: 'success' },
+          { title: 'No control', dismissible: false, tone: 'secondary' },
+          { title: 'With a clock', duration: 12000, progress: true, tone: 'success' },
         ]}
         size="tall"
       />
@@ -305,22 +313,22 @@ export const Keyboard: Story = {
   parameters: scenario('keyboard'),
   render: () => (
     <div className="slotted-demo-stage" data-layout="block">
-      <Button size="sm">Um controlo qualquer da página</Button>
+      <Button size="sm">Any control on the page</Button>
       <DemoRegion
         limit={2}
         seed={[
           {
-            title: 'Fatura enviada',
-            description: 'Carregue F6 para chegar aqui.',
+            title: 'Invoice sent',
+            description: 'Press F6 to get here.',
             tone: 'success',
           },
-          { title: 'Rascunho salvo', tone: 'accent' },
+          { title: 'Draft saved', tone: 'accent' },
         ]}
         size="layer"
       />
       <Text size="sm" tone="muted">
-        F6 leva o foco à mensagem mais recente. Tab percorre os controlos, Escape fecha a mensagem
-        onde o foco está e devolve-o ao controlo acima.
+        F6 takes focus to the newest message. Tab walks the controls, Escape closes the message
+        focus is on and returns it to the control above.
       </Text>
     </div>
   ),
@@ -333,14 +341,14 @@ export const Content: Story = {
       <DemoRegion
         limit={3}
         seed={[
-          { title: 'Implantação recusada', description: DIGEST, tone: 'danger' },
+          { title: 'Deployment rejected', description: DIGEST, tone: 'danger' },
           {
             title: 'Die Zwischenspeicherung der Berechtigungsnachweise wurde zurückgesetzt',
             tone: 'warning',
           },
           {
-            title: 'Sem marca nenhuma',
-            description: 'As palavras começam no recuo da própria caixa.',
+            title: 'No mark at all',
+            description: 'The words start at the box’s own inset.',
             hideIcon: true,
             tone: 'secondary',
           },
@@ -358,8 +366,8 @@ export const Composition: Story = {
       <DemoRegion
         seed={[
           {
-            title: 'Escrita pela página',
-            description: 'O comportamento continua a ser da família.',
+            title: 'Written by the page',
+            description: 'The behaviour still belongs to the family.',
           },
         ]}
         size="layer"

@@ -2,16 +2,10 @@ import { createContext, useContext } from 'react';
 
 import type { PageDefaults, PageDefaultsProviderProps } from './page.types';
 
-/** The strings the family says before an application says otherwise. */
-export const DEFAULT_PAGE_MESSAGES = {
-  footer: 'Ações da página',
-} as const;
-
 const FALLBACK: PageDefaults = {
   ground: 'sunken',
   inset: 6,
   landmark: 'main',
-  messages: DEFAULT_PAGE_MESSAGES,
   scroll: 'ancestor',
   width: 'wide',
 };
@@ -26,13 +20,10 @@ export function usePageDefaults(): PageDefaults {
 /**
  * An application decides once how its pages are laid out — the measure, the
  * inset, who scrolls, the ground — rather than repeating the same props on
- * every route. A page that states any of them itself still wins.
+ * every route. A page that states any of them itself still wins. Its words
+ * come from the language in force (`SlottedProvider`).
  */
-export function PageDefaultsProvider({
-  children,
-  messages,
-  ...defaults
-}: PageDefaultsProviderProps) {
+export function PageDefaultsProvider({ children, ...defaults }: PageDefaultsProviderProps) {
   const inherited = usePageDefaults();
 
   return (
@@ -41,7 +32,6 @@ export function PageDefaultsProvider({
         ground: defaults.ground ?? inherited.ground,
         inset: defaults.inset ?? inherited.inset,
         landmark: defaults.landmark ?? inherited.landmark,
-        messages: { ...inherited.messages, ...messages },
         scroll: defaults.scroll ?? inherited.scroll,
         width: defaults.width ?? inherited.width,
       }}

@@ -44,6 +44,7 @@ import type {
   EventPlacement,
   EventShift,
 } from '@slotted/core/event-calendar';
+import { eventCalendarMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { COMPACT_BELOW, createWidthGate } from '@slotted/core/measure';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
@@ -79,6 +80,7 @@ import {
 } from '../drawer';
 import { ContextMenu, ContextMenuTrigger, useContextMenu } from '../context-menu';
 import type { ContextMenuContextValue } from '../context-menu';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { Menu, MenuCheckboxItem, MenuContent, MenuTrigger } from '../menu';
 import {
@@ -268,7 +270,6 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
   fixedWeeks,
   header = true,
   hourCycle,
-  labels,
   level = 2,
   listRange,
   loading = false,
@@ -277,6 +278,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
   locale,
   maxColumns,
   maxEvents,
+  messages,
   onDateChange,
   onEventChange,
   canDrop,
@@ -310,8 +312,9 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
   const baseId = useId();
   const titleId = `${baseId}-title`;
 
-  const words = useMemo(() => ({ ...defaults.labels, ...labels }), [defaults.labels, labels]);
-  const resolvedLocale = locale ?? defaults.locale;
+  const appLocale = useLocale();
+  const t = useMessages(eventCalendarMessages, messages);
+  const resolvedLocale = locale ?? appLocale;
   const resolvedZone = timeZone ?? defaults.timeZone;
   const resolvedCycle = hourCycle ?? defaults.hourCycle;
   const resolvedWeekends = weekends ?? defaults.weekends;
@@ -661,8 +664,8 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
   /** The chosen stretch in words, said once through the shared live region. */
   const announce = useCallback(
     (next: EventCalendarSelection) =>
-      getLiveAnnouncer().announce(words.selected(stretchWords(next))),
-    [stretchWords, words],
+      getLiveAnnouncer().announce(t('selected', { text: stretchWords(next) })),
+    [stretchWords, t],
   );
 
   useEffect(() => {
@@ -945,7 +948,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
           allowed: (candidate) => allows(occurrence, candidate, kind),
         });
         if (placement === null) {
-          getLiveAnnouncer().announce(words.dropInvalid(occurrence.event.title));
+          getLiveAnnouncer().announce(t('dropInvalid', { title: occurrence.event.title }));
           return;
         }
         pendingEventFocus.current = occurrence.key;
@@ -1123,11 +1126,12 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
     const timer = setTimeout(() => setLoaderMounted(false), delay + holdFor);
     return () => clearTimeout(timer);
   }, [delay, holdFor, loading]);
+  const loadingText = t('loading');
   useEffect(() => {
     if (!loading) return undefined;
-    const timer = setTimeout(() => getLiveAnnouncer().announce(words.loading), delay);
+    const timer = setTimeout(() => getLiveAnnouncer().announce(loadingText), delay);
     return () => clearTimeout(timer);
-  }, [delay, loading, words.loading]);
+  }, [delay, loading, loadingText]);
 
   /* ── The handle ──────────────────────────────────────────────────────── */
 
@@ -1174,7 +1178,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
 
   const model: EventCalendarModel = {
     id: baseId,
-    labels: words,
+    t,
     locale: resolvedLocale,
     hourCycle: resolvedCycle,
     timeZone: resolvedZone,
@@ -1243,9 +1247,9 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
   const headerElement = header ? (
     <div data-part="header">
       {titleElement}
-      <div aria-label={words.navigation} data-part="navigation" role="group">
+      <div aria-label={t('navigation')} data-part="navigation" role="group">
         <button
-          aria-label={words.previous[currentView]}
+          aria-label={t(`previous.${currentView}` as const)}
           data-part="previous"
           onClick={(clicked) =>
             requestDate(
@@ -1271,10 +1275,10 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
           }
           type="button"
         >
-          {words.today}
+          {t('today')}
         </button>
         <button
-          aria-label={words.next[currentView]}
+          aria-label={t(`next.${currentView}` as const)}
           data-part="next"
           onClick={(clicked) =>
             requestDate(
@@ -1293,7 +1297,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
       {views.length > 1 ? (
         <div data-part="views">
           <SegmentedControl
-            aria-label={words.views}
+            aria-label={t('views')}
             fullWidth
             onValueChange={(next, request) =>
               requestView(next as typeof currentView, request.reason, request.source)
@@ -1302,7 +1306,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
           >
             {views.map((name) => (
               <Segment key={name} value={name}>
-                {words.view[name]}
+                {t(`view.${name}` as const)}
               </Segment>
             ))}
           </SegmentedControl>
@@ -1316,7 +1320,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
                 <Icon>
                   <Glyph name="funnel" />
                 </Icon>
-                <span>{words.calendars}</span>
+                <span>{t('calendars')}</span>
                 <Icon>
                   <Glyph name="chevron-down" />
                 </Icon>
@@ -1374,7 +1378,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
           <ProgressBar
             delay={delay}
             hideLabel
-            label={words.loading}
+            label={t('loading')}
             loading={loading}
             minDuration={holdFor}
             onWithdraw={() => setLoaderMounted(false)}
@@ -1387,7 +1391,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
         <List
           days={range.days}
           empty={empty}
-          emptyText={words.empty[emptyKey]}
+          emptyText={t(`empty.${emptyKey}` as const)}
           occurrences={laidOut}
         />
       ) : currentView === 'month' ? (
@@ -1483,7 +1487,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
   const moreList =
     more === null ? null : (
       <ul
-        aria-label={words.dayEvents(moreTitle ?? '')}
+        aria-label={t('dayEvents', { day: moreTitle ?? '' })}
         data-layout="stacked"
         data-part="list-events"
         role="list"

@@ -1,6 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
 import type { CodeLine, CodeMarks } from '@slotted/core/code';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/code-block/contract.json';
@@ -264,6 +266,21 @@ describe('SlCodeBlock', () => {
     expect(host.revealed()).toBe(false);
   });
 
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const { host, part, settle } = setup([
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+    host.collapseAfter.set(3);
+    settle();
+    expect(part('reveal').textContent?.trim()).toBe('Mostrar mais 1 linha');
+    expect(part('copy').getAttribute('aria-label')).toBe('Copiar código');
+
+    locale.set('en-US');
+    settle();
+    expect(part('reveal').textContent?.trim()).toBe('Show 1 more line');
+  });
+
   it('refuses a cancelled request', () => {
     const { host, root, part, settle } = setup();
     host.collapseAfter.set(1);
@@ -281,6 +298,15 @@ describe('SlCodeBlock', () => {
     settle();
     expect(root.style.getPropertyValue('--slotted-code-block-max-lines')).toBe('2');
     expect(part('body').hasAttribute('data-max-lines')).toBe(true);
+  });
+
+  it('scrolls only inline unless maxLines bounds it, so the page keeps its wheel', () => {
+    const { host, part, settle } = setup();
+    settle();
+    expect(part('body').getAttribute('data-axis')).toBe('inline');
+    host.maxLines.set(2);
+    settle();
+    expect(part('body').getAttribute('data-axis')).toBe('both');
   });
 
   it('draws skeleton lines while loading and one empty line for an empty string', () => {

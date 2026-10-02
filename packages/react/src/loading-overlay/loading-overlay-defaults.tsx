@@ -14,9 +14,10 @@ export function useLoadingOverlayDefaults(): LoadingOverlayDefaults {
 /**
  * An application decides once how its overlays obscure what they cover, how
  * long a wait has to last before one appears, how long one is held once it
- * has, and what a screen reader hears in the language it ships. An overlay
- * that states any of those still wins: an explicit prop is never overridden by
- * context.
+ * has, and what a screen reader hears when a wait ends. An overlay that states
+ * any of those still wins: an explicit prop is never overridden by context.
+ * The words the family writes come from the language in force
+ * (`SlottedProvider`).
  *
  * The timing belongs here more than anywhere else, for the reason `skeleton`
  * records: it is a policy about latency, and latency is a property of the
@@ -33,9 +34,7 @@ export function LoadingOverlayDefaultsProvider({
   return (
     <LoadingOverlayDefaultsContext.Provider
       value={{
-        cancelLabel: defaults.cancelLabel ?? inherited.cancelLabel,
         delay: defaults.delay ?? inherited.delay,
-        label: defaults.label ?? inherited.label,
         live: defaults.live ?? inherited.live,
         loadedLabel: defaults.loadedLabel ?? inherited.loadedLabel,
         minDuration: defaults.minDuration ?? inherited.minDuration,

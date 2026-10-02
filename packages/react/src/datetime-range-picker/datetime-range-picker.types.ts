@@ -6,6 +6,7 @@ import type {
   TimeGranularity,
   TimeOption,
 } from '@slotted/core/date';
+import type { DatetimeRangePickerMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -46,80 +47,32 @@ export type DateTimeRangePickerValueReason = Extract<
   'pointer' | 'keyboard' | 'select' | 'clear' | 'blur' | 'programmatic'
 >;
 
-/**
- * What the hint says, in the product's own words. `{end}` is replaced by the
- * current end's label, `{day}` by the day the list serves.
- */
-export interface DateTimeRangePickerHintLabels {
-  /** While the current end has no date; `{end}` is replaced by its label. */
-  choose: string;
-  /** While the current end has a date and no time; `{end}` and `{day}` are replaced. */
-  chooseTime: string;
-  /** The work is whole and the end comes before the start. */
-  order: string;
-  /** The work is whole and its duration falls outside minLength or maxLength. */
-  length: string;
-  /** The work is whole and crosses an unavailable time or day. */
-  unavailable: string;
-  /** The work is whole and an end falls outside min or max. */
-  bounds: string;
-}
-
 /** What an application sets once for every datetime range picker under it. */
 export type DateTimeRangePickerCalendar = 'gregory';
 
 export interface DateTimeRangePickerDefaults {
   calendar: DateTimeRangePickerCalendar;
-  /** The trigger's name once a range is chosen, before the two datetimes. */
-  changeLabel: string;
-  /** The trigger's name, and the frame's placeholder, while nothing is chosen. */
-  chooseLabel: string;
-  clearLabel: string;
   closeOnSelect: DateTimeRangePickerCloseOnSelect;
-  /** What a panel says when its end has no time available at all. */
-  emptyLabel: string;
-  /** The accessible name of the end field and the label of its panel. */
-  endLabel: string;
   firstDayOfWeek: number | undefined;
   granularity: TimeGranularity;
   hourCycle: DateTimeFieldHourCycle | undefined;
   /** "2 hr 30 min", in the product's own words; seconds in, and the family's locale. */
   lengthLabel: (seconds: number, locale: string | undefined) => string;
-  /** "30 min to 4 hr": what the band says while a limit is set; seconds in, and the locale. */
-  limitLabel: (
-    min: number | undefined,
-    max: number | undefined,
-    locale: string | undefined,
-  ) => string;
-  locale: string | undefined;
   /** How many rows a list may reach before it is cut. */
   maxOptions: number;
   /** How many months the grid shows; one, because two lists stand beside it. */
   months: number;
-  /** The control in the band that writes the current date and time into the current end. */
-  nowLabel: string;
-  /** The button at the end of the footer that closes with what is written. */
-  doneLabel: string;
-  /** What the hint says: what to choose next, or what is wrong. */
-  hintLabels: DateTimeRangePickerHintLabels;
   placement: DateTimeRangePickerPlacement;
   size: DateTimeRangePickerSize;
-  /** The accessible name of the start field and the label of its panel. */
-  startLabel: string;
   /** Seconds between two offered times. */
   step: number;
   timeZone: string | undefined;
-  /** What a panel says when its list stops short of the configuration. */
-  truncatedLabel: string;
   unavailableOptions: DateTimeRangePickerUnavailableOptions;
   variant: DateTimeRangePickerVariant;
 }
 
-export interface DateTimeRangePickerDefaultsProviderProps extends Partial<
-  Omit<DateTimeRangePickerDefaults, 'hintLabels'>
-> {
+export interface DateTimeRangePickerDefaultsProviderProps extends Partial<DateTimeRangePickerDefaults> {
   children?: ReactNode | undefined;
-  hintLabels?: Partial<DateTimeRangePickerHintLabels> | undefined;
 }
 
 export interface DateTimeRangePickerRootProps extends HTMLAttributes<HTMLElement> {
@@ -216,7 +169,6 @@ export interface DateTimeRangePickerProps extends Omit<
   minLength?: number | undefined;
   maxLength?: number | undefined;
   lengthLabel?: DateTimeRangePickerDefaults['lengthLabel'] | undefined;
-  limitLabel?: DateTimeRangePickerDefaults['limitLabel'] | undefined;
 
   /** Seconds between two offered times. Ignored when `options` states the list. */
   step?: number | undefined;
@@ -231,6 +183,7 @@ export interface DateTimeRangePickerProps extends Omit<
   /** Six rows whatever the month needs, so a press of "next" moves no target. On by default. */
   fixedWeeks?: boolean | undefined;
 
+  /** BCP 47. Unset, the language in force (`SlottedProvider`) decides. */
   locale?: string | undefined;
   timeZone?: string | undefined;
   hourCycle?: DateTimeFieldHourCycle | undefined;
@@ -255,16 +208,12 @@ export interface DateTimeRangePickerProps extends Omit<
   clearable?: boolean | undefined;
   /** Whether the two fields in the band take the relative expression. */
   relative?: boolean | undefined;
-  clearLabel?: string | undefined;
-  chooseLabel?: string | undefined;
-  changeLabel?: string | undefined;
-  startLabel?: string | undefined;
-  endLabel?: string | undefined;
-  nowLabel?: string | undefined;
-  doneLabel?: string | undefined;
-  hintLabels?: Partial<DateTimeRangePickerHintLabels> | undefined;
-  emptyLabel?: string | undefined;
-  truncatedLabel?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * trigger's names, the two ends, the hint, the limit, and what a panel says
+   * when it is empty or cut short.
+   */
+  messages?: PartialMessages<DatetimeRangePickerMessages> | undefined;
 
   /** The names of the two hidden inputs a plain form post reads. */
   startName?: string | undefined;

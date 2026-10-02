@@ -24,7 +24,7 @@ export const REACT_TIME_FIELD_TOKENS = timeFieldTokens.map((name) => ({
 }));
 
 const imports: ReferenceImport = {
-  source: "import { TimeField, TimeFieldDefaultsProvider } from '@slotted/react';",
+  source: "import { SlottedProvider, TimeField, TimeFieldDefaultsProvider } from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -176,11 +176,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'time-field-react-relative',
       label: 'The expression',
       language: 'tsx',
-      source: `<TimeField
-  durationLabel="Hora como duração a partir de agora"
-  locale="pt-BR"
-  referenceTime={{ hour: 14, minute: 40, second: 0 }}
-/>;`,
+      source: `<TimeField locale="pt-BR" referenceTime={{ hour: 14, minute: 40, second: 0 }} />;`,
     }),
   },
   {
@@ -193,7 +189,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       source: `<TimeField
   locale="pt-BR"
-  nextDayLabel="no dia seguinte"
+  messages={{ nextDay: '{time} no dia seguinte' }}
   onValueChange={(value, request) => save(value, request.crossesMidnight)}
   referenceTime={{ hour: 23, minute: 0, second: 0 }}
 />;`,
@@ -275,7 +271,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'time-field-react-clear',
       label: 'Clearing',
       language: 'tsx',
-      source: `<TimeField clearable clearLabel="Limpar a hora" />;`,
+      source: `<TimeField clearable messages={{ clear: 'Limpar a hora' }} />;`,
     }),
   },
   {
@@ -326,14 +322,16 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition and escape hatches',
-    note: 'The provider sets the locale, the clock and the labels once for everything under it; render substitutes the frame’s element; and the ref carries focus(), clear() and which field holds focus.',
+    note: 'The provider sets the clock once for everything under it, SlottedProvider the language; render substitutes the frame’s element; and the ref carries focus(), clear() and which field holds focus.',
     snippet: defineSnippet({
       id: 'time-field-react-composition',
       label: 'The three surfaces',
       language: 'tsx',
-      source: `<TimeFieldDefaultsProvider hourCycle={24} locale="pt-BR">
-  <TimeField ref={handle} render={(props) => <section {...props} />} />
-</TimeFieldDefaultsProvider>;`,
+      source: `<SlottedProvider locale="pt-BR">
+  <TimeFieldDefaultsProvider hourCycle={24}>
+    <TimeField ref={handle} render={(props) => <section {...props} />} />
+  </TimeFieldDefaultsProvider>
+</SlottedProvider>;`,
     }),
   },
   {
@@ -392,9 +390,9 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    'runtime',
+    'SlottedProvider',
     'TimeField',
-    'BCP 47. Decides the field order, the separators, the placeholder and whether a day period is drawn at all.',
+    'BCP 47. Decides the field order, the separators, the placeholder and whether a day period is drawn at all. Unset, the language in force decides.',
   ],
   [
     'timeZone',
@@ -461,7 +459,6 @@ const api: ApiRow[] = apiRows([
     'TimeField',
     'Draws a button that empties the value and returns focus to the first segment.',
   ],
-  ['clearLabel', 'string', 'Clear', 'TimeField', 'The clear button’s accessible name.'],
   [
     'relative',
     'boolean',
@@ -470,18 +467,11 @@ const api: ApiRow[] = apiRows([
     'Whether +, - and = open the duration expression. Set it false and the three keys do nothing, which is the whole of removing the mode.',
   ],
   [
-    'durationLabel',
-    'string',
-    'Time as a duration from now',
+    'messages',
+    'Partial<TimeFieldMessages>',
+    '—',
     'TimeField',
-    'The accessible name of the expression region.',
-  ],
-  [
-    'nextDayLabel',
-    'string',
-    'next day',
-    'TimeField',
-    'What the preview says after the time when a duration ran past midnight.',
+    'Words laid over the language in force, key by key: the clear button’s name (clear), the expression region’s name (duration) and the preview of a time past midnight (nextDay, with a {time} slot).',
   ],
   [
     'name',
@@ -514,7 +504,7 @@ const composition: ApiRow[] = apiRows([
     'component',
     '—',
     'application',
-    'Sets locale, timeZone, hourCycle, granularity, relative, size, variant and every label once for everything under it. A control that states any of them itself still wins.',
+    'Sets timeZone, hourCycle, granularity, relative, size and variant once for everything under it. A control that states any of them itself still wins. The locale and the words come from SlottedProvider.',
   ],
   [
     'render',

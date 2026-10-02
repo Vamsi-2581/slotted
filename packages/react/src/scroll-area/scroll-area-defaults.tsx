@@ -6,11 +6,6 @@ const FALLBACK: ScrollAreaDefaults = {
   axis: 'block',
   fade: 'both',
   gutter: 'stable',
-  /**
-   * The same words `prose` falls back to for its own scrolling block, so a
-   * product that has translated the phrase once has translated it for both.
-   */
-  label: 'Scrollable content',
   overscroll: 'contain',
   scrollbars: 'auto',
 };
@@ -24,8 +19,9 @@ export function useScrollAreaDefaults(): ScrollAreaDefaults {
 
 /**
  * An application decides once what its scroll areas look like — whether the
- * bar waits for a hand, whether the veil dims both ends, what a region is
- * called in this language — rather than repeating it on fifty of them.
+ * bar waits for a hand, whether the veil dims both ends — rather than repeating
+ * it on fifty of them. A region's name comes from the language in force
+ * (`SlottedProvider`).
  *
  * None of the five surveyed implementations has an equivalent: each takes its
  * policy per instance, and Mantine's `type` in particular is written on every
@@ -46,7 +42,6 @@ export function ScrollAreaDefaultsProvider({
         axis: defaults.axis ?? inherited.axis,
         fade: defaults.fade ?? inherited.fade,
         gutter: defaults.gutter ?? inherited.gutter,
-        label: defaults.label ?? inherited.label,
         overscroll: defaults.overscroll ?? inherited.overscroll,
         scrollbars: defaults.scrollbars ?? inherited.scrollbars,
       }}

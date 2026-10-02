@@ -112,7 +112,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A field, its label and its help',
       source:
-        '<Field required>\n  <FieldLabel>E-mail</FieldLabel>\n  <FieldControl type="email" />\n  <FieldDescription>Usaremos este endereço para a cobrança.</FieldDescription>\n</Field>;',
+        '<Field required>\n  <FieldLabel>Email</FieldLabel>\n  <FieldControl type="email" />\n  <FieldDescription>We will use this address for billing.</FieldDescription>\n</Field>;',
     }),
   },
   {
@@ -136,7 +136,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A side label that stacks when the field is narrow',
       source:
-        '<Field labelPlacement="side">\n  <FieldLabel>Razão social</FieldLabel>\n  <FieldControl />\n</Field>;',
+        '<Field labelPlacement="side">\n  <FieldLabel>Legal name</FieldLabel>\n  <FieldControl />\n</Field>;',
     }),
   },
   {
@@ -160,7 +160,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Every state unset by default, and native where the word means native',
       source:
-        '// aria-invalid on the control, and the error joins its aria-describedby.\n<Field invalid required>\n  <FieldLabel>CNPJ</FieldLabel>\n  <FieldControl />\n  <FieldError>Faltam seis dígitos.</FieldError>\n</Field>;\n\n// disabled and readOnly are the native attributes; required is aria-required.\n<Field disabled>…</Field>;\n<Field readOnly>…</Field>;',
+        '// aria-invalid on the control, and the error joins its aria-describedby.\n<Field invalid required>\n  <FieldLabel>Tax ID</FieldLabel>\n  <FieldControl />\n  <FieldError>Six digits are missing.</FieldError>\n</Field>;\n\n// disabled and readOnly are the native attributes; required is aria-required.\n<Field disabled>…</Field>;\n<Field readOnly>…</Field>;',
     }),
   },
   {
@@ -172,7 +172,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A description, an error, and a warning that is not one',
       source:
-        '<Field invalid>\n  <FieldControl />\n  <FieldDescription>Somente números.</FieldDescription>\n  <FieldError reserve>{errors.cnpj}</FieldError>\n</Field>;\n\n// A warning that does not block submission is the same part in another tone.\n<FieldError tone="warning">A senha é válida, mas fácil de adivinhar.</FieldError>;',
+        '<Field invalid>\n  <FieldControl />\n  <FieldDescription>Numbers only.</FieldDescription>\n  <FieldError reserve>{errors.cnpj}</FieldError>\n</Field>;\n\n// A warning that does not block submission is the same part in another tone.\n<FieldError tone="warning">The password is valid but easy to guess.</FieldError>;',
     }),
   },
   {
@@ -184,7 +184,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'The page owns the number; the field owns where it sits',
       source:
-        'const over = value.length > 140;\n\n<Field invalid={over}>\n  <FieldLabel>Descrição pública</FieldLabel>\n  <FieldCounter invalid={over}>{`${value.length}/140`}</FieldCounter>\n  <FieldControl render={(props) => <textarea {...props} />} />\n</Field>;',
+        'const over = value.length > 140;\n\n<Field invalid={over}>\n  <FieldLabel>Public description</FieldLabel>\n  <FieldCounter invalid={over}>{`${value.length}/140`}</FieldCounter>\n  <FieldControl render={(props) => <textarea {...props} />} />\n</Field>;',
     }),
   },
   {
@@ -196,7 +196,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A header around the label and what stands beside it',
       source:
-        '<Field required>\n  <FieldHeader>\n    <FieldLabel>Senha</FieldLabel>\n    <FieldHelp>No mínimo oito caracteres, com letras e números.</FieldHelp>\n    <FieldAction render={(props) => <a {...props} href="/recuperar" />}>\n      Esqueceu a senha?\n    </FieldAction>\n  </FieldHeader>\n  <FieldControl type="password" />\n</Field>;\n\n<Field>\n  <FieldHeader>\n    <FieldLabel>Endpoint da API</FieldLabel>\n    <FieldIndicator>\n      <Badge size="sm" tone="accent" variant="soft">\n        Beta\n      </Badge>\n    </FieldIndicator>\n  </FieldHeader>\n  <FieldControl />\n</Field>;',
+        '<Field required>\n  <FieldHeader>\n    <FieldLabel>Password</FieldLabel>\n    <FieldHelp>At least eight characters, with letters and numbers.</FieldHelp>\n    <FieldAction render={(props) => <a {...props} href="/recover" />}>\n      Forgot your password?\n    </FieldAction>\n  </FieldHeader>\n  <FieldControl type="password" />\n</Field>;\n\n<Field>\n  <FieldHeader>\n    <FieldLabel>API endpoint</FieldLabel>\n    <FieldIndicator>\n      <Badge size="sm" tone="accent" variant="soft">\n        Beta\n      </Badge>\n    </FieldIndicator>\n  </FieldHeader>\n  <FieldControl />\n</Field>;',
     }),
   },
   {
@@ -220,7 +220,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'One decision for the application, and one control of your own',
       source:
-        '<FieldDefaultsProvider necessityWords={{ optional: \'(opcional)\' }} necessity="words" size="sm">\n  <App />\n</FieldDefaultsProvider>;\n\n// A control the library does not own, wired without a wrapper.\nfunction MoneyInput() {\n  const field = useField();\n  return <input id={field?.ids.control} aria-describedby={field?.describedBy} />;\n}',
+        '<FieldDefaultsProvider necessity="words" size="sm">\n  <App />\n</FieldDefaultsProvider>;\n\n// A control the library does not own, wired without a wrapper.\nfunction MoneyInput() {\n  const field = useField();\n  return <input id={field?.ids.control} aria-describedby={field?.describedBy} />;\n}',
     }),
   },
   {
@@ -232,7 +232,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'The identifiers, and the ones that are read',
       source:
-        '<div data-ui="field" data-part="root">\n  <div data-part="header">\n    <label data-part="label" for="cnpj-control">\n      CNPJ\n      <span aria-hidden="true" data-part="mark">\n        *\n      </span>\n    </label>\n    <button aria-describedby="cnpj-help" aria-label="More information" data-part="help">\n      <span data-part="help-text" hidden id="cnpj-help">\n        Somente números.\n      </span>\n    </button>\n  </div>\n  <input\n    aria-describedby="cnpj-help cnpj-description cnpj-error"\n    aria-invalid="true"\n    aria-required="true"\n    id="cnpj-control"\n  />\n</div>;',
+        '<div data-ui="field" data-part="root">\n  <div data-part="header">\n    <label data-part="label" for="cnpj-control">\n      Tax ID\n      <span aria-hidden="true" data-part="mark">\n        *\n      </span>\n    </label>\n    <button aria-describedby="cnpj-help" aria-label="More information" data-part="help">\n      <span data-part="help-text" hidden id="cnpj-help">\n        Numbers only.\n      </span>\n    </button>\n  </div>\n  <input\n    aria-describedby="cnpj-help cnpj-description cnpj-error"\n    aria-invalid="true"\n    aria-required="true"\n    id="cnpj-control"\n  />\n</div>;',
     }),
   },
 ];
@@ -265,11 +265,11 @@ export const REACT_FIELD_DOCS = {
         'How necessity is said: an asterisk on a required field, (optional) on the fields a reader may skip, both words, or nothing — for a form that says once that every field is required',
       ],
       [
-        'necessityWords',
-        '{ required?: string; optional?: string }',
-        '(required) / (optional)',
-        'Field, FieldDefaultsProvider',
-        'The two words necessity="optional" and necessity="words" write, merged over the inherited pair so one can be replaced alone',
+        'messages',
+        'Partial<FieldMessages>',
+        '—',
+        'Field',
+        'Words laid over the language in force, key by key: the necessity words (optional, required) and the help control’s name (help)',
       ],
       [
         'required',
@@ -337,16 +337,9 @@ export const REACT_FIELD_DOCS = {
       [
         'aria-label',
         'string',
-        'helpLabel',
+        'messages.help',
         'FieldHelp',
-        'The accessible name of the help control. Unstated, it is the provider’s helpLabel; stated, it wins for this control alone',
-      ],
-      [
-        'helpLabel',
-        'string',
-        'More information',
-        'FieldDefaultsProvider, FieldGroup',
-        'The accessible name of every help control under it, so an application translates it once',
+        'The accessible name of the help control. Unstated, it is the field’s help message; stated, it wins for this control alone',
       ],
       [
         'type',
@@ -409,10 +402,10 @@ export const REACT_FIELD_DOCS = {
       ],
       [
         'FieldDefaultsProvider',
-        '{ size, labelPlacement, necessity, necessityWords, helpLabel, disabled, readOnly }',
+        '{ size, labelPlacement, necessity, disabled, readOnly }',
         '—',
         'a subtree',
-        'The seven decisions an application takes once. FieldGroup renders one for the fields inside it, so a compact or disabled section is one attribute rather than one per field',
+        'The five decisions an application takes once. FieldGroup renders one for the fields inside it, so a compact or disabled section is one attribute rather than one per field',
       ],
       [
         'ref',
@@ -440,7 +433,7 @@ export const REACT_FIELD_DOCS = {
         language: 'tsx',
         label: 'Anatomy, as it reaches the DOM',
         source:
-          '<div\n  data-ui="field"\n  data-part="root"\n  data-size="md"\n  data-label-placement="top"\n  data-necessity="mark"\n  data-required\n  data-invalid\n>\n  <label data-part="label" for="cnpj-control">\n    CNPJ\n    <span aria-hidden="true" data-part="mark">\n      *\n    </span>\n  </label>\n  <span data-part="counter">14/18</span>\n  <input data-part="control" id="cnpj-control" aria-invalid="true" aria-required="true" />\n  <p data-ui="inline-message" data-part="root" data-tone="secondary" id="cnpj-description">\n    <span data-part="text">Somente números.</span>\n  </p>\n</div>;',
+          '<div\n  data-ui="field"\n  data-part="root"\n  data-size="md"\n  data-label-placement="top"\n  data-necessity="mark"\n  data-required\n  data-invalid\n>\n  <label data-part="label" for="cnpj-control">\n    Tax ID\n    <span aria-hidden="true" data-part="mark">\n      *\n    </span>\n  </label>\n  <span data-part="counter">14/18</span>\n  <input data-part="control" id="cnpj-control" aria-invalid="true" aria-required="true" />\n  <p data-ui="inline-message" data-part="root" data-tone="secondary" id="cnpj-description">\n    <span data-part="text">Numbers only.</span>\n  </p>\n</div>;',
       }),
       defineSnippet({
         id: 'field-theming',

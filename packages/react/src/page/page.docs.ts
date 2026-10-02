@@ -54,7 +54,7 @@ const anatomy: AnatomyRow[] = [
     element: 'footer, or the element render returns',
     required: false,
     purpose:
-      'The bar for the actions that finish the task, passed through the footer prop so it sits outside the scroll part. In the flow and stuck to the bottom of the root, never fixed; named by messages.footer; held through its exit by presence, with data-status for the stylesheet.',
+      'The bar for the actions that finish the task, passed through the footer prop so it sits outside the scroll part. In the flow and stuck to the bottom of the root, never fixed; named by the footer message; held through its exit by presence, with data-status for the stylesheet.',
   },
   {
     part: 'actions',
@@ -183,12 +183,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'defaults',
     title: 'Setting it once, and reaching past it',
-    note: 'The provider carries width, inset, scroll, ground, landmark and the footer’s name for every page under it; render makes the root an article; ref reaches the element.',
+    note: 'The provider carries width, inset, scroll, ground and landmark for every page under it; render makes the root an article; ref reaches the element.',
     snippet: defineSnippet({
       id: 'page-react-defaults',
       language: 'tsx',
-      label: 'Six decisions, taken once',
-      source: `<PageDefaultsProvider ground="surface" messages={{ footer: 'Decisões' }} width="content">
+      label: 'Five decisions, taken once',
+      source: `<PageDefaultsProvider ground="surface" width="content">
   <Page>…</Page>
 </PageDefaultsProvider>;`,
     }),
@@ -282,10 +282,10 @@ export const REACT_PAGE_DOCS = {
       ],
       [
         'messages',
-        '{ footer }',
+        'Partial<PageMessages>',
         '—',
-        'PageDefaultsProvider',
-        'The accessible name of the footer. An aria-label written on PageFooter itself still wins',
+        'Page',
+        'Words laid over the language in force: the accessible name of the footer (footer). An aria-label written on PageFooter itself still wins',
       ],
     ]),
     composition: apiRows([
@@ -308,14 +308,14 @@ export const REACT_PAGE_DOCS = {
         '() => PageContextValue | undefined',
         '—',
         'inside Page',
-        'What the header and the footer read: width, inset, scroll, ground, loading and the messages. Undefined outside a page, so a header standing alone is complete',
+        'What the header and the footer read: width, inset, scroll, ground, loading and the translator t. Undefined outside a page, so a header standing alone is complete',
       ],
       [
         'PageDefaultsProvider',
-        '{ width, inset, scroll, ground, landmark, messages }',
+        '{ width, inset, scroll, ground, landmark }',
         '—',
         'a subtree',
-        'The six decisions an application takes once. A page that states any of them itself still wins',
+        'The five decisions an application takes once. A page that states any of them itself still wins',
       ],
       [
         '--slotted-page-sticky-top, --slotted-page-sticky-bottom',
@@ -327,7 +327,7 @@ export const REACT_PAGE_DOCS = {
     ]),
     accessibility: [
       'The practice is the WAI-ARIA APG’s Landmark Regions (w3.org/WAI/ARIA/apg/practices/landmark-regions/): each page should have one main landmark, and the page is it. landmark="none" is for the page that is not the document’s — inside a drawer, a dialog or the detail pane of a master–detail layout — and it renders a div so the document keeps one main.',
-      'The footer is a footer element inside main, which is not a contentinfo landmark, so it is named: messages.footer by default, an aria-label the consumer writes otherwise. A reader walking the page’s controls finds “Ações da página” before the buttons in it.',
+      'The footer is a footer element inside main, which is not a contentinfo landmark, so it is named: the catalog’s footer message by default, an aria-label the consumer writes otherwise. A reader walking the page’s controls finds “Page actions” before the buttons in it.',
       'The outline is typography’s. The body is one HeadingLevel deeper than the header, so a Section written directly in it takes h2 under the header’s h1, and a section inside that takes h3 — without either family reading the other, and without a skip the HTML Standard forbids.',
       'The body carries aria-busy while loading, which is what tells a screen reader the region is not ready. The page draws no placeholder: the header stands skeleton text of the title’s own width, and each family inside stands its own.',
       'Scrolling is the platform’s. The page never writes a scroll position, and under scroll="self" the scroll part is an ordinary scrolling box a keyboard reaches with the arrow keys once something inside it has focus.',
@@ -346,7 +346,7 @@ export const REACT_PAGE_DOCS = {
       </div>
     </div>
   </div>
-  <footer data-part="footer" aria-label="Ações da página" data-status="open">
+  <footer data-part="footer" aria-label="Page actions" data-status="open">
     <div data-ui="container" data-size="wide" data-inset="6">
       <div data-part="actions">…</div>
     </div>

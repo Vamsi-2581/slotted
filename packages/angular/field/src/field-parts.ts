@@ -51,11 +51,7 @@ export class SlFieldLabel {
   protected readonly labelId = computed(() => this.writtenId ?? this.field.ids().label);
 
   private readonly necessity = computed(() =>
-    necessityMark(
-      this.field.resolvedNecessity(),
-      this.field.required() === true,
-      this.field.resolvedWords(),
-    ),
+    necessityMark(this.field.resolvedNecessity(), this.field.required() === true, this.field.t),
   );
   protected readonly markHidden = computed(() => this.necessity()?.hidden === true);
   protected readonly mark = computed(() => this.necessity()?.text ?? null);

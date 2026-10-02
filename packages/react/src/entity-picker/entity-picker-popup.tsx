@@ -1,4 +1,4 @@
-import { CREATE_OPTION, RETRY_OPTION, formatEntityLabel } from '@slotted/core/entity-picker';
+import { CREATE_OPTION, RETRY_OPTION } from '@slotted/core/entity-picker';
 import type { Entity } from '@slotted/core/entity-picker';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
@@ -49,7 +49,7 @@ function SkeletonRow() {
  */
 export function EntityPickerPopup() {
   const picker = useEntityPicker();
-  const { labels, search } = picker;
+  const { t, search } = picker;
   const headingPrefix = useId();
 
   const [layerNode, setLayerNode] = useState<HTMLElement | null>(null);
@@ -177,10 +177,9 @@ export function EntityPickerPopup() {
   const failedNow = search.status === 'error';
   useEffect(() => {
     if (!failedNow || !latest.current.open) return;
-    getLiveAnnouncer(latest.current.inputNode?.ownerDocument).announce(
-      latest.current.labels.error,
-      { repeat: true },
-    );
+    getLiveAnnouncer(latest.current.inputNode?.ownerDocument).announce(latest.current.t('error'), {
+      repeat: true,
+    });
   }, [failedNow]);
 
   /* The last row came into view: the next page, if there is one. */
@@ -217,12 +216,12 @@ export function EntityPickerPopup() {
 
   const message = (() => {
     if (search.status === 'short') {
-      return formatEntityLabel(labels.minQuery, { count: picker.props.minQueryLength ?? 0 });
+      return t('minQuery', { count: picker.props.minQueryLength ?? 0 });
     }
     if (failed) return null;
-    if (search.indicator && (firstPage || search.loadingMore)) return labels.loading;
+    if (search.indicator && (firstPage || search.loadingMore)) return t('loading');
     if (search.status === 'ready' && picker.query !== '') {
-      return formatEntityLabel(labels.count, { count: search.total ?? search.items.length });
+      return t('count', { count: search.total ?? search.items.length });
     }
     return null;
   })();
@@ -374,10 +373,8 @@ export function EntityPickerPopup() {
         ) : null}
         <div ref={sentinel} />
         {picker.offerCreate
-          ? offer(
-              CREATE_OPTION,
-              formatEntityLabel(labels.create, { query: picker.query.trim() }),
-              (event) => picker.activate(CREATE_OPTION, 'pointer', event.nativeEvent),
+          ? offer(CREATE_OPTION, t('create', { query: picker.query.trim() }), (event) =>
+              picker.activate(CREATE_OPTION, 'pointer', event.nativeEvent),
             )
           : null}
         {failed ? (
@@ -385,16 +382,16 @@ export function EntityPickerPopup() {
             <Icon>
               <Glyph name="circle-alert" />
             </Icon>
-            {labels.error}
+            {t('error')}
           </div>
         ) : null}
         {failed
-          ? offer(RETRY_OPTION, labels.retry, () => {
+          ? offer(RETRY_OPTION, t('retry'), () => {
               picker.retry();
               picker.inputNode?.focus({ preventScroll: true });
             })
           : null}
-        {empty ? <div data-part="empty">{labels.empty}</div> : null}
+        {empty ? <div data-part="empty">{t('empty')}</div> : null}
         <div aria-live="polite" data-part="status" role="status">
           {message}
         </div>

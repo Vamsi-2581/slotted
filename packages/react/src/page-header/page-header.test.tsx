@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createRef, useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/page-header/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Page, PageBody } from '../page';
 import { PageHeader } from './page-header';
 import { PageHeaderDefaultsProvider } from './page-header-defaults';
@@ -139,7 +141,7 @@ describe('PageHeader', () => {
 
   it('writes the disclosure wiring on the toggle and names the region', () => {
     render(<Full />);
-    const control = screen.getByRole('button', { name: 'Recolher cabeçalho' });
+    const control = screen.getByRole('button', { name: 'Collapse header' });
     expect(control).toHaveAttribute('aria-expanded', 'true');
     expect(
       control.querySelector('[data-ui="icon"] > svg[data-glyph="chevron-down"]'),
@@ -150,14 +152,14 @@ describe('PageHeader', () => {
     expect(back.firstElementChild).toHaveAttribute('data-ui', 'icon');
     expect(back.firstElementChild).toHaveAttribute('data-directional');
     expect(back.querySelector('svg[data-glyph="arrow-left"]')).not.toBeNull();
-    expect(screen.getByRole('region', { name: 'Cabeçalho da página' })).toBe(area());
+    expect(screen.getByRole('region', { name: 'Page header' })).toBe(area());
     expect(root()).toHaveAttribute('data-expanded');
   });
 
   it('collapses from the toggle with the reason the device gave, and stays a button', () => {
     const onExpandedChange = vi.fn();
     render(<Full onExpandedChange={onExpandedChange} />);
-    const control = screen.getByRole('button', { name: 'Recolher cabeçalho' });
+    const control = screen.getByRole('button', { name: 'Collapse header' });
 
     fireEvent.click(control, { detail: 1 });
     expect(onExpandedChange).toHaveBeenLastCalledWith(
@@ -166,7 +168,7 @@ describe('PageHeader', () => {
     );
     expect(root()).not.toHaveAttribute('data-expanded');
     expect(control).toHaveAttribute('aria-expanded', 'false');
-    expect(control).toHaveAccessibleName('Expandir cabeçalho');
+    expect(control).toHaveAccessibleName('Expand header');
     /* Collapsed by the control, the area leaves the tab sequence. */
     expect(area()).toHaveAttribute('inert');
     expect(area()).toHaveAttribute('aria-hidden', 'true');
@@ -207,7 +209,7 @@ describe('PageHeader', () => {
     render(<Full />);
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 300 });
     act(() => FakeIntersectionObserver.last?.report(false));
-    const control = screen.getByRole('button', { name: 'Expandir cabeçalho' });
+    const control = screen.getByRole('button', { name: 'Expand header' });
 
     fireEvent.click(control);
     expect(root()).toHaveAttribute('data-expanded');
@@ -237,7 +239,7 @@ describe('PageHeader', () => {
     const glyph = () =>
       control.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
     expect(control).toHaveAttribute('aria-pressed', 'false');
-    expect(control).toHaveAccessibleName('Fixar cabeçalho');
+    expect(control).toHaveAccessibleName('Pin header');
     expect(glyph()).toBe('pin');
 
     fireEvent.click(control, { detail: 1 });
@@ -251,7 +253,7 @@ describe('PageHeader', () => {
     );
     expect(control).toHaveAttribute('aria-pressed', 'true');
     expect(control).toHaveAttribute('data-pressed');
-    expect(control).toHaveAccessibleName('Soltar cabeçalho');
+    expect(control).toHaveAccessibleName('Unpin header');
     expect(glyph()).toBe('pin-off');
     expect(root()).toHaveAttribute('data-expanded');
   });
@@ -259,7 +261,7 @@ describe('PageHeader', () => {
   it('lets the pin go before collapsing by the toggle', () => {
     const onPinnedChange = vi.fn();
     render(<Full defaultPinned onPinnedChange={onPinnedChange} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Recolher cabeçalho' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse header' }));
     expect(onPinnedChange).toHaveBeenLastCalledWith(
       false,
       expect.objectContaining({ reason: 'programmatic' }),
@@ -270,7 +272,7 @@ describe('PageHeader', () => {
   it('stays where the consumer puts it while controlled', () => {
     const onExpandedChange = vi.fn();
     render(<Full expanded onExpandedChange={onExpandedChange} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Recolher cabeçalho' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse header' }));
     expect(onExpandedChange).toHaveBeenCalledTimes(1);
     expect(root()).toHaveAttribute('data-expanded');
   });
@@ -281,13 +283,13 @@ describe('PageHeader', () => {
       return <Full expanded={expanded} onExpandedChange={setExpanded} />;
     }
     render(<Owner />);
-    fireEvent.click(screen.getByRole('button', { name: 'Recolher cabeçalho' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse header' }));
     expect(root()).not.toHaveAttribute('data-expanded');
   });
 
   it('lets a request be refused before anything commits', () => {
     render(<Full onExpandedChange={(_next, request) => request.cancel()} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Recolher cabeçalho' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse header' }));
     expect(root()).toHaveAttribute('data-expanded');
   });
 
@@ -360,19 +362,24 @@ describe('PageHeader', () => {
 
   it('takes its defaults from the provider, and its own props over them', () => {
     render(
-      <PageHeaderDefaultsProvider
-        collapse="manual"
-        level="2"
-        messages={{ collapse: 'Fechar' }}
-        size="lg"
-      >
-        <Full size="sm" />
+      <PageHeaderDefaultsProvider collapse="manual" level="2" size="lg">
+        <Full messages={{ collapse: 'Fechar' }} size="sm" />
       </PageHeaderDefaultsProvider>,
     );
     expect(root()).toHaveAttribute('data-collapse', 'manual');
     expect(root()).toHaveAttribute('data-level', '2');
     expect(root()).toHaveAttribute('data-size', 'sm');
     expect(screen.getByRole('button', { name: 'Fechar' })).toBeInTheDocument();
+  });
+
+  it('speaks the language in force', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Full />
+      </SlottedProvider>,
+    );
+    expect(screen.getByRole('button', { name: 'Recolher cabeçalho' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Cabeçalho da página' })).toBe(area());
   });
 
   it('aligns its rows to the page around it', () => {

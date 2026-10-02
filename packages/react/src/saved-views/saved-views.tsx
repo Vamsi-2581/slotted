@@ -15,6 +15,7 @@ import {
   type SavedView,
   type SavedViewsState,
 } from '@slotted/core/grid';
+import { savedViewsMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import type { ChangeRequest } from '@slotted/core/state';
 import { useEffect, useId, useImperativeHandle, useRef, useState } from 'react';
@@ -22,11 +23,11 @@ import type { FormEvent, MouseEvent as ReactMouseEvent } from 'react';
 
 import { Button } from '../button';
 import { Field, FieldError, FieldLabel } from '../field';
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '../menu';
 import { Popover, PopoverContent, PopoverLayer, PopoverTrigger } from '../popover';
 import { TextField } from '../text-field';
-import { useSavedViewsDefaults } from './saved-views-defaults';
 import type {
   SavedViewsAction,
   SavedViewsOpenReason,
@@ -54,8 +55,6 @@ export function newSavedViewId(): string {
   return `view-${Date.now().toString(36)}-${counter}`;
 }
 
-const fill = (template: string, name: string) => template.split('{name}').join(name);
-
 /** A click the keyboard produced has no pointer detail. */
 const pressReason = (event: { detail?: number } | undefined): 'pointer' | 'keyboard' =>
   event?.detail === 0 ? 'keyboard' : 'pointer';
@@ -73,8 +72,7 @@ export function SavedViews({
   current,
   defaultOpen,
   defaultState,
-  label,
-  labels: labelsProp,
+  messages,
   onOpenChange,
   onStateChange,
   onViewApply,
@@ -83,8 +81,7 @@ export function SavedViews({
   state: stateProp,
   ...rest
 }: SavedViewsProps) {
-  const defaults = useSavedViewsDefaults();
-  const labels = { ...defaults.labels, ...labelsProp };
+  const t = useMessages(savedViewsMessages, messages);
   const base = useId();
 
   const [own, setOwn] = useState<SavedViewsState>(() => defaultState ?? emptySavedViews());
@@ -104,11 +101,11 @@ export function SavedViews({
   const active = state.views.find((view) => view.id === state.activeId) ?? null;
   const activeView = active ? parseGridView(active.view, columns) : builtIn;
   const modified = !sameSavedView(current, activeView, columns);
-  const activeName = active?.name ?? labels.builtIn;
+  const activeName = active?.name ?? t('builtIn');
   const panelId = `${base}-panel`;
 
-  function announce(template: string, name: string) {
-    getLiveAnnouncer(rootRef.current?.ownerDocument).announce(fill(template, name));
+  function announce(text: string) {
+    getLiveAnnouncer(rootRef.current?.ownerDocument).announce(text);
   }
 
   /** Asks for a new state. Not emitted when nothing would change; refused when cancelled. */
@@ -172,7 +169,7 @@ export function SavedViews({
     const change = request(withActiveView(state, id), 'apply', reason, source);
     if (change === null) return;
     onViewApply?.(target ? parseGridView(target.view, columns) : builtIn, change);
-    announce(labels.applied, target?.name ?? labels.builtIn);
+    announce(t('applied', { name: target?.name ?? t('builtIn') }));
     setOpen(
       false,
       reason === 'keyboard' ? 'keyboard' : reason === 'pointer' ? 'pointer' : 'programmatic',
@@ -184,7 +181,7 @@ export function SavedViews({
     const change = request(state, 'revert', pressReason(event), event);
     if (change === null) return;
     onViewApply?.(activeView, change);
-    announce(labels.applied, activeName);
+    announce(t('applied', { name: activeName }));
     setFocusTarget({ id: null, part: 'trigger' });
   }
 
@@ -193,15 +190,15 @@ export function SavedViews({
     const reason = pressReason(event);
     const next = withViewSaved(state, active.id, savedViewText(current, columns));
     if (request(next, 'save', reason, event) === null) return;
-    announce(labels.saved, active.name);
+    announce(t('saved', { name: active.name }));
     setOpen(false, reason, event);
   }
 
   function setDefault(id: string | null, reason: SavedViewsReason, source?: unknown) {
     const change = request(withDefaultView(state, id), 'default', reason, source);
     if (change === null) return;
-    const name = state.views.find((view) => view.id === id)?.name ?? labels.builtIn;
-    announce(labels.defaultChanged, name);
+    const name = state.views.find((view) => view.id === id)?.name ?? t('builtIn');
+    announce(t('defaultChanged', { name }));
   }
 
   function startCreate() {
@@ -241,7 +238,7 @@ export function SavedViews({
       setError('empty');
       return null;
     }
-    const builtInName = labels.builtIn.trim().toLocaleLowerCase();
+    const builtInName = t('builtIn').trim().toLocaleLowerCase();
     if (isViewNameTaken(state, name, except) || name.toLocaleLowerCase() === builtInName) {
       setError('duplicate');
       return null;
@@ -264,14 +261,14 @@ export function SavedViews({
       const id = newSavedViewId();
       const next = withViewCreated(state, name, savedViewText(current, columns), id);
       if (request(next, 'create', 'submit', event) === null) return;
-      announce(labels.saved, name);
+      announce(t('saved', { name }));
       closeForms();
       setFocusTarget({ id, part: 'apply' });
       return;
     }
     const next = withViewRenamed(state, editing.id, name);
     if (request(next, 'rename', 'submit', event) === null) return;
-    announce(labels.renamed, name);
+    announce(t('renamed', { name }));
     closeForms();
     setFocusTarget({ id: editing.id, part: 'apply' });
   }
@@ -281,7 +278,7 @@ export function SavedViews({
     const view = state.views[index];
     if (view === undefined) return;
     if (request(withViewDeleted(state, id), 'delete', 'remove', event) === null) return;
-    announce(labels.deleted, view.name);
+    announce(t('deleted', { name: view.name }));
     closeForms();
     const before = state.views[index - 1];
     setFocusTarget({ id: before?.id ?? BUILT_IN_VIEW_ID, part: 'apply' });
@@ -327,13 +324,13 @@ export function SavedViews({
     const invalid = error !== null;
     return (
       <form
-        aria-label={kind === 'create' ? labels.saveAs : `${labels.rename} ${name ?? ''}`.trim()}
+        aria-label={kind === 'create' ? t('saveAs') : t('renameView', { name: name ?? '' })}
         data-part="form"
         noValidate
         onSubmit={submit}
       >
         <Field invalid={invalid} size="sm">
-          <FieldLabel>{labels.name}</FieldLabel>
+          <FieldLabel>{t('name')}</FieldLabel>
           <TextField
             autoComplete="off"
             onValueChange={(value) => {
@@ -344,15 +341,15 @@ export function SavedViews({
             value={draft}
           />
           {invalid ? (
-            <FieldError>{error === 'empty' ? labels.empty : labels.duplicate}</FieldError>
+            <FieldError>{error === 'empty' ? t('empty') : t('duplicate')}</FieldError>
           ) : null}
         </Field>
         <div data-buttons="">
           <Button data-cancel="" onClick={cancelEditing} size="sm" tone="secondary" variant="ghost">
-            {labels.cancel}
+            {t('cancel')}
           </Button>
           <Button size="sm" type="submit">
-            {kind === 'create' ? labels.create : labels.rename}
+            {kind === 'create' ? t('create') : t('rename')}
           </Button>
         </div>
       </form>
@@ -362,7 +359,7 @@ export function SavedViews({
   function renderItem(view: SavedView | null) {
     const id = view?.id ?? null;
     const key = id ?? BUILT_IN_VIEW_ID;
-    const name = view?.name ?? labels.builtIn;
+    const name = view?.name ?? t('builtIn');
     const current = state.activeId === id;
     const isDefault = state.defaultId === id;
     const edit =
@@ -382,7 +379,7 @@ export function SavedViews({
           renderForm('rename', name)
         ) : edit?.kind === 'delete' && view !== null ? (
           <div aria-labelledby={`${base}-confirm-${key}`} data-part="confirm" role="group">
-            <p id={`${base}-confirm-${key}`}>{fill(labels.confirmDelete, name)}</p>
+            <p id={`${base}-confirm-${key}`}>{t('confirmDelete', { name })}</p>
             <div data-buttons="">
               <Button
                 data-cancel=""
@@ -391,10 +388,10 @@ export function SavedViews({
                 tone="secondary"
                 variant="ghost"
               >
-                {labels.cancel}
+                {t('cancel')}
               </Button>
               <Button onClick={(event) => confirmDelete(view.id, event)} size="sm" tone="danger">
-                {labels.delete}
+                {t('delete')}
               </Button>
             </div>
           </div>
@@ -418,7 +415,7 @@ export function SavedViews({
                   <Icon size="sm">
                     <Glyph name="pin" />
                   </Icon>
-                  <span>{labels.isDefault}</span>
+                  <span>{t('isDefault')}</span>
                 </span>
               ) : null}
             </button>
@@ -427,7 +424,7 @@ export function SavedViews({
                 render={(props) => (
                   <button
                     {...props}
-                    aria-label={fill(labels.actions, name)}
+                    aria-label={t('actions', { name })}
                     data-part="actions"
                     type="button"
                   >
@@ -439,17 +436,17 @@ export function SavedViews({
               />
               <MenuContent>
                 {view !== null ? (
-                  <MenuItem onSelect={() => startRename(view)}>{labels.rename}</MenuItem>
+                  <MenuItem onSelect={() => startRename(view)}>{t('rename')}</MenuItem>
                 ) : null}
                 <MenuItem
                   disabled={isDefault}
                   onSelect={(event) => setDefault(id, event.reason, event.source)}
                 >
-                  {labels.setDefault}
+                  {t('setDefault')}
                 </MenuItem>
                 {view !== null ? (
                   <MenuItem onSelect={() => startDelete(view)} tone="danger">
-                    {labels.delete}
+                    {t('delete')}
                   </MenuItem>
                 ) : null}
               </MenuContent>
@@ -463,7 +460,7 @@ export function SavedViews({
   return (
     <div
       {...rest}
-      aria-label={rest['aria-label'] ?? label ?? labels.label}
+      aria-label={rest['aria-label'] ?? t('label')}
       data-part="root"
       data-ui="saved-views"
       ref={rootRef}
@@ -498,7 +495,7 @@ export function SavedViews({
               type="button"
             >
               <span data-label="">{activeName}</span>
-              {modified ? <span data-part="modified">{labels.modified}</span> : null}
+              {modified ? <span data-part="modified">{t('modified')}</span> : null}
               <Icon size="md">
                 <Glyph name="chevron-down" />
               </Icon>
@@ -506,7 +503,7 @@ export function SavedViews({
           )}
         />
         <PopoverLayer>
-          <PopoverContent aria-label={label ?? labels.label}>
+          <PopoverContent aria-label={rest['aria-label'] ?? t('label')}>
             {/* The family's identifier is on its own element rather than on
                 the popover's: PopoverContent names its own part. */}
             <div data-part="panel" data-ui="saved-views" id={panelId} ref={panelRef}>
@@ -523,10 +520,10 @@ export function SavedViews({
                   tone="secondary"
                   variant="ghost"
                 >
-                  {labels.saveAs}
+                  {t('saveAs')}
                 </Button>
                 <Button disabled={active === null || !modified} onClick={save} size="sm">
-                  {labels.save}
+                  {t('save')}
                 </Button>
               </div>
             </div>
@@ -539,7 +536,7 @@ export function SavedViews({
           <Icon directional size="sm">
             <Glyph name="rotate-ccw" />
           </Icon>
-          {labels.revert}
+          {t('revert')}
         </button>
       ) : null}
     </div>

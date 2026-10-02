@@ -49,11 +49,28 @@ describe('renderTheme', () => {
 
   it('scopes each scheme to its nearest root and re-derives under data-slotted-seeds', () => {
     expect(css).toContain(
-      '@scope ([data-slotted-theme="test"][data-slotted-scheme="dark"], [data-slotted-theme="test"] [data-slotted-scheme="dark"], [data-slotted-scheme="dark"] [data-slotted-theme="test"]) to ([data-slotted-scheme], [data-slotted-theme]) {\n    :scope,\n    [data-slotted-seeds] {\n      color-scheme: dark;',
+      '@scope ([data-slotted-theme="test"][data-slotted-scheme="dark"], [data-slotted-theme="test"] [data-slotted-scheme="dark"], [data-slotted-scheme="dark"] [data-slotted-theme="test"]:not([data-slotted-scheme])) to ([data-slotted-scheme], [data-slotted-theme]) {\n    :scope,\n    [data-slotted-seeds] {\n      color-scheme: dark;',
     );
     expect(css).toContain(
       '--slotted-tone-accent-solid: oklch(from oklch(from var(--slotted-seed-accent)',
     );
+  });
+
+  /*
+   * A theme root under a scheme takes that scheme only when it names none of
+   * its own: a light panel in a dark page, written theme and scheme on one
+   * element, matched the dark scope's third form as well as its own, and the
+   * scope written later in the file won.
+   */
+  it('roots a scheme on a theme element below it only when the element names no scheme', () => {
+    for (const scheme of ['light', 'dark', 'high-contrast', 'system']) {
+      expect(css).toContain(
+        `[data-slotted-scheme="${scheme}"] [data-slotted-theme="test"]:not([data-slotted-scheme])) to`,
+      );
+      expect(css).not.toContain(
+        `[data-slotted-scheme="${scheme}"] [data-slotted-theme="test"]) to`,
+      );
+    }
   });
 
   it('follows the operating system under the system scheme', () => {

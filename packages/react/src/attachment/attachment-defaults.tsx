@@ -4,9 +4,7 @@ import type { AttachmentDefaults, AttachmentDefaultsProviderProps } from './atta
 
 const FALLBACK: AttachmentDefaults = {
   layout: 'list',
-  locale: undefined,
   orientation: 'horizontal',
-  removeLabel: 'Remove',
   size: 'md',
 };
 
@@ -18,9 +16,10 @@ export function useAttachmentDefaults(): AttachmentDefaults {
 }
 
 /**
- * An application decides once how large its attachments are, how a set of
- * them is arranged, which locale writes their sizes and what the remove
- * control says. A group or an attachment that states any of them still wins.
+ * An application decides once how large its attachments are and how a set of
+ * them is arranged. A group or an attachment that states either still wins.
+ * Their words and the locale that writes their sizes come from the language
+ * in force (`SlottedProvider`).
  */
 export function AttachmentDefaultsProvider({
   children,
@@ -32,9 +31,7 @@ export function AttachmentDefaultsProvider({
     <AttachmentDefaultsContext.Provider
       value={{
         layout: defaults.layout ?? inherited.layout,
-        locale: defaults.locale ?? inherited.locale,
         orientation: defaults.orientation ?? inherited.orientation,
-        removeLabel: defaults.removeLabel ?? inherited.removeLabel,
         size: defaults.size ?? inherited.size,
       }}
     >

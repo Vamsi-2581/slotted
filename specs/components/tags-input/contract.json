@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "tags-input",
   "ui": "tags-input",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Text input that collects values as tags."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/grid/",
   "patternStatus": "One page answers this family, read on 2026-09-14 from the rendered pattern page: the Grid pattern's Layout Grids for Grouping Widgets half, which names this exact control — \"a list of recipients for a message may be a grid where each cell contains a link that represents a recipient. The grid may initially have a single row but then wrap into multiple rows as recipients are added.\" The combobox pattern is not cited: the input is a text box that opens nothing, and writing role=combobox on it would promise a popup that does not exist. The itemised comparison is in docs/history/designs/2026-09-14-tags-input-design.md §4, and the two departures are in `departures` below.",
   "roles": {
@@ -48,8 +52,8 @@
       "stylesheet": "tag/tag.css"
     },
     "removeTabindex": -1,
-    "label": "Remove {label}",
-    "rowLabel": "{label}, {count} values",
+    "message": "remove",
+    "rowMessage": "countNamed",
     "locked": "lockedValues",
     "reason": "The values are the chips themselves rather than a sentence about them. Each chip is a tag, worn as data-ui beside this family's own data-part, so the chip a reader removes here is the chip they know from everywhere else and the pill's geometry — including the remove control floored at --slotted-target-min per density — is stated once, in tag.css. A locked value's chip carries data-disabled, draws no remove control, is skipped by Backspace, and is still reachable by arrow.",
     "count": {
@@ -68,7 +72,7 @@
   "validity": {
     "validator": "validate",
     "angularInput": "validateValue, because validate is the Validator interface's own method on the component",
-    "shape": "validate(text) => boolean | string — true is valid; false is invalid with invalidLabel; a string is invalid with that reason",
+    "shape": "validate(text) => boolean | string — true is valid; false is invalid with the invalid message; a string is invalid with that reason",
     "platform": "With no validate given, each value is judged by the input's own constraints — type, pattern, minlength and maxlength — through a detached input carrying the same attributes, and the message is its validationMessage, already in the reader's language. <TagsInput type=\"email\"> marks jhon.company with the browser's own sentence and no consumer code.",
     "chip": {
       "tone": "danger",
@@ -419,21 +423,25 @@
       "required",
       "invalid",
       "max",
-      "delimiters",
-      "addedLabel",
-      "clearLabel",
-      "copiedLabel",
-      "countLabel",
-      "counterLabel",
-      "duplicateLabel",
-      "editHintLabel",
-      "hintLabel",
-      "invalidLabel",
-      "removedLabel",
-      "removeLabel",
-      "reorderLabel"
+      "delimiters"
     ]
   },
+  "messages": [
+    "added",
+    "addedInvalid",
+    "clear",
+    "copied",
+    "count",
+    "countNamed",
+    "counter",
+    "duplicate",
+    "editHint",
+    "hint",
+    "invalid",
+    "remove",
+    "removed",
+    "reorder"
+  ],
   "stateAttributes": {
     "disabled": "data-disabled",
     "readonly": "data-readonly",
@@ -479,19 +487,7 @@
         "required": false,
         "invalid": false,
         "max": null,
-        "delimiters": [","],
-        "addedLabel": "{label} added, {count}",
-        "clearLabel": "Clear",
-        "copiedLabel": "{count} copied",
-        "countLabel": "{count} values",
-        "counterLabel": "{count} of {max}",
-        "duplicateLabel": "{label} is already in the list",
-        "editHintLabel": "Press Enter to edit a value.",
-        "hintLabel": "Press Delete to remove a value.",
-        "invalidLabel": "Not a valid value",
-        "removedLabel": "{label} removed, {count}",
-        "removeLabel": "Remove {label}",
-        "reorderLabel": "{label}, position {position} of {count}"
+        "delimiters": [","]
       },
       "capabilities": [
         "value",

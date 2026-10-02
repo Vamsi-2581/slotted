@@ -207,9 +207,9 @@ const OPENING: GridQuery = {
               (valueChangeRequest)="store.setFilter($event.value)"
               [query]="store.search()"
               (queryChangeRequest)="store.setSearch($event.value)"
-              [labels]="{ count: countLabel }"
+              [messages]="countMessages"
               [count]="store.total() ?? undefined"
-              [total]="store.grandTotal() ?? undefined"
+              [total]="store.total() === store.grandTotal() ? undefined : (store.grandTotal() ?? undefined)"
               [loading]="store.loading()"
             >
               <app-list-view-tools
@@ -223,7 +223,7 @@ const OPENING: GridQuery = {
             </div>
             <sl-data-grid
               #grid="slDataGrid"
-              label="Purchase orders to receive"
+              aria-label="Purchase orders to receive"
               rowKey="id"
               variant="framed"
               activatable
@@ -274,8 +274,8 @@ const OPENING: GridQuery = {
               <nav
                 slDataGridFooter
                 slPagination
-                label="Receiving pages"
-                [labels]="pagerLabels"
+                aria-label="Receiving pages"
+                [messages]="pagerMessages"
                 [count]="store.total() ?? 0"
                 [page]="store.page().index + 1"
                 [pageSize]="store.page().size"
@@ -374,14 +374,11 @@ export class ReceivingPage {
     return `Purchase orders on their way to ${place} — sent, acknowledged or partly received — flagged orders first, then the earliest expected.${receives}`;
   });
 
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total
-      ? `${count} purchase orders to receive`
-      : `${count} of ${total} purchase orders to receive`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} purchase orders to receive', countOnly: '{count} purchase orders to receive' };
 
-  readonly pagerLabels = {
-    range: (start: number, end: number, count: number) =>
-      `Purchase orders ${start}–${end} of ${count.toLocaleString('en-US')}`,
+  readonly pagerMessages = {
+    range: 'Purchase orders {start}–{end} of {count}',
     pageSize: 'Purchase orders per page',
   };
 

@@ -11,7 +11,10 @@ export type ComboboxStrategy = 'absolute' | 'fixed';
 
 /** The pattern's own three values for `aria-autocomplete`. */
 export type ComboboxAutocomplete = 'none' | 'list' | 'both';
-/** When the popup opens on its own: as the reader types, on focus, or never. */
+/**
+ * When the popup opens on its own: as the reader types or presses the input, on
+ * every focus and press, or never.
+ */
 export type ComboboxOpenOn = 'input' | 'focus' | 'manual';
 
 export type ComboboxOptionValue = string;
@@ -57,23 +60,17 @@ export interface ComboboxDefaults {
   autocomplete: ComboboxAutocomplete;
   autoHighlight: boolean;
   clearable: boolean;
-  clearLabel: string;
-  /** The offer to add what was typed. `{query}` is the text (CB8). */
-  createLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   closeOnSelect: boolean;
   collisionPadding: number;
-  countLabel: string;
   disabled: boolean;
-  emptyLabel: string;
   flip: boolean;
   fullWidth: boolean;
   hideWhenDetached: boolean;
   highlightMatch: boolean;
   invalid: boolean;
   loading: boolean;
-  loadingLabel: string;
   loop: boolean;
   mount: ComboboxMount;
   openOn: ComboboxOpenOn;
@@ -85,7 +82,6 @@ export interface ComboboxDefaults {
   sideOffset: number;
   size: ComboboxSize;
   strategy: ComboboxStrategy;
-  triggerLabel: string;
   variant: ComboboxVariant;
   width: ComboboxWidth;
 }
@@ -103,22 +99,17 @@ export const COMBOBOX_FALLBACK: ComboboxDefaults = {
   autocomplete: 'list',
   autoHighlight: false,
   clearable: true,
-  clearLabel: 'Clear',
-  createLabel: 'Create \u201c{query}\u201d',
   closeOnEscape: true,
   closeOnOutsidePress: true,
   closeOnSelect: true,
   collisionPadding: 8,
-  countLabel: '{count} results',
   disabled: false,
-  emptyLabel: 'No matches',
   flip: true,
   fullWidth: true,
   hideWhenDetached: true,
   highlightMatch: true,
   invalid: false,
   loading: false,
-  loadingLabel: 'Loading…',
   loop: false,
   mount: 'active',
   openOn: 'input',
@@ -130,7 +121,6 @@ export const COMBOBOX_FALLBACK: ComboboxDefaults = {
   sideOffset: 4,
   size: 'md',
   strategy: 'absolute',
-  triggerLabel: 'Show options',
   variant: 'outline',
   width: 'anchor',
 };
@@ -140,7 +130,10 @@ export const COMBOBOX_DEFAULTS = new InjectionToken<ComboboxDefaults>('COMBOBOX_
   factory: () => COMBOBOX_FALLBACK,
 });
 
-/** The decisions an application takes once, including the five sentences. */
+/**
+ * The decisions an application takes once. Its words come from the language in
+ * force (`provideSlotted`).
+ */
 export function provideComboboxDefaults(defaults: Partial<ComboboxDefaults>): Provider {
   return { provide: COMBOBOX_DEFAULTS, useValue: { ...COMBOBOX_FALLBACK, ...defaults } };
 }

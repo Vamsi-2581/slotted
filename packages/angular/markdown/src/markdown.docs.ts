@@ -86,14 +86,14 @@ const anatomy: AnatomyRow[] = [
     part: 'empty',
     element: 'p',
     required: false,
-    purpose: 'O documento não tem conteúdo: labels.empty, ou o nó do consumidor em empty.',
+    purpose: 'O documento não tem conteúdo: messages.empty, ou o nó do consumidor em empty.',
   },
   {
     part: 'error',
     element: 'div',
     required: false,
     purpose:
-      'A fonte não chegou: inline-message em danger com labels.error e, com retryable, um botão de repetir.',
+      'A fonte não chegou: inline-message em danger com messages.error e, com retryable, um botão de repetir.',
   },
 ];
 
@@ -175,7 +175,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'markdown-angular-footnotes',
       language: 'angular',
       label: 'O rótulo da secção, traduzido',
-      source: '<div slMarkdown [labels]="{ footnotes: \'Notas\' }" [tree]="tree"></div>',
+      source: '<div slMarkdown [messages]="{ footnotes: \'Notas\' }" [tree]="tree"></div>',
     }),
   },
   {
@@ -228,7 +228,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'states',
     title: 'Carregando, vazio e erro',
-    note: 'loading desenha um parágrafo de três linhas depois do delay do skeleton, na tipografia da região; vazio escreve labels.empty ou o conteúdo projetado em slMarkdownEmpty; status="error" troca o documento por uma mensagem e, com retryable, um botão que emite retry.',
+    note: 'loading desenha um parágrafo de três linhas depois do delay do skeleton, na tipografia da região; vazio escreve messages.empty ou o conteúdo projetado em slMarkdownEmpty; status="error" troca o documento por uma mensagem e, com retryable, um botão que emite retry.',
     snippet: defineSnippet({
       id: 'markdown-angular-states',
       language: 'angular',
@@ -351,7 +351,13 @@ export const ANGULAR_MARKDOWN_DOCS = {
         '[slMarkdown]',
         'Se um link sai da aplicação',
       ],
-      ['labels', 'Partial<MarkdownLabels>', '—', '[slMarkdown]', 'As palavras da família'],
+      [
+        'messages',
+        'PartialMessages<MarkdownMessages>',
+        '—',
+        '[slMarkdown]',
+        'As palavras da família sobre o idioma em vigor, chave a chave',
+      ],
       [
         'editableTasks',
         'boolean',
@@ -392,7 +398,7 @@ export const ANGULAR_MARKDOWN_DOCS = {
       ],
       [
         'provideMarkdownDefaults',
-        'labels | external | headingAnchors | alerts | allow | transformUrl | isExternal',
+        'external | headingAnchors | alerts | allow | transformUrl | isExternal',
         '—',
         'Aplicação',
         'Decidido uma vez para todos os documentos por baixo; um input ganha',

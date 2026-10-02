@@ -1,3 +1,4 @@
+import type { PartialMessages, TransferMessages } from '@slotted/core/i18n';
 import type { TransferDirection, TransferSide } from '@slotted/core/transfer';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
@@ -52,43 +53,6 @@ export interface TransferItem {
   disabled?: boolean | undefined;
 }
 
-/** The words the family says. `{slot}` is filled in. */
-export interface TransferLabels {
-  source: string;
-  target: string;
-  /** `{pane}` */
-  search: string;
-  /** `{pane}` */
-  selectAll: string;
-  /** `{total}` */
-  count: string;
-  /** `{selected}`, `{total}` */
-  countSelected: string;
-  /** `{shown}`, `{total}` */
-  countFiltered: string;
-  /** `{pane}`, `{total}` */
-  paneCount: string;
-  panes: string;
-  empty: string;
-  noResults: string;
-  /** The row at the end of a source that has more to give. */
-  loading: string;
-  actions: string;
-  moveToTarget: string;
-  moveAllToTarget: string;
-  moveToSource: string;
-  moveAllToSource: string;
-  reorder: string;
-  moveUp: string;
-  moveDown: string;
-  /** `{count}`, `{pane}` */
-  moved: string;
-  /** `{item}`, `{pane}` */
-  movedOne: string;
-  /** `{item}`, `{position}` */
-  reordered: string;
-}
-
 /** What an application sets once for every transfer under it. */
 export interface TransferDefaults {
   size: TransferSize;
@@ -97,11 +61,9 @@ export interface TransferDefaults {
   selectAll: boolean;
   reorderable: boolean;
   rows: number;
-  labels: TransferLabels;
 }
 
-export interface TransferDefaultsProviderProps extends Partial<Omit<TransferDefaults, 'labels'>> {
-  labels?: Partial<TransferLabels> | undefined;
+export interface TransferDefaultsProviderProps extends Partial<TransferDefaults> {
   children?: ReactNode | undefined;
 }
 
@@ -214,7 +176,11 @@ export interface TransferProps<T = TransferItem> extends Omit<
   /** Submits one hidden input per target key. */
   name?: string | undefined;
 
-  labels?: Partial<TransferLabels> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * panes' names, the controls, the counts and the announcements.
+   */
+  messages?: PartialMessages<TransferMessages> | undefined;
   /** Content under a pane's list. */
   renderFooter?: ((side: TransferSide) => ReactNode) | undefined;
 

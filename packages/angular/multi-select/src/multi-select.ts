@@ -4,6 +4,11 @@ import { createDismissableLayer, pressOrigin } from '@slotted/core/dismissable-l
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createArrowNavigation, createRemovalFocus } from '@slotted/core/focus';
 import type { ArrowNavigationHandle, RemovalFocusHandle } from '@slotted/core/focus';
+import {
+  multiSelectMessages,
+  type MultiSelectMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createWidthGate } from '@slotted/core/measure';
 import type { WidthGateHandle } from '@slotted/core/measure';
@@ -45,6 +50,7 @@ import {
 } from '@angular/core';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 
@@ -57,6 +63,7 @@ import type {
   MultiSelectInputReason,
   MultiSelectItems,
   MultiSelectMount,
+  MultiSelectOpenOn,
   MultiSelectOpenReason,
   MultiSelectOption,
   MultiSelectOptionGroup,
@@ -245,6 +252,8 @@ const same = (a: readonly string[], b: readonly string[]) =>
             [attr.aria-readonly]="resolvedReadOnly() ? true : null"
             [attr.aria-invalid]="resolvedInvalid() ? true : null"
             (input)="onInput($event)"
+            (focus)="onFocus()"
+            (click)="onClick($event)"
             (keydown)="onKeyDown($event)"
             (paste)="onPaste($event)"
             (blur)="onBlur($event)"
@@ -260,7 +269,7 @@ const same = (a: readonly string[], b: readonly string[]) =>
       <button
         type="button"
         data-part="clear"
-        [attr.aria-label]="resolvedClearLabel()"
+        [attr.aria-label]="t('clear')"
         (click)="onClear($event)"
       >
         <span slIcon><svg slGlyph name="x"></svg></span>
@@ -274,7 +283,7 @@ const same = (a: readonly string[], b: readonly string[]) =>
         tabindex="-1"
         data-part="trigger"
         [disabled]="resolvedDisabled()"
-        [attr.aria-label]="resolvedTriggerLabel()"
+        [attr.aria-label]="t('trigger')"
         (click)="onToggle($event)"
       >
         <span data-part="arrow"
@@ -362,13 +371,13 @@ const same = (a: readonly string[], b: readonly string[]) =>
               (pointerenter)="setHighlighted(query, 'pointer', $event)"
             >
               <span data-part="icon"></span>
-              <span data-part="label">{{ resolvedCreateLabel().replace('{query}', query) }}</span>
+              <span data-part="label">{{ t('create', { query: query }) }}</span>
               <span data-part="indicator"
                 ><span slIcon><svg slGlyph name="plus"></svg></span
               ></span>
             </div>
           } @else if (!loading() && optionCount() === 0) {
-            <div data-part="empty">{{ resolvedEmptyLabel() }}</div>
+            <div data-part="empty">{{ t('empty') }}</div>
           }
           @if (loading()) {
             <div data-part="placeholder" aria-hidden="true">
@@ -429,6 +438,10 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
   readonly form = input<string | undefined>(undefined);
   readonly items = input<MultiSelectItems | undefined>(undefined);
   readonly total = input(undefined, { transform: SlMultiSelect.count });
+  /**
+   * BCP 47, for the comparison the default filter and the duplicate rule make.
+   * The language in force when absent.
+   */
   readonly locale = input<string | undefined>(undefined);
   readonly filter = input<MultiSelectFilter | undefined>(undefined);
   readonly validateValue = input<MultiSelectValidator | undefined>(undefined);
@@ -442,19 +455,15 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
   readonly width = input<MultiSelectWidth | undefined>(undefined);
   readonly mount = input<MultiSelectMount | undefined>(undefined);
   readonly strategy = input<MultiSelectStrategy | undefined>(undefined);
+  readonly openOn = input<MultiSelectOpenOn | undefined>(undefined);
   readonly overflow = input<MultiSelectOverflow | undefined>(undefined);
   readonly chosenOptions = input<MultiSelectChosenOptions | undefined>(undefined);
 
-  readonly chosenLabel = input<string | undefined>(undefined);
-  readonly clearLabel = input<string | undefined>(undefined);
-  readonly counterLabel = input<string | undefined>(undefined);
-  readonly createLabel = input<string | undefined>(undefined);
-  readonly emptyLabel = input<string | undefined>(undefined);
-  readonly loadingLabel = input<string | undefined>(undefined);
-  readonly removeLabel = input<string | undefined>(undefined);
-  readonly reorderLabel = input<string | undefined>(undefined);
-  readonly triggerLabel = input<string | undefined>(undefined);
-  readonly countLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * buttons, the chips, the counter, the offer to add, and the sentences.
+   */
+  readonly messages = input<PartialMessages<MultiSelectMessages> | undefined>(undefined);
 
   readonly sideOffset = input(undefined, { transform: SlMultiSelect.count });
   readonly alignOffset = input(undefined, { transform: SlMultiSelect.count });
@@ -484,6 +493,11 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
   readonly loading = input(false, { transform: booleanAttribute });
 
   private readonly defaults = injectMultiSelectDefaults();
+  /** The family's words in the language in force, with this control's `messages` laid over them. */
+  readonly t = injectMessages(multiSelectMessages, this.messages);
+  private readonly inForceLocale = injectLocale();
+  /** The locale the filter and the duplicate rule compare in: the `locale` input, or the language in force. */
+  readonly resolvedLocale = computed(() => this.locale() ?? this.inForceLocale());
   private readonly viewContainer = inject(ViewContainerRef);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly template = viewChild.required<TemplateRef<unknown>>('layer');
@@ -530,6 +544,7 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
   readonly resolvedSide = computed(() => this.side() ?? this.defaults.side);
   readonly resolvedWidth = computed(() => this.width() ?? this.defaults.width);
   readonly resolvedMount = computed(() => this.mount() ?? this.defaults.mount);
+  readonly resolvedOpenOn = computed(() => this.openOn() ?? this.defaults.openOn);
   readonly resolvedOverflow = computed(() => this.overflow() ?? this.defaults.overflow);
   readonly resolvedChosenOptions = computed(
     () => this.chosenOptions() ?? this.defaults.chosenOptions,
@@ -553,16 +568,6 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
   readonly resolvedHighlightMatch = computed(
     () => this.highlightMatch() ?? this.defaults.highlightMatch,
   );
-  readonly resolvedChosenLabel = computed(() => this.chosenLabel() ?? this.defaults.chosenLabel);
-  readonly resolvedClearLabel = computed(() => this.clearLabel() ?? this.defaults.clearLabel);
-  readonly resolvedCounterLabel = computed(() => this.counterLabel() ?? this.defaults.counterLabel);
-  readonly resolvedCreateLabel = computed(() => this.createLabel() ?? this.defaults.createLabel);
-  readonly resolvedEmptyLabel = computed(() => this.emptyLabel() ?? this.defaults.emptyLabel);
-  readonly resolvedLoadingLabel = computed(() => this.loadingLabel() ?? this.defaults.loadingLabel);
-  readonly resolvedRemoveLabel = computed(() => this.removeLabel() ?? this.defaults.removeLabel);
-  readonly resolvedReorderLabel = computed(() => this.reorderLabel() ?? this.defaults.reorderLabel);
-  readonly resolvedTriggerLabel = computed(() => this.triggerLabel() ?? this.defaults.triggerLabel);
-  readonly resolvedCountLabel = computed(() => this.countLabel() ?? this.defaults.countLabel);
 
   readonly resolvedDisabled = computed(
     () =>
@@ -597,7 +602,9 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
   /** The query is the typed text: unlike a combobox's, committing empties it. */
   readonly query = computed(() => this.inputValue());
 
-  private readonly collator = computed<Filter>(() => createFilter({ locale: this.locale() }));
+  private readonly collator = computed<Filter>(() =>
+    createFilter({ locale: this.resolvedLocale() }),
+  );
 
   readonly showClear = computed(
     () =>
@@ -607,16 +614,12 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
       !this.resolvedReadOnly(),
   );
 
-  readonly gridLabel = computed(() =>
-    this.resolvedChosenLabel().replace('{count}', String(this.value().length)),
-  );
+  readonly gridLabel = computed(() => this.t('chosen', { count: this.value().length }));
 
   readonly counterText = computed(() => {
     const limit = this.resolvedMax();
     if (limit !== null) {
-      return this.resolvedCounterLabel()
-        .replace('{count}', String(this.value().length))
-        .replace('{max}', String(limit));
+      return this.t('counter', { count: this.value().length, max: limit });
     }
     if (this.narrow() && this.value().length > 0) return this.gridLabel();
     return null;
@@ -643,9 +646,9 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
   );
 
   readonly statusMessage = computed(() => {
-    if (this.loading()) return this.resolvedLoadingLabel();
+    if (this.loading()) return this.t('loading');
     const count = this.optionCount();
-    return count === 0 ? '' : this.resolvedCountLabel().replace('{count}', String(count));
+    return count === 0 ? '' : this.t('count', { count });
   });
 
   constructor() {
@@ -703,15 +706,16 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
   }
 
   protected removeLabelFor(value: MultiSelectOptionValue) {
-    return this.resolvedRemoveLabel().replace('{label}', this.labelFor(value) ?? value);
+    return this.t('remove', { label: this.labelFor(value) ?? value });
   }
 
   protected chipLabel(value: MultiSelectOptionValue, index: number) {
     if (!this.resolvedReorderable()) return null;
-    return this.resolvedReorderLabel()
-      .replace('{label}', this.labelFor(value) ?? value)
-      .replace('{position}', String(index + 1))
-      .replace('{count}', String(this.value().length));
+    return this.t('reorder', {
+      label: this.labelFor(value) ?? value,
+      position: index + 1,
+      count: this.value().length,
+    });
   }
 
   matches(label: string): boolean {
@@ -869,7 +873,8 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
        the other two have nothing to point at, so they are said. */
     if (existing !== null) this.focusChip(existing);
     const limit = this.resolvedMax();
-    if (refused.limit.length > 0 && limit !== null) this.announce(`${limit} of ${limit}`);
+    if (refused.limit.length > 0 && limit !== null)
+      this.announce(this.t('counter', { count: limit, max: limit }));
   }
 
   /** The one door into the set. */
@@ -975,12 +980,34 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
   protected onInput(event: Event) {
     const next = (event.target as HTMLInputElement).value;
     this.setInputValue(next, 'keyboard', event);
-    if (!this.isOpen() && !this.resolvedReadOnly() && next !== '') {
+    if (
+      this.resolvedOpenOn() !== 'manual' &&
+      !this.isOpen() &&
+      !this.resolvedReadOnly() &&
+      next !== ''
+    ) {
       this.entry = 'none';
       this.setOpen(true, 'keyboard', event);
     } else {
       this.recount();
     }
+  }
+
+  protected onFocus() {
+    if (this.resolvedOpenOn() !== 'focus' || this.isOpen()) return;
+    if (this.resolvedDisabled() || this.resolvedReadOnly()) return;
+    this.entry = 'none';
+    this.setOpen(true, 'keyboard');
+  }
+
+  /* A press on the input opens a closed popup and never closes an open one,
+     because the same press places the caret. Under `focus` the press has
+     already opened it through focus, so this finds it open. */
+  protected onClick(event: MouseEvent) {
+    if (event.defaultPrevented || this.resolvedOpenOn() === 'manual' || this.isOpen()) return;
+    if (this.resolvedDisabled() || this.resolvedReadOnly()) return;
+    this.entry = 'none';
+    this.setOpen(true, 'pointer', event);
   }
 
   protected onEditInput(event: Event) {

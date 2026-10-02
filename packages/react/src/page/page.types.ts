@@ -1,3 +1,4 @@
+import type { FamilyTranslator, PageMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode } from 'react';
 
 import type { ContainerInset, ContainerSize } from '../container';
@@ -22,25 +23,17 @@ export type PageGround = 'sunken' | 'surface';
 /** Whether the root is the document's `main` landmark. */
 export type PageLandmark = 'main' | 'none';
 
-/** The strings the family says on the reader's behalf. */
-export interface PageMessages {
-  /** The accessible name of the footer. */
-  footer: string;
-}
-
 /** What an application sets once for every page under it. */
 export interface PageDefaults {
   ground: PageGround;
   inset: PageInset;
   landmark: PageLandmark;
-  messages: PageMessages;
   scroll: PageScroll;
   width: PageWidth;
 }
 
-export interface PageDefaultsProviderProps extends Partial<Omit<PageDefaults, 'messages'>> {
+export interface PageDefaultsProviderProps extends Partial<PageDefaults> {
   children?: ReactNode | undefined;
-  messages?: Partial<PageMessages> | undefined;
 }
 
 /**
@@ -90,6 +83,11 @@ export interface PageProps extends ComponentPropsWithRef<'main'> {
   landmark?: PageLandmark | undefined;
   /** The body carries `aria-busy`; what stands in for the content is each family's own placeholder. */
   loading?: boolean | undefined;
+  /**
+   * Words laid over the catalog of the language in force: the footer's
+   * accessible name (`footer`). A native `aria-label` on the footer still wins.
+   */
+  messages?: PartialMessages<PageMessages> | undefined;
   /** Renders the root into another element. */
   render?: ((props: PageRootProps) => ReactNode) | undefined;
   /** Defaults to the provider, then `ancestor`. */
@@ -112,6 +110,7 @@ export interface PageFooterProps extends ComponentPropsWithRef<'footer'> {
 export interface PageContextValue extends PageMeasure {
   ground: PageGround;
   loading: boolean;
-  messages: PageMessages;
   scroll: PageScroll;
+  /** The family's words in the language in force, with this page's `messages` laid over them. */
+  t: FamilyTranslator<PageMessages>;
 }

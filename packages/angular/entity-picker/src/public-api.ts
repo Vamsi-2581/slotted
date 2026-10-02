@@ -1,6 +1,5 @@
 export { SlEntityPicker, SlEntityPickerChip, SlEntityPickerOption } from './entity-picker';
 export {
-  DEFAULT_ENTITY_PICKER_LABELS,
   ENTITY_PICKER_DEFAULTS,
   ENTITY_PICKER_FALLBACK,
   injectEntityPickerDefaults,
@@ -13,7 +12,6 @@ export type {
   EntityPickerDefaults,
   EntityPickerHighlightReason,
   EntityPickerInputReason,
-  EntityPickerLabels,
   EntityPickerMedia,
   EntityPickerOpenOn,
   EntityPickerOpenReason,

@@ -458,7 +458,7 @@ export class SlPopoverClose {
   protected readonly popover = inject(SlPopover);
   private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
 
-  protected readonly label = computed(() => this.written ?? this.popover.resolvedCloseLabel());
+  protected readonly label = computed(() => this.written ?? this.popover.t('close'));
 }
 
 /**

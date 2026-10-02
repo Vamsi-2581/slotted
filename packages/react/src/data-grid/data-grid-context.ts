@@ -9,6 +9,7 @@ import type {
   ResolvedGridColumn,
   SortDirection,
 } from '@slotted/core/grid';
+import type { DataGridMessages, FamilyTranslator } from '@slotted/core/i18n';
 import { createContext, useContext } from 'react';
 import type { KeyboardEvent, MouseEvent, PointerEvent, ReactNode } from 'react';
 
@@ -19,7 +20,6 @@ import type {
   DataGridGroupContext,
   DataGridHeaderContext,
   DataGridReason,
-  DataGridResolvedLabels,
   DataGridSelectionMode,
 } from './data-grid.types';
 
@@ -50,8 +50,11 @@ export interface ColumnMenuAnchor {
  */
 export interface DataGridInternal<Row> {
   readonly id: string;
-  readonly labels: DataGridResolvedLabels;
-  readonly locale: string | undefined;
+  /** The family's words in the language in force, with the grid's `messages` laid over them. */
+  readonly t: FamilyTranslator<DataGridMessages>;
+  readonly locale: string;
+  /** What a boolean cell says, in the language in force. */
+  readonly booleans: { readonly true: string; readonly false: string };
   readonly timeZone: string | undefined;
   readonly columns: readonly GridColumn<Row>[];
   readonly resolved: readonly ResolvedGridColumn<Row>[];

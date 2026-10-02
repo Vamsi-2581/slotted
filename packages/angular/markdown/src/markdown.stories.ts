@@ -17,6 +17,8 @@ import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
 import { marked } from 'marked';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
 import { SlMarkdown, SlMarkdownChildren, SlMarkdownEmpty, SlMarkdownNode } from './markdown';
 import type { MarkdownTaskChange } from './markdown';
@@ -323,12 +325,7 @@ class FailingSourceDemo {
   selector: 'sl-markdown-demo-docs',
   imports: [SlMarkdown, SlContainer],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    provideMarkdownDefaults({
-      headingAnchors: true,
-      labels: { anchor: (heading) => `Ligação para: ${heading}` },
-    }),
-  ],
+  providers: [provideMarkdownDefaults({ headingAnchors: true })],
   template: `
     <nav aria-label="Nesta página">
       <ul>
@@ -339,7 +336,9 @@ class FailingSourceDemo {
         }
       </ul>
     </nav>
-    <div slContainer size="measure"><div slMarkdown [tree]="tree"></div></div>
+    <div slContainer size="measure">
+      <div slMarkdown [messages]="{ anchor: 'Ligação para: {heading}' }" [tree]="tree"></div>
+    </div>
   `,
 })
 class DocsPageDemo {
@@ -351,19 +350,7 @@ class DocsPageDemo {
   selector: 'sl-markdown-demo-alerts',
   imports: [SlMarkdown],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    provideMarkdownDefaults({
-      labels: {
-        alerts: {
-          caution: 'Cuidado',
-          important: 'Importante',
-          note: 'Nota',
-          tip: 'Dica',
-          warning: 'Aviso',
-        },
-      },
-    }),
-  ],
+  providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
   template: `<div slMarkdown [tree]="tree"></div>`,
 })
 class TranslatedAlertsDemo {
@@ -406,10 +393,7 @@ const SAMPLES = {
   accessible: md(ACCESSIBLE),
   alertsOff: md(ALERTS.split('\n\n')[0] ?? ''),
   code: md(CODE),
-  footnoteLabels: {
-    backReference: (n: number, o: number) => `Voltar à referência ${n}${o > 1 ? `-${o}` : ''}`,
-    footnotes: 'Notas',
-  },
+  footnoteMessages: { footnotes: 'Notas' },
   footnotes: FOOTNOTES,
   hostile: md(HOSTILE),
   internalDomain: (href: string) =>
@@ -588,7 +572,7 @@ export const Footnotes: Story = {
       scene(
         'Duas notas, três referências',
         'A nota 1 é referida duas vezes e tem duas setas de retorno; a definição que ninguém refere não aparece. Siga uma referência e volte pela seta.',
-        `<div slMarkdown [labels]="footnoteLabels" [tree]="footnotes"></div>`,
+        `<div slMarkdown [messages]="footnoteMessages" [tree]="footnotes"></div>`,
       ),
     ),
   }),

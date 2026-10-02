@@ -31,4 +31,3 @@ export type {
   ButtonType,
   ButtonVariant,
 } from './button.constants';
-export { BUTTON_LOADING_LABEL } from './button.constants';

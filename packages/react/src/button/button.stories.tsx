@@ -172,19 +172,19 @@ export const Loading: Story = {
         <div className="slotted-demo-row">
           <Button
             loading={saving}
-            loadingLabel="Saving"
+            messages={{ loading: 'Saving' }}
             onClick={() => wait(setSaving, 2000)}
             start={<SaveIcon />}
           >
             Save changes
           </Button>
-          <Button loading loadingLabel="Adding" variant="outline">
+          <Button loading messages={{ loading: 'Adding' }} variant="outline">
             Add member
           </Button>
           <Button
             loading={publishing}
             loadingDelay={400}
-            loadingLabel="Publishing"
+            messages={{ loading: 'Publishing' }}
             onClick={() => wait(setPublishing, 250)}
             start={<SaveIcon />}
             variant="outline"
@@ -198,7 +198,7 @@ export const Loading: Story = {
               <Button
                 key={tone}
                 loading
-                loadingLabel={`${tone} ${variant}`}
+                messages={{ loading: `${tone} ${variant}` }}
                 start={<SaveIcon />}
                 tone={tone}
                 variant={variant}
@@ -210,7 +210,7 @@ export const Loading: Story = {
               <Button
                 key={`${tone}-words`}
                 loading
-                loadingLabel={`${tone} ${variant}, no glyph`}
+                messages={{ loading: `${tone} ${variant}, no glyph` }}
                 tone={tone}
                 variant={variant}
               >
@@ -221,12 +221,24 @@ export const Loading: Story = {
         ))}
         <div className="slotted-demo-row">
           {BUTTON_SIZES.map((size) => (
-            <Button key={size} loading loadingLabel={size} size={size} start={<SaveIcon />}>
+            <Button
+              key={size}
+              loading
+              messages={{ loading: size }}
+              size={size}
+              start={<SaveIcon />}
+            >
               {size}
             </Button>
           ))}
           {BUTTON_SIZES.map((size) => (
-            <Button key={`${size}-words`} loading loadingLabel={size} size={size} variant="outline">
+            <Button
+              key={`${size}-words`}
+              loading
+              messages={{ loading: size }}
+              size={size}
+              variant="outline"
+            >
               {size}
             </Button>
           ))}

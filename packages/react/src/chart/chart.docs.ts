@@ -201,7 +201,7 @@ const anatomy: AnatomyRow[] = [
     part: 'center-label',
     element: 'span',
     required: false,
-    purpose: 'What the total is: messages.total.',
+    purpose: 'What the total is: the total message.',
   },
   {
     part: 'tooltip',
@@ -776,9 +776,9 @@ const scenes: ReferenceSceneMeta[] = [
     snippet: defineSnippet({
       id: 'chart-react-accessibility',
       language: 'tsx',
-      label: 'Messages, translated once',
+      label: 'The language, set once',
       source:
-        "<ChartDefaultsProvider locale=\"pt-BR\" messages={{ roledescription: 'gráfico', total: 'Total' }}>\n  <App />\n</ChartDefaultsProvider>;",
+        '<SlottedProvider locale="pt-BR" catalogs={{ \'pt-BR\': PT_BR }}>\n  <App />\n</SlottedProvider>;',
     }),
   },
 ];
@@ -908,7 +908,13 @@ export const REACT_CHART_DOCS = {
         'Chart',
         'The field that names a record when x is a value axis, for points and selection',
       ],
-      ['locale', 'string', '—', 'Chart', 'BCP 47, for every number and date'],
+      [
+        'locale',
+        'string',
+        '—',
+        'Chart',
+        'BCP 47, for every number and date; the language in force when absent',
+      ],
       [
         'title',
         'ReactNode',
@@ -924,7 +930,7 @@ export const REACT_CHART_DOCS = {
         'Partial<ChartMessages>',
         '—',
         'Chart',
-        'Every word the chart writes or says, with {placeholders}',
+        'Words laid over the language in force, key by key: every word the chart writes or says, with {slots}',
       ],
       ['size', "'sm' | 'md' | 'lg'", 'md', 'Chart', 'The plot height: 192, 256 or 384 pixels'],
       [
@@ -1101,7 +1107,7 @@ export const REACT_CHART_DOCS = {
         'ChartDefaults',
         '—',
         'Application',
-        'locale, messages, size, variant, palette, toolbar, renderer, grid, legendOverflow, tooltip and animate, once; a prop still wins',
+        'size, variant, palette, toolbar, renderer, grid, legendOverflow, tooltip and animate, once; a prop still wins',
       ],
       [
         'preloadChartEngine',

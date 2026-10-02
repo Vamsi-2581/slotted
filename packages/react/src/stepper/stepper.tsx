@@ -1,14 +1,15 @@
 import '@slotted/styles/stepper/stepper.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
+import { stepperMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import { stepPercent, stepReachable, stepStatus } from '@slotted/core/steps';
 import { createContext, useContext, useId, useState } from 'react';
 
+import { useLocale, useMessages } from '../i18n';
 import { useStepperDefaults } from './stepper-defaults';
 import type {
   StepperContextValue,
-  StepperLabels,
   StepperProps,
   StepperRootProps,
   StepperStepContextValue,
@@ -42,15 +43,6 @@ export function useStepperStep(): StepperStepContextValue | undefined {
 
 export const StepperStepProvider = StepperStepContext.Provider;
 
-export const DEFAULT_STEPPER_LABELS: StepperLabels = {
-  complete: 'completed',
-  current: 'current',
-  invalid: 'needs attention',
-  loading: 'checking',
-  position: (index, count) => `Step ${index + 1} of ${count}`,
-  unavailable: 'unavailable',
-};
-
 /** The registry each `Stepper.Step` writes itself into, so the root can count. */
 export interface StepperRegistration {
   complete: boolean | undefined;
@@ -82,10 +74,9 @@ export function Stepper({
   autoComplete,
   children,
   defaultStep,
-  label,
   labelPlacement,
-  labels,
   linear,
+  messages,
   navigation,
   onStepChange,
   orientation,
@@ -94,6 +85,8 @@ export function Stepper({
   ...nativeProps
 }: StepperProps) {
   const defaults = useStepperDefaults();
+  const t = useMessages(stepperMessages, messages);
+  const locale = useLocale();
   const generatedId = useId();
 
   const [own, setOwn] = useState(defaultStep ?? 0);
@@ -143,8 +136,8 @@ export function Stepper({
       trigger: (index) => `slotted-stepper-${generatedId}-trigger-${index}`,
     },
     labelPlacement: labelPlacement ?? defaults.labelPlacement ?? 'end',
-    labels: { ...DEFAULT_STEPPER_LABELS, ...defaults.labels, ...labels },
     linear: resolvedLinear,
+    locale,
     navigation: navigation ?? defaults.navigation ?? 'button',
     next: (reason, source) => goToStep(current + 1, reason, source),
     orientation: orientation ?? defaults.orientation ?? 'horizontal',
@@ -154,17 +147,12 @@ export function Stepper({
     reset: (source) => goToStep(defaultStep ?? 0, 'programmatic', source),
     statusOf,
     step: current,
+    t,
   };
 
   const rootProps: StepperRootProps = {
     ...nativeProps,
-    children: (
-      <StepperRegistry.Provider value={setSteps}>
-        <StepperListLabel.Provider value={label ?? defaults.label ?? 'Progress'}>
-          {children}
-        </StepperListLabel.Provider>
-      </StepperRegistry.Provider>
-    ),
+    children: <StepperRegistry.Provider value={setSteps}>{children}</StepperRegistry.Provider>,
     'data-label-placement': context.labelPlacement,
     'data-navigation': context.navigation,
     'data-orientation': context.orientation,
@@ -180,11 +168,10 @@ export function Stepper({
 }
 
 /**
- * The two things the list needs from the root and the root needs from the list.
- * The registry is a setter rather than a context value, because the list is
- * what actually sees the steps and the root is what has to count them.
+ * What the list hands back to the root. The registry is a setter rather than a
+ * context value, because the list is what actually sees the steps and the root
+ * is what has to count them.
  */
 export const StepperRegistry = createContext<
   ((steps: readonly StepperRegistration[]) => void) | undefined
 >(undefined);
-export const StepperListLabel = createContext<string>('Progress');

@@ -25,7 +25,7 @@ export const ANGULAR_SAVED_VIEWS_TOKENS = savedViewsTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import {\n  SlSavedViews,\n  persistedSavedViews,\n  provideSavedViewsDefaults,\n} from '@slotted/angular/saved-views';\nimport type { GridView, SavedViewsState } from '@slotted/core/grid';",
+    "import { SlSavedViews, persistedSavedViews } from '@slotted/angular/saved-views';\nimport type { GridView, SavedViewsState } from '@slotted/core/grid';",
   selector: 'sl-saved-views',
   exportAs: 'slSavedViews',
 };
@@ -263,7 +263,7 @@ const grid = persistedGridView({
   (viewApply)="write($event.view)"
 />
 <sl-data-grid
-  label="Orders"
+  aria-label="Orders"
   rowKey="id"
   [columns]="columns"
   [rows]="orders"
@@ -293,11 +293,7 @@ const grid = persistedGridView({
       id: 'saved-views-angular-a11y',
       language: 'ts',
       label: 'Translated once for the application',
-      source: `providers: [
-  provideSavedViewsDefaults({
-    labels: { label: 'Vistas', builtIn: 'Padrão', modified: 'Alterada', revert: 'Reverter' },
-  }),
-];`,
+      source: `providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })];`,
     }),
   },
   {
@@ -359,7 +355,7 @@ export const ANGULAR_SAVED_VIEWS_DOCS = {
         'input.required<GridView>',
         '—',
         'sl-saved-views',
-        'The built-in view, named labels.builtIn: the application’s defaults, emitted when it is applied',
+        'The built-in view, named messages.builtIn: the application’s defaults, emitted when it is applied',
       ],
       [
         'columns',
@@ -396,13 +392,12 @@ export const ANGULAR_SAVED_VIEWS_DOCS = {
         'sl-saved-views',
         'The layer an unbound instance starts with',
       ],
-      ['label', 'string', 'Views', 'sl-saved-views', 'The group’s and the panel’s accessible name'],
       [
-        'labels',
-        'Partial<SavedViewsLabels>',
-        'English',
-        'sl-saved-views, provideSavedViewsDefaults',
-        'Every word the family says; {name} is replaced with the view’s name',
+        'messages',
+        'Partial<SavedViewsMessages>',
+        '—',
+        'sl-saved-views',
+        'Words laid over the language in force, key by key: the group’s and the panel’s name (label) and every other word; {name} is the view’s name',
       ],
       [
         'exportAs',
@@ -410,13 +405,6 @@ export const ANGULAR_SAVED_VIEWS_DOCS = {
         '—',
         'sl-saved-views',
         'show(), hide(), focus(), apply(id) — show, hide and apply with the reason programmatic',
-      ],
-      [
-        'provideSavedViewsDefaults',
-        '{ labels }',
-        '—',
-        'an injector',
-        'Translates the family once. An instance’s own labels still win, word by word',
       ],
       [
         'persistedSavedViews',

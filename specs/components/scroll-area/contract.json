@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "scroll-area",
   "ui": "scroll-area",
+  "catalog": {
+    "group": "Layout",
+    "summary": "Scrolling region with styled scrollbars."
+  },
   "pattern": null,
   "patternAbsent": {
     "reason": "The WAI-ARIA Authoring Practices index holds no Scroll Area pattern, and no ARIA role describes a scroll container. Recording the absence is the requirement; claiming a pattern that does not exist is the failure",
@@ -50,7 +54,7 @@
   "wiring": {
     "role": "region, written only while the content overflows",
     "tabindex": "0, on the same condition, because a tab stop on content that fits is a tab stop that does nothing",
-    "name": "aria-labelledby, then aria-label, then the label a defaults provider sets. A tab stop owes a name, and Base UI and Zag both write role=presentation beside theirs",
+    "name": "aria-labelledby, then aria-label, then the catalog of the language in force. A tab stop owes a name, and Base UI and Zag both write role=presentation beside theirs",
     "movement": "none. Arrow keys, Page keys, Home, End and Space are the platform's on a focused scrollport, and the family writes not one of them",
     "consumerFirst": "A role, a name or a tabindex the consumer wrote is kept. The family adds the wiring a scrolling region needs and never argues with the one already there",
     "element": "the viewport, which is the element that scrolls. Base UI and Zag both put their tab stop there for the same reason"
@@ -147,6 +151,7 @@
     "rule": "@media print releases the maximum size and the clipping",
     "reason": "docs/component-features.md section 4 names printing in this family's own sentence, and none of the five surveyed implementations answers it: a printed page otherwise carries the visible slice and silently drops the rest"
   },
+  "messages": ["label"],
   "members": {
     "scrollArea": {
       "nativeElement": "div",
@@ -156,8 +161,7 @@
         "gutter": "stable",
         "fade": "both",
         "overscroll": "contain",
-        "tabbable": true,
-        "label": "Scrollable content"
+        "tabbable": true
       },
       "capabilities": ["overflow", "appearance", "wiring"],
       "states": ["default", "hover", "focus-visible"],

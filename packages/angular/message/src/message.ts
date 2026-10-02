@@ -11,6 +11,13 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
+import {
+  messageMessages,
+  type FamilyTranslator,
+  type MessageMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 
@@ -92,6 +99,11 @@ export class SlMessage {
   readonly version = model(0);
   /** How many versions exist; the pager draws when there are two or more. */
   readonly versionCount = input(1);
+  /**
+   * Words laid over the catalog of the language in force, key by key, for
+   * this row and every part and bubble inside it.
+   */
+  readonly messages = input<PartialMessages<MessageMessages> | undefined>(undefined);
 
   /** Emitted before the version moves; `cancel()` keeps it. */
   readonly versionChangeRequest = output<ChangeRequest<number>>();
@@ -105,7 +117,8 @@ export class SlMessage {
     inject(new HostAttributeToken('aria-labelledby'), { optional: true });
 
   readonly authorId = `sl-message-${nextId++}-author`;
-  readonly messages = this.defaults.messages;
+  /** The family's words in the language in force, with this row's `messages` laid over them. */
+  readonly t = injectMessages(messageMessages, this.messages);
   private readonly authorPresent = signal(false);
 
   readonly resolvedLayout = computed(
@@ -136,4 +149,13 @@ export class SlMessage {
   requestRetry(reason: MessageChangeReason, source: Event) {
     this.retry.emit({ reason, source });
   }
+}
+
+/**
+ * The family's words for a part that may stand outside a row: the row's, with
+ * its `messages` laid over the language in force, or the language alone.
+ */
+export function injectMessageWords(): FamilyTranslator<MessageMessages> {
+  const own = injectMessages(messageMessages);
+  return inject(SlMessage, { optional: true })?.t ?? own;
 }

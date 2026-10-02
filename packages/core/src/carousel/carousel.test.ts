@@ -6,7 +6,6 @@ import {
   carouselPages,
   createCarouselEngine,
   createCarouselRotation,
-  formatCarouselMessage,
   indicatorDistance,
   intentPage,
   nearestPage,
@@ -175,14 +174,6 @@ describe('the spring', () => {
     expect(far / 400).toBeLessThan(near / 40);
     expect(rubberBand(1e6, 400)).toBeLessThan(400);
     expect(rubberBand(-40, 400)).toBeCloseTo(-near, 9);
-  });
-});
-
-describe('formatCarouselMessage', () => {
-  it('fills the numbers in the locale', () => {
-    expect(formatCarouselMessage('Slide {page} de {count}', { page: 3, count: 12 }, 'pt-PT')).toBe(
-      'Slide 3 de 12',
-    );
   });
 });
 

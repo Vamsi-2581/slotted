@@ -28,14 +28,17 @@ const schemeSelector = (scheme: string) => `[data-slotted-scheme="${scheme}"]`;
 /**
  * One scheme, scoped to the nearest element that names it. The limit stops at
  * any element that names another scheme or theme, and scoping proximity makes
- * the nearest root win when two schemes are nested. `[data-slotted-seeds]`
- * re-derives every colour from the seeds an element carries itself.
+ * the nearest root win when two schemes are nested. A theme element under the
+ * scheme roots it only when it names no scheme of its own; without the guard,
+ * a light panel in a dark page was a root of both scopes at the same distance,
+ * and the one written later won. `[data-slotted-seeds]` re-derives every
+ * colour from the seeds an element carries itself.
  */
 function schemeScope(theme: string, scheme: string, body: string): string {
   const t = themeSelector(theme);
   const s = schemeSelector(scheme);
   return (
-    `@scope (${t}${s}, ${t} ${s}, ${s} ${t}) to ([data-slotted-scheme], [data-slotted-theme]) {\n` +
+    `@scope (${t}${s}, ${t} ${s}, ${s} ${t}:not([data-slotted-scheme])) to ([data-slotted-scheme], [data-slotted-theme]) {\n` +
     `${indent(block([':scope', '[data-slotted-seeds]'], body))}\n}`
   );
 }

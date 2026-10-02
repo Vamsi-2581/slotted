@@ -74,6 +74,8 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `tags-input` | [2026-09-14](2026-09-14-tags-input-capability-inventory.md) | [2026-09-14](2026-09-14-tags-input-design.md) | [2026-09-14](2026-09-14-tags-input-self-assessment.md) |
 | `timeline` | [2026-09-14](2026-09-14-timeline-capability-inventory.md) | [2026-09-14](2026-09-14-timeline-design.md) | [2026-09-14](2026-09-14-timeline-self-assessment.md) |
 | `internationalization` | — | [2026-09-22](2026-09-22-internationalization-design.md) | — |
+| `internationalization` | — | [2026-10-01](2026-10-01-internationalization-design.md) | — |
+| `theming-architecture` | — | [2026-10-01](2026-10-01-theming-architecture-design.md) | — |
 | `column-management` (`column-manager`, `saved-views`, `data-grid`) | [2026-09-23 §1](2026-09-23-column-management-design.md) | [2026-09-23](2026-09-23-column-management-design.md) | [2026-09-23](2026-09-23-column-management-self-assessment.md) |
 | `narrow-layout` (classes de tamanho, pop-in de `data-grid`, `page`, `page-header`) | [2026-09-23 §2](2026-09-23-narrow-layout-design.md) | [2026-09-23](2026-09-23-narrow-layout-design.md) | — |
 | `data-list` | [2026-09-24](2026-09-24-data-list-capability-inventory.md) | [2026-09-24](2026-09-24-data-list-design.md) | [2026-09-24](2026-09-24-data-list-self-assessment.md) |
@@ -86,9 +88,9 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `import-export-center` | [2026-09-25 §1](2026-09-25-import-export-center-design.md) | [2026-09-25](2026-09-25-import-export-center-design.md) | [2026-09-25](2026-09-25-import-export-center-self-assessment.md) |
 | `rating` | [2026-09-25 §1](2026-09-25-rating-design.md) | [2026-09-25](2026-09-25-rating-design.md) | [2026-09-29](2026-09-29-rating-self-assessment.md) |
 | `cascader` | [2026-09-30 §1–4](2026-09-30-cascader-design.md) | [2026-09-30 §5–9](2026-09-30-cascader-design.md) | [2026-10-01](2026-10-01-cascader-self-assessment.md) |
-| `text-field` (passo ReUI) | [2026-09-30 §1](2026-09-30-text-field-rebuild-design.md) | [2026-09-30](2026-09-30-text-field-rebuild-design.md) | [2026-09-30](2026-09-30-text-field-self-assessment.md) |
 | `field-label-row` | [2026-09-30 §1](2026-09-30-field-label-row-design.md) | [2026-09-30](2026-09-30-field-label-row-design.md) | [2026-09-30](2026-09-30-field-self-assessment.md) |
 | `message`, `message-scroller` | [2026-09-30 §2](2026-09-30-message-design.md) | [2026-09-30](2026-09-30-message-design.md) | [2026-09-30](2026-09-30-message-self-assessment.md) |
+| `text-field` (passo ReUI) | [2026-09-30 §1](2026-09-30-text-field-rebuild-design.md) | [2026-09-30](2026-09-30-text-field-rebuild-design.md) | [2026-09-30](2026-09-30-text-field-self-assessment.md) |
 | `prompt-composer` | [2026-09-30 §1](2026-09-30-prompt-composer-design.md) | [2026-09-30](2026-09-30-prompt-composer-design.md) | [2026-09-30](2026-09-30-prompt-composer-self-assessment.md) |
 | `carousel` | [2026-10-01 §1–4](2026-10-01-carousel-design.md) | [2026-10-01 §5–10](2026-10-01-carousel-design.md) | [2026-10-01](2026-10-01-carousel-self-assessment.md) |
 | `color-picker` | [2026-10-01 §1](2026-10-01-color-picker-design.md) | [2026-10-01](2026-10-01-color-picker-design.md) | [2026-10-01](2026-10-01-color-picker-self-assessment.md) |
@@ -105,6 +107,8 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 - [2026-08-31-component-foundation-and-craft-skill-design.md](2026-08-31-component-foundation-and-craft-skill-design.md)
 - [2026-09-03-css-theming-design.md](2026-09-03-css-theming-design.md)
 - [2026-09-03-theme-axis-design.md](2026-09-03-theme-axis-design.md)
+- [2026-10-01-docs-site-design.md](2026-10-01-docs-site-design.md)
+- [2026-10-01-agent-docs-design.md](2026-10-01-agent-docs-design.md)
 
 ## Anteriores à fundação (famílias refeitas ou retiradas)
 
@@ -136,9 +140,9 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 - [2026-09-30-menu-reui-dossier.md](2026-09-30-menu-reui-dossier.md)
 - [2026-09-30-filter-bar-reui-dossier.md](2026-09-30-filter-bar-reui-dossier.md)
 - [2026-09-30-upload-reui-dossier.md](2026-09-30-upload-reui-dossier.md)
+- [2026-09-30-kbd-reui-dossier.md](2026-09-30-kbd-reui-dossier.md)
 - [2026-09-30-text-field-reui-dossier.md](2026-09-30-text-field-reui-dossier.md)
 - [2026-09-30-field-reui-dossier.md](2026-09-30-field-reui-dossier.md)
-- [2026-09-30-kbd-reui-dossier.md](2026-09-30-kbd-reui-dossier.md)
 - [2026-09-30-message-reui-dossier.md](2026-09-30-message-reui-dossier.md)
 - [2026-09-30-prompt-composer-reui-dossier.md](2026-09-30-prompt-composer-reui-dossier.md)
 - [2026-10-01-carousel-reui-dossier.md](2026-10-01-carousel-reui-dossier.md)

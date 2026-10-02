@@ -1,5 +1,6 @@
 import { addDays, plainDate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -7,6 +8,7 @@ import { useRef, useState } from 'react';
 
 import { Button } from '../button';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { DateRangePicker, DateRangePickerPreset } from './date-range-picker';
 import { DateRangePickerDefaultsProvider } from './date-range-picker-defaults';
 import { Grid, Measure, Scene } from './date-range-picker-demo';
@@ -24,6 +26,18 @@ import type {
 const CHECKIN = plainDate(2026, 9, 12);
 const CHECKOUT = plainDate(2026, 9, 16);
 const STAY: DateRange = { start: CHECKIN, end: CHECKOUT };
+
+/** The Portuguese catalog with a hotel's own words laid over the range picker's. */
+const HOTEL = {
+  ...PT_BR,
+  dateRangePicker: {
+    ...PT_BR.dateRangePicker,
+    change: 'Alterar estadia, {start} – {end}, {length}',
+    choose: 'Escolher estadia',
+    end: 'Check-out',
+    start: 'Check-in',
+  },
+};
 const WEEKEND: DateRange = { start: plainDate(2026, 9, 18), end: plainDate(2026, 9, 20) };
 const week = (from: PlainDate): DateRange => ({ start: from, end: addDays(from, 7) });
 const isTaken = (date: PlainDate) => date.month === 9 && date.day >= 15 && date.day <= 18;
@@ -87,9 +101,8 @@ export const Playground: Story = {
         <DateRangePicker
           {...args}
           defaultValue={STAY}
-          endLabel="Check-out"
           endName="checkout"
-          startLabel="Check-in"
+          messages={{ end: 'Check-out', start: 'Check-in' }}
           startName="checkin"
         />
         <FieldDescription>Digite as datas ou escolha as duas no calendário.</FieldDescription>
@@ -389,20 +402,13 @@ export const Composition: Story = {
       <Grid columns={1}>
         <Scene
           label="Set once for the application"
-          note="One provider decides that every stay counts nights, in Portuguese, one month at a time, with the hotel’s own words — so a product does not repeat six props on each form."
+          note="One provider decides that every stay counts nights, one month at a time; SlottedProvider decides Portuguese, with the hotel’s own words laid over the catalog — so a product does not repeat them on each form."
         >
-          <DateRangePickerDefaultsProvider
-            changeLabel="Alterar estadia"
-            chooseLabel="Escolher estadia"
-            count="nights"
-            endLabel="Check-out"
-            lengthLabel={(count) => `${String(count)} ${count === 1 ? 'noite' : 'noites'}`}
-            locale="pt-BR"
-            months={1}
-            startLabel="Check-in"
-          >
-            <DateRangePicker defaultValue={STAY} />
-          </DateRangePickerDefaultsProvider>
+          <SlottedProvider catalogs={{ 'pt-BR': HOTEL }} locale="pt-BR">
+            <DateRangePickerDefaultsProvider count="nights" months={1}>
+              <DateRangePicker defaultValue={STAY} />
+            </DateRangePickerDefaultsProvider>
+          </SlottedProvider>
         </Scene>
         <Scene
           label="The handle, and the end being edited"

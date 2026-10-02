@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useRef } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/scroll-area/contract.json';
+import { SlottedProvider } from '../i18n';
 import { ScrollArea } from './scroll-area';
 import { ScrollAreaDefaultsProvider } from './scroll-area-defaults';
 import type { ScrollAreaHandle, ScrollAreaProps } from './scroll-area.types';
@@ -157,7 +159,7 @@ describe('the measurement in the DOM', () => {
  */
 describe('the region', () => {
   it('is a named region with a tab stop while the content overflows', () => {
-    render(<Area label="Notas de versão" />);
+    render(<Area messages={{ label: 'Notas de versão' }} />);
 
     expect(viewport()).toHaveAttribute('role', 'region');
     expect(viewport()).toHaveAttribute('tabindex', '0');
@@ -166,7 +168,7 @@ describe('the region', () => {
   });
 
   it('is nothing at all while the content fits', () => {
-    render(<Area sizes={FITS} label="Notas de versão" />);
+    render(<Area sizes={FITS} messages={{ label: 'Notas de versão' }} />);
 
     expect(viewport()).not.toHaveAttribute('role');
     expect(viewport()).not.toHaveAttribute('tabindex');
@@ -177,7 +179,7 @@ describe('the region', () => {
     render(
       <>
         <h2 id="notas">Notas de versão</h2>
-        <Area label="ignored" labelledBy="notas" />
+        <Area labelledBy="notas" messages={{ label: 'ignored' }} />
       </>,
     );
 
@@ -186,20 +188,20 @@ describe('the region', () => {
     expect(viewport()).toHaveAccessibleName('Notas de versão');
   });
 
-  it('falls back to the label a provider set, in the words prose already uses', () => {
+  it('speaks the language in force, in the words prose already uses', () => {
     render(
-      <ScrollAreaDefaultsProvider label="Conteúdo com rolagem">
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
         <Area />
-      </ScrollAreaDefaultsProvider>,
+      </SlottedProvider>,
     );
 
-    expect(viewport()).toHaveAccessibleName('Conteúdo com rolagem');
+    expect(viewport()).toHaveAccessibleName('Conteúdo rolável');
   });
 
-  it('speaks the contract’s fallback name when nothing else is set', () => {
+  it('speaks the base catalog when nothing else is set', () => {
     render(<Area />);
 
-    expect(viewport()).toHaveAccessibleName(contract.members.scrollArea.defaults.label);
+    expect(viewport()).toHaveAccessibleName('Scrollable content');
   });
 
   it('leaves the tab sequence alone when the consumer says the content is reachable', () => {

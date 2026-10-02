@@ -29,29 +29,17 @@ export type CalendarOutsideDays = 'shown' | 'selectable' | 'hidden';
  */
 export type CalendarCalendar = 'gregory';
 
-/**
- * The two words the family's own triggers announce. They are constants rather
- * than strings built inside the component, because the only translation layer
- * this library has is the consumer's — a provider at the top of the
- * application, or an input on the instance.
- */
-export const CALENDAR_PREVIOUS_LABEL = 'Previous month';
-export const CALENDAR_NEXT_LABEL = 'Next month';
-
 export interface CalendarDefaults {
   calendar: CalendarCalendar;
   firstDayOfWeek: number | undefined;
   fixedWeeks: boolean;
-  locale: string | undefined;
   months: number;
-  nextLabel: string;
   /**
    * Unset is not `shown`: a calendar showing one month draws the days either
    * side of it, and a calendar showing two would draw the same six days in
    * both grids. See the resolution in `calendar.ts`.
    */
   outsideDays: CalendarOutsideDays | undefined;
-  previousLabel: string;
   timeZone: string | undefined;
   weekNumbers: boolean;
 }
@@ -60,11 +48,8 @@ const FALLBACK: CalendarDefaults = {
   calendar: 'gregory',
   firstDayOfWeek: undefined,
   fixedWeeks: false,
-  locale: undefined,
   months: 1,
-  nextLabel: CALENDAR_NEXT_LABEL,
   outsideDays: undefined,
-  previousLabel: CALENDAR_PREVIOUS_LABEL,
   timeZone: undefined,
   weekNumbers: false,
 };
@@ -75,9 +60,10 @@ export const CALENDAR_DEFAULTS = new InjectionToken<CalendarDefaults>('slotted c
 });
 
 /**
- * An application decides once which locale writes its months, which day its
- * weeks start on, which zone answers "today" and whether its calendars keep a
- * fixed six-row grid — rather than repeating the same inputs on every instance.
+ * An application decides once which day its weeks start on, which zone answers
+ * "today" and whether its calendars keep a fixed six-row grid — rather than
+ * repeating the same inputs on every instance. Its words and the locale that
+ * writes its months come from the language in force (`provideSlotted`).
  *
  * `fixedWeeks` is the one worth setting where calendars live in popovers: a
  * surface that grows a row between one press of "next" and the next moves the

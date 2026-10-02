@@ -4,6 +4,7 @@ import {
   computed,
   Directive,
   ElementRef,
+  HostAttributeToken,
   inject,
   input,
   OnDestroy,
@@ -107,7 +108,7 @@ export class SlDialogTrigger implements OnInit, OnDestroy {
       <button
         type="button"
         data-part="fullscreen"
-        aria-label="Full screen"
+        [attr.aria-label]="dialog.t('fullScreen')"
         [attr.aria-pressed]="dialog.resolvedFullscreen()"
         (click)="toggle($event)"
       >
@@ -226,11 +227,10 @@ export class SlDialogClose {
   readonly value = input<string | undefined>(undefined);
 
   private readonly dialog = inject(SlDialogBase);
-  private readonly native: HTMLElement = inject(ElementRef).nativeElement;
+  /** A consumer's own `aria-label`, which wins over the catalog. */
+  private readonly ownLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
 
-  protected readonly label = computed(() =>
-    this.native.hasAttribute('aria-label') ? null : 'Close',
-  );
+  protected readonly label = computed(() => this.ownLabel ?? this.dialog.t('close'));
 
   constructor() {
     if (this.dialog.isAlert()) {

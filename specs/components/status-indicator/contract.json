@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "status-indicator",
   "ui": "status-indicator",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Colored mark and label for a status."
+  },
   "axes": {
     "status": ["neutral", "info", "success", "warning", "danger", "unknown"],
     "mark": ["dot", "icon"],
@@ -24,14 +28,7 @@
     "danger": "circle-x",
     "unknown": "circle-question"
   },
-  "defaultLabels": {
-    "neutral": "Neutral",
-    "info": "Information",
-    "success": "Success",
-    "warning": "Warning",
-    "danger": "Error",
-    "unknown": "Unknown"
-  },
+  "messages": ["danger", "info", "neutral", "success", "unknown", "warning"],
   "members": {
     "statusIndicator": {
       "nativeElement": "span",

@@ -121,7 +121,7 @@ import { SessionStore } from '../../core/session/session.store';
           <div slSectionBody>
             @if (demo.info() === null) {
               <!-- The session is on its way: the rows' own boxes, so the wait is visible. -->
-              <div slSkeletonRegion label="Loading demo controls" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Loading demo controls' }" [loading]="true">
                 <ul slList>
                   @for (i of placeholders; track i) {
                     <li slListItem size="sm">

@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "collapsible",
   "ui": "collapsible",
+  "catalog": {
+    "group": "Layout",
+    "summary": "One region whose content shows or hides."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/",
   "groupPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/accordion/",
   "groupFamily": "accordion",

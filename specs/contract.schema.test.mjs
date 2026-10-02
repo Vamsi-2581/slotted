@@ -1,14 +1,17 @@
 import assert from 'node:assert/strict';
+import { readdirSync, readFileSync } from 'node:fs';
 import test from 'node:test';
 
 import {
   CHANGE_REASONS,
+  GROUPS,
   KNOWN_CAPABILITIES,
   LEGACY_FAMILIES,
   LEGACY_SCHEMA_VERSION,
   MUTABLE_CAPABILITIES,
   STATE_ATTRIBUTES,
   STATE_PRECEDENCE,
+  SUMMARY_MAX,
   assertContractShape,
   strongestState,
 } from './contract.schema.mjs';
@@ -17,6 +20,7 @@ const valid = {
   schemaVersion: 5,
   family: 'example',
   ui: 'example',
+  catalog: { group: 'Actions', summary: 'An example family.' },
   stateAttributes: { disabled: 'data-disabled' },
   members: {
     example: {
@@ -411,4 +415,56 @@ test('requires a model for the error map a form holds', () => {
  */
 test('carries the refused-drop state a drop region introduces', () => {
   assert.equal(STATE_ATTRIBUTES['drop-invalid'], 'data-drop-invalid');
+});
+
+test('rejects a catalog group outside the shared list', () => {
+  const contract = structuredClone(valid);
+  contract.catalog.group = 'Widgets';
+  assert.throws(() => assertContractShape(contract), /group/);
+});
+
+test('rejects a summary that is missing, too long or more than one sentence', () => {
+  for (const summary of [
+    undefined,
+    `${'A'.repeat(SUMMARY_MAX)}.`,
+    'Two things. In one field.',
+    'no capital.',
+    'No period',
+  ]) {
+    const contract = structuredClone(valid);
+    contract.catalog.summary = summary;
+    assert.throws(() => assertContractShape(contract), /summary/, String(summary));
+  }
+});
+
+const componentsRoot = new URL('./components/', import.meta.url);
+const contracts = readdirSync(componentsRoot, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) =>
+    JSON.parse(readFileSync(new URL(`${entry.name}/contract.json`, componentsRoot), 'utf8')),
+  );
+
+test('every contract states its catalog group and a one-sentence summary', () => {
+  const missing = contracts
+    .filter(
+      (contract) =>
+        !GROUPS.includes(contract.catalog?.group) || typeof contract.catalog?.summary !== 'string',
+    )
+    .map((contract) => contract.family);
+  assert.deepEqual(missing, []);
+});
+
+/**
+ * The agent index lists one line per family, `- <family>: <summary>`, and an
+ * agent reads it whole before writing UI. 8 KB is the size of the index that
+ * took Vercel's eval from 53% to 100%; 512 bytes cover its title, its path line
+ * and the group headings.
+ */
+test('the index lines of every family fit the 8 KB index budget', () => {
+  const bytes = contracts.reduce(
+    (sum, contract) =>
+      sum + Buffer.byteLength(`- ${contract.family}: ${contract.catalog.summary}\n`),
+    512,
+  );
+  assert.ok(bytes <= 8192, `index lines total ${bytes} bytes`);
 });

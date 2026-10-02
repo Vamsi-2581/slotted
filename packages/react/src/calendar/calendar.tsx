@@ -17,6 +17,7 @@ import {
   yearPage,
 } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
+import { calendarMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import {
   useCallback,
@@ -29,6 +30,7 @@ import {
 } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useCalendarDefaults } from './calendar-defaults';
 import {
@@ -90,15 +92,14 @@ export function Calendar({
   locale,
   max,
   min,
+  messages,
   months,
-  nextLabel,
   onFocusedDateChange,
   onKeyDown,
   onPreviewChange,
   onValueChange,
   onViewChange,
   outsideDays,
-  previousLabel,
   readOnly,
   ref,
   render,
@@ -111,10 +112,12 @@ export function Calendar({
   ...nativeProps
 }: CalendarProps) {
   const defaults = useCalendarDefaults();
+  const appLocale = useLocale();
+  const t = useMessages(calendarMessages, messages);
   const rootRef = useRef<HTMLElement | null>(null);
   const headingId = useId();
 
-  const resolvedLocale = locale ?? defaults.locale;
+  const resolvedLocale = locale ?? appLocale;
   const resolvedFirstDay = firstDayOfWeek ?? defaults.firstDayOfWeek;
   const resolvedTimeZone = timeZone ?? defaults.timeZone;
   const resolvedMonths = Math.max(1, months ?? defaults.months);
@@ -133,8 +136,6 @@ export function Calendar({
   const resolvedOutsideDays =
     outsideDays ?? defaults.outsideDays ?? (resolvedMonths > 1 ? 'hidden' : 'shown');
   const resolvedCalendar = calendar ?? defaults.calendar;
-  const resolvedPrevious = previousLabel ?? defaults.previousLabel;
-  const resolvedNext = nextLabel ?? defaults.nextLabel;
   const editable = disabled !== true && readOnly !== true;
 
   const format = useMemo(
@@ -461,7 +462,7 @@ export function Calendar({
     <>
       <div data-part="header">
         <button
-          aria-label={resolvedPrevious}
+          aria-label={t('previous')}
           data-part="previous"
           disabled={!editable}
           onClick={turnPage(-1)}
@@ -489,7 +490,7 @@ export function Calendar({
           )}
         </button>
         <button
-          aria-label={resolvedNext}
+          aria-label={t('next')}
           data-part="next"
           disabled={!editable}
           onClick={turnPage(1)}

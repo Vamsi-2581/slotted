@@ -144,10 +144,3 @@ export function createTimeFormatter(
   );
   return (value) => intl.format(value);
 }
-
-/** Fills `{name}` placeholders. A placeholder with no value stays as written. */
-export function fillMessage(template: string, values: Readonly<Record<string, string | number>>) {
-  return template.replace(/\{(\w+)\}/g, (whole, name: string) =>
-    name in values ? String(values[name]) : whole,
-  );
-}

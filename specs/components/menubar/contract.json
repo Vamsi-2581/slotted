@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "menubar",
   "ui": "menubar",
+  "catalog": {
+    "group": "Navigation",
+    "summary": "Horizontal bar of menus, as in desktop apps."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/menubar/",
   "patternStatus": "The same page menu answers, read on 2026-09-04. Everything the pattern says about the bar is here; everything it says about the surface is in specs/components/menu/contract.json.",
   "roles": {

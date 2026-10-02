@@ -145,13 +145,13 @@ const STILL = '[modal]="false" [initialFocus]="false" escape="none" outsidePress
 const panel = (
   attributes = '',
   {
-    body = '<p slText size="sm">Um diálogo guarda uma tarefa. A linha do meio é a única que rola.</p>',
-    description = 'O nome é visível para todo o espaço de trabalho.',
+    body = '<p slText size="sm">A dialog holds one task. The middle row is the only one that scrolls.</p>',
+    description = 'The name is visible to the whole workspace.',
     footer = `<footer slDialogFooter>
-      <button slButton size="sm" variant="ghost" tone="secondary">Cancelar</button>
-      <button slButton size="sm">Salvar</button>
+      <button slButton size="sm" variant="ghost" tone="secondary">Cancel</button>
+      <button slButton size="sm">Save</button>
     </footer>`,
-    title = 'Editar projeto',
+    title = 'Edit project',
   } = {},
 ) =>
   layer(`<sl-dialog [container]="box" [open]="true" ${STILL} ${attributes}>
@@ -179,7 +179,7 @@ export const Playground: Story = {
   parameters: { ...scenario('playground'), controls: { disable: false } },
   render: (args) => ({
     props: args,
-    template: layer(`<button slButton [slDialogTrigger]="d">Editar projeto</button>
+    template: layer(`<button slButton [slDialogTrigger]="d">Edit project</button>
       <sl-dialog
         #d="slDialog"
         [container]="box"
@@ -194,16 +194,16 @@ export const Playground: Story = {
         [loading]="loading"
       >
         <header slDialogHeader>
-          <h2 slDialogTitle>Editar projeto</h2>
-          <p slDialogDescription>O nome é visível para todo o espaço.</p>
+          <h2 slDialogTitle>Edit project</h2>
+          <p slDialogDescription>The name is visible to the whole space.</p>
           <button slDialogClose></button>
         </header>
         <div slDialogBody>
-          <input slTextField aria-label="Nome" value="Redesign da home" />
+          <input slTextField aria-label="Name" value="Home page redesign" />
         </div>
         <footer slDialogFooter>
-          <button slButton size="sm" variant="ghost" tone="secondary">Cancelar</button>
-          <button slButton size="sm">Salvar</button>
+          <button slButton size="sm" variant="ghost" tone="secondary">Cancel</button>
+          <button slButton size="sm">Save</button>
         </footer>
       </sl-dialog>`),
   }),
@@ -217,12 +217,12 @@ export const Sizes: Story = {
       scene(
         'sm, for a question',
         'Twenty-four rems. Wide enough for one sentence and two actions, narrow enough that the eye does not have to travel to read it.',
-        panel('size="sm" fullScreen="never"', { title: 'Arquivar projeto' }),
+        panel('size="sm" fullScreen="never"', { title: 'Archive project' }),
       ) +
         scene(
           'xl, for a form',
           'Fifty-six rems. The step a two-column form needs; below it the columns stack and the panel reads as one long list of fields.',
-          panel('size="xl" fullScreen="never"', { title: 'Editar faturamento' }),
+          panel('size="xl" fullScreen="never"', { title: 'Edit billing' }),
         ),
     ),
   }),
@@ -241,17 +241,17 @@ export const Placement: Story = {
         scene(
           'top',
           'The panel keeps its distance from the start edge as it grows, so a textarea that gains a line does not slide the whole panel up under the cursor.',
-          panel('placement="top" fullScreen="never"', { title: 'Comentário' }),
+          panel('placement="top" fullScreen="never"', { title: 'Comment' }),
         ),
     ),
   }),
 };
 
 const LONG = `<p slText size="sm">
-  A linha do meio é o único trilho que rola. Limitada, ela rola; ilimitada, empurraria o rodapé
-  para fora da tela e o leitor não alcançaria o botão. Radix e React Aria não entregam layout
-  algum, então esse é o resultado padrão de seguir o exemplo de qualquer uma das duas. Um
-  terceiro parágrafo, para que haja o que rolar. E um quarto. E um quinto, abaixo da dobra.
+  The middle row is the only track that scrolls. Bounded, it scrolls; unbounded, it would push the footer
+  off the screen and the reader could not reach the button. Radix and React Aria ship no layout
+  at all, so this is the default result of following either one’s example. A
+  third paragraph, so there is something to scroll. And a fourth. And a fifth, below the fold.
 </p>`;
 
 export const Scroll: Story = {
@@ -262,12 +262,12 @@ export const Scroll: Story = {
       scene(
         'content — the body scrolls',
         'The header and the actions hold still while the middle row moves. This is the default, and it is the whole reason the panel is a three-row grid bounded to the layer.',
-        panel('fullScreen="never"', { body: LONG, title: 'Termos de uso' }),
+        panel('fullScreen="never"', { body: LONG, title: 'Terms of use' }),
       ) +
         scene(
           'viewport — the panel scrolls',
           'For content that is read rather than acted on. The scrim stays where it is while the panel moves under it, because it is the other cell of the layer’s grid rather than a child of the box that scrolls.',
-          panel('scroll="viewport" fullScreen="never"', { body: LONG, title: 'Termos de uso' }),
+          panel('scroll="viewport" fullScreen="never"', { body: LONG, title: 'Terms of use' }),
         ),
     ),
   }),
@@ -288,9 +288,9 @@ export const Surface: Story = {
           'No ground, no border, no radius, no shadow, no rows and no padding. The portal, the scrim, the focus containment and the dismissal policy are all still here; only the picture is yours.',
           layer(`<sl-dialog [container]="box" [open]="true" ${STILL} surface="plain" fullScreen="never">
             <div slCard fill="elevated">
-              <h2 slDialogTitle>Um card, dentro da layer</h2>
+              <h2 slDialogTitle>A card, inside the layer</h2>
               <p slDialogDescription>
-                A família não pinta nada aqui. Escape ainda fecha, o foco ainda fica contido.
+                The family paints nothing here. Escape still closes, focus still stays inside.
               </p>
             </div>
           </sl-dialog>`),
@@ -331,11 +331,11 @@ export const Modal: Story = {
       scene(
         'modal — the page is out of reach',
         'Press Abrir modal: the scroll locks, everything outside the layer goes inert, and Tab wraps inside the panel. It is opened from a trigger because a modal layer takes the whole page over, and a page showing several at once would be lying about what one does.',
-        layer(`<button slButton [slDialogTrigger]="d">Abrir modal</button>
+        layer(`<button slButton [slDialogTrigger]="d">Open modal</button>
           <sl-dialog #d="slDialog" [container]="box" fullScreen="never">
             <header slDialogHeader>
               <h2 slDialogTitle>Modal</h2>
-              <p slDialogDescription>A rolagem está travada e o resto da página está inert.</p>
+              <p slDialogDescription>Scrolling is locked and the rest of the page is inert.</p>
               <button slDialogClose></button>
             </header>
           </sl-dialog>`),
@@ -345,7 +345,7 @@ export const Modal: Story = {
              attribute is written with the entity and reads as `{`. */
           'modal=&#123;false&#125; — and no aria-modal',
           'Nothing is inert, nothing is locked and focus is not contained, so the panel writes no aria-modal. The APG warns that marking a dialog modal without all of that is worse for a screen-reader reader than not marking it at all — and it is why every still demonstration on this page is this one.',
-          panel('fullScreen="never"', { title: 'Detalhes' }),
+          panel('fullScreen="never"', { title: 'Details' }),
         ),
     ),
   }),
@@ -366,11 +366,11 @@ export const Policy: Story = {
       scene(
         'Three ways out',
         'Press Abrir, then Escape, the scrim or the ✕: each closes it, and each carries its own reason — escape, outsidePress, dismiss. The scrim decides on the click, so a selection dragged out of the panel and let go over it closes nothing.',
-        layer(`<button slButton [slDialogTrigger]="a">Abrir</button>
+        layer(`<button slButton [slDialogTrigger]="a">Open</button>
           <sl-dialog #a="slDialog" [container]="box" fullScreen="never">
             <header slDialogHeader>
-              <h2 slDialogTitle>Editar projeto</h2>
-              <p slDialogDescription>Escape, a scrim e o ✕ são as três saídas.</p>
+              <h2 slDialogTitle>Edit project</h2>
+              <p slDialogDescription>Escape, the scrim and the ✕ are the three exits.</p>
               <button slDialogClose></button>
             </header>
           </sl-dialog>`),
@@ -379,10 +379,10 @@ export const Policy: Story = {
           'One guard, six ways out',
           'Press Escape, click the scrim, then the ✕: all three are refused by the same handler, because they are one request carrying a reason rather than four callbacks. Let the save finish and the same three work.',
           layer(`<button slButton size="sm" variant="outline" (click)="saving = !saving">
-        {{ saving ? 'Terminar de salvar' : 'Voltar a salvar' }}
+        {{ saving ? 'Finish saving' : 'Save again' }}
       </button>
       <button slButton size="sm" variant="ghost" [disabled]="open" (click)="open = true">
-        Abrir de novo
+        Open again
       </button>
       <sl-dialog
         [container]="box"
@@ -393,9 +393,9 @@ export const Policy: Story = {
         (openChangeRequest)="refuse($event)"
       >
         <header slDialogHeader>
-          <h2 slDialogTitle>Salvando</h2>
+          <h2 slDialogTitle>Saving</h2>
           <p slDialogDescription>
-            Escape, um clique fora e o ✕ estão todos recusados pelo mesmo handler.
+            Escape, a click outside and the ✕ are all refused by the same handler.
           </p>
           <button slDialogClose></button>
         </header>
@@ -405,11 +405,11 @@ export const Policy: Story = {
         scene(
           'outsidePress="none"',
           'The scrim is not a way out: a press on it does nothing, while Escape and the ✕ still close it. For a form a stray click must not throw away.',
-          layer(`<button slButton [slDialogTrigger]="n">Abrir</button>
+          layer(`<button slButton [slDialogTrigger]="n">Open</button>
           <sl-dialog #n="slDialog" [container]="box" fullScreen="never" outsidePress="none">
             <header slDialogHeader>
-              <h2 slDialogTitle>Editar projeto</h2>
-              <p slDialogDescription>A scrim não fecha; Escape e o ✕ fecham.</p>
+              <h2 slDialogTitle>Edit project</h2>
+              <p slDialogDescription>The scrim does not close it; Escape and the ✕ do.</p>
               <button slDialogClose></button>
             </header>
           </sl-dialog>`),
@@ -426,29 +426,29 @@ export const Focus: Story = {
       scene(
         'The first tabbable element',
         'The default, and the pattern’s own. Tab from here and the ring never leaves the panel; Escape closes it and the ring is back on the trigger, not on the top of the page.',
-        layer(`<button slButton [slDialogTrigger]="d">Abrir</button>
+        layer(`<button slButton [slDialogTrigger]="d">Open</button>
           <sl-dialog #d="slDialog" [container]="box" fullScreen="never">
             <header slDialogHeader>
-              <h2 slDialogTitle>Renomear</h2>
-              <p slDialogDescription>O foco entra e volta.</p>
+              <h2 slDialogTitle>Rename</h2>
+              <p slDialogDescription>Focus goes in and comes back.</p>
               <button slDialogClose></button>
             </header>
-            <div slDialogBody><input slTextField aria-label="Nome" /></div>
+            <div slDialogBody><input slTextField aria-label="Name" /></div>
           </sl-dialog>`),
       ) +
         scene(
           'An element the consumer names',
           'Press Convidar: the caret starts in the second field rather than the first, because initialFocus takes an element. Opened from a trigger, because where focus goes on open cannot be shown by a panel that was already open.',
-          layer(`<button slButton [slDialogTrigger]="d">Convidar alguém</button>
+          layer(`<button slButton [slDialogTrigger]="d">Invite someone</button>
             <sl-dialog #d="slDialog" [container]="box" [initialFocus]="email" size="lg" fullScreen="never">
             <header slDialogHeader>
-              <h2 slDialogTitle>Convidar alguém</h2>
-              <p slDialogDescription>O foco não cai no primeiro campo, e sim no segundo.</p>
+              <h2 slDialogTitle>Invite someone</h2>
+              <p slDialogDescription>Focus lands on the second field, not the first.</p>
               <button slDialogClose></button>
             </header>
             <div slDialogBody>
-              <input slTextField aria-label="Time" value="Equipe de produto" />
-              <input #email slTextField aria-label="E-mail" />
+              <input slTextField aria-label="Time" value="Product team" />
+              <input #email slTextField aria-label="Email" />
             </div>
           </sl-dialog>`),
         ),
@@ -464,8 +464,8 @@ export const Loading: Story = {
       'The body carries aria-busy and holds a floor, so the panel does not jump when the data lands. The ✕ and Escape both still work: a dialog a reader cannot leave is the worse failure.',
       panel('loading fullScreen="never"', {
         body: '<span slSkeleton shape="text"></span><span slSkeleton shape="text"></span>',
-        description: 'Buscando os itens da fatura.',
-        title: 'Fatura 4471',
+        description: 'Fetching the invoice items.',
+        title: 'Invoice 4471',
       }),
     ),
   }),
@@ -479,26 +479,26 @@ export const Nested: Story = {
       'Press Cancelar assinatura, then Escape once: only the confirmation closes, because dismissable-layer asks the topmost layer and stops there. The depth comes from the single stack, so neither layer states a z-index.',
       layer(`<sl-dialog [container]="box" [open]="true" ${STILL} size="lg" fullScreen="never">
         <header slDialogHeader>
-          <h2 slDialogTitle>Faturamento</h2>
-          <p slDialogDescription>A camada de baixo.</p>
+          <h2 slDialogTitle>Billing</h2>
+          <p slDialogDescription>The layer below.</p>
           <button slDialogClose></button>
         </header>
         <div slDialogBody>
           <button slButton size="sm" tone="danger" variant="outline" [slDialogTrigger]="inner">
-            Cancelar assinatura
+            Cancel subscription
           </button>
           <sl-alert-dialog #inner="slAlertDialog" [container]="box">
             <header slDialogHeader>
               <span slAlertDialogIcon></span>
-              <h2 slDialogTitle>Cancelar a assinatura?</h2>
-              <p slDialogDescription>A cobrança para no fim do período.</p>
+              <h2 slDialogTitle>Cancel the subscription?</h2>
+              <p slDialogDescription>Billing stops at the end of the period.</p>
             </header>
             <footer slDialogFooter>
               <button slButton size="sm" variant="outline" tone="secondary" slAlertDialogCancel>
                 Manter
               </button>
               <button slButton size="sm" tone="danger" slAlertDialogAction>
-                Cancelar assinatura
+                Cancel subscription
               </button>
             </footer>
           </sl-alert-dialog>
@@ -529,8 +529,8 @@ export const Content: Story = {
           'A header and a footer with nothing between them draw one rule, not two: every rule belongs to the row below it. When the two rows together are taller than the layer, the layer scrolls.',
           panel('size="sm" fullScreen="never"', {
             body: '',
-            description: 'O projeto sai do espaço de trabalho.',
-            title: 'Arquivar projeto',
+            description: 'The project leaves the workspace.',
+            title: 'Archive project',
           }),
         ),
     ),
@@ -547,12 +547,12 @@ export const Composition: Story = {
         'The trigger is the consumer’s own button',
         'slDialogTrigger is a directive on a slButton, so the wiring — aria-haspopup, aria-expanded, aria-controls and the press — lands on the library’s own control. Nothing is wrapped and nothing is reimplemented.',
         layer(`<button slButton variant="outline" tone="secondary" [slDialogTrigger]="d">
-            Editar projeto
+            Edit project
           </button>
           <sl-dialog #d="slDialog" [container]="box" size="sm" fullScreen="never">
             <header slDialogHeader>
-              <h2 slDialogTitle>Editar projeto</h2>
-              <p slDialogDescription>O gatilho é um slButton.</p>
+              <h2 slDialogTitle>Edit project</h2>
+              <p slDialogDescription>The trigger is an slButton.</p>
               <button slDialogClose></button>
             </header>
           </sl-dialog>`),
@@ -561,16 +561,16 @@ export const Composition: Story = {
           'Opening from code, and reading the result',
           'A template reference variable reaches the instance, so openDialog() and close(result) are available anywhere in the template. The result arrives on (closed), which is afterClosed() as an output.',
           layer(`<button slButton size="sm" variant="outline" (click)="d.openDialog()">
-            Abrir do código
+            Open from code
           </button>
-          <p slText size="sm">{{ result === undefined ? 'Sem resultado ainda.' : 'Resultado: ' + result }}</p>
+          <p slText size="sm">{{ result === undefined ? 'No result yet.' : 'Resultado: ' + result }}</p>
           <sl-dialog #d="slDialog" [container]="box" size="sm" fullScreen="never" (closed)="result = $event">
             <header slDialogHeader>
-              <h2 slDialogTitle>Sem gatilho</h2>
-              <p slDialogDescription>Aberto por openDialog(), fechado com um resultado.</p>
+              <h2 slDialogTitle>No trigger</h2>
+              <p slDialogDescription>Opened by openDialog(), closed with a result.</p>
             </header>
             <footer slDialogFooter>
-              <button slButton size="sm" slDialogClose value="salvo">Salvar</button>
+              <button slButton size="sm" slDialogClose value="salvo">Save</button>
             </footer>
           </sl-dialog>`),
           'stack',
@@ -585,7 +585,7 @@ export const Defaults: Story = {
     template: scene(
       'Eight decisions, taken once',
       'provideDialogDefaults sets the size, the placement and the full-screen policy for everything under the injector; a dialog that states one of them itself still wins, because an explicit consumer value always does.',
-      panel('size="lg" fullScreen="never"', { title: 'Do próprio diálogo' }),
+      panel('size="lg" fullScreen="never"', { title: 'From the dialog itself' }),
     ),
   }),
 };
@@ -596,17 +596,17 @@ export const Accessibility: Story = {
     template: scene(
       'Tab, Shift+Tab and Escape',
       'Tab from the last control and the ring lands on the first, not on the page behind. Escape closes and focus is back on the trigger. Both are @slotted/core/focus, because the platform’s dialog element is declined.',
-      layer(`<button slButton [slDialogTrigger]="d">Abrir e tabular</button>
+      layer(`<button slButton [slDialogTrigger]="d">Open and tab</button>
         <sl-dialog #d="slDialog" [container]="box" fullScreen="never">
           <header slDialogHeader>
-            <h2 slDialogTitle>Três paradas de tabulação</h2>
+            <h2 slDialogTitle>Three tab stops</h2>
             <p slDialogDescription>
-              O ✕, o campo e o botão. Tab no último volta para o primeiro.
+              The ✕, the field and the button. Tab on the last one returns to the first.
             </p>
             <button slDialogClose></button>
           </header>
-          <div slDialogBody><input slTextField aria-label="Nome" /></div>
-          <footer slDialogFooter><button slButton size="sm">Salvar</button></footer>
+          <div slDialogBody><input slTextField aria-label="Name" /></div>
+          <footer slDialogFooter><button slButton size="sm">Save</button></footer>
         </sl-dialog>`),
     ),
   }),

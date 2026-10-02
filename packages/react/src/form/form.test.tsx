@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/form/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Form } from './form';
 import { FormDefaultsProvider } from './form-defaults';
 import { FormActions, FormSummary } from './form-parts';
@@ -247,7 +249,7 @@ describe('Form', () => {
       expect(region).toHaveAttribute('role', 'alert');
       expect(region).toHaveAttribute('tabindex', '-1');
       expect(region.querySelector('[data-part="summary-title"]')).toHaveTextContent(
-        contract.summary.title,
+        'There is a problem',
       );
       expect(items()[0]).toHaveAttribute('href', '#name');
     });
@@ -343,7 +345,7 @@ describe('Form', () => {
 
     it('lets an application decide once how its forms behave', () => {
       render(
-        <FormDefaultsProvider align="stretch" summaryTitle="Corrija estes campos">
+        <FormDefaultsProvider align="stretch">
           <Form errors={{ name: 'Informe seu nome' }}>
             <Fields />
             <FormActions data-testid="actions" />
@@ -352,9 +354,26 @@ describe('Form', () => {
       );
 
       expect(screen.getByTestId('actions')).toHaveAttribute('data-align', 'stretch');
-      expect(document.querySelector('[data-part="summary-title"]')).toHaveTextContent(
-        'Corrija estes campos',
+    });
+
+    it('titles the summary in the language in force, and lays its own messages over it', () => {
+      render(
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+          <Form errors={{ name: 'Informe seu nome' }}>
+            <Fields />
+          </Form>
+          <Form
+            errors={{ name: 'Informe seu nome' }}
+            messages={{ summaryTitle: 'Corrija estes campos' }}
+          >
+            <Fields />
+          </Form>
+        </SlottedProvider>,
       );
+
+      const titles = document.querySelectorAll('[data-part="summary-title"]');
+      expect(titles[0]).toHaveTextContent('Há um problema');
+      expect(titles[1]).toHaveTextContent('Corrija estes campos');
     });
 
     it('exposes the four actions a value cannot express', () => {

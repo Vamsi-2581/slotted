@@ -12,7 +12,6 @@ import type { SkeletonAnimation, SkeletonLive } from './skeleton.constants';
 export interface SkeletonDefaults {
   animation?: SkeletonAnimation;
   delay?: number;
-  label?: string;
   lastLineSize?: string;
   live?: SkeletonLive;
   loadedLabel?: string;
@@ -27,9 +26,10 @@ export const SKELETON_DEFAULTS_TOKEN = new InjectionToken<SkeletonDefaults>(
 /**
  * An application decides once how its placeholders are animated, how long a
  * wait has to last before one appears, how long one is held once it has, and
- * what a screen reader hears in the language it ships. A region or a box that
+ * what a screen reader hears when the content arrives. A region or a box that
  * states any of those still wins: an explicit input is never overridden by the
- * token.
+ * token. The words the family writes come from the language in force
+ * (`provideSlotted`).
  */
 export function provideSkeletonDefaults(defaults: SkeletonDefaults) {
   return { provide: SKELETON_DEFAULTS_TOKEN, useValue: defaults };

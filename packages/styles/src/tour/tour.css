@@ -492,7 +492,10 @@
   [data-ui='tour'] [data-part='content'] > [data-part='body'] {
     flex: 1 1 auto;
     min-block-size: 0;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overflow-inline: hidden;
+    overflow-block: auto;
     overscroll-behavior: contain;
     overflow-wrap: anywhere;
     unicode-bidi: plaintext;

@@ -45,7 +45,6 @@ export interface ToastContent {
   variant?: ToastVariant;
   hideIcon?: boolean;
   dismissible?: boolean;
-  closeLabel?: string;
   progress?: boolean;
   /**
    * The controls that act on the message, and the whole body when a message
@@ -96,14 +95,8 @@ export interface ToastDefaults {
   duration: number;
   swipeThreshold: number;
   hotkey: string;
-  label: string;
-  closeLabel: string;
 }
 
-/** The word the close control announces, before any application translates it. */
-export const TOAST_CLOSE_LABEL = 'Close';
-/** The name a reader finds the region by in the landmark list. */
-export const TOAST_LABEL = 'Notifications';
 /**
  * The key that moves focus into the region. Five surveyed implementations ship
  * a shortcut and no two chose the same key; `F6` is the one two of them chose
@@ -127,8 +120,6 @@ const FALLBACK: ToastDefaults = {
   duration: 5000,
   swipeThreshold: 48,
   hotkey: TOAST_HOTKEY,
-  label: TOAST_LABEL,
-  closeLabel: TOAST_CLOSE_LABEL,
 };
 
 export const TOAST_DEFAULTS = new InjectionToken<ToastDefaults>('slotted toast defaults', {
@@ -137,9 +128,10 @@ export const TOAST_DEFAULTS = new InjectionToken<ToastDefaults>('slotted toast d
 });
 
 /**
- * An application decides once where its messages appear, how long they stay and
- * what their close controls are called. A region or a message that states any
- * of them still wins: an explicit value is never overridden by the token.
+ * An application decides once where its messages appear and how long they
+ * stay. A region or a message that states any of them still wins: an explicit
+ * value is never overridden by the token. The region's name and the close
+ * control's come from the language in force (`provideSlotted`).
  */
 export function provideToastDefaults(defaults: Partial<ToastDefaults>) {
   return {

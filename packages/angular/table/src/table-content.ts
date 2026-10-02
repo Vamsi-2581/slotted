@@ -7,6 +7,7 @@ import {
   computed,
   DestroyRef,
   ElementRef,
+  HostAttributeToken,
   inject,
   input,
   numberAttribute,
@@ -64,20 +65,20 @@ export class SlTableContent {
   readonly totalRowCount = input<number | undefined, number | string | undefined>(undefined, {
     transform: (count) => (count === undefined ? undefined : numberAttribute(count)),
   });
-  /** The name the scrolling region takes while it overflows. */
-  readonly scrollLabel = input<string | undefined>(undefined);
   /** The element that names it instead, which is usually the caption. */
   readonly scrollLabelledBy = input<string | undefined>(undefined);
 
   readonly table = inject(SlTable);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  /** The host's own `aria-label`, which wins over the catalog's name for the region. */
+  private readonly ownLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
   private affordance: ScrollAffordanceHandle | null = null;
 
   readonly state = signal<OverflowState>({ overflowing: false, atStart: true, atEnd: true });
 
   readonly regionLabel = computed(() =>
     this.state().overflowing && this.scrollLabelledBy() === undefined
-      ? (this.scrollLabel() ?? this.table.resolvedLabels().scroll)
+      ? (this.ownLabel ?? this.table.t('scroll'))
       : null,
   );
 

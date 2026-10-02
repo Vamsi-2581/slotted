@@ -21,6 +21,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { SlButton, SlButtonEnd, SlButtonLink } from '@slotted/angular/button';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import type { GlyphName } from '@slotted/angular/icon';
 import { SlProgressBar } from '@slotted/angular/progress-indicator';
@@ -64,13 +65,17 @@ import type {
   FocusableJob,
   FocusMemory,
   ImportExportJob,
-  ImportExportMessages,
   JobControls,
   JobCounts,
   JobFile,
   JobFileRole,
   ProgressSample,
 } from '@slotted/core/import-export-center';
+import {
+  importExportCenterMessages,
+  type ImportExportCenterMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
@@ -297,25 +302,25 @@ export class SlImportExportCenterFooter {}
       @switch (levelValue()) {
         @case ('3') {
           <h3 data-part="title" [id]="titleId">
-            {{ messageSet().title }}
+            {{ t('title') }}
             @if (active() > 0) {
-              <span data-part="count">{{ messageSet().active(active()) }}</span>
+              <span data-part="count">{{ t('active', { count: active() }) }}</span>
             }
           </h3>
         }
         @case ('4') {
           <h4 data-part="title" [id]="titleId">
-            {{ messageSet().title }}
+            {{ t('title') }}
             @if (active() > 0) {
-              <span data-part="count">{{ messageSet().active(active()) }}</span>
+              <span data-part="count">{{ t('active', { count: active() }) }}</span>
             }
           </h4>
         }
         @default {
           <h2 data-part="title" [id]="titleId">
-            {{ messageSet().title }}
+            {{ t('title') }}
             @if (active() > 0) {
-              <span data-part="count">{{ messageSet().active(active()) }}</span>
+              <span data-part="count">{{ t('active', { count: active() }) }}</span>
             }
           </h2>
         }
@@ -331,7 +336,7 @@ export class SlImportExportCenterFooter {}
               type="button"
               (click)="clear($event)"
             >
-              {{ messageSet().clear }}
+              {{ t('clear') }}
             </button>
           </span>
         }
@@ -347,7 +352,7 @@ export class SlImportExportCenterFooter {}
           [value]="currentView()"
           (valueChange)="forwardView($event)"
         >
-          <div slTabList [attr.aria-label]="messageSet().views">
+          <div slTabList [attr.aria-label]="t('views')">
             @for (entry of viewList(); track entry.value) {
               <div slTab [value]="entry.value" [controls]="listId">{{ entry.label }}</div>
             }
@@ -359,8 +364,8 @@ export class SlImportExportCenterFooter {}
       <div data-part="error">
         <section slResultState reach="section" status="error" live="off">
           <div slResultStateContent>
-            <div slResultStateTitle>{{ messageSet().loadError }}</div>
-            <p slResultStateDescription>{{ messageSet().loadErrorDescription }}</p>
+            <div slResultStateTitle>{{ t('loadError') }}</div>
+            <p slResultStateDescription>{{ t('loadErrorDescription') }}</p>
           </div>
           <div slResultStateActions>
             <button
@@ -371,7 +376,7 @@ export class SlImportExportCenterFooter {}
               type="button"
               (click)="reload($event)"
             >
-              {{ messageSet().reload }}
+              {{ t('reload') }}
             </button>
           </div>
         </section>
@@ -382,7 +387,7 @@ export class SlImportExportCenterFooter {}
           <section slResultState reach="section" status="empty" live="off">
             <div slResultStateContent>
               <div slResultStateTitle>{{ emptyTitle() }}</div>
-              <p slResultStateDescription>{{ messageSet().emptyDescription }}</p>
+              <p slResultStateDescription>{{ t('emptyDescription') }}</p>
             </div>
           </section>
         </ng-content>
@@ -425,7 +430,7 @@ export class SlImportExportCenterFooter {}
         [attr.data-loading]="loading() ? '' : null"
         (click)="loadMore($event)"
       >
-        {{ loading() ? messageSet().loading : messageSet().loadMore }}
+        {{ loading() ? t('loading') : t('loadMore') }}
       </button>
     }
     <ng-content select="[slImportExportCenterFooter]" />
@@ -625,7 +630,7 @@ export class SlImportExportCenterFooter {}
                       [attr.aria-labelledby]="view.ids.toggle + ' ' + view.ids.title"
                       (click)="toggle(view.job.key, pressReason($event), $event)"
                     >
-                      {{ messageSet().details }}
+                      {{ t('details') }}
                       <span slButtonEnd
                         ><span data-part="chevron"
                           ><span slIcon><svg slGlyph name="chevron-down"></svg></span></span
@@ -646,7 +651,7 @@ export class SlImportExportCenterFooter {}
                       [attr.aria-describedby]="view.ids.status"
                       (click)="press(part, view.job.key, $event)"
                     >
-                      {{ part === 'cancel' ? messageSet().cancel : view.retryLabel }}
+                      {{ part === 'cancel' ? t('cancel') : view.retryLabel }}
                     </button>
                   </span>
                 }
@@ -663,7 +668,7 @@ export class SlImportExportCenterFooter {}
               <button
                 slImportExportControl
                 data-part="remove"
-                [text]="messageSet().remove"
+                [text]="t('remove')"
                 [describedBy]="view.ids.title"
                 (click)="removeOne(view.job.key, $event)"
               >
@@ -714,7 +719,7 @@ export class SlImportExportCenterFooter {}
                           view,
                           file: row.file,
                           role: row.role,
-                          label: messageSet().download,
+                          label: t('download'),
                           primary: false,
                         }"
                       />
@@ -729,15 +734,15 @@ export class SlImportExportCenterFooter {}
                   <div slTableContent>
                     <caption slTableCaption>
                       {{
-                        messageSet().errorsCaption
+                        t('errorsCaption')
                       }}
                     </caption>
                     <thead slTableHead>
                       <tr slTableRow>
-                        <th slTableColumnHeader numeric>{{ messageSet().errorColumns.row }}</th>
-                        <th slTableColumnHeader>{{ messageSet().errorColumns.message }}</th>
-                        <th slTableColumnHeader>{{ messageSet().errorColumns.column }}</th>
-                        <th slTableColumnHeader>{{ messageSet().errorColumns.value }}</th>
+                        <th slTableColumnHeader numeric>{{ t('errorColumns.row') }}</th>
+                        <th slTableColumnHeader>{{ t('errorColumns.message') }}</th>
+                        <th slTableColumnHeader>{{ t('errorColumns.column') }}</th>
+                        <th slTableColumnHeader>{{ t('errorColumns.value') }}</th>
                       </tr>
                     </thead>
                     <tbody slTableBody>
@@ -790,6 +795,7 @@ export class SlImportExportCenter {
   readonly level = input<ImportExportCenterLevel | undefined>(undefined);
   readonly growing = input<ImportExportCenterGrowing | undefined>(undefined);
   readonly timeFormat = input<ImportExportCenterTimeFormat | undefined>(undefined);
+  /** What numbers, sizes, times and deadlines are written in. Absent, the language in force. */
   readonly locale = input<string | undefined>(undefined);
   readonly timeZone = input<string | undefined>(undefined);
   /** The moment a relative reading and a deadline count from. State it for a stable server render. */
@@ -798,7 +804,8 @@ export class SlImportExportCenter {
   readonly status = input<ImportExportCenterStatus>('ready');
   /** Whether the history has another page; `growing="button"` draws `more` while it has. */
   readonly hasMore = input(false, { transform: booleanAttribute });
-  readonly messages = input<Partial<ImportExportMessages> | undefined>(undefined);
+  /** Words laid over the catalog of the language in force, key by key. */
+  readonly messages = input<PartialMessages<ImportExportCenterMessages> | undefined>(undefined);
   /** The view an unbound centre starts on, read once. */
   readonly defaultView = input<string | undefined>(undefined);
   /** The keys an unbound centre starts with shown, read once. */
@@ -839,12 +846,11 @@ export class SlImportExportCenter {
   readonly levelValue = computed(() => this.level() ?? this.defaults.level);
   readonly growingValue = computed(() => this.growing() ?? this.defaults.growing);
   readonly timeFormatValue = computed(() => this.timeFormat() ?? this.defaults.timeFormat);
-  readonly localeValue = computed(() => this.locale() ?? this.defaults.locale);
+  private readonly contextLocale = injectLocale();
+  readonly localeValue = computed(() => this.locale() ?? this.contextLocale());
   readonly timeZoneValue = computed(() => this.timeZone() ?? this.defaults.timeZone);
-  readonly messageSet = computed<ImportExportMessages>(() => ({
-    ...this.defaults.messages,
-    ...this.messages(),
-  }));
+  /** The family's words in the language in force, with this centre's `messages` laid over them. */
+  readonly t = injectMessages(importExportCenterMessages, this.messages);
 
   protected readonly labelledBy = computed(() =>
     this.writtenLabel !== null ? null : (this.writtenLabelledBy ?? this.titleId),
@@ -853,9 +859,9 @@ export class SlImportExportCenter {
   readonly viewList = computed<readonly ImportExportView[]>(
     () =>
       this.views() ?? [
-        { label: this.messageSet().all, value: 'all' },
-        { label: this.messageSet().imports, value: 'import' },
-        { label: this.messageSet().exports, value: 'export' },
+        { label: this.t('all'), value: 'all' },
+        { label: this.t('imports'), value: 'import' },
+        { label: this.t('exports'), value: 'export' },
       ],
   );
 
@@ -878,12 +884,11 @@ export class SlImportExportCenter {
   readonly showEmpty = computed(() => !this.waiting() && this.visibleJobs().length === 0);
   readonly emptyTitle = computed(() => {
     const view = this.currentView();
-    const words = this.messageSet();
     return view === 'import'
-      ? words.emptyImports
+      ? this.t('emptyImports')
       : view === 'export'
-        ? words.emptyExports
-        : words.empty;
+        ? this.t('emptyExports')
+        : this.t('empty');
   });
 
   private readonly remaining = signal<ReadonlyMap<string, number | null>>(new Map());
@@ -909,7 +914,7 @@ export class SlImportExportCenter {
         for (const job of jobs) {
           const transition = jobTransition(seen.get(job.key), job);
           if (transition !== null) {
-            getLiveAnnouncer().announce(jobAnnouncement(transition, job, this.messageSet()));
+            getLiveAnnouncer().announce(jobAnnouncement(transition, job, this.t));
           }
         }
       });
@@ -997,7 +1002,7 @@ export class SlImportExportCenter {
   }
 
   private viewOf(job: ImportExportJob, expandedKeys: ReadonlySet<string>): JobView {
-    const words = this.messageSet();
+    const t = this.t;
     const locale = this.localeValue();
     const clock = { now: this.now(), timeZone: this.timeZoneValue() };
     const prefix = `${this.id}-${escapeKey(job.key)}`;
@@ -1042,15 +1047,15 @@ export class SlImportExportCenter {
           downloadable: availability === 'available' || availability === 'expires',
           extension,
           file,
-          label: words.fileLabels[role],
+          label: t(`fileLabels.${role}`),
           note:
             availability === 'denied'
               ? (file.denied ?? null)
               : file.expiresAt === undefined
                 ? null
                 : availability === 'expired'
-                  ? words.expired(this.deadline(file.expiresAt))
-                  : words.expires(this.deadline(file.expiresAt)),
+                  ? t('expired', { date: this.deadline(file.expiresAt) })
+                  : t('expires', { date: this.deadline(file.expiresAt) }),
           role,
           size: file.size === undefined ? null : formatBytes(file.size, locale),
           stem,
@@ -1069,14 +1074,14 @@ export class SlImportExportCenter {
       controls,
       counts: COUNT_KEYS.filter((name) => typeof counts[name] === 'number').map((name) => ({
         key: name,
-        label: words.countLabels[name],
+        label: t(`countLabels.${name}`),
         value: count.format(counts[name] ?? 0),
       })),
       downloadFile,
-      downloadLabel: controls.download === 'errors' ? words.downloadErrors : words.download,
+      downloadLabel: controls.download === 'errors' ? t('downloadErrors') : t('download'),
       errorNote:
         total > errors.length && errors.length > 0
-          ? words.sample(count.format(errors.length), count.format(total))
+          ? t('sample', { shown: errors.length, total })
           : null,
       expanded:
         expandedKeys.has(job.key) && controls.controls.includes('toggle') && hasDetails(job),
@@ -1090,7 +1095,7 @@ export class SlImportExportCenter {
       files,
       ids,
       job,
-      directionText: words[job.direction],
+      directionText: t(job.direction),
       kind,
       kindGlyph: KIND_GLYPH[kind],
       mark,
@@ -1101,14 +1106,14 @@ export class SlImportExportCenter {
         job.status === 'running'
           ? jobProgressText(job, {
               locale,
-              messages: words,
+              t,
               remaining: this.remaining().get(job.key),
             })
           : [],
       removable: controls.controls.includes('remove'),
-      retryLabel: controls.retry === 'regenerate' ? words.regenerate : words.retry,
-      statusText: jobStatusText(job, words),
-      summary: jobSummaryText(job, { locale, messages: words }),
+      retryLabel: controls.retry === 'regenerate' ? t('regenerate') : t('retry'),
+      statusText: jobStatusText(job, t),
+      summary: jobSummaryText(job, { locale, t }),
       time:
         when === undefined
           ? null
@@ -1132,9 +1137,9 @@ export class SlImportExportCenter {
     if (availability === 'denied') return result.denied ?? null;
     if (result.expiresAt === undefined) return null;
     if (availability === 'expired')
-      return this.messageSet().expired(this.deadline(result.expiresAt));
+      return this.t('expired', { date: this.deadline(result.expiresAt) });
     if (availability === 'expires')
-      return this.messageSet().expires(this.deadline(result.expiresAt));
+      return this.t('expires', { date: this.deadline(result.expiresAt) });
     return null;
   }
 

@@ -1,5 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it } from 'vitest';
 
 import { SlSparkline } from './sparkline';
@@ -21,6 +23,7 @@ import { provideSparklineDefaults } from './sparkline-defaults';
     [description]="description()"
     [locale]="locale()"
     [formatOptions]="formatOptions()"
+    [messages]="messages()"
   ></span>`,
 })
 class TestHost {
@@ -36,6 +39,7 @@ class TestHost {
   readonly description = signal<string | undefined>(undefined);
   readonly locale = signal<string | undefined>(undefined);
   readonly formatOptions = signal<Intl.NumberFormatOptions | undefined>(undefined);
+  readonly messages = signal<{ up?: string } | undefined>(undefined);
 }
 
 function mount(providers: unknown[] = []) {
@@ -133,18 +137,31 @@ describe('SlSparkline', () => {
     expect(root.getAttribute('aria-label')).toBe('Twelve weeks of revenue, rising');
   });
 
-  it('takes its defaults from the provider', () => {
-    const { root, part } = mount([
-      provideSparklineDefaults({
-        area: true,
-        curve: 'monotone',
-        messages: { up: '{last} (+{change})' },
-      }),
+  it('takes its defaults from the provider, and its own messages over the language', () => {
+    const { fixture, host, root, part } = mount([
+      provideSparklineDefaults({ area: true, curve: 'monotone' }),
     ]);
 
     expect(root.getAttribute('data-curve')).toBe('monotone');
-    expect(root.getAttribute('aria-label')).toBe('Revenue: 30 (+18)');
     expect(part('area')).not.toBeNull();
+
+    host.messages.set({ up: '{last} (+{change})' });
+    fixture.detectChanges();
+    expect(root.getAttribute('aria-label')).toBe('Revenue: 30 (+18)');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const { fixture, host, root } = mount([
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+    host.data.set([1000, 1250.5]);
+    fixture.detectChanges();
+    expect(root.getAttribute('aria-label')).toBe('Revenue: 1.250,5, alta de 250,5 desde 1.000');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(root.getAttribute('aria-label')).toBe('Revenue: 1,250.5, up 250.5 since 1,000');
   });
 
   it('keeps an aria-label the consumer wrote on their own element', () => {

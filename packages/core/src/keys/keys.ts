@@ -16,7 +16,12 @@
  * shortcut can be turned off.
  */
 
+import type { FamilyTranslator, KeysMessages, MessageSlots } from '../i18n';
+
 export type KbdPlatform = 'mac' | 'windows' | 'linux' | 'other';
+
+/** The `keys` catalog in the language in force: every word a key is written or heard as. */
+export type KeysTranslator = FamilyTranslator<KeysMessages>;
 
 /** `auto` asks the runtime; everything else states the answer. */
 export type KbdPlatformInput = 'auto' | KbdPlatform;
@@ -58,6 +63,8 @@ export interface ResolvedShortcut {
 
 export interface KeyOptions {
   platform: KbdPlatform;
+  /** The words a key is written and heard as, from the `keys` catalog. */
+  t: KeysTranslator;
   /** Replaces what the eye sees, per token. `{ ctrl: 'Strg' }`. */
   legends?: Readonly<Record<string, string>> | undefined;
   /** Replaces what the ear gets, per token. `{ ctrl: 'Steuerung' }`. */
@@ -66,33 +73,24 @@ export interface KeyOptions {
 
 export interface ShortcutOptions extends KeyOptions {
   separator?: string | undefined;
-  thenLabel?: string | undefined;
 }
 
-/** A legend or a name, stated per platform where the platforms disagree. */
-interface PerPlatform {
-  default: string;
-  mac?: string;
-  windows?: string;
-  linux?: string;
-}
-
+/**
+ * A key of the vocabulary. Its words — the legend where the platform writes
+ * one, and the name a screen reader hears — live in the `keys` catalog under
+ * the token; only the marks, which read the same in every language, live here.
+ */
 interface KeyDefinition {
-  legend: PerPlatform;
-  name: PerPlatform;
+  /** The mark Apple draws on a Mac in place of the word. */
+  mac?: string;
+  /** The mark every platform draws: the legend is never a word. */
+  mark?: string;
   /**
    * Where the key sits among the modifiers, per platform. Absent for a key
    * that is not a modifier, which keeps the order it was written in.
    */
   order?: { mac: number; other: number };
 }
-
-const ARROWS: Record<string, [string, string]> = {
-  up: ['↑', 'Up arrow'],
-  down: ['↓', 'Down arrow'],
-  left: ['←', 'Left arrow'],
-  right: ['→', 'Right arrow'],
-};
 
 /**
  * The vocabulary. Legends follow the platform each one belongs to: Apple's
@@ -108,72 +106,39 @@ const ARROWS: Record<string, [string, string]> = {
  * Windows key depending on which meaning the author had.
  */
 const KEYS: Readonly<Record<string, KeyDefinition>> = {
-  mod: {
-    legend: { default: 'Ctrl', mac: '⌘' },
-    name: { default: 'Control', mac: 'Command' },
-    order: { mac: 4, other: 2 },
-  },
-  meta: {
-    legend: { default: 'Meta', mac: '⌘', windows: 'Win', linux: 'Super' },
-    name: { default: 'Meta', mac: 'Command', windows: 'Windows', linux: 'Super' },
-    order: { mac: 4, other: 1 },
-  },
-  ctrl: {
-    legend: { default: 'Ctrl', mac: '⌃' },
-    name: { default: 'Control' },
-    order: { mac: 1, other: 2 },
-  },
-  alt: {
-    legend: { default: 'Alt', mac: '⌥' },
-    name: { default: 'Alt', mac: 'Option' },
-    order: { mac: 2, other: 3 },
-  },
-  shift: {
-    legend: { default: 'Shift', mac: '⇧' },
-    name: { default: 'Shift' },
-    order: { mac: 3, other: 4 },
-  },
+  mod: { mac: '⌘', order: { mac: 4, other: 2 } },
+  meta: { mac: '⌘', order: { mac: 4, other: 1 } },
+  ctrl: { mac: '⌃', order: { mac: 1, other: 2 } },
+  alt: { mac: '⌥', order: { mac: 2, other: 3 } },
+  shift: { mac: '⇧', order: { mac: 3, other: 4 } },
   /**
    * First on both platforms. It is a hardware key rather than an accelerator,
    * so it is written where a keyboard puts it — outside everything else.
    */
-  fn: {
-    legend: { default: 'Fn', mac: 'fn' },
-    name: { default: 'Function' },
-    order: { mac: 0, other: 0 },
-  },
+  fn: { order: { mac: 0, other: 0 } },
 
-  enter: { legend: { default: 'Enter', mac: '↩' }, name: { default: 'Enter', mac: 'Return' } },
-  escape: { legend: { default: 'Esc' }, name: { default: 'Escape' } },
-  tab: { legend: { default: 'Tab', mac: '⇥' }, name: { default: 'Tab' } },
+  enter: { mac: '↩' },
+  escape: {},
+  tab: { mac: '⇥' },
   /**
    * The word on every platform. `␣` is the Unicode open box, and a cap holding
    * one is a cap nobody can read at eleven pixels — the only legend in the
    * vocabulary where the symbol is less legible than the word it replaces.
    */
-  space: { legend: { default: 'Space' }, name: { default: 'Space' } },
-  backspace: {
-    legend: { default: 'Backspace', mac: '⌫' },
-    name: { default: 'Backspace', mac: 'Delete' },
-  },
-  delete: {
-    legend: { default: 'Del', mac: '⌦' },
-    name: { default: 'Delete', mac: 'Forward delete' },
-  },
-  capslock: { legend: { default: 'Caps Lock', mac: '⇪' }, name: { default: 'Caps lock' } },
-  pageup: { legend: { default: 'Page Up', mac: '⇞' }, name: { default: 'Page up' } },
-  pagedown: { legend: { default: 'Page Down', mac: '⇟' }, name: { default: 'Page down' } },
-  home: { legend: { default: 'Home', mac: '↖' }, name: { default: 'Home' } },
-  end: { legend: { default: 'End', mac: '↘' }, name: { default: 'End' } },
+  space: {},
+  backspace: { mac: '⌫' },
+  delete: { mac: '⌦' },
+  capslock: { mac: '⇪' },
+  pageup: { mac: '⇞' },
+  pagedown: { mac: '⇟' },
+  home: { mac: '↖' },
+  end: { mac: '↘' },
   /** The escape hatch for a literal plus, which is what the grammar splits on. */
-  plus: { legend: { default: '+' }, name: { default: 'Plus' } },
-
-  ...Object.fromEntries(
-    Object.entries(ARROWS).map(([token, [legend, name]]) => [
-      token,
-      { legend: { default: legend }, name: { default: name } },
-    ]),
-  ),
+  plus: { mark: '+' },
+  up: { mark: '↑' },
+  down: { mark: '↓' },
+  left: { mark: '←' },
+  right: { mark: '→' },
 };
 
 /** The names the field already writes, mapped onto the canonical token. */
@@ -206,8 +171,15 @@ const FUNCTION_KEY = /^f([1-9]|1\d|2[0-4])$/;
 const SINGLE_LETTER = /^\p{Letter}$/u;
 const WORDLIKE = /[\p{Letter}\p{Number}]/u;
 
-function pick(value: PerPlatform, platform: KbdPlatform) {
-  return value[platform as 'mac' | 'windows' | 'linux'] ?? value.default;
+/** The catalog read by a key path built from a token, which the key types cannot follow. */
+function word(t: KeysTranslator, path: string, platform: KbdPlatform) {
+  return (t as unknown as (key: string, slots: MessageSlots) => string)(path, { platform });
+}
+
+/** The token of the vocabulary a written key names, or `undefined` for one it does not hold. */
+export function canonicalKey(token: string): string | undefined {
+  const lower = token.toLowerCase();
+  return lower in KEYS ? lower : ALIASES[lower];
 }
 
 /**
@@ -254,7 +226,7 @@ export function parseShortcut(keys: string): string[][] {
 
 export function resolveKey(token: string, options: KeyOptions): ResolvedKey {
   const lower = token.toLowerCase();
-  const canonical = lower in KEYS ? lower : ALIASES[lower];
+  const canonical = canonicalKey(token);
   const definition = canonical === undefined ? undefined : KEYS[canonical];
 
   if (canonical === undefined || definition === undefined) {
@@ -267,12 +239,17 @@ export function resolveKey(token: string, options: KeyOptions): ResolvedKey {
     return { token: undefined, legend, name: undefined, symbolic: !WORDLIKE.test(legend) };
   }
 
-  const legend = options.legends?.[canonical] ?? pick(definition.legend, options.platform);
+  const { platform, t } = options;
+  const legend =
+    options.legends?.[canonical] ??
+    (platform === 'mac' ? definition.mac : undefined) ??
+    definition.mark ??
+    word(t, `legends.${canonical}`, platform);
 
   return {
     token: canonical,
     legend,
-    name: options.names?.[canonical] ?? pick(definition.name, options.platform),
+    name: options.names?.[canonical] ?? word(t, `names.${canonical}`, platform),
     symbolic: !WORDLIKE.test(legend),
   };
 }
@@ -314,7 +291,7 @@ export function resolveShortcut(keys: string, options: ShortcutOptions): Resolve
     steps,
     /* macOS writes ⌘⇧K with nothing between the keys; Windows writes Ctrl+Shift+K. */
     separator: platform === 'mac' ? '' : (options.separator ?? '+'),
-    thenLabel: options.thenLabel ?? 'then',
+    thenLabel: options.t('then'),
   };
 }
 
@@ -367,7 +344,7 @@ export function matchesShortcut(
   let key: string | undefined;
 
   for (const token of step) {
-    const canonical = resolveKey(token, { platform }).token ?? token.toLowerCase();
+    const canonical = canonicalKey(token) ?? token.toLowerCase();
     if (canonical === 'mod') {
       if (platform === 'mac') wanted.meta = true;
       else wanted.ctrl = true;

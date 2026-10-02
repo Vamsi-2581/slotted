@@ -1,13 +1,16 @@
 import { operatorsFor, setFilter } from '@slotted/core/filter';
 import type { FilterDescriptor, SetFilter } from '@slotted/core/filter';
+import { tableMessages } from '@slotted/core/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/table/contract.json';
+import { SlottedProvider } from '../i18n';
 import { TooltipDefaultsProvider } from '../tooltip/tooltip-defaults';
 import { Table } from './table';
 import { TableContent } from './table-content';
-import { DEFAULT_TABLE_LABELS, TableDefaultsProvider } from './table-defaults';
+import { TableDefaultsProvider } from './table-defaults';
 import {
   TableBooleanFilter,
   TableDateFilter,
@@ -512,7 +515,7 @@ describe('the column filter', () => {
 
     const offered = (await screen.findAllByRole('option')).map((option) => option.textContent);
     expect(offered).toEqual(
-      operatorsFor('text').map((operator) => DEFAULT_TABLE_LABELS.filterOperators[operator]),
+      operatorsFor('text').map((operator) => tableMessages.base.filterOperators[operator]),
     );
   });
 
@@ -758,7 +761,7 @@ describe('the column filter', () => {
     fireEvent.click(screen.getAllByRole('combobox', { name: 'Condition' })[0] as HTMLElement);
     const offered = (await screen.findAllByRole('option')).map((option) => option.textContent);
     expect(offered).toEqual(
-      operatorsFor('datetime').map((operator) => DEFAULT_TABLE_LABELS.filterOperators[operator]),
+      operatorsFor('datetime').map((operator) => tableMessages.base.filterOperators[operator]),
     );
   });
 
@@ -1073,7 +1076,7 @@ describe('the scrolling region', () => {
 describe('an application setting the family once', () => {
   it('is overridden by a table that states the axis itself', () => {
     render(
-      <TableDefaultsProvider labels={{ scroll: 'Tabela rolável' }} variant="plain">
+      <TableDefaultsProvider variant="plain">
         <Invoices />
         <Invoices variant="framed" />
       </TableDefaultsProvider>,
@@ -1082,6 +1085,21 @@ describe('an application setting the family once', () => {
     const [plain, framed] = screen.getAllByRole('table').map((table) => table.closest('[data-ui]'));
     expect(plain).toHaveAttribute('data-variant', 'plain');
     expect(framed).toHaveAttribute('data-variant', 'framed');
+  });
+});
+
+describe('the language in force', () => {
+  it('speaks it, and lays its own messages over it', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Invoices messages={{ selectRow: 'Marcar {row}' }} selectionMode="multiple" />
+      </SlottedProvider>,
+    );
+
+    expect(
+      screen.getByRole('checkbox', { name: 'Selecionar todas as linhas' }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole('checkbox', { name: /^Marcar \S/ }).length).toBeGreaterThan(0);
   });
 });
 

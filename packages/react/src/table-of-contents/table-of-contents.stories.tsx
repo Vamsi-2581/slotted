@@ -458,16 +458,11 @@ export const History: Story = {
 export const Defaults: Story = {
   parameters: scenario('defaults'),
   render: () => (
-    <TableOfContentsDefaultsProvider
-      history="replace"
-      messages={{ navigation: 'Neste artigo' }}
-      numbered
-      size="sm"
-    >
+    <TableOfContentsDefaultsProvider history="replace" numbered size="sm">
       <Grid columns={2}>
         <Scene
           label="from the provider"
-          note="Small, numbered, named “Neste artigo”, replacing the URL — none of it stated here."
+          note="Small, numbered, replacing the URL — none of it stated here. The name comes from the language in force."
           layout="block"
         >
           <TableOfContents items={SHORT} value="enderecos" />

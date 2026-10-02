@@ -134,6 +134,17 @@ describe('createFullscreen', () => {
     controller.destroy();
   });
 
+  /** The words are the binding's: core announces what its translator writes, and no English of its own. */
+  it('announces entry and exit in the words the translator writes', async () => {
+    const t = vi.fn((key: string) => `said ${key}`);
+    const controller = createFullscreen(region(), { policy: 'layout', t: t as never });
+
+    await controller.enter();
+    await controller.exit();
+    expect(t.mock.calls.map(([key]) => key)).toEqual(['entered', 'exited']);
+    controller.destroy();
+  });
+
   /**
    * A leave the application did not ask for is reported, not performed twice.
    * In native the agent has already left, so the region is out by the time

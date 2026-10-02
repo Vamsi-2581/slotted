@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/fullscreen/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Fullscreen, FullscreenContent, FullscreenTrigger } from './fullscreen';
 import { FullscreenDefaultsProvider } from './fullscreen-defaults';
 import { useFullscreen } from './use-fullscreen';
@@ -225,9 +227,9 @@ describe('Fullscreen', () => {
     expect(trigger()).toHaveAccessibleName('Full screen');
   });
 
-  it('reads size, variant and messages from the provider, and the instance wins', () => {
+  it('reads size and variant from the provider, and the instance wins', () => {
     render(
-      <FullscreenDefaultsProvider messages={{ enter: 'Tela cheia' }} size="sm" variant="outline">
+      <FullscreenDefaultsProvider size="sm" variant="outline">
         <Fullscreen>
           <FullscreenTrigger size="lg" />
         </Fullscreen>
@@ -236,7 +238,23 @@ describe('Fullscreen', () => {
 
     expect(trigger()).toHaveAttribute('data-size', 'lg');
     expect(trigger()).toHaveAttribute('data-variant', 'outline');
-    expect(trigger()).toHaveAccessibleName('Tela cheia');
+  });
+
+  it('speaks the language in force, and lays its own messages over it', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Fullscreen>
+          <FullscreenTrigger />
+        </Fullscreen>
+        <Fullscreen messages={{ enter: 'Apresentar' }}>
+          <FullscreenTrigger />
+        </Fullscreen>
+      </SlottedProvider>,
+    );
+
+    const [shared, own] = screen.getAllByRole('button');
+    expect(shared).toHaveAccessibleName('Tela cheia');
+    expect(own).toHaveAccessibleName('Apresentar');
   });
 
   it('drives a region from a control outside it through the handle', async () => {

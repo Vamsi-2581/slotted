@@ -1,5 +1,6 @@
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode } from 'react';
 
+import type { KeysMessages, PartialMessages } from '@slotted/core/i18n';
 import type { KbdPlatform, KbdPlatformInput } from '@slotted/core/keys';
 
 export type { KbdPlatform, KbdPlatformInput } from '@slotted/core/keys';
@@ -30,8 +31,6 @@ export interface KbdDefaults {
   variant: KbdVariant;
   /** Between two simultaneous keys. A Mac joins with nothing whatever this says. */
   separator: string;
-  /** Between two steps of a sequence — `G then I`. */
-  thenLabel: string;
   /** Replaces what the eye sees, per key token: `{ ctrl: 'Strg' }`. */
   legends: Readonly<Record<string, string>> | undefined;
   /** Replaces what a reader hears, per key token: `{ ctrl: 'Steuerung' }`. */
@@ -77,6 +76,11 @@ export interface KbdProps extends ComponentPropsWithRef<'kbd'> {
    * and the word a screen reader hears in place of it.
    */
   keyName?: string | undefined;
+  /**
+   * Words laid over the `keys` catalog of the language in force, key by key:
+   * `legends.*` for what a cap shows, `names.*` for what a reader hears.
+   */
+  messages?: PartialMessages<KeysMessages> | undefined;
   /** Defaults to the provider, then to `auto`. */
   platform?: KbdPlatformInput | undefined;
   /** Renders the wiring into another element, keeping the axes and the parts. */
@@ -104,6 +108,11 @@ export interface ShortcutProps extends ComponentPropsWithRef<'kbd'> {
   keys?: string | undefined;
   /** Replaces what the eye sees, per key token. Defaults to the provider. */
   legends?: Readonly<Record<string, string>> | undefined;
+  /**
+   * Words laid over the `keys` catalog of the language in force, key by key:
+   * `legends.*`, `names.*`, and `then` between two steps of a sequence.
+   */
+  messages?: PartialMessages<KeysMessages> | undefined;
   /** Replaces what a reader hears, per key token. Defaults to the provider. */
   names?: Readonly<Record<string, string>> | undefined;
   platform?: KbdPlatformInput | undefined;
@@ -111,7 +120,5 @@ export interface ShortcutProps extends ComponentPropsWithRef<'kbd'> {
   /** Between two simultaneous keys. Defaults to the provider, then to `+`. */
   separator?: string | undefined;
   size?: KbdSize | undefined;
-  /** Between two steps of a sequence. Defaults to the provider, then to `then`. */
-  thenLabel?: string | undefined;
   variant?: KbdVariant | undefined;
 }

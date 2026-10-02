@@ -42,16 +42,9 @@ export type NumberFieldClamp = 'blur' | 'strict' | 'none';
  */
 export type NumberFieldFormatOn = 'change' | 'commit';
 
-/** The two words the family's own buttons announce. */
-export const NUMBER_FIELD_INCREMENT_LABEL = 'Increase';
-export const NUMBER_FIELD_DECREMENT_LABEL = 'Decrease';
-
 export interface NumberFieldDefaults {
   clamp: NumberFieldClamp;
-  decrementLabel: string;
   formatOn: NumberFieldFormatOn;
-  incrementLabel: string;
-  locale: string | undefined;
   size: NumberFieldSize;
   stepper: NumberFieldStepper;
   variant: NumberFieldVariant;
@@ -59,10 +52,7 @@ export interface NumberFieldDefaults {
 
 const FALLBACK: NumberFieldDefaults = {
   clamp: 'blur',
-  decrementLabel: NUMBER_FIELD_DECREMENT_LABEL,
   formatOn: 'change',
-  incrementLabel: NUMBER_FIELD_INCREMENT_LABEL,
-  locale: undefined,
   size: 'md',
   stepper: 'stacked',
   variant: 'outline',
@@ -74,15 +64,15 @@ export const NUMBER_FIELD_DEFAULTS = new InjectionToken<NumberFieldDefaults>(
 );
 
 /**
- * An application decides once what its number fields look like, which locale
- * they are written in and what their two buttons are called, rather than
+ * An application decides once what its number fields look like, rather than
  * repeating the same inputs on every amount in a form. A control that states
  * any of them itself still wins.
  *
- * `locale` is the one worth setting first: it decides the decimal separator,
- * the grouping and the numbering system, and a form where one field reads
- * `1.234` as a thousand and another as one point two three four is a form that
- * loses money.
+ * The locale and the two buttons' words come from the language in force
+ * (`provideSlotted`): one locale for the whole application decides the decimal
+ * separator, the grouping and the numbering system, and a form where one field
+ * reads `1.234` as a thousand and another as one point two three four is a
+ * form that loses money.
  */
 export function provideNumberFieldDefaults(defaults: Partial<NumberFieldDefaults>) {
   return {

@@ -33,19 +33,12 @@ export interface ScrollAreaDefaults {
   gutter: ScrollAreaGutter;
   fade: ScrollAreaFade;
   overscroll: ScrollAreaOverscroll;
-  /** The name a region falls back to when the instance states none. */
-  label: string;
 }
 
 const FALLBACK: ScrollAreaDefaults = {
   axis: 'block',
   fade: 'both',
   gutter: 'stable',
-  /**
-   * The same words `prose` falls back to for its own scrolling block, so a
-   * product that has translated the phrase once has translated it for both.
-   */
-  label: 'Scrollable content',
   overscroll: 'contain',
   scrollbars: 'auto',
 };
@@ -57,8 +50,9 @@ export const SCROLL_AREA_DEFAULTS = new InjectionToken<ScrollAreaDefaults>(
 
 /**
  * An application decides once what its scroll areas look like — whether the
- * bar waits for a hand, whether the veil dims both ends, what a region is
- * called in this language — rather than repeating it on fifty of them.
+ * bar waits for a hand, whether the veil dims both ends — rather than repeating
+ * it on fifty of them. A region's name comes from the language in force
+ * (`provideSlotted`).
  *
  * None of the five surveyed implementations has an equivalent: each takes its
  * policy per instance, and Mantine's `type` in particular is written on every

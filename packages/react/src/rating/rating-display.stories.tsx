@@ -4,8 +4,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Fragment } from 'react';
 
 import { Grid, Measure, Scene } from '../field/field-demo';
+import { SlottedProvider } from '../i18n';
 import { Glyph, Icon } from '../icon';
-import { RatingProvider } from './rating-defaults';
 import { RatingDisplay } from './rating-display';
 import { REACT_RATING_DOCS, REACT_RATING_TOKENS } from './rating.docs';
 
@@ -87,12 +87,12 @@ export const Fractions: Story = {
         note="4,6 lights six tenths of the fifth star, 3,5 half of the fourth and 2,25 a quarter of the third. The number beside the stars is the reading that does not depend on seeing the fraction."
         layout="stack"
       >
-        <RatingProvider locale="pt-BR">
+        <SlottedProvider locale="pt-BR">
           <RatingDisplay value={4.6} />
           <RatingDisplay value={3.5} />
           <RatingDisplay value={2.25} />
           <RatingDisplay value={0.8} />
-        </RatingProvider>
+        </SlottedProvider>
       </Scene>
     </Grid>
   ),

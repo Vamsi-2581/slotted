@@ -467,9 +467,9 @@ export const Composition: Story = {
         label="A form in a panel, portalled as it would be in an application"
         note="This one keeps the default portal, so the layer is rendered at the end of the document and inherits the theme, scheme, density and direction of the region it was opened from. The controls inside are the consumer's own."
       >
-        <PopoverDefaultsProvider closeLabel="Close the panel" size="lg">
+        <PopoverDefaultsProvider size="lg">
           <Viewport>
-            <Popover initialFocus="input" side="bottom">
+            <Popover initialFocus="input" messages={{ close: 'Close the panel' }} side="bottom">
               <PopoverTrigger render={(props) => <Button {...props}>New invoice</Button>} />
               <PopoverLayer>
                 <PopoverContent>

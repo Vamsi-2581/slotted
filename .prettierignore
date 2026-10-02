@@ -11,6 +11,5 @@ node_modules
 demos/nexora/angular
 pnpm-lock.yaml
 docs/product/prd.md
-packages/theme/src/generated/
-packages/theme/src/recipes/standard.ts
+.astro
 packages/theme/test/fixtures/proof/proof.css

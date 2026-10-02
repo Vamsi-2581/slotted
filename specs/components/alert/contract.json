@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "alert",
   "ui": "alert",
+  "catalog": {
+    "group": "Feedback",
+    "summary": "Static message with a tone, icon and actions."
+  },
   "axes": {
     "tone": ["accent", "secondary", "success", "warning", "danger"],
     "variant": ["soft", "outline", "solid"],
@@ -31,6 +35,7 @@
       "reasons": ["dismiss", "programmatic"]
     }
   },
+  "messages": ["dismiss"],
   "members": {
     "alert": {
       "nativeElement": "section",
@@ -41,7 +46,6 @@
         "live": "off",
         "hideIcon": false,
         "dismissible": false,
-        "dismissLabel": "Dismiss",
         "defaultOpen": true,
         "restoreFocus": true
       },

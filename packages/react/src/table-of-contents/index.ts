@@ -5,7 +5,6 @@ export {
   useTableOfContentsItem,
 } from './table-of-contents-context';
 export {
-  DEFAULT_TABLE_OF_CONTENTS_MESSAGES,
   TABLE_OF_CONTENTS_FALLBACK,
   TableOfContentsDefaultsProvider,
   useTableOfContentsDefaults,
@@ -30,7 +29,6 @@ export type {
   TableOfContentsLayout,
   TableOfContentsLinkProps,
   TableOfContentsLinkRootProps,
-  TableOfContentsMessages,
   TableOfContentsOpenReason,
   TableOfContentsOpenRequest,
   TableOfContentsProps,

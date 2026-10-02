@@ -377,7 +377,8 @@
 </section>
 
 <script type="module">
-  import { createMessageScroller, formatScrollerMessage } from '@slotted/core/message-scroller';
+  import { formatMessage } from '@slotted/core/i18n';
+  import { createMessageScroller } from '@slotted/core/message-scroller';
 
   const replies = [
     'Posso escrever o patch e deixar o script de reenvio ao lado. Queres que abra o pull request?',
@@ -417,10 +418,10 @@
       jump.tabIndex = active ? 0 : -1;
       let count = jump.querySelector('[data-part="jump-count"]');
       if (newCount > 0) {
-        const words = formatScrollerMessage(
+        const words = formatMessage(
           '{count, plural, one {# nova} other {# novas}}',
           { count: newCount },
-          'pt-PT',
+          'pt-BR',
         );
         if (!count) {
           count = document.createElement('span');
@@ -428,7 +429,14 @@
           jump.append(count);
         }
         count.textContent = words;
-        jump.setAttribute('aria-label', `Ir para a mais recente, ${words}`);
+        jump.setAttribute(
+          'aria-label',
+          formatMessage(
+            'Ir para a mais recente, {count, plural, one {# nova} other {# novas}}',
+            { count: newCount },
+            'pt-BR',
+          ),
+        );
       } else {
         count?.remove();
         jump.setAttribute('aria-label', 'Ir para a mais recente');

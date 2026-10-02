@@ -1,3 +1,4 @@
+import type { FamilyTranslator, PartialMessages, StepperMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { StepOrientation, StepStatus } from '@slotted/core/steps';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
@@ -10,21 +11,8 @@ export type StepperStepReason = 'pointer' | 'keyboard' | 'programmatic';
 export type StepperChangeRequest = ChangeRequest<number>;
 export type { StepStatus };
 
-/** The wording every step announces, so an application translates once. */
-export interface StepperLabels {
-  /** "Step 2 of 5" — the position a reader hears in place of the marker. */
-  position: (index: number, count: number) => string;
-  complete: string;
-  current: string;
-  invalid: string;
-  loading: string;
-  unavailable: string;
-}
-
 export interface StepperDefaults {
-  label?: string | undefined;
   labelPlacement?: StepperLabelPlacement | undefined;
-  labels?: Partial<StepperLabels> | undefined;
   linear?: boolean | undefined;
   navigation?: StepperNavigation | undefined;
   orientation?: StepperOrientation | undefined;
@@ -51,13 +39,15 @@ export interface StepperProps extends ComponentPropsWithRef<'div'> {
   autoComplete?: boolean | undefined;
   /** The step an uncontrolled stepper starts from, read once. */
   defaultStep?: number | undefined;
-  /** The name of the sequence, announced on the list. */
-  label?: string | undefined;
-  labels?: Partial<StepperLabels> | undefined;
   /** `end` beside the marker, `bottom` under it. */
   labelPlacement?: StepperLabelPlacement | undefined;
   /** Requires every earlier step to be complete before a later one is reached. */
   linear?: boolean | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * list's name (`label`), the position, and the status each step announces.
+   */
+  messages?: PartialMessages<StepperMessages> | undefined;
   /** What a header is. `none` is a read-only progress indicator. */
   navigation?: StepperNavigation | undefined;
   /** Called before the step moves, with the request that carries the reason. */
@@ -125,8 +115,9 @@ export interface StepperContextValue {
   goToStep: (step: number, reason?: StepperStepReason, source?: unknown) => void;
   ids: { panel: (index: number) => string; trigger: (index: number) => string };
   labelPlacement: StepperLabelPlacement;
-  labels: StepperLabels;
   linear: boolean;
+  /** The locale in force: what the descriptors a step announces are listed in. */
+  locale: string;
   navigation: StepperNavigation;
   next: (reason?: StepperStepReason, source?: unknown) => void;
   orientation: StepperOrientation;
@@ -138,6 +129,8 @@ export interface StepperContextValue {
   step: number;
   /** Whether a linear flow lets the reader jump to an index. */
   reachable: (index: number) => boolean;
+  /** The family's words in the language in force, with this stepper's `messages` laid over them. */
+  t: FamilyTranslator<StepperMessages>;
 }
 
 /** What one step is told by the list that laid it out. */

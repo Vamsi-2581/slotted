@@ -135,3 +135,7 @@ test('gives a stuck header air under the chrome without moving it at rest', () =
   assert.match(header, /padding-block-start:var\(--slotted-space-4,0\.5rem\)/);
   assert.match(header, /margin-block-start:calc\(-1 \* var\(--slotted-space-4,0\.5rem\)\)/);
 });
+
+test('publishes its raised ground to the families inside it', () => {
+  assert.match(rule(`${ui}[data-ground='surface']`), /--slotted-ground:var\(--_ground\)/);
+});

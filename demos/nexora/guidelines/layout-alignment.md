@@ -78,11 +78,11 @@ Check: Scroll a long list under the header: the tab strip stays visible under th
 
 ### LA-05 · Controls side by side share their top
 
-Level: SHOULD
-Applies to: fields on one line — a table row of editable cells, an inline group of fields — where some carry a line of help or an error and others do not
-Rule: Fields on one line are aligned to the start of the block axis, so every control of the line starts at the same height whatever stands under it.
-Why: Centred, a field with a line of help under it stands higher than its neighbour without one, and the line of controls the eye follows across the row breaks by the help's height.
-Do: Declare `cellAlign="start"` on a `table` whose cells hold fields, and `align="start"` on an `inline` of fields; a value read beside the controls is centred on the controls' height.
-Don't: Keep the table's centred cells for a row of fields, where a quantity with help stood 21 pixels above the cost beside it.
-Seen in: Nexora · new purchase order, the lines table (ledger row "table, field") · corrected
-Check: Add two lines, one whose quantity carries help and one whose does not: in each row every control has the same top.
+Level: MUST
+Applies to: fields on one line — a table row of editable cells, an inline group of fields, a grid of fields with an action button — where some carry a line of help or an error and others do not
+Rule: Fields on one line are aligned to the start of the block axis, so every control of the line starts at the same height and has the same height whatever stands under it. A button on the line stands on the controls' row, not on the labels' or the help's.
+Why: Centred or aligned to the end, a field with a line of help under it stands its control higher than its neighbour without one, and the line of controls the eye follows across the row breaks by the help's height.
+Do: Declare `cellAlign="start"` on a `table` whose cells hold fields, and `align="start"` on an `inline` of fields. In a grid of fields with a button, give the grid three rows — label, control, help — each field spanning them with `grid-template-rows: subgrid`, and place the button in the control row; a value read beside the controls is centred on the controls' height.
+Don't: Keep the table's centred cells for a row of fields, where a quantity with help stood 21 pixels above the cost beside it. Align a grid of fields with `align-items: end` to bring a button level with the controls: the field with help lifts its control by the help's height.
+Seen in: Nexora · new purchase order, the lines table (ledger row "table, field") · corrected. Nexora · new quote, the line picker: Discount with "Percent off the list price." stood 24 pixels above Item and Quantity · corrected
+Check: On a line where one field carries help and another does not, every control and the button share one top and one height, measured by bounding box.

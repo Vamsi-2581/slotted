@@ -279,7 +279,7 @@ export const Loading: Story = {
              slSwitch
              [checked]="on()"
              [loading]="saving()"
-             loadingLabel="Salvando a preferência"
+             [messages]="{ loading: 'Salvando a preferência' }"
              (checkedChange)="save($event.value)"
            >
              Sincronização automática

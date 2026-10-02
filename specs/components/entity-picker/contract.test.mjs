@@ -231,15 +231,13 @@ test('offers the axes with their defaults and lets an application set them once'
   assert.deepEqual(contract.axes.size, ['sm', 'md', 'lg']);
   assert.deepEqual(contract.axes.variant, ['outline', 'subtle', 'plain']);
   assert.deepEqual(contract.axes.media, ['avatar', 'none']);
-  assert.deepEqual(contract.axes.openOn, ['input', 'focus']);
   assert.equal(member.defaults.selectionMode, 'single');
   assert.equal(member.defaults.searchDelay, 250);
   assert.equal(member.defaults.minQueryLength, 0);
   assert.equal(member.defaults.max, null);
   assert.equal(member.defaults.media, 'avatar');
-  assert.equal(member.defaults.openOn, 'focus');
   assert.deepEqual(contract.resolution.disabled, ['prop', 'field', 'defaults', false]);
-  assert.ok(contract.provides.entityPickerDefaults.includes('labels'));
+  assert.ok(!contract.provides.entityPickerDefaults.includes('labels'));
   assert.ok(contract.provides.entityPickerDefaults.includes('searchDelay'));
   for (const label of [
     'empty',
@@ -262,7 +260,7 @@ test('offers the axes with their defaults and lets an application set them once'
     'clear',
     'trigger',
   ]) {
-    assert.equal(typeof contract.labels[label], 'string', `${label} has no default`);
+    assert.ok(contract.messages.includes(label), `${label} is not a message`);
   }
 });
 
@@ -298,4 +296,24 @@ test('declares one page of demonstrations for every scenario', () => {
     'composition',
   ]);
   assert.equal(contract.design, 'docs/history/designs/2026-09-24-entity-picker-design.md');
+});
+
+/**
+ * A reader tabbing through a form passes this control on the way to the next
+ * field, and a popup that opens on every Tab is a list announced and dismissed
+ * for nothing. A press on the input is the other gesture: the reader aimed at
+ * this control, and a press that only places the caret leaves them hunting for
+ * the chevron. combobox, multi-select and entity-picker answer both alike.
+ */
+test('opens on typing and on a press on the input, and never on a Tab into it', () => {
+  assert.deepEqual(contract.axes.openOn, ['input', 'focus', 'manual']);
+  assert.equal(member.defaults.openOn, 'input');
+  assert.deepEqual(contract.resolution.openOn, ['prop', 'defaults', 'input']);
+  assert.match(contract.opening.input, /typing/);
+  assert.match(contract.opening.input, /Tab/);
+  assert.match(contract.opening.focus, /every focus/);
+  assert.match(contract.opening.manual, /trigger/);
+  assert.match(contract.opening.press, /pointer/);
+  assert.match(contract.opening.press, /never closes/);
+  assert.match(contract.opening.press, /manual/);
 });

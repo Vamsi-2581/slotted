@@ -1,7 +1,6 @@
 export { SlFormActions } from './form-actions';
 export {
   FORM_DEFAULTS,
-  FORM_SUMMARY_TITLE,
   injectFormDefaults,
   injectFormErrorMessages,
   provideFormDefaults,

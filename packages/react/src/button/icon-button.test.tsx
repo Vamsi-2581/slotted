@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/button/contract.json';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from '../menu';
 import { IconButton } from './icon-button';
 
 const defaults = contract.members.iconButton.defaults;
@@ -134,7 +135,12 @@ describe('IconButton', () => {
   it('waits without losing its name, and refuses activation while it does', () => {
     const onClick = vi.fn();
     render(
-      <IconButton aria-label="Refresh" loading loadingLabel="Refreshing" onClick={onClick}>
+      <IconButton
+        aria-label="Refresh"
+        loading
+        messages={{ loading: 'Refreshing' }}
+        onClick={onClick}
+      >
         <svg data-testid="glyph" />
       </IconButton>,
     );
@@ -185,5 +191,43 @@ describe('IconButton', () => {
     );
 
     expect(screen.getByRole('button')).toHaveAttribute('data-shape', 'circle');
+  });
+
+  /**
+   * A trigger hands its root every attribute a button can carry, so its props
+   * type `aria-labelledby` as an optional string. The icon button has to take
+   * them as they are: the family's own docs offer it as the trigger a toolbar
+   * or an action bar overflows into. What the type holds is that a name
+   * exists, not that only one attribute could have given it.
+   */
+  it("takes a trigger's props whole, and still requires a name", () => {
+    render(
+      <Menu>
+        <MenuTrigger
+          render={(props) => (
+            <IconButton {...props} aria-label="More actions">
+              <svg />
+            </IconButton>
+          )}
+        />
+        <MenuContent>
+          <MenuItem>Archive</MenuItem>
+        </MenuContent>
+      </Menu>,
+    );
+
+    expect(screen.getByRole('button', { name: 'More actions' })).toHaveAttribute(
+      'aria-haspopup',
+      'menu',
+    );
+
+    void (
+      (
+        // @ts-expect-error -- an icon carries no text, so a name is required.
+        <IconButton>
+          <svg />
+        </IconButton>
+      )
+    );
   });
 });

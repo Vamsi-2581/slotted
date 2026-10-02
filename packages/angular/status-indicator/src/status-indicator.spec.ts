@@ -1,6 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
+
+import { provideSlotted } from '@slotted/angular/i18n';
+import { statusIndicatorMessages } from '@slotted/core/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
 import contract from '../../../../specs/components/status-indicator/contract.json';
 import { provideStatusIndicatorDefaults } from './status-indicator-defaults';
@@ -100,7 +104,7 @@ describe('SlStatusIndicator', () => {
       TestBed.resetTestingModule();
       const fixture = renderTemplate(`<span slStatusIndicator status="${status}"></span>`);
       expect(part(fixture, 'announcement')?.textContent?.trim()).toBe(
-        contract.defaultLabels[status],
+        statusIndicatorMessages.base[status],
       );
     }
   });
@@ -186,12 +190,25 @@ describe('SlStatusIndicator', () => {
       expect(root(fixture).getAttribute('data-size')).toBe('lg');
     });
 
-    it('translates the six words in one decision', () => {
+    it('speaks the language in force, and follows a change of it in place', () => {
+      const locale = signal('pt-BR');
       const fixture = renderTemplate(`<span slStatusIndicator status="danger"></span>`, [
-        provideStatusIndicatorDefaults({ labels: { danger: 'Fehler' } }),
+        provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
       ]);
 
-      expect(part(fixture, 'announcement')?.textContent?.trim()).toBe('Fehler');
+      expect(part(fixture, 'announcement')?.textContent?.trim()).toBe('Erro');
+
+      locale.set('en-US');
+      fixture.detectChanges();
+      expect(part(fixture, 'announcement')?.textContent?.trim()).toBe('Error');
+    });
+
+    it('lays its own messages over the catalog key by key', () => {
+      const fixture = renderTemplate(
+        `<span slStatusIndicator status="success" [messages]="{ success: 'Ready' }"></span>`,
+      );
+
+      expect(part(fixture, 'announcement')?.textContent?.trim()).toBe('Ready');
     });
   });
 

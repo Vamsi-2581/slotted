@@ -224,7 +224,7 @@ export const Labels: Story = {
       </Scene>
       <Scene
         label="Messages in another language"
-        note="Every string is a message on the provider or the instance. itemLabel names each radio, and the locale writes its digits."
+        note="Every string is a message of the language in force, laid over per instance. itemLabel names each radio, and the locale writes its digits."
         layout="stack"
       >
         <Rating

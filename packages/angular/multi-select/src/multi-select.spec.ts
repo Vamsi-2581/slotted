@@ -1,11 +1,15 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+import type { ChangeRequest } from '@slotted/core/state';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { SlMultiSelect } from './multi-select';
 import { SlMultiSelectItem } from './multi-select-items';
-import type { MultiSelectRefuseCause } from './multi-select-defaults';
+import { provideMultiSelectDefaults } from './multi-select-defaults';
+import type { MultiSelectOpenOn, MultiSelectRefuseCause } from './multi-select-defaults';
 
 @Component({
   standalone: true,
@@ -350,6 +354,146 @@ describe('SlMultiSelect', () => {
   standalone: true,
   imports: [SlMultiSelect, SlMultiSelectItem],
   template: `
+    <sl-multi-select
+      aria-label="Fruit"
+      [portal]="false"
+      [openOn]="openOn()"
+      [readOnly]="readOnly()"
+      (openChangeRequest)="requests.push($event)"
+    >
+      <sl-multi-select-item value="blueberry" label="Blueberry" />
+      <sl-multi-select-item value="raspberry" label="Raspberry" />
+    </sl-multi-select>
+  `,
+})
+class OpeningHost {
+  readonly openOn = signal<MultiSelectOpenOn | undefined>('input');
+  readonly readOnly = signal(false);
+  readonly requests: ChangeRequest<boolean>[] = [];
+}
+
+/**
+ * The contract's `opening`: `input` opens on typing and on a press, `focus` on
+ * every focus, `manual` only on the trigger and the arrows. A press on the
+ * input opens a closed popup and never closes an open one.
+ */
+describe('SlMultiSelect, opening', () => {
+  let fixture: ComponentFixture<OpeningHost>;
+
+  const create = async (providers: unknown[] = []) => {
+    await TestBed.configureTestingModule({
+      imports: [OpeningHost],
+      providers: providers as never[],
+    }).compileComponents();
+    fixture = TestBed.createComponent(OpeningHost);
+  };
+
+  const expanded = () => field().getAttribute('aria-expanded');
+  const focusField = () => {
+    field().focus();
+    fixture.detectChanges();
+  };
+  const pressField = () => {
+    field().click();
+    fixture.detectChanges();
+  };
+
+  it('opens a closed popup on a press on the input, once, with reason pointer', async () => {
+    await create();
+    fixture.detectChanges();
+    focusField();
+    pressField();
+    expect(expanded()).toBe('true');
+    expect(fixture.componentInstance.requests).toHaveLength(1);
+    expect(fixture.componentInstance.requests[0]).toMatchObject({ value: true, reason: 'pointer' });
+  });
+
+  it('keeps an open popup open on a press on the input', async () => {
+    await create();
+    fixture.detectChanges();
+    focusField();
+    pressField();
+    pressField();
+    expect(expanded()).toBe('true');
+    expect(fixture.componentInstance.requests).toHaveLength(1);
+  });
+
+  it('opens nothing on a Tab into the input under input', async () => {
+    await create();
+    fixture.detectChanges();
+    focusField();
+    expect(expanded()).toBe('false');
+    expect(fixture.componentInstance.requests).toHaveLength(0);
+  });
+
+  it('opens on typing under input', async () => {
+    await create();
+    fixture.detectChanges();
+    focusField();
+    type(fixture, 'be');
+    expect(expanded()).toBe('true');
+  });
+
+  it('opens only on the trigger and the arrows under manual', async () => {
+    await create();
+    fixture.componentInstance.openOn.set('manual');
+    fixture.detectChanges();
+    focusField();
+    type(fixture, 'be');
+    expect(expanded()).toBe('false');
+    pressField();
+    expect(expanded()).toBe('false');
+    expect(fixture.componentInstance.requests).toHaveLength(0);
+    press(field(), 'ArrowDown');
+    fixture.detectChanges();
+    expect(expanded()).toBe('true');
+  });
+
+  it('opens on focus under focus, and a press that focuses opens it once', async () => {
+    await create();
+    fixture.componentInstance.openOn.set('focus');
+    fixture.detectChanges();
+    focusField();
+    pressField();
+    expect(expanded()).toBe('true');
+    expect(fixture.componentInstance.requests).toHaveLength(1);
+  });
+
+  it('opens nothing on a press on a read-only control', async () => {
+    await create();
+    fixture.componentInstance.readOnly.set(true);
+    fixture.detectChanges();
+    focusField();
+    pressField();
+    expect(expanded()).toBe('false');
+    expect(fixture.componentInstance.requests).toHaveLength(0);
+  });
+
+  it('stays closed when a listener before it prevents the click', async () => {
+    await create();
+    fixture.detectChanges();
+    fixture.nativeElement.addEventListener('click', (event: Event) => event.preventDefault(), {
+      capture: true,
+    });
+    focusField();
+    pressField();
+    expect(expanded()).toBe('false');
+    expect(fixture.componentInstance.requests).toHaveLength(0);
+  });
+
+  it('takes openOn from the defaults provider', async () => {
+    await create([provideMultiSelectDefaults({ openOn: 'focus' })]);
+    fixture.componentInstance.openOn.set(undefined);
+    fixture.detectChanges();
+    focusField();
+    expect(expanded()).toBe('true');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlMultiSelect, SlMultiSelectItem],
+  template: `
     <sl-multi-select aria-label="Fruit" [portal]="false">
       <sl-multi-select-item value="blueberry" label="Blueberry" icon="dot" />
       <sl-multi-select-item value="raspberry" label="Raspberry" />
@@ -370,5 +514,25 @@ describe('SlMultiSelect, the icon column', () => {
     expect(column?.querySelector("[data-ui='icon'] > svg")?.getAttribute('data-glyph')).toBe('dot');
     expect(column?.textContent?.trim()).toBe('');
     expect(optionFor('raspberry').querySelector("[data-part='icon']")).toBeNull();
+  });
+});
+
+/** The words come from the language in force, and follow a change of it in place. */
+describe('SlMultiSelect, the language in force', () => {
+  it('speaks pt-BR, and follows a change of locale without being created again', async () => {
+    const locale = signal('pt-BR');
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.defaultValue.set(['blueberry', 'raspberry']);
+    await settle(fixture);
+
+    expect(grid().getAttribute('aria-label')).toBe('2 escolhidos');
+
+    locale.set('en-US');
+    await settle(fixture);
+    expect(grid().getAttribute('aria-label')).toBe('2 chosen');
   });
 });

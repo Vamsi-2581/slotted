@@ -8,6 +8,7 @@ import '@slotted/styles/tag/tag.css';
 
 import { writeToClipboard } from '@slotted/core/clipboard';
 import { createFilter } from '@slotted/core/collection';
+import { tagsInputMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createWidthGate } from '@slotted/core/measure';
 import { createControllable } from '@slotted/core/state';
@@ -32,6 +33,7 @@ import type {
 } from 'react';
 
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { CHIP_SELECTOR, ChipRow } from './tags-input-chips';
 import type { TagsInputChipsContext } from './tags-input-chips';
@@ -69,13 +71,6 @@ function attach<T>(node: T, ...refs: (Ref<T> | undefined)[]) {
 
 function same(a: readonly string[], b: readonly string[]) {
   return a.length === b.length && a.every((value, index) => value === b[index]);
-}
-
-function fill(template: string, values: Record<string, string | number>) {
-  return Object.entries(values).reduce(
-    (text, [key, value]) => text.replaceAll(`{${key}}`, String(value)),
-    template,
-  );
 }
 
 /** How long the chip that answered a duplicate stays marked: the theme's long step. */
@@ -118,8 +113,9 @@ export function TagsInput({
   formatLabel,
   handleRef,
   inputValue,
-  locale,
+  locale: localeProp,
   lockedValues = [],
+  messages,
   normalize,
   onValueCopy,
   onInputValueChange,
@@ -136,6 +132,9 @@ export function TagsInput({
 }: TagsInputProps) {
   const defaults = useTagsInputDefaults();
   const field = useField();
+  const t = useMessages(tagsInputMessages, messages);
+  const inForce = useLocale();
+  const locale = localeProp ?? inForce;
 
   const axes: Partial<TagsInputDefaults> = {};
   const nativeProps: Record<string, unknown> = {};
@@ -211,18 +210,11 @@ export function TagsInput({
     const message =
       firstFailure === undefined
         ? resolved.max !== null && currentValue.length > resolved.max
-          ? fill(resolved.counterLabel, { count: currentValue.length, max: resolved.max })
+          ? t('counter', { count: currentValue.length, max: resolved.max })
           : ''
-        : firstFailure.message || resolved.invalidLabel;
+        : firstFailure.message || t('invalid');
     inputNode.setCustomValidity(message);
-  }, [
-    inputNode,
-    firstFailure,
-    currentValue.length,
-    resolved.max,
-    resolved.counterLabel,
-    resolved.invalidLabel,
-  ]);
+  }, [inputNode, firstFailure, currentValue.length, resolved.max, t]);
 
   /**
    * Under 120 pixels there is no room for a chip at all, and the counter
@@ -331,11 +323,13 @@ export function TagsInput({
       if (result.added.length > 0 && commit(result.next, 'submit', source)) {
         const last = result.added[result.added.length - 1] as string;
         const verdict = judge(last);
-        const said = fill(resolved.addedLabel, {
-          label: labelFor(last),
-          count: result.next.length,
-        });
-        announce(verdict.valid ? said : `${said}. ${verdict.message || resolved.invalidLabel}`);
+        const label = labelFor(last);
+        const count = result.next.length;
+        announce(
+          verdict.valid
+            ? t('added', { label, count })
+            : t('addedInvalid', { label, count, reason: verdict.message || t('invalid') }),
+        );
       }
 
       for (const cause of ['duplicate', 'limit', 'invalid'] as const) {
@@ -345,17 +339,17 @@ export function TagsInput({
       if (result.existing.length > 0) {
         const existing = result.existing[0] as string;
         setDuplicate(existing);
-        announce(fill(resolved.duplicateLabel, { label: labelFor(existing) }));
+        announce(t('duplicate', { label: labelFor(existing) }));
       }
       if (result.refused.limit.length > 0 && resolved.max !== null) {
-        announce(fill(resolved.counterLabel, { count: resolved.max, max: resolved.max }));
+        announce(t('counter', { count: resolved.max, max: resolved.max }));
       }
       if (result.refused.invalid.length > 0) {
-        announce(judge(result.refused.invalid[0] as string).valid ? '' : resolved.invalidLabel);
+        announce(judge(result.refused.invalid[0] as string).valid ? '' : t('invalid'));
       }
       return result;
     },
-    [announce, collator, commit, judge, labelFor, normalise, resolved],
+    [announce, collator, commit, judge, labelFor, normalise, resolved, t],
   );
 
   const remove = useCallback(
@@ -365,10 +359,10 @@ export function TagsInput({
       if (target === undefined || lockedValues.includes(target)) return;
       const next = state.currentValue.filter((_, at) => at !== index);
       if (commit(next, 'remove', source)) {
-        announce(fill(resolved.removedLabel, { label: labelFor(target), count: next.length }));
+        announce(t('removed', { label: labelFor(target), count: next.length }));
       }
     },
-    [announce, commit, labelFor, lockedValues, resolved.removedLabel],
+    [announce, commit, labelFor, lockedValues, t],
   );
 
   const clear = useCallback(
@@ -394,14 +388,14 @@ export function TagsInput({
       next.splice(target, 0, moved as string);
       if (!commit(next, 'keyboard', source)) return;
       announce(
-        fill(resolved.reorderLabel, {
+        t('reorder', {
           label: labelFor(moved as string),
           position: target + 1,
           count: next.length,
         }),
       );
     },
-    [announce, commit, labelFor, resolved.reorderLabel],
+    [announce, commit, labelFor, t],
   );
 
   const copy = useCallback(
@@ -412,9 +406,9 @@ export function TagsInput({
         frame.current?.ownerDocument,
       );
       onValueCopy?.(values, outcome);
-      if (outcome !== 'refused') announce(fill(resolved.copiedLabel, { count: values.length }));
+      if (outcome !== 'refused') announce(t('copied', { count: values.length }));
     },
-    [announce, onValueCopy, resolved.copiedLabel, resolved.delimiters],
+    [announce, onValueCopy, resolved.delimiters, t],
   );
 
   /** The typed text, committed as one or several values. */
@@ -533,7 +527,7 @@ export function TagsInput({
   );
 
   const describedBy = [native['aria-describedby'], field?.describedBy].filter(Boolean).join(' ');
-  const count = fill(resolved.countLabel, { count: currentValue.length });
+  const count = t('count', { count: currentValue.length });
   const ownLabel = native['aria-label'];
   const showClear =
     resolved.clearable &&
@@ -542,15 +536,13 @@ export function TagsInput({
 
   const counter = (() => {
     if (resolved.max !== null) {
-      return fill(resolved.counterLabel, { count: currentValue.length, max: resolved.max });
+      return t('counter', { count: currentValue.length, max: resolved.max });
     }
     if (narrow && currentValue.length > 0) return count;
     return null;
   })();
 
-  const hint = resolved.editable
-    ? `${resolved.hintLabel} ${resolved.editHintLabel}`
-    : resolved.hintLabel;
+  const hint = resolved.editable ? t('editHint') : t('hint');
 
   const chipsContext: TagsInputChipsContext = {
     announce,
@@ -560,16 +552,14 @@ export function TagsInput({
     duplicate,
     editable: resolved.editable && !frozen,
     inputNode,
-    invalidLabel: resolved.invalidLabel,
     labelFor,
     lockedValues,
     move,
     readOnly: resolved.readOnly,
     remove,
-    removeLabel: resolved.removeLabel,
     reorderable: resolved.reorderable && !frozen,
-    reorderLabel: resolved.reorderLabel,
     replace: (index, text, source) => admit([text], source, index),
+    t,
     value: currentValue,
     verdicts,
   };
@@ -598,7 +588,11 @@ export function TagsInput({
   const inner = (
     <>
       <div
-        aria-label={ownLabel === undefined ? undefined : `${ownLabel}, ${count}`}
+        aria-label={
+          ownLabel === undefined
+            ? undefined
+            : t('countNamed', { label: ownLabel, count: currentValue.length })
+        }
         aria-labelledby={
           ownLabel === undefined && field !== undefined ? field.ids.label : undefined
         }
@@ -633,7 +627,7 @@ export function TagsInput({
         </span>
       )}
       {showClear ? (
-        <button aria-label={resolved.clearLabel} data-part="clear" onClick={onClear} type="button">
+        <button aria-label={t('clear')} data-part="clear" onClick={onClear} type="button">
           <Icon>
             <Glyph name="x" />
           </Icon>

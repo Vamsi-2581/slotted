@@ -7,5 +7,4 @@ export const SKELETON_DEFAULT_ANIMATION: SkeletonAnimation = 'shimmer';
 export const SKELETON_DEFAULT_SHAPE: SkeletonShape = 'text';
 export const SKELETON_DEFAULT_SIZE: SkeletonSize = 'md';
 export const SKELETON_DEFAULT_LIVE: SkeletonLive = 'polite';
-export const SKELETON_DEFAULT_LABEL = 'Loading…';
 export const SKELETON_DEFAULT_LINES = 3;

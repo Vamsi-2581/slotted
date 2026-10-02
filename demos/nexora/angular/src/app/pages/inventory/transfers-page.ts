@@ -214,9 +214,9 @@ function transferColumns(codeOf: (id: string) => string): readonly GridColumn<Tr
             (valueChangeRequest)="store.setFilter($event.value)"
             [query]="store.search()"
             (queryChangeRequest)="store.setSearch($event.value)"
-            [labels]="{ count: countLabel }"
+            [messages]="countMessages"
             [count]="store.total() ?? undefined"
-            [total]="store.grandTotal() ?? undefined"
+            [total]="store.total() === store.grandTotal() ? undefined : (store.grandTotal() ?? undefined)"
             [loading]="store.loading()"
           >
             <app-list-view-tools
@@ -230,7 +230,7 @@ function transferColumns(codeOf: (id: string) => string): readonly GridColumn<Tr
           </div>
           <sl-data-grid
             #grid="slDataGrid"
-            label="Transfers"
+            aria-label="Transfers"
             rowKey="id"
             variant="framed"
             activatable
@@ -268,8 +268,8 @@ function transferColumns(codeOf: (id: string) => string): readonly GridColumn<Tr
             <nav
               slDataGridFooter
               slPagination
-              label="Transfer pages"
-              [labels]="pagerLabels"
+              aria-label="Transfer pages"
+              [messages]="pagerMessages"
               [count]="store.total() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
@@ -367,14 +367,11 @@ export class TransfersPage {
     return `Stock moving ${where}. A transfer is written as a draft, marked ready, shipped from its source and received at its destination line by line.`;
   });
 
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total
-      ? `${count} transfers`
-      : `${count} of ${total} transfers`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} transfers', countOnly: '{count} transfers' };
 
-  readonly pagerLabels = {
-    range: (start: number, end: number, count: number) =>
-      `Transfers ${start}–${end} of ${count.toLocaleString('en-US')}`,
+  readonly pagerMessages = {
+    range: 'Transfers {start}–{end} of {count}',
     pageSize: 'Transfers per page',
   };
 

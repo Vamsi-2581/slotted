@@ -40,7 +40,8 @@ const anatomy: AnatomyRow[] = [
     part: 'edit-bar',
     element: 'div',
     required: false,
-    purpose: 'role="group" named labels.editBar, above the grid while editing and editBar is true.',
+    purpose:
+      'role="group" named messages.editBar, above the grid while editing and editBar is true.',
   },
   {
     part: 'edit-status',
@@ -318,25 +319,16 @@ const [editing, setEditing] = useState(false);
   {
     id: 'labels',
     title: 'Words for another product',
-    note: 'Every word is a label: the bar, the handle’s name, the menu, the size readout and the announcements. A provider sets them once, in Portuguese here, together with the heading level.',
+    note: 'Every word comes from the language in force: the bar, the handle’s name, the menu, the size readout and the announcements. SlottedProvider sets Portuguese here, and the defaults provider the heading level.',
     snippet: defineSnippet({
       id: 'dashboard-grid-react-labels',
       language: 'tsx',
       label: 'Portuguese, set once',
-      source: `<DashboardGridDefaultsProvider
-  headingLevel={2}
-  labels={{
-    editBar: 'Layout',
-    add: 'Adicionar widget',
-    reset: 'Repor layout',
-    cancel: 'Cancelar',
-    done: 'Concluir',
-    handle: 'Reorganizar {title}',
-    moved: '{title} movido para a posição {position} de {total}',
-  }}
->
-  <App />
-</DashboardGridDefaultsProvider>;`,
+      source: `<SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+  <DashboardGridDefaultsProvider headingLevel={2}>
+    <App />
+  </DashboardGridDefaultsProvider>
+</SlottedProvider>;`,
     }),
   },
   {
@@ -431,11 +423,11 @@ export const REACT_DASHBOARD_GRID_DOCS = {
         'The level of each widget’s title',
       ],
       [
-        'labels',
-        'Partial<DashboardGridLabels>',
-        'English',
-        'DashboardGrid, DashboardGridDefaultsProvider',
-        'editBar, editStatus, add, reset, cancel, done, handle, detail, retry, emptyTitle, errorTitle, empty, emptyEditing, the eight menu items, hide, size, moved, resized, hidden, shown, resetDone, cancelled; {slot}s are filled',
+        'messages',
+        'Partial<DashboardGridMessages>',
+        '—',
+        'DashboardGrid',
+        'Words laid over the language in force, key by key: editBar, editStatus, add, reset, cancel, done, handle, detail, retry, emptyTitle, errorTitle, empty, emptyEditing, the eight menu items, hide, size, moved, movedInOrder, resized, hidden, shown, resetDone, cancelled',
       ],
       [
         'ref',
@@ -543,14 +535,14 @@ export const REACT_DASHBOARD_GRID_DOCS = {
       [
         'emptyTitle / emptyDescription / emptyAction',
         'ReactNode',
-        'labels.emptyTitle / — / —',
+        'messages.emptyTitle / — / —',
         'DashboardWidget',
         'The empty message and the action that creates the first entry',
       ],
       [
         'errorTitle / errorDescription',
         'ReactNode',
-        'labels.errorTitle / —',
+        'messages.errorTitle / —',
         'DashboardWidget',
         'The error message',
       ],
@@ -585,10 +577,10 @@ export const REACT_DASHBOARD_GRID_DOCS = {
       ],
       [
         'DashboardGridDefaultsProvider',
-        '{ columns, editBar, headingLevel, labels }',
+        '{ columns, editBar, headingLevel }',
         '—',
         'a subtree',
-        'The decisions an application takes once; an instance that states any of them wins',
+        'The decisions an application takes once; an instance that states any of them wins. The words come from the language in force (SlottedProvider)',
       ],
       [
         'usePersistedDashboardLayout',

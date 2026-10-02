@@ -1,6 +1,8 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { SlottedProvider } from '../i18n';
 import { ColorField, ColorPicker } from './color-picker';
 import { ColorPickerDefaultsProvider } from './color-picker-defaults';
 
@@ -70,7 +72,7 @@ describe('ColorPicker', () => {
   it('holds a colour still being typed, and commits it in the current notation', () => {
     const onValueChange = vi.fn();
     render(<ColorPicker defaultValue="#2563EB" onValueChange={onValueChange} />);
-    const input = screen.getByRole('textbox', { name: 'Colour' });
+    const input = screen.getByRole('textbox', { name: 'Color' });
     fireEvent.change(input, { target: { value: 'rgb(220 38' } });
     expect(input).toHaveAttribute('aria-invalid', 'true');
     fireEvent.change(input, { target: { value: 'rgb(220 38 38)' } });
@@ -80,7 +82,7 @@ describe('ColorPicker', () => {
 
   it('puts back the last valid colour when the text is abandoned', () => {
     render(<ColorPicker defaultValue="#2563EB" />);
-    const input = screen.getByRole<HTMLInputElement>('textbox', { name: 'Colour' });
+    const input = screen.getByRole<HTMLInputElement>('textbox', { name: 'Color' });
     fireEvent.change(input, { target: { value: 'azul' } });
     fireEvent.blur(input);
     expect(input.value).toBe('#2563EB');
@@ -140,14 +142,28 @@ describe('ColorPicker', () => {
     expect(screen.queryByRole('slider')).toBeNull();
   });
 
-  it('takes its words and its palette from the provider', () => {
+  it('takes its palette from the provider', () => {
     render(
-      <ColorPickerDefaultsProvider hueLabel="Matiz" presets={['#16A34A']}>
+      <ColorPickerDefaultsProvider presets={['#16A34A']}>
         <ColorPicker defaultValue="#16A34A" />
       </ColorPickerDefaultsProvider>,
     );
-    expect(screen.getByRole('slider', { name: 'Matiz' })).toBeInTheDocument();
     expect(screen.getByRole('radio', { name: '#16A34A' })).toBeInTheDocument();
+  });
+
+  it('speaks the language in force, and lays its own messages over it', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <ColorPicker contrastWith="#FFFFFF" defaultValue="#FFFF00" messages={{ hue: 'Tom' }} />
+      </SlottedProvider>,
+    );
+    expect(screen.getByRole('slider', { name: 'Tom' })).toBeInTheDocument();
+    expect(screen.getByRole('slider', { name: 'Saturação e brilho' })).toHaveAttribute(
+      'aria-roledescription',
+      'controle deslizante 2D',
+    );
+    expect(screen.getByRole('button', { name: 'Restaurar #FFFF00' })).toBeInTheDocument();
+    expect(root().querySelector('[data-part="contrast-level"]')).toHaveTextContent('Insuficiente');
   });
 });
 
@@ -161,14 +177,14 @@ describe('ColorField', () => {
     fireEvent.change(input, { target: { value: 'hsl(0 72% 51%)' } });
     fireEvent.keyDown(input, { key: 'Enter' });
     expect(onValueChange.mock.calls[0]![0]).toBe('#DC2828');
-    const trigger = screen.getByRole('button', { name: 'Choose a colour' });
+    const trigger = screen.getByRole('button', { name: 'Choose a color' });
     expect(trigger).toHaveAttribute('data-part', 'trigger');
     expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
   });
 
   it('opens the panel from the swatch', () => {
     render(<ColorField aria-label="Primária" defaultValue="#2563EB" />);
-    fireEvent.click(screen.getByRole('button', { name: 'Choose a colour' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose a color' }));
     expect(screen.getByRole('slider', { name: 'Hue' })).toBeInTheDocument();
   });
 });

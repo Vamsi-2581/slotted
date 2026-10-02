@@ -108,15 +108,14 @@ test('owns the arrows, stops at both ends and reaches both ends in one key', () 
   assert.ok(contract.declined.PageUp, 'PageUp and PageDown are declined with a reason');
 });
 
-test('announces each value by a label a provider can translate', () => {
-  assert.equal(contract.itemLabel.default, '{value} de {max}');
-  assert.equal(contract.displayLabel.default, 'Avaliação {value} de {max}');
+test('announces each value by a message of the language in force', () => {
+  assert.equal(contract.itemLabel.message, 'itemLabel');
+  assert.equal(contract.displayLabel.message, 'displayLabel');
   assert.deepEqual(contract.provides.ratingDefaults, [
     'size',
     'tone',
     'max',
     'clearable',
-    'messages',
     'insightThresholds',
   ]);
 });
@@ -207,7 +206,7 @@ test('summarises many ratings as an aggregate and a distribution that can filter
     reasons: ['pointer', 'keyboard', 'clear'],
   });
   assert.equal(contract.shareProperty, '--slotted-rating-share');
-  assert.equal(contract.summaryLabel.empty, 'Ainda sem avaliações');
+  assert.equal(contract.summaryLabel.empty, 'summaryEmpty');
 });
 
 /**
@@ -255,19 +254,13 @@ test('reports a preview as an event, not as state it holds', () => {
 });
 
 /**
- * One source for every default string, and one formatter for both bindings:
+ * One catalog for every default string, and one grammar for both bindings:
  * "1 estrela" and "1 avaliação" come from the locale's plural rules, not from
  * a template that said "1 estrelas" in both.
  */
-test('states every default message once, with the plural forms the locale picks', () => {
-  assert.match(
-    contract.messages.levelLabel,
-    /\{level, plural, one \{# estrela\} other \{# estrelas\}\}/,
-  );
-  assert.match(
-    contract.messages.summaryCount,
-    /\{count, plural, =0 \{# avaliações\} one \{# avaliação\} other \{# avaliações\}\}/,
-  );
-  assert.equal(contract.messageFormat.startsWith('@slotted/core/rating'), true);
+test('reads every message from the catalog, through the shared grammar', () => {
+  assert.ok(contract.messages.includes('levelLabel'));
+  assert.ok(contract.messages.includes('summaryCount'));
+  assert.equal(contract.messageFormat.startsWith('@slotted/core/i18n'), true);
   assert.equal(contract.insight.shownIn, 'spectrum');
 });

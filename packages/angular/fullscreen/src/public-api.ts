@@ -17,7 +17,6 @@ export type {
 } from './fullscreen-defaults';
 export type {
   FullscreenError,
-  FullscreenMessages,
   FullscreenMode,
   FullscreenNavigationUI,
   FullscreenPolicy,

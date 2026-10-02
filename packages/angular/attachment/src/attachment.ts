@@ -13,7 +13,13 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { createRemovalFocus } from '@slotted/core/focus';
+import {
+  attachmentMessages,
+  type AttachmentMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { fileKind, splitName } from '@slotted/core/upload';
 
 import { ATTACHMENT_CONTROL_SELECTOR, injectAttachmentDefaults } from './attachment-defaults';
@@ -129,8 +135,12 @@ export class SlAttachment {
   readonly disabled = input(false, { transform: booleanAttribute });
   /** Draws `slAttachmentRemove` and lets `Backspace` and `Delete` ask for removal. */
   readonly removable = input(false, { transform: booleanAttribute });
-  /** The word before the file name in the remove control's name. Falls back to the token. */
-  readonly removeLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * remove control's name (`remove`, with the file's `{name}`) and the tile's
+   * word for a file without an extension.
+   */
+  readonly messages = input<PartialMessages<AttachmentMessages> | undefined>(undefined);
 
   /** Asks to be taken out of the list. Not emitted while disabled, nor for a repeated key. */
   readonly remove = output<AttachmentRemoveRequest>();
@@ -140,13 +150,15 @@ export class SlAttachment {
 
   readonly id = `sl-attachment-${nextId++}`;
   readonly ids = { detail: `${this.id}-detail`, message: `${this.id}-message` };
-  readonly locale = this.defaults.locale;
+  /** The language in force, which writes the size the detail line shows. */
+  readonly locale = injectLocale();
+  /** The family's words in the language in force, with this attachment's `messages` laid over them. */
+  readonly t = injectMessages(attachmentMessages, this.messages);
 
   readonly resolvedSize = computed(() => this.size() ?? this.group?.size() ?? this.defaults.size);
   readonly resolvedOrientation = computed(
     () => this.orientation() ?? this.group?.orientation() ?? this.defaults.orientation,
   );
-  readonly resolvedRemoveLabel = computed(() => this.removeLabel() ?? this.defaults.removeLabel);
   readonly kind = computed(() => {
     const file = this.file();
     return fileKind({ name: file.name, type: file.type ?? '' });

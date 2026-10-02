@@ -95,7 +95,7 @@ import { formatDate, formatMoney } from './order-labels';
                       size="sm"
                       type="button"
                       [loading]="busy()"
-                      loadingLabel="Approving"
+                      [messages]="{ loading: 'Approving' }"
                       (click)="decide.emit('approve')"
                     >
                       Approve

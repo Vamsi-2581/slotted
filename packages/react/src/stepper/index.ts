@@ -1,4 +1,4 @@
-export { DEFAULT_STEPPER_LABELS, Stepper, useStepper } from './stepper';
+export { Stepper, useStepper } from './stepper';
 export { StepperDefaultsProvider, useStepperDefaults } from './stepper-defaults';
 export {
   StepperList,
@@ -14,7 +14,6 @@ export type {
   StepperDefaults,
   StepperDefaultsProviderProps,
   StepperLabelPlacement,
-  StepperLabels,
   StepperListProps,
   StepperListRootProps,
   StepperNavigation,

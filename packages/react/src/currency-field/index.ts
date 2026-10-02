@@ -1,10 +1,5 @@
 export { CurrencyField, CurrencyFieldScrub } from './currency-field';
-export {
-  CURRENCY_FIELD_DECREMENT_LABEL,
-  CURRENCY_FIELD_INCREMENT_LABEL,
-  CurrencyFieldDefaultsProvider,
-  useCurrencyFieldDefaults,
-} from './currency-field-defaults';
+export { CurrencyFieldDefaultsProvider, useCurrencyFieldDefaults } from './currency-field-defaults';
 export type {
   CurrencyFieldAlign,
   CurrencyFieldClamp,

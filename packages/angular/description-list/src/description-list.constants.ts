@@ -29,33 +29,8 @@ export interface DescriptionListCopyRequest {
   readonly source?: Event;
 }
 
-/**
- * The words the family says. They are here rather than inside the components
- * because an application translates them once, and a reader of a Portuguese
- * page should not meet "Show more" in the one place a family forgot.
- */
-export interface DescriptionListLabels {
-  /** The accessible name of the copy control. */
-  copy?: string;
-  /** Announced, politely, once a value has reached the clipboard. */
-  copied?: string;
-  /** The control that shows the rest of a clamped value. */
-  reveal?: string;
-  /** The same control, once the value is whole. */
-  collapse?: string;
-  /** What a screen reader reads in place of a value that is missing. */
-  placeholder?: string;
-  /**
-   * Announced when the platform refuses the clipboard and the family selects
-   * the value instead. A browser blocks `writeText` where the document is not
-   * focused, and inside an iframe that carries no `clipboard-write` permission.
-   */
-  copyBlocked?: string;
-}
-
 export interface DescriptionListDefaults {
   columns?: DescriptionListColumns;
-  labels?: DescriptionListLabels;
   layout?: DescriptionListLayout;
   /** The maximum width of the term column, as a CSS length. */
   termWidth?: string;
@@ -66,7 +41,6 @@ export const DESCRIPTION_LIST_DEFAULT_LAYOUT: DescriptionListLayout = 'row';
 export const DESCRIPTION_LIST_DEFAULT_COLUMNS: DescriptionListColumns = 1;
 export const DESCRIPTION_LIST_DEFAULT_VARIANT: DescriptionListVariant = 'plain';
 
-/** The words the family says when nothing else says them. */
 /**
  * The mark a row shows where it has no value: an em dash, which is what a table
  * has used for a missing value since tables were set in lead. It is a character
@@ -75,15 +49,6 @@ export const DESCRIPTION_LIST_DEFAULT_VARIANT: DescriptionListVariant = 'plain';
  * the width, sitting at a different height (DL2).
  */
 export const DESCRIPTION_LIST_EMPTY_VALUE_MARK = '\u2014';
-
-export const DESCRIPTION_LIST_DEFAULT_LABELS: Required<DescriptionListLabels> = {
-  collapse: 'Show less',
-  copied: 'Copied',
-  copy: 'Copy',
-  copyBlocked: 'Value selected — copy it with your keyboard',
-  placeholder: 'Not provided',
-  reveal: 'Show more',
-};
 
 /** How long the copy control says it succeeded before returning to rest. */
 export const COPIED_FOR = 1500;
@@ -94,9 +59,10 @@ export const DESCRIPTION_LIST_DEFAULTS_TOKEN = new InjectionToken<DescriptionLis
 );
 
 /**
- * An application decides once how its details panels are arranged and what
- * their controls are called. A list that states any of it itself still wins: an
- * explicit input is never overridden by the token.
+ * An application decides once how its details panels are arranged. A list
+ * that states any of it itself still wins: an explicit input is never
+ * overridden by the token. Its words come from the language in force
+ * (`provideSlotted`).
  */
 export function provideDescriptionListDefaults(defaults: DescriptionListDefaults) {
   return { provide: DESCRIPTION_LIST_DEFAULTS_TOKEN, useValue: defaults };

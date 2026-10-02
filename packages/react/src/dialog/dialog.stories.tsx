@@ -96,10 +96,12 @@ const STILL = {
 /** One panel, written once, so a scene shows the axis rather than the markup. */
 function Panel({
   actions = true,
-  body = <Text size="sm">Um diálogo guarda uma tarefa. A linha do meio é a única que rola.</Text>,
+  body = (
+    <Text size="sm">A dialog holds one task. The middle row is the only one that scrolls.</Text>
+  ),
   container,
-  description = 'O nome é visível para todo o espaço de trabalho.',
-  title = 'Editar projeto',
+  description = 'The name is visible to the whole workspace.',
+  title = 'Edit project',
   ...props
 }: Partial<DialogProps> & {
   actions?: boolean;
@@ -120,9 +122,9 @@ function Panel({
         {actions ? (
           <DialogFooter>
             <Button size="sm" tone="secondary" variant="ghost">
-              Cancelar
+              Cancel
             </Button>
-            <Button size="sm">Salvar</Button>
+            <Button size="sm">Save</Button>
           </DialogFooter>
         ) : null}
       </DialogContent>
@@ -147,21 +149,21 @@ export const Playground: Story = {
     <Layer>
       {(container) => (
         <Dialog {...args} container={container}>
-          <DialogTrigger render={(props) => <Button {...props}>Editar projeto</Button>} />
+          <DialogTrigger render={(props) => <Button {...props}>Edit project</Button>} />
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Editar projeto</DialogTitle>
-              <DialogDescription>O nome é visível para todo o espaço.</DialogDescription>
+              <DialogTitle>Edit project</DialogTitle>
+              <DialogDescription>The name is visible to the whole space.</DialogDescription>
               <DialogClose />
             </DialogHeader>
             <DialogBody>
-              <TextField aria-label="Nome" defaultValue="Redesign da home" />
+              <TextField aria-label="Name" defaultValue="Home page redesign" />
             </DialogBody>
             <DialogFooter>
               <Button size="sm" tone="secondary" variant="ghost">
-                Cancelar
+                Cancel
               </Button>
-              <Button size="sm">Salvar</Button>
+              <Button size="sm">Save</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -179,7 +181,7 @@ export const Sizes: Story = {
         note="Twenty-four rems. Wide enough for one sentence and two actions, narrow enough that the eye does not have to travel to read it."
       >
         <Layer>
-          {(container) => <Panel container={container} size="sm" title="Arquivar projeto" />}
+          {(container) => <Panel container={container} size="sm" title="Archive project" />}
         </Layer>
       </Scene>
       <Scene
@@ -188,7 +190,7 @@ export const Sizes: Story = {
       >
         <Layer>
           {(container) => (
-            <Panel container={container} fullScreen="never" size="xl" title="Editar faturamento" />
+            <Panel container={container} fullScreen="never" size="xl" title="Edit billing" />
           )}
         </Layer>
       </Scene>
@@ -212,7 +214,7 @@ export const Placement: Story = {
       >
         <Layer>
           {(container) => (
-            <Panel container={container} fullScreen="never" placement="top" title="Comentário" />
+            <Panel container={container} fullScreen="never" placement="top" title="Comment" />
           )}
         </Layer>
       </Scene>
@@ -222,10 +224,10 @@ export const Placement: Story = {
 
 const LONG = (
   <Text size="sm">
-    A linha do meio é o único trilho que rola. Limitada, ela rola; ilimitada, empurraria o rodapé
-    para fora da tela e o leitor não alcançaria o botão. Radix e React Aria não entregam layout
-    algum, então esse é o resultado padrão de seguir o exemplo de qualquer uma das duas. Um terceiro
-    parágrafo, para que haja o que rolar. E um quarto. E um quinto, que já está abaixo da dobra.
+    The middle row is the only track that scrolls. Bounded, it scrolls; unbounded, it would push the
+    footer off the screen and the reader could not reach the button. Radix and React Aria ship no
+    layout at all, so this is the default result of following either one’s example. A third
+    paragraph, so there is something to scroll. And a fourth. And a fifth, already below the fold.
   </Text>
 );
 
@@ -239,7 +241,7 @@ export const Scroll: Story = {
       >
         <Layer>
           {(container) => (
-            <Panel body={LONG} container={container} fullScreen="never" title="Termos de uso" />
+            <Panel body={LONG} container={container} fullScreen="never" title="Terms of use" />
           )}
         </Layer>
       </Scene>
@@ -254,7 +256,7 @@ export const Scroll: Story = {
               container={container}
               fullScreen="never"
               scroll="viewport"
-              title="Termos de uso"
+              title="Terms of use"
             />
           )}
         </Layer>
@@ -282,9 +284,9 @@ export const Surface: Story = {
             <Dialog container={container} defaultOpen {...STILL} fullScreen="never" surface="plain">
               <DialogContent>
                 <Card fill="elevated">
-                  <DialogTitle>Um card, dentro da layer</DialogTitle>
+                  <DialogTitle>A card, inside the layer</DialogTitle>
                   <DialogDescription>
-                    A família não pinta nada aqui. Escape ainda fecha, o foco ainda fica contido.
+                    The family paints nothing here. Escape still closes, focus still stays inside.
                   </DialogDescription>
                 </Card>
               </DialogContent>
@@ -335,12 +337,12 @@ export const Modal: Story = {
         <Layer>
           {(container) => (
             <Dialog container={container} fullScreen="never">
-              <DialogTrigger render={(props) => <Button {...props}>Abrir modal</Button>} />
+              <DialogTrigger render={(props) => <Button {...props}>Open modal</Button>} />
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Modal</DialogTitle>
                   <DialogDescription>
-                    A rolagem está travada e o resto da página está inert.
+                    Scrolling is locked and the rest of the page is inert.
                   </DialogDescription>
                   <DialogClose />
                 </DialogHeader>
@@ -355,7 +357,7 @@ export const Modal: Story = {
       >
         <Layer>
           {(container) => (
-            <Panel container={container} fullScreen="never" modal={false} title="Detalhes" />
+            <Panel container={container} fullScreen="never" modal={false} title="Details" />
           )}
         </Layer>
       </Scene>
@@ -370,10 +372,10 @@ function Guarded({ container }: { container: Element }) {
   return (
     <>
       <Button onClick={() => setSaving((value) => !value)} size="sm" variant="outline">
-        {saving ? 'Terminar de salvar' : 'Voltar a salvar'}
+        {saving ? 'Finish saving' : 'Save again'}
       </Button>
       <Button disabled={open} onClick={() => setOpen(true)} size="sm" variant="ghost">
-        Abrir de novo
+        Open again
       </Button>
       <Dialog
         container={container}
@@ -388,11 +390,11 @@ function Guarded({ container }: { container: Element }) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Salvando</DialogTitle>
+            <DialogTitle>Saving</DialogTitle>
             <DialogDescription>
               {saving
-                ? 'Escape, um clique fora e o ✕ estão todos recusados pelo mesmo guard.'
-                : 'O guard saiu: agora as seis saídas funcionam.'}
+                ? 'Escape, a click outside and the ✕ are all refused by the same guard.'
+                : 'The guard is gone: all six exits work now.'}
             </DialogDescription>
             <DialogClose />
           </DialogHeader>
@@ -432,11 +434,11 @@ export const Policy: Story = {
 function Opened({ container, ...props }: Partial<DialogProps> & { container: Element }) {
   return (
     <Dialog container={container} fullScreen="never" {...props}>
-      <DialogTrigger render={(triggerProps) => <Button {...triggerProps}>Abrir</Button>} />
+      <DialogTrigger render={(triggerProps) => <Button {...triggerProps}>Open</Button>} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Editar projeto</DialogTitle>
-          <DialogDescription>Escape, a scrim e o ✕ são as três saídas.</DialogDescription>
+          <DialogTitle>Edit project</DialogTitle>
+          <DialogDescription>Escape, the scrim and the ✕ are the three exits.</DialogDescription>
           <DialogClose />
         </DialogHeader>
       </DialogContent>
@@ -449,16 +451,16 @@ function Named({ container }: { container: Element }) {
 
   return (
     <Dialog container={container} fullScreen="never" initialFocus={second} size="lg">
-      <DialogTrigger render={(props) => <Button {...props}>Convidar alguém</Button>} />
+      <DialogTrigger render={(props) => <Button {...props}>Invite someone</Button>} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Convidar alguém</DialogTitle>
-          <DialogDescription>O foco não cai no primeiro campo, e sim no segundo.</DialogDescription>
+          <DialogTitle>Invite someone</DialogTitle>
+          <DialogDescription>Focus lands on the second field, not the first.</DialogDescription>
           <DialogClose />
         </DialogHeader>
         <DialogBody>
-          <TextField aria-label="Time" defaultValue="Equipe de produto" />
-          <TextField aria-label="E-mail" ref={second} />
+          <TextField aria-label="Time" defaultValue="Product team" />
+          <TextField aria-label="Email" ref={second} />
         </DialogBody>
       </DialogContent>
     </Dialog>
@@ -476,15 +478,15 @@ export const Focus: Story = {
         <Layer>
           {(container) => (
             <Dialog container={container} fullScreen="never">
-              <DialogTrigger render={(props) => <Button {...props}>Abrir</Button>} />
+              <DialogTrigger render={(props) => <Button {...props}>Open</Button>} />
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Renomear</DialogTitle>
-                  <DialogDescription>O foco entra e volta.</DialogDescription>
+                  <DialogTitle>Rename</DialogTitle>
+                  <DialogDescription>Focus goes in and comes back.</DialogDescription>
                   <DialogClose />
                 </DialogHeader>
                 <DialogBody>
-                  <TextField aria-label="Nome" />
+                  <TextField aria-label="Name" />
                 </DialogBody>
               </DialogContent>
             </Dialog>
@@ -518,10 +520,10 @@ export const Loading: Story = {
               </>
             }
             container={container}
-            description="Buscando os itens da fatura."
+            description="Fetching the invoice items."
             fullScreen="never"
             loading
-            title="Fatura 4471"
+            title="Invoice 4471"
           />
         )}
       </Layer>
@@ -541,8 +543,8 @@ export const Nested: Story = {
           <Dialog container={container} defaultOpen {...STILL} fullScreen="never" size="lg">
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Faturamento</DialogTitle>
-                <DialogDescription>A camada de baixo.</DialogDescription>
+                <DialogTitle>Billing</DialogTitle>
+                <DialogDescription>The layer below.</DialogDescription>
                 <DialogClose />
               </DialogHeader>
               <DialogBody>
@@ -550,15 +552,15 @@ export const Nested: Story = {
                   <DialogTrigger
                     render={(props) => (
                       <Button {...props} size="sm" tone="danger" variant="outline">
-                        Cancelar assinatura
+                        Cancel subscription
                       </Button>
                     )}
                   />
                   <DialogContent>
                     <DialogHeader>
                       <AlertDialogIcon />
-                      <DialogTitle>Cancelar a assinatura?</DialogTitle>
-                      <DialogDescription>A cobrança para no fim do período.</DialogDescription>
+                      <DialogTitle>Cancel the subscription?</DialogTitle>
+                      <DialogDescription>Billing stops at the end of the period.</DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                       <AlertDialogCancel
@@ -577,7 +579,7 @@ export const Nested: Story = {
                           </Button>
                         )}
                       >
-                        Cancelar assinatura
+                        Cancel subscription
                       </AlertDialogAction>
                     </DialogFooter>
                   </DialogContent>
@@ -621,10 +623,10 @@ export const Content: Story = {
             <Panel
               body={null}
               container={container}
-              description="O projeto sai do espaço de trabalho."
+              description="The project leaves the workspace."
               fullScreen="never"
               size="sm"
-              title="Arquivar projeto"
+              title="Archive project"
             />
           )}
         </Layer>
@@ -640,11 +642,9 @@ function Imperative({ container }: { container: Element }) {
   return (
     <>
       <Button onClick={() => handle.current?.open()} size="sm" variant="outline">
-        Abrir do código
+        Open from code
       </Button>
-      <Text size="sm">
-        {result === undefined ? 'Sem resultado ainda.' : `Resultado: ${result}`}
-      </Text>
+      <Text size="sm">{result === undefined ? 'No result yet.' : `Resultado: ${result}`}</Text>
       <Dialog
         container={container}
         fullScreen="never"
@@ -654,10 +654,8 @@ function Imperative({ container }: { container: Element }) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Sem gatilho</DialogTitle>
-            <DialogDescription>
-              Aberto por handle.open(), fechado com um resultado.
-            </DialogDescription>
+            <DialogTitle>No trigger</DialogTitle>
+            <DialogDescription>Opened by handle.open(), closed with a result.</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose
@@ -668,7 +666,7 @@ function Imperative({ container }: { container: Element }) {
               )}
               value="salvo"
             >
-              Salvar
+              Save
             </DialogClose>
           </DialogFooter>
         </DialogContent>
@@ -691,14 +689,14 @@ export const Composition: Story = {
               <DialogTrigger
                 render={(props) => (
                   <Button {...props} tone="secondary" variant="outline">
-                    Editar projeto
+                    Edit project
                   </Button>
                 )}
               />
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Editar projeto</DialogTitle>
-                  <DialogDescription>O gatilho é um Button.</DialogDescription>
+                  <DialogTitle>Edit project</DialogTitle>
+                  <DialogDescription>The trigger is a Button.</DialogDescription>
                   <DialogClose />
                 </DialogHeader>
               </DialogContent>
@@ -727,11 +725,15 @@ export const Defaults: Story = {
       <DialogDefaultsProvider fullScreen="never" placement="top" size="sm">
         <Grid columns={2}>
           <Scene label="From the provider" note="No size prop at all: it is the provider’s sm.">
-            <Layer>{(container) => <Panel container={container} title="Do provider" />}</Layer>
+            <Layer>
+              {(container) => <Panel container={container} title="From the provider" />}
+            </Layer>
           </Scene>
           <Scene label="Stated on the dialog" note='size="lg" on this one, over the provider’s sm.'>
             <Layer>
-              {(container) => <Panel container={container} size="lg" title="Do próprio diálogo" />}
+              {(container) => (
+                <Panel container={container} size="lg" title="From the dialog itself" />
+              )}
             </Layer>
           </Scene>
         </Grid>
@@ -750,20 +752,20 @@ export const Accessibility: Story = {
       <Layer>
         {(container) => (
           <Dialog container={container} fullScreen="never">
-            <DialogTrigger render={(props) => <Button {...props}>Abrir e tabular</Button>} />
+            <DialogTrigger render={(props) => <Button {...props}>Open and tab</Button>} />
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Três paradas de tabulação</DialogTitle>
+                <DialogTitle>Three tab stops</DialogTitle>
                 <DialogDescription>
-                  O ✕, o campo e o botão. Tab no último volta para o primeiro.
+                  The ✕, the field and the button. Tab on the last one returns to the first.
                 </DialogDescription>
                 <DialogClose />
               </DialogHeader>
               <DialogBody>
-                <TextField aria-label="Nome" />
+                <TextField aria-label="Name" />
               </DialogBody>
               <DialogFooter>
-                <Button size="sm">Salvar</Button>
+                <Button size="sm">Save</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

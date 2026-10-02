@@ -21,25 +21,6 @@ export interface UploadSummary {
   readonly complete: boolean;
 }
 
-/**
- * One sentence about the queue as a whole, by what it is for: the summary
- * line, the count the `field` shape shows, the announcement that files
- * arrived, and the announcement that the queue finished. Each binding holds an
- * English `describeQueue` over this, on its defaults provider, beside
- * `describeRejection`.
- */
-export type UploadQueueMessage =
-  | {
-      readonly kind: 'summary';
-      readonly uploaded: number;
-      readonly total: number;
-      /** Seconds until the queue finishes, or `null` when it cannot be said. */
-      readonly secondsLeft: number | null;
-    }
-  | { readonly kind: 'selection'; readonly count: number }
-  | { readonly kind: 'added'; readonly count: number }
-  | { readonly kind: 'finished'; readonly uploaded: number; readonly total: number };
-
 const EMPTY: Record<UploadStatus, number> = {
   rejected: 0,
   ready: 0,

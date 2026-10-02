@@ -1,8 +1,11 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useRef, useState } from 'react';
+import { renderToString } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/table-of-contents/contract.json';
+import { SlottedProvider } from '../i18n';
 import { TableOfContents } from './table-of-contents';
 import { TableOfContentsDefaultsProvider } from './table-of-contents-defaults';
 import {
@@ -108,6 +111,13 @@ describe('anatomy', () => {
 
   it('names the landmark from the messages when there is no label, and keeps a written name', () => {
     render(<List />);
+    expect(screen.getByRole('navigation', { name: 'On this page' })).toBeTruthy();
+    document.body.innerHTML = '';
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <List />
+      </SlottedProvider>,
+    );
     expect(screen.getByRole('navigation', { name: 'Nesta página' })).toBeTruthy();
     document.body.innerHTML = '';
     render(<List aria-label="Cláusulas" />);
@@ -436,17 +446,11 @@ describe('keyboard', () => {
 });
 
 describe('defaults', () => {
-  it('reads the axes and the messages from the provider, and lets a list win', () => {
+  it('reads the axes from the provider, and lets a list win', () => {
     render(
-      <TableOfContentsDefaultsProvider
-        layout="horizontal"
-        messages={{ navigation: 'Secções' }}
-        numbered
-        size="sm"
-        sticky
-      >
-        <List />
-        <List size="lg" />
+      <TableOfContentsDefaultsProvider layout="horizontal" numbered size="sm" sticky>
+        <List messages={{ navigation: 'Secções' }} />
+        <List messages={{ navigation: 'Secções' }} size="lg" />
       </TableOfContentsDefaultsProvider>,
     );
     const [first, second] = screen.getAllByRole('navigation', { name: 'Secções' });
@@ -455,5 +459,43 @@ describe('defaults', () => {
     expect(first?.hasAttribute('data-numbered')).toBe(true);
     expect(first?.hasAttribute('data-sticky')).toBe(true);
     expect(second?.getAttribute('data-size')).toBe('lg');
+  });
+});
+
+/**
+ * The links register in effects, which the server never runs and the first
+ * client render has not run yet. A list given its items is not empty then:
+ * drawn hidden, a statically rendered page shows an empty column until the
+ * script arrives, and the hydrated one until something renders it again.
+ */
+describe('TableOfContents before its links register', () => {
+  const items = [
+    { id: 'installation', label: 'Installation' },
+    { id: 'usage', label: 'Usage' },
+  ];
+
+  it('renders the given items on the server, not an empty list', () => {
+    const html = renderToString(<TableOfContents items={items} label="On this page" />);
+
+    expect(html).not.toContain('data-empty');
+    expect(html).toContain('href="#installation"');
+  });
+
+  it('renders composed links on the server, not an empty list', () => {
+    const html = renderToString(
+      <TableOfContents label="On this page">
+        <TableOfContentsItem value="usage">
+          <TableOfContentsLink>Usage</TableOfContentsLink>
+        </TableOfContentsItem>
+      </TableOfContents>,
+    );
+
+    expect(html).not.toContain('data-empty');
+  });
+
+  it('is empty on the server when it was given no items', () => {
+    const html = renderToString(<TableOfContents items={[]} label="On this page" />);
+
+    expect(html).toContain('data-empty');
   });
 });

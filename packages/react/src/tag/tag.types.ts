@@ -1,3 +1,4 @@
+import type { PartialMessages, TagMessages } from '@slotted/core/i18n';
 import type { ChangeReason } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref, SyntheticEvent } from 'react';
 
@@ -40,7 +41,6 @@ export interface TagRemoveRequest {
 
 /** What an application sets once for every tag under it. */
 export interface TagDefaults {
-  removeLabel: string;
   shape: TagShape;
   size: TagSize;
   tone: TagTone;
@@ -81,11 +81,11 @@ export interface TagRemovableProps {
    */
   onRemove?: ((request: TagRemoveRequest) => void) | undefined;
   /**
-   * The word the remove control announces before the tag's own label, so it
-   * reads "Remove Design" rather than "Remove". Defaults to the provider,
-   * then to `Remove`.
+   * Words laid over the catalog of the language in force, key by key: `remove`
+   * is the word the remove control announces before the tag's own label, so it
+   * reads "Remove Design" rather than "Remove".
    */
-  removeLabel?: string | undefined;
+  messages?: PartialMessages<TagMessages> | undefined;
   /** Refuses the removal while leaving the rest of the tag operable. */
   removeDisabled?: boolean | undefined;
 }

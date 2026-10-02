@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "avatar-group",
   "ui": "avatar-group",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Overlapping avatars with an overflow count."
+  },
   "memberFamily": "avatar",
   "provides": {
     "avatarDefaults": ["size", "shape", "variant"]

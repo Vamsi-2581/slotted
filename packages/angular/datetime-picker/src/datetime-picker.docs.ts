@@ -266,7 +266,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'datetime-picker-angular-now',
       label: 'The head control',
       language: 'angular',
-      source: `<div slDateTimePicker nowLabel="Agora" locale="pt-BR"></div>`,
+      source: `<div slDateTimePicker [messages]="{ now: 'Agora' }" locale="pt-BR"></div>`,
     }),
   },
   {
@@ -382,7 +382,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition and escape hatches',
-    note: 'provideDateTimePickerDefaults sets the locale, the clock, the step and every label once; a slDateTimePickerOption template draws one row the consumer’s own way; slDateTimePickerFooter takes their actions; and exportAs reaches focus(), openSurface() and closeSurface(). A control that states any default itself still wins.',
+    note: 'provideDateTimePickerDefaults sets the clock and the step once, provideSlotted the language and every word; a slDateTimePickerOption template draws one row the consumer’s own way; slDateTimePickerFooter takes their actions; and exportAs reaches focus(), openSurface() and closeSurface(). A control that states any default itself still wins.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-composition',
       label: 'A row of its own',
@@ -524,7 +524,7 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    'runtime',
+    'the language in force',
     'SlDateTimePicker',
     'BCP 47. Reaches the field, the calendar and the list.',
   ],
@@ -657,33 +657,11 @@ const api: ApiRow[] = apiRows([
     'The name a plain form post carries the ISO string under.',
   ],
   [
-    'chooseLabel',
-    'string',
-    'Choose date and time',
+    'messages',
+    'Partial<DatetimePickerMessages>',
+    '—',
     'SlDateTimePicker',
-    'The trigger’s name while nothing is chosen.',
-  ],
-  [
-    'changeLabel',
-    'string',
-    'Change date and time',
-    'SlDateTimePicker',
-    'The trigger’s name once something is, with the value in words after it.',
-  ],
-  ['nowLabel', 'string', 'Now', 'SlDateTimePicker', 'The head control’s label.'],
-  [
-    'emptyLabel',
-    'string',
-    'No time is available on this day.',
-    'SlDateTimePicker',
-    'What the panel says when the day the reader is on offers no time at all.',
-  ],
-  [
-    'truncatedLabel',
-    'string',
-    'The list is cut short…',
-    'SlDateTimePicker',
-    'What the panel’s accessible description says when the list has been cut at maxOptions — and it says where the rest of the times are, which is the field.',
+    'Words laid over the language in force, key by key: the trigger’s name while nothing is chosen (choose) and once something is (change, with the value in its {date} slot), the head control (now), what an empty day says (empty), and the accessible description of a list cut at maxOptions (truncated), which says the rest of the times are typed into the field.',
   ],
   [
     'slDateTimePickerPresets',
@@ -725,7 +703,7 @@ const composition: ApiRow[] = apiRows([
     'provider',
     '—',
     'application',
-    'Sets locale, timeZone, hourCycle, granularity, step, maxOptions, placement, openTo, closeOnSelect, unavailableOptions, size, variant and every label once for everything under it. A control that states any of them itself still wins.',
+    'Sets timeZone, hourCycle, granularity, step, maxOptions, placement, openTo, closeOnSelect, unavailableOptions, size and variant once for everything under it. A control that states any of them itself still wins.',
   ],
   [
     'slDateTimePickerOption',

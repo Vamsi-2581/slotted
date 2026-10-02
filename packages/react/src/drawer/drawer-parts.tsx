@@ -1009,7 +1009,7 @@ export function DrawerClose({
   const drawer = useDrawer();
 
   const rootProps = {
-    'aria-label': 'Close',
+    'aria-label': drawer.t('close'),
     ...rest,
     /* The cross is drawn unless the consumer wrote content of their own. */
     children: children ?? (

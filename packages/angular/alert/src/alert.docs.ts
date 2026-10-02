@@ -78,7 +78,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'Closes the message. Rendered when dismissible, named by dismissLabel, and sized from its glyph plus a step of air, floored at the WCAG 2.2 minimum so the target holds at every density (R2).',
+      'Closes the message. Rendered when dismissible, named by the catalog’s dismiss, and sized from its glyph plus a step of air, floored at the WCAG 2.2 minimum so the target holds at every density (R2).',
   },
 ];
 
@@ -188,7 +188,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'ts',
       label: 'One decision for the application, and three for one message',
       source:
-        "bootstrapApplication(App, {\n  providers: [provideAlertDefaults({ dismissLabel: 'Dispensar', reach: 'page' })],\n});",
+        "bootstrapApplication(App, {\n  providers: [provideAlertDefaults({ reach: 'page' })],\n});",
     }),
   },
   {
@@ -263,11 +263,11 @@ export const ANGULAR_ALERT_DOCS = {
         'Renders the control that closes the message. Angular cannot see whether an output is subscribed, so the opt-in is stated — the asymmetry with React that tag recorded first',
       ],
       [
-        'dismissLabel',
-        'string',
-        'Dismiss',
+        'messages',
+        'Partial<AlertMessages>',
+        '—',
         'slAlert',
-        'What that control announces. Falls back to provideAlertDefaults, which is where an application translates it once',
+        'Words laid over the language in force, key by key: what that control announces (dismiss)',
       ],
       [
         'open',
@@ -315,10 +315,10 @@ export const ANGULAR_ALERT_DOCS = {
       ],
       [
         'provideAlertDefaults',
-        '{ tone, variant, reach, live, dismissLabel }',
+        '{ tone, variant, reach, live }',
         '—',
         'an injector',
-        'Sets all five once for every alert under it; an explicit input on one message still wins',
+        'Sets all four once for every alert under it; an explicit input on one message still wins',
       ],
       [
         'ng-content',

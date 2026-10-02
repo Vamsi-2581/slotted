@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
   cellAt,
   dashboardKeyIntent,
-  formatDashboardLabel,
   handleShortcuts,
   layoutsEqual,
   materializeLayout,
@@ -318,12 +317,6 @@ describe('layoutsEqual', () => {
     const a: DashboardLayout = [{ key: 'a', x: 0, y: 0, w: 3, h: 2 }];
     expect(layoutsEqual(a, [{ key: 'a', x: 0, y: 0, w: 3, h: 2, hidden: false }])).toBe(true);
     expect(layoutsEqual(a, [{ key: 'a', x: 1, y: 0, w: 3, h: 2 }])).toBe(false);
-  });
-});
-
-describe('formatDashboardLabel', () => {
-  it('fills the placeholders it is given and leaves the others', () => {
-    expect(formatDashboardLabel('{title} at {position}', { title: 'A' })).toBe('A at {position}');
   });
 });
 

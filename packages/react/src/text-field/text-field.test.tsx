@@ -1,9 +1,11 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/text-field/contract.json';
 import { Field, FieldCounter, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { TextField, TextFieldAction } from './text-field';
 import { TextFieldDefaultsProvider } from './text-field-defaults';
 
@@ -328,17 +330,26 @@ describe('TextField', () => {
 
   /* ------------------------------------------------------- defaults once - */
 
-  it('lets an application name the two buttons once', async () => {
+  it('lets an application decide the appearance once', () => {
     render(
-      <TextFieldDefaultsProvider clearLabel="Limpar" revealLabel="Mostrar senha" variant="subtle">
+      <TextFieldDefaultsProvider variant="subtle">
         <TextField clearable data-testid="input" defaultValue="x" />
-        <TextField revealable type="password" />
       </TextFieldDefaultsProvider>,
     );
 
-    expect(screen.getByRole('button', { name: 'Limpar' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Mostrar senha' })).toBeInTheDocument();
     expect(screen.getByTestId('input').parentElement).toHaveAttribute('data-variant', 'subtle');
+  });
+
+  it('names its buttons in the language in force, and lays its own messages over it', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <TextField clearable defaultValue="x" messages={{ clear: 'Apagar' }} />
+        <TextField revealable type="password" />
+      </SlottedProvider>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Apagar' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Mostrar senha' })).toBeInTheDocument();
   });
 
   it('lets a controlled consumer own both values at once', async () => {

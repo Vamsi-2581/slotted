@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "slider",
   "ui": "slider",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Picks a value or range along a track."
+  },
   "controlPart": "input",
   "controlElement": "input[type=range]",
   "controlRole": "slider",
@@ -134,10 +138,10 @@
     "size": ["prop", "field", "defaults", "md"],
     "orientation": ["prop", "defaults", "horizontal"],
     "valueLabel": ["prop", "defaults", "auto"],
-    "locale": ["prop", "defaults", "runtime"]
+    "locale": ["prop", "slotted", "en-US"]
   },
   "provides": {
-    "sliderDefaults": ["size", "orientation", "valueLabel", "locale"]
+    "sliderDefaults": ["size", "orientation", "valueLabel"]
   },
   "imperative": ["focusThumb"],
   "stateAttributes": {

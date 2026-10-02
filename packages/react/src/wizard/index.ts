@@ -1,11 +1,6 @@
 export { Wizard } from './wizard';
 export { useWizard, useWizardStep } from './wizard-context';
-export {
-  DEFAULT_WIZARD_LABELS,
-  WIZARD_FALLBACK,
-  useWizardDefaults,
-  WizardDefaultsProvider,
-} from './wizard-defaults';
+export { WIZARD_FALLBACK, useWizardDefaults, WizardDefaultsProvider } from './wizard-defaults';
 export {
   WizardActions,
   WizardCancel,
@@ -33,7 +28,6 @@ export type {
   WizardEditProps,
   WizardFailure,
   WizardHandle,
-  WizardLabels,
   WizardLevel,
   WizardPersistence,
   WizardProgress,

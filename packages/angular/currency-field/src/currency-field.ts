@@ -9,7 +9,13 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  currencyFieldMessages,
+  type CurrencyFieldMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import {
   STEP_REPEAT_DELAY,
   STEP_REPEAT_DELAY_COARSE,
@@ -65,7 +71,7 @@ export type {
         type="button"
         tabindex="-1"
         [attr.aria-controls]="control()?.controlId()"
-        [attr.aria-label]="resolvedDecrementLabel()"
+        [attr.aria-label]="t('decrement')"
         [disabled]="decrementDisabled()"
         (pointerdown)="press(-1, $event)"
         (pointerup)="release()"
@@ -84,7 +90,7 @@ export type {
         type="button"
         tabindex="-1"
         [attr.aria-controls]="control()?.controlId()"
-        [attr.aria-label]="resolvedIncrementLabel()"
+        [attr.aria-label]="t('increment')"
         [disabled]="incrementDisabled()"
         (pointerdown)="press(1, $event)"
         (pointerup)="release()"
@@ -100,7 +106,7 @@ export type {
           type="button"
           tabindex="-1"
           [attr.aria-controls]="control()?.controlId()"
-          [attr.aria-label]="resolvedIncrementLabel()"
+          [attr.aria-label]="t('increment')"
           [disabled]="incrementDisabled()"
           (pointerdown)="press(1, $event)"
           (pointerup)="release()"
@@ -116,7 +122,7 @@ export type {
           type="button"
           tabindex="-1"
           [attr.aria-controls]="control()?.controlId()"
-          [attr.aria-label]="resolvedDecrementLabel()"
+          [attr.aria-label]="t('decrement')"
           [disabled]="decrementDisabled()"
           (pointerdown)="press(-1, $event)"
           (pointerup)="release()"
@@ -161,10 +167,11 @@ export class SlCurrencyField {
   readonly align = input<CurrencyFieldAlign | undefined>(undefined);
   /** Where the two steppers sit. Defaults to the token, then `none`. */
   readonly stepper = input<CurrencyFieldStepper | undefined>(undefined);
-  /** The increment button's accessible name. Defaults to the token's. */
-  readonly incrementLabel = input<string | undefined>(undefined);
-  /** The decrement button's accessible name. Defaults to the token's. */
-  readonly decrementLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * `increment` and `decrement` buttons' accessible names.
+   */
+  readonly messages = input<PartialMessages<CurrencyFieldMessages> | undefined>(undefined);
 
   private readonly defaults = injectCurrencyFieldDefaults();
   private readonly field = inject(SlField, { optional: true });
@@ -189,12 +196,8 @@ export class SlCurrencyField {
    * next keystroke is read.
    */
   readonly resolvedEntry = computed(() => this.control()?.resolvedEntry() ?? this.defaults.entry);
-  protected readonly resolvedIncrementLabel = computed(
-    () => this.incrementLabel() ?? this.defaults.incrementLabel,
-  );
-  protected readonly resolvedDecrementLabel = computed(
-    () => this.decrementLabel() ?? this.defaults.decrementLabel,
-  );
+  /** The family's words in the language in force, with this field's `messages` laid over them. */
+  readonly t = injectMessages(currencyFieldMessages, this.messages);
 
   /** Whether a `slCurrencyFieldScrub` inside is being dragged. */
   readonly scrubbing = signal(false);

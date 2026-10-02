@@ -1,8 +1,5 @@
-import type {
-  ImportExportJob,
-  ImportExportMessages,
-  JobFileRole,
-} from '@slotted/core/import-export-center';
+import type { ImportExportJob, JobFileRole } from '@slotted/core/import-export-center';
+import type { ImportExportCenterMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -55,18 +52,13 @@ export interface ImportExportView {
 export interface ImportExportCenterDefaults {
   growing: ImportExportCenterGrowing;
   level: ImportExportCenterLevel;
-  locale?: string | undefined;
-  messages: ImportExportMessages;
   size: ImportExportCenterSize;
   timeFormat: ImportExportCenterTimeFormat;
   timeZone?: string | undefined;
 }
 
-export interface ImportExportCenterDefaultsProviderProps extends Partial<
-  Omit<ImportExportCenterDefaults, 'messages'>
-> {
+export interface ImportExportCenterDefaultsProviderProps extends Partial<ImportExportCenterDefaults> {
   children?: ReactNode | undefined;
-  messages?: Partial<ImportExportMessages> | undefined;
 }
 
 export interface ImportExportCenterRootProps extends HTMLAttributes<HTMLElement> {
@@ -152,7 +144,8 @@ export interface ImportExportCenterProps extends Omit<
   timeZone?: string | undefined;
   /** The moment a relative reading and a deadline count from, in epoch milliseconds. */
   now?: number | undefined;
-  messages?: Partial<ImportExportMessages> | undefined;
+  /** Words laid over the catalog of the language in force, key by key. */
+  messages?: PartialMessages<ImportExportCenterMessages> | undefined;
   /** Replaces the view's empty page. */
   empty?: ReactNode | undefined;
   footer?: ReactNode | undefined;
@@ -167,5 +160,6 @@ export interface UseJobToastsOptions {
   toaster?: Toaster | undefined;
   /** What View does: navigate to the centre, then call its `reveal(key)`. */
   onView?: ((key: string) => void) | undefined;
-  messages?: Partial<ImportExportMessages> | undefined;
+  /** Words laid over the catalog of the language in force: the announcement and View. */
+  messages?: PartialMessages<ImportExportCenterMessages> | undefined;
 }

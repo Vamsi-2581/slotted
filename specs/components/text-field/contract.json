@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "text-field",
   "ui": "text-field",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Single-line text input."
+  },
   "controlPart": "input",
   "rootRole": null,
   "stateSource": "field",
@@ -33,18 +37,9 @@
     "variant": ["prop", "defaults", "outline"]
   },
   "provides": {
-    "textFieldDefaults": [
-      "size",
-      "variant",
-      "mono",
-      "clearLabel",
-      "revealLabel",
-      "copyLabel",
-      "copiedLabel",
-      "copyFailedLabel",
-      "capsLockLabel"
-    ]
+    "textFieldDefaults": ["size", "variant", "mono"]
   },
+  "messages": ["capsLock", "clear", "copied", "copy", "copyFailed", "reveal"],
   "stateAttributes": {
     "disabled": "data-disabled",
     "invalid": "data-invalid",
@@ -92,7 +87,7 @@
     "glyphs": ["copy", "check"],
     "output": "onValueCopy",
     "detail": ["copied", "reason", "source", "value"],
-    "announces": ["copiedLabel", "copyFailedLabel"]
+    "announces": ["copied", "copyFailed"]
   },
   "capsLock": {
     "part": "caps-lock",
@@ -100,7 +95,7 @@
     "read": "KeyboardEvent.getModifierState('CapsLock')",
     "while": "focus",
     "glyph": "caps-lock",
-    "announces": "capsLockLabel"
+    "announces": "capsLock"
   },
   "literals": {
     "--slotted-text-field-action-size": "The two buttons inside the frame are square and sized from the control's own glyph scale plus its gap, which is arithmetic over tokens rather than a literal; the floor under it is --slotted-target-min, which the theme owns. On a coarse pointer each box reaches --slotted-target-comfortable in the block axis by a padding its ground does not paint, given back as a negative margin, and the input spans the frame's border box, so the control is the frame's height."

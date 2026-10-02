@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "command-palette",
   "ui": "command-palette",
+  "catalog": {
+    "group": "Navigation",
+    "summary": "Searchable dialog of commands and destinations."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/",
   "layerPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
   "patternStatus": "The combobox pattern with a listbox popup answers the search field and the list: DOM focus stays on the input and the list is navigated with aria-activedescendant, which is the pattern's own note. The popup never closes on its own — the list is the surface — so aria-expanded is always true, recorded as a departure in docs/history/designs/2026-09-15-command-palette-design.md §6. The dialog pattern is answered by the dialog family this one composes. Both read on 2026-09-15.",
@@ -86,7 +90,7 @@
     "reason": "cmdk leaves pages to the consumer's own state and kbar navigates by parent; Raycast and Linear draw the trail and return on Backspace. The stack is state a consumer can own, so it has a model."
   },
   "recent": {
-    "shown": "with an empty query, at the root page, when recent holds at least one id that names an item: a first group labelled recentLabel, in the order of the array",
+    "shown": "with an empty query, at the root page, when recent holds at least one id that names an item: a first group labelled by the recent message, in the order of the array",
     "updated": "executing an item asks onRecentChange with the id moved to the front and the array cut at recentLimit",
     "unknown": "an id that names no item is not drawn and is kept in the array",
     "persist": "the product's: it receives the array and stores it",
@@ -94,7 +98,7 @@
   },
   "execution": {
     "event": "onSelect(item, request) on the root and onSelect on the item; reason pointer or keyboard, the source event, keepOpen() and the pending promise",
-    "async": "a handler that returns a promise keeps the palette open, marks the item data-loading and aria-busy, and refuses to execute the same item again until it settles; on fulfilment the palette closes unless keepOpen() was called; on rejection it stays open and the status row announces errorLabel",
+    "async": "a handler that returns a promise keeps the palette open, marks the item data-loading and aria-busy, and refuses to execute the same item again until it settles; on fulfilment the palette closes unless keepOpen() was called; on rejection it stays open and the status row announces the error message",
     "close": "closeOnSelect closes with reason select after a synchronous handler and after a fulfilled promise",
     "reason": "docs/process/build-order.md: 'ações assíncronas' and 'não executa item disabled'."
   },
@@ -130,9 +134,9 @@
   "announce": {
     "part": "status",
     "module": "packages/core/src/live-announcer",
-    "count": "countLabel, with {count} replaced, after every change of the result set",
-    "loading": "loadingLabel while loading",
-    "error": "errorLabel, with {message} replaced, after a rejected handler",
+    "count": "the count message, a plural on {count}, after every change of the result set",
+    "loading": "the loading message while loading",
+    "error": "the error message, with {message} filled, after a rejected handler",
     "reason": "docs/process/build-order.md: 'anuncia o número de resultados pelo live-announcer'. The row is visually hidden and never duplicated: the announcer refuses to say the same sentence twice in a row."
   },
   "wiring": {
@@ -146,7 +150,7 @@
     "aria-busy": "on the list while loading, on an item while its handler is pending",
     "aria-keyshortcuts": "on an item with a shortcut, as menu writes it: Meta+K for mod+k on a Mac, Control+K elsewhere; a sequence is drawn and not announced",
     "aria-labelledby": "on each group, naming its group-label",
-    "aria-label": "inputLabel on the input; label on the dialog's content, through the dialog family",
+    "aria-label": "the input message on the input; the label message on the dialog's content, through the dialog family",
     "aria-hidden": "on shortcut, meta, arrow, search, busy, placeholder and the footer hints: each is drawn for the eye and said another way",
     "autocomplete": "off on the input, with spellcheck false",
     "tabindex": "-1 on clear; the page buttons in the trail keep their place in the tab sequence",
@@ -279,7 +283,7 @@
   },
   "declined": {
     "closeAtEveryWidth": {
-      "reason": "The dialog closes on Escape and on the scrim, and a ✕ beside a search field reads as clear, so above the dialog's full-screen step there is no close part. Below it there is no scrim to press and a touch screen has no Escape, which left a palette opened by mistake with nothing to press but a command: close is a word — closeLabel — at the end of the field, drawn by the stylesheet under the dialog's own full-screen query alone, and it asks open to be false with the reason dismiss. A consumer with outsidePress none above the step still draws its own in the footer."
+      "reason": "The dialog closes on Escape and on the scrim, and a ✕ beside a search field reads as clear, so above the dialog's full-screen step there is no close part. Below it there is no scrim to press and a touch screen has no Escape, which left a palette opened by mistake with nothing to press but a command: close is a word — the close message — at the end of the field, drawn by the stylesheet under the dialog's own full-screen query alone, and it asks open to be false with the reason dismiss. A consumer with outsidePress none above the step still draws its own in the footer."
     },
     "itemShortcuts": {
       "reason": "Shortcuts on items are drawn and announced, never bound. kbd says 'não registra atalhos sozinho', and a global registry is a family of its own. The consumer binds one with matchesShortcut in three lines, shown on both reference pages."
@@ -337,24 +341,26 @@
       "clearOnClose",
       "highlightMatch",
       "hotkey",
-      "recentLimit",
-      "label",
-      "inputLabel",
-      "placeholder",
-      "emptyLabel",
-      "loadingLabel",
-      "errorLabel",
-      "countLabel",
-      "recentLabel",
-      "clearLabel",
-      "closeLabel",
-      "backLabel",
-      "hintNavigate",
-      "hintSelect",
-      "hintClose",
-      "hintBack"
+      "recentLimit"
     ]
   },
+  "messages": [
+    "back",
+    "clear",
+    "close",
+    "count",
+    "empty",
+    "error",
+    "hintBack",
+    "hintClose",
+    "hintNavigate",
+    "hintSelect",
+    "input",
+    "label",
+    "loading",
+    "placeholder",
+    "recent"
+  ],
   "stateAttributes": {
     "open": "data-open",
     "disabled": "data-disabled",
@@ -418,22 +424,7 @@
         "loading": false,
         "disabled": false,
         "hotkey": "mod+k",
-        "recentLimit": 5,
-        "label": "Command palette",
-        "inputLabel": "Search commands",
-        "placeholder": "Type a command or search…",
-        "emptyLabel": "No results",
-        "loadingLabel": "Loading…",
-        "errorLabel": "The command failed: {message}",
-        "countLabel": "{count} results",
-        "recentLabel": "Recent",
-        "clearLabel": "Clear",
-        "closeLabel": "Close",
-        "backLabel": "Back",
-        "hintNavigate": "Navigate",
-        "hintSelect": "Select",
-        "hintClose": "Close",
-        "hintBack": "Back"
+        "recentLimit": 5
       },
       "capabilities": [
         "open",

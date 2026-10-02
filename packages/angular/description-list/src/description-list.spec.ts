@@ -1,6 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ChangeRequest } from '@slotted/core/state';
+import { provideSlotted } from '@slotted/angular/i18n';
+import type { DescriptionListMessages, PartialMessages } from '@slotted/core/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/description-list/contract.json';
@@ -316,7 +319,7 @@ describe('a clamped value', () => {
   standalone: true,
   imports: PARTS,
   template: `
-    <div slDescriptionList>
+    <div slDescriptionList [messages]="words()">
       <div slDescriptionListItem>
         <dt slDescriptionListTerm>Resource name</dt>
         <dd
@@ -343,6 +346,7 @@ describe('a clamped value', () => {
 class Panels {
   readonly copyValue = signal<string | undefined>(undefined);
   readonly placeholder = signal<string | undefined>(undefined);
+  readonly words = signal<PartialMessages<DescriptionListMessages> | undefined>(undefined);
   readonly results: DescriptionListCopyRequest[] = [];
 }
 
@@ -452,6 +456,29 @@ describe('copying, the missing value and the row action', () => {
     /* An em dash, never a hyphen: a hyphen is a word joiner (DL2). */
     expect(mark.textContent).toBe('\u2014');
     expect(root.querySelector('[data-ui="visually-hidden"]')?.textContent).toBe('Not provided');
+  });
+
+  it('reads the list messages over the language in force', () => {
+    const { fixture, root } = panels();
+    fixture.componentInstance.words.set({ placeholder: 'Sem valor', copy: 'Copiar' });
+    fixture.detectChanges();
+    expect(root.querySelector('[data-ui="visually-hidden"]')?.textContent).toBe('Sem valor');
+    expect(root.querySelector('[data-part="copy"]')?.getAttribute('aria-label')).toBe('Copiar');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    TestBed.configureTestingModule({
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const { fixture, root } = panels();
+    const hidden = () => root.querySelector('[data-ui="visually-hidden"]')?.textContent;
+    expect(hidden()).toBe('Não informado');
+    expect(root.querySelector('[data-part="copy"]')?.getAttribute('aria-label')).toBe('Copiar');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(hidden()).toBe('Not provided');
   });
 
   it('shows the words it was given rather than drawing over them', () => {

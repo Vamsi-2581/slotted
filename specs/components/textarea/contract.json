@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "textarea",
   "ui": "textarea",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Multi-line text input."
+  },
   "controlPart": "root",
   "stateSource": "field",
   "mirrorsState": true,

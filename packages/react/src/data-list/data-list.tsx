@@ -5,14 +5,10 @@ import {
   dataListKeys,
   dataListNodes,
   describeDataListSort,
-  formatDataListMessage,
   resolveDataListLayout,
   withDataListSortColumn,
   withDataListSortDirection,
-  type DataListLabels,
-  type DataListMessage,
   type DataListNode,
-  type DataListSlots,
 } from '@slotted/core/data-list';
 import {
   applyQuery,
@@ -26,6 +22,7 @@ import {
   type SortDirection,
 } from '@slotted/core/grid';
 import { nextSelection } from '@slotted/core/collection';
+import { dataListMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import {
@@ -42,6 +39,7 @@ import type { FocusEvent, ReactNode } from 'react';
 
 import { Button } from '../button';
 import { Checkbox } from '../checkbox';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { List, ListSection, type ListSectionLevel } from '../list';
 import {
@@ -166,12 +164,12 @@ export function DataList<Row>({
   href,
   label,
   labelledBy,
-  labels: labelsProp,
   loading = false,
   loadingDelay,
   loadingKeys,
   loadingMinDuration,
   locale: localeProp,
+  messages,
   mode: modeProp,
   onActivate,
   onExpandedChange,
@@ -198,14 +196,18 @@ export function DataList<Row>({
   ...rest
 }: DataListProps<Row>) {
   const defaults = useDataListDefaults();
-  const labels: DataListLabels = { ...defaults.labels, ...labelsProp };
-  const locale = localeProp ?? defaults.locale;
+  const t = useMessages(dataListMessages, messages);
+  const providedLocale = useLocale();
+  const locale = localeProp ?? providedLocale;
+  const yes = t('true');
+  const no = t('false');
+  /* What a boolean field says, kept by its words: an inline `messages`
+     makes a new translator on every render. */
+  const booleans = useMemo(() => ({ true: yes, false: no }), [yes, no]);
   const variant = variantProp ?? defaults.variant;
   const size = sizeProp ?? defaults.size;
   const selectionMode = selectionModeProp ?? defaults.selectionMode;
   const mode = modeProp ?? (totalCount === undefined ? 'client' : 'server');
-  const say = (message: DataListMessage, slots?: DataListSlots) =>
-    formatDataListMessage(message, slots, locale);
 
   const base = useId();
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -284,9 +286,9 @@ export function DataList<Row>({
         total: totalCount ?? rows.length,
       };
     }
-    const result = applyQuery(rows, columns, query, { rowKey: keyOf, locale });
+    const result = applyQuery(rows, columns, query, { rowKey: keyOf, locale, booleans });
     return { nodes: dataListNodes(result.nodes), visible: result.rows, total: result.total };
-  }, [columns, keyOf, locale, mode, query, rows, totalCount]);
+  }, [booleans, columns, keyOf, locale, mode, query, rows, totalCount]);
 
   const nodes: readonly DataListNode<Row>[] = applied.nodes;
   const drawnKeys = dataListKeys(nodes);
@@ -331,8 +333,8 @@ export function DataList<Row>({
     if (!requestQuery(next, 'sort', reason, source) && queryProp === undefined) return;
     announce(
       next.sort.length === 0
-        ? say(labels.sortCleared)
-        : say(labels.sortedBy, { order: describeDataListSort(next.sort, columns, labels, locale) }),
+        ? t('sortCleared')
+        : t('sortedBy', { order: describeDataListSort(next.sort, columns, t) }),
     );
   }
 
@@ -458,7 +460,7 @@ export function DataList<Row>({
     key: string,
     place: DataListCellContext<Row>['place'],
   ): ReactNode {
-    const text = dataListFieldText(column, row, { locale });
+    const text = dataListFieldText(column, row, { locale, booleans });
     const context: DataListCellContext<Row> = {
       column,
       row,
@@ -473,7 +475,7 @@ export function DataList<Row>({
       return (
         <span data-part="field-empty">
           <span aria-hidden="true">—</span>
-          <VisuallyHidden>{say(labels.empty)}</VisuallyHidden>
+          <VisuallyHidden>{t('empty')}</VisuallyHidden>
         </span>
       );
     }
@@ -489,7 +491,9 @@ export function DataList<Row>({
     const isCurrent = current !== undefined && current !== null && current === key;
     const isExpanded = expanded.includes(key);
     const fieldsId = `${base}-${key}-fields`;
-    const titleText = layout.title ? (dataListFieldText(layout.title, row, { locale }) ?? '') : key;
+    const titleText = layout.title
+      ? (dataListFieldText(layout.title, row, { locale, booleans }) ?? '')
+      : key;
     const visibleFields = isExpanded ? layout.fields : layout.fields.slice(0, layout.shown);
     const hiddenCount = layout.fields.length - layout.shown;
     const destination = href?.(row);
@@ -552,7 +556,7 @@ export function DataList<Row>({
               {selectionMode === 'none' ? null : (
                 <span data-part="selection">
                   <Checkbox
-                    aria-label={say(labels.selectRow, { title: titleText })}
+                    aria-label={t('selectRow', { title: titleText })}
                     checked={isSelected}
                     disabled={isDisabled}
                     onCheckedChange={(_checked, request) =>
@@ -606,7 +610,7 @@ export function DataList<Row>({
               onClick={(event) => requestExpanded(key, pressReason(event), event)}
               type="button"
             >
-              {isExpanded ? say(labels.less) : say(labels.more, { count: hiddenCount })}
+              {isExpanded ? t('less') : t('more', { count: hiddenCount })}
               <Icon size="sm">
                 <Glyph name="chevron-down" />
               </Icon>
@@ -631,7 +635,7 @@ export function DataList<Row>({
       return (
         <ListSection
           key={node.key}
-          label={`${column?.label ?? node.column}: ${node.text} · ${formatDataListMessage('{count}', { count: node.count }, locale)}`}
+          label={`${column?.label ?? node.column}: ${node.text} · ${new Intl.NumberFormat(locale).format(node.count)}`}
           level={String(Math.min(node.level + 2, 6)) as ListSectionLevel}
         >
           {renderNodes(node.children)}
@@ -644,8 +648,8 @@ export function DataList<Row>({
 
   const countText =
     selectionMode !== 'none' && selected.length > 0
-      ? say(labels.selectedCount, { selected: selected.length, count: applied.total })
-      : say(labels.count, { count: applied.total });
+      ? t('selectedCount', { selected: selected.length, count: applied.total })
+      : t('count', { count: applied.total });
 
   const sortTrigger = (
     <MenuTrigger
@@ -654,8 +658,8 @@ export function DataList<Row>({
           {...props}
           aria-label={
             firstKey
-              ? `${say(labels.sort)}, ${describeDataListSort(query.sort, columns, labels, locale)}`
-              : say(labels.sort)
+              ? t('sortNamed', { order: describeDataListSort(query.sort, columns, t) })
+              : t('sort')
           }
           disabled={showLoader}
           end={
@@ -675,12 +679,8 @@ export function DataList<Row>({
           variant="ghost"
         >
           {sortColumn
-            ? `${say(labels.sort)}: ${sortColumn.label}${
-                query.sort.length > 1
-                  ? ` ${say(labels.sortMore, { count: query.sort.length - 1 })}`
-                  : ''
-              }`
-            : say(labels.sort)}
+            ? t('sortSummary', { column: sortColumn.label, more: query.sort.length - 1 })
+            : t('sort')}
         </Button>
       )}
     />
@@ -691,7 +691,7 @@ export function DataList<Row>({
       {selectionMode === 'multiple' && !showLoader ? (
         <span data-part="select-all">
           <Checkbox
-            aria-label={say(labels.selectAll, { count: allKeys.length })}
+            aria-label={t('selectAll', { count: allKeys.length })}
             checked={allSelected}
             disabled={allKeys.length === 0}
             indeterminate={someSelected && !allSelected}
@@ -707,7 +707,7 @@ export function DataList<Row>({
         <span data-direction={firstKey?.direction} data-part="sort">
           <Menu align="end">
             {sortTrigger}
-            <MenuContent aria-label={say(labels.sort)}>
+            <MenuContent aria-label={t('sort')}>
               <MenuRadioGroup
                 aria-labelledby={`${base}-sort-column`}
                 onValueChange={(next, request) =>
@@ -719,8 +719,8 @@ export function DataList<Row>({
                 }
                 value={firstKey?.column ?? NO_SORT}
               >
-                <MenuGroupLabel id={`${base}-sort-column`}>{say(labels.sortColumn)}</MenuGroupLabel>
-                <MenuRadioItem value={NO_SORT}>{say(labels.sortNone)}</MenuRadioItem>
+                <MenuGroupLabel id={`${base}-sort-column`}>{t('sortColumn')}</MenuGroupLabel>
+                <MenuRadioItem value={NO_SORT}>{t('sortNone')}</MenuRadioItem>
                 {layout.sortable.map((column) => (
                   <MenuRadioItem key={column.id} value={column.id}>
                     {column.label}
@@ -739,14 +739,12 @@ export function DataList<Row>({
                 }
                 value={firstKey?.direction ?? ''}
               >
-                <MenuGroupLabel id={`${base}-sort-direction`}>
-                  {say(labels.sortDirection)}
-                </MenuGroupLabel>
+                <MenuGroupLabel id={`${base}-sort-direction`}>{t('sortDirection')}</MenuGroupLabel>
                 <MenuRadioItem disabled={!firstKey} value="ascending">
-                  {say(labels.ascending)}
+                  {t('ascending')}
                 </MenuRadioItem>
                 <MenuRadioItem disabled={!firstKey} value="descending">
-                  {say(labels.descending)}
+                  {t('descending')}
                 </MenuRadioItem>
               </MenuRadioGroup>
             </MenuContent>
@@ -763,7 +761,7 @@ export function DataList<Row>({
     <div data-part="loader">
       <SkeletonRegion
         delay={loadingDelay ?? defaults.loadingDelay}
-        label={say(labels.loading)}
+        messages={{ label: t('loading') }}
         loading={firstLoad}
         minDuration={loadingMinDuration ?? defaults.loadingMinDuration}
         onReveal={() => setHolding(false)}
@@ -818,10 +816,10 @@ export function DataList<Row>({
       status === 'error'
         ? typeof error === 'string'
           ? error
-          : say(labels.errorTitle)
+          : t('errorTitle')
         : status === 'no-results'
-          ? say(labels.noResultsTitle)
-          : say(labels.emptyTitle);
+          ? t('noResultsTitle')
+          : t('emptyTitle');
     return (
       <div data-part="empty">
         <ResultState reach="section" status={status} tabIndex={-1}>
@@ -851,13 +849,13 @@ export function DataList<Row>({
                 tone="secondary"
                 variant="outline"
               >
-                {say(labels.clearFilters)}
+                {t('clearFilters')}
               </Button>
             </ResultStateActions>
           ) : status === 'error' && onRetry ? (
             <ResultStateActions>
               <Button onClick={() => onRetry()} size="md" tone="secondary" variant="outline">
-                {say(labels.retry)}
+                {t('retry')}
               </Button>
             </ResultStateActions>
           ) : null}
@@ -911,7 +909,7 @@ export function DataList<Row>({
                 tone="secondary"
                 variant="outline"
               >
-                {say(labels.loadMore)}
+                {t('loadMore')}
               </Button>
             </span>
           ) : null}

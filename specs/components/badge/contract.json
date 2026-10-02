@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "badge",
   "ui": "badge",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Short label or count attached to an element."
+  },
   "axes": {
     "tone": ["accent", "secondary", "success", "warning", "danger"],
     "variant": ["solid", "soft", "outline"],

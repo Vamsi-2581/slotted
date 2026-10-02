@@ -138,7 +138,7 @@ export const Loading: Story = {
       <div className="slotted-demo-row">
         <ToggleButton
           loading={saving}
-          loadingLabel="Saving"
+          messages={{ loading: 'Saving' }}
           onPressedChange={(next) => {
             setSaving(true);
             window.setTimeout(() => {
@@ -151,7 +151,7 @@ export const Loading: Story = {
         >
           Follow
         </ToggleButton>
-        <ToggleButton defaultPressed loading loadingLabel="Unpinning">
+        <ToggleButton defaultPressed loading messages={{ loading: 'Unpinning' }}>
           Pinned
         </ToggleButton>
       </div>

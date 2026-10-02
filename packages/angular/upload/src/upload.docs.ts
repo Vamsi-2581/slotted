@@ -575,13 +575,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'defaults',
     title: 'Deciding once for the whole application',
-    note: 'Where files go, how many run at once, what every control is called, what a refusal says and how the queue counts itself — set once in the injector rather than repeated on every form, which is how one of them ends up pointing somewhere else. An upload that states any of them itself still wins.',
+    note: 'Where files go and how many run at once — set once in the injector rather than repeated on every form, which is how one of them ends up pointing somewhere else. An upload that states any of them itself still wins. What every control is called, what a refusal says and how the queue counts itself come from the language in force, and an upload lays its own messages over them.',
     snippet: defineSnippet({
       id: 'upload-angular-defaults',
       language: 'ts',
-      label: 'Every label, the sentence a refusal carries, and the counts',
+      label: 'The sender and the language for the application',
       source:
-        "provideUploadDefaults({\n  adapter,\n  concurrency: 3,\n  locale: 'pt-BR',\n  labels: { trigger: 'Escolher ficheiros', dropzone: 'Largue os ficheiros aqui' },\n  describeRejection: (file, { bytes }) =>\n    file.reason === 'size'\n      ? `Máximo de ${bytes(10 * 1024 * 1024)} por ficheiro.`\n      : 'Ficheiro recusado.',\n  describeQueue: (message) =>\n    message.kind === 'summary'\n      ? `${message.uploaded} de ${message.total} enviados`\n      : message.kind === 'finished'\n        ? `${message.uploaded} de ${message.total} ficheiros enviados`\n        : `${message.count} ficheiros`,\n});",
+        "bootstrapApplication(App, {\n  providers: [\n    provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }),\n    provideUploadDefaults({ adapter, concurrency: 3 }),\n  ],\n});",
     }),
   },
   {
@@ -834,7 +834,13 @@ export const ANGULAR_UPLOAD_DOCS = {
         'div[slUpload]',
         'Whether a transfer still running makes the control invalid',
       ],
-      ['locale', 'string', '—', 'div[slUpload]', 'BCP 47, for the size and the time left'],
+      [
+        'locale',
+        'string',
+        'the language in force',
+        'div[slUpload]',
+        'BCP 47, for the size and the time left',
+      ],
       [
         'label',
         'string',
@@ -879,39 +885,11 @@ export const ANGULAR_UPLOAD_DOCS = {
       ],
       ['name', 'string', '—', 'div[slUpload]', 'What the native input submits under'],
       [
-        'labels',
-        'Partial<UploadLabels>',
-        'the English set',
+        'messages',
+        'Partial<UploadMessages>',
+        '—',
         'div[slUpload]',
-        'The fifteen strings the family says, replaceable one at a time',
-      ],
-      [
-        'statusLabels',
-        'Partial<UploadStatusLabels>',
-        'the English set',
-        'div[slUpload]',
-        'The word each of the nine statuses says',
-      ],
-      [
-        'kindLabels',
-        'Partial<UploadKindLabels>',
-        'the English set',
-        'div[slUpload]',
-        'The word each of the nine kinds says, which is what the viewer reads',
-      ],
-      [
-        'describeRejection',
-        '(file, formatters) => string',
-        'the English default',
-        'div[slUpload]',
-        'The sentence a refused file carries',
-      ],
-      [
-        'describeQueue',
-        '(message, formatters) => string',
-        'the English default',
-        'div[slUpload]',
-        'Every sentence about the queue as a whole: the summary line, the count the field shape shows, and the announcements that files arrived and that the queue finished',
+        'Words laid over the language in force, key by key: every control, the word for each status and each kind, the sentences about the queue (summary, selection, added, finished), and the sentence a refused file carries (rejection.*)',
       ],
     ]),
     composition: apiRows([
@@ -920,7 +898,7 @@ export const ANGULAR_UPLOAD_DOCS = {
         'provider',
         '—',
         'any injector',
-        'Sets the adapter, the limits, the locale, every label and the rejection sentence once for the application',
+        'Sets the adapter, the limits and the behaviour once for the application; the words come from provideSlotted',
       ],
       [
         'UPLOAD_DEFAULTS',

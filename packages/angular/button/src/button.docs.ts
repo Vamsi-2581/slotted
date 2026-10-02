@@ -54,7 +54,13 @@ const waiting = (member: string): ApiTuple[] => [
     member,
     'Milliseconds before the indicator appears; the refusal is immediate',
   ],
-  ['loadingLabel', 'string', 'Loading', member, 'What the indicator announces itself as'],
+  [
+    'messages',
+    'Partial<ButtonMessages>',
+    '—',
+    member,
+    'Words laid over the language in force, key by key: what the indicator announces itself as (loading)',
+  ],
 ];
 
 const CONTENT = (member: string): ApiTuple[] => [
@@ -94,7 +100,7 @@ export const ANGULAR_BUTTON_DOCS = {
         label: 'Waiting for the action to finish',
         language: 'angular',
         source:
-          '<button slButton [loading]="saving()" [loadingDelay]="300" loadingLabel="Saving" (click)="save()">\n  <span slButtonStart><ng-icon aria-hidden="true" name="lucideSave" /></span>\n  Save changes\n</button>',
+          '<button\n  slButton\n  [loading]="saving()"\n  [loadingDelay]="300"\n  [messages]="{ loading: \'Saving\' }"\n  (click)="save()"\n>\n  <span slButtonStart><ng-icon aria-hidden="true" name="lucideSave" /></span>\n  Save changes\n</button>',
       }),
       defineSnippet({
         id: 'angular-button-defaults',

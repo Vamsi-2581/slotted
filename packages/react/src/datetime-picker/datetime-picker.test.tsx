@@ -1,9 +1,11 @@
 import { plainDate, plainDateTime, plainTime, toISODateTime } from '@slotted/core/date';
 import type { PlainDateTime } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { SlottedProvider } from '../i18n';
 import { DateTimePicker, DateTimePickerDefaultsProvider } from './index';
 import type { DateTimePickerHandle } from './index';
 
@@ -391,14 +393,21 @@ describe('the contract with the consumer', () => {
     await waitFor(() => expect(hidden()).toHaveValue(toISODateTime(REFERENCE)));
   });
 
-  it('takes its defaults from a provider', () => {
+  it('takes its defaults from a provider, and its words from the language in force', () => {
     render(
-      <DateTimePickerDefaultsProvider nowLabel="Agora" step={3600}>
-        <DateTimePicker {...base} defaultOpen value={TENTH} />
-      </DateTimePickerDefaultsProvider>,
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+        <DateTimePickerDefaultsProvider step={3600}>
+          <DateTimePicker {...base} defaultOpen value={TENTH} />
+        </DateTimePickerDefaultsProvider>
+      </SlottedProvider>,
     );
     expect(screen.getByRole('button', { name: 'Agora' })).not.toBeNull();
     expect(options()).toHaveLength(24);
+  });
+
+  it('lays its own messages over the catalog', () => {
+    render(<DateTimePicker {...base} defaultOpen messages={{ now: 'Já' }} />);
+    expect(screen.getByRole('button', { name: 'Já' })).not.toBeNull();
   });
 
   it('takes the consumer s own slots', () => {
@@ -453,5 +462,21 @@ describe('states', () => {
 
     rerender(<DateTimePicker {...base} value={TENTH} />);
     expect(trigger().getAttribute('aria-label')).toContain('setembro');
+  });
+
+  it('changes its words and its moment together with the language in force', () => {
+    const inLocale = (locale: string) => (
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale={locale}>
+        <DateTimePicker aria-label="Quando" referenceDateTime={REFERENCE} value={TENTH} />
+      </SlottedProvider>
+    );
+    const { rerender } = render(inLocale('pt-BR'));
+    const name = () =>
+      document.querySelector('[data-part="trigger"]')?.getAttribute('aria-label') ?? '';
+
+    expect(name()).toMatch(/^Alterar data e hora, .*setembro/);
+
+    rerender(inLocale('en-US'));
+    expect(name()).toMatch(/^Change date and time, .*September/);
   });
 });

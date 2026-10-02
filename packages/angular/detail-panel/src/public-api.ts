@@ -9,7 +9,6 @@ export {
   SlDetailPanelTabs,
 } from './detail-panel-parts';
 export {
-  DEFAULT_DETAIL_PANEL_MESSAGES,
   DETAIL_PANEL_DEFAULTS,
   injectDetailPanelDefaults,
   provideDetailPanelDefaults,
@@ -20,7 +19,6 @@ export type {
   DetailPanelDefaults,
   DetailPanelLayout,
   DetailPanelLevel,
-  DetailPanelMessages,
   DetailPanelMount,
   DetailPanelScroll,
   DetailPanelSectionReason,

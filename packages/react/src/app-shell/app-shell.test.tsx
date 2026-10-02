@@ -1,6 +1,10 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+import { act, fireEvent, render as renderBase, screen } from '@testing-library/react';
 import { useRef, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
+
+import { SlottedProvider } from '../i18n';
 
 import { AppShell } from './app-shell';
 import { AppShellDefaultsProvider } from './app-shell-defaults';
@@ -9,6 +13,7 @@ import {
   AppShellAside,
   AppShellAsideBody,
   AppShellAsideHeader,
+  AppShellAsideResizer,
   AppShellAsideToggle,
   AppShellBanner,
   AppShellBrand,
@@ -26,6 +31,17 @@ const press = (node: Element) => fireEvent.click(node, { detail: 1 });
 const activateByKey = (node: Element) => fireEvent.click(node, { detail: 0 });
 const escape = () =>
   fireEvent.keyDown(document, { key: 'Escape', bubbles: true, cancelable: true });
+
+/** The shells the tests read are in Brazilian Portuguese: the words come from the pt-BR catalog. */
+function PtBr({ children }: { children: ReactNode }) {
+  return (
+    <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+      {children}
+    </SlottedProvider>
+  );
+}
+
+const render = (ui: ReactElement) => renderBase(ui, { wrapper: PtBr });
 
 function Shell({ children, ...props }: Partial<AppShellProps> = {}) {
   return (
@@ -85,9 +101,9 @@ describe('AppShell', () => {
     const links = () => [...container.querySelectorAll('[data-part="skip"] a')];
 
     expect(links().map((link) => link.textContent)).toEqual([
-      'Saltar para o conteúdo',
-      'Saltar para a navegação',
-      'Saltar para o painel lateral',
+      'Pular para o conteúdo',
+      'Pular para a navegação',
+      'Pular para o painel lateral',
     ]);
     expect(links()[0]?.getAttribute('href')).toBe(`#${screen.getByRole('main').id}`);
 
@@ -337,13 +353,11 @@ describe('AppShell', () => {
     expect(root).toHaveAttribute('data-nav-size', 'sm');
   });
 
-  it('takes the strings from the provider, and from the instance over it', () => {
-    render(
-      <AppShellDefaultsProvider messages={{ close: 'Recolher' }}>
-        <Shell />
-      </AppShellDefaultsProvider>,
-    );
-    expect(screen.getByRole('button', { name: 'Recolher' })).toBeInTheDocument();
+  it('takes the strings from the language in force, and from the instance over it', () => {
+    renderBase(<Shell messages={{ close: 'Collapse' }} />);
+    expect(screen.getByRole('button', { name: 'Collapse' })).toBeInTheDocument();
+    expect(screen.getByRole('navigation')).toHaveAccessibleName('Main navigation');
+    expect(screen.getByRole('link', { name: 'Skip to content' })).toBeInTheDocument();
   });
 
   /**
@@ -616,7 +630,7 @@ describe('AppShell', () => {
 
     it('writes no skip link to a pane the reader closed', () => {
       render(<Shell asideMode="inline" defaultAsideOpen={false} />);
-      expect(screen.queryByRole('link', { name: 'Saltar para o painel lateral' })).toBeNull();
+      expect(screen.queryByRole('link', { name: 'Pular para o painel lateral' })).toBeNull();
     });
 
     it('names the region, and lets an instance rename it', () => {
@@ -687,6 +701,205 @@ describe('AppShell', () => {
         escape();
         expect(document.activeElement).toBe(open);
       });
+    });
+  });
+
+  describe('the pane body', () => {
+    it('stands on the pane inset unless the content brings its own', () => {
+      const { container, rerender } = render(
+        <AppShell asideMode="inline" navMode="inline">
+          <AppShellAside>
+            <AppShellAsideBody>
+              <p>ENC-4521</p>
+            </AppShellAsideBody>
+          </AppShellAside>
+        </AppShell>,
+      );
+      const body = () => container.querySelector('[data-part="aside-body"]');
+      expect(body()).not.toHaveAttribute('data-inset');
+
+      rerender(
+        <AppShell asideMode="inline" navMode="inline">
+          <AppShellAside>
+            <AppShellAsideBody inset="none">
+              <p>ENC-4521</p>
+            </AppShellAsideBody>
+          </AppShellAside>
+        </AppShell>,
+      );
+      expect(body()).toHaveAttribute('data-inset', 'none');
+    });
+  });
+
+  describe('the pane edge', () => {
+    function Resizable(props: Partial<AppShellProps>) {
+      return (
+        <AppShell asideMode="inline" navMode="inline" {...props}>
+          <AppShellMain>
+            <p>Encomendas</p>
+          </AppShellMain>
+          <AppShellAside>
+            <AppShellAsideResizer />
+            <AppShellAsideBody>
+              <p>ENC-4521</p>
+            </AppShellAsideBody>
+          </AppShellAside>
+        </AppShell>
+      );
+    }
+
+    const separator = () => screen.getByRole('separator');
+    const aside = () => document.querySelector('[data-part="aside"]') as HTMLElement;
+    const root = () => document.querySelector('[data-ui="app-shell"]') as HTMLElement;
+
+    /** jsdom lays nothing out, so the shell is given an inline size once, here. */
+    function measureShellAs(width: number) {
+      return vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+        bottom: 800,
+        height: 800,
+        left: 0,
+        right: width,
+        toJSON: () => ({}),
+        top: 0,
+        width,
+        x: 0,
+        y: 0,
+      } as DOMRect);
+    }
+
+    it('is a focusable separator for the pane, valued in whole percentages of the shell', () => {
+      render(<Resizable asideExtent={0.3} />);
+      const edge = separator();
+      expect(edge).toHaveAttribute('tabindex', '0');
+      expect(edge).toHaveAttribute('aria-orientation', 'vertical');
+      expect(edge).toHaveAttribute('aria-controls', aside().id);
+      expect(edge).toHaveAttribute('aria-valuemin', '16');
+      expect(edge).toHaveAttribute('aria-valuemax', '60');
+      expect(edge).toHaveAttribute('aria-valuenow', '30');
+      expect(edge).toHaveAccessibleName('Redimensionar painel');
+      expect(edge).toHaveAttribute('data-part', 'aside-resizer');
+    });
+
+    it('takes its limits from the shell', () => {
+      render(<Resizable asideExtent={0.3} maxAsideExtent={0.5} minAsideExtent={0.2} />);
+      expect(separator()).toHaveAttribute('aria-valuemin', '20');
+      expect(separator()).toHaveAttribute('aria-valuemax', '50');
+    });
+
+    it('moves the edge sixteen pixels per arrow and sixty-four with Shift, and says keyboard', () => {
+      const spy = measureShellAs(1000);
+      const onAsideExtentChange = vi.fn();
+      /* Controlled and never moved, so each press is measured from one place. */
+      render(<Resizable asideExtent={0.3} onAsideExtentChange={onAsideExtentChange} />);
+
+      fireEvent.keyDown(separator(), { key: 'ArrowLeft' });
+      expect(onAsideExtentChange).toHaveBeenLastCalledWith(
+        expect.closeTo(0.316, 5),
+        expect.objectContaining({ reason: 'keyboard' }),
+      );
+      fireEvent.keyDown(separator(), { key: 'ArrowRight' });
+      expect(onAsideExtentChange).toHaveBeenLastCalledWith(
+        expect.closeTo(0.284, 5),
+        expect.objectContaining({ reason: 'keyboard' }),
+      );
+      fireEvent.keyDown(separator(), { key: 'ArrowLeft', shiftKey: true });
+      expect(onAsideExtentChange).toHaveBeenLastCalledWith(
+        expect.closeTo(0.364, 5),
+        expect.objectContaining({ reason: 'keyboard' }),
+      );
+      fireEvent.keyDown(separator(), { key: 'Home' });
+      expect(onAsideExtentChange).toHaveBeenLastCalledWith(
+        0.16,
+        expect.objectContaining({ reason: 'keyboard' }),
+      );
+      fireEvent.keyDown(separator(), { key: 'End' });
+      expect(onAsideExtentChange).toHaveBeenLastCalledWith(
+        0.6,
+        expect.objectContaining({ reason: 'keyboard' }),
+      );
+      /* Controlled: the family reported and did not move itself. */
+      expect(separator()).toHaveAttribute('aria-valuenow', '30');
+      spy.mockRestore();
+    });
+
+    it('moves itself when uncontrolled, inside its limits', () => {
+      const spy = measureShellAs(1000);
+      render(<Resizable defaultAsideExtent={0.59} />);
+      fireEvent.keyDown(separator(), { key: 'ArrowLeft', shiftKey: true });
+      expect(separator()).toHaveAttribute('aria-valuenow', '60');
+      fireEvent.keyDown(separator(), { key: 'Home' });
+      expect(separator()).toHaveAttribute('aria-valuenow', '16');
+      spy.mockRestore();
+    });
+
+    it('turns the arrows round where the pane stands at the start, and in a mirrored line', () => {
+      const spy = measureShellAs(1000);
+      const onAsideExtentChange = vi.fn();
+      const { rerender } = render(
+        <Resizable asideExtent={0.3} navSide="end" onAsideExtentChange={onAsideExtentChange} />,
+      );
+      fireEvent.keyDown(separator(), { key: 'ArrowLeft' });
+      expect(onAsideExtentChange).toHaveBeenLastCalledWith(
+        expect.closeTo(0.284, 5),
+        expect.anything(),
+      );
+
+      rerender(
+        <AppShell
+          asideExtent={0.3}
+          asideMode="inline"
+          navMode="inline"
+          onAsideExtentChange={onAsideExtentChange}
+        >
+          <AppShellAside>
+            <AppShellAsideResizer style={{ direction: 'rtl' }} />
+          </AppShellAside>
+        </AppShell>,
+      );
+      fireEvent.keyDown(separator(), { key: 'ArrowLeft' });
+      expect(onAsideExtentChange).toHaveBeenLastCalledWith(
+        expect.closeTo(0.284, 5),
+        expect.anything(),
+      );
+      spy.mockRestore();
+    });
+
+    it('follows a drag from where it was grabbed, and marks the root while it lasts', () => {
+      const spy = measureShellAs(1000);
+      const onAsideExtentChange = vi.fn();
+      render(<Resizable defaultAsideExtent={0.3} onAsideExtentChange={onAsideExtentChange} />);
+      const edge = separator();
+      edge.setPointerCapture = () => {};
+      edge.hasPointerCapture = () => true;
+      edge.releasePointerCapture = () => {};
+
+      fireEvent.pointerDown(edge, { button: 0, clientX: 700, pointerId: 1 });
+      fireEvent.pointerMove(edge, { clientX: 600, pointerId: 1 });
+      expect(root()).toHaveAttribute('data-dragging');
+      expect(onAsideExtentChange).toHaveBeenLastCalledWith(
+        expect.closeTo(0.4, 5),
+        expect.objectContaining({ reason: 'pointer' }),
+      );
+      fireEvent.pointerUp(edge, { clientX: 600, pointerId: 1 });
+      expect(root()).not.toHaveAttribute('data-dragging');
+      expect(separator()).toHaveAttribute('aria-valuenow', '40');
+      spy.mockRestore();
+    });
+
+    it('writes the extent as the width of the column, and nothing while it is unset', () => {
+      const { rerender } = render(<Resizable />);
+      expect(aside().style.getPropertyValue('--slotted-app-shell-aside-extent')).toBe('');
+
+      rerender(<Resizable asideExtent={0.25} />);
+      expect(aside().style.getPropertyValue('--slotted-app-shell-aside-extent')).toBe('25cqi');
+    });
+
+    it('draws no edge where the pane is a layer, or closed', () => {
+      const { rerender } = render(<Resizable asideMode="overlay" />);
+      expect(screen.queryByRole('separator')).toBeNull();
+
+      rerender(<Resizable asideOpen={false} />);
+      expect(screen.queryByRole('separator')).toBeNull();
     });
   });
 });

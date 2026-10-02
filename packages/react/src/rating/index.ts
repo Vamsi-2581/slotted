@@ -1,5 +1,5 @@
 export { Rating } from './rating';
-export { RATING_MESSAGES, RatingProvider, useRatingDefaults } from './rating-defaults';
+export { RatingProvider, useRatingDefaults } from './rating-defaults';
 export { RatingDisplay } from './rating-display';
 export { RatingSummary } from './rating-summary';
 export type {
@@ -13,7 +13,6 @@ export type {
   RatingInsight,
   RatingInsightThresholds,
   RatingLevelsChangeRequest,
-  RatingMessages,
   RatingProps,
   RatingProviderProps,
   RatingRootProps,

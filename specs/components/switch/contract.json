@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "switch",
   "ui": "switch",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Toggle that turns a setting on or off."
+  },
   "controlPart": "control",
   "controlType": "checkbox",
   "controlRole": "switch",
@@ -42,8 +46,9 @@
     "labelPlacement": ["prop", "defaults", "end"]
   },
   "provides": {
-    "switchDefaults": ["size", "indicator", "labelPlacement", "loadingLabel"]
+    "switchDefaults": ["size", "indicator", "labelPlacement"]
   },
+  "messages": ["loading"],
   "stateAttributes": {
     "checked": "data-checked",
     "disabled": "data-disabled",

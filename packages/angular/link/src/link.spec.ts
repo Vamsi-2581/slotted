@@ -3,6 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, RouterLink, RouterLinkActive } from '@angular/router';
 import { describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/link/contract.json';
 import { SlLink } from './link';
 import { WORD_JOINER } from './link.constants';
@@ -248,7 +251,6 @@ describe('SlLink', () => {
       TestBed.configureTestingModule({
         providers: [
           provideLinkDefaults({
-            externalHint: '(nueva pestaña)',
             underline: 'hover',
             variant: 'neutral',
             visited: true,
@@ -262,7 +264,24 @@ describe('SlLink', () => {
       expect(link.getAttribute('data-underline')).toBe('hover');
       expect(link.getAttribute('data-variant')).toBe('neutral');
       expect(link.hasAttribute('data-visited')).toBe(true);
-      expect(link.textContent).toContain('(nueva pestaña)');
+    });
+
+    it('speaks the language in force, and follows a change of it in place', () => {
+      const locale = signal('pt-BR');
+      TestBed.configureTestingModule({
+        providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+      });
+      const fixture = TestBed.createComponent(DefaultedHost);
+      fixture.detectChanges();
+      const hint = () =>
+        (fixture.nativeElement as HTMLElement).querySelector('[data-part="external-hint"]')
+          ?.textContent;
+
+      expect(hint()).toContain('(abre em uma nova aba)');
+
+      locale.set('en-US');
+      fixture.detectChanges();
+      expect(hint()).toContain('(opens in a new tab)');
     });
 
     it('lets the link overrule what the application decided', () => {

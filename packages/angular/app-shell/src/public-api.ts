@@ -6,6 +6,7 @@ export {
   SlAppShellAsideBody,
   SlAppShellAsideFooter,
   SlAppShellAsideHeader,
+  SlAppShellAsideResizer,
   SlAppShellAsideToggle,
   SlAppShellBanner,
   SlAppShellBrand,
@@ -21,18 +22,18 @@ export {
 } from './app-shell';
 export {
   APP_SHELL_DEFAULTS,
-  DEFAULT_APP_SHELL_MESSAGES,
   injectAppShellDefaults,
   provideAppShellDefaults,
 } from './app-shell-defaults';
 export type {
+  AppShellAsideExtentReason,
+  AppShellAsideExtentRequest,
   AppShellAsideMode,
   AppShellAsideOpenReason,
   AppShellCanvas,
   AppShellCollapsedTo,
   AppShellDefaults,
   AppShellDismissPolicy,
-  AppShellMessages,
   AppShellNavMode,
   AppShellNavSide,
   AppShellOpenReason,

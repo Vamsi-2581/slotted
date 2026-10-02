@@ -162,7 +162,6 @@ test('offers the layout axes with their defaults', () => {
   assert.equal(contract.reflow.container, 'slotted-wizard');
   assert.equal(contract.reflow.breakpoint, '600px');
   assert.deepEqual(contract.provides.wizardDefaults, [
-    'labels',
     'progress',
     'linear',
     'level',
@@ -190,8 +189,8 @@ test('answers every wait with one indicator', () => {
   assert.equal(member.defaults.minDuration, 400);
 });
 
-test('carries every label the design names', () => {
-  assert.deepEqual(Object.keys(contract.labels).sort(), [
+test('carries every word the design names, as catalog keys', () => {
+  assert.deepEqual(contract.messages, [
     'cancel',
     'draftFailed',
     'edit',
@@ -203,15 +202,13 @@ test('carries every label the design names', () => {
     'progress',
     'restoring',
     'return',
-    'saveDraft',
     'saved',
+    'saveDraft',
     'saving',
     'skip',
     'submit',
     'submitFailed',
   ]);
-  assert.equal(contract.labels.position, 'Step {index} of {count}');
-  assert.equal(contract.labels.return, 'Save and return');
 });
 
 test('names the family that owns each declined capability', () => {

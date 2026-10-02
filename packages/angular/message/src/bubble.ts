@@ -26,7 +26,7 @@ import {
 } from '@slotted/core/text-stream';
 import type { ChangeRequest } from '@slotted/core/state';
 
-import { SlMessage } from './message';
+import { injectMessageWords, SlMessage } from './message';
 import { injectMessageDefaults, reasonOf } from './message-defaults';
 import type { BubbleTone, BubbleVariant, MessageChangeReason } from './message-defaults';
 
@@ -59,7 +59,7 @@ let nextId = 0;
         [attr.aria-expanded]="revealed()"
         (click)="toggle($event)"
       >
-        {{ revealed() ? messages.less : messages.more }}
+        {{ revealed() ? t('less') : t('more') }}
         <span slIcon><svg slGlyph name="chevron-down"></svg></span>
       </button>
     }`,
@@ -89,7 +89,8 @@ export class SlBubble {
   private readonly row = inject(SlMessage, { optional: true });
 
   readonly contentId = `sl-bubble-${nextId++}-content`;
-  readonly messages = this.defaults.messages;
+  /** The family's words: the row's, or the language in force outside a row. */
+  readonly t = injectMessageWords();
   readonly overflowing = signal(false);
   readonly clamped = computed(() => this.maxLines() !== undefined);
 
@@ -255,12 +256,13 @@ export class SlBubbleCaret {}
   template: '<span></span><span></span><span></span>',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'typing', role: 'img', '[attr.aria-label]': 'resolvedLabel()' },
+  host: { 'data-part': 'typing', role: 'img', '[attr.aria-label]': 'label()' },
 })
 export class SlBubbleTyping {
-  readonly label = input<string | undefined>(undefined);
-  private readonly defaults = injectMessageDefaults();
-  protected readonly resolvedLabel = computed(() => this.label() ?? this.defaults.messages.typing);
+  private readonly t = injectMessageWords();
+  private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
+  /** A written `aria-label` wins over the `typing` message. */
+  protected readonly label = computed(() => this.written ?? this.t('typing'));
 }
 
 /**
@@ -278,15 +280,15 @@ export class SlBubbleTyping {
   host: {
     'data-part': 'retry',
     type: 'button',
-    '[attr.aria-label]': 'label',
+    '[attr.aria-label]': 'label()',
     '(click)': 'onClick($event)',
   },
 })
 export class SlBubbleRetry {
   private readonly row = inject(SlMessage, { optional: true });
-  protected readonly label =
-    inject(new HostAttributeToken('aria-label'), { optional: true }) ??
-    injectMessageDefaults().messages.retry;
+  private readonly t = injectMessageWords();
+  private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
+  protected readonly label = computed(() => this.written ?? this.t('retry'));
 
   protected onClick(event: MouseEvent) {
     if (event.defaultPrevented) return;
@@ -298,12 +300,12 @@ export class SlBubbleRetry {
 @Directive({
   selector: '[slBubbleReactions]',
   standalone: true,
-  host: { 'data-part': 'reactions', role: 'group', '[attr.aria-label]': 'label' },
+  host: { 'data-part': 'reactions', role: 'group', '[attr.aria-label]': 'label()' },
 })
 export class SlBubbleReactions {
-  protected readonly label =
-    inject(new HostAttributeToken('aria-label'), { optional: true }) ??
-    injectMessageDefaults().messages.reactions;
+  private readonly t = injectMessageWords();
+  private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
+  protected readonly label = computed(() => this.written ?? this.t('reactions'));
 }
 
 /**

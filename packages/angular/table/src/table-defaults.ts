@@ -1,4 +1,3 @@
-import type { FilterJoin, FilterOperator } from '@slotted/core/filter';
 import { inject, Injectable, InjectionToken } from '@angular/core';
 
 /** How much of a frame the set is given. The vocabulary `description-list` set. */
@@ -44,72 +43,9 @@ export type TableSortReason = 'pointer' | 'keyboard' | 'clear' | 'programmatic';
 export type TableSelectionReason = 'pointer' | 'keyboard' | 'select' | 'clear' | 'programmatic';
 export type TableExpandedReason = 'pointer' | 'keyboard' | 'programmatic';
 
-/**
- * The words the family says. One input rather than eight: an application
- * translates them once, and a family that spread them across the root would
- * make seven of the eight an input nobody sets.
- */
-export interface TableLabels {
-  collapse: string;
-  expand: string;
-  /** The verb the filter trigger is named with, joined to the column's name. */
-  filter: string;
-  /** The action that commits the draft. */
-  filterApply: string;
-  /** The action that empties the filter. */
-  filterClear: string;
-  /** What is announced when the filter is emptied. */
-  filterCleared: string;
-  /** What is announced when the second condition appears. */
-  filterConditionAdded: string;
-  /** The word shown when a search matches nothing. */
-  filterEmpty: string;
-  /** The first end of a range, as a name and as a placeholder. */
-  filterFrom: string;
-  /** The name of the control that joins two conditions. */
-  filterJoin: string;
-  /**
-   * The two words a pair of conditions is joined with. They are also the word
-   * between the two ends of a range, which is why they are a map rather than
-   * two fields: "between 10 and 20" reads the same word as "contains a and
-   * begins with b".
-   */
-  filterJoins: Partial<Record<FilterJoin, string>>;
-  /** The word after the count announced when a search narrows the list. */
-  filterMatches: string;
-  /** Announced after an operator that takes no operand at all. */
-  filterOperandsNone: string;
-  /** Announced after an operator that takes one. */
-  filterOperandsOne: string;
-  /** Announced after `between`. */
-  filterOperandsTwo: string;
-  /** The operator chooser's own name. */
-  filterOperator: string;
-  /**
-   * Every operator's name, keyed by the engine's own operator. One map rather
-   * than nineteen fields, and `filter-bar` reads the same one in wave 8.
-   */
-  filterOperators: Partial<Record<FilterOperator, string>>;
-  /** The search field's name and its placeholder. */
-  filterSearch: string;
-  /** The covering checkbox, which answers for what the search left. */
-  filterSelectAll: string;
-  /** The second end of a range. */
-  filterTo: string;
-  /** The name of the field an operator that takes one operand draws. */
-  filterValue: string;
-  scroll: string;
-  selectAll: string;
-  selectRow: string;
-  sortCleared: string;
-  sortedAscending: string;
-  sortedDescending: string;
-}
-
 export interface TableDefaults {
   cellAlign: TableAlign;
   columns: number;
-  labels: TableLabels;
   layout: TableLayout;
   selectionMode: TableSelectionMode;
   stickyFooter: boolean;
@@ -119,72 +55,9 @@ export interface TableDefaults {
   variant: TableVariant;
 }
 
-/**
- * The words the family says when nothing else says them. They are English
- * because the package is, and every one is replaceable in two places: once for
- * an application, through the provider below, and once for a table.
- */
-export const TABLE_LABELS: TableLabels = {
-  collapse: 'Hide details',
-  expand: 'Show details',
-  filter: 'Filter',
-  filterApply: 'Apply',
-  filterCleared: 'filter removed',
-  filterClear: 'Clear',
-  filterConditionAdded: 'second condition added',
-  filterEmpty: 'No values match',
-  filterFrom: 'From',
-  filterJoin: 'Match',
-  filterJoins: { and: 'And', or: 'Or' },
-  filterMatches: 'values match',
-  filterOperandsNone: 'no value needed',
-  filterOperandsOne: 'one value',
-  filterOperandsTwo: 'two values',
-  filterOperator: 'Condition',
-  /**
-   * Keyed by the engine's operator rather than by kind, so a column of dates
-   * and a column of numbers read one word for `between`. An application that
-   * translates them replaces the entries it names and keeps the rest, which is
-   * what `resolveLabels` merges for.
-   */
-  filterOperators: {
-    after: 'After',
-    anyOf: 'Is any of',
-    before: 'Before',
-    between: 'Between',
-    contains: 'Contains',
-    empty: 'Is empty',
-    endsWith: 'Ends with',
-    equals: 'Equals',
-    greaterThan: 'Greater than',
-    greaterThanOrEqual: 'Greater than or equal to',
-    is: 'Is',
-    isNot: 'Is not',
-    lessThan: 'Less than',
-    lessThanOrEqual: 'Less than or equal to',
-    noneOf: 'Is none of',
-    notContains: 'Does not contain',
-    notEmpty: 'Is not empty',
-    notEquals: 'Does not equal',
-    startsWith: 'Begins with',
-  },
-  filterSearch: 'Search values',
-  filterSelectAll: 'All',
-  filterTo: 'To',
-  filterValue: 'Value',
-
-  scroll: 'Table, scrollable',
-  selectAll: 'Select all rows',
-  selectRow: 'Select row',
-  sortCleared: 'sorting removed',
-  sortedAscending: 'sorted ascending',
-  sortedDescending: 'sorted descending',
-};
-
 const FALLBACK: TableDefaults = {
   cellAlign: 'center',
   columns: 1,
-  labels: TABLE_LABELS,
   layout: 'auto',
   selectionMode: 'none',
   stickyFooter: false,
@@ -200,18 +73,15 @@ export const TABLE_DEFAULTS = new InjectionToken<TableDefaults>('slotted table d
 });
 
 /**
- * An application decides once how its tables are framed, how they select and
- * what their controls are called, rather than repeating the same inputs on
- * every listing screen. A table that states any of them itself still wins.
+ * An application decides once how its tables are framed and how they select,
+ * rather than repeating the same inputs on every listing screen. A table that
+ * states any of them itself still wins. Its words come from the language in
+ * force (`provideSlotted`).
  */
 export function provideTableDefaults(defaults: Partial<TableDefaults>) {
   return {
     provide: TABLE_DEFAULTS,
-    useFactory: (): TableDefaults => ({
-      ...FALLBACK,
-      ...defaults,
-      labels: { ...TABLE_LABELS, ...(defaults.labels ?? {}) },
-    }),
+    useFactory: (): TableDefaults => ({ ...FALLBACK, ...defaults }),
   };
 }
 

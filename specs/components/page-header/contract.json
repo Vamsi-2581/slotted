@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "page-header",
   "ui": "page-header",
+  "catalog": {
+    "group": "Layout",
+    "summary": "Page title, description and actions."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/",
   "togglePattern": "https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/",
   "pinPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/button/",
@@ -170,13 +174,7 @@
     "narrow": "600px",
     "below": "the header is not sticky and scrolls away with the page, see compact; breadcrumbs hide and back remains; navigation leaves the title row and joins the actions row; the actions row wraps under the title, unless the actions hold a toolbar with overflow=menu, which keeps them on the title row and folds what does not fit; the subheading is one line with an ellipsis; the heading size drops one step"
   },
-  "messages": {
-    "expand": "Expandir cabeçalho",
-    "collapse": "Recolher cabeçalho",
-    "pin": "Fixar cabeçalho",
-    "unpin": "Soltar cabeçalho",
-    "headerArea": "Cabeçalho da página"
-  },
+  "messages": ["collapse", "expand", "headerArea", "pin", "unpin"],
   "declined": {
     "titleClick": {
       "reason": "sap.f toggles the header when the title area is clicked, and UI5 gives the title a tabindex for it. The title area holds links, breadcrumbs and buttons, and a button may not contain a control: a clickable title would be a nested interactive. The toggle is a dedicated button. Cost: one more target; gain: the strip stays walkable by Tab, control by control"
@@ -225,7 +223,7 @@
     "collapse": ["prop", "defaults", "scroll"]
   },
   "provides": {
-    "pageHeaderDefaults": ["size", "level", "collapse", "messages"]
+    "pageHeaderDefaults": ["size", "level", "collapse"]
   },
   "stateAttributes": {
     "expanded": "data-expanded",

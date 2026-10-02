@@ -173,12 +173,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'time-field-angular-relative',
       label: 'The expression',
       language: 'angular',
-      source: `<div
-  slTimeField
-  locale="pt-BR"
-  durationLabel="Hora como duração a partir de agora"
-  [referenceTime]="afternoon"
-></div>`,
+      source: `<div slTimeField locale="pt-BR" [referenceTime]="afternoon"></div>`,
     }),
   },
   {
@@ -192,7 +187,7 @@ const scenes: ReferenceSceneMeta[] = [
       source: `<div
   slTimeField
   locale="pt-BR"
-  nextDayLabel="no dia seguinte"
+  [messages]="{ nextDay: '{time} no dia seguinte' }"
   [referenceTime]="late"
   (valueChange)="save($event.value, $event.crossesMidnight)"
 ></div>`,
@@ -268,7 +263,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'time-field-angular-clear',
       label: 'Clearing',
       language: 'angular',
-      source: `<div slTimeField clearable clearLabel="Limpar a hora"></div>`,
+      source: `<div slTimeField clearable [messages]="{ clear: 'Limpar a hora' }"></div>`,
     }),
   },
   {
@@ -315,7 +310,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition and escape hatches',
-    note: 'The provider sets the locale, the clock and the labels once for everything under it; render substitutes the frame’s element; and the ref carries focus(), clear() and which field holds focus.',
+    note: 'The provider sets the clock once for everything under it, provideSlotted the language; render substitutes the frame’s element; and the ref carries focus(), clear() and which field holds focus.',
     snippet: defineSnippet({
       id: 'time-field-angular-composition',
       label: 'The three surfaces',
@@ -377,9 +372,9 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    'runtime',
+    'provideSlotted',
     'SlTimeField',
-    'BCP 47. Decides the field order, the separators, the placeholder and whether a day period is drawn at all.',
+    'BCP 47. Decides the field order, the separators, the placeholder and whether a day period is drawn at all. Unset, the language in force decides.',
   ],
   [
     'timeZone',
@@ -458,7 +453,6 @@ const api: ApiRow[] = apiRows([
     'SlTimeField',
     'Draws a button that empties the value and returns focus to the first segment.',
   ],
-  ['clearLabel', 'string', 'Clear', 'SlTimeField', 'The clear button’s accessible name.'],
   [
     'relative',
     'boolean',
@@ -467,18 +461,11 @@ const api: ApiRow[] = apiRows([
     'Whether +, - and = open the duration expression. Set it false and the three keys do nothing.',
   ],
   [
-    'durationLabel',
-    'string',
-    'Time as a duration from now',
+    'messages',
+    'Partial<TimeFieldMessages>',
+    '—',
     'SlTimeField',
-    'The accessible name of the expression region.',
-  ],
-  [
-    'nextDayLabel',
-    'string',
-    'next day',
-    'SlTimeField',
-    'What the preview says after the time when a duration ran past midnight.',
+    'Words laid over the language in force, key by key: the clear button’s name (clear), the expression region’s name (duration) and the preview of a time past midnight (nextDay, with a {time} slot).',
   ],
   [
     'name',
@@ -517,7 +504,7 @@ const composition: ApiRow[] = apiRows([
     'provider',
     '—',
     'application',
-    'Sets locale, timeZone, hourCycle, granularity, relative, size, variant and every label once for everything under it. A control that states any of them itself still wins.',
+    'Sets timeZone, hourCycle, granularity, relative, size and variant once for everything under it. A control that states any of them itself still wins. The locale and the words come from provideSlotted.',
   ],
   [
     'ControlValueAccessor',

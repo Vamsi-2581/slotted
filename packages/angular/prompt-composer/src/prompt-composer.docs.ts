@@ -250,7 +250,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Setting it once, and reaching past it',
-    note: 'providePromptComposerDefaults carries the variant, the send key and every label an application translates once; exportAs reaches the textarea, which already has select(); the value binds to a reactive form.',
+    note: 'providePromptComposerDefaults carries the variant and the send key, and the words come from the language in force; exportAs reaches the textarea, which already has select(); the value binds to a reactive form.',
     snippet: defineSnippet({
       id: 'prompt-composer-angular-composition',
       language: 'angular',
@@ -424,11 +424,11 @@ export const ANGULAR_PROMPT_COMPOSER_DOCS = {
         'Publishes the length of the value to the field, which draws the count',
       ],
       [
-        'sendLabel / stopLabel / retryLabel / sendingLabel / stoppedLabel / attachLabel',
-        'string',
-        'Send / Stop / Retry / Sending / Stopped / Attach files',
-        'providePromptComposerDefaults',
-        'What the send says in each status, what is announced, and the paperclip’s name',
+        'messages',
+        'Partial<PromptComposerMessages>',
+        '—',
+        'slPromptComposer',
+        'Words laid over the language in force, key by key: what the send says in each status, what is announced, and the paperclip’s name',
       ],
     ]),
     composition: apiRows([

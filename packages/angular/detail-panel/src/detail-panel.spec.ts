@@ -4,6 +4,8 @@ import type { ComponentFixture } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ChangeRequest } from '@slotted/core/state';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import {
   SlPageHeader,
   SlPageHeaderHeading,
@@ -306,7 +308,7 @@ describe('SlDetailPanel', () => {
   it('names the aside from messages and lets a consumer rename it', () => {
     const aside = () => one('[data-part="aside"]');
     expect(aside().tagName).toBe('ASIDE');
-    expect(aside().getAttribute('aria-label')).toBe('Detalhes');
+    expect(aside().getAttribute('aria-label')).toBe('Details');
   });
 
   it('renders no aside under aside="none"', () => {
@@ -336,10 +338,8 @@ describe('SlDetailPanel', () => {
 @Component({
   standalone: true,
   imports: PARTS,
-  providers: [
-    provideDetailPanelDefaults({ layout: 'tabs', aside: 'start', messages: { aside: 'Campos' } }),
-  ],
-  template: `<article slDetailPanel>
+  providers: [provideDetailPanelDefaults({ layout: 'tabs', aside: 'start' })],
+  template: `<article slDetailPanel [messages]="{ aside: 'Campos' }">
     <header slPageHeader>
       <div slPageHeaderTitleArea>
         <div slPageHeaderTitleRow>
@@ -357,7 +357,7 @@ describe('SlDetailPanel', () => {
 class Provided {}
 
 describe('provideDetailPanelDefaults', () => {
-  it('sets the layout, the aside and the messages once for every panel under it', () => {
+  it('sets the layout and the aside once for every panel under it, and yields to messages', () => {
     vi.stubGlobal('ResizeObserver', FakeObserver);
     vi.stubGlobal('IntersectionObserver', FakeObserver);
     const fixture = TestBed.createComponent(Provided);
@@ -367,6 +367,39 @@ describe('provideDetailPanelDefaults', () => {
     expect(root.dataset['aside']).toBe('start');
     expect(root.querySelector('[data-part="aside"]')?.getAttribute('aria-label')).toBe('Campos');
     expect(root.querySelector('[role="tablist"]')).not.toBeNull();
+    vi.unstubAllGlobals();
+  });
+});
+
+const panelLocale = signal('pt-BR');
+
+@Component({
+  standalone: true,
+  imports: PARTS,
+  providers: [provideSlotted({ locale: panelLocale, catalogs: { 'pt-BR': PT_BR } })],
+  template: `<article slDetailPanel>
+    <div slDetailPanelBody>
+      <ng-template slDetailPanelSection name="a" label="A"><p>a</p></ng-template>
+      <aside slDetailPanelAside><dl>x</dl></aside>
+    </div>
+  </article>`,
+})
+class Localized {}
+
+describe('SlDetailPanel language', () => {
+  it('speaks the language in force, and follows a change of it in place', () => {
+    vi.stubGlobal('ResizeObserver', FakeObserver);
+    vi.stubGlobal('IntersectionObserver', FakeObserver);
+    panelLocale.set('pt-BR');
+    const fixture = TestBed.createComponent(Localized);
+    fixture.detectChanges();
+    const aside = () =>
+      (fixture.nativeElement as HTMLElement).querySelector('[data-part="aside"]') as HTMLElement;
+    expect(aside().getAttribute('aria-label')).toBe('Detalhes');
+
+    panelLocale.set('en-US');
+    fixture.detectChanges();
+    expect(aside().getAttribute('aria-label')).toBe('Details');
     vi.unstubAllGlobals();
   });
 });

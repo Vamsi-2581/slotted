@@ -158,7 +158,7 @@ describe('FieldGroup', () => {
 
   it('says the set’s necessity in words when the application asks for words', () => {
     render(
-      <FieldGroup necessityWords={{ required: '(obrigatório)' }} required necessity="words">
+      <FieldGroup messages={{ required: '(obrigatório)' }} required necessity="words">
         <FieldGroupLegend>Nacionalidade</FieldGroupLegend>
       </FieldGroup>,
     );

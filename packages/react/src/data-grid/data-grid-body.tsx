@@ -19,7 +19,6 @@ import {
   SELECTION_COLUMN,
 } from './data-grid-constants';
 import { useDataGridInternal } from './data-grid-context';
-import { fill } from './data-grid-defaults';
 import { cellText } from '@slotted/core/grid';
 
 interface BodyProps<Row> {
@@ -217,7 +216,7 @@ function SelectionCell<Row>({ rowKey }: { rowKey: string }) {
       {...(current ? { 'data-current': '' } : {})}
     >
       <Checkbox
-        aria-label={`${grid.labels.selectRow} ${rowKey}`}
+        aria-label={grid.t('selectRow', { row: rowKey })}
         checked={grid.isSelected(rowKey)}
         disabled={disabled || undefined}
         onCheckedChange={(_checked, request) => {
@@ -260,7 +259,7 @@ function DragHandleCell<Row>({ node }: { node: Extract<GridNode<Row>, { kind: 'r
     >
       <button
         aria-disabled={grid.rowsReorderable ? undefined : true}
-        aria-label={fill(grid.labels.reorderRow, { row: grid.rowLabelOf(node.key) })}
+        aria-label={grid.t('reorderRow', { row: grid.rowLabelOf(node.key) })}
         data-part="row-handle"
         {...(grid.rowsReorderable ? {} : { 'data-disabled': '' })}
         tabIndex={current ? 0 : -1}
@@ -304,7 +303,7 @@ function ExpanderCell<Row>({ node }: { node: Extract<GridNode<Row>, { kind: 'row
         <button
           aria-controls={open ? grid.detailId(node.key) : undefined}
           aria-expanded={open}
-          aria-label={open ? grid.labels.collapse : grid.labels.expand}
+          aria-label={grid.t(open ? 'collapse' : 'expand')}
           data-part="expander"
           onClick={(event) => grid.toggleExpanded(node.key, event)}
           tabIndex={current ? 0 : -1}
@@ -394,7 +393,7 @@ function BodyCell<Row>({
         branch ? (
           <button
             aria-expanded={node.open}
-            aria-label={node.open ? grid.labels.collapse : grid.labels.expand}
+            aria-label={grid.t(node.open ? 'collapse' : 'expand')}
             data-part="tree-toggle"
             onClick={(event) => {
               event.stopPropagation();
@@ -515,7 +514,7 @@ function GroupRow<Row>({
   const cellOf = (columnId: string) => ({ row: cursorRow, column: columnId });
   const firstColumn = grid.columnIds[0]!;
   const current = grid.current !== null && grid.current.row === cursorRow;
-  const label = fill(grid.labels.groupCount, { count: node.count });
+  const label = grid.t('groupCount', { count: node.count });
 
   return (
     <div
@@ -545,7 +544,7 @@ function GroupRow<Row>({
       >
         <button
           aria-expanded={node.expanded}
-          aria-label={`${node.expanded ? grid.labels.collapseGroup : grid.labels.expandGroup} ${node.text}`}
+          aria-label={grid.t(node.expanded ? 'collapseGroup' : 'expandGroup', { group: node.text })}
           data-part="group-toggle"
           onClick={(event) => {
             event.stopPropagation();
@@ -575,6 +574,7 @@ function GroupRow<Row>({
             ? ''
             : cellText({ ...entry.column, accessor: () => value }, node.rows[0] as Row, {
                 locale: grid.locale,
+                booleans: grid.booleans,
               });
         const cell = cellOf(entry.id);
         const here = current && grid.current?.column === entry.id;
@@ -659,6 +659,7 @@ export function DataGridSummary<Row>({
       ? ''
       : cellText({ ...column.column, accessor: () => value }, {} as Row, {
           locale: grid.locale,
+          booleans: grid.booleans,
         });
   };
   const popinCell = { row: SUMMARY_ROW, column: POPIN_COLUMN_ID };

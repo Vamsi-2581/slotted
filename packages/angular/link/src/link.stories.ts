@@ -177,8 +177,8 @@ export const External: Story = {
        <a slLink external href="https://www.w3.org/TR/wai-aria-1.2/">the WAI-ARIA specification</a>.
      </p>
      <p>
-       The wording is an input, so an application in another language reads
-       <a slLink external externalHint="(abre numa nova aba)" href="https://www.w3.org/TR/wai-aria-1.2/"
+       The wording is a message, so an application in another language reads
+       <a slLink external [messages]="{ externalHint: '(abre numa nova aba)' }" href="https://www.w3.org/TR/wai-aria-1.2/"
          >a hint of its own</a
        >.
      </p>`,

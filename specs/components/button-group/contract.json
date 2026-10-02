@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "button-group",
   "ui": "button-group",
+  "catalog": {
+    "group": "Actions",
+    "summary": "Buttons joined into one control."
+  },
   "role": "group",
   "rovingFocus": false,
   "rovingFocusOwner": "toolbar",

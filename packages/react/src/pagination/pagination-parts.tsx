@@ -102,7 +102,7 @@ export function PaginationFirst(props: PaginationTriggerProps) {
   return (
     <Trigger
       {...props}
-      label={props['aria-label'] ?? pagination.labels.first}
+      label={props['aria-label'] ?? pagination.t('first')}
       part="first"
       target={1}
       usable={pagination.canGoPrevious}
@@ -115,7 +115,7 @@ export function PaginationPrevious(props: PaginationTriggerProps) {
   return (
     <Trigger
       {...props}
-      label={props['aria-label'] ?? pagination.labels.previous}
+      label={props['aria-label'] ?? pagination.t('previous')}
       part="previous"
       target={pagination.page - 1}
       usable={pagination.canGoPrevious}
@@ -128,7 +128,7 @@ export function PaginationNext(props: PaginationTriggerProps) {
   return (
     <Trigger
       {...props}
-      label={props['aria-label'] ?? pagination.labels.next}
+      label={props['aria-label'] ?? pagination.t('next')}
       part="next"
       target={pagination.page + 1}
       usable={pagination.canGoNext}
@@ -141,7 +141,7 @@ export function PaginationLast(props: PaginationTriggerProps) {
   return (
     <Trigger
       {...props}
-      label={props['aria-label'] ?? pagination.labels.last}
+      label={props['aria-label'] ?? pagination.t('last')}
       part="last"
       target={pagination.pages}
       usable={pagination.canGoNext}
@@ -183,7 +183,7 @@ export function PaginationItems({ ref, render, ...nativeProps }: PaginationItems
     <>
       {render === undefined ? <ul {...rootProps} ref={ref} /> : render(rootProps)}
       <span data-part="summary">
-        {pagination.labels.summary(pagination.page, pagination.pages)}
+        {pagination.t('summary', { page: pagination.page, pages: pagination.pages })}
       </span>
     </>
   );
@@ -202,7 +202,7 @@ function Page({ page }: { page: number }) {
 
   const shared = {
     'aria-current': current ? ('page' as const) : undefined,
-    'aria-label': pagination.labels.page(page),
+    'aria-label': pagination.t('page', { page }),
     children: page,
     'data-disabled': pagination.disabled ? '' : undefined,
     'data-loading': pagination.loading ? '' : undefined,
@@ -238,7 +238,11 @@ export function PaginationStatus({ children, ref, render, ...nativeProps }: Pagi
     'aria-live': pagination.live,
     children:
       children ??
-      pagination.labels.range(pagination.range.start, pagination.range.end, pagination.count ?? 0),
+      pagination.t('range', {
+        start: pagination.range.start,
+        end: pagination.range.end,
+        count: pagination.count ?? 0,
+      }),
     'data-part': 'status',
   };
 
@@ -287,7 +291,7 @@ export function PaginationPageSize({
 
   return (
     <label data-part="page-size-label">
-      {label ?? pagination.labels.pageSize}
+      {label ?? pagination.t('pageSize')}
       {control}
       <Icon>
         <Glyph name="chevron-down" />

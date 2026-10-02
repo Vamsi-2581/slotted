@@ -216,7 +216,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition and escape hatches',
-    note: 'A provider sets the locale, the zone and the two trigger names once; the ref hands back focus(), open() and close(); and the value is a request a consumer may refuse before anything commits.',
+    note: 'A provider sets the zone and the placement once, provideSlotted the language and the two trigger names; the ref hands back focus(), open() and close(); and the value is a request a consumer may refuse before anything commits.',
     snippet: defineSnippet({
       id: 'date-picker-angular-composition',
       label: 'Provider and exportAs',
@@ -319,7 +319,7 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    'the runtime’s',
+    'the language in force',
     'SlDatePicker',
     'BCP 47. Reaches both halves: the field’s order and the grid’s month names.',
   ],
@@ -378,18 +378,11 @@ const api: ApiRow[] = apiRows([
     'The name the hidden input carries the ISO string under.',
   ],
   [
-    'chooseLabel',
-    'string',
-    'Choose date',
+    'messages',
+    'Partial<DatePickerMessages>',
+    '—',
     'SlDatePicker',
-    'The trigger’s name while nothing is chosen.',
-  ],
-  [
-    'changeLabel',
-    'string',
-    'Change date',
-    'SlDatePicker',
-    'The trigger’s name once a date is chosen, before the date itself.',
+    'Words laid over the language in force, key by key: the trigger’s name while nothing is chosen (choose), and once a date is (change, with the date in its {date} slot).',
   ],
   [
     'slDatePickerPresets',
@@ -426,7 +419,7 @@ const composition: ApiRow[] = apiRows([
     'Provider',
     '—',
     'application',
-    'Sets locale, timeZone, placement, closeOnSelect, calendar, size, variant and the two trigger names once for everything under the injector.',
+    'Sets timeZone, placement, closeOnSelect, calendar, size and variant once for everything under the injector.',
   ],
   [
     'exportAs',

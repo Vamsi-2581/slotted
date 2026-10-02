@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "message-scroller",
   "ui": "message-scroller",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Scrolling log of messages that follows new ones."
+  },
   "pattern": null,
   "patternAbsent": {
     "index": "https://www.w3.org/WAI/ARIA/apg/patterns/",
@@ -32,7 +36,7 @@
   "aria": {
     "viewport": {
       "tabindex": "0",
-      "aria-label": "messages.label"
+      "aria-label": "the label message"
     },
     "content": {
       "aria-relevant": "additions",
@@ -161,18 +165,19 @@
     "scrollMargin": ["prop", "defaults", 0]
   },
   "provides": {
-    "messageScrollerDefaults": ["follow", "defaultPosition", "peek", "scrollMargin", "messages"]
+    "messageScrollerDefaults": ["follow", "defaultPosition", "peek", "scrollMargin"]
   },
-  "messages": {
-    "label": "Mensagens",
-    "jumpToEnd": "Ir para a mais recente",
-    "jumpToStart": "Ir para a primeira",
-    "jumpCount": "{count, plural, one {# nova} other {# novas}}",
-    "loader": "A carregar mensagens anteriores",
-    "unread": "Novas mensagens",
-    "busy": "A responder",
-    "idle": "Resposta completa"
-  },
+  "messages": [
+    "busy",
+    "idle",
+    "jumpCount",
+    "jumpToEnd",
+    "jumpToEndCount",
+    "jumpToStart",
+    "label",
+    "loader",
+    "unread"
+  ],
   "dataAttributes": {
     "root": ["data-scrollable", "data-following", "data-pending"],
     "viewport": ["data-scrollable", "data-pending"],

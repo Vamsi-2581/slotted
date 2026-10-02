@@ -14,7 +14,7 @@ export type EntityPickerSize = 'sm' | 'md' | 'lg';
 export type EntityPickerVariant = 'outline' | 'subtle' | 'plain';
 export type EntityPickerMedia = 'avatar' | 'none';
 export type EntityPickerOverflow = 'collapse' | 'wrap';
-export type EntityPickerOpenOn = 'input' | 'focus';
+export type EntityPickerOpenOn = 'input' | 'focus' | 'manual';
 export type EntityPickerSide = 'bottom' | 'top';
 export type EntityPickerWidth = 'anchor' | 'content';
 export type EntityPickerStrategy = 'absolute' | 'fixed';
@@ -68,32 +68,6 @@ export interface EntityPickerChipContext {
   readonly $implicit: Entity;
 }
 
-/** Every sentence the family says. `{name}` slots are filled where they occur. */
-export interface EntityPickerLabels {
-  clear: string;
-  trigger: string;
-  empty: string;
-  loading: string;
-  count: string;
-  minQuery: string;
-  create: string;
-  error: string;
-  retry: string;
-  chosen: string;
-  favorites: string;
-  recent: string;
-  results: string;
-  unresolved: string;
-  remove: string;
-  scope: string;
-  chips: string;
-  more: string;
-  moreLabel: string;
-  added: string;
-  removed: string;
-  complete: string;
-}
-
 /** What an application sets once for every picker under it. */
 export interface EntityPickerDefaults {
   clearable: boolean;
@@ -101,7 +75,6 @@ export interface EntityPickerDefaults {
   fullWidth: boolean;
   highlightMatch: boolean;
   invalid: boolean;
-  labels: EntityPickerLabels;
   loop: boolean;
   media: EntityPickerMedia;
   minQueryLength: number;
@@ -118,32 +91,6 @@ export interface EntityPickerDefaults {
   width: EntityPickerWidth;
 }
 
-/** The words the family says before an application says otherwise. */
-export const DEFAULT_ENTITY_PICKER_LABELS: EntityPickerLabels = {
-  clear: 'Clear',
-  trigger: 'Show results',
-  empty: 'No results',
-  loading: 'Loading…',
-  count: '{count} results',
-  minQuery: 'Type {count} or more characters',
-  create: 'Create “{query}”',
-  error: 'Couldn’t load results',
-  retry: 'Try again',
-  chosen: 'Chosen',
-  favorites: 'Favorites',
-  recent: 'Recent',
-  results: 'Results',
-  unresolved: 'Unavailable',
-  remove: 'Remove {label}',
-  scope: 'Search in',
-  chips: '{label}, {count} chosen',
-  more: '+{count}',
-  moreLabel: '{count} more chosen',
-  added: '{label} added, {count} chosen',
-  removed: '{label} removed, {count} chosen',
-  complete: 'Limit of {max} reached',
-};
-
 /** The contract's defaults, `specs/components/entity-picker/contract.json`. */
 export const ENTITY_PICKER_FALLBACK: EntityPickerDefaults = {
   clearable: true,
@@ -151,11 +98,10 @@ export const ENTITY_PICKER_FALLBACK: EntityPickerDefaults = {
   fullWidth: true,
   highlightMatch: true,
   invalid: false,
-  labels: DEFAULT_ENTITY_PICKER_LABELS,
   loop: false,
   media: 'avatar',
   minQueryLength: 0,
-  openOn: 'focus',
+  openOn: 'input',
   overflow: 'collapse',
   portal: true,
   readOnly: false,
@@ -174,28 +120,19 @@ export const ENTITY_PICKER_DEFAULTS = new InjectionToken<EntityPickerDefaults>(
 );
 
 /**
- * An application decides once how its pickers look, how long they wait and
- * what they say. A picker that states any of it itself still wins, and a
- * nested provider overrides only what it names.
+ * An application decides once how its pickers look and how long they wait. A
+ * picker that states any of it itself still wins, and a nested provider
+ * overrides only what it names. Its words come from the language in force
+ * (`provideSlotted`).
  */
-export function provideEntityPickerDefaults(
-  defaults: Partial<Omit<EntityPickerDefaults, 'labels'>> & {
-    labels?: Partial<EntityPickerLabels>;
-  },
-) {
+export function provideEntityPickerDefaults(defaults: Partial<EntityPickerDefaults>) {
   return {
     provide: ENTITY_PICKER_DEFAULTS,
     useFactory: (): EntityPickerDefaults => {
       const inherited = inject(ENTITY_PICKER_DEFAULTS, { skipSelf: true, optional: true });
-      const base = inherited ?? ENTITY_PICKER_FALLBACK;
-      const merged: EntityPickerDefaults = {
-        ...base,
-        labels: { ...base.labels, ...defaults.labels },
-      };
+      const merged: EntityPickerDefaults = { ...(inherited ?? ENTITY_PICKER_FALLBACK) };
       for (const [key, value] of Object.entries(defaults)) {
-        if (key !== 'labels' && value !== undefined) {
-          (merged as unknown as Record<string, unknown>)[key] = value;
-        }
+        if (value !== undefined) (merged as unknown as Record<string, unknown>)[key] = value;
       }
       return merged;
     },

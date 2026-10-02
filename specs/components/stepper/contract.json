@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "stepper",
   "ui": "stepper",
+  "catalog": {
+    "group": "Navigation",
+    "summary": "Shows progress through ordered steps."
+  },
   "rootRole": "none",
   "listElement": "ol",
   "currentValue": "step",
@@ -107,9 +111,11 @@
     }
   },
   "provides": {
-    "stepperDefaults": ["label", "orientation", "labelPlacement", "navigation", "linear"],
+    "stepperDefaults": ["orientation", "labelPlacement", "navigation", "linear"],
     "toItems": ["orientation", "labelPlacement", "navigation", "linear", "count"]
   },
+  "messages": ["complete", "current", "label", "invalid", "loading", "position", "unavailable"],
+  "messagesReason": "The words the family says come from the stepper catalog of the language in force, laid over by one messages input on the root: the list's name (label), the position counted from one, and the five statuses. A step announces them as one list written with Intl.ListFormat in the locale in force, so each language joins its own descriptors.",
   "stateAttributes": {
     "current": "data-current",
     "complete": "data-complete",
@@ -144,7 +150,6 @@
     "stepper": {
       "nativeElement": "div",
       "defaults": {
-        "label": "Progress",
         "defaultStep": 0,
         "orientation": "horizontal",
         "labelPlacement": "end",

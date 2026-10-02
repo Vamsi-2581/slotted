@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "tag",
   "ui": "tag",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Label for a category, removable or selectable."
+  },
   "axes": {
     "tone": ["accent", "secondary", "success", "warning", "danger"],
     "variant": ["solid", "soft", "outline"],
@@ -9,6 +13,7 @@
     "shape": ["pill", "square"],
     "orientation": ["horizontal", "vertical"]
   },
+  "messages": ["remove"],
   "stateAttributes": {
     "disabled": "data-disabled",
     "selected": "data-selected"
@@ -30,8 +35,7 @@
         "size": "md",
         "shape": "pill",
         "orientation": "horizontal",
-        "disabled": false,
-        "removeLabel": "Remove"
+        "disabled": false
       },
       "capabilities": [
         "appearance",
@@ -52,8 +56,7 @@
         "variant": "soft",
         "size": "md",
         "shape": "pill",
-        "disabled": false,
-        "removeLabel": "Remove"
+        "disabled": false
       },
       "capabilities": ["appearance", "size", "shape", "content", "disabled", "removable"],
       "states": ["default", "hover", "active", "focus-visible", "disabled"],
@@ -66,8 +69,7 @@
         "variant": "soft",
         "size": "md",
         "shape": "pill",
-        "disabled": false,
-        "removeLabel": "Remove"
+        "disabled": false
       },
       "capabilities": ["appearance", "size", "shape", "content", "disabled", "removable"],
       "states": ["default", "hover", "active", "focus-visible", "disabled"],
@@ -81,8 +83,7 @@
         "size": "md",
         "shape": "pill",
         "disabled": false,
-        "selected": false,
-        "removeLabel": "Remove"
+        "selected": false
       },
       "capabilities": [
         "appearance",

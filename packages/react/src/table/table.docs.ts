@@ -435,7 +435,8 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'table-react-scroll',
       language: 'tsx',
       label: 'Naming the region',
-      source: '<TableContent scrollLabel="Invoices, scrollable">{rows}</TableContent>;',
+      source:
+        "<TableContent scrollProps={{ 'aria-label': 'Invoices, scrollable' }}>{rows}</TableContent>;",
     }),
   },
   {
@@ -524,13 +525,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Setting the family once, and reaching past it',
-    note: 'The provider sets the frame, the layout and the words for everything below it, and a table that states an axis itself still wins. Every part takes render, a ref and native props, so a part can become your own element without losing a data attribute.',
+    note: 'The provider sets the frame and the layout for everything below it, SlottedProvider the language, and a table that states an axis itself still wins. Every part takes render, a ref and native props, so a part can become your own element without losing a data attribute.',
     snippet: defineSnippet({
       id: 'table-react-composition',
       language: 'tsx',
       label: 'An application deciding once',
       source:
-        '<TableDefaultsProvider variant="framed" stickyHeader labels={{ selectAll: \'Selecionar tudo\' }}>\n  <App />\n</TableDefaultsProvider>;',
+        '<TableDefaultsProvider variant="framed" stickyHeader>\n  <App />\n</TableDefaultsProvider>;',
     }),
   },
   {
@@ -747,7 +748,13 @@ export const REACT_TABLE_DOCS = {
         'Table',
         'A refresh over rows already shown: aria-busy, and nothing moves',
       ],
-      ['labels', 'TableLabels', '—', 'Table', 'The eight words the family says, translated once'],
+      [
+        'messages',
+        'Partial<TableMessages>',
+        '—',
+        'Table',
+        'Words laid over the language in force, key by key: selection, expansion, sort and every word of the column filters',
+      ],
       ['skeletonRows', 'number', '5', 'TableLoader', 'How many skeleton rows a first load draws'],
       [
         'totalRowCount',
@@ -755,13 +762,6 @@ export const REACT_TABLE_DOCS = {
         '—',
         'TableContent',
         'The size of the set behind a page, written as aria-rowcount',
-      ],
-      [
-        'scrollLabel',
-        'string',
-        '—',
-        'TableContent',
-        'The name the scrolling region takes while it overflows',
       ],
       [
         'scrollLabelledBy',
@@ -873,7 +873,7 @@ export const REACT_TABLE_DOCS = {
       ],
       [
         'TableDefaultsProvider',
-        'variant | striped | stickyHeader | stickyFooter | stickyTo | layout | selectionMode | columns | labels',
+        'variant | striped | stickyHeader | stickyFooter | stickyTo | layout | selectionMode | columns',
         '—',
         'Application',
         'Sets those once for everything below it; a prop on the table still wins',

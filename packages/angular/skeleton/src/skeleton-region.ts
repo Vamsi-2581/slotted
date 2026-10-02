@@ -1,3 +1,4 @@
+import { type PartialMessages, skeletonMessages, type SkeletonMessages } from '@slotted/core/i18n';
 import { initialLoadingVisibility, nextLoadingVisibility } from '@slotted/core/loading';
 import type { LoadingVisibilityState } from '@slotted/core/loading';
 import {
@@ -15,11 +16,11 @@ import {
   untracked,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 
 import { injectSkeletonDefaults } from './skeleton-defaults';
 import {
   SKELETON_DEFAULT_ANIMATION,
-  SKELETON_DEFAULT_LABEL,
   SKELETON_DEFAULT_LIVE,
   type SkeletonAnimation,
   type SkeletonLive,
@@ -75,7 +76,11 @@ export class SlSkeletonRegion {
   readonly loading = input(true, { transform: booleanAttribute });
   readonly animation = input<SkeletonAnimation | undefined>(undefined);
   readonly live = input<SkeletonLive | undefined>(undefined);
-  readonly label = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: what a
+   * screen reader hears once, while the region is waiting (`label`).
+   */
+  readonly messages = input<PartialMessages<SkeletonMessages> | undefined>(undefined);
   readonly loadedLabel = input<string | undefined>(undefined);
   readonly delay = input<number | undefined, unknown>(undefined, { transform: optionalNumber });
   readonly minDuration = input<number | undefined, unknown>(undefined, {
@@ -91,6 +96,8 @@ export class SlSkeletonRegion {
   readonly reveal = output<void>();
 
   private readonly defaults = injectSkeletonDefaults();
+  /** The family's words in the language in force, with this region's `messages` laid over them. */
+  readonly t = injectMessages(skeletonMessages, this.messages);
 
   readonly animationValue = computed(
     () => this.animation() ?? this.defaults.animation ?? SKELETON_DEFAULT_ANIMATION,
@@ -109,9 +116,7 @@ export class SlSkeletonRegion {
    * to hear.
    */
   readonly announcement = computed(() =>
-    this.painted()
-      ? (this.label() ?? this.defaults.label ?? SKELETON_DEFAULT_LABEL)
-      : (this.loadedLabel() ?? this.defaults.loadedLabel ?? ''),
+    this.painted() ? this.t('label') : (this.loadedLabel() ?? this.defaults.loadedLabel ?? ''),
   );
 
   private machine: LoadingVisibilityState = initialLoadingVisibility;

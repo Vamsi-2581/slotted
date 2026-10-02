@@ -70,6 +70,9 @@
     );
 
     background-color: var(--_card-surface);
+    /* The ground a family inside states its own ground from — a table's rows,
+       a grid's cells — so they stand on the card and not on the page. */
+    --slotted-ground: var(--_card-surface);
     /* The edge is drawn by `::before` over the border box, never in flow, so a
        hairline becoming a selected 2px edge moves no text. A real border would
        have to reserve its own width, and reserving the resting width is what

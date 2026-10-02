@@ -1,9 +1,15 @@
-import { effect, inject, untracked } from '@angular/core';
+import { effect, inject, signal, untracked } from '@angular/core';
 import type { Signal, TemplateRef } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlToastService } from '@slotted/angular/toast';
 import type { ToastContent, ToastMessage } from '@slotted/angular/toast';
-import { DEFAULT_IMPORT_EXPORT_MESSAGES, jobNotice } from '@slotted/core/import-export-center';
-import type { ImportExportJob, ImportExportMessages } from '@slotted/core/import-export-center';
+import {
+  importExportCenterMessages,
+  type ImportExportCenterMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
+import { jobNotice } from '@slotted/core/import-export-center';
+import type { ImportExportJob } from '@slotted/core/import-export-center';
 
 export interface JobToastsOptions {
   /**
@@ -17,7 +23,8 @@ export interface JobToastsOptions {
     | TemplateRef<{ $implicit: ToastMessage<ToastContent> }>
     | (() => TemplateRef<{ $implicit: ToastMessage<ToastContent> }> | undefined)
     | undefined;
-  messages?: Partial<ImportExportMessages> | undefined;
+  /** Words laid over the catalog of the language in force: the announcement a toast carries. */
+  messages?: PartialMessages<ImportExportCenterMessages> | undefined;
 }
 
 /** What a notice's toast carries in `data`: the job it points at. */
@@ -45,6 +52,7 @@ export function jobToasts(
   { actions, messages }: JobToastsOptions = {},
 ): void {
   const toasts = inject(SlToastService);
+  const t = injectMessages(importExportCenterMessages, signal(messages));
   let previous: ReadonlyMap<string, ImportExportJob> | null = null;
 
   effect(() => {
@@ -53,9 +61,8 @@ export function jobToasts(
       const seen = previous;
       previous = new Map(current.map((job) => [job.key, job]));
       if (seen === null) return;
-      const words = { ...DEFAULT_IMPORT_EXPORT_MESSAGES, ...messages };
       for (const job of current) {
-        const notice = jobNotice(seen.get(job.key), job, words);
+        const notice = jobNotice(seen.get(job.key), job, t);
         if (notice === null) continue;
         const template = typeof actions === 'function' ? actions() : actions;
         toasts.show({

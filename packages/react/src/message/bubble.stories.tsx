@@ -246,7 +246,7 @@ export const Clamp: Story = {
     <Grid columns={1}>
       <Scene
         label="Three lines, then the rest"
-        note="The clamp ends in an ellipsis and the inset under it stays clean; press Mostrar mais and the chevron turns. A short text under the same clamp draws no control."
+        note="The clamp ends in an ellipsis and the inset under it stays clean; press Show more and the chevron turns. A short text under the same clamp draws no control."
       >
         <Stack>
           <Message aria-label="Assistente">
@@ -319,7 +319,7 @@ export const Typing: Story = {
           <MessageBody>
             <Bubble>
               <BubbleContent>
-                <BubbleTyping label="Marta Silva está a escrever" />
+                <BubbleTyping aria-label="Marta Silva está a escrever" />
               </BubbleContent>
             </Bubble>
             <MessageFooter aria-hidden="true">Marta está a escrever</MessageFooter>

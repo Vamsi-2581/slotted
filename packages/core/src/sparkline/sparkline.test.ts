@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { createTranslator, sparklineMessages } from '../i18n';
+import { PT_BR } from '../i18n/locales/pt-BR';
+
 import {
   describeSparkline,
   layoutSparkline,
@@ -199,32 +202,32 @@ describe('layoutSparkline: bar', () => {
 });
 
 describe('describeSparkline', () => {
-  const messages = {
-    up: '{last}, up {change} since {first}',
-    down: '{last}, down {change} since {first}',
-    flat: '{last}, unchanged since {first}',
-    noData: 'no data',
-  };
+  const t = createTranslator({ locale: 'en-US' }).family(sparklineMessages);
   const format = (value: number) => String(value);
 
   it('says the last value, the direction and the change since the first', () => {
-    expect(describeSparkline([100, 120, 130], { messages, format })).toBe('130, up 30 since 100');
+    expect(describeSparkline([100, 120, 130], { t, format })).toBe('130, up 30 since 100');
   });
 
   it('names the series first when it has a name', () => {
-    expect(describeSparkline([5, 3], { messages, format, label: 'Errors' })).toBe(
+    expect(describeSparkline([5, 3], { t, format, label: 'Errors' })).toBe(
       'Errors: 3, down 2 since 5',
     );
   });
 
   it('says a flat series is unchanged and names no change', () => {
-    expect(describeSparkline([5, 9, 5], { messages, format })).toBe('5, unchanged since 5');
+    expect(describeSparkline([5, 9, 5], { t, format })).toBe('5, unchanged since 5');
   });
 
   it('says there is nothing when there is nothing', () => {
-    expect(describeSparkline([null], { messages, format, label: 'Errors' })).toBe(
-      'Errors: no data',
+    expect(describeSparkline([null], { t, format, label: 'Errors' })).toBe('Errors: no data');
+  });
+
+  it('speaks the language of the translator it is given', () => {
+    const pt = createTranslator({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }).family(
+      sparklineMessages,
     );
+    expect(describeSparkline([100, 120, 130], { t: pt, format })).toBe('130, alta de 30 desde 100');
   });
 });
 

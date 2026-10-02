@@ -1,6 +1,5 @@
 export {
   createMessageScroller,
-  formatScrollerMessage,
   ITEM_SELECTOR,
   items,
   offsetIn,

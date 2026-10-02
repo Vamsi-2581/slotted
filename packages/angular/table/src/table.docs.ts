@@ -438,7 +438,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'table-angular-scroll',
       language: 'angular',
       label: 'Naming the region',
-      source: '<div slTableContent scrollLabel="Invoices, scrollable"></div>',
+      source: '<div slTableContent aria-label="Invoices, scrollable"></div>',
     }),
   },
   {
@@ -527,13 +527,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Setting the family once, and reaching past it',
-    note: 'provideTableDefaults sets the frame, the layout and the words for everything under that injector, and a table that states an axis itself still wins. Every part is a directive on your own element, so nothing is wrapped that you did not write.',
+    note: 'provideTableDefaults sets the frame and the layout for everything under that injector, provideSlotted the language, and a table that states an axis itself still wins. Every part is a directive on your own element, so nothing is wrapped that you did not write.',
     snippet: defineSnippet({
       id: 'table-angular-composition',
       language: 'ts',
       label: 'An application deciding once',
       source:
-        "bootstrapApplication(App, {\n  providers: [\n    provideTableDefaults({\n      variant: 'framed',\n      stickyHeader: true,\n      labels: { selectAll: 'Selecionar tudo' },\n    }),\n  ],\n});",
+        "bootstrapApplication(App, {\n  providers: [\n    provideTableDefaults({\n      variant: 'framed',\n      stickyHeader: true,\n    }),\n  ],\n});",
     }),
   },
   {
@@ -759,11 +759,11 @@ export const ANGULAR_TABLE_DOCS = {
         'A refresh over rows already shown: aria-busy, and nothing moves',
       ],
       [
-        'labels',
-        'Partial<TableLabels>',
+        'messages',
+        'Partial<TableMessages>',
         '—',
         'slTable',
-        'The eight words the family says, translated once',
+        'Words laid over the language in force, key by key: selection, expansion, sort and every word of the column filters',
       ],
       ['skeletonRows', 'number', '5', 'slTableLoader', 'How many skeleton rows a first load draws'],
       [
@@ -774,11 +774,11 @@ export const ANGULAR_TABLE_DOCS = {
         'The size of the set behind a page, written as aria-rowcount',
       ],
       [
-        'scrollLabel',
+        'aria-label',
         'string',
         '—',
         'slTableContent',
-        'The name the scrolling region takes while it overflows',
+        'The name the scrolling region takes while it overflows, over the catalog’s',
       ],
       [
         'scrollLabelledBy',
@@ -878,7 +878,7 @@ export const ANGULAR_TABLE_DOCS = {
         'Partial<TableDefaults>',
         '—',
         'Application',
-        'Sets the frame, the layout, the selection and the words once; an input on the table still wins',
+        'Sets the frame, the layout and the selection once; an input on the table still wins',
       ],
       [
         'ControlValueAccessor',

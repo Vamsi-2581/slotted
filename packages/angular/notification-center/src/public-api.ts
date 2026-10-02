@@ -9,7 +9,6 @@ export {
 } from './notification-center';
 export type { NotificationItemContext } from './notification-center';
 export {
-  DEFAULT_NOTIFICATION_CENTER_MESSAGES,
   injectNotificationCenterDefaults,
   NOTIFICATION_CENTER_DEFAULTS,
   provideNotificationCenterDefaults,
@@ -23,7 +22,6 @@ export type {
   NotificationCenterItemRequest,
   NotificationCenterLevel,
   NotificationCenterLoadReason,
-  NotificationCenterMessages,
   NotificationCenterPressReason,
   NotificationCenterReadReason,
   NotificationCenterReadRequest,

@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import type { ComponentPropsWithRef } from 'react';
 import { describe, expect, it } from 'vitest';
 
+import { SlottedProvider } from '../i18n';
 import { Sparkline } from '../sparkline';
 import {
   StatCard,
@@ -222,8 +224,8 @@ describe('StatCard', () => {
 
   it('takes its defaults from the provider, and an explicit prop wins', () => {
     render(
-      <StatCardDefaultsProvider fill="subtle" goodWhen="down" messages={{ up: 'subiu' }} size="sm">
-        <StatCard delta={0.2}>
+      <StatCardDefaultsProvider fill="subtle" goodWhen="down" size="sm">
+        <StatCard delta={0.2} messages={{ up: 'subiu' }}>
           <StatCardDelta />
         </StatCard>
         <StatCard delta={0.2} goodWhen="up" size="lg">
@@ -239,6 +241,22 @@ describe('StatCard', () => {
     expect(first!.querySelector('[data-part="delta"]')).toHaveTextContent('subiu');
     expect(second).toHaveAttribute('data-size', 'lg');
     expect(second).toHaveAttribute('data-tone', 'success');
+  });
+
+  it('speaks the language in force, and writes its numbers in that locale', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <StatCard delta={-0.032}>
+          <StatCardDelta />
+        </StatCard>
+        <StatCard status="empty">
+          <StatCardValue value={1} />
+        </StatCard>
+      </SlottedProvider>,
+    );
+
+    expect(part('delta')).toHaveTextContent('queda -3,2%');
+    expect(part('value')).toHaveTextContent('—');
   });
 
   it('keeps the consumer label id and then names the group by it', () => {

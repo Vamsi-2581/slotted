@@ -11,7 +11,6 @@ export { autoScrollDelta, resolvePoint } from './geometry';
 export type { MeasuredContainer, Rect } from './geometry';
 export { DRAG_KEYS, intentForKey, operationForModifiers } from './keys';
 export type { Modifiers, WritingDirection } from './keys';
-export { DEFAULT_DRAG_MESSAGES } from './messages';
 export {
   containerPositions,
   isIdentity,
@@ -21,13 +20,12 @@ export {
 } from './positions';
 export type { ContainerFacts, DragFacts } from './positions';
 export type {
+  DragAnnouncement,
   DragAutoScrollOptions,
   DragContainerOptions,
   DragController,
   DragControllerOptions,
   DragEndEvent,
-  DragMessageContext,
-  DragMessages,
   DragOrientation,
   DragOrigin,
   DragPreviewOptions,

@@ -24,7 +24,6 @@ export function TableContent({
   children,
   handleRef,
   ref,
-  scrollLabel,
   scrollLabelledBy,
   scrollProps,
   totalRowCount,
@@ -99,7 +98,7 @@ export function TableContent({
     scroll['tabIndex'] = restScrollProps.tabIndex ?? 0;
     if (scrollLabelledBy !== undefined) scroll['aria-labelledby'] = scrollLabelledBy;
     else if (restScrollProps['aria-label'] === undefined) {
-      scroll['aria-label'] = scrollLabel ?? table.labels.scroll;
+      scroll['aria-label'] = table.t('scroll');
     }
   }
 

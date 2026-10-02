@@ -77,7 +77,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span, rendered by the frame',
     required: false,
     purpose:
-      'A mark in a password while Caps Lock is on and the control has focus. Hidden from assistive technology; capsLockLabel is announced once as it turns on.',
+      'A mark in a password while Caps Lock is on and the control has focus. Hidden from assistive technology; the capsLock message is announced once as it turns on.',
   },
   {
     part: 'clear',
@@ -532,25 +532,11 @@ export const ANGULAR_TEXT_FIELD_DOCS = {
         'Draws the shared ring before the buttons and marks the input aria-busy; the value stays editable. Bound at all, false included, the ring keeps its place so it can leave with motion',
       ],
       [
-        'copyLabel / copiedLabel / copyFailedLabel',
-        'string',
-        'Copy / Copied / Copy failed',
-        'slTextField, provideTextFieldDefaults',
-        'The copy button’s name, and the two announcements of its outcome',
-      ],
-      [
-        'capsLockLabel',
-        'string',
-        'Caps Lock is on',
-        'slTextField, provideTextFieldDefaults',
-        'What a password announces once as Caps Lock turns on while it has focus',
-      ],
-      [
-        'clearLabel / revealLabel',
-        'string',
-        'Clear / Show password',
-        'slTextField, provideTextFieldDefaults',
-        'What the two buttons announce. The reveal label does not change with its state — aria-pressed carries that — and both are set once for an application',
+        'messages',
+        'Partial<TextFieldMessages>',
+        '—',
+        'slTextField',
+        'Words laid over the language in force, key by key: clear, reveal and copy name the buttons (reveal does not change with its state — aria-pressed carries that); copied and copyFailed announce a copy’s outcome; capsLock is announced once as Caps Lock turns on in a focused password',
       ],
     ]),
     composition: apiRows([
@@ -577,7 +563,7 @@ export const ANGULAR_TEXT_FIELD_DOCS = {
       ],
       [
         'provideTextFieldDefaults()',
-        '{ size, variant, mono, clearLabel, revealLabel, copyLabel, copiedLabel, copyFailedLabel, capsLockLabel }',
+        '{ size, variant, mono }',
         '—',
         'an injector',
         'The decisions an application takes once. size is the one a field outranks, so a control inside a field takes the field’s step',

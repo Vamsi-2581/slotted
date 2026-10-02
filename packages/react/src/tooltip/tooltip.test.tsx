@@ -259,6 +259,35 @@ describe('Tooltip', () => {
     expect(trigger().hasAttribute('data-open')).toBe(false);
   });
 
+  /**
+   * A rail hint is disabled while the navigation is expanded and enabled in the
+   * rail. A hover while disabled has to leave nothing behind, or every hint
+   * hovered in the expanded navigation appears at once when it collapses.
+   */
+  it('keeps no open state from a hover while disabled, once it is enabled again', async () => {
+    const { rerender } = render(<Basic disabled openDelay={600} closeDelay={150} />);
+
+    hover(trigger());
+    act(() => void vi.advanceTimersByTime(600));
+    unhover(trigger());
+    act(() => void vi.advanceTimersByTime(150));
+
+    rerender(<Basic openDelay={600} closeDelay={150} />);
+    await act(async () => {});
+    expect(layer()).toBeNull();
+    expect(trigger().hasAttribute('data-open')).toBe(false);
+  });
+
+  it('drops its own open state when it becomes disabled', async () => {
+    const { rerender } = render(<Basic defaultOpen />);
+    await waitFor(() => expect(layer()).not.toBeNull());
+
+    rerender(<Basic defaultOpen disabled />);
+    rerender(<Basic defaultOpen />);
+    await act(async () => {});
+    expect(trigger().hasAttribute('data-open')).toBe(false);
+  });
+
   it('opens and closes from the handle, without a delay', async () => {
     function WithHandle() {
       const handle = useRef<TooltipHandle>(null);

@@ -6,12 +6,14 @@ import {
   computed,
   DestroyRef,
   Directive,
+  effect,
   inject,
   input,
   model,
   numberAttribute,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 
 import { injectTooltipDefaults, SlTooltipGroup, SlTooltipIdFactory } from './tooltip-defaults';
@@ -198,6 +200,14 @@ export class SlTooltip {
 
   constructor() {
     this.destroyRef.onDestroy(() => this.cancelPending());
+    /** Disabling cancels a waiting open and drops an open one, so enabling opens nothing. */
+    effect(() => {
+      if (!this.disabled()) return;
+      untracked(() => {
+        this.cancelPending();
+        if (this.open()) this.open.set(false);
+      });
+    });
   }
 
   cancelPending() {
@@ -248,6 +258,12 @@ export class SlTooltip {
   toggle(next: boolean, reason: TooltipOpenReason, source?: Event) {
     this.cancelPending();
     if (next === this.isOpen()) return;
+    /**
+     * Refused rather than recorded: an open granted while disabled is hidden by
+     * `isOpen`, and the leave that follows finds nothing to close, so it would
+     * surface the moment `disabled` turned false.
+     */
+    if (next && this.disabled()) return;
     /**
      * Measured here rather than watched: the answer is needed at the moment the
      * hint would open, and a box measured then is never a box two column drags

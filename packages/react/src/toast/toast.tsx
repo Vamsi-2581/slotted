@@ -1,6 +1,7 @@
 import '@slotted/styles/toast/toast.css';
 
 import { createRemovalFocus } from '@slotted/core/focus';
+import { type FamilyTranslator, toastMessages, type ToastMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import type { ToastMessage } from '@slotted/core/toast';
 import { createToastStore } from '@slotted/core/toast';
@@ -16,6 +17,7 @@ import {
 import type { CSSProperties, FocusEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { createPortal } from 'react-dom';
 
+import { useMessages } from '../i18n';
 import { useToastDefaults, useToaster } from './toast-defaults';
 import { Toast } from './toast-parts';
 import type { ToastContent, ToastDefaults, ToastRegionProps, ToastStore } from './toast.types';
@@ -28,6 +30,8 @@ export interface ToastRegionContextValue {
   placement: ToastRegionProps['placement'];
   /** Where the keyboard was before the hotkey moved it into the region. */
   cameFrom: { current: HTMLElement | null };
+  /** The family's words in the language in force, with this region's `messages` laid over them. */
+  t: FamilyTranslator<ToastMessages>;
 }
 
 const ToastRegionContext = createContext<ToastRegionContextValue | undefined>(undefined);
@@ -110,8 +114,8 @@ export function ToastRegion({
   defaultToasts,
   duration,
   hotkey,
-  label,
   limit,
+  messages,
   onToastsChange,
   pauseOnHover,
   pauseWhenHidden,
@@ -125,12 +129,12 @@ export function ToastRegion({
 }: ToastRegionProps) {
   const defaults = useToastDefaults();
   const shared = useToaster();
+  const t = useMessages(toastMessages, messages);
 
   const resolvedAttach = attach ?? defaults.attach;
   const resolvedPlacement = placement ?? defaults.placement;
   const resolvedStacking = stacking ?? defaults.stacking;
   const resolvedSwipe = swipe ?? defaults.swipe;
-  const resolvedLabel = label ?? defaults.label;
   const resolvedHotkey = hotkey ?? defaults.hotkey;
 
   /**
@@ -301,10 +305,11 @@ export function ToastRegion({
         swipeThreshold: defaults.swipeThreshold,
         placement: resolvedPlacement,
         cameFrom,
+        t,
       }}
     >
       <section
-        aria-label={resolvedLabel}
+        aria-label={t('label')}
         {...nativeProps}
         data-attach={resolvedAttach}
         data-part="root"

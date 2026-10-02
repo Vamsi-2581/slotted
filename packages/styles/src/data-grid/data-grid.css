@@ -68,7 +68,12 @@
        because a pinned cell inherits it to cover the cells sliding under it. */
     --_text: var(--slotted-data-grid-color, var(--slotted-text, CanvasText));
     --_muted: var(--slotted-data-grid-color-muted, var(--slotted-text-muted, GrayText));
-    --_surface: var(--slotted-data-grid-surface, var(--slotted-surface, Canvas));
+    /* The ground a raised container publishes (a card, a section on a surface),
+       else the page's surface. */
+    --_surface: var(
+      --slotted-data-grid-surface,
+      var(--slotted-ground, var(--slotted-surface, Canvas))
+    );
     /* The header band, mixed from the ink at 8% as `table` mixes it: neutral,
        darker than the page in light and lighter in dark, and one step above
        the stripe at 5%. A group row and the filter row take the same mix at

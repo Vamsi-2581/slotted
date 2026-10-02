@@ -83,3 +83,26 @@ test('keeps today and the timed lines readable in forced colours', () => {
   );
   assert.ok(forced.includes('border-color:Canvas;'));
 });
+
+/**
+ * The calendar draws no box of its own: placed on a page's sunken ground, a
+ * card or a panel, it takes that ground. A consumer that wants one names it
+ * with `--slotted-event-calendar-background`, and that one value is also the
+ * ground every event fill is mixed over, so the fills and the ground cannot
+ * disagree.
+ */
+test('takes the ground it is placed on, and mixes its fills over that ground', () => {
+  const root = rulesNaming("[data-ui='event-calendar'][data-part='root']").join('');
+  assert.ok(
+    root.includes('background-color:var(--slotted-event-calendar-background,transparent);'),
+    'the root paints nothing unless the consumer names a ground',
+  );
+  assert.ok(
+    root.includes(
+      '--_base:var(--slotted-event-calendar-background,var(--slotted-surface,#ffffff));',
+    ),
+    'the ground the fills are mixed over is the named one, else the surface',
+  );
+  const direct = normalized.match(/var\(--slotted-surface,#ffffff\)/g) ?? [];
+  assert.equal(direct.length, 1, 'only `--_base` reads the surface; every fill reads `--_base`');
+});

@@ -382,7 +382,7 @@ export const Jump: Story = {
     template: page(
       scene(
         'Two arrived while you were away',
-        'Scroll up, then press Receber resposta twice: the round control widens into 2 novas; press it to go back to the end and it leaves.',
+        'Scroll up, then press Receber resposta twice: the round control widens into 2 new; press it to go back to the end and it leaves.',
         '<sl-message-scroller-chat-demo [follow]="false"></sl-message-scroller-chat-demo>',
       ),
     ),
@@ -434,7 +434,7 @@ export const Busy: Story = {
     template: page(
       scene(
         'A reply announced once',
-        'Send a question: while the answer streams the log is aria-busy and a screen reader hears A responder; when it ends, Resposta completa.',
+        'Send a question: while the answer streams the log is aria-busy and a screen reader hears Responding; when it ends, Response complete.',
         '<sl-message-scroller-chat-demo></sl-message-scroller-chat-demo>',
       ),
     ),

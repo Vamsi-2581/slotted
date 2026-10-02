@@ -190,10 +190,11 @@ export const Insight: Story = {
         note="The same readings with consensus set at 95%: nothing else holds, so the conclusion is mixed. The provider sets thresholds once; an instance can still move one."
         layout="block"
       >
-        <RatingProvider insightThresholds={{ consensus: 0.95 }} locale="pt-BR">
+        <RatingProvider insightThresholds={{ consensus: 0.95 }}>
           <RatingSummary
             aria-label="Fone Studio Pro, limiar alto"
             counts={STRONG}
+            locale="pt-BR"
             variant="spectrum"
           />
         </RatingProvider>

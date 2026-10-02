@@ -3,12 +3,9 @@ import type { FormDefaultsProviderProps } from './form.types';
 
 /**
  * An application decides once how its forms behave: when they validate, where
- * focus goes after a failed submit, what the summary is called, and how its
- * action row is arranged. A form that states any of them itself still wins.
- *
- * `summaryTitle` is the one worth setting first, because it is the only string
- * this family writes and the only place a reader is told, in words, that
- * something is wrong.
+ * focus goes after a failed submit, and how its action row is arranged. A form
+ * that states any of them itself still wins. The summary's heading comes from
+ * the language in force (`SlottedProvider`).
  */
 export function FormDefaultsProvider({ children, ...defaults }: FormDefaultsProviderProps) {
   const inherited = useFormDefaults();
@@ -21,7 +18,6 @@ export function FormDefaultsProvider({ children, ...defaults }: FormDefaultsProv
         nativeValidation: defaults.nativeValidation ?? inherited.nativeValidation,
         summary: defaults.summary ?? inherited.summary,
         summaryDescription: defaults.summaryDescription ?? inherited.summaryDescription,
-        summaryTitle: defaults.summaryTitle ?? inherited.summaryTitle,
         validate: defaults.validate ?? inherited.validate,
       }}
     >

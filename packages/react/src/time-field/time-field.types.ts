@@ -5,6 +5,7 @@ import type {
   TimeFieldName,
   TimeGranularity,
 } from '@slotted/core/date';
+import type { PartialMessages, TimeFieldMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -44,16 +45,9 @@ export interface TimeFieldChangeRequest extends ChangeRequest<PlainTime | null> 
 
 /** What an application sets once for every time field under it. */
 export interface TimeFieldDefaults {
-  clearLabel: string;
-  /** The accessible name of the expression region. */
-  durationLabel: string;
   granularity: TimeGranularity;
   /** Unset means the locale decides both the cycle and its variant. */
   hourCycle: TimeFieldHourCycle | undefined;
-  /** BCP 47. Unset means the runtime decides. */
-  locale: string | undefined;
-  /** What the preview says after the time when a duration ran past midnight. */
-  nextDayLabel: string;
   /** Whether `+`, `-` and `=` open the duration expression. */
   relative: boolean;
   size: TimeFieldSize;
@@ -119,7 +113,10 @@ export interface TimeFieldProps extends Omit<
   /** Refuses particular times — a lunch break, a booked slot, a closed shop. */
   isTimeUnavailable?: ((time: PlainTime) => boolean) | undefined;
 
-  /** BCP 47. Decides the field order, the separators and the placeholder. */
+  /**
+   * BCP 47. Decides the field order, the separators and the placeholder.
+   * Unset, the language in force (`SlottedProvider`) decides.
+   */
   locale?: string | undefined;
   /** Which zone answers "what time is it now", and nothing else. */
   timeZone?: string | undefined;
@@ -143,12 +140,14 @@ export interface TimeFieldProps extends Omit<
 
   /** Draws a button that empties the value and returns focus to the control. */
   clearable?: boolean | undefined;
-  clearLabel?: string | undefined;
 
   /** Whether `+`, `-` and `=` open the duration expression. */
   relative?: boolean | undefined;
-  durationLabel?: string | undefined;
-  nextDayLabel?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * clear button, the duration region's name and the next-day preview.
+   */
+  messages?: PartialMessages<TimeFieldMessages> | undefined;
 
   /** The name a plain form post carries the `HH:mm:ss` string under. */
   name?: string | undefined;

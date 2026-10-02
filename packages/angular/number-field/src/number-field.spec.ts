@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SlField, SlFieldError, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import { describe, expect, it } from 'vitest';
 
@@ -399,7 +401,7 @@ describe('SlNumberField', () => {
   describe('the two steppers', () => {
     it('keeps them out of the tab order and in the accessibility tree', () => {
       const fixture = renderTemplate(
-        `<div slNumberField incrementLabel="Mais" decrementLabel="Menos">
+        `<div slNumberField [messages]="{ increment: 'Mais', decrement: 'Menos' }">
            <input slNumberFieldInput defaultValue="1" />
          </div>`,
       );
@@ -631,13 +633,28 @@ describe('SlNumberField', () => {
     it('lets an application decide once what its number fields look like', () => {
       const fixture = renderTemplate(
         `<div slNumberField><input slNumberFieldInput defaultValue="1480.5" /></div>`,
-        [provideNumberFieldDefaults({ locale: 'pt-BR', stepper: 'split', variant: 'subtle' })],
+        [provideNumberFieldDefaults({ stepper: 'split', variant: 'subtle' })],
       );
 
       const root = query(fixture, '[data-ui="number-field"]');
       expect(root.getAttribute('data-variant')).toBe('subtle');
       expect(root.getAttribute('data-stepper')).toBe('split');
+    });
+
+    it('writes and speaks in the language in force, and follows a change of it in place', () => {
+      const locale = signal('pt-BR');
+      const fixture = renderTemplate(
+        `<div slNumberField><input slNumberFieldInput defaultValue="1480.5" /></div>`,
+        [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+      );
+
       expect(input(fixture).value).toBe('1.480,5');
+      expect(stepper(fixture, 'increment').getAttribute('aria-label')).toBe('Aumentar');
+
+      locale.set('en-US');
+      fixture.detectChanges();
+      expect(stepper(fixture, 'increment').getAttribute('aria-label')).toBe('Increase');
+      expect(stepper(fixture, 'decrement').getAttribute('aria-label')).toBe('Decrease');
     });
 
     it('lets a static attribute the consumer wrote survive the host bindings', () => {

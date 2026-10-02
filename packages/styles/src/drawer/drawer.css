@@ -1208,7 +1208,10 @@
     grid-row: 2;
     min-block-size: 0;
     min-inline-size: 0;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overflow-inline: hidden;
+    overflow-block: auto;
     overscroll-behavior: contain;
     padding-block: var(--_padding-block);
     padding-inline: var(--_row-padding-inline-start) var(--_row-padding-inline-end);

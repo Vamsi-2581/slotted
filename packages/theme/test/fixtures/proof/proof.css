@@ -189,7 +189,7 @@
     --slotted-card-radius: var(--slotted-radius-lg);
   }
 
-  @scope ([data-slotted-theme="proof"][data-slotted-scheme="light"], [data-slotted-theme="proof"] [data-slotted-scheme="light"], [data-slotted-scheme="light"] [data-slotted-theme="proof"]) to ([data-slotted-scheme], [data-slotted-theme]) {
+  @scope ([data-slotted-theme="proof"][data-slotted-scheme="light"], [data-slotted-theme="proof"] [data-slotted-scheme="light"], [data-slotted-scheme="light"] [data-slotted-theme="proof"]:not([data-slotted-scheme])) to ([data-slotted-scheme], [data-slotted-theme]) {
     :scope,
     [data-slotted-seeds] {
       color-scheme: light;
@@ -295,7 +295,7 @@
     }
   }
 
-  @scope ([data-slotted-theme="proof"][data-slotted-scheme="dark"], [data-slotted-theme="proof"] [data-slotted-scheme="dark"], [data-slotted-scheme="dark"] [data-slotted-theme="proof"]) to ([data-slotted-scheme], [data-slotted-theme]) {
+  @scope ([data-slotted-theme="proof"][data-slotted-scheme="dark"], [data-slotted-theme="proof"] [data-slotted-scheme="dark"], [data-slotted-scheme="dark"] [data-slotted-theme="proof"]:not([data-slotted-scheme])) to ([data-slotted-scheme], [data-slotted-theme]) {
     :scope,
     [data-slotted-seeds] {
       color-scheme: dark;
@@ -401,7 +401,7 @@
     }
   }
 
-  @scope ([data-slotted-theme="proof"][data-slotted-scheme="high-contrast"], [data-slotted-theme="proof"] [data-slotted-scheme="high-contrast"], [data-slotted-scheme="high-contrast"] [data-slotted-theme="proof"]) to ([data-slotted-scheme], [data-slotted-theme]) {
+  @scope ([data-slotted-theme="proof"][data-slotted-scheme="high-contrast"], [data-slotted-theme="proof"] [data-slotted-scheme="high-contrast"], [data-slotted-scheme="high-contrast"] [data-slotted-theme="proof"]:not([data-slotted-scheme])) to ([data-slotted-scheme], [data-slotted-theme]) {
     :scope,
     [data-slotted-seeds] {
       color-scheme: light;
@@ -507,7 +507,7 @@
     }
   }
 
-  @scope ([data-slotted-theme="proof"][data-slotted-scheme="system"], [data-slotted-theme="proof"] [data-slotted-scheme="system"], [data-slotted-scheme="system"] [data-slotted-theme="proof"]) to ([data-slotted-scheme], [data-slotted-theme]) {
+  @scope ([data-slotted-theme="proof"][data-slotted-scheme="system"], [data-slotted-theme="proof"] [data-slotted-scheme="system"], [data-slotted-scheme="system"] [data-slotted-theme="proof"]:not([data-slotted-scheme])) to ([data-slotted-scheme], [data-slotted-theme]) {
     :scope,
     [data-slotted-seeds] {
       color-scheme: light;
@@ -614,7 +614,7 @@
   }
 
   @media (prefers-color-scheme: dark) {
-    @scope ([data-slotted-theme="proof"][data-slotted-scheme="system"], [data-slotted-theme="proof"] [data-slotted-scheme="system"], [data-slotted-scheme="system"] [data-slotted-theme="proof"]) to ([data-slotted-scheme], [data-slotted-theme]) {
+    @scope ([data-slotted-theme="proof"][data-slotted-scheme="system"], [data-slotted-theme="proof"] [data-slotted-scheme="system"], [data-slotted-scheme="system"] [data-slotted-theme="proof"]:not([data-slotted-scheme])) to ([data-slotted-scheme], [data-slotted-theme]) {
       :scope,
       [data-slotted-seeds] {
         color-scheme: dark;
@@ -738,6 +738,9 @@
     --slotted-control-gap-sm: 6px;
     --slotted-control-gap-md: 8px;
     --slotted-control-gap-lg: 8px;
+    --slotted-control-label-gap-sm: 8px;
+    --slotted-control-label-gap-md: 12px;
+    --slotted-control-label-gap-lg: 12px;
     --slotted-control-inner-size-sm: 22px;
     --slotted-control-inner-size-md: 24px;
     --slotted-control-inner-size-lg: 28px;
@@ -765,6 +768,9 @@
     --slotted-control-gap-sm: 4px;
     --slotted-control-gap-md: 6px;
     --slotted-control-gap-lg: 6px;
+    --slotted-control-label-gap-sm: 6px;
+    --slotted-control-label-gap-md: 8px;
+    --slotted-control-label-gap-lg: 8px;
     --slotted-control-inner-size-sm: 18px;
     --slotted-control-inner-size-md: 20px;
     --slotted-control-inner-size-lg: 24px;
@@ -792,6 +798,9 @@
     --slotted-control-gap-sm: 4px;
     --slotted-control-gap-md: 4px;
     --slotted-control-gap-lg: 6px;
+    --slotted-control-label-gap-sm: 6px;
+    --slotted-control-label-gap-md: 6px;
+    --slotted-control-label-gap-lg: 8px;
     --slotted-control-inner-size-sm: 16px;
     --slotted-control-inner-size-md: 18px;
     --slotted-control-inner-size-lg: 22px;
@@ -928,7 +937,7 @@
       --slotted-rating-edge: CanvasText;
     }
 
-    @scope ([data-slotted-theme="proof"][data-slotted-scheme="light"], [data-slotted-theme="proof"] [data-slotted-scheme="light"], [data-slotted-scheme="light"] [data-slotted-theme="proof"]) to ([data-slotted-scheme], [data-slotted-theme]) {
+    @scope ([data-slotted-theme="proof"][data-slotted-scheme="light"], [data-slotted-theme="proof"] [data-slotted-scheme="light"], [data-slotted-scheme="light"] [data-slotted-theme="proof"]:not([data-slotted-scheme])) to ([data-slotted-scheme], [data-slotted-theme]) {
       :scope,
       [data-slotted-seeds] {
         --slotted-focus-ring-color: Highlight;
@@ -1033,7 +1042,7 @@
       }
     }
 
-    @scope ([data-slotted-theme="proof"][data-slotted-scheme="dark"], [data-slotted-theme="proof"] [data-slotted-scheme="dark"], [data-slotted-scheme="dark"] [data-slotted-theme="proof"]) to ([data-slotted-scheme], [data-slotted-theme]) {
+    @scope ([data-slotted-theme="proof"][data-slotted-scheme="dark"], [data-slotted-theme="proof"] [data-slotted-scheme="dark"], [data-slotted-scheme="dark"] [data-slotted-theme="proof"]:not([data-slotted-scheme])) to ([data-slotted-scheme], [data-slotted-theme]) {
       :scope,
       [data-slotted-seeds] {
         --slotted-focus-ring-color: Highlight;
@@ -1138,7 +1147,7 @@
       }
     }
 
-    @scope ([data-slotted-theme="proof"][data-slotted-scheme="high-contrast"], [data-slotted-theme="proof"] [data-slotted-scheme="high-contrast"], [data-slotted-scheme="high-contrast"] [data-slotted-theme="proof"]) to ([data-slotted-scheme], [data-slotted-theme]) {
+    @scope ([data-slotted-theme="proof"][data-slotted-scheme="high-contrast"], [data-slotted-theme="proof"] [data-slotted-scheme="high-contrast"], [data-slotted-scheme="high-contrast"] [data-slotted-theme="proof"]:not([data-slotted-scheme])) to ([data-slotted-scheme], [data-slotted-theme]) {
       :scope,
       [data-slotted-seeds] {
         --slotted-focus-ring-color: Highlight;
@@ -1243,7 +1252,7 @@
       }
     }
 
-    @scope ([data-slotted-theme="proof"][data-slotted-scheme="system"], [data-slotted-theme="proof"] [data-slotted-scheme="system"], [data-slotted-scheme="system"] [data-slotted-theme="proof"]) to ([data-slotted-scheme], [data-slotted-theme]) {
+    @scope ([data-slotted-theme="proof"][data-slotted-scheme="system"], [data-slotted-theme="proof"] [data-slotted-scheme="system"], [data-slotted-scheme="system"] [data-slotted-theme="proof"]:not([data-slotted-scheme])) to ([data-slotted-scheme], [data-slotted-theme]) {
       :scope,
       [data-slotted-seeds] {
         --slotted-focus-ring-color: Highlight;

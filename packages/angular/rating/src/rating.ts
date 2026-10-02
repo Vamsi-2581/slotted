@@ -27,25 +27,22 @@ import type {
 } from '@angular/forms';
 import { SlField } from '@slotted/angular/field';
 import { SlFieldGroup } from '@slotted/angular/field-group';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import { type PartialMessages, ratingMessages, type RatingMessages } from '@slotted/core/i18n';
 import {
+  formatRatingValue,
   normaliseRating,
   ratingAtPoint,
   ratingFills,
   ratingForKey,
-  formatRatingMessage,
 } from '@slotted/core/rating';
 import type { RatingScale } from '@slotted/core/rating';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 
-import {
-  injectDocumentLocale,
-  injectRatingDefaults,
-  RATING_MESSAGES,
-  SlRatingIdFactory,
-} from './rating-defaults';
-import type { RatingMessages, RatingSize, RatingStep, RatingTone } from './rating-defaults';
+import { injectRatingDefaults, SlRatingIdFactory } from './rating-defaults';
+import type { RatingSize, RatingStep, RatingTone } from './rating-defaults';
 
 /** Why the value moved. A rating can produce exactly these three. */
 export type RatingValueReason = 'pointer' | 'keyboard' | 'clear';
@@ -257,8 +254,9 @@ export class SlRating implements ControlValueAccessor, Validator {
   readonly required = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: optionalBoolean,
   });
-  /** Merged over the application's messages, key by key. */
-  readonly messages = input<Partial<RatingMessages> | undefined>(undefined);
+  /** Words laid over the catalog of the language in force, key by key. */
+  readonly messages = input<PartialMessages<RatingMessages> | undefined>(undefined);
+  /** The locale numbers are written in. Unstated, the language in force. */
   readonly locale = input<string | undefined>(undefined);
 
   /**
@@ -273,7 +271,9 @@ export class SlRating implements ControlValueAccessor, Validator {
   private readonly field = inject(SlField, { optional: true });
   private readonly fieldGroup = inject(SlFieldGroup, { optional: true });
   private readonly defaults = injectRatingDefaults();
-  private readonly documentLocale = injectDocumentLocale();
+  private readonly appLocale = injectLocale();
+  /** The family's words in the language in force, with this rating's `messages` laid over them. */
+  readonly t = injectMessages(ratingMessages, this.messages);
   private readonly generatedName = inject(SlRatingIdFactory).next();
   private readonly writtenRole = inject(new HostAttributeToken('role'), { optional: true });
   private readonly writtenDescribedBy = inject(new HostAttributeToken('aria-describedby'), {
@@ -313,14 +313,7 @@ export class SlRating implements ControlValueAccessor, Validator {
   readonly resolvedRequired = computed(
     () => this.required() ?? this.field?.required() ?? this.fieldGroup?.required(),
   );
-  readonly resolvedMessages = computed<RatingMessages>(() => ({
-    ...RATING_MESSAGES,
-    ...this.defaults.messages,
-    ...this.messages(),
-  }));
-  readonly resolvedLocale = computed(
-    () => this.locale() ?? this.defaults.locale ?? this.documentLocale,
-  );
+  readonly resolvedLocale = computed(() => this.locale() ?? this.appLocale());
 
   private readonly scale = computed<RatingScale>(() => ({
     max: this.resolvedMax(),
@@ -334,7 +327,6 @@ export class SlRating implements ControlValueAccessor, Validator {
     const { max, step } = this.scale();
     const current = this.current();
     const fills = ratingFills(current, max);
-    const template = this.resolvedMessages().itemLabel;
     const locale = this.resolvedLocale();
     return fills.map((fill, index) => {
       const whole = index + 1;
@@ -345,7 +337,7 @@ export class SlRating implements ControlValueAccessor, Validator {
         radios: values.map((value) => ({
           value,
           half: value !== whole,
-          label: formatRatingMessage(template, { value, max }, locale),
+          label: this.t('itemLabel', { value: formatRatingValue(value, locale), max }),
         })),
         context: { $implicit: { index, fill }, index, fill },
       };

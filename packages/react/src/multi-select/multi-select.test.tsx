@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/multi-select/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { MultiSelect } from './multi-select';
 import { MultiSelectDefaultsProvider } from './multi-select-defaults';
@@ -395,13 +397,124 @@ describe('MultiSelect', () => {
     expect(screen.queryByRole('option', { name: 'Add “Quince”' })).toBeNull();
   });
 
+  /**
+   * The contract's `opening`: `input` opens on typing and on a press, `focus`
+   * on every focus, `manual` only on the trigger and the arrows. A press on the
+   * input opens a closed popup and never closes an open one.
+   */
+  describe('opening', () => {
+    it('opens a closed popup on a press on the input, once, with reason pointer', async () => {
+      const onOpenChange = vi.fn();
+      render(<Basic onOpenChange={onOpenChange} />);
+      input().focus();
+      fireEvent.click(input());
+      await screen.findByRole('listbox');
+      expect(onOpenChange).toHaveBeenCalledTimes(1);
+      expect(onOpenChange).toHaveBeenCalledWith(
+        true,
+        expect.objectContaining({ reason: 'pointer' }),
+      );
+      expect(contract.members['multi-select'].defaults.openOn).toBe('input');
+    });
+
+    it('keeps an open popup open on a press on the input', async () => {
+      const onOpenChange = vi.fn();
+      render(<Basic onOpenChange={onOpenChange} />);
+      await openByArrow();
+      onOpenChange.mockClear();
+      fireEvent.click(input());
+      expect(screen.getByRole('listbox')).toBeInTheDocument();
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    it('opens nothing on a Tab into the input under input', () => {
+      render(<Basic />);
+      input().focus();
+      expect(screen.queryByRole('listbox')).toBeNull();
+      expect(input()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('opens on typing under input', async () => {
+      render(<Basic />);
+      input().focus();
+      type('be');
+      await screen.findByRole('listbox');
+    });
+
+    it('opens only on the trigger and the arrows under manual', async () => {
+      const onOpenChange = vi.fn();
+      render(<Basic onOpenChange={onOpenChange} openOn="manual" />);
+      input().focus();
+      type('be');
+      expect(screen.queryByRole('listbox')).toBeNull();
+      fireEvent.click(input());
+      expect(screen.queryByRole('listbox')).toBeNull();
+      expect(onOpenChange).not.toHaveBeenCalled();
+      press('ArrowDown');
+      await screen.findByRole('listbox');
+    });
+
+    it('opens on focus under focus, and a press that focuses opens it once', async () => {
+      const onOpenChange = vi.fn();
+      render(<Basic onOpenChange={onOpenChange} openOn="focus" />);
+      /* A browser focuses on pointerdown and clicks on pointerup, two tasks
+         with a render between them; act() keeps them apart here too. */
+      act(() => input().focus());
+      fireEvent.click(input());
+      await screen.findByRole('listbox');
+      expect(onOpenChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('opens nothing on a press on a read-only control', () => {
+      const onOpenChange = vi.fn();
+      render(<Basic onOpenChange={onOpenChange} readOnly />);
+      input().focus();
+      fireEvent.click(input());
+      expect(screen.queryByRole('listbox')).toBeNull();
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    it('stays closed when the consumer prevents the click', () => {
+      const onOpenChange = vi.fn();
+      render(
+        <MultiSelect onOpenChange={onOpenChange}>
+          <MultiSelectControl aria-label="Fruit" onClick={(event) => event.preventDefault()} />
+          <MultiSelectContent aria-label="Fruit" />
+        </MultiSelect>,
+      );
+      input().focus();
+      fireEvent.click(input());
+      expect(screen.queryByRole('listbox')).toBeNull();
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    it('takes openOn from the defaults provider', async () => {
+      render(
+        <MultiSelectDefaultsProvider openOn="focus">
+          <Basic />
+        </MultiSelectDefaultsProvider>,
+      );
+      input().focus();
+      await screen.findByRole('listbox');
+    });
+  });
+
+  it('speaks the language in force, and lays its own messages over it', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Basic defaultValue={['fig']} messages={{ trigger: 'Abrir' }} />
+      </SlottedProvider>,
+    );
+    expect(screen.getByRole('button', { name: 'Limpar' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Abrir' })).toBeInTheDocument();
+  });
+
   it('lets an application set the defaults once', () => {
     render(
-      <MultiSelectDefaultsProvider clearLabel="Limpar" size="lg">
+      <MultiSelectDefaultsProvider size="lg">
         <Basic defaultValue={['fig']} />
       </MultiSelectDefaultsProvider>,
     );
-    expect(screen.getByRole('button', { name: 'Limpar' })).toBeInTheDocument();
     expect(screen.getByRole('grid').closest("[data-part='root']")).toHaveAttribute(
       'data-size',
       'lg',

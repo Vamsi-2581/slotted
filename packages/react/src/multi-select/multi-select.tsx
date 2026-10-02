@@ -13,6 +13,11 @@ import '@slotted/styles/spinner/spinner.css';
 import '@slotted/styles/skeleton/skeleton.css';
 
 import { createFilter } from '@slotted/core/collection';
+import {
+  multiSelectMessages,
+  type FamilyTranslator,
+  type MultiSelectMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import {
@@ -28,6 +33,7 @@ import {
 import type { MutableRefObject } from 'react';
 
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { useMultiSelectDefaults } from './multi-select-defaults';
 import type {
   MultiSelectAlign,
@@ -36,6 +42,7 @@ import type {
   MultiSelectInputReason,
   MultiSelectItems,
   MultiSelectMount,
+  MultiSelectOpenOn,
   MultiSelectOpenReason,
   MultiSelectOption,
   MultiSelectOptionGroup,
@@ -61,11 +68,9 @@ export interface MultiSelectContextValue {
   align: MultiSelectAlign;
   alignOffset: number;
   announce: (message: string) => void;
-  chosenLabel: string;
   chosenOptions: MultiSelectChosenOptions;
   clear: (source?: unknown) => void;
   clearable: boolean;
-  clearLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   closeOnSelect: boolean;
@@ -74,16 +79,12 @@ export interface MultiSelectContextValue {
   contentId: string;
   contentNode: HTMLElement | null;
   controlId: string;
-  countLabel: string;
-  counterLabel: string;
   creatable: boolean;
-  createLabel: string;
   delimiters: readonly string[];
   disabled: boolean;
   /** The value a refused duplicate is already held under, for the chip to take focus. */
   duplicate: MultiSelectOptionValue | null;
   editable: boolean;
-  emptyLabel: string;
   entry: MutableRefObject<MultiSelectEntry>;
   flip: boolean;
   form: string | undefined;
@@ -99,8 +100,8 @@ export interface MultiSelectContextValue {
   invalid: boolean;
   labelFor: (value: MultiSelectOptionValue) => string | undefined;
   loading: boolean;
-  loadingLabel: string;
-  locale: string | undefined;
+  /** The locale the filter and the duplicate rule compare in: the `locale` prop, or the language in force. */
+  locale: string;
   loop: boolean;
   matches: (label: string) => boolean;
   max: number | null;
@@ -110,6 +111,7 @@ export interface MultiSelectContextValue {
   name: string | undefined;
   onLoadMore: (() => void) | undefined;
   open: boolean;
+  openOn: MultiSelectOpenOn;
   optionId: (value: MultiSelectOptionValue) => string;
   overflow: MultiSelectOverflow;
   portal: boolean;
@@ -120,9 +122,7 @@ export interface MultiSelectContextValue {
   remove: (value: MultiSelectOptionValue, source?: unknown) => void;
   /** Puts one value in another's place, as one transition. */
   replace: (value: MultiSelectOptionValue, text: string, source?: unknown) => void;
-  removeLabel: string;
   reorderable: boolean;
-  reorderLabel: string;
   required: boolean;
   seen: boolean;
   setContentNode: (node: HTMLElement | null) => void;
@@ -145,8 +145,9 @@ export interface MultiSelectContextValue {
   narrow: boolean;
   /** Adds or removes one value, which is what pressing an option does. */
   toggle: (value: MultiSelectOptionValue, reason: MultiSelectValueReason, source?: unknown) => void;
+  /** The family's words in the language in force, with this control's `messages` laid over them. */
+  t: FamilyTranslator<MultiSelectMessages>;
   total: number | undefined;
-  triggerLabel: string;
   value: readonly MultiSelectOptionValue[];
   variant: MultiSelectVariant;
   width: MultiSelectWidth;
@@ -204,7 +205,8 @@ export function MultiSelect({
   highlightedValue,
   inputValue,
   items,
-  locale,
+  locale: localeProp,
+  messages,
   name,
   onHighlightedValueChange,
   onInputValueChange,
@@ -221,6 +223,9 @@ export function MultiSelect({
 }: MultiSelectProps) {
   const defaults = useMultiSelectDefaults();
   const field = useField();
+  const t = useMessages(multiSelectMessages, messages);
+  const inForce = useLocale();
+  const locale = localeProp ?? inForce;
 
   const generated = useId();
   const contentId = `${generated}listbox`;
@@ -322,6 +327,7 @@ export function MultiSelect({
     onValueChange,
     onValueRefuse,
     open,
+    t,
     validateValue,
     value,
   });
@@ -344,6 +350,7 @@ export function MultiSelect({
     onValueChange,
     onValueRefuse,
     open,
+    t,
     validateValue,
     value,
   };
@@ -488,7 +495,7 @@ export function MultiSelect({
          point at, so they are said. */
       if (existing !== null) setDuplicate(existing);
       if (refused.limit.length > 0 && state.max !== null) {
-        state.announcer(`${state.max} of ${state.max}`);
+        state.announcer(state.t('counter', { count: state.max, max: state.max }));
       }
     },
     [],
@@ -616,11 +623,9 @@ export function MultiSelect({
     align: axes.align ?? defaults.align,
     alignOffset: axes.alignOffset ?? defaults.alignOffset,
     announce: announcer,
-    chosenLabel: axes.chosenLabel ?? defaults.chosenLabel,
     chosenOptions: axes.chosenOptions ?? defaults.chosenOptions,
     clear,
     clearable: axes.clearable ?? defaults.clearable,
-    clearLabel: axes.clearLabel ?? defaults.clearLabel,
     closeOnEscape: axes.closeOnEscape ?? defaults.closeOnEscape,
     closeOnOutsidePress: axes.closeOnOutsidePress ?? defaults.closeOnOutsidePress,
     closeOnSelect: axes.closeOnSelect ?? defaults.closeOnSelect,
@@ -629,15 +634,11 @@ export function MultiSelect({
     contentId,
     contentNode,
     controlId,
-    countLabel: axes.countLabel ?? defaults.countLabel,
-    counterLabel: axes.counterLabel ?? defaults.counterLabel,
     creatable: axes.creatable ?? defaults.creatable,
-    createLabel: axes.createLabel ?? defaults.createLabel,
     delimiters: axes.delimiters ?? defaults.delimiters,
     disabled: resolvedDisabled,
     duplicate,
     editable: axes.editable ?? defaults.editable,
-    emptyLabel: axes.emptyLabel ?? defaults.emptyLabel,
     entry,
     flip: axes.flip ?? defaults.flip,
     form,
@@ -652,7 +653,6 @@ export function MultiSelect({
     invalid: axes.invalid ?? field?.invalid ?? defaults.invalid,
     labelFor,
     loading: axes.loading ?? defaults.loading,
-    loadingLabel: axes.loadingLabel ?? defaults.loadingLabel,
     locale,
     loop: axes.loop ?? defaults.loop,
     matches,
@@ -663,6 +663,7 @@ export function MultiSelect({
     narrow,
     onLoadMore,
     open: currentOpen,
+    openOn: axes.openOn ?? defaults.openOn,
     optionId,
     overflow: axes.overflow ?? defaults.overflow,
     portal: axes.portal ?? defaults.portal,
@@ -671,9 +672,7 @@ export function MultiSelect({
     registerLabel,
     remove,
     replace,
-    removeLabel: axes.removeLabel ?? defaults.removeLabel,
     reorderable: axes.reorderable ?? defaults.reorderable,
-    reorderLabel: axes.reorderLabel ?? defaults.reorderLabel,
     required: axes.required ?? field?.required ?? defaults.required,
     seen: seen.current,
     setContentNode,
@@ -689,8 +688,8 @@ export function MultiSelect({
     size: axes.size ?? field?.size ?? defaults.size,
     strategy: axes.strategy ?? defaults.strategy,
     toggle,
+    t,
     total,
-    triggerLabel: axes.triggerLabel ?? defaults.triggerLabel,
     value: currentValue,
     variant: axes.variant ?? defaults.variant,
     width: axes.width ?? defaults.width,

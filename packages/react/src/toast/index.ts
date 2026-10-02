@@ -1,9 +1,7 @@
 export { ToastRegion, useToastQueue, useToastRegion } from './toast';
 export {
   createToaster,
-  TOAST_CLOSE_LABEL,
   TOAST_HOTKEY,
-  TOAST_LABEL,
   toast,
   ToastDefaultsProvider,
   ToasterProvider,

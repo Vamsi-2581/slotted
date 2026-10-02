@@ -1,5 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it } from 'vitest';
 
 import { SlSparkline } from '@slotted/angular/sparkline';
@@ -48,6 +50,7 @@ import { toneOf, trendOf } from './stat-card.constants';
     [loading]="loading()"
     [size]="size()"
     [locale]="locale()"
+    [messages]="messages()"
   >
     <div slStatCardHeader>
       <span slStatCardLabel>Monthly recurring revenue</span>
@@ -74,6 +77,7 @@ class TestHost {
   readonly loading = signal(false);
   readonly size = signal<'sm' | 'md' | 'lg' | undefined>(undefined);
   readonly locale = signal<string | undefined>('en-US');
+  readonly messages = signal<{ up?: string } | undefined>(undefined);
 }
 
 function mount(providers: unknown[] = []) {
@@ -201,17 +205,16 @@ describe('SlStatCard', () => {
 
   it('takes its defaults from the token, and an explicit input wins', () => {
     const { fixture, host, root, part } = mount([
-      provideStatCardDefaults({
-        fill: 'subtle',
-        goodWhen: 'down',
-        size: 'sm',
-        messages: { up: 'subiu' },
-      }),
+      provideStatCardDefaults({ fill: 'subtle', goodWhen: 'down', size: 'sm' }),
     ]);
 
     expect(root.getAttribute('data-fill')).toBe('subtle');
     expect(root.getAttribute('data-size')).toBe('sm');
     expect(root.getAttribute('data-tone')).toBe('danger');
+    expect(part('delta')?.textContent).toContain('up');
+
+    host.messages.set({ up: 'subiu' });
+    fixture.detectChanges();
     expect(part('delta')?.textContent).toContain('subiu');
 
     host.size.set('lg');
@@ -219,6 +222,20 @@ describe('SlStatCard', () => {
     fixture.detectChanges();
     expect(root.getAttribute('data-size')).toBe('lg');
     expect(root.getAttribute('data-tone')).toBe('success');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const { fixture, host, part } = mount([
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+    host.locale.set(undefined);
+    fixture.detectChanges();
+    expect(part('delta')?.textContent).toContain('alta +12,4%');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(part('delta')?.textContent).toContain('up +12.4%');
   });
 
   it('keeps an id and an aria-label the consumer wrote', () => {

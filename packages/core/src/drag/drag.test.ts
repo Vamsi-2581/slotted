@@ -1,8 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { createTranslator, dragMessages } from '../i18n';
+import { PT_BR } from '../i18n/locales/pt-BR';
 import { DRAG_PREVIEW_ATTRIBUTE, createDragController } from './drag';
 import * as surface from './index';
 import type { DragContainerOptions, DragControllerOptions, DropTarget } from './types';
+
+const t = createTranslator({ locale: 'en-US' }).family(dragMessages);
 
 const between = (container: string, index: number): DropTarget => ({
   kind: 'between',
@@ -48,6 +52,7 @@ function scene(overrides: Partial<DragControllerOptions> = {}) {
   const ends: unknown[] = [];
 
   const drag = createDragController({
+    t,
     announce: (message) => announced.push(message),
     onDrop: (event) => drops.push(event),
     onDragEnd: (event) => ends.push(event),
@@ -166,7 +171,7 @@ describe('the keyboard session', () => {
 
     expect(drops).toEqual([]);
     expect(ends[0]).toMatchObject({ dropped: false });
-    expect(announced).toEqual(['Drag cancelled. b returned.']);
+    expect(announced).toEqual(['Drag canceled. b returned.']);
   });
 
   it('crosses to the other container and back, cycling', () => {
@@ -239,6 +244,53 @@ describe('the keyboard session', () => {
     expect(announced).toEqual(['2 items picked up, position 1 of 3 in todo.']);
     drag.move('nextContainer');
     expect(announced[1]).toBe('2 items, position 1 of 3 in done.');
+  });
+
+  it('speaks the language of the translator it is given', () => {
+    const pt = createTranslator({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }).family(
+      dragMessages,
+    );
+    const { drag, announced, list } = scene({ t: pt });
+    list('todo');
+    drag.pickUp({ items: ['b'], source: { container: 'todo', index: 1 }, reason: 'keyboard' });
+    drag.cancel();
+    expect(announced).toEqual([
+      'Você pegou b, posição 2 de 3 em todo.',
+      'Arraste de b cancelado; tudo ficou onde estava.',
+    ]);
+  });
+
+  it('says the sentence without a place when the target names none', () => {
+    const { drag, announced, model } = scene();
+    /* The same list, registered again without a name of its own. */
+    drag.registerContainer({
+      key: 'todo',
+      items: () => model.todo,
+      element: () => document.getElementById('todo'),
+      itemElement: (item) => document.getElementById(`todo-${item}`),
+    });
+    drag.pickUp({ items: ['b'], source: { container: 'todo', index: 1 }, reason: 'keyboard' });
+    drag.move('next');
+    expect(announced).toEqual(['b picked up, position 2 of 3.', 'b, position 3 of 3.']);
+  });
+
+  it('leaves unsaid what the family says itself, and says nothing without words', () => {
+    const quiet = scene({ silent: ['pickedUp', 'moved'] });
+    quiet.list('todo');
+    quiet.drag.pickUp({
+      items: ['b'],
+      source: { container: 'todo', index: 1 },
+      reason: 'keyboard',
+    });
+    quiet.drag.move('next');
+    quiet.drag.drop();
+    expect(quiet.announced).toEqual(['b dropped, position 3 of 3 in todo.']);
+
+    const mute = scene({ t: undefined });
+    mute.list('todo');
+    mute.drag.pickUp({ items: ['b'], source: { container: 'todo', index: 1 }, reason: 'keyboard' });
+    mute.drag.cancel();
+    expect(mute.announced).toEqual([]);
   });
 
   it('lets the consumer refuse the start', () => {
@@ -737,12 +789,11 @@ describe('the pointer', () => {
 });
 
 describe('the public surface', () => {
-  it('exports the controller, the pure pieces and the defaults', () => {
+  it('exports the controller and the pure pieces', () => {
     expect(typeof surface.createDragController).toBe('function');
     expect(typeof surface.resolvePoint).toBe('function');
     expect(typeof surface.containerPositions).toBe('function');
     expect(typeof surface.intentForKey).toBe('function');
-    expect(surface.DEFAULT_DRAG_MESSAGES.instructions).toContain('Escape');
     expect(surface.DRAG_KEYS.drop).toEqual(['Space', 'Enter']);
   });
 });

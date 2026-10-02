@@ -113,7 +113,7 @@ test('binds every key the sourced pattern lists', () => {
  */
 test('keeps the steppers out of the tab order and in the accessibility tree', () => {
   assert.equal(contract.stepperTabIndex, -1);
-  assert.deepEqual(contract.stepperNames, ['incrementLabel', 'decrementLabel']);
+  assert.deepEqual(contract.stepperNames, ['increment', 'decrement']);
   assert.equal(contract.stepperDisabledAtBound, true);
 });
 
@@ -257,11 +257,8 @@ test('lets an application decide once what its number fields look like', () => {
     'size',
     'variant',
     'stepper',
-    'locale',
     'formatOn',
     'clamp',
-    'incrementLabel',
-    'decrementLabel',
   ]);
 });
 

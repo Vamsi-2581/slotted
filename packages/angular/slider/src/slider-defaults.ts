@@ -27,14 +27,12 @@ export interface SliderMark {
 }
 
 export interface SliderDefaults {
-  locale: string | undefined;
   orientation: SliderOrientation;
   size: SliderSize;
   valueLabel: SliderValueLabel;
 }
 
 const FALLBACK: SliderDefaults = {
-  locale: undefined,
   orientation: 'horizontal',
   size: 'md',
   valueLabel: 'auto',
@@ -46,10 +44,11 @@ export const SLIDER_DEFAULTS = new InjectionToken<SliderDefaults>('slotted slide
 });
 
 /**
- * An application decides once what its sliders look like and which locale their
- * values are written in, rather than repeating the same inputs on every scale.
- * A slider that states any of them itself still wins, and a slider inside a
- * field takes the field's step before this token's.
+ * An application decides once what its sliders look like, rather than
+ * repeating the same inputs on every scale. A slider that states any of them
+ * itself still wins, and a slider inside a field takes the field's step before
+ * this token's. The locale its values are written in comes from the language
+ * in force (`provideSlotted`).
  */
 export function provideSliderDefaults(defaults: Partial<SliderDefaults>) {
   return {

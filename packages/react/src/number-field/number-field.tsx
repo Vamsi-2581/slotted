@@ -1,5 +1,6 @@
 import '@slotted/styles/number-field/number-field.css';
 
+import { numberFieldMessages } from '@slotted/core/i18n';
 import { clamp as clampNumber } from '@slotted/core/measure';
 import {
   createNumberFormat,
@@ -25,6 +26,7 @@ import {
 import type { KeyboardEvent, PointerEvent, PointerEventHandler, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useNumberFieldDefaults } from './number-field-defaults';
 import type {
@@ -87,7 +89,6 @@ export function NumberField({
   'aria-required': ariaRequired,
   className,
   clamp,
-  decrementLabel,
   defaultValue = null,
   disabled,
   end,
@@ -96,12 +97,12 @@ export function NumberField({
   formatOn,
   handle,
   id,
-  incrementLabel,
   inputMode,
   invalid,
   largeStep,
   locale,
   max,
+  messages,
   min,
   name,
   onBlur,
@@ -126,6 +127,8 @@ export function NumberField({
 }: NumberFieldProps) {
   const field = useField();
   const defaults = useNumberFieldDefaults();
+  const t = useMessages(numberFieldMessages, messages);
+  const appLocale = useLocale();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const resolvedSize = size ?? field?.size ?? defaults.size;
@@ -133,7 +136,7 @@ export function NumberField({
   const resolvedStepper = stepper ?? defaults.stepper;
   const resolvedClamp = clamp ?? defaults.clamp;
   const resolvedFormatOn = formatOn ?? defaults.formatOn;
-  const resolvedLocale = locale ?? defaults.locale;
+  const resolvedLocale = locale ?? appLocale;
   const resolvedDisabled = disabled ?? field?.disabled;
   const resolvedReadOnly = readOnly ?? field?.readOnly;
   const resolvedInvalid = invalid ?? field?.invalid;
@@ -149,7 +152,7 @@ export function NumberField({
   const formatter = useMemo(
     () =>
       createNumberFormat({
-        ...(resolvedLocale === undefined ? {} : { locale: resolvedLocale }),
+        locale: resolvedLocale,
         ...(format === undefined ? {} : { options: format }),
       }),
     /* `formatKey` stands in for `format`: the options are compared by content,
@@ -521,11 +524,7 @@ export function NumberField({
     return (
       <button
         aria-controls={id ?? field?.ids.control}
-        aria-label={
-          direction === 1
-            ? (incrementLabel ?? defaults.incrementLabel)
-            : (decrementLabel ?? defaults.decrementLabel)
-        }
+        aria-label={t(part)}
         data-part={part}
         disabled={inert || (direction === 1 ? atMax : atMin)}
         key={part}

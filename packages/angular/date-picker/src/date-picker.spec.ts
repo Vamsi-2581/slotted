@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { plainDate, toISODate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { CalendarValue } from '@slotted/angular/calendar';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/date-picker/contract.json';
@@ -120,9 +122,9 @@ describe('what it is made of', () => {
 describe('what the trigger says', () => {
   it('names itself for choosing while nothing is chosen', () => {
     const fixture = renderTemplate(
-      `<div slDatePicker locale="pt-BR" chooseLabel="Escolher data"></div>`,
+      `<div slDatePicker locale="pt-BR" [messages]="{ choose: 'Escolher uma data' }"></div>`,
     );
-    expect(trigger(fixture).getAttribute('aria-label')).toBe('Escolher data');
+    expect(trigger(fixture).getAttribute('aria-label')).toBe('Escolher uma data');
   });
 
   /**
@@ -131,10 +133,10 @@ describe('what the trigger says', () => {
    */
   it('carries the chosen date in words once there is one', () => {
     const fixture = renderTemplate(
-      `<div slDatePicker locale="pt-BR" changeLabel="Alterar data" [defaultValue]="ninth"></div>`,
+      `<div slDatePicker locale="pt-BR" [messages]="{ change: 'Alterar a data, {date}' }" [defaultValue]="ninth"></div>`,
     );
     const label = trigger(fixture).getAttribute('aria-label') ?? '';
-    expect(label).toContain('Alterar data');
+    expect(label).toContain('Alterar a data, ');
     expect(label).toContain('setembro');
   });
 
@@ -302,9 +304,10 @@ describe('what the field around it says', () => {
 });
 
 describe('what an application sets once', () => {
-  it('takes the locale and the appearance from a provider', () => {
+  it('takes the appearance from a provider and the locale from the language in force', () => {
     const fixture = renderTemplate(`<div slDatePicker></div>`, [
-      provideDatePickerDefaults({ chooseLabel: 'Pick a date', locale: 'ja-JP', size: 'lg' }),
+      provideSlotted({ locale: 'ja-JP' }),
+      provideDatePickerDefaults({ size: 'lg' }),
     ]);
 
     const fields = [...fixture.nativeElement.querySelectorAll('[data-part="segment"]')].map(
@@ -312,7 +315,24 @@ describe('what an application sets once', () => {
     );
     expect(fields).toEqual(['year', 'month', 'day']);
     expect(root(fixture).getAttribute('data-size')).toBe('lg');
-    expect(trigger(fixture).getAttribute('aria-label')).toBe('Pick a date');
+    expect(trigger(fixture).getAttribute('aria-label')).toBe('Choose date');
+  });
+
+  it('changes its words and its date together with the language in force', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(`<div slDatePicker [defaultValue]="ninth"></div>`, [
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+
+    expect(trigger(fixture).getAttribute('aria-label')).toMatch(
+      /^Alterar data, .*setembro de 2026/,
+    );
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(trigger(fixture).getAttribute('aria-label')).toMatch(
+      /^Change date, .*September 9, 2026/,
+    );
   });
 });
 

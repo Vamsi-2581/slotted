@@ -651,15 +651,13 @@ export const Composition: Story = {
       contacts: Object.keys(CONTACTS),
     },
     moduleMetadata: {
-      providers: [
-        provideTagsInputDefaults({ removeLabel: 'Retirar {label}', size: 'sm', variant: 'subtle' }),
-      ],
+      providers: [provideTagsInputDefaults({ size: 'sm', variant: 'subtle' })],
     },
     template: `
       <div class="slotted-demo-grid">
         ${scene(
           'Defaults an application sets once',
-          'provideTagsInputDefaults carries every axis and every sentence; a binding written on one control still wins over it, which is the resolution order every family declares.',
+          'provideTagsInputDefaults carries every axis; a binding written on one control still wins over it, which is the resolution order every family declares. The words come from the language in force.',
           `
             <div class="slotted-demo-stack">
               <sl-tags-input aria-label="From the provider" type="email" [defaultValue]="one" />

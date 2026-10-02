@@ -122,7 +122,7 @@ import {
           <form
             slForm
             data-testid="new-supplier-form"
-            summaryTitle="This supplier was not written"
+            [messages]="{ summaryTitle: 'This supplier was not written' }"
             [errors]="store.errors()"
             (errorsChange)="store.errors.set($event.value)"
             [loading]="store.creating()"
@@ -272,7 +272,7 @@ import {
                 type="submit"
                 data-testid="create-supplier"
                 [loading]="store.creating()"
-                loadingLabel="Writing the supplier"
+                [messages]="{ loading: 'Writing the supplier' }"
               >
                 Write the supplier
               </button>

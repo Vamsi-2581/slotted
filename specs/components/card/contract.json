@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "card",
   "ui": "card",
+  "catalog": {
+    "group": "Layout",
+    "summary": "Bordered surface that groups related content."
+  },
   "axes": {
     "orientation": ["vertical", "horizontal"],
     "fill": ["outline", "elevated", "subtle"],

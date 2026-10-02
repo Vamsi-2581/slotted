@@ -6,7 +6,6 @@ import type {
   DateFilter,
   DateOperator,
   FilterDescriptor,
-  FilterJoin,
   FilterOperator,
   NumberFilter,
   NumberOperator,
@@ -18,6 +17,7 @@ import type {
   TextOperator,
 } from '@slotted/core/filter';
 import type { PlainTime, TimeGranularity } from '@slotted/core/date';
+import type { FamilyTranslator, PartialMessages, TableMessages } from '@slotted/core/i18n';
 import type { TimeFieldHourCycle } from '../time-field';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { PopoverChangeRequest, PopoverProps } from '../popover/popover.types';
@@ -87,71 +87,6 @@ export type TableSortRequest = ChangeRequest<TableSortDescriptor | null>;
 export type TableSelectionRequest = ChangeRequest<readonly string[]>;
 export type TableExpandedRequest = ChangeRequest<readonly string[]>;
 
-/**
- * The words the family says. One input rather than eight props: an application
- * translates them once, and a family that spread them across the root would
- * make seven of the eight a prop nobody sets.
- */
-export interface TableLabels {
-  /** The name of a row's own checkbox, joined to the row's value. */
-  selectRow?: string;
-  /** The name of the header checkbox, which states the count it covers. */
-  selectAll?: string;
-  expand?: string;
-  collapse?: string;
-  sortedAscending?: string;
-  sortedDescending?: string;
-  sortCleared?: string;
-  /** The name of the scrolling region, raised only while the table overflows. */
-  scroll?: string;
-  /** The verb the filter trigger is named with, joined to the column's name. */
-  filter?: string;
-  /** The search field's name and its placeholder. */
-  filterSearch?: string;
-  /** The word after the count announced when a search narrows the list. */
-  filterMatches?: string;
-  /** The covering checkbox, which answers for what the search left. */
-  filterSelectAll?: string;
-  /** The word shown when a search matches nothing. */
-  filterEmpty?: string;
-  /** The action that empties the filter. */
-  filterClear?: string;
-  /** The action that commits the draft. */
-  filterApply?: string;
-  /** What is announced when the filter is emptied. */
-  filterCleared?: string;
-  /** The operator chooser's own name. */
-  filterOperator?: string;
-  /** The name of the field an operator that takes one operand draws. */
-  filterValue?: string;
-  /** The first end of a range, as a name and as a placeholder. */
-  filterFrom?: string;
-  /** The second end. */
-  filterTo?: string;
-  /** The name of the control that joins two conditions. */
-  filterJoin?: string;
-  /** What is announced when the second condition appears. */
-  filterConditionAdded?: string;
-  /** Announced after an operator that takes no operand at all. */
-  filterOperandsNone?: string;
-  /** Announced after an operator that takes one. */
-  filterOperandsOne?: string;
-  /** Announced after `between`. */
-  filterOperandsTwo?: string;
-  /**
-   * The two words a pair of conditions is joined with. They are also the word
-   * between the two ends of a range, which is why they are a map rather than
-   * two props: "between 10 and 20" reads the same word as "contains a and
-   * begins with b".
-   */
-  filterJoins?: Partial<Record<FilterJoin, string>>;
-  /**
-   * Every operator's name, keyed by the engine's own operator. One map rather
-   * than nineteen props, and `filter-bar` reads the same one in wave 8.
-   */
-  filterOperators?: Partial<Record<FilterOperator, string>>;
-}
-
 /** One value a column can be filtered to. */
 export interface TableFilterOption {
   /** The value the consumer's query matches. It is what the state holds. */
@@ -190,18 +125,14 @@ export interface TableFilterOperandProps<Value> {
 
 /**
  * What every kind's filter takes. The typed value and the kind-specific props
- * are added by each of the five components; everything here is shared, and
- * every label falls back to the table's own so an application translates the
+ * are added by each of the five components; everything here is shared. The
+ * panel's words are the table's `messages`, so an application translates the
  * panel once rather than per column.
  */
 export interface TableFilterSharedProps extends Pick<
   PopoverProps,
   'align' | 'collisionPadding' | 'mount' | 'portal' | 'side' | 'sideOffset'
 > {
-  /** The action that commits the draft. Defaults to the table's label. */
-  applyLabel?: string | undefined;
-  /** The action that empties the filter. Defaults to the table's label. */
-  clearLabel?: string | undefined;
   /**
    * The column's name in the trigger's own name. Read from the column header
    * around it when it is not stated, and stated when the header's text is not a
@@ -218,10 +149,11 @@ export interface TableFilterSharedProps extends Pick<
   /** The panel's starting state when nobody owns it. */
   defaultOpen?: boolean | undefined;
   onOpenChange?: ((open: boolean, request: PopoverChangeRequest) => void) | undefined;
-  /** The trigger's whole accessible name, replacing the one built from labels. */
+  /**
+   * The trigger's whole accessible name, replacing the one the catalog writes.
+   * It is the trigger's `aria-label`, which no other prop reaches.
+   */
   label?: string | undefined;
-  /** The operator's chooser label. Defaults to the table's label. */
-  operatorLabel?: string | undefined;
 }
 
 /** The props every condition-shaped filter takes, over its own operator type. */
@@ -345,23 +277,18 @@ export interface TableDateTimeFilterProps extends TableConditionFilterProps<
   presets?: ReactNode | undefined;
 }
 
-export interface TableBooleanFilterProps extends TableConditionFilterProps<
+/** A column of two answers, called by the catalog's `true` and `false`. */
+export type TableBooleanFilterProps = TableConditionFilterProps<
   BooleanFilter,
   BooleanOperator,
   boolean
-> {
-  /** What the two answers are called. Defaults to Yes and No. */
-  trueLabel?: string | undefined;
-  falseLabel?: string | undefined;
-}
+>;
 
 export interface TableSetFilterProps extends TableConditionFilterProps<
   SetFilter,
   SetOperator,
   readonly string[]
 > {
-  /** The word shown when the search matches nothing. */
-  emptyLabel?: string | undefined;
   /**
    * How the values are chosen. `list` is the search, the covering checkbox and
    * the values; `tags` is `tags-input`, for a list too long to tick — the
@@ -376,8 +303,6 @@ export interface TableSetFilterProps extends TableConditionFilterProps<
    * knows; without it any typed value is admitted.
    */
   options?: readonly TableFilterOption[] | undefined;
-  /** The search field's name and placeholder. */
-  searchLabel?: string | undefined;
   /**
    * Whether the panel carries a search. Unstated, it appears once there are
    * `searchThreshold` values: a search over four values is a control a reader
@@ -386,17 +311,12 @@ export interface TableSetFilterProps extends TableConditionFilterProps<
   searchable?: boolean | undefined;
   /** How many values bring the search with them. Eight unless stated. */
   searchThreshold?: number | undefined;
-  /** The covering checkbox's label. */
-  selectAllLabel?: string | undefined;
 }
-
-export type TableResolvedLabels = Required<TableLabels>;
 
 /** What an application sets once for every table under it. */
 export interface TableDefaults {
   cellAlign?: TableAlign | undefined;
   columns?: number | undefined;
-  labels?: TableLabels | undefined;
   layout?: TableLayout | undefined;
   selectionMode?: TableSelectionMode | undefined;
   stickyFooter?: boolean | undefined;
@@ -406,9 +326,8 @@ export interface TableDefaults {
   variant?: TableVariant | undefined;
 }
 
-export interface TableDefaultsProviderProps extends Omit<TableDefaults, 'labels'> {
+export interface TableDefaultsProviderProps extends TableDefaults {
   children?: ReactNode | undefined;
-  labels?: TableLabels | undefined;
 }
 
 /** What `render` receives for the root, so it can be spread onto any element. */
@@ -449,10 +368,15 @@ export interface TableProps extends Omit<ComponentPropsWithRef<'div'>, 'onChange
   defaultSort?: TableSortDescriptor | null | undefined;
   defaultValue?: readonly string[] | undefined;
   expanded?: readonly string[] | undefined;
-  labels?: TableLabels | undefined;
   layout?: TableLayout | undefined;
   /** A refresh over rows already shown: `aria-busy`, and nothing moves. */
   loading?: boolean | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * selection, expansion and sort words, the scrolling region's name and every
+   * word of the column filters.
+   */
+  messages?: PartialMessages<TableMessages> | undefined;
   onExpandedChange?: (value: readonly string[], request: TableExpandedRequest) => void;
   onSortChange?: (value: TableSortDescriptor | null, request: TableSortRequest) => void;
   onValueChange?: (value: readonly string[], request: TableSelectionRequest) => void;
@@ -495,7 +419,6 @@ export interface TableContextValue {
   id: string;
   isExpanded: (value: string) => boolean;
   isSelected: (value: string) => boolean;
-  labels: TableResolvedLabels;
   loading: boolean;
   requestSort: (column: string, source: unknown) => void;
   /** Every selectable row's value, in the order the body renders them. */
@@ -505,16 +428,19 @@ export interface TableContextValue {
   toggleExpanded: (value: string, source: unknown) => void;
   toggleSelected: (value: string, options: { range: boolean; source: unknown }) => void;
   toggleSelectAll: (source: unknown) => void;
+  /** The family's words in the language in force, with this table's `messages` laid over them. */
+  t: FamilyTranslator<TableMessages>;
   value: readonly string[];
 }
 
 export interface TableContentProps extends ComponentPropsWithRef<'table'> {
   handleRef?: RefObject<TableHandle | null> | undefined;
-  /** The name the scrolling region takes while it overflows. */
-  scrollLabel?: string | undefined;
   /** The element that names the scrolling region, which is usually the caption. */
   scrollLabelledBy?: string | undefined;
-  /** Props for the scroller the family draws around the table. */
+  /**
+   * Props for the scroller the family draws around the table. Its `aria-label`
+   * wins over the catalog's name for the scrolling region.
+   */
   scrollProps?: ComponentPropsWithRef<'div'> | undefined;
   /**
    * The total number of rows behind a paged or filtered table. Written as

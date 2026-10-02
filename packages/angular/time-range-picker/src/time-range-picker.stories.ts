@@ -1,6 +1,8 @@
 import { plainTime } from '@slotted/core/date';
 import type { PlainTime } from '@slotted/core/date';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { SlField, SlFieldDescription, SlFieldError, SlFieldLabel } from '@slotted/angular/field';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
@@ -58,6 +60,16 @@ const AFTER_NOON = [13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5].map((hour)
   plainTime(Math.floor(hour), hour % 1 === 0 ? 0 : 30),
 );
 const minutes = (seconds: number) => `${String(Math.round(seconds / 60))} min`;
+/** The office's own words for the trigger and the done button, laid over the Portuguese catalog. */
+const OFFICE = {
+  ...PT_BR,
+  timeRangePicker: {
+    ...PT_BR.timeRangePicker,
+    change: 'Alterar reserva, {start} – {end}, {length}',
+    choose: 'Escolher horário',
+    done: 'Concluir',
+  },
+};
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
   bindScenes(ANGULAR_TIME_RANGE_PICKER_DOCS.timeRangePicker.scenes, {
@@ -93,8 +105,7 @@ const DIRECTIVES = [
 ];
 
 /** The inputs every scene repeats: the room's words, its clock and its hours. */
-const ROOM =
-  'startLabel="Início" endLabel="Fim" nowLabel="Agora" locale="pt-BR" [hourCycle]="24" [referenceTime]="clock"';
+const ROOM = 'locale="pt-BR" [hourCycle]="24" [referenceTime]="clock"';
 
 const meta: Meta<TimeRangePickerStoryArgs> = {
   title: 'Components/TimeRangePicker',
@@ -102,19 +113,8 @@ const meta: Meta<TimeRangePickerStoryArgs> = {
   decorators: [
     moduleMetadata({
       imports: DIRECTIVES,
-      /* The office's own words for the hint and the done button, once for every scene. */
-      providers: [
-        provideTimeRangePickerDefaults({
-          doneLabel: 'Concluir',
-          hintLabels: {
-            choose: '{end}: escolha a hora',
-            order: 'O fim tem de vir depois do início',
-            length: 'Fora da duração permitida',
-            unavailable: 'Passa por uma hora indisponível',
-            bounds: 'Fora do horário permitido',
-          },
-        }),
-      ],
+      /* The room's language, once for every scene. */
+      providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
     }),
   ],
   parameters: {
@@ -194,9 +194,6 @@ export const Playground: Story = {
           <label slFieldLabel>Reserva da sala</label>
           <div
             slTimeRangePicker
-            startLabel="Início"
-            endLabel="Fim"
-            nowLabel="Agora"
             startName="inicio"
             endName="fim"
             [locale]="locale"
@@ -507,7 +504,7 @@ export const Composition: Story = {
       1,
       scene(
         'Set once for the application',
-        'One provider decides that every booking is in Portuguese, in half-hour slots, with the office’s own words — so a product does not repeat six inputs on each form.',
+        'provideSlotted decides that every booking is in Portuguese, with the office’s own words laid over the catalog, and one defaults provider that it runs in half-hour slots — so a product does not repeat six inputs on each form.',
         `<div slTimeRangePicker [referenceTime]="clock" [defaultValue]="booking"></div>`,
       ) +
         scene(
@@ -539,18 +536,8 @@ export const Composition: Story = {
     moduleMetadata({
       imports: DIRECTIVES,
       providers: [
-        provideTimeRangePickerDefaults({
-          changeLabel: 'Alterar reserva',
-          chooseLabel: 'Escolher horário',
-          doneLabel: 'Concluir',
-          hintLabels: { choose: '{end}: escolha a hora' },
-          endLabel: 'Fim',
-          hourCycle: 24,
-          locale: 'pt-BR',
-          nowLabel: 'Agora',
-          startLabel: 'Início',
-          step: 1800,
-        }),
+        provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': OFFICE } }),
+        provideTimeRangePickerDefaults({ hourCycle: 24, step: 1800 }),
       ],
     }),
   ],

@@ -70,7 +70,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span, visually hidden',
     required: false,
     purpose:
-      "Why a value is wrong, inside its chip: the consumer's reason, the browser's own validationMessage, or the generic invalidLabel. The chip names it as its description and repeats it as its title.",
+      "Why a value is wrong, inside its chip: the consumer's reason, the browser's own validationMessage, or the generic invalid message. The chip names it as its description and repeats it as its title.",
   },
   {
     part: 'counter',
@@ -358,7 +358,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition, and the defaults an application sets once',
-    note: 'An injection token carries the axes and every sentence, exportAs reaches the instance from the template, and list passes through to a datalist for the browser’s own completion.',
+    note: 'An injection token carries the axes, provideSlotted the language, exportAs reaches the instance from the template, and list passes through to a datalist for the browser’s own completion.',
     snippet: defineSnippet({
       id: 'tags-input-angular-composition',
       language: 'angular',
@@ -480,7 +480,7 @@ const api: ApiRow[] = apiRows([
     'string',
     '—',
     'sl-tags-input',
-    'BCP 47, for the comparison the duplicate rule makes.',
+    'BCP 47, for the comparison the duplicate rule makes. The language in force when absent.',
   ],
   ['max', 'number | null', 'null', 'sl-tags-input', 'The most values the list may hold.'],
   [
@@ -577,76 +577,11 @@ const api: ApiRow[] = apiRows([
     'Whether the control is drawn in error, in addition to any value that failed.',
   ],
   [
-    'addedLabel',
-    'string',
-    '{label} added, {count}',
+    'messages',
+    'Partial<TagsInputMessages>',
+    '—',
     'sl-tags-input',
-    'What is announced when a value is added.',
-  ],
-  ['clearLabel', 'string', 'Clear', 'sl-tags-input', 'The accessible name of the clear button.'],
-  ['copiedLabel', 'string', '{count} copied', 'sl-tags-input', 'What is announced after a copy.'],
-  [
-    'countLabel',
-    'string',
-    '{count} values',
-    'sl-tags-input',
-    'The row’s own name, and the counter’s text while the frame is too narrow for a chip.',
-  ],
-  [
-    'counterLabel',
-    'string',
-    '{count} of {max}',
-    'sl-tags-input',
-    'The counter’s text while max is set, and the announcement when it is reached.',
-  ],
-  [
-    'duplicateLabel',
-    'string',
-    '{label} is already in the list',
-    'sl-tags-input',
-    'What is announced when a duplicate is refused.',
-  ],
-  [
-    'editHintLabel',
-    'string',
-    'Press Enter to edit a value.',
-    'sl-tags-input',
-    'The second sentence of the row’s description, while editable.',
-  ],
-  [
-    'hintLabel',
-    'string',
-    'Press Delete to remove a value.',
-    'sl-tags-input',
-    'The row’s description: what the keys do.',
-  ],
-  [
-    'invalidLabel',
-    'string',
-    'Not a valid value',
-    'sl-tags-input',
-    'The reason on a chip when the validator says false and the platform has no sentence.',
-  ],
-  [
-    'removedLabel',
-    'string',
-    '{label} removed, {count}',
-    'sl-tags-input',
-    'What is announced when a value leaves — with the count that is left.',
-  ],
-  [
-    'removeLabel',
-    'string',
-    'Remove {label}',
-    'sl-tags-input',
-    'The accessible name of a chip’s remove button.',
-  ],
-  [
-    'reorderLabel',
-    'string',
-    '{label}, position {position} of {count}',
-    'sl-tags-input',
-    'A chip’s accessible name while reorder is on, and the announcement after a move.',
+    'Words laid over the language in force, key by key: added, addedInvalid, clear, copied, count, countNamed, counter, duplicate, editHint, hint, invalid, remove, removed, reorder',
   ],
 ]);
 
@@ -689,7 +624,7 @@ const composition = apiRows([
     '(defaults: Partial<TagsInputDefaults>) => Provider',
     '—',
     'application',
-    'Sets every axis and every sentence once, at bootstrap or on a route. A binding on a control wins over it.',
+    'Sets every axis once, at bootstrap or on a route; the words come from the language in force (provideSlotted). A binding on a control wins over it.',
   ],
   [
     'exportAs',

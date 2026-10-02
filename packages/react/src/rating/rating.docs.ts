@@ -630,16 +630,16 @@ const shared = {
   locale: [
     'locale',
     'string',
-    'the provider’s, then the runtime’s',
-    'all members, RatingProvider',
+    'the language in force',
+    'all members',
     'The locale every number is written in: 4,6 and 1.284 in pt-BR',
   ],
   messages: [
     'messages',
     'Partial<RatingMessages>',
-    'Portuguese',
-    'all members, RatingProvider',
-    'Every string the family writes, merged key by key over the provider’s',
+    '—',
+    'all members',
+    'Words laid over the language in force, key by key: every string the family writes',
   ],
 } as const satisfies Record<string, ApiTuple>;
 
@@ -661,10 +661,10 @@ const composition = (member: string, rootElement: string): ApiRow[] =>
     ],
     [
       'RatingProvider',
-      '{ size, tone, max, clearable, messages, insightThresholds, locale }',
+      '{ size, tone, max, clearable, insightThresholds }',
       '—',
       'a subtree',
-      'The decisions an application takes once. messages and insightThresholds merge key by key; the instance always wins',
+      'The decisions an application takes once. insightThresholds merges key by key; the instance always wins. The words and the locale come from SlottedProvider',
     ],
   ]);
 

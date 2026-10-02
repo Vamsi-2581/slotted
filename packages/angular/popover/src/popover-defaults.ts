@@ -39,7 +39,6 @@ export interface PopoverDefaults {
   arrow: boolean;
   arrowPadding: number;
   autoFocus: boolean;
-  closeLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   collisionPadding: number;
@@ -66,7 +65,6 @@ export const POPOVER_FALLBACK: PopoverDefaults = {
   arrow: true,
   arrowPadding: 12,
   autoFocus: true,
-  closeLabel: 'Close',
   closeOnEscape: true,
   closeOnOutsidePress: true,
   collisionPadding: 8,
@@ -88,9 +86,9 @@ export const POPOVER_DEFAULTS = new InjectionToken<PopoverDefaults>('slotted pop
 });
 
 /**
- * An application decides once how its popovers behave and look, including the
- * close control's accessible name — a string belongs in one place in an
- * application rather than on every popover it renders.
+ * An application decides once how its popovers behave and look. The close
+ * control's accessible name comes from the language in force
+ * (`provideSlotted`).
  */
 export function providePopoverDefaults(defaults: Partial<PopoverDefaults>): Provider {
   return {

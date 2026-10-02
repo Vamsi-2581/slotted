@@ -329,7 +329,7 @@ type View = 'lines' | 'shipments' | 'invoices' | 'tickets';
                           slButton
                           type="button"
                           [loading]="store.busy() === 'submit'"
-                          loadingLabel="Submitting"
+                          [messages]="{ loading: 'Submitting' }"
                           (click)="submit()"
                         >
                           Submit
@@ -343,7 +343,7 @@ type View = 'lines' | 'shipments' | 'invoices' | 'tickets';
                           variant="outline"
                           type="button"
                           [loading]="store.busy() === 'release'"
-                          loadingLabel="Releasing"
+                          [messages]="{ loading: 'Releasing' }"
                           (click)="release()"
                         >
                           Release hold
@@ -374,7 +374,7 @@ type View = 'lines' | 'shipments' | 'invoices' | 'tickets';
                           aria-label="Refresh"
                           data-testid="refresh"
                           [loading]="store.loading()"
-                          loadingLabel="Refreshing"
+                          [messages]="{ loading: 'Refreshing' }"
                           (click)="store.load()"
                         >
                           <ng-icon name="lucideRefreshCw" />
@@ -420,7 +420,7 @@ type View = 'lines' | 'shipments' | 'invoices' | 'tickets';
                           type="button"
                           data-testid="create-invoice"
                           [loading]="store.busy() === 'invoice'"
-                          loadingLabel="Creating the invoice"
+                          [messages]="{ loading: 'Creating the invoice' }"
                           (click)="createInvoice()"
                         >
                           Create invoice
@@ -515,7 +515,7 @@ type View = 'lines' | 'shipments' | 'invoices' | 'tickets';
                 the boxes they will occupy. What some orders carry and others
                 do not stands under the tabs' content and is not reserved.
               -->
-              <div slSkeletonRegion label="Reading the order" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the order' }" [loading]="true">
                 <div slStack [gap]="6">
                   <div slGrid [columns]="phone() ? 2 : 4" minItemWidth="xs" [gap]="4">
                     @for (label of figureLabels; track label) {

@@ -1,3 +1,4 @@
+import type { AppShellMessages, FamilyTranslator, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, RefObject } from 'react';
 
@@ -79,27 +80,8 @@ export type AppShellOpenReason =
 /** Why the secondary pane opened or closed. No `select`: a pane has no destinations. */
 export type AppShellAsideOpenReason = Exclude<AppShellOpenReason, 'select'>;
 
-/** The strings the family says on the reader's behalf. */
-export interface AppShellMessages {
-  /** The accessible name of the navigation landmark. */
-  nav: string;
-  /** The accessible name of the toggle while the region is closed. */
-  open: string;
-  /** The accessible name of the toggle while the region is open. */
-  close: string;
-  /** The accessible name of the secondary pane. */
-  aside: string;
-  /** The accessible name of the pane's toggle while the pane is closed. */
-  openAside: string;
-  /** The accessible name of the pane's toggle while the pane is open. */
-  closeAside: string;
-  /** The label of the skip link that jumps to the content. */
-  skipToMain: string;
-  /** The label of the skip link that jumps to the navigation. */
-  skipToNav: string;
-  /** The label of the skip link that jumps to the secondary pane. */
-  skipToAside: string;
-}
+/** Why the pane's extent moved. */
+export type AppShellAsideExtentReason = 'pointer' | 'keyboard' | 'programmatic';
 
 /** What an application sets once for every shell under it. */
 export interface AppShellDefaults {
@@ -112,7 +94,6 @@ export interface AppShellDefaults {
   escape: AppShellDismissPolicy;
   /** The platform's way back — a phone's gesture, a browser's button — closes a modal layer. */
   back: AppShellDismissPolicy;
-  messages: AppShellMessages;
   modal: boolean;
   navMode: AppShellNavMode;
   navSide: AppShellNavSide;
@@ -122,9 +103,8 @@ export interface AppShellDefaults {
   scroll: AppShellScroll;
 }
 
-export interface AppShellDefaultsProviderProps extends Partial<Omit<AppShellDefaults, 'messages'>> {
+export interface AppShellDefaultsProviderProps extends Partial<AppShellDefaults> {
   children?: ReactNode | undefined;
-  messages?: Partial<AppShellMessages> | undefined;
 }
 
 /**
@@ -139,6 +119,17 @@ export interface AppShellOpenRequest extends Omit<ChangeRequest<boolean>, 'reaso
 /** The request the shell makes before the secondary pane moves. */
 export interface AppShellAsideOpenRequest extends Omit<ChangeRequest<boolean>, 'reason'> {
   reason: AppShellAsideOpenReason;
+}
+
+/**
+ * The request the shell makes before the pane's extent moves. `undefined` is
+ * the pane back on the measure its size step gives it.
+ */
+export interface AppShellAsideExtentRequest extends Omit<
+  ChangeRequest<number | undefined>,
+  'reason'
+> {
+  reason: AppShellAsideExtentReason;
 }
 
 /** The imperative actions a consumer cannot express declaratively. */
@@ -163,6 +154,12 @@ export interface AppShellContextValue {
   asideMode: Exclude<AppShellAsideMode, 'auto'> | undefined;
   asideOpen: boolean;
   asideSize: AppShellSize;
+  /** The pane's measure as a fraction of the shell, or `undefined` while the size step decides. */
+  asideExtent: number | undefined;
+  minAsideExtent: number;
+  maxAsideExtent: number;
+  /** Whether a pointer is moving the pane's edge, which the root reports as `data-dragging`. */
+  asideDragging: boolean;
   canvas: AppShellCanvas;
   closeOnNavigate: boolean;
   collapsedTo: AppShellCollapsedTo;
@@ -170,7 +167,8 @@ export interface AppShellContextValue {
   escape: AppShellDismissPolicy;
   /** The platform's way back — a phone's gesture, a browser's button — closes a modal layer. */
   back: AppShellDismissPolicy;
-  messages: AppShellMessages;
+  /** The family's words in the language in force, with this shell's `messages` laid over them. */
+  t: FamilyTranslator<AppShellMessages>;
   modal: boolean;
   /** The resolved mode, which is `auto` answered against the shell's own width. */
   navMode: Exclude<AppShellNavMode, 'auto'> | undefined;
@@ -190,6 +188,15 @@ export interface AppShellContextValue {
   setOpen: (next: boolean, reason: AppShellOpenReason, source?: unknown) => void;
   /** Asks to move the secondary pane. */
   setAsideOpen: (next: boolean, reason: AppShellAsideOpenReason, source?: unknown) => void;
+  /** Asks to move the pane's extent, held inside the limits. */
+  setAsideExtent: (
+    next: number | undefined,
+    reason: AppShellAsideExtentReason,
+    source?: unknown,
+  ) => void;
+  setAsideDragging: (dragging: boolean) => void;
+  /** The root, which the pane's extent is a fraction of. */
+  root: HTMLElement | null;
   /** A region says it exists, so a skip link is never written to a target nobody rendered. */
   register: (region: 'nav' | 'main' | 'aside') => () => void;
   /** The nodes the layer and the focus scope need, and nothing else reads. */
@@ -210,6 +217,7 @@ export interface AppShellRootProps extends HTMLAttributes<HTMLElement> {
   'data-aside-size': AppShellSize;
   'data-canvas': AppShellCanvas;
   'data-collapsed-to': AppShellCollapsedTo;
+  'data-dragging'?: '' | undefined;
   'data-nav-mode'?: 'inline' | 'overlay' | undefined;
   'data-nav-side': AppShellNavSide;
   'data-nav-size': AppShellSize;
@@ -233,6 +241,12 @@ interface Common {
 }
 
 export interface AppShellProps extends Omit<Native<'div'>, 'ref'>, Common {
+  /**
+   * How much of the shell's inline size the pane takes as a column, in
+   * `[0, 1]`. Unset means `asideSize` decides. Passing anything but
+   * `undefined` puts the extent in controlled mode.
+   */
+  asideExtent?: number | undefined;
   asideMode?: AppShellAsideMode | undefined;
   /** The controlled value of the secondary pane. */
   asideOpen?: boolean | undefined;
@@ -241,6 +255,8 @@ export interface AppShellProps extends Omit<Native<'div'>, 'ref'>, Common {
   /** A click on an `a[href]` inside the overlaid region asks to close, with the reason `select`. */
   closeOnNavigate?: boolean | undefined;
   collapsedTo?: AppShellCollapsedTo | undefined;
+  /** The uncontrolled starting extent of the pane, read once. */
+  defaultAsideExtent?: number | undefined;
   /** The uncontrolled starting value of the pane, read once. */
   defaultAsideOpen?: boolean | undefined;
   /** The uncontrolled starting value, read once. */
@@ -251,8 +267,16 @@ export interface AppShellProps extends Omit<Native<'div'>, 'ref'>, Common {
    * a modal layer instead of leaving the page. Defaults to the provider, then `close`.
    */
   back?: AppShellDismissPolicy | undefined;
-  /** Strings for this shell, over the provider's and over the family's own. */
-  messages?: Partial<AppShellMessages> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * landmarks' names, the toggles and the skip links. A native `aria-label` on
+   * a part still wins.
+   */
+  messages?: PartialMessages<AppShellMessages> | undefined;
+  /** The largest extent the reader may give the pane. Defaults to `0.6`. */
+  maxAsideExtent?: number | undefined;
+  /** The smallest extent the reader may give the pane. Defaults to `0.16`. */
+  minAsideExtent?: number | undefined;
   /** Whether the overlaid region contains focus and makes the rest of the shell `inert`. */
   modal?: boolean | undefined;
   /** The controlled value. Passing anything but `undefined` puts the shell in controlled mode. */
@@ -260,6 +284,8 @@ export interface AppShellProps extends Omit<Native<'div'>, 'ref'>, Common {
   navMode?: AppShellNavMode | undefined;
   navSide?: AppShellNavSide | undefined;
   navSize?: AppShellSize | undefined;
+  onAsideExtentChange?:
+    ((extent: number | undefined, request: AppShellAsideExtentRequest) => void) | undefined;
   onAsideOpenChange?: ((open: boolean, request: AppShellAsideOpenRequest) => void) | undefined;
   onNavOpenChange?: ((open: boolean, request: AppShellOpenRequest) => void) | undefined;
   outsidePress?: AppShellDismissPolicy | undefined;
@@ -297,6 +323,13 @@ export interface AppShellAsideProps extends Native<'aside'>, Common {
   render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
 }
 export interface AppShellAsideSectionProps extends Native<'div'>, Common {
+  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+}
+export interface AppShellAsideBodyProps extends AppShellAsideSectionProps {
+  /** `none` drops the body's own padding, for content that brings its own inset. */
+  inset?: 'none' | undefined;
+}
+export interface AppShellAsideResizerProps extends Native<'div'>, Common {
   render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
 }
 export interface AppShellAsideToggleProps extends Native<'button'>, Common {

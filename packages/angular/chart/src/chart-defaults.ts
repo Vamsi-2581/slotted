@@ -1,5 +1,5 @@
 import { inject, InjectionToken } from '@angular/core';
-import type { ChartGrid, ChartMessages } from '@slotted/core/chart';
+import type { ChartGrid } from '@slotted/core/chart';
 
 export type ChartSize = 'sm' | 'md' | 'lg';
 export type ChartVariant = 'plain' | 'card';
@@ -16,8 +16,6 @@ export interface ChartTooltipSettings {
 
 /** What every chart in an application does before any of them states its own. */
 export interface ChartDefaults {
-  locale?: string;
-  messages?: Partial<ChartMessages>;
   size?: ChartSize;
   variant?: ChartVariant;
   palette?: ChartPalette;
@@ -35,10 +33,11 @@ export const CHART_DEFAULTS_TOKEN = new InjectionToken<ChartDefaults>('slotted c
 });
 
 /**
- * An application decides once how its charts read and look — the language,
- * the messages, the tile or the plain form, the palette, the toolbar — and
- * every chart inherits the decision. A chart that states any of them still
- * wins: an explicit input is never overridden by the token.
+ * An application decides once how its charts look — the tile or the plain
+ * form, the palette, the toolbar — and every chart inherits the decision. A
+ * chart that states any of them still wins: an explicit input is never
+ * overridden by the token. The words and the locale come from the language in
+ * force (`provideSlotted`).
  */
 export function provideChartDefaults(defaults: ChartDefaults) {
   return { provide: CHART_DEFAULTS_TOKEN, useValue: defaults };

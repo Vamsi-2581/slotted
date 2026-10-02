@@ -44,7 +44,7 @@ export function TagToggle({
   onRemove,
   onSelectedChange,
   removeDisabled = false,
-  removeLabel,
+  messages,
   render,
   rootProps,
   selected,
@@ -57,7 +57,7 @@ export function TagToggle({
   ...nativeProps
 }: TagToggleProps) {
   const appearance = useAppearance({ shape, size, tone, variant });
-  const removal = useRemoval({ disabled, onRemove, removeDisabled, removeLabel });
+  const removal = useRemoval({ disabled, onRemove, removeDisabled, messages });
   const [uncontrolled, setUncontrolled] = useState(defaultSelected ?? false);
   const id = useId();
   const labelId = `${id}label`;

@@ -490,12 +490,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition, and the defaults an application sets once',
-    note: 'A provider carries the axes and the eight sentences the family speaks, render replaces the frame while keeping the measurement, and the handle answers the actions a prop cannot express.',
+    note: 'A provider carries the axes, the words come from the language in force, render replaces the frame while keeping the measurement, and the handle answers the actions a prop cannot express.',
     snippet: defineSnippet({
       id: 'multi-select-react-composition',
       language: 'tsx',
       label: 'Set once, replaced where it matters',
-      source: `<MultiSelectDefaultsProvider removeLabel="Remover {label}" size="sm" variant="subtle">
+      source: `<MultiSelectDefaultsProvider size="sm" variant="subtle">
   <MultiSelect ref={handle}>
     <MultiSelectControl render={(props) => <fieldset {...props} />} />
     <MultiSelectContent aria-label="Affected services">…</MultiSelectContent>
@@ -569,7 +569,7 @@ const api: ApiRow[] = apiRows([
     'string',
     '—',
     'MultiSelect',
-    'BCP 47, for the comparison the filter and the duplicate rule make.',
+    'BCP 47, for the comparison the filter and the duplicate rule make. The language in force when absent.',
   ],
   [
     'validateValue',
@@ -754,6 +754,13 @@ const api: ApiRow[] = apiRows([
     'MultiSelect',
     'The positioning strategy the layer uses.',
   ],
+  [
+    'openOn',
+    "'input' | 'focus' | 'manual'",
+    'input',
+    'MultiSelect',
+    'Which gestures open the popup besides the trigger and the arrows.',
+  ],
   ['sideOffset', 'number', '4', 'MultiSelect', 'The distance between the control and the popup.'],
   ['alignOffset', 'number', '0', 'MultiSelect', 'The shift along the aligned edge.'],
   [
@@ -803,58 +810,13 @@ const api: ApiRow[] = apiRows([
   ['required', 'boolean', 'false', 'MultiSelect', 'Whether an empty set is a validity error.'],
   ['invalid', 'boolean', 'false', 'MultiSelect', 'Whether the control is drawn in error.'],
   ['loading', 'boolean', 'false', 'MultiSelect', 'Whether an answer is travelling.'],
-  ['clearLabel', 'string', 'Clear', 'MultiSelect', 'The accessible name of the clear button.'],
   [
-    'chosenLabel',
-    'string',
-    '{count} chosen',
+    'messages',
+    'Partial<MultiSelectMessages>',
+    '—',
     'MultiSelect',
-    'The row’s own name, and the counter’s text while the frame is too narrow for a chip.',
+    'Words laid over the language in force, key by key: clear, trigger, chosen ({count}), count ({count}), counter ({count}, {max}), create ({query}), empty, loading, remove ({label}), reorder ({label}, {position}, {count})',
   ],
-  [
-    'countLabel',
-    'string',
-    '{count} results',
-    'MultiSelect',
-    'What the live region says about the number of options that matched.',
-  ],
-  [
-    'counterLabel',
-    'string',
-    '{count} of {max}',
-    'MultiSelect',
-    'The counter’s text while max is set.',
-  ],
-  ['createLabel', 'string', 'Add “{query}”', 'MultiSelect', 'The offer to add what was typed.'],
-  [
-    'emptyLabel',
-    'string',
-    'No matches',
-    'MultiSelect',
-    'The message for a query nothing answered.',
-  ],
-  [
-    'loadingLabel',
-    'string',
-    'Loading…',
-    'MultiSelect',
-    'What the live region says while an answer is travelling.',
-  ],
-  [
-    'removeLabel',
-    'string',
-    'Remove {label}',
-    'MultiSelect',
-    'The accessible name of a chip’s remove button.',
-  ],
-  [
-    'reorderLabel',
-    'string',
-    '{label}, position {position} of {count}',
-    'MultiSelect',
-    'A chip’s accessible name while reorder is on, so its place is heard as well as seen.',
-  ],
-  ['triggerLabel', 'string', 'Show options', 'MultiSelect', 'The accessible name of the trigger.'],
   [
     'render',
     '(props) => ReactNode',
@@ -937,7 +899,7 @@ const composition = apiRows([
     'component',
     '—',
     'Application',
-    'Every axis and all eight sentences the family speaks, set once in a bootstrap — which is where an application translates them. A consumer’s own prop always wins over the provider, and the provider over the built-in default.',
+    'Every axis, set once in a bootstrap; the words come from the language in force (SlottedProvider). A consumer’s own prop always wins over the provider, and the provider over the built-in default.',
   ],
   [
     'render',

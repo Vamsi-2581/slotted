@@ -3,6 +3,7 @@ import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SlField, SlFieldDescription, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
 
@@ -276,14 +277,8 @@ export const Composition: Story = {
   decorators: [
     moduleMetadata({
       providers: [
-        provideColorPickerDefaults({
-          alphaLabel: 'Opacidade',
-          areaLabel: 'Saturação e brilho',
-          format: 'hsl',
-          hueLabel: 'Matiz',
-          inputLabel: 'Cor',
-          previousLabel: 'Repor',
-        }),
+        provideSlotted({ locale: 'pt-BR' }),
+        provideColorPickerDefaults({ format: 'hsl' }),
       ],
     }),
   ],
@@ -292,7 +287,7 @@ export const Composition: Story = {
       1,
       scene(
         'Portuguese words and hsl, for the whole application',
-        'provideColorPickerDefaults sets the notation and every label once; the picker below states nothing of its own.',
+        'provideSlotted sets the language and provideColorPickerDefaults the notation, once; the picker below states nothing of its own.',
         `<div slColorPicker defaultValue="hsl(221 83% 53%)"></div>`,
       ),
     ),

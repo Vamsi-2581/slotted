@@ -158,7 +158,7 @@ const anatomy: AnatomyRow[] = [
     element: 'p',
     required: false,
     purpose:
-      'A contagem, em aria-live="polite": count de total nas figuras do locale. Com loading, um spinner e aria-busy.',
+      'A contagem, em aria-live="polite": count de total nas figuras da língua em vigor. Com loading, um spinner e aria-busy.',
   },
   {
     part: 'builder',
@@ -392,13 +392,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'count',
     title: 'A contagem como região viva',
-    note: 'count e total são os números do consumidor, escritos nas figuras do locale. A parte é aria-live="polite", por isso uma mudança no filtro é ouvida como o seu efeito; com loading a contagem dá lugar a um spinner e aria-busy.',
+    note: 'count e total são os números do consumidor, escritos nas figuras da língua em vigor. A parte é aria-live="polite", por isso uma mudança no filtro é ouvida como o seu efeito; com loading a contagem dá lugar a um spinner e aria-busy.',
     snippet: defineSnippet({
       id: 'filter-bar-react-count',
       language: 'tsx',
       label: 'Quantos ficaram, de quantos',
-      source:
-        '<FilterBar count={128} fields={FIELDS} loading={fetching} locale="pt-BR" total={3412} />;',
+      source: '<FilterBar count={128} fields={FIELDS} loading={fetching} total={3412} />;',
     }),
   },
   {
@@ -593,13 +592,12 @@ export const REACT_FILTER_BAR_DOCS = {
       ],
       ['count', 'number', '—', 'FilterBar', 'Quantas linhas o filtro manteve'],
       ['total', 'number', '—', 'FilterBar', 'Quantas há'],
-      ['locale', 'string', '—', 'FilterBar', 'BCP 47 para as figuras da contagem'],
       [
-        'labels',
-        'Partial<FilterBarLabels>',
+        'messages',
+        'Partial<FilterBarMessages>',
         '—',
         'FilterBar',
-        'As palavras da família e o mapa dos operadores, fundidos com os do provider',
+        'Palavras sobre as da língua em vigor, chave a chave: o nome do landmark (bar), os controles, os nomes dos chips, a contagem e os anúncios',
       ],
       [
         'renderOperand',
@@ -634,7 +632,7 @@ export const REACT_FILTER_BAR_DOCS = {
       ],
       [
         'FilterBarDefaultsProvider',
-        'apply | chipLimit | queryDelay | shortcut | size | labels',
+        'apply | chipLimit | queryDelay | shortcut | size',
         '—',
         'Aplicação',
         'Decide uma vez para tudo por baixo; uma prop na barra ganha',

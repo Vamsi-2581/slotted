@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "breadcrumb",
   "ui": "breadcrumb",
+  "catalog": {
+    "group": "Navigation",
+    "summary": "Trail of links to the current page's ancestors."
+  },
   "rootRole": "navigation",
   "currentValue": "page",
   "currentSource": "aria-current",
@@ -80,14 +84,9 @@
     "overflow": ["prop", "defaults", "collapse"]
   },
   "provides": {
-    "breadcrumbDefaults": [
-      "label",
-      "maxItems",
-      "itemsBeforeCollapse",
-      "itemsAfterCollapse",
-      "overflow"
-    ]
+    "breadcrumbDefaults": ["maxItems", "itemsBeforeCollapse", "itemsAfterCollapse", "overflow"]
   },
+  "messages": ["label", "showHidden"],
   "stateAttributes": {
     "expanded": "data-expanded",
     "open": "data-open"
@@ -107,7 +106,6 @@
     "breadcrumb": {
       "nativeElement": "nav",
       "defaults": {
-        "label": "Breadcrumb",
         "maxItems": 8,
         "itemsBeforeCollapse": 1,
         "itemsAfterCollapse": 2,

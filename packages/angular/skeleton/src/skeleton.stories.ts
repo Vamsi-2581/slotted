@@ -239,7 +239,7 @@ export const Region: Story = {
   ${scene(
     'One region, one wait',
     'Every placeholder reads the region rather than its own input, the whole subtree leaves the tab order, and the status message is said once instead of six times.',
-    `<div slSkeletonRegion label="Loading members" [loading]="pending">
+    `<div slSkeletonRegion [messages]="{ label: 'Loading members' }" [loading]="pending">
        <div class="slotted-demo-stack">
          <div class="slotted-demo-row">
            <span slSkeleton shape="circle" size="md">
@@ -275,7 +275,7 @@ export const Timing: Story = {
   ${scene(
     'No timing',
     'A load that finishes every nine hundred milliseconds. The placeholder appears and vanishes with it, and the row never settles — that churn is the flash.',
-    `<div slSkeletonRegion label="Loading member" [loading]="pending">
+    `<div slSkeletonRegion [messages]="{ label: 'Loading member' }" [loading]="pending">
        <div class="slotted-demo-row">
          <span slSkeleton shape="circle" size="md">
            <span slAvatar name="Ada Lovelace" size="md"></span>
@@ -289,7 +289,7 @@ export const Timing: Story = {
     'The same load beside it. Nothing is painted until the wait has lasted six hundred milliseconds, and anything painted stays for six hundred more, so the row changes half as often.',
     `<div
        slSkeletonRegion
-       label="Loading member"
+       [messages]="{ label: 'Loading member' }"
        [loading]="pending"
        [delay]="600"
        [minDuration]="600"
@@ -341,7 +341,6 @@ export const Composition: Story = {
       providers: [
         provideSkeletonDefaults({
           animation: 'shimmer',
-          label: 'A carregar…',
           lastLineSize: '45%',
         }),
       ],
@@ -354,7 +353,7 @@ export const Composition: Story = {
   ${scene(
     'A member row',
     'Each placeholder reserves the box its own family will occupy — an avatar disc, two lines of type, a chip — so the row does not move when the data lands.',
-    `<div slSkeletonRegion label="Loading members" animation="shimmer" [loading]="pending">
+    `<div slSkeletonRegion [messages]="{ label: 'Loading members' }" animation="shimmer" [loading]="pending">
        <div class="slotted-demo-row">
          <span slSkeleton shape="circle" size="md">
            <span slAvatar name="Grace Hopper" size="md"></span>
@@ -371,7 +370,7 @@ export const Composition: Story = {
   )}
   ${scene(
     'Defaults for a whole application',
-    'provideSkeletonDefaults decides the animation, the wording and the timing once. A region or a box that states its own still wins over it — the row beside this one does.',
+    'provideSkeletonDefaults decides the animation, the measure and the timing once. A region or a box that states its own still wins over it — the row beside this one does.',
     `<div slSkeletonRegion>
        <div slSkeletonText [lines]="3"></div>
      </div>`,
@@ -418,7 +417,7 @@ export const Accessibility: Story = {
     'Focus never enters a waiting region',
     'Tab from the button above and focus reaches the one below it, skipping the covered button entirely — it is inert, not merely hidden.',
     `<button slButton variant="outline" type="button">Before</button>
-     <div slSkeletonRegion label="Loading actions" [loading]="pending">
+     <div slSkeletonRegion [messages]="{ label: 'Loading actions' }" [loading]="pending">
        <span slSkeleton shape="block">
          <button slButton tone="accent" type="button">Approve invoice</button>
        </span>

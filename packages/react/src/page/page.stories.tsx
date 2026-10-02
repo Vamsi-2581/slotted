@@ -499,12 +499,13 @@ export const Defaults: Story = {
   render: () => (
     <Grid columns={1}>
       <Scene
-        label="Six decisions an application takes once"
-        note="The provider carries width, inset, scroll, ground, landmark and the footer’s name for every page under it — here a document application in English. A page that states any of them itself still wins."
+        label="Five decisions an application takes once"
+        note="The provider carries width, inset, scroll, ground and landmark for every page under it — here a document application. A page that states any of them itself still wins, and its messages name the footer."
       >
-        <PageDefaultsProvider ground="surface" messages={{ footer: 'Decisions' }} width="content">
+        <PageDefaultsProvider ground="surface" width="content">
           <Viewport>
             <Page
+              messages={{ footer: 'Decisions' }}
               footer={
                 <PageFooter>
                   <Button variant="ghost">Discard</Button>
@@ -533,7 +534,7 @@ export const Accessibility: Story = {
     <Grid columns={1}>
       <Scene
         label="One main, named regions, an outline without a skip"
-        note="Open the screen reader’s landmark list: main, then the regions the sections make, then the footer named “Ações da página”. Open the heading list: h1 for the order, h2 for each section, h3 for what is inside."
+        note="Open the screen reader’s landmark list: main, then the regions the sections make, then the footer named by the catalog — “Page actions” in English. Open the heading list: h1 for the order, h2 for each section, h3 for what is inside."
       >
         <OrderScreen />
       </Scene>

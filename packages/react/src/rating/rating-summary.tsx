@@ -1,19 +1,16 @@
 import '@slotted/styles/rating/rating.css';
 
-import {
-  formatRating,
-  formatRatingMessage,
-  formatShare,
-  summariseRatings,
-} from '@slotted/core/rating';
+import { ratingMessages } from '@slotted/core/i18n';
+import { formatRating, formatShare, summariseRatings } from '@slotted/core/rating';
 import type { RatingInsight } from '@slotted/core/rating';
 import { createControllable } from '@slotted/core/state';
 import { useState } from 'react';
 import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 
+import { useLocale, useMessages } from '../i18n';
 import { useRatingDefaults } from './rating-defaults';
 import { RatingDisplay, RatingStar, shareValue } from './rating-display';
-import type { RatingMessages, RatingRootProps, RatingSummaryProps } from './rating.types';
+import type { RatingRootProps, RatingSummaryProps } from './rating.types';
 
 /** The tone each conclusion is drawn in, as the contract declares it. */
 const INSIGHT_TONE: Record<RatingInsight, string> = {
@@ -23,9 +20,12 @@ const INSIGHT_TONE: Record<RatingInsight, string> = {
   mixed: 'secondary',
 };
 
-/** A message with its `{share}` set in `strong`, the way the sentiment line reads. */
-function withStrongShare(template: string, share: string): ReactNode {
-  const [before = '', ...after] = template.split('{share}');
+/** A written message with its share set in `strong`, the way the sentiment line reads. */
+/** Stands in for the share while a message is written, so the share can be set apart. */
+const SHARE_MARK = '\uE000';
+
+function withStrongShare(written: string, share: string): ReactNode {
+  const [before = '', ...after] = written.split(SHARE_MARK);
   return (
     <>
       {before}
@@ -77,8 +77,9 @@ export function RatingSummary({
   const resolvedMax = Math.max(1, Math.floor(max ?? defaults.max));
   const resolvedVariant = variant ?? 'bars';
   const resolvedTone = tone ?? defaults.tone;
-  const resolvedLocale = locale ?? defaults.locale;
-  const resolvedMessages: RatingMessages = { ...defaults.messages, ...messages };
+  const t = useMessages(ratingMessages, messages);
+  const appLocale = useLocale();
+  const resolvedLocale = locale ?? appLocale;
   const levelCounts = Array.from({ length: resolvedMax }, (_, index) => counts[index] ?? 0);
   const thresholds = { ...defaults.insightThresholds, ...insightThresholds };
   const summary = summariseRatings(levelCounts, thresholds);
@@ -113,11 +114,7 @@ export function RatingSummary({
   };
 
   const levelName = (level: number, count: number, share: number) =>
-    formatRatingMessage(
-      resolvedMessages.levelLabel,
-      { level, count, share: formatShare(share, resolvedLocale) },
-      resolvedLocale,
-    );
+    t('levelLabel', { level, count, share: formatShare(share, resolvedLocale) });
 
   /** A level or a column: a pressed button while filtering, a named group otherwise. */
   const level = (
@@ -162,9 +159,7 @@ export function RatingSummary({
   const figure = rated ? (
     <>
       <span data-part="value">{formatRating(summary.average ?? 0, resolvedLocale)}</span>
-      <span data-part="scale">
-        {formatRatingMessage(resolvedMessages.scale, { max: resolvedMax }, resolvedLocale)}
-      </span>
+      <span data-part="scale">{t('scale', { max: resolvedMax })}</span>
     </>
   ) : null;
 
@@ -175,23 +170,17 @@ export function RatingSummary({
         <RatingDisplay
           locale={resolvedLocale}
           max={resolvedMax}
-          messages={resolvedMessages}
+          messages={messages}
           showValue={false}
           size="sm"
           tone={resolvedTone}
           value={summary.average ?? 0}
         />
         <span data-part="count">
-          {rated
-            ? formatRatingMessage(
-                resolvedMessages.summaryCount,
-                { count: summary.total },
-                resolvedLocale,
-              )
-            : resolvedMessages.summaryEmpty}
+          {rated ? t('summaryCount', { count: summary.total }) : t('summaryEmpty')}
         </span>
       </div>
-      <ul aria-label={resolvedMessages.distributionLabel} data-part="distribution">
+      <ul aria-label={t('distributionLabel')} data-part="distribution">
         {summary.levels.map((entry) => (
           <li key={entry.level}>
             {level(
@@ -217,22 +206,14 @@ export function RatingSummary({
   const ascending = [...summary.levels].reverse();
   const largest = Math.max(0, ...ascending.map((entry) => entry.count));
   const spectrumCount = !rated
-    ? resolvedMessages.summaryEmpty
+    ? t('summaryEmpty')
     : (summary.margin ?? 0) >= thresholds.margin
-      ? formatRatingMessage(
-          resolvedMessages.spectrumUncertain,
-          {
-            count: summary.total,
-            low: formatRating(summary.interval?.[0] ?? 0, resolvedLocale),
-            high: formatRating(summary.interval?.[1] ?? 0, resolvedLocale),
-          },
-          resolvedLocale,
-        )
-      : formatRatingMessage(
-          resolvedMessages.spectrumCount,
-          { count: summary.total, margin: margin.format(summary.margin ?? 0) },
-          resolvedLocale,
-        );
+      ? t('spectrumUncertain', {
+          count: summary.total,
+          low: formatRating(summary.interval?.[0] ?? 0, resolvedLocale),
+          high: formatRating(summary.interval?.[1] ?? 0, resolvedLocale),
+        })
+      : t('spectrumCount', { count: summary.total, margin: margin.format(summary.margin ?? 0) });
 
   const spectrum = (
     <>
@@ -240,7 +221,7 @@ export function RatingSummary({
         {figure}
         {showInsight !== false && summary.insight !== null ? (
           <span data-part="insight" data-tone={INSIGHT_TONE[summary.insight]}>
-            {resolvedMessages[summary.insight]}
+            {t(summary.insight)}
           </span>
         ) : null}
         <span data-part="count">{spectrumCount}</span>
@@ -286,7 +267,7 @@ export function RatingSummary({
             <span data-part="bucket" data-tone={bucketTone} key={bucket}>
               <span aria-hidden="true" data-part="swatch" />
               {withStrongShare(
-                resolvedMessages[bucket],
+                t(bucket, { share: SHARE_MARK }),
                 formatShare(summary.buckets[bucket], resolvedLocale),
               )}
             </span>

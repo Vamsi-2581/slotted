@@ -13,8 +13,14 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { SlField } from '@slotted/angular/field';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { writeToClipboard } from '@slotted/core/clipboard';
+import {
+  type PartialMessages,
+  textFieldMessages,
+  type TextFieldMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 
 import { injectTextFieldDefaults, SlTextFieldControl } from './text-field-defaults';
@@ -64,7 +70,7 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
         data-part="clear"
         type="button"
         [hidden]="!showClear()"
-        [attr.aria-label]="resolvedClearLabel()"
+        [attr.aria-label]="t('clear')"
         (click)="control()!.clear($event)"
       >
         <span slIcon><svg slGlyph name="x"></svg></span>
@@ -75,7 +81,7 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
         data-part="copy"
         type="button"
         [hidden]="!showCopy()"
-        [attr.aria-label]="copyLabel() ?? defaults.copyLabel"
+        [attr.aria-label]="t('copy')"
         [attr.data-complete]="copied() ? '' : null"
         (click)="copy($event)"
       >
@@ -91,7 +97,7 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
       <button
         data-part="reveal"
         type="button"
-        [attr.aria-label]="resolvedRevealLabel()"
+        [attr.aria-label]="t('reveal')"
         [attr.aria-pressed]="control()!.revealed()"
         (click)="control()!.toggleReveal($event)"
       >
@@ -131,24 +137,18 @@ export class SlTextField {
   readonly clearable = input(false, { transform: booleanAttribute });
   /** Draws a toggle that turns a password from dots into characters. */
   readonly revealable = input(false, { transform: booleanAttribute });
-  /** The clear button's accessible name. Defaults to the token's. */
-  readonly clearLabel = input<string | undefined>(undefined);
-  /** The reveal button's accessible name. It does not change with the state. */
-  readonly revealLabel = input<string | undefined>(undefined);
   /**
    * Draws a button that writes the value to the clipboard, shows a check for
    * two seconds and announces the outcome. It stays for a read-only value and
    * leaves while the value is empty or disabled.
    */
   readonly copyable = input(false, { transform: booleanAttribute });
-  /** The copy button's accessible name. */
-  readonly copyLabel = input<string | undefined>(undefined);
-  /** What a copy that reached the clipboard announces. */
-  readonly copiedLabel = input<string | undefined>(undefined);
-  /** What a copy the clipboard refused announces. */
-  readonly copyFailedLabel = input<string | undefined>(undefined);
-  /** What the Caps Lock mark announces when it appears in a password. */
-  readonly capsLockLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * names of the clear, copy and reveal buttons (`reveal` does not change with
+   * the state), and what a copy and the Caps Lock mark announce.
+   */
+  readonly messages = input<PartialMessages<TextFieldMessages> | undefined>(undefined);
   /**
    * Draws the shared ring before the buttons while something about the value
    * is being checked, and marks the control `aria-busy`. The value stays
@@ -180,12 +180,8 @@ export class SlTextField {
   );
   readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   readonly resolvedMono = computed(() => this.mono() ?? this.defaults.mono);
-  protected readonly resolvedClearLabel = computed(
-    () => this.clearLabel() ?? this.defaults.clearLabel,
-  );
-  protected readonly resolvedRevealLabel = computed(
-    () => this.revealLabel() ?? this.defaults.revealLabel,
-  );
+  /** The family's words in the language in force, with this field's `messages` laid over them. */
+  readonly t = injectMessages(textFieldMessages, this.messages);
 
   /**
    * A button that clears an empty control, or a value the reader cannot change,
@@ -220,9 +216,7 @@ export class SlTextField {
       this.copiedTimer = setTimeout(() => this.copied.set(false), COPIED_FOR);
     }
     getLiveAnnouncer(this.element.ownerDocument).announce(
-      done
-        ? (this.copiedLabel() ?? this.defaults.copiedLabel)
-        : (this.copyFailedLabel() ?? this.defaults.copyFailedLabel),
+      done ? this.t('copied') : this.t('copyFailed'),
     );
     this.valueCopy.emit({ copied: done, reason, source: event, value });
   }

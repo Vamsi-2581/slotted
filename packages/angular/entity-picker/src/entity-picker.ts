@@ -28,6 +28,7 @@ import {
 import type { EmbeddedViewRef } from '@angular/core';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlAvatar } from '@slotted/angular/avatar';
 import { SlField } from '@slotted/angular/field';
@@ -48,7 +49,6 @@ import {
   entityOptions,
   entityPickerKey,
   entitySections,
-  formatEntityLabel,
   localEntitySource,
   offersCreation,
 } from '@slotted/core/entity-picker';
@@ -62,6 +62,11 @@ import type {
 } from '@slotted/core/entity-picker';
 import { createArrowNavigation, createRemovalFocus } from '@slotted/core/focus';
 import type { ArrowNavigationHandle, RemovalFocusHandle } from '@slotted/core/focus';
+import {
+  entityPickerMessages,
+  type EntityPickerMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createCollapse } from '@slotted/core/overflow';
 import type { CollapseHandle } from '@slotted/core/overflow';
@@ -95,7 +100,6 @@ import type {
   EntityPickerValueRequest,
   EntityPickerVariant,
   EntityPickerWidth,
-  EntityPickerLabels,
 } from './entity-picker-defaults';
 
 /** Replaces the content of an option; the face, the check and the row stay the family's. */
@@ -196,7 +200,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
           [size]="resolvedSize()"
           [variant]="resolvedVariant()"
           [disabled]="resolvedDisabled() || resolvedReadOnly()"
-          [aria-label]="labels().scope"
+          [aria-label]="t('scope')"
           (valueChangeRequest)="onScopeRequest($event)"
         >
           @for (item of scopes(); track item.id) {
@@ -216,7 +220,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
             [initials]="initials(chosen)"
             [src]="chosen.avatar?.src"
             [shape]="chosen.avatar?.shape ?? 'circle'"
-            [locale]="locale()"
+            [locale]="resolvedLocale()"
           ></span>
         </span>
       }
@@ -252,7 +256,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
                           [initials]="initials(entity)"
                           [src]="entity.avatar?.src"
                           [shape]="entity.avatar?.shape ?? 'circle'"
-                          [locale]="locale()"
+                          [locale]="resolvedLocale()"
                         ></span>
                       } @else if (resolution(id) === 'pending') {
                         <span
@@ -283,7 +287,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
                         [ngTemplateOutletContext]="{ $implicit: record(id)! }"
                       />
                     } @else {
-                      {{ record(id)?.label ?? labels().unresolved }}
+                      {{ record(id)?.label ?? t('unresolved') }}
                     }
                   </span>
                 </span>
@@ -332,7 +336,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
         <button
           type="button"
           data-part="clear"
-          [attr.aria-label]="labels().clear"
+          [attr.aria-label]="t('clear')"
           (click)="onClear($event)"
         >
           <span slIcon><svg slGlyph name="x"></svg></span>
@@ -343,7 +347,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
         tabindex="-1"
         data-part="trigger"
         [disabled]="resolvedDisabled()"
-        [attr.aria-label]="labels().trigger"
+        [attr.aria-label]="t('trigger')"
         (click)="onToggle($event)"
       >
         @if (busy()) {
@@ -379,6 +383,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
         [attr.aria-invalid]="resolvedInvalid() ? true : null"
         [attr.aria-busy]="pendingSingle() ? true : null"
         (input)="onInput($event)"
+        (click)="onInputClick($event)"
         (keydown)="onKeyDown($event)"
         (focus)="onFocus()"
         (blur)="onBlur($event)"
@@ -487,7 +492,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
           }
           @if (failed()) {
             <div data-part="error">
-              <span slIcon><svg slGlyph name="circle-alert"></svg></span>{{ labels().error }}
+              <span slIcon><svg slGlyph name="circle-alert"></svg></span>{{ t('error') }}
             </div>
             <div
               role="option"
@@ -504,11 +509,11 @@ function sameIds(a: readonly string[], b: readonly string[]) {
               <span data-part="media" aria-hidden="true"
                 ><span slIcon><svg slGlyph name="rotate-ccw"></svg></span
               ></span>
-              <span data-part="label">{{ labels().retry }}</span>
+              <span data-part="label">{{ t('retry') }}</span>
             </div>
           }
           @if (showEmpty()) {
-            <div data-part="empty">{{ labels().empty }}</div>
+            <div data-part="empty">{{ t('empty') }}</div>
           }
           <div data-part="status" role="status" aria-live="polite">{{ statusMessage() }}</div>
         </div>
@@ -540,7 +545,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
               [initials]="initials(entity)"
               [src]="entity.avatar?.src"
               [shape]="entity.avatar?.shape ?? 'circle'"
-              [locale]="locale()"
+              [locale]="resolvedLocale()"
             ></span>
           </span>
         }
@@ -558,7 +563,12 @@ function sameIds(a: readonly string[], b: readonly string[]) {
         } @else {
           <span data-part="label">
             @if (resolvedHighlightMatch() && query() !== '') {
-              <span slHighlight [text]="entity.label" [query]="query()" [locale]="locale()"></span>
+              <span
+                slHighlight
+                [text]="entity.label"
+                [query]="query()"
+                [locale]="resolvedLocale()"
+              ></span>
             } @else {
               {{ entity.label }}
             }
@@ -621,16 +631,24 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
   readonly placeholder = input<string>('');
   readonly name = input<string | undefined>(undefined);
   readonly form = input<string | undefined>(undefined);
+  /** BCP 47, for the local filter and the mark. The language in force when absent. */
   readonly locale = input<string | undefined>(undefined);
   readonly max = input(undefined, { transform: SlEntityPicker.count });
-  readonly labelsInput = input<Partial<EntityPickerLabels> | undefined>(undefined, {
-    alias: 'labels',
-  });
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * buttons, the sections, the chips, and the sentences the popup and the
+   * announcer say.
+   */
+  readonly messages = input<PartialMessages<EntityPickerMessages> | undefined>(undefined);
 
   readonly size = input<EntityPickerSize | undefined>(undefined);
   readonly variant = input<EntityPickerVariant | undefined>(undefined);
   readonly media = input<EntityPickerMedia | undefined>(undefined);
   readonly overflow = input<EntityPickerOverflow | undefined>(undefined);
+  /**
+   * What opens the popup besides the trigger and the arrows. `input` (default): typing or a
+   * press on the input; `focus`: every focus as well; `manual`: typing filters without opening.
+   */
   readonly openOn = input<EntityPickerOpenOn | undefined>(undefined);
   readonly side = input<EntityPickerSide | undefined>(undefined);
   readonly width = input<EntityPickerWidth | undefined>(undefined);
@@ -699,10 +717,11 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
 
   // ── Resolution ─────────────────────────────────────────────────────────
 
-  readonly labels = computed<EntityPickerLabels>(() => ({
-    ...this.defaults.labels,
-    ...this.labelsInput(),
-  }));
+  /** The family's words in the language in force, with this picker's `messages` laid over them. */
+  readonly t = injectMessages(entityPickerMessages, this.messages);
+  private readonly inForceLocale = injectLocale();
+  /** The locale the local filter and the mark compare in: the `locale` input, or the language in force. */
+  readonly resolvedLocale = computed(() => this.locale() ?? this.inForceLocale());
   readonly multiple = computed(() => this.selectionMode() === 'multiple');
   readonly resolvedSize = computed(() => this.size() ?? this.field?.size() ?? this.defaults.size);
   readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
@@ -731,7 +750,8 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
     () => this.minQueryLength() ?? this.defaults.minQueryLength,
   );
   private readonly resolvedSource = computed<EntitySource>(
-    () => this.source() ?? localEntitySource(this.items() ?? EMPTY, { locale: this.locale() }),
+    () =>
+      this.source() ?? localEntitySource(this.items() ?? EMPTY, { locale: this.resolvedLocale() }),
   );
 
   readonly hasScopes = computed(() => this.scopes().length > 0);
@@ -767,7 +787,12 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
       recent: this.recent(),
       results: search.status === 'error' || search.status === 'short' ? search.items : results,
       searchedEmpty: this.resolvedMinQuery() === 0,
-      labels: this.labels(),
+      labels: {
+        chosen: this.t('chosen'),
+        favorites: this.t('favorites'),
+        recent: this.t('recent'),
+        results: this.t('results'),
+      },
     });
   });
 
@@ -779,7 +804,7 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
         query: this.query(),
         answered: this.search().status === 'ready',
         results: this.search().items,
-        locale: this.locale(),
+        locale: this.resolvedLocale(),
       }),
   );
 
@@ -837,14 +862,13 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
 
   readonly statusMessage = computed(() => {
     const search = this.search();
-    const labels = this.labels();
     if (search.status === 'short') {
-      return formatEntityLabel(labels.minQuery, { count: this.resolvedMinQuery() });
+      return this.t('minQuery', { count: this.resolvedMinQuery() });
     }
     if (search.status === 'error') return '';
-    if (search.indicator && (this.firstPage() || search.loadingMore)) return labels.loading;
+    if (search.indicator && (this.firstPage() || search.loadingMore)) return this.t('loading');
     if (search.status === 'ready' && this.query() !== '') {
-      return formatEntityLabel(labels.count, { count: search.total ?? search.items.length });
+      return this.t('count', { count: search.total ?? search.items.length });
     }
     return '';
   });
@@ -880,21 +904,17 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
   });
 
   readonly chipsLabel = computed(() =>
-    formatEntityLabel(this.labels().chips, {
+    this.t('chips', {
       label: this.ariaLabel() ?? '',
       count: this.chosen().length,
     }).replace(/^, /, ''),
   );
 
-  readonly moreText = computed(() =>
-    formatEntityLabel(this.labels().more, { count: Math.max(this.collapsedCount(), 1) }),
-  );
+  readonly moreText = computed(() => this.t('more', { count: Math.max(this.collapsedCount(), 1) }));
   readonly moreLabel = computed(() =>
-    formatEntityLabel(this.labels().moreLabel, { count: Math.max(this.collapsedCount(), 1) }),
+    this.t('moreLabel', { count: Math.max(this.collapsedCount(), 1) }),
   );
-  readonly createText = computed(() =>
-    formatEntityLabel(this.labels().create, { query: this.query().trim() }),
-  );
+  readonly createText = computed(() => this.t('create', { query: this.query().trim() }));
 
   constructor() {
     const destroyRef = inject(DestroyRef);
@@ -979,7 +999,7 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
     /* The failure is said once, by the announcer. */
     effect(() => {
       if (!this.failed() || !this.isOpen()) return;
-      untracked(() => this.announce(this.labels().error));
+      untracked(() => this.announce(this.t('error')));
     });
 
     afterRenderEffect(() => {
@@ -1031,16 +1051,15 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
 
   protected chipName(id: string) {
     const entity = this.record(id);
-    const labels = this.labels();
     if (entity !== undefined) return entityName(entity);
     return this.resolution(id) === 'missing'
-      ? `${labels.unresolved}, ${id}`
-      : `${labels.loading}, ${id}`;
+      ? this.t('unresolvedChip', { id })
+      : this.t('loadingChip', { id });
   }
 
   protected removeLabel(id: string) {
-    return formatEntityLabel(this.labels().remove, {
-      label: this.record(id)?.label ?? this.labels().unresolved,
+    return this.t('remove', {
+      label: this.record(id)?.label ?? this.t('unresolved'),
     });
   }
 
@@ -1171,24 +1190,19 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
 
   private toggle(id: string, reason: EntityPickerValueReason, source?: Event) {
     const chosen = this.chosen();
-    const labels = this.labels();
     if (chosen.includes(id)) {
       const next = chosen.filter((item) => item !== id);
       if (this.requestIds(next, reason, source)) {
-        this.announce(
-          formatEntityLabel(labels.removed, { label: this.labelOf(id), count: next.length }),
-        );
+        this.announce(this.t('removed', { label: this.labelOf(id), count: next.length }));
       }
     } else {
       const max = this.maxResolved();
       if (max !== null && chosen.length >= max) return;
       const next = [...chosen, id];
       if (this.requestIds(next, reason, source)) {
-        this.announce(
-          formatEntityLabel(labels.added, { label: this.labelOf(id), count: next.length }),
-        );
+        this.announce(this.t('added', { label: this.labelOf(id), count: next.length }));
         if (max !== null && next.length === max) {
-          this.announce(formatEntityLabel(labels.complete, { max }));
+          this.announce(this.t('complete', { max }));
         }
       }
     }
@@ -1199,8 +1213,8 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
     const next = this.chosen().filter((item) => item !== id);
     if (this.requestIds(next, 'remove', source)) {
       this.announce(
-        formatEntityLabel(this.labels().removed, {
-          label: this.labelOf(id) || this.labels().unresolved,
+        this.t('removed', {
+          label: this.labelOf(id) || this.t('unresolved'),
           count: next.length,
         }),
       );
@@ -1228,9 +1242,7 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
         const chosen = this.chosen();
         if (!chosen.includes(made.id)) {
           this.requestIds([...chosen, made.id], 'submit', source);
-          this.announce(
-            formatEntityLabel(this.labels().added, { label: made.label, count: chosen.length + 1 }),
-          );
+          this.announce(this.t('added', { label: made.label, count: chosen.length + 1 }));
         }
         this.setInput('', 'select', source);
       } else {
@@ -1254,7 +1266,7 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
     const next = (event.target as HTMLInputElement).value;
     this.typed.set(true);
     this.setInput(next, 'keyboard', event);
-    if (!this.isOpen() && !this.resolvedReadOnly()) {
+    if (!this.isOpen() && !this.resolvedReadOnly() && this.resolvedOpenOn() !== 'manual') {
       this.entry = 'keep';
       this.setOpen(true, 'keyboard', event);
     }
@@ -1264,6 +1276,20 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
     if (this.resolvedOpenOn() !== 'focus' || this.resolvedReadOnly() || this.isOpen()) return;
     this.entry = this.multiple() ? 'keep' : 'selected';
     this.setOpen(true, 'keyboard');
+  }
+
+  protected onInputClick(event: MouseEvent) {
+    if (
+      event.defaultPrevented ||
+      this.resolvedOpenOn() === 'manual' ||
+      this.resolvedDisabled() ||
+      this.resolvedReadOnly() ||
+      this.isOpen()
+    ) {
+      return;
+    }
+    this.entry = this.multiple() ? 'keep' : 'selected';
+    this.setOpen(true, 'pointer', event);
   }
 
   protected onBlur(event: FocusEvent) {

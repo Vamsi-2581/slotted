@@ -11,6 +11,7 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import {
   provideTooltipDefaults,
@@ -20,11 +21,11 @@ import {
   SlTooltipLayer,
   SlTooltipTrigger,
 } from '@slotted/angular/tooltip';
+import { fieldMessages } from '@slotted/core/i18n';
 
 import { SlField } from './field';
 import { formatFieldCount, isFieldCountOver } from './field-counter';
 import {
-  FIELD_HELP_LABEL,
   SlFieldHeaderSlot,
   SlFieldHelpSlot,
   SlFieldIdFactory,
@@ -163,10 +164,12 @@ export class SlFieldHelp {
     optional: true,
   });
   private readonly fallbackId = `${inject(SlFieldIdFactory).next()}-help`;
+  /** The field family's words, for a help control outside a field. */
+  private readonly own = injectMessages(fieldMessages);
 
   protected readonly textId = computed(() => this.field?.ids().help ?? this.fallbackId);
   protected readonly label = computed(
-    () => this.writtenLabel ?? this.field?.resolvedHelpLabel() ?? FIELD_HELP_LABEL,
+    () => this.writtenLabel ?? (this.field?.t ?? this.own)('help'),
   );
   protected readonly describedBy = computed(() => this.writtenDescribedBy ?? this.textId());
 

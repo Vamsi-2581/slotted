@@ -1,9 +1,5 @@
 import { inject, InjectionToken } from '@angular/core';
-import {
-  DEFAULT_DATA_LIST_FIELDS,
-  DEFAULT_DATA_LIST_LABELS,
-  type DataListLabels,
-} from '@slotted/core/data-list';
+import { DEFAULT_DATA_LIST_FIELDS } from '@slotted/core/data-list';
 import type { GridQuery, GridQueryChange } from '@slotted/core/grid';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 
@@ -47,8 +43,6 @@ export interface DataListDefaults {
   skeletonRows: number;
   loadingDelay: number;
   loadingMinDuration: number;
-  locale: string | undefined;
-  labels: DataListLabels;
 }
 
 const FALLBACK: DataListDefaults = {
@@ -59,8 +53,6 @@ const FALLBACK: DataListDefaults = {
   skeletonRows: 5,
   loadingDelay: 200,
   loadingMinDuration: 400,
-  locale: undefined,
-  labels: DEFAULT_DATA_LIST_LABELS,
 };
 
 export const DATA_LIST_DEFAULTS = new InjectionToken<DataListDefaults>(
@@ -73,17 +65,15 @@ export const DATA_LIST_DEFAULTS = new InjectionToken<DataListDefaults>(
 
 /**
  * An application states the family's defaults once. A list that states its
- * own value still wins, and labels merge word by word.
+ * own value still wins. Its words come from the language in force
+ * (`provideSlotted`).
  */
-export function provideDataListDefaults(
-  defaults: Partial<Omit<DataListDefaults, 'labels'>> & { labels?: Partial<DataListLabels> },
-) {
+export function provideDataListDefaults(defaults: Partial<DataListDefaults>) {
   return {
     provide: DATA_LIST_DEFAULTS,
     useFactory: (): DataListDefaults => ({
       ...FALLBACK,
       ...Object.fromEntries(Object.entries(defaults).filter(([, value]) => value !== undefined)),
-      labels: { ...FALLBACK.labels, ...defaults.labels },
     }),
   };
 }

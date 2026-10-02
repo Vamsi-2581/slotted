@@ -106,20 +106,9 @@ test('refuses the close request while a form is open', () => {
 
 test('announces each outcome through the live announcer', () => {
   assert.ok(member.capabilities.includes('live'));
-  for (const label of ['applied', 'saved', 'deleted']) {
-    assert.match(contract.labels[label], /\{name\}/, label);
+  for (const key of ['applied', 'saved', 'deleted']) {
+    assert.ok(contract.messages.includes(key), key);
   }
-});
-
-test('ships the design’s labels in English', () => {
-  assert.equal(contract.labels.label, 'Views');
-  assert.equal(contract.labels.builtIn, 'Default');
-  assert.equal(contract.labels.modified, 'Modified');
-  assert.equal(contract.labels.revert, 'Revert');
-  assert.equal(contract.labels.save, 'Save');
-  assert.equal(contract.labels.saveAs, 'Save as new view…');
-  assert.equal(contract.labels.duplicate, 'A view with this name already exists');
-  assert.equal(contract.labels.confirmDelete, 'Delete “{name}”?');
 });
 
 test('declares a scenario per question a reader of the page has', () => {
@@ -142,5 +131,4 @@ test('declares a scenario per question a reader of the page has', () => {
 test('composes the families it renders and owns none of their behaviour', () => {
   assert.deepEqual(contract.composes, ['popover', 'menu', 'button', 'field', 'text-field']);
   assert.match(contract.engine, /@slotted\/core\/grid/);
-  assert.deepEqual(contract.provides.savedViewsDefaults, ['labels']);
 });

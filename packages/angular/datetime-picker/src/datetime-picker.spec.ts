@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { plainDate, plainDateTime, plainTime, toISODateTime } from '@slotted/core/date';
 import type { PlainDate, PlainDateTime, PlainTime } from '@slotted/core/date';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/datetime-picker/contract.json';
@@ -347,12 +349,20 @@ describe('the contract with the consumer', () => {
     expect(hidden(fixture).value).toBe(toISODateTime(REFERENCE));
   });
 
-  it('takes its defaults from a provider', () => {
+  it('takes its defaults from a provider, and its words from the language in force', () => {
     const fixture = renderTemplate(`<div slDateTimePicker ${OPEN} [defaultValue]="tenth"></div>`, [
-      provideDateTimePickerDefaults({ nowLabel: 'Agora', step: 3600 }),
+      provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }),
+      provideDateTimePickerDefaults({ step: 3600 }),
     ]);
     expect(panel(fixture)?.querySelector('[data-part="now"]')?.textContent?.trim()).toBe('Agora');
     expect(options(fixture)).toHaveLength(24);
+  });
+
+  it('lays its own messages over the catalog', () => {
+    const fixture = renderTemplate(
+      `<div slDateTimePicker ${OPEN} [messages]="{ now: 'Já' }" [defaultValue]="tenth"></div>`,
+    );
+    expect(panel(fixture)?.querySelector('[data-part="now"]')?.textContent?.trim()).toBe('Já');
   });
 
   it('takes the consumer s own slots', () => {
@@ -393,6 +403,22 @@ describe('the contract with the consumer', () => {
       `<div slDateTimePicker locale="pt-BR" [defaultValue]="tenth"></div>`,
     );
     expect(trigger(chosen).getAttribute('aria-label')).toContain('setembro');
+  });
+
+  it('changes its words and its moment together with the language in force', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(
+      `<div slDateTimePicker aria-label="Quando" [defaultValue]="tenth"></div>`,
+      [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    );
+
+    expect(trigger(fixture).getAttribute('aria-label')).toMatch(/^Alterar data e hora, .*setembro/);
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(trigger(fixture).getAttribute('aria-label')).toMatch(
+      /^Change date and time, .*September/,
+    );
   });
 
   it('reports a value the bounds refuse', () => {

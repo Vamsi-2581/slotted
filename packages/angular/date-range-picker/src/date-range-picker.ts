@@ -36,7 +36,13 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import type { OnInit } from '@angular/core';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  dateRangePickerMessages,
+  type DateRangePickerMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type {
   AbstractControl,
@@ -54,7 +60,6 @@ import type {
   DateRangePickerCalendar,
   DateRangePickerCloseOnSelect,
   DateRangePickerCount,
-  DateRangePickerDefaults,
   DateRangePickerPlacement,
   DateRangePickerPosition,
   DateRangePickerSize,
@@ -119,7 +124,7 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
           slDateField
           #startField="slDateField"
           variant="plain"
-          [label]="resolvedStartLabel()"
+          [label]="t('start')"
           [locale]="resolvedLocale()"
           [timeZone]="resolvedTimeZone()"
           [firstDayOfWeek]="firstDayOfWeek()"
@@ -147,7 +152,7 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
           slDateField
           #endField="slDateField"
           variant="plain"
-          [label]="resolvedEndLabel()"
+          [label]="t('end')"
           [locale]="resolvedLocale()"
           [timeZone]="resolvedTimeZone()"
           [firstDayOfWeek]="firstDayOfWeek()"
@@ -170,7 +175,7 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
         <button
           data-part="clear"
           type="button"
-          [attr.aria-label]="clearLabel() ?? defaults.clearLabel"
+          [attr.aria-label]="t('clear')"
           [disabled]="!editable()"
           (click)="clear($event)"
         >
@@ -212,14 +217,14 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
               data-part="head-start"
               [attr.data-placeholder]="shownStart() === null ? '' : null"
               [attr.data-pending]="startPending() ? '' : null"
-              >{{ shownStart() === null ? resolvedStartLabel() : writeShort(shownStart()!) }}</span
+              >{{ shownStart() === null ? t('start') : writeShort(shownStart()!) }}</span
             >
             –
             <span
               data-part="head-end"
               [attr.data-placeholder]="shownEnd() === null ? '' : null"
               [attr.data-pending]="endPending() ? '' : null"
-              >{{ shownEnd() === null ? resolvedEndLabel() : writeShort(shownEnd()!) }}</span
+              >{{ shownEnd() === null ? t('end') : writeShort(shownEnd()!) }}</span
             >
             <span
               data-part="length"
@@ -306,8 +311,6 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
       value === undefined || value === null ? undefined : numberAttribute(value),
   });
   readonly count = input<DateRangePickerCount | undefined>(undefined);
-  readonly lengthLabel = input<DateRangePickerDefaults['lengthLabel'] | undefined>(undefined);
-  readonly limitLabel = input<DateRangePickerDefaults['limitLabel'] | undefined>(undefined);
 
   readonly months = input<number | undefined, unknown>(undefined, {
     transform: (value) =>
@@ -319,6 +322,7 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
   /** Six rows whatever the month needs, so a press of "next" moves no target. */
   readonly fixedWeeks = input(true, { transform: booleanAttribute });
 
+  /** BCP 47. Writes both fields, the grid and the trigger's dates. Unset, the language in force decides. */
   readonly locale = input<string | undefined>(undefined);
   readonly timeZone = input<string | undefined>(undefined);
   readonly firstDayOfWeek = input<number | undefined, unknown>(undefined, {
@@ -351,11 +355,12 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
 
   /** Draws one clear on the frame, which empties both ends. */
   readonly clearable = input(false, { transform: booleanAttribute });
-  readonly clearLabel = input<string | undefined>(undefined);
-  readonly chooseLabel = input<string | undefined>(undefined);
-  readonly changeLabel = input<string | undefined>(undefined);
-  readonly startLabel = input<string | undefined>(undefined);
-  readonly endLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * trigger's two names, the clear, the names of the two ends, and the
+   * phrases that count the run (`days.length`, `nights.between`, …).
+   */
+  readonly messages = input<PartialMessages<DateRangePickerMessages> | undefined>(undefined);
   /** The names of the two hidden inputs a plain form post reads. */
   readonly startName = input<string | undefined>(undefined);
   readonly endName = input<string | undefined>(undefined);
@@ -372,6 +377,9 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   protected readonly defaults = injectDateRangePickerDefaults();
+  private readonly appLocale = injectLocale();
+  /** The family's words in the language in force, with this picker's `messages` laid over them. */
+  readonly t = injectMessages(dateRangePickerMessages, this.messages);
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   private readonly enclosing = inject(SlField, { optional: true });
@@ -422,7 +430,7 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
   });
   protected readonly reversed = computed(() => this.problems().includes('order'));
 
-  protected readonly resolvedLocale = computed(() => this.locale() ?? this.defaults.locale);
+  protected readonly resolvedLocale = computed(() => this.locale() ?? this.appLocale());
   protected readonly resolvedTimeZone = computed(() => this.timeZone() ?? this.defaults.timeZone);
   protected readonly resolvedCalendar = computed(() => this.calendar() ?? this.defaults.calendar);
   protected readonly resolvedSize = computed(
@@ -434,10 +442,6 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
   );
   protected readonly resolvedCount = computed(() => this.count() ?? this.defaults.count);
   protected readonly resolvedMonths = computed(() => this.months() ?? this.defaults.months);
-  protected readonly resolvedStartLabel = computed(
-    () => this.startLabel() ?? this.defaults.startLabel,
-  );
-  protected readonly resolvedEndLabel = computed(() => this.endLabel() ?? this.defaults.endLabel);
   protected readonly resolvedDisabled = computed(
     () => this.disabled() ?? this.formDisabled() ?? this.enclosing?.resolvedDisabled(),
   );
@@ -552,23 +556,30 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
     () => this.pendingRun() !== null && !this.startPending(),
   );
 
+  /** "4 nights": the run's length, in the unit `count` names. */
   protected readonly spokenLength = computed(() => {
-    const label = this.lengthLabel() ?? this.defaults.lengthLabel;
     const count = this.resolvedCount();
+    const length = (days: number) => this.t(`${count}.length` as const, { count: days });
     const pending = this.pendingRun();
-    if (pending !== null) return label(rangeLength(pending.start, pending.end, count), count);
+    if (pending !== null) return length(rangeLength(pending.start, pending.end, count));
     const start = this.start();
     const end = this.end();
     if (this.ordered() && start !== null && end !== null) {
-      return label(rangeLength(start, end, count), count);
+      return length(rangeLength(start, end, count));
     }
     return '';
   });
+  /** "2 to 7 nights", "at least 2 nights", "at most 7 nights". */
   protected readonly limitText = computed(() => {
     const min = this.minLength();
     const max = this.maxLength();
-    if (min === undefined && max === undefined) return null;
-    return (this.limitLabel() ?? this.defaults.limitLabel)(min, max, this.resolvedCount());
+    const count = this.resolvedCount();
+    if (min !== undefined && max !== undefined) {
+      return this.t(`${count}.between` as const, { min, max });
+    }
+    if (min !== undefined) return this.t(`${count}.atLeast` as const, { min });
+    if (max !== undefined) return this.t(`${count}.atMost` as const, { max });
+    return null;
   });
 
   /** The trigger's accessible name: focus returns here when the surface closes. */
@@ -576,11 +587,14 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
     const start = this.start();
     const end = this.end();
     if (!this.ordered() || start === null || end === null) {
-      return this.chooseLabel() ?? this.defaults.chooseLabel;
+      return this.t('choose');
     }
     const format = createDateFormat({ locale: this.resolvedLocale() });
-    const change = this.changeLabel() ?? this.defaults.changeLabel;
-    return `${change}, ${format.describe(start)} – ${format.describe(end)}, ${this.spokenLength()}`;
+    return this.t('change', {
+      start: format.describe(start),
+      end: format.describe(end),
+      length: this.spokenLength(),
+    });
   });
 
   /* The band writes each end short — "12 Sep" — because the whole date in

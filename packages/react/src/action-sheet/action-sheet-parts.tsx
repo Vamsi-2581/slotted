@@ -400,7 +400,7 @@ export function ActionSheetCancel({
 
   const rootProps: ActionSheetCancelRootProps = {
     ...nativeProps,
-    children: children ?? sheet.cancelLabel,
+    children: children ?? sheet.t('cancel'),
     'data-part': 'cancel',
     onClick: compose(onClick, (event: MouseEvent<HTMLButtonElement>) =>
       sheet.close('dismiss', undefined, event.nativeEvent),

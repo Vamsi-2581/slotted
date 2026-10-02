@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "carousel",
   "ui": "carousel",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Slides that scroll one page at a time."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/carousel/",
   "roles": {
     "root": "region",
@@ -25,7 +29,7 @@
   "rotation": {
     "part": "autoplay",
     "pressedState": false,
-    "labels": ["stop", "start"],
+    "messages": ["stop", "start"],
     "firstInSequence": true,
     "keyboardFocus": "stop",
     "hover": "pause",
@@ -227,8 +231,7 @@
       "size",
       "loop",
       "draggable",
-      "autoplayDelay",
-      "messages"
+      "autoplayDelay"
     ]
   },
   "imperative": ["scrollTo", "scrollToSlide", "refresh"],
@@ -245,19 +248,19 @@
     "data-measured": "root, once the pages have been read from the layout",
     "data-moving": "viewport, while the engine moves the scroll or a mouse drags it; written in the same task as the movement"
   },
-  "messages": {
-    "roleDescription": "carrossel",
-    "slideRoleDescription": "slide",
-    "slide": "{index} de {count}",
-    "indicators": "Escolher slide",
-    "indicator": "Slide {page} de {count}",
-    "previous": "Slide anterior",
-    "next": "Slide seguinte",
-    "stop": "Parar a rotação",
-    "start": "Retomar a rotação",
-    "viewport": "Slides",
-    "announce": "Slide {page} de {count}"
-  },
+  "messages": [
+    "announce",
+    "indicator",
+    "indicators",
+    "next",
+    "previous",
+    "roleDescription",
+    "slide",
+    "slideRoleDescription",
+    "start",
+    "stop",
+    "viewport"
+  ],
   "stateAttributes": {
     "current": "data-current",
     "disabled": "data-disabled",

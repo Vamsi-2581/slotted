@@ -25,6 +25,7 @@ import {
 import type { CSSProperties, KeyboardEvent, PointerEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { useLocale } from '../i18n';
 import { useSliderDefaults } from './slider-defaults';
 import type { SliderMark, SliderProps, SliderRootProps } from './slider.types';
 
@@ -101,6 +102,7 @@ export function Slider({
 }: SliderProps) {
   const field = useField();
   const defaults = useSliderDefaults();
+  const appLocale = useLocale();
   const generatedId = useId();
   const trackRef = useRef<HTMLDivElement | null>(null);
   const thumbRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -108,7 +110,7 @@ export function Slider({
   const resolvedSize = size ?? field?.size ?? defaults.size;
   const resolvedOrientation = orientation ?? defaults.orientation;
   const resolvedValueLabel = valueLabel ?? defaults.valueLabel;
-  const resolvedLocale = locale ?? defaults.locale;
+  const resolvedLocale = locale ?? appLocale;
   const resolvedDisabled = disabled ?? field?.disabled;
   const resolvedReadOnly = readOnly ?? field?.readOnly;
   const resolvedInvalid = invalid ?? field?.invalid;
@@ -127,7 +129,7 @@ export function Slider({
   const formatter = useMemo(
     () =>
       createNumberFormat({
-        ...(resolvedLocale === undefined ? {} : { locale: resolvedLocale }),
+        locale: resolvedLocale,
         ...(format === undefined ? {} : { options: format }),
       }),
     /* `formatKey` stands in for `format`: the options are compared by content. */

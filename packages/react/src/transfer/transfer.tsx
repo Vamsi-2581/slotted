@@ -2,6 +2,7 @@ import '@slotted/styles/transfer/transfer.css';
 
 import { createFilter } from '@slotted/core/collection';
 import { createDragController, type DragController } from '@slotted/core/drag';
+import { dragMessages, transferMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable, type ChangeReason, type ChangeRequest } from '@slotted/core/state';
 import {
@@ -33,6 +34,7 @@ import { Button } from '../button';
 import { Checkbox } from '../checkbox';
 import { useField, useFieldDefaults } from '../field';
 import { FieldContext } from '../field/field-context';
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import {
   Listbox,
@@ -44,7 +46,7 @@ import {
 } from '../listbox';
 import { Segment, SegmentedControl } from '../segmented-control';
 import { TextField } from '../text-field';
-import { fillLabel, useTransferDefaults } from './transfer-defaults';
+import { useTransferDefaults } from './transfer-defaults';
 import type {
   TransferItem,
   TransferMoveReason,
@@ -183,7 +185,7 @@ export function Transfer<T = TransferItem>({
   hasMore,
   onLoadMore,
   name,
-  labels: labelsProp,
+  messages,
   renderFooter,
   handleRef,
   render,
@@ -194,10 +196,8 @@ export function Transfer<T = TransferItem>({
   const defaults = useTransferDefaults();
   const field = useField();
   const fieldDefaults = useFieldDefaults();
-  const labels = useMemo(
-    () => ({ ...defaults.labels, ...labelsProp }),
-    [defaults.labels, labelsProp],
-  );
+  const t = useMessages(transferMessages, messages);
+  const dragT = useMessages(dragMessages);
 
   const size = sizeProp ?? field?.size ?? defaults.size;
   const layout = layoutProp ?? defaults.layout;
@@ -352,11 +352,11 @@ export function Transfer<T = TransferItem>({
       reason,
       event,
     );
-    const title = to === 'target' ? labels.target : labels.source;
+    const title = to === 'target' ? t('target') : t('source');
     announce(
       keys.length === 1
-        ? fillLabel(labels.movedOne, { item: labelOf(keys[0]!), pane: title })
-        : fillLabel(labels.moved, { count: keys.length, pane: title }),
+        ? t('movedOne', { item: labelOf(keys[0]!), pane: title })
+        : t('moved', { count: keys.length, pane: title }),
     );
     const list = lists.current[from];
     if (!list?.contains(list.ownerDocument.activeElement)) return;
@@ -387,7 +387,7 @@ export function Transfer<T = TransferItem>({
     const asked = requestTarget(next, reason, event, { direction: 'reorder', keys });
     if (!asked) return;
     announce(
-      fillLabel(labels.reordered, {
+      t('reordered', {
         item: labelOf(keys[0]!),
         position: next.indexOf(keys[0]!) + 1,
       }),
@@ -516,8 +516,8 @@ export function Transfer<T = TransferItem>({
   const [drag, setDrag] = useState<DragView>(NO_DRAG);
   const [dropOffset, setDropOffset] = useState<number | null>(null);
   const controller = useRef<DragController | null>(null);
-  const live = useRef({ visible, move, reorder, partition, frozen, canReorder, labels, labelOf });
-  live.current = { visible, move, reorder, partition, frozen, canReorder, labels, labelOf };
+  const live = useRef({ visible, move, reorder, partition, frozen, canReorder, t, dragT, labelOf });
+  live.current = { visible, move, reorder, partition, frozen, canReorder, t, dragT, labelOf };
 
   useEffect(() => {
     if (!root) return;
@@ -531,8 +531,9 @@ export function Transfer<T = TransferItem>({
       preview: false,
       restoreFocus: false,
       autoScroll: { axis: 'y' },
+      t: (key, slots) => live.current.dragT(key, slots),
       /* The move says what happened once, in the family's own words. */
-      messages: { moved: () => '', dropped: () => '' },
+      silent: ['moved', 'dropped'],
       onDrop: ({ items: carried, source, target, reason, event }) => {
         const now = live.current;
         const from = source.container as TransferSide;
@@ -569,7 +570,7 @@ export function Transfer<T = TransferItem>({
           return target.container === 'target' && live.current.canReorder;
         },
         disabled: () => live.current.frozen,
-        label: () => (side === 'target' ? live.current.labels.target : live.current.labels.source),
+        label: () => (side === 'target' ? live.current.t('target') : live.current.t('source')),
         itemLabel: (key) => live.current.labelOf(key),
       }),
     );
@@ -696,7 +697,7 @@ export function Transfer<T = TransferItem>({
 
   const innerSize = INNER_SIZE[size];
   const dragging = new Set(drag.items);
-  const title = (side: TransferSide) => (side === 'target' ? labels.target : labels.source);
+  const title = (side: TransferSide) => (side === 'target' ? t('target') : t('source'));
 
   const moveButton = (
     part: string,
@@ -747,10 +748,10 @@ export function Transfer<T = TransferItem>({
     const chosenHere = keys.filter((key) => selectedSet.has(key)).length;
     const chosenReach = reach.filter((key) => selectedSet.has(key)).length;
     const count = typed
-      ? fillLabel(labels.countFiltered, { shown: shown.length, total: keys.length })
+      ? t('countFiltered', { shown: shown.length, total: keys.length })
       : chosenHere > 0
-        ? fillLabel(labels.countSelected, { selected: chosenHere, total: keys.length })
-        : fillLabel(labels.count, { total: keys.length });
+        ? t('countSelected', { selected: chosenHere, total: keys.length })
+        : t('count', { total: keys.length });
     const entries: Entry<T>[] = shown.map((key) => ({ key, item: byKey.get(key) }));
     const setQuery = side === 'source' ? requestSourceQuery : requestTargetQuery;
     const footer = renderFooter?.(side);
@@ -770,7 +771,7 @@ export function Transfer<T = TransferItem>({
           {withSelectAll ? (
             <span data-part="select-all">
               <Checkbox
-                aria-label={fillLabel(labels.selectAll, { pane: title(side) })}
+                aria-label={t('selectAll', { pane: title(side) })}
                 checked={reach.length > 0 && chosenReach === reach.length}
                 disabled={isDisabled || reach.length === 0}
                 indeterminate={chosenReach > 0 && chosenReach < reach.length}
@@ -787,13 +788,13 @@ export function Transfer<T = TransferItem>({
         {searchable ? (
           <div data-part="search">
             <TextField
-              aria-label={fillLabel(labels.search, { pane: title(side) })}
+              aria-label={t('search', { pane: title(side) })}
               clearable
               disabled={isDisabled}
               onValueChange={(next, request) =>
                 setQuery(next, request.reason === 'clear' ? 'clear' : 'keyboard', request.source)
               }
-              placeholder={fillLabel(labels.search, { pane: title(side) })}
+              placeholder={t('search', { pane: title(side) })}
               size={innerSize}
               start={
                 <span data-part="search-icon">
@@ -834,7 +835,7 @@ export function Transfer<T = TransferItem>({
                 <Icon>
                   <Glyph name={typed ? 'search-x' : 'inbox'} />
                 </Icon>
-                {typed ? labels.noResults : labels.empty}
+                {typed ? t('noResults') : t('empty')}
               </div>
             }
             getKey={(entry) => entry.key}
@@ -890,7 +891,7 @@ export function Transfer<T = TransferItem>({
                   loading: loading === true,
                   hasMore: hasMore === true,
                   ...(onLoadMore === undefined ? {} : { onLoadMore }),
-                  loaderContent: labels.loading,
+                  loaderContent: t('loading'),
                 }
               : {})}
           />
@@ -939,7 +940,7 @@ export function Transfer<T = TransferItem>({
       <FieldContext.Provider value={undefined}>
         <div data-part="switch">
           <SegmentedControl
-            aria-label={labels.panes}
+            aria-label={t('panes')}
             disabled={isDisabled}
             fullWidth
             onValueChange={(next, request) =>
@@ -954,17 +955,17 @@ export function Transfer<T = TransferItem>({
           >
             {SIDES.map((side) => (
               <Segment key={side} value={side}>
-                {fillLabel(labels.paneCount, { pane: title(side), total: partition[side].length })}
+                {t('paneCount', { pane: title(side), total: partition[side].length })}
               </Segment>
             ))}
           </SegmentedControl>
         </div>
         <div data-part="body">
           {renderPane('source')}
-          <div aria-label={labels.actions} data-part="actions" role="group">
+          <div aria-label={t('actions')} data-part="actions" role="group">
             {moveButton(
               'move-to-target',
-              labels.moveToTarget,
+              t('moveToTarget'),
               'target',
               selectedToMove('source'),
               'end',
@@ -972,14 +973,14 @@ export function Transfer<T = TransferItem>({
             )}
             {moveButton(
               'move-all-to-target',
-              labels.moveAllToTarget,
+              t('moveAllToTarget'),
               'target',
               enabledVisible('source'),
               'end',
             )}
             {moveButton(
               'move-to-source',
-              labels.moveToSource,
+              t('moveToSource'),
               'source',
               selectedToMove('target'),
               'start',
@@ -987,13 +988,13 @@ export function Transfer<T = TransferItem>({
             )}
             {moveButton(
               'move-all-to-source',
-              labels.moveAllToSource,
+              t('moveAllToSource'),
               'source',
               enabledVisible('target'),
               'start',
             )}
             {reorderable ? (
-              <div aria-label={labels.reorder} data-part="reorder" role="group">
+              <div aria-label={t('reorder')} data-part="reorder" role="group">
                 {(['move-up', 'move-down'] as const).map((part) => (
                   <Button
                     aria-keyshortcuts={part === 'move-up' ? 'Alt+ArrowUp' : 'Alt+ArrowDown'}
@@ -1015,7 +1016,7 @@ export function Transfer<T = TransferItem>({
                     tone="secondary"
                     variant="ghost"
                   >
-                    {part === 'move-up' ? labels.moveUp : labels.moveDown}
+                    {part === 'move-up' ? t('moveUp') : t('moveDown')}
                   </Button>
                 ))}
               </div>

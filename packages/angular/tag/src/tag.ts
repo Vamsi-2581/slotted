@@ -1,3 +1,4 @@
+import { tagMessages, type PartialMessages, type TagMessages } from '@slotted/core/i18n';
 import type { ChangeReason } from '@slotted/core/state';
 import {
   booleanAttribute,
@@ -11,6 +12,7 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 
 import { injectTagDefaults, SlTagIdFactory } from './tag-defaults';
 import type { TagShape, TagSize, TagTone, TagVariant } from './tag-defaults';
@@ -92,10 +94,11 @@ export class SlTag {
   /** Refuses the removal while the rest of the tag stays operable. */
   readonly removeDisabled = input(false, { transform: booleanAttribute });
   /**
-   * The word the remove control announces before the tag's own label, so it
-   * reads "Remove Design" rather than "Remove". Defaults to the provider.
+   * Words laid over the catalog of the language in force, key by key: `remove`
+   * is the word the remove control announces before the tag's own label, so it
+   * reads "Remove Design" rather than "Remove".
    */
-  readonly removeLabel = input<string | undefined>(undefined);
+  readonly messages = input<PartialMessages<TagMessages> | undefined>(undefined);
 
   /** One output for one transition, carrying the reason, the event and `cancel()`. */
   readonly remove = output<TagRemoveRequest>();
@@ -124,7 +127,8 @@ export class SlTag {
   protected readonly role = computed(() => this.writtenRole ?? this.group?.itemRole() ?? null);
 
   readonly selected = computed(() => this.selectedState());
-  readonly resolvedRemoveLabel = computed(() => this.removeLabel() ?? this.defaults.removeLabel);
+  /** The family's words in the language in force, with this tag's `messages` laid over them. */
+  readonly t = injectMessages(tagMessages, this.messages);
   readonly removeRefused = computed(() => this.disabled() || this.removeDisabled());
 
   /** Called by the toggle, which owns the value and only reports it here. */

@@ -1,3 +1,4 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -41,6 +42,7 @@ vi.mock('@slotted/core/chart-echarts', () => ({
 }));
 
 const { Chart, ChartDefaultsProvider } = await import('./index');
+const { SlottedProvider } = await import('../i18n');
 
 const data = [
   { month: 'Jan', revenue: 120, cost: 80 },
@@ -360,18 +362,25 @@ describe('Chart', () => {
   describe('defaults and handle', () => {
     it('takes an application’s defaults, and an explicit prop still wins', () => {
       render(
-        <ChartDefaultsProvider
-          messages={{ roledescription: 'gráfico' }}
-          palette="sequential"
-          variant="card"
-        >
+        <ChartDefaultsProvider palette="sequential" variant="card">
           <Chart {...base} variant="plain" />
         </ChartDefaultsProvider>,
       );
 
       expect(root()).toHaveAttribute('data-palette', 'sequential');
       expect(root()).toHaveAttribute('data-variant', 'plain');
+    });
+
+    it('speaks the language in force, and lays its own messages over it', () => {
+      render(
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+          <Chart {...base} messages={{ toolbar: 'Ferramentas' }} />
+        </SlottedProvider>,
+      );
+
       expect(part('plot')).toHaveAttribute('aria-roledescription', 'gráfico');
+      expect(part('toolbar')).toHaveAccessibleName('Ferramentas');
+      expect(screen.getByRole('button', { name: 'Mostrar como tabela' })).toBeInTheDocument();
     });
 
     it('exposes focus, a zoom reset, the drawing and the data', () => {

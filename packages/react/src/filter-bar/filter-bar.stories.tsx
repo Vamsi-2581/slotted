@@ -6,6 +6,7 @@ import {
   toFilterBarParams,
 } from '@slotted/core/filter';
 import type { FilterGroup } from '@slotted/core/filter';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -16,6 +17,7 @@ import { Button } from '../button';
 import { Layer } from '../drawer/drawer-demo';
 import { CodeBlock } from '../code-block';
 import { Grid, Scene } from '../field/field-demo';
+import { SlottedProvider } from '../i18n';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
 import {
   Table,
@@ -28,7 +30,6 @@ import {
   TableRowHeader,
 } from '../table';
 import { FilterBar } from './filter-bar';
-import { FilterBarDefaultsProvider } from './filter-bar-defaults';
 import { REACT_FILTER_BAR_DOCS, REACT_FILTER_BAR_TOKENS } from './filter-bar.docs';
 import type { FilterBarField, FilterBarHandle, FilterBarProps } from './filter-bar.types';
 
@@ -344,7 +345,6 @@ function Orders(
       <ThemedFilterBar
         count={kept.length}
         fields={FIELDS}
-        locale="pt-BR"
         onQueryChange={setQuery}
         onValueChange={set}
         query={query}
@@ -609,28 +609,19 @@ export const Count: Story = {
     <Grid columns={1}>
       <Scene
         label="128 de 3.412"
-        note="As figuras são do locale — pt-BR separa milhares com ponto. A parte é aria-live: uma mudança no filtro é ouvida como o seu efeito."
+        note="As figuras são da língua em vigor — pt-BR separa milhares com ponto. A parte é aria-live: uma mudança no filtro é ouvida como o seu efeito."
       >
-        <ThemedFilterBar
-          count={128}
-          fields={FIELDS}
-          locale="pt-BR"
-          total={3412}
-          value={PAID_OVER_100}
-        />
+        <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+          <ThemedFilterBar count={128} fields={FIELDS} total={3412} value={PAID_OVER_100} />
+        </SlottedProvider>
       </Scene>
       <Scene
         label="loading"
         note="A contagem dá lugar ao spinner e aria-busy; os controles ficam, Apply desliga-se."
       >
-        <ThemedFilterBar
-          count={128}
-          fields={FIELDS}
-          loading
-          locale="pt-BR"
-          total={3412}
-          value={PAID_OVER_100}
-        />
+        <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+          <ThemedFilterBar count={128} fields={FIELDS} loading total={3412} value={PAID_OVER_100} />
+        </SlottedProvider>
       </Scene>
     </Grid>
   ),
@@ -802,10 +793,8 @@ export const Keyboard: Story = {
         label="Tab três vezes, setas, Delete"
         note="Tab: busca, toolbar, chips. Setas entre os pills; Enter abre; nos chips, Delete remove e o foco segue para o próximo."
       >
-        <FilterBarDefaultsProvider
-          labels={{ add: 'Adicionar filtro', clear: 'Limpar tudo', search: 'Buscar pedidos' }}
-        >
-          <Orders initial={APPLIED}>
+        <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+          <Orders initial={APPLIED} messages={{ search: 'Buscar pedidos' }}>
             <Select items={[{ label: 'Mais recentes', value: 'recent' }]} size="md" value="recent">
               <SelectTrigger aria-label="Ordenar">
                 <SelectValue />
@@ -815,7 +804,7 @@ export const Keyboard: Story = {
               </SelectContent>
             </Select>
           </Orders>
-        </FilterBarDefaultsProvider>
+        </SlottedProvider>
       </Scene>
     </Grid>
   ),

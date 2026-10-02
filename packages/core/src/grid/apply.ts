@@ -23,8 +23,11 @@ export function cellValue<Row>(column: GridColumn<Row>, row: Row): unknown {
 export interface FormatOptions {
   locale?: string | undefined;
   timeZone?: string | undefined;
-  /** What a boolean says. Default `Yes` and `No`; the bindings pass their labels. */
-  booleans?: { readonly true: string; readonly false: string } | undefined;
+  /**
+   * What a boolean says, in the language of the caller's catalog. Required:
+   * core writes no words of its own.
+   */
+  booleans: { readonly true: string; readonly false: string };
 }
 
 const numberFormats = new Map<string, Intl.NumberFormat>();
@@ -84,11 +87,7 @@ function isoToDate(kind: 'date' | 'time' | 'datetime', text: string): Date | nul
 }
 
 /** The text a cell draws: the column's own `format`, else the kind's. */
-export function cellText<Row>(
-  column: GridColumn<Row>,
-  row: Row,
-  options: FormatOptions = {},
-): string {
+export function cellText<Row>(column: GridColumn<Row>, row: Row, options: FormatOptions): string {
   const value = cellValue(column, row);
   if (column.format) return column.format(value, row);
   return formatValue(column.kind ?? 'text', value, column, options);
@@ -97,15 +96,15 @@ export function cellText<Row>(
 export function formatValue<Row>(
   kind: string,
   value: unknown,
-  column?: GridColumn<Row>,
-  options: FormatOptions = {},
+  column: GridColumn<Row> | undefined,
+  options: FormatOptions,
 ): string {
   if (value === null || value === undefined) return '';
   switch (kind) {
     case 'number':
       return typeof value === 'number' ? numberFormat(options.locale).format(value) : String(value);
     case 'boolean':
-      return value ? (options.booleans?.true ?? 'Yes') : (options.booleans?.false ?? 'No');
+      return value ? options.booleans.true : options.booleans.false;
     case 'set': {
       const values = Array.isArray(value) ? value : [value];
       const names = new Map(column?.options?.map((option) => [option.value, option.label]) ?? []);

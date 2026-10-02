@@ -7,6 +7,8 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
+import { injectMessages } from '@slotted/angular/i18n';
+import { keysMessages, type KeysMessages, type PartialMessages } from '@slotted/core/i18n';
 import { resolveKey } from '@slotted/core/keys';
 
 import { injectKbdDefaults, injectKbdPlatform } from './kbd-defaults';
@@ -73,9 +75,15 @@ export class SlKbd {
    * row this key belongs to is what says it is unavailable.
    */
   readonly disabled = input(undefined, { transform: booleanAttribute });
+  /**
+   * Words laid over the `keys` catalog of the language in force, key by key:
+   * `legends.*` for what a cap shows, `names.*` for what a reader hears.
+   */
+  readonly messages = input<PartialMessages<KeysMessages> | undefined>(undefined);
 
   private readonly defaults = injectKbdDefaults();
   private readonly platformOf = injectKbdPlatform();
+  private readonly t = injectMessages(keysMessages, this.messages);
   /**
    * The combination this key sits in, when it sits in one. It is optional, so a
    * key written on its own works, and a key written by hand inside a `Shortcut`
@@ -101,6 +109,7 @@ export class SlKbd {
     if (token === undefined || token === '') return undefined;
     return resolveKey(token, {
       platform: this.resolvedPlatform(),
+      t: this.t,
       legends: this.defaults.legends,
       names: this.defaults.names,
     });

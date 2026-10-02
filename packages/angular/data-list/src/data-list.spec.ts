@@ -1,7 +1,10 @@
 import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { emptyQuery, type GridColumn, type GridQuery } from '@slotted/core/grid';
+import type { DataListMessages, PartialMessages } from '@slotted/core/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import { describe, expect, it } from 'vitest';
 
@@ -98,6 +101,7 @@ const COLUMNS: GridColumn<Account>[] = [
     [loading]="loading()"
     [error]="error()"
     [hasMore]="hasMore()"
+    [messages]="messages()"
     [loadingDelay]="0"
     [loadingMinDuration]="0"
     [(query)]="query"
@@ -133,6 +137,7 @@ class Host {
   readonly error = signal<boolean | string | null>(null);
   readonly hasMore = signal(false);
   readonly strong = signal(false);
+  readonly messages = signal<PartialMessages<DataListMessages> | undefined>(undefined);
   query: GridQuery = emptyQuery();
   value: DataListSelection = null;
   expanded: readonly string[] = [];
@@ -404,14 +409,28 @@ describe('SlDataList', () => {
     expect(host.list().scrollToKey('nope')).toBe(false);
   });
 
-  it('takes labels and defaults from the provider, and plurals from a function', async () => {
-    await mount(() => {}, [
-      provideDataListDefaults({
-        variant: 'framed',
-        labels: { count: ({ count }) => (count === 1 ? 'uma conta' : `${count} contas`) },
-      }),
-    ]);
+  it('takes defaults from the provider, and plurals from its own messages', async () => {
+    await mount(
+      (h) => h.messages.set({ count: '{count, plural, one {# conta} other {# contas}}' }),
+      [provideDataListDefaults({ variant: 'framed' })],
+    );
     expect(root().querySelector('[data-part=count]')?.textContent?.trim()).toBe('3 contas');
     expect(root().getAttribute('data-variant')).toBe('framed');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', async () => {
+    const locale = signal('pt-BR');
+    await mount(
+      (h) => h.selectionMode.set('multiple'),
+      [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    );
+    const count = () => root().querySelector('[data-part=count]')?.textContent?.trim();
+    expect(count()).toBe('3 itens');
+    expect(checkbox('Selecionar Acme Logistics')).toBeDefined();
+
+    locale.set('en-US');
+    await settle();
+    expect(count()).toBe('3 items');
+    expect(checkbox('Select Acme Logistics')).toBeDefined();
   });
 });

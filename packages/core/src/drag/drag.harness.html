@@ -476,6 +476,9 @@
 
 <script type="module">
   import { createDragController } from '@slotted/core/drag';
+  import { createTranslator, dragMessages } from '@slotted/core/i18n';
+
+  const t = createTranslator({ locale: 'en-US' }).family(dragMessages);
 
   for (const root of document.querySelectorAll('[data-drag]')) wire(root);
 
@@ -494,6 +497,7 @@
       byKey(list, key)?.querySelector('[data-label]')?.textContent.trim() ?? key;
 
     const drag = createDragController({
+      t,
       announce: (message) => {
         if (status) status.textContent = message;
       },
@@ -505,7 +509,7 @@
         byKey(list, state.target.key)?.setAttribute('data-expanded', '');
       },
     });
-    if (instructions) instructions.textContent = drag.messages.instructions;
+    if (instructions) instructions.textContent = t('instructions');
 
     for (const list of containers) {
       const key = list.dataset.container;

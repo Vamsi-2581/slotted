@@ -265,7 +265,7 @@ type ReceiptLine = GoodsReceiptDetail['lines'][number];
                 >
               }
             } @else {
-              <div slSkeletonRegion label="Reading the receipt" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the receipt' }" [loading]="true">
                 <div slGrid [columns]="phone() ? 2 : 3" minItemWidth="xs" [gap]="4">
                   @for (figure of ['Into stock', 'Lines damaged', 'Lines rejected']; track figure) {
                     <div slStatCard size="sm" loading>

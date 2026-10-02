@@ -1,6 +1,7 @@
 import { Component, input, signal } from '@angular/core';
 import { SlAlert, SlAlertContent, SlAlertDescription, SlAlertTitle } from '@slotted/angular/alert';
 import { SlButton } from '@slotted/angular/button';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlMenuItem, SlMenuSeparator } from '@slotted/angular/menu';
 import {
   SlDescriptionList,
@@ -11,6 +12,7 @@ import {
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
 import { dayOfWeek, plainDate, toISODate, wallClockIn } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
@@ -18,7 +20,6 @@ import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { applicationConfig, moduleMetadata } from '@storybook/angular-vite';
 
 import { SlEventCalendar } from './event-calendar';
-import { provideEventCalendarDefaults } from './event-calendar-defaults';
 import type {
   EventCalendarEventChange,
   EventCalendarSelection,
@@ -804,17 +805,7 @@ export const Locale: Story = {
   parameters: scenario('locale'),
   decorators: [
     applicationConfig({
-      providers: [
-        provideEventCalendarDefaults({
-          labels: {
-            today: 'Hoje',
-            allDay: 'Dia inteiro',
-            calendars: 'Agendas',
-            views: 'Visualização',
-            view: { month: 'Mês', week: 'Semana', day: 'Dia', list: 'Lista' },
-          },
-        }),
-      ],
+      providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
     }),
   ],
   render: () => ({
@@ -822,7 +813,7 @@ export const Locale: Story = {
     template: grid(
       scene(
         'pt-BR',
-        'Sunday first, a 24-hour clock, Portuguese words from the provider.',
+        'Sunday first, a 24-hour clock, and every word from the Portuguese catalog provideSlotted puts in force.',
         `<div slEventCalendar [calendars]="calendars" [defaultDate]="today" [events]="events" defaultView="week" locale="pt-BR" timeZone="America/Sao_Paulo"></div>`,
       ),
       scene(

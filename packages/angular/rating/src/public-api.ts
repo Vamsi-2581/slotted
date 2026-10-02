@@ -3,7 +3,6 @@ export type { RatingCaptionContext, RatingSymbolContext, RatingValueReason } fro
 export {
   injectRatingDefaults,
   provideRating,
-  RATING_MESSAGES,
   SL_RATING_DEFAULTS,
   SlRatingIdFactory,
 } from './rating-defaults';
@@ -11,7 +10,6 @@ export type {
   RatingDefaults,
   RatingDefaultsInput,
   RatingDisplayVariant,
-  RatingMessages,
   RatingSize,
   RatingStep,
   RatingSummaryVariant,

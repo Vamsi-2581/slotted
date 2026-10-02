@@ -16,6 +16,7 @@ import {
 import type { AfterViewInit, OnInit } from '@angular/core';
 import { ControlContainer } from '@angular/forms';
 import type { AbstractControl, FormArray, FormGroup } from '@angular/forms';
+import { injectMessages } from '@slotted/angular/i18n';
 import {
   collectValidity,
   hasErrors,
@@ -27,6 +28,7 @@ import {
   withoutError,
 } from '@slotted/core/form';
 import type { FormErrorInput, FormErrors } from '@slotted/core/form';
+import { formMessages, type FormMessages, type PartialMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 
@@ -142,7 +144,8 @@ export class SlFormSummary implements AfterViewInit {
  *
  * **Reactive Forms is the second source.** When there is a `ControlContainer`,
  * every control is marked touched at submit and each failing one becomes a
- * sentence through `SL_FORM_ERROR_MESSAGES`, which an application replaces once.
+ * sentence: a built-in validator's through the catalog's `errors.*` messages,
+ * an application's own through `SL_FORM_ERROR_MESSAGES`.
  *
  * **Signal Forms needs nothing here.** Angular 22's `[field]` binds a control
  * through its `ControlValueAccessor`, which every Slotted control provides, so
@@ -187,9 +190,14 @@ export class SlForm implements SlFormOwner, OnInit {
   readonly validate = input<FormValidate | undefined>(undefined);
   readonly errorFocus = input<FormErrorFocus | undefined>(undefined);
   readonly summary = input<FormSummaryMode | undefined>(undefined);
-  readonly summaryTitle = input<string | undefined>(undefined);
   readonly summaryDescription = input<string | undefined>(undefined);
   readonly align = input<FormActionsAlign | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * summary's heading (`summaryTitle`) and the built-in validators' sentences
+   * (`errors.*`).
+   */
+  readonly messages = input<PartialMessages<FormMessages> | undefined>(undefined);
   /** Lets the browser draw its own validation bubble. Off by default. */
   readonly nativeValidation = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (raw) => (raw === undefined ? undefined : booleanAttribute(raw)),
@@ -226,7 +234,9 @@ export class SlForm implements SlFormOwner, OnInit {
 
   private readonly element = inject<ElementRef<HTMLFormElement>>(ElementRef).nativeElement;
   private readonly defaults = injectFormDefaults();
-  private readonly messages = injectFormErrorMessages();
+  private readonly errorMessages = injectFormErrorMessages();
+  /** The family's words in the language in force, with this form's `messages` laid over them. */
+  readonly t = injectMessages(formMessages, this.messages);
   /** The Reactive Forms group around this element, when a consumer wrote one. */
   private readonly container = inject(ControlContainer, { optional: true, self: true });
   private readonly writtenNoValidate = inject(new HostAttributeToken('novalidate'), {
@@ -251,7 +261,7 @@ export class SlForm implements SlFormOwner, OnInit {
   protected readonly hasAnyError = computed(() => hasErrors(this.errors()));
 
   readonly summaryId = signal(`slotted-form-summary-${(summaryCounter += 1)}`);
-  readonly resolvedSummaryTitle = computed(() => this.summaryTitle() ?? this.defaults.summaryTitle);
+  readonly resolvedSummaryTitle = computed(() => this.t('summaryTitle'));
   readonly resolvedSummaryDescription = computed(
     () => this.summaryDescription() ?? this.defaults.summaryDescription,
   );
@@ -435,11 +445,41 @@ export class SlForm implements SlFormOwner, OnInit {
       const errors = control.errors;
       if (errors === null || control.disabled) continue;
       const messages = Object.entries(errors)
-        .map(([key, detail]) => this.messages[key]?.({ name, key, detail }))
+        .map(
+          ([key, detail]) =>
+            this.errorMessages[key]?.({ name, key, detail }) ?? this.builtInMessage(key, detail),
+        )
         .filter((message): message is string => typeof message === 'string');
       if (messages.length > 0) found[name] = messages;
     }
     return found;
+  }
+
+  /**
+   * The sentence for one of Angular's own validators, from the catalog; for a
+   * key the catalog does not know, nothing — the application's validator names
+   * its own message through `SL_FORM_ERROR_MESSAGES`.
+   */
+  private builtInMessage(key: string, detail: unknown): string | undefined {
+    const shape = (detail ?? {}) as { min?: unknown; max?: unknown; requiredLength?: unknown };
+    switch (key) {
+      case 'required':
+        return this.t('errors.required');
+      case 'email':
+        return this.t('errors.email');
+      case 'min':
+        return this.t('errors.min', { min: Number(shape.min) });
+      case 'max':
+        return this.t('errors.max', { max: Number(shape.max) });
+      case 'minlength':
+        return this.t('errors.minlength', { length: Number(shape.requiredLength) });
+      case 'maxlength':
+        return this.t('errors.maxlength', { length: Number(shape.requiredLength) });
+      case 'pattern':
+        return this.t('errors.pattern');
+      default:
+        return undefined;
+    }
   }
 
   private readControls() {

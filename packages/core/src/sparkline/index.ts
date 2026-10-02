@@ -14,7 +14,6 @@ export type {
   SparklineDescriptionRequest,
   SparklineLayout,
   SparklineLayoutRequest,
-  SparklineMessages,
   SparklinePoint,
   SparklineSizeStep,
   SparklineSummary,

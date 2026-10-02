@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { createMessageScroller, formatScrollerMessage, ROOM_PROPERTY } from './message-scroller';
+import { createMessageScroller, ROOM_PROPERTY } from './message-scroller';
 
 /**
  * jsdom has no layout, and what is under test is the engine's arithmetic and
@@ -341,14 +341,5 @@ describe('jumping', () => {
     scroller.scrollToEnd({ behavior: 'smooth' });
     expect(scrollTo).not.toHaveBeenCalled();
     expect(f.viewport.scrollTop).toBe(600);
-  });
-});
-
-describe('messages', () => {
-  it('pluralises the count the jump control reads', () => {
-    const message = '{count, plural, one {# nova} other {# novas}}';
-    expect(formatScrollerMessage(message, { count: 1 }, 'pt-PT')).toBe('1 nova');
-    expect(formatScrollerMessage(message, { count: 12 }, 'pt-PT')).toBe('12 novas');
-    expect(formatScrollerMessage('{label}, {count}', { label: 'Ir', count: 3 })).toBe('Ir, 3');
   });
 });

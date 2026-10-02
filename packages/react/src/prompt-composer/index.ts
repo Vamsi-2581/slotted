@@ -8,12 +8,6 @@ export {
   PromptComposerSubmit,
 } from './prompt-composer';
 export {
-  PROMPT_COMPOSER_ATTACH_LABEL,
-  PROMPT_COMPOSER_RETRY_LABEL,
-  PROMPT_COMPOSER_SEND_LABEL,
-  PROMPT_COMPOSER_SENDING_LABEL,
-  PROMPT_COMPOSER_STOP_LABEL,
-  PROMPT_COMPOSER_STOPPED_LABEL,
   PromptComposerDefaultsProvider,
   usePromptComposerDefaults,
 } from './prompt-composer-defaults';

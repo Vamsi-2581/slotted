@@ -1,4 +1,5 @@
 import { dayOfWeek, plainDate, toISODate, wallClockIn } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -14,6 +15,7 @@ import {
   DescriptionListTerm,
 } from '../description-list';
 import { Grid, Scene } from '../field/field-demo';
+import { SlottedProvider } from '../i18n';
 import { MenuItem, MenuSeparator } from '../menu';
 import { TextField } from '../text-field';
 import { EventCalendar } from './event-calendar';
@@ -749,25 +751,21 @@ export const Locale: Story = {
   parameters: scenario('locale'),
   render: () => (
     <Grid columns={1}>
-      <Scene label="pt-BR" note="Sunday first, a 24-hour clock, Portuguese words.">
-        <EventCalendarDefaultsProvider
-          labels={{
-            today: 'Hoje',
-            allDay: 'Dia inteiro',
-            calendars: 'Agendas',
-            views: 'Visualização',
-            view: { month: 'Mês', week: 'Semana', day: 'Dia', list: 'Lista' },
-          }}
-          locale="pt-BR"
-          timeZone="America/Sao_Paulo"
-        >
-          <EventCalendar<StudioEvent>
-            calendars={STUDIO_CALENDARS}
-            defaultDate={TODAY}
-            defaultView="week"
-            events={STUDIO_EVENTS}
-          />
-        </EventCalendarDefaultsProvider>
+      <Scene
+        label="pt-BR"
+        note="Sunday first, a 24-hour clock, and every word from the Portuguese catalog; messages renames the calendar menu for this studio."
+      >
+        <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+          <EventCalendarDefaultsProvider timeZone="America/Sao_Paulo">
+            <EventCalendar<StudioEvent>
+              calendars={STUDIO_CALENDARS}
+              defaultDate={TODAY}
+              defaultView="week"
+              events={STUDIO_EVENTS}
+              messages={{ calendars: 'Agendas' }}
+            />
+          </EventCalendarDefaultsProvider>
+        </SlottedProvider>
       </Scene>
       <Scene
         label="he, right to left"

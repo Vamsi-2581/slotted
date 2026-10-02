@@ -50,6 +50,7 @@ import {
   AppShellAsideBody,
   AppShellAsideFooter,
   AppShellAsideHeader,
+  AppShellAsideResizer,
   AppShellAsideToggle,
   AppShellBanner,
   AppShellBrand,
@@ -377,11 +378,21 @@ export function AuroraContent({
   );
 }
 
-/** The pane: one consignment, read while the list stays on screen. */
-export function AuroraPane({ id = 'ENC-4521' }: { id?: string | undefined }) {
+/**
+ * The pane: one consignment, read while the list stays on screen. `resizable`
+ * renders the pane's edge, which is the whole of that capability.
+ */
+export function AuroraPane({
+  id = 'ENC-4521',
+  resizable = false,
+}: {
+  id?: string | undefined;
+  resizable?: boolean | undefined;
+}) {
   const row = SHIPMENTS.find((shipment) => shipment.id === id) ?? SHIPMENTS[0]!;
   return (
     <AppShellAside>
+      {resizable ? <AppShellAsideResizer /> : null}
       <AppShellAsideHeader>
         <span className="slotted-demo-pane-title">
           {row.id} · {row.customer}
@@ -497,7 +508,7 @@ export function AuroraSelection(props: { shell?: Partial<AppShellProps> | undefi
             />
           </AuroraContent>
         </AppShellMain>
-        <AuroraPane id={selected} />
+        <AuroraPane id={selected} resizable />
       </AppShell>
     </Viewport>
   );

@@ -8,22 +8,13 @@ import {
   input,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
-import { formatRating, formatRatingMessage, ratingFills } from '@slotted/core/rating';
+import { type PartialMessages, ratingMessages, type RatingMessages } from '@slotted/core/i18n';
+import { formatRating, formatRatingValue, ratingFills } from '@slotted/core/rating';
 
-import {
-  cssNumber,
-  formatCount,
-  injectDocumentLocale,
-  injectRatingDefaults,
-  RATING_MESSAGES,
-} from './rating-defaults';
-import type {
-  RatingDisplayVariant,
-  RatingMessages,
-  RatingSize,
-  RatingTone,
-} from './rating-defaults';
+import { cssNumber, formatCount, injectRatingDefaults } from './rating-defaults';
+import type { RatingDisplayVariant, RatingSize, RatingTone } from './rating-defaults';
 
 /**
  * A rating the page reports rather than asks for: an image of lit symbols
@@ -89,26 +80,22 @@ export class SlRatingDisplay {
   /** Counts per level, lowest first, for the `histogram` variant. */
   readonly distribution = input<readonly number[] | undefined>(undefined);
   readonly showValue = input(true, { transform: booleanAttribute });
-  /** Merged over the application's messages, key by key. */
-  readonly messages = input<Partial<RatingMessages> | undefined>(undefined);
+  /** Words laid over the catalog of the language in force, key by key. */
+  readonly messages = input<PartialMessages<RatingMessages> | undefined>(undefined);
+  /** The locale numbers are written in. Unstated, the language in force. */
   readonly locale = input<string | undefined>(undefined);
 
   private readonly defaults = injectRatingDefaults();
-  private readonly documentLocale = injectDocumentLocale();
+  private readonly appLocale = injectLocale();
+  /** The family's words in the language in force, with this display's `messages` laid over them. */
+  readonly t = injectMessages(ratingMessages, this.messages);
   private readonly writtenLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
 
   readonly resolvedMax = computed(() => Math.max(1, Math.round(this.max() ?? this.defaults.max)));
   readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   readonly resolvedTone = computed(() => this.tone() ?? this.defaults.tone);
   readonly resolvedVariant = computed(() => this.variant());
-  private readonly resolvedMessages = computed<RatingMessages>(() => ({
-    ...RATING_MESSAGES,
-    ...this.defaults.messages,
-    ...this.messages(),
-  }));
-  private readonly resolvedLocale = computed(
-    () => this.locale() ?? this.defaults.locale ?? this.documentLocale,
-  );
+  private readonly resolvedLocale = computed(() => this.locale() ?? this.appLocale());
 
   /** The value clamped to the scale, and `NaN` read as nought. */
   private readonly drawn = computed(() => {
@@ -142,12 +129,11 @@ export class SlRatingDisplay {
 
   protected readonly label = computed(() => {
     if (this.writtenLabel !== null) return this.writtenLabel;
-    const messages = this.resolvedMessages();
     const count = this.count();
-    return formatRatingMessage(
-      count === undefined ? messages.displayLabel : messages.displayLabelWithCount,
-      { value: this.drawn(), max: this.resolvedMax(), count },
-      this.resolvedLocale(),
-    );
+    const value = formatRatingValue(this.drawn(), this.resolvedLocale());
+    const max = this.resolvedMax();
+    return count === undefined
+      ? this.t('displayLabel', { value, max })
+      : this.t('displayLabelWithCount', { value, max, count });
   });
 }

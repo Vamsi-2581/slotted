@@ -1,6 +1,8 @@
+import { injectMessages } from '@slotted/angular/i18n';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createFocusScope } from '@slotted/core/focus';
+import { dialogMessages, type DialogMessages, type PartialMessages } from '@slotted/core/i18n';
 import type { FocusScopeHandle } from '@slotted/core/focus';
 import { createPortalRoot } from '@slotted/core/portal';
 import type { PortalRootHandle } from '@slotted/core/portal';
@@ -98,6 +100,11 @@ export abstract class SlDialogBase {
   readonly container = input<Element | null | undefined>(undefined);
   readonly initialFocus = input<DialogInitialFocus | undefined>(undefined);
   readonly finalFocus = input<DialogFinalFocus | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * corner controls' names (`close`, `fullScreen`).
+   */
+  readonly messages = input<PartialMessages<DialogMessages> | undefined>(undefined);
 
   /** One output for one transition, carrying the reason, the result and the event. */
   readonly openChangeRequest = output<DialogChangeRequest>();
@@ -110,6 +117,8 @@ export abstract class SlDialogBase {
   readonly fullscreenChangeRequest = output<DialogFullscreenRequest>();
 
   protected readonly defaults = injectDialogDefaults();
+  /** The family's words in the language in force, with this layer's `messages` laid over them. */
+  readonly t = injectMessages(dialogMessages, this.messages);
   protected readonly host: HTMLElement = inject(ElementRef).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
   private readonly baseId = inject(SlDialogIdFactory).next();

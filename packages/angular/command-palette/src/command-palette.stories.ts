@@ -3,6 +3,7 @@ import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import { SlAvatar } from '@slotted/angular/avatar';
 import { SlHighlight } from '@slotted/angular/highlight';
 import { SlButton } from '@slotted/angular/button';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlKbd } from '@slotted/angular/kbd';
 import { SlPopover } from '@slotted/angular/popover';
 import { SlPopoverContent, SlPopoverLayer, SlPopoverTrigger } from '@slotted/angular/popover';
@@ -341,7 +342,7 @@ export const Pages: Story = {
           scene(
             'Inside the page',
             'The trail names where the reader is; pressing it, Backspace on an empty query, or Escape returns to the root.',
-            panel(`[pages]="['team']" placeholder="Search teams…"`),
+            panel(`[pages]="['team']" [messages]="{ placeholder: 'Search teams…' }"`),
           ),
       ),
     ),
@@ -434,7 +435,7 @@ export const Empty: Story = {
       grid(
         1,
         scene(
-          'emptyLabel',
+          'messages.empty',
           'The family’s sentence, centred in the list, with the clear control drawn because there is a query to clear.',
           panel('query="xylophone"'),
         ) +
@@ -464,7 +465,7 @@ export const Inline: Story = {
               <button slButton slPopoverTrigger type="button">Assign to…</button>
               <ng-template slPopoverLayer>
                 <div slPopoverContent aria-label="Assign to">
-                  <sl-command-palette presentation="inline" hideFooter placeholder="Search people…" [items]="teams" />
+                  <sl-command-palette presentation="inline" hideFooter [messages]="{ placeholder: 'Search people…' }" [items]="teams" />
                 </div>
               </ng-template>
             </ng-container>
@@ -553,18 +554,8 @@ export const Defaults: Story = {
   decorators: [
     moduleMetadata({
       providers: [
-        provideCommandPaletteDefaults({
-          clearLabel: 'Limpar',
-          countLabel: '{count} resultados',
-          emptyLabel: 'Nenhum resultado',
-          hintClose: 'Fechar',
-          hintNavigate: 'Navegar',
-          hintSelect: 'Executar',
-          inputLabel: 'Buscar comandos',
-          placeholder: 'Comando ou busca…',
-          recentLabel: 'Recentes',
-          size: 'sm',
-        }),
+        provideSlotted({ locale: 'pt-BR' }),
+        provideCommandPaletteDefaults({ size: 'sm' }),
       ],
     }),
   ],
@@ -574,8 +565,8 @@ export const Defaults: Story = {
       grid(
         1,
         scene(
-          'Portuguese, from the provider',
-          'Nothing on the panel states a label or a size; the provider around it does, once, for every palette under it.',
+          'Portuguese, from the providers',
+          'Nothing on the panel states a word or a size; provideSlotted gives the language and the defaults provider the size, once, for every palette under them.',
           `<sl-command-palette presentation="inline" [groups]="portugueseGroups" [items]="items" [recent]="['inbox']" />`,
         ),
       ),
@@ -594,7 +585,7 @@ export const Composition: Story = {
           layer(`<button slButton tone="secondary" variant="outline" [slCommandPaletteTrigger]="p" type="button">
               Search people <kbd slKbd size="sm">⌘K</kbd>
             </button>
-            <sl-command-palette #p="slCommandPalette" label="People" inputLabel="Search people" placeholder="Search people…" [container]="pictured ? box : undefined" [open]="pictured" [items]="teams">
+            <sl-command-palette #p="slCommandPalette" [messages]="{ label: 'People', input: 'Search people', placeholder: 'Search people…' }" [container]="pictured ? box : undefined" [open]="pictured" [items]="teams">
               <ng-template slCommandPaletteItem let-item let-query="query">
                 <span data-part="icon"><span slAvatar [name]="item.label" size="xs"></span></span>
                 <span data-part="label"><span slHighlight [text]="item.label" [query]="query"></span></span>
@@ -633,7 +624,7 @@ export const Accessibility: Story = {
         scene(
           'Two names, one live region',
           'The field is named Search deployments and the list borrows it; the current row is aria-selected and named by aria-activedescendant; the hidden status row holds the count.',
-          panel('label="Deployment commands" inputLabel="Search deployments"'),
+          panel(`[messages]="{ label: 'Deployment commands', input: 'Search deployments' }"`),
         ),
       ),
     ),

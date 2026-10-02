@@ -1,5 +1,6 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { SlButton } from '@slotted/angular/button';
+import { provideSlotted } from '@slotted/angular/i18n';
 import {
   SlDialog,
   SlDialogBody,
@@ -12,13 +13,13 @@ import { SlSegment, SlSegmentedControl } from '@slotted/angular/segmented-contro
 import { SlStack } from '@slotted/angular/stack';
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
 import { SlText } from '@slotted/angular/typography';
+import type { PartialMessages, TourMessages } from '@slotted/core/i18n';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
 
 import { SlTour } from './tour';
-import { provideTourDefaults } from './tour-defaults';
 import type {
   TourLayout,
   TourMissing,
@@ -58,7 +59,7 @@ function tourOf(id: string): TourStep[] {
       title: 'Welcome to Reports',
       description:
         'Five stops, about a minute. You can leave at any point and pick it up from Help.',
-      labels: { next: 'Start tour', skip: 'Not now' },
+      messages: { next: 'Start tour', skip: 'Not now' },
     },
     {
       id: 'search',
@@ -163,7 +164,7 @@ class ScreenDemo {
       [layout]="layout()"
       [missing]="missing()"
       [closeOnOutsidePress]="closeOnOutsidePress()"
-      [labels]="labels()"
+      [messages]="messages()"
       (openChangeRequest)="onOpen($event)"
       (stepChangeRequest)="onStep($event)"
     />
@@ -178,7 +179,7 @@ class TourDemo {
   readonly missing = input<TourMissing | undefined>(undefined);
   readonly layout = input<TourLayout | undefined>(undefined);
   readonly closeOnOutsidePress = input<boolean | undefined>(undefined);
-  readonly labels = input<Record<string, unknown> | undefined>(undefined);
+  readonly messages = input<PartialMessages<TourMessages> | undefined>(undefined);
   /** Opens at once: the story's own page shows the tour, the reference page waits for Start. */
   readonly startOpen = input(false);
   protected readonly open = signal(false);
@@ -268,7 +269,7 @@ class SpotlightDemo {
       target: '#spotlight-views',
       title: 'Keep this view',
       description: 'Save the filters and columns you use every week.',
-      labels: { done: 'Got it' },
+      messages: { done: 'Got it' },
     },
   ];
 }
@@ -469,7 +470,9 @@ class ControlledDemo {
             <button slButton size="sm" tone="secondary" variant="ghost" (click)="guide.set(true)">
               Read the guide
             </button>
-            <button slButton slTourNext size="sm" tone="accent">{{ tour.nextLabel() }}</button>
+            <button slButton slTourNext size="sm" tone="accent">
+              {{ tour.t(tour.last() ? 'done' : 'next') }}
+            </button>
           </div>
         </div>
       </ng-template>
@@ -486,24 +489,12 @@ class CompositionDemo {
   }
 }
 
-/** The labels, once for the application. */
+/** The language, once for the application. */
 @Component({
   selector: 'sl-tour-provided-demo',
   standalone: true,
   imports: [TourDemo],
-  providers: [
-    provideTourDefaults({
-      labels: {
-        close: 'Fechar tour',
-        done: 'Concluir',
-        next: 'Próximo',
-        preparing: 'Preparando o próximo passo',
-        prev: 'Voltar',
-        progress: (position, total) => `Passo ${position} de ${total}`,
-        skip: 'Pular tour',
-      },
-    }),
-  ],
+  providers: [provideSlotted({ locale: 'pt-BR' })],
   template: `<sl-tour-demo id="labels-pt" label="Iniciar tour" [steps]="steps" />`,
 })
 class ProvidedDemo {
@@ -687,12 +678,11 @@ const one = (label: string, note: string, body: string) => ({
   template: grid(scene(label, note, body)),
 });
 
-const GERMAN_LABELS = {
+const GERMAN_MESSAGES: PartialMessages<TourMessages> = {
   done: 'Fertig',
   next: 'Weiter',
   prev: 'Zurück',
-  progress: (position: number, total: number) =>
-    `Schritt ${position} von ${total} in der Einführung`,
+  progress: 'Schritt {position} von {total} in der Einführung',
   skip: 'Tour überspringen',
 };
 
@@ -935,17 +925,17 @@ export const Composition: Story = {
 export const Labels: Story = {
   parameters: scenario('labels'),
   render: () => ({
-    props: { labels: GERMAN_LABELS, steps: GERMAN_STEPS },
+    props: { messages: GERMAN_MESSAGES, steps: GERMAN_STEPS },
     template: grid(
       scene(
         'Em português, uma vez para a aplicação',
-        'The provider says Próximo, Voltar, Concluir, Pular tour, Fechar tour and “Passo 2 de 4”; every tour under it reads them.',
+        'The language in force says Próximo, Voltar, Concluir, Pular tour, Fechar tour and “2 de 4”; every tour under the provider reads them.',
         `<sl-tour-provided-demo />`,
       ) +
         scene(
           'A long German title and progress',
           'Automatisierungsregelverwaltungsoberfläche is one unbroken word and “Schritt 1 von 2 in der Einführung” a long progress: both wrap inside the card, which keeps its measure.',
-          `<sl-tour-demo id="labels-de" [labels]="labels" [steps]="steps" />`,
+          `<sl-tour-demo id="labels-de" [messages]="messages" [steps]="steps" />`,
         ),
     ),
   }),

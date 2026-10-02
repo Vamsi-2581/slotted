@@ -1,3 +1,4 @@
+import type { FamilyTranslator, PartialMessages, StatCardMessages } from '@slotted/core/i18n';
 import type { ComponentPropsWithRef, JSX, ReactNode } from 'react';
 
 export type StatCardSize = 'sm' | 'md' | 'lg';
@@ -10,18 +11,6 @@ export type StatCardDirection = 'up' | 'down' | 'flat';
 export type StatCardDeltaFormat = 'percent' | 'decimal';
 
 /**
- * The words a screen reader hears beside a change, and what stands in for a
- * value that is not there. `up`, `down` and `flat` are read before the
- * number, because a sign is a glyph some readers skip.
- */
-export interface StatCardMessages {
-  up: string;
-  down: string;
-  flat: string;
-  empty: string;
-}
-
-/**
  * What every card in an application does before any of them states anything
  * of its own. `goodWhen` is here because a product usually has one answer —
  * a sales dashboard wants everything up, an operations one wants everything
@@ -32,8 +21,6 @@ export interface StatCardDefaults {
   formatOptions?: Intl.NumberFormatOptions | undefined;
   goodWhen?: StatCardGoodWhen | undefined;
   layout?: StatCardLayout | undefined;
-  locale?: string | undefined;
-  messages?: Partial<StatCardMessages> | undefined;
   size?: StatCardSize | undefined;
 }
 
@@ -73,10 +60,17 @@ export interface StatCardProps extends ComponentPropsWithRef<'div'> {
   delta?: number;
   /** The tone the card hands to its trend. Unset, it is the delta's. */
   tone?: StatCardTone;
+  /** The locale numbers are written in; the language in force when absent. */
   locale?: string;
   /** How the value, the delta and the comparison read numbers. */
   formatOptions?: Intl.NumberFormatOptions;
-  messages?: Partial<StatCardMessages>;
+  /**
+   * Words laid over the catalog of the language in force, key by key: what a
+   * screen reader hears beside a change (`up`, `down`, `flat`, read before the
+   * number because a sign is a glyph some readers skip) and what stands in for
+   * a value that is not there (`empty`).
+   */
+  messages?: PartialMessages<StatCardMessages> | undefined;
   render?: (props: StatCardRootProps) => ReactNode;
 }
 
@@ -156,8 +150,9 @@ export interface StatCardContextValue {
   goodWhen: StatCardGoodWhen;
   labelId: string;
   loading: boolean;
-  locale: string | undefined;
-  messages: StatCardMessages;
+  locale: string;
+  /** The family's words in the language in force, with this card's `messages` laid over them. */
+  t: FamilyTranslator<StatCardMessages>;
   size: StatCardSize;
   status: StatCardValueStatus;
   tone: StatCardTone | undefined;

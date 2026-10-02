@@ -28,6 +28,7 @@ import type {
   TimeFieldName,
   TimeFormat,
 } from '@slotted/core/date';
+import { timeFieldMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import {
   useCallback,
@@ -41,6 +42,7 @@ import {
 import type { ClipboardEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useTimeFieldDefaults } from './time-field-defaults';
 import type {
@@ -115,10 +117,8 @@ export function TimeField({
   'aria-labelledby': labelledBy,
   className,
   clearable = false,
-  clearLabel,
   defaultValue,
   disabled,
-  durationLabel,
   end,
   granularity,
   hourCycle,
@@ -127,9 +127,9 @@ export function TimeField({
   isTimeUnavailable,
   locale,
   max,
+  messages,
   min,
   name,
-  nextDayLabel,
   onKeyDown,
   onPaste: onPasteProp,
   onValueChange,
@@ -149,11 +149,13 @@ export function TimeField({
 }: TimeFieldProps) {
   const field = useField();
   const defaults = useTimeFieldDefaults();
+  const appLocale = useLocale();
+  const t = useMessages(timeFieldMessages, messages);
   const rootRef = useRef<HTMLElement | null>(null);
   const durationRef = useRef<HTMLInputElement | null>(null);
   const generatedId = useId();
 
-  const resolvedLocale = locale ?? defaults.locale;
+  const resolvedLocale = locale ?? appLocale;
   const resolvedTimeZone = timeZone ?? defaults.timeZone;
   const resolvedGranularity = granularity ?? defaults.granularity;
   const resolvedHourCycle = hourCycle ?? defaults.hourCycle;
@@ -578,7 +580,7 @@ export function TimeField({
             aria-describedby={
               [describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined
             }
-            aria-label={durationLabel ?? defaults.durationLabel}
+            aria-label={t('duration')}
             data-part="duration"
             onBlur={(event) => commitExpression(event)}
             onChange={(event) => setExpression(event.target.value)}
@@ -602,7 +604,7 @@ export function TimeField({
               ? ''
               : resolved.days === 0
                 ? format.format(resolved.time)
-                : `${format.format(resolved.time)} ${nextDayLabel ?? defaults.nextDayLabel}`}
+                : t('nextDay', { time: format.format(resolved.time) })}
           </span>
         </>
       ) : (
@@ -658,12 +660,7 @@ export function TimeField({
         {spoken}
       </span>
       {showClear ? (
-        <button
-          aria-label={clearLabel ?? defaults.clearLabel}
-          data-part="clear"
-          onClick={clear}
-          type="button"
-        >
+        <button aria-label={t('clear')} data-part="clear" onClick={clear} type="button">
           <Icon>
             <Glyph name="x" />
           </Icon>

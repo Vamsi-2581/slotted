@@ -54,7 +54,13 @@ const waiting = (member: string): ApiTuple[] => [
     member,
     'Milliseconds before the indicator appears; the refusal is immediate',
   ],
-  ['loadingLabel', 'string', 'Loading', member, 'What the indicator announces itself as'],
+  [
+    'messages',
+    'Partial<ButtonMessages>',
+    '—',
+    member,
+    'Words laid over the language in force, key by key: what the indicator announces itself as (loading)',
+  ],
 ];
 
 const substitutable = (member: string): ApiTuple[] => [
@@ -101,7 +107,7 @@ export const REACT_BUTTON_DOCS = {
         label: 'Waiting for the action to finish',
         language: 'tsx',
         source:
-          '<Button\n  loading={saving}\n  loadingDelay={300}\n  loadingLabel="Saving"\n  onClick={save}\n  start={<Save aria-hidden="true" />}\n>\n  Save changes\n</Button>;',
+          '<Button\n  loading={saving}\n  loadingDelay={300}\n  messages={{ loading: \'Saving\' }}\n  onClick={save}\n  start={<Save aria-hidden="true" />}\n>\n  Save changes\n</Button>;',
       }),
       defineSnippet({
         id: 'react-button-defaults',

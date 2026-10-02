@@ -61,11 +61,11 @@ const removable = (member: string): ApiTuple[] => [
     'Whether the chip can be removed. Stated rather than inferred: Angular cannot see whether an output was subscribed',
   ],
   [
-    'removeLabel',
-    'string',
-    'Remove',
+    'messages',
+    'Partial<TagMessages>',
+    '—',
     member,
-    'The word the remove control announces before the tag’s own label, so it reads “Remove Design”. Falls back to the token',
+    'Words laid over the language in force, key by key: remove is the word the remove control announces before the tag’s own label, so it reads “Remove Design”',
   ],
   [
     'removeDisabled',
@@ -135,7 +135,7 @@ export const ANGULAR_TAG_DOCS = {
       ],
       [
         'provideTagDefaults',
-        '{ tone, variant, size, shape, removeLabel }',
+        '{ tone, variant, size, shape }',
         '—',
         'an injector',
         'Sets the defaults once for every tag under it; an explicit input still wins',
@@ -172,7 +172,7 @@ export const ANGULAR_TAG_DOCS = {
         language: 'ts',
         label: 'One decision for every tag in the application',
         source:
-          "bootstrapApplication(App, {\n  providers: [provideTagDefaults({ removeLabel: 'Remover', size: 'sm' })],\n});",
+          "bootstrapApplication(App, {\n  providers: [provideTagDefaults({ size: 'sm' })],\n});",
       }),
     ],
   },

@@ -1,11 +1,11 @@
 import type {
   FilterDescriptor,
   FilterGroup,
-  FilterJoin,
   FilterKind,
   FilterOperator,
   FilterPath,
 } from '@slotted/core/filter';
+import type { FilterBarMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode, RefObject } from 'react';
 
@@ -102,74 +102,6 @@ export interface FilterBarPreset {
   value: FilterGroup | null;
 }
 
-/** What the family says, in the application's language. */
-export interface FilterBarLabels {
-  /** The search landmark's name. */
-  bar: string;
-  /** The toolbar's name. */
-  filters: string;
-  /** The drawer's title. */
-  builder: string;
-  search: string;
-  add: string;
-  clear: string;
-  /** The control that empties the rule a pill opens. */
-  clearRule: string;
-  apply: string;
-  reset: string;
-  done: string;
-  cancel: string;
-  /** The narrow control. `{count}` is the number of active rules. */
-  summary: string;
-  /** The fold control. `{count}` is the number of folded chips. */
-  more: string;
-  less: string;
-  preset: string;
-  presetNone: string;
-  savePreset: string;
-  addRule: string;
-  addGroup: string;
-  removeRule: string;
-  removeGroup: string;
-  /** The words between a group's rules. */
-  joins: Record<FilterJoin, string>;
-  /** The sentence around the join control: `{join}` is the control. */
-  matches: string;
-  /** The two faces of the join control: every rule, or any rule. */
-  matchAll: string;
-  matchAny: string;
-  /** The word before the first rule of a group; the join word stands before the rest. */
-  where: string;
-  field: string;
-  operator: string;
-  value: string;
-  from: string;
-  to: string;
-  /** `{count}` and `{total}`; `{total}` may be absent. */
-  count: string;
-  countOnly: string;
-  /** `{field}` */
-  removed: string;
-  cleared: string;
-  /** `{field}` */
-  required: string;
-  /** `{field}` */
-  unknownField: string;
-  /** The word before a chip's own label on its remove control. */
-  remove: string;
-  /** The value segment of a condition still waiting for its value. */
-  noValue: string;
-  /** Appended to a chip's name while its condition is incomplete. */
-  incomplete: string;
-  /** After the first two values of a longer list. `{count}` is the rest. */
-  moreValues: string;
-  /** Said by the toolbar of a read-only bar. */
-  readOnly: string;
-  /** `{count}` */
-  appliedCount: string;
-  operators: Partial<Record<FilterOperator, string>>;
-}
-
 /** What the operand body of a rule is handed. */
 export interface FilterBarOperandProps {
   field: FilterBarField;
@@ -195,7 +127,6 @@ export interface FilterBarHandle {
 export interface FilterBarDefaults {
   apply?: FilterBarApply | undefined;
   chipLimit?: number | undefined;
-  labels?: Partial<FilterBarLabels> | undefined;
   queryDelay?: number | undefined;
   shortcut?: string | null | undefined;
   size?: FilterBarSize | undefined;
@@ -256,12 +187,19 @@ export interface FilterBarProps extends Omit<
   /** The conditions can be read and reached, and nothing changes them. */
   readOnly?: boolean | undefined;
   loading?: boolean | undefined;
-  /** BCP 47, for the figures in the count. Defaults to the runtime's. */
-  locale?: string | undefined;
-  /** The number of rows the filter kept, and the number there are. */
+  /**
+   * The number of rows the filter kept, and the number there are. Written by
+   * the `count` message, or `countOnly` without a total, in the digits of the
+   * language in force.
+   */
   count?: number | undefined;
   total?: number | undefined;
-  labels?: Partial<FilterBarLabels> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * landmark's name (`bar`), the controls, the chips' names, the count and the
+   * announcements.
+   */
+  messages?: PartialMessages<FilterBarMessages> | undefined;
   /** Replaces the operand control of a rule. Returning `undefined` keeps the kind's own. */
   renderOperand?: ((props: FilterBarOperandProps) => ReactNode) | undefined;
   /** The consumer's own controls, drawn in the `end` slot. */

@@ -11,7 +11,9 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlInlineMessage } from '@slotted/angular/inline-message';
+import { fieldMessages, type FieldMessages, type PartialMessages } from '@slotted/core/i18n';
 
 import {
   deriveFieldIds,
@@ -24,24 +26,13 @@ import {
   SlFieldIdFactory,
   SlFieldIndicatorSlot,
 } from './field-defaults';
-import type {
-  FieldLabelPlacement,
-  FieldNecessity,
-  FieldNecessityWords,
-  FieldSize,
-} from './field-defaults';
+import type { FieldLabelPlacement, FieldNecessity, FieldSize } from './field-defaults';
 import { formatFieldCount, isFieldCountOver, SlFieldCounter } from './field-counter';
 import type { FieldCount } from './field-counter';
 import { SlFieldDescription, SlFieldError } from './field-messages';
 
 export type { FieldCount } from './field-counter';
-export type {
-  FieldIds,
-  FieldLabelPlacement,
-  FieldNecessity,
-  FieldNecessityWords,
-  FieldSize,
-} from './field-defaults';
+export type { FieldIds, FieldLabelPlacement, FieldNecessity, FieldSize } from './field-defaults';
 
 /**
  * One control, its name, its necessity, its help and its error — and the
@@ -131,8 +122,11 @@ export class SlField {
   readonly labelPlacement = input<FieldLabelPlacement | undefined>(undefined);
   /** Defaults to the token, then to `mark`. */
   readonly necessity = input<FieldNecessity | undefined>(undefined);
-  /** Merged over the token's pair, for one field that names necessity its own way. */
-  readonly necessityWords = input<Partial<FieldNecessityWords> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * necessity words (`optional`, `required`) and the help control's name (`help`).
+   */
+  readonly messages = input<PartialMessages<FieldMessages> | undefined>(undefined);
 
   /**
    * Unstated rather than `false`, so the field defers to its group and the group
@@ -224,14 +218,10 @@ export class SlField {
     () => this.labelPlacement() ?? this.defaults().labelPlacement,
   );
   readonly resolvedNecessity = computed(() => this.necessity() ?? this.defaults().necessity);
-  /** The accessible name of the help control, until one states its own. */
-  readonly resolvedHelpLabel = computed(() => this.defaults().helpLabel);
   readonly resolvedDisabled = computed(() => this.disabled() ?? this.defaults().disabled);
   readonly resolvedReadOnly = computed(() => this.readOnly() ?? this.defaults().readOnly);
-  readonly resolvedWords = computed<FieldNecessityWords>(() => ({
-    ...this.defaults().necessityWords,
-    ...this.necessityWords(),
-  }));
+  /** The field's words in the language in force, with this field's `messages` laid over them. */
+  readonly t = injectMessages(fieldMessages, this.messages);
 
   /**
    * A message is quieter than the control it is about, so it starts one step

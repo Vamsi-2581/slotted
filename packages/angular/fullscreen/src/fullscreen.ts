@@ -18,17 +18,22 @@ import {
   untracked,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { createFullscreen, fullscreenSupported } from '@slotted/core/fullscreen';
 import type {
   FullscreenController,
   FullscreenError,
-  FullscreenMessages,
   FullscreenMode,
   FullscreenNavigationUI,
   FullscreenOptions,
   FullscreenPolicy,
 } from '@slotted/core/fullscreen';
+import {
+  fullscreenMessages,
+  type FullscreenMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 
@@ -71,9 +76,11 @@ export class SlFullscreen {
   /** `auto` asks the platform and falls back to the layout; `layout` never asks. */
   readonly policy = input<FullscreenPolicy | undefined>(undefined, { alias: 'mode' });
   readonly navigationUI = input<FullscreenNavigationUI | undefined>(undefined);
-  readonly messageOverrides = input<Partial<FullscreenMessages> | undefined>(undefined, {
-    alias: 'messages',
-  });
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * control's (`enter`, `exit`) and the announcements (`entered`, `exited`).
+   */
+  readonly messages = input<PartialMessages<FullscreenMessages> | undefined>(undefined);
 
   readonly fullscreenChangeRequest = output<ChangeRequest<boolean>>();
   /** The platform was absent or refused. The region is in the layout by then. */
@@ -88,10 +95,8 @@ export class SlFullscreen {
   readonly supported = signal(false);
   /** The last refusal, cleared on the next entry. */
   readonly error = signal<FullscreenError | null>(null);
-  readonly messages = computed<FullscreenMessages>(() => ({
-    ...this.defaults.messages,
-    ...this.messageOverrides(),
-  }));
+  /** The family's words in the language in force, with this region's `messages` laid over them. */
+  readonly t = injectMessages(fullscreenMessages, this.messages);
 
   private controller: FullscreenController | null = null;
   /* Set when the agent left native and the state was kept: a new request
@@ -179,7 +184,7 @@ export class SlFullscreen {
     return {
       policy: this.policy() ?? this.defaults.mode,
       navigationUI: this.navigationUI() ?? this.defaults.navigationUI,
-      messages: this.messages(),
+      t: this.t,
       onModeChange: (mode) => this.mode.set(mode),
       onError: (failure) => {
         this.error.set(failure);
@@ -251,6 +256,8 @@ export class SlFullscreenTrigger implements AfterViewInit {
   readonly variant = input<FullscreenTriggerVariant | undefined>(undefined);
 
   private readonly defaults = injectFullscreenDefaults();
+  /* A control with no region has no region's words, and speaks the catalog's. */
+  private readonly own = injectMessages(fullscreenMessages);
   private readonly enclosing = inject(SlFullscreen, { optional: true });
   private readonly element = inject(ElementRef<HTMLButtonElement>).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
@@ -263,10 +270,9 @@ export class SlFullscreenTrigger implements AfterViewInit {
     return target instanceof SlFullscreen ? target : this.enclosing;
   });
   readonly on = computed(() => this.region()?.fullscreen() ?? false);
-  protected readonly label = computed(() => {
-    const messages = this.region()?.messages() ?? this.defaults.messages;
-    return this.on() ? messages.exit : messages.enter;
-  });
+  protected readonly label = computed(() =>
+    (this.region()?.t ?? this.own)(this.on() ? 'exit' : 'enter'),
+  );
   readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
 

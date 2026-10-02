@@ -2,6 +2,8 @@ import { addDays, plainDate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SlField, SlFieldDescription, SlFieldError, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
@@ -44,7 +46,18 @@ const REVERSED: DateRange = { start: CHECKOUT, end: CHECKIN };
 const WEEKEND: DateRange = { start: plainDate(2026, 9, 18), end: plainDate(2026, 9, 20) };
 const week = (from: PlainDate): DateRange => ({ start: from, end: addDays(from, 7) });
 const isTaken = (date: PlainDate) => date.month === 9 && date.day >= 15 && date.day <= 18;
-const noites = (count: number) => `${String(count)} ${count === 1 ? 'noite' : 'noites'}`;
+
+/** The Portuguese catalog with a hotel's own words laid over the range picker's. */
+const HOTEL = {
+  ...PT_BR,
+  dateRangePicker: {
+    ...PT_BR.dateRangePicker,
+    change: 'Alterar estadia, {start} – {end}, {length}',
+    choose: 'Escolher estadia',
+    end: 'Check-out',
+    start: 'Check-in',
+  },
+};
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
   bindScenes(ANGULAR_DATE_RANGE_PICKER_DOCS.dateRangePicker.scenes, {
@@ -145,8 +158,7 @@ export const Playground: Story = {
           <label slFieldLabel>Estadia</label>
           <div
             slDateRangePicker
-            startLabel="Check-in"
-            endLabel="Check-out"
+            [messages]="{ start: 'Check-in', end: 'Check-out' }"
             startName="checkin"
             endName="checkout"
             [locale]="locale"
@@ -398,7 +410,7 @@ export const Composition: Story = {
       1,
       scene(
         'Set once for the application',
-        'One provider decides that every stay counts nights, in Portuguese, one month at a time, with the hotel’s own words — so a product does not repeat six inputs on each form.',
+        'One provider decides that every stay counts nights, one month at a time; provideSlotted decides Portuguese, with the hotel’s own words laid over the catalog — so a product does not repeat them on each form.',
         `<div slDateRangePicker [defaultValue]="stay"></div>`,
       ) +
         scene(
@@ -417,16 +429,8 @@ export const Composition: Story = {
     moduleMetadata({
       imports: DIRECTIVES,
       providers: [
-        provideDateRangePickerDefaults({
-          changeLabel: 'Alterar estadia',
-          chooseLabel: 'Escolher estadia',
-          count: 'nights',
-          endLabel: 'Check-out',
-          lengthLabel: noites,
-          locale: 'pt-BR',
-          months: 1,
-          startLabel: 'Check-in',
-        }),
+        provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': HOTEL } }),
+        provideDateRangePickerDefaults({ count: 'nights', months: 1 }),
       ],
     }),
   ],

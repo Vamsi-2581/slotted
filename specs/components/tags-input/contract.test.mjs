@@ -297,8 +297,11 @@ test('lets an application set the family defaults once', () => {
   for (const axis of Object.keys(contract.axes)) {
     assert.ok(contract.provides.tagsInputDefaults.includes(axis), axis);
   }
-  for (const value of ['max', 'delimiters', 'removeLabel', 'invalidLabel', 'copiedLabel']) {
+  for (const value of ['max', 'delimiters']) {
     assert.ok(contract.provides.tagsInputDefaults.includes(value), value);
+  }
+  for (const word of ['remove', 'invalid', 'copied']) {
+    assert.ok(contract.messages.includes(word), `${word} is not a message`);
   }
 });
 

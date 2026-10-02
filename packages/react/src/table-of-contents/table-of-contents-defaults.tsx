@@ -4,12 +4,7 @@ import { createContext, useContext, useMemo } from 'react';
 import type {
   TableOfContentsDefaults,
   TableOfContentsDefaultsProviderProps,
-  TableOfContentsMessages,
 } from './table-of-contents.types';
-
-export const DEFAULT_TABLE_OF_CONTENTS_MESSAGES: TableOfContentsMessages = {
-  navigation: 'Nesta página',
-};
 
 /** The contract's defaults. */
 export const TABLE_OF_CONTENTS_FALLBACK: TableOfContentsDefaults = {
@@ -17,7 +12,6 @@ export const TABLE_OF_CONTENTS_FALLBACK: TableOfContentsDefaults = {
   landmark: true,
   layout: 'vertical',
   levels: DEFAULT_LEVELS,
-  messages: DEFAULT_TABLE_OF_CONTENTS_MESSAGES,
   numbered: false,
   offset: 0,
   size: 'md',
@@ -37,11 +31,10 @@ export function useTableOfContentsDefaults(): TableOfContentsDefaults {
  * An application decides once how its lists read — the levels a document
  * outlines, whether the column pins, what a press does to the URL — rather
  * than repeating it on every page. A list that states any of them itself
- * still wins.
+ * still wins. Its words come from the language in force (`SlottedProvider`).
  */
 export function TableOfContentsDefaultsProvider({
   children,
-  messages,
   ...defaults
 }: TableOfContentsDefaultsProviderProps) {
   const inherited = useTableOfContentsDefaults();
@@ -52,7 +45,6 @@ export function TableOfContentsDefaultsProvider({
       landmark: defaults.landmark ?? inherited.landmark,
       layout: defaults.layout ?? inherited.layout,
       levels: defaults.levels ?? inherited.levels,
-      messages: { ...inherited.messages, ...messages },
       numbered: defaults.numbered ?? inherited.numbered,
       offset: defaults.offset ?? inherited.offset,
       size: defaults.size ?? inherited.size,
@@ -68,7 +60,6 @@ export function TableOfContentsDefaultsProvider({
       defaults.size,
       defaults.sticky,
       inherited,
-      messages,
     ],
   );
 

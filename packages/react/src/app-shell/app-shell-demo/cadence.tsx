@@ -165,7 +165,7 @@ export function CadenceBanner() {
     <AppShellBanner>
       <AppShellBrand />
       <AppShellCentre>
-        <Breadcrumb label="Localização">
+        <Breadcrumb aria-label="Localização">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="#platform">Plataforma</BreadcrumbLink>

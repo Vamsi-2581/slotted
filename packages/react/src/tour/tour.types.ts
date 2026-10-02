@@ -1,3 +1,4 @@
+import type { FamilyTranslator, PartialMessages, TourMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { TourMissing, TourOutcome, TourTarget } from '@slotted/core/tour';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactElement, ReactNode, Ref } from 'react';
@@ -41,17 +42,10 @@ export interface TourStepRequest extends ChangeRequest<string | null> {
   readonly reason: TourStepReason;
 }
 
-export interface TourLabels {
-  next: string;
-  prev: string;
-  done: string;
-  skip: string;
-  close: string;
-  /** What the progress part reads, and what a reader hears in its place. */
-  progress: (position: number, total: number) => string;
-  /** The name of the wait while the next step prepares. */
-  preparing: string;
-}
+/** The words a step may say in place of the tour's: "Start tour", "Got it". */
+export type TourStepMessages = PartialMessages<
+  Pick<TourMessages, 'next' | 'prev' | 'skip' | 'done'>
+>;
 
 /** Which of the card's own actions a step shows. Unstated ones follow the rule in the docs. */
 export interface TourStepActions {
@@ -84,8 +78,8 @@ export interface TourStep {
   advanceOn?: string | undefined;
   /** Overrides the tour's `spotlight` for this step. */
   spotlight?: boolean | undefined;
-  /** Overrides the tour's labels for this step: "Start tour", "Got it". */
-  labels?: Partial<Pick<TourLabels, 'next' | 'prev' | 'skip' | 'done'>> | undefined;
+  /** Laid over the tour's words for this step: "Start tour", "Got it". */
+  messages?: TourStepMessages | undefined;
   actions?: TourStepActions | undefined;
   /** Read aloud when the step arrives while focus is elsewhere. Defaults to the title's text. */
   announcement?: string | undefined;
@@ -101,7 +95,6 @@ export interface TourDefaults {
   closeOnOutsidePress: boolean;
   collisionPadding: number;
   keyboardNavigation: boolean;
-  labels: TourLabels;
   layout: TourLayout;
   missing: TourMissing;
   modal: boolean;
@@ -113,11 +106,10 @@ export interface TourDefaults {
   targetTimeout: number;
 }
 
-export interface TourDefaultsProviderProps extends Partial<Omit<TourDefaults, 'labels'>> {
+export interface TourDefaultsProviderProps extends Partial<TourDefaults> {
   children?: ReactNode | undefined;
   /** Where every tour's layer is portalled, instead of the end of the body. */
   container?: Element | null | undefined;
-  labels?: Partial<TourLabels> | undefined;
 }
 
 export interface TourHandle {
@@ -143,7 +135,8 @@ export interface TourState<Step extends TourStep = TourStep> {
   /** The step named a target that could not be found; it is shown centred. */
   readonly missing: boolean;
   readonly target: Element | null;
-  readonly labels: TourLabels;
+  /** The family's words in the language in force, with the tour's and the step's `messages` laid over them. */
+  readonly t: FamilyTranslator<TourMessages>;
   next: (source?: unknown) => void;
   prev: (source?: unknown) => void;
   goTo: (id: string) => void;
@@ -203,7 +196,8 @@ export interface TourProps<Step extends TourStep = TourStep> {
   keyboardNavigation?: boolean | undefined;
   /** How long to wait for a target that is not in the document yet, in milliseconds. */
   targetTimeout?: number | undefined;
-  labels?: Partial<TourLabels> | undefined;
+  /** Words laid over the catalog of the language in force, key by key. */
+  messages?: PartialMessages<TourMessages> | undefined;
   /** Where focus goes when the tour closes, instead of where it was when the tour opened. */
   finalFocus?: TourFocusTarget | undefined;
 }

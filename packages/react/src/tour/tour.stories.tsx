@@ -13,13 +13,13 @@ import {
   DialogTitle,
 } from '../dialog';
 import { Grid, Scene } from '../field/field-demo';
+import { SlottedProvider } from '../i18n';
 import { Inline } from '../inline';
 import { Segment, SegmentedControl } from '../segmented-control';
 import { Stack } from '../stack';
 import { TextField } from '../text-field';
 import { Text } from '../typography';
 import { Tour, useTour } from './tour';
-import { TourDefaultsProvider } from './tour-defaults';
 import { TourContent, TourDescription, TourFooter, TourNext, TourTitle } from './tour-parts';
 import { REACT_TOUR_DOCS, REACT_TOUR_TOKENS } from './tour.docs';
 import type {
@@ -116,7 +116,7 @@ function tourOf(id: string): TourStep[] {
       title: 'Welcome to Reports',
       description:
         'Five stops, about a minute. You can leave at any point and pick it up from Help.',
-      labels: { next: 'Start tour', skip: 'Not now' },
+      messages: { next: 'Start tour', skip: 'Not now' },
     },
     {
       id: 'search',
@@ -346,7 +346,7 @@ export const Centered: Story = {
             description:
               'Five stops, about a minute. You can leave at any point and pick it up from Help.',
             media: <ReportsPicture />,
-            labels: { next: 'Start tour', skip: 'Not now' },
+            messages: { next: 'Start tour', skip: 'Not now' },
           },
           ...tourOf('centered').slice(1),
         ]}
@@ -384,7 +384,7 @@ export const Spotlight: Story = {
               target: '#spotlight-views',
               title: 'Keep this view',
               description: 'Save the filters and columns you use every week.',
-              labels: { done: 'Got it' },
+              messages: { done: 'Got it' },
             },
           ]}
         />
@@ -670,19 +670,9 @@ export const Labels: Story = {
     <Grid columns={1}>
       <Scene
         label="Em português, uma vez para a aplicação"
-        note="The provider says Próximo, Voltar, Concluir, Pular tour, Fechar tour and “Passo 2 de 4”; every tour under it reads them."
+        note="The language in force says Próximo, Voltar, Concluir, Pular tour, Fechar tour and “2 de 4”; every tour under the provider reads them."
       >
-        <TourDefaultsProvider
-          labels={{
-            close: 'Fechar tour',
-            done: 'Concluir',
-            next: 'Próximo',
-            preparing: 'Preparando o próximo passo',
-            prev: 'Voltar',
-            progress: (position, total) => `Passo ${position} de ${total}`,
-            skip: 'Pular tour',
-          }}
-        >
+        <SlottedProvider locale="pt-BR">
           <Demo
             id="labels-pt"
             label="Iniciar tour"
@@ -697,7 +687,7 @@ export const Labels: Story = {
               { id: 'export', target: '#labels-pt-export', title: 'Exporte o que vê' },
             ]}
           />
-        </TourDefaultsProvider>
+        </SlottedProvider>
       </Scene>
       <Scene
         label="A long German title and progress"
@@ -705,11 +695,11 @@ export const Labels: Story = {
       >
         <Demo
           id="labels-de"
-          labels={{
+          messages={{
             done: 'Fertig',
             next: 'Weiter',
             prev: 'Zurück',
-            progress: (position, total) => `Schritt ${position} von ${total} in der Einführung`,
+            progress: 'Schritt {position} von {total} in der Einführung',
             skip: 'Tour überspringen',
           }}
           steps={[

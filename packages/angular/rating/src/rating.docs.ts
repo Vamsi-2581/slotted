@@ -299,15 +299,15 @@ const ratingApi = apiRows([
   [
     'messages',
     'Partial<RatingMessages>',
-    'the provider’s',
-    'SlRating, provideRating',
-    'Merged over the application’s messages key by key. itemLabel names each radio: "{value} de {max}"',
+    '—',
+    'SlRating',
+    'Words laid over the language in force, key by key. itemLabel names each radio: "{value} out of {max}"',
   ],
   [
     'locale',
     'string',
-    'the document’s lang',
-    'SlRating, provideRating',
+    'the language in force',
+    'SlRating',
     'The locale the radio names are written in: "3,5 de 5" in pt-BR, "3.5 de 5" in en',
   ],
   [
@@ -343,10 +343,10 @@ const ratingComposition = apiRows([
   ],
   [
     'provideRating()',
-    '{ size, tone, max, clearable, messages, insightThresholds, locale }',
+    '{ size, tone, max, clearable, insightThresholds }',
     '—',
     'an injector',
-    'The decisions an application takes once, for all three members. messages and insightThresholds merge key by key; an instance input always wins',
+    'The decisions an application takes once, for all three members. insightThresholds merges key by key; an instance input always wins. The words and the locale come from provideSlotted',
   ],
   [
     'aria-label, aria-describedby, role',
@@ -529,15 +529,15 @@ const displayApi = apiRows([
   [
     'messages',
     'Partial<RatingMessages>',
-    'the provider’s',
-    'SlRatingDisplay, provideRating',
-    'displayLabel and displayLabelWithCount name the image',
+    '—',
+    'SlRatingDisplay',
+    'Words laid over the language in force, key by key: displayLabel and displayLabelWithCount name the image',
   ],
   [
     'locale',
     'string',
-    'the document’s lang',
-    'SlRatingDisplay, provideRating',
+    'the language in force',
+    'SlRatingDisplay',
     'The locale the number and the count are written in',
   ],
 ]);
@@ -801,15 +801,15 @@ const summaryApi = apiRows([
   [
     'messages',
     'Partial<RatingMessages>',
-    'the provider’s',
-    'SlRatingSummary, provideRating',
-    'Every sentence of the summary: summaryCount, summaryEmpty, spectrumCount, spectrumUncertain, levelLabel, distributionLabel, the buckets and the four conclusions',
+    '—',
+    'SlRatingSummary',
+    'Words laid over the language in force, key by key — every sentence of the summary: summaryCount, summaryEmpty, spectrumCount, spectrumUncertain, levelLabel, distributionLabel, the buckets and the four conclusions',
   ],
   [
     'locale',
     'string',
-    'the document’s lang',
-    'SlRatingSummary, provideRating',
+    'the language in force',
+    'SlRatingSummary',
     'The locale every number is written in',
   ],
 ]);
@@ -835,10 +835,14 @@ export const ANGULAR_RATING_DOCS = {
         id: 'rating-angular-defaults',
         language: 'ts',
         label: 'The decisions an application takes once',
-        source: `import { provideRating } from '@slotted/angular/rating';
+        source: `import { provideSlotted } from '@slotted/angular/i18n';
+import { provideRating } from '@slotted/angular/rating';
 
 bootstrapApplication(App, {
-  providers: [provideRating({ tone: 'accent', locale: 'pt-BR', clearable: false })],
+  providers: [
+    provideSlotted({ locale: 'pt-BR' }),
+    provideRating({ tone: 'accent', clearable: false }),
+  ],
 });`,
       }),
       defineSnippet({
@@ -893,7 +897,7 @@ bootstrapApplication(App, {
       ],
       [
         'provideRating()',
-        '{ size, tone, max, messages, locale }',
+        '{ size, tone, max }',
         '—',
         'an injector',
         'Shared with the other two members',
@@ -938,7 +942,7 @@ bootstrapApplication(App, {
       ],
       [
         'provideRating()',
-        '{ size, tone, max, messages, insightThresholds, locale }',
+        '{ size, tone, max, insightThresholds }',
         '—',
         'an injector',
         'Shared with the other two members',

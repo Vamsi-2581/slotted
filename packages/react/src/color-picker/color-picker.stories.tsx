@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 
 import { Field, FieldDescription, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import {
   ColorField,
   ColorPicker,
@@ -269,19 +270,14 @@ export const Composition: Story = {
     <Grid columns={1}>
       <Scene
         label="Portuguese words and hsl, for the whole application"
-        note="The provider sets the notation and every label once; the picker below states nothing of its own."
+        note="SlottedProvider sets the language and the provider the notation, once; the picker below states nothing of its own."
         layout="stack"
       >
-        <ColorPickerDefaultsProvider
-          alphaLabel="Opacidade"
-          areaLabel="Saturação e brilho"
-          format="hsl"
-          hueLabel="Matiz"
-          inputLabel="Cor"
-          previousLabel="Repor"
-        >
-          <ColorPicker defaultValue="hsl(221 83% 53%)" />
-        </ColorPickerDefaultsProvider>
+        <SlottedProvider locale="pt-BR">
+          <ColorPickerDefaultsProvider format="hsl">
+            <ColorPicker defaultValue="hsl(221 83% 53%)" />
+          </ColorPickerDefaultsProvider>
+        </SlottedProvider>
       </Scene>
     </Grid>
   ),

@@ -116,7 +116,7 @@ test('announces from the region, once, and lets an application switch it off', (
   assert.ok(skeleton.capabilities.includes('live'));
   assert.deepEqual(contract.axes.live, ['polite', 'off']);
   assert.equal(skeleton.defaults.live, 'polite');
-  assert.equal(skeleton.defaults.label, 'Loading…');
+  assert.deepEqual(contract.messages, ['label']);
   assert.ok(skeleton.parts.includes('announcement'));
 });
 

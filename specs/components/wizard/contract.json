@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "wizard",
   "ui": "wizard",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Multi-step form with validation per step."
+  },
   "pattern": "https://www.w3.org/WAI/tutorials/forms/multi-page/",
   "patternStatus": "No APG pattern names a wizard. Read on 2026-09-25: the WAI Multi-page Forms tutorial supplies the progress in the main heading, the ordered step indicator with its hidden current and completed text, the link back to completed steps that keeps what was typed, and the skippable optional step. The progress keeps the stepper family's own transcription and each step keeps the form family's. The itemised comparison is in docs/history/designs/2026-09-25-wizard-design.md §2.",
   "design": "docs/history/designs/2026-09-25-wizard-design.md",
@@ -23,7 +27,7 @@
     "layout": "the grid of progress and main, one element in from the root so the container query on the root can change its tracks",
     "progress": "the column or row holding the stepper; data-open while the compact progress is expanded",
     "progress-toggle": "a button laid out only in the compact class: aria-expanded, aria-controls the stepper's list; holds progress-position, progress-track and a chevron; it does not repeat the step's name, which the heading under it says",
-    "progress-position": "labels.position for the current step, inside the toggle; the toggle's accessible name",
+    "progress-position": "messages.position for the current step, inside the toggle; the toggle's accessible name",
     "progress-track": "aria-hidden: one progress-segment per step present, the whole flow at a glance where no column can hold the list",
     "progress-segment": "one step: data-complete, data-current or data-invalid, the facts the stepper's markers carry",
     "main": "the column of error, step and actions, or of complete",
@@ -31,20 +35,20 @@
     "step": "the div around the current step: header and form; aria-busy while a draft is restored",
     "step-header": "the step's heading and description",
     "step-title": "an h2, h3 or h4 by level, tabindex=-1, the focus target on every step change; holds position, the step's label and optional",
-    "position": "labels.position inside the heading, on its own line above the label",
-    "optional": "the tag family reading labels.optional, inside the heading, on an optional step only",
+    "position": "messages.position inside the heading, on its own line above the label",
+    "optional": "the tag family reading messages.optional, inside the heading, on an optional step only",
     "step-description": "the consumer's sentence under the heading; absent when none is given",
     "actions": "the row under the step: actions-start and actions-end",
     "actions-start": "the actions that leave the flow: cancel and save-draft, then draft-status",
     "actions-end": "the actions that move it: skip, previous, then next or submit at the end edge",
     "cancel": "a button, the button family's ghost variant: asks onCancel with dirty; closes nothing",
     "save-draft": "a button, the button family's secondary variant: writes the snapshot; loading while the save is pending; rendered only when onSaveDraft or persistence is given",
-    "draft-status": "a polite status reading labels.saved, labels.saving or labels.draftFailed; empty until the first save",
+    "draft-status": "a polite status reading messages.saved, messages.saving or messages.draftFailed; empty until the first save",
     "skip": "a button, ghost: on an optional step only; accepts the step with {} and moves on",
     "previous": "a button, secondary: the previous step present; absent on the first",
-    "next": "a submit button, primary, form= the step form's id: on every step but the last; reads labels.return while a return point stands; loading while validate is pending",
-    "submit": "the same button on the last step, reading labels.submit; data-final; loading while onSubmit is pending",
-    "edit": "a button placed by the consumer, usually on a review step: goes to the named step and sets the return point; labels.edit plus the step's label, hidden, for its accessible name",
+    "next": "a submit button, primary, form= the step form's id: on every step but the last; reads messages.return while a return point stands; loading while validate is pending",
+    "submit": "the same button on the last step, reading messages.submit; data-final; loading while onSubmit is pending",
+    "edit": "a button placed by the consumer, usually on a review step: goes to the named step and sets the return point; messages.edit plus the step's label, hidden, for its accessible name",
     "complete": "the consumer's content after an accepted submission, in place of step and actions; tabindex=-1, the focus target",
     "skeleton": "stands for the step form while an asynchronous restore is pending: one field family field whose label and control are skeletons; the step-header keeps its parts with skeleton lines for position and title; actions absent"
   },
@@ -61,7 +65,7 @@
     "equal": "a request for a value equal to the current one is not emitted",
     "cancel": "onCancel({ dirty, source }): dirty is true while any step holds typed values that were not accepted, or accepted values that were not submitted",
     "saveDraft": "onSaveDraft(snapshot, request): reason pointer from the part, programmatic from the handle, submit from autosave",
-    "submitResult": "onSubmit(values, request) returns void, a WizardFailure { message, step?, errors? }, or a promise of either; a rejected promise is a failure whose message is labels.submitFailed"
+    "submitResult": "onSubmit(values, request) returns void, a WizardFailure { message, step?, errors? }, or a promise of either; a rejected promise is a failure whose message is messages.submitFailed"
   },
   "rules": {
     "complete": "a step is complete exactly when its name is in value; a value from a server declares completed steps without a second field",
@@ -81,7 +85,7 @@
     "pendingRemoved": "a step that leaves the list while its validate is pending aborts it; a late answer neither advances nor publishes errors",
     "uniqueNames": "two steps with one name throw: they would share one answer",
     "liveConditions": "a condition over value shows its step after the advance that accepted the answer; a live preview reads the consumer's own state",
-    "countChanges": "labels.position is recomputed and not announced; the next step's heading says the new position when it takes focus",
+    "countChanges": "messages.position is recomputed and not announced; the next step's heading says the new position when it takes focus",
     "empty": "no steps throws: a wizard with nothing to show is a consumer mistake a render would hide",
     "skip": "skip accepts an optional step with {} in value",
     "url": "the family never writes location; a router owns step through the controlled pair, and an unreachable step is clamped",
@@ -110,7 +114,7 @@
     "escape": "Escape inside the expanded compact progress closes it and returns focus to progress-toggle"
   },
   "waits": {
-    "restore": "an asynchronous load: the skeleton part after delay, held for minDuration, aria-busy on step, labels.restoring announced once",
+    "restore": "an asynchronous load: the skeleton part after delay, held for minDuration, aria-busy on step, messages.restoring announced once",
     "validate": "the next button's own loading; aria-busy on the step form",
     "submit": "the submit button's own loading; data-loading on the root",
     "draft": "the save-draft button's own loading, then draft-status"
@@ -177,27 +181,29 @@
     "autosave": ["prop", "step when persistence is given", "none"]
   },
   "provides": {
-    "wizardDefaults": ["labels", "progress", "linear", "level", "scroll", "delay", "minDuration"]
+    "wizardDefaults": ["progress", "linear", "level", "scroll", "delay", "minDuration"]
   },
-  "labels": {
-    "position": "Step {index} of {count}",
-    "progress": "Progress",
-    "previous": "Back",
-    "next": "Next",
-    "submit": "Submit",
-    "return": "Save and return",
-    "cancel": "Cancel",
-    "saveDraft": "Save draft",
-    "saving": "Saving draft…",
-    "saved": "Draft saved at {time}",
-    "draftFailed": "The draft could not be saved",
-    "skip": "Skip",
-    "optional": "Optional",
-    "edit": "Change",
-    "incomplete": "Complete this step to submit",
-    "submitFailed": "The submission did not go through",
-    "restoring": "Restoring your draft"
-  },
+  "messages": [
+    "cancel",
+    "draftFailed",
+    "edit",
+    "incomplete",
+    "next",
+    "optional",
+    "position",
+    "previous",
+    "progress",
+    "restoring",
+    "return",
+    "saved",
+    "saveDraft",
+    "saving",
+    "skip",
+    "submit",
+    "submitFailed"
+  ],
+  "messagesReason": "The words the family says come from the wizard catalog of the language in force, laid over by one messages input on the root. position takes the one-based index and the count as slots; saved takes the hour and minute the binding has already written with Intl.DateTimeFormat in the locale in force, so each language orders its own sentence around the time.",
+
   "stateAttributes": {
     "loading": "data-loading",
     "invalid": "data-invalid",

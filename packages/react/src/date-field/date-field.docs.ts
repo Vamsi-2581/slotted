@@ -186,7 +186,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'date-field-react-clear',
       label: 'Clearing',
       language: 'tsx',
-      source: `<DateField clearable clearLabel="Limpar a data" />;`,
+      source: `<DateField clearable messages={{ clear: 'Limpar a data' }} />;`,
     }),
   },
   {
@@ -243,12 +243,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition and escape hatches',
-    note: 'A provider sets the locale, the zone and the pivot once for the whole application; render substitutes the frame’s element; and the ref hands back focus() and clear() — the two actions no prop can express.',
+    note: 'A provider sets the zone and the pivot once for the whole application, SlottedProvider the language; render substitutes the frame’s element; and the ref hands back focus() and clear() — the two actions no prop can express.',
     snippet: defineSnippet({
       id: 'date-field-react-composition',
       label: 'Provider, render and ref',
       language: 'tsx',
-      source: `<DateFieldDefaultsProvider locale="pt-BR" timeZone="America/Sao_Paulo">
+      source: `<DateFieldDefaultsProvider timeZone="America/Sao_Paulo">
   <DateField ref={handle} render={(props) => <section {...props} />} />
 </DateFieldDefaultsProvider>;`,
     }),
@@ -310,7 +310,7 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    'the runtime’s',
+    'the language in force',
     'DateField',
     'BCP 47. Decides the field order, the separators, the placeholder and the language a month is announced in.',
   ],
@@ -379,7 +379,13 @@ const api: ApiRow[] = apiRows([
     'DateField',
     'Draws a button that empties the value and returns focus to the first segment.',
   ],
-  ['clearLabel', 'string', 'Clear', 'DateField', 'The clear button’s accessible name.'],
+  [
+    'messages',
+    'Partial<DateFieldMessages>',
+    '—',
+    'DateField',
+    'Words laid over the language in force, key by key: the clear button’s accessible name (clear).',
+  ],
   [
     'name',
     'string',
@@ -411,7 +417,7 @@ const composition: ApiRow[] = apiRows([
     'component',
     '—',
     'application',
-    'Sets locale, timeZone, firstDayOfWeek, yearPivot, calendar, size, variant and clearLabel once for everything under it. A control that states any of them itself still wins.',
+    'Sets timeZone, firstDayOfWeek, yearPivot, calendar, size and variant once for everything under it. A control that states any of them itself still wins.',
   ],
   [
     'render',

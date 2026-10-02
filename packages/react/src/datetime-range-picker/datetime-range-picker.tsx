@@ -24,6 +24,7 @@ import {
 } from '@slotted/core/date';
 import type { PlainDate, PlainDateTime, PlainTime, TimeOption } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { datetimeRangePickerMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
@@ -50,6 +51,7 @@ import type { CalendarHandle, CalendarValue, CalendarView } from '../calendar';
 import { DateTimeField } from '../datetime-field';
 import type { DateTimeFieldChangeRequest, DateTimeFieldHandle } from '../datetime-field';
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useDateTimeRangePickerDefaults } from './datetime-range-picker-defaults';
 import type {
@@ -177,11 +179,8 @@ function rangeOf(work: Work): DateTimeRange | null {
  */
 export function DateTimeRangePicker({
   calendar,
-  changeLabel,
-  chooseLabel,
   className,
   clearable = false,
-  clearLabel,
   closeOnSelect,
   contiguous = true,
   defaultHighlighted,
@@ -189,32 +188,27 @@ export function DateTimeRangePicker({
   defaultPosition = 'start',
   defaultValue,
   disabled,
-  doneLabel,
-  emptyLabel,
-  endLabel,
   endName,
   firstDayOfWeek,
   fixedWeeks = true,
   footer,
   granularity,
   highlighted,
-  hintLabels,
   hourCycle,
   invalid,
   isDateUnavailable,
   isTimeUnavailable,
   lengthLabel,
-  limitLabel,
   locale,
   max,
   maxLength,
   maxOptions,
+  messages,
   maxTime,
   min,
   minLength,
   minTime,
   months,
-  nowLabel,
   onHighlightedChange,
   onKeyDown,
   onOpenChange,
@@ -233,12 +227,10 @@ export function DateTimeRangePicker({
   renderOption,
   required,
   size,
-  startLabel,
   startName,
   step,
   style,
   timeZone,
-  truncatedLabel,
   unavailableOptions,
   value,
   variant,
@@ -248,6 +240,8 @@ export function DateTimeRangePicker({
 }: DateTimeRangePickerProps) {
   const field = useField();
   const defaults = useDateTimeRangePickerDefaults();
+  const appLocale = useLocale();
+  const t = useMessages(datetimeRangePickerMessages, messages);
   const rootRef = useRef<HTMLElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const fieldRef = useRef<DateTimeFieldHandle | null>(null);
@@ -295,7 +289,7 @@ export function DateTimeRangePicker({
   } | null>(null);
   const [listFocused, setListFocused] = useState(false);
 
-  const resolvedLocale = locale ?? defaults.locale;
+  const resolvedLocale = locale ?? appLocale;
   const resolvedTimeZone = timeZone ?? defaults.timeZone;
   const resolvedCalendar = calendar ?? defaults.calendar;
   const resolvedGranularity = granularity ?? defaults.granularity;
@@ -310,23 +304,12 @@ export function DateTimeRangePicker({
   const resolvedMonths = months ?? defaults.months;
   const resolvedUnavailable = unavailableOptions ?? defaults.unavailableOptions;
   const lengthLabelOf = lengthLabel ?? defaults.lengthLabel;
-  const limitLabelOf = limitLabel ?? defaults.limitLabel;
   const resolvedLengthLabel = useCallback(
     (seconds: number) => lengthLabelOf(seconds, resolvedLocale),
     [lengthLabelOf, resolvedLocale],
   );
-  const resolvedLimitLabel = useCallback(
-    (min: number | undefined, max: number | undefined) => limitLabelOf(min, max, resolvedLocale),
-    [limitLabelOf, resolvedLocale],
-  );
-  const resolvedStartLabel = startLabel ?? defaults.startLabel;
-  const resolvedEndLabel = endLabel ?? defaults.endLabel;
-  const labelOf = (position: DateTimeRangePickerPosition) =>
-    position === 'start' ? resolvedStartLabel : resolvedEndLabel;
-  const resolvedHintLabels = useMemo(
-    () => ({ ...defaults.hintLabels, ...hintLabels }),
-    [defaults.hintLabels, hintLabels],
-  );
+  /** The name of one end: the field's, its tab's and the hint's `{end}`. */
+  const labelOf = (position: DateTimeRangePickerPosition) => t(position);
   const resolvedDisabled = disabled ?? field?.disabled;
   const resolvedReadOnly = readOnly ?? field?.readOnly;
   const resolvedRequired = required ?? field?.required;
@@ -1119,10 +1102,18 @@ export function DateTimeRangePicker({
       : '';
   };
   const spokenLength = pendingRun === null ? spokenFor(work) : spokenFor(pendingRun);
+  /** "1 day to 7 days", "at least 1 day", "at most 7 days". */
   const limitText =
-    minLength === undefined && maxLength === undefined
-      ? null
-      : resolvedLimitLabel(minLength, maxLength);
+    minLength !== undefined && maxLength !== undefined
+      ? t('limit.between', {
+          min: resolvedLengthLabel(minLength),
+          max: resolvedLengthLabel(maxLength),
+        })
+      : minLength !== undefined
+        ? t('limit.atLeast', { min: resolvedLengthLabel(minLength) })
+        : maxLength !== undefined
+          ? t('limit.atMost', { max: resolvedLengthLabel(maxLength) })
+          : null;
 
   /**
    * What the next press should be, or what is wrong: the difference between a
@@ -1148,24 +1139,27 @@ export function DateTimeRangePicker({
   const currentHalf = work[currentPosition];
   const hint =
     currentHalf.date === null
-      ? resolvedHintLabels.choose.replace('{end}', labelOf(currentPosition))
+      ? t('chooseDay', { end: labelOf(currentPosition) })
       : currentHalf.time === null
-        ? resolvedHintLabels.chooseTime
-            .replace('{end}', labelOf(currentPosition))
-            .replace('{day}', format.describeDate(currentHalf.date, 'short'))
+        ? t('chooseTime', {
+            end: labelOf(currentPosition),
+            day: format.describeDate(currentHalf.date, 'short'),
+          })
         : hintProblem === undefined
           ? ''
-          : resolvedHintLabels[
-              hintProblem === 'min' || hintProblem === 'max' ? 'bounds' : hintProblem
-            ];
+          : t(hintProblem === 'min' || hintProblem === 'max' ? 'bounds' : hintProblem);
   const hintId = `${contentId}-hint`;
 
   const spoken =
     start !== null && end !== null
-      ? `${changeLabel ?? defaults.changeLabel}, ${format.describe(start)} – ${format.describe(end)}${
-          ordered ? `, ${resolvedLengthLabel(dateTimeRangeSeconds(start, end))}` : ''
-        }`
-      : (chooseLabel ?? defaults.chooseLabel);
+      ? ordered
+        ? t('change', {
+            start: format.describe(start),
+            end: format.describe(end),
+            length: resolvedLengthLabel(dateTimeRangeSeconds(start, end)),
+          })
+        : t('changeReversed', { start: format.describe(start), end: format.describe(end) })
+      : t('choose');
 
   /* The frame writes each end short — "12 Sep, 14:00" — because the whole
      value in words is the trigger's. */
@@ -1308,7 +1302,7 @@ export function DateTimeRangePicker({
           />
         </div>
         {list.length === 0 ? (
-          <div data-part="empty">{emptyLabel ?? defaults.emptyLabel}</div>
+          <div data-part="empty">{t('empty')}</div>
         ) : (
           <div
             aria-describedby={hint === '' ? undefined : hintId}
@@ -1326,7 +1320,7 @@ export function DateTimeRangePicker({
             role="listbox"
             {...(truncated
               ? {
-                  'aria-description': truncatedLabel ?? defaults.truncatedLabel,
+                  'aria-description': t('truncated'),
                   'data-truncated': '',
                 }
               : {})}
@@ -1418,7 +1412,7 @@ export function DateTimeRangePicker({
             onClick={(event) => chooseNow(currentPosition, event)}
             type="button"
           >
-            {nowLabel ?? defaults.nowLabel}
+            {t('now')}
           </button>
           <span
             data-part="hint"
@@ -1445,7 +1439,7 @@ export function DateTimeRangePicker({
         <div data-part="footer">
           {footer}
           <button data-part="done" onClick={done} type="button">
-            {doneLabel ?? defaults.doneLabel}
+            {t('done')}
           </button>
         </div>
       </div>
@@ -1471,7 +1465,7 @@ export function DateTimeRangePicker({
           type="button"
         >
           <span data-part="summary" {...(summary === null ? { 'data-placeholder': '' } : {})}>
-            {summary ?? chooseLabel ?? defaults.chooseLabel}
+            {summary ?? t('choose')}
           </span>
           <Icon>
             <Glyph name="calendar" />
@@ -1479,7 +1473,7 @@ export function DateTimeRangePicker({
         </button>
         {clearable && held !== null ? (
           <button
-            aria-label={clearLabel ?? defaults.clearLabel}
+            aria-label={t('clear')}
             data-part="clear"
             disabled={!editable}
             onClick={(event) => {

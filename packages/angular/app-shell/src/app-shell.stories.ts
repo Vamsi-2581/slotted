@@ -100,6 +100,7 @@ import {
   SlAppShellAsideBody,
   SlAppShellAsideFooter,
   SlAppShellAsideHeader,
+  SlAppShellAsideResizer,
   SlAppShellAsideToggle,
   SlAppShellBanner,
   SlAppShellBrand,
@@ -398,6 +399,12 @@ const AURORA_PANE = `<aside slAppShellAside>
   </div>
 </aside>`;
 
+/** The pane with its edge: rendering the resizer is the whole of that capability. */
+const AURORA_PANE_RESIZABLE = AURORA_PANE.replace(
+  '<aside slAppShellAside>',
+  '<aside slAppShellAside>\n  <div slAppShellAsideResizer></div>',
+);
+
 const AURORA_FOOTER = `<footer slAppShellFooter>
   <span slText size="xs" tone="muted">Aurora 4.2.0 · Ambiente de produção · Sessão iniciada às 08:14</span>
 </footer>`;
@@ -522,7 +529,7 @@ const MODULES: readonly Module[] = [
  * region stands at the foot of the strip, the part that survives closing it.
  */
 const RAIL_NAV = `<nav slAppShellNav class="slotted-demo-nav">
-  <div slAppShellNavRail aria-label="Módulos">
+  <div slAppShellNavRail aria-label="Modules">
     <span slAvatar shape="square" size="sm" tone="accent" variant="solid"><span slAvatarFallback>AL</span></span>
     @for (module of modules; track module.id) {
       <button
@@ -660,7 +667,7 @@ const CADENCE_NAV = `<nav slAppShellNav class="slotted-demo-nav slotted-demo-she
 const CADENCE_BANNER = `<header slAppShellBanner>
   <div slAppShellBrand></div>
   <div slAppShellCentre>
-    <nav slBreadcrumb label="Localização">
+    <nav slBreadcrumb aria-label="Localização">
       <ol slBreadcrumbList>
         <li slBreadcrumbItem><a slBreadcrumbLink href="#platform">Plataforma</a></li>
         <li slBreadcrumbItem><a slBreadcrumbLink href="#cycle">Ciclo 14</a></li>
@@ -854,6 +861,7 @@ const ANATOMY = viewport(`<div slAppShell asideMode="inline" navMode="inline">
   </nav>
   <main slAppShellMain>${SLOT('main', 'a rota')}</main>
   <aside slAppShellAside>
+    <div slAppShellAsideResizer></div>
     <div slAppShellAsideHeader>${SLOT('aside-header', 'o título do painel', false)}<button slAppShellAsideToggle></button></div>
     <div slAppShellAsideBody>${SLOT('aside-body', 'o painel, e o que rola')}</div>
     <div slAppShellAsideFooter>${SLOT('aside-footer', 'as ações do painel', false)}</div>
@@ -870,6 +878,7 @@ const DIRECTIVES = [
   SlAppShellAsideBody,
   SlAppShellAsideFooter,
   SlAppShellAsideHeader,
+  SlAppShellAsideResizer,
   SlAppShellAsideToggle,
   SlAppShellBanner,
   SlAppShellBrand,
@@ -1289,12 +1298,12 @@ export const Aside: StoryObj<Data> = {
     grid(
       scene(
         'Opened by a selection, closed from its own head',
-        "Select a row: the product sets asideOpen from its selection and the pane opens with the consignment. Press the control in the pane's head: the shell asks with the reason pointer, the product clears the selection, and the content takes the room — a closed pane leaves no rail. The skip link to the pane exists only while it is open.",
+        "Select a row: the product sets asideOpen from its selection and the pane opens with the consignment. Press the control in the pane's head: the shell asks with the reason pointer, the product clears the selection, and the content takes the room — a closed pane leaves no rail. The skip link to the pane exists only while it is open. Drag the pane's inner edge, or focus it and press the arrows, Home and End: the column follows asideExtent between 16 and 60 per cent of the shell, and the body's fields stand on the title's edge with no padding of their own.",
         viewport(`<div slAppShell asideMode="inline" navMode="inline" [asideOpen]="selected() !== undefined" (asideOpenChangeRequest)="$event.value ? null : selected.set(undefined)">
   ${AURORA_BANNER()}
   ${AURORA_NAV()}
   <main slAppShellMain>${AURORA_CONTENT(SHIPMENTS_TABLE('selectionMode="single" [value]="selectedKeys()" (valueChange)="select($event)"'))}</main>
-  ${AURORA_PANE}
+  ${AURORA_PANE_RESIZABLE}
 </div>`),
       ),
       scene(
@@ -1522,14 +1531,13 @@ export const Defaults: StoryObj<Data> = {
         provideAppShellDefaults({
           canvas: 'flush',
           navSize: 'lg',
-          messages: { skipToMain: 'Pular para o conteúdo', aside: 'Detalhe da encomenda' },
         }),
       ],
     },
     template: grid(
       scene(
         'provideAppShellDefaults()',
-        'Every shell under the injector is on the flush plane, with a large region and Portuguese-of-Brazil strings — and the shell below states none of it. A shell that states any of them itself still wins.',
+        'Every shell under the injector is on the flush plane, with a large region — and the shell below states none of it. A shell that states any of them itself still wins. The words come from the language in force.',
         aurora('asideMode="inline" navMode="inline"'),
       ),
       scene(

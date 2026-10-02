@@ -428,7 +428,7 @@ export const Aside: Story = {
     <Grid columns={1}>
       <Scene
         label="Opened by a selection, closed from its own head"
-        note="Select a row: the product sets asideOpen from its selection and the pane opens with the consignment. Press the control in the pane's head: the shell asks with the reason pointer, the product clears the selection, and the content takes the room — a closed pane leaves no rail. The skip link to the pane exists only while it is open."
+        note="Select a row: the product sets asideOpen from its selection and the pane opens with the consignment. Press the control in the pane's head: the shell asks with the reason pointer, the product clears the selection, and the content takes the room — a closed pane leaves no rail. The skip link to the pane exists only while it is open. Drag the pane's inner edge, or focus it and press the arrows, Home and End: the column follows asideExtent between 16 and 60 per cent of the shell, and the body's fields stand on the title's edge with no padding of their own."
       >
         <AuroraSelection shell={{ navMode: 'inline' }} />
       </Scene>
@@ -779,13 +779,9 @@ export const Defaults: Story = {
     <Grid columns={1}>
       <Scene
         label="AppShellDefaultsProvider"
-        note="Every shell under the provider is on the flush plane, with a large region and Portuguese-of-Brazil strings — and the shell below states none of it. A shell that states any of them itself still wins."
+        note="Every shell under the provider is on the flush plane, with a large region — and the shell below states none of it. A shell that states any of them itself still wins. The words come from the language in force."
       >
-        <AppShellDefaultsProvider
-          canvas="flush"
-          messages={{ skipToMain: 'Pular para o conteúdo', aside: 'Detalhe da encomenda' }}
-          navSize="lg"
-        >
+        <AppShellDefaultsProvider canvas="flush" navSize="lg">
           <Aurora shell={{ asideMode: 'inline', navMode: 'inline' }} />
         </AppShellDefaultsProvider>
       </Scene>

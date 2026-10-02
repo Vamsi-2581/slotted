@@ -1,6 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
 import contract from '../../../../specs/components/toast/contract.json';
 import { SlToastRegion } from './toast';
@@ -181,14 +184,10 @@ describe('the keyboard', () => {
 
 describe('what an application decides once', () => {
   it('reads the injection token for every axis a message did not state', () => {
+    const locale = signal('pt-BR');
     const fixture = render([
-      provideToastDefaults({
-        closeLabel: 'Fechar',
-        label: 'Notificações',
-        placement: 'top-start',
-        tone: 'success',
-        variant: 'soft',
-      }),
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+      provideToastDefaults({ placement: 'top-start', tone: 'success', variant: 'soft' }),
     ]);
     fixture.componentInstance.toasts.show({ title: 'Salvo' });
     fixture.detectChanges();
@@ -199,6 +198,11 @@ describe('what an application decides once', () => {
     expect(items(fixture)[0]?.getAttribute('data-tone')).toBe('success');
     expect(items(fixture)[0]?.getAttribute('data-variant')).toBe('soft');
     expect(root.querySelector('[data-part="close"]')?.getAttribute('aria-label')).toBe('Fechar');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(root.getAttribute('aria-label')).toBe('Notifications');
+    expect(root.querySelector('[data-part="close"]')?.getAttribute('aria-label')).toBe('Close');
   });
 
   it('lets a message overrule the token it is under', () => {

@@ -31,28 +31,17 @@ export interface TableOfContentsItemData {
   children?: readonly TableOfContentsItemData[] | undefined;
 }
 
-/** The strings the family writes itself, replaceable once per application. */
-export interface TableOfContentsMessages {
-  /** The landmark's name when the consumer gives none, and the collapsed trigger's fixed text. */
-  navigation: string;
-}
-
 /** What an application sets once for every list under it. */
 export interface TableOfContentsDefaults {
   history: TableOfContentsHistory;
   landmark: boolean;
   layout: TableOfContentsLayout;
   levels: readonly [number, number];
-  messages: TableOfContentsMessages;
   numbered: boolean;
   offset: number;
   size: TableOfContentsSize;
   sticky: boolean;
 }
-
-export const DEFAULT_TABLE_OF_CONTENTS_MESSAGES: TableOfContentsMessages = {
-  navigation: 'Nesta página',
-};
 
 /** The contract's defaults. */
 export const TABLE_OF_CONTENTS_FALLBACK: TableOfContentsDefaults = {
@@ -60,7 +49,6 @@ export const TABLE_OF_CONTENTS_FALLBACK: TableOfContentsDefaults = {
   landmark: true,
   layout: 'vertical',
   levels: DEFAULT_LEVELS,
-  messages: DEFAULT_TABLE_OF_CONTENTS_MESSAGES,
   numbered: false,
   offset: 0,
   size: 'md',
@@ -76,20 +64,12 @@ export const TABLE_OF_CONTENTS_DEFAULTS = new InjectionToken<TableOfContentsDefa
  * An application decides once how its lists read — the levels a document
  * outlines, whether the column pins, what a press does to the URL — rather
  * than repeating it on every page. A list that states any of them itself
- * still wins.
+ * still wins. Its words come from the language in force (`provideSlotted`).
  */
-export function provideTableOfContentsDefaults(
-  defaults: Partial<Omit<TableOfContentsDefaults, 'messages'>> & {
-    messages?: Partial<TableOfContentsMessages>;
-  },
-) {
+export function provideTableOfContentsDefaults(defaults: Partial<TableOfContentsDefaults>) {
   return {
     provide: TABLE_OF_CONTENTS_DEFAULTS,
-    useFactory: (): TableOfContentsDefaults => ({
-      ...TABLE_OF_CONTENTS_FALLBACK,
-      ...defaults,
-      messages: { ...TABLE_OF_CONTENTS_FALLBACK.messages, ...defaults.messages },
-    }),
+    useFactory: (): TableOfContentsDefaults => ({ ...TABLE_OF_CONTENTS_FALLBACK, ...defaults }),
   };
 }
 

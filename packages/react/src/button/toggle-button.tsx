@@ -1,9 +1,11 @@
+import { buttonMessages } from '@slotted/core/i18n';
+
+import { useMessages } from '../i18n';
 import { ButtonContent } from './button-content';
 import { TOGGLE_BUTTON_DEFAULTS } from './button.constants';
 import {
   blockActivation,
   inertness,
-  loadingLabelOf,
   rootData,
   useAppearance,
   useLoadingIndicator,
@@ -32,7 +34,7 @@ export function ToggleButton({
   fullWidth = false,
   loading = false,
   loadingDelay = 0,
-  loadingLabel,
+  messages,
   onClick,
   onClickCapture,
   onPressedChange,
@@ -48,6 +50,7 @@ export function ToggleButton({
   const appearance = useAppearance({ size, tone, variant }, TOGGLE_BUTTON_DEFAULTS);
   const inert = inertness({ disabled, focusableWhenDisabled, loading });
   const waiting = useLoadingIndicator({ loading, loadingDelay });
+  const t = useMessages(buttonMessages, messages);
   const state = usePressed({ defaultPressed, onPressedChange, pressed });
 
   const rootProps: ButtonRootProps = {
@@ -58,7 +61,7 @@ export function ToggleButton({
     children: (
       <ButtonContent
         end={end}
-        indicator={waiting ? <ButtonIndicator label={loadingLabelOf({ loadingLabel })} /> : null}
+        indicator={waiting ? <ButtonIndicator label={t('loading')} /> : null}
         start={start}
       >
         {children}

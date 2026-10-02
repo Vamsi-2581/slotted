@@ -66,7 +66,7 @@ export function StatCardDelta({
             <Glyph name={trend === 'flat' ? 'minus' : 'trending-up'} />
           </Icon>
         </span>
-        <VisuallyHidden>{card.messages[trend]} </VisuallyHidden>
+        <VisuallyHidden>{card.t(trend)} </VisuallyHidden>
         {children ?? formatted}
       </>
     ),

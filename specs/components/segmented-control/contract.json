@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "segmented-control",
   "ui": "segmented-control",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Row of exclusive options, one selected."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/radio/",
   "roles": {
     "root": "radiogroup",

@@ -239,18 +239,11 @@ export const REACT_PROSE_DOCS = {
         'The space between blocks, from which every other distance derives — the gap above a heading, between list rows, and around a rule. tight is a chat message, loose an article',
       ],
       [
-        'scrollLabel',
-        'string',
-        'Scrollable content',
-        'ProseDefaultsProvider',
-        'The last resort name of a scrolling block, used when neither labelledBy nor label names one. It is a default rather than a required prop because a renderer’s component map cannot supply one per table',
-      ],
-      [
-        'label',
-        'string',
+        'messages',
+        'Partial<ProseMessages>',
         '—',
         'ProseScroll',
-        'Names the region once it becomes focusable. Loses to labelledBy, and wins over the provider’s scrollLabel',
+        'Words laid over the language in force: the last resort name of a scrolling block (scroll), used when neither labelledBy nor aria-label names one. It comes from the catalog rather than a required prop because a renderer’s component map cannot supply one per table',
       ],
       [
         'labelledBy',
@@ -284,10 +277,10 @@ export const REACT_PROSE_DOCS = {
       ],
       [
         'ProseDefaultsProvider',
-        '{ size, flow, scrollLabel }',
+        '{ size, flow }',
         '—',
         'a subtree',
-        'Sets all three once for every region under it — Typeset’s presets, typed. An explicit prop on one region still wins, and nesting a provider narrows the decision for part of a page',
+        'Sets both once for every region under it — Typeset’s presets, typed. An explicit prop on one region still wins, and nesting a provider narrows the decision for part of a page',
       ],
       [
         'Container',

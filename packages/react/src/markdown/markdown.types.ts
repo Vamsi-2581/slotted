@@ -1,11 +1,11 @@
 import type {
-  MarkdownAlertType,
   MarkdownCustomElement,
   MarkdownElement,
   MarkdownKind,
   MarkdownNode,
   MarkdownUrlKind,
 } from '@slotted/core/markdown';
+import type { MarkdownMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode } from 'react';
 
@@ -17,26 +17,6 @@ export type MarkdownStatus = 'ready' | 'error';
 /** Where a link that leaves the application opens. */
 export type MarkdownExternal = 'new-tab' | 'same-tab';
 
-/** Every string the family writes itself, for translation. */
-export interface MarkdownLabels {
-  /** The empty part's text. */
-  empty: string;
-  /** The error part's message. */
-  error: string;
-  /** The retry button in the error part. */
-  retry: string;
-  /** What a screen reader hears once while the placeholder is painted. */
-  loading: string;
-  /** The footnotes section's heading, read by assistive technology. */
-  footnotes: string;
-  /** A footnote's back link. */
-  backReference: (number: number, occurrence: number) => string;
-  /** A heading's permalink. */
-  anchor: (heading: string) => string;
-  /** The title of each GitHub alert. */
-  alerts: Record<MarkdownAlertType, string>;
-}
-
 /** What an application sets once for every document under it. */
 export interface MarkdownDefaults {
   alerts?: boolean | undefined;
@@ -44,7 +24,6 @@ export interface MarkdownDefaults {
   external?: MarkdownExternal | undefined;
   headingAnchors?: boolean | undefined;
   isExternal?: ((href: string) => boolean) | undefined;
-  labels?: Partial<MarkdownLabels> | undefined;
   transformUrl?:
     ((url: string, kind: MarkdownUrlKind, node: MarkdownNode) => string | null) | undefined;
 }
@@ -134,7 +113,12 @@ export interface MarkdownProps extends Omit<ComponentPropsWithRef<'div'>, 'child
   /** Renders a node type the family does not know — `math`, `html`, a directive. */
   extensions?: MarkdownExtensions | undefined;
 
-  labels?: Partial<MarkdownLabels> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * empty, error, retry and loading texts, the footnotes heading, the back
+   * link, the heading permalink, and each alert's title (`alerts.note`).
+   */
+  messages?: PartialMessages<MarkdownMessages> | undefined;
   /** Replaces the empty part's text — the place for the action that creates the first content. */
   empty?: ReactNode | undefined;
 

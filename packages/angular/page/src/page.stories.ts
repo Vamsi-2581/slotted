@@ -809,7 +809,6 @@ export const Defaults: Story = {
       providers: [
         providePageDefaults({
           ground: 'surface',
-          messages: { footer: 'Decisions' },
           width: 'content',
         }),
       ],
@@ -820,9 +819,9 @@ export const Defaults: Story = {
     template: grid(
       1,
       scene(
-        'Six decisions an application takes once',
-        'providePageDefaults carries width, inset, scroll, ground, landmark and the footer’s name for every page under it — here a document application in English, on an article. A page that states any of them itself still wins.',
-        viewport(`<article slPage>
+        'Five decisions an application takes once',
+        'providePageDefaults carries width, inset, scroll, ground and landmark for every page under it — here a document application, on an article. A page that states any of them itself still wins, and its messages name the footer.',
+        viewport(`<article slPage [messages]="{ footer: 'Decisions' }">
   ${HEADER()}
   <div slPageBody>${SECTIONS()}</div>
   <footer slPageFooter>
@@ -843,7 +842,7 @@ export const Accessibility: Story = {
       1,
       scene(
         'One main, named regions, an outline without a skip',
-        'Open the screen reader’s landmark list: main, then the regions the sections make, then the footer named “Ações da página”. Open the heading list: h1 for the order, h2 for each section, h3 for what is inside.',
+        'Open the screen reader’s landmark list: main, then the regions the sections make, then the footer named by the catalog — “Page actions” in English. Open the heading list: h1 for the order, h2 for each section, h3 for what is inside.',
         screen(),
       ),
     ),

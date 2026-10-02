@@ -1,3 +1,4 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -5,6 +6,7 @@ import { useRef, useState, type ReactNode } from 'react';
 
 import { Button } from '../button';
 import { Grid, Scene } from '../field/field-demo';
+import { SlottedProvider } from '../i18n';
 import { Inline } from '../inline';
 import { Stack } from '../stack';
 import { Text } from '../typography';
@@ -348,49 +350,26 @@ export const Labels: Story = {
   render: () => (
     <One
       label="O painel de vendas, em português"
-      note="The provider sets the bar, the handle’s name, the menu and the announcements once, and the titles become h2."
+      note="The language in force sets the bar, the handle’s name, the menu and the announcements once; the provider makes the titles h2."
     >
-      <DashboardGridDefaultsProvider
-        headingLevel={2}
-        labels={{
-          editStatus:
-            'Arraste um widget para o mover e puxe as arestas para o redimensionar. Pelo teclado, foque a pega: Alt com uma seta move-o, Shift com uma seta redimensiona-o.',
-          add: 'Adicionar widget',
-          reset: 'Repor layout',
-          cancel: 'Cancelar',
-          done: 'Concluir',
-          handle: 'Reorganizar {title}',
-          detail: 'Abrir {title}',
-          moveUp: 'Mover para cima',
-          moveDown: 'Mover para baixo',
-          moveStart: 'Mover para a esquerda',
-          moveEnd: 'Mover para a direita',
-          wider: 'Mais largo',
-          narrower: 'Mais estreito',
-          taller: 'Mais alto',
-          shorter: 'Mais baixo',
-          hide: 'Esconder',
-          moved: '{title} movido para a linha {row}, coluna {column}',
-          movedInOrder: '{title} movido para a posição {position} de {total}',
-          resized: '{title} tem {columns} colunas por {rows} linhas',
-          hidden: '{title} escondido',
-        }}
-      >
-        <Sales
-          defaultEditing
-          children={salesWidgets({
-            revenue: { title: 'Receita' },
-            orders: { title: 'Encomendas' },
-            refunds: { title: 'Reembolsos' },
-            conversion: { title: 'Conversão' },
-            trend: {
-              title: 'Receita por semana',
-              description: 'Últimas doze semanas, todos os canais',
-            },
-            products: { title: 'Produtos mais vendidos' },
-          })}
-        />
-      </DashboardGridDefaultsProvider>
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+        <DashboardGridDefaultsProvider headingLevel={2}>
+          <Sales
+            defaultEditing
+            children={salesWidgets({
+              revenue: { title: 'Receita' },
+              orders: { title: 'Encomendas' },
+              refunds: { title: 'Reembolsos' },
+              conversion: { title: 'Conversão' },
+              trend: {
+                title: 'Receita por semana',
+                description: 'Últimas doze semanas, todos os canais',
+              },
+              products: { title: 'Produtos mais vendidos' },
+            })}
+          />
+        </DashboardGridDefaultsProvider>
+      </SlottedProvider>
     </One>
   ),
 };

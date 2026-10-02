@@ -75,24 +75,6 @@ export interface CommandPaletteDefaults {
   /** The chord that opens the palette anywhere in the document; `null` for none. */
   hotkey: string | null;
   recentLimit: number;
-  label: string;
-  inputLabel: string;
-  placeholder: string;
-  emptyLabel: string;
-  loadingLabel: string;
-  /** `{message}` becomes the error's message. */
-  errorLabel: string;
-  /** `{count}` becomes the number. */
-  countLabel: string;
-  recentLabel: string;
-  clearLabel: string;
-  /** The word on the close control a full-screen palette draws. */
-  closeLabel: string;
-  backLabel: string;
-  hintNavigate: string;
-  hintSelect: string;
-  hintClose: string;
-  hintBack: string;
 }
 
 /**
@@ -110,21 +92,6 @@ export const COMMAND_PALETTE_FALLBACK: CommandPaletteDefaults = {
   highlightMatch: true,
   hotkey: 'mod+k',
   recentLimit: 5,
-  label: 'Command palette',
-  inputLabel: 'Search commands',
-  placeholder: 'Type a command or search…',
-  emptyLabel: 'No results',
-  loadingLabel: 'Loading…',
-  errorLabel: 'The command failed: {message}',
-  countLabel: '{count} results',
-  recentLabel: 'Recent',
-  clearLabel: 'Clear',
-  closeLabel: 'Close',
-  backLabel: 'Back',
-  hintNavigate: 'Navigate',
-  hintSelect: 'Select',
-  hintClose: 'Close',
-  hintBack: 'Back',
 };
 
 export const COMMAND_PALETTE_DEFAULTS = new InjectionToken<CommandPaletteDefaults>(
@@ -132,7 +99,10 @@ export const COMMAND_PALETTE_DEFAULTS = new InjectionToken<CommandPaletteDefault
   { providedIn: 'root', factory: () => COMMAND_PALETTE_FALLBACK },
 );
 
-/** The decisions an application takes once, the fourteen sentences included. */
+/**
+ * The decisions an application takes once. The sentences the family speaks
+ * come from the language in force (`provideSlotted`).
+ */
 export function provideCommandPaletteDefaults(defaults: Partial<CommandPaletteDefaults>): Provider {
   return {
     provide: COMMAND_PALETTE_DEFAULTS,

@@ -1933,10 +1933,10 @@ button.slotted-demo-nav-account,
 }
 
 /**
- * What a pane's body holds, in a product: a record's fields on the pane's own
- * inset, and a title that is one line. The shell gives the pane its head, its
- * body and its foot; the product gives them content on the geometry the head
- * stands on, so the first field's label starts where the title does.
+ * What a pane's body holds, in a product: a record's fields, and a title that
+ * is one line. The shell gives the pane its head, its body and its foot, and
+ * the body stands on the inset the head stands on, so the first field's label
+ * starts where the title does without a padding written here.
  */
 .slotted-demo-pane-fields {
   display: grid;
@@ -1946,11 +1946,6 @@ button.slotted-demo-nav-account,
   grid-template-columns: max-content minmax(0, 1fr);
   line-height: var(--slotted-line-height-sm);
   margin: 0;
-  padding: var(--slotted-space-4)
-    calc(
-      var(--slotted-app-shell-row-inset, var(--slotted-space-4)) +
-        var(--slotted-app-shell-row-gap, var(--slotted-control-gap-md))
-    );
 }
 .slotted-demo-pane-fields > dt {
   color: var(--slotted-text-muted);
@@ -1968,15 +1963,10 @@ button.slotted-demo-nav-account,
   font-weight: var(--slotted-font-weight-semibold);
   line-height: var(--slotted-line-height-sm);
 }
-/* A pane holding a form: the fields take the pane's own inset. */
+/* A pane holding a form: the fields stand on the pane body's own inset. */
 .slotted-demo-pane-form {
   display: grid;
   gap: var(--slotted-space-5);
-  padding: var(--slotted-space-5)
-    calc(
-      var(--slotted-app-shell-row-inset, var(--slotted-space-4)) +
-        var(--slotted-app-shell-row-gap, var(--slotted-control-gap-md))
-    );
 }
 
 /**

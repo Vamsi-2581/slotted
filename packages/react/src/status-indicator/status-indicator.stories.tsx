@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 
 import { Avatar } from '../avatar';
 import { Badge, BadgeAnchor } from '../badge';
+import { SlottedProvider } from '../i18n';
 import { Heading, Text } from '../typography';
 import { VisuallyHidden } from '../visually-hidden';
 import { StatusIndicator } from './status-indicator';
@@ -379,17 +380,22 @@ export const Content: Story = {
       </Scene>
       <Scene
         label="Another language, decided once"
-        note="The provider replaces the six fallback words, so a bare mark announces “Fehler” without a translation call at any call site."
+        note="A catalog for the locale replaces the six fallback words, so a bare mark announces “Fehler” without a translation call at any call site."
       >
-        <StatusIndicatorDefaultsProvider
-          labels={{ danger: 'Fehler', success: 'Erfolgreich', warning: 'Warnung' }}
+        <SlottedProvider
+          catalogs={{
+            'de-DE': {
+              statusIndicator: { danger: 'Fehler', success: 'Erfolgreich', warning: 'Warnung' },
+            },
+          }}
+          locale="de-DE"
         >
           <StatusIndicator status="danger" />
           <StatusIndicator status="success">Bereitstellung abgeschlossen</StatusIndicator>
           <StatusIndicator mark="icon" status="warning">
             Zertifikat läuft ab
           </StatusIndicator>
-        </StatusIndicatorDefaultsProvider>
+        </SlottedProvider>
       </Scene>
     </div>
   ),

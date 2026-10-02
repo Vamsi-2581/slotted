@@ -1712,6 +1712,27 @@ export const contract: TokenContract = {
       "root": true
     },
     {
+      "name": "--slotted-control-label-gap-sm",
+      "layer": "semantic",
+      "axis": "density",
+      "type": "length",
+      "root": true
+    },
+    {
+      "name": "--slotted-control-label-gap-md",
+      "layer": "semantic",
+      "axis": "density",
+      "type": "length",
+      "root": true
+    },
+    {
+      "name": "--slotted-control-label-gap-lg",
+      "layer": "semantic",
+      "axis": "density",
+      "type": "length",
+      "root": true
+    },
+    {
       "name": "--slotted-control-inner-size-sm",
       "layer": "semantic",
       "axis": "density",
@@ -2213,6 +2234,9 @@ export type DensityToken =
   | '--slotted-control-gap-sm'
   | '--slotted-control-gap-md'
   | '--slotted-control-gap-lg'
+  | '--slotted-control-label-gap-sm'
+  | '--slotted-control-label-gap-md'
+  | '--slotted-control-label-gap-lg'
   | '--slotted-control-inner-size-sm'
   | '--slotted-control-inner-size-md'
   | '--slotted-control-inner-size-lg'
@@ -2362,6 +2386,7 @@ export type ComponentToken =
   | '--slotted-alert-title-font-family'
   | '--slotted-alert-title-font-weight'
   | '--slotted-app-shell-aside-color'
+  | '--slotted-app-shell-aside-extent'
   | '--slotted-app-shell-aside-size-lg'
   | '--slotted-app-shell-aside-size-md'
   | '--slotted-app-shell-aside-size-sm'
@@ -2390,6 +2415,7 @@ export type ComponentToken =
   | '--slotted-app-shell-nav-surface'
   | '--slotted-app-shell-radius'
   | '--slotted-app-shell-rail-size'
+  | '--slotted-app-shell-resizer-color'
   | '--slotted-app-shell-row-font-size'
   | '--slotted-app-shell-row-gap'
   | '--slotted-app-shell-row-height'
@@ -3227,6 +3253,7 @@ export type ComponentToken =
   | '--slotted-grid-min-item-width-sm'
   | '--slotted-grid-min-item-width-xl'
   | '--slotted-grid-min-item-width-xs'
+  | '--slotted-ground'
   | '--slotted-highlight-background'
   | '--slotted-highlight-color'
   | '--slotted-highlight-current-background'
@@ -4508,6 +4535,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-alert-title-font-family",
   "--slotted-alert-title-font-weight",
   "--slotted-app-shell-aside-color",
+  "--slotted-app-shell-aside-extent",
   "--slotted-app-shell-aside-size-lg",
   "--slotted-app-shell-aside-size-md",
   "--slotted-app-shell-aside-size-sm",
@@ -4536,6 +4564,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-app-shell-nav-surface",
   "--slotted-app-shell-radius",
   "--slotted-app-shell-rail-size",
+  "--slotted-app-shell-resizer-color",
   "--slotted-app-shell-row-font-size",
   "--slotted-app-shell-row-gap",
   "--slotted-app-shell-row-height",
@@ -5373,6 +5402,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-grid-min-item-width-sm",
   "--slotted-grid-min-item-width-xl",
   "--slotted-grid-min-item-width-xs",
+  "--slotted-ground",
   "--slotted-highlight-background",
   "--slotted-highlight-color",
   "--slotted-highlight-current-background",

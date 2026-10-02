@@ -187,11 +187,11 @@ export const ANGULAR_FIELD_GROUP_DOCS = {
         'How the set’s necessity is said on its legend — an asterisk, (optional) on an optional set only, both words, or nothing — and the style provided to every field inside',
       ],
       [
-        'necessityWords',
-        '{ required?: string; optional?: string }',
-        '(required) / (optional)',
+        'messages',
+        'Partial<FieldMessages>',
+        '—',
         'slFieldGroup',
-        'The two words necessity="optional" and necessity="words" write, merged over the inherited pair and provided to every field inside',
+        'Words laid over the language in force for the legend’s necessity word (optional, required); a field inside states its own',
       ],
       [
         'labelPlacement',
@@ -288,10 +288,10 @@ export const ANGULAR_FIELD_GROUP_DOCS = {
       ],
       [
         'provideFieldDefaults()',
-        '{ size, labelPlacement, necessity, necessityWords, helpLabel, disabled, readOnly }',
+        '{ size, labelPlacement, necessity, disabled, readOnly }',
         '—',
         'an application or a route',
-        'The same six decisions, taken once for the whole application. A group overrides them for its own subtree, and an outer group for an inner one',
+        'The same five decisions, taken once for the whole application. A group overrides them for its own subtree, and an outer group for an inner one',
       ],
     ]),
     accessibility: [

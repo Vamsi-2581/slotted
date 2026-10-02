@@ -1,9 +1,11 @@
+import { buttonMessages } from '@slotted/core/i18n';
+
+import { useMessages } from '../i18n';
 import { ButtonContent } from './button-content';
 import { BUTTON_DEFAULTS } from './button.constants';
 import {
   blockActivation,
   inertness,
-  loadingLabelOf,
   rootData,
   useAppearance,
   useLoadingIndicator,
@@ -23,7 +25,7 @@ export function Button({
   fullWidth = false,
   loading = false,
   loadingDelay = 0,
-  loadingLabel,
+  messages,
   onClick,
   onClickCapture,
   render,
@@ -37,6 +39,7 @@ export function Button({
   const appearance = useAppearance({ size, tone, variant }, BUTTON_DEFAULTS);
   const inert = inertness({ disabled, focusableWhenDisabled, loading });
   const waiting = useLoadingIndicator({ loading, loadingDelay });
+  const t = useMessages(buttonMessages, messages);
 
   const rootProps: ButtonRootProps = {
     ...nativeProps,
@@ -45,7 +48,7 @@ export function Button({
     children: (
       <ButtonContent
         end={end}
-        indicator={waiting ? <ButtonIndicator label={loadingLabelOf({ loadingLabel })} /> : null}
+        indicator={waiting ? <ButtonIndicator label={t('loading')} /> : null}
         start={start}
       >
         {children}

@@ -54,6 +54,7 @@ import {
   type ResolvedGridColumn,
   type SortDirection,
 } from '@slotted/core/grid';
+import { dataGridMessages, dragMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createScrollAffordance } from '@slotted/core/overflow';
 import type { PositionerAnchor } from '@slotted/core/positioner';
@@ -70,6 +71,7 @@ import {
 import type { CSSProperties, KeyboardEvent, MouseEvent, PointerEvent, ReactNode } from 'react';
 
 import { Button } from '../button';
+import { useLocale, useMessages } from '../i18n';
 import {
   ResultState,
   ResultStateActions,
@@ -89,7 +91,7 @@ import {
   type DataGridInternal,
   type EditSession,
 } from './data-grid-context';
-import { fill, resolveLabels, useDataGridDefaults } from './data-grid-defaults';
+import { useDataGridDefaults } from './data-grid-defaults';
 import { useDataSource } from './use-data-source';
 import { DataGridHead } from './data-grid-header';
 import {
@@ -228,12 +230,11 @@ export function DataGrid<Row>({
   hasMore: givenHasMore,
   height,
   highlightChanges,
-  label,
   labelledBy,
-  labels,
   loadMoreThreshold,
   loading: givenLoading,
   locale,
+  messages,
   mode,
   onActivate,
   onColumnStateChange,
@@ -295,10 +296,9 @@ export function DataGrid<Row>({
   const scroll = useRef<HTMLDivElement | null>(null);
 
   /* ── Resolution ─────────────────────────────────────────────────────── */
-  const resolvedLabels = useMemo(
-    () => resolveLabels(defaults.labels, labels),
-    [defaults.labels, labels],
-  );
+  const t = useMessages(dataGridMessages, messages);
+  const dragT = useMessages(dragMessages);
+  const providedLocale = useLocale();
   const resolvedVariant = variant ?? defaults.variant ?? 'ruled';
   const resolvedStriped = striped ?? defaults.striped ?? false;
   const resolvedSticky = stickyHeader ?? defaults.stickyHeader ?? true;
@@ -313,7 +313,7 @@ export function DataGrid<Row>({
   const resolvedDebounce = filterDebounce ?? defaults.filterDebounce ?? 300;
   const resolvedThreshold = loadMoreThreshold ?? defaults.loadMoreThreshold ?? 20;
   const resolvedSkeleton = skeletonRows ?? defaults.skeletonRows ?? 8;
-  const resolvedLocale = locale ?? defaults.locale;
+  const resolvedLocale = locale ?? providedLocale;
   const resolvedActivatable = activatable ?? false;
 
   const rowKeyOf = useCallback(
@@ -323,13 +323,17 @@ export function DataGrid<Row>({
         : String((row as Record<keyof Row, unknown>)[rowKey]),
     [rowKey],
   );
+  /* Strings, not the translator, are the dependencies: an inline `messages`
+     object makes a new translator on every render. */
+  const booleanYes = t('filterYes');
+  const booleanNo = t('filterNo');
   const formatOptions = useMemo(
     () => ({
       locale: resolvedLocale,
       timeZone,
-      booleans: { true: resolvedLabels.filterYes, false: resolvedLabels.filterNo },
+      booleans: { true: booleanYes, false: booleanNo },
     }),
-    [resolvedLocale, timeZone, resolvedLabels.filterYes, resolvedLabels.filterNo],
+    [resolvedLocale, timeZone, booleanYes, booleanNo],
   );
   const textOf = useCallback(
     (column: GridColumn<Row>, row: Row) => cellText(column, row, formatOptions),
@@ -960,24 +964,19 @@ export function DataGrid<Row>({
   const announceSort = useCallback(
     (next: GridQuery) => {
       if (next.sort.length === 0) {
-        announce(resolvedLabels.sortCleared);
+        announce(t('sortCleared'));
         return;
       }
       const order = next.sort
         .map((key) =>
-          fill(
-            key.direction === 'ascending'
-              ? resolvedLabels.sortAscending
-              : resolvedLabels.sortDescending,
-            {
-              column: labelOf(key.column),
-            },
-          ),
+          t(key.direction === 'ascending' ? 'sortAscending' : 'sortDescending', {
+            column: labelOf(key.column),
+          }),
         )
         .join(', ');
-      announce(fill(resolvedLabels.sortedBy, { order }));
+      announce(t('sortedBy', { order }));
     },
-    [announce, resolvedLabels, labelOf],
+    [announce, t, labelOf],
   );
   const pressSort = useCallback(
     (columnId: string, append: boolean, source?: unknown, reason: DataGridReason = 'pointer') => {
@@ -1101,9 +1100,9 @@ export function DataGrid<Row>({
       const column = columns.find((entry) => entry.id === columnId);
       if (!column || effectiveState.hidden.includes(columnId)) return;
       requestState(withColumnHidden(effectiveState, columnId, true), 'hidden', reason, source);
-      announce(fill(resolvedLabels.columnHidden, { column: column.label }));
+      announce(t('columnHidden', { column: column.label }));
     },
-    [columns, effectiveState, requestState, announce, resolvedLabels.columnHidden],
+    [columns, effectiveState, requestState, announce, t],
   );
   const resizeTo = useCallback(
     (columnId: string, width: number, reason: DataGridReason, source?: unknown) => {
@@ -1113,14 +1112,14 @@ export function DataGrid<Row>({
       requestState(next, 'width', reason, source);
       if (reason === 'keyboard') {
         announce(
-          fill(resolvedLabels.resized, {
+          t('resized', {
             column: column.label,
-            width: next.widths[columnId] ?? width,
+            width: String(next.widths[columnId] ?? width),
           }),
         );
       }
     },
-    [columns, effectiveState, requestState, announce, resolvedLabels.resized],
+    [columns, effectiveState, requestState, announce, t],
   );
   const resizeBy = useCallback(
     (columnId: string, delta: number, source?: unknown) => {
@@ -1210,8 +1209,8 @@ export function DataGrid<Row>({
     scrollTop: 0,
   });
   const drag = useRef<DragController | null>(null);
-  const latest = useRef({ resolved, effectiveState, requestState, gutters, labelOf });
-  latest.current = { resolved, effectiveState, requestState, gutters, labelOf };
+  const latest = useRef({ resolved, effectiveState, requestState, gutters, labelOf, t, dragT });
+  latest.current = { resolved, effectiveState, requestState, gutters, labelOf, t, dragT };
   const draggables = useRef(new Map<string, () => void>());
   const swallowClick = useRef(false);
 
@@ -1266,6 +1265,7 @@ export function DataGrid<Row>({
        the edge. */
     const controller = createDragController({
       document: element.ownerDocument,
+      t: (key, slots) => latest.current.dragT(key, slots),
       preview: false,
       /* The scroller moves sideways when a header is dragged to its edge, so a
          column can reach a place past the viewport; never up or down — the
@@ -1296,7 +1296,7 @@ export function DataGrid<Row>({
       element: () =>
         element.querySelector('[data-part="head"] > [data-part="header-row"]:last-of-type'),
       itemElement: headerOf,
-      label: () => 'columns',
+      label: () => latest.current.t('dragColumns'),
       itemLabel: (columnId) => latest.current.labelOf(columnId),
     });
     let wasDragging = false;
@@ -1404,6 +1404,8 @@ export function DataGrid<Row>({
     rowsReorderableNow,
     onRowsReorder,
     labelOf: rowLabelOf,
+    t,
+    dragT,
   });
   latestRows.current = {
     nodeByKey,
@@ -1411,6 +1413,8 @@ export function DataGrid<Row>({
     rowsReorderableNow,
     onRowsReorder,
     labelOf: rowLabelOf,
+    t,
+    dragT,
   };
   const attachRowNode = useCallback((node: HTMLElement | null, key: string) => {
     const controller = rowDrag.current;
@@ -1458,6 +1462,7 @@ export function DataGrid<Row>({
     if (!element || !hasDragColumn) return;
     const controller = createDragController({
       document: element.ownerDocument,
+      t: (key, slots) => latestRows.current.dragT(key, slots),
       preview: false,
       autoScroll: { axis: 'y' },
       onDrop: ({ items, target, reason, event }) => {
@@ -1483,7 +1488,7 @@ export function DataGrid<Row>({
       orientation: 'vertical',
       element: () => element.querySelector('[data-part="body"]'),
       itemElement: rowOf,
-      label: () => 'rows',
+      label: () => latestRows.current.t('dragRows'),
       itemLabel: (key) => latestRows.current.labelOf(key),
     });
     const unsubscribe = controller.subscribe((state) => {
@@ -1533,13 +1538,13 @@ export function DataGrid<Row>({
       if (!move) return;
       onRowsReorder?.({ ...move, reason: 'keyboard', event: source as Event | undefined });
       announce(
-        fill(resolvedLabels.rowMoved, {
+        t('rowMoved', {
           row: latestRows.current.labelOf(key),
           position: move.to + 1,
         }),
       );
     },
-    [rowMove, onRowsReorder, announce, resolvedLabels.rowMoved],
+    [rowMove, onRowsReorder, announce, t],
   );
 
   /* ── Changed cells ──────────────────────────────────────────────────── */
@@ -1806,9 +1811,7 @@ export function DataGrid<Row>({
           after();
         } catch (failure) {
           const message =
-            failure instanceof Error && failure.message
-              ? failure.message
-              : resolvedLabels.editFailed;
+            failure instanceof Error && failure.message ? failure.message : t('editFailed');
           setEdit((state) =>
             state ? { ...state, status: 'invalid', messages: { [primary]: message } } : state,
           );
@@ -1817,19 +1820,11 @@ export function DataGrid<Row>({
       };
       void run();
     },
-    [
-      rowOf,
-      nextEditableCell,
-      setCurrent,
-      resolvedEditMode,
-      startEdit,
-      columns,
-      onEditCommit,
-      resolvedLabels.editFailed,
-    ],
+    [rowOf, nextEditableCell, setCurrent, resolvedEditMode, startEdit, columns, onEditCommit, t],
   );
 
   /* A row that changes under an open editor is a conflict, not a refresh. */
+  const editConflict = t('editConflict');
   useEffect(() => {
     const session = editRef.current;
     if (!session || session.status === 'pending') return;
@@ -1839,13 +1834,13 @@ export function DataGrid<Row>({
     for (const columnId of session.columns) {
       const column = columns.find((entry) => entry.id === columnId);
       if (column && !Object.is(cellValue(column, row), session.originals[columnId])) {
-        conflicts[columnId] = resolvedLabels.editConflict;
+        conflicts[columnId] = editConflict;
       }
     }
     if (Object.keys(conflicts).length > 0) {
       setEdit({ ...session, status: 'invalid', messages: { ...session.messages, ...conflicts } });
     }
-  }, [rows, rowOf, columns, resolvedLabels.editConflict]);
+  }, [rows, rowOf, columns, editConflict]);
 
   const activate = useCallback(
     (key: string, reason: 'pointer' | 'keyboard', event: unknown) => {
@@ -1979,12 +1974,10 @@ export function DataGrid<Row>({
       });
       const outcome = await writeToClipboard(text, root.current?.ownerDocument);
       if (outcome !== 'refused') {
-        announce(
-          fill(resolvedLabels.copied, { count: cells.reduce((sum, line) => sum + line.length, 0) }),
-        );
+        announce(t('copied', { count: cells.reduce((sum, line) => sum + line.length, 0) }));
       }
     },
-    [bounds, cursorGrid, rowOf, columns, textOf, announce, resolvedLabels.copied],
+    [bounds, cursorGrid, rowOf, columns, textOf, announce, t],
   );
 
   const onCellKeyDown = useCallback(
@@ -2530,9 +2523,9 @@ export function DataGrid<Row>({
       const own = editorRenderers?.[context.column.id];
       if (own) return own(context);
       if (renderEditor) return renderEditor(context);
-      return defaultEditor(context, resolvedLabels, resolvedLocale);
+      return defaultEditor(context, t, resolvedLocale);
     },
-    [editorRenderers, renderEditor, resolvedLabels, resolvedLocale],
+    [editorRenderers, renderEditor, t, resolvedLocale],
   );
 
   /* ── Handle ─────────────────────────────────────────────────────────── */
@@ -2593,8 +2586,8 @@ export function DataGrid<Row>({
       return toCsv(chosen, model, {
         locale: resolvedLocale,
         timeZone,
-        booleans: formatOptions.booleans,
         ...csv,
+        booleans: csv.booleans ?? formatOptions.booleans,
       });
     },
     [
@@ -2714,8 +2707,9 @@ export function DataGrid<Row>({
   const internal = useMemo<DataGridInternal<Row>>(
     () => ({
       id,
-      labels: resolvedLabels,
+      t,
       locale: resolvedLocale,
+      booleans: formatOptions.booleans,
       timeZone,
       columns,
       resolved,
@@ -2820,8 +2814,9 @@ export function DataGrid<Row>({
     }),
     [
       id,
-      resolvedLabels,
+      t,
       resolvedLocale,
+      formatOptions.booleans,
       timeZone,
       columns,
       resolved,
@@ -2949,12 +2944,8 @@ export function DataGrid<Row>({
       resolvedMode === 'client' ? nodes.filter((node) => node.kind === 'row').length : rows.length;
     const last = start + shown - 1;
     return total === null || total < 0
-      ? fill(resolvedLabels.rangeUnknown, { start, end: last })
-      : fill(resolvedLabels.range, {
-          start,
-          end: last,
-          total: total.toLocaleString(resolvedLocale),
-        });
+      ? t('rangeUnknown', { start, end: last })
+      : t('range', { start, end: last, total });
   })();
 
   const emptyContent = (() => {
@@ -2962,11 +2953,7 @@ export function DataGrid<Row>({
     const kind = status;
     if (renderEmpty) return renderEmpty(kind);
     const title =
-      kind === 'error'
-        ? resolvedLabels.error
-        : kind === 'no-results'
-          ? resolvedLabels.noResults
-          : resolvedLabels.empty;
+      kind === 'error' ? t('error') : kind === 'no-results' ? t('noResults') : t('empty');
     return (
       <ResultState reach="section" status={kind} tabIndex={-1}>
         <ResultStateTitle>{title}</ResultStateTitle>
@@ -2985,11 +2972,11 @@ export function DataGrid<Row>({
                 tone="secondary"
                 variant="outline"
               >
-                {resolvedLabels.clearFilters}
+                {t('clearFilters')}
               </Button>
             ) : (
               <Button onClick={() => onRetry?.()} size="sm" tone="secondary" variant="outline">
-                {resolvedLabels.retry}
+                {t('retry')}
               </Button>
             )}
           </ResultStateActions>
@@ -3004,7 +2991,7 @@ export function DataGrid<Row>({
         {...nativeProps}
         aria-busy={loading && rows.length > 0 ? true : undefined}
         aria-colcount={ariaColCount}
-        aria-label={label ?? (labelledBy ? undefined : resolvedLabels.grid)}
+        aria-label={nativeProps['aria-label'] ?? (labelledBy ? undefined : t('grid'))}
         aria-labelledby={labelledBy}
         aria-multiselectable={
           resolvedSelection === 'multiple' || resolvedSelection === 'range' ? true : undefined
@@ -3121,7 +3108,7 @@ export function DataGrid<Row>({
                   tone="secondary"
                   variant="outline"
                 >
-                  {resolvedLabels.loadMore}
+                  {t('loadMore')}
                 </Button>
               </div>
             ) : null}

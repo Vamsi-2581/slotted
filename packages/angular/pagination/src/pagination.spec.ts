@@ -2,6 +2,9 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/pagination/contract.json';
 import {
   SlPagination,
@@ -235,9 +238,22 @@ describe('SlPagination', () => {
   });
 
   it('takes the application defaults, and yields to an explicit input', () => {
-    const { part } = setup([providePaginationDefaults({ labels: { next: 'Próxima' } })]);
+    const { pages } = setup([providePaginationDefaults({ siblingCount: 2 })]);
 
-    expect(part('next').getAttribute('aria-label')).toBe('Próxima');
-    expect(part('previous').getAttribute('aria-label')).toBe('Previous page');
+    expect(pages()).toEqual(['1', '2', '3', '4', '5', '6', '7', '25']);
+  });
+
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const { part, root, settle } = setup([
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+
+    expect(root.getAttribute('aria-label')).toBe('Paginação');
+    expect(part('next').getAttribute('aria-label')).toBe('Próxima página');
+
+    locale.set('en-US');
+    settle();
+    expect(part('next').getAttribute('aria-label')).toBe('Next page');
   });
 });

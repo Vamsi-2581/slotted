@@ -21,17 +21,17 @@ import type { EventRenderContext } from './event-calendar.types';
  * which says so in words elsewhere.
  */
 export function timeLabel(
-  model: Pick<EventCalendarModel, 'labels' | 'locale' | 'hourCycle'>,
+  model: Pick<EventCalendarModel, 't' | 'locale' | 'hourCycle'>,
   occurrence: EventOccurrence,
   date: PlainDate,
 ): string {
-  if (occurrence.allDay) return model.labels.allDay;
+  if (occurrence.allDay) return model.t('allDay');
   const options = { locale: model.locale, hourCycle: model.hourCycle };
   const { start, end } = occurrenceTimes(occurrence, date);
   if (start !== null && end !== null) return formatTimeRange(start, end, options);
-  if (start !== null) return model.labels.from(formatTime(start, options));
-  if (end !== null) return model.labels.until(formatTime(end, options));
-  return model.labels.allDay;
+  if (start !== null) return model.t('from', { time: formatTime(start, options) });
+  if (end !== null) return model.t('until', { time: formatTime(end, options) });
+  return model.t('allDay');
 }
 
 /**
@@ -46,14 +46,15 @@ function metaText(
 ): string {
   const parts = [
     formatOccurrence(occurrence, { locale: model.locale, hourCycle: model.hourCycle }),
-    occurrence.allDay ? model.labels.allDay : undefined,
+    occurrence.allDay ? model.t('allDay') : undefined,
     model.calendarLabel(occurrence.event.calendar),
-    occurrence.event.status === 'tentative' ? model.labels.tentative : undefined,
-    occurrence.event.status === 'cancelled' ? model.labels.cancelled : undefined,
-    occurrence.recurring ? model.labels.recurring : undefined,
-    continued ? model.labels.continues : undefined,
+    occurrence.event.status === 'tentative' ? model.t('tentative') : undefined,
+    occurrence.event.status === 'cancelled' ? model.t('cancelled') : undefined,
+    occurrence.recurring ? model.t('recurring') : undefined,
+    continued ? model.t('continues') : undefined,
   ].filter((part): part is string => part !== undefined && part !== '');
-  return `, ${parts.join(', ')}`;
+  /* A list of descriptors, written the way the locale in force lists them. */
+  return `, ${new Intl.ListFormat(model.locale, { type: 'unit' }).format(parts)}`;
 }
 
 export interface EventItemProps {

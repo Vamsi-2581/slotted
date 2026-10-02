@@ -193,6 +193,39 @@ describe('SlTooltip', () => {
     expect(layer()).toBeNull();
   });
 
+  /**
+   * A rail hint is disabled while the navigation is expanded and enabled in the
+   * rail. A hover while disabled has to leave nothing behind, or every hint
+   * hovered in the expanded navigation appears at once when it collapses.
+   */
+  it('keeps no open state from a hover while disabled, once it is enabled again', async () => {
+    fixture.componentInstance.disabled.set(true);
+    await settle(fixture);
+
+    trigger(fixture).dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    await settle(fixture);
+    trigger(fixture).dispatchEvent(new PointerEvent('pointerleave', { pointerType: 'mouse' }));
+    await settle(fixture);
+
+    fixture.componentInstance.disabled.set(false);
+    await settle(fixture);
+    expect(layer()).toBeNull();
+    expect(fixture.componentInstance.open()).toBe(false);
+    expect(trigger(fixture).hasAttribute('data-open')).toBe(false);
+  });
+
+  it('drops its open state when it becomes disabled', async () => {
+    fixture.componentInstance.open.set(true);
+    await settle(fixture);
+    expect(layer()).not.toBeNull();
+
+    fixture.componentInstance.disabled.set(true);
+    await settle(fixture);
+    fixture.componentInstance.disabled.set(false);
+    await settle(fixture);
+    expect(fixture.componentInstance.open()).toBe(false);
+  });
+
   it('paints the axes the stylesheet reads', async () => {
     fixture.componentInstance.size.set('sm');
     fixture.componentInstance.open.set(true);

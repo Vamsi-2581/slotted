@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "rating",
   "ui": "rating",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Star rating input, display and summary."
+  },
   "rootRole": {
     "rating": "radiogroup",
     "ratingDisplay": "img",
@@ -24,13 +28,13 @@
     "ratingSummary": "fillProperty on the aggregate display, shareProperty on each level"
   },
   "itemLabel": {
-    "default": "{value} de {max}",
+    "message": "itemLabel",
     "on": "input",
     "attribute": "aria-label"
   },
   "displayLabel": {
-    "default": "Avaliação {value} de {max}",
-    "withCount": "Avaliação {value} de {max}, {count} avaliações",
+    "message": "displayLabel",
+    "withCount": "displayLabelWithCount",
     "on": "root",
     "attribute": "aria-label"
   },
@@ -157,7 +161,7 @@
     "summaryVariant": ["prop", "defaults", "bars"]
   },
   "provides": {
-    "ratingDefaults": ["size", "tone", "max", "clearable", "messages", "insightThresholds"]
+    "ratingDefaults": ["size", "tone", "max", "clearable", "insightThresholds"]
   },
   "imperative": ["focus"],
   "stateAttributes": {
@@ -277,15 +281,15 @@
   "core": "@slotted/core/rating",
   "edgeToken": "--slotted-rating-edge",
   "summaryLabel": {
-    "default": "Com base em {count} avaliações",
-    "empty": "Ainda sem avaliações",
-    "level": "{level} estrelas: {count} avaliações, {share}",
-    "margin": "margem de ± {margin}",
-    "uncertain": "média incerta, entre {low} e {high}",
+    "default": "summaryCount",
+    "empty": "summaryEmpty",
+    "level": "levelLabel",
+    "margin": "spectrumCount",
+    "uncertain": "spectrumUncertain",
     "buckets": {
-      "positive": "{share} positivas",
-      "neutral": "{share} neutras",
-      "negative": "{share} negativas"
+      "positive": "positive",
+      "neutral": "neutral",
+      "negative": "negative"
     }
   },
   "meanProperties": ["--slotted-rating-mean", "--slotted-rating-low", "--slotted-rating-high"],
@@ -299,10 +303,10 @@
       "consensus": 0.8
     },
     "messages": {
-      "divided": "Opiniões divididas",
-      "few": "Poucas avaliações",
-      "consensus": "Consenso forte",
-      "mixed": "Opiniões variadas"
+      "divided": "divided",
+      "few": "few",
+      "consensus": "consensus",
+      "mixed": "mixed"
     },
     "tone": {
       "divided": "warning",
@@ -313,24 +317,24 @@
     "interval": "95%, normal approximation, clamped to the scale",
     "shownIn": "spectrum"
   },
-  "messages": {
-    "itemLabel": "{value} de {max}",
-    "displayLabel": "Avaliação {value} de {max}",
-    "displayLabelWithCount": "Avaliação {value} de {max}, {count, plural, =0 {# avaliações} one {# avaliação} other {# avaliações}}",
-    "scale": "de {max}",
-    "summaryCount": "Com base em {count, plural, =0 {# avaliações} one {# avaliação} other {# avaliações}}",
-    "summaryEmpty": "Ainda sem avaliações",
-    "spectrumCount": "{count, plural, =0 {# avaliações} one {# avaliação} other {# avaliações}} · margem de ± {margin}",
-    "spectrumUncertain": "{count, plural, =0 {# avaliações} one {# avaliação} other {# avaliações}} · média incerta, entre {low} e {high}",
-    "levelLabel": "{level, plural, one {# estrela} other {# estrelas}}: {count, plural, =0 {# avaliações} one {# avaliação} other {# avaliações}}, {share}",
-    "distributionLabel": "Distribuição por estrelas",
-    "positive": "{share} positivas",
-    "neutral": "{share} neutras",
-    "negative": "{share} negativas",
-    "divided": "Opiniões divididas",
-    "few": "Poucas avaliações",
-    "consensus": "Consenso forte",
-    "mixed": "Opiniões variadas"
-  },
-  "messageFormat": "@slotted/core/rating formatRatingMessage; shares with formatShare"
+  "messages": [
+    "consensus",
+    "displayLabel",
+    "displayLabelWithCount",
+    "distributionLabel",
+    "divided",
+    "few",
+    "itemLabel",
+    "levelLabel",
+    "mixed",
+    "negative",
+    "neutral",
+    "positive",
+    "scale",
+    "spectrumCount",
+    "spectrumUncertain",
+    "summaryCount",
+    "summaryEmpty"
+  ],
+  "messageFormat": "@slotted/core/i18n message grammar; {value} written by formatRatingValue, shares by formatShare"
 }

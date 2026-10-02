@@ -1,5 +1,6 @@
 import { plainDate } from '@slotted/core/date';
 import type { PlainDate, SegmentState } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -8,6 +9,7 @@ import { useRef, useState } from 'react';
 
 import { Button } from '../button';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { Icon } from '../icon';
 import { DateField } from './date-field';
 import { DateFieldDefaultsProvider } from './date-field-defaults';
@@ -419,20 +421,22 @@ export const Composition: Story = {
       <Grid columns={2}>
         <Scene
           label="Set once for the application"
-          note="The provider decides the locale, the zone and the pivot for everything under it. Unset, each control asks the browser — which is the reader’s locale and not the application’s."
+          note="The provider decides the zone and the appearance for everything under it, and SlottedProvider the language that writes the date and names the clear button."
         >
-          <DateFieldDefaultsProvider locale="pt-BR" timeZone="America/Sao_Paulo" variant="subtle">
-            <DateField aria-label="Herdado" defaultValue={NINTH} />
-            <DateField aria-label="Também herdado" />
-          </DateFieldDefaultsProvider>
+          <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+            <DateFieldDefaultsProvider timeZone="America/Sao_Paulo" variant="subtle">
+              <DateField aria-label="Herdado" clearable defaultValue={NINTH} />
+              <DateField aria-label="Também herdado" />
+            </DateFieldDefaultsProvider>
+          </SlottedProvider>
         </Scene>
         <Scene
           label="One control outranks it"
-          note="An explicit prop always wins over a provider, so a single Japanese date inside a Brazilian application needs one attribute and no second provider."
+          note="An explicit prop always wins over the language in force, so a single Japanese date inside a Brazilian application needs one attribute and no second provider."
         >
-          <DateFieldDefaultsProvider locale="pt-BR">
+          <SlottedProvider locale="pt-BR">
             <DateField aria-label="日付" defaultValue={NINTH} locale="ja-JP" />
-          </DateFieldDefaultsProvider>
+          </SlottedProvider>
         </Scene>
         <Scene
           label="The imperative handle"

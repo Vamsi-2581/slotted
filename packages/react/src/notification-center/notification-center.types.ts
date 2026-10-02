@@ -1,3 +1,4 @@
+import type { NotificationCenterMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { TimestampValue } from '@slotted/core/timeline';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
@@ -86,56 +87,19 @@ export interface NotificationView {
   count?: number | undefined;
 }
 
-/** What the family says on the reader's behalf. */
-export interface NotificationCenterMessages {
-  /** The header's heading, and the root's name when the consumer gives none. */
-  title: string;
-  /** The mark-all control. */
-  markAll: string;
-  /** The read-toggle's name while the item is unread. */
-  markRead: string;
-  /** The read-toggle's name while the item is read. */
-  markUnread: string;
-  /** The dismiss control's name. */
-  dismiss: string;
-  /** The fresh control, and the announcement of held arrivals. */
-  fresh: (count: number) => string;
-  /** The announcement of the unread count. */
-  unread: (count: number) => string;
-  /** The more button. */
-  loadMore: string;
-  /** The waiting row under growing, and the root's name while loading with no title. */
-  loading: string;
-  /** The empty page under any view but unread. */
-  empty: string;
-  /** The empty page under the unread view. */
-  caughtUp: string;
-  /** The built-in `all` view's label. */
-  all: string;
-  /** The built-in `unread` view's label. */
-  unreadView: string;
-  /** The views strip's accessible name. */
-  views: string;
-}
-
 /** What an application sets once for every centre under it. */
 export interface NotificationCenterDefaults {
   arrivals: NotificationCenterArrivals;
   controls: NotificationCenterControls;
   growing: NotificationCenterGrowing;
   level: NotificationCenterLevel;
-  locale?: string | undefined;
-  messages: NotificationCenterMessages;
   size: NotificationCenterSize;
   timeFormat: NotificationCenterTimeFormat;
   timeZone?: string | undefined;
 }
 
-export interface NotificationCenterDefaultsProviderProps extends Partial<
-  Omit<NotificationCenterDefaults, 'messages'>
-> {
+export interface NotificationCenterDefaultsProviderProps extends Partial<NotificationCenterDefaults> {
   children?: ReactNode | undefined;
-  messages?: Partial<NotificationCenterMessages> | undefined;
 }
 
 /** What `renderItem` is told about the item it substitutes. */
@@ -208,9 +172,13 @@ export interface NotificationCenterProps extends Omit<
   level?: NotificationCenterLevel | undefined;
   /** `aria-busy` on the feed; skeleton rows while nothing is loaded, the waiting row under growing otherwise. */
   loading?: boolean | undefined;
-  /** For the time; defaults to the provider, then to the runtime's. */
+  /** For the time; defaults to the language in force (`SlottedProvider`). */
   locale?: string | undefined;
-  messages?: Partial<NotificationCenterMessages> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * heading, the controls, the views, the empty pages and the announcements.
+   */
+  messages?: PartialMessages<NotificationCenterMessages> | undefined;
   /** The instant a relative time is measured from. State it for a stable server render. */
   now?: number | undefined;
   /** Called before a page is asked for, with the request that carries the reason. */

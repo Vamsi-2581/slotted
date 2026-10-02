@@ -1,10 +1,5 @@
 export { Calendar } from './calendar';
-export {
-  CALENDAR_NEXT_LABEL,
-  CALENDAR_PREVIOUS_LABEL,
-  CalendarDefaultsProvider,
-  useCalendarDefaults,
-} from './calendar-defaults';
+export { CalendarDefaultsProvider, useCalendarDefaults } from './calendar-defaults';
 export {
   asDates,
   isRange,

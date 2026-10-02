@@ -10,6 +10,7 @@ import {
   plainLines,
 } from '@slotted/core/code';
 import type { CodeLine } from '@slotted/core/code';
+import { codeBlockMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import { fileKind } from '@slotted/core/upload';
@@ -21,9 +22,9 @@ import type { GlyphName } from '../icon';
 import { ScrollArea } from '../scroll-area';
 import type { ScrollAreaHandle } from '../scroll-area';
 import { Skeleton } from '../skeleton';
-import { CODE_BLOCK_LABELS, useCodeBlockDefaults } from './code-block-defaults';
+import { useMessages } from '../i18n';
+import { useCodeBlockDefaults } from './code-block-defaults';
 import type {
-  CodeBlockLabels,
   CodeBlockProps,
   CodeBlockRevealedReason,
   CodeBlockWrapReason,
@@ -59,12 +60,12 @@ export function CodeBlock({
   defaultWrap,
   fileName,
   highlight: highlightProp,
-  labels: labelsProp,
   language = 'text',
   lineNumbers: lineNumbersProp,
   loading = false,
   marks,
   maxLines,
+  messages,
   onCopy,
   onHighlightError,
   onRevealedChange,
@@ -82,10 +83,7 @@ export function CodeBlock({
   ...nativeProps
 }: CodeBlockProps) {
   const defaults = useCodeBlockDefaults();
-  const labels: CodeBlockLabels = useMemo(
-    () => ({ ...CODE_BLOCK_LABELS, ...defaults.labels, ...labelsProp }),
-    [defaults.labels, labelsProp],
-  );
+  const t = useMessages(codeBlockMessages, messages);
   const highlight = highlightProp === null ? undefined : (highlightProp ?? defaults.highlight);
   const lineNumbers = lineNumbersProp ?? defaults.lineNumbers ?? false;
   const copyControl = copyProp ?? defaults.copy ?? true;
@@ -166,9 +164,7 @@ export function CodeBlock({
       clearTimeout(timer.current);
       timer.current = setTimeout(() => setCopied(false), COPIED_FOR);
     }
-    getLiveAnnouncer(root.current?.ownerDocument).announce(
-      done ? labels.copied : labels.copyFailed,
-    );
+    getLiveAnnouncer(root.current?.ownerDocument).announce(t(done ? 'copied' : 'copyFailed'));
     onCopy?.({ copied: done, reason, source, value });
     return done;
   }
@@ -227,7 +223,7 @@ export function CodeBlock({
       {actions}
       {overflow || wrap ? (
         <button
-          aria-label={wrap ? labels.unwrap : labels.wrap}
+          aria-label={t(wrap ? 'unwrap' : 'wrap')}
           aria-pressed={wrap}
           data-part="wrap"
           onClick={(event) => requestWrap(!wrap, keyed.current ? 'keyboard' : 'pointer', event)}
@@ -244,7 +240,7 @@ export function CodeBlock({
       ) : null}
       {copyControl ? (
         <button
-          aria-label={labels.copy}
+          aria-label={t('copy')}
           data-part="copy"
           type="button"
           {...copyHandlers}
@@ -267,8 +263,7 @@ export function CodeBlock({
     ...(maxLines !== undefined ? { '--slotted-code-block-max-lines': maxLines } : {}),
   } as React.CSSProperties;
 
-  const regionName =
-    typeof title === 'string' ? title : (nativeProps['aria-label'] ?? labels.region);
+  const regionName = typeof title === 'string' ? title : (nativeProps['aria-label'] ?? t('region'));
 
   return (
     <div
@@ -308,11 +303,15 @@ export function CodeBlock({
       ) : null}
 
       <ScrollArea
-        axis="both"
+        /* Inline only, unless maxLines gives the body a height to scroll in:
+           a body scrolling both ways is a vertical scroll container with
+           nothing to scroll, and the scroll-area's `contain` keeps the page's
+           wheel from passing through it. */
+        axis={maxLines === undefined ? 'inline' : 'both'}
         fade="both"
         gutter="auto"
         id={`${base}body`}
-        label={regionName}
+        messages={{ label: regionName }}
         onOverflowChange={(state) => setOverflow(state.inline.overflowing)}
         ref={body}
         /* The scroll-area's root is this family's body: its own part name is
@@ -389,7 +388,7 @@ export function CodeBlock({
           }}
           type="button"
         >
-          {revealed ? labels.collapse : labels.reveal.replace('{count}', String(hidden))}
+          {revealed ? t('collapse') : t('reveal', { count: hidden })}
         </button>
       ) : null}
     </div>

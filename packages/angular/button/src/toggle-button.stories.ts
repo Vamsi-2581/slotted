@@ -133,8 +133,8 @@ export const Loading: Story = {
   parameters: scenario('loading'),
   render: () => ({
     template: `<div class="slotted-demo-row">
-      <button slToggleButton loading loadingLabel="Saving">Follow</button>
-      <button slToggleButton defaultPressed loading loadingLabel="Unpinning">Pinned</button>
+      <button slToggleButton loading [messages]="{ loading: 'Saving' }">Follow</button>
+      <button slToggleButton defaultPressed loading [messages]="{ loading: 'Unpinning' }">Pinned</button>
     </div>`,
   }),
 };

@@ -1,4 +1,4 @@
-export { StatCard, STAT_CARD_MESSAGES } from './stat-card';
+export { StatCard } from './stat-card';
 export { toneOf, trendOf, useStatCard } from './stat-card-context';
 export { StatCardDefaultsProvider, useStatCardDefaults } from './stat-card-defaults';
 export { StatCardDelta } from './stat-card-delta';
@@ -32,7 +32,6 @@ export type {
   StatCardLabelProps,
   StatCardLayout,
   StatCardMessageProps,
-  StatCardMessages,
   StatCardPartProps,
   StatCardPeriodProps,
   StatCardProps,

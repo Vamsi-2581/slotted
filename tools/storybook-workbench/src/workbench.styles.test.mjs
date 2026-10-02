@@ -843,9 +843,13 @@ test('offers the furniture a shell demonstration needs and the family does not o
   assert.match(css, /\.slotted-demo-bar-search\s*\{/);
   assert.match(css, /\.slotted-demo-bar-crumbs\s*\{/);
   assert.match(css, /\.slotted-demo-bar-wordmark\s*\{/);
-  assert.match(css, /\.slotted-demo-pane-fields\s*\{[^}]*--slotted-app-shell-row-inset/);
   assert.match(css, /\.slotted-demo-pane-title\s*\{/);
-  assert.match(css, /\.slotted-demo-pane-form\s*\{/);
+  /* The pane body stands on the shell's own inset, so neither pads by hand. */
+  for (const name of ['pane-fields', 'pane-form']) {
+    const body = new RegExp(`\\.slotted-demo-${name}\\s*\\{([^}]*)\\}`).exec(css)?.[1];
+    assert.ok(body !== undefined, `${name} has no rule`);
+    assert.doesNotMatch(body, /padding/, `${name} pads the pane body by hand`);
+  }
   /* And a window around a screen, so a shell reads as an application. */
   const frame = /\.slotted-demo-viewport\[data-frame='window'\]\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
   assert.match(frame, /border-radius/);

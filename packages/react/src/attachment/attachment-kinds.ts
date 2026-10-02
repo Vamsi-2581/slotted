@@ -27,7 +27,10 @@ export const ATTACHMENT_KIND_GLYPH: Readonly<Record<FileKind, GlyphName>> = {
 export const ATTACHMENT_CONTROL_SELECTOR =
   '[data-part="trigger"], [data-part="action"], [data-part="remove"]';
 
-/** The extension as the card writes it: `PDF`, or `FILE` when the name has none. */
-export function extensionLabel(extension: string): string {
-  return extension === '' ? 'FILE' : extension.slice(1).toUpperCase();
+/**
+ * The extension as the card writes it: `PDF`, or the catalog's `noExtension`
+ * word when the name has none.
+ */
+export function extensionLabel(extension: string, none: string): string {
+  return extension === '' ? none : extension.slice(1).toUpperCase();
 }

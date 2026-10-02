@@ -171,3 +171,10 @@ test('draws the sort mark and the chevron with the Glyph element, never a mask',
     /data-part="expander"[^>]*>\s*<span data-ui="icon"[^>]*>\s*<svg data-part="glyph" data-glyph="chevron-right">/,
   );
 });
+
+test('stands on the ground its container publishes before the page surface', () => {
+  assert.match(
+    normalized,
+    /--_surface:var\(--slotted-table-surface,var\(--slotted-ground,var\(--slotted-surface,Canvas\)\)\)/,
+  );
+});

@@ -1,3 +1,4 @@
+import { injectMessages } from '@slotted/angular/i18n';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import {
@@ -12,6 +13,7 @@ import {
 } from '@slotted/core/extent';
 import { createFocusScope } from '@slotted/core/focus';
 import type { FocusScopeHandle } from '@slotted/core/focus';
+import { drawerMessages, type DrawerMessages, type PartialMessages } from '@slotted/core/i18n';
 import { clamp, observeKeyboardInset } from '@slotted/core/measure';
 import { createPortalRoot } from '@slotted/core/portal';
 import type { PortalRootHandle } from '@slotted/core/portal';
@@ -160,6 +162,8 @@ export class SlDrawer implements OnInit {
   readonly modal = input(true, { transform: booleanAttribute });
   /** Whether the panel's content is still on its way. */
   readonly loading = input(false, { transform: booleanAttribute });
+  /** Words laid over the catalog of the language in force, key by key: the close control's name (`close`). */
+  readonly messages = input<PartialMessages<DrawerMessages> | undefined>(undefined);
   /** What a hand moves an overlay sheet from the bottom by. */
   readonly drag = input<DrawerDrag | undefined>(undefined);
   /**
@@ -189,6 +193,8 @@ export class SlDrawer implements OnInit {
   readonly closed = output<string | undefined>();
 
   private readonly defaults = injectDrawerDefaults();
+  /** The family's words in the language in force, with this drawer's `messages` laid over them. */
+  readonly t = injectMessages(drawerMessages, this.messages);
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
   private readonly baseId = inject(SlDrawerIdFactory).next();

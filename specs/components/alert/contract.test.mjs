@@ -173,12 +173,12 @@ test('states openness in the DOM rather than by existing', () => {
 });
 
 /**
- * The dismiss control is a real button with a real name, and the word is
- * replaceable per application. Carbon and MUI both ship the string; neither
- * ships a way to state it once.
+ * The dismiss control is a real button with a real name, and the word comes
+ * from the catalog of the language in force. Carbon and MUI both ship the
+ * string; neither ships a way to state it once.
  */
 test('gives the dismiss control a word, and one place to translate it', () => {
-  assert.equal(contract.members.alert.defaults.dismissLabel, 'Dismiss');
+  assert.deepEqual(contract.messages, ['dismiss']);
 });
 
 /**

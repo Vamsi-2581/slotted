@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/dialog/contract.json';
+import { SlottedProvider } from '../i18n';
 import { AlertDialog, Dialog } from './dialog';
 import { DialogDefaultsProvider } from './dialog-defaults';
 import {
@@ -153,6 +155,17 @@ describe('Dialog', () => {
       expect(corner).toContain('fullscreen');
       expect(toggle().tagName).toBe('BUTTON');
       expect(toggle()).toHaveAccessibleName('Full screen');
+    });
+
+    it('names the corner controls in the language in force, and lays its own messages over it', () => {
+      render(
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+          <Basic defaultOpen fullscreenToggle messages={{ close: 'Fechar janela' }} />
+        </SlottedProvider>,
+      );
+
+      expect(toggle()).toHaveAccessibleName('Tela cheia');
+      expect(screen.getByRole('button', { name: 'Fechar janela' })).toBeInTheDocument();
     });
 
     it('carries the reason, and the keyboard says so', () => {

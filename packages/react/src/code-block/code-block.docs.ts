@@ -415,7 +415,13 @@ export const REACT_CODE_BLOCK_DOCS = {
         'Skeletons na altura de seis linhas, aria-busy, sem cópia',
       ],
       ['tabSize', 'number', '2', 'CodeBlock', 'Largura de um tab, para o indent da continuação'],
-      ['labels', 'Partial<CodeBlockLabels>', '—', 'CodeBlock', 'As nove palavras da família'],
+      [
+        'messages',
+        'PartialMessages<CodeBlockMessages>',
+        '—',
+        'CodeBlock',
+        'As palavras da família sobre o idioma em vigor, chave a chave',
+      ],
       [
         'renderLine',
         '(props) => ReactNode',
@@ -445,7 +451,7 @@ export const REACT_CODE_BLOCK_DOCS = {
       ],
       [
         'CodeBlockDefaultsProvider',
-        'highlight | lineNumbers | copy | labels',
+        'highlight | lineNumbers | copy',
         '—',
         'Aplicação',
         'O motor carregado uma vez, para todos os blocos por baixo; uma prop no bloco ganha',

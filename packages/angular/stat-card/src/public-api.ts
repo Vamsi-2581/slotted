@@ -19,14 +19,13 @@ export {
   STAT_CARD_DEFAULTS_TOKEN,
 } from './stat-card-defaults';
 export type { StatCardDefaults } from './stat-card-defaults';
-export { STAT_CARD_MESSAGES, toneOf, trendOf } from './stat-card.constants';
+export { toneOf, trendOf } from './stat-card.constants';
 export type {
   StatCardDeltaFormat,
   StatCardDirection,
   StatCardFill,
   StatCardGoodWhen,
   StatCardLayout,
-  StatCardMessages,
   StatCardSize,
   StatCardTone,
   StatCardValueStatus,

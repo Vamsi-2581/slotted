@@ -1,3 +1,4 @@
+import { alertMessages, type AlertMessages, type PartialMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import {
@@ -17,6 +18,7 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import type { GlyphName } from '@slotted/angular/icon';
 
@@ -97,7 +99,7 @@ export class SlAlertIcon {}
       <button
         type="button"
         data-part="dismiss"
-        [attr.aria-label]="resolvedDismissLabel()"
+        [attr.aria-label]="t('dismiss')"
         (click)="onDismiss($event)"
       >
         <span slIcon><svg slGlyph name="x"></svg></span>
@@ -138,8 +140,8 @@ export class SlAlert {
    * subscribed, so the opt-in is stated — the asymmetry `tag` recorded.
    */
   readonly dismissible = input(false, { transform: booleanAttribute });
-  /** What that control announces. Falls back to the provider. */
-  readonly dismissLabel = input<string | undefined>(undefined);
+  /** Words laid over the catalog of the language in force, key by key: what that control announces (`dismiss`). */
+  readonly messages = input<PartialMessages<AlertMessages> | undefined>(undefined);
   /** Present means controlled, for the life of the component. */
   readonly open = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
@@ -160,6 +162,8 @@ export class SlAlert {
   readonly openChange = output<ChangeRequest<boolean>>();
 
   private readonly defaults = injectAlertDefaults();
+  /** The family's words in the language in force, with this alert's `messages` laid over them. */
+  readonly t = injectMessages(alertMessages, this.messages);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   /** An explicit tab index the consumer wrote is never replaced by the family's. */
   protected readonly writtenTabIndex = inject(new HostAttributeToken('tabindex'), {
@@ -188,9 +192,6 @@ export class SlAlert {
   protected readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   protected readonly resolvedReach = computed(() => this.reach() ?? this.defaults.reach);
   readonly resolvedLive = computed(() => this.live() ?? this.defaults.live);
-  protected readonly resolvedDismissLabel = computed(
-    () => this.dismissLabel() ?? this.defaults.dismissLabel,
-  );
 
   readonly isOpen = computed(() => this.open() ?? this.own() ?? this.defaultOpen());
 

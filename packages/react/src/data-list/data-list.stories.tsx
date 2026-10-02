@@ -1,6 +1,7 @@
 import { COMPACT_BELOW, createWidthGate } from '@slotted/core/measure';
 import { emptyQuery, type GridQuery } from '@slotted/core/grid';
 import type { FilterGroup } from '@slotted/core/filter';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -11,6 +12,7 @@ import { Button, IconButton } from '../button';
 import { Grid, Scene } from '../field/field-demo';
 import { FilterBar } from '../filter-bar';
 import type { FilterBarField } from '../filter-bar';
+import { SlottedProvider } from '../i18n';
 import { Segment, SegmentedControl } from '../segmented-control';
 import {
   Table,
@@ -27,7 +29,6 @@ import {
 } from '../table';
 import type { TableSortDescriptor } from '../table';
 import { DataList } from './data-list';
-import { DataListDefaultsProvider } from './data-list-defaults';
 import {
   ACCOUNTS,
   AccountAvatar,
@@ -596,22 +597,18 @@ const LONG: Account[] = [
 export const Content: Story = {
   parameters: scenario('content'),
   render: () => (
-    <DataListDefaultsProvider
-      labels={{
-        count: ({ count }) => (count === 1 ? '1 conta' : `${count} contas`),
-        empty: 'Sem valor',
-      }}
-    >
+    <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
       <Phone>
         <DataList
           {...LIST}
           columns={COLUMNS.map((column) =>
             column.id === 'owner' ? { ...column, label: 'Responsável pela conta' } : column,
           )}
+          messages={{ count: '{count, plural, one {# conta} other {# contas}}' }}
           rows={LONG}
         />
       </Phone>
-    </DataListDefaultsProvider>
+    </SlottedProvider>
   ),
 };
 

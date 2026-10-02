@@ -1,6 +1,7 @@
 import '@slotted/styles/currency-field/currency-field.css';
 
 import { createCurrencyFormat, MAX_AMOUNT_DIGITS, withAmount } from '@slotted/core/currency';
+import { currencyFieldMessages } from '@slotted/core/i18n';
 import { clamp as clampNumber } from '@slotted/core/measure';
 import {
   createScrub,
@@ -25,6 +26,7 @@ import {
 import type { KeyboardEvent, PointerEvent, PointerEventHandler, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useCurrencyFieldDefaults } from './currency-field-defaults';
 import type {
@@ -86,7 +88,6 @@ export function CurrencyField({
   clamp,
   currency,
   currencyDisplay,
-  decrementLabel,
   defaultValue = null,
   disabled,
   end,
@@ -97,12 +98,12 @@ export function CurrencyField({
   fractionDigits,
   handle,
   id,
-  incrementLabel,
   inputMode,
   invalid,
   largeStep,
   locale,
   max,
+  messages,
   min,
   name,
   onBlur,
@@ -126,6 +127,8 @@ export function CurrencyField({
 }: CurrencyFieldProps) {
   const field = useField();
   const defaults = useCurrencyFieldDefaults();
+  const t = useMessages(currencyFieldMessages, messages);
+  const appLocale = useLocale();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const resolvedSize = size ?? field?.size ?? defaults.size;
@@ -135,7 +138,7 @@ export function CurrencyField({
   const resolvedFormatOn = formatOn ?? defaults.formatOn;
   const resolvedStepper = stepper ?? defaults.stepper;
   const resolvedClamp = clamp ?? defaults.clamp;
-  const resolvedLocale = locale ?? defaults.locale;
+  const resolvedLocale = locale ?? appLocale;
   const resolvedDisplay = currencyDisplay ?? defaults.currencyDisplay;
   const resolvedCurrency = currency ?? defaults.currency;
   const resolvedDisabled = disabled ?? field?.disabled;
@@ -162,7 +165,7 @@ export function CurrencyField({
       createCurrencyFormat({
         currency: resolvedCurrency,
         currencyDisplay: resolvedDisplay,
-        ...(resolvedLocale === undefined ? {} : { locale: resolvedLocale }),
+        locale: resolvedLocale,
         ...(fractionDigits === undefined ? {} : { fractionDigits }),
         ...(format === undefined ? {} : { options: format }),
       }),
@@ -620,11 +623,7 @@ export function CurrencyField({
     return (
       <button
         aria-controls={id ?? field?.ids.control}
-        aria-label={
-          direction === 1
-            ? (incrementLabel ?? defaults.incrementLabel)
-            : (decrementLabel ?? defaults.decrementLabel)
-        }
+        aria-label={t(part)}
         data-part={part}
         disabled={inert || (direction === 1 ? atMax : atMin)}
         key={part}

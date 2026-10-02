@@ -2,7 +2,6 @@ export { SlEventCalendar } from './event-calendar';
 export {
   EVENT_CALENDAR_DEFAULTS,
   EVENT_CALENDAR_FALLBACK,
-  EVENT_CALENDAR_LABELS,
   injectEventCalendarDefaults,
   provideEventCalendarDefaults,
 } from './event-calendar-defaults';
@@ -18,7 +17,6 @@ export type {
   EventCalendarEventChange,
   EventCalendarEventContext,
   EventCalendarHourCycle,
-  EventCalendarLabels,
   EventCalendarListRange,
   EventCalendarRange,
   EventCalendarSelection,

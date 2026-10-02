@@ -153,9 +153,9 @@ import { paymentColumns, paymentDoorFilter, paymentFilterFields } from './financ
             (valueChangeRequest)="store.setFilter($event.value)"
             [query]="store.search()"
             (queryChangeRequest)="store.setSearch($event.value)"
-            [labels]="{ count: countLabel }"
+            [messages]="countMessages"
             [count]="store.total() ?? undefined"
-            [total]="store.grandTotal() ?? undefined"
+            [total]="store.total() === store.grandTotal() ? undefined : (store.grandTotal() ?? undefined)"
             [loading]="store.loading()"
           >
             <app-list-view-tools
@@ -169,7 +169,7 @@ import { paymentColumns, paymentDoorFilter, paymentFilterFields } from './financ
           </div>
           <sl-data-grid
             #grid="slDataGrid"
-            label="Payments"
+            aria-label="Payments"
             rowKey="id"
             variant="framed"
             activatable
@@ -233,8 +233,8 @@ import { paymentColumns, paymentDoorFilter, paymentFilterFields } from './financ
             <nav
               slDataGridFooter
               slPagination
-              label="Payment pages"
-              [labels]="pagerLabels"
+              aria-label="Payment pages"
+              [messages]="pagerMessages"
               [count]="store.total() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
@@ -288,12 +288,11 @@ export class PaymentsPage {
       : `${base} Payments are recorded by holders of payments.record — ${FINANCE_HOLDERS['payments.record']}.`;
   });
 
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total ? `${count} payments` : `${count} of ${total} payments`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} payments', countOnly: '{count} payments' };
 
-  readonly pagerLabels = {
-    range: (start: number, end: number, count: number) =>
-      `Payments ${start}–${end} of ${count.toLocaleString('en-US')}`,
+  readonly pagerMessages = {
+    range: 'Payments {start}–{end} of {count}',
     pageSize: 'Payments per page',
   };
 

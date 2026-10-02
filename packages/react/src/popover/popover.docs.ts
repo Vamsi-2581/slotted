@@ -190,11 +190,11 @@ const api = apiRows([
     'The popover never opens. The trigger’s own disabled is the consumer’s.',
   ],
   [
-    'closeLabel',
-    'string',
-    'Close',
+    'messages',
+    'Partial<PopoverMessages>',
+    '—',
     'Popover',
-    'The close control’s accessible name. The provider is where an application translates it once.',
+    'Words laid over the language in force, key by key: the close control’s accessible name (close). A native aria-label on PopoverClose still wins.',
   ],
   [
     'sideOffset',
@@ -300,7 +300,7 @@ const snippets = [
     label: 'Application defaults',
     language: 'tsx',
     source: `
-<PopoverDefaultsProvider closeLabel="Fechar" size="lg">
+<PopoverDefaultsProvider size="lg">
   <App />
 </PopoverDefaultsProvider>;
 `,

@@ -78,14 +78,11 @@ test('leaves room for a focus ring inside every region that scrolls', () => {
   }
 });
 
-/** A step reached is thicker than a step ahead, so progress is not colour alone. */
-test('draws the compact track in two thicknesses', () => {
+/** Every segment fills the track's height; colour separates the states. */
+test('draws the compact track in one thickness', () => {
   assert.match(
     normalized,
-    /\[data-part='progress-segment'\]\{background-color:[^}]*block-size:var\(--slotted-border-width-thin,1px\)/,
+    /\[data-part='progress-segment'\]\{background-color:[^}]*block-size:100%/,
   );
-  assert.match(
-    normalized,
-    /\[data-part='progress-segment'\]:is\(\[data-complete\],\[data-current\],\[data-invalid\]\)\{block-size:100%;\}/,
-  );
+  assert.doesNotMatch(normalized, /\[data-part='progress-segment'\]:is\([^)]*\)\{block-size:/);
 });

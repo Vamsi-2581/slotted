@@ -1,7 +1,9 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { SlottedProvider } from '../i18n';
 import { Tag, TagButton, TagDefaultsProvider, TagGroup, TagLink, TagToggle } from './index';
 import type { TagRemoveRequest } from './tag.types';
 
@@ -149,9 +151,9 @@ describe('Tag', () => {
 });
 
 describe('TagDefaultsProvider', () => {
-  it('sets the appearance and the remove word once, and loses to an explicit prop', () => {
+  it('sets the appearance once, and loses to an explicit prop', () => {
     const { container } = render(
-      <TagDefaultsProvider removeLabel="Remover" size="sm" tone="accent">
+      <TagDefaultsProvider size="sm" tone="accent">
         <Tag onRemove={() => undefined}>Herda</Tag>
         <Tag size="lg">Sobrescreve</Tag>
       </TagDefaultsProvider>,
@@ -161,7 +163,28 @@ describe('TagDefaultsProvider', () => {
     expect(chips[0]).toHaveAttribute('data-tone', 'accent');
     expect(chips[0]).toHaveAttribute('data-size', 'sm');
     expect(chips[1]).toHaveAttribute('data-size', 'lg');
-    expect(screen.getByRole('button', { name: 'Remover Herda' })).toBeInTheDocument();
+  });
+});
+
+describe('messages', () => {
+  it('announces the remove word of the language in force', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Tag onRemove={() => undefined}>Design</Tag>
+      </SlottedProvider>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Remover Design' })).toBeInTheDocument();
+  });
+
+  it('lays its own messages over the catalog', () => {
+    render(
+      <Tag messages={{ remove: 'Tirar' }} onRemove={() => undefined}>
+        Design
+      </Tag>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Tirar Design' })).toBeInTheDocument();
   });
 });
 

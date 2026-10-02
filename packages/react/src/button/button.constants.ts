@@ -21,10 +21,3 @@ export const TOGGLE_BUTTON_DEFAULTS = {
   variant: 'outline',
   size: 'md',
 } as const;
-
-/**
- * What the ring announces itself as when the consumer says nothing. It is a
- * progress bar, so it needs a name; an application replaces it per instance or
- * translates it once at the call site.
- */
-export const BUTTON_LOADING_LABEL = 'Loading';

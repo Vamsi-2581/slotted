@@ -357,7 +357,7 @@ export const REACT_SPLIT_BUTTON_DOCS = {
         'Every prop of Menu reaches the menu unchanged: the surface is menu’s and nothing of it is re-declared here',
       ],
       [
-        'start, end, type, loadingDelay, loadingLabel, focusableWhenDisabled, on SplitButtonPrimary',
+        'start, end, type, loadingDelay, messages, focusableWhenDisabled, on SplitButtonPrimary',
         'ButtonProps',
         'Button’s',
         'SplitButtonPrimary',

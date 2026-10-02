@@ -441,9 +441,9 @@ export const Composition: Story = {
     <Grid columns={2}>
       <Scene
         label="One decision for the application"
-        note="The provider sets the tone, the painting, the reach and the word the dismiss control announces once; a message that states any of them still wins."
+        note="The provider sets the tone, the painting and the reach once; a message that states any of them still wins."
       >
-        <AlertDefaultsProvider dismissLabel="Dispensar" reach="inline" tone="secondary">
+        <AlertDefaultsProvider reach="inline" tone="secondary">
           <Alert dismissible>
             <AlertContent>
               <AlertDescription>Herda tudo do provider.</AlertDescription>

@@ -5,6 +5,7 @@ import type {
   ToastStatus,
   ToastStore,
 } from '@slotted/core/toast';
+import type { PartialMessages, ToastMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
@@ -50,8 +51,6 @@ export interface ToastContent {
   actions?: ReactNode | undefined;
   /** Renders the control that closes the message. Defaults to the provider. */
   dismissible?: boolean | undefined;
-  /** What that control announces. Falls back to the provider. */
-  closeLabel?: string | undefined;
   /** Draws how much of the duration is left. Defaults to the provider. */
   progress?: boolean | undefined;
   /** Replaces the message's whole body, keeping the box, the tone and the timer. */
@@ -119,8 +118,6 @@ export interface ToastDefaults {
   duration: number;
   swipeThreshold: number;
   hotkey: string;
-  label: string;
-  closeLabel: string;
 }
 
 export interface ToastDefaultsProviderProps extends Partial<ToastDefaults> {
@@ -156,8 +153,12 @@ export interface ToastRegionProps extends Omit<ComponentPropsWithRef<'section'>,
   pauseWhenHidden?: boolean | undefined;
   /** The key that moves focus into the region. Defaults to the provider. */
   hotkey?: string | undefined;
-  /** The name a reader finds the region by. Defaults to the provider. */
-  label?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the name
+   * a reader finds the region by (`label`) and what each close control
+   * announces (`close`). A native `aria-label` still names the region.
+   */
+  messages?: PartialMessages<ToastMessages> | undefined;
   /** The element a portalled region is placed inside. */
   container?: Element | null | undefined;
   /** Renders each message. Defaults to the family's own anatomy. */

@@ -5,7 +5,6 @@ import {
   createCarouselEngine,
   createCarouselRotation,
   EMPTY_PAGES,
-  formatCarouselMessage,
   stepPage,
 } from '@slotted/core/carousel';
 import type {
@@ -13,6 +12,7 @@ import type {
   CarouselPages,
   CarouselRotationHandle,
 } from '@slotted/core/carousel';
+import { carouselMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import {
@@ -27,6 +27,7 @@ import {
 } from 'react';
 import type { CSSProperties, FocusEvent, PointerEvent } from 'react';
 
+import { useLocale, useMessages } from '../i18n';
 import { useCarouselDefaults } from './carousel-defaults';
 import type {
   CarouselContextValue,
@@ -128,7 +129,8 @@ export function Carousel({
   const resolvedOrientation = orientation ?? defaults.orientation;
   const resolvedSize = size ?? defaults.size;
   const resolvedTransition = transition ?? defaults.transition;
-  const resolvedMessages = { ...defaults.messages, ...messages };
+  const t = useMessages(carouselMessages, messages);
+  const locale = useLocale();
   const resolvedSlidesPerMove = slidesPerMove ?? 'page';
   const rotates = autoplay !== undefined && autoplay !== false;
   const delay = typeof autoplay === 'number' ? autoplay : defaults.autoplayDelay;
@@ -214,8 +216,7 @@ export function Carousel({
     slidesPerMove: resolvedSlidesPerMove,
     transition: resolvedTransition,
     draggable: resolvedDraggable,
-    messages: resolvedMessages,
-    locale: defaults.locale,
+    t,
   });
   options.current = {
     orientation: resolvedOrientation,
@@ -223,8 +224,7 @@ export function Carousel({
     slidesPerMove: resolvedSlidesPerMove,
     transition: resolvedTransition,
     draggable: resolvedDraggable,
-    messages: resolvedMessages,
-    locale: defaults.locale,
+    t,
   };
 
   useIsomorphicLayoutEffect(() => {
@@ -237,12 +237,7 @@ export function Carousel({
       draggable: () => options.current.draggable,
       page: () => latest.current.current,
       idPrefix: `${baseId}slide-`,
-      slideLabel: (index, count) =>
-        formatCarouselMessage(
-          options.current.messages.slide,
-          { index: index + 1, count },
-          options.current.locale,
-        ),
+      slideLabel: (index, count) => options.current.t('slide', { index: index + 1, count }),
       onPages: (next, ids) => {
         setPages(next);
         setSlideIds(ids);
@@ -288,11 +283,7 @@ export function Carousel({
     handle.scrollToPage(current, { animate: moved ? motion.current.animate : true });
     if (moved && motion.current.announce && pageCount > 0) {
       getLiveAnnouncer(viewport?.ownerDocument).announce(
-        formatCarouselMessage(
-          resolvedMessages.announce,
-          { page: current + 1, count: pageCount },
-          defaults.locale,
-        ),
+        t('announce', { page: current + 1, count: pageCount }),
       );
     }
     motion.current = { animate: false, announce: false };
@@ -382,8 +373,8 @@ export function Carousel({
     transition: resolvedTransition,
     size: resolvedSize,
     loop: resolvedLoop,
-    messages: resolvedMessages,
-    locale: defaults.locale,
+    t,
+    locale,
     page: shown,
     pageCount,
     pages,
@@ -404,7 +395,7 @@ export function Carousel({
 
   const rootProps: CarouselRootProps = {
     ...nativeProps,
-    'aria-roledescription': resolvedMessages.roleDescription,
+    'aria-roledescription': t('roleDescription'),
     children,
     'data-align': resolvedAlign,
     'data-arrows': resolvedArrows,

@@ -68,7 +68,7 @@ export class SlPromptComposerAction {
   host: {
     'data-part': 'attach',
     type: 'button',
-    '[attr.aria-label]': 'label ?? composer.defaults.attachLabel',
+    '[attr.aria-label]': "label ?? composer.t('attach')",
     '[disabled]': 'composer.off()',
     '(click)': 'open()',
   },
@@ -139,16 +139,16 @@ export class SlPromptComposerSubmit {
   protected readonly named = signal(false);
 
   protected readonly label = computed(() => {
-    const { defaults } = this.composer;
+    const { t } = this.composer;
     switch (this.composer.status()) {
       case 'streaming':
-        return defaults.stopLabel;
+        return t('stop');
       case 'submitted':
-        return defaults.sendingLabel;
+        return t('sending');
       case 'error':
-        return defaults.retryLabel;
+        return t('retry');
       default:
-        return defaults.sendLabel;
+        return t('send');
     }
   });
 

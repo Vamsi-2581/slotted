@@ -224,7 +224,7 @@ import { phoneSignal } from '../../core/layout/phone';
                 </div>
               </div>
             } @else {
-              <div slSkeletonRegion label="Reading the price lists" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the price lists' }" [loading]="true">
                 <div slGrid [columns]="phone() ? 2 : 4" minItemWidth="xs" [gap]="4">
                   @for (figure of figureLabels; track figure) {
                     <div slStatCard size="sm" loading>
@@ -355,8 +355,7 @@ import { phoneSignal } from '../../core/layout/phone';
                       [value]="store.chosenId()"
                       (valueChangeRequest)="choose($event.value)"
                       placeholder="A code or a name — AST-MOT, servo…"
-                      emptyLabel="No SKU answers that"
-                      loadingLabel="Looking for SKUs"
+                      [messages]="{ empty: 'No SKU answers that', loading: 'Looking for SKUs' }"
                       clearable
                     >
                       <!--

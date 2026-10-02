@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/pagination/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Pagination } from './pagination';
 import { PaginationDefaultsProvider } from './pagination-defaults';
 import {
@@ -300,21 +302,28 @@ describe('Pagination', () => {
   describe('composition', () => {
     it('takes the application defaults, and yields to an explicit prop', () => {
       render(
-        <PaginationDefaultsProvider labels={{ next: 'Próxima página' }} siblingCount={2}>
+        <PaginationDefaultsProvider siblingCount={2}>
           <Numbered defaultPage={10} />
         </PaginationDefaultsProvider>,
       );
 
-      expect(control('next')).toHaveAccessibleName('Próxima página');
       expect(pages()).toEqual(['1', '8', '9', '10', '11', '12', '25']);
     });
 
-    it('merges one translated label with the seven it did not touch', () => {
+    it('speaks the language in force, and lays its own messages over it', () => {
       render(
-        <PaginationDefaultsProvider labels={{ next: 'Próxima' }}>
-          <Numbered />
-        </PaginationDefaultsProvider>,
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+          <Numbered defaultPage={10} messages={{ previous: 'Voltar' }} />
+        </SlottedProvider>,
       );
+
+      expect(control('next')).toHaveAccessibleName('Próxima página');
+      expect(control('previous')).toHaveAccessibleName('Voltar');
+      expect(screen.getByRole('navigation')).toHaveAccessibleName('Paginação');
+    });
+
+    it('merges one message with the eight it did not touch', () => {
+      render(<Numbered messages={{ next: 'Próxima' }} />);
 
       expect(control('next')).toHaveAccessibleName('Próxima');
       expect(control('previous')).toHaveAccessibleName('Previous page');

@@ -10,10 +10,8 @@ export {
   STATUS_INDICATOR_DEFAULT_MARK,
   STATUS_INDICATOR_DEFAULT_SIZE,
   STATUS_INDICATOR_DEFAULT_STATUS,
-  STATUS_INDICATOR_LABELS,
 } from './status-indicator.constants';
 export type {
-  StatusIndicatorLabels,
   StatusIndicatorLive,
   StatusIndicatorMark,
   StatusIndicatorSize,

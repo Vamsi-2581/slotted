@@ -391,9 +391,9 @@ test('holds the sort descriptor and reorders nothing', () => {
 test('announces the sort it applies, politely', () => {
   assert.match(contract.sort.announce, /live-announcer/);
   assert.ok(contract.composes.includes('live-announcer'));
-  assert.ok(contract.labels.sortedAscending.length > 0);
-  assert.ok(contract.labels.sortedDescending.length > 0);
-  assert.ok(contract.labels.sortCleared.length > 0);
+  for (const key of ['sortedAscending', 'sortedDescending', 'sortCleared']) {
+    assert.ok(contract.messages.includes(key), key);
+  }
 });
 
 /**
@@ -461,7 +461,7 @@ test('makes the scroller a region only while it overflows', () => {
   assert.match(contract.scroll.wiring, /role="region"/);
   assert.match(contract.scroll.wiring, /tabindex/);
   assert.match(contract.scroll.condition, /overflow/);
-  assert.ok(contract.labels.scroll.length > 0);
+  assert.ok(contract.messages.includes('scroll'));
 });
 
 /**
@@ -649,61 +649,60 @@ test('states the reason for every literal it writes', () => {
 });
 
 /**
- * The words the family says are one input rather than eight defaults. An
- * application translates them once, which is the shape `description-list` and
- * `stepper` both use.
+ * The words the family says come from the catalog of the language in force,
+ * laid over by one `messages` input, and none of them is a declared default.
  */
 test('holds the words it says apart from the values it defaults', () => {
-  assert.deepEqual(Object.keys(contract.labels).sort(), [
-    'collapse',
-    'expand',
-    'filter',
-    'filterApply',
-    'filterClear',
-    'filterCleared',
-    'filterConditionAdded',
-    'filterEmpty',
-    'filterFrom',
-    'filterJoin',
-    'filterJoins',
-    'filterMatches',
-    'filterOperandsNone',
-    'filterOperandsOne',
-    'filterOperandsTwo',
-    'filterOperator',
-    'filterOperators',
-    'filterSearch',
-    'filterSelectAll',
-    'filterTo',
-    'filterValue',
-    'scroll',
-    'selectAll',
-    'selectRow',
-    'sortCleared',
-    'sortedAscending',
-    'sortedDescending',
-  ]);
-  for (const [key, word] of Object.entries(contract.labels)) {
-    /* Two of them are maps: the joins, and the operator names keyed by the
-       engine's own operator. Everything under them is a word like the rest. */
-    const words = typeof word === 'string' ? { [key]: word } : word;
-    for (const [name, said] of Object.entries(words)) {
-      assert.equal(typeof said, 'string', `${key}.${name} is not a word`);
-      assert.ok(said.length > 0, `${key}.${name} says nothing`);
-    }
-    assert.ok(!(key in table.defaults), `${key} is a word, not a default`);
+  assert.deepEqual(
+    contract.messages.filter((key) => !key.includes('.')),
+    [
+      'collapse',
+      'expand',
+      'false',
+      'filterApplied',
+      'filterApply',
+      'filterClear',
+      'filterCleared',
+      'filterColumn',
+      'filterConditionAdded',
+      'filterEmpty',
+      'filterFrom',
+      'filterJoin',
+      'filterMatches',
+      'filterOperands',
+      'filterOperator',
+      'filterSearch',
+      'filterSelectAll',
+      'filterTo',
+      'filterValue',
+      'scroll',
+      'selectAll',
+      'selectRow',
+      'sortCleared',
+      'sortedAscending',
+      'sortedDescending',
+      'true',
+    ],
+  );
+  for (const key of contract.messages) {
+    assert.ok(!(key.split('.')[0] in table.defaults), `${key} is a word, not a default`);
   }
+  assert.ok(!('labels' in contract), 'the words are messages, not labels');
 });
 
 /**
  * The operator names are keyed by the engine's operator, so an application that
  * translates them once covers every kind — and `filter-bar` reads the same map
- * for the same operators in wave 8.
+ * for the same operators.
  */
 test('says every operator the five kinds offer, and nothing they do not', () => {
   const offered = new Set(Object.values(contract.filter.kinds).flatMap((kind) => kind.operators));
-  assert.deepEqual(Object.keys(contract.labels.filterOperators).sort(), [...offered].sort());
-  assert.deepEqual(Object.keys(contract.labels.filterJoins), contract.filter.conditions.joins);
+  const group = (name) =>
+    contract.messages
+      .filter((key) => key.startsWith(`${name}.`))
+      .map((key) => key.slice(name.length + 1));
+  assert.deepEqual(group('filterOperators').sort(), [...offered].sort());
+  assert.deepEqual(group('filterJoins'), contract.filter.conditions.joins);
 });
 
 test('lets an application set the whole family once', () => {

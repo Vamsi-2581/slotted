@@ -1,9 +1,11 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/message/contract.json';
 import { Avatar } from '../avatar';
+import { SlottedProvider } from '../i18n';
 import {
   Bubble,
   BubbleCaret,
@@ -156,10 +158,10 @@ describe('Message', () => {
     );
     const inside = screen.getByTestId('inside');
     expect(inside.querySelector('svg')).not.toBeNull();
-    expect(inside).toHaveTextContent(contract.messages.delivered);
+    expect(inside).toHaveTextContent('Delivered');
     const outside = screen.getByTestId('outside');
     expect(outside.querySelector('svg')).toBeNull();
-    expect(outside).toHaveTextContent(contract.messages.failed);
+    expect(outside).toHaveTextContent('Not sent');
   });
 
   it('pages versions without wrapping, by pointer and by arrow, controlled and uncontrolled', () => {
@@ -169,18 +171,18 @@ describe('Message', () => {
         <MessageVersions />
       </Message>,
     );
-    const previous = screen.getByRole('button', { name: contract.messages.previousVersion });
-    const next = screen.getByRole('button', { name: contract.messages.nextVersion });
+    const previous = screen.getByRole('button', { name: 'Previous version' });
+    const next = screen.getByRole('button', { name: 'Next version' });
     expect(previous).toBeDisabled();
-    expect(screen.getByText('1 de 3')).toBeInTheDocument();
+    expect(screen.getByText('1 of 3')).toBeInTheDocument();
     fireEvent.click(next, { detail: 1 });
     expect(onVersionChange).toHaveBeenLastCalledWith(
       1,
       expect.objectContaining({ reason: 'pointer' }),
     );
-    expect(screen.getByText('2 de 3')).toBeInTheDocument();
+    expect(screen.getByText('2 of 3')).toBeInTheDocument();
     fireEvent.keyDown(next, { key: 'ArrowRight' });
-    expect(screen.getByText('3 de 3')).toBeInTheDocument();
+    expect(screen.getByText('3 of 3')).toBeInTheDocument();
     expect(next).toBeDisabled();
     expect(onVersionChange).toHaveBeenLastCalledWith(
       2,
@@ -201,9 +203,9 @@ describe('Message', () => {
       );
     }
     render(<Controlled />);
-    fireEvent.click(screen.getByRole('button', { name: contract.messages.nextVersion }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next version' }));
     expect(screen.getByTestId('out')).toHaveTextContent('1');
-    expect(screen.getByText('2 de 2')).toBeInTheDocument();
+    expect(screen.getByText('2 of 2')).toBeInTheDocument();
   });
 
   it('draws no pager for a message with one version', () => {
@@ -225,7 +227,7 @@ describe('Message', () => {
         </Bubble>
       </Message>,
     );
-    fireEvent.click(screen.getByRole('button', { name: contract.messages.retry }), { detail: 1 });
+    fireEvent.click(screen.getByRole('button', { name: 'Try sending again' }), { detail: 1 });
     expect(onRetry).toHaveBeenCalledWith(expect.objectContaining({ reason: 'pointer' }));
   });
 
@@ -260,11 +262,11 @@ describe('Message', () => {
         <BubbleContent>um texto muito longo</BubbleContent>
       </Bubble>,
     );
-    const more = screen.getByRole('button', { name: contract.messages.more });
+    const more = screen.getByRole('button', { name: 'Show more' });
     expect(more).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(more);
     expect(screen.getByTestId('bubble')).toHaveAttribute('data-revealed', '');
-    expect(screen.getByRole('button', { name: contract.messages.less })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: 'Show less' })).toHaveAttribute(
       'aria-expanded',
       'true',
     );
@@ -291,30 +293,26 @@ describe('Message', () => {
   it('names the typing dots and the quote jump, and runs the consumer’s own handlers', () => {
     const onJump = vi.fn();
     render(
-      <MessageDefaultsProvider messages={{ typing: 'Marta está a escrever' }}>
-        <Bubble>
-          <BubbleContent>
-            <BubbleQuote author="Tiago" onJump={onJump}>
-              citado
-            </BubbleQuote>
-            <BubbleTyping />
-          </BubbleContent>
-        </Bubble>
-      </MessageDefaultsProvider>,
+      <Bubble>
+        <BubbleContent>
+          <BubbleQuote author="Tiago" onJump={onJump}>
+            citado
+          </BubbleQuote>
+          <BubbleTyping />
+          <BubbleTyping aria-label="Marta está a escrever" />
+        </BubbleContent>
+      </Bubble>,
     );
+    expect(screen.getByRole('img', { name: 'Typing' })).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Marta está a escrever' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Tiago/ }));
     expect(onJump).toHaveBeenCalled();
   });
 
-  it('lets an application set the words once', () => {
+  it('lets an application set the layout once, and a row lay its own words over the language', () => {
     render(
-      <MessageDefaultsProvider
-        actionsVisibility="always"
-        layout="thread"
-        messages={{ actions: 'Actions' }}
-      >
-        <Message data-testid="row">
+      <MessageDefaultsProvider actionsVisibility="always" layout="thread">
+        <Message data-testid="row" messages={{ actions: 'Actions' }}>
           <MessageActions />
         </Message>
       </MessageDefaultsProvider>,
@@ -322,6 +320,19 @@ describe('Message', () => {
     expect(screen.getByTestId('row')).toHaveAttribute('data-layout', 'thread');
     expect(screen.getByTestId('row')).toHaveAttribute('data-actions', 'always');
     expect(screen.getByRole('toolbar', { name: 'Actions' })).toBeInTheDocument();
+  });
+
+  it('speaks the language in force, the version label in its own word order', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Message versionCount={3}>
+          <MessageVersions />
+          <MessageActions />
+        </Message>
+      </SlottedProvider>,
+    );
+    expect(screen.getByText('1 de 3')).toBeInTheDocument();
+    expect(screen.getByRole('toolbar', { name: 'Ações da mensagem' })).toBeInTheDocument();
   });
 
   it('keeps an explicit accessible name over the author', async () => {

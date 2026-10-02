@@ -2,6 +2,9 @@ import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/scroll-area/contract.json';
 import { SlScrollArea, SlScrollAreaContent } from './scroll-area';
 import { provideScrollAreaDefaults } from './scroll-area-defaults';
@@ -25,7 +28,7 @@ const FITS = { clientHeight: 200, scrollHeight: 200, clientWidth: 300, scrollWid
       class="frame"
       [axis]="axis()"
       [fade]="fade()"
-      [label]="label()"
+      [messages]="messages()"
       [labelledBy]="labelledBy()"
       [maxBlockSize]="maxBlockSize()"
       [tabbable]="tabbable()"
@@ -42,7 +45,7 @@ class Host {
   readonly area = viewChild.required<SlScrollArea>('area');
   readonly axis = signal<ScrollAreaAxis | undefined>(undefined);
   readonly fade = signal<ScrollAreaFade | undefined>(undefined);
-  readonly label = signal<string | undefined>(undefined);
+  readonly messages = signal<{ label?: string } | undefined>(undefined);
   readonly labelledBy = signal<string | undefined>(undefined);
   readonly maxBlockSize = signal<string | undefined>(undefined);
   readonly tabbable = signal(true);
@@ -184,7 +187,7 @@ describe('the measurement in the DOM', () => {
 describe('the region', () => {
   it('is a named region with a tab stop while the content overflows', () => {
     const { host, viewport, fixture } = mount();
-    host.label.set('Notas de versão');
+    host.messages.set({ label: 'Notas de versão' });
     fixture.detectChanges();
 
     expect(viewport.getAttribute('role')).toBe('region');
@@ -194,7 +197,7 @@ describe('the region', () => {
 
   it('is nothing at all while the content fits', () => {
     const { host, viewport, fixture } = mount(FITS);
-    host.label.set('Notas de versão');
+    host.messages.set({ label: 'Notas de versão' });
     fixture.detectChanges();
 
     expect(viewport.hasAttribute('role')).toBe(false);
@@ -204,7 +207,7 @@ describe('the region', () => {
 
   it('is named by the element the consumer points at before by a string', () => {
     const { host, viewport, fixture } = mount();
-    host.label.set('ignored');
+    host.messages.set({ label: 'ignored' });
     host.labelledBy.set('notas');
     fixture.detectChanges();
 
@@ -212,18 +215,17 @@ describe('the region', () => {
     expect(viewport.hasAttribute('aria-label')).toBe(false);
   });
 
-  it('falls back to the label the provider set', () => {
-    const { viewport } = mount(TALL, [
-      provideScrollAreaDefaults({ label: 'Conteúdo com rolagem' }),
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const { fixture, viewport } = mount(TALL, [
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
     ]);
 
-    expect(viewport.getAttribute('aria-label')).toBe('Conteúdo com rolagem');
-  });
+    expect(viewport.getAttribute('aria-label')).toBe('Conteúdo rolável');
 
-  it('speaks the contract’s fallback name when nothing else is set', () => {
-    const { viewport } = mount();
-
-    expect(viewport.getAttribute('aria-label')).toBe(contract.members.scrollArea.defaults.label);
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(viewport.getAttribute('aria-label')).toBe('Scrollable content');
   });
 
   it('leaves the tab sequence alone when the consumer says the content is reachable', () => {

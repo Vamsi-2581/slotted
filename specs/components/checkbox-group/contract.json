@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "checkbox-group",
   "ui": "checkbox-group",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Set of checkboxes under one label."
+  },
   "itemFamily": "checkbox",
   "rootRole": "group",
   "roleWithdrawnInside": "field-group",

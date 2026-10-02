@@ -1,4 +1,4 @@
-export { DEFAULT_PAGINATION_LABELS, Pagination, usePagination } from './pagination';
+export { Pagination, usePagination } from './pagination';
 export { PaginationDefaultsProvider, usePaginationDefaults } from './pagination-defaults';
 export {
   PaginationFirst,
@@ -15,7 +15,6 @@ export type {
   PaginationDefaultsProviderProps,
   PaginationItemsProps,
   PaginationItemsRootProps,
-  PaginationLabels,
   PaginationLive,
   PaginationPageReason,
   PaginationPageRequest,

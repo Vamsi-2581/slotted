@@ -1,6 +1,7 @@
 import '@slotted/styles/drawer/drawer.css';
 
 import { extentBounds } from '@slotted/core/extent';
+import { drawerMessages } from '@slotted/core/i18n';
 import { clamp } from '@slotted/core/measure';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
@@ -17,6 +18,7 @@ import {
   useState,
 } from 'react';
 
+import { useMessages } from '../i18n';
 import { useDrawerDefaults } from './drawer-defaults';
 import type {
   DrawerContextValue,
@@ -78,6 +80,7 @@ export function Drawer({
   initialFocus,
   loading,
   maxExtent,
+  messages,
   minExtent,
   modal,
   mode,
@@ -93,6 +96,7 @@ export function Drawer({
   snapPoints,
 }: DrawerProps) {
   const defaults = useDrawerDefaults();
+  const t = useMessages(drawerMessages, messages);
   const baseId = useId();
 
   const [ownOpen, setOwnOpen] = useState<boolean>(defaultOpen ?? false);
@@ -347,6 +351,7 @@ export function Drawer({
       side: resolvedSide,
       size: resolvedSize,
       snapPoints: resolvedSnapPoints,
+      t,
       titleId: titleRendered ? `${baseId}title` : '',
       triggerId: `${baseId}trigger`,
       /** What the stylesheet keys on, which is a frame behind what was asked. */
@@ -387,6 +392,7 @@ export function Drawer({
       resolvedSize,
       resolvedSnapPoints,
       status,
+      t,
       titleRendered,
     ],
   );

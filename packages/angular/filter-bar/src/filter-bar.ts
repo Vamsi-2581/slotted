@@ -71,10 +71,18 @@ import type {
   FilterRule,
 } from '@slotted/core/filter';
 import { createRemovalFocus, createRovingTabindex } from '@slotted/core/focus';
+import { filterBarMessages } from '@slotted/core/i18n';
+import type {
+  FamilyTranslator,
+  FilterBarMessages,
+  MessageSlots,
+  PartialMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import { SlButton, SlButtonStart, SlIconButton } from '@slotted/angular/button';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlDatePicker } from '@slotted/angular/date-picker';
 import { SlDateTimePicker } from '@slotted/angular/datetime-picker';
 import {
@@ -120,10 +128,8 @@ import {
   FILTER_BAR_DEFAULT_QUERY_DELAY,
   FILTER_BAR_DEFAULT_SIZE,
   injectFilterBarDefaults,
-  resolveFilterBarLabels,
   type FilterBarApply,
   type FilterBarField,
-  type FilterBarLabels,
   type FilterBarOpenReason,
   type FilterBarPreset,
   type FilterBarPresetReason,
@@ -180,8 +186,35 @@ function fieldByKey(fields: readonly FilterBarField[], key: string) {
   return fields.find((field) => field.key === key);
 }
 
-function operatorName(labels: FilterBarLabels, operator: string) {
-  return labels.operators[operator as FilterOperator] ?? operator;
+/** The family's words in the language in force, with the bar's `messages` laid over them. */
+export type FilterBarTranslator = FamilyTranslator<FilterBarMessages>;
+
+/**
+ * A translator that calls the one an input holds at the moment it is read, so
+ * an editor's template writes `t('key')` and follows both the input and a
+ * change of language.
+ */
+function follow(source: () => FilterBarTranslator): FilterBarTranslator {
+  return ((key: string, slots?: MessageSlots) =>
+    (source() as (key: string, slots?: MessageSlots) => string)(key, slots)) as FilterBarTranslator;
+}
+
+/** An operator's name, or the operator itself when the catalog names no such operator. */
+function operatorName(t: FilterBarTranslator, operator: string) {
+  return operator in filterBarMessages.base.operators
+    ? t(`operators.${operator as FilterOperator}`)
+    : operator;
+}
+
+/**
+ * A message's text on either side of one slot, for a sentence that holds a
+ * control: the join chooser stands where `{join}` stands, in the order the
+ * language writes it.
+ */
+function aroundSlot(written: (mark: string) => string): [string, string] {
+  const mark = '\u0000';
+  const [before = '', after = ''] = written(mark).split(mark);
+  return [before.trim(), after.trim()];
 }
 
 /** The rule a field starts with: its default, else one empty condition on its default operator. */
@@ -198,7 +231,7 @@ function blankRule(field: FilterBarField): FilterDescriptor {
  * title.
  */
 function ruleWords(
-  labels: FilterBarLabels,
+  t: FilterBarTranslator,
   field: FilterBarField | undefined,
   filter: FilterDescriptor | null | undefined,
 ): { operator: string; value: string; full: string; operands: number } {
@@ -207,7 +240,7 @@ function ruleWords(
     operator: field ? (field.defaultOperator ?? kindDefaultOperator(field.kind)) : 'contains',
   };
   const operands = operandCount(condition.operator as FilterOperator);
-  const operator = operatorName(labels, spokenOperator(kind, condition));
+  const operator = operatorName(t, spokenOperator(kind, condition));
   const write = (value: unknown) =>
     field?.options?.find((option) => option.value === value)?.label ?? String(value);
   const present = (value: unknown) =>
@@ -221,7 +254,7 @@ function ruleWords(
     const full = values.join(', ');
     const value =
       values.length > 2
-        ? `${values.slice(0, 2).join(', ')} ${labels.moreValues(values.length - 2)}`
+        ? t('moreValues', { values: values.slice(0, 2).join(', '), count: values.length - 2 })
         : full;
     return { operator, value, full, operands };
   }
@@ -308,7 +341,7 @@ export class SlFilterBarEnd {}
 /** What every editor in the family reads from the bar. */
 export interface FilterBarEnvironment {
   fields: () => readonly FilterBarField[];
-  labels: () => FilterBarLabels;
+  t: FilterBarTranslator;
   size: () => FilterBarSize;
   operandTemplates: () => readonly SlFilterBarOperand[];
 }
@@ -342,7 +375,7 @@ export interface FilterBarEnvironment {
           [size]="size()"
           [fullWidth]="true"
           [items]="operatorItems()"
-          [attr.aria-label]="labels().operator"
+          [attr.aria-label]="t('operator')"
           [value]="condition().operator"
           (valueChange)="setOperator($any($event))"
         >
@@ -459,7 +492,8 @@ export interface FilterBarEnvironment {
 export class SlFilterBarCondition {
   readonly field = input.required<FilterBarField>();
   readonly condition = input.required<Condition>();
-  readonly labels = input.required<FilterBarLabels>();
+  /** The bar's words, which the condition speaks in. */
+  readonly translator = input.required<FilterBarTranslator>();
   readonly size = input.required<FilterBarSize>();
   readonly operandTemplates = input<readonly SlFilterBarOperand[]>([]);
   /** Draws the operator control. A chip's value popover leaves it to the chip's operator segment. */
@@ -493,14 +527,15 @@ export class SlFilterBarCondition {
     );
   });
 
+  protected readonly t = follow(this.translator);
+
   operatorName(operator: string) {
-    return operatorName(this.labels(), operator);
+    return operatorName(this.t, operator);
   }
 
   protected operandLabel(slot: 0 | 1) {
-    const labels = this.labels();
-    if (this.slots().length < 2) return labels.value;
-    return slot === 0 ? labels.from : labels.to;
+    if (this.slots().length < 2) return this.t('value');
+    return slot === 0 ? this.t('from') : this.t('to');
   }
 
   protected operand(slot: 0 | 1): unknown {
@@ -578,7 +613,7 @@ export class SlFilterBarCondition {
         ><span data-field>{{ label() }}</span
         >&ngsp;<span data-operator>{{ words().operator }}</span>
         @if (words().operands > 0) {
-          &ngsp;<span data-value>{{ words().value || labels().noValue }}</span>
+          &ngsp;<span data-value>{{ words().value || t('noValue') }}</span>
         }
       </span>
       <span slIcon><svg slGlyph name="chevron-down"></svg></span>
@@ -588,7 +623,7 @@ export class SlFilterBarCondition {
         [size]="size()"
         [fullWidth]="true"
         [items]="fieldItems()"
-        [attr.aria-label]="labels().field"
+        [attr.aria-label]="t('field')"
         [value]="rule().field"
         (valueChange)="changeField($any($event))"
       >
@@ -602,7 +637,7 @@ export class SlFilterBarCondition {
         slFilterBarCondition
         [field]="known"
         [condition]="condition()"
-        [labels]="labels()"
+        [translator]="translator()"
         [size]="size()"
         [operandTemplates]="operandTemplates()"
         [ids]="{ operator: id + '-operator', operand: id + '-operand' }"
@@ -617,7 +652,7 @@ export class SlFilterBarCondition {
       <button
         data-part="remove"
         type="button"
-        [attr.aria-label]="labels().removeRule"
+        [attr.aria-label]="t('removeRule')"
         (click)="removeRequest.emit()"
       >
         <span slIcon><svg slGlyph name="x"></svg></span>
@@ -639,7 +674,8 @@ export class SlFilterBarCondition {
 export class SlFilterBarRule {
   readonly rule = input.required<FilterRule>();
   readonly fields = input.required<readonly FilterBarField[]>();
-  readonly labels = input.required<FilterBarLabels>();
+  /** The bar's words, which the rule speaks in. */
+  readonly translator = input.required<FilterBarTranslator>();
   readonly size = input.required<FilterBarSize>();
   readonly operandTemplates = input<readonly SlFilterBarOperand[]>([]);
   readonly removable = input(true, { transform: booleanAttribute });
@@ -654,6 +690,7 @@ export class SlFilterBarRule {
   readonly expandedChange = output<string | null>();
 
   protected readonly id = `slotted-filter-bar-rule-${(counter += 1)}`;
+  protected readonly t = follow(this.translator);
   protected readonly key = computed(() => this.path().join('.'));
   protected readonly isExpanded = computed(() => this.expanded() === this.key());
   protected readonly field = computed(() => fieldByKey(this.fields(), this.rule().field));
@@ -671,11 +708,9 @@ export class SlFilterBarRule {
   protected readonly fieldItems = computed(() =>
     this.fields().map((entry) => ({ label: entry.label, value: entry.key })),
   );
-  protected readonly words = computed(() =>
-    ruleWords(this.labels(), this.field(), this.rule().filter),
-  );
+  protected readonly words = computed(() => ruleWords(this.t, this.field(), this.rule().filter));
   protected readonly label = computed(
-    () => this.field()?.label ?? this.labels().unknownField(this.rule().field),
+    () => this.field()?.label ?? this.t('unknownField', { field: this.rule().field }),
   );
 
   protected changeField(key: string) {
@@ -714,20 +749,24 @@ export class SlFilterBarRule {
     SlSegmentedControl,
   ],
   template: `
-    <legend>{{ labels().match }} {{ joinWord() }} {{ labels().matches }}</legend>
+    <legend>{{ t('matches', { join: joinWord() }) }}</legend>
     <div data-part="join">
-      <span>{{ labels().match }}</span>
+      @if (aroundJoin()[0]) {
+        <span>{{ aroundJoin()[0] }}</span>
+      }
       <div
         slSegmentedControl
         size="sm"
-        [attr.aria-label]="labels().match + ' ' + labels().matches"
+        [attr.aria-label]="t('match')"
         [value]="group().join"
         (valueChange)="setJoin($event.value ?? 'and')"
       >
-        <label slSegment value="and">{{ labels().matchAll }}</label>
-        <label slSegment value="or">{{ labels().matchAny }}</label>
+        <label slSegment value="and">{{ t('matchAll') }}</label>
+        <label slSegment value="or">{{ t('matchAny') }}</label>
       </div>
-      <span>{{ labels().matches }}</span>
+      @if (aroundJoin()[1]) {
+        <span>{{ aroundJoin()[1] }}</span>
+      }
       @if (path().length > 0) {
         <button
           slIconButton
@@ -736,8 +775,8 @@ export class SlFilterBarRule {
           tone="secondary"
           variant="ghost"
           [size]="buttonSize()"
-          [attr.aria-label]="labels().removeGroup"
-          [attr.title]="labels().removeGroup"
+          [attr.aria-label]="t('removeGroup')"
+          [attr.title]="t('removeGroup')"
           (click)="rootChange.emit(removeNodeAt(root(), path()))"
         >
           <span slIcon><svg slGlyph name="trash"></svg></span>
@@ -747,7 +786,7 @@ export class SlFilterBarRule {
     <div data-part="rules">
       @for (node of group().rules; track $index) {
         <span data-part="conjunction">{{
-          $index === 0 ? labels().where : labels().joins[group().join]
+          $index === 0 ? t('where') : t(group().join === 'and' ? 'joins.and' : 'joins.or')
         }}</span>
         @if (isGroup(node)) {
           <fieldset
@@ -756,7 +795,7 @@ export class SlFilterBarRule {
             [path]="childPath($index)"
             [root]="root()"
             [fields]="fields()"
-            [labels]="labels()"
+            [translator]="translator()"
             [size]="size()"
             [operandTemplates]="operandTemplates()"
             [expanded]="expanded()"
@@ -770,7 +809,7 @@ export class SlFilterBarRule {
             [rule]="$any(node)"
             [path]="childPath($index)"
             [fields]="fields()"
-            [labels]="labels()"
+            [translator]="translator()"
             [size]="size()"
             [operandTemplates]="operandTemplates()"
             [removable]="!isRequired($any(node))"
@@ -797,7 +836,7 @@ export class SlFilterBarRule {
         <span slButtonStart
           ><span slIcon><svg slGlyph name="plus"></svg></span
         ></span>
-        {{ labels().addRule }}
+        {{ t('addRule') }}
       </button>
       <button
         slButton
@@ -812,7 +851,7 @@ export class SlFilterBarRule {
         <span slButtonStart
           ><span slIcon><svg slGlyph name="plus"></svg></span
         ></span>
-        {{ labels().addGroup }}
+        {{ t('addGroup') }}
       </button>
       @if (path().length === 0) {
         <ng-content></ng-content>
@@ -831,7 +870,8 @@ export class SlFilterBarGroup {
   readonly path = input<FilterPath>([]);
   readonly root = input.required<FilterGroup>();
   readonly fields = input.required<readonly FilterBarField[]>();
-  readonly labels = input.required<FilterBarLabels>();
+  /** The bar's words, which the group speaks in. */
+  readonly translator = input.required<FilterBarTranslator>();
   readonly size = input.required<FilterBarSize>();
   readonly operandTemplates = input<readonly SlFilterBarOperand[]>([]);
   /** The one rule card open in the builder, by its path joined with dots. */
@@ -840,9 +880,12 @@ export class SlFilterBarGroup {
   readonly applyRequest = output<void>();
   readonly expandedChange = output<string | null>();
 
+  protected readonly t = follow(this.translator);
   protected readonly joinWord = computed(() =>
-    this.group().join === 'and' ? this.labels().matchAll : this.labels().matchAny,
+    this.group().join === 'and' ? this.t('matchAll') : this.t('matchAny'),
   );
+  /** The words of `matches` before and after the join chooser, which stands in its `{join}`. */
+  protected readonly aroundJoin = computed(() => aroundSlot((join) => this.t('matches', { join })));
   protected readonly removeNodeAt = removeNodeAt;
   protected readonly firstField = computed(() => this.fields()[0]);
   protected readonly buttonSize = computed(() => (this.size() === 'lg' ? 'md' : 'sm'));
@@ -904,7 +947,7 @@ export class SlFilterBarGroup {
       slFilterBarCondition
       [field]="field()"
       [condition]="condition()"
-      [labels]="labels()"
+      [translator]="translator()"
       [size]="size()"
       [operandTemplates]="operandTemplates()"
       [withOperator]="withOperator()"
@@ -921,9 +964,9 @@ export class SlFilterBarGroup {
         [disabled]="field().required === true"
         (click)="clear()"
       >
-        {{ labels().clearRule }}
+        {{ t('clearRule') }}
       </button>
-      <button slButton type="button" size="sm" (click)="done()">{{ labels().done }}</button>
+      <button slButton type="button" size="sm" (click)="done()">{{ t('done') }}</button>
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -938,7 +981,8 @@ export class SlFilterBarGroup {
 export class SlFilterBarRuleEditor {
   readonly field = input.required<FilterBarField>();
   readonly current = input<FilterDescriptor | undefined>(undefined);
-  readonly labels = input.required<FilterBarLabels>();
+  /** The bar's words, which the editor speaks in. */
+  readonly translator = input.required<FilterBarTranslator>();
   readonly size = input.required<FilterBarSize>();
   readonly operandTemplates = input<readonly SlFilterBarOperand[]>([]);
   readonly queryDelay = input(0);
@@ -948,6 +992,7 @@ export class SlFilterBarRuleEditor {
   readonly ruleChange = output<FilterDescriptor | null>();
   readonly doneRequest = output<void>();
 
+  protected readonly t = follow(this.translator);
   private readonly destroyRef = inject(DestroyRef);
   private readonly local = signal<FilterDescriptor | null>(null);
   private timer: ReturnType<typeof setTimeout> | undefined;
@@ -1136,8 +1181,8 @@ interface PendingRule {
             slTextFieldInput
             type="search"
             [value]="shownQuery()"
-            [attr.aria-label]="labelSet().search"
-            [attr.placeholder]="labelSet().search"
+            [attr.aria-label]="t('search')"
+            [attr.placeholder]="t('search')"
             [disabled]="disabled()"
             (valueChange)="typeQuery($event)"
             (keydown)="onSearchKeyDown($event)"
@@ -1154,8 +1199,8 @@ interface PendingRule {
         #barRow
         data-part="bar"
         role="toolbar"
-        [attr.aria-label]="labelSet().filters"
-        [attr.aria-description]="readOnly() ? labelSet().readOnly : null"
+        [attr.aria-label]="t('filters')"
+        [attr.aria-description]="readOnly() ? t('readOnly') : null"
         [attr.data-revealed]="isRevealed() ? '' : null"
       >
         <button
@@ -1172,8 +1217,7 @@ interface PendingRule {
           <span slButtonStart
             ><span slIcon><svg slGlyph name="funnel"></svg></span
           ></span>
-          <span>{{ summaryWord() }}</span
-          >&ngsp;<span>{{ summaryCount() }}</span>
+          <span>{{ t('summary', { count: activeCount() }) }}</span>
         </button>
 
         @for (member of members(); track member.id) {
@@ -1229,7 +1273,7 @@ interface PendingRule {
                 >
                   {{ chip.operator }}
                 </button>
-                <sl-menu #operatorMenu [aria-label]="labelSet().operator">
+                <sl-menu #operatorMenu [aria-label]="t('operator')">
                   <sl-menu-radio-group
                     [value]="chip.condition"
                     (valueChangeRequest)="setOperator(chip.key, chip.filter, $event.value)"
@@ -1282,7 +1326,7 @@ interface PendingRule {
                             slFilterBarRuleEditor
                             [field]="field"
                             [current]="chip.filter"
-                            [labels]="labelSet()"
+                            [translator]="t"
                             [size]="sizeValue()"
                             [operandTemplates]="operandTemplates()"
                             [queryDelay]="applyValue() === 'live' ? queryDelayValue() : 0"
@@ -1301,7 +1345,7 @@ interface PendingRule {
                 <button
                   data-part="chip-remove"
                   type="button"
-                  [attr.aria-label]="labelSet().remove + ' ' + chip.label"
+                  [attr.aria-label]="t('remove', { name: chip.label })"
                   [disabled]="disabled()"
                   (click)="removeField(chip.key, $event)"
                 >
@@ -1334,7 +1378,7 @@ interface PendingRule {
                 <button
                   data-part="chip-remove"
                   type="button"
-                  [attr.aria-label]="labelSet().remove + ' ' + group.words"
+                  [attr.aria-label]="t('remove', { name: group.words })"
                   [disabled]="disabled()"
                   (click)="removeNode(group.path, $event)"
                 >
@@ -1353,7 +1397,7 @@ interface PendingRule {
             [disabled]="disabled()"
             (click)="requestRevealed(!isRevealed(), 'pointer', $event)"
           >
-            {{ isRevealed() ? labelSet().less : labelSet().more(folded()) }}
+            {{ isRevealed() ? t('less') : t('more', { count: folded() }) }}
           </button>
         }
 
@@ -1369,8 +1413,8 @@ interface PendingRule {
               tone="secondary"
               variant="outline"
               [size]="sizeValue()"
-              [attr.aria-label]="labelSet().add"
-              [attr.title]="labelSet().add"
+              [attr.aria-label]="t('add')"
+              [attr.title]="t('add')"
               [disabled]="disabled() || unfiltered().length === 0"
               [slMenuTriggerFor]="addMenu"
             >
@@ -1391,10 +1435,10 @@ interface PendingRule {
               <span slButtonStart
                 ><span slIcon><svg slGlyph name="plus"></svg></span
               ></span>
-              {{ labelSet().add }}
+              {{ t('add') }}
             </button>
           }
-          <sl-menu #addMenu [aria-label]="labelSet().add">
+          <sl-menu #addMenu [aria-label]="t('add')">
             @for (section of sections(); track section.name ?? '') {
               @if (section.name === undefined) {
                 @for (field of section.fields; track field.key) {
@@ -1440,7 +1484,7 @@ interface PendingRule {
             [disabled]="disabled()"
             (click)="clearAll($event)"
           >
-            {{ labelSet().clear }}
+            {{ t('clear') }}
           </button>
         }
 
@@ -1456,7 +1500,7 @@ interface PendingRule {
               [disabled]="disabled() || !dirty()"
               (click)="reset()"
             >
-              {{ labelSet().reset }}
+              {{ t('reset') }}
             </button>
             <button
               slButton
@@ -1466,7 +1510,7 @@ interface PendingRule {
               [disabled]="disabled() || loading() || !dirty()"
               (click)="submit($event)"
             >
-              {{ labelSet().apply }}
+              {{ t('apply') }}
             </button>
           </div>
         }
@@ -1483,8 +1527,8 @@ interface PendingRule {
                 [size]="sizeValue()"
                 [disabled]="disabled() || readOnly()"
                 [items]="presetItems()"
-                [attr.aria-label]="labelSet().preset"
-                [placeholder]="labelSet().presetNone"
+                [attr.aria-label]="t('preset')"
+                [placeholder]="t('presetNone')"
                 [value]="currentPreset()"
                 (valueChange)="choosePreset($any($event))"
               >
@@ -1506,7 +1550,7 @@ interface PendingRule {
               data-part="root"
               data-size="sm"
               role="progressbar"
-              [attr.aria-label]="labelSet().filters"
+              [attr.aria-label]="t('filters')"
             ></span>
           }
           {{ countText() }}
@@ -1522,7 +1566,7 @@ interface PendingRule {
       (openChangeRequest)="onDrawerRequest($event)"
     >
       <header slDrawerHeader>
-        <h2 slDrawerTitle>{{ labelSet().builder }}</h2>
+        <h2 slDrawerTitle>{{ t('builder') }}</h2>
         <button slDrawerClose></button>
       </header>
       <div slDrawerBody>
@@ -1532,7 +1576,7 @@ interface PendingRule {
             [group]="drawerDraft() ?? empty"
             [root]="drawerDraft() ?? empty"
             [fields]="fields()"
-            [labels]="labelSet()"
+            [translator]="t"
             [size]="sizeValue()"
             [operandTemplates]="operandTemplates()"
             [expanded]="expanded()"
@@ -1550,7 +1594,7 @@ interface PendingRule {
                 variant="ghost"
                 (click)="drawerDraft.set(baseline())"
               >
-                {{ labelSet().clear }}
+                {{ t('clear') }}
               </button>
             }
             @if (savePresetEnabled()) {
@@ -1563,7 +1607,7 @@ interface PendingRule {
                 variant="ghost"
                 (click)="savePreset.emit(normalized(drawerDraft()))"
               >
-                {{ labelSet().savePreset }}
+                {{ t('savePreset') }}
               </button>
             }
           </fieldset>
@@ -1578,10 +1622,10 @@ interface PendingRule {
           variant="ghost"
           (click)="requestOpen(false, 'dismiss', $event)"
         >
-          {{ labelSet().cancel }}
+          {{ t('cancel') }}
         </button>
         <button slButton type="button" size="sm" (click)="commitDrawer()">
-          {{ labelSet().apply }}
+          {{ t('apply') }}
         </button>
       </footer>
     </sl-drawer>
@@ -1594,7 +1638,7 @@ interface PendingRule {
     'data-ui': 'filter-bar',
     'data-part': 'root',
     role: 'search',
-    '[attr.aria-label]': 'ariaLabel ?? labelSet().bar',
+    '[attr.aria-label]': "ariaLabel ?? t('bar')",
     '[attr.data-apply]': 'applyValue()',
     '[attr.data-size]': 'sizeValue()',
     '[attr.data-disabled]': 'disabled() ? "" : null',
@@ -1647,15 +1691,23 @@ export class SlFilterBar {
   /** The conditions can be read and reached, and nothing changes them. */
   readonly readOnly = input(false, { transform: booleanAttribute });
   readonly loading = input(false, { transform: booleanAttribute });
-  /** BCP 47, for the figures in the count. */
-  readonly locale = input<string | undefined>(undefined);
+  /**
+   * The number of rows the filter kept, and the number there are. Written by
+   * the `count` message, or `countOnly` without a total, in the digits of the
+   * language in force.
+   */
   readonly count = input<number | undefined, number | string | undefined>(undefined, {
     transform: (value) => (value === undefined ? undefined : numberAttribute(value)),
   });
   readonly total = input<number | undefined, number | string | undefined>(undefined, {
     transform: (value) => (value === undefined ? undefined : numberAttribute(value)),
   });
-  readonly labels = input<Partial<FilterBarLabels> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * landmark's name (`bar`), the controls, the chips' names, the count and the
+   * announcements.
+   */
+  readonly messages = input<PartialMessages<FilterBarMessages> | undefined>(undefined);
 
   /** The requests behind every committed change, each with the reason it carries. */
   readonly valueChangeRequest = output<ChangeRequest<FilterGroup | null>>();
@@ -1681,9 +1733,8 @@ export class SlFilterBar {
   readonly id = `slotted-filter-bar-${(counter += 1)}`;
   protected readonly empty = emptyFilterGroup();
 
-  protected readonly labelSet = computed(() =>
-    resolveFilterBarLabels(this.defaults.labels, this.labels()),
-  );
+  /** The family's words in the language in force, with this bar's `messages` laid over them. */
+  readonly t: FilterBarTranslator = injectMessages(filterBarMessages, this.messages);
   protected readonly applyValue = computed(
     () => this.apply() ?? this.defaults.apply ?? FILTER_BAR_DEFAULT_APPLY,
   );
@@ -1747,12 +1798,11 @@ export class SlFilterBar {
   });
 
   private readonly format = computed(() => {
-    const labels = this.labelSet();
     const fields = this.fields();
     return {
       field: (key: string) => fieldByKey(fields, key)?.label ?? key,
-      join: (join: FilterJoin) => labels.joins[join],
-      operator: (operator: string) => operatorName(labels, operator),
+      join: (join: FilterJoin) => this.t(join === 'and' ? 'joins.and' : 'joins.or'),
+      operator: (operator: string) => operatorName(this.t, operator),
     };
   });
 
@@ -1851,23 +1901,9 @@ export class SlFilterBar {
   protected readonly countText = computed(() => {
     const count = this.count();
     if (count === undefined) return null;
-    const figure = new Intl.NumberFormat(this.locale());
     const total = this.total();
-    return this.labelSet().count(
-      figure.format(count),
-      total === undefined ? undefined : figure.format(total),
-    );
+    return total === undefined ? this.t('countOnly', { count }) : this.t('count', { count, total });
   });
-  protected readonly summaryWord = computed(() =>
-    this.labelSet()
-      .summary(this.activeCount())
-      .replace(/\s*\(.*$/, ''),
-  );
-  protected readonly summaryCount = computed(() =>
-    this.labelSet()
-      .summary(this.activeCount())
-      .replace(/^[^(]*/, ''),
-  );
 
   constructor() {
     /* A controlled value that changes from outside replaces the draft: the application's value wins. */
@@ -2011,7 +2047,7 @@ export class SlFilterBar {
   }
 
   protected operatorWords(operator: string) {
-    return operatorName(this.labelSet(), operator);
+    return operatorName(this.t, operator);
   }
 
   protected normalized(group: FilterGroup | null) {
@@ -2024,13 +2060,19 @@ export class SlFilterBar {
     filter: FilterDescriptor,
     flags: { pinned?: boolean; incomplete?: boolean; folded: boolean },
   ): BarChip {
-    const labels = this.labelSet();
     const field = fieldByKey(this.fields(), key);
     const unknown = field === undefined;
     const label = field?.label ?? key;
-    const words = ruleWords(labels, field, filter);
+    const words = ruleWords(this.t, field, filter);
     const incomplete = flags.incomplete === true || !isFilterActive(filter);
-    const value = words.value || labels.noValue;
+    const value = words.value || this.t('noValue');
+    const rule = this.t('rule', {
+      condition:
+        words.operands > 0
+          ? this.t('condition', { operator: words.operator, value })
+          : words.operator,
+      field: unknown ? this.t('unknownField', { field: key }) : label,
+    });
     return {
       condition: filter.conditions[0]?.operator ?? '',
       field,
@@ -2042,10 +2084,7 @@ export class SlFilterBar {
       key,
       kind: 'chip',
       label,
-      name:
-        (unknown ? labels.unknownField(key) : label) +
-        `: ${words.operator}${words.operands > 0 ? ` ${value}` : ''}` +
-        (incomplete ? `, ${labels.incomplete}` : ''),
+      name: incomplete ? this.t('incomplete', { rule }) : rule,
       operands: words.operands,
       operator: words.operator,
       operators: field?.operators ?? (field ? (operatorsFor(field.kind) as readonly string[]) : []),
@@ -2053,7 +2092,7 @@ export class SlFilterBar {
       removable: field?.required !== true && !this.readOnly(),
       unknown,
       value,
-      valueName: `${words.operator} ${words.full || value}`,
+      valueName: this.t('condition', { operator: words.operator, value: words.full || value }),
       valueTitle: words.full && words.full !== words.value ? words.full : null,
     };
   }
@@ -2147,7 +2186,7 @@ export class SlFilterBar {
   /** A required field refuses: data-invalid on its chip or pill, its message said, and focus on it when asked. */
   private refuse(field: FilterBarField, focus: boolean) {
     this.invalid.set(field.key);
-    this.announce(this.labelSet().required(field.label));
+    this.announce(this.t('required', { field: field.label }));
     if (!focus) return;
     const member = this.barElement().nativeElement.querySelector<HTMLElement>(
       `[data-field='${CSS.escape(field.key)}']`,
@@ -2227,7 +2266,9 @@ export class SlFilterBar {
     const field = fieldByKey(this.fields(), key);
     const rule = ruleFor(this.shown(), key);
     if (rule && isFilterActive(rule)) {
-      this.announce(`${field?.label ?? key}: ${this.sentenceOf(field, rule)}`);
+      this.announce(
+        this.t('rule', { condition: this.sentenceOf(field, rule), field: field?.label ?? key }),
+      );
     }
     if (this.valueOpen() === key) this.valueOpen.set(null);
   }
@@ -2250,7 +2291,7 @@ export class SlFilterBar {
       if (ruleFor(this.shown(), key) === undefined) return;
     }
     this.edit(withoutRuleFor(this.shown(), key), 'remove', source);
-    this.announce(this.labelSet().removed(field?.label ?? key));
+    this.announce(this.t('removed', { field: field?.label ?? key }));
   }
 
   protected removeNode(path: FilterPath, source?: unknown) {
@@ -2321,9 +2362,10 @@ export class SlFilterBar {
       this.requestValue(next, 'clear', source);
       if (this.currentQuery() !== '') this.requestQuery('', 'clear', source);
     }
-    const labels = this.labelSet();
     this.announce(
-      next ? `${labels.cleared}. ${describeFilterGroup(next, this.format())}` : labels.cleared,
+      next
+        ? this.t('clearedTo', { filters: describeFilterGroup(next, this.format()) })
+        : this.t('cleared'),
     );
   }
 
@@ -2340,11 +2382,13 @@ export class SlFilterBar {
     if (draft.query !== this.currentQuery()) this.requestQuery(draft.query, 'submit', source);
     this.draft.set(null);
     const applied = normalizeFilterGroup(draft.value);
-    const labels = this.labelSet();
     this.announce(
       applied
-        ? `${labels.appliedCount(firstLevelRules(applied).length)}: ${describeFilterGroup(applied, this.format())}`
-        : labels.cleared,
+        ? this.t('appliedCount', {
+            count: firstLevelRules(applied).length,
+            filters: describeFilterGroup(applied, this.format()),
+          })
+        : this.t('cleared'),
     );
   }
 
@@ -2408,11 +2452,13 @@ export class SlFilterBar {
     this.invalid.set(null);
     this.edit(next, 'submit');
     const applied = normalizeFilterGroup(next);
-    const labels = this.labelSet();
     this.announce(
       applied
-        ? `${labels.appliedCount(countActive(applied))}: ${describeFilterGroup(applied, this.format())}`
-        : labels.cleared,
+        ? this.t('appliedCount', {
+            count: countActive(applied),
+            filters: describeFilterGroup(applied, this.format()),
+          })
+        : this.t('cleared'),
     );
     this.requestOpen(false, 'submit');
   }

@@ -7,6 +7,7 @@ import { createCollapse } from '@slotted/core/overflow';
 import type { CollapseHandle } from '@slotted/core/overflow';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
+import { selectMessages, type PartialMessages, type SelectMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import type { PortalRootHandle } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
@@ -46,6 +47,7 @@ import {
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 
@@ -221,7 +223,7 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
       <button
         type="button"
         data-part="clear"
-        [attr.aria-label]="resolvedClearLabel()"
+        [attr.aria-label]="t('clear')"
         (click)="onClear($event)"
       >
         <span slIcon><svg slGlyph name="x"></svg></span>
@@ -310,7 +312,7 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
         </div>
       }
       @if (!loading() && empty()) {
-        <div data-part="empty">{{ resolvedEmptyLabel() }}</div>
+        <div data-part="empty">{{ t('empty') }}</div>
       }
       @if (loading() || resolvedSearch()) {
         <!--
@@ -375,8 +377,8 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
                 [id]="searchId"
                 [attr.aria-controls]="listId"
                 [attr.aria-activedescendant]="activeDescendant()"
-                [attr.aria-label]="resolvedSearchLabel()"
-                [placeholder]="resolvedSearchPlaceholder()"
+                [attr.aria-label]="t('search')"
+                [placeholder]="t('searchPlaceholder')"
                 [value]="query()"
                 (input)="onSearchInput($event)"
                 (keydown)="onSearchKeyDown($event)"
@@ -441,17 +443,15 @@ export class SlSelect implements ControlValueAccessor, Validator {
   readonly width = input<SelectWidth | undefined>(undefined);
   readonly mount = input<SelectMount | undefined>(undefined);
   readonly strategy = input<SelectStrategy | undefined>(undefined);
-  readonly clearLabel = input<string | undefined>(undefined);
-  readonly removeLabel = input<string | undefined>(undefined);
-  readonly summaryLabel = input<string | undefined>(undefined);
-  readonly emptyLabel = input<string | undefined>(undefined);
-  readonly loadingLabel = input<string | undefined>(undefined);
-  readonly countLabel = input<string | undefined>(undefined);
-  readonly searchLabel = input<string | undefined>(undefined);
-  readonly searchPlaceholder = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the clear
+   * button, the chips, the summary, the search field, and the sentences.
+   */
+  readonly messages = input<PartialMessages<SelectMessages> | undefined>(undefined);
   /** Whether an option answers the query. `null` turns filtering off. */
   readonly filter = input<SelectFilter | undefined>(undefined);
   /** BCP 47, for the comparison the default filter makes. */
+  /** BCP 47, for the comparison the default filter makes. The language in force when absent. */
   readonly locale = input<string | undefined>(undefined);
 
   readonly sideOffset = input(undefined, { transform: SlSelect.count });
@@ -480,6 +480,11 @@ export class SlSelect implements ControlValueAccessor, Validator {
   readonly loading = input(false, { transform: booleanAttribute });
 
   private readonly defaults = injectSelectDefaults();
+  /** The family's words in the language in force, with this select's `messages` laid over them. */
+  readonly t = injectMessages(selectMessages, this.messages);
+  private readonly inForceLocale = injectLocale();
+  /** The locale the default filter compares in: the `locale` input, or the language in force. */
+  readonly resolvedLocale = computed(() => this.locale() ?? this.inForceLocale());
   private readonly viewContainer = inject(ViewContainerRef);
   private readonly template = viewChild.required<TemplateRef<unknown>>('layer');
   private readonly triggerRef = viewChild.required<{ nativeElement: HTMLButtonElement }>('trigger');
@@ -545,21 +550,11 @@ export class SlSelect implements ControlValueAccessor, Validator {
     () => this.closeOnSelect() ?? this.defaults.closeOnSelect,
   );
   readonly resolvedFullWidth = computed(() => this.fullWidth() ?? this.defaults.fullWidth);
-  readonly resolvedClearLabel = computed(() => this.clearLabel() ?? this.defaults.clearLabel);
-  readonly resolvedRemoveLabel = computed(() => this.removeLabel() ?? this.defaults.removeLabel);
-  readonly resolvedSummaryLabel = computed(() => this.summaryLabel() ?? this.defaults.summaryLabel);
-  readonly resolvedEmptyLabel = computed(() => this.emptyLabel() ?? this.defaults.emptyLabel);
-  readonly resolvedLoadingLabel = computed(() => this.loadingLabel() ?? this.defaults.loadingLabel);
-  readonly resolvedCountLabel = computed(() => this.countLabel() ?? this.defaults.countLabel);
-  readonly resolvedSearchLabel = computed(() => this.searchLabel() ?? this.defaults.searchLabel);
-  readonly resolvedSearchPlaceholder = computed(
-    () => this.searchPlaceholder() ?? this.defaults.searchPlaceholder,
-  );
 
   /** The query, which only exists while there is a field holding it. */
   readonly query = computed(() => (this.resolvedSearch() ? this.searchValue() : ''));
 
-  private readonly fallbackFilter = computed(() => createFilter({ locale: this.locale() }));
+  private readonly fallbackFilter = computed(() => createFilter({ locale: this.resolvedLocale() }));
 
   /**
    * Three answers, and `undefined` is not one of them. Not giving `filter` asks
@@ -577,9 +572,9 @@ export class SlSelect implements ControlValueAccessor, Validator {
 
   /** What the live region carries: the wait, or how many options survived. */
   readonly statusMessage = computed(() => {
-    if (this.loading()) return this.resolvedLoadingLabel();
+    if (this.loading()) return this.t('loading');
     if (!this.resolvedSearch() || this.optionCount() === 0) return '';
-    return this.resolvedCountLabel().replace('{count}', String(this.optionCount()));
+    return this.t('count', { count: this.optionCount() });
   });
 
   /** Unset asks the field; a field that says nothing leaves the default. */
@@ -627,7 +622,7 @@ export class SlSelect implements ControlValueAccessor, Validator {
     /* Several values are the chips beside this element, not a sentence here
        (SL4). The sentence stays: it names the trigger, and it is what a control
        too narrow for a chip shows instead. */
-    return this.resolvedSummaryLabel().replace('{count}', String(held.length));
+    return this.t('summary', { count: held.length });
   });
 
   readonly showClear = computed(
@@ -680,7 +675,7 @@ export class SlSelect implements ControlValueAccessor, Validator {
   private widthGate: WidthGateHandle | null = null;
 
   protected removeLabelFor(value: SelectOptionValue) {
-    return this.resolvedRemoveLabel().replace('{label}', String(this.labelFor(value) ?? value));
+    return this.t('remove', { label: String(this.labelFor(value) ?? value) });
   }
 
   protected onRemoveChip(value: SelectOptionValue, event: MouseEvent) {

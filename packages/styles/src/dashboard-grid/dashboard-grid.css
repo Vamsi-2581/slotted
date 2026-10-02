@@ -125,13 +125,15 @@
     position: relative;
   }
 
+  /* The content grows into a taller cell and never shrinks under its own
+     height: shrunk, it overflowed its own box, and the body scrolled only that
+     overflow, so its last rows and the end padding stayed out of reach. */
   [data-ui='dashboard-grid']
     [data-part='widget']
     > [data-ui='card']
     > [data-part='body']
     > :not([data-part='busy-indicator']) {
-    flex: 1 1 auto;
-    min-block-size: 0;
+    flex: 1 0 auto;
   }
 
   /**

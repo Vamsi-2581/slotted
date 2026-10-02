@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { SlCascader, SlCascaderPanel } from './cascader';
@@ -240,14 +242,32 @@ describe('SlCascader', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       imports: [Host],
-      providers: [provideCascaderDefaults({ size: 'lg', labels: { placeholder: 'Pick a place' } })],
+      providers: [provideCascaderDefaults({ size: 'lg' })],
     });
     const scoped = TestBed.createComponent(Host);
     scoped.detectChanges();
     await scoped.whenStable();
     const root = scoped.nativeElement.querySelector('sl-cascader') as HTMLElement;
     expect(root.getAttribute('data-size')).toBe('lg');
-    expect(root.textContent).toContain('Pick a place');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', async () => {
+    TestBed.resetTestingModule();
+    const locale = signal('pt-BR');
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const scoped = TestBed.createComponent(Host);
+    scoped.detectChanges();
+    await scoped.whenStable();
+    const placeholder = () =>
+      scoped.nativeElement.querySelector("[data-part='placeholder']")?.textContent?.trim();
+    expect(placeholder()).toBe('Escolher…');
+
+    locale.set('en-US');
+    scoped.detectChanges();
+    expect(placeholder()).toBe('Choose…');
   });
 });
 

@@ -372,7 +372,7 @@ export const ANGULAR_SPLIT_BUTTON_DOCS = {
         'Every input of sl-menu is written on the consumer’s own sl-menu: the surface is menu’s and nothing of it is re-declared here',
       ],
       [
-        'type, loadingDelay, loadingLabel, focusableWhenDisabled, slButtonStart, slButtonEnd, on slSplitButtonPrimary',
+        'type, loadingDelay, messages, focusableWhenDisabled, slButtonStart, slButtonEnd, on slSplitButtonPrimary',
         'SlButton’s inputs and slots',
         'SlButton’s',
         'slSplitButtonPrimary',

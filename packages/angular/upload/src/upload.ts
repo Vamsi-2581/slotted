@@ -39,21 +39,17 @@ import {
 } from '@angular/core';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlProgressBar } from '@slotted/angular/progress-indicator';
+import { uploadMessages, type PartialMessages, type UploadMessages } from '@slotted/core/i18n';
 
 import {
   injectUploadDefaults,
   uploadFormatters,
-  type DescribeQueue,
-  type DescribeRejection,
-  type UploadLabels,
-  type UploadQueueMessage,
   type UploadLayout,
   type UploadPreview,
   type UploadSize,
-  type UploadKindLabels,
-  type UploadStatusLabels,
   type UploadVariant,
   type UploadView,
 } from './upload-defaults';
@@ -128,7 +124,7 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
         <!-- The region carries the mark, so the trigger inside it does not. -->
         @if (resolvedVariant() === 'dropzone') {
           <span slIcon><svg slGlyph name="upload"></svg></span>
-          {{ labels().dropzone }}
+          {{ t('dropzone') }}
         }
         <ng-container [ngTemplateOutlet]="triggerTemplate" />
         @if (resolvedVariant() === 'field') {
@@ -142,7 +138,7 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
         <span>{{ summaryText() }}</span>
         @if (!readOnly()) {
           <button (click)="clear($event)" data-part="clear" type="button">
-            {{ labels().clear }}
+            {{ t('clear') }}
           </button>
         }
       </div>
@@ -192,7 +188,7 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
               @for (action of actions(file); track action.part) {
                 <button
                   (click)="act(file, action.action, $event)"
-                  [attr.aria-label]="action.label + ': ' + file.name"
+                  [attr.aria-label]="action.label"
                   [attr.data-part]="action.part"
                   type="button"
                 >
@@ -226,9 +222,8 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
     <div
       (viewingChange)="setViewing($event.key, $event.reason, $event.source)"
       [files]="files()"
-      [kindLabels]="kindLabels()"
-      [labels]="labels()"
       [locale]="resolvedLocale()"
+      [messages]="messages()"
       [size]="resolvedSize()"
       [urls]="urls()"
       [viewing]="resolvedView() === 'none' ? null : viewing()"
@@ -255,7 +250,7 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
           data-part="input"
           type="file"
         />
-        {{ labels().trigger }}
+        {{ t('trigger') }}
       </label>
     </ng-template>
   `,
@@ -342,17 +337,17 @@ export class SlUpload implements ControlValueAccessor, Validator {
     transform: optionalNumber,
   });
   readonly maxRows = input<number | undefined, unknown>(undefined, { transform: optionalNumber });
+  /** What sizes and durations are written in. Absent, the language in force. */
   readonly locale = input<string | undefined>(undefined);
   readonly fileKey = input<((file: File) => string) | undefined>(undefined);
-  readonly describeRejection = input<DescribeRejection | undefined>(undefined);
-  readonly describeQueue = input<DescribeQueue | undefined>(undefined);
-  readonly labelsInput = input<Partial<UploadLabels> | undefined>(undefined, { alias: 'labels' });
-  readonly statusLabelsInput = input<Partial<UploadStatusLabels> | undefined>(undefined, {
-    alias: 'statusLabels',
-  });
-  readonly kindLabelsInput = input<Partial<UploadKindLabels> | undefined>(undefined, {
-    alias: 'kindLabels',
-  });
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * controls, the word for each status and each kind, the sentences about the
+   * queue, and why a file was refused (`rejection.*`). Only the application
+   * knows whether a limit is a policy, a plan or a bug, so a refusal is worded
+   * here.
+   */
+  readonly messages = input<PartialMessages<UploadMessages> | undefined>(undefined);
 
   readonly label = input<string | undefined>(undefined);
   readonly description = input<string | undefined>(undefined);
@@ -383,17 +378,11 @@ export class SlUpload implements ControlValueAccessor, Validator {
   readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   readonly resolvedPreview = computed(() => this.preview() ?? this.defaults.preview);
   readonly resolvedView = computed(() => this.view() ?? this.defaults.view);
-  readonly resolvedLocale = computed(() => this.locale() ?? this.defaults.locale);
+  private readonly contextLocale = injectLocale();
+  readonly resolvedLocale = computed(() => this.locale() ?? this.contextLocale());
+  /** The family's words in the language in force, with this upload's `messages` laid over them. */
+  readonly t = injectMessages(uploadMessages, this.messages);
   readonly resolvedDisabled = computed(() => this.disabled() || this.formDisabled());
-  readonly labels = computed(() => ({ ...this.defaults.labels, ...this.labelsInput() }));
-  readonly statusLabels = computed(() => ({
-    ...this.defaults.statusLabels,
-    ...this.statusLabelsInput(),
-  }));
-  readonly kindLabels = computed(() => ({
-    ...this.defaults.kindLabels,
-    ...this.kindLabelsInput(),
-  }));
   readonly formatters = computed(() => uploadFormatters(this.resolvedLocale()));
   readonly summary = computed(() => uploadSummary(this.files()));
   readonly insideField = computed(() => this.host.closest('[data-ui="field"]') !== null);
@@ -415,18 +404,19 @@ export class SlUpload implements ControlValueAccessor, Validator {
     if (list.length === 1 && first !== undefined) {
       return `${first.name} · ${this.formatters().bytes(first.size)}`;
     }
-    return this.queueText({ kind: 'selection', count: list.length });
+    return this.t('selection', { count: list.length });
   });
 
   readonly summaryText = computed(() => {
     const summary = this.summary();
     const remaining = summary.pending ? estimateRemaining(this.samples(), summary) : null;
-    return this.queueText({
-      kind: 'summary',
-      uploaded: summary.counts.success,
-      total: summary.total,
-      secondsLeft: remaining,
-    });
+    const counts = { uploaded: summary.counts.success, total: summary.total };
+    return remaining === null
+      ? this.t('summary', counts)
+      : this.t('summaryRemaining', {
+          ...counts,
+          duration: this.formatters().duration(remaining),
+        });
   });
 
   /** Whether a click anywhere in the region opens the picker, which is when it answers a pointer. */
@@ -475,14 +465,15 @@ export class SlUpload implements ControlValueAccessor, Validator {
     effect(() => {
       const list = this.files();
       const summary = this.summary();
-      const statusLabels = this.statusLabels();
       untracked(() => {
         const announcer = getLiveAnnouncer();
         for (const file of list) {
           const before = this.statuses.get(file.key);
           if (before === undefined || before === file.status) continue;
           if (file.status === 'error' || file.status === 'canceled') {
-            announcer?.announce(`${file.name}: ${statusLabels[file.status]}`);
+            announcer?.announce(
+              this.t('fileNotice', { name: file.name, message: this.t(file.status) }),
+            );
           }
         }
         this.statuses = new Map(list.map((file) => [file.key, file.status]));
@@ -490,11 +481,7 @@ export class SlUpload implements ControlValueAccessor, Validator {
         const finished = summary.complete && summary.total > 0;
         if (finished && this.finished === false) {
           announcer?.announce(
-            this.queueText({
-              kind: 'finished',
-              uploaded: summary.counts.success,
-              total: summary.total,
-            }),
+            this.t('finished', { uploaded: summary.counts.success, total: summary.total }),
           );
         }
         this.finished = finished;
@@ -543,7 +530,7 @@ export class SlUpload implements ControlValueAccessor, Validator {
     effect(() => {
       const blocked = this.pendingBlocked();
       const element = this.host.querySelector<HTMLInputElement>('[data-part="input"]');
-      element?.setCustomValidity(blocked ? this.labels().pending : '');
+      element?.setCustomValidity(blocked ? this.t('pending') : '');
       this.onValidatorChange();
     });
 
@@ -717,11 +704,13 @@ export class SlUpload implements ControlValueAccessor, Validator {
       (file) => file.status !== 'rejected' && !existing.includes(file),
     ).length;
     const announcer = getLiveAnnouncer();
-    if (kept > 0) announcer?.announce(this.queueText({ kind: 'added', count: kept }));
+    if (kept > 0) announcer?.announce(this.t('added', { count: kept }));
     if (outcome.rejected.length > 0) {
       this.reject.emit(outcome.rejected);
       for (const file of outcome.rejected) {
-        announcer?.announce(`${file.name}: ${this.messageText(file)}`);
+        announcer?.announce(
+          this.t('fileNotice', { name: file.name, message: this.messageText(file) }),
+        );
       }
     }
 
@@ -816,7 +805,7 @@ export class SlUpload implements ControlValueAccessor, Validator {
 
   protected extensionLabel(file: UploadFile) {
     const extension = splitName(file.name).extension;
-    return extension === '' ? 'FILE' : extension.slice(1).toUpperCase();
+    return extension === '' ? this.t('noExtension') : extension.slice(1).toUpperCase();
   }
 
   protected url(file: UploadFile) {
@@ -836,46 +825,60 @@ export class SlUpload implements ControlValueAccessor, Validator {
   }
 
   protected statusText(file: UploadFile) {
-    const word = this.statusLabels()[file.status];
+    const word = this.t(file.status);
     const percent = this.percent(file);
     return this.showBar(file) && percent !== null ? `${word} · ${Math.round(percent)}%` : word;
   }
 
-  private queueText(message: UploadQueueMessage) {
-    const describe = this.describeQueue() ?? this.defaults.describeQueue;
-    return describe(message, this.formatters());
-  }
-
+  /** The status word for a failure; for a refusal, the catalog's sentence for its reason. */
   protected messageText(file: UploadFile) {
-    if (file.status !== 'rejected') return this.statusLabels().error;
-    const describe = this.describeRejection() ?? this.defaults.describeRejection;
-    return describe(file, this.formatters());
+    if (file.status !== 'rejected') return this.t('error');
+    return file.reason === 'size'
+      ? this.t('rejection.size', { size: this.formatters().bytes(file.size) })
+      : this.t(`rejection.${file.reason ?? 'custom'}`);
   }
 
   protected actions(file: UploadFile) {
     if (this.readOnly()) return [];
-    const labels = this.labels();
+    /* The control's name is the action's message holding the file's name, so a
+       language writes its own order. */
+    const named = { name: file.name };
     /* Five marks chosen against each other, because they appear together on one
        row: a cross means *stop this* and a bin means *take it away*. */
-    const start = { part: 'start', glyph: 'play', label: labels.start, action: 'start' } as const;
+    const start = {
+      part: 'start',
+      glyph: 'play',
+      label: this.t('start', named),
+      action: 'start',
+    } as const;
     const resume = {
       part: 'start',
       glyph: 'play',
-      label: labels.resume,
+      label: this.t('resume', named),
       action: 'resume',
     } as const;
-    const pause = { part: 'pause', glyph: 'pause', label: labels.pause, action: 'pause' } as const;
+    const pause = {
+      part: 'pause',
+      glyph: 'pause',
+      label: this.t('pause', named),
+      action: 'pause',
+    } as const;
     const retry = {
       part: 'retry',
       glyph: 'rotate-ccw',
-      label: labels.retry,
+      label: this.t('retry', named),
       action: 'retry',
     } as const;
-    const cancel = { part: 'cancel', glyph: 'x', label: labels.cancel, action: 'cancel' } as const;
+    const cancel = {
+      part: 'cancel',
+      glyph: 'x',
+      label: this.t('cancel', named),
+      action: 'cancel',
+    } as const;
     const remove = {
       part: 'remove',
       glyph: 'trash',
-      label: labels.remove,
+      label: this.t('remove', named),
       action: 'remove',
     } as const;
 

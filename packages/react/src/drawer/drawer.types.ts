@@ -1,4 +1,5 @@
 import type { ExtentSide } from '@slotted/core/extent';
+import type { DrawerMessages, FamilyTranslator, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref, RefObject } from 'react';
 
@@ -123,6 +124,8 @@ export interface DrawerDefaultsProviderProps extends Partial<DrawerDefaults> {
 
 /** What the family hands its own parts. */
 export interface DrawerContextValue {
+  /** The family's words in the language in force, with this drawer's `messages` laid over them. */
+  t: FamilyTranslator<DrawerMessages>;
   /** Marks a part as present, so the panel wires only what was rendered. */
   announce: (part: 'title' | 'description') => () => void;
   /** Asks to close, carrying the reason, the result and the event. */
@@ -254,6 +257,8 @@ export interface DrawerProps {
   back?: DrawerDismissPolicy | undefined;
   /** Whether the panel's content is still on its way. */
   loading?: boolean | undefined;
+  /** Words laid over the catalog of the language in force, key by key: the close control's name (`close`). */
+  messages?: PartialMessages<DrawerMessages> | undefined;
   /** What a hand moves an overlay sheet from the bottom by. */
   drag?: DrawerDrag | undefined;
   /**

@@ -315,6 +315,23 @@
     overscroll-behavior: none;
   }
 
+  /**
+   * Chaining is held back only on the axes the area scrolls. An axis it does
+   * not scroll is still an axis of a scroll container — `overflow: hidden` is
+   * one — and under `contain` Chrome kept the page's wheel inside a one-line
+   * code block. These come after the two above, so a chosen `none` holds the
+   * scrolling axis and lets the other through.
+   */
+  [data-ui='scroll-area'][data-axis='inline'] > [data-part='viewport'] {
+    overscroll-behavior-y: auto;
+    overscroll-behavior-block: auto;
+  }
+
+  [data-ui='scroll-area'][data-axis='block'] > [data-part='viewport'] {
+    overscroll-behavior-x: auto;
+    overscroll-behavior-inline: auto;
+  }
+
   /* ── The veil, edge by edge ────────────────────────────────────────────── */
 
   [data-ui='scroll-area'][data-at-block-start] > [data-part='viewport'] {

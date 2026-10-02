@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "button",
   "ui": "button",
+  "catalog": {
+    "group": "Actions",
+    "summary": "Button, link button, icon button and toggle button."
+  },
   "axes": {
     "tone": ["accent", "secondary", "success", "warning", "danger"],
     "variant": ["solid", "outline", "ghost"],
@@ -13,6 +17,7 @@
     "part": "indicator",
     "stylesheet": "spinner/spinner.css"
   },
+  "messages": ["loading"],
   "stateAttributes": {
     "disabled": "data-disabled",
     "loading": "data-loading",
@@ -38,8 +43,7 @@
         "disabled": false,
         "focusableWhenDisabled": false,
         "loading": false,
-        "loadingDelay": 0,
-        "loadingLabel": "Loading"
+        "loadingDelay": 0
       },
       "capabilities": ["appearance", "content", "fullWidth", "disabled", "loading"],
       "states": ["default", "hover", "active", "focus-visible", "disabled", "loading"],
@@ -69,8 +73,7 @@
         "disabled": false,
         "focusableWhenDisabled": false,
         "loading": false,
-        "loadingDelay": 0,
-        "loadingLabel": "Loading"
+        "loadingDelay": 0
       },
       "capabilities": ["appearance", "shape", "disabled", "loading", "pressed"],
       "states": ["default", "hover", "active", "focus-visible", "disabled", "loading", "pressed"],
@@ -88,7 +91,6 @@
         "focusableWhenDisabled": false,
         "loading": false,
         "loadingDelay": 0,
-        "loadingLabel": "Loading",
         "defaultPressed": false
       },
       "capabilities": ["appearance", "content", "fullWidth", "disabled", "loading", "pressed"],

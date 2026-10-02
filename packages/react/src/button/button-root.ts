@@ -5,7 +5,6 @@ import type { ChangeReason } from '@slotted/core/state';
 import { useEffect, useState } from 'react';
 import type { MouseEvent, SyntheticEvent } from 'react';
 
-import { BUTTON_LOADING_LABEL } from './button.constants';
 import { useButtonDefaults } from './button-defaults';
 import type {
   ButtonAppearanceProps,
@@ -129,10 +128,6 @@ export function useLoadingIndicator({ loading = false, loadingDelay = 0 }: Butto
   }, [loading, loadingDelay]);
 
   return loading && (loadingDelay <= 0 || elapsed);
-}
-
-export function loadingLabelOf({ loadingLabel = BUTTON_LOADING_LABEL }: ButtonLoadingProps) {
-  return loadingLabel;
 }
 
 /**

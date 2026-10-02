@@ -1,12 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SlField, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/rating/contract.json';
 import { SlRating, SlRatingCaption, SlRatingSymbol } from './rating';
-import { provideRating, RATING_MESSAGES, SlRatingIdFactory } from './rating-defaults';
+import { provideRating, SlRatingIdFactory } from './rating-defaults';
 import { SlRatingDisplay } from './rating-display';
 import { SlRatingSummary } from './rating-summary';
 
@@ -74,7 +76,8 @@ function measureRow(fixture: Fixture, width = 100) {
   return row;
 }
 
-const PT = [provideRating({ locale: 'pt-BR' })];
+/** The family's own sentences are asserted in Brazilian Portuguese, the language the page is in. */
+const PT = [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })];
 
 describe('SlRating', () => {
   it('renders the harness anatomy: a radio group of items, each a radio, a symbol and a fill', () => {
@@ -463,28 +466,19 @@ describe('SlRating', () => {
   it('lets an application decide once, and an instance still win', () => {
     const fixture = renderTemplate(
       `<div slRating class="a"></div><div slRating class="b" size="sm" [max]="3"></div>`,
-      [
-        provideRating({
-          size: 'lg',
-          tone: 'accent',
-          max: 10,
-          clearable: false,
-          locale: 'pt-BR',
-          messages: { itemLabel: '{value} estrelas' },
-        }),
-      ],
+      [provideRating({ size: 'lg', tone: 'accent', max: 10, clearable: false }), ...PT],
     );
     const a = root(fixture, '.a');
     const b = root(fixture, '.b');
     expect(a.getAttribute('data-size')).toBe('lg');
     expect(a.getAttribute('data-tone')).toBe('accent');
     expect(a.querySelectorAll('input')).toHaveLength(10);
-    expect(a.querySelector('input')?.getAttribute('aria-label')).toBe('1 estrelas');
+    expect(a.querySelector('input')?.getAttribute('aria-label')).toBe('1 de 10');
     expect(b.getAttribute('data-size')).toBe('sm');
     expect(b.querySelectorAll('input')).toHaveLength(3);
   });
 
-  it('merges a partial message record from the instance over the application’s', () => {
+  it('lays a partial message record from the instance over the language in force', () => {
     const fixture = renderTemplate(
       `<div slRating [messages]="{ itemLabel: 'Nota {value} de {max}' }" [step]="0.5"></div>`,
       PT,
@@ -622,9 +616,19 @@ describe('SlRatingIdFactory', () => {
   });
 });
 
-describe('RATING_MESSAGES', () => {
-  it('is the contract’s messages, word for word', () => {
-    expect(RATING_MESSAGES).toEqual(contract.messages);
+describe('rating messages', () => {
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(`<div slRatingDisplay [value]="3" [count]="0"></div>`, [
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+    const label = () => root(fixture, '[slRatingDisplay]').getAttribute('aria-label');
+    /* CLDR files nought under `one` in Portuguese: the exact branch is read first. */
+    expect(label()).toBe('Avaliação 3 de 5, 0 avaliações');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(label()).toBe('Rated 3 out of 5, 0 ratings');
   });
 
   it('writes the singular for one', () => {
@@ -731,7 +735,7 @@ describe('SlRatingSummary', () => {
     const fixture = renderTemplate(
       `<section slRatingSummary variant="spectrum" class="a" [counts]="counts"></section>
        <section slRatingSummary variant="spectrum" class="b" [counts]="counts" [insightThresholds]="{ consensus: 0.99 }"></section>`,
-      [provideRating({ insightThresholds: { few: 5000 } })],
+      [provideRating({ insightThresholds: { few: 5000 } }), ...PT],
     );
     expect(root(fixture, '.a [data-part="insight"]').textContent).toBe('Poucas avaliações');
     expect(root(fixture, '.a [data-part="insight"]').getAttribute('data-tone')).toBe('secondary');

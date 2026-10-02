@@ -3,6 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import { SlMenu, SlMenuItem, SlMenuTrigger } from '@slotted/angular/menu';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/breadcrumb/contract.json';
 import {
   SlBreadcrumb,
@@ -18,7 +21,7 @@ import { collapsedRange, provideBreadcrumbDefaults } from './breadcrumb.constant
   imports: [SlBreadcrumb, SlBreadcrumbItem, SlBreadcrumbLink, SlBreadcrumbList, SlBreadcrumbPage],
   template: `<nav
     slBreadcrumb
-    [label]="label()"
+    [messages]="messages()"
     [maxItems]="maxItems()"
     [expanded]="expanded()"
     (expandedChange)="onExpandedChange($event)"
@@ -35,7 +38,7 @@ import { collapsedRange, provideBreadcrumbDefaults } from './breadcrumb.constant
 })
 class TestHost {
   readonly levels = signal(['Workspace', 'Northwind', 'Accounts', 'Billing', 'Invoices']);
-  readonly label = signal<string | undefined>(undefined);
+  readonly messages = signal<{ label?: string } | undefined>(undefined);
   readonly maxItems = signal<number | undefined>(0);
   readonly expanded = signal<boolean | undefined>(undefined);
   readonly onExpandedChange = vi.fn();
@@ -71,7 +74,7 @@ describe('SlBreadcrumb', () => {
     const { root, host, settle } = setup();
     expect(root?.getAttribute('aria-label')).toBe('Breadcrumb');
 
-    host.label.set('Fatura');
+    host.messages.set({ label: 'Fatura' });
     settle();
     expect(root?.getAttribute('aria-label')).toBe('Fatura');
   });
@@ -161,12 +164,34 @@ describe('SlBreadcrumb', () => {
   });
 
   it('takes the application defaults, and yields to an explicit input', () => {
-    const { host, root, settle } = setup([provideBreadcrumbDefaults({ label: 'Trilha' })]);
-    expect(root?.getAttribute('aria-label')).toBe('Trilha');
+    const { host, items, settle } = setup([provideBreadcrumbDefaults({ maxItems: 4 })]);
+    /* The ellipsis is an item too, hidden while it has nothing to reveal. */
+    const folded = () =>
+      items().filter(
+        (item) => item.hasAttribute('hidden') && !item.querySelector('[data-part="ellipsis"]'),
+      );
+    expect(folded()).toHaveLength(0);
 
-    host.label.set('Fatura');
+    host.maxItems.set(undefined);
     settle();
-    expect(root?.getAttribute('aria-label')).toBe('Fatura');
+    expect(folded()).toHaveLength(3);
+  });
+
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const { host, root, ellipsis, settle } = setup([
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+    host.maxItems.set(4);
+    settle();
+
+    expect(root.getAttribute('aria-label')).toBe('Trilha de navegação');
+    expect(ellipsis()?.getAttribute('aria-label')).toBe('Mostrar 3 níveis ocultos');
+
+    locale.set('en-US');
+    settle();
+    expect(root.getAttribute('aria-label')).toBe('Breadcrumb');
+    expect(ellipsis()?.getAttribute('aria-label')).toBe('Show 3 hidden levels');
   });
 
   /** A static attribute the consumer wrote survives the host binding. */

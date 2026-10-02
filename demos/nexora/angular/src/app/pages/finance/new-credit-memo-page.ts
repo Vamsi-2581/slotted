@@ -121,7 +121,7 @@ import { phoneSignal } from '../../core/layout/phone';
           <form
             slForm
             data-testid="new-credit-memo-form"
-            summaryTitle="This credit memo was not written"
+            [messages]="{ summaryTitle: 'This credit memo was not written' }"
             [errors]="store.errors()"
             (errorsChange)="store.errors.set($event.value)"
             [loading]="store.creating()"
@@ -277,7 +277,7 @@ import { phoneSignal } from '../../core/layout/phone';
                 type="submit"
                 data-testid="create-credit-memo"
                 [loading]="store.creating()"
-                loadingLabel="Writing the draft"
+                [messages]="{ loading: 'Writing the draft' }"
               >
                 Write the draft
               </button>

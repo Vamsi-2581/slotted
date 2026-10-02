@@ -20,6 +20,7 @@ import {
   computed,
   Directive,
   ElementRef,
+  HostAttributeToken,
   inject,
   input,
   OnDestroy,
@@ -207,11 +208,10 @@ export class SlDrawerClose {
   readonly value = input<string | undefined>(undefined);
 
   private readonly drawer = inject(SlDrawer);
-  private readonly native: HTMLElement = inject(ElementRef).nativeElement;
+  /** A consumer's own `aria-label`, which wins over the catalog. */
+  private readonly ownLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
 
-  protected readonly label = computed(() =>
-    this.native.hasAttribute('aria-label') ? null : 'Close',
-  );
+  protected readonly label = computed(() => this.ownLabel ?? this.drawer.t('close'));
 
   protected press(event: MouseEvent) {
     if (event.defaultPrevented) return;

@@ -1,9 +1,11 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/currency-field/contract.json';
 import { Field, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { CurrencyField, CurrencyFieldScrub } from './currency-field';
 import { CurrencyFieldDefaultsProvider } from './currency-field-defaults';
 import type { CurrencyFieldHandle } from './currency-field.types';
@@ -126,12 +128,26 @@ describe('CurrencyField', () => {
 
   it('takes the currency from an application that set one once', () => {
     render(
-      <CurrencyFieldDefaultsProvider currency="JPY" locale="ja-JP">
-        <CurrencyField defaultValue={1480} />
-      </CurrencyFieldDefaultsProvider>,
+      <SlottedProvider locale="ja-JP">
+        <CurrencyFieldDefaultsProvider currency="JPY">
+          <CurrencyField defaultValue={1480} />
+        </CurrencyFieldDefaultsProvider>
+      </SlottedProvider>,
     );
 
     expect(control().value).toBe('￥1,480');
+  });
+
+  it('writes and speaks in the language in force', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <CurrencyField currency="BRL" defaultValue={1480} stepper="split" />
+      </SlottedProvider>,
+    );
+
+    expect(plain(control().value)).toBe('R$ 1.480,00');
+    expect(stepper('increment')).toHaveAccessibleName('Aumentar');
+    expect(stepper('decrement')).toHaveAccessibleName('Diminuir');
   });
 });
 
@@ -606,11 +622,10 @@ describe('the two steppers', () => {
     render(
       <CurrencyField
         currency="BRL"
-        decrementLabel="Menos"
         defaultValue={100}
         id="total"
-        incrementLabel="Mais"
         locale="pt-BR"
+        messages={{ decrement: 'Menos', increment: 'Mais' }}
         stepper="stacked"
       />,
     );
@@ -814,7 +829,6 @@ describe('an application that decides once', () => {
         align="start"
         currency="USD"
         entry="natural"
-        locale="en-US"
         size="sm"
         stepper="split"
         variant="subtle"

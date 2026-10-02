@@ -3,6 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import {
   SlSection,
   SlSectionHeader,
@@ -129,7 +132,7 @@ describe('SlPage', () => {
 
   it('names the footer and holds it through its exit', async () => {
     const footer = query('[data-part="footer"]');
-    expect(footer.getAttribute('aria-label')).toBe('Ações da página');
+    expect(footer.getAttribute('aria-label')).toBe('Page actions');
     expect(footer.getAttribute('data-status')).toBe('open');
     expect(query('[data-part="footer"] [data-part="actions"]')).not.toBeNull();
     host.footer.set(false);
@@ -165,10 +168,9 @@ describe('SlPage defaults', () => {
         ground: 'surface',
         scroll: 'self',
         width: 'content',
-        messages: { footer: 'Decisões' },
       }),
     ],
-    template: `<main slPage width="full">
+    template: `<main slPage width="full" [messages]="{ footer: 'Decisões' }">
       <div slPageBody>x</div>
       <footer slPageFooter><button type="button">Enviar</button></footer>
     </main>`,
@@ -184,6 +186,38 @@ describe('SlPage defaults', () => {
     expect(root.getAttribute('data-scroll')).toBe('self');
     expect(root.getAttribute('data-width')).toBe('full');
     expect(root.querySelector('[data-part="footer"]')?.getAttribute('aria-label')).toBe('Decisões');
+    vi.unstubAllGlobals();
+  });
+});
+
+describe('SlPage language', () => {
+  @Component({
+    standalone: true,
+    imports: [SlPage, SlPageBody, SlPageFooter],
+    template: `<main slPage>
+        <div slPageBody>x</div>
+        <footer slPageFooter id="inside"><button type="button">Enviar</button></footer>
+      </main>
+      <footer slPageFooter id="alone"></footer>`,
+  })
+  class Spoken {}
+
+  it('speaks the language in force, inside a page and outside one, and follows a change of it', () => {
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+    const locale = signal('pt-BR');
+    TestBed.configureTestingModule({
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const fixture = TestBed.createComponent(Spoken);
+    fixture.detectChanges();
+    const label = (id: string) =>
+      (fixture.nativeElement as HTMLElement).querySelector(`#${id}`)?.getAttribute('aria-label');
+    expect(label('inside')).toBe('Ações da página');
+    expect(label('alone')).toBe('Ações da página');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(label('inside')).toBe('Page actions');
     vi.unstubAllGlobals();
   });
 });

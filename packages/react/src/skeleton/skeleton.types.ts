@@ -1,3 +1,4 @@
+import type { PartialMessages, SkeletonMessages } from '@slotted/core/i18n';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 export type SkeletonShape = 'text' | 'block' | 'circle' | 'square';
@@ -15,7 +16,6 @@ export type SkeletonLive = 'polite' | 'off';
 export interface SkeletonDefaults {
   animation?: SkeletonAnimation | undefined;
   delay?: number | undefined;
-  label?: string | undefined;
   lastLineSize?: string | undefined;
   live?: SkeletonLive | undefined;
   loadedLabel?: string | undefined;
@@ -98,8 +98,11 @@ export interface SkeletonRegionProps extends ComponentPropsWithRef<'div'> {
   animation?: SkeletonAnimation;
   /** How long the wait must last before anything is painted. */
   delay?: number;
-  /** What a screen reader hears once, while the region is waiting. */
-  label?: string;
+  /**
+   * Words laid over the catalog of the language in force, key by key: what a
+   * screen reader hears once, while the region is waiting (`label`).
+   */
+  messages?: PartialMessages<SkeletonMessages> | undefined;
   /** Whether the region announces at all. */
   live?: SkeletonLive;
   /** What a screen reader hears when the content arrives. Silent by default. */

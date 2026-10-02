@@ -1,9 +1,5 @@
 export { PageHeader, usePageHeader } from './page-header';
-export {
-  DEFAULT_PAGE_HEADER_MESSAGES,
-  PageHeaderDefaultsProvider,
-  usePageHeaderDefaults,
-} from './page-header-defaults';
+export { PageHeaderDefaultsProvider, usePageHeaderDefaults } from './page-header-defaults';
 export {
   PageHeaderActions,
   PageHeaderArea,
@@ -41,7 +37,6 @@ export type {
   PageHeaderHeadingProps,
   PageHeaderHeadingRootProps,
   PageHeaderLevel,
-  PageHeaderMessages,
   PageHeaderPartComponentProps,
   PageHeaderPartProps,
   PageHeaderPinProps,

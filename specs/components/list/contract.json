@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "list",
   "ui": "list",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Vertical list of items with sections."
+  },
   "pattern": null,
   "patternAbsent": {
     "index": "https://www.w3.org/WAI/ARIA/apg/patterns/",

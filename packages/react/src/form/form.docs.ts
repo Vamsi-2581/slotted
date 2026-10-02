@@ -48,7 +48,7 @@ const anatomy: AnatomyRow[] = [
     element: 'h2',
     required: false,
     purpose:
-      'The heading the sourced pattern requires, defaulting to “There is a problem”. It labels the region, so a reader who is moved there is told what they arrived at.',
+      'The heading the sourced pattern requires, the summaryTitle message of the language in force (“There is a problem”). It labels the region, so a reader who is moved there is told what they arrived at.',
   },
   {
     part: 'summary-list',
@@ -219,12 +219,12 @@ const form = useFormState();
   {
     id: 'composition',
     title: 'Setting it once, reaching past it, and guarding it',
-    note: 'The provider carries the seven decisions an application takes once; the handle reaches the four actions a value cannot express; guardUnsaved registers a beforeunload while anything has been edited, which nothing surveyed ships.',
+    note: 'The provider carries the six decisions an application takes once; the handle reaches the four actions a value cannot express; guardUnsaved registers a beforeunload while anything has been edited, which nothing surveyed ships.',
     snippet: defineSnippet({
       id: 'form-react-composition',
       language: 'tsx',
       label: 'A provider, a handle and an unsaved guard',
-      source: `<FormDefaultsProvider summaryTitle="Corrija estes campos" validate="blur">
+      source: `<FormDefaultsProvider validate="blur">
   <Form guardUnsaved handle={handle}>
     …
   </Form>
@@ -310,9 +310,16 @@ export const REACT_FORM_DOCS = {
       [
         'summaryTitle',
         'ReactNode',
-        'There is a problem',
-        'Form, FormDefaultsProvider',
-        'The summary’s heading, and the only string this family writes',
+        '—',
+        'Form',
+        'The summary’s heading as content of the page’s own, replacing the summaryTitle message',
+      ],
+      [
+        'messages',
+        'Partial<FormMessages>',
+        '—',
+        'Form',
+        'Words laid over the language in force: the summary’s heading (summaryTitle)',
       ],
       [
         'summaryDescription',
@@ -395,10 +402,10 @@ export const REACT_FORM_DOCS = {
       ],
       [
         'FormDefaultsProvider',
-        '{ validate, errorFocus, summary, summaryTitle, summaryDescription, align, nativeValidation }',
+        '{ validate, errorFocus, summary, summaryDescription, align, nativeValidation }',
         '—',
         'a subtree',
-        'The seven decisions an application takes once. summaryTitle is the one worth setting first, because it is the only place a reader is told in words that something is wrong',
+        'The six decisions an application takes once. The summary’s heading comes from the language in force (SlottedProvider)',
       ],
     ]),
     accessibility: [

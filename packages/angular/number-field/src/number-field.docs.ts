@@ -238,7 +238,7 @@ const scenes: ReferenceSceneMeta[] = [
 
 // Set once for the application rather than per amount.
 bootstrapApplication(App, {
-  providers: [provideNumberFieldDefaults({ locale: 'pt-BR' })],
+  providers: [provideSlotted({ locale: 'pt-BR' })],
 });`,
     }),
   },
@@ -485,8 +485,8 @@ export const ANGULAR_NUMBER_FIELD_DOCS = {
       [
         'locale',
         'string',
-        'the runtime’s',
-        'input[slNumberFieldInput], provideNumberFieldDefaults',
+        'the language in force',
+        'input[slNumberFieldInput]',
         'BCP 47. It decides the decimal separator, the grouping and the numbering system, on the way out and on the way back in',
       ],
       [
@@ -574,11 +574,11 @@ export const ANGULAR_NUMBER_FIELD_DOCS = {
         'Read as static attributes, removed from the visible control and given to a hidden input beside it that carries the raw number. Submitting "R$ 1.480,00" to a server expecting 1480 is the defect this avoids',
       ],
       [
-        'incrementLabel / decrementLabel',
-        'string',
-        'Increase / Decrease',
-        '[slNumberField], provideNumberFieldDefaults',
-        'What the two buttons announce. Both are set once for an application rather than per amount',
+        'messages',
+        'Partial<NumberFieldMessages>',
+        '—',
+        '[slNumberField]',
+        'Words laid over the language in force, key by key: increment and decrement are what the two buttons announce',
       ],
     ]),
     composition: apiRows([
@@ -605,10 +605,10 @@ export const ANGULAR_NUMBER_FIELD_DOCS = {
       ],
       [
         'provideNumberFieldDefaults',
-        '{ size, variant, stepper, locale, formatOn, clamp, incrementLabel, decrementLabel }',
+        '{ size, variant, stepper, formatOn, clamp }',
         '—',
         'an injector',
-        'The seven decisions an application takes once. locale is the one worth setting first: a form where one field reads 1.234 as a thousand and another as one point two three four is a form that loses money',
+        'The five decisions an application takes once. The locale comes from provideSlotted, for the whole application: a form where one field reads 1.234 as a thousand and another as one point two three four is a form that loses money',
       ],
       [
         'HostAttributeToken',

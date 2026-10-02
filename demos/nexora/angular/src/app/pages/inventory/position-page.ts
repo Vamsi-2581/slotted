@@ -431,7 +431,7 @@ import { leaveForm } from './leave-form';
                 </span>
               }
             } @else {
-              <div slSkeletonRegion label="Reading the stock" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the stock' }" [loading]="true">
                 <div slGrid [columns]="phone() ? 2 : figureColumns()" minItemWidth="xs" [gap]="4">
                   @for (figure of figureLabels(); track figure) {
                     <div slStatCard size="sm" loading>
@@ -502,7 +502,7 @@ import { leaveForm } from './leave-form';
                       <form
                         slForm
                         data-testid="adjust-form"
-                        summaryTitle="The stock was not adjusted"
+                        [messages]="{ summaryTitle: 'The stock was not adjusted' }"
                         [errors]="store.errors()"
                         (errorsChange)="store.errors.set($event.value)"
                         [loading]="store.saving()"
@@ -659,7 +659,7 @@ import { leaveForm } from './leave-form';
                             type="submit"
                             data-testid="adjust-submit"
                             [loading]="store.saving()"
-                            loadingLabel="Adjusting the stock"
+                            [messages]="{ loading: 'Adjusting the stock' }"
                           >
                             {{ submitWord() }}
                           </button>

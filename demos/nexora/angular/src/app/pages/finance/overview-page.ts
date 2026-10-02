@@ -457,7 +457,7 @@ export function financeFigures(
                   <p slResultStateDescription>Nexora did not answer the summary. Nothing is shown rather than a zero that is not true.</p>
                 </div>
                 <div slResultStateActions>
-                  <button slButton type="button" data-testid="figures-retry" [loading]="store.overview().pending" loadingLabel="Asking again" (click)="retry()">
+                  <button slButton type="button" data-testid="figures-retry" [loading]="store.overview().pending" [messages]="{ loading: 'Asking again' }" (click)="retry()">
                     Try again
                   </button>
                 </div>

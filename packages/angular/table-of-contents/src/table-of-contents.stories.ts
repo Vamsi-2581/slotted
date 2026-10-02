@@ -139,7 +139,6 @@ class HistoryDemo {
   providers: [
     provideTableOfContentsDefaults({
       history: 'replace',
-      messages: { navigation: 'Neste artigo' },
       numbered: true,
       size: 'sm',
     }),
@@ -150,8 +149,8 @@ class HistoryDemo {
         <header class="slotted-demo-scene__header">
           <span class="slotted-demo-scene__label">from the provider</span>
           <span class="slotted-demo-scene__note"
-            >Small, numbered, named “Neste artigo”, replacing the URL — none of it stated
-            here.</span
+            >Small, numbered, replacing the URL — none of it stated here. The name comes from the
+            language in force.</span
           >
         </header>
         <div class="slotted-demo-stage" data-layout="block">

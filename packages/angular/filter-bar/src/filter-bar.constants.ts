@@ -1,12 +1,6 @@
 import { InjectionToken, inject } from '@angular/core';
 import type { TemplateRef } from '@angular/core';
-import type {
-  FilterDescriptor,
-  FilterGroup,
-  FilterJoin,
-  FilterKind,
-  FilterOperator,
-} from '@slotted/core/filter';
+import type { FilterDescriptor, FilterGroup, FilterKind } from '@slotted/core/filter';
 
 export type FilterBarApply = 'live' | 'manual';
 export type FilterBarSize = 'sm' | 'md' | 'lg';
@@ -72,131 +66,6 @@ export interface FilterBarPreset {
   value: FilterGroup | null;
 }
 
-/** What the family says, in the application's language. */
-export interface FilterBarLabels {
-  bar: string;
-  filters: string;
-  builder: string;
-  search: string;
-  add: string;
-  clear: string;
-  /** The control that empties the rule a pill opens. */
-  clearRule: string;
-  apply: string;
-  reset: string;
-  done: string;
-  cancel: string;
-  summary: (count: number) => string;
-  more: (count: number) => string;
-  less: string;
-  preset: string;
-  presetNone: string;
-  savePreset: string;
-  addRule: string;
-  addGroup: string;
-  removeRule: string;
-  removeGroup: string;
-  joins: Record<FilterJoin, string>;
-  /** The two faces of the join control: every rule, or any rule. */
-  matchAll: string;
-  matchAny: string;
-  /** The words before the join control. */
-  match: string;
-  /** The words after the join control. */
-  matches: string;
-  /** The word before the first rule of a group; the join word stands before the rest. */
-  where: string;
-  field: string;
-  operator: string;
-  value: string;
-  from: string;
-  to: string;
-  count: (count: string, total: string | undefined) => string;
-  removed: (field: string) => string;
-  cleared: string;
-  required: (field: string) => string;
-  unknownField: (field: string) => string;
-  /** The word before a chip's own label on its remove control. */
-  remove: string;
-  /** The value segment of a condition still waiting for its value. */
-  noValue: string;
-  /** Appended to a chip's name while its condition is incomplete. */
-  incomplete: string;
-  /** After the first two values of a longer list; `count` is the rest. */
-  moreValues: (count: number) => string;
-  /** Said by the toolbar of a read-only bar. */
-  readOnly: string;
-  appliedCount: (count: number) => string;
-  operators: Partial<Record<FilterOperator, string>>;
-}
-
-export const FILTER_BAR_DEFAULT_LABELS: FilterBarLabels = {
-  add: 'Add filter',
-  addGroup: 'Add group',
-  addRule: 'Add rule',
-  appliedCount: (count) => `${count} filters applied`,
-  apply: 'Apply',
-  bar: 'Filter',
-  builder: 'Filters',
-  cancel: 'Cancel',
-  clear: 'Clear all',
-  clearRule: 'Clear',
-  cleared: 'Filters cleared',
-  count: (count, total) => (total === undefined ? count : `${count} of ${total}`),
-  done: 'Done',
-  field: 'Field',
-  filters: 'Filters',
-  from: 'From',
-  incomplete: 'incomplete',
-  joins: { and: 'and', or: 'or' },
-  less: 'Show less',
-  match: 'Match',
-  matchAll: 'All',
-  matchAny: 'Any',
-  matches: 'of the following',
-  more: (count) => `+${count} more`,
-  moreValues: (count) => `+${count}`,
-  noValue: 'Select value',
-  operator: 'Operator',
-  operators: {
-    after: 'after',
-    anyOf: 'any of',
-    before: 'before',
-    between: 'between',
-    contains: 'contains',
-    empty: 'is empty',
-    endsWith: 'ends with',
-    equals: 'equals',
-    greaterThan: 'greater than',
-    greaterThanOrEqual: 'at least',
-    is: 'is',
-    isNot: 'is not',
-    lessThan: 'less than',
-    lessThanOrEqual: 'at most',
-    noneOf: 'none of',
-    notContains: 'does not contain',
-    notEmpty: 'is not empty',
-    notEquals: 'does not equal',
-    startsWith: 'starts with',
-  } as FilterBarLabels['operators'],
-  preset: 'Saved view',
-  presetNone: 'No saved view',
-  readOnly: 'Read only',
-  remove: 'Remove',
-  removeGroup: 'Remove group',
-  removeRule: 'Remove rule',
-  removed: (field) => `${field} filter removed`,
-  required: (field) => `${field} needs a value`,
-  reset: 'Reset',
-  savePreset: 'Save as view…',
-  search: 'Search',
-  summary: (count) => `Filters (${count})`,
-  to: 'To',
-  unknownField: (field) => `Unknown field ${field}`,
-  value: 'Value',
-  where: 'Where',
-};
-
 export const FILTER_BAR_DEFAULT_APPLY: FilterBarApply = 'live';
 export const FILTER_BAR_DEFAULT_SIZE: FilterBarSize = 'md';
 export const FILTER_BAR_DEFAULT_QUERY_DELAY = 320;
@@ -205,7 +74,6 @@ export const FILTER_BAR_DEFAULT_CHIP_LIMIT = 6;
 export interface FilterBarDefaults {
   apply?: FilterBarApply;
   chipLimit?: number;
-  labels?: Partial<FilterBarLabels>;
   queryDelay?: number;
   shortcut?: string | null;
   size?: FilterBarSize;
@@ -218,8 +86,9 @@ export const FILTER_BAR_DEFAULTS_TOKEN = new InjectionToken<FilterBarDefaults>(
 
 /**
  * An application decides once how its bars apply, how long the query waits,
- * how many chips show, which key reaches the search, and what the family says
- * in the language it ships. A bar that states any of those itself still wins.
+ * how many chips show, and which key reaches the search. A bar that states any
+ * of those itself still wins. Its words come from the language in force
+ * (`provideSlotted`).
  */
 export function provideFilterBarDefaults(defaults: FilterBarDefaults) {
   return { provide: FILTER_BAR_DEFAULTS_TOKEN, useValue: defaults };
@@ -227,20 +96,4 @@ export function provideFilterBarDefaults(defaults: FilterBarDefaults) {
 
 export function injectFilterBarDefaults(): FilterBarDefaults {
   return inject(FILTER_BAR_DEFAULTS_TOKEN);
-}
-
-export function resolveFilterBarLabels(
-  ...layers: (Partial<FilterBarLabels> | undefined)[]
-): FilterBarLabels {
-  let resolved = FILTER_BAR_DEFAULT_LABELS;
-  for (const layer of layers) {
-    if (!layer) continue;
-    resolved = {
-      ...resolved,
-      ...layer,
-      joins: { ...resolved.joins, ...layer.joins },
-      operators: { ...resolved.operators, ...layer.operators },
-    };
-  }
-  return resolved;
 }

@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/cascader/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Cascader, CascaderPanel } from './cascader';
 import { CascaderDefaultsProvider } from './cascader-defaults';
 import type { CascaderLoadRequest, CascaderProps, CascaderValue } from './cascader.types';
@@ -247,12 +249,21 @@ describe('Cascader', () => {
 
   it('takes the defaults an application set once', () => {
     render(
-      <CascaderDefaultsProvider labels={{ placeholder: 'Pick a place' }} size="lg">
-        <Basic />
+      <CascaderDefaultsProvider size="lg">
+        <Basic messages={{ placeholder: 'Pick a place' }} />
       </CascaderDefaultsProvider>,
     );
     expect(trigger().closest("[data-part='root']")).toHaveAttribute('data-size', 'lg');
     expect(trigger()).toHaveTextContent('Pick a place');
+  });
+
+  it('speaks the language in force', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Basic defaultValue="alf" />
+      </SlottedProvider>,
+    );
+    expect(screen.getByRole('button', { name: 'Limpar seleção' })).toBeInTheDocument();
   });
 
   it('lets a request be refused before anything moves', () => {

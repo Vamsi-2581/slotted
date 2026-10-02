@@ -1,3 +1,4 @@
+import type { PartialMessages, TagsInputMessages } from '@slotted/core/i18n';
 import type { ClipboardOutcome } from '@slotted/core/clipboard';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { TagsRefuseCause, TagsValidator } from '@slotted/core/tags';
@@ -35,34 +36,22 @@ export type TagsInputInputReason = 'keyboard' | 'submit' | 'clear' | 'blur' | 'p
 export type TagsInputRefuseCause = TagsRefuseCause;
 
 export interface TagsInputDefaults {
-  addedLabel: string;
   addOnPaste: boolean;
   allowDuplicates: boolean;
   clearable: boolean;
-  clearLabel: string;
-  copiedLabel: string;
-  countLabel: string;
-  counterLabel: string;
   /** The characters that commit the typed text, and split a paste. */
   delimiters: readonly string[];
   disabled: boolean;
-  duplicateLabel: string;
   editable: boolean;
-  editHintLabel: string;
   fullWidth: boolean;
-  hintLabel: string;
   invalid: boolean;
-  invalidLabel: string;
   invalidValues: TagsInputInvalidValues;
   /** The most values the list may hold, or `null` for no limit. */
   max: number | null;
   overflow: TagsInputOverflow;
   pendingOnBlur: TagsInputPendingOnBlur;
   readOnly: boolean;
-  removedLabel: string;
-  removeLabel: string;
   reorderable: boolean;
-  reorderLabel: string;
   required: boolean;
   size: TagsInputSize;
   variant: TagsInputVariant;
@@ -108,8 +97,14 @@ export interface TagsInputProps extends TagsInputNativeProps, Partial<TagsInputD
   /** The imperative handle; `ref` is the input. */
   handleRef?: Ref<TagsInputHandle> | undefined;
   inputValue?: string | undefined;
-  /** BCP 47, for the comparison the duplicate rule makes. */
+  /** BCP 47, for the comparison the duplicate rule makes. The language in force when absent. */
   locale?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * clear button, the chips, the counter, the hint, and the sentences the
+   * announcer says.
+   */
+  messages?: PartialMessages<TagsInputMessages> | undefined;
   /** The values the reader may not remove: a mandatory recipient, an inherited tag. */
   lockedValues?: readonly string[] | undefined;
   /** Runs before a value is judged. Trim by default. */

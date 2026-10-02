@@ -1,6 +1,6 @@
 export { Tag } from './tag';
 export { TagButton } from './tag-button';
-export { TAG_REMOVE_LABEL, TagDefaultsProvider, useTagDefaults } from './tag-defaults';
+export { TagDefaultsProvider, useTagDefaults } from './tag-defaults';
 export { TagGroup } from './tag-group';
 export { TagLink } from './tag-link';
 export { TagToggle } from './tag-toggle';

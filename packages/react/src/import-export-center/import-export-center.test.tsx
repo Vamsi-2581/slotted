@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/import-export-center/contract.json';
+import { SlottedProvider } from '../i18n';
 import { createToaster } from '../toast';
 import { ImportExportCenter } from './import-export-center';
 import { ImportExportCenterDefaultsProvider } from './import-export-center-defaults';
@@ -53,8 +55,13 @@ const JOBS: ImportExportJob[] = [
   },
 ];
 
+/** The jobs are Brazilian, so the centre speaks Brazilian Portuguese around them. */
 function Centre(props: Partial<ImportExportCenterProps>) {
-  return <ImportExportCenter jobs={JOBS} now={NOW} {...props} />;
+  return (
+    <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+      <ImportExportCenter jobs={JOBS} now={NOW} {...props} />
+    </SlottedProvider>
+  );
 }
 
 const root = () => document.querySelector('[data-ui="import-export-center"]') as HTMLElement;
@@ -74,6 +81,25 @@ describe('ImportExportCenter', () => {
   it('draws the count of active jobs beside the title', () => {
     render(<Centre />);
     expect(root().querySelector('[data-part="count"]')?.textContent).toBe('1 em andamento');
+  });
+
+  it('speaks English without a language in force, and lays its own messages over it', () => {
+    render(
+      <ImportExportCenter
+        defaultExpanded={['catalog']}
+        jobs={JOBS}
+        messages={{ title: 'Jobs' }}
+        now={NOW}
+      />,
+    );
+    expect(screen.getByRole('region', { name: /^Jobs/ })).toBe(root());
+    expect(job('catalog').querySelector('[data-part="status-label"]')?.textContent).toContain(
+      'Completed with 12 errors',
+    );
+    expect(job('catalog').querySelector('[data-part="errors-note"]')?.textContent).toBe(
+      'Showing 2 of 12',
+    );
+    expect(within(job('crm')).getByRole('button', { name: 'Cancel Contatos do CRM' })).toBeTruthy();
   });
 
   it('derives the partial outcome from the counts and paints the status it declares', () => {
@@ -329,8 +355,8 @@ describe('ImportExportCenter', () => {
 
   it('takes its defaults from the provider, and an explicit prop still wins', () => {
     render(
-      <ImportExportCenterDefaultsProvider level="3" messages={{ title: 'Jobs' }} size="sm">
-        <Centre size="md" />
+      <ImportExportCenterDefaultsProvider level="3" size="sm">
+        <Centre messages={{ title: 'Jobs' }} size="md" />
       </ImportExportCenterDefaultsProvider>,
     );
     expect(screen.getByRole('heading', { level: 3 }).textContent).toContain('Jobs');
@@ -389,10 +415,10 @@ describe('useJobToasts', () => {
     expect(show.mock.calls[0]?.[0]).toMatchObject({
       id: 'import-export-center:x',
       loading: true,
-      title: 'Exportação Faturas iniciada',
+      title: 'Export Faturas started',
     });
     expect(show.mock.calls[1]?.[0]).toMatchObject({
-      announcement: 'Exportação Faturas concluída',
+      announcement: 'Export Faturas completed',
       id: 'import-export-center:x',
       loading: false,
       tone: 'success',

@@ -3,8 +3,6 @@ export {
   deriveFieldIds,
   FIELD_DEFAULTS,
   FIELD_DESCRIBED_ORDER,
-  FIELD_HELP_LABEL,
-  FIELD_NECESSITY_WORDS,
   injectFieldDefaults,
   necessityMark,
   provideFieldDefaults,
@@ -21,7 +19,6 @@ export type {
   FieldIds,
   FieldLabelPlacement,
   FieldNecessity,
-  FieldNecessityWords,
   FieldSize,
 } from './field-defaults';
 export { formatFieldCount, isFieldCountOver, SlFieldCounter } from './field-counter';

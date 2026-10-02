@@ -412,9 +412,9 @@ export const Composition: Story = {
       <Scene
         label="Set once for an application"
         layout="stack"
-        note="The provider carries the seven decisions an application takes once. A form that states any of them itself still wins, which is how one screen departs from the house rule without changing it."
+        note="The provider carries the six decisions an application takes once. A form that states any of them itself still wins, which is how one screen departs from the house rule without changing it."
       >
-        <FormDefaultsProvider summaryTitle="Corrija estes campos" validate="blur">
+        <FormDefaultsProvider validate="blur">
           <Checkout />
         </FormDefaultsProvider>
       </Scene>

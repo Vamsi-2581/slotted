@@ -1,4 +1,5 @@
 import type { PlainDate } from '@slotted/core/date';
+import type { DatePickerMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -24,12 +25,7 @@ export type DatePickerCalendar = 'gregory';
 /** What an application sets once for every date picker under it. */
 export interface DatePickerDefaults {
   calendar: DatePickerCalendar;
-  /** The trigger's name once a date is chosen, before the date itself. */
-  changeLabel: string;
-  /** The trigger's name while nothing is chosen. */
-  chooseLabel: string;
   closeOnSelect: DatePickerCloseOnSelect;
-  locale: string | undefined;
   placement: DatePickerPlacement;
   size: DatePickerSize;
   timeZone: string | undefined;
@@ -91,6 +87,7 @@ export interface DatePickerProps extends Omit<
    */
   fixedWeeks?: boolean | undefined;
 
+  /** BCP 47. Writes the field, the grid and the trigger's date. Unset, the language in force decides. */
   locale?: string | undefined;
   timeZone?: string | undefined;
   firstDayOfWeek?: number | undefined;
@@ -109,8 +106,11 @@ export interface DatePickerProps extends Omit<
 
   clearable?: boolean | undefined;
   name?: string | undefined;
-  chooseLabel?: string | undefined;
-  changeLabel?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * trigger's name before (`choose`) and after (`change`) a date is chosen.
+   */
+  messages?: PartialMessages<DatePickerMessages> | undefined;
 
   /** The consumer's own shortcuts, in a column beside the grid. */
   presets?: ReactNode | undefined;

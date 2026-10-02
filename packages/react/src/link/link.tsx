@@ -1,8 +1,10 @@
 import '@slotted/styles/link/link.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
+import { linkMessages } from '@slotted/core/i18n';
 import type { SyntheticEvent } from 'react';
 
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useLinkDefaults } from './link-defaults';
 import type { LinkProps, LinkRootProps } from './link.types';
@@ -47,8 +49,8 @@ export function Link({
   children,
   disabled = false,
   external = false,
-  externalHint,
   href,
+  messages,
   onAuxClick,
   onAuxClickCapture,
   onClick,
@@ -65,8 +67,8 @@ export function Link({
   ...nativeProps
 }: LinkProps) {
   const defaults = useLinkDefaults();
+  const t = useMessages(linkMessages, messages);
   const resolved = {
-    externalHint: externalHint ?? defaults.externalHint ?? '(opens in a new tab)',
     underline: underline ?? defaults.underline ?? 'always',
     variant: variant ?? defaults.variant ?? 'accent',
     visited: visited ?? defaults.visited ?? false,
@@ -98,7 +100,7 @@ export function Link({
               </Icon>
             </span>
             <span data-part="external-hint" data-ui="visually-hidden">
-              {` ${resolved.externalHint}`}
+              {` ${t('externalHint')}`}
             </span>
             {WORD_JOINER}
           </>

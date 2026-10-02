@@ -1,6 +1,5 @@
 import {
   carouselKeyIntent,
-  formatCarouselMessage,
   indicatorDistance,
   intentPage,
   revealInStrip,
@@ -80,7 +79,7 @@ export function CarouselViewport({
   }
 
   const rootProps = {
-    'aria-label': carousel.messages.viewport,
+    'aria-label': carousel.t('viewport'),
     role: 'group',
     tabIndex: 0,
     ...nativeProps,
@@ -106,7 +105,7 @@ export function CarouselSlide({ children, ref, render, ...nativeProps }: Carouse
   const carousel = useCarousel();
   const rootProps = {
     role: 'group',
-    'aria-roledescription': carousel.messages.slideRoleDescription,
+    'aria-roledescription': carousel.t('slideRoleDescription'),
     ...nativeProps,
     children,
     'data-part': 'slide',
@@ -137,7 +136,7 @@ function StepButton({
 
   const rootProps: CarouselButtonRootProps = {
     'aria-controls': carousel.viewportId,
-    'aria-label': delta === 1 ? carousel.messages.next : carousel.messages.previous,
+    'aria-label': carousel.t(delta === 1 ? 'next' : 'previous'),
     ...nativeProps,
     /* aria-disabled, never disabled: a disabled button drops the focus it holds onto the page. */
     ...(available ? {} : { 'aria-disabled': 'true' as const, 'data-disabled': '' as const }),
@@ -192,7 +191,7 @@ export function CarouselAutoplay({
 
   const rootProps: CarouselButtonRootProps = {
     'aria-controls': carousel.viewportId,
-    'aria-label': carousel.playing ? carousel.messages.stop : carousel.messages.start,
+    'aria-label': carousel.t(carousel.playing ? 'stop' : 'start'),
     ...nativeProps,
     children: children ?? (
       <Icon>
@@ -279,7 +278,7 @@ export function CarouselIndicators({
   const pagesList = Array.from({ length: carousel.pageCount }, (_, index) => index);
 
   const rootProps = {
-    'aria-label': carousel.messages.indicators,
+    'aria-label': carousel.t('indicators'),
     ...nativeProps,
     children: pagesList.map((index) =>
       children === undefined ? <CarouselIndicator key={index} page={index} /> : children(index),
@@ -321,11 +320,7 @@ export function CarouselIndicator({
   const rootProps: CarouselIndicatorRootProps = {
     ...(children === undefined
       ? {
-          'aria-label': formatCarouselMessage(
-            carousel.messages.indicator,
-            { page: page + 1, count: carousel.pageCount },
-            carousel.locale,
-          ),
+          'aria-label': carousel.t('indicator', { page: page + 1, count: carousel.pageCount }),
         }
       : {}),
     ...nativeProps,

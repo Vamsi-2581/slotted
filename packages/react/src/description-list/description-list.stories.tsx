@@ -403,13 +403,9 @@ export const Composition: Story = {
       </Scene>
       <Scene
         label="DescriptionListDefaultsProvider"
-        note="One decision for every panel below it: the arrangement, the term width and the five words the family says. A prop on the list still wins over all of them."
+        note="One decision for every panel below it: the arrangement and the term width. A prop on the list still wins over both. The words come from the language in force."
       >
-        <DescriptionListDefaultsProvider
-          labels={{ copy: 'Copiar', placeholder: 'Não informado' }}
-          termWidth="8rem"
-          variant="framed"
-        >
+        <DescriptionListDefaultsProvider termWidth="8rem" variant="framed">
           <DescriptionList>
             <Pair copy term="Chave">
               sk_live_51N2xQe4Hh8bTqVzL

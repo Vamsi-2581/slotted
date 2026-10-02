@@ -181,7 +181,7 @@ test('asks canDrop about each destination before it asks to move', () => {
   assert.match(contract.editing.canDrop, /asks for nothing/);
   assert.match(contract.editing.canDrop, /nextAllowedPlacement/);
   assert.ok(contract.dataAttributes['data-drop-invalid'].length > 0);
-  assert.ok(contract.labels.includes('dropInvalid'));
+  assert.ok(contract.messages.includes('dropInvalid'));
   const alt = contract.keyboard.find((entry) => entry.key === 'Alt+Arrow');
   assert.match(alt.effect, /refused/);
 });

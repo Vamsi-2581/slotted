@@ -27,6 +27,7 @@ import {
   toISOTime,
 } from '@slotted/core/date';
 import { FILTER_ROW, type ResolvedGridColumn } from '@slotted/core/grid';
+import type { DataGridMessages, FamilyTranslator } from '@slotted/core/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 
@@ -50,10 +51,8 @@ import { TextField } from '../text-field';
 import { TimePicker } from '../time-picker';
 import { TimeRangePicker } from '../time-range-picker';
 import { useDataGridInternal } from './data-grid-context';
-import { fill } from './data-grid-defaults';
 import { dateOf, dateTimeOf, timeOf } from './data-grid-editors';
 import { cellStyle, columnAttributes } from './data-grid-constants';
-import type { DataGridResolvedLabels } from './data-grid.types';
 
 type Condition = FilterCondition<string, unknown>;
 
@@ -86,7 +85,7 @@ interface OperandProps<Row> {
   onKeyDown?: ((event: KeyboardEvent<HTMLElement>) => void) | undefined;
   label: string;
   variant: 'plain' | 'outline';
-  labels: DataGridResolvedLabels;
+  t: FamilyTranslator<DataGridMessages>;
   locale: string | undefined;
   counts?: ReadonlyMap<string, number> | undefined;
   placeholder?: string | undefined;
@@ -106,7 +105,7 @@ interface RangeOperandProps {
   start: unknown;
   end: unknown;
   onChange: (start: unknown, end: unknown) => void;
-  labels: DataGridResolvedLabels;
+  t: FamilyTranslator<DataGridMessages>;
   locale: string | undefined;
   variant: 'plain' | 'outline';
   autoFocus?: boolean | undefined;
@@ -124,23 +123,23 @@ function RangeOperand({
   start,
   end,
   onChange,
-  labels,
+  t,
   locale,
   variant,
   autoFocus,
 }: RangeOperandProps) {
   const shared = {
-    endLabel: labels.filterTo,
     size: 'sm' as const,
-    startLabel: labels.filterFrom,
     variant,
     ...(autoFocus ? { autoFocus: true } : {}),
     ...(locale === undefined ? {} : { locale }),
   };
+  const ends = { messages: { end: t('filterTo'), start: t('filterFrom') } };
   if (kind === 'time') {
     return (
       <TimeRangePicker
         {...shared}
+        {...ends}
         onValueChange={(next) =>
           onChange(
             isPlainTime(next?.start) ? toISOTime(next.start, 'minute') : null,
@@ -155,6 +154,7 @@ function RangeOperand({
     return (
       <DateTimeRangePicker
         {...shared}
+        {...ends}
         onValueChange={(next) =>
           onChange(
             isPlainDateTime(next?.start) ? toISODateTime(next.start) : null,
@@ -168,6 +168,7 @@ function RangeOperand({
   return (
     <DateRangePicker
       {...shared}
+      messages={{ end: t('filterTo'), start: t('filterFrom') }}
       onValueChange={(next) =>
         onChange(
           isPlainDate(next?.start) ? toISODate(next.start) : null,
@@ -192,7 +193,7 @@ function Operand<Row>({
   counts,
   kind,
   label,
-  labels,
+  t,
   locale,
   onChange,
   onKeyDown,
@@ -251,8 +252,8 @@ function Operand<Row>({
           fullWidth
           width="content"
           items={[
-            { label: labels.filterYes, value: 'true' },
-            { label: labels.filterNo, value: 'false' },
+            { label: t('filterYes'), value: 'true' },
+            { label: t('filterNo'), value: 'false' },
           ]}
           onValueChange={(next) =>
             onChange(next === 'true' ? true : next === 'false' ? false : null)
@@ -262,11 +263,11 @@ function Operand<Row>({
           variant={variant}
         >
           <SelectTrigger aria-label={label} {...(autoFocus ? { autoFocus: true } : {})}>
-            <SelectValue placeholder={labels.filterAny} />
+            <SelectValue placeholder={t('filterAny')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="true">{labels.filterYes}</SelectItem>
-            <SelectItem value="false">{labels.filterNo}</SelectItem>
+            <SelectItem value="true">{t('filterYes')}</SelectItem>
+            <SelectItem value="false">{t('filterNo')}</SelectItem>
           </SelectContent>
         </Select>
       );
@@ -297,7 +298,7 @@ function Operand<Row>({
         >
           <MultiSelectControl
             aria-label={label}
-            placeholder={labels.filterAny}
+            placeholder={t('filterAny')}
             {...(autoFocus ? { autoFocus: true } : {})}
           />
           <MultiSelectContent aria-label={label}>
@@ -341,7 +342,7 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
   const kind = filterKindOf(column);
   const open = grid.filterOpen === column.id && kind !== null;
   const committed = grid.filterOf(column.id);
-  const labels = grid.labels;
+  const t = grid.t;
   const anchor = useRef<HTMLElement | null>(null);
   const setAnchor = useCallback((node: HTMLElement | null) => {
     anchor.current = node;
@@ -360,8 +361,8 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
   const panelKind: FilterKind = kind;
   const name = column.column.label;
   const format = {
-    join: (join: FilterJoin) => labels.filterJoins[join],
-    operator: (operator: FilterOperator) => labels.filterOperators[operator] ?? operator,
+    join: (join: FilterJoin) => t(`filterJoins.${join}`),
+    operator: (operator: FilterOperator) => t(`filterOperators.${operator}`),
   };
   const operators = operatorsFor(kind) as readonly string[];
   const allowed = kind === 'set' ? 1 : 2;
@@ -378,15 +379,15 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
     if (!sameFilter(next, committed)) grid.setFilter(column.id, next, reason, source);
     grid.announce(
       next
-        ? `${labels.filter} ${name}: ${describeFilter(next, format)}`
-        : `${labels.filter} ${name}, ${labels.filterCleared}`,
+        ? t('filterApplied', { column: name, filter: describeFilter(next, format) })
+        : t('filterCleared', { column: name }),
     );
     close();
   }
   function clear(source: unknown) {
     setDraft(blank());
     if (committed) grid.setFilter(column.id, null, 'clear', source);
-    grid.announce(`${labels.filter} ${name}, ${labels.filterCleared}`);
+    grid.announce(t('filterCleared', { column: name }));
     close();
   }
   function setOperator(index: number, operator: string) {
@@ -422,7 +423,7 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
         {index === 1 ? (
           <div data-part="filter-join">
             <SegmentedControl
-              aria-label={labels.filterJoin}
+              aria-label={t('filterJoin')}
               onValueChange={(join) => setDraft(withJoin(current, join as FilterJoin))}
               size="sm"
               value={current.join}
@@ -445,7 +446,7 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
             value={condition.operator}
           >
             <SelectTrigger
-              aria-label={labels.filterOperator}
+              aria-label={t('filterOperator')}
               {...(index === 0 ? { autoFocus: true } : {})}
             >
               <SelectValue />
@@ -470,7 +471,7 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
             <RangeOperand
               end={condition.end ?? null}
               kind={panelKind}
-              labels={labels}
+              t={t}
               locale={grid.locale}
               onChange={(start, end) =>
                 setDraft(
@@ -483,11 +484,7 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
           ) : (
             ([0, 1] as const).slice(0, operands).map((slot) => {
               const label =
-                operands === 2
-                  ? slot === 0
-                    ? labels.filterFrom
-                    : labels.filterTo
-                  : labels.filterValue;
+                operands === 2 ? (slot === 0 ? t('filterFrom') : t('filterTo')) : t('filterValue');
               const value = (slot === 0 ? condition.value : condition.end) ?? null;
               if (custom) {
                 return (
@@ -510,7 +507,7 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
                   key={slot}
                   kind={panelKind}
                   label={label}
-                  labels={labels}
+                  t={t}
                   locale={grid.locale}
                   onChange={(next) => setOperand(index, slot, next)}
                   onKeyDown={applyOnEnter}
@@ -550,7 +547,7 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
       />
       {open ? (
         <PopoverLayer>
-          <PopoverContent aria-label={`${labels.filter} ${name}`}>
+          <PopoverContent aria-label={t('filterColumn', { column: name })}>
             <div data-kind={panelKind} data-part="filter-panel" data-ui="data-grid">
               {renderCondition(0)}
               {showsSecond ? renderCondition(1) : null}
@@ -562,10 +559,10 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
                   tone="secondary"
                   variant="ghost"
                 >
-                  {labels.filterClear}
+                  {t('filterClear')}
                 </Button>
                 <Button onClick={(event) => apply(event, 'pointer')} size="sm">
-                  {labels.filterApply}
+                  {t('filterApply')}
                 </Button>
               </div>
             </div>
@@ -591,7 +588,7 @@ export function DataGridFilterCell<Row>({ column }: { column: ResolvedGridColumn
   const current =
     grid.current !== null && grid.current.row === FILTER_ROW && grid.current.column === column.id;
   const committed = grid.filterOf(column.id);
-  const labels = grid.labels;
+  const t = grid.t;
   const condition: Condition | null = committed?.conditions[0] ?? null;
   const [operator, setOperator] = useState<string>(
     condition?.operator ?? (kind ? (defaultOperator(kind) as string) : 'contains'),
@@ -670,7 +667,7 @@ export function DataGridFilterCell<Row>({ column }: { column: ResolvedGridColumn
       commit({ operator, ...draft }, 'keyboard');
     }
   };
-  const symbol = labels.filterSymbols[operator as FilterOperator] ?? '=';
+  const symbol = t(`filterSymbols.${operator as FilterOperator}`);
   const custom = grid.renderFilterOperand;
 
   return (
@@ -700,10 +697,12 @@ export function DataGridFilterCell<Row>({ column }: { column: ResolvedGridColumn
               render={(props) => (
                 <button
                   {...props}
-                  aria-label={`${labels.filterOperator}: ${labels.filterOperators[operator as FilterOperator] ?? operator}`}
+                  aria-label={t('filterOperatorChosen', {
+                    operator: t(`filterOperators.${operator as FilterOperator}`),
+                  })}
                   /* The symbol says the operator to a reader who knows the
                      notation; the title says it in words to one who hovers. */
-                  title={labels.filterOperators[operator as FilterOperator] ?? operator}
+                  title={t(`filterOperators.${operator as FilterOperator}`)}
                   tabIndex={-1}
                   type="button"
                 >
@@ -714,7 +713,7 @@ export function DataGridFilterCell<Row>({ column }: { column: ResolvedGridColumn
             <MenuContent>
               {operators.map((entry) => (
                 <MenuItem key={entry} onSelect={() => chooseOperator(entry)}>
-                  {labels.filterOperators[entry as FilterOperator]}
+                  {t(`filterOperators.${entry as FilterOperator}`)}
                 </MenuItem>
               ))}
             </MenuContent>
@@ -724,7 +723,7 @@ export function DataGridFilterCell<Row>({ column }: { column: ResolvedGridColumn
           <RangeOperand
             end={draft.end}
             kind={kind}
-            labels={labels}
+            t={t}
             locale={grid.locale}
             onChange={(start, end) => schedule({ value: start, end }, true)}
             start={draft.value}
@@ -732,7 +731,13 @@ export function DataGridFilterCell<Row>({ column }: { column: ResolvedGridColumn
           />
         ) : (
           ([0, 1] as const).slice(0, operands).map((slot) => {
-            const label = `${labels.filter} ${column.column.label}${operands === 2 ? `, ${slot === 0 ? labels.filterFrom : labels.filterTo}` : ''}`;
+            const label =
+              operands === 2
+                ? t('filterRange', {
+                    bound: slot === 0 ? 'from' : 'to',
+                    column: column.column.label,
+                  })
+                : t('filterColumn', { column: column.column.label });
             const value = slot === 0 ? draft.value : draft.end;
             const write = (next: unknown, immediate = false) =>
               schedule(slot === 0 ? { ...draft, value: next } : { ...draft, end: next }, immediate);
@@ -757,17 +762,13 @@ export function DataGridFilterCell<Row>({ column }: { column: ResolvedGridColumn
                 key={slot}
                 kind={kind}
                 label={label}
-                labels={labels}
+                t={t}
                 locale={grid.locale}
                 onChange={(next) => write(next, kind !== 'text' && kind !== 'number')}
                 onKeyDown={applyOnEnter}
                 operator={operator}
                 placeholder={
-                  operands === 2
-                    ? slot === 0
-                      ? labels.filterFrom
-                      : labels.filterTo
-                    : fill(labels.filter, {})
+                  operands === 2 ? (slot === 0 ? t('filterFrom') : t('filterTo')) : t('filter')
                 }
                 value={value}
                 variant="plain"

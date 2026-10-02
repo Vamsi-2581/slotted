@@ -567,7 +567,7 @@ export const Responsive: Story = {
 export const Defaults: Story = {
   parameters: scenario('defaults'),
   render: () => (
-    <ActionSheetDefaultsProvider cancelLabel="Fechar">
+    <ActionSheetDefaultsProvider closeOnSelect={false}>
       <Layer>
         {(container) => (
           <ActionSheet container={container} {...STILL}>

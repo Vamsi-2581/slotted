@@ -1,3 +1,4 @@
+import type { FamilyTranslator, PartialMessages, TimelineMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type {
   TimelineConnector,
@@ -30,23 +31,6 @@ export type {
   TimestampValue,
 };
 
-/** The wording the family speaks, so an application translates once. */
-export interface TimelineMessages {
-  /** The button at the end of what has been loaded. */
-  loadMore: string;
-  /** Announced, and shown beside the ring, while more is on its way. */
-  loading: string;
-  /** "3 new events" — the pill that holds fresh events back. */
-  freshItems: (count: number) => string;
-  /** The list with nothing in it yet. */
-  empty: string;
-  /** Read after the title of the current event. */
-  current: string;
-  /** The accessible name of a folded group's trigger, after its label. */
-  expand: string;
-  collapse: string;
-}
-
 export interface TimelineDefaults {
   mode?: TimelineMode | undefined;
   orientation?: TimelineOrientation | undefined;
@@ -57,12 +41,10 @@ export interface TimelineDefaults {
   size?: TimelineSize | undefined;
   growing?: TimelineGrowing | undefined;
   timeFormat?: TimelineTimeFormat | undefined;
-  locale?: string | undefined;
   timeZone?: string | undefined;
   /** The moment relative readings count from, in epoch milliseconds. */
   now?: number | undefined;
   level?: TimelineLevel | undefined;
-  messages?: Partial<TimelineMessages> | undefined;
 }
 
 export interface TimelineDefaultsProviderProps extends TimelineDefaults {
@@ -105,8 +87,14 @@ export interface TimelineProps extends Omit<ComponentPropsWithRef<'div'>, 'child
   level?: TimelineLevel | undefined;
   /** Whether more events are on their way. */
   loading?: boolean | undefined;
+  /** For the timestamps; defaults to the language in force (`SlottedProvider`). */
   locale?: string | undefined;
-  messages?: Partial<TimelineMessages> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * more control, the waiting line, the fresh pill, the empty line, the
+   * current event's mark and a folded group's trigger.
+   */
+  messages?: PartialMessages<TimelineMessages> | undefined;
   mode?: TimelineMode | undefined;
   /** The moment relative readings count from, in epoch milliseconds. */
   now?: number | undefined;
@@ -212,14 +200,15 @@ export interface TimelineContextValue {
   ids: { item: (index: number, part: string) => string; list: string };
   level: TimelineLevel;
   loading: boolean;
-  locale: string | undefined;
-  messages: TimelineMessages;
+  locale: string;
   mode: TimelineMode;
   now: number | undefined;
   order: TimelineOrder;
   orientation: TimelineOrientation;
   placement: TimelinePlacement;
   size: TimelineSize;
+  /** The family's words in the language in force, with this timeline's `messages` laid over them. */
+  t: FamilyTranslator<TimelineMessages>;
   timeFormat: TimelineTimeFormat;
   timeZone: string | undefined;
   tone: TimelineTone;

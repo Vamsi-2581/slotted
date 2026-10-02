@@ -1,9 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+import type { ChangeRequest } from '@slotted/core/state';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { SlCombobox } from './combobox';
+import type { ComboboxOpenOn } from './combobox-defaults';
 import { SlComboboxItem } from './combobox-items';
 
 @Component({
@@ -87,6 +91,28 @@ class CreateHost {
   readonly creatable = signal(true);
   readonly created = signal<string | undefined>(undefined);
   readonly requested = signal<string | null | undefined>(undefined);
+}
+
+@Component({
+  standalone: true,
+  imports: [SlCombobox, SlComboboxItem],
+  template: `
+    <sl-combobox
+      aria-label="Fruit"
+      [portal]="false"
+      [openOn]="openOn()"
+      [readOnly]="readOnly()"
+      (openChangeRequest)="requests.push($event)"
+    >
+      <sl-combobox-item value="blueberry" label="Blueberry" />
+      <sl-combobox-item value="raspberry" label="Raspberry" />
+    </sl-combobox>
+  `,
+})
+class OpeningHost {
+  readonly openOn = signal<ComboboxOpenOn>('input');
+  readonly readOnly = signal(false);
+  readonly requests: ChangeRequest<boolean>[] = [];
 }
 
 const field = () =>
@@ -242,6 +268,96 @@ describe('SlCombobox', () => {
    * something that cannot hold focus, so the browser took focus off the input
    * and the settling of CB7 ran on text the reader was in the middle of using.
    */
+  /**
+   * The contract's `opening.press`: a press on the input opens a closed popup
+   * under `input` and `focus`, never closes an open one, and under `manual`
+   * only places the caret.
+   */
+  describe('a press on the input', () => {
+    let fixture: ComponentFixture<OpeningHost>;
+
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({ imports: [OpeningHost] }).compileComponents();
+      fixture = TestBed.createComponent(OpeningHost);
+    });
+
+    const expanded = () => field().getAttribute('aria-expanded');
+    const focusField = () => {
+      field().focus();
+      fixture.detectChanges();
+    };
+    const pressField = () => {
+      field().click();
+      fixture.detectChanges();
+    };
+
+    it('opens a closed popup, once, with reason pointer', () => {
+      fixture.detectChanges();
+      focusField();
+      pressField();
+      expect(expanded()).toBe('true');
+      expect(fixture.componentInstance.requests).toHaveLength(1);
+      expect(fixture.componentInstance.requests[0]).toMatchObject({
+        value: true,
+        reason: 'pointer',
+      });
+    });
+
+    it('keeps an open popup open', () => {
+      fixture.detectChanges();
+      focusField();
+      pressField();
+      pressField();
+      expect(expanded()).toBe('true');
+      expect(fixture.componentInstance.requests).toHaveLength(1);
+    });
+
+    it('opens nothing on a Tab into the input under input', () => {
+      fixture.detectChanges();
+      focusField();
+      expect(expanded()).toBe('false');
+      expect(fixture.componentInstance.requests).toHaveLength(0);
+    });
+
+    it('only places the caret under manual', () => {
+      fixture.componentInstance.openOn.set('manual');
+      fixture.detectChanges();
+      focusField();
+      pressField();
+      expect(expanded()).toBe('false');
+      expect(fixture.componentInstance.requests).toHaveLength(0);
+    });
+
+    it('opens once under focus, through the focus the press gave', () => {
+      fixture.componentInstance.openOn.set('focus');
+      fixture.detectChanges();
+      focusField();
+      pressField();
+      expect(expanded()).toBe('true');
+      expect(fixture.componentInstance.requests).toHaveLength(1);
+    });
+
+    it('opens nothing on a read-only control', () => {
+      fixture.componentInstance.readOnly.set(true);
+      fixture.detectChanges();
+      focusField();
+      pressField();
+      expect(expanded()).toBe('false');
+      expect(fixture.componentInstance.requests).toHaveLength(0);
+    });
+
+    it('stays closed when a listener before it prevents the click', () => {
+      fixture.detectChanges();
+      fixture.nativeElement.addEventListener('click', (event: Event) => event.preventDefault(), {
+        capture: true,
+      });
+      focusField();
+      pressField();
+      expect(expanded()).toBe('false');
+      expect(fixture.componentInstance.requests).toHaveLength(0);
+    });
+  });
+
   describe('choosing with the pointer', () => {
     beforeEach(async () => {
       await TestBed.configureTestingModule({ imports: [SettleHost] }).compileComponents();
@@ -385,5 +501,25 @@ describe('SlCombobox, the icon column', () => {
     );
     expect(column?.textContent?.trim()).toBe('');
     expect(item('norman')?.querySelector("[data-part='icon']")).toBeNull();
+  });
+});
+
+/** The words come from the language in force, and follow a change of it in place. */
+describe('SlCombobox, the language in force', () => {
+  it('speaks pt-BR, and follows a change of locale without being created again', async () => {
+    const locale = signal('pt-BR');
+    await TestBed.configureTestingModule({
+      imports: [IconHost],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(IconHost);
+    fixture.detectChanges();
+    const trigger = () => document.querySelector("[data-part='trigger']");
+
+    expect(trigger()?.getAttribute('aria-label')).toBe('Mostrar opções');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(trigger()?.getAttribute('aria-label')).toBe('Show options');
   });
 });

@@ -1,6 +1,11 @@
 import '@slotted/styles/prompt-composer/prompt-composer.css';
 import '@slotted/styles/spinner/spinner.css';
 
+import {
+  promptComposerMessages,
+  type FamilyTranslator,
+  type PromptComposerMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import { selectFiles } from '@slotted/core/upload';
@@ -16,6 +21,7 @@ import type {
 } from 'react';
 
 import { useField } from '../field';
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { usePromptComposerDefaults } from './prompt-composer-defaults';
 import type {
@@ -23,7 +29,6 @@ import type {
   PromptComposerAttachDetail,
   PromptComposerAttachProps,
   PromptComposerBandProps,
-  PromptComposerDefaults,
   PromptComposerInputProps,
   PromptComposerProps,
   PromptComposerRootProps,
@@ -41,7 +46,6 @@ interface ComposerContext {
   ) => void;
   accept: string | undefined;
   canSubmit: boolean;
-  defaults: PromptComposerDefaults;
   describedBy: string | undefined;
   disabled: boolean | undefined;
   id: string | undefined;
@@ -55,6 +59,8 @@ interface ComposerContext {
   stop: (reason: PromptComposerSubmitReason, source: unknown) => void;
   submit: (reason: PromptComposerSubmitReason, source: unknown) => void;
   submitOn: PromptComposerSubmitOn;
+  /** The family's words in the language in force, with this composer's `messages` laid over them. */
+  t: FamilyTranslator<PromptComposerMessages>;
   value: string;
 }
 
@@ -99,6 +105,7 @@ export function PromptComposer({
   invalid,
   maxFiles,
   maxSize,
+  messages,
   multiple = true,
   onAttach,
   onDragLeave,
@@ -121,6 +128,7 @@ export function PromptComposer({
 }: PromptComposerProps) {
   const field = useField();
   const defaults = usePromptComposerDefaults();
+  const t = useMessages(promptComposerMessages, messages);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const [own, setOwn] = useState(defaultValue ?? '');
   const [dropTarget, setDropTarget] = useState(false);
@@ -146,7 +154,7 @@ export function PromptComposer({
   const previousStatus = useRef(status);
   useEffect(() => {
     if (status === 'submitted' && previousStatus.current !== 'submitted') {
-      announcer().announce(defaults.sendingLabel);
+      announcer().announce(t('sending'));
     }
     previousStatus.current = status;
   });
@@ -181,7 +189,7 @@ export function PromptComposer({
 
   const stop = (reason: PromptComposerSubmitReason, source: unknown) => {
     onStop?.({ reason, source });
-    announcer().announce(defaults.stoppedLabel);
+    announcer().announce(t('stopped'));
     inputRef.current?.focus();
   };
 
@@ -202,7 +210,6 @@ export function PromptComposer({
     accept,
     attach,
     canSubmit: resolvedCanSubmit,
-    defaults: { ...defaults, submitOn: submitOn ?? defaults.submitOn },
     describedBy: field?.describedBy,
     disabled: resolvedDisabled,
     id: field?.ids.control,
@@ -216,6 +223,7 @@ export function PromptComposer({
     stop,
     submit,
     submitOn: submitOn ?? defaults.submitOn,
+    t,
     value: current,
   };
 
@@ -402,7 +410,7 @@ export function PromptComposerAttach({
     <>
       <button
         {...nativeProps}
-        aria-label={ariaLabel ?? composer.defaults.attachLabel}
+        aria-label={ariaLabel ?? composer.t('attach')}
         data-part="attach"
         disabled={off}
         onClick={(event) => {
@@ -452,17 +460,17 @@ export function PromptComposerSubmit({
   ...nativeProps
 }: PromptComposerSubmitProps) {
   const composer = useComposer('Submit');
-  const { defaults, status } = composer;
+  const { status, t } = composer;
   const streaming = status === 'streaming';
   const submitted = status === 'submitted';
 
   const label = streaming
-    ? defaults.stopLabel
+    ? t('stop')
     : submitted
-      ? defaults.sendingLabel
+      ? t('sending')
       : status === 'error'
-        ? defaults.retryLabel
-        : defaults.sendLabel;
+        ? t('retry')
+        : t('send');
   const glyph = status === 'error' ? 'rotate-ccw' : 'arrow-up';
 
   return (

@@ -769,7 +769,10 @@
 
   [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > [data-part='body'] {
     min-block-size: 0;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overflow-inline: hidden;
+    overflow-block: auto;
     overscroll-behavior: contain;
     padding-block: var(--_padding-block);
     padding-inline: var(--_padding-inline);

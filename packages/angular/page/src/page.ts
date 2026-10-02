@@ -2,7 +2,9 @@ import { createPresence } from '@slotted/core/presence';
 import type { PresenceStatus } from '@slotted/core/presence';
 import { findScrollParent } from '@slotted/core/sticky-header';
 import { SlContainer } from '@slotted/angular/container';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlHeadingLevel } from '@slotted/angular/typography';
+import { pageMessages, type PageMessages, type PartialMessages } from '@slotted/core/i18n';
 import {
   afterNextRender,
   booleanAttribute,
@@ -20,21 +22,13 @@ import {
 } from '@angular/core';
 
 import { injectPageDefaults } from './page-defaults';
-import type {
-  PageGround,
-  PageInset,
-  PageLandmark,
-  PageMessages,
-  PageScroll,
-  PageWidth,
-} from './page-defaults';
+import type { PageGround, PageInset, PageLandmark, PageScroll, PageWidth } from './page-defaults';
 
 export type {
   PageDefaults,
   PageGround,
   PageInset,
   PageLandmark,
-  PageMessages,
   PageScroll,
   PageWidth,
 } from './page-defaults';
@@ -106,6 +100,11 @@ export class SlPage {
   readonly fill = input(false, { transform: booleanAttribute });
   /** The body carries `aria-busy`; what stands in for the content is each family's own placeholder. */
   readonly loading = input(false, { transform: booleanAttribute });
+  /**
+   * Words laid over the catalog of the language in force: the footer's
+   * accessible name (`footer`). A static `aria-label` on the footer still wins.
+   */
+  readonly messages = input<PartialMessages<PageMessages> | undefined>(undefined);
 
   private readonly defaults = injectPageDefaults();
   private readonly native: HTMLElement = inject(ElementRef).nativeElement;
@@ -116,7 +115,8 @@ export class SlPage {
   readonly resolvedScroll = computed(() => this.scroll() ?? this.defaults.scroll);
   readonly resolvedGround = computed(() => this.ground() ?? this.defaults.ground);
   readonly resolvedLandmark = computed(() => this.landmark() ?? this.defaults.landmark);
-  readonly messages: PageMessages = this.defaults.messages;
+  /** The family's words in the language in force, with this page's `messages` laid over them. */
+  readonly t = injectMessages(pageMessages, this.messages);
 
   /** `role="main"` only where the element is not already `main`, and only when asked. */
   protected readonly role = computed(() => {
@@ -205,9 +205,11 @@ export class SlPageFooter {
   private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
   private readonly native: HTMLElement = inject(ElementRef).nativeElement;
   protected readonly status = signal<PresenceStatus>('open');
+  /** A footer outside a page still speaks the language in force. */
+  private readonly own = injectMessages(pageMessages);
 
   protected readonly label = computed(
-    () => this.written ?? this.page?.messages.footer ?? 'Ações da página',
+    () => this.written ?? (this.page === null ? this.own('footer') : this.page.t('footer')),
   );
 
   constructor() {

@@ -149,7 +149,7 @@ import { chosenDate } from '../../core/chosen-date';
           <form
             slForm
             data-testid="new-po-form"
-            summaryTitle="This purchase order was not written"
+            [messages]="{ summaryTitle: 'This purchase order was not written' }"
             [errors]="store.errors()"
             (errorsChange)="store.errors.set($event.value)"
             [loading]="store.creating() !== null"
@@ -358,7 +358,7 @@ import { chosenDate } from '../../core/chosen-date';
                 data-testid="save-draft"
                 [loading]="store.creating() === 'draft'"
                 [disabled]="store.creating() === 'submit'"
-                loadingLabel="Writing the draft"
+                [messages]="{ loading: 'Writing the draft' }"
               >
                 Save as draft
               </button>
@@ -368,7 +368,7 @@ import { chosenDate } from '../../core/chosen-date';
                 data-testid="create-and-submit"
                 [loading]="store.creating() === 'submit'"
                 [disabled]="store.creating() === 'draft'"
-                loadingLabel="Writing and submitting"
+                [messages]="{ loading: 'Writing and submitting' }"
                 (click)="writeAndSubmit()"
               >
                 {{ submitLabel() }}

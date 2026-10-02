@@ -4,6 +4,7 @@ import type {
   GridColumnStateChange,
   GridOutOfSpace,
 } from '@slotted/core/grid';
+import type { ColumnManagerMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode, Ref, RefObject } from 'react';
 
@@ -37,48 +38,15 @@ export interface ColumnManagerOpenRequest extends ChangeRequest<boolean> {
   readonly reason: ColumnManagerOpenReason;
 }
 
-/** The words the family says. `{slot}` is filled in. */
-export interface ColumnManagerLabels {
-  title: string;
-  search: string;
-  noResults: string;
-  showAll: string;
-  reset: string;
-  apply: string;
-  cancel: string;
-  pinnedStart: string;
-  unpinned: string;
-  pinnedEnd: string;
-  /** `{column}` */
-  pin: string;
-  pinStart: string;
-  pinEnd: string;
-  unpin: string;
-  /** `{column}` */
-  reorder: string;
-  /** `{column}`, `{position}` */
-  moved: string;
-  required: string;
-  hiddenBySpace: string;
-  inRow: string;
-  hiddenCountOne: string;
-  /** `{count}` */
-  hiddenCountOther: string;
-  /** `{visible}`, `{total}` */
-  visibleCount: string;
-}
-
 /** What an application sets once for every manager under it. */
 export interface ColumnManagerDefaults {
   presentation: ColumnManagerPresentation;
   apply: ColumnManagerApply;
-  labels: ColumnManagerLabels;
 }
 
 export interface ColumnManagerProviderProps {
   presentation?: ColumnManagerPresentation | undefined;
   apply?: ColumnManagerApply | undefined;
-  labels?: Partial<ColumnManagerLabels> | undefined;
   children?: ReactNode | undefined;
 }
 
@@ -114,7 +82,8 @@ export interface ColumnManagerProps<Row = unknown> extends Omit<
   open?: boolean | undefined;
   defaultOpen?: boolean | undefined;
   onOpenChange?: ((open: boolean, request: ColumnManagerOpenRequest) => void) | undefined;
-  labels?: Partial<ColumnManagerLabels> | undefined;
+  /** Words laid over the catalog of the language in force, key by key. */
+  messages?: PartialMessages<ColumnManagerMessages> | undefined;
   ref?: Ref<ColumnManagerHandle> | undefined;
 }
 

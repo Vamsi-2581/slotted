@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "visually-hidden",
   "ui": "visually-hidden",
+  "catalog": {
+    "group": "Layout",
+    "summary": "Hides content visually, keeps it for readers."
+  },
   "members": {
     "visuallyHidden": {
       "nativeElement": "span",

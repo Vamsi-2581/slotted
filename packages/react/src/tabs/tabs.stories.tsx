@@ -53,15 +53,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const VIEWS = [
-  { label: 'Resumo', panel: 'Entrega prevista para 12 de setembro.', value: 'resumo' },
-  { label: 'Itens', panel: 'Três itens, dois em separação.', value: 'itens' },
-  { label: 'Pagamento', panel: 'Cartão de crédito, aprovado.', value: 'pagamento' },
+  { label: 'Summary', panel: 'Delivery expected on September 12.', value: 'summary' },
+  { label: 'Items', panel: 'Three items, two being picked.', value: 'items' },
+  { label: 'Payment', panel: 'Credit card, approved.', value: 'payment' },
 ];
 
 function Order(props: Record<string, unknown>) {
   return (
-    <Tabs defaultValue="resumo" {...props}>
-      <TabList aria-label="Pedido">
+    <Tabs defaultValue="summary" {...props}>
+      <TabList aria-label="Order">
         {VIEWS.map((view) => (
           <Tab key={view.value} value={view.value}>
             {view.label}
@@ -200,15 +200,15 @@ export const Fit: Story = {
         note="Angular Material's stretchTabs and Carbon's grid-aware alignment: equal columns, so the length of a translated string never decides the emphasis. It is the one place a horizontal label truncates."
       >
         <Tabs defaultValue="a" fit="equal" variant="contained">
-          <TabList aria-label="Relatórios">
-            <Tab value="a">Hoje</Tab>
-            <Tab value="b">Uma etiqueta longa que precisa ser cortada</Tab>
+          <TabList aria-label="Reports">
+            <Tab value="a">Today</Tab>
+            <Tab value="b">A long label that needs to be truncated</Tab>
           </TabList>
           <TabPanel value="a">
-            <Text size="sm">Partes iguais da linha.</Text>
+            <Text size="sm">Equal shares of the line.</Text>
           </TabPanel>
           <TabPanel value="b">
-            <Text size="sm">A etiqueta é o que cede.</Text>
+            <Text size="sm">The label is what gives way.</Text>
           </TabPanel>
         </Tabs>
       </Scene>
@@ -225,15 +225,15 @@ export const States: Story = {
         note="A single unavailable tab carries the native attribute, so it dims, refuses its click and is skipped by the arrow keys — three behaviours from one word."
       >
         <Tabs defaultValue="a">
-          <TabList aria-label="Documento">
-            <Tab value="a">Conteúdo</Tab>
+          <TabList aria-label="Document">
+            <Tab value="a">Content</Tab>
             <Tab disabled value="b">
-              Assinaturas
+              Subscriptions
             </Tab>
-            <Tab value="c">Histórico</Tab>
+            <Tab value="c">History</Tab>
           </TabList>
           <TabPanel value="a">
-            <Text size="sm">Assinaturas ficam disponíveis após o envio.</Text>
+            <Text size="sm">Subscriptions become available after submission.</Text>
           </TabPanel>
         </Tabs>
       </Scene>
@@ -277,8 +277,8 @@ export const Dismissible: Story = {
   parameters: scenario('dismissible'),
   render: () => {
     function Editor() {
-      const [queries, setQueries] = useState(['clientes.sql', 'faturamento.sql', 'estoque.sql']);
-      const [active, setActive] = useState('clientes.sql');
+      const [queries, setQueries] = useState(['customers.sql', 'faturamento.sql', 'estoque.sql']);
+      const [active, setActive] = useState('customers.sql');
 
       return (
         <Tabs
@@ -286,9 +286,9 @@ export const Dismissible: Story = {
           onValueChange={setActive}
           value={active}
         >
-          <TabList aria-label="Consultas abertas">
+          <TabList aria-label="Open queries">
             {queries.map((query) => (
-              <Tab dismissLabel={`Fechar ${query}`} dismissible key={query} value={query}>
+              <Tab dismissLabel={`Close ${query}`} dismissible key={query} value={query}>
                 {query}
               </Tab>
             ))}
@@ -323,7 +323,7 @@ export const Overflow: Story = {
       >
         <Measure>
           <Tabs defaultValue="v1" size="sm">
-            <TabList aria-label="Versões">
+            <TabList aria-label="Versions">
               {Array.from({ length: 12 }, (_, index) => (
                 <Tab key={index} value={`v${index + 1}`}>
                   Versão {index + 1}
@@ -331,7 +331,7 @@ export const Overflow: Story = {
               ))}
             </TabList>
             <TabPanel value="v1">
-              <Text size="sm">Publicada em 12 de setembro.</Text>
+              <Text size="sm">Published on September 12.</Text>
             </TabPanel>
           </Tabs>
         </Measure>
@@ -342,7 +342,7 @@ export const Overflow: Story = {
       >
         <Measure>
           <Tabs activation="manual" defaultValue="v1" size="sm">
-            <TabList aria-label="Versões, ativação manual">
+            <TabList aria-label="Versions, manual activation">
               {Array.from({ length: 12 }, (_, index) => (
                 <Tab key={index} value={`v${index + 1}`}>
                   Versão {index + 1}
@@ -350,7 +350,7 @@ export const Overflow: Story = {
               ))}
             </TabList>
             <TabPanel value="v1">
-              <Text size="sm">Enter abre a versão em foco.</Text>
+              <Text size="sm">Enter opens the focused version.</Text>
             </TabPanel>
           </Tabs>
         </Measure>
@@ -367,26 +367,26 @@ export const Links: Story = {
         label="A destination, not a decoration"
         note="Each tab is an anchor with a real href: a plain click selects the view, and ⌘-click or middle-click opens it in a new browser tab, because the family leaves a modified click to the browser."
       >
-        <Tabs defaultValue="resumo">
-          <TabList aria-label="Pedido, com destino">
-            <Tab href="#resumo" value="resumo">
-              Resumo
+        <Tabs defaultValue="summary">
+          <TabList aria-label="Order, with destinations">
+            <Tab href="#summary" value="summary">
+              Summary
             </Tab>
-            <Tab href="#itens" value="itens">
-              Itens
+            <Tab href="#items" value="items">
+              Items
             </Tab>
-            <Tab href="#pagamento" value="pagamento">
-              Pagamento
+            <Tab href="#payment" value="payment">
+              Payment
             </Tab>
           </TabList>
-          <TabPanel value="resumo">
-            <Text size="sm">O endereço da barra acompanha a vista.</Text>
+          <TabPanel value="summary">
+            <Text size="sm">The address bar follows the view.</Text>
           </TabPanel>
-          <TabPanel value="itens">
-            <Text size="sm">Três itens.</Text>
+          <TabPanel value="items">
+            <Text size="sm">Three items.</Text>
           </TabPanel>
-          <TabPanel value="pagamento">
-            <Text size="sm">Cartão de crédito.</Text>
+          <TabPanel value="payment">
+            <Text size="sm">Credit card.</Text>
           </TabPanel>
         </Tabs>
       </Scene>
@@ -404,10 +404,10 @@ export const Content: Story = {
       >
         <Measure>
           <Tabs defaultValue="a" size="sm">
-            <TabList aria-label="Conteúdo extremo">
+            <TabList aria-label="Extreme content">
               <Tab value="a">sha256:9f86d081884c7d659a2feaa0c55ad015</Tab>
               <Tab value="b">بيانات التسليم</Tab>
-              <Tab value="c">Relatório consolidado</Tab>
+              <Tab value="c">Consolidated report</Tab>
             </TabList>
             <TabPanel value="a">
               <Text size="sm">
@@ -421,16 +421,16 @@ export const Content: Story = {
         label="A label with an icon and a count"
         note="The tab is a row with its own gap, so anything composed into it — a status dot, a badge — sits on the label's optical line rather than on the box's."
       >
-        <Tabs defaultValue="abertos">
-          <TabList aria-label="Chamados">
-            <Tab value="abertos">Abertos · 12</Tab>
-            <Tab value="fechados">Fechados · 340</Tab>
+        <Tabs defaultValue="open">
+          <TabList aria-label="Tickets">
+            <Tab value="open">Open · 12</Tab>
+            <Tab value="closed">Closed · 340</Tab>
           </TabList>
-          <TabPanel value="abertos">
-            <Text size="sm">Doze chamados aguardando triagem.</Text>
+          <TabPanel value="open">
+            <Text size="sm">Twelve tickets awaiting triage.</Text>
           </TabPanel>
-          <TabPanel value="fechados">
-            <Text size="sm">Trezentos e quarenta encerrados.</Text>
+          <TabPanel value="closed">
+            <Text size="sm">Three hundred and forty closed.</Text>
           </TabPanel>
         </Tabs>
       </Scene>
@@ -454,26 +454,26 @@ export const Composition: Story = {
         label="A toolbar beside the list"
         note="The actions slot is a cell of the same grid row, and what belongs in it is a toolbar: one tab stop for however many actions, which keeps the distance from the list to the panel at two stops."
       >
-        <Tabs defaultValue="resumo">
-          <TabList aria-label="Pedido, com ações">
-            <Tab value="resumo">Resumo</Tab>
-            <Tab value="itens">Itens</Tab>
+        <Tabs defaultValue="summary">
+          <TabList aria-label="Order, with actions">
+            <Tab value="summary">Summary</Tab>
+            <Tab value="items">Items</Tab>
           </TabList>
           <TabActions>
-            <Toolbar aria-label="Ações do pedido" size="sm">
+            <Toolbar aria-label="Order actions" size="sm">
               <Button size="sm" variant="ghost">
-                Exportar
+                Export
               </Button>
               <Button size="sm" variant="ghost">
-                Imprimir
+                Print
               </Button>
             </Toolbar>
           </TabActions>
-          <TabPanel value="resumo">
-            <Text size="sm">Entrega prevista para 12 de setembro.</Text>
+          <TabPanel value="summary">
+            <Text size="sm">Delivery expected on September 12.</Text>
           </TabPanel>
-          <TabPanel value="itens">
-            <Text size="sm">Três itens.</Text>
+          <TabPanel value="items">
+            <Text size="sm">Three items.</Text>
           </TabPanel>
         </Tabs>
       </Scene>
@@ -489,19 +489,19 @@ export const Keyboard: Story = {
       return (
         <>
           <Tabs defaultValue="a" onValueChange={(_value, request) => setReason(request.reason)}>
-            <TabList aria-label="Qual dispositivo pediu">
-              <Tab value="a">Com o ponteiro</Tab>
-              <Tab value="b">Depois com as setas</Tab>
-              <Tab value="c">E de volta</Tab>
+            <TabList aria-label="Which device asked">
+              <Tab value="a">With the pointer</Tab>
+              <Tab value="b">Then with the arrows</Tab>
+              <Tab value="c">And back</Tab>
             </TabList>
             <TabPanel value="a">
-              <Text size="sm">Clique, depois use as setas.</Text>
+              <Text size="sm">Click, then use the arrows.</Text>
             </TabPanel>
             <TabPanel value="b">
-              <Text size="sm">A razão muda com o dispositivo.</Text>
+              <Text size="sm">The reason changes with the device.</Text>
             </TabPanel>
             <TabPanel value="c">
-              <Text size="sm">E volta a mudar.</Text>
+              <Text size="sm">And it changes again.</Text>
             </TabPanel>
           </Tabs>
           <Text size="sm" tone="muted">
@@ -518,7 +518,7 @@ export const Keyboard: Story = {
           note="Tab lands on the selected tab and the next Tab leaves to the panel; the arrows move and wrap, and Home and End reach the ends. No key listener exists for activation."
           layout="stack"
         >
-          <Order defaultValue="itens" />
+          <Order defaultValue="items" />
         </Scene>
         <Scene
           label="Which device asked"

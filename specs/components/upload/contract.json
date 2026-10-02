@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "upload",
   "ui": "upload",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Picks or drops files and shows their progress."
+  },
   "pattern": null,
   "patternStatus": "There is no upload, no dropzone and no drag-and-drop pattern in the WAI-ARIA Authoring Practices. The index at https://www.w3.org/WAI/ARIA/apg/patterns/ was read on 10 September 2026 and lists none of the three. The platform supplies the control and the four sources below settle the rest; a family that wrote \"checked against APG\" here would be citing a page that does not exist.",
   "sources": [
@@ -131,7 +135,7 @@
     "directory",
     "custom"
   ],
-  "rejectionReason": "A refused file is reported, never silently dropped and never thrown: silence leaves the reader looking for a file that never appeared, and an exception makes a routine outcome into an error. The reason is the family's and the message is the consumer's, because only they know whether a limit is a policy, a plan or a bug. describeRejection on the defaults provider is the English default they replace.",
+  "rejectionReason": "A refused file is reported, never silently dropped and never thrown: silence leaves the reader looking for a file that never appeared, and an exception makes a routine outcome into an error. The reason is the family's and the message is the consumer's, because only they know whether a limit is a policy, a plan or a bug. The catalog holds one sentence per reason (`rejection.<reason>`), and an upload's `messages` replaces any of them.",
   "duplicates": {
     "identity": "fileKey — name, size and lastModified, joined, and replaceable per instance",
     "policies": {
@@ -410,23 +414,60 @@
       "presentWhen": "with the viewer"
     }
   },
-  "labels": {
-    "trigger": "Browse files",
-    "dropzone": "Drop files here",
-    "clear": "Remove all",
-    "start": "Upload",
-    "pause": "Pause",
-    "resume": "Resume",
-    "retry": "Try again",
-    "cancel": "Cancel",
-    "remove": "Remove",
-    "reason": "Every visible string is on the defaults provider, so an application translates once rather than on every control, and an instance may still state its own. Vaadin holds the same set as an i18n object and Ark as `translations`.",
-    "viewerUnsupported": "This file cannot be previewed here.",
-    "viewerExternal": "Open in a new tab",
-    "viewerClose": "Close",
-    "viewerPrevious": "Previous file",
-    "viewerNext": "Next file"
-  },
+  "messages": [
+    "added",
+    "archive",
+    "audio",
+    "cancel",
+    "canceled",
+    "clear",
+    "document",
+    "dropzone",
+    "error",
+    "fileNotice",
+    "finished",
+    "image",
+    "noExtension",
+    "other",
+    "pause",
+    "paused",
+    "pdf",
+    "pending",
+    "presentation",
+    "queued",
+    "ready",
+    "rejected",
+    "rejection.custom",
+    "rejection.directory",
+    "rejection.duplicate",
+    "rejection.maxFiles",
+    "rejection.minSize",
+    "rejection.multiple",
+    "rejection.size",
+    "rejection.totalSize",
+    "rejection.type",
+    "remove",
+    "resume",
+    "retry",
+    "selection",
+    "spreadsheet",
+    "stalled",
+    "start",
+    "success",
+    "summary",
+    "summaryRemaining",
+    "trigger",
+    "uploading",
+    "video",
+    "viewerClose",
+    "viewerExternal",
+    "viewerNext",
+    "viewerMeta",
+    "viewerMetaPosition",
+    "viewerPrevious",
+    "viewerUnsupported"
+  ],
+  "messagesReason": "Every word the family writes or says comes from the catalog of the language in force: the controls, the word for each status and each kind, the sentences about the queue and the sentence for each refusal. An upload lays its own `messages` over them key by key, so an application translates once through its provider and still words one refusal its own way. A row control names the file inside its message (`Remove: {name}`), so a language writes its own order.",
   "declined": {
     "fullScreenDrop": {
       "composition": "the document drop guard publishes the drag; the application shell draws the layer it wants",
@@ -505,17 +546,13 @@
       "retryDelay",
       "stallAfter",
       "maxRows",
-      "locale",
-      "fileKey",
-      "describeRejection",
-      "describeQueue",
-      "labels"
+      "fileKey"
     ]
   },
   "queueMessage": {
-    "owner": "describeQueue",
-    "kinds": ["summary", "selection", "added", "finished"],
-    "reason": "Every sentence about the queue as a whole — the summary line, the count the field shape shows, the announcement that files arrived and the announcement that the queue finished — is one function on the defaults provider, beside describeRejection. They carry numbers, so they cannot be labels; they are four sentences of one subject, so they are one function with a kind rather than four props. They were English written into both bindings, against labels.reason, and a translated application still said \"2 of 3 uploaded\"."
+    "owner": "messages",
+    "kinds": ["summary", "summaryRemaining", "selection", "added", "finished"],
+    "reason": "Every sentence about the queue as a whole — the summary line, the count the field shape shows, the announcement that files arrived and the announcement that the queue finished — is a catalog message with its numbers as slots, so a translated application says \"1 de 2 enviados\" and a plural is written by the language rather than by the binding."
   },
   "dataAttributes": {
     "data-browsable": "on the dropzone while clickToBrowse is on and the family accepts files, which is when a click anywhere in the region opens the picker",

@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "field-group",
   "ui": "field-group",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Fieldset that groups related fields."
+  },
   "role": null,
   "nativeDisabled": true,
   "messageFamily": "inline-message",
@@ -18,15 +22,7 @@
     "--slotted-field-group-track-min": "14rem is a line length rather than a step on a scale: the width a field is given in a row before the row wraps, holding a date, a document number or a short name at the md step without the control clipping what is being typed into it."
   },
   "provides": {
-    "fieldDefaults": [
-      "size",
-      "labelPlacement",
-      "necessity",
-      "necessityWords",
-      "helpLabel",
-      "disabled",
-      "readOnly"
-    ]
+    "fieldDefaults": ["size", "labelPlacement", "necessity", "disabled", "readOnly"]
   },
   "axes": {
     "size": ["sm", "md", "lg"],

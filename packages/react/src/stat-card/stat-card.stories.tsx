@@ -1,10 +1,12 @@
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Badge } from '../badge';
 import { Card, CardBody } from '../card';
 import { Grid } from '../grid';
+import { SlottedProvider } from '../i18n';
 import { Link } from '../link';
 import { Sparkline } from '../sparkline';
 import { StatCard } from './stat-card';
@@ -695,12 +697,9 @@ export const Accessibility: Story = {
       </Scene>
       <Scene
         label="translated once"
-        note="The provider sets the locale and the words a reader hears: “subiu +3,2%”, and a missing value says “—” in whatever the product calls one."
+        note="The language in force sets the locale and the words a reader hears: “alta +3,2%”, and a missing value says “—” in whatever the product calls one."
       >
-        <StatCardDefaultsProvider
-          locale="pt-BR"
-          messages={{ up: 'subiu', down: 'caiu', flat: 'sem variação', empty: '—' }}
-        >
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
           <StatCard delta={0.032}>
             <StatCardHeader>
               <StatCardLabel>Taxa de atendimento</StatCardLabel>
@@ -713,7 +712,7 @@ export const Accessibility: Story = {
               <StatCardDelta />
             </StatCardFigure>
           </StatCard>
-        </StatCardDefaultsProvider>
+        </SlottedProvider>
       </Scene>
     </Grid>
   ),

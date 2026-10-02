@@ -11,9 +11,10 @@ export function useSkeletonDefaults(): SkeletonDefaults {
 /**
  * An application decides once how its placeholders are animated, how long a
  * wait has to last before one appears, how long one is held once it has, and
- * what a screen reader hears in the language it ships. A region or a box that
+ * what a screen reader hears when the content arrives. A region or a box that
  * states any of those still wins: an explicit prop is never overridden by
- * context.
+ * context. The words the family writes come from the language in force
+ * (`SlottedProvider`).
  *
  * The timing belongs here more than anywhere else. It is a policy about
  * latency, and latency is a property of the application rather than of the
@@ -28,7 +29,6 @@ export function SkeletonDefaultsProvider({ children, ...defaults }: SkeletonDefa
       value={{
         animation: defaults.animation ?? inherited.animation,
         delay: defaults.delay ?? inherited.delay,
-        label: defaults.label ?? inherited.label,
         lastLineSize: defaults.lastLineSize ?? inherited.lastLineSize,
         live: defaults.live ?? inherited.live,
         loadedLabel: defaults.loadedLabel ?? inherited.loadedLabel,

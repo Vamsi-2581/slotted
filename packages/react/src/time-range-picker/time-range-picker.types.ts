@@ -1,4 +1,5 @@
 import type { PlainTime, TimeGranularity, TimeOption, TimeRangeValue } from '@slotted/core/date';
+import type { PartialMessages, TimeRangePickerMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -39,72 +40,26 @@ export type TimeRangePickerValueReason = Extract<
   'pointer' | 'keyboard' | 'select' | 'clear' | 'blur' | 'programmatic'
 >;
 
-/**
- * What the hint says, in the product's own words. `{end}` is replaced by the
- * current end's label.
- */
-export interface TimeRangePickerHintLabels {
-  /** While the current end is missing; `{end}` is replaced by its label. */
-  choose: string;
-  /** The work is whole and the end comes before the start. */
-  order: string;
-  /** The work is whole and its duration falls outside minLength or maxLength. */
-  length: string;
-  /** The work is whole and crosses an unavailable time. */
-  unavailable: string;
-  /** The work is whole and an end falls outside min or max. */
-  bounds: string;
-}
-
 /** What an application sets once for every time range picker under it. */
 export interface TimeRangePickerDefaults {
-  /** The trigger's name once a range is chosen, before the two times. */
-  changeLabel: string;
-  /** The trigger's name, and the frame's placeholder, while nothing is chosen. */
-  chooseLabel: string;
-  clearLabel: string;
   closeOnSelect: TimeRangePickerCloseOnSelect;
-  /** What a panel says when its end has no time available at all. */
-  emptyLabel: string;
-  /** The accessible name of the end field and the label of its panel. */
-  endLabel: string;
   granularity: TimeGranularity;
   hourCycle: TimeFieldHourCycle | undefined;
   /** "2 hr 30 min", in the product's own words; seconds in, and the family's locale. */
   lengthLabel: (seconds: number, locale: string | undefined) => string;
-  /** "30 min to 4 hr": what the band says while a limit is set; seconds in, and the locale. */
-  limitLabel: (
-    min: number | undefined,
-    max: number | undefined,
-    locale: string | undefined,
-  ) => string;
-  locale: string | undefined;
   /** How many rows a list may reach before it is cut. */
   maxOptions: number;
-  /** The control in the band that writes the current time into the current end. */
-  nowLabel: string;
-  /** The button at the end of the footer that closes with what is written. */
-  doneLabel: string;
-  /** What the hint says: what to choose next, or what is wrong. */
-  hintLabels: TimeRangePickerHintLabels;
   placement: TimeRangePickerPlacement;
   size: TimeRangePickerSize;
-  /** The accessible name of the start field and the label of its panel. */
-  startLabel: string;
   /** Seconds between two offered times. */
   step: number;
   timeZone: string | undefined;
-  /** What a panel says when its list stops short of the configuration. */
-  truncatedLabel: string;
   unavailableOptions: TimeRangePickerUnavailableOptions;
   variant: TimeRangePickerVariant;
 }
 
-export interface TimeRangePickerDefaultsProviderProps extends Partial<
-  Omit<TimeRangePickerDefaults, 'hintLabels'>
-> {
+export interface TimeRangePickerDefaultsProviderProps extends Partial<TimeRangePickerDefaults> {
   children?: ReactNode | undefined;
-  hintLabels?: Partial<TimeRangePickerHintLabels> | undefined;
 }
 
 export interface TimeRangePickerRootProps extends HTMLAttributes<HTMLElement> {
@@ -185,7 +140,6 @@ export interface TimeRangePickerProps extends Omit<
   minLength?: number | undefined;
   maxLength?: number | undefined;
   lengthLabel?: TimeRangePickerDefaults['lengthLabel'] | undefined;
-  limitLabel?: TimeRangePickerDefaults['limitLabel'] | undefined;
 
   /** Seconds between two offered times. Ignored when `options` states the list. */
   step?: number | undefined;
@@ -195,6 +149,7 @@ export interface TimeRangePickerProps extends Omit<
   maxOptions?: number | undefined;
   unavailableOptions?: TimeRangePickerUnavailableOptions | undefined;
 
+  /** BCP 47. Unset, the language in force (`SlottedProvider`) decides. */
   locale?: string | undefined;
   timeZone?: string | undefined;
   hourCycle?: TimeFieldHourCycle | undefined;
@@ -216,16 +171,12 @@ export interface TimeRangePickerProps extends Omit<
   clearable?: boolean | undefined;
   /** Whether the two fields in the band take the relative expression. */
   relative?: boolean | undefined;
-  clearLabel?: string | undefined;
-  chooseLabel?: string | undefined;
-  changeLabel?: string | undefined;
-  startLabel?: string | undefined;
-  endLabel?: string | undefined;
-  nowLabel?: string | undefined;
-  doneLabel?: string | undefined;
-  hintLabels?: Partial<TimeRangePickerHintLabels> | undefined;
-  emptyLabel?: string | undefined;
-  truncatedLabel?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * trigger's names, the two ends, the hint, the limit, and what a panel says
+   * when it is empty or cut short.
+   */
+  messages?: PartialMessages<TimeRangePickerMessages> | undefined;
 
   /** The names of the two hidden inputs a plain form post reads. */
   startName?: string | undefined;

@@ -15,6 +15,12 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { SlField } from '@slotted/angular/field';
+import { injectMessages } from '@slotted/angular/i18n';
+import {
+  type PartialMessages,
+  promptComposerMessages,
+  type PromptComposerMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -93,6 +99,12 @@ export class SlPromptComposer {
   readonly maxFiles = input<number | undefined, unknown>(undefined, {
     transform: (value) => (value == null ? undefined : numberAttribute(value)),
   });
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * names of the attach and submit buttons for each status (`send`, `sending`,
+   * `stop`, `retry`), and the `sending` and `stopped` announcements.
+   */
+  readonly messages = input<PartialMessages<PromptComposerMessages> | undefined>(undefined);
 
   /** Before the message is sent; `cancel()` keeps the value where it is. */
   readonly valueSubmit = output<ChangeRequest<string>>();
@@ -102,6 +114,8 @@ export class SlPromptComposer {
   readonly attach = output<PromptComposerAttachEvent>();
 
   readonly defaults = injectPromptComposerDefaults();
+  /** The family's words in the language in force, with this composer's `messages` laid over them. */
+  readonly t = injectMessages(promptComposerMessages, this.messages);
   private readonly field = inject(SlField, { optional: true });
   private readonly element: HTMLFormElement = inject(ElementRef).nativeElement;
 
@@ -131,7 +145,7 @@ export class SlPromptComposer {
     effect(() => {
       const status = this.status();
       if (status === 'submitted' && previous !== 'submitted') {
-        untracked(() => this.announce(this.defaults.sendingLabel));
+        untracked(() => this.announce(this.t('sending')));
       }
       previous = status;
     });
@@ -163,7 +177,7 @@ export class SlPromptComposer {
 
   stopWith(reason: PromptComposerSubmitReason, source: Event) {
     this.stop.emit({ reason, source });
-    this.announce(this.defaults.stoppedLabel);
+    this.announce(this.t('stopped'));
     this.control()?.focus();
   }
 

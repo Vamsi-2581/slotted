@@ -151,7 +151,7 @@ import { chosenDate } from '../../core/chosen-date';
         <div class="work">
           <form
             slForm
-            summaryTitle="This count was not planned"
+            [messages]="{ summaryTitle: 'This count was not planned' }"
             [errors]="store.errors()"
             (errorsChange)="store.errors.set($event.value)"
             [loading]="store.creating()"
@@ -312,7 +312,7 @@ import { chosenDate } from '../../core/chosen-date';
                 type="submit"
                 data-testid="create-count"
                 [loading]="store.creating()"
-                loadingLabel="Planning the count"
+                [messages]="{ loading: 'Planning the count' }"
               >
                 Plan the count
               </button>

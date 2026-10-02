@@ -1,3 +1,4 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useEffect } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -16,6 +17,7 @@ import {
   FieldIndicator,
   FieldLabel,
 } from './index';
+import { SlottedProvider } from '../i18n';
 import { useField as useFieldForTest } from './field-context';
 
 describe('Field', () => {
@@ -209,16 +211,22 @@ describe('Field', () => {
     expect(screen.queryByText('*')).not.toBeInTheDocument();
   });
 
-  it('lets an application translate the two necessity words once', () => {
+  it('speaks the necessity words of the language in force, and lets a field lay its own over them', () => {
     render(
-      <FieldDefaultsProvider necessity="words" necessityWords={{ optional: '(opcional)' }}>
-        <Field>
-          <FieldLabel>Inscrição estadual</FieldLabel>
-        </Field>
-      </FieldDefaultsProvider>,
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <FieldDefaultsProvider necessity="words">
+          <Field>
+            <FieldLabel>Inscrição estadual</FieldLabel>
+          </Field>
+          <Field messages={{ required: '(exigido)' }} required>
+            <FieldLabel>CNPJ</FieldLabel>
+          </Field>
+        </FieldDefaultsProvider>
+      </SlottedProvider>,
     );
 
     expect(screen.getByText('(opcional)')).toBeInTheDocument();
+    expect(screen.getByText('(exigido)')).toBeInTheDocument();
   });
 
   it('lets an application set the family’s appearance once, and a field override it', () => {
@@ -470,9 +478,9 @@ describe('Field', () => {
     expect(help).not.toHaveAttribute('data-open');
   });
 
-  it('lets an application name the help control once, and a page name one of its own', () => {
+  it('names the help control in the language in force, and lets a page name one of its own', () => {
     render(
-      <FieldDefaultsProvider helpLabel="Mais informações">
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
         <Field>
           <FieldHeader>
             <FieldLabel>Prazo</FieldLabel>
@@ -485,7 +493,7 @@ describe('Field', () => {
             <FieldHelp aria-label="Como os juros são calculados">Ao mês.</FieldHelp>
           </FieldHeader>
         </Field>
-      </FieldDefaultsProvider>,
+      </SlottedProvider>,
     );
 
     expect(screen.getByRole('button', { name: 'Mais informações' })).toBeInTheDocument();

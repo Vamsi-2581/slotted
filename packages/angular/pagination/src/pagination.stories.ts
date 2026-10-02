@@ -387,7 +387,7 @@ export const Keyboard: Story = {
     'Tab, Enter, Space',
     'Tab reaches every control in reading order; Enter and Space activate one. The family binds no key of its own, so nothing here surprises a reader who knows the platform.',
     `
-    <nav slPagination label="Invoices" [count]="482" [defaultPage]="7">
+    <nav slPagination aria-label="Invoices" [count]="482" [defaultPage]="7">
       <button slPaginationFirst type="button"></button>
       <button slPaginationPrevious type="button"></button>
       <sl-pagination-items />

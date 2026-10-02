@@ -1,7 +1,18 @@
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
+import {
+  anchorsAtStart,
+  EXTENT_LARGE_STEP_PX,
+  EXTENT_STEP_PX,
+  extentAtPoint,
+  holdResizeGesture,
+  stepAmountFromPixels,
+  stepExtent,
+} from '@slotted/core/extent';
+import type { ExtentRect, ExtentSide } from '@slotted/core/extent';
 import { createFocusScope } from '@slotted/core/focus';
-import { COMPACT_BELOW, createWidthGate } from '@slotted/core/measure';
+import { appShellMessages, type AppShellMessages, type PartialMessages } from '@slotted/core/i18n';
+import { clamp, COMPACT_BELOW, createWidthGate } from '@slotted/core/measure';
 import { setPortalContainer } from '@slotted/core/portal';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
@@ -25,16 +36,18 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { injectAppShellDefaults } from './app-shell-defaults';
 import type {
+  AppShellAsideExtentReason,
+  AppShellAsideExtentRequest,
   AppShellAsideMode,
   AppShellAsideOpenReason,
   AppShellCanvas,
   AppShellCollapsedTo,
   AppShellDismissPolicy,
-  AppShellMessages,
   AppShellNavMode,
   AppShellNavSide,
   AppShellOpenReason,
@@ -46,13 +59,14 @@ import type {
 } from './app-shell-defaults';
 
 export type {
+  AppShellAsideExtentReason,
+  AppShellAsideExtentRequest,
   AppShellAsideMode,
   AppShellAsideOpenReason,
   AppShellCanvas,
   AppShellCollapsedTo,
   AppShellDefaults,
   AppShellDismissPolicy,
-  AppShellMessages,
   AppShellNavMode,
   AppShellNavSide,
   AppShellOpenReason,
@@ -122,6 +136,7 @@ let nextId = 0;
     '[attr.data-scroll]': 'resolvedScroll()',
     '[attr.data-separation]': 'resolvedSeparation()',
     '[attr.data-open]': "navOpen() ? '' : null",
+    '[attr.data-dragging]': "asideDragging() ? '' : null",
     '(click)': 'onClick($event)',
   },
 })
@@ -130,6 +145,15 @@ export class SlAppShell {
   readonly navOpen = model<boolean>(true);
   /** Whether the secondary pane is showing. Two-way. */
   readonly asideOpen = model<boolean>(true);
+  /**
+   * How much of the shell's inline size the pane takes as a column, in
+   * `[0, 1]`. Unset means `asideSize` decides. Two-way.
+   */
+  readonly asideExtent = model<number | undefined>(undefined);
+  /** The smallest extent the reader may give the pane. */
+  readonly minAsideExtent = input(0.16);
+  /** The largest extent the reader may give the pane. */
+  readonly maxAsideExtent = input(0.6);
 
   /** Defaults to the provider, then `banner`. */
   readonly primary = input<AppShellPrimary | undefined>(undefined);
@@ -164,8 +188,12 @@ export class SlAppShell {
   readonly back = input<AppShellDismissPolicy | undefined>(undefined);
   /** Defaults to the provider, then `true`. */
   readonly closeOnNavigate = input<boolean | undefined>(undefined, { transform: optionalBoolean });
-  /** Strings for this shell, over the provider's and over the family's own. */
-  readonly messages = input<Partial<AppShellMessages> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * landmarks' names, the toggles and the skip links. A static `aria-label`
+   * on a part still wins.
+   */
+  readonly messages = input<PartialMessages<AppShellMessages> | undefined>(undefined);
 
   /**
    * The request, before anything commits. `reason` is what tells the reader's
@@ -176,10 +204,19 @@ export class SlAppShell {
   readonly navOpenChangeRequest = output<AppShellOpenRequest>();
   /** The pane's request, with the same shape and the reasons a pane can carry. */
   readonly asideOpenChangeRequest = output<AppShellOpenRequest>();
+  /** The request before the pane's extent moves, already held inside the limits. */
+  readonly asideExtentChangeRequest = output<AppShellAsideExtentRequest>();
 
   private readonly defaults = injectAppShellDefaults();
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
   private readonly narrow = signal<boolean | undefined>(undefined);
+  /** Whether a pointer is moving the pane's edge, which the host reports as `data-dragging`. */
+  readonly asideDragging = signal(false);
+  /** The limits, ordered and inside `[0, 1]`. */
+  readonly asideBounds = computed(() => {
+    const min = clamp(this.minAsideExtent(), 0, 1);
+    return { min, max: clamp(this.maxAsideExtent(), min, 1) };
+  });
 
   /**
    * Stable ids, and not `crypto.randomUUID()`: a server render and the
@@ -244,10 +281,8 @@ export class SlAppShell {
   readonly resolvedCloseOnNavigate = computed(
     () => this.closeOnNavigate() ?? this.defaults.closeOnNavigate,
   );
-  readonly resolvedMessages = computed<AppShellMessages>(() => ({
-    ...this.defaults.messages,
-    ...this.messages(),
-  }));
+  /** The family's words in the language in force, with this shell's `messages` laid over them. */
+  readonly t = injectMessages(appShellMessages, this.messages);
 
   private readonly wantedMode = computed(() => this.navMode() ?? this.defaults.navMode);
 
@@ -284,14 +319,13 @@ export class SlAppShell {
   private veilPresence: PresenceHandle | null = null;
 
   protected readonly skipTargets = computed(() => {
-    const messages = this.resolvedMessages();
     const regions = this.regions();
     const targets: { href: string; label: string }[] = [];
-    if (regions.main) targets.push({ href: this.mainId, label: messages.skipToMain });
-    if (regions.nav) targets.push({ href: this.navId, label: messages.skipToNav });
+    if (regions.main) targets.push({ href: this.mainId, label: this.t('skipToMain') });
+    if (regions.nav) targets.push({ href: this.navId, label: this.t('skipToNav') });
     /* A link to a pane the reader closed is a dead destination. */
     if (regions.aside && this.asideOpen()) {
-      targets.push({ href: this.asideId, label: messages.skipToAside });
+      targets.push({ href: this.asideId, label: this.t('skipToAside') });
     }
     return targets;
   });
@@ -462,6 +496,42 @@ export class SlAppShell {
       () => this.nodes.asideToggle,
       (reason, source) => this.requestAside(false, reason, source),
     );
+  }
+
+  /** The root, which the pane's extent is a fraction of. */
+  get element(): HTMLElement {
+    return this.host;
+  }
+
+  /**
+   * Asks to move the pane's extent, held inside the limits. `undefined`
+   * travels whole: it is the pane back on its size step.
+   */
+  requestAsideExtent(next: number | undefined, reason: AppShellAsideExtentReason, source: unknown) {
+    const { max, min } = this.asideBounds();
+    const wanted = next === undefined ? undefined : clamp(next, min, max);
+    if (wanted === this.asideExtent()) return;
+
+    let cancelled = false;
+    const state = createControllable<number | undefined>({
+      initial: this.asideExtent(),
+      onRequest: (raw) => {
+        cancelled = raw.cancelled;
+        this.asideExtentChangeRequest.emit({
+          cancel: () => raw.cancel(),
+          get cancelled() {
+            return raw.cancelled;
+          },
+          previous: raw.previous,
+          reason,
+          source: raw.source,
+          value: raw.value,
+        });
+      },
+    });
+
+    if (!state.request(wanted, reason, source) || cancelled) return;
+    this.asideExtent.set(wanted);
   }
 
   /** A region says it exists, so a skip link is never written to a target nobody rendered. */
@@ -640,7 +710,7 @@ export class SlAppShellNav {
   private readonly writtenId = inject(new HostAttributeToken('id'), { optional: true });
 
   protected readonly elementId = this.writtenId ?? this.shell.navId;
-  protected readonly label = computed(() => this.written ?? this.shell.resolvedMessages().nav);
+  protected readonly label = computed(() => this.written ?? this.shell.t('nav'));
 
   constructor() {
     const remove = this.shell.registerRegion('nav');
@@ -731,6 +801,7 @@ export class SlAppShellMain {
     '[attr.id]': 'elementId',
     '[attr.aria-label]': 'label()',
     '[attr.data-open]': "shell.asideOpen() ? '' : null",
+    '[style.--slotted-app-shell-aside-extent]': 'extentLength()',
   },
 })
 export class SlAppShellAside {
@@ -738,7 +809,13 @@ export class SlAppShellAside {
   private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
   private readonly writtenId = inject(new HostAttributeToken('id'), { optional: true });
   protected readonly elementId = this.writtenId ?? this.shell.asideId;
-  protected readonly label = computed(() => this.written ?? this.shell.resolvedMessages().aside);
+  protected readonly label = computed(() => this.written ?? this.shell.t('aside'));
+  /* The extent as the column's width: a fraction of the shell in `cqi`, which
+     the stylesheet reads in the column alone. */
+  protected readonly extentLength = computed(() => {
+    const extent = this.shell.asideExtent();
+    return extent === undefined ? null : `${Math.round(extent * 10000) / 100}cqi`;
+  });
 
   constructor() {
     const remove = this.shell.registerRegion('aside');
@@ -755,14 +832,228 @@ export class SlAppShellAside {
 })
 export class SlAppShellAsideHeader {}
 
-/** The middle, and the only part of the pane that scrolls. */
+/**
+ * The middle, and the only part of the pane that scrolls. It stands on the
+ * pane's inset; `inset="none"` drops it for content that brings its own.
+ */
 @Directive({
   selector: '[slAppShellAsideBody]',
   standalone: true,
   exportAs: 'slAppShellAsideBody',
-  host: { 'data-part': 'aside-body' },
+  host: { 'data-part': 'aside-body', '[attr.data-inset]': 'inset() ?? null' },
 })
-export class SlAppShellAsideBody {}
+export class SlAppShellAsideBody {
+  /** `none` drops the body's own padding, for content that brings its own inset. */
+  readonly inset = input<'none' | undefined>(undefined);
+}
+
+/**
+ * The box the pane's extent is a fraction of: the shell's content box, which
+ * is what `cqi` resolves against. Physical edges, because the pointer and the
+ * rectangle are both in client coordinates.
+ */
+function shellRect(root: HTMLElement): ExtentRect | null {
+  const rect = root.getBoundingClientRect();
+  const box = getComputedStyle(root);
+  /* A border whose style is none is nought wide, whatever its width says. */
+  const border = (style: string, width: string) =>
+    style === 'none' || style === 'hidden' ? 0 : parseFloat(width) || 0;
+  const start =
+    (parseFloat(box.paddingLeft) || 0) + border(box.borderLeftStyle, box.borderLeftWidth);
+  const end =
+    (parseFloat(box.paddingRight) || 0) + border(box.borderRightStyle, box.borderRightWidth);
+  const width = Math.max(0, rect.width - start - end);
+  return width > 0 ? { height: rect.height, width, x: rect.x + start, y: rect.y } : null;
+}
+
+/** How far a press on the separator may wander and still be a tap. */
+const TAP_SLOP_PX = 3;
+
+/**
+ * The pane's inner edge, from the WAI-ARIA Window Splitter pattern: a focusable
+ * `separator` whose three values are the extent as whole percentages of the
+ * shell. **Rendering it is the capability**; there is no `resizable` input.
+ *
+ * It moves the column alone. Under `asideMode="overlay"` the layer keeps its
+ * size step and a closed pane has nothing to resize, so the element is
+ * `hidden` there; below the breakpoint the stylesheet hides it, because a row
+ * under the content has no inline edge.
+ *
+ * The arrows are physical, the pattern's own reading: `ArrowLeft` grows an end
+ * pane in a left-to-right document, and shrinks it where `navSide="end"` or a
+ * mirrored line puts the pane at the start.
+ */
+@Directive({
+  selector: '[slAppShellAsideResizer]',
+  standalone: true,
+  exportAs: 'slAppShellAsideResizer',
+  host: {
+    'data-part': 'aside-resizer',
+    role: 'separator',
+    tabindex: '0',
+    'aria-orientation': 'vertical',
+    '[attr.aria-controls]': 'shell.asideId',
+    '[attr.aria-label]': 'label()',
+    '[attr.aria-valuemin]': 'percent(shell.asideBounds().min)',
+    '[attr.aria-valuemax]': 'percent(shell.asideBounds().max)',
+    '[attr.aria-valuenow]': 'percent(current())',
+    '[attr.hidden]': "shown() ? null : ''",
+    '(pointerdown)': 'pointerDown($event)',
+    '(pointermove)': 'pointerMove($event)',
+    '(pointerup)': 'endDrag($event)',
+    '(lostpointercapture)': 'endDrag($event)',
+    '(keydown)': 'keyDown($event)',
+  },
+})
+export class SlAppShellAsideResizer {
+  protected readonly shell = inject(SlAppShell);
+  private readonly native: HTMLElement = inject(ElementRef).nativeElement;
+  private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
+
+  /** Where the press began and how far the edge was from the pointer then. */
+  private press: { x: number; offset: number; moved: boolean } | null = null;
+  /** What the document looked like before the drag, and how to put it back. */
+  private gesture: (() => void) | null = null;
+  /** The pane's measure while the size step decides it, read from the layout. */
+  private readonly rest = signal<number | undefined>(undefined);
+
+  protected readonly label = computed(() => this.written ?? this.shell.t('resizeAside'));
+  protected readonly shown = computed(
+    () => this.shell.resolvedAsideMode() === 'inline' && this.shell.asideOpen(),
+  );
+  /* The pane is at the end of the line the navigation is not on. */
+  private readonly side = computed<ExtentSide>(() =>
+    this.shell.resolvedNavSide() === 'end' ? 'start' : 'end',
+  );
+  protected readonly current = computed(() => {
+    const { max, min } = this.shell.asideBounds();
+    return clamp(this.shell.asideExtent() ?? this.rest() ?? min, min, max);
+  });
+
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    destroyRef.onDestroy(() => this.gesture?.());
+    afterNextRender(() => {
+      const aside = this.shell.nodes.aside;
+      if (aside === null) return;
+      const read = () => {
+        const rect = shellRect(this.shell.element);
+        this.rest.set(rect === null ? undefined : aside.getBoundingClientRect().width / rect.width);
+      };
+      read();
+      if (typeof ResizeObserver === 'undefined') return;
+      const observer = new ResizeObserver(read);
+      observer.observe(aside);
+      destroyRef.onDestroy(() => observer.disconnect());
+    });
+  }
+
+  protected percent(value: number) {
+    return Math.round(clamp(value, 0, 1) * 100);
+  }
+
+  private isRtl() {
+    return getComputedStyle(this.native).direction === 'rtl';
+  }
+
+  private pointAt(event: PointerEvent, rect: ExtentRect) {
+    return extentAtPoint({
+      point: { x: event.clientX, y: event.clientY },
+      rect,
+      rtl: this.isRtl(),
+      side: this.side(),
+    });
+  }
+
+  protected pointerDown(event: PointerEvent) {
+    if (event.defaultPrevented || event.button !== 0) return;
+    const rect = shellRect(this.shell.element);
+    if (rect === null) return;
+
+    event.preventDefault();
+    this.native.setPointerCapture(event.pointerId);
+    this.native.focus();
+    this.press = {
+      moved: false,
+      offset: this.current() - this.pointAt(event, rect),
+      x: event.clientX,
+    };
+  }
+
+  protected pointerMove(event: PointerEvent) {
+    const held = this.press;
+    if (held === null) return;
+    const rect = shellRect(this.shell.element);
+    if (rect === null) return;
+
+    if (!held.moved) {
+      if (Math.abs(event.clientX - held.x) < TAP_SLOP_PX) return;
+      held.moved = true;
+      /* The cursor has to survive the pointer leaving the separator, and a drag
+         across the page must not select the text under it. Both are the
+         document's and neither is reachable from the family's own stylesheet. */
+      this.gesture?.();
+      this.gesture = holdResizeGesture(this.native.ownerDocument, 'col-resize');
+      this.shell.asideDragging.set(true);
+    }
+    this.shell.requestAsideExtent(this.pointAt(event, rect) + held.offset, 'pointer', event);
+  }
+
+  protected endDrag(event: PointerEvent) {
+    const held = this.press;
+    if (held === null) return;
+    this.press = null;
+    if (this.native.hasPointerCapture(event.pointerId)) {
+      this.native.releasePointerCapture(event.pointerId);
+    }
+    if (!held.moved) return;
+    this.gesture?.();
+    this.gesture = null;
+    this.shell.asideDragging.set(false);
+  }
+
+  protected keyDown(event: KeyboardEvent) {
+    if (event.defaultPrevented) return;
+    const side = this.side();
+    const { max, min } = this.shell.asideBounds();
+    const atStart = anchorsAtStart(side, this.isRtl());
+
+    /* A distance and not a proportion, converted against the shell measured at
+       the moment of the press. */
+    const by = (direction: 1 | -1) => {
+      event.preventDefault();
+      const rect = shellRect(this.shell.element);
+      const amount =
+        rect === null
+          ? 0
+          : stepAmountFromPixels({
+              pixels: event.shiftKey ? EXTENT_LARGE_STEP_PX : EXTENT_STEP_PX,
+              rect,
+              side,
+            });
+      this.shell.requestAsideExtent(
+        stepExtent({ amount, direction, fraction: this.current(), max, min }),
+        'keyboard',
+        event,
+      );
+    };
+
+    switch (event.key) {
+      case 'ArrowLeft':
+        return by(atStart ? -1 : 1);
+      case 'ArrowRight':
+        return by(atStart ? 1 : -1);
+      case 'Home':
+        event.preventDefault();
+        return this.shell.requestAsideExtent(min, 'keyboard', event);
+      case 'End':
+        event.preventDefault();
+        return this.shell.requestAsideExtent(max, 'keyboard', event);
+      default:
+        return undefined;
+    }
+  }
+}
 
 /** The pinned bottom: the actions that close the task the pane holds. */
 @Directive({
@@ -811,8 +1102,7 @@ export class SlAppShellAsideToggle {
   protected readonly controls = this.writtenControls ?? this.shell.asideId;
   protected readonly label = computed(() => {
     if (this.written !== null) return this.written;
-    const messages = this.shell.resolvedMessages();
-    return this.shell.asideOpen() ? messages.closeAside : messages.openAside;
+    return this.shell.asideOpen() ? this.shell.t('closeAside') : this.shell.t('openAside');
   });
 
   protected press(event: MouseEvent) {
@@ -873,8 +1163,7 @@ export class SlAppShellNavToggle {
   protected readonly controls = this.writtenControls ?? this.shell.navId;
   protected readonly label = computed(() => {
     if (this.written !== null) return this.written;
-    const messages = this.shell.resolvedMessages();
-    return this.shell.navOpen() ? messages.close : messages.open;
+    return this.shell.navOpen() ? this.shell.t('close') : this.shell.t('open');
   });
 
   protected press(event: MouseEvent) {

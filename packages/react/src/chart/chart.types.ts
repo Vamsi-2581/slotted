@@ -2,7 +2,6 @@ import type {
   ChartAnnotation,
   ChartGrid,
   ChartLegendEntry,
-  ChartMessages,
   ChartModel,
   ChartOrientation,
   ChartPoint,
@@ -15,6 +14,7 @@ import type {
   ChartYAxis,
   ChartZoom,
 } from '@slotted/core/chart';
+import type { ChartMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -44,8 +44,6 @@ export interface ChartTooltipSettings {
 
 /** What an application sets once for every chart under it. */
 export interface ChartDefaults {
-  locale?: string | undefined;
-  messages?: Partial<ChartMessages> | undefined;
   size?: ChartSize | undefined;
   variant?: ChartVariant | undefined;
   palette?: ChartPalette | undefined;
@@ -115,7 +113,11 @@ export interface ChartProps extends NativeFigureProps {
   readonly help?: ReactNode | undefined;
   /** Controls of the consumer's own, before the toolbar. */
   readonly actions?: ReactNode | undefined;
-  readonly messages?: Partial<ChartMessages> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * toolbar, the legend, the states and the sentences a screen reader hears.
+   */
+  readonly messages?: PartialMessages<ChartMessages> | undefined;
 
   /* ── How it looks ──────────────────────────────────────────────────── */
   readonly size?: ChartSize | undefined;

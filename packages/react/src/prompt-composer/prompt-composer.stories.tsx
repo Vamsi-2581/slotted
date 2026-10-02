@@ -464,8 +464,8 @@ export const Content: Story = {
 function FocusFromOutside() {
   const ref = useRef<HTMLTextAreaElement>(null);
   return (
-    <PromptComposerDefaultsProvider sendLabel="Enviar" stopLabel="Parar" variant="outline">
-      <PromptComposer>
+    <PromptComposerDefaultsProvider variant="outline">
+      <PromptComposer messages={{ send: 'Enviar', stop: 'Parar' }}>
         <PromptComposerInput aria-label="Mensagem" placeholder="Escreva e envie" ref={ref} />
         <PromptComposerFooter>
           <PromptComposerAction onClick={() => ref.current?.select()}>

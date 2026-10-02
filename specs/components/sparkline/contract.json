@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "sparkline",
   "ui": "sparkline",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Tiny inline trend chart."
+  },
   "axes": {
     "type": ["line", "bar"],
     "size": ["sm", "md", "lg"],
@@ -29,6 +33,7 @@
       "parts": ["root", "plot", "area", "line", "bar", "reference", "ring", "marker"]
     }
   },
+  "messages": ["down", "flat", "noData", "up"],
   "stateAttributes": {},
   "scenarios": {
     "sparkline": [

@@ -5,6 +5,34 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "@slotted/angular#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/specs/components/*/contract.json",
+        "$TURBO_ROOT$/packages/styles/src/*/*.tokens.json",
+        "$TURBO_ROOT$/apps/docs/examples/**",
+        "$TURBO_ROOT$/tools/agent-docs/src/**",
+        "$TURBO_ROOT$/tools/agent-docs/bin/**"
+      ]
+    },
+    "@slotted/react#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/specs/components/*/contract.json",
+        "$TURBO_ROOT$/packages/styles/src/*/*.tokens.json",
+        "$TURBO_ROOT$/apps/docs/examples/**",
+        "$TURBO_ROOT$/tools/agent-docs/src/**",
+        "$TURBO_ROOT$/tools/agent-docs/bin/**"
+      ]
+    },
+    "@slotted/docs#build": {
+      "dependsOn": ["^build", "@slotted/react#build", "@slotted/angular#build"],
+      "outputs": ["dist/**"]
+    },
     "dev": {
       "dependsOn": ["@slotted/theme#build", "@slotted/themes#build"],
       "cache": false,
@@ -35,6 +63,10 @@
         "$TURBO_ROOT$/scripts/generate-icon-glyphs.mjs",
         "$TURBO_ROOT$/scripts/glyph-ink.mjs"
       ]
+    },
+    "@slotted/docs#verify": {
+      "dependsOn": ["^verify", "@slotted/react#verify", "@slotted/angular#verify"],
+      "outputs": ["dist/**"]
     }
   }
 }

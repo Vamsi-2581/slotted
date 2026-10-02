@@ -2,6 +2,9 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/loading-overlay/contract.json';
 import { SlLoadingOverlay, SlLoadingOverlayCancel } from './loading-overlay';
 import { provideLoadingOverlayDefaults } from './loading-overlay-defaults';
@@ -18,7 +21,7 @@ const defaults = contract.members.loadingOverlay.defaults;
     [veil]="veil()"
     [size]="size()"
     [live]="live()"
-    [label]="label()"
+    [messages]="messages()"
     [loadedLabel]="loadedLabel()"
     [description]="description()"
     [cancellable]="cancellable()"
@@ -37,7 +40,7 @@ class TestHost {
   readonly veil = signal<'wash' | 'blur' | 'none' | undefined>(undefined);
   readonly size = signal<'sm' | 'md' | 'lg' | undefined>(undefined);
   readonly live = signal<'polite' | 'off' | undefined>(undefined);
-  readonly label = signal<string | undefined>(undefined);
+  readonly messages = signal<{ label: string } | undefined>(undefined);
   readonly loadedLabel = signal<string | undefined>(undefined);
   readonly description = signal<string | undefined>(undefined);
   readonly cancellable = signal(false);
@@ -124,7 +127,7 @@ describe('SlLoadingOverlay', () => {
 
   it('announces the wait once, and empties the region rather than replacing it', () => {
     const fixture = mount();
-    fixture.componentInstance.label.set('Saving changes');
+    fixture.componentInstance.messages.set({ label: 'Saving changes' });
     fixture.detectChanges();
 
     expect(announcement()!.getAttribute('role')).toBe('status');
@@ -155,7 +158,7 @@ describe('SlLoadingOverlay', () => {
 
   it('paints the two lines and hides them from the tree', () => {
     const fixture = mount();
-    fixture.componentInstance.label.set('Saving changes');
+    fixture.componentInstance.messages.set({ label: 'Saving changes' });
     fixture.componentInstance.description.set('About a minute left.');
     fixture.detectChanges();
 
@@ -332,6 +335,22 @@ describe('SlLoadingOverlay', () => {
       fixture.detectChanges();
 
       expect(root().getAttribute('data-veil')).toBe('none');
+    });
+
+    it('speaks the language in force, and follows a change of it in place', () => {
+      const locale = signal('pt-BR');
+      const fixture = mount(
+        (host) => host.cancellable.set(true),
+        [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+      );
+
+      expect(announcement()!.textContent?.trim()).toBe('Carregando…');
+      expect(cancel()!.textContent?.trim()).toBe('Cancelar');
+
+      locale.set('en-US');
+      fixture.detectChanges();
+      expect(announcement()!.textContent?.trim()).toBe('Loading…');
+      expect(cancel()!.textContent?.trim()).toBe('Cancel');
     });
   });
 });

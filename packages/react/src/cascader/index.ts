@@ -1,7 +1,6 @@
 export { Cascader, CascaderPanel } from './cascader';
 export {
   CASCADER_FALLBACK,
-  CASCADER_LABELS,
   CascaderDefaultsProvider,
   useCascaderDefaults,
 } from './cascader-defaults';
@@ -14,7 +13,6 @@ export type {
   CascaderExpandOn,
   CascaderHandle,
   CascaderKeysRequest,
-  CascaderLabels,
   CascaderLayoutAxis,
   CascaderLoadRequest,
   CascaderNodeView,

@@ -15,6 +15,45 @@ export const LEGACY_FAMILIES = JSON.parse(
   readFileSync(new URL('./legacy-families.json', import.meta.url), 'utf8'),
 ).families;
 
+/**
+ * The shelf a family sits on, in the order a reader meets them: the docs
+ * sidebar and the agent index group by it, so a family declares it here rather
+ * than in each consumer.
+ */
+export const GROUPS = [
+  'Actions',
+  'Forms',
+  'Data display',
+  'Feedback',
+  'Navigation',
+  'Overlays',
+  'Layout',
+];
+
+/**
+ * One sentence an agent reads to choose the family, short enough that 123 of
+ * them fit the 8 KB agent index beside their names.
+ */
+export const SUMMARY_MAX = 56;
+
+function assertSummary(contract) {
+  const summary = contract.catalog?.summary;
+  assert.equal(typeof summary, 'string', `${contract.family}: catalog.summary must be a string`);
+  assert.ok(
+    summary.length <= SUMMARY_MAX,
+    `${contract.family}: catalog.summary exceeds ${SUMMARY_MAX} characters`,
+  );
+  assert.match(
+    summary,
+    /^[A-Z][^]*\.$/,
+    `${contract.family}: catalog.summary must open with a capital and end with a period`,
+  );
+  assert.ok(
+    !/[.!?]\s/.test(summary),
+    `${contract.family}: catalog.summary holds more than one sentence`,
+  );
+}
+
 export const PSEUDO_STATES = ['default', 'hover', 'active', 'focus-visible'];
 
 export const STATE_ATTRIBUTES = {
@@ -582,6 +621,12 @@ export function assertContractShape(contract) {
       ? `${contract.family} is listed as legacy, so it stays on schema ${LEGACY_SCHEMA_VERSION} until it is rebuilt`
       : `${contract.family} is not listed as legacy, so it must satisfy schema ${SCHEMA_VERSION}`,
   );
+
+  assert.ok(
+    GROUPS.includes(contract.catalog?.group),
+    `${contract.family}: catalog.group ${contract.catalog?.group} is not one of ${GROUPS.join(', ')}`,
+  );
+  assertSummary(contract);
 
   const memberNames = Object.keys(contract.members ?? {});
   assert.ok(memberNames.length > 0, 'contract declares no members');

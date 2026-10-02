@@ -27,7 +27,7 @@ export function TagLink({
   onKeyDownCapture,
   onRemove,
   removeDisabled = false,
-  removeLabel,
+  messages,
   render,
   rootProps,
   shape,
@@ -39,7 +39,7 @@ export function TagLink({
   ...nativeProps
 }: TagLinkProps) {
   const appearance = useAppearance({ shape, size, tone, variant });
-  const removal = useRemoval({ disabled, onRemove, removeDisabled, removeLabel });
+  const removal = useRemoval({ disabled, onRemove, removeDisabled, messages });
   const id = useId();
   const labelId = `${id}label`;
   const wordId = `${id}remove`;

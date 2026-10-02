@@ -57,33 +57,20 @@ export interface SelectDefaults {
   align: SelectAlign;
   alignOffset: number;
   clearable: boolean;
-  clearLabel: string;
-  /** The sentence the live region announces while searching. `{count}` becomes the number. */
-  countLabel: string;
   /** Whether the span a query matched is marked inside the option's label. */
   highlightMatch: boolean;
   /** Whether the popup opens onto a field the reader filters the options with. */
   search: boolean;
-  /** The accessible name of the search field, which has no visible label. */
-  searchLabel: string;
-  /** What the empty search field says. */
-  searchPlaceholder: string;
-  /** The accessible name of a chip's remove control. `{label}` is the value's own label. */
-  removeLabel: string;
-  /** What a control too narrow for chips says instead. `{count}` is how many are chosen. */
-  summaryLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   closeOnSelect: boolean;
   collisionPadding: number;
   disabled: boolean;
-  emptyLabel: string;
   flip: boolean;
   fullWidth: boolean;
   hideWhenDetached: boolean;
   invalid: boolean;
   loading: boolean;
-  loadingLabel: string;
   loop: boolean;
   mount: SelectMount;
   multiple: boolean;
@@ -111,26 +98,18 @@ export const SELECT_FALLBACK: SelectDefaults = {
   align: 'start',
   alignOffset: 0,
   clearable: false,
-  clearLabel: 'Clear selection',
-  countLabel: '{count} results',
   highlightMatch: true,
   search: false,
-  searchLabel: 'Search options',
-  searchPlaceholder: 'Search…',
-  removeLabel: 'Remove {label}',
-  summaryLabel: '{count} selected',
   closeOnEscape: true,
   closeOnOutsidePress: true,
   closeOnSelect: true,
   collisionPadding: 8,
   disabled: false,
-  emptyLabel: 'No options',
   flip: true,
   fullWidth: true,
   hideWhenDetached: true,
   invalid: false,
   loading: false,
-  loadingLabel: 'Loading…',
   loop: false,
   mount: 'active',
   multiple: false,
@@ -156,6 +135,7 @@ export const SELECT_DEFAULTS = new InjectionToken<SelectDefaults>('SELECT_DEFAUL
 /**
  * The decisions an application takes once, in its bootstrap, rather than on
  * every select it renders. A select that states one of them itself still wins.
+ * Its words come from the language in force (`provideSlotted`).
  */
 export function provideSelectDefaults(defaults: Partial<SelectDefaults>): Provider {
   return { provide: SELECT_DEFAULTS, useValue: { ...SELECT_FALLBACK, ...defaults } };

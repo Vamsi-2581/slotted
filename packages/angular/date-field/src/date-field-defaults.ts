@@ -18,9 +18,6 @@ export type DateFieldVariant = 'outline' | 'subtle' | 'plain';
  */
 export type DateFieldCalendar = 'gregory';
 
-/** The one word the family's own button announces. */
-export const DATE_FIELD_CLEAR_LABEL = 'Clear';
-
 /**
  * Two typed digits up to twenty years ahead of this year are this century, and
  * anything above them is the last: `30` is 2030 and `80` is 1980 in 2026.
@@ -33,11 +30,8 @@ export const DATE_FIELD_YEAR_PIVOT = 20;
 
 export interface DateFieldDefaults {
   calendar: DateFieldCalendar;
-  clearLabel: string;
   /** `0` is Sunday. Unset means the locale decides. */
   firstDayOfWeek: number | undefined;
-  /** BCP 47. Unset means the runtime decides. */
-  locale: string | undefined;
   size: DateFieldSize;
   /** Which zone answers "what is today". Unset means the runtime's own. */
   timeZone: string | undefined;
@@ -47,9 +41,7 @@ export interface DateFieldDefaults {
 
 const FALLBACK: DateFieldDefaults = {
   calendar: 'gregory',
-  clearLabel: DATE_FIELD_CLEAR_LABEL,
   firstDayOfWeek: undefined,
-  locale: undefined,
   size: 'md',
   timeZone: undefined,
   variant: 'outline',
@@ -62,15 +54,11 @@ export const DATE_FIELD_DEFAULTS = new InjectionToken<DateFieldDefaults>(
 );
 
 /**
- * An application decides once what its dates look like, which locale writes
- * them, which zone answers "today" and how a two-digit year resolves, rather
- * than repeating the same inputs on every control in a form. A control that
- * states any of them itself still wins.
- *
- * `locale` is the one worth setting first. Unset, each control asks the runtime
- * — which is the browser's locale, not the application's, and an application
- * served in Portuguese to a browser set to English writes its dates in the
- * American order.
+ * An application decides once what its dates look like, which zone answers
+ * "today" and how a two-digit year resolves, rather than repeating the same
+ * inputs on every control in a form. A control that states any of them itself
+ * still wins. The locale that writes the dates, and the clear button's name,
+ * come from the language in force (`provideSlotted`).
  */
 export function provideDateFieldDefaults(defaults: Partial<DateFieldDefaults>) {
   return {

@@ -1,3 +1,4 @@
+import type { ButtonMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactElement, ReactNode } from 'react';
 
@@ -64,8 +65,11 @@ export interface ButtonLoadingProps {
    * showing a spinner for an action that takes ninety of them.
    */
   loadingDelay?: number | undefined;
-  /** What the indicator announces itself as. It is a progress bar, so it has a name. */
-  loadingLabel?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: what the
+   * indicator announces itself as (`loading`). It is a progress bar, so it has a name.
+   */
+  messages?: PartialMessages<ButtonMessages> | undefined;
 }
 
 /**
@@ -132,12 +136,15 @@ export type ButtonLinkProps = NativeButtonLinkProps | AdaptedButtonLinkProps;
 
 /**
  * An icon carries no text, so the name cannot be computed from the content.
- * The union makes one of the two naming attributes mandatory at the type level
- * rather than at run time.
+ * The union makes a naming attribute mandatory at the type level rather than
+ * at run time. It requires at least one, not exactly one: a trigger's root
+ * props type `aria-labelledby` as an optional string, and forbidding it would
+ * refuse every trigger an icon button is composed onto. When both arrive,
+ * `aria-labelledby` names the button, as accessible-name computation says.
  */
 type IconButtonAccessibleName =
-  | { 'aria-label': string; 'aria-labelledby'?: never }
-  | { 'aria-label'?: never; 'aria-labelledby': string };
+  | { 'aria-label': string; 'aria-labelledby'?: string | undefined }
+  | { 'aria-label'?: string | undefined; 'aria-labelledby': string };
 
 export type IconButtonProps = Omit<
   ComponentPropsWithRef<'button'>,

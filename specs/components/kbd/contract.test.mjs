@@ -48,12 +48,13 @@ test('separates what is seen from what is spoken', () => {
  * The one part between two keys, and it is one part rather than two because
  * both answers are the same slot: `+` between simultaneous keys, the word
  * `then` between two steps of a sequence. macOS joins with neither, so on that
- * platform the part is not rendered at all rather than rendered empty.
+ * platform the part is not rendered at all rather than rendered empty. `then`
+ * is a word of the shared keys catalog, not a default an instance sets.
  */
 test('reserves the slot between two keys, and the two words that fill it', () => {
   assert.ok(contract.members.kbd.parts.includes('separator'));
   assert.equal(contract.members.kbd.defaults.separator, '+');
-  assert.equal(contract.members.kbd.defaults.thenLabel, 'then');
+  assert.equal('thenLabel' in contract.members.kbd.defaults, false);
 });
 
 /**

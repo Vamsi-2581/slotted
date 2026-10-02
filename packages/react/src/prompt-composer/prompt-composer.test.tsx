@@ -1,9 +1,11 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/prompt-composer/contract.json';
 import { Field, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import {
   PromptComposer,
   PromptComposerAction,
@@ -205,15 +207,23 @@ describe('PromptComposer', () => {
     expect(input().value).toBe('');
   });
 
-  it('lets an application name the buttons once', () => {
+  it('lets an application decide the appearance once', () => {
     render(
-      <PromptComposerDefaultsProvider attachLabel="Anexar" sendLabel="Enviar" variant="outline">
+      <PromptComposerDefaultsProvider variant="outline">
         <Composer />
       </PromptComposerDefaultsProvider>,
     );
+    expect(root()).toHaveAttribute('data-variant', 'outline');
+  });
+
+  it('names its buttons in the language in force, and lays its own messages over it', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Composer messages={{ attach: 'Anexar' }} />
+      </SlottedProvider>,
+    );
     expect(screen.getByRole('button', { name: 'Enviar' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Anexar' })).toBeInTheDocument();
-    expect(root()).toHaveAttribute('data-variant', 'outline');
   });
 
   it('runs the consumer’s own key handler before its own', () => {

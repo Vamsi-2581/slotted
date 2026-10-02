@@ -20,15 +20,7 @@ export type AlertReach = 'inline' | 'section' | 'page';
  */
 export type AlertLive = 'off' | 'polite' | 'assertive';
 
-/**
- * The word the dismiss control announces. A constant rather than a string built
- * inside the component, because the only translation layer this library has
- * today is the consumer's — the token below, or an input on the alert.
- */
-export const ALERT_DISMISS_LABEL = 'Dismiss';
-
 export interface AlertDefaults {
-  dismissLabel: string;
   live: AlertLive;
   reach: AlertReach;
   tone: AlertTone;
@@ -36,7 +28,6 @@ export interface AlertDefaults {
 }
 
 const FALLBACK: AlertDefaults = {
-  dismissLabel: ALERT_DISMISS_LABEL,
   live: 'off',
   reach: 'section',
   tone: 'accent',
@@ -49,16 +40,16 @@ export const ALERT_DEFAULTS = new InjectionToken<AlertDefaults>('slotted alert d
 });
 
 /**
- * An application decides once how its messages are painted, at what reach, and
- * what its dismiss controls are called, rather than repeating the same inputs
- * on every alert in a settings page. An alert that states any of them itself
- * still wins: an explicit input is never overridden by the token.
+ * An application decides once how its messages are painted, at what reach and
+ * how loud, rather than repeating the same inputs on every alert in a settings
+ * page. An alert that states any of them itself still wins: an explicit input is
+ * never overridden by the token. The dismiss control's name comes from the
+ * language in force (`provideSlotted`).
  */
 export function provideAlertDefaults(defaults: Partial<AlertDefaults>) {
   return {
     provide: ALERT_DEFAULTS,
     useFactory: (): AlertDefaults => ({
-      dismissLabel: defaults.dismissLabel ?? FALLBACK.dismissLabel,
       live: defaults.live ?? FALLBACK.live,
       reach: defaults.reach ?? FALLBACK.reach,
       tone: defaults.tone ?? FALLBACK.tone,

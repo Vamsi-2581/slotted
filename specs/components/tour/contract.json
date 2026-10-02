@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "tour",
   "ui": "tour",
+  "catalog": {
+    "group": "Overlays",
+    "summary": "Guided steps anchored to elements."
+  },
   "design": "docs/history/designs/2026-09-24-tour-design.md",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
   "patternStatus": "There is no tour pattern in the APG. A modal step answers the modal dialog pattern; a step whose target the reader must operate answers the non-modal dialog that popover answers, with that family's focus guards.",
@@ -164,18 +168,12 @@
     "interactive": "the target stays operable and the step is non-modal",
     "advanceOn": "optional DOM event name on the target that goes to the next step, carrying the reason of the event that fired it",
     "prepare": "optional; awaited with an AbortSignal before the target is resolved",
-    "spotlight": "overrides the tour's spotlight"
+    "spotlight": "overrides the tour's spotlight",
+    "messages": "optional; laid over the tour's next, prev, skip and done for this step"
   },
-  "labels": {
-    "next": "Next",
-    "prev": "Back",
-    "done": "Done",
-    "skip": "Skip tour",
-    "close": "Close tour",
-    "preparing": "Preparing the next step",
-    "progress": "{position} of {total}",
-    "reason": "Strings the defaults provider holds, so an application translates them once. progress is a function in both bindings; the value here is the English default it produces."
-  },
+  "messages": ["close", "done", "next", "preparing", "prev", "progress", "skip"],
+  "messagesReason": "The words the tour says come from the tour catalog of the language in force, laid over by one messages input on the tour and, for next, prev, skip and done, by a step's own messages. progress is one message with {position} and {total}, so each language orders its own words; preparing names the Next button's wait.",
+
   "declined": {
     "indicatorDots": {
       "compose": "useTour() in React and slTour in Angular expose position and total; three lines draw the dots inside the footer",
@@ -244,14 +242,7 @@
       "scrollIntoView",
       "missing",
       "keyboardNavigation",
-      "targetTimeout",
-      "labels.next",
-      "labels.prev",
-      "labels.done",
-      "labels.skip",
-      "labels.close",
-      "labels.preparing",
-      "labels.progress"
+      "targetTimeout"
     ]
   },
   "stateAttributes": {

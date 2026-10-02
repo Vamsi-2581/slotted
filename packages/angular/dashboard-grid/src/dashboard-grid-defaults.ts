@@ -1,16 +1,13 @@
 import { inject, Injectable, InjectionToken } from '@angular/core';
-import {
-  DEFAULT_DASHBOARD_GRID_LABELS,
-  type DashboardColumnsInput,
-  type DashboardGridLabels,
-  type DashboardLayout,
-  type DashboardLayoutChange,
+import type {
+  DashboardColumnsInput,
+  DashboardLayout,
+  DashboardLayoutChange,
 } from '@slotted/core/dashboard-grid';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 
 export type {
   DashboardColumnsInput,
-  DashboardGridLabels,
   DashboardLayout,
   DashboardLayoutChange,
   DashboardLayoutItem,
@@ -44,14 +41,12 @@ export interface DashboardGridDefaults {
   columns: DashboardColumnsInput;
   editBar: boolean;
   headingLevel: DashboardHeadingLevel;
-  labels: DashboardGridLabels;
 }
 
 const FALLBACK: DashboardGridDefaults = {
   columns: 12,
   editBar: true,
   headingLevel: 3,
-  labels: DEFAULT_DASHBOARD_GRID_LABELS,
 };
 
 export const DASHBOARD_GRID_DEFAULTS = new InjectionToken<DashboardGridDefaults>(
@@ -61,21 +56,14 @@ export const DASHBOARD_GRID_DEFAULTS = new InjectionToken<DashboardGridDefaults>
 
 /**
  * An application decides once how many columns its dashboards have, whether
- * the family draws the edit bar, the level of a widget's title and what the
- * family says. A grid that states any of it itself still wins.
+ * the family draws the edit bar and the level of a widget's title. A grid that
+ * states any of it itself still wins. Its words come from the language in force
+ * (`provideSlotted`).
  */
-export function provideDashboardGridDefaults(
-  defaults: Partial<Omit<DashboardGridDefaults, 'labels'>> & {
-    labels?: Partial<DashboardGridLabels>;
-  },
-) {
+export function provideDashboardGridDefaults(defaults: Partial<DashboardGridDefaults>) {
   return {
     provide: DASHBOARD_GRID_DEFAULTS,
-    useFactory: (): DashboardGridDefaults => ({
-      ...FALLBACK,
-      ...defaults,
-      labels: { ...FALLBACK.labels, ...defaults.labels },
-    }),
+    useFactory: (): DashboardGridDefaults => ({ ...FALLBACK, ...defaults }),
   };
 }
 

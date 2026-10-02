@@ -34,7 +34,7 @@ export function csvField(text: string, delimiter: string): string {
 export function toCsv<Row>(
   rows: readonly Row[],
   columns: readonly GridColumn<Row>[],
-  options: CsvOptions = {},
+  options: CsvOptions,
 ): string {
   /* No columns is no file: an empty record per row would be a line of
      nothing with a header of nothing over it. */

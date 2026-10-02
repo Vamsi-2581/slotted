@@ -238,12 +238,7 @@ test('offers both orientations and three ways to show the number', () => {
 });
 
 test('lets an application decide once what its sliders look like', () => {
-  assert.deepEqual(contract.provides.sliderDefaults, [
-    'size',
-    'orientation',
-    'valueLabel',
-    'locale',
-  ]);
+  assert.deepEqual(contract.provides.sliderDefaults, ['size', 'orientation', 'valueLabel']);
 });
 
 /** The one action a value cannot express: putting focus on a named thumb. */

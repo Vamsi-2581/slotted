@@ -1,5 +1,6 @@
 import { plainTime } from '@slotted/core/date';
 import type { PlainTime } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -8,6 +9,7 @@ import type React from 'react';
 
 import { Button } from '../button';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { TimeRangePicker, TimeRangePickerPreset } from './time-range-picker';
 import { TimeRangePickerDefaultsProvider } from './time-range-picker-defaults';
 import { Grid, Measure, Scene } from './time-range-picker-demo';
@@ -54,26 +56,14 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     keyboard: Keyboard,
   }) as never;
 
-/* The office's own words for the hint and the done button, set once for every scene. */
-const WORDS = {
-  doneLabel: 'Concluir',
-  hintLabels: {
-    choose: '{end}: escolha a hora',
-    order: 'O fim tem de vir depois do início',
-    length: 'Fora da duração permitida',
-    unavailable: 'Passa por uma hora indisponível',
-    bounds: 'Fora do horário permitido',
-  },
-};
-
 const meta = {
   title: 'Components/TimeRangePicker',
   component: TimeRangePicker,
   decorators: [
     (Story) => (
-      <TimeRangePickerDefaultsProvider {...WORDS}>
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
         <Story />
-      </TimeRangePickerDefaultsProvider>
+      </SlottedProvider>
     ),
   ],
   parameters: {
@@ -116,11 +106,8 @@ export const Playground: Story = {
         <TimeRangePicker
           {...args}
           defaultValue={BOOKING}
-          endLabel="Fim"
           endName="fim"
-          nowLabel="Agora"
           referenceTime={TEN_TWENTY}
-          startLabel="Início"
           startName="inicio"
         />
         <FieldDescription>Abra e escolha o início e o fim nas duas listas.</FieldDescription>
@@ -148,12 +135,9 @@ export const Panel: Story = {
           <TimeRangePicker
             defaultOpen
             defaultValue={{ start: START, end: null }}
-            endLabel="Fim"
             hourCycle={24}
             locale="pt-BR"
-            nowLabel="Agora"
             referenceTime={TEN_TWENTY}
-            startLabel="Início"
           />
         </Screen>
       </Scene>
@@ -171,12 +155,9 @@ export const Length: Story = {
       >
         <TimeRangePicker
           defaultValue={{ start: START, end: null }}
-          endLabel="Fim"
           hourCycle={24}
           locale="pt-BR"
-          nowLabel="Agora"
           referenceTime={TEN_TWENTY}
-          startLabel="Início"
         />
       </Scene>
       <Scene
@@ -185,13 +166,10 @@ export const Length: Story = {
       >
         <TimeRangePicker
           defaultValue={BOOKING}
-          endLabel="Fim"
           hourCycle={24}
           lengthLabel={(seconds) => `${String(Math.round(seconds / 60))} min`}
           locale="pt-BR"
-          nowLabel="Agora"
           referenceTime={TEN_TWENTY}
-          startLabel="Início"
         />
       </Scene>
     </Grid>
@@ -210,14 +188,11 @@ export const Limits: Story = {
           <FieldLabel>Reserva da sala</FieldLabel>
           <TimeRangePicker
             defaultValue={{ start: START, end: null }}
-            endLabel="Fim"
             hourCycle={24}
             locale="pt-BR"
             maxLength={4 * 3600}
             minLength={30 * 60}
-            nowLabel="Agora"
             referenceTime={TEN_TWENTY}
-            startLabel="Início"
           />
           <FieldError>Uma reserva tem de 30 minutos a 4 horas.</FieldError>
         </Field>
@@ -236,13 +211,10 @@ export const Unavailable: Story = {
       >
         <TimeRangePicker
           defaultValue={{ start: plainTime(10), end: null }}
-          endLabel="Fim"
           hourCycle={24}
           isTimeUnavailable={isCleaning}
           locale="pt-BR"
-          nowLabel="Agora"
           referenceTime={TEN_TWENTY}
-          startLabel="Início"
         />
       </Scene>
       <Scene
@@ -252,13 +224,10 @@ export const Unavailable: Story = {
         <TimeRangePicker
           contiguous={false}
           defaultValue={{ start: plainTime(10), end: null }}
-          endLabel="Fim"
           hourCycle={24}
           isTimeUnavailable={isCleaning}
           locale="pt-BR"
-          nowLabel="Agora"
           referenceTime={TEN_TWENTY}
-          startLabel="Início"
         />
       </Scene>
     </Grid>
@@ -275,14 +244,11 @@ export const Step: Story = {
       >
         <TimeRangePicker
           defaultValue={BOOKING}
-          endLabel="Fim"
           hourCycle={24}
           locale="pt-BR"
           max={plainTime(20)}
           min={plainTime(8)}
-          nowLabel="Agora"
           referenceTime={TEN_TWENTY}
-          startLabel="Início"
           step={1800}
         />
       </Scene>
@@ -292,13 +258,10 @@ export const Step: Story = {
       >
         <TimeRangePicker
           defaultValue={{ start: plainTime(9), end: null }}
-          endLabel="Fim"
           hourCycle={24}
           locale="pt-BR"
-          nowLabel="Agora"
           options={[...HOURS_BEFORE_NOON, ...AFTER_NOON]}
           referenceTime={TEN_TWENTY}
-          startLabel="Início"
         />
       </Scene>
     </Grid>
@@ -313,14 +276,7 @@ export const Now: Story = {
         label="One now per end"
         note="It is 10:20. Press “Agora”: the start is written, the tab moves to the end, and focus carries to its list, whose rows now say how long a meeting from 10:20 would be. referenceTime fixes the clock for this page."
       >
-        <TimeRangePicker
-          endLabel="Fim"
-          hourCycle={24}
-          locale="pt-BR"
-          nowLabel="Agora"
-          referenceTime={TEN_TWENTY}
-          startLabel="Início"
-        />
+        <TimeRangePicker hourCycle={24} locale="pt-BR" referenceTime={TEN_TWENTY} />
       </Scene>
     </Grid>
   ),
@@ -338,7 +294,6 @@ export const Presets: Story = {
           note="The afternoon is marked because it is the value. Press “Próxima hora”: the run is computed at the press, written with the select reason, and the surface closes. The footer holds the product’s own actions."
         >
           <TimeRangePicker
-            endLabel="Fim"
             footer={
               <Button onClick={() => setValue(null)} size="sm" variant="ghost">
                 Limpar
@@ -346,7 +301,6 @@ export const Presets: Story = {
             }
             hourCycle={24}
             locale="pt-BR"
-            nowLabel="Agora"
             onValueChange={setValue}
             presets={
               <>
@@ -358,7 +312,6 @@ export const Presets: Story = {
               </>
             }
             referenceTime={TEN_TWENTY}
-            startLabel="Início"
             value={value}
           />
         </Scene>
@@ -378,12 +331,9 @@ export const OpenEnd: Story = {
         <TimeRangePicker
           clearable
           defaultValue={{ start: START, end: null }}
-          endLabel="Fim"
           hourCycle={24}
           locale="pt-BR"
-          nowLabel="Agora"
           referenceTime={TEN_TWENTY}
-          startLabel="Início"
         />
       </Scene>
       <Scene
@@ -392,14 +342,7 @@ export const OpenEnd: Story = {
       >
         <Field required>
           <FieldLabel>Reserva da sala</FieldLabel>
-          <TimeRangePicker
-            endLabel="Fim"
-            hourCycle={24}
-            locale="pt-BR"
-            nowLabel="Agora"
-            referenceTime={TEN_TWENTY}
-            startLabel="Início"
-          />
+          <TimeRangePicker hourCycle={24} locale="pt-BR" referenceTime={TEN_TWENTY} />
         </Field>
       </Scene>
     </Grid>
@@ -548,21 +491,21 @@ export const Composition: Story = {
       <Grid columns={1}>
         <Scene
           label="Set once for the application"
-          note="One provider decides that every booking is in Portuguese, in half-hour slots, with the office’s own words — so a product does not repeat six props on each form."
+          note="SlottedProvider decides that every booking is in Portuguese, one defaults provider that it runs in half-hour slots on a 24-hour clock, and messages lays the office’s own words over the catalog — so a product does not repeat six props on each form."
         >
-          <TimeRangePickerDefaultsProvider
-            changeLabel="Alterar reserva"
-            chooseLabel="Escolher horário"
-            doneLabel="Concluir"
-            endLabel="Fim"
-            hourCycle={24}
-            locale="pt-BR"
-            nowLabel="Agora"
-            startLabel="Início"
-            step={1800}
-          >
-            <TimeRangePicker defaultValue={BOOKING} referenceTime={TEN_TWENTY} />
-          </TimeRangePickerDefaultsProvider>
+          <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+            <TimeRangePickerDefaultsProvider hourCycle={24} step={1800}>
+              <TimeRangePicker
+                defaultValue={BOOKING}
+                messages={{
+                  change: 'Alterar reserva, {start} – {end}, {length}',
+                  choose: 'Escolher horário',
+                  done: 'Concluir',
+                }}
+                referenceTime={TEN_TWENTY}
+              />
+            </TimeRangePickerDefaultsProvider>
+          </SlottedProvider>
         </Scene>
         <Scene
           label="What a row draws"
@@ -572,7 +515,6 @@ export const Composition: Story = {
             defaultValue={BOOKING}
             hourCycle={24}
             locale="pt-BR"
-            nowLabel="Agora"
             referenceTime={TEN_TWENTY}
             renderOption={({ duration, label }) => (
               <>
@@ -592,7 +534,6 @@ export const Composition: Story = {
             defaultValue={BOOKING}
             hourCycle={24}
             locale="pt-BR"
-            nowLabel="Agora"
             onPositionChange={setPosition}
             position={position}
             ref={handle}
@@ -626,12 +567,9 @@ export const Keyboard: Story = {
       >
         <TimeRangePicker
           defaultValue={BOOKING}
-          endLabel="Fim"
           hourCycle={24}
           locale="pt-BR"
-          nowLabel="Agora"
           referenceTime={TEN_TWENTY}
-          startLabel="Início"
         />
       </Scene>
     </Grid>

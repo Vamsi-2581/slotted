@@ -3,6 +3,7 @@ import '@slotted/styles/spinner/spinner.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
 import { tabbables } from '@slotted/core/focus';
+import { timelineMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { feedFocusTarget, revealFocusIndex } from '@slotted/core/timeline';
 import {
@@ -15,12 +16,9 @@ import {
   type RefObject,
 } from 'react';
 
+import { useLocale, useMessages } from '../i18n';
 import { useTimelineDefaults } from './timeline-defaults';
-import {
-  DEFAULT_TIMELINE_MESSAGES,
-  TimelineContext,
-  TimelineListContext,
-} from './timeline-context';
+import { TimelineContext, TimelineListContext } from './timeline-context';
 import { layoutEvents } from './timeline-parts';
 import type { TimelineContextValue, TimelineProps, TimelineRootProps } from './timeline.types';
 
@@ -77,6 +75,8 @@ export function Timeline({
   ...nativeProps
 }: TimelineProps) {
   const defaults = useTimelineDefaults();
+  const runtimeLocale = useLocale();
+  const t = useMessages(timelineMessages, messages);
   const generatedId = useId();
   const listId = `slotted-timeline-${generatedId}`;
   const listRef = useRef<HTMLElement | null>(null);
@@ -94,7 +94,6 @@ export function Timeline({
 
   const resolvedMode = mode ?? defaults.mode ?? 'list';
   const resolvedGrowing = growing ?? defaults.growing ?? 'none';
-  const resolvedMessages = { ...DEFAULT_TIMELINE_MESSAGES, ...defaults.messages, ...messages };
   const feed = resolvedMode === 'feed';
 
   const layout = layoutEvents(children, 0);
@@ -119,14 +118,14 @@ export function Timeline({
     },
     level: level ?? defaults.level ?? 3,
     loading,
-    locale: locale ?? defaults.locale,
-    messages: resolvedMessages,
+    locale: locale ?? runtimeLocale,
     mode: resolvedMode,
     now: now ?? defaults.now,
     order: order ?? defaults.order ?? 'oldest-first',
     orientation: orientation ?? defaults.orientation ?? 'vertical',
     placement: placement ?? defaults.placement ?? 'end',
     size: size ?? defaults.size ?? 'md',
+    t,
     timeFormat: timeFormat ?? defaults.timeFormat ?? 'absolute',
     timeZone: timeZone ?? defaults.timeZone,
     tone: tone ?? defaults.tone ?? 'secondary',
@@ -178,8 +177,8 @@ export function Timeline({
   /** Fresh events are announced once per change of the count, politely. */
   useEffect(() => {
     if (freshCount <= 0) return;
-    getLiveAnnouncer().announce(resolvedMessages.freshItems(freshCount));
-    /* The count is the dependency; the message function is not state. */
+    getLiveAnnouncer().announce(t('freshItems', { count: freshCount }));
+    /* The count is the dependency; the translator is not state. */
   }, [freshCount]);
 
   /**
@@ -244,7 +243,7 @@ export function Timeline({
     resolvedGrowing === 'none' ? null : loading ? (
       <div aria-live="polite" data-part="more" ref={moreRef as RefObject<HTMLDivElement | null>}>
         <span aria-hidden="true" data-part="root" data-ui="spinner" />
-        {resolvedMessages.loading}
+        {t('loading')}
       </div>
     ) : resolvedGrowing === 'button' ? (
       <button
@@ -253,7 +252,7 @@ export function Timeline({
         ref={moreRef as RefObject<HTMLButtonElement | null>}
         type="button"
       >
-        {resolvedMessages.loadMore}
+        {t('loadMore')}
       </button>
     ) : (
       <div data-part="more" ref={moreRef as RefObject<HTMLDivElement | null>} />
@@ -274,13 +273,13 @@ export function Timeline({
               ref={freshRef}
               type="button"
             >
-              {resolvedMessages.freshItems(heldCount)}
+              {t('freshItems', { count: heldCount })}
             </button>
           ) : null}
           {list}
           {more}
           {layout.count === 0 && !loading ? (
-            <div data-part="empty">{empty ?? resolvedMessages.empty}</div>
+            <div data-part="empty">{empty ?? t('empty')}</div>
           ) : null}
         </TimelineListContext.Provider>
       </TimelineContext.Provider>

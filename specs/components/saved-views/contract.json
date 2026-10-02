@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "saved-views",
   "ui": "saved-views",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Named, saved sets of filters for a list."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/",
   "patternNote": "No APG pattern covers a list of named views. The trigger opens a non-modal dialog (popover, aria-haspopup=dialog); each row's actions control is the Menu Button pattern, held by the menu family; everything inside the panel is native buttons, a form and a list in native tab order.",
   "design": "docs/history/designs/2026-09-23-column-management-design.md",
@@ -10,9 +14,9 @@
   "engine": "@slotted/core/grid — SavedViewsState and its pure functions, serializeGridView, parseGridView, sameGridView",
   "rootElement": "div",
   "roles": {
-    "root": "group, named by label",
+    "root": "group, named by messages.label",
     "trigger": "button with aria-haspopup=dialog, aria-expanded and aria-controls naming the panel",
-    "panel": "the popover's dialog, named by label",
+    "panel": "the popover's dialog, named by messages.label",
     "list": "list",
     "apply": "button; aria-current=true on the view in use",
     "actions": "button opening a menu (aria-haspopup=menu)",
@@ -20,19 +24,19 @@
     "confirm": "group, named by the question it asks"
   },
   "anatomy": {
-    "root": "a div: data-ui=saved-views, role=group, aria-label=label, data-modified, data-open; the trigger and revert in one row",
-    "trigger": "a button naming the view in use — labels.builtIn when activeId is null — truncated with its whole name kept in the DOM, then modified, then a chevron; opens the layer",
-    "modified": "a span inside the trigger: a dot in the accent solid and the word labels.modified; present only with data-modified",
+    "root": "a div: data-ui=saved-views, role=group, aria-label=messages.label, data-modified, data-open; the trigger and revert in one row",
+    "trigger": "a button naming the view in use — messages.builtIn when activeId is null — truncated with its whole name kept in the DOM, then modified, then a chevron; opens the layer",
+    "modified": "a span inside the trigger: a dot in the accent solid and the word messages.modified; present only with data-modified",
     "revert": "a button beside the trigger that asks for the view in use again (action revert); present only with data-modified",
     "panel": "a div inside the popover's content carrying data-ui=saved-views: the list, the save-as form and the footer, at --slotted-saved-views-panel-inline-size",
     "list": "a ul, role=list: the built-in view first, then the saved views in the order the state holds them",
     "item": "an li per view: data-current on the view in use, data-default on the default, data-built-in on the built-in view, data-editing while its form or confirmation replaces it",
     "apply": "a button with the view's name that asks to apply it; aria-current=true and a check mark on the view in use",
-    "default-mark": "a span inside apply: the pin glyph and the visually hidden word labels.isDefault, so the name reads 'Late orders, default'",
+    "default-mark": "a span inside apply: the pin glyph and the visually hidden word messages.isDefault, so the name reads 'Late orders, default'",
     "actions": "a button opening a menu for the row: Rename, Set as default, Delete; on the built-in view only Set as default",
-    "form": "a form holding a field — label labels.name, a text field, the error — and a submit and a cancel button: in the row for rename, above the footer for save-as",
+    "form": "a form holding a field — label messages.name, a text field, the error — and a submit and a cancel button: in the row for rename, above the footer for save-as",
     "footer": "a div: Save (overwrites the view in use; disabled on the built-in view and while nothing is modified) and Save as new view…",
-    "confirm": "a div, role=group, in the row being deleted: the question labels.confirmDelete with the view's name, Delete in the danger tone and Cancel"
+    "confirm": "a div, role=group, in the row being deleted: the question messages.confirmDelete with the view's name, Delete in the danger tone and Cancel"
   },
   "attributes": {
     "data-modified": "on the root while current differs from the active view",
@@ -60,10 +64,10 @@
   },
   "rules": {
     "modified": "modified is !sameGridView(current, activeView, columns): the comparison of the two serialized lines of text, which already normalise an untouched order and width",
-    "builtIn": "the built-in view is first in the list, named labels.builtIn, applies builtIn, and its menu holds only Set as default; it is never renamed, overwritten or deleted",
+    "builtIn": "the built-in view is first in the list, named messages.builtIn, applies builtIn, and its menu holds only Set as default; it is never renamed, overwritten or deleted",
     "save": "Save overwrites the view in use with current; disabled on the built-in view and while the view is not modified",
     "saveAs": "Save as new view… opens the form above the footer; its submit creates a view from current with a new id — crypto.randomUUID() when available, a counter otherwise — and makes it the view in use",
-    "name": "a name is trimmed; an empty name is refused with labels.empty and a name isViewNameTaken finds — or the built-in view's name — with labels.duplicate; the field is invalid and the error joins the input's description",
+    "name": "a name is trimmed; an empty name is refused with messages.empty and a name isViewNameTaken finds — or the built-in view's name — with messages.duplicate; the field is invalid and the error joins the input's description",
     "delete": "Delete asks in the row, naming the view; confirming removes it with the reason remove. A deleted view that was in use or the default leaves the built-in view in its place; the grid keeps its arrangement, which then reads as modified",
     "focus": "apply, save and revert close the layer and focus returns to the trigger; a submitted form focuses the row's apply; a cancelled form focuses the control that opened it; a confirmed delete focuses the previous row's apply",
     "announce": "applied, saved (save and create), renamed, deleted and defaultChanged are announced politely through @slotted/core/live-announcer"
@@ -100,30 +104,31 @@
       "source": "menu"
     }
   ],
-  "labels": {
-    "label": "Views",
-    "builtIn": "Default",
-    "modified": "Modified",
-    "revert": "Revert",
-    "save": "Save",
-    "saveAs": "Save as new view…",
-    "name": "View name",
-    "create": "Save view",
-    "rename": "Rename",
-    "setDefault": "Set as default",
-    "isDefault": "default",
-    "delete": "Delete",
-    "confirmDelete": "Delete “{name}”?",
-    "cancel": "Cancel",
-    "actions": "Actions for {name}",
-    "applied": "View {name} applied",
-    "saved": "View {name} saved",
-    "renamed": "View renamed to {name}",
-    "deleted": "View {name} deleted",
-    "defaultChanged": "{name} is now the default view",
-    "duplicate": "A view with this name already exists",
-    "empty": "Enter a name for the view"
-  },
+  "messages": [
+    "actions",
+    "applied",
+    "builtIn",
+    "cancel",
+    "confirmDelete",
+    "create",
+    "defaultChanged",
+    "delete",
+    "deleted",
+    "duplicate",
+    "empty",
+    "isDefault",
+    "label",
+    "modified",
+    "name",
+    "rename",
+    "renameView",
+    "renamed",
+    "revert",
+    "save",
+    "saveAs",
+    "saved",
+    "setDefault"
+  ],
   "declined": {
     "sharing": {
       "reason": "who else sees a view is the application's permission model; the state is serializable and the consumer's store decides where it lives"
@@ -139,10 +144,7 @@
       "reason": "the family applies nothing to a grid; it emits the view and the consumer writes it, through persistedGridView or its own state"
     }
   },
-  "resolution": "the consumer's explicit prop, then the family's defaults provider, then the fallback",
-  "provides": {
-    "savedViewsDefaults": ["labels"]
-  },
+  "resolution": "a word: the instance's messages, then the language in force, then English",
   "stateAttributes": {
     "open": "data-open",
     "current": "data-current"
@@ -165,8 +167,7 @@
     "savedViews": {
       "nativeElement": "div",
       "defaults": {
-        "defaultOpen": false,
-        "label": "Views"
+        "defaultOpen": false
       },
       "capabilities": ["views", "open", "live", "content", "wiring"],
       "states": ["default", "hover", "active", "focus-visible", "open", "current"],

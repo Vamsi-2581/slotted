@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "date-range-picker",
   "ui": "date-range-picker",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Start and end dates with a calendar popover."
+  },
   "controlPart": "control",
   "rootRole": null,
   "contentRole": "dialog",
@@ -38,8 +42,8 @@
     "aria-label": "the trigger, carrying both ends and the length"
   },
   "triggerName": {
-    "empty": "chooseLabel",
-    "chosen": "changeLabel, both ends in words, then the length",
+    "empty": "the choose message",
+    "chosen": "the change message, with both ends in words and the length in its start, end and length slots",
     "why": "Focus returns to the trigger when the popup closes, so the name is where the reader is told what was chosen."
   },
   "draft": {
@@ -55,7 +59,7 @@
   "length": {
     "liveRegion": "polite",
     "pending": "the length of the run that would exist if the pending end were chosen; with the run whole, the length of the value",
-    "label": "lengthLabel(count, unit), per instance and per provider",
+    "label": "the days.length or nights.length message, a plural over the count, laid over per instance through messages",
     "sameDay": "the same day at both ends is 1 day or 0 nights, and the band says so"
   },
   "position": {
@@ -160,30 +164,37 @@
     "closeOnSelect": ["prop", "defaults", "auto"],
     "count": ["prop", "defaults", "days"],
     "months": ["prop", "defaults", "2"],
-    "locale": ["prop", "defaults", "runtime"],
+    "locale": ["prop", "slotted", "en-US"],
     "timeZone": ["prop", "defaults", "runtime"],
     "calendar": ["prop", "defaults", "gregory"]
   },
   "provides": {
     "dateRangePickerDefaults": [
       "calendar",
-      "changeLabel",
-      "chooseLabel",
-      "clearLabel",
       "closeOnSelect",
       "count",
-      "endLabel",
-      "lengthLabel",
-      "limitLabel",
-      "locale",
       "months",
       "placement",
       "size",
-      "startLabel",
       "timeZone",
       "variant"
     ]
   },
+  "messages": [
+    "change",
+    "choose",
+    "clear",
+    "end",
+    "start",
+    "days.length",
+    "days.between",
+    "days.atLeast",
+    "days.atMost",
+    "nights.length",
+    "nights.between",
+    "nights.atLeast",
+    "nights.atMost"
+  ],
   "imperative": ["focus", "open", "close"],
   "stateAttributes": {
     "disabled": "data-disabled",

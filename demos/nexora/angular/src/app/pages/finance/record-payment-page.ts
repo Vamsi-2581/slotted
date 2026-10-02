@@ -138,7 +138,7 @@ const plainDate = (iso: string): PlainDate | null => {
         <form
           slForm
           data-testid="record-payment-form"
-          summaryTitle="The payment was not recorded"
+          [messages]="{ summaryTitle: 'The payment was not recorded' }"
           [errors]="store.errors()"
           (errorsChange)="store.acceptErrors($event.value)"
           [loading]="store.creating()"
@@ -299,7 +299,7 @@ const plainDate = (iso: string): PlainDate | null => {
               type="submit"
               data-testid="record-submit"
               [loading]="store.creating()"
-              loadingLabel="Recording"
+              [messages]="{ loading: 'Recording' }"
             >
               Record payment
             </button>

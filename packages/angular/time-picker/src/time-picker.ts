@@ -13,6 +13,11 @@ import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createPositioner } from '@slotted/core/positioner';
 import type { PositionerHandle } from '@slotted/core/positioner';
+import {
+  timePickerMessages,
+  type PartialMessages,
+  type TimePickerMessages,
+} from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import { createTypeahead, isPrintable } from '@slotted/core/typeahead';
@@ -40,6 +45,7 @@ import {
 } from '@angular/core';
 import type { OnInit } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 import { SlTimeField, SlTimeFieldEnd } from '@slotted/angular/time-field';
@@ -138,16 +144,16 @@ let sequence = 0;
           role="listbox"
           [attr.id]="contentId"
           [attr.aria-label]="triggerLabel()"
-          [attr.aria-description]="truncated() ? resolvedTruncatedLabel() : null"
+          [attr.aria-description]="truncated() ? t('truncated') : null"
         >
           <ng-content select="[slTimePickerPresets]" />
           <div data-part="head">
             <button data-part="now" type="button" (click)="chooseNow($event)">
-              {{ resolvedNowLabel() }}
+              {{ t('now') }}
             </button>
           </div>
           @if (list().length === 0) {
-            <div data-part="empty">{{ resolvedEmptyLabel() }}</div>
+            <div data-part="empty">{{ t('empty') }}</div>
           } @else {
             <div
               #rows
@@ -233,6 +239,7 @@ export class SlTimePicker implements OnInit {
   });
   readonly unavailableOptions = input<TimePickerUnavailableOptions | undefined>(undefined);
 
+  /** BCP 47. Unset, the language in force (`provideSlotted`) decides. */
   readonly locale = input<string | undefined>(undefined);
   readonly timeZone = input<string | undefined>(undefined);
   readonly hourCycle = input<TimeFieldHourCycle | undefined>(undefined);
@@ -262,11 +269,12 @@ export class SlTimePicker implements OnInit {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
   });
   readonly name = input<string | undefined>(undefined);
-  readonly chooseLabel = input<string | undefined>(undefined);
-  readonly changeLabel = input<string | undefined>(undefined);
-  readonly nowLabel = input<string | undefined>(undefined);
-  readonly emptyLabel = input<string | undefined>(undefined);
-  readonly truncatedLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * trigger's two names, the now control, and what the panel says when it is
+   * empty or cut short.
+   */
+  readonly messages = input<PartialMessages<TimePickerMessages> | undefined>(undefined);
 
   readonly valueChange = output<TimeFieldChangeRequest | ChangeRequest<PlainTime | null>>();
   readonly openChange = output<ChangeRequest<boolean>>();
@@ -287,6 +295,9 @@ export class SlTimePicker implements OnInit {
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly defaults = injectTimePickerDefaults();
+  private readonly appLocale = injectLocale();
+  /** The family's words in the language in force, with this picker's `messages` laid over them. */
+  readonly t = injectMessages(timePickerMessages, this.messages);
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   private readonly enclosing = inject(SlField, { optional: true });
@@ -307,7 +318,7 @@ export class SlTimePicker implements OnInit {
   protected readonly isOpen = computed(() => this.open() ?? this.ownOpen());
   protected readonly held = computed(() => this.value() ?? this.ownValue());
 
-  protected readonly resolvedLocale = computed(() => this.locale() ?? this.defaults.locale);
+  protected readonly resolvedLocale = computed(() => this.locale() ?? this.appLocale());
   protected readonly resolvedTimeZone = computed(() => this.timeZone() ?? this.defaults.timeZone);
   protected readonly resolvedHourCycle = computed(
     () => this.hourCycle() ?? this.defaults.hourCycle,
@@ -321,13 +332,6 @@ export class SlTimePicker implements OnInit {
   protected readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   protected readonly resolvedPlacement = computed(
     () => this.placement() ?? this.defaults.placement,
-  );
-  protected readonly resolvedNowLabel = computed(() => this.nowLabel() ?? this.defaults.nowLabel);
-  protected readonly resolvedEmptyLabel = computed(
-    () => this.emptyLabel() ?? this.defaults.emptyLabel,
-  );
-  protected readonly resolvedTruncatedLabel = computed(
-    () => this.truncatedLabel() ?? this.defaults.truncatedLabel,
   );
   protected readonly resolvedDisabled = computed(
     () => this.disabled() ?? this.enclosing?.resolvedDisabled(),
@@ -399,9 +403,8 @@ export class SlTimePicker implements OnInit {
    */
   protected readonly triggerLabel = computed(() => {
     const chosen = this.held();
-    if (chosen === null) return this.chooseLabel() ?? this.defaults.chooseLabel;
-    const change = this.changeLabel() ?? this.defaults.changeLabel;
-    return `${change}, ${this.format().describe(chosen)}`;
+    if (chosen === null) return this.t('choose');
+    return this.t('change', { time: this.format().describe(chosen) });
   });
 
   private readonly closesOnSelect = computed(

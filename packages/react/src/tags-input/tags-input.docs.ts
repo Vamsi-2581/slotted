@@ -371,12 +371,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition and escape hatches',
-    note: 'The provider carries every axis and every sentence; a prop on one control still wins over it. render replaces the frame, ref reaches the input, handleRef reaches focus, clear and setValue, and list passes through to a datalist for the browser’s own completion.',
+    note: 'The provider carries every axis, the words come from the language in force, and a prop on one control still wins over it. render replaces the frame, ref reaches the input, handleRef reaches focus, clear and setValue, and list passes through to a datalist for the browser’s own completion.',
     snippet: defineSnippet({
       id: 'tags-input-react-composition',
       language: 'tsx',
       label: 'Defaults once, and the handle',
-      source: `<TagsInputDefaultsProvider delimiters={[',', ';']} removeLabel="Retirar {label}">
+      source: `<TagsInputDefaultsProvider delimiters={[',', ';']}>
   <TagsInput aria-label="To" handleRef={handle} list="contacts" type="email" />
   <datalist id="contacts">
     <option value="ana.pereira@example.com" />
@@ -464,7 +464,13 @@ const api: ApiRow[] = apiRows([
     'TagsInput',
     'The values the reader may not remove. Their chips carry data-disabled and draw no remove control.',
   ],
-  ['locale', 'string', '—', 'TagsInput', 'BCP 47, for the comparison the duplicate rule makes.'],
+  [
+    'locale',
+    'string',
+    '—',
+    'TagsInput',
+    'BCP 47, for the comparison the duplicate rule makes. The language in force when absent.',
+  ],
   ['max', 'number | null', 'null', 'TagsInput', 'The most values the list may hold.'],
   [
     'delimiters',
@@ -554,76 +560,11 @@ const api: ApiRow[] = apiRows([
     'Whether the control is drawn in error, in addition to any value that failed.',
   ],
   [
-    'addedLabel',
-    'string',
-    '{label} added, {count}',
+    'messages',
+    'Partial<TagsInputMessages>',
+    '—',
     'TagsInput',
-    'What is announced when a value is added.',
-  ],
-  ['clearLabel', 'string', 'Clear', 'TagsInput', 'The accessible name of the clear button.'],
-  ['copiedLabel', 'string', '{count} copied', 'TagsInput', 'What is announced after a copy.'],
-  [
-    'countLabel',
-    'string',
-    '{count} values',
-    'TagsInput',
-    'The row’s own name, and the counter’s text while the frame is too narrow for a chip.',
-  ],
-  [
-    'counterLabel',
-    'string',
-    '{count} of {max}',
-    'TagsInput',
-    'The counter’s text while max is set, and the announcement when it is reached.',
-  ],
-  [
-    'duplicateLabel',
-    'string',
-    '{label} is already in the list',
-    'TagsInput',
-    'What is announced when a duplicate is refused.',
-  ],
-  [
-    'editHintLabel',
-    'string',
-    'Press Enter to edit a value.',
-    'TagsInput',
-    'The second sentence of the row’s description, while editable.',
-  ],
-  [
-    'hintLabel',
-    'string',
-    'Press Delete to remove a value.',
-    'TagsInput',
-    'The row’s description: what the keys do, for a reader who cannot see the remove buttons.',
-  ],
-  [
-    'invalidLabel',
-    'string',
-    'Not a valid value',
-    'TagsInput',
-    'The reason on a chip when validate says false and the platform has no sentence.',
-  ],
-  [
-    'removedLabel',
-    'string',
-    '{label} removed, {count}',
-    'TagsInput',
-    'What is announced when a value leaves — with the count that is left.',
-  ],
-  [
-    'removeLabel',
-    'string',
-    'Remove {label}',
-    'TagsInput',
-    'The accessible name of a chip’s remove button.',
-  ],
-  [
-    'reorderLabel',
-    'string',
-    '{label}, position {position} of {count}',
-    'TagsInput',
-    'A chip’s accessible name while reorder is on, and the announcement after a move.',
+    'Words laid over the language in force, key by key: added, addedInvalid, clear, copied, count, countNamed, counter, duplicate, editHint, hint, invalid, remove, removed, reorder',
   ],
   [
     'render',
@@ -670,7 +611,7 @@ const composition = apiRows([
     'component',
     '—',
     'Provider',
-    'Sets every axis and every sentence once for a subtree. A prop on a control wins over it.',
+    'Sets every axis once for a subtree; the words come from the language in force (SlottedProvider). A prop on a control wins over it.',
   ],
   [
     'render',

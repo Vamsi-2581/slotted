@@ -1,8 +1,10 @@
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Grid } from '../grid';
+import { SlottedProvider } from '../i18n';
 import {
   Table,
   TableBody,
@@ -15,7 +17,6 @@ import {
   TableRowHeader,
 } from '../table';
 import { Sparkline } from './sparkline';
-import { SparklineDefaultsProvider } from './sparkline-defaults';
 import type { SparklineSeries } from './sparkline.types';
 import { REACT_SPARKLINE_DOCS, REACT_SPARKLINE_TOKENS } from './sparkline.docs';
 
@@ -424,19 +425,11 @@ export const Accessibility: Story = {
       </Scene>
       <Scene
         label="translated once"
-        note="The provider sets the locale and the four sentences for everything below it: “Taxa de atendimento: 96,1%, subiu 3,2% desde 92,9%”."
+        note="The language in force sets the locale and the four sentences for everything below it: “Taxa de atendimento: 96,1%, alta de 3,2% desde 92,9%”."
       >
-        <SparklineDefaultsProvider
-          locale="pt-BR"
-          messages={{
-            up: '{last}, subiu {change} desde {first}',
-            down: '{last}, caiu {change} desde {first}',
-            flat: '{last}, sem variação desde {first}',
-            noData: 'sem dados',
-          }}
-        >
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
           <Sparkline area data={FILL_RATE} formatOptions={PERCENT} label="Taxa de atendimento" />
-        </SparklineDefaultsProvider>
+        </SlottedProvider>
       </Scene>
     </Grid>
   ),

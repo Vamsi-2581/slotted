@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "message",
   "ui": "message",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Chat message with author, bubble and actions."
+  },
   "pattern": null,
   "patternAbsent": {
     "index": "https://www.w3.org/WAI/ARIA/apg/patterns/",
@@ -42,10 +46,10 @@
   },
   "labelling": {
     "root": "aria-labelledby author",
-    "actions": "aria-label from messages.actions",
-    "versions": "aria-label from messages.versions",
-    "reactions": "aria-label from messages.reactions",
-    "typing": "aria-label from messages.typing",
+    "actions": "aria-label from the actions message",
+    "versions": "aria-label from the versions message",
+    "reactions": "aria-label from the reactions message",
+    "typing": "aria-label from the typing message; a written aria-label wins",
     "receipt": "the status word, visible or in a visually hidden span"
   },
   "inference": {
@@ -119,7 +123,7 @@
   },
   "versions": {
     "count": "versionCount",
-    "label": "{current} de {total}",
+    "label": "the versionLabel message, with {current} and {total}",
     "glyph": "chevron-right",
     "mirrored": "the previous control turns the chevron, and a right-to-left document turns both",
     "boundary": "the previous control is disabled at the first version and the next one at the last; no wrap"
@@ -219,26 +223,26 @@
     "tone": ["prop", "message", "defaults", "secondary"]
   },
   "provides": {
-    "messageDefaults": ["layout", "actionsVisibility", "variant", "tone", "messages"]
+    "messageDefaults": ["layout", "actionsVisibility", "variant", "tone"]
   },
-  "messages": {
-    "actions": "Ações da mensagem",
-    "versions": "Versões",
-    "versionLabel": "{current} de {total}",
-    "previousVersion": "Versão anterior",
-    "nextVersion": "Versão seguinte",
-    "reactions": "Reações",
-    "typing": "A escrever",
-    "more": "Mostrar mais",
-    "less": "Mostrar menos",
-    "sending": "A enviar",
-    "sent": "Enviada",
-    "delivered": "Entregue",
-    "read": "Lida",
-    "failed": "Não enviada",
-    "retry": "Tentar enviar de novo",
-    "streaming": "A responder"
-  },
+  "messages": [
+    "actions",
+    "delivered",
+    "failed",
+    "less",
+    "more",
+    "nextVersion",
+    "previousVersion",
+    "reactions",
+    "read",
+    "retry",
+    "sending",
+    "sent",
+    "streaming",
+    "typing",
+    "versionLabel",
+    "versions"
+  ],
   "dataAttributes": {
     "root": ["data-align", "data-layout", "data-status", "data-actions"],
     "bubble": ["data-variant", "data-tone", "data-interactive"],

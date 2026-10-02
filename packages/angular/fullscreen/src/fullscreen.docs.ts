@@ -223,7 +223,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Defaults once, words and mark of the consumer',
-    note: 'provideFullscreenDefaults sets the step, the variant and the messages for an injector. Projected words and a slFullscreenIcon mark replace the family’s, and read fs.fullscreen() to keep following the state.',
+    note: 'provideFullscreenDefaults sets the step and the variant for an injector. Projected words and a slFullscreenIcon mark replace the family’s, and read fs.fullscreen() to keep following the state.',
     snippet: defineSnippet({
       id: 'fullscreen-angular-composition',
       language: 'angular',
@@ -293,10 +293,10 @@ export const ANGULAR_FULLSCREEN_DOCS = {
       ],
       [
         'messages',
-        'Partial<{ enter, exit, entered, exited }>',
-        'English',
+        'Partial<FullscreenMessages>',
+        '—',
         'slFullscreen',
-        'The two labels of the control and the two announcements. entered says how to leave',
+        'Words laid over the language in force, key by key: the two labels of the control (enter, exit) and the two announcements (entered, exited). entered says how to leave',
       ],
       [
         'slFullscreenTrigger',
@@ -344,17 +344,17 @@ export const ANGULAR_FULLSCREEN_DOCS = {
     composition: apiRows([
       [
         'provideFullscreenDefaults',
-        '{ mode, navigationUI, size, variant, messages }',
+        '{ mode, navigationUI, size, variant }',
         '—',
         'an injector',
-        'The decisions an application takes once; messages merge key by key, and an input still wins',
+        'The decisions an application takes once; an input still wins',
       ],
       [
         'exportAs',
         'slFullscreen',
         '—',
         '[slFullscreen]',
-        'The instance: fullscreen(), mode(), supported(), error(), messages(), enter(), exit(), toggle()',
+        'The instance: fullscreen(), mode(), supported(), error(), t(), enter(), exit(), toggle()',
       ],
       [
         'slFullscreenContent',

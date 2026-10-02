@@ -1,10 +1,5 @@
 export { Tour, useTour } from './tour';
-export {
-  DEFAULT_TOUR_LABELS,
-  TOUR_FALLBACK,
-  TourDefaultsProvider,
-  useTourDefaults,
-} from './tour-defaults';
+export { TOUR_FALLBACK, TourDefaultsProvider, useTourDefaults } from './tour-defaults';
 export {
   TourBody,
   TourClose,
@@ -33,7 +28,6 @@ export type {
   TourFooterProps,
   TourHandle,
   TourHeaderProps,
-  TourLabels,
   TourLayout,
   TourMediaProps,
   TourMissing,

@@ -1,13 +1,14 @@
 import '@slotted/styles/pagination/pagination.css';
 
+import { paginationMessages } from '@slotted/core/i18n';
 import { clampPage, itemRange, pageItems, totalPages } from '@slotted/core/pagination';
 import { createControllable } from '@slotted/core/state';
 import { createContext, useContext, useEffect, useState } from 'react';
 
+import { useMessages } from '../i18n';
 import { usePaginationDefaults } from './pagination-defaults';
 import type {
   PaginationContextValue,
-  PaginationLabels,
   PaginationPageReason,
   PaginationPageSizeReason,
   PaginationProps,
@@ -28,17 +29,6 @@ export function usePagination(): PaginationContextValue {
   }
   return context;
 }
-
-export const DEFAULT_PAGINATION_LABELS: PaginationLabels = {
-  first: 'First page',
-  last: 'Last page',
-  next: 'Next page',
-  page: (page) => `Page ${page}`,
-  pageSize: 'Rows per page',
-  previous: 'Previous page',
-  range: (start, end, count) => (count === 0 ? 'No results' : `${start}–${end} of ${count}`),
-  summary: (page, pages) => `Page ${page} of ${pages}`,
-};
 
 /**
  * Moving between pages of a collection the consumer owns.
@@ -66,9 +56,8 @@ export function Pagination({
   defaultPageSize,
   disabled,
   itemHref,
-  label,
-  labels,
   live,
+  messages,
   loading,
   onPageChange,
   onPageSizeChange,
@@ -80,6 +69,7 @@ export function Pagination({
   ...nativeProps
 }: PaginationProps) {
   const defaults = usePaginationDefaults();
+  const t = useMessages(paginationMessages, messages);
 
   const [ownPage, setOwnPage] = useState(defaultPage ?? 1);
   const [ownSize, setOwnSize] = useState(defaultPageSize ?? defaults.defaultPageSize ?? 20);
@@ -174,7 +164,6 @@ export function Pagination({
             pageSize: currentSize,
             siblingCount: siblingCount ?? defaults.siblingCount ?? 1,
           }),
-    labels: { ...DEFAULT_PAGINATION_LABELS, ...defaults.labels, ...labels },
     live: live ?? defaults.live ?? 'polite',
     loading: resolvedLoading,
     next: (reason, source) => goToPage(currentPage + 1, reason, source),
@@ -188,10 +177,11 @@ export function Pagination({
         ? { start: 0, end: 0 }
         : itemRange({ count, page: currentPage, pageSize: currentSize }),
     setPageSize,
+    t,
   };
 
   const rootProps: PaginationRootProps = {
-    'aria-label': label ?? defaults.label ?? 'Pagination',
+    'aria-label': t('label'),
     ...nativeProps,
     'aria-busy': resolvedLoading ? true : nativeProps['aria-busy'],
     children,

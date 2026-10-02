@@ -1,8 +1,6 @@
 export {
-  formatMessage,
   injectMessageDefaults,
   MESSAGE_DEFAULTS,
-  MESSAGE_MESSAGES,
   provideMessageDefaults,
 } from './message-defaults';
 export type {
@@ -14,7 +12,6 @@ export type {
   MessageChangeReason,
   MessageDefaults,
   MessageLayout,
-  MessageMessages,
   MessageRetryRequest,
   MessageStatus,
 } from './message-defaults';

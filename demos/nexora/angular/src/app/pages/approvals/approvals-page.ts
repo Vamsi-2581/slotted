@@ -155,7 +155,7 @@ import { ReasonDialog } from '../orders/reason-dialog';
             answer lands, and nothing already drawn moves.
           -->
           @if (store.loading() && store.rows().length === 0) {
-            <div slSkeletonRegion label="Reading the queue" [loading]="true">
+            <div slSkeletonRegion [messages]="{ label: 'Reading the queue' }" [loading]="true">
               <div class="queue">
                 @for (card of [1, 2, 3]; track card) {
                   <div slCard>

@@ -1,10 +1,5 @@
 export { DateTimeField } from './datetime-field';
-export {
-  DATE_TIME_FIELD_CLEAR_LABEL,
-  DATE_TIME_FIELD_DURATION_LABEL,
-  DateTimeFieldDefaultsProvider,
-  useDateTimeFieldDefaults,
-} from './datetime-field-defaults';
+export { DateTimeFieldDefaultsProvider, useDateTimeFieldDefaults } from './datetime-field-defaults';
 export type {
   DateTimeFieldChangeRequest,
   DateTimeFieldDefaults,

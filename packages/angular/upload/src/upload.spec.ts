@@ -4,6 +4,8 @@ import type { ComponentFixture } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { UploadAdapterLike, UploadFile } from '@slotted/core/upload';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { SlUpload } from './upload';
@@ -41,7 +43,7 @@ class Host {
 @Component({
   standalone: true,
   imports: [SlUpload],
-  template: `<div slUpload></div>
+  template: `<div [messages]="{ trigger: 'Anexar' }" slUpload></div>
     <div size="sm" slUpload></div>`,
 })
 class Two {}
@@ -394,7 +396,7 @@ describe('SlUpload defaults', () => {
   it('lets an application decide once, and an instance decide for itself', async () => {
     await TestBed.configureTestingModule({
       imports: [Two],
-      providers: [provideUploadDefaults({ size: 'lg', labels: { trigger: 'Anexar' } })],
+      providers: [provideUploadDefaults({ size: 'lg' })],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(Two);
@@ -405,6 +407,9 @@ describe('SlUpload defaults', () => {
     expect((roots[1] as HTMLElement).getAttribute('data-size')).toBe('sm');
     expect((roots[0] as HTMLElement).querySelector('[data-part="trigger"]')?.textContent).toContain(
       'Anexar',
+    );
+    expect((roots[1] as HTMLElement).querySelector('[data-part="trigger"]')?.textContent).toContain(
+      'Browse files',
     );
   });
 });
@@ -443,19 +448,29 @@ describe('SlUpload queue sentences', () => {
     expect(zone().hasAttribute('data-browsable')).toBe(false);
   });
 
-  it('writes the summary and the field count through the provider', async () => {
+  it('writes the summary and the field count in the language in force, and follows it', async () => {
+    const locale = signal('pt-BR');
     await TestBed.configureTestingModule({
       imports: [Queue],
-      providers: [provideUploadDefaults({ describeQueue: (message) => `queue:${message.kind}` })],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
     }).compileComponents();
     const fixture = TestBed.createComponent(Queue);
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
+    const summary = () => element.querySelector('[data-part="summary"]')?.textContent;
+    const meta = () =>
+      element.querySelector('[data-part="dropzone"] [data-part="meta"]')?.textContent;
 
-    expect(element.querySelector('[data-part="summary"]')?.textContent).toContain('queue:summary');
-    expect(
-      element.querySelector('[data-part="dropzone"] [data-part="meta"]')?.textContent,
-    ).toContain('queue:selection');
+    expect(summary()).toContain('1 de 2 enviados');
+    expect(meta()).toContain('2 arquivos');
+    expect(element.querySelector('[data-part="remove"]')?.getAttribute('aria-label')).toBe(
+      'Remover: a.pdf',
+    );
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(summary()).toContain('1 of 2 uploaded');
+    expect(meta()).toContain('2 files');
   });
 });
 

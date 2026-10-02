@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/attachment/contract.json';
+import { SlottedProvider } from '../i18n';
 import {
   ATTACHMENT_KIND_GLYPH,
   Attachment,
@@ -217,9 +219,14 @@ describe('Attachment', () => {
 
   it('inherits size and orientation from the group and the provider, and its own prop wins', () => {
     render(
-      <AttachmentDefaultsProvider layout="strip" removeLabel="Retirer" size="lg">
+      <AttachmentDefaultsProvider layout="strip" size="lg">
         <AttachmentGroup aria-label="Pièces jointes" data-testid="group" orientation="vertical">
-          <Attachment data-testid="a" file={claim} onRemove={() => {}}>
+          <Attachment
+            data-testid="a"
+            file={claim}
+            messages={{ remove: 'Retirer {name}' }}
+            onRemove={() => {}}
+          >
             <AttachmentRemove />
           </Attachment>
           <Attachment data-testid="b" file={claim} orientation="horizontal" size="sm" />
@@ -233,6 +240,21 @@ describe('Attachment', () => {
     expect(screen.getByTestId('b')).toHaveAttribute('data-size', 'sm');
     expect(screen.getByTestId('b')).toHaveAttribute('data-orientation', 'horizontal');
     expect(screen.getByRole('button', { name: 'Retirer claim-form-2026-0914.pdf' })).toBeVisible();
+  });
+
+  it('speaks the language in force, and writes the size in its digits', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Attachment file={{ name: 'README', size: 1_500_000 }} onRemove={() => {}}>
+          <AttachmentPreview data-testid="preview" />
+          <AttachmentDetail data-testid="detail" />
+          <AttachmentRemove />
+        </Attachment>
+      </SlottedProvider>,
+    );
+    expect(screen.getByRole('button', { name: 'Remover README' })).toBeVisible();
+    expect(screen.getByTestId('preview')).toHaveAttribute('data-extension', 'ARQUIVO');
+    expect(screen.getByTestId('detail')).toHaveTextContent('1,5 MB');
   });
 
   it('moves focus to the attachment that took the removed one’s place', async () => {

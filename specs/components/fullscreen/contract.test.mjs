@@ -69,7 +69,7 @@ test('answers the API absent or refused with the in-layout fallback', () => {
  */
 test('changes label and icon with the state and never writes aria-pressed', () => {
   assert.match(contract.wiring['aria-pressed'], /^never/);
-  assert.deepEqual(contract.messages, ['enter', 'exit', 'entered', 'exited']);
+  assert.deepEqual(contract.messages, ['enter', 'entered', 'exit', 'exited']);
   /* Glyph names: the binding draws `<Glyph name>` from the state. */
   assert.equal(contract.icon.enter, 'maximize');
   assert.equal(contract.icon.exit, 'minimize');
@@ -98,7 +98,6 @@ test('sets its defaults once through one provider', () => {
     'navigationUI',
     'size',
     'variant',
-    'messages',
   ]);
   for (const key of contract.provides.fullscreenDefaults) {
     assert.ok(key in contract.resolution, `${key} resolves`);

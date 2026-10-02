@@ -23,9 +23,15 @@ import {
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import type { GlyphName } from '@slotted/angular/icon';
 import { SlButton } from '@slotted/angular/button';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlSkeleton, SlSkeletonText } from '@slotted/angular/skeleton';
 import { SlTab, SlTabList, SlTabs } from '@slotted/angular/tabs';
 import { tabbables } from '@slotted/core/focus';
+import {
+  notificationCenterMessages,
+  type NotificationCenterMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -41,7 +47,6 @@ import {
   type NotificationCenterItemRequest,
   type NotificationCenterLevel,
   type NotificationCenterLoadReason,
-  type NotificationCenterMessages,
   type NotificationCenterPressReason,
   type NotificationCenterReadReason,
   type NotificationCenterReadRequest,
@@ -209,7 +214,7 @@ export class SlNotificationActions {
       @switch (levelValue()) {
         @case ('3') {
           <h3 data-part="title" [id]="titleId">
-            {{ messageSet().title }}
+            {{ t('title') }}
             @if (unread() > 0) {
               <span data-part="count">{{ unread() }}</span>
             }
@@ -217,7 +222,7 @@ export class SlNotificationActions {
         }
         @case ('4') {
           <h4 data-part="title" [id]="titleId">
-            {{ messageSet().title }}
+            {{ t('title') }}
             @if (unread() > 0) {
               <span data-part="count">{{ unread() }}</span>
             }
@@ -225,7 +230,7 @@ export class SlNotificationActions {
         }
         @default {
           <h2 data-part="title" [id]="titleId">
-            {{ messageSet().title }}
+            {{ t('title') }}
             @if (unread() > 0) {
               <span data-part="count">{{ unread() }}</span>
             }
@@ -242,7 +247,7 @@ export class SlNotificationActions {
           [disabled]="unread() === 0"
           (click)="markAll($event)"
         >
-          {{ messageSet().markAll }}
+          {{ t('markAll') }}
         </button>
       </span>
       <ng-content select="[slNotificationCenterActions]" />
@@ -256,7 +261,7 @@ export class SlNotificationActions {
           [value]="currentView()"
           (valueChange)="forwardView($event)"
         >
-          <div slTabList [attr.aria-label]="messageSet().views">
+          <div slTabList [attr.aria-label]="t('views')">
             @for (entry of viewList(); track entry.value) {
               <div slTab [value]="entry.value" [controls]="feedId">
                 {{ entry.label }}
@@ -271,7 +276,7 @@ export class SlNotificationActions {
     }
     @if (held().length > 0) {
       <button #fresh data-part="fresh" type="button" (click)="reveal(pressReason($event), $event)">
-        {{ messageSet().fresh(held().length) }}
+        {{ t('fresh', { count: held().length }) }}
       </button>
     }
     <div
@@ -327,10 +332,10 @@ export class SlNotificationActions {
       </div>
     } @else if (growingValue() !== 'none') {
       @if (loading()) {
-        <div #more aria-live="polite" data-part="more">{{ messageSet().loading }}</div>
+        <div #more aria-live="polite" data-part="more">{{ t('loading') }}</div>
       } @else if (growingValue() === 'button') {
         <button #more data-part="more" type="button" (click)="loadMore($event)">
-          {{ messageSet().loadMore }}
+          {{ t('loadMore') }}
         </button>
       } @else {
         <div #more data-part="more"></div>
@@ -403,7 +408,7 @@ export class SlNotificationActions {
               <button
                 slNotificationControl
                 data-part="read-toggle"
-                [text]="item.read ? messageSet().markUnread : messageSet().markRead"
+                [text]="item.read ? t('markUnread') : t('markRead')"
                 (click)="requestRead([item.key], !item.read, pressReason($event), $event)"
               >
                 <span slIcon><svg slGlyph [name]="item.read ? 'dot' : 'check'"></svg></span>
@@ -413,7 +418,7 @@ export class SlNotificationActions {
               <button
                 slNotificationControl
                 data-part="dismiss"
-                [text]="messageSet().dismiss"
+                [text]="t('dismiss')"
                 (click)="remove(item.key, pressReason($event), $event)"
               >
                 <span slIcon><svg slGlyph name="x"></svg></span>
@@ -453,6 +458,7 @@ export class SlNotificationCenter {
   readonly arrivals = input<NotificationCenterArrivals | undefined>(undefined);
   readonly timeFormat = input<NotificationCenterTimeFormat | undefined>(undefined);
   readonly controls = input<NotificationCenterControls | undefined>(undefined);
+  /** For the time; defaults to the language in force (`provideSlotted`). */
   readonly locale = input<string | undefined>(undefined);
   readonly timeZone = input<string | undefined>(undefined);
   /** The instant a relative time is measured from. State it for a stable server render. */
@@ -463,8 +469,11 @@ export class SlNotificationCenter {
   readonly count = input<number | undefined>(undefined);
   /** Groups the feed: the label an item is filed under, in the order the items give. */
   readonly groupBy = input<((item: NotificationItem) => string) | undefined>(undefined);
-  /** Strings for this instance alone, over the provider's. */
-  readonly messages = input<Partial<NotificationCenterMessages> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * heading, the controls, the views, the empty pages and the announcements.
+   */
+  readonly messages = input<PartialMessages<NotificationCenterMessages> | undefined>(undefined);
   /** The view an unbound centre starts on, read once. */
   readonly defaultView = input<string | undefined>(undefined);
   /** The current view. Two-way, so a template may bind it directly. */
@@ -516,20 +525,19 @@ export class SlNotificationCenter {
   readonly arrivalsValue = computed(() => this.arrivals() ?? this.defaults.arrivals);
   readonly timeFormatValue = computed(() => this.timeFormat() ?? this.defaults.timeFormat);
   readonly controlsValue = computed(() => this.controls() ?? this.defaults.controls);
-  readonly localeValue = computed(() => this.locale() ?? this.defaults.locale);
+  private readonly runtimeLocale = injectLocale();
+  readonly localeValue = computed(() => this.locale() ?? this.runtimeLocale());
   readonly timeZoneValue = computed(() => this.timeZone() ?? this.defaults.timeZone);
-  readonly messageSet = computed<NotificationCenterMessages>(() => ({
-    ...this.defaults.messages,
-    ...this.messages(),
-  }));
+  /** The family's words in the language in force, with this centre's `messages` laid over them. */
+  readonly t = injectMessages(notificationCenterMessages, this.messages);
 
   /** The unread count among every item, held or shown. */
   readonly unread = computed(() => this.items().filter((item) => !item.read).length);
   readonly viewList = computed<readonly NotificationView[]>(
     () =>
       this.views() ?? [
-        { label: this.messageSet().all, value: 'all' },
-        { count: this.unread(), label: this.messageSet().unreadView, value: 'unread' },
+        { label: this.t('all'), value: 'all' },
+        { count: this.unread(), label: this.t('unreadView'), value: 'unread' },
       ],
   );
   /** The view: the model, then defaultView, then the first entry. */
@@ -569,7 +577,7 @@ export class SlNotificationCenter {
     () => !this.waiting() && this.visibleItems().length === 0,
   );
   protected readonly emptyWords = computed(() =>
-    this.currentView() === 'unread' ? this.messageSet().caughtUp : this.messageSet().empty,
+    this.currentView() === 'unread' ? this.t('caughtUp') : this.t('empty'),
   );
   protected readonly labelledBy = computed(() =>
     this.writtenLabel !== null || this.writtenLabelledBy !== null
@@ -604,7 +612,7 @@ export class SlNotificationCenter {
     effect(() => {
       const count = this.held().length;
       if (count === 0) return;
-      getLiveAnnouncer().announce(untracked(() => this.messageSet()).fresh(count));
+      getLiveAnnouncer().announce(untracked(() => this.t('fresh', { count })));
     });
 
     /** The unread count is a fact for the bell, reported on the first read and on every change. */
@@ -615,7 +623,7 @@ export class SlNotificationCenter {
       const initial = reported === null;
       reported = count;
       this.unreadChange.emit(count);
-      if (!initial) getLiveAnnouncer().announce(untracked(() => this.messageSet()).unread(count));
+      if (!initial) getLiveAnnouncer().announce(untracked(() => this.t('unread', { count })));
     });
 
     /** A keyboard reveal moves focus to the first revealed article once it is in the DOM. */

@@ -7,25 +7,6 @@ export type StatCardTone = 'neutral' | 'accent' | 'secondary' | 'success' | 'war
 export type StatCardDirection = 'up' | 'down' | 'flat';
 export type StatCardDeltaFormat = 'percent' | 'decimal';
 
-/**
- * The words a screen reader hears beside a change, and what stands in for a
- * value that is not there. `up`, `down` and `flat` are read before the
- * number, because a sign is a glyph some readers skip.
- */
-export interface StatCardMessages {
-  up: string;
-  down: string;
-  flat: string;
-  empty: string;
-}
-
-export const STAT_CARD_MESSAGES: StatCardMessages = {
-  up: 'up',
-  down: 'down',
-  flat: 'unchanged',
-  empty: '—',
-};
-
 /** The direction of a change, from its sign. */
 export function trendOf(value: number | undefined): StatCardDirection {
   if (value === undefined || Number.isNaN(value) || value === 0) return 'flat';

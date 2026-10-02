@@ -163,22 +163,22 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'side-navigation-react-playground',
       language: 'tsx',
       label: 'A column of destinations',
-      source: `<SideNavigation defaultValue="cargas">
+      source: `<SideNavigation defaultValue="loads">
   <SideNavigationList>
-    <SideNavigationItem value="painel">
-      <SideNavigationLink href="/painel">
+    <SideNavigationItem value="dashboard">
+      <SideNavigationLink href="/dashboard">
         <SideNavigationIcon>
           <ChartNoAxesColumn />
         </SideNavigationIcon>
-        <SideNavigationLabel>Painel</SideNavigationLabel>
+        <SideNavigationLabel>Dashboard</SideNavigationLabel>
       </SideNavigationLink>
     </SideNavigationItem>
-    <SideNavigationItem value="cargas">
-      <SideNavigationLink href="/cargas">
+    <SideNavigationItem value="loads">
+      <SideNavigationLink href="/loads">
         <SideNavigationIcon>
           <Package />
         </SideNavigationIcon>
-        <SideNavigationLabel>Cargas</SideNavigationLabel>
+        <SideNavigationLabel>Loads</SideNavigationLabel>
         <SideNavigationCount>12</SideNavigationCount>
       </SideNavigationLink>
     </SideNavigationItem>
@@ -228,18 +228,18 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'side-navigation-react-groups',
       language: 'tsx',
       label: 'A group under a trigger',
-      source: `<SideNavigationItem value="entregas">
+      source: `<SideNavigationItem value="deliveries">
   <SideNavigationTrigger>
     <SideNavigationIcon>
       <Truck />
     </SideNavigationIcon>
-    <SideNavigationLabel>Entregas</SideNavigationLabel>
+    <SideNavigationLabel>Deliveries</SideNavigationLabel>
     <SideNavigationCount>38</SideNavigationCount>
   </SideNavigationTrigger>
   <SideNavigationGroup>
-    <SideNavigationItem value="hoje">
-      <SideNavigationLink href="/entregas/hoje">
-        <SideNavigationLabel>Hoje</SideNavigationLabel>
+    <SideNavigationItem value="today">
+      <SideNavigationLink href="/deliveries/today">
+        <SideNavigationLabel>Today</SideNavigationLabel>
       </SideNavigationLink>
     </SideNavigationItem>
   </SideNavigationGroup>
@@ -254,12 +254,12 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'side-navigation-react-hybrid',
       language: 'tsx',
       label: 'A link and its trigger side by side',
-      source: `<SideNavigationItem value="relatorios">
-  <SideNavigationLink href="/relatorios">
+      source: `<SideNavigationItem value="reports">
+  <SideNavigationLink href="/reports">
     <SideNavigationIcon>
       <ChartNoAxesColumn />
     </SideNavigationIcon>
-    <SideNavigationLabel>Relatórios</SideNavigationLabel>
+    <SideNavigationLabel>Reports</SideNavigationLabel>
   </SideNavigationLink>
   <SideNavigationTrigger />
   <SideNavigationGroup>…</SideNavigationGroup>
@@ -276,19 +276,19 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'Titled sections',
       source: `<SideNavigation>
   <SideNavigationSection>
-    <SideNavigationSectionLabel>Operações</SideNavigationSectionLabel>
+    <SideNavigationSectionLabel>Operations</SideNavigationSectionLabel>
     <SideNavigationList>…</SideNavigationList>
   </SideNavigationSection>
   <SideNavigationSection>
-    <SideNavigationSectionLabel>Administração</SideNavigationSectionLabel>
+    <SideNavigationSectionLabel>Administration</SideNavigationSectionLabel>
     <SideNavigationList>
       <SideNavigationDivider />
-      <SideNavigationItem value="nova">
+      <SideNavigationItem value="new">
         <SideNavigationLink onClick={() => openDialog()}>
           <SideNavigationIcon>
             <Plus />
           </SideNavigationIcon>
-          <SideNavigationLabel>Nova carga</SideNavigationLabel>
+          <SideNavigationLabel>New load</SideNavigationLabel>
         </SideNavigationLink>
       </SideNavigationItem>
     </SideNavigationList>
@@ -304,7 +304,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'side-navigation-react-current',
       language: 'tsx',
       label: 'The destination owned by the application',
-      source: `const [value, setValue] = useState<string | null>('encomendas');
+      source: `const [value, setValue] = useState<string | null>('orders');
 
 <SideNavigation value={value} onValueChange={(next) => setValue(next)}>
   …
@@ -319,7 +319,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'side-navigation-react-compact',
       language: 'tsx',
       label: 'A rail of marks',
-      source: `<SideNavigation mode="compact" defaultValue="cargas">
+      source: `<SideNavigation mode="compact" defaultValue="loads">
   …
 </SideNavigation>;`,
     }),
@@ -358,13 +358,13 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'side-navigation-react-states',
       language: 'tsx',
       label: 'A disabled row',
-      source: `<SideNavigationItem disabled value="faturacao">
-  <SideNavigationLink href="/faturacao">
+      source: `<SideNavigationItem disabled value="billing">
+  <SideNavigationLink href="/billing">
     <SideNavigationIcon>
       <CreditCard />
     </SideNavigationIcon>
-    <SideNavigationLabel>Faturação</SideNavigationLabel>
-    <SideNavigationDescription>Disponível no plano Equipa</SideNavigationDescription>
+    <SideNavigationLabel>Billing</SideNavigationLabel>
+    <SideNavigationDescription>Available on the Team plan</SideNavigationDescription>
   </SideNavigationLink>
 </SideNavigationItem>;`,
     }),
@@ -409,7 +409,7 @@ const scenes: ReferenceSceneMeta[] = [
   <AppShellBanner>…</AppShellBanner>
   <AppShellNav>
     <AppShellNavBody>
-      <SideNavigation defaultValue="encomendas">…</SideNavigation>
+      <SideNavigation defaultValue="orders">…</SideNavigation>
     </AppShellNavBody>
   </AppShellNav>
   <AppShellMain>…</AppShellMain>
@@ -437,11 +437,11 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'side-navigation-react-composition',
       language: 'tsx',
       label: 'A router link as the row',
-      source: `<SideNavigationLink render={(props) => <NavLink {...props} to="/cargas" />}>
+      source: `<SideNavigationLink render={(props) => <NavLink {...props} to="/loads" />}>
   <SideNavigationIcon>
     <Package />
   </SideNavigationIcon>
-  <SideNavigationLabel>Cargas</SideNavigationLabel>
+  <SideNavigationLabel>Loads</SideNavigationLabel>
   <SideNavigationEnd>
     <Badge tone="danger" size="sm">
       3
@@ -474,7 +474,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'side-navigation-react-accessibility',
       language: 'tsx',
       label: 'The landmark’s name',
-      source: `<SideNavigation aria-label="Navegação principal">…</SideNavigation>;`,
+      source: `<SideNavigation aria-label="Main navigation">…</SideNavigation>;`,
     }),
   },
 ];
@@ -612,10 +612,10 @@ export const REACT_SIDE_NAVIGATION_DOCS = {
       ],
       [
         'messages',
-        '{ navigation }',
-        "{ navigation: 'Navegação' }",
-        'SideNavigation, SideNavigationDefaultsProvider',
-        'The landmark’s name when the consumer gives no aria-label',
+        'Partial<SideNavigationMessages>',
+        '—',
+        'SideNavigation',
+        'Words laid over the language in force: the landmark’s name when the consumer gives no aria-label (navigation)',
       ],
       [
         'value',
@@ -684,7 +684,7 @@ export const REACT_SIDE_NAVIGATION_DOCS = {
       ],
       [
         'SideNavigationDefaultsProvider',
-        '{ size, mode, truncate, multiple, autoExpand, guides, landmark, compactAt, messages }',
+        '{ size, mode, truncate, multiple, autoExpand, guides, landmark, compactAt }',
         '—',
         'a subtree',
         'The decisions an application takes once. A column that states any of them itself still wins',
@@ -693,7 +693,7 @@ export const REACT_SIDE_NAVIGATION_DOCS = {
     accessibility: [
       'The pattern is the WAI-ARIA APG’s Disclosure Navigation Menu with Top-Level Links (w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-navigation-hybrid/), and no role is written: the DOM is nav > ul > li > (a | button) + ul, so a reader hears a navigation landmark, a list of so many items, a link or a button, and a nested list. The tree role is refused on the APG’s own advice — it demands functionality a site’s navigation does not need.',
       'Every link and trigger is in the page tab sequence and nothing here writes tabindex. The arrow keys, Home and End — optional in the pattern and adopted — walk the visible rows, into the flyout when it is open; Escape closes the group holding focus and lands on its trigger, as the pattern lists. A closed group is visibility: hidden, so its rows leave the tab sequence and the accessibility tree together.',
-      'A trigger carries aria-expanded and aria-controls, and its group aria-labelledby pointing at the row’s label; a trigger beside a link is named by that same label through aria-labelledby, so the hybrid row is heard as “Relatórios, link” then “Relatórios, button, collapsed”. Identifiers come from useId, so a server response and the first client render agree.',
+      'A trigger carries aria-expanded and aria-controls, and its group aria-labelledby pointing at the row’s label; a trigger beside a link is named by that same label through aria-labelledby, so the hybrid row is heard as “Reports, link” then “Reports, button, collapsed”. Identifiers come from useId, so a server response and the first client render agree.',
       'The current destination is aria-current="page" on the link and nowhere else. The parent of a destination the reader cannot see carries data-current for the stylesheet and no ARIA, because the destination is the thing that is current.',
       'In the rail the label is clipped to a pixel rather than removed, so the link keeps its accessible name; a tooltip repeats it on hover, on visible focus and on press-and-hold. Under truncate a row whose label the binding measured as cut opens the same tooltip, and a middle cut writes the whole text as aria-label so the name is the name and not the cut.',
       'A disabled destination is aria-disabled with its href kept: perceivable, focusable, and refused on press, so a reader can reach the row and hear why it is unavailable. A disabled trigger takes the native attribute. The item carries data-disabled and never aria-disabled, which ARIA 1.2 deprecates on listitem.',
@@ -710,26 +710,26 @@ export const REACT_SIDE_NAVIGATION_DOCS = {
   data-size="md"
   data-truncate="end"
   data-guides
-  aria-label="Navegação"
+  aria-label="Navigation"
 >
   <div data-part="section">
-    <div data-part="section-label">Operações</div>
+    <div data-part="section-label">Operations</div>
     <ul data-part="list">
-      <li data-part="item" data-value="cargas" data-current>
-        <a data-part="link" href="/cargas" aria-current="page" data-current>
+      <li data-part="item" data-value="loads" data-current>
+        <a data-part="link" href="/loads" aria-current="page" data-current>
           <span data-part="icon" aria-hidden="true">
             …
           </span>
           <span data-part="label" id="l-a">
-            Cargas
+            Loads
           </span>
           <span data-part="count">12</span>
         </a>
       </li>
-      <li data-part="item" data-value="entregas" data-expanded>
+      <li data-part="item" data-value="deliveries" data-expanded>
         <button data-part="trigger" id="t-b" aria-expanded="true" aria-controls="g-b">
           <span data-part="label" id="l-b">
-            Entregas
+            Deliveries
           </span>
           <span data-part="indicator" aria-hidden="true">
             <span data-ui="icon" data-part="root" data-directional aria-hidden="true">

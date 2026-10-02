@@ -633,23 +633,11 @@ export const Content: Story = {
 export const Defaults: Story = {
   parameters: scenario('defaults'),
   render: () => (
-    <ImportExportCenterDefaultsProvider
-      level="3"
-      locale="en-US"
-      messages={{
-        download: 'Download',
-        exports: 'Exports',
-        imports: 'Imports',
-        all: 'All',
-        title: 'Imports and exports',
-      }}
-      size="sm"
-      timeFormat="absolute"
-    >
+    <ImportExportCenterDefaultsProvider level="3" size="sm" timeFormat="absolute">
       <Grid columns={1}>
         <Scene
           label="From the provider"
-          note="English words, absolute times and the sm step, set once for the subtree."
+          note="Absolute times, the third rank and the sm step, set once for the subtree; the words come from the language in force."
         >
           <Jobs live={false} locale="en-US" seed={byKey(['invoices-q3', 'debtors'])} />
         </Scene>

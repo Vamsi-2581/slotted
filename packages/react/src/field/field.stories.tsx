@@ -69,9 +69,9 @@ export const Playground: Story = {
   render: (args) => (
     <div className="slotted-demo-stage" data-layout="block">
       <Field {...args}>
-        <FieldLabel>E-mail</FieldLabel>
-        <FieldControl placeholder="voce@empresa.com.br" type="email" />
-        <FieldDescription>Usaremos este endereço para a cobrança.</FieldDescription>
+        <FieldLabel>Email</FieldLabel>
+        <FieldControl placeholder="you@company.com" type="email" />
+        <FieldDescription>We will use this address for billing.</FieldDescription>
       </Field>
     </div>
   ),
@@ -86,11 +86,11 @@ export const Necessity: Story = {
         note="The mark is drawn by the label rather than written by the page, so it cannot be forgotten — and it is aria-hidden, because aria-required on the control already says it."
       >
         <Field required>
-          <FieldLabel>CNPJ</FieldLabel>
+          <FieldLabel>Tax ID</FieldLabel>
           <FieldControl defaultValue="12.345.678/0001-90" />
         </Field>
         <Field>
-          <FieldLabel>Inscrição estadual</FieldLabel>
+          <FieldLabel>State registration</FieldLabel>
           <FieldControl />
         </Field>
       </Scene>
@@ -99,11 +99,11 @@ export const Necessity: Story = {
         note='Marking the two required fields in a form of twenty optional ones leaves the other eighteen ambiguous. necessity="words" names both sides, and the two words come from the provider.'
       >
         <Field required necessity="words">
-          <FieldLabel>CNPJ</FieldLabel>
+          <FieldLabel>Tax ID</FieldLabel>
           <FieldControl defaultValue="12.345.678/0001-90" />
         </Field>
         <Field necessity="words">
-          <FieldLabel>Inscrição estadual</FieldLabel>
+          <FieldLabel>State registration</FieldLabel>
           <FieldControl />
         </Field>
       </Scene>
@@ -112,11 +112,11 @@ export const Necessity: Story = {
         note='necessity="optional" writes (optional) on the field a reader may skip and nothing on the others — the recommendation GOV.UK and Carbon make, because twenty asterisks say less than one word.'
       >
         <Field necessity="optional" required>
-          <FieldLabel>Razão social</FieldLabel>
-          <FieldControl defaultValue="Sirius Group Tecnologia Ltda." />
+          <FieldLabel>Legal name</FieldLabel>
+          <FieldControl defaultValue="Sirius Group Technology Ltd." />
         </Field>
         <Field necessity="optional">
-          <FieldLabel>Nome fantasia</FieldLabel>
+          <FieldLabel>Trade name</FieldLabel>
           <FieldControl />
         </Field>
       </Scene>
@@ -125,7 +125,7 @@ export const Necessity: Story = {
         note='necessity="none" draws no mark. aria-required still reaches the control, so a reader hears “required” on every field the form marked.'
       >
         <Field necessity="none" required>
-          <FieldLabel>CNPJ</FieldLabel>
+          <FieldLabel>Tax ID</FieldLabel>
           <FieldControl defaultValue="12.345.678/0001-90" />
         </Field>
       </Scene>
@@ -142,11 +142,11 @@ export const Placement: Story = {
         note="The label takes a track of its own and the control the rest. A label of twelve words wraps inside its track and stays level with the control’s first line rather than sliding under it."
       >
         <Field labelPlacement="side">
-          <FieldLabel>Razão social</FieldLabel>
-          <FieldControl defaultValue="Sirius Group Tecnologia" />
+          <FieldLabel>Legal name</FieldLabel>
+          <FieldControl defaultValue="Sirius Group Technology" />
         </Field>
         <Field labelPlacement="side">
-          <FieldLabel>Endereço de correspondência da matriz</FieldLabel>
+          <FieldLabel>Headquarters mailing address</FieldLabel>
           <FieldControl defaultValue="Avenida Paulista, 1000" />
         </Field>
       </Scene>
@@ -156,13 +156,13 @@ export const Placement: Story = {
       >
         <Measure width="drawer">
           <Field labelPlacement="side">
-            <FieldLabel>Razão social</FieldLabel>
-            <FieldControl defaultValue="Sirius Group Tecnologia" />
+            <FieldLabel>Legal name</FieldLabel>
+            <FieldControl defaultValue="Sirius Group Technology" />
           </Field>
         </Measure>
         <Measure width="drawer">
           <Field labelPlacement="side">
-            <FieldLabel>Endereço de correspondência da matriz</FieldLabel>
+            <FieldLabel>Headquarters mailing address</FieldLabel>
             <FieldControl defaultValue="Avenida Paulista, 1000" />
           </Field>
         </Measure>
@@ -183,7 +183,7 @@ export const Sizes: Story = {
           <Field key={size} size={size}>
             <FieldLabel>{`Apelido — ${size}`}</FieldLabel>
             <FieldControl defaultValue={size} />
-            <FieldDescription>Aparece nos relatórios.</FieldDescription>
+            <FieldDescription>Appears in the reports.</FieldDescription>
           </Field>
         ))}
       </Scene>
@@ -192,12 +192,12 @@ export const Sizes: Story = {
         note="Set the toolbar to dense: all three steps read the control type scale, which is one of the three the theme restates per density, so a field in a dense table shrinks whole rather than in parts."
       >
         <Field size="lg">
-          <FieldLabel>Descrição da unidade</FieldLabel>
-          <FieldControl defaultValue="Matriz — São Paulo" />
-          <FieldDescription>Aparece no cabeçalho dos relatórios.</FieldDescription>
+          <FieldLabel>Unit description</FieldLabel>
+          <FieldControl defaultValue="Headquarters — São Paulo" />
+          <FieldDescription>Appears in the report header.</FieldDescription>
         </Field>
         <Field size="sm">
-          <FieldLabel>Centro de custo</FieldLabel>
+          <FieldLabel>Cost center</FieldLabel>
           <FieldControl defaultValue="CC-4021" />
         </Field>
       </Scene>
@@ -214,10 +214,10 @@ export const States: Story = {
         note="Only the message turns. The label keeps its ink because the error already says the same thing in words and in colour, and a red marker on a red label is a marker nobody can see."
       >
         <Field invalid required>
-          <FieldLabel>CNPJ</FieldLabel>
+          <FieldLabel>Tax ID</FieldLabel>
           <FieldControl defaultValue="12.345.678" />
-          <FieldDescription>Somente números, com filial e dígito.</FieldDescription>
-          <FieldError>Faltam seis dígitos.</FieldError>
+          <FieldDescription>Numbers only, with branch and check digit.</FieldDescription>
+          <FieldError>Six digits are missing.</FieldError>
         </Field>
       </Scene>
       <Scene
@@ -225,14 +225,14 @@ export const States: Story = {
         note="Read-only stays focusable and copyable and looks nothing like disabled, which is muted to a colour the theme measures rather than faded by opacity — a label nobody can read is a field nobody can identify."
       >
         <Field readOnly>
-          <FieldLabel>Identificador da conta</FieldLabel>
+          <FieldLabel>Account identifier</FieldLabel>
           <FieldControl defaultValue="acc_9f2b7c41" readOnly />
-          <FieldDescription>Gerado na criação da conta e copiável.</FieldDescription>
+          <FieldDescription>Generated when the account is created, and copyable.</FieldDescription>
         </Field>
         <Field disabled required>
-          <FieldLabel>Centro de custo</FieldLabel>
-          <FieldControl defaultValue="Escolha uma unidade primeiro" />
-          <FieldDescription>Disponível depois que a unidade for escolhida.</FieldDescription>
+          <FieldLabel>Cost center</FieldLabel>
+          <FieldControl defaultValue="Choose a unit first" />
+          <FieldDescription>Available once a unit is chosen.</FieldDescription>
         </Field>
       </Scene>
     </Grid>
@@ -245,14 +245,14 @@ function SubmitOnce() {
   return (
     <>
       <Field invalid={submitted}>
-        <FieldLabel>Telefone</FieldLabel>
+        <FieldLabel>Phone</FieldLabel>
         <FieldControl defaultValue="(11) 90000-0000" />
         <FieldError live="polite" reserve>
-          {submitted ? 'Informe o nono dígito.' : undefined}
+          {submitted ? 'Enter the ninth digit.' : undefined}
         </FieldError>
       </Field>
       <button onClick={() => setSubmitted((value) => !value)} type="button">
-        {submitted ? 'Limpar o erro' : 'Enviar'}
+        {submitted ? 'Clear the error' : 'Submit'}
       </button>
     </>
   );
@@ -267,10 +267,12 @@ export const Messages: Story = {
         note="All three are inline-message roots. The error carries a clipped “Error:” a screen reader reads before the sentence, and the warning is the same part in another tone rather than a member of its own."
       >
         <Field>
-          <FieldLabel>Senha</FieldLabel>
+          <FieldLabel>Password</FieldLabel>
           <FieldControl defaultValue="paulista1000" type="password" />
-          <FieldDescription>Entre 8 e 64 caracteres, com ao menos um número.</FieldDescription>
-          <FieldError tone="warning">A senha é válida, mas fácil de adivinhar.</FieldError>
+          <FieldDescription>
+            Between 8 and 64 characters, with at least one number.
+          </FieldDescription>
+          <FieldError tone="warning">The password is valid but easy to guess.</FieldError>
         </Field>
       </Scene>
       <Scene
@@ -285,13 +287,13 @@ export const Messages: Story = {
 
 function Description() {
   const [value, setValue] = useState(
-    'Integramos folha, ponto e benefícios em um só lugar, com fechamento contábil por competência.',
+    'Payroll, time tracking and benefits in one place, with accrual-based accounting close.',
   );
   const over = value.length > 140;
 
   return (
     <Field invalid={over}>
-      <FieldLabel>Descrição pública</FieldLabel>
+      <FieldLabel>Public description</FieldLabel>
       <FieldCounter invalid={over}>{`${value.length}/140`}</FieldCounter>
       <FieldControl
         render={(props) => (
@@ -325,7 +327,7 @@ export const Counter: Story = {
         <Field labelPlacement="side">
           <FieldLabel>Assunto</FieldLabel>
           <FieldCounter>12/60</FieldCounter>
-          <FieldControl defaultValue="Fatura março" />
+          <FieldControl defaultValue="March invoice" />
         </Field>
       </Scene>
     </Grid>
@@ -333,20 +335,20 @@ export const Counter: Story = {
 };
 
 function Bio() {
-  const [value, setValue] = useState('Engenheira de dados; contribuidora do Apache Arrow.');
+  const [value, setValue] = useState('Data engineer; Apache Arrow contributor.');
   const over = value.length > 160;
   return (
     <Field invalid={over}>
       <FieldHeader>
-        <FieldLabel>Apresentação</FieldLabel>
+        <FieldLabel>Introduction</FieldLabel>
         <FieldAction
           onClick={() =>
             setValue(
-              'Engenheira de dados na Sirius; mantém a camada de ingestão e o Arrow interno.',
+              'Data engineer at Sirius; maintains the ingestion layer and the internal Arrow fork.',
             )
           }
         >
-          Gerar a partir do cargo
+          Generate from the job title
         </FieldAction>
         <FieldCounter invalid={over}>{`${value.length}/160`}</FieldCounter>
       </FieldHeader>
@@ -370,10 +372,10 @@ export const Header: Story = {
         >
           <Field required>
             <FieldHeader>
-              <FieldLabel>Senha</FieldLabel>
-              <FieldHelp>No mínimo oito caracteres, com letras e números.</FieldHelp>
-              <FieldAction render={(props) => <a {...props} href="#recuperar" />}>
-                Esqueceu a senha?
+              <FieldLabel>Password</FieldLabel>
+              <FieldHelp>At least eight characters, with letters and numbers.</FieldHelp>
+              <FieldAction render={(props) => <a {...props} href="#recover" />}>
+                Forgot your password?
               </FieldAction>
             </FieldHeader>
             <FieldControl autoComplete="current-password" type="password" />
@@ -385,28 +387,30 @@ export const Header: Story = {
         >
           <Field required>
             <FieldHeader>
-              <FieldLabel>Endpoint de notificações</FieldLabel>
-              <FieldHelp>O endereço que recebe um POST a cada fatura emitida.</FieldHelp>
+              <FieldLabel>Notification endpoint</FieldLabel>
+              <FieldHelp>The address that receives a POST for every invoice issued.</FieldHelp>
               <FieldIndicator>
                 <Badge size="sm" tone="accent" variant="soft">
                   Beta
                 </Badge>
               </FieldIndicator>
             </FieldHeader>
-            <FieldControl defaultValue="https://api.sirius.com.br/webhooks/faturas" type="url" />
-            <FieldDescription>Use HTTPS; o certificado é verificado a cada envio.</FieldDescription>
+            <FieldControl defaultValue="https://api.sirius.com/webhooks/invoices" type="url" />
+            <FieldDescription>
+              Use HTTPS; the certificate is checked on every delivery.
+            </FieldDescription>
           </Field>
           <Field disabled>
             <FieldHeader>
-              <FieldLabel>Centro de custo</FieldLabel>
-              <FieldHelp>Liberado depois que a unidade for escolhida.</FieldHelp>
+              <FieldLabel>Cost center</FieldLabel>
+              <FieldHelp>Unlocked once a unit is chosen.</FieldHelp>
               <FieldIndicator>
                 <Badge size="sm" tone="secondary" variant="soft">
                   Pro
                 </Badge>
               </FieldIndicator>
             </FieldHeader>
-            <FieldControl placeholder="Escolha uma unidade primeiro" />
+            <FieldControl placeholder="Choose a unit first" />
           </Field>
         </Scene>
         <Scene
@@ -422,14 +426,14 @@ export const Header: Story = {
           <Measure width="drawer">
             <Field required>
               <FieldHeader>
-                <FieldLabel>Endereço de correspondência da matriz</FieldLabel>
-                <FieldHelp>Recebe as notas fiscais em papel.</FieldHelp>
+                <FieldLabel>Headquarters mailing address</FieldLabel>
+                <FieldHelp>Receives the paper invoices.</FieldHelp>
                 <FieldIndicator>
                   <Badge size="sm" tone="warning" variant="soft">
-                    Obrigatório para PJ
+                    Required for companies
                   </Badge>
                 </FieldIndicator>
-                <FieldAction>Usar o de cobrança</FieldAction>
+                <FieldAction>Use the billing one</FieldAction>
                 <FieldCounter>0/120</FieldCounter>
               </FieldHeader>
               <FieldControl />
@@ -444,10 +448,10 @@ export const Header: Story = {
         >
           <Field labelPlacement="side">
             <FieldHeader>
-              <FieldLabel>Senha</FieldLabel>
-              <FieldHelp>No mínimo oito caracteres, com letras e números.</FieldHelp>
-              <FieldAction render={(props) => <a {...props} href="#recuperar" />}>
-                Esqueceu a senha?
+              <FieldLabel>Password</FieldLabel>
+              <FieldHelp>At least eight characters, with letters and numbers.</FieldHelp>
+              <FieldAction render={(props) => <a {...props} href="#recover" />}>
+                Forgot your password?
               </FieldAction>
             </FieldHeader>
             <FieldControl type="password" />
@@ -457,7 +461,7 @@ export const Header: Story = {
               <FieldLabel>Assunto</FieldLabel>
               <FieldCounter>12/60</FieldCounter>
             </FieldHeader>
-            <FieldControl defaultValue="Fatura março" />
+            <FieldControl defaultValue="March invoice" />
           </Field>
         </Scene>
       </Grid>
@@ -521,19 +525,15 @@ export const Composition: Story = {
     <Grid columns={2}>
       <Scene
         label="One decision for every field in the application"
-        note="The provider sets the step, the necessity style and both words once. A field that states its own still wins, which is the same rule the control follows against the field."
+        note="The provider sets the step and the necessity style once; the words come from the language in force. A field that states its own still wins, which is the same rule the control follows against the field."
       >
-        <FieldDefaultsProvider
-          necessityWords={{ optional: '(opcional)', required: '(obrigatório)' }}
-          necessity="words"
-          size="sm"
-        >
+        <FieldDefaultsProvider necessity="words" size="sm">
           <Field required>
-            <FieldLabel>CNPJ</FieldLabel>
+            <FieldLabel>Tax ID</FieldLabel>
             <FieldControl defaultValue="12.345.678/0001-90" />
           </Field>
           <Field>
-            <FieldLabel>Inscrição estadual</FieldLabel>
+            <FieldLabel>State registration</FieldLabel>
             <FieldControl />
           </Field>
         </FieldDefaultsProvider>
@@ -543,10 +543,10 @@ export const Composition: Story = {
         note="useField hands a control the identifier and the description without a wrapper around it; render substitutes any part’s element, here turning the counter into an output."
       >
         <Field id="money">
-          <FieldLabel>Valor da parcela</FieldLabel>
-          <FieldCounter render={(props) => <output {...props} />}>1 de 12</FieldCounter>
+          <FieldLabel>Installment amount</FieldLabel>
+          <FieldCounter render={(props) => <output {...props} />}>1 of 12</FieldCounter>
           <MoneyInput />
-          <FieldDescription>Debitado no dia 5 de cada mês.</FieldDescription>
+          <FieldDescription>Charged on the 5th of each month.</FieldDescription>
         </Field>
       </Scene>
     </Grid>
@@ -563,12 +563,12 @@ export const Accessibility: Story = {
       >
         <Field id="cnpj" invalid required>
           <FieldHeader>
-            <FieldLabel>CNPJ</FieldLabel>
-            <FieldHelp>O da matriz, com os catorze dígitos.</FieldHelp>
+            <FieldLabel>Tax ID</FieldLabel>
+            <FieldHelp>The headquarters one, with all fourteen digits.</FieldHelp>
           </FieldHeader>
           <FieldControl defaultValue="12.345.678" />
-          <FieldDescription>Somente números, com filial e dígito.</FieldDescription>
-          <FieldError live="polite">Faltam seis dígitos.</FieldError>
+          <FieldDescription>Numbers only, with branch and check digit.</FieldDescription>
+          <FieldError live="polite">Six digits are missing.</FieldError>
         </Field>
       </Scene>
       <Scene
@@ -576,7 +576,7 @@ export const Accessibility: Story = {
         note="The association is explicit — for pointing at the derived identifier — so the click moves focus into the control. The implicit form, wrapping the control in the label, is the one the APG records as unreliable."
       >
         <Field id="account">
-          <FieldLabel>Identificador da conta</FieldLabel>
+          <FieldLabel>Account identifier</FieldLabel>
           <FieldControl defaultValue="acc_9f2b7c41" />
           <FieldDescription>
             Clique no rótulo acima: o foco entra no campo, sem nenhum JavaScript.

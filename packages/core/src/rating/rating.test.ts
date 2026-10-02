@@ -2,13 +2,12 @@ import { describe, expect, it } from 'vitest';
 
 import {
   formatRating,
-  formatRatingMessage,
+  formatRatingValue,
   formatShare,
   normaliseRating,
   ratingAtPoint,
   ratingFills,
   ratingForKey,
-  ratingLabel,
   summariseRatings,
 } from './rating';
 
@@ -182,58 +181,16 @@ describe('summariseRatings: shape and confidence', () => {
   });
 });
 
-describe('formatRating and ratingLabel', () => {
+describe('formatRating, formatRatingValue and formatShare', () => {
   it('writes a value with the locale’s decimal separator and one place', () => {
     expect(formatRating(4.6, 'pt-BR')).toBe('4,6');
     expect(formatRating(4, 'en-US')).toBe('4.0');
   });
 
-  it('fills a message template from the value, the maximum and the count', () => {
-    expect(ratingLabel('{value} de {max}', { value: 3.5, max: 5 }, 'pt-BR')).toBe('3,5 de 5');
-    expect(
-      ratingLabel(
-        'Avaliação {value} de {max}, {count} avaliações',
-        { value: 4.6, max: 5, count: 1284 },
-        'pt-BR',
-      ),
-    ).toBe('Avaliação 4,6 de 5, 1.284 avaliações');
-  });
-
-  it('writes a whole value without a decimal in a label', () => {
-    expect(ratingLabel('{value} de {max}', { value: 3, max: 5 }, 'pt-BR')).toBe('3 de 5');
-  });
-});
-
-describe('formatRatingMessage and formatShare', () => {
-  it('fills numbers in the locale and picks the plural form the locale asks for', () => {
-    const template =
-      '{level, plural, one {# estrela} other {# estrelas}}: {count, plural, one {# avaliação} other {# avaliações}}, {share}';
-
-    expect(formatRatingMessage(template, { level: 1, count: 1, share: '1%' }, 'pt-BR')).toBe(
-      '1 estrela: 1 avaliação, 1%',
-    );
-    expect(formatRatingMessage(template, { level: 5, count: 1052, share: '82%' }, 'pt-BR')).toBe(
-      '5 estrelas: 1.052 avaliações, 82%',
-    );
-  });
-
-  /** CLDR files nought under `one` in Portuguese; "0 avaliação" is not how a page in Brazil reads. */
-  it('takes an exact branch before the plural rule', () => {
-    const template = '{count, plural, =0 {# avaliações} one {# avaliação} other {# avaliações}}';
-
-    expect(formatRatingMessage(template, { count: 0 }, 'pt-BR')).toBe('0 avaliações');
-    expect(formatRatingMessage(template, { count: 1 }, 'pt-BR')).toBe('1 avaliação');
-  });
-
-  it('writes a value to one place at most and leaves a string as it is', () => {
-    expect(formatRatingMessage('{value} de {max}', { value: 3.5, max: 5 }, 'pt-BR')).toBe(
-      '3,5 de 5',
-    );
-    expect(formatRatingMessage('± {margin}', { margin: '0,04' }, 'pt-BR')).toBe('± 0,04');
-  });
-
-  it('leaves a placeholder it has no value for untouched', () => {
-    expect(formatRatingMessage('{value} de {max}', { value: 3 }, 'pt-BR')).toBe('3 de {max}');
+  it('writes a value for a label to one place at most, a whole one whole', () => {
+    expect(formatRatingValue(3.5, 'pt-BR')).toBe('3,5');
+    expect(formatRatingValue(3.75, 'en-US')).toBe('3.8');
+    expect(formatRatingValue(3, 'pt-BR')).toBe('3');
   });
 
   it('writes a share as a whole percentage, a half rounded away from nought', () => {

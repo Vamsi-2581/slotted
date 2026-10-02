@@ -1,5 +1,7 @@
 import '@slotted/styles/markdown/markdown.css';
 
+import { markdownMessages } from '@slotted/core/i18n';
+import type { FamilyTranslator, MarkdownMessages } from '@slotted/core/i18n';
 import { initialLoadingVisibility, nextLoadingVisibility } from '@slotted/core/loading';
 import type { LoadingVisibilityState } from '@slotted/core/loading';
 import { MARKDOWN_KINDS, prepareMarkdown } from '@slotted/core/markdown';
@@ -16,17 +18,17 @@ import { Alert, AlertContent, AlertDescription, AlertTitle } from '../alert';
 import { Button } from '../button';
 import { Checkbox } from '../checkbox';
 import { CodeBlock } from '../code-block';
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { InlineMessage } from '../inline-message';
 import { Link } from '../link';
 import { Prose, ProseAnchor, ProseFootnotes, ProseScroll, useProseDefaults } from '../prose';
 import { SkeletonRegion, SkeletonText, useSkeletonDefaults } from '../skeleton';
 import { VisuallyHidden } from '../visually-hidden';
-import { MARKDOWN_LABELS, useMarkdownDefaults } from './markdown-defaults';
+import { useMarkdownDefaults } from './markdown-defaults';
 import type {
   MarkdownExtensions,
   MarkdownExternal,
-  MarkdownLabels,
   MarkdownProps,
   MarkdownRenderer,
   MarkdownRenderers,
@@ -60,8 +62,8 @@ export function Markdown({
   headingOffset,
   idPrefix,
   isExternal,
-  labels,
   loading = false,
+  messages,
   onRetry,
   onTaskChange,
   render,
@@ -78,12 +80,7 @@ export function Markdown({
   const prose = useProseDefaults();
   const skeleton = useSkeletonDefaults();
 
-  const resolvedLabels: MarkdownLabels = {
-    ...MARKDOWN_LABELS,
-    ...defaults.labels,
-    ...labels,
-    alerts: { ...MARKDOWN_LABELS.alerts, ...defaults.labels?.alerts, ...labels?.alerts },
-  };
+  const t = useMessages(markdownMessages, messages);
   const resolvedFlow = flow ?? prose.flow;
   const resolvedTransform = transformUrl ?? defaults.transformUrl;
   const resolvedIsExternal = isExternal ?? defaults.isExternal;
@@ -127,8 +124,8 @@ export function Markdown({
     extensions: extensions ?? {},
     external: external ?? defaults.external ?? 'new-tab',
     headingAnchors: headingAnchors ?? defaults.headingAnchors ?? false,
-    labels: resolvedLabels,
     onTaskChange,
+    t,
     renderers: renderers ?? {},
   };
 
@@ -136,7 +133,7 @@ export function Markdown({
   if (status === 'error') {
     body = (
       <div data-part="error">
-        <InlineMessage tone="danger">{resolvedLabels.error}</InlineMessage>
+        <InlineMessage tone="danger">{t('error')}</InlineMessage>
         {onRetry === undefined ? null : (
           <Button
             onClick={(event) => onRetry(event.detail === 0 ? 'keyboard' : 'pointer')}
@@ -144,21 +141,21 @@ export function Markdown({
             tone="secondary"
             variant="outline"
           >
-            {resolvedLabels.retry}
+            {t('retry')}
           </Button>
         )}
       </div>
     );
   } else if (painted) {
     body = (
-      <SkeletonRegion delay={0} label={resolvedLabels.loading} loading minDuration={0}>
+      <SkeletonRegion delay={0} messages={{ label: t('loading') }} loading minDuration={0}>
         <Prose flow={resolvedFlow} size={size}>
           <SkeletonText lastLineSize="62%" lines={3} />
         </Prose>
       </SkeletonRegion>
     );
   } else if (document.empty) {
-    body = loading ? null : <p data-part="empty">{empty ?? resolvedLabels.empty}</p>;
+    body = loading ? null : <p data-part="empty">{empty ?? t('empty')}</p>;
   } else {
     body = (
       <Prose flow={resolvedFlow} size={size}>
@@ -193,9 +190,10 @@ interface RenderContext {
   extensions: MarkdownExtensions;
   external: MarkdownExternal;
   headingAnchors: boolean;
-  labels: MarkdownLabels;
   onTaskChange: MarkdownProps['onTaskChange'];
   renderers: MarkdownRenderers;
+  /** The family's words in the language in force, with this document's `messages` laid over them. */
+  t: FamilyTranslator<MarkdownMessages>;
 }
 
 function renderElements(elements: readonly MarkdownElement[], context: RenderContext): ReactNode[] {
@@ -254,7 +252,10 @@ function renderDefault(
         { id: element.id },
         children,
         context.headingAnchors ? (
-          <ProseAnchor aria-label={context.labels.anchor(element.text)} href={`#${element.id}`}>
+          <ProseAnchor
+            aria-label={context.t('anchor', { heading: element.text })}
+            href={`#${element.id}`}
+          >
             #
           </ProseAnchor>
         ) : null,
@@ -264,7 +265,7 @@ function renderDefault(
         <div data-part="embed">
           <Alert live="off" reach="section" tone={element.tone}>
             <AlertContent>
-              <AlertTitle>{context.labels.alerts[element.type]}</AlertTitle>
+              <AlertTitle>{context.t(`alerts.${element.type}`)}</AlertTitle>
               <AlertDescription
                 render={({ children: body, ...props }) => <div {...props}>{body}</div>}
               >
@@ -408,7 +409,7 @@ function renderFootnotes(document: MarkdownDocument, context: RenderContext): Re
   return (
     <ProseFootnotes>
       <VisuallyHidden id={document.footnoteLabelId} render={(props) => <h2 {...props} />}>
-        {context.labels.footnotes}
+        {context.t('footnotes')}
       </VisuallyHidden>
       <ol>
         {document.footnotes.map((footnote) => (
@@ -424,7 +425,7 @@ function renderFootnotes(document: MarkdownDocument, context: RenderContext): Re
 function renderFootnoteBody(footnote: MarkdownFootnote, context: RenderContext): ReactNode {
   const backrefs = footnote.references.map((reference, index) => (
     <a
-      aria-label={context.labels.backReference(footnote.number, index + 1)}
+      aria-label={context.t('backReference', { number: footnote.number, occurrence: index + 1 })}
       data-part="backref"
       href={`#${reference}`}
       key={reference}

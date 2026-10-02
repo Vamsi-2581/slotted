@@ -360,7 +360,7 @@ type View = 'overview' | 'contacts' | 'orders' | 'invoices' | 'tickets' | 'notes
                             variant="outline"
                             type="button"
                             [loading]="store.busy() === 'release'"
-                            loadingLabel="Releasing hold"
+                            [messages]="{ loading: 'Releasing hold' }"
                             (click)="releaseHold()"
                           >
                             Release hold
@@ -372,7 +372,7 @@ type View = 'overview' | 'contacts' | 'orders' | 'invoices' | 'tickets' | 'notes
                             tone="danger"
                             type="button"
                             [loading]="store.busy() === 'hold'"
-                            loadingLabel="Placing on hold"
+                            [messages]="{ loading: 'Placing on hold' }"
                             (click)="holdDialogOpen.set(true)"
                           >
                             Place on hold
@@ -424,7 +424,7 @@ type View = 'overview' | 'contacts' | 'orders' | 'invoices' | 'tickets' | 'notes
                           aria-label="Refresh"
                           data-testid="refresh"
                           [loading]="store.loading()"
-                          loadingLabel="Refreshing"
+                          [messages]="{ loading: 'Refreshing' }"
                           (click)="store.refresh()"
                         >
                           <ng-icon name="lucideRefreshCw" />
@@ -443,7 +443,7 @@ type View = 'overview' | 'contacts' | 'orders' | 'invoices' | 'tickets' | 'notes
                           tone="danger"
                           type="button"
                           [loading]="store.busy() === 'archive'"
-                          loadingLabel="Archiving"
+                          [messages]="{ loading: 'Archiving' }"
                           (click)="archive()"
                         >
                           Archive
@@ -785,7 +785,7 @@ type View = 'overview' | 'contacts' | 'orders' | 'invoices' | 'tickets' | 'notes
                             slButton
                             type="submit"
                             [loading]="store.busy() === 'note'"
-                            loadingLabel="Adding note"
+                            [messages]="{ loading: 'Adding note' }"
                           >
                             Add note
                           </button>
@@ -851,7 +851,6 @@ type View = 'overview' | 'contacts' | 'orders' | 'invoices' | 'tickets' | 'notes
                         variant="outline"
                         type="button"
                         [loading]="store.activityLoading()"
-                        loadingLabel="Loading"
                         (click)="store.loadActivity(true)"
                       >
                         Load more

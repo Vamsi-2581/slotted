@@ -221,12 +221,8 @@
    * painted in the danger tone for a step in error: the same three facts the
    * list's markers carry, at the size a bar can hold. The track is
    * `aria-hidden`; the position in words is the bar's accessible name.
-   *
-   * A step still ahead is a hairline and a step reached is a bar four times
-   * as thick, so the progress does not rest on colour alone
-   * (`docs/component-features.md` §7): in `high-contrast` the pending line
-   * and the accent are both near black, and the thickness is what tells them
-   * apart.
+   * Every segment fills the track's height; colour alone separates a step
+   * ahead from a step reached.
    */
   [data-ui='wizard']
     > [data-part='layout']
@@ -251,21 +247,10 @@
       --slotted-wizard-segment-color,
       var(--slotted-control-border-color, ButtonBorder)
     );
-    block-size: var(--slotted-border-width-thin, 1px);
+    block-size: 100%;
     border-radius: var(--slotted-radius-full, 9999px);
     flex: 1 1 0;
-    transition:
-      background-color var(--slotted-duration-medium) var(--slotted-easing-standard, ease),
-      block-size var(--slotted-duration-medium) var(--slotted-easing-standard, ease);
-  }
-
-  [data-ui='wizard']
-    > [data-part='layout']
-    > [data-part='progress']
-    > [data-part='progress-toggle']
-    > [data-part='progress-track']
-    > [data-part='progress-segment']:is([data-complete], [data-current], [data-invalid]) {
-    block-size: 100%;
+    transition: background-color var(--slotted-duration-medium) var(--slotted-easing-standard, ease);
   }
 
   [data-ui='wizard']

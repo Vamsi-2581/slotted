@@ -3,8 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactNode } from 'react';
 
 import { Grid, Scene } from '../field/field-demo';
+import { SlottedProvider } from '../i18n';
 import { Rating } from './rating';
-import { RatingProvider } from './rating-defaults';
 import { RatingDisplay } from './rating-display';
 import { RatingSummary } from './rating-summary';
 import type { RatingSize, RatingTone } from './rating.types';
@@ -45,7 +45,7 @@ export const Members: Story = {
   parameters: scenario('members'),
   render: () => (
     <main className="slotted-component-lab">
-      <RatingProvider locale="pt-BR">
+      <SlottedProvider locale="pt-BR">
         <LabSection
           description='Three members share one contract, one stylesheet and data-ui="rating". Rating is the value a reader gives, RatingDisplay the value a page reports, RatingSummary the aggregate of many.'
           title="Rating"
@@ -89,7 +89,7 @@ export const Members: Story = {
             </Scene>
           </Grid>
         </LabSection>
-      </RatingProvider>
+      </SlottedProvider>
     </main>
   ),
 };
@@ -141,7 +141,7 @@ export const Composition: Story = {
         note="The summary leads, filters the reviews below it, and each review reports its own rating in compact form; the reader’s own rating is the input member at the end."
         layout="block"
       >
-        <RatingProvider locale="pt-BR">
+        <SlottedProvider locale="pt-BR">
           <RatingSummary aria-label="Avaliações do Fone Studio Pro" counts={COUNTS} filterable />
           <div className="slotted-demo-rows">
             <span>Ana, há 2 dias</span>
@@ -150,7 +150,7 @@ export const Composition: Story = {
             <RatingDisplay size="sm" value={4} variant="compact" />
           </div>
           <Rating aria-label="Sua avaliação do Fone Studio Pro" />
-        </RatingProvider>
+        </SlottedProvider>
       </Scene>
     </Grid>
   ),

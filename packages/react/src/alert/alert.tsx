@@ -1,9 +1,11 @@
 import '@slotted/styles/alert/alert.css';
 
+import { alertMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { FocusEvent, MouseEvent, SyntheticEvent } from 'react';
 
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import type { GlyphName } from '../icon';
 import { useAlertDefaults } from './alert-defaults';
@@ -51,11 +53,11 @@ const TONE_GLYPH: Record<AlertTone, GlyphName | null> = {
 export function Alert({
   children,
   defaultOpen = true,
-  dismissLabel,
   dismissible = false,
   hideIcon = false,
   icon,
   live,
+  messages,
   onBlur,
   onFocus,
   onOpenChange,
@@ -69,6 +71,7 @@ export function Alert({
   ...nativeProps
 }: AlertProps) {
   const defaults = useAlertDefaults();
+  const t = useMessages(alertMessages, messages);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const [hasTitle, setHasTitle] = useState(false);
   const id = useId();
@@ -145,7 +148,7 @@ export function Alert({
         {children}
         {dismissible ? (
           <button
-            aria-label={dismissLabel ?? defaults.dismissLabel}
+            aria-label={t('dismiss')}
             data-part="dismiss"
             onClick={(event: MouseEvent<HTMLButtonElement>) => {
               /* A consumer that called preventDefault has refused the

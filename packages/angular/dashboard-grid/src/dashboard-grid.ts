@@ -25,6 +25,7 @@ import {
   SlCardFooter,
   SlCardHeader,
 } from '@slotted/angular/card';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import {
   SlMenu,
@@ -44,7 +45,6 @@ import { SlSkeleton } from '@slotted/angular/skeleton';
 import {
   cellAt,
   dashboardKeyIntent,
-  formatDashboardLabel,
   handleShortcuts,
   layoutsEqual,
   materializeLayout,
@@ -66,7 +66,6 @@ import {
   type DashboardBox,
   type DashboardColumnsInput,
   type DashboardDirection,
-  type DashboardGridLabels,
   type DashboardLayout,
   type DashboardLayoutChange,
   type DashboardSizeClass,
@@ -74,6 +73,12 @@ import {
   type MeasuredTile,
 } from '@slotted/core/dashboard-grid';
 import { createDragController, type DropTarget } from '@slotted/core/drag';
+import {
+  dashboardGridMessages,
+  dragMessages,
+  type DashboardGridMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import type { ChangeReason } from '@slotted/core/state';
 
@@ -290,8 +295,8 @@ interface Slot {
   },
   template: `
     @if (isEditing() && resolvedEditBar()) {
-      <div data-part="edit-bar" role="group" [attr.aria-label]="t().editBar">
-        <p data-part="edit-status" [id]="statusId">{{ t().editStatus }}</p>
+      <div data-part="edit-bar" role="group" [attr.aria-label]="t('editBar')">
+        <p data-part="edit-status" [id]="statusId">{{ t('editStatus') }}</p>
         <div data-part="edit-actions">
           @if (hiddenTiles().length > 0) {
             <button
@@ -305,7 +310,7 @@ interface Slot {
             >
               <span slButtonStart
                 ><span slIcon><svg slGlyph name="plus"></svg></span></span
-              >{{ t().add }}
+              >{{ t('add') }}
             </button>
             <sl-menu #addMenu>
               @for (tile of hiddenTiles(); track tile.key) {
@@ -323,7 +328,7 @@ interface Slot {
             variant="ghost"
             (click)="reset(pressReason($event), $event)"
           >
-            {{ t().reset }}
+            {{ t('reset') }}
           </button>
           <button
             slButton
@@ -333,7 +338,7 @@ interface Slot {
             variant="outline"
             (click)="cancelEditing(pressReason($event), $event)"
           >
-            {{ t().cancel }}
+            {{ t('cancel') }}
           </button>
           <button
             slButton
@@ -343,14 +348,14 @@ interface Slot {
             variant="solid"
             (click)="commitEditing('submit', $event)"
           >
-            {{ t().done }}
+            {{ t('done') }}
           </button>
         </div>
       </div>
     }
     @if (isEditing() && !resolvedEditBar()) {
       <p data-part="edit-status" data-ui="visually-hidden" [id]="statusId">
-        {{ t().editStatus }}
+        {{ t('editStatus') }}
       </p>
     }
     <ul
@@ -424,7 +429,7 @@ interface Slot {
                       data-size="sm"
                       data-shape="square"
                       [attr.href]="href"
-                      [attr.aria-label]="fill(t().detail, { title: slot.widget.title() })"
+                      [attr.aria-label]="t('detail', { title: slot.widget.title() })"
                       (click)="slot.widget.detail.emit($event)"
                       ><span data-part="icon" aria-hidden="true"
                         ><span slIcon directional><svg slGlyph name="external"></svg></span></span
@@ -436,7 +441,7 @@ interface Slot {
                       size="sm"
                       tone="secondary"
                       variant="ghost"
-                      [attr.aria-label]="fill(t().detail, { title: slot.widget.title() })"
+                      [attr.aria-label]="t('detail', { title: slot.widget.title() })"
                       (click)="slot.widget.detail.emit($event)"
                     >
                       <span slIcon directional><svg slGlyph name="external"></svg></span>
@@ -461,7 +466,9 @@ interface Slot {
                 <div data-part="message">
                   <section slResultState status="empty" reach="section" align="center" live="off">
                     <div slResultStateContent>
-                      <div slResultStateTitle>{{ slot.widget.emptyTitle() ?? t().emptyTitle }}</div>
+                      <div slResultStateTitle>
+                        {{ slot.widget.emptyTitle() ?? t('emptyTitle') }}
+                      </div>
                       @if (slot.widget.emptyDescription(); as description) {
                         <p slResultStateDescription>{{ description }}</p>
                       }
@@ -483,7 +490,9 @@ interface Slot {
                     live="polite"
                   >
                     <div slResultStateContent>
-                      <div slResultStateTitle>{{ slot.widget.errorTitle() ?? t().errorTitle }}</div>
+                      <div slResultStateTitle>
+                        {{ slot.widget.errorTitle() ?? t('errorTitle') }}
+                      </div>
                       @if (slot.widget.errorDescription(); as description) {
                         <p slResultStateDescription>{{ description }}</p>
                       }
@@ -500,7 +509,7 @@ interface Slot {
                         >
                           <span slButtonStart
                             ><span slIcon><svg slGlyph name="rotate-ccw"></svg></span></span
-                          >{{ t().retry }}
+                          >{{ t('retry') }}
                         </button>
                       </div>
                     }
@@ -520,7 +529,7 @@ interface Slot {
             <button
               slDashboardPart="handle"
               [attr.data-handle]="slot.tile.key"
-              [attr.aria-label]="fill(t().handle, { title: slot.widget.title() })"
+              [attr.aria-label]="t('handle', { title: slot.widget.title() })"
               [attr.aria-describedby]="statusId"
               [attr.aria-keyshortcuts]="shortcuts(slot.tile.removable)"
               [slMenuTriggerFor]="handleMenu"
@@ -535,7 +544,7 @@ interface Slot {
                   [disabled]="!slot.can.up"
                   (select)="move(slot.tile.key, 'up', reasonOf($event), $event.source)"
                 >
-                  {{ t().moveUp }}
+                  {{ t('moveUp') }}
                 </button>
                 <button
                   slMenuItem
@@ -543,7 +552,7 @@ interface Slot {
                   [disabled]="!slot.can.down"
                   (select)="move(slot.tile.key, 'down', reasonOf($event), $event.source)"
                 >
-                  {{ t().moveDown }}
+                  {{ t('moveDown') }}
                 </button>
                 @if (!flows()) {
                   <button
@@ -552,7 +561,7 @@ interface Slot {
                     [disabled]="!slot.can.left"
                     (select)="move(slot.tile.key, 'left', reasonOf($event), $event.source)"
                   >
-                    {{ t().moveStart }}
+                    {{ t('moveStart') }}
                   </button>
                   <button
                     slMenuItem
@@ -560,7 +569,7 @@ interface Slot {
                     [disabled]="!slot.can.right"
                     (select)="move(slot.tile.key, 'right', reasonOf($event), $event.source)"
                   >
-                    {{ t().moveEnd }}
+                    {{ t('moveEnd') }}
                   </button>
                 }
               }
@@ -574,7 +583,7 @@ interface Slot {
                   [disabled]="!slot.can.wider"
                   (select)="resize(slot.tile.key, 1, 0, reasonOf($event), $event.source)"
                 >
-                  {{ t().wider }}
+                  {{ t('wider') }}
                 </button>
                 <button
                   slMenuItem
@@ -582,7 +591,7 @@ interface Slot {
                   [disabled]="!slot.can.narrower"
                   (select)="resize(slot.tile.key, -1, 0, reasonOf($event), $event.source)"
                 >
-                  {{ t().narrower }}
+                  {{ t('narrower') }}
                 </button>
                 <button
                   slMenuItem
@@ -590,7 +599,7 @@ interface Slot {
                   [disabled]="!slot.can.taller"
                   (select)="resize(slot.tile.key, 0, 1, reasonOf($event), $event.source)"
                 >
-                  {{ t().taller }}
+                  {{ t('taller') }}
                 </button>
                 <button
                   slMenuItem
@@ -598,7 +607,7 @@ interface Slot {
                   [disabled]="!slot.can.shorter"
                   (select)="resize(slot.tile.key, 0, -1, reasonOf($event), $event.source)"
                 >
-                  {{ t().shorter }}
+                  {{ t('shorter') }}
                 </button>
               }
               @if (slot.tile.removable) {
@@ -611,7 +620,7 @@ interface Slot {
                   shortcut="Delete"
                   (select)="hide(slot.tile.key, 'remove', $event.source)"
                 >
-                  {{ t().hide }}
+                  {{ t('hide') }}
                 </button>
               }
             </sl-menu>
@@ -642,9 +651,9 @@ interface Slot {
       <div data-part="empty">
         <section slResultState status="empty" reach="section" live="polite">
           <div slResultStateContent>
-            <div slResultStateTitle>{{ t().empty }}</div>
+            <div slResultStateTitle>{{ t('empty') }}</div>
             @if (isEditing()) {
-              <p slResultStateDescription>{{ t().emptyEditing }}</p>
+              <p slResultStateDescription>{{ t('emptyEditing') }}</p>
             }
           </div>
         </section>
@@ -669,7 +678,8 @@ export class SlDashboardGrid {
     transform: (given) => (given === undefined ? undefined : booleanAttribute(given)),
   });
   readonly headingLevel = input<DashboardHeadingLevel | undefined>(undefined);
-  readonly labels = input<Partial<DashboardGridLabels> | undefined>(undefined);
+  /** Words laid over the catalog of the language in force, key by key. */
+  readonly messages = input<PartialMessages<DashboardGridMessages> | undefined>(undefined);
   readonly ariaLabel = input<string | undefined>(undefined, { alias: 'aria-label' });
   readonly ariaLabelledBy = input<string | undefined>(undefined, { alias: 'aria-labelledby' });
 
@@ -688,13 +698,12 @@ export class SlDashboardGrid {
   protected readonly statusId = `${this.base}-edit-status`;
   protected readonly edges = EDGES;
   protected readonly pressReason = pressReason;
-  protected readonly fill = formatDashboardLabel;
   protected readonly shortcuts = handleShortcuts;
 
-  protected readonly t = computed<DashboardGridLabels>(() => ({
-    ...this.defaults.labels,
-    ...this.labels(),
-  }));
+  /** The family's words in the language in force, with this grid's `messages` laid over them. */
+  protected readonly t = injectMessages(dashboardGridMessages, this.messages);
+  /** What a drag of a widget says when no position is left, in the language in force. */
+  private readonly dragT = injectMessages(dragMessages);
   protected readonly grid = computed(() => resolveColumns(this.columns() ?? this.defaults.columns));
   protected readonly resolvedEditBar = computed(() => this.editBar() ?? this.defaults.editBar);
 
@@ -762,7 +771,7 @@ export class SlDashboardGrid {
         resizing,
         edge: resizing ? gesture.edge : null,
         readout: resizing
-          ? formatDashboardLabel(this.t().size, {
+          ? this.t('size', {
               columns: gesture.sizeClass === 'medium' ? shown.medium : shown.w,
               rows: shown.h,
             })
@@ -948,12 +957,12 @@ export class SlDashboardGrid {
       const tile = placed[index];
       if (tile === undefined) return '';
       return drawnIn === 'expanded'
-        ? formatDashboardLabel(this.t().moved, {
+        ? this.t('moved', {
             title: this.titleOf(key),
             row: tile.y + 1,
             column: tile.x + 1,
           })
-        : formatDashboardLabel(this.t().movedInOrder, {
+        : this.t('movedInOrder', {
             title: this.titleOf(key),
             position: index + 1,
             total: placed.length,
@@ -966,7 +975,7 @@ export class SlDashboardGrid {
       const tile = resolveTiles(layout, this.specs(), this.grid()).find((each) => each.key === key);
       return tile === undefined
         ? ''
-        : formatDashboardLabel(this.t().resized, {
+        : this.t('resized', {
             title: this.titleOf(key),
             columns: drawnIn === 'medium' ? tile.medium : tile.w,
             rows: tile.h,
@@ -1028,7 +1037,7 @@ export class SlDashboardGrid {
     this.focusAfter = (visible[at + 1] ?? visible[at - 1])?.key ?? ADD;
     const next = setTileHidden(this.currentLayout(), this.specs(), this.grid(), key, true);
     const done = this.change(next, reason, { kind: 'hide', key }, source, () =>
-      formatDashboardLabel(this.t().hidden, { title: this.titleOf(key) }),
+      this.t('hidden', { title: this.titleOf(key) }),
     );
     if (!done) this.focusAfter = null;
   }
@@ -1037,17 +1046,13 @@ export class SlDashboardGrid {
     this.focusAfter = key;
     const next = setTileHidden(this.currentLayout(), this.specs(), this.grid(), key, false);
     this.change(next, reason, { kind: 'show', key }, source, () =>
-      formatDashboardLabel(this.t().shown, { title: this.titleOf(key) }),
+      this.t('shown', { title: this.titleOf(key) }),
     );
   }
 
   protected reset(reason: DashboardLayoutReason, source?: unknown) {
-    this.change(
-      EMPTY_LAYOUT,
-      reason,
-      { kind: 'reset', key: null },
-      source,
-      () => this.t().resetDone,
+    this.change(EMPTY_LAYOUT, reason, { kind: 'reset', key: null }, source, () =>
+      this.t('resetDone'),
     );
   }
 
@@ -1060,7 +1065,9 @@ export class SlDashboardGrid {
   cancelEditing(reason: DashboardEditingReason = 'programmatic', source?: unknown) {
     const back = this.snapshot;
     if (back !== null) {
-      this.change(back, 'dismiss', { kind: 'cancel', key: null }, source, () => this.t().cancelled);
+      this.change(back, 'dismiss', { kind: 'cancel', key: null }, source, () =>
+        this.t('cancelled'),
+      );
     }
     this.requestEditing(false, reason, source);
   }
@@ -1285,8 +1292,9 @@ export class SlDashboardGrid {
       restoreFocus: false,
       preview: false,
       autoScroll: { axis: 'y' },
+      t: this.dragT,
       /* The move says what happened once, in the family's own words. */
-      messages: { pickedUp: () => '', moved: () => '', dropped: () => '', cancelled: () => '' },
+      silent: ['pickedUp', 'moved', 'dropped', 'cancelled'],
       /**
        * In the expanded class the target is a cell: the one the card's leading
        * corner is nearest, so a widget lands where it is drawn under the
@@ -1355,7 +1363,7 @@ export class SlDashboardGrid {
       targets: ['on'],
       element: () => list,
       itemElement: (key) => this.widgetNodes().get(key) ?? null,
-      label: () => this.t().editBar,
+      label: () => this.t('editBar'),
       itemLabel: (key) => this.titleOf(key),
     });
 

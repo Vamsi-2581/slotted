@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "context-menu",
   "ui": "context-menu",
+  "catalog": {
+    "group": "Overlays",
+    "summary": "Menu opened by right click on a target."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/menubar/",
   "triggerPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/",
   "patternStatus": "The APG has no context-menu pattern. The surface is the menu pattern's, held by specs/components/menu/contract.json; the four keys of the menu-button pattern are not taken on the target, because a region is not a button. The two keys that open a context menu from the keyboard — Shift+F10 and the ContextMenu key — are a platform convention, named by docs/component-features.md §8, and shipped by none of the four surveyed libraries. Both pages were read on 2026-09-16 and the target's own keys are transcribed in docs/history/designs/2026-09-16-context-menu-hover-card-design.md §2.4.",

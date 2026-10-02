@@ -12,9 +12,9 @@ import type { ComboboxDefaults, ComboboxDefaultsProviderProps } from './combobox
  * a reader typing `ma` into a list of names sees `Mark` appear under their
  * caret. It is one word away and it is not the default.
  *
- * `openOn` is `input`: the popup appears once there is something to filter,
- * which is what a reader typing expects and what `focus` gets wrong for a form
- * a reader is tabbing through.
+ * `openOn` is `input`: the popup appears once there is something to filter, or
+ * when the reader presses the input, which is what a reader typing or pointing
+ * expects and what `focus` gets wrong for a form a reader is tabbing through.
  *
  * `autoHighlight` is `false`. Highlighting the first match means `Enter`
  * commits an option the reader never looked at, and the pattern is explicit
@@ -34,22 +34,17 @@ export const COMBOBOX_FALLBACK: ComboboxDefaults = {
   autocomplete: 'list',
   autoHighlight: false,
   clearable: true,
-  clearLabel: 'Clear',
-  createLabel: 'Create \u201c{query}\u201d',
   closeOnEscape: true,
   closeOnOutsidePress: true,
   closeOnSelect: true,
   collisionPadding: 8,
-  countLabel: '{count} results',
   disabled: false,
-  emptyLabel: 'No matches',
   flip: true,
   fullWidth: true,
   hideWhenDetached: true,
   highlightMatch: true,
   invalid: false,
   loading: false,
-  loadingLabel: 'Loading…',
   loop: false,
   mount: 'active',
   openOn: 'input',
@@ -61,7 +56,6 @@ export const COMBOBOX_FALLBACK: ComboboxDefaults = {
   sideOffset: 4,
   size: 'md',
   strategy: 'absolute',
-  triggerLabel: 'Show options',
   variant: 'outline',
   width: 'anchor',
 };
@@ -75,8 +69,8 @@ export function useComboboxDefaults(): ComboboxDefaults {
 
 /**
  * The decisions an application takes once, in its bootstrap, rather than on
- * every combobox it renders — including the five sentences the family speaks,
- * which is where an application translates them.
+ * every combobox it renders. Its words come from the language in force
+ * (`SlottedProvider`).
  */
 export function ComboboxDefaultsProvider({
   children,
@@ -98,22 +92,17 @@ export function ComboboxDefaultsProvider({
     autocomplete: overrides.autocomplete ?? inherited.autocomplete,
     autoHighlight: overrides.autoHighlight ?? inherited.autoHighlight,
     clearable: overrides.clearable ?? inherited.clearable,
-    clearLabel: overrides.clearLabel ?? inherited.clearLabel,
-    createLabel: overrides.createLabel ?? inherited.createLabel,
     closeOnEscape: overrides.closeOnEscape ?? inherited.closeOnEscape,
     closeOnOutsidePress: overrides.closeOnOutsidePress ?? inherited.closeOnOutsidePress,
     closeOnSelect: overrides.closeOnSelect ?? inherited.closeOnSelect,
     collisionPadding: overrides.collisionPadding ?? inherited.collisionPadding,
-    countLabel: overrides.countLabel ?? inherited.countLabel,
     disabled: overrides.disabled ?? inherited.disabled,
-    emptyLabel: overrides.emptyLabel ?? inherited.emptyLabel,
     flip: overrides.flip ?? inherited.flip,
     fullWidth: overrides.fullWidth ?? inherited.fullWidth,
     hideWhenDetached: overrides.hideWhenDetached ?? inherited.hideWhenDetached,
     highlightMatch: overrides.highlightMatch ?? inherited.highlightMatch,
     invalid: overrides.invalid ?? inherited.invalid,
     loading: overrides.loading ?? inherited.loading,
-    loadingLabel: overrides.loadingLabel ?? inherited.loadingLabel,
     loop: overrides.loop ?? inherited.loop,
     mount: overrides.mount ?? inherited.mount,
     openOn: overrides.openOn ?? inherited.openOn,
@@ -125,7 +114,6 @@ export function ComboboxDefaultsProvider({
     sideOffset: overrides.sideOffset ?? inherited.sideOffset,
     size: overrides.size ?? inherited.size,
     strategy: overrides.strategy ?? inherited.strategy,
-    triggerLabel: overrides.triggerLabel ?? inherited.triggerLabel,
     variant: overrides.variant ?? inherited.variant,
     width: overrides.width ?? inherited.width,
   };

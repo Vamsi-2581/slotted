@@ -21,7 +21,7 @@ convention.
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
 | `primitive` | A value with no meaning attached: a step on a scale.           | 121    |
-| `semantic`  | What a value is for: a surface, a border, a control, a target. | 113    |
+| `semantic`  | What a value is for: a surface, a border, a control, a target. | 116    |
 | `component` | One family adjusting a semantic value for itself.              | 28     |
 
 A token is a **scale root** when it states a value rather than composing one: a
@@ -544,8 +544,8 @@ target is not the box either; it is a transparent square of
 `--slotted-target-min` around it.
 
 The halo has no size token. It reaches half the gap between the control and
-its label, `--slotted-control-gap-<step>` divided by two, so it follows density
-through the gap and never paints under the label. A stated 32px diameter
+its label, `--slotted-control-label-gap-<step>` divided by two, so it follows
+density through the gap and never paints under the label. A stated 32px diameter
 reached past the gap in seven of the nine size-and-density pairs.
 
 | Token                              | Default value |
@@ -888,9 +888,19 @@ rebuilt, and nothing aliases it now.
 | `--slotted-control-gap-sm`            | `6px`       | `4px`   | `4px`  |
 | `--slotted-control-gap-md`            | `8px`       | `6px`   | `4px`  |
 | `--slotted-control-gap-lg`            | `8px`       | `6px`   | `6px`  |
+| `--slotted-control-label-gap-sm`      | `8px`       | `6px`   | `6px`  |
+| `--slotted-control-label-gap-md`      | `12px`      | `8px`   | `6px`  |
+| `--slotted-control-label-gap-lg`      | `12px`      | `8px`   | `8px`  |
 | `--slotted-control-inner-size-sm`     | `22px`      | `18px`  | `16px` |
 | `--slotted-control-inner-size-md`     | `24px`      | `20px`  | `18px` |
 | `--slotted-control-inner-size-lg`     | `28px`      | `24px`  | `22px` |
+
+`--slotted-control-label-gap-*` is the distance between a binary control —
+the box of `checkbox`, the circle of `radio-group`, the pill of `switch` — and
+its own label. It is wider than `--slotted-control-gap-*` because the control
+beside the text is a shape and not a glyph: at `md` the pill is 40px wide, and
+8px beside it read as no gap at all. `--slotted-control-gap-*` still spaces one
+choice from the next in `checkbox-group` and `radio-group`.
 
 `--slotted-control-inner-size-*` is the block size of anything that stands
 inside a control: a key in a search field, a chip in a multi-select, the clear

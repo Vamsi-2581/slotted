@@ -4,6 +4,8 @@ import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-wo
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
 import { SlCalendar } from './calendar';
 import { provideCalendarDefaults } from './calendar-defaults';
@@ -436,7 +438,7 @@ export const Composition: Story = {
       1,
       scene(
         'Set once for the application',
-        'The provider decides the locale, the week’s first day and the fixed grid for everything under it, so a product does not repeat four inputs on every calendar.',
+        'The provider decides the week’s first day and the fixed grid for everything under it, and provideSlotted the language, so a product does not repeat three inputs on every calendar.',
         `<div slCalendar aria-label="Herdado" [defaultFocusedDate]="ninth"></div>`,
       ) +
         scene(
@@ -458,7 +460,8 @@ export const Composition: Story = {
     moduleMetadata({
       imports: [SlCalendar],
       providers: [
-        provideCalendarDefaults({ firstDayOfWeek: 1, fixedWeeks: true, locale: 'pt-BR' }),
+        provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }),
+        provideCalendarDefaults({ firstDayOfWeek: 1, fixedWeeks: true }),
       ],
     }),
   ],

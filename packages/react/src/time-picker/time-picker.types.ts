@@ -1,4 +1,5 @@
 import type { PlainTime, TimeGranularity, TimeOption } from '@slotted/core/date';
+import type { PartialMessages, TimePickerMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -22,27 +23,16 @@ export type TimePickerVariant = 'outline' | 'subtle' | 'plain';
 
 /** What an application sets once for every time picker under it. */
 export interface TimePickerDefaults {
-  /** The trigger's name once a time is chosen, before the time itself. */
-  changeLabel: string;
-  /** The trigger's name while nothing is chosen. */
-  chooseLabel: string;
   closeOnSelect: TimePickerCloseOnSelect;
-  /** What the panel says when no time is available at all. */
-  emptyLabel: string;
   granularity: TimeGranularity;
   hourCycle: TimeFieldHourCycle | undefined;
-  locale: string | undefined;
   /** How many rows the list may reach before it is cut. */
   maxOptions: number;
-  /** The control at the head of the panel that writes the current time. */
-  nowLabel: string;
   placement: TimePickerPlacement;
   size: TimePickerSize;
   /** Seconds between two offered times. */
   step: number;
   timeZone: string | undefined;
-  /** What the panel says when the list stops short of the configuration. */
-  truncatedLabel: string;
   unavailableOptions: TimePickerUnavailableOptions;
   variant: TimePickerVariant;
 }
@@ -121,6 +111,7 @@ export interface TimePickerProps extends Omit<
   maxOptions?: number | undefined;
   unavailableOptions?: TimePickerUnavailableOptions | undefined;
 
+  /** BCP 47. Unset, the language in force (`SlottedProvider`) decides. */
   locale?: string | undefined;
   timeZone?: string | undefined;
   hourCycle?: TimeFieldHourCycle | undefined;
@@ -140,11 +131,12 @@ export interface TimePickerProps extends Omit<
   clearable?: boolean | undefined;
   relative?: boolean | undefined;
   name?: string | undefined;
-  chooseLabel?: string | undefined;
-  changeLabel?: string | undefined;
-  nowLabel?: string | undefined;
-  emptyLabel?: string | undefined;
-  truncatedLabel?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * trigger's two names, the now control, and what the panel says when it is
+   * empty or cut short.
+   */
+  messages?: PartialMessages<TimePickerMessages> | undefined;
 
   /** The consumer's own shortcuts, in a column beside the list. */
   presets?: ReactNode | undefined;

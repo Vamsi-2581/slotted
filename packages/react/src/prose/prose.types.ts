@@ -1,3 +1,4 @@
+import type { PartialMessages, ProseMessages } from '@slotted/core/i18n';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref, RefCallback } from 'react';
 
 /**
@@ -19,8 +20,6 @@ export type ProseFlow = 'tight' | 'normal' | 'loose';
 export interface ProseDefaults {
   flow: ProseFlow;
   size: ProseSize;
-  /** The last resort name of a scrolling block, when nothing else names it. */
-  scrollLabel: string;
 }
 
 export interface ProseDefaultsProviderProps extends Partial<ProseDefaults> {
@@ -83,8 +82,11 @@ export interface ProseScrollRootProps extends HTMLAttributes<HTMLElement> {
 }
 
 export interface ProseScrollProps extends Omit<ComponentPropsWithRef<'div'>, 'ref'> {
-  /** Names the region when it becomes focusable. Overrides `scrollLabel`. */
-  label?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force: the last resort name
+   * of the region (`scroll`). A native `aria-label` still wins.
+   */
+  messages?: PartialMessages<ProseMessages> | undefined;
   /** Names it from an element already on the page — a table's own caption. */
   labelledBy?: string | undefined;
   /** The handle a consumer needs when content arrives outside React's cycle. */

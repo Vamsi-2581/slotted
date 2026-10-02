@@ -1,6 +1,9 @@
 import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
+import { provideSlotted } from '@slotted/angular/i18n';
+import type { MessageScrollerMessages, PartialMessages } from '@slotted/core/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
 import contract from '../../../../specs/components/message-scroller/contract.json';
 
@@ -28,7 +31,7 @@ import { provideMessageScrollerDefaults } from './message-scroller-defaults';
     SlMessageScrollerViewport,
   ],
   template: `
-    <div slMessageScroller #chat="slMessageScroller" id="root" [busy]="busy()">
+    <div slMessageScroller #chat="slMessageScroller" id="root" [busy]="busy()" [messages]="words()">
       <div slMessageScrollerViewport id="viewport">
         <div slMessageScrollerContent id="log">
           <div slMessageScrollerLoader></div>
@@ -47,6 +50,7 @@ import { provideMessageScrollerDefaults } from './message-scroller-defaults';
 })
 class Chat {
   readonly busy = signal(false);
+  readonly words = signal<PartialMessages<MessageScrollerMessages> | undefined>(undefined);
   readonly rows = ['m0', 'm1', 'm2'];
   readonly chat = viewChild.required<SlMessageScroller>('chat');
 }
@@ -72,7 +76,7 @@ describe('slMessageScroller', () => {
     const { fixture, root } = await mount();
     const viewport = root.querySelector('#viewport') as HTMLElement;
     expect(viewport.getAttribute('role')).toBe('region');
-    expect(viewport.getAttribute('aria-label')).toBe(contract.messages.label);
+    expect(viewport.getAttribute('aria-label')).toBe('Messages');
     expect(viewport.getAttribute('tabindex')).toBe('0');
     const log = root.querySelector('#log') as HTMLElement;
     expect(log.getAttribute('role')).toBe('log');
@@ -95,7 +99,7 @@ describe('slMessageScroller', () => {
     expect(jump.getAttribute('data-active')).toBe('false');
     expect(jump.getAttribute('tabindex')).toBe('-1');
     expect(jump.hasAttribute('inert')).toBe(true);
-    expect(jump.getAttribute('aria-label')).toBe(contract.messages.jumpToEnd);
+    expect(jump.getAttribute('aria-label')).toBe('Go to the latest');
   });
 
   it('exposes the commands on the instance', async () => {
@@ -107,14 +111,29 @@ describe('slMessageScroller', () => {
     expect(document.activeElement).toBe(root.querySelector('#viewport'));
   });
 
-  it('lets an application set its words once', async () => {
-    TestBed.configureTestingModule({
-      providers: [
-        provideMessageScrollerDefaults({ messages: { label: 'Conversa', unread: 'Por ler' } }),
-      ],
-    });
-    const { root } = await mount();
+  it('lays its own words over the language in force', async () => {
+    TestBed.configureTestingModule({ providers: [provideMessageScrollerDefaults({ peek: 32 })] });
+    const { fixture, root } = await mount();
+    fixture.componentInstance.words.set({ label: 'Conversa', unread: 'Por ler' });
+    fixture.detectChanges();
     expect(root.querySelector('#viewport')?.getAttribute('aria-label')).toBe('Conversa');
     expect(root.querySelector('[data-part="unread"]')?.textContent?.trim()).toBe('Por ler');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', async () => {
+    const locale = signal('pt-BR');
+    TestBed.configureTestingModule({
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const { fixture, root } = await mount();
+    const viewport = root.querySelector('#viewport') as HTMLElement;
+    const loader = root.querySelector('[data-part="loader"]') as HTMLElement;
+    expect(viewport.getAttribute('aria-label')).toBe('Mensagens');
+    expect(loader.textContent?.trim()).toBe('Carregando mensagens anteriores');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(viewport.getAttribute('aria-label')).toBe('Messages');
+    expect(loader.textContent?.trim()).toBe('Loading earlier messages');
   });
 });

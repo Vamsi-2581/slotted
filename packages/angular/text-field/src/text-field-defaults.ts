@@ -19,41 +19,14 @@ export type TextFieldVariant = 'outline' | 'subtle' | 'plain';
  */
 export type TextFieldType = 'text' | 'search' | 'email' | 'url' | 'tel' | 'password';
 
-/**
- * The words the family's own buttons and marks announce.
- *
- * The reveal label does not change with the state. That is the APG's rule for a
- * toggle: `aria-pressed` says whether the password is showing, and a label that
- * changed with it would say the same thing twice and disagree with itself in
- * the moment between.
- */
-export const TEXT_FIELD_CLEAR_LABEL = 'Clear';
-export const TEXT_FIELD_REVEAL_LABEL = 'Show password';
-export const TEXT_FIELD_COPY_LABEL = 'Copy';
-export const TEXT_FIELD_COPIED_LABEL = 'Copied';
-export const TEXT_FIELD_COPY_FAILED_LABEL = 'Copy failed';
-export const TEXT_FIELD_CAPS_LOCK_LABEL = 'Caps Lock is on';
-
 export interface TextFieldDefaults {
-  capsLockLabel: string;
-  clearLabel: string;
-  copiedLabel: string;
-  copyFailedLabel: string;
-  copyLabel: string;
   mono: boolean;
-  revealLabel: string;
   size: TextFieldSize;
   variant: TextFieldVariant;
 }
 
 const FALLBACK: TextFieldDefaults = {
-  capsLockLabel: TEXT_FIELD_CAPS_LOCK_LABEL,
-  clearLabel: TEXT_FIELD_CLEAR_LABEL,
-  copiedLabel: TEXT_FIELD_COPIED_LABEL,
-  copyFailedLabel: TEXT_FIELD_COPY_FAILED_LABEL,
-  copyLabel: TEXT_FIELD_COPY_LABEL,
   mono: false,
-  revealLabel: TEXT_FIELD_REVEAL_LABEL,
   size: 'md',
   variant: 'outline',
 };
@@ -64,9 +37,10 @@ export const TEXT_FIELD_DEFAULTS = new InjectionToken<TextFieldDefaults>(
 );
 
 /**
- * An application decides once what its text fields look like and what their two
- * buttons are called, rather than repeating the same inputs on every control in
- * a form. A control that states any of them itself still wins.
+ * An application decides once what its text fields look like, rather than
+ * repeating the same inputs on every control in a form. A control that states
+ * any of them itself still wins. What the buttons and marks say comes from the
+ * language in force (`provideSlotted`).
  *
  * `size` is the one the field outranks: a `size="sm"` field holding an `md`
  * control is a field and a control disagreeing about one row, so a control

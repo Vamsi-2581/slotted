@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "date-field",
   "ui": "date-field",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Typed date input split into segments."
+  },
   "controlPart": "segments",
   "controlRole": "group",
   "segmentRole": "spinbutton",
@@ -80,24 +84,16 @@
   "resolution": {
     "size": ["prop", "field", "defaults", "md"],
     "variant": ["prop", "defaults", "outline"],
-    "locale": ["prop", "defaults", "runtime"],
+    "locale": ["prop", "slotted", "en-US"],
     "timeZone": ["prop", "defaults", "runtime"],
     "firstDayOfWeek": ["prop", "defaults", "locale"],
     "yearPivot": ["prop", "defaults", "20"],
     "calendar": ["prop", "defaults", "gregory"]
   },
   "provides": {
-    "dateFieldDefaults": [
-      "calendar",
-      "clearLabel",
-      "firstDayOfWeek",
-      "locale",
-      "size",
-      "timeZone",
-      "variant",
-      "yearPivot"
-    ]
+    "dateFieldDefaults": ["calendar", "firstDayOfWeek", "size", "timeZone", "variant", "yearPivot"]
   },
+  "messages": ["clear"],
   "imperative": ["focus", "clear"],
   "stateAttributes": {
     "disabled": "data-disabled",

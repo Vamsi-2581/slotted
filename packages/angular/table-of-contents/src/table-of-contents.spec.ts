@@ -3,6 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import type { ChangeRequest } from '@slotted/core/state';
 import contract from '../../../../specs/components/table-of-contents/contract.json';
 import {
@@ -125,16 +128,28 @@ class FromSource {
   providers: [
     provideTableOfContentsDefaults({
       layout: 'horizontal',
-      messages: { navigation: 'Secções' },
       numbered: true,
       size: 'sm',
       sticky: true,
     }),
   ],
-  template: `<nav slTableOfContents [items]="items"></nav>
+  template: `<nav slTableOfContents [items]="items" [messages]="{ navigation: 'Secções' }"></nav>
     <nav slTableOfContents [items]="items" size="lg"></nav>`,
 })
 class WithDefaults {
+  readonly items = ITEMS;
+}
+
+/** The language a `Spoken` list is in, changed by the test that reads it. */
+const spokenLocale = signal('pt-BR');
+
+@Component({
+  standalone: true,
+  imports: [SlTableOfContents],
+  providers: [provideSlotted({ locale: spokenLocale, catalogs: { 'pt-BR': PT_BR } })],
+  template: `<nav slTableOfContents [items]="items"></nav>`,
+})
+class Spoken {
   readonly items = ITEMS;
 }
 
@@ -175,7 +190,7 @@ describe('SlTableOfContents', () => {
     /* And scrolled a little: at its start the first target is current before anything is measured. */
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 10 });
     await TestBed.configureTestingModule({
-      imports: [Host, FromSource, WithDefaults],
+      imports: [Host, FromSource, WithDefaults, Spoken],
     }).compileComponents();
     fixture = TestBed.createComponent(Host);
     host = fixture.componentInstance;
@@ -192,7 +207,7 @@ describe('SlTableOfContents', () => {
   it('renders the parts the contract declares, named from the messages', () => {
     expect(root().tagName).toBe('NAV');
     expect(root().getAttribute('data-ui')).toBe(contract.ui);
-    expect(root().getAttribute('aria-label')).toBe('Nesta página');
+    expect(root().getAttribute('aria-label')).toBe('On this page');
     expect(root().getAttribute('data-layout')).toBe('vertical');
     expect(root().getAttribute('data-size')).toBe('md');
     for (const part of ['panel', 'list', 'item', 'link', 'group', 'marker']) {
@@ -433,7 +448,19 @@ describe('SlTableOfContents', () => {
     });
   });
 
-  it('reads the axes and the messages from the provider, and lets a list win', () => {
+  it('speaks the language in force, and follows a change of it in place', () => {
+    spokenLocale.set('pt-BR');
+    const spoken = TestBed.createComponent(Spoken);
+    spoken.detectChanges();
+    const list = spoken.nativeElement.querySelector('[data-ui="table-of-contents"]') as HTMLElement;
+    expect(list.getAttribute('aria-label')).toBe('Nesta página');
+
+    spokenLocale.set('en-US');
+    spoken.detectChanges();
+    expect(list.getAttribute('aria-label')).toBe('On this page');
+  });
+
+  it('reads the axes from the provider, and lets a list win', () => {
     const provided = TestBed.createComponent(WithDefaults);
     provided.detectChanges();
     const [first, second] = [

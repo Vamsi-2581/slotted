@@ -1,10 +1,12 @@
 import { plainDate, toISODate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { Field, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { DateField, DateFieldDefaultsProvider } from './index';
 import type { DateFieldChangeRequest, DateFieldHandle } from './index';
 
@@ -343,7 +345,7 @@ describe('the pointer', () => {
       <DateField
         aria-label="Data"
         clearable
-        clearLabel="Limpar"
+        messages={{ clear: 'Limpar' }}
         defaultValue={NINTH}
         locale="pt-BR"
       />,
@@ -404,11 +406,13 @@ describe('what the field around it says', () => {
 });
 
 describe('what an application sets once', () => {
-  it('takes the locale, the pivot and the appearance from a provider', () => {
+  it('takes the appearance from a provider and the locale from the language in force', () => {
     const { container } = render(
-      <DateFieldDefaultsProvider locale="ja-JP" size="lg" variant="subtle">
-        <DateField aria-label="Date" defaultValue={NINTH} />
-      </DateFieldDefaultsProvider>,
+      <SlottedProvider locale="ja-JP">
+        <DateFieldDefaultsProvider size="lg" variant="subtle">
+          <DateField aria-label="Date" defaultValue={NINTH} />
+        </DateFieldDefaultsProvider>
+      </SlottedProvider>,
     );
 
     expect(segments().map((element) => element.dataset['field'])).toEqual(['year', 'month', 'day']);
@@ -417,15 +421,31 @@ describe('what an application sets once', () => {
     expect(root).toHaveAttribute('data-variant', 'subtle');
   });
 
-  it('lets one control outrank the provider', () => {
+  it('lets one control outrank the language in force', () => {
     const { container } = render(
-      <DateFieldDefaultsProvider locale="ja-JP">
+      <SlottedProvider locale="ja-JP">
         <DateField aria-label="Data" defaultValue={NINTH} locale="pt-BR" />
-      </DateFieldDefaultsProvider>,
+      </SlottedProvider>,
     );
 
     expect(segments().map((element) => element.dataset['field'])).toEqual(['day', 'month', 'year']);
     expect(container.querySelector('[data-ui="date-field"]')).toBeInTheDocument();
+  });
+
+  it('changes its words and its date order together with the language in force', () => {
+    const inLocale = (locale: string) => (
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale={locale}>
+        <DateField aria-label="Data" clearable defaultValue={NINTH} />
+      </SlottedProvider>
+    );
+    const { rerender } = render(inLocale('pt-BR'));
+
+    expect(screen.getByRole('button', { name: 'Limpar' })).toBeInTheDocument();
+    expect(segments().map((element) => element.dataset['field'])).toEqual(['day', 'month', 'year']);
+
+    rerender(inLocale('en-US'));
+    expect(screen.getByRole('button', { name: 'Clear' })).toBeInTheDocument();
+    expect(segments().map((element) => element.dataset['field'])).toEqual(['month', 'day', 'year']);
   });
 });
 
@@ -436,7 +456,7 @@ describe('the composition surface', () => {
       <DateField
         aria-label="Data"
         clearable
-        clearLabel="Limpar"
+        messages={{ clear: 'Limpar' }}
         defaultValue={NINTH}
         locale="pt-BR"
         onValueChange={onValueChange}

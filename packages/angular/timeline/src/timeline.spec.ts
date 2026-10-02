@@ -1,6 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
+import { provideSlotted } from '@slotted/angular/i18n';
+import type { PartialMessages, TimelineMessages } from '@slotted/core/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
 import contract from '../../../../specs/components/timeline/contract.json';
 import {
@@ -52,6 +55,7 @@ const PARTS = [
     [freshCount]="freshCount()"
     [count]="count()"
     [autoComplete]="autoComplete()"
+    [messages]="words()"
     (loadMoreRequest)="onLoadMore($event)"
     (revealRequest)="onReveal($event)"
   >
@@ -105,6 +109,7 @@ class TestHost {
   readonly freshCount = signal(0);
   readonly count = signal<number | undefined>(undefined);
   readonly autoComplete = signal(false);
+  readonly words = signal<PartialMessages<TimelineMessages> | undefined>(undefined);
   readonly events = signal<
     {
       title: string;
@@ -524,7 +529,7 @@ describe('SlTimelineGroup', () => {
         .querySelector('[data-part="group-indicator"] > [data-ui="icon"] > svg[data-glyph]')
         ?.getAttribute('data-glyph'),
     ).toBe('chevron-down');
-    expect(trigger.textContent?.replace(/\s+/g, ' ').trim()).toBe('Today , Hide events');
+    expect(trigger.textContent?.replace(/\s+/g, ' ').trim()).toBe('Today, Hide events');
     const list = document.getElementById(
       trigger.getAttribute('aria-controls') as string,
     ) as HTMLElement;
@@ -544,8 +549,6 @@ describe('provideTimelineDefaults', () => {
   it('sets the family defaults once, and an explicit input still wins', () => {
     const { host, root, item, part, settle } = setup([
       provideTimelineDefaults({
-        locale: 'en',
-        messages: { loadMore: 'Mais' },
         mode: 'feed',
         placement: 'start',
         timeFormat: 'relative',
@@ -554,11 +557,33 @@ describe('provideTimelineDefaults', () => {
     ]);
     host.growing.set('button');
     host.placement.set('alternate');
+    host.words.set({ loadMore: 'Mais' });
     settle();
     expect(root.getAttribute('data-mode')).toBe('feed');
     expect(root.getAttribute('data-placement')).toBe('alternate');
     expect(root.getAttribute('data-variant')).toBe('solid');
     expect(part(item(2), 'time').textContent?.trim()).toBe('2 hours ago');
     expect(root.querySelector('button[data-part="more"]')?.textContent?.trim()).toBe('Mais');
+  });
+});
+
+describe('language', () => {
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const { host, root, settle } = setup([
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+    host.freshCount.set(1);
+    settle();
+    const fresh = () => root.querySelector('[data-part="fresh"]')?.textContent?.trim();
+    expect(fresh()).toBe('1 novo evento');
+    const current = () =>
+      root.querySelector('[aria-current="true"] [data-part="content"]')?.textContent;
+    expect(current()?.replace(/\s+/g, ' ')).toContain('Paid in full, atual');
+
+    locale.set('en-US');
+    settle();
+    expect(fresh()).toBe('1 new event');
+    expect(current()?.replace(/\s+/g, ' ')).toContain('Paid in full, current');
   });
 });

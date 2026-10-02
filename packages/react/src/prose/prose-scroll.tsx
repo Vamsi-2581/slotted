@@ -1,8 +1,9 @@
+import { proseMessages } from '@slotted/core/i18n';
 import { createScrollAffordance } from '@slotted/core/overflow';
 import type { ScrollAffordanceHandle } from '@slotted/core/overflow';
 import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
-import { useProseDefaults } from './prose-defaults';
+import { useMessages } from '../i18n';
 import type { ProseScrollHandle, ProseScrollProps, ProseScrollRootProps } from './prose.types';
 
 /**
@@ -25,18 +26,19 @@ import type { ProseScrollHandle, ProseScrollProps, ProseScrollRootProps } from '
  * part with no arguments at all:
  *
  * 1. `labelledBy`, which is the block's own caption and is Roselli's answer;
- * 2. `label`, a string this instance states;
- * 3. `scrollLabel` from `ProseDefaultsProvider`.
+ * 2. a native `aria-label` this instance states;
+ * 3. `scroll` from the catalog of the language in force, with this instance's
+ *    `messages` laid over it.
  */
 export function ProseScroll({
   handleRef,
-  label,
   labelledBy,
+  messages,
   ref,
   render,
   ...nativeProps
 }: ProseScrollProps) {
-  const defaults = useProseDefaults();
+  const t = useMessages(proseMessages, messages);
   const [element, setElement] = useState<HTMLElement | null>(null);
   const [overflowing, setOverflowing] = useState(false);
   const affordance = useRef<ScrollAffordanceHandle | null>(null);
@@ -98,7 +100,7 @@ export function ProseScroll({
     rootProps.tabIndex = nativeProps.tabIndex ?? 0;
     if (labelledBy !== undefined) rootProps['aria-labelledby'] = labelledBy;
     else if (nativeProps['aria-label'] === undefined) {
-      rootProps['aria-label'] = label ?? defaults.scrollLabel;
+      rootProps['aria-label'] = t('scroll');
     }
   }
 

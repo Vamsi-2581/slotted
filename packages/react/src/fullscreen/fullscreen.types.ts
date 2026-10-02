@@ -1,14 +1,14 @@
 import type {
   FullscreenError,
-  FullscreenMessages,
   FullscreenMode,
   FullscreenNavigationUI,
   FullscreenPolicy,
 } from '@slotted/core/fullscreen';
+import type { FamilyTranslator, FullscreenMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, RefObject } from 'react';
 
-export type { FullscreenError, FullscreenMessages, FullscreenMode, FullscreenNavigationUI };
+export type { FullscreenError, FullscreenMode, FullscreenNavigationUI };
 
 /** `auto` asks the platform first and falls back to the layout; `layout` never asks. */
 export type FullscreenPolicyMode = FullscreenPolicy;
@@ -42,13 +42,9 @@ export interface FullscreenDefaults {
   navigationUI: FullscreenNavigationUI;
   size: FullscreenTriggerSize;
   variant: FullscreenTriggerVariant;
-  messages: FullscreenMessages;
 }
 
-export interface FullscreenDefaultsProviderProps extends Partial<
-  Omit<FullscreenDefaults, 'messages'>
-> {
-  messages?: Partial<FullscreenMessages> | undefined;
+export interface FullscreenDefaultsProviderProps extends Partial<FullscreenDefaults> {
   children?: ReactNode | undefined;
 }
 
@@ -62,7 +58,11 @@ export interface UseFullscreenOptions {
   onFullscreenError?: ((error: FullscreenError) => void) | undefined;
   mode?: FullscreenPolicyMode | undefined;
   navigationUI?: FullscreenNavigationUI | undefined;
-  messages?: Partial<FullscreenMessages> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * control's (`enter`, `exit`) and the announcements (`entered`, `exited`).
+   */
+  messages?: PartialMessages<FullscreenMessages> | undefined;
 }
 
 /**
@@ -77,7 +77,8 @@ export interface FullscreenHandle {
   readonly supported: boolean;
   /** The last refusal, cleared on the next entry. */
   readonly error: FullscreenError | null;
-  readonly messages: FullscreenMessages;
+  /** The family's words in the language in force, with the region's `messages` laid over them. */
+  readonly t: FamilyTranslator<FullscreenMessages>;
   enter: (reason?: FullscreenReason, source?: unknown) => void;
   exit: (reason?: FullscreenReason, source?: unknown) => void;
   toggle: (reason?: FullscreenReason, source?: unknown) => void;

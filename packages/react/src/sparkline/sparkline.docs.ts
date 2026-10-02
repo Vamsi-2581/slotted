@@ -201,7 +201,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'The description, formatted and translated',
       source:
-        "<Sparkline\n  data={fillRate}\n  formatOptions={{ style: 'percent', maximumFractionDigits: 1 }}\n  label=\"Fill rate\"\n/>;\n\n<SparklineDefaultsProvider\n  locale=\"pt-BR\"\n  messages={{\n    up: '{last}, subiu {change} desde {first}',\n    down: '{last}, caiu {change} desde {first}',\n    flat: '{last}, sem variação desde {first}',\n    noData: 'sem dados',\n  }}\n>\n  <App />\n</SparklineDefaultsProvider>;",
+        '<Sparkline\n  data={fillRate}\n  formatOptions={{ style: \'percent\', maximumFractionDigits: 1 }}\n  label="Fill rate"\n/>;\n\n<SlottedProvider locale="pt-BR" catalogs={{ \'pt-BR\': PT_BR }}>\n  <App />\n</SlottedProvider>;',
     }),
   },
 ];
@@ -293,13 +293,19 @@ export const REACT_SPARKLINE_DOCS = {
         'Sparkline',
         'A formatter of your own for the description, in place of Intl',
       ],
-      ['locale', 'string', '—', 'Sparkline', 'BCP 47, for the description’s numbers'],
+      [
+        'locale',
+        'string',
+        '—',
+        'Sparkline',
+        'BCP 47, for the description’s numbers; the language in force when absent',
+      ],
       [
         'messages',
         'Partial<SparklineMessages>',
         '—',
         'Sparkline',
-        'The four sentences: up, down and flat with {last}, {change} and {first}, and noData',
+        'Words laid over the language in force, key by key: up, down and flat with {last}, {change} and {first}, and noData',
       ],
     ]),
     events: [] satisfies EventRow[],
@@ -330,7 +336,7 @@ export const REACT_SPARKLINE_DOCS = {
         'SparklineDefaults',
         '—',
         'Application',
-        'Sets curve, area, marker, locale, formatOptions and messages once for everything below it; a prop still wins',
+        'Sets curve, area, marker and formatOptions once for everything below it; a prop still wins',
       ],
     ]),
     accessibility: [

@@ -74,7 +74,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      'A mark in a password while Caps Lock is on and the control has focus. Hidden from assistive technology; capsLockLabel is announced once as it turns on.',
+      'A mark in a password while Caps Lock is on and the control has focus. Hidden from assistive technology; the capsLock message is announced once as it turns on.',
   },
   {
     part: 'clear',
@@ -343,8 +343,8 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'text-field-react-composition',
       language: 'tsx',
       label: 'A provider, a ref, and a substituted frame',
-      source: `<TextFieldDefaultsProvider variant="subtle" clearLabel="Limpar">
-  <TextField clearable />
+      source: `<TextFieldDefaultsProvider variant="subtle">
+  <TextField clearable messages={{ clear: 'Limpar' }} />
 </TextFieldDefaultsProvider>;
 
 const ref = useRef<HTMLInputElement>(null);
@@ -535,25 +535,11 @@ export const REACT_TEXT_FIELD_DOCS = {
         'The element’s own type. Any other string an input accepts still reaches the element',
       ],
       [
-        'clearLabel / revealLabel',
-        'string',
-        'Clear / Show password',
-        'TextField, TextFieldDefaultsProvider',
-        'What the two buttons announce. The reveal label does not change with its state — aria-pressed carries that — and both are set once for an application',
-      ],
-      [
-        'copyLabel / copiedLabel / copyFailedLabel',
-        'string',
-        'Copy / Copied / Copy failed',
-        'TextField, TextFieldDefaultsProvider',
-        'The copy button’s name, and the two announcements of its outcome',
-      ],
-      [
-        'capsLockLabel',
-        'string',
-        'Caps Lock is on',
-        'TextField, TextFieldDefaultsProvider',
-        'What a password announces once as Caps Lock turns on while it has focus',
+        'messages',
+        'Partial<TextFieldMessages>',
+        '—',
+        'TextField',
+        'Words laid over the language in force, key by key: clear, reveal and copy name the buttons (reveal does not change with its state — aria-pressed carries that); copied and copyFailed announce a copy’s outcome; capsLock is announced once as Caps Lock turns on in a focused password',
       ],
     ]),
     composition: apiRows([
@@ -587,7 +573,7 @@ export const REACT_TEXT_FIELD_DOCS = {
       ],
       [
         'TextFieldDefaultsProvider',
-        '{ size, variant, mono, clearLabel, revealLabel, copyLabel, copiedLabel, copyFailedLabel, capsLockLabel }',
+        '{ size, variant, mono }',
         '—',
         'a subtree',
         'The decisions an application takes once. size is the one a field outranks, so a control inside a field takes the field’s step',

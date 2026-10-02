@@ -10,7 +10,6 @@ export {
   useMessageScroller,
 } from './message-scroller';
 export {
-  MESSAGE_SCROLLER_MESSAGES,
   MessageScrollerDefaultsProvider,
   useMessageScrollerDefaults,
 } from './message-scroller-defaults';

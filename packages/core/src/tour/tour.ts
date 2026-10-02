@@ -133,11 +133,6 @@ export function tourProgress(steps: readonly TourStepShape[], id: string | null)
   };
 }
 
-/** The English default the defaults providers start from. */
-export function formatTourProgress(position: number, total: number): string {
-  return `${position} of ${total}`;
-}
-
 /**
  * The action an arrow key asks for. In a right-to-left document the next step
  * is to the left, the way a reader's eye moves.

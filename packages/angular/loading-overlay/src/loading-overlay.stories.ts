@@ -37,7 +37,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<div class="slotted-demo-stack">
     <span slText tone="muted">Neither duration set — the layer paints on every flip.</span>
-    <div slLoadingOverlay [loading]="pending()" label="Reconciling September">
+    <div slLoadingOverlay [loading]="pending()" [messages]="{ label: 'Reconciling September' }">
       <div class="slotted-demo-rows">
         <span>ACME Ltda.</span><span>R$ 1 240,00</span> <span>Papelaria Vento Norte</span
         ><span>R$ 318,90</span>
@@ -51,7 +51,7 @@ import {
       [loading]="pending()"
       [delay]="600"
       [minDuration]="600"
-      label="Reconciling"
+      [messages]="{ label: 'Reconciling' }"
     >
       <div class="slotted-demo-rows">
         <span>ACME Ltda.</span><span>R$ 1 240,00</span> <span>Papelaria Vento Norte</span
@@ -71,8 +71,8 @@ class TimingDemo {
 
 interface LoadingOverlayStoryArgs {
   cancellable: boolean;
-  label: string;
   loading: boolean;
+  messages: { label: string };
   scope: LoadingOverlayScope;
   size: LoadingOverlaySize;
   veil: LoadingOverlayVeil;
@@ -179,8 +179,8 @@ const invoices = `
 export const Playground: Story = {
   args: {
     cancellable: false,
-    label: 'Saving changes',
     loading: true,
+    messages: { label: 'Saving changes' },
     scope: 'region',
     size: 'md',
     veil: 'wash',
@@ -197,7 +197,7 @@ export const Playground: Story = {
     [size]="size"
     [veil]="veil"
     [cancellable]="cancellable"
-    [label]="label"
+    [messages]="messages"
   >${billingAddress}</div>
 </div>`,
   }),
@@ -213,7 +213,7 @@ export const Region: Story = {
         <div class="slotted-demo-row">
           <button slButton variant="outline">Focus starts here</button>
         </div>
-        <div slLoadingOverlay label="Saving changes">${billingAddress}</div>
+        <div slLoadingOverlay [messages]="{ label: 'Saving changes' }">${billingAddress}</div>
         <span slText tone="muted">Nothing below the region moves while the wash is up.</span>`,
     ),
   }),
@@ -239,8 +239,7 @@ export const Page: Story = {
             size="lg"
             [loading]="closing"
             cancellable
-            cancelLabel="Interromper"
-            label="Closing the accounting period"
+            [messages]="{ cancel: 'Interromper', label: 'Closing the accounting period' }"
             description="Do not close this tab. The ledger is locked until this finishes."
             (cancel)="closing = false"
           ></div>
@@ -257,17 +256,17 @@ export const Veil: Story = {
       ${scene(
         'wash',
         'The theme’s own scrim, restated per colour scheme and turned opaque under forced colours. It is the same token dialog and drawer read, so three families dim a surface in one tint.',
-        `<div slLoadingOverlay veil="wash" label="Reconciling September">${invoices}</div>`,
+        `<div slLoadingOverlay veil="wash" [messages]="{ label: 'Reconciling September' }">${invoices}</div>`,
       )}
       ${scene(
         'blur',
         'The wash and a backdrop filter together. Text under it stops being legible before it stops being visible, which is exactly the message the layer is carrying.',
-        `<div slLoadingOverlay veil="blur" label="Reconciling September">${invoices}</div>`,
+        `<div slLoadingOverlay veil="blur" [messages]="{ label: 'Reconciling September' }">${invoices}</div>`,
       )}
       ${scene(
         'none',
         'Nothing is dimmed and nothing is reachable: the panel is what says so. It is the form to reach for when the wait is short enough that a wash would read as a flash.',
-        `<div slLoadingOverlay veil="none" label="Reconciling September">${invoices}</div>`,
+        `<div slLoadingOverlay veil="none" [messages]="{ label: 'Reconciling September' }">${invoices}</div>`,
       )}
     </div>`,
   }),
@@ -300,7 +299,7 @@ export const Sizes: Story = {
             `<div
               slLoadingOverlay
               size="${size}"
-              label="Reconciling September"
+              [messages]="{ label: 'Reconciling September' }"
               description="1 284 entries"
             >${invoices}</div>`,
           ),
@@ -319,7 +318,7 @@ export const Shapes: Story = {
         'The mark above the two lines above the control, centred. It is the arrangement for a card, a panel or anything with room to spare in the block axis.',
         `<div
           slLoadingOverlay
-          label="Importing 4 812 rows"
+          [messages]="{ label: 'Importing 4 812 rows' }"
           description="About a minute left."
           cancellable
         >${billingAddress}</div>`,
@@ -329,7 +328,7 @@ export const Shapes: Story = {
         'Nothing is dropped: the mark moves beside the text, the two lines stack next to it, and the control goes to the end of the row. Sixty pixels tall carrying what the column carried.',
         `<div
           slLoadingOverlay
-          label="Importing 4 812 rows"
+          [messages]="{ label: 'Importing 4 812 rows' }"
           description="About a minute left."
           cancellable
         >${invoices}</div>`,
@@ -338,7 +337,7 @@ export const Shapes: Story = {
         'A small region keeps the mark',
         'Under 220 pixels across, or 88 down, the words go and the panel gives up its ground. They are not lost: the live region holds the same sentence, which is where it was doing the work for the reader who needed it.',
         `<div class="slotted-demo-measure">
-          <div slLoadingOverlay label="Loading the sparkline">
+          <div slLoadingOverlay [messages]="{ label: 'Loading the sparkline' }">
             <div slCard>
               <div slCardBody>
                 <span slText tone="muted" size="sm">Receita</span>
@@ -376,8 +375,7 @@ export const Cancel: Story = {
             slLoadingOverlay
             [loading]="state !== 'idle'"
             cancellable
-            [cancelLabel]="state === 'stopping' ? 'Interrompendo…' : 'Interromper'"
-            [label]="state === 'stopping' ? 'Rolling the batch back' : 'Importing 4 812 rows'"
+            [messages]="{ cancel: state === 'stopping' ? 'Interrompendo…' : 'Interromper', label: state === 'stopping' ? 'Rolling the batch back' : 'Importing 4 812 rows' }"
             [description]="
               state === 'stopping'
                 ? 'Nothing has been committed.'
@@ -408,7 +406,7 @@ export const Focus: Story = {
             [loading]="saving"
             cancellable
             [minDuration]="1600"
-            label="Saving changes"
+            [messages]="{ label: 'Saving changes' }"
             (cancel)="saving = false"
             (reveal)="field.focus()"
           >
@@ -439,7 +437,7 @@ export const Indicator: Story = {
       'A wait with a number on it',
       'The mark is a projection slot and the default is the contained loader. A determinate wait projects progress-indicator’s own slProgressBar, and the family that owns a measured quantity draws it — this one has no value input and never will.',
       `
-        <div slLoadingOverlay label="Uploading contrato.pdf" description="2,4 MB of 3,9 MB">
+        <div slLoadingOverlay [messages]="{ label: 'Uploading contrato.pdf' }" description="2,4 MB of 3,9 MB">
           <div slLoadingOverlayIndicator slProgressBar [value]="62" label="Uploaded" hideLabel></div>
           ${invoices}
         </div>`,
@@ -456,10 +454,9 @@ export const Content: Story = {
         'Longer than the English one that was measured. The panel wraps it, keeps its own measure, and never truncates — the announcement holds the same sentence whole for the reader who would otherwise lose it.',
         `<div
           slLoadingOverlay
-          label="A reconciliar os lançamentos do período com o extrato bancário importado"
+          [messages]="{ label: 'A reconciliar os lançamentos do período com o extrato bancário importado', cancel: 'Interromper' }"
           description="Interromper agora deixaria metade do período conciliado."
           cancellable
-          cancelLabel="Interromper"
         >${billingAddress}</div>`,
       )}
       ${scene(
@@ -469,7 +466,7 @@ export const Content: Story = {
           <div
             slLoadingOverlay
             size="sm"
-            label="Uploading conciliacao-bancaria-setembro-2026-consolidado-final.pdf"
+            [messages]="{ label: 'Uploading conciliacao-bancaria-setembro-2026-consolidado-final.pdf' }"
           >${invoices}</div>
         </div>`,
         'stack',
@@ -485,12 +482,12 @@ export const Composition: Story = {
       ${scene(
         'The region is the element the page already has',
         'The selector is a bare attribute, so the region is a section here rather than a div the family inserted. Your own attributes and listeners stay on it.',
-        `<section slLoadingOverlay label="Reconciling September">${invoices}</section>`,
+        `<section slLoadingOverlay [messages]="{ label: 'Reconciling September' }">${invoices}</section>`,
       )}
       ${scene(
         'The control is the consumer’s own',
         'slLoadingOverlayCancel takes the part and the press. The family’s own control paint is written :not([data-ui]), so the slButton keeps its own — the part stays the part, and only the paint steps back.',
-        `<div slLoadingOverlay label="Importing 4 812 rows" cancellable>
+        `<div slLoadingOverlay [messages]="{ label: 'Importing 4 812 rows' }" cancellable>
           <button slLoadingOverlayCancel slButton variant="outline" size="sm">Interromper</button>
           ${invoices}
         </div>`,
@@ -498,7 +495,7 @@ export const Composition: Story = {
       ${scene(
         'The instance, from the template',
         'exportAs reaches painted(), which is not the same signal as loading: with minDuration holding, the layer is still up after the data has arrived.',
-        `<div slLoadingOverlay #overlay="slLoadingOverlay" [minDuration]="600" label="Reconciling September">
+        `<div slLoadingOverlay #overlay="slLoadingOverlay" [minDuration]="600" [messages]="{ label: 'Reconciling September' }">
           ${invoices}
         </div>
         <span slText tone="muted">painted(): {{ overlay.painted() }}</span>`,
@@ -514,14 +511,14 @@ export const Accessibility: Story = {
       ${scene(
         'One wait, one announcement',
         'A visually-hidden role="status" holds the label while the layer blocks and is emptied afterwards, because emptying a live region announces nothing. loadedLabel opts into a second message.',
-        `<div slLoadingOverlay label="Saving changes" loadedLabel="Changes saved">
+        `<div slLoadingOverlay [messages]="{ label: 'Saving changes' }" loadedLabel="Changes saved">
           ${billingAddress}
         </div>`,
       )}
       ${scene(
         'The wait can also be silent',
         'live="off" renders no live region at all, for a page that already announces the same wait somewhere else — a route transition that speaks for the whole screen, say.',
-        `<div slLoadingOverlay live="off" label="Saving changes">${invoices}</div>`,
+        `<div slLoadingOverlay live="off" [messages]="{ label: 'Saving changes' }">${invoices}</div>`,
       )}
     </div>`,
   }),

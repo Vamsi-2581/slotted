@@ -158,10 +158,11 @@ export abstract class SlTableFilterBase {
    * around it when it is not stated.
    */
   readonly columnLabel = input<string | undefined>(undefined);
-  /** The trigger's whole accessible name, replacing the one built from labels. */
+  /**
+   * The trigger's whole accessible name, replacing the one the catalog writes.
+   * It is the trigger's `aria-label`, which no other input reaches.
+   */
   readonly label = input<string | undefined>(undefined);
-  /** The operator chooser's own name. Defaults to the table's label. */
-  readonly operatorLabel = input<string | undefined>(undefined);
   /**
    * Whether the panel is drawn at the end of the document. On by default, and
    * that is not a preference: a framed table clips its own overflow, so an
@@ -181,7 +182,8 @@ export abstract class SlTableFilterBase {
   readonly open = model(false);
   readonly draft = signal<FilterDescriptor>(emptyFilter('text'));
 
-  readonly labels = computed(() => this.table.resolvedLabels());
+  /** The table's words, which the panel speaks in. */
+  readonly t = this.table.t;
 
   protected readonly start = computed(
     () => this.defaultOperator() ?? (kindDefaultOperator(this.kind) as string),
@@ -191,16 +193,13 @@ export abstract class SlTableFilterBase {
     () => this.operators() ?? (operatorsFor(this.kind) as readonly string[]),
   );
 
-  private readonly format = computed(() => {
-    const labels = this.labels();
-    return {
-      join: (join: FilterJoin) => labels.filterJoins[join] ?? join,
-      operator: (operator: FilterOperator) => labels.filterOperators[operator] ?? operator,
-    };
-  });
+  private readonly format = {
+    join: (join: FilterJoin) => this.t(`filterJoins.${join}`),
+    operator: (operator: FilterOperator) => this.t(`filterOperators.${operator}`),
+  };
 
   operatorName(operator: string) {
-    return this.format().operator(operator as FilterOperator);
+    return this.format.operator(operator as FilterOperator);
   }
 
   /** Every operator as a labelled option, so the closed chooser names its own. */
@@ -209,7 +208,7 @@ export abstract class SlTableFilterBase {
   );
 
   joinName(join: FilterJoin) {
-    return this.format().join(join);
+    return this.format.join(join);
   }
 
   readonly filtered = computed(() => isFilterActive(this.readValue()));
@@ -217,12 +216,11 @@ export abstract class SlTableFilterBase {
   readonly name = computed(() => {
     const stated = this.label();
     if (stated !== undefined) return stated;
-    const labels = this.labels();
-    const column = this.columnLabel() ?? this.header?.column() ?? '';
+    const column = this.columnName();
     const committed = this.readValue();
     return isFilterActive(committed)
-      ? `${labels.filter} ${column}: ${describeFilter(committed, this.format())}`.trim()
-      : `${labels.filter} ${column}`.trim();
+      ? this.t('filterApplied', { column, filter: describeFilter(committed, this.format) })
+      : this.t('filterColumn', { column }).trim();
   });
 
   /** One condition, or the two the panel can hold. */
@@ -267,9 +265,8 @@ export abstract class SlTableFilterBase {
   }
 
   operandLabel(condition: Condition, slot: 0 | 1) {
-    const labels = this.labels();
-    if (operandCount(condition.operator as FilterOperator) < 2) return labels.filterValue;
-    return slot === 0 ? labels.filterFrom : labels.filterTo;
+    if (operandCount(condition.operator as FilterOperator) < 2) return this.t('filterValue');
+    return slot === 0 ? this.t('filterFrom') : this.t('filterTo');
   }
 
   context(index: number): TableFilterOperandContext {
@@ -302,12 +299,6 @@ export abstract class SlTableFilterBase {
     return emptyFilter(this.kind, this.start() as never) as FilterDescriptor;
   }
 
-  private operandsWord(count: 0 | 1 | 2) {
-    const labels = this.labels();
-    if (count === 0) return labels.filterOperandsNone;
-    return count === 1 ? labels.filterOperandsOne : labels.filterOperandsTwo;
-  }
-
   setOperator(index: number, operator: string) {
     const condition = this.rows()[index] ?? { operator: this.start() };
     const before = operandCount(condition.operator as FilterOperator);
@@ -325,7 +316,9 @@ export abstract class SlTableFilterBase {
     /* The panel grows a field or loses two. Announced, because a form that
        changes shape under a reader who cannot see it says nothing otherwise. */
     if (after !== before) {
-      this.announce(`${this.operatorName(operator)}, ${this.operandsWord(after)}`);
+      this.announce(
+        this.t('filterOperands', { operator: this.operatorName(operator), count: after }),
+      );
     }
   }
 
@@ -337,7 +330,7 @@ export abstract class SlTableFilterBase {
 
     this.draft.set(withCondition(this.draft(), index, next as never));
     if (index === 0 && this.allowed() >= 2 && !wasActive && isConditionActive(this.kind, next)) {
-      this.announce(this.labels().filterConditionAdded);
+      this.announce(this.t('filterConditionAdded'));
     }
   }
 
@@ -348,7 +341,7 @@ export abstract class SlTableFilterBase {
 
     this.draft.set(withCondition(this.draft(), index, next as never));
     if (index === 0 && this.allowed() >= 2 && !wasActive && isConditionActive(this.kind, next)) {
-      this.announce(this.labels().filterConditionAdded);
+      this.announce(this.t('filterConditionAdded'));
     }
   }
 
@@ -363,19 +356,18 @@ export abstract class SlTableFilterBase {
   applyDraft(source: unknown, reason: TableFilterReason = 'pointer') {
     const next = normalizeFilter(this.draft());
     this.request(next, reason, source);
+    const column = this.columnName();
     this.announce(
       next
-        ? `${this.labels().filter} ${this.columnName()}: ${describeFilter(next, this.format())}`.trim()
-        : `${this.labels().filter} ${this.columnName()}, ${this.labels().filterCleared}`.trim(),
+        ? this.t('filterApplied', { column, filter: describeFilter(next, this.format) })
+        : this.t('filterCleared', { column }),
     );
     this.open.set(false);
   }
 
   clear(source: unknown) {
     this.draft.set(this.blank());
-    this.announce(
-      `${this.labels().filter} ${this.columnName()}, ${this.labels().filterCleared}`.trim(),
-    );
+    this.announce(this.t('filterCleared', { column: this.columnName() }));
     this.request(null, 'clear', source);
     this.open.set(false);
   }
@@ -456,12 +448,12 @@ export abstract class SlTableFilterBase {
           @for (row of owner().rows(); track $index) {
             @if ($index === 1) {
               <div data-part="filter-join">
-                <span data-label>{{ owner().labels().filterJoin }}</span>
+                <span data-label>{{ owner().t('filterJoin') }}</span>
                 <div
                   slRadioGroup
                   orientation="horizontal"
                   size="sm"
-                  [attr.aria-label]="owner().labels().filterJoin"
+                  [attr.aria-label]="owner().t('filterJoin')"
                   [value]="owner().draft().join"
                   (valueChange)="owner().setJoin($event.value ?? 'and')"
                 >
@@ -480,7 +472,7 @@ export abstract class SlTableFilterBase {
                   size="sm"
                   [fullWidth]="true"
                   [items]="owner().operatorItems()"
-                  [attr.aria-label]="owner().operatorLabel() ?? owner().labels().filterOperator"
+                  [attr.aria-label]="owner().t('filterOperator')"
                   [value]="row.operator"
                   (valueChange)="owner().setOperator($index, $any($event))"
                 >
@@ -518,10 +510,10 @@ export abstract class SlTableFilterBase {
               [disabled]="!owner().canClear()"
               (click)="owner().clear($event)"
             >
-              {{ owner().labels().filterClear }}
+              {{ owner().t('filterClear') }}
             </button>
             <button slButton type="button" size="sm" (click)="owner().applyDraft($event)">
-              {{ owner().labels().filterApply }}
+              {{ owner().t('filterApply') }}
             </button>
           </div>
         </div>
@@ -647,8 +639,7 @@ export class SlTableNumberFilter extends SlTableFilterBase {
           slDateRangePicker
           size="sm"
           [locale]="locale()"
-          [startLabel]="context.label(0)"
-          [endLabel]="context.label(1)"
+          [messages]="{ start: context.label(0), end: context.label(1) }"
           [value]="range(context.condition)"
           (valueChange)="context.setBoth(iso($event.value?.start), iso($event.value?.end))"
           (keydown.enter)="context.apply()"
@@ -768,8 +759,7 @@ function dateTimeOf(text: unknown): PlainDateTime | null {
           [options]="options()"
           [min]="timeOf(min())"
           [max]="timeOf(max())"
-          [startLabel]="context.label(0)"
-          [endLabel]="context.label(1)"
+          [messages]="{ start: context.label(0), end: context.label(1) }"
           [value]="range(context.condition)"
           (valueChange)="context.setBoth(iso($event.value?.start), iso($event.value?.end))"
         >
@@ -887,8 +877,7 @@ export class SlTableTimeFilter extends SlTableFilterBase {
           [step]="step()"
           [min]="dateTimeOf(min())"
           [max]="dateTimeOf(max())"
-          [startLabel]="context.label(0)"
-          [endLabel]="context.label(1)"
+          [messages]="{ start: context.label(0), end: context.label(1) }"
           [value]="range(context.condition)"
           (valueChange)="context.setBoth(iso($event.value?.start), iso($event.value?.end))"
         >
@@ -992,8 +981,8 @@ export class SlTableDateTimeFilter extends SlTableFilterBase {
         [value]="answer(context.condition.value)"
         (valueChange)="context.set(0, $event.value === 'true')"
       >
-        <div slRadio value="true">{{ trueLabel() }}</div>
-        <div slRadio value="false">{{ falseLabel() }}</div>
+        <div slRadio value="true">{{ t('true') }}</div>
+        <div slRadio value="false">{{ t('false') }}</div>
       </div>
     </ng-template>`,
   standalone: true,
@@ -1003,9 +992,6 @@ export class SlTableDateTimeFilter extends SlTableFilterBase {
 export class SlTableBooleanFilter extends SlTableFilterBase {
   override readonly kind = 'boolean' as const;
   readonly value = model<BooleanFilter | null>(null);
-  /** What the two answers are called. */
-  readonly trueLabel = input('Yes');
-  readonly falseLabel = input('No');
 
   answer(value: unknown) {
     return value === undefined || value === null ? '' : String(value);
@@ -1070,8 +1056,8 @@ export class SlTableBooleanFilter extends SlTableFilterBase {
               <input
                 slTextFieldInput
                 [value]="query()"
-                [attr.aria-label]="searchLabel() ?? labels().filterSearch"
-                [attr.placeholder]="searchLabel() ?? labels().filterSearch"
+                [attr.aria-label]="t('filterSearch')"
+                [attr.placeholder]="t('filterSearch')"
                 (input)="search($event)"
               />
             </div>
@@ -1079,7 +1065,7 @@ export class SlTableBooleanFilter extends SlTableFilterBase {
         }
 
         @if (shown().length === 0) {
-          <p data-part="filter-empty">{{ emptyLabel() ?? labels().filterEmpty }}</p>
+          <p data-part="filter-empty">{{ t('filterEmpty') }}</p>
         } @else {
           <div data-part="filter-list">
             <div data-part="filter-option" data-covering>
@@ -1089,7 +1075,7 @@ export class SlTableBooleanFilter extends SlTableFilterBase {
                 [indeterminate]="someCovered(context)"
                 (checkedChange)="coverAll(context, !allCovered(context))"
               >
-                {{ selectAllLabel() ?? labels().filterSelectAll }}
+                {{ t('filterSelectAll') }}
               </span>
               <span data-count>{{ shown().length }}</span>
             </div>
@@ -1133,12 +1119,6 @@ export class SlTableSetFilter extends SlTableFilterBase {
    * knows; without it any typed value is admitted.
    */
   readonly options = input<readonly TableFilterOption[]>([]);
-  /** The word shown when the search matches nothing. */
-  readonly emptyLabel = input<string | undefined>(undefined);
-  /** The search field's name and placeholder. */
-  readonly searchLabel = input<string | undefined>(undefined);
-  /** The covering checkbox's label. */
-  readonly selectAllLabel = input<string | undefined>(undefined);
   /**
    * Whether the panel carries a search. Unstated, it appears once there are
    * `searchThreshold` values.
@@ -1218,7 +1198,7 @@ export class SlTableSetFilter extends SlTableFilterBase {
   search(event: Event) {
     this.query.set((event.target as HTMLInputElement).value);
     /* A list that shortens under a reader who cannot see it says nothing. */
-    this.announce(`${this.shown().length} ${this.labels().filterMatches}`);
+    this.announce(this.t('filterMatches', { count: this.shown().length }));
   }
 
   hold(context: TableFilterOperandContext, value: string, next: boolean) {

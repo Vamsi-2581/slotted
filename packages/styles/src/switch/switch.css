@@ -39,7 +39,7 @@
     );
     --_travel: calc(var(--_thumb-size) + var(--_gutter));
     --_font-size: var(--slotted-control-font-size-md, 13px);
-    --_gap: var(--slotted-control-gap-md, 8px);
+    --_gap: var(--slotted-control-label-gap-md, 12px);
     --_line-height: var(--slotted-switch-line-height, var(--slotted-line-height-md, 1.5));
     /**
      * The height the label's line is missing before it is as tall as the pill,
@@ -353,19 +353,19 @@
   [data-ui='switch'][data-part='root'][data-size='sm'] {
     --_thumb-size: var(--slotted-control-icon-size-sm, 14px);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
-    --_gap: var(--slotted-control-gap-sm, 6px);
+    --_gap: var(--slotted-control-label-gap-sm, 8px);
   }
 
   [data-ui='switch'][data-part='root'][data-size='md'] {
     --_thumb-size: var(--slotted-control-icon-size-md, 16px);
     --_font-size: var(--slotted-control-font-size-md, 13px);
-    --_gap: var(--slotted-control-gap-md, 8px);
+    --_gap: var(--slotted-control-label-gap-md, 12px);
   }
 
   [data-ui='switch'][data-part='root'][data-size='lg'] {
     --_thumb-size: var(--slotted-control-icon-size-lg, 18px);
     --_font-size: var(--slotted-control-font-size-lg, 14px);
-    --_gap: var(--slotted-control-gap-lg, 8px);
+    --_gap: var(--slotted-control-label-gap-lg, 12px);
   }
 
   /* ── States ───────────────────────────────────────────────────────────

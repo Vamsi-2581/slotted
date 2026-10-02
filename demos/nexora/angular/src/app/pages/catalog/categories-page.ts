@@ -334,7 +334,7 @@ import { phoneSignal } from '../../core/layout/phone';
               occupy: the four figures, and a tree of rows whose labels are
               text placeholders the family already varies in width by row.
             -->
-            <div slSkeletonRegion label="Reading the categories" [loading]="true">
+            <div slSkeletonRegion [messages]="{ label: 'Reading the categories' }" [loading]="true">
               <div slStack [gap]="6">
                 <div slGrid [columns]="phone() ? 2 : 4" minItemWidth="xs" [gap]="4">
                   @for (figure of figureLabels; track figure) {

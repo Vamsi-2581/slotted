@@ -3,6 +3,12 @@ import { createWidthGate } from '@slotted/core/measure';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import { SlAppShellNav } from '@slotted/angular/app-shell';
+import { injectMessages } from '@slotted/angular/i18n';
+import {
+  sideNavigationMessages,
+  type PartialMessages,
+  type SideNavigationMessages,
+} from '@slotted/core/i18n';
 import {
   afterNextRender,
   booleanAttribute,
@@ -26,7 +32,6 @@ import { injectSideNavigationDefaults } from './side-navigation-defaults';
 import type {
   SideNavigationExpandedReason,
   SideNavigationFlyoutReason,
-  SideNavigationMessages,
   SideNavigationMode,
   SideNavigationSize,
   SideNavigationTruncate,
@@ -37,7 +42,6 @@ export type {
   SideNavigationDefaults,
   SideNavigationExpandedReason,
   SideNavigationFlyoutReason,
-  SideNavigationMessages,
   SideNavigationMode,
   SideNavigationSize,
   SideNavigationTruncate,
@@ -133,7 +137,11 @@ export class SlSideNavigation {
   readonly compactAt = input<number | undefined, number | string | undefined>(undefined, {
     transform: (state) => (state === undefined ? undefined : numberAttribute(state)),
   });
-  readonly messages = input<Partial<SideNavigationMessages> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force: the landmark's name
+   * (`navigation`). A static `aria-label` still wins.
+   */
+  readonly messages = input<PartialMessages<SideNavigationMessages> | undefined>(undefined);
 
   /** One output for one transition, carrying the reason and the event. */
   readonly valueChangeRequest = output<ChangeRequest<string | null>>();
@@ -156,13 +164,11 @@ export class SlSideNavigation {
   readonly resolvedLandmark = computed(
     () => this.landmark() ?? (this.shell === null ? this.defaults.landmark : false),
   );
-  readonly resolvedMessages = computed<SideNavigationMessages>(() => ({
-    ...this.defaults.messages,
-    ...this.messages(),
-  }));
+  /** The family's words in the language in force, with this column's `messages` laid over them. */
+  readonly t = injectMessages(sideNavigationMessages, this.messages);
 
   protected readonly ariaLabel = computed(() =>
-    this.resolvedLandmark() ? (this.writtenLabel ?? this.resolvedMessages().navigation) : null,
+    this.resolvedLandmark() ? (this.writtenLabel ?? this.t('navigation')) : null,
   );
 
   /** Whether the root is under `compactAt`, measured. */

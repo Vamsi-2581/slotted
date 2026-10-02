@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/description-list/contract.json';
+import { SlottedProvider } from '../i18n';
 import { DescriptionList } from './description-list';
 import { copyToClipboard } from './description-list-clipboard';
 import { DescriptionListDefaultsProvider } from './description-list-defaults';
@@ -371,28 +373,36 @@ describe('DescriptionListDescription', () => {
     expect(screen.getByText('Not provided')).toHaveAttribute('data-ui', 'visually-hidden');
   });
 
-  it('takes the placeholder text from the instance, then the provider', () => {
+  it('takes the placeholder text from the description, then the list messages, then the language', () => {
     const { rerender } = render(
-      <DescriptionListDefaultsProvider labels={{ placeholder: 'Sem valor' }}>
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
         <DescriptionList>
           <DescriptionListItem>
             <DescriptionListTerm>Owner</DescriptionListTerm>
             <DescriptionListDescription empty />
           </DescriptionListItem>
         </DescriptionList>
-      </DescriptionListDefaultsProvider>,
+      </SlottedProvider>,
+    );
+    expect(screen.getByText('Não informado')).toBeInTheDocument();
+
+    rerender(
+      <DescriptionList messages={{ placeholder: 'Sem valor' }}>
+        <DescriptionListItem>
+          <DescriptionListTerm>Owner</DescriptionListTerm>
+          <DescriptionListDescription empty />
+        </DescriptionListItem>
+      </DescriptionList>,
     );
     expect(screen.getByText('Sem valor')).toBeInTheDocument();
 
     rerender(
-      <DescriptionListDefaultsProvider labels={{ placeholder: 'Sem valor' }}>
-        <DescriptionList>
-          <DescriptionListItem>
-            <DescriptionListTerm>Owner</DescriptionListTerm>
-            <DescriptionListDescription empty placeholder="Não informado" />
-          </DescriptionListItem>
-        </DescriptionList>
-      </DescriptionListDefaultsProvider>,
+      <DescriptionList messages={{ placeholder: 'Sem valor' }}>
+        <DescriptionListItem>
+          <DescriptionListTerm>Owner</DescriptionListTerm>
+          <DescriptionListDescription empty placeholder="Não informado" />
+        </DescriptionListItem>
+      </DescriptionList>,
     );
     expect(screen.getByText('Não informado')).toBeInTheDocument();
   });

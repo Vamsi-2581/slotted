@@ -1,10 +1,5 @@
 export { DataGrid } from './data-grid';
-export {
-  DataGridDefaultsProvider,
-  DEFAULT_DATA_GRID_LABELS,
-  resolveLabels as resolveDataGridLabels,
-  useDataGridDefaults,
-} from './data-grid-defaults';
+export { DataGridDefaultsProvider, useDataGridDefaults } from './data-grid-defaults';
 export { DRAG_COLUMN, EXPANDER_COLUMN, SELECTION_COLUMN } from './data-grid-constants';
 export { usePersistedGridView } from './use-persisted-grid-view';
 export type {
@@ -30,13 +25,11 @@ export type {
   DataGridGroupContext,
   DataGridHandle,
   DataGridHeaderContext,
-  DataGridLabels,
   DataGridMode,
   DataGridPinnedRows,
   DataGridProps,
   DataGridQueryRequest,
   DataGridReason,
-  DataGridResolvedLabels,
   DataGridRowsReorderEvent,
   DataGridRowHeight,
   DataGridSelectionMode,

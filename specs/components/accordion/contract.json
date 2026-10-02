@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "accordion",
   "ui": "accordion",
+  "catalog": {
+    "group": "Layout",
+    "summary": "Stacked sections that expand and collapse."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/accordion/",
   "itemFamily": "collapsible",
   "roles": {

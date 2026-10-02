@@ -967,9 +967,9 @@ export const ANGULAR_EVENT_CALENDAR_DOCS = {
       [
         'locale',
         'string',
-        'runtime',
-        'slEventCalendar, provideEventCalendarDefaults',
-        'BCP 47; decides the first day and the clock',
+        'provideSlotted',
+        'slEventCalendar',
+        'BCP 47; decides the first day and the clock. Unset, the language in force decides',
       ],
       [
         'timeZone',
@@ -993,11 +993,11 @@ export const ANGULAR_EVENT_CALENDAR_DOCS = {
         'The clock',
       ],
       [
-        'labels',
-        'Partial<EventCalendarLabels>',
-        'English',
-        'slEventCalendar, provideEventCalendarDefaults',
-        'Every word, merged over the provider’s',
+        'messages',
+        'Partial<EventCalendarMessages>',
+        '—',
+        'slEventCalendar',
+        'Words laid over the language in force, key by key; a group (previous, next, view, empty) is laid over entry by entry',
       ],
       [
         'ng-template[slEventCalendarEvent]',
@@ -1092,11 +1092,8 @@ export class TeamCalendar {
         label: 'Defaults once, for the application',
         source: `bootstrapApplication(App, {
   providers: [
-    provideEventCalendarDefaults({
-      locale: 'pt-BR',
-      timeZone: 'America/Sao_Paulo',
-      labels: { today: 'Hoje', allDay: 'Dia inteiro' },
-    }),
+    provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }),
+    provideEventCalendarDefaults({ timeZone: 'America/Sao_Paulo' }),
   ],
 });`,
       }),

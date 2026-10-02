@@ -13,9 +13,6 @@ export type StatusIndicatorMark = 'dot' | 'icon';
 export type StatusIndicatorSize = 'sm' | 'md' | 'lg';
 export type StatusIndicatorLive = 'off' | 'polite' | 'assertive';
 
-/** What a reader hears when the page showed no words. Replaceable per status. */
-export type StatusIndicatorLabels = Partial<Record<StatusIndicatorStatus, string>>;
-
 export const STATUS_INDICATOR_DEFAULT_STATUS: StatusIndicatorStatus = 'neutral';
 
 /**
@@ -34,26 +31,6 @@ export const STATUS_INDICATOR_GLYPHS: Record<StatusIndicatorStatus, GlyphName> =
 export const STATUS_INDICATOR_DEFAULT_MARK: StatusIndicatorMark = 'dot';
 export const STATUS_INDICATOR_DEFAULT_SIZE: StatusIndicatorSize = 'md';
 export const STATUS_INDICATOR_DEFAULT_LIVE: StatusIndicatorLive = 'off';
-
-/**
- * The word a reader hears when the consumer projected no content.
- *
- * It is a table rather than a sentence built at the call site, because it is
- * the one thing every surveyed implementation of this family gets wrong.
- * React Spectrum's page says an `aria-label` “must be provided” and ships a
- * nameless dot when nobody does; Fluent builds one from its own
- * `DEFAULT_STRINGS`, which is English and cannot be replaced. Here the table
- * is the fallback and the whole of it is replaceable in one decision, through
- * `provideStatusIndicatorDefaults`.
- */
-export const STATUS_INDICATOR_LABELS: Required<StatusIndicatorLabels> = {
-  neutral: 'Neutral',
-  info: 'Information',
-  success: 'Success',
-  warning: 'Warning',
-  danger: 'Error',
-  unknown: 'Unknown',
-};
 
 /**
  * What `live` writes on the host. The names are the platform's: `status` is a

@@ -5,35 +5,15 @@ export type { ColorFormat };
 export type ColorPickerSize = 'sm' | 'md' | 'lg';
 
 export interface ColorPickerDefaults {
-  alphaLabel: string;
-  areaLabel: string;
-  eyedropperLabel: string;
   format: ColorFormat;
-  formatLabel: string;
-  gamutLabel: string;
-  hueLabel: string;
-  inputLabel: string;
   presets: readonly string[] | undefined;
-  presetsLabel: string;
-  previousLabel: string;
   size: ColorPickerSize;
-  triggerLabel: string;
 }
 
 const FALLBACK: ColorPickerDefaults = {
-  alphaLabel: 'Opacity',
-  areaLabel: 'Saturation and brightness',
-  eyedropperLabel: 'Pick a colour from the screen',
   format: 'hex',
-  formatLabel: 'Notation',
-  gamutLabel: 'Outside sRGB: the screen shows the nearest colour.',
-  hueLabel: 'Hue',
-  inputLabel: 'Colour',
   presets: undefined,
-  presetsLabel: 'Presets',
-  previousLabel: 'Restore',
   size: 'md',
-  triggerLabel: 'Choose a colour',
 };
 
 export const COLOR_PICKER_DEFAULTS = new InjectionToken<ColorPickerDefaults>(
@@ -41,7 +21,10 @@ export const COLOR_PICKER_DEFAULTS = new InjectionToken<ColorPickerDefaults>(
   { providedIn: 'root', factory: () => FALLBACK },
 );
 
-/** An application decides once its notation, its palette and its words. */
+/**
+ * An application decides once its notation, its palette and its size. The
+ * words come from the language in force (`provideSlotted`).
+ */
 export function provideColorPickerDefaults(defaults: Partial<ColorPickerDefaults>) {
   return {
     provide: COLOR_PICKER_DEFAULTS,

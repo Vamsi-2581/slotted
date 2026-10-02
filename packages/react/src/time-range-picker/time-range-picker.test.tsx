@@ -1,10 +1,12 @@
 import { plainTime } from '@slotted/core/date';
 import type { PlainTime } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/time-range-picker/contract.json';
+import { SlottedProvider } from '../i18n';
 import { TimeRangePicker, TimeRangePickerDefaultsProvider, TimeRangePickerPreset } from './index';
 import type { TimeRange, TimeRangePickerHandle } from './index';
 
@@ -90,7 +92,7 @@ describe('what it is made of', () => {
   });
 
   it('carries the dialog role, and names the list by the current tab', () => {
-    render(<TRP defaultOpen locale="pt-BR" startLabel="Início" endLabel="Fim" />);
+    render(<TRP defaultOpen locale="pt-BR" messages={{ start: 'Início', end: 'Fim' }} />);
 
     expect(surface()).toHaveAttribute('role', 'dialog');
     expect(trigger()).toHaveAttribute('aria-haspopup', 'dialog');
@@ -105,7 +107,7 @@ describe('what it is made of', () => {
   });
 
   it('says what to choose, and what is wrong', () => {
-    const empty = render(<TRP defaultOpen startLabel="Início" endLabel="Fim" />);
+    const empty = render(<TRP defaultOpen messages={{ start: 'Início', end: 'Fim' }} />);
     expect(part('hint')).toHaveTextContent('Início: choose a time');
     expect(list('start')).toHaveAttribute('aria-describedby', part('hint').id);
     empty.unmount();
@@ -153,16 +155,22 @@ describe('what it is made of', () => {
 
 describe('what the frame says', () => {
   it('shows the placeholder and names itself for choosing while nothing is chosen', () => {
-    render(<TRP chooseLabel="Escolher horário" />);
+    render(<TRP messages={{ choose: 'Escolher horário' }} />);
     expect(trigger()).toHaveAttribute('aria-label', 'Escolher horário');
     expect(part('summary')).toHaveAttribute('data-placeholder');
     expect(part('summary')).toHaveTextContent('Escolher horário');
   });
 
   it('carries both ends and the duration once the run is whole', () => {
-    render(<TRP changeLabel="Alterar horário" defaultValue={RUN} locale="pt-BR" />);
+    render(
+      <TRP
+        defaultValue={RUN}
+        locale="pt-BR"
+        messages={{ change: 'Alterar horário, {start} – {end}, {length}' }}
+      />,
+    );
     const name = trigger().getAttribute('aria-label') ?? '';
-    expect(name).toContain('Alterar horário');
+    expect(name).toMatch(/^Alterar horário, /);
     expect(name).toContain('14');
     expect(name).toContain('16');
     expect(name).toMatch(/2 h 30 min|2 hr 30 min/);
@@ -272,7 +280,7 @@ describe('what each list refuses', () => {
       <TRP
         defaultOpen
         defaultValue={{ start: t(17), end: null }}
-        emptyLabel="Nada depois"
+        messages={{ empty: 'Nada depois' }}
         max={t(17)}
         minLength={900}
         unavailableOptions="hide"
@@ -583,14 +591,37 @@ describe('ownership', () => {
 
   it('reads the defaults an application set once', () => {
     render(
-      <TimeRangePickerDefaultsProvider chooseLabel="Escolher" nowLabel="Já" step={1800}>
+      <TimeRangePickerDefaultsProvider step={1800}>
         <TRP defaultOpen />
       </TimeRangePickerDefaultsProvider>,
     );
-    expect(trigger()).toHaveAttribute('aria-label', 'Escolher');
-    expect(part('now')).toHaveTextContent('Já');
     expect(optionFor('start', '00:15')).toBeUndefined();
     expect(optionFor('start', '00:30')).toBeDefined();
+  });
+
+  it('changes its words and its time format together with the language in force', () => {
+    const inLocale = (locale: string) => (
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale={locale}>
+        <TimeRangePicker defaultValue={RUN} />
+      </SlottedProvider>
+    );
+    const { rerender } = render(inLocale('pt-BR'));
+
+    expect(trigger().getAttribute('aria-label')).toMatch(/^Alterar período, /);
+    expect(part('summary')).toHaveTextContent('14:00 – 16:30');
+
+    rerender(inLocale('en-US'));
+    expect(trigger().getAttribute('aria-label')).toMatch(/^Change range, /);
+    expect(part('summary')).toHaveTextContent(/0?2:00\sPM – 0?4:30\sPM/);
+  });
+
+  it('names the limit in the language in force', () => {
+    render(
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+        <TimeRangePicker defaultOpen maxLength={4 * 3600} minLength={1800} />
+      </SlottedProvider>,
+    );
+    expect(part('limit')).toHaveTextContent(/^de 30 min a 4 h/);
   });
 
   it('mutes, locks and marks the frame', () => {

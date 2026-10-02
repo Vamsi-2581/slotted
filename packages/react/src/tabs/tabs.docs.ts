@@ -103,13 +103,13 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'tabs-react-playground',
       language: 'tsx',
       label: 'A set of views over one panel',
-      source: `<Tabs defaultValue="resumo">
-  <TabList aria-label="Pedido">
-    <Tab value="resumo">Resumo</Tab>
-    <Tab value="itens">Itens</Tab>
+      source: `<Tabs defaultValue="summary">
+  <TabList aria-label="Order">
+    <Tab value="summary">Summary</Tab>
+    <Tab value="items">Items</Tab>
   </TabList>
-  <TabPanel value="resumo">Entrega prevista para 12 de setembro.</TabPanel>
-  <TabPanel value="itens">Três itens.</TabPanel>
+  <TabPanel value="summary">Delivery expected on September 12.</TabPanel>
+  <TabPanel value="items">Three items.</TabPanel>
 </Tabs>;`,
     }),
   },
@@ -134,12 +134,12 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A row of views, and a column of them',
       source: `<Tabs defaultValue="a" orientation="vertical">
-  <TabList aria-label="Configurações">
-    <Tab value="a">Perfil</Tab>
-    <Tab value="b">Notificações</Tab>
+  <TabList aria-label="Settings">
+    <Tab value="a">Profile</Tab>
+    <Tab value="b">Notifications</Tab>
   </TabList>
-  <TabPanel value="a">Nome e foto.</TabPanel>
-  <TabPanel value="b">Avisos por e-mail.</TabPanel>
+  <TabPanel value="a">Name and photo.</TabPanel>
+  <TabPanel value="b">Email notices.</TabPanel>
 </Tabs>;`,
     }),
   },
@@ -192,10 +192,10 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'One tab out of reach, and a whole family',
       source: `<Tabs defaultValue="a">
-  <TabList aria-label="Pedido">
-    <Tab value="a">Disponível</Tab>
+  <TabList aria-label="Order">
+    <Tab value="a">Available</Tab>
     <Tab disabled value="b">
-      Indisponível
+      Unavailable
     </Tab>
   </TabList>
   <TabPanel value="a">…</TabPanel>
@@ -230,7 +230,7 @@ const scenes: ReferenceSceneMeta[] = [
   onValueChange={setActive}
   value={active}
 >
-  <TabList aria-label="Consultas">
+  <TabList aria-label="Queries">
     {queries.map((query) => (
       <Tab dismissLabel={\`Fechar \${query}\`} dismissible key={query} value={query}>
         {query}
@@ -251,7 +251,7 @@ const scenes: ReferenceSceneMeta[] = [
       source: `// Nothing to write: the list scrolls, the controls appear when they are
 // needed, and the selected tab is brought into view on every change.
 <Tabs defaultValue="v1">
-  <TabList aria-label="Versões">{versions.map(renderTab)}</TabList>
+  <TabList aria-label="Versions">{versions.map(renderTab)}</TabList>
 </Tabs>;`,
     }),
   },
@@ -264,12 +264,12 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Selection and navigation in one control',
       source: `<Tabs onValueChange={(value) => navigate(\`/pedido/\${value}\`)} value={view}>
-  <TabList aria-label="Pedido">
-    <Tab href="/pedido/resumo" value="resumo">
-      Resumo
+  <TabList aria-label="Order">
+    <Tab href="/order/summary" value="summary">
+      Summary
     </Tab>
-    <Tab href="/pedido/itens" value="itens">
-      Itens
+    <Tab href="/order/items" value="items">
+      Items
     </Tab>
   </TabList>
 </Tabs>;`,
@@ -284,7 +284,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Long, unbroken and right-to-left',
       source: `<Tabs defaultValue="a">
-  <TabList aria-label="Conteúdo extremo">
+  <TabList aria-label="Extreme content">
     <Tab value="a">sha256:9f86d081884c7d659a2feaa0c55ad015</Tab>
     <Tab value="b">بيانات التسليم</Tab>
   </TabList>
@@ -301,10 +301,10 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'A provider, a nav, and a toolbar beside the list',
       source: `<TabsDefaultsProvider size="sm" variant="contained">
   <Tabs defaultValue="a" render={(props) => <section {...props} />}>
-    <TabList aria-label="Pedido" render={(props) => <nav {...props} />} />
+    <TabList aria-label="Order" render={(props) => <nav {...props} />} />
     <TabActions>
-      <Toolbar aria-label="Ações do pedido" size="sm">
-        <Button variant="ghost">Exportar</Button>
+      <Toolbar aria-label="Order actions" size="sm">
+        <Button variant="ghost">Export</Button>
       </Toolbar>
     </TabActions>
   </Tabs>
@@ -459,7 +459,7 @@ export const REACT_TABS_DOCS = {
         'string',
         '—',
         'Tab',
-        'The accessible name of that control. Required whenever it is drawn: “Fechar clientes.sql” says what closes, where “Fechar” alone says only that something does',
+        'The accessible name of that control. Required whenever it is drawn: “Close customers.sql” says what closes, where “Close” alone says only that something does',
       ],
       [
         'href',
@@ -536,12 +536,12 @@ export const REACT_TABS_DOCS = {
   data-fit="auto"
   data-activation-direction="forward"
 >
-  <div data-part="list" role="tablist" aria-label="Pedido" tabindex="-1">
+  <div data-part="list" role="tablist" aria-label="Order" tabindex="-1">
     <div data-part="item" role="presentation" data-selected>
       <button data-part="tab" role="tab" id="t-a" aria-controls="p-a" aria-selected="true">
-        <span data-part="label">Resumo</span>
+        <span data-part="label">Summary</span>
       </button>
-      <button data-part="dismiss" tabindex="-1" aria-label="Fechar Resumo" />
+      <button data-part="dismiss" tabindex="-1" aria-label="Close Summary" />
     </div>
   </div>
   <div data-part="actions">…</div>

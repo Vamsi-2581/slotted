@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "calendar",
   "ui": "calendar",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Month grid for choosing a date or a range."
+  },
   "controlPart": "grid",
   "controlRole": "grid",
   "rootRole": null,
@@ -79,7 +83,7 @@
     "weekNumbers": ["prop", "defaults", "off"],
     "fixedWeeks": ["prop", "defaults", "off"],
     "outsideDays": ["prop", "defaults", "shown with one month, hidden with more"],
-    "locale": ["prop", "defaults", "runtime"],
+    "locale": ["prop", "slotted", "en-US"],
     "timeZone": ["prop", "defaults", "runtime"],
     "firstDayOfWeek": ["prop", "defaults", "locale"],
     "calendar": ["prop", "defaults", "gregory"]
@@ -89,15 +93,13 @@
       "calendar",
       "firstDayOfWeek",
       "fixedWeeks",
-      "locale",
       "months",
-      "nextLabel",
       "outsideDays",
-      "previousLabel",
       "timeZone",
       "weekNumbers"
     ]
   },
+  "messages": ["next", "previous"],
   "imperative": ["focus", "focusDate"],
   "container": {
     "name": "slotted-calendar",

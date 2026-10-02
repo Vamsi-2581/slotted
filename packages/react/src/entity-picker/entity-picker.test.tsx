@@ -1,11 +1,12 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { StrictMode, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/entity-picker/contract.json';
 import { Field, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { EntityPicker } from './entity-picker';
-import { EntityPickerDefaultsProvider } from './entity-picker-defaults';
 import type { Entity, EntityPickerProps, EntitySource } from './entity-picker.types';
 
 const PEOPLE: Entity[] = [
@@ -42,6 +43,11 @@ const press = (key: string, options: Record<string, unknown> = {}) =>
   fireEvent.keyDown(document.activeElement ?? document.body, { key, ...options });
 const type = (value: string) => fireEvent.change(input(), { target: { value } });
 const highlighted = () => input().getAttribute('aria-activedescendant');
+/** A pointer press on the input: focus on pointerdown, then the click. */
+const pressInput = () => {
+  act(() => input().focus());
+  fireEvent.click(input());
+};
 
 describe('EntityPicker', () => {
   it('draws every part it declares somewhere in its states', async () => {
@@ -64,14 +70,16 @@ describe('EntityPicker', () => {
       </StrictMode>,
     );
     await screen.findByRole('gridcell', { name: 'Bruno Costa, bruno@acme.com' });
-    act(() => input().focus());
+    pressInput();
     await screen.findByRole('option', { name: /Ana Silva.*acme/ });
     expect(asked[0]?.query).toBe('');
   });
 
   it('opens on focus with favorites and recent, and searches the empty query', async () => {
     const { asked, source } = recordingSource();
-    render(<Picker favorites={[PEOPLE[2]!]} recent={[PEOPLE[0]!]} source={source} />);
+    render(
+      <Picker favorites={[PEOPLE[2]!]} openOn="focus" recent={[PEOPLE[0]!]} source={source} />,
+    );
     act(() => input().focus());
     await screen.findByRole('listbox');
     const groups = await screen.findAllByRole('group');
@@ -89,7 +97,7 @@ describe('EntityPicker', () => {
     const option = await screen.findByRole('option', { name: /Bruno Costa/ });
     expect(option.querySelector("[data-part='match']")?.textContent).toBe('Bru');
     expect(asked.at(-1)?.query).toBe('bru');
-    await screen.findByText('1 results');
+    await screen.findByText('1 result');
   });
 
   it('chooses by keyboard, with the record on the request, and closes', async () => {
@@ -189,7 +197,7 @@ describe('EntityPicker', () => {
   it('lists the chosen first on an empty query in multiple', async () => {
     const { source } = recordingSource();
     render(<Picker defaultValue={['bruno']} selectionMode="multiple" source={source} />);
-    act(() => input().focus());
+    pressInput();
     const groups = await screen.findAllByRole('group');
     expect(groups[0]?.firstChild?.textContent).toBe('Chosen');
   });
@@ -389,16 +397,16 @@ describe('EntityPicker', () => {
     expect(data.getAll('reviewers')).toEqual(['ana', 'bruno']);
   });
 
-  it('reads its words from the defaults provider, and its own win', async () => {
+  it('speaks the language in force, and its own messages win', async () => {
     const { source } = recordingSource({ fail: true });
     render(
-      <EntityPickerDefaultsProvider labels={{ error: 'Sem resposta', retry: 'De novo' }}>
-        <Picker labels={{ retry: 'Outra vez' }} source={source} />
-      </EntityPickerDefaultsProvider>,
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Picker messages={{ retry: 'Outra vez' }} source={source} />
+      </SlottedProvider>,
     );
     act(() => input().focus());
     type('a');
-    await screen.findByText('Sem resposta');
+    await screen.findByText('Não foi possível carregar os resultados');
     expect(screen.getByRole('option', { name: 'Outra vez' })).toBeInTheDocument();
   });
 
@@ -437,7 +445,7 @@ describe('EntityPicker', () => {
     const root = document.querySelector("[data-ui='entity-picker'][data-part='root']")!;
     expect(root).toHaveAttribute('role', 'group');
     expect(root.querySelector("[data-part='scope'] [data-ui='select']")).not.toBeNull();
-    act(() => input().focus());
+    pressInput();
     await waitFor(() => expect(asked.at(-1)?.scope).toBe('people'));
   });
 
@@ -449,5 +457,92 @@ describe('EntityPicker', () => {
     press('ArrowDown');
     expect(onKeyDown).toHaveBeenCalled();
     await screen.findByRole('listbox');
+  });
+
+  describe('openOn', () => {
+    const expanded = () => input().getAttribute('aria-expanded');
+
+    it('opens on a press on the input by default, once, with reason pointer', () => {
+      const onOpenChange = vi.fn();
+      render(<Picker items={PEOPLE} onOpenChange={onOpenChange} />);
+      pressInput();
+      expect(expanded()).toBe('true');
+      expect(onOpenChange).toHaveBeenCalledTimes(1);
+      expect(onOpenChange).toHaveBeenCalledWith(
+        true,
+        expect.objectContaining({ reason: 'pointer' }),
+      );
+    });
+
+    it('keeps an open popup open on a second press on the input', () => {
+      const onOpenChange = vi.fn();
+      render(<Picker items={PEOPLE} onOpenChange={onOpenChange} />);
+      pressInput();
+      fireEvent.click(input());
+      expect(expanded()).toBe('true');
+      expect(onOpenChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not open when a Tab brings focus in by default', () => {
+      const onOpenChange = vi.fn();
+      render(<Picker items={PEOPLE} onOpenChange={onOpenChange} />);
+      act(() => input().focus());
+      expect(expanded()).toBe('false');
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    it('opens on typing by default', () => {
+      render(<Picker items={PEOPLE} />);
+      act(() => input().focus());
+      type('bru');
+      expect(expanded()).toBe('true');
+    });
+
+    it('keeps the popup closed on a press whose handler prevented it', () => {
+      const onOpenChange = vi.fn();
+      render(
+        <Picker
+          items={PEOPLE}
+          onClick={(event) => event.preventDefault()}
+          onOpenChange={onOpenChange}
+        />,
+      );
+      pressInput();
+      expect(expanded()).toBe('false');
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    it('under manual, typing filters and a press only places the caret; ArrowDown opens', () => {
+      const onOpenChange = vi.fn();
+      render(<Picker items={PEOPLE} onOpenChange={onOpenChange} openOn="manual" />);
+      pressInput();
+      expect(expanded()).toBe('false');
+      type('bru');
+      expect(expanded()).toBe('false');
+      expect(input()).toHaveValue('bru');
+      expect(onOpenChange).not.toHaveBeenCalled();
+      press('ArrowDown');
+      expect(expanded()).toBe('true');
+      expect(onOpenChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('under focus, a focus opens, and a press that focuses opens exactly once', () => {
+      const onOpenChange = vi.fn();
+      render(<Picker items={PEOPLE} onOpenChange={onOpenChange} openOn="focus" />);
+      act(() => input().focus());
+      expect(expanded()).toBe('true');
+      expect(onOpenChange).toHaveBeenCalledTimes(1);
+      fireEvent.click(input());
+      expect(expanded()).toBe('true');
+      expect(onOpenChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not open on a press when read-only', () => {
+      const onOpenChange = vi.fn();
+      render(<Picker items={PEOPLE} onOpenChange={onOpenChange} readOnly />);
+      pressInput();
+      expect(expanded()).toBe('false');
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
   });
 });

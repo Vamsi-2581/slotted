@@ -90,7 +90,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'Puts the message away. Rendered when dismissible, named by closeLabel, and sized from its glyph plus a step of air, floored at the WCAG 2.2 minimum so the target holds at every density (R2).',
+      'Puts the message away. Rendered when dismissible, named by the catalog’s close, and sized from its glyph plus a step of air, floored at the WCAG 2.2 minimum so the target holds at every density (R2).',
   },
   {
     part: 'progress',
@@ -111,7 +111,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'The region once, and a message from anywhere',
       source:
-        "// Once, near the root of the application.\n<ToastRegion />;\n\n// From anywhere at all — an event handler, an interceptor, a saga.\ntoast.show({\n  title: 'Rascunho salvo',\n  description: 'Tudo desde as 14h02 está guardado.',\n});",
+        "// Once, near the root of the application.\n<ToastRegion />;\n\n// From anywhere at all — an event handler, an interceptor, a saga.\ntoast.show({\n  title: 'Draft saved',\n  description: 'Everything since 2:02 PM is saved.',\n});",
     }),
   },
   {
@@ -123,7 +123,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'The five, and what each one says',
       source:
-        "// accent is information, secondary a neutral note, success something\n// finished, warning something that needs attention, danger something failed.\ntoast.show({ title: 'Não foi possível enviar', tone: 'danger' });",
+        "// accent is information, secondary a neutral note, success something\n// finished, warning something that needs attention, danger something failed.\ntoast.show({ title: 'Could not send', tone: 'danger' });",
     }),
   },
   {
@@ -135,7 +135,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Three paintings of one tone',
       source:
-        "toast.show({ title: 'Fatura enviada', tone: 'success', variant: 'raised' });\ntoast.show({ title: 'Fatura enviada', tone: 'success', variant: 'soft' });\ntoast.show({ title: 'Falha no envio', tone: 'danger', variant: 'solid' });",
+        "toast.show({ title: 'Invoice sent', tone: 'success', variant: 'raised' });\ntoast.show({ title: 'Invoice sent', tone: 'success', variant: 'soft' });\ntoast.show({ title: 'Sending failed', tone: 'danger', variant: 'solid' });",
     }),
   },
   {
@@ -158,7 +158,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A duration, and a message that has none',
       source:
-        "toast.show({ title: 'Exportado', duration: 8000, progress: true });\n\n// 0 never expires. A message that must be answered rather than read is one\n// of the two cases the family gives no duration to on its own.\ntoast.show({ title: 'Sessão expirada', tone: 'danger', duration: 0 });",
+        "toast.show({ title: 'Exported', duration: 8000, progress: true });\n\n// 0 never expires. A message that must be answered rather than read is one\n// of the two cases the family gives no duration to on its own.\ntoast.show({ title: 'Session expired', tone: 'danger', duration: 0 });",
     }),
   },
   {
@@ -170,7 +170,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Undo, and the message that waits for it',
       source:
-        "const id = toast.show({\n  title: 'Mensagem arquivada',\n  actions: <Button onClick={() => restore(id)}>Desfazer</Button>,\n});",
+        "const id = toast.show({\n  title: 'Message archived',\n  actions: <Button onClick={() => restore(id)}>Undo</Button>,\n});",
     }),
   },
   {
@@ -182,7 +182,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Loading, then whichever way it went',
       source:
-        "toast.promise(publish(), {\n  loading: { title: 'Publicando', icon: <Spinner size=\"sm\" /> },\n  success: (version) => ({ title: `Versão ${version} no ar`, tone: 'success' }),\n  error: { title: 'Falha ao publicar', tone: 'danger' },\n});",
+        "toast.promise(publish(), {\n  loading: { title: 'Publishing', icon: <Spinner size=\"sm\" /> },\n  success: (version) => ({ title: `Version ${version} is live`, tone: 'success' }),\n  error: { title: 'Publishing failed', tone: 'danger' },\n});",
     }),
   },
   {
@@ -239,7 +239,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A string that has to wrap somewhere',
       source:
-        "toast.show({\n  title: 'Implantação recusada',\n  description: digest,\n  tone: 'danger',\n  duration: 0,\n});",
+        "toast.show({\n  title: 'Deployment rejected',\n  description: digest,\n  tone: 'danger',\n  duration: 0,\n});",
     }),
   },
   {
@@ -340,11 +340,11 @@ export const REACT_TOAST_DOCS = {
         'The key that moves focus into the region, written the way a reader says it — F6, Alt+T, Shift+F8',
       ],
       [
-        'label',
-        'string',
-        'Notifications',
+        'messages',
+        'Partial<ToastMessages>',
+        '—',
         'ToastRegion',
-        'The name a reader finds the region by in their landmark list, and what the hotkey lands in',
+        'Words laid over the language in force, key by key: the name a reader finds the region by in their landmark list, and what the hotkey lands in (label), and what each close control announces (close)',
       ],
       [
         'tone',
@@ -373,13 +373,6 @@ export const REACT_TOAST_DOCS = {
         'true',
         'toast.show',
         'Renders the control that closes the message. A touch reader has no Escape key, so the pointer needs a target',
-      ],
-      [
-        'closeLabel',
-        'string',
-        'Close',
-        'toast.show',
-        'What that control announces. Falls back to ToastDefaultsProvider, which is where an application translates it once',
       ],
       [
         'progress',
@@ -497,7 +490,7 @@ export const REACT_TOAST_DOCS = {
       ],
       [
         'ToastDefaultsProvider',
-        '{ placement, attach, stacking, tone, variant, limit, duration, hotkey, label, closeLabel, … }',
+        '{ placement, attach, stacking, tone, variant, limit, duration, hotkey, … }',
         '—',
         'a subtree',
         'Sets every axis once for every region and every message under it; an explicit value on one message still wins',
@@ -527,7 +520,7 @@ export const REACT_TOAST_DOCS = {
         language: 'tsx',
         label: 'Anatomy, as it reaches the DOM',
         source:
-          '<section\n  aria-label="Notifications"\n  data-ui="toast"\n  data-part="root"\n  data-placement="bottom-end"\n  data-attach="portal"\n  data-stacking="list"\n  data-swipe="true"\n  tabIndex={-1}\n>\n  <ol data-part="list">\n    <li data-part="item" data-tone="success" data-variant="raised" data-open="" tabIndex={-1}>\n      <span aria-hidden="true" data-part="icon" />\n      <div data-part="content">\n        <div data-part="title">Fatura enviada</div>\n        <p data-part="description">Uma cópia foi para o financeiro.</p>\n      </div>\n      <button aria-label="Close" data-part="close" type="button" />\n      <div data-part="actions">…</div>\n      <div aria-hidden="true" data-part="progress" />\n    </li>\n  </ol>\n</section>;',
+          '<section\n  aria-label="Notifications"\n  data-ui="toast"\n  data-part="root"\n  data-placement="bottom-end"\n  data-attach="portal"\n  data-stacking="list"\n  data-swipe="true"\n  tabIndex={-1}\n>\n  <ol data-part="list">\n    <li data-part="item" data-tone="success" data-variant="raised" data-open="" tabIndex={-1}>\n      <span aria-hidden="true" data-part="icon" />\n      <div data-part="content">\n        <div data-part="title">Invoice sent</div>\n        <p data-part="description">A copy went to finance.</p>\n      </div>\n      <button aria-label="Close" data-part="close" type="button" />\n      <div data-part="actions">…</div>\n      <div aria-hidden="true" data-part="progress" />\n    </li>\n  </ol>\n</section>;',
       }),
       defineSnippet({
         id: 'toast-theming',

@@ -1,3 +1,4 @@
+import type { FamilyTranslator, FieldMessages, PartialMessages } from '@slotted/core/i18n';
 import type {
   AllHTMLAttributes,
   AriaAttributes,
@@ -29,12 +30,6 @@ export type FieldLabelPlacement = 'top' | 'side';
  * says so once.
  */
 export type FieldNecessity = 'mark' | 'optional' | 'words' | 'none';
-
-/** The two words `optional` and `words` write, so an application translates them once. */
-export interface FieldNecessityWords {
-  required: string;
-  optional: string;
-}
 
 /**
  * What a control tells the field about its own value, so the field can draw the
@@ -71,11 +66,8 @@ export type FieldDescribedSlot = 'indicator' | 'help' | 'description' | 'counter
 /** What an application sets once for every field under it. */
 export interface FieldDefaults {
   disabled: boolean | undefined;
-  /** The accessible name of every help control, until one states its own. */
-  helpLabel: string;
   labelPlacement: FieldLabelPlacement;
   necessity: FieldNecessity;
-  necessityWords: FieldNecessityWords;
   readOnly: boolean | undefined;
   size: FieldSize;
 }
@@ -83,11 +75,8 @@ export interface FieldDefaults {
 export interface FieldDefaultsProviderProps {
   children?: ReactNode | undefined;
   disabled?: boolean | undefined;
-  helpLabel?: string | undefined;
   labelPlacement?: FieldLabelPlacement | undefined;
   necessity?: FieldNecessity | undefined;
-  /** Merged over the inherited pair, so one word can be replaced alone. */
-  necessityWords?: Partial<FieldNecessityWords> | undefined;
   readOnly?: boolean | undefined;
   size?: FieldSize | undefined;
 }
@@ -102,12 +91,10 @@ export interface FieldContextValue {
   hasCounter: boolean;
   /** Whether the page wrote a header; the header then draws the published count. */
   hasHeader: boolean;
-  helpLabel: string;
   ids: FieldIds;
   invalid: boolean | undefined;
   messageSize: 'sm' | 'md';
   necessity: FieldNecessity;
-  necessityWords: FieldNecessityWords;
   readOnly: boolean | undefined;
   registerControl: () => void;
   /**
@@ -122,6 +109,11 @@ export interface FieldContextValue {
   /** Called by a control this library ships, whenever its value changes. */
   setCount: (count: FieldCount | undefined) => void;
   size: FieldSize;
+  /**
+   * The field's words in the language in force, with this field's `messages`
+   * laid over them: the necessity words and the help control's name.
+   */
+  t: FamilyTranslator<FieldMessages>;
 }
 
 /**
@@ -166,8 +158,11 @@ export interface FieldProps extends Omit<ComponentPropsWithRef<'div'>, 'children
   labelPlacement?: FieldLabelPlacement | undefined;
   /** Defaults to the provider, then to `mark`. */
   necessity?: FieldNecessity | undefined;
-  /** Merged over the provider's pair, for one field that names necessity its own way. */
-  necessityWords?: Partial<FieldNecessityWords> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * necessity words (`optional`, `required`) and the help control's name (`help`).
+   */
+  messages?: PartialMessages<FieldMessages> | undefined;
   /** Unstated rather than `false`. Writes the native `readonly` on the control. */
   readOnly?: boolean | undefined;
   /**

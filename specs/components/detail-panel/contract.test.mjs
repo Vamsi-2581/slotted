@@ -125,7 +125,7 @@ test('reflows the aside under the body instead of hiding it', () => {
   assert.equal(contract.responsive.hidden.declined, true);
   assert.equal(contract.sticky.aside.declined, true);
   assert.equal(contract.roles.aside, 'complementary');
-  assert.equal(contract.messages.aside, 'Detalhes');
+  assert.ok(contract.messages.includes('aside'));
 });
 
 /**
@@ -153,6 +153,5 @@ test('sets the page-header defaults for its subtree from its own level and size'
     'size',
     'scroll',
     'mount',
-    'messages',
   ]);
 });

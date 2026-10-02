@@ -501,9 +501,9 @@ export const Composition: Story = {
     <div className="slotted-demo-grid">
       <Scene
         label="A claim thread"
-        note="A message from the adjuster with its files under the text: links that download, one photo still sending. The provider sets size and locale once for the thread."
+        note="A message from the adjuster with its files under the text: links that download, one photo still sending. The provider sets the size once for the thread."
       >
-        <AttachmentDefaultsProvider locale="en-GB" size="sm">
+        <AttachmentDefaultsProvider size="sm">
           <div className="slotted-demo-stack">
             <Text>Maria Okafor · 14 Sep, 09:12</Text>
             <Text tone="muted">

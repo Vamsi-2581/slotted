@@ -2,8 +2,10 @@ import '@slotted/styles/kbd/kbd.css';
 
 import { Fragment } from 'react';
 
+import { keysMessages } from '@slotted/core/i18n';
 import { resolveShortcut } from '@slotted/core/keys';
 
+import { useMessages } from '../i18n';
 import { KeyElement } from './key-element';
 import { KbdGroupContext, useKbdDefaults, useResolvedPlatform } from './kbd-defaults';
 import type { KbdShortcutRootProps, ShortcutProps } from './kbd.types';
@@ -27,17 +29,18 @@ export function Shortcut({
   disabled,
   keys,
   legends,
+  messages,
   names,
   platform,
   render,
   separator,
   size,
-  thenLabel,
   variant,
   ...nativeProps
 }: ShortcutProps) {
   const defaults = useKbdDefaults();
   const resolvedPlatform = useResolvedPlatform(platform);
+  const t = useMessages(keysMessages, messages);
   const resolvedSize = size ?? defaults.size;
   const resolvedVariant = variant ?? defaults.variant;
 
@@ -46,10 +49,10 @@ export function Shortcut({
       ? undefined
       : resolveShortcut(keys, {
           platform: resolvedPlatform,
+          t,
           legends: legends ?? defaults.legends,
           names: names ?? defaults.names,
           separator: separator ?? defaults.separator,
-          thenLabel: thenLabel ?? defaults.thenLabel,
         });
 
   /**

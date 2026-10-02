@@ -5,6 +5,7 @@ import { applicationConfig, moduleMetadata } from '@storybook/angular-vite';
 
 import { SlAvatar } from '@slotted/angular/avatar';
 import { SlBadge, SlBadgeAnchor } from '@slotted/angular/badge';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlHeading, SlText } from '@slotted/angular/typography';
 import { SlVisuallyHidden } from '@slotted/angular/visually-hidden';
 
@@ -325,7 +326,7 @@ export const Content: Story = {
         ) +
         scene(
           'Another language, decided once',
-          'The provider replaces the six fallback words, so a bare mark announces “Fehler” without a translation call at any call site.',
+          'A catalog for the locale replaces the six fallback words, so a bare mark announces “Fehler” without a translation call at any call site.',
           `<span slStatusIndicator status="danger"></span>` +
             `<span slStatusIndicator status="success">Bereitstellung abgeschlossen</span>` +
             `<span slStatusIndicator status="warning" mark="icon">Zertifikat läuft ab</span>`,
@@ -335,8 +336,13 @@ export const Content: Story = {
   decorators: [
     applicationConfig({
       providers: [
-        provideStatusIndicatorDefaults({
-          labels: { danger: 'Fehler', success: 'Erfolgreich', warning: 'Warnung' },
+        provideSlotted({
+          locale: 'de-DE',
+          catalogs: {
+            'de-DE': {
+              statusIndicator: { danger: 'Fehler', success: 'Erfolgreich', warning: 'Warnung' },
+            },
+          },
         }),
       ],
     }),

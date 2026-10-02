@@ -1,3 +1,4 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createSnapshot, storagePersistence } from '@slotted/core/wizard';
 import type { WizardPersistence } from '@slotted/core/wizard';
@@ -5,6 +6,7 @@ import { createRef, useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/wizard/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Wizard } from './wizard';
 import { useWizardStep } from './wizard-context';
 import { WizardDefaultsProvider } from './wizard-defaults';
@@ -652,17 +654,39 @@ describe('Wizard', () => {
     await waitFor(() => expect(title()).toHaveTextContent('Account'));
   });
 
-  it('takes its wording and layout from the provider', () => {
+  it('takes its layout from the provider and its words from the language in force', () => {
     render(
-      <WizardDefaultsProvider labels={{ next: 'Continuar' }} progress="top">
-        <Wizard>
-          <WizardStep label="Conta" name="account" />
-          <WizardStep label="Envio" name="shipping" />
-        </Wizard>
-      </WizardDefaultsProvider>,
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <WizardDefaultsProvider progress="top">
+          <Wizard messages={{ next: 'Continuar' }}>
+            <WizardStep label="Conta" name="account" />
+            <WizardStep label="Envio" name="shipping" />
+          </Wizard>
+        </WizardDefaultsProvider>
+      </SlottedProvider>,
     );
     expect(next()).toHaveTextContent('Continuar');
     expect(root()).toHaveAttribute('data-progress', 'top');
+    expect(title()).toHaveTextContent('Etapa 1 de 2');
+    expect(screen.getByRole('list')).toHaveAccessibleName('Progresso');
+  });
+
+  it('writes the hour a draft was saved in the locale in force', async () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Wizard onSaveDraft={() => undefined}>
+          <WizardStep label="Conta" name="account">
+            <Text name="email" />
+          </WizardStep>
+        </Wizard>
+      </SlottedProvider>,
+    );
+    fireEvent.click(document.querySelector('[data-part="save-draft"]') as HTMLButtonElement);
+    await waitFor(() =>
+      expect(document.querySelector('[data-part="draft-status"]')).toHaveTextContent(
+        /^Rascunho salvo às \d{2}:\d{2}$/,
+      ),
+    );
   });
 
   it('reaches the imperative actions through its handle', async () => {

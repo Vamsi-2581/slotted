@@ -2,7 +2,9 @@ import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlListboxLabel, SlListboxMeta } from '@slotted/angular/listbox';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it } from 'vitest';
 
 import { SlTransfer, SlTransferFooter, SlTransferItem } from './transfer';
@@ -336,20 +338,44 @@ describe('SlTransfer in a form', () => {
 @Component({
   standalone: true,
   imports: [SlTransfer],
-  providers: [provideTransferDefaults({ size: 'sm', labels: { source: 'Pool' } })],
-  template: `<div slTransfer [items]="items" [labels]="{ target: 'Granted' }"></div>`,
+  providers: [provideTransferDefaults({ size: 'sm' })],
+  template: `<div slTransfer [items]="items" [messages]="{ target: 'Granted' }"></div>`,
 })
 class DefaultsHost {
   readonly items = ITEMS;
 }
 
+@Component({
+  standalone: true,
+  imports: [SlTransfer],
+  template: `<div slTransfer [items]="items"></div>`,
+})
+class LanguageHost {
+  readonly items = ITEMS;
+}
+
 describe('SlTransfer defaults', () => {
-  it('takes its words and its look from the provider, and its own inputs over them', async () => {
+  it('takes its look from the provider, and its own messages over the language', async () => {
     const fixture = TestBed.createComponent(DefaultsHost);
     await settle(fixture);
     const root = document.querySelector('[data-ui="transfer"]')!;
     expect(root.getAttribute('data-size')).toBe('sm');
-    expect(pane('source').querySelector('[data-part="title"]')!.textContent).toBe('Pool');
+    expect(pane('source').querySelector('[data-part="title"]')!.textContent).toBe('Available');
     expect(pane('target').querySelector('[data-part="title"]')!.textContent).toBe('Granted');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', async () => {
+    const locale = signal('pt-BR');
+    TestBed.configureTestingModule({
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const fixture = TestBed.createComponent(LanguageHost);
+    await settle(fixture);
+    const title = () => pane('source').querySelector('[data-part="title"]')!.textContent;
+    expect(title()).toBe('Disponíveis');
+
+    locale.set('en-US');
+    await settle(fixture);
+    expect(title()).toBe('Available');
   });
 });

@@ -6,6 +6,7 @@ import { useRef, useState } from 'react';
 
 import { Button } from '../button';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { Icon } from '../icon';
 import { NumberField, NumberFieldScrub } from './number-field';
 import { NumberFieldDefaultsProvider } from './number-field-defaults';
@@ -285,12 +286,12 @@ export const Locale: Story = {
       <Scene
         label="Set once for the application"
         layout="stack"
-        note="A form where one amount reads 1.234 as a thousand and another as one point two three four is a form that loses money, so the locale is a provider decision rather than a per-field one."
+        note="A form where one amount reads 1.234 as a thousand and another as one point two three four is a form that loses money, so the locale is the application's decision (SlottedProvider) rather than a per-field one."
       >
-        <NumberFieldDefaultsProvider locale="pt-BR">
+        <SlottedProvider locale="pt-BR">
           <NumberField defaultValue={1480.5} />
           <NumberField defaultValue={98765.43} format={{ currency: 'BRL', style: 'currency' }} />
-        </NumberFieldDefaultsProvider>
+        </SlottedProvider>
       </Scene>
     </Grid>
   ),
@@ -450,11 +451,11 @@ function CompositionScenes() {
   return (
     <Grid columns={2}>
       <Scene
-        label="Seven decisions an application takes once"
+        label="Five decisions an application takes once"
         layout="stack"
-        note="The provider carries the appearance, the locale, the clamp policy and the two button names, so a form of twenty amounts repeats none of them. A control that states one itself still wins."
+        note="The provider carries the appearance, the stepper, the format timing and the clamp policy, so a form of twenty amounts repeats none of them. A control that states one itself still wins."
       >
-        <NumberFieldDefaultsProvider locale="pt-BR" stepper="split" variant="subtle">
+        <NumberFieldDefaultsProvider stepper="split" variant="subtle">
           <NumberField defaultValue={3} max={99} min={1} />
           <NumberField defaultValue={12} stepper="stacked" />
         </NumberFieldDefaultsProvider>

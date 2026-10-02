@@ -299,7 +299,7 @@ import { leaveForm } from './leave-form';
                           type="button"
                           data-testid="start-count"
                           [loading]="store.busy() === 'start'"
-                          loadingLabel="Starting"
+                          [messages]="{ loading: 'Starting' }"
                           (click)="start()"
                         >
                           Start counting
@@ -324,7 +324,7 @@ import { leaveForm } from './leave-form';
                           type="button"
                           data-testid="complete-count"
                           [loading]="store.busy() === 'complete'"
-                          loadingLabel="Completing"
+                          [messages]="{ loading: 'Completing' }"
                           (click)="complete()"
                         >
                           Complete the count
@@ -343,7 +343,7 @@ import { leaveForm } from './leave-form';
                           aria-label="Refresh"
                           data-testid="refresh"
                           [loading]="store.loading()"
-                          loadingLabel="Refreshing"
+                          [messages]="{ loading: 'Refreshing' }"
                           (click)="store.load()"
                         >
                           <ng-icon name="lucideRefreshCw" />
@@ -466,7 +466,7 @@ import { leaveForm } from './leave-form';
                 </section>
               }
             } @else {
-              <div slSkeletonRegion label="Reading the count" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the count' }" [loading]="true">
                 <div slStack [gap]="6">
                   <div slGrid [columns]="phone() ? 2 : figureColumns()" minItemWidth="xs" [gap]="4">
                     @for (figure of figureLabels(); track figure) {
@@ -521,7 +521,7 @@ import { leaveForm } from './leave-form';
                   <form
                     slForm
                     data-testid="count-form"
-                    summaryTitle="The count was not submitted"
+                    [messages]="{ summaryTitle: 'The count was not submitted' }"
                     [errors]="store.errors()"
                     (errorsChange)="store.errors.set($event.value)"
                     [loading]="store.busy() === 'submit'"
@@ -641,7 +641,7 @@ import { leaveForm } from './leave-form';
                         type="submit"
                         data-testid="submit-count"
                         [loading]="store.busy() === 'submit'"
-                        loadingLabel="Submitting the count"
+                        [messages]="{ loading: 'Submitting the count' }"
                       >
                         Submit the count
                       </button>

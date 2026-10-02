@@ -1,10 +1,5 @@
 export { Timeline } from './timeline';
-export {
-  DEFAULT_TIMELINE_MESSAGES,
-  useTimeline,
-  useTimelineItem,
-  useTimelineList,
-} from './timeline-context';
+export { useTimeline, useTimelineItem, useTimelineList } from './timeline-context';
 export { TimelineDefaultsProvider, useTimelineDefaults } from './timeline-defaults';
 export { TimelineGroup, TimelineItem, TimelineTime } from './timeline-parts';
 export type {
@@ -21,7 +16,6 @@ export type {
   TimelineLevel,
   TimelineListContextValue,
   TimelineLoadMoreReason,
-  TimelineMessages,
   TimelineMode,
   TimelineOpenReason,
   TimelineOpenRequest,

@@ -9,6 +9,7 @@ import {
   toISODateTime,
   toISOTime,
 } from '@slotted/core/date';
+import type { DataGridMessages, FamilyTranslator } from '@slotted/core/i18n';
 import type { ReactNode } from 'react';
 
 import { Checkbox } from '../checkbox';
@@ -18,11 +19,7 @@ import { NumberField } from '../number-field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
 import { TextField } from '../text-field';
 import { TimeField } from '../time-field';
-import type {
-  DataGridCellContext,
-  DataGridEditorContext,
-  DataGridResolvedLabels,
-} from './data-grid.types';
+import type { DataGridCellContext, DataGridEditorContext } from './data-grid.types';
 
 /** What a cell draws when nothing else says: the formatted text, in one span. */
 export function defaultCellContent<Row>(context: DataGridCellContext<Row>): ReactNode {
@@ -55,7 +52,7 @@ export function dateOf(text: unknown) {
  */
 export function defaultEditor<Row>(
   context: DataGridEditorContext<Row>,
-  labels: DataGridResolvedLabels,
+  t: FamilyTranslator<DataGridMessages>,
   locale: string | undefined,
 ): ReactNode {
   const { column, draft, setDraft, invalid, message } = context;
@@ -138,7 +135,7 @@ export function defaultEditor<Row>(
           variant="plain"
         >
           <SelectTrigger aria-label={name} autoFocus>
-            <SelectValue placeholder={labels.filterAny} />
+            <SelectValue placeholder={t('filterAny')} />
           </SelectTrigger>
           <SelectContent>
             {options.map((option) => (

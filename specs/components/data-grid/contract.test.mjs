@@ -288,12 +288,13 @@ test('gives the filter the compact form the invocation asked for, and the row fo
 });
 
 test('names every operator the engine has, in words and in a symbol', () => {
-  assert.deepEqual(Object.keys(contract.labels.filterOperators), FILTER_OPERATORS);
-  assert.deepEqual(Object.keys(contract.labels.filterSymbols), FILTER_OPERATORS);
-  for (const symbol of Object.values(contract.labels.filterSymbols)) {
-    assert.ok(symbol.length >= 1 && symbol.length <= 2, `${symbol} is one character`);
-  }
-  assert.deepEqual(Object.keys(contract.labels.filterJoins), ['and', 'or']);
+  const group = (name) =>
+    contract.messages
+      .filter((key) => key.startsWith(`${name}.`))
+      .map((key) => key.slice(name.length + 1));
+  assert.deepEqual(group('filterOperators').sort(), [...FILTER_OPERATORS].sort());
+  assert.deepEqual(group('filterSymbols').sort(), [...FILTER_OPERATORS].sort());
+  assert.deepEqual(group('filterJoins'), ['and', 'or']);
 });
 
 test('keeps the edited value where the reader typed it', () => {
@@ -372,7 +373,7 @@ test('explains a column in its header, in its menu and to a reader', () => {
   assert.match(contract.data.columns, /description/);
   assert.match(contract.data.columns, /priority/);
   assert.match(contract.wiring['aria-describedby'], /column-description/);
-  assert.equal(contract.labels.columnHelp, 'About {column}');
+  assert.ok(contract.messages.includes('columnHelp'));
   const f2 = contract.keyboard.find(
     (entry) => entry.key === 'F2' && entry.where === 'on a column header',
   );
@@ -382,8 +383,8 @@ test('explains a column in its header, in its menu and to a reader', () => {
 });
 
 test('announces a hidden column, fits every column, and yields columns to a narrow frame', () => {
-  assert.equal(contract.labels.columnHidden, '{column} hidden');
-  assert.equal(contract.labels.autofitAll, 'Fit all columns');
+  assert.ok(contract.messages.includes('columnHidden'));
+  assert.ok(contract.messages.includes('autofitAll'));
   assert.match(contract.columnState.resize, /Shift/);
   assert.match(contract.columnState.priority, /outOfSpace/);
   assert.match(contract.columnState.priority, /columnsOutOfSpace/);
@@ -434,7 +435,7 @@ test('moves the columns a narrow frame took out into a pop-in in each row', () =
   assert.equal(contract.elements.popin, 'div');
   assert.equal(contract.elements['popin-header'], 'div');
   assert.equal(contract.elements['popin-label'], 'span');
-  assert.equal(contract.labels.popinHeader, 'Details');
+  assert.ok(contract.messages.includes('popinHeader'));
   assert.equal(contract.members['data-grid'].defaults.columnOverflow, 'auto');
   assert.deepEqual(contract.axes.columnOverflow, ['auto', 'popin', 'scroll']);
   assert.deepEqual(contract.resolution.columnOverflow, ['prop', 'defaults', 'auto']);

@@ -204,9 +204,9 @@ const FIELDS: readonly FilterBarField[] = [
             (valueChangeRequest)="store.setFilter($event.value)"
             [query]="store.search()"
             (queryChangeRequest)="store.setSearch($event.value)"
-            [labels]="{ count: countLabel }"
+            [messages]="countMessages"
             [count]="store.rows().length"
-            [total]="store.loaded().length"
+            [total]="store.rows().length === store.loaded().length ? undefined : store.loaded().length"
             [loading]="store.loading()"
           >
             <app-list-view-tools
@@ -235,7 +235,7 @@ const FIELDS: readonly FilterBarField[] = [
                   tone="secondary"
                   type="button"
                   [loading]="store.loading()"
-                  loadingLabel="Reading the accounts again"
+                  [messages]="{ loading: 'Reading the accounts again' }"
                   (click)="store.reload()"
                 >
                   Try again
@@ -245,7 +245,7 @@ const FIELDS: readonly FilterBarField[] = [
           }
           <sl-data-grid
             #grid="slDataGrid"
-            label="Contacts"
+            aria-label="Contacts"
             rowKey="id"
             mode="client"
             variant="framed"
@@ -306,8 +306,8 @@ const FIELDS: readonly FilterBarField[] = [
             <nav
               slDataGridFooter
               slPagination
-              label="Account pages"
-              [labels]="pagerLabels"
+              aria-label="Account pages"
+              [messages]="pagerMessages"
               [count]="store.accountTotal() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
@@ -337,9 +337,8 @@ export class ContactsPage implements OnInit {
   readonly fields = FIELDS;
   readonly pageSizes = CONTACT_ACCOUNT_PAGE_SIZES;
   /** The pager turns accounts, not contacts, and says so in its own words. */
-  readonly pagerLabels = {
-    range: (start: number, end: number, count: number) =>
-      `Accounts ${start}–${end} of ${count.toLocaleString('en-US')}`,
+  readonly pagerMessages = {
+    range: 'Accounts {start}–{end} of {count}',
     pageSize: 'Accounts per page',
   };
   /** The compact size class: the pager leaves its page size at the default. */
@@ -376,8 +375,8 @@ export class ContactsPage implements OnInit {
   });
 
   /** Every number on this screen says what it counts: contacts here, accounts in the pager. */
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total ? `${count} contacts` : `${count} of ${total} contacts`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} contacts', countOnly: '{count} contacts' };
 
   /** The sentence that states the reach of this page, with the numbers of the page itself. */
   readonly scope = computed(() => {

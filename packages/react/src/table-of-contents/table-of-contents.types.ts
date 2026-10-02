@@ -1,3 +1,4 @@
+import type { PartialMessages, TableOfContentsMessages } from '@slotted/core/i18n';
 import type { OutlineEntry } from '@slotted/core/outline';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode, RefObject } from 'react';
@@ -39,30 +40,20 @@ export interface TableOfContentsItemData {
   children?: readonly TableOfContentsItemData[] | undefined;
 }
 
-/** The strings the family writes itself, replaceable once per application. */
-export interface TableOfContentsMessages {
-  /** The landmark's name when the consumer gives none, and the collapsed trigger's fixed text. */
-  navigation: string;
-}
-
 /** What an application sets once for every list under it. */
 export interface TableOfContentsDefaults {
   history: TableOfContentsHistory;
   landmark: boolean;
   layout: TableOfContentsLayout;
   levels: readonly [number, number];
-  messages: TableOfContentsMessages;
   numbered: boolean;
   offset: number;
   size: TableOfContentsSize;
   sticky: boolean;
 }
 
-export interface TableOfContentsDefaultsProviderProps extends Partial<
-  Omit<TableOfContentsDefaults, 'messages'>
-> {
+export interface TableOfContentsDefaultsProviderProps extends Partial<TableOfContentsDefaults> {
   children?: ReactNode | undefined;
-  messages?: Partial<TableOfContentsMessages> | undefined;
 }
 
 /** What the root hands every part under it. */
@@ -139,7 +130,12 @@ export interface TableOfContentsProps extends Omit<
   label?: ReactNode | undefined;
   /** Rows of skeleton in the list's place. */
   loading?: boolean | undefined;
-  messages?: Partial<TableOfContentsMessages> | undefined;
+  /**
+   * Words laid over the catalog of the language in force: the landmark's name
+   * when no `label` is given, and the collapsed trigger's fixed text
+   * (`navigation`). A native `aria-label` still wins.
+   */
+  messages?: PartialMessages<TableOfContentsMessages> | undefined;
   ref?: React.Ref<TableOfContentsHandle> | undefined;
   render?: ((props: TableOfContentsRootProps) => ReactNode) | undefined;
 }

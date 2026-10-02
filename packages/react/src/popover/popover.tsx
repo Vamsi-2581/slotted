@@ -1,5 +1,6 @@
 import '@slotted/styles/popover/popover.css';
 
+import { popoverMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import {
   createContext,
@@ -11,6 +12,7 @@ import {
   useState,
 } from 'react';
 
+import { useMessages } from '../i18n';
 import { usePopoverDefaults } from './popover-defaults';
 import type { PopoverContextValue, PopoverOpenReason, PopoverProps } from './popover.types';
 
@@ -62,7 +64,6 @@ export function Popover({
   arrowPadding,
   autoFocus,
   children,
-  closeLabel,
   closeOnEscape,
   closeOnOutsidePress,
   collisionPadding,
@@ -72,6 +73,7 @@ export function Popover({
   flip,
   hideWhenDetached,
   initialFocus,
+  messages,
   mount,
   onOpenChange,
   open,
@@ -85,6 +87,7 @@ export function Popover({
   width,
 }: PopoverProps) {
   const defaults = usePopoverDefaults();
+  const t = useMessages(popoverMessages, messages);
   const base = useId();
 
   const [own, setOwn] = useState<boolean>(defaultOpen ?? false);
@@ -140,7 +143,6 @@ export function Popover({
     arrowNode,
     arrowPadding: arrowPadding ?? defaults.arrowPadding,
     autoFocus: autoFocus ?? defaults.autoFocus,
-    closeLabel: closeLabel ?? defaults.closeLabel,
     closeOnEscape: closeOnEscape ?? defaults.closeOnEscape,
     closeOnOutsidePress: closeOnOutsidePress ?? defaults.closeOnOutsidePress,
     collisionPadding: collisionPadding ?? defaults.collisionPadding,
@@ -170,6 +172,7 @@ export function Popover({
     sideOffset: sideOffset ?? defaults.sideOffset,
     size: size ?? defaults.size,
     strategy: strategy ?? defaults.strategy,
+    t,
     titleId: `${base}title`,
     toggle,
     triggerNode,

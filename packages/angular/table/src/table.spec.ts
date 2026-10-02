@@ -14,10 +14,13 @@ import type {
   TimeFilter,
 } from '@slotted/core/filter';
 import type { ChangeRequest } from '@slotted/core/state';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { provideTooltipDefaults } from '@slotted/angular/tooltip';
+import { tableMessages } from '@slotted/core/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { SlTable } from './table';
 import { SlTableContent } from './table-content';
-import { provideTableDefaults, TABLE_LABELS } from './table-defaults';
+import { provideTableDefaults } from './table-defaults';
 import type { TableSortDescriptor } from './table-defaults';
 import {
   SlTableDateFilter,
@@ -279,6 +282,25 @@ describe('SlTable', () => {
     const scroll = query(fixture, '[data-part="scroll"]');
     expect(scroll.hasAttribute('tabindex')).toBe(false);
     expect(scroll.hasAttribute('role')).toBe(false);
+  });
+});
+
+describe('the language in force', () => {
+  it('speaks it, and follows a change of it in place', async () => {
+    const locale = signal('pt-BR');
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const expander = query(fixture, '[data-part="expander"]');
+    expect(expander.getAttribute('aria-label')).toBe('Mostrar detalhes');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(expander.getAttribute('aria-label')).toBe('Show details');
   });
 });
 
@@ -669,7 +691,7 @@ describe('the column filter', () => {
       (option.textContent ?? '').trim(),
     );
     expect(offered).toEqual(
-      operatorsFor('text').map((operator) => TABLE_LABELS.filterOperators[operator]),
+      operatorsFor('text').map((operator) => tableMessages.base.filterOperators[operator]),
     );
   });
 
@@ -866,7 +888,7 @@ describe('the column filter', () => {
       (option.textContent ?? '').trim(),
     );
     expect(offered).toEqual(
-      operatorsFor('datetime').map((operator) => TABLE_LABELS.filterOperators[operator]),
+      operatorsFor('datetime').map((operator) => tableMessages.base.filterOperators[operator]),
     );
   });
 

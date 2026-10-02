@@ -159,7 +159,7 @@ import { phoneSignal } from '../../core/layout/phone';
         <div class="work">
           <form
             slForm
-            summaryTitle="This transfer was not written"
+            [messages]="{ summaryTitle: 'This transfer was not written' }"
             [errors]="store.errors()"
             (errorsChange)="store.errors.set($event.value)"
             [loading]="store.creating()"
@@ -412,7 +412,7 @@ import { phoneSignal } from '../../core/layout/phone';
                 type="submit"
                 data-testid="create-transfer"
                 [loading]="store.creating()"
-                loadingLabel="Writing the transfer"
+                [messages]="{ loading: 'Writing the transfer' }"
               >
                 Write the draft
               </button>

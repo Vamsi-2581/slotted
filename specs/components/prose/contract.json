@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "prose",
   "ui": "prose",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Styles long-form HTML text."
+  },
   "pattern": null,
   "patternAbsent": {
     "index": "https://www.w3.org/WAI/ARIA/apg/patterns/",
@@ -85,7 +89,7 @@
     "role": "region",
     "appliesWhen": "overflowing",
     "measuredBy": "@slotted/core/overflow",
-    "name": ["labelledBy", "label", "scrollLabel"],
+    "name": ["labelledBy", "aria-label", "messages.scroll"],
     "focusSelector": "[data-part='scroll'][tabindex]",
     "reason": "A pre or a table wider than the column scrolls sideways, and none of the four surveyed implementations lets a keyboard reach it. Anything that takes focus needs a name and a role or it fails SC 4.1.2, and a block that fits needs neither: a tab stop on it is a tab stop that does nothing. The ring is painted on the markup that is actually operable, which is Adrian Roselli's own selector trick, and it answers :focus-visible rather than :focus because a pointer press inside a tabindex box focuses it.",
     "source": "https://adrianroselli.com/2020/11/under-engineered-responsive-tables.html"
@@ -135,13 +139,13 @@
       "reason": "docs/component-features.md section 10 states it in the family's own sentence: prose does not sanitise content on its own behalf. A component that both styled and sanitised would hide which of the two failed."
     }
   },
+  "messages": ["scroll"],
   "members": {
     "prose": {
       "nativeElement": "div",
       "defaults": {
         "size": "lg",
-        "flow": "normal",
-        "scrollLabel": "Scrollable content"
+        "flow": "normal"
       },
       "capabilities": ["appearance", "arrangement", "size", "wiring"],
       "states": ["default", "hover", "focus-visible"],

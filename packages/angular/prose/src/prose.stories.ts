@@ -286,7 +286,7 @@ export const Scroll: Story = {
   </p>
   ${wideTable}
   <p>The one below fits, and takes neither.</p>
-  <div slProseScroll label="Two rows">
+  <div slProseScroll aria-label="Two rows">
     <table>
       <tbody>
         <tr>

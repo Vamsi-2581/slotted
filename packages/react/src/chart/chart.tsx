@@ -17,12 +17,10 @@ import {
   describeChart,
   describePoint,
   describeZoom,
-  fillMessage,
   firstPoint,
   FULL_ZOOM,
   isDrawn,
   isFullZoom,
-  mergeMessages,
   observeChartTheme,
   placeLayer,
   placeTooltip,
@@ -46,6 +44,7 @@ import type {
   ChartZoom,
 } from '@slotted/core/chart';
 import { mountChartEngine } from '@slotted/core/chart-echarts';
+import { chartMessages } from '@slotted/core/i18n';
 import type { ChartEngine, ChartPointLocation } from '@slotted/core/chart-echarts';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { collapseState } from '@slotted/core/overflow';
@@ -71,6 +70,7 @@ import type {
   ToggleEvent as ReactToggleEvent,
 } from 'react';
 
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import type { GlyphName } from '../icon';
 import { useChartDefaults } from './chart-defaults';
@@ -341,7 +341,7 @@ export function Chart(props: ChartProps) {
     description,
     help,
     actions,
-    messages: messageOverrides,
+    messages,
     size,
     variant,
     palette,
@@ -394,10 +394,8 @@ export function Chart(props: ChartProps) {
 
   const defaults = useChartDefaults();
   const id = useId();
-  const messages = useMemo(
-    () => mergeMessages(defaults.messages, messageOverrides),
-    [defaults.messages, messageOverrides],
-  );
+  const t = useMessages(chartMessages, messages);
+  const appLocale = useLocale();
   const resolved = {
     size: size ?? defaults.size ?? 'md',
     variant: variant ?? defaults.variant ?? 'plain',
@@ -457,9 +455,9 @@ export function Chart(props: ChartProps) {
       stackMode,
       annotations,
       recordKey,
-      locale: locale ?? defaults.locale,
+      locale: locale ?? appLocale,
     }),
-    [data, series, x, y, orientation, stackMode, annotations, recordKey, locale, defaults.locale],
+    [data, series, x, y, orientation, stackMode, annotations, recordKey, locale, appLocale],
   );
   const built = useMemo(() => {
     try {
@@ -699,16 +697,14 @@ export function Chart(props: ChartProps) {
     for (const action of actionsFor) {
       if (action.type === 'active') {
         requestActive(action.point, action.reason, event.nativeEvent);
-        if (action.point)
-          pointAnnouncer.say(describePoint(model, action.point, selectionValue, messages));
+        if (action.point) pointAnnouncer.say(describePoint(model, action.point, selectionValue, t));
         else pointAnnouncer.cancel();
       } else if (action.type === 'select') {
         requestSelection(action.point, 'keyboard', event.nativeEvent);
-        if (action.point)
-          pointAnnouncer.say(describePoint(model, action.point, action.point, messages));
+        if (action.point) pointAnnouncer.say(describePoint(model, action.point, action.point, t));
       } else {
         requestZoom(action.zoom, action.reason, event.nativeEvent);
-        announce(describeZoom(model, action.zoom, messages));
+        announce(describeZoom(model, action.zoom, t));
       }
     }
   };
@@ -719,7 +715,7 @@ export function Chart(props: ChartProps) {
     const point = firstPoint(model);
     if (!point) return;
     requestActive(point, 'keyboard', event.nativeEvent);
-    pointAnnouncer.say(describePoint(model, point, selectionValue, messages));
+    pointAnnouncer.say(describePoint(model, point, selectionValue, t));
   };
 
   /* ── Full screen ─────────────────────────────────────────────────────── */
@@ -843,7 +839,7 @@ export function Chart(props: ChartProps) {
     setLegendFocus(entry.key);
     requestHidden(next, reason, source);
     announce(
-      fillMessage(next.includes(entry.key) ? messages.hidden : messages.shown, {
+      t(next.includes(entry.key) ? 'hidden' : 'shown', {
         series: entry.label,
       }),
     );
@@ -981,19 +977,19 @@ export function Chart(props: ChartProps) {
       focus: () => plot.current?.focus(),
       resetZoom: () => requestZoom(FULL_ZOOM, 'programmatic'),
       toDataURL: () => engine.current?.toDataURL() ?? null,
-      toCsv: () => (model ? chartToCsv(model, messages) : ''),
+      toCsv: () => (model ? chartToCsv(model, t) : ''),
     }),
-    [model, messages, requestZoom],
+    [model, t, requestZoom],
   );
 
   /* ── What the plot says ──────────────────────────────────────────────── */
 
   const summary = waiting
-    ? messages.loading
+    ? t('loading')
     : failed
-      ? messages.error
+      ? t('error')
       : model
-        ? describeChart(model, messages)
+        ? describeChart(model, t)
         : '';
   const titleId = `${id}-title`;
   const descriptionId = `${id}-description`;
@@ -1003,7 +999,7 @@ export function Chart(props: ChartProps) {
     : spec.series.every((entry) => entry.kind === 'line' || entry.kind === 'area')
       ? 'line'
       : 'bar';
-  const table = tableValue && usable && model ? chartTable(model, { messages }) : null;
+  const table = tableValue && usable && model ? chartTable(model, t) : null;
 
   const retry = () => {
     setEngineFailure(null);
@@ -1028,7 +1024,7 @@ export function Chart(props: ChartProps) {
                 <button
                   {...helpLayer.controlProps}
                   aria-controls={`${id}-help`}
-                  aria-label={messages.help}
+                  aria-label={t('help')}
                   data-part="help"
                   type="button"
                 >
@@ -1055,13 +1051,13 @@ export function Chart(props: ChartProps) {
         </div>
         {actions !== undefined ? <div data-part="actions">{actions}</div> : null}
         {resolved.toolbar !== 'none' && usable && model ? (
-          <div aria-label={messages.toolbar} data-part="toolbar" role="toolbar">
+          <div aria-label={t('toolbar')} data-part="toolbar" role="toolbar">
             {zoomable && !isFullZoom(zoomValue) && model.shape === 'cartesian' ? (
               <ToolbarButton
-                label={messages.resetZoom}
+                label={t('resetZoom')}
                 onPress={(_, source) => {
                   requestZoom(FULL_ZOOM, 'clear', source);
-                  announce(describeZoom(model, FULL_ZOOM, messages));
+                  announce(describeZoom(model, FULL_ZOOM, t));
                   plot.current?.focus();
                 }}
                 glyph="rotate-ccw"
@@ -1069,14 +1065,14 @@ export function Chart(props: ChartProps) {
               />
             ) : null}
             <ToolbarButton
-              label={messages.tableView}
+              label={t('tableView')}
               onPress={(reason, source) => requestTable(!tableValue, reason, source)}
               glyph="file-spreadsheet"
               part="view-toggle"
               pressed={tableValue}
             />
             <ToolbarButton
-              label={fullscreenValue ? messages.exitFullscreen : messages.fullscreen}
+              label={fullscreenValue ? t('exitFullscreen') : t('fullscreen')}
               glyph={fullscreenValue ? 'minimize' : 'maximize'}
               onPress={(reason, source) => toggleFullscreen(reason, source)}
               part="fullscreen-toggle"
@@ -1084,19 +1080,19 @@ export function Chart(props: ChartProps) {
             <button
               {...menu.controlProps}
               aria-haspopup="menu"
-              aria-label={messages.more}
+              aria-label={t('more')}
               data-part="menu-trigger"
-              title={messages.more}
+              title={t('more')}
               type="button"
             >
               <Icon>
                 <Glyph name="ellipsis" />
               </Icon>
             </button>
-            <div {...menu.layerProps} aria-label={messages.more} data-part="menu" role="menu">
+            <div {...menu.layerProps} aria-label={t('more')} data-part="menu" role="menu">
               <MenuItem
                 action="view"
-                label={messages.tableView}
+                label={t('tableView')}
                 onPress={(reason, source) => {
                   menu.close();
                   requestTable(!tableValue, reason, source);
@@ -1104,7 +1100,7 @@ export function Chart(props: ChartProps) {
               />
               <MenuItem
                 action="fullscreen"
-                label={fullscreenValue ? messages.exitFullscreen : messages.fullscreen}
+                label={fullscreenValue ? t('exitFullscreen') : t('fullscreen')}
                 onPress={(reason, source) => {
                   menu.close();
                   toggleFullscreen(reason, source);
@@ -1112,18 +1108,18 @@ export function Chart(props: ChartProps) {
               />
               <MenuItem
                 action="csv"
-                label={messages.downloadCsv}
+                label={t('downloadCsv')}
                 onPress={() => {
                   menu.close();
                   download(
                     `${fileName}.csv`,
-                    `data:text/csv;charset=utf-8,${encodeURIComponent(chartToCsv(model, messages))}`,
+                    `data:text/csv;charset=utf-8,${encodeURIComponent(chartToCsv(model, t))}`,
                   );
                 }}
               />
               <MenuItem
                 action="image"
-                label={messages.downloadImage}
+                label={t('downloadImage')}
                 onPress={() => {
                   menu.close();
                   const url = engine.current?.toDataURL();
@@ -1143,7 +1139,7 @@ export function Chart(props: ChartProps) {
   const legendRow =
     showLegend === false ? null : (
       <div
-        aria-label={waiting && (!model || model.shape === 'pie') ? undefined : messages.legend}
+        aria-label={waiting && (!model || model.shape === 'pie') ? undefined : t('legend')}
         data-part="legend"
         onKeyDown={onLegendKeyDown}
         ref={legendNode}
@@ -1167,20 +1163,19 @@ export function Chart(props: ChartProps) {
             <button
               {...moreLayer.controlProps}
               aria-haspopup="true"
-              aria-label={`${messages.legend}: ${collapsed.map((index) => legendEntries[index]?.label).join(', ')}`}
+              aria-label={t('legendMore', {
+                series: new Intl.ListFormat(locale ?? appLocale, { type: 'unit' }).format(
+                  collapsed.map((index) => legendEntries[index]?.label ?? ''),
+                ),
+              })}
               data-part="legend-more"
               hidden={collapsed.length === 0}
               tabIndex={rovingKey === null ? 0 : -1}
               type="button"
             >
-              {fillMessage(messages.moreSeries, { count: collapsed.length })}
+              {t('moreSeries', { count: collapsed.length })}
             </button>
-            <div
-              {...moreLayer.layerProps}
-              aria-label={messages.legend}
-              data-part="menu"
-              role="group"
-            >
+            <div {...moreLayer.layerProps} aria-label={t('legend')} data-part="menu" role="group">
               {collapsed.map((index) => {
                 const entry = legendEntries[index];
                 return entry ? legendItem(entry, index, true) : null;
@@ -1215,12 +1210,10 @@ export function Chart(props: ChartProps) {
           aria-busy={waiting || undefined}
           aria-describedby={description !== undefined ? `${descriptionId} ${summaryId}` : summaryId}
           aria-label={
-            title === undefined
-              ? (nativeProps['aria-label'] ?? messages.roledescription)
-              : undefined
+            title === undefined ? (nativeProps['aria-label'] ?? t('roledescription')) : undefined
           }
           aria-labelledby={title !== undefined ? titleId : undefined}
-          aria-roledescription={messages.roledescription}
+          aria-roledescription={t('roledescription')}
           data-part="plot"
           onBlur={(event) => requestActive(null, 'blur', event.nativeEvent)}
           onFocus={onPlotFocus}
@@ -1272,7 +1265,7 @@ export function Chart(props: ChartProps) {
                     context={overlay.tooltip}
                     indicator={resolved.tooltip.indicator}
                     model={model}
-                    totalLabel={messages.total}
+                    totalLabel={t('total')}
                   />
                 ))
               : null}
@@ -1282,7 +1275,7 @@ export function Chart(props: ChartProps) {
               {renderCenter?.(model) ?? (
                 <>
                   <span data-part="center-value">{model.series[0]!.format(model.total)}</span>
-                  <span data-part="center-label">{messages.total}</span>
+                  <span data-part="center-label">{t('total')}</span>
                 </>
               )}
             </div>
@@ -1296,10 +1289,20 @@ export function Chart(props: ChartProps) {
             >
               <table data-part="table">
                 <caption>
-                  {typeof title === 'string' ? title : null}
                   {table.omitted
-                    ? ` — ${fillMessage(messages.truncated, { shown: table.rows.length, count: table.rows.length + table.omitted })}`
-                    : null}
+                    ? typeof title === 'string'
+                      ? t('truncatedCaption', {
+                          title,
+                          shown: table.rows.length,
+                          count: table.rows.length + table.omitted,
+                        })
+                      : t('truncated', {
+                          shown: table.rows.length,
+                          count: table.rows.length + table.omitted,
+                        })
+                    : typeof title === 'string'
+                      ? title
+                      : null}
                 </caption>
                 <thead>
                   <tr>
@@ -1339,10 +1342,10 @@ export function Chart(props: ChartProps) {
             <div data-part="error">
               {renderError?.() ?? (
                 <ResultState
-                  action={onRetry || engineFailure ? messages.retry : undefined}
+                  action={onRetry || engineFailure ? t('retry') : undefined}
                   onAction={retry}
                   status="error"
-                  text={messages.error}
+                  text={t('error')}
                 />
               )}
             </div>
@@ -1351,10 +1354,10 @@ export function Chart(props: ChartProps) {
             <div data-part="empty">
               {renderEmpty?.(model.empty) ?? (
                 <ResultState
-                  action={model.empty === 'all-hidden' ? messages.showAll : undefined}
+                  action={model.empty === 'all-hidden' ? t('showAll') : undefined}
                   onAction={(source) => requestHidden(NO_KEYS, 'pointer', source)}
                   status={model.empty === 'all-hidden' ? 'no-results' : 'empty'}
-                  text={model.empty === 'all-hidden' ? messages.allHidden : messages.noData}
+                  text={model.empty === 'all-hidden' ? t('allHidden') : t('noData')}
                 />
               )}
             </div>

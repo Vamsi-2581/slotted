@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "time-range-picker",
   "ui": "time-range-picker",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Start and end times with a picker."
+  },
   "controlPart": "control",
   "rootRole": null,
   "contentRole": "dialog",
@@ -110,7 +114,7 @@
       "search": "over the list, once per chosen end, never over the seconds: a list holds at most maxOptions entries",
       "typed": "the predicate runs over the two typed ends once per value change"
     },
-    "explained": "the limit part names minLength and maxLength while either is set"
+    "explained": "the limit part names minLength and maxLength while either is set, through the limit.between, limit.atLeast and limit.atMost messages, each duration written by lengthLabel"
   },
   "validity": {
     "owned": "bounds, unavailable times, the order of the two ends, and the duration",
@@ -140,8 +144,8 @@
   },
   "triggerIcon": "clock",
   "triggerName": {
-    "empty": "chooseLabel",
-    "chosen": "changeLabel, both ends in words, then the duration",
+    "empty": "the choose message",
+    "chosen": "the change message, with both ends in words and the duration in its start, end and length slots; changeReversed, without the duration, while the ends are out of order",
     "why": "Focus returns to the trigger when the popup closes, so the name is where the reader is told what was chosen."
   },
   "keyboard": [
@@ -252,38 +256,46 @@
     "step": ["prop", "defaults", "900"],
     "maxOptions": ["prop", "defaults", "1440"],
     "unavailableOptions": ["prop", "defaults", "disable"],
-    "locale": ["prop", "defaults", "runtime"],
+    "locale": ["prop", "slotted", "en-US"],
     "timeZone": ["prop", "defaults", "runtime"],
     "hourCycle": ["prop", "defaults", "locale"],
     "granularity": ["prop", "defaults", "minute"]
   },
   "provides": {
     "timeRangePickerDefaults": [
-      "changeLabel",
-      "chooseLabel",
-      "clearLabel",
       "closeOnSelect",
-      "doneLabel",
-      "emptyLabel",
-      "endLabel",
       "granularity",
-      "hintLabels",
       "hourCycle",
       "lengthLabel",
-      "limitLabel",
-      "locale",
       "maxOptions",
-      "nowLabel",
       "placement",
       "size",
-      "startLabel",
       "step",
       "timeZone",
-      "truncatedLabel",
       "unavailableOptions",
       "variant"
     ]
   },
+  "messages": [
+    "bounds",
+    "change",
+    "changeReversed",
+    "choose",
+    "chooseTime",
+    "clear",
+    "done",
+    "empty",
+    "end",
+    "length",
+    "limit.between",
+    "limit.atLeast",
+    "limit.atMost",
+    "now",
+    "order",
+    "start",
+    "truncated",
+    "unavailable"
+  ],
   "imperative": ["focus", "open", "close"],
   "stateAttributes": {
     "disabled": "data-disabled",
@@ -456,13 +468,13 @@
   "hint": {
     "part": "hint",
     "says": "what the next press should be, or what is wrong: choose while the current end is missing; order, length, unavailable or bounds while the work is whole and invalid; empty while the work is whole and valid, when length says the duration",
-    "labels": "hintLabels, a map with {end} for the end's label: choose, order, length, unavailable, bounds",
+    "messages": "chooseTime, with {end} for the end's name; order, length, unavailable, bounds",
     "wiring": "aria-describedby of the list and of the field",
     "why": "a panel that only refuses — struck rows, a red frame — does not say what can be done; the hint does"
   },
   "done": {
     "part": "done",
-    "label": "doneLabel",
+    "label": "the done message",
     "effect": "closes with reason pointer; a whole work is emitted with reason select before closing; one end alone stays as it is",
     "always": true,
     "why": "a sheet that fills the screen has no outside to press and no Escape key; on the desktop it is the way out of an edit left half way"

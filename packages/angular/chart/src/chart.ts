@@ -21,6 +21,7 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import {
   categoryIndex,
@@ -33,12 +34,10 @@ import {
   describeChart,
   describePoint,
   describeZoom,
-  fillMessage,
   firstPoint,
   FULL_ZOOM,
   isDrawn,
   isFullZoom,
-  mergeMessages,
   observeChartTheme,
   placeLayer,
   placeTooltip,
@@ -50,12 +49,12 @@ import {
   tooltipContext,
   trackModality,
 } from '@slotted/core/chart';
+import { chartMessages, type ChartMessages, type PartialMessages } from '@slotted/core/i18n';
 import type {
   ChartAnnotation,
   ChartColor,
   ChartGrid,
   ChartLegendEntry,
-  ChartMessages,
   ChartModel,
   ChartOrientation,
   ChartPoint,
@@ -216,7 +215,11 @@ export class SlChart implements ChartHandle {
   readonly description = input<string | undefined>(undefined);
   /** A note behind an information control beside the title. */
   readonly help = input<string | undefined>(undefined);
-  readonly messages = input<Partial<ChartMessages> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * toolbar, the legend, the states and the sentences a screen reader hears.
+   */
+  readonly messages = input<PartialMessages<ChartMessages> | undefined>(undefined);
 
   /* ── How it looks ──────────────────────────────────────────────────── */
   readonly size = input<ChartSize | undefined>(undefined);
@@ -295,9 +298,19 @@ export class SlChart implements ChartHandle {
   );
 
   /* ── Derived ───────────────────────────────────────────────────────── */
-  protected readonly resolvedMessages = computed(() =>
-    mergeMessages(this.defaults.messages, this.messages()),
-  );
+  /** The family's words in the language in force, with this chart's `messages` laid over them. */
+  protected readonly t = injectMessages(chartMessages, this.messages);
+  private readonly appLocale = injectLocale();
+  /** The name of the control holding the series the legend has no room for. */
+  protected readonly legendMoreName = computed(() => {
+    const legend = this.chartModel()?.legend ?? [];
+    const names = this.collapsed().map((index) => legend[index]?.label ?? '');
+    return this.t('legendMore', {
+      series: new Intl.ListFormat(this.locale() ?? this.appLocale(), { type: 'unit' }).format(
+        names,
+      ),
+    });
+  });
   protected readonly resolvedSize = computed(() => this.size() ?? this.defaults.size ?? 'md');
   protected readonly resolvedVariant = computed(
     () => this.variant() ?? this.defaults.variant ?? 'plain',
@@ -325,7 +338,7 @@ export class SlChart implements ChartHandle {
     stackMode: this.stackMode(),
     annotations: this.annotations(),
     recordKey: this.recordKey(),
-    locale: this.locale() ?? this.defaults.locale,
+    locale: this.locale() ?? this.appLocale(),
   }));
   private readonly built = computed(() => {
     try {
@@ -359,11 +372,10 @@ export class SlChart implements ChartHandle {
     return point && current && isDrawn(current, point) ? point.key : null;
   });
   protected readonly summary = computed(() => {
-    const messages = this.resolvedMessages();
-    if (this.loading()) return messages.loading;
-    if (this.failed()) return messages.error;
+    if (this.loading()) return this.t('loading');
+    if (this.failed()) return this.t('error');
     const current = this.chartModel();
-    return current ? describeChart(current, messages) : '';
+    return current ? describeChart(current, this.t) : '';
   });
   protected readonly skeletonKind = computed(() => {
     const kinds = this.series().map((entry) => entry.kind);
@@ -376,9 +388,7 @@ export class SlChart implements ChartHandle {
   });
   protected readonly table = computed(() => {
     const current = this.chartModel();
-    return this.tableOpen() && this.usable() && current
-      ? chartTable(current, { messages: this.resolvedMessages() })
-      : null;
+    return this.tableOpen() && this.usable() && current ? chartTable(current, this.t) : null;
   });
   protected readonly rowKeys = computed(() => {
     const entries = this.chartModel()?.legend ?? [];
@@ -779,12 +789,7 @@ export class SlChart implements ChartHandle {
     this.legendFocus.set(entry.key);
     this.requestHidden(next, reason, source);
     getLiveAnnouncer().announce(
-      fillMessage(
-        next.includes(entry.key) ? this.resolvedMessages().hidden : this.resolvedMessages().shown,
-        {
-          series: entry.label,
-        },
-      ),
+      this.t(next.includes(entry.key) ? 'hidden' : 'shown', { series: entry.label }),
     );
   }
 
@@ -924,7 +929,7 @@ export class SlChart implements ChartHandle {
     if (action === 'csv' && current) {
       this.download(
         `${this.fileName()}.csv`,
-        `data:text/csv;charset=utf-8,${encodeURIComponent(chartToCsv(current, this.resolvedMessages()))}`,
+        `data:text/csv;charset=utf-8,${encodeURIComponent(chartToCsv(current, this.t))}`,
       );
     }
     if (action === 'image') {
@@ -953,8 +958,7 @@ export class SlChart implements ChartHandle {
   protected resetZoomFromToolbar(event: Event) {
     const current = this.chartModel();
     this.requestZoom(FULL_ZOOM, 'clear', event);
-    if (current)
-      getLiveAnnouncer().announce(describeZoom(current, FULL_ZOOM, this.resolvedMessages()));
+    if (current) getLiveAnnouncer().announce(describeZoom(current, FULL_ZOOM, this.t));
     this.plotRef()?.nativeElement.focus();
   }
 
@@ -977,7 +981,6 @@ export class SlChart implements ChartHandle {
   protected onPlotKeyDown(event: KeyboardEvent) {
     const current = this.chartModel();
     if (!current || !this.drawable() || this.tableOpen()) return;
-    const messages = this.resolvedMessages();
     const actions = chartKeyAction(
       current,
       {
@@ -995,15 +998,15 @@ export class SlChart implements ChartHandle {
       if (action.type === 'active') {
         this.requestActive(action.point, action.reason, event);
         if (action.point)
-          this.pointAnnouncer.say(describePoint(current, action.point, this.selection(), messages));
+          this.pointAnnouncer.say(describePoint(current, action.point, this.selection(), this.t));
         else this.pointAnnouncer.cancel();
       } else if (action.type === 'select') {
         this.requestSelection(action.point, 'keyboard', event);
         if (action.point)
-          this.pointAnnouncer.say(describePoint(current, action.point, action.point, messages));
+          this.pointAnnouncer.say(describePoint(current, action.point, action.point, this.t));
       } else {
         this.requestZoom(action.zoom, action.reason, event);
-        getLiveAnnouncer().announce(describeZoom(current, action.zoom, messages));
+        getLiveAnnouncer().announce(describeZoom(current, action.zoom, this.t));
       }
     }
   }
@@ -1015,9 +1018,7 @@ export class SlChart implements ChartHandle {
     const point = firstPoint(current);
     if (!point) return;
     this.requestActive(point, 'keyboard', event);
-    this.pointAnnouncer.say(
-      describePoint(current, point, this.selection(), this.resolvedMessages()),
-    );
+    this.pointAnnouncer.say(describePoint(current, point, this.selection(), this.t));
   }
 
   protected onRootKeyDown(event: KeyboardEvent) {
@@ -1042,6 +1043,6 @@ export class SlChart implements ChartHandle {
 
   toCsv() {
     const current = this.chartModel();
-    return current ? chartToCsv(current, this.resolvedMessages()) : '';
+    return current ? chartToCsv(current, this.t) : '';
   }
 }

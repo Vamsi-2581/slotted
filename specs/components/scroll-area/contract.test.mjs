@@ -5,9 +5,6 @@ import test from 'node:test';
 import { assertContractShape, MUTABLE_CAPABILITIES } from '../../contract.schema.mjs';
 
 const contract = JSON.parse(await readFile(new URL('./contract.json', import.meta.url), 'utf8'));
-const prose = JSON.parse(
-  await readFile(new URL('../prose/contract.json', import.meta.url), 'utf8'),
-);
 const member = contract.members.scrollArea;
 const keyboard = (key) => contract.keyboard.find((entry) => entry.key === key);
 
@@ -151,15 +148,6 @@ test('writes the region only while it overflows, and never without a name', () =
   assert.match(contract.wiring.tabindex, /a tab stop on content that fits is a tab stop/);
   assert.match(contract.wiring.name, /aria-labelledby, then aria-label/);
   assert.match(contract.wiring.movement, /^none\./);
-});
-
-/**
- * `prose` shipped the same conditional named region for one block inside a
- * document, and this family is the one that owns it. The two agree on the
- * fallback name, so a product that has set it once has set it for both.
- */
-test('speaks the same fallback name as the family that shipped the pattern first', () => {
-  assert.equal(member.defaults.label, prose.members.prose.defaults.scrollLabel);
 });
 
 /**

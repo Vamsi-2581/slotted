@@ -1,8 +1,6 @@
 export { SlCalendar } from './calendar';
 export {
   CALENDAR_DEFAULTS,
-  CALENDAR_NEXT_LABEL,
-  CALENDAR_PREVIOUS_LABEL,
   injectCalendarDefaults,
   provideCalendarDefaults,
 } from './calendar-defaults';

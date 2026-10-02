@@ -1,9 +1,9 @@
+import type { PartialMessages, UploadMessages } from '@slotted/core/i18n';
 import type {
   DuplicatePolicy,
   FileKind,
   UploadAdapterLike,
   UploadFile,
-  UploadQueueMessage,
   UploadRejectionReason,
 } from '@slotted/core/upload';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -21,7 +21,7 @@ export type UploadSize = 'sm' | 'md' | 'lg';
 export type UploadPreview = 'auto' | 'none';
 export type UploadView = 'auto' | 'none';
 
-export type { DuplicatePolicy, FileKind, UploadFile, UploadQueueMessage, UploadRejectionReason };
+export type { DuplicatePolicy, FileKind, UploadFile, UploadRejectionReason };
 
 export type UploadFilesReason =
   'select' | 'pointer' | 'keyboard' | 'remove' | 'clear' | 'programmatic';
@@ -29,54 +29,11 @@ export type UploadFilesReason =
 export type UploadViewingReason =
   'pointer' | 'keyboard' | 'escape' | 'outsidePress' | 'dismiss' | 'programmatic';
 
-/**
- * The sentence a refused file carries. The reason is the family's and the
- * message is the consumer's, because only they know whether a limit is a
- * policy, a plan or a bug — so this is the English default they replace.
- */
-export type DescribeRejection = (file: UploadFile, formatters: UploadFormatters) => string;
-
-/**
- * A sentence about the queue as a whole. It carries numbers, so it is a
- * function rather than a label, and the four sentences share one subject, so
- * they are one function with a `kind` rather than four.
- */
-export type DescribeQueue = (message: UploadQueueMessage, formatters: UploadFormatters) => string;
-
+/** The two formatters a row, the summary and the viewer read, bound to one locale. */
 export interface UploadFormatters {
   bytes(value: number): string;
   duration(seconds: number): string;
 }
-
-/** Every visible string, so an application translates once rather than per control. */
-export interface UploadLabels {
-  trigger: string;
-  dropzone: string;
-  clear: string;
-  start: string;
-  pause: string;
-  resume: string;
-  retry: string;
-  cancel: string;
-  remove: string;
-  viewerExternal: string;
-  viewerClose: string;
-  viewerPrevious: string;
-  viewerNext: string;
-  viewerUnsupported: string;
-  /** What the control says while a transfer is pending and a form is submitted. */
-  pending: string;
-}
-
-/** The word a row says for the state it is in. */
-export type UploadStatusLabels = Record<UploadFile['status'], string>;
-
-/**
- * The word the viewer says a file is. The kind is the family's — it is measured
- * from the media type and the extension — and the word for it is the
- * consumer's, for the reason every other visible string here is.
- */
-export type UploadKindLabels = Record<UploadFile['kind'], string>;
 
 export interface UploadDefaults {
   variant: UploadVariant;
@@ -97,23 +54,11 @@ export interface UploadDefaults {
   retryDelay: number;
   stallAfter: number;
   maxRows: number;
-  locale: string | undefined;
   fileKey: ((file: File) => string) | undefined;
-  describeRejection: DescribeRejection;
-  describeQueue: DescribeQueue;
-  labels: UploadLabels;
-  statusLabels: UploadStatusLabels;
-  kindLabels: UploadKindLabels;
 }
 
-export interface UploadDefaultsProviderProps extends Partial<
-  Omit<UploadDefaults, 'labels' | 'statusLabels' | 'kindLabels'>
-> {
+export interface UploadDefaultsProviderProps extends Partial<UploadDefaults> {
   children?: ReactNode | undefined;
-  /** Merged over the inherited set, so one word can be replaced alone. */
-  labels?: Partial<UploadLabels> | undefined;
-  statusLabels?: Partial<UploadStatusLabels> | undefined;
-  kindLabels?: Partial<UploadKindLabels> | undefined;
 }
 
 /**
@@ -205,13 +150,17 @@ export interface UploadProps extends Omit<
   retryDelay?: number | undefined;
   stallAfter?: number | undefined;
   maxRows?: number | undefined;
+  /** What sizes and durations are written in. Absent, the language in force. */
   locale?: string | undefined;
   fileKey?: ((file: File) => string) | undefined;
-  describeRejection?: DescribeRejection | undefined;
-  describeQueue?: DescribeQueue | undefined;
-  labels?: Partial<UploadLabels> | undefined;
-  statusLabels?: Partial<UploadStatusLabels> | undefined;
-  kindLabels?: Partial<UploadKindLabels> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * controls, the word for each status and each kind, the sentences about the
+   * queue, and why a file was refused (`rejection.*`). Only the application
+   * knows whether a limit is a policy, a plan or a bug, so a refusal is worded
+   * here.
+   */
+  messages?: PartialMessages<UploadMessages> | undefined;
 
   /** The family's own label, for an upload that is not inside a `field`. */
   label?: ReactNode | undefined;

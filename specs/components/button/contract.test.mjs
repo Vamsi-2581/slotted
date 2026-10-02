@@ -141,7 +141,6 @@ test('gives loading to every member that performs work', () => {
 test('lets the indicator wait without letting the action through', () => {
   for (const name of ['button', 'iconButton', 'toggleButton']) {
     assert.equal(contract.members[name].defaults.loadingDelay, 0, name);
-    assert.equal(contract.members[name].defaults.loadingLabel, 'Loading', name);
   }
 });
 

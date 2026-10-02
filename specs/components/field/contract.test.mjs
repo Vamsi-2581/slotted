@@ -155,7 +155,8 @@ test('describes the control with the help text whether the hint is open or not',
   assert.equal(contract.help.describedBy, 'hidden-node');
   assert.equal(contract.help.tooltipDescribes, 'none');
   assert.equal(contract.help.glyph, 'circle-question');
-  assert.equal(contract.help.name, 'More information');
+  assert.equal(contract.help.name, 'messages.help');
+  assert.ok(contract.messages.includes('help'));
 });
 
 /**
@@ -220,7 +221,8 @@ test('says necessity as a mark, as a word on the optional fields, as words, or n
   assert.deepEqual(contract.axes.necessity, ['mark', 'optional', 'words', 'none']);
   assert.ok(!('requiredMark' in contract.axes));
   assert.equal(field.defaults.necessity, 'mark');
-  assert.deepEqual(Object.keys(contract.necessityWords), ['required', 'optional']);
+  assert.ok(!('necessityWords' in contract));
+  for (const word of ['required', 'optional']) assert.ok(contract.messages.includes(word));
 });
 
 /**
@@ -358,13 +360,7 @@ test('records the reason for every value that is not a token', () => {
 
 /** What an application decides once instead of on every field in a form. */
 test('names the decisions an application takes once', () => {
-  assert.deepEqual(contract.provides.fieldDefaults, [
-    'size',
-    'labelPlacement',
-    'necessity',
-    'necessityWords',
-    'helpLabel',
-  ]);
+  assert.deepEqual(contract.provides.fieldDefaults, ['size', 'labelPlacement', 'necessity']);
 });
 
 test('names one reference page, covering every axis and every state', () => {

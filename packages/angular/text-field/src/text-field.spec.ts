@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SlField, SlFieldCounter, SlFieldError, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/text-field/contract.json';
@@ -313,13 +315,28 @@ describe('SlTextField', () => {
 
   /* ---------------------------------------------------------- defaults - */
 
-  it('lets an application name the two buttons once', () => {
+  it('names its buttons in the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
     const fixture = renderTemplate(
       `<div slTextField clearable><input slTextFieldInput defaultValue="x" /></div>`,
-      [provideTextFieldDefaults({ clearLabel: 'Limpar' })],
+      [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
     );
 
     expect(query(fixture, '[data-part="clear"]').getAttribute('aria-label')).toBe('Limpar');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(query(fixture, '[data-part="clear"]').getAttribute('aria-label')).toBe('Clear');
+  });
+
+  it('lays its own messages over the language in force', () => {
+    const fixture = renderTemplate(
+      `<div slTextField clearable [messages]="{ clear: 'Apagar' }">
+        <input slTextFieldInput defaultValue="x" />
+      </div>`,
+    );
+
+    expect(query(fixture, '[data-part="clear"]').getAttribute('aria-label')).toBe('Apagar');
   });
 
   /* -------------------------------------------------- inside the frame - */

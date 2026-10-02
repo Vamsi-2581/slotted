@@ -14,7 +14,7 @@ import { SlStatCard } from './stat-card';
  * The number. A numeric `value` is formatted with the card's locale and
  * `formatOptions` — `notation: 'compact'` is how 12,900 becomes 12.9K — and
  * projected content is the consumer's own rendering, unit and all, after
- * it. A missing or failed value is the dash the messages name; a loading
+ * it. A missing or failed value is the `empty` message, a dash; a loading
  * one is a placeholder five figures wide, on the value's own line.
  */
 @Component({
@@ -24,7 +24,7 @@ import { SlStatCard } from './stat-card';
   template: `@if (card.loading()) {
       <span slSkeleton inlineSize="5ch"></span>
     } @else if (card.status() !== 'ready') {
-      {{ card.resolvedMessages().empty }}
+      {{ card.t('empty') }}
     } @else {
       {{ formatted() }}<ng-content />
     }`,

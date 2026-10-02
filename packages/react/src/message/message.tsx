@@ -1,9 +1,11 @@
 import '@slotted/styles/message/message.css';
 
+import { type FamilyTranslator, type MessageMessages, messageMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import { createContext, useCallback, useContext, useId, useMemo, useState } from 'react';
 import type { SyntheticEvent } from 'react';
 
+import { useMessages } from '../i18n';
 import { useMessageDefaults } from './message-defaults';
 import type {
   MessageChangeReason,
@@ -27,6 +29,15 @@ export function useMessage(): MessageContextValue {
 /** The row around a bubble, when there is one: a bubble stands alone as well. */
 export function useOptionalMessage(): MessageContextValue | null {
   return useContext(MessageContext);
+}
+
+/**
+ * The family's words: the row's, with its `messages` laid over the language
+ * in force, or the language alone for a bubble that stands outside a row.
+ */
+export function useMessageWords(): FamilyTranslator<MessageMessages> {
+  const own = useMessages(messageMessages);
+  return useContext(MessageContext)?.t ?? own;
 }
 
 /** Whether a click came from the keyboard: a synthetic click from Enter or Space has no detail. */
@@ -77,6 +88,7 @@ export function Message({
   align = 'start',
   defaultVersion = 0,
   layout,
+  messages,
   onRetry,
   onVersionChange,
   render,
@@ -86,6 +98,7 @@ export function Message({
   ...nativeProps
 }: MessageProps) {
   const defaults = useMessageDefaults();
+  const t = useMessages(messageMessages, messages);
   const group = useContext(GroupContext);
   const authorId = useId();
   const [authorPresent, setAuthorPresent] = useState(false);
@@ -115,11 +128,11 @@ export function Message({
     align,
     authorId,
     layout: resolvedLayout,
-    messages: defaults.messages,
     onRetry,
     registerAuthor,
     requestVersion,
     status,
+    t,
     version: currentVersion,
     versionCount,
   };

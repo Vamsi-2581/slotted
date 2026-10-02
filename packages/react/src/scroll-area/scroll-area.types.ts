@@ -1,3 +1,4 @@
+import type { PartialMessages, ScrollAreaMessages } from '@slotted/core/i18n';
 import type { LogicalEdge, ScrollEdgesState, ScrollPosition } from '@slotted/core/overflow';
 import type { ComponentPropsWithRef, ReactNode, RefObject, UIEvent } from 'react';
 
@@ -59,8 +60,6 @@ export interface ScrollAreaDefaults {
   readonly gutter: ScrollAreaGutter;
   readonly fade: ScrollAreaFade;
   readonly overscroll: ScrollAreaOverscroll;
-  /** The name a region falls back to when the instance states none. */
-  readonly label: string;
 }
 
 export interface ScrollAreaDefaultsProviderProps extends Partial<ScrollAreaDefaults> {
@@ -99,10 +98,11 @@ export interface ScrollAreaProps extends Omit<ComponentPropsWithRef<'div'>, 'ref
 
   /**
    * The name the region is announced by. Resolved in one order: `labelledBy`,
-   * then `label`, then the label a `ScrollAreaDefaultsProvider` sets.
+   * then `messages.label`, then the catalog of the language in force.
    */
-  label?: string | undefined;
   labelledBy?: string | undefined;
+  /** Words laid over the catalog of the language in force: the region's name (`label`). */
+  messages?: PartialMessages<ScrollAreaMessages> | undefined;
 
   /**
    * Reports the position, as a distance from each logical start, on every

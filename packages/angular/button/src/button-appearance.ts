@@ -9,6 +9,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import type { Signal, WritableSignal } from '@angular/core';
+import type { ButtonMessages, FamilyTranslator } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 
@@ -132,7 +133,8 @@ export function resolveLoadingIndicator(
  */
 export interface ButtonWait {
   readonly waiting: Signal<boolean>;
-  readonly loadingLabel: Signal<string>;
+  /** The family's words in the language in force; the ring is named by `loading`. */
+  readonly t: FamilyTranslator<ButtonMessages>;
   /**
    * Whether the control has a start slot. The ring takes the first visual slot
    * the control has, and the two slots are siblings — a sibling cannot be
@@ -162,7 +164,7 @@ export const BUTTON_WAIT = new InjectionToken<ButtonWait>('slotted button wait')
       <span
         data-part="indicator"
         role="progressbar"
-        [attr.aria-label]="wait?.loadingLabel() ?? null"
+        [attr.aria-label]="wait?.t('loading') ?? null"
       ></span>
     }`,
   styleUrl: '../../../styles/src/button/button.css',
@@ -183,7 +185,7 @@ export class SlButtonStart {
       <span
         data-part="indicator"
         role="progressbar"
-        [attr.aria-label]="wait?.loadingLabel() ?? null"
+        [attr.aria-label]="wait?.t('loading') ?? null"
       ></span>
     }`,
   styleUrl: '../../../styles/src/button/button.css',

@@ -185,7 +185,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'playground',
     title: 'Playground',
-    note: 'Five notifications of the Nexora sales desk over a store that answers every request. Mark one read, dismiss one, switch to Não lidas, and use the controls below to change the size, the rank, how more loads and which item controls exist.',
+    note: 'Five notifications of the Nexora sales desk over a store that answers every request. Mark one read, dismiss one, switch to Unread, and use the controls below to change the size, the rank, how more loads and which item controls exist.',
     snippet: defineSnippet({
       id: 'notification-center-react-playground',
       language: 'tsx',
@@ -231,7 +231,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'views',
     title: 'Views',
-    note: 'The built-in strip: Todas and Não lidas, the second with its count; the family filters the unread view itself. Below, the consumer’s own views — the family shows what it is given for each — and a controlled view that refuses to leave Todas.',
+    note: 'The built-in strip: All and Unread, the second with its count; the family filters the unread view itself. Below, the consumer’s own views — the family shows what it is given for each — and a controlled view that refuses to leave All.',
     snippet: defineSnippet({
       id: 'notification-center-react-views',
       language: 'tsx',
@@ -282,7 +282,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'growing',
     title: 'Growing',
-    note: 'growing="button" draws Carregar mais; press it, the waiting row says A carregar notificações and two older items arrive. growing="scroll" replaces the button with a sentinel that asks with the reason scroll when it enters the scrollport. aria-setsize is -1 while more may come and the consumer’s count when stated.',
+    note: 'growing="button" draws Load more; press it, the waiting row says Loading notifications and two older items arrive. growing="scroll" replaces the button with a sentinel that asks with the reason scroll when it enters the scrollport. aria-setsize is -1 while more may come and the consumer’s count when stated.',
     snippet: defineSnippet({
       id: 'notification-center-react-growing',
       language: 'tsx',
@@ -357,7 +357,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'empty',
     title: 'Empty',
-    note: 'A feed with nothing shows messages.empty; the unread view with nothing unread shows messages.caughtUp — Tudo lido. The empty prop replaces both with a ResultState of the consumer’s own.',
+    note: 'A feed with nothing shows messages.empty; the unread view with nothing unread shows messages.caughtUp — All caught up. The empty prop replaces both with a ResultState of the consumer’s own.',
     snippet: defineSnippet({
       id: 'notification-center-react-empty',
       language: 'tsx',
@@ -429,18 +429,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'defaults',
     title: 'Defaults and the handle',
-    note: 'Two centres under one provider: neither states a size, a growing mode or a title, and both read small, paged by button and called Avisos; the second states its own controls and wins. The handle focuses the first article, reveals held arrivals and marks every shown item read with the reason programmatic.',
+    note: 'Two centres under one provider: neither states a size or a growing mode, and both read small and paged by button; the second states its own controls and wins. The handle focuses the first article, reveals held arrivals and marks every shown item read with the reason programmatic.',
     snippet: defineSnippet({
       id: 'notification-center-react-defaults',
       language: 'tsx',
       label: 'Once, for the application',
-      source: `<NotificationCenterDefaultsProvider
-  growing="button"
-  locale="pt-PT"
-  messages={{ title: 'Avisos' }}
-  size="sm"
-  timeZone="Europe/Lisbon"
->
+      source: `<NotificationCenterDefaultsProvider growing="button" size="sm" timeZone="Europe/Lisbon">
   <App />
 </NotificationCenterDefaultsProvider>;`,
     }),
@@ -554,7 +548,7 @@ export const REACT_NOTIFICATION_CENTER_DOCS = {
         'readonly { value, label, count? }[]',
         'all, unread',
         'NotificationCenter',
-        'The strip’s entries. Unstated, the built-in Todas and Não lidas with the unread count; one entry draws no strip',
+        'The strip’s entries. Unstated, the built-in All and Unread with the unread count; one entry draws no strip',
       ],
       [
         'size',
@@ -622,16 +616,16 @@ export const REACT_NOTIFICATION_CENTER_DOCS = {
       [
         'locale, timeZone, now',
         'string, string, number',
-        'the runtime’s',
-        'NotificationCenter, NotificationCenterDefaultsProvider (locale, timeZone)',
+        'the language in force, the runtime’s',
+        'NotificationCenter, NotificationCenterDefaultsProvider (timeZone)',
         'What the time is formatted with. State now for a stable server render of a relative time',
       ],
       [
         'messages',
-        'Partial<NotificationCenterMessages>',
-        'Portuguese',
-        'NotificationCenter, NotificationCenterDefaultsProvider',
-        'title, markAll, markRead, markUnread, dismiss, fresh(count), unread(count), loadMore, loading, empty, caughtUp, all, unreadView, views',
+        'PartialMessages<NotificationCenterMessages>',
+        '—',
+        'NotificationCenter',
+        'Words laid over the language in force, key by key: title, markAll, markRead, markUnread, dismiss, fresh {count}, unread {count}, loadMore, loading, empty, caughtUp, all, unreadView, views',
       ],
       [
         'actions, footer, empty',
@@ -663,7 +657,7 @@ export const REACT_NOTIFICATION_CENTER_DOCS = {
       ],
       [
         'NotificationCenterDefaultsProvider',
-        '{ size, level, growing, arrivals, timeFormat, controls, locale, timeZone, messages }',
+        '{ size, level, growing, arrivals, timeFormat, controls, timeZone }',
         '—',
         'a subtree',
         'The decisions an application takes once. A centre that states any of them itself still wins',
@@ -678,8 +672,8 @@ export const REACT_NOTIFICATION_CENTER_DOCS = {
     ]),
     accessibility: [
       'The governing pattern is the WAI-ARIA Authoring Practices Feed (w3.org/WAI/ARIA/apg/patterns/feed/): the feed is role="feed" named by the title, every item is an article with tabindex="0", aria-labelledby its title, aria-describedby its description, aria-posinset its position and aria-setsize the consumer’s count, the loaded number under growing="none", or -1 while more may come. PageDown and PageUp move between articles, Control+End and Control+Home leave the feed on either side, and the feed is aria-busy while a page is on its way. The keys are @slotted/core/timeline’s, shared with the timeline family.',
-      'The root is a section — a region — named by aria-labelledby its own heading, Notificações by default, so a reader finds it in the landmark list under the words it shows; a consumer’s aria-label or aria-labelledby wins. The strip is the tabs family’s list with the feed as its one panel: every tab carries aria-controls naming the feed, and ArrowLeft, ArrowRight, Home and End are the tabs family’s.',
-      'Read is said three ways and none of them is colour alone: the wash under the row, the semibold title, and the read-toggle’s name — Marcar como lida while unread, Marcar como não lida once read — so a reader hears the state on the control that changes it. The family’s tone glyphs are all circles; a triangle is refused in this library.',
+      'The root is a section — a region — named by aria-labelledby its own heading, Notifications in English, so a reader finds it in the landmark list under the words it shows; a consumer’s aria-label or aria-labelledby wins. The strip is the tabs family’s list with the feed as its one panel: every tab carries aria-controls naming the feed, and ArrowLeft, ArrowRight, Home and End are the tabs family’s.',
+      'Read is said three ways and none of them is colour alone: the wash under the row, the semibold title, and the read-toggle’s name — Mark as read while unread, Mark as unread once read — so a reader hears the state on the control that changes it. The family’s tone glyphs are all circles; a triangle is refused in this library.',
       'Held arrivals are announced politely once per change of their count, and the unread count once per change after the first, through the shared live announcer. A keyboard reveal moves focus to the first revealed article; a keyboard removal moves it to the next article, the previous, or the first control of the region, so focus never lands on a row that left.',
       'While loading with nothing loaded, the three skeleton rows are aria-hidden and the feed is busy; the tabs stay, because the views are known before the items are. The article’s focus ring is drawn inward because the rows touch, and every control’s ring outward; the controls are muted at rest and take the text ink on the row under the pointer or holding focus, so they are visible before they are needed and legible when they are.',
     ],
@@ -702,10 +696,10 @@ export const REACT_NOTIFICATION_CENTER_DOCS = {
 >
   <div data-part="header">
     <h2 data-part="title" id=":r1:-title">
-      Notificações <span data-part="count">3</span>
+      Notifications <span data-part="count">3</span>
     </h2>
     <span data-part="mark-all">
-      <button data-ui="button">Marcar tudo como lido</button>
+      <button data-ui="button">Mark all as read</button>
     </span>
     <div data-part="actions">…</div>
   </div>
@@ -739,13 +733,13 @@ export const REACT_NOTIFICATION_CENTER_DOCS = {
           <div data-part="actions">…</div>
         </div>
         <div data-part="controls">
-          <button data-part="read-toggle" aria-label="Marcar como lida" />
-          <button data-part="dismiss" aria-label="Dispensar" />
+          <button data-part="read-toggle" aria-label="Mark as read" />
+          <button data-part="dismiss" aria-label="Dismiss" />
         </div>
       </article>
     </div>
   </div>
-  <button data-part="more">Carregar mais</button>
+  <button data-part="more">Load more</button>
   <div data-part="footer">…</div>
 </section>;`,
       }),

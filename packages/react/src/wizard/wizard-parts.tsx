@@ -2,6 +2,7 @@ import type { MouseEvent, ReactElement } from 'react';
 
 import { Button } from '../button';
 import type { ButtonRootProps } from '../button';
+import { useLocale } from '../i18n';
 import { useWizard } from './wizard-context';
 import type {
   WizardActionProps,
@@ -109,12 +110,7 @@ export function WizardNext({ children, onClick, render, ...props }: WizardAction
       variant="solid"
       {...props}
     >
-      {children ??
-        (wizard.returning
-          ? wizard.labels.return
-          : final
-            ? wizard.labels.submit
-            : wizard.labels.next)}
+      {children ?? wizard.t(wizard.returning ? 'return' : final ? 'submit' : 'next')}
     </Button>
   );
 }
@@ -134,7 +130,7 @@ export function WizardPrevious({ children, onClick, render, ...props }: WizardAc
       variant="outline"
       {...props}
     >
-      {children ?? wizard.labels.previous}
+      {children ?? wizard.t('previous')}
     </Button>
   );
 }
@@ -154,7 +150,7 @@ export function WizardCancel({ children, onClick, render, ...props }: WizardActi
       variant="ghost"
       {...props}
     >
-      {children ?? wizard.labels.cancel}
+      {children ?? wizard.t('cancel')}
     </Button>
   );
 }
@@ -175,7 +171,7 @@ export function WizardSaveDraft({ children, onClick, render, ...props }: WizardA
       variant="ghost"
       {...props}
     >
-      {children ?? wizard.labels.saveDraft}
+      {children ?? wizard.t('saveDraft')}
     </Button>
   );
 }
@@ -195,7 +191,7 @@ export function WizardSkip({ children, onClick, render, ...props }: WizardAction
       variant="ghost"
       {...props}
     >
-      {children ?? wizard.labels.skip}
+      {children ?? wizard.t('skip')}
     </Button>
   );
 }
@@ -207,14 +203,19 @@ export function WizardSkip({ children, onClick, render, ...props }: WizardAction
  */
 export function WizardDraftStatus() {
   const wizard = useWizard();
+  const locale = useLocale();
   if (!wizard.canSaveDraft) return null;
   const text =
     wizard.draftState === 'saving'
-      ? wizard.labels.saving
+      ? wizard.t('saving')
       : wizard.draftState === 'failed'
-        ? wizard.labels.draftFailed
+        ? wizard.t('draftFailed')
         : wizard.draftState === 'saved' && wizard.savedAt !== undefined
-          ? wizard.labels.saved(wizard.savedAt)
+          ? wizard.t('saved', {
+              time: new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(
+                wizard.savedAt,
+              ),
+            })
           : '';
   return (
     <span data-part="draft-status" role="status">
@@ -244,7 +245,7 @@ export function WizardEdit({ children, onClick, ref, step, ...nativeProps }: Wiz
       ref={ref}
       type="button"
     >
-      {children ?? wizard.labels.edit}
+      {children ?? wizard.t('edit')}
       {target === undefined ? null : (
         <>
           {' '}

@@ -1,6 +1,7 @@
 import '@slotted/styles/action-sheet/action-sheet.css';
 import '@slotted/styles/spinner/spinner.css';
 
+import { actionSheetMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import {
   createContext,
@@ -13,6 +14,7 @@ import {
 } from 'react';
 
 import { Drawer } from '../drawer';
+import { useMessages } from '../i18n';
 import type { DrawerChangeRequest, DrawerHandle } from '../drawer';
 import { useActionSheetDefaults } from './action-sheet-defaults';
 import { entryTarget } from './action-sheet-entry';
@@ -60,7 +62,6 @@ const NEVER_DIMMED = 2;
  */
 export function ActionSheet({
   back,
-  cancelLabel,
   children,
   closeOnSelect,
   container,
@@ -68,6 +69,7 @@ export function ActionSheet({
   escape,
   finalFocus,
   initialFocus,
+  messages,
   modal,
   mount,
   onOpenChange,
@@ -76,6 +78,7 @@ export function ActionSheet({
   ref,
 }: ActionSheetProps) {
   const defaults = useActionSheetDefaults();
+  const t = useMessages(actionSheetMessages, messages);
 
   const [ownOpen, setOwnOpen] = useState<boolean>(defaultOpen ?? false);
   const currentOpen = open ?? ownOpen;
@@ -168,12 +171,12 @@ export function ActionSheet({
 
   const value = useMemo<ActionSheetContextValue>(
     () => ({
-      cancelLabel: cancelLabel ?? defaults.cancelLabel,
       close: (reason, result, source) => void requestOpen(false, reason, result, source),
       closeOnSelect: closeOnSelect ?? defaults.closeOnSelect,
       nodes: nodes.current,
+      t,
     }),
-    [cancelLabel, closeOnSelect, defaults, requestOpen],
+    [closeOnSelect, defaults, requestOpen, t],
   );
 
   return (

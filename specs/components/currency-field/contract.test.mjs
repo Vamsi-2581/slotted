@@ -93,7 +93,7 @@ test('binds every key the sourced pattern lists, plus the two signs', () => {
 
 test('keeps the steppers out of the tab order and in the accessibility tree', () => {
   assert.equal(contract.stepperTabIndex, -1);
-  assert.deepEqual(contract.stepperNames, ['incrementLabel', 'decrementLabel']);
+  assert.deepEqual(contract.stepperNames, ['increment', 'decrement']);
   assert.equal(contract.stepperDisabledAtBound, true);
 });
 
@@ -324,9 +324,9 @@ test('offers the three stepper arrangements and shows none of them by default', 
 });
 
 /**
- * A product has one currency and one locale in nine screens out of ten, and
- * `currency` is the one input a field cannot be built without — so the provider
- * is the second place it may come from.
+ * A product has one currency in nine screens out of ten, and `currency` is the
+ * one input a field cannot be built without — so the provider is the second
+ * place it may come from. The locale is the application's (`SlottedProvider`).
  */
 test('lets an application decide once what its currency fields are', () => {
   assert.deepEqual(contract.provides.currencyFieldDefaults, [
@@ -334,11 +334,8 @@ test('lets an application decide once what its currency fields are', () => {
     'clamp',
     'currency',
     'currencyDisplay',
-    'decrementLabel',
     'entry',
     'formatOn',
-    'incrementLabel',
-    'locale',
     'size',
     'stepper',
     'variant',

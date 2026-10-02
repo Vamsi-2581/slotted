@@ -2,6 +2,9 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/attachment/contract.json';
 
 import { SlAttachment, SlAttachmentGroup } from './attachment';
@@ -238,7 +241,7 @@ describe('SlAttachment', () => {
   imports: [SlAttachment, SlAttachmentGroup, SlAttachmentRemove],
   template: `
     <ul slAttachmentGroup aria-label="Pièces jointes" id="group" orientation="vertical">
-      <li slAttachment id="a" [file]="file" removable>
+      <li slAttachment id="a" [file]="file" [messages]="{ remove: 'Retirer {name}' }" removable>
         <button slAttachmentRemove></button>
       </li>
       <li slAttachment id="b" [file]="file" size="sm" orientation="horizontal"></li>
@@ -252,9 +255,7 @@ class Inherited {
 describe('SlAttachment defaults', () => {
   it('inherits from the group and the provider, and its own input wins', () => {
     TestBed.configureTestingModule({
-      providers: [
-        provideAttachmentDefaults({ layout: 'strip', removeLabel: 'Retirer', size: 'lg' }),
-      ],
+      providers: [provideAttachmentDefaults({ layout: 'strip', size: 'lg' })],
     });
     const fixture = TestBed.createComponent(Inherited);
     fixture.detectChanges();
@@ -266,6 +267,41 @@ describe('SlAttachment defaults', () => {
     expect(q('#b').getAttribute('data-size')).toBe('sm');
     expect(q('#b').getAttribute('data-orientation')).toBe('horizontal');
     expect(q('[data-part="remove"]').getAttribute('aria-label')).toBe(`Retirer ${CLAIM.name}`);
+  });
+});
+
+@Component({
+  imports: [SlAttachment, SlAttachmentDetail, SlAttachmentPreview, SlAttachmentRemove],
+  template: `
+    <div slAttachment [file]="file" removable>
+      <span slAttachmentPreview id="preview"></span>
+      <p slAttachmentDetail id="detail"></p>
+      <button slAttachmentRemove></button>
+    </div>
+  `,
+})
+class Spoken {
+  readonly file: AttachmentFile = { name: 'README', size: 1_500_000 };
+}
+
+describe('SlAttachment language', () => {
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    TestBed.configureTestingModule({
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const fixture = TestBed.createComponent(Spoken);
+    fixture.detectChanges();
+    const q = (selector: string) =>
+      (fixture.nativeElement as HTMLElement).querySelector(selector) as HTMLElement;
+    expect(q('[data-part="remove"]').getAttribute('aria-label')).toBe('Remover README');
+    expect(q('#preview').getAttribute('data-extension')).toBe('ARQUIVO');
+    expect(q('#detail').textContent?.trim()).toBe('1,5 MB');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(q('[data-part="remove"]').getAttribute('aria-label')).toBe('Remove README');
+    expect(q('#detail').textContent?.trim()).toBe('1.5 MB');
   });
 });
 

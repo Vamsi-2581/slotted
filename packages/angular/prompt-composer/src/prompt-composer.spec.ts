@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SlField, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/prompt-composer/contract.json';
@@ -203,12 +205,23 @@ describe('SlPromptComposer', () => {
     expect(root(fixture).hasAttribute('data-disabled')).toBe(true);
   });
 
-  it('lets an application name the buttons once', () => {
+  it('lets an application decide the appearance once', () => {
     const fixture = renderTemplate(COMPOSER, [
-      providePromptComposerDefaults({ sendLabel: 'Enviar', variant: 'outline' }),
+      providePromptComposerDefaults({ variant: 'outline' }),
+    ]);
+    expect(root(fixture).getAttribute('data-variant')).toBe('outline');
+  });
+
+  it('names its buttons in the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(COMPOSER, [
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
     ]);
     expect(send(fixture).getAttribute('aria-label')).toBe('Enviar');
-    expect(root(fixture).getAttribute('data-variant')).toBe('outline');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(send(fixture).getAttribute('aria-label')).toBe('Send');
   });
 
   it('keeps the action’s part beside its own attributes', () => {

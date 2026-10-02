@@ -1,10 +1,5 @@
 import { inject, InjectionToken } from '@angular/core';
-import { FULLSCREEN_MESSAGES } from '@slotted/core/fullscreen';
-import type {
-  FullscreenMessages,
-  FullscreenNavigationUI,
-  FullscreenPolicy,
-} from '@slotted/core/fullscreen';
+import type { FullscreenNavigationUI, FullscreenPolicy } from '@slotted/core/fullscreen';
 
 export type FullscreenTriggerSize = 'sm' | 'md' | 'lg';
 
@@ -16,7 +11,6 @@ export interface FullscreenDefaults {
   navigationUI: FullscreenNavigationUI;
   size: FullscreenTriggerSize;
   variant: FullscreenTriggerVariant;
-  messages: FullscreenMessages;
 }
 
 const FALLBACK: FullscreenDefaults = {
@@ -24,7 +18,6 @@ const FALLBACK: FullscreenDefaults = {
   navigationUI: 'auto',
   size: 'md',
   variant: 'ghost',
-  messages: FULLSCREEN_MESSAGES,
 };
 
 export const FULLSCREEN_DEFAULTS = new InjectionToken<FullscreenDefaults>(
@@ -33,22 +26,14 @@ export const FULLSCREEN_DEFAULTS = new InjectionToken<FullscreenDefaults>(
 );
 
 /**
- * An application decides once whether its regions ask the platform, how the
- * control is drawn and what it says. Messages merge key by key; a region or a
- * control that states any of them itself still wins.
+ * An application decides once whether its regions ask the platform and how the
+ * control is drawn; a region or a control that states any of them itself still
+ * wins. The words come from the language in force (`provideSlotted`).
  */
-export function provideFullscreenDefaults(
-  defaults: Partial<Omit<FullscreenDefaults, 'messages'>> & {
-    messages?: Partial<FullscreenMessages>;
-  },
-) {
+export function provideFullscreenDefaults(defaults: Partial<FullscreenDefaults>) {
   return {
     provide: FULLSCREEN_DEFAULTS,
-    useFactory: (): FullscreenDefaults => ({
-      ...FALLBACK,
-      ...defaults,
-      messages: { ...FALLBACK.messages, ...defaults.messages },
-    }),
+    useFactory: (): FullscreenDefaults => ({ ...FALLBACK, ...defaults }),
   };
 }
 

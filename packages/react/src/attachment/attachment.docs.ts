@@ -87,7 +87,7 @@ const anatomy: AnatomyRow[] = [
     element: 'p',
     required: false,
     purpose:
-      'One line under the name. Absent children it writes the size with formatBytes in the provider locale.',
+      'One line under the name. Absent children it writes the size with formatBytes in the language in force.',
   },
   {
     part: 'message',
@@ -301,12 +301,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'In a claim thread',
-    note: 'A message carries its files the way the product would: the group under the text, links that download, one file still sending. The provider sets the size and the remove word once for the whole thread.',
+    note: 'A message carries its files the way the product would: the group under the text, links that download, one file still sending. The provider sets the size once for the whole thread; the words come from the language in force.',
     snippet: defineSnippet({
       id: 'attachment-react-composition',
       language: 'tsx',
       label: 'One decision for the whole thread',
-      source: `<AttachmentDefaultsProvider locale="en-GB" removeLabel="Remove" size="sm">
+      source: `<AttachmentDefaultsProvider size="sm">
   <ClaimThread />
 </AttachmentDefaultsProvider>;`,
     }),
@@ -402,11 +402,11 @@ export const REACT_ATTACHMENT_DOCS = {
         'Makes the attachment removable: AttachmentRemove renders and Backspace and Delete answer',
       ],
       [
-        'removeLabel',
-        'string',
-        'Remove',
+        'messages',
+        'Partial<AttachmentMessages>',
+        '—',
         'Attachment',
-        'The word before the file name in the remove control name',
+        'Words laid over the language in force, key by key: the remove control name (remove, with the file name) and the tile word for a file without an extension (noExtension)',
       ],
       [
         'src',
@@ -468,10 +468,10 @@ export const REACT_ATTACHMENT_DOCS = {
     composition: apiRows([
       [
         'AttachmentDefaultsProvider',
-        '{ size, orientation, layout, locale, removeLabel }',
+        '{ size, orientation, layout }',
         '—',
         'a subtree',
-        'Sets the five once; the group and the attachment still win',
+        'Sets the three once; the group and the attachment still win',
       ],
       [
         'render',

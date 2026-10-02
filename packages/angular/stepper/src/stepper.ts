@@ -18,21 +18,20 @@ import {
   untracked,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import type { GlyphName } from '@slotted/angular/icon';
+import { stepperMessages, type PartialMessages, type StepperMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import { stepFocusIndex, stepPercent, stepReachable, stepStatus } from '@slotted/core/steps';
 
 import {
   injectStepperDefaults,
-  STEPPER_DEFAULT_LABEL,
-  STEPPER_DEFAULT_LABELS,
   STEPPER_DEFAULT_LABEL_PLACEMENT,
   STEPPER_DEFAULT_NAVIGATION,
   STEPPER_DEFAULT_ORIENTATION,
   type StepperLabelPlacement,
-  type StepperLabels,
   type StepperNavigation,
   type StepperOrientation,
   type StepperStepReason,
@@ -84,8 +83,11 @@ export class SlStepper {
   readonly stepValue = input(undefined, { alias: 'step', transform: optionalNumber });
   /** What an uncontrolled stepper starts from, read once. */
   readonly defaultStep = input(0, { transform: numberAttribute });
-  readonly label = input<string | undefined>(undefined);
-  readonly labels = input<Partial<StepperLabels> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * list's name (`label`), the position, and the status each step announces.
+   */
+  readonly messages = input<PartialMessages<StepperMessages> | undefined>(undefined);
   readonly orientation = input<StepperOrientation | undefined>(undefined);
   readonly labelPlacement = input<StepperLabelPlacement | undefined>(undefined);
   readonly navigation = input<StepperNavigation | undefined>(undefined);
@@ -118,12 +120,10 @@ export class SlStepper {
     () => this.navigation() ?? this.defaults.navigation ?? STEPPER_DEFAULT_NAVIGATION,
   );
   readonly linearValue = computed(() => this.linear() || this.defaults.linear === true);
-  readonly labelSet = computed<StepperLabels>(() => ({
-    ...STEPPER_DEFAULT_LABELS,
-    ...this.defaults.labels,
-    ...this.labels(),
-  }));
-  readonly listLabel = computed(() => this.label() ?? this.defaults.label ?? STEPPER_DEFAULT_LABEL);
+  /** The family's words in the language in force, with this stepper's `messages` laid over them. */
+  readonly t = injectMessages(stepperMessages, this.messages);
+  /** The locale in force: what the descriptors a step announces are listed in. */
+  readonly locale = injectLocale();
 
   /** How far along the row the reader has travelled, nought to a hundred. */
   readonly percent = computed(() => stepPercent({ count: this.count(), step: this.step() }));
@@ -217,7 +217,7 @@ export class SlStepperList {
   private readonly element = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly ownLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
 
-  readonly accessibleLabel = computed(() => this.ownLabel ?? this.stepper.listLabel());
+  readonly accessibleLabel = computed(() => this.ownLabel ?? this.stepper.t('label'));
 
   constructor() {
     effect(() => {
@@ -386,23 +386,24 @@ export class SlStepperStep {
     this.invalid() ? 'x' : this.status() === 'complete' && !this.current() ? 'check' : null,
   );
 
+  /** A list of descriptors, written the way the locale in force lists them. */
   readonly announced = computed(() => {
-    const labels = this.stepper.labelSet();
+    const t = this.stepper.t;
     const state = this.invalid()
-      ? labels.invalid
+      ? t('invalid')
       : this.current()
-        ? labels.current
+        ? t('current')
         : this.status() === 'complete'
-          ? labels.complete
+          ? t('complete')
           : undefined;
-    return [
-      labels.position(this.index(), this.stepper.count()),
-      state,
-      this.loading() ? labels.loading : undefined,
-      this.unreachable() && !this.current() ? labels.unavailable : undefined,
-    ]
-      .filter(Boolean)
-      .join(', ');
+    return new Intl.ListFormat(this.stepper.locale(), { type: 'unit' }).format(
+      [
+        t('position', { index: this.index() + 1, count: this.stepper.count() }),
+        state,
+        this.loading() ? t('loading') : undefined,
+        this.unreachable() && !this.current() ? t('unavailable') : undefined,
+      ].filter((part): part is string => part !== undefined),
+    );
   });
 
   activate(event: Event) {

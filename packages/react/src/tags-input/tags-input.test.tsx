@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/tags-input/contract.json';
+import { SlottedProvider } from '../i18n';
 import { TagsInput } from './tags-input';
 import { TagsInputDefaultsProvider } from './tags-input-defaults';
 import type { TagsInputHandle, TagsInputProps } from './tags-input.types';
@@ -26,7 +28,7 @@ describe('TagsInput', () => {
     render(<Basic defaultValue={['ana@example.com']} />);
     expect(input()).not.toHaveAttribute('role');
     expect(input()).not.toHaveAttribute('aria-expanded');
-    expect(screen.getByRole('grid')).toHaveAttribute('aria-label', 'To, 1 values');
+    expect(screen.getByRole('grid')).toHaveAttribute('aria-label', 'To, 1 value');
     expect(screen.getByRole('row')).toBeInTheDocument();
     expect(contract.roles).toMatchObject({ input: null, control: 'grid', chip: 'gridcell' });
   });
@@ -378,8 +380,8 @@ describe('TagsInput', () => {
 
   it('takes its defaults from the provider, and the prop over the provider', () => {
     render(
-      <TagsInputDefaultsProvider delimiters={[';']} removeLabel="Drop {label}" size="sm">
-        <Basic defaultValue={['a']} size="lg" />
+      <TagsInputDefaultsProvider delimiters={[';']} size="sm">
+        <Basic defaultValue={['a']} messages={{ remove: 'Drop {label}' }} size="lg" />
       </TagsInputDefaultsProvider>,
     );
     expect(root()).toHaveAttribute('data-size', 'lg');
@@ -388,6 +390,16 @@ describe('TagsInput', () => {
     type('b');
     fireEvent.keyDown(input(), { key: ';' });
     expect(chipLabels()).toEqual(['a', 'b']);
+  });
+
+  it('speaks the language in force', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Basic defaultValue={['a', 'b']} />
+      </SlottedProvider>,
+    );
+    expect(screen.getByRole('button', { name: 'Remover a' })).toBeInTheDocument();
+    expect(screen.getByRole('grid')).toHaveAccessibleName('To, 2 valores');
   });
 
   it('withholds every remove control while read-only, and keeps the chips legible', () => {

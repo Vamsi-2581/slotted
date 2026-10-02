@@ -11,6 +11,7 @@ import {
   withoutError,
 } from '@slotted/core/form';
 import type { FormErrorEntry, FormErrors } from '@slotted/core/form';
+import { formMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason } from '@slotted/core/state';
 import {
@@ -24,6 +25,7 @@ import {
 } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 
+import { useMessages } from '../i18n';
 import { FormContext, useFormDefaults } from './form-context';
 import { FormSummary } from './form-parts';
 import type { FormErrorInput, FormProps, FormRootProps } from './form.types';
@@ -72,6 +74,7 @@ export function Form({
   guardUnsaved = false,
   handle,
   loading = false,
+  messages,
   nativeValidation,
   onErrorsChange,
   onSubmit,
@@ -84,6 +87,7 @@ export function Form({
   ...nativeProps
 }: FormProps) {
   const defaults = useFormDefaults();
+  const t = useMessages(formMessages, messages);
   const formRef = useRef<HTMLFormElement | null>(null);
   const summaryRef = useRef<HTMLElement | null>(null);
   const summaryId = useId();
@@ -91,7 +95,7 @@ export function Form({
   const resolvedAlign = align ?? defaults.align;
   const resolvedErrorFocus = errorFocus ?? defaults.errorFocus;
   const resolvedSummary = summary ?? defaults.summary;
-  const resolvedTitle = summaryTitle ?? defaults.summaryTitle;
+  const resolvedTitle = summaryTitle ?? t('summaryTitle');
   const resolvedDescription = summaryDescription ?? defaults.summaryDescription;
   const resolvedValidate = validate ?? defaults.validate;
   const resolvedNativeValidation = nativeValidation ?? defaults.nativeValidation;

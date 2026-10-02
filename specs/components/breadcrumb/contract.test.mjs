@@ -25,7 +25,6 @@ test('declares one member, because the trail is one family', () => {
 test('renders the landmark the pattern asks for', () => {
   assert.equal(breadcrumb.nativeElement, 'nav');
   assert.equal(contract.rootRole, 'navigation');
-  assert.equal(breadcrumb.defaults.label, 'Breadcrumb');
 });
 
 test('names the eight parts a trail is made of', () => {

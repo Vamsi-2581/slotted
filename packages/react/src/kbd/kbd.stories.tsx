@@ -344,10 +344,9 @@ export const Content: Story = {
           legends={{ ctrl: 'Strg', shift: 'Umschalt', delete: 'Entf' }}
           names={{ ctrl: 'Steuerung', shift: 'Umschalt', delete: 'Entfernen' }}
           platform="windows"
-          thenLabel="dann"
         >
           <Shortcut keys="mod+shift+delete" />
-          <Shortcut keys="mod+k mod+s" />
+          <Shortcut keys="mod+k mod+s" messages={{ then: 'dann' }} />
         </KbdDefaultsProvider>
       </Scene>
       <Scene

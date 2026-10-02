@@ -1,3 +1,4 @@
+import type { FamilyTranslator, PageHeaderMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type {
   ButtonHTMLAttributes,
@@ -36,33 +37,15 @@ export type PageHeaderPinnedReason = Extract<
 /** The request the family emits before either value moves. */
 export type PageHeaderChangeRequest = ChangeRequest<boolean>;
 
-/** The strings the family says on the reader's behalf. */
-export interface PageHeaderMessages {
-  /** The toggle's name while the area is collapsed. */
-  expand: string;
-  /** The toggle's name while the area is expanded. */
-  collapse: string;
-  /** The pin's name while it is not pressed. */
-  pin: string;
-  /** The pin's name while it is pressed. */
-  unpin: string;
-  /** The accessible name of the header area's region. */
-  headerArea: string;
-}
-
 /** What an application sets once for every page header under it. */
 export interface PageHeaderDefaults {
   collapse: PageHeaderCollapse;
   level: PageHeaderLevel;
-  messages: PageHeaderMessages;
   size: PageHeaderSize;
 }
 
-export interface PageHeaderDefaultsProviderProps extends Partial<
-  Omit<PageHeaderDefaults, 'messages'>
-> {
+export interface PageHeaderDefaultsProviderProps extends Partial<PageHeaderDefaults> {
   children?: ReactNode | undefined;
-  messages?: Partial<PageHeaderMessages> | undefined;
 }
 
 /** The imperative actions a consumer cannot express declaratively. */
@@ -87,7 +70,8 @@ export interface PageHeaderContextValue {
   ids: { areaId: string; headingId: string };
   level: PageHeaderLevel;
   loading: boolean;
-  messages: PageHeaderMessages;
+  /** The family's words in the language in force, with this header's `messages` laid over them. */
+  t: FamilyTranslator<PageHeaderMessages>;
   pinned: boolean;
   /** Whether the area is shown whole in place although the scroll has passed it. */
   revealed: boolean;
@@ -169,8 +153,12 @@ export interface PageHeaderProps extends Omit<ComponentPropsWithRef<'header'>, '
    * actions stay operable; the root carries `aria-busy`.
    */
   loading?: boolean | undefined;
-  /** Strings for this instance alone, over the provider's. */
-  messages?: Partial<PageHeaderMessages> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * toggle, the pin and the header area's name. A native `aria-label` on a
+   * part still wins.
+   */
+  messages?: PartialMessages<PageHeaderMessages> | undefined;
   /** Called before the header area moves, with the request that carries the reason. */
   onExpandedChange?: ((expanded: boolean, request: PageHeaderChangeRequest) => void) | undefined;
   /** Called before the pin moves, with the request that carries the reason. */

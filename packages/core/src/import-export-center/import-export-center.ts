@@ -13,9 +13,11 @@
 import type { GlyphName } from '../glyph';
 import { timestampOf, zonedEpoch } from '../timeline';
 import type { TimestampValue } from '../timeline';
+import type { FamilyTranslator, ImportExportCenterMessages } from '../i18n';
 import { formatBytes, formatDuration } from '../upload';
 
-import type { ImportExportMessages } from './messages';
+/** The family's words, from the `importExportCenter` catalog in `@slotted/core/i18n`. */
+export type ImportExportTranslator = FamilyTranslator<ImportExportCenterMessages>;
 
 export type JobDirection = 'import' | 'export';
 
@@ -327,15 +329,11 @@ export function remainingSeconds(
 }
 
 export interface TextOptions {
+  /** What sizes, percentages and durations are written in. */
   readonly locale?: string | undefined;
-  readonly messages: ImportExportMessages;
+  readonly t: ImportExportTranslator;
   /** Seconds left, from `remainingSeconds`. */
   readonly remaining?: number | null | undefined;
-}
-
-function numberIn(locale: string | undefined) {
-  const format = new Intl.NumberFormat(locale);
-  return (value: number) => format.format(value);
 }
 
 /**
@@ -345,13 +343,12 @@ function numberIn(locale: string | undefined) {
  */
 export function jobProgressText(
   job: ImportExportJob,
-  { locale, messages, remaining }: TextOptions,
+  { locale, t, remaining }: TextOptions,
 ): readonly string[] {
   const value = job.progress?.value;
   if (value === undefined) return [];
   const max = job.progress?.max;
   const unit = job.progress?.unit ?? 'rows';
-  const count = numberIn(locale);
   const items: string[] = [];
   const percent =
     max !== undefined && max > 0
@@ -365,48 +362,44 @@ export function jobProgressText(
   } else if (max !== undefined) {
     items.push(
       unit === 'bytes'
-        ? messages.ofBytes(formatBytes(value, locale), formatBytes(max, locale))
-        : messages.ofRows(count(value), count(max)),
+        ? t('ofBytes', { value: formatBytes(value, locale), max: formatBytes(max, locale) })
+        : t('ofRows', { value, max }),
     );
     if (percent !== null) items.push(percent);
   } else {
-    items.push(unit === 'bytes' ? formatBytes(value, locale) : messages.rows(count(value)));
+    items.push(unit === 'bytes' ? formatBytes(value, locale) : t('rows', { count: value }));
   }
 
   if (remaining !== undefined && remaining !== null && remaining > 0) {
-    items.push(messages.remaining(formatDuration(remaining, locale)));
+    items.push(t('remaining', { duration: formatDuration(remaining, locale) }));
   }
   return items;
 }
 
 /** The counts of a finished job, in one line: processed of total, created, updated, skipped. */
-export function jobSummaryText(
-  job: ImportExportJob,
-  { locale, messages }: TextOptions,
-): readonly string[] {
+export function jobSummaryText(job: ImportExportJob, { t }: TextOptions): readonly string[] {
   if (!isFinishedJob(job) || job.counts === undefined) return [];
   const { total, processed, created, updated, skipped } = job.counts;
-  const count = numberIn(locale);
   const items: string[] = [];
   if (processed !== undefined && total !== undefined) {
-    items.push(messages.ofRows(count(processed), count(total)));
+    items.push(t('ofRows', { value: processed, max: total }));
   } else if (processed !== undefined) {
-    items.push(messages.rows(count(processed)));
+    items.push(t('rows', { count: processed }));
   }
-  if (created !== undefined) items.push(messages.created(count(created)));
-  if (updated !== undefined) items.push(messages.updated(count(updated)));
-  if (skipped !== undefined && skipped > 0) items.push(messages.skipped(count(skipped)));
+  if (created !== undefined) items.push(t('created', { count: created }));
+  if (updated !== undefined) items.push(t('updated', { count: updated }));
+  if (skipped !== undefined && skipped > 0) items.push(t('skipped', { count: skipped }));
   return items;
 }
 
 /** The word for the job's state, which the status line and the announcer both say. */
-export function jobStatusText(job: ImportExportJob, messages: ImportExportMessages): string {
+export function jobStatusText(job: ImportExportJob, t: ImportExportTranslator): string {
   const outcome = jobOutcome(job);
-  if (outcome === 'partial') return messages.partial(failedRows(job));
-  if (outcome === 'success') return messages.success;
-  if (outcome === 'failed') return messages.failed;
-  if (outcome === 'canceled') return messages.canceled;
-  return job.status === 'queued' ? messages.queued : messages.running;
+  if (outcome === 'partial') return t('partial', { failed: failedRows(job) });
+  if (outcome === 'success') return t('success');
+  if (outcome === 'failed') return t('failed');
+  if (outcome === 'canceled') return t('canceled');
+  return job.status === 'queued' ? t('queued') : t('running');
 }
 
 export type JobTransition = 'started' | 'success' | 'partial' | 'failed' | 'canceled';
@@ -428,14 +421,12 @@ export function jobTransition(
 export function jobAnnouncement(
   transition: JobTransition,
   job: ImportExportJob,
-  messages: ImportExportMessages,
+  t: ImportExportTranslator,
 ): string {
-  return messages.announce({
-    direction: messages[job.direction],
-    title: job.title,
-    transition,
-    failed: failedRows(job),
-  });
+  const slots = { direction: job.direction, title: job.title };
+  return transition === 'partial'
+    ? t('announce.partial', { ...slots, failed: failedRows(job) })
+    : t(`announce.${transition}`, slots);
 }
 
 export interface JobNotice {
@@ -460,14 +451,14 @@ export const NOTICE_PREFIX = 'import-export-center:';
 export function jobNotice(
   previous: ImportExportJob | undefined,
   next: ImportExportJob,
-  messages: ImportExportMessages,
+  t: ImportExportTranslator,
 ): JobNotice | null {
   const transition = jobTransition(previous, next);
   if (transition === null || transition === 'canceled') return null;
   return {
     id: `${NOTICE_PREFIX}${next.key}`,
     key: next.key,
-    title: jobAnnouncement(transition, next, messages),
+    title: jobAnnouncement(transition, next, t),
     description: next.message ?? next.stage ?? next.title,
     tone: transition === 'started' ? 'accent' : jobTone(next),
     loading: transition === 'started',

@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "popover",
   "ui": "popover",
+  "catalog": {
+    "group": "Overlays",
+    "summary": "Floating panel anchored to a trigger."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
   "patternStatus": "There is no popover pattern in the APG. The tooltip pattern names the non-modal dialog as what to build when the surface holds focusable elements, so the dialog pattern is what this family answers — everything in it about modality, and only that, is deliberately not taken.",
   "roles": {
@@ -134,10 +138,8 @@
       "reason": "As tooltip's: the gap is the layer's padding, so the pointer never crosses empty space and the arrow has a band to stand in. `sideOffset` means additional distance beyond it."
     }
   },
-  "labels": {
-    "close": "Close",
-    "reason": "The close control's accessible name is a string the defaults provider holds, so an application translates it once rather than on every popover it renders. An instance may still state its own."
-  },
+  "messages": ["close"],
+  "messagesReason": "The close control's accessible name comes from the catalog of the language in force, so an application translates it once rather than on every popover it renders. An instance may still lay its own messages over it.",
   "declined": {
     "modal": {
       "deferTo": "dialog",
@@ -220,8 +222,7 @@
       "sideOffset",
       "alignOffset",
       "collisionPadding",
-      "arrowPadding",
-      "closeLabel"
+      "arrowPadding"
     ]
   },
   "stateAttributes": {
@@ -257,8 +258,7 @@
         "sideOffset": 0,
         "alignOffset": 0,
         "collisionPadding": 8,
-        "arrowPadding": 12,
-        "closeLabel": "Close"
+        "arrowPadding": 12
       },
       "capabilities": ["open", "placement", "size", "appearance", "disabled", "wiring"],
       "states": ["default", "hover", "active", "focus-visible", "open"],

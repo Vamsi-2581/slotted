@@ -1139,13 +1139,6 @@ export const Defaults: Story = {
           collapse: 'manual',
           level: '2',
           size: 'sm',
-          messages: {
-            collapse: 'Collapse header',
-            expand: 'Expand header',
-            headerArea: 'Page header',
-            pin: 'Pin header',
-            unpin: 'Unpin header',
-          },
         }),
       ],
     }),
@@ -1155,12 +1148,12 @@ export const Defaults: Story = {
     template: grid(
       1,
       scene(
-        'Four decisions an application takes once',
-        'providePageHeaderDefaults carries collapse, level, size and the strings for every header under it — here in English, and manual. A header that states any of them itself still wins: this one says size="md".',
+        'Three decisions an application takes once',
+        'providePageHeaderDefaults carries collapse, level and size for every header under it — here manual. A header that states any of them itself still wins: this one says size="md". The words come from the language in force.',
         viewport(
           `<main slPage>${HEADER('size="md" #h="slPageHeader"', { navigation: false, tabs: false })}<div slPageBody>
   <div slStack [gap]="2">
-    <p slText size="sm">Hover the pill: the names are the provider’s. The four buttons move the header through the instance with the reason programmatic.</p>
+    <p slText size="sm">Hover the pill: the names are the catalog’s. The four buttons move the header through the instance with the reason programmatic.</p>
     <div slStack [gap]="2">
       <button slButton size="sm" variant="outline" (click)="h.collapseArea()">collapseArea()</button>
       <button slButton size="sm" variant="outline" (click)="h.expand()">expand()</button>

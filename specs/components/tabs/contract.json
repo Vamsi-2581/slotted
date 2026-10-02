@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "tabs",
   "ui": "tabs",
+  "catalog": {
+    "group": "Navigation",
+    "summary": "Switches between panels of related content."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/tabs/",
   "roles": {
     "list": "tablist",

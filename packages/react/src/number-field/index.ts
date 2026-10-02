@@ -1,10 +1,5 @@
 export { NumberField, NumberFieldScrub } from './number-field';
-export {
-  NUMBER_FIELD_DECREMENT_LABEL,
-  NUMBER_FIELD_INCREMENT_LABEL,
-  NumberFieldDefaultsProvider,
-  useNumberFieldDefaults,
-} from './number-field-defaults';
+export { NumberFieldDefaultsProvider, useNumberFieldDefaults } from './number-field-defaults';
 export type {
   NumberFieldClamp,
   NumberFieldDefaults,

@@ -1,3 +1,4 @@
+import type { FamilyTranslator, FieldMessages } from '@slotted/core/i18n';
 import { createContext, useContext } from 'react';
 
 import type {
@@ -6,7 +7,6 @@ import type {
   FieldDescribedSlot,
   FieldIds,
   FieldNecessity,
-  FieldNecessityWords,
 } from './field.types';
 
 /**
@@ -60,15 +60,15 @@ export const FIELD_DESCRIBED_ORDER: readonly FieldDescribedSlot[] = [
 export function necessityMark(
   necessity: FieldNecessity,
   required: boolean,
-  words: FieldNecessityWords,
+  t: FamilyTranslator<FieldMessages>,
 ): { hidden: boolean; text: string } | null {
   switch (necessity) {
     case 'mark':
       return required ? { hidden: true, text: '*' } : null;
     case 'optional':
-      return required ? null : { hidden: false, text: words.optional };
+      return required ? null : { hidden: false, text: t('optional') };
     case 'words':
-      return { hidden: false, text: required ? words.required : words.optional };
+      return { hidden: false, text: t(required ? 'required' : 'optional') };
     case 'none':
       return null;
   }

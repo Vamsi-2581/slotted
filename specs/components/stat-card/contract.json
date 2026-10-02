@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "stat-card",
   "ui": "stat-card",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Key figure with label, change and trend."
+  },
   "axes": {
     "size": ["sm", "md", "lg"],
     "fill": ["outline", "elevated", "subtle", "plain"],
@@ -43,6 +47,7 @@
       ]
     }
   },
+  "messages": ["down", "empty", "flat", "up"],
   "stateAttributes": {
     "loading": "data-loading"
   },

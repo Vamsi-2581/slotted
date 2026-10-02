@@ -268,7 +268,7 @@ export const Midnight: Story = {
            slTimeField
            locale="pt-BR"
            aria-label="Fim do turno"
-           nextDayLabel="no dia seguinte"
+           [messages]="{ nextDay: '{time} no dia seguinte' }"
            [referenceTime]="late"
          ></div>`,
       ),
@@ -412,12 +412,12 @@ export const Clear: Story = {
       scene(
         'With a value',
         'The button is drawn only once a segment holds something, and pressing it puts focus back on the first segment.',
-        `<div slTimeField locale="pt-BR" clearable clearLabel="Limpar a hora" aria-label="Com valor" [defaultValue]="value"></div>`,
+        `<div slTimeField locale="pt-BR" clearable [messages]="{ clear: 'Limpar a hora' }" aria-label="Com valor" [defaultValue]="value"></div>`,
       ) +
         scene(
           'Empty',
           'Nothing to clear, so nothing is drawn — and the value keeps its place rather than shifting sideways.',
-          `<div slTimeField locale="pt-BR" clearable clearLabel="Limpar a hora" aria-label="Vazia"></div>`,
+          `<div slTimeField locale="pt-BR" clearable [messages]="{ clear: 'Limpar a hora' }" aria-label="Vazia"></div>`,
         ),
     ),
   }),
@@ -500,7 +500,7 @@ export const Composition: Story = {
       1,
       scene(
         'The instance a template can reach',
-        'exportAs gives the template the component itself: focus() puts the reader on the first segment, clear() empties the value with the clear reason, and time() is the derived value as a signal. provideTimeFieldDefaults states the locale and the clock once for everything under it.',
+        'exportAs gives the template the component itself: focus() puts the reader on the first segment, clear() empties the value with the clear reason, and time() is the derived value as a signal. provideTimeFieldDefaults states the clock once for everything under it, and provideSlotted the language.',
         `<div slTimeField #hora="slTimeField" locale="pt-BR" aria-label="Com instância" [defaultValue]="value"></div>
          <button type="button" (click)="hora.focus()">Focar</button>
          <button type="button" (click)="hora.clear()">Limpar</button>`,

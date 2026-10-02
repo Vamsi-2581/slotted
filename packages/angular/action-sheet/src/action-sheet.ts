@@ -1,5 +1,11 @@
 import { SlDrawer } from '@slotted/angular/drawer';
 import type { DrawerChangeRequest } from '@slotted/angular/drawer';
+import { injectMessages } from '@slotted/angular/i18n';
+import {
+  actionSheetMessages,
+  type ActionSheetMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import {
   booleanAttribute,
@@ -119,7 +125,8 @@ export class SlActionSheet {
   readonly outsidePress = input<ActionSheetDismissPolicy | undefined>(undefined);
   readonly back = input<ActionSheetDismissPolicy | undefined>(undefined);
   readonly closeOnSelect = input(undefined, { transform: optionalBoolean });
-  readonly cancelLabel = input<string | undefined>(undefined);
+  /** Words laid over the catalog of the language in force, key by key: the cancel's (`cancel`). */
+  readonly messages = input<PartialMessages<ActionSheetMessages> | undefined>(undefined);
   readonly container = input<Element | null | undefined>(undefined);
   readonly initialFocus = input<HTMLElement | false | undefined>(undefined);
   readonly finalFocus = input<HTMLElement | false | undefined>(undefined);
@@ -128,6 +135,8 @@ export class SlActionSheet {
   readonly closed = output<string | undefined>();
 
   private readonly defaults = injectActionSheetDefaults();
+  /** The family's words in the language in force, with this sheet's `messages` laid over them. */
+  readonly t = injectMessages(actionSheetMessages, this.messages);
 
   /**
    * A consumer's own `aria-label` on `<sl-action-sheet>`, read before the host
@@ -160,7 +169,6 @@ export class SlActionSheet {
   readonly resolvedCloseOnSelect = computed(
     () => this.closeOnSelect() ?? this.defaults.closeOnSelect,
   );
-  readonly resolvedCancelLabel = computed(() => this.cancelLabel() ?? this.defaults.cancelLabel);
   protected readonly resolvedEscape = computed(() => this.escape() ?? this.defaults.escape);
   protected readonly resolvedBack = computed(() => this.back() ?? this.defaults.back);
   protected readonly resolvedOutsidePress = computed(

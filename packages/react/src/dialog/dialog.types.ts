@@ -1,3 +1,4 @@
+import type { DialogMessages, FamilyTranslator, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref, RefObject } from 'react';
 
@@ -197,6 +198,8 @@ export interface DialogContextValue {
    * the initial focus and leaves it on `body`.
    */
   interactive: boolean;
+  /** The family's words in the language in force, with this layer's `messages` laid over them. */
+  t: FamilyTranslator<DialogMessages>;
 }
 
 /** What the two members share. */
@@ -221,6 +224,11 @@ interface DialogOwnProps {
   back?: DialogDismissPolicy | undefined;
   /** Whether the layer's content is still on its way. */
   loading?: boolean | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * corner controls' names (`close`, `fullScreen`).
+   */
+  messages?: PartialMessages<DialogMessages> | undefined;
   /** A parent for this layer alone, instead of the shared portal root. */
   container?: Element | null | undefined;
   initialFocus?: DialogInitialFocus | undefined;

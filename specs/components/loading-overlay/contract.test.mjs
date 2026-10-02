@@ -183,7 +183,7 @@ test('sizes on the scale the family that draws the mark already owns', () => {
 test('announces with the vocabulary the sibling family already established', () => {
   assert.deepEqual(contract.axes.live, skeleton.axes.live);
   assert.equal(overlay.defaults.live, skeleton.members.skeleton.defaults.live);
-  assert.equal(overlay.defaults.label, skeleton.members.skeleton.defaults.label);
+  assert.deepEqual(contract.messages.slice(0, 1), skeleton.messages);
 });
 
 /**

@@ -1,5 +1,6 @@
 import '@slotted/styles/dialog/dialog.css';
 
+import { dialogMessages } from '@slotted/core/i18n';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { createControllable } from '@slotted/core/state';
@@ -15,6 +16,7 @@ import {
   useState,
 } from 'react';
 
+import { useMessages } from '../i18n';
 import { useDialogDefaults } from './dialog-defaults';
 import type {
   AlertDialogProps,
@@ -70,6 +72,7 @@ function DialogFamily({
   initialFocus,
   loading,
   member,
+  messages,
   modal,
   mount,
   onFullscreenChange,
@@ -84,6 +87,7 @@ function DialogFamily({
   tone,
 }: FamilyProps) {
   const defaults = useDialogDefaults();
+  const t = useMessages(dialogMessages, messages);
   const baseId = useId();
 
   const [own, setOwn] = useState<boolean>(defaultOpen ?? false);
@@ -277,6 +281,7 @@ function DialogFamily({
       scroll: resolvedScroll,
       size: resolvedSize,
       surface: resolvedSurface,
+      t,
       titleId: titleRendered ? `${baseId}title` : '',
       tone: isAlert ? (tone ?? 'danger') : undefined,
       triggerId: `${baseId}trigger`,
@@ -311,6 +316,7 @@ function DialogFamily({
       setFullscreen,
       resolvedSurface,
       status,
+      t,
       titleRendered,
       tone,
     ],

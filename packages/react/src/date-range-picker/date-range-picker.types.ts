@@ -1,4 +1,5 @@
 import type { PlainDate } from '@slotted/core/date';
+import type { DateRangePickerMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -39,29 +40,11 @@ export type DateRangePickerValueReason = Extract<
 /** What an application sets once for every range picker under it. */
 export interface DateRangePickerDefaults {
   calendar: DateRangePickerCalendar;
-  /** The trigger's name once a range is chosen, before the two dates. */
-  changeLabel: string;
-  /** The trigger's name while nothing is chosen. */
-  chooseLabel: string;
-  clearLabel: string;
   closeOnSelect: DateRangePickerCloseOnSelect;
   count: DateRangePickerCount;
-  /** The accessible name of the end field. */
-  endLabel: string;
-  /** "4 nights", in the product's own words. */
-  lengthLabel: (count: number, unit: DateRangePickerCount) => string;
-  /** "2 to 7 nights": what the band says while a limit is set. */
-  limitLabel: (
-    min: number | undefined,
-    max: number | undefined,
-    unit: DateRangePickerCount,
-  ) => string;
-  locale: string | undefined;
   months: number;
   placement: DateRangePickerPlacement;
   size: DateRangePickerSize;
-  /** The accessible name of the start field. */
-  startLabel: string;
   timeZone: string | undefined;
   variant: DateRangePickerVariant;
 }
@@ -127,14 +110,13 @@ export interface DateRangePickerProps extends Omit<
   minLength?: number | undefined;
   maxLength?: number | undefined;
   count?: DateRangePickerCount | undefined;
-  lengthLabel?: DateRangePickerDefaults['lengthLabel'] | undefined;
-  limitLabel?: DateRangePickerDefaults['limitLabel'] | undefined;
 
   months?: number | undefined;
   weekNumbers?: boolean | undefined;
   /** Six rows whatever the month needs, so a press of "next" moves no target. On by default. */
   fixedWeeks?: boolean | undefined;
 
+  /** BCP 47. Writes both fields, the grid and the trigger's dates. Unset, the language in force decides. */
   locale?: string | undefined;
   timeZone?: string | undefined;
   firstDayOfWeek?: number | undefined;
@@ -153,11 +135,12 @@ export interface DateRangePickerProps extends Omit<
 
   /** Draws one clear on the frame, which empties both ends. */
   clearable?: boolean | undefined;
-  clearLabel?: string | undefined;
-  chooseLabel?: string | undefined;
-  changeLabel?: string | undefined;
-  startLabel?: string | undefined;
-  endLabel?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * trigger's two names, the clear, the names of the two ends, and the
+   * phrases that count the run (`days.length`, `nights.between`, …).
+   */
+  messages?: PartialMessages<DateRangePickerMessages> | undefined;
 
   /** The names of the two hidden inputs a plain form post reads. */
   startName?: string | undefined;

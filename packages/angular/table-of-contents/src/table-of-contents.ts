@@ -22,9 +22,15 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import {
+  tableOfContentsMessages,
+  type PartialMessages,
+  type TableOfContentsMessages,
+} from '@slotted/core/i18n';
 import { collectOutline } from '@slotted/core/outline';
 import type { OutlineEntry } from '@slotted/core/outline';
 import {
@@ -47,7 +53,6 @@ import type {
   TableOfContentsHistory,
   TableOfContentsItemData,
   TableOfContentsLayout,
-  TableOfContentsMessages,
   TableOfContentsOpenReason,
   TableOfContentsSize,
   TableOfContentsValueReason,
@@ -58,7 +63,6 @@ export type {
   TableOfContentsHistory,
   TableOfContentsItemData,
   TableOfContentsLayout,
-  TableOfContentsMessages,
   TableOfContentsOpenReason,
   TableOfContentsSize,
   TableOfContentsValueReason,
@@ -303,7 +307,12 @@ export class SlTableOfContents {
   readonly label = input<string | undefined>(undefined);
   /** Rows of skeleton in the list's place. */
   readonly loading = input<boolean, boolean | string>(false, { transform: booleanAttribute });
-  readonly messages = input<Partial<TableOfContentsMessages> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force: the landmark's name
+   * when no label is given, and the collapsed trigger's fixed text
+   * (`navigation`). A static `aria-label` still wins.
+   */
+  readonly messages = input<PartialMessages<TableOfContentsMessages> | undefined>(undefined);
 
   /** One output for one transition, carrying the reason and the event. */
   readonly valueChangeRequest = output<ChangeRequest<string | null>>();
@@ -336,10 +345,8 @@ export class SlTableOfContents {
   readonly resolvedLandmark = computed(() => this.landmark() ?? this.defaults.landmark);
   readonly resolvedLevels = computed(() => this.levels() ?? this.defaults.levels);
   readonly resolvedOffset = computed(() => this.offset() ?? this.defaults.offset);
-  readonly resolvedMessages = computed<TableOfContentsMessages>(() => ({
-    ...this.defaults.messages,
-    ...this.messages(),
-  }));
+  /** The family's words in the language in force, with this list's `messages` laid over them. */
+  readonly t = injectMessages(tableOfContentsMessages, this.messages);
   readonly collapsed = computed(() => this.resolvedLayout() === 'collapsed');
 
   /** The headings of `source`, as the list reads them. */
@@ -354,7 +361,7 @@ export class SlTableOfContents {
   readonly hasLabel = computed(
     () => this.labelTemplate() !== undefined || this.label() !== undefined,
   );
-  readonly resolvedLabel = computed(() => this.label() ?? this.resolvedMessages().navigation);
+  readonly resolvedLabel = computed(() => this.label() ?? this.t('navigation'));
   readonly currentLabel = computed(() => {
     const current = this.value();
     return current === null ? '' : (this.flat().find((entry) => entry.id === current)?.label ?? '');
@@ -367,7 +374,7 @@ export class SlTableOfContents {
   );
   protected readonly ariaLabel = computed(() =>
     this.resolvedLandmark() && this.writtenLabelledBy === null && !this.hasLabel()
-      ? (this.writtenLabel ?? this.resolvedMessages().navigation)
+      ? (this.writtenLabel ?? this.t('navigation'))
       : this.writtenLabel,
   );
 

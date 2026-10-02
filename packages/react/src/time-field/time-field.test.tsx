@@ -1,10 +1,12 @@
 import { plainTime, toISOTime } from '@slotted/core/date';
 import type { PlainTime } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { Field, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { TimeField, TimeFieldDefaultsProvider } from './index';
 import type { TimeFieldChangeRequest, TimeFieldHandle } from './index';
 
@@ -458,25 +460,57 @@ describe('what the field around it decides', () => {
     expect(screen.getByRole('group')).toHaveAttribute('aria-invalid', 'true');
   });
 
-  it('lets an application state the locale and the clock once', () => {
+  it('lets an application state the clock once, and takes the locale from the language in force', () => {
     render(
-      <TimeFieldDefaultsProvider hourCycle={12} locale="en-US">
-        <TimeField defaultValue={HALF_PAST_TWO} />
-      </TimeFieldDefaultsProvider>,
+      <SlottedProvider locale="en-US">
+        <TimeFieldDefaultsProvider hourCycle={12}>
+          <TimeField defaultValue={HALF_PAST_TWO} />
+        </TimeFieldDefaultsProvider>
+      </SlottedProvider>,
     );
 
     expect(segments()).toHaveLength(3);
     expect(text()).toContain('02');
   });
 
-  it('lets the control outrank the provider', () => {
+  it('lets the control outrank the language in force', () => {
     render(
-      <TimeFieldDefaultsProvider locale="en-US">
+      <SlottedProvider locale="en-US">
         <TimeField defaultValue={HALF_PAST_TWO} locale="pt-BR" />
-      </TimeFieldDefaultsProvider>,
+      </SlottedProvider>,
     );
 
     expect(text()).toEqual(['14', '30']);
+  });
+
+  it('changes its words and its time format together with the language in force', () => {
+    const inLocale = (locale: string) => (
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale={locale}>
+        <TimeField aria-label="Hora" clearable defaultValue={HALF_PAST_TWO} />
+      </SlottedProvider>
+    );
+    const { rerender } = render(inLocale('pt-BR'));
+
+    expect(screen.getByRole('button', { name: 'Limpar' })).toBeInTheDocument();
+    expect(text()).toEqual(['14', '30']);
+
+    rerender(inLocale('en-US'));
+    expect(screen.getByRole('button', { name: 'Clear' })).toBeInTheDocument();
+    expect(segments()).toHaveLength(3);
+  });
+
+  it('lays its own messages over the language in force', () => {
+    render(
+      <TimeField
+        aria-label="Hora"
+        clearable
+        defaultValue={HALF_PAST_TWO}
+        locale="pt-BR"
+        messages={{ clear: 'Limpar a hora' }}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Limpar a hora' })).toBeInTheDocument();
   });
 });
 

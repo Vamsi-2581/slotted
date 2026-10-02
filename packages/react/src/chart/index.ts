@@ -25,7 +25,6 @@ export type {
 export type {
   ChartAnnotation,
   ChartKind,
-  ChartMessages,
   ChartPoint,
   ChartRecord,
   ChartSeries,

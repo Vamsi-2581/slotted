@@ -195,9 +195,9 @@ function countColumns(codeOf: (id: string) => string): readonly GridColumn<Cycle
             (valueChangeRequest)="store.setFilter($event.value)"
             [query]="store.search()"
             (queryChangeRequest)="store.setSearch($event.value)"
-            [labels]="{ count: countLabel }"
+            [messages]="countMessages"
             [count]="store.total() ?? undefined"
-            [total]="store.grandTotal() ?? undefined"
+            [total]="store.total() === store.grandTotal() ? undefined : (store.grandTotal() ?? undefined)"
             [loading]="store.loading()"
           >
             <app-list-view-tools
@@ -211,7 +211,7 @@ function countColumns(codeOf: (id: string) => string): readonly GridColumn<Cycle
           </div>
           <sl-data-grid
             #grid="slDataGrid"
-            label="Cycle counts"
+            aria-label="Cycle counts"
             rowKey="id"
             variant="framed"
             activatable
@@ -249,8 +249,8 @@ function countColumns(codeOf: (id: string) => string): readonly GridColumn<Cycle
             <nav
               slDataGridFooter
               slPagination
-              label="Count pages"
-              [labels]="pagerLabels"
+              aria-label="Count pages"
+              [messages]="pagerMessages"
               [count]="store.total() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
@@ -340,12 +340,11 @@ export class CycleCountsPage {
     return `Counts of ${where} stock. Starting a count takes a snapshot; the counted quantities change nothing until the count is submitted, and a variance worth US$2,500 or more at standard cost waits on a warehouse manager.`;
   });
 
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total ? `${count} counts` : `${count} of ${total} counts`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} counts', countOnly: '{count} counts' };
 
-  readonly pagerLabels = {
-    range: (start: number, end: number, count: number) =>
-      `Counts ${start}–${end} of ${count.toLocaleString('en-US')}`,
+  readonly pagerMessages = {
+    range: 'Counts {start}–{end} of {count}',
     pageSize: 'Counts per page',
   };
 

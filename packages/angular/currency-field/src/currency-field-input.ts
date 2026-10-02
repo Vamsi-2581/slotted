@@ -23,6 +23,7 @@ import { stepNumber } from '@slotted/core/number';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason } from '@slotted/core/state';
 import { SlField } from '@slotted/angular/field';
+import { injectLocale } from '@slotted/angular/i18n';
 
 import { injectCurrencyFieldDefaults, SlCurrencyFieldControl } from './currency-field-defaults';
 import type {
@@ -149,7 +150,10 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
   readonly clamp = input<CurrencyFieldClamp | undefined>(undefined);
   /** Any other `Intl.NumberFormatOptions`. Every key here wins over the family's own. */
   readonly format = input<Intl.NumberFormatOptions | undefined>(undefined);
-  /** BCP 47. Decides the separators and the numbering system, never the symbol. */
+  /**
+   * BCP 47. Decides the separators and the numbering system, never the symbol.
+   * Defaults to the language in force (`provideSlotted`).
+   */
   readonly locale = input<string | undefined>(undefined);
   /**
    * Lets the wheel move the amount while the control has focus. Off by default:
@@ -193,6 +197,7 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
   readonly currencyField = inject(SlCurrencyField);
   private readonly field = inject(SlField, { optional: true });
   private readonly defaults = injectCurrencyFieldDefaults();
+  private readonly appLocale = injectLocale();
 
   private readonly writtenId = inject(new HostAttributeToken('id'), { optional: true });
   private readonly writtenName = inject(new HostAttributeToken('name'), { optional: true });
@@ -242,13 +247,12 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
         'slCurrencyFieldInput needs a currency: set [currency], or provideCurrencyFieldDefaults({ currency }).',
       );
     }
-    const locale = this.locale() ?? this.defaults.locale;
     const fractionDigits = this.fractionDigits();
     const options = this.format();
     return createCurrencyFormat({
       currency,
       currencyDisplay: this.currencyDisplay() ?? this.defaults.currencyDisplay,
-      ...(locale === undefined ? {} : { locale }),
+      locale: this.locale() ?? this.appLocale(),
       ...(fractionDigits === undefined ? {} : { fractionDigits }),
       ...(options === undefined ? {} : { options }),
     });

@@ -1,4 +1,3 @@
-import { DEFAULT_DASHBOARD_GRID_LABELS } from '@slotted/core/dashboard-grid';
 import { createContext, useContext } from 'react';
 
 import type {
@@ -10,7 +9,6 @@ export const DASHBOARD_GRID_FALLBACK: DashboardGridDefaults = {
   columns: 12,
   editBar: true,
   headingLevel: 3,
-  labels: DEFAULT_DASHBOARD_GRID_LABELS,
 };
 
 const DashboardGridDefaultsContext = createContext<DashboardGridDefaults>(DASHBOARD_GRID_FALLBACK);
@@ -22,13 +20,12 @@ export function useDashboardGridDefaults(): DashboardGridDefaults {
 
 /**
  * An application decides once how many columns its dashboards have, whether
- * the family draws the edit bar, the level of a widget's title and what the
- * family says. A grid that states any of it itself still wins, and a nested
- * provider overrides only what it names.
+ * the family draws the edit bar and the level of a widget's title. A grid that
+ * states any of it itself still wins, and a nested provider overrides only what
+ * it names. Its words come from the language in force (`SlottedProvider`).
  */
 export function DashboardGridDefaultsProvider({
   children,
-  labels,
   ...rest
 }: DashboardGridDefaultsProviderProps) {
   const inherited = useDashboardGridDefaults();
@@ -38,7 +35,6 @@ export function DashboardGridDefaultsProvider({
         columns: rest.columns ?? inherited.columns,
         editBar: rest.editBar ?? inherited.editBar,
         headingLevel: rest.headingLevel ?? inherited.headingLevel,
-        labels: { ...inherited.labels, ...labels },
       }}
     >
       {children}

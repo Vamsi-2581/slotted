@@ -31,6 +31,7 @@ export type {
   FocusDestination,
   FocusMemory,
   ImportExportJob,
+  ImportExportTranslator,
   JobControl,
   JobControls,
   JobCounts,
@@ -49,5 +50,3 @@ export type {
   ProgressSample,
   TextOptions,
 } from './import-export-center';
-export { DEFAULT_IMPORT_EXPORT_MESSAGES } from './messages';
-export type { AnnouncementInput, ImportExportMessages } from './messages';

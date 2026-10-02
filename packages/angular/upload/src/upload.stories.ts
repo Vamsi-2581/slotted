@@ -695,7 +695,7 @@ export const Defaults: Story = {
     template: stage(`
       <div
         slUploadDemo
-        description="provideUploadDefaults sets every string, the locale and the limits once in the injector."
+        description="provideUploadDefaults sets the limits once in the injector; provideSlotted sets every word and the locale."
         label="Documentos do sinistro"
         [maxSize]="2097152"
         [multiple]="true"

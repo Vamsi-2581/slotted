@@ -169,16 +169,16 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'A column of destinations',
       source: `<nav slSideNavigation [(value)]="value">
   <ul slSideNavigationList>
-    <li slSideNavigationItem value="painel">
-      <a slSideNavigationLink routerLink="/painel">
+    <li slSideNavigationItem value="dashboard">
+      <a slSideNavigationLink routerLink="/dashboard">
         <span slSideNavigationIcon><lucide-icon name="chart-no-axes-column" /></span>
-        <span slSideNavigationLabel>Painel</span>
+        <span slSideNavigationLabel>Dashboard</span>
       </a>
     </li>
-    <li slSideNavigationItem value="cargas">
-      <a slSideNavigationLink routerLink="/cargas">
+    <li slSideNavigationItem value="loads">
+      <a slSideNavigationLink routerLink="/loads">
         <span slSideNavigationIcon><lucide-icon name="package" /></span>
-        <span slSideNavigationLabel>Cargas</span>
+        <span slSideNavigationLabel>Loads</span>
         <span slSideNavigationCount>12</span>
       </a>
     </li>
@@ -228,16 +228,16 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'side-navigation-angular-groups',
       language: 'angular',
       label: 'A group under a trigger',
-      source: `<li slSideNavigationItem value="entregas">
+      source: `<li slSideNavigationItem value="deliveries">
   <button slSideNavigationTrigger>
     <span slSideNavigationIcon><lucide-icon name="truck" /></span>
-    <span slSideNavigationLabel>Entregas</span>
+    <span slSideNavigationLabel>Deliveries</span>
     <span slSideNavigationCount>38</span>
   </button>
   <ul slSideNavigationGroup>
-    <li slSideNavigationItem value="hoje">
-      <a slSideNavigationLink routerLink="/entregas/hoje"
-        ><span slSideNavigationLabel>Hoje</span></a
+    <li slSideNavigationItem value="today">
+      <a slSideNavigationLink routerLink="/deliveries/today"
+        ><span slSideNavigationLabel>Today</span></a
       >
     </li>
   </ul>
@@ -252,10 +252,10 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'side-navigation-angular-hybrid',
       language: 'angular',
       label: 'A link and its trigger side by side',
-      source: `<li slSideNavigationItem value="relatorios">
-  <a slSideNavigationLink routerLink="/relatorios">
+      source: `<li slSideNavigationItem value="reports">
+  <a slSideNavigationLink routerLink="/reports">
     <span slSideNavigationIcon><lucide-icon name="chart-no-axes-column" /></span>
-    <span slSideNavigationLabel>Relatórios</span>
+    <span slSideNavigationLabel>Reports</span>
   </a>
   <button slSideNavigationTrigger></button>
   <ul slSideNavigationGroup>
@@ -274,19 +274,19 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'Titled sections',
       source: `<nav slSideNavigation>
   <div slSideNavigationSection>
-    <div slSideNavigationSectionLabel>Operações</div>
+    <div slSideNavigationSectionLabel>Operations</div>
     <ul slSideNavigationList>
       …
     </ul>
   </div>
   <div slSideNavigationSection>
-    <div slSideNavigationSectionLabel>Administração</div>
+    <div slSideNavigationSectionLabel>Administration</div>
     <ul slSideNavigationList>
       <li slSideNavigationDivider></li>
-      <li slSideNavigationItem value="nova">
+      <li slSideNavigationItem value="new">
         <button slSideNavigationLink (click)="openDialog()">
           <span slSideNavigationIcon><lucide-icon name="plus" /></span>
-          <span slSideNavigationLabel>Nova carga</span>
+          <span slSideNavigationLabel>New load</span>
         </button>
       </li>
     </ul>
@@ -313,7 +313,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'side-navigation-angular-compact',
       language: 'angular',
       label: 'A rail of marks',
-      source: `<nav slSideNavigation mode="compact" value="cargas">…</nav>`,
+      source: `<nav slSideNavigation mode="compact" value="loads">…</nav>`,
     }),
   },
   {
@@ -346,11 +346,11 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'side-navigation-angular-states',
       language: 'angular',
       label: 'A disabled row',
-      source: `<li slSideNavigationItem value="faturacao" disabled>
-  <a slSideNavigationLink href="/faturacao">
+      source: `<li slSideNavigationItem value="billing" disabled>
+  <a slSideNavigationLink href="/billing">
     <span slSideNavigationIcon><lucide-icon name="credit-card" /></span>
-    <span slSideNavigationLabel>Faturação</span>
-    <span slSideNavigationDescription>Disponível no plano Equipa</span>
+    <span slSideNavigationLabel>Billing</span>
+    <span slSideNavigationDescription>Available on the Team plan</span>
   </a>
 </li>`,
     }),
@@ -395,7 +395,7 @@ const scenes: ReferenceSceneMeta[] = [
   <header slAppShellBanner>…</header>
   <nav slAppShellNav>
     <div slAppShellNavBody>
-      <div slSideNavigation value="encomendas">…</div>
+      <div slSideNavigation value="orders">…</div>
     </div>
   </nav>
   <main slAppShellMain>…</main>
@@ -427,9 +427,9 @@ export class Settings {}`,
       id: 'side-navigation-angular-composition',
       language: 'angular',
       label: 'A router link as the row',
-      source: `<a slSideNavigationLink routerLink="/cargas" routerLinkActive ariaCurrentWhenActive="page">
+      source: `<a slSideNavigationLink routerLink="/loads" routerLinkActive ariaCurrentWhenActive="page">
   <span slSideNavigationIcon><lucide-icon name="package" /></span>
-  <span slSideNavigationLabel>Cargas</span>
+  <span slSideNavigationLabel>Loads</span>
   <span slSideNavigationEnd><span slBadge tone="danger" size="sm">3</span></span>
 </a>`,
     }),
@@ -459,7 +459,7 @@ export class Settings {}`,
       id: 'side-navigation-angular-accessibility',
       language: 'angular',
       label: 'The landmark’s name',
-      source: `<nav slSideNavigation aria-label="Navegação principal">…</nav>`,
+      source: `<nav slSideNavigation aria-label="Main navigation">…</nav>`,
     }),
   },
 ];
@@ -576,10 +576,10 @@ export const ANGULAR_SIDE_NAVIGATION_DOCS = {
       ],
       [
         'messages',
-        '{ navigation }',
-        "{ navigation: 'Navegação' }",
-        'slSideNavigation, provideSideNavigationDefaults',
-        'The landmark’s name when the consumer gives no aria-label',
+        'Partial<SideNavigationMessages>',
+        '—',
+        'slSideNavigation',
+        'Words laid over the language in force: the landmark’s name when the consumer gives no aria-label (navigation)',
       ],
       [
         'value',
@@ -634,7 +634,7 @@ export const ANGULAR_SIDE_NAVIGATION_DOCS = {
       ],
       [
         'provideSideNavigationDefaults()',
-        '{ size, mode, truncate, multiple, autoExpand, guides, landmark, compactAt, messages }',
+        '{ size, mode, truncate, multiple, autoExpand, guides, landmark, compactAt }',
         '—',
         'a component or route’s providers',
         'The decisions an application takes once, through the SIDE_NAVIGATION_DEFAULTS token. A column that states any of them itself still wins',
@@ -650,7 +650,7 @@ export const ANGULAR_SIDE_NAVIGATION_DOCS = {
     accessibility: [
       'The pattern is the WAI-ARIA APG’s Disclosure Navigation Menu with Top-Level Links (w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-navigation-hybrid/), and no role is written: the DOM is nav > ul > li > (a | button) + ul, so a reader hears a navigation landmark, a list of so many items, a link or a button, and a nested list. The tree role is refused on the APG’s own advice — it demands functionality a site’s navigation does not need.',
       'Every link and trigger is in the page tab sequence and nothing here writes tabindex. The arrow keys, Home and End — optional in the pattern and adopted — walk the visible rows, into the flyout when it is open; Escape closes the group holding focus and lands on its trigger, as the pattern lists. A closed group is visibility: hidden, so its rows leave the tab sequence and the accessibility tree together.',
-      'A trigger carries aria-expanded and aria-controls, and its group aria-labelledby pointing at the row’s label; a trigger beside a link is named by that same label through aria-labelledby, so the hybrid row is heard as “Relatórios, link” then “Relatórios, button, collapsed”. Identifiers come from an application-scoped factory, so a server response and the first client render agree.',
+      'A trigger carries aria-expanded and aria-controls, and its group aria-labelledby pointing at the row’s label; a trigger beside a link is named by that same label through aria-labelledby, so the hybrid row is heard as “Reports, link” then “Reports, button, collapsed”. Identifiers come from an application-scoped factory, so a server response and the first client render agree.',
       'The current destination is aria-current="page" on the link and nowhere else. The parent of a destination the reader cannot see carries data-current for the stylesheet and no ARIA, because the destination is the thing that is current.',
       'In the rail the label is clipped to a pixel rather than removed, so the link keeps its accessible name; a tooltip repeats it on hover, on visible focus and on press-and-hold. Under truncate a row whose label the binding measured as cut opens the same tooltip, and a middle cut writes the whole text as aria-label so the name is the name and not the cut.',
       'A disabled destination is aria-disabled with its href kept: perceivable, focusable, and refused on press, so a reader can reach the row and hear why it is unavailable. A disabled trigger takes the native attribute. The item carries data-disabled and never aria-disabled, which ARIA 1.2 deprecates on listitem.',
@@ -667,21 +667,21 @@ export const ANGULAR_SIDE_NAVIGATION_DOCS = {
   data-size="md"
   data-truncate="end"
   data-guides
-  aria-label="Navegação"
+  aria-label="Navigation"
 >
   <div data-part="section">
-    <div data-part="section-label">Operações</div>
+    <div data-part="section-label">Operations</div>
     <ul data-part="list">
-      <li data-part="item" data-value="cargas" data-current>
-        <a data-part="link" href="/cargas" aria-current="page" data-current>
+      <li data-part="item" data-value="loads" data-current>
+        <a data-part="link" href="/loads" aria-current="page" data-current>
           <span data-part="icon" aria-hidden="true"> … </span>
-          <span data-part="label" id="l-a"> Cargas </span>
+          <span data-part="label" id="l-a"> Loads </span>
           <span data-part="count">12</span>
         </a>
       </li>
-      <li data-part="item" data-value="entregas" data-expanded>
+      <li data-part="item" data-value="deliveries" data-expanded>
         <button data-part="trigger" id="t-b" aria-expanded="true" aria-controls="g-b">
-          <span data-part="label" id="l-b"> Entregas </span>
+          <span data-part="label" id="l-b"> Deliveries </span>
           <span data-part="indicator" aria-hidden="true">
             <span data-ui="icon" data-part="root" data-directional aria-hidden="true">
               <svg data-part="glyph" data-glyph="chevron-right"></svg>

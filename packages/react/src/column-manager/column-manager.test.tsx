@@ -1,10 +1,11 @@
 import type { GridColumn, GridColumnState } from '@slotted/core/grid';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { SlottedProvider } from '../i18n';
 import { ColumnManager, ColumnManagerTrigger } from './column-manager';
-import { ColumnManagerProvider } from './column-manager-defaults';
 import type {
   ColumnManagerHandle,
   ColumnManagerProps,
@@ -141,6 +142,50 @@ describe('ColumnManager', () => {
     expect(document.activeElement).toBe(handle('customer'));
   });
 
+  it('says where a pointer drop landed, in the words of the drag catalog', async () => {
+    const { onColumnStateChange } = inline();
+    const section = document.querySelector<HTMLElement>(
+      '[data-part="section"][data-zone="middle"]',
+    )!;
+    const box = (top: number, height: number) =>
+      ({
+        top,
+        bottom: top + height,
+        left: 0,
+        right: 300,
+        width: 300,
+        height,
+        x: 0,
+        y: top,
+        toJSON: () => ({}),
+      }) as DOMRect;
+    const items = [...section.querySelectorAll<HTMLElement>('[data-part="item"]')];
+    items.forEach((node, index) => {
+      node.getBoundingClientRect = () => box(100 + index * 30, 30);
+    });
+    section.getBoundingClientRect = () => box(100, items.length * 30);
+    const press = (type: string, y: number) =>
+      new PointerEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        pointerId: 1,
+        pointerType: 'mouse',
+        clientX: 10,
+        clientY: y,
+        button: 0,
+      });
+    act(() => {
+      handle('customer').dispatchEvent(press('pointerdown', 115));
+      document.dispatchEvent(press('pointermove', 140));
+      document.dispatchEvent(press('pointermove', 170));
+      document.dispatchEvent(press('pointerup', 170));
+    });
+    expect(lastRequest(onColumnStateChange).reason).toBe('pointer');
+    await waitFor(() =>
+      expect(document.body.textContent).toMatch(/Customer dropped, position 2 of \d+\./),
+    );
+  });
+
   it('never moves a column out of its zone, and moves nothing while searching', () => {
     const { onColumnStateChange } = inline();
     fireEvent.keyDown(handle('order'), { key: 'ArrowDown', altKey: true });
@@ -216,17 +261,22 @@ describe('ColumnManager', () => {
     expect(box('status')).toHaveAccessibleDescription('Fulfilment stage, from Draft to Delivered');
   });
 
-  it('reads the labels an application sets once', () => {
+  it('speaks the language in force', () => {
     render(
-      <ColumnManagerProvider labels={{ title: 'Colunas', showAll: 'Mostrar todas' }}>
-        <ColumnManager columns={COLUMNS} presentation="inline" />
-      </ColumnManagerProvider>,
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+        <ColumnManager columns={COLUMNS} defaultColumnState={DEFAULTS} presentation="inline" />
+      </SlottedProvider>,
     );
-    expect(screen.getByRole('group', { name: 'Colunas' })).toHaveAttribute(
-      'data-ui',
-      'column-manager',
-    );
+    expect(screen.getByRole('heading', { name: 'Colunas' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Fixadas no início' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Mostrar todas' })).toBeInTheDocument();
+    expect(screen.getByText('5 de 6 visíveis')).toBeInTheDocument();
+  });
+
+  it('lays its own messages over the catalog', () => {
+    inline({ messages: { showAll: 'Reveal all' } });
+    expect(screen.getByRole('button', { name: 'Reveal all' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Restore defaults' })).toBeInTheDocument();
   });
 });
 

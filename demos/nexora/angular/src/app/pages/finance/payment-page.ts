@@ -425,7 +425,7 @@ type View = 'allocations' | 'refunds' | 'details';
                 >{{ sentence() }}</span
               >
             } @else {
-              <div slSkeletonRegion label="Reading the payment" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the payment' }" [loading]="true">
                 <div slStack [gap]="6">
                   <div slGrid [columns]="phone() ? 2 : 4" minItemWidth="xs" [gap]="4">
                     @for (figure of figureLabels; track figure) {
@@ -467,7 +467,7 @@ type View = 'allocations' | 'refunds' | 'details';
                       <form
                         slForm
                         data-testid="allocate-form"
-                        summaryTitle="Nothing was allocated"
+                        [messages]="{ summaryTitle: 'Nothing was allocated' }"
                         [errors]="store.allocationErrors()"
                         [loading]="store.busy() === 'allocate'"
                         (formSubmit)="allocate($event)"
@@ -498,7 +498,7 @@ type View = 'allocations' | 'refunds' | 'details';
                             type="submit"
                             data-testid="allocate-submit"
                             [loading]="store.busy() === 'allocate'"
-                            loadingLabel="Allocating"
+                            [messages]="{ loading: 'Allocating' }"
                           >
                             Allocate
                           </button>
@@ -628,7 +628,7 @@ type View = 'allocations' | 'refunds' | 'details';
                       <form
                         slForm
                         data-testid="refund-form"
-                        summaryTitle="Nothing was refunded"
+                        [messages]="{ summaryTitle: 'Nothing was refunded' }"
                         [errors]="refundErrors()"
                         (errorsChange)="store.refundErrors.set($event.value)"
                         [loading]="store.busy() === 'refund'"
@@ -705,7 +705,7 @@ type View = 'allocations' | 'refunds' | 'details';
                             type="submit"
                             data-testid="refund-submit"
                             [loading]="store.busy() === 'refund'"
-                            loadingLabel="Refunding"
+                            [messages]="{ loading: 'Refunding' }"
                           >
                             Refund
                           </button>

@@ -1,3 +1,4 @@
+import type { FamilyTranslator, TagsInputMessages } from '@slotted/core/i18n';
 import { createArrowNavigation, createRemovalFocus } from '@slotted/core/focus';
 import { createCollapse } from '@slotted/core/overflow';
 import type { CollapseHandle } from '@slotted/core/overflow';
@@ -21,16 +22,15 @@ export interface TagsInputChipsContext {
   duplicate: string | null;
   editable: boolean;
   inputNode: HTMLInputElement | null;
-  invalidLabel: string;
   labelFor: (value: string) => string;
   lockedValues: readonly string[];
   move: (from: number, to: number, source?: unknown) => void;
   readOnly: boolean;
   remove: (index: number, source?: unknown) => void;
-  removeLabel: string;
   reorderable: boolean;
-  reorderLabel: string;
   replace: (index: number, text: string, source?: unknown) => void;
+  /** The family's words in the language in force. */
+  t: FamilyTranslator<TagsInputMessages>;
   value: readonly string[];
   verdicts: readonly TagsVerdict[];
 }
@@ -69,7 +69,7 @@ function Chip({ context, index, value }: ChipProps) {
   const locked = context.lockedValues.includes(value);
   const frozen = context.disabled || context.readOnly || locked;
   const verdict = context.verdicts[index] ?? { valid: true };
-  const message = verdict.valid ? null : verdict.message || context.invalidLabel;
+  const message = verdict.valid ? null : verdict.message || context.t('invalid');
   const count = context.value.length;
 
   /* A duplicate the reader offered is answered by the chip that already holds
@@ -215,10 +215,7 @@ function Chip({ context, index, value }: ChipProps) {
       aria-invalid={message === null ? undefined : true}
       aria-label={
         context.reorderable
-          ? context.reorderLabel
-              .replace('{label}', label)
-              .replace('{position}', String(index + 1))
-              .replace('{count}', String(count))
+          ? context.t('reorder', { label, position: index + 1, count })
           : undefined
       }
       data-part="root"
@@ -253,7 +250,7 @@ function Chip({ context, index, value }: ChipProps) {
       )}
       {frozen ? null : (
         <button
-          aria-label={context.removeLabel.replace('{label}', label)}
+          aria-label={context.t('remove', { label })}
           data-part="remove"
           onClick={onRemove}
           tabIndex={-1}

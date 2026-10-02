@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "markdown",
   "ui": "markdown",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Renders Markdown with an element allowlist."
+  },
   "design": "docs/history/designs/2026-09-24-markdown-design.md",
   "inventory": "docs/history/designs/2026-09-24-markdown-design.md#1-capability-inventory",
   "reference": "react-markdown, Streamdown, ngx-markdown, Ant Design X XMarkdown, mdast and mdast-util-to-hast, rehype-sanitize's GitHub schema, marked's lexer",
@@ -119,6 +123,21 @@
       "reason": "docs/process/build-order.md makes the parser an adapter. A parser inside the family would fix one dialect and one version for every consumer, and it is what makes react-markdown's bundle."
     }
   },
+  "messages": [
+    "alerts.caution",
+    "alerts.important",
+    "alerts.note",
+    "alerts.tip",
+    "alerts.warning",
+    "anchor",
+    "backReference",
+    "empty",
+    "error",
+    "footnotes",
+    "loading",
+    "retry"
+  ],
+  "messagesReason": "The words the family says come from the markdown catalog of the language in force, laid over by one messages input on the root. The permalink is one message with the heading as a slot, and the back link a plural on the occurrence, so each language orders its own words and states its own forms.",
   "stateAttributes": {
     "loading": "data-loading"
   },

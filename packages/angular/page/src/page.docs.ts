@@ -58,7 +58,7 @@ const anatomy: AnatomyRow[] = [
     element: 'the footer carrying slPageFooter',
     required: false,
     purpose:
-      'The bar for the actions that finish the task, projected outside the scroll part. In the flow and stuck to the bottom of the root, never fixed; named by the messages; open keeps it through its exit, with data-status for the stylesheet.',
+      'The bar for the actions that finish the task, projected outside the scroll part. In the flow and stuck to the bottom of the root, never fixed; named by the footer message; open keeps it through its exit, with data-status for the stylesheet.',
   },
   {
     part: 'actions',
@@ -174,15 +174,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'defaults',
     title: 'Setting it once, and reaching past it',
-    note: 'providePageDefaults carries width, inset, scroll, ground, landmark and the footer’s name for every page under it; the directive sits on the consumer’s own element, so an article is an article; the instance is reachable through exportAs.',
+    note: 'providePageDefaults carries width, inset, scroll, ground and landmark for every page under it; the directive sits on the consumer’s own element, so an article is an article; the instance is reachable through exportAs.',
     snippet: defineSnippet({
       id: 'page-angular-defaults',
       language: 'ts',
-      label: 'Six decisions, taken once',
+      label: 'Five decisions, taken once',
       source: `bootstrapApplication(App, {
-  providers: [
-    providePageDefaults({ ground: 'surface', messages: { footer: 'Decisões' }, width: 'content' }),
-  ],
+  providers: [providePageDefaults({ ground: 'surface', width: 'content' })],
 });`,
     }),
   },
@@ -271,10 +269,10 @@ export const ANGULAR_PAGE_DOCS = {
       ],
       [
         'messages',
-        '{ footer }',
+        'Partial<PageMessages>',
         '—',
-        'providePageDefaults',
-        'The accessible name of the footer. An aria-label written on the footer itself still wins',
+        'slPage',
+        'Words laid over the language in force: the accessible name of the footer (footer). An aria-label written on the footer itself still wins',
       ],
     ]),
     composition: apiRows([
@@ -294,10 +292,10 @@ export const ANGULAR_PAGE_DOCS = {
       ],
       [
         'providePageDefaults()',
-        '{ width, inset, scroll, ground, landmark, messages }',
+        '{ width, inset, scroll, ground, landmark }',
         '—',
         'an injector',
-        'The six decisions an application takes once. A page that states any of them itself still wins',
+        'The five decisions an application takes once. A page that states any of them itself still wins',
       ],
       [
         '--slotted-page-sticky-top, --slotted-page-sticky-bottom',
@@ -316,7 +314,7 @@ export const ANGULAR_PAGE_DOCS = {
     ]),
     accessibility: [
       'The practice is the WAI-ARIA APG’s Landmark Regions (w3.org/WAI/ARIA/apg/practices/landmark-regions/): each page should have one main landmark, and the page is it. Write it on a main element and the directive adds nothing; on any other element it writes role="main", unless landmark="none" says the document already has one.',
-      'The footer is a footer element inside main, which is not a contentinfo landmark, so it is named: messages.footer by default, an aria-label the consumer writes otherwise — read with HostAttributeToken, so the consumer’s word is never written over.',
+      'The footer is a footer element inside main, which is not a contentinfo landmark, so it is named: the catalog’s footer message by default, an aria-label the consumer writes otherwise — read with HostAttributeToken, so the consumer’s word is never written over.',
       'The outline is typography’s. slHeadingLevel is a host directive of the body, so a section written directly in it takes h2 under the header’s h1 and a section inside that takes h3 — without either family reading the other, and without a skip the HTML Standard forbids.',
       'The body carries aria-busy while loading, which is what tells a screen reader the region is not ready. The page draws no placeholder: the header stands skeleton text of the title’s own width, and each family inside stands its own.',
       'Scrolling is the platform’s. The page never writes a scroll position, and under scroll="self" the scroll part is an ordinary scrolling box a keyboard reaches with the arrow keys once something inside it has focus.',
@@ -333,7 +331,7 @@ export const ANGULAR_PAGE_DOCS = {
       <div data-ui="container" data-size="wide" data-inset="6">…</div>
     </div>
   </div>
-  <footer data-part="footer" aria-label="Ações da página" data-status="open">
+  <footer data-part="footer" aria-label="Page actions" data-status="open">
     <div data-ui="container" data-size="wide" data-inset="6">
       <div data-part="actions">…</div>
     </div>

@@ -17,6 +17,7 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlButton } from '@slotted/angular/button';
 import { SlField, SlFieldError, SlFieldLabel } from '@slotted/angular/field';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
@@ -48,16 +49,19 @@ import {
   type SavedView,
   type SavedViewsState,
 } from '@slotted/core/grid';
+import {
+  type PartialMessages,
+  savedViewsMessages,
+  type SavedViewsMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import type { ChangeRequest } from '@slotted/core/state';
 
 import {
-  injectSavedViewsDefaults,
   newSavedViewId,
   SlSavedViewsIdFactory,
   type SavedViewApply,
   type SavedViewsAction,
-  type SavedViewsLabels,
   type SavedViewsOpenReason,
   type SavedViewsReason,
   type SavedViewsRequest,
@@ -81,8 +85,6 @@ interface Row {
   readonly current: boolean;
   readonly isDefault: boolean;
 }
-
-const fill = (template: string, name: string) => template.split('{name}').join(name);
 
 /**
  * `slMenuTriggerFor` binds `[attr.data-part]` and resolves it to `null` on a
@@ -137,7 +139,7 @@ export class SlSavedViewsPart {
     'data-ui': 'saved-views',
     'data-part': 'root',
     '[attr.role]': 'role',
-    '[attr.aria-label]': 'writtenLabel ?? resolvedLabel()',
+    '[attr.aria-label]': 'resolvedLabel()',
     '[attr.data-modified]': 'modified() ? "" : null',
     '[attr.data-open]': 'isOpen() ? "" : null',
   },
@@ -157,7 +159,7 @@ export class SlSavedViewsPart {
       >
         <span data-label>{{ activeName() }}</span>
         @if (modified()) {
-          <span data-part="modified">{{ labelSet().modified }}</span>
+          <span data-part="modified">{{ t('modified') }}</span>
         }
         <span slIcon size="md"><svg slGlyph name="chevron-down"></svg></span>
       </button>
@@ -191,7 +193,7 @@ export class SlSavedViewsPart {
                         [attr.aria-labelledby]="panelId + '-confirm-' + row.key"
                       >
                         <p [id]="panelId + '-confirm-' + row.key">
-                          {{ fill(labelSet().confirmDelete, row.name) }}
+                          {{ t('confirmDelete', { name: row.name }) }}
                         </p>
                         <div data-buttons>
                           <button
@@ -202,7 +204,7 @@ export class SlSavedViewsPart {
                             variant="ghost"
                             (click)="cancelEditing()"
                           >
-                            {{ labelSet().cancel }}
+                            {{ t('cancel') }}
                           </button>
                           <button
                             slButton
@@ -210,7 +212,7 @@ export class SlSavedViewsPart {
                             tone="danger"
                             (click)="confirmDelete(row.key, $event)"
                           >
-                            {{ labelSet().delete }}
+                            {{ t('delete') }}
                           </button>
                         </div>
                       </div>
@@ -229,7 +231,7 @@ export class SlSavedViewsPart {
                         @if (row.isDefault) {
                           <span data-part="default-mark"
                             ><span slIcon size="sm"><svg slGlyph name="pin"></svg></span
-                            ><span>{{ labelSet().isDefault }}</span></span
+                            ><span>{{ t('isDefault') }}</span></span
                           >
                         }
                       </button>
@@ -238,14 +240,14 @@ export class SlSavedViewsPart {
                         data-part="actions"
                         slSavedViewsPart="actions"
                         [slMenuTriggerFor]="menu"
-                        [attr.aria-label]="fill(labelSet().actions, row.name)"
+                        [attr.aria-label]="t('actions', { name: row.name })"
                       >
                         <span slIcon size="md"><svg slGlyph name="ellipsis"></svg></span>
                       </button>
                       <sl-menu #menu>
                         @if (row.view; as view) {
                           <button slMenuItem (select)="startRename(view)">
-                            {{ labelSet().rename }}
+                            {{ t('rename') }}
                           </button>
                         }
                         <button
@@ -253,11 +255,11 @@ export class SlSavedViewsPart {
                           [disabled]="row.isDefault"
                           (select)="setDefault(row.id, $event)"
                         >
-                          {{ labelSet().setDefault }}
+                          {{ t('setDefault') }}
                         </button>
                         @if (row.view; as view) {
                           <button slMenuItem tone="danger" (select)="startDelete(view)">
-                            {{ labelSet().delete }}
+                            {{ t('delete') }}
                           </button>
                         }
                       </sl-menu>
@@ -281,10 +283,10 @@ export class SlSavedViewsPart {
                 variant="ghost"
                 (click)="startCreate()"
               >
-                {{ labelSet().saveAs }}
+                {{ t('saveAs') }}
               </button>
               <button slButton size="sm" [disabled]="!canSave()" (click)="save($event)">
-                {{ labelSet().save }}
+                {{ t('save') }}
               </button>
             </div>
           </div>
@@ -296,7 +298,7 @@ export class SlSavedViewsPart {
       <button data-part="revert" type="button" (click)="revert($event)">
         <!-- An arrow that turns back turns the other way in a right-to-left document. -->
         <span slIcon size="sm" directional><svg slGlyph name="rotate-ccw"></svg></span>
-        {{ labelSet().revert }}
+        {{ t('revert') }}
       </button>
     }
 
@@ -304,11 +306,11 @@ export class SlSavedViewsPart {
       <form
         data-part="form"
         novalidate
-        [attr.aria-label]="kind === 'create' ? labelSet().saveAs : labelSet().rename + ' ' + name"
+        [attr.aria-label]="kind === 'create' ? t('saveAs') : t('renameView', { name: name })"
         (submit)="submit($event)"
       >
         <div slField size="sm" [invalid]="error() !== null">
-          <label slFieldLabel>{{ labelSet().name }}</label>
+          <label slFieldLabel>{{ t('name') }}</label>
           <div slTextField size="sm">
             <input
               slTextFieldInput
@@ -318,9 +320,7 @@ export class SlSavedViewsPart {
             />
           </div>
           @if (error(); as reason) {
-            <span slFieldError>{{
-              reason === 'empty' ? labelSet().empty : labelSet().duplicate
-            }}</span>
+            <span slFieldError>{{ reason === 'empty' ? t('empty') : t('duplicate') }}</span>
           }
         </div>
         <div data-buttons>
@@ -332,10 +332,10 @@ export class SlSavedViewsPart {
             variant="ghost"
             (click)="cancelEditing()"
           >
-            {{ labelSet().cancel }}
+            {{ t('cancel') }}
           </button>
           <button slButton type="submit" size="sm">
-            {{ kind === 'create' ? labelSet().create : labelSet().rename }}
+            {{ kind === 'create' ? t('create') : t('rename') }}
           </button>
         </div>
       </form>
@@ -356,10 +356,12 @@ export class SlSavedViews {
   /** Whether the layer is open. Two-way. */
   readonly open = model<boolean | undefined>(undefined);
   readonly defaultOpen = input(false, { transform: booleanAttribute });
-  /** The group's accessible name. Defaults to `labels.label`. */
-  readonly label = input<string | undefined>(undefined);
-  /** Words for this instance alone, over the provider's. */
-  readonly labels = input<Partial<SavedViewsLabels> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * group's and the panel's name (`label`), the controls, the forms and the
+   * announcements. A host `aria-label` names both instead.
+   */
+  readonly messages = input<PartialMessages<SavedViewsMessages> | undefined>(undefined);
 
   /** Every change to the views, carrying the action and the reason; cancellable. */
   readonly stateChangeRequest = output<SavedViewsRequest>();
@@ -368,7 +370,6 @@ export class SlSavedViews {
   /** After apply and revert: the view to write into the grid. */
   readonly viewApply = output<SavedViewApply>();
 
-  private readonly defaults = injectSavedViewsDefaults();
   private readonly injector = inject(Injector);
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
   protected readonly role = inject(new HostAttributeToken('role'), { optional: true }) ?? 'group';
@@ -383,11 +384,9 @@ export class SlSavedViews {
   protected readonly draft = signal('');
   protected readonly error = signal<'empty' | 'duplicate' | null>(null);
 
-  readonly labelSet = computed<SavedViewsLabels>(() => ({
-    ...this.defaults.labels,
-    ...this.labels(),
-  }));
-  readonly resolvedLabel = computed(() => this.label() ?? this.labelSet().label);
+  /** The family's words in the language in force, with this control's `messages` laid over them. */
+  readonly t = injectMessages(savedViewsMessages, this.messages);
+  readonly resolvedLabel = computed(() => this.writtenLabel ?? this.t('label'));
   readonly resolvedState = computed<SavedViewsState>(
     () => this.state() ?? this.defaultState() ?? emptySavedViews(),
   );
@@ -403,7 +402,7 @@ export class SlSavedViews {
   readonly modified = computed(
     () => !sameSavedView(this.current(), this.activeView(), this.columns()),
   );
-  readonly activeName = computed(() => this.active()?.name ?? this.labelSet().builtIn);
+  readonly activeName = computed(() => this.active()?.name ?? this.t('builtIn'));
   readonly canSave = computed(() => this.active() !== null && this.modified());
   readonly rows = computed<readonly Row[]>(() => {
     const state = this.resolvedState();
@@ -411,7 +410,7 @@ export class SlSavedViews {
       {
         id: null,
         key: BUILT_IN_VIEW_ID,
-        name: this.labelSet().builtIn,
+        name: this.t('builtIn'),
         view: null,
         current: state.activeId === null,
         isDefault: state.defaultId === null,
@@ -426,8 +425,6 @@ export class SlSavedViews {
       })),
     ];
   });
-
-  protected readonly fill = fill;
 
   /** A click the keyboard produced has no pointer detail. */
   protected pressReason(event: MouseEvent): 'pointer' | 'keyboard' {
@@ -464,7 +461,7 @@ export class SlSavedViews {
     if (request === null) return;
     const view = target ? parseGridView(target.view, this.columns()) : this.builtIn();
     this.viewApply.emit({ view, request });
-    this.announce(this.labelSet().applied, target?.name ?? this.labelSet().builtIn);
+    this.announce(this.t('applied', { name: target?.name ?? this.t('builtIn') }));
     this.setOpen(
       false,
       reason === 'keyboard' || reason === 'pointer' ? reason : 'programmatic',
@@ -476,7 +473,7 @@ export class SlSavedViews {
     const request = this.request(this.resolvedState(), 'revert', this.pressReason(event), event);
     if (request === null) return;
     this.viewApply.emit({ view: this.activeView(), request });
-    this.announce(this.labelSet().applied, this.activeName());
+    this.announce(this.t('applied', { name: this.activeName() }));
     this.focusAfterRender({ id: null, part: 'trigger' });
   }
 
@@ -490,7 +487,7 @@ export class SlSavedViews {
       savedViewText(this.current(), this.columns()),
     );
     if (this.request(next, 'save', reason, event) === null) return;
-    this.announce(this.labelSet().saved, active.name);
+    this.announce(this.t('saved', { name: active.name }));
     this.setOpen(false, reason, event);
   }
 
@@ -498,8 +495,8 @@ export class SlSavedViews {
     const state = this.resolvedState();
     const request = this.request(withDefaultView(state, id), 'default', event.reason, event.source);
     if (request === null) return;
-    const name = state.views.find((view) => view.id === id)?.name ?? this.labelSet().builtIn;
-    this.announce(this.labelSet().defaultChanged, name);
+    const name = state.views.find((view) => view.id === id)?.name ?? this.t('builtIn');
+    this.announce(this.t('defaultChanged', { name }));
   }
 
   protected startCreate() {
@@ -544,7 +541,7 @@ export class SlSavedViews {
     const state = this.resolvedState();
     const name = this.draft().trim();
     const except = editing.kind === 'rename' ? editing.id : null;
-    const builtIn = this.labelSet().builtIn.trim().toLocaleLowerCase();
+    const builtIn = this.t('builtIn').trim().toLocaleLowerCase();
     if (name === '') this.error.set('empty');
     else if (isViewNameTaken(state, name, except) || name.toLocaleLowerCase() === builtIn) {
       this.error.set('duplicate');
@@ -557,7 +554,7 @@ export class SlSavedViews {
       const id = newSavedViewId();
       const next = withViewCreated(state, name, savedViewText(this.current(), this.columns()), id);
       if (this.request(next, 'create', 'submit', event) === null) return;
-      this.announce(this.labelSet().saved, name);
+      this.announce(this.t('saved', { name }));
       this.closeForms();
       this.focusAfterRender({ id, part: 'apply' });
       return;
@@ -567,7 +564,7 @@ export class SlSavedViews {
     ) {
       return;
     }
-    this.announce(this.labelSet().renamed, name);
+    this.announce(this.t('renamed', { name }));
     this.closeForms();
     this.focusAfterRender({ id: editing.id, part: 'apply' });
   }
@@ -578,7 +575,7 @@ export class SlSavedViews {
     const view = state.views[index];
     if (view === undefined) return;
     if (this.request(withViewDeleted(state, id), 'delete', 'remove', event) === null) return;
-    this.announce(this.labelSet().deleted, view.name);
+    this.announce(this.t('deleted', { name: view.name }));
     this.closeForms();
     this.focusAfterRender({ id: state.views[index - 1]?.id ?? BUILT_IN_VIEW_ID, part: 'apply' });
   }
@@ -658,8 +655,8 @@ export class SlSavedViews {
     this.error.set(null);
   }
 
-  private announce(template: string, name: string) {
-    getLiveAnnouncer(this.host.ownerDocument).announce(fill(template, name));
+  private announce(text: string) {
+    getLiveAnnouncer(this.host.ownerDocument).announce(text);
   }
 
   private focusAfterRender(target: FocusTarget) {

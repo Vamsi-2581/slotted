@@ -1,16 +1,17 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlListboxLabel, SlListboxMeta } from '@slotted/angular/listbox';
 import { SlStack } from '@slotted/angular/stack';
 import { SlText } from '@slotted/angular/typography';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
 
 import { SlTransfer, SlTransferFooter, SlTransferItem } from './transfer';
 import {
-  provideTransferDefaults,
   type TransferItem,
   type TransferLayout,
   type TransferMoveRequest,
@@ -134,7 +135,7 @@ const DIRECTORY: TransferItem[] = Array.from({ length: 2000 }, (_, index) => ({
         [required]="required()"
         [virtual]="virtual()"
         [itemSize]="virtual() ? 34 : undefined"
-        [labels]="labels()"
+        [messages]="messages()"
         (targetKeysChangeRequest)="last.set($event)"
       >
         @if (scoped()) {
@@ -165,7 +166,7 @@ class TeamDemo {
   readonly required = input(false);
   readonly virtual = input(false);
   readonly scoped = input(false);
-  readonly labels = input<Record<string, string> | undefined>(undefined);
+  readonly messages = input<Record<string, string> | undefined>(undefined);
 
   protected readonly keys = signal<readonly string[] | undefined>(undefined);
   protected readonly last = signal<TransferMoveRequest | null>(null);
@@ -239,27 +240,22 @@ class FormDemo {
   selector: 'sl-transfer-provided-demo',
   standalone: true,
   imports: [TeamDemo],
-  providers: [
-    provideTransferDefaults({
-      labels: {
-        source: 'Disponíveis',
-        target: 'Concedidas',
-        search: 'Buscar em {pane}',
-        selectAll: 'Selecionar tudo em {pane}',
-        count: '{total} itens',
-        countSelected: '{selected} de {total} selecionados',
-        moveToTarget: 'Conceder',
-        moveAllToTarget: 'Conceder todas',
-        moveToSource: 'Revogar',
-        moveAllToSource: 'Revogar todas',
-        moved: '{count} movidas para {pane}',
-      },
-    }),
-  ],
-  template: `<sl-transfer-team-demo [items]="permissions" [initial]="['customers.read']" />`,
+  providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
+  template: `<sl-transfer-team-demo
+    [items]="permissions"
+    [initial]="['customers.read']"
+    [messages]="granting"
+  />`,
 })
 class ProvidedDemo {
   protected readonly permissions = PERMISSIONS;
+  protected readonly granting = {
+    target: 'Concedidas',
+    moveToTarget: 'Conceder',
+    moveAllToTarget: 'Conceder todas',
+    moveToSource: 'Revogar',
+    moveAllToSource: 'Revogar todas',
+  };
 }
 
 /* ── Template helpers ───────────────────────────────────────────────────── */
@@ -388,7 +384,7 @@ export const Order: Story = {
       scene(
         'The dashboard’s widgets, in their order',
         'Select Pipeline on the right and press Up, or hold Alt and press ArrowUp in the list. A move from the left joins the end.',
-        `<sl-transfer-team-demo [items]="widgets" [initial]="['revenue', 'active', 'conversion', 'pipeline']" [reorderable]="true" [labels]="{ target: 'On the dashboard' }" />`,
+        `<sl-transfer-team-demo [items]="widgets" [initial]="['revenue', 'active', 'conversion', 'pipeline']" [reorderable]="true" [messages]="{ target: 'On the dashboard' }" />`,
       ) +
         scene(
           'The order of the collection',
@@ -480,7 +476,7 @@ export const Content: Story = {
       scene(
         'Permissions, with their scope',
         'The slTransferItem template puts the scope in the listbox’s meta; the long description wraps and the unbroken key breaks rather than escaping the pane.',
-        `<sl-transfer-team-demo size="lg" [scoped]="true" [items]="permissions" [initial]="['customers.read']" [labels]="{ source: 'Permissões disponíveis', target: 'Concedidas' }" />`,
+        `<sl-transfer-team-demo size="lg" [scoped]="true" [items]="permissions" [initial]="['customers.read']" [messages]="{ source: 'Permissões disponíveis', target: 'Concedidas' }" />`,
       ) +
         scene(
           'A key the collection does not hold',
@@ -506,7 +502,7 @@ export const Labels: Story = {
   render: () =>
     one(
       'Granting permissions, in Portuguese',
-      'The provider says Disponíveis, Concedidas, Conceder and Revogar once; the counts and the announcements follow.',
+      'The language in force says every word; this transfer lays Concedidas, Conceder and Revogar over it, and the counts and the announcements follow.',
       `<sl-transfer-provided-demo />`,
     ),
 };

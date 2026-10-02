@@ -1,3 +1,4 @@
+import type { PartialMessages, TextFieldMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode } from 'react';
 
@@ -38,13 +39,7 @@ export interface TextFieldCopyDetail {
 
 /** What an application sets once for every text field under it. */
 export interface TextFieldDefaults {
-  capsLockLabel: string;
-  clearLabel: string;
-  copiedLabel: string;
-  copyFailedLabel: string;
-  copyLabel: string;
   mono: boolean;
-  revealLabel: string;
   size: TextFieldSize;
   variant: TextFieldVariant;
 }
@@ -86,27 +81,14 @@ export interface TextFieldProps extends Omit<
   ComponentPropsWithRef<'input'>,
   'defaultValue' | 'size' | 'type' | 'value'
 > {
-  /**
-   * What the Caps Lock mark announces when it appears in a password. The mark
-   * itself is hidden from assistive technology; the announcement is the text.
-   */
-  capsLockLabel?: string | undefined;
   /** Draws a button that empties the value and returns focus to the control. */
   clearable?: boolean | undefined;
-  /** The clear button's accessible name. Defaults to the provider's. */
-  clearLabel?: string | undefined;
   /**
    * Draws a button that writes the value to the clipboard, shows a check for
    * two seconds and announces the outcome. It stays for a read-only value —
    * a share link, a key — and leaves while the value is empty or disabled.
    */
   copyable?: boolean | undefined;
-  /** What a copy that reached the clipboard announces. */
-  copiedLabel?: string | undefined;
-  /** What a copy the clipboard refused announces. */
-  copyFailedLabel?: string | undefined;
-  /** The copy button's accessible name. */
-  copyLabel?: string | undefined;
   /**
    * The limit the count is measured against. Defaults to `maxLength`, and set
    * alone it is a soft limit: the value can pass it, and the counter says so
@@ -136,6 +118,12 @@ export interface TextFieldProps extends Omit<
    * the frame, so it can leave as well as arrive.
    */
   loading?: boolean | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * names of the clear, copy and reveal buttons (`reveal` does not change with
+   * the state), and what a copy and the Caps Lock mark announce.
+   */
+  messages?: PartialMessages<TextFieldMessages> | undefined;
   /** Sets the value in the monospaced family, for identifiers, hashes and keys. */
   mono?: boolean | undefined;
   /**
@@ -155,8 +143,6 @@ export interface TextFieldProps extends Omit<
   revealed?: boolean | undefined;
   /** Draws a toggle that turns a password from dots into characters. */
   revealable?: boolean | undefined;
-  /** The reveal button's accessible name. It does not change with the state. */
-  revealLabel?: string | undefined;
   /** Publishes the length of the value to the field, which draws the count. */
   showCount?: boolean | undefined;
   /** Defaults to the field, then to the provider, then to `md`. */

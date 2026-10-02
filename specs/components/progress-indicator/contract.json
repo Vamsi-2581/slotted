@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "progress-indicator",
   "ui": "progress-indicator",
+  "catalog": {
+    "group": "Feedback",
+    "summary": "Progress bar or ring, known or indeterminate."
+  },
   "absorbs": ["spinner", "progress-bar", "loading-bar"],
   "components": {
     "progressBar": "linear",

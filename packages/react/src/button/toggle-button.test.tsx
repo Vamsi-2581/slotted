@@ -152,7 +152,12 @@ describe('ToggleButton', () => {
   it('holds its state while it waits, and refuses to move', () => {
     const onPressedChange = vi.fn();
     render(
-      <ToggleButton defaultPressed loading loadingLabel="Saving" onPressedChange={onPressedChange}>
+      <ToggleButton
+        defaultPressed
+        loading
+        messages={{ loading: 'Saving' }}
+        onPressedChange={onPressedChange}
+      >
         Pin
       </ToggleButton>,
     );

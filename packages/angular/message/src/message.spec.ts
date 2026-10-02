@@ -1,6 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ChangeRequest } from '@slotted/core/state';
+import { provideSlotted } from '@slotted/angular/i18n';
+import type { MessageMessages, PartialMessages } from '@slotted/core/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/message/contract.json';
@@ -68,6 +71,7 @@ const ALL = [
         slMessage
         id="row"
         [status]="status()"
+        [messages]="rowMessages()"
         [versionCount]="3"
         [(version)]="version"
         (versionChangeRequest)="versionAsked($event)"
@@ -117,6 +121,7 @@ const ALL = [
 })
 class Everything {
   readonly status = signal<MessageStatus>('read');
+  readonly rowMessages = signal<PartialMessages<MessageMessages> | undefined>(undefined);
   version = 0;
   pressed = false;
   readonly versionAsked = vi.fn<(request: ChangeRequest<number>) => void>();
@@ -176,10 +181,10 @@ describe('slMessage', () => {
     const { root } = mount();
     const inside = root.querySelector('#inside') as HTMLElement;
     expect(inside.querySelector('svg')).not.toBeNull();
-    expect(inside.textContent).toContain(contract.messages.read);
+    expect(inside.textContent).toContain('Read');
     const outside = root.querySelector('#outside') as HTMLElement;
     expect(outside.querySelector('svg')).toBeNull();
-    expect(outside.textContent?.trim()).toBe(contract.messages.failed);
+    expect(outside.textContent?.trim()).toBe('Not sent');
   });
 
   it('pages versions without wrapping, asking first, by pointer and by arrow', () => {
@@ -196,14 +201,14 @@ describe('slMessage', () => {
     next.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowRight' }));
     fixture.detectChanges();
     expect(fixture.componentInstance.version).toBe(2);
-    expect(root.querySelector('[data-part="version-label"]')?.textContent?.trim()).toBe('3 de 3');
+    expect(root.querySelector('[data-part="version-label"]')?.textContent?.trim()).toBe('3 of 3');
     expect(next.disabled).toBe(true);
   });
 
   it('asks the row to send a failed message again', () => {
     const { fixture, root } = mount();
     const retry = root.querySelector('[data-part="retry"]') as HTMLButtonElement;
-    expect(retry.getAttribute('aria-label')).toBe(contract.messages.retry);
+    expect(retry.getAttribute('aria-label')).toBe('Try sending again');
     retry.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
     expect(fixture.componentInstance.retried).toHaveBeenCalledWith(
       expect.objectContaining({ reason: 'pointer' }),
@@ -230,13 +235,32 @@ describe('slMessage', () => {
     expect(root.querySelector('[data-complete]')).not.toBeNull();
   });
 
-  it('lets an application set the words once', () => {
+  it('lets an application set the layout once, and a row lay its own words over the language', () => {
     TestBed.configureTestingModule({
-      providers: [provideMessageDefaults({ messages: { actions: 'Actions' }, layout: 'thread' })],
+      providers: [provideMessageDefaults({ layout: 'thread' })],
     });
-    const { root } = mount();
+    const { fixture, root } = mount();
+    fixture.componentInstance.rowMessages.set({ actions: 'Actions' });
+    fixture.detectChanges();
     expect(root.querySelector('[data-part="actions"]')?.getAttribute('aria-label')).toBe('Actions');
     expect(root.querySelector('#row')?.getAttribute('data-layout')).toBe('thread');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    TestBed.configureTestingModule({
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const { fixture, root } = mount();
+    const label = () => root.querySelector('[data-part="version-label"]')?.textContent?.trim();
+    const typing = () => root.querySelector('[data-part="typing"]')?.getAttribute('aria-label');
+    expect(label()).toBe('1 de 3');
+    expect(typing()).toBe('Digitando');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(label()).toBe('1 of 3');
+    expect(typing()).toBe('Typing');
   });
 });
 

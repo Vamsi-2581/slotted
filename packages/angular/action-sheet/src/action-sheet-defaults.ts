@@ -49,8 +49,6 @@ export interface ActionSheetSelectEvent {
 
 export interface ActionSheetDefaults {
   back: ActionSheetDismissPolicy;
-  /** The cancel's words when it is given none. */
-  cancelLabel: string;
   closeOnSelect: boolean;
   escape: ActionSheetDismissPolicy;
   modal: boolean;
@@ -60,7 +58,6 @@ export interface ActionSheetDefaults {
 
 const FALLBACK: ActionSheetDefaults = {
   back: 'close',
-  cancelLabel: 'Cancel',
   closeOnSelect: true,
   escape: 'close',
   modal: true,
@@ -74,8 +71,9 @@ export const ACTION_SHEET_DEFAULTS = new InjectionToken<ActionSheetDefaults>(
 );
 
 /**
- * An application decides once how its sheets behave and what the cancel says.
- * A sheet that states any of them itself still wins.
+ * An application decides once how its sheets behave. A sheet that states any of
+ * them itself still wins. The cancel's words come from the language in force
+ * (`provideSlotted`).
  */
 export function provideActionSheetDefaults(defaults: Partial<ActionSheetDefaults>) {
   return {

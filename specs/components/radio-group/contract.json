@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "radio-group",
   "ui": "radio-group",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Set of radios for one choice."
+  },
   "controlPart": "control",
   "itemPart": "item",
   "rootRole": "radiogroup",

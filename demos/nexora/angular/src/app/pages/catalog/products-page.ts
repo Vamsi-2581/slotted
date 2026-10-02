@@ -147,7 +147,7 @@ import { ListViewTools } from '../list-view/list-view-tools';
               slBreadcrumb
               slPageHeaderBreadcrumbs
               [maxItems]="phone() ? 3 : 8"
-              label="Where this list stands"
+              aria-label="Where this list stands"
             >
               <ol slBreadcrumbList>
                 <li slBreadcrumbItem>
@@ -219,9 +219,9 @@ import { ListViewTools } from '../list-view/list-view-tools';
             (valueChangeRequest)="setFilter($event.value)"
             [query]="store.search()"
             (queryChangeRequest)="store.setSearch($event.value)"
-            [labels]="{ count: countLabel }"
+            [messages]="countMessages"
             [count]="store.total() ?? undefined"
-            [total]="store.grandTotal() ?? undefined"
+            [total]="store.total() === store.grandTotal() ? undefined : (store.grandTotal() ?? undefined)"
             [loading]="store.loading()"
           >
             <app-list-view-tools
@@ -242,7 +242,7 @@ import { ListViewTools } from '../list-view/list-view-tools';
           }
           <sl-data-grid
             #grid="slDataGrid"
-            label="Products"
+            aria-label="Products"
             rowKey="id"
             variant="framed"
             activatable
@@ -280,8 +280,8 @@ import { ListViewTools } from '../list-view/list-view-tools';
             <nav
               slDataGridFooter
               slPagination
-              label="Product pages"
-              [labels]="pagerLabels"
+              aria-label="Product pages"
+              [messages]="pagerMessages"
               [count]="store.total() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
@@ -351,12 +351,11 @@ export class ProductsPage {
     return `${held} products are filed in ${place}${all}.${filed}`;
   });
 
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total ? `${count} products` : `${count} of ${total} products`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} products', countOnly: '{count} products' };
 
-  readonly pagerLabels = {
-    range: (start: number, end: number, count: number) =>
-      `Products ${start}–${end} of ${count.toLocaleString('en-US')}`,
+  readonly pagerMessages = {
+    range: 'Products {start}–{end} of {count}',
     pageSize: 'Products per page',
   };
 

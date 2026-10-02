@@ -640,6 +640,7 @@ de outra da mesma onda.
   `docs/history/designs/2026-10-01-cascader-self-assessment.md`. React `Cascader` e
   `CascaderPanel`; Angular `sl-cascader` (`ControlValueAccessor` + `Validator`) e
   `sl-cascader-panel`.
+
 - `master-detail` — coordena lista ou grelha e detalhe: seleção por URL ou ID,
   estado vazio e retorno de foco. Desktop usa painéis (`splitter`); tela
   estreita usa navegação ou `drawer` com retorno previsível. O detalhe preserva
@@ -912,6 +913,29 @@ e redimensionamento de `dialog`) e `gauge` (arco de `progress-indicator`).
   `docs/history/designs/2026-09-30-attachment-self-assessment.md`. Saída animada de um anexo
   removido fica aberta, como a da linha do `upload`.
 
+- `prompt-composer` — invocada em 2026-09-30 pelo pedido das entradas (fila, item 2). Moldura de
+  várias linhas sob `data-ui="prompt-composer"`: `root` (`form`), `header`, `input` (`textarea`
+  com `field-sizing: content`, `rows` piso e `maxRows` teto), `footer`, `action`, `attach`,
+  `submit`. `value`/`defaultValue`/`onValueChange` com razões `keyboard` e `submit`;
+  `onValueSubmit` cancelável; `submitOn` `enter`/`mod-enter` com guarda IME; `status`
+  `ready`/`submitted`/`streaming`/`error` do consumidor, com envio a virar parar e `onStop`;
+  `onAttach` por botão, colar e largar, validado por `selectFiles` de `@slotted/core/upload`;
+  anexos desenhados pelo consumidor com `attachment`. React `PromptComposer` e partes,
+  `PromptComposerDefaultsProvider`; Angular `form[slPromptComposer]`,
+  `textarea[slPromptComposerInput]` com `ControlValueAccessor`, `providePromptComposerDefaults()`.
+  Desenho em `docs/history/designs/2026-09-30-prompt-composer-design.md`.
+
+- `color-picker` — invocada em 2026-10-01 pelo pedido das entradas (fila, item 3). Dois membros
+  sob `data-ui="color-picker"`: `colorPicker` (área de saturação e brilho, canais `hue` e `alpha`,
+  `swatch` e `previous`, texto do valor numa moldura de `text-field`, `format` por `menu`,
+  `eyedropper` onde existe `EyeDropper`, `presets` em `radiogroup`, `contrast` contra
+  `contrastWith`, `gamut`) e `colorField` (`text-field` com a amostra em `start` a abrir o painel
+  num `popover`). Valor em string no formato atual (`hex`/`rgb`/`hsl`/`oklch`) com razões
+  `pointer`, `keyboard`, `select`, `programmatic`; `format` com par próprio. Núcleo
+  `@slotted/core/color`. React `ColorPicker` (partes por filhos) e `ColorField`; Angular
+  `div[slColorPicker]` e `div[slColorField]` com `ControlValueAccessor`. Desenho em
+  `docs/history/designs/2026-10-01-color-picker-design.md`.
+
 - `message` — invocada em 2026-09-30 pelo `/reui build` de mensagem, bolha e scroller. Dois membros
   sob `data-ui="message"`: `message` (`article` com `group`, `avatar`, `body`, `header`, `author`,
   `time`, `footer`, `receipt`, `actions`, `activity`, `activity-step`, `versions`) e `bubble` (raiz
@@ -938,29 +962,6 @@ e redimensionamento de `dialog`) e `gauge` (arco de `progress-indicator`).
   `@slotted/core/message-scroller` com `overflow-anchor: none` e referência restaurada pelo próprio
   motor. React `MessageScroller` com `ref` e partes; Angular `[slMessageScroller]` com `exportAs`.
   Desenho e autoavaliação partilhados com `message`.
-
-- `prompt-composer` — invocada em 2026-09-30 pelo pedido das entradas (fila, item 2). Moldura de
-  várias linhas sob `data-ui="prompt-composer"`: `root` (`form`), `header`, `input` (`textarea`
-  com `field-sizing: content`, `rows` piso e `maxRows` teto), `footer`, `action`, `attach`,
-  `submit`. `value`/`defaultValue`/`onValueChange` com razões `keyboard` e `submit`;
-  `onValueSubmit` cancelável; `submitOn` `enter`/`mod-enter` com guarda IME; `status`
-  `ready`/`submitted`/`streaming`/`error` do consumidor, com envio a virar parar e `onStop`;
-  `onAttach` por botão, colar e largar, validado por `selectFiles` de `@slotted/core/upload`;
-  anexos desenhados pelo consumidor com `attachment`. React `PromptComposer` e partes,
-  `PromptComposerDefaultsProvider`; Angular `form[slPromptComposer]`,
-  `textarea[slPromptComposerInput]` com `ControlValueAccessor`, `providePromptComposerDefaults()`.
-  Desenho em `docs/history/designs/2026-09-30-prompt-composer-design.md`.
-
-- `color-picker` — invocada em 2026-10-01 pelo pedido das entradas (fila, item 3). Dois membros
-  sob `data-ui="color-picker"`: `colorPicker` (área de saturação e brilho, canais `hue` e `alpha`,
-  `swatch` e `previous`, texto do valor numa moldura de `text-field`, `format` por `menu`,
-  `eyedropper` onde existe `EyeDropper`, `presets` em `radiogroup`, `contrast` contra
-  `contrastWith`, `gamut`) e `colorField` (`text-field` com a amostra em `start` a abrir o painel
-  num `popover`). Valor em string no formato atual (`hex`/`rgb`/`hsl`/`oklch`) com razões
-  `pointer`, `keyboard`, `select`, `programmatic`; `format` com par próprio. Núcleo
-  `@slotted/core/color`. React `ColorPicker` (partes por filhos) e `ColorField`; Angular
-  `div[slColorPicker]` e `div[slColorField]` com `ControlValueAccessor`. Desenho em
-  `docs/history/designs/2026-10-01-color-picker-design.md`.
 
 ## Regra de commit
 

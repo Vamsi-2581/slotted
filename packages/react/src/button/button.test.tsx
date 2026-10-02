@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/button/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Button } from './button';
 import { ButtonDefaultsProvider } from './button-defaults';
 
@@ -134,7 +136,7 @@ describe('Button', () => {
     expect(screen.queryByRole('progressbar')).toBeNull();
 
     rerender(
-      <Button loading loadingLabel="Saving">
+      <Button loading messages={{ loading: 'Saving' }}>
         Save
       </Button>,
     );
@@ -145,6 +147,16 @@ describe('Button', () => {
     expect(indicator).toHaveAttribute('data-ui', 'spinner');
     expect(indicator).not.toHaveAttribute('aria-valuenow');
     expect(screen.getByRole('button', { name: /Save/ })).toContainElement(indicator);
+  });
+
+  it('names the ring in the language in force', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Button loading>Save</Button>
+      </SlottedProvider>,
+    );
+
+    expect(screen.getByRole('progressbar', { name: 'Carregando' })).toBeInTheDocument();
   });
 
   /**

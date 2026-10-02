@@ -1,3 +1,4 @@
+import type { PartialMessages, SideNavigationMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type {
   AnchorHTMLAttributes,
@@ -45,30 +46,20 @@ export type SideNavigationExpandedRequest = ChangeRequest<readonly string[]>;
 export type SideNavigationFlyoutRequest = ChangeRequest<string | null>;
 export type SideNavigationValueRequest = ChangeRequest<string | null>;
 
-/** The strings the family writes itself, replaceable once per application. */
-export interface SideNavigationMessages {
-  /** The landmark's name when the consumer gives none. */
-  navigation: string;
-}
-
 /** What an application sets once for every column under it. */
 export interface SideNavigationDefaults {
   autoExpand: boolean;
   compactAt: number;
   guides: boolean;
   landmark: boolean;
-  messages: SideNavigationMessages;
   mode: SideNavigationMode;
   multiple: boolean;
   size: SideNavigationSize;
   truncate: SideNavigationTruncate;
 }
 
-export interface SideNavigationDefaultsProviderProps extends Partial<
-  Omit<SideNavigationDefaults, 'messages'>
-> {
+export interface SideNavigationDefaultsProviderProps extends Partial<SideNavigationDefaults> {
   children?: ReactNode | undefined;
-  messages?: Partial<SideNavigationMessages> | undefined;
 }
 
 /** What the root hands every part under it. */
@@ -79,7 +70,6 @@ export interface SideNavigationContextValue {
   expanded: readonly string[];
   flyout: string | null;
   guides: boolean;
-  messages: SideNavigationMessages;
   mode: SideNavigationMode;
   multiple: boolean;
   size: SideNavigationSize;
@@ -173,8 +163,11 @@ export interface SideNavigationProps extends Omit<
    * a `div` inside `app-shell`'s nav region, which is already the landmark.
    */
   landmark?: boolean | undefined;
-  /** The strings the family writes itself. */
-  messages?: Partial<SideNavigationMessages> | undefined;
+  /**
+   * Words laid over the catalog of the language in force: the landmark's name
+   * (`navigation`). A native `aria-label` still wins.
+   */
+  messages?: PartialMessages<SideNavigationMessages> | undefined;
   mode?: SideNavigationMode | undefined;
   /** Whether more than one group may be open at once. */
   multiple?: boolean | undefined;
@@ -243,8 +236,13 @@ export interface SideNavigationItemProps extends ComponentPropsWithRef<'li'> {
   value: string;
 }
 
+/**
+ * The row's attributes, typed for any element: `render` draws an `a` for a
+ * router's link and a `button` for an application that routes in state, and
+ * handlers typed for an anchor alone would refuse the second.
+ */
 export interface SideNavigationLinkRootProps extends Omit<
-  AnchorHTMLAttributes<HTMLAnchorElement>,
+  AnchorHTMLAttributes<HTMLElement>,
   'aria-current' | 'aria-disabled'
 > {
   'aria-current'?: 'page' | undefined;

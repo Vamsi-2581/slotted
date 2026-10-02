@@ -8,6 +8,8 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
+import { injectMessages } from '@slotted/angular/i18n';
+import { keysMessages, type KeysMessages, type PartialMessages } from '@slotted/core/i18n';
 import { resolveShortcut } from '@slotted/core/keys';
 
 import { SlShortcutAxes } from './kbd-axes';
@@ -87,8 +89,11 @@ export class SlShortcut {
   readonly disabled = input(undefined, { transform: booleanAttribute });
   /** Between two simultaneous keys. Defaults to the provider, then to `+`. */
   readonly separator = input<string | undefined>(undefined);
-  /** Between two steps of a sequence. Defaults to the provider, then to `then`. */
-  readonly thenLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the `keys` catalog of the language in force, key by key:
+   * `legends.*`, `names.*`, and `then` between two steps of a sequence.
+   */
+  readonly messages = input<PartialMessages<KeysMessages> | undefined>(undefined);
   /** Replaces what the eye sees, per key token. Defaults to the provider. */
   readonly legends = input<Readonly<Record<string, string>> | undefined>(undefined);
   /** Replaces what a reader hears, per key token. Defaults to the provider. */
@@ -96,6 +101,7 @@ export class SlShortcut {
 
   private readonly defaults = injectKbdDefaults();
   private readonly platformOf = injectKbdPlatform();
+  private readonly t = injectMessages(keysMessages, this.messages);
 
   protected readonly resolvedPlatform = computed(() => this.platformOf(this.platform()));
   protected readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
@@ -106,10 +112,10 @@ export class SlShortcut {
     if (keys === undefined) return undefined;
     return resolveShortcut(keys, {
       platform: this.resolvedPlatform(),
+      t: this.t,
       legends: this.legends() ?? this.defaults.legends,
       names: this.names() ?? this.defaults.names,
       separator: this.separator() ?? this.defaults.separator,
-      thenLabel: this.thenLabel() ?? this.defaults.thenLabel,
     });
   });
 

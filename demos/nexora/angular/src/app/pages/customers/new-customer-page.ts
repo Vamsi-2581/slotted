@@ -118,7 +118,7 @@ const REGION_LOCALE: Record<RegionCode, string> = { US: 'en-US', BR: 'pt-BR' };
         <form
           slForm
           #form="slForm"
-          summaryTitle="This account was not created"
+          [messages]="{ summaryTitle: 'This account was not created' }"
           [errors]="store.errors()"
           (errorsChange)="store.errors.set($event.value)"
           [loading]="store.submitting()"
@@ -598,7 +598,7 @@ const REGION_LOCALE: Record<RegionCode, string> = { US: 'en-US', BR: 'pt-BR' };
               type="submit"
               tone="accent"
               [loading]="store.submitting()"
-              loadingLabel="Creating the account"
+              [messages]="{ loading: 'Creating the account' }"
             >
               Create account
             </button>

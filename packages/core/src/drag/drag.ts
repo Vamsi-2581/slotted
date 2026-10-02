@@ -33,12 +33,12 @@
  * value the consumer already holds is not emitted.
  */
 
+import type { DragMessages, FamilyTranslator } from '../i18n';
 import { getLiveAnnouncer } from '../live-announcer';
 import { autoScrollDelta, contains, resolvePoint } from './geometry';
 import type { MeasuredContainer, Point, Rect } from './geometry';
 import { intentForKey, isDropKey, operationForModifiers } from './keys';
 import type { Modifiers, WritingDirection } from './keys';
-import { DEFAULT_DRAG_MESSAGES } from './messages';
 import {
   containerPositions,
   isIdentity,
@@ -48,11 +48,10 @@ import {
 } from './positions';
 import type { DragFacts } from './positions';
 import type {
+  DragAnnouncement,
   DragContainerOptions,
   DragController,
   DragControllerOptions,
-  DragMessageContext,
-  DragMessages,
   DragReason,
   DragState,
   DraggableOptions,
@@ -141,7 +140,7 @@ export function createDragController(options: DragControllerOptions = {}): DragC
   const containers = new Map<string, DragContainerOptions>();
   const draggables = new Set<() => void>();
   const listeners = new Set<(state: DragState) => void>();
-  const messages: DragMessages = { ...DEFAULT_DRAG_MESSAGES, ...options.messages };
+  const silent = new Set(options.silent ?? []);
   const restoreFocus = options.restoreFocus ?? true;
   const dwellDelay = options.dwellDelay ?? DEFAULT_DWELL_DELAY;
   const announce =
@@ -209,39 +208,59 @@ export function createDragController(options: DragControllerOptions = {}): DragC
     return view.getComputedStyle(element).direction === 'rtl' ? 'rtl' : 'ltr';
   }
 
-  function context(): DragMessageContext {
+  /**
+   * The sentence for one announcement, from the drag's words: the item, and
+   * the place the drop would land when one can be said — the `*At` form then
+   * carries it as `{where}`.
+   */
+  function sentence(announcement: DragAnnouncement, t: FamilyTranslator<DragMessages>): string {
+    if (announcement === 'nowhere') return t('nowhere');
     const source = container(state.source?.container);
     const first = state.items[0] ?? '';
-    const item =
-      state.items.length > 1
-        ? `${state.items.length} items`
-        : (source?.itemLabel?.(first) ?? first);
-    const target = state.target;
-    const owner = container(target?.container);
-    const resulting =
-      target !== null && owner !== undefined
-        ? resultingPosition(target, owner.items(), facts())
-        : null;
-    const targetLabel =
-      target === null || owner === undefined
-        ? null
-        : target.kind === 'on'
-          ? (owner.itemLabel?.(target.key) ?? target.key)
-          : (owner.label?.() ?? null);
+    const count = state.items.length;
+    const item = count > 1 ? t('items', { count }) : (source?.itemLabel?.(first) ?? first);
+    if (announcement === 'cancelled') return t('cancelled', { item });
 
-    return {
-      state,
-      item,
-      count: state.items.length,
-      position: resulting?.position ?? null,
-      total: resulting?.total ?? null,
-      targetLabel,
-      operation: state.operation,
-    };
+    const where = place(t);
+    const operation = state.operation ?? 'move';
+    if (announcement === 'pickedUp') {
+      return where === null ? t('pickedUp', { item }) : t('pickedUpAt', { item, where });
+    }
+    if (announcement === 'moved') {
+      return where === null ? t('moved', { item }) : t('movedAt', { item, where });
+    }
+    return where === null
+      ? t('dropped', { item, operation })
+      : t('droppedAt', { item, operation, where });
   }
 
-  function say(message: keyof Omit<DragMessages, 'instructions'>) {
-    announce(messages[message](context()));
+  /**
+   * Where the drop would land: the item it lands on, or the position it takes
+   * and the container it takes it in. `null` when nothing of it can be said.
+   */
+  function place(t: FamilyTranslator<DragMessages>): string | null {
+    const target = state.target;
+    const owner = container(target?.container);
+    if (target === null || owner === undefined) return null;
+    if (target.kind === 'on') {
+      return t('place.on', { target: owner.itemLabel?.(target.key) ?? target.key });
+    }
+    const label = owner.label?.() ?? null;
+    if (target.kind === 'between') {
+      const resulting = resultingPosition(target, owner.items(), facts());
+      if (resulting !== null) {
+        const { position, total } = resulting;
+        return label === null
+          ? t('place.position', { position, total })
+          : t('place.positionIn', { position, total, target: label });
+      }
+    }
+    return label === null ? null : t('place.in', { target: label });
+  }
+
+  function say(announcement: DragAnnouncement) {
+    if (options.t === undefined || silent.has(announcement)) return;
+    announce(sentence(announcement, options.t));
   }
 
   /** The source still holds what it did; otherwise the drag has nothing to move. */
@@ -845,7 +864,6 @@ export function createDragController(options: DragControllerOptions = {}): DragC
     get state() {
       return state;
     },
-    messages,
     subscribe(listener) {
       listeners.add(listener);
       return () => listeners.delete(listener);

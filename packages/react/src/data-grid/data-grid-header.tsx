@@ -23,7 +23,6 @@ import {
   SELECTION_COLUMN,
 } from './data-grid-constants';
 import { useDataGridInternal } from './data-grid-context';
-import { fill } from './data-grid-defaults';
 import { DataGridFilterCell, DataGridFilterPanel } from './data-grid-filter';
 import type { DataGridColumn } from './data-grid.types';
 
@@ -97,7 +96,7 @@ export function DataGridHead<Row>({ columnGroups, headerRowCount }: HeadProps) {
             data-part="popin-header"
             role="columnheader"
           >
-            {grid.labels.popinHeader}
+            {grid.t('popinHeader')}
           </div>
         ) : null}
       </div>
@@ -191,13 +190,11 @@ function SelectAllCell() {
     grid.current !== null &&
     grid.current.row === HEADER_ROW &&
     grid.current.column === SELECTION_COLUMN;
-  const name = fill(
+  const name = grid.t(
     grid.total !== null && grid.total > grid.selectableCount
-      ? grid.labels.selectAllPage
-      : grid.labels.selectAllFiltered,
-    {
-      count: grid.selectableCount,
-    },
+      ? 'selectAllPage'
+      : 'selectAllFiltered',
+    { count: grid.selectableCount },
   );
   return (
     <div
@@ -377,7 +374,7 @@ function ColumnHelp<Row>({
   help: ReactNode;
 }) {
   const grid = useDataGridInternal<Row>();
-  const name = fill(grid.labels.columnHelp, { column: column.column.label });
+  const name = grid.t('columnHelp', { column: column.column.label });
   return (
     <Popover align="start" side="bottom" size="sm">
       <PopoverTrigger
@@ -426,7 +423,7 @@ function FilterTrigger<Row>({
     <button
       aria-expanded={open}
       aria-haspopup="dialog"
-      aria-label={`${grid.labels.filter} ${column.column.label}`}
+      aria-label={grid.t('filterColumn', { column: column.column.label })}
       data-part="filter"
       onClick={(event) => {
         event.stopPropagation();
@@ -462,7 +459,7 @@ function ColumnMenu<Row>({
   open: boolean;
 }) {
   const grid = useDataGridInternal<Row>();
-  const labels = grid.labels;
+  const t = grid.t;
   const sort = grid.sortOf(column.id);
   const name = column.column.label;
   const anchored = grid.menuAnchor !== null && grid.menuAnchor.column === column.id;
@@ -480,7 +477,7 @@ function ColumnMenu<Row>({
         render={(props) => (
           <button
             {...props}
-            aria-label={`${labels.columnMenu}, ${name}`}
+            aria-label={t('columnMenu', { column: name })}
             data-part="column-menu"
             onPointerDown={(event) => {
               event.stopPropagation();
@@ -515,7 +512,7 @@ function ColumnMenu<Row>({
               }
               onSelect={(event) => grid.setSort(column.id, 'ascending', event)}
             >
-              {labels.sortAscendingAction}
+              {t('sortAscendingAction')}
             </MenuItem>
             <MenuItem
               disabled={
@@ -523,55 +520,53 @@ function ColumnMenu<Row>({
               }
               onSelect={(event) => grid.setSort(column.id, 'descending', event)}
             >
-              {labels.sortDescendingAction}
+              {t('sortDescendingAction')}
             </MenuItem>
             <MenuItem
               disabled={sort === null}
               onSelect={(event) => grid.setSort(column.id, null, event)}
             >
-              {labels.sortClearAction}
+              {t('sortClearAction')}
             </MenuItem>
             <MenuSeparator />
           </>
         ) : null}
         {column.filterable ? (
-          <MenuItem onSelect={() => grid.setFilterOpen(column.id)}>{`${labels.filter}…`}</MenuItem>
+          <MenuItem onSelect={() => grid.setFilterOpen(column.id)}>{t('filterMenu')}</MenuItem>
         ) : null}
         <MenuItem
           disabled={column.pinned === 'start'}
           onSelect={(event) => grid.pin(column.id, 'start', event)}
         >
-          {labels.pinStart}
+          {t('pinStart')}
         </MenuItem>
         <MenuItem
           disabled={column.pinned === 'end'}
           onSelect={(event) => grid.pin(column.id, 'end', event)}
         >
-          {labels.pinEnd}
+          {t('pinEnd')}
         </MenuItem>
         {column.pinned ? (
-          <MenuItem onSelect={(event) => grid.pin(column.id, null, event)}>{labels.unpin}</MenuItem>
+          <MenuItem onSelect={(event) => grid.pin(column.id, null, event)}>{t('unpin')}</MenuItem>
         ) : null}
         <MenuSeparator />
         {column.resizable ? (
           <>
             <MenuItem onSelect={(event) => grid.autofit(column.id, event.reason, event)}>
-              {labels.autofit}
+              {t('autofit')}
             </MenuItem>
             <MenuItem onSelect={(event) => grid.autofit(null, event.reason, event)}>
-              {labels.autofitAll}
+              {t('autofitAll')}
             </MenuItem>
           </>
         ) : null}
         {column.hideable ? (
           <MenuItem onSelect={(event) => grid.hide(column.id, event, event.reason)}>
-            {labels.hide}
+            {t('hide')}
           </MenuItem>
         ) : null}
         {grid.onManageColumns ? (
-          <MenuItem
-            onSelect={() => grid.onManageColumns?.()}
-          >{`${labels.manageColumns}…`}</MenuItem>
+          <MenuItem onSelect={() => grid.onManageColumns?.()}>{t('manageColumns')}</MenuItem>
         ) : null}
       </MenuContent>
     </Menu>
@@ -654,7 +649,7 @@ function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
       onPointerDown={down}
       onPointerMove={move}
       onPointerUp={up}
-      title={grid.labels.resize}
+      title={grid.t('resize')}
       {...(session ? { 'data-resizing': '' } : {})}
     />
   );

@@ -1,27 +1,12 @@
 import '@slotted/styles/stat-card/stat-card.css';
 
+import { statCardMessages } from '@slotted/core/i18n';
 import { useId, useMemo } from 'react';
 
+import { useLocale, useMessages } from '../i18n';
 import { StatCardProvider, toneOf, trendOf } from './stat-card-context';
 import { useStatCardDefaults } from './stat-card-defaults';
-import type {
-  StatCardContextValue,
-  StatCardMessages,
-  StatCardProps,
-  StatCardRootProps,
-} from './stat-card.types';
-
-/**
- * What a screen reader hears beside a change, and what stands in for a value
- * that is not there, in the language the family ships. An application
- * replaces them once through `StatCardDefaultsProvider`, or per card.
- */
-export const STAT_CARD_MESSAGES: StatCardMessages = {
-  up: 'up',
-  down: 'down',
-  flat: 'unchanged',
-  empty: '—',
-};
+import type { StatCardContextValue, StatCardProps, StatCardRootProps } from './stat-card.types';
 
 /**
  * A metric with its name, its change and its trend, in a frame.
@@ -56,13 +41,15 @@ export function StatCard({
   ...nativeProps
 }: StatCardProps) {
   const defaults = useStatCardDefaults();
+  const appLocale = useLocale();
+  const t = useMessages(statCardMessages, messages);
   const labelId = useId();
   const resolved = {
     fill: fill ?? defaults.fill ?? 'outline',
     goodWhen: goodWhen ?? defaults.goodWhen ?? 'up',
     layout: layout ?? defaults.layout ?? 'inline',
     size: size ?? defaults.size ?? 'md',
-    locale: locale ?? defaults.locale,
+    locale: locale ?? appLocale,
     formatOptions: formatOptions ?? defaults.formatOptions,
   };
   const resolvedTone =
@@ -76,7 +63,7 @@ export function StatCard({
       labelId,
       loading,
       locale: resolved.locale,
-      messages: { ...STAT_CARD_MESSAGES, ...defaults.messages, ...messages },
+      t,
       size: resolved.size,
       status,
       tone: resolvedTone,
@@ -88,8 +75,7 @@ export function StatCard({
       labelId,
       loading,
       resolved.locale,
-      defaults.messages,
-      messages,
+      t,
       resolved.size,
       status,
       resolvedTone,

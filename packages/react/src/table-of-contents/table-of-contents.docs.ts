@@ -294,18 +294,12 @@ const items = nestOutline(toc); // [{ id, label, level }]
   {
     id: 'defaults',
     title: 'Decided once for the application',
-    note: 'The provider sets the levels a document outlines, whether the column pins, what a press does to the URL and the landmark’s name — and every list under it reads them. A list that states an axis itself still wins: the second one here is lg under a provider that said sm.',
+    note: 'The provider sets the levels a document outlines, whether the column pins, and what a press does to the URL — and every list under it reads them. The landmark’s name comes from the language in force. A list that states an axis itself still wins: the second one here is lg under a provider that said sm.',
     snippet: defineSnippet({
       id: 'table-of-contents-react-defaults',
       language: 'tsx',
       label: 'The provider',
-      source: `<TableOfContentsDefaultsProvider
-  history="replace"
-  levels={[2, 4]}
-  messages={{ navigation: 'Neste artigo' }}
-  size="sm"
-  sticky
->
+      source: `<TableOfContentsDefaultsProvider history="replace" levels={[2, 4]} size="sm" sticky>
   <App />
 </TableOfContentsDefaultsProvider>;`,
     }),
@@ -498,10 +492,10 @@ export const REACT_TABLE_OF_CONTENTS_DOCS = {
       ],
       [
         'messages',
-        '{ navigation }',
+        'Partial<TableOfContentsMessages>',
         '—',
         'TableOfContents',
-        'The landmark’s name when there is no label. “Nesta página” unless the provider says otherwise',
+        'Words laid over the language in force: the landmark’s name when there is no label, and the collapsed trigger’s fixed text (navigation)',
       ],
       [
         'value',
@@ -542,7 +536,7 @@ export const REACT_TABLE_OF_CONTENTS_DOCS = {
       ],
       [
         'TableOfContentsDefaultsProvider',
-        '{ layout, size, sticky, history, numbered, landmark, levels, offset, messages }',
+        '{ layout, size, sticky, history, numbered, landmark, levels, offset }',
         '—',
         'a subtree',
         'The decisions an application takes once. A list that states any of them itself still wins',

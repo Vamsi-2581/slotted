@@ -370,7 +370,7 @@ export class SlActionSheetFooter {}
 
 /**
  * The explicit way out, on the consumer's own `button`. Never disabled: a sheet
- * that cannot be left is a trap. Given no words, it shows `cancelLabel`.
+ * that cannot be left is a trap. Given no words, it shows the catalog's `cancel`.
  */
 @Component({
   selector: 'button[slActionSheetCancel]',
@@ -383,7 +383,7 @@ export class SlActionSheetFooter {}
     '[disabled]': 'false',
     '(click)': 'onClick($event)',
   },
-  template: `<ng-content>{{ sheet.resolvedCancelLabel() }}</ng-content>`,
+  template: `<ng-content>{{ sheet.t('cancel') }}</ng-content>`,
 })
 export class SlActionSheetCancel {
   protected readonly sheet = inject(SlActionSheet);

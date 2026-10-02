@@ -138,7 +138,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'A list of members loading',
       source:
-        '<section slSkeletonRegion label="Loading members" [loading]="pending()">\n  @for (member of members(); track member.id) {\n    <app-member-row [member]="member" />\n  }\n</section>',
+        '<section slSkeletonRegion [messages]="{ label: \'Loading members\' }" [loading]="pending()">\n  @for (member of members(); track member.id) {\n    <app-member-row [member]="member" />\n  }\n</section>',
     }),
   },
   {
@@ -174,7 +174,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'A member row',
       source:
-        '<div slSkeletonRegion label="Loading members" [loading]="pending()">\n  <div slInline gap="5">\n    <span slSkeleton shape="circle" size="md"></span>\n    <div slStack gap="2">\n      <span slSkeleton shape="text" inlineSize="9rem"></span>\n      <span slSkeleton shape="text" inlineSize="5rem"></span>\n    </div>\n  </div>\n</div>',
+        '<div slSkeletonRegion [messages]="{ label: \'Loading members\' }" [loading]="pending()">\n  <div slInline gap="5">\n    <span slSkeleton shape="circle" size="md"></span>\n    <div slStack gap="2">\n      <span slSkeleton shape="text" inlineSize="9rem"></span>\n      <span slSkeleton shape="text" inlineSize="5rem"></span>\n    </div>\n  </div>\n</div>',
     }),
   },
   {
@@ -198,7 +198,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'The announcement, and switching it off',
       source:
-        '<div slSkeletonRegion label="Loading invoices" loadedLabel="Invoices loaded">\n  <div slSkeletonText></div>\n</div>\n\n<!-- A region the reader never waits on says nothing at all. -->\n<div slSkeletonRegion live="off">\n  <span slSkeleton shape="circle"></span>\n</div>',
+        '<div slSkeletonRegion [messages]="{ label: \'Loading invoices\' }" loadedLabel="Invoices loaded">\n  <div slSkeletonText></div>\n</div>\n\n<!-- A region the reader never waits on says nothing at all. -->\n<div slSkeletonRegion live="off">\n  <span slSkeleton shape="circle"></span>\n</div>',
     }),
   },
 ];
@@ -260,11 +260,11 @@ export const ANGULAR_SKELETON_DOCS = {
         'Whether the region announces the wait at all',
       ],
       [
-        'label',
-        'string',
-        'Loading…',
+        'messages',
+        'Partial<SkeletonMessages>',
+        '—',
         'SlSkeletonRegion',
-        'What a screen reader hears once, while the region is waiting',
+        'Words laid over the language in force, key by key: what a screen reader hears once, while the region is waiting (label)',
       ],
       [
         'loadedLabel',
@@ -322,7 +322,7 @@ export const ANGULAR_SKELETON_DOCS = {
         'SkeletonDefaults',
         '—',
         'Application',
-        'Sets the animation, the wording and the timing once through SKELETON_DEFAULTS_TOKEN; an input on a region or a box still wins',
+        'Sets the animation, the measure and the timing once through SKELETON_DEFAULTS_TOKEN; an input on a region or a box still wins',
       ],
     ]),
     accessibility: [

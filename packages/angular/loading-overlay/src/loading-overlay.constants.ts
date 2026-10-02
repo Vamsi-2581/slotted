@@ -38,8 +38,6 @@ export interface LoadingOverlayCancelRequest {
   readonly source: Event;
 }
 
-export const LOADING_OVERLAY_DEFAULT_LABEL = 'Loading…';
-export const LOADING_OVERLAY_DEFAULT_CANCEL_LABEL = 'Cancel';
 export const LOADING_OVERLAY_DEFAULT_LIVE: LoadingOverlayLive = 'polite';
 export const LOADING_OVERLAY_DEFAULT_SIZE: LoadingOverlaySize = 'md';
 export const LOADING_OVERLAY_DEFAULT_VEIL: LoadingOverlayVeil = 'wash';

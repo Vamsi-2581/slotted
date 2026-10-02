@@ -1,5 +1,6 @@
 import '@slotted/styles/upload/upload.css';
 
+import { uploadMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason } from '@slotted/core/state';
@@ -24,6 +25,7 @@ import {
 import type { ClipboardEvent, DragEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import type { GlyphName } from '../icon';
 import { ProgressBar } from '../progress-indicator';
@@ -58,8 +60,6 @@ export function Upload({
   concurrency: concurrencyProp,
   defaultFiles,
   defaultViewing = null,
-  describeQueue: describeQueueProp,
-  describeRejection: describeProp,
   description,
   directory = false,
   disabled,
@@ -70,13 +70,13 @@ export function Upload({
   id,
   invalid,
   label,
-  labels: labelsProp,
   layout: layoutProp,
   locale: localeProp,
   maxFiles,
   maxRows: maxRowsProp,
   maxSize,
   maxTotalSize,
+  messages,
   minFiles,
   minSize,
   multiple = false,
@@ -100,8 +100,6 @@ export function Upload({
   retryDelay: retryDelayProp,
   size: sizeProp,
   stallAfter: stallAfterProp,
-  statusLabels: statusLabelsProp,
-  kindLabels: kindLabelsProp,
   style,
   transform,
   validate,
@@ -130,22 +128,16 @@ export function Upload({
   const pendingBlocksSubmit = pendingProp ?? defaults.pendingBlocksSubmit;
   const adapter = adapterProp ?? defaults.adapter;
   const maxRows = maxRowsProp ?? defaults.maxRows;
-  const locale = localeProp ?? defaults.locale;
-  const describe = describeProp ?? defaults.describeRejection;
-  const describeQueue = describeQueueProp ?? defaults.describeQueue;
-  const labels = useMemo(
-    () => ({ ...defaults.labels, ...labelsProp }),
-    [defaults.labels, labelsProp],
-  );
-  const statusLabels = useMemo(
-    () => ({ ...defaults.statusLabels, ...statusLabelsProp }),
-    [defaults.statusLabels, statusLabelsProp],
-  );
-  const kindLabels = useMemo(
-    () => ({ ...defaults.kindLabels, ...kindLabelsProp }),
-    [defaults.kindLabels, kindLabelsProp],
-  );
+  const contextLocale = useLocale();
+  const locale = localeProp ?? contextLocale;
+  const t = useMessages(uploadMessages, messages);
   const formatters = useUploadFormatters(locale);
+
+  /** Why a file was refused, in the catalog's words for the reason the family measured. */
+  const rejection = (file: UploadFile) =>
+    file.reason === 'size'
+      ? t('rejection.size', { size: formatters.bytes(file.size) })
+      : t(`rejection.${file.reason ?? 'custom'}`);
 
   const resolvedDisabled = disabled ?? field?.disabled;
   const resolvedReadOnly = readOnly ?? field?.readOnly;
@@ -296,10 +288,12 @@ export function Upload({
     const kept = outcome.files.filter(
       (file) => file.status !== 'rejected' && !existing.includes(file),
     ).length;
-    if (kept > 0) announce(describeQueue({ kind: 'added', count: kept }, formatters));
+    if (kept > 0) announce(t('added', { count: kept }));
     if (outcome.rejected.length > 0) {
       onReject?.(outcome.rejected);
-      for (const file of outcome.rejected) announce(`${file.name}: ${describe(file, formatters)}`);
+      for (const file of outcome.rejected) {
+        announce(t('fileNotice', { name: file.name, message: rejection(file) }));
+      }
     }
 
     if (!autoUpload) return;
@@ -435,8 +429,8 @@ export function Upload({
     if (element === null) return;
     const short = minFiles !== undefined && summary.counts.success < minFiles;
     const blocked = pendingBlocksSubmit && summary.pending;
-    element.setCustomValidity(blocked ? labels.pending : short ? labels.pending : '');
-  }, [labels.pending, minFiles, pendingBlocksSubmit, summary.counts.success, summary.pending]);
+    element.setCustomValidity(blocked || short ? t('pending') : '');
+  }, [t, minFiles, pendingBlocksSubmit, summary.counts.success, summary.pending]);
 
   /*
    * Said when the queue becomes finished, not whenever it is: a list that
@@ -449,12 +443,7 @@ export function Upload({
     const was = finishedRef.current;
     finishedRef.current = finished;
     if (!finished || was) return;
-    announce(
-      describeQueue(
-        { kind: 'finished', uploaded: summary.counts.success, total: summary.total },
-        formatters,
-      ),
-    );
+    announce(t('finished', { uploaded: summary.counts.success, total: summary.total }));
   }, [finished, summary.counts.success, summary.total]);
 
   /*
@@ -471,11 +460,11 @@ export function Upload({
       const before = previous.get(file.key);
       if (before === undefined || before === file.status) continue;
       if (file.status === 'error' || file.status === 'canceled') {
-        announce(`${file.name}: ${statusLabels[file.status]}`);
+        announce(t('fileNotice', { name: file.name, message: t(file.status) }));
       }
     }
     statusesRef.current = new Map(current.map((file) => [file.key, file.status]));
-  }, [current, statusLabels]);
+  }, [current, t]);
 
   /* ── What the reader can do to one row ─────────────────────────────── */
 
@@ -539,9 +528,11 @@ export function Upload({
 
   const controls = (file: UploadFile): ReactNode => {
     if (resolvedReadOnly === true) return null;
-    const button = (part: UploadAction, label: string, action: Parameters<typeof act>[1]) => (
+    /* The control's name is the action's message holding the file's name, so a
+       language writes its own order. */
+    const button = (part: UploadAction, action: Parameters<typeof act>[1]) => (
       <button
-        aria-label={`${label}: ${file.name}`}
+        aria-label={t(action, { name: file.name })}
         data-part={part}
         key={part}
         onClick={(event) => act(file, action, event)}
@@ -555,30 +546,21 @@ export function Upload({
 
     switch (file.status) {
       case 'ready':
-        return [button('start', labels.start, 'start'), button('remove', labels.remove, 'remove')];
+        return [button('start', 'start'), button('remove', 'remove')];
       case 'queued':
-        return [
-          button('cancel', labels.cancel, 'cancel'),
-          button('remove', labels.remove, 'remove'),
-        ];
+        return [button('cancel', 'cancel'), button('remove', 'remove')];
       case 'uploading':
-        return [
-          ...(pausable ? [button('pause', labels.pause, 'pause')] : []),
-          button('cancel', labels.cancel, 'cancel'),
-        ];
+        return [...(pausable ? [button('pause', 'pause')] : []), button('cancel', 'cancel')];
       case 'paused':
-        return [
-          button('start', labels.resume, 'resume'),
-          button('cancel', labels.cancel, 'cancel'),
-        ];
+        return [button('start', 'resume'), button('cancel', 'cancel')];
       case 'stalled':
-        return [button('cancel', labels.cancel, 'cancel')];
+        return [button('cancel', 'cancel')];
       case 'error':
-        return [button('retry', labels.retry, 'retry'), button('remove', labels.remove, 'remove')];
+        return [button('retry', 'retry'), button('remove', 'remove')];
       case 'canceled':
-        return [button('start', labels.start, 'start'), button('remove', labels.remove, 'remove')];
+        return [button('start', 'start'), button('remove', 'remove')];
       default:
-        return [button('remove', labels.remove, 'remove')];
+        return [button('remove', 'remove')];
     }
   };
 
@@ -605,7 +587,7 @@ export function Upload({
       <li data-part="item" data-status={file.status} key={file.key}>
         {preview === 'none' && layout === 'list' ? null : (
           <span
-            data-extension={extension.replace('.', '').toUpperCase() || 'FILE'}
+            data-extension={extension.replace('.', '').toUpperCase() || t('noExtension')}
             data-kind={file.kind}
             data-part="preview"
           >
@@ -632,7 +614,7 @@ export function Upload({
           <div data-part="detail">
             <span data-part="meta">{formatters.bytes(file.size)}</span>
             <span data-part="status">
-              {statusLabels[file.status]}
+              {t(file.status)}
               {percent !== null && showBar ? ` · ${Math.round(percent)}%` : ''}
             </span>
           </div>
@@ -655,9 +637,7 @@ export function Upload({
         ) : null}
 
         {file.status === 'rejected' || file.status === 'error' ? (
-          <p data-part="message">
-            {file.status === 'rejected' ? describe(file, formatters) : statusLabels.error}
-          </p>
+          <p data-part="message">{file.status === 'rejected' ? rejection(file) : t('error')}</p>
         ) : null}
       </li>
     );
@@ -712,7 +692,7 @@ export function Upload({
                 <Icon>
                   <Glyph name="upload" />
                 </Icon>
-                {labels.dropzone}
+                {t('dropzone')}
               </>
             ) : null}
             {trigger()}
@@ -722,7 +702,7 @@ export function Upload({
                   ? '—'
                   : current.length === 1
                     ? `${current[0]?.name} · ${formatters.bytes(current[0]?.size ?? 0)}`
-                    : describeQueue({ kind: 'selection', count: current.length }, formatters)}
+                    : t('selection', { count: current.length })}
               </span>
             ) : null}
           </div>
@@ -731,15 +711,13 @@ export function Upload({
         {current.length > 1 ? (
           <div data-part="summary">
             <span>
-              {describeQueue(
-                {
-                  kind: 'summary',
-                  uploaded: summary.counts.success,
-                  total: summary.total,
-                  secondsLeft: remaining,
-                },
-                formatters,
-              )}
+              {remaining === null
+                ? t('summary', { uploaded: summary.counts.success, total: summary.total })
+                : t('summaryRemaining', {
+                    uploaded: summary.counts.success,
+                    total: summary.total,
+                    duration: formatters.duration(remaining),
+                  })}
             </span>
             {resolvedReadOnly === true ? null : (
               <button
@@ -750,7 +728,7 @@ export function Upload({
                 }}
                 type="button"
               >
-                {labels.clear}
+                {t('clear')}
               </button>
             )}
           </div>
@@ -774,10 +752,9 @@ export function Upload({
         <UploadViewer
           files={current}
           formatters={formatters}
-          kindLabel={(file) => kindLabels[file.kind]}
-          labels={labels}
           onViewing={setViewing}
           size={size}
+          t={t}
           urls={urls}
           viewing={view === 'none' ? null : viewedKey}
         />
@@ -822,7 +799,7 @@ export function Upload({
           type="file"
           {...(directory ? { webkitdirectory: '' } : {})}
         />
-        {labels.trigger}
+        {t('trigger')}
       </label>
     );
   }

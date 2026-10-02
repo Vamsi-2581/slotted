@@ -14,18 +14,21 @@ import {
   untracked,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  paginationMessages,
+  type PaginationMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { clampPage, itemRange, pageItems, totalPages } from '@slotted/core/pagination';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 
 import {
   injectPaginationDefaults,
-  PAGINATION_DEFAULT_LABEL,
-  PAGINATION_DEFAULT_LABELS,
   PAGINATION_DEFAULT_PAGE_SIZE,
   PAGINATION_DEFAULT_PAGE_SIZE_OPTIONS,
-  type PaginationLabels,
   type PaginationLive,
   type PaginationPageReason,
   type PaginationPageSizeReason,
@@ -79,8 +82,11 @@ export class SlPagination {
   readonly siblingCount = input(undefined, { transform: optionalNumber });
   readonly boundaryCount = input(undefined, { transform: optionalNumber });
   readonly pageSizeOptions = input<readonly number[] | undefined>(undefined);
-  readonly label = input<string | undefined>(undefined);
-  readonly labels = input<Partial<PaginationLabels> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * landmark's name (`label`), the controls, and the sentences.
+   */
+  readonly messages = input<PartialMessages<PaginationMessages> | undefined>(undefined);
   readonly live = input<PaginationLive | undefined>(undefined);
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly loading = input(false, { transform: booleanAttribute });
@@ -111,14 +117,9 @@ export class SlPagination {
   private readonly defaults = injectPaginationDefaults();
   private readonly ownLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
 
-  readonly accessibleLabel = computed(
-    () => this.ownLabel ?? this.label() ?? this.defaults.label ?? PAGINATION_DEFAULT_LABEL,
-  );
-  readonly labelSet = computed<PaginationLabels>(() => ({
-    ...PAGINATION_DEFAULT_LABELS,
-    ...this.defaults.labels,
-    ...this.labels(),
-  }));
+  /** The family's words in the language in force, with this paginator's `messages` laid over them. */
+  readonly t = injectMessages(paginationMessages, this.messages);
+  readonly accessibleLabel = computed(() => this.ownLabel ?? this.t('label'));
   readonly liveValue = computed(() => this.live() ?? this.defaults.live ?? 'polite');
   readonly sizeOptions = computed(
     () =>
@@ -304,7 +305,7 @@ export class SlPaginationFirst extends SlPaginationTrigger {
   override readonly part = 'first' as const;
   protected override target = () => 1;
   protected override usable = () => this.pagination.canGoPrevious();
-  protected override defaultLabel = () => this.pagination.labelSet().first;
+  protected override defaultLabel = () => this.pagination.t('first');
 }
 
 @Component({
@@ -324,7 +325,7 @@ export class SlPaginationPrevious extends SlPaginationTrigger {
   override readonly part = 'previous' as const;
   protected override target = () => this.pagination.currentPage() - 1;
   protected override usable = () => this.pagination.canGoPrevious();
-  protected override defaultLabel = () => this.pagination.labelSet().previous;
+  protected override defaultLabel = () => this.pagination.t('previous');
 }
 
 @Component({
@@ -344,7 +345,7 @@ export class SlPaginationNext extends SlPaginationTrigger {
   override readonly part = 'next' as const;
   protected override target = () => this.pagination.currentPage() + 1;
   protected override usable = () => this.pagination.canGoNext();
-  protected override defaultLabel = () => this.pagination.labelSet().next;
+  protected override defaultLabel = () => this.pagination.t('next');
 }
 
 @Component({
@@ -364,7 +365,7 @@ export class SlPaginationLast extends SlPaginationTrigger {
   override readonly part = 'last' as const;
   protected override target = () => this.pagination.pages();
   protected override usable = () => this.pagination.canGoNext();
-  protected override defaultLabel = () => this.pagination.labelSet().last;
+  protected override defaultLabel = () => this.pagination.t('last');
 }
 
 /**
@@ -386,7 +387,7 @@ export class SlPaginationLast extends SlPaginationTrigger {
                 <a
                   [attr.aria-current]="item.value === pagination.currentPage() ? 'page' : null"
                   [attr.aria-disabled]="pagination.inert() ? 'true' : null"
-                  [attr.aria-label]="pagination.labelSet().page(item.value)"
+                  [attr.aria-label]="pagination.t('page', { page: item.value })"
                   [attr.data-disabled]="pagination.disabled() ? '' : null"
                   [attr.data-loading]="pagination.loading() ? '' : null"
                   [attr.href]="pagination.inert() ? null : href(item.value)"
@@ -397,7 +398,7 @@ export class SlPaginationLast extends SlPaginationTrigger {
               } @else {
                 <button
                   [attr.aria-current]="item.value === pagination.currentPage() ? 'page' : null"
-                  [attr.aria-label]="pagination.labelSet().page(item.value)"
+                  [attr.aria-label]="pagination.t('page', { page: item.value })"
                   [attr.data-disabled]="pagination.disabled() ? '' : null"
                   [attr.data-loading]="pagination.loading() ? '' : null"
                   [disabled]="pagination.inert()"
@@ -415,7 +416,7 @@ export class SlPaginationLast extends SlPaginationTrigger {
         }
       </ul>
       <span data-part="summary">{{
-        pagination.labelSet().summary(pagination.currentPage(), pagination.pages())
+        pagination.t('summary', { page: pagination.currentPage(), pages: pagination.pages() })
       }}</span>
     }
   `,
@@ -450,7 +451,11 @@ export class SlPaginationStatus {
   readonly pagination = inject(SlPagination);
   readonly text = computed(() => {
     const range = this.pagination.range();
-    return this.pagination.labelSet().range(range.start, range.end, this.pagination.count() ?? 0);
+    return this.pagination.t('range', {
+      start: range.start,
+      end: range.end,
+      count: this.pagination.count() ?? 0,
+    });
   });
 }
 
@@ -468,7 +473,7 @@ export class SlPaginationStatus {
   imports: [SlGlyph, SlIcon],
   template: `
     <label data-part="page-size-label">
-      <ng-content>{{ pagination.labelSet().pageSize }}</ng-content>
+      <ng-content>{{ pagination.t('pageSize') }}</ng-content>
       <select
         [disabled]="pagination.inert()"
         [value]="pagination.pageSize()"

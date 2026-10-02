@@ -2,6 +2,7 @@ import '@slotted/styles/date-picker/date-picker.css';
 
 import { createDateFormat, isDateInRange } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { datePickerMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
@@ -24,6 +25,7 @@ import type { CalendarValue, CalendarView } from '../calendar';
 import { DateField } from '../date-field';
 import type { DateFieldHandle } from '../date-field';
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useDatePickerDefaults } from './date-picker-defaults';
 import type { DatePickerProps, DatePickerRootProps } from './date-picker.types';
@@ -56,8 +58,6 @@ const SHEET_QUERY = '(max-width: 480px) and (pointer: coarse)';
  */
 export function DatePicker({
   calendar,
-  changeLabel,
-  chooseLabel,
   className,
   clearable = false,
   closeOnSelect,
@@ -72,6 +72,7 @@ export function DatePicker({
   isDateUnavailable,
   locale,
   max,
+  messages,
   min,
   months,
   name,
@@ -97,6 +98,8 @@ export function DatePicker({
 }: DatePickerProps) {
   const field = useField();
   const defaults = useDatePickerDefaults();
+  const appLocale = useLocale();
+  const t = useMessages(datePickerMessages, messages);
   const rootRef = useRef<HTMLElement | null>(null);
   const fieldHandle = useRef<DateFieldHandle | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -114,7 +117,7 @@ export function DatePicker({
   const held = value ?? ownValue;
   const [view, setView] = useState<CalendarView>(defaultView ?? 'day');
 
-  const resolvedLocale = locale ?? defaults.locale;
+  const resolvedLocale = locale ?? appLocale;
   const resolvedTimeZone = timeZone ?? defaults.timeZone;
   const resolvedCalendar = calendar ?? defaults.calendar;
   const resolvedSize = size ?? field?.size ?? defaults.size;
@@ -290,8 +293,8 @@ export function DatePicker({
   const chosen = asDates(held);
   const spoken =
     chosen.length === 0
-      ? (chooseLabel ?? defaults.chooseLabel)
-      : `${changeLabel ?? defaults.changeLabel}, ${chosen.map((date) => format.describe(date)).join(' – ')}`;
+      ? t('choose')
+      : t('change', { date: chosen.map((date) => format.describe(date)).join(' – ') });
 
   const closesOnSelect =
     resolvedCloseOnSelect === 'always' ||

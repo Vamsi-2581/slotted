@@ -1,4 +1,4 @@
-import { formatTourProgress } from '@slotted/core/tour';
+import type { PartialMessages, TourMessages } from '@slotted/core/i18n';
 import type { TourMissing, TourOutcome, TourTarget } from '@slotted/core/tour';
 import type { ChangeRequest } from '@slotted/core/state';
 import { inject, Injectable, InjectionToken } from '@angular/core';
@@ -43,15 +43,10 @@ export interface TourStepRequest extends ChangeRequest<string | null> {
   readonly reason: TourStepReason;
 }
 
-export interface TourLabels {
-  next: string;
-  prev: string;
-  done: string;
-  skip: string;
-  close: string;
-  preparing: string;
-  progress: (position: number, total: number) => string;
-}
+/** The words a step may say in place of the tour's: "Start tour", "Got it". */
+export type TourStepMessages = PartialMessages<
+  Pick<TourMessages, 'next' | 'prev' | 'skip' | 'done'>
+>;
 
 export interface TourStepActions {
   prev?: boolean | undefined;
@@ -82,7 +77,8 @@ export interface TourStep {
   interactive?: boolean | undefined;
   advanceOn?: string | undefined;
   spotlight?: boolean | undefined;
-  labels?: Partial<Pick<TourLabels, 'next' | 'prev' | 'skip' | 'done'>> | undefined;
+  /** Laid over the tour's words for this step: "Start tour", "Got it". */
+  messages?: TourStepMessages | undefined;
   actions?: TourStepActions | undefined;
   /** Read aloud when the step arrives while focus is elsewhere. Defaults to the title. */
   announcement?: string | undefined;
@@ -98,7 +94,6 @@ export interface TourDefaults {
   closeOnOutsidePress: boolean;
   collisionPadding: number;
   keyboardNavigation: boolean;
-  labels: TourLabels;
   layout: TourLayout;
   missing: TourMissing;
   modal: boolean;
@@ -109,16 +104,6 @@ export interface TourDefaults {
   spotlight: boolean;
   targetTimeout: number;
 }
-
-export const DEFAULT_TOUR_LABELS: TourLabels = {
-  close: 'Close tour',
-  done: 'Done',
-  next: 'Next',
-  preparing: 'Preparing the next step',
-  prev: 'Back',
-  progress: formatTourProgress,
-  skip: 'Skip tour',
-};
 
 /**
  * `closeOnOutsidePress` is off: a press on the scrim is the easiest press on
@@ -136,7 +121,6 @@ export const TOUR_FALLBACK: TourDefaults = {
   closeOnOutsidePress: false,
   collisionPadding: 8,
   keyboardNavigation: true,
-  labels: DEFAULT_TOUR_LABELS,
   layout: 'auto',
   missing: 'center',
   modal: true,
@@ -154,19 +138,14 @@ export const TOUR_DEFAULTS = new InjectionToken<TourDefaults>('slotted tour defa
 });
 
 /**
- * An application decides once how its tours behave and what their controls
- * say. A tour that states any of them itself still wins, and so does a step.
+ * An application decides once how its tours behave. A tour that states any of
+ * it itself still wins, and so does a step. Its words come from the language
+ * in force (`provideSlotted`).
  */
-export function provideTourDefaults(
-  defaults: Partial<Omit<TourDefaults, 'labels'>> & { labels?: Partial<TourLabels> },
-): Provider {
+export function provideTourDefaults(defaults: Partial<TourDefaults>): Provider {
   return {
     provide: TOUR_DEFAULTS,
-    useFactory: (): TourDefaults => ({
-      ...TOUR_FALLBACK,
-      ...defaults,
-      labels: { ...DEFAULT_TOUR_LABELS, ...defaults.labels },
-    }),
+    useFactory: (): TourDefaults => ({ ...TOUR_FALLBACK, ...defaults }),
   };
 }
 

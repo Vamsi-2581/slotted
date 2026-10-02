@@ -1,12 +1,7 @@
+import type { FamilyTranslator, FieldMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode } from 'react';
 
-import type {
-  FieldLabelPlacement,
-  FieldMessageProps,
-  FieldNecessity,
-  FieldNecessityWords,
-  FieldSize,
-} from '../field';
+import type { FieldLabelPlacement, FieldMessageProps, FieldNecessity, FieldSize } from '../field';
 
 /** How the fields inside the group flow. */
 export type FieldGroupOrientation = 'vertical' | 'horizontal';
@@ -21,11 +16,12 @@ export interface FieldGroupIds {
 export interface FieldGroupContextValue {
   ids: FieldGroupIds;
   messageSize: 'sm' | 'md';
-  necessityWords: FieldNecessityWords;
   registerMessage: (slot: 'description' | 'error', present: boolean) => void;
   necessity: FieldNecessity;
   required: boolean | undefined;
   size: FieldSize;
+  /** The field family's words in the language in force, with the group's `messages` laid over them. */
+  t: FamilyTranslator<FieldMessages>;
 }
 
 /**
@@ -61,10 +57,12 @@ export interface FieldGroupProps extends Omit<ComponentPropsWithRef<'fieldset'>,
   invalid?: boolean | undefined;
   /** Provided to every field inside, unless the field states its own. */
   labelPlacement?: FieldLabelPlacement | undefined;
-  /** Provided to every field inside: the accessible name of its help controls. */
-  helpLabel?: string | undefined;
-  /** Merged over the provider's pair, and provided to every field inside. */
-  necessityWords?: Partial<FieldNecessityWords> | undefined;
+  /**
+   * Words laid over the field catalog of the language in force for the
+   * legend's own necessity word (`optional`, `required`). A field inside
+   * states its own `messages`.
+   */
+  messages?: PartialMessages<FieldMessages> | undefined;
   /** How the fields inside flow. Defaults to `vertical`. */
   orientation?: FieldGroupOrientation | undefined;
   /** Provided to every field inside, unless the field states its own. */

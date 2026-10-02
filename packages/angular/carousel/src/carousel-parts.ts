@@ -18,7 +18,6 @@ import {
 } from '@angular/core';
 import {
   carouselKeyIntent,
-  formatCarouselMessage,
   indicatorDistance,
   intentPage,
   revealInStrip,
@@ -56,7 +55,7 @@ function consumerLabel(): string | null {
     role: 'group',
     tabindex: '0',
     '[id]': 'carousel.viewportId',
-    '[attr.aria-label]': 'label ?? carousel.resolvedMessages().viewport',
+    '[attr.aria-label]': "label ?? carousel.t('viewport')",
     '(keydown)': 'onKeyDown($event)',
   },
 })
@@ -96,7 +95,7 @@ export class SlCarouselViewport {
   host: {
     'data-part': 'slide',
     role: 'group',
-    '[attr.aria-roledescription]': 'carousel.resolvedMessages().slideRoleDescription',
+    '[attr.aria-roledescription]': "carousel.t('slideRoleDescription')",
   },
 })
 export class SlCarouselSlide {
@@ -118,7 +117,7 @@ export class SlCarouselSlide {
     'data-part': 'previous',
     type: 'button',
     '[attr.aria-controls]': 'carousel.viewportId',
-    '[attr.aria-label]': 'label ?? carousel.resolvedMessages().previous',
+    '[attr.aria-label]': "label ?? carousel.t('previous')",
     '[attr.aria-disabled]': "carousel.canPrevious() ? null : 'true'",
     '[attr.data-disabled]': "carousel.canPrevious() ? null : ''",
     '(click)': 'onClick($event)',
@@ -149,7 +148,7 @@ export class SlCarouselPrevious {
     'data-part': 'next',
     type: 'button',
     '[attr.aria-controls]': 'carousel.viewportId',
-    '[attr.aria-label]': 'label ?? carousel.resolvedMessages().next',
+    '[attr.aria-label]': "label ?? carousel.t('next')",
     '[attr.aria-disabled]': "carousel.canNext() ? null : 'true'",
     '[attr.data-disabled]': "carousel.canNext() ? null : ''",
     '(click)': 'onClick($event)',
@@ -183,8 +182,7 @@ export class SlCarouselNext {
     type: 'button',
     '[attr.hidden]': "carousel.rotates() ? null : ''",
     '[attr.aria-controls]': 'carousel.viewportId',
-    '[attr.aria-label]':
-      'label ?? (carousel.isPlaying() ? carousel.resolvedMessages().stop : carousel.resolvedMessages().start)',
+    '[attr.aria-label]': "label ?? carousel.t(carousel.isPlaying() ? 'stop' : 'start')",
     '(click)': 'onClick($event)',
   },
 })
@@ -250,11 +248,10 @@ export class SlCarouselIndicator {
   protected readonly resolvedLabel = computed(() => {
     if (this.label !== null) return this.label;
     if (this.element.childElementCount > 0) return null;
-    return formatCarouselMessage(
-      this.carousel.resolvedMessages().indicator,
-      { page: this.page() + 1, count: this.carousel.pageCount() },
-      this.carousel.locale,
-    );
+    return this.carousel.t('indicator', {
+      page: this.page() + 1,
+      count: this.carousel.pageCount(),
+    });
   });
 
   protected onClick(event: MouseEvent) {
@@ -293,7 +290,7 @@ export class SlCarouselIndicatorTemplate {
   host: {
     'data-part': 'indicators',
     role: 'tablist',
-    '[attr.aria-label]': 'label ?? carousel.resolvedMessages().indicators',
+    '[attr.aria-label]': "label ?? carousel.t('indicators')",
     '[attr.data-variant]': 'variant()',
     '[attr.data-adaptive]': "adaptive() ? '' : null",
   },
@@ -359,11 +356,12 @@ export class SlCarouselIndicators {
 })
 export class SlCarouselCounter {
   protected readonly carousel = inject(SlCarousel);
-  private readonly number = new Intl.NumberFormat(this.carousel.locale);
+  private readonly number = computed(() => new Intl.NumberFormat(this.carousel.locale()));
 
   protected readonly text = computed(() => {
     const count = this.carousel.pageCount();
     const shown = count === 0 ? 0 : this.carousel.shown() + 1;
-    return `${this.number.format(shown)} / ${this.number.format(count)}`;
+    const number = this.number();
+    return `${number.format(shown)} / ${number.format(count)}`;
   });
 }

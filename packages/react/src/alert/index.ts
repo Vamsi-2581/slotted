@@ -1,5 +1,5 @@
 export { Alert } from './alert';
-export { ALERT_DISMISS_LABEL, AlertDefaultsProvider, useAlertDefaults } from './alert-defaults';
+export { AlertDefaultsProvider, useAlertDefaults } from './alert-defaults';
 export { AlertActions, AlertContent, AlertDescription, AlertTitle } from './alert-parts';
 export type {
   AlertActionsProps,

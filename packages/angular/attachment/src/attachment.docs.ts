@@ -91,7 +91,7 @@ const anatomy: AnatomyRow[] = [
     element: 'p',
     required: false,
     purpose:
-      'One line under the name. With nothing projected it writes the size with formatBytes in the token’s locale.',
+      'One line under the name. With nothing projected it writes the size with formatBytes in the language in force.',
   },
   {
     part: 'message',
@@ -292,13 +292,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'In a claim thread',
-    note: 'A message carries its files the way the product would: the group under the text, links that download, one file still sending. provideAttachmentDefaults sets the size and the locale once for the application.',
+    note: 'A message carries its files the way the product would: the group under the text, links that download, one file still sending. provideAttachmentDefaults sets the size once for the application; the words and the locale come from provideSlotted.',
     snippet: defineSnippet({
       id: 'attachment-angular-composition',
       language: 'ts',
       label: 'One decision for the whole application',
       source: `bootstrapApplication(App, {
-  providers: [provideAttachmentDefaults({ locale: 'en-GB', size: 'sm' })],
+  providers: [provideAttachmentDefaults({ size: 'sm' })],
 });`,
     }),
   },
@@ -387,11 +387,11 @@ export const ANGULAR_ATTACHMENT_DOCS = {
         'Shows slAttachmentRemove and lets Backspace and Delete ask for removal',
       ],
       [
-        'removeLabel',
-        'string',
-        'Remove',
+        'messages',
+        'Partial<AttachmentMessages>',
+        '—',
         'slAttachment',
-        'The word before the file name in the remove control name',
+        'Words laid over the language in force, key by key: the remove control name (remove, with the file name) and the tile word for a file without an extension (noExtension)',
       ],
       [
         'src',
@@ -418,10 +418,10 @@ export const ANGULAR_ATTACHMENT_DOCS = {
     composition: apiRows([
       [
         'provideAttachmentDefaults',
-        '{ size, orientation, layout, locale, removeLabel }',
+        '{ size, orientation, layout }',
         '—',
         'an injector',
-        'Sets the five once; the group and the attachment still win',
+        'Sets the three once; the group and the attachment still win',
       ],
       [
         'exportAs',

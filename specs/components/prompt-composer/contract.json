@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "prompt-composer",
   "ui": "prompt-composer",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Multi-line message input with send and tools."
+  },
   "controlPart": "input",
   "rootRole": null,
   "stateSource": "field",
@@ -55,18 +59,9 @@
     "submitOn": ["prop", "defaults", "enter"]
   },
   "provides": {
-    "promptComposerDefaults": [
-      "size",
-      "variant",
-      "submitOn",
-      "sendLabel",
-      "stopLabel",
-      "retryLabel",
-      "attachLabel",
-      "sendingLabel",
-      "stoppedLabel"
-    ]
+    "promptComposerDefaults": ["size", "variant", "submitOn"]
   },
+  "messages": ["attach", "retry", "send", "sending", "stop", "stopped"],
   "stateAttributes": {
     "disabled": "data-disabled",
     "invalid": "data-invalid",
@@ -97,7 +92,7 @@
       "stop": "stop",
       "retry": "rotate-ccw"
     },
-    "announces": ["sendingLabel", "stoppedLabel"],
+    "announces": ["sending", "stopped"],
     "retryWhile": ["error"]
   },
   "attach": {

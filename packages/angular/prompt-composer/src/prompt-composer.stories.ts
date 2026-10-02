@@ -516,13 +516,7 @@ export const Composition: Story = {
   parameters: scenario('composition'),
   decorators: [
     moduleMetadata({
-      providers: [
-        providePromptComposerDefaults({
-          sendLabel: 'Enviar',
-          stopLabel: 'Parar',
-          variant: 'outline',
-        }),
-      ],
+      providers: [providePromptComposerDefaults({ variant: 'outline' })],
     }),
   ],
   render: () => ({
@@ -530,8 +524,8 @@ export const Composition: Story = {
       1,
       scene(
         'A provider, an exported instance, an action of your own',
-        'providePromptComposerDefaults makes every composer below it outline and names its send Enviar; exportAs reaches the textarea, which already has select().',
-        `<form slPromptComposer>
+        'providePromptComposerDefaults makes every composer below it outline, and messages names this send Enviar; exportAs reaches the textarea, which already has select().',
+        `<form slPromptComposer [messages]="{ send: 'Enviar', stop: 'Parar' }">
            <textarea slPromptComposerInput #mensagem="slPromptComposerInput" aria-label="Mensagem" placeholder="Escreva e envie"></textarea>
            <div slPromptComposerFooter>
              <button slPromptComposerAction (click)="mensagem.inputElement.select()">Selecionar</button>

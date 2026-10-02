@@ -9,30 +9,19 @@ import {
   output,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
-import {
-  formatRating,
-  formatRatingMessage,
-  formatShare,
-  summariseRatings,
-} from '@slotted/core/rating';
+import { type PartialMessages, ratingMessages, type RatingMessages } from '@slotted/core/i18n';
+import { formatRating, formatShare, summariseRatings } from '@slotted/core/rating';
 import type { RatingInsight, RatingInsightThresholds } from '@slotted/core/rating';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 
-import {
-  cssNumber,
-  formatCount,
-  injectDocumentLocale,
-  injectRatingDefaults,
-  RATING_MESSAGES,
-} from './rating-defaults';
-import type {
-  RatingMessages,
-  RatingSize,
-  RatingSummaryVariant,
-  RatingTone,
-} from './rating-defaults';
+import { cssNumber, formatCount, injectRatingDefaults } from './rating-defaults';
+import type { RatingSize, RatingSummaryVariant, RatingTone } from './rating-defaults';
+
+/** Stands in for the share while a message is written, so the share can be set apart. */
+const SHARE_MARK = '\uE000';
 import { SlRatingDisplay } from './rating-display';
 
 /** Why the selected levels moved: a press, or Space or Enter on a level. */
@@ -108,14 +97,14 @@ interface SummaryBucket {
           [value]="summary().average ?? 0"
           [max]="resolvedMax()"
           [showValue]="false"
-          [messages]="resolvedMessages()"
+          [messages]="messages()"
           [locale]="resolvedLocale()"
         ></div>
       }
       <span data-part="count">{{ countText() }}</span>
     </div>
     @if (resolvedVariant() === 'bars') {
-      <ul data-part="distribution" [attr.aria-label]="resolvedMessages().distributionLabel">
+      <ul data-part="distribution" [attr.aria-label]="t('distributionLabel')">
         @for (level of highestFirst(); track level.level) {
           <li>
             @if (filterable()) {
@@ -233,7 +222,9 @@ export class SlRatingSummary {
   readonly showInsight = input(true, { transform: booleanAttribute });
   readonly size = input<RatingSize | undefined>(undefined);
   readonly tone = input<RatingTone | undefined>(undefined);
-  readonly messages = input<Partial<RatingMessages> | undefined>(undefined);
+  /** Words laid over the catalog of the language in force, key by key. */
+  readonly messages = input<PartialMessages<RatingMessages> | undefined>(undefined);
+  /** The locale numbers are written in. Unstated, the language in force. */
   readonly locale = input<string | undefined>(undefined);
 
   /**
@@ -243,20 +234,15 @@ export class SlRatingSummary {
   readonly selectedLevelsChangeRequest = output<ChangeRequest<readonly number[]>>();
 
   private readonly defaults = injectRatingDefaults();
-  private readonly documentLocale = injectDocumentLocale();
+  private readonly appLocale = injectLocale();
+  /** The family's words in the language in force, with this summary's `messages` laid over them. */
+  readonly t = injectMessages(ratingMessages, this.messages);
 
   readonly resolvedMax = computed(() => Math.max(1, Math.round(this.max() ?? this.defaults.max)));
   readonly resolvedVariant = computed(() => this.variant());
   readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   readonly resolvedTone = computed(() => this.tone() ?? this.defaults.tone);
-  protected readonly resolvedMessages = computed<RatingMessages>(() => ({
-    ...RATING_MESSAGES,
-    ...this.defaults.messages,
-    ...this.messages(),
-  }));
-  protected readonly resolvedLocale = computed(
-    () => this.locale() ?? this.defaults.locale ?? this.documentLocale,
-  );
+  protected readonly resolvedLocale = computed(() => this.locale() ?? this.appLocale());
   private readonly thresholds = computed<RatingInsightThresholds>(() => ({
     ...this.defaults.insightThresholds,
     ...this.insightThresholds(),
@@ -272,7 +258,6 @@ export class SlRatingSummary {
   protected readonly lowestFirst = computed<SummaryLevel[]>(() => {
     const { levels, total } = this.summary();
     const locale = this.resolvedLocale();
-    const template = this.resolvedMessages().levelLabel;
     const pressed = this.selectedLevels();
     const largest = Math.max(0, ...levels.map((level) => level.count));
     return [...levels].reverse().map(({ level, count, share }) => {
@@ -285,7 +270,7 @@ export class SlRatingSummary {
         share: cssNumber(total === 0 ? 0 : share, 4),
         peak: cssNumber(largest === 0 ? 0 : count / largest, 4),
         shareText,
-        label: formatRatingMessage(template, { level, count, share: shareText }, locale),
+        label: this.t('levelLabel', { level, count, share: shareText }),
         pressed: pressed.includes(level),
       };
     });
@@ -298,32 +283,19 @@ export class SlRatingSummary {
     return average === null ? '' : formatRating(average, this.resolvedLocale());
   });
 
-  protected readonly scaleText = computed(() =>
-    formatRatingMessage(
-      this.resolvedMessages().scale,
-      { max: this.resolvedMax() },
-      this.resolvedLocale(),
-    ),
-  );
+  protected readonly scaleText = computed(() => this.t('scale', { max: this.resolvedMax() }));
 
   protected readonly countText = computed(() => {
     const { total, margin, interval } = this.summary();
-    const messages = this.resolvedMessages();
     const locale = this.resolvedLocale();
-    if (total === 0) return messages.summaryEmpty;
-    if (this.resolvedVariant() === 'bars') {
-      return formatRatingMessage(messages.summaryCount, { count: total }, locale);
-    }
+    if (total === 0) return this.t('summaryEmpty');
+    if (this.resolvedVariant() === 'bars') return this.t('summaryCount', { count: total });
     if (margin !== null && interval !== null && margin >= this.thresholds().margin) {
-      return formatRatingMessage(
-        messages.spectrumUncertain,
-        {
-          count: total,
-          low: formatRating(interval[0], locale),
-          high: formatRating(interval[1], locale),
-        },
-        locale,
-      );
+      return this.t('spectrumUncertain', {
+        count: total,
+        low: formatRating(interval[0], locale),
+        high: formatRating(interval[1], locale),
+      });
     }
     /* Two places, written here: the core writes a number to one place, and a
        margin of 0,04 would read as nought. */
@@ -331,7 +303,7 @@ export class SlRatingSummary {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(margin ?? 0);
-    return formatRatingMessage(messages.spectrumCount, { count: total, margin: written }, locale);
+    return this.t('spectrumCount', { count: total, margin: written });
   });
 
   protected readonly insight = computed(() => {
@@ -340,16 +312,15 @@ export class SlRatingSummary {
     if (this.resolvedVariant() !== 'spectrum' || !this.showInsight() || insight === null) {
       return null;
     }
-    return { tone: INSIGHT_TONE[insight], text: this.resolvedMessages()[insight] };
+    return { tone: INSIGHT_TONE[insight], text: this.t(insight) };
   });
 
   protected readonly buckets = computed<SummaryBucket[]>(() => {
     const { buckets } = this.summary();
-    const messages = this.resolvedMessages();
     const locale = this.resolvedLocale();
     const tones = { positive: 'success', neutral: 'secondary', negative: 'danger' } as const;
     return (['positive', 'neutral', 'negative'] as const).map((key) => {
-      const [before = '', after = ''] = messages[key].split('{share}');
+      const [before = '', after = ''] = this.t(key, { share: SHARE_MARK }).split(SHARE_MARK);
       return { key, tone: tones[key], before, share: formatShare(buckets[key], locale), after };
     });
   });

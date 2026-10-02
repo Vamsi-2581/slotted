@@ -1,5 +1,5 @@
 export { Message, MessageGroup, useMessage } from './message';
-export { MESSAGE_MESSAGES, MessageDefaultsProvider, useMessageDefaults } from './message-defaults';
+export { MessageDefaultsProvider, useMessageDefaults } from './message-defaults';
 export {
   MessageActions,
   MessageActivity,

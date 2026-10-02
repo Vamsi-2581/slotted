@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "timeline",
   "ui": "timeline",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Events in time order with markers."
+  },
   "rootRole": "none",
   "listElement": {
     "list": "ol",
@@ -166,11 +170,9 @@
       "size",
       "growing",
       "timeFormat",
-      "locale",
       "timeZone",
       "now",
-      "level",
-      "messages"
+      "level"
     ],
     "toItems": [
       "mode",
@@ -189,15 +191,7 @@
       "count"
     ]
   },
-  "messages": {
-    "loadMore": "Load more",
-    "loading": "Loading more events",
-    "freshItems": "(count) => `${count} new events`",
-    "empty": "No events yet",
-    "current": "current",
-    "expand": "Show events",
-    "collapse": "Hide events"
-  },
+  "messages": ["collapse", "current", "empty", "expand", "freshItems", "loading", "loadMore"],
   "stateAttributes": {
     "open": "data-open",
     "loading": "data-loading",

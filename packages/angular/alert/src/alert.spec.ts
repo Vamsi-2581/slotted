@@ -1,6 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
+
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
 import contract from '../../../../specs/components/alert/contract.json';
 import { SlAlert } from './alert';
@@ -231,14 +234,18 @@ describe('SlAlert', () => {
       expect(alert.hasAttribute('hidden')).toBe(false);
     });
 
-    it('takes the word a provider gave every dismiss control', () => {
+    it('speaks the language in force, and follows a change of it in place', () => {
+      const locale = signal('pt-BR');
       const fixture = renderTemplate(`<section slAlert dismissible>${MESSAGE}</section>`, [
-        provideAlertDefaults({ dismissLabel: 'Dispensar' }),
+        provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
       ]);
+      const dismiss = () => root(fixture).querySelector('[data-part="dismiss"]');
 
-      expect(root(fixture).querySelector('[data-part="dismiss"]')?.getAttribute('aria-label')).toBe(
-        'Dispensar',
-      );
+      expect(dismiss()?.getAttribute('aria-label')).toBe('Dispensar');
+
+      locale.set('en-US');
+      fixture.detectChanges();
+      expect(dismiss()?.getAttribute('aria-label')).toBe('Dismiss');
     });
 
     /**

@@ -45,7 +45,7 @@ const DEFAULT_DENSITY = signal<GridDensity | null>(null);
   template: `
     <button type="button" (click)="view.reset()">reset</button>
     <sl-data-grid
-      label="Items"
+      aria-label="Items"
       rowKey="id"
       [rows]="rows"
       [columns]="columns"

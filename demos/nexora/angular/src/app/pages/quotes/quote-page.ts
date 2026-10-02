@@ -251,7 +251,7 @@ import { ReasonDialog } from '../orders/reason-dialog';
                           tone="secondary"
                           type="button"
                           [loading]="store.busy() === 'submit'"
-                          loadingLabel="Submitting"
+                          [messages]="{ loading: 'Submitting' }"
                           (click)="submit()"
                         >
                           Submit for approval
@@ -264,7 +264,7 @@ import { ReasonDialog } from '../orders/reason-dialog';
                           slButton
                           type="button"
                           [loading]="store.busy() === 'send'"
-                          loadingLabel="Sending"
+                          [messages]="{ loading: 'Sending' }"
                           (click)="send()"
                         >
                           Send to the customer
@@ -277,7 +277,7 @@ import { ReasonDialog } from '../orders/reason-dialog';
                           slButton
                           type="button"
                           [loading]="store.busy() === 'accept'"
-                          loadingLabel="Marking accepted"
+                          [messages]="{ loading: 'Marking accepted' }"
                           (click)="accept()"
                         >
                           Customer accepted
@@ -302,7 +302,7 @@ import { ReasonDialog } from '../orders/reason-dialog';
                           tone="accent"
                           type="button"
                           [loading]="store.busy() === 'convert'"
-                          loadingLabel="Making the order"
+                          [messages]="{ loading: 'Making the order' }"
                           (click)="convert()"
                         >
                           Turn into an order
@@ -321,7 +321,7 @@ import { ReasonDialog } from '../orders/reason-dialog';
                           aria-label="Refresh"
                           data-testid="refresh"
                           [loading]="store.recordLoading()"
-                          loadingLabel="Refreshing"
+                          [messages]="{ loading: 'Refreshing' }"
                           (click)="store.loadRecord()"
                         >
                           <ng-icon name="lucideRefreshCw" />
@@ -340,7 +340,7 @@ import { ReasonDialog } from '../orders/reason-dialog';
                           tone="danger"
                           type="button"
                           [loading]="store.busy() === 'cancel'"
-                          loadingLabel="Cancelling"
+                          [messages]="{ loading: 'Cancelling' }"
                           (click)="cancel()"
                         >
                           Cancel quote
@@ -405,7 +405,7 @@ import { ReasonDialog } from '../orders/reason-dialog';
                 and not others, so they stand under the lines and the page
                 grows downward when they arrive.
               -->
-              <div slSkeletonRegion label="Reading the quote" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the quote' }" [loading]="true">
                 <div slGrid [columns]="phone() ? 2 : 4" minItemWidth="xs" [gap]="4">
                   @for (label of figureLabels; track label) {
                     <div slStatCard size="sm" loading>

@@ -2,6 +2,7 @@ import { createFilter, moveIndex } from '@slotted/core/collection';
 import type { Filter, MoveIntent } from '@slotted/core/collection';
 import { createDismissableLayer, pressOrigin } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
+import { comboboxMessages, type ComboboxMessages, type PartialMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import type { PortalRootHandle } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
@@ -36,6 +37,7 @@ import {
 } from '@angular/core';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 
@@ -142,6 +144,7 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
       (input)="onInput($event)"
       (keydown)="onKeyDown($event)"
       (focus)="onFocus()"
+      (click)="onClick($event)"
       (blur)="onBlur($event)"
     />
 
@@ -149,7 +152,7 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
       <button
         type="button"
         data-part="clear"
-        [attr.aria-label]="resolvedClearLabel()"
+        [attr.aria-label]="t('clear')"
         (click)="onClear($event)"
       >
         <span slIcon><svg slGlyph name="x"></svg></span>
@@ -160,7 +163,7 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
       tabindex="-1"
       data-part="trigger"
       [disabled]="resolvedDisabled()"
-      [attr.aria-label]="resolvedTriggerLabel()"
+      [attr.aria-label]="t('trigger')"
       (click)="onToggle($event)"
     >
       @if (loading()) {
@@ -232,10 +235,10 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
               (pointerdown)="onOptionPointerDown($event)"
               (pointerenter)="setHighlighted(query, 'pointer', $event)"
             >
-              <span data-part="label">{{ resolvedCreateLabel().replace('{query}', query) }}</span>
+              <span data-part="label">{{ t('create', { query: query }) }}</span>
             </div>
           } @else if (!loading() && optionCount() === 0) {
-            <div data-part="empty">{{ resolvedEmptyLabel() }}</div>
+            <div data-part="empty">{{ t('empty') }}</div>
           }
           @if (loading()) {
             <!--
@@ -304,6 +307,7 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
   readonly form = input<string | undefined>(undefined);
   readonly items = input<ComboboxItems | undefined>(undefined);
   readonly total = input(undefined, { transform: SlCombobox.count });
+  /** BCP 47, for the comparison the default filter makes. The language in force when absent. */
   readonly locale = input<string | undefined>(undefined);
   readonly filter = input<ComboboxFilter | undefined>(undefined);
 
@@ -316,12 +320,12 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
   readonly strategy = input<ComboboxStrategy | undefined>(undefined);
   readonly autocomplete = input<ComboboxAutocomplete | undefined>(undefined);
   readonly openOn = input<ComboboxOpenOn | undefined>(undefined);
-  readonly clearLabel = input<string | undefined>(undefined);
-  readonly createLabel = input<string | undefined>(undefined);
-  readonly emptyLabel = input<string | undefined>(undefined);
-  readonly loadingLabel = input<string | undefined>(undefined);
-  readonly triggerLabel = input<string | undefined>(undefined);
-  readonly countLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * clear and trigger buttons, the offer to create, the empty, loading and
+   * count sentences.
+   */
+  readonly messages = input<PartialMessages<ComboboxMessages> | undefined>(undefined);
 
   readonly sideOffset = input(undefined, { transform: SlCombobox.count });
   readonly alignOffset = input(undefined, { transform: SlCombobox.count });
@@ -347,6 +351,11 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
   readonly loading = input(false, { transform: booleanAttribute });
 
   private readonly defaults = injectComboboxDefaults();
+  /** The family's words in the language in force, with this combobox's `messages` laid over them. */
+  readonly t = injectMessages(comboboxMessages, this.messages);
+  private readonly inForceLocale = injectLocale();
+  /** The locale the default filter compares in: the `locale` input, or the language in force. */
+  readonly resolvedLocale = computed(() => this.locale() ?? this.inForceLocale());
   private readonly viewContainer = inject(ViewContainerRef);
   private readonly template = viewChild.required<TemplateRef<unknown>>('layer');
   private readonly controlRef = viewChild.required<{ nativeElement: HTMLInputElement }>('control');
@@ -406,8 +415,6 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
   readonly resolvedHighlightMatch = computed(
     () => this.highlightMatch() ?? this.defaults.highlightMatch,
   );
-  readonly resolvedClearLabel = computed(() => this.clearLabel() ?? this.defaults.clearLabel);
-  readonly resolvedCreateLabel = computed(() => this.createLabel() ?? this.defaults.createLabel);
   /**
    * The offer to add what was typed (CB8): the query, while the consumer will
    * take one, the reader typed something and nothing in the collection matched
@@ -419,10 +426,6 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
       ? this.query()
       : null,
   );
-  readonly resolvedEmptyLabel = computed(() => this.emptyLabel() ?? this.defaults.emptyLabel);
-  readonly resolvedLoadingLabel = computed(() => this.loadingLabel() ?? this.defaults.loadingLabel);
-  readonly resolvedTriggerLabel = computed(() => this.triggerLabel() ?? this.defaults.triggerLabel);
-  readonly resolvedCountLabel = computed(() => this.countLabel() ?? this.defaults.countLabel);
 
   readonly resolvedDisabled = computed(
     () =>
@@ -460,7 +463,9 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
     return this.inputValue() === committed ? '' : this.inputValue();
   });
 
-  private readonly fallbackFilter = computed<Filter>(() => createFilter({ locale: this.locale() }));
+  private readonly fallbackFilter = computed<Filter>(() =>
+    createFilter({ locale: this.resolvedLocale() }),
+  );
 
   readonly showClear = computed(
     () =>
@@ -476,9 +481,9 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
   });
 
   readonly statusMessage = computed(() => {
-    if (this.loading()) return this.resolvedLoadingLabel();
+    if (this.loading()) return this.t('loading');
     const count = this.optionCount();
-    return count === 0 ? '' : this.resolvedCountLabel().replace('{count}', String(count));
+    return count === 0 ? '' : this.t('count', { count });
   });
 
   constructor() {
@@ -645,6 +650,16 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
     if (this.resolvedOpenOn() !== 'focus' || this.resolvedReadOnly() || this.isOpen()) return;
     this.entry = 'selected';
     this.setOpen(true, 'keyboard');
+  }
+
+  /* A press on the input opens a closed popup and never closes an open one,
+     because the same press places the caret. Under `focus` the press has
+     already opened it through focus, so this finds it open. */
+  protected onClick(event: MouseEvent) {
+    if (event.defaultPrevented || this.resolvedOpenOn() === 'manual' || this.isOpen()) return;
+    if (this.resolvedDisabled() || this.resolvedReadOnly()) return;
+    this.entry = 'selected';
+    this.setOpen(true, 'pointer', event);
   }
 
   protected onBlur(event: FocusEvent) {

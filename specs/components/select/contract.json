@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "select",
   "ui": "select",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Picks one option from a popup list."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/",
   "examplePattern": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/",
   "listboxPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/listbox/",
@@ -72,7 +76,10 @@
   },
   "chips": {
     "row": "tags",
-    "chip": { "ui": "tag", "stylesheet": "tag/tag.css" },
+    "chip": {
+      "ui": "tag",
+      "stylesheet": "tag/tag.css"
+    },
     "overflowAttribute": "data-overflow",
     "summary": "summary",
     "band": "chosen",
@@ -453,17 +460,19 @@
       "sideOffset",
       "alignOffset",
       "collisionPadding",
-      "typeaheadTimeout",
-      "clearLabel",
-      "countLabel",
-      "emptyLabel",
-      "searchLabel",
-      "searchPlaceholder",
-      "loadingLabel",
-      "removeLabel",
-      "summaryLabel"
+      "typeaheadTimeout"
     ]
   },
+  "messages": [
+    "clear",
+    "count",
+    "empty",
+    "loading",
+    "remove",
+    "search",
+    "searchPlaceholder",
+    "summary"
+  ],
   "stateAttributes": {
     "open": "data-open",
     "disabled": "data-disabled",
@@ -542,15 +551,7 @@
         "sideOffset": 4,
         "alignOffset": 0,
         "collisionPadding": 8,
-        "typeaheadTimeout": 500,
-        "clearLabel": "Clear selection",
-        "countLabel": "{count} results",
-        "emptyLabel": "No options",
-        "searchLabel": "Search options",
-        "searchPlaceholder": "Search\u2026",
-        "loadingLabel": "Loading…",
-        "removeLabel": "Remove {label}",
-        "summaryLabel": "{count} selected"
+        "typeaheadTimeout": 500
       },
       "capabilities": [
         "selection",

@@ -151,9 +151,11 @@ const scenes: ReferenceSceneMeta[] = [
 <CurrencyField currency="EUR" defaultValue={1480} locale="fr-FR" />;
 
 // Set once for an application, rather than on every amount in a form.
-<CurrencyFieldDefaultsProvider currency="BRL" locale="pt-BR">
-  <CurrencyField defaultValue={1480} />
-</CurrencyFieldDefaultsProvider>;`,
+<SlottedProvider locale="pt-BR">
+  <CurrencyFieldDefaultsProvider currency="BRL">
+    <CurrencyField defaultValue={1480} />
+  </CurrencyFieldDefaultsProvider>
+</SlottedProvider>;`,
     }),
   },
   {
@@ -343,7 +345,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'currency-field-react-composition',
       language: 'tsx',
       label: 'A provider, a form, and the integer a gateway wants',
-      source: `<CurrencyFieldDefaultsProvider currency="BRL" locale="pt-BR">
+      source: `<CurrencyFieldDefaultsProvider currency="BRL">
   <CurrencyField defaultValue={1480} name="total" />
 </CurrencyFieldDefaultsProvider>;
 
@@ -451,8 +453,8 @@ export const REACT_CURRENCY_FIELD_DOCS = {
       [
         'locale',
         'string',
-        'the runtime’s own',
-        'CurrencyField, CurrencyFieldDefaultsProvider',
+        'the language in force',
+        'CurrencyField',
         'BCP 47. It decides the separators, where the symbol goes and the numbering system — never the symbol itself, which is the currency’s',
       ],
       [
@@ -605,11 +607,11 @@ export const REACT_CURRENCY_FIELD_DOCS = {
         'The element’s own attribute. transaction-amount is the standard autofill field name for a payment amount, and transaction-currency for the currency beside it; the default is off, because a browser offering to fill an invoice total is worse than no help at all',
       ],
       [
-        'incrementLabel / decrementLabel',
-        'string',
-        'Increase / Decrease',
-        'CurrencyField, CurrencyFieldDefaultsProvider',
-        'What the two buttons announce. Both are set once for an application rather than per amount',
+        'messages',
+        'Partial<CurrencyFieldMessages>',
+        '—',
+        'CurrencyField',
+        'Words laid over the language in force, key by key: increment and decrement are what the two buttons announce',
       ],
     ]),
     composition: apiRows([
@@ -643,7 +645,7 @@ export const REACT_CURRENCY_FIELD_DOCS = {
       ],
       [
         'CurrencyFieldDefaultsProvider',
-        '{ currency, currencyDisplay, locale, entry, align, size, variant, stepper, clamp, incrementLabel, decrementLabel }',
+        '{ currency, currencyDisplay, entry, align, size, variant, stepper, clamp }',
         '—',
         'a subtree',
         'The decisions an application takes once. currency is the one worth setting first, and the only one a field cannot be built without: a product has one currency in nine screens out of ten, and the tenth states its own',

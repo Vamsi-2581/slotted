@@ -1,15 +1,16 @@
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useMemo, useState, type ReactNode } from 'react';
 
 import { Field, FieldDescription, FieldLabel } from '../field';
 import { Grid, Scene } from '../field/field-demo';
+import { SlottedProvider } from '../i18n';
 import { ListboxLabel, ListboxMeta } from '../listbox';
 import { Stack } from '../stack';
 import { Text } from '../typography';
 import { Transfer } from './transfer';
-import { TransferDefaultsProvider } from './transfer-defaults';
 import { REACT_TRANSFER_DOCS, REACT_TRANSFER_TOKENS } from './transfer.docs';
 import type {
   TransferItem,
@@ -284,7 +285,7 @@ export const Order: Story = {
         <Team
           initial={['revenue', 'active', 'conversion', 'pipeline']}
           items={WIDGETS}
-          labels={{ source: 'Available', target: 'On the dashboard' }}
+          messages={{ target: 'On the dashboard' }}
           reorderable
         />
       </Scene>
@@ -427,7 +428,7 @@ export const Content: Story = {
         <Team
           initial={['customers.read']}
           items={PERMISSIONS}
-          labels={{ source: 'Permissões disponíveis', target: 'Concedidas' }}
+          messages={{ source: 'Permissões disponíveis', target: 'Concedidas' }}
           renderItem={(item) => (
             <>
               <ListboxLabel>{item.label}</ListboxLabel>
@@ -470,25 +471,21 @@ export const Labels: Story = {
   render: () => (
     <One
       label="Granting permissions, in Portuguese"
-      note="The provider says Disponíveis, Concedidas, Conceder and Revogar once; the counts and the announcements follow."
+      note="The language in force says every word; this transfer lays Concedidas, Conceder and Revogar over it, and the counts and the announcements follow."
     >
-      <TransferDefaultsProvider
-        labels={{
-          source: 'Disponíveis',
-          target: 'Concedidas',
-          search: 'Buscar em {pane}',
-          selectAll: 'Selecionar tudo em {pane}',
-          count: '{total} itens',
-          countSelected: '{selected} de {total} selecionados',
-          moveToTarget: 'Conceder',
-          moveAllToTarget: 'Conceder todas',
-          moveToSource: 'Revogar',
-          moveAllToSource: 'Revogar todas',
-          moved: '{count} movidas para {pane}',
-        }}
-      >
-        <Team initial={['customers.read']} items={PERMISSIONS} />
-      </TransferDefaultsProvider>
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Team
+          initial={['customers.read']}
+          items={PERMISSIONS}
+          messages={{
+            target: 'Concedidas',
+            moveToTarget: 'Conceder',
+            moveAllToTarget: 'Conceder todas',
+            moveToSource: 'Revogar',
+            moveAllToSource: 'Revogar todas',
+          }}
+        />
+      </SlottedProvider>
     </One>
   ),
 };

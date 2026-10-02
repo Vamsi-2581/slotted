@@ -94,7 +94,7 @@
   "escapeBound": false,
   "enterSubmits": true,
   "stepperTabIndex": -1,
-  "stepperNames": ["incrementLabel", "decrementLabel"],
+  "stepperNames": ["increment", "decrement"],
   "stepperDisabledAtBound": true,
   "parseOn": "input",
   "commitOn": ["blur", "enter", "step", "wheel", "scrub"],
@@ -186,7 +186,7 @@
     "formatOn": ["prop", "defaults", "change"],
     "currency": ["prop", "defaults"],
     "currencyDisplay": ["prop", "defaults", "symbol"],
-    "locale": ["prop", "defaults", "runtime"]
+    "locale": ["prop", "slotted", "en-US"]
   },
   "provides": {
     "currencyFieldDefaults": [
@@ -194,16 +194,14 @@
       "clamp",
       "currency",
       "currencyDisplay",
-      "decrementLabel",
       "entry",
       "formatOn",
-      "incrementLabel",
-      "locale",
       "size",
       "stepper",
       "variant"
     ]
   },
+  "messages": ["decrement", "increment"],
   "imperative": ["increment", "decrement"],
   "stateAttributes": {
     "disabled": "data-disabled",

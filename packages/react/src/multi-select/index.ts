@@ -22,6 +22,7 @@ export type {
   MultiSelectItemProps,
   MultiSelectItems,
   MultiSelectMount,
+  MultiSelectOpenOn,
   MultiSelectOpenReason,
   MultiSelectOption,
   MultiSelectOptionGroup,

@@ -22,6 +22,7 @@ import type { NumberFormat } from '@slotted/core/number';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import { SlField } from '@slotted/angular/field';
+import { injectLocale } from '@slotted/angular/i18n';
 
 import { injectNumberFieldDefaults, SlNumberFieldControl } from './number-field-defaults';
 import type { NumberFieldClamp, NumberFieldFormatOn } from './number-field-defaults';
@@ -122,7 +123,7 @@ export class SlNumberFieldInput implements ControlValueAccessor, OnInit, SlNumbe
   readonly format = input<Intl.NumberFormatOptions | undefined>(undefined);
   /** When the text takes that shape. Defaults to the token, then `change`. */
   readonly formatOn = input<NumberFieldFormatOn | undefined>(undefined);
-  /** BCP 47. Defaults to the token, then to the runtime's own locale. */
+  /** BCP 47. Defaults to the language in force (`provideSlotted`). */
   readonly locale = input<string | undefined>(undefined);
   /**
    * Lets the wheel move the value while the control has focus. Off by default:
@@ -158,6 +159,7 @@ export class SlNumberFieldInput implements ControlValueAccessor, OnInit, SlNumbe
   readonly numberField = inject(SlNumberField);
   private readonly field = inject(SlField, { optional: true });
   private readonly defaults = injectNumberFieldDefaults();
+  private readonly appLocale = injectLocale();
 
   private readonly writtenId = inject(new HostAttributeToken('id'), { optional: true });
   private readonly writtenName = inject(new HostAttributeToken('name'), { optional: true });
@@ -190,10 +192,9 @@ export class SlNumberFieldInput implements ControlValueAccessor, OnInit, SlNumbe
    * every change detection does not rebuild the parser.
    */
   private readonly formatter = computed<NumberFormat>(() => {
-    const locale = this.locale() ?? this.defaults.locale;
     const options = this.format();
     return createNumberFormat({
-      ...(locale === undefined ? {} : { locale }),
+      locale: this.locale() ?? this.appLocale(),
       ...(options === undefined ? {} : { options }),
     });
   });

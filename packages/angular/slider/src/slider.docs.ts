@@ -383,8 +383,8 @@ export const ANGULAR_SLIDER_DOCS = {
       [
         'locale',
         'string',
-        'the runtime’s',
-        'slSlider, provideSliderDefaults',
+        'the language in force',
+        'slSlider',
         'BCP 47. It decides the decimal separator, the grouping and the numbering system',
       ],
       [
@@ -468,10 +468,10 @@ export const ANGULAR_SLIDER_DOCS = {
       ],
       [
         'provideSliderDefaults',
-        '{ size, orientation, valueLabel, locale }',
+        '{ size, orientation, valueLabel }',
         '—',
         'an injector',
-        'The four decisions an application takes once. locale is the one worth setting first, for the reason a form of amounts always has',
+        'The three decisions an application takes once. The locale comes from the language in force (provideSlotted)',
       ],
       [
         'slField',

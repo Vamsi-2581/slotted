@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/command-palette/contract.json';
+import { SlottedProvider } from '../i18n';
 import { CommandPalette, CommandPaletteTrigger } from './command-palette';
 import { CommandPaletteDefaultsProvider } from './command-palette-defaults';
 import type {
@@ -164,7 +166,7 @@ describe('CommandPalette', () => {
   });
 
   it('says so when nothing matched', () => {
-    const { container } = render(<Inline emptyLabel="Nothing here" />);
+    const { container } = render(<Inline messages={{ empty: 'Nothing here' }} />);
     fireEvent.change(input(), { target: { value: 'xylophone' } });
     expect(screen.queryAllByRole('option')).toEqual([]);
     expect(container.querySelector("[data-part='empty']")?.textContent).toBe('Nothing here');
@@ -346,7 +348,7 @@ describe('CommandPalette', () => {
     render(
       <CommandPalette
         defaultOpen
-        errorLabel="Failed: {message}"
+        messages={{ error: 'Failed: {message}' }}
         items={[{ id: 'bad', label: 'Bad', onSelect: () => Promise.reject(new Error('nope')) }]}
         onOpenChange={onOpenChange}
       />,
@@ -497,16 +499,19 @@ describe('CommandPalette', () => {
     expect(screen.getAllByRole('option').length).toBe(1);
   });
 
-  it('takes its defaults from the provider and its labels from the sentences', () => {
+  it('takes its defaults from the provider and its words from the language in force', () => {
     const { container } = render(
-      <CommandPaletteDefaultsProvider hintNavigate="Navegar" placeholder="Buscar…" size="lg">
-        <Inline />
-      </CommandPaletteDefaultsProvider>,
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <CommandPaletteDefaultsProvider size="lg">
+          <Inline messages={{ placeholder: 'Buscar…' }} />
+        </CommandPaletteDefaultsProvider>
+      </SlottedProvider>,
     );
     expect(container.querySelector("[data-ui='command-palette']")?.getAttribute('data-size')).toBe(
       'lg',
     );
     expect(input().getAttribute('placeholder')).toBe('Buscar…');
+    expect(input().getAttribute('aria-label')).toBe('Pesquisar comandos');
     expect(container.querySelector("[data-part='footer']")?.textContent).toContain('Navegar');
   });
 

@@ -3,9 +3,10 @@ import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import { SlCarousel } from './carousel';
-import { provideCarouselDefaults } from './carousel-defaults';
 import {
   SlCarouselAutoplay,
   SlCarouselControls,
@@ -168,9 +169,9 @@ describe('SlCarousel', () => {
 
   it('writes the APG anatomy, in the words of the page', () => {
     expect(root().tagName).toBe('SECTION');
-    expect(root().getAttribute('aria-roledescription')).toBe('carrossel');
+    expect(root().getAttribute('aria-roledescription')).toBe('carousel');
     expect(all('slide')[0]?.getAttribute('aria-roledescription')).toBe('slide');
-    expect(all('slide')[0]?.getAttribute('aria-label')).toBe('1 de 3');
+    expect(all('slide')[0]?.getAttribute('aria-label')).toBe('1 of 3');
     expect(part('indicators').getAttribute('role')).toBe('tablist');
     expect(all('indicator')).toHaveLength(3);
     expect(all('indicator')[0]?.getAttribute('aria-selected')).toBe('true');
@@ -253,7 +254,7 @@ describe('SlCarousel', () => {
     fixture.componentInstance.loop.set(true);
     await settle();
     expect(root().hasAttribute('data-playing')).toBe(true);
-    expect(part('autoplay').getAttribute('aria-label')).toBe('Parar a rotação');
+    expect(part('autoplay').getAttribute('aria-label')).toBe('Stop rotation');
     expect(part('autoplay').hasAttribute('aria-pressed')).toBe(false);
     vi.advanceTimersByTime(1000);
     await settle();
@@ -277,7 +278,7 @@ describe('SlCarousel', () => {
     expect(fixture.componentInstance.playing[0]).toEqual(
       expect.objectContaining({ value: false, reason: 'keyboard' }),
     );
-    expect(part('autoplay').getAttribute('aria-label')).toBe('Retomar a rotação');
+    expect(part('autoplay').getAttribute('aria-label')).toBe('Resume rotation');
   });
 
   it('leaves a name the consumer gave a slide alone, and draws thumbnails from a template', async () => {
@@ -289,7 +290,7 @@ describe('SlCarousel', () => {
     const element = gallery.nativeElement as HTMLElement;
     const slides = element.querySelectorAll('[data-part="slide"]');
     expect(slides[0]?.getAttribute('aria-label')).toBe('Jarro Mel, de frente');
-    expect(slides[1]?.getAttribute('aria-label')).toBe('2 de 2');
+    expect(slides[1]?.getAttribute('aria-label')).toBe('2 of 2');
     const thumbnails = element.querySelectorAll('[data-part="indicator"]');
     expect(thumbnails).toHaveLength(2);
     expect(thumbnails[0]?.hasAttribute('aria-label')).toBe(false);
@@ -297,17 +298,22 @@ describe('SlCarousel', () => {
   });
 });
 
-describe('provideCarouselDefaults', () => {
-  it('merges the application’s words over the family’s', async () => {
+describe('SlCarousel language', () => {
+  it('speaks the language in force, and follows a change of it in place', async () => {
     layout();
+    const locale = signal('pt-BR');
     TestBed.configureTestingModule({
       imports: [Host],
-      providers: [provideCarouselDefaults({ messages: { next: 'Next slide' } })],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
     });
     fixture = TestBed.createComponent(Host);
     await settle();
+    expect(part('next').getAttribute('aria-label')).toBe('Próximo slide');
+    expect(root().getAttribute('aria-roledescription')).toBe('carrossel');
+
+    locale.set('en-US');
+    await settle();
     expect(part('next').getAttribute('aria-label')).toBe('Next slide');
-    expect(part('previous').getAttribute('aria-label')).toBe('Slide anterior');
     vi.restoreAllMocks();
   });
 });

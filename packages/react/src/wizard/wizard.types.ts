@@ -1,3 +1,4 @@
+import type { FamilyTranslator, PartialMessages, WizardMessages } from '@slotted/core/i18n';
 import type { FormErrorInput } from '@slotted/core/form';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import type {
@@ -34,34 +35,8 @@ export type WizardProgressOpenReason = Extract<
 >;
 export type WizardDraftReason = Extract<ChangeReason, 'pointer' | 'submit' | 'programmatic'>;
 
-/** The wording the family writes, so an application translates once. */
-export interface WizardLabels {
-  /** "Step 2 of 5", one-based. */
-  position: (index: number, count: number) => string;
-  /** The name of the list of steps. */
-  progress: string;
-  previous: string;
-  next: string;
-  submit: string;
-  /** The next button while an edit started from a review step is open. */
-  return: string;
-  cancel: string;
-  saveDraft: string;
-  saving: string;
-  saved: (savedAt: Date) => string;
-  draftFailed: string;
-  skip: string;
-  optional: string;
-  edit: string;
-  /** Said on a step the submission found incomplete. */
-  incomplete: string;
-  submitFailed: string;
-  restoring: string;
-}
-
 /** What an application sets once for every wizard under it. */
 export interface WizardDefaults {
-  labels: WizardLabels;
   progress: WizardProgress;
   linear: boolean;
   level: WizardLevel;
@@ -72,9 +47,8 @@ export interface WizardDefaults {
   minDuration: number;
 }
 
-export interface WizardDefaultsProviderProps extends Partial<Omit<WizardDefaults, 'labels'>> {
+export interface WizardDefaultsProviderProps extends Partial<WizardDefaults> {
   children?: ReactNode | undefined;
-  labels?: Partial<WizardLabels> | undefined;
 }
 
 /**
@@ -196,9 +170,12 @@ export interface WizardProps extends Omit<
   scroll?: WizardScroll | undefined;
   linear?: boolean | undefined;
   level?: WizardLevel | undefined;
-  /** The name of the list of steps. Defaults to `labels.progress`. */
-  label?: string | undefined;
-  labels?: Partial<WizardLabels> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * name of the list of steps (`progress`), the position, the actions, the
+   * draft status and the failures.
+   */
+  messages?: PartialMessages<WizardMessages> | undefined;
   delay?: number | undefined;
   minDuration?: number | undefined;
   /** The row of actions. Defaults to `<WizardActions />`. */
@@ -250,7 +227,8 @@ export interface WizardContextValue {
   canCancel: boolean;
   draftState: 'idle' | 'saving' | 'saved' | 'failed';
   savedAt: Date | undefined;
-  labels: WizardLabels;
+  /** The family's words in the language in force, with this wizard's `messages` laid over them. */
+  t: FamilyTranslator<WizardMessages>;
   formId: string;
   next: (source?: unknown) => void;
   previous: (source?: unknown) => void;

@@ -84,8 +84,8 @@ export const Playground: Story = {
       ...args,
       seed: [
         {
-          title: 'Rascunho salvo',
-          description: 'Tudo desde as 14h02 está guardado.',
+          title: 'Draft saved',
+          description: 'Everything since 2:02 PM is saved.',
           tone: 'accent',
         },
       ],
@@ -104,9 +104,9 @@ export const Playground: Story = {
           slButton
           size="sm"
           type="button"
-          (click)="demo.show({ title: 'Rascunho salvo', description: 'Tudo desde as 14h02 está guardado.', duration: 0 })"
+          (click)="demo.show({ title: 'Draft saved', description: 'Everything since 2:02 PM is saved.', duration: 0 })"
         >
-          Mostrar mais uma
+          Show one more
         </button>
       </sl-toast-demo>`),
   }),
@@ -117,11 +117,11 @@ export const Tones: Story = {
   render: () => ({
     props: {
       seed: [
-        { tone: 'accent', title: 'Duas pessoas entraram' },
-        { tone: 'secondary', title: 'Filtros limpos' },
-        { tone: 'success', title: 'Fatura enviada' },
-        { tone: 'warning', title: 'A licença expira em 3 dias' },
-        { tone: 'danger', title: 'Não foi possível enviar' },
+        { tone: 'accent', title: 'Two people joined' },
+        { tone: 'secondary', title: 'Filters cleared' },
+        { tone: 'success', title: 'Invoice sent' },
+        { tone: 'warning', title: 'The license expires in 3 days' },
+        { tone: 'danger', title: 'Could not send' },
       ],
     },
     template: stage('<sl-toast-demo size="tall" [limit]="5" [seed]="seed" />'),
@@ -133,16 +133,20 @@ export const Variants: Story = {
   render: () => ({
     props: {
       seed: [
-        { title: 'raised', description: 'O tom está na marca e em mais nada.', tone: 'success' },
+        {
+          title: 'raised',
+          description: 'The tone is in the mark and nowhere else.',
+          tone: 'success',
+        },
         {
           title: 'soft',
-          description: 'A superfície do tom, e a tinta do tom.',
+          description: 'The tone’s surface, and the tone’s ink.',
           tone: 'success',
           variant: 'soft',
         },
         {
           title: 'solid',
-          description: 'O preenchimento, e a única tinta medida contra ele.',
+          description: 'The fill, and the one ink measured against it.',
           tone: 'danger',
           variant: 'solid',
         },
@@ -157,7 +161,7 @@ export const Placement: Story = {
   render: () => ({
     props: {
       top: [{ title: 'top-start', tone: 'accent' }],
-      bottom: [{ title: 'bottom, centrado' }],
+      bottom: [{ title: 'bottom, centered' }],
     },
     template: stage(`
       <sl-toast-demo placement="top-start" size="layer" [seed]="top" />
@@ -171,13 +175,13 @@ export const Timing: Story = {
     props: {
       seed: [
         {
-          title: 'Exportadas 1.204 linhas',
-          description: 'O ficheiro está nas transferências.',
+          title: 'Exported 1,204 rows',
+          description: 'The file is in your downloads.',
           tone: 'success',
           duration: 8000,
           progress: true,
         },
-        { title: 'Sessão expirada', tone: 'danger', duration: 0 },
+        { title: 'Session expired', tone: 'danger', duration: 0 },
       ],
     },
     template: stage('<sl-toast-demo size="layer" [limit]="2" [seed]="seed" />'),
@@ -191,7 +195,7 @@ export const Actions: Story = {
     template: stage(`
       <ng-template #undo let-message>
         <button slButton size="sm" type="button" variant="outline" (click)="demo.dismiss(message.id)">
-          Desfazer
+          Undo
         </button>
       </ng-template>
       <sl-toast-demo #demo="slToastDemo" size="layer">
@@ -199,7 +203,7 @@ export const Actions: Story = {
           slButton
           size="sm"
           type="button"
-          (click)="demo.show({ title: 'Mensagem arquivada', description: 'Saiu da caixa de entrada e continua na conta.', tone: 'secondary', actions: undo })"
+          (click)="demo.show({ title: 'Message archived', description: 'It left the inbox and stays in the account.', tone: 'secondary', actions: undo })"
         >
           Arquivar
         </button>
@@ -216,7 +220,7 @@ export const PromiseScene: Story = {
           setTimeout(() => resolve('4.2'), 1600);
         }),
       onPublished: (version: string) => ({
-        title: `Versão ${version} no ar`,
+        title: `Version ${version} is live`,
         tone: 'success',
         duration: 0,
       }),
@@ -227,7 +231,7 @@ export const PromiseScene: Story = {
           slButton
           size="sm"
           type="button"
-          (click)="demo.promise(publish(), { loading: { id: 'publish', title: 'A publicar', description: 'Demora um minuto.' }, success: onPublished, error: { title: 'Falha ao publicar', tone: 'danger', duration: 0 } })"
+          (click)="demo.promise(publish(), { loading: { id: 'publish', title: 'Publishing', description: 'It takes a minute.' }, success: onPublished, error: { title: 'Publishing failed', tone: 'danger', duration: 0 } })"
         >
           Publicar
         </button>
@@ -240,17 +244,17 @@ export const Queue: Story = {
   render: () => ({
     props: {
       seed: [
-        { title: 'Primeira', description: 'Chegou antes das outras.' },
-        { title: 'Segunda', tone: 'secondary' },
-        { title: 'Terceira', tone: 'success' },
-        { title: 'Quarta', tone: 'warning' },
+        { title: 'First', description: 'It arrived before the others.' },
+        { title: 'Second', tone: 'secondary' },
+        { title: 'Third', tone: 'success' },
+        { title: 'Fourth', tone: 'warning' },
       ],
     },
     template: stage(`
       <sl-toast-demo size="layer" [limit]="2" [seed]="seed" />
       <p slText size="sm" tone="muted">
-        Duas na tela, duas à espera. Feche uma e a seguinte aparece — e só então o relógio dela
-        começa.
+        Two on screen, two waiting. Close one and the next appears — and only then does its clock
+        start.
       </p>`),
   }),
 };
@@ -260,11 +264,11 @@ export const Stacking: Story = {
   render: () => ({
     props: {
       seed: [
-        { title: 'Filtros limpos', tone: 'secondary' },
-        { title: 'Rascunho salvo', tone: 'accent' },
+        { title: 'Filters cleared', tone: 'secondary' },
+        { title: 'Draft saved', tone: 'accent' },
         {
-          title: 'Fatura enviada',
-          description: 'Uma cópia foi para o financeiro.',
+          title: 'Invoice sent',
+          description: 'A copy went to finance.',
           tone: 'success',
         },
       ],
@@ -278,9 +282,9 @@ export const Dismissal: Story = {
   render: () => ({
     props: {
       seed: [
-        { title: 'Com controlo de fecho', description: 'Carregue no ✕, ou arraste para a borda.' },
-        { title: 'Sem controlo', dismissible: false, tone: 'secondary' },
-        { title: 'Com relógio', duration: 12000, progress: true, tone: 'success' },
+        { title: 'With a close control', description: 'Press the ✕, or drag it to the edge.' },
+        { title: 'No control', dismissible: false, tone: 'secondary' },
+        { title: 'With a clock', duration: 12000, progress: true, tone: 'success' },
       ],
     },
     template: stage('<sl-toast-demo size="tall" [limit]="3" [seed]="seed" />'),
@@ -292,16 +296,16 @@ export const Keyboard: Story = {
   render: () => ({
     props: {
       seed: [
-        { title: 'Fatura enviada', description: 'Carregue F6 para chegar aqui.', tone: 'success' },
-        { title: 'Rascunho salvo', tone: 'accent' },
+        { title: 'Invoice sent', description: 'Press F6 to get here.', tone: 'success' },
+        { title: 'Draft saved', tone: 'accent' },
       ],
     },
     template: stage(`
-      <button slButton size="sm" type="button">Um controlo qualquer da página</button>
+      <button slButton size="sm" type="button">Any control on the page</button>
       <sl-toast-demo size="layer" [limit]="2" [seed]="seed" />
       <p slText size="sm" tone="muted">
-        F6 leva o foco à mensagem mais recente. Tab percorre os controlos, Escape fecha a mensagem
-        onde o foco está e devolve-o ao controlo acima.
+        F6 takes focus to the newest message. Tab walks the controls, Escape closes the message
+        focus is on and returns it to the control above.
       </p>`),
   }),
 };
@@ -311,14 +315,14 @@ export const Content: Story = {
   render: () => ({
     props: {
       seed: [
-        { title: 'Implantação recusada', description: DIGEST, tone: 'danger' },
+        { title: 'Deployment rejected', description: DIGEST, tone: 'danger' },
         {
           title: 'Die Zwischenspeicherung der Berechtigungsnachweise wurde zurückgesetzt',
           tone: 'warning',
         },
         {
-          title: 'Sem marca nenhuma',
-          description: 'As palavras começam no recuo da própria caixa.',
+          title: 'No mark at all',
+          description: 'The words start at the box’s own inset.',
           hideIcon: true,
           tone: 'secondary',
         },
@@ -344,7 +348,7 @@ export const Composition: Story = {
           slButton
           size="sm"
           type="button"
-          (click)="demo.show({ title: 'Escrita pela página', description: 'O comportamento continua a ser da família.', duration: 0, body: body })"
+          (click)="demo.show({ title: 'Written by the page', description: 'The behaviour still belongs to the family.', duration: 0, body: body })"
         >
           Mostrar
         </button>

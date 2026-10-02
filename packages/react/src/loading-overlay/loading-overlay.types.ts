@@ -1,3 +1,4 @@
+import type { LoadingOverlayMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeReason } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode, SyntheticEvent } from 'react';
 
@@ -43,10 +44,8 @@ export interface LoadingOverlayCancelRequest {
 
 /** What an application sets once for every overlay under it. */
 export interface LoadingOverlayDefaults {
-  cancelLabel?: string | undefined;
   /** How long the wait has to last before anything is painted. */
   delay?: number | undefined;
-  label?: string | undefined;
   live?: LoadingOverlayLive | undefined;
   /** What a screen reader hears when the wait ends. Nothing by default. */
   loadedLabel?: string | undefined;
@@ -111,10 +110,11 @@ export interface LoadingOverlayProps extends Omit<ComponentPropsWithRef<'div'>, 
   /** Defaults to the provider, then to `polite`. */
   live?: LoadingOverlayLive | undefined;
   /**
-   * The short line. It is painted in the panel and announced once, which is
-   * why it is a string: a live region reads text.
+   * Words laid over the catalog of the language in force, key by key: the
+   * short line (`label`), painted in the panel and announced once, and the
+   * cancel control's words (`cancel`).
    */
-  label?: string | undefined;
+  messages?: PartialMessages<LoadingOverlayMessages> | undefined;
   /** What a screen reader hears when the wait ends. Announced only if given. */
   loadedLabel?: string | undefined;
   /** The second line, for what the first cannot hold. Painted, never announced. */
@@ -126,7 +126,7 @@ export interface LoadingOverlayProps extends Omit<ComponentPropsWithRef<'div'>, 
   indicator?: ReactNode | undefined;
   /** Renders the control that asks to stop. Absent by default. */
   cancellable?: boolean | undefined;
-  /** What that control says. Falls back to the provider, then `Cancel`. */
+  /** What that control says, in place of the catalog's `cancel`. */
   cancelLabel?: ReactNode | undefined;
   /**
    * Asks to stop, carrying the reason and the event. The family commits

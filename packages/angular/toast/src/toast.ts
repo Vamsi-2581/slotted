@@ -17,10 +17,12 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlLoader } from '@slotted/angular/progress-indicator';
 import type { GlyphName } from '@slotted/angular/icon';
 import { createRemovalFocus } from '@slotted/core/focus';
+import { type PartialMessages, toastMessages, type ToastMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPresence } from '@slotted/core/presence';
 import { createToastStore } from '@slotted/core/toast';
@@ -269,7 +271,7 @@ export class SlToastItem {
     data-ui="toast"
     role="region"
     tabindex="-1"
-    [attr.aria-label]="resolvedLabel()"
+    [attr.aria-label]="t('label')"
     [attr.data-attach]="resolvedAttach()"
     [attr.data-expanded]="paused() ? '' : null"
     [attr.data-placement]="resolvedPlacement()"
@@ -320,7 +322,7 @@ export class SlToastItem {
               <button
                 type="button"
                 data-part="close"
-                [attr.aria-label]="message.data.closeLabel ?? defaults.closeLabel"
+                [attr.aria-label]="t('close')"
                 (click)="store.dismiss(message.id, 'dismiss')"
               >
                 <span slIcon><svg slGlyph name="x"></svg></span>
@@ -367,8 +369,12 @@ export class SlToastRegion {
   });
   /** The key that moves focus into the region. Defaults to the token. */
   readonly hotkey = input<string | undefined>(undefined);
-  /** The name a reader finds the region by. Defaults to the token. */
-  readonly label = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the name
+   * a reader finds the region by (`label`) and what each close control
+   * announces (`close`).
+   */
+  readonly messages = input<PartialMessages<ToastMessages> | undefined>(undefined);
   /** The element a portalled region is placed inside. */
   readonly container = input<Element | null | undefined>(undefined);
   /** The queue the page owns. Present at all decides the mode for good. */
@@ -383,6 +389,8 @@ export class SlToastRegion {
   readonly toastsChange = output<ChangeRequest<readonly ToastMessage<ToastContent>[]>>();
 
   readonly defaults = injectToastDefaults();
+  /** The family's words in the language in force, with this region's `messages` laid over them. */
+  readonly t = injectMessages(toastMessages, this.messages);
   private readonly service = inject(SlToastService);
   private readonly layer = viewChild.required<ElementRef<HTMLElement>>('layer');
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -409,7 +417,6 @@ export class SlToastRegion {
   readonly resolvedAttach = computed(() => this.attach() ?? this.defaults.attach);
   readonly resolvedStacking = computed(() => this.stacking() ?? this.defaults.stacking);
   readonly resolvedSwipe = computed(() => this.swipe() ?? this.defaults.swipe);
-  readonly resolvedLabel = computed(() => this.label() ?? this.defaults.label);
   readonly resolvedHotkey = computed(() => this.hotkey() ?? this.defaults.hotkey);
 
   private readonly interacting = { pointer: false, focus: false };

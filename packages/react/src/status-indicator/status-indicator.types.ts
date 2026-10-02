@@ -1,3 +1,4 @@
+import type { PartialMessages, StatusIndicatorMessages } from '@slotted/core/i18n';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode } from 'react';
 
 /**
@@ -15,17 +16,12 @@ export type StatusIndicatorMark = 'dot' | 'icon';
 export type StatusIndicatorSize = 'sm' | 'md' | 'lg';
 export type StatusIndicatorLive = 'off' | 'polite' | 'assertive';
 
-/** What a reader hears when the page showed no words. Replaceable per status. */
-export type StatusIndicatorLabels = Partial<Record<StatusIndicatorStatus, string>>;
-
 /**
- * What every status in an application looks like, and what it is called,
- * before any one of them states anything of its own. The wording belongs here
- * more than anywhere else: it is the same six words on every page, in the
- * language the application ships, and a team should decide it once.
+ * What every status in an application looks like before any one of them states
+ * anything of its own. The six words come from the language in force
+ * (`SlottedProvider`).
  */
 export interface StatusIndicatorDefaults {
-  labels?: StatusIndicatorLabels | undefined;
   live?: StatusIndicatorLive | undefined;
   mark?: StatusIndicatorMark | undefined;
   size?: StatusIndicatorSize | undefined;
@@ -60,10 +56,14 @@ export interface StatusIndicatorProps extends ComponentPropsWithRef<'span'> {
   /**
    * What a reader hears when there are no visible words. Ignored when there
    * are, because naming an element twice is how a screen reader comes to read
-   * “Success Healthy”. Falls back to the provider's table, then to the
-   * family's own.
+   * “Success Healthy”. Falls back to the status's word in the catalog.
    */
   label?: string;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * word each status is heard as when there are no visible words.
+   */
+  messages?: PartialMessages<StatusIndicatorMessages> | undefined;
   /**
    * Whether a change of status is announced, and how loudly. `off` by default:
    * a status that was already on the page when it loaded is not news, and

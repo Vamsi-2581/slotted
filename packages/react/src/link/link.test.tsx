@@ -1,7 +1,9 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { SlottedProvider } from '../i18n';
 import { Link, LinkDefaultsProvider } from './index';
 
 describe('Link', () => {
@@ -148,7 +150,11 @@ describe('Link', () => {
 
     it('takes the wording of the warning from the consumer', () => {
       render(
-        <Link external externalHint="(abre numa nova aba)" href="https://example.com">
+        <Link
+          external
+          href="https://example.com"
+          messages={{ externalHint: '(abre numa nova aba)' }}
+        >
           Documentação
         </Link>,
       );
@@ -270,7 +276,7 @@ describe('Link', () => {
   describe('application defaults', () => {
     it('paints every link the way the application decided once', () => {
       render(
-        <LinkDefaultsProvider externalHint="(nueva pestaña)" underline="hover" variant="neutral">
+        <LinkDefaultsProvider underline="hover" variant="neutral">
           <Link href="/a">Inherited</Link>
         </LinkDefaultsProvider>,
       );
@@ -294,16 +300,16 @@ describe('Link', () => {
       expect(link).toHaveAttribute('data-variant', 'accent');
     });
 
-    it('translates the warning for the whole application', () => {
+    it('speaks the language in force', () => {
       render(
-        <LinkDefaultsProvider externalHint="(nueva pestaña)">
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
           <Link external href="https://example.com">
-            Documentación
+            Documentação
           </Link>
-        </LinkDefaultsProvider>,
+        </SlottedProvider>,
       );
 
-      expect(screen.getByRole('link')).toHaveAccessibleName(/nueva pestaña/);
+      expect(screen.getByRole('link')).toHaveAccessibleName(/\(abre em uma nova aba\)/);
     });
   });
 });

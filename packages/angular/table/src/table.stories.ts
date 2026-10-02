@@ -1328,7 +1328,7 @@ export const Expansion: Story = {
 
 const WIDE = `
   <div slTable [columns]="5" variant="framed" [stickyHeader]="sticky">
-    <div slTableContent [scrollLabel]="'Invoices, scrollable'">
+    <div slTableContent aria-label="Invoices, scrollable">
       <thead slTableHead>
         <tr slTableRow>
           <th slTableColumnHeader sticky="start" text="nowrap">Invoice</th>
@@ -1951,7 +1951,7 @@ export const Composition: Story = {
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
     'Reaching the instance from the template',
-    'exportAs gives the template the row, the table and the scroller: a row knows whether it is expanded, and the scroller can bring a record into view. provideTableDefaults sets the frame and the words once for the whole application.',
+    'exportAs gives the template the row, the table and the scroller: a row knows whether it is expanded, and the scroller can bring a record into view. provideTableDefaults sets the frame once for the whole application, and provideSlotted the language.',
     `
   <div slTable [columns]="4" variant="framed" #table="slTable">
     <div slTableContent #content="slTableContent">${HEAD}${BODY}</div>

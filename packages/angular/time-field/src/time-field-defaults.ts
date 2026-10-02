@@ -16,22 +16,10 @@ export type TimeFieldVariant = 'outline' | 'subtle' | 'plain';
  */
 export type TimeFieldHourCycle = 12 | 24;
 
-/** The words the family's own controls announce. */
-export const TIME_FIELD_CLEAR_LABEL = 'Clear';
-export const TIME_FIELD_DURATION_LABEL = 'Time as a duration from now';
-/** What the preview says after the time when a duration ran past midnight. */
-export const TIME_FIELD_NEXT_DAY_LABEL = 'next day';
-
 export interface TimeFieldDefaults {
-  clearLabel: string;
-  /** The accessible name of the expression region. */
-  durationLabel: string;
   granularity: TimeGranularity;
   /** Unset means the locale decides both the cycle and its variant. */
   hourCycle: TimeFieldHourCycle | undefined;
-  /** BCP 47. Unset means the runtime decides. */
-  locale: string | undefined;
-  nextDayLabel: string;
   /** Whether `+`, `-` and `=` open the duration expression. */
   relative: boolean;
   size: TimeFieldSize;
@@ -41,12 +29,8 @@ export interface TimeFieldDefaults {
 }
 
 const FALLBACK: TimeFieldDefaults = {
-  clearLabel: TIME_FIELD_CLEAR_LABEL,
-  durationLabel: TIME_FIELD_DURATION_LABEL,
   granularity: 'minute',
   hourCycle: undefined,
-  locale: undefined,
-  nextDayLabel: TIME_FIELD_NEXT_DAY_LABEL,
   relative: true,
   size: 'md',
   timeZone: undefined,
@@ -59,15 +43,11 @@ export const TIME_FIELD_DEFAULTS = new InjectionToken<TimeFieldDefaults>(
 );
 
 /**
- * An application decides once what its times look like, which locale writes
- * them, which clock they run on and which zone answers "now", rather than
- * repeating the same inputs on every control in a form. A control that states
- * any of them itself still wins.
- *
- * `locale` is the one worth setting first. Unset, each control asks the runtime
- * — which is the browser's locale, not the application's, and an application
- * served in Portuguese to a browser set to English writes `2:30 PM` where it
- * means `14:30`.
+ * An application decides once what its times look like, which clock they run
+ * on and which zone answers "now", rather than repeating the same inputs on
+ * every control in a form. A control that states any of them itself still
+ * wins. The locale that writes the times, and the words, come from the
+ * language in force (`provideSlotted`).
  */
 export function provideTimeFieldDefaults(defaults: Partial<TimeFieldDefaults>) {
   return {

@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "splitter",
   "ui": "splitter",
+  "catalog": {
+    "group": "Layout",
+    "summary": "Resizable panes divided by a handle."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/",
   "crossAxisNavigates": false,
   "identity": {

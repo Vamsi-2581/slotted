@@ -1,4 +1,3 @@
-import { DEFAULT_IMPORT_EXPORT_MESSAGES } from '@slotted/core/import-export-center';
 import { createContext, useContext } from 'react';
 
 import type {
@@ -9,7 +8,6 @@ import type {
 const FALLBACK: ImportExportCenterDefaults = {
   growing: 'none',
   level: '2',
-  messages: DEFAULT_IMPORT_EXPORT_MESSAGES,
   size: 'md',
   timeFormat: 'relative',
 };
@@ -23,12 +21,12 @@ export function useImportExportCenterDefaults(): ImportExportCenterDefaults {
 
 /**
  * An application decides once how its job centre reads — the size, the rank,
- * how history loads, how time is written, the locale and zone, the words —
- * rather than on every screen. A centre that states any of them still wins.
+ * how history loads, how time is written and in which zone — rather than on
+ * every screen. A centre that states any of them still wins. Its words and the
+ * locale come from the language in force (`SlottedProvider`).
  */
 export function ImportExportCenterDefaultsProvider({
   children,
-  messages,
   ...defaults
 }: ImportExportCenterDefaultsProviderProps) {
   const inherited = useImportExportCenterDefaults();
@@ -38,8 +36,6 @@ export function ImportExportCenterDefaultsProvider({
       value={{
         growing: defaults.growing ?? inherited.growing,
         level: defaults.level ?? inherited.level,
-        locale: defaults.locale ?? inherited.locale,
-        messages: { ...inherited.messages, ...messages },
         size: defaults.size ?? inherited.size,
         timeFormat: defaults.timeFormat ?? inherited.timeFormat,
         timeZone: defaults.timeZone ?? inherited.timeZone,

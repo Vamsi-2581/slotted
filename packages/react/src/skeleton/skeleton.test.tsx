@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import type { Ref } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { SlottedProvider } from '../i18n';
 import { Skeleton, SkeletonDefaultsProvider, SkeletonRegion, SkeletonText } from './index';
 
 const box = () => document.querySelector('[data-ui="skeleton"][data-part="root"]')!;
@@ -137,7 +139,7 @@ describe('SkeletonText', () => {
 describe('SkeletonRegion', () => {
   it('reports itself busy and announces the wait exactly once', () => {
     render(
-      <SkeletonRegion label="Loading members">
+      <SkeletonRegion messages={{ label: 'Loading members' }}>
         <SkeletonText />
       </SkeletonRegion>,
     );
@@ -283,13 +285,15 @@ describe('SkeletonRegion timing', () => {
 });
 
 describe('SkeletonDefaultsProvider', () => {
-  it('sets the animation, the wording and the timing once for an application', () => {
+  it('sets the animation and the measure once for an application, in the language in force', () => {
     render(
-      <SkeletonDefaultsProvider animation="pulse" label="Carregando…" lastLineSize="45%">
-        <SkeletonRegion>
-          <SkeletonText />
-        </SkeletonRegion>
-      </SkeletonDefaultsProvider>,
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <SkeletonDefaultsProvider animation="pulse" lastLineSize="45%">
+          <SkeletonRegion>
+            <SkeletonText />
+          </SkeletonRegion>
+        </SkeletonDefaultsProvider>
+      </SlottedProvider>,
     );
 
     expect(region()).toHaveAttribute('data-animation', 'pulse');

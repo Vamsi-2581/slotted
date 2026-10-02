@@ -76,7 +76,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'Closes the message. Rendered when dismissible, named by dismissLabel, and sized from its glyph plus a step of air, floored at the WCAG 2.2 minimum so the target holds at every density (R2).',
+      'Closes the message. Rendered when dismissible, named by the catalog’s dismiss, and sized from its glyph plus a step of air, floored at the WCAG 2.2 minimum so the target holds at every density (R2).',
   },
 ];
 
@@ -186,7 +186,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'One decision for the application, and three for one message',
       source:
-        '<AlertDefaultsProvider dismissLabel="Dispensar" reach="page">\n  <App />\n</AlertDefaultsProvider>;\n\n<Alert icon={<ShieldIcon />} render={(props) => <aside {...props} />}>\n  <AlertContent>\n    <AlertTitle render={(props) => <h3 {...props} />}>Manutenção</AlertTitle>\n  </AlertContent>\n</Alert>;',
+        '<AlertDefaultsProvider reach="page">\n  <App />\n</AlertDefaultsProvider>;\n\n<Alert icon={<ShieldIcon />} render={(props) => <aside {...props} />}>\n  <AlertContent>\n    <AlertTitle render={(props) => <h3 {...props} />}>Manutenção</AlertTitle>\n  </AlertContent>\n</Alert>;',
     }),
   },
   {
@@ -268,11 +268,11 @@ export const REACT_ALERT_DOCS = {
         'Renders the control that closes the message. A critical banner should not have one: the guide’s rule is that it does not go away on its own',
       ],
       [
-        'dismissLabel',
-        'string',
-        'Dismiss',
+        'messages',
+        'Partial<AlertMessages>',
+        '—',
         'Alert',
-        'What that control announces. Falls back to AlertDefaultsProvider, which is where an application translates it once',
+        'Words laid over the language in force, key by key: what that control announces (dismiss)',
       ],
       [
         'open',
@@ -313,10 +313,10 @@ export const REACT_ALERT_DOCS = {
       ],
       [
         'AlertDefaultsProvider',
-        '{ tone, variant, reach, live, dismissLabel }',
+        '{ tone, variant, reach, live }',
         '—',
         'a subtree',
-        'Sets all five once for every alert under it; an explicit prop on one message still wins',
+        'Sets all four once for every alert under it; an explicit prop on one message still wins',
       ],
       [
         'children',

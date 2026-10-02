@@ -4,6 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { SlField, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
 
 import contract from '../../../../specs/components/slider/contract.json';
 import { provideSliderDefaults } from './slider-defaults';
@@ -238,6 +239,19 @@ describe('SlSlider', () => {
     const root = rootOf(mount());
     expect(root.getAttribute('data-size')).toBe('lg');
     expect(root.getAttribute('data-value-label')).toBe('always');
+  });
+
+  it('writes its value in the language in force, and follows a change of it', () => {
+    const locale = signal('de-DE');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ imports: [Host], providers: [provideSlotted({ locale })] });
+
+    const fixture = mount({ max: 2000, start: 1480 });
+    expect(thumbsOf(fixture)[0]?.getAttribute('aria-valuetext')).toBe('1.480');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(thumbsOf(fixture)[0]?.getAttribute('aria-valuetext')).toBe('1,480');
   });
 });
 

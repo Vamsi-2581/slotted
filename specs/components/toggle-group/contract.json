@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "toggle-group",
   "ui": "toggle-group",
+  "catalog": {
+    "group": "Actions",
+    "summary": "Set of toggles, single or multiple."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/button/",
   "navigationPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/",
   "roles": {

@@ -141,9 +141,9 @@ import { supplierColumns, supplierFilterFields } from './procurement-columns';
             (valueChangeRequest)="store.setFilter($event.value)"
             [query]="store.search()"
             (queryChangeRequest)="store.setSearch($event.value)"
-            [labels]="{ count: countLabel }"
+            [messages]="countMessages"
             [count]="store.total() ?? undefined"
-            [total]="store.grandTotal() ?? undefined"
+            [total]="store.total() === store.grandTotal() ? undefined : (store.grandTotal() ?? undefined)"
             [loading]="store.loading()"
           >
             <app-list-view-tools
@@ -157,7 +157,7 @@ import { supplierColumns, supplierFilterFields } from './procurement-columns';
           </div>
           <sl-data-grid
             #grid="slDataGrid"
-            label="Suppliers"
+            aria-label="Suppliers"
             rowKey="id"
             variant="framed"
             activatable
@@ -195,8 +195,8 @@ import { supplierColumns, supplierFilterFields } from './procurement-columns';
             <nav
               slDataGridFooter
               slPagination
-              label="Supplier pages"
-              [labels]="pagerLabels"
+              aria-label="Supplier pages"
+              [messages]="pagerMessages"
               [count]="store.total() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
@@ -248,14 +248,11 @@ export class SuppliersPage {
       : `${base} What is spent with each supplier is shown to holders of cost.view — ${HOLDERS['cost.view']}.`;
   });
 
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total
-      ? `${count} suppliers`
-      : `${count} of ${total} suppliers`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} suppliers', countOnly: '{count} suppliers' };
 
-  readonly pagerLabels = {
-    range: (start: number, end: number, count: number) =>
-      `Suppliers ${start}–${end} of ${count.toLocaleString('en-US')}`,
+  readonly pagerMessages = {
+    range: 'Suppliers {start}–{end} of {count}',
     pageSize: 'Suppliers per page',
   };
 

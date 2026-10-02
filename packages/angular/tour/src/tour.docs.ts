@@ -103,7 +103,7 @@ const anatomy: AnatomyRow[] = [
     part: 'close',
     element: 'button[slTourClose]',
     required: false,
-    purpose: 'Closes with the outcome close; named by labels.close.',
+    purpose: 'Closes with the outcome close; named by messages.close.',
   },
   {
     part: 'title',
@@ -183,7 +183,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'centered',
     title: 'A step with no target',
-    note: 'The opening step points at nothing: it stands in the middle of the screen over the whole scrim, with a picture above the header and its own labels, “Not now” and “Start tour”.',
+    note: 'The opening step points at nothing: it stands in the middle of the screen over the whole scrim, with a picture above the header and its own words, “Not now” and “Start tour”.',
     snippet: defineSnippet({
       id: 'tour-angular-centered',
       language: 'angular',
@@ -313,7 +313,9 @@ const scenes: ReferenceSceneMeta[] = [
       <div slTourFooter>
         <span aria-hidden="true">{{ tour.position() }} / {{ tour.total() }}</span>
         <button slButton size="sm" variant="ghost" (click)="openGuide()">Read the guide</button>
-        <button slButton slTourNext size="sm" tone="accent">{{ tour.nextLabel() }}</button>
+        <button slButton slTourNext size="sm" tone="accent">
+          {{ tour.t(tour.last() ? 'done' : 'next') }}
+        </button>
       </div>
     </div>
   </ng-template>
@@ -323,23 +325,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'labels',
     title: 'The tour in another language',
-    note: 'The provider says Próximo, Voltar, Concluir, Pular tour and “Passo 2 de 5” once for the application; a long German progress and title wrap inside the card rather than widening it.',
+    note: 'The language in force says Próximo, Voltar, Concluir, Pular tour and “2 de 5” once for the application; a long German progress and title wrap inside the card rather than widening it.',
     snippet: defineSnippet({
       id: 'tour-angular-labels',
       language: 'ts',
-      label: 'Labels, once',
-      source: `providers: [
-  provideTourDefaults({
-    labels: {
-      next: 'Próximo',
-      prev: 'Voltar',
-      done: 'Concluir',
-      skip: 'Pular tour',
-      close: 'Fechar tour',
-      progress: (position, total) => \`Passo \${position} de \${total}\`,
-    },
-  }),
-];`,
+      label: 'The language, once',
+      source: `providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })];`,
     }),
   },
   {
@@ -523,11 +514,11 @@ export const ANGULAR_TOUR_DOCS = {
         'Milliseconds to watch the page for a target that is not there yet',
       ],
       [
-        'labels',
-        'Partial<TourLabels>',
-        'English',
-        'sl-tour, provideTourDefaults',
-        'next, prev, done, skip, close, preparing, and progress(position, total)',
+        'messages',
+        'PartialMessages<TourMessages>',
+        '—',
+        'sl-tour',
+        'Words laid over the language in force, key by key: next, prev, done, skip, close, preparing, and progress with {position} and {total}',
       ],
       [
         'finalFocus',
@@ -577,11 +568,11 @@ export const ANGULAR_TOUR_DOCS = {
       ],
       ['advanceOn', 'string', '—', 'TourStep', 'An event on the target that goes to the next step'],
       [
-        'labels',
-        'Partial<{ next, prev, skip, done }>',
+        'messages',
+        'PartialMessages<{ next, prev, skip, done }>',
         '—',
         'TourStep',
-        'The step’s own wording: “Start tour”, “Got it”',
+        'The step’s own words, laid over the tour’s: “Start tour”, “Got it”',
       ],
       [
         'actions',
@@ -616,7 +607,7 @@ export const ANGULAR_TOUR_DOCS = {
         'exportAs',
         '—',
         'sl-tour',
-        'start(id?), next(), prev(), goTo(id), close(outcome?), reposition(); position(), total(), nextLabel() and the rest as signals',
+        'start(id?), next(), prev(), goTo(id), close(outcome?), reposition(); position(), total(), t() and the rest as signals',
       ],
       [
         'provideTourDefaults',

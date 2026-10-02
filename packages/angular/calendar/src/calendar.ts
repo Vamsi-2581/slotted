@@ -32,13 +32,11 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import type { OnInit } from '@angular/core';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import { calendarMessages, type CalendarMessages, type PartialMessages } from '@slotted/core/i18n';
 
-import {
-  CALENDAR_NEXT_LABEL,
-  CALENDAR_PREVIOUS_LABEL,
-  injectCalendarDefaults,
-} from './calendar-defaults';
+import { injectCalendarDefaults } from './calendar-defaults';
 import type {
   CalendarCalendar,
   CalendarOutsideDays,
@@ -85,7 +83,7 @@ let sequence = 0;
       <button
         data-part="previous"
         type="button"
-        [attr.aria-label]="resolvedPreviousLabel()"
+        [attr.aria-label]="t('previous')"
         [disabled]="!editable()"
         (click)="turnPage(-1, $event)"
       >
@@ -111,7 +109,7 @@ let sequence = 0;
       <button
         data-part="next"
         type="button"
-        [attr.aria-label]="resolvedNextLabel()"
+        [attr.aria-label]="t('next')"
         [disabled]="!editable()"
         (click)="turnPage(1, $event)"
       >
@@ -273,6 +271,7 @@ export class SlCalendar implements OnInit {
   });
   readonly outsideDays = input<CalendarOutsideDays | undefined>(undefined);
 
+  /** The locale that writes months and days. Unset, the language in force decides. */
   readonly locale = input<string | undefined>(undefined);
   readonly timeZone = input<string | undefined>(undefined);
   readonly firstDayOfWeek = input<number | undefined, unknown>(undefined, {
@@ -291,8 +290,11 @@ export class SlCalendar implements OnInit {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
   });
 
-  readonly previousLabel = input<string | undefined>(undefined);
-  readonly nextLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * names of the previous and next triggers.
+   */
+  readonly messages = input<PartialMessages<CalendarMessages> | undefined>(undefined);
 
   readonly valueChange = output<ChangeRequest<CalendarValue>>();
   readonly focusedDateChange = output<ChangeRequest<PlainDate>>();
@@ -308,6 +310,9 @@ export class SlCalendar implements OnInit {
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly defaults = injectCalendarDefaults();
+  private readonly appLocale = injectLocale();
+  /** The family's words in the language in force, with this calendar's `messages` laid over them. */
+  readonly t = injectMessages(calendarMessages, this.messages);
 
   protected readonly headingId = `sl-calendar-${String((sequence += 1))}`;
 
@@ -358,19 +363,13 @@ export class SlCalendar implements OnInit {
       (this.resolvedMonths() > 1 ? 'hidden' : 'shown'),
   );
   protected readonly resolvedCalendar = computed(() => this.calendar() ?? this.defaults.calendar);
-  protected readonly resolvedPreviousLabel = computed(
-    () => this.previousLabel() ?? this.defaults.previousLabel ?? CALENDAR_PREVIOUS_LABEL,
-  );
-  protected readonly resolvedNextLabel = computed(
-    () => this.nextLabel() ?? this.defaults.nextLabel ?? CALENDAR_NEXT_LABEL,
-  );
   protected readonly editable = computed(
     () => this.disabled() !== true && this.readOnly() !== true,
   );
 
   protected readonly format = computed(() =>
     createDateFormat({
-      locale: this.locale() ?? this.defaults.locale,
+      locale: this.locale() ?? this.appLocale(),
       firstDayOfWeek: this.firstDayOfWeek() ?? this.defaults.firstDayOfWeek,
     }),
   );

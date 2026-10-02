@@ -182,7 +182,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'date-field-angular-clear',
       label: 'Clearing',
       language: 'angular',
-      source: `<div slDateField clearable clearLabel="Limpar a data"></div>`,
+      source: `<div slDateField clearable [messages]="{ clear: 'Limpar a data' }"></div>`,
     }),
   },
   {
@@ -230,7 +230,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition and escape hatches',
-    note: 'provideDateFieldDefaults sets the locale, the zone and the pivot once; exportAs hands a template the instance; and focus() and clear() are the two actions no input can express.',
+    note: 'provideDateFieldDefaults sets the zone and the pivot once, provideSlotted the language; exportAs hands a template the instance; and focus() and clear() are the two actions no input can express.',
     snippet: defineSnippet({
       id: 'date-field-angular-composition',
       label: 'Provider and exportAs',
@@ -297,7 +297,7 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    'the runtime’s',
+    'the language in force',
     'SlDateField',
     'BCP 47. Decides the field order, the separators, the placeholder and the language a month is announced in.',
   ],
@@ -378,7 +378,13 @@ const api: ApiRow[] = apiRows([
     'SlDateField',
     'Draws a button that empties the value and returns focus to the first segment.',
   ],
-  ['clearLabel', 'string', 'Clear', 'SlDateField', 'The clear button’s accessible name.'],
+  [
+    'messages',
+    'Partial<DateFieldMessages>',
+    '—',
+    'SlDateField',
+    'Words laid over the language in force, key by key: the clear button’s accessible name (clear).',
+  ],
   [
     'name',
     'string',
@@ -402,7 +408,7 @@ const composition: ApiRow[] = apiRows([
     'Provider',
     '—',
     'application',
-    'Sets locale, timeZone, firstDayOfWeek, yearPivot, calendar, size, variant and clearLabel once for everything under the injector. A control that states any of them itself still wins.',
+    'Sets timeZone, firstDayOfWeek, yearPivot, calendar, size and variant once for everything under the injector. A control that states any of them itself still wins.',
   ],
   [
     'exportAs',

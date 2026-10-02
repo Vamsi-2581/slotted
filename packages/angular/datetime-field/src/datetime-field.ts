@@ -59,7 +59,13 @@ import type {
   ValidationErrors,
   Validator,
 } from '@angular/forms';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  datetimeFieldMessages,
+  type DatetimeFieldMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { SlField } from '@slotted/angular/field';
 
 import { injectDateTimeFieldDefaults } from './datetime-field-defaults';
@@ -143,7 +149,7 @@ export interface DateTimeFieldChangeRequest extends ChangeRequest<PlainDateTime 
         data-part="duration"
         type="text"
         placeholder="+40m, 1h30, +2d"
-        [attr.aria-label]="resolvedDurationLabel()"
+        [attr.aria-label]="t('duration')"
         [attr.aria-describedby]="describedBy()"
         [value]="expression()"
         (input)="onExpressionInput($event)"
@@ -223,7 +229,7 @@ export interface DateTimeFieldChangeRequest extends ChangeRequest<PlainDateTime 
       <button
         data-part="clear"
         type="button"
-        [attr.aria-label]="resolvedClearLabel()"
+        [attr.aria-label]="t('clear')"
         (click)="clear($event)"
       >
         <span slIcon><svg slGlyph name="x"></svg></span>
@@ -286,7 +292,10 @@ export class SlDateTimeField implements ControlValueAccessor, Validator, OnInit 
     undefined,
   );
 
-  /** BCP 47. Decides the field order, the separators and the placeholder. */
+  /**
+   * BCP 47. Decides the field order, the separators and the placeholder.
+   * Unset, the language in force decides.
+   */
   readonly locale = input<string | undefined>(undefined);
   /** Which zone answers "what is the time now", and nothing else. */
   readonly timeZone = input<string | undefined>(undefined);
@@ -320,12 +329,15 @@ export class SlDateTimeField implements ControlValueAccessor, Validator, OnInit 
 
   /** Draws a button that empties both halves and returns focus to the control. */
   readonly clearable = input(false, { transform: booleanAttribute });
-  readonly clearLabel = input<string | undefined>(undefined);
   /** Whether `+`, `-` and `=` open the duration expression. */
   readonly relative = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
   });
-  readonly durationLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * clear button's name and the duration expression's name.
+   */
+  readonly messages = input<PartialMessages<DatetimeFieldMessages> | undefined>(undefined);
   /** The name a plain form post carries the ISO string under. */
   readonly name = input<string | undefined>(undefined);
 
@@ -347,6 +359,9 @@ export class SlDateTimeField implements ControlValueAccessor, Validator, OnInit 
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly defaults = injectDateTimeFieldDefaults();
+  private readonly appLocale = injectLocale();
+  /** The family's words in the language in force, with this field's `messages` laid over them. */
+  readonly t = injectMessages(datetimeFieldMessages, this.messages);
   private readonly field = inject(SlField, { optional: true });
 
   /** Read before the host binding computes, so it never writes over it. */
@@ -394,7 +409,7 @@ export class SlDateTimeField implements ControlValueAccessor, Validator, OnInit 
     return createDateTimeFormat({
       granularity: this.resolvedGranularity(),
       hourCycle: this.hourCycle() ?? this.defaults.hourCycle,
-      locale: this.locale() ?? this.defaults.locale,
+      locale: this.locale() ?? this.appLocale(),
       ...(firstDayOfWeek === undefined ? {} : { firstDayOfWeek }),
       ...(yearPivot === undefined ? {} : { yearPivot }),
     });
@@ -483,10 +498,6 @@ export class SlDateTimeField implements ControlValueAccessor, Validator, OnInit 
     return step === null ? '' : this.format().describeDate(step.date, 'short');
   });
 
-  protected readonly resolvedDurationLabel = computed(
-    () => this.durationLabel() ?? this.defaults.durationLabel,
-  );
-
   /* ── What the field around it decides ────────────────────────────────── */
 
   readonly resolvedSize = computed(
@@ -512,9 +523,6 @@ export class SlDateTimeField implements ControlValueAccessor, Validator, OnInit 
     return this.invalid() ?? this.field?.invalid();
   });
 
-  protected readonly resolvedClearLabel = computed(
-    () => this.clearLabel() ?? this.defaults.clearLabel,
-  );
   protected readonly controlId = computed(
     () => this.writtenId ?? this.field?.ids().control ?? null,
   );

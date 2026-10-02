@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "hover-card",
   "ui": "hover-card",
+  "catalog": {
+    "group": "Overlays",
+    "summary": "Preview card that opens on hover or focus."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/",
   "criterion": "https://www.w3.org/WAI/WCAG22/Understanding/content-on-hover-or-focus.html",
   "patternStatus": "The APG has no hover-card pattern. Its tooltip page names the non-modal dialog for hover content that contains focusable elements, which is what the panel is when navigable; WCAG 2.2 SC 1.4.13 states what the card owes a reader — Dismissible, Hoverable, Persistent — and each of the three is answered in dismissal below. Both were read on 2026-09-16.",

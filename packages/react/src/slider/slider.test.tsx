@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/slider/contract.json';
 import { Field, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { Slider } from './slider';
 import { SliderDefaultsProvider } from './slider-defaults';
 import type { SliderHandle } from './slider.types';
@@ -377,6 +378,24 @@ describe('Slider', () => {
       );
 
       expect(rootOf(thumb())).toHaveAttribute('data-size', 'sm');
+    });
+
+    it('writes its value in the language in force, and an instance locale wins', () => {
+      render(
+        <SlottedProvider locale="de-DE">
+          <Slider aria-label="Provider" defaultValue={1480} max={2000} />
+          <Slider aria-label="Instance" defaultValue={1480} locale="en-US" max={2000} />
+        </SlottedProvider>,
+      );
+
+      expect(screen.getByRole('slider', { name: 'Provider' })).toHaveAttribute(
+        'aria-valuetext',
+        '1.480',
+      );
+      expect(screen.getByRole('slider', { name: 'Instance' })).toHaveAttribute(
+        'aria-valuetext',
+        '1,480',
+      );
     });
 
     it('renders the root into another element', () => {

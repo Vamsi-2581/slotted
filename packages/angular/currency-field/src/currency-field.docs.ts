@@ -392,7 +392,10 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'ts',
       label: 'A provider, a form, and the integer a gateway wants',
       source: `bootstrapApplication(App, {
-  providers: [provideCurrencyFieldDefaults({ currency: 'BRL', locale: 'pt-BR' })],
+  providers: [
+    provideSlotted({ locale: 'pt-BR' }),
+    provideCurrencyFieldDefaults({ currency: 'BRL' }),
+  ],
 });
 
 @Component({
@@ -512,8 +515,8 @@ export const ANGULAR_CURRENCY_FIELD_DOCS = {
       [
         'locale',
         'string',
-        'the runtime’s own',
-        'slCurrencyFieldInput, provideCurrencyFieldDefaults',
+        'the language in force',
+        'slCurrencyFieldInput',
         'BCP 47. It decides the separators, where the symbol goes and the numbering system — never the symbol itself, which is the currency’s',
       ],
       [
@@ -672,11 +675,11 @@ export const ANGULAR_CURRENCY_FIELD_DOCS = {
         'The element’s own attribute, read before the host binding computes. transaction-amount is the standard autofill field name for a payment amount, and transaction-currency for the currency beside it',
       ],
       [
-        'incrementLabel / decrementLabel',
-        'string',
-        'Increase / Decrease',
-        'slCurrencyField, provideCurrencyFieldDefaults',
-        'What the two buttons announce. Both are set once for an application rather than per amount',
+        'messages',
+        'Partial<CurrencyFieldMessages>',
+        '—',
+        'slCurrencyField',
+        'Words laid over the language in force, key by key: increment and decrement are what the two buttons announce',
       ],
     ]),
     composition: apiRows([
@@ -703,7 +706,7 @@ export const ANGULAR_CURRENCY_FIELD_DOCS = {
       ],
       [
         'provideCurrencyFieldDefaults',
-        '{ currency, currencyDisplay, locale, entry, align, size, variant, stepper, clamp, incrementLabel, decrementLabel }',
+        '{ currency, currencyDisplay, entry, align, size, variant, stepper, clamp }',
         '—',
         'an injector',
         'The decisions an application takes once. currency is the one worth setting first, and the only one a field cannot be built without: a product has one currency in nine screens out of ten, and the tenth states its own',

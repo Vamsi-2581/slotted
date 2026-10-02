@@ -4,7 +4,6 @@ import type {
   StatCardFill,
   StatCardGoodWhen,
   StatCardLayout,
-  StatCardMessages,
   StatCardSize,
 } from './stat-card.constants';
 
@@ -19,8 +18,6 @@ export interface StatCardDefaults {
   formatOptions?: Intl.NumberFormatOptions;
   goodWhen?: StatCardGoodWhen;
   layout?: StatCardLayout;
-  locale?: string;
-  messages?: Partial<StatCardMessages>;
   size?: StatCardSize;
 }
 
@@ -29,7 +26,10 @@ export const STAT_CARD_DEFAULTS_TOKEN = new InjectionToken<StatCardDefaults>(
   { providedIn: 'root', factory: (): StatCardDefaults => ({}) },
 );
 
-/** An explicit input is never overridden by the token. */
+/**
+ * An explicit input is never overridden by the token. The words and the locale
+ * come from the language in force (`provideSlotted`).
+ */
 export function provideStatCardDefaults(defaults: StatCardDefaults) {
   return { provide: STAT_CARD_DEFAULTS_TOKEN, useValue: defaults };
 }

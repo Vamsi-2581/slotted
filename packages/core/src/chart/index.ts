@@ -1,21 +1,8 @@
 export { createLatestAnnouncer } from './announce';
 export { placeLayer, trackModality } from './layer';
 export type { ActivationReason, LayerPlacement } from './layer';
-export {
-  CHART_MESSAGES,
-  describeChart,
-  describePoint,
-  describeZoom,
-  mergeMessages,
-} from './describe';
-export type { ChartMessages } from './describe';
-export {
-  chartNumber,
-  chartTime,
-  createNumberFormatter,
-  createTimeFormatter,
-  fillMessage,
-} from './format';
+export { describeChart, describePoint, describeZoom } from './describe';
+export { chartNumber, chartTime, createNumberFormatter, createTimeFormatter } from './format';
 export { assignColors, categoryIndex, createChartModel, seriesOf, visibleSeries } from './model';
 export type {
   ChartCategory,

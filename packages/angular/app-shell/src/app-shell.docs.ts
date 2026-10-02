@@ -31,6 +31,7 @@ const imports: ReferenceImport = {
   SlAppShellAsideBody,
   SlAppShellAsideFooter,
   SlAppShellAsideHeader,
+  SlAppShellAsideResizer,
   SlAppShellAsideToggle,
   SlAppShellBanner,
   SlAppShellBrand,
@@ -157,6 +158,13 @@ const anatomy: AnatomyRow[] = [
       'The complementary landmark, carrying the family’s own label. It opens and closes the way the navigation does — a column beside the content or a layer over it, by asideMode — and carries its own data-open, because the root’s is the navigation’s. Closed, it leaves the layout: a pane has no rail.',
   },
   {
+    part: 'aside-resizer',
+    element: 'any element carrying slAppShellAsideResizer',
+    required: false,
+    purpose:
+      'The pane’s inner edge, from the WAI-ARIA Window Splitter pattern: focusable, role="separator", aria-controls the pane, its three values the extent as whole percentages of the shell. Placed inside the aside; rendering it is the capability. Drawn on the column alone — under asideMode="overlay" or a closed pane it is hidden, and a row under the content hides it.',
+  },
+  {
     part: 'aside-header',
     element: 'div',
     required: false,
@@ -167,7 +175,8 @@ const anatomy: AnatomyRow[] = [
     part: 'aside-body',
     element: 'div',
     required: false,
-    purpose: 'The middle, and the only part of the pane that scrolls.',
+    purpose:
+      'The middle, and the only part of the pane that scrolls. It stands on the inset the head and the foot stand on, so its content lines up with the title; inset="none" drops it for content that brings its own — a page, a detail panel, a list to the edges.',
   },
   {
     part: 'aside-footer',
@@ -282,11 +291,11 @@ const scenes: ReferenceSceneMeta[] = [
   <div slAppShellCentre>
     <div slTextField size="sm" variant="subtle">
       <span slTextFieldStart><ng-icon name="lucideSearch" /></span>
-      <input slTextFieldInput type="search" placeholder="Procurar…" />
+      <input slTextFieldInput type="search" placeholder="Search…" />
     </div>
   </div>
   <div slAppShellActions>
-    <button slIconButton aria-label="Notificações">…</button>
+    <button slIconButton aria-label="Notifications">…</button>
     <span slAvatar><span slAvatarFallback>AB</span></span>
   </div>
 </header>`,
@@ -370,7 +379,7 @@ const scenes: ReferenceSceneMeta[] = [
       source: `<div slAppShell primary="main">
   <header slAppShellBanner>…</header>
   <nav slAppShellNav>
-    <div slAppShellNavRail aria-label="Módulos">
+    <div slAppShellNavRail aria-label="Modules">
       @for (module of modules; track module.id) {
         <button
           slIconButton
@@ -398,7 +407,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'aside',
     title: 'The pane opens on a selection, and closes from its own head',
-    note: 'The pane holds the second open state, under the same shape as the navigation’s: a two-way asideOpen model and asideOpenChangeRequest with a reason. Select a row and the product opens the pane; press the control in the pane’s head, or Escape when it is a layer, and it closes — the content takes the room, because a closed pane leaves no rail. The skip link to the pane exists only while it is open.',
+    note: 'The pane holds the second open state, under the same shape as the navigation’s: a two-way asideOpen model and asideOpenChangeRequest with a reason. Select a row and the product opens the pane; press the control in the pane’s head, or Escape when it is a layer, and it closes — the content takes the room, because a closed pane leaves no rail. The skip link to the pane exists only while it is open. Drag the pane’s inner edge, or focus it and press the arrows, Home and End: the two-way asideExtent is a fraction of the shell between minAsideExtent and maxAsideExtent, and asideExtentChangeRequest says which hand moved it.',
     snippet: defineSnippet({
       id: 'app-shell-angular-aside',
       language: 'angular',
@@ -414,6 +423,7 @@ const scenes: ReferenceSceneMeta[] = [
     </div>
   </main>
   <aside slAppShellAside>
+    <div slAppShellAsideResizer></div>
     <div slAppShellAsideHeader>
       <span>{{ selected() }}</span>
       <button slAppShellAsideToggle></button>
@@ -480,7 +490,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'app-shell-angular-skip',
       language: 'angular',
       label: 'Written from the regions that exist',
-      source: `<div slAppShell [messages]="{ skipToMain: 'Pular para o conteúdo' }">
+      source: `<div slAppShell [messages]="{ skipToMain: 'Skip to the order' }">
   <main slAppShellMain>…</main>
 </div>`,
     }),
@@ -542,8 +552,8 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'app-shell-angular-accessibility',
       language: 'angular',
       label: 'The name the region carries',
-      source: `<nav slAppShellNav aria-label="Navegação principal">…</nav>
-<aside slAppShellAside aria-label="Detalhe da encomenda">…</aside>`,
+      source: `<nav slAppShellNav aria-label="Main navigation">…</nav>
+<aside slAppShellAside aria-label="Order details">…</aside>`,
     }),
   },
 ];
@@ -558,6 +568,11 @@ const events: EventRow[] = [
     name: 'asideOpenChangeRequest',
     payload: 'AppShellOpenRequest',
     when: 'Before the secondary pane moves, with the same shape. The reasons a pane can carry are pointer, keyboard, escape, outsidePress, resize and programmatic — no select, because a pane has no destinations. (asideOpenChange) fires afterwards.',
+  },
+  {
+    name: 'asideExtentChangeRequest',
+    payload: 'AppShellAsideExtentRequest',
+    when: 'Before the pane’s extent moves, already held inside minAsideExtent and maxAsideExtent, with the reason pointer for a drag on the aside-resizer, keyboard for an arrow, Home or End, and programmatic otherwise. undefined is the pane back on its asideSize step. (asideExtentChange) fires afterwards.',
   },
 ];
 
@@ -581,6 +596,34 @@ export const ANGULAR_APP_SHELL_DOCS = {
         'true',
         'slAppShell',
         'Whether the secondary pane is showing, under the same rule. A product that opens the pane on a selection binds the selection to this',
+      ],
+      [
+        'asideExtent',
+        'model<number | undefined>',
+        '—',
+        'slAppShell',
+        'The measure of the pane as a column, as a fraction of the shell’s inline size. Unset, asideSize decides. The pane writes it as --slotted-app-shell-aside-extent in cqi, which the stylesheet reads in the column alone: a layer keeps its step',
+      ],
+      [
+        'minAsideExtent',
+        'number',
+        '0.16',
+        'slAppShell',
+        'The smallest fraction of the shell the reader may give the pane, and Home’s target. aria-valuemin is this times a hundred',
+      ],
+      [
+        'maxAsideExtent',
+        'number',
+        '0.6',
+        'slAppShell',
+        'The largest fraction, and End’s target. aria-valuemax is this times a hundred',
+      ],
+      [
+        'inset',
+        "'none' | undefined",
+        '—',
+        'slAppShellAsideBody',
+        'none drops the body’s own padding, for content that brings its own inset. Written as data-inset',
       ],
       [
         'primary',
@@ -689,10 +732,10 @@ export const ANGULAR_APP_SHELL_DOCS = {
       ],
       [
         'messages',
-        'Partial<{ nav, open, close, aside, openAside, closeAside, skipToMain, skipToNav, skipToAside }>',
+        'Partial<AppShellMessages>',
         '—',
-        'slAppShell, provideAppShellDefaults',
-        'The nine strings the family says: the two regions’ accessible names, the two controls’ labels in each state, and the three skip links. An aria-label written on the element itself still wins',
+        'slAppShell',
+        'Words laid over the language in force, key by key — aside, close, closeAside, nav, open, openAside, resizeAside, skipToAside, skipToMain, skipToNav: the two regions’ accessible names, the two controls’ labels in each state, the pane edge’s name, and the three skip links. An aria-label written on the element itself still wins',
       ],
     ]),
     composition: apiRows([
@@ -740,7 +783,7 @@ export const ANGULAR_APP_SHELL_DOCS = {
       ],
       [
         'provideAppShellDefaults()',
-        '{ …fourteen axes, messages }',
+        '{ …fourteen axes }',
         '—',
         'an injector',
         'What an application decides once for every route, through APP_SHELL_DEFAULTS. A shell that states any of them itself still wins',
@@ -784,9 +827,10 @@ export const ANGULAR_APP_SHELL_DOCS = {
     accessibility: [
       'The structure is the WAI-ARIA APG’s Landmark Regions (w3.org/WAI/ARIA/apg/practices/landmark-regions/), and every one of the five is earned from the element rather than written as a role: header in the context of the body is banner, nav is navigation, main is main, aside is complementary, footer is contentinfo. The root is a div for exactly that reason — a main inside a sectioning element stops being a landmark, and the shell has to be placeable anywhere.',
       'Both controls are the APG’s Disclosure pattern (w3.org/WAI/ARIA/apg/patterns/disclosure/): real buttons, so Enter and Space activate them natively, carrying aria-expanded and aria-controls pointing at their region. One departure is written and costed: under collapsedTo="rail" the navigation does not disappear, it narrows — aria-expanded is still true or false about the region’s full form, and the region stays in the tab order because a rail whose destinations cannot be reached is not a rail. The pane has no such departure: closed, it leaves the layout and the tab order.',
-      'A document with more than one navigation or complementary landmark needs a unique label on each, so both regions carry the family’s strings and a consumer may replace either per instance. Each control’s own name changes with the state — “Abrir navegação” and “Fechar navegação”, “Abrir painel lateral” and “Fechar painel lateral” — because a control whose name never changes leaves the reader to infer the state from aria-expanded alone.',
+      'A document with more than one navigation or complementary landmark needs a unique label on each, so both regions carry the family’s strings and a consumer may replace either per instance. Each control’s own name changes with the state — “Open navigation” and “Close navigation”, “Open side panel” and “Close side panel” — because a control whose name never changes leaves the reader to infer the state from aria-expanded alone.',
       'The skip links are written from the regions that rendered and are open, so no link ever points at a target nobody built or the reader closed, and main carries tabindex="-1": without it the browser moves the scroll and leaves the focus behind in Safari and Firefox, which is a link that appears to work and moves nothing a screen reader follows.',
       'While an overlaid region is modal, @slotted/core/focus contains the keyboard inside it and returns it to the control that opened it on close, and every region beside it — the banner included — takes inert, so Tab cannot reach them and a screen reader does not read them. The ways out are Escape, the veil, a destination, and whatever control the product put in the panel. Two layers can be open together only with both modes forced, and @slotted/core/dismissable-layer keeps one stack, so Escape reaches the topmost.',
+      'The pane’s edge is the APG’s Window Splitter (w3.org/WAI/ARIA/apg/patterns/windowsplitter/): a focusable separator with aria-orientation="vertical", aria-controls pointing at the pane and aria-valuemin, aria-valuemax and aria-valuenow as whole percentages of the shell, named “Resize panel”. ArrowLeft and ArrowRight move it sixteen pixels, sixty-four with Shift, by the direction on the screen — so ArrowLeft grows an end pane and shrinks a start one, mirrored in right-to-left — and Home and End go to the limits.',
       'Nothing important depends on hover, the frame answers its own inline size rather than the window’s — which is what makes a 400% zoom behave like a narrow window — and every transition comes from the motion scale, so prefers-reduced-motion collapses all of them at once.',
     ],
     snippets: [
@@ -810,7 +854,7 @@ export const ANGULAR_APP_SHELL_DOCS = {
   data-open
 >
   <div data-part="skip">
-    <a href="#…-main">Saltar para o conteúdo</a>
+    <a href="#…-main">Skip to content</a>
   </div>
   <header data-part="banner">
     <div data-part="brand">
@@ -819,14 +863,14 @@ export const ANGULAR_APP_SHELL_DOCS = {
     <div data-part="centre">…</div>
     <div data-part="actions">…</div>
   </header>
-  <nav data-part="nav" id="…-nav" aria-label="Navegação principal">
+  <nav data-part="nav" id="…-nav" aria-label="Main navigation">
     <div data-part="nav-rail">…</div>
     <div data-part="nav-header">…</div>
     <div data-part="nav-body">…</div>
     <div data-part="nav-footer">…</div>
   </nav>
   <main data-part="main" id="…-main" tabindex="-1">…</main>
-  <aside data-part="aside" id="…-aside" aria-label="Painel lateral" data-open>
+  <aside data-part="aside" id="…-aside" aria-label="Side panel" data-open>
     <div data-part="aside-header">
       …
       <button data-part="aside-toggle" aria-expanded="true" aria-controls="…-aside"></button>

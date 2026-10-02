@@ -30,6 +30,7 @@ import {
   type ValidationErrors,
   type Validator,
 } from '@angular/forms';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlButton, SlButtonEnd, SlButtonStart } from '@slotted/angular/button';
 import { SlCheckbox } from '@slotted/angular/checkbox';
@@ -47,6 +48,12 @@ import { SlSegment, SlSegmentedControl } from '@slotted/angular/segmented-contro
 import { SlTextField, SlTextFieldInput, SlTextFieldStart } from '@slotted/angular/text-field';
 import { createFilter } from '@slotted/core/collection';
 import { createDragController, type DragController } from '@slotted/core/drag';
+import {
+  dragMessages,
+  type PartialMessages,
+  transferMessages,
+  type TransferMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import {
@@ -60,11 +67,9 @@ import {
 } from '@slotted/core/transfer';
 
 import {
-  fillLabel,
   injectTransferDefaults,
   SlTransferIdFactory,
   type TransferItem,
-  type TransferLabels,
   type TransferLayout,
   type TransferMoveReason,
   type TransferMoveRequest,
@@ -202,7 +207,7 @@ export class SlTransferPart {
     <div data-part="switch">
       <div
         slSegmentedControl
-        [attr.aria-label]="t().panes"
+        [attr.aria-label]="t('panes')"
         [disabled]="isDisabled()"
         [fullWidth]="true"
         [size]="resolvedSize()"
@@ -219,7 +224,7 @@ export class SlTransferPart {
         [ngTemplateOutlet]="paneTemplate"
         [ngTemplateOutletContext]="{ $implicit: 'source' }"
       />
-      <div data-part="actions" role="group" [attr.aria-label]="t().actions">
+      <div data-part="actions" role="group" [attr.aria-label]="t('actions')">
         <button
           slButton
           slTransferPart="move-to-target"
@@ -231,7 +236,7 @@ export class SlTransferPart {
           [focusableWhenDisabled]="!isDisabled()"
           (click)="move(selectedToMove('source'), 'target', pressReason($event), $event)"
         >
-          {{ t().moveToTarget
+          {{ t('moveToTarget')
           }}<span slButtonEnd aria-hidden="true"
             ><span slIcon><svg slGlyph name="chevron-right"></svg></span
           ></span>
@@ -246,7 +251,7 @@ export class SlTransferPart {
           [focusableWhenDisabled]="!isDisabled()"
           (click)="move(enabledVisible('source'), 'target', pressReason($event), $event)"
         >
-          {{ t().moveAllToTarget
+          {{ t('moveAllToTarget')
           }}<span slButtonEnd aria-hidden="true"
             ><span slIcon><svg slGlyph name="chevrons-right"></svg></span
           ></span>
@@ -264,7 +269,7 @@ export class SlTransferPart {
         >
           <span slButtonStart aria-hidden="true"
             ><span slIcon><svg slGlyph name="chevron-right"></svg></span></span
-          >{{ t().moveToSource }}
+          >{{ t('moveToSource') }}
         </button>
         <button
           slButton
@@ -278,10 +283,10 @@ export class SlTransferPart {
         >
           <span slButtonStart aria-hidden="true"
             ><span slIcon><svg slGlyph name="chevrons-right"></svg></span></span
-          >{{ t().moveAllToSource }}
+          >{{ t('moveAllToSource') }}
         </button>
         @if (resolvedReorderable()) {
-          <div data-part="reorder" role="group" [attr.aria-label]="t().reorder">
+          <div data-part="reorder" role="group" [attr.aria-label]="t('reorder')">
             <button
               slButton
               slTransferPart="move-up"
@@ -295,7 +300,7 @@ export class SlTransferPart {
             >
               <span slButtonStart aria-hidden="true"
                 ><span slIcon><svg slGlyph name="chevron-down"></svg></span></span
-              >{{ t().moveUp }}
+              >{{ t('moveUp') }}
             </button>
             <button
               slButton
@@ -310,7 +315,7 @@ export class SlTransferPart {
             >
               <span slButtonStart aria-hidden="true"
                 ><span slIcon><svg slGlyph name="chevron-down"></svg></span></span
-              >{{ t().moveDown }}
+              >{{ t('moveDown') }}
             </button>
           </div>
         }
@@ -363,8 +368,8 @@ export class SlTransferPart {
                 type="search"
                 [disabled]="isDisabled()"
                 [value]="queryOf(side)"
-                [attr.aria-label]="fill(t().search, { pane: title(side) })"
-                [attr.placeholder]="fill(t().search, { pane: title(side) })"
+                [attr.aria-label]="t('search', { pane: title(side) })"
+                [attr.placeholder]="t('search', { pane: title(side) })"
                 (valueChange)="onQuery(side, $event)"
               />
             </div>
@@ -422,12 +427,12 @@ export class SlTransferPart {
                   <span slIcon
                     ><svg slGlyph [name]="typed(side) ? 'search-x' : 'inbox'"></svg
                   ></span>
-                  {{ typed(side) ? t().noResults : t().empty }}
+                  {{ typed(side) ? t('noResults') : t('empty') }}
                 </div>
               </div>
             }
             @if (side === 'source' && hasMore()) {
-              <div slListboxLoader>{{ t().loading }}</div>
+              <div slListboxLoader>{{ t('loading') }}</div>
             }
           </div>
           @if (side === 'target' && dropOffset() !== null) {
@@ -534,7 +539,11 @@ export class SlTransfer<T = TransferItem> implements ControlValueAccessor, Valid
   readonly hasMore = input(false, { transform: booleanAttribute });
   /** Submits one hidden input per target key. */
   readonly name = input<string | undefined>(undefined);
-  readonly labels = input<Partial<TransferLabels> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * panes' names, the controls, the counts and the announcements.
+   */
+  readonly messages = input<PartialMessages<TransferMessages> | undefined>(undefined);
 
   /* ── Outputs ──────────────────────────────────────────────────────── */
 
@@ -561,13 +570,12 @@ export class SlTransfer<T = TransferItem> implements ControlValueAccessor, Valid
   private readonly listboxes = viewChildren(SlListbox);
 
   protected readonly sides = SIDES;
-  protected readonly fill = fillLabel;
   protected readonly pressReason = pressReason;
 
-  protected readonly t = computed<TransferLabels>(() => ({
-    ...this.defaults.labels,
-    ...this.labels(),
-  }));
+  /** The family's words in the language in force, with this transfer's `messages` laid over them. */
+  protected readonly t = injectMessages(transferMessages, this.messages);
+  /** What a keyboard drag between the panes says, in the language in force. */
+  private readonly dragT = injectMessages(dragMessages);
   protected readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   protected readonly innerSize = computed(() => INNER_SIZE[this.resolvedSize()]);
   protected readonly resolvedLayout = computed(() => this.layout() ?? this.defaults.layout);
@@ -703,7 +711,7 @@ export class SlTransfer<T = TransferItem> implements ControlValueAccessor, Valid
   /* ── Reading ──────────────────────────────────────────────────────── */
 
   protected title(side: TransferSide) {
-    return side === 'target' ? this.t().target : this.t().source;
+    return side === 'target' ? this.t('target') : this.t('source');
   }
 
   protected titleId(side: TransferSide) {
@@ -756,19 +764,18 @@ export class SlTransfer<T = TransferItem> implements ControlValueAccessor, Valid
 
   protected countText(side: TransferSide) {
     const keys = this.partition()[side];
-    const t = this.t();
     if (this.typed(side)) {
-      return fillLabel(t.countFiltered, { shown: this.visible()[side].length, total: keys.length });
+      return this.t('countFiltered', { shown: this.visible()[side].length, total: keys.length });
     }
     const selected = new Set(this.currentSelectedKeys());
     const chosen = keys.filter((key) => selected.has(key)).length;
     return chosen > 0
-      ? fillLabel(t.countSelected, { selected: chosen, total: keys.length })
-      : fillLabel(t.count, { total: keys.length });
+      ? this.t('countSelected', { selected: chosen, total: keys.length })
+      : this.t('count', { total: keys.length });
   }
 
   protected paneCount(side: TransferSide) {
-    return fillLabel(this.t().paneCount, {
+    return this.t('paneCount', {
       pane: this.title(side),
       total: this.partition()[side].length,
     });
@@ -897,12 +904,11 @@ export class SlTransfer<T = TransferItem> implements ControlValueAccessor, Valid
       reason,
       source,
     );
-    const t = this.t();
     const pane = this.title(to);
     this.announce(
       keys.length === 1
-        ? fillLabel(t.movedOne, { item: this.labelOf(keys[0]!), pane })
-        : fillLabel(t.moved, { count: keys.length, pane }),
+        ? this.t('movedOne', { item: this.labelOf(keys[0]!), pane })
+        : this.t('moved', { count: keys.length, pane }),
     );
     const list = this.listOf(from);
     if (!list?.contains(list.ownerDocument.activeElement)) return;
@@ -932,7 +938,7 @@ export class SlTransfer<T = TransferItem> implements ControlValueAccessor, Valid
     if (this.frozen() || keys.length === 0 || sameKeys(next, this.partition().target)) return;
     if (!this.requestTarget(next, reason, source, { direction: 'reorder', keys })) return;
     this.announce(
-      fillLabel(this.t().reordered, {
+      this.t('reordered', {
         item: this.labelOf(keys[0]!),
         position: next.indexOf(keys[0]!) + 1,
       }),
@@ -1065,7 +1071,7 @@ export class SlTransfer<T = TransferItem> implements ControlValueAccessor, Valid
       const control = this.host.nativeElement.querySelector<HTMLInputElement>(
         `[data-part="pane"][data-side="${side}"] [data-part="select-all"] input`,
       );
-      const name = fillLabel(this.t().selectAll, { pane: this.title(side) });
+      const name = this.t('selectAll', { pane: this.title(side) });
       if (control && control.getAttribute('aria-label') !== name) {
         control.setAttribute('aria-label', name);
       }
@@ -1102,7 +1108,9 @@ export class SlTransfer<T = TransferItem> implements ControlValueAccessor, Valid
       preview: false,
       restoreFocus: false,
       autoScroll: { axis: 'y' },
-      messages: { moved: () => '', dropped: () => '' },
+      t: this.dragT,
+      /* The move says what happened once, in the family's own words. */
+      silent: ['moved', 'dropped'],
       onDrop: ({ items: carried, source, target, reason, event }) => {
         const from = source.container as TransferSide;
         const to = target.container as TransferSide;

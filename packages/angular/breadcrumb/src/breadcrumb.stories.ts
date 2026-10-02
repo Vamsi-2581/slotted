@@ -20,7 +20,6 @@ import { ANGULAR_BREADCRUMB_DOCS, ANGULAR_BREADCRUMB_TOKENS } from './breadcrumb
 interface BreadcrumbStoryArgs {
   itemsAfterCollapse: number;
   itemsBeforeCollapse: number;
-  label: string;
   maxItems: number;
 }
 
@@ -114,7 +113,6 @@ export const Playground: Story = {
   args: {
     itemsAfterCollapse: 2,
     itemsBeforeCollapse: 1,
-    label: 'Breadcrumb',
     maxItems: 8,
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
@@ -124,7 +122,6 @@ export const Playground: Story = {
 <div class="slotted-demo-stage" data-layout="stack">
   <nav
     slBreadcrumb
-    [label]="label"
     [maxItems]="maxItems"
     [itemsBeforeCollapse]="itemsBeforeCollapse"
     [itemsAfterCollapse]="itemsAfterCollapse"
@@ -246,7 +243,7 @@ export const Composition: Story = {
   parameters: scenario('composition'),
   decorators: [
     applicationConfig({
-      providers: [provideBreadcrumbDefaults({ label: 'Trilha', maxItems: 4 })],
+      providers: [provideBreadcrumbDefaults({ maxItems: 4 })],
     }),
   ],
   render: () => ({
@@ -254,9 +251,9 @@ export const Composition: Story = {
 <div class="slotted-demo-grid" data-columns="2">
   ${scene(
     'provideBreadcrumbDefaults',
-    'This page provides a Portuguese landmark name and a fold at four for every trail on it. The first inherits both; the second states its own and wins.',
+    'This page provides a fold at four for every trail on it. The first inherits it; the second states its own and wins.',
     `<nav slBreadcrumb><ol slBreadcrumbList>${DEEP}</ol></nav>
-     <nav slBreadcrumb label="Breadcrumb" [maxItems]="0"><ol slBreadcrumbList>${SHORT}</ol></nav>`,
+     <nav slBreadcrumb [maxItems]="0"><ol slBreadcrumbList>${SHORT}</ol></nav>`,
   )}
   ${scene(
     'The consumer’s own anchor',

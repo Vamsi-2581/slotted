@@ -252,11 +252,11 @@ export const REACT_KBD_DOCS = {
         'Between two simultaneous keys. A Mac joins with nothing whatever this says',
       ],
       [
-        'thenLabel',
-        'string',
-        'then',
-        'Shortcut',
-        'Between two steps of a sequence. It is read aloud, so it belongs in the reader’s language',
+        'messages',
+        'PartialMessages<KeysMessages>',
+        '—',
+        'Kbd, Shortcut',
+        'Words laid over the keys catalog of the language in force, key by key: legends.*, names.*, and then — the word between two steps of a sequence, read aloud',
       ],
       [
         'legends',
@@ -304,10 +304,10 @@ export const REACT_KBD_DOCS = {
       ],
       [
         'KbdDefaultsProvider',
-        '{ platform, size, variant, separator, thenLabel, legends, names }',
+        '{ platform, size, variant, separator, legends, names }',
         '—',
         'a subtree',
-        'Sets all seven once for everything below it; an explicit prop on a key still wins',
+        'Sets all six once for everything below it; an explicit prop on a key still wins',
       ],
     ]),
     accessibility: [

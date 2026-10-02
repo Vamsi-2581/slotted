@@ -1,8 +1,10 @@
 import '@slotted/styles/field-group/field-group.css';
 
+import { fieldMessages } from '@slotted/core/i18n';
 import { createContext, useCallback, useContext, useId, useMemo, useState } from 'react';
 
 import { FieldDefaultsProvider, useFieldDefaults } from '../field';
+import { useMessages } from '../i18n';
 import type {
   FieldGroupContextValue,
   FieldGroupIds,
@@ -46,7 +48,7 @@ export function deriveFieldGroupIds(base: string): FieldGroupIds {
  * names them both.
  *
  * **The group provides for its fields.** `size`, `labelPlacement`,
- * `necessity`, the necessity words, the help label, `disabled` and `readOnly` reach every
+ * `necessity`, `disabled` and `readOnly` reach every
  * field inside through the same provider an application uses, so a compact
  * section is one attribute rather than one per field. `required` is not
  * provided: it is a fact about one value, and a section cannot know it.
@@ -55,12 +57,11 @@ export function FieldGroup({
   'aria-describedby': describedBy,
   children,
   disabled,
-  helpLabel,
   id,
   invalid,
   labelPlacement,
+  messages: words,
   necessity,
-  necessityWords,
   orientation,
   readOnly,
   ref,
@@ -70,6 +71,7 @@ export function FieldGroup({
   ...nativeProps
 }: FieldGroupProps) {
   const defaults = useFieldDefaults();
+  const t = useMessages(fieldMessages, words);
   const generatedId = useId();
   const ids = useMemo(
     () => deriveFieldGroupIds(id ?? `slotted-field-group-${generatedId}`),
@@ -86,7 +88,6 @@ export function FieldGroup({
 
   const resolvedSize = size ?? defaults.size;
   const resolvedNecessity = necessity ?? defaults.necessity;
-  const resolvedWords = { ...defaults.necessityWords, ...necessityWords };
 
   const merged =
     [
@@ -106,11 +107,11 @@ export function FieldGroup({
      * a whole set read as the help under the control above it.
      */
     messageSize: resolvedSize === 'sm' ? 'sm' : 'md',
-    necessityWords: resolvedWords,
     necessity: resolvedNecessity,
     registerMessage,
     required,
     size: resolvedSize,
+    t,
   };
 
   const rootProps: FieldGroupRootProps = {
@@ -133,10 +134,8 @@ export function FieldGroup({
     <FieldGroupContext.Provider value={value}>
       <FieldDefaultsProvider
         disabled={disabled}
-        helpLabel={helpLabel}
         labelPlacement={labelPlacement}
         necessity={resolvedNecessity}
-        necessityWords={resolvedWords}
         readOnly={readOnly}
         size={resolvedSize}
       >

@@ -232,12 +232,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Setting it once, and reaching past it',
-    note: 'The provider carries the variant, the send key and every label an application translates once; ref reaches the textarea; render substitutes the root, keeping every attribute and handler.',
+    note: 'The provider carries the variant and the send key, and the words come from the language in force; ref reaches the textarea; render substitutes the root, keeping every attribute and handler.',
     snippet: defineSnippet({
       id: 'prompt-composer-react-composition',
       language: 'tsx',
       label: 'A provider, a ref and a substituted root',
-      source: `<PromptComposerDefaultsProvider sendLabel="Enviar" stopLabel="Parar" submitOn="mod-enter">
+      source: `<PromptComposerDefaultsProvider submitOn="mod-enter">
   <App />
 </PromptComposerDefaultsProvider>;
 
@@ -403,11 +403,11 @@ export const REACT_PROMPT_COMPOSER_DOCS = {
         'Publishes the length of the value to the field, which draws the count',
       ],
       [
-        'sendLabel / stopLabel / retryLabel / sendingLabel / stoppedLabel / attachLabel',
-        'string',
-        'Send / Stop / Retry / Sending / Stopped / Attach files',
-        'PromptComposerDefaultsProvider',
-        'What the send says in each status, what is announced, and the paperclip’s name',
+        'messages',
+        'Partial<PromptComposerMessages>',
+        '—',
+        'PromptComposer',
+        'Words laid over the language in force, key by key: what the send says in each status, what is announced, and the paperclip’s name',
       ],
     ]),
     composition: apiRows([
@@ -434,7 +434,7 @@ export const REACT_PROMPT_COMPOSER_DOCS = {
       ],
       [
         'PromptComposerDefaultsProvider',
-        '{ size, variant, submitOn, labels }',
+        '{ size, variant, submitOn }',
         '—',
         'a subtree',
         'The decisions an application takes once',

@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "result-state",
   "ui": "result-state",
+  "catalog": {
+    "group": "Feedback",
+    "summary": "Empty, no-results, error or success state."
+  },
   "axes": {
     "status": ["empty", "no-results", "not-found", "error", "forbidden", "offline", "success"],
     "reach": ["inline", "section", "page"],

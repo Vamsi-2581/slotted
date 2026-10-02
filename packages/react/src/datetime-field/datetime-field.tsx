@@ -32,6 +32,7 @@ import type {
   SegmentReference,
   SegmentState,
 } from '@slotted/core/date';
+import { datetimeFieldMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import {
   useCallback,
@@ -45,6 +46,7 @@ import {
 import type { ClipboardEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useDateTimeFieldDefaults } from './datetime-field-defaults';
 import type {
@@ -121,10 +123,8 @@ export function DateTimeField({
   calendar,
   className,
   clearable = false,
-  clearLabel,
   defaultValue,
   disabled,
-  durationLabel,
   end,
   firstDayOfWeek,
   granularity,
@@ -135,6 +135,7 @@ export function DateTimeField({
   isTimeUnavailable,
   locale,
   max,
+  messages,
   maxTime,
   min,
   minTime,
@@ -159,11 +160,13 @@ export function DateTimeField({
 }: DateTimeFieldProps) {
   const field = useField();
   const defaults = useDateTimeFieldDefaults();
+  const appLocale = useLocale();
+  const t = useMessages(datetimeFieldMessages, messages);
   const rootRef = useRef<HTMLElement | null>(null);
   const durationRef = useRef<HTMLInputElement | null>(null);
   const generatedId = useId();
 
-  const resolvedLocale = locale ?? defaults.locale;
+  const resolvedLocale = locale ?? appLocale;
   const resolvedTimeZone = timeZone ?? defaults.timeZone;
   const resolvedGranularity = granularity ?? defaults.granularity;
   const resolvedHourCycle = hourCycle ?? defaults.hourCycle;
@@ -639,7 +642,7 @@ export function DateTimeField({
             aria-describedby={
               [describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined
             }
-            aria-label={durationLabel ?? defaults.durationLabel}
+            aria-label={t('duration')}
             data-part="duration"
             onBlur={(event) => commitExpression(event)}
             onChange={(event) => setExpression(event.target.value)}
@@ -743,12 +746,7 @@ export function DateTimeField({
         {spoken}
       </span>
       {showClear ? (
-        <button
-          aria-label={clearLabel ?? defaults.clearLabel}
-          data-part="clear"
-          onClick={clear}
-          type="button"
-        >
+        <button aria-label={t('clear')} data-part="clear" onClick={clear} type="button">
           <Icon>
             <Glyph name="x" />
           </Icon>

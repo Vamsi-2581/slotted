@@ -159,9 +159,9 @@ import { creditMemoColumns, creditMemoFilterFields } from './credit-memo-columns
             (valueChangeRequest)="store.setFilter($event.value)"
             [query]="store.search()"
             (queryChangeRequest)="store.setSearch($event.value)"
-            [labels]="{ count: countLabel }"
+            [messages]="countMessages"
             [count]="store.total() ?? undefined"
-            [total]="store.grandTotal() ?? undefined"
+            [total]="store.total() === store.grandTotal() ? undefined : (store.grandTotal() ?? undefined)"
             [loading]="store.loading()"
           >
             <app-list-view-tools
@@ -175,7 +175,7 @@ import { creditMemoColumns, creditMemoFilterFields } from './credit-memo-columns
           </div>
           <sl-data-grid
             #grid="slDataGrid"
-            label="Credit memos"
+            aria-label="Credit memos"
             rowKey="id"
             variant="framed"
             activatable
@@ -216,8 +216,8 @@ import { creditMemoColumns, creditMemoFilterFields } from './credit-memo-columns
             <nav
               slDataGridFooter
               slPagination
-              label="Credit memo pages"
-              [labels]="pagerLabels"
+              aria-label="Credit memo pages"
+              [messages]="pagerMessages"
               [count]="store.total() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
@@ -260,14 +260,11 @@ export class CreditMemosPage {
     return this.session.can('credit_memos.create');
   });
 
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total
-      ? `${count} credit memos`
-      : `${count} of ${total} credit memos`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} credit memos', countOnly: '{count} credit memos' };
 
-  readonly pagerLabels = {
-    range: (start: number, end: number, count: number) =>
-      `Credit memos ${start}–${end} of ${count.toLocaleString('en-US')}`,
+  readonly pagerMessages = {
+    range: 'Credit memos {start}–{end} of {count}',
     pageSize: 'Credit memos per page',
   };
 

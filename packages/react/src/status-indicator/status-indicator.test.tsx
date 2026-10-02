@@ -1,8 +1,11 @@
+import { statusIndicatorMessages } from '@slotted/core/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/status-indicator/contract.json';
+import { SlottedProvider } from '../i18n';
 import { StatusIndicator, StatusIndicatorDefaultsProvider } from './index';
 import type { StatusIndicatorStatus } from './index';
 
@@ -84,7 +87,7 @@ describe('StatusIndicator', () => {
     for (const status of STATUSES) {
       const { unmount } = render(<StatusIndicator status={status} />);
       expect(document.querySelector('[data-part="announcement"]')?.textContent?.trim()).toBe(
-        contract.defaultLabels[status],
+        statusIndicatorMessages.base[status],
       );
       unmount();
     }
@@ -183,31 +186,29 @@ describe('StatusIndicator', () => {
       expect(root()).toHaveAttribute('data-size', 'lg');
     });
 
-    it('translates the six words in one decision', () => {
+    it('speaks the six words in the language in force', () => {
       render(
-        <StatusIndicatorDefaultsProvider labels={{ danger: 'Fehler', success: 'Erfolg' }}>
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
           <StatusIndicator status="danger" />
-        </StatusIndicatorDefaultsProvider>,
+        </SlottedProvider>,
       );
 
-      expect(announcement()).toHaveTextContent('Fehler');
+      expect(announcement()).toHaveTextContent('Erro');
     });
 
-    /** A page that renames one status keeps the five its parent named. */
-    it('merges a nested table rather than replacing it', () => {
+    /** An indicator that renames one status keeps the five the catalog names. */
+    it('lays its own messages over the catalog key by key', () => {
       render(
-        <StatusIndicatorDefaultsProvider labels={{ danger: 'Fehler', success: 'Erfolg' }}>
-          <StatusIndicatorDefaultsProvider labels={{ success: 'Fertig' }}>
-            <StatusIndicator status="danger" />
-            <StatusIndicator status="success" />
-          </StatusIndicatorDefaultsProvider>
-        </StatusIndicatorDefaultsProvider>,
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+          <StatusIndicator messages={{ success: 'Pronto' }} status="danger" />
+          <StatusIndicator messages={{ success: 'Pronto' }} status="success" />
+        </SlottedProvider>,
       );
 
       const words = [...document.querySelectorAll('[data-part="announcement"]')].map(
         (node) => node.textContent,
       );
-      expect(words).toEqual(['Fehler', 'Fertig']);
+      expect(words).toEqual(['Erro', 'Pronto']);
     });
   });
 

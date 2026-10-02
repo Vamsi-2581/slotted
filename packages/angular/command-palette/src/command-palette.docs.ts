@@ -95,7 +95,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'The way out where the scrim is not: the word closeLabel at the end of the field, drawn by the stylesheet only while the dialog is full screen, asking open to be false with the reason dismiss. Absent inline.',
+      'The way out where the scrim is not: the close message at the end of the field, drawn by the stylesheet only while the dialog is full screen, asking open to be false with the reason dismiss. Absent inline.',
   },
   {
     part: 'list',
@@ -108,7 +108,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'role="group", named by its group-label. The recents are the first group, labelled recentLabel.',
+      'role="group", named by its group-label. The recents are the first group, labelled by the recent message.',
   },
   { part: 'group-label', element: 'div', required: false, purpose: 'The heading of a group.' },
   {
@@ -175,7 +175,8 @@ const anatomy: AnatomyRow[] = [
     part: 'empty',
     element: 'div',
     required: false,
-    purpose: 'The message when nothing matched: emptyLabel, or ng-template[slCommandPaletteEmpty].',
+    purpose:
+      'The message when nothing matched: the empty message, or ng-template[slCommandPaletteEmpty].',
   },
   {
     part: 'status',
@@ -317,7 +318,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'loading',
     title: 'While the results travel',
-    note: 'loading swaps the magnifier for the ring, draws three skeleton rows when there is nothing to show yet, and says loadingLabel in the status row. The palette debounces nothing: the product does, in a few lines.',
+    note: 'loading swaps the magnifier for the ring, draws three skeleton rows when there is nothing to show yet, and says the loading message in the status row. The palette debounces nothing: the product does, in a few lines.',
     snippet: defineSnippet({
       id: 'command-palette-angular-loading',
       language: 'angular',
@@ -401,13 +402,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'defaults',
     title: 'Set once for the application',
-    note: 'The provider holds every axis and every sentence the family speaks, which is where a product translates it: the panel below reads Portuguese labels, a size and a hotkey it did not state itself.',
+    note: 'The provider holds every axis, and provideSlotted the language the family speaks: the panel below reads Portuguese words, a size and a hotkey it did not state itself.',
     snippet: defineSnippet({
       id: 'command-palette-angular-defaults',
       language: 'ts',
       label: 'Translating the family',
       source:
-        "bootstrapApplication(App, {\n  providers: [\n    provideCommandPaletteDefaults({\n      countLabel: '{count} resultados',\n      emptyLabel: 'Nenhum resultado',\n      hintNavigate: 'Navegar',\n      hintSelect: 'Executar',\n      hotkey: 'mod+p',\n      placeholder: 'Comando ou busca…',\n      recentLabel: 'Recentes',\n    }),\n  ],\n});",
+        "bootstrapApplication(App, {\n  providers: [\n    provideSlotted({ locale: 'pt-BR' }),\n    provideCommandPaletteDefaults({ hotkey: 'mod+p', size: 'sm' }),\n  ],\n});",
     }),
   },
   {
@@ -436,13 +437,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'accessibility',
     title: 'What a screen reader meets',
-    note: 'The dialog is named by label, the field by inputLabel, the list by the same; the current row is aria-selected and named by aria-activedescendant; the count, the wait and a failure are one live region. Open the tree to read it.',
+    note: 'The dialog is named by the label message, the field by the input message, the list by the same; the current row is aria-selected and named by aria-activedescendant; the count, the wait and a failure are one live region. Open the tree to read it.',
     snippet: defineSnippet({
       id: 'command-palette-angular-accessibility',
       language: 'angular',
       label: 'The two names',
       source:
-        '<sl-command-palette label="Deployment commands" inputLabel="Search deployments" [items]="items" />',
+        '<sl-command-palette\n  [messages]="{ label: \'Deployment commands\', input: \'Search deployments\' }"\n  [items]="items"\n/>',
     }),
   },
 ];
@@ -625,7 +626,7 @@ export const ANGULAR_COMMAND_PALETTE_DOCS = {
         'boolean',
         'false',
         'sl-command-palette',
-        'The ring in the header, three skeleton rows when there is nothing to show, aria-busy on the list, loadingLabel in the status row',
+        'The ring in the header, three skeleton rows when there is nothing to show, aria-busy on the list, the loading message in the status row',
       ],
       [
         'disabled',
@@ -648,92 +649,12 @@ export const ANGULAR_COMMAND_PALETTE_DOCS = {
         'sl-command-palette',
         'A parent for the layer alone, instead of the portal root the dialog makes beside this host',
       ],
-      ['label', 'string', 'Command palette', 'sl-command-palette', 'The dialog’s accessible name'],
       [
-        'inputLabel',
-        'string',
-        'Search commands',
+        'messages',
+        'Partial<CommandPaletteMessages>',
+        '—',
         'sl-command-palette',
-        'The field’s and the list’s accessible name',
-      ],
-      [
-        'placeholder',
-        'string',
-        'Type a command or search…',
-        'sl-command-palette',
-        'The field’s placeholder',
-      ],
-      [
-        'emptyLabel',
-        'string',
-        'No results',
-        'sl-command-palette',
-        'The empty message; ng-template[slCommandPaletteEmpty] replaces it',
-      ],
-      [
-        'loadingLabel',
-        'string',
-        'Loading…',
-        'sl-command-palette',
-        'What the status row says while loading',
-      ],
-      [
-        'errorLabel',
-        'string',
-        'The command failed: {message}',
-        'sl-command-palette',
-        'What the status row says after a rejected handler; {message} becomes the error’s message',
-      ],
-      [
-        'countLabel',
-        'string',
-        '{count} results',
-        'sl-command-palette',
-        'What the status row says after every change of the rows',
-      ],
-      ['recentLabel', 'string', 'Recent', 'sl-command-palette', 'The heading over the recents'],
-      [
-        'clearLabel',
-        'string',
-        'Clear',
-        'sl-command-palette',
-        'The clear control’s accessible name',
-      ],
-      [
-        'closeLabel',
-        'string',
-        'Close',
-        'sl-command-palette',
-        'The word on the close control, drawn only while the dialog is full screen',
-      ],
-      ['backLabel', 'string', 'Back', 'sl-command-palette', 'The trail’s accessible name'],
-      [
-        'hintNavigate',
-        'string',
-        'Navigate',
-        'sl-command-palette',
-        'The word beside the arrow keys in the footer',
-      ],
-      [
-        'hintSelect',
-        'string',
-        'Select',
-        'sl-command-palette',
-        'The word beside Enter in the footer',
-      ],
-      [
-        'hintClose',
-        'string',
-        'Close',
-        'sl-command-palette',
-        'The word beside Escape in the footer, in dialog presentation',
-      ],
-      [
-        'hintBack',
-        'string',
-        'Back',
-        'sl-command-palette',
-        'The word beside Backspace in the footer, while a page is open',
+        'Words laid over the language in force, key by key: the dialog’s name (label), the field’s name and placeholder (input, placeholder), the empty, loading, count and error sentences, the recents heading, the clear, close and back controls, and the footer’s hints',
       ],
       [
         'slCommandPaletteTrigger',
@@ -785,12 +706,12 @@ export const ANGULAR_COMMAND_PALETTE_DOCS = {
         'Partial<CommandPaletteDefaults>',
         '—',
         'the injector',
-        'Every axis and every sentence, set once; an explicit input still wins',
+        'Every axis, set once; an explicit input still wins',
       ],
     ]),
     accessibility: [
       'The field carries role="combobox" with aria-expanded="true", aria-controls naming the list and aria-autocomplete="list"; the list carries role="listbox" and each row role="option". DOM focus stays on the field for the whole interaction and the current row is named by aria-activedescendant and marked aria-selected — the WAI-ARIA combobox pattern with a listbox popup, whose note says exactly this.',
-      'The layer is the dialog family’s: role="dialog", aria-modal, the page inert behind the scrim, focus contained and returned to the trigger. Its name is label, pointed at through a hidden title the dialog labels itself by; the field’s name is inputLabel, and the list borrows it.',
+      'The layer is the dialog family’s: role="dialog", aria-modal, the page inert behind the scrim, focus contained and returned to the trigger. Its name is the label message, pointed at through a hidden title the dialog labels itself by; the field’s name is the input message, and the list borrows it.',
       'A row with a shortcut carries aria-keyshortcuts in the platform’s own words — Meta+Shift+D on a Mac, Control+Shift+D elsewhere — while the drawn keys are aria-hidden; a sequence has no syntax in the attribute and is drawn only. A disabled row is announced with aria-disabled, stays in the list, and is skipped by every movement key.',
       'The result count, the loading sentence and the failure of a rejected handler are one visually hidden role="status" row, spoken through the shared live announcer so the same sentence is never said twice in a row.',
       'Escape is three steps in a fixed order — clear the query, return one page, close — so a reader who typed does not lose the palette on the first press; the footer draws the same keys the family answers.',

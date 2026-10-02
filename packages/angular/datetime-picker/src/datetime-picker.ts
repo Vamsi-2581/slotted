@@ -51,7 +51,13 @@ import {
 } from '@angular/core';
 import type { OnInit } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  datetimePickerMessages,
+  type DatetimePickerMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { SlCalendar } from '@slotted/angular/calendar';
 import type { CalendarValue, CalendarView } from '@slotted/angular/calendar';
 import { SlDateTimeField, SlDateTimeFieldEnd } from '@slotted/angular/datetime-field';
@@ -169,7 +175,7 @@ export interface DateTimePickerHighlight {
           role="dialog"
           [attr.id]="contentId"
           [attr.aria-label]="triggerLabel()"
-          [attr.aria-description]="truncated() ? resolvedTruncatedLabel() : null"
+          [attr.aria-description]="truncated() ? t('truncated') : null"
           [attr.data-granularity]="resolvedGranularity()"
           [attr.data-open-to]="resolvedOpenTo()"
         >
@@ -185,7 +191,7 @@ export interface DateTimePickerHighlight {
             <ng-content select="[slDateTimePickerPresets]" />
             <button data-part="now" type="button" (click)="chooseNow($event)">
               <span slIcon size="sm"><svg slGlyph name="clock"></svg></span>
-              {{ resolvedNowLabel() }}
+              {{ t('now') }}
             </button>
           </div>
 
@@ -215,7 +221,7 @@ export interface DateTimePickerHighlight {
 
             <div data-part="time-panel">
               @if (list().length === 0) {
-                <div data-part="empty">{{ resolvedEmptyLabel() }}</div>
+                <div data-part="empty">{{ t('empty') }}</div>
               } @else {
                 <div
                   #rows
@@ -312,6 +318,7 @@ export class SlDateTimePicker implements OnInit {
   });
   readonly unavailableOptions = input<DateTimePickerUnavailableOptions | undefined>(undefined);
 
+  /** BCP 47. Writes the field, the grid, the list and the trigger's moment. Unset, the language in force decides. */
   readonly locale = input<string | undefined>(undefined);
   readonly timeZone = input<string | undefined>(undefined);
   readonly hourCycle = input<DateTimePickerHourCycle | undefined>(undefined);
@@ -346,11 +353,12 @@ export class SlDateTimePicker implements OnInit {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
   });
   readonly name = input<string | undefined>(undefined);
-  readonly chooseLabel = input<string | undefined>(undefined);
-  readonly changeLabel = input<string | undefined>(undefined);
-  readonly nowLabel = input<string | undefined>(undefined);
-  readonly emptyLabel = input<string | undefined>(undefined);
-  readonly truncatedLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * trigger's two names, the `now` button, what an empty day says and what a
+   * cut list says.
+   */
+  readonly messages = input<PartialMessages<DatetimePickerMessages> | undefined>(undefined);
 
   readonly valueChange = output<DateTimeFieldChangeRequest | ChangeRequest<PlainDateTime | null>>();
   readonly openChange = output<ChangeRequest<boolean>>();
@@ -368,6 +376,9 @@ export class SlDateTimePicker implements OnInit {
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly defaults = injectDateTimePickerDefaults();
+  private readonly appLocale = injectLocale();
+  /** The family's words in the language in force, with this picker's `messages` laid over them. */
+  readonly t = injectMessages(datetimePickerMessages, this.messages);
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   private readonly enclosing = inject(SlField, { optional: true });
@@ -402,7 +413,7 @@ export class SlDateTimePicker implements OnInit {
   protected readonly held = computed(() => this.value() ?? this.ownValue());
   protected readonly highlight = computed(() => this.highlighted() ?? this.ownHighlight());
 
-  protected readonly resolvedLocale = computed(() => this.locale() ?? this.defaults.locale);
+  protected readonly resolvedLocale = computed(() => this.locale() ?? this.appLocale());
   protected readonly resolvedTimeZone = computed(() => this.timeZone() ?? this.defaults.timeZone);
   protected readonly resolvedHourCycle = computed(
     () => this.hourCycle() ?? this.defaults.hourCycle,
@@ -419,13 +430,6 @@ export class SlDateTimePicker implements OnInit {
     () => this.placement() ?? this.defaults.placement,
   );
   protected readonly resolvedOpenTo = computed(() => this.openTo() ?? this.defaults.openTo);
-  protected readonly resolvedNowLabel = computed(() => this.nowLabel() ?? this.defaults.nowLabel);
-  protected readonly resolvedEmptyLabel = computed(
-    () => this.emptyLabel() ?? this.defaults.emptyLabel,
-  );
-  protected readonly resolvedTruncatedLabel = computed(
-    () => this.truncatedLabel() ?? this.defaults.truncatedLabel,
-  );
   protected readonly resolvedDisabled = computed(
     () => this.disabled() ?? this.enclosing?.resolvedDisabled(),
   );
@@ -548,9 +552,8 @@ export class SlDateTimePicker implements OnInit {
    */
   protected readonly triggerLabel = computed(() => {
     const chosen = this.held();
-    if (chosen === null) return this.chooseLabel() ?? this.defaults.chooseLabel;
-    const change = this.changeLabel() ?? this.defaults.changeLabel;
-    return `${change}, ${this.format().describe(chosen)}`;
+    if (chosen === null) return this.t('choose');
+    return this.t('change', { date: this.format().describe(chosen) });
   });
 
   constructor() {

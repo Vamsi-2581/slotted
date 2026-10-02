@@ -11,7 +11,11 @@ import {
   offsetChangeOn,
   zoneLabel,
 } from '@slotted/core/event-calendar';
-import type { CalendarEvent, EventOccurrence } from '@slotted/core/event-calendar';
+import type {
+  CalendarEvent,
+  EventOccurrence,
+  TimeFormatOptions,
+} from '@slotted/core/event-calendar';
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import type { CSSProperties, Ref } from 'react';
 
@@ -35,6 +39,21 @@ const SHORT_MINUTES = 45;
 const MIN_BLOCK_MINUTES = 20;
 
 const minutesOf = (value: PlainDateTime) => secondsOfDay(value.time) / 60;
+
+/**
+ * The slots of a clock change: which way the clocks move, by how many hours,
+ * and the local time they move at.
+ */
+function offsetSlots(
+  change: NonNullable<ReturnType<typeof offsetChangeOn>>,
+  options: TimeFormatOptions,
+) {
+  return {
+    direction: change.minutes > 0 ? 'forward' : 'back',
+    hours: Math.abs(change.minutes) / 60,
+    at: formatTime(change.at, options),
+  };
+}
 
 export interface TimeGridProps {
   days: readonly PlainDate[];
@@ -144,17 +163,11 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                 )}
                 {change === null ? null : (
                   <span
-                    aria-label={model.labels.offsetChange(
-                      change.minutes,
-                      formatTime(change.at, timeOptions),
-                    )}
+                    aria-label={model.t('offsetChange', offsetSlots(change, timeOptions))}
                     data-part="offset-change"
                     role="note"
                   >
-                    {model.labels.offsetChangeShort(
-                      change.minutes,
-                      formatTime(change.at, timeOptions),
-                    )}
+                    {model.t('offsetChangeShort', offsetSlots(change, timeOptions))}
                   </span>
                 )}
               </div>
@@ -167,7 +180,7 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
           style={{ '--slotted-event-calendar-lanes': Math.max(1, lanes) } as CSSProperties}
         >
           <div data-part="all-day-label" role="rowheader">
-            {model.labels.allDay}
+            {model.t('allDay')}
           </div>
           {days.map((date, index) => {
             const starting = segments.filter((segment) => segment.start === index);
@@ -207,7 +220,7 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                 ))}
                 {continuing.map((segment) => (
                   <span data-part="continuation" key={segment.occurrence.key}>
-                    {`${segment.occurrence.event.title}, ${model.labels.continues}`}
+                    {model.t('titleContinues', { title: segment.occurrence.event.title })}
                   </span>
                 ))}
               </div>
@@ -218,7 +231,7 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
       <div data-part="scroller" ref={attachScroller} role="rowgroup">
         <div data-part="time-row" role="row">
           <div data-part="gutter" role="rowheader">
-            <span data-ui="visually-hidden">{model.labels.timed}</span>
+            <span data-ui="visually-hidden">{model.t('timed')}</span>
             {hours.map((hour) => (
               <span aria-hidden="true" data-part="hour" key={hour}>
                 {formatHour(hour, timeOptions)}
@@ -321,7 +334,7 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                   <button
                     aria-expanded={model.moreDate === toISODate(date)}
                     aria-haspopup="dialog"
-                    aria-label={model.labels.moreEvents(entry.occurrences.length)}
+                    aria-label={model.t('moreEvents', { count: entry.occurrences.length })}
                     data-overlay={entry.overlay ? '' : undefined}
                     data-part="more"
                     key={entry.start}
@@ -339,7 +352,7 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                     type="button"
                   >
                     {`+${entry.occurrences.length}`}
-                    <span>{model.labels.more}</span>
+                    <span>{model.t('more')}</span>
                   </button>
                 ))}
                 {nowHere === null || nowHere < startHour * 60 || nowHere > endHour * 60 ? null : (

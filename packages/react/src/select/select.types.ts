@@ -1,3 +1,4 @@
+import type { PartialMessages, SelectMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -82,33 +83,20 @@ export interface SelectDefaults {
   align: SelectAlign;
   alignOffset: number;
   clearable: boolean;
-  clearLabel: string;
-  /** The sentence the live region announces while searching. `{count}` becomes the number. */
-  countLabel: string;
   /** Whether the span a query matched is marked inside the option's label. */
   highlightMatch: boolean;
   /** Whether the popup opens onto a field the reader filters the options with. */
   search: boolean;
-  /** The accessible name of the search field, which has no visible label. */
-  searchLabel: string;
-  /** What the empty search field says. */
-  searchPlaceholder: string;
-  /** The accessible name of a chip's remove control. `{label}` is the value's own label. */
-  removeLabel: string;
-  /** What a control too narrow for chips says instead. `{count}` is how many are chosen. */
-  summaryLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   closeOnSelect: boolean;
   collisionPadding: number;
   disabled: boolean;
-  emptyLabel: string;
   flip: boolean;
   fullWidth: boolean;
   hideWhenDetached: boolean;
   invalid: boolean;
   loading: boolean;
-  loadingLabel: string;
   loop: boolean;
   mount: SelectMount;
   multiple: boolean;
@@ -148,20 +136,15 @@ export interface SelectProps {
   alignOffset?: number;
   children?: ReactNode;
   clearable?: boolean;
-  clearLabel?: string;
-  removeLabel?: string;
-  summaryLabel?: string;
   closeOnEscape?: boolean;
   closeOnOutsidePress?: boolean;
   closeOnSelect?: boolean;
   collisionPadding?: number;
-  countLabel?: string;
   defaultHighlightedValue?: SelectOptionValue | null;
   defaultOpen?: boolean;
   defaultSearchValue?: string;
   defaultValue?: SelectSelection;
   disabled?: boolean;
-  emptyLabel?: string;
   filter?: SelectFilter;
   flip?: boolean;
   /** The form this control submits with, when it is not the enclosing one. */
@@ -174,10 +157,14 @@ export interface SelectProps {
   /** Labels for values, so a closed control can name a value it never rendered. */
   items?: SelectItems;
   loading?: boolean;
-  loadingLabel?: string;
-  /** BCP 47, for the comparison the default filter makes. */
+  /** BCP 47, for the comparison the default filter makes. The language in force when absent. */
   locale?: string;
   loop?: boolean;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the clear
+   * button, the chips, the summary, the search field, and the sentences.
+   */
+  messages?: PartialMessages<SelectMessages> | undefined;
   mount?: SelectMount;
   multiple?: boolean;
   /** The submission name of the hidden native control. */
@@ -195,8 +182,6 @@ export interface SelectProps {
   ref?: Ref<SelectHandle>;
   required?: boolean;
   search?: boolean;
-  searchLabel?: string;
-  searchPlaceholder?: string;
   searchValue?: string;
   shift?: boolean;
   side?: SelectSide;
@@ -278,7 +263,7 @@ export interface SelectSearchProps extends Omit<
 }
 
 export interface SelectContentProps extends ComponentPropsWithRef<'div'> {
-  /** What the popup says when it holds no options. Replaces `emptyLabel`. */
+  /** What the popup says when it holds no options. Replaces the `empty` message. */
   empty?: ReactNode;
   ref?: Ref<HTMLDivElement>;
   render?: (props: SelectPositionerProps) => ReactNode;
@@ -289,7 +274,7 @@ export interface SelectContentProps extends ComponentPropsWithRef<'div'> {
    * glyph, its `render` and every native attribute of the input.
    */
   searchProps?: SelectSearchProps;
-  /** What the popup says while an answer is travelling. Replaces `loadingLabel`. */
+  /** What the popup says while an answer is travelling. Replaces the `loading` message. */
   status?: ReactNode;
 }
 

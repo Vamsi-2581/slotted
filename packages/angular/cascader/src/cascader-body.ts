@@ -40,11 +40,6 @@ export class SlCascaderNode<T = unknown> {
   }
 }
 
-const fill = (template: string, values: Record<string, string | number>) =>
-  template.replace(/\{(\w+)\}/g, (whole, name: string) =>
-    name in values ? String(values[name]) : whole,
-  );
-
 /**
  * What the surface holds, the same in the popup and on the page: the
  * breadcrumb, then the tree with its columns, or the results of a query. Its
@@ -61,7 +56,7 @@ const fill = (template: string, values: Record<string, string | number>) =>
   template: `
     @let view = engine().view();
     @if (view.crumbs.length > 0) {
-      <nav data-part="breadcrumb" [attr.aria-label]="engine().labels.breadcrumb">
+      <nav data-part="breadcrumb" [attr.aria-label]="engine().t('breadcrumb')">
         @for (crumb of view.crumbs; track $index) {
           @if (!$first) {
             <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
@@ -106,7 +101,7 @@ const fill = (template: string, values: Record<string, string | number>) =>
       (keydown)="treeKeydown.emit($event)"
     >
       @if (view.searching) {
-        <div data-part="column" role="group" [attr.aria-label]="engine().labels.search">
+        <div data-part="column" role="group" [attr.aria-label]="engine().t('search')">
           @for (node of view.results; track node.key) {
             <ng-container *ngTemplateOutlet="row; context: { $implicit: node }" />
           }
@@ -143,12 +138,12 @@ const fill = (template: string, values: Record<string, string | number>) =>
                   type="button"
                   (click)="retry.emit(column.parent)"
                 >
-                  {{ engine().labels.retry }}
+                  {{ engine().t('retry') }}
                 </button>
               </div>
             }
             @if (!column.pending && !column.failed && column.nodes.length === 0) {
-              <div data-part="empty">{{ engine().labels.empty }}</div>
+              <div data-part="empty">{{ engine().t('empty') }}</div>
             }
           </div>
         }
@@ -260,20 +255,19 @@ export class SlCascaderBody<T> {
   }
 
   protected backLabel(key: string | undefined) {
-    return fill(this.engine().labels.back, { label: this.engine().labelOf(key) });
+    return this.engine().t('back', { label: this.engine().labelOf(key) });
   }
 
   protected failedLabel(key: string) {
-    return fill(this.engine().labels.failed, { label: this.engine().labelOf(key) });
+    return this.engine().t('failed', { label: this.engine().labelOf(key) });
   }
 
   protected noResults() {
-    return fill(this.engine().labels.noResults, { query: this.engine().query });
+    return this.engine().t('noResults', { query: this.engine().query });
   }
 
   protected resultCount(count: number) {
-    const labels = this.engine().labels;
-    return count === 0 ? '' : fill(count === 1 ? labels.result : labels.results, { count });
+    return count === 0 ? '' : this.engine().t('results', { count });
   }
 
   protected descriptionOf(node: CascaderNodeView, searching: boolean): string | undefined {

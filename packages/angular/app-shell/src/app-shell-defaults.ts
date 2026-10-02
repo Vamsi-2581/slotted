@@ -65,6 +65,22 @@ export type AppShellOpenReason =
 /** Why the secondary pane opened or closed. No `select`: a pane has no destinations. */
 export type AppShellAsideOpenReason = Exclude<AppShellOpenReason, 'select'>;
 
+/** Why the pane's extent moved. */
+export type AppShellAsideExtentReason = 'pointer' | 'keyboard' | 'programmatic';
+
+/**
+ * The request the shell makes before the pane's extent moves. `undefined` is
+ * the pane back on the measure its size step gives it.
+ */
+export interface AppShellAsideExtentRequest {
+  readonly value: number | undefined;
+  readonly previous: number | undefined;
+  readonly reason: AppShellAsideExtentReason;
+  readonly source?: unknown;
+  readonly cancelled: boolean;
+  cancel(): void;
+}
+
 /** The request the shell makes before the region moves. Cancel it and nothing commits. */
 export interface AppShellOpenRequest {
   readonly value: boolean;
@@ -73,19 +89,6 @@ export interface AppShellOpenRequest {
   readonly source?: unknown;
   readonly cancelled: boolean;
   cancel(): void;
-}
-
-/** The strings the family says on the reader's behalf. */
-export interface AppShellMessages {
-  nav: string;
-  open: string;
-  close: string;
-  aside: string;
-  openAside: string;
-  closeAside: string;
-  skipToMain: string;
-  skipToNav: string;
-  skipToAside: string;
 }
 
 export interface AppShellDefaults {
@@ -97,7 +100,6 @@ export interface AppShellDefaults {
   escape: AppShellDismissPolicy;
   /** The platform's way back — a phone's gesture, a browser's button — closes a modal layer. */
   back: AppShellDismissPolicy;
-  messages: AppShellMessages;
   modal: boolean;
   navMode: AppShellNavMode;
   navSide: AppShellNavSide;
@@ -108,19 +110,6 @@ export interface AppShellDefaults {
   separation: AppShellSeparation;
 }
 
-/** The strings the family says before an application says otherwise. */
-export const DEFAULT_APP_SHELL_MESSAGES: AppShellMessages = {
-  nav: 'Navegação principal',
-  open: 'Abrir navegação',
-  close: 'Fechar navegação',
-  aside: 'Painel lateral',
-  openAside: 'Abrir painel lateral',
-  closeAside: 'Fechar painel lateral',
-  skipToMain: 'Saltar para o conteúdo',
-  skipToNav: 'Saltar para a navegação',
-  skipToAside: 'Saltar para o painel lateral',
-};
-
 const FALLBACK: AppShellDefaults = {
   asideMode: 'auto',
   asideSize: 'md',
@@ -129,7 +118,6 @@ const FALLBACK: AppShellDefaults = {
   collapsedTo: 'rail',
   escape: 'close',
   back: 'close',
-  messages: DEFAULT_APP_SHELL_MESSAGES,
   modal: true,
   navMode: 'auto',
   navSide: 'start',
@@ -152,18 +140,13 @@ export const APP_SHELL_DEFAULTS = new InjectionToken<AppShellDefaults>(
  * An application decides once how its shell is arranged — which region reaches
  * the corner, which plane the content sits on, how the navigation behaves when
  * the space runs out — rather than repeating the same inputs on every route. A
- * shell that states any of them itself still wins.
+ * shell that states any of them itself still wins. Its words come from the
+ * language in force (`provideSlotted`).
  */
-export function provideAppShellDefaults(
-  defaults: Partial<Omit<AppShellDefaults, 'messages'>> & { messages?: Partial<AppShellMessages> },
-) {
+export function provideAppShellDefaults(defaults: Partial<AppShellDefaults>) {
   return {
     provide: APP_SHELL_DEFAULTS,
-    useFactory: (): AppShellDefaults => ({
-      ...FALLBACK,
-      ...defaults,
-      messages: { ...FALLBACK.messages, ...defaults.messages },
-    }),
+    useFactory: (): AppShellDefaults => ({ ...FALLBACK, ...defaults }),
   };
 }
 

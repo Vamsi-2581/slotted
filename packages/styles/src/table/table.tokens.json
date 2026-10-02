@@ -20,6 +20,7 @@
   "--slotted-font-weight-medium",
   "--slotted-font-weight-regular",
   "--slotted-font-weight-semibold",
+  "--slotted-ground",
   "--slotted-line-height-md",
   "--slotted-radius-md",
   "--slotted-radius-sm",

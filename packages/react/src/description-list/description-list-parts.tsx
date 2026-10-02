@@ -278,7 +278,7 @@ export function DescriptionListDescription({
       timer.current = setTimeout(() => setCopied(false), COPIED_FOR);
       /* Through the shared announcer rather than a region this family owns, so
          two copies in one update are both heard. */
-      getLiveAnnouncer().announce(list.labels.copied);
+      getLiveAnnouncer().announce(list.t('copied'));
     } else {
       /**
        * Both ways were refused — the API and the command behind it — which is
@@ -289,7 +289,7 @@ export function DescriptionListDescription({
        * keyboard, and says so.
        */
       selected = selectValue(value.current);
-      getLiveAnnouncer().announce(list.labels.copyBlocked);
+      getLiveAnnouncer().announce(list.t('copyBlocked'));
     }
 
     const request: DescriptionListCopyRequest = {
@@ -326,11 +326,11 @@ export function DescriptionListDescription({
     children: (
       <>
         <span data-part="value" ref={value}>
-          {missing ? placeholderContent(placeholder, list.labels.placeholder) : children}
+          {missing ? placeholderContent(placeholder, list.t('placeholder')) : children}
         </span>
         {copy === true ? (
           <button
-            aria-label={list.labels.copy}
+            aria-label={list.t('copy')}
             data-complete={copied ? '' : undefined}
             data-part="copy"
             onClick={(event) => void press(event, write)}
@@ -353,7 +353,7 @@ export function DescriptionListDescription({
             onKeyDown={remember}
             type="button"
           >
-            {current ? list.labels.collapse : list.labels.reveal}
+            {current ? list.t('collapse') : list.t('reveal')}
             <Icon>
               <Glyph name="chevron-down" />
             </Icon>

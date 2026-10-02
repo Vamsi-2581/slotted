@@ -25,7 +25,7 @@ export const REACT_TIME_RANGE_PICKER_TOKENS = timeRangePickerTokens.map((name) =
 
 const imports: ReferenceImport = {
   source:
-    "import { TimeRangePicker, TimeRangePickerDefaultsProvider, TimeRangePickerPreset } from '@slotted/react';",
+    "import { SlottedProvider, TimeRangePicker, TimeRangePickerDefaultsProvider, TimeRangePickerPreset } from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -109,7 +109,7 @@ const anatomy: AnatomyRow[] = [
     part: 'tab-label',
     element: 'span',
     required: false,
-    purpose: '"Start" or "End", from startLabel and endLabel.',
+    purpose: '"Start" or "End", from the start and end messages.',
   },
   {
     part: 'tab-value',
@@ -136,7 +136,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      'What the next press should be, or what is wrong — "End: choose a time", "The end must come after the start" — in the words hintLabels gives it. data-invalid while it names a problem; aria-describedby of the list and the field. Empty while the work is whole and valid.',
+      'What the next press should be, or what is wrong — "End: choose a time", "The end must come after the start" — from the chooseTime, order, length, unavailable and bounds messages. data-invalid while it names a problem; aria-describedby of the list and the field. Empty while the work is whole and valid.',
   },
   {
     part: 'length',
@@ -229,9 +229,8 @@ const scenes: ReferenceSceneMeta[] = [
   <TimeRangePicker
     clearable
     defaultValue={{ start: plainTime(14), end: plainTime(16, 30) }}
-    endLabel="Fim"
     locale="pt-BR"
-    startLabel="Início"
+    messages={{ start: 'Início', end: 'Fim' }}
   />
 </Field>;`,
     }),
@@ -303,7 +302,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'time-range-picker-react-now',
       label: 'One now per end',
       language: 'tsx',
-      source: `<TimeRangePicker nowLabel="Agora" referenceTime={plainTime(10, 20)} />;`,
+      source: `<TimeRangePicker messages={{ now: 'Agora' }} referenceTime={plainTime(10, 20)} />;`,
     }),
   },
   {
@@ -411,14 +410,16 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition',
-    note: 'The provider sets locale, step, labels, the hint’s and the duration’s words once; the handle opens, closes and focuses; renderOption replaces what a row draws; position — which tab — is the consumer’s to own.',
+    note: 'The provider sets the step and how a duration is written once, SlottedProvider the language and every word; the handle opens, closes and focuses; renderOption replaces what a row draws; position — which tab — is the consumer’s to own.',
     snippet: defineSnippet({
       id: 'time-range-picker-react-composition',
       label: 'Set once, and the handle',
       language: 'tsx',
-      source: `<TimeRangePickerDefaultsProvider locale="pt-BR" nowLabel="Agora" step={1800}>
-  <TimeRangePicker ref={handle} />
-</TimeRangePickerDefaultsProvider>;`,
+      source: `<SlottedProvider locale="pt-BR">
+  <TimeRangePickerDefaultsProvider step={1800}>
+    <TimeRangePicker ref={handle} />
+  </TimeRangePickerDefaultsProvider>
+</SlottedProvider>;`,
     }),
   },
   {
@@ -524,13 +525,6 @@ const api: ApiRow[] = apiRows([
     'What the band and the rows say for a duration, in the product’s own words. The default writes "2 hr 30 min" in the family’s locale.',
   ],
   [
-    'limitLabel',
-    '(min?: number, max?: number, locale?: string) => string',
-    '"30 min to 4 hr"',
-    'TimeRangePicker',
-    'What the band says while a limit is set.',
-  ],
-  [
     'step',
     'number',
     '900',
@@ -561,9 +555,9 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    '—',
+    'SlottedProvider',
     'TimeRangePicker',
-    'BCP 47. Decides the field order, the digits, the day-period names and the duration’s words.',
+    'BCP 47. Decides the field order, the digits, the day-period names and the duration’s units. Unset, the language in force decides.',
   ],
   ['timeZone', 'string', '—', 'TimeRangePicker', 'The zone "now" is read in.'],
   [
@@ -640,62 +634,11 @@ const api: ApiRow[] = apiRows([
     'Whether the field in the band takes the relative expression — +40, 1h30, = — the way a time-field does.',
   ],
   [
-    'startLabel',
-    'string',
-    'Start',
+    'messages',
+    'Partial<TimeRangePickerMessages>',
+    '—',
     'TimeRangePicker',
-    'The start tab’s label, and the field’s name while the start is current.',
-  ],
-  [
-    'endLabel',
-    'string',
-    'End',
-    'TimeRangePicker',
-    'The end tab’s label, and the field’s name while the end is current.',
-  ],
-  [
-    'chooseLabel',
-    'string',
-    'Choose range',
-    'TimeRangePicker',
-    'The trigger’s name and the frame’s placeholder while nothing is chosen.',
-  ],
-  [
-    'changeLabel',
-    'string',
-    'Change range',
-    'TimeRangePicker',
-    'The trigger’s name once a range is chosen, before the two times.',
-  ],
-  ['clearLabel', 'string', 'Clear range', 'TimeRangePicker', 'The clear’s name.'],
-  ['nowLabel', 'string', 'Now', 'TimeRangePicker', 'The now control beside the field.'],
-  [
-    'doneLabel',
-    'string',
-    'Done',
-    'TimeRangePicker',
-    'The button at the end of the footer that closes with what is written.',
-  ],
-  [
-    'hintLabels',
-    'Partial<TimeRangePickerHintLabels>',
-    'English',
-    'TimeRangePicker',
-    'What the hint says: choose while the current end is missing, with {end} for its label; order, length, unavailable and bounds while the work is whole and invalid.',
-  ],
-  [
-    'emptyLabel',
-    'string',
-    'No time available',
-    'TimeRangePicker',
-    'What a panel says when its end has no time at all.',
-  ],
-  [
-    'truncatedLabel',
-    'string',
-    'Only the first times are listed; type the rest into the field',
-    'TimeRangePicker',
-    'A list’s description when it stops at maxOptions.',
+    'Words laid over the language in force, key by key: the two ends (start, end), the trigger’s names (choose; change with {start}, {end} and {length}; changeReversed), the hint (chooseTime with {end}; order, length, unavailable, bounds), the limit (limit.between, limit.atLeast, limit.atMost), now, done, clear, and a panel that is empty or cut short (empty, truncated).',
   ],
   [
     'startName',
@@ -758,7 +701,7 @@ const composition: ApiRow[] = apiRows([
     'component',
     '—',
     'application',
-    'Sets locale, timeZone, hourCycle, granularity, step, maxOptions, unavailableOptions, closeOnSelect, placement, size, variant, lengthLabel, limitLabel, hintLabels and every label once for everything under it.',
+    'Sets timeZone, hourCycle, granularity, step, maxOptions, unavailableOptions, closeOnSelect, placement, size, variant and lengthLabel once for everything under it. The locale and the words come from SlottedProvider.',
   ],
   [
     'TimeRangePickerPreset',

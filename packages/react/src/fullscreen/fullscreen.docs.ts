@@ -62,7 +62,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: true,
     purpose:
-      'The words — “Full screen” or “Exit full screen” from the messages, or the consumer’s. With iconOnly they are visually hidden and stay the accessible name.',
+      'The words — “Full screen” or “Exit full screen” from the catalog of the language in force, or the consumer’s. With iconOnly they are visually hidden and stay the accessible name.',
   },
 ];
 
@@ -239,15 +239,12 @@ const handle = useFullscreen(chart);
   {
     id: 'composition',
     title: 'Defaults once, words and mark of the consumer',
-    note: 'A provider sets the control’s step, variant and messages for a subtree. children and icon take a function of the state, so a “Present” control keeps following it; render puts the wiring on the consumer’s own element.',
+    note: 'A provider sets the control’s step and variant for a subtree. children and icon take a function of the state, so a “Present” control keeps following it; render puts the wiring on the consumer’s own element.',
     snippet: defineSnippet({
       id: 'fullscreen-react-composition',
       language: 'tsx',
       label: 'A provider and a label that follows the state',
-      source: `<FullscreenDefaultsProvider
-  messages={{ enter: 'Tela cheia', exit: 'Sair da tela cheia' }}
-  size="sm"
->
+      source: `<FullscreenDefaultsProvider size="sm">
   <Fullscreen>
     <FullscreenTrigger icon={(on) => (on ? <X size={14} /> : <Presentation size={14} />)}>
       {(on) => (on ? 'Terminar' : 'Apresentar')}
@@ -313,10 +310,10 @@ export const REACT_FULLSCREEN_DOCS = {
       ],
       [
         'messages',
-        'Partial<{ enter, exit, entered, exited }>',
-        'English',
+        'Partial<FullscreenMessages>',
+        '—',
         'Fullscreen',
-        'The two labels of the control and the two announcements. entered says how to leave',
+        'Words laid over the language in force, key by key: the two labels of the control (enter, exit) and the two announcements (entered, exited). entered says how to leave',
       ],
       [
         'size',
@@ -385,10 +382,10 @@ export const REACT_FULLSCREEN_DOCS = {
       ],
       [
         'FullscreenDefaultsProvider',
-        '{ mode, navigationUI, size, variant, messages }',
+        '{ mode, navigationUI, size, variant }',
         '—',
         'a subtree',
-        'The decisions an application takes once; messages merge key by key, and an instance still wins',
+        'The decisions an application takes once; an instance still wins',
       ],
       [
         'render',

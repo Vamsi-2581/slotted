@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "avatar",
   "ui": "avatar",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Image or initials that stand for a person."
+  },
   "fallbackOrder": ["image", "initials", "glyph"],
   "autoTonePalette": ["accent", "secondary", "success", "warning", "danger"],
   "axes": {

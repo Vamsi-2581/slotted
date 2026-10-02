@@ -42,7 +42,6 @@ test('names three variants and no tone scale', () => {
 test('carries the two parts an external link owes the reader', () => {
   assert.deepEqual(link.parts, ['root', 'external-icon', 'external-hint']);
   assert.equal(link.defaults.external, false);
-  assert.equal(link.defaults.externalHint, '(opens in a new tab)');
 });
 
 test('paints a disabled link and holds the weaker states back for it', () => {

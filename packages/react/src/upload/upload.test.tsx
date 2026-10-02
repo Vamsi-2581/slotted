@@ -1,3 +1,4 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createRef } from 'react';
@@ -5,9 +6,10 @@ import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/upload/contract.json';
 import { Field, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { Upload } from './upload';
 import { UploadDefaultsProvider } from './upload-defaults';
-import type { UploadFile, UploadHandle, UploadQueueMessage } from './upload.types';
+import type { UploadFile, UploadHandle } from './upload.types';
 
 function makeFile(name: string, { size = 100, type = '', lastModified = 1 } = {}): File {
   const file = new File(['x'], name, { type, lastModified });
@@ -293,20 +295,23 @@ describe('Upload', () => {
       expect(part('dropzone')).not.toHaveAttribute('data-browsable');
     });
 
-    it('writes the summary and the field count through the provider', () => {
-      const describeQueue = vi.fn((message: UploadQueueMessage) => `queue:${message.kind}`);
-      render(
-        <UploadDefaultsProvider describeQueue={describeQueue}>
-          <Upload
-            defaultFiles={[stored('a.pdf', 'success'), stored('b.pdf', 'ready')]}
-            multiple
-            variant="field"
-          />
-        </UploadDefaultsProvider>,
-      );
+    it('writes the summary and the field count in the catalog, and in its own messages', () => {
+      const files = [stored('a.pdf', 'success'), stored('b.pdf', 'ready')];
+      const { rerender } = render(<Upload defaultFiles={files} multiple variant="field" />);
 
-      expect(part('summary')).toHaveTextContent('queue:summary');
-      expect(part('meta')).toHaveTextContent('queue:selection');
+      expect(part('summary')).toHaveTextContent('1 of 2 uploaded');
+      expect(part('meta')).toHaveTextContent('2 files');
+
+      rerender(
+        <Upload
+          defaultFiles={files}
+          messages={{ selection: 'queue:{count}', summary: 'queue:{uploaded}/{total}' }}
+          multiple
+          variant="field"
+        />,
+      );
+      expect(part('summary')).toHaveTextContent('queue:1/2');
+      expect(part('meta')).toHaveTextContent('queue:2');
     });
 
     it('announces arrivals, failures and the end of the queue, in the provider’s words', async () => {
@@ -385,8 +390,8 @@ describe('Upload', () => {
 
   it('lets an application decide once, and an instance decide for itself', () => {
     render(
-      <UploadDefaultsProvider labels={{ trigger: 'Anexar' }} size="lg">
-        <Upload />
+      <UploadDefaultsProvider size="lg">
+        <Upload messages={{ trigger: 'Anexar' }} />
         <Upload data-testid="own" size="sm" />
       </UploadDefaultsProvider>,
     );
@@ -395,6 +400,21 @@ describe('Upload', () => {
     expect(roots[0]).toHaveAttribute('data-size', 'lg');
     expect(roots[1]).toHaveAttribute('data-size', 'sm');
     expect(roots[0]?.querySelector('[data-part="trigger"]')).toHaveTextContent('Anexar');
+    expect(roots[1]?.querySelector('[data-part="trigger"]')).toHaveTextContent('Browse files');
+  });
+
+  it('speaks the language in force: the controls, the reason a file was refused, its size', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Upload maxSize={1000} />
+      </SlottedProvider>,
+    );
+    choose([makeFile('grande.pdf', { size: 1_500_000, type: 'application/pdf' })]);
+
+    expect(input()).toHaveAccessibleName('Procurar arquivos');
+    expect(part('status')).toHaveTextContent('Recusado');
+    expect(part('message')).toHaveTextContent('Este arquivo tem 1,5 MB e é grande demais.');
+    expect(screen.getByRole('button', { name: 'Remover: grande.pdf' })).toBeVisible();
   });
 
   /**

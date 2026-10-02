@@ -110,7 +110,7 @@ import { SessionStore } from '../../core/session/session.store';
         @if (form.open()) {
           <form
             slForm
-            summaryTitle="This address was not added"
+            [messages]="{ summaryTitle: 'This address was not added' }"
             [errors]="form.errors()"
             (errorsChange)="form.errors.set($event.value)"
             [loading]="form.saving()"
@@ -265,7 +265,7 @@ import { SessionStore } from '../../core/session/session.store';
                 slButton
                 type="submit"
                 [loading]="form.saving()"
-                loadingLabel="Adding the address"
+                [messages]="{ loading: 'Adding the address' }"
               >
                 Add address
               </button>

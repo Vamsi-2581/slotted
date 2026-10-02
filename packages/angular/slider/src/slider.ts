@@ -30,6 +30,7 @@ import {
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import { SlField } from '@slotted/angular/field';
+import { injectLocale } from '@slotted/angular/i18n';
 
 import { injectSliderDefaults } from './slider-defaults';
 import type {
@@ -182,7 +183,7 @@ export class SlSlider implements ControlValueAccessor {
   readonly marks = input<readonly (number | SliderMark)[] | undefined>(undefined);
   /** How the value is written, through `Intl.NumberFormat`. */
   readonly format = input<Intl.NumberFormatOptions | undefined>(undefined);
-  /** BCP 47. Defaults to the token, then to the runtime's own locale. */
+  /** BCP 47. Unset, the language in force decides. */
   readonly locale = input<string | undefined>(undefined);
   /** The accessible name of each thumb, in order. */
   readonly thumbLabels = input<readonly string[] | undefined>(undefined);
@@ -219,6 +220,7 @@ export class SlSlider implements ControlValueAccessor {
   private readonly track = viewChild<ElementRef<HTMLElement>>('track');
   private readonly field = inject(SlField, { optional: true });
   private readonly defaults = injectSliderDefaults();
+  private readonly appLocale = injectLocale();
 
   private readonly writtenId = inject(new HostAttributeToken('id'), { optional: true });
   private readonly writtenName = inject(new HostAttributeToken('name'), { optional: true });
@@ -261,10 +263,9 @@ export class SlSlider implements ControlValueAccessor {
   });
 
   private readonly formatter = computed(() => {
-    const locale = this.locale() ?? this.defaults.locale;
     const options = this.format();
     return createNumberFormat({
-      ...(locale === undefined ? {} : { locale }),
+      locale: this.locale() ?? this.appLocale(),
       ...(options === undefined ? {} : { options }),
     });
   });

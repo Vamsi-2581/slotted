@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "description-list",
   "ui": "description-list",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Term and value pairs for record details."
+  },
   "rootElement": "div",
   "itemElement": "div",
   "termElement": "dt",
@@ -117,7 +121,7 @@
     }
   },
   "provides": {
-    "descriptionListDefaults": ["layout", "columns", "variant", "termWidth", "labels"],
+    "descriptionListDefaults": ["layout", "columns", "variant", "termWidth"],
     "toParts": ["layout", "columns", "variant"]
   },
   "stateAttributes": {
@@ -198,15 +202,8 @@
   },
   "listElement": "dl",
   "rootReason": "A container cannot answer its own container query: `container-type: inline-size` makes an element a query container for its descendants and not for itself. The tracks and the arrangement are what the query changes, so the query container is the root and the grid is the list — the same division `stepper` makes between its root and its `ol`, and `breadcrumb` between its `nav` and its own.",
-  "labels": {
-    "copy": "Copy",
-    "copied": "Copied",
-    "reveal": "Show more",
-    "collapse": "Show less",
-    "placeholder": "Not provided",
-    "copyBlocked": "Value selected — copy it with your keyboard"
-  },
-  "labelsReason": "The five words the family says, in one input rather than five: an application translates them once and a family that spread them across the root would make four of the five a prop nobody sets. `stepper` groups its own the same way, and neither set is a declared default — a default is a value a consumer overrides one at a time.",
+  "messages": ["collapse", "copied", "copy", "copyBlocked", "placeholder", "reveal"],
+  "messagesReason": "The six words the family says come from the catalog of the language in force, laid over by one `messages` input rather than six: an application translates them once through its provider, and a family that spread them across the root would make five of the six a prop nobody sets. None of them is a declared default — a default is a value a consumer overrides one at a time.",
   "reveal": {
     "control": "toggle",
     "appears": "only where the value wants more room than the clamp gives it",

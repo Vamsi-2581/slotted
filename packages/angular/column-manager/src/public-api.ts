@@ -7,7 +7,6 @@ export {
 } from './column-manager';
 export {
   COLUMN_MANAGER_DEFAULTS,
-  DEFAULT_COLUMN_MANAGER_LABELS,
   injectColumnManagerDefaults,
   provideColumnManagerDefaults,
   SlColumnManagerIdFactory,
@@ -16,7 +15,6 @@ export type {
   ColumnManagerApply,
   ColumnManagerColumnReason,
   ColumnManagerDefaults,
-  ColumnManagerLabels,
   ColumnManagerOpenReason,
   ColumnManagerOpenRequest,
   ColumnManagerPresentation,

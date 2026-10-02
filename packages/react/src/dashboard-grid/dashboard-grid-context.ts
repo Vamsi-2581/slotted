@@ -1,9 +1,9 @@
 import type {
   DashboardDirection,
-  DashboardGridLabels,
   DashboardSizeClass,
   DashboardTile,
 } from '@slotted/core/dashboard-grid';
+import type { DashboardGridMessages, FamilyTranslator } from '@slotted/core/i18n';
 import { createContext, useContext } from 'react';
 import type { KeyboardEvent, PointerEvent } from 'react';
 
@@ -37,7 +37,8 @@ export interface DashboardSlot {
 
 export interface DashboardGridContextValue {
   readonly editing: boolean;
-  readonly labels: DashboardGridLabels;
+  /** The family's words in the language in force, with the grid's `messages` laid over them. */
+  readonly t: FamilyTranslator<DashboardGridMessages>;
   readonly headingLevel: DashboardHeadingLevel;
   readonly statusId: string;
   readonly sizeClass: DashboardSizeClass;

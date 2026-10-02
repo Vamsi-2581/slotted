@@ -1,6 +1,7 @@
 import '@slotted/styles/select/select.css';
 
 import { createFilter } from '@slotted/core/collection';
+import { selectMessages, type FamilyTranslator, type SelectMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import {
   createContext,
@@ -15,6 +16,7 @@ import {
 import type { MutableRefObject } from 'react';
 
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { useSelectDefaults } from './select-defaults';
 import type {
   SelectAlign,
@@ -44,18 +46,13 @@ export interface SelectContextValue {
   alignOffset: number;
   clear: (reason: SelectValueReason, source?: unknown) => void;
   clearable: boolean;
-  clearLabel: string;
-  removeLabel: string;
-  summaryLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   closeOnSelect: boolean;
   collisionPadding: number;
   contentId: string;
   contentNode: HTMLElement | null;
-  countLabel: string;
   disabled: boolean;
-  emptyLabel: string;
   entry: MutableRefObject<SelectEntry>;
   flip: boolean;
   form: string | undefined;
@@ -67,8 +64,8 @@ export interface SelectContextValue {
   labelFor: (value: SelectOptionValue) => string | undefined;
   listId: string;
   loading: boolean;
-  loadingLabel: string;
-  locale: string | undefined;
+  /** The locale the default filter compares in: the `locale` prop, or the language in force. */
+  locale: string;
   loop: boolean;
   /** Whether an option's label answers the query. Always true while it is empty. */
   matches: (label: string) => boolean;
@@ -85,9 +82,7 @@ export interface SelectContextValue {
   required: boolean;
   search: boolean;
   searchId: string;
-  searchLabel: string;
   searchNode: HTMLInputElement | null;
-  searchPlaceholder: string;
   seen: boolean;
   selection: readonly SelectOptionValue[];
   setContentNode: (node: HTMLElement | null) => void;
@@ -105,6 +100,8 @@ export interface SelectContextValue {
   sideOffset: number;
   size: SelectSize;
   strategy: SelectStrategy;
+  /** The family's words in the language in force, with this select's `messages` laid over them. */
+  t: FamilyTranslator<SelectMessages>;
   toggle: (value: SelectOptionValue, reason: SelectValueReason, source?: unknown) => void;
   total: number | undefined;
   triggerId: string;
@@ -174,20 +171,15 @@ export function Select({
   alignOffset,
   children,
   clearable,
-  clearLabel,
-  removeLabel,
-  summaryLabel,
   closeOnEscape,
   closeOnOutsidePress,
   closeOnSelect,
   collisionPadding,
-  countLabel,
   defaultHighlightedValue = null,
   defaultOpen = false,
   defaultSearchValue = '',
   defaultValue,
   disabled,
-  emptyLabel,
   filter,
   flip,
   form,
@@ -198,9 +190,9 @@ export function Select({
   invalid,
   items,
   loading,
-  loadingLabel,
-  locale,
+  locale: localeProp,
   loop,
+  messages,
   mount,
   multiple,
   name,
@@ -214,8 +206,6 @@ export function Select({
   ref,
   required,
   search,
-  searchLabel,
-  searchPlaceholder,
   searchValue,
   shift,
   side,
@@ -231,6 +221,9 @@ export function Select({
 }: SelectProps) {
   const defaults = useSelectDefaults();
   const field = useField();
+  const t = useMessages(selectMessages, messages);
+  const inForce = useLocale();
+  const locale = localeProp ?? inForce;
 
   const generated = useId();
   const contentId = `${generated}listbox`;
@@ -514,18 +507,13 @@ export function Select({
     alignOffset: alignOffset ?? defaults.alignOffset,
     clear,
     clearable: clearable ?? defaults.clearable,
-    clearLabel: clearLabel ?? defaults.clearLabel,
-    removeLabel: removeLabel ?? defaults.removeLabel,
-    summaryLabel: summaryLabel ?? defaults.summaryLabel,
     closeOnEscape: closeOnEscape ?? defaults.closeOnEscape,
     closeOnOutsidePress: closeOnOutsidePress ?? defaults.closeOnOutsidePress,
     closeOnSelect: closeOnSelect ?? defaults.closeOnSelect,
     collisionPadding: collisionPadding ?? defaults.collisionPadding,
     contentId,
     contentNode,
-    countLabel: countLabel ?? defaults.countLabel,
     disabled: resolvedDisabled,
-    emptyLabel: emptyLabel ?? defaults.emptyLabel,
     entry,
     flip: flip ?? defaults.flip,
     form,
@@ -537,7 +525,6 @@ export function Select({
     labelFor,
     listId,
     loading: loading ?? defaults.loading,
-    loadingLabel: loadingLabel ?? defaults.loadingLabel,
     locale,
     loop: loop ?? defaults.loop,
     matches,
@@ -553,9 +540,7 @@ export function Select({
     required: required ?? field?.required ?? defaults.required,
     search: resolvedSearch,
     searchId,
-    searchLabel: searchLabel ?? defaults.searchLabel,
     searchNode,
-    searchPlaceholder: searchPlaceholder ?? defaults.searchPlaceholder,
     seen: seen.current,
     selection: currentSelection,
     setContentNode,
@@ -569,6 +554,7 @@ export function Select({
     sideOffset: sideOffset ?? defaults.sideOffset,
     size: size ?? field?.size ?? defaults.size,
     strategy: strategy ?? defaults.strategy,
+    t,
     toggle,
     total,
     triggerId,

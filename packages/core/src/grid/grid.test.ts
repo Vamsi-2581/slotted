@@ -37,6 +37,9 @@ import {
   type GridColumn,
 } from './index';
 
+/** What a boolean cell says; the bindings take it from their catalog. */
+const booleans = { true: 'Yes', false: 'No' };
+
 interface Shipment {
   id: string;
   customer: string;
@@ -257,6 +260,7 @@ describe('toCsv', () => {
         { id: 'b', name: 'Bolt', note: 'two\nlines', weight: null, sent: false },
       ],
       csvColumns,
+      { booleans },
     );
     expect(csv).toBe(
       'Id,"Name, full",Note,Weight,Sent\r\n' +
@@ -272,10 +276,10 @@ describe('toCsv', () => {
         { id: 'id', label: 'Id' },
         { id: 'n', label: 'N', kind: 'number' },
       ],
-      { delimiter: ';', header: false, bom: true, locale: 'de-DE' },
+      { delimiter: ';', header: false, bom: true, locale: 'de-DE', booleans },
     );
     expect(csv).toBe('﻿a;1,5\r\n');
-    expect(toCsv([], [])).toBe('');
+    expect(toCsv([], [], { booleans })).toBe('');
   });
 });
 
@@ -384,7 +388,7 @@ describe('applyQuery', () => {
       sort: [{ column: 'weight' as const, direction: 'descending' as const }],
       search: 'a',
     };
-    const result = applyQuery(rows, columns, query, { rowKey });
+    const result = applyQuery(rows, columns, query, { rowKey, booleans });
     /* Every customer with an `a`: Aurora, Casa Verde, Ärger (base sensitivity). */
     expect(result.total).toBe(3);
     expect(result.rows.map((row) => row.id)).toEqual(['S1', 'S4', 'S5']);
@@ -398,21 +402,21 @@ describe('applyQuery', () => {
       rows,
       columns,
       { ...emptyQuery(), sort: [{ column: 'weight', direction: 'ascending' }] },
-      { rowKey },
+      { rowKey, booleans },
     );
     expect(asc.rows.map((row) => row.id)).toEqual(['S5', 'S2', 'S4', 'S1', 'S3']);
     const desc = applyQuery(
       rows,
       columns,
       { ...emptyQuery(), sort: [{ column: 'weight', direction: 'descending' }] },
-      { rowKey },
+      { rowKey, booleans },
     );
     expect(desc.rows.map((row) => row.id)).toEqual(['S1', 'S4', 'S2', 'S5', 'S3']);
     const text = applyQuery(
       rows,
       columns,
       { ...emptyQuery(), sort: [{ column: 'customer', direction: 'ascending' }] },
-      { rowKey, locale: 'en' },
+      { rowKey, locale: 'en', booleans },
     );
     expect(text.rows.map((row) => row.customer)).toEqual([
       'Ärger',
@@ -431,7 +435,7 @@ describe('applyQuery', () => {
       group: ['carrier', 'priority'],
       sort: [{ column: 'id' as const, direction: 'ascending' as const }],
     };
-    const open = applyQuery(rows, columns, query, { rowKey });
+    const open = applyQuery(rows, columns, query, { rowKey, booleans });
     const keys = open.nodes.map((node) =>
       node.kind === 'group' ? `${node.level}:${node.key}` : node.key,
     );
@@ -455,6 +459,7 @@ describe('applyQuery', () => {
     expect(dhl.aggregates).toEqual({ weight: 206.8 });
     const closed = applyQuery(rows, columns, query, {
       rowKey,
+      booleans,
       expandedGroups: ['carrier=UPS', 'carrier=UPS/priority=No'],
     });
     expect(closed.nodes.map((node) => node.key)).toEqual([
@@ -468,15 +473,17 @@ describe('applyQuery', () => {
   });
 
   it('formats by kind and by the column’s own format', () => {
-    expect(cellText(columns[3]!, rows[0]!, { locale: 'en-US' })).toBe('142.5');
-    expect(cellText(columns[3]!, rows[2]!)).toBe('');
+    expect(cellText(columns[3]!, rows[0]!, { locale: 'en-US', booleans })).toBe('142.5');
+    expect(cellText(columns[3]!, rows[2]!, { booleans })).toBe('');
     expect(cellText(columns[5]!, rows[0]!, { booleans: { true: 'Sim', false: 'Não' } })).toBe(
       'Sim',
     );
-    expect(cellText({ ...columns[4]!, format: (value) => `on ${String(value)}` }, rows[0]!)).toBe(
-      'on 2026-09-12',
-    );
-    expect(cellText(columns[4]!, rows[0]!, { locale: 'en-US' })).toBe('Sep 12, 2026');
+    expect(
+      cellText({ ...columns[4]!, format: (value) => `on ${String(value)}` }, rows[0]!, {
+        booleans,
+      }),
+    ).toBe('on 2026-09-12');
+    expect(cellText(columns[4]!, rows[0]!, { locale: 'en-US', booleans })).toBe('Sep 12, 2026');
   });
 });
 
@@ -508,7 +515,11 @@ describe('applyQuery with a tree', () => {
     );
 
   it('flattens the open branches in order, roots first, an orphan as a root', () => {
-    const closed = applyQuery(sites, siteColumns, emptyQuery(), { rowKey: (row) => row.id, tree });
+    const closed = applyQuery(sites, siteColumns, emptyQuery(), {
+      rowKey: (row) => row.id,
+      booleans,
+      tree,
+    });
     expect(keys(closed)).toEqual(['pt', 'es', 'orphan']);
     const node = closed.nodes[0]!;
     expect(node.kind === 'row' && [node.level, node.parent, node.childCount, node.open]).toEqual([
@@ -521,6 +532,7 @@ describe('applyQuery with a tree', () => {
 
     const open = applyQuery(sites, siteColumns, emptyQuery(), {
       rowKey: (row) => row.id,
+      booleans,
       tree,
       expanded: ['pt', 'pt-lis'],
     });
@@ -544,7 +556,7 @@ describe('applyQuery with a tree', () => {
       sites,
       siteColumns,
       { ...emptyQuery(), sort: [{ column: 'stock', direction: 'descending' }] },
-      { rowKey: (row) => row.id, tree, expanded: ['pt', 'pt-lis'] },
+      { rowKey: (row) => row.id, booleans, tree, expanded: ['pt', 'pt-lis'] },
     );
     expect(keys(sorted)).toEqual([
       'orphan',
@@ -560,7 +572,7 @@ describe('applyQuery with a tree', () => {
       sites,
       siteColumns,
       { ...emptyQuery(), search: 'zona b' },
-      { rowKey: (row) => row.id, tree, expanded: ['pt', 'pt-lis'] },
+      { rowKey: (row) => row.id, booleans, tree, expanded: ['pt', 'pt-lis'] },
     );
     expect(keys(searched)).toEqual(['pt', '  pt-lis', '    pt-lis-b']);
     expect(searched.total).toBe(3);
@@ -569,7 +581,7 @@ describe('applyQuery with a tree', () => {
       sites,
       siteColumns,
       { ...emptyQuery(), search: 'zona b' },
-      { rowKey: (row) => row.id, tree },
+      { rowKey: (row) => row.id, booleans, tree },
     );
     expect(keys(closedSearch)).toEqual(['pt']);
   });
@@ -579,7 +591,7 @@ describe('applyQuery with a tree', () => {
       sites,
       siteColumns,
       { ...emptyQuery({ index: 1, size: 3 }), group: ['name'] },
-      { rowKey: (row) => row.id, tree, expanded: ['pt', 'pt-lis'] },
+      { rowKey: (row) => row.id, booleans, tree, expanded: ['pt', 'pt-lis'] },
     );
     expect(keys(page)).toEqual(['    pt-lis-b', '  pt-por', 'es']);
     expect(page.total).toBe(7);

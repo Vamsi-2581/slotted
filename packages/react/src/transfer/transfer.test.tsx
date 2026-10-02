@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, within } from '@testing-library/react';
 import { useRef } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { Field, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { Transfer } from './transfer';
 import { TransferDefaultsProvider } from './transfer-defaults';
 import type {
@@ -272,16 +274,26 @@ describe('Transfer', () => {
     expect(inputs.map((input) => input.value)).toEqual(['ana', 'bruno']);
   });
 
-  it('takes its words and its look from the defaults provider, and its own props over them', () => {
+  it('takes its look from the defaults provider, and its own messages over the language', () => {
     render(
-      <TransferDefaultsProvider labels={{ source: 'Pool', moveToTarget: 'Grant' }} size="sm">
-        <Transfer items={ITEMS} labels={{ target: 'Granted' }} />
+      <TransferDefaultsProvider size="sm">
+        <Transfer items={ITEMS} messages={{ target: 'Granted', moveToTarget: 'Grant' }} />
       </TransferDefaultsProvider>,
     );
-    expect(within(pane('source')).getByText('Pool')).toBeInTheDocument();
+    expect(within(pane('source')).getByText('Available')).toBeInTheDocument();
     expect(within(pane('target')).getByText('Granted')).toBeInTheDocument();
     expect(button('move-to-target')).toHaveTextContent('Grant');
     expect(document.querySelector('[data-ui="transfer"]')).toHaveAttribute('data-size', 'sm');
+  });
+
+  it('speaks the language in force', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Transfer items={ITEMS} />
+      </SlottedProvider>,
+    );
+    expect(within(pane('source')).getByText('Disponíveis')).toBeInTheDocument();
+    expect(button('move-to-target')).toHaveTextContent('Adicionar');
   });
 
   it('is named and disabled by the field around it, and its lists are not', () => {

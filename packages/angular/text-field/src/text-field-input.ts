@@ -22,7 +22,7 @@ import type { ControlValueAccessor } from '@angular/forms';
 import { SlField } from '@slotted/angular/field';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 
-import { injectTextFieldDefaults, SlTextFieldControl } from './text-field-defaults';
+import { SlTextFieldControl } from './text-field-defaults';
 import type { TextFieldType } from './text-field-defaults';
 import { SlTextField } from './text-field';
 
@@ -131,7 +131,6 @@ export class SlTextFieldInput implements ControlValueAccessor, OnInit, SlTextFie
    */
   readonly textField = inject(SlTextField);
   private readonly field = inject(SlField, { optional: true });
-  private readonly defaults = injectTextFieldDefaults();
 
   private readonly writtenId = inject(new HostAttributeToken('id'), { optional: true });
   private readonly writtenType = inject(new HostAttributeToken('type'), { optional: true });
@@ -326,9 +325,7 @@ export class SlTextFieldInput implements ControlValueAccessor, OnInit, SlTextFie
     if (!this.password() || typeof event.getModifierState !== 'function') return;
     const on = event.getModifierState('CapsLock');
     if (on && !this.ownCapsLock()) {
-      getLiveAnnouncer(this.element.ownerDocument).announce(
-        this.textField.capsLockLabel() ?? this.defaults.capsLockLabel,
-      );
+      getLiveAnnouncer(this.element.ownerDocument).announce(this.textField.t('capsLock'));
     }
     this.ownCapsLock.set(on);
   }

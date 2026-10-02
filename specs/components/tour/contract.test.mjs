@@ -139,9 +139,10 @@ test('lets an application set every default once', () => {
   for (const axis of Object.keys(contract.resolution)) {
     assert.ok(provided.includes(axis), `${axis} is not provided`);
   }
-  for (const label of Object.keys(contract.labels).filter((key) => key !== 'reason')) {
-    assert.ok(provided.includes(`labels.${label}`), `label ${label} is not provided`);
-  }
+  assert.ok(
+    provided.every((key) => !key.startsWith('labels')),
+    'words come from the catalog, not the defaults provider',
+  );
 });
 
 test('declares one scenario per capability the reference page has to show', () => {

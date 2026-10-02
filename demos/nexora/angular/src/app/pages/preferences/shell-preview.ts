@@ -104,7 +104,13 @@ const RAIL = 9;
           <stop offset="1" stop-color="var(--slotted-surface-sunken)" />
         </radialGradient>
       </defs>
-      <rect [class]="preset().wash ? 'wash' : 'frame'" x="0" y="0" [attr.width]="width" [attr.height]="height" />
+      <rect
+        [class]="preset().wash ? 'wash' : 'frame'"
+        x="0"
+        y="0"
+        [attr.width]="width"
+        [attr.height]="height"
+      />
       @for (region of regions(); track $index) {
         <rect
           [class]="region.ground + (region.card ? ' card' : '')"
@@ -116,7 +122,13 @@ const RAIL = 9;
         />
       }
       @for (seam of seams(); track $index) {
-        <line class="seam" [attr.x1]="seam.x1" [attr.y1]="seam.y1" [attr.x2]="seam.x2" [attr.y2]="seam.y2" />
+        <line
+          class="seam"
+          [attr.x1]="seam.x1"
+          [attr.y1]="seam.y1"
+          [attr.x2]="seam.x2"
+          [attr.y2]="seam.y2"
+        />
       }
       @for (row of rows(); track $index) {
         <rect
@@ -129,7 +141,14 @@ const RAIL = 9;
         />
       }
       @for (block of blocks(); track $index) {
-        <rect class="block" [attr.x]="block.x" [attr.y]="block.y" [attr.width]="block.w" [attr.height]="block.h" rx="1.2" />
+        <rect
+          class="block"
+          [attr.x]="block.x"
+          [attr.y]="block.y"
+          [attr.width]="block.w"
+          [attr.height]="block.h"
+          rx="1.2"
+        />
       }
     </svg>
   `,
@@ -179,7 +198,14 @@ export class ShellPreview {
     }
     if (p.canvas === 'inset' || p.canvas === 'floating') {
       const top = navFirst ? bar.y : main.y;
-      regions.push({ x: main.x, y: top, w: main.w, h: main.y + main.h - top, ground: 'surface', card: true });
+      regions.push({
+        x: main.x,
+        y: top,
+        w: main.w,
+        h: main.y + main.h - top,
+        ground: 'surface',
+        card: true,
+      });
     }
     if (p.canvas === 'floating') {
       regions.push({ ...nav, ground: p.darkNav ? 'dark' : 'surface', card: true });
@@ -218,10 +244,12 @@ export class ShellPreview {
     const { bar, nav, navFirst } = this.layout();
     const seams: Seam[] = [];
     const flushOrPanel = p.canvas === 'flush' || p.canvas === 'panel';
-    if (flushOrPanel) seams.push({ x1: nav.x + nav.w, y1: nav.y, x2: nav.x + nav.w, y2: nav.y + nav.h });
+    if (flushOrPanel)
+      seams.push({ x1: nav.x + nav.w, y1: nav.y, x2: nav.x + nav.w, y2: nav.y + nav.h });
     if (p.canvas === 'flush' && !navFirst) seams.push({ x1: 0, y1: BAR, x2: W, y2: BAR });
     if (navFirst) seams.push({ x1: bar.x, y1: bar.y + BAR, x2: bar.x + bar.w, y2: bar.y + BAR });
-    if (p.twoLevel) seams.push({ x1: nav.x + RAIL, y1: nav.y + 2, x2: nav.x + RAIL, y2: nav.y + nav.h - 2 });
+    if (p.twoLevel)
+      seams.push({ x1: nav.x + RAIL, y1: nav.y + 2, x2: nav.x + RAIL, y2: nav.y + nav.h - 2 });
     return seams;
   });
 
@@ -230,15 +258,30 @@ export class ShellPreview {
     const p = this.preset();
     const { nav } = this.layout();
     const dark = p.darkNav === true;
-    const rows: { x: number; y: number; w: number; h: number; current: boolean; dark: boolean }[] = [];
+    const rows: { x: number; y: number; w: number; h: number; current: boolean; dark: boolean }[] =
+      [];
     const left = nav.x + (p.twoLevel ? RAIL : 0) + 3;
     const width = nav.w - (p.twoLevel ? RAIL : 0) - 6;
     for (let i = 0; i < 5; i++) {
-      rows.push({ x: left, y: nav.y + 5 + i * 6, w: i === 0 ? width * 0.7 : width, h: 3, current: i === 2, dark });
+      rows.push({
+        x: left,
+        y: nav.y + 5 + i * 6,
+        w: i === 0 ? width * 0.7 : width,
+        h: 3,
+        current: i === 2,
+        dark,
+      });
     }
     if (p.twoLevel) {
       for (let i = 0; i < 4; i++) {
-        rows.push({ x: nav.x + 2.5, y: nav.y + 4 + i * 6, w: RAIL - 5, h: 4, current: i === 1, dark });
+        rows.push({
+          x: nav.x + 2.5,
+          y: nav.y + 4 + i * 6,
+          w: RAIL - 5,
+          h: 4,
+          current: i === 1,
+          dark,
+        });
       }
     }
     return rows;

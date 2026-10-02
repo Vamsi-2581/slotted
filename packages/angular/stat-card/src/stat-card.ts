@@ -9,16 +9,16 @@ import {
   numberAttribute,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
+import { type PartialMessages, statCardMessages, type StatCardMessages } from '@slotted/core/i18n';
 
 import { injectStatCardDefaults } from './stat-card-defaults';
 import {
-  STAT_CARD_MESSAGES,
   toneOf,
   trendOf,
   type StatCardFill,
   type StatCardGoodWhen,
   type StatCardLayout,
-  type StatCardMessages,
   type StatCardSize,
   type StatCardTone,
   type StatCardValueStatus,
@@ -82,12 +82,20 @@ export class SlStatCard {
   readonly delta = input<number | undefined, unknown>(undefined, { transform: optionalNumber });
   /** The tone the card hands to its trend. Unset, it is the delta's. */
   readonly tone = input<StatCardTone | undefined>(undefined);
+  /** The locale numbers are written in; the language in force when absent. */
   readonly locale = input<string | undefined>(undefined);
   /** How the value, the delta and the comparison read numbers. */
   readonly formatOptions = input<Intl.NumberFormatOptions | undefined>(undefined);
-  readonly messages = input<Partial<StatCardMessages> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: what a
+   * screen reader hears beside a change (`up`, `down`, `flat`, read before the
+   * number because a sign is a glyph some readers skip) and what stands in for
+   * a value that is not there (`empty`).
+   */
+  readonly messages = input<PartialMessages<StatCardMessages> | undefined>(undefined);
 
   private readonly defaults = injectStatCardDefaults();
+  private readonly appLocale = injectLocale();
   private readonly ownLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
   private readonly ownLabelledBy = inject(new HostAttributeToken('aria-labelledby'), {
     optional: true,
@@ -100,15 +108,12 @@ export class SlStatCard {
   readonly resolvedFill = computed(() => this.fill() ?? this.defaults.fill ?? 'outline');
   readonly resolvedLayout = computed(() => this.layout() ?? this.defaults.layout ?? 'inline');
   readonly resolvedGoodWhen = computed(() => this.goodWhen() ?? this.defaults.goodWhen ?? 'up');
-  readonly resolvedLocale = computed(() => this.locale() ?? this.defaults.locale);
+  readonly resolvedLocale = computed(() => this.locale() ?? this.appLocale());
   readonly resolvedFormatOptions = computed(
     () => this.formatOptions() ?? this.defaults.formatOptions,
   );
-  readonly resolvedMessages = computed<StatCardMessages>(() => ({
-    ...STAT_CARD_MESSAGES,
-    ...this.defaults.messages,
-    ...this.messages(),
-  }));
+  /** The family's words in the language in force, with this card's `messages` laid over them. */
+  readonly t = injectMessages(statCardMessages, this.messages);
   readonly resolvedTone = computed<StatCardTone | undefined>(() => {
     const explicit = this.tone();
     if (explicit !== undefined) return explicit;

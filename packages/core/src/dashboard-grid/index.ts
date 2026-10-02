@@ -1,7 +1,6 @@
 export {
   cellAt,
   DASHBOARD_LAYOUT_VERSION,
-  formatDashboardLabel,
   gridStyle,
   layoutsEqual,
   materializeLayout,
@@ -39,7 +38,5 @@ export type {
 } from './dashboard-grid';
 export { measureTiles, parseDuration, playFlip, playResize } from './flip';
 export type { MeasuredTile, PlayFlipOptions } from './flip';
-export { dashboardKeyIntent } from './keys';
+export { dashboardKeyIntent, handleShortcuts } from './keys';
 export type { DashboardKeyEvent, DashboardKeyIntent } from './keys';
-export { DEFAULT_DASHBOARD_GRID_LABELS, handleShortcuts } from './labels';
-export type { DashboardGridLabels } from './labels';

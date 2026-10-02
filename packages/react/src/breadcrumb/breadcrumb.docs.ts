@@ -161,13 +161,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition',
-    note: 'render substitutes any part for a router link or another element, and BreadcrumbDefaultsProvider decides the label, the separator and the collapse for a whole application.',
+    note: 'render substitutes any part for a router link or another element, and BreadcrumbDefaultsProvider decides the separator and the collapse for a whole application.',
     snippet: defineSnippet({
       id: 'breadcrumb-react-composition',
       language: 'tsx',
       label: 'A router link, and defaults for the application',
       source:
-        '<BreadcrumbLink href="/invoices" render={(props) => <RouterLink {...props} to={props.href} />}>\n  Invoices\n</BreadcrumbLink>;\n\n<BreadcrumbDefaultsProvider label="Trilha" maxItems={5}>\n  <App />\n</BreadcrumbDefaultsProvider>;',
+        '<BreadcrumbLink href="/invoices" render={(props) => <RouterLink {...props} to={props.href} />}>\n  Invoices\n</BreadcrumbLink>;\n\n<BreadcrumbDefaultsProvider maxItems={5}>\n  <App />\n</BreadcrumbDefaultsProvider>;',
     }),
   },
   {
@@ -203,7 +203,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'What each control announces',
       source:
-        '// The landmark is named, the ellipsis says how many it hides,\n// and the last crumb says it is this page.\n<Breadcrumb label="Breadcrumb" maxItems={4}>\n  <BreadcrumbList>{levels}</BreadcrumbList>\n</Breadcrumb>;',
+        '// The landmark is named, the ellipsis says how many it hides,\n// and the last crumb says it is this page.\n<Breadcrumb aria-label="Breadcrumb" maxItems={4}>\n  <BreadcrumbList>{levels}</BreadcrumbList>\n</Breadcrumb>;',
     }),
   },
 ];
@@ -223,7 +223,13 @@ export const REACT_BREADCRUMB_DOCS = {
     scenes,
     events,
     api: apiRows([
-      ['label', 'string', 'Breadcrumb', 'Breadcrumb', "The landmark's own name"],
+      [
+        'messages',
+        'Partial<BreadcrumbMessages>',
+        '—',
+        'Breadcrumb',
+        "Words laid over the language in force, key by key: the landmark's name (label) and the ellipsis (showHidden)",
+      ],
       [
         'maxItems',
         'number',
@@ -300,10 +306,10 @@ export const REACT_BREADCRUMB_DOCS = {
       ],
       [
         'BreadcrumbDefaultsProvider',
-        'label | maxItems | itemsBeforeCollapse | itemsAfterCollapse | overflow | separator',
+        'maxItems | itemsBeforeCollapse | itemsAfterCollapse | overflow | separator',
         '—',
         'Application',
-        'Sets those six once for everything below it; a prop on the trail still wins',
+        'Sets those five once for everything below it; a prop on the trail still wins',
       ],
     ]),
     accessibility: [

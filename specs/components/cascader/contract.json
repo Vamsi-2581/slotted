@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "cascader",
   "ui": "cascader",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Picks a value from nested option columns."
+  },
   "design": "docs/history/designs/2026-09-30-cascader-design.md",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/",
   "treePattern": "https://www.w3.org/WAI/ARIA/apg/patterns/treeview/",
@@ -291,6 +295,23 @@
       "maxCrumbs"
     ]
   },
+  "messages": [
+    "back",
+    "breadcrumb",
+    "clear",
+    "empty",
+    "failed",
+    "loading",
+    "noResults",
+    "placeholder",
+    "remove",
+    "results",
+    "retry",
+    "root",
+    "search",
+    "searchPlaceholder",
+    "summary"
+  ],
   "stateAttributes": {
     "open": "data-open",
     "expanded": "data-expanded",

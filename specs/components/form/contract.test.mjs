@@ -107,7 +107,7 @@ test('answers the sourced error-summary contract item by item', () => {
   assert.deepEqual(contract.summary, {
     role: 'alert',
     focusable: true,
-    title: 'There is a problem',
+    title: 'messages.summaryTitle',
     itemElement: 'a[href]',
     linksTo: 'control',
   });
@@ -203,7 +203,6 @@ test('lets an application decide once how its forms behave', () => {
     'validate',
     'errorFocus',
     'summary',
-    'summaryTitle',
     'summaryDescription',
     'align',
     'nativeValidation',

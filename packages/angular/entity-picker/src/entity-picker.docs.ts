@@ -271,7 +271,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'sections',
     title: 'Favorites and recent',
-    note: 'Focus the empty field: favorites, then recent, then what the empty query returned, with no id twice. rememberRecent keeps the application’s list.',
+    note: 'Press the empty field: favorites, then recent, then what the empty query returned, with no id twice. rememberRecent keeps the application’s list.',
     snippet: defineSnippet({
       id: 'entity-picker-angular-sections',
       language: 'angular',
@@ -438,7 +438,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition',
-    note: 'An option template adds the team after the address; a chip template adds the role; the provider says every sentence in Portuguese once.',
+    note: 'An option template adds the team after the address; a chip template adds the role; provideSlotted says every sentence in Portuguese once.',
     snippet: defineSnippet({
       id: 'entity-picker-angular-composition',
       language: 'angular',
@@ -473,7 +473,7 @@ const events: EventRow[] = [
   {
     name: 'openChangeRequest / openChange',
     payload: 'ChangeRequest<boolean> / boolean',
-    when: 'The popup: focus and keys (keyboard), the trigger (pointer), escape, outsidePress, select, blur.',
+    when: 'The popup: focus and keys (keyboard), a press on the input or the trigger (pointer), escape, outsidePress, select, blur.',
   },
   {
     name: 'highlightedValueChangeRequest / highlightedValueChange',
@@ -586,10 +586,10 @@ export const ANGULAR_ENTITY_PICKER_DOCS = {
       ],
       [
         'openOn',
-        "'input' | 'focus'",
-        'focus',
+        "'input' | 'focus' | 'manual'",
+        'input',
         'sl-entity-picker',
-        'focus shows favorites and recent at once',
+        'input: typing or a press opens; focus: every focus too; manual: only the trigger and the arrows',
       ],
       ['size', "'sm' | 'md' | 'lg'", 'md', 'sl-entity-picker', 'The control step; a field sets it'],
       [
@@ -623,8 +623,14 @@ export const ANGULAR_ENTITY_PICKER_DOCS = {
       ['readOnly', 'boolean', 'false', 'sl-entity-picker', 'Keeps the text, withholds the popup'],
       ['required', 'boolean', 'false', 'sl-entity-picker', 'Reported by the Validator'],
       ['invalid', 'boolean', 'false', 'sl-entity-picker', 'Also from a field'],
-      ['locale', 'string', '—', 'sl-entity-picker', 'BCP 47'],
-      ['labels', 'Partial<EntityPickerLabels>', 'English', 'sl-entity-picker', 'Every sentence'],
+      ['locale', 'string', '—', 'sl-entity-picker', 'BCP 47. The language in force when absent'],
+      [
+        'messages',
+        'Partial<EntityPickerMessages>',
+        '—',
+        'sl-entity-picker',
+        'Words laid over the language in force, key by key; {count}, {query}, {label}, {id} and {max} are slots',
+      ],
       ['aria-label', 'string', '—', 'sl-entity-picker', 'The name when no field labels it'],
       [
         'slEntityPickerOption',

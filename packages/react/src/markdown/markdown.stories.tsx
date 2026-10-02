@@ -352,19 +352,7 @@ export const Alerts: Story = {
         label="Os cinco alertas"
         note="Nota, dica, importante, aviso e cuidado, cada um no seu tom e com o seu glifo; o aviso tem dois parágrafos e o segundo segue o fluxo da região."
       >
-        <MarkdownDefaultsProvider
-          labels={{
-            alerts: {
-              caution: 'Cuidado',
-              important: 'Importante',
-              note: 'Nota',
-              tip: 'Dica',
-              warning: 'Aviso',
-            },
-          }}
-        >
-          <Markdown tree={md(ALERTS)} />
-        </MarkdownDefaultsProvider>
+        <Markdown tree={md(ALERTS)} />
       </Scene>
       <Scene
         label="alerts={false}"
@@ -383,13 +371,7 @@ export const Footnotes: Story = {
       label="Duas notas, três referências"
       note="A nota 1 é referida duas vezes e tem duas setas de retorno; a definição que ninguém refere não aparece. Siga uma referência e volte pela seta."
     >
-      <Markdown
-        labels={{
-          backReference: (n, o) => `Voltar à referência ${n}${o > 1 ? `-${o}` : ''}`,
-          footnotes: 'Notas',
-        }}
-        tree={FOOTNOTES}
-      />
+      <Markdown messages={{ footnotes: 'Notas' }} tree={FOOTNOTES} />
     </Single>
   ),
 };
@@ -588,10 +570,7 @@ function DocsPage() {
   const tree = useMemo(() => md(RUNBOOK), []);
   const { headings } = useMemo(() => prepareMarkdown(tree), [tree]);
   return (
-    <MarkdownDefaultsProvider
-      headingAnchors
-      labels={{ anchor: (heading) => `Ligação para: ${heading}` }}
-    >
+    <MarkdownDefaultsProvider headingAnchors>
       <nav aria-label="Nesta página">
         <ul>
           {headings.map((heading) => (
@@ -602,7 +581,7 @@ function DocsPage() {
         </ul>
       </nav>
       <Container size="measure">
-        <Markdown tree={tree} />
+        <Markdown messages={{ anchor: 'Ligação para: {heading}' }} tree={tree} />
       </Container>
     </MarkdownDefaultsProvider>
   );
@@ -613,7 +592,7 @@ export const Composition: Story = {
   render: () => (
     <Single
       label="Índice, medida e rótulos em português"
-      note="O índice vem de prepareMarkdown com os mesmos ids que os títulos desenham, por isso cada entrada chega ao seu título. O provider decide as âncoras e o nome delas uma vez."
+      note="O índice vem de prepareMarkdown com os mesmos ids que os títulos desenham, por isso cada entrada chega ao seu título. O provider decide as âncoras uma vez, e messages o nome delas."
     >
       <DocsPage />
     </Single>

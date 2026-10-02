@@ -144,7 +144,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A router link, and defaults for the application',
       source:
-        '<Link href="/invoices" render={(props) => <RouterLink {...props} to={props.href} />}>\n  Invoices\n</Link>;\n\n<LinkDefaultsProvider externalHint="(abre numa nova aba)" underline="hover">\n  <App />\n</LinkDefaultsProvider>;',
+        '<Link href="/invoices" render={(props) => <RouterLink {...props} to={props.href} />}>\n  Invoices\n</Link>;\n\n<LinkDefaultsProvider underline="hover">\n  <App />\n</LinkDefaultsProvider>;',
     }),
   },
   {
@@ -177,11 +177,11 @@ export const REACT_LINK_DOCS = {
       ],
       ['external', 'boolean', 'false', 'Link', 'Opens a new tab and warns that it does'],
       [
-        'externalHint',
-        'string',
-        '(opens in a new tab)',
+        'messages',
+        'Partial<LinkMessages>',
+        '—',
         'Link',
-        'Wording of that warning, for translation',
+        'Words laid over the language in force: the wording of that warning (externalHint)',
       ],
       [
         'disabled',
@@ -217,10 +217,10 @@ export const REACT_LINK_DOCS = {
       ],
       [
         'LinkDefaultsProvider',
-        'underline | variant | visited | externalHint',
+        'underline | variant | visited',
         '—',
         'Application',
-        'Sets those four once for everything below it; a prop on the link still wins',
+        'Sets those three once for everything below it; a prop on the link still wins',
       ],
     ]),
     accessibility: [

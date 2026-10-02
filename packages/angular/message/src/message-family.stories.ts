@@ -132,7 +132,7 @@ export const Conversation: Story = {
             <div slMessageAvatar><span slAvatar name="Marta Silva" size="sm"></span></div>
             <div slMessageBody>
               <div slBubble>
-                <div slBubbleContent><span slBubbleTyping label="Marta Silva está a escrever"></span></div>
+                <div slBubbleContent><span slBubbleTyping aria-label="Marta Silva está a escrever"></span></div>
               </div>
             </div>
           </article>`),
@@ -245,7 +245,7 @@ export const Accessibility: Story = {
     template: page(
       scene(
         'What a screen reader hears',
-        'Each article is named by its author; inside a bubble the ticks carry the word Lida for assistive technology; the typing dots are one image with a name, never three characters.',
+        'Each article is named by its author; inside a bubble the ticks carry the word Read for assistive technology; the typing dots are one image with a name, never three characters.',
         stack(theirs('Chega hoje à tarde.', { time: '09:38' }) + mine('Reenvio assim que chegar.')),
       ),
     ),

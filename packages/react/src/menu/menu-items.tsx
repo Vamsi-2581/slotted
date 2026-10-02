@@ -1,9 +1,11 @@
+import { keysMessages } from '@slotted/core/i18n';
+import type { KbdPlatform, KeysTranslator } from '@slotted/core/keys';
+import { canonicalKey, parseShortcut, resolveShortcut } from '@slotted/core/keys';
 import { createControllable } from '@slotted/core/state';
-import type { KbdPlatform } from '@slotted/core/keys';
-import { parseShortcut, resolveKey, resolveShortcut } from '@slotted/core/keys';
 import { createContext, useCallback, useContext, useEffect, useId, useState } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import type { GlyphName } from '../icon';
 import { useResolvedPlatform } from '../kbd/kbd-defaults';
@@ -65,7 +67,7 @@ function announce(keys: string, platform: KbdPlatform): string | undefined {
 
   return steps[0]
     ?.map((token) => {
-      const canonical = resolveKey(token, { platform }).token;
+      const canonical = canonicalKey(token);
       if (canonical === 'mod') return platform === 'mac' ? 'Meta' : 'Control';
       if (canonical !== undefined && canonical in ARIA_MODIFIERS) {
         return ARIA_MODIFIERS[canonical] as string;
@@ -76,9 +78,9 @@ function announce(keys: string, platform: KbdPlatform): string | undefined {
     .join('+');
 }
 
-/** The legends a reader sees, in the order the platform writes them. */
-function legends(keys: string, platform: KbdPlatform): string {
-  const shortcut = resolveShortcut(keys, { platform });
+/** The legends a reader sees, in the order the platform writes them, in the language in force. */
+function legends(keys: string, platform: KbdPlatform, t: KeysTranslator): string {
+  const shortcut = resolveShortcut(keys, { platform, t });
   return shortcut.steps
     .map((step) => step.map((key) => key.legend).join(shortcut.separator))
     .join(` ${shortcut.thenLabel} `);
@@ -129,6 +131,7 @@ export function MenuItemMeta({ children, ...nativeProps }: MenuItemMetaProps) {
  */
 export function MenuItemShortcut({ children, keys, ...nativeProps }: MenuItemShortcutProps) {
   const platform = useResolvedPlatform(undefined);
+  const t = useMessages(keysMessages);
   return (
     <span
       {...nativeProps}
@@ -138,7 +141,7 @@ export function MenuItemShortcut({ children, keys, ...nativeProps }: MenuItemSho
       {...(keys === undefined ? {} : { 'aria-hidden': true })}
       data-part="shortcut"
     >
-      {keys === undefined ? children : legends(keys, platform)}
+      {keys === undefined ? children : legends(keys, platform, t)}
     </span>
   );
 }

@@ -139,8 +139,6 @@ test('provides for the fields inside it what an application provides for all of 
     'size',
     'labelPlacement',
     'necessity',
-    'necessityWords',
-    'helpLabel',
     'disabled',
     'readOnly',
   ]);

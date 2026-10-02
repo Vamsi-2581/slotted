@@ -71,6 +71,11 @@ import type {
   EventOccurrence,
   WorkingHours,
 } from '@slotted/core/event-calendar';
+import {
+  eventCalendarMessages,
+  type EventCalendarMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { COMPACT_BELOW, createWidthGate } from '@slotted/core/measure';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
@@ -83,6 +88,7 @@ import {
   SlDrawerResizer,
   SlDrawerTitle,
 } from '@slotted/angular/drawer';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlContextMenuTrigger } from '@slotted/angular/context-menu';
 import { SlMenu, SlMenuItem, SlMenuTrigger } from '@slotted/angular/menu';
@@ -99,12 +105,11 @@ import {
 import { SlProgressBar } from '@slotted/angular/progress-indicator';
 import { SlSegment, SlSegmentedControl } from '@slotted/angular/segmented-control';
 
-import { EVENT_CALENDAR_LABELS, injectEventCalendarDefaults } from './event-calendar-defaults';
+import { injectEventCalendarDefaults } from './event-calendar-defaults';
 import type {
   EventCalendarCompact,
   EventCalendarEventChange,
   EventCalendarHourCycle,
-  EventCalendarLabels,
   EventCalendarRange,
   EventCalendarContextTarget,
   EventCalendarSelection,
@@ -273,22 +278,22 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
         >
           {{ title() }}
         </div>
-        <div data-part="navigation" role="group" [attr.aria-label]="words().navigation">
+        <div data-part="navigation" role="group" [attr.aria-label]="t('navigation')">
           <button
             data-part="previous"
             type="button"
-            [attr.aria-label]="words().previous[currentView()]"
+            [attr.aria-label]="previousLabel()"
             (click)="step(-1, $event)"
           >
             <span slIcon><svg slGlyph name="chevron-right"></svg></span>
           </button>
           <button data-part="today" type="button" (click)="goToday($event)">
-            {{ words().today }}
+            {{ t('today') }}
           </button>
           <button
             data-part="next"
             type="button"
-            [attr.aria-label]="words().next[currentView()]"
+            [attr.aria-label]="nextLabel()"
             (click)="step(1, $event)"
           >
             <span slIcon><svg slGlyph name="chevron-right"></svg></span>
@@ -299,12 +304,12 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
             <div
               slSegmentedControl
               fullWidth
-              [attr.aria-label]="words().views"
+              [attr.aria-label]="t('views')"
               [value]="currentView()"
               (valueChange)="onViewRequest($event)"
             >
               @for (name of views(); track name) {
-                <label slSegment [value]="name">{{ words().view[name] }}</label>
+                <label slSegment [value]="name">{{ viewLabel(name) }}</label>
               }
             </div>
           </div>
@@ -312,7 +317,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
         @if (calendars().length > 1) {
           <button #filterButton data-part="filter" type="button" [slMenuTriggerFor]="filterMenu">
             <span slIcon><svg slGlyph name="funnel"></svg></span>
-            <span>{{ words().calendars }}</span>
+            <span>{{ t('calendars') }}</span>
             <span slIcon><svg slGlyph name="chevron-down"></svg></span>
           </button>
           <sl-menu #filterMenu>
@@ -386,7 +391,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
             hideLabel
             size="sm"
             [loading]="loading()"
-            [label]="words().loading"
+            [label]="t('loading')"
             [delay]="loadingDelayValue()"
             [minDuration]="loadingMinDurationValue()"
           ></div>
@@ -427,7 +432,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
             </section>
           } @empty {
             <div data-part="empty">
-              <p>{{ words().empty[emptyKey()] }}</p>
+              <p>{{ emptyText() }}</p>
               <ng-content select="[slEventCalendarEmpty]" />
             </div>
           }
@@ -438,7 +443,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
             <tr data-part="weekdays">
               @if (weekNumbersValue()) {
                 <th data-part="week-number-header" scope="col">
-                  <span data-ui="visually-hidden">{{ words().weekNumber }}</span>
+                  <span data-ui="visually-hidden">{{ t('weekNumber') }}</span>
                 </th>
               }
               @for (name of monthDrawing().weekdays; track name.key) {
@@ -518,7 +523,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                           [attr.aria-label]="cell.moreLabel"
                           (click)="openMore(cell.date, $event)"
                         >
-                          +{{ cell.more }}<span>{{ words().more }}</span>
+                          +{{ cell.more }}<span>{{ t('more') }}</span>
                         </button>
                       }
                     </div>
@@ -585,7 +590,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
               role="row"
               [style.--slotted-event-calendar-lanes]="timeDrawing().lanes"
             >
-              <div data-part="all-day-label" role="rowheader">{{ words().allDay }}</div>
+              <div data-part="all-day-label" role="rowheader">{{ t('allDay') }}</div>
               @for (cell of timeDrawing().allDay; track cell.iso) {
                 <div
                   data-part="all-day-cell"
@@ -613,7 +618,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
           <div #scroller data-part="scroller" role="rowgroup">
             <div data-part="time-row" role="row">
               <div data-part="gutter" role="rowheader">
-                <span data-ui="visually-hidden">{{ words().timed }}</span>
+                <span data-ui="visually-hidden">{{ t('timed') }}</span>
                 @for (hour of timeDrawing().hours; track hour.hour) {
                   <span data-part="hour" aria-hidden="true">{{ hour.label }}</span>
                 }
@@ -656,7 +661,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                       [style]="entry.style"
                       (click)="openMore(column.date, $event)"
                     >
-                      +{{ entry.count }}<span>{{ words().more }}</span>
+                      +{{ entry.count }}<span>{{ t('more') }}</span>
                     </button>
                   }
                   @if (column.now; as now) {
@@ -692,7 +697,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
               data-part="list-events"
               data-layout="stacked"
               role="list"
-              [attr.aria-label]="words().dayEvents(dateLabel(date))"
+              [attr.aria-label]="t('dayEvents', { day: dateLabel(date) })"
             >
               @for (view of moreViews(); track view.key) {
                 <li>
@@ -758,7 +763,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                   data-part="list-events"
                   data-layout="stacked"
                   role="list"
-                  [attr.aria-label]="words().dayEvents(dateLabel(date))"
+                  [attr.aria-label]="t('dayEvents', { day: dateLabel(date) })"
                 >
                   @for (view of moreViews(); track view.key) {
                     <li>
@@ -966,11 +971,17 @@ export class SlEventCalendar implements OnInit {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
   });
   readonly hourCycle = input<EventCalendarHourCycle | undefined>(undefined);
-  readonly labels = input<Partial<EventCalendarLabels> | undefined>(undefined);
   readonly listRange = input<EventCalendarListRange | undefined>(undefined);
   readonly loadingDelay = input<number | undefined>(undefined);
   readonly loadingMinDuration = input<number | undefined>(undefined);
+  /** BCP 47. Unset, the language in force (`provideSlotted`) decides. */
   readonly locale = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * toolbar, the views, the empty and loading states, the counts and the
+   * sentences said aloud.
+   */
+  readonly messages = input<PartialMessages<EventCalendarMessages> | undefined>(undefined);
   readonly maxColumns = input<number | undefined>(undefined);
   readonly maxEvents = input<number | undefined>(undefined);
   readonly scrollTime = input<PlainTime | undefined>(undefined);
@@ -1029,12 +1040,10 @@ export class SlEventCalendar implements OnInit {
 
   /* ── Resolved options ──────────────────────────────────────────────── */
 
-  protected readonly words = computed<EventCalendarLabels>(() => ({
-    ...EVENT_CALENDAR_LABELS,
-    ...this.defaults.labels,
-    ...this.labels(),
-  }));
-  private readonly localeValue = computed(() => this.locale() ?? this.defaults.locale);
+  private readonly appLocale = injectLocale();
+  /** The family's words in the language in force, with this calendar's `messages` laid over them. */
+  readonly t = injectMessages(eventCalendarMessages, this.messages);
+  private readonly localeValue = computed(() => this.locale() ?? this.appLocale());
   private readonly zoneValue = computed(() => this.timeZone() ?? this.defaults.timeZone);
   private readonly cycleValue = computed(() => this.hourCycle() ?? this.defaults.hourCycle);
   private readonly hoursValue = computed(() => this.dayHours() ?? this.defaults.dayHours);
@@ -1187,7 +1196,7 @@ export class SlEventCalendar implements OnInit {
 
   private readonly drawingInput = computed<DrawingInput>(() => ({
     id: this.id,
-    labels: this.words(),
+    t: this.t,
     locale: this.localeValue(),
     hourCycle: this.cycleValue(),
     timeZone: this.zoneValue(),
@@ -1235,6 +1244,17 @@ export class SlEventCalendar implements OnInit {
   protected readonly emptyKey = computed(() =>
     this.currentView() === 'month' ? 'month' : this.currentView() === 'day' ? 'day' : 'week',
   );
+  /** The empty state's sentence for the period in view. */
+  protected readonly emptyText = computed(() => this.t(`empty.${this.emptyKey()}` as const));
+  /** The names of the two steps, which say how far each one moves. */
+  protected readonly previousLabel = computed(() =>
+    this.t(`previous.${this.currentView()}` as const),
+  );
+  protected readonly nextLabel = computed(() => this.t(`next.${this.currentView()}` as const));
+  /** A view's name in the switcher. */
+  protected viewLabel(view: EventCalendarView): string {
+    return this.t(`view.${view}` as const);
+  }
 
   /**
    * The indicator exists while there is a wait, and a little after: through
@@ -1421,7 +1441,7 @@ export class SlEventCalendar implements OnInit {
     /* One polite announcement per wait, after the delay the indicator waits. */
     effect((onCleanup) => {
       if (!this.loading()) return;
-      const words = untracked(() => this.words().loading);
+      const words = untracked(() => this.t('loading'));
       const timer = setTimeout(
         () => getLiveAnnouncer().announce(words),
         untracked(() => this.loadingDelayValue()),
@@ -1683,7 +1703,7 @@ export class SlEventCalendar implements OnInit {
   }
 
   private announce(next: EventCalendarSelection) {
-    getLiveAnnouncer().announce(this.words().selected(this.stretchWords(next)));
+    getLiveAnnouncer().announce(this.t('selected', { text: this.stretchWords(next) }));
   }
 
   /* ── Selection by pointer ──────────────────────────────────────────── */
@@ -1963,7 +1983,7 @@ export class SlEventCalendar implements OnInit {
       allowed: (candidate) => this.allows(occurrence, candidate, kind),
     });
     if (placement === null) {
-      getLiveAnnouncer().announce(this.words().dropInvalid(occurrence.event.title));
+      getLiveAnnouncer().announce(this.t('dropInvalid', { title: occurrence.event.title }));
       return;
     }
     if (!this.requestEventChange(occurrence, placement, kind, 'keyboard', event)) return;

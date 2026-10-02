@@ -1,7 +1,6 @@
 export { EventCalendar } from './event-calendar';
 export {
   EVENT_CALENDAR_FALLBACK,
-  EVENT_CALENDAR_LABELS,
   EventCalendarDefaultsProvider,
   useEventCalendarDefaults,
 } from './event-calendar-defaults';
@@ -15,7 +14,6 @@ export type {
   EventCalendarEventChange,
   EventCalendarHandle,
   EventCalendarHourCycle,
-  EventCalendarLabels,
   EventCalendarListRange,
   EventCalendarProps,
   EventCalendarRange,

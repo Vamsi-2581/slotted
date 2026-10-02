@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "datetime-range-picker",
   "ui": "datetime-range-picker",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Start and end date-times with a picker."
+  },
   "controlPart": "control",
   "rootRole": null,
   "contentRole": "dialog",
@@ -123,7 +127,7 @@
       "search": "once per chosen start over the days, up to maxLength days or 366; over the list for the times",
       "typed": "the day predicate runs over every day between two typed ends and the time predicate over the two ends, once per value change"
     },
-    "explained": "the limit part names minLength and maxLength while either is set"
+    "explained": "the limit part names minLength and maxLength while either is set, through the limit.between, limit.atLeast and limit.atMost messages, each duration written by lengthLabel"
   },
   "validity": {
     "owned": "bounds, the day window, unavailable days and times, the order of the two ends, and the duration",
@@ -153,8 +157,8 @@
   },
   "triggerIcon": "calendar",
   "triggerName": {
-    "empty": "chooseLabel",
-    "chosen": "changeLabel, both ends in words, then the duration",
+    "empty": "the choose message",
+    "chosen": "the change message, with both ends in words and the duration in its start, end and length slots; changeReversed, without the duration, while the ends are out of order",
     "why": "Focus returns to the trigger when the popup closes, so the name is where the reader is told what was chosen."
   },
   "keyboard": [
@@ -273,7 +277,7 @@
     "maxOptions": ["prop", "defaults", "1440"],
     "unavailableOptions": ["prop", "defaults", "disable"],
     "months": ["prop", "defaults", "1"],
-    "locale": ["prop", "defaults", "runtime"],
+    "locale": ["prop", "slotted", "en-US"],
     "timeZone": ["prop", "defaults", "runtime"],
     "hourCycle": ["prop", "defaults", "locale"],
     "granularity": ["prop", "defaults", "minute"],
@@ -282,33 +286,42 @@
   "provides": {
     "dateTimeRangePickerDefaults": [
       "calendar",
-      "changeLabel",
-      "chooseLabel",
-      "clearLabel",
       "closeOnSelect",
-      "doneLabel",
-      "emptyLabel",
-      "endLabel",
       "firstDayOfWeek",
       "granularity",
-      "hintLabels",
       "hourCycle",
       "lengthLabel",
-      "limitLabel",
-      "locale",
       "maxOptions",
       "months",
-      "nowLabel",
       "placement",
       "size",
-      "startLabel",
       "step",
       "timeZone",
-      "truncatedLabel",
       "unavailableOptions",
       "variant"
     ]
   },
+  "messages": [
+    "bounds",
+    "change",
+    "changeReversed",
+    "choose",
+    "chooseDay",
+    "chooseTime",
+    "clear",
+    "done",
+    "empty",
+    "end",
+    "length",
+    "limit.between",
+    "limit.atLeast",
+    "limit.atMost",
+    "now",
+    "order",
+    "start",
+    "truncated",
+    "unavailable"
+  ],
   "imperative": ["focus", "open", "close"],
   "stateAttributes": {
     "disabled": "data-disabled",
@@ -487,13 +500,13 @@
   "hint": {
     "part": "hint",
     "says": "what the next press should be, or what is wrong: chooseDay while the current end has no date, chooseTime while it has a date and no time; order, length, unavailable or bounds while the work is whole and invalid; empty while the work is whole and valid, when length says the duration",
-    "labels": "hintLabels, a map with {end} for the end's label and {day} for the day the list serves: choose, chooseDay, chooseTime, order, length, unavailable, bounds",
+    "messages": "chooseDay with {end} for the end's name; chooseTime with {end} and {day} for the day the list serves; order, length, unavailable, bounds",
     "wiring": "aria-describedby of the list and of the field",
     "why": "a panel that only refuses — struck rows, a red frame — does not say what can be done; the hint does"
   },
   "done": {
     "part": "done",
-    "label": "doneLabel",
+    "label": "the done message",
     "effect": "closes with reason pointer; a whole work is emitted with reason select before closing; one end alone stays as it is",
     "always": true,
     "why": "a sheet that fills the screen has no outside to press and no Escape key; on the desktop it is the way out of an edit left half way"

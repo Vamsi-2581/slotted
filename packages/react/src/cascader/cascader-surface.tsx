@@ -8,11 +8,6 @@ import { Glyph, Icon } from '../icon';
 import type { CascaderState } from './cascader-state';
 import type { CascaderDataProps } from './cascader.types';
 
-const fill = (template: string, values: Record<string, string | number>) =>
-  template.replace(/\{(\w+)\}/g, (whole, name: string) =>
-    name in values ? String(values[name]) : whole,
-  );
-
 interface SurfaceProps<T> {
   state: CascaderState<T>;
   data: CascaderDataProps<T>;
@@ -48,12 +43,12 @@ export function CascaderSurfaceBody<T>({
   treeProps,
   treeRef,
 }: SurfaceProps<T>) {
-  const { labels, view } = state;
+  const { t, view } = state;
   const hover = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(hover.current), []);
 
   const labelOf = (key: string | undefined) =>
-    key === undefined ? labels.root : (state.collection.nodeFor(key)?.label ?? key);
+    key === undefined ? t('root') : (state.collection.nodeFor(key)?.label ?? key);
 
   const onNodeClick = (node: CascaderNodeView, event: MouseEvent<HTMLElement>) => {
     if (node.disabled) return;
@@ -107,7 +102,7 @@ export function CascaderSurfaceBody<T>({
     const item = state.itemFor(node.key);
     if (item !== undefined && data.renderNode !== undefined) return data.renderNode(item, node);
     if (!view.searching || state.query === '') return node.label;
-    return splitByMatch(node.label, state.query, { locale: data.locale }).map((run, index) =>
+    return splitByMatch(node.label, state.query, { locale: state.locale }).map((run, index) =>
       run.matched ? (
         <mark data-part="match" key={index}>
           {run.text}
@@ -226,7 +221,7 @@ export function CascaderSurfaceBody<T>({
           : null}
         {column.failed && column.parent !== undefined ? (
           <div data-part="status" role="status">
-            {fill(labels.failed, { label: name })}
+            {t('failed', { label: name })}
             <Button
               onClick={() => {
                 const key = column.parent as string;
@@ -235,12 +230,12 @@ export function CascaderSurfaceBody<T>({
               size="sm"
               variant="outline"
             >
-              {labels.retry}
+              {t('retry')}
             </Button>
           </div>
         ) : null}
         {!column.pending && !column.failed && column.nodes.length === 0 ? (
-          <div data-part="empty">{labels.empty}</div>
+          <div data-part="empty">{t('empty')}</div>
         ) : null}
       </div>
     );
@@ -257,7 +252,7 @@ export function CascaderSurfaceBody<T>({
       return [
         separatorIcon,
         <button
-          aria-label={fill(labels.back, { label: labelOf(crumb.target) })}
+          aria-label={t('back', { label: labelOf(crumb.target) })}
           data-collapsed=""
           data-part="crumb"
           key="collapsed"
@@ -292,7 +287,7 @@ export function CascaderSurfaceBody<T>({
   return (
     <>
       {crumbs.length > 0 ? (
-        <nav aria-label={labels.breadcrumb} data-part="breadcrumb">
+        <nav aria-label={t('breadcrumb')} data-part="breadcrumb">
           {crumbs.flatMap(renderCrumb)}
           {state.layout === 'columns' ? (
             <Icon directional>
@@ -317,17 +312,13 @@ export function CascaderSurfaceBody<T>({
         role="tree"
       >
         {view.searching ? (
-          <div aria-label={labels.search} data-part="column" role="group">
+          <div aria-label={t('search')} data-part="column" role="group">
             {view.results.map(renderNode)}
             {view.results.length === 0 ? (
-              <div data-part="empty">{fill(labels.noResults, { query: state.query })}</div>
+              <div data-part="empty">{t('noResults', { query: state.query })}</div>
             ) : null}
             <div data-part="status" role="status">
-              {view.results.length === 0
-                ? ''
-                : fill(view.results.length === 1 ? labels.result : labels.results, {
-                    count: view.results.length,
-                  })}
+              {view.results.length === 0 ? '' : t('results', { count: view.results.length })}
             </div>
           </div>
         ) : (

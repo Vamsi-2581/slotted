@@ -16,3 +16,5 @@ tools/harness/out/
 *.log
 demos/.registry/
 tmp/
+# Astro writes generated types beside the site.
+.astro/

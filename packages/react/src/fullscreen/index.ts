@@ -15,7 +15,6 @@ export type {
   FullscreenDefaultsProviderProps,
   FullscreenError,
   FullscreenHandle,
-  FullscreenMessages,
   FullscreenMode,
   FullscreenNavigationUI,
   FullscreenPolicyMode,

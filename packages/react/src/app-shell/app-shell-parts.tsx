@@ -1,11 +1,32 @@
-import { useCallback, useEffect } from 'react';
-import type { HTMLAttributes, MouseEvent, ReactNode, Ref } from 'react';
+import {
+  anchorsAtStart,
+  EXTENT_LARGE_STEP_PX,
+  EXTENT_STEP_PX,
+  extentAtPoint,
+  holdResizeGesture,
+  stepAmountFromPixels,
+  stepExtent,
+} from '@slotted/core/extent';
+import type { ExtentRect, ExtentSide } from '@slotted/core/extent';
+import { clamp } from '@slotted/core/measure';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type {
+  CSSProperties,
+  HTMLAttributes,
+  KeyboardEvent,
+  MouseEvent,
+  PointerEvent,
+  ReactNode,
+  Ref,
+} from 'react';
 
 import { Glyph, Icon } from '../icon';
 import { useAppShell } from './app-shell';
 import type {
   AppShellActionsProps,
+  AppShellAsideBodyProps,
   AppShellAsideProps,
+  AppShellAsideResizerProps,
   AppShellAsideSectionProps,
   AppShellAsideToggleProps,
   AppShellBannerProps,
@@ -137,7 +158,7 @@ export function AppShellNav({
 
   const rootProps = {
     ...nativeProps,
-    'aria-label': ariaLabel ?? shell.messages.nav,
+    'aria-label': ariaLabel ?? shell.t('nav'),
     children,
     className,
     'data-part': 'nav',
@@ -259,15 +280,24 @@ export function AppShellAside({
   const attach = useNode('aside', ref as never);
   useRegion('aside');
 
+  /* The extent as the column's width: a fraction of the shell in `cqi`, which
+     the stylesheet reads in the column alone. */
+  const extent = shell.asideExtent;
   const rootProps = {
     ...nativeProps,
-    'aria-label': ariaLabel ?? shell.messages.aside,
+    'aria-label': ariaLabel ?? shell.t('aside'),
     children,
     className,
     ...(shell.asideOpen ? { 'data-open': '' as const } : {}),
     'data-part': 'aside',
     id: id ?? shell.asideId,
-    style,
+    style:
+      extent === undefined
+        ? style
+        : ({
+            ...style,
+            '--slotted-app-shell-aside-extent': `${Math.round(extent * 10000) / 100}cqi`,
+          } as CSSProperties),
   };
   return part(rootProps, render) ?? <aside {...rootProps} ref={attach} />;
 }
@@ -285,17 +315,253 @@ export function AppShellAsideHeader({
   return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
 }
 
-/** The middle, and the only part of the pane that scrolls. */
+/**
+ * The middle, and the only part of the pane that scrolls. It stands on the
+ * pane's inset; `inset="none"` drops it for content that brings its own.
+ */
 export function AppShellAsideBody({
   children,
   className,
+  inset,
   ref,
   render,
   style,
   ...nativeProps
-}: AppShellAsideSectionProps) {
-  const rootProps = { ...nativeProps, children, className, 'data-part': 'aside-body', style };
+}: AppShellAsideBodyProps) {
+  const rootProps = {
+    ...nativeProps,
+    children,
+    className,
+    ...(inset === undefined ? {} : { 'data-inset': inset }),
+    'data-part': 'aside-body',
+    style,
+  };
   return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
+}
+
+const useIsomorphicLayoutEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
+
+function isRtl(node: HTMLElement | null): boolean {
+  return node !== null && getComputedStyle(node).direction === 'rtl';
+}
+
+/**
+ * The box the pane's extent is a fraction of: the shell's content box, which
+ * is what `cqi` resolves against. Physical edges, because the pointer and the
+ * rectangle are both in client coordinates.
+ */
+function shellRect(root: HTMLElement | null): ExtentRect | null {
+  if (root === null) return null;
+  const rect = root.getBoundingClientRect();
+  const box = getComputedStyle(root);
+  /* A border whose style is none is nought wide, whatever its width says. */
+  const border = (style: string, width: string) =>
+    style === 'none' || style === 'hidden' ? 0 : parseFloat(width) || 0;
+  const start =
+    (parseFloat(box.paddingLeft) || 0) + border(box.borderLeftStyle, box.borderLeftWidth);
+  const end =
+    (parseFloat(box.paddingRight) || 0) + border(box.borderRightStyle, box.borderRightWidth);
+  return {
+    height: rect.height,
+    width: Math.max(0, rect.width - start - end),
+    x: rect.x + start,
+    y: rect.y,
+  };
+}
+
+/** How far a press on the separator may wander and still be a tap. */
+const TAP_SLOP_PX = 3;
+
+/**
+ * The pane's inner edge, from the WAI-ARIA Window Splitter pattern: a focusable
+ * `separator` whose three values are the extent as whole percentages of the
+ * shell. **Rendering it is the capability**; there is no `resizable` prop.
+ *
+ * It moves the column alone. Under `asideMode="overlay"` the layer keeps its
+ * size step and a closed pane has nothing to resize, so it renders nothing
+ * there; below the breakpoint the stylesheet hides it, because a row under the
+ * content has no inline edge.
+ *
+ * The arrows are physical, the pattern's own reading: `ArrowLeft` grows an end
+ * pane in a left-to-right document, and shrinks it where `navSide="end"` or a
+ * mirrored line puts the pane at the start.
+ */
+export function AppShellAsideResizer({
+  'aria-label': ariaLabel,
+  className,
+  onKeyDown,
+  onPointerDown,
+  ref,
+  render,
+  style,
+  ...nativeProps
+}: AppShellAsideResizerProps) {
+  const shell = useAppShell();
+  const node = useRef<HTMLDivElement | null>(null);
+  /** Where the press began and how far the edge was from the pointer then. */
+  const press = useRef<{ x: number; offset: number; moved: boolean } | null>(null);
+  /** What the document looked like before the drag, and how to put it back. */
+  const gesture = useRef<(() => void) | null>(null);
+  /** The pane's measure while the size step decides it, read from the layout. */
+  const [rest, setRest] = useState<number | undefined>(undefined);
+
+  /* The pane is at the end of the line the navigation is not on. */
+  const side: ExtentSide = shell.navSide === 'end' ? 'start' : 'end';
+  const shown = shell.asideMode === 'inline' && shell.asideOpen;
+  const { asideExtent, nodes, root } = shell;
+
+  useIsomorphicLayoutEffect(() => {
+    const aside = nodes.aside;
+    if (!shown || asideExtent !== undefined || aside === null) return undefined;
+    const read = () => {
+      const rect = shellRect(root);
+      if (rect === null || rect.width <= 0) return setRest(undefined);
+      setRest(aside.getBoundingClientRect().width / rect.width);
+    };
+    read();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(read);
+    observer.observe(aside);
+    return () => observer.disconnect();
+  }, [asideExtent, nodes, root, shown]);
+
+  useEffect(() => () => gesture.current?.(), []);
+
+  if (!shown) return null;
+
+  const current = clamp(
+    shell.asideExtent ?? rest ?? shell.minAsideExtent,
+    shell.minAsideExtent,
+    shell.maxAsideExtent,
+  );
+  const percent = (value: number) => Math.round(clamp(value, 0, 1) * 100);
+
+  const pointAt = (event: PointerEvent<HTMLDivElement>, rect: ExtentRect) =>
+    extentAtPoint({
+      point: { x: event.clientX, y: event.clientY },
+      rect,
+      rtl: isRtl(node.current),
+      side,
+    });
+
+  const pointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    onPointerDown?.(event);
+    if (event.defaultPrevented || event.button !== 0) return;
+    const rect = shellRect(shell.root);
+    if (rect === null || rect.width <= 0) return;
+
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.currentTarget.focus();
+    press.current = { moved: false, offset: current - pointAt(event, rect), x: event.clientX };
+  };
+
+  const pointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const held = press.current;
+    if (held === null) return;
+    const rect = shellRect(shell.root);
+    if (rect === null || rect.width <= 0) return;
+
+    if (!held.moved) {
+      if (Math.abs(event.clientX - held.x) < TAP_SLOP_PX) return;
+      held.moved = true;
+      /* The cursor has to survive the pointer leaving the separator, and a drag
+         across the page must not select the text under it. Both are the
+         document's and neither is reachable from the family's own stylesheet. */
+      gesture.current?.();
+      gesture.current = holdResizeGesture(node.current?.ownerDocument, 'col-resize');
+      shell.setAsideDragging(true);
+    }
+    shell.setAsideExtent(pointAt(event, rect) + held.offset, 'pointer', event);
+  };
+
+  const endDrag = (event: PointerEvent<HTMLDivElement>) => {
+    const held = press.current;
+    if (held === null) return;
+    press.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    if (!held.moved) return;
+    gesture.current?.();
+    gesture.current = null;
+    shell.setAsideDragging(false);
+  };
+
+  const keyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    onKeyDown?.(event);
+    if (event.defaultPrevented) return;
+    const atStart = anchorsAtStart(side, isRtl(node.current));
+
+    /* A distance and not a proportion, converted against the shell measured at
+       the moment of the press. */
+    const by = (direction: 1 | -1) => {
+      event.preventDefault();
+      const rect = shellRect(shell.root);
+      const amount =
+        rect === null
+          ? 0
+          : stepAmountFromPixels({
+              pixels: event.shiftKey ? EXTENT_LARGE_STEP_PX : EXTENT_STEP_PX,
+              rect,
+              side,
+            });
+      shell.setAsideExtent(
+        stepExtent({
+          amount,
+          direction,
+          fraction: current,
+          max: shell.maxAsideExtent,
+          min: shell.minAsideExtent,
+        }),
+        'keyboard',
+        event,
+      );
+    };
+
+    switch (event.key) {
+      case 'ArrowLeft':
+        return by(atStart ? -1 : 1);
+      case 'ArrowRight':
+        return by(atStart ? 1 : -1);
+      case 'Home':
+        event.preventDefault();
+        return shell.setAsideExtent(shell.minAsideExtent, 'keyboard', event);
+      case 'End':
+        event.preventDefault();
+        return shell.setAsideExtent(shell.maxAsideExtent, 'keyboard', event);
+      default:
+        return undefined;
+    }
+  };
+
+  const attach = (element: HTMLDivElement | null) => {
+    node.current = element;
+    if (typeof ref === 'function') ref(element);
+    else if (ref) ref.current = element;
+  };
+
+  const rootProps = {
+    ...nativeProps,
+    'aria-controls': shell.asideId,
+    'aria-label': ariaLabel ?? shell.t('resizeAside'),
+    'aria-orientation': 'vertical' as const,
+    'aria-valuemax': percent(shell.maxAsideExtent),
+    'aria-valuemin': percent(shell.minAsideExtent),
+    'aria-valuenow': percent(current),
+    className,
+    'data-part': 'aside-resizer',
+    onKeyDown: keyDown,
+    onLostPointerCapture: endDrag,
+    onPointerDown: pointerDown,
+    onPointerMove: pointerMove,
+    onPointerUp: endDrag,
+    role: 'separator' as const,
+    style,
+    tabIndex: 0,
+  };
+  if (render !== undefined) return render({ ...rootProps, ref: attach } as never);
+  return <div {...rootProps} ref={attach} />;
 }
 
 /** The pinned bottom: the actions that close the task the pane holds. */
@@ -368,7 +634,7 @@ export function AppShellNavToggle({
     ...nativeProps,
     'aria-controls': ariaControls ?? shell.navId,
     'aria-expanded': shell.open,
-    'aria-label': ariaLabel ?? (shell.open ? shell.messages.close : shell.messages.open),
+    'aria-label': ariaLabel ?? (shell.open ? shell.t('close') : shell.t('open')),
     /* The panel mark says what a press does: open while closed, close while open. */
     children: children ?? (
       <Icon>
@@ -421,8 +687,7 @@ export function AppShellAsideToggle({
     ...nativeProps,
     'aria-controls': ariaControls ?? shell.asideId,
     'aria-expanded': shell.asideOpen,
-    'aria-label':
-      ariaLabel ?? (shell.asideOpen ? shell.messages.closeAside : shell.messages.openAside),
+    'aria-label': ariaLabel ?? (shell.asideOpen ? shell.t('closeAside') : shell.t('openAside')),
     children: children ?? (
       <Icon>
         <Glyph name={shell.asideOpen ? 'panel-close' : 'panel-open'} />

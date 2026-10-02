@@ -1,8 +1,9 @@
 /**
  * What a list of records draws for each record, from the column model a data
  * grid reads: which column is the title, which are the fields and in what
- * order, which sort keys the list can offer, and the words it says about
- * them. Nothing here holds state; both bindings call it on every render.
+ * order, and which sort keys the list can offer. Nothing here holds state;
+ * both bindings call it on every render. The words come from the `dataList`
+ * catalog in `@slotted/core/i18n`.
  */
 
 import {
@@ -18,107 +19,7 @@ import {
   type SortDirection,
   type SortKey,
 } from '../grid';
-
-/* ── The words ───────────────────────────────────────────────────────── */
-
-export type DataListSlots = Readonly<Record<string, string | number>>;
-
-/**
- * A string with `{slot}` markers, or a function of the slots: the function is
- * how an application states a plural — `{count} items` alone says `1 items`.
- */
-export type DataListMessage =
-  string | ((slots: DataListSlots, locale: string | undefined) => string);
-
-export interface DataListLabels {
-  readonly count: DataListMessage;
-  readonly selectedCount: DataListMessage;
-  readonly selectAll: DataListMessage;
-  readonly selectRow: DataListMessage;
-  readonly sort: DataListMessage;
-  readonly sortMore: DataListMessage;
-  readonly sortNone: DataListMessage;
-  readonly sortColumn: DataListMessage;
-  readonly sortDirection: DataListMessage;
-  readonly ascending: DataListMessage;
-  readonly descending: DataListMessage;
-  readonly sortedBy: DataListMessage;
-  readonly sortedByAscending: DataListMessage;
-  readonly sortedByDescending: DataListMessage;
-  readonly sortCleared: DataListMessage;
-  readonly more: DataListMessage;
-  readonly less: DataListMessage;
-  readonly empty: DataListMessage;
-  readonly loading: DataListMessage;
-  readonly loadMore: DataListMessage;
-  readonly clearFilters: DataListMessage;
-  readonly retry: DataListMessage;
-  readonly noResultsTitle: DataListMessage;
-  readonly emptyTitle: DataListMessage;
-  readonly errorTitle: DataListMessage;
-}
-
-const numberFormats = new Map<string, Intl.NumberFormat>();
-
-function formatNumber(value: number, locale: string | undefined): string {
-  const key = locale ?? '';
-  let format = numberFormats.get(key);
-  if (!format) {
-    format = new Intl.NumberFormat(locale);
-    numberFormats.set(key, format);
-  }
-  return format.format(value);
-}
-
-/** The message with its slots filled; a number is formatted in the locale. */
-export function formatDataListMessage(
-  message: DataListMessage,
-  slots: DataListSlots = {},
-  locale?: string,
-): string {
-  if (typeof message === 'function') return message(slots, locale);
-  return message.replace(/\{(\w+)\}/g, (marker, name: string) => {
-    const value = slots[name];
-    if (value === undefined) return marker;
-    return typeof value === 'number' ? formatNumber(value, locale) : value;
-  });
-}
-
-const counted =
-  (one: string, other: string): DataListMessage =>
-  (slots, locale) => {
-    const count = Number(slots['count'] ?? 0);
-    return formatDataListMessage(count === 1 ? one : other, slots, locale);
-  };
-
-/** The words the family says before an application says otherwise. */
-export const DEFAULT_DATA_LIST_LABELS: DataListLabels = {
-  count: counted('{count} item', '{count} items'),
-  selectedCount: '{selected} of {count} selected',
-  selectAll: counted('Select the item', 'Select all {count} items'),
-  selectRow: 'Select {title}',
-  sort: 'Sort',
-  sortMore: '+{count}',
-  sortNone: 'No sorting',
-  sortColumn: 'Sort by',
-  sortDirection: 'Direction',
-  ascending: 'Ascending',
-  descending: 'Descending',
-  sortedBy: 'Sorted by {order}',
-  sortedByAscending: '{column} ascending',
-  sortedByDescending: '{column} descending',
-  sortCleared: 'Sorting removed',
-  more: 'Show {count} more',
-  less: 'Show less',
-  empty: 'Empty',
-  loading: 'Loading items',
-  loadMore: 'Load more',
-  clearFilters: 'Clear filters',
-  retry: 'Try again',
-  noResultsTitle: 'No items match',
-  emptyTitle: 'No items yet',
-  errorTitle: 'Items could not be loaded',
-};
+import type { DataListMessages, FamilyTranslator } from '../i18n';
 
 /* ── The columns ─────────────────────────────────────────────────────── */
 
@@ -212,7 +113,7 @@ export function resolveDataListLayout<Row>(
 export function dataListFieldText<Row>(
   column: GridColumn<Row>,
   row: Row,
-  options: FormatOptions = {},
+  options: FormatOptions,
 ): string | null {
   if (isEmptyValue(cellValue(column, row))) return null;
   return cellText(column, row, options);
@@ -241,15 +142,14 @@ export function withDataListSortDirection(query: GridQuery, direction: SortDirec
 export function describeDataListSort<Row>(
   sort: readonly SortKey[],
   columns: readonly GridColumn<Row>[],
-  labels: Pick<DataListLabels, 'sortedByAscending' | 'sortedByDescending'>,
-  locale?: string,
+  t: FamilyTranslator<DataListMessages>,
 ): string {
   return sort
     .map((key) => {
       const column = columns.find((entry) => entry.id === key.column)?.label ?? key.column;
-      const message =
-        key.direction === 'ascending' ? labels.sortedByAscending : labels.sortedByDescending;
-      return formatDataListMessage(message, { column }, locale);
+      return t(key.direction === 'ascending' ? 'sortedByAscending' : 'sortedByDescending', {
+        column,
+      });
     })
     .join(', ');
 }

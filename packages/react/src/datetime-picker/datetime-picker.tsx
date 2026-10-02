@@ -17,6 +17,7 @@ import {
 } from '@slotted/core/date';
 import type { PlainDate, PlainDateTime, PlainTime, TimeOption } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { datetimePickerMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
@@ -40,6 +41,7 @@ import type { CalendarHandle, CalendarView } from '../calendar';
 import { DateTimeField } from '../datetime-field';
 import type { DateTimeFieldHandle } from '../datetime-field';
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useDateTimePickerDefaults } from './datetime-picker-defaults';
 import type {
@@ -88,8 +90,6 @@ const SSR_REFERENCE: PlainDateTime = {
  */
 export function DateTimePicker({
   calendar,
-  changeLabel,
-  chooseLabel,
   className,
   clearable = false,
   closeOnSelect,
@@ -97,7 +97,6 @@ export function DateTimePicker({
   defaultOpen = false,
   defaultValue,
   disabled,
-  emptyLabel,
   firstDayOfWeek,
   footer,
   granularity,
@@ -108,13 +107,13 @@ export function DateTimePicker({
   isTimeUnavailable,
   locale,
   max,
+  messages,
   maxOptions,
   maxTime,
   min,
   minTime,
   months,
   name,
-  nowLabel,
   onHighlightedChange,
   onKeyDown,
   onOpenChange,
@@ -135,7 +134,6 @@ export function DateTimePicker({
   step,
   style,
   timeZone,
-  truncatedLabel,
   unavailableOptions,
   value,
   variant,
@@ -144,6 +142,8 @@ export function DateTimePicker({
 }: DateTimePickerProps) {
   const field = useField();
   const defaults = useDateTimePickerDefaults();
+  const appLocale = useLocale();
+  const t = useMessages(datetimePickerMessages, messages);
   const rootRef = useRef<HTMLElement | null>(null);
   const fieldHandle = useRef<DateTimeFieldHandle | null>(null);
   const calendarHandle = useRef<CalendarHandle | null>(null);
@@ -165,7 +165,7 @@ export function DateTimePicker({
   const [ownValue, setOwnValue] = useState<PlainDateTime | null>(defaultValue ?? null);
   const held = value ?? ownValue;
 
-  const resolvedLocale = locale ?? defaults.locale;
+  const resolvedLocale = locale ?? appLocale;
   const resolvedTimeZone = timeZone ?? defaults.timeZone;
   const resolvedGranularity = granularity ?? defaults.granularity;
   const resolvedHourCycle = hourCycle ?? defaults.hourCycle;
@@ -536,10 +536,7 @@ export function DateTimePicker({
    * The trigger's accessible name. Focus returns here when the panel closes, so
    * this is where the reader is told what was chosen.
    */
-  const spoken =
-    held === null
-      ? (chooseLabel ?? defaults.chooseLabel)
-      : `${changeLabel ?? defaults.changeLabel}, ${format.describe(held)}`;
+  const spoken = held === null ? t('choose') : t('change', { date: format.describe(held) });
 
   /* ── Focus follows the missing half ──────────────────────────────────── */
 
@@ -756,7 +753,7 @@ export function DateTimePicker({
         data-part="content"
         id={contentId}
         role="dialog"
-        {...(truncated ? { 'aria-description': truncatedLabel ?? defaults.truncatedLabel } : {})}
+        {...(truncated ? { 'aria-description': t('truncated') } : {})}
       >
         <div data-part="head">
           <span data-part="head-value">{headValue}</span>
@@ -774,7 +771,7 @@ export function DateTimePicker({
             <Icon size="sm">
               <Glyph name="clock" />
             </Icon>
-            {nowLabel ?? defaults.nowLabel}
+            {t('now')}
           </button>
         </div>
 
@@ -813,7 +810,7 @@ export function DateTimePicker({
 
           <div data-part="time-panel">
             {list.length === 0 ? (
-              <div data-part="empty">{emptyLabel ?? defaults.emptyLabel}</div>
+              <div data-part="empty">{t('empty')}</div>
             ) : (
               <div
                 aria-label={format.describeDate(listDate, 'short')}

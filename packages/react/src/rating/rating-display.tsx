@@ -1,8 +1,10 @@
 import '@slotted/styles/rating/rating.css';
 
-import { formatRating, formatRatingMessage, ratingFills } from '@slotted/core/rating';
+import { ratingMessages } from '@slotted/core/i18n';
+import { formatRating, formatRatingValue, ratingFills } from '@slotted/core/rating';
 import type { CSSProperties, ReactNode } from 'react';
 
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useRatingDefaults } from './rating-defaults';
 import type { RatingDisplayProps, RatingRootProps, RatingSymbolState } from './rating.types';
@@ -76,10 +78,11 @@ export function RatingDisplay({
   ...nativeProps
 }: RatingDisplayProps) {
   const defaults = useRatingDefaults();
+  const t = useMessages(ratingMessages, messages);
+  const appLocale = useLocale();
   const resolvedMax = Math.max(1, Math.floor(max ?? defaults.max));
   const resolvedVariant = variant ?? 'full';
-  const resolvedLocale = locale ?? defaults.locale;
-  const resolvedMessages = { ...defaults.messages, ...messages };
+  const resolvedLocale = locale ?? appLocale;
   const shown = Number.isFinite(value) ? Math.min(Math.max(value, 0), resolvedMax) : 0;
   const single = resolvedVariant !== 'full';
   const fills = single ? [shown > 0 ? 1 : 0] : ratingFills(shown, resolvedMax);
@@ -90,15 +93,13 @@ export function RatingDisplay({
     ...nativeProps,
     'aria-label':
       ariaLabel ??
-      formatRatingMessage(
-        count === undefined
-          ? resolvedMessages.displayLabel
-          : resolvedMessages.displayLabelWithCount,
-        count === undefined
-          ? { value: shown, max: resolvedMax }
-          : { value: shown, max: resolvedMax, count },
-        resolvedLocale,
-      ),
+      (count === undefined
+        ? t('displayLabel', { value: formatRatingValue(shown, resolvedLocale), max: resolvedMax })
+        : t('displayLabelWithCount', {
+            value: formatRatingValue(shown, resolvedLocale),
+            max: resolvedMax,
+            count,
+          })),
     children: (
       <>
         <div data-part="symbols">

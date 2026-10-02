@@ -1,7 +1,8 @@
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
-import type { KbdPlatform } from '@slotted/core/keys';
-import { parseShortcut, resolveKey, resolvePlatform, resolveShortcut } from '@slotted/core/keys';
+import { keysMessages } from '@slotted/core/i18n';
+import type { KbdPlatform, KeysTranslator } from '@slotted/core/keys';
+import { canonicalKey, parseShortcut, resolvePlatform, resolveShortcut } from '@slotted/core/keys';
 import {
   booleanAttribute,
   ChangeDetectionStrategy,
@@ -18,6 +19,7 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlMenu } from './menu';
@@ -44,7 +46,7 @@ export function announceShortcut(keys: string, platform: KbdPlatform): string | 
 
   return steps[0]
     ?.map((token) => {
-      const canonical = resolveKey(token, { platform }).token;
+      const canonical = canonicalKey(token);
       if (canonical === 'mod') return platform === 'mac' ? 'Meta' : 'Control';
       if (canonical !== undefined && canonical in ARIA_MODIFIERS) {
         return ARIA_MODIFIERS[canonical] as string;
@@ -55,9 +57,9 @@ export function announceShortcut(keys: string, platform: KbdPlatform): string | 
     .join('+');
 }
 
-/** The legends a reader sees, in the order the platform writes them. */
-export function shortcutLegends(keys: string, platform: KbdPlatform): string {
-  const shortcut = resolveShortcut(keys, { platform });
+/** The legends a reader sees, in the order the platform writes them, in the language of `t`. */
+export function shortcutLegends(keys: string, platform: KbdPlatform, t: KeysTranslator): string {
+  const shortcut = resolveShortcut(keys, { platform, t });
   return shortcut.steps
     .map((step) => step.map((key) => key.legend).join(shortcut.separator))
     .join(` ${shortcut.thenLabel} `);
@@ -157,6 +159,8 @@ export class SlMenuItem {
   private readonly group = inject(SlMenuRadioGroup, { optional: true });
   private readonly element: HTMLElement = inject(ElementRef).nativeElement;
   private readonly platform = resolvePlatform('auto');
+  /** The words a shortcut's keys are written in, from the `keys` catalog of the language in force. */
+  private readonly keysT = injectMessages(keysMessages);
 
   private readonly isCheckbox =
     inject(new HostAttributeToken('slMenuCheckboxItem'), {
@@ -184,7 +188,7 @@ export class SlMenuItem {
 
   protected readonly legend = computed(() => {
     const keys = this.shortcut();
-    return keys === undefined ? undefined : shortcutLegends(keys, this.platform);
+    return keys === undefined ? undefined : shortcutLegends(keys, this.platform, this.keysT);
   });
 
   protected readonly announced = computed(() => {

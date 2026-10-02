@@ -17,7 +17,6 @@ export type {
   CarouselControlsPlacement,
   CarouselDefaults,
   CarouselIndicatorsVariant,
-  CarouselMessages,
   CarouselOrientation,
   CarouselSize,
   CarouselSlidesPerMove,

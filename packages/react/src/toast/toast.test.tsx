@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/toast/contract.json';
+import { SlottedProvider } from '../i18n';
 import { createToaster, Toast, ToastDefaultsProvider, ToasterProvider, ToastRegion } from './index';
 import type { Toaster, ToastMessage } from './index';
 
@@ -232,17 +234,13 @@ describe('what an application decides once', () => {
   it('reads the provider for every axis a message did not state', () => {
     const toaster = createToaster();
     render(
-      <ToasterProvider value={toaster}>
-        <ToastDefaultsProvider
-          closeLabel="Fechar"
-          label="Notificações"
-          placement="top-start"
-          tone="success"
-          variant="soft"
-        >
-          <ToastRegion attach="inline" />
-        </ToastDefaultsProvider>
-      </ToasterProvider>,
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <ToasterProvider value={toaster}>
+          <ToastDefaultsProvider placement="top-start" tone="success" variant="soft">
+            <ToastRegion attach="inline" />
+          </ToastDefaultsProvider>
+        </ToasterProvider>
+      </SlottedProvider>,
     );
 
     act(() => {

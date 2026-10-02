@@ -33,12 +33,9 @@ import type {
   EventOccurrence,
   WorkingHours,
 } from '@slotted/core/event-calendar';
+import type { EventCalendarMessages, FamilyTranslator } from '@slotted/core/i18n';
 
-import type {
-  EventCalendarHourCycle,
-  EventCalendarLabels,
-  EventCalendarSelection,
-} from './event-calendar-defaults';
+import type { EventCalendarHourCycle, EventCalendarSelection } from './event-calendar-defaults';
 
 /** A block shorter than this puts its time beside its title, on one line. */
 const SHORT_MINUTES = 45;
@@ -52,8 +49,9 @@ const MIN_BLOCK_MINUTES = 20;
  */
 export interface DrawingInput {
   readonly id: string;
-  readonly labels: EventCalendarLabels;
-  readonly locale: string | undefined;
+  /** The family's words in the language in force, with the calendar's `messages` laid over them. */
+  readonly t: FamilyTranslator<EventCalendarMessages>;
+  readonly locale: string;
   readonly hourCycle: EventCalendarHourCycle | undefined;
   readonly timeZone: string | undefined;
   readonly view: EventCalendarView;
@@ -133,26 +131,27 @@ export function timeLabel(
   occurrence: EventOccurrence,
   date: PlainDate,
 ): string {
-  if (occurrence.allDay) return input.labels.allDay;
+  if (occurrence.allDay) return input.t('allDay');
   const options = { locale: input.locale, hourCycle: input.hourCycle };
   const { start, end } = occurrenceTimes(occurrence, date);
   if (start !== null && end !== null) return formatTimeRange(start, end, options);
-  if (start !== null) return input.labels.from(formatTime(start, options));
-  if (end !== null) return input.labels.until(formatTime(end, options));
-  return input.labels.allDay;
+  if (start !== null) return input.t('from', { time: formatTime(start, options) });
+  if (end !== null) return input.t('until', { time: formatTime(end, options) });
+  return input.t('allDay');
 }
 
 function metaText(input: DrawingInput, occurrence: EventOccurrence, continued: boolean): string {
   const parts = [
     formatOccurrence(occurrence, { locale: input.locale, hourCycle: input.hourCycle }),
-    occurrence.allDay ? input.labels.allDay : undefined,
+    occurrence.allDay ? input.t('allDay') : undefined,
     input.calendars.find((entry) => entry.key === occurrence.event.calendar)?.label,
-    occurrence.event.status === 'tentative' ? input.labels.tentative : undefined,
-    occurrence.event.status === 'cancelled' ? input.labels.cancelled : undefined,
-    occurrence.recurring ? input.labels.recurring : undefined,
-    continued ? input.labels.continues : undefined,
+    occurrence.event.status === 'tentative' ? input.t('tentative') : undefined,
+    occurrence.event.status === 'cancelled' ? input.t('cancelled') : undefined,
+    occurrence.recurring ? input.t('recurring') : undefined,
+    continued ? input.t('continues') : undefined,
   ].filter((part): part is string => part !== undefined && part !== '');
-  return `, ${parts.join(', ')}`;
+  /* A list of descriptors, written the way the locale in force lists them. */
+  return `, ${new Intl.ListFormat(input.locale, { type: 'unit' }).format(parts)}`;
 }
 
 export function eventView(
@@ -284,7 +283,7 @@ export function drawMonth(
             iso: toISODate(date),
             date,
             label: fullDate(input.locale, date),
-            count: input.labels.events(occurrencesOn(occurrences, date).length),
+            count: input.t('events', { count: occurrencesOn(occurrences, date).length }),
             tabIndex: isSameDate(date, input.date) ? 0 : -1,
             today: input.today !== null && isSameDate(date, input.today),
             outside: date.month !== input.date.month,
@@ -303,11 +302,11 @@ export function drawMonth(
                   : { '--slotted-event-lane': segment.lane + 1 },
               });
             }),
-            continuations: continuing.map(
-              (segment) => `${segment.occurrence.event.title}, ${input.labels.continues}`,
+            continuations: continuing.map((segment) =>
+              input.t('titleContinues', { title: segment.occurrence.event.title }),
             ),
             more,
-            moreLabel: input.labels.moreEvents(more),
+            moreLabel: input.t('moreEvents', { count: more }),
           };
         }),
       };
@@ -393,7 +392,14 @@ export function drawTimeGrid(
     })),
     headers: days.map((date) => {
       const change = offsetChangeOn(date, input.timeZone);
-      const at = change === null ? '' : formatTime(change.at, options);
+      const slots =
+        change === null
+          ? null
+          : {
+              direction: change.minutes > 0 ? 'forward' : 'back',
+              hours: Math.abs(change.minutes) / 60,
+              at: formatTime(change.at, options),
+            };
       return {
         iso: toISODate(date),
         date,
@@ -401,8 +407,8 @@ export function drawTimeGrid(
         label: fullDate(input.locale, date),
         tabIndex: input.row === 'header' && tabDay(date) ? 0 : -1,
         today: isToday(date),
-        offsetShort: change === null ? null : input.labels.offsetChangeShort(change.minutes, at),
-        offsetLong: change === null ? null : input.labels.offsetChange(change.minutes, at),
+        offsetShort: slots === null ? null : input.t('offsetChangeShort', slots),
+        offsetLong: slots === null ? null : input.t('offsetChange', slots),
       };
     }),
     allDay: days.map((date, index) => ({
@@ -426,7 +432,7 @@ export function drawTimeGrid(
         ),
       continuations: segments
         .filter((segment) => segment.start < index && segment.start + segment.span > index)
-        .map((segment) => `${segment.occurrence.event.title}, ${input.labels.continues}`),
+        .map((segment) => input.t('titleContinues', { title: segment.occurrence.event.title })),
     })),
     columns: days.map((date) => {
       const { items, more } = layoutColumn(occurrences, date, {
@@ -490,7 +496,7 @@ export function drawTimeGrid(
         more: more.map((entry) => ({
           count: entry.occurrences.length,
           overlay: entry.overlay,
-          label: input.labels.moreEvents(entry.occurrences.length),
+          label: input.t('moreEvents', { count: entry.occurrences.length }),
           style: {
             '--slotted-event-start': entry.start,
             '--slotted-event-length': entry.length,

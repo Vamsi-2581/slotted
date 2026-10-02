@@ -226,17 +226,17 @@ test('resolves disabled over every other state', () => {
   assert.equal(strongestState(filterBar.states), 'disabled');
 });
 
-test('lets an application set the labels and the policy once', () => {
+test('lets an application set the policy once, and takes its words from the catalog', () => {
   assert.deepEqual(contract.provides.filterBarDefaults, [
-    'labels',
     'apply',
     'queryDelay',
     'chipLimit',
     'shortcut',
   ]);
-  assert.ok(contract.labels.includes('required'));
-  assert.ok(contract.labels.includes('operators'));
-  assert.ok(contract.labels.includes('count'));
+  for (const key of ['required', 'operators.contains', 'count', 'countOnly', 'rule', 'remove']) {
+    assert.ok(contract.messages.includes(key), key);
+  }
+  assert.ok(!('labels' in contract), 'the words are messages, not labels');
 });
 
 test('declares a scenario for every capability the page has to show', () => {

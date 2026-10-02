@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/action-sheet/contract.json';
+import { SlottedProvider } from '../i18n';
 import { ActionSheet } from './action-sheet';
 import { ActionSheetDefaultsProvider } from './action-sheet-defaults';
 import {
@@ -267,7 +269,7 @@ describe('ActionSheet', () => {
 
   it('reads its defaults from the provider, and an explicit prop still wins', () => {
     render(
-      <ActionSheetDefaultsProvider cancelLabel="Fechar" modal={false}>
+      <ActionSheetDefaultsProvider modal={false}>
         <ActionSheet defaultOpen modal>
           <ActionSheetContent aria-label="Actions">
             <ActionSheetList aria-label="Actions">
@@ -278,8 +280,27 @@ describe('ActionSheet', () => {
         </ActionSheet>
       </ActionSheetDefaultsProvider>,
     );
-    expect(screen.getByRole('button', { name: 'Fechar' })).toBeInTheDocument();
     expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true');
+  });
+
+  it('speaks the language in force, and lays its own messages over it', () => {
+    const sheet = (messages?: { cancel: string }) => (
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <ActionSheet defaultOpen messages={messages}>
+          <ActionSheetContent aria-label="Actions">
+            <ActionSheetList aria-label="Actions">
+              <ActionSheetItem>One</ActionSheetItem>
+            </ActionSheetList>
+            <ActionSheetCancel />
+          </ActionSheetContent>
+        </ActionSheet>
+      </SlottedProvider>
+    );
+    const { rerender } = render(sheet());
+    expect(screen.getByRole('button', { name: 'Cancelar' })).toBeInTheDocument();
+
+    rerender(sheet({ cancel: 'Fechar' }));
+    expect(screen.getByRole('button', { name: 'Fechar' })).toBeInTheDocument();
   });
 
   it("runs the consumer's handler first, and preventDefault refuses the family's", () => {

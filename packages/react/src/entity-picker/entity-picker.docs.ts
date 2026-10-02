@@ -285,7 +285,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'sections',
     title: 'Favorites and recent',
-    note: 'Focus the empty field: favorites, then recent, then what the empty query returned, with no id twice. rememberRecent keeps the application’s list.',
+    note: 'Press the empty field: favorites, then recent, then what the empty query returned, with no id twice. rememberRecent keeps the application’s list.',
     snippet: defineSnippet({
       id: 'entity-picker-react-sections',
       language: 'tsx',
@@ -464,18 +464,19 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition',
-    note: 'renderOption adds the team after the address; renderChip adds the role to a chip; the defaults provider says every sentence in Portuguese once.',
+    note: 'renderOption adds the team after the address; renderChip adds the role to a chip; SlottedProvider says every sentence in Portuguese once.',
     snippet: defineSnippet({
       id: 'entity-picker-react-composition',
       language: 'tsx',
       label: 'renderOption and a provider',
-      source: `<EntityPickerDefaultsProvider labels={{ empty: 'Nenhum resultado', retry: 'Tentar de novo' }}>
+      source: `<SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
   <EntityPicker
     aria-label="Responsável"
+    messages={{ retry: 'Buscar outra vez' }}
     renderOption={(person) => <span data-part="label">{person.label}</span>}
     source={directory}
   />
-</EntityPickerDefaultsProvider>;`,
+</SlottedProvider>;`,
     }),
   },
 ];
@@ -495,7 +496,7 @@ const events: EventRow[] = [
   {
     name: 'onOpenChange',
     payload: '(open: boolean, request: ChangeRequest<boolean>)',
-    when: 'Before the popup opens or closes: focus, typing, arrows (keyboard), the trigger (pointer), Escape (escape), a press outside (outsidePress), a choice (select), leaving (blur).',
+    when: 'Before the popup opens or closes: focus, typing, arrows (keyboard), a press on the input or the trigger (pointer), Escape (escape), a press outside (outsidePress), a choice (select), leaving (blur).',
   },
   {
     name: 'onHighlightedValueChange',
@@ -657,10 +658,10 @@ export const REACT_ENTITY_PICKER_DOCS = {
       ],
       [
         'openOn',
-        "'input' | 'focus'",
-        'focus',
+        "'input' | 'focus' | 'manual'",
+        'input',
         'EntityPicker',
-        'focus shows favorites and recent at once',
+        'input: typing or a press opens; focus: every focus too; manual: only the trigger and the arrows',
       ],
       [
         'size',
@@ -724,18 +725,24 @@ export const REACT_ENTITY_PICKER_DOCS = {
       ],
       ['required', 'boolean', 'false', 'EntityPicker', 'On the input while nothing is chosen'],
       ['invalid', 'boolean', 'false', 'EntityPicker', 'Also read from a Field'],
-      ['locale', 'string', '—', 'EntityPicker', 'BCP 47, for the local filter and the mark'],
       [
-        'labels',
-        'Partial<EntityPickerLabels>',
-        'English',
+        'locale',
+        'string',
+        '—',
         'EntityPicker',
-        'Every sentence; {count}, {query}, {label} and {max} are filled',
+        'BCP 47, for the local filter and the mark. The language in force when absent',
+      ],
+      [
+        'messages',
+        'Partial<EntityPickerMessages>',
+        '—',
+        'EntityPicker',
+        'Words laid over the language in force, key by key; {count}, {query}, {label}, {id} and {max} are slots',
       ],
       ['name', 'string', '—', 'EntityPicker', 'One hidden input per id under this name'],
       [
         'EntityPickerDefaultsProvider',
-        '{ size, variant, media, overflow, openOn, searchDelay, minQueryLength, labels, … }',
+        '{ size, variant, media, overflow, openOn, searchDelay, minQueryLength, … }',
         '—',
         'a subtree',
         'The decisions an application takes once; an instance that states any of them wins',

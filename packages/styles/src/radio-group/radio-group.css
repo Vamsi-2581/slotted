@@ -23,13 +23,16 @@
      */
     --_size: var(--slotted-radio-group-size, var(--slotted-selection-size-md, 16px));
     --_font-size: var(--slotted-control-font-size-md, 13px);
+    /** `--_gap` spaces one choice from the next; `--_label-gap` spaces a
+        circle from its own label, and is the wider of the two. */
     --_gap: var(--slotted-control-gap-md, 8px);
+    --_label-gap: var(--slotted-control-label-gap-md, 12px);
     --_line-height: var(--slotted-radio-group-line-height, var(--slotted-line-height-md, 1.5));
     /**
      * The air the halo keeps around the circle and past the end of the text:
      * half the gap between them, for the reason `checkbox` records.
      */
-    --_halo-spread: calc(var(--_gap) / 2);
+    --_halo-spread: calc(var(--_label-gap) / 2);
     /**
      * The target: the WCAG 2.2 minimum, hit around the circle by the halo's
      * own box rather than laid out beside it, for the reason `checkbox`
@@ -81,6 +84,7 @@
     --_size: var(--slotted-radio-group-size, var(--slotted-selection-size-sm, 14px));
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_gap: var(--slotted-control-gap-sm, 6px);
+    --_label-gap: var(--slotted-control-label-gap-sm, 8px);
     --_tile-inset: var(
       --slotted-radio-group-tile-inset,
       var(--slotted-control-padding-inline-sm, 10px)
@@ -91,6 +95,7 @@
     --_size: var(--slotted-radio-group-size, var(--slotted-selection-size-md, 16px));
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_gap: var(--slotted-control-gap-md, 8px);
+    --_label-gap: var(--slotted-control-label-gap-md, 12px);
     --_tile-inset: var(
       --slotted-radio-group-tile-inset,
       var(--slotted-control-padding-inline-md, 13px)
@@ -101,6 +106,7 @@
     --_size: var(--slotted-radio-group-size, var(--slotted-selection-size-lg, 18px));
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_gap: var(--slotted-control-gap-lg, 8px);
+    --_label-gap: var(--slotted-control-label-gap-lg, 12px);
     --_tile-inset: var(
       --slotted-radio-group-tile-inset,
       var(--slotted-control-padding-inline-lg, 16px)
@@ -208,7 +214,7 @@
    * nothing, with the text against the control.
    */
   [data-ui='radio-group'] [data-part='item']:has(> [data-part='label']) {
-    column-gap: var(--_gap);
+    column-gap: var(--_label-gap);
   }
 
   [data-ui='radio-group'][data-part='root']:not([data-variant='tile']) [data-part='label'] {
@@ -232,7 +238,9 @@
     direction: var(--_direction);
     inline-size: var(--_target);
     inset-block-start: calc(var(--_lift) + var(--_size) - var(--_target));
-    inset-inline-start: calc((var(--_size) - var(--_target)) / 2 - var(--_size) - var(--_gap));
+    inset-inline-start: calc(
+      (var(--_size) - var(--_target)) / 2 - var(--_size) - var(--_label-gap)
+    );
     position: absolute;
     z-index: -1;
   }
@@ -244,7 +252,7 @@
     direction: var(--_direction);
     inset-block: calc(var(--_lift) - var(--_halo-spread));
     inset-inline-end: calc(-1.5 * var(--_halo-spread));
-    inset-inline-start: calc(-1 * (var(--_size) + var(--_gap) + var(--_halo-spread)));
+    inset-inline-start: calc(-1 * (var(--_size) + var(--_label-gap) + var(--_halo-spread)));
     opacity: 0;
     position: absolute;
     transition: opacity var(--slotted-control-transition-duration)
@@ -257,7 +265,7 @@
      the circle at the same distance on all four sides. */
   [data-ui='radio-group'][data-part='root']:not([data-variant='tile'])
     [data-part='label']:empty::after {
-    inset-inline-end: calc(var(--_gap) - var(--_halo-spread));
+    inset-inline-end: calc(var(--_label-gap) - var(--_halo-spread));
   }
 
   [data-ui='radio-group'] [data-part='description'] {
@@ -306,13 +314,13 @@
 
   [data-ui='radio-group'][data-part='root'][data-label-placement='start']
     [data-part='label']::before {
-    inset-inline-end: calc(-1 * (var(--_size) + var(--_gap)));
+    inset-inline-end: calc(-1 * (var(--_size) + var(--_label-gap)));
     inset-inline-start: auto;
   }
 
   [data-ui='radio-group'][data-part='root'][data-label-placement='start']
     [data-part='label']::after {
-    inset-inline-end: calc(-1 * (var(--_size) + var(--_gap) + var(--_halo-spread)));
+    inset-inline-end: calc(-1 * (var(--_size) + var(--_label-gap) + var(--_halo-spread)));
     inset-inline-start: calc(-1.5 * var(--_halo-spread));
   }
 

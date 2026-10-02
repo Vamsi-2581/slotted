@@ -246,7 +246,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Setting it once',
-    note: 'The provider carries the notation, the palette and every label an application translates once.',
+    note: 'The provider carries the notation and the palette; the words come from the language in force.',
     snippet: defineSnippet({
       id: 'color-picker-angular-composition',
       language: 'angular',
@@ -384,11 +384,11 @@ export const ANGULAR_COLOR_PICKER_DOCS = {
         'Present means the consumer owns whether the panel is open; defaultOpen is the uncontrolled half',
       ],
       [
-        'labels',
-        'areaLabel, hueLabel, alphaLabel, inputLabel, formatLabel, eyedropperLabel, previousLabel, presetsLabel, gamutLabel, triggerLabel',
-        'English',
-        'provideColorPickerDefaults',
-        'What each control is called, translated once',
+        'messages',
+        'Partial<ColorPickerMessages>',
+        '—',
+        'slColorPicker, slColorField',
+        'Words laid over the language in force, key by key: what each control is called, the gamut sentence and the contrast levels',
       ],
     ]),
     composition: apiRows([
@@ -404,7 +404,7 @@ export const ANGULAR_COLOR_PICKER_DOCS = {
         '(defaults: Partial<ColorPickerDefaults>) => Provider',
         '—',
         'an injector',
-        'The notation, the palette and the labels an application takes once',
+        'The notation, the palette and the size an application takes once',
       ],
       [
         'exportAs',

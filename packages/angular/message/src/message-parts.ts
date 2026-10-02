@@ -13,7 +13,7 @@ import {
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlMessage } from './message';
-import { formatMessage, reasonOf } from './message-defaults';
+import { reasonOf } from './message-defaults';
 import type { MessageActivityStepStatus, MessageStatus } from './message-defaults';
 
 function message(): SlMessage {
@@ -108,7 +108,7 @@ export class SlMessageReceipt {
     const own = this.owner.status();
     return this.status() ?? (own === 'streaming' ? undefined : own) ?? 'sent';
   });
-  protected readonly word = computed(() => this.owner.messages[this.resolved()]);
+  protected readonly word = computed(() => this.owner.t(this.resolved()));
   protected readonly glyph = computed(() => {
     const status = this.resolved();
     return this.inMeta && status !== 'failed' ? RECEIPT_GLYPH[status] : null;
@@ -122,12 +122,13 @@ export class SlMessageReceipt {
   host: {
     'data-part': 'actions',
     role: 'toolbar',
-    '[attr.aria-label]': 'label',
+    '[attr.aria-label]': 'label()',
   },
 })
 export class SlMessageActions {
-  protected readonly label =
-    inject(new HostAttributeToken('aria-label'), { optional: true }) ?? message().messages.actions;
+  private readonly owner = message();
+  private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
+  protected readonly label = computed(() => this.written ?? this.owner.t('actions'));
 }
 
 /** What a reply is doing before it has words, as a short log of steps; a status region. */
@@ -182,7 +183,7 @@ export class SlMessageActivityStep {
     <button
       type="button"
       data-part="version-previous"
-      [attr.aria-label]="owner.messages.previousVersion"
+      [attr.aria-label]="owner.t('previousVersion')"
       [disabled]="owner.version() <= 0"
       (click)="step(-1, $event)"
     >
@@ -192,7 +193,7 @@ export class SlMessageActivityStep {
     <button
       type="button"
       data-part="version-next"
-      [attr.aria-label]="owner.messages.nextVersion"
+      [attr.aria-label]="owner.t('nextVersion')"
       [disabled]="owner.version() >= owner.versionCount() - 1"
       (click)="step(1, $event)"
     >
@@ -204,7 +205,7 @@ export class SlMessageActivityStep {
   host: {
     'data-part': 'versions',
     role: 'group',
-    '[attr.aria-label]': 'owner.messages.versions',
+    '[attr.aria-label]': "owner.t('versions')",
     '[attr.hidden]': "owner.versionCount() > 1 ? null : ''",
     '(keydown)': 'onKeyDown($event)',
   },
@@ -214,7 +215,7 @@ export class SlMessageVersions {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
   protected readonly label = computed(() =>
-    formatMessage(this.owner.messages.versionLabel, {
+    this.owner.t('versionLabel', {
       current: this.owner.version() + 1,
       total: this.owner.versionCount(),
     }),

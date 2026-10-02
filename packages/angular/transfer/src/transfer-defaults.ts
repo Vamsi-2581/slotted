@@ -48,33 +48,6 @@ export interface TransferItem {
   disabled?: boolean | undefined;
 }
 
-/** The words the family says. `{slot}` is filled in. */
-export interface TransferLabels {
-  source: string;
-  target: string;
-  search: string;
-  selectAll: string;
-  count: string;
-  countSelected: string;
-  countFiltered: string;
-  paneCount: string;
-  panes: string;
-  empty: string;
-  noResults: string;
-  loading: string;
-  actions: string;
-  moveToTarget: string;
-  moveAllToTarget: string;
-  moveToSource: string;
-  moveAllToSource: string;
-  reorder: string;
-  moveUp: string;
-  moveDown: string;
-  moved: string;
-  movedOne: string;
-  reordered: string;
-}
-
 /** What an application sets once for every transfer under it. */
 export interface TransferDefaults {
   size: TransferSize;
@@ -83,35 +56,7 @@ export interface TransferDefaults {
   selectAll: boolean;
   reorderable: boolean;
   rows: number;
-  labels: TransferLabels;
 }
-
-/** The words the family says before an application says otherwise. */
-export const DEFAULT_TRANSFER_LABELS: TransferLabels = {
-  source: 'Available',
-  target: 'Chosen',
-  search: 'Search {pane}',
-  selectAll: 'Select all in {pane}',
-  count: '{total} items',
-  countSelected: '{selected} of {total} selected',
-  countFiltered: '{shown} of {total} shown',
-  paneCount: '{pane} ({total})',
-  panes: 'Lists',
-  empty: 'No items',
-  noResults: 'No matches',
-  loading: 'Loading…',
-  actions: 'Move items',
-  moveToTarget: 'Add',
-  moveAllToTarget: 'Add all',
-  moveToSource: 'Remove',
-  moveAllToSource: 'Remove all',
-  reorder: 'Order',
-  moveUp: 'Up',
-  moveDown: 'Down',
-  moved: '{count} moved to {pane}',
-  movedOne: '{item} moved to {pane}',
-  reordered: '{item} moved to position {position}',
-};
 
 const FALLBACK: TransferDefaults = {
   size: 'md',
@@ -120,7 +65,6 @@ const FALLBACK: TransferDefaults = {
   selectAll: true,
   reorderable: false,
   rows: 8,
-  labels: DEFAULT_TRANSFER_LABELS,
 };
 
 export const TRANSFER_DEFAULTS = new InjectionToken<TransferDefaults>('slotted transfer defaults', {
@@ -129,19 +73,14 @@ export const TRANSFER_DEFAULTS = new InjectionToken<TransferDefaults>('slotted t
 });
 
 /**
- * An application decides once how its transfers look and what they say. A
- * transfer that states any of it itself still wins.
+ * An application decides once how its transfers look. A transfer that states
+ * any of it itself still wins. The words come from the language in force
+ * (`provideSlotted`).
  */
-export function provideTransferDefaults(
-  defaults: Partial<Omit<TransferDefaults, 'labels'>> & { labels?: Partial<TransferLabels> },
-) {
+export function provideTransferDefaults(defaults: Partial<TransferDefaults>) {
   return {
     provide: TRANSFER_DEFAULTS,
-    useFactory: (): TransferDefaults => ({
-      ...FALLBACK,
-      ...defaults,
-      labels: { ...FALLBACK.labels, ...defaults.labels },
-    }),
+    useFactory: (): TransferDefaults => ({ ...FALLBACK, ...defaults }),
   };
 }
 
@@ -157,11 +96,4 @@ export class SlTransferIdFactory {
     this.count += 1;
     return `slotted-transfer-${this.count}`;
   }
-}
-
-/** Fills `{name}` slots in a label. */
-export function fillLabel(label: string, slots: Record<string, string | number>): string {
-  return label.replace(/\{(\w+)\}/g, (match, name: string) =>
-    name in slots ? String(slots[name]) : match,
-  );
 }

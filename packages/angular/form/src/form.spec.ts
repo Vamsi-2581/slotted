@@ -1,6 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/form/contract.json';
@@ -130,7 +132,7 @@ describe('SlForm', () => {
     expect(region.getAttribute('role')).toBe('alert');
     expect(region.getAttribute('tabindex')).toBe('-1');
     expect(region.querySelector('[data-part="summary-title"]')?.textContent?.trim()).toBe(
-      contract.summary.title,
+      'There is a problem',
     );
     expect(itemsOf(fixture)[0]?.getAttribute('href')).toBe('#name');
   });
@@ -208,7 +210,7 @@ describe('SlForm defaults', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       imports: [Host],
-      providers: [provideFormDefaults({ align: 'stretch', summaryTitle: 'Corrija estes campos' })],
+      providers: [provideFormDefaults({ align: 'stretch' })],
     });
 
     const fixture = mount({ errors: { name: 'Informe seu nome' } });
@@ -218,11 +220,26 @@ describe('SlForm defaults', () => {
         (fixture.nativeElement as HTMLElement).querySelector('[data-part="actions"]') as HTMLElement
       ).getAttribute('data-align'),
     ).toBe('stretch');
-    expect(
+  });
+
+  it('titles the summary in the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+
+    const fixture = mount({ errors: { name: 'Informe seu nome' } });
+    const title = () =>
       (fixture.nativeElement as HTMLElement)
         .querySelector('[data-part="summary-title"]')
-        ?.textContent?.trim(),
-    ).toBe('Corrija estes campos');
+        ?.textContent?.trim();
+
+    expect(title()).toBe('Há um problema');
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(title()).toBe('There is a problem');
   });
 });
 
@@ -283,6 +300,28 @@ describe('SlForm with Reactive Forms', () => {
     expect(fixture.componentInstance.group.controls.name.touched).toBe(true);
   });
 
+  it('writes a built-in validator’s sentence in the language in force', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [LengthHost],
+      providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
+    });
+
+    const fixture = TestBed.createComponent(LengthHost);
+    fixture.detectChanges();
+    (fixture.nativeElement as HTMLElement)
+      .querySelector('form')
+      ?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll('[data-part="summary-item"]'),
+        (item) => item.textContent?.trim(),
+      ),
+    ).toEqual(['Use pelo menos 8 caracteres.', 'CNPJ inválido.']);
+  });
+
   it('lets an application replace the sentence', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
@@ -304,6 +343,23 @@ describe('SlForm with Reactive Forms', () => {
     ).toBe('Campo obrigatório.');
   });
 });
+
+/** A built-in validator with a shape, and one the application adds and names. */
+@Component({
+  standalone: true,
+  imports: [SlForm, ReactiveFormsModule],
+  providers: [provideFormErrorMessages({ cnpj: () => 'CNPJ inválido.' })],
+  template: `<form slForm [formGroup]="group">
+    <input id="la-code" name="code" formControlName="code" />
+    <input id="la-tax" name="tax" formControlName="tax" />
+  </form>`,
+})
+class LengthHost {
+  readonly group = new FormGroup({
+    code: new FormControl('abc', { nonNullable: true, validators: [Validators.minLength(8)] }),
+    tax: new FormControl('1', { nonNullable: true, validators: [() => ({ cnpj: true })] }),
+  });
+}
 
 /** Kept so the placed-summary path is exercised as well as the rendered one. */
 @Component({

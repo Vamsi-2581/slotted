@@ -1,9 +1,11 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/number-field/contract.json';
 import { Field, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { NumberField, NumberFieldScrub } from './number-field';
 import { NumberFieldDefaultsProvider } from './number-field-defaults';
 import type { NumberFieldHandle } from './number-field.types';
@@ -383,7 +385,7 @@ describe('NumberField', () => {
 
   describe('the two steppers', () => {
     it('keeps them out of the tab order and in the accessibility tree', () => {
-      render(<NumberField defaultValue={1} decrementLabel="Menos" incrementLabel="Mais" />);
+      render(<NumberField defaultValue={1} messages={{ decrement: 'Menos', increment: 'Mais' }} />);
 
       for (const part of ['increment', 'decrement'] as const) {
         const button = stepper(part);
@@ -615,14 +617,25 @@ describe('NumberField', () => {
 
     it('lets an application decide once what its number fields look like', () => {
       render(
-        <NumberFieldDefaultsProvider locale="pt-BR" stepper="split" variant="subtle">
+        <NumberFieldDefaultsProvider stepper="split" variant="subtle">
           <NumberField defaultValue={1480.5} />
         </NumberFieldDefaultsProvider>,
       );
 
       expect(frameOf(control())).toHaveAttribute('data-variant', 'subtle');
       expect(frameOf(control())).toHaveAttribute('data-stepper', 'split');
+    });
+
+    it('writes and speaks in the language in force', () => {
+      render(
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+          <NumberField defaultValue={1480.5} />
+        </SlottedProvider>,
+      );
+
       expect(control()).toHaveValue('1.480,5');
+      expect(stepper('increment')).toHaveAttribute('aria-label', 'Aumentar');
+      expect(stepper('decrement')).toHaveAttribute('aria-label', 'Diminuir');
     });
 
     it('passes every native attribute through to the element that owns it', () => {

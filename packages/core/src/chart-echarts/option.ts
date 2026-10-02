@@ -265,6 +265,30 @@ export function buildChartOption(view: ChartEngineView, width = 0): ChartOptionR
     lineStyle: { color: theme.grid, width: 1, type: 'solid' },
   });
 
+  /* A category label is estimated at six tenths of the type size per
+     character, as the value labels below are. Its band is the plot's width,
+     the client width less the grid's insets and the value labels beside the
+     plot, shared between the categories. */
+  const estimate = (text: string) => text.length * theme.labelSize * 0.6;
+  const valueLabelRoom = model.axes.reduce((room, axis, index) => {
+    const extremes = visible
+      .filter((series) => series.axis === index)
+      .flatMap((series) => [...series.plotted, ...series.top]);
+    const longestValue = Math.max(
+      0,
+      ...[axis.min, axis.max, ...extremes].map((value) =>
+        value === null || value === undefined ? 0 : estimate(axis.format(value)),
+      ),
+    );
+    return room + longestValue + theme.inset;
+  }, 0);
+  const band =
+    Math.max(0, width - theme.inset * 2 - valueLabelRoom) / Math.max(1, model.categories.length);
+  const longestCategory = Math.max(
+    0,
+    ...model.categories.map((category) => estimate(category.label)),
+  );
+
   const categoryAxis: Record<string, unknown> = {
     type: model.xType,
     name: model.x.label,
@@ -283,27 +307,20 @@ export function buildChartOption(view: ChartEngineView, width = 0): ChartOptionR
       /* A time or value axis puts a label wherever a tick falls, the last one
          at the plot's edge; its text runs inward so it is not cut there. */
       ...(model.xType !== 'category' ? { alignMaxLabel: 'right', alignMinLabel: 'left' } : {}),
-      /* A category's text never takes more than its own band beside the
-         others, or a third of the plot when the categories stand in a column:
-         a long name is cut with an ellipsis, whole in the tooltip and the
-         table, rather than every label vanishing because each one overlapped
-         the next. */
-      ...(model.xType === 'category' && width > 0
+      /* Every category keeps its label when the longest one fits its band,
+         and a third of the plot when the categories stand in a column; a long
+         name in a column is cut with an ellipsis, whole in the tooltip and the
+         table. Where the longest does not fit, the engine thins the labels
+         rather than each one being cut to a stub or touching the next. */
+      ...(model.xType === 'category' && width > 0 && (horizontal || longestCategory <= band * 0.92)
         ? {
-            width: horizontal
-              ? Math.round(width / 3)
-              : Math.max(
-                  theme.labelSize * 3,
-                  Math.round((width / Math.max(1, model.categories.length)) * 0.92),
-                ),
+            width: horizontal ? Math.round(width / 3) : Math.round(band * 0.92),
             overflow: 'truncate',
             ellipsis: '…',
-            /* Cut to its band, a label cannot overlap its neighbour, so every
-               category keeps one — unless the band is narrower than three
-               characters, where the engine thins them instead. */
-            ...(horizontal || width / Math.max(1, model.categories.length) >= theme.labelSize * 3
-              ? { interval: 0, hideOverlap: false, showMinLabel: true, showMaxLabel: true }
-              : {}),
+            interval: 0,
+            hideOverlap: false,
+            showMinLabel: true,
+            showMaxLabel: true,
           }
         : {}),
       formatter: (value: number | string) =>

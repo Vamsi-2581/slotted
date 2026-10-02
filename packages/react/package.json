@@ -469,7 +469,7 @@
     }
   },
   "scripts": {
-    "build": "vite build && tsc -p tsconfig.build.json && node layer-order.build.mjs && node package-boundary.verify.mjs",
+    "build": "vite build && tsc -p tsconfig.build.json && node layer-order.build.mjs && node ../../tools/agent-docs/bin/build.mjs --binding react --out dist/docs && node package-boundary.verify.mjs",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit --pretty false",
     "verify": "pnpm test && pnpm typecheck && pnpm build"
@@ -480,6 +480,7 @@
     "react": ">=19.2.0 <20"
   },
   "devDependencies": {
+    "@slotted/agent-docs": "workspace:*",
     "@slotted/core": "workspace:*",
     "@slotted/storybook-workbench": "workspace:*",
     "@slotted/styles": "workspace:*",

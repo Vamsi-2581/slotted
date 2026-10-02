@@ -4,6 +4,8 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { plainDate, toISODate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
 import { SlField, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/date-field/contract.json';
@@ -439,10 +441,13 @@ describe('what the field around it says', () => {
 });
 
 describe('what an application sets once', () => {
-  it('takes the locale and the appearance from a provider', () => {
+  it('takes the appearance from a provider and the locale from the language in force', () => {
     const fixture = renderTemplate(
       `<div slDateField aria-label="Date" [defaultValue]="{ year: 2026, month: 9, day: 9 }"></div>`,
-      [provideDateFieldDefaults({ locale: 'ja-JP', size: 'lg', variant: 'subtle' })],
+      [
+        provideSlotted({ locale: 'ja-JP' }),
+        provideDateFieldDefaults({ size: 'lg', variant: 'subtle' }),
+      ],
     );
 
     expect(segments(fixture).map((element) => element.dataset['field'])).toEqual([
@@ -454,10 +459,10 @@ describe('what an application sets once', () => {
     expect(root(fixture).getAttribute('data-variant')).toBe('subtle');
   });
 
-  it('lets one control outrank the provider', () => {
+  it('lets one control outrank the language in force', () => {
     const fixture = renderTemplate(
       `<div slDateField locale="pt-BR" aria-label="Data" [defaultValue]="{ year: 2026, month: 9, day: 9 }"></div>`,
-      [provideDateFieldDefaults({ locale: 'ja-JP' })],
+      [provideSlotted({ locale: 'ja-JP' })],
     );
 
     expect(segments(fixture).map((element) => element.dataset['field'])).toEqual([
@@ -465,6 +470,25 @@ describe('what an application sets once', () => {
       'month',
       'year',
     ]);
+  });
+
+  it('changes its words and its date order together with the language in force', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(
+      `<div slDateField clearable aria-label="Data" [defaultValue]="{ year: 2026, month: 9, day: 9 }"></div>`,
+      [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    );
+    const clear = () =>
+      fixture.nativeElement.querySelector('[data-part="clear"]').getAttribute('aria-label');
+    const order = () => segments(fixture).map((element) => element.dataset['field']);
+
+    expect(clear()).toBe('Limpar');
+    expect(order()).toEqual(['day', 'month', 'year']);
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(clear()).toBe('Clear');
+    expect(order()).toEqual(['month', 'day', 'year']);
   });
 });
 

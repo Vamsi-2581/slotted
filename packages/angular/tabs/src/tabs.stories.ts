@@ -73,14 +73,14 @@ const meta: Meta<TabsStoryArgs> = {
 export default meta;
 type Story = StoryObj<TabsStoryArgs>;
 
-const ORDER = `<div slTabList aria-label="Pedido">
-    <div slTab value="resumo">Resumo</div>
-    <div slTab value="itens">Itens</div>
-    <div slTab value="pagamento">Pagamento</div>
+const ORDER = `<div slTabList aria-label="Order">
+    <div slTab value="summary">Summary</div>
+    <div slTab value="items">Items</div>
+    <div slTab value="payment">Payment</div>
   </div>
-  <div slTabPanel value="resumo"><p slText size="sm">Entrega prevista para 12 de setembro.</p></div>
-  <div slTabPanel value="itens"><p slText size="sm">Três itens, dois em separação.</p></div>
-  <div slTabPanel value="pagamento"><p slText size="sm">Cartão de crédito, aprovado.</p></div>`;
+  <div slTabPanel value="summary"><p slText size="sm">Delivery expected on September 12.</p></div>
+  <div slTabPanel value="items"><p slText size="sm">Three items, two being picked.</p></div>
+  <div slTabPanel value="payment"><p slText size="sm">Credit card, approved.</p></div>`;
 
 const scene = (label: string, note: string, body: string, layout = 'block') =>
   `<section class="slotted-demo-scene">
@@ -111,7 +111,7 @@ export const Playground: Story = {
     template: `<div class="slotted-demo-stage" data-layout="block">
       <div
         slTabs
-        defaultValue="resumo"
+        defaultValue="summary"
         [activation]="activation"
         [orientation]="orientation"
         [size]="size"
@@ -133,12 +133,12 @@ export const Activation: Story = {
       scene(
         'Automatic, the default',
         'Arrow along the list: every tab opens as focus reaches it, which is what the APG recommends while the panels are already loaded.',
-        `<div slTabs defaultValue="resumo">${ORDER}</div>`,
+        `<div slTabs defaultValue="summary">${ORDER}</div>`,
       ) +
         scene(
           'Manual, for a panel that fetches',
           'Focus moves and the panel stays; Enter or Space opens the one focus is on, so arrowing past four tabs makes no four requests.',
-          `<div slTabs defaultValue="resumo" activation="manual">${ORDER}</div>`,
+          `<div slTabs defaultValue="summary" activation="manual">${ORDER}</div>`,
         ),
     ),
   }),
@@ -152,12 +152,12 @@ export const Orientation: Story = {
       scene(
         'A row of views',
         'The track runs under the whole list and the marker sits on it, so the selected label and the edge of the panel are one line.',
-        `<div slTabs defaultValue="resumo">${ORDER}</div>`,
+        `<div slTabs defaultValue="summary">${ORDER}</div>`,
       ) +
         scene(
           'A column of them',
           'The track and the marker turn a quarter, the labels read down their own start edge, and the panel takes the second column.',
-          `<div slTabs defaultValue="resumo" orientation="vertical">${ORDER}</div>`,
+          `<div slTabs defaultValue="summary" orientation="vertical">${ORDER}</div>`,
         ),
     ),
   }),
@@ -171,17 +171,17 @@ export const Variant: Story = {
       scene(
         'Line',
         'A row of labels over a hairline. The marker covers the track exactly, so the two lines read as one that thickens where the selection is.',
-        `<div slTabs defaultValue="resumo">${ORDER}</div>`,
+        `<div slTabs defaultValue="summary">${ORDER}</div>`,
       ) +
         scene(
           'Contained',
           'A sunken track that hugs its tabs, with a surface under the selected one. The marker stays, which is what the high-contrast scheme is left with.',
-          `<div slTabs defaultValue="resumo" variant="contained">${ORDER}</div>`,
+          `<div slTabs defaultValue="summary" variant="contained">${ORDER}</div>`,
         ) +
         scene(
           'track="none", for a line that is already there',
           "The labels and the marker stay and the hairline goes, so a list sitting on a card header's edge or a table's own rule draws one line instead of two a pixel apart.",
-          `<div slTabs defaultValue="resumo" track="none">${ORDER}</div>`,
+          `<div slTabs defaultValue="summary" track="none">${ORDER}</div>`,
         ),
     ),
   }),
@@ -195,17 +195,17 @@ export const Sizes: Story = {
       scene(
         'sm',
         'The compact step, for a bar inside a card header or above a dense table.',
-        `<div slTabs defaultValue="resumo" size="sm">${ORDER}</div>`,
+        `<div slTabs defaultValue="summary" size="sm">${ORDER}</div>`,
       ) +
         scene(
           'md',
           'The default, and the step a page-level set of views sits at.',
-          `<div slTabs defaultValue="resumo" size="md">${ORDER}</div>`,
+          `<div slTabs defaultValue="summary" size="md">${ORDER}</div>`,
         ) +
         scene(
           'lg',
           'The comfortable step. Height, type and padding move together, because all three read the control scales.',
-          `<div slTabs defaultValue="resumo" size="lg">${ORDER}</div>`,
+          `<div slTabs defaultValue="summary" size="lg">${ORDER}</div>`,
         ),
     ),
   }),
@@ -219,18 +219,18 @@ export const Fit: Story = {
       scene(
         'auto — as wide as the label',
         'Each tab is the width of what it says, and a list that outgrows its container scrolls rather than squeezing every label.',
-        `<div slTabs defaultValue="resumo">${ORDER}</div>`,
+        `<div slTabs defaultValue="summary">${ORDER}</div>`,
       ) +
         scene(
           'equal — a share of the line',
           "Angular Material's stretchTabs and Carbon's grid-aware alignment: equal columns, so the length of a translated string never decides the emphasis.",
           `<div slTabs defaultValue="a" fit="equal" variant="contained">
-            <div slTabList aria-label="Relatórios">
-              <div slTab value="a">Hoje</div>
-              <div slTab value="b">Uma etiqueta longa que precisa ser cortada</div>
+            <div slTabList aria-label="Reports">
+              <div slTab value="a">Today</div>
+              <div slTab value="b">A long label that needs to be truncated</div>
             </div>
-            <div slTabPanel value="a"><p slText size="sm">Partes iguais da linha.</p></div>
-            <div slTabPanel value="b"><p slText size="sm">A etiqueta é o que cede.</p></div>
+            <div slTabPanel value="a"><p slText size="sm">Equal shares of the line.</p></div>
+            <div slTabPanel value="b"><p slText size="sm">The label is what gives way.</p></div>
           </div>`,
         ),
     ),
@@ -246,20 +246,20 @@ export const States: Story = {
         'One view out of reach',
         'A single unavailable tab carries the native attribute, so it dims, refuses its click and is skipped by the arrow keys — three behaviours from one word.',
         `<div slTabs defaultValue="a">
-          <div slTabList aria-label="Documento">
-            <div slTab value="a">Conteúdo</div>
-            <div slTab value="b" disabled>Assinaturas</div>
-            <div slTab value="c">Histórico</div>
+          <div slTabList aria-label="Document">
+            <div slTab value="a">Content</div>
+            <div slTab value="b" disabled>Subscriptions</div>
+            <div slTab value="c">History</div>
           </div>
           <div slTabPanel value="a">
-            <p slText size="sm">Assinaturas ficam disponíveis após o envio.</p>
+            <p slText size="sm">Subscriptions become available after submission.</p>
           </div>
         </div>`,
       ) +
         scene(
           'The whole family, while a job runs',
           'One attribute reaches every tab and the track dims with them, so a family waiting on a server does not read as a live one with grey labels.',
-          `<div slTabs defaultValue="resumo" disabled>${ORDER}</div>`,
+          `<div slTabs defaultValue="summary" disabled>${ORDER}</div>`,
         ),
     ),
   }),
@@ -273,17 +273,17 @@ export const Mount: Story = {
       scene(
         'active — the default',
         'Only the selected panel exists. A panel holding a table, a chart or a form is not built until it is asked for.',
-        `<div slTabs defaultValue="resumo" mount="active">${ORDER}</div>`,
+        `<div slTabs defaultValue="summary" mount="active">${ORDER}</div>`,
       ) +
         scene(
           'lazy — built once, then kept',
           'A panel survives its first selection, so a form half filled in is still there when the reader comes back to it.',
-          `<div slTabs defaultValue="resumo" mount="lazy">${ORDER}</div>`,
+          `<div slTabs defaultValue="summary" mount="lazy">${ORDER}</div>`,
         ) +
         scene(
           'eager — every panel up front',
           'All three exist from the start and the hidden ones carry the hidden attribute, which find-in-page understands.',
-          `<div slTabs defaultValue="resumo" mount="eager">${ORDER}</div>`,
+          `<div slTabs defaultValue="summary" mount="eager">${ORDER}</div>`,
         ),
     ),
   }),
@@ -293,8 +293,8 @@ export const Dismissible: Story = {
   parameters: scenario('dismissible'),
   render: () => ({
     props: {
-      queries: ['clientes.sql', 'faturamento.sql', 'estoque.sql'],
-      active: 'clientes.sql',
+      queries: ['customers.sql', 'faturamento.sql', 'estoque.sql'],
+      active: 'customers.sql',
       close(this: { queries: string[]; active: string }, value: string) {
         this.queries = this.queries.filter((query) => query !== value);
       },
@@ -313,9 +313,9 @@ export const Dismissible: Story = {
           (valueChange)="select($event.value)"
           (tabDismiss)="close($event.value)"
         >
-          <div slTabList aria-label="Consultas abertas">
+          <div slTabList aria-label="Open queries">
             @for (query of queries; track query) {
-              <div slTab [value]="query" dismissible [dismissLabel]="'Fechar ' + query">
+              <div slTab [value]="query" dismissible [dismissLabel]="'Close ' + query">
                 {{ query }}
               </div>
             }
@@ -330,7 +330,7 @@ export const Dismissible: Story = {
 export const Overflow: Story = {
   parameters: scenario('overflow'),
   render: () => ({
-    props: { versions: Array.from({ length: 12 }, (_, index) => `Versão ${index + 1}`) },
+    props: { versions: Array.from({ length: 12 }, (_, index) => `Version ${index + 1}`) },
     template: grid(
       2,
       scene(
@@ -338,13 +338,13 @@ export const Overflow: Story = {
         'The list scrolls rather than wrapping, the two paging controls appear only while there is somewhere to scroll, and each one disables at its own end.',
         `<div class="slotted-demo-measure">
           <div slTabs [defaultValue]="versions[0]" size="sm">
-            <div slTabList aria-label="Versões">
+            <div slTabList aria-label="Versions">
               @for (version of versions; track version) {
                 <div slTab [value]="version">{{ version }}</div>
               }
             </div>
             <div slTabPanel [value]="versions[0]">
-              <p slText size="sm">Publicada em 12 de setembro.</p>
+              <p slText size="sm">Published on September 12.</p>
             </div>
           </div>
         </div>`,
@@ -354,13 +354,13 @@ export const Overflow: Story = {
           'Arrow to the end of the list: the browser brings each tab into view as focus lands on it, which is why the paging controls stay out of the tab sequence.',
           `<div class="slotted-demo-measure">
           <div slTabs [defaultValue]="versions[0]" size="sm" activation="manual">
-            <div slTabList aria-label="Versões, ativação manual">
+            <div slTabList aria-label="Versions, manual activation">
               @for (version of versions; track version) {
                 <div slTab [value]="version">{{ version }}</div>
               }
             </div>
             <div slTabPanel [value]="versions[0]">
-              <p slText size="sm">Enter abre a versão em foco.</p>
+              <p slText size="sm">Enter opens the focused version.</p>
             </div>
           </div>
         </div>`,
@@ -377,17 +377,17 @@ export const Links: Story = {
       scene(
         'A destination, not a decoration',
         'Each tab is an anchor with a real href: a plain click selects the view, and ⌘-click or middle-click opens it in a new browser tab, because the family leaves a modified click to the browser.',
-        `<div slTabs defaultValue="resumo">
-          <div slTabList aria-label="Pedido, com destino">
-            <div slTab value="resumo" href="#resumo">Resumo</div>
-            <div slTab value="itens" href="#itens">Itens</div>
-            <div slTab value="pagamento" href="#pagamento">Pagamento</div>
+        `<div slTabs defaultValue="summary">
+          <div slTabList aria-label="Order, with destinations">
+            <div slTab value="summary" href="#summary">Summary</div>
+            <div slTab value="items" href="#items">Items</div>
+            <div slTab value="payment" href="#payment">Payment</div>
           </div>
-          <div slTabPanel value="resumo">
-            <p slText size="sm">O endereço da barra acompanha a vista.</p>
+          <div slTabPanel value="summary">
+            <p slText size="sm">The address bar follows the view.</p>
           </div>
-          <div slTabPanel value="itens"><p slText size="sm">Três itens.</p></div>
-          <div slTabPanel value="pagamento"><p slText size="sm">Cartão de crédito.</p></div>
+          <div slTabPanel value="items"><p slText size="sm">Three items.</p></div>
+          <div slTabPanel value="payment"><p slText size="sm">Credit card.</p></div>
         </div>`,
       ),
     ),
@@ -404,10 +404,10 @@ export const Content: Story = {
         'An unbroken digest scrolls with the list instead of setting its width, and a right-to-left label reads its own way inside a page that reads the other.',
         `<div class="slotted-demo-measure">
           <div slTabs defaultValue="a" size="sm">
-            <div slTabList aria-label="Conteúdo extremo">
+            <div slTabList aria-label="Extreme content">
               <div slTab value="a">sha256:9f86d081884c7d659a2feaa0c55ad015</div>
               <div slTab value="b">بيانات التسليم</div>
-              <div slTab value="c">Relatório consolidado</div>
+              <div slTab value="c">Consolidated report</div>
             </div>
             <div slTabPanel value="a">
               <p slText size="sm">
@@ -420,16 +420,16 @@ export const Content: Story = {
         scene(
           'A label with a count',
           "The tab is a row with its own gap, so anything composed into it sits on the label's optical line rather than on the box's.",
-          `<div slTabs defaultValue="abertos">
-          <div slTabList aria-label="Chamados">
-            <div slTab value="abertos">Abertos · 12</div>
-            <div slTab value="fechados">Fechados · 340</div>
+          `<div slTabs defaultValue="open">
+          <div slTabList aria-label="Tickets">
+            <div slTab value="open">Open · 12</div>
+            <div slTab value="closed">Closed · 340</div>
           </div>
-          <div slTabPanel value="abertos">
-            <p slText size="sm">Doze chamados aguardando triagem.</p>
+          <div slTabPanel value="open">
+            <p slText size="sm">Twelve tickets awaiting triage.</p>
           </div>
-          <div slTabPanel value="fechados">
-            <p slText size="sm">Trezentos e quarenta encerrados.</p>
+          <div slTabPanel value="closed">
+            <p slText size="sm">Three hundred and forty closed.</p>
           </div>
         </div>`,
         ),
@@ -445,26 +445,26 @@ export const Composition: Story = {
       scene(
         'A family that states its own axes',
         'The provider carries the seven decisions an application takes once, in the bootstrap file; a family that states one itself still wins, which is what this compact contained set is.',
-        `<div slTabs defaultValue="resumo" size="sm" variant="contained">${ORDER}</div>`,
+        `<div slTabs defaultValue="summary" size="sm" variant="contained">${ORDER}</div>`,
       ) +
         scene(
           'A toolbar beside the list',
           'The actions slot is a cell of the same grid row, and what belongs in it is a toolbar: one tab stop for however many actions, which keeps the distance from the list to the panel at two stops.',
-          `<div slTabs defaultValue="resumo">
-          <div slTabList aria-label="Pedido, com ações">
-            <div slTab value="resumo">Resumo</div>
-            <div slTab value="itens">Itens</div>
+          `<div slTabs defaultValue="summary">
+          <div slTabList aria-label="Order, with actions">
+            <div slTab value="summary">Summary</div>
+            <div slTab value="items">Items</div>
           </div>
           <div slTabActions>
-            <div slToolbar aria-label="Ações do pedido" size="sm">
-              <button slButton size="sm" variant="ghost">Exportar</button>
-              <button slButton size="sm" variant="ghost">Imprimir</button>
+            <div slToolbar aria-label="Order actions" size="sm">
+              <button slButton size="sm" variant="ghost">Export</button>
+              <button slButton size="sm" variant="ghost">Print</button>
             </div>
           </div>
-          <div slTabPanel value="resumo">
-            <p slText size="sm">Entrega prevista para 12 de setembro.</p>
+          <div slTabPanel value="summary">
+            <p slText size="sm">Delivery expected on September 12.</p>
           </div>
-          <div slTabPanel value="itens"><p slText size="sm">Três itens.</p></div>
+          <div slTabPanel value="items"><p slText size="sm">Three items.</p></div>
         </div>`,
         ),
     ),
@@ -480,21 +480,21 @@ export const Keyboard: Story = {
       scene(
         'One tab stop for the whole list',
         'Tab lands on the selected tab and the next Tab leaves to the panel; the arrows move and wrap, and Home and End reach the ends. No key listener exists for activation.',
-        `<div slTabs defaultValue="itens">${ORDER}</div>`,
+        `<div slTabs defaultValue="items">${ORDER}</div>`,
         'stack',
       ) +
         scene(
           'Which device asked',
           'A click synthesised by the keyboard reports no detail and a real one reports the click count, which is how the reason is recovered without a key listener anywhere.',
           `<div slTabs defaultValue="a" (valueChange)="reason = $event.reason">
-            <div slTabList aria-label="Qual dispositivo pediu">
-              <div slTab value="a">Com o ponteiro</div>
-              <div slTab value="b">Depois com as setas</div>
-              <div slTab value="c">E de volta</div>
+            <div slTabList aria-label="Which device asked">
+              <div slTab value="a">With the pointer</div>
+              <div slTab value="b">Then with the arrows</div>
+              <div slTab value="c">And back</div>
             </div>
-            <div slTabPanel value="a"><p slText size="sm">Clique, depois use as setas.</p></div>
-            <div slTabPanel value="b"><p slText size="sm">A razão muda com o dispositivo.</p></div>
-            <div slTabPanel value="c"><p slText size="sm">E volta a mudar.</p></div>
+            <div slTabPanel value="a"><p slText size="sm">Click, then use the arrows.</p></div>
+            <div slTabPanel value="b"><p slText size="sm">The reason changes with the device.</p></div>
+            <div slTabPanel value="c"><p slText size="sm">And it changes again.</p></div>
           </div>
           <p slText size="sm" tone="muted">reason: {{ reason }}</p>`,
           'stack',

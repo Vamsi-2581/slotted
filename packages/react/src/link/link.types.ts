@@ -1,15 +1,11 @@
+import type { LinkMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 export type LinkUnderline = 'always' | 'hover' | 'none';
 export type LinkVariant = 'accent' | 'neutral' | 'inverse';
 
-/**
- * What every link on the page looks like before it states anything of its own.
- * `externalHint` is here as well as on the instance because it is the family's
- * one string, and a translated application sets a string once.
- */
+/** What every link on the page looks like before it states anything of its own. */
 export interface LinkDefaults {
-  externalHint?: string | undefined;
   underline?: LinkUnderline | undefined;
   variant?: LinkVariant | undefined;
   visited?: boolean | undefined;
@@ -38,8 +34,11 @@ export interface LinkProps extends ComponentPropsWithRef<'a'> {
   disabled?: boolean;
   /** Opens the destination in a new browsing context, and says so. */
   external?: boolean;
-  /** The wording of that warning, for translation. */
-  externalHint?: string;
+  /**
+   * Words laid over the catalog of the language in force: the warning a link
+   * to a new tab announces (`externalHint`).
+   */
+  messages?: PartialMessages<LinkMessages> | undefined;
   /** Substitutes the rendered element — a router's own link, typically. */
   render?: (props: LinkRootProps) => ReactNode;
   underline?: LinkUnderline;

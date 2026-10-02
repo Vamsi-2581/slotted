@@ -288,7 +288,7 @@ const { data, isPending } = useQuery({ queryKey: ['people', deferred], queryFn: 
       id: 'combobox-react-clearable',
       language: 'tsx',
       label: 'Emptying the field',
-      source: `<Combobox clearable clearLabel="Clear the search">
+      source: `<Combobox clearable messages={{ clear: 'Clear the search' }}>
   …
 </Combobox>;`,
     }),
@@ -393,12 +393,12 @@ const { data, isPending } = useQuery({ queryKey: ['people', deferred], queryFn: 
   {
     id: 'composition',
     title: 'Composition',
-    note: 'Defaults and every sentence set once for an application, the frame replaced through render, and the imperative handle for what a consumer cannot say declaratively.',
+    note: 'Defaults set once for an application, the words from the language in force, the frame replaced through render, and the imperative handle for what a consumer cannot say declaratively.',
     snippet: defineSnippet({
       id: 'combobox-react-composition',
       language: 'tsx',
       label: 'What a consumer can replace',
-      source: `<ComboboxDefaultsProvider countLabel="{count} pessoas" emptyLabel="Nada encontrado" size="sm">
+      source: `<ComboboxDefaultsProvider size="sm">
   <Combobox ref={handle}>
     <ComboboxInput render={(props) => <label {...props} />} />…
   </Combobox>
@@ -459,7 +459,13 @@ const api = apiRows([
     'Combobox',
     'The comparison. Unset asks for the library’s locale-sensitive contains; null turns filtering off for a list a server has already filtered.',
   ],
-  ['locale', 'string', '—', 'Combobox', 'BCP 47, for the comparison the default filter makes.'],
+  [
+    'locale',
+    'string',
+    '—',
+    'Combobox',
+    'BCP 47, for the comparison the default filter makes. The language in force when absent.',
+  ],
   [
     'items',
     'ComboboxItems',
@@ -500,7 +506,7 @@ const api = apiRows([
     "'input' | 'focus' | 'manual'",
     'input',
     'Combobox',
-    'When the popup opens on its own.',
+    'When the popup opens on its own: on typing or a press on the input (input), on every focus and press (focus), or only from the trigger and the arrow keys (manual).',
   ],
   [
     'allowsCustomValue',
@@ -674,37 +680,14 @@ const api = apiRows([
     'Combobox',
     'How close to the viewport edge the popup may come.',
   ],
-  ['clearLabel', 'string', 'Clear', 'Combobox', 'The accessible name of the clear button.'],
   [
-    'createLabel',
-    'string',
-    'Create \u201c{query}\u201d',
+    'messages',
+    'Partial<ComboboxMessages>',
+    '—',
     'Combobox',
-    'The offer to add what was typed. `{query}` is the text.',
+    'Words laid over the language in force, key by key: clear, trigger, create ({query}), empty, loading, count ({count})',
   ],
-  ['emptyLabel', 'string', 'No matches', 'Combobox', 'What the popup says when nothing matched.'],
-  [
-    'loadingLabel',
-    'string',
-    'Loading…',
-    'Combobox',
-    'What the popup says while an answer is travelling.',
-  ],
-  [
-    'triggerLabel',
-    'string',
-    'Show options',
-    'Combobox',
-    'The accessible name of the button that opens the popup.',
-  ],
-  [
-    'countLabel',
-    'string',
-    '{count} results',
-    'Combobox',
-    'The sentence the live region announces. {count} becomes the number.',
-  ],
-  ['empty', 'ReactNode', '—', 'ComboboxContent', 'Replaces emptyLabel for this popup.'],
+  ['empty', 'ReactNode', '—', 'ComboboxContent', 'Replaces the empty message for this popup.'],
   [
     'status',
     'ReactNode',
@@ -785,7 +768,7 @@ const composition = apiRows([
     'component',
     '—',
     'Application',
-    'Every axis and all five sentences the family speaks, set once in a bootstrap — which is where an application translates them.',
+    'Every axis set once in a bootstrap. The words come from the language in force (SlottedProvider).',
   ],
   [
     'render',

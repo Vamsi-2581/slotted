@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useRef } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/popover/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Popover } from './popover';
 import { PopoverDefaultsProvider } from './popover-defaults';
 import {
@@ -257,15 +259,23 @@ describe('Popover', () => {
     await waitFor(() => expect(layer()).not.toBeNull());
   });
 
-  it('takes the close label from the provider, and the instance still wins', async () => {
+  it('takes the size from the provider, and the close label from the language in force', async () => {
     render(
-      <PopoverDefaultsProvider closeLabel="Fechar" size="lg">
-        <Basic defaultOpen />
-      </PopoverDefaultsProvider>,
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <PopoverDefaultsProvider size="lg">
+          <Basic defaultOpen />
+        </PopoverDefaultsProvider>
+      </SlottedProvider>,
     );
     await waitFor(() => expect(layer()).not.toBeNull());
     expect(screen.getByRole('button', { name: 'Fechar' })).not.toBeNull();
     expect(layer()?.getAttribute('data-size')).toBe('lg');
+  });
+
+  it('lays its own messages over the catalog', async () => {
+    render(<Basic defaultOpen messages={{ close: 'Close the filters' }} />);
+    await waitFor(() => expect(layer()).not.toBeNull());
+    expect(screen.getByRole('button', { name: 'Close the filters' })).not.toBeNull();
   });
 
   it('runs the consumer own handler beside the family one', () => {

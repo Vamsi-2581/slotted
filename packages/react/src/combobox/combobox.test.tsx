@@ -1,9 +1,11 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/combobox/contract.json';
 import { Field, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { Combobox } from './combobox';
 import { ComboboxDefaultsProvider } from './combobox-defaults';
@@ -270,6 +272,88 @@ describe('Combobox', () => {
     expect(screen.queryByRole('listbox')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Show options' }));
     await screen.findByRole('listbox');
+  });
+
+  /**
+   * The contract's `opening.press`: a press on the input opens a closed popup
+   * under `input` and `focus`, never closes an open one, and under `manual`
+   * only places the caret.
+   */
+  describe('a press on the input', () => {
+    it('opens a closed popup, once, with reason pointer', async () => {
+      const onOpenChange = vi.fn();
+      render(<Basic onOpenChange={onOpenChange} />);
+      input().focus();
+      fireEvent.click(input());
+      await screen.findByRole('listbox');
+      expect(onOpenChange).toHaveBeenCalledTimes(1);
+      expect(onOpenChange).toHaveBeenCalledWith(
+        true,
+        expect.objectContaining({ reason: 'pointer' }),
+      );
+    });
+
+    it('keeps an open popup open', async () => {
+      const onOpenChange = vi.fn();
+      render(<Basic onOpenChange={onOpenChange} />);
+      await openByArrow();
+      onOpenChange.mockClear();
+      fireEvent.click(input());
+      expect(screen.getByRole('listbox')).toBeInTheDocument();
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    it('opens nothing on a Tab into the input under input', () => {
+      render(<Basic />);
+      input().focus();
+      expect(screen.queryByRole('listbox')).toBeNull();
+      expect(input()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('only places the caret under manual', () => {
+      const onOpenChange = vi.fn();
+      render(<Basic onOpenChange={onOpenChange} openOn="manual" />);
+      input().focus();
+      fireEvent.click(input());
+      expect(screen.queryByRole('listbox')).toBeNull();
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    it('opens once under focus, through the focus the press gave', async () => {
+      const onOpenChange = vi.fn();
+      render(<Basic onOpenChange={onOpenChange} openOn="focus" />);
+      /* A browser dispatches the focus and the click in separate tasks, so the
+         focus's render lands before the click reads the state. */
+      act(() => input().focus());
+      fireEvent.click(input());
+      await screen.findByRole('listbox');
+      expect(onOpenChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('opens nothing on a read-only control', () => {
+      const onOpenChange = vi.fn();
+      render(<Basic onOpenChange={onOpenChange} readOnly />);
+      input().focus();
+      fireEvent.click(input());
+      expect(screen.queryByRole('listbox')).toBeNull();
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    it('stays closed when the consumer prevents the click', () => {
+      const onOpenChange = vi.fn();
+      render(
+        <Combobox onOpenChange={onOpenChange}>
+          <ComboboxInput aria-label="Fruit" onClick={(event) => event.preventDefault()} />
+          <ComboboxContent aria-label="Fruit">
+            <ComboboxItem value="blueberry">Blueberry</ComboboxItem>
+          </ComboboxContent>
+        </Combobox>,
+      );
+      input().focus();
+      fireEvent.click(input());
+      expect(screen.queryByRole('listbox')).toBeNull();
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
   });
 
   it('keeps the trigger out of the page tab sequence, as the pattern asks', () => {
@@ -662,17 +746,26 @@ describe('Combobox', () => {
     expect(hidden?.value).toBe('blueberry');
   });
 
-  it('lets an application set its defaults and its sentences once', async () => {
+  it('lets an application set its defaults once', () => {
     render(
-      <ComboboxDefaultsProvider emptyLabel="Nothing here" size="lg">
+      <ComboboxDefaultsProvider size="lg">
         <Basic />
       </ComboboxDefaultsProvider>,
     );
     expect(input().closest("[data-ui='combobox']")).toHaveAttribute('data-size', 'lg');
+  });
+
+  it('speaks the language in force, and lays its own messages over it', async () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Basic messages={{ empty: 'Nada aqui' }} />
+      </SlottedProvider>,
+    );
+    expect(screen.getByRole('button', { name: 'Mostrar opções' })).toBeInTheDocument();
     input().focus();
     type('zzz');
     await screen.findByRole('listbox');
-    expect(screen.getByText('Nothing here')).toBeInTheDocument();
+    expect(screen.getByText('Nada aqui')).toBeInTheDocument();
   });
 
   it('runs the consumer’s own handler as well as its own', async () => {

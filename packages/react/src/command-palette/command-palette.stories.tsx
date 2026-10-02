@@ -8,6 +8,7 @@ import { Avatar } from '../avatar';
 import { Button } from '../button';
 import { Layer } from '../dialog/dialog-demo';
 import { Grid, Scene } from '../field/field-demo';
+import { SlottedProvider } from '../i18n';
 import { Kbd } from '../kbd';
 import { Popover, PopoverContent, PopoverTrigger } from '../popover';
 import { TextField } from '../text-field';
@@ -350,7 +351,7 @@ export const Pages: Story = {
         label="Inside the page"
         note="The trail names where the reader is; pressing it, Backspace on an empty query, or Escape returns to the root."
       >
-        <Panel defaultPages={['team']} placeholder="Search teams…" />
+        <Panel defaultPages={['team']} messages={{ placeholder: 'Search teams…' }} />
       </Scene>
     </Grid>
   ),
@@ -519,7 +520,7 @@ export const Inline: Story = {
               <CommandPalette
                 footer={null}
                 items={TEAMS.map((team) => ({ ...team, description: undefined }))}
-                placeholder="Search people…"
+                messages={{ placeholder: 'Search people…' }}
                 presentation="inline"
               />
             </PopoverContent>
@@ -698,29 +699,20 @@ export const Defaults: Story = {
   render: () => (
     <Grid columns={1}>
       <Scene
-        label="Portuguese, from the provider"
-        note="Nothing on the panel states a label or a size; the provider around it does, once, for every palette under it."
+        label="Portuguese, from the providers"
+        note="Nothing on the panel states a word or a size; SlottedProvider gives the language and the defaults provider the size, once, for every palette under them."
       >
-        <CommandPaletteDefaultsProvider
-          clearLabel="Limpar"
-          countLabel="{count} resultados"
-          emptyLabel="Nenhum resultado"
-          hintClose="Fechar"
-          hintNavigate="Navegar"
-          hintSelect="Executar"
-          inputLabel="Buscar comandos"
-          placeholder="Comando ou busca…"
-          recentLabel="Recentes"
-          size="sm"
-        >
-          <Panel
-            defaultRecent={['inbox']}
-            groups={[
-              { id: 'nav', label: 'Ir para' },
-              { id: 'actions', label: 'Ações' },
-            ]}
-          />
-        </CommandPaletteDefaultsProvider>
+        <SlottedProvider locale="pt-BR">
+          <CommandPaletteDefaultsProvider size="sm">
+            <Panel
+              defaultRecent={['inbox']}
+              groups={[
+                { id: 'nav', label: 'Ir para' },
+                { id: 'actions', label: 'Ações' },
+              ]}
+            />
+          </CommandPaletteDefaultsProvider>
+        </SlottedProvider>
       </Scene>
     </Grid>
   ),
@@ -739,10 +731,8 @@ export const Composition: Story = {
             <CommandPalette
               {...layerProps(container)}
               defaultOpen={isolated(context)}
-              inputLabel="Search people"
               items={TEAMS}
-              label="People"
-              placeholder="Search people…"
+              messages={{ input: 'Search people', label: 'People', placeholder: 'Search people…' }}
               renderItem={(item, state) => (
                 <>
                   <span data-part="icon">
@@ -792,7 +782,7 @@ export const Accessibility: Story = {
         label="Two names, one live region"
         note="The field is named Search deployments and the list borrows it; the current row is aria-selected and named by aria-activedescendant; the hidden status row holds the count."
       >
-        <Panel inputLabel="Search deployments" label="Deployment commands" />
+        <Panel messages={{ input: 'Search deployments', label: 'Deployment commands' }} />
       </Scene>
     </Grid>
   ),

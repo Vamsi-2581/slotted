@@ -1,3 +1,4 @@
+import type { NumberFieldMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -67,10 +68,7 @@ export interface NumberFieldHandle {
 /** What an application sets once for every number field under it. */
 export interface NumberFieldDefaults {
   clamp: NumberFieldClamp;
-  decrementLabel: string;
   formatOn: NumberFieldFormatOn;
-  incrementLabel: string;
-  locale: string | undefined;
   size: NumberFieldSize;
   stepper: NumberFieldStepper;
   variant: NumberFieldVariant;
@@ -114,8 +112,6 @@ export interface NumberFieldProps extends Omit<
 > {
   /** Where a value outside the range goes, and when. Defaults to the provider, then `blur`. */
   clamp?: NumberFieldClamp | undefined;
-  /** The decrement button's accessible name. Defaults to the provider's. */
-  decrementLabel?: string | undefined;
   /** The value an uncontrolled control starts from, read once. `null` is empty. */
   defaultValue?: number | null | undefined;
   /**
@@ -135,8 +131,6 @@ export interface NumberFieldProps extends Omit<
   formatOn?: NumberFieldFormatOn | undefined;
   /** Reaches `increment()` and `decrement()`. `ref` reaches the input itself. */
   handle?: Ref<NumberFieldHandle> | undefined;
-  /** The increment button's accessible name. Defaults to the provider's. */
-  incrementLabel?: string | undefined;
   /**
    * Unstated rather than `false`. Writes `aria-invalid` on the control and
    * `data-invalid` on the frame.
@@ -144,8 +138,13 @@ export interface NumberFieldProps extends Omit<
   invalid?: boolean | undefined;
   /** The amount `Shift` and the page keys move by. Defaults to `step * 10`. */
   largeStep?: number | undefined;
-  /** BCP 47. Defaults to the provider, then to the runtime's own locale. */
+  /** BCP 47. Defaults to the language in force (`SlottedProvider`). */
   locale?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * `increment` and `decrement` buttons' accessible names.
+   */
+  messages?: PartialMessages<NumberFieldMessages> | undefined;
   /** The largest value the control holds. `End` goes here. */
   max?: number | undefined;
   /** The smallest value the control holds. `Home` goes here. */

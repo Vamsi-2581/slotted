@@ -305,7 +305,6 @@ export const Content: Story = {
           platform: 'windows',
           legends: { ctrl: 'Strg', shift: 'Umschalt', delete: 'Entf' },
           names: { ctrl: 'Steuerung', shift: 'Umschalt', delete: 'Entfernen' },
-          thenLabel: 'dann',
         }),
       ],
     }),
@@ -322,7 +321,7 @@ export const Content: Story = {
         scene(
           'Translated legends',
           'Both the mark and the spoken word are replaced through provideKbdDefaults, so Strg is seen and Steuerung is heard without touching either binding.',
-          `<kbd slShortcut keys="mod+shift+delete"></kbd><kbd slShortcut keys="mod+k mod+s"></kbd>`,
+          `<kbd slShortcut keys="mod+shift+delete"></kbd><kbd slShortcut keys="mod+k mod+s" [messages]="{ then: 'dann' }"></kbd>`,
           'stack',
         ) +
         scene(

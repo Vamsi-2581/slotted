@@ -1,3 +1,4 @@
+import type { MultiSelectMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -8,6 +9,9 @@ export type MultiSelectAlign = 'start' | 'center' | 'end';
 export type MultiSelectWidth = 'anchor' | 'content';
 export type MultiSelectMount = 'active' | 'lazy' | 'eager';
 export type MultiSelectStrategy = 'absolute' | 'fixed';
+
+/** Which gestures open the popup besides the trigger and the arrows. */
+export type MultiSelectOpenOn = 'input' | 'focus' | 'manual';
 
 /** What the row does with more chips than fit on one line. */
 export type MultiSelectOverflow = 'wrap' | 'collapse';
@@ -78,48 +82,39 @@ export interface MultiSelectDefaults {
   align: MultiSelectAlign;
   alignOffset: number;
   allowDuplicates: boolean;
-  chosenLabel: string;
   chosenOptions: MultiSelectChosenOptions;
   clearable: boolean;
-  clearLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   closeOnSelect: boolean;
   collisionPadding: number;
   commitOnBlur: boolean;
-  countLabel: string;
-  counterLabel: string;
-  createLabel: string;
   creatable: boolean;
   /** The characters that commit the typed text, and split a paste. */
   delimiters: readonly string[];
   disabled: boolean;
   editable: boolean;
-  emptyLabel: string;
   flip: boolean;
   fullWidth: boolean;
   hideWhenDetached: boolean;
   highlightMatch: boolean;
   invalid: boolean;
   loading: boolean;
-  loadingLabel: string;
   loop: boolean;
   /** The most values the set may hold, or `null` for no limit. */
   max: number | null;
   mount: MultiSelectMount;
+  openOn: MultiSelectOpenOn;
   overflow: MultiSelectOverflow;
   portal: boolean;
   readOnly: boolean;
-  removeLabel: string;
   reorderable: boolean;
-  reorderLabel: string;
   required: boolean;
   shift: boolean;
   side: MultiSelectSide;
   sideOffset: number;
   size: MultiSelectSize;
   strategy: MultiSelectStrategy;
-  triggerLabel: string;
   variant: MultiSelectVariant;
   width: MultiSelectWidth;
 }
@@ -149,8 +144,16 @@ export interface MultiSelectProps extends Partial<MultiSelectDefaults> {
   highlightedValue?: MultiSelectOptionValue | null;
   inputValue?: string;
   items?: MultiSelectItems;
-  /** BCP 47, for the comparison the default filter and the duplicate rule make. */
+  /**
+   * BCP 47, for the comparison the default filter and the duplicate rule make.
+   * The language in force when absent.
+   */
   locale?: string;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * buttons, the chips, the counter, the offer to add, and the sentences.
+   */
+  messages?: PartialMessages<MultiSelectMessages> | undefined;
   name?: string;
   onHighlightedValueChange?: (
     value: MultiSelectOptionValue | null,

@@ -3,6 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/popover/contract.json';
 import { SlPopover } from './popover';
 import { providePopoverDefaults } from './popover-defaults';
@@ -273,20 +276,27 @@ describe('SlPopover', () => {
 });
 
 describe('providePopoverDefaults', () => {
-  it('translates the close control once for an application', async () => {
+  it('sets the width once, and the close control speaks the language in force', async () => {
+    const locale = signal('pt-BR');
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [Host],
-      providers: [providePopoverDefaults({ closeLabel: 'Fechar', width: 'anchor' })],
+      providers: [
+        provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+        providePopoverDefaults({ width: 'anchor' }),
+      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.open.set(true);
     await settle(fixture);
 
-    expect(document.querySelector('[data-part="close"]')?.getAttribute('aria-label')).toBe(
-      'Fechar',
-    );
+    const close = () => document.querySelector('[data-part="close"]')?.getAttribute('aria-label');
+    expect(close()).toBe('Fechar');
     expect(layer()?.getAttribute('data-width')).toBe('anchor');
+
+    locale.set('en-US');
+    await settle(fixture);
+    expect(close()).toBe('Close');
   });
 });

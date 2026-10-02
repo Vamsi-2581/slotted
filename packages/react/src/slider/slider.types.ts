@@ -47,7 +47,6 @@ export interface SliderHandle {
 
 /** What an application sets once for every slider under it. */
 export interface SliderDefaults {
-  locale: string | undefined;
   orientation: SliderOrientation;
   size: SliderSize;
   valueLabel: SliderValueLabel;
@@ -109,7 +108,7 @@ export interface SliderProps extends Omit<
   invalid?: boolean | undefined;
   /** The amount `Shift` and the page keys move by. Defaults to `step * 10`. */
   largeStep?: number | undefined;
-  /** BCP 47. Defaults to the provider, then to the runtime's own locale. */
+  /** BCP 47. Unset, the language in force decides. */
   locale?: string | undefined;
   /** The ticks drawn beside the rail. A mark's label becomes its announced value. */
   marks?: readonly (number | SliderMark)[] | undefined;

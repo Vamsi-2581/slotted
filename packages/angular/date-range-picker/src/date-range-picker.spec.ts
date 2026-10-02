@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { plainDate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -47,8 +49,6 @@ class Host {
   });
   readonly refuseFifteenth = (date: PlainDate) => date.day === 15;
   readonly refuseNinth = (date: PlainDate) => date.day === 9;
-  readonly noites = (count: number, unit: string) =>
-    `${String(count)} ${unit === 'nights' ? 'noites' : 'dias'}`;
 }
 
 function renderTemplate(template: string, providers: unknown[] = []) {
@@ -136,7 +136,7 @@ describe('what it is made of', () => {
 
   it('names the two fields and submits them under two names', () => {
     const fixture = renderTemplate(
-      `<div slDateRangePicker locale="pt-BR" [defaultValue]="run" startLabel="Início" endLabel="Fim" startName="inicio" endName="fim"></div>`,
+      `<div slDateRangePicker locale="pt-BR" [defaultValue]="run" [messages]="{ start: 'Início', end: 'Fim' }" startName="inicio" endName="fim"></div>`,
     );
     const groups = [...fixture.nativeElement.querySelectorAll('[role="group"]')] as HTMLElement[];
     expect(groups.map((group) => group.getAttribute('aria-label'))).toEqual(['Início', 'Fim']);
@@ -148,15 +148,15 @@ describe('what it is made of', () => {
 describe('what the trigger says', () => {
   it('names itself for choosing, then carries both ends and the length', () => {
     const empty = renderTemplate(
-      `<div slDateRangePicker locale="pt-BR" chooseLabel="Escolher período"></div>`,
+      `<div slDateRangePicker locale="pt-BR" [messages]="{ choose: 'Escolher um período' }"></div>`,
     );
-    expect(trigger(empty).getAttribute('aria-label')).toBe('Escolher período');
+    expect(trigger(empty).getAttribute('aria-label')).toBe('Escolher um período');
 
     const chosen = renderTemplate(
-      `<div slDateRangePicker locale="pt-BR" count="nights" changeLabel="Alterar período" [defaultValue]="run"></div>`,
+      `<div slDateRangePicker locale="pt-BR" count="nights" [messages]="{ change: 'Alterar o período, {start} – {end}, {length}' }" [defaultValue]="run"></div>`,
     );
     const name = trigger(chosen).getAttribute('aria-label') ?? '';
-    expect(name).toContain('Alterar período');
+    expect(name).toContain('Alterar o período');
     expect(name).toMatch(/7 de setembro de 2026/);
     expect(name).toContain('4 nights');
   });
@@ -439,23 +439,50 @@ describe('what a form sees', () => {
 });
 
 describe('what an application sets once', () => {
-  it('takes the unit, the labels and the months from a provider', () => {
+  it('takes the unit and the months from a provider, and its words from the language in force', () => {
     const fixture = renderTemplate(
       `<div slDateRangePicker defaultOpen [defaultValue]="run"></div>`,
       [
-        provideDateRangePickerDefaults({
-          changeLabel: 'Alterar',
-          count: 'nights',
-          lengthLabel: (count, unit) => `${String(count)} ${unit === 'nights' ? 'noites' : 'dias'}`,
-          locale: 'pt-BR',
-          months: 1,
-        }),
+        provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }),
+        provideDateRangePickerDefaults({ count: 'nights', months: 1 }),
       ],
     );
     expect(root(fixture).getAttribute('data-count')).toBe('nights');
     expect(text(fixture, 'length')).toBe('4 noites');
-    expect(trigger(fixture).getAttribute('aria-label')).toContain('Alterar');
+    expect(trigger(fixture).getAttribute('aria-label')).toContain('Alterar período');
     expect(fixture.nativeElement.querySelectorAll('[data-part="grid"]')).toHaveLength(1);
+  });
+
+  it('lays its own messages over the catalog, a counting phrase included', () => {
+    const fixture = renderTemplate(
+      `<div
+         slDateRangePicker
+         count="nights"
+         defaultOpen
+         [defaultValue]="run"
+         [messages]="{ nights: { length: '{count, plural, one {# diária} other {# diárias}}' } }"
+       ></div>`,
+    );
+    expect(text(fixture, 'length')).toBe('4 diárias');
+    expect(trigger(fixture).getAttribute('aria-label')).toContain('Change range');
+  });
+
+  it('changes its words and its dates together with the language in force', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(
+      `<div slDateRangePicker count="nights" [defaultValue]="run"></div>`,
+      [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    );
+
+    expect(trigger(fixture).getAttribute('aria-label')).toMatch(
+      /^Alterar período, .*7 de setembro de 2026 – .*11 de setembro de 2026, 4 noites$/,
+    );
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(trigger(fixture).getAttribute('aria-label')).toMatch(
+      /^Change range, .*September 7, 2026 – .*September 11, 2026, 4 nights$/,
+    );
   });
 });
 

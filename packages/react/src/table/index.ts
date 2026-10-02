@@ -9,7 +9,7 @@ export {
   TableTextFilter,
   TableTimeFilter,
 } from './table-filter';
-export { DEFAULT_TABLE_LABELS, TableDefaultsProvider, useTableDefaults } from './table-defaults';
+export { TableDefaultsProvider, useTableDefaults } from './table-defaults';
 export {
   TableBody,
   TableCaption,
@@ -64,11 +64,9 @@ export type {
   TableFooterProps,
   TableHandle,
   TableHeadProps,
-  TableLabels,
   TableLayout,
   TableLoaderProps,
   TableProps,
-  TableResolvedLabels,
   TableRootProps,
   TableRowContextValue,
   TableRowHeaderProps,

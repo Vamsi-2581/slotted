@@ -20,35 +20,15 @@ export type PageHeaderExpandedReason = 'pointer' | 'keyboard' | 'scroll' | 'prog
 /** Why the pin took hold or let go. */
 export type PageHeaderPinnedReason = 'pointer' | 'keyboard' | 'programmatic';
 
-/** The strings the family says on the reader's behalf. */
-export interface PageHeaderMessages {
-  expand: string;
-  collapse: string;
-  pin: string;
-  unpin: string;
-  headerArea: string;
-}
-
 export interface PageHeaderDefaults {
   collapse: PageHeaderCollapse;
   level: PageHeaderLevel;
-  messages: PageHeaderMessages;
   size: PageHeaderSize;
 }
-
-/** The strings the family says before an application says otherwise. */
-export const DEFAULT_PAGE_HEADER_MESSAGES: PageHeaderMessages = {
-  expand: 'Expandir cabeçalho',
-  collapse: 'Recolher cabeçalho',
-  pin: 'Fixar cabeçalho',
-  unpin: 'Soltar cabeçalho',
-  headerArea: 'Cabeçalho da página',
-};
 
 const FALLBACK: PageHeaderDefaults = {
   collapse: 'scroll',
   level: '1',
-  messages: DEFAULT_PAGE_HEADER_MESSAGES,
   size: 'md',
 };
 
@@ -59,22 +39,14 @@ export const PAGE_HEADER_DEFAULTS = new InjectionToken<PageHeaderDefaults>(
 
 /**
  * An application decides once how its page headers behave — the size, the
- * rank, whether a scroll collapses the area, and the words the two controls
- * say — rather than repeating them on every screen. A header that states any
- * of them itself still wins.
+ * rank, whether a scroll collapses the area — rather than repeating them on
+ * every screen. A header that states any of them itself still wins. Its words
+ * come from the language in force (`provideSlotted`).
  */
-export function providePageHeaderDefaults(
-  defaults: Partial<Omit<PageHeaderDefaults, 'messages'>> & {
-    messages?: Partial<PageHeaderMessages>;
-  },
-) {
+export function providePageHeaderDefaults(defaults: Partial<PageHeaderDefaults>) {
   return {
     provide: PAGE_HEADER_DEFAULTS,
-    useFactory: (): PageHeaderDefaults => ({
-      ...FALLBACK,
-      ...defaults,
-      messages: { ...FALLBACK.messages, ...defaults.messages },
-    }),
+    useFactory: (): PageHeaderDefaults => ({ ...FALLBACK, ...defaults }),
   };
 }
 

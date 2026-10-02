@@ -1,5 +1,6 @@
 import { Component, Injector, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
 import type { ComponentFixture } from '@angular/core/testing';
 import {
   emptyGridView,
@@ -10,18 +11,13 @@ import {
   type GridViewStorage,
   type SavedViewsState,
 } from '@slotted/core/grid';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import contract from '../../../../specs/components/saved-views/contract.json';
 import { persistedSavedViews } from './persisted-saved-views';
 import { SlSavedViews } from './saved-views';
-import {
-  DEFAULT_SAVED_VIEWS_LABELS,
-  provideSavedViewsDefaults,
-  type SavedViewApply,
-  type SavedViewsRequest,
-} from './saved-views-defaults';
+import type { SavedViewApply, SavedViewsRequest } from './saved-views-defaults';
 
 const BUILT_IN: GridView = emptyGridView();
 const withSearch = (search: string, density: GridView['density'] = null): GridView => ({
@@ -50,7 +46,7 @@ const STATE: SavedViewsState = {
     [current]="current()"
     [builtIn]="builtIn()"
     [defaultState]="initial()"
-    [labels]="labels()"
+    [messages]="messages()"
     (stateChangeRequest)="onState($event)"
     (viewApply)="applied.push($event)"
     (openChangeRequest)="opens.push($event)"
@@ -59,7 +55,7 @@ const STATE: SavedViewsState = {
 class Host {
   readonly current = signal<GridView>(LATE);
   readonly initial = signal<SavedViewsState>(STATE);
-  readonly labels = signal<Record<string, string> | undefined>(undefined);
+  readonly messages = signal<Record<string, string> | undefined>(undefined);
   readonly builtIn = signal<GridView>(BUILT_IN);
   readonly views = viewChild.required<SlSavedViews>('views');
   readonly requests: SavedViewsRequest[] = [];
@@ -145,7 +141,7 @@ describe('SlSavedViews', () => {
   it('renders the contract identity, the group and the view in use', () => {
     expect(root().getAttribute('data-part')).toBe('root');
     expect(root().getAttribute('role')).toBe('group');
-    expect(root().getAttribute('aria-label')).toBe(contract.labels.label);
+    expect(root().getAttribute('aria-label')).toBe('Views');
     expect(trigger().textContent).toContain('Late orders');
     expect(root().hasAttribute('data-modified')).toBe(false);
   });
@@ -233,11 +229,11 @@ describe('SlSavedViews', () => {
     click(button(panel(), 'Save as new view…'));
     await settle();
     await submit();
-    expect(panel().textContent).toContain(contract.labels.empty);
+    expect(panel().textContent).toContain('Enter a name for the view');
     expect(panel().querySelector("[data-ui='field']")?.hasAttribute('data-invalid')).toBe(true);
     await type('my REGION');
     await submit();
-    expect(panel().textContent).toContain(contract.labels.duplicate);
+    expect(panel().textContent).toContain('A view with this name already exists');
     expect(host.requests).toHaveLength(0);
     await type('  Big accounts ');
     await submit();
@@ -337,16 +333,21 @@ describe('SlSavedViews', () => {
     expect(host.opens.at(-1)).toMatchObject({ value: false, reason: 'escape' });
   });
 
-  it('takes its words from the provider, and the instance wins', async () => {
+  it('speaks the language in force, follows a change of it in place, and the instance wins', async () => {
     fixture.destroy();
-    await mount([provideSavedViewsDefaults({ labels: { builtIn: 'Padrão', revert: 'Reverter' } })]);
+    const locale = signal('pt-BR');
+    await mount([provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })]);
     host.initial.set({ ...STATE, activeId: null });
     host.current.set(withSearch('x'));
-    host.labels.set({ revert: 'Desfazer' });
+    host.messages.set({ revert: 'Desfazer' });
     await settle();
+    expect(root().getAttribute('aria-label')).toBe('Visualizações');
     expect(trigger().textContent).toContain('Padrão');
     expect(root().querySelector("[data-part='revert']")?.textContent?.trim()).toBe('Desfazer');
-    expect(DEFAULT_SAVED_VIEWS_LABELS).toEqual(contract.labels);
+
+    locale.set('en-US');
+    await settle();
+    expect(root().getAttribute('aria-label')).toBe('Views');
   });
 });
 

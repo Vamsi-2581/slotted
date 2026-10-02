@@ -166,7 +166,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'ts',
       label: 'One decision for the application',
       source:
-        "bootstrapApplication(App, {\n  providers: [\n    provideStatusIndicatorDefaults({\n      mark: 'icon',\n      size: 'sm',\n      labels: { danger: 'Fehler' },\n    }),\n  ],\n});",
+        "bootstrapApplication(App, {\n  providers: [provideStatusIndicatorDefaults({ mark: 'icon', size: 'sm' })],\n});",
     }),
   },
   {
@@ -229,7 +229,14 @@ export const ANGULAR_STATUS_INDICATOR_DOCS = {
         'string',
         '—',
         'SlStatusIndicator',
-        'What a reader hears when nothing is projected. Ignored when something is. Falls back to the provider’s table, then to the family’s own',
+        'What a reader hears when nothing is projected. Ignored when something is. Falls back to the status’s word in the catalog',
+      ],
+      [
+        'messages',
+        'Partial<StatusIndicatorMessages>',
+        '—',
+        'SlStatusIndicator',
+        'Words laid over the language in force, key by key: the word each status is heard as when nothing is projected (neutral, info, success, warning, danger, unknown)',
       ],
     ]),
     composition: apiRows([
@@ -256,10 +263,10 @@ export const ANGULAR_STATUS_INDICATOR_DOCS = {
       ],
       [
         'provideStatusIndicatorDefaults',
-        '{ mark, size, live, labels }',
+        '{ mark, size, live }',
         '—',
         'an injector',
-        'Sets the four once for an application or a route. An explicit input still wins',
+        'Sets the three once for an application or a route. An explicit input still wins',
       ],
       [
         'outputs',

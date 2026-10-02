@@ -13,11 +13,18 @@ import {
   input,
   output,
   signal,
+  untracked,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  messageScrollerMessages,
+  type MessageScrollerMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
-import { createMessageScroller, formatScrollerMessage } from '@slotted/core/message-scroller';
+import { createMessageScroller } from '@slotted/core/message-scroller';
 import type {
   MessageScrollerEdges,
   MessageScrollerPosition,
@@ -62,6 +69,12 @@ export class SlMessageScroller {
   readonly preserveOnPrepend = input<boolean | undefined>(undefined);
   /** A reply is streaming: the log is `aria-busy` and the change is announced once each way. */
   readonly busy = input(false, { transform: booleanAttribute });
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * region's name, the jump controls, the unread line, the loader and the
+   * two announcements of a streaming reply.
+   */
+  readonly messages = input<PartialMessages<MessageScrollerMessages> | undefined>(undefined);
 
   /** The reader reached the top — the moment to ask for older messages. */
   readonly reachStart = output<'scroll'>();
@@ -69,8 +82,8 @@ export class SlMessageScroller {
   readonly scrollableChange = output<MessageScrollerEdges>();
 
   private readonly defaults = injectMessageScrollerDefaults();
-  readonly messages = this.defaults.messages;
-  readonly locale = this.defaults.locale;
+  /** The family's words in the language in force, with this scroller's `messages` laid over them. */
+  readonly t = injectMessages(messageScrollerMessages, this.messages);
   readonly resolvedPosition = computed(
     () => this.defaultPosition() ?? this.defaults.defaultPosition,
   );
@@ -106,7 +119,7 @@ export class SlMessageScroller {
     effect(() => {
       const busy = this.busy();
       if (wasBusy !== null && wasBusy !== busy) {
-        getLiveAnnouncer().announce(busy ? this.messages.busy : this.messages.idle);
+        getLiveAnnouncer().announce(untracked(() => (busy ? this.t('busy') : this.t('idle'))));
       }
       wasBusy = busy;
     });
@@ -174,15 +187,15 @@ function scroller(): SlMessageScroller {
     'data-part': 'viewport',
     role: 'region',
     '[attr.tabindex]': 'tabindex',
-    '[attr.aria-label]': 'label',
+    '[attr.aria-label]': 'label()',
   },
 })
 export class SlMessageScrollerViewport {
   private readonly owner = scroller();
   protected readonly tabindex =
     inject(new HostAttributeToken('tabindex'), { optional: true }) ?? '0';
-  protected readonly label =
-    inject(new HostAttributeToken('aria-label'), { optional: true }) ?? this.owner.messages.label;
+  private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
+  protected readonly label = computed(() => this.written ?? this.owner.t('label'));
 
   constructor() {
     const host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
@@ -243,7 +256,9 @@ export class SlMessageScrollerSeparator {
 @Component({
   selector: '[slMessageScrollerUnread]',
   standalone: true,
-  template: '<span><ng-content>{{ owner.messages.unread }}</ng-content></span>',
+  template: `<span
+    ><ng-content>{{ owner.t('unread') }}</ng-content></span
+  >`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: { 'data-part': 'unread' },
@@ -258,7 +273,7 @@ export class SlMessageScrollerUnread {
   standalone: true,
   template: `<span aria-hidden="true" data-ui="spinner"></span
     ><span
-      ><ng-content>{{ owner.messages.loader }}</ng-content></span
+      ><ng-content>{{ owner.t('loader') }}</ng-content></span
     >`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -306,18 +321,18 @@ export class SlMessageScrollerJump {
     const { scrollable } = this.owner.state();
     return this.direction() === 'end' ? scrollable.end : scrollable.start;
   });
+  private readonly count = computed(() =>
+    this.direction() === 'end' ? this.owner.state().newCount : 0,
+  );
   protected readonly words = computed(() => {
-    const count = this.direction() === 'end' ? this.owner.state().newCount : 0;
-    return count > 0
-      ? formatScrollerMessage(this.owner.messages.jumpCount, { count }, this.owner.locale)
-      : null;
+    const count = this.count();
+    return count > 0 ? this.owner.t('jumpCount', { count }) : null;
   });
   protected readonly label = computed(() => {
     if (this.ownLabel !== null) return this.ownLabel;
-    const base =
-      this.direction() === 'end' ? this.owner.messages.jumpToEnd : this.owner.messages.jumpToStart;
-    const words = this.words();
-    return words === null ? base : `${base}, ${words}`;
+    if (this.direction() === 'start') return this.owner.t('jumpToStart');
+    const count = this.count();
+    return count > 0 ? this.owner.t('jumpToEndCount', { count }) : this.owner.t('jumpToEnd');
   });
 
   protected onClick(event: MouseEvent) {

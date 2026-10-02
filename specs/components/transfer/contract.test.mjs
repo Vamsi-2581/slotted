@@ -148,7 +148,6 @@ test('offers the layout, search, select-all and order axes with their defaults',
     'selectAll',
     'reorderable',
     'rows',
-    'labels',
   ]);
 });
 
@@ -182,8 +181,8 @@ test('declares the keyboard of §4.1', () => {
   assert.match(contract.wiring['aria-keyshortcuts'], /Alt\+ArrowUp/);
 });
 
-test('carries every label the design names', () => {
-  assert.deepEqual(Object.keys(contract.labels).sort(), [
+test('carries every message the design names', () => {
+  assert.deepEqual([...contract.messages].sort(), [
     'actions',
     'count',
     'countFiltered',
@@ -208,8 +207,6 @@ test('carries every label the design names', () => {
     'source',
     'target',
   ]);
-  assert.equal(contract.labels.moved, '{count} moved to {pane}');
-  assert.equal(contract.labels.countSelected, '{selected} of {total} selected');
 });
 
 test('names the family that owns each declined capability', () => {

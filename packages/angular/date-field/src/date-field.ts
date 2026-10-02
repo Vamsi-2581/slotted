@@ -42,7 +42,13 @@ import type {
   ValidationErrors,
   Validator,
 } from '@angular/forms';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  dateFieldMessages,
+  type DateFieldMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { SlField } from '@slotted/angular/field';
 
 import { injectDateFieldDefaults } from './date-field-defaults';
@@ -144,7 +150,7 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
       <button
         data-part="clear"
         type="button"
-        [attr.aria-label]="resolvedClearLabel()"
+        [attr.aria-label]="t('clear')"
         (click)="clear($event)"
       >
         <span slIcon><svg slGlyph name="x"></svg></span>
@@ -186,7 +192,10 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
   /** Refuses particular dates — a weekend, a holiday, a booked day. */
   readonly isDateUnavailable = input<((date: PlainDate) => boolean) | undefined>(undefined);
 
-  /** BCP 47. Decides the field order, the separators and the placeholder. */
+  /**
+   * BCP 47. Decides the field order, the separators and the placeholder.
+   * Unset, the language in force decides.
+   */
   readonly locale = input<string | undefined>(undefined);
   /** Which zone answers "what is today", and nothing else. */
   readonly timeZone = input<string | undefined>(undefined);
@@ -219,7 +228,8 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
 
   /** Draws a button that empties the value and returns focus to the control. */
   readonly clearable = input(false, { transform: booleanAttribute });
-  readonly clearLabel = input<string | undefined>(undefined);
+  /** Words laid over the catalog of the language in force, key by key: the clear button's name. */
+  readonly messages = input<PartialMessages<DateFieldMessages> | undefined>(undefined);
   /** The name a plain form post carries the ISO string under. */
   readonly name = input<string | undefined>(undefined);
   /**
@@ -240,6 +250,9 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly defaults = injectDateFieldDefaults();
+  private readonly appLocale = injectLocale();
+  /** The family's words in the language in force, with this field's `messages` laid over them. */
+  readonly t = injectMessages(dateFieldMessages, this.messages);
   private readonly field = inject(SlField, { optional: true });
 
   /** Read before the host binding computes, so it never writes over it. */
@@ -273,7 +286,7 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
 
   protected readonly format = computed(() =>
     createDateFormat({
-      locale: this.locale() ?? this.defaults.locale,
+      locale: this.locale() ?? this.appLocale(),
       firstDayOfWeek: this.firstDayOfWeek() ?? this.defaults.firstDayOfWeek,
       yearPivot: this.yearPivot() ?? this.defaults.yearPivot,
     }),
@@ -319,9 +332,6 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
     return this.invalid() ?? this.field?.invalid();
   });
 
-  protected readonly resolvedClearLabel = computed(
-    () => this.clearLabel() ?? this.defaults.clearLabel,
-  );
   protected readonly controlId = computed(
     () => this.writtenId ?? this.field?.ids().control ?? null,
   );

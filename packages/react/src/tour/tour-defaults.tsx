@@ -1,18 +1,7 @@
 import { setPortalContainer } from '@slotted/core/portal';
-import { formatTourProgress } from '@slotted/core/tour';
 import { createContext, useContext, useEffect } from 'react';
 
-import type { TourDefaults, TourDefaultsProviderProps, TourLabels } from './tour.types';
-
-export const DEFAULT_TOUR_LABELS: TourLabels = {
-  close: 'Close tour',
-  done: 'Done',
-  next: 'Next',
-  preparing: 'Preparing the next step',
-  prev: 'Back',
-  progress: formatTourProgress,
-  skip: 'Skip tour',
-};
+import type { TourDefaults, TourDefaultsProviderProps } from './tour.types';
 
 /**
  * `closeOnOutsidePress` is off: a press on the scrim is the easiest press on
@@ -30,7 +19,6 @@ export const TOUR_FALLBACK: TourDefaults = {
   closeOnOutsidePress: false,
   collisionPadding: 8,
   keyboardNavigation: true,
-  labels: DEFAULT_TOUR_LABELS,
   layout: 'auto',
   missing: 'center',
   modal: true,
@@ -50,21 +38,17 @@ export function useTourDefaults(): TourDefaults {
 }
 
 /**
- * An application decides once how its tours behave and what their controls
- * say. A tour that states any of them itself still wins, and so does a step.
+ * An application decides once how its tours behave. A tour that states any of
+ * it itself still wins, and so does a step. Its words come from the language
+ * in force (`SlottedProvider`).
  */
 export function TourDefaultsProvider({
   children,
   container,
-  labels,
   ...defaults
 }: TourDefaultsProviderProps) {
   const inherited = useTourDefaults();
-  const value: TourDefaults = {
-    ...inherited,
-    ...stated(defaults),
-    labels: { ...inherited.labels, ...stated(labels ?? {}) },
-  };
+  const value: TourDefaults = { ...inherited, ...stated(defaults) };
 
   useEffect(() => {
     if (container === undefined) return;

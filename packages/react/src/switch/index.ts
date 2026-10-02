@@ -1,7 +1,6 @@
 export { Switch } from './switch';
 export {
   SWITCH_LOADING_ANNOUNCE_DELAY,
-  SWITCH_LOADING_LABEL,
   SwitchDefaultsProvider,
   useSwitchDefaults,
 } from './switch-defaults';

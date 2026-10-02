@@ -1,9 +1,11 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/side-navigation/contract.json';
 import { AppShell, AppShellNav, AppShellNavBody } from '../app-shell';
+import { SlottedProvider } from '../i18n';
 import { SideNavigation } from './side-navigation';
 import { SideNavigationDefaultsProvider } from './side-navigation-defaults';
 import {
@@ -107,9 +109,25 @@ describe('SideNavigation', () => {
       expect(document.querySelector(`[data-part="${part}"]`), part).not.toBeNull();
     }
     expect(root().tagName).toBe('NAV');
-    expect(root()).toHaveAttribute('aria-label', 'Navegação');
+    expect(root()).toHaveAttribute('aria-label', 'Navigation');
     expect(root()).toHaveAttribute('data-mode', 'auto');
     expect(root()).toHaveAttribute('data-truncate', 'end');
+  });
+
+  it('speaks the language in force, and lays its own messages over it', () => {
+    const { rerender } = render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Column />
+      </SlottedProvider>,
+    );
+    expect(root()).toHaveAttribute('aria-label', 'Navegação');
+
+    rerender(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Column messages={{ navigation: 'Menu' }} />
+      </SlottedProvider>,
+    );
+    expect(root()).toHaveAttribute('aria-label', 'Menu');
   });
 
   /** The shell's nav region is already the navigation landmark. */
@@ -394,5 +412,43 @@ describe('SideNavigation', () => {
     );
     fireEvent.click(link('a'));
     expect(onValueChange).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * An application that routes in state, not in the URL, draws its destinations
+ * as buttons through `render`. The root props are typed for any element, so
+ * the row can be one without a cast, and it is still a destination.
+ */
+describe('SideNavigationLink rendered as a button', () => {
+  it('compiles, selects, and marks the current destination', () => {
+    function Routed() {
+      const [page, setPage] = useState('orders');
+      return (
+        <SideNavigation value={page} onValueChange={(next) => next !== null && setPage(next)}>
+          <SideNavigationList>
+            <SideNavigationItem value="orders">
+              <SideNavigationLink render={(props) => <button {...props} type="button" />}>
+                <SideNavigationLabel>Orders</SideNavigationLabel>
+              </SideNavigationLink>
+            </SideNavigationItem>
+            <SideNavigationItem value="invoices">
+              <SideNavigationLink render={(props) => <button {...props} type="button" />}>
+                <SideNavigationLabel>Invoices</SideNavigationLabel>
+              </SideNavigationLink>
+            </SideNavigationItem>
+          </SideNavigationList>
+        </SideNavigation>
+      );
+    }
+    render(<Routed />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Invoices' }));
+
+    expect(screen.getByRole('button', { name: 'Invoices' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    expect(screen.getByRole('button', { name: 'Orders' })).not.toHaveAttribute('aria-current');
   });
 });

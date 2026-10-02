@@ -125,7 +125,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button, or the element render returns',
     required: false,
     purpose:
-      'The explicit way out, asking to close with the reason dismiss. Never disabled. Its words default to cancelLabel.',
+      'The explicit way out, asking to close with the reason dismiss. Never disabled. Its words default to the catalog’s cancel.',
   },
 ];
 
@@ -336,12 +336,12 @@ coarse ? (
   {
     id: 'defaults',
     title: 'Decided once for the application',
-    note: 'ActionSheetDefaultsProvider sets modal, mount, escape, outsidePress, back, closeOnSelect and the cancel’s words for every sheet below it. The cancel here reads Fechar with no children, and a sheet that states a value itself still wins.',
+    note: 'ActionSheetDefaultsProvider sets modal, mount, escape, outsidePress, back and closeOnSelect for every sheet below it, and a sheet that states a value itself still wins. The cancel’s words come from the language in force (SlottedProvider).',
     snippet: defineSnippet({
       id: 'action-sheet-react-defaults',
       language: 'tsx',
       label: 'Once, at the root',
-      source: `<ActionSheetDefaultsProvider cancelLabel="Fechar" back="close">
+      source: `<ActionSheetDefaultsProvider closeOnSelect={false} back="close">
   <App />
 </ActionSheetDefaultsProvider>;`,
     }),
@@ -410,7 +410,7 @@ const composition = apiRows([
   ],
   [
     'ActionSheetDefaultsProvider',
-    '{ modal, mount, escape, outsidePress, back, closeOnSelect, cancelLabel }',
+    '{ modal, mount, escape, outsidePress, back, closeOnSelect }',
     '—',
     'a subtree',
     'The decisions an application takes once. A sheet that states any of them itself still wins',
@@ -565,11 +565,11 @@ export const REACT_ACTION_SHEET_DOCS = {
       'Whether choosing an action closes the sheet with the reason select',
     ],
     [
-      'cancelLabel',
-      'string',
-      'Cancel',
-      'ActionSheet, ActionSheetDefaultsProvider',
-      'The cancel’s words when it is given no children',
+      'messages',
+      'Partial<ActionSheetMessages>',
+      '—',
+      'ActionSheet',
+      'Words laid over the language in force, key by key: the cancel’s words when it is given no children (cancel)',
     ],
     [
       'initialFocus',

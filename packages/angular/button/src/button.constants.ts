@@ -27,10 +27,3 @@ export type ButtonVariant = (typeof BUTTON_VARIANTS)[number];
 export type ButtonSize = (typeof BUTTON_SIZES)[number];
 export type ButtonShape = (typeof BUTTON_SHAPES)[number];
 export type ButtonType = 'button' | 'submit' | 'reset';
-
-/**
- * What the ring announces itself as when the consumer says nothing. It is a
- * progress bar, so it needs a name; an application replaces it per instance or
- * translates it once at the call site.
- */
-export const BUTTON_LOADING_LABEL = 'Loading';

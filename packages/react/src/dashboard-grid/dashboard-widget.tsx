@@ -1,4 +1,4 @@
-import { formatDashboardLabel, handleShortcuts, tileStyle } from '@slotted/core/dashboard-grid';
+import { handleShortcuts, tileStyle } from '@slotted/core/dashboard-grid';
 import {
   useCallback,
   useId,
@@ -153,7 +153,7 @@ export function DashboardWidget({
 
   if (slot === undefined) return null;
   const { tile, can } = slot;
-  const { labels, editing, sizeClass } = grid;
+  const { t, editing, sizeClass } = grid;
   const Heading = `h${headingLevel ?? grid.headingLevel}` as const;
   const named = { title };
   const flows = sizeClass !== 'expanded';
@@ -161,7 +161,7 @@ export function DashboardWidget({
   const detail =
     detailHref !== undefined ? (
       <IconButton
-        aria-label={formatDashboardLabel(labels.detail, named)}
+        aria-label={t('detail', named)}
         size="sm"
         tone="secondary"
         variant="ghost"
@@ -176,7 +176,7 @@ export function DashboardWidget({
       </IconButton>
     ) : onDetail !== undefined ? (
       <IconButton
-        aria-label={formatDashboardLabel(labels.detail, named)}
+        aria-label={t('detail', named)}
         size="sm"
         tone="secondary"
         variant="ghost"
@@ -203,7 +203,7 @@ export function DashboardWidget({
           render={({ ref: triggerRef, ...props }) => (
             <HandleButton
               {...(props as ComponentPropsWithRef<'button'>)}
-              aria-label={formatDashboardLabel(labels.handle, named)}
+              aria-label={t('handle', named)}
               aria-describedby={grid.statusId}
               aria-keyshortcuts={handleShortcuts(tile.removable)}
               register={setHandle}
@@ -215,21 +215,21 @@ export function DashboardWidget({
           {tile.movable ? (
             <>
               <MenuItem disabled={!can.up} onSelect={move('up')}>
-                <MenuItemLabel>{labels.moveUp}</MenuItemLabel>
+                <MenuItemLabel>{t('moveUp')}</MenuItemLabel>
                 <MenuItemShortcut keys="Alt+ArrowUp" />
               </MenuItem>
               <MenuItem disabled={!can.down} onSelect={move('down')}>
-                <MenuItemLabel>{labels.moveDown}</MenuItemLabel>
+                <MenuItemLabel>{t('moveDown')}</MenuItemLabel>
                 <MenuItemShortcut keys="Alt+ArrowDown" />
               </MenuItem>
               {flows ? null : (
                 <>
                   <MenuItem disabled={!can.left} onSelect={move('left')}>
-                    <MenuItemLabel>{labels.moveStart}</MenuItemLabel>
+                    <MenuItemLabel>{t('moveStart')}</MenuItemLabel>
                     <MenuItemShortcut keys="Alt+ArrowLeft" />
                   </MenuItem>
                   <MenuItem disabled={!can.right} onSelect={move('right')}>
-                    <MenuItemLabel>{labels.moveEnd}</MenuItemLabel>
+                    <MenuItemLabel>{t('moveEnd')}</MenuItemLabel>
                     <MenuItemShortcut keys="Alt+ArrowRight" />
                   </MenuItem>
                 </>
@@ -240,19 +240,19 @@ export function DashboardWidget({
           {sizable ? (
             <>
               <MenuItem disabled={!can.wider} onSelect={resize(1, 0)}>
-                <MenuItemLabel>{labels.wider}</MenuItemLabel>
+                <MenuItemLabel>{t('wider')}</MenuItemLabel>
                 <MenuItemShortcut keys="Shift+ArrowRight" />
               </MenuItem>
               <MenuItem disabled={!can.narrower} onSelect={resize(-1, 0)}>
-                <MenuItemLabel>{labels.narrower}</MenuItemLabel>
+                <MenuItemLabel>{t('narrower')}</MenuItemLabel>
                 <MenuItemShortcut keys="Shift+ArrowLeft" />
               </MenuItem>
               <MenuItem disabled={!can.taller} onSelect={resize(0, 1)}>
-                <MenuItemLabel>{labels.taller}</MenuItemLabel>
+                <MenuItemLabel>{t('taller')}</MenuItemLabel>
                 <MenuItemShortcut keys="Shift+ArrowDown" />
               </MenuItem>
               <MenuItem disabled={!can.shorter} onSelect={resize(0, -1)}>
-                <MenuItemLabel>{labels.shorter}</MenuItemLabel>
+                <MenuItemLabel>{t('shorter')}</MenuItemLabel>
                 <MenuItemShortcut keys="Shift+ArrowUp" />
               </MenuItem>
             </>
@@ -264,7 +264,7 @@ export function DashboardWidget({
                 tone="danger"
                 onSelect={(event) => grid.hide(value, 'remove', event.source)}
               >
-                <MenuItemLabel>{labels.hide}</MenuItemLabel>
+                <MenuItemLabel>{t('hide')}</MenuItemLabel>
                 <MenuItemShortcut keys="Delete" />
               </MenuItem>
             </>
@@ -283,9 +283,7 @@ export function DashboardWidget({
       >
         <ResultStateContent>
           <ResultStateTitle>
-            {kind === 'empty'
-              ? (emptyTitle ?? labels.emptyTitle)
-              : (errorTitle ?? labels.errorTitle)}
+            {kind === 'empty' ? (emptyTitle ?? t('emptyTitle')) : (errorTitle ?? t('errorTitle'))}
           </ResultStateTitle>
           {(kind === 'empty' ? emptyDescription : errorDescription) === undefined ? null : (
             <ResultStateDescription>
@@ -310,7 +308,7 @@ export function DashboardWidget({
               onClick={onRetry}
               render={(props) => <button {...props} data-part="retry" />}
             >
-              {labels.retry}
+              {t('retry')}
             </Button>
           </ResultStateActions>
         ) : null}

@@ -1,3 +1,4 @@
+import type { PartialMessages, PromptComposerMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { UploadFile } from '@slotted/core/upload';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
@@ -41,13 +42,7 @@ export interface PromptComposerAttachDetail {
 
 /** What an application sets once for every composer under it. */
 export interface PromptComposerDefaults {
-  attachLabel: string;
-  retryLabel: string;
-  sendLabel: string;
-  sendingLabel: string;
   size: PromptComposerSize;
-  stopLabel: string;
-  stoppedLabel: string;
   submitOn: PromptComposerSubmitOn;
   variant: PromptComposerVariant;
 }
@@ -95,6 +90,12 @@ export interface PromptComposerProps extends Omit<
   maxFiles?: number | undefined;
   /** The largest file, in bytes. */
   maxSize?: number | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * names of the attach and submit buttons for each status (`send`, `sending`,
+   * `stop`, `retry`), and the `sending` and `stopped` announcements.
+   */
+  messages?: PartialMessages<PromptComposerMessages> | undefined;
   /** Whether one attach may bring more than one file. Defaults to `true`. */
   multiple?: boolean | undefined;
   /** Files from the attach button, a paste or a drop, after the selection rules. */

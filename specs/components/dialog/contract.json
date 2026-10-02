@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "dialog",
   "ui": "dialog",
+  "catalog": {
+    "group": "Overlays",
+    "summary": "Modal dialog and alert dialog."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
   "alertPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/alertdialog/",
   "composes": ["portal", "dismissable-layer", "presence", "focus"],
@@ -165,6 +169,7 @@
       "back"
     ]
   },
+  "messages": ["close", "fullScreen"],
   "declined": {
     "dialogElement": {
       "reason": "The platform ships the top layer, ::backdrop, browser-enforced tab containment, browser-enforced inertness, Escape as a cancellable cancel event and returnValue, and none of the six surveyed libraries uses any of it. What decides it here is the top layer itself: an element promoted to it paints above every element in the document regardless of z-index, and every other overlay in this library is portalled to the end of the body and stacked with --slotted-z-index-overlay plus --slotted-layer-depth. A select opened inside a dialog would portal to the body and paint behind the dialog it belongs to, with no z-index able to correct it",

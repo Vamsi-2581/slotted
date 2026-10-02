@@ -1,10 +1,12 @@
 import { plainDate, plainTime } from '@slotted/core/date';
 import type { PlainDate, PlainDateTime, PlainTime } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/datetime-range-picker/contract.json';
+import { SlottedProvider } from '../i18n';
 import {
   DateTimeRangePicker,
   DateTimeRangePickerDefaultsProvider,
@@ -100,7 +102,9 @@ describe('what it is made of', () => {
   });
 
   it('shows one month by default and names the list by the current tab', () => {
-    render(<DTRP defaultOpen defaultValue={RUN} startLabel="Retirada" endLabel="Devolução" />);
+    render(
+      <DTRP defaultOpen defaultValue={RUN} messages={{ start: 'Retirada', end: 'Devolução' }} />,
+    );
     /* The calendar writes `data-months` only past one. */
     expect(document.querySelector('[data-ui="calendar"]')).not.toHaveAttribute('data-months');
     expect(document.querySelectorAll('[data-part="grid"]')).toHaveLength(1);
@@ -110,7 +114,7 @@ describe('what it is made of', () => {
   });
 
   it('says which half to choose, with the day once there is one', () => {
-    const empty = render(<DTRP defaultOpen startLabel="Retirada" endLabel="Devolução" />);
+    const empty = render(<DTRP defaultOpen messages={{ start: 'Retirada', end: 'Devolução' }} />);
     expect(hint()).toHaveTextContent('Retirada: choose a day');
     fireEvent.click(dayFor(12));
     expect(hint().textContent).toMatch(/Retirada: choose a time on .*12/);
@@ -202,7 +206,7 @@ describe('what each list refuses', () => {
       <DTRP
         defaultOpen
         defaultValue={{ start: dt(17, 9), end: null }}
-        emptyLabel="Fechado"
+        messages={{ empty: 'Fechado' }}
         isDateUnavailable={(date: PlainDate) => date.day === 19}
       />,
     );
@@ -388,12 +392,36 @@ describe('keys and ownership', () => {
 
   it('reads the defaults an application set once', () => {
     render(
-      <DateTimeRangePickerDefaultsProvider months={2} nowLabel="Já">
+      <DateTimeRangePickerDefaultsProvider months={2}>
         <DTRP defaultOpen />
       </DateTimeRangePickerDefaultsProvider>,
     );
     expect(document.querySelector('[data-ui="calendar"]')).toHaveAttribute('data-months', '2');
-    expect(part('now')).toHaveTextContent('Já');
+  });
+
+  it('changes its words and its date and time format together with the language in force', () => {
+    const inLocale = (locale: string) => (
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale={locale}>
+        <DateTimeRangePicker defaultValue={RUN} referenceDateTime={NOON} />
+      </SlottedProvider>
+    );
+    const { rerender } = render(inLocale('pt-BR'));
+
+    expect(trigger().getAttribute('aria-label')).toMatch(/^Alterar período, /);
+    expect(part('summary').textContent).toMatch(/12 de set.*14:00/);
+
+    rerender(inLocale('en-US'));
+    expect(trigger().getAttribute('aria-label')).toMatch(/^Change range, /);
+    expect(part('summary').textContent).toMatch(/Sep 12.*2:00\sPM/);
+  });
+
+  it('names the limit in the language in force', () => {
+    render(
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+        <DateTimeRangePicker defaultOpen maxLength={7 * 86400} minLength={86400} />
+      </SlottedProvider>,
+    );
+    expect(part('limit')).toHaveTextContent(/^de 1 dia a 7 dias$/);
   });
 
   it('refuses a time unavailable on its day, and only there', () => {

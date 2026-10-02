@@ -3,6 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import type { ChangeRequest } from '@slotted/core/state';
 import { SlPage, SlPageBody } from '@slotted/angular/page';
 import { SlPageHeader } from './page-header';
@@ -213,7 +216,7 @@ describe('SlPageHeader', () => {
   it('writes the disclosure wiring on the toggle and names the region', () => {
     expect(toggle().getAttribute('aria-expanded')).toBe('true');
     expect(toggle().getAttribute('aria-controls')).toBe(area().id);
-    expect(toggle().getAttribute('aria-label')).toBe('Recolher cabeçalho');
+    expect(toggle().getAttribute('aria-label')).toBe('Collapse header');
     expect(
       toggle().querySelector('[data-ui="icon"] > svg[data-glyph="chevron-down"]'),
     ).not.toBeNull();
@@ -224,7 +227,7 @@ describe('SlPageHeader', () => {
     expect(back.querySelector('svg[data-glyph="arrow-left"]')).not.toBeNull();
     expect(back.textContent?.trim()).toBe('Pedidos');
     expect(area().getAttribute('role')).toBe('region');
-    expect(area().getAttribute('aria-label')).toBe('Cabeçalho da página');
+    expect(area().getAttribute('aria-label')).toBe('Page header');
     expect(root().hasAttribute('data-expanded')).toBe(true);
   });
 
@@ -233,7 +236,7 @@ describe('SlPageHeader', () => {
     expect(host.expandedRequests.at(-1)?.reason).toBe('pointer');
     expect(host.expanded()).toBe(false);
     expect(root().hasAttribute('data-expanded')).toBe(false);
-    expect(toggle().getAttribute('aria-label')).toBe('Expandir cabeçalho');
+    expect(toggle().getAttribute('aria-label')).toBe('Expand header');
     expect(area().hasAttribute('inert')).toBe(true);
 
     click(toggle(), 0);
@@ -281,7 +284,7 @@ describe('SlPageHeader', () => {
     expect(host.pinned()).toBe(true);
     expect(pin().getAttribute('aria-pressed')).toBe('true');
     expect(pin().hasAttribute('data-pressed')).toBe(true);
-    expect(pin().getAttribute('aria-label')).toBe('Soltar cabeçalho');
+    expect(pin().getAttribute('aria-label')).toBe('Unpin header');
     expect(glyph()).toBe('pin-off');
     expect(host.expandedRequests.at(-1)?.reason).toBe('programmatic');
     expect(host.expanded()).toBe(true);
@@ -510,10 +513,9 @@ describe('SlPageHeader defaults', () => {
         collapse: 'manual',
         level: '2',
         size: 'lg',
-        messages: { collapse: 'Fechar' },
       }),
     ],
-    template: `<header slPageHeader size="sm">
+    template: `<header slPageHeader size="sm" [messages]="{ collapse: 'Fechar' }">
       <div slPageHeaderArea></div>
       <div slPageHeaderControls><button slPageHeaderToggle></button></div>
     </header>`,
@@ -529,6 +531,39 @@ describe('SlPageHeader defaults', () => {
     expect(root.getAttribute('data-level')).toBe('2');
     expect(root.getAttribute('data-size')).toBe('sm');
     expect(root.querySelector('[data-part="toggle"]')?.getAttribute('aria-label')).toBe('Fechar');
+    vi.unstubAllGlobals();
+  });
+});
+
+describe('SlPageHeader language', () => {
+  @Component({
+    standalone: true,
+    imports: [SlPageHeader, SlPageHeaderArea, SlPageHeaderControls, SlPageHeaderToggle],
+    template: `<header slPageHeader>
+      <div slPageHeaderArea></div>
+      <div slPageHeaderControls><button slPageHeaderToggle></button></div>
+    </header>`,
+  })
+  class Spoken {}
+
+  it('speaks the language in force, and follows a change of it in place', () => {
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+    const locale = signal('pt-BR');
+    TestBed.configureTestingModule({
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const fixture = TestBed.createComponent(Spoken);
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector('[data-ui="page-header"]') as HTMLElement;
+    const toggle = () => root.querySelector('[data-part="toggle"]')?.getAttribute('aria-label');
+    expect(toggle()).toBe('Recolher cabeçalho');
+    expect(root.querySelector('[data-part="header-area"]')?.getAttribute('aria-label')).toBe(
+      'Cabeçalho da página',
+    );
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(toggle()).toBe('Collapse header');
     vi.unstubAllGlobals();
   });
 });

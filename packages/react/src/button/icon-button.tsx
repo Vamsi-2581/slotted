@@ -1,9 +1,11 @@
+import { buttonMessages } from '@slotted/core/i18n';
+
+import { useMessages } from '../i18n';
 import { ICON_BUTTON_DEFAULTS } from './button.constants';
 import {
   blockActivation,
   holdsPressedState,
   inertness,
-  loadingLabelOf,
   rootData,
   useAppearance,
   useLoadingIndicator,
@@ -30,7 +32,7 @@ export function IconButton({
   focusableWhenDisabled = false,
   loading = false,
   loadingDelay = 0,
-  loadingLabel,
+  messages,
   onClick,
   onClickCapture,
   onPressedChange,
@@ -46,6 +48,7 @@ export function IconButton({
   const appearance = useAppearance({ size, tone, variant }, ICON_BUTTON_DEFAULTS);
   const inert = inertness({ disabled, focusableWhenDisabled, loading });
   const waiting = useLoadingIndicator({ loading, loadingDelay });
+  const t = useMessages(buttonMessages, messages);
   const toggles = holdsPressedState({ defaultPressed, pressed });
   const state = usePressed({ defaultPressed, onPressedChange, pressed });
 
@@ -68,7 +71,7 @@ export function IconButton({
     children: (
       <span data-part="icon">
         {children}
-        {waiting ? <ButtonIndicator label={loadingLabelOf({ loadingLabel })} /> : null}
+        {waiting ? <ButtonIndicator label={t('loading')} /> : null}
       </span>
     ),
     disabled: inert.nativelyDisabled,

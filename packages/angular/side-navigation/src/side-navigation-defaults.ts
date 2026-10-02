@@ -33,27 +33,16 @@ export type SideNavigationFlyoutReason =
 /** Why the current destination moved. */
 export type SideNavigationValueReason = 'pointer' | 'keyboard' | 'programmatic';
 
-/** The strings the family writes itself, replaceable once per application. */
-export interface SideNavigationMessages {
-  /** The landmark's name when the consumer gives none. */
-  navigation: string;
-}
-
 export interface SideNavigationDefaults {
   autoExpand: boolean;
   compactAt: number;
   guides: boolean;
   landmark: boolean;
-  messages: SideNavigationMessages;
   mode: SideNavigationMode;
   multiple: boolean;
   size: SideNavigationSize;
   truncate: SideNavigationTruncate;
 }
-
-export const DEFAULT_SIDE_NAVIGATION_MESSAGES: SideNavigationMessages = {
-  navigation: 'Navegação',
-};
 
 /** The contract's defaults, and the width the rail is read at. */
 export const SIDE_NAVIGATION_FALLBACK: SideNavigationDefaults = {
@@ -61,7 +50,6 @@ export const SIDE_NAVIGATION_FALLBACK: SideNavigationDefaults = {
   compactAt: 96,
   guides: true,
   landmark: true,
-  messages: DEFAULT_SIDE_NAVIGATION_MESSAGES,
   mode: 'auto',
   multiple: true,
   size: 'md',
@@ -77,19 +65,12 @@ export const SIDE_NAVIGATION_DEFAULTS = new InjectionToken<SideNavigationDefault
  * An application decides once how its columns read — the rail's width, the
  * cut, whether groups open one at a time — rather than repeating it on every
  * navigation in a product. A column that states any of them itself still wins.
+ * Its words come from the language in force (`provideSlotted`).
  */
-export function provideSideNavigationDefaults(
-  defaults: Partial<Omit<SideNavigationDefaults, 'messages'>> & {
-    messages?: Partial<SideNavigationMessages>;
-  },
-) {
+export function provideSideNavigationDefaults(defaults: Partial<SideNavigationDefaults>) {
   return {
     provide: SIDE_NAVIGATION_DEFAULTS,
-    useFactory: (): SideNavigationDefaults => ({
-      ...SIDE_NAVIGATION_FALLBACK,
-      ...defaults,
-      messages: { ...SIDE_NAVIGATION_FALLBACK.messages, ...defaults.messages },
-    }),
+    useFactory: (): SideNavigationDefaults => ({ ...SIDE_NAVIGATION_FALLBACK, ...defaults }),
   };
 }
 

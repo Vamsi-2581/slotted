@@ -170,3 +170,24 @@ test('exercises every part and every axis value in the harness', () => {
     assert.ok(fragment.includes(edge), `no scene renders ${edge}`);
   }
 });
+
+/**
+ * `overscroll-behavior` is per axis, and an axis the area does not scroll on
+ * still counts: Chrome kept the page's wheel inside a one-line code block
+ * whose viewport was `overflow-y: hidden` under `contain`. The axis that does
+ * not scroll lets the wheel through, whatever chaining the area chose.
+ */
+test('lets the wheel through on the axis it does not scroll', () => {
+  const flat = css.replace(/\s+/g, '');
+  const inline =
+    "[data-ui='scroll-area'][data-axis='inline']>[data-part='viewport']{overscroll-behavior-y:auto;overscroll-behavior-block:auto;}";
+  const block =
+    "[data-ui='scroll-area'][data-axis='block']>[data-part='viewport']{overscroll-behavior-x:auto;overscroll-behavior-inline:auto;}";
+  assert.ok(flat.includes(inline), 'an inline area passes the vertical wheel on');
+  assert.ok(flat.includes(block), 'a block area passes the horizontal wheel on');
+  const lastChaining = Math.max(
+    flat.lastIndexOf("[data-overscroll='auto']"),
+    flat.lastIndexOf("[data-overscroll='none']"),
+  );
+  assert.ok(flat.indexOf(inline) > lastChaining, 'the axis rule wins over a chosen `none`');
+});

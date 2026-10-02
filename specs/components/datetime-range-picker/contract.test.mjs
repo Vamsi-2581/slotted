@@ -93,7 +93,7 @@ test('draws the range calendar and the list of the current end, behind two tabs'
   assert.ok(!member.parts.includes('panel-day') && !member.parts.includes('panel-label'));
   assert.match(contract.panel.day, /focused day/);
   assert.match(contract.hint.says, /chooseDay/);
-  assert.match(contract.hint.labels, /\{day\}/);
+  assert.match(contract.hint.messages, /\{day\}/);
   assert.equal(contract.done.always, true);
   assert.match(contract.responsive.sheetList, /under the grid/);
   assert.match(contract.list.duration, /beside its time/);
@@ -229,27 +229,17 @@ test('opens on the field of the current end, or on its cell from the arrow', () 
 test('defaults are settable once, in both bindings', () => {
   for (const name of [
     'calendar',
-    'changeLabel',
-    'chooseLabel',
-    'clearLabel',
     'closeOnSelect',
-    'emptyLabel',
-    'endLabel',
     'firstDayOfWeek',
     'granularity',
     'hourCycle',
     'lengthLabel',
-    'limitLabel',
-    'locale',
     'maxOptions',
     'months',
-    'nowLabel',
     'placement',
     'size',
-    'startLabel',
     'step',
     'timeZone',
-    'truncatedLabel',
     'unavailableOptions',
     'variant',
   ]) {

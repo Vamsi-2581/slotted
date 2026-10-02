@@ -16,24 +16,15 @@ export type DateTimeFieldVariant = 'outline' | 'subtle' | 'plain';
  */
 export type DateTimeFieldHourCycle = 12 | 24;
 
-/** The words the family's own controls announce. */
-export const DATE_TIME_FIELD_CLEAR_LABEL = 'Clear';
-export const DATE_TIME_FIELD_DURATION_LABEL = 'Date and time as a duration from now';
-
 export interface DateTimeFieldDefaults {
   /** Only `gregory` today. The axis exists so a second calendar can arrive. */
   calendar: 'gregory';
-  clearLabel: string;
-  /** The accessible name of the expression region. */
-  durationLabel: string;
   /** `0` is Sunday. Unset asks the locale. */
   firstDayOfWeek: number | undefined;
   /** How much of the time half is written. The date half is always whole. */
   granularity: TimeGranularity;
   /** Unset means the locale decides both the cycle and its variant. */
   hourCycle: DateTimeFieldHourCycle | undefined;
-  /** BCP 47. Unset means the runtime decides. */
-  locale: string | undefined;
   /** Whether `+`, `-` and `=` open the duration expression. */
   relative: boolean;
   size: DateTimeFieldSize;
@@ -46,12 +37,9 @@ export interface DateTimeFieldDefaults {
 
 const FALLBACK: DateTimeFieldDefaults = {
   calendar: 'gregory',
-  clearLabel: DATE_TIME_FIELD_CLEAR_LABEL,
-  durationLabel: DATE_TIME_FIELD_DURATION_LABEL,
   firstDayOfWeek: undefined,
   granularity: 'minute',
   hourCycle: undefined,
-  locale: undefined,
   relative: true,
   size: 'md',
   timeZone: undefined,
@@ -65,15 +53,11 @@ export const DATE_TIME_FIELD_DEFAULTS = new InjectionToken<DateTimeFieldDefaults
 );
 
 /**
- * An application decides once what its datetimes look like, which locale writes
- * them, which clock they run on and which zone answers "now", rather than
- * repeating the same inputs on every control in a form. A control that states
- * any of them itself still wins.
- *
- * `locale` is the one worth setting first. Unset, each control asks the runtime
- * — which is the browser's locale, not the application's, and an application
- * served in Portuguese to a browser set to English writes `9/10/2026, 3:20 PM`
- * where it means `10/09/2026, 15:20`.
+ * An application decides once what its datetimes look like, which clock they
+ * run on and which zone answers "now", rather than repeating the same inputs on
+ * every control in a form. A control that states any of them itself still
+ * wins. The locale that writes them, and the words the controls announce, come
+ * from the language in force (`provideSlotted`).
  */
 export function provideDateTimeFieldDefaults(defaults: Partial<DateTimeFieldDefaults>) {
   return {

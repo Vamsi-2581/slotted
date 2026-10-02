@@ -1,4 +1,5 @@
 import { serializeSavedViews, type SavedViewsState } from '@slotted/core/grid';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -6,10 +7,10 @@ import { useRef } from 'react';
 
 import { Button } from '../button';
 import { Grid, Measure, Scene } from '../field/field-demo';
+import { SlottedProvider } from '../i18n';
 import { Stack } from '../stack';
 import { TextField } from '../text-field';
 import { SavedViews } from './saved-views';
-import { SavedViewsProvider } from './saved-views-defaults';
 import {
   BUILT_IN,
   HIGH,
@@ -233,21 +234,11 @@ export const Accessibility: Story = {
     <Grid columns={1}>
       <Scene
         label="Translated once, named in context"
-        note="SavedViewsProvider sets the Portuguese words for the subtree; the group is named Vistas de encomendas."
+        note="SlottedProvider sets the Portuguese words for the subtree; aria-label names the group Visualizações de pedidos."
       >
-        <SavedViewsProvider
-          labels={{
-            label: 'Vistas',
-            builtIn: 'Padrão',
-            modified: 'Alterada',
-            revert: 'Reverter',
-            save: 'Salvar',
-            saveAs: 'Salvar como nova vista…',
-            actions: 'Ações de {name}',
-          }}
-        >
-          <ViewsBar initialView={sortedByTotal(LATE)} label="Vistas de encomendas" />
-        </SavedViewsProvider>
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+          <ViewsBar aria-label="Visualizações de pedidos" initialView={sortedByTotal(LATE)} />
+        </SlottedProvider>
       </Scene>
     </Grid>
   ),

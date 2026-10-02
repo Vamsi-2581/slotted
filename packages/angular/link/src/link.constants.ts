@@ -9,6 +9,5 @@ export type LinkVariant = 'accent' | 'neutral' | 'inverse';
  */
 export const WORD_JOINER = '\u2060';
 
-export const LINK_DEFAULT_EXTERNAL_HINT = '(opens in a new tab)';
 export const LINK_DEFAULT_UNDERLINE: LinkUnderline = 'always';
 export const LINK_DEFAULT_VARIANT: LinkVariant = 'accent';

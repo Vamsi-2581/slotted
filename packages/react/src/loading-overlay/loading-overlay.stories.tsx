@@ -126,8 +126,8 @@ function Invoices() {
 export const Playground: Story = {
   args: {
     cancellable: false,
-    label: 'Saving changes',
     loading: true,
+    messages: { label: 'Saving changes' },
     scope: 'region',
     size: 'md',
     veil: 'wash',
@@ -152,7 +152,7 @@ export const Region: Story = {
       <div className="slotted-demo-row">
         <Button variant="outline">Focus starts here</Button>
       </div>
-      <LoadingOverlay label="Saving changes">
+      <LoadingOverlay messages={{ label: 'Saving changes' }}>
         <BillingAddress />
       </LoadingOverlay>
       <Text tone="muted">Nothing below the region moves while the wash is up.</Text>
@@ -180,7 +180,7 @@ export const Page: Story = {
             loading={closing}
             cancellable
             cancelLabel="Interromper"
-            label="Closing the accounting period"
+            messages={{ label: 'Closing the accounting period' }}
             description="Do not close this tab. The ledger is locked until this finishes."
             onCancel={() => setClosing(false)}
           />
@@ -206,7 +206,7 @@ export const Veil: Story = {
         label="wash"
         note="The theme’s own scrim, restated per colour scheme and turned opaque under forced colours. It is the same token dialog and drawer read, so three families dim a surface in one tint."
       >
-        <LoadingOverlay veil="wash" label="Reconciling September">
+        <LoadingOverlay veil="wash" messages={{ label: 'Reconciling September' }}>
           <Invoices />
         </LoadingOverlay>
       </Scene>
@@ -214,7 +214,7 @@ export const Veil: Story = {
         label="blur"
         note="The wash and a backdrop filter together. Text under it stops being legible before it stops being visible, which is exactly the message the layer is carrying."
       >
-        <LoadingOverlay veil="blur" label="Reconciling September">
+        <LoadingOverlay veil="blur" messages={{ label: 'Reconciling September' }}>
           <Invoices />
         </LoadingOverlay>
       </Scene>
@@ -222,7 +222,7 @@ export const Veil: Story = {
         label="none"
         note="Nothing is dimmed and nothing is reachable: the panel is what says so. It is the form to reach for when the wait is short enough that a wash would read as a flash."
       >
-        <LoadingOverlay veil="none" label="Reconciling September">
+        <LoadingOverlay veil="none" messages={{ label: 'Reconciling September' }}>
           <Invoices />
         </LoadingOverlay>
       </Scene>
@@ -251,7 +251,11 @@ export const Sizes: Story = {
         ] as const
       ).map(([size, note]) => (
         <Scene key={size} label={size} note={note}>
-          <LoadingOverlay size={size} label="Reconciling September" description="1 284 entries">
+          <LoadingOverlay
+            size={size}
+            messages={{ label: 'Reconciling September' }}
+            description="1 284 entries"
+          >
             <Invoices />
           </LoadingOverlay>
         </Scene>
@@ -268,7 +272,11 @@ export const Shapes: Story = {
         label="A tall region takes a column"
         note="The mark above the two lines above the control, centred. It is the arrangement for a card, a panel or anything with room to spare in the block axis."
       >
-        <LoadingOverlay label="Importing 4 812 rows" description="About a minute left." cancellable>
+        <LoadingOverlay
+          messages={{ label: 'Importing 4 812 rows' }}
+          description="About a minute left."
+          cancellable
+        >
           <BillingAddress />
         </LoadingOverlay>
       </Scene>
@@ -276,7 +284,11 @@ export const Shapes: Story = {
         label="A short region takes a bar"
         note="Nothing is dropped: the mark moves beside the text, the two lines stack next to it, and the control goes to the end of the row. Sixty pixels tall carrying what the column carried."
       >
-        <LoadingOverlay label="Importing 4 812 rows" description="About a minute left." cancellable>
+        <LoadingOverlay
+          messages={{ label: 'Importing 4 812 rows' }}
+          description="About a minute left."
+          cancellable
+        >
           <Invoices />
         </LoadingOverlay>
       </Scene>
@@ -286,7 +298,7 @@ export const Shapes: Story = {
         layout="stack"
       >
         <div className="slotted-demo-measure">
-          <LoadingOverlay label="Loading the sparkline">
+          <LoadingOverlay messages={{ label: 'Loading the sparkline' }}>
             <Card>
               <CardBody>
                 <Text tone="muted" size="sm">
@@ -310,7 +322,7 @@ export const Timing: Story = {
       return (
         <div className="slotted-demo-stack">
           <Text tone="muted">Neither duration set — the layer paints on every flip.</Text>
-          <LoadingOverlay loading={pending} label="Reconciling September">
+          <LoadingOverlay loading={pending} messages={{ label: 'Reconciling September' }}>
             <Invoices />
           </LoadingOverlay>
           <Text tone="muted">
@@ -320,7 +332,7 @@ export const Timing: Story = {
             loading={pending}
             delay={600}
             minDuration={600}
-            label="Reconciling September"
+            messages={{ label: 'Reconciling September' }}
           >
             <Invoices />
           </LoadingOverlay>
@@ -349,7 +361,9 @@ export const Cancel: Story = {
             loading={state !== 'idle'}
             cancellable
             cancelLabel={state === 'stopping' ? 'Interrompendo…' : 'Interromper'}
-            label={state === 'stopping' ? 'Rolling the batch back' : 'Importing 4 812 rows'}
+            messages={{
+              label: state === 'stopping' ? 'Rolling the batch back' : 'Importing 4 812 rows',
+            }}
             description={
               state === 'stopping'
                 ? 'Nothing has been committed.'
@@ -393,7 +407,7 @@ export const Focus: Story = {
             loading={saving}
             cancellable
             minDuration={1600}
-            label="Saving changes"
+            messages={{ label: 'Saving changes' }}
             onCancel={() => setSaving(false)}
             onReveal={() => field.current?.focus()}
           >
@@ -438,7 +452,7 @@ export const Indicator: Story = {
       note="The mark is a slot and the default is the contained loader. A determinate wait passes progress-indicator’s own ProgressBar, and the family that owns a measured quantity draws it — this one has no value prop and never will."
     >
       <LoadingOverlay
-        label="Uploading contrato.pdf"
+        messages={{ label: 'Uploading contrato.pdf' }}
         description="2,4 MB of 3,9 MB"
         indicator={<ProgressBar value={62} label="Uploaded" hideLabel />}
       >
@@ -457,7 +471,9 @@ export const Content: Story = {
         note="Longer than the English one that was measured. The panel wraps it, keeps its own measure, and never truncates — the announcement holds the same sentence whole for the reader who would otherwise lose it."
       >
         <LoadingOverlay
-          label="A reconciliar os lançamentos do período com o extrato bancário importado"
+          messages={{
+            label: 'A reconciliar os lançamentos do período com o extrato bancário importado',
+          }}
           description="Interromper agora deixaria metade do período conciliado."
           cancellable
           cancelLabel="Interromper"
@@ -472,7 +488,9 @@ export const Content: Story = {
       >
         <div className="slotted-demo-measure">
           <LoadingOverlay
-            label="Uploading conciliacao-bancaria-setembro-2026-consolidado-final.pdf"
+            messages={{
+              label: 'Uploading conciliacao-bancaria-setembro-2026-consolidado-final.pdf',
+            }}
             size="sm"
           >
             <Invoices />
@@ -491,7 +509,10 @@ export const Composition: Story = {
         label="The region is the element the page already has"
         note="render substitutes the root, and every data attribute, the ref and aria-busy are handed to it. Here the region is a section rather than a div."
       >
-        <LoadingOverlay label="Reconciling" render={(props) => <section {...props} />}>
+        <LoadingOverlay
+          messages={{ label: 'Reconciling' }}
+          render={(props) => <section {...props} />}
+        >
           <Invoices />
         </LoadingOverlay>
       </Scene>
@@ -500,7 +521,7 @@ export const Composition: Story = {
         note="renderCancel puts this library’s Button in the slot. The family’s own control paint is written :not([data-ui]), so the Button keeps its own — the part stays the part, and only the paint steps back."
       >
         <LoadingOverlay
-          label="Importing 4 812 rows"
+          messages={{ label: 'Importing 4 812 rows' }}
           cancellable
           renderCancel={(props) => <Button {...props} variant="outline" size="sm" />}
         >
@@ -509,14 +530,14 @@ export const Composition: Story = {
       </Scene>
       <Scene
         label="An application decides once"
-        note="The provider sets the veil, the size, the timing and every message below it. An overlay that states any of them still wins, because an explicit prop is never overridden by context."
+        note="The provider sets the veil, the size and the timing below it. An overlay that states any of them still wins, because an explicit prop is never overridden by context."
       >
-        <LoadingOverlayDefaultsProvider veil="blur" size="sm" label="Aguarde">
+        <LoadingOverlayDefaultsProvider veil="blur" size="sm">
           <div className="slotted-demo-stack">
             <LoadingOverlay>
               <Invoices />
             </LoadingOverlay>
-            <LoadingOverlay veil="wash" label="This one states its own">
+            <LoadingOverlay veil="wash" messages={{ label: 'This one states its own' }}>
               <Invoices />
             </LoadingOverlay>
           </div>
@@ -534,7 +555,7 @@ export const Accessibility: Story = {
         label="One wait, one announcement"
         note='A visually-hidden role="status" holds the label while the layer blocks and is emptied afterwards, because emptying a live region announces nothing. loadedLabel opts into a second message.'
       >
-        <LoadingOverlay label="Saving changes" loadedLabel="Changes saved">
+        <LoadingOverlay messages={{ label: 'Saving changes' }} loadedLabel="Changes saved">
           <BillingAddress />
         </LoadingOverlay>
       </Scene>
@@ -542,7 +563,7 @@ export const Accessibility: Story = {
         label="The wait can also be silent"
         note='live="off" renders no live region at all, for a page that already announces the same wait somewhere else — a route transition that speaks for the whole screen, say.'
       >
-        <LoadingOverlay live="off" label="Saving changes">
+        <LoadingOverlay live="off" messages={{ label: 'Saving changes' }}>
           <Invoices />
         </LoadingOverlay>
       </Scene>

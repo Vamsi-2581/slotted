@@ -4,7 +4,6 @@ import type { ActionSheetDefaults, ActionSheetDefaultsProviderProps } from './ac
 
 const FALLBACK: ActionSheetDefaults = {
   back: 'close',
-  cancelLabel: 'Cancel',
   closeOnSelect: true,
   escape: 'close',
   modal: true,
@@ -20,9 +19,10 @@ export function useActionSheetDefaults(): ActionSheetDefaults {
 }
 
 /**
- * An application decides once how its sheets behave and what the cancel says,
- * rather than on every sheet. A sheet that states any of them itself still
- * wins, because an explicit consumer value always does.
+ * An application decides once how its sheets behave, rather than on every
+ * sheet. A sheet that states any of them itself still wins, because an
+ * explicit consumer value always does. The cancel's words come from the
+ * language in force (`SlottedProvider`).
  */
 export function ActionSheetDefaultsProvider({
   children,
@@ -34,7 +34,6 @@ export function ActionSheetDefaultsProvider({
     <ActionSheetDefaultsContext.Provider
       value={{
         back: defaults.back ?? inherited.back,
-        cancelLabel: defaults.cancelLabel ?? inherited.cancelLabel,
         closeOnSelect: defaults.closeOnSelect ?? inherited.closeOnSelect,
         escape: defaults.escape ?? inherited.escape,
         modal: defaults.modal ?? inherited.modal,

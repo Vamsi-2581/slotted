@@ -3,12 +3,15 @@ import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SlField, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+import type { ChangeRequest } from '@slotted/core/state';
 import { describe, expect, it } from 'vitest';
 
 import { SlEntityPicker, SlEntityPickerOption } from './entity-picker';
 import {
-  provideEntityPickerDefaults,
   type Entity,
+  type EntityPickerOpenOn,
   type EntityPickerValue,
   type EntityPickerValueRequest,
   type EntitySource,
@@ -52,7 +55,10 @@ function recordingSource(fail = false) {
       [max]="max()"
       [minQueryLength]="minQuery()"
       [createEntity]="maker()"
+      [openOn]="openOn()"
+      [readOnly]="readOnly()"
       (valueChangeRequest)="requests.push($event)"
+      (openChangeRequest)="openRequests.push($event)"
     />
   `,
 })
@@ -65,7 +71,10 @@ class Host {
   readonly max = signal<number | undefined>(undefined);
   readonly minQuery = signal<number | undefined>(undefined);
   readonly maker = signal<((query: string) => Promise<Entity>) | undefined>(undefined);
+  readonly openOn = signal<EntityPickerOpenOn | undefined>(undefined);
+  readonly readOnly = signal<boolean | undefined>(undefined);
   readonly requests: EntityPickerValueRequest[] = [];
+  readonly openRequests: ChangeRequest<boolean>[] = [];
 }
 
 async function mount(setup: (host: Host) => void = () => {}) {
@@ -90,6 +99,7 @@ const type = (value: string) => {
   input().value = value;
   input().dispatchEvent(new Event('input', { bubbles: true }));
 };
+const expanded = () => input().getAttribute('aria-expanded');
 const options = () => [...document.querySelectorAll<HTMLElement>("[role='option']")];
 
 describe('SlEntityPicker', () => {
@@ -98,6 +108,7 @@ describe('SlEntityPicker', () => {
     const fixture = await mount((host) => {
       host.source.set(source);
       host.favorites.set([PEOPLE[2]!]);
+      host.openOn.set('focus');
     });
     input().focus();
     await settle(fixture);
@@ -286,16 +297,116 @@ describe('SlEntityPicker', () => {
     expect(asked).toEqual([]);
   });
 
-  it('reads its words from the application defaults', async () => {
+  it('speaks the language in force, and follows a change of it in place', async () => {
+    const locale = signal('pt-BR');
     TestBed.configureTestingModule({
-      providers: [provideEntityPickerDefaults({ labels: { empty: 'Nada' } })],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
     });
     const { source } = recordingSource();
     const fixture = await mount((host) => host.source.set(source));
     input().focus();
     type('zzz');
     await settle(fixture);
-    expect(document.querySelector("[data-part='empty']")?.textContent?.trim()).toBe('Nada');
+    const empty = () => document.querySelector("[data-part='empty']")?.textContent?.trim();
+    expect(empty()).toBe('Nenhum resultado');
+
+    locale.set('en-US');
+    await settle(fixture);
+    expect(empty()).toBe('No results');
+  });
+});
+
+describe('SlEntityPicker openOn', () => {
+  it('opens on a press on the input by default, once, with reason pointer', async () => {
+    const fixture = await mount();
+    input().focus();
+    input().click();
+    await settle(fixture);
+    expect(expanded()).toBe('true');
+    const { openRequests } = fixture.componentInstance;
+    expect(openRequests.length).toBe(1);
+    expect(openRequests[0]!.value).toBe(true);
+    expect(openRequests[0]!.reason).toBe('pointer');
+  });
+
+  it('keeps an open popup open on a second press on the input', async () => {
+    const fixture = await mount();
+    input().focus();
+    input().click();
+    await settle(fixture);
+    input().click();
+    await settle(fixture);
+    expect(expanded()).toBe('true');
+    expect(fixture.componentInstance.openRequests.length).toBe(1);
+  });
+
+  it('does not open when a Tab brings focus in by default', async () => {
+    const fixture = await mount();
+    input().focus();
+    await settle(fixture);
+    expect(expanded()).toBe('false');
+    expect(fixture.componentInstance.openRequests).toEqual([]);
+  });
+
+  it('opens on typing by default', async () => {
+    const fixture = await mount();
+    input().focus();
+    type('bru');
+    await settle(fixture);
+    expect(expanded()).toBe('true');
+  });
+
+  it('keeps the popup closed on a press a consumer prevented', async () => {
+    const fixture = await mount();
+    const prevent = (event: Event) => event.preventDefault();
+    document.addEventListener('click', prevent, { capture: true });
+    try {
+      input().focus();
+      input().click();
+      await settle(fixture);
+    } finally {
+      document.removeEventListener('click', prevent, { capture: true });
+    }
+    expect(expanded()).toBe('false');
+    expect(fixture.componentInstance.openRequests).toEqual([]);
+  });
+
+  it('under manual, typing filters and a press only places the caret; ArrowDown opens', async () => {
+    const fixture = await mount((host) => host.openOn.set('manual'));
+    input().focus();
+    input().click();
+    await settle(fixture);
+    expect(expanded()).toBe('false');
+    type('bru');
+    await settle(fixture);
+    expect(expanded()).toBe('false');
+    expect(input().value).toBe('bru');
+    expect(fixture.componentInstance.openRequests).toEqual([]);
+    press('ArrowDown', input());
+    await settle(fixture);
+    expect(expanded()).toBe('true');
+    expect(fixture.componentInstance.openRequests.length).toBe(1);
+  });
+
+  it('under focus, a focus opens, and a press that focuses opens exactly once', async () => {
+    const fixture = await mount((host) => host.openOn.set('focus'));
+    input().focus();
+    await settle(fixture);
+    expect(expanded()).toBe('true');
+    expect(fixture.componentInstance.openRequests.length).toBe(1);
+    input().click();
+    await settle(fixture);
+    expect(expanded()).toBe('true');
+    expect(fixture.componentInstance.openRequests.length).toBe(1);
+  });
+
+  it('does not open on a press when read-only', async () => {
+    const fixture = await mount((host) => host.readOnly.set(true));
+    input().focus();
+    input().click();
+    await settle(fixture);
+    expect(expanded()).toBe('false');
+    expect(fixture.componentInstance.openRequests).toEqual([]);
   });
 });
 

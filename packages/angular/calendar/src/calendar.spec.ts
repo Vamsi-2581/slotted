@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { plainDate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -562,21 +564,49 @@ describe('how much of it is drawn', () => {
 });
 
 describe('what an application sets once', () => {
-  it('takes the locale and the shape from a provider', () => {
+  it('takes the shape from a provider and the locale from the language in force', () => {
     const fixture = renderTemplate(`<div slCalendar [defaultFocusedDate]="ninth"></div>`, [
-      provideCalendarDefaults({ fixedWeeks: true, locale: 'de-DE' }),
+      provideSlotted({ locale: 'de-DE' }),
+      provideCalendarDefaults({ fixedWeeks: true }),
     ]);
 
     expect(headingText(fixture)).toBe('September 2026');
     expect(fixture.nativeElement.querySelectorAll('[data-part="week"]')).toHaveLength(6);
   });
 
-  it('lets one calendar outrank the provider', () => {
+  it('lets one calendar outrank the language in force', () => {
     const fixture = renderTemplate(
       `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth"></div>`,
-      [provideCalendarDefaults({ locale: 'de-DE' })],
+      [provideSlotted({ locale: 'de-DE' })],
     );
     expect(headingText(fixture)).toBe('setembro de 2026');
+  });
+
+  it('changes its words and its month names together with the language in force', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(`<div slCalendar [defaultFocusedDate]="ninth"></div>`, [
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+    const previous = () =>
+      fixture.nativeElement.querySelector('[data-part="previous"]').getAttribute('aria-label');
+
+    expect(previous()).toBe('Mês anterior');
+    expect(headingText(fixture)).toBe('setembro de 2026');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(previous()).toBe('Previous month');
+    expect(headingText(fixture)).toBe('September 2026');
+  });
+
+  it('lays its own messages over the catalog', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar [messages]="{ next: 'Seguinte' }" [defaultFocusedDate]="ninth"></div>`,
+    );
+    const name = (part: string) =>
+      fixture.nativeElement.querySelector(`[data-part="${part}"]`).getAttribute('aria-label');
+    expect(name('next')).toBe('Seguinte');
+    expect(name('previous')).toBe('Previous month');
   });
 });
 

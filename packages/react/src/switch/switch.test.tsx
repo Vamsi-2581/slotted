@@ -1,9 +1,11 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/switch/contract.json';
 import { Field, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { activationReason, Switch } from './switch';
 import { SwitchDefaultsProvider } from './switch-defaults';
 
@@ -207,7 +209,7 @@ describe('Switch', () => {
   it('stays silent before it announces that it is saving', async () => {
     vi.useFakeTimers();
     try {
-      const { rerender } = render(<Switch loading loadingLabel="Salvando" />);
+      const { rerender } = render(<Switch loading messages={{ loading: 'Salvando' }} />);
       const region = screen.getByRole('status');
       expect(region).toHaveTextContent('');
 
@@ -216,8 +218,26 @@ describe('Switch', () => {
       });
       expect(region).toHaveTextContent('Salvando');
 
-      rerender(<Switch loadingLabel="Salvando" />);
+      rerender(<Switch messages={{ loading: 'Salvando' }} />);
       expect(screen.getByRole('status')).toHaveTextContent('');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('announces the pending word of the language in force', async () => {
+    vi.useFakeTimers();
+    try {
+      render(
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+          <Switch loading />
+        </SlottedProvider>,
+      );
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(2000);
+      });
+      expect(screen.getByRole('status')).toHaveTextContent('Salvando');
     } finally {
       vi.useRealTimers();
     }

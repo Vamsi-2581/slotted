@@ -28,6 +28,7 @@ import type { AfterContentInit } from '@angular/core';
 import { ControlContainer } from '@angular/forms';
 import { hasErrors, isDirty, normaliseErrors } from '@slotted/core/form';
 import type { FormErrorInput } from '@slotted/core/form';
+import { wizardMessages, type PartialMessages, type WizardMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import {
@@ -54,6 +55,7 @@ import type {
 import { SlAlert, SlAlertContent, SlAlertDescription, SlAlertTitle } from '@slotted/angular/alert';
 import { SlButton } from '@slotted/angular/button';
 import { SlForm } from '@slotted/angular/form';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlSkeleton } from '@slotted/angular/skeleton';
 import { SlStepper, SlStepperList, SlStepperStep } from '@slotted/angular/stepper';
@@ -66,7 +68,6 @@ import type {
   WizardDraftReason,
   WizardDraftRequest,
   WizardFailure,
-  WizardLabels,
   WizardLevel,
   WizardProgress,
   WizardProgressOpenRequest,
@@ -316,7 +317,7 @@ export class SlWizardForm {
           </button>
           <div
             slStepper
-            [label]="label() ?? labelSet().progress"
+            [messages]="stepperMessages()"
             [navigation]="phase() === 'complete' ? 'none' : 'button'"
             [orientation]="resolvedProgress() === 'top' ? 'horizontal' : 'vertical'"
             [step]="finished() ? entries().length : currentIndex()"
@@ -327,7 +328,7 @@ export class SlWizardForm {
                 <li
                   slStepperStep
                   [complete]="phase() === 'complete' || isComplete(item.name())"
-                  [description]="item.optional() ? labelSet().optional : undefined"
+                  [description]="item.optional() ? t('optional') : undefined"
                   [disabled]="disabled() || item.disabled() || !isReachable(item.name())"
                   [invalid]="invalid().has(item.name())"
                   [label]="item.label()"
@@ -344,7 +345,7 @@ export class SlWizardForm {
           <div data-part="error">
             <section #alert slAlert live="off" reach="section" tone="danger">
               <div slAlertContent>
-                <div slAlertTitle>{{ error() ?? labelSet().submitFailed }}</div>
+                <div slAlertTitle>{{ error() ?? t('submitFailed') }}</div>
                 @if (error() === undefined && failure()?.message) {
                   <p slAlertDescription>{{ failure()?.message }}</p>
                 }
@@ -425,7 +426,7 @@ export class SlWizardForm {
                       focusableWhenDisabled
                       [disabled]="phase() === 'submitting'"
                     >
-                      {{ labelSet().cancel }}
+                      {{ t('cancel') }}
                     </button>
                   }
                   @if (canSaveDraft()) {
@@ -438,7 +439,7 @@ export class SlWizardForm {
                       [disabled]="disabled() || busy()"
                       [loading]="draftState() === 'saving'"
                     >
-                      {{ labelSet().saveDraft }}
+                      {{ t('saveDraft') }}
                     </button>
                     <span slWizardDraftStatus></span>
                   }
@@ -453,7 +454,7 @@ export class SlWizardForm {
                       focusableWhenDisabled
                       [disabled]="disabled() || busy()"
                     >
-                      {{ labelSet().skip }}
+                      {{ t('skip') }}
                     </button>
                   }
                   @if (!isFirst()) {
@@ -465,7 +466,7 @@ export class SlWizardForm {
                       focusableWhenDisabled
                       [disabled]="disabled() || busy()"
                     >
-                      {{ labelSet().previous }}
+                      {{ t('previous') }}
                     </button>
                   }
                   <button
@@ -495,7 +496,7 @@ export class SlWizardForm {
         <span data-part="optional"
           >{{ ' '
           }}<span slTag shape="pill" size="sm" tone="secondary" variant="soft">{{
-            labelSet().optional
+            t('optional')
           }}</span>
         </span>
       }
@@ -537,9 +538,12 @@ export class SlWizard implements AfterContentInit {
   readonly scroll = input<WizardScroll | undefined>(undefined);
   readonly linear = input(undefined, { transform: optionalBoolean });
   readonly level = input<WizardLevel | undefined>(undefined);
-  /** The name of the list of steps. Defaults to `labels.progress`. */
-  readonly label = input<string | undefined>(undefined);
-  readonly labels = input<Partial<WizardLabels> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * name of the list of steps (`progress`), the position, the actions, the
+   * draft status and the failures.
+   */
+  readonly messages = input<PartialMessages<WizardMessages> | undefined>(undefined);
   readonly disabled = input(false, { transform: booleanAttribute });
   /** An error of the consumer's own, shown above the step; it wins over a failed submission. */
   readonly error = input<string | undefined>(undefined);
@@ -592,10 +596,19 @@ export class SlWizard implements AfterContentInit {
   readonly titleId = `${this.id}-title`;
   readonly listId = `${this.id}-list`;
 
-  readonly labelSet = computed<WizardLabels>(() => ({
-    ...this.defaults.labels,
-    ...this.labels(),
-  }));
+  /** The family's words in the language in force, with this wizard's `messages` laid over them. */
+  readonly t = injectMessages(wizardMessages, this.messages);
+  /** The locale in force: what the hour a draft was saved is written in. */
+  readonly locale = injectLocale();
+  /**
+   * The list of steps is a stepper named by this family's `progress`: the
+   * written word is handed over as a message function, so the stepper never
+   * reads it as message grammar again.
+   */
+  protected readonly stepperMessages = computed(() => {
+    const progress = this.t('progress');
+    return { label: () => progress };
+  });
   readonly resolvedProgress = computed(() => this.progress() ?? this.defaults.progress);
   readonly resolvedScroll = computed(() => this.scroll() ?? this.defaults.scroll);
   readonly resolvedLinear = computed(() => this.linear() ?? this.defaults.linear);
@@ -673,7 +686,7 @@ export class SlWizard implements AfterContentInit {
   protected readonly optionalStep = computed(() => this.currentStep()?.optional() === true);
   readonly position = computed(() => stepPosition(this.entries(), this.current()));
   protected readonly positionText = computed(() =>
-    this.labelSet().position(this.position().index, this.position().count),
+    this.t('position', { index: this.position().index, count: this.position().count }),
   );
   readonly isFirst = computed(() => {
     const current = this.current();
@@ -696,11 +709,7 @@ export class SlWizard implements AfterContentInit {
     );
   });
   protected readonly nextLabel = computed(() =>
-    this.returning()
-      ? this.labelSet().return
-      : this.isFinal()
-        ? this.labelSet().submit
-        : this.labelSet().next,
+    this.t(this.returning() ? 'return' : this.isFinal() ? 'submit' : 'next'),
   );
   readonly busy = computed(() => this.pending() !== undefined || this.phase() === 'submitting');
   readonly hasForm = computed(() => this.form() !== undefined);
@@ -1036,7 +1045,7 @@ export class SlWizard implements AfterContentInit {
     const open = firstIncomplete({ steps: this.entries(), value: accepted });
     if (open !== undefined) {
       this.requestStep(open, 'submit', source);
-      this.failure.set({ message: this.labelSet().incomplete });
+      this.failure.set({ message: this.t('incomplete') });
       this.focusNext = 'alert';
       return;
     }
@@ -1432,12 +1441,18 @@ export class SlWizardSkip {
 export class SlWizardDraftStatus {
   private readonly wizard = inject(SlWizard);
   protected readonly text = computed(() => {
-    const labels = this.wizard.labelSet();
+    const t = this.wizard.t;
     const state = this.wizard.draftState();
     const savedAt = this.wizard.savedAt();
-    if (state === 'saving') return labels.saving;
-    if (state === 'failed') return labels.draftFailed;
-    if (state === 'saved' && savedAt !== undefined) return labels.saved(savedAt);
+    if (state === 'saving') return t('saving');
+    if (state === 'failed') return t('draftFailed');
+    if (state === 'saved' && savedAt !== undefined) {
+      const time = new Intl.DateTimeFormat(this.wizard.locale(), {
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(savedAt);
+      return t('saved', { time });
+    }
     return '';
   });
 }
@@ -1450,7 +1465,7 @@ export class SlWizardDraftStatus {
 @Component({
   selector: 'button[slWizardEdit]',
   standalone: true,
-  template: `<ng-content>{{ wizard.labelSet().edit }}</ng-content>
+  template: `<ng-content>{{ wizard.t('edit') }}</ng-content>
     @if (target(); as step) {
       {{ ' ' }}<span data-ui="visually-hidden">{{ step.label() }}</span>
     }`,

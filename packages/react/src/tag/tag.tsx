@@ -23,7 +23,7 @@ export function Tag({
   end,
   onRemove,
   removeDisabled = false,
-  removeLabel,
+  messages,
   render,
   shape,
   size,
@@ -33,7 +33,7 @@ export function Tag({
   ...nativeProps
 }: TagProps) {
   const appearance = useAppearance({ shape, size, tone, variant });
-  const removal = useRemoval({ disabled, onRemove, removeDisabled, removeLabel });
+  const removal = useRemoval({ disabled, onRemove, removeDisabled, messages });
   const id = useId();
   const labelId = `${id}label`;
   const wordId = `${id}remove`;

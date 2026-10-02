@@ -74,7 +74,7 @@ export class SlAttachmentPreview {
   protected readonly glyph = computed(() => ATTACHMENT_KIND_GLYPH[this.owner.kind()]);
   protected readonly extension = computed(() => {
     const extension = this.owner.split().extension;
-    return extension === '' ? 'FILE' : extension.slice(1).toUpperCase();
+    return extension === '' ? this.owner.t('noExtension') : extension.slice(1).toUpperCase();
   });
 }
 
@@ -164,7 +164,7 @@ export class SlAttachmentTrigger {
 
 /**
  * The line under the name. With nothing projected it writes the size with
- * `formatBytes` in the token's locale; anything the page writes replaces it.
+ * `formatBytes` in the language in force; anything the page writes replaces it.
  */
 @Component({
   selector: '[slAttachmentDetail]',
@@ -183,7 +183,7 @@ export class SlAttachmentDetail {
   protected readonly owner = this.wiring.owner;
   protected readonly bytes = computed(() => {
     const size = this.owner.file().size;
-    return size === undefined ? '' : formatBytes(size, this.owner.locale);
+    return size === undefined ? '' : formatBytes(size, this.owner.locale());
   });
 }
 
@@ -297,6 +297,6 @@ export class SlAttachmentRemove {
   protected readonly owner = attachment();
   private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
   protected readonly label = computed(
-    () => this.written ?? `${this.owner.resolvedRemoveLabel()} ${this.owner.file().name}`,
+    () => this.written ?? this.owner.t('remove', { name: this.owner.file().name }),
   );
 }

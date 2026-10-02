@@ -3,6 +3,7 @@ import type { OnInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SlButton } from '@slotted/angular/button';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlCheckbox } from '@slotted/angular/checkbox';
 import {
   SlDescriptionList,
@@ -23,6 +24,7 @@ import {
 import { SlStack } from '@slotted/angular/stack';
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
 import { SlText } from '@slotted/angular/typography';
+import type { PartialMessages, WizardMessages } from '@slotted/core/i18n';
 import { createSnapshot, storagePersistence } from '@slotted/core/wizard';
 import type { WizardPersistence, WizardValue } from '@slotted/core/wizard';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
@@ -31,7 +33,6 @@ import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
 
 import { SlWizard, SlWizardComplete, SlWizardEdit, SlWizardForm, SlWizardStep } from './wizard';
-import { provideWizardDefaults } from './wizard-defaults';
 import type {
   WizardFailure,
   WizardProgress,
@@ -90,7 +91,7 @@ function text(value: WizardValue | undefined, step: string, name: string) {
     <div
       slWizard
       cancellable
-      label="Account opening"
+      [messages]="words()"
       [(step)]="step"
       [(value)]="value"
       [defaultStep]="startStep()"
@@ -244,6 +245,9 @@ class OpeningDemo implements OnInit {
   readonly startStep = input<string | undefined>(undefined);
   readonly startValue = input<WizardValue | undefined>(undefined);
   readonly refuseOnce = input(false);
+  /** Words a scene lays over the language in force; the list of steps is named after the flow. */
+  readonly messages = input<PartialMessages<WizardMessages>>({});
+  protected readonly words = computed(() => ({ progress: 'Account opening', ...this.messages() }));
 
   /** Two-way, so a scene can stand for the router that owns it. */
   readonly step = model<string | undefined>(undefined);
@@ -298,7 +302,7 @@ class OpeningDemo implements OnInit {
     SlWizardStep,
   ],
   template: `
-    <div slWizard label="Account opening" [(value)]="value">
+    <div slWizard [messages]="{ progress: 'Account opening' }" [(value)]="value">
       <ng-template slWizardStep="account" label="Account">
         <form slForm slWizardForm [formGroup]="account">
           <div slStack [gap]="6">
@@ -370,7 +374,7 @@ class BranchDemo {
   ],
   template: `
     <div slStack [gap]="4">
-      <div slWizard label="Account opening" progress="top" [(value)]="value">
+      <div slWizard [messages]="{ progress: 'Account opening' }" progress="top" [(value)]="value">
         <ng-template slWizardStep="account" label="Account">
           <form slForm slWizardForm [formGroup]="account">
             <div slField>
@@ -496,20 +500,8 @@ class RoutedDemo {
     SlWizardForm,
     SlWizardStep,
   ],
-  providers: [
-    provideWizardDefaults({
-      labels: {
-        next: 'Weiter',
-        position: (index, count) => `Schritt ${index} von ${count}`,
-        previous: 'Zurück',
-        progress: 'Fortschritt',
-        saveDraft: 'Entwurf speichern',
-        submit: 'Absenden',
-      },
-    }),
-  ],
   template: `
-    <div slWizard draftable defaultStep="zahlung" [defaultValue]="start">
+    <div slWizard draftable defaultStep="zahlung" [defaultValue]="start" [messages]="german">
       @for (step of steps; track step[0]) {
         <ng-template [slWizardStep]="step[0]" [label]="step[1]">
           <form slForm slWizardForm>
@@ -525,6 +517,14 @@ class RoutedDemo {
 })
 class GermanDemo {
   protected readonly start: WizardValue = { konto: {}, lieferung: {}, person: {} };
+  protected readonly german: PartialMessages<WizardMessages> = {
+    next: 'Weiter',
+    position: 'Schritt {index} von {count}',
+    previous: 'Zurück',
+    progress: 'Fortschritt',
+    saveDraft: 'Entwurf speichern',
+    submit: 'Absenden',
+  };
   protected readonly steps = [
     ['konto', 'Kontodaten'],
     ['person', 'Persönliche Angaben'],
@@ -540,22 +540,20 @@ class GermanDemo {
   selector: 'sl-wizard-provided-demo',
   standalone: true,
   imports: [OpeningDemo],
-  providers: [
-    provideWizardDefaults({
-      labels: {
-        cancel: 'Cancelar',
-        next: 'Continuar',
-        position: (index, count) => `Etapa ${index} de ${count}`,
-        previous: 'Voltar',
-        progress: 'Progresso',
-        submit: 'Abrir conta',
-      },
-    }),
-  ],
-  template: `<sl-wizard-opening-demo startStep="company" [startValue]="start" />`,
+  providers: [provideSlotted({ locale: 'pt-BR' })],
+  template: `<sl-wizard-opening-demo
+    startStep="company"
+    [startValue]="start"
+    [messages]="words"
+  />`,
 })
 class ProvidedDemo {
   protected readonly start: WizardValue = { account: FILLED['account']! };
+  protected readonly words: PartialMessages<WizardMessages> = {
+    next: 'Continuar',
+    progress: 'Abertura de conta',
+    submit: 'Abrir conta',
+  };
 }
 
 /* ── Template helpers ───────────────────────────────────────────────────── */
@@ -835,7 +833,7 @@ export const Labels: Story = {
   render: () =>
     one(
       'Abertura de conta, em português',
-      'provideWizardDefaults says Etapa 2 de 4, Voltar, Continuar and Abrir conta once.',
+      'The language in force says Etapa 2 de 4, Voltar and Cancelar; the wizard’s messages say Continuar and Abrir conta.',
       room('<sl-wizard-provided-demo />'),
     ),
 };

@@ -1,6 +1,5 @@
 export { DateField } from './date-field';
 export {
-  DATE_FIELD_CLEAR_LABEL,
   DATE_FIELD_YEAR_PIVOT,
   DateFieldDefaultsProvider,
   useDateFieldDefaults,

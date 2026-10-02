@@ -82,7 +82,15 @@
     --_line-xs: round(nearest, calc(1em * var(--slotted-line-height-xs, 1.4)), 1px);
     --_line-sm: round(nearest, calc(1em * var(--slotted-line-height-sm, 1.45)), 1px);
 
-    background-color: var(--slotted-event-calendar-background, var(--slotted-surface, #ffffff));
+    /**
+     * The ground the calendar sits on. It draws no box of its own — on a
+     * sunken page, a card or a panel it takes that ground — and every fill it
+     * mixes is mixed over this one value, so a consumer who names the ground
+     * with `--slotted-event-calendar-background` moves the fills with it.
+     */
+    --_base: var(--slotted-event-calendar-background, var(--slotted-surface, #ffffff));
+
+    background-color: var(--slotted-event-calendar-background, transparent);
     box-sizing: border-box;
     color: var(--slotted-text, #0f172a);
     display: flex;
@@ -743,8 +751,8 @@
     [data-part='day-events']
     > [data-part='event']:not([data-bar])[data-open] {
     background-color: light-dark(
-      color-mix(in oklab, var(--_hue) var(--_tint), var(--slotted-surface, #ffffff)),
-      color-mix(in oklab, var(--_hue) var(--_tint-dark), var(--slotted-surface, #ffffff))
+      color-mix(in oklab, var(--_hue) var(--_tint), var(--_base)),
+      color-mix(in oklab, var(--_hue) var(--_tint-dark), var(--_base))
     );
   }
 
@@ -758,15 +766,15 @@
   [data-ui='event-calendar'] [data-part='event'][data-bar],
   [data-ui='event-calendar'] [data-part='column'] > [data-part='event'] {
     --_ground: light-dark(
-      color-mix(in oklab, var(--_hue) var(--_tint), var(--slotted-surface, #ffffff)),
-      color-mix(in oklab, var(--_hue) var(--_tint-dark), var(--slotted-surface, #ffffff))
+      color-mix(in oklab, var(--_hue) var(--_tint), var(--_base)),
+      color-mix(in oklab, var(--_hue) var(--_tint-dark), var(--_base))
     );
     --_ink: color-mix(in oklab, var(--_hue) var(--_ink-mix), var(--slotted-text, #0f172a));
 
     background-color: var(--_ground);
     border-color: light-dark(
-      color-mix(in oklab, var(--_hue) var(--_edge), var(--slotted-surface, #ffffff)),
-      color-mix(in oklab, var(--_hue) var(--_edge-dark), var(--slotted-surface, #ffffff))
+      color-mix(in oklab, var(--_hue) var(--_edge), var(--_base)),
+      color-mix(in oklab, var(--_hue) var(--_edge-dark), var(--_base))
     );
     color: var(--_ink);
   }
@@ -792,13 +800,13 @@
     [data-part='column']
     > [data-part='event']:hover:not([data-disabled], [data-open], [data-dragging], [data-context]) {
     --_ground: light-dark(
-      color-mix(in oklab, var(--_hue) var(--_tint-hover), var(--slotted-surface, #ffffff)),
-      color-mix(in oklab, var(--_hue) var(--_tint-hover-dark), var(--slotted-surface, #ffffff))
+      color-mix(in oklab, var(--_hue) var(--_tint-hover), var(--_base)),
+      color-mix(in oklab, var(--_hue) var(--_tint-hover-dark), var(--_base))
     );
 
     border-color: light-dark(
-      color-mix(in oklab, var(--_hue) var(--_edge-hover), var(--slotted-surface, #ffffff)),
-      color-mix(in oklab, var(--_hue) var(--_edge-hover-dark), var(--slotted-surface, #ffffff))
+      color-mix(in oklab, var(--_hue) var(--_edge-hover), var(--_base)),
+      color-mix(in oklab, var(--_hue) var(--_edge-hover-dark), var(--_base))
     );
   }
 
@@ -818,8 +826,8 @@
       [data-context]
     ) {
     --_ground: light-dark(
-      color-mix(in oklab, var(--_hue) var(--_tint-active), var(--slotted-surface, #ffffff)),
-      color-mix(in oklab, var(--_hue) var(--_tint-active-dark), var(--slotted-surface, #ffffff))
+      color-mix(in oklab, var(--_hue) var(--_tint-active), var(--_base)),
+      color-mix(in oklab, var(--_hue) var(--_tint-active-dark), var(--_base))
     );
 
     transition-duration: var(--slotted-duration-instant);
@@ -855,8 +863,8 @@
     [data-part='column']
     > [data-part='event'][data-dragging][data-drop-invalid] {
     --_ground: light-dark(
-      color-mix(in oklab, var(--_hue) var(--_tint), var(--slotted-surface, #ffffff)),
-      color-mix(in oklab, var(--_hue) var(--_tint-dark), var(--slotted-surface, #ffffff))
+      color-mix(in oklab, var(--_hue) var(--_tint), var(--_base)),
+      color-mix(in oklab, var(--_hue) var(--_tint-dark), var(--_base))
     );
     --_ink: color-mix(in oklab, var(--_hue) var(--_ink-mix), var(--slotted-text, #0f172a));
 
@@ -1531,35 +1539,19 @@
   [data-ui='event-calendar'] [data-part='column'] > [data-part='more'] {
     align-items: start;
     container: slotted-event-calendar-event / inline-size;
-    background-color: color-mix(
-      in oklab,
-      var(--slotted-text-muted, #5b6b7f) 9%,
-      var(--slotted-surface, #ffffff)
-    );
-    border-color: color-mix(
-      in oklab,
-      var(--slotted-text-muted, #5b6b7f) 24%,
-      var(--slotted-surface, #ffffff)
-    );
+    background-color: color-mix(in oklab, var(--slotted-text-muted, #5b6b7f) 9%, var(--_base));
+    border-color: color-mix(in oklab, var(--slotted-text-muted, #5b6b7f) 24%, var(--_base));
     padding-block: var(--slotted-space-1, 0.125rem);
     z-index: 1;
   }
 
   [data-ui='event-calendar'] [data-part='column'] > [data-part='more']:hover:not([data-disabled]),
   [data-ui='event-calendar'] [data-part='column'] > [data-part='more'][aria-expanded='true'] {
-    background-color: color-mix(
-      in oklab,
-      var(--slotted-text-muted, #5b6b7f) 15%,
-      var(--slotted-surface, #ffffff)
-    );
+    background-color: color-mix(in oklab, var(--slotted-text-muted, #5b6b7f) 15%, var(--_base));
   }
 
   [data-ui='event-calendar'] [data-part='column'] > [data-part='more']:active:not([data-disabled]) {
-    background-color: color-mix(
-      in oklab,
-      var(--slotted-text-muted, #5b6b7f) 21%,
-      var(--slotted-surface, #ffffff)
-    );
+    background-color: color-mix(in oklab, var(--slotted-text-muted, #5b6b7f) 21%, var(--_base));
   }
 
   /**
@@ -1571,7 +1563,7 @@
    */
   [data-ui='event-calendar'] [data-part='column'] > [data-part='more'][data-overlay] {
     align-items: center;
-    background-color: var(--slotted-surface, #ffffff);
+    background-color: var(--_base);
     block-size: auto;
     border-radius: var(--slotted-radius-full, 9999px);
     box-shadow: var(--slotted-shadow-sm, none);
@@ -1800,8 +1792,8 @@
   [data-ui='event-calendar'] [data-part='list-events'] [data-part='event'][data-open],
   [data-ui='event-calendar'] [data-part='list-events'] [data-part='event'][data-context] {
     background-color: light-dark(
-      color-mix(in oklab, var(--_hue) var(--_tint), var(--slotted-surface, #ffffff)),
-      color-mix(in oklab, var(--_hue) var(--_tint-dark), var(--slotted-surface, #ffffff))
+      color-mix(in oklab, var(--_hue) var(--_tint), var(--_base)),
+      color-mix(in oklab, var(--_hue) var(--_tint-dark), var(--_base))
     );
   }
 
@@ -1996,8 +1988,8 @@
      */
     [data-ui='event-calendar'] [data-part='column'] > [data-part='event'] {
       background-color: light-dark(
-        color-mix(in oklab, var(--_hue) var(--_tint-active), var(--slotted-surface, #ffffff)),
-        color-mix(in oklab, var(--_hue) var(--_tint-active-dark), var(--slotted-surface, #ffffff))
+        color-mix(in oklab, var(--_hue) var(--_tint-active), var(--_base)),
+        color-mix(in oklab, var(--_hue) var(--_tint-active-dark), var(--_base))
       );
       border-color: var(--_hue);
       padding: 0;

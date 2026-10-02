@@ -1,3 +1,4 @@
+import type { PartialMessages, SwitchMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode } from 'react';
 
@@ -32,7 +33,6 @@ export type SwitchCheckedReason = Extract<
 export interface SwitchDefaults {
   indicator: SwitchIndicator;
   labelPlacement: SwitchLabelPlacement;
-  loadingLabel: string;
   size: SwitchSize;
 }
 
@@ -111,8 +111,11 @@ export interface SwitchProps extends Omit<
    * change, and the pending label is announced politely after two seconds.
    */
   loading?: boolean | undefined;
-  /** What a reader hears while the switch is pending. Defaults to the provider's. */
-  loadingLabel?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key:
+   * `loading` is what a reader hears while the switch is pending.
+   */
+  messages?: PartialMessages<SwitchMessages> | undefined;
   /** Called before the switch moves, with the request that carries the reason. */
   onCheckedChange?: ((checked: boolean, request: ChangeRequest<boolean>) => void) | undefined;
   /**

@@ -101,15 +101,15 @@ test("draws one panel, the current end's, behind two tabs", () => {
 test('says what is missing, and gives the sheet a way out', () => {
   assert.match(contract.hint.says, /missing/);
   assert.match(contract.hint.says, /invalid/);
-  assert.match(contract.hint.labels, /\{end\}/);
+  assert.match(contract.hint.messages, /\{end\}/);
   assert.match(contract.hint.wiring, /aria-describedby/);
   assert.equal(contract.done.always, true);
   assert.match(contract.done.effect, /whole work/);
   assert.match(contract.responsive.coarsePointer, /target-comfortable/);
   assert.match(contract.responsive.sheetList, /100dvh/);
   assert.ok(contract.keyboard.some((row) => row.from === 'a tab' && /automatic/.test(row.effect)));
-  assert.ok(contract.provides.timeRangePickerDefaults.includes('doneLabel'));
-  assert.ok(contract.provides.timeRangePickerDefaults.includes('hintLabels'));
+  assert.ok(contract.messages.includes('done'));
+  assert.ok(contract.messages.includes('chooseTime'));
 });
 
 test('takes every overlay behaviour from core, as time-picker does', () => {
@@ -276,25 +276,15 @@ test('opens on the field of the current end, or on its list from the arrow', () 
 
 test('defaults are settable once, in both bindings', () => {
   for (const name of [
-    'changeLabel',
-    'chooseLabel',
-    'clearLabel',
     'closeOnSelect',
-    'emptyLabel',
-    'endLabel',
     'granularity',
     'hourCycle',
     'lengthLabel',
-    'limitLabel',
-    'locale',
     'maxOptions',
-    'nowLabel',
     'placement',
     'size',
-    'startLabel',
     'step',
     'timeZone',
-    'truncatedLabel',
     'unavailableOptions',
     'variant',
   ]) {

@@ -25,7 +25,7 @@ export const REACT_EVENT_CALENDAR_TOKENS = eventCalendarTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { EventCalendar, EventCalendarDefaultsProvider } from '@slotted/react';\nimport type { CalendarEvent } from '@slotted/react';\nimport { wallClockIn } from '@slotted/core/date';",
+    "import { EventCalendar, EventCalendarDefaultsProvider, SlottedProvider } from '@slotted/react';\nimport type { CalendarEvent } from '@slotted/react';\nimport { wallClockIn } from '@slotted/core/date';",
 };
 
 /** Shared by both bindings' pages: the parts are the contract's, not a binding's. */
@@ -731,18 +731,16 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'locale',
     title: 'Locale, clock and direction',
-    note: 'Portuguese starts the week on Sunday and writes a 24-hour clock; Hebrew mirrors the grid, the chevrons and the bars, and an English title on a Hebrew page keeps its own direction.',
+    note: 'Portuguese starts the week on Sunday, writes a 24-hour clock and takes every word from the catalog of the language in force; Hebrew mirrors the grid, the chevrons and the bars, and an English title on a Hebrew page keeps its own direction.',
     snippet: defineSnippet({
       id: 'event-calendar-react-locale',
       language: 'tsx',
       label: 'Every word replaceable',
-      source: `<EventCalendarDefaultsProvider
-  labels={{ today: 'Hoje', allDay: 'Dia inteiro' }}
-  locale="pt-BR"
-  timeZone="America/Sao_Paulo"
->
-  <EventCalendar events={events} />
-</EventCalendarDefaultsProvider>;`,
+      source: `<SlottedProvider locale="pt-BR">
+  <EventCalendarDefaultsProvider timeZone="America/Sao_Paulo">
+    <EventCalendar events={events} messages={{ calendars: 'Agendas' }} />
+  </EventCalendarDefaultsProvider>
+</SlottedProvider>;`,
     }),
   },
   {
@@ -1054,9 +1052,9 @@ export const REACT_EVENT_CALENDAR_DOCS = {
       [
         'locale',
         'string',
-        'runtime',
-        'EventCalendar, EventCalendarDefaultsProvider',
-        'BCP 47; decides the first day and the clock',
+        'SlottedProvider',
+        'EventCalendar',
+        'BCP 47; decides the first day and the clock. Unset, the language in force decides',
       ],
       [
         'timeZone',
@@ -1080,11 +1078,11 @@ export const REACT_EVENT_CALENDAR_DOCS = {
         'The clock',
       ],
       [
-        'labels',
-        'Partial<EventCalendarLabels>',
-        'English',
-        'EventCalendar, EventCalendarDefaultsProvider',
-        'Every word, merged over the provider’s',
+        'messages',
+        'Partial<EventCalendarMessages>',
+        '—',
+        'EventCalendar',
+        'Words laid over the language in force, key by key; a group (previous, next, view, empty) is laid over entry by entry',
       ],
       [
         'render',

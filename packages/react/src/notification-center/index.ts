@@ -1,6 +1,5 @@
 export { NotificationCenter } from './notification-center';
 export {
-  DEFAULT_NOTIFICATION_CENTER_MESSAGES,
   NotificationCenterDefaultsProvider,
   useNotificationCenterDefaults,
 } from './notification-center-defaults';
@@ -13,7 +12,6 @@ export type {
   NotificationCenterHandle,
   NotificationCenterLevel,
   NotificationCenterLoadReason,
-  NotificationCenterMessages,
   NotificationCenterPressReason,
   NotificationCenterProps,
   NotificationCenterReadChange,

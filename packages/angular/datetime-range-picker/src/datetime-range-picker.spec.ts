@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { plainDate, plainTime } from '@slotted/core/date';
 import type { PlainDate, PlainDateTime, PlainTime } from '@slotted/core/date';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -159,7 +161,7 @@ describe('what it is made of', () => {
 
   it('names the list by the current tab, says what to choose, and submits two named values', () => {
     const fixture = renderTemplate(
-      `<div ${BASE} defaultOpen [defaultValue]="run" startName="inicio" endName="fim" startLabel="Retirada" endLabel="Devolução"></div>`,
+      `<div ${BASE} defaultOpen [defaultValue]="run" startName="inicio" endName="fim" [messages]="{ start: 'Retirada', end: 'Devolução' }"></div>`,
     );
     expect(
       document.getElementById(list(fixture, 'start').getAttribute('aria-labelledby') ?? ''),
@@ -167,7 +169,7 @@ describe('what it is made of', () => {
     expect(text(fixture, 'hint')).toBe('');
 
     const empty = renderTemplate(
-      `<div ${BASE} defaultOpen startLabel="Retirada" endLabel="Devolução"></div>`,
+      `<div ${BASE} defaultOpen [messages]="{ start: 'Retirada', end: 'Devolução' }"></div>`,
     );
     expect(text(empty, 'hint')).toBe('Retirada: choose a day');
     click(empty, dayFor(empty, 12));
@@ -300,9 +302,33 @@ describe('forms and ownership', () => {
 
   it('reads the defaults an application provided once', () => {
     const fixture = renderTemplate(`<div ${BASE} defaultOpen></div>`, [
-      provideDateTimeRangePickerDefaults({ months: 2, nowLabel: 'Já' }),
+      provideDateTimeRangePickerDefaults({ months: 2 }),
     ]);
     expect(fixture.nativeElement.querySelectorAll('[data-part="grid"]')).toHaveLength(2);
-    expect(text(fixture, 'now')).toBe('Já');
+  });
+
+  it('changes its words and its date and time format together with the language in force', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(
+      `<div slDateTimeRangePicker [referenceDateTime]="noon" [defaultValue]="run"></div>`,
+      [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    );
+    const name = () => part(fixture, 'trigger')?.getAttribute('aria-label') ?? '';
+
+    expect(name()).toMatch(/^Alterar período, /);
+    expect(text(fixture, 'summary')).toMatch(/12 de set.*14:00/);
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(name()).toMatch(/^Change range, /);
+    expect(text(fixture, 'summary')).toMatch(/Sep 12.*2:00\sPM/);
+  });
+
+  it('names the limit in the language in force', () => {
+    const fixture = renderTemplate(
+      `<div slDateTimeRangePicker defaultOpen [referenceDateTime]="noon" [minLength]="86400" [maxLength]="604800"></div>`,
+      [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
+    );
+    expect(text(fixture, 'limit')).toBe('de 1 dia a 7 dias');
   });
 });

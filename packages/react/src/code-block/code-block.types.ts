@@ -1,4 +1,5 @@
 import type { CodeHighlighter, CodeLine, CodeMarks, CodeToken } from '@slotted/core/code';
+import type { CodeBlockMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode, RefObject } from 'react';
 
@@ -24,20 +25,6 @@ export interface CodeBlockCopyRequest {
   readonly source?: unknown;
 }
 
-export interface CodeBlockLabels {
-  /** The scroll region's name when the block has no title. */
-  region: string;
-  copy: string;
-  copied: string;
-  copyFailed: string;
-  wrap: string;
-  unwrap: string;
-  /** `{count}` */
-  reveal: string;
-  collapse: string;
-  loading: string;
-}
-
 export interface CodeBlockLineProps {
   /** One-based. */
   number: number;
@@ -58,7 +45,6 @@ export interface CodeBlockDefaults {
   highlight?: CodeHighlighter | undefined;
   lineNumbers?: boolean | undefined;
   copy?: boolean | undefined;
-  labels?: Partial<CodeBlockLabels> | undefined;
 }
 
 export interface CodeBlockDefaultsProviderProps extends CodeBlockDefaults {
@@ -108,7 +94,12 @@ export interface CodeBlockProps extends Omit<
   onCopy?: ((request: CodeBlockCopyRequest) => void) | undefined;
 
   loading?: boolean | undefined;
-  labels?: Partial<CodeBlockLabels> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * scroll region's name when the block has no title (`region`), the controls,
+   * and the announcements.
+   */
+  messages?: PartialMessages<CodeBlockMessages> | undefined;
   /** Tab width in characters, for the wrapped continuation's indent. */
   tabSize?: number | undefined;
 

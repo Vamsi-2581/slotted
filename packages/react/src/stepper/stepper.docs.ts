@@ -230,7 +230,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'What each header announces',
       source:
-        '// "Cart, Step 1 of 4, completed" — the position and the status in words,\n// because the number in the circle is hidden from assistive technology.\n<Stepper label="Checkout" defaultStep={1}>\n  <StepperList>{steps}</StepperList>\n</Stepper>;',
+        '// "Cart, Step 1 of 4, completed" — the position and the status in words,\n// because the number in the circle is hidden from assistive technology.\n<Stepper defaultStep={1} messages={{ label: \'Checkout\' }}>\n  <StepperList>{steps}</StepperList>\n</Stepper>;',
     }),
   },
 ];
@@ -250,7 +250,6 @@ export const REACT_STEPPER_DOCS = {
     scenes,
     events,
     api: apiRows([
-      ['label', 'string', 'Progress', 'Stepper', 'The name of the sequence, announced on the list'],
       [
         'step',
         'number',
@@ -301,11 +300,11 @@ export const REACT_STEPPER_DOCS = {
         'Whether reaching a later step means the earlier ones are finished. Off, because walking past a step is not completing it.',
       ],
       [
-        'labels',
-        'Partial<StepperLabels>',
+        'messages',
+        'PartialMessages<StepperMessages>',
         '—',
         'Stepper',
-        'The six words a step announces. Merged with the defaults, so translating one keeps the other five.',
+        'Words laid over the language in force, key by key: the name of the sequence announced on the list (label), the position, and the five statuses a step announces',
       ],
       [
         'complete',
@@ -363,10 +362,10 @@ export const REACT_STEPPER_DOCS = {
       ],
       [
         'StepperDefaultsProvider',
-        'label | labelPlacement | labels | linear | navigation | orientation',
+        'labelPlacement | linear | navigation | orientation',
         '—',
         'Application',
-        'Sets those six once for everything below it; a prop on the stepper still wins',
+        'Sets those four once for everything below it; a prop on the stepper still wins',
       ],
     ]),
     accessibility: [

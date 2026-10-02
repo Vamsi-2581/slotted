@@ -1,7 +1,9 @@
 import '@slotted/styles/field/field.css';
 
+import { fieldMessages } from '@slotted/core/i18n';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 
+import { useMessages } from '../i18n';
 import {
   deriveFieldIds,
   FIELD_DESCRIBED_ORDER,
@@ -53,8 +55,8 @@ export function Field({
   id,
   invalid,
   labelPlacement,
+  messages: words,
   necessity,
-  necessityWords,
   readOnly,
   ref,
   render,
@@ -63,6 +65,7 @@ export function Field({
   ...nativeProps
 }: FieldProps) {
   const defaults = useFieldDefaults();
+  const t = useMessages(fieldMessages, words);
   const generatedId = useId();
   const ids = useMemo(
     () => deriveFieldIds(id ?? `slotted-field-${generatedId}`),
@@ -121,14 +124,12 @@ export function Field({
     disabled: resolvedDisabled,
     hasCounter,
     hasHeader,
-    helpLabel: defaults.helpLabel,
     ids,
     invalid,
     /* A message is quieter than the control it is about, so it starts one step
        below and only the largest field's message reaches the second step. */
     messageSize: resolvedSize === 'lg' ? 'md' : 'sm',
     necessity: resolvedNecessity,
-    necessityWords: { ...defaults.necessityWords, ...necessityWords },
     readOnly: resolvedReadOnly,
     registerControl,
     registerCounter,
@@ -137,6 +138,7 @@ export function Field({
     required,
     setCount,
     size: resolvedSize,
+    t,
   };
 
   /**

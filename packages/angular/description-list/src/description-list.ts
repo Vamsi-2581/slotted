@@ -18,7 +18,13 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  descriptionListMessages,
+  type DescriptionListMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -27,7 +33,6 @@ import {
   COPIED_FOR,
   copyToClipboard,
   DESCRIPTION_LIST_DEFAULT_COLUMNS,
-  DESCRIPTION_LIST_DEFAULT_LABELS,
   DESCRIPTION_LIST_DEFAULT_LAYOUT,
   DESCRIPTION_LIST_DEFAULT_VARIANT,
   DESCRIPTION_LIST_EMPTY_VALUE_MARK,
@@ -38,7 +43,6 @@ import {
   spanWithin,
   type DescriptionListColumns,
   type DescriptionListCopyRequest,
-  type DescriptionListLabels,
   type DescriptionListLayout,
   type DescriptionListVariant,
 } from './description-list.constants';
@@ -84,7 +88,12 @@ export class SlDescriptionList {
   readonly variant = input<DescriptionListVariant | undefined>(undefined);
   /** The maximum width of the term column, as a CSS length. */
   readonly termWidth = input<string | undefined>(undefined);
-  readonly labels = input<DescriptionListLabels | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * copy control and its announcements, the reveal control, and the sentence
+   * read in place of a missing value.
+   */
+  readonly messages = input<PartialMessages<DescriptionListMessages> | undefined>(undefined);
 
   private readonly defaults = injectDescriptionListDefaults();
 
@@ -99,26 +108,8 @@ export class SlDescriptionList {
   );
   readonly termWidthValue = computed(() => this.termWidth() ?? this.defaults.termWidth);
 
-  /**
-   * Every label, after the list's own input and the provider have had their
-   * say. An absent value defers rather than overwriting: an application that
-   * translated four of the five keeps the fifth in English rather than losing
-   * it.
-   */
-  readonly labelsValue = computed<Required<DescriptionListLabels>>(() => {
-    const provided = this.defaults.labels ?? {};
-    const own = this.labels() ?? {};
-    return {
-      collapse: own.collapse ?? provided.collapse ?? DESCRIPTION_LIST_DEFAULT_LABELS.collapse,
-      copied: own.copied ?? provided.copied ?? DESCRIPTION_LIST_DEFAULT_LABELS.copied,
-      copy: own.copy ?? provided.copy ?? DESCRIPTION_LIST_DEFAULT_LABELS.copy,
-      copyBlocked:
-        own.copyBlocked ?? provided.copyBlocked ?? DESCRIPTION_LIST_DEFAULT_LABELS.copyBlocked,
-      placeholder:
-        own.placeholder ?? provided.placeholder ?? DESCRIPTION_LIST_DEFAULT_LABELS.placeholder,
-      reveal: own.reveal ?? provided.reveal ?? DESCRIPTION_LIST_DEFAULT_LABELS.reveal,
-    };
-  });
+  /** The family's words in the language in force, with this list's `messages` laid over them. */
+  readonly t = injectMessages(descriptionListMessages, this.messages);
 }
 
 /**
@@ -213,7 +204,7 @@ export class SlDescriptionListHint {}
     </span>
     @if (copy()) {
       <button
-        [attr.aria-label]="list.labelsValue().copy"
+        [attr.aria-label]="list.t('copy')"
         [attr.data-complete]="copied() ? '' : null"
         data-part="copy"
         type="button"
@@ -232,7 +223,7 @@ export class SlDescriptionListHint {}
         (click)="onToggle($event)"
         (keydown)="onKeydown($event)"
       >
-        {{ revealed() ? list.labelsValue().collapse : list.labelsValue().reveal }}
+        {{ revealed() ? list.t('collapse') : list.t('reveal') }}
         <span slIcon><svg slGlyph name="chevron-down"></svg></span>
       </button>
     }
@@ -308,9 +299,7 @@ export class SlDescriptionListDescription {
   readonly copied = computed(() => this.done());
   /** Whether the value wants more room than the clamp gives it. */
   readonly overflows = computed(() => this.overflowing());
-  readonly placeholderText = computed(
-    () => this.placeholder() ?? this.list.labelsValue().placeholder,
-  );
+  readonly placeholderText = computed(() => this.placeholder() ?? this.list.t('placeholder'));
 
   constructor() {
     this.own.set(this.defaultRevealed());
@@ -390,7 +379,7 @@ export class SlDescriptionListDescription {
       this.timer = setTimeout(() => this.done.set(false), COPIED_FOR);
       /* Through the shared announcer rather than a region this family owns, so
          two copies in one update are both heard. */
-      getLiveAnnouncer().announce(this.list.labelsValue().copied);
+      getLiveAnnouncer().announce(this.list.t('copied'));
     } else {
       /**
        * A refused write used to leave the control at rest and the reader with
@@ -401,7 +390,7 @@ export class SlDescriptionListDescription {
        * reader can see and copy with the keyboard, and says so.
        */
       selected = selectValue(this.value()?.nativeElement);
-      getLiveAnnouncer().announce(this.list.labelsValue().copyBlocked);
+      getLiveAnnouncer().announce(this.list.t('copyBlocked'));
     }
 
     this.copied$.emit({ copied, reason, selected, source: event, value: text });

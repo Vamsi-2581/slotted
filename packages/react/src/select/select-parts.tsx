@@ -333,7 +333,7 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
           select.toggle(value, 'select', event.nativeEvent);
           node?.focus({ preventScroll: true });
         }}
-        removeLabel={select.removeLabel}
+        removeLabel={(label) => select.t('remove', { label })}
         values={select.selection}
       />
     ) : null;
@@ -382,7 +382,7 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
         {children}
       </button>
       {showClear ? (
-        <button aria-label={select.clearLabel} data-part="clear" onClick={clear} type="button">
+        <button aria-label={select.t('clear')} data-part="clear" onClick={clear} type="button">
           <Icon>
             <Glyph name="x" />
           </Icon>
@@ -494,9 +494,7 @@ export function SelectValue({ children, placeholder, ...nativeProps }: SelectVal
      * the same either way.
      */
     return (
-      <span data-part="summary">
-        {select.summaryLabel.replace('{count}', String(select.selection.length))}
-      </span>
+      <span data-part="summary">{select.t('summary', { count: select.selection.length })}</span>
     );
   })();
 
@@ -622,7 +620,7 @@ export function SelectSearch({ icon, ref, render, ...nativeProps }: SelectSearch
         aria-autocomplete="list"
         aria-controls={select.listId}
         aria-expanded={true}
-        aria-label={nativeProps['aria-label'] ?? select.searchLabel}
+        aria-label={nativeProps['aria-label'] ?? select.t('search')}
         autoComplete="off"
         data-part="search-input"
         id={nativeProps.id ?? select.searchId}
@@ -630,7 +628,7 @@ export function SelectSearch({ icon, ref, render, ...nativeProps }: SelectSearch
           select.setQuery(event.target.value, 'keyboard', event.nativeEvent),
         )}
         onKeyDown={compose(nativeProps.onKeyDown, onKeyDown)}
-        placeholder={nativeProps.placeholder ?? select.searchPlaceholder}
+        placeholder={nativeProps.placeholder ?? select.t('searchPlaceholder')}
         ref={(element: HTMLInputElement | null) => {
           select.setSearchNode(element);
           attach(element, ref);
@@ -912,9 +910,9 @@ export function SelectContent({
    */
   const message = (() => {
     if (statusMessage !== undefined) return statusMessage;
-    if (select.loading) return select.loadingLabel;
+    if (select.loading) return select.t('loading');
     if (!select.search || count === 0) return null;
-    return select.countLabel.replace('{count}', String(count));
+    return select.t('count', { count });
   })();
 
   /*
@@ -977,7 +975,7 @@ export function SelectContent({
         </div>
       ) : null}
       {!select.loading && count === 0 ? (
-        <div data-part="empty">{empty ?? select.emptyLabel}</div>
+        <div data-part="empty">{empty ?? select.t('empty')}</div>
       ) : null}
       {select.search || select.loading ? (
         <div

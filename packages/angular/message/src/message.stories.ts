@@ -297,7 +297,7 @@ export const Versions: Story = {
     template: page(
       scene(
         'Three drafts of one note',
-        'Press the chevrons or focus one and use the arrows: the pager stops at 1 de 3 and 3 de 3, and the words change with it.',
+        'Press the chevrons or focus one and use the arrows: the pager stops at 1 of 3 and 3 of 3, and the words change with it.',
         '<sl-message-versions-demo></sl-message-versions-demo>',
       ),
     ),

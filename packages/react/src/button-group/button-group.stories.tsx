@@ -377,7 +377,7 @@ export const Composition: Story = {
               <Caption>one control waiting, one unavailable</Caption>
               <ButtonGroup aria-label="Review" tone="secondary" variant="outline">
                 <Button>Approve</Button>
-                <Button loading loadingLabel="Reassigning">
+                <Button loading messages={{ loading: 'Reassigning' }}>
                   Reassign
                 </Button>
                 <Button disabled>Reject</Button>

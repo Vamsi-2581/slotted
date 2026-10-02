@@ -25,34 +25,22 @@ export type TagsInputValidator = TagsValidator;
 export type TagsInputCopyOutcome = ClipboardOutcome;
 
 export interface TagsInputDefaults {
-  addedLabel: string;
   addOnPaste: boolean;
   allowDuplicates: boolean;
   clearable: boolean;
-  clearLabel: string;
-  copiedLabel: string;
-  countLabel: string;
-  counterLabel: string;
   /** The characters that commit the typed text, and split a paste. */
   delimiters: readonly string[];
   disabled: boolean;
-  duplicateLabel: string;
   editable: boolean;
-  editHintLabel: string;
   fullWidth: boolean;
-  hintLabel: string;
   invalid: boolean;
-  invalidLabel: string;
   invalidValues: TagsInputInvalidValues;
   /** The most values the list may hold, or `null` for no limit. */
   max: number | null;
   overflow: TagsInputOverflow;
   pendingOnBlur: TagsInputPendingOnBlur;
   readOnly: boolean;
-  removedLabel: string;
-  removeLabel: string;
   reorderable: boolean;
-  reorderLabel: string;
   required: boolean;
   size: TagsInputSize;
   variant: TagsInputVariant;
@@ -65,32 +53,20 @@ export interface TagsInputDefaults {
  * ship two controls that behave differently under the same name.
  */
 export const TAGS_INPUT_FALLBACK: TagsInputDefaults = {
-  addedLabel: '{label} added, {count}',
   addOnPaste: true,
   allowDuplicates: false,
   clearable: true,
-  clearLabel: 'Clear',
-  copiedLabel: '{count} copied',
-  countLabel: '{count} values',
-  counterLabel: '{count} of {max}',
   delimiters: [','],
   disabled: false,
-  duplicateLabel: '{label} is already in the list',
   editable: false,
-  editHintLabel: 'Press Enter to edit a value.',
   fullWidth: true,
-  hintLabel: 'Press Delete to remove a value.',
   invalid: false,
-  invalidLabel: 'Not a valid value',
   invalidValues: 'keep',
   max: null,
   overflow: 'wrap',
   pendingOnBlur: 'commit',
   readOnly: false,
-  removedLabel: '{label} removed, {count}',
-  removeLabel: 'Remove {label}',
   reorderable: false,
-  reorderLabel: '{label}, position {position} of {count}',
   required: false,
   size: 'md',
   variant: 'outline',
@@ -101,7 +77,10 @@ export const TAGS_INPUT_DEFAULTS = new InjectionToken<TagsInputDefaults>('TAGS_I
   factory: () => TAGS_INPUT_FALLBACK,
 });
 
-/** The decisions an application takes once, including the sentences it translates. */
+/**
+ * The decisions an application takes once. Its words come from the language in
+ * force (`provideSlotted`).
+ */
 export function provideTagsInputDefaults(defaults: Partial<TagsInputDefaults>): Provider {
   return { provide: TAGS_INPUT_DEFAULTS, useValue: { ...TAGS_INPUT_FALLBACK, ...defaults } };
 }

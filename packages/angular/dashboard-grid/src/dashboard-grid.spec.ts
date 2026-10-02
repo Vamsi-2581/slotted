@@ -1,6 +1,8 @@
 import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it } from 'vitest';
 
 import { SlDashboardGrid } from './dashboard-grid';
@@ -456,6 +458,24 @@ describe('provideDashboardGridDefaults', () => {
     expect(root().style.getPropertyValue('--_dg-columns-expanded')).toBe('8');
     expect(root().style.getPropertyValue('--_dg-columns-medium')).toBe('4');
     expect(widget('revenue').querySelector('h2[data-part="title"]')).not.toBeNull();
+  });
+});
+
+describe('the language in force', () => {
+  it('speaks it, and follows a change of it in place', async () => {
+    const locale = signal('pt-BR');
+    TestBed.configureTestingModule({
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const fixture = await setup((host) => host.editing.set(true));
+    expect(handle('revenue').getAttribute('aria-label')).toBe('Reorganizar Revenue');
+    expect(part('edit-bar').getAttribute('aria-label')).toBe('Layout');
+    expect(part('done').textContent?.trim()).toBe('Concluído');
+
+    locale.set('en-US');
+    await settle(fixture);
+    expect(handle('revenue').getAttribute('aria-label')).toBe('Rearrange Revenue');
+    expect(part('done').textContent?.trim()).toBe('Done');
   });
 });
 

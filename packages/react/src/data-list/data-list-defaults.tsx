@@ -1,4 +1,4 @@
-import { DEFAULT_DATA_LIST_FIELDS, DEFAULT_DATA_LIST_LABELS } from '@slotted/core/data-list';
+import { DEFAULT_DATA_LIST_FIELDS } from '@slotted/core/data-list';
 import { createContext, useContext } from 'react';
 
 import type { DataListDefaults, DataListDefaultsProviderProps } from './data-list.types';
@@ -11,8 +11,6 @@ const FALLBACK: DataListDefaults = {
   skeletonRows: 5,
   loadingDelay: 200,
   loadingMinDuration: 400,
-  locale: undefined,
-  labels: DEFAULT_DATA_LIST_LABELS,
 };
 
 const DataListDefaultsContext = createContext<DataListDefaults>(FALLBACK);
@@ -24,21 +22,16 @@ export function useDataListDefaults(): DataListDefaults {
 
 /**
  * An application states the family's defaults once. A list that states its
- * own value still wins, and labels merge word by word.
+ * own value still wins. Its words come from the language in force
+ * (`SlottedProvider`).
  */
-export function DataListDefaultsProvider({
-  children,
-  labels,
-  ...rest
-}: DataListDefaultsProviderProps) {
+export function DataListDefaultsProvider({ children, ...rest }: DataListDefaultsProviderProps) {
   const inherited = useDataListDefaults();
   const defined = Object.fromEntries(
     Object.entries(rest).filter(([, value]) => value !== undefined),
   ) as Partial<DataListDefaults>;
   return (
-    <DataListDefaultsContext.Provider
-      value={{ ...inherited, ...defined, labels: { ...inherited.labels, ...labels } }}
-    >
+    <DataListDefaultsContext.Provider value={{ ...inherited, ...defined }}>
       {children}
     </DataListDefaultsContext.Provider>
   );

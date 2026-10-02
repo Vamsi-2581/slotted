@@ -578,7 +578,7 @@ export const Clear: Story = {
            slDateTimeField
            locale="pt-BR"
            clearable
-           clearLabel="Limpar"
+           [messages]="{ clear: 'Limpar' }"
            aria-label="Com valor"
            [defaultValue]="value"
          ></div>`,
@@ -688,7 +688,7 @@ export const Composition: Story = {
       1,
       scene(
         'A instância que um template alcança',
-        'exportAs dá ao template o próprio componente: focus() põe o leitor no primeiro segmento, focusEntry() no primeiro campo ainda por preencher, e clear() esvazia as duas metades com a razão clear. provideDateTimeFieldDefaults declara o locale e o relógio uma vez para tudo o que está por baixo.',
+        'exportAs dá ao template o próprio componente: focus() põe o leitor no primeiro segmento, focusEntry() no primeiro campo ainda por preencher, e clear() esvazia as duas metades com a razão clear. provideDateTimeFieldDefaults declara o relógio uma vez para tudo o que está por baixo, e provideSlotted a língua.',
         `<div
            slDateTimeField
            #inicio="slDateTimeField"

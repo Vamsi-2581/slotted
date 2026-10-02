@@ -1,9 +1,5 @@
 export { Transfer } from './transfer';
-export {
-  DEFAULT_TRANSFER_LABELS,
-  TransferDefaultsProvider,
-  useTransferDefaults,
-} from './transfer-defaults';
+export { TransferDefaultsProvider, useTransferDefaults } from './transfer-defaults';
 export type {
   TransferDefaults,
   TransferDefaultsProviderProps,
@@ -11,7 +7,6 @@ export type {
   TransferHandle,
   TransferItem,
   TransferItemContext,
-  TransferLabels,
   TransferLayout,
   TransferMoveReason,
   TransferMoveRequest,

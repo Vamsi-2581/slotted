@@ -1,9 +1,11 @@
 import { emptyQuery, type GridColumn, type GridQuery } from '@slotted/core/grid';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/data-list/contract.json';
+import { SlottedProvider } from '../i18n';
 import { DataList } from './data-list';
 import { DataListDefaultsProvider } from './data-list-defaults';
 import type { DataListHandle, DataListProps } from './data-list.types';
@@ -399,13 +401,10 @@ describe('DataList', () => {
     expect(ref.current?.focusKey('nope')).toBe(false);
   });
 
-  it('takes labels and defaults from the provider, and plurals from a function', () => {
+  it('takes defaults from the provider, and plurals from its own messages', () => {
     render(
-      <DataListDefaultsProvider
-        labels={{ count: ({ count }) => (count === 1 ? 'uma conta' : `${count} contas`) }}
-        variant="framed"
-      >
-        <Harness />
+      <DataListDefaultsProvider variant="framed">
+        <Harness messages={{ count: '{count, plural, one {# conta} other {# contas}}' }} />
       </DataListDefaultsProvider>,
     );
     expect(screen.getByText('3 contas')).toBeInTheDocument();
@@ -413,6 +412,19 @@ describe('DataList', () => {
       'data-variant',
       'framed',
     );
+  });
+
+  it('speaks the language in force', () => {
+    render(
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+        <Harness selectionMode="multiple" />
+      </SlottedProvider>,
+    );
+    expect(screen.getByText('3 itens')).toBeInTheDocument();
+    expect(
+      screen.getByRole('checkbox', { name: 'Selecionar todos os 3 itens' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Selecionar Acme Logistics' })).toBeInTheDocument();
   });
 
   it('passes native props and composes the consumer’s blur handler', () => {

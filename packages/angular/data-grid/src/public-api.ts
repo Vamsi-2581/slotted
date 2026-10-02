@@ -27,12 +27,9 @@ export {
 } from './data-grid-templates';
 export {
   DATA_GRID_DEFAULTS,
-  DATA_GRID_LABELS,
   SlDataGridIdFactory,
-  fillLabel,
   injectDataGridDefaults,
   provideDataGridDefaults,
-  resolveDataGridLabels,
 } from './data-grid-defaults';
 export type {
   DataGridActivateEvent,
@@ -51,7 +48,6 @@ export type {
   DataGridFilterOperandContext,
   DataGridGroupContext,
   DataGridHeaderContext,
-  DataGridLabels,
   DataGridMode,
   DataGridPinnedRows,
   DataGridQueryRequest,

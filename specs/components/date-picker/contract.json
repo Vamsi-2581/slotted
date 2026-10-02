@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "date-picker",
   "ui": "date-picker",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Date field with a calendar popover."
+  },
   "controlPart": "control",
   "rootRole": null,
   "contentRole": "dialog",
@@ -25,8 +29,8 @@
     "aria-label": "the trigger, carrying the selected date"
   },
   "triggerName": {
-    "empty": "chooseLabel",
-    "chosen": "changeLabel, with the whole date in words",
+    "empty": "the choose message",
+    "chosen": "the change message, with the whole date in words in its date slot",
     "why": "Focus returns to the trigger when the popup closes, so the name is where the reader is told what was chosen. The APG's own example names this as an accessibility feature."
   },
   "keyboard": [
@@ -63,23 +67,14 @@
     "variant": ["prop", "defaults", "outline"],
     "placement": ["prop", "defaults", "bottom-start"],
     "closeOnSelect": ["prop", "defaults", "auto"],
-    "locale": ["prop", "defaults", "runtime"],
+    "locale": ["prop", "slotted", "en-US"],
     "timeZone": ["prop", "defaults", "runtime"],
     "calendar": ["prop", "defaults", "gregory"]
   },
   "provides": {
-    "datePickerDefaults": [
-      "calendar",
-      "changeLabel",
-      "chooseLabel",
-      "closeOnSelect",
-      "locale",
-      "placement",
-      "size",
-      "timeZone",
-      "variant"
-    ]
+    "datePickerDefaults": ["calendar", "closeOnSelect", "placement", "size", "timeZone", "variant"]
   },
+  "messages": ["change", "choose"],
   "imperative": ["focus", "open", "close"],
   "stateAttributes": {
     "disabled": "data-disabled",

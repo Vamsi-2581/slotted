@@ -1,7 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { serializeFilterGroup } from '@slotted/core/filter';
 import type { FilterGroup, FilterRule } from '@slotted/core/filter';
+import type { FilterBarMessages, PartialMessages } from '@slotted/core/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/filter-bar/contract.json';
@@ -9,7 +12,6 @@ import { SlFilterBar, SlFilterBarEnd, SlFilterBarOperand } from './filter-bar';
 import {
   provideFilterBarDefaults,
   type FilterBarField,
-  type FilterBarLabels,
   type FilterBarPreset,
 } from './filter-bar.constants';
 
@@ -60,7 +62,6 @@ const TREE: FilterGroup = {
   template: `<div
     slFilterBar
     #bar="slFilterBar"
-    locale="en-US"
     [fields]="fields()"
     [(value)]="value"
     [(query)]="query"
@@ -76,7 +77,7 @@ const TREE: FilterGroup = {
     [total]="total()"
     [loading]="loading()"
     [readOnly]="readOnly()"
-    [labels]="labels()"
+    [messages]="messages()"
     (valueChangeRequest)="onValue($event)"
     (queryChangeRequest)="onQuery($event)"
     (presetChangeRequest)="onPreset($event)"
@@ -102,7 +103,7 @@ class TestHost {
   readonly total = signal<number | undefined>(3412);
   readonly loading = signal(false);
   readonly readOnly = signal(false);
-  readonly labels = signal<Partial<FilterBarLabels> | undefined>(undefined);
+  readonly messages = signal<PartialMessages<FilterBarMessages> | undefined>(undefined);
   readonly onValue = vi.fn();
   readonly onQuery = vi.fn();
   readonly onPreset = vi.fn();
@@ -702,20 +703,31 @@ describe('SlFilterBar', () => {
   });
 
   it('reads defaults from the token and lets an input win', () => {
-    const { root, part } = setup([
-      provideFilterBarDefaults({
-        apply: 'manual',
-        chipLimit: 1,
-        labels: { add: 'Adicionar filtro' },
-      }),
-    ]);
+    const { root, part } = setup(
+      [provideFilterBarDefaults({ apply: 'manual', chipLimit: 1 })],
+      (host) => host.messages.set({ add: 'New filter' }),
+    );
     expect(root.getAttribute('data-apply')).toBe('manual');
     /* With chips in the bar, add is its glyph alone and keeps the label as its name. */
-    expect(part('add').getAttribute('aria-label')).toBe('Adicionar filtro');
-    expect(part('add').getAttribute('title')).toBe('Adicionar filtro');
+    expect(part('add').getAttribute('aria-label')).toBe('New filter');
+    expect(part('add').getAttribute('title')).toBe('New filter');
     expect(part('add').hasAttribute('data-compact')).toBe(true);
     expect(part('add').getAttribute('data-shape')).toBe('circle');
     expect(part('more')).not.toBeNull();
+  });
+
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const { part, root, settle } = setup([
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+    expect(root.getAttribute('aria-label')).toBe('Filtro');
+    expect(text(part('count'))).toBe('128 de 3.412');
+
+    locale.set('en-US');
+    settle();
+    expect(root.getAttribute('aria-label')).toBe('Filter');
+    expect(text(part('count'))).toBe('128 of 3,412');
   });
 
   it('keeps add’s label while no chip is in the bar', () => {
@@ -741,7 +753,7 @@ describe('SlFilterBar', () => {
 
   it('writes a chip from the same words the sentence uses, a long list as two values and a count', () => {
     const { chip } = setup([], (host) => {
-      host.labels.set({ operators: { anyOf: 'is one of' } });
+      host.messages.set({ operators: { anyOf: 'is one of' } });
       host.value.set({
         join: 'and',
         rules: [

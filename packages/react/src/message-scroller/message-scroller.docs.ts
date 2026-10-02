@@ -41,7 +41,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: true,
     purpose:
-      'The element that scrolls: role region, tabIndex 0, named Mensagens. Hidden, laid out, until the opening position applies.',
+      'The element that scrolls: role region, tabIndex 0, named Messages. Hidden, laid out, until the opening position applies.',
   },
   {
     part: 'content',
@@ -236,7 +236,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'busy',
     title: 'Announcing a reply once',
-    note: 'While busy the log holds its announcements back; the change is said once each way — A responder, then Resposta completa — never word by word.',
+    note: 'While busy the log holds its announcements back; the change is said once each way — Responding, then Response complete — never word by word.',
     snippet: defineSnippet({
       id: 'message-scroller-react-busy',
       language: 'tsx',
@@ -321,6 +321,13 @@ export const REACT_MESSAGE_SCROLLER_DOCS = {
         'A reply is streaming: the log is aria-busy and the change is announced once each way',
       ],
       [
+        'messages',
+        'PartialMessages<MessageScrollerMessages>',
+        '—',
+        'MessageScroller',
+        'Words laid over the language in force, key by key: the region’s name, the jump controls, the unread line, the loader and the two streaming announcements',
+      ],
+      [
         'messageId',
         'string',
         '—',
@@ -373,7 +380,7 @@ export const REACT_MESSAGE_SCROLLER_DOCS = {
     composition: apiRows([
       [
         'MessageScrollerDefaultsProvider',
-        '{ follow, defaultPosition, peek, scrollMargin, locale, messages }',
+        '{ follow, defaultPosition, peek, scrollMargin }',
         '—',
         'a subtree',
         'Sets them once; a scroller still wins',
@@ -401,7 +408,7 @@ export const REACT_MESSAGE_SCROLLER_DOCS = {
       ],
     ]),
     accessibility: [
-      'The viewport is a region named Mensagens with tabIndex 0, so a keyboard reaches it and scrolls it with the arrows, Page Up, Page Down, Home and End the platform already binds.',
+      'The viewport is a region named Messages with tabIndex 0, so a keyboard reaches it and scrolls it with the arrows, Page Up, Page Down, Home and End the platform already binds.',
       'The rows are a WAI-ARIA log with aria-relevant additions: a row that arrives is read, a row that grows is not; busy holds even the arrival back until a reply is whole.',
       'A streaming reply is announced once when it starts and once when it ends through the shared live announcer, never word by word.',
       'The jump control is a real button, inert and out of the tab order while there is nowhere to go, and its name carries the count of rows that arrived out of view.',

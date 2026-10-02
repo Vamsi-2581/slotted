@@ -1,9 +1,11 @@
 import { plainDate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/calendar/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Calendar, CalendarDefaultsProvider } from './index';
 import type { CalendarHandle, CalendarValue, DateRange } from './index';
 
@@ -502,24 +504,48 @@ describe('how much of it is drawn', () => {
 });
 
 describe('what an application sets once', () => {
-  it('takes the locale and the shape from a provider', () => {
+  it('takes the shape from a provider and the locale from the language in force', () => {
     render(
-      <CalendarDefaultsProvider fixedWeeks locale="de-DE">
-        <Calendar defaultFocusedDate={NINTH} />
-      </CalendarDefaultsProvider>,
+      <SlottedProvider locale="de-DE">
+        <CalendarDefaultsProvider fixedWeeks>
+          <Calendar defaultFocusedDate={NINTH} />
+        </CalendarDefaultsProvider>
+      </SlottedProvider>,
     );
 
     expect(screen.getByRole('button', { name: /September 2026/ })).toBeInTheDocument();
     expect(document.querySelectorAll('[data-part="week"]')).toHaveLength(6);
   });
 
-  it('lets one calendar outrank the provider', () => {
+  it('lets one calendar outrank the language in force', () => {
     render(
-      <CalendarDefaultsProvider locale="de-DE">
+      <SlottedProvider locale="de-DE">
         <Calendar defaultFocusedDate={NINTH} locale="pt-BR" />
-      </CalendarDefaultsProvider>,
+      </SlottedProvider>,
     );
     expect(screen.getByRole('button', { name: /setembro de 2026/ })).toBeInTheDocument();
+  });
+
+  it('changes its words and its month names together with the language in force', () => {
+    const inLocale = (locale: string) => (
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale={locale}>
+        <Calendar defaultFocusedDate={NINTH} />
+      </SlottedProvider>
+    );
+    const { rerender } = render(inLocale('pt-BR'));
+
+    expect(screen.getByRole('button', { name: 'Mês anterior' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /setembro de 2026/ })).toBeInTheDocument();
+
+    rerender(inLocale('en-US'));
+    expect(screen.getByRole('button', { name: 'Previous month' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /September 2026/ })).toBeInTheDocument();
+  });
+
+  it('lays its own messages over the catalog', () => {
+    render(<Calendar defaultFocusedDate={NINTH} messages={{ next: 'Seguinte' }} />);
+    expect(screen.getByRole('button', { name: 'Seguinte' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Previous month' })).toBeInTheDocument();
   });
 });
 

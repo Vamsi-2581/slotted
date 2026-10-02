@@ -1,3 +1,4 @@
+import type { AlertMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
@@ -30,7 +31,6 @@ export type AlertCloseReason = Extract<ChangeReason, 'dismiss' | 'programmatic'>
 
 /** What an application sets once for every alert under it. */
 export interface AlertDefaults {
-  dismissLabel: string;
   live: AlertLive;
   reach: AlertReach;
   tone: AlertTone;
@@ -93,8 +93,8 @@ export interface AlertProps extends Omit<ComponentPropsWithRef<'section'>, 'chil
   icon?: ReactNode | undefined;
   /** Renders the control that closes the message. */
   dismissible?: boolean | undefined;
-  /** What that control announces. Falls back to the provider, then `Dismiss`. */
-  dismissLabel?: string | undefined;
+  /** Words laid over the catalog of the language in force, key by key: what that control announces (`dismiss`). */
+  messages?: PartialMessages<AlertMessages> | undefined;
   /** The openness the consumer owns. Passing it decides the mode for good. */
   open?: boolean | undefined;
   /** The openness an uncontrolled alert starts from, read once. */

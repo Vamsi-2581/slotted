@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "pagination",
   "ui": "pagination",
+  "catalog": {
+    "group": "Navigation",
+    "summary": "Moves between pages of results."
+  },
   "rootRole": "navigation",
   "currentValue": "page",
   "currentSource": "aria-current",
@@ -65,15 +69,24 @@
   },
   "provides": {
     "paginationDefaults": [
-      "label",
       "siblingCount",
       "boundaryCount",
       "defaultPageSize",
       "pageSizeOptions",
-      "live",
-      "labels"
+      "live"
     ]
   },
+  "messages": [
+    "label",
+    "first",
+    "last",
+    "next",
+    "page",
+    "pageSize",
+    "previous",
+    "range",
+    "summary"
+  ],
   "stateAttributes": {
     "disabled": "data-disabled",
     "loading": "data-loading"
@@ -99,7 +112,6 @@
     "pagination": {
       "nativeElement": "nav",
       "defaults": {
-        "label": "Pagination",
         "defaultPage": 1,
         "defaultPageSize": 20,
         "siblingCount": 1,

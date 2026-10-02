@@ -368,7 +368,7 @@ export const Jump: Story = {
     <Grid columns={1}>
       <Scene
         label="Two arrived while you were away"
-        note="Scroll up, then press Receber resposta twice: the round control widens into 2 novas; press it to go back to the end and it leaves."
+        note="Scroll up, then press Receber resposta twice: the round control widens into 2 new; press it to go back to the end and it leaves."
       >
         <Chat follow={false} />
       </Scene>
@@ -424,7 +424,7 @@ export const Busy: Story = {
     <Grid columns={1}>
       <Scene
         label="A reply announced once"
-        note="Send a question: while the answer streams the log is aria-busy and a screen reader hears A responder; when it ends, Resposta completa."
+        note="Send a question: while the answer streams the log is aria-busy and a screen reader hears Responding; when it ends, Response complete."
       >
         <Chat />
       </Scene>

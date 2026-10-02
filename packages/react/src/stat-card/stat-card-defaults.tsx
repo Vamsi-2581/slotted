@@ -9,9 +9,10 @@ export function useStatCardDefaults(): StatCardDefaults {
 }
 
 /**
- * An application decides once which way is good, how its numbers read, in
- * which language, and which frame and size its cards take. A card that states
- * any of those still wins: an explicit prop is never overridden by context.
+ * An application decides once which way is good, how its numbers read, and
+ * which frame and size its cards take. A card that states any of those still
+ * wins: an explicit prop is never overridden by context. Its words and locale
+ * come from the language in force (`SlottedProvider`).
  */
 export function StatCardDefaultsProvider({ children, ...defaults }: StatCardDefaultsProviderProps) {
   const inherited = useStatCardDefaults();
@@ -23,8 +24,6 @@ export function StatCardDefaultsProvider({ children, ...defaults }: StatCardDefa
         formatOptions: defaults.formatOptions ?? inherited.formatOptions,
         goodWhen: defaults.goodWhen ?? inherited.goodWhen,
         layout: defaults.layout ?? inherited.layout,
-        locale: defaults.locale ?? inherited.locale,
-        messages: { ...inherited.messages, ...defaults.messages },
         size: defaults.size ?? inherited.size,
       }}
     >

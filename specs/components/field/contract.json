@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "field",
   "ui": "field",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Label, control, help and error for one input."
+  },
   "messageFamily": "inline-message",
   "messageTones": {
     "description": "secondary",
@@ -19,10 +23,6 @@
     "disabled": "disabled",
     "readonly": "readOnly"
   },
-  "necessityWords": {
-    "required": "(required)",
-    "optional": "(optional)"
-  },
   "markHidden": true,
   "header": {
     "optional": true,
@@ -32,7 +32,7 @@
   },
   "help": {
     "glyph": "circle-question",
-    "name": "More information",
+    "name": "messages.help",
     "describedBy": "hidden-node",
     "tooltipDescribes": "none",
     "opensOn": "press, hover and focus",
@@ -46,8 +46,9 @@
     "reflowBreakpoint": "320px is literal because CSS forbids a custom property in a container condition, which docs/token-foundation.md rule 4 records."
   },
   "provides": {
-    "fieldDefaults": ["size", "labelPlacement", "necessity", "necessityWords", "helpLabel"]
+    "fieldDefaults": ["size", "labelPlacement", "necessity"]
   },
+  "messages": ["help", "optional", "required"],
   "axes": {
     "size": ["sm", "md", "lg"],
     "labelPlacement": ["top", "side"],

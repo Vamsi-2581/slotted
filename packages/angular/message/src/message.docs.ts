@@ -116,7 +116,8 @@ const messageAnatomy: AnatomyRow[] = [
     part: 'versions',
     element: 'div',
     required: false,
-    purpose: 'The pager between a reply’s versions, drawn with two or more; a group named Versões.',
+    purpose:
+      'The pager between a reply’s versions, drawn with two or more; a group named Versions.',
   },
   {
     part: 'version-previous',
@@ -128,7 +129,7 @@ const messageAnatomy: AnatomyRow[] = [
     part: 'version-label',
     element: 'span',
     required: false,
-    purpose: '“2 de 3”, a polite live region so a reader hears where the pager landed.',
+    purpose: '“2 of 3”, a polite live region so a reader hears where the pager landed.',
   },
   {
     part: 'version-next',
@@ -178,7 +179,7 @@ const bubbleAnatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      '“Mostrar mais” under a clamped text, drawn only while it overflows; aria-expanded and aria-controls.',
+      '“Show more” under a clamped text, drawn only while it overflows; aria-expanded and aria-controls.',
   },
   {
     part: 'stream',
@@ -205,7 +206,7 @@ const bubbleAnatomy: AnatomyRow[] = [
     part: 'typing',
     element: 'span',
     required: false,
-    purpose: 'Three dots in a wave, role img, named “A escrever”; the bubble trails two circles.',
+    purpose: 'Three dots in a wave, role img, named “Typing”; the bubble trails two circles.',
   },
   {
     part: 'retry',
@@ -514,7 +515,7 @@ const bubbleScenes: ReferenceSceneMeta[] = [
   {
     id: 'clamp',
     title: 'A long reply, clamped',
-    note: 'maxLines shows the first lines and draws “Mostrar mais” only while the text overflows. The whole text stays in the DOM for copying and finding in the page; the chevron turns as it opens.',
+    note: 'maxLines shows the first lines and draws “Show more” only while the text overflows. The whole text stays in the DOM for copying and finding in the page; the chevron turns as it opens.',
     snippet: defineSnippet({
       id: 'message-angular-clamp',
       language: 'angular',
@@ -553,7 +554,7 @@ const bubbleScenes: ReferenceSceneMeta[] = [
       label: 'Typing',
       source: `<div slBubble>
   <div slBubbleContent>
-    <span slBubbleTyping label="Marta está a escrever"></span>
+    <span slBubbleTyping aria-label="Marta is typing"></span>
   </div>
 </div>`,
     }),
@@ -674,6 +675,13 @@ export const ANGULAR_MESSAGE_DOCS = {
         'How many versions exist; the pager draws with two or more',
       ],
       [
+        'messages',
+        'PartialMessages<MessageMessages>',
+        '—',
+        'slMessage',
+        'Words laid over the language in force, key by key, for the row and every part and bubble inside it; a bubble outside a row speaks the language in force',
+      ],
+      [
         'status',
         "'sending' | 'sent' | 'delivered' | 'read' | 'failed'",
         'the row’s',
@@ -705,7 +713,7 @@ export const ANGULAR_MESSAGE_DOCS = {
     composition: apiRows([
       [
         'provideMessageDefaults',
-        '{ layout, actionsVisibility, variant, tone, messages }',
+        '{ layout, actionsVisibility, variant, tone }',
         '—',
         'providers',
         'Sets them once; a group, a row or a bubble still wins',
@@ -736,7 +744,7 @@ export const ANGULAR_MESSAGE_DOCS = {
       'Each message is an article labelled by its author, so a screen reader that moves between articles hears who spoke; an aria-label written on the article replaces the author.',
       'Delivery is said three ways: a state attribute for styling, a mark for the eye, and a word for assistive technology — the word inside slBubbleMeta is visually hidden, and outside a bubble it is the only thing drawn.',
       'A message that is sending or streaming is aria-busy, so its words are not announced as they land; the scroller’s log announces the finished row once.',
-      'The actions are a toolbar named Ações da mensagem; revealed by hover, they also appear on focus inside the row and are always painted where the pointer cannot hover.',
+      'The actions are a toolbar named Message actions; revealed by hover, they also appear on focus inside the row and are always painted where the pointer cannot hover.',
       'The activity is a status region; the current step carries aria-current="step", and its travelling band stops under reduced motion.',
       'The version pager is a group with two named buttons and a polite live label; the buttons disable at the ends rather than wrapping.',
     ],
@@ -795,7 +803,7 @@ export const ANGULAR_MESSAGE_DOCS = {
         'number',
         '—',
         'slBubble',
-        'Lines shown before the text is clamped behind “Mostrar mais”',
+        'Lines shown before the text is clamped behind “Show more”',
       ],
       [
         'revealed',
@@ -848,7 +856,13 @@ export const ANGULAR_MESSAGE_DOCS = {
         'The native disabled; the reaction stays legible',
       ],
       ['author', 'string', '—', 'slBubbleQuote', 'The quoted message’s author'],
-      ['label', 'string', 'A escrever', 'slBubbleTyping', 'The dots’ accessible name'],
+      [
+        'aria-label',
+        'string',
+        'typing message',
+        'slBubbleTyping',
+        'The dots’ accessible name; the typing message when absent',
+      ],
       [
         'element',
         'div | button | a',
@@ -860,10 +874,10 @@ export const ANGULAR_MESSAGE_DOCS = {
     composition: apiRows([
       [
         'provideMessageDefaults',
-        '{ variant, tone, messages }',
+        '{ variant, tone }',
         '—',
         'providers',
-        'The painting of a bubble nothing infers, and the family’s words',
+        'The painting of a bubble nothing infers',
       ],
       [
         'element',
@@ -883,9 +897,9 @@ export const ANGULAR_MESSAGE_DOCS = {
     accessibility: [
       'A bubble paints; it adds no role. slBubbleContent written on a button or an a is that element, so its name is its words and it keeps the platform’s keys.',
       'Painting is never the only signal: a danger bubble says its failure in words, the reader’s own side is the row’s alignment, and a reaction’s pressed state is aria-pressed.',
-      '“Mostrar mais” is a button with aria-expanded and aria-controls on the surface; the clamped text is never removed from the DOM.',
+      '“Show more” is a button with aria-expanded and aria-controls on the surface; the clamped text is never removed from the DOM.',
       'The typing dots are one image with a name, and the caret is aria-hidden: neither is read as characters.',
-      'The retry control is named Tentar enviar de novo and sits beside the surface it resends, after it in the reading order.',
+      'The retry control is named Try sending again and sits beside the surface it resends, after it in the reading order.',
     ],
     snippets: [
       defineSnippet({

@@ -1,5 +1,6 @@
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
+import { createTranslator, fullscreenMessages } from '@slotted/core/i18n';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Presentation, X } from 'lucide-react';
 import { useState } from 'react';
@@ -14,7 +15,7 @@ import { Heading, Text } from '../typography';
 import { Fullscreen, FullscreenContent, FullscreenTrigger } from './fullscreen';
 import { FullscreenDefaultsProvider } from './fullscreen-defaults';
 import { REACT_FULLSCREEN_DOCS, REACT_FULLSCREEN_TOKENS } from './fullscreen.docs';
-import type { FullscreenError, FullscreenProps } from './fullscreen.types';
+import type { FullscreenError, FullscreenHandle, FullscreenProps } from './fullscreen.types';
 import { useFullscreen } from './use-fullscreen';
 
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
@@ -368,21 +369,16 @@ export const Trigger: Story = {
 };
 
 /** A handle that says full screen, so the control's other face can be shown at rest. */
-const FULL = {
+const FULL: FullscreenHandle = {
   fullscreen: true,
   mode: 'layout',
   supported: true,
   error: null,
-  messages: {
-    enter: 'Full screen',
-    exit: 'Exit full screen',
-    entered: 'Full screen. Press Escape to exit.',
-    exited: 'Exited full screen',
-  },
+  t: createTranslator({ locale: 'en-US' }).family(fullscreenMessages),
   enter: () => {},
   exit: () => {},
   toggle: () => {},
-} as const;
+};
 
 export const IconOnly: Story = {
   parameters: scenario('iconOnly'),
@@ -447,13 +443,10 @@ export const Composition: Story = {
   render: () => (
     <Scene
       label="Provider, a label and a mark of the consumer"
-      note="The provider sets the step and the Portuguese messages; the control says Apresentar and Terminar and changes its mark with the state."
+      note="The provider sets the step; the control says Apresentar and Terminar and changes its mark with the state."
     >
       <Measure>
-        <FullscreenDefaultsProvider
-          messages={{ enter: 'Tela cheia', exit: 'Sair da tela cheia' }}
-          size="sm"
-        >
+        <FullscreenDefaultsProvider size="sm">
           <Fullscreen mode="layout">
             <RevenuePanel
               control={

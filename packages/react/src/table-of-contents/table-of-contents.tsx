@@ -1,6 +1,7 @@
 import '@slotted/styles/table-of-contents/table-of-contents.css';
 
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { tableOfContentsMessages } from '@slotted/core/i18n';
 import { collectOutline } from '@slotted/core/outline';
 import type { OutlineEntry } from '@slotted/core/outline';
 import {
@@ -25,6 +26,7 @@ import {
 } from 'react';
 import type { KeyboardEvent, ReactNode, RefObject } from 'react';
 
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { Skeleton } from '../skeleton';
 import { TableOfContentsContext } from './table-of-contents-context';
@@ -140,10 +142,7 @@ export function TableOfContents({
   const resolvedOffset = offset ?? defaults.offset;
   const resolvedSize = size ?? defaults.size;
   const resolvedSticky = sticky ?? defaults.sticky;
-  const resolvedMessages = useMemo(
-    () => ({ ...defaults.messages, ...messages }),
-    [defaults.messages, messages],
-  );
+  const t = useMessages(tableOfContentsMessages, messages);
 
   const [ownValue, setOwnValue] = useState<string | null>(defaultValue ?? null);
   const [ownOpen, setOwnOpen] = useState(defaultOpen ?? false);
@@ -478,7 +477,20 @@ export function TableOfContents({
   );
 
   const content = children ?? renderItems(items ?? fromOutline(outline));
-  const empty = !loading && links.current.size === 0;
+  /*
+   * The links register in effects. Until they have — on the server, and in
+   * the first client render — the list is as empty as what it was given:
+   * items by their count, composed links never, a scanned outline by what
+   * has been read. Both renders take the same branch, so hydration agrees.
+   */
+  const registered = registrationTick > 0;
+  const given =
+    children !== undefined && children !== null
+      ? 1
+      : items !== undefined
+        ? items.length
+        : outline.length;
+  const empty = !loading && (registered ? links.current.size : given) === 0;
   const currentLabel = currentValue === null ? '' : (links.current.get(currentValue)?.() ?? '');
   const hasLabel = label !== undefined && label !== null;
 
@@ -487,7 +499,7 @@ export function TableOfContents({
     ...(resolvedLandmark
       ? hasLabel
         ? { 'aria-labelledby': nativeProps['aria-labelledby'] ?? labelId }
-        : { 'aria-label': nativeProps['aria-label'] ?? resolvedMessages.navigation }
+        : { 'aria-label': nativeProps['aria-label'] ?? t('navigation') }
       : {}),
     ...(loading ? { 'aria-busy': true } : {}),
     className,
@@ -520,7 +532,7 @@ export function TableOfContents({
             type="button"
           >
             <span data-part="label" id={labelId}>
-              {hasLabel ? label : resolvedMessages.navigation}
+              {hasLabel ? label : t('navigation')}
             </span>
             <span data-part="current">{currentLabel}</span>
             <span aria-hidden="true" data-part="indicator">

@@ -250,63 +250,12 @@ export function formatRating(value: number, locale?: string): string {
 }
 
 /**
- * A message filled from the rating: `{value}`, `{max}` and `{count}` are
- * replaced by the numbers written in the locale's digits and separators. A
- * whole value is written whole — "3 de 5", not "3,0 de 5" — because a label is
- * read aloud.
+ * A value as a label reads it: to one place at most, in the locale's digits. A
+ * whole value is written whole — "3", not "3,0" — because a label is read
+ * aloud. The bindings hand it to the catalog's `{value}` already written.
  */
-export function ratingLabel(
-  template: string,
-  { value, max, count }: { value: number; max: number; count?: number },
-  locale?: string,
-): string {
-  const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
-  return template
-    .replaceAll('{value}', number.format(value))
-    .replaceAll('{max}', number.format(max))
-    .replaceAll('{count}', count === undefined ? '' : number.format(count));
-}
-
-/**
- * A message filled from named numbers and strings, in the locale's digits and
- * with the locale's plural forms. `{name}` is replaced by the value — a number
- * to one place at most, a string as it is — and
- * `{name, plural, one {# estrela} other {# estrelas}}` picks the branch
- * `Intl.PluralRules` names for the number, `#` standing for it; an exact branch
- * such as `=0` is read first, as ICU reads it. Both bindings
- * format every message of the family through this, so "1 estrela" and
- * "1.052 avaliações" are one answer in React and Angular. A placeholder with no
- * value is left as written, which is louder than an empty string.
- */
-export function formatRatingMessage(
-  template: string,
-  values: Readonly<Record<string, number | string | undefined>>,
-  locale?: string,
-): string {
-  const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
-  const plural = new Intl.PluralRules(locale);
-  const write = (value: number | string) =>
-    typeof value === 'number' ? number.format(value) : value;
-
-  return template
-    .replace(
-      /\{(\w+), plural,((?:\s*=?\w+ \{[^{}]*\})+)\s*\}/g,
-      (whole, name: string, branches: string) => {
-        const value = values[name];
-        if (typeof value !== 'number') return whole;
-        const forms = new Map(
-          [...branches.matchAll(/(=?\w+) \{([^{}]*)\}/g)].map(([, form, text]) => [form, text]),
-        );
-        /* An exact branch (`=0`) is read before the locale's category, as ICU reads it. */
-        const text =
-          forms.get(`=${value}`) ?? forms.get(plural.select(value)) ?? forms.get('other') ?? '';
-        return text.replaceAll('#', number.format(value));
-      },
-    )
-    .replace(/\{(\w+)\}/g, (whole, name: string) => {
-      const value = values[name];
-      return value === undefined ? whole : write(value);
-    });
+export function formatRatingValue(value: number, locale?: string): string {
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value);
 }
 
 /** A share from nought to one as a whole percentage, a half rounded away from nought. */

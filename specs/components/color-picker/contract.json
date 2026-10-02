@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "color-picker",
   "ui": "color-picker",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Color panel and color field in four notations."
+  },
   "controlPart": "input",
   "rootRole": null,
   "stateSource": "field",
@@ -83,19 +87,26 @@
     "format": ["prop", "value", "defaults", "hex"]
   },
   "provides": {
-    "colorPickerDefaults": [
-      "size",
-      "variant",
-      "format",
-      "presets",
-      "areaLabel",
-      "hueLabel",
-      "alphaLabel",
-      "eyedropperLabel",
-      "previousLabel",
-      "gamutLabel"
-    ]
+    "colorPickerDefaults": ["size", "variant", "format", "presets"]
   },
+  "messages": [
+    "alpha",
+    "area",
+    "areaRoleDescription",
+    "contrastLevels.AAA",
+    "contrastLevels.AA",
+    "contrastLevels.AALarge",
+    "contrastLevels.fail",
+    "contrastSample",
+    "eyedropper",
+    "format",
+    "gamut",
+    "hue",
+    "input",
+    "presets",
+    "previous",
+    "trigger"
+  ],
   "stateAttributes": {
     "disabled": "data-disabled",
     "invalid": "data-invalid",

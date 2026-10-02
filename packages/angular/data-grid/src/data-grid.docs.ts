@@ -244,7 +244,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div[role="columnheader"]',
     required: false,
     purpose:
-      'The pop-in’s column, last in the header row while columns are out of space: labels.popinHeader, visually hidden, with no track.',
+      'The pop-in’s column, last in the header row while columns are out of space: messages.popinHeader, visually hidden, with no track.',
   },
   {
     part: 'popin',
@@ -346,7 +346,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'A grid of shipments',
       source: `<sl-data-grid
-  label="Shipments"
+  aria-label="Shipments"
   rowKey="id"
   height="100%"
   selectionMode="multiple"
@@ -1059,18 +1059,20 @@ class ShipmentsPage {
   {
     id: 'accessibility',
     title: 'What a reader hears',
-    note: 'A grid named by label; every row with its index in the whole set and every cell with its column index; aria-sort on the first key and the rest announced; the selection’s size in the header checkbox’s name; a resize as a width; a filter as its sentence. Inspect the tree with a screen reader.',
+    note: 'A grid named by aria-label; every row with its index in the whole set and every cell with its column index; aria-sort on the first key and the rest announced; the selection’s size in the header checkbox’s name; a resize as a width; a filter as its sentence. Inspect the tree with a screen reader.',
     snippet: defineSnippet({
       id: 'data-grid-angular-accessibility',
       language: 'ts',
       label: 'Name, counts and announcements',
-      source: `bootstrapApplication(App, {
-  providers: [
-    provideDataGridDefaults({
-      labels: { selectAllFiltered: 'Select all {count} shipments', grid: 'Shipments' },
-    }),
-  ],
-});`,
+      source: `@Component({
+  template: \`<sl-data-grid aria-label="Shipments" [messages]="messages" />\`,
+})
+class Shipments {
+  readonly messages: PartialMessages<DataGridMessages> = {
+    selectAllFiltered:
+      '{count, plural, one {Select the # shipment} other {Select all # shipments}}',
+  };
+}`,
     }),
   },
 ];
@@ -1388,19 +1390,24 @@ const api = apiRows([
     'sl-data-grid',
     'The frame’s height; without one the grid grows to its rows.',
   ],
-  ['label', 'string', 'Data grid', 'sl-data-grid', 'The accessible name.'],
-  ['labelledBy', 'string', '—', 'sl-data-grid', 'The id of the element that names the grid.'],
   [
-    'labels',
-    'Partial<DataGridLabels>',
+    'labelledBy',
+    'string',
     '—',
     'sl-data-grid',
-    'Every word the family says, replaceable one by one; the operator names and symbols are maps.',
+    'The id of the element that names the grid; a static aria-label names it directly, and with neither the grid is named by messages.grid.',
+  ],
+  [
+    'messages',
+    'Partial<DataGridMessages>',
+    '—',
+    'sl-data-grid',
+    'Words laid over the language in force, key by key: every control, state and announcement, the grid’s name (grid), and filterYes and filterNo for a boolean cell. The operator names and symbols are the groups filterOperators and filterSymbols.',
   ],
   [
     'locale',
     'string',
-    '—',
+    'the language in force',
     'sl-data-grid',
     'BCP 47, for the collator, the number and the date formats.',
   ],
@@ -1578,7 +1585,7 @@ const composition = apiRows([
     'provider',
     '—',
     'Application',
-    'Sets variant, striped, stickyHeader, stickyTo, selectionMode, editMode, filterRow, virtualize, rowHeight, columnOverflow, overscan, pageSizes, filterDebounce, loadMoreThreshold, skeletonRows, locale and labels once for an injector. A grid that states one itself still wins.',
+    'Sets variant, striped, stickyHeader, stickyTo, selectionMode, editMode, filterRow, virtualize, rowHeight, columnOverflow, overscan, pageSizes, filterDebounce, loadMoreThreshold and skeletonRows once for an injector. A grid that states one itself still wins. Its words and its locale come from the language in force (provideSlotted).',
   ],
   [
     '@slotted/core/grid',

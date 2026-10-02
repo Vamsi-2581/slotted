@@ -43,7 +43,7 @@ import type { SplitButtonValueReason } from './split-button';
         data-part="indicator"
         data-ui="spinner"
         role="progressbar"
-        [attr.aria-label]="loadingLabel()"
+        [attr.aria-label]="t('loading')"
       ></span>
     }`,
   styleUrls: [
@@ -118,7 +118,7 @@ const OPENING_KEYS = new Set(['ArrowDown', 'ArrowUp', 'Enter', ' ']);
         data-part="indicator"
         data-ui="spinner"
         role="progressbar"
-        [attr.aria-label]="loadingLabel()"
+        [attr.aria-label]="t('loading')"
       ></span>
     }
   </span>`,

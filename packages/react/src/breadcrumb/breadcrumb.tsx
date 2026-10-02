@@ -1,8 +1,10 @@
 import '@slotted/styles/breadcrumb/breadcrumb.css';
 
+import { breadcrumbMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import { createContext, useContext, useEffect, useId, useRef, useState } from 'react';
 
+import { useMessages } from '../i18n';
 import { useBreadcrumbDefaults } from './breadcrumb-defaults';
 import type {
   BreadcrumbContextValue,
@@ -63,8 +65,8 @@ export function Breadcrumb({
   expanded,
   itemsAfterCollapse,
   itemsBeforeCollapse,
-  label,
   maxItems,
+  messages,
   onExpandedChange,
   overflow,
   render,
@@ -72,6 +74,7 @@ export function Breadcrumb({
   ...nativeProps
 }: BreadcrumbProps) {
   const defaults = useBreadcrumbDefaults();
+  const t = useMessages(breadcrumbMessages, messages);
   const generatedId = useId();
 
   const [own, setOwn] = useState(defaultExpanded ?? false);
@@ -114,10 +117,11 @@ export function Breadcrumb({
     overflow: overflow ?? defaults.overflow ?? 'collapse',
     separator: separator ?? defaults.separator,
     setCollapsed,
+    t,
   };
 
   const rootProps: BreadcrumbRootProps = {
-    'aria-label': label ?? defaults.label ?? 'Breadcrumb',
+    'aria-label': t('label'),
     ...nativeProps,
     children,
     'data-collapsed': collapsed > 0 ? String(collapsed) : undefined,

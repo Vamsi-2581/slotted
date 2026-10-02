@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "toast",
   "ui": "toast",
+  "catalog": {
+    "group": "Feedback",
+    "summary": "Temporary notification with optional action."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/alert/",
   "patternStatus": "There is no toast, notification or snackbar pattern in the WAI-ARIA Authoring Practices. The Alert pattern is the closest official guidance, and this family departs from it in exactly two places, both named under `departures`.",
   "departures": {
@@ -33,7 +37,7 @@
     "reason": "One layer in the single stack, above every overlay: a message about what just happened has to be readable over the dialog that caused it."
   },
   "wiring": {
-    "aria-label": "the region names itself, from the `label` default, so the hotkey has somewhere to land and a reader can find it in the landmark list",
+    "aria-label": "the region names itself, from the catalog's `label`, so the hotkey has somewhere to land and a reader can find it in the landmark list",
     "aria-labelledby": "a message names itself by its own title, when a title part is present",
     "aria-describedby": "a message points at its description, when a description part is present",
     "aria-live": "never written. The announcement is the announcer's, and a second live region would read the same words twice.",
@@ -179,11 +183,8 @@
     "dedupe": "by id: creating a message whose id is already in the queue updates that message instead of adding a second one. `docs/component-features.md` §14 requires a deduplication policy of this family by name.",
     "order": "arrival order, newest nearest the region's own edge, so the newest message is the one the reader's eye is already on"
   },
-  "labels": {
-    "label": "Notifications",
-    "closeLabel": "Close",
-    "reason": "Both are strings the defaults provider holds, so an application translates them once rather than on every message it shows. An instance may still state its own."
-  },
+  "messages": ["close", "label"],
+  "messagesReason": "Both come from the catalog of the language in force, so an application translates them once rather than on every message it shows. A region may still lay its own messages over them.",
   "declined": {
     "anchored": {
       "deferTo": "popover",
@@ -255,9 +256,7 @@
       "pauseWhenHidden",
       "limit",
       "duration",
-      "hotkey",
-      "label",
-      "closeLabel"
+      "hotkey"
     ]
   },
   "stateAttributes": {
@@ -289,9 +288,7 @@
         "pauseWhenHidden": true,
         "limit": 3,
         "duration": 5000,
-        "hotkey": "F6",
-        "label": "Notifications",
-        "closeLabel": "Close"
+        "hotkey": "F6"
       },
       "capabilities": [
         "queue",

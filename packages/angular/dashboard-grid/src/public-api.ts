@@ -18,7 +18,6 @@ export type {
   DashboardEditingReason,
   DashboardEditingRequest,
   DashboardGridDefaults,
-  DashboardGridLabels,
   DashboardHeadingLevel,
   DashboardLayout,
   DashboardLayoutChange,

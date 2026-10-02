@@ -11,12 +11,9 @@ export function useTimelineDefaults(): TimelineDefaults {
 /**
  * An application decides once which way its timelines run, which side the
  * events take, how a timestamp is written and in which zone, the moment a
- * relative reading counts from, and what the family says in the language it
- * ships. A timeline that states any of those itself still wins: an explicit
- * prop is never overridden by context.
- *
- * `messages` is merged rather than replaced, so an application translating
- * one line keeps the other six.
+ * relative reading counts from. A timeline that states any of those itself
+ * still wins: an explicit prop is never overridden by context. Its words and
+ * locale come from the language in force (`SlottedProvider`).
  */
 export function TimelineDefaultsProvider({ children, ...defaults }: TimelineDefaultsProviderProps) {
   const inherited = useTimelineDefaults();
@@ -26,8 +23,6 @@ export function TimelineDefaultsProvider({ children, ...defaults }: TimelineDefa
       value={{
         growing: defaults.growing ?? inherited.growing,
         level: defaults.level ?? inherited.level,
-        locale: defaults.locale ?? inherited.locale,
-        messages: { ...inherited.messages, ...defaults.messages },
         mode: defaults.mode ?? inherited.mode,
         now: defaults.now ?? inherited.now,
         order: defaults.order ?? inherited.order,

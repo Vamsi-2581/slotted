@@ -19,6 +19,7 @@ import {
 } from '@slotted/core/date';
 import type { PlainTime, TimeOption } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { timeRangePickerMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
@@ -40,6 +41,7 @@ import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { TimeField } from '../time-field';
 import type { TimeFieldChangeRequest, TimeFieldHandle } from '../time-field';
@@ -132,11 +134,8 @@ function other(position: TimeRangePickerPosition): TimeRangePickerPosition {
  * field is a value on its own, where the reader sees it.
  */
 export function TimeRangePicker({
-  changeLabel,
-  chooseLabel,
   className,
   clearable = false,
-  clearLabel,
   closeOnSelect,
   contiguous = true,
   defaultHighlighted,
@@ -144,26 +143,21 @@ export function TimeRangePicker({
   defaultPosition = 'start',
   defaultValue,
   disabled,
-  doneLabel,
-  emptyLabel,
-  endLabel,
   endName,
   footer,
   granularity,
   highlighted,
-  hintLabels,
   hourCycle,
   invalid,
   isTimeUnavailable,
   lengthLabel,
-  limitLabel,
   locale,
   max,
   maxLength,
   maxOptions,
+  messages,
   min,
   minLength,
-  nowLabel,
   onHighlightedChange,
   onKeyDown,
   onOpenChange,
@@ -182,12 +176,10 @@ export function TimeRangePicker({
   renderOption,
   required,
   size,
-  startLabel,
   startName,
   step,
   style,
   timeZone,
-  truncatedLabel,
   unavailableOptions,
   value,
   variant,
@@ -195,6 +187,8 @@ export function TimeRangePicker({
 }: TimeRangePickerProps) {
   const field = useField();
   const defaults = useTimeRangePickerDefaults();
+  const appLocale = useLocale();
+  const t = useMessages(timeRangePickerMessages, messages);
   const rootRef = useRef<HTMLElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const fieldRef = useRef<TimeFieldHandle | null>(null);
@@ -238,7 +232,7 @@ export function TimeRangePicker({
   /** Whether the list holds focus, so its highlight is the pending end. */
   const [listFocused, setListFocused] = useState(false);
 
-  const resolvedLocale = locale ?? defaults.locale;
+  const resolvedLocale = locale ?? appLocale;
   const resolvedTimeZone = timeZone ?? defaults.timeZone;
   const resolvedGranularity = granularity ?? defaults.granularity;
   const resolvedHourCycle = hourCycle ?? defaults.hourCycle;
@@ -250,23 +244,12 @@ export function TimeRangePicker({
   const resolvedMaxOptions = maxOptions ?? defaults.maxOptions;
   const resolvedUnavailable = unavailableOptions ?? defaults.unavailableOptions;
   const lengthLabelOf = lengthLabel ?? defaults.lengthLabel;
-  const limitLabelOf = limitLabel ?? defaults.limitLabel;
   const resolvedLengthLabel = useCallback(
     (seconds: number) => lengthLabelOf(seconds, resolvedLocale),
     [lengthLabelOf, resolvedLocale],
   );
-  const resolvedLimitLabel = useCallback(
-    (min: number | undefined, max: number | undefined) => limitLabelOf(min, max, resolvedLocale),
-    [limitLabelOf, resolvedLocale],
-  );
-  const resolvedStartLabel = startLabel ?? defaults.startLabel;
-  const resolvedEndLabel = endLabel ?? defaults.endLabel;
-  const labelOf = (position: TimeRangePickerPosition) =>
-    position === 'start' ? resolvedStartLabel : resolvedEndLabel;
-  const resolvedHintLabels = useMemo(
-    () => ({ ...defaults.hintLabels, ...hintLabels }),
-    [defaults.hintLabels, hintLabels],
-  );
+  /** The name of one end: the field's, its tab's and the hint's `{end}`. */
+  const labelOf = (position: TimeRangePickerPosition) => t(position);
   const resolvedDisabled = disabled ?? field?.disabled;
   const resolvedReadOnly = readOnly ?? field?.readOnly;
   const resolvedRequired = required ?? field?.required;
@@ -862,10 +845,18 @@ export function TimeRangePicker({
       ? resolvedLengthLabel(timeRangeSeconds(range.start, range.end))
       : '';
   const spokenLength = pendingRun === null ? spokenFor(work) : spokenFor(pendingRun);
+  /** "30 min to 4 hr", "at least 30 min", "at most 4 hr". */
   const limitText =
-    minLength === undefined && maxLength === undefined
-      ? null
-      : resolvedLimitLabel(minLength, maxLength);
+    minLength !== undefined && maxLength !== undefined
+      ? t('limit.between', {
+          min: resolvedLengthLabel(minLength),
+          max: resolvedLengthLabel(maxLength),
+        })
+      : minLength !== undefined
+        ? t('limit.atLeast', { min: resolvedLengthLabel(minLength) })
+        : maxLength !== undefined
+          ? t('limit.atMost', { max: resolvedLengthLabel(maxLength) })
+          : null;
 
   /**
    * What the next press should be, or what is wrong: the difference between a
@@ -885,21 +876,23 @@ export function TimeRangePicker({
   const hintProblem = workProblems[0];
   const hint =
     work[currentPosition] === null
-      ? resolvedHintLabels.choose.replace('{end}', labelOf(currentPosition))
+      ? t('chooseTime', { end: labelOf(currentPosition) })
       : hintProblem === undefined
         ? ''
-        : resolvedHintLabels[
-            hintProblem === 'min' || hintProblem === 'max' ? 'bounds' : hintProblem
-          ];
+        : t(hintProblem === 'min' || hintProblem === 'max' ? 'bounds' : hintProblem);
   const hintId = `${contentId}-hint`;
 
   /** The trigger's accessible name: focus returns here when the surface closes. */
   const spoken =
     start !== null && end !== null
-      ? `${changeLabel ?? defaults.changeLabel}, ${format.describe(start)} – ${format.describe(end)}${
-          ordered ? `, ${resolvedLengthLabel(timeRangeSeconds(start, end))}` : ''
-        }`
-      : (chooseLabel ?? defaults.chooseLabel);
+      ? ordered
+        ? t('change', {
+            start: format.describe(start),
+            end: format.describe(end),
+            length: resolvedLengthLabel(timeRangeSeconds(start, end)),
+          })
+        : t('changeReversed', { start: format.describe(start), end: format.describe(end) })
+      : t('choose');
   const summary =
     held === null
       ? null
@@ -976,7 +969,7 @@ export function TimeRangePicker({
     return (
       <div data-part="panel" data-position={position} id={`${contentId}-panel`}>
         {list.length === 0 ? (
-          <div data-part="empty">{emptyLabel ?? defaults.emptyLabel}</div>
+          <div data-part="empty">{t('empty')}</div>
         ) : (
           <div
             aria-describedby={hint === '' ? undefined : hintId}
@@ -994,7 +987,7 @@ export function TimeRangePicker({
             role="listbox"
             {...(truncated
               ? {
-                  'aria-description': truncatedLabel ?? defaults.truncatedLabel,
+                  'aria-description': t('truncated'),
                   'data-truncated': '',
                 }
               : {})}
@@ -1085,7 +1078,7 @@ export function TimeRangePicker({
             onClick={(event) => writeEnd(currentPosition, anchor, event)}
             type="button"
           >
-            {nowLabel ?? defaults.nowLabel}
+            {t('now')}
           </button>
           <span
             data-part="hint"
@@ -1112,7 +1105,7 @@ export function TimeRangePicker({
         <div data-part="footer">
           {footer}
           <button data-part="done" onClick={done} type="button">
-            {doneLabel ?? defaults.doneLabel}
+            {t('done')}
           </button>
         </div>
       </div>
@@ -1138,7 +1131,7 @@ export function TimeRangePicker({
           type="button"
         >
           <span data-part="summary" {...(summary === null ? { 'data-placeholder': '' } : {})}>
-            {summary ?? chooseLabel ?? defaults.chooseLabel}
+            {summary ?? t('choose')}
           </span>
           <Icon>
             <Glyph name="clock" />
@@ -1146,7 +1139,7 @@ export function TimeRangePicker({
         </button>
         {clearable && held !== null ? (
           <button
-            aria-label={clearLabel ?? defaults.clearLabel}
+            aria-label={t('clear')}
             data-part="clear"
             disabled={!editable}
             onClick={(event) => {

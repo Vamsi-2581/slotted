@@ -1,7 +1,8 @@
 import { InjectionToken } from '@angular/core';
 import type { Signal, TemplateRef } from '@angular/core';
+import type { FamilyTranslator, TourMessages } from '@slotted/core/i18n';
 
-import type { TourLabels, TourOutcome, TourStep } from './tour-defaults';
+import type { TourOutcome, TourStep } from './tour-defaults';
 
 /**
  * What a part reads from the tour around it. A token rather than the class,
@@ -16,7 +17,8 @@ export interface TourContext {
   readonly last: Signal<boolean>;
   readonly pending: Signal<boolean>;
   readonly modal: Signal<boolean>;
-  readonly labels: Signal<TourLabels>;
+  /** The family's words in the language in force, with the tour's and the step's `messages` laid over them. */
+  readonly t: FamilyTranslator<TourMessages>;
   readonly titleId: string;
   readonly descriptionId: string;
   readonly hasDescription: Signal<boolean>;
@@ -24,9 +26,6 @@ export interface TourContext {
   readonly showNext: Signal<boolean>;
   readonly showSkip: Signal<boolean>;
   readonly showClose: Signal<boolean>;
-  readonly nextLabel: Signal<string>;
-  readonly prevLabel: Signal<string>;
-  readonly skipLabel: Signal<string>;
   /** The body the current step renders: its own template, one written for it in the tour, or text. */
   readonly bodyTemplate: Signal<TemplateRef<unknown> | null>;
   readonly mediaTemplate: Signal<TemplateRef<unknown> | null>;

@@ -22,6 +22,7 @@ import {
 import { SlButton } from '@slotted/angular/button';
 import { SlCheckbox, SlCheckboxDescription } from '@slotted/angular/checkbox';
 import { SlDrawer } from '@slotted/angular/drawer';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlMenu, SlMenuItem, SlMenuTrigger } from '@slotted/angular/menu';
 import type { MenuSelectEvent } from '@slotted/angular/menu';
@@ -39,16 +40,20 @@ import {
   type GridOutOfSpace,
   type GridPinZone,
 } from '@slotted/core/grid';
+import {
+  columnManagerMessages,
+  dragMessages,
+  type ColumnManagerMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable, type ChangeRequest } from '@slotted/core/state';
 
 import {
-  fillLabel,
   injectColumnManagerDefaults,
   SlColumnManagerIdFactory,
   type ColumnManagerApply,
   type ColumnManagerColumnReason,
-  type ColumnManagerLabels,
   type ColumnManagerOpenReason,
   type ColumnManagerPresentation,
   type ColumnManagerRequest,
@@ -213,7 +218,7 @@ export class SlColumnManagerPart {
         [attr.data-apply]="resolvedApply()"
       >
         <div data-part="header">
-          <h2 data-part="title" [attr.id]="titleId">{{ t().title }}</h2>
+          <h2 data-part="title" [attr.id]="titleId">{{ t('title') }}</h2>
           <span data-part="summary">{{ summary() }}</span>
         </div>
         <div data-part="search">
@@ -225,15 +230,15 @@ export class SlColumnManagerPart {
               slTextFieldInput
               type="search"
               [value]="query()"
-              [attr.aria-label]="t().search"
-              [attr.placeholder]="t().search"
+              [attr.aria-label]="t('search')"
+              [attr.placeholder]="t('search')"
               (valueChange)="query.set($event.value)"
             />
           </div>
         </div>
         <div data-part="list">
           @if (sections().length === 0 && searching()) {
-            <div data-part="empty" role="status">{{ t().noResults }}</div>
+            <div data-part="empty" role="status">{{ t('noResults') }}</div>
           }
           @for (section of sections(); track section.key) {
             <div
@@ -265,7 +270,7 @@ export class SlColumnManagerPart {
                   <button
                     data-part="handle"
                     type="button"
-                    [attr.aria-label]="fill(t().reorder, { column: item.column.label })"
+                    [attr.aria-label]="t('reorder', { column: item.column.label })"
                     [attr.aria-disabled]="item.handleDisabled ? 'true' : null"
                     [attr.data-disabled]="item.handleDisabled ? '' : null"
                     (keydown)="onHandleKeyDown($event, item.id, section.key)"
@@ -293,7 +298,7 @@ export class SlColumnManagerPart {
                     slColumnManagerPart="pin"
                     data-part="pin"
                     [slMenuTriggerFor]="pinMenu"
-                    [attr.aria-label]="fill(t().pin, { column: item.column.label })"
+                    [attr.aria-label]="t('pin', { column: item.column.label })"
                     [attr.data-pinned]="item.zone ? '' : null"
                   >
                     <span slIcon size="sm"><svg slGlyph name="pin"></svg></span>
@@ -304,18 +309,18 @@ export class SlColumnManagerPart {
                       [disabled]="item.zone === 'start'"
                       (select)="pin(item.id, 'start', $event)"
                     >
-                      {{ t().pinStart }}
+                      {{ t('pinStart') }}
                     </button>
                     <button
                       slMenuItem
                       [disabled]="item.zone === 'end'"
                       (select)="pin(item.id, 'end', $event)"
                     >
-                      {{ t().pinEnd }}
+                      {{ t('pinEnd') }}
                     </button>
                     @if (item.zone) {
                       <button slMenuItem (select)="pin(item.id, null, $event)">
-                        {{ t().unpin }}
+                        {{ t('unpin') }}
                       </button>
                     }
                   </sl-menu>
@@ -338,7 +343,7 @@ export class SlColumnManagerPart {
             [disabled]="working().hidden.length === 0"
             (click)="showAll($event)"
           >
-            {{ t().showAll }}
+            {{ t('showAll') }}
           </button>
           <button
             slButton
@@ -350,7 +355,7 @@ export class SlColumnManagerPart {
             [disabled]="atDefault()"
             (click)="reset($event)"
           >
-            {{ t().reset }}
+            {{ t('reset') }}
           </button>
           @if (confirm()) {
             <button
@@ -362,7 +367,7 @@ export class SlColumnManagerPart {
               type="button"
               (click)="cancel($event)"
             >
-              {{ t().cancel }}
+              {{ t('cancel') }}
             </button>
             <button
               slButton
@@ -372,7 +377,7 @@ export class SlColumnManagerPart {
               [disabled]="!dirty()"
               (click)="applyDraft($event)"
             >
-              {{ t().apply }}
+              {{ t('apply') }}
             </button>
           }
         </div>
@@ -399,7 +404,8 @@ export class SlColumnManager {
   readonly presentation = input<ColumnManagerPresentation | undefined>(undefined);
   readonly apply = input<ColumnManagerApply | undefined>(undefined);
   readonly open = model<boolean>(false);
-  readonly labels = input<Partial<ColumnManagerLabels> | undefined>(undefined);
+  /** Words laid over the catalog of the language in force, key by key. */
+  readonly messages = input<PartialMessages<ColumnManagerMessages> | undefined>(undefined);
 
   /** Before the state moves, with the reason and every key that moved. */
   readonly columnStateChangeRequest = output<ColumnManagerRequest>();
@@ -411,12 +417,10 @@ export class SlColumnManager {
   readonly rootId = `${this.base}-panel`;
   readonly titleId = `${this.base}-title`;
 
-  /** The words in use: the instance's, then the provider's, then the fallback. */
-  readonly resolvedLabels = computed<ColumnManagerLabels>(() => ({
-    ...this.defaults.labels,
-    ...this.labels(),
-  }));
-  protected readonly t = this.resolvedLabels;
+  /** The family's words in the language in force, with this manager's `messages` laid over them. */
+  readonly t = injectMessages(columnManagerMessages, this.messages);
+  /** What a drag of a column says, in the language in force. */
+  private readonly dragT = injectMessages(dragMessages);
   readonly resolvedPresentation = computed(() => this.presentation() ?? this.defaults.presentation);
   readonly resolvedApply = computed(() => this.apply() ?? this.defaults.apply);
   protected readonly confirm = computed(() => this.resolvedApply() === 'confirm');
@@ -456,7 +460,7 @@ export class SlColumnManager {
     return this.working().order.filter((id) => !hidden.has(id)).length;
   });
   protected readonly summary = computed(() =>
-    fillLabel(this.t().visibleCount, {
+    this.t('visibleCount', {
       visible: this.visibleCount(),
       total: this.working().order.length,
     }),
@@ -473,8 +477,8 @@ export class SlColumnManager {
     const visible = this.visibleCount();
     const text = this.searchText();
     const searching = text !== '';
-    const t = this.t();
-    const labels = { start: t.pinnedStart, middle: t.unpinned, end: t.pinnedEnd };
+    const t = this.t;
+    const labels = { start: t('pinnedStart'), middle: t('unpinned'), end: t('pinnedEnd') };
     return ZONE_KEYS.map((key) => {
       const items = zones[key]
         .map((id, index) => ({ id, index, column: byId.get(id) }))
@@ -499,7 +503,13 @@ export class SlColumnManager {
             lastVisible: !isHidden && visible <= 1,
             bySpace,
             handleDisabled: searching || column.reorderable === false,
-            status: locked ? t.required : bySpace ? t.hiddenBySpace : shownInRow ? t.inRow : null,
+            status: locked
+              ? t('required')
+              : bySpace
+                ? t('hiddenBySpace')
+                : shownInRow
+                  ? t('inRow')
+                  : null,
             zone: key === 'middle' ? null : key,
           } satisfies ItemView;
         });
@@ -511,8 +521,6 @@ export class SlColumnManager {
       };
     }).filter((section) => section.items.length > 0);
   });
-
-  protected readonly fill = fillLabel;
 
   /* ── The trigger ─────────────────────────────────────────────────────── */
 
@@ -592,12 +600,10 @@ export class SlColumnManager {
       restoreFocus: false,
       autoScroll: { axis: 'y' },
       announce,
-      /* A one-step keyboard move says where the column landed once, below. */
-      messages: {
-        moved: () => '',
-        dropped: ({ item, position }) =>
-          fillLabel(this.t().moved, { column: item, position: position ?? '' }),
-      },
+      t: this.dragT,
+      /* A one-step keyboard move says where the column landed once, below;
+         the controller's own step-by-step position would say it twice. */
+      silent: ['moved'],
       onDrop: ({ items, source, target, reason, event }) => {
         if (target.kind !== 'between' || target.container !== source.container) return;
         const zone = this.zones()[source.container as ZoneKey];
@@ -611,7 +617,7 @@ export class SlColumnManager {
         if (reason === 'keyboard') {
           this.pendingFocus = id;
           const label = this.byId().get(id)?.label ?? id;
-          announce(fillLabel(this.t().moved, { column: label, position: to + 1 }));
+          announce(this.t('moved', { column: label, position: to + 1 }));
         }
       },
     });
@@ -855,17 +861,13 @@ export class SlColumnManagerTrigger {
       if (!nodes) return;
       const manager = this.manager();
       const hidden = manager.hiddenCount();
-      const labels = manager.resolvedLabels();
       if (hidden === 0) {
         nodes.chip.remove();
         nodes.sentence.remove();
         return;
       }
       nodes.chip.textContent = String(hidden);
-      nodes.sentence.textContent =
-        hidden === 1
-          ? labels.hiddenCountOne
-          : fillLabel(labels.hiddenCountOther, { count: hidden });
+      nodes.sentence.textContent = manager.t('hiddenCount', { count: hidden });
       if (!nodes.chip.isConnected) {
         this.host.append(' ', nodes.chip, ' ', nodes.sentence);
       }

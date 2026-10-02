@@ -16,7 +16,6 @@ export {
 } from './wizard';
 export type { WizardStepContext } from './wizard';
 export {
-  DEFAULT_WIZARD_LABELS,
   injectWizardDefaults,
   provideWizardDefaults,
   WIZARD_DEFAULTS,
@@ -30,7 +29,6 @@ export type {
   WizardDraftReason,
   WizardDraftRequest,
   WizardFailure,
-  WizardLabels,
   WizardLevel,
   WizardPersistence,
   WizardProgress,

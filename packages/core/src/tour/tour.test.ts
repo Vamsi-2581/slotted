@@ -4,7 +4,6 @@ import {
   cardFits,
   keepOverTarget,
   compactSide,
-  formatTourProgress,
   isTextEntry,
   resolveStep,
   resolveTarget,
@@ -64,12 +63,6 @@ describe('tourProgress', () => {
 
   it('answers position zero for a step it does not hold', () => {
     expect(tourProgress(steps, 'zz')).toEqual({ position: 0, total: 3, first: false, last: false });
-  });
-});
-
-describe('formatTourProgress', () => {
-  it('writes the English default', () => {
-    expect(formatTourProgress(2, 5)).toBe('2 of 5');
   });
 });
 

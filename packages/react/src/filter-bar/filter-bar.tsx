@@ -25,6 +25,7 @@ import type {
   FilterPath,
 } from '@slotted/core/filter';
 import { createRemovalFocus, createRovingTabindex } from '@slotted/core/focus';
+import { filterBarMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import {
@@ -71,8 +72,9 @@ import {
   usePopover,
 } from '../popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
+import { useMessages } from '../i18n';
 import { TextField } from '../text-field';
-import { fill, resolveFilterBarLabels, useFilterBarDefaults } from './filter-bar-defaults';
+import { useFilterBarDefaults } from './filter-bar-defaults';
 import {
   blankRule,
   ConditionEditor,
@@ -85,7 +87,6 @@ import {
 import type { RuleEnvironment } from './filter-bar-rules';
 import type {
   FilterBarField,
-  FilterBarLabels,
   FilterBarOpenReason,
   FilterBarPresetReason,
   FilterBarProps,
@@ -216,9 +217,8 @@ export function FilterBar({
   defaultValue,
   disabled = false,
   fields,
-  labels: labelsProp,
   loading = false,
-  locale,
+  messages,
   onOpenChange,
   onPresetChange,
   onPresetSave,
@@ -243,10 +243,7 @@ export function FilterBar({
   ...nativeProps
 }: FilterBarProps) {
   const defaults = useFilterBarDefaults();
-  const labels = useMemo(
-    () => resolveFilterBarLabels(defaults.labels, labelsProp),
-    [defaults.labels, labelsProp],
-  );
+  const t = useMessages(filterBarMessages, messages);
   const apply = applyProp ?? defaults.apply ?? FILTER_BAR_FALLBACK.apply;
   const chipLimit = chipLimitProp ?? defaults.chipLimit ?? FILTER_BAR_FALLBACK.chipLimit;
   const queryDelay = queryDelayProp ?? defaults.queryDelay ?? FILTER_BAR_FALLBACK.queryDelay;
@@ -285,10 +282,10 @@ export function FilterBar({
   const format = useMemo(
     () => ({
       field: (key: string) => fieldByKey(fields, key)?.label ?? key,
-      join: (join: 'and' | 'or') => labels.joins[join],
-      operator: (operator: string) => operatorName(labels, operator),
+      join: (join: 'and' | 'or') => t(`joins.${join}`),
+      operator: (operator: string) => operatorName(t, operator),
     }),
-    [fields, labels],
+    [fields, t],
   );
 
   /** The sentence for one field's rule, with a set value written as its option's label. */
@@ -417,7 +414,7 @@ export function FilterBar({
     if (lacking.length > 0) {
       const first = lacking[0]!;
       setInvalid(first.key);
-      announce(fill(labels.required, { field: first.label }));
+      announce(t('required', { field: first.label }));
       root.current
         ?.querySelector<HTMLElement>(`[data-part='pill'][data-field='${CSS.escape(first.key)}']`)
         ?.focus();
@@ -430,10 +427,11 @@ export function FilterBar({
     const applied = normalizeFilterGroup(draft.value);
     announce(
       applied
-        ? fill(labels.appliedCount, { count: firstLevelRules(applied).length }) +
-            ': ' +
-            describeFilterGroup(applied, format)
-        : labels.cleared,
+        ? t('appliedCount', {
+            count: firstLevelRules(applied).length,
+            filters: describeFilterGroup(applied, format),
+          })
+        : t('cleared'),
     );
   }
 
@@ -452,14 +450,14 @@ export function FilterBar({
       requestValue(next, 'clear', source);
       if (query !== '') requestQuery('', 'clear', source);
     }
-    announce(next ? `${labels.cleared}. ${describeFilterGroup(next, format)}` : labels.cleared);
+    announce(next ? t('clearedTo', { filters: describeFilterGroup(next, format) }) : t('cleared'));
   }
 
   function removeField(key: string, source?: unknown) {
     const field = fieldByKey(fields, key);
     if (field?.required) {
       setInvalid(key);
-      announce(fill(labels.required, { field: field.label }));
+      announce(t('required', { field: field.label }));
       return;
     }
     if (pending?.key === key) {
@@ -467,7 +465,7 @@ export function FilterBar({
       if (ruleFor(shown, key) === undefined) return;
     }
     edit(withoutRuleFor(shown, key), 'remove', source);
-    announce(fill(labels.removed, { field: field?.label ?? key }));
+    announce(t('removed', { field: field?.label ?? key }));
   }
 
   function removeNode(path: FilterPath, source?: unknown) {
@@ -635,13 +633,12 @@ export function FilterBar({
 
   /* ── Announce the count ──────────────────────────────────────────────── */
 
-  const figure = (n: number) => new Intl.NumberFormat(locale).format(n);
   const countText =
     count === undefined
       ? null
       : total === undefined
-        ? fill(labels.countOnly, { count: figure(count) })
-        : fill(labels.count, { count: figure(count), total: figure(total) });
+        ? t('countOnly', { count })
+        : t('count', { count, total });
 
   /* ── The builder ─────────────────────────────────────────────────────── */
 
@@ -699,9 +696,9 @@ export function FilterBar({
   const environment: RuleEnvironment = {
     apply: () => (apply === 'manual' ? submit() : undefined),
     fields,
-    labels,
     renderOperand,
     size,
+    t,
   };
 
   const locked = disabled || readOnly;
@@ -748,7 +745,7 @@ export function FilterBar({
     if (next === null) {
       if (field?.required) {
         setInvalid(key);
-        announce(fill(labels.required, { field: field.label }));
+        announce(t('required', { field: field.label }));
         return;
       }
       if (pending?.key === key) setPending(null);
@@ -828,13 +825,17 @@ export function FilterBar({
     const field = fieldByKey(fields, key);
     const unknown = field === undefined;
     const label = field?.label ?? key;
-    const words = ruleWords(labels, field, filter);
+    const words = ruleWords(t, field, filter);
     const incomplete = flags.incomplete === true || !isFilterActive(filter);
-    const shownValue = words.value || labels.noValue;
-    const name =
-      (unknown ? fill(labels.unknownField, { field: key }) : label) +
-      `: ${words.operator}${words.operands > 0 ? ` ${words.value || labels.noValue}` : ''}` +
-      (incomplete ? `, ${labels.incomplete}` : '');
+    const shownValue = words.value || t('noValue');
+    const rule = t('rule', {
+      condition:
+        words.operands > 0
+          ? t('condition', { operator: words.operator, value: shownValue })
+          : words.operator,
+      field: unknown ? t('unknownField', { field: key }) : label,
+    });
+    const name = incomplete ? t('incomplete', { rule }) : rule;
     const condition = filter.conditions[0];
     const operators =
       field?.operators ?? (field ? (operatorsFor(field.kind) as readonly string[]) : []);
@@ -865,14 +866,14 @@ export function FilterBar({
               </button>
             )}
           />
-          <MenuContent aria-label={labels.operator}>
+          <MenuContent aria-label={t('operator')}>
             <MenuRadioGroup
               onValueChange={(next, request) => setOperator(key, filter, next, request.source)}
               value={condition?.operator ?? ''}
             >
               {operators.map((operator) => (
                 <MenuRadioItem key={operator} value={operator}>
-                  {operatorName(labels, operator)}
+                  {operatorName(t, operator)}
                 </MenuRadioItem>
               ))}
             </MenuRadioGroup>
@@ -886,7 +887,7 @@ export function FilterBar({
         <span data-value="">{shownValue}</span>
       </>
     );
-    const valueName = `${words.operator} ${words.full || shownValue}`;
+    const valueName = t('condition', { operator: words.operator, value: words.full || shownValue });
     const valueTitle = words.full && words.full !== words.value ? words.full : undefined;
 
     let valueSegment: ReactNode = null;
@@ -936,12 +937,11 @@ export function FilterBar({
                     environment={environment}
                     field={field}
                     invalid={invalid === key}
-                    labels={labels}
                     onChange={(next) => changeRule(key, next, 'keyboard')}
                     onDone={() => {
                       const rule = ruleFor(shown, key);
                       if (rule && isFilterActive(rule)) {
-                        announce(`${label}: ${sentence(field, rule)}`);
+                        announce(t('rule', { condition: sentence(field, rule), field: label }));
                       }
                     }}
                     queryDelay={queryDelay}
@@ -976,7 +976,7 @@ export function FilterBar({
         {valueSegment}
         {field?.required || readOnly ? null : (
           <button
-            aria-label={`${labels.remove} ${label}`}
+            aria-label={t('remove', { name: label })}
             data-part="chip-remove"
             disabled={disabled}
             onClick={(event) => removeField(key, event)}
@@ -1022,7 +1022,7 @@ export function FilterBar({
         </button>
         {readOnly ? null : (
           <button
-            aria-label={`${labels.remove} ${words}`}
+            aria-label={t('remove', { name: words })}
             data-part="chip-remove"
             disabled={disabled}
             onClick={(event) => removeNode(path, event)}
@@ -1093,7 +1093,7 @@ export function FilterBar({
 
   return (
     <div
-      aria-label={labels.bar}
+      aria-label={t('bar')}
       role="search"
       {...nativeProps}
       data-apply={apply}
@@ -1111,7 +1111,7 @@ export function FilterBar({
       <div data-part="frame">
         <div data-part="search">
           <TextField
-            aria-label={labels.search}
+            aria-label={t('search')}
             clearable
             disabled={disabled}
             end={shortcut ? <Kbd size="sm">{shortcut}</Kbd> : undefined}
@@ -1119,7 +1119,7 @@ export function FilterBar({
             onValueChange={(next, request) =>
               typeQuery(next, request.reason === 'clear' ? 'clear' : 'keyboard', request.source)
             }
-            placeholder={labels.search}
+            placeholder={t('search')}
             ref={search}
             size={size}
             start={
@@ -1133,11 +1133,11 @@ export function FilterBar({
         </div>
 
         <div
-          aria-label={labels.filters}
+          aria-label={t('filters')}
           data-part="bar"
           ref={bar}
           role="toolbar"
-          {...(readOnly ? { 'aria-description': labels.readOnly } : {})}
+          {...(readOnly ? { 'aria-description': t('readOnly') } : {})}
           {...(revealed ? { 'data-revealed': '' } : {})}
         >
           <Button
@@ -1154,8 +1154,7 @@ export function FilterBar({
             tone="secondary"
             variant="outline"
           >
-            <span>{fill(labels.summary, { count: activeCount }).replace(/\s*\(.*$/, '')}</span>{' '}
-            <span>{fill(labels.summary, { count: activeCount }).replace(/^[^(]*/, '')}</span>
+            <span>{t('summary', { count: activeCount })}</span>
           </Button>
 
           {members}
@@ -1168,7 +1167,7 @@ export function FilterBar({
               onClick={(event) => requestRevealed(!revealed, 'pointer', event)}
               type="button"
             >
-              {revealed ? labels.less : fill(labels.more, { count: folded })}
+              {revealed ? t('less') : t('more', { count: folded })}
             </button>
           ) : null}
 
@@ -1180,12 +1179,12 @@ export function FilterBar({
                     /* With a chip in the bar, add is its glyph alone, in the chips' shape; the label stays its name. */
                     <IconButton
                       {...(props as object)}
-                      aria-label={labels.add}
+                      aria-label={t('add')}
                       disabled={disabled || unfiltered.length === 0}
                       render={(inner) => <button {...inner} data-compact="" data-part="add" />}
                       shape="circle"
                       size={size}
-                      title={labels.add}
+                      title={t('add')}
                       tone="secondary"
                       variant="outline"
                     >
@@ -1207,12 +1206,12 @@ export function FilterBar({
                       tone="secondary"
                       variant="ghost"
                     >
-                      {labels.add}
+                      {t('add')}
                     </Button>
                   )
                 }
               />
-              <MenuContent aria-label={labels.add}>
+              <MenuContent aria-label={t('add')}>
                 {[...sections.entries()].map(([section, list]) => {
                   const items = list.map((field) => (
                     <MenuItem key={field.key} onSelect={(event) => start(field.key, event)}>
@@ -1245,7 +1244,7 @@ export function FilterBar({
               tone="secondary"
               variant="ghost"
             >
-              {labels.clear}
+              {t('clear')}
             </Button>
           ) : null}
 
@@ -1259,7 +1258,7 @@ export function FilterBar({
                 tone="secondary"
                 variant="ghost"
               >
-                {labels.reset}
+                {t('reset')}
               </Button>
               <Button
                 disabled={disabled || loading || !dirty}
@@ -1267,7 +1266,7 @@ export function FilterBar({
                 render={(props) => <button {...props} data-part="apply" />}
                 size={size}
               >
-                {labels.apply}
+                {t('apply')}
               </Button>
             </div>
           ) : null}
@@ -1288,8 +1287,8 @@ export function FilterBar({
                 size={size}
                 value={preset}
               >
-                <SelectTrigger aria-label={labels.preset}>
-                  <SelectValue placeholder={labels.presetNone} />
+                <SelectTrigger aria-label={t('preset')}>
+                  <SelectValue placeholder={t('presetNone')} />
                 </SelectTrigger>
                 <SelectContent>
                   {presets.map((entry) => (
@@ -1312,7 +1311,7 @@ export function FilterBar({
                 data-part="root"
                 data-size="sm"
                 role="progressbar"
-                aria-label={labels.filters}
+                aria-label={t('filters')}
               />
             ) : null}
             {countText}
@@ -1331,7 +1330,7 @@ export function FilterBar({
       >
         <DrawerPanel>
           <DrawerHeader>
-            <DrawerTitle>{labels.builder}</DrawerTitle>
+            <DrawerTitle>{t('builder')}</DrawerTitle>
             <DrawerClose />
           </DrawerHeader>
           <DrawerBody>
@@ -1353,7 +1352,7 @@ export function FilterBar({
                         tone="secondary"
                         variant="ghost"
                       >
-                        {labels.clear}
+                        {t('clear')}
                       </Button>
                     ) : null}
                     {onPresetSave ? (
@@ -1364,7 +1363,7 @@ export function FilterBar({
                         tone="secondary"
                         variant="ghost"
                       >
-                        {labels.savePreset}
+                        {t('savePreset')}
                       </Button>
                     ) : null}
                   </>
@@ -1384,10 +1383,10 @@ export function FilterBar({
               tone="secondary"
               variant="ghost"
             >
-              {labels.cancel}
+              {t('cancel')}
             </Button>
             <Button onClick={() => commitDrawer()} size="sm">
-              {labels.apply}
+              {t('apply')}
             </Button>
           </DrawerFooter>
         </DrawerPanel>
@@ -1401,7 +1400,7 @@ export function FilterBar({
     if (lacking.length > 0) {
       const first = lacking[0]!;
       setInvalid(first.key);
-      announce(fill(labels.required, { field: first.label }));
+      announce(t('required', { field: first.label }));
       return;
     }
     setInvalid(null);
@@ -1409,10 +1408,11 @@ export function FilterBar({
     const applied = normalizeFilterGroup(next);
     announce(
       applied
-        ? fill(labels.appliedCount, { count: countActive(applied) }) +
-            ': ' +
-            describeFilterGroup(applied, format)
-        : labels.cleared,
+        ? t('appliedCount', {
+            count: countActive(applied),
+            filters: describeFilterGroup(applied, format),
+          })
+        : t('cleared'),
     );
     requestOpen(false, 'submit');
   }
@@ -1458,7 +1458,6 @@ interface RuleEditorPopoverBodyProps {
   environment: RuleEnvironment;
   field: FilterBarField;
   invalid: boolean;
-  labels: FilterBarLabels;
   onChange: (next: FilterDescriptor | null) => void;
   onDone: () => void;
   queryDelay: number;
@@ -1477,7 +1476,6 @@ function RuleEditorPopoverBody({
   environment,
   field,
   invalid,
-  labels,
   onChange,
   onDone,
   queryDelay,
@@ -1552,10 +1550,10 @@ function RuleEditorPopoverBody({
           tone="secondary"
           variant="ghost"
         >
-          {labels.clearRule}
+          {environment.t('clearRule')}
         </Button>
         <Button onClick={done} size="sm">
-          {labels.done}
+          {environment.t('done')}
         </Button>
       </div>
     </div>

@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "icon",
   "ui": "icon",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Sized glyph with an optional tone."
+  },
   "axes": {
     "size": ["text", "sm", "md", "lg"],
     "tone": ["inherit", "default", "muted", "accent", "success", "warning", "danger", "inverse"]

@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 
 import { Button } from '../button';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { NumberField } from '../number-field';
 import { Slider } from './slider';
 import { SliderDefaultsProvider } from './slider-defaults';
@@ -446,11 +447,13 @@ export const Composition: Story = {
       <Scene
         label="A provider, a field and a handle"
         layout="stack"
-        note="The provider carries the four decisions an application takes once; the field supplies the label and the identifier; the handle reaches the one action a value cannot express."
+        note="The provider carries the decisions an application takes once, SlottedProvider the locale; the field supplies the label and the identifier; the handle reaches the one action a value cannot express."
       >
-        <SliderDefaultsProvider locale="pt-BR" valueLabel="always">
-          <Handled />
-        </SliderDefaultsProvider>
+        <SlottedProvider locale="pt-BR">
+          <SliderDefaultsProvider valueLabel="always">
+            <Handled />
+          </SliderDefaultsProvider>
+        </SlottedProvider>
       </Scene>
     </Grid>
   ),

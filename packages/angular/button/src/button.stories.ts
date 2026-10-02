@@ -171,30 +171,30 @@ export const Loading: Story = {
     template: `<div class="slotted-demo-stage">
       <div class="slotted-demo-row">
         <button slButton>${icon('lucideSave', 'slButtonStart')}Save changes</button>
-        <button slButton loading loadingLabel="Saving">${icon('lucideSave', 'slButtonStart')}Save changes</button>
-        <button slButton loading loadingLabel="Adding" variant="outline">Add member</button>
-        <button slButton loading [loadingDelay]="400" loadingLabel="Publishing" variant="outline">${icon('lucideSave', 'slButtonStart')}Delayed wait</button>
+        <button slButton loading [messages]="{ loading: 'Saving' }">${icon('lucideSave', 'slButtonStart')}Save changes</button>
+        <button slButton loading [messages]="{ loading: 'Adding' }" variant="outline">Add member</button>
+        <button slButton loading [loadingDelay]="400" [messages]="{ loading: 'Publishing' }" variant="outline">${icon('lucideSave', 'slButtonStart')}Delayed wait</button>
       </div>
       ${BUTTON_VARIANTS.map(
         (variant) => `<div class="slotted-demo-row">
         ${BUTTON_TONES.map(
           (tone) =>
-            `<button slButton loading loadingLabel="${tone} ${variant}" tone="${tone}" variant="${variant}">${icon('lucideSave', 'slButtonStart')}${tone}</button>`,
+            `<button slButton loading [messages]="{ loading: '${tone} ${variant}' }" tone="${tone}" variant="${variant}">${icon('lucideSave', 'slButtonStart')}${tone}</button>`,
         ).join('')}
         ${BUTTON_TONES.map(
           (tone) =>
-            `<button slButton loading loadingLabel="${tone} ${variant}, no glyph" tone="${tone}" variant="${variant}">${tone}</button>`,
+            `<button slButton loading [messages]="{ loading: '${tone} ${variant}, no glyph' }" tone="${tone}" variant="${variant}">${tone}</button>`,
         ).join('')}
       </div>`,
       ).join('')}
       <div class="slotted-demo-row">
         ${BUTTON_SIZES.map(
           (size) =>
-            `<button slButton loading loadingLabel="${size}" size="${size}">${icon('lucideSave', 'slButtonStart')}${size}</button>`,
+            `<button slButton loading [messages]="{ loading: '${size}' }" size="${size}">${icon('lucideSave', 'slButtonStart')}${size}</button>`,
         ).join('')}
         ${BUTTON_SIZES.map(
           (size) =>
-            `<button slButton loading loadingLabel="${size}" size="${size}" variant="outline">${size}</button>`,
+            `<button slButton loading [messages]="{ loading: '${size}' }" size="${size}" variant="outline">${size}</button>`,
         ).join('')}
       </div>
     </div>`,

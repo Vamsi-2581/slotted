@@ -1,8 +1,10 @@
 import '@slotted/styles/fullscreen/fullscreen.css';
 
+import { fullscreenMessages } from '@slotted/core/i18n';
 import { createContext, useContext, useState } from 'react';
 import type { MouseEvent, Ref } from 'react';
 
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useFullscreenDefaults } from './fullscreen-defaults';
 import type {
@@ -138,7 +140,9 @@ export function FullscreenTrigger({
   const on = handle?.fullscreen ?? false;
   const words = typeof children === 'function' ? children(on) : children;
   const mark = typeof icon === 'function' ? icon(on) : icon;
-  const messages = handle?.messages ?? defaults.messages;
+  /* A control with no region has no region's words, and speaks the catalog's. */
+  const own = useMessages(fullscreenMessages);
+  const t = handle?.t ?? own;
 
   const rootProps: FullscreenTriggerRootProps = {
     ...nativeProps,
@@ -152,7 +156,7 @@ export function FullscreenTrigger({
             </Icon>
           )}
         </span>
-        <span data-part="label">{words ?? (on ? messages.exit : messages.enter)}</span>
+        <span data-part="label">{words ?? t(on ? 'exit' : 'enter')}</span>
       </>
     ),
     className,

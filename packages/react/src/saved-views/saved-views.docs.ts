@@ -25,7 +25,7 @@ export const REACT_SAVED_VIEWS_TOKENS = savedViewsTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { SavedViews, SavedViewsProvider, usePersistedSavedViews } from '@slotted/react';\nimport type { GridView, SavedViewsState } from '@slotted/core/grid';",
+    "import { SavedViews, usePersistedSavedViews } from '@slotted/react';\nimport type { GridView, SavedViewsState } from '@slotted/core/grid';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -293,7 +293,7 @@ useHotkey('Mod+Shift+V', () => views.current?.open());`,
       id: 'saved-views-react-a11y',
       language: 'tsx',
       label: 'Naming the group in context',
-      source: `<SavedViews builtIn={defaults} current={current} label="Order views" />;`,
+      source: `<SavedViews aria-label="Order views" builtIn={defaults} current={current} />;`,
     }),
   },
   {
@@ -351,7 +351,7 @@ export const REACT_SAVED_VIEWS_DOCS = {
         'GridView',
         '—',
         'SavedViews',
-        'The built-in view, named labels.builtIn: the application’s defaults, handed back when it is applied',
+        'The built-in view, named messages.builtIn: the application’s defaults, handed back when it is applied',
       ],
       [
         'columns',
@@ -382,13 +382,12 @@ export const REACT_SAVED_VIEWS_DOCS = {
         'SavedViews',
         'The layer an uncontrolled instance starts with',
       ],
-      ['label', 'string', 'Views', 'SavedViews', 'The group’s and the panel’s accessible name'],
       [
-        'labels',
-        'Partial<SavedViewsLabels>',
-        'English',
-        'SavedViews, SavedViewsProvider',
-        'Every word the family says; {name} is replaced with the view’s name',
+        'messages',
+        'Partial<SavedViewsMessages>',
+        '—',
+        'SavedViews',
+        'Words laid over the language in force, key by key: the group’s and the panel’s name (label) and every other word; {name} is the view’s name',
       ],
       [
         'ref',
@@ -396,13 +395,6 @@ export const REACT_SAVED_VIEWS_DOCS = {
         '—',
         'SavedViews',
         'element, focus(), open(), close(), apply(id) — the last three with the reason programmatic',
-      ],
-      [
-        'SavedViewsProvider',
-        '{ labels }',
-        '—',
-        'a subtree',
-        'Translates the family once. An instance’s own labels still win, word by word',
       ],
       [
         'usePersistedSavedViews',

@@ -2,7 +2,9 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { fromMarkedTokens } from '@slotted/core/markdown';
 import type { MarkdownNode } from '@slotted/core/markdown';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { provideSkeletonDefaults } from '@slotted/angular/skeleton';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { marked } from 'marked';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -130,6 +132,18 @@ describe('SlMarkdown', () => {
     expect(alert?.getAttribute('data-tone')).toBe('success');
     expect(alert?.getAttribute('data-live')).toBe('off');
     expect(alert?.textContent).toContain('Tip');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const { root, update } = mount('> [!TIP]\n> Use the flag.', [
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+    expect(root.querySelector("[data-ui='alert']")?.textContent).toContain('Dica');
+
+    locale.set('en-US');
+    update();
+    expect(root.querySelector("[data-ui='alert']")?.textContent).toContain('Tip');
   });
 
   it('draws tasks read-only until the template enables them, and asks for each change', () => {

@@ -180,7 +180,7 @@ const scenes: ReferenceSceneMeta[] = [
   slSwitch
   [checked]="on()"
   [loading]="saving()"
-  loadingLabel="Salvando a preferência"
+  [messages]="{ loading: 'Salvando a preferência' }"
   (checkedChange)="save($event.value)"
 >
   Sincronização automática
@@ -322,11 +322,11 @@ export const ANGULAR_SWITCH_DOCS = {
         'The value is not settled yet. Activation is refused, the geometry does not change, aria-busy is set, and the pending label is announced politely two seconds in',
       ],
       [
-        'loadingLabel',
-        'string',
-        'Saving',
-        '[slSwitch], provideSwitchDefaults',
-        'What a reader hears while the switch is pending. It reaches a live region rather than the control’s name, which never changes with the state',
+        'messages',
+        'Partial<SwitchMessages>',
+        '—',
+        '[slSwitch]',
+        'Words laid over the language in force, key by key: loading is what a reader hears while the switch is pending. It reaches a live region rather than the control’s name, which never changes with the state',
       ],
       [
         'disabled',
@@ -388,10 +388,10 @@ export const ANGULAR_SWITCH_DOCS = {
       ],
       [
         'provideSwitchDefaults()',
-        '{ size, indicator, labelPlacement, loadingLabel }',
+        '{ size, indicator, labelPlacement }',
         '—',
         'an injector',
-        'The four decisions an application takes once. size is the one a field outranks, so a switch inside a field takes the field’s step',
+        'The three decisions an application takes once. size is the one a field outranks, so a switch inside a field takes the field’s step',
       ],
       [
         'SlField',

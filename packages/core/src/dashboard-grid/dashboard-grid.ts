@@ -721,13 +721,3 @@ export function parseDashboardLayout(text: string): DashboardLayout | null {
   }
   return layout;
 }
-
-/** Fills `{name}` placeholders; a placeholder with no value stays as written. */
-export function formatDashboardLabel(
-  template: string,
-  values: Readonly<Record<string, string | number>>,
-): string {
-  return template.replace(/\{(\w+)\}/g, (match, name: string) =>
-    name in values ? String(values[name]) : match,
-  );
-}

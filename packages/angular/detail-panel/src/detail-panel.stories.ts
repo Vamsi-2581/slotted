@@ -702,7 +702,7 @@ class NamedDemo {
   imports: PARTS,
   providers: [
     provideIcons({ lucidePackage }),
-    provideDetailPanelDefaults({ aside: 'start', layout: 'tabs', messages: { aside: 'Campos' } }),
+    provideDetailPanelDefaults({ aside: 'start', layout: 'tabs' }),
   ],
   template: `<div slStack [gap]="6">
     ${room(PANEL())}
@@ -1138,7 +1138,7 @@ export const Defaults: Story = {
       1,
       scene(
         'Two panels under one provider',
-        'Neither panel states a layout, an aside side or a name for its fields; both read tabbed with the fields at the start, called Campos. A panel that states its own still wins.',
+        'Neither panel states a layout or an aside side; both read tabbed with the fields at the start. A panel that states its own still wins. The aside’s name comes from the language in force.',
         '<sl-detail-panel-provided-demo></sl-detail-panel-provided-demo>',
       ) +
         scene(
@@ -1157,7 +1157,7 @@ export const Accessibility: Story = {
       1,
       scene(
         'Landmarks and the tab sequence',
-        'The article is named by its heading and the aside is a complementary landmark called Detalhes. Tab from the strip’s selected tab: the shown section takes the outward ring, then the table inside it, then the fields. Press next in the header and the heading takes focus.',
+        'The article is named by its heading and the aside is a complementary landmark named by the aside message. Tab from the strip’s selected tab: the shown section takes the outward ring, then the table inside it, then the fields. Press next in the header and the heading takes focus.',
         '<sl-detail-panel-records-demo layout="tabs"></sl-detail-panel-records-demo>',
       ),
     ),

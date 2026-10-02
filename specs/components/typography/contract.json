@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "typography",
   "ui": "typography",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Text and heading with type scale steps."
+  },
   "axes": {
     "size": ["xs", "sm", "md", "lg", "xl", "2xl", "3xl"],
     "weight": ["regular", "medium", "semibold"],

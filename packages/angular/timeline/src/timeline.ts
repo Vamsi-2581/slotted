@@ -25,8 +25,10 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { tabbables } from '@slotted/core/focus';
+import { timelineMessages, type PartialMessages, type TimelineMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -53,7 +55,6 @@ import {
   injectTimelineDefaults,
   TIMELINE_DEFAULT_GROWING,
   TIMELINE_DEFAULT_LEVEL,
-  TIMELINE_DEFAULT_MESSAGES,
   TIMELINE_DEFAULT_MODE,
   TIMELINE_DEFAULT_ORDER,
   TIMELINE_DEFAULT_ORIENTATION,
@@ -64,7 +65,6 @@ import {
   TIMELINE_DEFAULT_VARIANT,
   type TimelineLevel,
   type TimelineLoadMoreReason,
-  type TimelineMessages,
   type TimelineMode,
   type TimelineOpenReason,
   type TimelineOrientation,
@@ -109,7 +109,7 @@ let counter = 0;
         [hidden]="freshCount() <= 0"
         (click)="reveal($event)"
       >
-        {{ messageSet().freshItems(heldCount()) }}
+        {{ t('freshItems', { count: heldCount() }) }}
       </button>
     }
     <ng-content></ng-content>
@@ -117,11 +117,11 @@ let counter = 0;
       @if (loading()) {
         <div #more aria-live="polite" data-part="more">
           <span aria-hidden="true" data-part="root" data-ui="spinner"></span>
-          {{ messageSet().loading }}
+          {{ t('loading') }}
         </div>
       } @else if (growingValue() === 'button') {
         <button #more data-part="more" type="button" (click)="loadMore($event)">
-          {{ messageSet().loadMore }}
+          {{ t('loadMore') }}
         </button>
       } @else {
         <div #more data-part="more"></div>
@@ -129,7 +129,7 @@ let counter = 0;
     }
     @if (loaded() === 0 && !loading()) {
       <div data-part="empty">
-        <ng-content select="[slTimelineEmpty]">{{ messageSet().empty }}</ng-content>
+        <ng-content select="[slTimelineEmpty]">{{ t('empty') }}</ng-content>
       </div>
     }
   `,
@@ -166,11 +166,17 @@ export class SlTimeline {
   readonly size = input<TimelineSize | undefined>(undefined);
   readonly growing = input<TimelineGrowing | undefined>(undefined);
   readonly timeFormat = input<TimelineTimeFormat | undefined>(undefined);
+  /** For the timestamps; defaults to the language in force (`provideSlotted`). */
   readonly locale = input<string | undefined>(undefined);
   readonly timeZone = input<string | undefined>(undefined);
   readonly now = input(undefined, { transform: optionalNumber });
   readonly level = input(undefined, { transform: optionalLevel });
-  readonly messages = input<Partial<TimelineMessages> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * more control, the waiting line, the fresh pill, the empty line, the
+   * current event's mark and a folded group's trigger.
+   */
+  readonly messages = input<PartialMessages<TimelineMessages> | undefined>(undefined);
   /** The accessible name of the list. */
   readonly label = input<string | undefined>(undefined);
   /** The total number of events, when the application knows it. */
@@ -216,17 +222,15 @@ export class SlTimeline {
   readonly timeFormatValue = computed(
     () => this.timeFormat() ?? this.defaults.timeFormat ?? TIMELINE_DEFAULT_TIME_FORMAT,
   );
-  readonly localeValue = computed(() => this.locale() ?? this.defaults.locale);
+  private readonly runtimeLocale = injectLocale();
+  readonly localeValue = computed(() => this.locale() ?? this.runtimeLocale());
   readonly timeZoneValue = computed(() => this.timeZone() ?? this.defaults.timeZone);
   readonly nowValue = computed(() => this.now() ?? this.defaults.now);
   readonly levelValue = computed(
     () => this.level() ?? this.defaults.level ?? TIMELINE_DEFAULT_LEVEL,
   );
-  readonly messageSet = computed<TimelineMessages>(() => ({
-    ...TIMELINE_DEFAULT_MESSAGES,
-    ...this.defaults.messages,
-    ...this.messages(),
-  }));
+  /** The family's words in the language in force, with this timeline's `messages` laid over them. */
+  readonly t = injectMessages(timelineMessages, this.messages);
   readonly feed = computed(() => this.modeValue() === 'feed');
 
   /**
@@ -249,7 +253,7 @@ export class SlTimeline {
     effect(() => {
       const count = this.freshCount();
       if (count <= 0) return;
-      getLiveAnnouncer().announce(untracked(() => this.messageSet()).freshItems(count));
+      getLiveAnnouncer().announce(untracked(() => this.t('freshItems', { count })));
     });
 
     /**
@@ -469,9 +473,9 @@ export class SlTimelineList {
           <span aria-hidden="true" data-part="group-indicator"
             ><span slIcon><svg slGlyph name="chevron-down"></svg></span
           ></span>
-          {{ label() }}
-          <span data-ui="visually-hidden">{{
-            ', ' + (isOpen() ? timeline.messageSet().collapse : timeline.messageSet().expand)
+          {{ label()
+          }}<span data-ui="visually-hidden">{{
+            isOpen() ? timeline.t('collapse') : timeline.t('expand')
           }}</span>
         </button>
       } @else {
@@ -596,9 +600,7 @@ export class SlTimelineGroupList {
       }
       <ng-content select="[slTimelineTitle]"></ng-content>
       @if (current()) {
-        <span data-ui="visually-hidden" [id]="partId('current')">{{
-          ', ' + timeline.messageSet().current
-        }}</span>
+        <span data-ui="visually-hidden" [id]="partId('current')">{{ timeline.t('current') }}</span>
       }
       @if (time() !== undefined) {
         @if (timeLabel() !== undefined) {
@@ -736,7 +738,7 @@ export class SlTimelineItem {
  * machine value always goes to `datetime`; the text is the family's
  * formatting unless the consumer projected their own, and a relative reading
  * keeps the absolute one in `title`. Outside a timeline it still works, from
- * the runtime's own locale and zone.
+ * the locale in force and the runtime's zone.
  */
 @Component({
   selector: 'time[slTimelineTime]',
@@ -753,6 +755,7 @@ export class SlTimelineItem {
 })
 export class SlTimelineTime {
   private readonly timeline = inject(SlTimeline, { optional: true });
+  private readonly runtimeLocale = injectLocale();
 
   readonly value = input.required<TimestampValue>();
   readonly format = input<TimelineTimeFormat | undefined>(undefined);
@@ -763,7 +766,7 @@ export class SlTimelineTime {
   readonly formatted = computed(() =>
     formatTimestamp(this.value(), {
       format: this.format() ?? this.timeline?.timeFormatValue(),
-      locale: this.locale() ?? this.timeline?.localeValue(),
+      locale: this.locale() ?? this.timeline?.localeValue() ?? this.runtimeLocale(),
       now: this.now() ?? this.timeline?.nowValue(),
       timeZone: this.timeZone() ?? this.timeline?.timeZoneValue(),
     }),

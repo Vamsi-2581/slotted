@@ -116,7 +116,7 @@ const NONE_OUT: GridOutOfSpace = { popin: [], hidden: [] };
       }
       <sl-saved-views
         data-testid="saved-views"
-        [label]="label() + ' views'"
+        [messages]="{ label: label() + ' views' }"
         [current]="view().current()"
         [builtIn]="view().builtIn"
         [columns]="columns()"

@@ -1,0 +1,58 @@
+---
+import { highlight } from '../lib/highlight';
+import { EXAMPLE_LANGUAGES, type Framework } from '../runtime/frameworks';
+import { render as renderReact } from '../runtime/react.server';
+import { exampleSource } from '../runtime/sources';
+import PreviewAxes from '../islands/PreviewAxes';
+import { CodeBlock } from '@slotted/react/code-block';
+
+interface Props {
+  /** The example file under `examples/<framework>/<family>/`, without extension. */
+  name: string;
+  /** Another family's example; the page's own family by default. */
+  family?: string;
+  /** A preview that needs the full column width rather than a centered column. */
+  wide?: boolean;
+}
+
+const framework = Astro.params['framework'] as Framework;
+const family = Astro.props.family ?? (Astro.params['family'] as string);
+const { name, wide = false } = Astro.props;
+const id = `${family}/${name}`;
+
+const renderers: Record<Framework, (id: string) => Promise<string>> = {
+  react: renderReact,
+};
+
+const html = await renderers[framework](id);
+const language = EXAMPLE_LANGUAGES[framework];
+const code = exampleSource(framework, id);
+const tokens = await highlight(code, language);
+const previewId = `preview-${family}-${name}`;
+---
+
+<figure class="docs-example" data-wide={wide ? '' : undefined}>
+  <div class="docs-example-stage" id={previewId}>
+    <div class="docs-example-bar">
+      <PreviewAxes client:idle target={previewId} />
+    </div>
+    <div class="docs-example-preview" data-example={id} data-example-framework={framework}>
+      <Fragment set:html={html} />
+    </div>
+  </div>
+  <div class="docs-code" data-joined data-slotted-theme="default" data-slotted-scheme="dark">
+    <CodeBlock
+      client:visible
+      code={code}
+      tokens={tokens}
+      language={language}
+      fileName={`${name}.${framework === 'react' ? 'tsx' : 'ts'}`}
+      copy
+      collapseAfter={12}
+    />
+  </div>
+</figure>
+
+<script>
+  import '../runtime/client';
+</script>

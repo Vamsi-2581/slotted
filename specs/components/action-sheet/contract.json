@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "action-sheet",
   "ui": "action-sheet",
+  "catalog": {
+    "group": "Overlays",
+    "summary": "Bottom sheet of short actions for touch."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
   "listPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/menubar/",
   "patternStatus": "No APG pattern describes an action sheet. The layer answers the modal dialog pattern and the list of actions answers the menu pattern, each item by item in docs/history/designs/2026-09-24-action-sheet-design.md section 2",
@@ -216,16 +220,9 @@
     "closeOnSelect": ["prop", "defaults", "family"]
   },
   "provides": {
-    "actionSheetDefaults": [
-      "modal",
-      "mount",
-      "escape",
-      "outsidePress",
-      "back",
-      "closeOnSelect",
-      "cancelLabel"
-    ]
+    "actionSheetDefaults": ["modal", "mount", "escape", "outsidePress", "back", "closeOnSelect"]
   },
+  "messages": ["cancel"],
   "declined": {
     "controller": {
       "reason": "Ionic's actionSheetController and Ant Mobile's ActionSheet.show return the choice from a promise. The decision dialog and drawer took holds: with state and @if it is three lines, and the close request already carries the chosen value as request.result",
@@ -286,8 +283,7 @@
         "escape": "close",
         "outsidePress": "close",
         "back": "close",
-        "closeOnSelect": true,
-        "cancelLabel": "Cancel"
+        "closeOnSelect": true
       },
       "capabilities": ["open", "content", "appearance", "disabled", "loading", "wiring"],
       "states": ["default", "hover", "active", "focus-visible", "open", "disabled", "loading"],

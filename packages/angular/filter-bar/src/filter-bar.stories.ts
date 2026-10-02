@@ -3,6 +3,7 @@ import type { OnInit } from '@angular/core';
 import { SlBadge } from '@slotted/angular/badge';
 import { SlButton } from '@slotted/angular/button';
 import { SlCodeBlock } from '@slotted/angular/code-block';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlSelect, SlSelectItem } from '@slotted/angular/select';
 import {
   SlTable,
@@ -22,6 +23,7 @@ import {
   toFilterBarParams,
 } from '@slotted/core/filter';
 import type { FilterGroup } from '@slotted/core/filter';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
@@ -29,7 +31,6 @@ import { moduleMetadata } from '@storybook/angular-vite';
 
 import { SlFilterBar, SlFilterBarEnd, SlFilterBarOperand } from './filter-bar';
 import type { FilterBarApply, FilterBarField, FilterBarSize } from './filter-bar.constants';
-import { provideFilterBarDefaults } from './filter-bar.constants';
 import { ANGULAR_FILTER_BAR_DOCS, ANGULAR_FILTER_BAR_TOKENS } from './filter-bar.docs';
 
 /* ── The listing: orders of a Brazilian marketplace ──────────────────────── */
@@ -315,7 +316,6 @@ const themeRootOf = (host: ElementRef<HTMLElement>) =>
     [disabled]="disabled()"
     [fields]="fields()"
     [loading]="loading()"
-    [locale]="locale()"
     [readOnly]="readOnly()"
     [total]="total()"
     [value]="value()"
@@ -327,7 +327,6 @@ class ThemedBar {
   readonly apply = input<FilterBarApply | undefined>(undefined);
   readonly count = input<number | undefined>(undefined);
   readonly total = input<number | undefined>(undefined);
-  readonly locale = input<string | undefined>(undefined);
   readonly disabled = input(false);
   readonly loading = input(false);
   readonly readOnly = input(false);
@@ -412,7 +411,6 @@ class OrdersTable {
       <div
         slFilterBar
         #bar="slFilterBar"
-        locale="pt-BR"
         [apply]="apply()"
         [chipLimit]="chipLimit()"
         [container]="container() ?? themeRoot"
@@ -765,19 +763,25 @@ export const Url: Story = {
 };
 
 export const Count: Story = {
+  decorators: [
+    moduleMetadata({
+      imports: IMPORTS,
+      providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
+    }),
+  ],
   parameters: scenario('count'),
   render: () => ({
     props: DATA,
     template: `<div class="slotted-demo-grid" data-columns="1">
       ${scene(
         '128 de 3.412',
-        'As figuras são do locale — pt-BR separa milhares com ponto. A parte é aria-live: uma mudança no filtro é ouvida como o seu efeito.',
-        `<sl-filter-bar-themed [count]="128" [fields]="fields" locale="pt-BR" [total]="3412" [value]="paidOver100" />`,
+        'As figuras são da língua em vigor — pt-BR separa milhares com ponto. A parte é aria-live: uma mudança no filtro é ouvida como o seu efeito.',
+        `<sl-filter-bar-themed [count]="128" [fields]="fields" [total]="3412" [value]="paidOver100" />`,
       )}
       ${scene(
         'loading',
         'A contagem dá lugar ao spinner e aria-busy; os controles ficam, Apply desliga-se.',
-        `<sl-filter-bar-themed [count]="128" [fields]="fields" [loading]="true" locale="pt-BR" [total]="3412" [value]="paidOver100" />`,
+        `<sl-filter-bar-themed [count]="128" [fields]="fields" [loading]="true" [total]="3412" [value]="paidOver100" />`,
       )}
     </div>`,
   }),
@@ -879,11 +883,7 @@ export const Keyboard: Story = {
   decorators: [
     moduleMetadata({
       imports: IMPORTS,
-      providers: [
-        provideFilterBarDefaults({
-          labels: { add: 'Adicionar filtro', clear: 'Limpar tudo', search: 'Buscar pedidos' },
-        }),
-      ],
+      providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
     }),
   ],
   parameters: scenario('keyboard'),
@@ -898,7 +898,7 @@ export const Keyboard: Story = {
     template: one(
       'Tab três vezes, setas, Delete',
       'Tab: busca, toolbar, chips. Setas entre os pills; Enter abre; nos chips, Delete remove e o foco segue para o próximo.',
-      `<div slFilterBar [container]="themeRoot" count="3" [fields]="fields" locale="pt-BR" total="8" [value]="applied">
+      `<div slFilterBar [container]="themeRoot" count="3" [fields]="fields" total="8" [value]="applied" [messages]="{ search: 'Buscar pedidos' }">
         <sl-select slFilterBarEnd aria-label="Ordenar" size="md" value="recent" [items]="[{ label: 'Mais recentes', value: 'recent' }]">
           <sl-select-item value="recent">Mais recentes</sl-select-item>
         </sl-select>

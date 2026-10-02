@@ -5,7 +5,6 @@ export {
   SlSwitchIdFactory,
   SWITCH_DEFAULTS,
   SWITCH_LOADING_ANNOUNCE_DELAY,
-  SWITCH_LOADING_LABEL,
 } from './switch-defaults';
 export type {
   SwitchDefaults,

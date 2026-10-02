@@ -1,6 +1,8 @@
+import { fieldMessages } from '@slotted/core/i18n';
 import { useEffect } from 'react';
 
-import { FIELD_NECESSITY_WORDS, necessityMark } from '../field';
+import { necessityMark } from '../field';
+import { useMessages } from '../i18n';
 import { InlineMessage } from '../inline-message';
 import { useFieldGroup } from './field-group';
 import type {
@@ -42,11 +44,8 @@ export function FieldGroupLegend({
   ...nativeProps
 }: FieldGroupLegendProps) {
   const group = useFieldGroup();
-  const mark = necessityMark(
-    group?.necessity ?? 'mark',
-    group?.required === true,
-    group?.necessityWords ?? FIELD_NECESSITY_WORDS,
-  );
+  const own = useMessages(fieldMessages);
+  const mark = necessityMark(group?.necessity ?? 'mark', group?.required === true, group?.t ?? own);
 
   const rootProps: FieldGroupLegendRootProps = {
     ...nativeProps,

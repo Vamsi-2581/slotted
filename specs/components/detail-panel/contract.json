@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "detail-panel",
   "ui": "detail-panel",
+  "catalog": {
+    "group": "Layout",
+    "summary": "Record summary, metadata, sections and actions."
+  },
   "pattern": null,
   "patternAbsent": {
     "index": "https://www.w3.org/WAI/ARIA/apg/patterns/",
@@ -23,7 +27,7 @@
     "main": "the column of sections",
     "section": "one named unit of content. Under layout=tabs it is the tabpanel of the strip's tab, hidden when not current; under layout=stacked it holds a section family root at the rank below the panel's, with the label as heading and the count as a badge after it",
     "section-actions": "under layout=tabs, the section's own controls in a row above its content; under stacked they are the section family's actions part",
-    "aside": "an aside element, complementary, beside the body above 600 pixels and after it below. Named by messages.aside unless the consumer names it",
+    "aside": "an aside element, complementary, beside the body above 600 pixels and after it below. Named by the aside message unless the consumer names it",
     "message": "in place of the columns under status=not-found or status=error, a centred box for a result-state",
     "footer": "sticky at --slotted-page-sticky-bottom, the slot an action-bar sits in. Absent when not written"
   },
@@ -35,7 +39,7 @@
   "wiring": {
     "aria-labelledby": "on the root, naming the page-header's heading; on a tabpanel section, naming its tab",
     "aria-controls": "on each tab of the strip, naming its section — the tabs family writes it from the ids the strip's identify returns",
-    "aria-label": "on the aside from messages.aside; a consumer's own wins",
+    "aria-label": "on the aside from the aside message; a consumer's own wins",
     "aria-busy": "true on the root while loading",
     "id": "on a tabpanel section, from the strip's identify; on a stacked section, the consumer's own or none",
     "tabindex": "0 on a tabpanel section, as the Tabs pattern asks; -1 on the page-header's heading at the moment the family focuses it"
@@ -127,10 +131,7 @@
       "source": "drawer"
     }
   ],
-  "messages": {
-    "aside": "Detalhes",
-    "loading": "A carregar o registo"
-  },
+  "messages": ["aside", "loading"],
   "declined": {
     "close": {
       "deferTo": "drawer",
@@ -165,7 +166,7 @@
   },
   "resolution": "the consumer's explicit prop, then the family's defaults provider, then the fallback",
   "provides": {
-    "detailPanelDefaults": ["layout", "aside", "level", "size", "scroll", "mount", "messages"],
+    "detailPanelDefaults": ["layout", "aside", "level", "size", "scroll", "mount"],
     "pageHeaderDefaults": ["level", "size"]
   },
   "stateAttributes": {

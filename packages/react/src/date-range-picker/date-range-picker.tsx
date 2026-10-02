@@ -12,6 +12,7 @@ import {
 } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { dateRangePickerMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
@@ -37,6 +38,7 @@ import type { CalendarHandle, CalendarValue, CalendarView, DateRange } from '../
 import { DateField } from '../date-field';
 import type { DateFieldHandle } from '../date-field';
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useDateRangePickerDefaults } from './date-range-picker-defaults';
 import type {
@@ -91,11 +93,8 @@ function normalize(range: DateRange | null): DateRange | null {
  */
 export function DateRangePicker({
   calendar,
-  changeLabel,
-  chooseLabel,
   className,
   clearable = false,
-  clearLabel,
   closeOnSelect,
   contiguous = true,
   count,
@@ -103,18 +102,16 @@ export function DateRangePicker({
   defaultPosition = 'start',
   defaultValue,
   disabled,
-  endLabel,
   endName,
   firstDayOfWeek,
   fixedWeeks = true,
   footer,
   invalid,
   isDateUnavailable,
-  lengthLabel,
-  limitLabel,
   locale,
   max,
   maxLength,
+  messages,
   min,
   minLength,
   months,
@@ -131,7 +128,6 @@ export function DateRangePicker({
   render,
   required,
   size,
-  startLabel,
   startName,
   style,
   timeZone,
@@ -143,6 +139,8 @@ export function DateRangePicker({
 }: DateRangePickerProps) {
   const field = useField();
   const defaults = useDateRangePickerDefaults();
+  const appLocale = useLocale();
+  const t = useMessages(dateRangePickerMessages, messages);
   const rootRef = useRef<HTMLElement | null>(null);
   const startHandle = useRef<DateFieldHandle | null>(null);
   const endHandle = useRef<DateFieldHandle | null>(null);
@@ -173,7 +171,7 @@ export function DateRangePicker({
   /** The pending end the calendar reports, or `null` while no run is open. */
   const [preview, setPreview] = useState<PlainDate | null>(null);
 
-  const resolvedLocale = locale ?? defaults.locale;
+  const resolvedLocale = locale ?? appLocale;
   const resolvedTimeZone = timeZone ?? defaults.timeZone;
   const resolvedCalendar = calendar ?? defaults.calendar;
   const resolvedSize = size ?? field?.size ?? defaults.size;
@@ -182,8 +180,8 @@ export function DateRangePicker({
   const resolvedCloseOnSelect = closeOnSelect ?? defaults.closeOnSelect;
   const resolvedCount = count ?? defaults.count;
   const resolvedMonths = months ?? defaults.months;
-  const resolvedLengthLabel = lengthLabel ?? defaults.lengthLabel;
-  const resolvedLimitLabel = limitLabel ?? defaults.limitLabel;
+  /** "4 nights": the run's length, in the unit `count` names. */
+  const lengthOf = (days: number) => t(`${resolvedCount}.length` as const, { count: days });
   const resolvedDisabled = disabled ?? field?.disabled;
   const resolvedReadOnly = readOnly ?? field?.readOnly;
   const resolvedRequired = required ?? field?.required;
@@ -453,22 +451,28 @@ export function DateRangePicker({
 
   const spokenLength =
     pendingRun !== null
-      ? resolvedLengthLabel(
-          rangeLength(pendingRun.start, pendingRun.end, resolvedCount),
-          resolvedCount,
-        )
+      ? lengthOf(rangeLength(pendingRun.start, pendingRun.end, resolvedCount))
       : ordered
-        ? resolvedLengthLabel(rangeLength(start, end, resolvedCount), resolvedCount)
+        ? lengthOf(rangeLength(start, end, resolvedCount))
         : '';
+  /** "2 to 7 nights", "at least 2 nights", "at most 7 nights". */
   const limitText =
-    minLength === undefined && maxLength === undefined
-      ? null
-      : resolvedLimitLabel(minLength, maxLength, resolvedCount);
+    minLength !== undefined && maxLength !== undefined
+      ? t(`${resolvedCount}.between` as const, { min: minLength, max: maxLength })
+      : minLength !== undefined
+        ? t(`${resolvedCount}.atLeast` as const, { min: minLength })
+        : maxLength !== undefined
+          ? t(`${resolvedCount}.atMost` as const, { max: maxLength })
+          : null;
 
   /** The trigger's accessible name: focus returns here when the surface closes. */
   const spoken = ordered
-    ? `${changeLabel ?? defaults.changeLabel}, ${format.describe(start)} – ${format.describe(end)}, ${spokenLength}`
-    : (chooseLabel ?? defaults.chooseLabel);
+    ? t('change', {
+        start: format.describe(start),
+        end: format.describe(end),
+        length: spokenLength,
+      })
+    : t('choose');
 
   const closeAfter = (whole: boolean, source: unknown) => {
     const closes =
@@ -537,7 +541,7 @@ export function DateRangePicker({
             {...(shownStart === null ? { 'data-placeholder': '' } : {})}
             {...(startPending ? { 'data-pending': '' } : {})}
           >
-            {shownStart === null ? (startLabel ?? defaults.startLabel) : writeShort(shownStart)}
+            {shownStart === null ? t('start') : writeShort(shownStart)}
           </span>
           {' – '}
           <span
@@ -545,7 +549,7 @@ export function DateRangePicker({
             {...(shownEnd === null ? { 'data-placeholder': '' } : {})}
             {...(endPending ? { 'data-pending': '' } : {})}
           >
-            {shownEnd === null ? (endLabel ?? defaults.endLabel) : writeShort(shownEnd)}
+            {shownEnd === null ? t('end') : writeShort(shownEnd)}
           </span>
           <span
             aria-live="polite"
@@ -623,7 +627,7 @@ export function DateRangePicker({
         >
           <DateField
             {...fieldProps}
-            aria-label={startLabel ?? defaults.startLabel}
+            aria-label={t('start')}
             max={startMax}
             min={min}
             name={startName}
@@ -648,7 +652,7 @@ export function DateRangePicker({
         >
           <DateField
             {...fieldProps}
-            aria-label={endLabel ?? defaults.endLabel}
+            aria-label={t('end')}
             invalid={problems.includes('order') ? true : undefined}
             max={max}
             min={endMin}
@@ -666,7 +670,7 @@ export function DateRangePicker({
         </div>
         {clearable && held !== null ? (
           <button
-            aria-label={clearLabel ?? defaults.clearLabel}
+            aria-label={t('clear')}
             data-part="clear"
             disabled={!editable}
             onClick={(event) => {

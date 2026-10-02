@@ -2,21 +2,10 @@ import { createContext, useContext } from 'react';
 
 import type { ColorPickerDefaults, ColorPickerDefaultsProviderProps } from './color-picker.types';
 
-/** What the picker's controls are called; an application translates them once. */
 const FALLBACK: ColorPickerDefaults = {
-  alphaLabel: 'Opacity',
-  areaLabel: 'Saturation and brightness',
-  eyedropperLabel: 'Pick a colour from the screen',
   format: 'hex',
-  formatLabel: 'Notation',
-  gamutLabel: 'Outside sRGB: the screen shows the nearest colour.',
-  hueLabel: 'Hue',
-  inputLabel: 'Colour',
   presets: undefined,
-  presetsLabel: 'Presets',
-  previousLabel: 'Restore',
   size: 'md',
-  triggerLabel: 'Choose a colour',
 };
 
 const ColorPickerDefaultsContext = createContext<ColorPickerDefaults>(FALLBACK);
@@ -25,7 +14,10 @@ export function useColorPickerDefaults(): ColorPickerDefaults {
   return useContext(ColorPickerDefaultsContext);
 }
 
-/** An application decides once its notation, its palette and its words. */
+/**
+ * An application decides once its notation, its palette and its size. The
+ * words come from the language in force (`SlottedProvider`).
+ */
 export function ColorPickerDefaultsProvider({
   children,
   ...defaults

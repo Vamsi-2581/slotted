@@ -1,6 +1,7 @@
 import '@slotted/styles/side-navigation/side-navigation.css';
 
 import { nextOpenValues, sameOpenValues } from '@slotted/core/disclosure';
+import { sideNavigationMessages } from '@slotted/core/i18n';
 import { createWidthGate } from '@slotted/core/measure';
 import { createControllable } from '@slotted/core/state';
 import {
@@ -16,6 +17,7 @@ import {
 import type { KeyboardEvent } from 'react';
 
 import { useAppShellIfPresent } from '../app-shell';
+import { useMessages } from '../i18n';
 import { useSideNavigationDefaults } from './side-navigation-defaults';
 import type {
   SideNavigationContextValue,
@@ -117,10 +119,7 @@ export function SideNavigation({
    * inside it renders a div; an explicit `landmark` still wins over the shell.
    */
   const resolvedLandmark = landmark ?? (shell === undefined ? defaults.landmark : false);
-  const resolvedMessages = useMemo(
-    () => ({ ...defaults.messages, ...messages }),
-    [defaults.messages, messages],
-  );
+  const t = useMessages(sideNavigationMessages, messages);
   const resolvedMode = mode ?? defaults.mode;
   const resolvedMultiple = multiple ?? defaults.multiple;
   const resolvedSize = size ?? defaults.size;
@@ -327,7 +326,6 @@ export function SideNavigation({
       guides: resolvedGuides,
       isExpanded: (itemValue) => currentExpanded.includes(itemValue),
       measureTick,
-      messages: resolvedMessages,
       mode: resolvedMode,
       multiple: resolvedMultiple,
       registerItem,
@@ -349,7 +347,6 @@ export function SideNavigation({
       registerItem,
       resolvedAutoExpand,
       resolvedGuides,
-      resolvedMessages,
       resolvedMode,
       resolvedMultiple,
       resolvedSize,
@@ -362,9 +359,7 @@ export function SideNavigation({
 
   const rootProps: SideNavigationRootProps = {
     ...nativeProps,
-    ...(resolvedLandmark
-      ? { 'aria-label': nativeProps['aria-label'] ?? resolvedMessages.navigation }
-      : {}),
+    ...(resolvedLandmark ? { 'aria-label': nativeProps['aria-label'] ?? t('navigation') } : {}),
     children,
     className,
     ...(compact ? { 'data-compact': '' as const } : {}),

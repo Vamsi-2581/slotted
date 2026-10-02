@@ -26,12 +26,18 @@ import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlDialog, SlDialogTitle } from '@slotted/angular/dialog';
 import type { DialogChangeRequest, DialogDismissPolicy } from '@slotted/angular/dialog';
 import { SlHighlight } from '@slotted/angular/highlight';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { injectKbdPlatform, SlShortcut } from '@slotted/angular/kbd';
 import { moveIndex, splitByMatch } from '@slotted/core/collection';
 import type { MoveIntent } from '@slotted/core/collection';
 import { createCommandRanker, pushRecent, resolveCommands } from '@slotted/core/commands';
 import type { CommandGroup, CommandRanker } from '@slotted/core/commands';
-import { isEditableTarget, matchesShortcut, parseShortcut, resolveKey } from '@slotted/core/keys';
+import {
+  commandPaletteMessages,
+  type CommandPaletteMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
+import { canonicalKey, isEditableTarget, matchesShortcut, parseShortcut } from '@slotted/core/keys';
 import type { KbdPlatform } from '@slotted/core/keys';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
@@ -65,35 +71,28 @@ import type {
 
 let nextId = 0;
 
-const ARIA_MODIFIERS: Record<string, string> = {
-  alt: 'Alt',
-  ctrl: 'Control',
-  meta: 'Meta',
-  shift: 'Shift',
-};
-
-/** The shortcut as `aria-keyshortcuts` states it; a sequence is drawn only. */
+/**
+ * The shortcut as `aria-keyshortcuts` states it; a sequence is drawn only.
+ *
+ * The attribute's grammar is the UI Events `key` values — `Control`, `Alt`,
+ * `Meta`, `Shift` — which a screen reader parses and speaks in its own
+ * language. They are tokens rather than words, so they stay out of the
+ * catalog: a translated or platform-named modifier (`Option`, `Command`) is
+ * not a value the attribute accepts.
+ */
 function announceShortcut(keys: string, platform: KbdPlatform): string | null {
   const steps = parseShortcut(keys);
   if (steps.length !== 1) return null;
   return (
     steps[0]
       ?.map((token) => {
-        const canonical = resolveKey(token, { platform }).token;
+        const canonical = canonicalKey(token);
         if (canonical === 'mod') return platform === 'mac' ? 'Meta' : 'Control';
-        if (canonical !== undefined && canonical in ARIA_MODIFIERS) {
-          return ARIA_MODIFIERS[canonical] as string;
-        }
+        if (canonical === 'ctrl') return 'Control';
         const word = canonical ?? token;
         return word.length === 1 ? word.toUpperCase() : `${word[0]?.toUpperCase()}${word.slice(1)}`;
       })
       .join('+') ?? null
-  );
-}
-
-function fill(template: string, values: Record<string, string | number>) {
-  return template.replace(/\{(\w+)\}/g, (match, key: string) =>
-    key in values ? String(values[key]) : match,
   );
 }
 
@@ -116,7 +115,7 @@ export class SlCommandPaletteFooter {
   readonly template = inject<TemplateRef<unknown>>(TemplateRef);
 }
 
-/** The empty message, in place of `emptyLabel`. */
+/** The empty message, in place of the catalog's `empty`. */
 @Directive({ selector: 'ng-template[slCommandPaletteEmpty]', standalone: true })
 export class SlCommandPaletteEmpty {
   readonly template = inject<TemplateRef<unknown>>(TemplateRef);
@@ -154,7 +153,7 @@ export class SlCommandPaletteEmpty {
         <!-- The dialog takes its name from a title it points at; the title is
              read by assistive technology and hidden from the eye, because the
              field under it is the name a reader sees. -->
-        <h2 slDialogTitle hidden>{{ resolvedLabel() }}</h2>
+        <h2 slDialogTitle hidden>{{ t('label') }}</h2>
         <ng-container *ngTemplateOutlet="panel" />
       </sl-dialog>
     }
@@ -180,7 +179,7 @@ export class SlCommandPaletteEmpty {
             ></span>
           }
           @if (rows().trail.length > 0) {
-            <ol data-part="pages" [attr.aria-label]="resolvedBackLabel()">
+            <ol data-part="pages" [attr.aria-label]="t('back')">
               @for (entry of rows().trail; track entry.id; let index = $index) {
                 <li>
                   <!-- The chevron between two pages, mirrored in a right-to-left document. -->
@@ -204,10 +203,10 @@ export class SlCommandPaletteEmpty {
             autocomplete="off"
             spellcheck="false"
             [id]="inputId"
-            [attr.aria-label]="resolvedInputLabel()"
+            [attr.aria-label]="t('input')"
             [attr.aria-controls]="listId"
             [attr.aria-activedescendant]="activeDescendant()"
-            [attr.placeholder]="resolvedPlaceholder()"
+            [attr.placeholder]="t('placeholder')"
             [disabled]="disabled()"
             [value]="query()"
             (input)="onInput($event)"
@@ -217,7 +216,7 @@ export class SlCommandPaletteEmpty {
             data-part="clear"
             type="button"
             tabindex="-1"
-            [attr.aria-label]="resolvedClearLabel()"
+            [attr.aria-label]="t('clear')"
             (click)="clear($event)"
           >
             <span slIcon><svg slGlyph name="x"></svg></span>
@@ -226,7 +225,7 @@ export class SlCommandPaletteEmpty {
             <!-- The way out where the scrim is not: shown by the stylesheet
                  under the dialog's full-screen query alone. -->
             <button data-part="close" type="button" (click)="setOpen(false, 'dismiss', $event)">
-              {{ resolvedCloseLabel() }}
+              {{ t('close') }}
             </button>
           }
         </div>
@@ -236,7 +235,7 @@ export class SlCommandPaletteEmpty {
           data-part="list"
           role="listbox"
           [id]="listId"
-          [attr.aria-label]="resolvedInputLabel()"
+          [attr.aria-label]="t('input')"
           [attr.aria-busy]="loading() ? 'true' : null"
           [attr.data-loading]="loading() ? '' : null"
         >
@@ -254,7 +253,7 @@ export class SlCommandPaletteEmpty {
               @if (emptyTemplate(); as template) {
                 <ng-container *ngTemplateOutlet="template.template" />
               } @else {
-                {{ resolvedEmptyLabel() }}
+                {{ t('empty') }}
               }
             </div>
           }
@@ -298,11 +297,11 @@ export class SlCommandPaletteEmpty {
             <span data-part="hint">
               <kbd slShortcut keys="up" separator="" size="inherit" variant="outline"></kbd>
               <kbd slShortcut keys="down" separator="" size="inherit" variant="outline"></kbd>
-              <span>{{ resolvedHintNavigate() }}</span>
+              <span>{{ t('hintNavigate') }}</span>
             </span>
             <span data-part="hint">
               <kbd slShortcut keys="enter" separator="" size="inherit" variant="outline"></kbd>
-              <span>{{ resolvedHintSelect() }}</span>
+              <span>{{ t('hintSelect') }}</span>
             </span>
             @if (pages().length > 0) {
               <span data-part="hint">
@@ -313,13 +312,13 @@ export class SlCommandPaletteEmpty {
                   size="inherit"
                   variant="outline"
                 ></kbd>
-                <span>{{ resolvedHintBack() }}</span>
+                <span>{{ t('hintBack') }}</span>
               </span>
             }
             @if (!inline()) {
               <span data-part="hint">
                 <kbd slShortcut keys="escape" separator="" size="inherit" variant="outline"></kbd>
-                <span>{{ resolvedHintClose() }}</span>
+                <span>{{ t('hintClose') }}</span>
               </span>
             }
           </div>
@@ -390,7 +389,12 @@ export class SlCommandPaletteEmpty {
         <span data-part="icon"></span>
         <span data-part="label">
           @if (marking()) {
-            <span slHighlight [text]="item.label" [query]="query()" [locale]="locale()"></span>
+            <span
+              slHighlight
+              [text]="item.label"
+              [query]="query()"
+              [locale]="resolvedLocale()"
+            ></span>
           } @else {
             {{ item.label }}
           }
@@ -445,6 +449,7 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
   readonly groups = input<readonly CommandGroup[] | undefined>(undefined);
   /** The adapter. Absent takes the core ranker; `null` shows the items as they came. */
   readonly rank = input<CommandRanker<Item> | null | undefined>(undefined);
+  /** BCP 47, for the comparison the default ranker makes. Defaults to the language in force. */
   readonly locale = input<string | undefined>(undefined);
   readonly limit = input(undefined, { transform: SlCommandPalette.count });
 
@@ -466,21 +471,13 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
   /** Removes the footer. An `ng-template[slCommandPaletteFooter]` replaces it instead. */
   readonly hideFooter = input(false, { transform: booleanAttribute });
 
-  readonly label = input<string | undefined>(undefined);
-  readonly inputLabel = input<string | undefined>(undefined);
-  readonly placeholder = input<string | undefined>(undefined);
-  readonly emptyLabel = input<string | undefined>(undefined);
-  readonly loadingLabel = input<string | undefined>(undefined);
-  readonly errorLabel = input<string | undefined>(undefined);
-  readonly countLabel = input<string | undefined>(undefined);
-  readonly recentLabel = input<string | undefined>(undefined);
-  readonly clearLabel = input<string | undefined>(undefined);
-  readonly closeLabel = input<string | undefined>(undefined);
-  readonly backLabel = input<string | undefined>(undefined);
-  readonly hintNavigate = input<string | undefined>(undefined);
-  readonly hintSelect = input<string | undefined>(undefined);
-  readonly hintClose = input<string | undefined>(undefined);
-  readonly hintBack = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * dialog's name (`label`), the input's name and placeholder, the empty,
+   * loading, count and error sentences, the recents heading, the clear, close
+   * and back controls, and the footer's hints.
+   */
+  readonly messages = input<PartialMessages<CommandPaletteMessages> | undefined>(undefined);
 
   /* ── The five values ──────────────────────────────────────────────────── */
 
@@ -544,35 +541,10 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
   protected readonly resolvedRecentLimit = computed(
     () => this.recentLimit() ?? this.defaults.recentLimit,
   );
-  protected readonly resolvedLabel = computed(() => this.label() ?? this.defaults.label);
-  protected readonly resolvedInputLabel = computed(
-    () => this.inputLabel() ?? this.defaults.inputLabel,
-  );
-  protected readonly resolvedPlaceholder = computed(
-    () => this.placeholder() ?? this.defaults.placeholder,
-  );
-  protected readonly resolvedEmptyLabel = computed(
-    () => this.emptyLabel() ?? this.defaults.emptyLabel,
-  );
-  protected readonly resolvedClearLabel = computed(
-    () => this.clearLabel() ?? this.defaults.clearLabel,
-  );
-  protected readonly resolvedCloseLabel = computed(
-    () => this.closeLabel() ?? this.defaults.closeLabel,
-  );
-  protected readonly resolvedBackLabel = computed(
-    () => this.backLabel() ?? this.defaults.backLabel,
-  );
-  protected readonly resolvedHintNavigate = computed(
-    () => this.hintNavigate() ?? this.defaults.hintNavigate,
-  );
-  protected readonly resolvedHintSelect = computed(
-    () => this.hintSelect() ?? this.defaults.hintSelect,
-  );
-  protected readonly resolvedHintClose = computed(
-    () => this.hintClose() ?? this.defaults.hintClose,
-  );
-  protected readonly resolvedHintBack = computed(() => this.hintBack() ?? this.defaults.hintBack);
+  /** The family's words in the language in force, with this palette's `messages` laid over them. */
+  readonly t = injectMessages(commandPaletteMessages, this.messages);
+  private readonly appLocale = injectLocale();
+  protected readonly resolvedLocale = computed(() => this.locale() ?? this.appLocale());
 
   /** Open for the stylesheet and the dialog: an inline palette is always open. */
   protected readonly isOpen = computed(() => this.inline() || this.open());
@@ -582,7 +554,7 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
 
   private readonly ranker = computed<CommandRanker<Item> | null>(() => {
     const own = this.rank();
-    return own === undefined ? createCommandRanker<Item>({ locale: this.locale() }) : own;
+    return own === undefined ? createCommandRanker<Item>({ locale: this.resolvedLocale() }) : own;
   });
 
   protected readonly rows = computed(() =>
@@ -609,12 +581,10 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
   private readonly error = signal<string | null>(null);
 
   protected readonly status = computed(() => {
-    if (this.loading()) return this.loadingLabel() ?? this.defaults.loadingLabel;
+    if (this.loading()) return this.t('loading');
     const failure = this.error();
-    if (failure !== null) {
-      return fill(this.errorLabel() ?? this.defaults.errorLabel, { message: failure });
-    }
-    return fill(this.countLabel() ?? this.defaults.countLabel, { count: this.rows().count });
+    if (failure !== null) return this.t('error', { message: failure });
+    return this.t('count', { count: this.rows().count });
   });
 
   constructor() {
@@ -681,8 +651,7 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
       const platform = this.platformOf();
       if (!matchesShortcut(event, keys, platform)) return;
       const bare = parseShortcut(keys)[0]?.every(
-        (token) =>
-          !['mod', 'meta', 'ctrl', 'alt'].includes(resolveKey(token, { platform }).token ?? ''),
+        (token) => !['mod', 'meta', 'ctrl', 'alt'].includes(canonicalKey(token) ?? ''),
       );
       if (bare === true && isEditableTarget(event)) return;
       event.preventDefault();
@@ -845,7 +814,7 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
   }
 
   protected headingOf(section: { recent: boolean; label: string | undefined }) {
-    return section.recent ? (this.recentLabel() ?? this.defaults.recentLabel) : section.label;
+    return section.recent ? this.t('recent') : section.label;
   }
 
   /** Whether the rows mark the query: the family's own switch, and a query to mark. */
@@ -863,7 +832,7 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
     if (!this.resolvedHighlightMatch() || query.trim() === '') {
       return [{ text: item.label, matched: false }];
     }
-    return splitByMatch(item.label, query, { locale: this.locale() });
+    return splitByMatch(item.label, query, { locale: this.resolvedLocale() });
   }
 
   protected keyshortcuts(item: Item) {

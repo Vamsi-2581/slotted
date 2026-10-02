@@ -1,4 +1,3 @@
-import { DOCUMENT } from '@angular/common';
 import { inject, Injectable, InjectionToken } from '@angular/core';
 import { RATING_INSIGHT_THRESHOLDS } from '@slotted/core/rating';
 import type { RatingInsightThresholds } from '@slotted/core/rating';
@@ -21,88 +20,16 @@ export type RatingDisplayVariant = 'full' | 'compact' | 'histogram';
 /** How the summary draws a distribution: one bar per level, or columns over the scale with the mean. */
 export type RatingSummaryVariant = 'bars' | 'spectrum';
 
-/**
- * Every sentence the family writes, in the ICU subset `formatRatingMessage`
- * reads: `{value}` and the other names are replaced by the number in the
- * locale's digits, and `{count, plural, one {…} other {…}}` picks the form the
- * locale's plural rules choose, `#` standing for the number.
- */
-export interface RatingMessages {
-  /** The accessible name of each radio. */
-  itemLabel: string;
-  /** The accessible name of the display. */
-  displayLabel: string;
-  /** The accessible name of the display when it carries a count. */
-  displayLabelWithCount: string;
-  /** The scale beside the summary's figure. */
-  scale: string;
-  /** The count under the summary's figure. */
-  summaryCount: string;
-  /** The count of a summary nobody has rated yet. */
-  summaryEmpty: string;
-  /** The count of a spectrum whose mean is trustworthy. */
-  spectrumCount: string;
-  /** The count of a spectrum whose margin reaches half a level. */
-  spectrumUncertain: string;
-  /** The accessible name of each level or column. */
-  levelLabel: string;
-  /** The accessible name of the list of levels. */
-  distributionLabel: string;
-  positive: string;
-  neutral: string;
-  negative: string;
-  divided: string;
-  few: string;
-  consensus: string;
-  mixed: string;
-}
-
-/**
- * The contract's `messages`, word for word; the spec asserts the equality.
- * The spectrum's two counts keep `± 0,04` and `2,0 e 4,5` on one line with
- * no-break spaces.
- */
-export const RATING_MESSAGES: RatingMessages = {
-  itemLabel: '{value} de {max}',
-  displayLabel: 'Avaliação {value} de {max}',
-  displayLabelWithCount:
-    'Avaliação {value} de {max}, {count, plural, =0 {# avaliações} one {# avaliação} other {# avaliações}}',
-  scale: 'de {max}',
-  summaryCount:
-    'Com base em {count, plural, =0 {# avaliações} one {# avaliação} other {# avaliações}}',
-  summaryEmpty: 'Ainda sem avaliações',
-  spectrumCount:
-    '{count, plural, =0 {# avaliações} one {# avaliação} other {# avaliações}} · margem de\u00a0±\u00a0{margin}',
-  spectrumUncertain:
-    '{count, plural, =0 {# avaliações} one {# avaliação} other {# avaliações}} · média incerta, entre {low}\u00a0e\u00a0{high}',
-  levelLabel:
-    '{level, plural, one {# estrela} other {# estrelas}}: {count, plural, =0 {# avaliações} one {# avaliação} other {# avaliações}}, {share}',
-  distributionLabel: 'Distribuição por estrelas',
-  positive: '{share} positivas',
-  neutral: '{share} neutras',
-  negative: '{share} negativas',
-  divided: 'Opiniões divididas',
-  few: 'Poucas avaliações',
-  consensus: 'Consenso forte',
-  mixed: 'Opiniões variadas',
-};
-
 export interface RatingDefaults {
   size: RatingSize;
   tone: RatingTone;
   max: number;
   clearable: boolean;
-  messages: RatingMessages;
   insightThresholds: RatingInsightThresholds;
-  /** The locale numbers are written in. Unset, the document's `lang`, then the runtime's. */
-  locale: string | undefined;
 }
 
-/** What `provideRating()` takes: every key optional, and the two records partial. */
-export type RatingDefaultsInput = Partial<
-  Omit<RatingDefaults, 'messages' | 'insightThresholds'>
-> & {
-  messages?: Partial<RatingMessages>;
+/** What `provideRating()` takes: every key optional, and the thresholds partial. */
+export type RatingDefaultsInput = Partial<Omit<RatingDefaults, 'insightThresholds'>> & {
   insightThresholds?: Partial<RatingInsightThresholds>;
 };
 
@@ -111,9 +38,7 @@ const FALLBACK: RatingDefaults = {
   tone: 'warning',
   max: 5,
   clearable: true,
-  messages: RATING_MESSAGES,
   insightThresholds: RATING_INSIGHT_THRESHOLDS,
-  locale: undefined,
 };
 
 export const SL_RATING_DEFAULTS = new InjectionToken<RatingDefaults>('slotted rating defaults', {
@@ -123,9 +48,10 @@ export const SL_RATING_DEFAULTS = new InjectionToken<RatingDefaults>('slotted ra
 
 /**
  * An application decides once how its ratings read — the step, the tone, the
- * scale, whether a press on the chosen star empties it, the words and the
- * thresholds of the summary's conclusion. A message or a threshold left out
- * keeps the family's; an instance that states any of them still wins.
+ * scale, whether a press on the chosen star empties it and the thresholds of
+ * the summary's conclusion. A threshold left out keeps the family's; an
+ * instance that states any of them still wins. The words and the locale come
+ * from the language in force (`provideSlotted`).
  */
 export function provideRating(defaults: RatingDefaultsInput) {
   return {
@@ -133,7 +59,6 @@ export function provideRating(defaults: RatingDefaultsInput) {
     useFactory: (): RatingDefaults => ({
       ...FALLBACK,
       ...defaults,
-      messages: { ...RATING_MESSAGES, ...defaults.messages },
       insightThresholds: { ...RATING_INSIGHT_THRESHOLDS, ...defaults.insightThresholds },
     }),
   };
@@ -142,16 +67,6 @@ export function provideRating(defaults: RatingDefaultsInput) {
 /** What a rating renders as here, before it states anything of its own. */
 export function injectRatingDefaults(): RatingDefaults {
   return inject(SL_RATING_DEFAULTS);
-}
-
-/**
- * The locale a member writes numbers in when neither the instance nor the
- * application names one: the document's `lang`, which is what a page already
- * declares its language with.
- */
-export function injectDocumentLocale(): string | undefined {
-  const lang = inject(DOCUMENT, { optional: true })?.documentElement?.lang;
-  return lang === undefined || lang === '' ? undefined : lang;
 }
 
 /**

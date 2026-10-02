@@ -8,6 +8,7 @@ import type {
   SegmentState,
   TimeGranularity,
 } from '@slotted/core/date';
+import type { DatetimeFieldMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -54,16 +55,11 @@ export interface DateTimeFieldChangeRequest extends ChangeRequest<PlainDateTime 
 export interface DateTimeFieldDefaults {
   /** Only `gregory` today. The axis exists so a second calendar can arrive. */
   calendar: 'gregory';
-  clearLabel: string;
-  /** The accessible name of the expression region. */
-  durationLabel: string;
   /** `0` is Sunday. Unset asks the locale. */
   firstDayOfWeek: number | undefined;
   granularity: TimeGranularity;
   /** Unset means the locale decides both the cycle and its variant. */
   hourCycle: DateTimeFieldHourCycle | undefined;
-  /** BCP 47. Unset means the runtime decides. */
-  locale: string | undefined;
   /** Whether `+`, `-` and `=` open the duration expression. */
   relative: boolean;
   size: DateTimeFieldSize;
@@ -151,7 +147,10 @@ export interface DateTimeFieldProps extends Omit<
    */
   isTimeUnavailable?: ((time: PlainTime, date: PlainDate) => boolean) | undefined;
 
-  /** BCP 47. Decides the field order, the separators and the placeholder. */
+  /**
+   * BCP 47. Decides the field order, the separators and the placeholder.
+   * Unset, the language in force decides.
+   */
   locale?: string | undefined;
   /** Which zone answers "what is the time now", and nothing else. */
   timeZone?: string | undefined;
@@ -179,11 +178,14 @@ export interface DateTimeFieldProps extends Omit<
 
   /** Draws a button that empties both halves and returns focus to the control. */
   clearable?: boolean | undefined;
-  clearLabel?: string | undefined;
 
   /** Whether `+`, `-` and `=` open the duration expression. */
   relative?: boolean | undefined;
-  durationLabel?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * clear button's name and the duration expression's name.
+   */
+  messages?: PartialMessages<DatetimeFieldMessages> | undefined;
 
   /** The name a plain form post carries the `YYYY-MM-DDTHH:mm:ss` string under. */
   name?: string | undefined;

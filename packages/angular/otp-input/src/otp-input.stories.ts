@@ -99,7 +99,7 @@ const FAMILY = [SlOtpInput, SlOtpInputControl];
           type="button"
           [disabled]="verified()"
           [loading]="verifying()"
-          loadingLabel="A verificar"
+          [messages]="{ loading: 'A verificar' }"
         >
           Confirmar
         </button>
@@ -703,7 +703,7 @@ export const States: Story = {
              <div slOtpInput [groups]="[3, 3]"><input slOtpInputControl defaultValue="482915" /></div>
            </div>
            <div class="slotted-demo-row">
-             <button slButton type="button" loading loadingLabel="A verificar">Confirmar</button>
+             <button slButton type="button" loading [messages]="{ loading: 'A verificar' }">Confirmar</button>
            </div>`,
         ) +
         scene(

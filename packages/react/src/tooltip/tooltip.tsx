@@ -134,6 +134,7 @@ export function Tooltip({
   const resolvedWhenClipped = whenClipped ?? defaults.whenClipped;
   const latest = useRef({
     current,
+    disabled: resolvedDisabled,
     group,
     onOpenChange,
     open,
@@ -142,6 +143,7 @@ export function Tooltip({
   });
   latest.current = {
     current,
+    disabled: resolvedDisabled,
     group,
     onOpenChange,
     open,
@@ -159,6 +161,12 @@ export function Tooltip({
       cancelPending();
       const state = latest.current;
       if (next === state.current) return;
+      /**
+       * Refused rather than recorded: an open granted while disabled is hidden
+       * by `current`, and the leave that follows finds nothing to close, so it
+       * would surface the moment `disabled` turned false.
+       */
+      if (next && state.disabled) return;
       /**
        * Measured here rather than watched: the answer is needed at the moment
        * the hint would open, and a box measured then is never a box two column
@@ -229,6 +237,13 @@ export function Tooltip({
   );
 
   useEffect(() => cancelPending, [cancelPending]);
+
+  /** Disabling cancels a waiting open and forgets an own open, so enabling opens nothing. */
+  useEffect(() => {
+    if (!resolvedDisabled) return;
+    cancelPending();
+    setOwn(false);
+  }, [cancelPending, resolvedDisabled]);
 
   useImperativeHandle(
     ref,

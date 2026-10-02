@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createRef } from 'react';
 
+import { SlottedProvider } from '../i18n';
 import { Kbd, KbdDefaultsProvider, Shortcut } from './index';
 
 const legends = (element: HTMLElement) =>
@@ -264,6 +266,20 @@ describe('Shortcut', () => {
   });
 });
 
+describe('Kbd language', () => {
+  it('writes and names its keys in the language in force', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Shortcut data-testid="shortcut" keys="space g" platform="windows" />
+      </SlottedProvider>,
+    );
+
+    const shortcut = screen.getByTestId('shortcut');
+    expect(legends(shortcut)).toEqual(['Espaço', 'G']);
+    expect(shortcut.querySelector('[data-separator="then"]')).toHaveTextContent('depois');
+  });
+});
+
 describe('KbdDefaultsProvider', () => {
   it('sets the platform, the painting and the wording once for a subtree', () => {
     render(
@@ -272,10 +288,9 @@ describe('KbdDefaultsProvider', () => {
         names={{ ctrl: 'Steuerung' }}
         platform="windows"
         size="sm"
-        thenLabel="dann"
         variant="soft"
       >
-        <Shortcut data-testid="shortcut" keys="ctrl+k ctrl+s" />
+        <Shortcut data-testid="shortcut" keys="ctrl+k ctrl+s" messages={{ then: 'dann' }} />
       </KbdDefaultsProvider>,
     );
 

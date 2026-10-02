@@ -1,6 +1,5 @@
 import { inject, Injectable, InjectionToken } from '@angular/core';
-import { DEFAULT_IMPORT_EXPORT_MESSAGES } from '@slotted/core/import-export-center';
-import type { ImportExportMessages, JobFileRole } from '@slotted/core/import-export-center';
+import type { JobFileRole } from '@slotted/core/import-export-center';
 
 export type ImportExportCenterSize = 'sm' | 'md';
 
@@ -51,8 +50,6 @@ export interface ImportExportView {
 export interface ImportExportCenterDefaults {
   growing: ImportExportCenterGrowing;
   level: ImportExportCenterLevel;
-  locale?: string | undefined;
-  messages: ImportExportMessages;
   size: ImportExportCenterSize;
   timeFormat: ImportExportCenterTimeFormat;
   timeZone?: string | undefined;
@@ -61,7 +58,6 @@ export interface ImportExportCenterDefaults {
 const FALLBACK: ImportExportCenterDefaults = {
   growing: 'none',
   level: '2',
-  messages: DEFAULT_IMPORT_EXPORT_MESSAGES,
   size: 'md',
   timeFormat: 'relative',
 };
@@ -73,21 +69,14 @@ export const IMPORT_EXPORT_CENTER_DEFAULTS = new InjectionToken<ImportExportCent
 
 /**
  * An application decides once how its job centre reads — the size, the rank,
- * how history loads, how time is written, the locale and zone, the words.
- * A centre that states any of them still wins.
+ * how history loads, how time is written and in which zone. A centre that
+ * states any of them still wins. Its words and the locale come from the
+ * language in force (`provideSlotted`).
  */
-export function provideImportExportCenterDefaults(
-  defaults: Partial<Omit<ImportExportCenterDefaults, 'messages'>> & {
-    messages?: Partial<ImportExportMessages>;
-  },
-) {
+export function provideImportExportCenterDefaults(defaults: Partial<ImportExportCenterDefaults>) {
   return {
     provide: IMPORT_EXPORT_CENTER_DEFAULTS,
-    useFactory: (): ImportExportCenterDefaults => ({
-      ...FALLBACK,
-      ...defaults,
-      messages: { ...FALLBACK.messages, ...defaults.messages },
-    }),
+    useFactory: (): ImportExportCenterDefaults => ({ ...FALLBACK, ...defaults }),
   };
 }
 

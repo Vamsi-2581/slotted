@@ -76,7 +76,7 @@ export function Month({ anchorMonth, occurrences, titleId, weeks }: MonthProps) 
         <tr data-part="weekdays">
           {model.weekNumbers ? (
             <th data-part="week-number-header" scope="col">
-              <span data-ui="visually-hidden">{model.labels.weekNumber}</span>
+              <span data-ui="visually-hidden">{model.t('weekNumber')}</span>
             </th>
           ) : null}
           {first.map((date) => (
@@ -159,7 +159,7 @@ export function Month({ anchorMonth, occurrences, titleId, weeks }: MonthProps) 
                         <div data-part="day-content">{content}</div>
                       )}
                       <span data-ui="visually-hidden" id={countId}>
-                        {model.labels.events(count)}
+                        {model.t('events', { count })}
                       </span>
                     </div>
                     <div data-part="day-events">
@@ -185,21 +185,21 @@ export function Month({ anchorMonth, occurrences, titleId, weeks }: MonthProps) 
                       })}
                       {continuing.map((segment) => (
                         <span data-part="continuation" key={segment.occurrence.key}>
-                          {`${segment.occurrence.event.title}, ${model.labels.continues}`}
+                          {model.t('titleContinues', { title: segment.occurrence.event.title })}
                         </span>
                       ))}
                       {more > 0 ? (
                         <button
                           aria-expanded={model.moreDate === iso}
                           aria-haspopup="dialog"
-                          aria-label={model.labels.moreEvents(more)}
+                          aria-label={model.t('moreEvents', { count: more })}
                           data-part="more"
                           onClick={(clicked) => model.openMore(date, clicked.currentTarget)}
                           tabIndex={-1}
                           type="button"
                         >
                           {`+${more}`}
-                          <span>{model.labels.more}</span>
+                          <span>{model.t('more')}</span>
                         </button>
                       ) : null}
                     </div>

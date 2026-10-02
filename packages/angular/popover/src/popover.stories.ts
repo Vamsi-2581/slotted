@@ -376,7 +376,7 @@ export const Composition: Story = {
   parameters: scenario('composition'),
   decorators: [
     applicationConfig({
-      providers: [providePopoverDefaults({ closeLabel: 'Close the panel', size: 'lg' })],
+      providers: [providePopoverDefaults({ size: 'lg' })],
     }),
   ],
   render: () => ({
@@ -386,7 +386,12 @@ export const Composition: Story = {
         'A form in a panel, portalled as it would be in an application',
         'This one keeps the default portal, so the layer is rendered at the end of the document and inherits the theme, scheme, density and direction of the region it was opened from. The controls inside are the consumer own.',
         viewport(`
-          <ng-container slPopover side="bottom" initialFocus="input">
+          <ng-container
+            slPopover
+            side="bottom"
+            initialFocus="input"
+            [messages]="{ close: 'Close the panel' }"
+          >
             <button slButton slPopoverTrigger type="button">New invoice</button>
             <ng-template slPopoverLayer>
               <div slPopoverContent>

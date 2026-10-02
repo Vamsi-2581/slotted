@@ -24,6 +24,7 @@ import {
 } from '@angular/core';
 import type { ComponentRef } from '@angular/core';
 import { SlButton } from '@slotted/angular/button';
+import { injectMessages } from '@slotted/angular/i18n';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissReason, DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createFocusScope, tabbables } from '@slotted/core/focus';
@@ -33,6 +34,7 @@ import type { PortalRootHandle } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceStatus } from '@slotted/core/presence';
+import { tourMessages, type PartialMessages, type TourMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import {
   cardFits,
@@ -55,7 +57,6 @@ import { injectTourDefaults, SlTourIdFactory } from './tour-defaults';
 import type {
   TourAlign,
   TourFocusTarget,
-  TourLabels,
   TourLayout,
   TourMissing,
   TourOpenReason,
@@ -192,10 +193,10 @@ function directionOf(node: Element): 'ltr' | 'rtl' {
           <div slTourBody></div>
           <div slTourFooter>
             <button slButton slTourSkip size="sm" tone="secondary" variant="ghost">
-              {{ tour.skipLabel() }}
+              {{ tour.t('skip') }}
             </button>
             <button slButton slTourPrev size="sm" tone="secondary" variant="outline">
-              {{ tour.prevLabel() }}
+              {{ tour.t('prev') }}
             </button>
             <button
               slButton
@@ -204,9 +205,9 @@ function directionOf(node: Element): 'ltr' | 'rtl' {
               tone="accent"
               variant="solid"
               [loading]="tour.pending()"
-              [loadingLabel]="tour.labels().preparing"
+              [messages]="{ loading: tour.t('preparing') }"
             >
-              {{ tour.nextLabel() }}
+              {{ tour.t(tour.last() ? 'done' : 'next') }}
             </button>
           </div>
         </div>
@@ -262,7 +263,8 @@ export class SlTour implements TourContext {
   readonly side = input<TourSide | undefined>(undefined);
   readonly align = input<TourAlign | undefined>(undefined);
   readonly missing = input<TourMissing | undefined>(undefined);
-  readonly labelsInput = input<Partial<TourLabels> | undefined>(undefined, { alias: 'labels' });
+  /** Words laid over the catalog of the language in force, key by key. */
+  readonly messages = input<PartialMessages<TourMessages> | undefined>(undefined);
   readonly finalFocus = input<TourFocusTarget | undefined>(undefined);
 
   readonly arrow = input<boolean | undefined, boolean | string | undefined>(undefined, {
@@ -351,10 +353,13 @@ export class SlTour implements TourContext {
   readonly drawn = signal<ResolvedStep<TourStep> | null>(null);
   readonly current = computed(() => this.drawn()?.step ?? null);
 
-  readonly labels = computed<TourLabels>(() => ({
-    ...this.defaults.labels,
-    ...definedOnly(this.labelsInput() ?? {}),
-  }));
+  /** The tour's own words and the drawn step's, laid over the catalog in that order. */
+  private readonly override = computed(() => {
+    const step = this.current()?.messages;
+    return step === undefined ? this.messages() : { ...this.messages(), ...step };
+  });
+  /** The family's words in the language in force, with the tour's and the step's `messages` laid over them. */
+  readonly t = injectMessages(tourMessages, this.override);
 
   readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   /** The viewport is in the compact size class: a lateral side turns vertical, the card takes the width. */
@@ -399,12 +404,6 @@ export class SlTour implements TourContext {
   readonly showNext = computed(
     () => this.current()?.actions?.next ?? this.current()?.advanceOn === undefined,
   );
-  readonly nextLabel = computed(() => {
-    const own = this.current()?.labels;
-    return this.last() ? (own?.done ?? this.labels().done) : (own?.next ?? this.labels().next);
-  });
-  readonly prevLabel = computed(() => this.current()?.labels?.prev ?? this.labels().prev);
-  readonly skipLabel = computed(() => this.current()?.labels?.skip ?? this.labels().skip);
 
   private readonly namedTemplate = (slot: 'body' | 'media') =>
     this.stepTemplates().find((entry) => entry.id() === this.current()?.id && entry.slot() === slot)
@@ -972,10 +971,4 @@ export class SlTour implements TourContext {
           : (named as HTMLElement);
     if (destination?.isConnected) destination.focus();
   }
-}
-
-function definedOnly<T extends object>(values: T): Partial<T> {
-  return Object.fromEntries(
-    Object.entries(values).filter(([, value]) => value !== undefined),
-  ) as Partial<T>;
 }

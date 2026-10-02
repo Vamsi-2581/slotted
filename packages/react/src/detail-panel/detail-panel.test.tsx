@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/detail-panel/contract.json';
+import { SlottedProvider } from '../i18n';
 import { PageHeader, PageHeaderHeading, PageHeaderTabs, PageHeaderTitle } from '../page-header';
 import { DetailPanel } from './detail-panel';
 import { DetailPanelDefaultsProvider } from './detail-panel-defaults';
@@ -243,16 +245,26 @@ describe('DetailPanel', () => {
     const { unmount } = render(<Order />);
     const aside = () => document.querySelector('[data-part="aside"]') as HTMLElement;
     expect(aside().tagName).toBe('ASIDE');
-    expect(aside().getAttribute('aria-label')).toBe('Detalhes');
+    expect(aside().getAttribute('aria-label')).toBe('Details');
     unmount();
     render(
-      <DetailPanelDefaultsProvider messages={{ aside: 'Campos' }} aside="start" layout="tabs">
-        <Order />
+      <DetailPanelDefaultsProvider aside="start" layout="tabs">
+        <Order messages={{ aside: 'Campos' }} />
       </DetailPanelDefaultsProvider>,
     );
     expect(aside().getAttribute('aria-label')).toBe('Campos');
     expect(root().dataset['aside']).toBe('start');
     expect(root().dataset['layout']).toBe('tabs');
+  });
+
+  it('speaks the language in force', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Order />
+      </SlottedProvider>,
+    );
+    const aside = document.querySelector('[data-part="aside"]') as HTMLElement;
+    expect(aside.getAttribute('aria-label')).toBe('Detalhes');
   });
 
   it('renders no aside under aside="none" and no banner or footer when none is written', () => {

@@ -136,7 +136,7 @@ test('declares copying as a capability that holds no state', () => {
 test('does the part it still can when the platform refuses the clipboard', () => {
   assert.match(contract.copy.blocked, /selects the value/);
   assert.match(contract.copy.blocked, /clipboard-write/);
-  assert.equal(contract.labels.copyBlocked.length > 0, true);
+  assert.ok(contract.messages.includes('copyBlocked'));
 });
 
 /**
@@ -187,8 +187,8 @@ test('gives a long value two ways out and takes none of it away', () => {
   assert.ok(list.parts.includes('copy'));
   assert.ok(list.parts.includes('toggle'));
   assert.equal(list.defaults.clamp, 0);
-  assert.equal(contract.labels.reveal, 'Show more');
-  assert.equal(contract.labels.collapse, 'Show less');
+  assert.ok(contract.messages.includes('reveal'));
+  assert.ok(contract.messages.includes('collapse'));
 });
 
 /**
@@ -241,7 +241,7 @@ test('draws a missing value and says why it is missing', () => {
   assert.equal(contract.empty.part, 'placeholder');
   assert.match(contract.empty.text, /visually-hidden/);
   assert.match(contract.empty.forms, /:empty/);
-  assert.equal(contract.labels.placeholder, 'Not provided');
+  assert.ok(contract.messages.includes('placeholder'));
 });
 
 test('answers every axis from the prop, then the provider, then a stated default', () => {
@@ -272,17 +272,13 @@ test('states the reason for every literal it writes', () => {
 });
 
 /**
- * An application decides its arrangement, its labels and its placeholder once.
- * Every value the provider carries is a value a part reads.
- */
-/**
- * The five words the family says are one input rather than five declared
+ * The six words the family says are catalog messages rather than declared
  * defaults. A default is a value a consumer overrides one at a time; a
- * vocabulary is translated once, which is why `stepper` groups its own the same
- * way and why neither set appears in `defaults`.
+ * vocabulary is translated once, which is why none of them appears in
+ * `defaults`.
  */
 test('holds the words it says apart from the values it defaults', () => {
-  assert.deepEqual(Object.keys(contract.labels).sort(), [
+  assert.deepEqual([...contract.messages].sort(), [
     'collapse',
     'copied',
     'copy',
@@ -290,24 +286,22 @@ test('holds the words it says apart from the values it defaults', () => {
     'placeholder',
     'reveal',
   ]);
-  for (const [key, word] of Object.entries(contract.labels)) {
-    assert.ok(word.length > 0, `${key} says nothing`);
-  }
   /* `copy` is a word here and a boolean input there — the control's name and
      whether it is drawn are two questions, and neither borrows the other's
      answer. Every other word stays out of the defaults entirely. */
   for (const key of ['collapse', 'copied', 'copyBlocked', 'placeholder', 'reveal']) {
     assert.ok(!(key in list.defaults), `${key} is a word, not a default`);
   }
-  assert.ok(contract.labelsReason.length > 40);
+  assert.ok(contract.messagesReason.length > 40);
 });
 
+/**
+ * An application decides its arrangement once. Every value the provider
+ * carries is a value a part reads.
+ */
 test('lets an application set the whole family once', () => {
   for (const key of contract.provides.descriptionListDefaults) {
-    assert.ok(
-      key in list.defaults || key === 'labels',
-      `${key} is provided and is neither a default nor the vocabulary`,
-    );
+    assert.ok(key in list.defaults, `${key} is provided and is not a default`);
   }
   for (const axis of contract.provides.toParts) {
     assert.ok(axis in contract.axes, `${axis} reaches the parts and is not an axis`);

@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "datetime-field",
   "ui": "datetime-field",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Typed date and time input in segments."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/spinbutton/",
   "patternStatus": "Read on 2026-09-10 and transcribed key by key into docs/history/designs/2026-09-10-datetime-design.md §2. The table is time-field's, widened by the three date fields; the example the pattern links is deprecated for its visible increment and decrement buttons, and its roles, its wrapping rule and its aria-valuetext guidance are taken whole.",
   "controlPart": "segments",
@@ -259,7 +263,7 @@
   "resolution": {
     "size": ["prop", "field", "defaults", "md"],
     "variant": ["prop", "defaults", "outline"],
-    "locale": ["prop", "defaults", "runtime"],
+    "locale": ["prop", "slotted", "en-US"],
     "timeZone": ["prop", "defaults", "runtime"],
     "hourCycle": ["prop", "defaults", "locale"],
     "granularity": ["prop", "defaults", "minute"],
@@ -270,12 +274,9 @@
   "provides": {
     "dateTimeFieldDefaults": [
       "calendar",
-      "clearLabel",
-      "durationLabel",
       "firstDayOfWeek",
       "granularity",
       "hourCycle",
-      "locale",
       "relative",
       "size",
       "timeZone",
@@ -283,6 +284,7 @@
       "yearPivot"
     ]
   },
+  "messages": ["clear", "duration"],
   "imperative": ["focus", "clear"],
   "stateAttributes": {
     "disabled": "data-disabled",

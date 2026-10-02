@@ -2,7 +2,9 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SlField, SlFieldError, SlFieldLabel } from '@slotted/angular/field';
-import { describe, expect, it } from 'vitest';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/switch/contract.json';
 import { activationReason, SlSwitch } from './switch';
@@ -200,6 +202,29 @@ describe('SlSwitch', () => {
     expect(control(fixture).getAttribute('aria-busy')).toBe('true');
     expect(root(fixture).getAttribute('data-loading')).toBe('');
     expect(control(fixture).getAttribute('aria-describedby')).toContain('-pending');
+  });
+
+  it('announces the pending word of the language in force, and follows a change of it in place', () => {
+    vi.useFakeTimers();
+    try {
+      const locale = signal('pt-BR');
+      const fixture = renderTemplate(`<span slSwitch [loading]="loading()">Backup diário</span>`, [
+        provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+      ]);
+      fixture.componentInstance.loading.set(true);
+      fixture.detectChanges();
+      vi.advanceTimersByTime(2000);
+      fixture.detectChanges();
+      const status = () => query(fixture, '[role="status"]').textContent?.trim();
+
+      expect(status()).toBe('Salvando');
+
+      locale.set('en-US');
+      fixture.detectChanges();
+      expect(status()).toBe('Saving');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('is disabled natively, and answers nothing when it is', () => {

@@ -9,7 +9,13 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  numberFieldMessages,
+  type NumberFieldMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import {
   STEP_REPEAT_DELAY,
   STEP_REPEAT_DELAY_COARSE,
@@ -61,7 +67,7 @@ export type {
         type="button"
         tabindex="-1"
         [attr.aria-controls]="control()?.controlId()"
-        [attr.aria-label]="resolvedDecrementLabel()"
+        [attr.aria-label]="t('decrement')"
         [disabled]="decrementDisabled()"
         (pointerdown)="press(-1, $event)"
         (pointerup)="release()"
@@ -80,7 +86,7 @@ export type {
         type="button"
         tabindex="-1"
         [attr.aria-controls]="control()?.controlId()"
-        [attr.aria-label]="resolvedIncrementLabel()"
+        [attr.aria-label]="t('increment')"
         [disabled]="incrementDisabled()"
         (pointerdown)="press(1, $event)"
         (pointerup)="release()"
@@ -96,7 +102,7 @@ export type {
           type="button"
           tabindex="-1"
           [attr.aria-controls]="control()?.controlId()"
-          [attr.aria-label]="resolvedIncrementLabel()"
+          [attr.aria-label]="t('increment')"
           [disabled]="incrementDisabled()"
           (pointerdown)="press(1, $event)"
           (pointerup)="release()"
@@ -112,7 +118,7 @@ export type {
           type="button"
           tabindex="-1"
           [attr.aria-controls]="control()?.controlId()"
-          [attr.aria-label]="resolvedDecrementLabel()"
+          [attr.aria-label]="t('decrement')"
           [disabled]="decrementDisabled()"
           (pointerdown)="press(-1, $event)"
           (pointerup)="release()"
@@ -153,10 +159,11 @@ export class SlNumberField {
   readonly variant = input<NumberFieldVariant | undefined>(undefined);
   /** Where the two steppers sit. Defaults to the token, then to `stacked`. */
   readonly stepper = input<NumberFieldStepper | undefined>(undefined);
-  /** The increment button's accessible name. Defaults to the token's. */
-  readonly incrementLabel = input<string | undefined>(undefined);
-  /** The decrement button's accessible name. Defaults to the token's. */
-  readonly decrementLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * `increment` and `decrement` buttons' accessible names.
+   */
+  readonly messages = input<PartialMessages<NumberFieldMessages> | undefined>(undefined);
 
   private readonly defaults = injectNumberFieldDefaults();
   private readonly field = inject(SlField, { optional: true });
@@ -173,12 +180,8 @@ export class SlNumberField {
   );
   readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   readonly resolvedStepper = computed(() => this.stepper() ?? this.defaults.stepper);
-  protected readonly resolvedIncrementLabel = computed(
-    () => this.incrementLabel() ?? this.defaults.incrementLabel,
-  );
-  protected readonly resolvedDecrementLabel = computed(
-    () => this.decrementLabel() ?? this.defaults.decrementLabel,
-  );
+  /** The family's words in the language in force, with this field's `messages` laid over them. */
+  readonly t = injectMessages(numberFieldMessages, this.messages);
 
   /** Whether a `slNumberFieldScrub` inside is being dragged. */
   readonly scrubbing = signal(false);

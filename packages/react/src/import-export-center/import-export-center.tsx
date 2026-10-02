@@ -21,12 +21,13 @@ import type {
   FocusableJob,
   FocusMemory,
   ImportExportJob,
-  ImportExportMessages,
+  ImportExportTranslator,
   JobControl,
   JobFile,
   JobFileRole,
   ProgressSample,
 } from '@slotted/core/import-export-center';
+import { importExportCenterMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason } from '@slotted/core/state';
@@ -49,6 +50,7 @@ import {
 } from 'react';
 
 import { Button, ButtonLink } from '../button';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import type { GlyphName } from '../icon';
 import { ProgressBar } from '../progress-indicator';
@@ -209,8 +211,9 @@ interface JobContext {
     details: string;
     control: (part: string) => string;
   };
-  locale: string | undefined;
-  messages: ImportExportMessages;
+  locale: string;
+  /** The family's words in the language in force, with the centre's `messages` laid over them. */
+  t: ImportExportTranslator;
   now: number | undefined;
   remaining: ReadonlyMap<string, number | null>;
   timeFormat: 'relative' | 'absolute';
@@ -302,14 +305,14 @@ function messageOf(job: ImportExportJob, context: JobContext): string | null {
   if (availability === 'denied') return result.denied ?? null;
   if (result.expiresAt === undefined) return null;
   if (availability === 'expired')
-    return context.messages.expired(deadlineText(result.expiresAt, context));
+    return context.t('expired', { date: deadlineText(result.expiresAt, context) });
   if (availability === 'expires')
-    return context.messages.expires(deadlineText(result.expiresAt, context));
+    return context.t('expires', { date: deadlineText(result.expiresAt, context) });
   return null;
 }
 
 function Details({ context, job }: { context: JobContext; job: ImportExportJob }) {
-  const { messages, locale } = context;
+  const { t, locale } = context;
   const ids = context.ids(job.key);
   const count = new Intl.NumberFormat(locale);
   const clock = { now: context.now, timeZone: context.timeZone };
@@ -333,7 +336,7 @@ function Details({ context, job }: { context: JobContext; job: ImportExportJob }
         <dl data-part="counts">
           {countKeys.map((name) => (
             <div data-count={name} key={name}>
-              <dt>{messages.countLabels[name]}</dt>
+              <dt>{t(`countLabels.${name}`)}</dt>
               <dd>{count.format(counts[name] ?? 0)}</dd>
             </div>
           ))}
@@ -349,13 +352,13 @@ function Details({ context, job }: { context: JobContext; job: ImportExportJob }
                 : file.expiresAt === undefined
                   ? undefined
                   : availability === 'expired'
-                    ? messages.expired(deadlineText(file.expiresAt, context))
-                    : messages.expires(deadlineText(file.expiresAt, context));
+                    ? t('expired', { date: deadlineText(file.expiresAt, context) })
+                    : t('expires', { date: deadlineText(file.expiresAt, context) });
             const canDownload = availability === 'available' || availability === 'expires';
             return (
               <li data-part="file" data-availability={availability} key={role}>
                 <span data-part="meta">
-                  <strong>{messages.fileLabels[role]}</strong>
+                  <strong>{t(`fileLabels.${role}`)}</strong>
                   <span>
                     <FileName name={file.name} />
                   </span>
@@ -367,7 +370,7 @@ function Details({ context, job }: { context: JobContext; job: ImportExportJob }
                     context={context}
                     file={file}
                     job={job}
-                    label={messages.download}
+                    label={t('download')}
                     role={role}
                     variant="ghost"
                   />
@@ -381,13 +384,13 @@ function Details({ context, job }: { context: JobContext; job: ImportExportJob }
         <div data-part="errors">
           <Table columns={4} variant="framed">
             <TableContent>
-              <TableCaption>{messages.errorsCaption}</TableCaption>
+              <TableCaption>{t('errorsCaption')}</TableCaption>
               <TableHead>
                 <TableRow>
-                  <TableColumnHeader numeric>{messages.errorColumns.row}</TableColumnHeader>
-                  <TableColumnHeader>{messages.errorColumns.message}</TableColumnHeader>
-                  <TableColumnHeader>{messages.errorColumns.column}</TableColumnHeader>
-                  <TableColumnHeader>{messages.errorColumns.value}</TableColumnHeader>
+                  <TableColumnHeader numeric>{t('errorColumns.row')}</TableColumnHeader>
+                  <TableColumnHeader>{t('errorColumns.message')}</TableColumnHeader>
+                  <TableColumnHeader>{t('errorColumns.column')}</TableColumnHeader>
+                  <TableColumnHeader>{t('errorColumns.value')}</TableColumnHeader>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -404,7 +407,7 @@ function Details({ context, job }: { context: JobContext; job: ImportExportJob }
           </Table>
           {total > errors.length ? (
             <p data-part="errors-note">
-              <span>{messages.sample(count.format(errors.length), count.format(total))}</span>
+              <span>{t('sample', { shown: errors.length, total })}</span>
             </p>
           ) : null}
         </div>
@@ -414,7 +417,7 @@ function Details({ context, job }: { context: JobContext; job: ImportExportJob }
 }
 
 function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
-  const { messages, locale } = context;
+  const { t, locale } = context;
   const ids = context.ids(job.key);
   const clock = { now: context.now, timeZone: context.timeZone };
   const outcome = jobOutcome(job);
@@ -437,9 +440,9 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
         });
   const progressText =
     job.status === 'running'
-      ? jobProgressText(job, { locale, messages, remaining: context.remaining.get(job.key) })
+      ? jobProgressText(job, { locale, t, remaining: context.remaining.get(job.key) })
       : [];
-  const summary = jobSummaryText(job, { locale, messages });
+  const summary = jobSummaryText(job, { locale, t });
   const message = messageOf(job, context);
   const actions = context.renderJobActions?.(job);
   const labelled = (part: string) => `${ids.control(part)} ${ids.title}`;
@@ -464,7 +467,7 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
             id={ids.control('download')}
             job={job}
             key={part}
-            label={role === 'errors' ? messages.downloadErrors : messages.download}
+            label={role === 'errors' ? t('downloadErrors') : t('download')}
             labelledBy={labelled('download')}
             role={role}
             variant="outline"
@@ -490,10 +493,10 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
               variant="outline"
             >
               {part === 'cancel'
-                ? messages.cancel
+                ? t('cancel')
                 : controls.retry === 'regenerate'
-                  ? messages.regenerate
-                  : messages.retry}
+                  ? t('regenerate')
+                  : t('retry')}
             </Button>
           </span>
         );
@@ -517,7 +520,7 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
               tone="secondary"
               variant="ghost"
             >
-              {messages.details}
+              {t('details')}
             </Button>
           </span>
         );
@@ -526,7 +529,7 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
           <RemoveControl
             describedBy={ids.title}
             key={part}
-            label={messages.remove}
+            label={t('remove')}
             onPress={(event) =>
               context.onRemove?.({ keys: [job.key] }, createRequest(pressReason(event), event))
             }
@@ -566,7 +569,7 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
             </a>
           )}
           <p data-part="meta">
-            <span>{messages[job.direction]}</span>
+            <span>{t(job.direction)}</span>
             {job.format === undefined ? null : <span>{job.format}</span>}
             {file === undefined ? null : (
               <span>
@@ -597,7 +600,7 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
             )}
           </span>
           <span data-part="status-label">
-            <span>{jobStatusText(job, messages)}</span>
+            <span>{jobStatusText(job, t)}</span>
             {job.stage === undefined || job.stage === '' ? null : (
               <span data-part="stage" title={job.stage}>
                 {job.stage}
@@ -717,14 +720,12 @@ export function ImportExportCenter({
 
   const resolvedGrowing = growing ?? defaults.growing;
   const resolvedLevel = level ?? defaults.level;
-  const resolvedLocale = locale ?? defaults.locale;
+  const contextLocale = useLocale();
+  const resolvedLocale = locale ?? contextLocale;
   const resolvedSize = size ?? defaults.size;
   const resolvedTimeFormat = timeFormat ?? defaults.timeFormat;
   const resolvedTimeZone = timeZone ?? defaults.timeZone;
-  const resolvedMessages = useMemo(
-    () => ({ ...defaults.messages, ...messages }),
-    [defaults.messages, messages],
-  );
+  const t = useMessages(importExportCenterMessages, messages);
 
   const [root, setRoot] = useState<HTMLElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
@@ -734,11 +735,11 @@ export function ImportExportCenter({
   const resolvedViews: readonly ImportExportView[] = useMemo(
     () =>
       views ?? [
-        { label: resolvedMessages.all, value: 'all' },
-        { label: resolvedMessages.imports, value: 'import' },
-        { label: resolvedMessages.exports, value: 'export' },
+        { label: t('all'), value: 'all' },
+        { label: t('imports'), value: 'import' },
+        { label: t('exports'), value: 'export' },
       ],
-    [views, resolvedMessages],
+    [views, t],
   );
   const [ownView, setOwnView] = useState<string | undefined>(defaultView);
   const currentView = view ?? ownView ?? resolvedViews[0]?.value ?? 'all';
@@ -823,7 +824,7 @@ export function ImportExportCenter({
     for (const job of jobs) {
       const transition = jobTransition(seen.get(job.key), job);
       if (transition === null) continue;
-      getLiveAnnouncer().announce(jobAnnouncement(transition, job, resolvedMessages));
+      getLiveAnnouncer().announce(jobAnnouncement(transition, job, t));
     }
     /* The jobs are the dependency; the words are not state. */
   }, [jobs]);
@@ -997,7 +998,6 @@ export function ImportExportCenter({
     expanded: new Set(currentExpanded),
     ids,
     locale: resolvedLocale,
-    messages: resolvedMessages,
     now,
     onCancel,
     onDownload,
@@ -1007,6 +1007,7 @@ export function ImportExportCenter({
     onToggle: toggle,
     remaining,
     renderJobActions,
+    t,
     timeFormat: resolvedTimeFormat,
     timeZone: resolvedTimeZone,
   };
@@ -1020,10 +1021,10 @@ export function ImportExportCenter({
 
   const emptyTitle =
     currentView === 'import'
-      ? resolvedMessages.emptyImports
+      ? t('emptyImports')
       : currentView === 'export'
-        ? resolvedMessages.emptyExports
-        : resolvedMessages.empty;
+        ? t('emptyExports')
+        : t('empty');
 
   const rootProps: ImportExportCenterRootProps = {
     ...nativeProps,
@@ -1034,11 +1035,11 @@ export function ImportExportCenter({
       <>
         <div data-part="header">
           <Heading data-part="title" id={titleId}>
-            {resolvedMessages.title}
+            {t('title')}
             {active > 0 ? (
               <>
                 {' '}
-                <span data-part="count">{resolvedMessages.active(active)}</span>
+                <span data-part="count">{t('active', { count: active })}</span>
               </>
             ) : null}
           </Heading>
@@ -1057,7 +1058,7 @@ export function ImportExportCenter({
                     tone="secondary"
                     variant="ghost"
                   >
-                    {resolvedMessages.clear}
+                    {t('clear')}
                   </Button>
                 </span>
               ) : null}
@@ -1075,7 +1076,7 @@ export function ImportExportCenter({
               track="none"
               value={currentView}
             >
-              <TabList aria-label={resolvedMessages.views}>
+              <TabList aria-label={t('views')}>
                 {resolvedViews.map((entry) => (
                   <Tab controls={listId} key={entry.value} value={entry.value}>
                     {entry.label}
@@ -1089,10 +1090,8 @@ export function ImportExportCenter({
           <div data-part="error">
             <ResultState live="off" reach="section" status="error">
               <ResultStateContent>
-                <ResultStateTitle>{resolvedMessages.loadError}</ResultStateTitle>
-                <ResultStateDescription>
-                  {resolvedMessages.loadErrorDescription}
-                </ResultStateDescription>
+                <ResultStateTitle>{t('loadError')}</ResultStateTitle>
+                <ResultStateDescription>{t('loadErrorDescription')}</ResultStateDescription>
               </ResultStateContent>
               <ResultStateActions>
                 <Button
@@ -1101,7 +1100,7 @@ export function ImportExportCenter({
                   tone="secondary"
                   variant="outline"
                 >
-                  {resolvedMessages.reload}
+                  {t('reload')}
                 </Button>
               </ResultStateActions>
             </ResultState>
@@ -1112,9 +1111,7 @@ export function ImportExportCenter({
               <ResultState live="off" reach="section" status="empty">
                 <ResultStateContent>
                   <ResultStateTitle>{emptyTitle}</ResultStateTitle>
-                  <ResultStateDescription>
-                    {resolvedMessages.emptyDescription}
-                  </ResultStateDescription>
+                  <ResultStateDescription>{t('emptyDescription')}</ResultStateDescription>
                 </ResultStateContent>
               </ResultState>
             )}
@@ -1155,7 +1152,7 @@ export function ImportExportCenter({
             }}
             type="button"
           >
-            {loading ? resolvedMessages.loading : resolvedMessages.loadMore}
+            {loading ? t('loading') : t('loadMore')}
           </button>
         ) : null}
         {presentNode(footer) ? <div data-part="footer">{footer}</div> : null}

@@ -1,3 +1,4 @@
+import type { ComboboxMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -12,7 +13,10 @@ export type ComboboxStrategy = 'absolute' | 'fixed';
 /** The pattern's own three values for `aria-autocomplete`. */
 export type ComboboxAutocomplete = 'none' | 'list' | 'both';
 
-/** When the popup opens on its own: as the reader types, on focus, or never. */
+/**
+ * When the popup opens on its own: as the reader types or presses the input, on
+ * every focus and press, or never.
+ */
 export type ComboboxOpenOn = 'input' | 'focus' | 'manual';
 
 /** An option's key. The reasoning is `select`'s, and it is the same reasoning. */
@@ -66,23 +70,17 @@ export interface ComboboxDefaults {
   autocomplete: ComboboxAutocomplete;
   autoHighlight: boolean;
   clearable: boolean;
-  clearLabel: string;
-  /** The offer to add what was typed. `{query}` is the text (CB8). */
-  createLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   closeOnSelect: boolean;
   collisionPadding: number;
-  countLabel: string;
   disabled: boolean;
-  emptyLabel: string;
   flip: boolean;
   fullWidth: boolean;
   hideWhenDetached: boolean;
   highlightMatch: boolean;
   invalid: boolean;
   loading: boolean;
-  loadingLabel: string;
   loop: boolean;
   mount: ComboboxMount;
   openOn: ComboboxOpenOn;
@@ -94,7 +92,6 @@ export interface ComboboxDefaults {
   sideOffset: number;
   size: ComboboxSize;
   strategy: ComboboxStrategy;
-  triggerLabel: string;
   variant: ComboboxVariant;
   width: ComboboxWidth;
 }
@@ -120,8 +117,6 @@ export interface ComboboxProps {
   autoHighlight?: boolean;
   children?: ReactNode;
   clearable?: boolean;
-  clearLabel?: string;
-  createLabel?: string;
   /** Called with the query the reader asked to add. The collection is the consumer's. */
   onCreate?: (query: string, details: { reason: ComboboxValueReason; source?: unknown }) => void;
   /** Called with the text the field refused when it settled, and why (CB7). */
@@ -130,14 +125,11 @@ export interface ComboboxProps {
   closeOnOutsidePress?: boolean;
   closeOnSelect?: boolean;
   collisionPadding?: number;
-  /** The sentence the live region announces. `{count}` becomes the number. */
-  countLabel?: string;
   defaultHighlightedValue?: ComboboxOptionValue | null;
   defaultInputValue?: string;
   defaultOpen?: boolean;
   defaultValue?: ComboboxOptionValue | null;
   disabled?: boolean;
-  emptyLabel?: string;
   filter?: ComboboxFilter;
   flip?: boolean;
   form?: string;
@@ -149,10 +141,15 @@ export interface ComboboxProps {
   invalid?: boolean;
   items?: ComboboxItems;
   loading?: boolean;
-  loadingLabel?: string;
-  /** BCP 47, for the comparison the default filter makes. */
+  /** BCP 47, for the comparison the default filter makes. The language in force when absent. */
   locale?: string;
   loop?: boolean;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * clear and trigger buttons, the offer to create, the empty, loading and
+   * count sentences.
+   */
+  messages?: PartialMessages<ComboboxMessages> | undefined;
   mount?: ComboboxMount;
   name?: string;
   onHighlightedValueChange?: (
@@ -179,7 +176,6 @@ export interface ComboboxProps {
   size?: ComboboxSize;
   strategy?: ComboboxStrategy;
   total?: number;
-  triggerLabel?: string;
   value?: ComboboxOptionValue | null;
   variant?: ComboboxVariant;
   width?: ComboboxWidth;

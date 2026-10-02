@@ -116,7 +116,7 @@ import { SessionStore } from '../../core/session/session.store';
         <div slSectionBody>
           <form
             slForm
-            summaryTitle="This contact was not saved"
+            [messages]="{ summaryTitle: 'This contact was not saved' }"
             [errors]="form.errors()"
             (errorsChange)="form.errors.set($event.value)"
             [loading]="form.saving()"
@@ -285,7 +285,7 @@ import { SessionStore } from '../../core/session/session.store';
                 slButton
                 type="submit"
                 [loading]="form.saving()"
-                loadingLabel="Saving the contact"
+                [messages]="{ loading: 'Saving the contact' }"
               >
                 {{ form.mode() === 'new' ? 'Add contact' : 'Save contact' }}
               </button>
@@ -377,7 +377,7 @@ import { SessionStore } from '../../core/session/session.store';
                             tone="secondary"
                             type="button"
                             [loading]="form.promoting() === contact.id"
-                            loadingLabel="Making primary"
+                            [messages]="{ loading: 'Making primary' }"
                             (click)="setPrimary(contact)"
                           >
                             Make primary

@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "skeleton",
   "ui": "skeleton",
+  "catalog": {
+    "group": "Feedback",
+    "summary": "Placeholder shapes while content loads."
+  },
   "sizedShapes": ["circle", "square"],
   "axes": {
     "shape": ["text", "block", "circle", "square"],
@@ -12,6 +16,7 @@
   "stateAttributes": {
     "loading": "data-loading"
   },
+  "messages": ["label"],
   "members": {
     "skeleton": {
       "nativeElement": "span",
@@ -23,7 +28,6 @@
         "lines": 3,
         "lastLineSize": "62%",
         "live": "polite",
-        "label": "Loading\u2026",
         "delay": 0,
         "minDuration": 0
       },

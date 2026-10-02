@@ -3,14 +3,12 @@ export type {
   SideNavigationDefaults,
   SideNavigationExpandedReason,
   SideNavigationFlyoutReason,
-  SideNavigationMessages,
   SideNavigationMode,
   SideNavigationSize,
   SideNavigationTruncate,
   SideNavigationValueReason,
 } from './side-navigation';
 export {
-  DEFAULT_SIDE_NAVIGATION_MESSAGES,
   injectSideNavigationDefaults,
   provideSideNavigationDefaults,
   SIDE_NAVIGATION_DEFAULTS,

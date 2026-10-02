@@ -89,7 +89,7 @@ export const Playground: Story = {
   args: {
     autoComplete: false,
     defaultStep: 1,
-    label: 'Checkout',
+    messages: { label: 'Checkout' },
     labelPlacement: 'end',
     linear: false,
     navigation: 'button',
@@ -404,7 +404,7 @@ export const Keyboard: Story = {
         label="Tab, arrows, Home, End, Enter"
         note="Tab reaches every header and the arrows reach the same ones, following the reading direction and wrapping at the ends. Enter and Space move to a step the flow has opened."
       >
-        <Flow defaultStep={1} label="Checkout" />
+        <Flow defaultStep={1} messages={{ label: 'Checkout' }} />
       </Scene>
     </div>
   ),

@@ -18,16 +18,16 @@ import {
   createCarouselEngine,
   createCarouselRotation,
   EMPTY_PAGES,
-  formatCarouselMessage,
   stepPage,
 } from '@slotted/core/carousel';
 import type {
   CarouselEngineHandle,
-  CarouselMessages,
   CarouselPages,
   CarouselRotationHandle,
   CarouselSlidesPerMove,
 } from '@slotted/core/carousel';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
+import { carouselMessages, type CarouselMessages, type PartialMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -98,7 +98,7 @@ function focusVisible(target: EventTarget | null): boolean {
   host: {
     'data-ui': 'carousel',
     'data-part': 'root',
-    '[attr.aria-roledescription]': 'resolvedMessages().roleDescription',
+    '[attr.aria-roledescription]': "t('roleDescription')",
     '[attr.data-orientation]': 'resolvedOrientation()',
     '[attr.data-transition]': 'resolvedTransition()',
     '[attr.data-align]': 'resolvedAlign()',
@@ -148,8 +148,8 @@ export class SlCarousel {
   readonly slidesPerView = input<number | undefined>(undefined);
   /** How many slides a page moves: a number, or `page` for the slides wholly in view. */
   readonly slidesPerMove = input<CarouselSlidesPerMove>('page');
-  /** Merged over the provider's messages, key by key. */
-  readonly messages = input<Partial<CarouselMessages> | undefined>(undefined);
+  /** Words laid over the catalog of the language in force, key by key. */
+  readonly messages = input<PartialMessages<CarouselMessages> | undefined>(undefined);
 
   /** The page after it moved, for `[(page)]`. */
   readonly pageChange = output<number>();
@@ -171,8 +171,10 @@ export class SlCarousel {
   readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   readonly resolvedLoop = computed(() => this.loop() ?? this.defaults.loop);
   readonly resolvedDraggable = computed(() => this.draggable() ?? this.defaults.draggable);
-  readonly resolvedMessages = computed(() => ({ ...this.defaults.messages, ...this.messages() }));
-  readonly locale = this.defaults.locale;
+  /** The family's words in the language in force, with this carousel's `messages` laid over them. */
+  readonly t = injectMessages(carouselMessages, this.messages);
+  /** The locale in force: what the counter's numbers are written in. */
+  readonly locale = injectLocale();
   readonly rotates = computed(() => this.autoplay() !== false);
   readonly delay = computed(() => {
     const value = this.autoplay();
@@ -278,12 +280,7 @@ export class SlCarousel {
       draggable: () => this.resolvedDraggable(),
       page: () => this.current(),
       idPrefix: `${this.baseId}-slide-`,
-      slideLabel: (index, count) =>
-        formatCarouselMessage(
-          this.resolvedMessages().slide,
-          { index: index + 1, count },
-          this.locale,
-        ),
+      slideLabel: (index, count) => this.t('slide', { index: index + 1, count }),
       onPages: (pages, ids) => {
         this.pages.set(pages);
         this.slideIds.set(ids);
@@ -324,11 +321,7 @@ export class SlCarousel {
     const count = this.pageCount();
     if (moved && this.motion.announce && count > 0) {
       getLiveAnnouncer(this.viewportElement()?.ownerDocument).announce(
-        formatCarouselMessage(
-          this.resolvedMessages().announce,
-          { page: current + 1, count },
-          this.locale,
-        ),
+        this.t('announce', { page: current + 1, count }),
       );
     }
     this.motion = { animate: false, announce: false };

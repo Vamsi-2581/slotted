@@ -22,9 +22,15 @@ import {
   SlPopoverLayer,
   SlPopoverTrigger,
 } from '@slotted/angular/popover';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlTextField, SlTextFieldInput, SlTextFieldStart } from '@slotted/angular/text-field';
 import { clampToGamut, formatColor, parseColor, toCss } from '@slotted/core/color';
 import type { ColorFormat } from '@slotted/core/color';
+import {
+  colorPickerMessages,
+  type ColorPickerMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 
@@ -72,7 +78,7 @@ function sameColor(a: string, b: string): boolean {
             type="button"
             data-ui="color-picker"
             data-part="trigger"
-            [attr.aria-label]="defaults.triggerLabel"
+            [attr.aria-label]="t('trigger')"
             [disabled]="resolvedDisabled()"
             [style.--slotted-color-picker-color]="css()"
           ></button>
@@ -92,7 +98,7 @@ function sameColor(a: string, b: string): boolean {
         />
       </div>
       <ng-template slPopoverLayer>
-        <div slPopoverContent [attr.aria-label]="defaults.triggerLabel">
+        <div slPopoverContent [attr.aria-label]="t('trigger')">
           <div slPopoverBody>
             <div
               slColorPicker
@@ -101,6 +107,7 @@ function sameColor(a: string, b: string): boolean {
               [alpha]="alpha()"
               [presets]="presets()"
               [contrastWith]="contrastWith()"
+              [messages]="messages()"
               (valueChange)="request($event.value, $event.reason, $event.source)"
               (formatChange)="ownFormat.set($event.value); formatChange.emit($event)"
             ></div>
@@ -124,6 +131,8 @@ export class SlColorField implements ControlValueAccessor {
   readonly contrastWith = input<string | undefined>(undefined);
   readonly size = input<ColorPickerSize | undefined>(undefined);
   readonly disabled = input(false, { transform: booleanAttribute });
+  /** Words laid over the catalog of the language in force, for the trigger and the panel. */
+  readonly messages = input<PartialMessages<ColorPickerMessages> | undefined>(undefined);
   /** Whether the panel is open. */
   readonly open = model(false);
 
@@ -131,6 +140,8 @@ export class SlColorField implements ControlValueAccessor {
   readonly formatChange = output<ChangeRequest<ColorFormat>>();
 
   protected readonly defaults = injectColorPickerDefaults();
+  /** The family's words in the language in force, with this field's `messages` laid over them. */
+  readonly t = injectMessages(colorPickerMessages, this.messages);
   /** The consumer's name for the field, moved onto the text it names. */
   protected readonly label = inject(new HostAttributeToken('aria-label'), { optional: true });
 

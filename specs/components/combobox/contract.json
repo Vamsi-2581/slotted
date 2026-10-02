@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "combobox",
   "ui": "combobox",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Text input that filters a list of options."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/",
   "listboxPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/listbox/",
   "patternStatus": "Two pages answer this family. The combobox pattern owns the input, its role, its aria-autocomplete axis and both key tables; the listbox pattern owns the popup, its options and its groups. Both were read on 2026-09-04 and transcribed into docs/history/designs/2026-09-04-select-and-combobox-design.md §4. The pattern's two key sections are merged into one table, which is what its own note asks for: DOM focus is maintained on the combobox and the popup is navigated with aria-activedescendant.",
@@ -81,7 +85,7 @@
   },
   "creation": {
     "prop": "onCreate",
-    "label": "createLabel",
+    "message": "create",
     "element": "an option of its own, marked data-create",
     "appears": "while onCreate is given, the query is not empty, and nothing in the collection matched it",
     "effect": "calls onCreate with the query and closes; the family selects nothing, because the collection does not hold the value yet",
@@ -218,6 +222,13 @@
     "guardsReason": "Focus never enters the layer, so there is nothing inside it for Tab to reach.",
     "removal": "A filter that removes the highlighted option moves the highlight to the option that took its index, then to the first, then to nothing."
   },
+  "opening": {
+    "input": "typing into the input opens the popup, and so does a press on the input; a Tab into the input does not, because a reader tabbing through a form is passing the control on the way to the next field",
+    "focus": "every focus on the input opens the popup, a Tab into it and a press on it alike. For a control that is the reason the page exists, such as a search field alone in a header",
+    "manual": "only the trigger, ArrowDown, ArrowUp and Alt+ArrowDown open the popup; typing filters without opening it",
+    "press": "a pointer press on the input opens a closed popup with reason pointer, under input and focus, and never closes an open one, because a press there also places the caret. Under manual it only places the caret. A consumer handler that calls preventDefault on the click keeps the popup closed",
+    "reason": "React Aria names the same three values in menuTrigger and defaults to input; Base UI (openOnInputClick) and Ark (openOnClick) open on a press on the input. combobox, multi-select and entity-picker answer both gestures alike, so one form holding the three opens on the same gestures"
+  },
   "mark": {
     "family": "highlight",
     "ui": "highlight",
@@ -242,7 +253,7 @@
   "async": {
     "loading": "paints the status row, sets aria-busy on the content, and keeps the popup's measure",
     "loadMore": "onLoadMore fires when the status row is scrolled into view",
-    "count": "the status row is the live region, and countLabel is the sentence it announces",
+    "count": "the status row is the live region, and the count message is the sentence it announces",
     "debounce": "declined; the consumer debounces the fetch, which the reference page shows in three lines",
     "reason": "docs/component-features.md §6 asks for async loading, load more and a count announced to a screen reader. Base UI asks the consumer to assemble the status element and the strings; React Aria exposes loadingState and draws nothing."
   },
@@ -416,15 +427,10 @@
       "loading",
       "sideOffset",
       "alignOffset",
-      "collisionPadding",
-      "clearLabel",
-      "emptyLabel",
-      "loadingLabel",
-      "triggerLabel",
-      "countLabel",
-      "createLabel"
+      "collisionPadding"
     ]
   },
+  "messages": ["clear", "count", "create", "empty", "loading", "trigger"],
   "stateAttributes": {
     "open": "data-open",
     "disabled": "data-disabled",
@@ -503,13 +509,7 @@
         "loading": false,
         "sideOffset": 4,
         "alignOffset": 0,
-        "collisionPadding": 8,
-        "clearLabel": "Clear",
-        "emptyLabel": "No matches",
-        "loadingLabel": "Loading…",
-        "triggerLabel": "Show options",
-        "countLabel": "{count} results",
-        "createLabel": "Create “{query}”"
+        "collisionPadding": 8
       },
       "capabilities": [
         "value",

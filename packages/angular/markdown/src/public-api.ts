@@ -9,7 +9,6 @@ export type {
 export {
   injectMarkdownDefaults,
   MARKDOWN_DEFAULTS,
-  MARKDOWN_LABELS,
   provideMarkdownDefaults,
 } from './markdown-defaults';
-export type { MarkdownDefaults, MarkdownExternal, MarkdownLabels } from './markdown-defaults';
+export type { MarkdownDefaults, MarkdownExternal } from './markdown-defaults';

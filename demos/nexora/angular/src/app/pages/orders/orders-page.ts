@@ -122,9 +122,9 @@ import { OrderProgress } from './order-progress';
             (valueChangeRequest)="filterRequest($event)"
             [query]="store.search()"
             (queryChangeRequest)="store.setSearch($event.value)"
-            [labels]="{ count: countLabel }"
+            [messages]="countMessages"
             [count]="store.total() ?? undefined"
-            [total]="store.grandTotal() ?? undefined"
+            [total]="store.total() === store.grandTotal() ? undefined : (store.grandTotal() ?? undefined)"
             [loading]="store.loading()"
           >
             <app-list-view-tools
@@ -145,7 +145,7 @@ import { OrderProgress } from './order-progress';
           }
           <sl-data-grid
             #grid="slDataGrid"
-            label="Sales orders"
+            aria-label="Sales orders"
             rowKey="id"
             variant="framed"
             activatable
@@ -225,12 +225,12 @@ import { OrderProgress } from './order-progress';
             <nav
               slDataGridFooter
               slPagination
-              label="Order pages"
+              aria-label="Order pages"
               [count]="store.total() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
               [pageSizeOptions]="pageSizes"
-              [labels]="{ range: rangeLabel, pageSize: 'Orders per page' }"
+              [messages]="pagerMessages"
               [loading]="store.loading()"
               (pageChange)="goTo($event.value)"
               (pageSizeChange)="resize($event.value)"
@@ -259,10 +259,12 @@ export class OrdersPage implements OnInit {
   readonly phone = phoneSignal();
 
   /** Every number on the screen names what it counts (LP-08). */
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total ? `${count} orders` : `${count} of ${total} orders`;
-  readonly rangeLabel = (start: number, end: number, count: number): string =>
-    count === 0 ? 'No orders' : `Orders ${start}–${end} of ${count.toLocaleString('en-US')}`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} orders', countOnly: '{count} orders' };
+  readonly pagerMessages = {
+    range: '{count, plural, =0 {No orders} other {Orders {start}–{end} of {count}}}',
+    pageSize: 'Orders per page',
+  };
 
   /** The reader's arrangement and density, kept in the browser; the query is the store's. */
   readonly view = listView({

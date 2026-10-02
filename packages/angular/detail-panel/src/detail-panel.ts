@@ -1,6 +1,12 @@
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import { findScrollParent } from '@slotted/core/sticky-header';
+import { injectMessages } from '@slotted/angular/i18n';
+import {
+  detailPanelMessages,
+  type DetailPanelMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { PAGE_HEADER_DEFAULTS } from '@slotted/angular/page-header';
 import type { PageHeaderDefaults } from '@slotted/angular/page-header';
 import {
@@ -29,7 +35,6 @@ import type {
   DetailPanelAside,
   DetailPanelLayout,
   DetailPanelLevel,
-  DetailPanelMessages,
   DetailPanelMount,
   DetailPanelScroll,
   DetailPanelSectionReason,
@@ -42,7 +47,6 @@ export type {
   DetailPanelDefaults,
   DetailPanelLayout,
   DetailPanelLevel,
-  DetailPanelMessages,
   DetailPanelMount,
   DetailPanelScroll,
   DetailPanelSectionReason,
@@ -132,9 +136,6 @@ export class SlDetailPanelSection {
           get level() {
             return panel.resolvedLevel();
           },
-          get messages() {
-            return inherited.messages;
-          },
           get size() {
             return panel.resolvedSize();
           },
@@ -171,8 +172,11 @@ export class SlDetailPanel {
   readonly loading = input(false, { transform: booleanAttribute });
   /** The identity of the record on screen. */
   readonly recordKey = input<string | number | undefined>(undefined);
-  /** Strings for this instance alone, over the provider's. */
-  readonly messages = input<Partial<DetailPanelMessages> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * aside's name (`aside`) and the root's name while loading (`loading`).
+   */
+  readonly messages = input<PartialMessages<DetailPanelMessages> | undefined>(undefined);
   /** The current section. Two-way, so a template may bind it directly. */
   readonly section = model<string | undefined>(undefined);
 
@@ -200,10 +204,8 @@ export class SlDetailPanel {
   readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   readonly resolvedScroll = computed(() => this.scroll() ?? this.defaults.scroll);
   readonly resolvedMount = computed(() => this.mount() ?? this.defaults.mount);
-  readonly resolvedMessages = computed<DetailPanelMessages>(() => ({
-    ...this.defaults.messages,
-    ...this.messages(),
-  }));
+  /** The family's words in the language in force, with this panel's `messages` laid over them. */
+  readonly t = injectMessages(detailPanelMessages, this.messages);
   /** The current section: the model, or under tabs the first section when nothing is named. */
   readonly current = computed(() => {
     const named = this.section();
@@ -219,7 +221,7 @@ export class SlDetailPanel {
   protected readonly label = computed(() => {
     if (this.writtenLabel !== null) return this.writtenLabel;
     if (this.writtenLabelledBy !== null || this.headingId() !== undefined) return null;
-    return this.loading() ? this.resolvedMessages().loading : null;
+    return this.loading() ? this.t('loading') : null;
   });
 
   constructor() {

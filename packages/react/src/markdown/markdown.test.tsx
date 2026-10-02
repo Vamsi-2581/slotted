@@ -1,3 +1,4 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fromMarkedTokens } from '@slotted/core/markdown';
 import type { MarkdownNode } from '@slotted/core/markdown';
 import { act, fireEvent, render, screen } from '@testing-library/react';
@@ -5,6 +6,7 @@ import { marked } from 'marked';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/markdown/contract.json';
+import { SlottedProvider } from '../i18n';
 import { SkeletonDefaultsProvider } from '../skeleton';
 import { Markdown, MarkdownDefaultsProvider } from './index';
 
@@ -160,6 +162,45 @@ describe('Markdown', () => {
     /* The arrow is the Glyph element, hidden, and the link keeps its own name. */
     const glyph = back.querySelector('[data-ui="icon"][aria-hidden="true"] > svg[data-glyph]');
     expect(glyph).toHaveAttribute('data-glyph', 'arrow-left');
+  });
+
+  it('speaks the language in force, and lays its own messages over it', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Markdown
+          headingAnchors
+          messages={{ retry: 'Repetir' }}
+          tree={md('> [!NOTE]\n> Leia.\n\n## Setup')}
+        />
+      </SlottedProvider>,
+    );
+    expect(screen.getByText('Nota')).toBeInTheDocument();
+    expect(
+      screen.getAllByRole('link', { name: 'Link para a seção: Setup' }).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it('writes a back link per reference, the second one counted', () => {
+    const tree: MarkdownNode = {
+      type: 'root',
+      children: [
+        {
+          type: 'paragraph',
+          children: [
+            { type: 'footnoteReference', identifier: 'a' },
+            { type: 'footnoteReference', identifier: 'a' },
+          ],
+        },
+        {
+          type: 'footnoteDefinition',
+          identifier: 'a',
+          children: [{ type: 'paragraph', children: [{ type: 'text', value: 'Source' }] }],
+        },
+      ],
+    };
+    render(<Markdown tree={tree} />);
+    expect(screen.getByRole('link', { name: 'Back to reference 1' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Back to reference 1-2' })).toBeInTheDocument();
   });
 
   it('draws the empty part for a document with nothing in it', () => {

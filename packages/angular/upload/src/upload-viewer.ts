@@ -13,15 +13,12 @@ import {
   output,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import type { GlyphName } from '@slotted/angular/icon';
+import { uploadMessages, type PartialMessages, type UploadMessages } from '@slotted/core/i18n';
 
-import type {
-  UploadKindLabels,
-  UploadLabels,
-  UploadSize,
-  UploadViewingReason,
-} from './upload-defaults';
+import type { UploadSize, UploadViewingReason } from './upload-defaults';
 
 /**
  * What a file is drawn as on its tile: one glyph per kind, the plain file for
@@ -98,7 +95,7 @@ export interface UploadViewingRequest {
               @if (url()) {
                 <button
                   (click)="openExternally()"
-                  [attr.aria-label]="labels().viewerExternal"
+                  [attr.aria-label]="t('viewerExternal')"
                   data-part="viewerExternal"
                   type="button"
                 >
@@ -107,7 +104,7 @@ export interface UploadViewingRequest {
               }
               <button
                 (click)="close($event)"
-                [attr.aria-label]="labels().viewerClose"
+                [attr.aria-label]="t('viewerClose')"
                 data-part="viewerClose"
                 type="button"
               >
@@ -120,7 +117,7 @@ export interface UploadViewingRequest {
             @if (shown().length > 1) {
               <button
                 (click)="move(-1, $event)"
-                [attr.aria-label]="labels().viewerPrevious"
+                [attr.aria-label]="t('viewerPrevious')"
                 [disabled]="index() <= 0"
                 data-part="viewerPrevious"
                 type="button"
@@ -153,14 +150,14 @@ export interface UploadViewingRequest {
                 >
                   <span slIcon><svg slGlyph [name]="kindGlyph[file.kind]"></svg></span>
                 </span>
-                <p>{{ labels().viewerUnsupported }}</p>
+                <p>{{ t('viewerUnsupported') }}</p>
               }
             }
 
             @if (shown().length > 1) {
               <button
                 (click)="move(1, $event)"
-                [attr.aria-label]="labels().viewerNext"
+                [attr.aria-label]="t('viewerNext')"
                 [disabled]="index() === -1 || index() >= shown().length - 1"
                 data-part="viewerNext"
                 type="button"
@@ -178,8 +175,9 @@ export class SlUploadViewer {
   readonly files = input<readonly UploadFile[]>([]);
   readonly viewing = input<string | null>(null);
   readonly urls = input<ReadonlyMap<string, string>>(new Map());
-  readonly labels = input.required<UploadLabels>();
-  readonly kindLabels = input.required<UploadKindLabels>();
+  /** The upload's own `messages`, laid over the catalog of the language in force. */
+  readonly messages = input<PartialMessages<UploadMessages> | undefined>(undefined);
+  /** What the size is written in. Absent, the language in force. */
   readonly locale = input<string | undefined>(undefined);
   /** The family's size, restated on the layer: it is portalled out of the root. */
   readonly size = input<UploadSize>('md');
@@ -187,6 +185,9 @@ export class SlUploadViewer {
   readonly viewingChange = output<UploadViewingRequest>();
 
   protected readonly kindGlyph = KIND_GLYPH;
+  private readonly contextLocale = injectLocale();
+  /** The family's words in the language in force, with the upload's `messages` laid over them. */
+  readonly t = injectMessages(uploadMessages, this.messages);
 
   /**
    * Only what the viewer can render, so previous and next skip a spreadsheet
@@ -250,14 +251,22 @@ export class SlUploadViewer {
   readonly metaText = computed(() => {
     const file = this.current();
     if (file === undefined) return '';
-    const position = this.index() === -1 ? '' : ` · ${this.index() + 1} of ${this.shown().length}`;
-    return `${formatBytes(file.size, this.locale())} · ${this.kindLabels()[file.kind]}${position}`;
+    const size = formatBytes(file.size, this.locale() ?? this.contextLocale());
+    const kind = this.t(file.kind);
+    return this.index() === -1
+      ? this.t('viewerMeta', { size, kind })
+      : this.t('viewerMetaPosition', {
+          size,
+          kind,
+          index: this.index() + 1,
+          count: this.shown().length,
+        });
   });
 
   readonly extensionLabel = computed(() => {
     const name = this.current()?.name ?? '';
     const dot = name.lastIndexOf('.');
-    return dot <= 0 ? 'FILE' : name.slice(dot + 1).toUpperCase();
+    return dot <= 0 ? this.t('noExtension') : name.slice(dot + 1).toUpperCase();
   });
 
   constructor() {

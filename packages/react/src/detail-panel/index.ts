@@ -1,9 +1,5 @@
 export { DetailPanel, useDetailPanel } from './detail-panel';
-export {
-  DEFAULT_DETAIL_PANEL_MESSAGES,
-  DetailPanelDefaultsProvider,
-  useDetailPanelDefaults,
-} from './detail-panel-defaults';
+export { DetailPanelDefaultsProvider, useDetailPanelDefaults } from './detail-panel-defaults';
 export { DetailPanelBody, DetailPanelSection, DetailPanelTabs } from './detail-panel-parts';
 export type {
   DetailPanelAside,
@@ -16,7 +12,6 @@ export type {
   DetailPanelIdentity,
   DetailPanelLayout,
   DetailPanelLevel,
-  DetailPanelMessages,
   DetailPanelMount,
   DetailPanelPartProps,
   DetailPanelProps,

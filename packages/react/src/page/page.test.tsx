@@ -1,7 +1,9 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/page/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Section, SectionHeader, SectionHeading, SectionTitle } from '../section';
 import { Page, PageBody, PageFooter, STICKY_BOTTOM_PROPERTY } from './page';
 import { PageDefaultsProvider } from './page-defaults';
@@ -98,7 +100,7 @@ describe('Page', () => {
       />,
     );
     const footer = document.querySelector('[data-part="footer"]') as HTMLElement;
-    expect(footer).toHaveAttribute('aria-label', 'Ações da página');
+    expect(footer).toHaveAttribute('aria-label', 'Page actions');
     expect(footer.querySelector('[data-ui="container"] > [data-part="actions"]')).not.toBeNull();
     expect(footer).toHaveAttribute('data-status', 'open');
   });
@@ -149,13 +151,9 @@ describe('Page', () => {
 
   it('takes its defaults from the provider, and its own props over them', () => {
     render(
-      <PageDefaultsProvider
-        ground="surface"
-        messages={{ footer: 'Decisões' }}
-        scroll="self"
-        width="content"
-      >
+      <PageDefaultsProvider ground="surface" scroll="self" width="content">
         <Screen
+          messages={{ footer: 'Decisões' }}
           width="full"
           footer={
             <PageFooter>
@@ -172,6 +170,26 @@ describe('Page', () => {
       'aria-label',
       'Decisões',
     );
+  });
+
+  it('speaks the language in force, inside a page and outside one', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Screen
+          footer={
+            <PageFooter>
+              <button type="button">Enviar</button>
+            </PageFooter>
+          }
+        />
+        <PageFooter data-testid="alone" />
+      </SlottedProvider>,
+    );
+    expect(document.querySelector('[data-part="footer"]')).toHaveAttribute(
+      'aria-label',
+      'Ações da página',
+    );
+    expect(screen.getByTestId('alone')).toHaveAttribute('aria-label', 'Ações da página');
   });
 
   it('passes native props through and substitutes the root through render', () => {

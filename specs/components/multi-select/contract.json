@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "multi-select",
   "ui": "multi-select",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Picks several options shown as tags."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/",
   "chipsPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/grid/",
   "patternStatus": "Two pages answer this family, both read on 2026-09-10 from the rendered pattern pages. The combobox pattern owns the input, its role, aria-expanded, aria-controls, aria-activedescendant, aria-autocomplete and both key tables. The grid pattern's Layout Grids for Grouping Widgets half owns the chip row, and it names this exact control: \"a list of recipients for a message may be a grid where each cell contains a link that represents a recipient. The grid may initially have a single row but then wrap into multiple rows as recipients are added.\" The itemised comparison of both is in docs/history/designs/2026-09-10-multi-select-design.md §4, and the three departures are in `departures` below.",
@@ -84,8 +88,8 @@
       "stylesheet": "tag/tag.css"
     },
     "removeTabindex": -1,
-    "label": "Remove {label}",
-    "rowLabel": "{label}, {count} chosen",
+    "message": "remove",
+    "rowMessage": "chosen",
     "reason": "The chosen values are the chips themselves rather than a sentence about them. Each chip is a tag, worn as data-ui beside this family's own data-part, so the chip a reader removes here is the chip they know from everywhere else and the pill's geometry — including the remove control floored at --slotted-target-min per density — is stated once, in tag.css. The row carries its own count in aria-label so a reader landing on it hears how many chips there are before hearing all of them.",
     "count": {
       "attribute": "data-count",
@@ -122,7 +126,7 @@
   },
   "creation": {
     "axis": "creatable",
-    "label": "createLabel",
+    "message": "create",
     "element": "an option of its own, marked data-create",
     "appears": "while creatable is set, the query is not empty, no value in the set already holds it, and nothing in the collection matched it",
     "effect": "adds the query to the set with reason submit, and empties the query",
@@ -342,6 +346,13 @@
     "guards": false,
     "guardsReason": "Focus never enters the portalled layer, so there is nothing inside it for Tab to reach."
   },
+  "opening": {
+    "input": "typing into the input opens the popup, and so does a press on the input; a Tab into the input does not, because a reader tabbing through a form is passing the control on the way to the next field",
+    "focus": "every focus on the input opens the popup, a Tab into it and a press on it alike. For a control that is the reason the page exists, such as a search field alone in a header",
+    "manual": "only the trigger, ArrowDown, ArrowUp and Alt+ArrowDown open the popup; typing filters without opening it",
+    "press": "a pointer press on the input opens a closed popup with reason pointer, under input and focus, and never closes an open one, because a press there also places the caret. Under manual it only places the caret. A consumer handler that calls preventDefault on the click keeps the popup closed",
+    "reason": "React Aria names the same three values in menuTrigger and defaults to input; Base UI (openOnInputClick) and Ark (openOnClick) open on a press on the input. combobox, multi-select and entity-picker answer both gestures alike, so one form holding the three opens on the same gestures"
+  },
   "waiting": {
     "busy": {
       "part": "busy",
@@ -449,6 +460,7 @@
     "width": ["anchor", "content"],
     "mount": ["active", "lazy", "eager"],
     "strategy": ["absolute", "fixed"],
+    "openOn": ["input", "focus", "manual"],
     "overflow": ["wrap", "collapse"],
     "chosenOptions": ["show", "hide"],
     "creatable": [true, false],
@@ -482,6 +494,7 @@
     "width": ["prop", "defaults", "anchor"],
     "mount": ["prop", "defaults", "active"],
     "strategy": ["prop", "defaults", "absolute"],
+    "openOn": ["prop", "defaults", "input"],
     "overflow": ["prop", "defaults", "wrap"],
     "chosenOptions": ["prop", "defaults", "show"],
     "creatable": ["prop", "defaults", false],
@@ -516,6 +529,7 @@
       "width",
       "mount",
       "strategy",
+      "openOn",
       "overflow",
       "chosenOptions",
       "creatable",
@@ -544,19 +558,21 @@
       "delimiters",
       "sideOffset",
       "alignOffset",
-      "collisionPadding",
-      "clearLabel",
-      "chosenLabel",
-      "countLabel",
-      "counterLabel",
-      "createLabel",
-      "emptyLabel",
-      "loadingLabel",
-      "removeLabel",
-      "reorderLabel",
-      "triggerLabel"
+      "collisionPadding"
     ]
   },
+  "messages": [
+    "chosen",
+    "clear",
+    "count",
+    "counter",
+    "create",
+    "empty",
+    "loading",
+    "remove",
+    "reorder",
+    "trigger"
+  ],
   "stateAttributes": {
     "open": "data-open",
     "disabled": "data-disabled",
@@ -614,6 +630,7 @@
         "width": "anchor",
         "mount": "active",
         "strategy": "absolute",
+        "openOn": "input",
         "overflow": "wrap",
         "chosenOptions": "show",
         "creatable": false,
@@ -642,17 +659,7 @@
         "delimiters": [","],
         "sideOffset": 4,
         "alignOffset": 0,
-        "collisionPadding": 8,
-        "clearLabel": "Clear",
-        "chosenLabel": "{count} chosen",
-        "countLabel": "{count} results",
-        "counterLabel": "{count} of {max}",
-        "createLabel": "Add “{query}”",
-        "emptyLabel": "No matches",
-        "loadingLabel": "Loading…",
-        "removeLabel": "Remove {label}",
-        "reorderLabel": "{label}, position {position} of {count}",
-        "triggerLabel": "Show options"
+        "collisionPadding": 8
       },
       "capabilities": [
         "value",

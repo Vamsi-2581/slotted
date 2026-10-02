@@ -111,10 +111,7 @@ test('draws every status in a circle, never a triangle', () => {
  * dot when they forget, and Fluent builds one that is English for ever.
  */
 test('carries a fallback name for every status, replaceable per application', () => {
-  assert.deepEqual(Object.keys(contract.defaultLabels), contract.axes.status);
-  for (const [status, label] of Object.entries(contract.defaultLabels)) {
-    assert.ok(label.trim().length > 0, `${status} has no word`);
-  }
+  assert.deepEqual([...contract.messages].sort(), [...contract.axes.status].sort());
   assert.ok(statusIndicator.parts.includes('announcement'));
 });
 

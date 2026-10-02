@@ -60,7 +60,7 @@ const anatomy: AnatomyRow[] = [
     part: 'progress-position',
     element: 'span',
     required: false,
-    purpose: 'labels.position, the toggle’s accessible name.',
+    purpose: 'messages.position, the toggle’s accessible name.',
   },
   {
     part: 'progress-track',
@@ -72,8 +72,7 @@ const anatomy: AnatomyRow[] = [
     part: 'progress-segment',
     element: 'span',
     required: false,
-    purpose:
-      'data-complete, data-current or data-invalid. A step reached is a bar four times as thick as a step ahead.',
+    purpose: 'data-complete, data-current or data-invalid.',
   },
   {
     part: 'main',
@@ -117,7 +116,7 @@ const anatomy: AnatomyRow[] = [
     part: 'optional',
     element: 'span around a Tag',
     required: false,
-    purpose: 'labels.optional, on an optional step.',
+    purpose: 'messages.optional, on an optional step.',
   },
   {
     part: 'step-description',
@@ -441,21 +440,14 @@ const navigate = useNavigate();
   {
     id: 'labels',
     title: 'Words for another product',
-    note: 'Every word is a label: the position, the four actions, the draft status and the failure. A provider sets them once.',
+    note: 'Every word is a message: the position, the four actions, the draft status and the failure. The language in force sets them once; a wizard lays its own over them.',
     snippet: defineSnippet({
       id: 'wizard-react-labels',
       language: 'tsx',
       label: 'In Portuguese',
-      source: `<WizardDefaultsProvider
-  labels={{
-    position: (index, count) => \`Etapa \${index} de \${count}\`,
-    next: 'Continuar',
-    previous: 'Voltar',
-    submit: 'Abrir conta',
-  }}
->
-  <App />
-</WizardDefaultsProvider>;`,
+      source: `<SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+  <Wizard messages={{ next: 'Continuar', submit: 'Abrir conta' }}>…</Wizard>
+</SlottedProvider>;`,
     }),
   },
   {
@@ -466,7 +458,7 @@ const navigate = useNavigate();
       id: 'wizard-react-accessibility',
       language: 'tsx',
       label: 'The list is named',
-      source: `<Wizard label="Account opening">…</Wizard>;`,
+      source: `<Wizard messages={{ progress: 'Account opening' }}>…</Wizard>;`,
     }),
   },
 ];
@@ -558,13 +550,12 @@ export const REACT_WIZARD_DOCS = {
         'A step ahead is reached only once every step before it is complete',
       ],
       ['level', '2 | 3 | 4', '2', 'Wizard, WizardDefaultsProvider', 'The step heading’s level'],
-      ['label', 'string', 'labels.progress', 'Wizard', 'The name of the list of steps'],
       [
-        'labels',
-        'Partial<WizardLabels>',
-        'English',
-        'Wizard, WizardDefaultsProvider',
-        'position, progress, previous, next, submit, return, cancel, saveDraft, saving, saved, draftFailed, skip, optional, edit, incomplete, submitFailed, restoring',
+        'messages',
+        'PartialMessages<WizardMessages>',
+        '—',
+        'Wizard',
+        'Words laid over the language in force, key by key: position, progress (the name of the list of steps), previous, next, submit, return, cancel, saveDraft, saving, saved with {time}, draftFailed, skip, optional, edit, incomplete, submitFailed, restoring',
       ],
       [
         'error',
@@ -668,7 +659,7 @@ export const REACT_WIZARD_DOCS = {
       ['step', 'string', '—', 'WizardEdit', 'The step to change and come back from'],
       [
         'WizardDefaultsProvider',
-        '{ labels, progress, linear, level, scroll, delay, minDuration }',
+        '{ progress, linear, level, scroll, delay, minDuration }',
         '—',
         'a subtree',
         'The decisions an application takes once; an instance that states any of them wins',

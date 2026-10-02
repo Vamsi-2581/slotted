@@ -1,7 +1,8 @@
 import '@slotted/styles/message-scroller/message-scroller.css';
 
+import { messageScrollerMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
-import { createMessageScroller, formatScrollerMessage } from '@slotted/core/message-scroller';
+import { createMessageScroller } from '@slotted/core/message-scroller';
 import type { MessageScrollerHandle as EngineHandle } from '@slotted/core/message-scroller';
 import {
   createContext,
@@ -15,6 +16,7 @@ import {
 } from 'react';
 import type { MouseEvent } from 'react';
 
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useMessageScrollerDefaults } from './message-scroller-defaults';
 import type {
@@ -65,6 +67,7 @@ export function MessageScroller({
   defaultPosition,
   edgeThreshold,
   follow,
+  messages,
   onAnchorChange,
   onReachStart,
   onScrollableChange,
@@ -76,6 +79,7 @@ export function MessageScroller({
   ...nativeProps
 }: MessageScrollerProps) {
   const defaults = useMessageScrollerDefaults();
+  const t = useMessages(messageScrollerMessages, messages);
   const resolvedPosition = defaultPosition ?? defaults.defaultPosition;
   const callbacks = useRef({ onAnchorChange, onReachStart, onScrollableChange });
   callbacks.current = { onAnchorChange, onReachStart, onScrollableChange };
@@ -125,8 +129,8 @@ export function MessageScroller({
   useEffect(() => {
     if (wasBusy.current === busy) return;
     wasBusy.current = busy;
-    getLiveAnnouncer().announce(busy ? defaults.messages.busy : defaults.messages.idle);
-  }, [busy, defaults.messages.busy, defaults.messages.idle]);
+    getLiveAnnouncer().announce(busy ? t('busy') : t('idle'));
+  }, [busy, t]);
 
   useImperativeHandle<MessageScrollerHandle, MessageScrollerHandle>(
     ref as never,
@@ -145,14 +149,13 @@ export function MessageScroller({
   const context: MessageScrollerContextValue = {
     busy,
     defaultPosition: resolvedPosition,
-    locale: defaults.locale,
-    messages: defaults.messages,
     registerContent: setContent,
     registerViewport: setViewport,
     scrollToEnd: engine.scrollToEnd,
     scrollToMessage: engine.scrollToMessage,
     scrollToStart: engine.scrollToStart,
     state,
+    t,
   };
 
   const rootProps = {
@@ -187,7 +190,7 @@ export function MessageScrollerViewport({ ref, render, ...nativeProps }: Message
     [ref, registerViewport],
   );
   const rootProps = {
-    'aria-label': scroller.messages.label,
+    'aria-label': scroller.t('label'),
     role: 'region',
     tabIndex: 0,
     ...nativeProps,
@@ -261,10 +264,10 @@ export function MessageScrollerUnread({
   render,
   ...nativeProps
 }: MessageScrollerPartProps) {
-  const { messages } = useMessageScroller();
+  const { t } = useMessageScroller();
   const rootProps: MessageScrollerRootProps = {
     ...nativeProps,
-    children: <span>{children ?? messages.unread}</span>,
+    children: <span>{children ?? t('unread')}</span>,
     'data-part': 'unread',
   };
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
@@ -276,14 +279,14 @@ export function MessageScrollerLoader({
   render,
   ...nativeProps
 }: MessageScrollerPartProps) {
-  const { messages } = useMessageScroller();
+  const { t } = useMessageScroller();
   const rootProps: MessageScrollerRootProps = {
     role: 'status',
     ...nativeProps,
     children: (
       <>
         <span aria-hidden="true" data-ui="spinner" />
-        <span>{children ?? messages.loader}</span>
+        <span>{children ?? t('loader')}</span>
       </>
     ),
     'data-part': 'loader',
@@ -306,16 +309,20 @@ export function MessageScrollerJump({
   ...nativeProps
 }: MessageScrollerJumpProps) {
   const scroller = useMessageScroller();
-  const { messages, state } = scroller;
+  const { state, t } = scroller;
   const active = direction === 'end' ? state.scrollable.end : state.scrollable.start;
   const count = direction === 'end' ? state.newCount : 0;
-  const words =
-    count > 0 ? formatScrollerMessage(messages.jumpCount, { count }, scroller.locale) : null;
-  const base = direction === 'end' ? messages.jumpToEnd : messages.jumpToStart;
+  const words = count > 0 ? t('jumpCount', { count }) : null;
+  const name =
+    direction === 'start'
+      ? t('jumpToStart')
+      : count > 0
+        ? t('jumpToEndCount', { count })
+        : t('jumpToEnd');
 
   return (
     <button
-      aria-label={ariaLabel ?? (words === null ? base : `${base}, ${words}`)}
+      aria-label={ariaLabel ?? name}
       type="button"
       {...nativeProps}
       data-active={String(active)}

@@ -62,7 +62,7 @@ export function DetailPanelBody({
           <div data-part="columns">
             <div data-part="main">{children}</div>
             {hasAside ? (
-              <aside data-part="aside" aria-label={panel.messages.aside}>
+              <aside data-part="aside" aria-label={panel.t('aside')}>
                 {panel.loading ? (
                   <SkeletonText lines={ASIDE_SKELETON_LINES} inlineSize="60%" />
                 ) : (

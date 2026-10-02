@@ -1,3 +1,4 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -6,11 +7,11 @@ import type { ReactNode } from 'react';
 
 import { Button } from '../button';
 import { Grid, Scene } from '../field/field-demo';
+import { SlottedProvider } from '../i18n';
 import { Inline } from '../inline';
 import { Link } from '../link';
 import { Stack } from '../stack';
 import { ScrollArea } from './scroll-area';
-import { ScrollAreaDefaultsProvider } from './scroll-area-defaults';
 import {
   Line,
   Log,
@@ -94,7 +95,7 @@ export const Playground: Story = {
         label="Notas de versão · block · auto · both"
         note="A configuração por omissão: um eixo, a barra da plataforma, o véu nas duas pontas. Role até ao fim e o véu de baixo levanta; volte ao início e o de cima desaparece."
       >
-        <Framed label="Notas de versão">
+        <Framed messages={{ label: 'Notas de versão' }}>
           <Notes />
         </Framed>
       </Scene>
@@ -110,7 +111,7 @@ export const Axis: Story = {
         label="block — o eixo por omissão"
         note="Só o eixo de bloco rola. O eixo em linha fica preso, por isso uma linha comprida quebra em vez de fugir para o lado."
       >
-        <Framed label="Notas de versão">
+        <Framed messages={{ label: 'Notas de versão' }}>
           <Notes />
         </Framed>
       </Scene>
@@ -118,7 +119,7 @@ export const Axis: Story = {
         label="inline — uma fila que passa da caixa"
         note="O véu cai na ponta que o leitor ainda não alcançou, e espelha com o documento: em RTL fica à esquerda. A barra horizontal é a da plataforma."
       >
-        <ScrollArea axis="inline" className="slotted-demo-frame" label="Regiões">
+        <ScrollArea axis="inline" className="slotted-demo-frame" messages={{ label: 'Regiões' }}>
           <ScrollArea.Content>
             <Regions />
           </ScrollArea.Content>
@@ -128,7 +129,11 @@ export const Axis: Story = {
         label="both — um registo mais largo e mais alto do que a caixa"
         note="Quatro véus, e as duas máscaras multiplicam-se nos cantos. O quadrado entre as duas barras é desenhado pelo sistema."
       >
-        <Framed axis="both" label="Registo de exportações" scrollTo={{ block: 40, inline: 60 }}>
+        <Framed
+          axis="both"
+          messages={{ label: 'Registo de exportações' }}
+          scrollTo={{ block: 40, inline: 60 }}
+        >
           <Log />
         </Framed>
       </Scene>
@@ -144,7 +149,7 @@ export const Scrollbars: Story = {
         label="auto"
         note="A barra aparece quando há o que rolar e reserva o seu espaço desde o início, para nada se mexer quando aparece."
       >
-        <Framed label="Notas de versão">
+        <Framed messages={{ label: 'Notas de versão' }}>
           <Notes />
         </Framed>
       </Scene>
@@ -152,7 +157,7 @@ export const Scrollbars: Story = {
         label="always"
         note="A calha fica reservada e desenhada mesmo em conteúdo que cabe inteiro. É overflow: scroll, a forma da plataforma dizer o mesmo."
       >
-        <Framed label="Notas de versão" scrollbars="always">
+        <Framed messages={{ label: 'Notas de versão' }} scrollbars="always">
           <Notes releases={RELEASES.slice(0, 2)} />
         </Framed>
       </Scene>
@@ -160,7 +165,7 @@ export const Scrollbars: Story = {
         label="hover"
         note="A calha fica, a barra não se pinta até um ponteiro ou o teclado estarem lá dentro. É a metade em CSS daquilo em que o Radix e o Mantine gastam um temporizador."
       >
-        <Framed label="Notas de versão" scrollbars="hover">
+        <Framed messages={{ label: 'Notas de versão' }} scrollbars="hover">
           <Notes />
         </Framed>
       </Scene>
@@ -168,7 +173,7 @@ export const Scrollbars: Story = {
         label="none"
         note="Sem barra e sem calha. O conteúdo continua a rolar por roda, toque, teclado e scrollTo, e o véu passa a ser a única coisa a dizer que há mais."
       >
-        <Framed label="Notas de versão" scrollbars="none">
+        <Framed messages={{ label: 'Notas de versão' }} scrollbars="none">
           <Notes />
         </Framed>
       </Scene>
@@ -184,7 +189,7 @@ export const Fade: Story = {
         label="both"
         note="Escurece o que o leitor já passou e o que ainda tem pela frente. As duas pontas leem-se como uma ideia só."
       >
-        <Framed label="Regiões" scrollTo={{ block: 40 }}>
+        <Framed messages={{ label: 'Regiões' }} scrollTo={{ block: 40 }}>
           <RegionList />
         </Framed>
       </Scene>
@@ -192,7 +197,7 @@ export const Fade: Story = {
         label="end"
         note="Só a ponta para onde há mais conteúdo. O início da lista fica nítido, para quem prefere não escurecer o que já foi lido."
       >
-        <Framed fade="end" label="Regiões" scrollTo={{ block: 40 }}>
+        <Framed fade="end" messages={{ label: 'Regiões' }} scrollTo={{ block: 40 }}>
           <RegionList />
         </Framed>
       </Scene>
@@ -200,7 +205,7 @@ export const Fade: Story = {
         label="none"
         note="Nenhum véu, e nenhuma máscara: a barra fica sozinha a dizer que há mais, e a área não paga uma camada de composição."
       >
-        <Framed fade="none" label="Regiões" scrollTo={{ block: 40 }}>
+        <Framed fade="none" messages={{ label: 'Regiões' }} scrollTo={{ block: 40 }}>
           <RegionList />
         </Framed>
       </Scene>
@@ -242,19 +247,19 @@ export const Gutter: Story = {
         label="auto"
         note="O recuo chega até à moldura. No momento em que o conteúdo crescer para lá da caixa, a barra aparece e empurra o texto para a esquerda."
       >
-        <Painted gutter="auto" label="Notas de versão" />
+        <Painted gutter="auto" messages={{ label: 'Notas de versão' }} />
       </Scene>
       <Scene
         label="stable — por omissão"
         note="Uma largura de barra fica guardada à direita desde o início, por isso nada se mexe quando ela aparece."
       >
-        <Painted label="Notas de versão" />
+        <Painted messages={{ label: 'Notas de versão' }} />
       </Scene>
       <Scene
         label="both-edges"
         note="A mesma largura dos dois lados, para uma coluna centrada continuar centrada quer a barra esteja quer não."
       >
-        <Painted gutter="both-edges" label="Notas de versão" />
+        <Painted gutter="both-edges" messages={{ label: 'Notas de versão' }} />
       </Scene>
     </Grid>
   ),
@@ -292,7 +297,11 @@ export const Overscroll: Story = {
         note="Chegue ao fim da área e continue a rolar: a página por trás fica quieta. Uma região limitada cujo último centímetro move a página é o defeito que a propriedade veio resolver."
       >
         <Page>
-          <ScrollArea className="slotted-demo-frame" label="Notas de versão" maxBlockSize="7rem">
+          <ScrollArea
+            className="slotted-demo-frame"
+            messages={{ label: 'Notas de versão' }}
+            maxBlockSize="7rem"
+          >
             <ScrollArea.Content>
               <Notes releases={RELEASES.slice(0, 2)} />
             </ScrollArea.Content>
@@ -306,7 +315,7 @@ export const Overscroll: Story = {
         <Page>
           <ScrollArea
             className="slotted-demo-frame"
-            label="Notas de versão"
+            messages={{ label: 'Notas de versão' }}
             maxBlockSize="7rem"
             overscroll="auto"
           >
@@ -325,7 +334,11 @@ function Growing() {
 
   return (
     <Stack gap={4}>
-      <ScrollArea className="slotted-demo-frame" label="Notas de versão" maxBlockSize="12rem">
+      <ScrollArea
+        className="slotted-demo-frame"
+        messages={{ label: 'Notas de versão' }}
+        maxBlockSize="12rem"
+      >
         <ScrollArea.Content>
           <Notes releases={RELEASES.slice(0, count)} />
         </ScrollArea.Content>
@@ -374,7 +387,7 @@ export const Keyboard: Story = {
         label="Tab chega à região; o resto é da plataforma"
         note="Prima Tab até à área e depois as setas, PageDown, End e Home. A família não escreve nenhuma destas teclas — escreve só o ponto de tabulação que as torna alcançáveis."
       >
-        <Framed label="Notas de versão">
+        <Framed messages={{ label: 'Notas de versão' }}>
           <Notes />
         </Framed>
       </Scene>
@@ -382,7 +395,7 @@ export const Keyboard: Story = {
         label="tabbable={false} — um filho já recebe o foco"
         note="A ligação lá dentro já é um ponto de tabulação, e um segundo na porta de rolagem seria um que não faz nada. O Tab vai direto à ligação; o ponteiro continua a poder focar a área."
       >
-        <Framed label="Notas de versão" tabbable={false}>
+        <Framed messages={{ label: 'Notas de versão' }} tabbable={false}>
           <Stack gap={4}>
             <Line tone="muted">
               A nota completa está em <Link href="#notas-de-versao">notas de versão 2026.9</Link>,
@@ -404,7 +417,7 @@ export const Content: Story = {
         label="Três caminhos sem quebra"
         note="Um token que não quebra rola no eixo em linha e é velado onde sai da caixa. A barra horizontal aparece por baixo dos três."
       >
-        <Framed axis="both" label="Ficheiros exportados">
+        <Framed axis="both" messages={{ label: 'Ficheiros exportados' }}>
           <Paths />
         </Framed>
       </Scene>
@@ -412,7 +425,7 @@ export const Content: Story = {
         label="Uma tradução com o dobro do comprimento"
         note="Quebra e rola no eixo de bloco, como qualquer texto. O véu cai sobre a palavra que está a sair, não sobre um recuo."
       >
-        <Framed label="Änderungsprotokoll">
+        <Framed messages={{ label: 'Änderungsprotokoll' }}>
           <Line tone="muted">{TRANSLATED}</Line>
         </Framed>
       </Scene>
@@ -420,7 +433,7 @@ export const Content: Story = {
         label="Três linhas que cabem"
         note="Nada transborda, por isso a área é uma caixa como outra qualquer: sem véu, sem barra, sem ponto de tabulação e sem papel."
       >
-        <Framed label="Notas de versão">
+        <Framed messages={{ label: 'Notas de versão' }}>
           <Fits />
         </Framed>
       </Scene>
@@ -437,7 +450,7 @@ function Driven() {
     <Stack gap={4}>
       <ScrollArea
         className="slotted-demo-bound slotted-demo-frame"
-        label="Notas de versão"
+        messages={{ label: 'Notas de versão' }}
         onScrollChange={(position) => setBlock(Math.round(position.block))}
         ref={area}
         render={(props) => <section {...props} />}
@@ -497,7 +510,7 @@ export const Print: Story = {
         label="No papel, tudo"
         note="Abra a pré-visualização de impressão desta página: a área larga o máximo e o recorte em @media print e imprime as seis notas, não as duas que estavam à vista. Nenhuma das cinco implementações pesquisadas o faz."
       >
-        <Framed label="Notas de versão">
+        <Framed messages={{ label: 'Notas de versão' }}>
           <Notes />
         </Framed>
       </Scene>
@@ -508,11 +521,11 @@ export const Print: Story = {
 export const Accessibility: Story = {
   parameters: scenario('accessibility'),
   render: () => (
-    <ScrollAreaDefaultsProvider label="Conteúdo com rolagem">
+    <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
       <Grid columns={3}>
         <Scene
           label="Transborda — uma região com nome"
-          note="role=region, tabindex=0 e o nome do fornecedor: «Conteúdo com rolagem». Um leitor de ecrã ouve o nome ao entrar e usa as setas do próprio navegador."
+          note="role=region, tabindex=0 e o nome do catálogo pt-BR: «Conteúdo rolável». Um leitor de ecrã ouve o nome ao entrar e usa as setas do próprio navegador."
         >
           <Framed>
             <RegionList />
@@ -528,7 +541,7 @@ export const Accessibility: Story = {
         </Scene>
         <Scene
           label="Nomeada pelo título — labelledBy"
-          note="O título por cima é o nome da região, na ordem em que o nome se resolve: labelledBy, depois label, depois o fornecedor."
+          note="O título por cima é o nome da região, na ordem em que o nome se resolve: labelledBy, depois messages.label, depois o catálogo."
         >
           <Stack gap={3}>
             <Line id="notas-titulo" weight="semibold">
@@ -540,6 +553,6 @@ export const Accessibility: Story = {
           </Stack>
         </Scene>
       </Grid>
-    </ScrollAreaDefaultsProvider>
+    </SlottedProvider>
   ),
 };

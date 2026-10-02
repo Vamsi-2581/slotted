@@ -202,9 +202,7 @@ export class SlPageHeaderArea {
   private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
   private readonly native: HTMLElement = inject(ElementRef).nativeElement;
 
-  protected readonly label = computed(
-    () => this.written ?? this.header.resolvedMessages().headerArea,
-  );
+  protected readonly label = computed(() => this.written ?? this.header.t('headerArea'));
 
   constructor() {
     effect(() => {
@@ -261,8 +259,7 @@ export class SlPageHeaderToggle {
 
   protected readonly label = computed(() => {
     if (this.written !== null) return this.written;
-    const messages = this.header.resolvedMessages();
-    return this.header.expanded() ? messages.collapse : messages.expand;
+    return this.header.expanded() ? this.header.t('collapse') : this.header.t('expand');
   });
 
   protected onClick(event: MouseEvent) {
@@ -297,8 +294,7 @@ export class SlPageHeaderPin {
 
   protected readonly label = computed(() => {
     if (this.written !== null) return this.written;
-    const messages = this.header.resolvedMessages();
-    return this.header.pinned() ? messages.unpin : messages.pin;
+    return this.header.pinned() ? this.header.t('unpin') : this.header.t('pin');
   });
 
   protected onClick(event: MouseEvent) {

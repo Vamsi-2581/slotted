@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "form",
   "ui": "form",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Form with validation, error summary and submit."
+  },
   "rootElement": "form",
   "rootRole": null,
   "core": "@slotted/core/form",
@@ -27,7 +31,7 @@
   "summary": {
     "role": "alert",
     "focusable": true,
-    "title": "There is a problem",
+    "title": "messages.summaryTitle",
     "itemElement": "a[href]",
     "linksTo": "control"
   },
@@ -63,12 +67,21 @@
       "validate",
       "errorFocus",
       "summary",
-      "summaryTitle",
       "summaryDescription",
       "align",
       "nativeValidation"
     ]
   },
+  "messages": [
+    "summaryTitle",
+    "errors.required",
+    "errors.email",
+    "errors.min",
+    "errors.max",
+    "errors.minlength",
+    "errors.maxlength",
+    "errors.pattern"
+  ],
   "imperative": ["validate", "submit", "reset", "focusFirstError"],
   "stateAttributes": {
     "invalid": "data-invalid",

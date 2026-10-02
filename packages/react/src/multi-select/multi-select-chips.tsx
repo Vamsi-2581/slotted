@@ -166,10 +166,7 @@ function Chip({ count, index, label, value }: ChipProps) {
     <span
       aria-label={
         multiSelect.reorderable
-          ? multiSelect.reorderLabel
-              .replace('{label}', label)
-              .replace('{position}', String(index + 1))
-              .replace('{count}', String(count))
+          ? multiSelect.t('reorder', { label, position: index + 1, count })
           : undefined
       }
       data-part="root"
@@ -188,7 +185,7 @@ function Chip({ count, index, label, value }: ChipProps) {
       </span>
       {frozen ? null : (
         <button
-          aria-label={multiSelect.removeLabel.replace('{label}', label)}
+          aria-label={multiSelect.t('remove', { label })}
           data-part="remove"
           onClick={onRemove}
           tabIndex={-1}
@@ -296,7 +293,7 @@ export function ChipRow({ children }: ChipRowProps) {
     collapse.current?.refresh();
   }, [multiSelect.value]);
 
-  const label = multiSelect.chosenLabel.replace('{count}', String(multiSelect.value.length));
+  const label = multiSelect.t('chosen', { count: multiSelect.value.length });
 
   return (
     <div aria-label={label} data-part="chips" ref={row} role="row">

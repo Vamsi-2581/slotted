@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "checkbox",
   "ui": "checkbox",
+  "catalog": {
+    "group": "Forms",
+    "summary": "Box that turns one option on or off."
+  },
   "controlPart": "control",
   "rootRole": null,
   "indicator": {

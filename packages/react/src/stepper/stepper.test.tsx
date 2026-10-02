@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/stepper/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Stepper, useStepper } from './stepper';
 import { StepperDefaultsProvider } from './stepper-defaults';
 import { StepperList, StepperNext, StepperPanel, StepperStep } from './stepper-parts';
@@ -56,7 +58,7 @@ describe('Stepper', () => {
    * first, in the Tabs entry itself.
    */
   it('names the sequence without claiming a role the guide refuses', () => {
-    render(<Checkout label="Checkout" />);
+    render(<Checkout messages={{ label: 'Checkout' }} />);
 
     expect(screen.getByRole('list')).toHaveAccessibleName('Checkout');
     expect(screen.queryByRole('tablist')).toBeNull();
@@ -485,15 +487,28 @@ describe('Stepper', () => {
       expect(root()).toHaveAttribute('data-orientation', 'horizontal');
     });
 
-    it('merges one translated word with the five it did not touch', () => {
+    it('merges one message with the six it did not touch', () => {
       render(
-        <StepperDefaultsProvider labels={{ complete: 'concluído' }}>
-          <Checkout defaultStep={1} stepProps={{ 0: { complete: true } }} />
-        </StepperDefaultsProvider>,
+        <Checkout
+          defaultStep={1}
+          messages={{ complete: 'done' }}
+          stepProps={{ 0: { complete: true } }}
+        />,
       );
 
-      expect(trigger(0)).toHaveAccessibleName('Cart, Step 1 of 4, concluído');
+      expect(trigger(0)).toHaveAccessibleName('Cart, Step 1 of 4, done');
       expect(trigger(1)).toHaveAccessibleName('Address, Step 2 of 4, current');
+    });
+
+    it('speaks the language in force, and lists the statuses the way it lists', () => {
+      render(
+        <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+          <Checkout defaultStep={1} stepProps={{ 0: { complete: true } }} />
+        </SlottedProvider>,
+      );
+
+      expect(screen.getByRole('list')).toHaveAccessibleName('Progresso');
+      expect(trigger(0)).toHaveAccessibleName('Cart, Etapa 1 de 4 e concluída');
     });
 
     it('refuses to render a part outside the stepper it belongs to', () => {

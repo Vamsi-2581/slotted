@@ -12,6 +12,8 @@ import {
   numberAttribute,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
+import { buttonMessages, type ButtonMessages, type PartialMessages } from '@slotted/core/i18n';
 
 import {
   BUTTON_WAIT,
@@ -26,7 +28,6 @@ import {
 import type { ButtonWait } from './button-appearance';
 import {
   BUTTON_DEFAULTS,
-  BUTTON_LOADING_LABEL,
   type ButtonSize,
   type ButtonTone,
   type ButtonType,
@@ -53,7 +54,7 @@ import {
         data-part="indicator"
         data-ui="spinner"
         role="progressbar"
-        [attr.aria-label]="loadingLabel()"
+        [attr.aria-label]="t('loading')"
       ></span>
     }`,
   styleUrls: ['../../../styles/src/button/button.css', '../../../styles/src/spinner/spinner.css'],
@@ -87,7 +88,13 @@ export class SlButton implements ButtonWait {
   readonly loading = input(false, { transform: booleanAttribute });
   /** How long the wait lasts before the ring is drawn. The refusal is immediate. */
   readonly loadingDelay = input(0, { transform: numberAttribute });
-  readonly loadingLabel = input(BUTTON_LOADING_LABEL);
+  /**
+   * Words laid over the catalog of the language in force, key by key: what the
+   * ring announces itself as (`loading`). It is a progress bar, so it has a name.
+   */
+  readonly messages = input<PartialMessages<ButtonMessages> | undefined>(undefined);
+  /** The family's words in the language in force, with this button's `messages` laid over them. */
+  readonly t = injectMessages(buttonMessages, this.messages);
   readonly size = input<ButtonSize | undefined>(undefined);
   readonly tone = input<ButtonTone | undefined>(undefined);
   readonly type = input<ButtonType>('button');

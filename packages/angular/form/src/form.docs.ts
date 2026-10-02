@@ -50,7 +50,7 @@ const anatomy: AnatomyRow[] = [
     element: 'h2',
     required: false,
     purpose:
-      'The heading the sourced pattern requires, defaulting to “There is a problem”. It labels the region, so a reader who is moved there is told what they arrived at.',
+      'The heading the sourced pattern requires, the summaryTitle message of the language in force (“There is a problem”). It labels the region, so a reader who is moved there is told what they arrived at.',
   },
   {
     part: 'summary-list',
@@ -134,7 +134,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'form-angular-summary',
       language: 'angular',
       label: 'Rendered by the family, or placed by the consumer',
-      source: `<form slForm summaryTitle="Corrija estes campos">…</form>
+      source: `<form slForm [messages]="{ summaryTitle: 'Corrija estes campos' }">…</form>
 
 <!-- Somewhere else on the page, under a heading of your own. -->
 <form slForm summary="none">
@@ -210,16 +210,15 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Setting it once, reaching past it, and guarding it',
-    note: 'Two injection tokens carry what an application decides once: how its forms behave, and how a validator’s key becomes a sentence. exportAs reaches the four actions a value cannot express, and guardUnsaved registers a beforeunload nothing surveyed ships.',
+    note: 'Two injection tokens carry what an application decides once: how its forms behave, and the sentence of a validator the application adds. exportAs reaches the four actions a value cannot express, and guardUnsaved registers a beforeunload nothing surveyed ships.',
     snippet: defineSnippet({
       id: 'form-angular-composition',
       language: 'ts',
       label: 'Two providers an application writes once',
       source: `providers: [
-  provideFormDefaults({ summaryTitle: 'Corrija estes campos', validate: 'blur' }),
+  provideFormDefaults({ validate: 'blur' }),
   provideFormErrorMessages({
-    required: () => 'Campo obrigatório.',
-    minlength: ({ detail }) => \`Use ao menos \${detail.requiredLength} caracteres.\`,
+    cnpj: () => 'CNPJ inválido.',
   }),
 ];`,
     }),
@@ -299,11 +298,11 @@ export const ANGULAR_FORM_DOCS = {
         'Whether the family renders the summary as its first child. none leaves it to the consumer, who puts slFormSummary wherever the page needs it',
       ],
       [
-        'summaryTitle',
-        'string',
-        'There is a problem',
-        'slForm, provideFormDefaults',
-        'The summary’s heading, and the only string this family writes',
+        'messages',
+        'Partial<FormMessages>',
+        '—',
+        'slForm',
+        'Words laid over the language in force, key by key: the summary’s heading (summaryTitle) and the built-in validators’ sentences (errors.required, errors.minlength, …)',
       ],
       [
         'summaryDescription',
@@ -361,21 +360,21 @@ export const ANGULAR_FORM_DOCS = {
         'formGroup, ngForm',
         '—',
         'the same element',
-        'Reactive Forms is the second source of errors. Every control is marked touched at submit, and each failing one becomes a sentence through SL_FORM_ERROR_MESSAGES',
+        'Reactive Forms is the second source of errors. Every control is marked touched at submit, and each failing one becomes a sentence: a built-in validator’s from the catalog’s errors.* messages, an application’s own through SL_FORM_ERROR_MESSAGES',
       ],
       [
         'provideFormErrorMessages',
         'Record<string, (context) => string>',
-        'seven English defaults',
+        '{}',
         'an injector',
-        'How a validator’s key becomes a sentence. Angular reports required, minlength and the rest as a key and a shape and never as a message, because a message is the application’s and so is its language',
+        'The sentence for a validator the application adds, by its key. Angular reports a key and a shape and never a message; the seven built-in keys are written by the catalog, and an entry for one of them replaces the catalog’s',
       ],
       [
         'provideFormDefaults',
-        '{ validate, errorFocus, summary, summaryTitle, summaryDescription, align, nativeValidation }',
+        '{ validate, errorFocus, summary, summaryDescription, align, nativeValidation }',
         '—',
         'an injector',
-        'The seven decisions an application takes once. summaryTitle is the one worth setting first, because it is the only place a reader is told in words that something is wrong',
+        'The six decisions an application takes once. The summary’s heading comes from the language in force (provideSlotted)',
       ],
       [
         'slFormSummary / slFormActions',

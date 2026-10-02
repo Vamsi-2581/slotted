@@ -2,6 +2,10 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { skeletonMessages } from '@slotted/core/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/skeleton/contract.json';
 import { SlSkeleton } from './skeleton';
 import { SlSkeletonRegion } from './skeleton-region';
@@ -17,7 +21,7 @@ const defaults = contract.members.skeleton.defaults;
     [loading]="loading()"
     [animation]="animation()"
     [live]="live()"
-    [label]="label()"
+    [messages]="messages()"
     [loadedLabel]="loadedLabel()"
     [delay]="delay()"
     [minDuration]="minDuration()"
@@ -32,7 +36,7 @@ class TestHost {
   readonly loading = signal(true);
   readonly animation = signal<'shimmer' | 'pulse' | 'none' | undefined>(undefined);
   readonly live = signal<'polite' | 'off' | undefined>(undefined);
-  readonly label = signal<string | undefined>(undefined);
+  readonly messages = signal<{ label: string } | undefined>(undefined);
   readonly loadedLabel = signal<string | undefined>(undefined);
   readonly delay = signal<number | undefined>(undefined);
   readonly minDuration = signal<number | undefined>(undefined);
@@ -165,7 +169,7 @@ describe('SlSkeletonRegion', () => {
     const { region, status, fixture } = mount();
 
     expect(region.getAttribute('aria-busy')).toBe('true');
-    expect(status()?.textContent?.trim()).toBe(defaults.label);
+    expect(status()?.textContent?.trim()).toBe(skeletonMessages.base.label);
     expect(fixture.nativeElement.querySelectorAll('[role="status"]')).toHaveLength(1);
   });
 
@@ -220,14 +224,27 @@ describe('SlSkeletonRegion', () => {
     expect(box.hasAttribute('inert')).toBe(true);
   });
 
-  it('sets the animation and the wording once for a whole application', () => {
+  it('sets the animation once for a whole application', () => {
     TestBed.configureTestingModule({
-      providers: [provideSkeletonDefaults({ animation: 'pulse', label: 'Carregando…' })],
+      providers: [provideSkeletonDefaults({ animation: 'pulse' })],
     });
-    const { box, status } = mount();
+    const { box } = mount();
 
     expect(box.getAttribute('data-animation')).toBe('pulse');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    TestBed.configureTestingModule({
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const { fixture, status } = mount();
+
     expect(status()?.textContent?.trim()).toBe('Carregando…');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(status()?.textContent?.trim()).toBe('Loading…');
   });
 });
 

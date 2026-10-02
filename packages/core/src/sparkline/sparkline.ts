@@ -14,6 +14,8 @@
  * stylesheet chose.
  */
 
+import type { FamilyTranslator, SparklineMessages } from '../i18n';
+
 export type SparklineDatum = number | null | undefined;
 
 export type SparklineTrend = 'up' | 'down' | 'flat';
@@ -93,17 +95,9 @@ export interface SparklineLayout {
   readonly marker: SparklinePoint | null;
 }
 
-export interface SparklineMessages {
-  /** `{last}`, `{change}` and `{first}` are replaced with the formatted numbers. */
-  readonly up: string;
-  readonly down: string;
-  /** `{last}` and `{first}`. */
-  readonly flat: string;
-  readonly noData: string;
-}
-
 export interface SparklineDescriptionRequest {
-  readonly messages: SparklineMessages;
+  /** The family's words in the language in force: `useMessages` / `injectMessages` of `sparklineMessages`. */
+  readonly t: FamilyTranslator<SparklineMessages>;
   readonly format: (value: number) => string;
   readonly label?: string | undefined;
 }
@@ -360,19 +354,19 @@ export function layoutSparkline(request: SparklineLayoutRequest): SparklineLayou
  */
 export function describeSparkline(
   data: readonly SparklineDatum[],
-  { messages, format, label }: SparklineDescriptionRequest,
+  { t, format, label }: SparklineDescriptionRequest,
 ) {
   const summary = summarizeSparkline(data);
   const prefix = label ? `${label}: ` : '';
   if (summary.count === 0 || summary.last === null || summary.first === null) {
-    return `${prefix}${messages.noData}`;
+    return `${prefix}${t('noData')}`;
   }
-  const template =
-    summary.trend === 'up' ? messages.up : summary.trend === 'down' ? messages.down : messages.flat;
-  const sentence = template
-    .replaceAll('{last}', format(summary.last))
-    .replaceAll('{first}', format(summary.first))
-    .replaceAll('{change}', format(Math.abs(summary.delta ?? 0)));
+  const last = format(summary.last);
+  const first = format(summary.first);
+  const sentence =
+    summary.trend === 'flat'
+      ? t('flat', { last, first })
+      : t(summary.trend, { last, first, change: format(Math.abs(summary.delta ?? 0)) });
   return `${prefix}${sentence}`;
 }
 

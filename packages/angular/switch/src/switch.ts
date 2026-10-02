@@ -1,3 +1,4 @@
+import { switchMessages, type PartialMessages, type SwitchMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import {
@@ -21,6 +22,7 @@ import {
 import type { OnInit } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor } from '@angular/forms';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlField } from '@slotted/angular/field';
 import { SlVisuallyHidden } from '@slotted/angular/visually-hidden';
@@ -141,8 +143,11 @@ export class SlSwitch implements ControlValueAccessor, OnInit {
    * announcing.
    */
   readonly loading = input(false, { transform: booleanAttribute });
-  /** What a reader hears while the switch is pending. Defaults to the token's. */
-  readonly loadingLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key:
+   * `loading` is what a reader hears while the switch is pending.
+   */
+  readonly messages = input<PartialMessages<SwitchMessages> | undefined>(undefined);
   /** Unstated rather than `false`, so the switch defers to its field. */
   readonly disabled = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
@@ -213,7 +218,8 @@ export class SlSwitch implements ControlValueAccessor, OnInit {
   );
   readonly resolvedReadOnly = computed(() => this.readOnly() ?? this.field?.resolvedReadOnly());
   readonly resolvedInvalid = computed(() => this.invalid() ?? this.field?.invalid());
-  readonly resolvedLoadingLabel = computed(() => this.loadingLabel() ?? this.defaults.loadingLabel);
+  /** The family's words in the language in force, with this switch's `messages` laid over them. */
+  readonly t = injectMessages(switchMessages, this.messages);
 
   /** Merged after the consumer's own, and the pending region last. */
   protected readonly describedBy = computed(() => {
@@ -242,7 +248,7 @@ export class SlSwitch implements ControlValueAccessor, OnInit {
   protected readonly requiredAttribute = computed(() => this.writtenRequired ?? null);
   /** Silence first, and the pending label only if the write is slow enough to notice. */
   protected readonly announcement = computed(() =>
-    this.loading() && this.announced() ? this.resolvedLoadingLabel() : '',
+    this.loading() && this.announced() ? this.t('loading') : '',
   );
 
   constructor() {

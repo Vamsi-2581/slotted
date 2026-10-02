@@ -2,6 +2,9 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/stepper/contract.json';
 import { SlStepper, SlStepperList, SlStepperNext, SlStepperPanel, SlStepperStep } from './stepper';
 import { provideStepperDefaults } from './stepper.constants';
@@ -398,5 +401,23 @@ describe('SlStepper', () => {
     host.orientation.set('horizontal');
     settle();
     expect(root.getAttribute('data-orientation')).toBe('horizontal');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const { host, root, item, settle } = setup([
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+    ]);
+    host.completed.set([0]);
+    host.defaultStep.set(1);
+    settle();
+    const announced = () => item(0).querySelector('[data-part="status"]')?.textContent?.trim();
+
+    expect(root.querySelector('ol')?.getAttribute('aria-label')).toBe('Progresso');
+    expect(announced()).toBe(', Etapa 1 de 4 e concluída');
+
+    locale.set('en-US');
+    settle();
+    expect(announced()).toBe(', Step 1 of 4, completed');
   });
 });

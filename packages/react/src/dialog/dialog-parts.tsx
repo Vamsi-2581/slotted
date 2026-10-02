@@ -332,7 +332,7 @@ function DialogFullscreen() {
   const dialog = useDialog();
   return (
     <button
-      aria-label="Full screen"
+      aria-label={dialog.t('fullScreen')}
       aria-pressed={dialog.fullscreen}
       data-part="fullscreen"
       onClick={(event) => {
@@ -477,7 +477,7 @@ export function DialogClose({
   }
 
   const rootProps = {
-    'aria-label': 'Close',
+    'aria-label': dialog.t('close'),
     ...rest,
     /* The cross is drawn unless the consumer wrote content of their own. */
     children: children ?? (

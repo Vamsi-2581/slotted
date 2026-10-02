@@ -1,5 +1,6 @@
 import type { GridColumn, GridColumnState, GridOutOfSpace } from '@slotted/core/grid';
 import { normalizeColumnState } from '@slotted/core/grid';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -8,11 +9,11 @@ import { useRef, useState, type ReactNode } from 'react';
 import { Button } from '../button';
 import { DataGrid } from '../data-grid';
 import { Grid, Measure, Scene } from '../field/field-demo';
+import { SlottedProvider } from '../i18n';
 import { Inline } from '../inline';
 import { Stack } from '../stack';
 import { Text } from '../typography';
 import { ColumnManager, ColumnManagerRoot, ColumnManagerTrigger } from './column-manager';
-import { ColumnManagerProvider } from './column-manager-defaults';
 import { REACT_COLUMN_MANAGER_DOCS, REACT_COLUMN_MANAGER_TOKENS } from './column-manager.docs';
 import type {
   ColumnManagerApply,
@@ -445,7 +446,7 @@ function Listing() {
           columnState={state}
           columns={COLUMNS}
           height="100%"
-          label="Orders"
+          aria-label="Orders"
           onColumnStateChange={(next) => setState(next)}
           onManageColumns={() => manager.current?.show()}
           onOutOfSpaceChange={setOutOfSpace}
@@ -495,35 +496,15 @@ export const Accessibility: Story = {
   render: () => (
     <One
       label="In Portuguese, from the provider"
-      note="Every word comes from labels once: the group, the zones, the statuses, the trigger’s sentence and the announcement."
+      note="Every word comes from the language in force: the group, the zones, the statuses, the trigger’s sentence and the announcement."
     >
-      <ColumnManagerProvider
-        labels={{
-          title: 'Colunas',
-          search: 'Procurar colunas',
-          noResults: 'Nenhuma coluna encontrada',
-          showAll: 'Mostrar todas',
-          reset: 'Restaurar padrão',
-          pinnedStart: 'Fixadas no início',
-          unpinned: 'Colunas',
-          pinnedEnd: 'Fixadas no fim',
-          pin: 'Fixar {column}',
-          reorder: 'Reordenar {column}',
-          moved: '{column} movida para a posição {position}',
-          required: 'Obrigatória',
-          hiddenBySpace: 'Oculta por espaço',
-          inRow: 'Mostrada na linha',
-          hiddenCountOne: '1 coluna oculta',
-          hiddenCountOther: '{count} colunas ocultas',
-          visibleCount: '{visible} de {total} visíveis',
-        }}
-      >
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
         <Orders
           outOfSpace={{ popin: ['owner'], hidden: ['region'] }}
           presentation="popover"
           trigger
         />
-      </ColumnManagerProvider>
+      </SlottedProvider>
     </One>
   ),
 };

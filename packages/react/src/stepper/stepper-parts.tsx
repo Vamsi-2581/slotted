@@ -3,7 +3,6 @@ import { Children, isValidElement, useContext, useEffect, useRef, type ReactNode
 
 import { Glyph, Icon } from '../icon';
 import {
-  StepperListLabel,
   StepperRegistry,
   StepperStepProvider,
   useStepper,
@@ -54,7 +53,6 @@ export function StepperList({
 }: StepperListProps) {
   const stepper = useStepper();
   const register = useContext(StepperRegistry);
-  const label = useContext(StepperListLabel);
   const items = Children.toArray(children).filter((child) => isValidElement(child));
 
   const registrations = items.map(registrationOf);
@@ -70,7 +68,7 @@ export function StepperList({
   }, [key, register]);
 
   const rootProps: StepperListRootProps = {
-    'aria-label': label,
+    'aria-label': stepper.t('label'),
     ...nativeProps,
     children: items.map((child, index) => (
       <StepperStepProvider
@@ -166,20 +164,21 @@ export function StepperStep({
    */
   const mark = invalid === true ? 'x' : status === 'complete' && !current ? 'check' : undefined;
 
-  const announced = [
-    stepper.labels.position(index, stepper.count),
-    invalid === true
-      ? stepper.labels.invalid
-      : current
-        ? stepper.labels.current
-        : status === 'complete'
-          ? stepper.labels.complete
-          : undefined,
-    loading === true ? stepper.labels.loading : undefined,
-    unreachable && !current ? stepper.labels.unavailable : undefined,
-  ]
-    .filter(Boolean)
-    .join(', ');
+  /* A list of descriptors, written the way the locale in force lists them. */
+  const announced = new Intl.ListFormat(stepper.locale, { type: 'unit' }).format(
+    [
+      stepper.t('position', { index: index + 1, count: stepper.count }),
+      invalid === true
+        ? stepper.t('invalid')
+        : current
+          ? stepper.t('current')
+          : status === 'complete'
+            ? stepper.t('complete')
+            : undefined,
+      loading === true ? stepper.t('loading') : undefined,
+      unreachable && !current ? stepper.t('unavailable') : undefined,
+    ].filter((part): part is string => part !== undefined),
+  );
 
   const triggerProps = {
     'aria-controls': nativeProps['aria-controls'],

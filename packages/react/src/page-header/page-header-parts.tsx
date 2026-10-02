@@ -227,7 +227,7 @@ export function PageHeaderArea({
   style,
   ...nativeProps
 }: PageHeaderAreaProps) {
-  const { expanded, ids, messages, scrolled } = usePageHeader();
+  const { expanded, ids, scrolled, t } = usePageHeader();
   const [element, setElement] = useState<HTMLElement | null>(null);
   const closedByControl = !expanded && !scrolled;
 
@@ -244,7 +244,7 @@ export function PageHeaderArea({
 
   const rootProps: PageHeaderAreaRootProps = {
     ...nativeProps,
-    'aria-label': ariaLabel ?? messages.headerArea,
+    'aria-label': ariaLabel ?? t('headerArea'),
     children,
     className,
     'data-part': 'header-area',
@@ -302,12 +302,12 @@ export function PageHeaderToggle({
   style,
   ...nativeProps
 }: PageHeaderToggleProps) {
-  const { expanded, ids, messages, setExpanded } = usePageHeader();
+  const { expanded, ids, setExpanded, t } = usePageHeader();
   const rootProps: PageHeaderToggleRootProps = {
     ...nativeProps,
     'aria-controls': ids.areaId,
     'aria-expanded': expanded,
-    'aria-label': ariaLabel ?? (expanded ? messages.collapse : messages.expand),
+    'aria-label': ariaLabel ?? (expanded ? t('collapse') : t('expand')),
     /* The stylesheet turns the chevron half a turn while the area is shown. */
     children: (children as ReactNode) ?? (
       <Icon>
@@ -344,10 +344,10 @@ export function PageHeaderPin({
   style,
   ...nativeProps
 }: PageHeaderPinProps) {
-  const { messages, pinned, setPinned } = usePageHeader();
+  const { pinned, setPinned, t } = usePageHeader();
   const rootProps: PageHeaderPinRootProps = {
     ...nativeProps,
-    'aria-label': ariaLabel ?? (pinned ? messages.unpin : messages.pin),
+    'aria-label': ariaLabel ?? (pinned ? t('unpin') : t('pin')),
     'aria-pressed': pinned,
     /* The mark says what a press does: pin while free, unpin while held. */
     children: (children as ReactNode) ?? (

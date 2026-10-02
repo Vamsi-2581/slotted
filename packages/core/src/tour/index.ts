@@ -4,7 +4,6 @@ export {
   cardFits,
   compactSide,
   isCompactViewport,
-  formatTourProgress,
   isTextEntry,
   keepOverTarget,
   resolveStep,

@@ -100,7 +100,7 @@ const anatomy: AnatomyRow[] = [
     part: 'close',
     element: 'button',
     required: false,
-    purpose: 'TourClose. Closes with the outcome close; named by labels.close.',
+    purpose: 'TourClose. Closes with the outcome close; named by messages.close.',
   },
   {
     part: 'title',
@@ -189,17 +189,17 @@ const [open, setOpen] = useState(false);
   {
     id: 'centered',
     title: 'A step with no target',
-    note: 'The opening step points at nothing: it stands in the middle of the screen over the whole scrim, with a picture above the header and its own labels, “Not now” and “Start tour”.',
+    note: 'The opening step points at nothing: it stands in the middle of the screen over the whole scrim, with a picture above the header and its own words, “Not now” and “Start tour”.',
     snippet: defineSnippet({
       id: 'tour-react-centered',
       language: 'tsx',
-      label: 'media and per-step labels',
+      label: 'media and per-step messages',
       source: `const step: TourStep = {
   id: 'welcome',
   title: 'Welcome to Reports',
   description: 'Five stops, about a minute.',
   media: <img alt="" src="/tour/reports.png" />,
-  labels: { next: 'Start tour', skip: 'Not now' },
+  messages: { next: 'Start tour', skip: 'Not now' },
 };`,
     }),
   },
@@ -214,7 +214,7 @@ const [open, setOpen] = useState(false);
       source: `<Tour
   modal={false}
   spotlight={false}
-  steps={[{ id: 'views', target: '#views', title: 'Keep this view', labels: { done: 'Got it' } }]}
+  steps={[{ id: 'views', target: '#views', title: 'Keep this view', messages: { done: 'Got it' } }]}
 />;`,
     }),
   },
@@ -345,23 +345,16 @@ const [open, setOpen] = useState(false);
   {
     id: 'labels',
     title: 'The tour in another language',
-    note: 'The provider says Próximo, Voltar, Concluir, Pular tour and “Passo 2 de 5” once for the application; a long German progress and title wrap inside the card rather than widening it.',
+    note: 'The language in force says Próximo, Voltar, Concluir, Pular tour and “2 de 5” once for the application; a long German progress and title wrap inside the card rather than widening it.',
     snippet: defineSnippet({
       id: 'tour-react-labels',
       language: 'tsx',
-      label: 'Labels, once',
-      source: `<TourDefaultsProvider
-  labels={{
-    next: 'Próximo',
-    prev: 'Voltar',
-    done: 'Concluir',
-    skip: 'Pular tour',
-    close: 'Fechar tour',
-    progress: (position, total) => \`Passo \${position} de \${total}\`,
-  }}
->
+      label: 'The language, once',
+      source: `<SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
   <App />
-</TourDefaultsProvider>;`,
+</SlottedProvider>;
+
+<Tour messages={{ progress: 'Passo {position} de {total}' }} steps={steps} />;`,
     }),
   },
   {
@@ -535,11 +528,11 @@ export const REACT_TOUR_DOCS = {
         'Milliseconds to watch the page for a target that is not there yet',
       ],
       [
-        'labels',
-        'Partial<TourLabels>',
-        'English',
-        'Tour, TourDefaultsProvider',
-        'next, prev, done, skip, close, preparing, and progress(position, total)',
+        'messages',
+        'PartialMessages<TourMessages>',
+        '—',
+        'Tour',
+        'Words laid over the language in force, key by key: next, prev, done, skip, close, preparing, and progress with {position} and {total}',
       ],
       [
         'finalFocus',
@@ -591,11 +584,11 @@ export const REACT_TOUR_DOCS = {
       ],
       ['advanceOn', 'string', '—', 'TourStep', 'An event on the target that goes to the next step'],
       [
-        'labels',
-        'Partial<{ next, prev, skip, done }>',
+        'messages',
+        'PartialMessages<{ next, prev, skip, done }>',
         '—',
         'TourStep',
-        'The step’s own wording: “Start tour”, “Got it”',
+        'The step’s own words, laid over the tour’s: “Start tour”, “Got it”',
       ],
       [
         'actions',
@@ -627,7 +620,7 @@ export const REACT_TOUR_DOCS = {
       ],
       [
         'TourDefaultsProvider',
-        '{ size, side, align, modal, spotlight, missing, targetTimeout, labels, container, … }',
+        '{ size, side, align, modal, spotlight, missing, targetTimeout, container, … }',
         '—',
         'a subtree',
         'The decisions an application takes once; a tour or a step that states any of them wins',

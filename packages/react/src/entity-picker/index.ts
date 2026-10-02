@@ -1,6 +1,5 @@
 export { EntityPicker } from './entity-picker';
 export {
-  DEFAULT_ENTITY_PICKER_LABELS,
   ENTITY_PICKER_FALLBACK,
   EntityPickerDefaultsProvider,
   useEntityPickerDefaults,
@@ -19,7 +18,6 @@ export type {
   EntityPickerHandle,
   EntityPickerHighlightReason,
   EntityPickerInputReason,
-  EntityPickerLabels,
   EntityPickerMedia,
   EntityPickerMultipleProps,
   EntityPickerOpenOn,

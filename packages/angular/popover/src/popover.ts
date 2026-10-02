@@ -1,3 +1,4 @@
+import { type PartialMessages, popoverMessages, type PopoverMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import {
@@ -11,6 +12,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 
 import { injectPopoverDefaults, SlPopoverIdFactory } from './popover-defaults';
 import type {
@@ -70,7 +72,11 @@ export class SlPopover {
   readonly align = input<PopoverAlign | undefined>(undefined);
   readonly mount = input<PopoverMount | undefined>(undefined);
   readonly strategy = input<PopoverStrategy | undefined>(undefined);
-  readonly closeLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * close control's accessible name (`close`).
+   */
+  readonly messages = input<PartialMessages<PopoverMessages> | undefined>(undefined);
 
   /** What takes focus on open instead of the panel — a search field, usually. */
   readonly initialFocus = input<PopoverFocusTarget | undefined>(undefined);
@@ -120,6 +126,8 @@ export class SlPopover {
   readonly openChangeRequest = output<ChangeRequest<boolean>>();
 
   private readonly defaults = injectPopoverDefaults();
+  /** The family's words in the language in force, with this popover's `messages` laid over them. */
+  readonly t = injectMessages(popoverMessages, this.messages);
   private readonly base = inject(SlPopoverIdFactory).next();
 
   readonly contentId = `${this.base}-panel`;
@@ -142,7 +150,6 @@ export class SlPopover {
   readonly resolvedAlign = computed(() => this.align() ?? this.defaults.align);
   readonly resolvedMount = computed(() => this.mount() ?? this.defaults.mount);
   readonly resolvedStrategy = computed(() => this.strategy() ?? this.defaults.strategy);
-  readonly resolvedCloseLabel = computed(() => this.closeLabel() ?? this.defaults.closeLabel);
   readonly resolvedArrow = computed(() => (this.arrow() ?? this.defaults.arrow) === true);
   readonly resolvedAutoFocus = computed(
     () => (this.autoFocus() ?? this.defaults.autoFocus) === true,

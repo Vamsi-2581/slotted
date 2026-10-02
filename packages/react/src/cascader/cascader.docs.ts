@@ -581,11 +581,11 @@ const api = apiRows([
   ],
   ['name', 'string', '—', 'Cascader', 'Submits one hidden input per emitted key.'],
   [
-    'labels',
-    'Partial<CascaderLabels>',
+    'messages',
+    'Partial<CascaderMessages>',
     '—',
     'Cascader, CascaderPanel',
-    'Every string the family prints or announces.',
+    'Words laid over the language in force, key by key: placeholder, clear, remove ({label}), summary ({count}), search, searchPlaceholder, root, back ({label}), breadcrumb, empty, noResults ({query}), results ({count}), loading, failed ({label}), retry',
   ],
   [
     'handleRef',
@@ -633,7 +633,7 @@ const composition = apiRows([
     'component',
     '—',
     'Application',
-    'Sets every axis and every label once for a subtree. A cascader that states one itself still wins.',
+    'Sets every axis once for a subtree; the words come from the language in force (SlottedProvider). A cascader that states one itself still wins.',
   ],
   ['CascaderPanel', 'component', '—', 'A page', 'The tree without a control or a layer.'],
   [

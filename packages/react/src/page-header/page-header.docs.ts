@@ -435,16 +435,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'defaults',
     title: 'Setting it once, and reaching past it',
-    note: 'The provider carries size, level, collapse and the four strings for every header under it; render substitutes the heading with the consumer’s own control; the handle moves the area with the reason programmatic.',
+    note: 'The provider carries size, level and collapse for every header under it; render substitutes the heading with the consumer’s own control; the handle moves the area with the reason programmatic.',
     snippet: defineSnippet({
       id: 'page-header-react-defaults',
       language: 'tsx',
-      label: 'Four decisions, taken once',
-      source: `<PageHeaderDefaultsProvider
-  collapse="manual"
-  messages={{ collapse: 'Collapse header', expand: 'Expand header' }}
-  size="sm"
->
+      label: 'Three decisions, taken once',
+      source: `<PageHeaderDefaultsProvider collapse="manual" size="sm">
   <PageHeader>…</PageHeader>
 </PageHeaderDefaultsProvider>;`,
     }),
@@ -547,8 +543,8 @@ export const REACT_PAGE_HEADER_DOCS = {
         'messages',
         'Partial<PageHeaderMessages>',
         '—',
-        'PageHeader, PageHeaderDefaultsProvider',
-        'expand, collapse, pin, unpin and headerArea: the names the two controls and the region carry. An aria-label written on the control itself still wins',
+        'PageHeader',
+        'Words laid over the language in force, key by key — expand, collapse, pin, unpin and headerArea: the names the two controls and the region carry. An aria-label written on the control itself still wins',
       ],
       [
         'data-when',
@@ -585,14 +581,14 @@ export const REACT_PAGE_HEADER_DOCS = {
         '() => PageHeaderContextValue',
         '—',
         'inside PageHeader',
-        'What the parts read: expanded, pinned, scrolled, revealed, loading, the identifiers, the messages, and setExpanded and setPinned with a reason. It throws outside a header',
+        'What the parts read: expanded, pinned, scrolled, revealed, loading, the identifiers, the translator t, and setExpanded and setPinned with a reason. It throws outside a header',
       ],
       [
         'PageHeaderDefaultsProvider',
-        '{ size, level, collapse, messages }',
+        '{ size, level, collapse }',
         '—',
         'a subtree',
-        'The four decisions an application takes once. A header that states any of them itself still wins',
+        'The three decisions an application takes once. A header that states any of them itself still wins',
       ],
       [
         'usePage()',
@@ -605,7 +601,7 @@ export const REACT_PAGE_HEADER_DOCS = {
     accessibility: [
       'The practice is the WAI-ARIA APG’s Landmark Regions (w3.org/WAI/ARIA/apg/practices/landmark-regions/), the toggle answers the Disclosure pattern and the pin the Button pattern’s toggle form. The root is a header element inside the page’s main, which is a plain header and not a banner: the banner is the application shell’s, and a second one would be a second site header.',
       'The whole keyboard is the platform’s. The toggle and the pin are buttons, so Enter and Space move them without the family binding a key; Tab walks the title area in document order and then the header area while it is visible. The title area is deliberately not a button, because it holds links and buttons of its own and a button may not contain a control — which is where sap.f’s click-to-toggle title departs from the ARIA rules.',
-      'The toggle carries aria-expanded and aria-controls naming the header area; the header area is a region named by messages.headerArea; the pin carries aria-pressed. Their names say which way they move — Recolher cabeçalho, Expandir cabeçalho, Fixar cabeçalho, Soltar cabeçalho — and an aria-label written on the control wins over them.',
+      'The toggle carries aria-expanded and aria-controls naming the header area; the header area is a region named by the headerArea message; the pin carries aria-pressed. Their names say which way they move — Collapse header, Expand header, Pin header, Unpin header — and an aria-label written on the control wins over them.',
       'Collapsed by the control, the area is inert and aria-hidden, because a 0fr row leaves its controls in the DOM and out of sight. Scrolled past, it is neither: a control inside it that receives focus is scrolled back into view by the browser, and the header re-opens with the reason scroll, which is the right thing for the reader who pressed Tab.',
       'A snapped heading written with data-when is display: none in the other state, so the accessibility tree holds one heading at a time and a screen reader’s heading list never shows the title twice.',
       'The reason on every request is what lets a product tell the reader’s own move from the scroll’s: pointer and keyboard are the reader, programmatic is the application, and scroll is the page. The Angular binding emits the same request on expandedRequest and pinnedRequest.',
@@ -645,7 +641,7 @@ export const REACT_PAGE_HEADER_DOCS = {
         <div data-part="navigation">…</div>
       </div>
     </div>
-    <div data-part="header-area" role="region" id="a" aria-label="Cabeçalho da página">
+    <div data-part="header-area" role="region" id="a" aria-label="Page header">
       <div data-part="content">
         <p data-part="description">…</p>
       </div>
@@ -656,9 +652,9 @@ export const REACT_PAGE_HEADER_DOCS = {
           data-part="toggle"
           aria-expanded="true"
           aria-controls="a"
-          aria-label="Recolher cabeçalho"
+          aria-label="Collapse header"
         />
-        <button data-part="pin" aria-pressed="false" aria-label="Fixar cabeçalho" />
+        <button data-part="pin" aria-pressed="false" aria-label="Pin header" />
       </div>
     </div>
     <div data-part="tabs">…</div>

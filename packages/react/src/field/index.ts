@@ -18,12 +18,7 @@ export {
   FieldIndicator,
   FieldLabel,
 } from './field-parts';
-export {
-  FIELD_HELP_LABEL,
-  FIELD_NECESSITY_WORDS,
-  FieldDefaultsProvider,
-  useFieldDefaults,
-} from './field-defaults';
+export { FieldDefaultsProvider, useFieldDefaults } from './field-defaults';
 export type {
   FieldActionProps,
   FieldActionRootProps,
@@ -47,7 +42,6 @@ export type {
   FieldLabelRootProps,
   FieldMessageProps,
   FieldNecessity,
-  FieldNecessityWords,
   FieldProps,
   FieldRootProps,
   FieldSize,

@@ -1,5 +1,5 @@
-@let messages = resolvedMessages(); @let current = chartModel(); @if (title() !== undefined ||
-description() !== undefined || resolvedToolbar() !== 'none') {
+@let current = chartModel(); @if (title() !== undefined || description() !== undefined ||
+resolvedToolbar() !== 'none') {
 <figcaption data-part="header">
   <div>
     <div>
@@ -10,7 +10,7 @@ description() !== undefined || resolvedToolbar() !== 'none') {
         #helpControl
         type="button"
         data-part="help"
-        [attr.aria-label]="messages.help"
+        [attr.aria-label]="t('help')"
         [attr.aria-controls]="id + '-help'"
         [attr.aria-expanded]="layerOpen()['help'] ?? false"
         [attr.data-open]="layerOpen()['help'] ? '' : null"
@@ -36,13 +36,13 @@ description() !== undefined || resolvedToolbar() !== 'none') {
   </div>
   <div data-part="actions"><ng-content select="[slChartActions]" /></div>
   @if (resolvedToolbar() !== 'none' && usable() && current) {
-  <div data-part="toolbar" role="toolbar" [attr.aria-label]="messages.toolbar">
+  <div data-part="toolbar" role="toolbar" [attr.aria-label]="t('toolbar')">
     @if (zoomed()) {
     <button
       type="button"
       data-part="zoom-reset"
-      [attr.aria-label]="messages.resetZoom"
-      [attr.title]="messages.resetZoom"
+      [attr.aria-label]="t('resetZoom')"
+      [attr.title]="t('resetZoom')"
       (click)="resetZoomFromToolbar($event)"
     >
       <span slIcon><svg slGlyph name="rotate-ccw"></svg></span>
@@ -51,8 +51,8 @@ description() !== undefined || resolvedToolbar() !== 'none') {
     <button
       type="button"
       data-part="view-toggle"
-      [attr.aria-label]="messages.tableView"
-      [attr.title]="messages.tableView"
+      [attr.aria-label]="t('tableView')"
+      [attr.title]="t('tableView')"
       [attr.aria-pressed]="tableOpen()"
       [attr.data-pressed]="tableOpen() ? '' : null"
       (click)="requestTable(!tableOpen(), pressReason(), $event)"
@@ -62,8 +62,8 @@ description() !== undefined || resolvedToolbar() !== 'none') {
     <button
       type="button"
       data-part="fullscreen-toggle"
-      [attr.aria-label]="fullscreen() ? messages.exitFullscreen : messages.fullscreen"
-      [attr.title]="fullscreen() ? messages.exitFullscreen : messages.fullscreen"
+      [attr.aria-label]="fullscreen() ? t('exitFullscreen') : t('fullscreen')"
+      [attr.title]="fullscreen() ? t('exitFullscreen') : t('fullscreen')"
       (click)="requestFullscreen(!fullscreen(), pressReason(), $event)"
     >
       <span slIcon><svg slGlyph [name]="fullscreen() ? 'minimize' : 'maximize'"></svg></span>
@@ -73,8 +73,8 @@ description() !== undefined || resolvedToolbar() !== 'none') {
       type="button"
       data-part="menu-trigger"
       aria-haspopup="menu"
-      [attr.aria-label]="messages.more"
-      [attr.title]="messages.more"
+      [attr.aria-label]="t('more')"
+      [attr.title]="t('more')"
       [attr.aria-expanded]="layerOpen()['menu'] ?? false"
       [attr.data-open]="layerOpen()['menu'] ? '' : null"
       (click)="toggleLayer('menu')"
@@ -86,7 +86,7 @@ description() !== undefined || resolvedToolbar() !== 'none') {
       popover="auto"
       data-part="menu"
       role="menu"
-      [attr.aria-label]="messages.more"
+      [attr.aria-label]="t('more')"
       (toggle)="onLayerToggle('menu', $event, menuControl, 'end')"
       (keydown)="onLayerKeyDown($event)"
     >
@@ -97,7 +97,7 @@ description() !== undefined || resolvedToolbar() !== 'none') {
         data-action="view"
         (click)="menuAction('view', $event)"
       >
-        {{ messages.tableView }}
+        {{ t('tableView') }}
       </button>
       <button
         type="button"
@@ -106,7 +106,7 @@ description() !== undefined || resolvedToolbar() !== 'none') {
         data-action="fullscreen"
         (click)="menuAction('fullscreen', $event)"
       >
-        {{ fullscreen() ? messages.exitFullscreen : messages.fullscreen }}
+        {{ fullscreen() ? t('exitFullscreen') : t('fullscreen') }}
       </button>
       <button
         type="button"
@@ -115,7 +115,7 @@ description() !== undefined || resolvedToolbar() !== 'none') {
         data-action="csv"
         (click)="menuAction('csv', $event)"
       >
-        {{ messages.downloadCsv }}
+        {{ t('downloadCsv') }}
       </button>
       <button
         type="button"
@@ -124,7 +124,7 @@ description() !== undefined || resolvedToolbar() !== 'none') {
         data-action="image"
         (click)="menuAction('image', $event)"
       >
-        {{ messages.downloadImage }}
+        {{ t('downloadImage') }}
       </button>
     </div>
   </div>
@@ -135,7 +135,7 @@ description() !== undefined || resolvedToolbar() !== 'none') {
   #legendRow
   data-part="legend"
   [attr.role]="legendWaiting() ? null : legendInteractive() ? 'toolbar' : 'list'"
-  [attr.aria-label]="legendWaiting() ? null : messages.legend"
+  [attr.aria-label]="legendWaiting() ? null : t('legend')"
   (keydown)="onLegendKeyDown($event)"
 >
   @if (legendWaiting()) { @for (line of repeat(3); track line) {
@@ -158,20 +158,21 @@ description() !== undefined || resolvedToolbar() !== 'none') {
     type="button"
     data-part="legend-more"
     aria-haspopup="true"
+    [attr.aria-label]="legendMoreName()"
     [hidden]="collapsed().length === 0"
     [attr.tabindex]="rovingKey() === null ? 0 : -1"
     [attr.aria-expanded]="layerOpen()['more'] ?? false"
     [attr.data-open]="layerOpen()['more'] ? '' : null"
     (click)="toggleLayer('more')"
   >
-    {{ '+' + collapsed().length }}
+    {{ t('moreSeries', { count: collapsed().length }) }}
   </button>
   <div
     #moreLayer
     popover="auto"
     data-part="menu"
     role="group"
-    [attr.aria-label]="messages.legend"
+    [attr.aria-label]="t('legend')"
     (toggle)="onLayerToggle('more', $event, moreControl, 'start')"
     (keydown)="onLayerKeyDown($event)"
   >
@@ -245,9 +246,9 @@ description() !== undefined || resolvedToolbar() !== 'none') {
   data-part="plot"
   role="group"
   tabindex="0"
-  [attr.aria-roledescription]="messages.roledescription"
+  [attr.aria-roledescription]="t('roledescription')"
   [attr.aria-labelledby]="title() !== undefined ? id + '-title' : null"
-  [attr.aria-label]="title() === undefined ? messages.roledescription : null"
+  [attr.aria-label]="title() === undefined ? t('roledescription') : null"
   [attr.aria-describedby]="describedBy()"
   [attr.aria-busy]="loading() ? 'true' : null"
   (keydown)="onPlotKeyDown($event)"
@@ -317,7 +318,7 @@ description() !== undefined || resolvedToolbar() !== 'none') {
     </div>
     } @if (overlayNow.tooltip.total; as total) {
     <div data-part="tooltip-total">
-      <span>{{ messages.total }}</span>
+      <span>{{ t('total') }}</span>
       <span data-part="tooltip-value">{{ total.formatted }}</span>
     </div>
     } } }
@@ -328,7 +329,7 @@ description() !== undefined || resolvedToolbar() !== 'none') {
     <ng-container *ngTemplateOutlet="custom.template; context: { $implicit: current }" />
     } @else {
     <span data-part="center-value">{{ current!.series[0]!.format(current!.total) }}</span>
-    <span data-part="center-label">{{ messages.total }}</span>
+    <span data-part="center-label">{{ t('total') }}</span>
     }
   </div>
   } @if (table(); as rows) {
@@ -432,7 +433,7 @@ description() !== undefined || resolvedToolbar() !== 'none') {
       data-live="polite"
     >
       <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content" role="status"><div data-part="title">{{ messages.error }}</div></div>
+      <div data-part="content" role="status"><div data-part="title">{{ t('error') }}</div></div>
       <div data-part="actions">
         <button
           data-ui="button"
@@ -443,7 +444,7 @@ description() !== undefined || resolvedToolbar() !== 'none') {
           type="button"
           (click)="onRetry()"
         >
-          <span data-part="label">{{ messages.retry }}</span>
+          <span data-part="label">{{ t('retry') }}</span>
         </button>
       </div>
     </section>
@@ -464,9 +465,7 @@ description() !== undefined || resolvedToolbar() !== 'none') {
     >
       <div data-part="media" aria-hidden="true"></div>
       <div data-part="content" role="status">
-        <div data-part="title">
-          {{ reason === 'all-hidden' ? messages.allHidden : messages.noData }}
-        </div>
+        <div data-part="title">{{ reason === 'all-hidden' ? t('allHidden') : t('noData') }}</div>
       </div>
       @if (reason === 'all-hidden') {
       <div data-part="actions">
@@ -479,7 +478,7 @@ description() !== undefined || resolvedToolbar() !== 'none') {
           type="button"
           (click)="showAll($event)"
         >
-          <span data-part="label">{{ messages.showAll }}</span>
+          <span data-part="label">{{ t('showAll') }}</span>
         </button>
       </div>
       }

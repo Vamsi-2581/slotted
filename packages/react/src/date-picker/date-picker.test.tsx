@@ -1,8 +1,10 @@
 import { plainDate, toISODate } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/date-picker/contract.json';
+import { SlottedProvider } from '../i18n';
 import { DatePicker, DatePickerDefaultsProvider } from './index';
 import type { DatePickerHandle } from './index';
 
@@ -71,13 +73,19 @@ describe('what the trigger says', () => {
    * is told what was chosen. The APG names it as an accessibility feature.
    */
   it('names itself for choosing while nothing is chosen', () => {
-    render(<DatePicker chooseLabel="Escolher data" locale="pt-BR" />);
-    expect(trigger()).toHaveAttribute('aria-label', 'Escolher data');
+    render(<DatePicker locale="pt-BR" messages={{ choose: 'Escolher uma data' }} />);
+    expect(trigger()).toHaveAttribute('aria-label', 'Escolher uma data');
   });
 
   it('carries the chosen date in words once there is one', () => {
-    render(<DatePicker changeLabel="Alterar data" defaultValue={NINTH} locale="pt-BR" />);
-    expect(trigger().getAttribute('aria-label')).toContain('Alterar data');
+    render(
+      <DatePicker
+        defaultValue={NINTH}
+        locale="pt-BR"
+        messages={{ change: 'Alterar a data, {date}' }}
+      />,
+    );
+    expect(trigger().getAttribute('aria-label')).toContain('Alterar a data, ');
     expect(trigger().getAttribute('aria-label')).toContain('setembro');
   });
 
@@ -243,11 +251,13 @@ describe('what the field around it says', () => {
 });
 
 describe('what an application sets once', () => {
-  it('takes the locale and the appearance from a provider', () => {
+  it('takes the appearance from a provider and the locale from the language in force', () => {
     render(
-      <DatePickerDefaultsProvider chooseLabel="Pick a date" locale="ja-JP" size="lg">
-        <DatePicker />
-      </DatePickerDefaultsProvider>,
+      <SlottedProvider locale="ja-JP">
+        <DatePickerDefaultsProvider size="lg">
+          <DatePicker />
+        </DatePickerDefaultsProvider>
+      </SlottedProvider>,
     );
 
     expect(screen.getAllByRole('spinbutton').map((element) => element.dataset['field'])).toEqual([
@@ -256,7 +266,21 @@ describe('what an application sets once', () => {
       'day',
     ]);
     expect(root()).toHaveAttribute('data-size', 'lg');
-    expect(trigger()).toHaveAttribute('aria-label', 'Pick a date');
+    expect(trigger()).toHaveAttribute('aria-label', 'Choose date');
+  });
+
+  it('changes its words and its date together with the language in force', () => {
+    const inLocale = (locale: string) => (
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale={locale}>
+        <DatePicker defaultValue={NINTH} />
+      </SlottedProvider>
+    );
+    const { rerender } = render(inLocale('pt-BR'));
+
+    expect(trigger().getAttribute('aria-label')).toMatch(/^Alterar data, .*setembro de 2026/);
+
+    rerender(inLocale('en-US'));
+    expect(trigger().getAttribute('aria-label')).toMatch(/^Change date, .*September 9, 2026/);
   });
 });
 

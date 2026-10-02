@@ -4,7 +4,6 @@ import '@slotted/styles/visually-hidden/visually-hidden.css';
 import {
   cellAt,
   dashboardKeyIntent,
-  formatDashboardLabel,
   gridStyle,
   layoutsEqual,
   materializeLayout,
@@ -31,6 +30,7 @@ import {
   type MeasuredTile,
 } from '@slotted/core/dashboard-grid';
 import { createDragController, type DropTarget } from '@slotted/core/drag';
+import { dashboardGridMessages, dragMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable, type ChangeReason, type ChangeRequest } from '@slotted/core/state';
 import {
@@ -52,6 +52,7 @@ import {
 } from 'react';
 
 import { Button } from '../button';
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { Menu, MenuContent, MenuItem, MenuItemLabel, MenuTrigger } from '../menu';
 import {
@@ -238,8 +239,8 @@ export function DashboardGrid({
   editBar: editBarProp,
   editing: editingProp,
   headingLevel: headingLevelProp,
-  labels: labelsProp,
   layout: layoutProp,
+  messages,
   onEditingChange,
   onLayoutChange,
   ref,
@@ -248,10 +249,8 @@ export function DashboardGrid({
   ...nativeProps
 }: DashboardGridProps) {
   const defaults = useDashboardGridDefaults();
-  const labels = useMemo(
-    () => ({ ...defaults.labels, ...labelsProp }),
-    [defaults.labels, labelsProp],
-  );
+  const t = useMessages(dashboardGridMessages, messages);
+  const dragT = useMessages(dragMessages);
   const grid = useMemo(
     () => resolveColumns(columnsProp ?? defaults.columns),
     [columnsProp, defaults.columns],
@@ -381,8 +380,8 @@ export function DashboardGrid({
     [root],
   );
 
-  const live = useRef({ layout, widgets, grid, tiles, visible, labels, titles, editing });
-  live.current = { layout, widgets, grid, tiles, visible, labels, titles, editing };
+  const live = useRef({ layout, widgets, grid, tiles, visible, t, dragT, titles, editing });
+  live.current = { layout, widgets, grid, tiles, visible, t, dragT, titles, editing };
 
   const titleOf = useCallback((key: string) => live.current.titles.get(key) ?? key, []);
 
@@ -419,12 +418,12 @@ export function DashboardGrid({
       const tile = placed[index];
       if (tile === undefined) return '';
       return drawnIn === 'expanded'
-        ? formatDashboardLabel(now.labels.moved, {
+        ? now.t('moved', {
             title: titleOf(key),
             row: tile.y + 1,
             column: tile.x + 1,
           })
-        : formatDashboardLabel(now.labels.movedInOrder, {
+        : now.t('movedInOrder', {
             title: titleOf(key),
             position: index + 1,
             total: placed.length,
@@ -439,7 +438,7 @@ export function DashboardGrid({
       const tile = resolveTiles(next, now.widgets, now.grid).find((each) => each.key === key);
       return tile === undefined
         ? ''
-        : formatDashboardLabel(now.labels.resized, {
+        : now.t('resized', {
             title: titleOf(key),
             columns: drawnIn === 'medium' ? tile.medium : tile.w,
             rows: tile.h,
@@ -484,7 +483,7 @@ export function DashboardGrid({
       focusAfter.current = neighbour?.key ?? `${GRID}:add`;
       const next = setTileHidden(now.layout, now.widgets, now.grid, key, true);
       const done = change(next, reason, { kind: 'hide', key }, source, () =>
-        formatDashboardLabel(now.labels.hidden, { title: titleOf(key) }),
+        now.t('hidden', { title: titleOf(key) }),
       );
       if (!done) focusAfter.current = null;
     },
@@ -497,7 +496,7 @@ export function DashboardGrid({
       focusAfter.current = key;
       const next = setTileHidden(now.layout, now.widgets, now.grid, key, false);
       change(next, reason, { kind: 'show', key }, source, () =>
-        formatDashboardLabel(now.labels.shown, { title: titleOf(key) }),
+        now.t('shown', { title: titleOf(key) }),
       );
     },
     [change, titleOf],
@@ -541,7 +540,7 @@ export function DashboardGrid({
       const now = live.current;
       const back = snapshot.current;
       if (back !== null) {
-        change(back, 'dismiss', { kind: 'cancel', key: null }, source, () => now.labels.cancelled);
+        change(back, 'dismiss', { kind: 'cancel', key: null }, source, () => now.t('cancelled'));
       }
       requestEditing(false, reason, source);
     },
@@ -551,13 +550,7 @@ export function DashboardGrid({
   const reset = useCallback(
     (reason: DashboardLayoutReason, source?: Event) => {
       const now = live.current;
-      change(
-        EMPTY_LAYOUT,
-        reason,
-        { kind: 'reset', key: null },
-        source,
-        () => now.labels.resetDone,
-      );
+      change(EMPTY_LAYOUT, reason, { kind: 'reset', key: null }, source, () => now.t('resetDone'));
     },
     [change],
   );
@@ -745,8 +738,9 @@ export function DashboardGrid({
       restoreFocus: false,
       preview: false,
       autoScroll: { axis: 'y' },
+      t: (key, slots) => live.current.dragT(key, slots),
       /* The move says what happened once, in the family's own words. */
-      messages: { pickedUp: () => '', moved: () => '', dropped: () => '', cancelled: () => '' },
+      silent: ['pickedUp', 'moved', 'dropped', 'cancelled'],
       /**
        * In the expanded class the target is a cell: the one the card's leading
        * corner is nearest, so a widget lands where it is drawn under the
@@ -816,7 +810,7 @@ export function DashboardGrid({
       targets: ['on'],
       element: () => list,
       itemElement: (key) => widgetNodes.current.get(key) ?? null,
-      label: () => live.current.labels.editBar,
+      label: () => live.current.t('editBar'),
       itemLabel: titleOf,
     });
 
@@ -1015,7 +1009,7 @@ export function DashboardGrid({
         resizing: resizingThis,
         edge: resizingThis ? gesture.edge : null,
         readout: resizingThis
-          ? formatDashboardLabel(labels.size, {
+          ? t('size', {
               columns: gesture.sizeClass === 'medium' ? shown.medium : shown.w,
               rows: shown.h,
             })
@@ -1033,23 +1027,12 @@ export function DashboardGrid({
       });
     }
     return map;
-  }, [
-    drawn,
-    drawnVisible,
-    visible,
-    gesture,
-    labels.size,
-    editing,
-    layout,
-    widgets,
-    grid,
-    drawnClass,
-  ]);
+  }, [drawn, drawnVisible, visible, gesture, t, editing, layout, widgets, grid, drawnClass]);
 
   const context = useMemo<DashboardGridContextValue>(
     () => ({
       editing,
-      labels,
+      t,
       headingLevel,
       statusId,
       sizeClass: drawnClass,
@@ -1065,7 +1048,7 @@ export function DashboardGrid({
     }),
     [
       editing,
-      labels,
+      t,
       headingLevel,
       statusId,
       drawnClass,
@@ -1084,7 +1067,7 @@ export function DashboardGrid({
   const hidden = tiles.filter((tile) => tile.hidden);
   const status = (
     <p data-part="edit-status" id={statusId} {...(editBar ? {} : { 'data-ui': 'visually-hidden' })}>
-      {labels.editStatus}
+      {t('editStatus')}
     </p>
   );
 
@@ -1107,7 +1090,7 @@ export function DashboardGrid({
                 <button {...buttonProps} ref={triggerRef as never} data-part="add" />
               )}
             >
-              {labels.add}
+              {t('add')}
             </Button>
           )}
         />
@@ -1154,19 +1137,17 @@ export function DashboardGrid({
     children: (
       <>
         {editing && editBar ? (
-          <div data-part="edit-bar" role="group" aria-label={labels.editBar}>
+          <div data-part="edit-bar" role="group" aria-label={t('editBar')}>
             {status}
             <div data-part="edit-actions">
               {addMenu}
-              {barButton('reset', labels.reset, (event) =>
+              {barButton('reset', t('reset'), (event) =>
                 reset(pressReason(event), event.nativeEvent),
               )}
-              {barButton('cancel', labels.cancel, (event) =>
+              {barButton('cancel', t('cancel'), (event) =>
                 cancelEditing(pressReason(event), event.nativeEvent),
               )}
-              {barButton('done', labels.done, (event) =>
-                commitEditing('submit', event.nativeEvent),
-              )}
+              {barButton('done', t('done'), (event) => commitEditing('submit', event.nativeEvent))}
             </div>
           </div>
         ) : null}
@@ -1198,9 +1179,9 @@ export function DashboardGrid({
           <div data-part="empty">
             <ResultState status="empty" reach="section" live="polite">
               <ResultStateContent>
-                <ResultStateTitle>{labels.empty}</ResultStateTitle>
+                <ResultStateTitle>{t('empty')}</ResultStateTitle>
                 {editing ? (
-                  <ResultStateDescription>{labels.emptyEditing}</ResultStateDescription>
+                  <ResultStateDescription>{t('emptyEditing')}</ResultStateDescription>
                 ) : null}
               </ResultStateContent>
             </ResultState>

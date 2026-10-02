@@ -198,9 +198,9 @@ const FIELDS: readonly FilterBarField[] = [
             (valueChangeRequest)="filterRequest($event)"
             [query]="store.search()"
             (queryChangeRequest)="store.setSearch($event.value)"
-            [labels]="{ count: countLabel }"
+            [messages]="countMessages"
             [count]="store.total() ?? undefined"
-            [total]="store.grandTotal() ?? undefined"
+            [total]="store.total() === store.grandTotal() ? undefined : (store.grandTotal() ?? undefined)"
             [loading]="store.loading()"
           >
             <app-list-view-tools
@@ -221,7 +221,7 @@ const FIELDS: readonly FilterBarField[] = [
           }
           <sl-data-grid
             #grid="slDataGrid"
-            label="Quotes"
+            aria-label="Quotes"
             rowKey="id"
             variant="framed"
             activatable
@@ -283,12 +283,12 @@ const FIELDS: readonly FilterBarField[] = [
             <nav
               slDataGridFooter
               slPagination
-              label="Quote pages"
+              aria-label="Quote pages"
               [count]="store.total() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
               [pageSizeOptions]="pageSizes"
-              [labels]="{ range: rangeLabel, pageSize: 'Quotes per page' }"
+              [messages]="pagerMessages"
               [loading]="store.loading()"
               (pageChange)="goTo($event.value)"
               (pageSizeChange)="resize($event.value)"
@@ -320,10 +320,12 @@ export class QuotesPage implements OnInit {
   /** The compact size class: the pager leaves its page size at the default. */
   readonly phone = phoneSignal();
 
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total ? `${count} quotes` : `${count} of ${total} quotes`;
-  readonly rangeLabel = (start: number, end: number, count: number): string =>
-    count === 0 ? 'No quotes' : `Quotes ${start}–${end} of ${count.toLocaleString('en-US')}`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} quotes', countOnly: '{count} quotes' };
+  readonly pagerMessages = {
+    range: '{count, plural, =0 {No quotes} other {Quotes {start}–{end} of {count}}}',
+    pageSize: 'Quotes per page',
+  };
 
   /** The reader's arrangement and density, kept in the browser; the query is the store's. */
   readonly view = listView({

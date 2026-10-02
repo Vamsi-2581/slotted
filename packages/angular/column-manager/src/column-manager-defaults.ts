@@ -27,67 +27,14 @@ export interface ColumnManagerRequest extends ChangeRequest<GridColumnState> {
 
 export type ColumnManagerOpenRequest = ChangeRequest<boolean>;
 
-/** The words the family says. `{slot}` is filled in. */
-export interface ColumnManagerLabels {
-  title: string;
-  search: string;
-  noResults: string;
-  showAll: string;
-  reset: string;
-  apply: string;
-  cancel: string;
-  pinnedStart: string;
-  unpinned: string;
-  pinnedEnd: string;
-  pin: string;
-  pinStart: string;
-  pinEnd: string;
-  unpin: string;
-  reorder: string;
-  moved: string;
-  required: string;
-  hiddenBySpace: string;
-  inRow: string;
-  hiddenCountOne: string;
-  hiddenCountOther: string;
-  visibleCount: string;
-}
-
 export interface ColumnManagerDefaults {
   presentation: ColumnManagerPresentation;
   apply: ColumnManagerApply;
-  labels: ColumnManagerLabels;
 }
-
-export const DEFAULT_COLUMN_MANAGER_LABELS: ColumnManagerLabels = {
-  title: 'Columns',
-  search: 'Search columns',
-  noResults: 'No columns match',
-  showAll: 'Show all',
-  reset: 'Restore defaults',
-  apply: 'Apply',
-  cancel: 'Cancel',
-  pinnedStart: 'Pinned to start',
-  unpinned: 'Columns',
-  pinnedEnd: 'Pinned to end',
-  pin: 'Pin {column}',
-  pinStart: 'Pin to start',
-  pinEnd: 'Pin to end',
-  unpin: 'Unpin',
-  reorder: 'Reorder {column}',
-  moved: '{column} moved to position {position}',
-  required: 'Required',
-  hiddenBySpace: 'Hidden for space',
-  inRow: 'Shown in row',
-  hiddenCountOne: '1 hidden column',
-  hiddenCountOther: '{count} hidden columns',
-  visibleCount: '{visible} of {total} shown',
-};
 
 const FALLBACK: ColumnManagerDefaults = {
   presentation: 'popover',
   apply: 'live',
-  labels: DEFAULT_COLUMN_MANAGER_LABELS,
 };
 
 export const COLUMN_MANAGER_DEFAULTS = new InjectionToken<ColumnManagerDefaults>(
@@ -96,21 +43,14 @@ export const COLUMN_MANAGER_DEFAULTS = new InjectionToken<ColumnManagerDefaults>
 );
 
 /**
- * An application decides once where its managers stand, whether they apply at
- * once, and what they say. A manager that states any of them itself still wins.
+ * An application decides once where its managers stand and whether they apply
+ * at once. A manager that states either itself still wins. Its words come from
+ * the language in force (`provideSlotted`).
  */
-export function provideColumnManagerDefaults(
-  defaults: Partial<Omit<ColumnManagerDefaults, 'labels'>> & {
-    labels?: Partial<ColumnManagerLabels>;
-  },
-) {
+export function provideColumnManagerDefaults(defaults: Partial<ColumnManagerDefaults>) {
   return {
     provide: COLUMN_MANAGER_DEFAULTS,
-    useFactory: (): ColumnManagerDefaults => ({
-      ...FALLBACK,
-      ...defaults,
-      labels: { ...FALLBACK.labels, ...defaults.labels },
-    }),
+    useFactory: (): ColumnManagerDefaults => ({ ...FALLBACK, ...defaults }),
   };
 }
 
@@ -126,11 +66,4 @@ export class SlColumnManagerIdFactory {
     this.count += 1;
     return `slotted-column-manager-${this.count}`;
   }
-}
-
-/** Fills `{name}` slots in a label. */
-export function fillLabel(label: string, slots: Record<string, string | number>): string {
-  return label.replace(/\{(\w+)\}/g, (match, name: string) =>
-    name in slots ? String(slots[name]) : match,
-  );
 }

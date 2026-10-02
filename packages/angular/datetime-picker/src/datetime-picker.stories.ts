@@ -489,7 +489,7 @@ export const DayWindow: Story = {
                locale="pt-BR"
                defaultOpen
                unavailableOptions="hide"
-               emptyLabel="Não há horário disponível neste dia."
+               [messages]="{ empty: 'Não há horário disponível neste dia.' }"
                aria-label="Dia fechado"
                [isTimeUnavailable]="closedAllDay"
                [step]="3600"
@@ -564,7 +564,7 @@ export const Now: Story = {
              slDateTimePicker
              locale="pt-BR"
              defaultOpen
-             nowLabel="Agora"
+             [messages]="{ now: 'Agora' }"
              aria-label="Agora"
              [referenceDateTime]="reference"
            ></div>`,

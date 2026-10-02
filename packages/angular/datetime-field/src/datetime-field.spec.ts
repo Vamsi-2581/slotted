@@ -4,6 +4,8 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { plainDate, plainDateTime, plainTime, toISODateTime } from '@slotted/core/date';
 import type { PlainDate, PlainDateTime, PlainTime } from '@slotted/core/date';
 import { SlField, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/datetime-field/contract.json';
@@ -463,7 +465,10 @@ describe('the contract with the consumer', () => {
     const fixture = renderTemplate(
       `<div slDateTimeField [defaultValue]="tenth"></div>
        <div slDateTimeField locale="pt-BR" [defaultValue]="tenth"></div>`,
-      [provideDateTimeFieldDefaults({ granularity: 'second', locale: 'en-US' })],
+      [
+        provideSlotted({ locale: 'en-US' }),
+        provideDateTimeFieldDefaults({ granularity: 'second' }),
+      ],
     );
 
     const roots = [
@@ -475,6 +480,28 @@ describe('the contract with the consumer', () => {
         (element) => (element as HTMLElement).dataset['field'],
       ),
     ).toEqual(['day', 'month', 'year', 'hour', 'minute', 'second']);
+  });
+
+  it('changes its words and its order together with the language in force', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(
+      `<div slDateTimeField clearable aria-label="Quando" [defaultValue]="tenth"></div>`,
+      [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    );
+    const clear = () =>
+      fixture.nativeElement.querySelector('[data-part="clear"]').getAttribute('aria-label');
+    const order = () =>
+      [...fixture.nativeElement.querySelectorAll('[data-part="segment"]')].map(
+        (element) => (element as HTMLElement).dataset['field'],
+      );
+
+    expect(clear()).toBe('Limpar');
+    expect(order()).toEqual(['day', 'month', 'year', 'hour', 'minute']);
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(clear()).toBe('Clear');
+    expect(order()).toEqual(['month', 'day', 'year', 'hour', 'minute', 'dayPeriod']);
   });
 
   it('takes the field s wiring when it sits inside one', () => {

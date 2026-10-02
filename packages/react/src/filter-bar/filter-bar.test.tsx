@@ -1,10 +1,12 @@
 import { serializeFilterGroup } from '@slotted/core/filter';
 import type { FilterGroup } from '@slotted/core/filter';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/filter-bar/contract.json';
+import { SlottedProvider } from '../i18n';
 import { FilterBar } from './filter-bar';
 import { FilterBarDefaultsProvider } from './filter-bar-defaults';
 import type { FilterBarField, FilterBarProps } from './filter-bar.types';
@@ -66,7 +68,7 @@ const TREE: FilterGroup = {
 };
 
 function Orders(props: Partial<FilterBarProps>) {
-  return <FilterBar count={128} fields={FIELDS} locale="en-US" total={3412} {...props} />;
+  return <FilterBar count={128} fields={FIELDS} total={3412} {...props} />;
 }
 
 const root = () =>
@@ -546,15 +548,26 @@ describe('FilterBar', () => {
 
   it('reads defaults from the provider and lets a prop win', () => {
     render(
-      <FilterBarDefaultsProvider apply="manual" chipLimit={1} labels={{ add: 'Adicionar filtro' }}>
-        <Orders defaultValue={TREE} />
+      <FilterBarDefaultsProvider apply="manual" chipLimit={1}>
+        <Orders defaultValue={TREE} messages={{ add: 'New filter' }} />
       </FilterBarDefaultsProvider>,
     );
     expect(root().dataset['apply']).toBe('manual');
     /* With chips in the bar, add is its glyph alone and keeps the label as its name. */
-    expect(part('add').getAttribute('aria-label')).toBe('Adicionar filtro');
+    expect(part('add').getAttribute('aria-label')).toBe('New filter');
     expect(part('add').hasAttribute('data-compact')).toBe(true);
     expect(part('more')).not.toBeNull();
+  });
+
+  it('speaks the language in force, the count in its digits', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Orders defaultValue={TREE} />
+      </SlottedProvider>,
+    );
+    expect(root().getAttribute('aria-label')).toBe('Filtro');
+    expect(part('count').textContent).toBe('128 de 3.412');
+    expect(screen.getByRole('button', { name: 'Remover Amount' })).not.toBeNull();
   });
 
   it('keeps add’s label while no chip is in the bar', () => {
@@ -594,7 +607,7 @@ describe('FilterBar', () => {
         },
       ],
     };
-    render(<Orders defaultValue={many} labels={{ operators: { anyOf: 'is one of' } }} />);
+    render(<Orders defaultValue={many} messages={{ operators: { anyOf: 'is one of' } }} />);
     const status = part('chip');
     expect(status.querySelector('[data-part="chip-operator"]')?.textContent).toBe('is one of');
     const value = status.querySelector('[data-part="chip-value"]') as HTMLElement;

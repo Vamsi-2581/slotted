@@ -3,10 +3,8 @@ export {
   injectToastDefaults,
   provideToastDefaults,
   SlToastService,
-  TOAST_CLOSE_LABEL,
   TOAST_DEFAULTS,
   TOAST_HOTKEY,
-  TOAST_LABEL,
 } from './toast-defaults';
 export type {
   ToastAttach,

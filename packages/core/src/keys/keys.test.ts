@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { createTranslator, keysMessages } from '../i18n';
+import { PT_BR } from '../i18n/locales/pt-BR';
 import {
+  canonicalKey,
   isEditableTarget,
   KBD_KEYS,
   matchesShortcut,
@@ -10,8 +13,11 @@ import {
   resolveShortcut,
 } from './keys';
 
+const t = createTranslator({ locale: 'en-US' }).family(keysMessages);
+const pt = createTranslator({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }).family(keysMessages);
+
 const legendsOf = (keys: string, platform: Parameters<typeof resolveShortcut>[1]['platform']) =>
-  resolveShortcut(keys, { platform }).steps.map((step) => step.map((key) => key.legend));
+  resolveShortcut(keys, { platform, t }).steps.map((step) => step.map((key) => key.legend));
 
 describe('resolvePlatform', () => {
   afterEach(() => {
@@ -100,17 +106,23 @@ describe('resolveKey', () => {
    * Windows key, depending on which meaning the author had in mind.
    */
   it('tells the platform accelerator from the Meta key', () => {
-    expect(resolveKey('mod', { platform: 'mac' })).toMatchObject({ legend: '⌘', name: 'Command' });
-    expect(resolveKey('mod', { platform: 'windows' })).toMatchObject({
+    expect(resolveKey('mod', { platform: 'mac', t })).toMatchObject({
+      legend: '⌘',
+      name: 'Command',
+    });
+    expect(resolveKey('mod', { platform: 'windows', t })).toMatchObject({
       legend: 'Ctrl',
       name: 'Control',
     });
-    expect(resolveKey('meta', { platform: 'mac' })).toMatchObject({ legend: '⌘', name: 'Command' });
-    expect(resolveKey('meta', { platform: 'windows' })).toMatchObject({
+    expect(resolveKey('meta', { platform: 'mac', t })).toMatchObject({
+      legend: '⌘',
+      name: 'Command',
+    });
+    expect(resolveKey('meta', { platform: 'windows', t })).toMatchObject({
       legend: 'Win',
       name: 'Windows',
     });
-    expect(resolveKey('meta', { platform: 'linux' })).toMatchObject({
+    expect(resolveKey('meta', { platform: 'linux', t })).toMatchObject({
       legend: 'Super',
       name: 'Super',
     });
@@ -122,9 +134,9 @@ describe('resolveKey', () => {
   });
 
   it('is case-insensitive about the token and upper-cases a single letter', () => {
-    expect(resolveKey('SHIFT', { platform: 'mac' }).legend).toBe('⇧');
-    expect(resolveKey('k', { platform: 'mac' }).legend).toBe('K');
-    expect(resolveKey('K', { platform: 'mac' }).legend).toBe('K');
+    expect(resolveKey('SHIFT', { platform: 'mac', t }).legend).toBe('⇧');
+    expect(resolveKey('k', { platform: 'mac', t }).legend).toBe('K');
+    expect(resolveKey('K', { platform: 'mac', t }).legend).toBe('K');
   });
 
   /**
@@ -134,13 +146,16 @@ describe('resolveKey', () => {
    * makes of it depends on its pronunciation dictionary rather than on us.
    */
   it('names every key in the vocabulary, and only those', () => {
-    expect(resolveKey('k', { platform: 'mac' }).name).toBeUndefined();
-    expect(resolveKey('Send', { platform: 'mac' }).name).toBeUndefined();
-    expect(resolveKey('ctrl', { platform: 'windows' })).toMatchObject({
+    expect(resolveKey('k', { platform: 'mac', t }).name).toBeUndefined();
+    expect(resolveKey('Send', { platform: 'mac', t }).name).toBeUndefined();
+    expect(resolveKey('ctrl', { platform: 'windows', t })).toMatchObject({
       legend: 'Ctrl',
       name: 'Control',
     });
-    expect(resolveKey('f6', { platform: 'mac' })).toMatchObject({ legend: 'F6', name: undefined });
+    expect(resolveKey('f6', { platform: 'mac', t })).toMatchObject({
+      legend: 'F6',
+      name: undefined,
+    });
   });
 
   it('reads the aliases the field already writes', () => {
@@ -159,13 +174,13 @@ describe('resolveKey', () => {
       ['pgdn', 'pagedown'],
       ['spacebar', 'space'],
     ] as const) {
-      expect(resolveKey(alias, { platform: 'mac' }).token).toBe(token);
+      expect(resolveKey(alias, { platform: 'mac', t }).token).toBe(token);
     }
   });
 
   /** An arrow legend is the physical key, so it is the same key in every language. */
   it('names an arrow rather than leaving the glyph to be read', () => {
-    expect(resolveKey('left', { platform: 'windows' })).toMatchObject({
+    expect(resolveKey('left', { platform: 'windows', t })).toMatchObject({
       legend: '←',
       name: 'Left arrow',
     });
@@ -175,6 +190,7 @@ describe('resolveKey', () => {
     expect(
       resolveKey('ctrl', {
         platform: 'windows',
+        t,
         legends: { ctrl: 'Strg' },
         names: { ctrl: 'Steuerung' },
       }),
@@ -188,18 +204,39 @@ describe('resolveKey', () => {
    */
   it('says whether the legend is a mark or a word', () => {
     for (const token of ['mod', 'shift', 'up', 'enter', 'plus']) {
-      expect(resolveKey(token, { platform: 'mac' }).symbolic).toBe(true);
+      expect(resolveKey(token, { platform: 'mac', t }).symbolic).toBe(true);
     }
     for (const token of ['mod', 'shift', 'escape', 'space', 'f6', 'k']) {
-      expect(resolveKey(token, { platform: 'windows' }).symbolic).toBe(false);
+      expect(resolveKey(token, { platform: 'windows', t }).symbolic).toBe(false);
     }
     /* A replaced legend is judged on what it became, not on what it was. */
-    expect(resolveKey('ctrl', { platform: 'mac', legends: { ctrl: 'Strg' } }).symbolic).toBe(false);
+    expect(resolveKey('ctrl', { platform: 'mac', t, legends: { ctrl: 'Strg' } }).symbolic).toBe(
+      false,
+    );
+  });
+
+  it('writes and names a key in the language of the catalog it is given', () => {
+    expect(resolveKey('space', { platform: 'windows', t: pt })).toMatchObject({
+      legend: 'Espaço',
+      name: 'Espaço',
+    });
+    expect(resolveKey('left', { platform: 'mac', t: pt })).toMatchObject({
+      legend: '←',
+      name: 'Seta para a esquerda',
+    });
+    expect(resolveKey('fn', { platform: 'mac', t }).legend).toBe('fn');
+    expect(resolveKey('fn', { platform: 'windows', t }).legend).toBe('Fn');
+  });
+
+  it('answers the canonical token of a written key without any words', () => {
+    expect(canonicalKey('Cmd')).toBe('meta');
+    expect(canonicalKey('ArrowLeft')).toBe('left');
+    expect(canonicalKey('k')).toBeUndefined();
   });
 
   /** A token the vocabulary does not hold is the application's own word. */
   it('renders an unknown token exactly as it was written', () => {
-    expect(resolveKey('Any key', { platform: 'mac' })).toMatchObject({
+    expect(resolveKey('Any key', { platform: 'mac', t })).toMatchObject({
       token: undefined,
       legend: 'Any key',
       name: undefined,
@@ -227,31 +264,29 @@ describe('resolveShortcut', () => {
 
   /** macOS writes ⌘⇧K with nothing between the keys; Windows writes Ctrl+Shift+K. */
   it('joins by platform, and joins with nothing on a Mac', () => {
-    expect(resolveShortcut('mod+k', { platform: 'mac' }).separator).toBe('');
-    expect(resolveShortcut('mod+k', { platform: 'windows' }).separator).toBe('+');
-    expect(resolveShortcut('mod+k', { platform: 'windows', separator: ' · ' }).separator).toBe(
+    expect(resolveShortcut('mod+k', { platform: 'mac', t }).separator).toBe('');
+    expect(resolveShortcut('mod+k', { platform: 'windows', t }).separator).toBe('+');
+    expect(resolveShortcut('mod+k', { platform: 'windows', t, separator: ' · ' }).separator).toBe(
       ' · ',
     );
   });
 
   it('carries the word that joins two steps of a sequence', () => {
-    const resolved = resolveShortcut('g i', { platform: 'mac' });
+    const resolved = resolveShortcut('g i', { platform: 'mac', t });
     expect(resolved.steps).toEqual([
       [{ token: undefined, legend: 'G', name: undefined, symbolic: false }],
       [{ token: undefined, legend: 'I', name: undefined, symbolic: false }],
     ]);
     expect(resolved.thenLabel).toBe('then');
-    expect(resolveShortcut('g i', { platform: 'mac', thenLabel: 'depois' }).thenLabel).toBe(
-      'depois',
-    );
+    expect(resolveShortcut('g i', { platform: 'mac', t: pt }).thenLabel).toBe('depois');
   });
 
   it('reports the platform it resolved to, so the DOM can say so', () => {
-    expect(resolveShortcut('mod+k', { platform: 'linux' }).platform).toBe('linux');
+    expect(resolveShortcut('mod+k', { platform: 'linux', t }).platform).toBe('linux');
   });
 
   it('resolves nothing for an empty shortcut, rather than an empty cap', () => {
-    expect(resolveShortcut('', { platform: 'mac' }).steps).toEqual([]);
+    expect(resolveShortcut('', { platform: 'mac', t }).steps).toEqual([]);
   });
 });
 
@@ -259,7 +294,7 @@ describe('KBD_KEYS', () => {
   it('names every canonical token once, and each one resolves', () => {
     expect(new Set(KBD_KEYS).size).toBe(KBD_KEYS.length);
     for (const token of KBD_KEYS) {
-      const resolved = resolveKey(token, { platform: 'mac' });
+      const resolved = resolveKey(token, { platform: 'mac', t });
       expect(resolved.token).toBe(token);
       expect(resolved.legend.length).toBeGreaterThan(0);
       expect(resolved.name?.length ?? 0).toBeGreaterThan(0);

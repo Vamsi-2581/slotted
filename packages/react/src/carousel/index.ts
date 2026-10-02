@@ -27,7 +27,6 @@ export type {
   CarouselIndicatorRootProps,
   CarouselIndicatorsProps,
   CarouselIndicatorsVariant,
-  CarouselMessages,
   CarouselOrientation,
   CarouselPageReason,
   CarouselPageRequest,

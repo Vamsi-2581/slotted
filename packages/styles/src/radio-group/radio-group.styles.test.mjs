@@ -176,17 +176,17 @@ test('lights the circle and its label as one wash, lit by hover alone', () => {
   assert.match(halo, /inset-inline-end:calc\(-1\.5 \* var\(--_halo-spread\)\)/);
   assert.match(
     halo,
-    /inset-inline-start:calc\(-1 \* \(var\(--_size\) \+ var\(--_gap\) \+ var\(--_halo-spread\)\)\)/,
+    /inset-inline-start:calc\(-1 \* \(var\(--_size\) \+ var\(--_label-gap\) \+ var\(--_halo-spread\)\)\)/,
   );
   assert.match(halo, /direction:var\(--_direction\)/);
   assert.doesNotMatch(halo, /box-shadow/);
   assert.match(
     rule(`${root}:not([data-variant='tile']) [data-part='label']:empty::after`),
-    /inset-inline-end:calc\(var\(--_gap\) - var\(--_halo-spread\)\)/,
+    /inset-inline-end:calc\(var\(--_label-gap\) - var\(--_halo-spread\)\)/,
   );
   assert.match(halo, /opacity:0/);
   assert.match(halo, /z-index:-1/);
-  assert.match(rule(root), /--_halo-spread:calc\(var\(--_gap\) \/ 2\)/);
+  assert.match(rule(root), /--_halo-spread:calc\(var\(--_label-gap\) \/ 2\)/);
   assert.doesNotMatch(normalized, /--slotted-selection-halo-size/);
   assert.match(rule(part('item')), /isolation:isolate/);
   assert.match(rule(part('item')), /position:relative/);
@@ -208,7 +208,7 @@ test('lights the circle and its label as one wash, lit by hover alone', () => {
   );
   assert.match(
     rule(`${root}[data-label-placement='start'] [data-part='label']::after`),
-    /inset-inline-end:calc\(-1 \* \(var\(--_size\) \+ var\(--_gap\) \+ var\(--_halo-spread\)\)\);inset-inline-start:calc\(-1\.5 \* var\(--_halo-spread\)\)/,
+    /inset-inline-end:calc\(-1 \* \(var\(--_size\) \+ var\(--_label-gap\) \+ var\(--_halo-spread\)\)\);inset-inline-start:calc\(-1\.5 \* var\(--_halo-spread\)\)/,
   );
 });
 
@@ -241,11 +241,11 @@ test('keeps the row at its line and hits the target around the circle', () => {
   );
   assert.match(
     target,
-    /inset-inline-start:calc\(\(var\(--_size\) - var\(--_target\)\) \/ 2 - var\(--_size\) - var\(--_gap\)\)/,
+    /inset-inline-start:calc\(\(var\(--_size\) - var\(--_target\)\) \/ 2 - var\(--_size\) - var\(--_label-gap\)\)/,
   );
   assert.match(
     rule(`${root}[data-label-placement='start'] [data-part='label']::before`),
-    /inset-inline-end:calc\(-1 \* \(var\(--_size\) \+ var\(--_gap\)\)\);inset-inline-start:auto/,
+    /inset-inline-end:calc\(-1 \* \(var\(--_size\) \+ var\(--_label-gap\)\)\);inset-inline-start:auto/,
   );
   assert.doesNotMatch(target, /box-shadow|opacity/);
   assert.match(target, /direction:var\(--_direction\)/);

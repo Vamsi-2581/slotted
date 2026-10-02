@@ -18,6 +18,7 @@ import {
   typeDigit,
 } from '@slotted/core/date';
 import type { DateFieldName, PlainDate, SegmentState } from '@slotted/core/date';
+import { dateFieldMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import {
   useCallback,
@@ -31,6 +32,7 @@ import {
 import type { ClipboardEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useDateFieldDefaults } from './date-field-defaults';
 import type {
@@ -93,7 +95,6 @@ export function DateField({
   calendar,
   className,
   clearable = false,
-  clearLabel,
   defaultValue,
   disabled,
   end,
@@ -103,6 +104,7 @@ export function DateField({
   isDateUnavailable,
   locale,
   max,
+  messages,
   min,
   name,
   onKeyDown,
@@ -123,10 +125,12 @@ export function DateField({
 }: DateFieldProps) {
   const field = useField();
   const defaults = useDateFieldDefaults();
+  const appLocale = useLocale();
+  const t = useMessages(dateFieldMessages, messages);
   const rootRef = useRef<HTMLElement | null>(null);
   const generatedId = useId();
 
-  const resolvedLocale = locale ?? defaults.locale;
+  const resolvedLocale = locale ?? appLocale;
   const resolvedFirstDay = firstDayOfWeek ?? defaults.firstDayOfWeek;
   const resolvedPivot = yearPivot ?? defaults.yearPivot;
   const resolvedTimeZone = timeZone ?? defaults.timeZone;
@@ -495,12 +499,7 @@ export function DateField({
         {spoken}
       </span>
       {showClear ? (
-        <button
-          aria-label={clearLabel ?? defaults.clearLabel}
-          data-part="clear"
-          onClick={clear}
-          type="button"
-        >
+        <button aria-label={t('clear')} data-part="clear" onClick={clear} type="button">
           <Icon>
             <Glyph name="x" />
           </Icon>

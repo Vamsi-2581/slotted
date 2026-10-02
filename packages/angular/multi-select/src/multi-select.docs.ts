@@ -411,7 +411,7 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'The wait, and the answer that was not there',
       source: `<sl-multi-select aria-label="Services" loading />
 
-<sl-multi-select aria-label="Services" emptyLabel="No service by that name" />`,
+<sl-multi-select aria-label="Services" [messages]="{ empty: 'No service by that name' }" />`,
     }),
   },
   {
@@ -457,7 +457,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition, and the defaults an application sets once',
-    note: 'An injection token carries the axes and the eight sentences, exportAs reaches the instance from the template, and projected options keep their own content.',
+    note: 'An injection token carries the axes, provideSlotted the language, exportAs reaches the instance from the template, and projected options keep their own content.',
     snippet: defineSnippet({
       id: 'multi-select-angular-composition',
       language: 'angular',
@@ -518,7 +518,7 @@ const api: ApiRow[] = apiRows([
     'string',
     '—',
     'sl-multi-select',
-    'BCP 47, for the comparison the filter and the duplicate rule make.',
+    'BCP 47, for the comparison the filter and the duplicate rule make. The language in force when absent.',
   ],
   [
     'validateValue',
@@ -705,6 +705,13 @@ const api: ApiRow[] = apiRows([
     'The positioning strategy the layer uses.',
   ],
   [
+    'openOn',
+    "'input' | 'focus' | 'manual'",
+    'input',
+    'sl-multi-select',
+    'Which gestures open the popup besides the trigger and the arrows.',
+  ],
+  [
     'sideOffset',
     'number',
     '4',
@@ -771,63 +778,12 @@ const api: ApiRow[] = apiRows([
   ['required', 'boolean', 'false', 'sl-multi-select', 'Whether an empty set is a validity error.'],
   ['invalid', 'boolean', 'false', 'sl-multi-select', 'Whether the control is drawn in error.'],
   ['loading', 'boolean', 'false', 'sl-multi-select', 'Whether an answer is travelling.'],
-  ['clearLabel', 'string', 'Clear', 'sl-multi-select', 'The accessible name of the clear button.'],
   [
-    'chosenLabel',
-    'string',
-    '{count} chosen',
+    'messages',
+    'Partial<MultiSelectMessages>',
+    '—',
     'sl-multi-select',
-    'The row’s own name, and the counter’s text while the frame is too narrow for a chip.',
-  ],
-  [
-    'countLabel',
-    'string',
-    '{count} results',
-    'sl-multi-select',
-    'What the live region says about the number of options that matched.',
-  ],
-  [
-    'counterLabel',
-    'string',
-    '{count} of {max}',
-    'sl-multi-select',
-    'The counter’s text while max is set.',
-  ],
-  ['createLabel', 'string', 'Add “{query}”', 'sl-multi-select', 'The offer to add what was typed.'],
-  [
-    'emptyLabel',
-    'string',
-    'No matches',
-    'sl-multi-select',
-    'The message for a query nothing answered.',
-  ],
-  [
-    'loadingLabel',
-    'string',
-    'Loading…',
-    'sl-multi-select',
-    'What the live region says while an answer is travelling.',
-  ],
-  [
-    'removeLabel',
-    'string',
-    'Remove {label}',
-    'sl-multi-select',
-    'The accessible name of a chip’s remove button.',
-  ],
-  [
-    'reorderLabel',
-    'string',
-    '{label}, position {position} of {count}',
-    'sl-multi-select',
-    'A chip’s accessible name while reorder is on, so its place is heard as well as seen.',
-  ],
-  [
-    'triggerLabel',
-    'string',
-    'Show options',
-    'sl-multi-select',
-    'The accessible name of the trigger.',
+    'Words laid over the language in force, key by key: clear, trigger, chosen ({count}), count ({count}), counter ({count}, {max}), create ({query}), empty, loading, remove ({label}), reorder ({label}, {position}, {count})',
   ],
   ['value', 'string', '—', 'sl-multi-select-item', 'The option’s key, and what enters the set.'],
   [
@@ -900,7 +856,7 @@ const composition = apiRows([
     'Provider',
     '—',
     'Application',
-    'Every axis and all eight sentences the family speaks, provided once in a bootstrap or a route. A binding written on one control still wins over it.',
+    'Every axis, provided once in a bootstrap or a route; the words come from the language in force (provideSlotted). A binding written on one control still wins over it.',
   ],
   [
     'exportAs',

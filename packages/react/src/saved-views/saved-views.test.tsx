@@ -7,13 +7,13 @@ import {
   type GridViewStorage,
   type SavedViewsState,
 } from '@slotted/core/grid';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, renderHook, screen, within } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import contract from '../../../../specs/components/saved-views/contract.json';
+import { SlottedProvider } from '../i18n';
 import { SavedViews } from './saved-views';
-import { DEFAULT_SAVED_VIEWS_LABELS, SavedViewsProvider } from './saved-views-defaults';
 import type { SavedViewsProps, SavedViewsRequest } from './saved-views.types';
 import { usePersistedSavedViews } from './use-persisted-saved-views';
 
@@ -56,7 +56,7 @@ describe('SavedViews', () => {
   it('renders the contract identity, the group and the view in use', () => {
     render(<Harness />);
     expect(root()).toHaveAttribute('role', 'group');
-    expect(root()).toHaveAttribute('aria-label', contract.labels.label);
+    expect(root()).toHaveAttribute('aria-label', 'Views');
     expect(trigger()).toHaveTextContent('Late orders');
     expect(root()).not.toHaveAttribute('data-modified');
     expect(root().querySelector('[data-part="revert"]')).toBeNull();
@@ -215,14 +215,14 @@ describe('SavedViews', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save as new view…' }));
     const input = screen.getByRole('textbox', { name: 'View name' });
     fireEvent.submit(input.closest('form')!);
-    expect(screen.getByText(contract.labels.empty)).toBeInTheDocument();
+    expect(screen.getByText('Enter a name for the view')).toBeInTheDocument();
     expect(input).toHaveAttribute('aria-invalid', 'true');
     fireEvent.change(input, { target: { value: 'my REGION' } });
     fireEvent.submit(input.closest('form')!);
-    expect(screen.getByText(contract.labels.duplicate)).toBeInTheDocument();
+    expect(screen.getByText('A view with this name already exists')).toBeInTheDocument();
     fireEvent.change(input, { target: { value: 'default' } });
     fireEvent.submit(input.closest('form')!);
-    expect(screen.getByText(contract.labels.duplicate)).toBeInTheDocument();
+    expect(screen.getByText('A view with this name already exists')).toBeInTheDocument();
     expect(onStateChange).not.toHaveBeenCalled();
   });
 
@@ -325,19 +325,19 @@ describe('SavedViews', () => {
     expect(item('High value')).toBeDefined();
   });
 
-  it('takes its words from the provider, and the instance wins', () => {
+  it('speaks the language in force, and the instance’s messages win', () => {
     render(
-      <SavedViewsProvider labels={{ builtIn: 'Padrão', revert: 'Reverter' }}>
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
         <Harness
           current={withSearch('x')}
           defaultState={{ ...STATE, activeId: null }}
-          labels={{ revert: 'Desfazer' }}
+          messages={{ revert: 'Desfazer' }}
         />
-      </SavedViewsProvider>,
+      </SlottedProvider>,
     );
+    expect(root()).toHaveAttribute('aria-label', 'Visualizações');
     expect(trigger()).toHaveTextContent('Padrão');
     expect(screen.getByRole('button', { name: 'Desfazer' })).toBeInTheDocument();
-    expect(DEFAULT_SAVED_VIEWS_LABELS).toEqual(contract.labels);
   });
 
   it('applies by id through the handle, with the reason programmatic', () => {

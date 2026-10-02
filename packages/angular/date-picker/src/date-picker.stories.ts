@@ -1,6 +1,8 @@
 import { plainDate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
 import { SlField, SlFieldDescription, SlFieldError, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
@@ -332,7 +334,7 @@ export const Composition: Story = {
       1,
       scene(
         'Set once for the application',
-        'One provider decides the locale, the zone and both trigger names for every picker under it, so a product does not repeat four inputs on each form.',
+        'One provider decides the zone for every picker under it, and provideSlotted the language that writes the date and names the trigger, so a product does not repeat them on each form.',
         `<div slDatePicker aria-label="Herdado" [defaultValue]="ninth"></div>`,
       ) +
         scene(
@@ -348,12 +350,8 @@ export const Composition: Story = {
     moduleMetadata({
       imports: DIRECTIVES,
       providers: [
-        provideDatePickerDefaults({
-          changeLabel: 'Alterar data',
-          chooseLabel: 'Escolher data',
-          locale: 'pt-BR',
-          timeZone: 'America/Sao_Paulo',
-        }),
+        provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }),
+        provideDatePickerDefaults({ timeZone: 'America/Sao_Paulo' }),
       ],
     }),
   ],

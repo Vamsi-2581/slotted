@@ -589,13 +589,7 @@ class HandledDemo {
   selector: 'sl-nc-provided',
   standalone: true,
   imports: [InboxDemo, SlStack],
-  providers: [
-    provideNotificationCenterDefaults({
-      growing: 'button',
-      messages: { title: 'Avisos' },
-      size: 'sm',
-    }),
-  ],
+  providers: [provideNotificationCenterDefaults({ growing: 'button', size: 'sm' })],
   template: `<div slStack [gap]="6">${panel(inbox(''))} ${panel(inbox('controls="none"'))}</div>`,
 })
 class ProvidedDemo {}
@@ -813,7 +807,7 @@ export const Growing: Story = {
     template: grid(
       scene(
         "growing='button'",
-        'Press Carregar mais: the waiting row says A carregar notificações for a moment and two older items arrive at the end. aria-setsize is -1 on every article until the consumer states a count.',
+        'Press Load more: the waiting row says Loading notifications for a moment and two older items arrive at the end. aria-setsize is -1 on every article until the consumer states a count.',
         inbox('growing="button"'),
       ) +
         scene(
@@ -885,7 +879,7 @@ export const Loading: Story = {
       ) +
         scene(
           'With items loaded and more on the way',
-          'The rows stay; the waiting row under the feed says A carregar notificações politely.',
+          'The rows stay; the waiting row under the feed says Loading notifications politely.',
           '<section slNotificationCenter growing="scroll" loading locale="pt-PT" [items]="items" [now]="now"></section>',
         ),
     ),
@@ -904,7 +898,7 @@ export const Empty: Story = {
       ) +
         scene(
           'Nothing unread',
-          'Under the unread view with every item read, messages.caughtUp — Tudo lido.',
+          'Under the unread view with every item read, the caughtUp message.',
           '<section slNotificationCenter locale="pt-PT" view="unread" [items]="read" [now]="now"></section>',
         ) +
         scene(
@@ -980,7 +974,7 @@ export const Defaults: Story = {
     template: grid(
       scene(
         'Two centres under one provider',
-        "Neither states a size, a growing mode or a title; both read small, paged by button and called Avisos. The second states controls='none' and wins.",
+        "Neither states a size or a growing mode; both read small and paged by button. The second states controls='none' and wins. The title comes from the language in force.",
         '<sl-nc-provided></sl-nc-provided>',
       ) +
         scene(

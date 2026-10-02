@@ -1,8 +1,14 @@
+import {
+  pageHeaderMessages,
+  type PageHeaderMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import { createStickyHeader } from '@slotted/core/sticky-header';
 import type { StickyHeaderHandle } from '@slotted/core/sticky-header';
 import { SlContainer } from '@slotted/angular/container';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlPage } from '@slotted/angular/page';
 import {
   afterNextRender,
@@ -27,7 +33,6 @@ import type {
   PageHeaderCollapse,
   PageHeaderExpandedReason,
   PageHeaderLevel,
-  PageHeaderMessages,
   PageHeaderPinnedReason,
   PageHeaderSize,
 } from './page-header-defaults';
@@ -37,7 +42,6 @@ export type {
   PageHeaderDefaults,
   PageHeaderExpandedReason,
   PageHeaderLevel,
-  PageHeaderMessages,
   PageHeaderPinnedReason,
   PageHeaderSize,
 } from './page-header-defaults';
@@ -102,8 +106,12 @@ export class SlPageHeader {
    * stay operable; the root carries `aria-busy`.
    */
   readonly loading = input(false, { transform: booleanAttribute });
-  /** Strings for this instance alone, over the provider's. */
-  readonly messages = input<Partial<PageHeaderMessages> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * toggle, the pin and the header area's name. A static `aria-label` on a
+   * part still wins.
+   */
+  readonly messages = input<PartialMessages<PageHeaderMessages> | undefined>(undefined);
 
   /** One output for one transition of the header area, carrying the reason and the event. */
   readonly expandedRequest = output<ChangeRequest<boolean>>();
@@ -118,10 +126,8 @@ export class SlPageHeader {
   readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   readonly resolvedLevel = computed(() => this.level() ?? this.defaults.level);
   readonly resolvedCollapse = computed(() => this.collapse() ?? this.defaults.collapse);
-  readonly resolvedMessages = computed<PageHeaderMessages>(() => ({
-    ...this.defaults.messages,
-    ...this.messages(),
-  }));
+  /** The family's words in the language in force, with this header's `messages` laid over them. */
+  readonly t = injectMessages(pageHeaderMessages, this.messages);
 
   protected readonly containerSize = computed(() => this.page?.resolvedWidth() ?? 'content');
   protected readonly containerInset = computed(() => this.page?.resolvedInset());

@@ -303,3 +303,23 @@ test('declares a scenario for every capability a reference page has to show', ()
     'composition',
   ]);
 });
+
+/**
+ * A reader tabbing through a form passes this control on the way to the next
+ * field, and a popup that opens on every Tab is a list announced and dismissed
+ * for nothing. A press on the input is the other gesture: the reader aimed at
+ * this control, and a press that only places the caret leaves them hunting for
+ * the chevron. combobox, multi-select and entity-picker answer both alike.
+ */
+test('opens on typing and on a press on the input, and never on a Tab into it', () => {
+  assert.deepEqual(contract.axes.openOn, ['input', 'focus', 'manual']);
+  assert.equal(member.defaults.openOn, 'input');
+  assert.deepEqual(contract.resolution.openOn, ['prop', 'defaults', 'input']);
+  assert.match(contract.opening.input, /typing/);
+  assert.match(contract.opening.input, /Tab/);
+  assert.match(contract.opening.focus, /every focus/);
+  assert.match(contract.opening.manual, /trigger/);
+  assert.match(contract.opening.press, /pointer/);
+  assert.match(contract.opening.press, /never closes/);
+  assert.match(contract.opening.press, /manual/);
+});

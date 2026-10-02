@@ -687,19 +687,13 @@ export const Composition: Story = {
   render: (_args, context) => ({
     props: { one: ['checkout-api'], two: ['auth-gateway'], pictured: isolated(context) },
     moduleMetadata: {
-      providers: [
-        provideMultiSelectDefaults({
-          removeLabel: 'Retirar {label}',
-          size: 'sm',
-          variant: 'subtle',
-        }),
-      ],
+      providers: [provideMultiSelectDefaults({ size: 'sm', variant: 'subtle' })],
     },
     template: `
       <div class="slotted-demo-grid">
         ${scene(
           'Defaults an application sets once',
-          'provideMultiSelectDefaults carries every axis and all eight sentences; a binding written on one control still wins over it, which is the resolution order every family declares.',
+          'provideMultiSelectDefaults carries every axis; a binding written on one control still wins over it, which is the resolution order every family declares. The words come from the language in force.',
           `
             <div class="slotted-demo-stack">
               <sl-multi-select aria-label="From the provider" [defaultValue]="one" [portal]="false">${SERVICES}</sl-multi-select>

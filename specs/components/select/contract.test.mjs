@@ -386,13 +386,12 @@ test('resolves every axis in the same order, and holds a default for each', () =
   }
 });
 
-test('lets an application set every axis and every word it speaks once', () => {
+test('lets an application set every axis once, and takes every word from the catalog', () => {
   for (const axis of Object.keys(contract.axes)) {
     assert.ok(contract.provides.selectDefaults.includes(axis), `${axis} is not in the provider`);
   }
-  for (const word of ['clearLabel', 'emptyLabel', 'loadingLabel']) {
-    assert.ok(contract.provides.selectDefaults.includes(word), `${word} is not in the provider`);
-    assert.ok(word in member.defaults, `${word} has no default`);
+  for (const word of ['clear', 'empty', 'loading']) {
+    assert.ok(contract.messages.includes(word), `${word} is not a message`);
   }
 });
 

@@ -122,7 +122,7 @@ export type SplitButtonMenuTriggerProps = Omit<
   | 'variant'
   | 'loading'
   | 'loadingDelay'
-  | 'loadingLabel'
+  | 'messages'
 > & {
   /** Replaces the family's chevron. */
   children?: ReactNode | undefined;

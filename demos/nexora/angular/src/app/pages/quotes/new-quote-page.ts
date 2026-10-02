@@ -125,12 +125,32 @@ import { chosenDate } from '../../core/chosen-date';
     .picker {
       display: grid;
       grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) auto;
-      gap: var(--slotted-space-3);
-      align-items: end;
+      column-gap: var(--slotted-space-3);
+      row-gap: 0;
+    }
+    /* Label, control and description share three rows across the fields: a field with a
+       description keeps its control on the same line as a field without one. */
+    .picker > [slField] {
+      grid-row: span 3;
+      grid-template-rows: subgrid;
+    }
+    .picker > [slButton] {
+      grid-column: -2;
+      grid-row: 2;
+      align-self: center;
     }
     @container (width < 720px) {
       .picker {
         grid-template-columns: minmax(0, 1fr);
+        row-gap: var(--slotted-space-3);
+      }
+      .picker > [slField],
+      .picker > [slButton] {
+        grid-column: auto;
+        grid-row: auto;
+      }
+      .picker > [slField] {
+        grid-template-rows: none;
       }
     }
     .totals {
@@ -164,7 +184,7 @@ import { chosenDate } from '../../core/chosen-date';
         <div class="work">
           <form
             slForm
-            summaryTitle="This quote was not written"
+            [messages]="{ summaryTitle: 'This quote was not written' }"
             [errors]="store.errors()"
             (errorsChange)="store.errors.set($event.value)"
             [loading]="store.creating()"
@@ -428,7 +448,7 @@ import { chosenDate } from '../../core/chosen-date';
                 tone="accent"
                 [disabled]="!store.ready()"
                 [loading]="store.creating()"
-                loadingLabel="Writing the quote"
+                [messages]="{ loading: 'Writing the quote' }"
               >
                 Write the quote
               </button>

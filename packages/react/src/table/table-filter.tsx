@@ -19,6 +19,7 @@ import type {
   FilterOperator,
 } from '@slotted/core/filter';
 import { createFilter } from '@slotted/core/collection';
+import type { FamilyTranslator, TableMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import {
   isPlainDate,
@@ -60,7 +61,6 @@ import type {
   TableFilterOption,
   TableFilterReason,
   TableNumberFilterProps,
-  TableResolvedLabels,
   TableSetFilterProps,
   TableTextFilterProps,
   TableTimeFilterProps,
@@ -95,7 +95,8 @@ interface BodyProps {
   announce: (message: string) => void;
   apply: () => void;
   condition: Condition;
-  labels: TableResolvedLabels;
+  /** The table's words, for the names of the operand fields. */
+  t: FamilyTranslator<TableMessages>;
   /** Writes one operand back into the draft. `slot` is `value` or `end`. */
   setOperand: (slot: 0 | 1, value: unknown) => void;
   /**
@@ -154,8 +155,6 @@ function TableFilterShell({
 }: ShellProps) {
   const {
     align,
-    applyLabel,
-    clearLabel,
     collisionPadding,
     columnLabel,
     conditions: maxConditions = 2,
@@ -167,7 +166,6 @@ function TableFilterShell({
     onOpenChange,
     onValueChange,
     open: openProp,
-    operatorLabel,
     portal,
     renderOperand,
     side,
@@ -190,7 +188,7 @@ function TableFilterShell({
   const open = openProp ?? ownOpen;
   const panel = useRef<HTMLDivElement | null>(null);
 
-  const labels = table.labels;
+  const t = table.t;
   const name = columnLabel ?? column ?? '';
   const filtered = isFilterActive(committed);
   const allowed = singleCondition ? 1 : maxConditions;
@@ -200,8 +198,8 @@ function TableFilterShell({
   }
 
   const format = {
-    join: (join: FilterJoin) => labels.filterJoins[join] ?? join,
-    operator: (operator: FilterOperator) => labels.filterOperators[operator] ?? operator,
+    join: (join: FilterJoin) => t(`filterJoins.${join}`),
+    operator: (operator: FilterOperator) => t(`filterOperators.${operator}`),
   };
 
   function request(next: FilterDescriptor | null, reason: TableFilterReason, source: unknown) {
@@ -232,11 +230,6 @@ function TableFilterShell({
      case, and an empty second row is noise in every panel that never needs it. */
   const showsSecond = allowed === 2 && isConditionActive(kind, first);
 
-  function operandsWord(count: 0 | 1 | 2) {
-    if (count === 0) return labels.filterOperandsNone;
-    return count === 1 ? labels.filterOperandsOne : labels.filterOperandsTwo;
-  }
-
   function setOperator(index: number, operator: string) {
     const condition = conditionAt(index);
     const before = operandCount(condition.operator as FilterOperator);
@@ -254,7 +247,12 @@ function TableFilterShell({
     /* The panel grows a field or loses two. Announced, because a form that
        changes shape under a reader who cannot see it says nothing otherwise. */
     if (after !== before)
-      announce(`${format.operator(operator as FilterOperator)}, ${operandsWord(after)}`);
+      announce(
+        t('filterOperands', {
+          operator: format.operator(operator as FilterOperator),
+          count: after,
+        }),
+      );
   }
 
   function setOperand(index: number, slot: 0 | 1, operand: unknown) {
@@ -265,7 +263,7 @@ function TableFilterShell({
 
     setDraft(withCondition(draft, index, next as never));
     if (index === 0 && allowed === 2 && !wasActive && isConditionActive(kind, next)) {
-      announce(labels.filterConditionAdded);
+      announce(t('filterConditionAdded'));
     }
   }
 
@@ -276,7 +274,7 @@ function TableFilterShell({
 
     setDraft(withCondition(draft, index, next as never));
     if (index === 0 && allowed === 2 && !wasActive && isConditionActive(kind, next)) {
-      announce(labels.filterConditionAdded);
+      announce(t('filterConditionAdded'));
     }
   }
 
@@ -285,8 +283,8 @@ function TableFilterShell({
     request(next, reason, source);
     announce(
       next
-        ? `${labels.filter} ${name}: ${describeFilter(next, format)}`.trim()
-        : `${labels.filter} ${name}, ${labels.filterCleared}`.trim(),
+        ? t('filterApplied', { column: name, filter: describeFilter(next, format) })
+        : t('filterCleared', { column: name }),
     );
     if (openProp === undefined) setOwnOpen(false);
     onOpenChange?.(false, source as never);
@@ -294,7 +292,7 @@ function TableFilterShell({
 
   function clear(source: unknown) {
     setDraft(blank());
-    announce(`${labels.filter} ${name}, ${labels.filterCleared}`.trim());
+    announce(t('filterCleared', { column: name }));
     request(null, 'clear', source);
     if (openProp === undefined) setOwnOpen(false);
     onOpenChange?.(false, source as never);
@@ -303,8 +301,8 @@ function TableFilterShell({
   const triggerName =
     label ??
     (filtered
-      ? `${labels.filter} ${name}: ${describeFilter(committed, format)}`.replace('  ', ' ').trim()
-      : `${labels.filter} ${name}`.trim());
+      ? t('filterApplied', { column: name, filter: describeFilter(committed, format) })
+      : t('filterColumn', { column: name }).trim());
 
   function renderCondition(index: 0 | 1) {
     const condition = conditionAt(index);
@@ -313,8 +311,7 @@ function TableFilterShell({
     const operandProps = (slot: 0 | 1): TableFilterOperandProps<unknown> => ({
       apply: () => apply(null, 'keyboard'),
       index: slot,
-      label:
-        operands === 2 ? (slot === 0 ? labels.filterFrom : labels.filterTo) : labels.filterValue,
+      label: operands === 2 ? (slot === 0 ? t('filterFrom') : t('filterTo')) : t('filterValue'),
       onValueChange: (operand) => setOperand(index, slot, operand),
       operator: condition.operator as FilterOperator,
       value: (slot === 0 ? condition.value : condition.end) ?? null,
@@ -337,7 +334,7 @@ function TableFilterShell({
             size="sm"
             value={condition.operator}
           >
-            <SelectTrigger aria-label={operatorLabel ?? labels.filterOperator}>
+            <SelectTrigger aria-label={t('filterOperator')}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -365,9 +362,9 @@ function TableFilterShell({
                   announce,
                   apply: () => apply(null, 'keyboard'),
                   condition,
-                  labels,
                   setOperand: (slot, operand) => setOperand(index, slot, operand),
                   setOperands: (value, end) => setOperands(index, value, end),
+                  t,
                 })}
           </div>
         )}
@@ -411,9 +408,9 @@ function TableFilterShell({
             {showsSecond ? (
               <>
                 <div data-part="filter-join">
-                  <span data-label="">{labels.filterJoin}</span>
+                  <span data-label="">{t('filterJoin')}</span>
                   <RadioGroup
-                    aria-label={labels.filterJoin}
+                    aria-label={t('filterJoin')}
                     onValueChange={(join) => setDraft(withJoin(draft, join as FilterJoin))}
                     orientation="horizontal"
                     size="sm"
@@ -435,10 +432,10 @@ function TableFilterShell({
                 tone="secondary"
                 variant="ghost"
               >
-                {clearLabel ?? labels.filterClear}
+                {t('filterClear')}
               </Button>
               <Button onClick={(event) => apply(event, 'pointer')} size="sm">
-                {applyLabel ?? labels.filterApply}
+                {t('filterApply')}
               </Button>
             </div>
           </div>
@@ -467,12 +464,12 @@ function narrowed<Operator extends string>(
 export function TableTextFilter(props: TableTextFilterProps) {
   return (
     <TableFilterShell
-      body={({ apply, condition, labels, setOperand }) => (
+      body={({ apply, condition, setOperand, t }) => (
         <TextField
-          aria-label={labels.filterValue}
+          aria-label={t('filterValue')}
           onChange={(event) => setOperand(0, event.target.value)}
           onKeyDown={applyOnEnter(apply)}
-          placeholder={labels.filterValue}
+          placeholder={t('filterValue')}
           size="sm"
           value={(condition.value as string | null) ?? ''}
         />
@@ -491,7 +488,7 @@ export function TableNumberFilter(props: TableNumberFilterProps) {
 
   return (
     <TableFilterShell
-      body={({ apply, condition, labels, setOperand }) => (
+      body={({ apply, condition, setOperand, t }) => (
         <>
           {([0, 1] as const)
             .slice(0, operandCount(condition.operator as FilterOperator))
@@ -500,9 +497,9 @@ export function TableNumberFilter(props: TableNumberFilterProps) {
                 aria-label={
                   operandCount(condition.operator as FilterOperator) === 2
                     ? slot === 0
-                      ? labels.filterFrom
-                      : labels.filterTo
-                    : labels.filterValue
+                      ? t('filterFrom')
+                      : t('filterTo')
+                    : t('filterValue')
                 }
                 key={slot}
                 onKeyDown={applyOnEnter(apply)}
@@ -510,9 +507,9 @@ export function TableNumberFilter(props: TableNumberFilterProps) {
                 placeholder={
                   operandCount(condition.operator as FilterOperator) === 2
                     ? slot === 0
-                      ? labels.filterFrom
-                      : labels.filterTo
-                    : labels.filterValue
+                      ? t('filterFrom')
+                      : t('filterTo')
+                    : t('filterValue')
                 }
                 size="sm"
                 value={((slot === 0 ? condition.value : condition.end) as number | null) ?? null}
@@ -549,17 +546,16 @@ export function TableDateFilter(props: TableDateFilterProps) {
 
   return (
     <TableFilterShell
-      body={({ apply, condition, labels, setOperand, setOperands }) =>
+      body={({ apply, condition, setOperand, setOperands, t }) =>
         operandCount(condition.operator as FilterOperator) === 2 ? (
           /* One control for both ends rather than two pickers: it says the
              run's length while it is drawn, takes the ends in either order and
              carries the application's presets. The descriptor is unchanged. */
           <DateRangePicker
-            endLabel={labels.filterTo}
+            messages={{ end: t('filterTo'), start: t('filterFrom') }}
             onKeyDown={applyOnEnter(apply)}
             onValueChange={(next) => setOperands(iso(next?.start), iso(next?.end))}
             size="sm"
-            startLabel={labels.filterFrom}
             value={{ start: day(condition.value), end: day(condition.end) }}
             {...(locale === undefined ? {} : { locale })}
             {...(day(min) ? { min: day(min) as PlainDate } : {})}
@@ -568,7 +564,7 @@ export function TableDateFilter(props: TableDateFilterProps) {
           />
         ) : (
           <DatePicker
-            aria-label={labels.filterValue}
+            aria-label={t('filterValue')}
             onKeyDown={applyOnEnter(apply)}
             onValueChange={(next) => setOperand(0, iso(next))}
             size="sm"
@@ -627,7 +623,7 @@ export function TableTimeFilter(props: TableTimeFilterProps) {
 
   return (
     <TableFilterShell
-      body={({ apply, condition, labels, setOperand, setOperands }) =>
+      body={({ apply, condition, setOperand, setOperands, t }) =>
         operandCount(condition.operator as FilterOperator) === 2 ? (
           /* `between` is one `time-range-picker`: it says the run's length
              while it is drawn, its end list refuses the times before the
@@ -639,17 +635,16 @@ export function TableTimeFilter(props: TableTimeFilterProps) {
              `applyOnEnter`: the frame is a button, and `Enter` on it opens
              the picker. */
           <TimeRangePicker
-            endLabel={labels.filterTo}
+            messages={{ start: t('filterFrom'), end: t('filterTo') }}
             onValueChange={(next) => setOperands(iso(next?.start), iso(next?.end))}
             size="sm"
-            startLabel={labels.filterFrom}
             value={{ start: timeOf(condition.value), end: timeOf(condition.end) }}
             {...bounds}
             {...(presets === undefined ? {} : { presets })}
           />
         ) : (
           <TimePicker
-            aria-label={labels.filterValue}
+            aria-label={t('filterValue')}
             onKeyDown={applyOnEnter(apply)}
             onValueChange={(next) => setOperand(0, iso(next))}
             size="sm"
@@ -692,7 +687,7 @@ export function TableDateTimeFilter(props: TableDateTimeFilterProps) {
 
   return (
     <TableFilterShell
-      body={({ apply, condition, labels, setOperand, setOperands }) =>
+      body={({ apply, condition, setOperand, setOperands, t }) =>
         operandCount(condition.operator as FilterOperator) === 2 ? (
           /* `between` is one `datetime-range-picker`: the run's length said
              while it is drawn, the dates ordered with each time kept on its
@@ -700,17 +695,16 @@ export function TableDateTimeFilter(props: TableDateTimeFilterProps) {
              draft as no operand, so the condition stays inactive until both
              exist. No `applyOnEnter`: the frame is a button. */
           <DateTimeRangePicker
-            endLabel={labels.filterTo}
+            messages={{ start: t('filterFrom'), end: t('filterTo') }}
             onValueChange={(next) => setOperands(iso(next?.start), iso(next?.end))}
             size="sm"
-            startLabel={labels.filterFrom}
             value={{ start: dateTimeOf(condition.value), end: dateTimeOf(condition.end) }}
             {...bounds}
             {...(presets === undefined ? {} : { presets })}
           />
         ) : (
           <DateTimePicker
-            aria-label={labels.filterValue}
+            aria-label={t('filterValue')}
             onKeyDown={applyOnEnter(apply)}
             onValueChange={(next) => setOperand(0, iso(next))}
             size="sm"
@@ -733,13 +727,11 @@ export function TableDateTimeFilter(props: TableDateTimeFilterProps) {
  * filtered at all, which is what Clear leaves and what an empty draft is.
  */
 export function TableBooleanFilter(props: TableBooleanFilterProps) {
-  const { falseLabel = 'No', trueLabel = 'Yes' } = props;
-
   return (
     <TableFilterShell
-      body={({ condition, labels, setOperand }) => (
+      body={({ condition, setOperand, t }) => (
         <RadioGroup
-          aria-label={labels.filterValue}
+          aria-label={t('filterValue')}
           onValueChange={(next) => setOperand(0, next === 'true')}
           orientation="horizontal"
           size="sm"
@@ -747,8 +739,8 @@ export function TableBooleanFilter(props: TableBooleanFilterProps) {
             condition.value === undefined || condition.value === null ? '' : String(condition.value)
           }
         >
-          <Radio value="true">{trueLabel}</Radio>
-          <Radio value="false">{falseLabel}</Radio>
+          <Radio value="true">{t('true')}</Radio>
+          <Radio value="false">{t('false')}</Radio>
         </RadioGroup>
       )}
       kind="boolean"
@@ -767,39 +759,28 @@ export function TableBooleanFilter(props: TableBooleanFilterProps) {
  * `anyOf (A ∩ B)`, so every pair of set conditions collapses to a single list.
  */
 export function TableSetFilter(props: TableSetFilterProps) {
-  const {
-    emptyLabel,
-    operand = 'list',
-    options = [],
-    searchLabel,
-    searchThreshold = 8,
-    searchable,
-    selectAllLabel,
-  } = props;
+  const { operand = 'list', options = [], searchThreshold = 8, searchable } = props;
 
   return (
     <TableFilterShell
-      body={({ announce, apply, condition, labels, setOperand }) =>
+      body={({ announce, apply, condition, setOperand, t }) =>
         operand === 'tags' ? (
           <TagsOperand
             apply={apply}
             chosen={(condition.value as readonly string[] | null) ?? []}
-            labels={labels}
             onChange={(next) => setOperand(0, next)}
             options={options}
+            t={t}
           />
         ) : (
           <SetOperand
             announce={announce}
             chosen={(condition.value as readonly string[] | null) ?? []}
-            labels={labels}
             onChange={(next) => setOperand(0, next)}
             options={options}
             searchThreshold={searchThreshold}
-            {...(emptyLabel === undefined ? {} : { emptyLabel })}
-            {...(searchLabel === undefined ? {} : { searchLabel })}
+            t={t}
             {...(searchable === undefined ? {} : { searchable })}
-            {...(selectAllLabel === undefined ? {} : { selectAllLabel })}
           />
         )
       }
@@ -815,9 +796,9 @@ export function TableSetFilter(props: TableSetFilterProps) {
 interface TagsOperandProps {
   apply: () => void;
   chosen: readonly string[];
-  labels: TableResolvedLabels;
   onChange: (values: readonly string[]) => void;
   options: readonly TableFilterOption[];
+  t: FamilyTranslator<TableMessages>;
 }
 
 /**
@@ -831,7 +812,7 @@ interface TagsOperandProps {
  * `Enter` with pending text commits a chip, which is `tags-input`'s own key;
  * `Enter` on an empty field applies, which is the panel's.
  */
-function TagsOperand({ apply, chosen, labels, onChange, options }: TagsOperandProps) {
+function TagsOperand({ apply, chosen, onChange, options, t }: TagsOperandProps) {
   const base = useId();
   const known = useMemo(() => new Map(options.map((option) => [option.value, option])), [options]);
   const constrained = options.length > 0;
@@ -839,7 +820,7 @@ function TagsOperand({ apply, chosen, labels, onChange, options }: TagsOperandPr
   return (
     <>
       <TagsInput
-        aria-label={labels.filterValue}
+        aria-label={t('filterValue')}
         formatLabel={(value) => known.get(value)?.label ?? value}
         fullWidth
         onKeyDown={(event) => {
@@ -873,27 +854,21 @@ function TagsOperand({ apply, chosen, labels, onChange, options }: TagsOperandPr
 interface SetOperandProps {
   announce: (message: string) => void;
   chosen: readonly string[];
-  emptyLabel?: string | undefined;
-  labels: TableResolvedLabels;
   onChange: (values: readonly string[]) => void;
   options: readonly TableFilterOption[];
-  searchLabel?: string | undefined;
   searchThreshold: number;
   searchable?: boolean | undefined;
-  selectAllLabel?: string | undefined;
+  t: FamilyTranslator<TableMessages>;
 }
 
 function SetOperand({
   announce,
   chosen,
-  emptyLabel,
-  labels,
   onChange,
   options,
-  searchLabel,
   searchThreshold,
   searchable,
-  selectAllLabel,
+  t,
 }: SetOperandProps) {
   const base = useId();
   const [query, setQuery] = useState('');
@@ -920,16 +895,16 @@ function SetOperand({
         <div data-part="filter-search">
           <TextField
             aria-controls={`${base}-list`}
-            aria-label={searchLabel ?? labels.filterSearch}
+            aria-label={t('filterSearch')}
             clearable
             onChange={(event) => {
               const next = event.target.value;
               setQuery(next);
               /* A list that shortens under a reader who cannot see it says
                  nothing otherwise. */
-              announce(`${matching(next).length} ${labels.filterMatches}`);
+              announce(t('filterMatches', { count: matching(next).length }));
             }}
-            placeholder={searchLabel ?? labels.filterSearch}
+            placeholder={t('filterSearch')}
             size="sm"
             value={query}
           />
@@ -937,7 +912,7 @@ function SetOperand({
       ) : null}
 
       {shown.length === 0 ? (
-        <p data-part="filter-empty">{emptyLabel ?? labels.filterEmpty}</p>
+        <p data-part="filter-empty">{t('filterEmpty')}</p>
       ) : (
         <div data-part="filter-list" id={`${base}-list`}>
           <div data-covering="" data-part="filter-option">
@@ -953,7 +928,7 @@ function SetOperand({
                 );
               }}
             >
-              {selectAllLabel ?? labels.filterSelectAll}
+              {t('filterSelectAll')}
             </Checkbox>
             <span data-count="">{shown.length}</span>
           </div>

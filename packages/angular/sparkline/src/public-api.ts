@@ -5,7 +5,6 @@ export {
   SPARKLINE_DEFAULTS_TOKEN,
 } from './sparkline-defaults';
 export type { SparklineDefaults } from './sparkline-defaults';
-export { SPARKLINE_MESSAGES } from './sparkline.constants';
 export type {
   SparklineCurve,
   SparklineSeries,

@@ -1,3 +1,4 @@
+import type { FamilyTranslator, PartialMessages, PopoverMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { AriaRole, ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -66,8 +67,6 @@ export interface PopoverDefaults {
   arrowPadding: number;
   /** Whether the panel takes the focus when it opens. */
   autoFocus: boolean;
-  /** The close control's accessible name, translated once for an application. */
-  closeLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   collisionPadding: number;
@@ -98,13 +97,14 @@ export interface PopoverHandle {
 
 /** What the family hands its own trigger, anchor, layer and panel parts. */
 export interface PopoverContextValue {
+  /** The family's words in the language in force, with this popover's `messages` laid over them. */
+  t: FamilyTranslator<PopoverMessages>;
   align: PopoverAlign;
   alignOffset: number;
   anchorNode: HTMLElement | null;
   arrowNode: HTMLElement | null;
   arrowPadding: number;
   autoFocus: boolean;
-  closeLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: PopoverOutsidePress;
   collisionPadding: number;
@@ -186,8 +186,11 @@ export interface PopoverProps {
    */
   autoFocus?: boolean | undefined;
   children?: ReactNode | undefined;
-  /** The close control's accessible name for this popover alone. */
-  closeLabel?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * close control's accessible name (`close`).
+   */
+  messages?: PartialMessages<PopoverMessages> | undefined;
   closeOnEscape?: boolean | undefined;
   /** `false`, or a predicate deciding which outside presses count. */
   closeOnOutsidePress?: PopoverOutsidePress | undefined;

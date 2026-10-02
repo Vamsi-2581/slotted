@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { chartMessages, createTranslator } from '../i18n';
+import { PT_BR } from '../i18n/locales/pt-BR';
+
 import {
   assignColors,
   createLatestAnnouncer,
@@ -24,6 +27,8 @@ import {
   zoomRange,
   type ChartSpec,
 } from './index';
+
+const t = createTranslator({ locale: 'en-US' }).family(chartMessages);
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
 const revenue: ChartSpec = {
@@ -361,7 +366,7 @@ describe('tooltip', () => {
 
 describe('text', () => {
   it('describes the chart in words, series by series', () => {
-    const text = describeChart(createChartModel(revenue));
+    const text = describeChart(createChartModel(revenue), t);
     expect(text).toContain('Combined chart with 2 series and 6 points, from Jan to Jun.');
     expect(text).toContain('Revenue: from 120 to 190; lowest 120 at Jan, highest 190 at Jun.');
   });
@@ -377,28 +382,39 @@ describe('text', () => {
       ],
       series: [{ kind: 'pie', field: 'v' }],
     });
-    expect(describeChart(model)).toBe(
-      'Pie chart with 2 slices, totalling 4. A: 3, 75%. B: 1, 25%. 1 negative values are not drawn.',
+    expect(describeChart(model, t)).toBe(
+      'Pie chart with 2 slices, totaling 4. A: 3, 75%. B: 1, 25%. 1 negative value is not drawn.',
     );
   });
 
   it('says a point and whether it is selected', () => {
     const model = createChartModel(revenue);
     const point = { series: 'cost', key: 'Mar' };
-    expect(describePoint(model, point, null)).toBe('Cost, Mar: 95.');
-    expect(describePoint(model, point, point)).toBe('Cost, Mar: 95. selected');
-    expect(describeZoom(model, { start: 0.2, end: 0.6 })).toBe('Showing Feb to Apr.');
+    expect(describePoint(model, point, null, t)).toBe('Cost, Mar: 95.');
+    expect(describePoint(model, point, point, t)).toBe('Cost, Mar: 95. selected');
+    expect(describeZoom(model, { start: 0.2, end: 0.6 }, t)).toBe('Showing Feb to Apr.');
+  });
+
+  it('speaks the language of the translator it is given', () => {
+    const pt = createTranslator({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }).family(
+      chartMessages,
+    );
+    const model = createChartModel(revenue);
+    expect(describeChart(model, pt)).toContain(
+      'Gráfico combinado com 2 séries e 6 pontos, de Jan a Jun.',
+    );
+    expect(describeZoom(model, null, pt)).toBe('Mostrando todos os dados.');
   });
 });
 
 describe('table and CSV', () => {
   it('lists the visible series, and every series when asked', () => {
     const model = createChartModel(revenue, { hidden: ['cost'] });
-    expect(chartTable(model).columns.map((column) => column.label)).toEqual([
+    expect(chartTable(model, t).columns.map((column) => column.label)).toEqual([
       'Category',
       'Revenue',
     ]);
-    const all = chartTable(model, { includeHidden: true });
+    const all = chartTable(model, t, { includeHidden: true });
     expect(all.columns.map((column) => column.label)).toEqual(['Category', 'Revenue', 'Cost']);
     expect(all.rows[2]!.cells.map((cell) => cell.text)).toEqual(['Mar', '', '95']);
   });
@@ -410,6 +426,7 @@ describe('table and CSV', () => {
         data: [{ x: '=HYPERLINK("http://x")', v: 1 }],
         series: [{ kind: 'bar', field: 'v', label: 'a,b' }],
       }),
+      t,
     );
     expect(csv).toBe('Category,"a,b"\r\n"\'=HYPERLINK(""http://x"")",1');
   });

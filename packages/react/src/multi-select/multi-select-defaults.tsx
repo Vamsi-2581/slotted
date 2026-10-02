@@ -28,6 +28,9 @@ import type { MultiSelectDefaults, MultiSelectDefaultsProviderProps } from './mu
  * one-line `collapse` is for a control in a table row, where the frame cannot
  * be allowed to grow.
  *
+ * `openOn` is `input`: typing and a press on the input open the popup, and a
+ * Tab into it does not, because a reader tabbing through a form is passing it.
+ *
  * `max` is `null`. A limit is a rule about the consumer's data, and a family
  * that invented one would refuse a value for a reason nobody wrote.
  */
@@ -36,46 +39,37 @@ export const MULTI_SELECT_FALLBACK: MultiSelectDefaults = {
   align: 'start',
   alignOffset: 0,
   allowDuplicates: false,
-  chosenLabel: '{count} chosen',
   chosenOptions: 'show',
   clearable: true,
-  clearLabel: 'Clear',
   closeOnEscape: true,
   closeOnOutsidePress: true,
   closeOnSelect: false,
   collisionPadding: 8,
   commitOnBlur: true,
-  countLabel: '{count} results',
-  counterLabel: '{count} of {max}',
-  createLabel: 'Add “{query}”',
   creatable: false,
   delimiters: [','],
   disabled: false,
   editable: false,
-  emptyLabel: 'No matches',
   flip: true,
   fullWidth: true,
   hideWhenDetached: true,
   highlightMatch: true,
   invalid: false,
   loading: false,
-  loadingLabel: 'Loading…',
   loop: false,
   max: null,
   mount: 'active',
+  openOn: 'input',
   overflow: 'wrap',
   portal: true,
   readOnly: false,
-  removeLabel: 'Remove {label}',
   reorderable: false,
-  reorderLabel: '{label}, position {position} of {count}',
   required: false,
   shift: true,
   side: 'bottom',
   sideOffset: 4,
   size: 'md',
   strategy: 'absolute',
-  triggerLabel: 'Show options',
   variant: 'outline',
   width: 'anchor',
 };
@@ -89,8 +83,8 @@ export function useMultiSelectDefaults(): MultiSelectDefaults {
 
 /**
  * The decisions an application takes once, in its bootstrap, rather than on
- * every control it renders — including the eight sentences the family speaks,
- * which is where an application translates them.
+ * every control it renders. Its words come from the language in force
+ * (`SlottedProvider`).
  */
 export function MultiSelectDefaultsProvider({
   children,
@@ -110,46 +104,37 @@ export function MultiSelectDefaultsProvider({
     align: overrides.align ?? inherited.align,
     alignOffset: overrides.alignOffset ?? inherited.alignOffset,
     allowDuplicates: overrides.allowDuplicates ?? inherited.allowDuplicates,
-    chosenLabel: overrides.chosenLabel ?? inherited.chosenLabel,
     chosenOptions: overrides.chosenOptions ?? inherited.chosenOptions,
     clearable: overrides.clearable ?? inherited.clearable,
-    clearLabel: overrides.clearLabel ?? inherited.clearLabel,
     closeOnEscape: overrides.closeOnEscape ?? inherited.closeOnEscape,
     closeOnOutsidePress: overrides.closeOnOutsidePress ?? inherited.closeOnOutsidePress,
     closeOnSelect: overrides.closeOnSelect ?? inherited.closeOnSelect,
     collisionPadding: overrides.collisionPadding ?? inherited.collisionPadding,
     commitOnBlur: overrides.commitOnBlur ?? inherited.commitOnBlur,
-    countLabel: overrides.countLabel ?? inherited.countLabel,
-    counterLabel: overrides.counterLabel ?? inherited.counterLabel,
-    createLabel: overrides.createLabel ?? inherited.createLabel,
     creatable: overrides.creatable ?? inherited.creatable,
     delimiters: overrides.delimiters ?? inherited.delimiters,
     disabled: overrides.disabled ?? inherited.disabled,
     editable: overrides.editable ?? inherited.editable,
-    emptyLabel: overrides.emptyLabel ?? inherited.emptyLabel,
     flip: overrides.flip ?? inherited.flip,
     fullWidth: overrides.fullWidth ?? inherited.fullWidth,
     hideWhenDetached: overrides.hideWhenDetached ?? inherited.hideWhenDetached,
     highlightMatch: overrides.highlightMatch ?? inherited.highlightMatch,
     invalid: overrides.invalid ?? inherited.invalid,
     loading: overrides.loading ?? inherited.loading,
-    loadingLabel: overrides.loadingLabel ?? inherited.loadingLabel,
     loop: overrides.loop ?? inherited.loop,
     max: overrides.max ?? inherited.max,
     mount: overrides.mount ?? inherited.mount,
+    openOn: overrides.openOn ?? inherited.openOn,
     overflow: overrides.overflow ?? inherited.overflow,
     portal: overrides.portal ?? inherited.portal,
     readOnly: overrides.readOnly ?? inherited.readOnly,
-    removeLabel: overrides.removeLabel ?? inherited.removeLabel,
     reorderable: overrides.reorderable ?? inherited.reorderable,
-    reorderLabel: overrides.reorderLabel ?? inherited.reorderLabel,
     required: overrides.required ?? inherited.required,
     shift: overrides.shift ?? inherited.shift,
     side: overrides.side ?? inherited.side,
     sideOffset: overrides.sideOffset ?? inherited.sideOffset,
     size: overrides.size ?? inherited.size,
     strategy: overrides.strategy ?? inherited.strategy,
-    triggerLabel: overrides.triggerLabel ?? inherited.triggerLabel,
     variant: overrides.variant ?? inherited.variant,
     width: overrides.width ?? inherited.width,
   };

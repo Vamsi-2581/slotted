@@ -12,13 +12,19 @@ import {
   rgbaToHsva,
   toCss,
 } from '@slotted/core/color';
-import type { ColorFormat, Hsva, ParsedColor } from '@slotted/core/color';
+import type { ColorFormat, ContrastLevel, Hsva, ParsedColor } from '@slotted/core/color';
+import {
+  colorPickerMessages,
+  type ColorPickerMessages,
+  type FamilyTranslator,
+} from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason } from '@slotted/core/state';
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
 
 import { useField } from '../field';
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { Menu, MenuContent, MenuRadioGroup, MenuRadioItem, MenuTrigger } from '../menu';
 import {
@@ -137,7 +143,8 @@ function useColorState(props: ColorPickerProps, defaults: ColorPickerDefaults): 
 }
 
 interface PickerContext extends ColorState {
-  defaults: ColorPickerDefaults;
+  /** The family's words in the language in force, with this picker's `messages` laid over them. */
+  t: FamilyTranslator<ColorPickerMessages>;
   disabled: boolean;
   readOnly: boolean;
   previous: string;
@@ -229,8 +236,8 @@ export function ColorPickerArea({ onKeyDown, ...props }: ColorPickerPartProps) {
     >
       <div
         aria-disabled={picker.disabled || undefined}
-        aria-label={picker.defaults.areaLabel}
-        aria-roledescription="2D slider"
+        aria-label={picker.t('area')}
+        aria-roledescription={picker.t('areaRoleDescription')}
         aria-valuetext={`${percentText(hsva.s)}, ${percentText(hsva.v)}`}
         data-part="area-thumb"
         onKeyDown={(event) => {
@@ -256,7 +263,7 @@ export function ColorPickerArea({ onKeyDown, ...props }: ColorPickerPartProps) {
 /** The hue around the circle, or the alpha from nothing to whole. */
 export function ColorPickerChannel({ channel, ...props }: ColorPickerChannelProps) {
   const picker = usePicker('Channel');
-  const { hsva, defaults } = picker;
+  const { hsva, t } = picker;
   const off = picker.disabled || picker.readOnly;
   const hue = channel === 'hue';
   const max = hue ? 360 : 1;
@@ -277,7 +284,7 @@ export function ColorPickerChannel({ channel, ...props }: ColorPickerChannelProp
     >
       <div
         aria-disabled={picker.disabled || undefined}
-        aria-label={hue ? defaults.hueLabel : defaults.alphaLabel}
+        aria-label={hue ? t('hue') : t('alpha')}
         aria-valuemax={hue ? 360 : 100}
         aria-valuemin={0}
         aria-valuenow={Math.round(hue ? current : current * 100)}
@@ -316,7 +323,7 @@ export function ColorPickerSwatch(props: ColorPickerPartProps) {
       <span {...props} aria-label={picker.value} data-part="swatch" role="img" />
       {
         <button
-          aria-label={`${picker.defaults.previousLabel} ${picker.previous}`}
+          aria-label={picker.t('previous', { color: picker.previous })}
           data-part="previous"
           disabled={picker.disabled || picker.readOnly}
           onClick={(event) => picker.requestValue(picker.previous, 'select', event.nativeEvent)}
@@ -365,7 +372,7 @@ export function ColorPickerInput(props: ColorPickerPartProps) {
     >
       <input
         aria-invalid={valid ? undefined : true}
-        aria-label={picker.defaults.inputLabel}
+        aria-label={picker.t('input')}
         autoComplete="off"
         data-part="input"
         dir="ltr"
@@ -398,7 +405,7 @@ export function ColorPickerFormat() {
         render={(props) => (
           <button
             {...props}
-            aria-label={`${picker.defaults.formatLabel}: ${picker.format}`}
+            aria-label={picker.t('format', { format: picker.format })}
             data-part="format"
             disabled={picker.disabled || picker.readOnly}
           >
@@ -439,7 +446,7 @@ export function ColorPickerEyedropper() {
   if (!supported) return null;
   return (
     <button
-      aria-label={picker.defaults.eyedropperLabel}
+      aria-label={picker.t('eyedropper')}
       data-part="eyedropper"
       disabled={picker.disabled || picker.readOnly}
       onClick={async (event) => {
@@ -499,7 +506,7 @@ export function ColorPickerPresets(props: ColorPickerPartProps) {
   };
 
   return (
-    <div {...props} aria-label={picker.defaults.presetsLabel} data-part="presets" role="radiogroup">
+    <div {...props} aria-label={picker.t('presets')} data-part="presets" role="radiogroup">
       {presets.map((preset, index) => (
         <button
           aria-checked={index === selected}
@@ -533,6 +540,14 @@ export function ColorPickerPresets(props: ColorPickerPartProps) {
   );
 }
 
+/** The catalog key of each WCAG outcome. */
+const CONTRAST_LEVEL_KEYS = {
+  AAA: 'contrastLevels.AAA',
+  AA: 'contrastLevels.AA',
+  'AA-large': 'contrastLevels.AALarge',
+  fail: 'contrastLevels.fail',
+} as const satisfies Record<ContrastLevel, string>;
+
 /** `Aa` in the colour over the named background, the WCAG ratio, and the level in words. */
 export function ColorPickerContrast(props: ColorPickerPartProps) {
   const picker = usePicker('Contrast');
@@ -540,14 +555,13 @@ export function ColorPickerContrast(props: ColorPickerPartProps) {
   if (background === null || picker.parsed === null) return null;
   const ratio = contrastRatio(picker.parsed.rgba, background.rgba);
   const level = contrastLevel(ratio);
-  const words = { AAA: 'AAA', AA: 'AA', 'AA-large': 'AA large', fail: 'Fail' }[level];
   return (
     <div {...props} aria-live="polite" data-level={level} data-part="contrast">
       <span aria-hidden="true" data-part="contrast-sample">
-        Aa
+        {picker.t('contrastSample')}
       </span>
       <span data-part="contrast-ratio">{ratio.toFixed(2)}:1</span>
-      <span data-part="contrast-level">{words}</span>
+      <span data-part="contrast-level">{picker.t(CONTRAST_LEVEL_KEYS[level])}</span>
     </div>
   );
 }
@@ -561,7 +575,7 @@ export function ColorPickerGamut(props: ColorPickerPartProps) {
       <Icon>
         <Glyph name="circle-alert" />
       </Icon>
-      {picker.defaults.gamutLabel}
+      {picker.t('gamut')}
     </p>
   );
 }
@@ -585,6 +599,7 @@ export function ColorPicker({
   disabled,
   format,
   invalid,
+  messages,
   onFormatChange,
   onValueChange,
   presets,
@@ -595,6 +610,7 @@ export function ColorPicker({
   ...nativeProps
 }: ColorPickerProps) {
   const defaults = useColorPickerDefaults();
+  const t = useMessages(colorPickerMessages, messages);
   const field = useField();
   const state = useColorState(
     { alpha, defaultFormat, defaultValue, format, onFormatChange, onValueChange, value },
@@ -623,11 +639,11 @@ export function ColorPicker({
   const context: PickerContext = {
     ...state,
     contrastWith,
-    defaults,
     disabled: resolvedDisabled,
     presets: presets ?? defaults.presets,
     previous,
     readOnly: resolvedReadOnly,
+    t,
   };
 
   return (
@@ -673,6 +689,7 @@ export function ColorField({
   defaultOpen,
   defaultValue,
   format,
+  messages,
   onBlur,
   onFormatChange,
   onKeyDown,
@@ -685,6 +702,7 @@ export function ColorField({
   ...textFieldProps
 }: ColorPickerFieldProps) {
   const defaults = useColorPickerDefaults();
+  const t = useMessages(colorPickerMessages, messages);
   const state = useColorState(
     { alpha, defaultFormat, defaultValue, format, onFormatChange, onValueChange, value },
     defaults,
@@ -739,7 +757,7 @@ export function ColorField({
               render={(props) => (
                 <button
                   {...props}
-                  aria-label={defaults.triggerLabel}
+                  aria-label={t('trigger')}
                   data-part="trigger"
                   data-ui="color-picker"
                   disabled={textFieldProps.disabled}
@@ -753,13 +771,14 @@ export function ColorField({
         />
       </PopoverAnchor>
       <PopoverLayer>
-        <PopoverContent aria-label={defaults.triggerLabel}>
+        <PopoverContent aria-label={t('trigger')}>
           <PopoverBody>
             <ColorPicker
               alpha={state.alpha}
               contrastWith={contrastWith}
               format={state.format}
               key={opens}
+              messages={messages}
               onFormatChange={(next, request) => state.requestFormat(next, request.source, false)}
               onValueChange={(next, request) =>
                 state.requestValue(next, request.reason as ColorPickerValueReason, request.source)

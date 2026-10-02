@@ -4,13 +4,13 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useMemo, useState, type ReactNode } from 'react';
 
 import { Field, FieldDescription, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { Grid, Measure, Scene } from '../field/field-demo';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
 import { Stack } from '../stack';
 import { TextField } from '../text-field';
 import { Text } from '../typography';
 import { EntityPicker } from './entity-picker';
-import { EntityPickerDefaultsProvider } from './entity-picker-defaults';
 import { REACT_ENTITY_PICKER_DOCS, REACT_ENTITY_PICKER_TOKENS } from './entity-picker.docs';
 import type {
   Entity,
@@ -436,7 +436,7 @@ export const Sections: Story = {
   render: () => (
     <One
       label="Before anything is typed"
-      note="Focus the field: Favorites, Recent, then Results for the empty query, and no one twice. Choose someone and they move to the top of Recent."
+      note="Press the field: Favorites, Recent, then Results for the empty query, and no one twice. Choose someone and they move to the top of Recent."
     >
       <SectionsDemo />
     </One>
@@ -495,7 +495,7 @@ export const Async: Story = {
   render: () => (
     <One
       label="A directory that takes 1.4 seconds"
-      note="Focus: three skeleton records. Type b: the rows recede until the answer lands. Scroll to the end: the next page comes under one skeleton row."
+      note="Press the field: three skeleton records. Type b: the rows recede until the answer lands. Scroll to the end: the next page comes under one skeleton row."
     >
       <Field>
         <FieldLabel>Watcher</FieldLabel>
@@ -850,30 +850,18 @@ export const Composition: Story = {
       </Scene>
       <Scene
         label="Said once, in Portuguese"
-        note="The provider sets every sentence for the subtree; the instance keeps its own retry label."
+        note="SlottedProvider sets the language for the subtree; the instance keeps its own retry message."
       >
-        <EntityPickerDefaultsProvider
-          labels={{
-            chosen: 'Escolhidos',
-            empty: 'Nenhum resultado',
-            error: 'Não foi possível carregar',
-            favorites: 'Favoritos',
-            recent: 'Recentes',
-            results: 'Resultados',
-            count: '{count} resultados',
-            trigger: 'Mostrar resultados',
-            clear: 'Limpar',
-          }}
-        >
+        <SlottedProvider locale="pt-BR">
           <Field>
             <FieldLabel>Responsável</FieldLabel>
             <EntityPicker
               favorites={[PEOPLE[0]!]}
-              labels={{ retry: 'Tentar de novo' }}
+              messages={{ retry: 'Buscar outra vez' }}
               source={DIRECTORY}
             />
           </Field>
-        </EntityPickerDefaultsProvider>
+        </SlottedProvider>
       </Scene>
     </Grid>
   ),

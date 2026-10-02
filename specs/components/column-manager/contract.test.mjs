@@ -88,7 +88,7 @@ test('offers three presentations and two apply policies, with their defaults', (
   assert.deepEqual(contract.axes.presentation, ['popover', 'drawer', 'inline']);
   assert.deepEqual(contract.axes.apply, ['live', 'confirm']);
   assert.deepEqual(member.defaults, { presentation: 'popover', apply: 'live', open: false });
-  assert.deepEqual(contract.provides.columnManagerDefaults, ['presentation', 'apply', 'labels']);
+  assert.deepEqual(contract.provides.columnManagerDefaults, ['presentation', 'apply']);
   assert.match(contract.composes.join(' '), /popover/);
   assert.match(contract.composes.join(' '), /drawer/);
 });
@@ -105,7 +105,7 @@ test('states the rules that decide what a control may do', () => {
   assert.match(contract.rules.hiddenBySpace, /status/);
   assert.match(contract.rules.hiddenBySpace, /outOfSpace\.hidden/);
   assert.match(contract.rules.inRow, /outOfSpace\.popin/);
-  assert.match(contract.rules.inRow, /labels\.inRow/);
+  assert.match(contract.rules.inRow, /messages\.inRow/);
   assert.match(contract.rules.search, /NFD/);
   assert.match(contract.rules.search, /description/);
   assert.match(contract.rules.search, /handle/);
@@ -127,13 +127,12 @@ test('paints a drag in the shared drag vocabulary', () => {
   assert.ok(member.parts.includes('drop-indicator'));
 });
 
-test('carries every label the design names', () => {
-  assert.deepEqual(Object.keys(contract.labels).sort(), [
+test('carries every message the design names', () => {
+  assert.deepEqual([...contract.messages].sort(), [
     'apply',
     'cancel',
     'hiddenBySpace',
-    'hiddenCountOne',
-    'hiddenCountOther',
+    'hiddenCount',
     'inRow',
     'moved',
     'noResults',
@@ -152,9 +151,6 @@ test('carries every label the design names', () => {
     'unpinned',
     'visibleCount',
   ]);
-  assert.equal(contract.labels.moved, '{column} moved to position {position}');
-  assert.equal(contract.labels.hiddenCountOther, '{count} hidden columns');
-  assert.equal(contract.labels.inRow, 'Shown in row');
 });
 
 test('declares the keyboard of §3.7, native order and all', () => {

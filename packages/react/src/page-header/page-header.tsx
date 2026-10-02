@@ -1,5 +1,6 @@
 import '@slotted/styles/page-header/page-header.css';
 
+import { pageHeaderMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import { createStickyHeader } from '@slotted/core/sticky-header';
 import type { StickyHeaderHandle } from '@slotted/core/sticky-header';
@@ -15,6 +16,7 @@ import {
 } from 'react';
 
 import { Container } from '../container';
+import { useMessages } from '../i18n';
 import { usePage } from '../page';
 import { usePageHeaderDefaults } from './page-header-defaults';
 import type {
@@ -102,7 +104,7 @@ export function PageHeader({
   const resolvedCollapse = collapse ?? defaults.collapse;
   const resolvedLevel = level ?? defaults.level;
   const resolvedSize = size ?? defaults.size;
-  const resolvedMessages = { ...defaults.messages, ...messages };
+  const t = useMessages(pageHeaderMessages, messages);
 
   const [ownExpanded, setOwnExpanded] = useState<boolean>(defaultExpanded ?? true);
   const [ownPinned, setOwnPinned] = useState<boolean>(defaultPinned ?? false);
@@ -272,7 +274,7 @@ export function PageHeader({
     ids: { areaId: `${baseId}area`, headingId: `${baseId}heading` },
     level: resolvedLevel,
     loading: loading === true,
-    messages: resolvedMessages,
+    t,
     pinned: currentPinned,
     revealed,
     scrolled,

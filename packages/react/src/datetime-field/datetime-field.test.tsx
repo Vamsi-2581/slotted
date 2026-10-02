@@ -1,10 +1,12 @@
 import { plainDate, plainDateTime, plainTime, toISODateTime } from '@slotted/core/date';
 import type { PlainDateTime } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { Field, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { DateTimeField, DateTimeFieldDefaultsProvider } from './index';
 import type { DateTimeFieldChangeRequest, DateTimeFieldHandle } from './index';
 
@@ -483,11 +485,13 @@ describe('the contract with the consumer', () => {
 
   it('takes its defaults from a provider, and a prop still wins', () => {
     render(
-      <DateTimeFieldDefaultsProvider granularity="second" locale="en-US">
-        <DateTimeField aria-label="When" value={TENTH} />
-      </DateTimeFieldDefaultsProvider>,
+      <SlottedProvider locale="en-US">
+        <DateTimeFieldDefaultsProvider granularity="second">
+          <DateTimeField aria-label="When" value={TENTH} />
+        </DateTimeFieldDefaultsProvider>
+      </SlottedProvider>,
     );
-    /* `en-US` from the provider: the month leads. */
+    /* `en-US` from the language in force: the month leads. */
     expect(segments().map((element) => element.dataset['field'])).toEqual([
       'month',
       'day',
@@ -500,13 +504,44 @@ describe('the contract with the consumer', () => {
     expect(root()).toHaveAttribute('data-granularity', 'second');
 
     render(
-      <DateTimeFieldDefaultsProvider granularity="second" locale="en-US">
-        <DateTimeField aria-label="Quando" granularity="minute" locale="pt-BR" value={TENTH} />
-      </DateTimeFieldDefaultsProvider>,
+      <SlottedProvider locale="en-US">
+        <DateTimeFieldDefaultsProvider granularity="second">
+          <DateTimeField aria-label="Quando" granularity="minute" locale="pt-BR" value={TENTH} />
+        </DateTimeFieldDefaultsProvider>
+      </SlottedProvider>,
     );
     const roots = [...document.querySelectorAll('[data-ui="datetime-field"]')];
     /* The control that states either of them itself still wins. */
     expect(roots.at(-1)).toHaveAttribute('data-granularity', 'minute');
+  });
+
+  it('changes its words and its order together with the language in force', () => {
+    const inLocale = (locale: string) => (
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale={locale}>
+        <DateTimeField aria-label="Quando" clearable defaultValue={TENTH} />
+      </SlottedProvider>
+    );
+    const { rerender } = render(inLocale('pt-BR'));
+
+    expect(screen.getByRole('button', { name: 'Limpar' })).toBeInTheDocument();
+    expect(segments().map((element) => element.dataset['field'])).toEqual([
+      'day',
+      'month',
+      'year',
+      'hour',
+      'minute',
+    ]);
+
+    rerender(inLocale('en-US'));
+    expect(screen.getByRole('button', { name: 'Clear' })).toBeInTheDocument();
+    expect(segments().map((element) => element.dataset['field'])).toEqual([
+      'month',
+      'day',
+      'year',
+      'hour',
+      'minute',
+      'dayPeriod',
+    ]);
   });
 
   it('takes the field s wiring when it sits inside one', () => {

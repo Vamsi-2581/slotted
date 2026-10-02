@@ -86,7 +86,7 @@ const anatomy: AnatomyRow[] = [
     element: 'the aside carrying slDetailPanelAside',
     required: false,
     purpose:
-      'The metadata column, a complementary landmark named by messages.aside. Beside the sections above 600 pixels, in the column the aside axis names; under them below, with a rule above. Never hidden.',
+      'The metadata column, a complementary landmark named by the aside message. Beside the sections above 600 pixels, in the column the aside axis names; under them below, with a rule above. Never hidden.',
   },
   {
     part: 'message',
@@ -372,15 +372,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'defaults',
     title: 'Setting it once, and reaching past it',
-    note: 'The provider carries the layout, the aside’s side, the rank, the size, who scrolls, the mount policy and the aside’s name for every panel under it; the two panels here state nothing and both read tabbed with the fields at the start. The handle reaches focus() and scrollToSection().',
+    note: 'The provider carries the layout, the aside’s side, the rank, the size, who scrolls, and the mount policy for every panel under it; the two panels here state nothing and both read tabbed with the fields at the start. The handle reaches focus() and scrollToSection().',
     snippet: defineSnippet({
       id: 'detail-panel-angular-defaults',
       language: 'ts',
-      label: 'Seven decisions, taken once',
+      label: 'Six decisions, taken once',
       source: `@Component({
-  providers: [
-    provideDetailPanelDefaults({ aside: 'start', layout: 'tabs', messages: { aside: 'Campos' } }),
-  ],
+  providers: [provideDetailPanelDefaults({ aside: 'start', layout: 'tabs' })],
 })
 export class OrdersPage {}`,
     }),
@@ -388,7 +386,7 @@ export class OrdersPage {}`,
   {
     id: 'accessibility',
     title: 'What a reader hears',
-    note: 'The article is named by the heading, so the record is announced by its identifier and customer; the aside is a complementary landmark called Detalhes; under tabs, Tab from the strip lands on the tabpanel with the outward ring and then on the table inside it. Press next: the heading takes focus and says the new record.',
+    note: 'The article is named by the heading, so the record is announced by its identifier and customer; the aside is a complementary landmark named by the aside message; under tabs, Tab from the strip lands on the tabpanel with the outward ring and then on the table inside it. Press next: the heading takes focus and says the new record.',
     snippet: defineSnippet({
       id: 'detail-panel-angular-accessibility',
       language: 'angular',
@@ -495,10 +493,10 @@ export const ANGULAR_DETAIL_PANEL_DOCS = {
       ],
       [
         'messages',
-        'Partial<{ aside, loading }>',
-        'Detalhes, A carregar o registo',
-        'slDetailPanel, provideDetailPanelDefaults',
-        'The aside’s accessible name, and the root’s while loading and the heading has no words yet',
+        'PartialMessages<DetailPanelMessages>',
+        '—',
+        'slDetailPanel',
+        'Words laid over the language in force, key by key: the aside’s accessible name (aside), and the root’s while loading and the heading has no words yet (loading)',
       ],
       [
         'name',
@@ -539,7 +537,7 @@ export const ANGULAR_DETAIL_PANEL_DOCS = {
       [
         'aria-label',
         'string',
-        'messages.aside',
+        'the aside message',
         'aside[slDetailPanelAside]',
         'A written name wins over the messages; read with HostAttributeToken before the family writes its own',
       ],
@@ -582,10 +580,10 @@ export const ANGULAR_DETAIL_PANEL_DOCS = {
       ],
       [
         'provideDetailPanelDefaults',
-        '{ layout, aside, level, size, scroll, mount, messages }',
+        '{ layout, aside, level, size, scroll, mount }',
         '—',
         'a providers array',
-        'The seven decisions an application takes once. A panel that states any of them itself still wins',
+        'The six decisions an application takes once. A panel that states any of them itself still wins',
       ],
       [
         'native attributes',
@@ -598,9 +596,9 @@ export const ANGULAR_DETAIL_PANEL_DOCS = {
     accessibility: [
       'There is no detail or record pattern in the WAI-ARIA Authoring Practices; the governing sources are the landmark practices (w3.org/WAI/ARIA/apg/practices/landmark-regions/) for the article and the aside, and the Tabs pattern (w3.org/WAI/ARIA/apg/patterns/tabs/) for the strip, which the tabs family holds. The root is an article — one self-contained record — named by aria-labelledby the page-header’s heading once it is in the DOM, so the record is announced by its identifier and its customer; a consumer’s own aria-label wins.',
       'Under layout="tabs" each section is the tabpanel of its tab: role="tabpanel", tabindex="0", aria-labelledby the tab, hidden when not current, and the tab’s aria-controls names it. The ids are the strip’s tabs family’s, handed to the panel on mount, so Tab from the selected tab lands on the shown section with the outward focus ring and then on its content. ArrowLeft, ArrowRight, Home and End on the strip are the tabs family’s, and under automatic activation each asks the panel to move section with the reason keyboard.',
-      'The aside is an aside element — a complementary landmark — named by messages.aside, Detalhes by default, so a reader can jump to the fields from the landmark list and hears what they are. It is never hidden below a width: content a desktop has and a phone does not is content a phone reader cannot reach, so the aside follows the sections in the flow instead.',
+      'The aside is an aside element — a complementary landmark — named by the aside message, Details in English, so a reader can jump to the fields from the landmark list and hears what they are. It is never hidden below a width: content a desktop has and a phone does not is content a phone reader cannot reach, so the aside follows the sections in the flow instead.',
       'Focus follows the record. When recordKey changes while document.activeElement is inside the root — the previous or next control was just pressed — the panel writes tabindex="-1" on the page-header’s heading, focuses it, and scrolls the container to its start, so a screen reader announces the new record rather than staying on a control whose record changed under it. When focus is elsewhere nothing moves.',
-      'While loading the root carries aria-busy="true", every placeholder is the skeleton family’s and hidden from assistive technology, the tab labels stay because they are known before the record is, and the root is named A carregar o registo until the heading has words. Under status="not-found" or "error" the message replaces the columns and the header, the back control and the footer stay, so a drawer opened on a deleted record still closes.',
+      'While loading the root carries aria-busy="true", every placeholder is the skeleton family’s and hidden from assistive technology, the tab labels stay because they are known before the record is, and the root is named by the loading message, Loading the record in English, until the heading has words. Under status="not-found" or "error" the message replaces the columns and the header, the back control and the footer stay, so a drawer opened on a deleted record still closes.',
     ],
     snippets: [
       defineSnippet({
@@ -646,7 +644,7 @@ export const ANGULAR_DETAIL_PANEL_DOCS = {
           </div>
           <div data-part="section" role="tabpanel" hidden>…</div>
         </div>
-        <aside data-part="aside" aria-label="Detalhes">…</aside>
+        <aside data-part="aside" aria-label="Details">…</aside>
       </div>
     </div>
   </div>

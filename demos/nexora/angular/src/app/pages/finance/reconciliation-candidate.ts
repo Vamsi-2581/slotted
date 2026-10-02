@@ -161,7 +161,7 @@ import { BAND_WORDS, type CandidateView } from '../../core/finance/reconciliatio
                 type="button"
                 data-testid="confirm-match"
                 [loading]="busy()"
-                loadingLabel="Matching"
+                [messages]="{ loading: 'Matching' }"
                 [disabled]="locked()"
                 (click)="confirm.emit(view())"
               >

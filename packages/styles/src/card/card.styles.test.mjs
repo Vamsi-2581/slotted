@@ -437,3 +437,12 @@ test('exercises every declared state in the harness fragment', () => {
     assert.ok(fragment.includes(attribute), `no scene renders the ${state} state`);
   }
 });
+
+/**
+ * A card publishes its current ground, so a family that states a ground of
+ * its own — a table's rows, a grid's cells — stands on the card's rather than
+ * on the page's surface, a darker band inside a raised card.
+ */
+test('publishes its ground to the families inside it', () => {
+  assert.match(rule(ui), /--slotted-ground:var\(--_card-surface\)/);
+});

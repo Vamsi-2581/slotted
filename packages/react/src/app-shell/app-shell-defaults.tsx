@@ -1,23 +1,6 @@
 import { createContext, useContext } from 'react';
 
-import type {
-  AppShellDefaults,
-  AppShellDefaultsProviderProps,
-  AppShellMessages,
-} from './app-shell.types';
-
-/** The strings the family says before an application says otherwise. */
-export const DEFAULT_APP_SHELL_MESSAGES: AppShellMessages = {
-  nav: 'Navegação principal',
-  open: 'Abrir navegação',
-  close: 'Fechar navegação',
-  aside: 'Painel lateral',
-  openAside: 'Abrir painel lateral',
-  closeAside: 'Fechar painel lateral',
-  skipToMain: 'Saltar para o conteúdo',
-  skipToNav: 'Saltar para a navegação',
-  skipToAside: 'Saltar para o painel lateral',
-};
+import type { AppShellDefaults, AppShellDefaultsProviderProps } from './app-shell.types';
 
 const FALLBACK: AppShellDefaults = {
   asideMode: 'auto',
@@ -27,7 +10,6 @@ const FALLBACK: AppShellDefaults = {
   collapsedTo: 'rail',
   escape: 'close',
   back: 'close',
-  messages: DEFAULT_APP_SHELL_MESSAGES,
   modal: true,
   navMode: 'auto',
   navSide: 'start',
@@ -49,13 +31,10 @@ export function useAppShellDefaults(): AppShellDefaults {
  * An application decides once how its shell is arranged — which region reaches
  * the corner, which plane the content sits on, how the navigation behaves when
  * the space runs out — rather than repeating the same props on every route. A
- * shell that states any of them itself still wins.
+ * shell that states any of them itself still wins. Its words come from the
+ * language in force (`SlottedProvider`).
  */
-export function AppShellDefaultsProvider({
-  children,
-  messages,
-  ...defaults
-}: AppShellDefaultsProviderProps) {
+export function AppShellDefaultsProvider({ children, ...defaults }: AppShellDefaultsProviderProps) {
   const inherited = useAppShellDefaults();
 
   return (
@@ -68,7 +47,6 @@ export function AppShellDefaultsProvider({
         collapsedTo: defaults.collapsedTo ?? inherited.collapsedTo,
         escape: defaults.escape ?? inherited.escape,
         back: defaults.back ?? inherited.back,
-        messages: { ...inherited.messages, ...messages },
         modal: defaults.modal ?? inherited.modal,
         navMode: defaults.navMode ?? inherited.navMode,
         navSide: defaults.navSide ?? inherited.navSide,

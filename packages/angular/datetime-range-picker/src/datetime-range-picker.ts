@@ -25,6 +25,11 @@ import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createPositioner } from '@slotted/core/positioner';
 import type { PositionerHandle } from '@slotted/core/positioner';
+import {
+  datetimeRangePickerMessages,
+  type DatetimeRangePickerMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import { createTypeahead, isPrintable } from '@slotted/core/typeahead';
@@ -61,6 +66,7 @@ import type {
   ValidationErrors,
   Validator,
 } from '@angular/forms';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlCalendar } from '@slotted/angular/calendar';
 import type { CalendarValue, CalendarView } from '@slotted/angular/calendar';
@@ -74,7 +80,6 @@ import type {
   DateTimeRangePickerCalendar,
   DateTimeRangePickerCloseOnSelect,
   DateTimeRangePickerDefaults,
-  DateTimeRangePickerHintLabels,
   DateTimeRangePickerHighlight,
   DateTimeRangePickerHourCycle,
   DateTimeRangePickerPlacement,
@@ -210,7 +215,7 @@ function rangeOf(work: Work): DateTimeRange | null {
         (keydown)="onTriggerKeyDown($event)"
       >
         <span data-part="summary" [attr.data-placeholder]="summary() === null ? '' : null">{{
-          summary() ?? resolvedChooseLabel()
+          summary() ?? t('choose')
         }}</span>
         <span slIcon><svg slGlyph name="calendar"></svg></span>
       </button>
@@ -218,7 +223,7 @@ function rangeOf(work: Work): DateTimeRange | null {
         <button
           data-part="clear"
           type="button"
-          [attr.aria-label]="clearLabel() ?? defaults.clearLabel"
+          [attr.aria-label]="t('clear')"
           [disabled]="!editable()"
           (click)="clear($event)"
         >
@@ -308,7 +313,7 @@ function rangeOf(work: Work): DateTimeRange | null {
               [disabled]="!editable()"
               (click)="chooseNow($event)"
             >
-              {{ resolvedNowLabel() }}
+              {{ t('now') }}
             </button>
             <span
               data-part="hint"
@@ -354,14 +359,14 @@ function rangeOf(work: Work): DateTimeRange | null {
                 ></div>
               </div>
               @if (lists()[position].length === 0) {
-                <div data-part="empty">{{ resolvedEmptyLabel() }}</div>
+                <div data-part="empty">{{ t('empty') }}</div>
               } @else {
                 <div
                   data-part="list"
                   role="listbox"
                   [attr.aria-labelledby]="contentId + '-tab-' + position"
                   [attr.aria-describedby]="hint() === '' ? null : contentId + '-hint'"
-                  [attr.aria-description]="truncated() ? resolvedTruncatedLabel() : null"
+                  [attr.aria-description]="truncated() ? t('truncated') : null"
                   [attr.data-truncated]="truncated() ? '' : null"
                   (keydown)="onListKeyDown(position, $event)"
                   (focusin)="listFocused.set(true)"
@@ -401,7 +406,7 @@ function rangeOf(work: Work): DateTimeRange | null {
           <div data-part="footer">
             <ng-content select="[slDateTimeRangePickerFooter]" />
             <button data-part="done" type="button" (click)="done($event)">
-              {{ resolvedDoneLabel() }}
+              {{ t('done') }}
             </button>
           </div>
         </div>
@@ -467,7 +472,6 @@ export class SlDateTimeRangePicker implements ControlValueAccessor, Validator, O
       value === undefined || value === null ? undefined : numberAttribute(value),
   });
   readonly lengthLabel = input<DateTimeRangePickerDefaults['lengthLabel'] | undefined>(undefined);
-  readonly limitLabel = input<DateTimeRangePickerDefaults['limitLabel'] | undefined>(undefined);
 
   /** Seconds between two offered times. Ignored when `options` states the list. */
   readonly step = input<number | undefined, unknown>(undefined, {
@@ -492,6 +496,7 @@ export class SlDateTimeRangePicker implements ControlValueAccessor, Validator, O
   /** Six rows whatever the month needs, so a press of "next" moves no target. */
   readonly fixedWeeks = input(true, { transform: booleanAttribute });
 
+  /** BCP 47. Unset, the language in force (`provideSlotted`) decides. */
   readonly locale = input<string | undefined>(undefined);
   readonly timeZone = input<string | undefined>(undefined);
   readonly hourCycle = input<DateTimeRangePickerHourCycle | undefined>(undefined);
@@ -532,16 +537,12 @@ export class SlDateTimeRangePicker implements ControlValueAccessor, Validator, O
   readonly relative = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
   });
-  readonly clearLabel = input<string | undefined>(undefined);
-  readonly chooseLabel = input<string | undefined>(undefined);
-  readonly changeLabel = input<string | undefined>(undefined);
-  readonly startLabel = input<string | undefined>(undefined);
-  readonly endLabel = input<string | undefined>(undefined);
-  readonly nowLabel = input<string | undefined>(undefined);
-  readonly doneLabel = input<string | undefined>(undefined);
-  readonly hintLabels = input<Partial<DateTimeRangePickerHintLabels> | undefined>(undefined);
-  readonly emptyLabel = input<string | undefined>(undefined);
-  readonly truncatedLabel = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * trigger's names, the two ends, the hint, the limit, and what a panel says
+   * when it is empty or cut short.
+   */
+  readonly messages = input<PartialMessages<DatetimeRangePickerMessages> | undefined>(undefined);
   /** The names of the two hidden inputs a plain form post reads. */
   readonly startName = input<string | undefined>(undefined);
   readonly endName = input<string | undefined>(undefined);
@@ -564,6 +565,9 @@ export class SlDateTimeRangePicker implements ControlValueAccessor, Validator, O
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   protected readonly defaults = injectDateTimeRangePickerDefaults();
+  private readonly appLocale = injectLocale();
+  /** The family's words in the language in force, with this picker's `messages` laid over them. */
+  readonly t = injectMessages(datetimeRangePickerMessages, this.messages);
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   private readonly enclosing = inject(SlField, { optional: true });
@@ -640,7 +644,7 @@ export class SlDateTimeRangePicker implements ControlValueAccessor, Validator, O
     return end === null ? '' : toISODateTime(end);
   });
 
-  protected readonly resolvedLocale = computed(() => this.locale() ?? this.defaults.locale);
+  protected readonly resolvedLocale = computed(() => this.locale() ?? this.appLocale());
   protected readonly resolvedTimeZone = computed(() => this.timeZone() ?? this.defaults.timeZone);
   protected readonly resolvedHourCycle = computed(
     () => this.hourCycle() ?? this.defaults.hourCycle,
@@ -659,27 +663,6 @@ export class SlDateTimeRangePicker implements ControlValueAccessor, Validator, O
   protected readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   protected readonly resolvedPlacement = computed(
     () => this.placement() ?? this.defaults.placement,
-  );
-  protected readonly resolvedStartLabel = computed(
-    () => this.startLabel() ?? this.defaults.startLabel,
-  );
-  protected readonly resolvedEndLabel = computed(() => this.endLabel() ?? this.defaults.endLabel);
-  protected readonly resolvedNowLabel = computed(() => this.nowLabel() ?? this.defaults.nowLabel);
-  protected readonly resolvedDoneLabel = computed(
-    () => this.doneLabel() ?? this.defaults.doneLabel,
-  );
-  private readonly resolvedHintLabels = computed(() => ({
-    ...this.defaults.hintLabels,
-    ...this.hintLabels(),
-  }));
-  protected readonly resolvedChooseLabel = computed(
-    () => this.chooseLabel() ?? this.defaults.chooseLabel,
-  );
-  protected readonly resolvedEmptyLabel = computed(
-    () => this.emptyLabel() ?? this.defaults.emptyLabel,
-  );
-  protected readonly resolvedTruncatedLabel = computed(
-    () => this.truncatedLabel() ?? this.defaults.truncatedLabel,
   );
   protected readonly resolvedDisabled = computed(
     () => this.disabled() ?? this.formDisabled() ?? this.enclosing?.resolvedDisabled(),
@@ -859,17 +842,17 @@ export class SlDateTimeRangePicker implements ControlValueAccessor, Validator, O
    */
   protected readonly hint = computed(() => {
     const position = this.currentPosition();
-    const labels = this.resolvedHintLabels();
     const half = this.work()[position];
-    if (half.date === null) return labels.choose.replace('{end}', this.labelFor(position));
+    if (half.date === null) return this.t('chooseDay', { end: this.labelFor(position) });
     if (half.time === null) {
-      return labels.chooseTime
-        .replace('{end}', this.labelFor(position))
-        .replace('{day}', this.format().describeDate(half.date, 'short'));
+      return this.t('chooseTime', {
+        end: this.labelFor(position),
+        day: this.format().describeDate(half.date, 'short'),
+      });
     }
     const problem = this.hintProblem();
     if (problem === undefined) return '';
-    return labels[problem === 'min' || problem === 'max' ? 'bounds' : problem];
+    return this.t(problem === 'min' || problem === 'max' ? 'bounds' : problem);
   });
 
   /* ── The two lists ─────────────────────────────────────────────────── */
@@ -951,8 +934,9 @@ export class SlDateTimeRangePicker implements ControlValueAccessor, Validator, O
     return isSameTime(option.time, this.work()[position].time);
   }
 
+  /** The name of one end: the field's, its tab's and the hint's `{end}`. */
   protected labelFor(position: DateTimeRangePickerPosition): string {
-    return position === 'start' ? this.resolvedStartLabel() : this.resolvedEndLabel();
+    return this.t(position);
   }
 
   /** The duration a row would make with the other end, on the same day only. */
@@ -1022,22 +1006,25 @@ export class SlDateTimeRangePicker implements ControlValueAccessor, Validator, O
   protected readonly limitText = computed(() => {
     const min = this.minLength();
     const max = this.maxLength();
-    if (min === undefined && max === undefined) return null;
-    return (this.limitLabel() ?? this.defaults.limitLabel)(min, max, this.resolvedLocale());
+    const length = this.lengthOf();
+    if (min !== undefined && max !== undefined) {
+      return this.t('limit.between', { min: length(min), max: length(max) });
+    }
+    if (min !== undefined) return this.t('limit.atLeast', { min: length(min) });
+    if (max !== undefined) return this.t('limit.atMost', { max: length(max) });
+    return null;
   });
 
   /** The trigger's accessible name: focus returns here when the surface closes. */
   protected readonly triggerLabel = computed(() => {
     const start = this.start();
     const end = this.end();
-    if (start === null || end === null) return this.resolvedChooseLabel();
+    if (start === null || end === null) return this.t('choose');
     const format = this.format();
-    const change = this.changeLabel() ?? this.defaults.changeLabel;
-    const length =
-      compareDateTime(start, end) <= 0
-        ? `, ${this.lengthOf()(dateTimeRangeSeconds(start, end))}`
-        : '';
-    return `${change}, ${format.describe(start)} – ${format.describe(end)}${length}`;
+    const ends = { start: format.describe(start), end: format.describe(end) };
+    return compareDateTime(start, end) <= 0
+      ? this.t('change', { ...ends, length: this.lengthOf()(dateTimeRangeSeconds(start, end)) })
+      : this.t('changeReversed', ends);
   });
   /* The frame writes each end short — "12 Sep, 14:00" — because the whole
      value in words is the trigger's. */

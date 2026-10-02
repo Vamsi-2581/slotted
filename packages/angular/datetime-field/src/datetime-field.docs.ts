@@ -306,7 +306,12 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'datetime-field-angular-clear',
       label: 'The clear button',
       language: 'angular',
-      source: `<div slDateTimeField clearLabel="Limpar" [clearable]="true" [defaultValue]="consultation"></div>`,
+      source: `<div
+  slDateTimeField
+  [messages]="{ clear: 'Limpar' }"
+  [clearable]="true"
+  [defaultValue]="consultation"
+></div>`,
     }),
   },
   {
@@ -358,17 +363,14 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition and escape hatches',
-    note: 'provideDateTimeFieldDefaults sets the locale, the clock and every label once for everything under it; exportAs reaches focus(), focusEntry() and clear() from a template; and the two slot directives take the consumer’s own elements. A control that states any default itself still wins over the provider.',
+    note: 'provideDateTimeFieldDefaults sets the clock and the zone once for everything under it, provideSlotted the language; exportAs reaches focus(), focusEntry() and clear() from a template; and the two slot directives take the consumer’s own elements. A control that states any default itself still wins over the provider.',
     snippet: defineSnippet({
       id: 'datetime-field-angular-composition',
       label: 'One decision, once',
       language: 'ts',
       source: `providers: [
-  provideDateTimeFieldDefaults({
-    hourCycle: 24,
-    locale: 'pt-BR',
-    timeZone: 'America/Sao_Paulo',
-  }),
+  provideSlotted({ locale: 'pt-BR' }),
+  provideDateTimeFieldDefaults({ hourCycle: 24, timeZone: 'America/Sao_Paulo' }),
 ];`,
     }),
   },
@@ -445,7 +447,7 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    'runtime',
+    'the language in force',
     'SlDateTimeField',
     'BCP 47. Decides the order of both halves, the separators, the boundary literal and the placeholders.',
   ],
@@ -547,7 +549,6 @@ const api: ApiRow[] = apiRows([
     'SlDateTimeField',
     'Draws a button that empties both halves and returns focus to the first segment.',
   ],
-  ['clearLabel', 'string', 'Clear', 'SlDateTimeField', 'The clear button’s accessible name.'],
   [
     'relative',
     'boolean',
@@ -556,11 +557,11 @@ const api: ApiRow[] = apiRows([
     'Whether +, - and = open the duration expression. Every value it can write is reachable by typing and by the arrows.',
   ],
   [
-    'durationLabel',
-    'string',
-    'Date and time as a duration from now',
+    'messages',
+    'Partial<DatetimeFieldMessages>',
+    '—',
     'SlDateTimeField',
-    'The expression region’s accessible name.',
+    'Words laid over the language in force, key by key: the clear button’s accessible name (clear) and the expression region’s (duration).',
   ],
   [
     'name',
@@ -599,7 +600,7 @@ const composition: ApiRow[] = apiRows([
     'provider',
     '—',
     'application',
-    'Sets locale, timeZone, hourCycle, granularity, relative, size, variant and every label once for everything under it. A control that states any of them itself still wins.',
+    'Sets timeZone, hourCycle, granularity, relative, size and variant once for everything under it. A control that states any of them itself still wins.',
   ],
   [
     'ControlValueAccessor',

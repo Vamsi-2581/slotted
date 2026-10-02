@@ -147,13 +147,7 @@ test('resolves every inherited value from the consumer first', () => {
   for (const [axis, order] of Object.entries(contract.resolution)) {
     assert.equal(order[0], 'prop', `${axis} lets something outrank the consumer`);
   }
-  assert.deepEqual(contract.provides.attachmentDefaults, [
-    'size',
-    'orientation',
-    'layout',
-    'locale',
-    'removeLabel',
-  ]);
+  assert.deepEqual(contract.provides.attachmentDefaults, ['size', 'orientation', 'layout']);
 });
 
 test('paints seven states, the three attributes in the order a stylesheet holds them', () => {

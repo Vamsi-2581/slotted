@@ -2,10 +2,12 @@ import '@slotted/styles/table/table.css';
 
 import { nextSelection } from '@slotted/core/collection';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
+import { tableMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import { createContext, useCallback, useContext, useId, useRef, useState } from 'react';
 
-import { resolveLabels, useTableDefaults } from './table-defaults';
+import { useMessages } from '../i18n';
+import { useTableDefaults } from './table-defaults';
 import type {
   TableContextValue,
   TableProps,
@@ -63,9 +65,9 @@ export function Table({
   defaultSort,
   defaultValue,
   expanded,
-  labels,
   layout,
   loading,
+  messages,
   onExpandedChange,
   onSortChange,
   onValueChange,
@@ -83,6 +85,7 @@ export function Table({
   ...nativeProps
 }: TableProps) {
   const defaults = useTableDefaults();
+  const t = useMessages(tableMessages, messages);
   const id = useId();
 
   const [ownSort, setOwnSort] = useState<TableSortDescriptor | null>(defaultSort ?? null);
@@ -97,7 +100,6 @@ export function Table({
   const currentExpanded = expanded ?? ownExpanded;
 
   const resolvedColumns = columns ?? defaults.columns ?? 1;
-  const resolvedLabels = resolveLabels(defaults.labels, labels);
   const resolvedLayout = layout ?? defaults.layout ?? 'auto';
   const resolvedMode = selectionMode ?? defaults.selectionMode ?? 'none';
   const resolvedSticky = (stickyHeader ?? defaults.stickyHeader ?? false) === true;
@@ -149,7 +151,6 @@ export function Table({
     id,
     isExpanded: (key) => currentExpanded.includes(key),
     isSelected: (key) => currentValue.includes(key),
-    labels: resolvedLabels,
     loading: loading === true,
     rows,
 
@@ -186,11 +187,11 @@ export function Table({
         )?.currentTarget?.textContent?.trim() ?? column;
       const said =
         next === null
-          ? resolvedLabels.sortCleared
+          ? t('sortCleared', { column: heading })
           : next.direction === 'ascending'
-            ? resolvedLabels.sortedAscending
-            : resolvedLabels.sortedDescending;
-      getLiveAnnouncer(root.current?.ownerDocument).announce(`${heading}, ${said}`);
+            ? t('sortedAscending', { column: heading })
+            : t('sortedDescending', { column: heading });
+      getLiveAnnouncer(root.current?.ownerDocument).announce(said);
 
       if (moved) setOwnSort(next);
     },
@@ -242,6 +243,7 @@ export function Table({
       requestValue(result.selected, result.selected.length === 0 ? 'clear' : 'select', source);
     },
 
+    t,
     value: currentValue,
   };
 

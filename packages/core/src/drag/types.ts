@@ -6,6 +6,7 @@
  * the geometry of whatever rendered it.
  */
 
+import type { DragMessages, FamilyTranslator } from '../i18n';
 import type { ChangeReason } from '../state';
 import type { Point } from '../pointer-intent';
 import type { MeasuredContainer } from './geometry';
@@ -76,30 +77,11 @@ export interface DragContainerOptions {
   itemLabel?: (key: string) => string;
 }
 
-export interface DragMessageContext {
-  readonly state: DragState;
-  /** The first item's label, or "N items" when several are dragged. */
-  readonly item: string;
-  readonly count: number;
-  /** 1-based position of the first item after the drop, for a `between` target. */
-  readonly position: number | null;
-  /** Items in the target container after the drop, for a `between` target. */
-  readonly total: number | null;
-  /** The container's label, or the item's label for an `on` target. */
-  readonly targetLabel: string | null;
-  readonly operation: DropOperation | null;
-}
-
-export interface DragMessages {
-  /** One string the family renders once, hidden, for `aria-describedby`. */
-  instructions: string;
-  pickedUp: (context: DragMessageContext) => string;
-  moved: (context: DragMessageContext) => string;
-  dropped: (context: DragMessageContext) => string;
-  cancelled: (context: DragMessageContext) => string;
-  /** No valid position exists anywhere. */
-  nowhere: (context: DragMessageContext) => string;
-}
+/**
+ * An announcement the controller makes: picking up, each move, the drop, the
+ * cancel, and a move with no position left to take.
+ */
+export type DragAnnouncement = 'pickedUp' | 'moved' | 'dropped' | 'cancelled' | 'nowhere';
 
 export interface DragStartRequest {
   readonly items: readonly string[];
@@ -206,7 +188,14 @@ export interface DragControllerOptions {
   onDwell?: (event: DragTargetEvent) => void;
   onDrop?: (event: DropEvent) => void;
   onDragEnd?: (event: DragEndEvent) => void;
-  readonly messages?: Partial<DragMessages>;
+  /**
+   * The drag's words in the language in force (`dragMessages` from
+   * `@slotted/core/i18n`), read at every announcement, so a binding passes a
+   * translator that follows the locale. Absent, nothing is announced.
+   */
+  t?: FamilyTranslator<DragMessages> | undefined;
+  /** The announcements the family makes in its own words, and the controller leaves unsaid. */
+  readonly silent?: readonly DragAnnouncement[];
   /** Default: the document's shared live announcer. */
   announce?: (message: string) => void;
   /** Default true. */
@@ -227,7 +216,6 @@ export interface DragControllerOptions {
 
 export interface DragController {
   readonly state: DragState;
-  readonly messages: DragMessages;
   subscribe(listener: (state: DragState) => void): () => void;
   registerContainer(options: DragContainerOptions): () => void;
   /** Opens a session. Returns false when refused or one is already open. */

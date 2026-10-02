@@ -149,7 +149,7 @@ export class SlSelectItem {
   ranges(text: string) {
     const query = this.select.query();
     if (!this.select.resolvedHighlightMatch() || query === '') return [];
-    return matchRanges(text, query, { locale: this.select.locale() });
+    return matchRanges(text, query, { locale: this.select.resolvedLocale() });
   }
 
   constructor() {

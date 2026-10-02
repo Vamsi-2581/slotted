@@ -107,7 +107,7 @@ export function TourProgress({ children, ref, render, ...nativeProps }: TourProg
 
   const rootProps = {
     ...nativeProps,
-    children: children ?? tour.labels.progress(tour.position, tour.total),
+    children: children ?? tour.t('progress', { position: tour.position, total: tour.total }),
     'data-part': 'progress',
   };
   if (render !== undefined)
@@ -125,7 +125,7 @@ export function TourClose({ children, onClick, ref, render, ...nativeProps }: To
   if (tour.step.actions?.close === false) return null;
 
   const rootProps = {
-    'aria-label': tour.labels.close,
+    'aria-label': tour.t('close'),
     ...nativeProps,
     /* The cross is the library's own glyph, unless the consumer wrote content of their own. */
     children: children ?? (
@@ -223,14 +223,16 @@ function action(
   props: TourActionProps,
   onPress: (event: MouseEvent<HTMLButtonElement>) => void,
   appearance: { tone: 'accent' | 'secondary'; variant: 'solid' | 'outline' | 'ghost' },
-  extra: { loading?: boolean; loadingLabel?: string; last?: boolean } = {},
+  extra: { loading?: boolean; loadingMessage?: string; last?: boolean } = {},
 ) {
   const { children, onClick, render, ...nativeProps } = props;
   return (
     <Button
       {...nativeProps}
       {...(extra.loading === undefined ? {} : { loading: extra.loading })}
-      {...(extra.loadingLabel === undefined ? {} : { loadingLabel: extra.loadingLabel })}
+      {...(extra.loadingMessage === undefined
+        ? {}
+        : { messages: { loading: extra.loadingMessage } })}
       onClick={compose(onClick, onPress)}
       render={({ ref: buttonRef, ...buttonProps }) => {
         const partProps = {
@@ -261,7 +263,7 @@ export function TourSkip(props: TourActionProps) {
   if (!shown) return null;
   return action(
     'skip',
-    tour.step.labels?.skip ?? tour.labels.skip,
+    tour.t('skip'),
     props,
     (event) => tour.close('skip', { detail: event.detail }),
     { tone: 'secondary', variant: 'ghost' },
@@ -273,13 +275,10 @@ export function TourPrev(props: TourActionProps) {
   const tour = useTourContext();
   const shown = tour.step.actions?.prev ?? !tour.first;
   if (!shown) return null;
-  return action(
-    'prev',
-    tour.step.labels?.prev ?? tour.labels.prev,
-    props,
-    (event) => tour.prev({ detail: event.detail }),
-    { tone: 'secondary', variant: 'outline' },
-  );
+  return action('prev', tour.t('prev'), props, (event) => tour.prev({ detail: event.detail }), {
+    tone: 'secondary',
+    variant: 'outline',
+  });
 }
 
 /**
@@ -293,15 +292,12 @@ export function TourNext(props: TourActionProps) {
   const tour = useTourContext();
   const shown = tour.step.actions?.next ?? tour.step.advanceOn === undefined;
   if (!shown) return null;
-  const label = tour.last
-    ? (tour.step.labels?.done ?? tour.labels.done)
-    : (tour.step.labels?.next ?? tour.labels.next);
   return action(
     'next',
-    label,
+    tour.t(tour.last ? 'done' : 'next'),
     props,
     (event) => tour.next({ detail: event.detail }),
     { tone: 'accent', variant: 'solid' },
-    { last: tour.last, loading: tour.pending, loadingLabel: tour.labels.preparing },
+    { last: tour.last, loading: tour.pending, loadingMessage: tour.t('preparing') },
   );
 }

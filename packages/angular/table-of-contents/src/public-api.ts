@@ -6,7 +6,6 @@ export {
 } from './table-of-contents';
 export type { TableOfContentsLinkContext } from './table-of-contents';
 export {
-  DEFAULT_TABLE_OF_CONTENTS_MESSAGES,
   injectTableOfContentsDefaults,
   provideTableOfContentsDefaults,
   SlTableOfContentsIdFactory,
@@ -18,7 +17,6 @@ export type {
   TableOfContentsHistory,
   TableOfContentsItemData,
   TableOfContentsLayout,
-  TableOfContentsMessages,
   TableOfContentsOpenReason,
   TableOfContentsSize,
   TableOfContentsValueReason,

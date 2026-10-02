@@ -43,7 +43,8 @@ const anatomy: AnatomyRow[] = [
     part: 'edit-bar',
     element: 'div',
     required: false,
-    purpose: 'role="group" named labels.editBar, above the grid while editing and editBar is true.',
+    purpose:
+      'role="group" named messages.editBar, above the grid while editing and editBar is true.',
   },
   {
     part: 'edit-status',
@@ -310,25 +311,15 @@ class SalesPage {
   {
     id: 'labels',
     title: 'Words for another product',
-    note: 'Every word is a label: the bar, the handle’s name, the menu, the size readout and the announcements. A provider sets them once, in Portuguese here, together with the heading level.',
+    note: 'Every word comes from the language in force: the bar, the handle’s name, the menu, the size readout and the announcements. provideSlotted sets Portuguese here, and the defaults provider the heading level.',
     snippet: defineSnippet({
       id: 'dashboard-grid-angular-labels',
       language: 'ts',
       label: 'Portuguese, set once',
       source: `bootstrapApplication(App, {
   providers: [
-    provideDashboardGridDefaults({
-      headingLevel: 2,
-      labels: {
-        add: 'Adicionar widget',
-        reset: 'Repor layout',
-        cancel: 'Cancelar',
-        done: 'Concluir',
-        handle: 'Reorganizar {title}',
-        moved: '{title} movido para a linha {row}, coluna {column}',
-        movedInOrder: '{title} movido para a posição {position} de {total}',
-      },
-    }),
+    provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }),
+    provideDashboardGridDefaults({ headingLevel: 2 }),
   ],
 });`,
     }),
@@ -433,11 +424,11 @@ export const ANGULAR_DASHBOARD_GRID_DOCS = {
         'The level of each widget’s title',
       ],
       [
-        'labels',
-        'Partial<DashboardGridLabels>',
-        'English',
-        '[slDashboardGrid], provideDashboardGridDefaults',
-        'editBar, editStatus, add, reset, cancel, done, handle, detail, retry, emptyTitle, errorTitle, empty, emptyEditing, the eight menu items, hide, size, moved, resized, hidden, shown, resetDone, cancelled; {slot}s are filled',
+        'messages',
+        'Partial<DashboardGridMessages>',
+        '—',
+        '[slDashboardGrid]',
+        'Words laid over the language in force, key by key: editBar, editStatus, add, reset, cancel, done, handle, detail, retry, emptyTitle, errorTitle, empty, emptyEditing, the eight menu items, hide, size, moved, movedInOrder, resized, hidden, shown, resetDone, cancelled',
       ],
       [
         'exportAs slDashboardGrid',
@@ -538,14 +529,14 @@ export const ANGULAR_DASHBOARD_GRID_DOCS = {
       [
         'emptyTitle / emptyDescription',
         'string',
-        'labels.emptyTitle / —',
+        'messages.emptyTitle / —',
         'sl-dashboard-widget',
         'The empty message; [slDashboardWidgetEmptyAction] is the action under it',
       ],
       [
         'errorTitle / errorDescription',
         'string',
-        'labels.errorTitle / —',
+        'messages.errorTitle / —',
         'sl-dashboard-widget',
         'The error message',
       ],
@@ -600,10 +591,10 @@ export const ANGULAR_DASHBOARD_GRID_DOCS = {
       ],
       [
         'provideDashboardGridDefaults',
-        '{ columns, editBar, headingLevel, labels }',
+        '{ columns, editBar, headingLevel }',
         '—',
         'providers',
-        'The decisions an application takes once; an instance that states any of them wins',
+        'The decisions an application takes once; an instance that states any of them wins. The words come from the language in force (provideSlotted)',
       ],
       [
         'persistedDashboardLayout',

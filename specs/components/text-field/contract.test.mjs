@@ -174,7 +174,7 @@ test('copies the value and says whether it could', () => {
     glyphs: ['copy', 'check'],
     output: 'onValueCopy',
     detail: ['copied', 'reason', 'source', 'value'],
-    announces: ['copiedLabel', 'copyFailedLabel'],
+    announces: ['copied', 'copyFailed'],
   });
   assert.ok(!('copied' in contract.stateModel));
 });
@@ -187,7 +187,7 @@ test('warns about Caps Lock in a password it has focus in', () => {
     read: "KeyboardEvent.getModifierState('CapsLock')",
     while: 'focus',
     glyph: 'caps-lock',
-    announces: 'capsLockLabel',
+    announces: 'capsLock',
   });
 });
 
@@ -225,17 +225,7 @@ test('resolves its axes in one stated order', () => {
 });
 
 test('lets an application decide once what its text fields look like', () => {
-  assert.deepEqual(contract.provides.textFieldDefaults, [
-    'size',
-    'variant',
-    'mono',
-    'clearLabel',
-    'revealLabel',
-    'copyLabel',
-    'copiedLabel',
-    'copyFailedLabel',
-    'capsLockLabel',
-  ]);
+  assert.deepEqual(contract.provides.textFieldDefaults, ['size', 'variant', 'mono']);
 });
 
 test('declares one scenario per demonstration the reference page owes', () => {

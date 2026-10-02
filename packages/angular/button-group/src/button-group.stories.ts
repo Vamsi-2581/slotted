@@ -396,7 +396,7 @@ export const Composition: Story = {
           <span [style]="demo.caption">one control waiting, one unavailable</span>
           <div slButtonGroup aria-label="Review" tone="secondary" variant="outline">
             <button slButton>Approve</button>
-            <button slButton loading loadingLabel="Reassigning">Reassign</button>
+            <button slButton loading [messages]="{ loading: 'Reassigning' }">Reassign</button>
             <button slButton disabled>Reject</button>
           </div>
         </div>

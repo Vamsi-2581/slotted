@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { SlSelect } from './select';
@@ -424,10 +426,10 @@ describe('SlSelect defaults', () => {
   })
   class ProvidedHost {}
 
-  it('lets an application set every axis and every word once', async () => {
+  it('lets an application set every axis once', async () => {
     await TestBed.configureTestingModule({
       imports: [ProvidedHost],
-      providers: [provideSelectDefaults({ size: 'sm', variant: 'subtle', emptyLabel: 'Nothing' })],
+      providers: [provideSelectDefaults({ size: 'sm', variant: 'subtle' })],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(ProvidedHost);
@@ -435,6 +437,35 @@ describe('SlSelect defaults', () => {
     const root = document.querySelector<HTMLElement>("[data-ui='select'][data-part='root']");
     expect(root?.getAttribute('data-size')).toBe('sm');
     expect(root?.getAttribute('data-variant')).toBe('subtle');
+  });
+
+  @Component({
+    standalone: true,
+    imports: [SlSelect, SlSelectItem],
+    template: `
+      <sl-select aria-label="Fruit" multiple [value]="['apple', 'cherry']" [portal]="false">
+        <sl-select-item value="apple">Apple</sl-select-item>
+        <sl-select-item value="cherry">Cherry</sl-select-item>
+      </sl-select>
+    `,
+  })
+  class SpokenHost {}
+
+  it('speaks the language in force, and follows a change of it in place', async () => {
+    const locale = signal('pt-BR');
+    await TestBed.configureTestingModule({
+      imports: [SpokenHost],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(SpokenHost);
+    fixture.detectChanges();
+    const summary = () => document.querySelector("[data-part='summary']")?.textContent?.trim();
+    expect(summary()).toBe('2 selecionados');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(summary()).toBe('2 selected');
   });
 });
 

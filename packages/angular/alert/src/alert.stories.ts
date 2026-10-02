@@ -401,9 +401,7 @@ export const Composition: Story = {
   parameters: scenario('composition'),
   decorators: [
     applicationConfig({
-      providers: [
-        provideAlertDefaults({ dismissLabel: 'Dispensar', reach: 'inline', tone: 'secondary' }),
-      ],
+      providers: [provideAlertDefaults({ reach: 'inline', tone: 'secondary' })],
     }),
   ],
   render: () => ({
@@ -411,7 +409,7 @@ export const Composition: Story = {
       2,
       scene(
         'One decision for the application',
-        'provideAlertDefaults sets the tone, the reach and the word the dismiss control announces once for everything in this story; a message that states any of them still wins.',
+        'provideAlertDefaults sets the tone and the reach once for everything in this story; a message that states any of them still wins.',
         message('dismissible', '', 'Herda tudo do provider.') +
           message('dismissible tone="danger"', '', 'Diz o próprio tom, e ganha.'),
       ) +

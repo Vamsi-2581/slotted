@@ -418,7 +418,13 @@ export const ANGULAR_CODE_BLOCK_DOCS = {
         'Skeletons na altura de seis linhas, aria-busy, sem cópia',
       ],
       ['tabSize', 'number', '2', 'CodeBlock', 'Largura de um tab, para o indent da continuação'],
-      ['labels', 'Partial<CodeBlockLabels>', '—', 'CodeBlock', 'As nove palavras da família'],
+      [
+        'messages',
+        'PartialMessages<CodeBlockMessages>',
+        '—',
+        'slCodeBlock',
+        'As palavras da família sobre o idioma em vigor, chave a chave',
+      ],
       [
         'ng-template[slCodeBlockLine]',
         'projeção',
@@ -458,7 +464,7 @@ export const ANGULAR_CODE_BLOCK_DOCS = {
       ],
       [
         'provideCodeBlockDefaults()',
-        'highlight | lineNumbers | copy | labels',
+        'highlight | lineNumbers | copy',
         '—',
         'Injector',
         'O motor carregado uma vez, para todos os blocos por baixo; um input no bloco ganha',

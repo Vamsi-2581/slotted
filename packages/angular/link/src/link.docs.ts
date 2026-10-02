@@ -145,7 +145,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'ts',
       label: 'Defaults for the application',
       source:
-        "bootstrapApplication(App, {\n  providers: [provideLinkDefaults({ externalHint: '(abre numa nova aba)', underline: 'hover' })],\n});",
+        "bootstrapApplication(App, {\n  providers: [provideLinkDefaults({ underline: 'hover' })],\n});",
     }),
   },
   {
@@ -184,11 +184,11 @@ export const ANGULAR_LINK_DOCS = {
       ],
       ['external', 'boolean', 'false', 'slLink', 'Opens a new tab and warns that it does'],
       [
-        'externalHint',
-        'string',
-        '(opens in a new tab)',
+        'messages',
+        'Partial<LinkMessages>',
+        '—',
         'slLink',
-        'Wording of that warning, for translation',
+        'Words laid over the language in force: the wording of that warning (externalHint)',
       ],
       [
         'disabled',
@@ -223,10 +223,10 @@ export const ANGULAR_LINK_DOCS = {
       ],
       [
         'provideLinkDefaults',
-        'underline | variant | visited | externalHint',
+        'underline | variant | visited',
         '—',
         'Application',
-        'Sets those four once for the whole injector; an input on the link still wins',
+        'Sets those three once for the whole injector; an input on the link still wins',
       ],
     ]),
     accessibility: [

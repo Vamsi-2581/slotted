@@ -269,9 +269,9 @@ export const Composition: Story = {
     <div className="slotted-demo-grid" data-columns="1">
       <DemoScene
         label="defaults"
-        note="An application decides once how its tags are painted, how large they are, and what its remove controls are called. An explicit prop still wins."
+        note="An application decides once how its tags are painted and how large they are. An explicit prop still wins; the remove word comes from the language in force."
       >
-        <TagDefaultsProvider removeLabel="Remover" size="sm" tone="accent">
+        <TagDefaultsProvider size="sm" tone="accent">
           <TagGroup aria-label="Com padrões">
             <Tag onRemove={() => undefined}>Herda tudo</Tag>
             <Tag onRemove={() => undefined} tone="danger">
@@ -315,10 +315,10 @@ export const Accessibility: Story = {
         note="Composed, not repeated: a hidden word joined to the tag’s own label by aria-labelledby, so it announces “Remover Ana Reis” rather than “Remover”."
       >
         <TagGroup aria-label="Participantes">
-          <Tag onRemove={() => undefined} removeLabel="Remover">
+          <Tag messages={{ remove: 'Remover' }} onRemove={() => undefined}>
             Ana Reis
           </Tag>
-          <Tag onRemove={() => undefined} removeLabel="Remover">
+          <Tag messages={{ remove: 'Remover' }} onRemove={() => undefined}>
             Bruno Sá
           </Tag>
         </TagGroup>

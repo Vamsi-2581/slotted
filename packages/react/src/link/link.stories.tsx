@@ -171,11 +171,11 @@ export const External: Story = {
           .
         </p>
         <p>
-          The wording is a prop, so an application in another language reads{' '}
+          The wording is a message, so an application in another language reads{' '}
           <Link
             external
-            externalHint="(abre numa nova aba)"
             href="https://www.w3.org/TR/wai-aria-1.2/"
+            messages={{ externalHint: '(abre numa nova aba)' }}
           >
             a hint of its own
           </Link>

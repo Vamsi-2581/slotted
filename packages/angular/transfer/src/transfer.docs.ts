@@ -70,7 +70,12 @@ const anatomy: AnatomyRow[] = [
     purpose:
       'Tri-state over the pane’s visible enabled items; its input is named “Select all in Available”.',
   },
-  { part: 'title', element: 'span', required: true, purpose: 'labels.source or labels.target.' },
+  {
+    part: 'title',
+    element: 'span',
+    required: true,
+    purpose: 'messages.source or messages.target.',
+  },
   {
     part: 'count',
     element: 'span',
@@ -99,7 +104,7 @@ const anatomy: AnatomyRow[] = [
     part: 'empty',
     element: 'div inside the listbox’s slListboxEmpty',
     required: false,
-    purpose: 'labels.empty, or labels.noResults with data-query while a query is typed.',
+    purpose: 'messages.empty, or messages.noResults with data-query while a query is typed.',
   },
   {
     part: 'drop-indicator',
@@ -117,7 +122,7 @@ const anatomy: AnatomyRow[] = [
     part: 'actions',
     element: 'div',
     required: true,
-    purpose: 'role="group" named labels.actions: the four moves, then reorder.',
+    purpose: 'role="group" named messages.actions: the four moves, then reorder.',
   },
   {
     part: 'move-to-target',
@@ -147,7 +152,7 @@ const anatomy: AnatomyRow[] = [
     part: 'reorder',
     element: 'div',
     required: false,
-    purpose: 'role="group" named labels.reorder, under reorderable.',
+    purpose: 'role="group" named messages.reorder, under reorderable.',
   },
   {
     part: 'move-up',
@@ -205,7 +210,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'transfer-angular-order',
       language: 'angular',
       label: 'Dashboard widgets, in the order they are drawn',
-      source: `<div slTransfer reorderable [items]="widgets" [labels]="{ target: 'On the dashboard' }"></div>`,
+      source: `<div slTransfer reorderable [items]="widgets" [messages]="{ target: 'On the dashboard' }"></div>`,
     }),
   },
   {
@@ -301,16 +306,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'labels',
     title: 'Words for another product',
-    note: 'Every word is a label: the titles, the four moves, the counts and the announcements. provideTransferDefaults sets them once; an instance overrides one.',
+    note: 'Every word is a message: the titles, the four moves, the counts and the announcements. provideSlotted sets the language once; an instance lays its own words over it.',
     snippet: defineSnippet({
       id: 'transfer-angular-labels',
       language: 'ts',
       label: 'Permissions in Portuguese',
-      source: `providers: [
-  provideTransferDefaults({
-    labels: { source: 'Disponíveis', target: 'Concedidas', moveToTarget: 'Conceder' },
-  }),
-];`,
+      source: `providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })];`,
     }),
   },
   {
@@ -331,8 +332,8 @@ const scenes: ReferenceSceneMeta[] = [
     snippet: defineSnippet({
       id: 'transfer-angular-accessibility',
       language: 'angular',
-      label: 'The announcement is a label',
-      source: `<div slTransfer [items]="people" [labels]="{ moved: '{count} added to {pane}' }"></div>`,
+      label: 'The announcement is a message',
+      source: `<div slTransfer [items]="people" [messages]="{ moved: '{count} added to {pane}' }"></div>`,
     }),
   },
 ];
@@ -566,11 +567,11 @@ export const ANGULAR_TRANSFER_DOCS = {
       ],
       ['name', 'string', '—', '[slTransfer]', 'Submits one hidden input per target key'],
       [
-        'labels',
-        'Partial<TransferLabels>',
-        'English',
-        '[slTransfer], provideTransferDefaults',
-        'The words the family says; {slot}s are filled',
+        'messages',
+        'Partial<TransferMessages>',
+        '—',
+        '[slTransfer]',
+        'Words laid over the language in force, key by key; {slot}s are filled',
       ],
       [
         'slTransferItem',
@@ -602,7 +603,7 @@ export const ANGULAR_TRANSFER_DOCS = {
       ],
       [
         'provideTransferDefaults',
-        '{ size, layout, searchable, selectAll, reorderable, rows, labels }',
+        '{ size, layout, searchable, selectAll, reorderable, rows }',
         '—',
         'providers',
         'The decisions an application takes once',

@@ -98,7 +98,7 @@ export class SlTourHeader {}
 @Component({
   selector: '[slTourProgress]',
   standalone: true,
-  template: `{{ tour.labels().progress(tour.position(), tour.total()) }}`,
+  template: `{{ tour.t('progress', { position: tour.position(), total: tour.total() }) }}`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
@@ -123,7 +123,7 @@ export class SlTourProgress {
   host: {
     'data-part': 'close',
     type: 'button',
-    '[attr.aria-label]': 'label ?? tour.labels().close',
+    '[attr.aria-label]': "label ?? tour.t('close')",
     '[attr.hidden]': 'tour.showClose() ? null : ""',
     '(click)': 'tour.close("close", $event, true)',
   },

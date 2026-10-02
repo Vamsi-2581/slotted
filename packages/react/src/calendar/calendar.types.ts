@@ -1,3 +1,4 @@
+import type { CalendarMessages, PartialMessages } from '@slotted/core/i18n';
 import type { PlainDate } from '@slotted/core/date';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
@@ -42,16 +43,13 @@ export interface CalendarDefaults {
   firstDayOfWeek: number | undefined;
   /** Always six rows, so paging does not change the surface's height. */
   fixedWeeks: boolean;
-  locale: string | undefined;
   months: number;
-  nextLabel: string;
   /**
    * Unset is not `shown`: a calendar showing one month draws the days either
    * side of it, and a calendar showing two would draw the same six days in
    * both grids. See the resolution in `calendar.tsx`.
    */
   outsideDays: CalendarOutsideDays | undefined;
-  previousLabel: string;
   /** Which zone answers "what is today". Unset means the runtime's own. */
   timeZone: string | undefined;
   weekNumbers: boolean;
@@ -121,6 +119,7 @@ export interface CalendarProps extends Omit<
   fixedWeeks?: boolean | undefined;
   outsideDays?: CalendarOutsideDays | undefined;
 
+  /** The locale that writes months and days. Unset, the language in force decides. */
   locale?: string | undefined;
   timeZone?: string | undefined;
   firstDayOfWeek?: number | undefined;
@@ -130,8 +129,11 @@ export interface CalendarProps extends Omit<
   readOnly?: boolean | undefined;
   invalid?: boolean | undefined;
 
-  previousLabel?: string | undefined;
-  nextLabel?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * names of the previous and next triggers.
+   */
+  messages?: PartialMessages<CalendarMessages> | undefined;
 
   render?: ((props: CalendarRootProps) => ReactNode) | undefined;
   ref?: Ref<CalendarHandle> | undefined;

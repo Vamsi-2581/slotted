@@ -415,7 +415,7 @@ interface Settlement {
                           type="button"
                           data-testid="open-invoice"
                           [loading]="store.busy() === 'open'"
-                          loadingLabel="Opening"
+                          [messages]="{ loading: 'Opening' }"
                           (click)="openInvoice()"
                         >
                           Open invoice
@@ -457,7 +457,7 @@ interface Settlement {
                           type="button"
                           data-testid="send-invoice"
                           [loading]="store.busy() === 'send'"
-                          loadingLabel="Sending"
+                          [messages]="{ loading: 'Sending' }"
                           (click)="send()"
                         >
                           {{ sendLabel() }}
@@ -513,7 +513,7 @@ interface Settlement {
                           type="button"
                           data-testid="resolve"
                           [loading]="store.busy() === 'resolve'"
-                          loadingLabel="Resolving"
+                          [messages]="{ loading: 'Resolving' }"
                           (click)="resolve()"
                         >
                           Resolve dispute
@@ -546,7 +546,7 @@ interface Settlement {
                           aria-label="Refresh"
                           data-testid="refresh"
                           [loading]="store.loading()"
-                          loadingLabel="Refreshing"
+                          [messages]="{ loading: 'Refreshing' }"
                           (click)="store.load()"
                         >
                           <ng-icon name="lucideRefreshCw" />
@@ -661,7 +661,7 @@ interface Settlement {
                 </div>
               </section>
             } @else {
-              <div slSkeletonRegion label="Reading the invoice" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the invoice' }" [loading]="true">
                 <div slStack [gap]="6">
                   <div slGrid [columns]="phone() ? 2 : 4" minItemWidth="xs" [gap]="4">
                     @for (figure of figureLabels; track figure) {
@@ -1108,7 +1108,7 @@ interface Settlement {
                 <form
                   slForm
                   data-testid="edit-form"
-                  summaryTitle="The draft was not saved"
+                  [messages]="{ summaryTitle: 'The draft was not saved' }"
                   [errors]="editErrors()"
                   (errorsChange)="edit.errors.set($event.value)"
                   [loading]="store.busy() === 'save'"
@@ -1205,7 +1205,7 @@ interface Settlement {
                       type="submit"
                       data-testid="save-draft"
                       [loading]="store.busy() === 'save'"
-                      loadingLabel="Saving"
+                      [messages]="{ loading: 'Saving' }"
                     >
                       Save
                     </button>
@@ -1231,7 +1231,7 @@ interface Settlement {
               <form
                 slForm
                 data-testid="contact-form"
-                summaryTitle="The attempt was not recorded"
+                [messages]="{ summaryTitle: 'The attempt was not recorded' }"
                 [errors]="contact.errors()"
                 (errorsChange)="contact.errors.set($event.value)"
                 [loading]="store.busy() === 'contact'"
@@ -1294,7 +1294,7 @@ interface Settlement {
                     type="submit"
                     data-testid="contact-submit"
                     [loading]="store.busy() === 'contact'"
-                    loadingLabel="Recording"
+                    [messages]="{ loading: 'Recording' }"
                   >
                     Record attempt
                   </button>
@@ -1320,7 +1320,7 @@ interface Settlement {
               <form
                 slForm
                 data-testid="credit-form"
-                summaryTitle="No credit was applied"
+                [messages]="{ summaryTitle: 'No credit was applied' }"
                 [errors]="credit.errors()"
                 (errorsChange)="credit.setErrors($event.value)"
                 [loading]="store.busy() === 'credit'"
@@ -1376,7 +1376,7 @@ interface Settlement {
                     type="submit"
                     data-testid="credit-submit"
                     [loading]="store.busy() === 'credit'"
-                    loadingLabel="Applying"
+                    [messages]="{ loading: 'Applying' }"
                   >
                     Apply credit
                   </button>

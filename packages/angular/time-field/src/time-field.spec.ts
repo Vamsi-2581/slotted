@@ -4,6 +4,8 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { plainTime } from '@slotted/core/date';
 import type { PlainTime } from '@slotted/core/date';
 import { SlField, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/time-field/contract.json';
@@ -323,19 +325,47 @@ describe('what the field around it decides', () => {
     expect(group(fixture).getAttribute('aria-invalid')).toBe('true');
   });
 
-  it('lets an application state the locale and the clock once', () => {
+  it('lets an application state the clock once, and takes the locale from the language in force', () => {
     const fixture = renderTemplate(`<div slTimeField [defaultValue]="control.value"></div>`, [
-      provideTimeFieldDefaults({ hourCycle: 12, locale: 'en-US' }),
+      provideSlotted({ locale: 'en-US' }),
+      provideTimeFieldDefaults({ hourCycle: 12 }),
     ]);
     expect(segments(fixture)).toHaveLength(3);
   });
 
-  it('lets the control outrank the provider', () => {
+  it('lets the control outrank the language in force', () => {
     const fixture = renderTemplate(
       `<div slTimeField locale="pt-BR" [defaultValue]="control.value"></div>`,
-      [provideTimeFieldDefaults({ locale: 'en-US' })],
+      [provideSlotted({ locale: 'en-US' })],
     );
     expect(text(fixture)).toEqual(['14', '30']);
+  });
+
+  it('changes its words and its time format together with the language in force', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(
+      `<div slTimeField clearable aria-label="Hora" [defaultValue]="control.value"></div>`,
+      [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    );
+    const clear = () =>
+      fixture.nativeElement.querySelector('[data-part="clear"]').getAttribute('aria-label');
+
+    expect(clear()).toBe('Limpar');
+    expect(text(fixture)).toEqual(['14', '30']);
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(clear()).toBe('Clear');
+    expect(segments(fixture)).toHaveLength(3);
+  });
+
+  it('lays its own messages over the language in force', () => {
+    const fixture = renderTemplate(
+      `<div slTimeField clearable locale="pt-BR" [messages]="{ clear: 'Limpar a hora' }" [defaultValue]="control.value"></div>`,
+    );
+    expect(
+      fixture.nativeElement.querySelector('[data-part="clear"]').getAttribute('aria-label'),
+    ).toBe('Limpar a hora');
   });
 
   /** A static attribute the consumer wrote survives the host bindings. */

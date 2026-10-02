@@ -21,6 +21,7 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import type { GlyphName } from '@slotted/angular/icon';
 import { writeToClipboard } from '@slotted/core/clipboard';
@@ -33,6 +34,11 @@ import {
   plainLines,
 } from '@slotted/core/code';
 import type { CodeHighlighter, CodeLine, CodeMarks, LineMark } from '@slotted/core/code';
+import {
+  codeBlockMessages,
+  type CodeBlockMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -42,10 +48,8 @@ import type { ScrollEdgesState } from '@slotted/angular/scroll-area';
 import { SlSkeleton } from '@slotted/angular/skeleton';
 
 import {
-  CODE_BLOCK_DEFAULT_LABELS,
   injectCodeBlockDefaults,
   type CodeBlockCopyRequest,
-  type CodeBlockLabels,
   type CodeBlockRevealedReason,
   type CodeBlockWrapReason,
 } from './code-block.constants';
@@ -115,7 +119,7 @@ export class SlCodeBlockLine {
               <button
                 data-part="wrap"
                 type="button"
-                [attr.aria-label]="isWrapped() ? labelSet().unwrap : labelSet().wrap"
+                [attr.aria-label]="t(isWrapped() ? 'unwrap' : 'wrap')"
                 [attr.aria-pressed]="isWrapped()"
                 [attr.data-pressed]="isWrapped() ? '' : null"
                 (click)="toggleWrap($event)"
@@ -128,7 +132,7 @@ export class SlCodeBlockLine {
               <button
                 data-part="copy"
                 type="button"
-                [attr.aria-label]="labelSet().copy"
+                [attr.aria-label]="t('copy')"
                 [attr.data-complete]="copied() ? '' : null"
                 (click)="copyFromControl($event)"
                 (keydown)="remember($event)"
@@ -145,11 +149,11 @@ export class SlCodeBlockLine {
       #body
       slScrollArea
       data-part="body"
-      axis="both"
+      [axis]="maxLines() === undefined ? 'inline' : 'both'"
       fade="both"
       gutter="auto"
       [id]="id + '-body'"
-      [label]="regionName()"
+      [messages]="{ label: regionName() }"
       [attr.data-max-lines]="maxLines() === undefined ? null : ''"
       (overflowChange)="onOverflow($event)"
     >
@@ -168,7 +172,7 @@ export class SlCodeBlockLine {
         (click)="toggleRevealed($event)"
         (keydown)="remember($event)"
       >
-        {{ isRevealed() ? labelSet().collapse : labelSet().reveal(hiddenCount()) }}
+        {{ isRevealed() ? t('collapse') : t('reveal', { count: hiddenCount() }) }}
       </button>
     }
   `,
@@ -230,7 +234,12 @@ export class SlCodeBlock {
   });
   readonly copyRemoved = input(false, { transform: booleanAttribute });
   readonly loading = input(false, { transform: booleanAttribute });
-  readonly labels = input<Partial<CodeBlockLabels> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * scroll region's name when the block has no title (`region`), the controls,
+   * and the announcements.
+   */
+  readonly messages = input<PartialMessages<CodeBlockMessages> | undefined>(undefined);
   readonly tabSize = input(2, { transform: numberAttribute });
 
   /** The request behind a wrap change, with the reason it carries. */
@@ -251,11 +260,8 @@ export class SlCodeBlock {
   readonly id = `slotted-code-block-${(counter += 1)}`;
   protected readonly skeletonWidths = [62, 78, 44, 70];
 
-  protected readonly labelSet = computed<CodeBlockLabels>(() => ({
-    ...CODE_BLOCK_DEFAULT_LABELS,
-    ...this.defaults.labels,
-    ...this.labels(),
-  }));
+  /** The family's words in the language in force, with this block's `messages` laid over them. */
+  readonly t = injectMessages(codeBlockMessages, this.messages);
   protected readonly lineNumbersValue = computed(
     () => this.lineNumbers() ?? this.defaults.lineNumbers ?? false,
   );
@@ -318,7 +324,7 @@ export class SlCodeBlock {
     return KIND_ICON[fileKind({ name, type: '' })] ?? 'file';
   });
   protected readonly regionName = computed(
-    () => this.title() ?? this.ariaLabel ?? this.labelSet().region,
+    () => this.title() ?? this.ariaLabel ?? this.t('region'),
   );
 
   constructor() {
@@ -408,9 +414,8 @@ export class SlCodeBlock {
       clearTimeout(this.timer);
       this.timer = setTimeout(() => this.copied.set(false), COPIED_FOR);
     }
-    const labels = this.labelSet();
     getLiveAnnouncer(this.host.nativeElement.ownerDocument).announce(
-      done ? labels.copied : labels.copyFailed,
+      this.t(done ? 'copied' : 'copyFailed'),
     );
     this.copyRequest.emit({ copied: done, reason, source, value });
     return done;

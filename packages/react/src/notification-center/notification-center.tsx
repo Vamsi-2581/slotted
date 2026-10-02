@@ -1,6 +1,11 @@
 import '@slotted/styles/notification-center/notification-center.css';
 
 import { tabbables } from '@slotted/core/focus';
+import {
+  type FamilyTranslator,
+  type NotificationCenterMessages,
+  notificationCenterMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import { findScrollParent } from '@slotted/core/sticky-header';
@@ -21,6 +26,7 @@ import {
 } from 'react';
 
 import { Button } from '../button';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import type { GlyphName } from '../icon';
 import { Skeleton, SkeletonText } from '../skeleton';
@@ -33,7 +39,6 @@ import { useNotificationCenterDefaults } from './notification-center-defaults';
 import type {
   NotificationCenterControls,
   NotificationCenterLoadReason,
-  NotificationCenterMessages,
   NotificationCenterPressReason,
   NotificationCenterProps,
   NotificationCenterReadReason,
@@ -139,8 +144,7 @@ function groupItems(
 interface ItemContext {
   controls: NotificationCenterControls;
   ids: (key: string) => { description: string; title: string };
-  locale: string | undefined;
-  messages: NotificationCenterMessages;
+  locale: string;
   now: number | undefined;
   onOpen: NotificationCenterProps['onOpen'];
   onRead: (
@@ -152,6 +156,7 @@ interface ItemContext {
   onRemove: NotificationCenterProps['onRemove'];
   renderItem: NotificationCenterProps['renderItem'];
   setSize: number;
+  t: FamilyTranslator<NotificationCenterMessages>;
   timeFormat: NotificationCenterTimeFormat;
   timeZone: string | undefined;
 }
@@ -250,7 +255,7 @@ function Item({
             <Control
               data-part="read-toggle"
               onClick={(event) => context.onRead([item.key], !item.read, pressReason(event), event)}
-              text={item.read ? context.messages.markUnread : context.messages.markRead}
+              text={item.read ? context.t('markUnread') : context.t('markRead')}
             >
               {/* Unread offers the check; read offers the dot, to mark it unread again. */}
               <Icon>
@@ -264,7 +269,7 @@ function Item({
               onClick={(event) =>
                 context.onRemove?.(item.key, createRequest(pressReason(event), event))
               }
-              text={context.messages.dismiss}
+              text={context.t('dismiss')}
             >
               <Icon>
                 <Glyph name="x" />
@@ -347,14 +352,12 @@ export function NotificationCenter({
   const resolvedControls = controls ?? defaults.controls;
   const resolvedGrowing = growing ?? defaults.growing;
   const resolvedLevel = level ?? defaults.level;
-  const resolvedLocale = locale ?? defaults.locale;
+  const runtimeLocale = useLocale();
+  const resolvedLocale = locale ?? runtimeLocale;
   const resolvedSize = size ?? defaults.size;
   const resolvedTimeFormat = timeFormat ?? defaults.timeFormat;
   const resolvedTimeZone = timeZone ?? defaults.timeZone;
-  const resolvedMessages = useMemo(
-    () => ({ ...defaults.messages, ...messages }),
-    [defaults.messages, messages],
-  );
+  const t = useMessages(notificationCenterMessages, messages);
 
   const [root, setRoot] = useState<HTMLElement | null>(null);
   const feedRef = useRef<HTMLDivElement | null>(null);
@@ -371,10 +374,10 @@ export function NotificationCenter({
   const resolvedViews: readonly NotificationView[] = useMemo(
     () =>
       views ?? [
-        { label: resolvedMessages.all, value: 'all' },
-        { count: unread, label: resolvedMessages.unreadView, value: 'unread' },
+        { label: t('all'), value: 'all' },
+        { count: unread, label: t('unreadView'), value: 'unread' },
       ],
-    [views, resolvedMessages, unread],
+    [views, t, unread],
   );
   const [ownView, setOwnView] = useState<string | undefined>(defaultView);
   const currentView = view ?? ownView ?? resolvedViews[0]?.value ?? 'all';
@@ -444,8 +447,8 @@ export function NotificationCenter({
   /** Held arrivals are announced once per change of the count, politely. */
   useEffect(() => {
     if (held.length === 0) return;
-    getLiveAnnouncer().announce(resolvedMessages.fresh(held.length));
-    /* The count is the dependency; the message function is not state. */
+    getLiveAnnouncer().announce(t('fresh', { count: held.length }));
+    /* The count is the dependency; the translator is not state. */
   }, [held.length]);
 
   const focusKey = useRef<string | null>(null);
@@ -477,7 +480,7 @@ export function NotificationCenter({
     const first = reportedUnread.current === null;
     reportedUnread.current = unread;
     onUnreadChange?.(unread);
-    if (!first) getLiveAnnouncer().announce(resolvedMessages.unread(unread));
+    if (!first) getLiveAnnouncer().announce(t('unread', { count: unread }));
     /* The count is the dependency; the handler and the message are not state. */
   }, [unread]);
 
@@ -628,13 +631,13 @@ export function NotificationCenter({
     controls: resolvedControls,
     ids,
     locale: resolvedLocale,
-    messages: resolvedMessages,
     now,
     onOpen,
     onRead: requestRead,
     onRemove,
     renderItem,
     setSize,
+    t,
     timeFormat: resolvedTimeFormat,
     timeZone: resolvedTimeZone,
   };
@@ -677,7 +680,7 @@ export function NotificationCenter({
   const more =
     resolvedGrowing === 'none' ? null : loading && !waiting ? (
       <div aria-live="polite" data-part="more" ref={moreRef as RefObject<HTMLDivElement>}>
-        {resolvedMessages.loading}
+        {t('loading')}
       </div>
     ) : resolvedGrowing === 'button' ? (
       <button
@@ -686,7 +689,7 @@ export function NotificationCenter({
         ref={moreRef as RefObject<HTMLButtonElement>}
         type="button"
       >
-        {resolvedMessages.loadMore}
+        {t('loadMore')}
       </button>
     ) : (
       <div data-part="more" ref={moreRef as RefObject<HTMLDivElement>} />
@@ -703,7 +706,7 @@ export function NotificationCenter({
       <>
         <div data-part="header">
           <Heading data-part="title" id={titleId}>
-            {resolvedMessages.title}
+            {t('title')}
             {unread > 0 ? <> {chip(unread)}</> : null}
           </Heading>
           <span data-part="mark-all">
@@ -721,7 +724,7 @@ export function NotificationCenter({
               tone="secondary"
               variant="ghost"
             >
-              {resolvedMessages.markAll}
+              {t('markAll')}
             </Button>
           </span>
           {presentNode(actions) ? <div data-part="actions">{actions}</div> : null}
@@ -736,7 +739,7 @@ export function NotificationCenter({
               track="none"
               value={currentView}
             >
-              <TabList aria-label={resolvedMessages.views}>
+              <TabList aria-label={t('views')}>
                 {resolvedViews.map((entry) => (
                   <Tab controls={feedId} key={entry.value} value={entry.value}>
                     {entry.label}
@@ -756,7 +759,7 @@ export function NotificationCenter({
             ref={freshRef}
             type="button"
           >
-            {resolvedMessages.fresh(held.length)}
+            {t('fresh', { count: held.length })}
           </button>
         ) : null}
         <div
@@ -771,8 +774,7 @@ export function NotificationCenter({
         </div>
         {showEmpty ? (
           <div data-part="empty">
-            {empty ??
-              (currentView === 'unread' ? resolvedMessages.caughtUp : resolvedMessages.empty)}
+            {empty ?? (currentView === 'unread' ? t('caughtUp') : t('empty'))}
           </div>
         ) : (
           more

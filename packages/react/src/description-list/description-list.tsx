@@ -1,38 +1,17 @@
 import '@slotted/styles/description-list/description-list.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
+import { descriptionListMessages } from '@slotted/core/i18n';
 import { createContext, useContext, type CSSProperties } from 'react';
 
-import {
-  DEFAULT_DESCRIPTION_LIST_LABELS,
-  resolveLabels,
-  useDescriptionListDefaults,
-} from './description-list-defaults';
+import { useMessages } from '../i18n';
+import { useDescriptionListDefaults } from './description-list-defaults';
 import type {
   DescriptionListContextValue,
   DescriptionListItemContextValue,
-  DescriptionListLabels,
-  DescriptionListResolvedLabels,
   DescriptionListProps,
   DescriptionListRootProps,
 } from './description-list.types';
-
-/**
- * Every label, after the list's own prop and the provider have had their say.
- * It is written out rather than spread, because a spread of a partial object
- * types every label as possibly absent and the components would then have to
- * answer for a default they were handed.
- */
-function answer(labels: DescriptionListLabels): DescriptionListResolvedLabels {
-  return {
-    collapse: labels.collapse ?? DEFAULT_DESCRIPTION_LIST_LABELS.collapse,
-    copied: labels.copied ?? DEFAULT_DESCRIPTION_LIST_LABELS.copied,
-    copy: labels.copy ?? DEFAULT_DESCRIPTION_LIST_LABELS.copy,
-    copyBlocked: labels.copyBlocked ?? DEFAULT_DESCRIPTION_LIST_LABELS.copyBlocked,
-    placeholder: labels.placeholder ?? DEFAULT_DESCRIPTION_LIST_LABELS.placeholder,
-    reveal: labels.reveal ?? DEFAULT_DESCRIPTION_LIST_LABELS.reveal,
-  };
-}
 
 const DescriptionListContext = createContext<DescriptionListContextValue | undefined>(undefined);
 const DescriptionListItemContext = createContext<DescriptionListItemContextValue | undefined>(
@@ -41,7 +20,7 @@ const DescriptionListItemContext = createContext<DescriptionListItemContextValue
 
 /**
  * What the list around this part decided. A part outside a list has no
- * arrangement to answer and no labels to read, so this throws rather than
+ * arrangement to answer and no words to read, so this throws rather than
  * rendering markup that looks right and behaves like nothing.
  */
 export function useDescriptionList(): DescriptionListContextValue {
@@ -82,8 +61,8 @@ export const DescriptionListItemProvider = DescriptionListItemContext.Provider;
 export function DescriptionList({
   children,
   columns,
-  labels,
   layout,
+  messages,
   render,
   style,
   termWidth,
@@ -91,11 +70,12 @@ export function DescriptionList({
   ...nativeProps
 }: DescriptionListProps) {
   const defaults = useDescriptionListDefaults();
+  const t = useMessages(descriptionListMessages, messages);
 
   const context: DescriptionListContextValue = {
     columns: columns ?? defaults.columns ?? 1,
-    labels: answer(resolveLabels(defaults.labels, labels)),
     layout: layout ?? defaults.layout ?? 'row',
+    t,
     variant: variant ?? defaults.variant ?? 'plain',
   };
 

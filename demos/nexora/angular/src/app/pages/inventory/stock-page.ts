@@ -169,9 +169,9 @@ import {
             (valueChangeRequest)="setFilter($event.value)"
             [query]="store.search()"
             (queryChangeRequest)="store.setSearch($event.value)"
-            [labels]="{ count: countLabel }"
+            [messages]="countMessages"
             [count]="store.total() ?? undefined"
-            [total]="store.grandTotal() ?? undefined"
+            [total]="store.total() === store.grandTotal() ? undefined : (store.grandTotal() ?? undefined)"
             [loading]="store.loading()"
           >
             <app-list-view-tools
@@ -199,7 +199,7 @@ import {
           }
           <sl-data-grid
             #grid="slDataGrid"
-            label="Stock positions"
+            aria-label="Stock positions"
             rowKey="key"
             variant="framed"
             activatable
@@ -251,8 +251,8 @@ import {
             <nav
               slDataGridFooter
               slPagination
-              label="Stock pages"
-              [labels]="pagerLabels"
+              aria-label="Stock pages"
+              [messages]="pagerMessages"
               [count]="store.total() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
@@ -316,14 +316,11 @@ export class StockPage {
     return `Every SKU held in ${where}, one row per warehouse. Quantities are in each SKU's own unit, so the list is read row by row and never added up.`;
   });
 
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total
-      ? `${count} positions`
-      : `${count} of ${total} positions`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} positions', countOnly: '{count} positions' };
 
-  readonly pagerLabels = {
-    range: (start: number, end: number, count: number) =>
-      `Positions ${start}–${end} of ${count.toLocaleString('en-US')}`,
+  readonly pagerMessages = {
+    range: 'Positions {start}–{end} of {count}',
     pageSize: 'Positions per page',
   };
 

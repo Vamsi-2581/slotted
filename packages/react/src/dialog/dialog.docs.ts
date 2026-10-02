@@ -173,21 +173,21 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A trigger, a panel and the actions',
       source: `<Dialog>
-  <DialogTrigger>Editar projeto</DialogTrigger>
+  <DialogTrigger>Edit project</DialogTrigger>
   <DialogContent>
     <DialogHeader>
-      <DialogTitle>Editar projeto</DialogTitle>
-      <DialogDescription>O nome é visível para todo o espaço.</DialogDescription>
+      <DialogTitle>Edit project</DialogTitle>
+      <DialogDescription>The name is visible to the whole space.</DialogDescription>
       <DialogClose />
     </DialogHeader>
     <DialogBody>
-      <TextField label="Nome" defaultValue="Redesign da home" />
+      <TextField aria-label="Name" defaultValue="Home page redesign" />
     </DialogBody>
     <DialogFooter>
       <Button variant="ghost" tone="secondary">
-        Cancelar
+        Cancel
       </Button>
-      <Button>Salvar</Button>
+      <Button>Save</Button>
     </DialogFooter>
   </DialogContent>
 </Dialog>;`,
@@ -202,7 +202,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'sm through full',
       source: `<Dialog size="lg">
-  <DialogTrigger>Ver a nota fiscal</DialogTrigger>
+  <DialogTrigger>View the invoice</DialogTrigger>
   <DialogContent>…</DialogContent>
 </Dialog>;`,
     }),
@@ -216,7 +216,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A panel that grows stays put',
       source: `<Dialog placement="top">
-  <DialogTrigger>Escrever um comentário</DialogTrigger>
+  <DialogTrigger>Write a comment</DialogTrigger>
   <DialogContent>…</DialogContent>
 </Dialog>;`,
     }),
@@ -230,14 +230,14 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'The body scrolls; the footer stays',
       source: `<Dialog scroll="content">
-  <DialogTrigger>Termos de uso</DialogTrigger>
+  <DialogTrigger>Terms of use</DialogTrigger>
   <DialogContent>
     <DialogHeader>
-      <DialogTitle>Termos de uso</DialogTitle>
+      <DialogTitle>Terms of use</DialogTitle>
     </DialogHeader>
     <DialogBody>{longText}</DialogBody>
     <DialogFooter>
-      <Button>Aceitar</Button>
+      <Button>Accept</Button>
     </DialogFooter>
   </DialogContent>
 </Dialog>;`,
@@ -252,11 +252,11 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A Card as the whole panel',
       source: `<Dialog surface="plain">
-  <DialogTrigger>Ver a mídia</DialogTrigger>
+  <DialogTrigger>View the media</DialogTrigger>
   <DialogContent>
     <Card fill="elevated">
-      <DialogTitle>Um card, dentro da layer</DialogTitle>
-      <DialogDescription>A família não pinta nada aqui.</DialogDescription>
+      <DialogTitle>A card, inside the layer</DialogTitle>
+      <DialogDescription>The family paints nothing here.</DialogDescription>
     </Card>
   </DialogContent>
 </Dialog>;`,
@@ -271,7 +271,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'narrow, never and always',
       source: `<Dialog fullScreen="always">
-  <DialogTrigger>Nova fatura</DialogTrigger>
+  <DialogTrigger>New invoice</DialogTrigger>
   <DialogContent>…</DialogContent>
 </Dialog>;`,
     }),
@@ -285,7 +285,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Non-modal, and honest about it',
       source: `<Dialog modal={false}>
-  <DialogTrigger>Detalhes do pedido</DialogTrigger>
+  <DialogTrigger>Order details</DialogTrigger>
   <DialogContent>…</DialogContent>
 </Dialog>;`,
     }),
@@ -320,10 +320,10 @@ const scenes: ReferenceSceneMeta[] = [
       source: `const search = useRef<HTMLInputElement>(null);
 
 <Dialog initialFocus={search}>
-  <DialogTrigger>Buscar</DialogTrigger>
+  <DialogTrigger>Search</DialogTrigger>
   <DialogContent>
     <DialogBody>
-      <TextField label="Buscar" ref={search} />
+      <TextField aria-label="Search" ref={search} />
     </DialogBody>
   </DialogContent>
 </Dialog>;`,
@@ -340,7 +340,7 @@ const scenes: ReferenceSceneMeta[] = [
       source: `<Dialog loading={invoice === undefined} defaultOpen>
   <DialogContent>
     <DialogHeader>
-      <DialogTitle>Fatura 4471</DialogTitle>
+      <DialogTitle>Invoice 4471</DialogTitle>
       <DialogClose />
     </DialogHeader>
     <DialogBody>
@@ -359,11 +359,11 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A confirmation over a dialog',
       source: `<Dialog>
-  <DialogTrigger>Faturamento</DialogTrigger>
+  <DialogTrigger>Billing</DialogTrigger>
   <DialogContent>
     <DialogBody>
       <AlertDialog>
-        <DialogTrigger>Cancelar assinatura</DialogTrigger>
+        <DialogTrigger>Cancel subscription</DialogTrigger>
         <DialogContent>…</DialogContent>
       </AlertDialog>
     </DialogBody>
@@ -390,7 +390,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'dialog-react-composition',
       language: 'tsx',
       label: 'The trigger is the consumer’s own button',
-      source: `<DialogTrigger render={(props) => <Button {...props}>Editar projeto</Button>} />;`,
+      source: `<DialogTrigger render={(props) => <Button {...props}>Edit project</Button>} />;`,
     }),
   },
   {
@@ -429,23 +429,23 @@ const alertScenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A question and two answers',
       source: `<AlertDialog>
-  <DialogTrigger>Excluir projeto</DialogTrigger>
+  <DialogTrigger>Delete project</DialogTrigger>
   <DialogContent>
     <DialogHeader>
       <AlertDialogIcon />
-      <DialogTitle>Excluir este projeto?</DialogTitle>
+      <DialogTitle>Delete this project?</DialogTitle>
       <DialogDescription>
-        O projeto e seus 42 documentos saem para todo mundo. Isso não pode ser desfeito.
+        The project and its 42 documents leave for everyone. This cannot be undone.
       </DialogDescription>
     </DialogHeader>
     <DialogFooter>
       <AlertDialogCancel
         render={(props) => <Button {...props} variant="outline" tone="secondary" />}
       >
-        Manter projeto
+        Keep project
       </AlertDialogCancel>
       <AlertDialogAction render={(props) => <Button {...props} tone="danger" />}>
-        Excluir projeto
+        Delete project
       </AlertDialogAction>
     </DialogFooter>
   </DialogContent>
@@ -461,7 +461,7 @@ const alertScenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'danger, warning and the rest',
       source: `<AlertDialog tone="warning">
-  <DialogTrigger>Sair sem salvar</DialogTrigger>
+  <DialogTrigger>Leave without saving</DialogTrigger>
   <DialogContent>…</DialogContent>
 </AlertDialog>;`,
     }),
@@ -475,8 +475,8 @@ const alertScenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Concrete labels, and the result each carries',
       source: `<DialogFooter>
-  <AlertDialogCancel>Manter projeto</AlertDialogCancel>
-  <AlertDialogAction value="deleted">Excluir projeto</AlertDialogAction>
+  <AlertDialogCancel>Keep project</AlertDialogCancel>
+  <AlertDialogAction value="deleted">Delete project</AlertDialogAction>
 </DialogFooter>;`,
     }),
   },
@@ -489,7 +489,7 @@ const alertScenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Escape, for a cancel that is not safe',
       source: `<AlertDialog escape="none">
-  <DialogTrigger>Encerrar a migração</DialogTrigger>
+  <DialogTrigger>End the migration</DialogTrigger>
   <DialogContent>…</DialogContent>
 </AlertDialog>;`,
     }),
@@ -503,7 +503,7 @@ const alertScenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Cancel first, by default',
       source: `<AlertDialog initialFocus="cancel">
-  <DialogTrigger>Excluir</DialogTrigger>
+  <DialogTrigger>Delete</DialogTrigger>
   <DialogContent>…</DialogContent>
 </AlertDialog>;`,
     }),
@@ -518,8 +518,8 @@ const alertScenes: ReferenceSceneMeta[] = [
       label: 'Description, then the detail',
       source: `<DialogHeader>
   <AlertDialogIcon />
-  <DialogTitle>Excluir 3 documentos?</DialogTitle>
-  <DialogDescription>Isso não pode ser desfeito.</DialogDescription>
+  <DialogTitle>Delete 3 documents?</DialogTitle>
+  <DialogDescription>This cannot be undone.</DialogDescription>
 </DialogHeader>;`,
     }),
   },
@@ -532,7 +532,7 @@ const alertScenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A Button that also closes the layer',
       source: `<AlertDialogAction render={(props) => <Button {...props} tone="danger" />}>
-  Excluir projeto
+  Delete project
 </AlertDialogAction>;`,
     }),
   },
@@ -544,7 +544,7 @@ const alertScenes: ReferenceSceneMeta[] = [
       id: 'alert-dialog-react-accessibility',
       language: 'tsx',
       label: 'The description the pattern requires',
-      source: `<DialogDescription>O projeto e seus 42 documentos saem para todo mundo.</DialogDescription>;`,
+      source: `<DialogDescription>The project and its 42 documents leave for everyone.</DialogDescription>;`,
     }),
   },
 ];
@@ -659,10 +659,10 @@ const snippets = [
     >
       <header data-part="header">
         <h2 data-part="title" id="d-t">
-          Editar projeto
+          Edit project
         </h2>
         <p data-part="description" id="d-d">
-          O nome é visível para todo o espaço.
+          The name is visible to the whole space.
         </p>
         <button data-part="close" type="button" aria-label="Close" />
       </header>
@@ -743,6 +743,13 @@ const sharedApi: ApiTuple[] = [
     'false',
     'Dialog, AlertDialog',
     'The body carries aria-busy and keeps a floor so the panel does not jump to size when the content lands. Nothing is disabled: a dialog a reader cannot leave is the worse failure',
+  ],
+  [
+    'messages',
+    'Partial<DialogMessages>',
+    '—',
+    'Dialog, AlertDialog',
+    'Words laid over the language in force, key by key: the names of the corner controls (close, fullScreen). A native aria-label on DialogClose still wins',
   ],
   [
     'initialFocus',
@@ -932,18 +939,18 @@ export const REACT_DIALOG_DOCS = {
       <header data-part="header">
         <span data-part="icon" aria-hidden="true" />
         <h2 data-part="title" id="a-t">
-          Excluir este projeto?
+          Delete this project?
         </h2>
         <p data-part="description" id="a-d">
-          Isso não pode ser desfeito.
+          This cannot be undone.
         </p>
       </header>
       <footer data-part="footer">
         <button data-part="cancel" type="button">
-          Manter projeto
+          Keep project
         </button>
         <button data-part="action" type="button">
-          Excluir projeto
+          Delete project
         </button>
       </footer>
     </div>

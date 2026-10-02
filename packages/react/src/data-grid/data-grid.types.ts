@@ -1,4 +1,4 @@
-import type { FilterDescriptor, FilterJoin, FilterOperator } from '@slotted/core/filter';
+import type { FilterDescriptor, FilterOperator } from '@slotted/core/filter';
 import type {
   CsvOptions,
   GridCell,
@@ -16,6 +16,7 @@ import type {
   ResolvedGridColumn,
   GridTree,
 } from '@slotted/core/grid';
+import type { DataGridMessages, FamilyTranslator, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
@@ -55,81 +56,6 @@ export interface DataGridColumnStateRequest extends ChangeRequest<GridColumnStat
 
 export type DataGridExpandedGroups = readonly string[] | 'all';
 
-/** The words the family says. Every one of them is replaceable per application and per grid. */
-export interface DataGridResolvedLabels {
-  selectRow: string;
-  selectAll: string;
-  selectAllFiltered: string;
-  selectAllPage: string;
-  expand: string;
-  collapse: string;
-  expandGroup: string;
-  collapseGroup: string;
-  groupCount: string;
-  sortedBy: string;
-  sortAscending: string;
-  sortDescending: string;
-  sortCleared: string;
-  sortAscendingAction: string;
-  sortDescendingAction: string;
-  sortClearAction: string;
-  columnMenu: string;
-  columnHelp: string;
-  pinStart: string;
-  pinEnd: string;
-  unpin: string;
-  hide: string;
-  columnHidden: string;
-  autofit: string;
-  autofitAll: string;
-  manageColumns: string;
-  popinHeader: string;
-  resized: string;
-  resize: string;
-  reorderRow: string;
-  rowMoved: string;
-  filter: string;
-  filterClear: string;
-  filterApply: string;
-  filterCleared: string;
-  filterOperator: string;
-  filterValue: string;
-  filterFrom: string;
-  filterTo: string;
-  filterJoin: string;
-  filterAny: string;
-  filterYes: string;
-  filterNo: string;
-  filterResults: string;
-  filterJoins: Record<FilterJoin, string>;
-  filterOperators: Record<FilterOperator, string>;
-  filterSymbols: Record<FilterOperator, string>;
-  edit: string;
-  save: string;
-  cancel: string;
-  editConflict: string;
-  editFailed: string;
-  copied: string;
-  empty: string;
-  noResults: string;
-  clearFilters: string;
-  error: string;
-  retry: string;
-  loadMore: string;
-  range: string;
-  rangeUnknown: string;
-  grid: string;
-  scroll: string;
-}
-
-export type DataGridLabels = Partial<
-  Omit<DataGridResolvedLabels, 'filterJoins' | 'filterOperators' | 'filterSymbols'>
-> & {
-  filterJoins?: Partial<Record<FilterJoin, string>> | undefined;
-  filterOperators?: Partial<Record<FilterOperator, string>> | undefined;
-  filterSymbols?: Partial<Record<FilterOperator, string>> | undefined;
-};
-
 /** What an application sets once. */
 export interface DataGridDefaults {
   variant?: DataGridVariant | undefined;
@@ -154,8 +80,6 @@ export interface DataGridDefaults {
   filterDebounce?: number | undefined;
   loadMoreThreshold?: number | undefined;
   skeletonRows?: number | undefined;
-  locale?: string | undefined;
-  labels?: DataGridLabels | undefined;
 }
 
 export interface DataGridDefaultsProviderProps extends DataGridDefaults {
@@ -225,7 +149,9 @@ export interface DataGridActivateEvent {
 }
 
 /** The imperative surface: what a consumer cannot express declaratively. */
-export interface DataGridExportOptions extends CsvOptions {
+export interface DataGridExportOptions extends Omit<CsvOptions, 'booleans'> {
+  /** What a boolean writes in the file. Default: the grid's own words, `filterYes` and `filterNo`. */
+  readonly booleans?: CsvOptions['booleans'] | undefined;
   /** Default `export.csv`. */
   readonly filename?: string | undefined;
   /** `visible`: the rows the query left (every page in client mode; the received page in server mode). `selected`: the selected rows, in the grid's order. Default `visible`. */
@@ -441,9 +367,15 @@ export interface DataGridProps<Row>
    * and windows nothing.
    */
   height?: string | number | undefined;
-  /** The accessible name, or the id of the element that names the grid. */
-  label?: string | undefined;
+  /** The id of the element that names the grid; a native `aria-label` names it directly. */
   labelledBy?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * grid's name (`grid`), every control, state and announcement.
+   */
+  messages?: PartialMessages<DataGridMessages> | undefined;
+  /** The locale cells, numbers and dates are written in. Default: the language in force. */
+  locale?: string | undefined;
   /** A name to announce and to persist by. */
   handle?: React.RefObject<DataGridHandle | null> | undefined;
   timeZone?: string | undefined;
@@ -451,8 +383,9 @@ export interface DataGridProps<Row>
 
 export interface DataGridContextValue<Row> {
   readonly id: string;
-  readonly labels: DataGridResolvedLabels;
-  readonly locale: string | undefined;
+  /** The family's words in the language in force, with this grid's `messages` laid over them. */
+  readonly t: FamilyTranslator<DataGridMessages>;
+  readonly locale: string;
   readonly timeZone: string | undefined;
   readonly columns: readonly GridColumn<Row>[];
   readonly resolved: readonly ResolvedGridColumn<Row>[];

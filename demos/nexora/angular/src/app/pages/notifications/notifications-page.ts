@@ -117,7 +117,7 @@ import { NotificationRow } from '../../shell/notifications/notification-row';
                     variant="outline"
                     [disabled]="store.unread() === 0"
                     [loading]="store.busyAll()"
-                    loadingLabel="Marking all as read"
+                    [messages]="{ loading: 'Marking all as read' }"
                     (click)="store.markAllRead()"
                   >
                     Mark all as read
@@ -147,7 +147,7 @@ import { NotificationRow } from '../../shell/notifications/notification-row';
       <div slPageBody>
         @if (store.items().length === 0 && store.loading()) {
           <!-- A view or a page on its way: the rows' own boxes, empty, so the wait is visible. -->
-          <div slSkeletonRegion label="Loading notifications" [loading]="true">
+          <div slSkeletonRegion [messages]="{ label: 'Loading notifications' }" [loading]="true">
             <ul slList>
               @for (i of placeholders; track i) {
                 <li slListItem>
@@ -193,7 +193,7 @@ import { NotificationRow } from '../../shell/notifications/notification-row';
           variant="ghost"
           [attr.aria-label]="'Mark as read: ' + n.title"
           [loading]="store.busy().has(n.id)"
-          loadingLabel="Marking as read"
+          [messages]="{ loading: 'Marking as read' }"
           (click)="store.markRead(n.id)"
         >
           <ng-icon name="lucideCheck" />
@@ -211,7 +211,7 @@ import { NotificationRow } from '../../shell/notifications/notification-row';
           variant="ghost"
           [attr.aria-label]="'Archive: ' + n.title"
           [loading]="store.busy().has(n.id)"
-          loadingLabel="Archiving"
+          [messages]="{ loading: 'Archiving' }"
           (click)="store.archive(n.id)"
         >
           <ng-icon name="lucideArchive" />
@@ -231,7 +231,7 @@ import { NotificationRow } from '../../shell/notifications/notification-row';
             [count]="store.total()"
             [pageSize]="25"
             (pageChange)="goTo($event.value)"
-            label="Notifications pages"
+            aria-label="Notifications pages"
           >
             <button slPaginationPrevious type="button"></button>
             <sl-pagination-items />

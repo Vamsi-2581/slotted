@@ -2,6 +2,9 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/fullscreen/contract.json';
 import {
   SlFullscreen,
@@ -240,21 +243,28 @@ describe('SlFullscreen', () => {
     expect(own.querySelector('[data-glyph]')).toBeNull();
   });
 
-  it('reads size, variant and messages from the provider, and the instance wins', () => {
+  it('reads size and variant from the provider, and the instance wins', () => {
     const fixture = renderTemplate(
       `<section slFullscreen><button slFullscreenTrigger size="lg"></button></section>`,
-      [
-        provideFullscreenDefaults({
-          size: 'sm',
-          variant: 'outline',
-          messages: { enter: 'Tela cheia' },
-        }),
-      ],
+      [provideFullscreenDefaults({ size: 'sm', variant: 'outline' })],
     );
 
     expect(trigger(fixture).getAttribute('data-size')).toBe('lg');
     expect(trigger(fixture).getAttribute('data-variant')).toBe('outline');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const fixture = renderTemplate(
+      `<section slFullscreen><button slFullscreenTrigger></button></section>`,
+      [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    );
+
     expect(trigger(fixture).textContent?.trim()).toBe('Tela cheia');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(trigger(fixture).textContent?.trim()).toBe('Full screen');
   });
 
   it('drives a region from a control outside it through the exported instance', async () => {

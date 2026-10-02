@@ -27,10 +27,12 @@ import {
 import type { EmbeddedViewRef } from '@angular/core';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { cascaderFit, cascaderMeasure, pathTo } from '@slotted/core/cascader';
 import type { CascaderCheckedStrategy, CascaderLayoutAxis } from '@slotted/core/cascader';
 import type { TreeCollection } from '@slotted/core/collection';
+import { cascaderMessages, type CascaderMessages, type PartialMessages } from '@slotted/core/i18n';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
@@ -45,7 +47,6 @@ import { SlCascaderBody, SlCascaderNode } from './cascader-body';
 import { injectCascaderDefaults } from './cascader-defaults';
 import type {
   CascaderExpandOn,
-  CascaderLabels,
   CascaderSelectionMode,
   CascaderSize,
   CascaderValue,
@@ -60,11 +61,6 @@ const directionOf = (node: Element | null): 'ltr' | 'rtl' =>
   node !== null && node.ownerDocument.defaultView?.getComputedStyle(node).direction === 'rtl'
     ? 'rtl'
     : 'ltr';
-
-const fill = (template: string, values: Record<string, string | number>) =>
-  template.replace(/\{(\w+)\}/g, (whole, name: string) =>
-    name in values ? String(values[name]) : whole,
-  );
 
 /**
  * The inputs both hosts read. A base class rather than a mixin: the two
@@ -85,6 +81,7 @@ abstract class CascaderBase<T> {
   readonly isNodeFailed = input<((node: T) => boolean) | undefined>(undefined);
   readonly getDescription = input<((node: T) => string | undefined) | undefined>(undefined);
   readonly filter = input<((node: T, query: string) => boolean) | undefined>(undefined);
+  /** BCP 47, for the substring test and its marks. The language in force when absent. */
   readonly locale = input<string | undefined>(undefined);
   /** The roots are on their way: the first level waits as rows. */
   readonly loading = input(false, { transform: booleanAttribute });
@@ -113,7 +110,12 @@ abstract class CascaderBase<T> {
     transform: (given: boolean | string | undefined) =>
       given === undefined ? undefined : booleanAttribute(given),
   });
-  readonly labels = input<Partial<CascaderLabels> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * placeholder, the buttons, the search field, the breadcrumb, and the
+   * sentences a level and a search say.
+   */
+  readonly messages = input<PartialMessages<CascaderMessages> | undefined>(undefined);
   readonly ariaLabel = input<string | undefined>(undefined, { alias: 'aria-label' });
   readonly ariaLabelledBy = input<string | undefined>(undefined, { alias: 'aria-labelledby' });
 
@@ -143,10 +145,11 @@ abstract class CascaderBase<T> {
     inset: 2,
   });
 
-  protected readonly resolvedLabels = computed(() => ({
-    ...this.defaults.labels,
-    ...this.labels(),
-  }));
+  /** The family's words in the language in force, with this instance's `messages` laid over them. */
+  readonly t = injectMessages(cascaderMessages, this.messages);
+  private readonly inForceLocale = injectLocale();
+  /** The locale the search compares and marks in: the `locale` input, or the language in force. */
+  protected readonly resolvedLocale = computed(() => this.locale() ?? this.inForceLocale());
   protected readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   protected readonly resolvedSeparator = computed(
     () => this.separator() ?? this.defaults.separator,
@@ -169,7 +172,7 @@ abstract class CascaderBase<T> {
     isNodeLoading: this.isNodeLoading,
     isNodeFailed: this.isNodeFailed,
     filter: this.filter,
-    locale: this.locale,
+    locale: this.resolvedLocale,
     loading: this.loading,
     multiple: computed(() => (this.selectionMode() ?? this.defaults.selectionMode) === 'multiple'),
     selectable: computed(() => this.selectable() ?? this.defaults.selectable),
@@ -179,7 +182,7 @@ abstract class CascaderBase<T> {
     maxColumns: computed(() => this.maxColumns() ?? this.defaults.maxColumns),
     maxCrumbs: computed(() => this.maxCrumbs() ?? this.defaults.maxCrumbs),
     readOnly: computed(() => this.readOnlyState()),
-    labels: this.resolvedLabels,
+    t: this.t,
     room: this.room,
     value: this.value,
     path: this.path,
@@ -298,7 +301,7 @@ abstract class CascaderBase<T> {
           ><span data-part="summary">{{ summary() }}</span></span
         >
       } @else if (engine.emitted().length === 0) {
-        <span data-part="placeholder">{{ placeholder() ?? resolvedLabels().placeholder }}</span>
+        <span data-part="placeholder">{{ t('placeholder') }}</span>
       } @else if (valueTemplate(); as template) {
         <span data-part="value">
           <ng-container *ngTemplateOutlet="template; context: { $implicit: valuePath() }" />
@@ -340,7 +343,7 @@ abstract class CascaderBase<T> {
       <button
         type="button"
         data-part="clear"
-        [attr.aria-label]="resolvedLabels().clear"
+        [attr.aria-label]="t('clear')"
         (click)="onClear($event)"
       >
         <span slIcon><svg slGlyph name="x"></svg></span>
@@ -373,7 +376,7 @@ abstract class CascaderBase<T> {
           data-part="content"
           [id]="contentId"
           [attr.role]="engineSearch() ? 'dialog' : null"
-          [attr.aria-label]="engineSearch() ? (ariaLabel() ?? resolvedLabels().search) : null"
+          [attr.aria-label]="engineSearch() ? (ariaLabel() ?? t('search')) : null"
         >
           @if (engineSearch()) {
             <div data-part="search">
@@ -384,11 +387,11 @@ abstract class CascaderBase<T> {
                 aria-autocomplete="list"
                 aria-expanded="true"
                 [attr.aria-controls]="treeId"
-                [attr.aria-label]="resolvedLabels().search"
+                [attr.aria-label]="t('search')"
                 [attr.aria-activedescendant]="
                   engine.activeKey === null ? null : nodeId(engine.activeKey!)
                 "
-                [placeholder]="resolvedLabels().searchPlaceholder"
+                [placeholder]="t('searchPlaceholder')"
                 [value]="searchValue()"
                 (input)="onSearchInput($event)"
                 (keydown)="onKey($event, true)"
@@ -406,7 +409,7 @@ abstract class CascaderBase<T> {
             [hoverDelay]="resolvedHoverDelay()"
             [nodeTemplate]="nodeTemplate()?.template"
             [getDescription]="getDescription()"
-            [locale]="locale()"
+            [locale]="resolvedLocale()"
             (retry)="retry.emit($event)"
           />
         </div>
@@ -450,7 +453,6 @@ export class SlCascader<T = unknown>
     transform: (given: boolean | string | undefined) =>
       given === undefined ? undefined : booleanAttribute(given),
   });
-  readonly placeholder = input<string | undefined>(undefined);
   readonly form = input<string | undefined>(undefined);
   /** The name the hidden inputs carry; a static `name` attribute is read before it is written over. */
   readonly name = input<string | undefined>(
@@ -499,7 +501,7 @@ export class SlCascader<T = unknown>
 
   protected readonly summary = computed(() => {
     const count = this.engine.emitted().length;
-    return count === 0 ? '' : fill(this.resolvedLabels().summary, { count });
+    return count === 0 ? '' : this.t('summary', { count });
   });
 
   protected readonly showClear = computed(
@@ -609,7 +611,7 @@ export class SlCascader<T = unknown>
   }
 
   protected removeLabel(key: string) {
-    return fill(this.resolvedLabels().remove, { label: this.engine.labelOf(key) });
+    return this.t('remove', { label: this.engine.labelOf(key) });
   }
 
   protected onTriggerClick(event: MouseEvent) {
@@ -817,7 +819,7 @@ export class SlCascader<T = unknown>
       [hoverDelay]="resolvedHoverDelay()"
       [nodeTemplate]="nodeTemplate()?.template"
       [getDescription]="getDescription()"
-      [locale]="locale()"
+      [locale]="resolvedLocale()"
       (retry)="retry.emit($event)"
       (treeKeydown)="onKey($event)"
     />

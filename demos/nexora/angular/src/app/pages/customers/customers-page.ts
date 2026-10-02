@@ -193,7 +193,7 @@ import { HoldDialog } from './hold-dialog';
           }
           <sl-data-grid
             #grid="slDataGrid"
-            label="Customers"
+            aria-label="Customers"
             rowKey="id"
             variant="framed"
             selectionMode="multiple"
@@ -239,7 +239,7 @@ import { HoldDialog } from './hold-dialog';
             <nav
               slDataGridFooter
               slPagination
-              label="Customer pages"
+              aria-label="Customer pages"
               [count]="store.total() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
@@ -306,7 +306,7 @@ import { HoldDialog } from './hold-dialog';
                   variant="outline"
                   type="button"
                   [loading]="store.bulkBusy()"
-                  loadingLabel="Releasing hold"
+                  [messages]="{ loading: 'Releasing hold' }"
                   (click)="releaseHold()"
                 >
                   Release hold
@@ -318,7 +318,7 @@ import { HoldDialog } from './hold-dialog';
                   tone="danger"
                   type="button"
                   [loading]="store.bulkBusy()"
-                  loadingLabel="Placing on hold"
+                  [messages]="{ loading: 'Placing on hold' }"
                   (click)="holdDialogOpen.set(true)"
                 >
                   Place on hold

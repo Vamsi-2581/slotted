@@ -119,7 +119,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'A field, its label and its help',
       source:
-        '<div slField required>\n  <label slFieldLabel>E-mail</label>\n  <input slFieldControl type="email" />\n  <span slFieldDescription>Usaremos este endereço para a cobrança.</span>\n</div>',
+        '<div slField required>\n  <label slFieldLabel>Email</label>\n  <input slFieldControl type="email" />\n  <span slFieldDescription>We will use this address for billing.</span>\n</div>',
     }),
   },
   {
@@ -143,7 +143,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'A side label that stacks when the field is narrow',
       source:
-        '<div slField labelPlacement="side">\n  <label slFieldLabel>Razão social</label>\n  <input slFieldControl />\n</div>',
+        '<div slField labelPlacement="side">\n  <label slFieldLabel>Legal name</label>\n  <input slFieldControl />\n</div>',
     }),
   },
   {
@@ -167,7 +167,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'Every state unset by default, and native where the word means native',
       source:
-        '<div slField invalid required>\n  <label slFieldLabel>CNPJ</label>\n  <input slFieldControl />\n  <span slFieldError>Faltam seis dígitos.</span>\n</div>\n\n<div slField disabled>…</div>\n<div slField readOnly>…</div>',
+        '<div slField invalid required>\n  <label slFieldLabel>Tax ID</label>\n  <input slFieldControl />\n  <span slFieldError>Six digits are missing.</span>\n</div>\n\n<div slField disabled>…</div>\n<div slField readOnly>…</div>',
     }),
   },
   {
@@ -179,7 +179,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'A description, an error, and a warning that is not one',
       source:
-        '<div slField [invalid]="submitted">\n  <input slFieldControl />\n  <span slFieldDescription>Somente números.</span>\n  <span slFieldError reserve live="polite">{{ errors.cnpj }}</span>\n</div>\n\n<span slFieldError tone="warning">A senha é válida, mas fácil de adivinhar.</span>',
+        '<div slField [invalid]="submitted">\n  <input slFieldControl />\n  <span slFieldDescription>Numbers only.</span>\n  <span slFieldError reserve live="polite">{{ errors.cnpj }}</span>\n</div>\n\n<span slFieldError tone="warning">The password is valid but easy to guess.</span>',
     }),
   },
   {
@@ -191,7 +191,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'The page owns the number; the field owns where it sits',
       source:
-        '<div slField [invalid]="value.length > 140">\n  <label slFieldLabel>Descrição pública</label>\n  <span slFieldCounter [invalid]="value.length > 140">{{ value.length }}/140</span>\n  <textarea slFieldControl [(ngModel)]="value" rows="3"></textarea>\n</div>',
+        '<div slField [invalid]="value.length > 140">\n  <label slFieldLabel>Public description</label>\n  <span slFieldCounter [invalid]="value.length > 140">{{ value.length }}/140</span>\n  <textarea slFieldControl [(ngModel)]="value" rows="3"></textarea>\n</div>',
     }),
   },
   {
@@ -203,7 +203,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'A header around the label and what stands beside it',
       source:
-        '<div slField required>\n  <div slFieldHeader>\n    <label slFieldLabel>Senha</label>\n    <button slFieldHelp="No mínimo oito caracteres, com letras e números."></button>\n    <a slFieldAction routerLink="/recuperar">Esqueceu a senha?</a>\n  </div>\n  <input slFieldControl type="password" />\n</div>\n\n<div slField>\n  <div slFieldHeader>\n    <label slFieldLabel>Endpoint da API</label>\n    <span slFieldIndicator><span slBadge size="sm" tone="accent" variant="soft">Beta</span></span>\n  </div>\n  <input slFieldControl />\n</div>',
+        '<div slField required>\n  <div slFieldHeader>\n    <label slFieldLabel>Password</label>\n    <button slFieldHelp="At least eight characters, with letters and numbers."></button>\n    <a slFieldAction routerLink="/recover">Forgot your password?</a>\n  </div>\n  <input slFieldControl type="password" />\n</div>\n\n<div slField>\n  <div slFieldHeader>\n    <label slFieldLabel>API endpoint</label>\n    <span slFieldIndicator><span slBadge size="sm" tone="accent" variant="soft">Beta</span></span>\n  </div>\n  <input slFieldControl />\n</div>',
     }),
   },
   {
@@ -227,7 +227,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'ts',
       label: 'One decision for the application, and one control of your own',
       source:
-        "bootstrapApplication(App, {\n  providers: [\n    provideFieldDefaults({\n      size: 'sm',\n      necessity: 'words',\n      necessityWords: { optional: '(opcional)' },\n    }),\n  ],\n});",
+        "bootstrapApplication(App, {\n  providers: [provideFieldDefaults({ size: 'sm', necessity: 'words' })],\n});",
     }),
   },
   {
@@ -239,7 +239,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'The identifiers, and the ones that are read',
       source:
-        '<div data-ui="field" data-part="root">\n  <div data-part="header">\n    <label data-part="label" for="cnpj-control">\n      CNPJ<span aria-hidden="true" data-part="mark">*</span>\n    </label>\n    <button data-part="help" aria-label="More information" aria-describedby="cnpj-help">\n      <span data-part="help-text" id="cnpj-help" hidden>Somente números.</span>\n    </button>\n  </div>\n  <input\n    data-part="control"\n    id="cnpj-control"\n    aria-describedby="cnpj-help cnpj-description cnpj-error"\n    aria-invalid="true"\n    aria-required="true"\n  />\n</div>',
+        '<div data-ui="field" data-part="root">\n  <div data-part="header">\n    <label data-part="label" for="cnpj-control">\n      Tax ID<span aria-hidden="true" data-part="mark">*</span>\n    </label>\n    <button data-part="help" aria-label="More information" aria-describedby="cnpj-help">\n      <span data-part="help-text" id="cnpj-help" hidden>Numbers only.</span>\n    </button>\n  </div>\n  <input\n    data-part="control"\n    id="cnpj-control"\n    aria-describedby="cnpj-help cnpj-description cnpj-error"\n    aria-invalid="true"\n    aria-required="true"\n  />\n</div>',
     }),
   },
 ];
@@ -272,11 +272,11 @@ export const ANGULAR_FIELD_DOCS = {
         'How necessity is said: an asterisk on a required field, (optional) on the fields a reader may skip, both words, or nothing — for a form that says once that every field is required',
       ],
       [
-        'necessityWords',
-        '{ required?: string; optional?: string }',
-        '(required) / (optional)',
-        'slField, provideFieldDefaults',
-        'The two words necessity="optional" and necessity="words" write, merged over the inherited pair so one can be replaced alone',
+        'messages',
+        'Partial<FieldMessages>',
+        '—',
+        'slField',
+        'Words laid over the language in force, key by key: the necessity words (optional, required) and the help control’s name (help)',
       ],
       [
         'required',
@@ -337,16 +337,9 @@ export const ANGULAR_FIELD_DOCS = {
       [
         'aria-label',
         'string',
-        'helpLabel',
+        'messages.help',
         'button[slFieldHelp]',
-        'The accessible name of the help control, read with HostAttributeToken. Unstated, it is the token’s helpLabel; written, it wins for this control alone',
-      ],
-      [
-        'helpLabel',
-        'string',
-        'More information',
-        'provideFieldDefaults, slFieldGroup',
-        'The accessible name of every help control under it, so an application translates it once',
+        'The accessible name of the help control, read with HostAttributeToken. Unstated, it is the field’s help message; written, it wins for this control alone',
       ],
       [
         'type',
@@ -409,10 +402,10 @@ export const ANGULAR_FIELD_DOCS = {
       ],
       [
         'provideFieldDefaults()',
-        '{ size, labelPlacement, necessity, necessityWords, helpLabel, disabled, readOnly }',
+        '{ size, labelPlacement, necessity, disabled, readOnly }',
         '—',
         'an application or a route',
-        'The seven decisions an application takes once. slFieldGroup answers the same source for its own subtree, so a compact or disabled section is one attribute rather than one per field',
+        'The five decisions an application takes once. slFieldGroup answers the same source for its own subtree, so a compact or disabled section is one attribute rather than one per field',
       ],
       [
         'ng-content',
@@ -440,7 +433,7 @@ export const ANGULAR_FIELD_DOCS = {
         language: 'angular',
         label: 'Anatomy, as it reaches the DOM',
         source:
-          '<div\n  data-ui="field"\n  data-part="root"\n  data-size="md"\n  data-label-placement="top"\n  data-necessity="mark"\n  data-required\n  data-invalid\n>\n  <label data-part="label" for="cnpj-control">\n    CNPJ<span aria-hidden="true" data-part="mark">*</span>\n  </label>\n  <span data-part="counter">14/18</span>\n  <input data-part="control" id="cnpj-control" aria-invalid="true" aria-required="true" />\n  <p data-ui="inline-message" data-part="root" data-tone="secondary" id="cnpj-description">\n    <span data-part="text">Somente números.</span>\n  </p>\n</div>',
+          '<div\n  data-ui="field"\n  data-part="root"\n  data-size="md"\n  data-label-placement="top"\n  data-necessity="mark"\n  data-required\n  data-invalid\n>\n  <label data-part="label" for="cnpj-control">\n    Tax ID<span aria-hidden="true" data-part="mark">*</span>\n  </label>\n  <span data-part="counter">14/18</span>\n  <input data-part="control" id="cnpj-control" aria-invalid="true" aria-required="true" />\n  <p data-ui="inline-message" data-part="root" data-tone="secondary" id="cnpj-description">\n    <span data-part="text">Numbers only.</span>\n  </p>\n</div>',
       }),
       defineSnippet({
         id: 'field-theming',

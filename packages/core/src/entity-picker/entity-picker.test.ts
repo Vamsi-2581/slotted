@@ -10,7 +10,6 @@ import {
   entityOptions,
   entityPickerKey,
   entitySections,
-  formatEntityLabel,
   localEntitySource,
   offersCreation,
   rememberRecent,
@@ -189,13 +188,6 @@ describe('names', () => {
     expect(entityInitials({ label: 'Platform' })).toBe('P');
     expect(entityInitials({ label: 'x', avatar: { name: 'Ada Lovelace' } })).toBe('AL');
     expect(entityInitials({ label: '  ' })).toBe('');
-  });
-
-  it('fills the placeholders it knows and leaves the rest', () => {
-    expect(formatEntityLabel('{label} added, {count} chosen', { label: 'Ana', count: 2 })).toBe(
-      'Ana added, 2 chosen',
-    );
-    expect(formatEntityLabel('{missing}', {})).toBe('{missing}');
   });
 });
 

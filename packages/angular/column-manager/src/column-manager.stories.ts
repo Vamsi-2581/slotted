@@ -1,11 +1,13 @@
 import { Component, input, signal } from '@angular/core';
 import { SlButton } from '@slotted/angular/button';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlDataGrid } from '@slotted/angular/data-grid';
 import { SlInline } from '@slotted/angular/inline';
 import { SlStack } from '@slotted/angular/stack';
 import { SlText } from '@slotted/angular/typography';
 import type { GridColumn, GridColumnState, GridOutOfSpace } from '@slotted/core/grid';
 import { normalizeColumnState } from '@slotted/core/grid';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
@@ -13,7 +15,6 @@ import { moduleMetadata } from '@storybook/angular-vite';
 
 import { SlColumnManager, SlColumnManagerTrigger } from './column-manager';
 import {
-  provideColumnManagerDefaults,
   type ColumnManagerApply,
   type ColumnManagerPresentation,
   type ColumnManagerRequest,
@@ -203,7 +204,7 @@ class OrdersDemo {
       <div class="slotted-demo-viewport" data-size="tall">
         <sl-data-grid
           #grid="slDataGrid"
-          label="Orders"
+          aria-label="Orders"
           manageable
           rowKey="id"
           height="100%"
@@ -266,29 +267,7 @@ class CountedDemo {
   selector: 'sl-column-manager-provided-demo',
   standalone: true,
   imports: [OrdersDemo],
-  providers: [
-    provideColumnManagerDefaults({
-      labels: {
-        title: 'Colunas',
-        search: 'Procurar colunas',
-        noResults: 'Nenhuma coluna encontrada',
-        showAll: 'Mostrar todas',
-        reset: 'Restaurar padrão',
-        pinnedStart: 'Fixadas no início',
-        unpinned: 'Colunas',
-        pinnedEnd: 'Fixadas no fim',
-        pin: 'Fixar {column}',
-        reorder: 'Reordenar {column}',
-        moved: '{column} movida para a posição {position}',
-        required: 'Obrigatória',
-        hiddenBySpace: 'Oculta por espaço',
-        inRow: 'Mostrada na linha',
-        hiddenCountOne: '1 coluna oculta',
-        hiddenCountOther: '{count} colunas ocultas',
-        visibleCount: '{visible} de {total} visíveis',
-      },
-    }),
-  ],
+  providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
   template: `<sl-column-manager-orders-demo
     presentation="popover"
     [trigger]="true"
@@ -524,7 +503,7 @@ export const Accessibility: Story = {
   render: () =>
     one(
       'In Portuguese, from the provider',
-      'Every word comes from labels once: the group, the zones, the statuses, the trigger’s sentence and the announcement.',
+      'Every word comes from the language in force: the group, the zones, the statuses, the trigger’s sentence and the announcement.',
       `<sl-column-manager-provided-demo />`,
     ),
 };

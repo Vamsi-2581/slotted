@@ -122,7 +122,7 @@ const meta: Meta<TimelineStoryArgs> = {
       imports: IMPORTS,
       providers: [
         provideIcons({ lucideCreditCard, lucideFileText, lucideSend }),
-        provideTimelineDefaults({ locale: 'pt-BR', now: NOW, timeZone: 'America/Sao_Paulo' }),
+        provideTimelineDefaults({ now: NOW, timeZone: 'America/Sao_Paulo' }),
       ],
     }),
   ],

@@ -44,7 +44,7 @@ import {
           data-testid="confirm"
           [tone]="tone()"
           [loading]="busy()"
-          [loadingLabel]="confirmLabel()"
+          [messages]="{ loading: confirmLabel() }"
           (click)="confirm.emit()"
         >
           {{ confirmLabel() }}

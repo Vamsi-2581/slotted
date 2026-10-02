@@ -1,4 +1,5 @@
 import type { PlainDate, PlainDateTime, PlainTime, TimeGranularity } from '@slotted/core/date';
+import type { DatetimePickerMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -63,25 +64,17 @@ export interface DateTimePickerOptionRender {
 /** What an application sets once for every datetime picker under it. */
 export interface DateTimePickerDefaults {
   calendar: 'gregory';
-  changeLabel: string;
-  chooseLabel: string;
   closeOnSelect: DateTimePickerCloseOnSelect;
-  /** What the panel says when the day the reader is on offers no time at all. */
-  emptyLabel: string;
   granularity: TimeGranularity;
   hourCycle: DateTimePickerHourCycle | undefined;
-  locale: string | undefined;
   /** How many rows the list may reach before it is cut. */
   maxOptions: number;
-  nowLabel: string;
   openTo: DateTimePickerOpenTo;
   placement: DateTimePickerPlacement;
   size: DateTimePickerSize;
   /** Seconds between two offered times. */
   step: number;
   timeZone: string | undefined;
-  /** What the panel's description says when the list has been cut. */
-  truncatedLabel: string;
   unavailableOptions: DateTimePickerUnavailableOptions;
   variant: DateTimePickerVariant;
 }
@@ -158,6 +151,7 @@ export interface DateTimePickerProps extends Omit<
   maxOptions?: number | undefined;
   unavailableOptions?: DateTimePickerUnavailableOptions | undefined;
 
+  /** BCP 47. Writes the field, the grid, the list and the trigger's moment. Unset, the language in force decides. */
   locale?: string | undefined;
   timeZone?: string | undefined;
   hourCycle?: DateTimePickerHourCycle | undefined;
@@ -191,11 +185,12 @@ export interface DateTimePickerProps extends Omit<
 
   name?: string | undefined;
 
-  changeLabel?: string | undefined;
-  chooseLabel?: string | undefined;
-  emptyLabel?: string | undefined;
-  nowLabel?: string | undefined;
-  truncatedLabel?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * trigger's two names, the `now` button, what an empty day says and what a
+   * cut list says.
+   */
+  messages?: PartialMessages<DatetimePickerMessages> | undefined;
 
   /** The consumer's own shortcuts, in the head beside `now`. */
   presets?: ReactNode | undefined;

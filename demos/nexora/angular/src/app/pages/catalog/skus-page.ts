@@ -160,7 +160,7 @@ import { SKU_HIDDEN_BY_DEFAULT, skuColumns, skuFilterFields } from './sku-column
               slBreadcrumb
               slPageHeaderBreadcrumbs
               [maxItems]="phone() ? 3 : 8"
-              label="Where this list stands"
+              aria-label="Where this list stands"
             >
               <ol slBreadcrumbList>
                 <li slBreadcrumbItem>
@@ -232,9 +232,9 @@ import { SKU_HIDDEN_BY_DEFAULT, skuColumns, skuFilterFields } from './sku-column
             (valueChangeRequest)="setFilter($event.value)"
             [query]="store.search()"
             (queryChangeRequest)="store.setSearch($event.value)"
-            [labels]="{ count: countLabel }"
+            [messages]="countMessages"
             [count]="store.total() ?? undefined"
-            [total]="store.grandTotal() ?? undefined"
+            [total]="store.total() === store.grandTotal() ? undefined : (store.grandTotal() ?? undefined)"
             [loading]="store.loading()"
           >
             <app-list-view-tools
@@ -261,7 +261,7 @@ import { SKU_HIDDEN_BY_DEFAULT, skuColumns, skuFilterFields } from './sku-column
           }
           <sl-data-grid
             #grid="slDataGrid"
-            label="SKUs"
+            aria-label="SKUs"
             rowKey="id"
             variant="framed"
             activatable
@@ -311,8 +311,8 @@ import { SKU_HIDDEN_BY_DEFAULT, skuColumns, skuFilterFields } from './sku-column
             <nav
               slDataGridFooter
               slPagination
-              label="SKU pages"
-              [labels]="pagerLabels"
+              aria-label="SKU pages"
+              [messages]="pagerMessages"
               [count]="store.total() ?? 0"
               [page]="store.page().index + 1"
               [pageSize]="store.page().size"
@@ -383,12 +383,11 @@ export class SkusPage {
     return `Every stockable item in ${place}${covers}: what a warehouse counts, what an order line buys and what a price list prices. A product groups them.`;
   });
 
-  readonly countLabel = (count: string, total: string | undefined): string =>
-    total === undefined || count === total ? `${count} SKUs` : `${count} of ${total} SKUs`;
+  /** The count in this listing's own noun: all of them, or how many of them a filter keeps. */
+  readonly countMessages = { count: '{count} of {total} SKUs', countOnly: '{count} SKUs' };
 
-  readonly pagerLabels = {
-    range: (start: number, end: number, count: number) =>
-      `SKUs ${start}–${end} of ${count.toLocaleString('en-US')}`,
+  readonly pagerMessages = {
+    range: 'SKUs {start}–{end} of {count}',
     pageSize: 'SKUs per page',
   };
 

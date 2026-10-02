@@ -751,9 +751,9 @@ export const Composition: Story = {
     <div className="slotted-demo-grid">
       <Scene
         label="Defaults an application sets once"
-        note="The provider carries every axis and all eight sentences; a prop written on one control still wins over it, which is the resolution order every family declares."
+        note="The provider carries every axis; a prop written on one control still wins over it, which is the resolution order every family declares. The words come from the language in force."
       >
-        <MultiSelectDefaultsProvider removeLabel="Retirar {label}" size="sm" variant="subtle">
+        <MultiSelectDefaultsProvider size="sm" variant="subtle">
           <div className="slotted-demo-stack">
             <Basic defaultValue={['checkout-api']} />
             <Basic defaultValue={['auth-gateway']} variant="outline" />

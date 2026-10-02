@@ -62,7 +62,7 @@ const anatomy: AnatomyRow[] = [
     part: 'progress-position',
     element: 'span',
     required: false,
-    purpose: 'labels.position, the toggle’s accessible name.',
+    purpose: 'messages.position, the toggle’s accessible name.',
   },
   {
     part: 'progress-track',
@@ -74,7 +74,7 @@ const anatomy: AnatomyRow[] = [
     part: 'progress-segment',
     element: 'span',
     required: false,
-    purpose: 'data-complete, data-current or data-invalid; a step reached is four times as thick.',
+    purpose: 'data-complete, data-current or data-invalid.',
   },
   {
     part: 'main',
@@ -116,7 +116,7 @@ const anatomy: AnatomyRow[] = [
     part: 'optional',
     element: 'span around an slTag',
     required: false,
-    purpose: 'labels.optional, on an optional step.',
+    purpose: 'messages.optional, on an optional step.',
   },
   {
     part: 'step-description',
@@ -384,20 +384,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'labels',
     title: 'Words for another product',
-    note: 'Every word is a label; provideWizardDefaults sets them once.',
+    note: 'Every word is a message; provideSlotted sets the language once, and a wizard lays its own words over it.',
     snippet: defineSnippet({
       id: 'wizard-angular-labels',
       language: 'ts',
       label: 'In Portuguese',
-      source: `providers: [
-  provideWizardDefaults({
-    labels: {
-      position: (index, count) => \`Etapa \${index} de \${count}\`,
-      next: 'Continuar',
-      previous: 'Voltar',
-    },
-  }),
-];`,
+      source: `providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })];`,
     }),
   },
   {
@@ -408,7 +400,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'wizard-angular-accessibility',
       language: 'angular',
       label: 'The list is named',
-      source: `<div slWizard label="Account opening">…</div>`,
+      source: `<div slWizard [messages]="{ progress: 'Account opening' }">…</div>`,
     }),
   },
 ];
@@ -511,13 +503,12 @@ export const ANGULAR_WIZARD_DOCS = {
         'A step ahead is reached only once every step before it is complete',
       ],
       ['level', '2 | 3 | 4', '2', 'slWizard, provideWizardDefaults', 'The step heading’s level'],
-      ['label', 'string', 'labels.progress', 'slWizard', 'The name of the list of steps'],
       [
-        'labels',
-        'Partial<WizardLabels>',
-        'English',
-        'slWizard, provideWizardDefaults',
-        'position, progress, previous, next, submit, return, cancel, saveDraft, saving, saved, draftFailed, skip, optional, edit, incomplete, submitFailed, restoring',
+        'messages',
+        'PartialMessages<WizardMessages>',
+        '—',
+        'slWizard',
+        'Words laid over the language in force, key by key: position, progress (the name of the list of steps), previous, next, submit, return, cancel, saveDraft, saving, saved with {time}, draftFailed, skip, optional, edit, incomplete, submitFailed, restoring',
       ],
       ['error', 'string', '—', 'slWizard', 'An error of your own above the step'],
       ['disabled', 'boolean', 'false', 'slWizard', 'Every action refused'],

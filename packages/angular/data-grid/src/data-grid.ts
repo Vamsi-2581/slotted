@@ -56,6 +56,12 @@ import {
   type SortDirection,
   type GridTree,
 } from '@slotted/core/grid';
+import {
+  dataGridMessages,
+  dragMessages,
+  type DataGridMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createScrollAffordance } from '@slotted/core/overflow';
 import type { PositionerAnchor } from '@slotted/core/positioner';
@@ -73,6 +79,7 @@ import {
   effect,
   ElementRef,
   forwardRef,
+  HostAttributeToken,
   inject,
   Injector,
   input,
@@ -88,6 +95,7 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor } from '@angular/forms';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlButton } from '@slotted/angular/button';
@@ -123,10 +131,7 @@ import {
   SlDataGridPart,
 } from './data-grid-controls';
 import {
-  DATA_GRID_LABELS,
-  fillLabel,
   injectDataGridDefaults,
-  resolveDataGridLabels,
   SlDataGridIdFactory,
   type DataGridActivateEvent,
   type DataGridCellContext,
@@ -143,7 +148,6 @@ import {
   type DataGridExpandedGroups,
   type DataGridGroupContext,
   type DataGridHeaderContext,
-  type DataGridLabels,
   type DataGridMode,
   type DataGridQueryRequest,
   type DataGridReason,
@@ -536,7 +540,7 @@ function contentWidth(cell: HTMLElement): number {
                       tabindex="-1"
                       aria-haspopup="dialog"
                       [attr.aria-expanded]="filterOpen() === column.id"
-                      [attr.aria-label]="t().filter + ' ' + column.column.label"
+                      [attr.aria-label]="t('filterColumn', { column: column.column.label })"
                       [attr.data-filtered]="filterOf(column.id) ? '' : null"
                       [attr.data-open]="filterOpen() === column.id ? '' : null"
                       (pointerdown)="$event.stopPropagation()"
@@ -551,7 +555,7 @@ function contentWidth(cell: HTMLElement): number {
                     tabindex="-1"
                     [slMenuTriggerFor]="columnMenu"
                     [attr.data-menu-for]="column.id"
-                    [attr.aria-label]="t().columnMenu + ', ' + column.column.label"
+                    [attr.aria-label]="t('columnMenu', { column: column.column.label })"
                     (pointerdown)="$event.stopPropagation()"
                     (click)="$event.stopPropagation(); anchorToButton(columnMenu)"
                   >
@@ -561,7 +565,7 @@ function contentWidth(cell: HTMLElement): number {
                     #columnMenu
                     size="sm"
                     [sideOffset]="MENU_OFFSET"
-                    [attr.aria-label]="t().columnMenu + ', ' + column.column.label"
+                    [attr.aria-label]="t('columnMenu', { column: column.column.label })"
                     [aria-describedby]="
                       column.column.description ? descriptionId(column.id) : undefined
                     "
@@ -577,27 +581,27 @@ function contentWidth(cell: HTMLElement): number {
                         [disabled]="isSortedAlone(column.id, 'ascending')"
                         (select)="setSort(column.id, 'ascending', $event)"
                       >
-                        {{ t().sortAscendingAction }}
+                        {{ t('sortAscendingAction') }}
                       </button>
                       <button
                         slMenuItem
                         [disabled]="isSortedAlone(column.id, 'descending')"
                         (select)="setSort(column.id, 'descending', $event)"
                       >
-                        {{ t().sortDescendingAction }}
+                        {{ t('sortDescendingAction') }}
                       </button>
                       <button
                         slMenuItem
                         [disabled]="sortOf(column.id) === null"
                         (select)="setSort(column.id, null, $event)"
                       >
-                        {{ t().sortClearAction }}
+                        {{ t('sortClearAction') }}
                       </button>
                       <hr slMenuSeparator />
                     }
                     @if (column.filterable && filterKind(column) !== null) {
                       <button slMenuItem (select)="filterOpen.set(column.id)">
-                        {{ t().filter }}…
+                        {{ t('filterMenu') }}
                       </button>
                     }
                     <button
@@ -605,37 +609,37 @@ function contentWidth(cell: HTMLElement): number {
                       [disabled]="column.pinned === 'start'"
                       (select)="pin(column.id, 'start', $event)"
                     >
-                      {{ t().pinStart }}
+                      {{ t('pinStart') }}
                     </button>
                     <button
                       slMenuItem
                       [disabled]="column.pinned === 'end'"
                       (select)="pin(column.id, 'end', $event)"
                     >
-                      {{ t().pinEnd }}
+                      {{ t('pinEnd') }}
                     </button>
                     @if (column.pinned) {
                       <button slMenuItem (select)="pin(column.id, null, $event)">
-                        {{ t().unpin }}
+                        {{ t('unpin') }}
                       </button>
                     }
                     <hr slMenuSeparator />
                     @if (column.resizable) {
                       <button slMenuItem (select)="fit(column.id, $event.reason, $event)">
-                        {{ t().autofit }}
+                        {{ t('autofit') }}
                       </button>
                       <button slMenuItem (select)="fit(null, $event.reason, $event)">
-                        {{ t().autofitAll }}
+                        {{ t('autofitAll') }}
                       </button>
                     }
                     @if (column.hideable) {
                       <button slMenuItem (select)="hide(column.id, $event, $event.reason)">
-                        {{ t().hide }}
+                        {{ t('hide') }}
                       </button>
                     }
                     @if (manageable()) {
                       <button slMenuItem (select)="manageColumns.emit()">
-                        {{ t().manageColumns }}…
+                        {{ t('manageColumns') }}
                       </button>
                     }
                   </sl-menu>
@@ -644,7 +648,7 @@ function contentWidth(cell: HTMLElement): number {
                   <div
                     data-part="resizer"
                     aria-hidden="true"
-                    [attr.title]="t().resize"
+                    [attr.title]="t('resize')"
                     [attr.data-resizing]="resizing() === column.id ? '' : null"
                     (pointerdown)="beginResize($event, column)"
                     (pointermove)="moveResize($event, column)"
@@ -659,12 +663,15 @@ function contentWidth(cell: HTMLElement): number {
                 }
               </div>
               <ng-template slPopoverLayer>
-                <div slPopoverContent [attr.aria-label]="t().filter + ' ' + column.column.label">
+                <div
+                  slPopoverContent
+                  [attr.aria-label]="t('filterColumn', { column: column.column.label })"
+                >
                   <sl-data-grid-filter-panel
                     [column]="$any(column)"
                     [kind]="filterKind(column)!"
                     [committed]="filterOf(column.id)"
-                    [labels]="t()"
+                    [t]="t"
                     [locale]="resolvedLocale()"
                     [counts]="filterKind(column) === 'set' ? countsFor(column.id) : undefined"
                     [customTemplate]="filterTemplate(column.id)"
@@ -682,7 +689,7 @@ function contentWidth(cell: HTMLElement): number {
               [attr.aria-colindex]="popinIndex()"
               [attr.data-column]="POPIN"
             >
-              {{ t().popinHeader }}
+              {{ t('popinHeader') }}
             </div>
           }
         </div>
@@ -747,7 +754,7 @@ function contentWidth(cell: HTMLElement): number {
                     [column]="$any(column)"
                     [kind]="kind"
                     [committed]="filterOf(column.id)"
-                    [labels]="t()"
+                    [t]="t"
                     [locale]="resolvedLocale()"
                     [counts]="kind === 'set' ? countsFor(column.id) : undefined"
                     [debounce]="resolvedDebounce()"
@@ -809,9 +816,9 @@ function contentWidth(cell: HTMLElement): number {
                   })
                 "
               >
-                <span data-ui="visually-hidden" data-part="root"
-                  >{{ t().selectRow }} {{ entry.node.key }}</span
-                >
+                <span data-ui="visually-hidden" data-part="root">{{
+                  t('selectRow', { row: entry.node.key })
+                }}</span>
               </span>
             </div>
           }
@@ -864,7 +871,7 @@ function contentWidth(cell: HTMLElement): number {
                   [attr.aria-controls]="
                     isExpanded(entry.node.key) ? detailId(entry.node.key) : null
                   "
-                  [attr.aria-label]="isExpanded(entry.node.key) ? t().collapse : t().expand"
+                  [attr.aria-label]="isExpanded(entry.node.key) ? t('collapse') : t('expand')"
                   (click)="toggleExpanded(entry.node.key, $event)"
                 >
                   <span slIcon><svg slGlyph name="chevron-right"></svg></span>
@@ -920,7 +927,7 @@ function contentWidth(cell: HTMLElement): number {
                   type="button"
                   tabindex="-1"
                   [attr.aria-expanded]="entry.node.open"
-                  [attr.aria-label]="entry.node.open ? t().collapse : t().expand"
+                  [attr.aria-label]="entry.node.open ? t('collapse') : t('expand')"
                   [attr.data-loading]="isLoadingChildren(entry.node.key) ? '' : null"
                   (click)="$event.stopPropagation(); toggleBranch(entry.node.key, $event)"
                   (pointerdown)="$event.stopPropagation()"
@@ -951,7 +958,7 @@ function contentWidth(cell: HTMLElement): number {
                       [value]="cell.value"
                       [invalid]="cell.invalid"
                       [message]="cell.message"
-                      [labels]="t()"
+                      [t]="t"
                       [locale]="resolvedLocale()"
                       (draftChange)="setDraft(column.id, $event)"
                     />
@@ -1126,9 +1133,9 @@ function contentWidth(cell: HTMLElement): number {
                     tabindex="-1"
                     [attr.aria-expanded]="entry.node.expanded"
                     [attr.aria-label]="
-                      (entry.node.expanded ? t().collapseGroup : t().expandGroup) +
-                      ' ' +
-                      entry.node.text
+                      t(entry.node.expanded ? 'collapseGroup' : 'expandGroup', {
+                        group: entry.node.text,
+                      })
                     "
                     (click)="$event.stopPropagation(); toggleGroup(entry.node.key, $event)"
                   >
@@ -1217,7 +1224,7 @@ function contentWidth(cell: HTMLElement): number {
                     variant="outline"
                     (click)="clearFilters($event)"
                   >
-                    {{ t().clearFilters }}
+                    {{ t('clearFilters') }}
                   </button>
                 </div>
               } @else if (status() === 'error') {
@@ -1230,7 +1237,7 @@ function contentWidth(cell: HTMLElement): number {
                     variant="outline"
                     (click)="onRetry()"
                   >
-                    {{ t().retry }}
+                    {{ t('retry') }}
                   </button>
                 </div>
               }
@@ -1347,7 +1354,7 @@ function contentWidth(cell: HTMLElement): number {
               [disabled]="loading()"
               (click)="loadMore.emit()"
             >
-              {{ t().loadMore }}
+              {{ t('loadMore') }}
             </button>
           </div>
         }
@@ -1548,9 +1555,14 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
    */
   readonly pinnedRows = input<DataGridPinnedRows | undefined>(undefined);
   readonly height = input<string | number | undefined>(undefined);
-  readonly label = input<string | undefined>(undefined);
+  /** The id of the element that names the grid; a static `aria-label` names it directly. */
   readonly labelledBy = input<string | undefined>(undefined);
-  readonly labels = input<Partial<DataGridLabels> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * grid's name (`grid`), every control, state and announcement.
+   */
+  readonly messages = input<PartialMessages<DataGridMessages> | undefined>(undefined);
+  /** The locale cells, numbers and dates are written in. Default: the language in force. */
   readonly locale = input<string | undefined>(undefined);
   readonly timeZone = input<string | undefined>(undefined);
   readonly showRange = input<boolean | undefined>(undefined);
@@ -1574,11 +1586,12 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   readonly id = inject(SlDataGridIdFactory).next();
 
   /* ── Resolution ─────────────────────────────────────────────────────── */
-  protected readonly resolvedLabels = computed(() =>
-    resolveDataGridLabels(this.defaults.labels, this.labels()),
-  );
-  /** The labels, under the short name the template reads them by. */
-  protected readonly t = this.resolvedLabels;
+  /** The family's words in the language in force, with this grid's `messages` laid over them. */
+  readonly t = injectMessages(dataGridMessages, this.messages);
+  /** What a drag of a column or a row says, in the language in force. */
+  private readonly dragT = injectMessages(dragMessages);
+  private readonly providedLocale = injectLocale();
+  private readonly ownLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
   protected readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   protected readonly resolvedStriped = computed(() => this.striped() ?? this.defaults.striped);
   protected readonly resolvedStickyHeader = computed(
@@ -1611,7 +1624,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   protected readonly resolvedSkeleton = computed(
     () => this.skeletonRows() ?? this.defaults.skeletonRows,
   );
-  protected readonly resolvedLocale = computed(() => this.locale() ?? this.defaults.locale);
+  protected readonly resolvedLocale = computed(() => this.locale() ?? this.providedLocale());
   protected readonly resolvedMode = computed<DataGridMode>(
     () =>
       this.mode() ??
@@ -1620,7 +1633,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
         : 'client'),
   );
   protected readonly ariaLabel = computed(
-    () => this.label() ?? (this.labelledBy() ? null : this.t().grid),
+    () => this.ownLabel ?? (this.labelledBy() ? null : this.t('grid')),
   );
   protected readonly blockSize = computed(() => {
     const height = this.height();
@@ -1642,7 +1655,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   private readonly formatOptions = computed(() => ({
     locale: this.resolvedLocale(),
     timeZone: this.timeZone(),
-    booleans: { true: this.t().filterYes, false: this.t().filterNo },
+    booleans: { true: this.t('filterYes'), false: this.t('filterNo') },
   }));
 
   rowKeyOf(row: Row): string {
@@ -1892,13 +1905,8 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     return status === 'error' || status === 'no-results' ? status : 'empty';
   });
   protected readonly emptyTitle = computed(() => {
-    const labels = this.t();
     const status = this.status();
-    return status === 'error'
-      ? labels.error
-      : status === 'no-results'
-        ? labels.noResults
-        : labels.empty;
+    return this.t(status === 'error' ? 'error' : status === 'no-results' ? 'noResults' : 'empty');
   });
   protected readonly ariaRowCount = computed(
     () =>
@@ -2080,9 +2088,9 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   protected readonly selectAllName = computed(() => {
     const total = this.total();
     const count = this.selectableKeys().length;
-    const label =
-      total !== null && total > count ? this.t().selectAllPage : this.t().selectAllFiltered;
-    return fillLabel(label, { count });
+    return this.t(total !== null && total > count ? 'selectAllPage' : 'selectAllFiltered', {
+      count,
+    });
   });
 
   private touched: (() => void) | undefined;
@@ -2309,19 +2317,18 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     return this.resolvedById().get(columnId)?.column.label ?? columnId;
   }
   private announceSort(next: GridQuery) {
-    const labels = this.t();
     if (next.sort.length === 0) {
-      this.announce(labels.sortCleared);
+      this.announce(this.t('sortCleared'));
       return;
     }
     const order = next.sort
       .map((key) =>
-        fillLabel(key.direction === 'ascending' ? labels.sortAscending : labels.sortDescending, {
+        this.t(key.direction === 'ascending' ? 'sortAscending' : 'sortDescending', {
           column: this.labelOf(key.column),
         }),
       )
       .join(', ');
-    this.announce(fillLabel(labels.sortedBy, { order }));
+    this.announce(this.t('sortedBy', { order }));
   }
   pressSort(
     columnId: string,
@@ -2439,7 +2446,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     const column = this.columns().find((entry) => entry.id === columnId);
     if (!column || state.hidden.includes(columnId)) return;
     this.requestState(withColumnHidden(state, columnId, true), 'hidden', reason, source);
-    this.announce(fillLabel(this.t().columnHidden, { column: column.label }));
+    this.announce(this.t('columnHidden', { column: column.label }));
   }
   resizeTo(columnId: string, width: number, reason: DataGridReason, source?: unknown) {
     const column = this.columns().find((entry) => entry.id === columnId);
@@ -2448,9 +2455,9 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     this.requestState(next, 'width', reason, source);
     if (reason === 'keyboard') {
       this.announce(
-        fillLabel(this.t().resized, {
+        this.t('resized', {
           column: column.label,
-          width: next.widths[columnId] ?? width,
+          width: String(next.widths[columnId] ?? width),
         }),
       );
     }
@@ -2649,7 +2656,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     return `${this.id}-detail-${key}`;
   }
   protected groupCount(node: GroupNode) {
-    return fillLabel(this.t().groupCount, { count: node.count });
+    return this.t('groupCount', { count: node.count });
   }
   protected groupContext(node: GroupNode): DataGridGroupContext<Row> {
     const column = this.columns().find((entry) => entry.id === node.column)!;
@@ -2792,7 +2799,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
         after();
       } catch (failure) {
         const message =
-          failure instanceof Error && failure.message ? failure.message : this.t().editFailed;
+          failure instanceof Error && failure.message ? failure.message : this.t('editFailed');
         this.edit.update((state) =>
           state ? { ...state, status: 'invalid', messages: { [primary]: message } } : state,
         );
@@ -2916,7 +2923,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     );
   }
   protected helpLabel(column: ResolvedGridColumn<Row>) {
-    return fillLabel(this.t().columnHelp, { column: column.column.label });
+    return this.t('columnHelp', { column: column.column.label });
   }
   protected descriptionId(columnId: string) {
     return `${this.id}-description-${columnId}`;
@@ -2942,14 +2949,9 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
         : this.rows().length;
     const last = start + shown - 1;
     const total = this.total();
-    const labels = this.t();
     return total === null || total < 0
-      ? fillLabel(labels.rangeUnknown, { start, end: last })
-      : fillLabel(labels.range, {
-          start,
-          end: last,
-          total: total.toLocaleString(this.resolvedLocale()),
-        });
+      ? this.t('rangeUnknown', { start, end: last })
+      : this.t('range', { start, end: last, total });
   });
 
   /* ── Groups ─────────────────────────────────────────────────────────── */
@@ -3262,7 +3264,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       for (const columnId of session.columns) {
         const column = this.columns().find((entry) => entry.id === columnId);
         if (column && !Object.is(cellValue(column, row), session.originals[columnId])) {
-          conflicts[columnId] = this.t().editConflict;
+          conflicts[columnId] = this.t('editConflict');
         }
       }
       if (Object.keys(conflicts).length > 0) {
@@ -3331,6 +3333,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
        the edge. */
     const controller = createDragController({
       document: element.ownerDocument,
+      t: this.dragT,
       preview: false,
       /* The scroller moves sideways when a header is dragged to its edge, so a
          column can reach a place past the viewport; never up or down — the
@@ -3361,7 +3364,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       element: () =>
         element.querySelector('[data-part="head"] > [data-part="header-row"]:last-of-type'),
       itemElement: headerOf,
-      label: () => 'columns',
+      label: () => this.t('dragColumns'),
       itemLabel: (columnId) => this.labelOf(columnId),
     });
     let wasDragging = false;
@@ -3491,7 +3494,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   private readonly rowDraggables = new Map<string, () => void>();
   private readonly rowDraggableNodes = new Map<string, HTMLElement>();
   protected rowHandleLabel(key: string) {
-    return fillLabel(this.t().reorderRow, { row: this.rowLabelOf(key) });
+    return this.t('reorderRow', { row: this.rowLabelOf(key) });
   }
   /** What a row is called: its row header's text, else its key. */
   private rowLabelOf(key: string) {
@@ -3527,14 +3530,13 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     const move = this.rowMove(key, index);
     if (!move) return;
     this.rowsReorder.emit({ ...move, reason: 'keyboard', event: source as Event | undefined });
-    this.announce(
-      fillLabel(this.t().rowMoved, { row: this.rowLabelOf(key), position: move.to + 1 }),
-    );
+    this.announce(this.t('rowMoved', { row: this.rowLabelOf(key), position: move.to + 1 }));
   }
   private wireRowDrag() {
     const element = this.host.nativeElement;
     const controller = createDragController({
       document: element.ownerDocument,
+      t: this.dragT,
       preview: false,
       autoScroll: { axis: 'y' },
       onDrop: ({ items, target, reason, event }) => {
@@ -3558,7 +3560,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       orientation: 'vertical',
       element: () => element.querySelector('[data-part="body"]'),
       itemElement: rowOf,
-      label: () => 'rows',
+      label: () => this.t('dragRows'),
       itemLabel: (key) => this.rowLabelOf(key),
     });
     controller.subscribe((state) => {
@@ -3812,9 +3814,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     });
     const outcome = await writeToClipboard(text, this.host.nativeElement.ownerDocument);
     if (outcome !== 'refused') {
-      this.announce(
-        fillLabel(this.t().copied, { count: cells.reduce((sum, line) => sum + line.length, 0) }),
-      );
+      this.announce(this.t('copied', { count: cells.reduce((sum, line) => sum + line.length, 0) }));
     }
   }
 
@@ -4196,7 +4196,11 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       which === 'selected' ? visible.filter((row) => selected.has(this.rowKeyOf(row))) : visible;
     const model =
       whichColumns === 'all' ? this.columns() : this.resolved().map((column) => column.column);
-    return toCsv(chosen, model, { ...this.formatOptions(), ...csv });
+    return toCsv(chosen, model, {
+      ...this.formatOptions(),
+      ...csv,
+      booleans: csv.booleans ?? this.formatOptions().booleans,
+    });
   }
   /**
    * Builds the file and hands it to the browser as a download: an anchor is
@@ -4228,5 +4232,3 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     this.formDisabled.set(isDisabled);
   }
 }
-
-export { DATA_GRID_LABELS };

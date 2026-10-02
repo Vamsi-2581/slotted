@@ -1,7 +1,6 @@
 export { SlDateField } from './date-field';
 export type { DateFieldChangeRequest } from './date-field';
 export {
-  DATE_FIELD_CLEAR_LABEL,
   DATE_FIELD_DEFAULTS,
   DATE_FIELD_YEAR_PIVOT,
   injectDateFieldDefaults,

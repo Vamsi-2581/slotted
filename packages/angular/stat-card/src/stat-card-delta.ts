@@ -41,8 +41,7 @@ import {
       <span data-part="indicator" aria-hidden="true"
         ><span slIcon [directional]="trend() !== 'flat'"
           ><svg slGlyph [name]="trend() === 'flat' ? 'minus' : 'trending-up'"></svg></span></span
-      ><span slVisuallyHidden>{{ card.resolvedMessages()[trend()] }} </span>{{ formatted()
-      }}<ng-content />
+      ><span slVisuallyHidden>{{ card.t(trend()) }} </span>{{ formatted() }}<ng-content />
     }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,

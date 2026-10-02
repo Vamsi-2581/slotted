@@ -1,7 +1,10 @@
 import { Component, signal, viewChild } from '@angular/core';
+import type { WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlToastService } from '@slotted/angular/toast';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ImportExportJob } from '@slotted/core/import-export-center';
 import type { ChangeRequest } from '@slotted/core/state';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -156,8 +159,15 @@ describe('SlImportExportCenter', () => {
     fixture.detectChanges();
   };
 
+  /** The jobs are Brazilian, so the centre speaks Brazilian Portuguese around them. */
+  let language: WritableSignal<string>;
+
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [Host, ToastHost] }).compileComponents();
+    language = signal('pt-BR');
+    await TestBed.configureTestingModule({
+      imports: [Host, ToastHost],
+      providers: [provideSlotted({ locale: language, catalogs: { 'pt-BR': PT_BR } })],
+    }).compileComponents();
     fixture = TestBed.createComponent(Host);
     host = fixture.componentInstance;
     await settle();
@@ -169,6 +179,17 @@ describe('SlImportExportCenter', () => {
     expect(root().getAttribute('aria-labelledby')).toBe(title.id);
     expect(query('ul[data-part="list"]')?.getAttribute('aria-labelledby')).toBe(title.id);
     expect(query('[data-part="count"]')?.textContent?.trim()).toBe('1 em andamento');
+  });
+
+  it('follows a change of the language in force without being created again', async () => {
+    expect(query('[data-part="title"]')?.textContent).toContain('Importações e exportações');
+    language.set('en-US');
+    await settle();
+    expect(query('[data-part="title"]')?.textContent).toContain('Imports and exports');
+    expect(query('[data-part="count"]')?.textContent?.trim()).toBe('1 in progress');
+    expect(job('catalog').querySelector('[data-part="status-label"]')?.textContent).toContain(
+      'Completed with 12 errors',
+    );
   });
 
   it('derives the outcome and draws spinner for a running job', () => {
@@ -336,14 +357,17 @@ describe('provideImportExportCenterDefaults', () => {
     @Component({
       standalone: true,
       imports: [SlImportExportCenter],
-      template: `<section slImportExportCenter size="md" [jobs]="[]"></section>`,
+      template: `<section
+        slImportExportCenter
+        size="md"
+        [jobs]="[]"
+        [messages]="{ title: 'Jobs' }"
+      ></section>`,
     })
     class Provided {}
     await TestBed.configureTestingModule({
       imports: [Provided],
-      providers: [
-        provideImportExportCenterDefaults({ level: '3', messages: { title: 'Jobs' }, size: 'sm' }),
-      ],
+      providers: [provideImportExportCenterDefaults({ level: '3', size: 'sm' })],
     }).compileComponents();
     const fixture = TestBed.createComponent(Provided);
     fixture.detectChanges();
@@ -378,7 +402,7 @@ describe('jobToasts', () => {
     expect(show).toHaveBeenCalledTimes(2);
     expect(show.mock.calls[0]?.[0]).toMatchObject({ id: 'import-export-center:x', loading: true });
     expect(show.mock.calls[1]?.[0]).toMatchObject({
-      announcement: 'Exportação Faturas concluída',
+      announcement: 'Export Faturas completed',
       data: { key: 'x' },
       tone: 'success',
     });

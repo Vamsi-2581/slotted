@@ -11,6 +11,12 @@ import {
   type GridColumnState,
   type GridPinZone,
 } from '@slotted/core/grid';
+import {
+  columnManagerMessages,
+  dragMessages,
+  type ColumnManagerMessages,
+  type FamilyTranslator,
+} from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable, type ChangeReason, type ChangeRequest } from '@slotted/core/state';
 import {
@@ -35,16 +41,16 @@ import {
 import { Button } from '../button';
 import { Checkbox } from '../checkbox';
 import { Drawer, DrawerPanel, useDrawer } from '../drawer';
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '../menu';
 import { Popover, PopoverContent, PopoverLayer, usePopover } from '../popover';
 import { TextField } from '../text-field';
 import { VisuallyHidden } from '../visually-hidden';
-import { fillLabel, useColumnManagerDefaults } from './column-manager-defaults';
+import { useColumnManagerDefaults } from './column-manager-defaults';
 import type {
   ColumnManagerColumnReason,
   ColumnManagerHandle,
-  ColumnManagerLabels,
   ColumnManagerOpenReason,
   ColumnManagerProps,
   ColumnManagerRequest,
@@ -96,7 +102,8 @@ interface TriggerSnapshot {
   readonly open: boolean;
   readonly hidden: number;
   readonly rootId: string;
-  readonly labels: ColumnManagerLabels;
+  /** The manager's words, so the trigger names the hidden count in its language. */
+  readonly t: FamilyTranslator<ColumnManagerMessages>;
 }
 
 /**
@@ -127,7 +134,7 @@ class TriggerChannel {
       current.open === next.open &&
       current.hidden === next.hidden &&
       current.rootId === next.rootId &&
-      current.labels === next.labels
+      current.t === next.t
     ) {
       return;
     }
@@ -237,7 +244,7 @@ export function ColumnManager<Row = unknown>({
   columns,
   defaultColumnState,
   defaultOpen,
-  labels: labelsProp,
+  messages,
   onColumnStateChange,
   onOpenChange,
   open: openProp,
@@ -249,10 +256,7 @@ export function ColumnManager<Row = unknown>({
   const defaults = useColumnManagerDefaults();
   const presentation = presentationProp ?? defaults.presentation;
   const applyMode = applyProp ?? defaults.apply;
-  const labels = useMemo(
-    () => ({ ...defaults.labels, ...labelsProp }),
-    [defaults.labels, labelsProp],
-  );
+  const t = useMessages(columnManagerMessages, messages);
 
   const base = useId();
   const rootId = `${base}-panel`;
@@ -361,7 +365,7 @@ export function ColumnManager<Row = unknown>({
 
   /* ── The trigger ─────────────────────────────────────────────────────── */
 
-  const [channel] = useState(() => new TriggerChannel({ open: false, hidden: 0, rootId, labels }));
+  const [channel] = useState(() => new TriggerChannel({ open: false, hidden: 0, rootId, t }));
   const [triggerNode, setTriggerNode] = useState<HTMLElement | null>(null);
   channel.onTrigger = setTriggerNode;
   channel.toggle = (reason, event) => setOpen(!open, reason, event);
@@ -370,7 +374,7 @@ export function ColumnManager<Row = unknown>({
       open,
       hidden: state.hidden.length,
       rootId: nativeProps.id ?? rootId,
-      labels,
+      t,
     });
   });
   const root = useContext(ColumnManagerRootContext);
@@ -406,8 +410,9 @@ export function ColumnManager<Row = unknown>({
   const [drag, setDrag] = useState<DragView>(NO_DRAG);
   const controller = useRef<DragController | null>(null);
   const pendingFocus = useRef<string | null>(null);
-  const latest = useRef({ zones, working, edit, searching, byId, labels });
-  latest.current = { zones, working, edit, searching, byId, labels };
+  const dragT = useMessages(dragMessages);
+  const latest = useRef({ zones, working, edit, searching, byId, t, dragT });
+  latest.current = { zones, working, edit, searching, byId, t, dragT };
 
   useEffect(() => {
     if (!panel) return;
@@ -423,16 +428,13 @@ export function ColumnManager<Row = unknown>({
       restoreFocus: false,
       autoScroll: { axis: 'y' },
       announce,
+      t: (key, slots) => latest.current.dragT(key, slots),
       /* A one-step keyboard move says where the column landed once, below;
          the controller's own step-by-step position would say it twice. */
-      messages: {
-        moved: () => '',
-        dropped: ({ item, position }) =>
-          fillLabel(latest.current.labels.moved, { column: item, position: position ?? '' }),
-      },
+      silent: ['moved'],
       onDrop: ({ items, source, target, reason, event }) => {
         if (target.kind !== 'between' || target.container !== source.container) return;
-        const { zones: current, working: from, edit: request, labels: words } = latest.current;
+        const { zones: current, working: from, edit: request, t: words } = latest.current;
         const key = source.container as ZoneKey;
         const zone = current[key];
         const id = items[0]!;
@@ -445,7 +447,7 @@ export function ColumnManager<Row = unknown>({
         if (reason === 'keyboard') {
           pendingFocus.current = id;
           const column = latest.current.byId.get(id);
-          announce(fillLabel(words.moved, { column: column?.label ?? id, position: to + 1 }));
+          announce(words('moved', { column: column?.label ?? id, position: to + 1 }));
         }
       },
     });
@@ -551,9 +553,9 @@ export function ColumnManager<Row = unknown>({
     ids: zones[key].filter((id) => byId.has(id) && matches(id)),
   })).filter((section) => section.ids.length > 0);
   const sectionLabel = {
-    start: labels.pinnedStart,
-    middle: labels.unpinned,
-    end: labels.pinnedEnd,
+    start: t('pinnedStart'),
+    middle: t('unpinned'),
+    end: t('pinnedEnd'),
   };
 
   const renderItem = (id: string, key: ZoneKey) => {
@@ -565,11 +567,11 @@ export function ColumnManager<Row = unknown>({
     const shownInRow = !isHidden && inRow.has(id);
     const handleDisabled = searching || column.reorderable === false;
     const status = locked
-      ? labels.required
+      ? t('required')
       : bySpace
-        ? labels.hiddenBySpace
+        ? t('hiddenBySpace')
         : shownInRow
-          ? labels.inRow
+          ? t('inRow')
           : null;
     const zone = zoneOfKey(key);
     return (
@@ -584,7 +586,7 @@ export function ColumnManager<Row = unknown>({
       >
         <button
           aria-disabled={handleDisabled || undefined}
-          aria-label={fillLabel(labels.reorder, { column: column.label })}
+          aria-label={t('reorder', { column: column.label })}
           data-part="handle"
           onKeyDown={(event) => onHandleKeyDown(event, id, key)}
           type="button"
@@ -621,7 +623,7 @@ export function ColumnManager<Row = unknown>({
             render={(props) => (
               <button
                 {...props}
-                aria-label={fillLabel(labels.pin, { column: column.label })}
+                aria-label={t('pin', { column: column.label })}
                 data-part="pin"
                 type="button"
                 {...(zone ? { 'data-pinned': '' } : {})}
@@ -639,7 +641,7 @@ export function ColumnManager<Row = unknown>({
                 edit(withColumnPinned(working, id, 'start'), event.reason, event.source)
               }
             >
-              {labels.pinStart}
+              {t('pinStart')}
             </MenuItem>
             <MenuItem
               disabled={zone === 'end'}
@@ -647,7 +649,7 @@ export function ColumnManager<Row = unknown>({
                 edit(withColumnPinned(working, id, 'end'), event.reason, event.source)
               }
             >
-              {labels.pinEnd}
+              {t('pinEnd')}
             </MenuItem>
             {zone === null ? null : (
               <MenuItem
@@ -655,7 +657,7 @@ export function ColumnManager<Row = unknown>({
                   edit(withColumnPinned(working, id, null), event.reason, event.source)
                 }
               >
-                {labels.unpin}
+                {t('unpin')}
               </MenuItem>
             )}
           </MenuContent>
@@ -684,16 +686,16 @@ export function ColumnManager<Row = unknown>({
     >
       <div data-part="header">
         <h2 data-part="title" id={titleId}>
-          {labels.title}
+          {t('title')}
         </h2>
-        <span data-part="summary">{fillLabel(labels.visibleCount, { visible, total })}</span>
+        <span data-part="summary">{t('visibleCount', { visible, total })}</span>
       </div>
       <div data-part="search">
         <TextField
-          aria-label={labels.search}
+          aria-label={t('search')}
           clearable
           onValueChange={(next) => setQuery(next)}
-          placeholder={labels.search}
+          placeholder={t('search')}
           size="sm"
           start={
             <Icon>
@@ -707,7 +709,7 @@ export function ColumnManager<Row = unknown>({
       <div data-part="list">
         {sections.length === 0 && searching ? (
           <div data-part="empty" role="status">
-            {labels.noResults}
+            {t('noResults')}
           </div>
         ) : (
           sections.map(({ key, ids }) => (
@@ -747,7 +749,7 @@ export function ColumnManager<Row = unknown>({
           tone="secondary"
           variant="ghost"
         >
-          {labels.showAll}
+          {t('showAll')}
         </Button>
         <Button
           disabled={sameState(working, normalizedDefault)}
@@ -757,7 +759,7 @@ export function ColumnManager<Row = unknown>({
           tone="secondary"
           variant="ghost"
         >
-          {labels.reset}
+          {t('reset')}
         </Button>
         {confirm ? (
           <>
@@ -768,7 +770,7 @@ export function ColumnManager<Row = unknown>({
               tone="secondary"
               variant="outline"
             >
-              {labels.cancel}
+              {t('cancel')}
             </Button>
             <Button
               disabled={draft === null || sameState(draft, state)}
@@ -776,7 +778,7 @@ export function ColumnManager<Row = unknown>({
               render={(props) => <button {...props} data-part="apply" />}
               size="sm"
             >
-              {labels.apply}
+              {t('apply')}
             </Button>
           </>
         ) : null}
@@ -831,7 +833,7 @@ const NO_SNAPSHOT: TriggerSnapshot = {
   open: false,
   hidden: 0,
   rootId: '',
-  labels: {} as ColumnManagerLabels,
+  t: () => '',
 };
 const NO_SUBSCRIPTION = () => () => undefined;
 
@@ -878,10 +880,7 @@ export function ColumnManagerTrigger({
   );
 
   const count = snapshot.hidden;
-  const sentence =
-    count === 1
-      ? snapshot.labels.hiddenCountOne
-      : fillLabel(snapshot.labels.hiddenCountOther ?? '', { count });
+  const sentence = snapshot.t('hiddenCount', { count });
 
   const rootProps: ColumnManagerTriggerRootProps = {
     ...nativeProps,

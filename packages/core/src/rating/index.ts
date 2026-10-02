@@ -1,13 +1,12 @@
 export {
   RATING_INSIGHT_THRESHOLDS,
   formatRating,
-  formatRatingMessage,
+  formatRatingValue,
   formatShare,
   normaliseRating,
   ratingAtPoint,
   ratingFills,
   ratingForKey,
-  ratingLabel,
   summariseRatings,
 } from './rating';
 export type {

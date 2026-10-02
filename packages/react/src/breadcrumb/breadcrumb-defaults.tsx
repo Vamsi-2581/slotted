@@ -9,10 +9,11 @@ export function useBreadcrumbDefaults(): BreadcrumbDefaults {
 }
 
 /**
- * An application decides once what its trails are called, how deep they may get
- * before they fold, whether they fold for want of width, and what is drawn between two crumbs. A trail that states
- * any of those itself still wins: an explicit prop is never overridden by
- * context.
+ * An application decides once how deep its trails may get before they fold,
+ * whether they fold for want of width, and what is drawn between two crumbs. A
+ * trail that states any of those itself still wins: an explicit prop is never
+ * overridden by context. Its words come from the language in force
+ * (`SlottedProvider`).
  */
 export function BreadcrumbDefaultsProvider({
   children,
@@ -25,7 +26,6 @@ export function BreadcrumbDefaultsProvider({
       value={{
         itemsAfterCollapse: defaults.itemsAfterCollapse ?? inherited.itemsAfterCollapse,
         itemsBeforeCollapse: defaults.itemsBeforeCollapse ?? inherited.itemsBeforeCollapse,
-        label: defaults.label ?? inherited.label,
         maxItems: defaults.maxItems ?? inherited.maxItems,
         overflow: defaults.overflow ?? inherited.overflow,
         separator: defaults.separator ?? inherited.separator,

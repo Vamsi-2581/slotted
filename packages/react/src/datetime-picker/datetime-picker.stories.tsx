@@ -1,5 +1,6 @@
 import { plainDate, plainDateTime, plainTime } from '@slotted/core/date';
 import type { PlainDate, PlainTime } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -8,6 +9,7 @@ import { useRef, useState } from 'react';
 
 import { Button } from '../button';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { DateTimePicker } from './datetime-picker';
 import { DateTimePickerDefaultsProvider } from './datetime-picker-defaults';
 import { Grid, Measure, Scene } from './datetime-picker-demo';
@@ -374,9 +376,9 @@ export const DayWindow: Story = {
             aria-label="Dia fechado"
             defaultOpen
             defaultValue={plainDateTime(plainDate(2026, 9, 12), plainTime(10, 0))}
-            emptyLabel="Não há horário disponível neste dia."
             isTimeUnavailable={(_time: PlainTime, date: PlainDate) => isSaturday(date)}
             locale="pt-BR"
+            messages={{ empty: 'Não há horário disponível neste dia.' }}
             referenceDateTime={REFERENCE}
             step={3600}
             unavailableOptions="hide"
@@ -442,7 +444,7 @@ export const Now: Story = {
             aria-label="Agora"
             defaultOpen
             locale="pt-BR"
-            nowLabel="Agora"
+            messages={{ now: 'Agora' }}
             referenceDateTime={REFERENCE}
           />
         </Stage>
@@ -770,12 +772,14 @@ export const Composition: Story = {
     <Grid columns={2}>
       <Scene
         label="Uma decisão, uma vez"
-        note="O provider fixa o locale, o relógio, o passo, a colocação e cada rótulo para tudo o que está por baixo. Um controlo que declare qualquer um deles continua a ganhar — é a segunda linha aqui."
+        note="O provider fixa o relógio, o passo e a colocação para tudo o que está por baixo, e o SlottedProvider a língua e cada rótulo. Um controlo que declare qualquer um deles continua a ganhar — é a segunda linha aqui."
       >
-        <DateTimePickerDefaultsProvider locale="pt-BR" step={1800}>
-          <DateTimePicker aria-label="Do provider" defaultValue={CONSULTATION} />
-          <DateTimePicker aria-label="Com passo próprio" defaultValue={CONSULTATION} step={900} />
-        </DateTimePickerDefaultsProvider>
+        <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+          <DateTimePickerDefaultsProvider step={1800}>
+            <DateTimePicker aria-label="Do provider" defaultValue={CONSULTATION} />
+            <DateTimePicker aria-label="Com passo próprio" defaultValue={CONSULTATION} step={900} />
+          </DateTimePickerDefaultsProvider>
+        </SlottedProvider>
       </Scene>
       <Scene
         label="Uma linha desenhada pelo consumidor"

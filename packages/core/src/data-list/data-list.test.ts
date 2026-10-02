@@ -1,17 +1,20 @@
 import { describe, expect, it } from 'vitest';
 
 import { applyQuery, emptyQuery, type GridColumn } from '../grid';
+import { createTranslator, dataListMessages } from '../i18n';
+import { PT_BR } from '../i18n/locales/pt-BR';
 import {
-  DEFAULT_DATA_LIST_LABELS,
   dataListFieldText,
   dataListKeys,
   dataListNodes,
   describeDataListSort,
-  formatDataListMessage,
   resolveDataListLayout,
   withDataListSortColumn,
   withDataListSortDirection,
 } from './data-list';
+
+/** What a boolean field says; the bindings take it from their catalog. */
+const booleans = { true: 'Yes', false: 'No' };
 
 interface Account {
   id: string;
@@ -94,31 +97,9 @@ describe('fields', () => {
       region: 'Lisbon',
       plan: '',
     };
-    expect(dataListFieldText(columns[6]!, row)).toBeNull();
-    expect(dataListFieldText(columns[3]!, row)).toBeNull();
-    expect(dataListFieldText(columns[2]!, row, { locale: 'en-US' })).toBe('12,480');
-  });
-});
-
-describe('messages', () => {
-  it('fills slots and formats numbers in the locale', () => {
-    expect(
-      formatDataListMessage(
-        '{selected} of {count} selected',
-        { selected: 1, count: 1200 },
-        'en-US',
-      ),
-    ).toBe('1 of 1,200 selected');
-    expect(formatDataListMessage('{count}', { count: 1200 }, 'pt-BR')).toBe('1.200');
-  });
-
-  it('states the plural through a function', () => {
-    expect(formatDataListMessage(DEFAULT_DATA_LIST_LABELS.count, { count: 1 })).toBe('1 item');
-    expect(formatDataListMessage(DEFAULT_DATA_LIST_LABELS.count, { count: 3 })).toBe('3 items');
-  });
-
-  it('leaves an unknown slot as written', () => {
-    expect(formatDataListMessage('Select {title}', {})).toBe('Select {title}');
+    expect(dataListFieldText(columns[6]!, row, { booleans })).toBeNull();
+    expect(dataListFieldText(columns[3]!, row, { booleans })).toBeNull();
+    expect(dataListFieldText(columns[2]!, row, { locale: 'en-US', booleans })).toBe('12,480');
   });
 });
 
@@ -157,9 +138,18 @@ describe('sorting', () => {
           { column: 'balance', direction: 'descending' },
         ],
         columns,
-        DEFAULT_DATA_LIST_LABELS,
+        createTranslator({ locale: 'en-US' }).family(dataListMessages),
       ),
     ).toBe('Account ascending, Balance descending');
+  });
+
+  it('says the order in the language of the translator it is given', () => {
+    const pt = createTranslator({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }).family(
+      dataListMessages,
+    );
+    expect(describeDataListSort([{ column: 'name', direction: 'descending' }], columns, pt)).toBe(
+      'Account em ordem decrescente',
+    );
   });
 });
 
@@ -198,7 +188,7 @@ describe('dataListNodes', () => {
   ];
 
   it('keeps a flat list flat', () => {
-    const result = applyQuery(rows, columns, emptyQuery(), { rowKey: (row) => row.id });
+    const result = applyQuery(rows, columns, emptyQuery(), { rowKey: (row) => row.id, booleans });
     const nodes = dataListNodes(result.nodes);
     expect(nodes.every((node) => node.kind === 'row')).toBe(true);
     expect(dataListKeys(nodes)).toEqual(['a', 'b', 'c']);
@@ -211,6 +201,7 @@ describe('dataListNodes', () => {
       { ...emptyQuery(), group: ['plan', 'status'] },
       {
         rowKey: (row) => row.id,
+        booleans,
       },
     );
     const nodes = dataListNodes(result.nodes);

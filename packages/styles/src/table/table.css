@@ -63,7 +63,9 @@
        and a transparent sticky cell shows the table through itself. */
     --_text: var(--slotted-table-color, var(--slotted-text, CanvasText));
     --_muted: var(--slotted-table-color-muted, var(--slotted-text-muted, GrayText));
-    --_surface: var(--slotted-table-surface, var(--slotted-surface, Canvas));
+    /* The ground a raised container publishes (a card, a section on a surface),
+       else the page's surface. */
+    --_surface: var(--slotted-table-surface, var(--slotted-ground, var(--slotted-surface, Canvas)));
     /**
      * The header band, mixed from the ink rather than taken from a tone. Read
      * in light, `--slotted-tone-secondary-surface` was both too blue and too

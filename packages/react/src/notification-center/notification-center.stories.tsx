@@ -285,7 +285,7 @@ export const Growing: Story = {
     <Grid columns={1}>
       <Scene
         label="growing='button'"
-        note="Press Carregar mais: the waiting row says A carregar notificações for a moment and two older items arrive at the end. aria-setsize is -1 on every article until the consumer states a count."
+        note="Press Load more: the waiting row says Loading notifications for a moment and two older items arrive at the end. aria-setsize is -1 on every article until the consumer states a count."
       >
         <Inbox growing="button" />
       </Scene>
@@ -403,7 +403,7 @@ export const Loading: Story = {
       </Scene>
       <Scene
         label="With items loaded and more on the way"
-        note="The rows stay; the waiting row under the feed says A carregar notificações politely."
+        note="The rows stay; the waiting row under the feed says Loading notifications politely."
       >
         <NotificationCenter
           growing="scroll"
@@ -429,7 +429,7 @@ export const Empty: Story = {
       </Scene>
       <Scene
         label="Nothing unread"
-        note="Under the unread view with every item read, messages.caughtUp — Tudo lido."
+        note="Under the unread view with every item read, the caughtUp message."
       >
         <NotificationCenter
           defaultView="unread"
@@ -600,13 +600,9 @@ export const Defaults: Story = {
     <Grid columns={1}>
       <Scene
         label="Two centres under one provider"
-        note="Neither states a size, a growing mode or a title; both read small, paged by button and called Avisos. The second states controls='none' and wins."
+        note="Neither states a size or a growing mode; both read small and paged by button. The second states controls='none' and wins. The title comes from the language in force."
       >
-        <NotificationCenterDefaultsProvider
-          growing="button"
-          messages={{ title: 'Avisos' }}
-          size="sm"
-        >
+        <NotificationCenterDefaultsProvider growing="button" size="sm">
           <Stack gap={6}>
             <Panel>
               <Inbox />

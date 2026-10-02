@@ -17,9 +17,7 @@ import type {
  * that sets neither pays for no timer.
  */
 export interface LoadingOverlayDefaults {
-  cancelLabel?: string;
   delay?: number;
-  label?: string;
   live?: LoadingOverlayLive;
   loadedLabel?: string;
   minDuration?: number;
@@ -34,7 +32,8 @@ export const LOADING_OVERLAY_DEFAULTS_TOKEN = new InjectionToken<LoadingOverlayD
 
 /**
  * An overlay that states any of these still wins: an explicit input is never
- * overridden by the token.
+ * overridden by the token. The words the family writes come from the language
+ * in force (`provideSlotted`).
  */
 export function provideLoadingOverlayDefaults(defaults: LoadingOverlayDefaults) {
   return { provide: LOADING_OVERLAY_DEFAULTS_TOKEN, useValue: defaults };

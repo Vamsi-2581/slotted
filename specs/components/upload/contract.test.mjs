@@ -232,9 +232,9 @@ test('makes the control invalid while a transfer is pending', () => {
 
 /**
  * Every rejection carries a reason the consumer turns into a message. The
- * family writes no message of its own beyond the default `describeRejection`
- * the provider holds, because only the consumer knows whether a limit is a
- * policy, a plan or a bug.
+ * catalog holds one sentence per reason, which an upload's `messages`
+ * replaces, because only the consumer knows whether a limit is a policy, a
+ * plan or a bug.
  */
 test('reports each refusal with a reason from a closed set', () => {
   assert.deepEqual(contract.rejectionReasons.sort(), [
@@ -248,7 +248,9 @@ test('reports each refusal with a reason from a closed set', () => {
     'totalSize',
     'type',
   ]);
-  assert.ok(contract.provides.uploadDefaults.includes('describeRejection'));
+  for (const reason of contract.rejectionReasons) {
+    assert.ok(contract.messages.includes(`rejection.${reason}`), `${reason} has no sentence`);
+  }
   assert.ok(member.parts.includes('message'));
 });
 
@@ -384,7 +386,7 @@ test('lets an application decide once', () => {
   for (const axis of Object.keys(contract.axes)) {
     assert.ok(provided.includes(axis), `${axis} cannot be set for the application`);
   }
-  for (const value of ['adapter', 'concurrency', 'retries', 'describeRejection', 'labels']) {
+  for (const value of ['adapter', 'concurrency', 'retries']) {
     assert.ok(provided.includes(value), `${value} cannot be set for the application`);
   }
 });
@@ -589,15 +591,20 @@ test('marks the region while a click inside it opens the picker', () => {
 });
 
 /**
- * Every visible and spoken sentence about the queue is the provider's, as the
- * labels are. The counts were English written into both bindings, against the
- * contract's own `labels.reason`, and Angular never said the queue had
- * finished at all.
+ * Every visible and spoken sentence about the queue is a catalog message, as
+ * the control words are. The counts were once English written into both
+ * bindings, and Angular never said the queue had finished at all.
  */
-test('says every count through the provider', () => {
-  assert.ok(contract.provides.uploadDefaults.includes('describeQueue'));
-  assert.deepEqual(contract.queueMessage.kinds, ['summary', 'selection', 'added', 'finished']);
-  assert.equal(contract.queueMessage.owner, 'describeQueue');
+test('says every count through the catalog', () => {
+  assert.deepEqual(contract.queueMessage.kinds, [
+    'summary',
+    'summaryRemaining',
+    'selection',
+    'added',
+    'finished',
+  ]);
+  assert.equal(contract.queueMessage.owner, 'messages');
+  for (const kind of contract.queueMessage.kinds) assert.ok(contract.messages.includes(kind));
   assert.ok(contract.announcement.announces.includes('queue finished'));
   assert.ok(contract.queueMessage.reason.length > 0);
 });

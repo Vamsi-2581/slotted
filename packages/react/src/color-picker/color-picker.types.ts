@@ -1,4 +1,5 @@
 import type { ColorFormat, ContrastLevel } from '@slotted/core/color';
+import type { ColorPickerMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
@@ -15,19 +16,9 @@ export type ColorPickerValueReason = Extract<
 
 /** What an application sets once for every colour picker under it. */
 export interface ColorPickerDefaults {
-  alphaLabel: string;
-  areaLabel: string;
-  eyedropperLabel: string;
   format: ColorFormat;
-  formatLabel: string;
-  gamutLabel: string;
-  hueLabel: string;
-  inputLabel: string;
   presets: readonly string[] | undefined;
-  presetsLabel: string;
-  previousLabel: string;
   size: ColorPickerSize;
-  triggerLabel: string;
 }
 
 export interface ColorPickerDefaultsProviderProps extends Partial<ColorPickerDefaults> {
@@ -53,6 +44,11 @@ interface ColorStateProps {
   readOnly?: boolean | undefined;
   invalid?: boolean | undefined;
   size?: ColorPickerSize | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: every
+   * control's name, the gamut sentence and the contrast levels.
+   */
+  messages?: PartialMessages<ColorPickerMessages> | undefined;
 }
 
 /**
@@ -73,7 +69,10 @@ export interface ColorPickerChannelProps extends ComponentPropsWithRef<'div'> {
 export interface ColorPickerFieldProps
   extends
     ColorStateProps,
-    Omit<TextFieldProps, 'value' | 'defaultValue' | 'onValueChange' | 'size' | 'start'> {
+    Omit<
+      TextFieldProps,
+      'value' | 'defaultValue' | 'onValueChange' | 'size' | 'start' | 'messages'
+    > {
   /** Present means the consumer owns whether the panel is open. */
   open?: boolean | undefined;
   defaultOpen?: boolean | undefined;

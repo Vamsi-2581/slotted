@@ -50,7 +50,7 @@ export interface ConflictField {
           }
         </div>
         <span slInline [gap]="3">
-          <button slButton size="sm" type="button" [loading]="busy()" loadingLabel="Saving" (click)="mine.emit()">
+          <button slButton size="sm" type="button" [loading]="busy()" [messages]="{ loading: 'Saving' }" (click)="mine.emit()">
             Keep what I wrote
           </button>
           <button slButton size="sm" variant="outline" tone="secondary" type="button" (click)="theirs.emit()">

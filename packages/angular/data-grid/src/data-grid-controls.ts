@@ -23,6 +23,7 @@ import {
   withCondition,
   withJoin,
 } from '@slotted/core/filter';
+import type { DataGridMessages, FamilyTranslator } from '@slotted/core/i18n';
 import type {
   FilterCondition,
   FilterDescriptor,
@@ -66,7 +67,7 @@ import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
 import { SlTimeField } from '@slotted/angular/time-field';
 import { SlTimePicker } from '@slotted/angular/time-picker';
 import { SlTimeRangePicker } from '@slotted/angular/time-range-picker';
-import type { DataGridFilterOperandContext, DataGridLabels } from './data-grid-defaults';
+import type { DataGridFilterOperandContext } from './data-grid-defaults';
 
 type Condition = FilterCondition<string, unknown>;
 
@@ -187,15 +188,15 @@ function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
           [variant]="variant()"
           [fullWidth]="true"
           [items]="truths()"
-          [placeholder]="labels().filterAny"
+          [placeholder]="t()('filterAny')"
           [attr.aria-label]="label()"
           [value]="value() === true ? 'true' : value() === false ? 'false' : null"
           (valueChange)="
             valueChange.emit($event === 'true' ? true : $event === 'false' ? false : null)
           "
         >
-          <sl-select-item value="true">{{ labels().filterYes }}</sl-select-item>
-          <sl-select-item value="false">{{ labels().filterNo }}</sl-select-item>
+          <sl-select-item value="true">{{ t()('filterYes') }}</sl-select-item>
+          <sl-select-item value="false">{{ t()('filterNo') }}</sl-select-item>
         </sl-select>
       }
       @case ('set') {
@@ -207,7 +208,7 @@ function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
           [fullWidth]="true"
           [items]="setItems()"
           [locale]="locale()"
-          [placeholder]="labels().filterAny"
+          [placeholder]="t()('filterAny')"
           [attr.aria-label]="label()"
           [value]="setValue()"
           (valueChange)="valueChange.emit([...$event])"
@@ -243,7 +244,8 @@ export class SlDataGridOperand {
   readonly column = input.required<GridColumn<unknown>>();
   readonly value = input<unknown>(null);
   readonly label = input.required<string>();
-  readonly labels = input.required<DataGridLabels>();
+  /** The grid's words, in the language in force. */
+  readonly t = input.required<FamilyTranslator<DataGridMessages>>();
   readonly variant = input<'plain' | 'outline'>('outline');
   readonly locale = input<string | undefined>(undefined);
   readonly counts = input<ReadonlyMap<string, number> | undefined>(undefined);
@@ -262,8 +264,8 @@ export class SlDataGridOperand {
   protected readonly timeValue = computed(() => timeOf(this.value()));
   protected readonly dateTimeValue = computed(() => dateTimeOf(this.value()));
   protected readonly truths = computed(() => [
-    { label: this.labels().filterYes, value: 'true' },
-    { label: this.labels().filterNo, value: 'false' },
+    { label: this.t()('filterYes'), value: 'true' },
+    { label: this.t()('filterNo'), value: 'false' },
   ]);
   protected readonly setOptions = computed(() => {
     const known = this.column().options ?? [];
@@ -328,8 +330,7 @@ export function isRangeOperand(kind: FilterKind, operator: string) {
           size="sm"
           [variant]="variant()"
           [locale]="locale()"
-          [startLabel]="labels().filterFrom"
-          [endLabel]="labels().filterTo"
+          [messages]="{ start: t()('filterFrom'), end: t()('filterTo') }"
           [value]="timeRange()"
           (valueChange)="
             rangeChange.emit({
@@ -345,8 +346,7 @@ export function isRangeOperand(kind: FilterKind, operator: string) {
           size="sm"
           [variant]="variant()"
           [locale]="locale()"
-          [startLabel]="labels().filterFrom"
-          [endLabel]="labels().filterTo"
+          [messages]="{ start: t()('filterFrom'), end: t()('filterTo') }"
           [value]="dateTimeRange()"
           (valueChange)="
             rangeChange.emit({
@@ -362,8 +362,7 @@ export function isRangeOperand(kind: FilterKind, operator: string) {
           size="sm"
           [variant]="variant()"
           [locale]="locale()"
-          [startLabel]="labels().filterFrom"
-          [endLabel]="labels().filterTo"
+          [messages]="{ start: t()('filterFrom'), end: t()('filterTo') }"
           [value]="dateRange()"
           (valueChange)="
             rangeChange.emit({ start: isoDay($event.value?.start), end: isoDay($event.value?.end) })
@@ -380,7 +379,8 @@ export class SlDataGridRangeOperand {
   readonly kind = input.required<FilterKind>();
   readonly start = input<unknown>(null);
   readonly end = input<unknown>(null);
-  readonly labels = input.required<DataGridLabels>();
+  /** The grid's words, in the language in force. */
+  readonly t = input.required<FamilyTranslator<DataGridMessages>>();
   readonly variant = input<'plain' | 'outline'>('outline');
   readonly locale = input<string | undefined>(undefined);
   readonly rangeChange = output<{ start: string | null; end: string | null }>();
@@ -437,7 +437,7 @@ export class SlDataGridRangeOperand {
                 slSegmentedControl
                 size="sm"
                 [value]="draft().join"
-                [attr.aria-label]="labels().filterJoin"
+                [attr.aria-label]="t()('filterJoin')"
                 (valueChange)="setJoin($event.value ?? 'and')"
               >
                 <label slSegment value="and">{{ joinName('and') }}</label>
@@ -451,7 +451,7 @@ export class SlDataGridRangeOperand {
               width="content"
               [fullWidth]="true"
               [items]="operatorItems()"
-              [attr.aria-label]="labels().filterOperator"
+              [attr.aria-label]="t()('filterOperator')"
               [value]="conditionAt(index).operator"
               (valueChange)="setOperator(index, $any($event))"
             >
@@ -470,7 +470,7 @@ export class SlDataGridRangeOperand {
                 [kind]="kind()"
                 [start]="operandOf(index, 0)"
                 [end]="operandOf(index, 1)"
-                [labels]="labels()"
+                [t]="t()"
                 [locale]="locale()"
                 variant="outline"
                 (rangeChange)="setOperands(index, $event.start, $event.end)"
@@ -490,7 +490,7 @@ export class SlDataGridRangeOperand {
                     [column]="column().column"
                     [value]="operandOf(index, slot)"
                     [label]="operandLabel(index, slot)"
-                    [labels]="labels()"
+                    [t]="t()"
                     [locale]="locale()"
                     [counts]="counts()"
                     variant="outline"
@@ -513,10 +513,10 @@ export class SlDataGridRangeOperand {
           [disabled]="!clearable()"
           (click)="clear()"
         >
-          {{ labels().filterClear }}
+          {{ t()('filterClear') }}
         </button>
         <button slButton type="button" size="sm" (click)="apply('pointer')">
-          {{ labels().filterApply }}
+          {{ t()('filterApply') }}
         </button>
       </div>
     </div>
@@ -529,7 +529,8 @@ export class SlDataGridFilterPanel {
   readonly column = input.required<ResolvedGridColumn<unknown>>();
   readonly kind = input.required<FilterKind>();
   readonly committed = input<FilterDescriptor | null>(null);
-  readonly labels = input.required<DataGridLabels>();
+  /** The grid's words, in the language in force. */
+  readonly t = input.required<FamilyTranslator<DataGridMessages>>();
   readonly locale = input<string | undefined>(undefined);
   readonly counts = input<ReadonlyMap<string, number> | undefined>(undefined);
   readonly customTemplate = input<TemplateRef<DataGridFilterOperandContext> | null>(null);
@@ -582,18 +583,18 @@ export class SlDataGridFilterPanel {
     return (slot === 0 ? condition.value : condition.end) ?? null;
   }
   protected operandLabel(index: number, slot: 0 | 1) {
-    const labels = this.labels();
+    const t = this.t();
     return this.operandsOf(index) === 2
       ? slot === 0
-        ? labels.filterFrom
-        : labels.filterTo
-      : labels.filterValue;
+        ? t('filterFrom')
+        : t('filterTo')
+      : t('filterValue');
   }
   protected operatorName(operator: string) {
-    return this.labels().filterOperators[operator as FilterOperator] ?? operator;
+    return this.t()(`filterOperators.${operator as FilterOperator}`);
   }
   protected joinName(join: FilterJoin) {
-    return this.labels().filterJoins[join] ?? join;
+    return this.t()(`filterJoins.${join}`);
   }
   protected context(index: number, slot: 0 | 1): DataGridFilterOperandContext {
     const value = this.operandOf(index, slot);
@@ -636,15 +637,15 @@ export class SlDataGridFilterPanel {
   }
   protected apply(reason: 'pointer' | 'keyboard') {
     const next = normalizeFilter(this.draft());
-    const labels = this.labels();
+    const t = this.t();
     const name = this.column().column.label;
     const format = {
       join: (join: FilterJoin) => this.joinName(join),
       operator: (operator: FilterOperator) => this.operatorName(operator),
     };
     const said = next
-      ? `${labels.filter} ${name}: ${describeFilter(next, format)}`
-      : `${labels.filter} ${name}, ${labels.filterCleared}`;
+      ? t('filterApplied', { column: name, filter: describeFilter(next, format) })
+      : t('filterCleared', { column: name });
     this.applyRequest.emit({
       filter: sameFilter(next, this.committed()) ? this.committed() : next,
       reason,
@@ -653,11 +654,11 @@ export class SlDataGridFilterPanel {
   }
   protected clear() {
     this.draft.set(this.blank());
-    const labels = this.labels();
+    const t = this.t();
     this.applyRequest.emit({
       filter: null,
       reason: 'clear',
-      said: `${labels.filter} ${this.column().column.label}, ${labels.filterCleared}`,
+      said: t('filterCleared', { column: this.column().column.label }),
     });
   }
 }
@@ -689,7 +690,7 @@ export class SlDataGridFilterPanel {
           type="button"
           tabindex="-1"
           [slMenuTriggerFor]="menu"
-          [attr.aria-label]="labels().filterOperator + ': ' + operatorName(operator())"
+          [attr.aria-label]="t()('filterOperatorChosen', { operator: operatorName(operator()) })"
           [attr.title]="operatorName(operator())"
         >
           {{ symbol() }}
@@ -705,7 +706,7 @@ export class SlDataGridFilterPanel {
           [kind]="kind()"
           [start]="draft().value"
           [end]="draft().end"
-          [labels]="labels()"
+          [t]="t()"
           [locale]="locale()"
           variant="plain"
           (rangeChange)="writeBoth($event.start, $event.end)"
@@ -722,7 +723,7 @@ export class SlDataGridFilterPanel {
               [column]="column().column"
               [value]="slot === 0 ? draft().value : draft().end"
               [label]="operandLabel(slot)"
-              [labels]="labels()"
+              [t]="t()"
               [locale]="locale()"
               [counts]="counts()"
               [placeholder]="rowPlaceholder(slot)"
@@ -743,7 +744,8 @@ export class SlDataGridFilterRowOperand {
   readonly column = input.required<ResolvedGridColumn<unknown>>();
   readonly kind = input.required<FilterKind>();
   readonly committed = input<FilterDescriptor | null>(null);
-  readonly labels = input.required<DataGridLabels>();
+  /** The grid's words, in the language in force. */
+  readonly t = input.required<FamilyTranslator<DataGridMessages>>();
   readonly locale = input<string | undefined>(undefined);
   readonly counts = input<ReadonlyMap<string, number> | undefined>(undefined);
   readonly debounce = input<number>(300);
@@ -777,30 +779,27 @@ export class SlDataGridFilterRowOperand {
     const operands = this.operands();
     return operands === 0 ? [] : operands === 1 ? [0] : [0, 1];
   });
-  protected readonly symbol = computed(
-    () => this.labels().filterSymbols[this.operator() as FilterOperator] ?? '=',
+  protected readonly symbol = computed(() =>
+    this.t()(`filterSymbols.${this.operator() as FilterOperator}`),
   );
   protected readonly range = computed(() => isRangeOperand(this.kind(), this.operator()));
 
   protected operatorName(operator: string) {
-    return this.labels().filterOperators[operator as FilterOperator] ?? operator;
+    return this.t()(`filterOperators.${operator as FilterOperator}`);
   }
   /* An amount in a filter is typed, never spun (`stepper="none"` above): the
      steppers took a third of a filter cell and a `between` had room for one
      digit. The two ends of a `between` are named From and To. */
   protected rowPlaceholder(slot: 0 | 1) {
-    const labels = this.labels();
-    return this.operands() === 2
-      ? slot === 0
-        ? labels.filterFrom
-        : labels.filterTo
-      : labels.filter;
+    const t = this.t();
+    return this.operands() === 2 ? (slot === 0 ? t('filterFrom') : t('filterTo')) : t('filter');
   }
   protected operandLabel(slot: 0 | 1) {
-    const labels = this.labels();
-    const suffix =
-      this.operands() === 2 ? `, ${slot === 0 ? labels.filterFrom : labels.filterTo}` : '';
-    return `${labels.filter} ${this.column().column.label}${suffix}`;
+    const t = this.t();
+    const column = this.column().column.label;
+    return this.operands() === 2
+      ? t('filterRange', { bound: slot === 0 ? 'from' : 'to', column })
+      : t('filterColumn', { column });
   }
   protected context(slot: 0 | 1): DataGridFilterOperandContext {
     const value = slot === 0 ? this.draft().value : this.draft().end;
@@ -946,7 +945,7 @@ export class SlDataGridFilterRowOperand {
           [fullWidth]="true"
           [multiple]="multiple()"
           [items]="setItems()"
-          [placeholder]="labels().filterAny"
+          [placeholder]="t()('filterAny')"
           [attr.aria-label]="column().label"
           [value]="setValue()"
           (valueChange)="draftChange.emit($event)"
@@ -981,7 +980,8 @@ export class SlDataGridEditor {
   readonly value = input<unknown>(null);
   readonly invalid = input(false);
   readonly message = input<string | null>(null);
-  readonly labels = input.required<DataGridLabels>();
+  /** The grid's words, in the language in force. */
+  readonly t = input.required<FamilyTranslator<DataGridMessages>>();
   readonly locale = input<string | undefined>(undefined);
   readonly draftChange = output<unknown>();
 

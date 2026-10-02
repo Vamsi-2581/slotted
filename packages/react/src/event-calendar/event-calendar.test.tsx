@@ -1,10 +1,12 @@
 import { plainDate } from '@slotted/core/date';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import type { PlainDate, PlainDateTime } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/event-calendar/contract.json';
+import { SlottedProvider } from '../i18n';
 import { MenuItem } from '../menu';
 import { EventCalendar, EventCalendarDefaultsProvider } from './index';
 import type {
@@ -638,19 +640,36 @@ describe('the calendars', () => {
 });
 
 describe('what an application sets once', () => {
-  it('reads words and working defaults from the provider, and lets the instance override them', () => {
+  it('reads the language in force and the working defaults, and lets the instance lay its words over them', () => {
     render(
-      <EventCalendarDefaultsProvider labels={{ today: 'Hoje' }} locale="pt-BR" timeZone="UTC">
-        <EventCalendar
-          defaultDate={day(24)}
-          events={[]}
-          labels={{ next: { month: 'Mês seguinte', week: '', day: '', list: '' } }}
-        />
-      </EventCalendarDefaultsProvider>,
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+        <EventCalendarDefaultsProvider timeZone="UTC">
+          <EventCalendar
+            defaultDate={day(24)}
+            events={[]}
+            messages={{ next: { month: 'Mês seguinte' } }}
+          />
+        </EventCalendarDefaultsProvider>
+      </SlottedProvider>,
     );
     expect(screen.getByRole('button', { name: 'Hoje' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Mês seguinte' })).toBeInTheDocument();
     expect(screen.getByRole('grid')).toHaveAccessibleName('setembro de 2026');
+  });
+
+  it('changes its words and its date format together with the language in force', () => {
+    const inLocale = (locale: string) => (
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale={locale}>
+        <EventCalendar defaultDate={day(24)} events={[]} timeZone="UTC" />
+      </SlottedProvider>
+    );
+    const { rerender } = render(inLocale('pt-BR'));
+    expect(screen.getByRole('button', { name: 'Hoje' })).toBeInTheDocument();
+    expect(screen.getByRole('grid')).toHaveAccessibleName('setembro de 2026');
+
+    rerender(inLocale('en-US'));
+    expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
+    expect(screen.getByRole('grid')).toHaveAccessibleName('September 2026');
   });
 
   it('hands the imperative actions a consumer cannot state as props', () => {

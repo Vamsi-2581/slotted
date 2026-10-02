@@ -13,6 +13,7 @@ import {
 } from '@slotted/core/date';
 import type { PlainTime, TimeOption } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { timePickerMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
@@ -32,6 +33,7 @@ import type { KeyboardEvent, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 import { useField } from '../field';
+import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { TimeField } from '../time-field';
 import type { TimeFieldHandle } from '../time-field';
@@ -68,8 +70,6 @@ const SSR_REFERENCE: PlainTime = { hour: 12, minute: 0, second: 0 };
  * exactly that.
  */
 export function TimePicker({
-  changeLabel,
-  chooseLabel,
   className,
   clearable = false,
   closeOnSelect,
@@ -77,7 +77,6 @@ export function TimePicker({
   defaultOpen = false,
   defaultValue,
   disabled,
-  emptyLabel,
   footer,
   granularity,
   highlightedValue,
@@ -87,9 +86,9 @@ export function TimePicker({
   locale,
   max,
   maxOptions,
+  messages,
   min,
   name,
-  nowLabel,
   onHighlightedValueChange,
   onKeyDown,
   onOpenChange,
@@ -109,7 +108,6 @@ export function TimePicker({
   step,
   style,
   timeZone,
-  truncatedLabel,
   unavailableOptions,
   value,
   variant,
@@ -117,6 +115,8 @@ export function TimePicker({
 }: TimePickerProps) {
   const field = useField();
   const defaults = useTimePickerDefaults();
+  const appLocale = useLocale();
+  const t = useMessages(timePickerMessages, messages);
   const rootRef = useRef<HTMLElement | null>(null);
   const fieldHandle = useRef<TimeFieldHandle | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -134,7 +134,7 @@ export function TimePicker({
   const [ownValue, setOwnValue] = useState<PlainTime | null>(defaultValue ?? null);
   const held = value ?? ownValue;
 
-  const resolvedLocale = locale ?? defaults.locale;
+  const resolvedLocale = locale ?? appLocale;
   const resolvedTimeZone = timeZone ?? defaults.timeZone;
   const resolvedGranularity = granularity ?? defaults.granularity;
   const resolvedHourCycle = hourCycle ?? defaults.hourCycle;
@@ -401,10 +401,7 @@ export function TimePicker({
    * The trigger's accessible name. Focus returns here when the surface closes,
    * so this is where the reader is told what was chosen.
    */
-  const spoken =
-    held === null
-      ? (chooseLabel ?? defaults.chooseLabel)
-      : `${changeLabel ?? defaults.changeLabel}, ${format.describe(held)}`;
+  const spoken = held === null ? t('choose') : t('change', { time: format.describe(held) });
 
   const closesOnSelect = resolvedCloseOnSelect !== 'never';
 
@@ -539,7 +536,7 @@ export function TimePicker({
         data-part="content"
         id={contentId}
         role="listbox"
-        {...(truncated ? { 'aria-description': truncatedLabel ?? defaults.truncatedLabel } : {})}
+        {...(truncated ? { 'aria-description': t('truncated') } : {})}
       >
         {presets === undefined ? null : <div data-part="presets">{presets}</div>}
         <div data-part="head">
@@ -548,11 +545,11 @@ export function TimePicker({
             onClick={(event) => requestValue(anchor, { reason: 'select', source: event })}
             type="button"
           >
-            {nowLabel ?? defaults.nowLabel}
+            {t('now')}
           </button>
         </div>
         {list.length === 0 ? (
-          <div data-part="empty">{emptyLabel ?? defaults.emptyLabel}</div>
+          <div data-part="empty">{t('empty')}</div>
         ) : (
           <div
             data-part="list"

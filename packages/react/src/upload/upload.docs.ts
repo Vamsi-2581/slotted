@@ -573,13 +573,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'defaults',
     title: 'Deciding once for the whole application',
-    note: 'Where files go, how many run at once, what every control is called, what a refusal says and how the queue counts itself — set once at the root rather than repeated on every form, which is how one of them ends up pointing somewhere else. An upload that states any of them itself still wins.',
+    note: 'Where files go and how many run at once — set once at the root rather than repeated on every form, which is how one of them ends up pointing somewhere else. An upload that states any of them itself still wins. What every control is called, what a refusal says and how the queue counts itself come from the language in force, and an upload lays its own messages over them.',
     snippet: defineSnippet({
       id: 'upload-react-defaults',
       language: 'tsx',
-      label: 'Every label, the sentence a refusal carries, and the counts',
+      label: 'The sender for the application, and the sentence one refusal carries',
       source:
-        "<UploadDefaultsProvider\n  adapter={adapter}\n  concurrency={3}\n  describeRejection={(file, { bytes }) =>\n    file.reason === 'size'\n      ? `Máximo de ${bytes(10 * 1024 * 1024)} por ficheiro.`\n      : 'Ficheiro recusado.'\n  }\n  describeQueue={(message) =>\n    message.kind === 'summary'\n      ? `${message.uploaded} de ${message.total} enviados`\n      : message.kind === 'finished'\n        ? `${message.uploaded} de ${message.total} ficheiros enviados`\n        : `${message.count} ficheiros`\n  }\n  labels={{ trigger: 'Escolher ficheiros', dropzone: 'Largue os ficheiros aqui' }}\n  locale=\"pt-BR\"\n>\n  <App />\n</UploadDefaultsProvider>;",
+        "<SlottedProvider locale=\"pt-BR\" catalogs={{ 'pt-BR': PT_BR }}>\n  <UploadDefaultsProvider adapter={adapter} concurrency={3}>\n    <App />\n  </UploadDefaultsProvider>\n</SlottedProvider>;\n\n<Upload\n  maxSize={10 * 1024 * 1024}\n  messages={{ rejection: { size: 'Máximo de 10 MB por arquivo; este tem {size}.' } }}\n/>;",
     }),
   },
   {
@@ -828,7 +828,13 @@ export const REACT_UPLOAD_DOCS = {
         'Upload',
         'Whether a transfer still running makes the control invalid',
       ],
-      ['locale', 'string', '—', 'Upload', 'BCP 47, for the size and the time left'],
+      [
+        'locale',
+        'string',
+        'the language in force',
+        'Upload',
+        'BCP 47, for the size and the time left',
+      ],
       ['label', 'ReactNode', '—', 'Upload', 'The family’s own label, drawn only outside a Field'],
       ['description', 'ReactNode', '—', 'Upload', 'The guidance, and the input’s aria-describedby'],
       [
@@ -861,39 +867,11 @@ export const REACT_UPLOAD_DOCS = {
       ],
       ['name', 'string', '—', 'Upload', 'What the native input submits under'],
       [
-        'labels',
-        'Partial<UploadLabels>',
-        'the English set',
+        'messages',
+        'Partial<UploadMessages>',
+        '—',
         'Upload',
-        'The fifteen strings the family says, replaceable one at a time',
-      ],
-      [
-        'statusLabels',
-        'Partial<UploadStatusLabels>',
-        'the English set',
-        'Upload',
-        'The word each of the nine statuses says',
-      ],
-      [
-        'kindLabels',
-        'Partial<UploadKindLabels>',
-        'the English set',
-        'Upload',
-        'The word each of the nine kinds says, which is what the viewer reads',
-      ],
-      [
-        'describeRejection',
-        '(file, formatters) => string',
-        'the English default',
-        'Upload',
-        'The sentence a refused file carries',
-      ],
-      [
-        'describeQueue',
-        '(message, formatters) => string',
-        'the English default',
-        'Upload',
-        'Every sentence about the queue as a whole: the summary line, the count the field shape shows, and the announcements that files arrived and that the queue finished',
+        'Words laid over the language in force, key by key: every control, the word for each status and each kind, the sentences about the queue (summary, selection, added, finished), and the sentence a refused file carries (rejection.*)',
       ],
       [
         'render',
@@ -916,7 +894,7 @@ export const REACT_UPLOAD_DOCS = {
         'component',
         '—',
         'anywhere above',
-        'Sets the adapter, the limits, the locale, every label and the rejection sentence once for the application',
+        'Sets the adapter, the limits and the behaviour once for the application; the words come from SlottedProvider',
       ],
       [
         'useUploadDefaults',

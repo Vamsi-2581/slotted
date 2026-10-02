@@ -97,7 +97,7 @@ test('keeps the footer in the flow and holds it through its exit', () => {
   assert.equal(contract.footer.position, 'sticky');
   assert.ok(contract.composes.includes('presence'));
   assert.equal(contract.footer.label, 'messages.footer');
-  assert.equal(contract.messages.footer, 'Ações da página');
+  assert.ok(contract.messages.includes('footer'));
 });
 
 /**
@@ -138,7 +138,6 @@ test('lets an application set its defaults once', () => {
     'scroll',
     'ground',
     'landmark',
-    'messages',
   ]);
   for (const axis of ['width', 'inset', 'scroll', 'ground', 'landmark']) {
     assert.deepEqual(contract.resolution[axis].slice(0, 2), ['prop', 'defaults']);

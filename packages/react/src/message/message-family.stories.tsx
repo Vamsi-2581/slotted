@@ -134,7 +134,7 @@ export const Conversation: Story = {
             <MessageBody>
               <Bubble>
                 <BubbleContent>
-                  <BubbleTyping label="Marta Silva está a escrever" />
+                  <BubbleTyping aria-label="Marta Silva está a escrever" />
                 </BubbleContent>
               </Bubble>
             </MessageBody>
@@ -264,7 +264,7 @@ export const Accessibility: Story = {
     <Grid columns={1}>
       <Scene
         label="What a screen reader hears"
-        note="Each article is named by its author; inside a bubble the ticks carry the word Lida for assistive technology; the typing dots are one image with a name, never three characters."
+        note="Each article is named by its author; inside a bubble the ticks carry the word Read for assistive technology; the typing dots are one image with a name, never three characters."
       >
         <Stack>
           <Theirs time="09:38">Chega hoje à tarde.</Theirs>

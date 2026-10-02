@@ -440,19 +440,14 @@ export const Composition: Story = {
   parameters: scenario('composition'),
   decorators: [
     applicationConfig({
-      providers: [
-        provideFullscreenDefaults({
-          size: 'sm',
-          messages: { enter: 'Tela cheia', exit: 'Sair da tela cheia' },
-        }),
-      ],
+      providers: [provideFullscreenDefaults({ size: 'sm' })],
     }),
   ],
   render: () => ({
     props: CHART,
     template: scene(
       'Provider, a label and a mark of the consumer',
-      'The provider sets the step and the Portuguese messages; the control says Apresentar and Terminar and changes its mark with the state.',
+      'The provider sets the step; the control says Apresentar and Terminar and changes its mark with the state.',
       `<div class="slotted-demo-measure">
         <section slFullscreen #fs="slFullscreen" mode="layout">${panel(
           `<button slFullscreenTrigger variant="outline">

@@ -61,11 +61,11 @@ const removable = (member: string): ApiTuple[] => [
     'Asks to be removed. The remove control is rendered only when this is present. request.reason is remove for the control and keyboard for Backspace or Delete; request.cancel() refuses it, and the group then leaves focus where it is',
   ],
   [
-    'removeLabel',
-    'string',
-    'Remove',
+    'messages',
+    'Partial<TagMessages>',
+    '—',
     member,
-    'The word the remove control announces before the tag’s own label, so it reads “Remove Design”. Falls back to the provider',
+    'Words laid over the language in force, key by key: remove is the word the remove control announces before the tag’s own label, so it reads “Remove Design”',
   ],
   [
     'removeDisabled',
@@ -147,7 +147,7 @@ export const REACT_TAG_DOCS = {
       ],
       [
         'TagDefaultsProvider',
-        '{ tone, variant, size, shape, removeLabel }',
+        '{ tone, variant, size, shape }',
         '—',
         'a subtree',
         'Sets the defaults once for every tag under it; an explicit prop still wins',
@@ -190,8 +190,7 @@ export const REACT_TAG_DOCS = {
         id: 'tag-react-defaults',
         language: 'tsx',
         label: 'One decision for every tag in the application',
-        source:
-          '<TagDefaultsProvider removeLabel="Remover" size="sm">\n  <App />\n</TagDefaultsProvider>;',
+        source: '<TagDefaultsProvider size="sm">\n  <App />\n</TagDefaultsProvider>;',
       }),
     ],
   },

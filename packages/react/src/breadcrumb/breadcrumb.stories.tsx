@@ -101,7 +101,6 @@ export const Playground: Story = {
   args: {
     itemsAfterCollapse: 2,
     itemsBeforeCollapse: 1,
-    label: 'Breadcrumb',
     maxItems: 8,
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
@@ -237,9 +236,9 @@ export const Composition: Story = {
       </Scene>
       <Scene
         label="BreadcrumbDefaultsProvider"
-        note="One decision for every trail below it: the landmark name, the separator and how deep a trail may get before it folds."
+        note="One decision for every trail below it: the separator and how deep a trail may get before it folds. The words come from the language in force."
       >
-        <BreadcrumbDefaultsProvider label="Trilha" maxItems={4} separator="·">
+        <BreadcrumbDefaultsProvider maxItems={4} separator="·">
           <Trail />
         </BreadcrumbDefaultsProvider>
       </Scene>

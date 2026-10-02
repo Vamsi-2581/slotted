@@ -164,13 +164,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition',
-    note: 'The directives sit on the consumer’s own elements, so routerLink composes on the same anchor, and provideBreadcrumbDefaults decides the label, the separator and the collapse for a whole application.',
+    note: 'The directives sit on the consumer’s own elements, so routerLink composes on the same anchor, and provideBreadcrumbDefaults decides the separator and the collapse for a whole application.',
     snippet: defineSnippet({
       id: 'breadcrumb-angular-composition',
       language: 'ts',
       label: 'Defaults for the application',
       source:
-        "bootstrapApplication(App, {\n  providers: [provideBreadcrumbDefaults({ label: 'Trilha', maxItems: 5 })],\n});",
+        'bootstrapApplication(App, {\n  providers: [provideBreadcrumbDefaults({ maxItems: 5 })],\n});',
     }),
   },
   {
@@ -206,7 +206,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'What each control announces',
       source:
-        '<!-- The landmark is named, the ellipsis says how many it hides,\n     and the last crumb says it is this page. -->\n<nav slBreadcrumb label="Breadcrumb" [maxItems]="4">\n  <ol slBreadcrumbList>\n    ...\n  </ol>\n</nav>',
+        '<!-- The landmark is named, the ellipsis says how many it hides,\n     and the last crumb says it is this page. -->\n<nav slBreadcrumb aria-label="Breadcrumb" [maxItems]="4">\n  <ol slBreadcrumbList>\n    ...\n  </ol>\n</nav>',
     }),
   },
 ];
@@ -226,7 +226,13 @@ export const ANGULAR_BREADCRUMB_DOCS = {
     scenes,
     events,
     api: apiRows([
-      ['label', 'string', 'Breadcrumb', 'slBreadcrumb', 'The landmark’s own name'],
+      [
+        'messages',
+        'Partial<BreadcrumbMessages>',
+        '—',
+        'slBreadcrumb',
+        'Words laid over the language in force, key by key: the landmark’s name (label) and the ellipsis (showHidden)',
+      ],
       [
         'maxItems',
         'number',
@@ -316,10 +322,10 @@ export const ANGULAR_BREADCRUMB_DOCS = {
       ],
       [
         'provideBreadcrumbDefaults',
-        'label | maxItems | itemsBeforeCollapse | itemsAfterCollapse | overflow | separator',
+        'maxItems | itemsBeforeCollapse | itemsAfterCollapse | overflow | separator',
         '—',
         'Application',
-        'Sets those six once for the whole injector; an input on the trail still wins',
+        'Sets those five once for the whole injector; an input on the trail still wins',
       ],
     ]),
     accessibility: [

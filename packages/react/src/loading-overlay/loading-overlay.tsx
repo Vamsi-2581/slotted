@@ -4,6 +4,7 @@ import '@slotted/styles/visually-hidden/visually-hidden.css';
 
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createFocusScope } from '@slotted/core/focus';
+import { loadingOverlayMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
@@ -11,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
+import { useMessages } from '../i18n';
 import { Loader } from '../progress-indicator';
 import { useLoadingOverlayDefaults } from './loading-overlay-defaults';
 import { useLoadingVisibility } from './use-loading-visibility';
@@ -53,10 +55,10 @@ export function LoadingOverlay({
   delay,
   description,
   indicator,
-  label,
   live,
   loadedLabel,
   loading = true,
+  messages,
   minDuration,
   onCancel,
   onReveal,
@@ -68,10 +70,11 @@ export function LoadingOverlay({
   ...nativeProps
 }: LoadingOverlayProps) {
   const defaults = useLoadingOverlayDefaults();
+  const t = useMessages(loadingOverlayMessages, messages);
   const resolved = {
-    cancelLabel: cancelLabel ?? defaults.cancelLabel ?? 'Cancel',
+    cancelLabel: cancelLabel ?? t('cancel'),
     delay: delay ?? defaults.delay ?? 0,
-    label: label ?? defaults.label ?? 'Loading…',
+    label: t('label'),
     live: live ?? defaults.live ?? 'polite',
     loadedLabel: loadedLabel ?? defaults.loadedLabel,
     minDuration: minDuration ?? defaults.minDuration ?? 0,

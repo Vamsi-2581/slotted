@@ -316,12 +316,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition',
-    note: 'One provider sets the unit, the months, the locale and every label for the application. The handle opens, closes and focuses one end; position and onPositionChange let a consumer own which end the next press writes.',
+    note: 'One provider sets the unit and the months for the application, SlottedProvider the language and every word. The handle opens, closes and focuses one end; position and onPositionChange let a consumer own which end the next press writes.',
     snippet: defineSnippet({
       id: 'date-range-picker-react-composition',
       label: 'Set once, and the handle',
       language: 'tsx',
-      source: `<DateRangePickerDefaultsProvider count="nights" locale="pt-BR" months={1}>
+      source: `<DateRangePickerDefaultsProvider count="nights" months={1}>
   <DateRangePicker ref={handle} />
 </DateRangePickerDefaultsProvider>;`,
     }),
@@ -413,20 +413,6 @@ const api: ApiRow[] = apiRows([
     'What the length counts. days counts both ends; nights counts the gaps between them. The same day at both ends is 1 day or 0 nights.',
   ],
   [
-    'lengthLabel',
-    '(count: number, unit) => string',
-    '"4 nights"',
-    'DateRangePicker',
-    'What the band says for a length, in the product’s own words.',
-  ],
-  [
-    'limitLabel',
-    '(min, max, unit) => string',
-    '"2 to 7 nights"',
-    'DateRangePicker',
-    'What the band says for the limits.',
-  ],
-  [
     'months',
     'number',
     '2',
@@ -458,7 +444,7 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    'the runtime’s',
+    'the language in force',
     'DateRangePicker',
     'BCP 47. Reaches the two fields, the band and the grid.',
   ],
@@ -521,34 +507,12 @@ const api: ApiRow[] = apiRows([
     'DateRangePicker',
     'Draws one clear on the frame, which empties both ends.',
   ],
-  ['clearLabel', 'string', 'Clear range', 'DateRangePicker', 'The clear button’s name.'],
   [
-    'chooseLabel',
-    'string',
-    'Choose range',
+    'messages',
+    'Partial<DateRangePickerMessages>',
+    '—',
     'DateRangePicker',
-    'The trigger’s name while nothing is chosen.',
-  ],
-  [
-    'changeLabel',
-    'string',
-    'Change range',
-    'DateRangePicker',
-    'The trigger’s name once a run is chosen, before the two dates and the length.',
-  ],
-  [
-    'startLabel',
-    'string',
-    'Start',
-    'DateRangePicker',
-    'The start field’s accessible name, and the band’s placeholder for it.',
-  ],
-  [
-    'endLabel',
-    'string',
-    'End',
-    'DateRangePicker',
-    'The end field’s accessible name, and the band’s placeholder for it.',
+    'Words laid over the language in force, key by key: the trigger’s name before (choose) and after (change, with {start}, {end} and {length} slots) a run is chosen, the clear, the two ends’ names and band placeholders (start, end), and the phrases the band counts in — days.length, nights.length, and between, atLeast and atMost for the limits.',
   ],
   [
     'startName',
@@ -605,7 +569,7 @@ const composition: ApiRow[] = apiRows([
     'component',
     '—',
     'application',
-    'Sets locale, timeZone, calendar, months, count, lengthLabel, limitLabel, closeOnSelect, placement, size, variant and every label once for everything under it.',
+    'Sets timeZone, calendar, months, count, closeOnSelect, placement, size and variant once for everything under it.',
   ],
   [
     'DateRangePickerPreset',
@@ -640,7 +604,7 @@ const composition: ApiRow[] = apiRows([
 const accessibility: string[] = [
   'The trigger’s accessible name carries both ends in words and the length — "Change range, 12 September 2026 – 16 September 2026, 4 nights". Focus returns to it when the surface closes, so it is where a screen-reader user is told what happened.',
   'The length is a polite live region. A sighted reader sees "4 nights" follow the pointer; a screen-reader user hears it follow every arrow, which is the same information at the same moment.',
-  'The two fields name themselves — startLabel and endLabel reach their groups — and the dash between them is aria-hidden. Each field keeps its own three spin buttons and its own keyboard.',
+  'The two fields name themselves — the start and end messages reach their groups — and the dash between them is aria-hidden. Each field keeps its own three spin buttons and its own keyboard.',
   'Escape is staged. dismissable-layer listens in the capture phase, so the family decides there: the calendar walks a view down first, and only then does the surface close and the half-drawn run get abandoned.',
   'A half-drawn run never reaches a form. The first press is a draft the band shows and no request carries; the second press emits the whole run. An open end that was typed is a value, because the reader saw it in the field.',
   'The surface is a role="dialog" with the same name as the trigger, and the trigger points aria-controls at it only while it is showing. Only one cell of the grid is in the Tab sequence, as the Grid Pattern requires.',

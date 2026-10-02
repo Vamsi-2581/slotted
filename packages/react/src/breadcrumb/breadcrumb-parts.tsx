@@ -205,7 +205,7 @@ function BreadcrumbEllipsis({
     <li data-part="item" hidden={idle} ref={itemRef}>
       <button
         aria-expanded={false}
-        aria-label={`Show ${hidden} hidden ${hidden === 1 ? 'level' : 'levels'}`}
+        aria-label={trail.t('showHidden', { count: hidden })}
         data-part="ellipsis"
         onClick={(event) => trail.expand('pointer', event)}
         onKeyDown={(event) => {

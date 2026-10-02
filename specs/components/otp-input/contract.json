@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "otp-input",
   "ui": "otp-input",
+  "catalog": {
+    "group": "Forms",
+    "summary": "One-time code split across several boxes."
+  },
   "controlPart": "input",
   "rootRole": null,
   "focusStops": 1,

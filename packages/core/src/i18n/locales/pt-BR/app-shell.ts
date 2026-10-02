@@ -7,6 +7,7 @@ export const ptBR: AppShellMessages = {
   nav: 'Navegação principal',
   open: 'Abrir navegação',
   openAside: 'Abrir painel lateral',
+  resizeAside: 'Redimensionar painel',
   skipToAside: 'Pular para o painel lateral',
   skipToMain: 'Pular para o conteúdo',
   skipToNav: 'Pular para a navegação',

@@ -18,6 +18,7 @@ import {
   TemplateRef,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlButton, SlButtonEnd } from '@slotted/angular/button';
 import { SlCheckbox } from '@slotted/angular/checkbox';
@@ -58,14 +59,10 @@ import {
   dataListKeys,
   dataListNodes,
   describeDataListSort,
-  formatDataListMessage,
   resolveDataListLayout,
   withDataListSortColumn,
   withDataListSortDirection,
-  type DataListLabels,
-  type DataListMessage,
   type DataListNode,
-  type DataListSlots,
 } from '@slotted/core/data-list';
 import {
   applyQuery,
@@ -79,6 +76,7 @@ import {
   type GridQueryChange,
   type SortDirection,
 } from '@slotted/core/grid';
+import { dataListMessages, type DataListMessages, type PartialMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 
@@ -276,9 +274,7 @@ interface RecordView<Row> {
             [disabled]="allKeys().length === 0"
             [size]="sizeValue()"
             (click)="pressAll($event)"
-            ><span slVisuallyHidden>{{
-              say(labelSet().selectAll, { count: allKeys().length })
-            }}</span></span
+            ><span slVisuallyHidden>{{ t('selectAll', { count: allKeys().length }) }}</span></span
           >
         </span>
       }
@@ -302,16 +298,16 @@ interface RecordView<Row> {
               }
             </span>
           </button>
-          <sl-menu #sortMenu align="end" [aria-label]="say(labelSet().sort)">
+          <sl-menu #sortMenu align="end" [aria-label]="t('sort')">
             <sl-menu-radio-group
               [attr.aria-labelledby]="id + '-sort-column'"
               [value]="firstKey()?.column ?? noSort"
               (valueChangeRequest)="chooseColumn($event)"
             >
               <div data-part="group-label" [id]="id + '-sort-column'">
-                {{ say(labelSet().sortColumn) }}
+                {{ t('sortColumn') }}
               </div>
-              <button slMenuRadioItem [value]="noSort">{{ say(labelSet().sortNone) }}</button>
+              <button slMenuRadioItem [value]="noSort">{{ t('sortNone') }}</button>
               @for (column of layout().sortable; track column.id) {
                 <button slMenuRadioItem [value]="column.id">{{ column.label }}</button>
               }
@@ -323,13 +319,13 @@ interface RecordView<Row> {
               (valueChangeRequest)="chooseDirection($event)"
             >
               <div data-part="group-label" [id]="id + '-sort-direction'">
-                {{ say(labelSet().sortDirection) }}
+                {{ t('sortDirection') }}
               </div>
               <button slMenuRadioItem value="ascending" [disabled]="!firstKey()">
-                {{ say(labelSet().ascending) }}
+                {{ t('ascending') }}
               </button>
               <button slMenuRadioItem value="descending" [disabled]="!firstKey()">
-                {{ say(labelSet().descending) }}
+                {{ t('descending') }}
               </button>
             </sl-menu-radio-group>
           </sl-menu>
@@ -351,7 +347,7 @@ interface RecordView<Row> {
           [loading]="firstLoad()"
           [delay]="loadingDelayValue()"
           [minDuration]="loadingMinDurationValue()"
-          [label]="say(labelSet().loading)"
+          [messages]="{ label: t('loading') }"
           (reveal)="holding.set(false)"
         >
           <ul slList aria-hidden="true" inert [variant]="variantValue()" [size]="sizeValue()">
@@ -421,7 +417,7 @@ interface RecordView<Row> {
               [loading]="loadingValue() && loadingMore()"
               (click)="askForMore()"
             >
-              {{ say(labelSet().loadMore) }}
+              {{ t('loadMore') }}
             </button>
           </span>
         }
@@ -477,7 +473,7 @@ interface RecordView<Row> {
                     [size]="sizeValue()"
                     (click)="pressRecord(view.key, $event)"
                     ><span slVisuallyHidden>{{
-                      say(labelSet().selectRow, { title: view.titleText })
+                      t('selectRow', { title: view.titleText })
                     }}</span></span
                   >
                 </span>
@@ -565,9 +561,7 @@ interface RecordView<Row> {
               [attr.aria-expanded]="view.expanded"
               (click)="toggleExpanded(view.key, $event)"
             >
-              {{
-                view.expanded ? say(labelSet().less) : say(labelSet().more, { count: view.hidden })
-              }}
+              {{ view.expanded ? t('less') : t('more', { count: view.hidden }) }}
               <span slIcon size="sm"><svg slGlyph name="chevron-down"></svg></span>
             </button>
           }
@@ -594,8 +588,7 @@ interface RecordView<Row> {
           />
         } @else if (field.context.text === '' && field.context.place !== 'actions') {
           <span data-part="field-empty"
-            ><span aria-hidden="true">—</span
-            ><span slVisuallyHidden>{{ say(labelSet().empty) }}</span></span
+            ><span aria-hidden="true">—</span><span slVisuallyHidden>{{ t('empty') }}</span></span
           >
         } @else {
           {{ field.context.text }}
@@ -624,7 +617,7 @@ interface RecordView<Row> {
                   variant="outline"
                   (click)="clearFilters($event)"
                 >
-                  {{ say(labelSet().clearFilters) }}
+                  {{ t('clearFilters') }}
                 </button>
               </div>
             } @else if (status === 'error') {
@@ -636,7 +629,7 @@ interface RecordView<Row> {
                   variant="outline"
                   (click)="retry.emit()"
                 >
-                  {{ say(labelSet().retry) }}
+                  {{ t('retry') }}
                 </button>
               </div>
             }
@@ -680,9 +673,9 @@ export class SlDataList<Row = unknown> {
   readonly hasMore = input(false, { transform: booleanAttribute });
   readonly variant = input<DataListVariant | undefined>(undefined);
   readonly size = input<DataListSize | undefined>(undefined);
-  readonly labels = input<Partial<Record<keyof DataListLabels, DataListMessage>> | undefined>(
-    undefined,
-  );
+  /** Words laid over the catalog of the language in force, key by key. */
+  readonly messages = input<PartialMessages<DataListMessages> | undefined>(undefined);
+  /** Formats the fields and counts; the provider's locale otherwise. */
   readonly locale = input<string | undefined>(undefined);
   readonly skeletonRows = input<number | undefined>(undefined);
   readonly loadingDelay = input<number | undefined>(undefined);
@@ -712,11 +705,12 @@ export class SlDataList<Row = unknown> {
   private focusedKey: string | null = null;
   private previousKeys: readonly string[] = [];
 
-  protected readonly labelSet = computed<DataListLabels>(() => ({
-    ...this.defaults.labels,
-    ...this.labels(),
-  }));
-  protected readonly localeValue = computed(() => this.locale() ?? this.defaults.locale);
+  /** The family's words in the language in force, with this list's `messages` laid over them. */
+  readonly t = injectMessages(dataListMessages, this.messages);
+  private readonly providedLocale = injectLocale();
+  protected readonly localeValue = computed(() => this.locale() ?? this.providedLocale());
+  /** What a boolean field says, in the language in force. */
+  private readonly booleans = computed(() => ({ true: this.t('true'), false: this.t('false') }));
   protected readonly variantValue = computed(() => this.variant() ?? this.defaults.variant);
   protected readonly sizeValue = computed(() => this.size() ?? this.defaults.size);
   protected readonly selectionModeValue = computed(
@@ -767,6 +761,7 @@ export class SlDataList<Row = unknown> {
     const result = applyQuery(rows, this.columns(), this.query(), {
       rowKey: keyOf,
       locale: this.localeValue(),
+      booleans: this.booleans(),
     });
     return { nodes: dataListNodes(result.nodes), visible: result.rows, total: result.total };
   });
@@ -798,18 +793,15 @@ export class SlDataList<Row = unknown> {
 
   protected readonly firstKey = computed(() => this.query().sort[0]);
   protected readonly sortName = computed(() => {
-    const labels = this.labelSet();
     const sort = this.query().sort;
-    if (sort.length === 0) return this.say(labels.sort);
-    return `${this.say(labels.sort)}, ${describeDataListSort(sort, this.columns(), labels, this.localeValue())}`;
+    if (sort.length === 0) return this.t('sort');
+    return this.t('sortNamed', { order: describeDataListSort(sort, this.columns(), this.t) });
   });
   protected readonly sortText = computed(() => {
-    const labels = this.labelSet();
     const sort = this.query().sort;
     const column = this.columns().find((entry) => entry.id === sort[0]?.column);
-    if (!column) return this.say(labels.sort);
-    const more = sort.length > 1 ? ` ${this.say(labels.sortMore, { count: sort.length - 1 })}` : '';
-    return `${this.say(labels.sort)}: ${column.label}${more}`;
+    if (!column) return this.t('sort');
+    return this.t('sortSummary', { column: column.label, more: sort.length - 1 });
   });
 
   protected readonly allKeys = computed(() => {
@@ -828,12 +820,11 @@ export class SlDataList<Row = unknown> {
     this.allKeys().some((key) => this.selectedSet().has(key)),
   );
   protected readonly countText = computed(() => {
-    const labels = this.labelSet();
     const selected = this.selectedKeys().length;
     const count = this.applied().total;
     return this.selectionModeValue() !== 'none' && selected > 0
-      ? this.say(labels.selectedCount, { selected, count })
-      : this.say(labels.count, { count });
+      ? this.t('selectedCount', { selected, count })
+      : this.t('count', { count });
   });
 
   constructor() {
@@ -865,12 +856,6 @@ export class SlDataList<Row = unknown> {
     });
   }
 
-  /* ── Words ───────────────────────────────────────────────────────── */
-
-  protected say(message: DataListMessage, slots?: DataListSlots): string {
-    return formatDataListMessage(message, slots, this.localeValue());
-  }
-
   protected bar(index: number) {
     return BAR_WIDTHS[index % BAR_WIDTHS.length];
   }
@@ -881,16 +866,15 @@ export class SlDataList<Row = unknown> {
 
   protected sectionLabel(node: Extract<DataListNode<Row>, { kind: 'section' }>) {
     const column = this.columns().find((entry) => entry.id === node.column);
-    return `${column?.label ?? node.column}: ${node.text} · ${this.say('{count}', { count: node.count })}`;
+    return `${column?.label ?? node.column}: ${node.text} · ${new Intl.NumberFormat(this.localeValue()).format(node.count)}`;
   }
 
   protected emptyTitle(status: DataListEmptyStatus) {
-    const labels = this.labelSet();
     if (status === 'error') {
       const error = this.error();
-      return typeof error === 'string' ? error : this.say(labels.errorTitle);
+      return typeof error === 'string' ? error : this.t('errorTitle');
     }
-    return this.say(status === 'no-results' ? labels.noResultsTitle : labels.emptyTitle);
+    return this.t(status === 'no-results' ? 'noResultsTitle' : 'emptyTitle');
   }
 
   /* ── One record ────────────────────────────────────────────────────── */
@@ -901,7 +885,9 @@ export class SlDataList<Row = unknown> {
     key: string,
     place: DataListCellContext['place'],
   ): FieldView<Row> {
-    const text = dataListFieldText(column, row, { locale: this.localeValue() }) ?? '';
+    const text =
+      dataListFieldText(column, row, { locale: this.localeValue(), booleans: this.booleans() }) ??
+      '';
     const templates = this.cellTemplates();
     const template =
       templates.find((entry) => entry.slDataListCell() === column.id) ??
@@ -1041,13 +1027,10 @@ export class SlDataList<Row = unknown> {
 
   private sortTo(next: GridQuery, reason: ChangeReason, source: unknown) {
     if (!this.requestQuery(next, 'sort', reason, source)) return;
-    const labels = this.labelSet();
     getLiveAnnouncer(this.host.ownerDocument).announce(
       next.sort.length === 0
-        ? this.say(labels.sortCleared)
-        : this.say(labels.sortedBy, {
-            order: describeDataListSort(next.sort, this.columns(), labels, this.localeValue()),
-          }),
+        ? this.t('sortCleared')
+        : this.t('sortedBy', { order: describeDataListSort(next.sort, this.columns(), this.t) }),
     );
   }
 

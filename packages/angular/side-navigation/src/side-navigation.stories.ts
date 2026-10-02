@@ -187,35 +187,35 @@ const destination = (
 
 const count = (n: number | string) => `<span slSideNavigationCount>${n}</span>`;
 
-const aurora = (attributes = '') => `<nav slSideNavigation value="encomendas" ${attributes}>
+const aurora = (attributes = '') => `<nav slSideNavigation value="orders" ${attributes}>
   <div slSideNavigationSection>
     <div slSideNavigationSectionLabel>Operação</div>
     <ul slSideNavigationList>
-      ${destination('painel', 'Painel', 'lucideChartNoAxesColumn')}
-      ${destination('expedicoes', 'Expedições', 'lucideTruck', count(19))}
-      ${destination('encomendas', 'Encomendas', 'lucidePackage', count(412))}
-      <li slSideNavigationItem value="entregas">
+      ${destination('dashboard', 'Dashboard', 'lucideChartNoAxesColumn')}
+      ${destination('shipments', 'Expedições', 'lucideTruck', count(19))}
+      ${destination('orders', 'Encomendas', 'lucidePackage', count(412))}
+      <li slSideNavigationItem value="deliveries">
         <button slSideNavigationTrigger>
           ${icon('lucideMapPin')}
-          <span slSideNavigationLabel>Entregas</span>
+          <span slSideNavigationLabel>Deliveries</span>
           ${count(38)}
         </button>
         <ul slSideNavigationGroup>
-          ${destination('hoje', 'Hoje')}
-          ${destination('atrasadas', 'Atrasadas', null, '<span slSideNavigationEnd><span slBadge size="sm" tone="danger" variant="soft">3</span></span>')}
-          ${destination('concluidas', 'Concluídas')}
+          ${destination('today', 'Today')}
+          ${destination('late', 'Atrasadas', null, '<span slSideNavigationEnd><span slBadge size="sm" tone="danger" variant="soft">3</span></span>')}
+          ${destination('done', 'Concluídas')}
         </ul>
       </li>
-      ${destination('armazens', 'Armazéns', 'lucideWarehouse')}
-      ${destination('clientes', 'Clientes', 'lucideUsers')}
+      ${destination('warehouses', 'Armazéns', 'lucideWarehouse')}
+      ${destination('customers', 'Clientes', 'lucideUsers')}
     </ul>
   </div>
   <div slSideNavigationSection>
     <div slSideNavigationSectionLabel>Sistema</div>
     <ul slSideNavigationList>
-      ${destination('definicoes', 'Definições', 'lucideSettings')}
-      ${destination('suporte', 'Suporte', 'lucideLifeBuoy')}
-      ${destination('faturacao', 'Faturação', 'lucideCreditCard', '<span slSideNavigationDescription>Disponível no plano Equipa</span>', 'disabled')}
+      ${destination('settings', 'Definições', 'lucideSettings')}
+      ${destination('support', 'Suporte', 'lucideLifeBuoy')}
+      ${destination('billing', 'Billing', 'lucideCreditCard', '<span slSideNavigationDescription>Available on the Team plan</span>', 'disabled')}
     </ul>
   </div>
 </nav>`;
@@ -249,7 +249,7 @@ export const Playground: Story = {
     props: args,
     template: `<div class="slotted-demo-stage" data-layout="block">${measure(
       aurora(
-        `[expanded]="['entregas']" [mode]="mode" [size]="size" [truncate]="truncate" [multiple]="multiple" [autoExpand]="autoExpand" [guides]="guides"`,
+        `[expanded]="['deliveries']" [mode]="mode" [size]="size" [truncate]="truncate" [multiple]="multiple" [autoExpand]="autoExpand" [guides]="guides"`,
       ),
     )}</div>`,
   }),
@@ -294,15 +294,15 @@ export const Anatomy: Story = {
 
 const groups = (attributes: string) => `<nav slSideNavigation ${attributes}>
   <ul slSideNavigationList>
-    <li slSideNavigationItem value="entregas">
-      <button slSideNavigationTrigger>${icon('lucideMapPin')}<span slSideNavigationLabel>Entregas</span>${count(38)}</button>
+    <li slSideNavigationItem value="deliveries">
+      <button slSideNavigationTrigger>${icon('lucideMapPin')}<span slSideNavigationLabel>Deliveries</span>${count(38)}</button>
       <ul slSideNavigationGroup>
-        ${destination('hoje', 'Hoje')}
-        ${destination('atrasadas', 'Atrasadas')}
-        ${destination('concluidas', 'Concluídas')}
+        ${destination('today', 'Today')}
+        ${destination('late', 'Atrasadas')}
+        ${destination('done', 'Concluídas')}
       </ul>
     </li>
-    <li slSideNavigationItem value="definicoes">
+    <li slSideNavigationItem value="settings">
       <button slSideNavigationTrigger>${icon('lucideSettings')}<span slSideNavigationLabel>Definições</span></button>
       <ul slSideNavigationGroup>
         ${destination('org', 'Organização')}
@@ -320,12 +320,12 @@ export const Groups: Story = {
       scene(
         'Any number open',
         'Press Entregas and Definições in turn: each opens on its own track, the chevron turns down, and the rows inside fade in as the room for them arrives.',
-        measure(groups(`value="hoje" [expanded]="['entregas']"`)),
+        measure(groups(`value="today" [expanded]="['deliveries']"`)),
       ),
       scene(
         'One at a time',
         'multiple=false: opening Definições closes Entregas in the same request, so the column never holds two open groups.',
-        measure(groups(`[expanded]="['entregas']" [multiple]="false"`)),
+        measure(groups(`[expanded]="['deliveries']" [multiple]="false"`)),
       ),
     ),
   }),
@@ -339,16 +339,16 @@ export const Hybrid: Story = {
       scene(
         'Link and trigger side by side',
         'Relatórios navigates; the chevron beside it opens the children and is named by the same label. Financeiro holds the current destination and says so while closed.',
-        measure(`<nav slSideNavigation value="faturas" [expanded]="['relatorios']">
+        measure(`<nav slSideNavigation value="invoices" [expanded]="['reports']">
   <ul slSideNavigationList>
-    <li slSideNavigationItem value="relatorios">
-      <a slSideNavigationLink href="#relatorios">${icon('lucideChartNoAxesColumn')}<span slSideNavigationLabel>Relatórios</span></a>
+    <li slSideNavigationItem value="reports">
+      <a slSideNavigationLink href="#relatorios">${icon('lucideChartNoAxesColumn')}<span slSideNavigationLabel>Reports</span></a>
       <button slSideNavigationTrigger></button>
-      <ul slSideNavigationGroup>${destination('mensal', 'Mensal')}${destination('anual', 'Anual')}</ul>
+      <ul slSideNavigationGroup>${destination('monthly', 'Mensal')}${destination('yearly', 'Anual')}</ul>
     </li>
-    <li slSideNavigationItem value="financeiro">
+    <li slSideNavigationItem value="finance">
       <button slSideNavigationTrigger>${icon('lucideCreditCard')}<span slSideNavigationLabel>Financeiro</span></button>
-      <ul slSideNavigationGroup>${destination('faturas', 'Faturas')}</ul>
+      <ul slSideNavigationGroup>${destination('invoices', 'Faturas')}</ul>
     </li>
   </ul>
 </nav>`),
@@ -356,13 +356,13 @@ export const Hybrid: Story = {
       scene(
         'Five levels',
         'Under a row with a mark the children stand under its words; under a row without one the indent is a constant step, so the fifth level still has room for a name.',
-        measure(`<nav slSideNavigation value="bh" [autoExpand]="false" [expanded]="['regioes', 'sudeste', 'minas']">
+        measure(`<nav slSideNavigation value="bh" [autoExpand]="false" [expanded]="['regions', 'southeast', 'minas']">
   <ul slSideNavigationList>
-    <li slSideNavigationItem value="regioes">
+    <li slSideNavigationItem value="regions">
       <button slSideNavigationTrigger>${icon('lucideMapPin')}<span slSideNavigationLabel>Por região</span>${count(128)}</button>
       <ul slSideNavigationGroup>
-        ${destination('norte', 'Norte')}
-        <li slSideNavigationItem value="sudeste">
+        ${destination('north', 'Norte')}
+        <li slSideNavigationItem value="southeast">
           <button slSideNavigationTrigger><span slSideNavigationLabel>Sudeste</span></button>
           <ul slSideNavigationGroup>
             ${destination('sp', 'São Paulo', null, count(36))}
@@ -375,7 +375,7 @@ export const Hybrid: Story = {
             </li>
           </ul>
         </li>
-        <li slSideNavigationItem value="sul">
+        <li slSideNavigationItem value="south">
           <button slSideNavigationTrigger><span slSideNavigationLabel>Sul</span></button>
           <ul slSideNavigationGroup>${destination('cwb', 'Curitiba')}</ul>
         </li>
@@ -391,25 +391,25 @@ export const Hybrid: Story = {
 export const Sections: Story = {
   parameters: scenario('sections'),
   render: () => ({
-    template: `<div class="slotted-demo-stage" data-layout="block">${measure(`<nav slSideNavigation value="encomendas">
+    template: `<div class="slotted-demo-stage" data-layout="block">${measure(`<nav slSideNavigation value="orders">
   <div slSideNavigationSection>
     <div slSideNavigationSectionLabel>Operação</div>
     <ul slSideNavigationList>
-      ${destination('painel', 'Painel', 'lucideChartNoAxesColumn')}
-      ${destination('encomendas', 'Encomendas', 'lucidePackage', count(412))}
-      ${destination('armazens', 'Armazéns', 'lucideWarehouse')}
+      ${destination('dashboard', 'Dashboard', 'lucideChartNoAxesColumn')}
+      ${destination('orders', 'Encomendas', 'lucidePackage', count(412))}
+      ${destination('warehouses', 'Armazéns', 'lucideWarehouse')}
     </ul>
   </div>
   <div slSideNavigationSection>
-    <div slSideNavigationSectionLabel>Administração</div>
+    <div slSideNavigationSectionLabel>Administration</div>
     <ul slSideNavigationList>
       ${destination('users', 'Utilizadores', 'lucideUsers')}
-      ${destination('definicoes', 'Definições', 'lucideSettings')}
+      ${destination('settings', 'Definições', 'lucideSettings')}
       <li slSideNavigationDivider></li>
-      <li slSideNavigationItem value="nova">
+      <li slSideNavigationItem value="new">
         <button slSideNavigationLink>
           ${icon('lucidePlus')}
-          <span slSideNavigationLabel>Nova carga</span>
+          <span slSideNavigationLabel>New load</span>
           <span slSideNavigationEnd><kbd slKbd>N</kbd></span>
         </button>
       </li>
@@ -423,7 +423,7 @@ export const Current: Story = {
   parameters: scenario('current'),
   render: () => ({
     props: {
-      value: signal<string | null>('encomendas'),
+      value: signal<string | null>('orders'),
       reason: signal('—'),
     },
     template: grid(
@@ -433,14 +433,14 @@ export const Current: Story = {
         'A press asks value to move and the application sets it. Ir para Atrasadas moves it from outside: the destination is inside a closed group, so autoExpand opens Entregas with the reason select.',
         measure(`<div slStack [gap]="4">
   <p slText size="sm" tone="muted">value: {{ value() ?? 'null' }} · reason: {{ reason() }}</p>
-  <button slButton size="sm" variant="outline" (click)="value.set('atrasadas')">Ir para Atrasadas</button>
+  <button slButton size="sm" variant="outline" (click)="value.set('late')">Ir para Atrasadas</button>
   ${aurora(`[value]="value()" (valueChangeRequest)="value.set($event.value); reason.set($event.reason)"`)}
 </div>`),
       ),
       scene(
         'Hidden, and said by the parent',
         'autoExpand off: Atrasadas is current inside a closed Entregas, so the parent row carries the ground until the group opens and the leaf takes it.',
-        measure(aurora(`value="atrasadas" [autoExpand]="false"`)),
+        measure(aurora(`value="late" [autoExpand]="false"`)),
       ),
     ),
   }),
@@ -491,15 +491,15 @@ export const Flyout: Story = {
 /** A shorter column, for the scenes that compare three of them. */
 const short = (
   attributes = '',
-) => `<nav slSideNavigation value="encomendas" [expanded]="['entregas']" ${attributes}>
+) => `<nav slSideNavigation value="orders" [expanded]="['deliveries']" ${attributes}>
   <ul slSideNavigationList>
-    ${destination('painel', 'Painel', 'lucideChartNoAxesColumn')}
-    ${destination('encomendas', 'Encomendas', 'lucidePackage', count(412))}
-    <li slSideNavigationItem value="entregas">
-      <button slSideNavigationTrigger>${icon('lucideMapPin')}<span slSideNavigationLabel>Entregas</span>${count(38)}</button>
-      <ul slSideNavigationGroup>${destination('hoje', 'Hoje')}${destination('atrasadas', 'Atrasadas')}</ul>
+    ${destination('dashboard', 'Dashboard', 'lucideChartNoAxesColumn')}
+    ${destination('orders', 'Encomendas', 'lucidePackage', count(412))}
+    <li slSideNavigationItem value="deliveries">
+      <button slSideNavigationTrigger>${icon('lucideMapPin')}<span slSideNavigationLabel>Deliveries</span>${count(38)}</button>
+      <ul slSideNavigationGroup>${destination('today', 'Today')}${destination('late', 'Atrasadas')}</ul>
     </li>
-    ${destination('definicoes', 'Definições', 'lucideSettings')}
+    ${destination('settings', 'Definições', 'lucideSettings')}
   </ul>
 </nav>`;
 
@@ -535,25 +535,25 @@ export const States: Story = {
       scene(
         'Current, expanded, disabled',
         'Encomendas is current on the accent ground; Entregas is expanded with its chevron down; Faturação is disabled, dimmed and refusing the press with its href still in place.',
-        measure(aurora(`[expanded]="['entregas']"`)),
+        measure(aurora(`[expanded]="['deliveries']"`)),
       ),
       scene(
         'Hover, press, focus',
         'Hover washes the row on the neutral ground; a press darkens it at once; Tab draws the ring inside the row, where a column that scrolls cannot clip it.',
-        measure(aurora('value="painel"')),
+        measure(aurora('value="dashboard"')),
       ),
     ),
   }),
 };
 
-const awkward = (attributes = '') => `<nav slSideNavigation value="setembro" ${attributes}>
+const awkward = (attributes = '') => `<nav slSideNavigation value="september" ${attributes}>
   <ul slSideNavigationList>
     ${destination('config', 'Configurações da organização e das integrações', 'lucideSettings', count(120))}
-    ${destination('setembro', 'Relatório mensal · setembro', 'lucideFileText', count(12))}
-    ${destination('outubro', 'Relatório mensal · outubro', 'lucideFileText', count(4))}
+    ${destination('september', 'Relatório mensal · setembro', 'lucideFileText', count(12))}
+    ${destination('october', 'Relatório mensal · outubro', 'lucideFileText', count(4))}
     ${destination('url', 'https://aurora.example/relatorios/2026/mensal/setembro', 'lucideMapPin')}
-    ${destination('clientes', 'العملاء', 'lucideUsers', count(4))}
-    ${destination('cargas', 'Cargas', 'lucidePackage', '<span slSideNavigationDescription>14 a aguardar despacho no armazém de Leixões</span>')}
+    ${destination('customers', 'العملاء', 'lucideUsers', count(4))}
+    ${destination('loads', 'Loads', 'lucidePackage', '<span slSideNavigationDescription>14 a aguardar despacho no armazém de Leixões</span>')}
   </ul>
 </nav>`;
 
@@ -589,9 +589,9 @@ export const Loading: Story = {
       scene(
         'Destinations on their way',
         'Three skeleton rows in the geometry of the rows they stand for: the mark’s square and the label’s bar, so nothing moves when the column lands.',
-        measure(`<nav slSideNavigation value="painel" aria-busy="true">
+        measure(`<nav slSideNavigation value="dashboard" aria-busy="true">
   <ul slSideNavigationList>
-    ${destination('painel', 'Painel', 'lucideChartNoAxesColumn')}
+    ${destination('dashboard', 'Dashboard', 'lucideChartNoAxesColumn')}
     <li slSideNavigationSkeleton labelSize="55%"></li>
     <li slSideNavigationSkeleton labelSize="70%"></li>
     <li slSideNavigationSkeleton labelSize="45%"></li>
@@ -601,10 +601,10 @@ export const Loading: Story = {
       scene(
         'Children on their way',
         'A group whose destinations are still loading: the row opened, the request carried its reason, and the skeletons hold the room.',
-        measure(`<nav slSideNavigation [expanded]="['entregas']">
+        measure(`<nav slSideNavigation [expanded]="['deliveries']">
   <ul slSideNavigationList>
-    <li slSideNavigationItem value="entregas">
-      <button slSideNavigationTrigger>${icon('lucideMapPin')}<span slSideNavigationLabel>Entregas</span></button>
+    <li slSideNavigationItem value="deliveries">
+      <button slSideNavigationTrigger>${icon('lucideMapPin')}<span slSideNavigationLabel>Deliveries</span></button>
       <ul slSideNavigationGroup aria-busy="true">
         <li slSideNavigationSkeleton labelSize="50%"></li>
         <li slSideNavigationSkeleton labelSize="65%"></li>
@@ -630,7 +630,7 @@ export const Shell: Story = {
     </header>
     <nav slAppShellNav>
       <div slAppShellNavBody>
-        ${aurora(`[expanded]="['entregas']"`).replace('<nav slSideNavigation', '<div slSideNavigation').replace('</nav>', '</div>')}
+        ${aurora(`[expanded]="['deliveries']"`).replace('<nav slSideNavigation', '<div slSideNavigation').replace('</nav>', '</div>')}
       </div>
     </nav>
     <main slAppShellMain>
@@ -656,12 +656,12 @@ export const Defaults: Story = {
       scene(
         'One at a time, no guides, middle cut',
         'provideSideNavigationDefaults carries the three decisions for every column under it.',
-        measure(aurora(`[expanded]="['entregas']"`)),
+        measure(aurora(`[expanded]="['deliveries']"`)),
       ),
       scene(
         'A column that states its own',
         'Under the same provider, guides stated on the column win: the guide is back and the rest still comes from the provider.',
-        measure(aurora(`[expanded]="['entregas']" guides`)),
+        measure(aurora(`[expanded]="['deliveries']" guides`)),
       ),
     ),
   }),
@@ -694,10 +694,10 @@ export const Composition: Story = {
         'The directive sits on the consumer’s own a, so routerLink and routerLinkActive live where they always do and an aria-current the router wrote is read. Actions stand outside the a.',
         measure(`<nav slSideNavigation>
   <ul slSideNavigationList>
-    <li slSideNavigationItem value="cargas">
-      <a slSideNavigationLink href="#cargas" aria-current="page">${icon('lucidePackage')}<span slSideNavigationLabel>Cargas</span></a>
+    <li slSideNavigationItem value="loads">
+      <a slSideNavigationLink href="#cargas" aria-current="page">${icon('lucidePackage')}<span slSideNavigationLabel>Loads</span></a>
     </li>
-    <li slSideNavigationItem value="equipa">
+    <li slSideNavigationItem value="team">
       <a slSideNavigationLink href="#equipa">${icon('lucideUsers')}<span slSideNavigationLabel>Equipa</span></a>
       <div slSideNavigationActions>
         <button slButton size="sm" variant="ghost" aria-label="Adicionar membro"><ng-icon name="lucidePlus" size="14" /></button>
@@ -719,7 +719,7 @@ export const Keyboard: Story = {
       scene(
         'Tab, arrows, Home, End, Escape',
         'Tab lands on Painel like any link. ArrowDown walks the rows, skipping a closed group; open Entregas, walk into it, and Escape closes it and lands on its trigger.',
-        measure(aurora(`[expanded]="['entregas']"`)),
+        measure(aurora(`[expanded]="['deliveries']"`)),
       ),
       scene(
         'Which device asked',
@@ -740,8 +740,8 @@ export const Accessibility: Story = {
       2,
       scene(
         'The landmark and its name',
-        'A nav named Navegação principal holding a list of nine items; each branch a button that says collapsed or expanded; one link that says current page.',
-        measure(aurora(`aria-label="Navegação principal" [expanded]="['entregas']"`)),
+        'A nav named Main navigation holding a list of nine items; each branch a button that says collapsed or expanded; one link that says current page.',
+        measure(aurora(`aria-label="Main navigation" [expanded]="['deliveries']"`)),
       ),
       scene(
         'A rail keeps every name',

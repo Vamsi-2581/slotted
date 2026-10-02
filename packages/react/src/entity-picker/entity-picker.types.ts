@@ -1,3 +1,4 @@
+import type { EntityPickerMessages, PartialMessages } from '@slotted/core/i18n';
 import type { Entity, EntitySource } from '@slotted/core/entity-picker';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
@@ -9,7 +10,7 @@ export type EntityPickerSize = 'sm' | 'md' | 'lg';
 export type EntityPickerVariant = 'outline' | 'subtle' | 'plain';
 export type EntityPickerMedia = 'avatar' | 'none';
 export type EntityPickerOverflow = 'collapse' | 'wrap';
-export type EntityPickerOpenOn = 'input' | 'focus';
+export type EntityPickerOpenOn = 'input' | 'focus' | 'manual';
 export type EntityPickerSide = 'bottom' | 'top';
 export type EntityPickerWidth = 'anchor' | 'content';
 export type EntityPickerStrategy = 'absolute' | 'fixed';
@@ -33,39 +34,12 @@ export interface EntityPickerScope {
   readonly label: string;
 }
 
-/** Every sentence the family says. `{name}` slots are filled where they occur. */
-export interface EntityPickerLabels {
-  clear: string;
-  trigger: string;
-  empty: string;
-  loading: string;
-  count: string;
-  minQuery: string;
-  create: string;
-  error: string;
-  retry: string;
-  chosen: string;
-  favorites: string;
-  recent: string;
-  results: string;
-  unresolved: string;
-  remove: string;
-  scope: string;
-  chips: string;
-  more: string;
-  moreLabel: string;
-  added: string;
-  removed: string;
-  complete: string;
-}
-
 export interface EntityPickerDefaults {
   clearable: boolean;
   disabled: boolean;
   fullWidth: boolean;
   highlightMatch: boolean;
   invalid: boolean;
-  labels: EntityPickerLabels;
   loop: boolean;
   media: EntityPickerMedia;
   minQueryLength: number;
@@ -82,11 +56,8 @@ export interface EntityPickerDefaults {
   width: EntityPickerWidth;
 }
 
-export interface EntityPickerDefaultsProviderProps extends Partial<
-  Omit<EntityPickerDefaults, 'labels'>
-> {
+export interface EntityPickerDefaultsProviderProps extends Partial<EntityPickerDefaults> {
   children?: ReactNode;
-  labels?: Partial<EntityPickerLabels>;
 }
 
 export interface EntityPickerHandle {
@@ -159,7 +130,7 @@ interface EntityPickerBaseProps extends Omit<
   render?: ((props: EntityPickerRootProps) => ReactNode) | undefined;
   handleRef?: Ref<EntityPickerHandle> | undefined;
   ref?: Ref<HTMLInputElement> | undefined;
-  /** BCP 47, for the local filter and the mark. */
+  /** BCP 47, for the local filter and the mark. The language in force when absent. */
   locale?: string | undefined;
   max?: number | null | undefined;
   clearable?: boolean | undefined;
@@ -167,10 +138,19 @@ interface EntityPickerBaseProps extends Omit<
   fullWidth?: boolean | undefined;
   highlightMatch?: boolean | undefined;
   invalid?: boolean | undefined;
-  labels?: Partial<EntityPickerLabels> | undefined;
   loop?: boolean | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * buttons, the sections, the chips, and the sentences the popup and the
+   * announcer say.
+   */
+  messages?: PartialMessages<EntityPickerMessages> | undefined;
   media?: EntityPickerMedia | undefined;
   minQueryLength?: number | undefined;
+  /**
+   * What opens the popup besides the trigger and the arrows. `input` (default): typing or a
+   * press on the input; `focus`: every focus as well; `manual`: typing filters without opening.
+   */
   openOn?: EntityPickerOpenOn | undefined;
   overflow?: EntityPickerOverflow | undefined;
   portal?: boolean | undefined;

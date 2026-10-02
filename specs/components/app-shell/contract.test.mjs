@@ -200,7 +200,7 @@ test('composes the overlay rather than rewriting it', () => {
  * own pair and its own reasons.
  */
 test('holds two open regions under one capability and says why each change happened', () => {
-  assert.deepEqual(Object.keys(contract.stateModel), ['open']);
+  assert.deepEqual(Object.keys(contract.stateModel), ['open', 'extent']);
   const set = contract.stateModel.open;
   assert.deepEqual(Object.keys(set), ['nav', 'aside']);
   assert.equal(stateModels(set).length, 2);
@@ -222,7 +222,7 @@ test('holds two open regions under one capability and says why each change happe
       assert.ok(CHANGE_REASONS.includes(reason), `unknown reason ${reason}`);
     }
   }
-  assert.deepEqual(contract.stateAttributes, { open: 'data-open' });
+  assert.deepEqual(contract.stateAttributes, { open: 'data-open', dragging: 'data-dragging' });
   /* The root's attribute was the navigation's before the pane had a state, and
      every selector written over it still reads the navigation. */
   assert.equal(set.nav.attributeOn, 'root');
@@ -257,6 +257,45 @@ test('gives the secondary pane a header, a body, a footer and a control', () => 
   assert.match(contract.anatomy['aside-body'], /only part of it that scrolls/);
   assert.match(contract.anatomy['aside-toggle'], /from the family context/);
   assert.match(contract.mark.aside, /same pair mirrored/);
+});
+
+/**
+ * The pane's edge is drawer's separator on another box: the Window Splitter
+ * pattern, a fraction of the shell, a part whose presence is the capability.
+ */
+test('lets the reader move the pane edge, on the column alone', () => {
+  assert.equal(contract.resizePattern, 'https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/');
+  assert.ok(contract.composes.includes('extent'));
+  assert.equal(member.parts.indexOf('aside-resizer'), member.parts.indexOf('aside') + 1);
+  assert.match(contract.anatomy['aside-resizer'], /role separator/);
+  assert.match(contract.anatomy['aside-resizer'], /resizeAside/);
+  assert.ok(member.capabilities.includes('extent'));
+  assert.ok(member.states.includes('dragging'));
+
+  const extent = contract.stateModel.extent;
+  assert.equal(extent.controlled, 'asideExtent');
+  assert.equal(extent.uncontrolled, 'defaultAsideExtent');
+  assert.equal(extent.request, 'onAsideExtentChange');
+  assert.deepEqual(extent.reasons, ['pointer', 'keyboard', 'programmatic']);
+  assert.equal(member.defaults.minAsideExtent, 0.16);
+  assert.equal(member.defaults.maxAsideExtent, 0.6);
+
+  assert.match(contract.asideExtent.property, /--slotted-app-shell-aside-extent/);
+  assert.match(contract.asideExtent.property, /cqi/);
+  assert.match(contract.asideExtent.modes, /overlay/);
+  assert.match(contract.asideExtent.capability, /no resizable prop/);
+  assert.deepEqual(
+    contract.keyboard.map((row) => row.key),
+    ['ArrowLeft', 'ArrowRight', 'Home', 'End'],
+  );
+  for (const row of contract.keyboard) assert.equal(row.source, '@slotted/core/extent');
+});
+
+/** The body stands on the pane inset; content that brings its own says so. */
+test('stands the pane body on the row inset, with the opt-out drawer has', () => {
+  assert.equal(contract.asideBodyInset.attribute, 'data-inset');
+  assert.deepEqual(contract.asideBodyInset.values, ['none']);
+  assert.match(contract.anatomy['aside-body'], /data-inset=none/);
 });
 
 /** A bar is three clusters: what starts the line, what grows, what ends it. */
@@ -308,7 +347,7 @@ test('keeps the uncontrolled name out of the axis defaults', () => {
 });
 
 test('lets an application set its defaults once', () => {
-  assert.deepEqual(contract.provides.appShellDefaults, [...Object.keys(contract.axes), 'messages']);
+  assert.deepEqual(contract.provides.appShellDefaults, Object.keys(contract.axes));
   for (const axis of Object.keys(contract.axes)) {
     assert.deepEqual(contract.resolution[axis].slice(0, 2), ['prop', 'defaults']);
     assert.equal(contract.resolution[axis][2], member.defaults[axis]);
@@ -325,20 +364,21 @@ test('declines with a reason, never silently', () => {
 });
 
 test('says every string it speaks on the reader behalf', () => {
-  assert.deepEqual(Object.keys(contract.messages), [
+  assert.deepEqual(contract.messages, [
+    'aside',
+    'close',
+    'closeAside',
     'nav',
     'open',
-    'close',
-    'aside',
     'openAside',
-    'closeAside',
+    'resizeAside',
+    'skipToAside',
     'skipToMain',
     'skipToNav',
-    'skipToAside',
   ]);
   for (const target of contract.skip.targets) {
     const key = `skipTo${target[0].toUpperCase()}${target.slice(1)}`;
-    assert.ok(key in contract.messages, `${target} has no skip-link label`);
+    assert.ok(contract.messages.includes(key), `${target} has no skip-link label`);
   }
 });
 

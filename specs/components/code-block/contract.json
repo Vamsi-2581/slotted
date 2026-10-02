@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "code-block",
   "ui": "code-block",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Highlighted source code with copy and line limits."
+  },
   "rootRole": "none",
   "pattern": null,
   "patternAbsent": {
@@ -15,7 +19,7 @@
       {
         "requirement": "scrollable-region-focusable",
         "url": "https://accessibilityinsights.io/info-examples/web/scrollable-region-focusable/",
-        "effect": "The rule the criterion is tested by; the tab stop it asks for owes a name, and the name is the title, then aria-label, then labels.region"
+        "effect": "The rule the criterion is tested by; the tab stop it asks for owes a name, and the name is the title, then aria-label, then messages.region"
       },
       {
         "requirement": "WCAG 2.2 SC 1.4.10 Reflow, Level AA",
@@ -121,18 +125,18 @@
     "engine": "no grammar is written or bundled; the highlight engine is an optional package the consumer loads, docs/component-features.md §10"
   },
   "provides": {
-    "codeBlockDefaults": ["highlight", "lineNumbers", "copy", "labels"]
+    "codeBlockDefaults": ["highlight", "lineNumbers", "copy"]
   },
-  "labels": [
-    "region",
-    "copy",
-    "copied",
-    "copyFailed",
-    "wrap",
-    "unwrap",
-    "reveal",
+  "messages": [
     "collapse",
-    "loading"
+    "copied",
+    "copy",
+    "copyFailed",
+    "loading",
+    "region",
+    "reveal",
+    "unwrap",
+    "wrap"
   ],
   "imperative": ["copy()", "scrollToLine(n)"],
   "axes": {

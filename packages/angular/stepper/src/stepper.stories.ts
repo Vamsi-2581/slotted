@@ -118,7 +118,7 @@ export const Playground: Story = {
 <div class="slotted-demo-stage" data-layout="block">
   <div
     slStepper
-    label="Checkout"
+    [messages]="{ label: 'Checkout' }"
     [autoComplete]="autoComplete"
     [defaultStep]="defaultStep"
     [labelPlacement]="labelPlacement"
@@ -140,14 +140,14 @@ export const Orientation: Story = {
   ${scene(
     'orientation="horizontal"',
     'Equal columns, so four markers line up however long their labels are. This is the arrangement a checkout header wants.',
-    `<div slStepper label="Checkout" orientation="horizontal" [defaultStep]="2">
+    `<div slStepper [messages]="{ label: 'Checkout' }" orientation="horizontal" [defaultStep]="2">
        <ol slStepperList>${CHECKOUT}</ol>
      </div>`,
   )}
   ${scene(
     'orientation="vertical"',
     'The connector runs down the marker’s own centre line, and a second line under each name has room to be read.',
-    `<div slStepper label="Release" orientation="vertical" [defaultStep]="1">
+    `<div slStepper [messages]="{ label: 'Release' }" orientation="vertical" [defaultStep]="1">
        <ol slStepperList>
          <li slStepperStep label="Build" description="Compiled in 42 seconds" [complete]="true"></li>
          <li slStepperStep label="Sign" description="Waiting for the release key"></li>
@@ -167,7 +167,7 @@ export const Statuses: Story = {
   ${scene(
     'Every status at once',
     'A fill and an edge for each, never a colour alone: a check on the finished disc, a cross on the failed one, a ring for where the reader is, an outline for what is still ahead.',
-    `<div slStepper label="Statuses" labelPlacement="bottom" [defaultStep]="2">
+    `<div slStepper [messages]="{ label: 'Statuses' }" labelPlacement="bottom" [defaultStep]="2">
        <ol slStepperList>
          <li slStepperStep label="Complete" [complete]="true"></li>
          <li slStepperStep label="Failed" invalid></li>
@@ -180,7 +180,7 @@ export const Statuses: Story = {
   ${scene(
     'loading, and the pair that outrank each other',
     'A step waiting on a check stops answering the pointer. A step marked both complete and invalid reads as invalid, because a completed step that failed is a step that failed.',
-    `<div slStepper label="Transfer" labelPlacement="bottom" [defaultStep]="1">
+    `<div slStepper [messages]="{ label: 'Transfer' }" labelPlacement="bottom" [defaultStep]="1">
        <ol slStepperList>
          <li slStepperStep label="Amount" [complete]="true"></li>
          <li slStepperStep label="Recipient" loading></li>
@@ -200,7 +200,7 @@ export const Linear: Story = {
   ${scene(
     'Not linear',
     'Every header moves the flow. Use it where the reader may fill the steps in whatever order suits them and nothing downstream depends on what came first.',
-    `<div slStepper label="Profile" labelPlacement="bottom" [defaultStep]="1">
+    `<div slStepper [messages]="{ label: 'Profile' }" labelPlacement="bottom" [defaultStep]="1">
        <ol slStepperList>
          <li slStepperStep label="Details"></li>
          <li slStepperStep label="Address"></li>
@@ -211,7 +211,7 @@ export const Linear: Story = {
   ${scene(
     'linear',
     'Only the first step whose predecessors are complete opens. The two beyond it carry aria-disabled and still take Tab, so the reader finds them and finds out they are closed.',
-    `<div slStepper label="Onboarding" labelPlacement="bottom" linear [defaultStep]="1">
+    `<div slStepper [messages]="{ label: 'Onboarding' }" labelPlacement="bottom" linear [defaultStep]="1">
        <ol slStepperList>
          <li slStepperStep label="Company" [complete]="true"></li>
          <li slStepperStep label="Bank account"></li>
@@ -232,14 +232,14 @@ export const Navigation: Story = {
   ${scene(
     'navigation="button"',
     'The default. A header is a button that moves the step, and the whole flow lives on one page.',
-    `<div slStepper label="Checkout" labelPlacement="bottom" [defaultStep]="1">
+    `<div slStepper [messages]="{ label: 'Checkout' }" labelPlacement="bottom" [defaultStep]="1">
        <ol slStepperList>${CHECKOUT}</ol>
      </div>`,
   )}
   ${scene(
     'navigation="link"',
     'Each header carries its own destination, for a flow whose steps are separate pages. A step the flow has not opened renders without an href, so a middle click cannot reach it either.',
-    `<div slStepper label="Application" labelPlacement="bottom" navigation="link" [defaultStep]="1">
+    `<div slStepper [messages]="{ label: 'Application' }" labelPlacement="bottom" navigation="link" [defaultStep]="1">
        <ol slStepperList>
          <li slStepperStep label="Identity" href="#identity" [complete]="true"></li>
          <li slStepperStep label="Income" href="#income"></li>
@@ -250,7 +250,7 @@ export const Navigation: Story = {
   ${scene(
     'navigation="none"',
     'Nothing to press: the header is a span. This is the read-only progress indicator the field ships as a separate component, and here it is the same family.',
-    `<div slStepper label="Order status" labelPlacement="bottom" navigation="none" [defaultStep]="1">
+    `<div slStepper [messages]="{ label: 'Order status' }" labelPlacement="bottom" navigation="none" [defaultStep]="1">
        <ol slStepperList>
          <li slStepperStep label="Placed" [complete]="true"></li>
          <li slStepperStep label="Packed"></li>
@@ -270,14 +270,14 @@ export const Placement: Story = {
   ${scene(
     'labelPlacement="end"',
     'The name sits beside its marker and the connector takes whatever the label leaves. It reads best with short names, or in a column.',
-    `<div slStepper label="Checkout" labelPlacement="end" [defaultStep]="2">
+    `<div slStepper [messages]="{ label: 'Checkout' }" labelPlacement="end" [defaultStep]="2">
        <ol slStepperList>${CHECKOUT}</ol>
      </div>`,
   )}
   ${scene(
     'labelPlacement="bottom"',
     'The marker centres over its own label and the connector runs between two centres. This is what a row of names longer than a word needs.',
-    `<div slStepper label="Onboarding" labelPlacement="bottom" [defaultStep]="1">
+    `<div slStepper [messages]="{ label: 'Onboarding' }" labelPlacement="bottom" [defaultStep]="1">
        <ol slStepperList>
          <li slStepperStep label="Company details" [complete]="true"></li>
          <li slStepperStep label="Bank account"></li>
@@ -297,7 +297,7 @@ export const Panels: Story = {
   ${scene(
     'A panel and the buttons that move it',
     'The panel of the current step is a group labelled by its own header; the others are not rendered at all. Back and Continue are ordinary buttons wearing a directive.',
-    `<div slStepper label="Transfer" labelPlacement="bottom" [defaultStep]="1">
+    `<div slStepper [messages]="{ label: 'Transfer' }" labelPlacement="bottom" [defaultStep]="1">
        <ol slStepperList>
          <li slStepperStep label="Amount" [complete]="true">
            <div slStepperPanel>How much, and out of which account.</div>
@@ -328,7 +328,7 @@ export const Compact: Story = {
     'Below thirty rems',
     'The same horizontal flow inside a narrow column. It answers its own inline size rather than the viewport, so a stepper in a panel reflows while one on a full page does not.',
     `<div class="slotted-demo-measure">
-       <div slStepper label="Checkout" labelPlacement="bottom" [defaultStep]="2">
+       <div slStepper [messages]="{ label: 'Checkout' }" labelPlacement="bottom" [defaultStep]="2">
          <ol slStepperList>${CHECKOUT}</ol>
        </div>
      </div>`,
@@ -345,7 +345,7 @@ export const Content: Story = {
   ${scene(
     'Six steps, and a compound that will not fit',
     'The label wraps inside its own column and the marker never does, so the row of markers stays on one line however long the names get.',
-    `<div slStepper label="Umsatzsteuervoranmeldung" labelPlacement="bottom" [defaultStep]="2">
+    `<div slStepper [messages]="{ label: 'Umsatzsteuervoranmeldung' }" labelPlacement="bottom" [defaultStep]="2">
        <ol slStepperList>
          <li slStepperStep label="Stammdaten" [complete]="true"></li>
          <li slStepperStep label="Zahlungsabwicklungseinstellungen" [complete]="true"></li>
@@ -359,7 +359,7 @@ export const Content: Story = {
   ${scene(
     'A second line, and a flow of one step',
     'A description renders inside the label, so the marker sits against the whole text block. One step draws no connector at all and still announces "Step 1 of 1".',
-    `<div slStepper label="Release" orientation="vertical">
+    `<div slStepper [messages]="{ label: 'Release' }" orientation="vertical">
        <ol slStepperList>
          <li slStepperStep label="Build" description="Compiled in 42 seconds"></li>
        </ol>
@@ -382,14 +382,14 @@ export const Composition: Story = {
   ${scene(
     'provideStepperDefaults',
     'This page provides bottom labels and a linear flow for every stepper on it. The first inherits both; the second states its own placement and wins.',
-    `<div slStepper label="Inherited" [defaultStep]="1">
+    `<div slStepper [messages]="{ label: 'Inherited' }" [defaultStep]="1">
        <ol slStepperList>
          <li slStepperStep label="Company" [complete]="true"></li>
          <li slStepperStep label="Bank account"></li>
          <li slStepperStep label="Verification"></li>
        </ol>
      </div>
-     <div slStepper label="Stated" labelPlacement="end" [defaultStep]="1">
+     <div slStepper [messages]="{ label: 'Stated' }" labelPlacement="end" [defaultStep]="1">
        <ol slStepperList>
          <li slStepperStep label="Company" [complete]="true"></li>
          <li slStepperStep label="Bank account"></li>
@@ -400,7 +400,7 @@ export const Composition: Story = {
   ${scene(
     'exportAs, and the consumer’s own buttons',
     'The template reads the instance for the count and the percentage, and moves the flow through two buttons it styled itself — the family paints no advance button of its own.',
-    `<div slStepper label="Wizard" navigation="none" [defaultStep]="1" #flow="slStepper">
+    `<div slStepper [messages]="{ label: 'Wizard' }" navigation="none" [defaultStep]="1" #flow="slStepper">
        <ol slStepperList>
          <li slStepperStep label="One" [complete]="true"></li>
          <li slStepperStep label="Two"></li>
@@ -428,7 +428,7 @@ export const Keyboard: Story = {
   ${scene(
     'Tab, the arrows, Home and End',
     'Every header is a tab stop. The arrows reach exactly the same ones and follow the reading direction; Home and End go to the ends; Enter and Space move to the focused step when the flow allows it.',
-    `<div slStepper label="Onboarding" labelPlacement="bottom" linear [defaultStep]="1">
+    `<div slStepper [messages]="{ label: 'Onboarding' }" labelPlacement="bottom" linear [defaultStep]="1">
        <ol slStepperList>
          <li slStepperStep label="Company" [complete]="true"></li>
          <li slStepperStep label="Bank account"></li>

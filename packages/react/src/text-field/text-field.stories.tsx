@@ -636,11 +636,11 @@ function CompositionScenes() {
   return (
     <Grid columns={2}>
       <Scene
-        label="Five decisions an application takes once"
-        note="The provider carries the appearance and the two button names, so a form of twenty controls repeats none of them. A control that states one itself still wins."
+        label="Three decisions an application takes once"
+        note="The provider carries the appearance, so a form of twenty controls repeats none of it; the button names come from the language in force. A control that states one itself still wins."
         layout="stack"
       >
-        <TextFieldDefaultsProvider clearLabel="Limpar" variant="subtle">
+        <TextFieldDefaultsProvider variant="subtle">
           <TextField clearable defaultValue="Herdado do provider" />
           <TextField clearable defaultValue="Escolhido aqui" variant="outline" />
         </TextFieldDefaultsProvider>

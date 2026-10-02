@@ -1,4 +1,5 @@
 import '@slotted/styles/scroll-area/scroll-area.css';
+import { scrollAreaMessages } from '@slotted/core/i18n';
 import {
   createScrollEdges,
   NO_SCROLL_EDGES,
@@ -9,6 +10,7 @@ import {
 import { useCallback, useImperativeHandle, useRef, useState } from 'react';
 import type { Ref, UIEvent } from 'react';
 
+import { useMessages } from '../i18n';
 import { useScrollAreaDefaults } from './scroll-area-defaults';
 import type {
   ScrollAreaContentProps,
@@ -50,10 +52,10 @@ export function ScrollArea({
   className,
   fade,
   gutter,
-  label,
   labelledBy,
   maxBlockSize,
   maxInlineSize,
+  messages,
   onOverflowChange,
   onScrollChange,
   overscroll,
@@ -66,6 +68,7 @@ export function ScrollArea({
   ...rest
 }: ScrollAreaProps) {
   const defaults = useScrollAreaDefaults();
+  const t = useMessages(scrollAreaMessages, messages);
   const resolvedAxis = axis ?? defaults.axis;
   const resolvedScrollbars = scrollbars ?? defaults.scrollbars;
   const resolvedGutter = gutter ?? defaults.gutter;
@@ -159,7 +162,7 @@ export function ScrollArea({
   /**
    * The scrollport's role, tab stop and name are the family's own, and
    * `ScrollAreaViewportProps` leaves them out by type: a consumer states a name
-   * through `label` and `labelledBy`, which is the one place it can be resolved
+   * through `labelledBy` and `messages.label`, which is the one place it can be resolved
    * in order. Everything else in `viewportProps` reaches the element; the two
    * the family composes are taken out here so they are not spread twice.
    */
@@ -178,7 +181,7 @@ export function ScrollArea({
             tabIndex: 0,
             ...(labelledBy !== undefined
               ? { 'aria-labelledby': labelledBy }
-              : { 'aria-label': label ?? defaults.label }),
+              : { 'aria-label': t('label') }),
           }
         : {})}
     >

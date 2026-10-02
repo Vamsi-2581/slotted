@@ -1,4 +1,5 @@
 import { inject, Injectable, InjectionToken } from '@angular/core';
+import type { FamilyTranslator, FieldMessages } from '@slotted/core/i18n';
 
 /** The type step the field sits at, matching the control it wraps. */
 export type FieldSize = 'sm' | 'md' | 'lg';
@@ -20,12 +21,6 @@ export type FieldLabelPlacement = 'top' | 'side';
  * says so once.
  */
 export type FieldNecessity = 'mark' | 'optional' | 'words' | 'none';
-
-/** The two words `necessity="optional"` and `necessity="words"` write, so an application translates them once. */
-export interface FieldNecessityWords {
-  required: string;
-  optional: string;
-}
 
 /** The identifiers a field derives from one base. */
 export interface FieldIds {
@@ -53,44 +48,18 @@ export const FIELD_DESCRIBED_ORDER: readonly FieldDescribedSlot[] = [
   'error',
 ];
 
-/**
- * The two words `necessity="optional"` and `necessity="words"` write.
- *
- * Spectrum's `necessityIndicator="label"` publishes the idea and localises the
- * pair itself; here it is a value an application replaces, because a library
- * that shipped its own translations would be a library an application has to
- * agree with about Portuguese.
- */
-export const FIELD_NECESSITY_WORDS: FieldNecessityWords = {
-  optional: '(optional)',
-  required: '(required)',
-};
-
 export interface FieldDefaults {
   disabled: boolean | undefined;
-  /** The accessible name of every help control, until one states its own. */
-  helpLabel: string;
   labelPlacement: FieldLabelPlacement;
   necessity: FieldNecessity;
-  necessityWords: FieldNecessityWords;
   readOnly: boolean | undefined;
   size: FieldSize;
 }
 
-/**
- * The accessible name of the help control. The hint itself describes the
- * button, so the name says what the button is for rather than repeating the
- * hint; an application translates it once, and a page that wants the label in
- * the name writes `aria-label` on the one control.
- */
-export const FIELD_HELP_LABEL = 'More information';
-
 const FALLBACK: FieldDefaults = {
   disabled: undefined,
-  helpLabel: FIELD_HELP_LABEL,
   labelPlacement: 'top',
   necessity: 'mark',
-  necessityWords: FIELD_NECESSITY_WORDS,
   readOnly: undefined,
   size: 'md',
 };
@@ -101,8 +70,9 @@ export const FIELD_DEFAULTS = new InjectionToken<FieldDefaults>('slotted field d
 });
 
 /**
- * An application decides once what its fields look like and what its necessity
- * words are, rather than repeating the same inputs on every field in a form.
+ * An application decides once what its fields look like, rather than repeating
+ * the same inputs on every field in a form. Their words come from the language
+ * in force (`provideSlotted`).
  * `SlFieldGroup` provides an overriding value for its own subtree, so a compact
  * section — or a disabled one — is one attribute rather than one per field.
  *
@@ -114,19 +84,13 @@ export const FIELD_DEFAULTS = new InjectionToken<FieldDefaults>('slotted field d
  * facts about one value, and a token that set them would mark every field in an
  * application as required for a reason no field could name.
  */
-export function provideFieldDefaults(
-  defaults: Partial<Omit<FieldDefaults, 'necessityWords'>> & {
-    necessityWords?: Partial<FieldNecessityWords>;
-  },
-) {
+export function provideFieldDefaults(defaults: Partial<FieldDefaults>) {
   return {
     provide: FIELD_DEFAULTS,
     useFactory: (): FieldDefaults => ({
       disabled: defaults.disabled ?? FALLBACK.disabled,
-      helpLabel: defaults.helpLabel ?? FALLBACK.helpLabel,
       labelPlacement: defaults.labelPlacement ?? FALLBACK.labelPlacement,
       necessity: defaults.necessity ?? FALLBACK.necessity,
-      necessityWords: { ...FALLBACK.necessityWords, ...defaults.necessityWords },
       readOnly: defaults.readOnly ?? FALLBACK.readOnly,
       size: defaults.size ?? FALLBACK.size,
     }),
@@ -177,15 +141,15 @@ export function deriveFieldIds(base: string): FieldIds {
 export function necessityMark(
   necessity: FieldNecessity,
   required: boolean,
-  words: FieldNecessityWords,
+  t: FamilyTranslator<FieldMessages>,
 ): { hidden: boolean; text: string } | null {
   switch (necessity) {
     case 'mark':
       return required ? { hidden: true, text: '*' } : null;
     case 'optional':
-      return required ? null : { hidden: false, text: words.optional };
+      return required ? null : { hidden: false, text: t('optional') };
     case 'words':
-      return { hidden: false, text: required ? words.required : words.optional };
+      return { hidden: false, text: t(required ? 'required' : 'optional') };
     case 'none':
       return null;
   }

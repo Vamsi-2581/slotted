@@ -1,3 +1,4 @@
+import type { BreadcrumbMessages, FamilyTranslator, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
@@ -15,14 +16,12 @@ export type BreadcrumbChangeRequest = ChangeRequest<boolean>;
 
 /**
  * What every trail on the page does before it states anything of its own. The
- * label is here because a translated application names its landmarks once, and
- * the three collapse numbers because how deep a trail may get before it folds
- * is a decision about the application rather than about one page.
+ * three collapse numbers are here because how deep a trail may get before it
+ * folds is a decision about the application rather than about one page.
  */
 export interface BreadcrumbDefaults {
   itemsAfterCollapse?: number | undefined;
   itemsBeforeCollapse?: number | undefined;
-  label?: string | undefined;
   maxItems?: number | undefined;
   overflow?: BreadcrumbOverflow | undefined;
   /** The mark drawn between two crumbs. Absent, the stylesheet draws its own. */
@@ -98,10 +97,13 @@ export interface BreadcrumbProps extends ComponentPropsWithRef<'nav'> {
   itemsAfterCollapse?: number | undefined;
   /** How many survive at its start. */
   itemsBeforeCollapse?: number | undefined;
-  /** The landmark's own name, so a page's landmarks can be told apart. */
-  label?: string | undefined;
   /** The count above which the trail collapses. `0` never collapses. */
   maxItems?: number | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * landmark's name (`label`) and the ellipsis. A native `aria-label` still wins.
+   */
+  messages?: PartialMessages<BreadcrumbMessages> | undefined;
   /** Called before the trail expands, with the request that carries the reason. */
   onExpandedChange?: ((expanded: boolean, request: BreadcrumbChangeRequest) => void) | undefined;
   /** What the trail does with crumbs its width cannot hold. `collapse` by default. */
@@ -124,6 +126,8 @@ export interface BreadcrumbContextValue {
   separator: ReactNode;
   /** The list reports how many crumbs it folded, so the root can say so. */
   setCollapsed: (count: number) => void;
+  /** The family's words in the language in force, with this trail's `messages` laid over them. */
+  t: FamilyTranslator<BreadcrumbMessages>;
 }
 
 /** What one crumb is told by the list that laid it out. */

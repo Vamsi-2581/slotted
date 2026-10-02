@@ -136,7 +136,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A list of members loading',
       source:
-        '<SkeletonRegion label="Loading members" loading={pending}>\n  {members.map((member) => (\n    <MemberRow key={member.id} member={member} />\n  ))}\n</SkeletonRegion>;',
+        "<SkeletonRegion messages={{ label: 'Loading members' }} loading={pending}>\n  {members.map((member) => (\n    <MemberRow key={member.id} member={member} />\n  ))}\n</SkeletonRegion>;",
     }),
   },
   {
@@ -172,7 +172,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A member row',
       source:
-        '<SkeletonRegion label="Loading members" loading={pending}>\n  <Inline gap="5">\n    <Skeleton shape="circle" size="md" />\n    <Stack gap="2">\n      <Skeleton inlineSize="9rem" shape="text" />\n      <Skeleton inlineSize="5rem" shape="text" />\n    </Stack>\n  </Inline>\n</SkeletonRegion>;',
+        '<SkeletonRegion messages={{ label: \'Loading members\' }} loading={pending}>\n  <Inline gap="5">\n    <Skeleton shape="circle" size="md" />\n    <Stack gap="2">\n      <Skeleton inlineSize="9rem" shape="text" />\n      <Skeleton inlineSize="5rem" shape="text" />\n    </Stack>\n  </Inline>\n</SkeletonRegion>;',
     }),
   },
   {
@@ -196,7 +196,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'The announcement, and switching it off',
       source:
-        '<SkeletonRegion label="Loading invoices" loadedLabel="Invoices loaded">\n  <SkeletonText />\n</SkeletonRegion>;\n\n// A region the reader never waits on says nothing at all.\n<SkeletonRegion live="off">\n  <Skeleton shape="circle" />\n</SkeletonRegion>;',
+        '<SkeletonRegion messages={{ label: \'Loading invoices\' }} loadedLabel="Invoices loaded">\n  <SkeletonText />\n</SkeletonRegion>;\n\n// A region the reader never waits on says nothing at all.\n<SkeletonRegion live="off">\n  <Skeleton shape="circle" />\n</SkeletonRegion>;',
     }),
   },
 ];
@@ -258,11 +258,11 @@ export const REACT_SKELETON_DOCS = {
         'Whether the region announces the wait at all',
       ],
       [
-        'label',
-        'string',
-        'Loading…',
+        'messages',
+        'Partial<SkeletonMessages>',
+        '—',
         'SkeletonRegion',
-        'What a screen reader hears once, while the region is waiting',
+        'Words laid over the language in force, key by key: what a screen reader hears once, while the region is waiting (label)',
       ],
       [
         'loadedLabel',
@@ -320,7 +320,7 @@ export const REACT_SKELETON_DOCS = {
         'SkeletonDefaults',
         '—',
         'Application',
-        'Sets animation, delay, minDuration, label, loadedLabel, lastLineSize and live once for everything below it; a prop on a region or a box still wins',
+        'Sets animation, delay, minDuration, loadedLabel, lastLineSize and live once for everything below it; a prop on a region or a box still wins',
       ],
     ]),
     accessibility: [

@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "inline-message",
   "ui": "inline-message",
+  "catalog": {
+    "group": "Feedback",
+    "summary": "Short status message next to content."
+  },
   "axes": {
     "tone": ["accent", "secondary", "success", "warning", "danger"],
     "size": ["sm", "md"],

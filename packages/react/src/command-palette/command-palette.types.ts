@@ -1,4 +1,5 @@
 import type { CommandGroup, CommandItem, CommandRanker } from '@slotted/core/commands';
+import type { CommandPaletteMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode, Ref } from 'react';
 
@@ -106,26 +107,6 @@ export interface CommandPaletteDefaults {
   /** The chord that opens the palette anywhere in the document; `null` for none. */
   hotkey: string | null;
   recentLimit: number;
-  /** The dialog's accessible name. */
-  label: string;
-  /** The input's accessible name. */
-  inputLabel: string;
-  placeholder: string;
-  emptyLabel: string;
-  loadingLabel: string;
-  /** `{message}` becomes the error's message. */
-  errorLabel: string;
-  /** `{count}` becomes the number. */
-  countLabel: string;
-  recentLabel: string;
-  clearLabel: string;
-  /** The word on the close control a full-screen palette draws. */
-  closeLabel: string;
-  backLabel: string;
-  hintNavigate: string;
-  hintSelect: string;
-  hintClose: string;
-  hintBack: string;
 }
 
 export interface CommandPaletteDefaultsProviderProps extends Partial<CommandPaletteDefaults> {
@@ -152,7 +133,7 @@ export interface CommandPaletteProps<
   groups?: readonly CommandGroup[] | undefined;
   /** The adapter. Absent takes the core ranker; `null` shows the items as they came. */
   rank?: CommandRanker<Item> | null | undefined;
-  /** BCP 47, for the comparison the default ranker makes. */
+  /** BCP 47, for the comparison the default ranker makes. Defaults to the language in force. */
   locale?: string | undefined;
   limit?: number | undefined;
 
@@ -194,22 +175,13 @@ export interface CommandPaletteProps<
   recentLimit?: number | undefined;
   loading?: boolean | undefined;
   disabled?: boolean | undefined;
-
-  label?: string | undefined;
-  inputLabel?: string | undefined;
-  placeholder?: string | undefined;
-  emptyLabel?: string | undefined;
-  loadingLabel?: string | undefined;
-  errorLabel?: string | undefined;
-  countLabel?: string | undefined;
-  recentLabel?: string | undefined;
-  clearLabel?: string | undefined;
-  closeLabel?: string | undefined;
-  backLabel?: string | undefined;
-  hintNavigate?: string | undefined;
-  hintSelect?: string | undefined;
-  hintClose?: string | undefined;
-  hintBack?: string | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * dialog's name (`label`), the input's name and placeholder, the empty,
+   * loading, count and error sentences, the recents heading, the clear, close
+   * and back controls, and the footer's hints.
+   */
+  messages?: PartialMessages<CommandPaletteMessages> | undefined;
 
   /** Replaces the row's content; the option element and its wiring stay the family's. */
   renderItem?: ((item: Item, state: CommandPaletteItemState) => ReactNode) | undefined;

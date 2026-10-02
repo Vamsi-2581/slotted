@@ -49,3 +49,18 @@ export function dashboardKeyIntent(
   if (!event.altKey && !event.shiftKey && event.key === 'Delete') return { kind: 'hide' };
   return null;
 }
+
+/** The shortcuts the handle declares in `aria-keyshortcuts`. */
+export function handleShortcuts(removable: boolean): string {
+  const keys = [
+    'Alt+ArrowUp',
+    'Alt+ArrowDown',
+    'Alt+ArrowLeft',
+    'Alt+ArrowRight',
+    'Shift+ArrowUp',
+    'Shift+ArrowDown',
+    'Shift+ArrowLeft',
+    'Shift+ArrowRight',
+  ];
+  return (removable ? [...keys, 'Delete'] : keys).join(' ');
+}

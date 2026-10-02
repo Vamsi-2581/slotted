@@ -52,7 +52,7 @@ export function AttachmentPreview({
           <Glyph name={ATTACHMENT_KIND_GLYPH[attachment.kind]} />
         </Icon>
       )),
-    'data-extension': extensionLabel(attachment.extension),
+    'data-extension': extensionLabel(attachment.extension, attachment.t('noExtension')),
     'data-kind': attachment.kind,
     'data-part': 'preview',
   };
@@ -172,7 +172,7 @@ export function AttachmentLink({
 
 /**
  * The line under the name. Absent children, it writes the size with
- * `formatBytes` in the provider's locale; anything the page writes replaces
+ * `formatBytes` in the language in force; anything the page writes replaces
  * it — a date, a sender, `Uploading · 62%`.
  */
 export function AttachmentDetail({ children, id, render, ...nativeProps }: AttachmentTextProps) {
@@ -280,7 +280,7 @@ export function AttachmentRemove({
 
   const rootProps: AttachmentActionRootProps = {
     ...nativeProps,
-    'aria-label': ariaLabel ?? `${attachment.removeLabel} ${attachment.file.name}`,
+    'aria-label': ariaLabel ?? attachment.t('remove', { name: attachment.file.name }),
     children: children ?? (
       <Icon>
         <Glyph name="x" />

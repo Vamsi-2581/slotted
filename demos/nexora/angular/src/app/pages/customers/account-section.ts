@@ -141,7 +141,7 @@ import { formatMoney, SEGMENT_LABEL, TERMS_LABEL } from './customer-columns';
             <form
               slForm
               #form="slForm"
-              summaryTitle="This account was not saved"
+              [messages]="{ summaryTitle: 'This account was not saved' }"
               [errors]="edit.errors()"
               (errorsChange)="edit.errors.set($event.value)"
               [loading]="edit.saving()"
@@ -177,7 +177,7 @@ import { formatMoney, SEGMENT_LABEL, TERMS_LABEL } from './customer-columns';
                         size="sm"
                         type="button"
                         [loading]="edit.saving()"
-                        loadingLabel="Saving"
+                        [messages]="{ loading: 'Saving' }"
                         (click)="applyMine()"
                       >
                         Keep what I wrote
@@ -377,7 +377,7 @@ import { formatMoney, SEGMENT_LABEL, TERMS_LABEL } from './customer-columns';
                   slButton
                   type="submit"
                   [loading]="edit.saving()"
-                  loadingLabel="Saving the account"
+                  [messages]="{ loading: 'Saving the account' }"
                 >
                   Save account
                 </button>

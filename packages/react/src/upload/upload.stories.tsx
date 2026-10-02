@@ -1,3 +1,4 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -5,6 +6,7 @@ import { useRef } from 'react';
 
 import { Button } from '../button';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { Text } from '../typography';
 import { Upload } from './upload';
 import { CLAIM, DemoUpload, demoAdapter } from './upload-demo';
@@ -572,42 +574,23 @@ export const Defaults: Story = {
   parameters: scenario('defaults'),
   render: () => (
     <div className={stage} data-layout="block">
-      <UploadDefaultsProvider
-        concurrency={2}
-        describeRejection={(file, { bytes }) =>
-          file.reason === 'size'
-            ? `Este ficheiro tem ${bytes(file.size)} e o limite é ${bytes(2 * 1024 * 1024)}.`
-            : 'Ficheiro recusado.'
-        }
-        describeQueue={(message) =>
-          message.kind === 'summary'
-            ? `${message.uploaded} de ${message.total} enviados`
-            : message.kind === 'finished'
-              ? `${message.uploaded} de ${message.total} ficheiros enviados`
-              : `${message.count} ficheiros`
-        }
-        labels={{
-          clear: 'Remover todos',
-          dropzone: 'Largue os ficheiros aqui',
-          remove: 'Remover',
-          trigger: 'Escolher ficheiros',
-        }}
-        locale="pt-BR"
-        maxRows={4}
-      >
-        <DemoUpload
-          description="Every string, the locale and the limits come from one provider above."
-          label="Documentos do sinistro"
-          maxSize={2 * 1024 * 1024}
-          multiple
-          seed={[CLAIM.form, { ...CLAIM.dashcam, status: 'rejected', reason: 'size' }]}
-        />
-        <DemoUpload
-          label="Um segundo, com o mesmo provedor"
-          seed={[CLAIM.witness]}
-          variant="field"
-        />
-      </UploadDefaultsProvider>
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+        <UploadDefaultsProvider concurrency={2} maxRows={4}>
+          <DemoUpload
+            description="Every word and the locale come from the language in force; the limits from one provider above."
+            label="Documentos do sinistro"
+            maxSize={2 * 1024 * 1024}
+            messages={{ rejection: { size: 'Este arquivo tem {size}; o limite é 2 MB.' } }}
+            multiple
+            seed={[CLAIM.form, { ...CLAIM.dashcam, status: 'rejected', reason: 'size' }]}
+          />
+          <DemoUpload
+            label="Um segundo, com o mesmo provedor"
+            seed={[CLAIM.witness]}
+            variant="field"
+          />
+        </UploadDefaultsProvider>
+      </SlottedProvider>
     </div>
   ),
 };

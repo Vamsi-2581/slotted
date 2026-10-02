@@ -61,7 +61,7 @@ test('gives each part the role the pattern asks for', () => {
  */
 test('names the rotation control by its action and never marks it pressed', () => {
   assert.equal(contract.rotation.pressedState, false);
-  assert.deepEqual(contract.rotation.labels, ['stop', 'start']);
+  assert.deepEqual(contract.rotation.messages, ['stop', 'start']);
   assert.equal(contract.rotation.firstInSequence, true);
 });
 

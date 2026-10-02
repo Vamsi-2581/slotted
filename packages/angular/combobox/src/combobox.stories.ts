@@ -461,22 +461,14 @@ export const InAForm: Story = {
 export const Composition: Story = {
   decorators: [
     moduleMetadata({
-      providers: [
-        provideComboboxDefaults({
-          countLabel: '{count} pessoas',
-          emptyLabel: 'Nada encontrado',
-          loadingLabel: 'Carregando…',
-          size: 'sm',
-          variant: 'subtle',
-        }),
-      ],
+      providers: [provideComboboxDefaults({ size: 'sm', variant: 'subtle' })],
     }),
   ],
   parameters: scenario('composition'),
   render: (_args, context) => ({
     props: { pictured: isolated(context) },
     template: viewport(
-      `<sl-combobox aria-label="Fruit" placeholder="Search fruit" [inputValue]="'zzz'" [open]="pictured" [portal]="false">${FRUIT}</sl-combobox>`,
+      `<sl-combobox aria-label="Fruit" placeholder="Search fruit" [inputValue]="'zzz'" [open]="pictured" [portal]="false" [messages]="{ empty: 'Nothing grows by that name' }">${FRUIT}</sl-combobox>`,
       'tall',
     ),
   }),

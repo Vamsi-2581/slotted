@@ -1,9 +1,11 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import type { ComponentPropsWithRef } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/notification-center/contract.json';
+import { SlottedProvider } from '../i18n';
 import { NotificationCenter } from './notification-center';
 import { NotificationCenterDefaultsProvider } from './notification-center-defaults';
 import type {
@@ -69,7 +71,7 @@ describe('NotificationCenter', () => {
     render(<Centre />);
 
     expect(root()).toHaveAttribute('aria-labelledby', screen.getByRole('heading').id);
-    expect(screen.getByRole('heading')).toHaveTextContent('Notificações');
+    expect(screen.getByRole('heading')).toHaveTextContent('Notifications');
     expect(feed()).toHaveAttribute('aria-labelledby', screen.getByRole('heading').id);
     expect(articles()).toHaveLength(3);
     expect(article(0)).toHaveAttribute('tabindex', '0');
@@ -166,20 +168,20 @@ describe('NotificationCenter', () => {
     const onReadChange = vi.fn();
     render(<Centre onReadChange={onReadChange} />);
 
-    click(screen.getAllByRole('button', { name: 'Marcar como lida' })[0] as HTMLElement);
+    click(screen.getAllByRole('button', { name: 'Mark as read' })[0] as HTMLElement);
     expect(onReadChange).toHaveBeenLastCalledWith(
       { keys: ['n1'], read: true },
       expect.objectContaining({ reason: 'pointer' }),
     );
     expect(article(0)).not.toHaveAttribute('data-read');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Marcar como não lida' }), { detail: 0 });
+    fireEvent.click(screen.getByRole('button', { name: 'Mark as unread' }), { detail: 0 });
     expect(onReadChange).toHaveBeenLastCalledWith(
       { keys: ['n3'], read: false },
       expect.objectContaining({ reason: 'keyboard' }),
     );
 
-    click(screen.getByRole('button', { name: 'Marcar tudo como lido' }));
+    click(screen.getByRole('button', { name: 'Mark all as read' }));
     expect(onReadChange).toHaveBeenLastCalledWith(
       { keys: ['n1', 'n2'], read: true },
       expect.objectContaining({ reason: 'pointer' }),
@@ -196,19 +198,19 @@ describe('NotificationCenter', () => {
 
     /* A key first: jsdom, like a browser, shows focus only after the keyboard was the last thing used. */
     fireEvent.keyDown(document.body, { key: 'Tab' });
-    const read = screen.getAllByRole('button', { name: 'Marcar como lida' })[0] as HTMLElement;
+    const read = screen.getAllByRole('button', { name: 'Mark as read' })[0] as HTMLElement;
     read.focus();
     fireEvent.focus(read);
     await waitFor(() => expect(document.querySelector('[role="tooltip"]')).not.toBeNull());
-    expect(document.querySelector('[role="tooltip"]')).toHaveTextContent('Marcar como lida');
+    expect(document.querySelector('[role="tooltip"]')).toHaveTextContent('Mark as read');
     fireEvent.blur(read);
     await waitFor(() => expect(document.querySelector('[role="tooltip"]')).toBeNull());
 
-    const dismiss = screen.getAllByRole('button', { name: 'Dispensar' })[0] as HTMLElement;
+    const dismiss = screen.getAllByRole('button', { name: 'Dismiss' })[0] as HTMLElement;
     dismiss.focus();
     fireEvent.focus(dismiss);
     await waitFor(() =>
-      expect(document.querySelector('[role="tooltip"]')).toHaveTextContent('Dispensar'),
+      expect(document.querySelector('[role="tooltip"]')).toHaveTextContent('Dismiss'),
     );
   });
 
@@ -217,7 +219,7 @@ describe('NotificationCenter', () => {
     const { rerender } = render(<Centre onUnreadChange={onUnreadChange} />);
 
     expect(screen.getByRole('heading').querySelector('[data-part="count"]')).toHaveTextContent('2');
-    expect(screen.getByRole('button', { name: 'Marcar tudo como lido' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Mark all as read' })).toBeEnabled();
     expect(onUnreadChange).toHaveBeenLastCalledWith(2);
 
     rerender(
@@ -227,7 +229,7 @@ describe('NotificationCenter', () => {
       />,
     );
     expect(screen.getByRole('heading').querySelector('[data-part="count"]')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Marcar tudo como lido' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Mark all as read' })).toBeDisabled();
     expect(onUnreadChange).toHaveBeenLastCalledWith(0);
     expect(onUnreadChange).toHaveBeenCalledTimes(2);
   });
@@ -236,7 +238,7 @@ describe('NotificationCenter', () => {
     const onRemove = vi.fn();
     render(<Centre onRemove={onRemove} />);
 
-    click(screen.getAllByRole('button', { name: 'Dispensar' })[1] as HTMLElement);
+    click(screen.getAllByRole('button', { name: 'Dismiss' })[1] as HTMLElement);
     expect(onRemove).toHaveBeenLastCalledWith('n2', expect.objectContaining({ reason: 'pointer' }));
 
     article(0).focus();
@@ -362,7 +364,7 @@ describe('NotificationCenter', () => {
     article(0).focus();
     fireEvent.click(screen.getByRole('button', { name: 'chega' }));
     expect(articles()).toHaveLength(3);
-    const fresh = screen.getByRole('button', { name: '1 novas notificações' });
+    const fresh = screen.getByRole('button', { name: '1 new notification' });
     expect(fresh).toHaveAttribute('data-part', 'fresh');
 
     press(article(0), 'PageUp');
@@ -373,7 +375,7 @@ describe('NotificationCenter', () => {
     expect(articles()).toHaveLength(4);
     expect(article(0)).toHaveAccessibleName('Nova');
     expect(article(0)).toHaveFocus();
-    expect(screen.queryByRole('button', { name: /novas/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /new notification/ })).toBeNull();
   });
 
   it('shows arrivals at once when nobody is reading, and always under show', () => {
@@ -399,7 +401,7 @@ describe('NotificationCenter', () => {
     const { unmount } = render(<Live arrivals="hold" />);
     fireEvent.click(screen.getByRole('button', { name: 'chega' }));
     expect(articles()).toHaveLength(4);
-    expect(screen.queryByRole('button', { name: /novas/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /new notification/ })).toBeNull();
     unmount();
 
     render(<Live arrivals="show" />);
@@ -439,7 +441,7 @@ describe('NotificationCenter', () => {
   it('groups the feed under labels one rank below the title', () => {
     render(<Centre groupBy={(item) => (item.read ? 'Ontem' : 'Hoje')} level="3" />);
 
-    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Notificações');
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Notifications');
     const labels = screen.getAllByRole('heading', { level: 4 });
     expect(labels.map((label) => label.textContent)).toEqual(['Hoje', 'Ontem']);
     expect(root().querySelectorAll('[data-part="group"]')).toHaveLength(2);
@@ -450,7 +452,7 @@ describe('NotificationCenter', () => {
     const onLoadMore = vi.fn();
     const { rerender } = render(<Centre growing="button" onLoadMore={onLoadMore} />);
 
-    click(screen.getByRole('button', { name: 'Carregar mais' }));
+    click(screen.getByRole('button', { name: 'Load more' }));
     expect(onLoadMore).toHaveBeenLastCalledWith(expect.objectContaining({ reason: 'pointer' }));
     expect(article(0)).toHaveAttribute('aria-setsize', '-1');
 
@@ -469,7 +471,7 @@ describe('NotificationCenter', () => {
     rerender(<Centre count={40} growing="scroll" loading onLoadMore={onLoadMore} />);
     expect(feed()).toHaveAttribute('aria-busy', 'true');
     expect(root()).toHaveAttribute('data-loading');
-    expect(root().querySelector('[data-part="more"]')).toHaveTextContent('A carregar notificações');
+    expect(root().querySelector('[data-part="more"]')).toHaveTextContent('Loading notifications');
     expect(article(0)).toHaveAttribute('aria-setsize', '40');
   });
 
@@ -481,10 +483,10 @@ describe('NotificationCenter', () => {
     expect(root().querySelector('[data-part="empty"]')).toBeNull();
 
     rerender(<Centre items={[]} />);
-    expect(root().querySelector('[data-part="empty"]')).toHaveTextContent('Nenhuma notificação');
+    expect(root().querySelector('[data-part="empty"]')).toHaveTextContent('No notifications');
 
     rerender(<Centre items={ITEMS.map((item) => ({ ...item, read: true }))} view="unread" />);
-    expect(root().querySelector('[data-part="empty"]')).toHaveTextContent('Tudo lido');
+    expect(root().querySelector('[data-part="empty"]')).toHaveTextContent('All caught up');
 
     rerender(<Centre empty={<p>Nada por aqui</p>} items={[]} />);
     expect(root().querySelector('[data-part="empty"]')).toHaveTextContent('Nada por aqui');
@@ -492,12 +494,12 @@ describe('NotificationCenter', () => {
 
   it('draws the controls the axis names', () => {
     const { rerender } = render(<Centre controls="read" />);
-    expect(screen.getAllByRole('button', { name: /Marcar como/ })).toHaveLength(3);
-    expect(screen.queryByRole('button', { name: 'Dispensar' })).toBeNull();
+    expect(screen.getAllByRole('button', { name: /Mark as/ })).toHaveLength(3);
+    expect(screen.queryByRole('button', { name: 'Dismiss' })).toBeNull();
 
     rerender(<Centre controls="dismiss" />);
-    expect(screen.queryByRole('button', { name: /Marcar como lida/ })).toBeNull();
-    expect(screen.getAllByRole('button', { name: 'Dispensar' })).toHaveLength(3);
+    expect(screen.queryByRole('button', { name: /Mark as read/ })).toBeNull();
+    expect(screen.getAllByRole('button', { name: 'Dismiss' })).toHaveLength(3);
 
     rerender(<Centre controls="none" />);
     expect(article(0).querySelector('[data-part="controls"]')).toBeNull();
@@ -521,13 +523,8 @@ describe('NotificationCenter', () => {
 
   it('reads its defaults from the provider and lets a prop win', () => {
     render(
-      <NotificationCenterDefaultsProvider
-        controls="none"
-        growing="button"
-        messages={{ title: 'Avisos' }}
-        size="sm"
-      >
-        <Centre level="4" />
+      <NotificationCenterDefaultsProvider controls="none" growing="button" size="sm">
+        <Centre level="4" messages={{ title: 'Avisos' }} />
       </NotificationCenterDefaultsProvider>,
     );
     expect(root()).toHaveAttribute('data-size', 'sm');
@@ -535,6 +532,17 @@ describe('NotificationCenter', () => {
     expect(root()).toHaveAttribute('data-controls', 'none');
     expect(root()).toHaveAttribute('data-level', '4');
     expect(screen.getByRole('heading', { level: 4 })).toHaveTextContent('Avisos');
+  });
+
+  it('speaks the language in force', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Centre />
+      </SlottedProvider>,
+    );
+    expect(screen.getByRole('heading')).toHaveTextContent('Notificações');
+    expect(screen.getByRole('button', { name: 'Marcar tudo como lido' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Não lidas/ })).toBeInTheDocument();
   });
 
   it('keeps a consumer name and native props on the root, and renders through render', () => {

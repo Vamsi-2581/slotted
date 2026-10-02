@@ -223,9 +223,9 @@ const scenes: ReferenceSceneMeta[] = [
 <NumberField defaultValue={1480.5} locale="ar-EG" />; // ١٬٤٨٠٫٥
 
 // Set once for the application rather than per amount.
-<NumberFieldDefaultsProvider locale="pt-BR">
+<SlottedProvider locale="pt-BR">
   <OrderForm />
-</NumberFieldDefaultsProvider>;`,
+</SlottedProvider>;`,
     }),
   },
   {
@@ -304,12 +304,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Setting it once, reaching past it, and putting it in a form',
-    note: 'The provider carries the seven decisions an application takes once; ref reaches the element and handle reaches the two actions a value cannot express; name submits the raw number through a hidden input rather than the formatted string.',
+    note: 'The provider carries the five decisions an application takes once; ref reaches the element and handle reaches the two actions a value cannot express; name submits the raw number through a hidden input rather than the formatted string.',
     snippet: defineSnippet({
       id: 'number-field-react-composition',
       language: 'tsx',
       label: 'A provider, a handle, and a form',
-      source: `<NumberFieldDefaultsProvider locale="pt-BR" stepper="split">
+      source: `<NumberFieldDefaultsProvider stepper="split">
   <NumberField defaultValue={3} />
 </NumberFieldDefaultsProvider>;
 
@@ -435,8 +435,8 @@ export const REACT_NUMBER_FIELD_DOCS = {
       [
         'locale',
         'string',
-        'the runtime’s',
-        'NumberField, NumberFieldDefaultsProvider',
+        'the language in force',
+        'NumberField',
         'BCP 47. It decides the decimal separator, the grouping and the numbering system, on the way out and on the way back in',
       ],
       [
@@ -524,11 +524,11 @@ export const REACT_NUMBER_FIELD_DOCS = {
         'Reach a hidden input beside the visible one, which carries the raw number. Submitting "R$ 1.480,00" to a server expecting 1480 is the defect this avoids',
       ],
       [
-        'incrementLabel / decrementLabel',
-        'string',
-        'Increase / Decrease',
-        'NumberField, NumberFieldDefaultsProvider',
-        'What the two buttons announce. Both are set once for an application rather than per amount',
+        'messages',
+        'Partial<NumberFieldMessages>',
+        '—',
+        'NumberField',
+        'Words laid over the language in force, key by key: increment and decrement are what the two buttons announce',
       ],
     ]),
     composition: apiRows([
@@ -562,10 +562,10 @@ export const REACT_NUMBER_FIELD_DOCS = {
       ],
       [
         'NumberFieldDefaultsProvider',
-        '{ size, variant, stepper, locale, formatOn, clamp, incrementLabel, decrementLabel }',
+        '{ size, variant, stepper, formatOn, clamp }',
         '—',
         'a subtree',
-        'The seven decisions an application takes once. locale is the one worth setting first: a form where one field reads 1.234 as a thousand and another as one point two three four is a form that loses money',
+        'The five decisions an application takes once. The locale comes from SlottedProvider, for the whole application: a form where one field reads 1.234 as a thousand and another as one point two three four is a form that loses money',
       ],
       [
         'useField()',

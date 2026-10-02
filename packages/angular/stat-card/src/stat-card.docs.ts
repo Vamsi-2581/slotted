@@ -257,13 +257,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'accessibility',
     title: 'What a reader hears',
-    note: 'The card is a group named by its label, so the details link inside it is “Details, Fill rate”; the delta reads “up +3.2%” with the direction said before the sign; the sparkline is an image described in the same numbers; the messages are one provider away from another language.',
+    note: 'The card is a group named by its label, so the details link inside it is “Details, Fill rate”; the delta reads “up +3.2%” with the direction said before the sign; the sparkline is an image described in the same numbers; the words are those of the language in force.',
     snippet: defineSnippet({
       id: 'stat-card-angular-accessibility',
       language: 'ts',
       label: 'Translated once',
       source:
-        "bootstrapApplication(App, {\n  providers: [\n    provideStatCardDefaults({\n      locale: 'pt-BR',\n      messages: { up: 'subiu', down: 'caiu', flat: 'sem variação', empty: '—' },\n    }),\n  ],\n});",
+        "bootstrapApplication(App, {\n  providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],\n});",
     }),
   },
 ];
@@ -324,7 +324,13 @@ export const ANGULAR_STAT_CARD_DOCS = {
         'slStatCard, slStatCardDelta',
         'An explicit tone, which wins over the derived one. On the root it is what the trend hands its sparkline',
       ],
-      ['locale', 'string', '—', 'slStatCard', 'BCP 47, for every number the card formats'],
+      [
+        'locale',
+        'string',
+        '—',
+        'slStatCard',
+        'BCP 47, for every number the card formats; the language in force when absent',
+      ],
       [
         'formatOptions',
         'Intl.NumberFormatOptions',
@@ -337,7 +343,7 @@ export const ANGULAR_STAT_CARD_DOCS = {
         'Partial<StatCardMessages>',
         '—',
         'slStatCard',
-        'up, down and flat, heard before the delta; empty, shown in place of a missing value',
+        'Words laid over the language in force, key by key: up, down and flat, heard before the delta; empty, shown in place of a missing value',
       ],
       [
         'value',
@@ -403,7 +409,7 @@ export const ANGULAR_STAT_CARD_DOCS = {
         'StatCardDefaults',
         '—',
         'Application',
-        'Sets goodWhen, size, fill, layout, locale, formatOptions and messages once, in a route or the application config; an input still wins',
+        'Sets goodWhen, size, fill, layout and formatOptions once, in a route or the application config; an input still wins',
       ],
     ]),
     accessibility: [

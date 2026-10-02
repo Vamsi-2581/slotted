@@ -1,18 +1,9 @@
 export { isSameTimeRange, TimeRangePicker, TimeRangePickerPreset } from './time-range-picker';
 export {
-  TIME_RANGE_PICKER_CHANGE_LABEL,
-  TIME_RANGE_PICKER_CHOOSE_LABEL,
-  TIME_RANGE_PICKER_CLEAR_LABEL,
-  TIME_RANGE_PICKER_EMPTY_LABEL,
-  TIME_RANGE_PICKER_END_LABEL,
   TIME_RANGE_PICKER_MAX_OPTIONS,
-  TIME_RANGE_PICKER_NOW_LABEL,
-  TIME_RANGE_PICKER_START_LABEL,
   TIME_RANGE_PICKER_STEP,
-  TIME_RANGE_PICKER_TRUNCATED_LABEL,
   TimeRangePickerDefaultsProvider,
   timeRangePickerLengthLabel,
-  timeRangePickerLimitLabel,
   useTimeRangePickerDefaults,
 } from './time-range-picker-defaults';
 export type {

@@ -25,7 +25,7 @@ export const REACT_DATETIME_RANGE_PICKER_TOKENS = dateTimeRangePickerTokens.map(
 
 const imports: ReferenceImport = {
   source:
-    "import { DateTimeRangePicker, DateTimeRangePickerDefaultsProvider, DateTimeRangePickerPreset } from '@slotted/react';",
+    "import { DateTimeRangePicker, DateTimeRangePickerDefaultsProvider, DateTimeRangePickerPreset, SlottedProvider } from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -109,7 +109,7 @@ const anatomy: AnatomyRow[] = [
     part: 'tab-label',
     element: 'span',
     required: false,
-    purpose: '"Start" or "End", from startLabel and endLabel.',
+    purpose: '"Start" or "End", from the start and end messages.',
   },
   {
     part: 'tab-value',
@@ -136,7 +136,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      'What the next press should be, or what is wrong — "Return: choose a day", "Return: choose a time on 16 Sep", "The end must come after the start" — in the words hintLabels gives it. data-invalid while it names a problem; aria-describedby of the list and the field. Empty while the work is whole and valid.',
+      'What the next press should be, or what is wrong — "Return: choose a day", "Return: choose a time on 16 Sep", "The end must come after the start" — from the chooseDay, chooseTime, order, length, unavailable and bounds messages. data-invalid while it names a problem; aria-describedby of the list and the field. Empty while the work is whole and valid.',
   },
   {
     part: 'length',
@@ -237,9 +237,8 @@ const scenes: ReferenceSceneMeta[] = [
   <DateTimeRangePicker
     clearable
     defaultValue={rental}
-    endLabel="Devolução"
     locale="pt-BR"
-    startLabel="Retirada"
+    messages={{ start: 'Retirada', end: 'Devolução' }}
   />
 </Field>;`,
     }),
@@ -337,7 +336,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'datetime-range-picker-react-now',
       label: 'One now per end',
       language: 'tsx',
-      source: `<DateTimeRangePicker nowLabel="Agora" referenceDateTime={now} />;`,
+      source: `<DateTimeRangePicker messages={{ now: 'Agora' }} referenceDateTime={now} />;`,
     }),
   },
   {
@@ -445,14 +444,16 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition',
-    note: 'The provider sets locale, months, step, labels, the hint’s and the duration’s words once; the handle opens, closes and focuses; renderOption replaces what a row draws; position — which tab — is the consumer’s to own.',
+    note: 'The provider sets the months, the step and how a duration is written once, SlottedProvider the language and every word; the handle opens, closes and focuses; renderOption replaces what a row draws; position — which tab — is the consumer’s to own.',
     snippet: defineSnippet({
       id: 'datetime-range-picker-react-composition',
       label: 'Set once, and the handle',
       language: 'tsx',
-      source: `<DateTimeRangePickerDefaultsProvider locale="pt-BR" months={2} nowLabel="Agora">
-  <DateTimeRangePicker ref={handle} />
-</DateTimeRangePickerDefaultsProvider>;`,
+      source: `<SlottedProvider locale="pt-BR">
+  <DateTimeRangePickerDefaultsProvider months={2}>
+    <DateTimeRangePicker ref={handle} />
+  </DateTimeRangePickerDefaultsProvider>
+</SlottedProvider>;`,
     }),
   },
   {
@@ -584,13 +585,6 @@ const api: ApiRow[] = apiRows([
     'What the band and the rows say for a duration, in the product’s own words. The default writes "3 days 21 hr" in the family’s locale.',
   ],
   [
-    'limitLabel',
-    '(min?: number, max?: number, locale?: string) => string',
-    '"1 hr to 30 days"',
-    'DateTimeRangePicker',
-    'What the band says while a limit is set.',
-  ],
-  [
     'step',
     'number',
     '900',
@@ -642,9 +636,9 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    '—',
+    'SlottedProvider',
     'DateTimeRangePicker',
-    'BCP 47. Decides the field order, the digits, the month names, the day-period names and the duration’s words.',
+    'BCP 47. Decides the field order, the digits, the month names, the day-period names and the duration’s units. Unset, the language in force decides.',
   ],
   ['timeZone', 'string', '—', 'DateTimeRangePicker', 'The zone "now" is read in.'],
   [
@@ -736,62 +730,11 @@ const api: ApiRow[] = apiRows([
     'Whether the field in the band takes the relative expression — +2d, 1h30, = — the way a datetime-field does.',
   ],
   [
-    'startLabel',
-    'string',
-    'Start',
+    'messages',
+    'Partial<DatetimeRangePickerMessages>',
+    '—',
     'DateTimeRangePicker',
-    'The start tab’s label, and the field’s name while the start is current.',
-  ],
-  [
-    'endLabel',
-    'string',
-    'End',
-    'DateTimeRangePicker',
-    'The end tab’s label, and the field’s name while the end is current.',
-  ],
-  [
-    'chooseLabel',
-    'string',
-    'Choose range',
-    'DateTimeRangePicker',
-    'The trigger’s name and the frame’s placeholder while nothing is chosen.',
-  ],
-  [
-    'changeLabel',
-    'string',
-    'Change range',
-    'DateTimeRangePicker',
-    'The trigger’s name once a range is chosen, before the two times.',
-  ],
-  ['clearLabel', 'string', 'Clear range', 'DateTimeRangePicker', 'The clear’s name.'],
-  ['nowLabel', 'string', 'Now', 'DateTimeRangePicker', 'The now control beside the field.'],
-  [
-    'doneLabel',
-    'string',
-    'Done',
-    'DateTimeRangePicker',
-    'The button at the end of the footer that closes with what is written.',
-  ],
-  [
-    'hintLabels',
-    'Partial<DateTimeRangePickerHintLabels>',
-    'English',
-    'DateTimeRangePicker',
-    'What the hint says: choose while the current end has no date and chooseTime while it has no time, with {end} for its label and {day} for the day; order, length, unavailable and bounds while the work is whole and invalid.',
-  ],
-  [
-    'emptyLabel',
-    'string',
-    'No time available',
-    'DateTimeRangePicker',
-    'What a panel says when its end has no time at all.',
-  ],
-  [
-    'truncatedLabel',
-    'string',
-    'Only the first times are listed; type the rest into the field',
-    'DateTimeRangePicker',
-    'A list’s description when it stops at maxOptions.',
+    'Words laid over the language in force, key by key: the two ends (start, end), the trigger’s names (choose; change with {start}, {end} and {length}; changeReversed), the hint (chooseDay with {end}; chooseTime with {end} and {day}; order, length, unavailable, bounds), the limit (limit.between, limit.atLeast, limit.atMost), now, done, clear, and a panel that is empty or cut short (empty, truncated).',
   ],
   [
     'startName',
@@ -866,7 +809,7 @@ const composition: ApiRow[] = apiRows([
     'component',
     '—',
     'application',
-    'Sets locale, timeZone, calendar, firstDayOfWeek, months, hourCycle, granularity, step, maxOptions, unavailableOptions, closeOnSelect, placement, size, variant, lengthLabel, limitLabel, hintLabels and every label once for everything under it.',
+    'Sets timeZone, calendar, firstDayOfWeek, months, hourCycle, granularity, step, maxOptions, unavailableOptions, closeOnSelect, placement, size, variant and lengthLabel once for everything under it. The locale and the words come from SlottedProvider.',
   ],
   [
     'DateTimeRangePickerPreset',

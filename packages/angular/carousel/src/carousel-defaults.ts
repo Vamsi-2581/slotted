@@ -1,15 +1,13 @@
 import { inject, Injectable, InjectionToken } from '@angular/core';
-import { CAROUSEL_MESSAGES, DEFAULT_AUTOPLAY_DELAY } from '@slotted/core/carousel';
+import { DEFAULT_AUTOPLAY_DELAY } from '@slotted/core/carousel';
 import type {
   CarouselAlign,
-  CarouselMessages,
   CarouselOrientation,
   CarouselTransition,
 } from '@slotted/core/carousel';
 
 export type {
   CarouselAlign,
-  CarouselMessages,
   CarouselOrientation,
   CarouselSlidesPerMove,
   CarouselTransition,
@@ -37,9 +35,6 @@ export interface CarouselDefaults {
   draggable: boolean;
   /** The rotation's wait on a page, in milliseconds, when `autoplay` is `true`. */
   autoplayDelay: number;
-  messages: CarouselMessages;
-  /** The locale numbers in messages are written in. Unset, the runtime's own. */
-  locale: string | undefined;
 }
 
 const FALLBACK: CarouselDefaults = {
@@ -47,9 +42,7 @@ const FALLBACK: CarouselDefaults = {
   arrows: 'inset',
   autoplayDelay: DEFAULT_AUTOPLAY_DELAY,
   draggable: true,
-  locale: undefined,
   loop: false,
-  messages: CAROUSEL_MESSAGES,
   orientation: 'horizontal',
   size: 'md',
   transition: 'slide',
@@ -61,20 +54,14 @@ export const CAROUSEL_DEFAULTS = new InjectionToken<CarouselDefaults>('slotted c
 });
 
 /**
- * An application decides once how its carousels look and move, and in which
- * words they speak. Messages merge key by key over the family's own; a
- * carousel that states anything itself still wins.
+ * An application decides once how its carousels look and move; a carousel that
+ * states anything itself still wins. Its words come from the language in force
+ * (`provideSlotted`).
  */
-export function provideCarouselDefaults(
-  defaults: Partial<Omit<CarouselDefaults, 'messages'>> & { messages?: Partial<CarouselMessages> },
-) {
+export function provideCarouselDefaults(defaults: Partial<CarouselDefaults>) {
   return {
     provide: CAROUSEL_DEFAULTS,
-    useFactory: (): CarouselDefaults => ({
-      ...FALLBACK,
-      ...defaults,
-      messages: { ...FALLBACK.messages, ...defaults.messages },
-    }),
+    useFactory: (): CarouselDefaults => ({ ...FALLBACK, ...defaults }),
   };
 }
 

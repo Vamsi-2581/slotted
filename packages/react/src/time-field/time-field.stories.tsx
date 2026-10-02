@@ -1,4 +1,5 @@
 import { plainTime } from '@slotted/core/date';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { PlainTime } from '@slotted/core/date';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
@@ -8,6 +9,7 @@ import { useRef, useState } from 'react';
 
 import { Button } from '../button';
 import { Field, FieldDescription, FieldError, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { Icon } from '../icon';
 import { TimeField } from './time-field';
 import { TimeFieldDefaultsProvider } from './time-field-defaults';
@@ -235,7 +237,7 @@ export const Midnight: Story = {
           <TimeField
             aria-label="Fim do turno"
             locale="pt-BR"
-            nextDayLabel="no dia seguinte"
+            messages={{ nextDay: '{time} no dia seguinte' }}
             onValueChange={(value: PlainTime | null, request: TimeFieldChangeRequest) =>
               setLast(
                 value === null
@@ -440,7 +442,7 @@ export const Clear: Story = {
         <TimeField
           aria-label="Com valor"
           clearable
-          clearLabel="Limpar a hora"
+          messages={{ clear: 'Limpar a hora' }}
           defaultValue={HALF_PAST_TWO}
           locale="pt-BR"
         />
@@ -449,7 +451,12 @@ export const Clear: Story = {
         label="Empty"
         note="Nothing to clear, so nothing is drawn — and the value keeps its place rather than shifting sideways when the button appears."
       >
-        <TimeField aria-label="Vazia" clearable clearLabel="Limpar a hora" locale="pt-BR" />
+        <TimeField
+          aria-label="Vazia"
+          clearable
+          locale="pt-BR"
+          messages={{ clear: 'Limpar a hora' }}
+        />
       </Scene>
     </Grid>
   ),
@@ -578,12 +585,14 @@ export const Composition: Story = {
       <Grid columns={2}>
         <Scene
           label="Set once for the application"
-          note="The provider states the locale, the clock and the labels for everything under it. A control that states any of them itself still wins — the second one here asks for en-US and gets it."
+          note="The provider states the clock for everything under it, and SlottedProvider the language. A control that states any of them itself still wins — the second one here asks for en-US and gets it."
         >
-          <TimeFieldDefaultsProvider hourCycle={24} locale="pt-BR">
-            <TimeField aria-label="Do provider" defaultValue={HALF_PAST_TWO} />
-            <TimeField aria-label="Próprio" defaultValue={HALF_PAST_TWO} locale="en-US" />
-          </TimeFieldDefaultsProvider>
+          <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+            <TimeFieldDefaultsProvider hourCycle={24}>
+              <TimeField aria-label="Do provider" defaultValue={HALF_PAST_TWO} />
+              <TimeField aria-label="Próprio" defaultValue={HALF_PAST_TWO} locale="en-US" />
+            </TimeFieldDefaultsProvider>
+          </SlottedProvider>
         </Scene>
         <Scene
           collapseFloor={40}

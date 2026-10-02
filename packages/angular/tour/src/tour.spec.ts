@@ -4,10 +4,11 @@ import type { ComponentFixture } from '@angular/core/testing';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { SlDialog, SlDialogBody, SlDialogTitle } from '@slotted/angular/dialog';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
 import contract from '../../../../specs/components/tour/contract.json';
 import { SlTour } from './tour';
-import { provideTourDefaults } from './tour-defaults';
 import type { TourOpenRequest, TourStep, TourStepRequest } from './tour-defaults';
 import { SlTourCard, SlTourNext, SlTourStep, SlTourTitle } from './tour-parts';
 import { SlTourContent } from './tour-parts';
@@ -94,6 +95,24 @@ describe('SlTour', () => {
     expect(part('progress')?.textContent?.trim()).toBe('1 of 3');
     expect(title()).toBe('Welcome to Reports');
     expect(root()?.getAttribute('data-placement')).toBe('centered');
+  });
+
+  it('speaks the language in force, under a step’s own words, and follows a change of it', async () => {
+    const locale = signal('pt-BR');
+    TestBed.configureTestingModule({
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const fixture = await mount((host) =>
+      host.steps.set([{ ...STEPS[0]!, messages: { skip: 'Agora não' } }, ...STEPS.slice(1)]),
+    );
+    expect(part('progress')?.textContent?.trim()).toBe('1 de 3');
+    expect(part('close')?.getAttribute('aria-label')).toBe('Fechar tour');
+    expect(part('skip')?.textContent?.trim()).toBe('Agora não');
+    expect(part('next')?.textContent?.trim()).toBe('Próximo');
+
+    locale.set('en-US');
+    await settle(fixture);
+    expect(part('next')?.textContent?.trim()).toBe('Next');
   });
 
   it('moves on with Next, anchors the step, and asks with the reason', async () => {
@@ -280,16 +299,14 @@ describe('SlTour', () => {
 @Component({
   standalone: true,
   imports: [SlTour, SlTourCard, SlTourContent, SlTourTitle, SlTourNext],
-  providers: [
-    provideTourDefaults({ labels: { progress: (p, t) => `Passo ${p} de ${t}`, next: 'Próximo' } }),
-  ],
+  providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
   template: `
     <sl-tour #tour="slTour" [steps]="steps" [(open)]="open">
       <ng-template slTourCard>
         <div slTourContent aria-label="Guia">
           <h3 slTourTitle></h3>
           <span data-testid="dots">{{ tour.position() }}/{{ tour.total() }}</span>
-          <button slTourNext type="button">{{ tour.nextLabel() }}</button>
+          <button slTourNext type="button">{{ tour.t('next') }}</button>
         </div>
       </ng-template>
     </sl-tour>
@@ -301,7 +318,7 @@ class Composed {
 }
 
 describe('SlTour composition', () => {
-  it('renders the consumer’s card with the parts and the provider’s labels', async () => {
+  it('renders the consumer’s card with the parts and the words of the language in force', async () => {
     const fixture = TestBed.createComponent(Composed);
     document.body.append(fixture.nativeElement);
     await settle(fixture);

@@ -1,11 +1,14 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+import { fireEvent, render as renderUi, screen } from '@testing-library/react';
 import { createRef, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/rating/contract.json';
 import { Field, FieldLabel } from '../field';
+import { SlottedProvider } from '../i18n';
 import { Rating } from './rating';
-import { RATING_MESSAGES, RatingProvider } from './rating-defaults';
+import { RatingProvider } from './rating-defaults';
 import { RatingDisplay } from './rating-display';
 import { RatingSummary } from './rating-summary';
 import type { RatingHandle, RatingProps } from './rating.types';
@@ -17,12 +20,19 @@ const group = () => screen.getByRole('radiogroup');
 const part = (root: Element, name: string) =>
   root.querySelector(`[data-part="${name}"]`) as HTMLElement;
 
-function Score(props: Partial<RatingProps>) {
+/** The family's own sentences are asserted in Brazilian Portuguese, the language the page is in. */
+function Portuguese({ children }: { children?: ReactNode }) {
   return (
-    <RatingProvider locale="pt-BR">
-      <Rating aria-label="Avaliação" {...props} />
-    </RatingProvider>
+    <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+      {children}
+    </SlottedProvider>
   );
+}
+
+const render = (ui: ReactElement) => renderUi(ui, { wrapper: Portuguese });
+
+function Score(props: Partial<RatingProps>) {
+  return <Rating aria-label="Avaliação" {...props} />;
 }
 
 /** Lays the row out as five symbols of 20 pixels from x = 100, which jsdom does not. */
@@ -47,8 +57,15 @@ afterEach(() => {
 });
 
 describe('Rating messages', () => {
-  it('defaults to the contract’s messages, exactly', () => {
-    expect(RATING_MESSAGES).toEqual(contract.messages);
+  it('speaks English with no provider, and the language in force under one', () => {
+    renderUi(<RatingDisplay count={0} value={3} />);
+    expect(screen.getByRole('img')).toHaveAccessibleName('Rated 3 out of 5, 0 ratings');
+  });
+
+  /** CLDR files nought under `one` in Portuguese; "0 avaliação" is not how a page in Brazil reads. */
+  it('takes the exact branch before the plural rule', () => {
+    render(<RatingDisplay count={0} value={0} />);
+    expect(screen.getByRole('img')).toHaveAccessibleName('Avaliação 0 de 5, 0 avaliações');
   });
 });
 
@@ -97,7 +114,7 @@ describe('Rating', () => {
     render(<Score step={0.5} />);
     expect(radio(3.5)).toHaveAccessibleName('3,5 de 5');
     expect(radio(4)).toHaveAccessibleName('4 de 5');
-    expect(contract.itemLabel.default).toBe('{value} de {max}');
+    expect(contract.itemLabel.message).toBe('itemLabel');
   });
 
   it('puts two radios in each item at half steps, the half one first', () => {
@@ -440,15 +457,12 @@ describe('Rating', () => {
 
     it('lets a provider decide the defaults once, and the instance win', () => {
       render(
-        <RatingProvider
-          clearable={false}
-          locale="pt-BR"
-          max={10}
-          messages={{ itemLabel: '{value} pontos de {max}' }}
-          size="lg"
-          tone="danger"
-        >
-          <Rating aria-label="Um" defaultValue={2} />
+        <RatingProvider clearable={false} max={10} size="lg" tone="danger">
+          <Rating
+            aria-label="Um"
+            defaultValue={2}
+            messages={{ itemLabel: '{value} pontos de {max}' }}
+          />
           <Rating aria-label="Dois" max={3} size="sm" tone="accent" />
         </RatingProvider>,
       );
@@ -576,7 +590,7 @@ describe('RatingDisplay', () => {
 
   it('takes the provider’s defaults and lets the instance win', () => {
     render(
-      <RatingProvider locale="pt-BR" max={10} size="lg" tone="success">
+      <RatingProvider max={10} size="lg" tone="success">
         <RatingDisplay tone="accent" value={7} />
       </RatingProvider>,
     );
@@ -749,7 +763,7 @@ describe('RatingSummary', () => {
       'insight',
       'count',
     ]);
-    expect(part(aggregate, 'insight')).toHaveTextContent(contract.insight.messages.consensus);
+    expect(part(aggregate, 'insight')).toHaveTextContent(PT_BR.rating.consensus as string);
     expect(part(aggregate, 'insight')).toHaveAttribute(
       'data-tone',
       contract.insight.tone.consensus,
@@ -869,14 +883,15 @@ describe('RatingSummary', () => {
     expect(screen.getByRole('button', { name: /^2 estrelas/ })).toBeDisabled();
   });
 
-  it('reads the provider’s thresholds, messages and scale', () => {
+  it('reads the provider’s thresholds and its own messages', () => {
     render(
-      <RatingProvider
-        insightThresholds={{ few: 5000 }}
-        locale="pt-BR"
-        messages={{ few: 'Amostra pequena' }}
-      >
-        <RatingSummary aria-label="Resumo" counts={STRONG} variant="spectrum" />
+      <RatingProvider insightThresholds={{ few: 5000 }}>
+        <RatingSummary
+          aria-label="Resumo"
+          counts={STRONG}
+          messages={{ few: 'Amostra pequena' }}
+          variant="spectrum"
+        />
       </RatingProvider>,
     );
     expect(part(region(), 'insight')).toHaveTextContent('Amostra pequena');

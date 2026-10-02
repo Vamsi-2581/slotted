@@ -92,7 +92,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'Puts the message away. Rendered when dismissible, named by closeLabel, and sized from its glyph plus a step of air, floored at the WCAG 2.2 minimum so the target holds at every density (R2).',
+      'Puts the message away. Rendered when dismissible, named by the catalog’s close, and sized from its glyph plus a step of air, floored at the WCAG 2.2 minimum so the target holds at every density (R2).',
   },
   {
     part: 'progress',
@@ -113,7 +113,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'ts',
       label: 'The region once, and a message from anywhere',
       source:
-        "// The region once, near the root: <sl-toast-region />\n// The service from anywhere — a component, an interceptor, a resolver.\nconst toasts = inject(SlToastService);\n\ntoasts.show({\n  title: 'Rascunho salvo',\n  description: 'Tudo desde as 14h02 está guardado.',\n});",
+        "// The region once, near the root: <sl-toast-region />\n// The service from anywhere — a component, an interceptor, a resolver.\nconst toasts = inject(SlToastService);\n\ntoasts.show({\n  title: 'Draft saved',\n  description: 'Everything since 2:02 PM is saved.',\n});",
     }),
   },
   {
@@ -125,7 +125,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'ts',
       label: 'The five, and what each one says',
       source:
-        "// accent is information, secondary a neutral note, success something\n// finished, warning something that needs attention, danger something failed.\nthis.toasts.show({ title: 'Não foi possível enviar', tone: 'danger' });",
+        "// accent is information, secondary a neutral note, success something\n// finished, warning something that needs attention, danger something failed.\nthis.toasts.show({ title: 'Could not send', tone: 'danger' });",
     }),
   },
   {
@@ -137,7 +137,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'ts',
       label: 'Three paintings of one tone',
       source:
-        "this.toasts.show({ title: 'Fatura enviada', tone: 'success', variant: 'raised' });\nthis.toasts.show({ title: 'Fatura enviada', tone: 'success', variant: 'soft' });\nthis.toasts.show({ title: 'Falha no envio', tone: 'danger', variant: 'solid' });",
+        "this.toasts.show({ title: 'Invoice sent', tone: 'success', variant: 'raised' });\nthis.toasts.show({ title: 'Invoice sent', tone: 'success', variant: 'soft' });\nthis.toasts.show({ title: 'Sending failed', tone: 'danger', variant: 'solid' });",
     }),
   },
   {
@@ -160,7 +160,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'ts',
       label: 'A duration, and a message that has none',
       source:
-        "this.toasts.show({ title: 'Exportado', duration: 8000, progress: true });\n\n// 0 never expires. A message that must be answered rather than read is one\n// of the two cases the family gives no duration to on its own.\nthis.toasts.show({ title: 'Sessão expirada', tone: 'danger', duration: 0 });",
+        "this.toasts.show({ title: 'Exported', duration: 8000, progress: true });\n\n// 0 never expires. A message that must be answered rather than read is one\n// of the two cases the family gives no duration to on its own.\nthis.toasts.show({ title: 'Session expired', tone: 'danger', duration: 0 });",
     }),
   },
   {
@@ -172,7 +172,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'Undo, and the message that waits for it',
       source:
-        '<!-- The controls are a template, rendered per message, with the message\n     in its context. It is what makes the toast wait: a message that carries\n     one is given no duration unless the call states one. -->\n<ng-template #undo let-message>\n  <button slButton size="sm" (click)="restore(message.id)">Desfazer</button>\n</ng-template>',
+        '<!-- The controls are a template, rendered per message, with the message\n     in its context. It is what makes the toast wait: a message that carries\n     one is given no duration unless the call states one. -->\n<ng-template #undo let-message>\n  <button slButton size="sm" (click)="restore(message.id)">Undo</button>\n</ng-template>',
     }),
   },
   {
@@ -184,7 +184,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'ts',
       label: 'Loading, then whichever way it went',
       source:
-        "this.toasts.promise(this.publish(), {\n  loading: { title: 'A publicar' },\n  success: (version) => ({ title: `Versão ${version} no ar`, tone: 'success' }),\n  error: { title: 'Falha ao publicar', tone: 'danger' },\n});",
+        "this.toasts.promise(this.publish(), {\n  loading: { title: 'Publishing' },\n  success: (version) => ({ title: `Version ${version} is live`, tone: 'success' }),\n  error: { title: 'Publishing failed', tone: 'danger' },\n});",
     }),
   },
   {
@@ -241,7 +241,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'ts',
       label: 'A string that has to wrap somewhere',
       source:
-        "this.toasts.show({\n  title: 'Implantação recusada',\n  description: digest,\n  tone: 'danger',\n  duration: 0,\n});",
+        "this.toasts.show({\n  title: 'Deployment rejected',\n  description: digest,\n  tone: 'danger',\n  duration: 0,\n});",
     }),
   },
   {
@@ -342,11 +342,11 @@ export const ANGULAR_TOAST_DOCS = {
         'The key that moves focus into the region, written the way a reader says it — F6, Alt+T, Shift+F8',
       ],
       [
-        'label',
-        'string',
-        'Notifications',
+        'messages',
+        'Partial<ToastMessages>',
+        '—',
         'sl-toast-region',
-        'The name a reader finds the region by in their landmark list, and what the hotkey lands in',
+        'Words laid over the language in force, key by key: the name a reader finds the region by in their landmark list, and what the hotkey lands in (label), and what each close control announces (close)',
       ],
       [
         'tone',
@@ -375,13 +375,6 @@ export const ANGULAR_TOAST_DOCS = {
         'true',
         'SlToastService.show',
         'Renders the control that closes the message. A touch reader has no Escape key, so the pointer needs a target',
-      ],
-      [
-        'closeLabel',
-        'string',
-        'Close',
-        'SlToastService.show',
-        'What that control announces. Falls back to ToastDefaultsProvider, which is where an application translates it once',
       ],
       [
         'progress',
@@ -529,7 +522,7 @@ export const ANGULAR_TOAST_DOCS = {
         language: 'angular',
         label: 'Anatomy, as it reaches the DOM',
         source:
-          '<section\n  aria-label="Notifications"\n  data-ui="toast"\n  data-part="root"\n  data-placement="bottom-end"\n  data-attach="portal"\n  data-stacking="list"\n  data-swipe="true"\n  tabindex="-1"\n>\n  <ol data-part="list">\n    <li data-part="item" data-tone="success" data-variant="raised" data-open="" tabindex="-1">\n      <span aria-hidden="true" data-part="icon"></span>\n      <div data-part="content">\n        <div data-part="title">Fatura enviada</div>\n        <p data-part="description">Uma cópia foi para o financeiro.</p>\n      </div>\n      <button aria-label="Close" data-part="close" type="button"></button>\n      <div data-part="actions">…</div>\n      <div aria-hidden="true" data-part="progress"></div>\n    </li>\n  </ol>\n</section>',
+          '<section\n  aria-label="Notifications"\n  data-ui="toast"\n  data-part="root"\n  data-placement="bottom-end"\n  data-attach="portal"\n  data-stacking="list"\n  data-swipe="true"\n  tabindex="-1"\n>\n  <ol data-part="list">\n    <li data-part="item" data-tone="success" data-variant="raised" data-open="" tabindex="-1">\n      <span aria-hidden="true" data-part="icon"></span>\n      <div data-part="content">\n        <div data-part="title">Invoice sent</div>\n        <p data-part="description">A copy went to finance.</p>\n      </div>\n      <button aria-label="Close" data-part="close" type="button"></button>\n      <div data-part="actions">…</div>\n      <div aria-hidden="true" data-part="progress"></div>\n    </li>\n  </ol>\n</section>',
       }),
       defineSnippet({
         id: 'toast-theming',

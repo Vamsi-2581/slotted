@@ -1,5 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import { describe, expect, it } from 'vitest';
 
@@ -127,6 +129,21 @@ describe('SlTagRemove', () => {
       .map((id) => document.getElementById(id)?.textContent?.trim())
       .join(' ');
     expect(words).toBe('Remove Ana Reis');
+  });
+
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    const { byId, fixture } = mount([provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })]);
+    const word = () => {
+      const [wordId] = byId('removable-remove').getAttribute('aria-labelledby')!.split(' ');
+      return document.getElementById(wordId!)?.textContent?.trim();
+    };
+
+    expect(word()).toBe('Remover');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(word()).toBe('Remove');
   });
 
   it('draws the x glyph, hidden, inside the control', () => {

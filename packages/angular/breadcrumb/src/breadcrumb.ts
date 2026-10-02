@@ -27,7 +27,13 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  breadcrumbMessages,
+  type BreadcrumbMessages,
+  type PartialMessages,
+} from '@slotted/core/i18n';
 import { createCollapse, type CollapseHandle } from '@slotted/core/overflow';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -35,7 +41,6 @@ import type { ChangeRequest } from '@slotted/core/state';
 import {
   BREADCRUMB_DEFAULT_ITEMS_AFTER,
   BREADCRUMB_DEFAULT_ITEMS_BEFORE,
-  BREADCRUMB_DEFAULT_LABEL,
   BREADCRUMB_DEFAULT_MAX_ITEMS,
   BREADCRUMB_DEFAULT_OVERFLOW,
   collapsedRange,
@@ -94,7 +99,11 @@ export class SlBreadcrumb {
   });
   /** What an uncontrolled trail starts from, read once. */
   readonly defaultExpanded = input(false, { transform: booleanAttribute });
-  readonly label = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * landmark's name (`label`) and the ellipsis. A static `aria-label` still wins.
+   */
+  readonly messages = input<PartialMessages<BreadcrumbMessages> | undefined>(undefined);
   readonly maxItems = input(undefined, { transform: optionalNumber });
   readonly itemsBeforeCollapse = input(undefined, { transform: optionalNumber });
   readonly itemsAfterCollapse = input(undefined, { transform: optionalNumber });
@@ -120,9 +129,9 @@ export class SlBreadcrumb {
   /** A static `aria-label` the consumer wrote survives the host binding. */
   private readonly ownLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
 
-  readonly accessibleLabel = computed(
-    () => this.ownLabel ?? this.label() ?? this.defaults.label ?? BREADCRUMB_DEFAULT_LABEL,
-  );
+  /** The family's words in the language in force, with this trail's `messages` laid over them. */
+  readonly t = injectMessages(breadcrumbMessages, this.messages);
+  readonly accessibleLabel = computed(() => this.ownLabel ?? this.t('label'));
   readonly maxItemsValue = computed(
     () => this.maxItems() ?? this.defaults.maxItems ?? BREADCRUMB_DEFAULT_MAX_ITEMS,
   );
@@ -218,10 +227,7 @@ class SlBreadcrumbEllipsis {
   /* Declared below this class, and read only when an instance is created. */
   private readonly list = inject(SlBreadcrumbList);
 
-  readonly label = computed(() => {
-    const hidden = this.list.hiddenCount();
-    return `Show ${hidden} hidden ${hidden === 1 ? 'level' : 'levels'}`;
-  });
+  readonly label = computed(() => this.trail.t('showHidden', { count: this.list.hiddenCount() }));
 
   onKeydown(event: KeyboardEvent) {
     /* `Enter` and `Space` both activate a button and the browser turns each

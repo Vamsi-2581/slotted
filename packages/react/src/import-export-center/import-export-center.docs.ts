@@ -49,7 +49,7 @@ const anatomy: AnatomyRow[] = anatomyRows([
     'title',
     'h2, h3 or h4 per level',
     true,
-    'messages.title, the words the region and the list are named by, with the count after them.',
+    'The title message, the words the region and the list are named by, with the count after them.',
   ],
   [
     'count',
@@ -505,18 +505,12 @@ const source: JobFile = {
   {
     id: 'defaults',
     title: 'Defaults, once',
-    note: 'ImportExportCenterDefaultsProvider sets the size, the rank, the time format, the locale and zone and the words for a whole application — here in English with absolute times; the second centre states size="md" itself and wins.',
+    note: 'ImportExportCenterDefaultsProvider sets the size, the rank, the time format and the zone for a whole application — here with absolute times; the second centre states size="md" itself and wins. The words and the locale come from SlottedProvider.',
     snippet: defineSnippet({
       id: 'import-export-center-react-defaults',
       language: 'tsx',
       label: 'An application’s defaults',
-      source: `<ImportExportCenterDefaultsProvider
-  level="3"
-  locale="en-US"
-  messages={{ title: 'Imports and exports', download: 'Download' }}
-  size="sm"
-  timeFormat="absolute"
->
+      source: `<ImportExportCenterDefaultsProvider level="3" size="sm" timeFormat="absolute">
   <App />
 </ImportExportCenterDefaultsProvider>;`,
     }),
@@ -524,7 +518,7 @@ const source: JobFile = {
   {
     id: 'accessibility',
     title: 'Keyboard and focus',
-    note: 'Tab through the controls: every one is named by its words and the job — Cancelar Contatos do CRM. Press Cancelar: the job ends, the control leaves, and focus stays in the job on its first control. Remove a job: focus goes to the same control of the job in its place.',
+    note: 'Tab through the controls: every one is named by its words and the job — Cancel Contatos do CRM. Press Cancel: the job ends, the control leaves, and focus stays in the job on its first control. Remove a job: focus goes to the same control of the job in its place.',
     snippet: defineSnippet({
       id: 'import-export-center-react-accessibility',
       language: 'tsx',
@@ -692,16 +686,16 @@ export const REACT_IMPORT_EXPORT_CENTER_DOCS = {
       [
         'locale, timeZone, now',
         'string, string, number',
-        'the runtime’s',
-        'ImportExportCenter, ImportExportCenterDefaultsProvider (locale, timeZone)',
+        'the language in force, the runtime’s zone',
+        'ImportExportCenter (all three), ImportExportCenterDefaultsProvider (timeZone)',
         'What numbers, sizes, times and deadlines are written with, and the moment they count from. State now for a stable server render',
       ],
       [
         'messages',
-        'Partial<ImportExportMessages>',
-        'Portuguese',
-        'ImportExportCenter, ImportExportCenterDefaultsProvider',
-        'Every word the family writes, the announcer says and a toast shows, from @slotted/core/import-export-center',
+        'Partial<ImportExportCenterMessages>',
+        '—',
+        'ImportExportCenter, useJobToasts',
+        'Words laid over the language in force, key by key: every word the family writes, the announcer says and a toast shows',
       ],
       [
         'actions, empty, footer',
@@ -733,7 +727,7 @@ export const REACT_IMPORT_EXPORT_CENTER_DOCS = {
       ],
       [
         'ImportExportCenterDefaultsProvider',
-        '{ size, level, growing, timeFormat, locale, timeZone, messages }',
+        '{ size, level, growing, timeFormat, timeZone }',
         '—',
         'a subtree',
         'The decisions an application takes once. A centre that states any of them itself still wins',

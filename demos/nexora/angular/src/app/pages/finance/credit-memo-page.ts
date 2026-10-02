@@ -327,7 +327,7 @@ type View = 'applications' | 'refunds' | 'details';
                           type="button"
                           data-testid="open-memo"
                           [loading]="store.busy() === 'open'"
-                          loadingLabel="Opening"
+                          [messages]="{ loading: 'Opening' }"
                           (click)="openMemo()"
                         >
                           Open the memo
@@ -466,7 +466,7 @@ type View = 'applications' | 'refunds' | 'details';
                 </div>
               </section>
             } @else {
-              <div slSkeletonRegion label="Reading the credit memo" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the credit memo' }" [loading]="true">
                 <div slStack [gap]="6">
                   <div slGrid [columns]="phone() ? 2 : 4" minItemWidth="xs" [gap]="4">
                     @for (figure of figureLabels; track figure) {
@@ -811,7 +811,7 @@ type View = 'applications' | 'refunds' | 'details';
               <form
                 slForm
                 data-testid="apply-form"
-                summaryTitle="The credit was not applied"
+                [messages]="{ summaryTitle: 'The credit was not applied' }"
                 [errors]="applyErrors()"
                 (errorsChange)="store.applyErrors.set($event.value)"
                 [loading]="store.busy() === 'apply'"
@@ -879,7 +879,7 @@ type View = 'applications' | 'refunds' | 'details';
                   } @else {
                     <div
                       slSkeletonRegion
-                      label="Reading the customer’s open invoices"
+                      [messages]="{ label: 'Reading the customer’s open invoices' }"
                       [loading]="true"
                     >
                       <div slGrid [columns]="phone() ? 1 : 2" [gap]="5" minItemWidth="sm">
@@ -904,7 +904,7 @@ type View = 'applications' | 'refunds' | 'details';
                       type="submit"
                       data-testid="apply-submit"
                       [loading]="store.busy() === 'apply'"
-                      loadingLabel="Applying"
+                      [messages]="{ loading: 'Applying' }"
                     >
                       Apply credit
                     </button>
@@ -927,7 +927,7 @@ type View = 'applications' | 'refunds' | 'details';
               <form
                 slForm
                 data-testid="refund-form"
-                summaryTitle="Nothing was refunded"
+                [messages]="{ summaryTitle: 'Nothing was refunded' }"
                 [errors]="refundErrors()"
                 (errorsChange)="store.refundErrors.set($event.value)"
                 [loading]="store.busy() === 'refund'"
@@ -1011,7 +1011,7 @@ type View = 'applications' | 'refunds' | 'details';
                     type="submit"
                     data-testid="refund-submit"
                     [loading]="store.busy() === 'refund'"
-                    loadingLabel="Refunding"
+                    [messages]="{ loading: 'Refunding' }"
                   >
                     Post the refund
                   </button>

@@ -240,7 +240,6 @@ test('declares its axes and resolves each from prop, defaults and family', () =>
     'outsidePress',
     'back',
     'closeOnSelect',
-    'cancelLabel',
   ]);
   assert.equal(sheet.defaults.modal, true);
   assert.equal(sheet.defaults.mount, 'active');

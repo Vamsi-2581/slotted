@@ -1,6 +1,5 @@
 export { SlPageHeader } from './page-header';
 export {
-  DEFAULT_PAGE_HEADER_MESSAGES,
   injectPageHeaderDefaults,
   PAGE_HEADER_DEFAULTS,
   providePageHeaderDefaults,
@@ -11,7 +10,6 @@ export type {
   PageHeaderDefaults,
   PageHeaderExpandedReason,
   PageHeaderLevel,
-  PageHeaderMessages,
   PageHeaderPinnedReason,
   PageHeaderSize,
 } from './page-header-defaults';

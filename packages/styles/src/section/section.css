@@ -57,6 +57,8 @@
    */
   [data-ui='section'][data-ground='surface'] {
     --_ground: var(--slotted-section-surface, var(--slotted-surface-raised, Canvas));
+    /* Published, as a card's is, for the families that state a ground inside it. */
+    --slotted-ground: var(--_ground);
     background-color: var(--_ground);
     border: var(--slotted-border-width-thin, 1px) solid var(--_rule);
     border-radius: var(--slotted-section-radius, var(--slotted-radius-lg, 8px));

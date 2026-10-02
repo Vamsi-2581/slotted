@@ -2,6 +2,10 @@
   "schemaVersion": 5,
   "family": "page",
   "ui": "page",
+  "catalog": {
+    "group": "Layout",
+    "summary": "Page body with width, scroll and footer."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/",
   "design": "docs/history/designs/2026-09-10-page-design.md",
   "inventory": "docs/history/designs/2026-09-10-page-capability-inventory.md",
@@ -72,9 +76,7 @@
     "body": "+1",
     "reason": "typography owns the outline: HeadingLevel steps it by one. The page wraps its body in one step, so a section placed directly in the page takes h2 under the page-header's h1 without either family reading the other"
   },
-  "messages": {
-    "footer": "Ações da página"
-  },
+  "messages": ["footer"],
   "declined": {
     "breakpointEvent": {
       "reason": "sap.f.breakpointChange reports the media range. The family answers its own width with a container query, and a consumer who needs the number writes a three-line ResizeObserver on the root"
@@ -106,7 +108,7 @@
     "landmark": ["prop", "defaults", "main"]
   },
   "provides": {
-    "pageDefaults": ["width", "inset", "scroll", "ground", "landmark", "messages"]
+    "pageDefaults": ["width", "inset", "scroll", "ground", "landmark"]
   },
   "stateAttributes": {
     "loading": "data-loading"

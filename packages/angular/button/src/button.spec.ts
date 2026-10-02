@@ -2,6 +2,9 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import contract from '../../../../specs/components/button/contract.json';
 import { SlButton } from './button';
 import { SlButtonEnd, SlButtonStart } from './button-appearance';
@@ -24,7 +27,7 @@ const defaults = contract.members.button.defaults;
     [fullWidth]="fullWidth()"
     [loading]="loading()"
     [loadingDelay]="loadingDelay()"
-    [loadingLabel]="loadingLabel()"
+    [messages]="{ loading: loadingMessage() }"
     (click)="onClick()"
   >
     @if (withIcons()) {
@@ -46,7 +49,7 @@ class TestHost {
   readonly fullWidth = signal(false);
   readonly loading = signal(false);
   readonly loadingDelay = signal(0);
-  readonly loadingLabel = signal('Loading');
+  readonly loadingMessage = signal('Loading');
   readonly withIcons = signal(false);
   readonly onClick = vi.fn();
 }
@@ -173,7 +176,7 @@ describe('SlButton', () => {
     const { button, fixture, host } = mount();
     expect(button.querySelector('[data-part="indicator"]')).toBeNull();
 
-    host.loadingLabel.set('Saving');
+    host.loadingMessage.set('Saving');
     host.loading.set(true);
     fixture.detectChanges();
     const indicator = button.querySelector('[data-part="indicator"]');
@@ -182,6 +185,24 @@ describe('SlButton', () => {
     expect(indicator?.getAttribute('role')).toBe('progressbar');
     expect(indicator?.getAttribute('aria-label')).toBe('Saving');
     expect(indicator?.hasAttribute('aria-valuenow')).toBe(false);
+  });
+
+  it('names the ring in the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
+    TestBed.configureTestingModule({
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+    });
+    TestBed.overrideComponent(TestHost, {
+      set: { template: '<button slButton loading>Save</button>' },
+    });
+    const { button, fixture } = mount();
+    const label = () => button.querySelector('[data-part="indicator"]')?.getAttribute('aria-label');
+
+    expect(label()).toBe('Carregando');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(label()).toBe('Loading');
   });
 
   /**

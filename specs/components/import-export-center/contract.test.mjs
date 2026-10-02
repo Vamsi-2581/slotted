@@ -88,8 +88,8 @@ test('says when a file expires, when it expired, and why it cannot be downloaded
   ]);
   assert.match(contract.files.expiry, /absolute date in every timeFormat/);
   assert.match(contract.files.permission, /denied/);
-  assert.ok(contract.messages.expires.includes('Disponível até'));
-  assert.ok(contract.messages.expired.includes('Expirou'));
+  assert.ok(contract.messages.includes('expires'));
+  assert.ok(contract.messages.includes('expired'));
 });
 
 /** The jobs are the consumer's facts; the family asks, with a reason. */

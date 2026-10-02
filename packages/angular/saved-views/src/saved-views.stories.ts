@@ -1,5 +1,6 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { SlButton } from '@slotted/angular/button';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { persistedGridView, SlDataGrid } from '@slotted/angular/data-grid';
 import { SlInline } from '@slotted/angular/inline';
 import { SlStack } from '@slotted/angular/stack';
@@ -15,12 +16,13 @@ import {
 } from '@slotted/core/grid';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
 
 import { persistedSavedViews } from './persisted-saved-views';
 import { SlSavedViews } from './saved-views';
-import { provideSavedViewsDefaults, type SavedViewsRequest } from './saved-views-defaults';
+import type { SavedViewsRequest } from './saved-views-defaults';
 import { ANGULAR_SAVED_VIEWS_DOCS, ANGULAR_SAVED_VIEWS_TOKENS } from './saved-views.docs';
 
 /* ── The domain: an orders listing ──────────────────────────────────────── */
@@ -219,7 +221,7 @@ function memoryStore(initial: Record<string, string>, entry = signal('')) {
         [columns]="model"
         [current]="current()"
         [defaultState]="state()"
-        [label]="label()"
+        [messages]="messages()"
         (stateChangeRequest)="log.set($event.action + ' · ' + $event.reason)"
         (viewApply)="current.set($event.view)"
       />
@@ -242,6 +244,10 @@ class ViewsBar {
   readonly initial = input<GridView>(LATE);
   readonly state = input<SavedViewsState>(VIEWS);
   readonly label = input<string | undefined>(undefined);
+  protected readonly messages = computed(() => {
+    const label = this.label();
+    return label === undefined ? undefined : { label };
+  });
   readonly builtIn = BUILT_IN;
   readonly model = MODEL;
   readonly current = signal<GridView>(LATE);
@@ -292,7 +298,7 @@ class PersistedDemo {
     />
     <div class="slotted-demo-viewport" data-size="tall">
       <sl-data-grid
-        label="Orders"
+        aria-label="Orders"
         rowKey="id"
         height="100%"
         [columns]="columns"
@@ -367,20 +373,8 @@ class HandledDemo {
   selector: 'sl-sv-translated',
   standalone: true,
   imports: [ViewsBar],
-  providers: [
-    provideSavedViewsDefaults({
-      labels: {
-        label: 'Vistas',
-        builtIn: 'Padrão',
-        modified: 'Alterada',
-        revert: 'Reverter',
-        save: 'Salvar',
-        saveAs: 'Salvar como nova vista…',
-        actions: 'Ações de {name}',
-      },
-    }),
-  ],
-  template: `<sl-sv-bar [initial]="initial" label="Vistas de encomendas" />`,
+  providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
+  template: `<sl-sv-bar [initial]="initial" label="Visualizações de pedidos" />`,
 })
 class TranslatedDemo {
   readonly initial = sortedByTotal(LATE);
@@ -555,7 +549,7 @@ export const Accessibility: Story = {
   render: () => ({
     template: scene(
       'Translated once, named in context',
-      'provideSavedViewsDefaults sets the Portuguese words for the component; the group is named Vistas de encomendas.',
+      'provideSlotted sets the Portuguese words for the component; its own label message names the group Visualizações de pedidos.',
       `<sl-sv-translated />`,
     ),
   }),

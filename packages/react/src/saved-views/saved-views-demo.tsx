@@ -276,7 +276,7 @@ export function OrdersDesk() {
         columns={COLUMNS}
         density={grid.density}
         height="22rem"
-        label="Orders"
+        aria-label="Orders"
         onColumnStateChange={grid.onColumnStateChange}
         onQueryChange={grid.onQueryChange}
         query={grid.query}

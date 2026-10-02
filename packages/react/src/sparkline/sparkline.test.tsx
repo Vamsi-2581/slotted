@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { render } from '@testing-library/react';
 import { createRef } from 'react';
 import type { ComponentPropsWithRef } from 'react';
 import { describe, expect, it } from 'vitest';
 
+import { SlottedProvider } from '../i18n';
 import { Sparkline, SparklineDefaultsProvider } from './index';
 
 const root = () => document.querySelector('[data-ui="sparkline"]')!;
@@ -103,6 +105,16 @@ describe('Sparkline', () => {
     );
   });
 
+  it('speaks the language in force, and writes its numbers in that locale', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Sparkline data={[1000, 1250.5]} label="Receita" />
+      </SlottedProvider>,
+    );
+
+    expect(root()).toHaveAttribute('aria-label', 'Receita: 1.250,5, alta de 250,5 desde 1.000');
+  });
+
   it('lets the consumer replace the whole description', () => {
     render(<Sparkline data={[1, 2]} description="Twelve weeks of revenue, rising" />);
 
@@ -111,8 +123,8 @@ describe('Sparkline', () => {
 
   it('takes its defaults from the provider, and an explicit prop wins', () => {
     render(
-      <SparklineDefaultsProvider area curve="monotone" messages={{ up: '{last} (+{change})' }}>
-        <Sparkline data={[1, 3]} />
+      <SparklineDefaultsProvider area curve="monotone">
+        <Sparkline data={[1, 3]} messages={{ up: '{last} (+{change})' }} />
         <Sparkline curve="linear" data={[1, 3]} />
       </SparklineDefaultsProvider>,
     );

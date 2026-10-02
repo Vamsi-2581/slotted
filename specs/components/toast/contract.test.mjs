@@ -296,15 +296,13 @@ test('resolves every axis in the same order, ending in a stated default', () => 
   }
 });
 
-test('lets an application set every axis once, and the two labels with them', () => {
+test('lets an application set every axis once, and its two words come from the catalog', () => {
   const provided = contract.provides.toastDefaults;
   for (const axis of Object.keys(contract.axes)) {
     assert.ok(provided.includes(axis), `${axis} cannot be set once`);
   }
-  assert.ok(provided.includes('label'));
-  assert.ok(provided.includes('closeLabel'));
   assert.ok(provided.includes('hotkey'));
-  assert.equal(member.defaults.label, 'Notifications');
+  assert.deepEqual(contract.messages, ['close', 'label']);
   assert.equal(member.defaults.hotkey, 'F6');
 });
 

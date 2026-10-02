@@ -1,8 +1,10 @@
 import '@slotted/styles/skeleton/skeleton.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
+import { skeletonMessages } from '@slotted/core/i18n';
 import { useEffect, useMemo, useRef } from 'react';
 
+import { useMessages } from '../i18n';
 import { useSkeletonDefaults } from './skeleton-defaults';
 import { SkeletonRegionProvider } from './skeleton-region-context';
 import { useLoadingVisibility } from './use-loading-visibility';
@@ -35,20 +37,21 @@ export function SkeletonRegion({
   animation,
   children,
   delay,
-  label,
   live,
   loadedLabel,
   loading = true,
+  messages,
   minDuration,
   onReveal,
   render,
   ...nativeProps
 }: SkeletonRegionProps) {
   const defaults = useSkeletonDefaults();
+  const t = useMessages(skeletonMessages, messages);
   const resolved = {
     animation: animation ?? defaults.animation ?? 'shimmer',
     delay: delay ?? defaults.delay ?? 0,
-    label: label ?? defaults.label ?? 'Loading…',
+    label: t('label'),
     live: live ?? defaults.live ?? 'polite',
     loadedLabel: loadedLabel ?? defaults.loadedLabel,
     minDuration: minDuration ?? defaults.minDuration ?? 0,

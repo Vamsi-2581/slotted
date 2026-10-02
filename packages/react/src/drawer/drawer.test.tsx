@@ -1,8 +1,10 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, createEvent, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/drawer/contract.json';
+import { SlottedProvider } from '../i18n';
 import { Drawer } from './drawer';
 import { DrawerDefaultsProvider } from './drawer-defaults';
 import {
@@ -182,6 +184,26 @@ describe('Drawer', () => {
   });
 
   /* -------------------------------------------------------------- closing - */
+
+  it('names the close in the language in force, and lays its own messages over it', () => {
+    const drawer = (messages?: { close: string }) => (
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Drawer defaultOpen messages={messages}>
+          <DrawerPanel>
+            <DrawerHeader>
+              <DrawerTitle>Invoice</DrawerTitle>
+              <DrawerClose />
+            </DrawerHeader>
+          </DrawerPanel>
+        </Drawer>
+      </SlottedProvider>
+    );
+    const { rerender } = render(drawer());
+    expect(screen.getByRole('button', { name: 'Fechar' })).toBeInTheDocument();
+
+    rerender(drawer({ close: 'Fechar fatura' }));
+    expect(screen.getByRole('button', { name: 'Fechar fatura' })).toBeInTheDocument();
+  });
 
   it('closes from the close button, carrying dismiss and its value', () => {
     const onOpenChange = vi.fn();

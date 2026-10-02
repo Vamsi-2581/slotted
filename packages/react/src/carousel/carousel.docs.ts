@@ -34,7 +34,7 @@ const anatomy: AnatomyRow[] = [
     element: 'section (Carousel), or the element render returns',
     required: true,
     purpose:
-      'The region, with aria-roledescription "carrossel" and the name the consumer gives it. A one-cell grid: previous, next and an overlay bar written as its children stand over the viewport. Carries data-orientation, data-transition, data-align, data-arrows, data-size, and data-playing, data-paused, data-dragging and data-measured.',
+      'The region, with aria-roledescription "carousel" and the name the consumer gives it. A one-cell grid: previous, next and an overlay bar written as its children stand over the viewport. Carries data-orientation, data-transition, data-align, data-arrows, data-size, and data-playing, data-paused, data-dragging and data-measured.',
   },
   {
     part: 'viewport',
@@ -48,7 +48,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div (CarouselSlide)',
     required: true,
     purpose:
-      'A group named "3 de 8" unless it carries a name; data-current on the slides of the page shown, data-inview on the ones in view, and inert on the ones that are not.',
+      'A group named "3 of 8" unless it carries a name; data-current on the slides of the page shown, data-inview on the ones in view, and inert on the ones that are not.',
   },
   {
     part: 'previous',
@@ -75,7 +75,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button (CarouselAutoplay)',
     required: false,
     purpose:
-      'The rotation control, named by the action it performs — Parar a rotação, Retomar a rotação — with no pressed state. Renders nothing in a carousel that does not rotate. Written first, so it is first in the tab sequence.',
+      'The rotation control, named by the action it performs — Stop rotation, Resume rotation — with no pressed state. Renders nothing in a carousel that does not rotate. Written first, so it is first in the tab sequence.',
   },
   {
     part: 'indicators',
@@ -535,57 +535,11 @@ export const REACT_CAROUSEL_DOCS = {
       ],
       [
         'messages',
-        'Partial<CarouselMessages>',
-        'Portuguese',
-        'Carousel, CarouselDefaultsProvider',
-        'Every word the family says: roleDescription, slide, indicators, indicator, previous, next, stop, start, viewport, announce — with {index}, {page} and {count}',
-      ],
-      [
-        'locale',
-        'string',
-        'the runtime’s',
-        'CarouselDefaultsProvider',
-        'The locale the numbers in the messages and the counter are written in',
-      ],
-      [
-        'placement',
-        "'below' | 'overlay'",
-        'below',
-        'CarouselControls',
-        'Under the viewport, or over its foot on a raised pill',
-      ],
-      [
-        'variant',
-        "'dots' | 'line' | 'thumbnails'",
-        'dots',
-        'CarouselIndicators',
-        'The mark of each page; thumbnails is the consumer’s picture inside each indicator',
-      ],
-      ['page', 'number', '—', 'CarouselIndicator', 'The page this indicator shows'],
-      [
-        'children',
-        '(page: number, count: number) => ReactNode',
-        '"3 / 8"',
-        'CarouselCounter',
-        'Writes the counter from the page, counted from one, and the count',
-      ],
-    ]),
-    composition: apiRows([
-      [
-        'render',
-        '(props) => ReactNode',
-        '—',
-        'every part',
-        'Substitutes the element and hands it every attribute and handler',
-      ],
-      [
-        'handleRef',
-        'Ref<CarouselHandle>',
+        'PartialMessages<CarouselMessages>',
         '—',
         'Carousel',
-        'scrollTo(page), scrollToSlide(index) and refresh(): the actions a consumer cannot express declaratively',
+        'Words laid over the language in force, key by key: roleDescription, slide, indicators, indicator, previous, next, stop, start, viewport, announce — with {index}, {page} and {count}',
       ],
-      ['ref', 'Ref<HTMLElement>', '—', 'every part', 'Reaches the native element of each part'],
       [
         'children',
         'ReactNode',
@@ -595,18 +549,18 @@ export const REACT_CAROUSEL_DOCS = {
       ],
       [
         'CarouselDefaultsProvider',
-        '{ orientation, transition, align, arrows, size, loop, draggable, autoplayDelay, messages, locale }',
+        '{ orientation, transition, align, arrows, size, loop, draggable, autoplayDelay }',
         '—',
         'a subtree',
         'The decisions an application takes once',
       ],
     ]),
     accessibility: [
-      'The root is a region with aria-roledescription "carrossel" and the consumer’s name; each slide is a group with aria-roledescription "slide" and the name "3 de 8", as the APG carousel asks, and a name the consumer gives a slide is never replaced.',
+      'The root is a region with aria-roledescription "carousel" and the consumer’s name; each slide is a group with aria-roledescription "slide" and the name "3 of 8", as the APG carousel asks, and a name the consumer gives a slide is never replaced.',
       'The slides out of view are inert, so the Tab key and a screen reader reach only what the reader can see; a press on a slide that peeks reaches the viewport, which brings that slide in.',
       'Previous and next at an end without a loop are aria-disabled rather than disabled, so the focus they hold is not dropped onto the page; a press does nothing and the disabled ink says so.',
       'The slide picker is the APG tabs pattern: one tab stop, arrows that move and show and stop at the ends, Home and End. Each tab names its page and controls its first slide; the slides stay groups because a page can hold several.',
-      'A page the reader asked for is announced once through the shared live announcer — "Slide 3 de 8" — and nothing is announced while the rotation turns, so a screen reader is never interrupted by a page the reader did not ask for.',
+      'A page the reader asked for is announced once through the shared live announcer — "Slide 3 of 8" — and nothing is announced while the rotation turns, so a screen reader is never interrupted by a page the reader did not ask for.',
       'The rotation never starts unless asked, does not start under reduced motion, pauses on hover and on a hidden browser tab, and stops on the first keyboard focus inside; its control is named by its action and carries no pressed state.',
     ],
     snippets: [
@@ -614,22 +568,22 @@ export const REACT_CAROUSEL_DOCS = {
         id: 'carousel-react-anatomy',
         language: 'tsx',
         label: 'Anatomy, as it reaches the DOM',
-        source: `<section aria-label="Coleção Outono" aria-roledescription="carrossel" data-ui="carousel">
+        source: `<section aria-label="Coleção Outono" aria-roledescription="carousel" data-ui="carousel">
   <div aria-label="Slides" data-part="viewport" role="group" tabIndex={0}>
     <div
-      aria-label="1 de 5"
+      aria-label="1 of 5"
       aria-roledescription="slide"
       data-current=""
       data-inview=""
       data-part="slide"
       role="group"
     />
-    <div aria-label="2 de 5" aria-roledescription="slide" data-part="slide" inert="" role="group" />
+    <div aria-label="2 of 5" aria-roledescription="slide" data-part="slide" inert="" role="group" />
   </div>
-  <button aria-disabled="true" aria-label="Slide anterior" data-part="previous" type="button" />
-  <button aria-label="Slide seguinte" data-part="next" type="button" />
+  <button aria-disabled="true" aria-label="Previous slide" data-part="previous" type="button" />
+  <button aria-label="Next slide" data-part="next" type="button" />
   <div data-part="controls" data-placement="below">
-    <div aria-label="Escolher slide" data-part="indicators" data-variant="dots" role="tablist">
+    <div aria-label="Choose slide" data-part="indicators" data-variant="dots" role="tablist">
       <button aria-selected="true" data-current="" data-part="indicator" role="tab" />
     </div>
     <span aria-hidden="true" data-part="counter">

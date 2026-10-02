@@ -8,7 +8,13 @@ import {
   input,
   ViewEncapsulation,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  type PartialMessages,
+  statusIndicatorMessages,
+  type StatusIndicatorMessages,
+} from '@slotted/core/i18n';
 
 import { injectStatusIndicatorDefaults } from './status-indicator-defaults';
 import {
@@ -17,7 +23,6 @@ import {
   STATUS_INDICATOR_DEFAULT_SIZE,
   STATUS_INDICATOR_DEFAULT_STATUS,
   STATUS_INDICATOR_GLYPHS,
-  STATUS_INDICATOR_LABELS,
   STATUS_INDICATOR_ROLE,
   type StatusIndicatorLive,
   type StatusIndicatorMark,
@@ -90,11 +95,18 @@ export class SlStatusIndicator {
   /**
    * What a reader hears when nothing was projected. Ignored when something
    * was, because naming an element twice is how a screen reader comes to read
-   * “Success Healthy”.
+   * “Success Healthy”. Falls back to the status's word in the catalog.
    */
   readonly label = input<string | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * word each status is heard as when nothing was projected.
+   */
+  readonly messages = input<PartialMessages<StatusIndicatorMessages> | undefined>(undefined);
 
   private readonly defaults = injectStatusIndicatorDefaults();
+  /** The family's words in the language in force, with this indicator's `messages` laid over them. */
+  readonly t = injectMessages(statusIndicatorMessages, this.messages);
   /**
    * Read once, before the host binding writes one. A consumer who put
    * `role="note"` on their own element keeps it, which is the rule
@@ -116,10 +128,5 @@ export class SlStatusIndicator {
 
   readonly roleValue = computed(() => this.ownRole ?? STATUS_INDICATOR_ROLE[this.liveValue()]);
 
-  readonly name = computed(
-    () =>
-      this.label() ??
-      this.defaults.labels?.[this.status()] ??
-      STATUS_INDICATOR_LABELS[this.status()],
-  );
+  readonly name = computed(() => this.label() ?? this.t(this.status()));
 }

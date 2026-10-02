@@ -157,13 +157,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'range',
     title: 'Which items this page holds',
-    note: 'The sentence the numbers do not say, in a polite live region so a page change is announced once. Replace the wording through labels, or the whole sentence with children.',
+    note: 'The sentence the numbers do not say, in a polite live region so a page change is announced once. Replace the wording through messages, or the whole sentence with children.',
     snippet: defineSnippet({
       id: 'pagination-react-range',
       language: 'tsx',
       label: 'The range, and a translated one',
       source:
-        '<PaginationStatus />;\n\n<Pagination count={482} labels={{ range: (a, b, n) => `${a}–${b} de ${n}` }}>\n  <PaginationStatus />\n</Pagination>;',
+        "<PaginationStatus />;\n\n<Pagination count={482} messages={{ range: '{start}–{end} de {count}' }}>\n  <PaginationStatus />\n</Pagination>;",
     }),
   },
   {
@@ -235,7 +235,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'Two arrangements, one family',
       source:
-        "<Pagination count={482}>\n  <PaginationPageSize />\n  <PaginationStatus />\n  <PaginationPrevious />\n  <PaginationNext />\n</Pagination>;\n\n<PaginationDefaultsProvider labels={{ next: 'Próxima' }} siblingCount={2}>\n  <App />\n</PaginationDefaultsProvider>;",
+        '<Pagination count={482}>\n  <PaginationPageSize />\n  <PaginationStatus />\n  <PaginationPrevious />\n  <PaginationNext />\n</Pagination>;\n\n<PaginationDefaultsProvider siblingCount={2}>\n  <App />\n</PaginationDefaultsProvider>;',
     }),
   },
   {
@@ -272,7 +272,6 @@ export const REACT_PAGINATION_DOCS = {
     scenes,
     events,
     api: apiRows([
-      ['label', 'string', 'Pagination', 'Pagination', "The landmark's own name"],
       [
         'count',
         'number',
@@ -313,11 +312,11 @@ export const REACT_PAGINATION_DOCS = {
         'Turns every page and every trigger into an anchor with a real destination',
       ],
       [
-        'labels',
-        'Partial<PaginationLabels>',
+        'messages',
+        'Partial<PaginationMessages>',
         '—',
         'Pagination',
-        'The wording of every control and both sentences, merged over the defaults',
+        "Words laid over the language in force, key by key: the landmark's name (label), every control and both sentences",
       ],
       [
         'live',
@@ -366,10 +365,10 @@ export const REACT_PAGINATION_DOCS = {
       ],
       [
         'PaginationDefaultsProvider',
-        'label | labels | siblingCount | boundaryCount | defaultPageSize | pageSizeOptions | live',
+        'siblingCount | boundaryCount | defaultPageSize | pageSizeOptions | live',
         '—',
         'Application',
-        'Sets those seven once for everything below it; a prop on the paginator still wins',
+        'Sets those five once for everything below it; a prop on the paginator still wins',
       ],
     ]),
     accessibility: [

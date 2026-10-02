@@ -4,6 +4,7 @@ import '@slotted/styles/visually-hidden/visually-hidden.css';
 
 import { hasErrors, isDirty, normaliseErrors } from '@slotted/core/form';
 import type { FormErrorInput } from '@slotted/core/form';
+import { wizardMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import {
@@ -39,6 +40,7 @@ import type { KeyboardEvent, ReactElement } from 'react';
 
 import { Alert, AlertContent, AlertDescription, AlertTitle } from '../alert';
 import { Form } from '../form';
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { Skeleton } from '../skeleton';
 import { Stepper, StepperList, StepperStep } from '../stepper';
@@ -132,10 +134,9 @@ export function Wizard({
   error,
   guardUnsaved = false,
   handle,
-  label,
-  labels,
   level,
   linear,
+  messages,
   minDuration,
   onCancel,
   onProgressOpenChange,
@@ -154,7 +155,7 @@ export function Wizard({
   ...nativeProps
 }: WizardProps) {
   const defaults = useWizardDefaults();
-  const resolvedLabels = { ...defaults.labels, ...labels };
+  const t = useMessages(wizardMessages, messages);
   const resolvedLinear = linear ?? defaults.linear;
   const resolvedProgress = progress ?? defaults.progress;
   const resolvedScroll = scroll ?? defaults.scroll;
@@ -427,7 +428,7 @@ export function Wizard({
     const open = firstIncomplete({ steps: latest.current.entries, value: accepted });
     if (open !== undefined) {
       requestStep(open, 'submit', source);
-      setFailure({ message: resolvedLabels.incomplete });
+      setFailure({ message: t('incomplete') });
       focusNext.current = 'alert';
       return;
     }
@@ -820,7 +821,6 @@ export function Wizard({
     goTo,
     isFinal,
     isFirst: current === undefined || previousStep({ current, steps: entries }) === undefined,
-    labels: resolvedLabels,
     next: () => formRef.current?.requestSubmit(),
     optional,
     phase,
@@ -832,6 +832,7 @@ export function Wizard({
     savedAt,
     skip,
     step: current,
+    t,
     steps: stepElements.map((element) => ({
       disabled: element.props.disabled === true,
       label: element.props.label,
@@ -863,7 +864,7 @@ export function Wizard({
   const finished = phase === 'complete';
   const currentIndex = entries.findIndex((entry) => entry.name === current);
   const shownError = error ?? failure;
-  const errorTitle = error ?? resolvedLabels.submitFailed;
+  const errorTitle = error ?? t('submitFailed');
   const errorDescription = error === undefined ? (failure?.message ?? undefined) : undefined;
 
   const progressPart =
@@ -889,7 +890,7 @@ export function Wizard({
           type="button"
         >
           <span data-part="progress-position">
-            {resolvedLabels.position(position.index, position.count)}
+            {t('position', { index: position.index, count: position.count })}
           </span>
           <span aria-hidden="true" data-part="progress-track">
             {entries.map((entry) => (
@@ -911,7 +912,6 @@ export function Wizard({
           </Icon>
         </button>
         <Stepper
-          label={label ?? resolvedLabels.progress}
           linear={false}
           navigation={phase === 'complete' ? 'none' : 'button'}
           onStepChange={(index, request) => {
@@ -923,7 +923,7 @@ export function Wizard({
           orientation={resolvedProgress === 'top' ? 'horizontal' : 'vertical'}
           step={finished ? entries.length : Math.max(0, currentIndex)}
         >
-          <StepperList id={listId}>
+          <StepperList aria-label={t('progress')} id={listId}>
             {stepElements.map((element) => {
               const name = element.props.name;
               const reachable =
@@ -939,9 +939,7 @@ export function Wizard({
                 <StepperStep
                   aria-controls={formId}
                   complete={phase === 'complete' || stepComplete(currentValue, name)}
-                  description={
-                    element.props.optional === true ? resolvedLabels.optional : undefined
-                  }
+                  description={element.props.optional === true ? t('optional') : undefined}
                   disabled={disabled || element.props.disabled === true || !reachable}
                   invalid={invalid.has(name)}
                   key={name}
@@ -984,14 +982,14 @@ export function Wizard({
         <div data-part="step-header">
           <Heading data-part="step-title" id={titleId} ref={titleRef} tabIndex={-1}>
             <span data-part="position">
-              {resolvedLabels.position(position.index, position.count)}
+              {t('position', { index: position.index, count: position.count })}
             </span>{' '}
             {currentElement.props.label}
             {optional ? (
               <span data-part="optional">
                 {' '}
                 <Tag shape="pill" size="sm" tone="secondary" variant="soft">
-                  {resolvedLabels.optional}
+                  {t('optional')}
                 </Tag>
               </span>
             ) : null}

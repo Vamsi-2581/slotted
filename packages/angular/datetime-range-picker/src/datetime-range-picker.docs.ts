@@ -111,7 +111,7 @@ const anatomy: AnatomyRow[] = [
     part: 'tab-label',
     element: 'span',
     required: false,
-    purpose: '"Start" or "End", from startLabel and endLabel.',
+    purpose: '"Start" or "End", from the start and end messages.',
   },
   {
     part: 'tab-value',
@@ -138,7 +138,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      'What the next press should be, or what is wrong — "Return: choose a day", "Return: choose a time on 16 Sep", "The end must come after the start" — in the words hintLabels gives it. data-invalid while it names a problem; aria-describedby of the list and the field. Empty while the work is whole and valid.',
+      'What the next press should be, or what is wrong — "Return: choose a day", "Return: choose a time on 16 Sep", "The end must come after the start" — from the chooseDay, chooseTime, order, length, unavailable and bounds messages. data-invalid while it names a problem; aria-describedby of the list and the field. Empty while the work is whole and valid.',
   },
   {
     part: 'length',
@@ -239,9 +239,8 @@ const scenes: ReferenceSceneMeta[] = [
   <div
     slDateTimeRangePicker
     clearable
-    endLabel="Devolução"
     locale="pt-BR"
-    startLabel="Retirada"
+    [messages]="{ start: 'Retirada', end: 'Devolução' }"
     [defaultValue]="rental"
   ></div>
 </div>`,
@@ -342,7 +341,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'datetime-range-picker-angular-now',
       label: 'One now per end',
       language: 'angular',
-      source: `<div slDateTimeRangePicker nowLabel="Agora" [referenceDateTime]="clock"></div>`,
+      source: `<div slDateTimeRangePicker [messages]="{ now: 'Agora' }" [referenceDateTime]="clock"></div>`,
     }),
   },
   {
@@ -447,7 +446,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition',
-    note: 'provideDateTimeRangePickerDefaults sets locale, months, step, labels, the hint’s and the duration’s words once; the exported instance opens, closes and focuses; the slDateTimeRangePickerOption template replaces what a row draws; position — which tab — is the consumer’s to own.',
+    note: 'provideDateTimeRangePickerDefaults sets the months, the step and how a duration is written once, provideSlotted the language and every word; the exported instance opens, closes and focuses; the slDateTimeRangePickerOption template replaces what a row draws; position — which tab — is the consumer’s to own.',
     snippet: defineSnippet({
       id: 'datetime-range-picker-angular-composition',
       label: 'Set once, and the handle',
@@ -595,13 +594,6 @@ const api: ApiRow[] = apiRows([
     'What the band and the rows say for a duration, in the product’s own words. The default writes "3 days 21 hr" in the family’s locale.',
   ],
   [
-    'limitLabel',
-    '(min?: number, max?: number, locale?: string) => string',
-    '"1 hr to 30 days"',
-    'SlDateTimeRangePicker',
-    'What the band says while a limit is set.',
-  ],
-  [
     'step',
     'number',
     '900',
@@ -653,9 +645,9 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    '—',
+    'provideSlotted',
     'SlDateTimeRangePicker',
-    'BCP 47. Decides the field order, the digits, the month names, the day-period names and the duration’s words.',
+    'BCP 47. Decides the field order, the digits, the month names, the day-period names and the duration’s units. Unset, the language in force decides.',
   ],
   ['timeZone', 'string', '—', 'SlDateTimeRangePicker', 'The zone "now" is read in.'],
   [
@@ -753,62 +745,11 @@ const api: ApiRow[] = apiRows([
     'Whether the field in the band takes the relative expression — +2d, 1h30, = — the way a datetime-field does.',
   ],
   [
-    'startLabel',
-    'string',
-    'Start',
+    'messages',
+    'Partial<DatetimeRangePickerMessages>',
+    '—',
     'SlDateTimeRangePicker',
-    'The start tab’s label, and the field’s name while the start is current.',
-  ],
-  [
-    'endLabel',
-    'string',
-    'End',
-    'SlDateTimeRangePicker',
-    'The end tab’s label, and the field’s name while the end is current.',
-  ],
-  [
-    'chooseLabel',
-    'string',
-    'Choose range',
-    'SlDateTimeRangePicker',
-    'The trigger’s name and the frame’s placeholder while nothing is chosen.',
-  ],
-  [
-    'changeLabel',
-    'string',
-    'Change range',
-    'SlDateTimeRangePicker',
-    'The trigger’s name once a range is chosen, before the two times.',
-  ],
-  ['clearLabel', 'string', 'Clear range', 'SlDateTimeRangePicker', 'The clear’s name.'],
-  ['nowLabel', 'string', 'Now', 'SlDateTimeRangePicker', 'The now control beside the field.'],
-  [
-    'doneLabel',
-    'string',
-    'Done',
-    'SlDateTimeRangePicker',
-    'The button at the end of the footer that closes with what is written.',
-  ],
-  [
-    'hintLabels',
-    'Partial<DateTimeRangePickerHintLabels>',
-    'English',
-    'SlDateTimeRangePicker',
-    'What the hint says: choose while the current end has no date and chooseTime while it has no time, with {end} for its label and {day} for the day; order, length, unavailable and bounds while the work is whole and invalid.',
-  ],
-  [
-    'emptyLabel',
-    'string',
-    'No time available',
-    'SlDateTimeRangePicker',
-    'What a panel says when its end has no time at all.',
-  ],
-  [
-    'truncatedLabel',
-    'string',
-    'Only the first times are listed; type the rest into the field',
-    'SlDateTimeRangePicker',
-    'A list’s description when it stops at maxOptions.',
+    'Words laid over the language in force, key by key: the two ends (start, end), the trigger’s names (choose; change with {start}, {end} and {length}; changeReversed), the hint (chooseDay with {end}; chooseTime with {end} and {day}; order, length, unavailable, bounds), the limit (limit.between, limit.atLeast, limit.atMost), now, done, clear, and a panel that is empty or cut short (empty, truncated).',
   ],
   [
     'startName',
@@ -883,7 +824,7 @@ const composition: ApiRow[] = apiRows([
     'Provider',
     '—',
     'application',
-    'Sets locale, timeZone, calendar, firstDayOfWeek, months, hourCycle, granularity, step, maxOptions, unavailableOptions, closeOnSelect, placement, size, variant, lengthLabel, limitLabel, hintLabels and every label once for everything under the injector.',
+    'Sets timeZone, calendar, firstDayOfWeek, months, hourCycle, granularity, step, maxOptions, unavailableOptions, closeOnSelect, placement, size, variant and lengthLabel once for everything under the injector. The locale and the words come from provideSlotted.',
   ],
   [
     'ControlValueAccessor and Validator',

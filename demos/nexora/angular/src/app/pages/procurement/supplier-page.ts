@@ -465,7 +465,7 @@ type View = 'skus' | 'orders' | 'details';
                 >
               </div>
             } @else {
-              <div slSkeletonRegion label="Reading the supplier" [loading]="true">
+              <div slSkeletonRegion [messages]="{ label: 'Reading the supplier' }" [loading]="true">
                 <div slStack [gap]="3">
                   <div
                     slGrid
@@ -723,7 +723,7 @@ type View = 'skus' | 'orders' | 'details';
                       <form
                         slForm
                         data-testid="supplier-form"
-                        summaryTitle="The supplier was not saved"
+                        [messages]="{ summaryTitle: 'The supplier was not saved' }"
                         [errors]="store.errors()"
                         (errorsChange)="store.errors.set($event.value)"
                         [loading]="store.busy() === 'save'"
@@ -813,7 +813,7 @@ type View = 'skus' | 'orders' | 'details';
                             type="submit"
                             data-testid="save-supplier"
                             [loading]="store.busy() === 'save'"
-                            loadingLabel="Saving"
+                            [messages]="{ loading: 'Saving' }"
                           >
                             Save
                           </button>

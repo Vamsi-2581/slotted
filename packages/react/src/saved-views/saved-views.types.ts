@@ -1,6 +1,7 @@
 import type { GridColumn, GridView, GridViewStorage, SavedViewsState } from '@slotted/core/grid';
+import type { PartialMessages, SavedViewsMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
-import type { ComponentPropsWithRef, ReactNode, Ref } from 'react';
+import type { ComponentPropsWithRef, Ref } from 'react';
 
 /** What the reader did. One state object answers seven different presses. */
 export type SavedViewsAction =
@@ -33,49 +34,6 @@ export interface SavedViewsRequest {
   readonly cancelled: boolean;
   /** Refuses the request. Nothing commits and no view is applied. */
   cancel(): void;
-}
-
-/** What the family says. `{name}` is replaced with the view's name. */
-export interface SavedViewsLabels {
-  /** The group's name, and the panel's. */
-  label: string;
-  /** The built-in view's name. */
-  builtIn: string;
-  modified: string;
-  revert: string;
-  save: string;
-  saveAs: string;
-  /** The name field's label. */
-  name: string;
-  /** The submit of the save-as form. */
-  create: string;
-  /** The menu item, and the submit of the rename form. */
-  rename: string;
-  setDefault: string;
-  /** The hidden word beside the default view's pin. */
-  isDefault: string;
-  delete: string;
-  confirmDelete: string;
-  cancel: string;
-  /** The row menu's accessible name. */
-  actions: string;
-  applied: string;
-  saved: string;
-  renamed: string;
-  deleted: string;
-  defaultChanged: string;
-  duplicate: string;
-  empty: string;
-}
-
-/** The decisions an application takes once. */
-export interface SavedViewsDefaults {
-  labels: SavedViewsLabels;
-}
-
-export interface SavedViewsProviderProps {
-  children?: ReactNode;
-  labels?: Partial<SavedViewsLabels> | undefined;
 }
 
 /** The imperative actions a consumer cannot express declaratively. */
@@ -112,9 +70,12 @@ export interface SavedViewsProps extends Omit<
   open?: boolean | undefined;
   defaultOpen?: boolean | undefined;
   onOpenChange?: ((open: boolean, request: ChangeRequest<boolean>) => void) | undefined;
-  /** The group's accessible name. Defaults to `labels.label`. */
-  label?: string | undefined;
-  labels?: Partial<SavedViewsLabels> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * group's and the panel's name (`label`), the controls, the forms and the
+   * announcements. A native `aria-label` names both instead.
+   */
+  messages?: PartialMessages<SavedViewsMessages> | undefined;
   ref?: Ref<SavedViewsHandle> | undefined;
 }
 

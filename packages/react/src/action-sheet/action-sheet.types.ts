@@ -1,3 +1,4 @@
+import type { ActionSheetMessages, FamilyTranslator, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref, RefObject } from 'react';
 
@@ -49,8 +50,6 @@ export interface ActionSheetSelectEvent {
 
 export interface ActionSheetDefaults {
   back: ActionSheetDismissPolicy;
-  /** The cancel's words when it is given none. */
-  cancelLabel: string;
   closeOnSelect: boolean;
   escape: ActionSheetDismissPolicy;
   modal: boolean;
@@ -70,13 +69,13 @@ export interface ActionSheetHandle {
   focus: () => void;
 }
 
-export interface ActionSheetProps extends Partial<Omit<ActionSheetDefaults, 'cancelLabel'>> {
+export interface ActionSheetProps extends Partial<ActionSheetDefaults> {
   children?: ReactNode;
   open?: boolean | undefined;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean, request: ActionSheetChangeRequest) => void;
-  /** The words the cancel shows when it is given none. */
-  cancelLabel?: string;
+  /** Words laid over the catalog of the language in force, key by key: the cancel's (`cancel`). */
+  messages?: PartialMessages<ActionSheetMessages> | undefined;
   /** Where the layer is portalled. The portal root decides when absent. */
   container?: Element | null;
   /**
@@ -185,7 +184,7 @@ export interface ActionSheetCancelRootProps extends HTMLAttributes<HTMLElement> 
   'data-part': 'cancel';
 }
 
-/** The footer and the button in it. Children default to `cancelLabel`. */
+/** The footer and the button in it. Children default to the catalog's `cancel`. */
 export interface ActionSheetCancelProps extends ComponentPropsWithRef<'button'> {
   render?: (props: ActionSheetCancelRootProps) => ReactNode;
 }
@@ -196,7 +195,8 @@ export interface ActionSheetCancelProps extends ComponentPropsWithRef<'button'> 
  * from `useDrawer`.
  */
 export interface ActionSheetContextValue {
-  cancelLabel: string;
+  /** The family's words in the language in force, with this sheet's `messages` laid over them. */
+  t: FamilyTranslator<ActionSheetMessages>;
   close: (reason: ActionSheetOpenReason, result: string | undefined, source: unknown) => void;
   closeOnSelect: boolean;
   nodes: { panel: HTMLElement | null; list: HTMLElement | null };

@@ -374,7 +374,7 @@ export const Locale: Story = {
       ) +
         scene(
           'The same decision, taken per control or once for the application',
-          'A form where one amount reads 1.234 as a thousand and another as one point two three four is a form that loses money, so provideNumberFieldDefaults carries the locale for the whole injector.',
+          'A form where one amount reads 1.234 as a thousand and another as one point two three four is a form that loses money, so provideSlotted carries the locale for the whole application.',
           `<div slNumberField>
              <input slNumberFieldInput defaultValue="1480.5" locale="pt-BR" />
            </div>

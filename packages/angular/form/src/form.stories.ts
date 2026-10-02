@@ -202,7 +202,7 @@ export const Summary: Story = {
       scene(
         'Rendered by the family, first in the form',
         'Submit it: focus moves to the region, which announces itself, and every item links to the field it names. Follow a link and focus lands on the control without the address bar changing.',
-        `<form slForm summaryTitle="Corrija estes campos">${fields}${actions}</form>`,
+        `<form slForm [messages]="{ summaryTitle: 'Corrija estes campos' }">${fields}${actions}</form>`,
       ) +
         scene(
           'Placed by the consumer, or skipped entirely',
@@ -355,8 +355,8 @@ export const Composition: Story = {
       ) +
         scene(
           'And set once for an application',
-          'Two tokens carry what an application decides once: provideFormDefaults for how its forms behave, and provideFormErrorMessages for how a validator’s key becomes a sentence in its language.',
-          `<form slForm summaryTitle="Corrija estes campos" validate="blur">${fields}${actions}</form>`,
+          'Two tokens carry what an application decides once: provideFormDefaults for how its forms behave, and provideFormErrorMessages for the sentence of a validator the application adds. The words come from the language in force.',
+          `<form slForm validate="blur">${fields}${actions}</form>`,
         ),
     ),
   }),

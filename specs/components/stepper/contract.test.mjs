@@ -59,7 +59,7 @@ test('takes sequence from the platform and claims no landmark', () => {
   assert.equal(stepper.nativeElement, 'div');
   assert.equal(contract.rootRole, 'none');
   assert.equal(contract.listElement, 'ol');
-  assert.equal(stepper.defaults.label, 'Progress');
+  assert.ok(contract.messages.includes('label'));
 });
 
 /**

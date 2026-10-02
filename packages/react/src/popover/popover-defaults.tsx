@@ -16,7 +16,6 @@ export const POPOVER_FALLBACK: PopoverDefaults = {
   arrow: true,
   arrowPadding: 12,
   autoFocus: true,
-  closeLabel: 'Close',
   closeOnEscape: true,
   closeOnOutsidePress: true,
   collisionPadding: 8,
@@ -41,11 +40,8 @@ export function usePopoverDefaults(): PopoverDefaults {
 
 /**
  * An application decides once how its popovers behave and look. A popover that
- * states any of them itself still wins.
- *
- * `closeLabel` is here because the close control's accessible name is a string,
- * and a string belongs in one place in an application rather than on every
- * popover it renders.
+ * states any of them itself still wins. The close control's accessible name
+ * comes from the language in force (`SlottedProvider`).
  */
 export function PopoverDefaultsProvider({
   children,

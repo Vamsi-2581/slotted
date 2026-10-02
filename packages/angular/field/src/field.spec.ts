@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/field/contract.json';
@@ -179,15 +181,22 @@ describe('SlField', () => {
     expect(markOf('f')).toBeNull();
   });
 
-  it('lets an application translate the two necessity words once', () => {
+  it('speaks the necessity words of the language in force, and follows a change of it in place', () => {
+    const locale = signal('pt-BR');
     const fixture = renderTemplate(
-      `<div slField necessity="words"><label slFieldLabel>IE</label></div>`,
-      [provideFieldDefaults({ necessityWords: { optional: '(opcional)' } })],
+      `<div slField id="a" necessity="words"><label slFieldLabel>IE</label></div>
+       <div slField id="b" necessity="words" required [messages]="{ required: '(exigido)' }">
+         <label slFieldLabel>CNPJ</label></div>`,
+      [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
     );
+    const mark = (id: string) => root(fixture, `#${id} [data-part="mark"]`).textContent;
 
-    expect(
-      (fixture.nativeElement.querySelector('[data-part="mark"]') as HTMLElement).textContent,
-    ).toBe('(opcional)');
+    expect(mark('a')).toBe('(opcional)');
+    expect(mark('b')).toBe('(exigido)');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(mark('a')).toBe('(optional)');
   });
 
   it('lets an application set the family’s appearance once, and a field override it', () => {
@@ -393,13 +402,13 @@ describe('SlField', () => {
     expect(help.hasAttribute('data-open')).toBe(false);
   });
 
-  it('lets an application name the help control once, and a page name one of its own', () => {
+  it('names the help control in the language in force, and lets a page name one of its own', () => {
     const fixture = renderTemplate(
       `<div slField id="a"><div slFieldHeader><label slFieldLabel>Prazo</label>
          <button slFieldHelp="Dias corridos."></button></div></div>
        <div slField id="b"><div slFieldHeader><label slFieldLabel>Juros</label>
          <button slFieldHelp="Ao mês." aria-label="Como os juros são calculados"></button></div></div>`,
-      [provideFieldDefaults({ helpLabel: 'Mais informações' })],
+      [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
     );
 
     expect(root(fixture, '#a [data-part="help"]').getAttribute('aria-label')).toBe(

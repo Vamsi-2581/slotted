@@ -12,16 +12,7 @@ export type TagShape = 'pill' | 'square';
 
 export type TagOrientation = 'horizontal' | 'vertical';
 
-/**
- * The word the remove control announces before the tag's own label. A constant
- * rather than a string built inside the component, because the only
- * translation layer this library has today is the consumer's — the token below,
- * or an input on the tag.
- */
-export const TAG_REMOVE_LABEL = 'Remove';
-
 export interface TagDefaults {
-  removeLabel: string;
   shape: TagShape;
   size: TagSize;
   tone: TagTone;
@@ -29,7 +20,6 @@ export interface TagDefaults {
 }
 
 const FALLBACK: TagDefaults = {
-  removeLabel: TAG_REMOVE_LABEL,
   shape: 'pill',
   size: 'md',
   tone: 'secondary',
@@ -42,16 +32,16 @@ export const TAG_DEFAULTS = new InjectionToken<TagDefaults>('slotted tag default
 });
 
 /**
- * An application decides once how its tags are painted, how large they are and
- * what its remove controls are called, rather than repeating five inputs on
- * every chip in a filter bar. A tag that states any of them itself still wins:
- * an explicit input is never overridden by the token.
+ * An application decides once how its tags are painted and how large they are,
+ * rather than repeating four inputs on every chip in a filter bar. A tag that
+ * states any of them itself still wins: an explicit input is never overridden
+ * by the token. The remove control's word comes from the language in force
+ * (`provideSlotted`).
  */
 export function provideTagDefaults(defaults: Partial<TagDefaults>) {
   return {
     provide: TAG_DEFAULTS,
     useFactory: (): TagDefaults => ({
-      removeLabel: defaults.removeLabel ?? FALLBACK.removeLabel,
       shape: defaults.shape ?? FALLBACK.shape,
       size: defaults.size ?? FALLBACK.size,
       tone: defaults.tone ?? FALLBACK.tone,

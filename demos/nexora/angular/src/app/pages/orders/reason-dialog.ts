@@ -63,7 +63,7 @@ import { SlTextarea } from '@slotted/angular/textarea';
           type="button"
           [tone]="tone()"
           [loading]="busy()"
-          [loadingLabel]="confirmLabel()"
+          [messages]="{ loading: confirmLabel() }"
           (click)="submit()"
         >
           {{ confirmLabel() }}

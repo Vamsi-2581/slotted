@@ -233,13 +233,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Inside a card, and beside the families it sits with',
-    note: 'Card owns the title and the header actions, so this family ships neither. The value slot takes a tag, a status indicator or a skeleton, and provideDescriptionListDefaults decides the arrangement and the words for a whole application.',
+    note: 'Card owns the title and the header actions, so this family ships neither. The value slot takes a tag, a status indicator or a skeleton, and provideDescriptionListDefaults decides the arrangement for a whole application; the words come from the language in force.',
     snippet: defineSnippet({
       id: 'description-list-angular-composition',
       language: 'ts',
       label: 'A titled panel, and defaults for the application',
       source:
-        "bootstrapApplication(App, {\n  providers: [\n    provideDescriptionListDefaults({\n      labels: { copy: 'Copiar', reveal: 'Ver mais' },\n      variant: 'ruled',\n    }),\n  ],\n});",
+        "bootstrapApplication(App, {\n  providers: [provideDescriptionListDefaults({ variant: 'ruled' })],\n});",
     }),
   },
   {
@@ -311,11 +311,11 @@ export const ANGULAR_DESCRIPTION_LIST_DOCS = {
         'The maximum width of the term column; the terms share one track sized to the widest of them, up to this',
       ],
       [
-        'labels',
-        'DescriptionListLabels',
+        'messages',
+        'PartialMessages<DescriptionListMessages>',
         '—',
         'slDescriptionList',
-        'The six words the family says: copy, copied, copyBlocked, reveal, collapse, placeholder',
+        'Words laid over the language in force, key by key: copy, copied, copyBlocked, reveal, collapse, placeholder',
       ],
       [
         'span',
@@ -357,7 +357,7 @@ export const ANGULAR_DESCRIPTION_LIST_DOCS = {
         'string',
         '—',
         'slDescriptionListDescription',
-        'Words shown in place of a value that is missing. Unset, the mark is drawn and the labels answer what is read instead',
+        'Words shown in place of a value that is missing. Unset, the mark is drawn and the placeholder message is read instead',
       ],
       [
         'revealed',
@@ -394,7 +394,7 @@ export const ANGULAR_DESCRIPTION_LIST_DOCS = {
         'DescriptionListDefaults',
         '—',
         'Application',
-        'Sets layout, columns, variant, termWidth and labels once for everything below it; an input on the list still wins',
+        'Sets layout, columns, variant and termWidth once for everything below it; an input on the list still wins',
       ],
       [
         'id / aria-describedby',

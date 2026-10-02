@@ -275,7 +275,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'combobox-angular-clearable',
       language: 'angular',
       label: 'Emptying the field',
-      source: `<sl-combobox clearable clearLabel="Clear the search">…</sl-combobox>`,
+      source: `<sl-combobox clearable [messages]="{ clear: 'Clear the search' }">…</sl-combobox>`,
     }),
   },
   {
@@ -325,7 +325,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'combobox-angular-empty',
       language: 'angular',
       label: 'The two states the field spends most time in',
-      source: `<sl-combobox emptyLabel="Try a different spelling" loadingLabel="Searching…">…</sl-combobox>`,
+      source: `<sl-combobox [messages]="{ empty: 'Try a different spelling' }">…</sl-combobox>`,
     }),
   },
   {
@@ -369,18 +369,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition',
-    note: 'Defaults and all five sentences provided once for a whole application, which is where an application translates them.',
+    note: 'Defaults provided once for a whole application; the words come from the language in force (provideSlotted).',
     snippet: defineSnippet({
       id: 'combobox-angular-composition',
       language: 'ts',
       label: 'What a consumer can replace',
-      source: `providers: [
-  provideComboboxDefaults({
-    countLabel: '{count} pessoas',
-    emptyLabel: 'Nada encontrado',
-    size: 'sm',
-  }),
-];`,
+      source: `providers: [provideComboboxDefaults({ size: 'sm' })];`,
     }),
   },
 ];
@@ -423,7 +417,13 @@ const api = apiRows([
     'sl-combobox',
     'The comparison. Unset asks for the library’s locale-sensitive contains; null turns filtering off.',
   ],
-  ['locale', 'string', '—', 'sl-combobox', 'BCP 47, for the comparison the default filter makes.'],
+  [
+    'locale',
+    'string',
+    '—',
+    'sl-combobox',
+    'BCP 47, for the comparison the default filter makes. The language in force when absent.',
+  ],
   [
     'items',
     'ComboboxItems',
@@ -464,7 +464,7 @@ const api = apiRows([
     "'input' | 'focus' | 'manual'",
     'input',
     'sl-combobox',
-    'When the popup opens on its own.',
+    'When the popup opens on its own: on typing or a press on the input (input), on every focus and press (focus), or only from the trigger and the arrow keys (manual).',
   ],
   [
     'allowsCustomValue',
@@ -644,41 +644,12 @@ const api = apiRows([
     'sl-combobox',
     'How close to the viewport edge the popup may come.',
   ],
-  ['clearLabel', 'string', 'Clear', 'sl-combobox', 'The accessible name of the clear button.'],
   [
-    'createLabel',
-    'string',
-    'Create \u201c{query}\u201d',
+    'messages',
+    'Partial<ComboboxMessages>',
+    '—',
     'sl-combobox',
-    'The offer to add what was typed. `{query}` is the text.',
-  ],
-  [
-    'emptyLabel',
-    'string',
-    'No matches',
-    'sl-combobox',
-    'What the popup says when nothing matched.',
-  ],
-  [
-    'loadingLabel',
-    'string',
-    'Loading…',
-    'sl-combobox',
-    'What the popup says while an answer is travelling.',
-  ],
-  [
-    'triggerLabel',
-    'string',
-    'Show options',
-    'sl-combobox',
-    'The accessible name of the button that opens the popup.',
-  ],
-  [
-    'countLabel',
-    'string',
-    '{count} results',
-    'sl-combobox',
-    'The sentence the live region announces. {count} becomes the number.',
+    'Words laid over the language in force, key by key: clear, trigger, create ({query}), empty, loading, count ({count})',
   ],
   [
     'value',
@@ -764,7 +735,7 @@ const composition = apiRows([
     'Provider',
     '—',
     'Application',
-    'Every axis and all five sentences the family speaks, provided once in a bootstrap or a route.',
+    'Every axis, provided once in a bootstrap or a route. The words come from the language in force (provideSlotted).',
   ],
   [
     'exportAs',

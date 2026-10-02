@@ -1,7 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, RouterLink } from '@angular/router';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
 import {
   SlAppShell,
@@ -9,6 +12,7 @@ import {
   SlAppShellAside,
   SlAppShellAsideBody,
   SlAppShellAsideHeader,
+  SlAppShellAsideResizer,
   SlAppShellAsideToggle,
   SlAppShellBanner,
   SlAppShellBrand,
@@ -21,6 +25,7 @@ import {
 } from './app-shell';
 import { provideAppShellDefaults } from './app-shell-defaults';
 import type {
+  AppShellAsideExtentRequest,
   AppShellCanvas,
   AppShellOpenRequest,
   AppShellPrimary,
@@ -33,6 +38,7 @@ const PARTS = [
   SlAppShellAside,
   SlAppShellAsideBody,
   SlAppShellAsideHeader,
+  SlAppShellAsideResizer,
   SlAppShellAsideToggle,
   SlAppShellBanner,
   SlAppShellBrand,
@@ -170,11 +176,60 @@ class RoutedHost {
   readonly open = signal(true);
 }
 
+@Component({
+  standalone: true,
+  imports: PARTS,
+  template: `<div
+    slAppShell
+    navMode="inline"
+    [asideMode]="asideMode()"
+    [navSide]="navSide()"
+    [(asideOpen)]="asideOpen"
+    [(asideExtent)]="extent"
+    [minAsideExtent]="min()"
+    [maxAsideExtent]="max()"
+    (asideExtentChangeRequest)="record($event)"
+  >
+    <main slAppShellMain>Encomendas</main>
+    <aside slAppShellAside>
+      <div slAppShellAsideResizer [style.direction]="direction()"></div>
+      <div slAppShellAsideBody [inset]="inset()">ENC-4521</div>
+    </aside>
+  </div>`,
+})
+class ResizableHost {
+  readonly asideMode = signal<'inline' | 'overlay'>('inline');
+  readonly navSide = signal<'start' | 'end'>('start');
+  readonly asideOpen = signal(true);
+  readonly extent = signal<number | undefined>(0.3);
+  readonly min = signal(0.16);
+  readonly max = signal(0.6);
+  readonly direction = signal<'ltr' | 'rtl'>('ltr');
+  readonly inset = signal<'none' | undefined>(undefined);
+  readonly extents: AppShellAsideExtentRequest[] = [];
+  cancelling = false;
+
+  record(request: AppShellAsideExtentRequest) {
+    this.extents.push(request);
+    if (this.cancelling) request.cancel();
+  }
+}
+
 @Component({ standalone: true, template: '' })
 class Destination {}
 
+/** The shells `setup` builds are in Brazilian Portuguese: the words come from the pt-BR catalog. */
+const locale = signal('pt-BR');
+
 function setup(providers: unknown[] = []) {
-  TestBed.configureTestingModule({ imports: [Host], providers: providers as never[] });
+  locale.set('pt-BR');
+  TestBed.configureTestingModule({
+    imports: [Host],
+    providers: [
+      provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } }),
+      ...(providers as never[]),
+    ],
+  });
   const fixture = TestBed.createComponent(Host);
   fixture.detectChanges();
   return fixture;
@@ -209,9 +264,9 @@ describe('SlAppShell', () => {
     const links = [...fixture.nativeElement.querySelectorAll('[data-part="skip"] a')];
 
     expect(links.map((link: HTMLAnchorElement) => link.textContent?.trim())).toEqual([
-      'Saltar para o conteúdo',
-      'Saltar para a navegação',
-      'Saltar para o painel lateral',
+      'Pular para o conteúdo',
+      'Pular para a navegação',
+      'Pular para o painel lateral',
     ]);
     expect(links[0]?.getAttribute('href')).toBe(`#${query(fixture, '[data-part="main"]').id}`);
   });
@@ -338,9 +393,15 @@ describe('SlAppShell', () => {
     expect(root.getAttribute('data-nav-mode')).toBe('inline');
   });
 
-  it('takes the strings from the provider', () => {
-    const fixture = setup([provideAppShellDefaults({ messages: { close: 'Recolher' } })]);
-    expect(query(fixture, '[data-part="nav-toggle"]').getAttribute('aria-label')).toBe('Recolher');
+  it('speaks the language in force, and follows a change of it in place', () => {
+    const fixture = setup();
+    const toggle = query(fixture, '[data-part="nav-toggle"]');
+    expect(toggle.getAttribute('aria-label')).toBe('Fechar navegação');
+
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(toggle.getAttribute('aria-label')).toBe('Close navigation');
+    expect(query(fixture, '[data-part="nav"]').getAttribute('aria-label')).toBe('Main navigation');
   });
 
   it('publishes the imperative actions an input cannot express', () => {
@@ -392,7 +453,7 @@ describe('SlAppShell', () => {
       const labels = [...fixture.nativeElement.querySelectorAll('[data-part="skip"] a')].map(
         (a: Element) => a.textContent?.trim(),
       );
-      expect(labels).not.toContain('Saltar para o painel lateral');
+      expect(labels).not.toContain('Pular para o painel lateral');
     });
 
     it('publishes the pane on the instance, with the reason programmatic', () => {
@@ -481,6 +542,179 @@ describe('SlAppShell', () => {
 
     await frame();
     expect(scrim()).toBeNull();
+  });
+
+  describe('the pane edge', () => {
+    const measured = HTMLElement.prototype.getBoundingClientRect;
+    beforeAll(() => {
+      const element = Element.prototype as unknown as Record<string, unknown>;
+      element['setPointerCapture'] ??= () => {};
+      element['releasePointerCapture'] ??= () => {};
+      element['hasPointerCapture'] ??= () => true;
+    });
+    afterEach(() => {
+      HTMLElement.prototype.getBoundingClientRect = measured;
+    });
+
+    /** jsdom lays nothing out, so the shell is given an inline size once, here. */
+    function measureShellAs(width: number) {
+      HTMLElement.prototype.getBoundingClientRect = () =>
+        ({
+          bottom: 800,
+          height: 800,
+          left: 0,
+          right: width,
+          toJSON: () => ({}),
+          top: 0,
+          width,
+          x: 0,
+          y: 0,
+        }) as DOMRect;
+    }
+
+    const find = (fixture: { nativeElement: HTMLElement }, selector: string) =>
+      fixture.nativeElement.querySelector(selector) as HTMLElement;
+
+    function resizable() {
+      TestBed.configureTestingModule({
+        imports: [ResizableHost],
+        providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
+      });
+      const fixture = TestBed.createComponent(ResizableHost);
+      fixture.detectChanges();
+      const edge = () =>
+        fixture.nativeElement.querySelector('[data-part="aside-resizer"]') as HTMLElement;
+      const key = (name: string, shiftKey = false) => {
+        edge().dispatchEvent(
+          new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: name, shiftKey }),
+        );
+        fixture.detectChanges();
+      };
+      return { fixture, host: fixture.componentInstance, edge, key };
+    }
+
+    it('is a focusable separator for the pane, valued in whole percentages of the shell', () => {
+      const { fixture, edge } = resizable();
+      const aside = find(fixture, '[data-part="aside"]');
+      expect(edge().getAttribute('role')).toBe('separator');
+      expect(edge().getAttribute('tabindex')).toBe('0');
+      expect(edge().getAttribute('aria-orientation')).toBe('vertical');
+      expect(edge().getAttribute('aria-controls')).toBe(aside.id);
+      expect(edge().getAttribute('aria-valuemin')).toBe('16');
+      expect(edge().getAttribute('aria-valuemax')).toBe('60');
+      expect(edge().getAttribute('aria-valuenow')).toBe('30');
+      expect(edge().getAttribute('aria-label')).toBe('Redimensionar painel');
+    });
+
+    it('takes its limits from the shell', () => {
+      const { fixture, host, edge } = resizable();
+      host.min.set(0.2);
+      host.max.set(0.5);
+      fixture.detectChanges();
+      expect(edge().getAttribute('aria-valuemin')).toBe('20');
+      expect(edge().getAttribute('aria-valuemax')).toBe('50');
+    });
+
+    it('moves the edge sixteen pixels per arrow and sixty-four with Shift, and says keyboard', () => {
+      measureShellAs(1000);
+      const { fixture, host, key } = resizable();
+      const from = (value: number) => {
+        host.extent.set(value);
+        fixture.detectChanges();
+      };
+
+      key('ArrowLeft');
+      expect(host.extent()).toBeCloseTo(0.316, 5);
+      expect(host.extents.at(-1)?.reason).toBe('keyboard');
+      from(0.3);
+      key('ArrowRight');
+      expect(host.extent()).toBeCloseTo(0.284, 5);
+      from(0.3);
+      key('ArrowLeft', true);
+      expect(host.extent()).toBeCloseTo(0.364, 5);
+      key('Home');
+      expect(host.extent()).toBe(0.16);
+      key('End');
+      expect(host.extent()).toBe(0.6);
+      expect(host.extents.at(-1)?.reason).toBe('keyboard');
+    });
+
+    it('commits nothing when the consumer cancels the request', () => {
+      measureShellAs(1000);
+      const { host, key } = resizable();
+      host.cancelling = true;
+      key('ArrowLeft');
+      expect(host.extent()).toBe(0.3);
+    });
+
+    it('turns the arrows round where the pane stands at the start, and in a mirrored line', () => {
+      measureShellAs(1000);
+      const { fixture, host, key } = resizable();
+      host.navSide.set('end');
+      fixture.detectChanges();
+      key('ArrowLeft');
+      expect(host.extent()).toBeCloseTo(0.284, 5);
+
+      host.navSide.set('start');
+      host.direction.set('rtl');
+      host.extent.set(0.3);
+      fixture.detectChanges();
+      key('ArrowLeft');
+      expect(host.extent()).toBeCloseTo(0.284, 5);
+    });
+
+    it('follows a drag from where it was grabbed, and marks the root while it lasts', () => {
+      measureShellAs(1000);
+      const { fixture, host, edge } = resizable();
+      const root = find(fixture, '[data-part="root"]');
+      const pointer = (type: string, clientX: number) => {
+        edge().dispatchEvent(
+          new PointerEvent(type, { bubbles: true, button: 0, clientX, pointerId: 1 }),
+        );
+        fixture.detectChanges();
+      };
+
+      pointer('pointerdown', 700);
+      pointer('pointermove', 600);
+      expect(root.hasAttribute('data-dragging')).toBe(true);
+      expect(host.extent()).toBeCloseTo(0.4, 5);
+      expect(host.extents.at(-1)?.reason).toBe('pointer');
+      pointer('pointerup', 600);
+      expect(root.hasAttribute('data-dragging')).toBe(false);
+    });
+
+    it('writes the extent as the width of the column, and nothing while it is unset', () => {
+      const { fixture, host } = resizable();
+      const aside = find(fixture, '[data-part="aside"]');
+      expect(aside.style.getPropertyValue('--slotted-app-shell-aside-extent')).toBe('30cqi');
+
+      host.extent.set(undefined);
+      fixture.detectChanges();
+      expect(aside.style.getPropertyValue('--slotted-app-shell-aside-extent')).toBe('');
+    });
+
+    it('draws no edge where the pane is a layer, or closed', () => {
+      const { fixture, host, edge } = resizable();
+      expect(edge().hidden).toBe(false);
+
+      host.asideMode.set('overlay');
+      fixture.detectChanges();
+      expect(edge().hidden).toBe(true);
+
+      host.asideMode.set('inline');
+      host.asideOpen.set(false);
+      fixture.detectChanges();
+      expect(edge().hidden).toBe(true);
+    });
+
+    it('stands the body on the pane inset unless the content brings its own', () => {
+      const { fixture, host } = resizable();
+      const body = find(fixture, '[data-part="aside-body"]');
+      expect(body.hasAttribute('data-inset')).toBe(false);
+      host.inset.set('none');
+      fixture.detectChanges();
+      expect(body.getAttribute('data-inset')).toBe('none');
+    });
   });
 
   describe('a destination in the overlaid navigation', () => {

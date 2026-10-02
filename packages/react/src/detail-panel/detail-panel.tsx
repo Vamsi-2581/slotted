@@ -1,5 +1,6 @@
 import '@slotted/styles/detail-panel/detail-panel.css';
 
+import { detailPanelMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import { findScrollParent } from '@slotted/core/sticky-header';
 import {
@@ -14,6 +15,7 @@ import {
 } from 'react';
 
 import { Container } from '../container';
+import { useMessages } from '../i18n';
 import { usePage } from '../page';
 import { PageHeaderDefaultsProvider } from '../page-header';
 import { useDetailPanelDefaults } from './detail-panel-defaults';
@@ -104,10 +106,7 @@ export function DetailPanel({
   const resolvedSize = size ?? defaults.size;
   const resolvedStatus = status ?? 'ready';
   const resolvedLoading = loading === true;
-  const resolvedMessages = useMemo(
-    () => ({ ...defaults.messages, ...messages }),
-    [defaults.messages, messages],
-  );
+  const t = useMessages(detailPanelMessages, messages);
 
   const [root, setRoot] = useState<HTMLElement | null>(null);
   const [headingId, setHeadingId] = useState<string | undefined>(undefined);
@@ -239,7 +238,6 @@ export function DetailPanel({
     layout: resolvedLayout,
     level: resolvedLevel,
     loading: resolvedLoading,
-    messages: resolvedMessages,
     mount: resolvedMount,
     register,
     sections,
@@ -247,6 +245,7 @@ export function DetailPanel({
     select,
     size: resolvedSize,
     status: resolvedStatus,
+    t,
   };
 
   const rootProps: DetailPanelRootProps = {
@@ -258,7 +257,7 @@ export function DetailPanel({
         : headingId !== undefined
           ? { 'aria-labelledby': headingId }
           : resolvedLoading
-            ? { 'aria-label': resolvedMessages.loading }
+            ? { 'aria-label': t('loading') }
             : {}),
     ...(resolvedLoading ? { 'aria-busy': true as const, 'data-loading': '' as const } : {}),
     children: (

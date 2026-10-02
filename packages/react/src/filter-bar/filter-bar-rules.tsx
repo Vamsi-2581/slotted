@@ -33,6 +33,8 @@ import {
   toISOTime,
 } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
+import { filterBarMessages } from '@slotted/core/i18n';
+import type { FamilyTranslator, FilterBarMessages } from '@slotted/core/i18n';
 import { Fragment, useId } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 
@@ -51,20 +53,15 @@ import { Segment, SegmentedControl } from '../segmented-control';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
 import { TextField } from '../text-field';
 import { TimePicker } from '../time-picker';
-import { fill } from './filter-bar-defaults';
-import type {
-  FilterBarField,
-  FilterBarLabels,
-  FilterBarOperandProps,
-  FilterBarSize,
-} from './filter-bar.types';
+import type { FilterBarField, FilterBarOperandProps, FilterBarSize } from './filter-bar.types';
 
 type Condition = FilterCondition<string, unknown>;
 
 /** What every editor in the family shares: the fields, the words, the size, the consumer's operand. */
 export interface RuleEnvironment {
   fields: readonly FilterBarField[];
-  labels: FilterBarLabels;
+  /** The family's words in the language in force, with the bar's `messages` laid over them. */
+  t: FamilyTranslator<FilterBarMessages>;
   size: FilterBarSize;
   renderOperand: ((props: FilterBarOperandProps) => ReactNode) | undefined;
   /** What `Enter` in an operand does in the surface the rule is drawn in. */
@@ -78,8 +75,22 @@ export function fieldByKey(fields: readonly FilterBarField[], key: string) {
   return fields.find((field) => field.key === key);
 }
 
-export function operatorName(labels: FilterBarLabels, operator: string) {
-  return labels.operators[operator as FilterOperator] ?? operator;
+/** An operator's name, or the operator itself when the catalog names no such operator. */
+export function operatorName(t: FamilyTranslator<FilterBarMessages>, operator: string) {
+  return operator in filterBarMessages.base.operators
+    ? t(`operators.${operator as FilterOperator}`)
+    : operator;
+}
+
+/**
+ * A message's text on either side of one slot, for a sentence that holds a
+ * control: the join chooser stands where `{join}` stands, in the order the
+ * language writes it.
+ */
+export function aroundSlot(written: (mark: string) => string): [string, string] {
+  const mark = '\u0000';
+  const [before = '', after = ''] = written(mark).split(mark);
+  return [before.trim(), after.trim()];
 }
 
 /** The rule a field starts with: its default, else one empty condition on its default operator. */
@@ -96,7 +107,7 @@ export function blankRule(field: FilterBarField): FilterDescriptor {
  * title.
  */
 export function ruleWords(
-  labels: FilterBarLabels,
+  t: FamilyTranslator<FilterBarMessages>,
   field: FilterBarField | undefined,
   filter: FilterDescriptor | null | undefined,
 ): { operator: string; value: string; full: string; operands: number } {
@@ -105,7 +116,7 @@ export function ruleWords(
     operator: field ? (field.defaultOperator ?? kindDefaultOperator(field.kind)) : 'contains',
   };
   const operands = operandCount(condition.operator as FilterOperator);
-  const operator = operatorName(labels, spokenOperator(kind, condition));
+  const operator = operatorName(t, spokenOperator(kind, condition));
   const write = (value: unknown) =>
     field?.options?.find((option) => option.value === value)?.label ?? String(value);
   const present = (value: unknown) =>
@@ -119,7 +130,7 @@ export function ruleWords(
     const full = values.join(', ');
     const value =
       values.length > 2
-        ? `${values.slice(0, 2).join(', ')} ${fill(labels.moreValues, { count: values.length - 2 })}`
+        ? t('moreValues', { values: values.slice(0, 2).join(', '), count: values.length - 2 })
         : full;
     return { operator, value, full, operands };
   }
@@ -298,7 +309,7 @@ export function ConditionEditor({
   onConditionChange,
   withOperator = true,
 }: ConditionEditorProps) {
-  const { apply, labels, renderOperand, size } = environment;
+  const { apply, renderOperand, size, t } = environment;
   const operators = field.operators ?? (operatorsFor(field.kind) as readonly string[]);
   const operands = operandCount(condition.operator as FilterOperator);
 
@@ -316,7 +327,7 @@ export function ConditionEditor({
     apply,
     field,
     index: slot,
-    label: operands === 2 ? (slot === 0 ? labels.from : labels.to) : labels.value,
+    label: operands === 2 ? (slot === 0 ? t('from') : t('to')) : t('value'),
     onValueChange: (operand) =>
       onConditionChange(
         slot === 0 ? { ...condition, value: operand } : { ...condition, end: operand },
@@ -333,20 +344,20 @@ export function ConditionEditor({
           <Select
             fullWidth
             items={operators.map((operator) => ({
-              label: operatorName(labels, operator),
+              label: operatorName(t, operator),
               value: operator,
             }))}
             onValueChange={(next) => setOperator(next as string)}
             size={size}
             value={condition.operator}
           >
-            <SelectTrigger aria-label={labels.operator}>
+            <SelectTrigger aria-label={t('operator')}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {operators.map((operator) => (
                 <SelectItem key={operator} value={operator}>
-                  {operatorName(labels, operator)}
+                  {operatorName(t, operator)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -384,7 +395,7 @@ export function RuleEditor({
   path,
   rule,
 }: RuleEditorProps) {
-  const { fields, labels, size } = environment;
+  const { fields, size, t } = environment;
   const id = useId();
   const key = path.join('.');
   const expanded = environment.expanded === key;
@@ -401,8 +412,8 @@ export function RuleEditor({
     onRuleChange({ field: key, filter: blankRule(next) });
   }
 
-  const words = ruleWords(labels, field, rule.filter);
-  const label = field?.label ?? fill(labels.unknownField, { field: rule.field });
+  const words = ruleWords(t, field, rule.filter);
+  const label = field?.label ?? t('unknownField', { field: rule.field });
 
   return (
     <div
@@ -425,7 +436,7 @@ export function RuleEditor({
           {words.operands > 0 ? (
             <>
               {' '}
-              <span data-value="">{words.value || labels.noValue}</span>
+              <span data-value="">{words.value || t('noValue')}</span>
             </>
           ) : null}
         </span>
@@ -441,9 +452,9 @@ export function RuleEditor({
           size={size}
           value={rule.field}
         >
-          <SelectTrigger aria-label={labels.field}>
+          <SelectTrigger aria-label={t('field')}>
             <SelectValue
-              placeholder={field ? undefined : fill(labels.unknownField, { field: rule.field })}
+              placeholder={field ? undefined : t('unknownField', { field: rule.field })}
             />
           </SelectTrigger>
           <SelectContent>
@@ -475,7 +486,7 @@ export function RuleEditor({
         </>
       )}
       {onRemove ? (
-        <button aria-label={labels.removeRule} data-part="remove" onClick={onRemove} type="button">
+        <button aria-label={t('removeRule')} data-part="remove" onClick={onRemove} type="button">
           <Icon>
             <Glyph name="x" />
           </Icon>
@@ -513,30 +524,30 @@ export function GroupEditor({
   path,
   root,
 }: GroupEditorProps) {
-  const { labels, size } = environment;
+  const { size, t } = environment;
   const depth = path.length;
 
   const joinControl = (
     <SegmentedControl
-      aria-label={labels.matches.replace('{join}', '').trim() || labels.operator}
+      aria-label={t('match')}
       onValueChange={(join) => onRootChange(withGroupJoin(root, path, join as FilterJoin))}
       size="sm"
       value={group.join}
     >
-      <Segment value="and">{labels.matchAll}</Segment>
-      <Segment value="or">{labels.matchAny}</Segment>
+      <Segment value="and">{t('matchAll')}</Segment>
+      <Segment value="or">{t('matchAny')}</Segment>
     </SegmentedControl>
   );
-  const [before, after] = labels.matches.split('{join}');
-  const joinWord = group.join === 'and' ? labels.matchAll : labels.matchAny;
+  const [before, after] = aroundSlot((join) => t('matches', { join }));
+  const joinWord = group.join === 'and' ? t('matchAll') : t('matchAny');
   const removeGroup =
     depth > 0 ? (
       <IconButton
-        aria-label={labels.removeGroup}
+        aria-label={t('removeGroup')}
         onClick={() => onRootChange(removeNodeAt(root, path))}
         render={(props) => <button {...props} data-part="remove-group" />}
         size={size === 'lg' ? 'md' : 'sm'}
-        title={labels.removeGroup}
+        title={t('removeGroup')}
         tone="secondary"
         variant="ghost"
       >
@@ -567,11 +578,11 @@ export function GroupEditor({
 
   return (
     <fieldset data-depth={depth} data-part="group">
-      <legend>{fill(labels.matches, { join: joinWord })}</legend>
+      <legend>{t('matches', { join: joinWord })}</legend>
       <div data-part="join">
-        {before?.trim() ? <span>{before.trim()}</span> : null}
+        {before ? <span>{before}</span> : null}
         {joinControl}
-        {after?.trim() ? <span>{after.trim()}</span> : null}
+        {after ? <span>{after}</span> : null}
         {removeGroup}
       </div>
       <div data-part="rules">
@@ -580,7 +591,7 @@ export function GroupEditor({
           /* The word that joins this row to the one above: "Where" on the first. */
           const conjunction = (
             <span data-part="conjunction">
-              {index === 0 ? labels.where : labels.joins[group.join]}
+              {index === 0 ? t('where') : t(`joins.${group.join}`)}
             </span>
           );
           if (isFilterGroup(node)) {
@@ -629,7 +640,7 @@ export function GroupEditor({
           tone="secondary"
           variant={depth === 0 ? 'outline' : 'ghost'}
         >
-          {labels.addRule}
+          {t('addRule')}
         </Button>
         <Button
           disabled={!firstField}
@@ -644,7 +655,7 @@ export function GroupEditor({
           tone="secondary"
           variant={depth === 0 ? 'outline' : 'ghost'}
         >
-          {labels.addGroup}
+          {t('addGroup')}
         </Button>
         {depth === 0 ? extra : null}
       </div>

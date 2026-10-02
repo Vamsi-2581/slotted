@@ -348,8 +348,8 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'select-angular-loading-and-empty',
       language: 'angular',
       label: 'Two states no surveyed implementation draws',
-      source: `<sl-select loading loadingLabel="Fetching teams…">…</sl-select>
-<sl-select emptyLabel="No teams yet"></sl-select>`,
+      source: `<sl-select loading [messages]="{ loading: 'Fetching teams…' }">…</sl-select>
+<sl-select [messages]="{ empty: 'No teams yet' }"></sl-select>`,
     }),
   },
   {
@@ -469,22 +469,7 @@ const api = apiRows([
     'string',
     '—',
     'sl-select',
-    'BCP 47, for the comparison the default filter makes. Unset asks the runtime.',
-  ],
-  ['searchPlaceholder', 'string', 'Search…', 'sl-select', 'What the empty field says.'],
-  [
-    'searchLabel',
-    'string',
-    'Search options',
-    'sl-select',
-    'The accessible name of the field, which carries no visible label.',
-  ],
-  [
-    'countLabel',
-    'string',
-    '{count} results',
-    'sl-select',
-    'What the live region announces while searching. {count} becomes the number of options that survived the query.',
+    'BCP 47, for the comparison the default filter makes. The language in force when absent.',
   ],
   [
     'label',
@@ -716,39 +701,11 @@ const api = apiRows([
     'How close to the viewport edge the popup may come.',
   ],
   [
-    'clearLabel',
-    'string',
-    'Clear selection',
+    'messages',
+    'Partial<SelectMessages>',
+    '—',
     'sl-select',
-    'The accessible name of the clear button.',
-  ],
-  [
-    'removeLabel',
-    'string',
-    'Remove {label}',
-    'sl-select',
-    "The accessible name of a chip's remove control. `{label}` is the value's own label.",
-  ],
-  [
-    'summaryLabel',
-    'string',
-    '{count} selected',
-    'sl-select',
-    'What a control too narrow for chips says instead. `{count}` is how many are chosen.',
-  ],
-  [
-    'emptyLabel',
-    'string',
-    'No options',
-    'sl-select',
-    'What the popup says when it holds no options.',
-  ],
-  [
-    'loadingLabel',
-    'string',
-    'Loading…',
-    'sl-select',
-    'What the popup says while an answer is travelling.',
+    'Words laid over the language in force, key by key: clear, remove ({label}), summary ({count}), search, searchPlaceholder, count ({count}), empty, loading',
   ],
   [
     'value',
@@ -839,7 +796,7 @@ const composition = apiRows([
     'Provider',
     '—',
     'Application',
-    'Every axis and every sentence the family speaks, provided once in a bootstrap or a route. A select that states one of them itself still wins.',
+    'Every axis, provided once in a bootstrap or a route; the words come from the language in force (provideSlotted). A select that states one of them itself still wins.',
   ],
   [
     'slSelectValue',

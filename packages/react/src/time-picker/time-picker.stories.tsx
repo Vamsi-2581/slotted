@@ -296,7 +296,7 @@ export const Now: Story = {
             locale="pt-BR"
             max={plainTime(11, 0)}
             min={MORNING}
-            nowLabel="Agora"
+            messages={{ now: 'Agora' }}
             referenceTime={NOW}
           />
         </Tall>

@@ -29,7 +29,7 @@ import { SlTag } from './tag';
   imports: [SlGlyph, SlIcon],
   template: `<ng-content
       ><span slIcon><svg slGlyph name="x"></svg></span></ng-content
-    ><span hidden [id]="tag.removeWordId">{{ tag.resolvedRemoveLabel() }}</span>`,
+    ><span hidden [id]="tag.removeWordId">{{ tag.t('remove') }}</span>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {

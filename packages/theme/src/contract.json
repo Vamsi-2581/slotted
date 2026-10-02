@@ -1693,6 +1693,27 @@
       "root": true
     },
     {
+      "name": "--slotted-control-label-gap-sm",
+      "layer": "semantic",
+      "axis": "density",
+      "type": "length",
+      "root": true
+    },
+    {
+      "name": "--slotted-control-label-gap-md",
+      "layer": "semantic",
+      "axis": "density",
+      "type": "length",
+      "root": true
+    },
+    {
+      "name": "--slotted-control-label-gap-lg",
+      "layer": "semantic",
+      "axis": "density",
+      "type": "length",
+      "root": true
+    },
+    {
       "name": "--slotted-control-inner-size-sm",
       "layer": "semantic",
       "axis": "density",

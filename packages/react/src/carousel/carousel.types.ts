@@ -1,11 +1,11 @@
 import type {
   CarouselAlign,
-  CarouselMessages,
   CarouselOrientation,
   CarouselPages,
   CarouselSlidesPerMove,
   CarouselTransition,
 } from '@slotted/core/carousel';
+import type { CarouselMessages, FamilyTranslator, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type {
   ButtonHTMLAttributes,
@@ -15,13 +15,7 @@ import type {
   Ref,
 } from 'react';
 
-export type {
-  CarouselAlign,
-  CarouselMessages,
-  CarouselOrientation,
-  CarouselSlidesPerMove,
-  CarouselTransition,
-};
+export type { CarouselAlign, CarouselOrientation, CarouselSlidesPerMove, CarouselTransition };
 
 /** Where previous and next stand when they are children of the root. */
 export type CarouselArrows = 'inset' | 'outside';
@@ -61,15 +55,10 @@ export interface CarouselDefaults {
   draggable: boolean;
   /** The rotation's wait on a page, in milliseconds, when `autoplay` is `true`. */
   autoplayDelay: number;
-  messages: CarouselMessages;
-  /** The locale numbers in messages are written in. Unset, the runtime's own. */
-  locale: string | undefined;
 }
 
-export interface CarouselDefaultsProviderProps extends Partial<Omit<CarouselDefaults, 'messages'>> {
+export interface CarouselDefaultsProviderProps extends Partial<CarouselDefaults> {
   children?: ReactNode | undefined;
-  /** Merged over the inherited messages, key by key. */
-  messages?: Partial<CarouselMessages> | undefined;
 }
 
 /** The actions a consumer cannot express declaratively. */
@@ -90,8 +79,10 @@ export interface CarouselContextValue {
   transition: CarouselTransition;
   size: CarouselSize;
   loop: boolean;
-  messages: CarouselMessages;
-  locale: string | undefined;
+  /** The family's words in the language in force, with this carousel's `messages` laid over them. */
+  t: FamilyTranslator<CarouselMessages>;
+  /** The locale in force: what the counter's numbers are written in. */
+  locale: string;
   /** The page the parts draw: the committed page, or the page a gesture is crossing. */
   page: number;
   pageCount: number;
@@ -159,8 +150,8 @@ export interface CarouselProps extends Omit<
   handleRef?: Ref<CarouselHandle> | undefined;
   /** Whether next on the last page goes to the first. Defaults to the provider, then to `false`. */
   loop?: boolean | undefined;
-  /** Merged over the provider's messages, key by key. */
-  messages?: Partial<CarouselMessages> | undefined;
+  /** Words laid over the catalog of the language in force, key by key. */
+  messages?: PartialMessages<CarouselMessages> | undefined;
   /** Called before the page moves, with the request that carries the reason. */
   onPageChange?: ((page: number, request: CarouselPageRequest) => void) | undefined;
   /** Called before the rotation starts or stops. */

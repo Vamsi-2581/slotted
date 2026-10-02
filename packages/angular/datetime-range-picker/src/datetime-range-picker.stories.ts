@@ -2,6 +2,8 @@ import { addDays, dayOfWeek, plainDate, plainTime } from '@slotted/core/date';
 import type { PlainDate, PlainDateTime, PlainTime } from '@slotted/core/date';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SlField, SlFieldDescription, SlFieldError, SlFieldLabel } from '@slotted/angular/field';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
@@ -100,9 +102,28 @@ const DIRECTIVES = [
   SlFieldLabel,
 ];
 
-/** The inputs every scene repeats: the agency's words and its clock. */
-const AGENCY =
-  'startLabel="Retirada" endLabel="Devolução" nowLabel="Agora" locale="pt-BR" [hourCycle]="24" [referenceDateTime]="clock"';
+/** The inputs every scene repeats: the agency's locale and its clock. */
+const AGENCY = 'locale="pt-BR" [hourCycle]="24" [referenceDateTime]="clock"';
+
+/** The agency names the two ends after what happens to the car, over the Portuguese catalog. */
+const RENTAL_WORDS = {
+  ...PT_BR,
+  datetimeRangePicker: {
+    ...PT_BR.datetimeRangePicker,
+    end: 'Devolução',
+    start: 'Retirada',
+  },
+};
+
+/** The agency's own trigger and done button, for the scene that sets everything once. */
+const AGENCY_WORDS = {
+  ...RENTAL_WORDS,
+  datetimeRangePicker: {
+    ...RENTAL_WORDS.datetimeRangePicker,
+    change: 'Alterar aluguel, {start} – {end}, {length}',
+    done: 'Concluir',
+  },
+};
 
 const meta: Meta<DateTimeRangePickerStoryArgs> = {
   title: 'Components/DateTimeRangePicker',
@@ -110,20 +131,8 @@ const meta: Meta<DateTimeRangePickerStoryArgs> = {
   decorators: [
     moduleMetadata({
       imports: DIRECTIVES,
-      /* The agency's own words for the hint and the done button, once for every scene. */
-      providers: [
-        provideDateTimeRangePickerDefaults({
-          doneLabel: 'Concluir',
-          hintLabels: {
-            choose: '{end}: escolha o dia',
-            chooseTime: '{end}: escolha a hora, {day}',
-            order: 'A devolução tem de vir depois da retirada',
-            length: 'Fora da duração permitida',
-            unavailable: 'Passa por um dia ou hora indisponível',
-            bounds: 'Fora do período permitido',
-          },
-        }),
-      ],
+      /* The agency's language and its names for the two ends, once for every scene. */
+      providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': RENTAL_WORDS } })],
     }),
   ],
   parameters: {
@@ -204,9 +213,6 @@ export const Playground: Story = {
           <label slFieldLabel>Retirada e devolução</label>
           <div
             slDateTimeRangePicker
-            startLabel="Retirada"
-            endLabel="Devolução"
-            nowLabel="Agora"
             startName="retirada"
             endName="devolucao"
             [locale]="locale"
@@ -543,7 +549,7 @@ export const Composition: Story = {
       1,
       scene(
         'Set once for the application',
-        'One provider decides that every rental is in Portuguese, two months at a time, in half-hour slots, with the agency’s own words — so a product does not repeat eight inputs on each form.',
+        'provideSlotted decides that every rental is in Portuguese, with the agency’s own words laid over the catalog, and one defaults provider that it runs two months at a time in half-hour slots — so a product does not repeat eight inputs on each form.',
         `<div slDateTimeRangePicker [referenceDateTime]="clock" [defaultValue]="rental"></div>`,
       ) +
         scene(
@@ -575,22 +581,8 @@ export const Composition: Story = {
     moduleMetadata({
       imports: DIRECTIVES,
       providers: [
-        provideDateTimeRangePickerDefaults({
-          changeLabel: 'Alterar aluguel',
-          chooseLabel: 'Escolher período',
-          doneLabel: 'Concluir',
-          hintLabels: {
-            choose: '{end}: escolha o dia',
-            chooseTime: '{end}: escolha a hora, {day}',
-          },
-          endLabel: 'Devolução',
-          hourCycle: 24,
-          locale: 'pt-BR',
-          months: 2,
-          nowLabel: 'Agora',
-          startLabel: 'Retirada',
-          step: 1800,
-        }),
+        provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': AGENCY_WORDS } }),
+        provideDateTimeRangePickerDefaults({ hourCycle: 24, months: 2, step: 1800 }),
       ],
     }),
   ],

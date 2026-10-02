@@ -5,25 +5,15 @@ import {
   SPARKLINE_STEPS,
   sparklineInset,
 } from '@slotted/core/sparkline';
-import type { SparklineBox, SparklineMessages } from '@slotted/core/sparkline';
+import type { SparklineBox } from '@slotted/core/sparkline';
+import { sparklineMessages } from '@slotted/core/i18n';
 import '@slotted/styles/sparkline/sparkline.css';
 
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
+import { useLocale, useMessages } from '../i18n';
 import { useSparklineDefaults } from './sparkline-defaults';
 import type { SparklineProps, SparklineRootProps } from './sparkline.types';
-
-/**
- * The sentences a screen reader hears in place of the drawing, in the
- * language the family ships. An application replaces them once through
- * `SparklineDefaultsProvider`, or per sparkline.
- */
-export const SPARKLINE_MESSAGES: SparklineMessages = {
-  up: '{last}, up {change} since {first}',
-  down: '{last}, down {change} since {first}',
-  flat: '{last}, unchanged since {first}',
-  noData: 'no data',
-};
 
 /** The bar's corner and the space between two bars, in pixels; the stylesheet's geometry. */
 const BAR_GAP = 2;
@@ -66,13 +56,14 @@ export function Sparkline({
   ...nativeProps
 }: SparklineProps) {
   const defaults = useSparklineDefaults();
+  const appLocale = useLocale();
+  const t = useMessages(sparklineMessages, messages);
   const resolved = {
     area: area ?? defaults.area ?? false,
     curve: curve ?? defaults.curve ?? 'linear',
     marker: marker ?? defaults.marker ?? true,
-    locale: locale ?? defaults.locale,
+    locale: locale ?? appLocale,
     formatOptions: formatOptions ?? defaults.formatOptions,
-    messages: { ...SPARKLINE_MESSAGES, ...defaults.messages, ...messages },
   };
 
   const rootRef = useRef<HTMLSpanElement>(null);
@@ -126,8 +117,7 @@ export function Sparkline({
     return (value: number) => formatter.format(value);
   }, [valueFormatter, resolved.locale, resolved.formatOptions]);
 
-  const name =
-    description ?? describeSparkline(data, { messages: resolved.messages, format, label });
+  const name = description ?? describeSparkline(data, { t, format, label });
 
   const rootProps: SparklineRootProps = {
     ...nativeProps,

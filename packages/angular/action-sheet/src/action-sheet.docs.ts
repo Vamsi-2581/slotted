@@ -127,7 +127,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button[slActionSheetCancel]',
     required: false,
     purpose:
-      'The explicit way out, asking to close with the reason dismiss. Never disabled. Its words default to cancelLabel.',
+      'The explicit way out, asking to close with the reason dismiss. Never disabled. Its words default to the catalog’s cancel.',
   },
 ];
 
@@ -305,12 +305,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'defaults',
     title: 'Decided once for the application',
-    note: 'provideActionSheetDefaults() sets modal, mount, escape, outsidePress, back, closeOnSelect and the cancel’s words for every sheet it reaches. The cancel here reads Fechar with no content, and a sheet that states a value itself still wins.',
+    note: 'provideActionSheetDefaults() sets modal, mount, escape, outsidePress, back and closeOnSelect for every sheet it reaches, and a sheet that states a value itself still wins. The cancel’s words come from the language in force (provideSlotted).',
     snippet: defineSnippet({
       id: 'action-sheet-angular-defaults',
       language: 'angular',
       label: 'Once, in the providers',
-      source: `<!-- bootstrapApplication(App, { providers: [provideActionSheetDefaults({ cancelLabel: 'Fechar' })] }) -->
+      source: `<!-- bootstrapApplication(App, { providers: [provideActionSheetDefaults({ closeOnSelect: false })] }) -->
 <div slActionSheetFooter><button slActionSheetCancel></button></div>`,
     }),
   },
@@ -384,7 +384,7 @@ const composition = apiRows([
   ],
   [
     'provideActionSheetDefaults()',
-    '{ modal, mount, escape, outsidePress, back, closeOnSelect, cancelLabel }',
+    '{ modal, mount, escape, outsidePress, back, closeOnSelect }',
     '—',
     'an injector',
     'The decisions an application takes once. A sheet that states any of them itself still wins',
@@ -515,11 +515,11 @@ export const ANGULAR_ACTION_SHEET_DOCS = {
       'Whether choosing an action closes the sheet with the reason select',
     ],
     [
-      'cancelLabel',
-      'string',
-      'Cancel',
-      'sl-action-sheet, provideActionSheetDefaults',
-      'The cancel’s words when it is given no content',
+      'messages',
+      'Partial<ActionSheetMessages>',
+      '—',
+      'sl-action-sheet',
+      'Words laid over the language in force, key by key: the cancel’s words when it is given no content (cancel)',
     ],
     [
       'initialFocus',

@@ -275,7 +275,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'slider-react-composition',
       language: 'tsx',
       label: 'A field, a provider, a form and a handle',
-      source: `<SliderDefaultsProvider locale="pt-BR" valueLabel="always">
+      source: `<SliderDefaultsProvider valueLabel="always">
   <Field invalid>
     <FieldLabel>Participação</FieldLabel>
     <Slider defaultValue={96} name="participacao" />
@@ -395,8 +395,8 @@ export const REACT_SLIDER_DOCS = {
       [
         'locale',
         'string',
-        'the runtime’s',
-        'Slider, SliderDefaultsProvider',
+        'the language in force',
+        'Slider',
         'BCP 47. It decides the decimal separator, the grouping and the numbering system',
       ],
       [
@@ -494,10 +494,10 @@ export const REACT_SLIDER_DOCS = {
       ],
       [
         'SliderDefaultsProvider',
-        '{ size, orientation, valueLabel, locale }',
+        '{ size, orientation, valueLabel }',
         '—',
         'a subtree',
-        'The four decisions an application takes once. locale is the one worth setting first, for the reason a form of amounts always has',
+        'The three decisions an application takes once. The locale comes from the language in force (SlottedProvider)',
       ],
       [
         'useField()',

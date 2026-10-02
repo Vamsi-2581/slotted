@@ -2,11 +2,16 @@
   "schemaVersion": 5,
   "family": "app-shell",
   "ui": "app-shell",
+  "catalog": {
+    "group": "Layout",
+    "summary": "Application frame with header, nav, main and aside."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/",
   "control": "https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/",
+  "resizePattern": "https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/",
   "design": "docs/history/designs/2026-09-29-app-shell-arrangements-design.md",
   "inventory": "docs/history/designs/2026-09-13-app-shell-capability-inventory.md",
-  "composes": ["presence", "dismissable-layer", "focus", "portal", "measure"],
+  "composes": ["presence", "dismissable-layer", "focus", "portal", "measure", "extent"],
   "anatomy": {
     "root": "a div, and a grid. It is deliberately not a sectioning element: a main inside an article stops being a landmark, and the root has to be placeable anywhere without changing what the five regions mean. It is the query container the whole family answers",
     "skip": "the links that jump past the chrome. One anchor per region that has a target, so a skip link never points at a region nobody rendered. Not a landmark: a nav here would be a third navigation region the reader has to cross to reach the two that matter",
@@ -23,8 +28,9 @@
     "scrim": "the veil under the overlay panel, mounted only while the layer is modal",
     "main": "a main with tabindex=-1. Without the tabindex the skip link moves the scroll and leaves focus behind, in Safari and in Firefox",
     "aside": "an aside, so it is the complementary landmark. It opens and closes like the navigation region does — a column beside the content or a layer over it, by asideMode — because a pane whose column has a fixed width cannot be closed by anything placed inside it",
+    "aside-resizer": "the separator on the pane inner edge, from the WAI-ARIA Window Splitter pattern: focusable, role separator, aria-orientation vertical, aria-controls the aside, aria-valuemin, aria-valuemax and aria-valuenow as whole percentages of the shell, named by the resizeAside message. The consumer places it inside the aside; rendering it is the capability. It stands at the inline-start of an end pane and the inline-end of a start pane, a strip the row inset wide lying inside the pane, because the pane scrolls under scroll=content and a scroll container clips what stands outside it. At rest it draws nothing; under the hand, the drag and the keyboard its outer border becomes a line in --slotted-border-strong, and the keyboard adds the focus ring. Drawn only on the column: a layer keeps its size step and a row under the content has no inline edge",
     "aside-header": "the top of the secondary pane, pinned: the title of what the pane shows and the control that closes it",
-    "aside-body": "the middle of the secondary pane, and the only part of it that scrolls",
+    "aside-body": "the middle of the secondary pane, and the only part of it that scrolls. It stands on the inset the header and the footer stand on — padding-block --slotted-space-5, padding-inline the row inset plus the row gap — so what it holds lines up with the pane title; data-inset=none drops it (see asideBodyInset)",
     "aside-footer": "the bottom of the secondary pane, pinned: the actions that close the task the pane holds",
     "aside-toggle": "the disclosure control for the secondary pane. Placeable anywhere for the reason nav-toggle is: it takes its id, its aria-expanded, its aria-controls and its handler from the family context",
     "footer": "a footer in the context of the body, so it is the contentinfo landmark. It is the application's footer, not the page's action bar, which lives inside main",
@@ -87,17 +93,18 @@
   },
   "focusOrder": ["skip", "banner", "nav-toggle", "nav", "main", "aside", "aside-toggle", "footer"],
   "focusOrderReason": "The DOM order, and it does not move with primary: grid-template-areas changes where a region is drawn, never where it is written. The nav-toggle stands before the region it controls, which is what the Disclosure pattern assumes; the aside-toggle stands inside the pane header by default, so a pane the reader has opened puts its own close control first",
-  "messages": {
-    "nav": "Navegação principal",
-    "open": "Abrir navegação",
-    "close": "Fechar navegação",
-    "aside": "Painel lateral",
-    "openAside": "Abrir painel lateral",
-    "closeAside": "Fechar painel lateral",
-    "skipToMain": "Saltar para o conteúdo",
-    "skipToNav": "Saltar para a navegação",
-    "skipToAside": "Saltar para o painel lateral"
-  },
+  "messages": [
+    "aside",
+    "close",
+    "closeAside",
+    "nav",
+    "open",
+    "openAside",
+    "resizeAside",
+    "skipToAside",
+    "skipToMain",
+    "skipToNav"
+  ],
   "declined": {
     "navItems": {
       "deferTo": "side-navigation",
@@ -135,7 +142,7 @@
       "reason": "PatternFly exposes getBreakpoint(width) and the width it measured. The family answers its own width with a container query and reports the resolved mode as data-nav-mode; a consumer who needs the number writes a three-line ResizeObserver on the root"
     },
     "runtimeProperties": {
-      "reason": "Mantine in mode=fixed writes padding on Main equal to the height and width of the sections, and has to know both; PatternFly runs a ResizeObserver over the whole page. A grid sizes its own tracks, so the family publishes no measured custom property and adds no line to packages/styles/src/runtime-properties.mjs. The one observer it creates draws nothing: it decides whether the keyboard and the focus are in overlay mode"
+      "reason": "Mantine in mode=fixed writes padding on Main equal to the height and width of the sections, and has to know both; PatternFly runs a ResizeObserver over the whole page. A grid sizes its own tracks, so the family publishes no measured custom property and adds no line to packages/styles/src/runtime-properties.mjs. The one observer it creates draws nothing: it decides whether the keyboard and the focus are in overlay mode. The pane extent is state and not a measurement: the binding writes the fraction as --slotted-app-shell-aside-extent in cqi, and the browser resolves it against the shell"
     },
     "asideCollapsedTo": {
       "reason": "A closed pane leaves no rail. A rail is a column of marks the reader can still reach, and a detail pane has no marks — its content is the thing it shows or nothing. Closing to hidden, the way collapsedTo=hidden does, is the only closed state a pane has"
@@ -194,8 +201,7 @@
       "escape",
       "outsidePress",
       "back",
-      "closeOnNavigate",
-      "messages"
+      "closeOnNavigate"
     ]
   },
   "stateModel": {
@@ -232,10 +238,18 @@
         "attributeOn": "aside",
         "reason": "No select: a pane has no destinations. The attribute is written on the region and not on the root, because the root data-open was the navigation before the pane had a state and every selector written over it still reads the navigation"
       }
+    },
+    "extent": {
+      "controlled": "asideExtent",
+      "uncontrolled": "defaultAsideExtent",
+      "request": "onAsideExtentChange",
+      "reasons": ["pointer", "keyboard", "programmatic"],
+      "valueType": "number | undefined, where undefined is the pane on the measure asideSize gives it"
     }
   },
   "stateAttributes": {
-    "open": "data-open"
+    "open": "data-open",
+    "dragging": "data-dragging"
   },
   "members": {
     "appShell": {
@@ -255,10 +269,12 @@
         "escape": "close",
         "outsidePress": "close",
         "back": "close",
-        "closeOnNavigate": true
+        "closeOnNavigate": true,
+        "minAsideExtent": 0.16,
+        "maxAsideExtent": 0.6
       },
-      "capabilities": ["open", "arrangement", "size", "appearance", "wiring"],
-      "states": ["default", "hover", "active", "focus-visible", "open"],
+      "capabilities": ["open", "extent", "arrangement", "size", "appearance", "wiring"],
+      "states": ["default", "hover", "active", "focus-visible", "open", "dragging"],
       "parts": [
         "root",
         "skip",
@@ -275,6 +291,7 @@
         "scrim",
         "main",
         "aside",
+        "aside-resizer",
         "aside-header",
         "aside-body",
         "aside-footer",
@@ -340,6 +357,50 @@
     "firstPaint": "data-aside-mode exists only once the script has decided, exactly as data-nav-mode does; below overlayAt the stylesheet shows the overlaid pane under [data-aside-mode=overlay] > [data-part=aside][data-open] alone"
   },
   "stateModelReason": "One capability held twice, as specs/contract.schema.mjs allows: a set of named models under open, each with its own pair and its own reasons. The first pass deferred the pane to drawer with mode=inline; the column the pane sits in has a fixed width by axis, so a drawer closed inside it left the column empty at its full width, and the pane could not be closed by anything placed inside it",
+  "keyboard": [
+    {
+      "key": "ArrowLeft",
+      "effect": "on the aside-resizer, moves the pane edge sixteen pixels, or sixty-four with Shift, to the left of the screen, which grows an end pane in a left-to-right document and shrinks it in a mirrored one or where navSide=end puts the pane at the start",
+      "focus": "stays on the aside-resizer",
+      "source": "@slotted/core/extent"
+    },
+    {
+      "key": "ArrowRight",
+      "effect": "on the aside-resizer, moves the pane edge sixteen pixels, or sixty-four with Shift, to the right of the screen",
+      "focus": "stays on the aside-resizer",
+      "source": "@slotted/core/extent"
+    },
+    {
+      "key": "Home",
+      "effect": "on the aside-resizer, gives the pane its smallest allowed extent, minAsideExtent",
+      "focus": "stays on the aside-resizer",
+      "source": "@slotted/core/extent"
+    },
+    {
+      "key": "End",
+      "effect": "on the aside-resizer, gives the pane its largest allowed extent, maxAsideExtent",
+      "focus": "stays on the aside-resizer",
+      "source": "@slotted/core/extent"
+    }
+  ],
+  "asideExtent": {
+    "unit": "a fraction of the shell root inline size, its content box, in [0, 1], rather than a CSS length",
+    "unset": "the size step decides: the column is var(--slotted-app-shell-aside-extent, var(--_aside-size)) wide",
+    "property": "--slotted-app-shell-aside-extent, written by the binding on the aside as an inline custom property while an extent is set, as the fraction times a hundred in cqi. The root is the query container, so cqi resolves against the shell from inside the pane's auto track, where a percentage would resolve against the track the pane itself sizes and a length would need an observer. It is a theme-owned decision as well — an application setting one measure for every pane writes it on [data-ui='app-shell'] — which is why it is in app-shell.tokens.json and not in packages/styles/src/runtime-properties.mjs",
+    "min": "minAsideExtent, default 0.16",
+    "max": "maxAsideExtent, default 0.6",
+    "step": "16px per arrow press and 64px with Shift, converted against the shell measured at the moment of the press, as drawer's extent.step",
+    "gesture": "a drag on the aside-resizer follows the pointer from the offset it was grabbed at, by extentAtPoint; while it lasts the root carries data-dragging, the separator holds the pointer capture, and holdResizeGesture holds the document cursor at col-resize and suspends its selection. A release outside the limits lands on the nearer limit: closing the pane belongs to the aside-toggle",
+    "modes": "only the column moves. Under asideMode overlay the layer keeps its size step and the separator is not drawn; a closed pane has nothing to resize; below overlayAt, in the inline mode, the pane is a row under the content and the separator is hidden by the stylesheet",
+    "capability": "Rendering the aside-resizer part is the capability. There is no resizable prop, so a resizable prop with no separator, and a separator a prop has switched off, are both states this family cannot be in",
+    "reason": "A fraction and not a length, for the reason drawer's extent is one: the Window Splitter pattern's three aria values are then the fraction times a hundred, and the limits are the same kind of number, so one clamp covers both"
+  },
+  "asideBodyInset": {
+    "attribute": "data-inset",
+    "values": ["none"],
+    "meaning": "the aside-body's own padding is dropped: what goes inside brings its own inset — a page, a detail-panel, a list to the pane's edges",
+    "reason": "The body had no padding while the header and the footer stood on the row inset, so every consumer padded the body by hand to reach the title's edge, and the workbench demonstrations computed the same sum twice. The family does not detect what it holds; the consumer says so, with the word drawer's bodyInset uses"
+  },
   "published": {
     "--slotted-app-shell-row-inset": "how far a row sits inside its region",
     "--slotted-app-shell-row-mark": "the box a row mark occupies, and the width of the rail",

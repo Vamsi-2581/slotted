@@ -222,10 +222,28 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     const next = event.currentTarget.value;
     multiSelect.setInputValue(next, 'keyboard', event.nativeEvent);
+    if (multiSelect.openOn === 'manual') return;
     if (!multiSelect.open && !multiSelect.readOnly && next !== '') {
       multiSelect.entry.current = 'none';
       multiSelect.setOpen(true, 'keyboard', event.nativeEvent);
     }
+  };
+
+  const onFocus = () => {
+    if (multiSelect.openOn !== 'focus' || multiSelect.open) return;
+    if (multiSelect.disabled || multiSelect.readOnly) return;
+    multiSelect.entry.current = 'none';
+    multiSelect.setOpen(true, 'keyboard');
+  };
+
+  /* A press on the input opens a closed popup and never closes an open one,
+     because the same press places the caret. Under `focus` the press has
+     already opened it through focus, so this finds it open. */
+  const onClick = (event: MouseEvent<HTMLInputElement>) => {
+    if (multiSelect.openOn === 'manual' || multiSelect.open) return;
+    if (multiSelect.disabled || multiSelect.readOnly) return;
+    multiSelect.entry.current = 'none';
+    multiSelect.setOpen(true, 'pointer', event.nativeEvent);
   };
 
   /**
@@ -289,12 +307,10 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
 
   const counter = (() => {
     if (multiSelect.max !== null) {
-      return multiSelect.counterLabel
-        .replace('{count}', String(multiSelect.value.length))
-        .replace('{max}', String(multiSelect.max));
+      return multiSelect.t('counter', { count: multiSelect.value.length, max: multiSelect.max });
     }
     if (multiSelect.narrow && multiSelect.value.length > 0) {
-      return multiSelect.chosenLabel.replace('{count}', String(multiSelect.value.length));
+      return multiSelect.t('chosen', { count: multiSelect.value.length });
     }
     return null;
   })();
@@ -344,6 +360,8 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
               id={nativeProps.id ?? field?.ids.control ?? multiSelect.inputId}
               onBlur={compose(nativeProps.onBlur, onBlur)}
               onChange={compose(nativeProps.onChange, onChange)}
+              onClick={compose(nativeProps.onClick, onClick)}
+              onFocus={compose(nativeProps.onFocus, onFocus)}
               onKeyDown={compose(nativeProps.onKeyDown, onKeyDown)}
               onPaste={compose(nativeProps.onPaste, onPaste)}
               /* The placeholder names what an empty control takes; beside a
@@ -366,7 +384,7 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
         </span>
       )}
       {showClear ? (
-        <button aria-label={multiSelect.clearLabel} data-part="clear" onClick={clear} type="button">
+        <button aria-label={multiSelect.t('clear')} data-part="clear" onClick={clear} type="button">
           <Icon>
             <Glyph name="x" />
           </Icon>
@@ -376,7 +394,7 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
         <span aria-hidden="true" data-part="busy" data-ui="spinner" />
       ) : (
         <button
-          aria-label={multiSelect.triggerLabel}
+          aria-label={multiSelect.t('trigger')}
           data-part="trigger"
           disabled={multiSelect.disabled}
           onClick={toggleOpen}
@@ -643,9 +661,9 @@ export function MultiSelectContent({
 
   const message = (() => {
     if (statusMessage !== undefined) return statusMessage;
-    if (multiSelect.loading) return multiSelect.loadingLabel;
+    if (multiSelect.loading) return multiSelect.t('loading');
     if (count === 0) return null;
-    return multiSelect.countLabel.replace('{count}', String(count));
+    return multiSelect.t('count', { count });
   })();
 
   /* The offer stands only while there is something to offer and room to take
@@ -719,9 +737,7 @@ export function MultiSelectContent({
             {...(multiSelect.highlighted === multiSelect.query ? { 'data-current': '' } : {})}
           >
             <span data-part="icon" />
-            <span data-part="label">
-              {multiSelect.createLabel.replace('{query}', multiSelect.query)}
-            </span>
+            <span data-part="label">{multiSelect.t('create', { query: multiSelect.query })}</span>
             <span data-part="indicator">
               <Icon>
                 <Glyph name="plus" />
@@ -730,7 +746,7 @@ export function MultiSelectContent({
           </div>
         ) : null}
         {!multiSelect.loading && count === 0 && !offering ? (
-          <div data-part="empty">{empty ?? multiSelect.emptyLabel}</div>
+          <div data-part="empty">{empty ?? multiSelect.t('empty')}</div>
         ) : null}
         {multiSelect.loading ? (
           <div aria-hidden="true" data-part="placeholder">

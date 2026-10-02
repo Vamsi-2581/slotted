@@ -158,7 +158,7 @@ test('wires a preset as a part that writes the value', () => {
 test('carries the same dialog role and trigger wiring as date-picker', () => {
   assert.equal(contract.contentRole, 'dialog');
   assert.equal(contract.wiring['aria-haspopup'], 'dialog');
-  assert.equal(contract.triggerName.empty, 'chooseLabel');
+  assert.match(contract.triggerName.empty, /choose message/);
   assert.match(contract.triggerName.chosen, /length/);
 });
 
@@ -192,19 +192,11 @@ test('opens on the current end, or on today', () => {
 test('defaults are settable once, in both bindings', () => {
   for (const name of [
     'calendar',
-    'changeLabel',
-    'chooseLabel',
-    'clearLabel',
     'closeOnSelect',
     'count',
-    'endLabel',
-    'lengthLabel',
-    'limitLabel',
-    'locale',
     'months',
     'placement',
     'size',
-    'startLabel',
     'timeZone',
     'variant',
   ]) {

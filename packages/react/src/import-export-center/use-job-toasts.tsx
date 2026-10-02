@@ -1,8 +1,10 @@
-import { DEFAULT_IMPORT_EXPORT_MESSAGES, jobNotice } from '@slotted/core/import-export-center';
+import { importExportCenterMessages } from '@slotted/core/i18n';
+import { jobNotice } from '@slotted/core/import-export-center';
 import type { ImportExportJob } from '@slotted/core/import-export-center';
 import { useEffect, useRef } from 'react';
 
 import { Button } from '../button';
+import { useMessages } from '../i18n';
 import { useToaster } from '../toast';
 import type { UseJobToastsOptions } from './import-export-center.types';
 
@@ -30,17 +32,17 @@ export function useJobToasts(
   const shared = useToaster();
   const target = toaster ?? shared;
   const previous = useRef<ReadonlyMap<string, ImportExportJob> | null>(null);
-  const latest = useRef({ messages, onView, target });
-  latest.current = { messages, onView, target };
+  const t = useMessages(importExportCenterMessages, messages);
+  const latest = useRef({ onView, t, target });
+  latest.current = { onView, t, target };
 
   useEffect(() => {
     const seen = previous.current;
     previous.current = new Map(jobs.map((job) => [job.key, job]));
     if (seen === null) return;
-    const { messages: words, onView: view, target: sink } = latest.current;
-    const resolved = { ...DEFAULT_IMPORT_EXPORT_MESSAGES, ...words };
+    const { onView: view, t: words, target: sink } = latest.current;
     for (const job of jobs) {
-      const notice = jobNotice(seen.get(job.key), job, resolved);
+      const notice = jobNotice(seen.get(job.key), job, words);
       if (notice === null) continue;
       sink.show({
         actions:
@@ -54,7 +56,7 @@ export function useJobToasts(
               tone="secondary"
               variant="outline"
             >
-              {resolved.view}
+              {words('view')}
             </Button>
           ),
         announcement: notice.title,

@@ -103,13 +103,14 @@ test('is a labelled, focusable region around a log', () => {
   assert.equal(contract.roles.content, 'log');
   assert.equal(contract.aria.content['aria-relevant'], 'additions');
   assert.equal(contract.aria.viewport.tabindex, '0');
-  assert.equal(contract.messages.label, 'Mensagens');
+  assert.ok(contract.messages.includes('label'));
 });
 
 test('the jump control says how many arrived out of view and is inert when it has nowhere to go', () => {
   assert.equal(contract.jump.inactive, 'inert, tabindex=-1, data-active="false"');
   assert.equal(contract.jump.count, 'jump-count');
-  assert.match(contract.messages.jumpCount, /plural/);
+  assert.ok(contract.messages.includes('jumpCount'));
+  assert.ok(contract.messages.includes('jumpToEndCount'));
 });
 
 test('has one reference page', () => {

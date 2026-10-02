@@ -51,7 +51,7 @@ export class SlDetailPanelMessage {}
 
 /**
  * The metadata column beside the sections. An `aside` element, named by
- * `messages.aside` unless the consumer names it; while the panel is loading
+ * the `aside` message unless the consumer names it; while the panel is loading
  * it shows four short skeleton lines in place of its content.
  */
 @Component({
@@ -75,7 +75,7 @@ export class SlDetailPanelAside {
   protected readonly panel = inject(SlDetailPanel);
   protected readonly lines = ASIDE_SKELETON_LINES;
   private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
-  protected readonly name = computed(() => this.written ?? this.panel.resolvedMessages().aside);
+  protected readonly name = computed(() => this.written ?? this.panel.t('aside'));
 }
 
 /**

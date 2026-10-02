@@ -19,10 +19,11 @@ import type {
   CascaderLayoutAxis,
   CascaderView,
 } from '@slotted/core/cascader';
+import type { CascaderMessages, FamilyTranslator } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 
-import type { CascaderLabels, CascaderValue } from './cascader-defaults';
+import type { CascaderValue } from './cascader-defaults';
 
 /** What a level that has not arrived asks for, with the signal that withdraws it. */
 export interface CascaderLoadRequest {
@@ -61,7 +62,8 @@ export interface CascaderEngineSource<T> {
   maxColumns: Signal<number>;
   maxCrumbs: Signal<number>;
   readOnly: Signal<boolean>;
-  labels: Signal<CascaderLabels>;
+  /** The family's words in the language in force. */
+  t: FamilyTranslator<CascaderMessages>;
   room: Signal<CascaderRoom>;
 
   value: ModelSignal<CascaderValue>;
@@ -190,8 +192,9 @@ export class CascaderEngine<T> {
     return this.source.multiple();
   }
 
-  get labels(): CascaderLabels {
-    return this.source.labels();
+  /** The family's words in the language in force, read by the surface. */
+  get t(): FamilyTranslator<CascaderMessages> {
+    return this.source.t;
   }
 
   get activeKey(): string | null {
@@ -203,7 +206,7 @@ export class CascaderEngine<T> {
   }
 
   labelOf(key: string | undefined): string {
-    if (key === undefined) return this.source.labels().root;
+    if (key === undefined) return this.source.t('root');
     return this.collection().nodeFor(key)?.label ?? key;
   }
 

@@ -139,23 +139,23 @@ function Destination({
 /** The freight operator's column: two sections, one group, one disabled row. */
 function Aurora(props: Partial<SideNavigationProps>) {
   return (
-    <SideNavigation defaultValue="encomendas" {...props}>
+    <SideNavigation defaultValue="orders" {...props}>
       <SideNavigationSection>
         <SideNavigationSectionLabel>Operação</SideNavigationSectionLabel>
         <SideNavigationList>
-          <Destination icon={ChartNoAxesColumn} label="Painel" value="painel" />
-          <Destination count={19} icon={Truck} label="Expedições" value="expedicoes" />
-          <Destination count={412} icon={Package} label="Encomendas" value="encomendas" />
-          <SideNavigationItem value="entregas">
+          <Destination icon={ChartNoAxesColumn} label="Dashboard" value="dashboard" />
+          <Destination count={19} icon={Truck} label="Expedições" value="shipments" />
+          <Destination count={412} icon={Package} label="Encomendas" value="orders" />
+          <SideNavigationItem value="deliveries">
             <SideNavigationTrigger>
               <SideNavigationIcon>
                 <MapPin aria-hidden size={16} />
               </SideNavigationIcon>
-              <SideNavigationLabel>Entregas</SideNavigationLabel>
+              <SideNavigationLabel>Deliveries</SideNavigationLabel>
               <SideNavigationCount>38</SideNavigationCount>
             </SideNavigationTrigger>
             <SideNavigationGroup>
-              <Destination label="Hoje" value="hoje" />
+              <Destination label="Today" value="today" />
               <Destination
                 end={
                   <Badge size="sm" tone="danger" variant="soft">
@@ -163,27 +163,27 @@ function Aurora(props: Partial<SideNavigationProps>) {
                   </Badge>
                 }
                 label="Atrasadas"
-                value="atrasadas"
+                value="late"
               />
-              <Destination label="Concluídas" value="concluidas" />
+              <Destination label="Concluídas" value="done" />
             </SideNavigationGroup>
           </SideNavigationItem>
-          <Destination icon={Warehouse} label="Armazéns" value="armazens" />
-          <Destination icon={Users} label="Clientes" value="clientes" />
+          <Destination icon={Warehouse} label="Armazéns" value="warehouses" />
+          <Destination icon={Users} label="Clientes" value="customers" />
         </SideNavigationList>
       </SideNavigationSection>
       <SideNavigationSection>
         <SideNavigationSectionLabel>Sistema</SideNavigationSectionLabel>
         <SideNavigationList>
-          <Destination icon={Settings} label="Definições" value="definicoes" />
-          <Destination icon={LifeBuoy} label="Suporte" value="suporte" />
-          <SideNavigationItem disabled value="faturacao">
+          <Destination icon={Settings} label="Definições" value="settings" />
+          <Destination icon={LifeBuoy} label="Suporte" value="support" />
+          <SideNavigationItem disabled value="billing">
             <SideNavigationLink href="#faturacao">
               <SideNavigationIcon>
                 <CreditCard aria-hidden size={16} />
               </SideNavigationIcon>
-              <SideNavigationLabel>Faturação</SideNavigationLabel>
-              <SideNavigationDescription>Disponível no plano Equipa</SideNavigationDescription>
+              <SideNavigationLabel>Billing</SideNavigationLabel>
+              <SideNavigationDescription>Available on the Team plan</SideNavigationDescription>
             </SideNavigationLink>
           </SideNavigationItem>
         </SideNavigationList>
@@ -204,7 +204,7 @@ export const Playground: Story = {
   parameters: { ...scenario('playground'), controls: { disable: false } },
   render: (args) => (
     <Measure>
-      <Aurora {...args} defaultExpanded={['entregas']} />
+      <Aurora {...args} defaultExpanded={['deliveries']} />
     </Measure>
   ),
 };
@@ -293,23 +293,23 @@ export const Groups: Story = {
         note="Press Entregas and Definições in turn: each opens on its own track, the chevron turns down, and the rows inside fade in as the room for them arrives."
       >
         <Measure>
-          <SideNavigation defaultExpanded={['entregas']} defaultValue="hoje">
+          <SideNavigation defaultExpanded={['deliveries']} defaultValue="today">
             <SideNavigationList>
-              <SideNavigationItem value="entregas">
+              <SideNavigationItem value="deliveries">
                 <SideNavigationTrigger>
                   <SideNavigationIcon>
                     <MapPin aria-hidden size={16} />
                   </SideNavigationIcon>
-                  <SideNavigationLabel>Entregas</SideNavigationLabel>
+                  <SideNavigationLabel>Deliveries</SideNavigationLabel>
                   <SideNavigationCount>38</SideNavigationCount>
                 </SideNavigationTrigger>
                 <SideNavigationGroup>
-                  <Destination label="Hoje" value="hoje" />
-                  <Destination label="Atrasadas" value="atrasadas" />
-                  <Destination label="Concluídas" value="concluidas" />
+                  <Destination label="Today" value="today" />
+                  <Destination label="Atrasadas" value="late" />
+                  <Destination label="Concluídas" value="done" />
                 </SideNavigationGroup>
               </SideNavigationItem>
-              <SideNavigationItem value="definicoes">
+              <SideNavigationItem value="settings">
                 <SideNavigationTrigger>
                   <SideNavigationIcon>
                     <Settings aria-hidden size={16} />
@@ -330,21 +330,21 @@ export const Groups: Story = {
         note="multiple=false: opening Definições closes Entregas in the same request, so the column never holds two open groups."
       >
         <Measure>
-          <SideNavigation defaultExpanded={['entregas']} multiple={false}>
+          <SideNavigation defaultExpanded={['deliveries']} multiple={false}>
             <SideNavigationList>
-              <SideNavigationItem value="entregas">
+              <SideNavigationItem value="deliveries">
                 <SideNavigationTrigger>
                   <SideNavigationIcon>
                     <MapPin aria-hidden size={16} />
                   </SideNavigationIcon>
-                  <SideNavigationLabel>Entregas</SideNavigationLabel>
+                  <SideNavigationLabel>Deliveries</SideNavigationLabel>
                 </SideNavigationTrigger>
                 <SideNavigationGroup>
-                  <Destination label="Hoje" value="hoje" />
-                  <Destination label="Atrasadas" value="atrasadas" />
+                  <Destination label="Today" value="today" />
+                  <Destination label="Atrasadas" value="late" />
                 </SideNavigationGroup>
               </SideNavigationItem>
-              <SideNavigationItem value="definicoes">
+              <SideNavigationItem value="settings">
                 <SideNavigationTrigger>
                   <SideNavigationIcon>
                     <Settings aria-hidden size={16} />
@@ -373,22 +373,22 @@ export const Hybrid: Story = {
         note="Relatórios navigates; the chevron beside it opens the children and is named by the same label. Financeiro holds the current destination and says so while closed."
       >
         <Measure>
-          <SideNavigation defaultExpanded={['relatorios']} defaultValue="faturas">
+          <SideNavigation defaultExpanded={['reports']} defaultValue="invoices">
             <SideNavigationList>
-              <SideNavigationItem value="relatorios">
+              <SideNavigationItem value="reports">
                 <SideNavigationLink href="#relatorios">
                   <SideNavigationIcon>
                     <ChartNoAxesColumn aria-hidden size={16} />
                   </SideNavigationIcon>
-                  <SideNavigationLabel>Relatórios</SideNavigationLabel>
+                  <SideNavigationLabel>Reports</SideNavigationLabel>
                 </SideNavigationLink>
                 <SideNavigationTrigger />
                 <SideNavigationGroup>
-                  <Destination label="Mensal" value="mensal" />
-                  <Destination label="Anual" value="anual" />
+                  <Destination label="Mensal" value="monthly" />
+                  <Destination label="Anual" value="yearly" />
                 </SideNavigationGroup>
               </SideNavigationItem>
-              <SideNavigationItem value="financeiro">
+              <SideNavigationItem value="finance">
                 <SideNavigationTrigger>
                   <SideNavigationIcon>
                     <CreditCard aria-hidden size={16} />
@@ -396,7 +396,7 @@ export const Hybrid: Story = {
                   <SideNavigationLabel>Financeiro</SideNavigationLabel>
                 </SideNavigationTrigger>
                 <SideNavigationGroup>
-                  <Destination label="Faturas" value="faturas" />
+                  <Destination label="Faturas" value="invoices" />
                 </SideNavigationGroup>
               </SideNavigationItem>
             </SideNavigationList>
@@ -410,11 +410,11 @@ export const Hybrid: Story = {
         <Measure>
           <SideNavigation
             autoExpand={false}
-            defaultExpanded={['regioes', 'sudeste', 'minas']}
+            defaultExpanded={['regions', 'southeast', 'minas']}
             defaultValue="bh"
           >
             <SideNavigationList>
-              <SideNavigationItem value="regioes">
+              <SideNavigationItem value="regions">
                 <SideNavigationTrigger>
                   <SideNavigationIcon>
                     <MapPin aria-hidden size={16} />
@@ -423,8 +423,8 @@ export const Hybrid: Story = {
                   <SideNavigationCount>128</SideNavigationCount>
                 </SideNavigationTrigger>
                 <SideNavigationGroup>
-                  <Destination label="Norte" value="norte" />
-                  <SideNavigationItem value="sudeste">
+                  <Destination label="Norte" value="north" />
+                  <SideNavigationItem value="southeast">
                     <SideNavigationTrigger>
                       <SideNavigationLabel>Sudeste</SideNavigationLabel>
                     </SideNavigationTrigger>
@@ -441,7 +441,7 @@ export const Hybrid: Story = {
                       </SideNavigationItem>
                     </SideNavigationGroup>
                   </SideNavigationItem>
-                  <SideNavigationItem value="sul">
+                  <SideNavigationItem value="south">
                     <SideNavigationTrigger>
                       <SideNavigationLabel>Sul</SideNavigationLabel>
                     </SideNavigationTrigger>
@@ -463,27 +463,27 @@ export const Sections: Story = {
   parameters: scenario('sections'),
   render: () => (
     <Measure>
-      <SideNavigation defaultValue="encomendas">
+      <SideNavigation defaultValue="orders">
         <SideNavigationSection>
           <SideNavigationSectionLabel>Operação</SideNavigationSectionLabel>
           <SideNavigationList>
-            <Destination icon={ChartNoAxesColumn} label="Painel" value="painel" />
-            <Destination count={412} icon={Package} label="Encomendas" value="encomendas" />
-            <Destination icon={Warehouse} label="Armazéns" value="armazens" />
+            <Destination icon={ChartNoAxesColumn} label="Dashboard" value="dashboard" />
+            <Destination count={412} icon={Package} label="Encomendas" value="orders" />
+            <Destination icon={Warehouse} label="Armazéns" value="warehouses" />
           </SideNavigationList>
         </SideNavigationSection>
         <SideNavigationSection>
-          <SideNavigationSectionLabel>Administração</SideNavigationSectionLabel>
+          <SideNavigationSectionLabel>Administration</SideNavigationSectionLabel>
           <SideNavigationList>
             <Destination icon={Users} label="Utilizadores" value="users" />
-            <Destination icon={Settings} label="Definições" value="definicoes" />
+            <Destination icon={Settings} label="Definições" value="settings" />
             <SideNavigationDivider />
-            <SideNavigationItem value="nova">
+            <SideNavigationItem value="new">
               <SideNavigationLink>
                 <SideNavigationIcon>
                   <Plus aria-hidden size={16} />
                 </SideNavigationIcon>
-                <SideNavigationLabel>Nova carga</SideNavigationLabel>
+                <SideNavigationLabel>New load</SideNavigationLabel>
                 <SideNavigationEnd>
                   <Kbd>N</Kbd>
                 </SideNavigationEnd>
@@ -500,14 +500,14 @@ export const Current: Story = {
   parameters: scenario('current'),
   render: () => {
     function Owned() {
-      const [value, setValue] = useState<string | null>('encomendas');
+      const [value, setValue] = useState<string | null>('orders');
       const [reason, setReason] = useState('—');
       return (
         <Stack gap={4}>
           <Text size="sm" tone="muted">
             value: {value ?? 'null'} · reason: {reason}
           </Text>
-          <Button onClick={() => setValue('atrasadas')} size="sm" variant="outline">
+          <Button onClick={() => setValue('late')} size="sm" variant="outline">
             Ir para Atrasadas
           </Button>
           <Aurora
@@ -535,7 +535,7 @@ export const Current: Story = {
           note="autoExpand off: Atrasadas is current inside a closed Entregas, so the parent row carries the ground until the group opens and the leaf takes it."
         >
           <Measure>
-            <Aurora autoExpand={false} defaultValue="atrasadas" />
+            <Aurora autoExpand={false} defaultValue="late" />
           </Measure>
         </Scene>
       </Grid>
@@ -615,24 +615,24 @@ export const Flyout: Story = {
 /** A shorter column, for the scenes that compare three of them. */
 function Short(props: Partial<SideNavigationProps>) {
   return (
-    <SideNavigation defaultExpanded={['entregas']} defaultValue="encomendas" {...props}>
+    <SideNavigation defaultExpanded={['deliveries']} defaultValue="orders" {...props}>
       <SideNavigationList>
-        <Destination icon={ChartNoAxesColumn} label="Painel" value="painel" />
-        <Destination count={412} icon={Package} label="Encomendas" value="encomendas" />
-        <SideNavigationItem value="entregas">
+        <Destination icon={ChartNoAxesColumn} label="Dashboard" value="dashboard" />
+        <Destination count={412} icon={Package} label="Encomendas" value="orders" />
+        <SideNavigationItem value="deliveries">
           <SideNavigationTrigger>
             <SideNavigationIcon>
               <MapPin aria-hidden size={16} />
             </SideNavigationIcon>
-            <SideNavigationLabel>Entregas</SideNavigationLabel>
+            <SideNavigationLabel>Deliveries</SideNavigationLabel>
             <SideNavigationCount>38</SideNavigationCount>
           </SideNavigationTrigger>
           <SideNavigationGroup>
-            <Destination label="Hoje" value="hoje" />
-            <Destination label="Atrasadas" value="atrasadas" />
+            <Destination label="Today" value="today" />
+            <Destination label="Atrasadas" value="late" />
           </SideNavigationGroup>
         </SideNavigationItem>
-        <Destination icon={Settings} label="Definições" value="definicoes" />
+        <Destination icon={Settings} label="Definições" value="settings" />
       </SideNavigationList>
     </SideNavigation>
   );
@@ -679,7 +679,7 @@ export const States: Story = {
         note="Encomendas is current on the accent ground; Entregas is expanded with its chevron down; Faturação is disabled, dimmed and refusing the press with its href still in place."
       >
         <Measure>
-          <Aurora defaultExpanded={['entregas']} />
+          <Aurora defaultExpanded={['deliveries']} />
         </Measure>
       </Scene>
       <Scene
@@ -687,7 +687,7 @@ export const States: Story = {
         note="Hover washes the row on the neutral ground; a press darkens it at once; Tab draws the ring inside the row, where a column that scrolls cannot clip it."
       >
         <Measure>
-          <Aurora defaultValue="painel" />
+          <Aurora defaultValue="dashboard" />
         </Measure>
       </Scene>
     </Grid>
@@ -697,7 +697,7 @@ export const States: Story = {
 /** Labels a product has: long, translated, an address, another script. */
 function Awkward(props: Partial<SideNavigationProps>) {
   return (
-    <SideNavigation defaultValue="setembro" {...props}>
+    <SideNavigation defaultValue="september" {...props}>
       <SideNavigationList>
         <Destination
           count={120}
@@ -709,20 +709,20 @@ function Awkward(props: Partial<SideNavigationProps>) {
           count={12}
           icon={FileText}
           label="Relatório mensal · setembro"
-          value="setembro"
+          value="september"
         />
-        <Destination count={4} icon={FileText} label="Relatório mensal · outubro" value="outubro" />
+        <Destination count={4} icon={FileText} label="Relatório mensal · outubro" value="october" />
         <Destination
           icon={MapPin}
           label="https://aurora.example/relatorios/2026/mensal/setembro"
           value="url"
         />
-        <Destination count={4} icon={Users} label="العملاء" value="clientes" />
+        <Destination count={4} icon={Users} label="العملاء" value="customers" />
         <Destination
           description="14 a aguardar despacho no armazém de Leixões"
           icon={Package}
-          label="Cargas"
-          value="cargas"
+          label="Loads"
+          value="loads"
         />
       </SideNavigationList>
     </SideNavigation>
@@ -770,9 +770,9 @@ export const Loading: Story = {
         note="Three skeleton rows in the geometry of the rows they stand for: the mark’s square and the label’s bar, so nothing moves when the column lands."
       >
         <Measure>
-          <SideNavigation aria-busy="true" defaultValue="painel">
+          <SideNavigation aria-busy="true" defaultValue="dashboard">
             <SideNavigationList>
-              <Destination icon={ChartNoAxesColumn} label="Painel" value="painel" />
+              <Destination icon={ChartNoAxesColumn} label="Dashboard" value="dashboard" />
               <SideNavigationSkeleton labelSize="55%" />
               <SideNavigationSkeleton labelSize="70%" />
               <SideNavigationSkeleton labelSize="45%" />
@@ -785,14 +785,14 @@ export const Loading: Story = {
         note="A group whose destinations are still loading: the row opened, the request carried its reason, and the skeletons hold the room."
       >
         <Measure>
-          <SideNavigation defaultExpanded={['entregas']}>
+          <SideNavigation defaultExpanded={['deliveries']}>
             <SideNavigationList>
-              <SideNavigationItem value="entregas">
+              <SideNavigationItem value="deliveries">
                 <SideNavigationTrigger>
                   <SideNavigationIcon>
                     <MapPin aria-hidden size={16} />
                   </SideNavigationIcon>
-                  <SideNavigationLabel>Entregas</SideNavigationLabel>
+                  <SideNavigationLabel>Deliveries</SideNavigationLabel>
                 </SideNavigationTrigger>
                 <SideNavigationGroup aria-busy="true">
                   <SideNavigationSkeleton labelSize="50%" />
@@ -822,7 +822,7 @@ export const Shell: Story = {
         </AppShellBanner>
         <AppShellNav>
           <AppShellNavBody>
-            <Aurora defaultExpanded={['entregas']} />
+            <Aurora defaultExpanded={['deliveries']} />
           </AppShellNavBody>
         </AppShellNav>
         <AppShellMain>
@@ -846,7 +846,7 @@ export const Defaults: Story = {
       >
         <Measure>
           <SideNavigationDefaultsProvider guides={false} multiple={false} truncate="middle">
-            <Aurora defaultExpanded={['entregas']} />
+            <Aurora defaultExpanded={['deliveries']} />
           </SideNavigationDefaultsProvider>
         </Measure>
       </Scene>
@@ -856,7 +856,7 @@ export const Defaults: Story = {
       >
         <Measure>
           <SideNavigationDefaultsProvider guides={false} multiple={false} truncate="middle">
-            <Aurora defaultExpanded={['entregas']} guides />
+            <Aurora defaultExpanded={['deliveries']} guides />
           </SideNavigationDefaultsProvider>
         </Measure>
       </Scene>
@@ -913,7 +913,7 @@ export const Composition: Story = {
         <Measure>
           <SideNavigation>
             <SideNavigationList>
-              <SideNavigationItem value="cargas">
+              <SideNavigationItem value="loads">
                 <SideNavigationLink
                   current
                   render={(props) => <a {...props} href="#cargas" data-router-link="" />}
@@ -921,10 +921,10 @@ export const Composition: Story = {
                   <SideNavigationIcon>
                     <Package aria-hidden size={16} />
                   </SideNavigationIcon>
-                  <SideNavigationLabel>Cargas</SideNavigationLabel>
+                  <SideNavigationLabel>Loads</SideNavigationLabel>
                 </SideNavigationLink>
               </SideNavigationItem>
-              <SideNavigationItem value="equipa">
+              <SideNavigationItem value="team">
                 <SideNavigationLink href="#equipa">
                   <SideNavigationIcon>
                     <Users aria-hidden size={16} />
@@ -971,7 +971,7 @@ export const Keyboard: Story = {
           note="Tab lands on Painel like any link. ArrowDown walks the rows, skipping a closed group; open Entregas, walk into it, and Escape closes it and lands on its trigger."
         >
           <Measure>
-            <Aurora defaultExpanded={['entregas']} />
+            <Aurora defaultExpanded={['deliveries']} />
           </Measure>
         </Scene>
         <Scene
@@ -993,10 +993,10 @@ export const Accessibility: Story = {
     <Grid columns={2}>
       <Scene
         label="The landmark and its name"
-        note="A nav named Navegação principal holding a list of nine items; each branch a button that says collapsed or expanded; one link that says current page."
+        note="A nav named Main navigation holding a list of nine items; each branch a button that says collapsed or expanded; one link that says current page."
       >
         <Measure>
-          <Aurora aria-label="Navegação principal" defaultExpanded={['entregas']} />
+          <Aurora aria-label="Main navigation" defaultExpanded={['deliveries']} />
         </Measure>
       </Scene>
       <Scene

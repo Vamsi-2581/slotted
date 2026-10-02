@@ -93,7 +93,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'The way out where the scrim is not: the word closeLabel at the end of the field, drawn by the stylesheet only while the dialog is full screen, asking open to be false with the reason dismiss. Absent inline.',
+      'The way out where the scrim is not: the close message at the end of the field, drawn by the stylesheet only while the dialog is full screen, asking open to be false with the reason dismiss. Absent inline.',
   },
   {
     part: 'list',
@@ -106,7 +106,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'role="group", named by its group-label. The recents are the first group, labelled recentLabel.',
+      'role="group", named by its group-label. The recents are the first group, labelled by the recent message.',
   },
   { part: 'group-label', element: 'div', required: false, purpose: 'The heading of a group.' },
   {
@@ -173,7 +173,7 @@ const anatomy: AnatomyRow[] = [
     part: 'empty',
     element: 'div',
     required: false,
-    purpose: 'The message when nothing matched: emptyLabel, or the empty prop.',
+    purpose: 'The message when nothing matched: the empty message, or the empty prop.',
   },
   {
     part: 'status',
@@ -315,7 +315,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'loading',
     title: 'While the results travel',
-    note: 'loading swaps the magnifier for the ring, draws three skeleton rows when there is nothing to show yet, and says loadingLabel in the status row. The palette debounces nothing: the product does, in three lines.',
+    note: 'loading swaps the magnifier for the ring, draws three skeleton rows when there is nothing to show yet, and says the loading message in the status row. The palette debounces nothing: the product does, in three lines.',
     snippet: defineSnippet({
       id: 'command-palette-react-loading',
       language: 'tsx',
@@ -399,13 +399,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'defaults',
     title: 'Set once for the application',
-    note: 'The provider holds every axis and every sentence the family speaks, which is where a product translates it: the panel below reads Portuguese labels, a size and a hotkey it did not state itself.',
+    note: 'The provider holds every axis, and SlottedProvider the language the family speaks: the panel below reads Portuguese words, a size and a hotkey it did not state itself.',
     snippet: defineSnippet({
       id: 'command-palette-react-defaults',
       language: 'tsx',
       label: 'Translating the family',
       source:
-        '<CommandPaletteDefaultsProvider\n  countLabel="{count} resultados"\n  emptyLabel="Nenhum resultado"\n  hintNavigate="Navegar"\n  hintSelect="Executar"\n  hotkey="mod+p"\n  placeholder="Comando ou busca…"\n  recentLabel="Recentes"\n>\n  <App />\n</CommandPaletteDefaultsProvider>;',
+        '<SlottedProvider locale="pt-BR">\n  <CommandPaletteDefaultsProvider hotkey="mod+p" size="sm">\n    <App />\n  </CommandPaletteDefaultsProvider>\n</SlottedProvider>;',
     }),
   },
   {
@@ -434,13 +434,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'accessibility',
     title: 'What a screen reader meets',
-    note: 'The dialog is named by label, the field by inputLabel, the list by the same; the current row is aria-selected and named by aria-activedescendant; the count, the wait and a failure are one live region. Open the tree to read it.',
+    note: 'The dialog is named by the label message, the field by the input message, the list by the same; the current row is aria-selected and named by aria-activedescendant; the count, the wait and a failure are one live region. Open the tree to read it.',
     snippet: defineSnippet({
       id: 'command-palette-react-accessibility',
       language: 'tsx',
       label: 'The two names',
       source:
-        '<CommandPalette inputLabel="Search deployments" items={items} label="Deployment commands" />;',
+        "<CommandPalette\n  items={items}\n  messages={{ input: 'Search deployments', label: 'Deployment commands' }}\n/>;",
     }),
   },
 ];
@@ -652,7 +652,7 @@ export const REACT_COMMAND_PALETTE_DOCS = {
         'boolean',
         'false',
         'CommandPalette',
-        'The ring in the header, three skeleton rows when there is nothing to show, aria-busy on the list, loadingLabel in the status row',
+        'The ring in the header, three skeleton rows when there is nothing to show, aria-busy on the list, the loading message in the status row',
       ],
       [
         'disabled',
@@ -661,80 +661,12 @@ export const REACT_COMMAND_PALETTE_DOCS = {
         'CommandPalette',
         'Disables the field, the trigger and the hotkey',
       ],
-      ['label', 'string', 'Command palette', 'CommandPalette', 'The dialog’s accessible name'],
       [
-        'inputLabel',
-        'string',
-        'Search commands',
+        'messages',
+        'Partial<CommandPaletteMessages>',
+        '—',
         'CommandPalette',
-        'The field’s and the list’s accessible name',
-      ],
-      [
-        'placeholder',
-        'string',
-        'Type a command or search…',
-        'CommandPalette',
-        'The field’s placeholder',
-      ],
-      [
-        'emptyLabel',
-        'string',
-        'No results',
-        'CommandPalette',
-        'The empty message; the empty prop replaces it with a node',
-      ],
-      [
-        'loadingLabel',
-        'string',
-        'Loading…',
-        'CommandPalette',
-        'What the status row says while loading',
-      ],
-      [
-        'errorLabel',
-        'string',
-        'The command failed: {message}',
-        'CommandPalette',
-        'What the status row says after a rejected handler; {message} becomes the error’s message',
-      ],
-      [
-        'countLabel',
-        'string',
-        '{count} results',
-        'CommandPalette',
-        'What the status row says after every change of the rows',
-      ],
-      ['recentLabel', 'string', 'Recent', 'CommandPalette', 'The heading over the recents'],
-      ['clearLabel', 'string', 'Clear', 'CommandPalette', 'The clear control’s accessible name'],
-      [
-        'closeLabel',
-        'string',
-        'Close',
-        'CommandPalette',
-        'The word on the close control, drawn only while the dialog is full screen',
-      ],
-      ['backLabel', 'string', 'Back', 'CommandPalette', 'The trail’s accessible name'],
-      [
-        'hintNavigate',
-        'string',
-        'Navigate',
-        'CommandPalette',
-        'The word beside the arrow keys in the footer',
-      ],
-      ['hintSelect', 'string', 'Select', 'CommandPalette', 'The word beside Enter in the footer'],
-      [
-        'hintClose',
-        'string',
-        'Close',
-        'CommandPalette',
-        'The word beside Escape in the footer, in dialog presentation',
-      ],
-      [
-        'hintBack',
-        'string',
-        'Back',
-        'CommandPalette',
-        'The word beside Backspace in the footer, while a page is open',
+        'Words laid over the language in force, key by key: the dialog’s name (label), the field’s name and placeholder (input, placeholder), the empty, loading, count and error sentences, the recents heading, the clear, close and back controls, and the footer’s hints',
       ],
     ]),
     events,
@@ -788,12 +720,12 @@ export const REACT_COMMAND_PALETTE_DOCS = {
         'Partial<CommandPaletteDefaults>',
         '—',
         'a subtree',
-        'Every axis and every sentence, set once; an explicit prop still wins',
+        'Every axis, set once; an explicit prop still wins',
       ],
     ]),
     accessibility: [
       'The field carries role="combobox" with aria-expanded="true", aria-controls naming the list and aria-autocomplete="list"; the list carries role="listbox" and each row role="option". DOM focus stays on the field for the whole interaction and the current row is named by aria-activedescendant and marked aria-selected — the WAI-ARIA combobox pattern with a listbox popup, whose note says exactly this.',
-      'The layer is the dialog family’s: role="dialog", aria-modal, the page inert behind the scrim, focus contained and returned to the trigger. Its name is label; the field’s name is inputLabel, and the list borrows it.',
+      'The layer is the dialog family’s: role="dialog", aria-modal, the page inert behind the scrim, focus contained and returned to the trigger. Its name is the label message; the field’s name is the input message, and the list borrows it.',
       'A row with a shortcut carries aria-keyshortcuts in the platform’s own words — Meta+Shift+D on a Mac, Control+Shift+D elsewhere — while the drawn keys are aria-hidden; a sequence has no syntax in the attribute and is drawn only. A disabled row is announced with aria-disabled, stays in the list, and is skipped by every movement key.',
       'The result count, the loading sentence and the failure of a rejected handler are one visually hidden role="status" row, spoken through the shared live announcer so the same sentence is never said twice in a row.',
       'Escape is three steps in a fixed order — clear the query, return one page, close — so a reader who typed does not lose the palette on the first press; the footer draws the same keys the family answers.',

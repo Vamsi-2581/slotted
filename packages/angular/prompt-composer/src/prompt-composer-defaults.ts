@@ -27,33 +27,14 @@ export interface PromptComposerStopEvent {
   source: Event;
 }
 
-export const PROMPT_COMPOSER_SEND_LABEL = 'Send';
-export const PROMPT_COMPOSER_STOP_LABEL = 'Stop';
-export const PROMPT_COMPOSER_RETRY_LABEL = 'Retry';
-export const PROMPT_COMPOSER_ATTACH_LABEL = 'Attach files';
-export const PROMPT_COMPOSER_SENDING_LABEL = 'Sending';
-export const PROMPT_COMPOSER_STOPPED_LABEL = 'Stopped';
-
 export interface PromptComposerDefaults {
-  attachLabel: string;
-  retryLabel: string;
-  sendLabel: string;
-  sendingLabel: string;
   size: PromptComposerSize;
-  stopLabel: string;
-  stoppedLabel: string;
   submitOn: PromptComposerSubmitOn;
   variant: PromptComposerVariant;
 }
 
 const FALLBACK: PromptComposerDefaults = {
-  attachLabel: PROMPT_COMPOSER_ATTACH_LABEL,
-  retryLabel: PROMPT_COMPOSER_RETRY_LABEL,
-  sendLabel: PROMPT_COMPOSER_SEND_LABEL,
-  sendingLabel: PROMPT_COMPOSER_SENDING_LABEL,
   size: 'md',
-  stopLabel: PROMPT_COMPOSER_STOP_LABEL,
-  stoppedLabel: PROMPT_COMPOSER_STOPPED_LABEL,
   submitOn: 'enter',
   variant: 'raised',
 };
@@ -64,8 +45,9 @@ export const PROMPT_COMPOSER_DEFAULTS = new InjectionToken<PromptComposerDefault
 );
 
 /**
- * An application decides once how its composers look, which key sends, and
- * what the buttons say. A composer that states any of them itself still wins.
+ * An application decides once how its composers look and which key sends. A
+ * composer that states any of them itself still wins. What the buttons say
+ * comes from the language in force (`provideSlotted`).
  */
 export function providePromptComposerDefaults(defaults: Partial<PromptComposerDefaults>) {
   return {

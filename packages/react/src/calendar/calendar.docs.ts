@@ -276,12 +276,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition and escape hatches',
-    note: 'A provider sets the locale and the shape once; focusedDate is a value of its own a consumer may own; and the ref hands back focus() and focusDate(), which page the grid to reach a date.',
+    note: 'A provider sets the shape once, SlottedProvider the language; focusedDate is a value of its own a consumer may own; and the ref hands back focus() and focusDate(), which page the grid to reach a date.',
     snippet: defineSnippet({
       id: 'calendar-react-composition',
       label: 'Provider and handle',
       language: 'tsx',
-      source: `<CalendarDefaultsProvider fixedWeeks locale="pt-BR">
+      source: `<CalendarDefaultsProvider fixedWeeks>
   <Calendar focusedDate={focused} onFocusedDateChange={setFocused} ref={handle} />
 </CalendarDefaultsProvider>;`,
     }),
@@ -395,7 +395,7 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    'the runtime’s',
+    'the language in force',
     'Calendar',
     'BCP 47. Decides the month names, the weekday names and the day a week starts on.',
   ],
@@ -423,8 +423,13 @@ const api: ApiRow[] = apiRows([
   ],
   ['readOnly', 'boolean', '—', 'Calendar', 'Readable and not changeable, and never faded.'],
   ['invalid', 'boolean', '—', 'Calendar', 'Retargets the focus ring to the danger colour.'],
-  ['previousLabel', 'string', 'Previous month', 'Calendar', 'The back trigger’s accessible name.'],
-  ['nextLabel', 'string', 'Next month', 'Calendar', 'The forward trigger’s accessible name.'],
+  [
+    'messages',
+    'Partial<CalendarMessages>',
+    '—',
+    'Calendar',
+    'Words laid over the language in force, key by key: the back (previous) and forward (next) triggers’ accessible names.',
+  ],
 ]);
 
 const events: EventRow[] = [
@@ -451,7 +456,7 @@ const composition: ApiRow[] = apiRows([
     'component',
     '—',
     'application',
-    'Sets locale, timeZone, firstDayOfWeek, months, weekNumbers, fixedWeeks, outsideDays, calendar and the two trigger labels once for everything under it.',
+    'Sets timeZone, firstDayOfWeek, months, weekNumbers, fixedWeeks, outsideDays and calendar once for everything under it; a prop on the calendar still wins.',
   ],
   [
     'render',

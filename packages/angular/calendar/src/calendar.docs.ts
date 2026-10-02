@@ -272,7 +272,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition and escape hatches',
-    note: 'A provider sets the locale and the shape once; focusedDate is a value of its own a consumer may own; and the ref hands back focus() and focusDate(), which page the grid to reach a date.',
+    note: 'A provider sets the shape once, provideSlotted the language; focusedDate is a value of its own a consumer may own; and the ref hands back focus() and focusDate(), which page the grid to reach a date.',
     snippet: defineSnippet({
       id: 'calendar-angular-composition',
       label: 'exportAs and the handle',
@@ -391,7 +391,7 @@ const api: ApiRow[] = apiRows([
   [
     'locale',
     'string',
-    'the runtime’s',
+    'the language in force',
     'SlCalendar',
     'BCP 47. Decides the month names, the weekday names and the day a week starts on.',
   ],
@@ -420,13 +420,12 @@ const api: ApiRow[] = apiRows([
   ['readOnly', 'boolean', '—', 'SlCalendar', 'Readable and not changeable, and never faded.'],
   ['invalid', 'boolean', '—', 'SlCalendar', 'Retargets the focus ring to the danger colour.'],
   [
-    'previousLabel',
-    'string',
-    'Previous month',
+    'messages',
+    'Partial<CalendarMessages>',
+    '—',
     'SlCalendar',
-    'The back trigger’s accessible name.',
+    'Words laid over the language in force, key by key: the back (previous) and forward (next) triggers’ accessible names.',
   ],
-  ['nextLabel', 'string', 'Next month', 'SlCalendar', 'The forward trigger’s accessible name.'],
 ]);
 
 const events: EventRow[] = [
@@ -453,7 +452,7 @@ const composition: ApiRow[] = apiRows([
     'Provider',
     '—',
     'application',
-    'Sets locale, timeZone, firstDayOfWeek, months, weekNumbers, fixedWeeks, outsideDays, calendar and the two trigger labels once for everything under the injector.',
+    'Sets timeZone, firstDayOfWeek, months, weekNumbers, fixedWeeks, outsideDays and calendar once for everything under the injector; an input on the calendar still wins.',
   ],
   [
     'exportAs',

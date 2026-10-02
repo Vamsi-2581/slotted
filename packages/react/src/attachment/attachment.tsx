@@ -1,6 +1,7 @@
 import '@slotted/styles/attachment/attachment.css';
 
 import { createRemovalFocus } from '@slotted/core/focus';
+import { attachmentMessages } from '@slotted/core/i18n';
 import { fileKind, splitName } from '@slotted/core/upload';
 import {
   createContext,
@@ -14,6 +15,7 @@ import {
 } from 'react';
 import type { KeyboardEvent, Ref, SyntheticEvent } from 'react';
 
+import { useLocale, useMessages } from '../i18n';
 import { useAttachmentDefaults } from './attachment-defaults';
 import { ATTACHMENT_CONTROL_SELECTOR } from './attachment-kinds';
 import type {
@@ -131,10 +133,10 @@ export function Attachment({
   file,
   invalid = false,
   loading = false,
+  messages,
   onKeyDown,
   onRemove,
   orientation,
-  removeLabel,
   render,
   size,
   ...nativeProps
@@ -142,6 +144,8 @@ export function Attachment({
   const defaults = useAttachmentDefaults();
   const group = useContext(GroupContext);
   const id = useId();
+  const locale = useLocale();
+  const t = useMessages(attachmentMessages, messages);
 
   const resolvedSize = size ?? group?.size ?? defaults.size;
   const resolvedOrientation = orientation ?? group?.orientation ?? defaults.orientation;
@@ -175,12 +179,12 @@ export function Attachment({
     invalid,
     kind,
     loading,
-    locale: defaults.locale,
+    locale,
     orientation: resolvedOrientation,
     removable,
-    removeLabel: removeLabel ?? defaults.removeLabel,
     request,
     stem,
+    t,
   };
 
   const rootProps: AttachmentRootProps = {

@@ -1,4 +1,4 @@
-export { Sparkline, SPARKLINE_MESSAGES } from './sparkline';
+export { Sparkline } from './sparkline';
 export { SparklineDefaultsProvider, useSparklineDefaults } from './sparkline-defaults';
 export type {
   SparklineCurve,

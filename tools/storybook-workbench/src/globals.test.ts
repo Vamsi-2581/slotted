@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -30,23 +30,19 @@ function packagesRoot() {
   return join(directory, 'packages');
 }
 
+/**
+ * `@slotted/themes` publishes one stylesheet per theme, `./<name>.css`, and
+ * `slotted-build-theme` names that file after the theme module's `name`.
+ */
 function publishedThemeNames() {
-  const root = packagesRoot();
+  const manifest = JSON.parse(
+    readFileSync(join(packagesRoot(), 'themes', 'package.json'), 'utf8'),
+  ) as { exports: Record<string, unknown> };
 
-  const fromThemePackages = readdirSync(root, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && entry.name.startsWith('theme-'))
-    .map(
-      (entry) => JSON.parse(readFileSync(join(root, entry.name, 'src', 'theme.json'), 'utf8')).name,
-    );
-
-  const themesSrc = join(root, 'themes', 'src');
-  const fromThemesPackage = readdirSync(themesSrc, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map(
-      (entry) => JSON.parse(readFileSync(join(themesSrc, entry.name, 'values.json'), 'utf8')).name,
-    );
-
-  return [...fromThemePackages, ...fromThemesPackage];
+  return Object.keys(manifest.exports).flatMap((subpath) => {
+    const match = /^\.\/([a-z][a-z0-9-]*)\.css$/.exec(subpath);
+    return match ? [match[1]] : [];
+  });
 }
 
 describe('resolveWorkbenchGlobals', () => {

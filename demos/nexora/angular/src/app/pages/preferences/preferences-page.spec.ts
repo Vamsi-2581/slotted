@@ -104,48 +104,33 @@ describe('PreferencesPage › Appearance', () => {
     root.querySelectorAll('[data-appearance] [data-ui=skeleton][data-loading]').length;
 
   /**
-   * The loading-states skill, §4: a wait that settles inside the region's
-   * 200 ms delay draws no placeholder. Until it settles, a sample whose sheet
-   * is missing keeps its box and draws nothing rather than another theme.
+   * AF-05: the region's placeholders are painted from the first frame, even
+   * when every definition is already at hand; the application's minimum
+   * (AF-06) then holds them.
    */
-  it('draws no placeholder when the definitions arrive inside the delay', async () => {
-    await TestBed.inject(PreferencesStore).useThemes(['nexora-soft']);
+  it('paints its placeholders from the first frame', async () => {
+    await TestBed.inject(PreferencesStore).useThemes();
     await import('../../core/theming/contrast-reading');
     const harness = await RouterTestingHarness.create('/settings/preferences');
     const root = harness.fixture.nativeElement as HTMLElement;
-    const region = root.querySelector<HTMLElement>('[data-appearance]')!;
-    const marks: string[] = [];
-    new MutationObserver((records) =>
-      records.forEach((record) => {
-        if (region.hasAttribute(record.attributeName!)) marks.push(record.attributeName!);
-      }),
-    ).observe(region, { attributes: true, attributeFilter: ['aria-busy', 'data-loading'] });
+    const region = () => root.querySelector<HTMLElement>('[data-appearance]')!;
     harness.detectChanges();
 
-    expect(region.hasAttribute('aria-busy')).toBe(false);
-    expect(samples(root).map((sample) => sample.reserved)).toEqual([false, false, true, true]);
+    expect(region().getAttribute('aria-busy')).toBe('true');
+    expect(painted(root)).toBeGreaterThan(0);
+    expect(samples(root).some((sample) => sample.reserved)).toBe(false);
 
-    await TestBed.inject(PreferencesStore).useThemes();
-    await until(harness, () => ratios(root) === 12);
-    await wait(250);
-    harness.detectChanges();
-
-    expect(marks).toEqual([]);
+    await until(harness, () => !region().hasAttribute('aria-busy'), 2000);
     expect(painted(root)).toBe(0);
-    expect(samples(root)).toEqual(
-      ['default', 'nexora-soft', 'nexora-sharp', 'nexora-editorial'].map((theme) => ({
-        theme,
-        reserved: false,
-      })),
-    );
+    expect(ratios(root)).toBe(12);
   });
 
   /**
-   * A wait past the delay is one busy skeleton region: the samples are drawn
-   * in `default` under their placeholders, and the contrast cells hold theirs.
-   * It holds them for the minimum, then the themes land.
+   * A longer wait is one busy skeleton region for as long as it lasts: the
+   * samples are drawn in `default` under their placeholders, and the contrast
+   * cells hold theirs. Then the themes land.
    */
-  it('paints one skeleton region when the definitions outlast the delay', async () => {
+  it('keeps one skeleton region over a wait longer than the minimum', async () => {
     const store = TestBed.inject(PreferencesStore);
     const load = store.useThemes.bind(store);
     let release!: () => void;
@@ -156,16 +141,12 @@ describe('PreferencesPage › Appearance', () => {
     const harness = await RouterTestingHarness.create('/settings/preferences');
     const root = harness.fixture.nativeElement as HTMLElement;
     const region = () => root.querySelector<HTMLElement>('[data-appearance]')!;
-
     harness.detectChanges();
-    expect(region().hasAttribute('aria-busy')).toBe(false);
+
+    expect(region().getAttribute('aria-busy')).toBe('true');
     expect(
       TestBed.inject(DOCUMENT).head.querySelectorAll('style[data-slotted-theme-sheet]'),
     ).toHaveLength(0);
-
-    await wait(260);
-    harness.detectChanges();
-    expect(region().getAttribute('aria-busy')).toBe('true');
     expect(samples(root).map((sample) => sample.theme)).toEqual([
       'default',
       'default',
@@ -176,6 +157,10 @@ describe('PreferencesPage › Appearance', () => {
     expect(root.querySelectorAll('[data-contrast] [data-ui=skeleton][data-loading]')).toHaveLength(
       12,
     );
+
+    await wait(500);
+    harness.detectChanges();
+    expect(region().getAttribute('aria-busy')).toBe('true');
 
     release();
     await until(harness, () => !region().hasAttribute('aria-busy'), 2000);
@@ -189,6 +174,33 @@ describe('PreferencesPage › Appearance', () => {
       'nexora-sharp',
       'nexora-editorial',
     ]);
+  });
+
+  /**
+   * A theme whose sheet never arrives is not drawn in `default` in its place:
+   * with no placeholder over them, the preview and the swatches keep their
+   * boxes and draw nothing.
+   */
+  it('draws nothing in place of a theme whose sheet did not load', async () => {
+    const store = TestBed.inject(PreferencesStore);
+    store.update({ theme: 'nexora-sharp' });
+    const load = vi.spyOn(store, 'useThemes').mockRejectedValue(new Error('chunk'));
+    const harness = await RouterTestingHarness.create('/settings/preferences');
+    const root = harness.fixture.nativeElement as HTMLElement;
+    await until(harness, () => root.querySelector('[data-themes-failed]') !== null);
+
+    const previews = [...root.querySelectorAll('app-appearance-preview')];
+    expect(previews).toHaveLength(3);
+    expect(previews.every((preview) => preview.classList.contains('reserved'))).toBe(true);
+    expect(
+      [...root.querySelectorAll('.swatch')].every((swatch) =>
+        swatch.classList.contains('reserved'),
+      ),
+    ).toBe(true);
+    expect(TestBed.inject(DOCUMENT).documentElement.getAttribute('data-slotted-theme')).toBe(
+      'default',
+    );
+    load.mockRestore();
   });
 
   /** A load that fails is said once, with a way to try again; the themes it could not draw cannot be chosen. */

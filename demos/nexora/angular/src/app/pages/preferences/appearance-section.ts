@@ -64,14 +64,11 @@ import { ContrastTable } from './contrast-table';
  *
  * The runtime themes' definitions and the contrast arithmetic load by
  * `import()` when the section opens, and the sheets are compiled then: one
- * wait, one skeleton region. It follows the loading-states skill §4 — a
- * 200 ms delay and a 400 ms minimum — so a load that settles first draws no
- * placeholder; until then a sample whose sheet is missing is reserved and not
- * drawn, since in `default` it would show another theme. AF-05 and AF-06 keep
- * placeholders undelayed for a region waiting on the backend (AF-01); this
- * wait is code, and every control of the section is on screen from the first
- * frame. A load that fails leaves the themes without a sheet out of the
- * choice, hides the contrast table and offers a retry.
+ * wait, one skeleton region, on the application's timing. A sample whose
+ * sheet is missing and that no placeholder covers keeps its box and draws
+ * nothing, since in `default` it would show another theme. A load that fails
+ * leaves the themes without a sheet out of the choice, hides the contrast
+ * table and offers a retry.
  */
 @Component({
   selector: 'app-appearance-section',
@@ -187,8 +184,6 @@ import { ContrastTable } from './contrast-table';
           slSkeletonRegion
           #wait="slSkeletonRegion"
           [loading]="pending()"
-          [delay]="200"
-          [minDuration]="400"
           [messages]="{ label: 'Loading the themes' }"
           data-appearance
         >

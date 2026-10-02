@@ -94,10 +94,12 @@ directory is not committed; it is written by:
   `0.x.y-beta.N`, then does the above.
 
 - `pnpm demo:refresh`: the loop after one library change — builds
-  `@slotted/angular`, `@slotted/core` and `@slotted/themes`, repacks only
-  those three at the current version and reinstalls, so
-  `demos/nexora/angular` sees the change on its next `pnpm start` (a
-  running dev server is restarted).
+  `@slotted/angular`, `@slotted/core`, `@slotted/theme` and `@slotted/themes`,
+  repacks only those four at the current version, reinstalls and deletes
+  `demos/nexora/angular/.angular/cache`, so `demos/nexora/angular` sees the
+  change on its next `pnpm start` (a running dev server is restarted). The
+  dev server pre-bundles the packages into that cache and would otherwise
+  keep serving the copy it bundled before the refresh.
 - `pnpm demo:nexora`: `demo:refresh` followed by `ng serve` of
   `demos/nexora/angular`, from the repository root.
 

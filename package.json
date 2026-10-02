@@ -21,7 +21,7 @@
     "format:check": "prettier --check .",
     "pack:beta": "pnpm build && node scripts/pack-beta.mjs",
     "release:beta": "node scripts/pack-beta.mjs --bump && pnpm pack:beta",
-    "demo:refresh": "turbo run build --filter @slotted/angular --filter @slotted/core --filter @slotted/theme --filter @slotted/themes && node scripts/pack-beta.mjs --only @slotted/angular,@slotted/core,@slotted/theme,@slotted/themes && pnpm install",
+    "demo:refresh": "turbo run build --filter @slotted/angular --filter @slotted/core --filter @slotted/theme --filter @slotted/themes && node scripts/pack-beta.mjs --only @slotted/angular,@slotted/core,@slotted/theme,@slotted/themes && pnpm install && node -e \"require('node:fs').rmSync('demos/nexora/angular/.angular/cache', { recursive: true, force: true })\"",
     "demo:nexora": "pnpm demo:refresh && pnpm --filter @slotted/demo-nexora-angular start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --build tsconfig.json --pretty false",

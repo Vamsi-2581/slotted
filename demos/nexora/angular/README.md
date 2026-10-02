@@ -56,8 +56,9 @@ side; `LIBRARY-FEEDBACK.md` is the ledger of what the library had to answer for.
 
 ## Seeing a library change here
 
-At the repository root, `pnpm demo:refresh` builds the three packages this app consumes, repacks
-them at the current beta version and reinstalls; restart `pnpm start` afterwards. `pnpm pack:beta`
+At the repository root, `pnpm demo:refresh` builds the four packages this app consumes, repacks
+them at the current beta version, reinstalls and deletes `.angular/cache`, where the dev server
+keeps its pre-bundled copy of them; restart `pnpm start` afterwards. `pnpm pack:beta`
 does the same for every package, after a full build.
 
 ## Moving to a newer beta

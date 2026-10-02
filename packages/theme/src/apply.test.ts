@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { applyTheme, seedStyle, THEME_CHANGE_EVENT, type ThemeChangeDetail } from './apply';
-import { defineTheme, type ThemeDefinition } from './define';
+import { defineTheme, type Theme, type ThemeDefinition } from './define';
 import { recipes } from './recipes';
 
 // jsdom's `URL` (the test environment's global) rejects a `file:` base, so this
@@ -80,6 +80,24 @@ describe('applyTheme', () => {
 
     disposeSecond();
     expect(seen).toHaveLength(3);
+  });
+});
+
+describe('applyTheme on a theme that did not come from defineTheme', () => {
+  it('refuses it before the name reaches a selector or a value reaches the page', () => {
+    const seen: Event[] = [];
+    const listener = (event: Event) => seen.push(event);
+    document.addEventListener(THEME_CHANGE_EVENT, listener);
+    const forged = JSON.parse(JSON.stringify(theme('#1d4ed8'))) as Theme;
+    for (const overrides of [
+      { name: 'live"], * { color: red } [x="' },
+      { components: { '--slotted-card-radius': '0; } * { color: red' } },
+    ]) {
+      expect(() => applyTheme({ ...forged, ...overrides } as Theme)).toThrow(/^Invalid theme /);
+    }
+    document.removeEventListener(THEME_CHANGE_EVENT, listener);
+    expect(document.head.querySelector('style')).toBeNull();
+    expect(seen).toHaveLength(0);
   });
 });
 

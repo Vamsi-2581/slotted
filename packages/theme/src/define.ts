@@ -9,6 +9,7 @@ import {
   type SchemeToken,
 } from './generated/contract';
 import {
+  derivationCss,
   evaluateRecipe,
   SCHEMES,
   SEED_NAMES,
@@ -99,9 +100,15 @@ export function flattenTheme(theme: ThemeDefinition): FlatTheme {
   };
 }
 
-export function defineTheme(definition: ThemeDefinition): Theme {
+/**
+ * Every reason a definition cannot be rendered: its name lands in selectors,
+ * every seed, value, font field and recipe derivation lands in a declaration,
+ * so each one is checked against the contract and against the structural
+ * characters that would close the rule it is written into.
+ */
+function themeErrors(definition: ThemeDefinition): string[] {
   const errors: string[] = [];
-  if (!NAME.test(definition.name)) {
+  if (typeof definition.name !== 'string' || !NAME.test(definition.name)) {
     errors.push(`name ${JSON.stringify(definition.name)} is not [a-z][a-z0-9-]*`);
   }
   for (const seed of SEED_NAMES) {
@@ -127,6 +134,20 @@ export function defineTheme(definition: ThemeDefinition): Theme {
       if (!schemeTokens.has(name))
         errors.push(`recipe ${scheme} derives ${name}, which no scheme carries`);
     }
+    for (const [name, rule] of Object.entries(definition.recipe?.[scheme] ?? {})) {
+      let css: string;
+      try {
+        css = derivationCss(rule);
+      } catch {
+        errors.push(`recipe ${scheme} ${name} is not a derivation`);
+        continue;
+      }
+      if (hasUnsafeStructuralChar(css)) {
+        errors.push(
+          `recipe ${scheme} ${name} writes ${JSON.stringify(css)}, which contains an unquoted ;, { or }, or leaves a string, a comment or an escape open`,
+        );
+      }
+    }
   }
   for (const rule of definition.rules ?? []) {
     if (typeof rule !== 'string' && !(rule instanceof URL))
@@ -135,6 +156,7 @@ export function defineTheme(definition: ThemeDefinition): Theme {
   // `family` is written through `JSON.stringify` and stays a quoted CSS string whatever
   // it contains; the other fields are interpolated into `@font-face` verbatim.
   for (const [index, font] of (definition.fonts ?? []).entries()) {
+    if (typeof font.family !== 'string') errors.push(`fonts[${index}].family is not a string`);
     for (const field of ['src', 'weight', 'style', 'display'] as const) {
       const value = font[field];
       if (value !== undefined && hasUnsafeStructuralChar(value)) {
@@ -151,11 +173,25 @@ export function defineTheme(definition: ThemeDefinition): Theme {
       errors.push((error as Error).message);
     }
   }
+  return errors;
+}
+
+/**
+ * Throws when `theme` could not have come from `defineTheme`. `renderTheme`
+ * calls it on every theme, because an object typed `Theme` — one read back
+ * from storage, say — need never have passed through `defineTheme`.
+ */
+export function assertTheme(theme: ThemeDefinition): void {
+  const errors = themeErrors(theme);
   if (errors.length > 0) {
     throw new Error(
-      `Invalid theme ${definition.name}:\n${errors.map((error) => `- ${error}`).join('\n')}`,
+      `Invalid theme ${String(theme.name)}:\n${errors.map((error) => `- ${error}`).join('\n')}`,
     );
   }
+}
+
+export function defineTheme(definition: ThemeDefinition): Theme {
+  assertTheme(definition);
   const { kind: _kind, ...plain } = definition as ThemeDefinition & { kind?: string };
   return deepFreeze({ ...plain, kind: 'slotted-theme' as const });
 }

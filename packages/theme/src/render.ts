@@ -1,4 +1,4 @@
-import { DENSITIES, type FontFaceDefinition, type Theme } from './define';
+import { assertTheme, DENSITIES, type FontFaceDefinition, type Theme } from './define';
 import { contract } from './generated/contract';
 import { LAYER_ORDER_STATEMENT } from './layer-order';
 import { derivationCss, SCHEMES, SEED_NAMES, type Scheme } from './recipe';
@@ -61,6 +61,24 @@ const fontFace = (font: FontFaceDefinition) =>
   `  font-weight: ${font.weight ?? 'normal'};\n  font-style: ${font.style ?? 'normal'};\n` +
   `  font-display: ${font.display ?? 'swap'};\n}`;
 
+/**
+ * A stylesheet inlined in an HTML `<style>` ends at the first `</style`,
+ * whatever CSS context that sits in. `</` is never CSS outside a string, a
+ * comment or an unquoted `url()`, and in each of them the escape `\3c ` reads
+ * as the same `<`, so every `<` followed by `/` is written as that escape and
+ * the text never carries `</`. A `<` that an odd run of `\` already escapes
+ * gives up that last `\`, since `\3c ` is the whole escape.
+ */
+const escapeEndTags = (css: string) =>
+  css.replace(
+    /(\\*)<\//g,
+    (_match, slashes: string) => `${slashes.length % 2 === 1 ? slashes.slice(1) : slashes}\\3c /`,
+  );
+
+/**
+ * The stylesheet of one theme. The theme is checked as `defineTheme` checks
+ * it, and the text is safe to inline in an HTML `<style>`.
+ */
 export function renderTheme(theme: Theme): string {
   for (const rule of theme.rules ?? []) {
     if (typeof rule !== 'string') {
@@ -69,6 +87,7 @@ export function renderTheme(theme: Theme): string {
       );
     }
   }
+  assertTheme(theme);
   const name = theme.name;
   const seeds = Object.fromEntries(
     SEED_NAMES.map((seed) => [`--slotted-seed-${seed}`, theme.seeds[seed]]),
@@ -174,5 +193,5 @@ export function renderTheme(theme: Theme): string {
       )}\n}`,
     );
   }
-  return `${parts.join('\n\n')}\n`;
+  return escapeEndTags(`${parts.join('\n\n')}\n`);
 }

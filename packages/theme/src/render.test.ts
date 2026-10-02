@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { defineTheme, type ThemeDefinition } from './define';
+import { defineTheme, type Theme, type ThemeDefinition } from './define';
 import { LAYER_ORDER_STATEMENT } from './layer-order';
 import { recipes } from './recipes';
 import { renderTheme } from './render';
@@ -99,5 +99,72 @@ describe('renderTheme', () => {
     expect(css).toContain(
       '@layer slotted.theme-rules {\n  @scope ([data-slotted-theme="commented"]) to ([data-slotted-theme]:not([data-slotted-theme="commented"])) {\n    [data-ui=\'card\'] { color: red; /* ; */ }\n  }\n}',
     );
+  });
+});
+
+/**
+ * `renderTheme` takes any object typed `Theme`, and a theme read back from
+ * storage or a network response is such an object without ever passing
+ * through `defineTheme`. Its name lands in selectors and every value in
+ * declarations, so the render refuses what `defineTheme` would refuse.
+ */
+describe('renderTheme on a theme that did not come from defineTheme', () => {
+  const forged = (overrides: Record<string, unknown>) => ({ ...theme, ...overrides }) as Theme;
+
+  it('refuses a name a selector cannot carry', () => {
+    expect(() => renderTheme(forged({ name: 'x"], * { color: red } [x="' }))).toThrow(
+      /is not \[a-z\]\[a-z0-9-\]\*/,
+    );
+  });
+
+  it('refuses a value, a seed, a font field and a recipe derivation that could close their rule', () => {
+    const [token] = Object.keys(recipes.standard.light);
+    for (const overrides of [
+      { components: { '--slotted-card-radius': '0; } * { color: red' } },
+      { base: { ...theme.base, '--slotted-space-1': '0; } * { color: red' } },
+      { seeds: { ...theme.seeds, accent: '#fff; } * { color: red' } },
+      { fonts: [{ family: { toString: () => '}' }, src: 'url(a.woff2)' }] },
+      {
+        recipe: {
+          ...recipes.standard,
+          light: { ...recipes.standard.light, [token!]: { alias: '--a); } * { color: red' } },
+        },
+      },
+    ]) {
+      expect(() => renderTheme(forged(overrides)), JSON.stringify(overrides)).toThrow(
+        /^Invalid theme test:/,
+      );
+    }
+  });
+});
+
+/**
+ * A server renders the theme into an inline `<style>`, whose text the HTML
+ * parser ends at the first `</style`, inside a CSS string or not.
+ */
+describe('renderTheme inlined in an HTML <style>', () => {
+  const hostile = defineTheme({
+    ...theme,
+    name: 'hostile',
+    fonts: [{ family: '</style><b>', src: 'url("</style><script>alert(1)</script>.woff2")' }],
+    rules: [`[data-ui='card']::before { content: "</style>"; }`],
+  });
+  const html = renderTheme(hostile);
+
+  it('never writes `</` and keeps every `<` it escapes', () => {
+    expect(html).not.toContain('</');
+    expect(html).toContain('src: url("\\3c /style><script>alert(1)\\3c /script>.woff2");');
+    expect(html).toContain('font-family: "\\3c /style><b>";');
+    expect(html).toContain(`content: "\\3c /style>";`);
+  });
+
+  it('stays one style element with no element after it', () => {
+    const parsed = new DOMParser().parseFromString(
+      `<!doctype html><html><head><style>${html}</style></head><body></body></html>`,
+      'text/html',
+    );
+    expect(parsed.querySelectorAll('style')).toHaveLength(1);
+    expect(parsed.querySelector('script, b')).toBeNull();
+    expect(parsed.querySelector('style')!.textContent).toBe(html);
   });
 });

@@ -284,3 +284,34 @@ nem `defaultValue`; um `model()` é os dois lados, como em `side-navigation`.
   coluna, com `overflow-x: auto` quando a coluna é mais estreita do que a
   sala. Primitiva partilhada, com teste em
   `tools/storybook-workbench/src/workbench.styles.test.mjs`.
+
+## 11. Reabertura de 2026-10-01 — secções como `navigation-menu`
+
+A secção que abre deixou de ser um `button` envolvido por `menu`: os seus
+destinos são links, e o padrão que o âmbito nomeia é o Disclosure Navigation
+Menu, que `navigation-menu` implementa
+(`2026-10-01-navigation-menu-design.md`).
+
+- **A `nav` é também a raiz do menu.** As partes coincidem
+  (`nav > ul[list] > li[item] > button[trigger]`), por isso o elemento leva
+  `data-ui="navigation-menu"` e `data-part="nav"`. React: `TopNavigationNav`
+  renderiza `NavigationMenu` com `render`. Angular: `SlNavigationMenu` é
+  `hostDirective` de `SlTopNavigationNav`, e a raiz do menu passou de
+  componente a diretiva por isso. O valor da secção aberta, o pedido e os
+  atrasos vivem na `nav`; o `value` da raiz continua a ser o destino corrente.
+- **Item e gatilho.** React: `TopNavigationItem` renderiza
+  `NavigationMenuItem` e `TopNavigationTrigger` é `NavigationMenuTrigger`
+  (sem `render`). Angular: `SlTopNavigationItem` fornece
+  `NAVIGATION_MENU_SECTION`; `SlTopNavigationTrigger` usa a diretiva de host
+  `SlNavigationMenuTriggerWiring`.
+- **Variáveis privadas.** A raiz do menu declara variáveis com os mesmos nomes
+  no mesmo elemento; a folha da barra herda as suas de volta na `nav`, e os
+  seletores das filas da barra passam a ser filhos de `nav > list > item` e de
+  `panel-list > item`, para não alcançarem os links dos painéis.
+- **Secção recolhida.** No painel «more» a secção abre o conteúdo em linha,
+  sem superfície partilhada, sem abrir por hover; o foco e a pressão dentro
+  desse conteúdo não contam como saída do menu; seguir um link fecha a secção
+  e o painel com a razão `select`.
+
+Custo: quebra de API sem migração (nenhum consumidor usava o padrão antigo);
+a folha de `navigation-menu` passa a vir com toda a barra.

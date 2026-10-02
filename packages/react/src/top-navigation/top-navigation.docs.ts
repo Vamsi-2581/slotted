@@ -82,7 +82,7 @@ const anatomy: AnatomyRow[] = [
     element: 'nav',
     required: false,
     purpose:
-      'The navigation landmark, named by messages.navigation unless the consumer writes aria-label. The panel follows it in DOM order.',
+      'The navigation landmark, named by messages.navigation unless the consumer writes aria-label, and a navigation-menu root on the same element: data-ui="navigation-menu", the shared surface after its list, and the open section’s value, request and delays on TopNavigationNav. The panel follows it in DOM order.',
   },
   {
     part: 'list',
@@ -109,7 +109,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'A section that opens: the consumer wraps it in Menu, whose trigger writes aria-expanded and data-open on it. The family adds the chevron.',
+      'A section that opens: the navigation-menu trigger of the NavigationMenuContent after it in the same item — aria-expanded, aria-controls, data-open, the chevron, a press and a resting pointer. Always a native button.',
   },
   {
     part: 'indicator',
@@ -137,7 +137,7 @@ const anatomy: AnatomyRow[] = [
     element: 'ul',
     required: false,
     purpose:
-      'The list that receives the folded items — rendered into it while the panel is present, so a trigger keeps its menu and a link keeps its badge.',
+      'The list that receives the folded items — rendered into it while the panel is present, so a section keeps its panel, which opens in line under its trigger there, and a link keeps its badge.',
   },
   {
     part: 'search',
@@ -340,23 +340,21 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'sections',
-    title: 'A section that opens a menu',
-    note: 'Frota is a trigger wrapped in Menu: the family draws the chevron, Menu writes aria-expanded and data-open on it, and the chevron turns while the menu is open. Folded into the panel, the trigger keeps its menu.',
+    title: 'A section that opens a panel of destinations',
+    note: 'Frota is a section of the navigation menu the nav part already is: its panel opens on the shared surface under the bar, a resting pointer opens it after a delay, and a second section switches without one. Folded into the panel, the section opens its links in line.',
     snippet: defineSnippet({
       id: 'top-navigation-react-sections',
       language: 'tsx',
-      label: 'A trigger rendered as a menu’s trigger',
+      label: 'A section and its panel',
       source: `<TopNavigationItem value="frota">
-  <Menu>
-    <MenuTrigger
-      render={(props) => <TopNavigationTrigger {...props}>Frota</TopNavigationTrigger>}
-    />
-    <MenuContent>
-      <MenuItem>Veículos</MenuItem>
-      <MenuItem>Motoristas</MenuItem>
-      <MenuItem>Manutenção</MenuItem>
-    </MenuContent>
-  </Menu>
+  <TopNavigationTrigger>Frota</TopNavigationTrigger>
+  <NavigationMenuContent>
+    <NavigationMenuLinks>
+      <li>
+        <NavigationMenuLink href="/fleet/vehicles">Veículos</NavigationMenuLink>
+      </li>
+    </NavigationMenuLinks>
+  </NavigationMenuContent>
 </TopNavigationItem>;`,
     }),
   },
@@ -530,15 +528,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'defaults',
     title: 'Decided once for an application',
-    note: 'The provider carries the size, the frame and the words on the icon-only controls for every bar under it — an application in English, at the large step — and a bar that states one itself still wins.',
+    note: 'The provider carries the size and the frame for every bar under it — an application at the large step — and a bar that states one itself still wins. The words on the icon-only controls come from the language in force.',
     snippet: defineSnippet({
       id: 'top-navigation-react-defaults',
       language: 'tsx',
       label: 'The provider',
-      source: `<TopNavigationDefaultsProvider
-  messages={{ account: 'Account', help: 'Help', more: 'More', search: 'Search' }}
-  size="lg"
->
+      source: `<TopNavigationDefaultsProvider size="lg">
   <TopNavigation>…</TopNavigation>
 </TopNavigationDefaultsProvider>;`,
     }),
@@ -699,11 +694,25 @@ export const REACT_TOP_NAVIGATION_DOCS = {
         'The id of the element the skip link jumps to. Absent, no skip link is rendered',
       ],
       [
+        'value, defaultValue, onValueChange',
+        'string | null, (value, request) => void',
+        '—',
+        'TopNavigationNav',
+        'The open section, on the nav part, which is a navigation-menu root: every way a section opens or closes asks with its reason. Not the current destination, which is the root’s value',
+      ],
+      [
+        'arrow, openDelay, closeDelay, closeOnSelect',
+        'boolean, number, number, boolean',
+        'false, 200, 300, true',
+        'TopNavigationNav',
+        'The navigation menu’s own axes, read from NavigationMenuDefaultsProvider when unstated',
+      ],
+      [
         'messages',
         'Partial<TopNavigationMessages>',
-        'the Portuguese strings',
-        'TopNavigation, TopNavigationDefaultsProvider',
-        'navigation, more, search, closeSearch, help, notifications, account, skip: the words on the controls that have no visible text',
+        '—',
+        'TopNavigation',
+        'Words laid over the language in force, key by key — navigation, more, moreCount, search, closeSearch, help, notifications, account, skip: the words on the controls that have no visible text',
       ],
       [
         'value',
@@ -753,8 +762,8 @@ export const REACT_TOP_NAVIGATION_DOCS = {
         'render',
         '(props) => ReactNode',
         '—',
-        'root, brand, home, mark, name, context, nav, list, item, link, trigger, search, actions, help, notifications, count, account',
-        'Substitutes the element and hands it every attribute: a router’s link as the destination, Menu’s trigger as a section, a button as help',
+        'root, brand, home, mark, name, context, nav, list, item, link, search, actions, help, notifications, count, account',
+        'Substitutes the element and hands it every attribute: a router’s link as the destination, a button as help. The trigger is fixed: the navigation menu wires it',
       ],
       [
         'ref',
@@ -779,7 +788,7 @@ export const REACT_TOP_NAVIGATION_DOCS = {
       ],
       [
         'TopNavigationDefaultsProvider',
-        '{ size, frame, landmark, messages }',
+        '{ size, frame, landmark }',
         '—',
         'a subtree',
         'The decisions an application takes once. A bar that states any of them itself still wins',
@@ -793,11 +802,11 @@ export const REACT_TOP_NAVIGATION_DOCS = {
       ],
     ]),
     accessibility: [
-      'The bar is the banner landmark — a header in the context of the body, with no role written — and its destinations are the navigation landmark, a nav named Navegação unless the consumer names it. Inside app-shell the root is a div, because the shell’s banner is already the banner and two banners in one document is what the resolution prevents.',
+      'The bar is the banner landmark — a header in the context of the body, with no role written — and its destinations are the navigation landmark, a nav named Navigation unless the consumer names it. Inside app-shell the root is a div, because the shell’s banner is already the banner and two banners in one document is what the resolution prevents.',
       'The destinations follow the WAI-ARIA APG’s Disclosure Navigation Menu example (w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-navigation/): nav > ul > li > a, so a reader hears a list of so many links, one of them aria-current="page". The Navigation Menubar example’s own caution — that menubar demands functionality a site’s navigation does not need — is why nothing here is a menubar, nothing writes tabindex and no arrow key moves focus: every control is a tab stop.',
-      'more is a button with aria-expanded and aria-controls pointing at the panel, and its name carries the count of what folded — Mais, 3. The panel stands in the DOM right after the nav, so Tab from more enters it, the way the disclosure pattern assumes; closed, it is visibility: hidden and its rows leave the tab sequence. Escape closes it and returns focus to more.',
-      'The folded destinations are the consumer’s own elements rendered into the panel, so a section trigger keeps its menu and a link keeps its badge, its href and its aria-current. Below 480 pixels the name is clipped rather than removed, so the home link keeps its name; help’s label is clipped in the bar and shown in the panel, so help has one name in both places.',
-      'Every icon-only control — the magnifier, the cross, help, the bell, the account, more — carries an accessible name from the family’s messages or the consumer’s aria-label, and repeats it in a tooltip on hover and on visible focus. The count stands inside the bell’s button, so a reader hears Notificações, 3 without the family composing a string.',
+      'more is a button with aria-expanded and aria-controls pointing at the panel, and its name carries the count of what folded — More, 3, the moreCount message. The panel stands in the DOM right after the nav, so Tab from more enters it, the way the disclosure pattern assumes; closed, it is visibility: hidden and its rows leave the tab sequence. Escape closes it and returns focus to more.',
+      'The folded destinations are the consumer’s own elements rendered into the panel, so a section keeps its panel and a link keeps its badge, its href and its aria-current. Below 480 pixels the name is clipped rather than removed, so the home link keeps its name; help’s label is clipped in the bar and shown in the panel, so help has one name in both places.',
+      'Every icon-only control — the magnifier, the cross, help, the bell, the account, more — carries an accessible name from the family’s messages or the consumer’s aria-label, and repeats it in a tooltip on hover and on visible focus. The count stands inside the bell’s button, so a reader hears Notifications, 3 without the family composing a string.',
       'Below 600 pixels the open search moves focus into the field and the closed search returns it to the magnifier, unless focus already went somewhere else — which is what closed it. A disabled destination is aria-disabled with its href kept: perceivable, focusable, refused on press. The item carries data-disabled and never aria-disabled, which ARIA 1.2 deprecates on listitem.',
     ],
     snippets: [
@@ -807,7 +816,7 @@ export const REACT_TOP_NAVIGATION_DOCS = {
         label: 'Anatomy, as it reaches the DOM',
         source: `<header data-ui="top-navigation" data-part="root" data-size="md" data-frame>
   <a data-part="skip" href="#conteudo">
-    Saltar para o conteúdo
+    Skip to content
   </a>
   <div data-part="brand">
     <a data-part="home" href="/">
@@ -817,7 +826,7 @@ export const REACT_TOP_NAVIGATION_DOCS = {
       <span data-part="name">Aurora Logística</span>
     </a>
   </div>
-  <nav data-part="nav" aria-label="Navegação">
+  <nav data-part="nav" aria-label="Navigation">
     <ul data-part="list">
       <li data-part="item" data-value="painel" data-priority="high" data-current>
         <a data-part="link" href="/painel" aria-current="page" data-current>
@@ -830,7 +839,7 @@ export const REACT_TOP_NAVIGATION_DOCS = {
       <li data-part="item">
         <button
           data-part="more"
-          aria-label="Mais, 1"
+          aria-label="More, 1"
           aria-expanded="false"
           aria-controls="p"
           data-overflow="1"
@@ -842,17 +851,17 @@ export const REACT_TOP_NAVIGATION_DOCS = {
     <ul data-part="panel-list" />
   </div>
   <div data-part="search">
-    …<button data-part="search-close" aria-label="Fechar procura" />
+    …<button data-part="search-close" aria-label="Close search" />
   </div>
   <div data-part="actions">
-    <button data-part="search-toggle" aria-label="Procurar" />
+    <button data-part="search-toggle" aria-label="Search" />
     <a data-part="help" href="/ajuda">
-      Ajuda
+      Help
     </a>
-    <button data-part="notifications" aria-label="Notificações">
+    <button data-part="notifications" aria-label="Notifications">
       <span data-part="count">3</span>
     </button>
-    <button data-part="account" aria-label="Conta">
+    <button data-part="account" aria-label="Account">
       …
     </button>
   </div>

@@ -210,14 +210,15 @@ test('names a glyph for every mark it draws', () => {
 });
 
 test('declares a message for every control that has no visible text', () => {
-  assert.deepEqual(Object.keys(contract.messages), [
-    'navigation',
-    'more',
-    'search',
+  assert.deepEqual(contract.messages, [
+    'account',
     'closeSearch',
     'help',
+    'more',
+    'moreCount',
+    'navigation',
     'notifications',
-    'account',
+    'search',
     'skip',
   ]);
 });
@@ -236,12 +237,7 @@ test('declines nothing without a reason', () => {
 });
 
 test('declares the defaults provider over the axes it can set once', () => {
-  assert.deepEqual(contract.provides.topNavigationDefaults, [
-    'size',
-    'landmark',
-    'frame',
-    'messages',
-  ]);
+  assert.deepEqual(contract.provides.topNavigationDefaults, ['size', 'landmark', 'frame']);
   assert.deepEqual(member.defaults, { size: 'md', landmark: true, frame: true });
 });
 
@@ -250,4 +246,17 @@ test('declares the shell as a scenario, because the bar is built for it', () => 
   assert.ok(contract.scenarios.topNavigation.includes('standalone'));
   assert.ok(contract.scenarios.topNavigation.includes('priority'));
   assert.ok(contract.scenarios.topNavigation.includes('search'));
+});
+
+/**
+ * A section of the bar is a section of a navigation menu: the destinations are
+ * links, and the disclosure pattern the scope names is the one that family
+ * implements. The nav part carries the menu's root.
+ */
+test('opens a section as a navigation-menu panel, never a menu', () => {
+  assert.ok(contract.composes.includes('navigation-menu'));
+  assert.equal(contract.sections.family, 'navigation-menu');
+  assert.match(contract.anatomy.trigger, /navigation-menu trigger/);
+  assert.match(contract.anatomy.nav, /data-ui=navigation-menu/);
+  assert.doesNotMatch(contract.anatomy.trigger, /wraps in menu/);
 });

@@ -12,6 +12,7 @@ import {
   computed,
   DestroyRef,
   Directive,
+  forwardRef,
   effect,
   ElementRef,
   HostAttributeToken,
@@ -23,6 +24,13 @@ import {
 } from '@angular/core';
 import type { Signal } from '@angular/core';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  NAVIGATION_MENU_SECTION,
+  SlNavigationMenu,
+  SlNavigationMenuIdFactory,
+  SlNavigationMenuTriggerWiring,
+} from '@slotted/angular/navigation-menu';
+import type { NavigationMenuSection } from '@slotted/angular/navigation-menu';
 
 import { SlTopNavigation } from './top-navigation';
 import type { TopNavigationPriority } from './top-navigation-defaults';
@@ -235,6 +243,19 @@ export class SlTopNavigationContext {
   selector: 'nav[slTopNavigationNav]',
   standalone: true,
   exportAs: 'slTopNavigationNav',
+  /**
+   * The nav is also a `navigation-menu` root: the open section, its request
+   * and the menu's own delays are bound here, on the element that holds the
+   * sections. Its `data-part` and its name are the bar's, written after the
+   * menu's by the host's own bindings.
+   */
+  hostDirectives: [
+    {
+      directive: SlNavigationMenu,
+      inputs: ['value', 'arrow', 'openDelay', 'closeDelay', 'closeOnSelect'],
+      outputs: ['valueChange', 'valueChangeRequest'],
+    },
+  ],
   host: {
     'data-part': 'nav',
     '[attr.aria-label]': 'ariaLabel()',
@@ -242,11 +263,12 @@ export class SlTopNavigationContext {
 })
 export class SlTopNavigationNav {
   private readonly navigation = inject(SlTopNavigation);
+  private readonly menu = inject(SlNavigationMenu);
   private readonly native: HTMLElement = inject(ElementRef).nativeElement;
   private readonly writtenLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
 
   protected readonly ariaLabel = computed(
-    () => this.writtenLabel ?? this.navigation.resolvedMessages().navigation,
+    () => this.writtenLabel ?? this.navigation.t('navigation'),
   );
 
   constructor() {
@@ -268,6 +290,14 @@ export class SlTopNavigationNav {
       if (this.navigation.moreOpen()) panel.setAttribute('data-open', '');
       else panel.removeAttribute('data-open');
     });
+
+    /* A destination followed inside the overflow panel closes the panel too. */
+    const followed = this.menu.valueChangeRequest.subscribe((request) => {
+      if (request.reason === 'select' && !request.cancelled && this.navigation.moreOpen()) {
+        this.navigation.setMoreOpen(false, 'select', request.source as Event | undefined);
+      }
+    });
+    inject(DestroyRef).onDestroy(() => followed.unsubscribe());
 
     inject(DestroyRef).onDestroy(() => {
       if (this.navigation.panelNode() === panel) {
@@ -312,8 +342,9 @@ export class SlTopNavigationNav {
 export class SlTopNavigationMore extends TopNavigationControl {
   readonly text = computed(() => {
     const folded = this.navigation.collapsed().length;
-    const word = this.navigation.resolvedMessages().more;
-    return folded > 0 ? `${word}, ${folded}` : word;
+    return folded > 0
+      ? this.navigation.t('moreCount', { count: folded })
+      : this.navigation.t('more');
   });
 
   constructor() {
@@ -358,8 +389,13 @@ export class SlTopNavigationList {}
   selector: 'li[slTopNavigationItem]',
   standalone: true,
   exportAs: 'slTopNavigationItem',
+  /** A section of the bar is a section of the navigation menu the nav is. */
+  providers: [
+    { provide: NAVIGATION_MENU_SECTION, useExisting: forwardRef(() => SlTopNavigationItem) },
+  ],
   host: {
     'data-part': 'item',
+    '[attr.data-open]': "open() ? '' : null",
     '[attr.data-value]': 'value()',
     '[attr.data-priority]': 'resolvedPriority()',
     '[attr.data-collapsed]': "collapsed() ? '' : null",
@@ -367,7 +403,7 @@ export class SlTopNavigationList {}
     '[attr.data-disabled]': "resolvedDisabled() ? '' : null",
   },
 })
-export class SlTopNavigationItem {
+export class SlTopNavigationItem implements NavigationMenuSection {
   /** The item's identity: what `value` names it by. */
   readonly value = input.required<string>();
   /** Which step of the width folds this item. Unstated, `medium`. */
@@ -389,7 +425,32 @@ export class SlTopNavigationItem {
     () => this.explicitCurrent() || this.navigation.value() === this.value(),
   );
 
+  /* ── As a section of the navigation menu ─────────────────────────────── */
+
+  private readonly menu = inject(SlNavigationMenu);
+  readonly contentId = `${inject(SlNavigationMenuIdFactory).next()}-content`;
+  readonly open = computed(() => this.menu.value() === this.value());
+  private readonly currents = signal<ReadonlySet<object>>(new Set());
+  readonly hasCurrent = computed(() => this.currents().size > 0);
+
+  reportCurrent(link: object, current: boolean) {
+    this.currents.update((set) => {
+      if (set.has(link) === current) return set;
+      const next = new Set(set);
+      if (current) next.add(link);
+      else next.delete(link);
+      return next;
+    });
+  }
+
   constructor() {
+    let section: (() => void) | null = null;
+    effect(() => {
+      section?.();
+      section = this.menu.register(this.value(), this.contentId);
+    });
+    inject(DestroyRef).onDestroy(() => section?.());
+
     let release: (() => void) | null = null;
     effect(() => {
       release?.();
@@ -482,9 +543,9 @@ export class SlTopNavigationLink {
 }
 
 /**
- * A section that opens: the consumer puts `slMenuTriggerFor` on the same
- * element, which writes `aria-expanded` and `data-open` on it; the family
- * adds the chevron and nothing else.
+ * A section that opens: the `navigation-menu` trigger of the panel that
+ * follows it in the same item — `aria-expanded`, `aria-controls`, the
+ * chevron, a press and a resting pointer — in the bar's row.
  */
 @Component({
   selector: 'button[slTopNavigationTrigger]',
@@ -494,29 +555,12 @@ export class SlTopNavigationLink {
   template: `<ng-content /><span data-part="indicator" aria-hidden="true"
       ><span slIcon><svg slGlyph name="chevron-down"></svg></span
     ></span>`,
+  styleUrl: '../../../styles/src/navigation-menu/navigation-menu.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: {
-    'data-part': 'trigger',
-    type: 'button',
-    '[disabled]': 'item.resolvedDisabled()',
-  },
+  hostDirectives: [SlNavigationMenuTriggerWiring],
 })
-export class SlTopNavigationTrigger {
-  readonly item = inject(SlTopNavigationItem);
-
-  constructor() {
-    const native: HTMLElement = inject(ElementRef).nativeElement;
-    /**
-     * `slMenuTriggerFor` binds `[attr.data-part]` and resolves it to `null`
-     * for a trigger that is neither a bar's item nor a submenu's, and a host
-     * binding of `null` removes the attribute the author wrote. The part is
-     * written back after the first change detection, where nothing writes
-     * over it again — the rule `docs/build-briefing.md` records for `toolbar`.
-     */
-    afterNextRender(() => native.setAttribute('data-part', 'trigger'));
-  }
-}
+export class SlTopNavigationTrigger {}
 
 /* ── Search ─────────────────────────────────────────────────────────────── */
 
@@ -539,7 +583,7 @@ export class SlTopNavigationTrigger {
   },
 })
 export class SlTopNavigationSearchClose extends TopNavigationControl {
-  readonly text = computed(() => this.navigation.resolvedMessages().closeSearch);
+  readonly text = computed(() => this.navigation.t('closeSearch'));
 
   protected onClick(event: Event) {
     if (event.defaultPrevented) return;
@@ -566,7 +610,7 @@ export class SlTopNavigationSearchClose extends TopNavigationControl {
   },
 })
 export class SlTopNavigationSearchToggle extends TopNavigationControl {
-  readonly text = computed(() => this.navigation.resolvedMessages().search);
+  readonly text = computed(() => this.navigation.t('search'));
 
   constructor() {
     super();
@@ -703,10 +747,10 @@ export class SlTopNavigationActions {
 })
 export class SlTopNavigationHelp extends TopNavigationControl {
   private readonly home = new Home(this.native);
-  readonly text = computed(() => this.writtenLabel ?? this.navigation.resolvedMessages().help);
+  readonly text = computed(() => this.writtenLabel ?? this.navigation.t('help'));
   /** The words shown when the consumer projected none. */
   protected readonly fallback = computed(() =>
-    this.writtenLabel === null ? this.navigation.resolvedMessages().help : '',
+    this.writtenLabel === null ? this.navigation.t('help') : '',
   );
   readonly inPanel = computed(
     () =>
@@ -751,9 +795,7 @@ export class SlTopNavigationHelp extends TopNavigationControl {
   },
 })
 export class SlTopNavigationNotifications extends TopNavigationControl {
-  readonly text = computed(
-    () => this.writtenLabel ?? this.navigation.resolvedMessages().notifications,
-  );
+  readonly text = computed(() => this.writtenLabel ?? this.navigation.t('notifications'));
 
   constructor() {
     super();
@@ -827,7 +869,7 @@ export class SlTopNavigationCount {}
   },
 })
 export class SlTopNavigationAccount extends TopNavigationControl {
-  readonly text = computed(() => this.writtenLabel ?? this.navigation.resolvedMessages().account);
+  readonly text = computed(() => this.writtenLabel ?? this.navigation.t('account'));
 
   constructor() {
     super();

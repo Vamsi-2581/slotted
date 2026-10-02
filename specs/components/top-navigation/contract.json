@@ -2,12 +2,16 @@
   "schemaVersion": 5,
   "family": "top-navigation",
   "ui": "top-navigation",
+  "catalog": {
+    "group": "Navigation",
+    "summary": "Application header with brand, search and account."
+  },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-navigation/",
   "landmarkPattern": "https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/",
   "patternStatus": "Read on 2026-09-15 from the rendered example page, with the Navigation Menubar example beside it. The menubar example's own caution — that menubar demands functionality a site's navigation does not need, and that the disclosure pattern is the one suited to it — is why no menubar role, no roving tabindex and no arrow keys are written here; the scope says the same in its own words: the bar is not a toolbar with one tab stop per region. The keyboard table transcribes the disclosure example's Keyboard Support section without its optional arrow keys; the itemised comparison is in docs/history/designs/2026-09-15-top-navigation-design.md §4.",
   "design": "docs/history/designs/2026-09-15-top-navigation-design.md",
   "inventory": "docs/history/designs/2026-09-15-top-navigation-capability-inventory.md",
-  "composes": ["presence", "dismissable-layer", "tooltip"],
+  "composes": ["presence", "dismissable-layer", "tooltip", "navigation-menu"],
   "roles": {
     "root": "banner | none",
     "nav": "navigation",
@@ -59,15 +63,15 @@
     "mark": "the box the logo stands in: square, the height of a md control, holding whatever image or svg the consumer gives it",
     "name": "the product's name, one line, cut at --slotted-top-navigation-name-max. Below 480 pixels it leaves the eye and not the DOM, so home keeps its accessible name",
     "context": "what the application is at this moment — the workspace, the store, the environment — as the consumer's own content: a menu trigger, a select, a badge. It keeps its width in the bar; below 600 pixels it is presented at the top of the panel",
-    "nav": "the navigation landmark, named by messages.navigation when the consumer writes no aria-label",
+    "nav": "the navigation landmark, named by messages.navigation when the consumer writes no aria-label, and a navigation-menu root on the same element: data-ui=navigation-menu with data-part=nav, the shared surface after the list, and the open section's value, request and delays bound on the nav part",
     "list": "the destinations of the bar, in the consumer's order",
     "item": "one destination or one section. It carries data-priority, data-collapsed while the width has folded it into the panel, data-current and data-disabled",
     "link": "the destination: an a with an href, aria-current=page while current, aria-disabled and a refused activation while disabled so the destination stays in the DOM",
-    "trigger": "a section that opens: a button the consumer wraps in menu, with the family's chevron at its end. The family writes no menu and wires nothing for it: menu's trigger writes aria-expanded and data-open on the element it is rendered as, and the stylesheet reads data-open on the trigger",
+    "trigger": "a section that opens: the navigation-menu trigger of the navigation-menu content that follows it in the same item — aria-expanded, aria-controls, data-open, the chevron, a press and a resting pointer. Always a native button, because the menu wires it",
     "indicator": "the trigger's chevron, the chevron-down Glyph element turned half a turn while the item is open",
     "more": "the disclosure button of the panel, at the end of the list inside its own li: the ellipsis Glyph element, aria-expanded, aria-controls, data-overflow holding the count of what is folded, data-current while the current destination is folded. Present in the DOM whenever the list exists, hidden by the stylesheet while nothing is folded, so a server render at a narrow width already shows it",
     "panel": "what did not fit, inside the root and after more in DOM order so Tab enters it: context, then panel-list, then help. Absolutely positioned under the bar, full width below 480 pixels and --slotted-top-navigation-panel-size wide above; presence holds it through its exit and dismissable-layer closes it",
-    "panel-list": "the ul that receives the folded items — the same li elements, moved (Angular) or portalled (React), so a trigger keeps its menu and a link keeps its badge",
+    "panel-list": "the ul that receives the folded items — the same li elements, moved (Angular) or portalled (React), so a trigger keeps its menu and a link keeps its badge. A folded section keeps its navigation-menu content, which opens in line under its trigger there rather than on the shared surface",
     "search": "the search region, holding the consumer's text-field and standing at the start of the middle of the bar — after the brand, the context and the destinations — and growing to --slotted-top-navigation-search-size, never under --slotted-top-navigation-search-min: the search is the first thing that gives way when the bar is short of room, and the floor is where a field is still a field. Below 600 pixels it exists only while searchOpen, and then takes the whole bar",
     "search-toggle": "the search Glyph element: the button that asks searchOpen to be true. Rendered by the family beside search, shown only below 600 pixels while the search is closed",
     "search-close": "the x Glyph element at the end of search, shown only below 600 pixels while the search is open: the pointer's way back when Escape is not at hand",
@@ -177,16 +181,17 @@
     "--slotted-app-shell-row-line-height"
   ],
   "readsReason": "The bar's brand starts on the shell's row inset so the toggle and the mark stand over the marks in the column; the panel's rows read the row height and type the column publishes so a folded destination reads as the same row it would be in side-navigation. Each is read with the family's own fallback, so a bar outside the shell measures the same",
-  "messages": {
-    "navigation": "Navegação",
-    "more": "Mais",
-    "search": "Procurar",
-    "closeSearch": "Fechar procura",
-    "help": "Ajuda",
-    "notifications": "Notificações",
-    "account": "Conta",
-    "skip": "Saltar para o conteúdo"
-  },
+  "messages": [
+    "account",
+    "closeSearch",
+    "help",
+    "more",
+    "moreCount",
+    "navigation",
+    "notifications",
+    "search",
+    "skip"
+  ],
   "declined": {
     "navToggle": {
       "deferTo": "app-shell",
@@ -239,7 +244,7 @@
     "attribute": "data-frame"
   },
   "provides": {
-    "topNavigationDefaults": ["size", "landmark", "frame", "messages"]
+    "topNavigationDefaults": ["size", "landmark", "frame"]
   },
   "stateModel": {
     "open": {
@@ -358,5 +363,11 @@
   },
   "glyphs": {
     "bell": "added for this family: the mark on notifications. Carbon and UI5 draw a bell there, and nothing in the scale stands in for it — inbox says received, the dot says something without saying what"
+  },
+  "sections": {
+    "family": "navigation-menu",
+    "rule": "the nav part is a navigation-menu root and every item is a navigation-menu section: a trigger followed by a navigation-menu content opens a panel of destinations on the shared surface under the bar. menu is not used for a section: its destinations are links, and the disclosure pattern is the one the scope names",
+    "folded": "a folded section opens its content in line inside the panel, and a link followed there closes the section and the panel with the reason select",
+    "reopened": "2026-10-01, with navigation-menu: the trigger was a button the consumer wrapped in menu"
   }
 }

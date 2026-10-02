@@ -21,49 +21,16 @@ export type TopNavigationSearchReason =
 /** Why the current destination moved. */
 export type TopNavigationValueReason = 'pointer' | 'keyboard' | 'programmatic';
 
-/** The strings the family writes itself, replaceable once per application. */
-export interface TopNavigationMessages {
-  /** The navigation landmark's name when the consumer gives none. */
-  navigation: string;
-  /** The name of the button that opens the panel; the count of what folded is appended. */
-  more: string;
-  /** The name of the button that opens the search. */
-  search: string;
-  /** The name of the button that closes the search. */
-  closeSearch: string;
-  /** The name of the help control when the consumer gives none. */
-  help: string;
-  /** The name of the notifications control when the consumer gives none. */
-  notifications: string;
-  /** The name of the account control when the consumer gives none. */
-  account: string;
-  /** The skip link's text. */
-  skip: string;
-}
-
 export interface TopNavigationDefaults {
   frame: boolean;
   landmark: boolean;
-  messages: TopNavigationMessages;
   size: TopNavigationSize;
 }
-
-export const DEFAULT_TOP_NAVIGATION_MESSAGES: TopNavigationMessages = {
-  account: 'Conta',
-  closeSearch: 'Fechar procura',
-  help: 'Ajuda',
-  more: 'Mais',
-  navigation: 'Navegação',
-  notifications: 'Notificações',
-  search: 'Procurar',
-  skip: 'Saltar para o conteúdo',
-};
 
 /** The contract's defaults. */
 export const TOP_NAVIGATION_FALLBACK: TopNavigationDefaults = {
   frame: true,
   landmark: true,
-  messages: DEFAULT_TOP_NAVIGATION_MESSAGES,
   size: 'md',
 };
 
@@ -85,22 +52,15 @@ export const TOP_NAVIGATION_DEFAULTS = new InjectionToken<TopNavigationDefaults>
 );
 
 /**
- * An application decides once how its bars read — the size, the frame, the
- * words on the controls that have no visible text — rather than repeating it
- * on every bar in a product. A bar that states any of them itself still wins.
+ * An application decides once how its bars read — the size, the frame —
+ * rather than repeating it on every bar in a product. A bar that states any of
+ * them itself still wins. Its words come from the language in force
+ * (`provideSlotted`).
  */
-export function provideTopNavigationDefaults(
-  defaults: Partial<Omit<TopNavigationDefaults, 'messages'>> & {
-    messages?: Partial<TopNavigationMessages>;
-  },
-) {
+export function provideTopNavigationDefaults(defaults: Partial<TopNavigationDefaults>) {
   return {
     provide: TOP_NAVIGATION_DEFAULTS,
-    useFactory: (): TopNavigationDefaults => ({
-      ...TOP_NAVIGATION_FALLBACK,
-      ...defaults,
-      messages: { ...TOP_NAVIGATION_FALLBACK.messages, ...defaults.messages },
-    }),
+    useFactory: (): TopNavigationDefaults => ({ ...TOP_NAVIGATION_FALLBACK, ...defaults }),
   };
 }
 

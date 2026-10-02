@@ -1,3 +1,5 @@
+import type { NavigationMenuValueRequest } from '../navigation-menu/navigation-menu.types';
+import type { FamilyTranslator, PartialMessages, TopNavigationMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type {
   AnchorHTMLAttributes,
@@ -39,39 +41,15 @@ export type TopNavigationMoreRequest = ChangeRequest<boolean>;
 export type TopNavigationSearchRequest = ChangeRequest<boolean>;
 export type TopNavigationValueRequest = ChangeRequest<string | null>;
 
-/** The strings the family writes itself, replaceable once per application. */
-export interface TopNavigationMessages {
-  /** The navigation landmark's name when the consumer gives none. */
-  navigation: string;
-  /** The name of the button that opens the panel; the count of what folded is appended. */
-  more: string;
-  /** The name of the button that opens the search. */
-  search: string;
-  /** The name of the button that closes the search. */
-  closeSearch: string;
-  /** The name of the help control when the consumer gives none. */
-  help: string;
-  /** The name of the notifications control when the consumer gives none. */
-  notifications: string;
-  /** The name of the account control when the consumer gives none. */
-  account: string;
-  /** The skip link's text. */
-  skip: string;
-}
-
 /** What an application sets once for every bar under it. */
 export interface TopNavigationDefaults {
   frame: boolean;
   landmark: boolean;
-  messages: TopNavigationMessages;
   size: TopNavigationSize;
 }
 
-export interface TopNavigationDefaultsProviderProps extends Partial<
-  Omit<TopNavigationDefaults, 'messages'>
-> {
+export interface TopNavigationDefaultsProviderProps extends Partial<TopNavigationDefaults> {
   children?: ReactNode | undefined;
-  messages?: Partial<TopNavigationMessages> | undefined;
 }
 
 /** What the root hands every part under it. */
@@ -88,7 +66,8 @@ export interface TopNavigationContextValue {
   currentFolded: boolean;
   /** Whether the panel has anything to show: a folded item, or the context or help at the high step. */
   panelHolds: boolean;
-  messages: TopNavigationMessages;
+  /** The family's words in the language in force, with this bar's `messages` laid over them. */
+  t: FamilyTranslator<TopNavigationMessages>;
   moreOpen: boolean;
   /** Whether the panel is present: open, or on its way out. */
   panelPresent: boolean;
@@ -167,8 +146,12 @@ export interface TopNavigationProps extends Omit<
    * and a `div` inside `app-shell`'s banner, which is already the landmark.
    */
   landmark?: boolean | undefined;
-  /** The strings the family writes itself. */
-  messages?: Partial<TopNavigationMessages> | undefined;
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * landmark's name, the names of the controls with no visible text, and the
+   * skip link. A native `aria-label` on a part still wins.
+   */
+  messages?: PartialMessages<TopNavigationMessages> | undefined;
   /** Present means the consumer owns the panel. */
   moreOpen?: boolean | undefined;
   /** Called when the set of folded items changes, with their values and the reason `resize`. */
@@ -225,9 +208,28 @@ export interface TopNavigationHomeProps extends ComponentPropsWithRef<'a'> {
     ((props: AnchorHTMLAttributes<HTMLElement> & { 'data-part': string }) => ReactNode) | undefined;
 }
 
-export interface TopNavigationNavProps extends ComponentPropsWithRef<'nav'> {
+/**
+ * The navigation landmark, which is also a `navigation-menu` root: the open
+ * section's value, its request and the menu's own axes are the menu's, on the
+ * element that holds the sections.
+ */
+export interface TopNavigationNavProps extends Omit<ComponentPropsWithRef<'nav'>, 'defaultValue'> {
+  /** Draws the mark on the surface's edge that points at the open section's trigger. */
+  arrow?: boolean | undefined;
+  /** Milliseconds a pointer leaving the destinations waits before a section closes. */
+  closeDelay?: number | undefined;
+  /** A link inside a section's panel closes the panel when it is followed. */
+  closeOnSelect?: boolean | undefined;
+  /** The section open on the first render, when the consumer does not own `value`. */
+  defaultValue?: string | null | undefined;
+  /** Called before the open section moves; `request.cancel()` keeps it. */
+  onValueChange?: ((value: string | null, request: NavigationMenuValueRequest) => void) | undefined;
+  /** Milliseconds a pointer rests on a trigger before its section opens. */
+  openDelay?: number | undefined;
   render?:
     ((props: HTMLAttributes<HTMLElement> & { 'data-part': string }) => ReactNode) | undefined;
+  /** The open section's value; present means the consumer owns it. Not the current destination, which is the root's. */
+  value?: string | null | undefined;
 }
 
 export interface TopNavigationListProps extends ComponentPropsWithRef<'ul'> {
@@ -277,14 +279,12 @@ export interface TopNavigationLinkProps extends Omit<
   render?: ((props: TopNavigationLinkRootProps) => ReactNode) | undefined;
 }
 
-export interface TopNavigationTriggerRootProps extends ButtonHTMLAttributes<HTMLElement> {
-  'data-part': string;
-  type: 'button';
-}
-
-export interface TopNavigationTriggerProps extends ComponentPropsWithRef<'button'> {
-  render?: ((props: TopNavigationTriggerRootProps) => ReactNode) | undefined;
-}
+/**
+ * A section that opens a `NavigationMenuContent` after it in the same item:
+ * always a native button, because the menu wires `aria-expanded` and
+ * `aria-controls` on it.
+ */
+export type TopNavigationTriggerProps = ComponentPropsWithRef<'button'>;
 
 export interface TopNavigationSearchProps extends ComponentPropsWithRef<'div'> {
   render?:

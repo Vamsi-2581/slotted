@@ -38,6 +38,13 @@ import {
   SlTextFieldInput,
   SlTextFieldStart,
 } from '@slotted/angular/text-field';
+import {
+  SlNavigationMenuContent,
+  SlNavigationMenuDescription,
+  SlNavigationMenuLabel,
+  SlNavigationMenuLink,
+  SlNavigationMenuLinks,
+} from '@slotted/angular/navigation-menu';
 import { SlPage, SlPageBody } from '@slotted/angular/page';
 import {
   SlPageHeader,
@@ -112,6 +119,11 @@ const meta: Meta<TopNavigationStoryArgs> = {
     moduleMetadata({
       imports: [
         NgIcon,
+        SlNavigationMenuContent,
+        SlNavigationMenuDescription,
+        SlNavigationMenuLabel,
+        SlNavigationMenuLink,
+        SlNavigationMenuLinks,
         SlTopNavigation,
         SlTopNavigationBrand,
         SlTopNavigationHome,
@@ -209,16 +221,16 @@ const brand = (name = 'Aurora Logística') => `<div slTopNavigationBrand>
 const item = (value: string, label: string, priority = 'medium', attributes = '') =>
   `<li slTopNavigationItem value="${value}" priority="${priority}" ${attributes}><a slTopNavigationLink href="#${value}">${label}</a></li>`;
 
-/** The section that opens a menu: Frota, after Cargas. */
-const fleet = (ref = 'frota') => `<li slTopNavigationItem value="frota">
-  <button slTopNavigationTrigger [slMenuTriggerFor]="${ref}">Frota</button>
-  <sl-menu #${ref} align="start" side="bottom">
-    <button slMenuItem>Veículos</button>
-    <button slMenuItem>Motoristas</button>
-    <button slMenuItem>Manutenção</button>
-    <hr slMenuSeparator />
-    <button slMenuItem>Novo veículo…</button>
-  </sl-menu>
+/** The section that opens a panel of destinations: Frota, after Cargas. */
+const fleet = () => `<li slTopNavigationItem value="frota">
+  <button slTopNavigationTrigger>Frota</button>
+  <div slNavigationMenuContent columns="2">
+    <ul slNavigationMenuLinks>
+      <li><a slNavigationMenuLink href="#veiculos"><span slNavigationMenuLabel>Veículos</span><span slNavigationMenuDescription>Matrículas, lotação e documentos.</span></a></li>
+      <li><a slNavigationMenuLink href="#motoristas"><span slNavigationMenuLabel>Motoristas</span><span slNavigationMenuDescription>Escalas, cartas e horas de condução.</span></a></li>
+      <li><a slNavigationMenuLink href="#manutencao"><span slNavigationMenuLabel>Manutenção</span><span slNavigationMenuDescription>Revisões marcadas e avarias abertas.</span></a></li>
+    </ul>
+  </div>
 </li>`;
 
 const destinations = ({
@@ -408,8 +420,8 @@ export const Anatomy: Story = {
     <ul slTopNavigationList>
       ${item('link', 'link', 'high')}
       <li slTopNavigationItem value="trigger" priority="high">
-        <button slTopNavigationTrigger [slMenuTriggerFor]="anatomyMenu">trigger › indicator</button>
-        <sl-menu #anatomyMenu><button slMenuItem>menu › item</button></sl-menu>
+        <button slTopNavigationTrigger>trigger › indicator</button>
+        <div slNavigationMenuContent columns="1"><ul slNavigationMenuLinks><li><a slNavigationMenuLink href="#content">navigation-menu › content › link</a></li></ul></div>
       </li>
       ${item('folded', 'item priority=low', 'low')}
     </ul>
@@ -488,7 +500,7 @@ export const Panel: Story = {
         'A folded section keeps its menu',
         'Frota folded into the panel still opens its own menu: the row is the same element, with the same slMenuTriggerFor on it.',
         stage(
-          `<header slTopNavigation [moreOpen]="true">${brand()}<nav slTopNavigationNav><ul slTopNavigationList>${item('painel', 'Painel', 'high')}${fleet('frotan3')}</ul></nav><div slTopNavigationActions>${account('accountn3')}</div></header>`,
+          `<header slTopNavigation [moreOpen]="true">${brand()}<nav slTopNavigationNav><ul slTopNavigationList>${item('painel', 'Painel', 'high')}${fleet()}</ul></nav><div slTopNavigationActions>${account('accountn3')}</div></header>`,
           'phone',
           true,
         ),
@@ -531,23 +543,23 @@ export const Sections: Story = {
         'Frota opens a menu',
         'Press Frota: slMenuTriggerFor writes aria-expanded and data-open on the trigger, the chevron turns, and the items are the menu’s own. Arrow keys inside are the menu’s.',
         stage(
-          `<header slTopNavigation value="painel">${brand()}<nav slTopNavigationNav><ul slTopNavigationList>${item('painel', 'Painel', 'high')}${item('cargas', 'Cargas', 'high')}${fleet('frotax1')}</ul></nav><div slTopNavigationActions>${account('accountx1')}</div></header>`,
+          `<header slTopNavigation value="painel">${brand()}<nav slTopNavigationNav><ul slTopNavigationList>${item('painel', 'Painel', 'high')}${item('cargas', 'Cargas', 'high')}${fleet()}</ul></nav><div slTopNavigationActions>${account('accountx1')}</div></header>`,
           'laptop',
           true,
         ),
       ),
       scene(
         'Two sections side by side',
-        'Operações and Administração as two triggers with two menus; only one is open at a time, because each menu owns its own state.',
+        'Operações and Administração as two sections of one navigation menu: one surface, one open at a time, and moving the pointer from one to the other switches without a delay.',
         stage(
           `<header slTopNavigation>${brand()}<nav slTopNavigationNav><ul slTopNavigationList>
   <li slTopNavigationItem value="operacoes" priority="high">
-    <button slTopNavigationTrigger [slMenuTriggerFor]="ops">Operações</button>
-    <sl-menu #ops align="start"><button slMenuItem>Cargas</button><button slMenuItem>Rotas</button><button slMenuItem>Entregas</button></sl-menu>
+    <button slTopNavigationTrigger>Operações</button>
+    <div slNavigationMenuContent columns="1"><ul slNavigationMenuLinks><li><a slNavigationMenuLink href="#cargas">Cargas</a></li><li><a slNavigationMenuLink href="#rotas">Rotas</a></li><li><a slNavigationMenuLink href="#entregas">Entregas</a></li></ul></div>
   </li>
   <li slTopNavigationItem value="administracao" priority="high">
-    <button slTopNavigationTrigger [slMenuTriggerFor]="adm">Administração</button>
-    <sl-menu #adm align="start"><button slMenuItem>Utilizadores</button><button slMenuItem>Faturação</button><button slMenuItem>Integrações</button></sl-menu>
+    <button slTopNavigationTrigger>Administração</button>
+    <div slNavigationMenuContent columns="1"><ul slNavigationMenuLinks><li><a slNavigationMenuLink href="#utilizadores">Utilizadores</a></li><li><a slNavigationMenuLink href="#faturacao">Faturação</a></li><li><a slNavigationMenuLink href="#integracoes">Integrações</a></li></ul></div>
   </li>
 </ul></nav><div slTopNavigationActions>${account('accountx2')}</div></header>`,
           'laptop',
@@ -750,7 +762,7 @@ export const Content: Story = {
   <nav slTopNavigationNav aria-label="التنقل"><ul slTopNavigationList>
     ${item('lawha', 'لوحة التحكم', 'high')}
     ${item('shahnat', 'الشحنات', 'high')}
-    <li slTopNavigationItem value="ustul"><button slTopNavigationTrigger [slMenuTriggerFor]="ustul">الأسطول</button><sl-menu #ustul align="start" side="bottom"><button slMenuItem>المركبات</button><button slMenuItem>السائقون</button></sl-menu></li>
+    <li slTopNavigationItem value="ustul"><button slTopNavigationTrigger>الأسطول</button><div slNavigationMenuContent columns="1"><ul slNavigationMenuLinks><li><a slNavigationMenuLink href="#markabat">المركبات</a></li><li><a slNavigationMenuLink href="#saiqun">السائقون</a></li></ul></div></li>
   </ul></nav>
   <div slTopNavigationSearch><div slTextField variant="subtle"><input slTextFieldInput type="search" aria-label="بحث" placeholder="ابحث عن الشحنات والعملاء…" /></div></div>
   <div slTopNavigationActions>
@@ -821,29 +833,15 @@ export const Standalone: Story = {
 export const Defaults: Story = {
   decorators: [
     applicationConfig({
-      providers: [
-        provideTopNavigationDefaults({
-          messages: {
-            account: 'Account',
-            closeSearch: 'Close search',
-            help: 'Help',
-            more: 'More',
-            navigation: 'Navigation',
-            notifications: 'Notifications',
-            search: 'Search',
-            skip: 'Skip to content',
-          },
-          size: 'lg',
-        }),
-      ],
+      providers: [provideTopNavigationDefaults({ size: 'lg' })],
     }),
   ],
   parameters: scenario('defaults'),
   render: () => ({
     template: grid(
       scene(
-        'An application in English, at the large step',
-        'The provider carries the words the icon-only controls are named by — hover the bell — and the size; the bar states neither.',
+        'An application at the large step',
+        'The provider carries the size; the bar does not state it. The words the icon-only controls are named by — hover the bell — come from the language in force.',
         stage(
           `<header slTopNavigation value="painel">${brand()}<nav slTopNavigationNav><ul slTopNavigationList>${item('painel', 'Painel', 'high')}${item('cargas', 'Cargas', 'high')}${item('rotas', 'Rotas', 'high')}</ul></nav><div slTopNavigationActions><a slTopNavigationHelp href="#help"></a><button slTopNavigationNotifications><span slTopNavigationCount>3</span></button>${account('accountd1')}</div></header>`,
           'laptop',
@@ -868,7 +866,7 @@ export const Composition: Story = {
       'Everything the bar composes',
       'A destination carrying the router’s aria-current, the workspace menu and the environment badge in the context, the shortcut in the search, a menu on Frota and on the account, a popover on the bell.',
       stage(
-        `<header slTopNavigation>${brand()}${context('workspacesco', true)}<nav slTopNavigationNav><ul slTopNavigationList>${item('painel', 'Painel', 'high')}<li slTopNavigationItem value="cargas" priority="high"><a slTopNavigationLink href="#cargas" aria-current="page">Cargas</a></li>${fleet('frotaco')}</ul></nav>${search()}${actions({ ref: 'co' })}</header>`,
+        `<header slTopNavigation>${brand()}${context('workspacesco', true)}<nav slTopNavigationNav><ul slTopNavigationList>${item('painel', 'Painel', 'high')}<li slTopNavigationItem value="cargas" priority="high"><a slTopNavigationLink href="#cargas" aria-current="page">Cargas</a></li>${fleet()}</ul></nav>${search()}${actions({ ref: 'co' })}</header>`,
         'desktop',
         true,
       ),

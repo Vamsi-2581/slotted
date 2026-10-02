@@ -86,7 +86,7 @@ const anatomy: AnatomyRow[] = [
     element: 'nav',
     required: false,
     purpose:
-      'The navigation landmark, named by messages.navigation unless the consumer writes aria-label. It builds the panel right after itself in DOM order.',
+      'The navigation landmark, named by messages.navigation unless the consumer writes aria-label, and a navigation-menu root on the same element through a host directive: data-ui="navigation-menu", the shared surface after its list, and [(value)], valueChangeRequest and the menu’s delays bound on slTopNavigationNav. It builds the panel right after itself in DOM order.',
   },
   {
     part: 'list',
@@ -113,7 +113,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'A section that opens: the consumer puts slMenuTriggerFor on it, which writes aria-expanded and data-open. The family adds the chevron.',
+      'A section that opens: the navigation-menu trigger of the slNavigationMenuContent after it in the same item — aria-expanded, aria-controls, data-open, the chevron, a press and a resting pointer.',
   },
   {
     part: 'indicator',
@@ -141,7 +141,7 @@ const anatomy: AnatomyRow[] = [
     element: 'ul, built by the nav',
     required: false,
     purpose:
-      'The list the folded items are moved into while the panel is present — the same li, so a trigger keeps its menu and a link keeps its badge — and moved back from when it has left.',
+      'The list the folded items are moved into while the panel is present — the same li, so a section keeps its panel, which opens in line under its trigger there, and a link keeps its badge — and moved back from when it has left.',
   },
   {
     part: 'search',
@@ -267,7 +267,8 @@ const scenes: ReferenceSceneMeta[] = [
     <ul slTopNavigationList>
       <li slTopNavigationItem value="link"><a slTopNavigationLink href="/link">link</a></li>
       <li slTopNavigationItem value="trigger">
-        <button slTopNavigationTrigger [slMenuTriggerFor]="menu">trigger</button>
+        <button slTopNavigationTrigger>trigger</button>
+        <div slNavigationMenuContent>…</div>
       </li>
     </ul>
   </nav>
@@ -331,19 +332,19 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'sections',
-    title: 'A section that opens a menu',
-    note: 'Frota is a trigger with slMenuTriggerFor: the family draws the chevron, the menu trigger writes aria-expanded and data-open on it, and the chevron turns while the menu is open. Folded into the panel, the trigger keeps its menu.',
+    title: 'A section that opens a panel of destinations',
+    note: 'Frota is a section of the navigation menu the nav part already is: its panel opens on the shared surface under the bar, a resting pointer opens it after a delay, and a second section switches without one. Folded into the panel, the section opens its links in line.',
     snippet: defineSnippet({
       id: 'top-navigation-angular-sections',
       language: 'angular',
-      label: 'A trigger that opens a menu',
+      label: 'A section and its panel',
       source: `<li slTopNavigationItem value="frota">
-  <button slTopNavigationTrigger [slMenuTriggerFor]="frota">Frota</button>
-  <sl-menu #frota>
-    <button slMenuItem>Veículos</button>
-    <button slMenuItem>Motoristas</button>
-    <button slMenuItem>Manutenção</button>
-  </sl-menu>
+  <button slTopNavigationTrigger>Frota</button>
+  <div slNavigationMenuContent>
+    <ul slNavigationMenuLinks>
+      <li><a slNavigationMenuLink routerLink="/fleet/vehicles">Veículos</a></li>
+    </ul>
+  </div>
 </li>`,
     }),
   },
@@ -486,18 +487,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'defaults',
     title: 'Decided once for an application',
-    note: 'The provider carries the size, the frame and the words on the icon-only controls for every bar under it — an application in English, at the large step — and a bar that states one itself still wins.',
+    note: 'The provider carries the size and the frame for every bar under it — an application at the large step — and a bar that states one itself still wins. The words on the icon-only controls come from the language in force.',
     snippet: defineSnippet({
       id: 'top-navigation-angular-defaults',
       language: 'ts',
       label: 'The provider',
       source: `@Component({
-  providers: [
-    provideTopNavigationDefaults({
-      messages: { account: 'Account', help: 'Help', more: 'More', search: 'Search' },
-      size: 'lg',
-    }),
-  ],
+  providers: [provideTopNavigationDefaults({ size: 'lg' })],
   template: '<header slTopNavigation>…</header>',
 })
 export class Shell {}`,
@@ -506,7 +502,7 @@ export class Shell {}`,
   {
     id: 'composition',
     title: 'Composed with what sits beside it',
-    note: 'routerLink and routerLinkActive on the destination, which is where aria-current comes from; a badge in the context; a kbd in the search; a menu on a section, on the account and on the workspace; a popover on the bell.',
+    note: 'routerLink and routerLinkActive on the destination, which is where aria-current comes from; a badge in the context; a kbd in the search; a navigation-menu panel on a section, a menu on the account and on the workspace; a popover on the bell.',
     snippet: defineSnippet({
       id: 'top-navigation-angular-composition',
       language: 'angular',
@@ -539,7 +535,7 @@ export class Shell {}`,
   {
     id: 'accessibility',
     title: 'What a reader hears',
-    note: 'A banner landmark holding a navigation landmark with a list of links, one of them current; a button named Mais that expands a panel; a search; and three buttons named for what they open. Nothing is a menubar and nothing writes tabindex.',
+    note: 'A banner landmark holding a navigation landmark with a list of links, one of them current; a button named More that expands a panel; a search; and three buttons named for what they open. Nothing is a menubar and nothing writes tabindex.',
     snippet: defineSnippet({
       id: 'top-navigation-angular-accessibility',
       language: 'angular',
@@ -641,9 +637,9 @@ export const ANGULAR_TOP_NAVIGATION_DOCS = {
       [
         'messages',
         'Partial<TopNavigationMessages>',
-        'the Portuguese strings',
-        'slTopNavigation, provideTopNavigationDefaults',
-        'navigation, more, search, closeSearch, help, notifications, account, skip: the words on the controls that have no visible text',
+        '—',
+        'slTopNavigation',
+        'Words laid over the language in force, key by key — navigation, more, moreCount, search, closeSearch, help, notifications, account, skip: the words on the controls that have no visible text',
       ],
       [
         'value',
@@ -698,7 +694,7 @@ export const ANGULAR_TOP_NAVIGATION_DOCS = {
       ],
       [
         'provideTopNavigationDefaults()',
-        '{ size, frame, landmark, messages }',
+        '{ size, frame, landmark }',
         '—',
         'a component or route’s providers',
         'The decisions an application takes once, through the TOP_NAVIGATION_DEFAULTS token. A bar that states any of them itself still wins',
@@ -719,11 +715,11 @@ export const ANGULAR_TOP_NAVIGATION_DOCS = {
       ],
     ]),
     accessibility: [
-      'The bar is the banner landmark — a header in the context of the body, with no role written — and its destinations are the navigation landmark, a nav named Navegação unless the consumer names it. Inside app-shell the consumer writes a div, because the shell’s banner is already the banner and two banners in one document is what the resolution prevents.',
+      'The bar is the banner landmark — a header in the context of the body, with no role written — and its destinations are the navigation landmark, a nav named Navigation unless the consumer names it. Inside app-shell the consumer writes a div, because the shell’s banner is already the banner and two banners in one document is what the resolution prevents.',
       'The destinations follow the WAI-ARIA APG’s Disclosure Navigation Menu example (w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-navigation/): nav > ul > li > a, so a reader hears a list of so many links, one of them aria-current="page". The Navigation Menubar example’s own caution — that menubar demands functionality a site’s navigation does not need — is why nothing here is a menubar, nothing writes tabindex and no arrow key moves focus: every control is a tab stop.',
-      'more is a button with aria-expanded and aria-controls pointing at the panel, and its name carries the count of what folded — Mais, 3. The panel is built right after the nav, so Tab from more enters it, the way the disclosure pattern assumes; closed, it is visibility: hidden and its rows leave the tab sequence. Escape closes it and returns focus to more.',
-      'The folded destinations are the consumer’s own elements, moved into the panel and back, so a section trigger keeps its menu and a link keeps its badge, its href and the router’s aria-current. Below 480 pixels the name is clipped rather than removed, so the home link keeps its name; help’s label is clipped in the bar and shown in the panel, so help has one name in both places.',
-      'Every icon-only control — the magnifier, the cross, help, the bell, the account, more — carries an accessible name from the family’s messages or the consumer’s aria-label, read with HostAttributeToken before the family writes its own, and repeats it in a tooltip on hover and on visible focus. The count stands inside the bell’s button, so a reader hears Notificações, 3 without the family composing a string.',
+      'more is a button with aria-expanded and aria-controls pointing at the panel, and its name carries the count of what folded — More, 3, the moreCount message. The panel is built right after the nav, so Tab from more enters it, the way the disclosure pattern assumes; closed, it is visibility: hidden and its rows leave the tab sequence. Escape closes it and returns focus to more.',
+      'The folded destinations are the consumer’s own elements, moved into the panel and back, so a section keeps its panel and a link keeps its badge, its href and the router’s aria-current. Below 480 pixels the name is clipped rather than removed, so the home link keeps its name; help’s label is clipped in the bar and shown in the panel, so help has one name in both places.',
+      'Every icon-only control — the magnifier, the cross, help, the bell, the account, more — carries an accessible name from the family’s messages or the consumer’s aria-label, read with HostAttributeToken before the family writes its own, and repeats it in a tooltip on hover and on visible focus. The count stands inside the bell’s button, so a reader hears Notifications, 3 without the family composing a string.',
       'Below 600 pixels the open search moves focus into the field and the closed search returns it to the magnifier, unless focus already went somewhere else — which is what closed it. A disabled destination is aria-disabled with its href kept: perceivable, focusable, refused on press. The item carries data-disabled and never aria-disabled, which ARIA 1.2 deprecates on listitem.',
     ],
     snippets: [
@@ -732,14 +728,14 @@ export const ANGULAR_TOP_NAVIGATION_DOCS = {
         language: 'angular',
         label: 'Anatomy, as it reaches the DOM',
         source: `<header data-ui="top-navigation" data-part="root" data-size="md" data-frame>
-  <a data-part="skip" href="#conteudo">Saltar para o conteúdo</a>
+  <a data-part="skip" href="#conteudo">Skip to content</a>
   <div data-part="brand">
     <a data-part="home" href="/">
       <span data-part="mark" aria-hidden="true">…</span>
       <span data-part="name">Aurora Logística</span>
     </a>
   </div>
-  <nav data-part="nav" aria-label="Navegação">
+  <nav data-part="nav" aria-label="Navigation">
     <ul data-part="list">
       <li data-part="item" data-value="painel" data-priority="high" data-current>
         <a data-part="link" href="/painel" aria-current="page" data-current>Painel</a>
@@ -748,7 +744,7 @@ export const ANGULAR_TOP_NAVIGATION_DOCS = {
       <li data-part="item">
         <button
           data-part="more"
-          aria-label="Mais, 1"
+          aria-label="More, 1"
           aria-expanded="false"
           aria-controls="p"
           data-overflow="1"
@@ -758,15 +754,15 @@ export const ANGULAR_TOP_NAVIGATION_DOCS = {
   </nav>
   <div data-part="panel" id="p"><ul data-part="panel-list"></ul></div>
   <div data-part="search">
-    …<button data-part="search-close" aria-label="Fechar procura"></button>
+    …<button data-part="search-close" aria-label="Close search"></button>
   </div>
   <div data-part="actions">
-    <button data-part="search-toggle" aria-label="Procurar"></button>
-    <a data-part="help" href="/ajuda">Ajuda</a>
-    <button data-part="notifications" aria-label="Notificações">
+    <button data-part="search-toggle" aria-label="Search"></button>
+    <a data-part="help" href="/ajuda">Help</a>
+    <button data-part="notifications" aria-label="Notifications">
       <span data-part="count">3</span>
     </button>
-    <button data-part="account" aria-label="Conta">…</button>
+    <button data-part="account" aria-label="Account">…</button>
   </div>
 </header>`,
       }),

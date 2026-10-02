@@ -6,6 +6,12 @@ import type { PresenceStatus } from '@slotted/core/presence';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import { SlAppShellBanner } from '@slotted/angular/app-shell';
+import { injectMessages } from '@slotted/angular/i18n';
+import {
+  topNavigationMessages,
+  type PartialMessages,
+  type TopNavigationMessages,
+} from '@slotted/core/i18n';
 import {
   booleanAttribute,
   ChangeDetectionStrategy,
@@ -28,7 +34,6 @@ import {
   TOP_NAVIGATION_COLLAPSE_AT,
 } from './top-navigation-defaults';
 import type {
-  TopNavigationMessages,
   TopNavigationMoreReason,
   TopNavigationPriority,
   TopNavigationSearchReason,
@@ -38,7 +43,6 @@ import type {
 
 export type {
   TopNavigationDefaults,
-  TopNavigationMessages,
   TopNavigationMoreReason,
   TopNavigationPriority,
   TopNavigationSearchReason,
@@ -80,7 +84,7 @@ interface ItemRecord {
   standalone: true,
   exportAs: 'slTopNavigation',
   template: `@if (skipTo()) {
-      <a data-part="skip" [attr.href]="'#' + skipTo()">{{ resolvedMessages().skip }}</a>
+      <a data-part="skip" [attr.href]="'#' + skipTo()">{{ t('skip') }}</a>
     }
     <ng-content />`,
   styleUrl: '../../../styles/src/top-navigation/top-navigation.css',
@@ -121,7 +125,12 @@ export class SlTopNavigation {
   });
   /** The id of the element the skip link jumps to. Absent, no skip link is rendered. */
   readonly skipTo = input<string | undefined>(undefined);
-  readonly messages = input<Partial<TopNavigationMessages> | undefined>(undefined);
+  /**
+   * Words laid over the catalog of the language in force, key by key: the
+   * landmark's name, the names of the controls with no visible text, and the
+   * skip link. A static `aria-label` on a part still wins.
+   */
+  readonly messages = input<PartialMessages<TopNavigationMessages> | undefined>(undefined);
 
   /** One output for one transition, carrying the reason and the event. */
   readonly valueChangeRequest = output<ChangeRequest<string | null>>();
@@ -145,10 +154,8 @@ export class SlTopNavigation {
   readonly resolvedLandmark = computed(
     () => this.landmark() ?? (this.shell === null ? this.defaults.landmark : false),
   );
-  readonly resolvedMessages = computed<TopNavigationMessages>(() => ({
-    ...this.defaults.messages,
-    ...this.messages(),
-  }));
+  /** The family's words in the language in force, with this bar's `messages` laid over them. */
+  readonly t = injectMessages(topNavigationMessages, this.messages);
 
   /** The three steps, measured: each gate reports once per crossing. */
   private readonly underLow = signal(false);

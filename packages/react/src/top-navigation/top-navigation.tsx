@@ -1,6 +1,7 @@
 import '@slotted/styles/top-navigation/top-navigation.css';
 
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { topNavigationMessages } from '@slotted/core/i18n';
 import { COMPACT_BELOW, createWidthGate } from '@slotted/core/measure';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
@@ -18,6 +19,7 @@ import {
 } from 'react';
 
 import { useAppShellIfPresent } from '../app-shell';
+import { useMessages } from '../i18n';
 import { useTopNavigationDefaults } from './top-navigation-defaults';
 import type {
   TopNavigationContextValue,
@@ -120,10 +122,7 @@ export function TopNavigation({
    */
   const resolvedLandmark = landmark ?? (shell === undefined ? defaults.landmark : false);
   const resolvedFrame = frame ?? (shell === undefined ? defaults.frame : false);
-  const resolvedMessages = useMemo(
-    () => ({ ...defaults.messages, ...messages }),
-    [defaults.messages, messages],
-  );
+  const t = useMessages(topNavigationMessages, messages);
   const resolvedSize = size ?? defaults.size;
 
   const [ownValue, setOwnValue] = useState<string | null>(defaultValue ?? null);
@@ -364,7 +363,6 @@ export function TopNavigation({
       hasHelp,
       hasSearch,
       ids,
-      messages: resolvedMessages,
       panelHolds,
       moreNode,
       moreOpen: currentMoreOpen,
@@ -389,6 +387,7 @@ export function TopNavigation({
       setSearchOpen,
       setSearchToggleNode,
       size: resolvedSize,
+      t,
       value: currentValue,
     }),
     [
@@ -408,13 +407,13 @@ export function TopNavigation({
       panelNode,
       panelStatus,
       registerItem,
-      resolvedMessages,
       resolvedSize,
       searchNode,
       searchToggleNode,
       select,
       setMoreOpen,
       setSearchOpen,
+      t,
       underHigh,
       underMedium,
     ],
@@ -426,7 +425,7 @@ export function TopNavigation({
       <>
         {skipTo !== undefined ? (
           <a data-part="skip" href={`#${skipTo}`}>
-            {resolvedMessages.skip}
+            {t('skip')}
           </a>
         ) : null}
         {children}

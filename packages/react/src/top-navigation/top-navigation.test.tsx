@@ -1,8 +1,15 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/top-navigation/contract.json';
 import { AppShell, AppShellBanner } from '../app-shell';
+import { SlottedProvider } from '../i18n';
+import {
+  NavigationMenuContent,
+  NavigationMenuLink,
+  NavigationMenuLinks,
+} from '../navigation-menu/navigation-menu-parts';
 import { TopNavigation } from './top-navigation';
 import { TopNavigationDefaultsProvider } from './top-navigation-defaults';
 import {
@@ -40,7 +47,16 @@ function widthOf(pixels: number) {
   });
 }
 
+/** The bar the tests read, in Brazilian Portuguese: the words come from the pt-BR catalog. */
 function Bar(props: Partial<TopNavigationProps>) {
+  return (
+    <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+      <Bare {...props} />
+    </SlottedProvider>
+  );
+}
+
+function Bare(props: Partial<TopNavigationProps>) {
   return (
     <TopNavigation skipTo="conteudo" {...props}>
       <TopNavigationBrand>
@@ -64,6 +80,13 @@ function Bar(props: Partial<TopNavigationProps>) {
           </TopNavigationItem>
           <TopNavigationItem value="frota">
             <TopNavigationTrigger>Frota</TopNavigationTrigger>
+            <NavigationMenuContent>
+              <NavigationMenuLinks>
+                <li>
+                  <NavigationMenuLink href="#veiculos">Veículos</NavigationMenuLink>
+                </li>
+              </NavigationMenuLinks>
+            </NavigationMenuContent>
           </TopNavigationItem>
           <TopNavigationItem priority="low" value="relatorios">
             <TopNavigationLink href="#relatorios">Relatórios</TopNavigationLink>
@@ -115,7 +138,16 @@ describe('TopNavigation', () => {
     expect(root()).toHaveAttribute('data-size', 'md');
     expect(part('nav')).toHaveAttribute('aria-label', 'Navegação');
     expect(part('skip')).toHaveAttribute('href', '#conteudo');
-    expect(part('skip')).toHaveTextContent('Saltar para o conteúdo');
+    expect(part('skip')).toHaveTextContent('Pular para o conteúdo');
+  });
+
+  it('speaks the base catalog without a provider, and lays its own messages over it', () => {
+    widthOf(1280);
+    render(<Bare messages={{ account: 'Profile' }} />);
+    expect(part('nav')).toHaveAttribute('aria-label', 'Navigation');
+    expect(part('skip')).toHaveTextContent('Skip to content');
+    expect(part('more')).toHaveAttribute('aria-label', 'More');
+    expect(part('account')).toHaveAttribute('aria-label', 'Profile');
   });
 
   /** The shell's banner is already the banner landmark and already paints. */
@@ -153,7 +185,7 @@ describe('TopNavigation', () => {
     expect(part('more')).toHaveAttribute('aria-label', 'Mais');
     expect(part('more')).toHaveAttribute('aria-expanded', 'false');
     expect(part('more').getAttribute('aria-controls')).toBe(part('panel').id);
-    expect(part('search-toggle')).toHaveAttribute('aria-label', 'Procurar');
+    expect(part('search-toggle')).toHaveAttribute('aria-label', 'Pesquisar');
 
     /* Each control leads with the family's mark, and the section's trigger ends in one. */
     const mark = (name: string) =>
@@ -304,6 +336,42 @@ describe('TopNavigation', () => {
     expect(part('panel')).not.toHaveAttribute('data-open');
   });
 
+  it('is a navigation menu: a section opens its panel on the surface after the list', () => {
+    widthOf(1280);
+    const onValueChange = vi.fn();
+    render(<Bar />);
+    const nav = part('nav');
+    expect(nav).toHaveAttribute('data-ui', 'navigation-menu');
+    const trigger = item('frota').querySelector('[data-part="trigger"]') as HTMLElement;
+    const panel = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
+    expect(trigger.nextElementSibling).toBe(panel);
+    expect(panel).toHaveAttribute('hidden');
+    fireEvent.click(trigger, { detail: 1 });
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(item('frota')).toHaveAttribute('data-open');
+    expect(nav.querySelector(':scope > [data-part="viewport"]')).toHaveAttribute('data-open');
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  it('opens a folded section in line inside the panel, and a link there closes both', () => {
+    widthOf(400);
+    const onMoreOpenChange = vi.fn();
+    render(<Bar defaultMoreOpen onMoreOpenChange={onMoreOpenChange} />);
+    expect(part('panel-list')).toContainElement(item('frota'));
+    const trigger = item('frota').querySelector('[data-part="trigger"]') as HTMLElement;
+    fireEvent.click(trigger, { detail: 1 });
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(part('nav').querySelector(':scope > [data-part="viewport"]')).not.toHaveAttribute(
+      'data-open',
+    );
+    fireEvent.click(document.querySelector('a[href="#veiculos"]') as HTMLElement, { detail: 1 });
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(onMoreOpenChange).toHaveBeenLastCalledWith(
+      false,
+      expect.objectContaining({ reason: 'select' }),
+    );
+  });
+
   it('closes the panel on Escape and returns focus to more', () => {
     widthOf(400);
     const onMoreOpenChange = vi.fn();
@@ -381,8 +449,8 @@ describe('TopNavigation', () => {
   it('takes its defaults from the provider and lets the bar win', () => {
     widthOf(1280);
     render(
-      <TopNavigationDefaultsProvider frame={false} messages={{ more: 'Outros' }} size="lg">
-        <Bar />
+      <TopNavigationDefaultsProvider frame={false} size="lg">
+        <Bar messages={{ more: 'Outros' }} />
       </TopNavigationDefaultsProvider>,
     );
     expect(root()).toHaveAttribute('data-size', 'lg');

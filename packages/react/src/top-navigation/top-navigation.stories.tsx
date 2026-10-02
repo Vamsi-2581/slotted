@@ -39,6 +39,13 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from '../popover';
+import {
+  NavigationMenuContent,
+  NavigationMenuDescription,
+  NavigationMenuLabel,
+  NavigationMenuLink,
+  NavigationMenuLinks,
+} from '../navigation-menu/navigation-menu-parts';
 import { Page, PageBody } from '../page';
 import {
   PageHeader,
@@ -196,22 +203,39 @@ function Brand({ name = 'Aurora Logística' }: { name?: string }) {
   );
 }
 
-/** The section that opens a menu: Frota, after Cargas. */
+/** The section that opens a panel of destinations: Frota, after Cargas. */
 function Fleet() {
   return (
     <TopNavigationItem value="frota">
-      <Menu align="start" side="bottom">
-        <MenuTrigger
-          render={(props) => <TopNavigationTrigger {...props}>Frota</TopNavigationTrigger>}
-        />
-        <MenuContent>
-          <MenuItem>Veículos</MenuItem>
-          <MenuItem>Motoristas</MenuItem>
-          <MenuItem>Manutenção</MenuItem>
-          <MenuSeparator />
-          <MenuItem>Novo veículo…</MenuItem>
-        </MenuContent>
-      </Menu>
+      <TopNavigationTrigger>Frota</TopNavigationTrigger>
+      <NavigationMenuContent columns={2}>
+        <NavigationMenuLinks>
+          <li>
+            <NavigationMenuLink href="#veiculos">
+              <NavigationMenuLabel>Veículos</NavigationMenuLabel>
+              <NavigationMenuDescription>
+                Matrículas, lotação e documentos.
+              </NavigationMenuDescription>
+            </NavigationMenuLink>
+          </li>
+          <li>
+            <NavigationMenuLink href="#motoristas">
+              <NavigationMenuLabel>Motoristas</NavigationMenuLabel>
+              <NavigationMenuDescription>
+                Escalas, cartas e horas de condução.
+              </NavigationMenuDescription>
+            </NavigationMenuLink>
+          </li>
+          <li>
+            <NavigationMenuLink href="#manutencao">
+              <NavigationMenuLabel>Manutenção</NavigationMenuLabel>
+              <NavigationMenuDescription>
+                Revisões marcadas e avarias abertas.
+              </NavigationMenuDescription>
+            </NavigationMenuLink>
+          </li>
+        </NavigationMenuLinks>
+      </NavigationMenuContent>
     </TopNavigationItem>
   );
 }
@@ -482,16 +506,16 @@ export const Anatomy: Story = {
               <TopNavigationLink href="#link">link</TopNavigationLink>
             </TopNavigationItem>
             <TopNavigationItem priority="high" value="trigger">
-              <Menu>
-                <MenuTrigger
-                  render={(props) => (
-                    <TopNavigationTrigger {...props}>trigger › indicator</TopNavigationTrigger>
-                  )}
-                />
-                <MenuContent>
-                  <MenuItem>menu › item</MenuItem>
-                </MenuContent>
-              </Menu>
+              <TopNavigationTrigger>trigger › indicator</TopNavigationTrigger>
+              <NavigationMenuContent>
+                <NavigationMenuLinks>
+                  <li>
+                    <NavigationMenuLink href="#content">
+                      navigation-menu › content › link
+                    </NavigationMenuLink>
+                  </li>
+                </NavigationMenuLinks>
+              </NavigationMenuContent>
             </TopNavigationItem>
             <TopNavigationItem priority="low" value="folded">
               <TopNavigationLink href="#folded">item priority=low</TopNavigationLink>
@@ -680,7 +704,7 @@ export const Sections: Story = {
       </Scene>
       <Scene
         label="Two sections side by side"
-        note="Operações and Administração as two triggers with two menus; only one is open at a time, because each Menu owns its own state."
+        note="Operações and Administração as two sections of one navigation menu: one surface, one open at a time, and moving the pointer from one to the other switches without a delay."
       >
         <Stage room="laptop" tall>
           <TopNavigation>
@@ -688,32 +712,36 @@ export const Sections: Story = {
             <TopNavigationNav>
               <TopNavigationList>
                 <TopNavigationItem priority="high" value="operacoes">
-                  <Menu align="start">
-                    <MenuTrigger
-                      render={(props) => (
-                        <TopNavigationTrigger {...props}>Operações</TopNavigationTrigger>
-                      )}
-                    />
-                    <MenuContent>
-                      <MenuItem>Cargas</MenuItem>
-                      <MenuItem>Rotas</MenuItem>
-                      <MenuItem>Entregas</MenuItem>
-                    </MenuContent>
-                  </Menu>
+                  <TopNavigationTrigger>Operações</TopNavigationTrigger>
+                  <NavigationMenuContent>
+                    <NavigationMenuLinks>
+                      <li>
+                        <NavigationMenuLink href="#cargas">Cargas</NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink href="#rotas">Rotas</NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink href="#entregas">Entregas</NavigationMenuLink>
+                      </li>
+                    </NavigationMenuLinks>
+                  </NavigationMenuContent>
                 </TopNavigationItem>
                 <TopNavigationItem priority="high" value="administracao">
-                  <Menu align="start">
-                    <MenuTrigger
-                      render={(props) => (
-                        <TopNavigationTrigger {...props}>Administração</TopNavigationTrigger>
-                      )}
-                    />
-                    <MenuContent>
-                      <MenuItem>Utilizadores</MenuItem>
-                      <MenuItem>Faturação</MenuItem>
-                      <MenuItem>Integrações</MenuItem>
-                    </MenuContent>
-                  </Menu>
+                  <TopNavigationTrigger>Administração</TopNavigationTrigger>
+                  <NavigationMenuContent>
+                    <NavigationMenuLinks>
+                      <li>
+                        <NavigationMenuLink href="#utilizadores">Utilizadores</NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink href="#faturacao">Faturação</NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink href="#integracoes">Integrações</NavigationMenuLink>
+                      </li>
+                    </NavigationMenuLinks>
+                  </NavigationMenuContent>
                 </TopNavigationItem>
               </TopNavigationList>
             </TopNavigationNav>
@@ -1076,17 +1104,17 @@ export const Content: Story = {
                   <TopNavigationLink href="#shahnat">الشحنات</TopNavigationLink>
                 </TopNavigationItem>
                 <TopNavigationItem value="masarat">
-                  <Menu align="start" side="bottom">
-                    <MenuTrigger
-                      render={(props) => (
-                        <TopNavigationTrigger {...props}>الأسطول</TopNavigationTrigger>
-                      )}
-                    />
-                    <MenuContent>
-                      <MenuItem>المركبات</MenuItem>
-                      <MenuItem>السائقون</MenuItem>
-                    </MenuContent>
-                  </Menu>
+                  <TopNavigationTrigger>الأسطول</TopNavigationTrigger>
+                  <NavigationMenuContent>
+                    <NavigationMenuLinks>
+                      <li>
+                        <NavigationMenuLink href="#markabat">المركبات</NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink href="#saiqun">السائقون</NavigationMenuLink>
+                      </li>
+                    </NavigationMenuLinks>
+                  </NavigationMenuContent>
                 </TopNavigationItem>
               </TopNavigationList>
             </TopNavigationNav>
@@ -1196,22 +1224,10 @@ export const Defaults: Story = {
   render: () => (
     <Grid columns={1}>
       <Scene
-        label="An application in English, at the large step"
-        note="The provider carries the words the icon-only controls are named by — hover the bell — and the size; the bar states neither."
+        label="An application at the large step"
+        note="The provider carries the size; the bar does not state it. The words the icon-only controls are named by — hover the bell — come from the language in force."
       >
-        <TopNavigationDefaultsProvider
-          messages={{
-            account: 'Account',
-            closeSearch: 'Close search',
-            help: 'Help',
-            more: 'More',
-            navigation: 'Navigation',
-            notifications: 'Notifications',
-            search: 'Search',
-            skip: 'Skip to content',
-          }}
-          size="lg"
-        >
+        <TopNavigationDefaultsProvider size="lg">
           <Stage room="laptop">
             <TopNavigation defaultValue="painel">
               <Brand />

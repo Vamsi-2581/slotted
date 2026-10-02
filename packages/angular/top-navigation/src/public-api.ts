@@ -1,7 +1,6 @@
 export { SlTopNavigation, TOP_NAVIGATION_CONTROL_SELECTOR } from './top-navigation';
 export type {
   TopNavigationDefaults,
-  TopNavigationMessages,
   TopNavigationMoreReason,
   TopNavigationPriority,
   TopNavigationSearchReason,
@@ -9,7 +8,6 @@ export type {
   TopNavigationValueReason,
 } from './top-navigation';
 export {
-  DEFAULT_TOP_NAVIGATION_MESSAGES,
   injectTopNavigationDefaults,
   provideTopNavigationDefaults,
   SlTopNavigationIdFactory,

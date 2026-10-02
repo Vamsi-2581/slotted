@@ -43,7 +43,13 @@
         >Homologação</span
       >
     </div>
-    <nav data-part="nav" aria-label="Navegação">
+    <nav
+      data-part="nav"
+      data-ui="navigation-menu"
+      data-orientation="horizontal"
+      data-size="md"
+      aria-label="Navegação"
+    >
       <ul data-part="list">
         <li data-part="item" data-priority="high" data-current="">
           <a data-part="link" href="#painel" aria-current="page" data-current="">Painel</a>
@@ -55,12 +61,24 @@
           <a data-part="link" href="#rotas">Rotas</a>
         </li>
         <li data-part="item" data-priority="medium">
-          <button data-part="trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+          <button
+            data-part="trigger"
+            aria-controls="tn-section-1"
+            type="button"
+            aria-expanded="false"
+          >
             Frota<span data-part="indicator" aria-hidden="true"
               ><span data-ui="icon" data-part="root" aria-hidden="true"
                 ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
+          <div data-part="content" id="tn-section-1" data-columns="1" hidden>
+            <ul data-part="links">
+              <li><a data-part="link" href="#veiculos">Veículos</a></li>
+              <li><a data-part="link" href="#motoristas">Motoristas</a></li>
+              <li><a data-part="link" href="#manutencao">Manutenção</a></li>
+            </ul>
+          </div>
         </li>
         <li data-part="item" data-priority="low">
           <a data-part="link" href="#relatorios">Relatórios</a>
@@ -82,6 +100,7 @@
           </button>
         </li>
       </ul>
+      <div data-part="viewport"></div>
     </nav>
     <div data-part="panel" id="tn-panel">
       <ul data-part="panel-list"></ul>
@@ -127,7 +146,7 @@
         ></span>
         <span data-part="count">3</span>
       </button>
-      <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta">
+      <button data-part="account" type="button" aria-label="Conta">
         <span
           data-ui="avatar"
           data-part="root"
@@ -175,7 +194,13 @@
           <span data-part="name">Aurora Logística</span>
         </a>
       </div>
-      <nav data-part="nav" aria-label="Navegação">
+      <nav
+        data-part="nav"
+        data-ui="navigation-menu"
+        data-orientation="horizontal"
+        data-size="md"
+        aria-label="Navegação"
+      >
         <ul data-part="list">
           <li data-part="item">
             <button
@@ -194,6 +219,7 @@
             </button>
           </li>
         </ul>
+        <div data-part="viewport"></div>
       </nav>
       <div data-part="panel" id="tn-panel-open" data-open="">
         <div data-part="context">
@@ -216,13 +242,26 @@
           <li data-part="item" data-priority="medium" data-collapsed="">
             <a data-part="link" href="#rotas">Rotas</a>
           </li>
-          <li data-part="item" data-priority="medium" data-collapsed="">
-            <button data-part="trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+          <li data-part="item" data-priority="medium" data-collapsed="" data-open="">
+            <button
+              data-part="trigger"
+              aria-controls="tn-section-2"
+              type="button"
+              aria-expanded="true"
+              data-open=""
+            >
               Frota<span data-part="indicator" aria-hidden="true"
                 ><span data-ui="icon" data-part="root" aria-hidden="true"
                   ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
               ></span>
             </button>
+            <div data-part="content" id="tn-section-2" data-columns="1" data-open="">
+              <ul data-part="links">
+                <li><a data-part="link" href="#veiculos">Veículos</a></li>
+                <li><a data-part="link" href="#motoristas">Motoristas</a></li>
+                <li><a data-part="link" href="#manutencao">Manutenção</a></li>
+              </ul>
+            </div>
           </li>
           <li data-part="item" data-priority="low" data-collapsed="">
             <a data-part="link" href="#relatorios">Relatórios</a>
@@ -249,7 +288,7 @@
           ></span>
           <span data-part="count">12</span>
         </button>
-        <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta">
+        <button data-part="account" type="button" aria-label="Conta">
           <span
             data-ui="avatar"
             data-part="root"
@@ -286,7 +325,13 @@
         <span data-part="name">Aurora Logística</span>
       </a>
     </div>
-    <nav data-part="nav" aria-label="Navegação">
+    <nav
+      data-part="nav"
+      data-ui="navigation-menu"
+      data-orientation="horizontal"
+      data-size="md"
+      aria-label="Navegação"
+    >
       <ul data-part="list">
         <li data-part="item" data-priority="high">
           <a data-part="link" href="#painel">Painel</a>
@@ -299,6 +344,7 @@
           </button>
         </li>
       </ul>
+      <div data-part="viewport"></div>
     </nav>
     <div data-part="search">
       <div data-ui="text-field" data-part="root" data-size="md" data-variant="subtle">
@@ -322,7 +368,7 @@
           ><svg data-part="glyph" data-glyph="search"></svg
         ></span>
       </button>
-      <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta">
+      <button data-part="account" type="button" aria-label="Conta">
         <span
           data-ui="avatar"
           data-part="root"
@@ -362,7 +408,13 @@
         <span data-part="name">Cadence</span>
       </span>
     </div>
-    <nav data-part="nav" aria-label="Navegação">
+    <nav
+      data-part="nav"
+      data-ui="navigation-menu"
+      data-orientation="horizontal"
+      data-size="md"
+      aria-label="Navegação"
+    >
       <ul data-part="list">
         <li data-part="item" data-priority="high" data-current="">
           <a data-part="link" href="#corrente" aria-current="page" data-current="">Corrente</a>
@@ -370,8 +422,8 @@
         <li data-part="item" data-priority="high">
           <button
             data-part="trigger"
+            aria-controls="tn-section-3"
             type="button"
-            aria-haspopup="menu"
             aria-expanded="true"
             data-open=""
           >
@@ -380,6 +432,13 @@
                 ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
+          <div data-part="content" id="tn-section-3" data-columns="1" hidden>
+            <ul data-part="links">
+              <li><a data-part="link" href="#veiculos">Veículos</a></li>
+              <li><a data-part="link" href="#motoristas">Motoristas</a></li>
+              <li><a data-part="link" href="#manutencao">Manutenção</a></li>
+            </ul>
+          </div>
         </li>
         <li data-part="item" data-priority="high" data-disabled="">
           <a data-part="link" href="#desativada" aria-disabled="true">Desativada</a>
@@ -387,8 +446,8 @@
         <li data-part="item" data-priority="high">
           <button
             data-part="trigger"
+            aria-controls="tn-section-4"
             type="button"
-            aria-haspopup="menu"
             aria-expanded="false"
             disabled
           >
@@ -397,6 +456,9 @@
                 ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
+          <div data-part="content" id="tn-section-4" data-columns="1" hidden>
+            <ul data-part="links"></ul>
+          </div>
         </li>
         <li data-part="item" data-priority="low">
           <a data-part="link" href="#dobrada">Dobrada</a>
@@ -416,6 +478,7 @@
           </button>
         </li>
       </ul>
+      <div data-part="viewport"></div>
     </nav>
     <div data-part="actions">
       <button data-part="search-toggle" type="button" aria-label="Procurar">
@@ -434,7 +497,7 @@
         ></span>
         <span data-part="count">128</span>
       </button>
-      <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta" disabled>
+      <button data-part="account" type="button" aria-label="Conta" disabled>
         <span
           data-ui="avatar"
           data-part="root"
@@ -504,7 +567,13 @@
               <span data-part="name">Aurora Logística</span>
             </a>
           </div>
-          <nav data-part="nav" aria-label="Navegação">
+          <nav
+            data-part="nav"
+            data-ui="navigation-menu"
+            data-orientation="horizontal"
+            data-size="md"
+            aria-label="Navegação"
+          >
             <ul data-part="list">
               <li data-part="item" data-priority="high" data-current="">
                 <a data-part="link" href="#painel" aria-current="page" data-current="">Painel</a>
@@ -523,6 +592,7 @@
                 </button>
               </li>
             </ul>
+            <div data-part="viewport"></div>
           </nav>
           <div data-part="search">
             <div data-ui="text-field" data-part="root" data-size="md" data-variant="subtle">
@@ -557,7 +627,7 @@
               ></span>
               <span data-part="count">3</span>
             </button>
-            <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta">
+            <button data-part="account" type="button" aria-label="Conta">
               <span
                 data-ui="avatar"
                 data-part="root"
@@ -572,8 +642,16 @@
           </div>
         </div>
       </header>
-      <nav data-part="nav" id="tn-shell-nav" aria-label="Navegação principal">
+      <nav
+        data-part="nav"
+        data-ui="navigation-menu"
+        data-orientation="horizontal"
+        data-size="md"
+        id="tn-shell-nav"
+        aria-label="Navegação principal"
+      >
         <div data-part="nav-body"></div>
+        <div data-part="viewport"></div>
       </nav>
       <main data-part="main" id="conteudo" tabindex="-1"></main>
     </div>
@@ -601,7 +679,13 @@
           <span data-part="name">Pequena</span>
         </a>
       </div>
-      <nav data-part="nav" aria-label="Navegação">
+      <nav
+        data-part="nav"
+        data-ui="navigation-menu"
+        data-orientation="horizontal"
+        data-size="md"
+        aria-label="Navegação"
+      >
         <ul data-part="list">
           <li data-part="item" data-priority="high" data-current="">
             <a data-part="link" href="#a" aria-current="page" data-current="">Painel</a>
@@ -615,6 +699,7 @@
             </button>
           </li>
         </ul>
+        <div data-part="viewport"></div>
       </nav>
       <div data-part="actions">
         <button data-part="search-toggle" type="button" aria-label="Procurar">
@@ -659,7 +744,13 @@
           <span data-part="name">Média</span>
         </a>
       </div>
-      <nav data-part="nav" aria-label="Navegação">
+      <nav
+        data-part="nav"
+        data-ui="navigation-menu"
+        data-orientation="horizontal"
+        data-size="md"
+        aria-label="Navegação"
+      >
         <ul data-part="list">
           <li data-part="item" data-priority="high" data-current="">
             <a data-part="link" href="#a" aria-current="page" data-current="">Painel</a>
@@ -673,6 +764,7 @@
             </button>
           </li>
         </ul>
+        <div data-part="viewport"></div>
       </nav>
       <div data-part="actions">
         <button data-part="search-toggle" type="button" aria-label="Procurar">
@@ -717,7 +809,13 @@
           <span data-part="name">Grande</span>
         </a>
       </div>
-      <nav data-part="nav" aria-label="Navegação">
+      <nav
+        data-part="nav"
+        data-ui="navigation-menu"
+        data-orientation="horizontal"
+        data-size="md"
+        aria-label="Navegação"
+      >
         <ul data-part="list">
           <li data-part="item" data-priority="high" data-current="">
             <a data-part="link" href="#a" aria-current="page" data-current="">Painel</a>
@@ -731,6 +829,7 @@
             </button>
           </li>
         </ul>
+        <div data-part="viewport"></div>
       </nav>
       <div data-part="actions">
         <button data-part="search-toggle" type="button" aria-label="Procurar">
@@ -782,7 +881,13 @@
         >
       </a>
     </div>
-    <nav data-part="nav" aria-label="Navegação">
+    <nav
+      data-part="nav"
+      data-ui="navigation-menu"
+      data-orientation="horizontal"
+      data-size="md"
+      aria-label="Navegação"
+    >
       <ul data-part="list">
         <li data-part="item" data-priority="high" data-current="">
           <a data-part="link" href="#a" aria-current="page" data-current=""
@@ -793,12 +898,24 @@
           <a data-part="link" href="#b">Planeamento de rotas</a>
         </li>
         <li data-part="item" data-priority="low">
-          <button data-part="trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+          <button
+            data-part="trigger"
+            aria-controls="tn-section-5"
+            type="button"
+            aria-expanded="false"
+          >
             Relatórios e indicadores<span data-part="indicator" aria-hidden="true"
               ><span data-ui="icon" data-part="root" aria-hidden="true"
                 ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
+          <div data-part="content" id="tn-section-5" data-columns="1" hidden>
+            <ul data-part="links">
+              <li><a data-part="link" href="#veiculos">Veículos</a></li>
+              <li><a data-part="link" href="#motoristas">Motoristas</a></li>
+              <li><a data-part="link" href="#manutencao">Manutenção</a></li>
+            </ul>
+          </div>
         </li>
         <li data-part="item">
           <button data-part="more" type="button" aria-label="Mais" aria-expanded="false">
@@ -808,6 +925,7 @@
           </button>
         </li>
       </ul>
+      <div data-part="viewport"></div>
     </nav>
     <div data-part="actions">
       <button data-part="search-toggle" type="button" aria-label="Procurar">
@@ -820,7 +938,7 @@
           ><svg data-part="glyph" data-glyph="bell"></svg></span
         ><span data-part="count">99+</span>
       </button>
-      <button data-part="account" type="button" aria-haspopup="menu">
+      <button data-part="account" type="button">
         <span
           data-ui="avatar"
           data-part="root"

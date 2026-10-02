@@ -3,6 +3,11 @@ import type { FocusEvent, HTMLAttributes, KeyboardEvent, MouseEvent, ReactNode, 
 import { createPortal } from 'react-dom';
 
 import { Glyph, Icon } from '../icon';
+import { NavigationMenu } from '../navigation-menu/navigation-menu';
+import {
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+} from '../navigation-menu/navigation-menu-parts';
 import type { GlyphName } from '../icon';
 import { Tooltip } from '../tooltip';
 import { TooltipContent, TooltipLayer, TooltipTrigger } from '../tooltip/tooltip-parts';
@@ -24,7 +29,6 @@ import type {
   TopNavigationSearchProps,
   TopNavigationSpanPartProps,
   TopNavigationTriggerProps,
-  TopNavigationTriggerRootProps,
 } from './top-navigation.types';
 
 /** Two refs on one element: the family's, and whatever the consumer passed. */
@@ -179,22 +183,50 @@ export function TopNavigationContext({
  * sight and out of the tab order by the stylesheet's `visibility`.
  */
 export function TopNavigationNav({
+  arrow,
   children,
+  closeDelay,
+  closeOnSelect,
+  defaultValue,
   'aria-label': ariaLabel,
+  onValueChange,
+  openDelay,
   ref,
   render,
+  value,
   ...nativeProps
 }: TopNavigationNavProps) {
   const navigation = useTopNavigation();
-  const rootProps = {
-    ...nativeProps,
-    'aria-label': ariaLabel ?? navigation.messages.navigation,
-    children,
-    'data-part': 'nav',
-  };
   return (
     <>
-      {render !== undefined ? render(rootProps) : <nav {...rootProps} ref={ref} />}
+      <NavigationMenu
+        aria-label={ariaLabel ?? navigation.t('navigation')}
+        arrow={arrow}
+        closeDelay={closeDelay}
+        closeOnSelect={closeOnSelect}
+        defaultValue={defaultValue}
+        onValueChange={(next, request) => {
+          onValueChange?.(next, request);
+          /* A destination followed inside the overflow panel closes the panel too. */
+          if (request.reason === 'select' && !request.cancelled && navigation.moreOpen) {
+            navigation.setMoreOpen(false, 'select', request.source);
+          }
+        }}
+        openDelay={openDelay}
+        render={(menu) => {
+          /* One element, two families: the menu's root and the bar's nav part. */
+          const rootProps = { ...nativeProps, ...menu, 'data-part': 'nav' };
+          return render !== undefined ? (
+            render(rootProps)
+          ) : (
+            <nav {...rootProps} ref={(node) => attach(node, menu.ref, ref)} />
+          );
+        }}
+        size={navigation.size}
+        value={value}
+      >
+        {children}
+      </NavigationMenu>
       <Panel />
     </>
   );
@@ -252,8 +284,8 @@ function More() {
   const navigation = useTopNavigation();
   const label =
     navigation.collapsed.length > 0
-      ? `${navigation.messages.more}, ${navigation.collapsed.length}`
-      : navigation.messages.more;
+      ? navigation.t('moreCount', { count: navigation.collapsed.length })
+      : navigation.t('more');
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     navigation.setMoreOpen(!navigation.moreOpen, activationReason(event), event.nativeEvent);
@@ -338,12 +370,23 @@ export function TopNavigationItem({
     'data-value': value,
   };
 
-  const element = render !== undefined ? render(rootProps) : <li {...rootProps} ref={ref} />;
   const inPanel = collapsed && navigation.panelPresent && navigation.panelListNode !== null;
 
   return (
     <ItemContext.Provider value={context}>
-      {inPanel ? createPortal(element, navigation.panelListNode as HTMLElement) : element}
+      <NavigationMenuItem
+        disabled={disabled}
+        render={(menuItem) => {
+          /* The section's open state is the menu's; the rest is the bar's. */
+          const props = {
+            ...rootProps,
+            ...(menuItem['data-open'] !== undefined ? { 'data-open': '' as const } : {}),
+          };
+          const element = render !== undefined ? render(props) : <li {...props} ref={ref} />;
+          return inPanel ? createPortal(element, navigation.panelListNode as HTMLElement) : element;
+        }}
+        value={value}
+      />
     </ItemContext.Provider>
   );
 }
@@ -403,34 +446,13 @@ export function TopNavigationLink({
 }
 
 /**
- * A section that opens: the consumer wraps it in `menu`, whose trigger writes
- * `aria-expanded` and `data-open` on it; the family adds the chevron and
- * nothing else.
+ * A section that opens: the `navigation-menu` trigger of the panel that
+ * follows it in the same item — `aria-expanded`, `aria-controls`, the
+ * chevron, a press and a resting pointer — in the bar's row.
  */
-export function TopNavigationTrigger({
-  children,
-  disabled,
-  ref,
-  render,
-  ...nativeProps
-}: TopNavigationTriggerProps) {
+export function TopNavigationTrigger({ disabled, ...nativeProps }: TopNavigationTriggerProps) {
   const item = useTopNavigationItem();
-  const rootProps: TopNavigationTriggerRootProps = {
-    ...nativeProps,
-    children: (
-      <>
-        {children}
-        <span aria-hidden="true" data-part="indicator">
-          <Mark glyph="chevron-down" />
-        </span>
-      </>
-    ),
-    'data-part': 'trigger',
-    disabled: disabled ?? item.disabled,
-    type: 'button',
-  };
-  if (render !== undefined) return render(rootProps);
-  return <button {...rootProps} ref={ref} />;
+  return <NavigationMenuTrigger {...nativeProps} disabled={disabled ?? item.disabled} />;
 }
 
 /* ── Search ─────────────────────────────────────────────────────────────── */
@@ -535,7 +557,7 @@ function SearchClose({
   onClose: (reason: 'pointer' | 'keyboard', source: unknown) => void;
 }) {
   const navigation = useTopNavigation();
-  const text = navigation.messages.closeSearch;
+  const text = navigation.t('closeSearch');
   return (
     <Hint text={text}>
       <TooltipTrigger
@@ -555,7 +577,7 @@ function SearchClose({
 /** The button that opens the search where the width has folded the field. */
 function SearchToggle() {
   const navigation = useTopNavigation();
-  const text = navigation.messages.search;
+  const text = navigation.t('search');
   return (
     <Hint text={text}>
       <TooltipTrigger
@@ -688,7 +710,7 @@ export function TopNavigationHelp({
     navigation.setHasHelp(true);
     return () => navigation.setHasHelp(false);
   }, [navigation.setHasHelp]);
-  const text = ariaLabel ?? navigation.messages.help;
+  const text = ariaLabel ?? navigation.t('help');
   const inPanel = navigation.narrowest && navigation.panelPresent && navigation.panelNode !== null;
   const rootProps = {
     ...nativeProps,
@@ -731,12 +753,7 @@ export function TopNavigationHelp({
 export function TopNavigationNotifications(props: TopNavigationControlProps) {
   const navigation = useTopNavigation();
   return (
-    <Control
-      {...props}
-      glyph="bell"
-      message={navigation.messages.notifications}
-      part="notifications"
-    />
+    <Control {...props} glyph="bell" message={navigation.t('notifications')} part="notifications" />
   );
 }
 
@@ -802,5 +819,5 @@ export function TopNavigationCount({
 /** The account: the consumer's avatar and, when there is room, the name. It never folds. */
 export function TopNavigationAccount(props: TopNavigationControlProps) {
   const navigation = useTopNavigation();
-  return <Control {...props} message={navigation.messages.account} part="account" />;
+  return <Control {...props} message={navigation.t('account')} part="account" />;
 }

@@ -5,7 +5,6 @@ export {
   useTopNavigation,
 } from './top-navigation';
 export {
-  DEFAULT_TOP_NAVIGATION_MESSAGES,
   TOP_NAVIGATION_FALLBACK,
   TopNavigationDefaultsProvider,
   useTopNavigationDefaults,
@@ -46,7 +45,6 @@ export type {
   TopNavigationLinkProps,
   TopNavigationLinkRootProps,
   TopNavigationListProps,
-  TopNavigationMessages,
   TopNavigationMoreReason,
   TopNavigationMoreRequest,
   TopNavigationNavProps,
@@ -60,7 +58,6 @@ export type {
   TopNavigationSize,
   TopNavigationSpanPartProps,
   TopNavigationTriggerProps,
-  TopNavigationTriggerRootProps,
   TopNavigationValueReason,
   TopNavigationValueRequest,
 } from './top-navigation.types';

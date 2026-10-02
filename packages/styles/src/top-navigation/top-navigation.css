@@ -346,7 +346,30 @@
 
   /* ── Navigation ─────────────────────────────────────────────────────────── */
 
+  /**
+   * The nav part is also a `navigation-menu` root, which declares private
+   * variables of the same names on the same element. The bar's own values are
+   * inherited back, so the bar's rows and the sections' panels read the bar's
+   * tokens — one bar, one set of decisions.
+   */
   [data-ui='top-navigation'] [data-part='nav'] {
+    --_control-height: inherit;
+    --_control-padding: inherit;
+    --_control-font-size: inherit;
+    --_icon-size: inherit;
+    --_gap: inherit;
+    --_radius: inherit;
+    --_color: inherit;
+    --_muted-color: inherit;
+    --_hover-background: inherit;
+    --_active-background: inherit;
+    --_current-color: inherit;
+    --_current-background: inherit;
+    --_current-edge: inherit;
+    --_disabled-color: inherit;
+    --_duration: inherit;
+    --_easing: inherit;
+
     display: flex;
     flex: 0 0 auto;
   }
@@ -375,7 +398,10 @@
    * muted ink in `light`; the icon-only controls stay muted, the way Carbon's
    * global actions do, because a mark carries less weight than a word.
    */
-  [data-ui='top-navigation'] :is([data-part='link'], [data-part='trigger']) {
+  [data-ui='top-navigation']
+    :is([data-part='nav'] > [data-part='list'], [data-part='panel-list'])
+    > [data-part='item']
+    > :is([data-part='link'], [data-part='trigger']) {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -438,20 +464,32 @@
    * router link rendered through `render` says where the reader is in the one
    * attribute it owns, and the stylesheet reads it as the same state.
    */
-  [data-ui='top-navigation'] [data-part='link']:is([data-current], [aria-current='page']) {
+  [data-ui='top-navigation']
+    :is([data-part='nav'] > [data-part='list'], [data-part='panel-list'])
+    > [data-part='item']
+    > [data-part='link']:is([data-current], [aria-current='page']) {
     background-color: var(--_current-background);
     box-shadow: inset 0 0 0 var(--_rule-width) var(--_current-edge);
     color: var(--_current-color);
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
 
-  [data-ui='top-navigation'] [data-part='item'][data-disabled] > [data-part='link'],
-  [data-ui='top-navigation'] [data-part='trigger']:disabled {
+  [data-ui='top-navigation']
+    :is([data-part='nav'] > [data-part='list'], [data-part='panel-list'])
+    > [data-part='item'][data-disabled]
+    > [data-part='link'],
+  [data-ui='top-navigation']
+    :is([data-part='nav'] > [data-part='list'], [data-part='panel-list'])
+    > [data-part='item']
+    > [data-part='trigger']:disabled {
     color: var(--_disabled-color);
     cursor: not-allowed;
   }
 
-  [data-ui='top-navigation'] :is([data-part='link'], [data-part='trigger']):focus-visible {
+  [data-ui='top-navigation']
+    :is([data-part='nav'] > [data-part='list'], [data-part='panel-list'])
+    > [data-part='item']
+    > :is([data-part='link'], [data-part='trigger']):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -462,7 +500,11 @@
    * the `chevron-down` Glyph element the binding renders in the part. Down is
    * down in both directions, so its box is not `directional`.
    */
-  [data-ui='top-navigation'] [data-part='indicator'] {
+  [data-ui='top-navigation']
+    :is([data-part='nav'] > [data-part='list'], [data-part='panel-list'])
+    > [data-part='item']
+    > [data-part='trigger']
+    > [data-part='indicator'] {
     --slotted-icon-size: var(--_icon-size);
 
     display: flex;
@@ -470,7 +512,12 @@
     margin-inline-end: calc(-1 * var(--slotted-space-2, 0.25rem));
   }
 
-  [data-ui='top-navigation'] [data-part='indicator'] > [data-ui='icon'] {
+  [data-ui='top-navigation']
+    :is([data-part='nav'] > [data-part='list'], [data-part='panel-list'])
+    > [data-part='item']
+    > [data-part='trigger']
+    > [data-part='indicator']
+    > [data-ui='icon'] {
     transition: rotate var(--slotted-duration-medium) var(--_easing);
   }
 
@@ -846,7 +893,10 @@
     flex: 0 0 auto;
   }
 
-  [data-ui='top-navigation'] [data-part='panel'] :is([data-part='link'], [data-part='trigger']),
+  [data-ui='top-navigation']
+    [data-part='panel-list']
+    > [data-part='item']
+    > :is([data-part='link'], [data-part='trigger']),
   [data-ui='top-navigation'] [data-part='panel'] > [data-part='help'] {
     flex: 1 1 auto;
     font-size: var(--_row-font-size);
@@ -857,9 +907,151 @@
     white-space: normal;
   }
 
-  [data-ui='top-navigation'] [data-part='panel'] [data-part='trigger'] > [data-part='indicator'] {
+  [data-ui='top-navigation']
+    [data-part='panel-list']
+    > [data-part='item']
+    > [data-part='trigger']
+    > [data-part='indicator'] {
     margin-inline-end: 0;
     margin-inline-start: auto;
+  }
+
+  /**
+   * A section folded into the panel opens its links in line under its
+   * trigger, as a group of the column does: the shared surface belongs to
+   * the bar's row, and a panel floating out of a panel is a second layer the
+   * reader did not ask for. The rows read the row geometry the folded links
+   * already read.
+   */
+  [data-ui='top-navigation']
+    [data-part='panel-list']
+    > [data-part='item']:has(> [data-part='content']) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  [data-ui='top-navigation'] [data-part='panel-list'] > [data-part='item'] > [data-part='content'] {
+    display: grid;
+    gap: var(--slotted-space-1, 0.125rem);
+    padding-block-end: var(--slotted-space-2, 0.25rem);
+    padding-inline-start: var(--_control-padding);
+  }
+
+  [data-ui='top-navigation']
+    [data-part='panel-list']
+    > [data-part='item']
+    > [data-part='content'][hidden] {
+    display: none;
+  }
+
+  [data-ui='top-navigation'] [data-part='panel-list'] [data-part='content'] [data-part='links'] {
+    display: grid;
+    gap: var(--slotted-space-1, 0.125rem);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  [data-ui='top-navigation'] [data-part='panel-list'] [data-part='content'] [data-part='link'] {
+    align-content: center;
+    border-radius: var(--_radius);
+    color: var(--_color);
+    column-gap: var(--_action-gap);
+    display: grid;
+    font-size: var(--_row-font-size);
+    grid-template-columns: auto minmax(0, 1fr);
+    line-height: var(--_row-line-height);
+    min-block-size: var(--_row-height);
+    padding-inline: var(--_control-padding);
+    text-decoration: none;
+    transition: background-color var(--_duration) var(--_easing);
+  }
+
+  [data-ui='top-navigation']
+    [data-part='panel-list']
+    [data-part='content']
+    [data-part='link']:not([data-disabled], [data-current], [aria-current='page']):hover {
+    background-color: var(--_hover-background);
+  }
+
+  [data-ui='top-navigation']
+    [data-part='panel-list']
+    [data-part='content']
+    [data-part='link']:not([data-disabled], [data-current], [aria-current='page']):active {
+    background-color: var(--_active-background);
+    transition-duration: var(--slotted-duration-instant);
+  }
+
+  [data-ui='top-navigation']
+    [data-part='panel-list']
+    [data-part='content']
+    [data-part='link']:is([data-current], [aria-current='page']) {
+    background-color: var(--_current-background);
+    box-shadow: inset 0 0 0 var(--_rule-width) var(--_current-edge);
+    color: var(--_current-color);
+  }
+
+  [data-ui='top-navigation']
+    [data-part='panel-list']
+    [data-part='content']
+    [data-part='link'][data-disabled] {
+    color: var(--_disabled-color);
+    cursor: not-allowed;
+  }
+
+  [data-ui='top-navigation']
+    [data-part='panel-list']
+    [data-part='content']
+    [data-part='link']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: calc(var(--slotted-focus-ring-width, 2px) * -1);
+  }
+
+  /** A link of plain words, or a rich one with no mark, starts its text at the inset. */
+  [data-ui='top-navigation']
+    [data-part='panel-list']
+    [data-part='content']
+    [data-part='link']:not(:has(> [data-part='icon']))
+    > * {
+    grid-column: 1 / -1;
+  }
+
+  [data-ui='top-navigation'] [data-part='panel-list'] [data-part='content'] [data-part='icon'] {
+    --slotted-icon-size: var(--_icon-size);
+
+    color: var(--_muted-color);
+    display: flex;
+    grid-row: 1 / span 2;
+  }
+
+  [data-ui='top-navigation']
+    [data-part='panel-list']
+    [data-part='content']
+    [data-part='description'] {
+    color: var(--_muted-color);
+    font-size: var(--slotted-font-size-xs, 0.75rem);
+    grid-column: 2;
+  }
+
+  [data-ui='top-navigation']
+    [data-part='panel-list']
+    [data-part='content']
+    [data-part='group-label'] {
+    color: var(--_muted-color);
+    font-size: var(--slotted-font-size-xs, 0.75rem);
+    font-weight: var(--slotted-font-weight-semibold, 600);
+    padding-block: var(--slotted-space-2, 0.25rem);
+    padding-inline: var(--_control-padding);
+  }
+
+  [data-ui='top-navigation'] [data-part='panel-list'] [data-part='content'] [data-part='footer'] {
+    align-items: center;
+    border-block-start: var(--_rule-width) solid var(--_border-color);
+    display: flex;
+    gap: var(--_action-gap);
+    justify-content: space-between;
+    padding-block-start: var(--slotted-space-2, 0.25rem);
+    padding-inline: var(--_control-padding);
   }
 
   /**
@@ -1061,7 +1253,10 @@
   /* ── Forced colours ─────────────────────────────────────────────────────── */
 
   @media (forced-colors: active) {
-    [data-ui='top-navigation'] [data-part='link']:is([data-current], [aria-current='page']) {
+    [data-ui='top-navigation']
+      :is([data-part='nav'] > [data-part='list'], [data-part='panel-list'])
+      > [data-part='item']
+      > [data-part='link']:is([data-current], [aria-current='page']) {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;
@@ -1073,8 +1268,14 @@
       forced-color-adjust: none;
     }
 
-    [data-ui='top-navigation'] [data-part='item'][data-disabled] > [data-part='link'],
-    [data-ui='top-navigation'] [data-part='trigger']:disabled {
+    [data-ui='top-navigation']
+      :is([data-part='nav'] > [data-part='list'], [data-part='panel-list'])
+      > [data-part='item'][data-disabled]
+      > [data-part='link'],
+    [data-ui='top-navigation']
+      :is([data-part='nav'] > [data-part='list'], [data-part='panel-list'])
+      > [data-part='item']
+      > [data-part='trigger']:disabled {
       color: GrayText;
     }
 

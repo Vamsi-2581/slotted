@@ -3,6 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
 import type { ChangeRequest } from '@slotted/core/state';
 import { SlAppShell, SlAppShellBanner } from '@slotted/angular/app-shell';
 import contract from '../../../../specs/components/top-navigation/contract.json';
@@ -28,8 +31,16 @@ import {
   SlTopNavigationSearch,
   SlTopNavigationTrigger,
 } from './top-navigation-parts';
+import {
+  SlNavigationMenuContent,
+  SlNavigationMenuLink,
+  SlNavigationMenuLinks,
+} from '@slotted/angular/navigation-menu';
 
 const PARTS = [
+  SlNavigationMenuContent,
+  SlNavigationMenuLink,
+  SlNavigationMenuLinks,
   SlTopNavigation,
   SlTopNavigationBrand,
   SlTopNavigationHome,
@@ -63,7 +74,12 @@ const BAR = `<div slTopNavigationBrand>
       <a slTopNavigationLink href="#painel">Painel</a>
     </li>
     <li slTopNavigationItem value="rotas"><a slTopNavigationLink href="#rotas">Rotas</a></li>
-    <li slTopNavigationItem value="frota"><button slTopNavigationTrigger>Frota</button></li>
+    <li slTopNavigationItem value="frota">
+      <button slTopNavigationTrigger>Frota</button>
+      <div slNavigationMenuContent>
+        <ul slNavigationMenuLinks><li><a slNavigationMenuLink href="#veiculos">Veículos</a></li></ul>
+      </div>
+    </li>
     <li slTopNavigationItem value="relatorios" priority="low">
       <a slTopNavigationLink href="#relatorios">Relatórios</a>
     </li>
@@ -127,10 +143,8 @@ class InShell {
 @Component({
   standalone: true,
   imports: PARTS,
-  providers: [
-    provideTopNavigationDefaults({ frame: false, size: 'lg', messages: { more: 'Outros' } }),
-  ],
-  template: `<header slTopNavigation>${BAR}</header>`,
+  providers: [provideTopNavigationDefaults({ frame: false, size: 'lg' })],
+  template: `<header slTopNavigation [messages]="{ more: 'Outros' }">${BAR}</header>`,
 })
 class WithDefaults {
   readonly approvalsLabel = signal('Aprovações, 7 pendentes');
@@ -150,6 +164,9 @@ function widthOf(pixels: number) {
     return { bottom: 0, height: 0, left: 0, right: width, top: 0, width, x: 0, y: 0 } as DOMRect;
   });
 }
+
+/** The bars the tests read are in Brazilian Portuguese: the words come from the pt-BR catalog. */
+const locale = signal('pt-BR');
 
 describe('SlTopNavigation', () => {
   let fixture: ComponentFixture<Host>;
@@ -173,8 +190,10 @@ describe('SlTopNavigation', () => {
 
   async function mount(width: number) {
     widthOf(width);
+    locale.set('pt-BR');
     await TestBed.configureTestingModule({
       imports: [Host, InShell, WithDefaults],
+      providers: [provideSlotted({ locale, catalogs: { 'pt-BR': PT_BR } })],
     }).compileComponents();
     fixture = TestBed.createComponent(Host);
     host = fixture.componentInstance;
@@ -196,9 +215,18 @@ describe('SlTopNavigation', () => {
     expect(root().getAttribute('data-size')).toBe('md');
     expect(part('nav').getAttribute('aria-label')).toBe('Navegação');
     expect(part('skip').getAttribute('href')).toBe('#conteudo');
-    expect(part('skip').textContent?.trim()).toBe('Saltar para o conteúdo');
+    expect(part('skip').textContent?.trim()).toBe('Pular para o conteúdo');
     /* The panel stands right after the nav, so Tab from more lands in it. */
     expect(part('nav').nextElementSibling).toBe(part('panel'));
+  });
+
+  it('follows a change of the language in place', async () => {
+    await mount(1280);
+    locale.set('en-US');
+    fixture.detectChanges();
+    expect(part('nav').getAttribute('aria-label')).toBe('Navigation');
+    expect(part('skip').textContent?.trim()).toBe('Skip to content');
+    expect(part('more').getAttribute('aria-label')).toBe('More');
   });
 
   /** The shell's banner is already the banner landmark and already paints. */
@@ -224,7 +252,7 @@ describe('SlTopNavigation', () => {
     expect(part('more').getAttribute('aria-label')).toBe('Mais');
     expect(part('more').getAttribute('aria-expanded')).toBe('false');
     expect(part('more').getAttribute('aria-controls')).toBe(part('panel').id);
-    expect(part('search-toggle').getAttribute('aria-label')).toBe('Procurar');
+    expect(part('search-toggle').getAttribute('aria-label')).toBe('Pesquisar');
     expect(part('trigger').querySelector('[data-part="indicator"]')).not.toBeNull();
 
     /* Each control leads with the family's mark, and the section's trigger ends in one. */
@@ -338,6 +366,38 @@ describe('SlTopNavigation', () => {
     click(link('rotas'));
     expect(host.moreRequests.at(-1)).toMatchObject({ reason: 'select', value: false });
     expect(part('panel').hasAttribute('data-open')).toBe(false);
+  });
+
+  it('is a navigation menu: the nav carries both identities and a section opens its panel', async () => {
+    await mount(1280);
+    const nav = part('nav');
+    expect(nav.getAttribute('data-ui')).toBe('navigation-menu');
+    expect(nav.getAttribute('data-part')).toBe('nav');
+    expect(nav.getAttribute('aria-label')).toBe('Navegação');
+    const trigger = item('frota').querySelector('[data-part="trigger"]') as HTMLElement;
+    const panel = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
+    expect(trigger.nextElementSibling).toBe(panel);
+    expect(panel?.hidden).toBe(true);
+    click(trigger);
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(item('frota').hasAttribute('data-open')).toBe(true);
+    expect(panel?.hidden).toBe(false);
+  });
+
+  it('opens a folded section in line inside the panel, and a link there closes both', async () => {
+    await mount(400);
+    click(part('more'));
+    expect(part('panel-list').contains(item('frota'))).toBe(true);
+    const trigger = item('frota').querySelector('[data-part="trigger"]') as HTMLElement;
+    click(trigger);
+    fixture.detectChanges();
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(
+      part('nav').querySelector(':scope > [data-part="viewport"]')?.hasAttribute('data-open'),
+    ).toBe(false);
+    click(fixture.nativeElement.querySelector('a[href="#veiculos"]') as HTMLElement);
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(host.moreRequests.at(-1)).toMatchObject({ reason: 'select', value: false });
   });
 
   it('closes the panel on Escape and returns focus to more', async () => {

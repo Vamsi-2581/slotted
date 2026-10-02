@@ -40,6 +40,7 @@ export default defineConfig({
         markdown: resolve(import.meta.dirname, 'src/markdown/index.ts'),
         measure: resolve(import.meta.dirname, 'src/measure/index.ts'),
         'message-scroller': resolve(import.meta.dirname, 'src/message-scroller/index.ts'),
+        'navigation-menu': resolve(import.meta.dirname, 'src/navigation-menu/index.ts'),
         number: resolve(import.meta.dirname, 'src/number/index.ts'),
         otp: resolve(import.meta.dirname, 'src/otp/index.ts'),
         outline: resolve(import.meta.dirname, 'src/outline/index.ts'),

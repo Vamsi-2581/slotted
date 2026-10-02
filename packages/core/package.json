@@ -156,6 +156,10 @@
       "types": "./dist/types/overflow/index.d.ts",
       "import": "./dist/overflow.js"
     },
+    "./navigation-menu": {
+      "types": "./dist/types/navigation-menu/index.d.ts",
+      "import": "./dist/navigation-menu.js"
+    },
     "./number": {
       "types": "./dist/types/number/index.d.ts",
       "import": "./dist/number.js"

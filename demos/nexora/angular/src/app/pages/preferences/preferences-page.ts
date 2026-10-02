@@ -22,11 +22,13 @@ import { visibleModules } from '../../core/nav/nav.model';
 import { PreferencesStore, type UserPreferences } from '../../core/session/preferences.store';
 import { SHELL_PRESETS } from '../../core/shell/shell-presets';
 import { SessionStore } from '../../core/session/session.store';
+import { AppearanceSection } from './appearance-section';
 import { ShellPreview } from './shell-preview';
 
 @Component({
   selector: 'app-preferences-page',
   imports: [
+    AppearanceSection,
     SlButton,
     SlCheckbox,
     SlField,
@@ -73,7 +75,8 @@ import { ShellPreview } from './shell-preview';
     }
   `,
   template: `
-    <div slPage width="measure">
+    <!-- CP-07: a form with a preview of three regions side by side, not prose: content width. -->
+    <div slPage width="content">
       <header slPageHeader>
         <div slPageHeaderTitleArea>
           <div slPageHeaderTitleRow>
@@ -90,30 +93,7 @@ import { ShellPreview } from './shell-preview';
       </header>
       <div slPageBody>
         <form slForm (submit)="$event.preventDefault(); save()">
-          <div slField>
-            <label slFieldLabel>Appearance</label>
-            <div
-              slRadioGroup
-              [value]="draft().scheme"
-              (valueChange)="patch({ scheme: $any($event.value) })"
-            >
-              <div slRadio value="light">Light</div>
-              <div slRadio value="dark">Dark</div>
-              <div slRadio value="system">System</div>
-            </div>
-          </div>
-          <div slField>
-            <label slFieldLabel>Density</label>
-            <div
-              slRadioGroup
-              [value]="draft().density"
-              (valueChange)="patch({ density: $any($event.value) })"
-            >
-              <div slRadio value="comfortable">Comfortable</div>
-              <div slRadio value="compact">Compact</div>
-              <div slRadio value="dense">Dense</div>
-            </div>
-          </div>
+          <app-appearance-section [draft]="draft()" (patch)="patch($event)" />
           <div slField>
             <label slFieldLabel>Shell layout</label>
             <span slFieldDescription>

@@ -9,40 +9,6 @@
 @import '@slotted/themes/default.css';
 
 @layer app {
-  /*
-   * Brand: Violeta — criativo, moderno, mais personalidade.
-   * The accent tone retuned on the theme scope, once per scheme.
-   * Every family under it reads the new values; no library selector is named.
-   * The nine names are the theme's accent vocabulary; a subset leaves the
-   * default accent mixed with the new one on the same screen. The focus ring
-   * follows the solid tone.
-   */
-  [data-slotted-theme='default'][data-slotted-scheme='light'] {
-    --slotted-tone-accent-solid: #7c3aed;
-    --slotted-tone-accent-solid-hover: #6d28d9;
-    --slotted-tone-accent-solid-active: #5b21b6;
-    --slotted-tone-accent-on-solid: #ffffff;
-    --slotted-tone-accent-surface: #ede9fe;
-    --slotted-tone-accent-border: #a78bfa;
-    --slotted-tone-accent-text: #6d28d9;
-    --slotted-tone-accent-subtle-hover: #f5f3ff;
-    --slotted-tone-accent-subtle-active: #ede9fe;
-    --slotted-focus-ring-color: #7c3aed;
-  }
-
-  [data-slotted-theme='default'][data-slotted-scheme='dark'] {
-    --slotted-tone-accent-solid: #a78bfa;
-    --slotted-tone-accent-solid-hover: #c4b5fd;
-    --slotted-tone-accent-solid-active: #8b5cf6;
-    --slotted-tone-accent-on-solid: #2e1065;
-    --slotted-tone-accent-surface: #221a38;
-    --slotted-tone-accent-border: #a78bfa;
-    --slotted-tone-accent-text: #c4b5fd;
-    --slotted-tone-accent-subtle-hover: #1a1429;
-    --slotted-tone-accent-subtle-active: #221a38;
-    --slotted-focus-ring-color: #a78bfa;
-  }
-
   /* Panels that hold a list need room for a row and its actions on one line. */
   [data-ui='popover'] {
     --slotted-popover-measure-lg: 28rem;

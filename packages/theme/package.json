@@ -22,6 +22,10 @@
       "types": "./dist/types/layer-order.d.ts",
       "import": "./dist/layer-order.js"
     },
+    "./seeds": {
+      "types": "./dist/types/seeds.d.ts",
+      "import": "./dist/seeds.js"
+    },
     "./contract.json": "./src/contract.json",
     "./conformance": "./conformance/theme-conformance.mjs",
     "./styles.css": "./dist/styles.css"

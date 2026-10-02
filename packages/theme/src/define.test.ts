@@ -62,6 +62,25 @@ describe('defineTheme', () => {
     ).toThrow('components contains --slotted-nope-radius, which no family reads');
   });
 
+  /**
+   * A heading face is a typeface of the theme's own choosing, which neither
+   * primitive face names: the contract records that reason, so a stack is
+   * accepted there and still refused on a semantic token that records none.
+   */
+  it('accepts a heading face stated as a stack of its own', () => {
+    const base = values.base as Record<string, string>;
+    expect(() =>
+      defineTheme(
+        definition({
+          base: { ...base, '--slotted-font-family-heading': "ui-serif, Georgia, 'Times', serif" },
+        }),
+      ),
+    ).not.toThrow();
+    expect(() =>
+      defineTheme(definition({ base: { ...base, '--slotted-control-font-family': 'serif' } })),
+    ).toThrow('base --slotted-control-font-family states a literal without declaring why');
+  });
+
   it('reports a contract token the theme leaves out', () => {
     const { ['--slotted-space-1']: _dropped, ...base } = values.base as Record<string, string>;
     expect(() => defineTheme(definition({ base }))).toThrow('base is missing --slotted-space-1');

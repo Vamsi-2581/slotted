@@ -40,5 +40,6 @@ export { validateContract, validateTheme } from './validate';
 export type { FlatTheme } from './validate';
 export { renderTheme } from './render';
 export { processRules, splitTopLevel } from './rules';
-export { applyTheme, seedStyle, THEME_CHANGE_EVENT } from './apply';
+export { applyTheme, THEME_CHANGE_EVENT } from './apply';
+export { seedStyle } from './seeds';
 export type { ThemeChangeDetail } from './apply';

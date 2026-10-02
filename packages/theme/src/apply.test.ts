@@ -2,9 +2,10 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { applyTheme, seedStyle, THEME_CHANGE_EVENT, type ThemeChangeDetail } from './apply';
+import { applyTheme, THEME_CHANGE_EVENT, type ThemeChangeDetail } from './apply';
 import { defineTheme, type Theme, type ThemeDefinition } from './define';
 import { recipes } from './recipes';
+import { seedStyle } from './seeds';
 
 // jsdom's `URL` (the test environment's global) rejects a `file:` base, so this
 // resolves the path with `node:path` rather than `new URL(..., import.meta.url)`.

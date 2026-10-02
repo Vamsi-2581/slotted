@@ -1,9 +1,9 @@
 import { applyBounds, boundCss, type Bound } from './bound';
 import type { Oklch } from './color';
 import { fmt } from './format';
+import { SEED_NAMES, type SeedName } from './seeds';
 
-export const SEED_NAMES = ['accent', 'neutral', 'success', 'warning', 'danger'] as const;
-export type SeedName = (typeof SEED_NAMES)[number];
+export { SEED_NAMES, type SeedName };
 
 export const SCHEMES = ['light', 'dark', 'high-contrast'] as const;
 export type Scheme = (typeof SCHEMES)[number];

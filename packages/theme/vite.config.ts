@@ -7,6 +7,7 @@ export default defineConfig({
       entry: {
         index: resolve(import.meta.dirname, 'src/index.ts'),
         'layer-order': resolve(import.meta.dirname, 'src/layer-order.ts'),
+        seeds: resolve(import.meta.dirname, 'src/seeds.ts'),
       },
       formats: ['es'],
     },

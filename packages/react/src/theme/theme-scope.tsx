@@ -1,4 +1,5 @@
-import { seedStyle, type Density, type Scheme, type SeedName } from '@slotted/theme';
+import type { Density, Scheme } from '@slotted/theme';
+import { seedStyle, type SeedName } from '@slotted/theme/seeds';
 import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
 
 /** The five seeds a theme derives its colours from (`@slotted/theme` › `SEED_NAMES`). */

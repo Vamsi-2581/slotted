@@ -1,5 +1,6 @@
 import { computed, Directive, input } from '@angular/core';
-import { seedStyle, type Density, type Scheme, type SeedName } from '@slotted/theme';
+import type { Density, Scheme } from '@slotted/theme';
+import { seedStyle, type SeedName } from '@slotted/theme/seeds';
 
 /** The five seeds a theme derives its colours from (`@slotted/theme` › `SEED_NAMES`). */
 export type ThemeSeedName = SeedName;

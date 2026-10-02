@@ -879,7 +879,8 @@ export const contract: TokenContract = {
       "name": "--slotted-font-family-heading",
       "layer": "semantic",
       "axis": "base",
-      "type": "font-family"
+      "type": "font-family",
+      "literal": "a heading face may be a typeface of its own, which no primitive face names"
     },
     {
       "name": "--slotted-control-font-family",

@@ -31,10 +31,11 @@ what the three layers exist to prevent — a component deciding, on its own, wha
 `4px` means.
 
 A non-root token may still state a literal when the contract records why, in
-its `literal` field. There are two such tokens, each carrying its reason, and
-both describe the same thing: the absence of a value a scale could hold — no
-tracking, and a line box that is the control's own height. A third described
-the absence of elevation until `--slotted-control-shadow` was given one.
+its `literal` field. There are three such tokens, each carrying its reason. Two
+describe the absence of a value a scale could hold — no tracking, and a line
+box that is the control's own height. The third, `--slotted-font-family-heading`,
+holds a typeface that neither primitive face names. A fourth described the
+absence of elevation until `--slotted-control-shadow` was given one.
 
 The component layer holds two scales, and holds each for the reason the layer
 exists: a family met a value a semantic token cannot be retuned to give. Button
@@ -151,7 +152,9 @@ This scale answers which typeface a component sets text in.
 `--slotted-font-family-heading` is the face of every heading and title: the
 heading of `typography`, the title of a surface or a region, and the headings
 of `prose`. It is a semantic token that names the sans face rather than a stack,
-so a theme that substitutes the sans face moves its headings with it.
+so a theme that substitutes the sans face moves its headings with it. A theme
+that sets headings in a face of their own states the stack on this token, and
+the contract's `literal` field records why `defineTheme` accepts it.
 `packages/styles/src/heading-face.test.mjs` lists each rule that reads it, and
 the title parts that keep the face of the text around them.
 

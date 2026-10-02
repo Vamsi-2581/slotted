@@ -1,6 +1,4 @@
-import { parseSeed } from './color';
 import type { Theme } from './define';
-import { SEED_NAMES, type SeedName } from './recipe';
 import { renderTheme } from './render';
 
 /** Dispatched on the document when a theme stylesheet is applied or removed. */
@@ -68,20 +66,4 @@ export function applyTheme(
     element.remove();
     announce(false);
   };
-}
-
-/** The `style` object that gives an element its own seeds, for React `style` and Angular `[style]`. */
-export function seedStyle(
-  seeds: Readonly<Partial<Record<SeedName, string>>>,
-): Record<string, string> {
-  const style: Record<string, string> = {};
-  for (const name of SEED_NAMES) {
-    const value = seeds[name];
-    if (value === undefined) continue;
-    if (parseSeed(value) === null) {
-      throw new Error(`seed ${name} ${JSON.stringify(value)} is neither #rrggbb nor oklch(L C H)`);
-    }
-    style[`--slotted-seed-${name}`] = value;
-  }
-  return style;
 }

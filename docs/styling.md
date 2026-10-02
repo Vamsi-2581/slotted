@@ -147,6 +147,13 @@ to the end of the body.
 `scheme="system"` resolves to `light`, and to `dark` while
 `prefers-color-scheme: dark` matches.
 
+`@slotted/theme/seeds` exports `SEED_NAMES` and `seedStyle` without the token
+contract, the validator and the renderer (3 kB against 177 kB for
+`@slotted/theme`). An application that writes a reader's seeds at start
+imports them from there, and `ThemeScope` and `slThemeScope` do the same; a
+bundler cannot drop the rest of `@slotted/theme` from a module the application
+shares with a theme it compiles later.
+
 A theme rule is CSS passed in `rules`, as a string or the URL of a `.css` file
 the build reads:
 

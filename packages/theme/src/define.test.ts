@@ -108,13 +108,40 @@ describe('defineTheme', () => {
   it('refuses a value that leaves a string open', () => {
     expect(() =>
       defineTheme(definition({ components: { '--slotted-card-radius': '0px "' } })),
-    ).toThrow(/components --slotted-card-radius is .* leaves a string or comment open/);
+    ).toThrow(
+      /components --slotted-card-radius is .* leaves a string, a comment or an escape open/,
+    );
+  });
+
+  it('refuses a value whose string a newline ends before its quote', () => {
+    expect(() =>
+      defineTheme(
+        definition({
+          components: { '--slotted-card-radius': '"a\n} [data-ui="card"] { color: red; } "' },
+        }),
+      ),
+    ).toThrow(
+      /components --slotted-card-radius is .* leaves a string, a comment or an escape open/,
+    );
+  });
+
+  it('reads an escaped structural character as escaped, and refuses a value ending in an escape', () => {
+    expect(() =>
+      defineTheme(definition({ components: { '--slotted-card-radius': 'a\\;b' } })),
+    ).not.toThrow();
+    expect(() =>
+      defineTheme(definition({ components: { '--slotted-card-radius': '0px\\' } })),
+    ).toThrow(
+      /components --slotted-card-radius is .* leaves a string, a comment or an escape open/,
+    );
   });
 
   it('refuses a value that leaves a comment open', () => {
     expect(() =>
       defineTheme(definition({ components: { '--slotted-card-radius': '0px /*' } })),
-    ).toThrow(/components --slotted-card-radius is .* leaves a string or comment open/);
+    ).toThrow(
+      /components --slotted-card-radius is .* leaves a string, a comment or an escape open/,
+    );
   });
 });
 

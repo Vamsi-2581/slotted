@@ -8,9 +8,10 @@ import { scanCssText } from './css-scan';
  * A theme rule is text a theme author wrote, concatenated with every other
  * rule into one `@layer`, so an unbalanced `}` here would close that layer
  * (or the `@scope` around it) early and let the rest of the input escape its
- * boundary. The four malformed shapes below are refused rather than silently
+ * boundary. The five malformed shapes below are refused rather than silently
  * reinterpreted: a closing brace with nothing open, braces still open at the
- * end, a string never closed, and a comment never closed.
+ * end, a string never closed (or ended by a newline), a comment never closed,
+ * and a trailing `\` that would escape whatever the compiler writes next.
  */
 export function splitTopLevel(css: string): string[] {
   const statements: string[] = [];
@@ -51,6 +52,9 @@ export function splitTopLevel(css: string): string[] {
   }
   if (end.openQuote !== null) {
     throw new Error(`theme rule has an unterminated string: ${css.slice(start)}`);
+  }
+  if (end.openEscape) {
+    throw new Error(`theme rule has a dangling escape: ${css.slice(start)}`);
   }
   if (depth !== 0) {
     throw new Error(`theme rule has an unclosed \`{\`: ${css.slice(start)}`);

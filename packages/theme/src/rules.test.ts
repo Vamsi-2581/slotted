@@ -25,6 +25,24 @@ describe('splitTopLevel', () => {
     expect(() => splitTopLevel('.a { content: "x; } .b { }')).toThrow(/unterminated string/);
   });
 
+  it('reads an escaped brace as part of the selector, so it cannot hide a closing brace', () => {
+    expect(splitTopLevel('.a\\{ { color: red; }')).toEqual(['.a\\{ { color: red; }']);
+    expect(() => splitTopLevel('.a\\{ } .b\\{ } [data-ui="button"]{color:red}')).toThrow(
+      /unbalanced `\}`/,
+    );
+  });
+
+  it('refuses a rule that ends in an escape, which would swallow the character after it', () => {
+    expect(() => splitTopLevel('.a { color: red; } \\')).toThrow(/dangling escape/);
+  });
+
+  it('ends a string at an unescaped newline, as CSS does, and refuses it as unterminated', () => {
+    expect(() =>
+      splitTopLevel('[data-ui="card"] { content: "a\n} [data-ui="button"] { color: red; } "; }'),
+    ).toThrow(/unterminated string/);
+    expect(splitTopLevel('.a { content: "a\\\nb"; }')).toEqual(['.a { content: "a\\\nb"; }']);
+  });
+
   it('refuses a rule left with an open comment at the end', () => {
     expect(() => splitTopLevel('.a { color: red; } /* unterminated')).toThrow(
       /unterminated comment/,

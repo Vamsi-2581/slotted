@@ -105,11 +105,22 @@ A demo names the version it consumes in its own `package.json` and moves to a
 newer one deliberately, the way a consumer would. `pnpm test:release` checks
 that the published set and the shared version stay what this section says.
 
+## Adding a locale
+
+The catalogs live in `packages/core/src/i18n` (`docs/decisions/0003-internationalization.md`). A locale `<tag>` is:
+
+1. `packages/core/src/i18n/locales/<tag>/<family>.ts` for every file in `messages/`, each exporting a constant typed by that family's `<Pascal>Messages` interface, with the slot names of the English message.
+2. `packages/core/src/i18n/locales/<tag>.ts`, exporting `<TAG>: SlottedMessages` assembled from those files (`pt-BR.ts` is the model).
+3. An entry `'i18n/<tag>'` in `packages/core/vite.config.ts` and an export `./i18n/<tag>` in `packages/core/package.json`.
+
+`SlottedMessages` refuses a locale that misses a family or a key, and `pnpm test:i18n` refuses one whose slots or grammar differ from `en-US`. An application then passes it to `SlottedProvider` or `provideSlotted` under `catalogs`.
+
 ## Validation Commands
 
 - `pnpm check`: normal fast repository gate.
 - `pnpm check:affected`: changed task-bearing packages and their dependents.
 - `pnpm check:full`: all task-bearing packages and root checks.
+- `pnpm test:i18n`: no family writes words outside the catalog; every locale matches `en-US`.
 - `pnpm format`: explicitly rewrite supported files with Prettier.
 
 Choose the smallest command that covers the changed surface. Pull requests that alter toolchain or cross-package contracts should use `pnpm check:full`.

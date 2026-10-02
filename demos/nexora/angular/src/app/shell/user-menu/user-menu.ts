@@ -12,7 +12,7 @@ import {
 import { SlTopNavigationAccount } from '@slotted/angular/top-navigation';
 
 import { DemoStore } from '../../core/demo/demo.store';
-import { PreferencesStore } from '../../core/session/preferences.store';
+import { type NexoraLocale, PreferencesStore } from '../../core/session/preferences.store';
 import { SessionStore } from '../../core/session/session.store';
 import { ShortcutsService } from '../../core/shortcuts/shortcuts.service';
 
@@ -81,6 +81,17 @@ import { ShortcutsService } from '../../core/shortcuts/shortcuts.service';
           <button slMenuRadioItem value="dense" [closeOnSelect]="false">Dense</button>
         </sl-menu-radio-group>
       </sl-menu-group>
+      <sl-menu-group label="Language">
+        <sl-menu-radio-group
+          [value]="preferences.preferences().locale"
+          (valueChangeRequest)="setLocale($event.value)"
+        >
+          <button slMenuRadioItem value="en-US" lang="en-US" [closeOnSelect]="false">English</button>
+          <button slMenuRadioItem value="pt-BR" lang="pt-BR" [closeOnSelect]="false">
+            Português (Brasil)
+          </button>
+        </sl-menu-radio-group>
+      </sl-menu-group>
       <hr slMenuSeparator />
       <button slMenuItem shortcut="?" (select)="shortcuts.openDialog()">Keyboard shortcuts</button>
       <hr slMenuSeparator />
@@ -108,6 +119,10 @@ export class UserMenu {
 
   setScheme(value: string): void {
     this.preferences.update({ scheme: value as 'light' | 'dark' | 'system' });
+  }
+
+  setLocale(value: string): void {
+    this.preferences.update({ locale: value as NexoraLocale });
   }
 
   setDensity(value: string): void {

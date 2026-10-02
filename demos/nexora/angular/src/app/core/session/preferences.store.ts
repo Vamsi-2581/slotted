@@ -3,9 +3,15 @@ import { computed, DOCUMENT, effect, inject, Injectable, signal } from '@angular
 import { DEFAULT_SHELL_PRESET, shellPreset, type ShellPresetId } from '../shell/shell-presets';
 import { SessionStore } from './session.store';
 
+/** The languages the library publishes a catalog for. */
+export const NEXORA_LOCALES = ['en-US', 'pt-BR'] as const;
+export type NexoraLocale = (typeof NEXORA_LOCALES)[number];
+
 export interface UserPreferences {
   scheme: 'light' | 'dark' | 'system';
   density: 'comfortable' | 'compact' | 'dense';
+  /** The language the library writes in; the demo's own pages stay in English. */
+  locale: NexoraLocale;
   /** The arrangement of the shell, one of the catalogue in `core/shell/shell-presets.ts`. */
   shell: ShellPresetId;
   startRoute: string;
@@ -15,6 +21,7 @@ export interface UserPreferences {
 export const DEFAULT_PREFERENCES: UserPreferences = {
   scheme: 'system',
   density: 'comfortable',
+  locale: 'en-US',
   shell: DEFAULT_SHELL_PRESET,
   startRoute: '/dashboard',
   notifications: { emailApprovals: true, emailMentions: true, inAppOperationalAlerts: true },
@@ -24,8 +31,8 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
  * Preferences live in the browser, per user: the simulated backend keeps no
  * user preferences, and the scheme has to apply before the backend has seeded.
  *
- * The scheme and the density are written onto `html`, because everything under
- * it answers them. The arrangement is an input of one shell, so the shell reads it
+ * The scheme, the density and the language are written onto `html`, because
+ * everything under it answers them. The arrangement is an input of one shell, so the shell reads it
  * here instead.
  */
 @Injectable({ providedIn: 'root' })
@@ -55,6 +62,7 @@ export class PreferencesStore {
         : preferences.scheme;
     html.setAttribute('data-slotted-scheme', scheme);
     html.setAttribute('data-slotted-density', preferences.density);
+    html.lang = preferences.locale;
     html.style.colorScheme = scheme;
   }
 
@@ -90,6 +98,9 @@ export class PreferencesStore {
         ...DEFAULT_PREFERENCES,
         ...stored,
         shell: shellPreset(stored.shell).id,
+        locale: NEXORA_LOCALES.includes(stored.locale as NexoraLocale)
+          ? (stored.locale as NexoraLocale)
+          : DEFAULT_PREFERENCES.locale,
         notifications: { ...DEFAULT_PREFERENCES.notifications, ...(stored.notifications ?? {}) },
       };
     } catch {

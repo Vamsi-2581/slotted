@@ -161,6 +161,8 @@ Follow these steps in order. Replace `<family>` with the invoked family name. Wh
 
 10. **Implement both frameworks.** Follow `references/frameworks.md`. Keep the conceptual contract shared, React idiomatic to React, and Angular idiomatic to Angular. Preserve native props, events, and explicit consumer values.
 
+    Every word the family writes on its own lives in the catalog (`docs/decisions/0003-internationalization.md`), never in the family: declare the interface, the American English and the definition in `packages/core/src/i18n/messages/<family>.ts`, translate it in `packages/core/src/i18n/locales/pt-BR/<family>.ts`, and add the family to `catalog.ts` and `locales/pt-BR.ts`. A count is a `plural` message. The component reads its words with `useMessages(<camel>Messages, messages)` or `injectMessages(<camel>Messages, this.messages)` and exposes one `messages` prop or input; it takes no `labels` and no string prop whose default the library supplies. The contract lists the keys under `messages`. `pnpm test:i18n` refuses a family that writes a word of its own.
+
 11. **Write both reference pages, then read them rendered.** Follow `references/stories.md`. The pages are where a consumer meets the family's API, and they are held to a contract of their own: the import, the anatomy, one captioned demonstration per declared scenario with the code that produced it, the inputs, the outputs, the composition surface, and the accessibility decisions. Two demonstrations and no source is the shape this step used to produce, and `specs/reference-pages.test.mjs` now refuses it.
 
     Lay every demonstration out with the workbench primitives; the stage owns the gap between examples, and a story that reaches for an inline style is refused. Then read both reference pages rendered, at 1280 and 720 pixels, in light and in dark — the page, not the story file:
@@ -191,6 +193,7 @@ Follow these steps in order. Replace `<family>` with the invoked family name. Wh
 
     ```bash
     pnpm check:affected
+    pnpm test:i18n
     ```
 
     If this is a shared-tool change (schema, harness, core utilities, or tests that affect every family), or if `pnpm check:affected` is not available, run `pnpm check` instead.

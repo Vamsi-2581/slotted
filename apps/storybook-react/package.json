@@ -11,6 +11,7 @@
     "verify": "pnpm test && pnpm typecheck"
   },
   "dependencies": {
+    "@slotted/core": "workspace:*",
     "@slotted/react": "workspace:*",
     "@slotted/storybook-workbench": "workspace:*",
     "@slotted/themes": "workspace:*",

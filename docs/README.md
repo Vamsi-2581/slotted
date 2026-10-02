@@ -23,6 +23,7 @@ pela skill `/component`. Cada subdiretório tem uma classe de leitura própria.
 | `styling.md`            | A camada de cascata `slotted` e a ordem publicada das subcamadas.                                |
 | `decisions/0001`        | Uma única camada de cascata de topo.                                                             |
 | `decisions/0002`        | Layout do repositório por tipo de conteúdo.                                                      |
+| `decisions/0003`        | Internacionalização: catálogo único, gramática ICU, provider por binding.                        |
 | `decisions/0004`        | Arquitetura de tematização: tema como módulo, sementes, receita, escopo e regras de tema.        |
 
 ## Produto

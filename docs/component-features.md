@@ -146,7 +146,10 @@ Nenhum comportamento importante pode depender de hover. O modo responsivo deve p
 ### 2.9 Internacionalização
 
 - `locale` usa BCP 47; direção, timezone e calendário são explícitos quando relevantes.
-- Textos internos, pluralização e mensagens vazias/erro são substituíveis por provider e por instância.
+- Todo texto que a família escreve por conta própria (texto de cromo) vem do catálogo em `@slotted/core/i18n` (`docs/decisions/0003-internationalization.md`): `messages/<família>.ts` declara as chaves e o inglês, cada locale publicado traduz todas.
+- A superfície de texto de uma família é uma única prop/input `messages`, sobreposta ao catálogo chave a chave. Uma prop de texto com valor por omissão da biblioteca não existe; conteúdo sem valor por omissão, slot `ReactNode` e `aria-label` nativo permanecem.
+- Mensagem é string na gramática ICU (`{slot}`, `plural` com `#` e ramos exatos, `select`) ou função `(slots, locale) => string`. Contagem é sempre `plural`.
+- O locale vem de `SlottedProvider`/`provideSlotted`; a troca reflete sem recarregar e sem recriar componentes; uma subárvore pode ter locale próprio.
 - Número, moeda, data e hora são valores de domínio, não strings formatadas.
 - Busca, ordenação e typeahead usam comparação sensível ao locale.
 - Layout e ícones direcionais espelham em RTL; ícones sem direção permanecem iguais.

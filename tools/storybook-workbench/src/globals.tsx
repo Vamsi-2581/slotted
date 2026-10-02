@@ -7,6 +7,11 @@
 export const SCHEMES = ['light', 'dark', 'high-contrast'] as const;
 export const DENSITIES = ['comfortable', 'compact', 'dense'] as const;
 export const DIRECTIONS = ['ltr', 'rtl'] as const;
+/**
+ * The languages the library publishes a catalog for. A story is read in each
+ * of them without a line of its own, the same way it is read right to left.
+ */
+export const LOCALES = ['en-US', 'pt-BR'] as const;
 
 /**
  * One entry per theme package whose stylesheet the preview loads. The value
@@ -22,6 +27,7 @@ export type WorkbenchTheme = (typeof THEMES)[number];
 export type WorkbenchScheme = (typeof SCHEMES)[number];
 export type WorkbenchDensity = (typeof DENSITIES)[number];
 export type WorkbenchDirection = (typeof DIRECTIONS)[number];
+export type WorkbenchLocale = (typeof LOCALES)[number];
 
 /** The canvas each scheme is previewed against, outside the component's surface. */
 const CANVAS: Record<WorkbenchScheme, string> = {
@@ -35,6 +41,7 @@ export const INITIAL_GLOBALS = {
   scheme: 'light',
   density: 'comfortable',
   direction: 'ltr',
+  locale: 'en-US',
 } as const;
 
 export const GLOBAL_TYPES = {
@@ -42,6 +49,7 @@ export const GLOBAL_TYPES = {
   scheme: { toolbar: { icon: 'contrast', items: [...SCHEMES] as string[] } },
   density: { toolbar: { icon: 'component', items: [...DENSITIES] as string[] } },
   direction: { toolbar: { icon: 'transfer', items: [...DIRECTIONS] as string[] } },
+  locale: { toolbar: { icon: 'globe', items: [...LOCALES] as string[] } },
 } as const;
 
 type StorybookGlobals = Record<string, unknown> | undefined;
@@ -55,11 +63,13 @@ export function resolveWorkbenchGlobals(globals: StorybookGlobals) {
   const scheme = oneOf(SCHEMES, globals?.['scheme'], 'light');
   const density = oneOf(DENSITIES, globals?.['density'], 'comfortable');
   const direction = oneOf(DIRECTIONS, globals?.['direction'], 'ltr');
+  const locale = oneOf(LOCALES, globals?.['locale'], 'en-US');
 
   return {
     background: CANVAS[scheme],
     density,
     direction,
+    locale,
     scheme,
     theme,
   } as const;

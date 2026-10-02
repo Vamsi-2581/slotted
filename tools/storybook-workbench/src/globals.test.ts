@@ -8,6 +8,7 @@ import {
   DIRECTIONS,
   GLOBAL_TYPES,
   INITIAL_GLOBALS,
+  LOCALES,
   SCHEMES,
   THEMES,
   resolveWorkbenchGlobals,
@@ -51,6 +52,7 @@ describe('resolveWorkbenchGlobals', () => {
       background: '#f4f6f8',
       density: 'comfortable',
       direction: 'ltr',
+      locale: 'en-US',
       scheme: 'light',
       theme: 'default',
     });
@@ -63,6 +65,7 @@ describe('resolveWorkbenchGlobals', () => {
       background: '#09090b',
       density: 'compact',
       direction: 'ltr',
+      locale: 'en-US',
       scheme: 'dark',
       theme: 'default',
     });
@@ -80,6 +83,14 @@ describe('resolveWorkbenchGlobals', () => {
     expect(GLOBAL_TYPES.scheme.toolbar.items).toEqual([...SCHEMES]);
     expect(GLOBAL_TYPES.density.toolbar.items).toEqual([...DENSITIES]);
     expect(GLOBAL_TYPES.direction.toolbar.items).toEqual([...DIRECTIONS]);
+    expect(LOCALES).toEqual(['en-US', 'pt-BR']);
+    expect(GLOBAL_TYPES.locale.toolbar.items).toEqual([...LOCALES]);
+  });
+
+  /** Every family is read in each published language without a story of its own. */
+  it('resolves the language it is handed and falls back to English', () => {
+    expect(resolveWorkbenchGlobals({ locale: 'pt-BR' })).toMatchObject({ locale: 'pt-BR' });
+    expect(resolveWorkbenchGlobals({ locale: 'xx' })).toMatchObject({ locale: 'en-US' });
   });
 
   /**
@@ -111,6 +122,7 @@ describe('resolveWorkbenchGlobals', () => {
       background: '#ffffff',
       density: 'dense',
       direction: 'rtl',
+      locale: 'en-US',
       scheme: 'high-contrast',
       theme: 'default',
     });

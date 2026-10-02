@@ -33,6 +33,11 @@ export function coreSourceAliases() {
     }));
 
   return [
+    /* A locale catalog sits one level below its entry point: `@slotted/core/i18n/pt-BR`. */
+    {
+      find: /^@slotted\/core\/i18n\/([\w-]+)$/,
+      replacement: join(coreRoot, 'src/i18n/locales/$1.ts'),
+    },
     /* The subpaths first: a bare string `find` matches by prefix, so
        `@slotted/core` would otherwise swallow `@slotted/core/number` and
        resolve it to `src/index.ts/number`. */

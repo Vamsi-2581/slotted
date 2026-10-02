@@ -27,6 +27,8 @@ import '@slotted/storybook-workbench/styles.css';
 
 import './preview.css';
 
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+import { SlottedProvider } from '@slotted/react/i18n';
 import type { Preview } from '@storybook/react-vite';
 import {
   GLOBAL_TYPES,
@@ -45,6 +47,9 @@ import { applyRootDirection, applyRootScheme, getPreviewStyle, normalizeScheme }
  * Enabling it here rather than per family is what keeps the next family from
  * inheriting the same silence.
  */
+/** Every catalog the locale axis offers; English is the base and needs none. */
+const CATALOGS = { 'pt-BR': PT_BR };
+
 const preview: Preview = {
   tags: ['autodocs'],
   initialGlobals: INITIAL_GLOBALS,
@@ -55,6 +60,7 @@ const preview: Preview = {
       const scheme = normalizeScheme(values.scheme);
       applyRootScheme(document.documentElement, scheme);
       applyRootDirection(document.documentElement, values.direction);
+      document.documentElement.lang = values.locale;
       const embedded = context?.viewMode === 'docs';
       const className = [
         'slotted-workbench-preview',
@@ -86,7 +92,9 @@ const preview: Preview = {
             ...(embedded ? {} : { padding: 24 }),
           }}
         >
-          <Story />
+          <SlottedProvider locale={values.locale} catalogs={CATALOGS}>
+            <Story />
+          </SlottedProvider>
         </div>
       );
     },

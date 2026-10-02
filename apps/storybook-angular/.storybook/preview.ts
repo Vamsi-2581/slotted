@@ -9,7 +9,10 @@ import '@slotted/themes/default.css';
 
 import './preview.css';
 
-import { componentWrapperDecorator } from '@storybook/angular-vite';
+import { signal } from '@angular/core';
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+import { applicationConfig, componentWrapperDecorator } from '@storybook/angular-vite';
 import type { Preview } from '@storybook/angular-vite';
 import {
   GLOBAL_TYPES,
@@ -29,6 +32,13 @@ import { applyRootDirection, applyRootScheme, getPreviewStyle, normalizeScheme }
  * Enabling it here rather than per family is what keeps the next family from
  * inheriting the same silence.
  */
+/**
+ * The locale axis, as a signal the application provider reads: setting it on a
+ * change of the toolbar rewrites every family's words in place, the way an
+ * application switching language does.
+ */
+const storyLocale = signal<string>(INITIAL_GLOBALS.locale);
+
 const preview: Preview = {
   tags: ['autodocs'],
   initialGlobals: INITIAL_GLOBALS,
@@ -43,6 +53,8 @@ const preview: Preview = {
         const previewStyle = getPreviewStyle(scheme);
         applyRootScheme(document.documentElement, scheme);
         applyRootDirection(document.documentElement, values.direction);
+        document.documentElement.lang = values.locale;
+        storyLocale.set(values.locale);
 
         return {
           slottedBackground: previewStyle.background,
@@ -56,6 +68,9 @@ const preview: Preview = {
         };
       },
     ),
+    applicationConfig({
+      providers: [provideSlotted({ locale: storyLocale, catalogs: { 'pt-BR': PT_BR } })],
+    }),
   ],
   parameters: {
     a11y: { test: 'todo' },

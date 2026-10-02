@@ -199,6 +199,10 @@
       "types": "./dist/types/highlight/index.d.ts",
       "import": "./dist/highlight.js"
     },
+    "./i18n": {
+      "types": "./dist/types/i18n/index.d.ts",
+      "import": "./dist/i18n.js"
+    },
     "./theme": {
       "types": "./dist/types/theme/index.d.ts",
       "import": "./dist/theme.js"

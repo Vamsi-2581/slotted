@@ -52,6 +52,7 @@ export * from './fullscreen';
 export * from './grid';
 export * from './hover-card';
 export * from './highlight';
+export * from './i18n';
 export * from './icon';
 export * from './image';
 export * from './inline';

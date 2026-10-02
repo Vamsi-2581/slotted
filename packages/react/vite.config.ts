@@ -50,6 +50,7 @@ export default defineConfig({
         grid: resolve(import.meta.dirname, 'src/grid/index.ts'),
         'hover-card': resolve(import.meta.dirname, 'src/hover-card/index.ts'),
         highlight: resolve(import.meta.dirname, 'src/highlight/index.ts'),
+        i18n: resolve(import.meta.dirname, 'src/i18n/index.ts'),
         theme: resolve(import.meta.dirname, 'src/theme/index.ts'),
         icon: resolve(import.meta.dirname, 'src/icon/index.ts'),
         image: resolve(import.meta.dirname, 'src/image/index.ts'),

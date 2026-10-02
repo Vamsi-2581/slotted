@@ -116,6 +116,14 @@
       "types": "./dist/types/identity/index.d.ts",
       "import": "./dist/identity.js"
     },
+    "./i18n": {
+      "types": "./dist/types/i18n/index.d.ts",
+      "import": "./dist/i18n.js"
+    },
+    "./i18n/pt-BR": {
+      "types": "./dist/types/i18n/locales/pt-BR.d.ts",
+      "import": "./dist/i18n/pt-BR.js"
+    },
     "./keys": {
       "types": "./dist/types/keys/index.d.ts",
       "import": "./dist/keys.js"

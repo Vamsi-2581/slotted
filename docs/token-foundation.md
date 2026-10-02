@@ -626,7 +626,7 @@ by forced colours instead.
 | `--slotted-control-border-color`     | `#bfc7d1`                           | `#3d4249`                           | `#000000`                           |
 | `--slotted-control-surface`          | `var(--slotted-surface)`            | `var(--slotted-surface)`            | `var(--slotted-surface)`            |
 | `--slotted-current-edge`             | `transparent`                       | `transparent`                       | `#000000`                           |
-| `--slotted-scrim`                    | `rgb(15 23 42 / 0.45)`              | `rgb(0 0 0 / 0.62)`                 | `rgb(0 0 0 / 0.75)`                 |
+| `--slotted-scrim`                    | `rgb(0 0 0 / 0.41)`                 | `rgb(0 0 0 / 0.62)`                 | `rgb(0 0 0 / 0.75)`                 |
 
 `--slotted-border-strong` is the line between two surfaces, and it holds the
 3:1 ratio a non-text element needs against every surface a control can be
@@ -1002,7 +1002,7 @@ to give.
 
 | Token                        | Light     | Dark      | High contrast |
 | ---------------------------- | --------- | --------- | ------------- |
-| `--slotted-code-comment`     | `#5b6b7f` | `#a1a1aa` | `#1f2937`     |
+| `--slotted-code-comment`     | `var(--slotted-text-muted)` | `var(--slotted-text-muted)` | `#1f2937` |
 | `--slotted-code-keyword`     | `#a21caf` | `#e879f9` | `#701a75`     |
 | `--slotted-code-string`      | `#15803d` | `#4ade80` | `#14532d`     |
 | `--slotted-code-number`      | `#b45309` | `#fbbf24` | `#713f12`     |
@@ -1028,7 +1028,9 @@ Every scope is text, so the floor is the text ratio each scheme promises —
 4.5:1 in `light` and `dark`, 7:1 in `high-contrast` — measured against the
 fence ground `prose` and `code-block` both draw, `--slotted-surface-sunken`,
 by `packages/themes/test/default-theme.test.mjs`. The lowest in the
-scale is 4.80:1, `string` and `number` in `light`. A marked line — added,
+scale, on the default seed, is 4.58:1, `string`, and 4.59:1, `number`, both in
+`light`; across the neutral grid the floor the test holds every scope to, the
+lowest is 4.578:1, `string` in `light`. A marked line — added,
 removed, highlighted — tints that ground at `--slotted-highlight-tint-opacity`
 from the tone's `text` role, for the reason the highlight band does: a fill
 from the tone's `surface` role would take `string` to 3.98:1.
@@ -1154,8 +1156,9 @@ at least 3.008:1 for every neutral seed of the grid, and the light
 `--slotted-tone-secondary-subtle-hover` from 0.968 to 0.959, 0.011 below the
 sunken ground as before. On the default seed the largest move of a ground is
 0.016 in OKLab: the light page, card and field are `#f8fafe` where they were
-`#ffffff`. `high-contrast` keeps white grounds, black lines and black inks:
-every tone ground of that scheme is the page's own white, and
+`#ffffff`. `high-contrast` keeps white grounds and achromatic lines and inks —
+its disabled border and foreground are `#595959`, its hover and active fills a
+grey, not black: every tone ground of that scheme is the page's own white, and
 `--slotted-text-muted` is the one neutral token there that carries the seed.
 
 Every other token of the `neutral` seed then followed it the same way. The fit
@@ -1173,6 +1176,22 @@ the light text, 0.006 for the dark inks. `--slotted-text-muted` in
 `high-contrast` keeps its share under the same gamut cap, 0.047. On the default
 seed the largest move is 0.007 in OKLab, the light `--slotted-text` from
 `#0f172a` to `#0d1828`, and no ratio this document cites moves.
+
+The light `--slotted-scrim` left the slate tint `rgb(15 23 42 / 0.45)` for the
+achromatic `rgb(0 0 0 / 0.41)`, like `dark` and `high-contrast`: a tinted page
+under the old scrim read two colours at once, its own and the scrim's slate.
+0.41 is the alpha a black veil needs to match the old tint's darkening of a
+white page: `rgb(15 23 42 / 0.45)` over `#ffffff` composites to `#93979f`, sRGB
+relative luminance 0.307, and `rgb(0 0 0 / α)` over `#ffffff` reaches that same
+luminance at α ≈ 0.410.
+
+`--slotted-code-comment` in `light` and `dark` left its own literal,
+`#5b6b7f` and `#a1a1aa`, for `var(--slotted-text-muted)`: the prose already
+named it the muted text step, and a literal that only approximated that token
+would miss it on the next retune of `text-muted`. The move on the default seed
+is 0.0014 OKLab in `light` (`#5b6b7f` → `#5c6b7f`) and 0.0075 in `dark`
+(`#a1a1aa` → `#9da3aa`). `high-contrast` keeps its own literal, `#1f2937`,
+unchanged.
 
 Everything else the theme emitted before this foundation resolves to the same
 value, which `packages/themes/test/resolve.test.mjs` holds. A row leaves that

@@ -9,6 +9,7 @@ import {
   evaluateRecipe,
   flattenTheme,
   parseSeed,
+  resolveTokens,
   SCHEMES,
   seedGrid,
 } from '@slotted/theme';
@@ -311,7 +312,10 @@ test('keeps every code scope legible as text against the fence ground', () => {
 
   assert.equal(scopes.length, 12, 'the palette changed size without this test noticing');
 
-  for (const [scheme, values] of Object.entries(theme.schemes)) {
+  for (const [scheme, raw] of Object.entries(theme.schemes)) {
+    // `--slotted-code-comment` aliases `--slotted-text-muted` in light and
+    // dark, so it is read resolved, the way a browser paints it.
+    const values = resolveTokens(raw);
     const ground = values['--slotted-surface-sunken'];
     for (const scope of scopes) {
       const ink = values[scope];
@@ -329,12 +333,55 @@ test('keeps every code scope legible as text against the fence ground', () => {
  * alike would be one scope drawn twice.
  */
 test('gives every code scope a colour of its own in every scheme', () => {
-  for (const [scheme, values] of Object.entries(theme.schemes)) {
+  for (const [scheme, raw] of Object.entries(theme.schemes)) {
+    const values = resolveTokens(raw);
     const painted = contract.tokens
       .filter((token) => token.name.startsWith('--slotted-code-'))
       .map((token) => values[token.name]);
     assert.equal(new Set(painted).size, painted.length, `${scheme} paints two scopes alike`);
   }
+});
+
+/**
+ * The fence ground follows the neutral seed, like every other ground, and
+ * `--slotted-code-comment` follows it too, through `--slotted-text-muted` —
+ * so the ratio above holds for the default seed alone until it is read for
+ * every neutral seed a theme can bring, the way the data-slot test below
+ * reads it.
+ */
+test('keeps every code scope legible against the fence ground for every neutral seed of the grid', () => {
+  const seeds = Object.fromEntries(
+    Object.entries(defaultTheme.seeds).map(([name, value]) => [name, parseSeed(value)]),
+  );
+  const scopes = contract.tokens
+    .filter((token) => token.name.startsWith('--slotted-code-'))
+    .map((token) => token.name);
+  const misses = new Map();
+  for (const scheme of SCHEMES) {
+    const floor = TEXT_RATIO[scheme];
+    const literalInk = Object.fromEntries(
+      scopes
+        .filter((scope) => scheme === 'high-contrast' || scope !== '--slotted-code-comment')
+        .map((scope) => [scope, parseSeed(theme.schemes[scheme][scope])]),
+    );
+    for (const neutral of seedGrid()) {
+      const derived = evaluateRecipe(defaultTheme.recipe, { ...seeds, neutral }, scheme);
+      const ground = derived['--slotted-surface-sunken'];
+      for (const scope of scopes) {
+        const ink =
+          scheme !== 'high-contrast' && scope === '--slotted-code-comment'
+            ? derived['--slotted-text-muted']
+            : literalInk[scope];
+        const ratio = colorContrast(ink, ground);
+        const key = `${scheme} ${scope}`;
+        if (ratio < floor && !(misses.get(key) <= ratio)) misses.set(key, ratio);
+      }
+    }
+  }
+  assert.deepEqual(
+    [...misses].map(([key, ratio]) => `${key}: ${ratio.toFixed(3)}:1`),
+    [],
+  );
 });
 
 /**

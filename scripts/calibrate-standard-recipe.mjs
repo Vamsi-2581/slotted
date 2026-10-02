@@ -95,8 +95,9 @@ function gamutCeiling(l) {
  * still reads 3:1 on it; the neutral highlight keeps the 0.011 step below the
  * sunken ground the reference had, and with it the 0.02 step from the grounds.
  * `high-contrast` keeps the fit: its grounds and every tone ground are the
- * page's own white, its lines and inks are black, and `--slotted-text-muted`
- * is the one neutral of that scheme that carries the seed.
+ * page's own white, its lines and inks are achromatic, and
+ * `--slotted-text-muted` is the one neutral of that scheme that carries the
+ * seed.
  */
 export const GROUNDS = {
   light: {

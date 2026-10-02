@@ -86,6 +86,9 @@ importers:
       '@slotted/angular':
         specifier: workspace:*
         version: link:../../packages/angular/dist
+      '@slotted/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@slotted/storybook-workbench':
         specifier: workspace:*
         version: link:../../tools/storybook-workbench
@@ -138,6 +141,9 @@ importers:
 
   apps/storybook-react:
     dependencies:
+      '@slotted/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@slotted/react':
         specifier: workspace:*
         version: link:../../packages/react
@@ -2730,7 +2736,7 @@ packages:
     engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0, npm: ^6.11.0 || ^7.5.6 || >=8.0.0, yarn: '>= 1.13.0'}
 
   '@slotted/angular@file:demos/.registry/slotted-angular-0.1.0-beta.0.tgz':
-    resolution: {integrity: sha512-QCBclEXq+oM9uV460UZqhqyNZJ2bp9rvnhKZxmT64F8ktW5C6fwAw6Dnwb7v4aN7WZkY1UF9hX75RSpL47aOiA==, tarball: file:demos/.registry/slotted-angular-0.1.0-beta.0.tgz}
+    resolution: {integrity: sha512-CnTIKlcOO8gYq0FlVu3TFdPuYLKXNPkYbPpumxWScKwavFWDXT9U0/3Y7TyFY8qQ7Hnca82AowSwm355P5Fq2Q==, tarball: file:demos/.registry/slotted-angular-0.1.0-beta.0.tgz}
     version: 0.1.0-beta.0
     peerDependencies:
       '@angular/common': '>=22.1.0 <23'
@@ -2749,12 +2755,12 @@ packages:
         optional: true
 
   '@slotted/theme@file:demos/.registry/slotted-theme-0.1.0-beta.0.tgz':
-    resolution: {integrity: sha512-RW2ryOAGnNjqIHW+0DxaWD/OcbL6Tq5tL0Lm6y56mOhnoeNqEInPQuQcJFX0ysXxuXHSWu2A43YlfYfxz3tCcQ==, tarball: file:demos/.registry/slotted-theme-0.1.0-beta.0.tgz}
+    resolution: {integrity: sha512-rD2A1HOitc7iy2iVHIydMZQqQouAMH0dpodRKhkcyJT8kBSxQKHqNJrz0664Gzz2e0RU8cSFGyAeeXmzZkqUJw==, tarball: file:demos/.registry/slotted-theme-0.1.0-beta.0.tgz}
     version: 0.1.0-beta.0
     hasBin: true
 
   '@slotted/themes@file:demos/.registry/slotted-themes-0.1.0-beta.0.tgz':
-    resolution: {integrity: sha512-QfVe9hzo40VReT/F/N1lfySUX/M4oIGUCG8yjtt/BSVnxr6w/llmmMKiwOne5IgBwxbQpS072TO/VrFJKLfFxQ==, tarball: file:demos/.registry/slotted-themes-0.1.0-beta.0.tgz}
+    resolution: {integrity: sha512-8tJlx1I6o9Im7CrrpRDN5uuf+Fhkamg9fqOPd1wn4w/zfxh6EMz9G2ooD5iBd7n3V7tiIXBMaKQQLo6EMdzIqg==, tarball: file:demos/.registry/slotted-themes-0.1.0-beta.0.tgz}
     version: 0.1.0-beta.0
     peerDependencies:
       '@slotted/theme': 0.1.0-beta.0

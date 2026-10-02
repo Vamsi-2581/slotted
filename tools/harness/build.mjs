@@ -337,7 +337,7 @@ async function main() {
     familyCss: await read(`packages/styles/src/${family}/${family}.css`),
     composedCss: composed.join('\n'),
     pageCss: css,
-    themeCss: await read(`packages/theme-${theme}/dist/styles.css`),
+    themeCss: await read(`packages/themes/dist/styles.css`),
     theme,
   });
   if (script.trim()) html = attachScript(html, await bundleScript(script, root));

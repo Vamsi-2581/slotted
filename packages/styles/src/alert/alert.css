@@ -494,6 +494,13 @@
     /* A title rendered as a heading keeps the root's type rather than the
        user agent's `1.17em`: the mark is `1em` of the root, and a 15-pixel
        title beside a 13-pixel mark put the mark a pixel above its capitals. */
+    font-family: var(
+      --slotted-alert-title-font-family,
+      var(
+        --slotted-font-family-heading,
+        var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
+      )
+    );
     font-size: inherit;
     font-weight: var(--slotted-alert-title-font-weight, var(--slotted-font-weight-semibold, 600));
     line-height: inherit;

@@ -103,6 +103,10 @@ import defaultTheme from '@slotted/themes/default';
 export default extendTheme(defaultTheme, { seeds: { accent: '#e11d48' } }, { name: 'rose' });
 ```
 
+Every heading and title reads `--slotted-font-family-heading`, so a theme gives
+headings their own face by declaring that one token
+(`docs/token-foundation.md` › Font family).
+
 A theme stylesheet declares the seeds on the element that names the theme
 (`data-slotted-theme`), and derives every colour token where a theme and a
 scheme are named. A seed set inline on that element recolours every token

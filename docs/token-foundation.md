@@ -21,7 +21,7 @@ convention.
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
 | `primitive` | A value with no meaning attached: a step on a scale.           | 121    |
-| `semantic`  | What a value is for: a surface, a border, a control, a target. | 112    |
+| `semantic`  | What a value is for: a surface, a border, a control, a target. | 113    |
 | `component` | One family adjusting a semantic value for itself.              | 28     |
 
 A token is a **scale root** when it states a value rather than composing one: a
@@ -142,18 +142,26 @@ This scale answers how much typographic emphasis text needs.
 
 This scale answers which typeface a component sets text in.
 
-| Token                        | Default value                                                           |
-| ---------------------------- | ----------------------------------------------------------------------- |
-| `--slotted-font-family-sans` | `'Geist Variable', ui-sans-serif, system-ui, sans-serif`                |
-| `--slotted-font-family-mono` | `'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace` |
+| Token                           | Default value                                                           |
+| ------------------------------- | ----------------------------------------------------------------------- |
+| `--slotted-font-family-sans`    | `'Geist Variable', ui-sans-serif, system-ui, sans-serif`                |
+| `--slotted-font-family-mono`    | `'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace` |
+| `--slotted-font-family-heading` | `var(--slotted-font-family-sans)`                                       |
 
-Both values name a family no package ships. Nothing in the repository emits
+`--slotted-font-family-heading` is the face of every heading and title: the
+heading of `typography`, the title of a surface or a region, and the headings
+of `prose`. It is a semantic token that names the sans face rather than a stack,
+so a theme that substitutes the sans face moves its headings with it.
+`packages/styles/src/heading-face.test.mjs` lists each rule that reads it, and
+the title parts that keep the face of the text around them.
+
+The sans and mono values name a family no package ships. Nothing in the repository emits
 `@font-face` or a font file: `tools/storybook-workbench` installs
 `@fontsource-variable/geist` and `@fontsource-variable/geist-mono` for the two
 Storybooks, and an application that loads the theme loads the faces the same
 way. Where the faces are absent, each stack resolves to its generic keyword.
 
-Substituting the typeface is a declaration of these two tokens. The theme emits
+Substituting the typeface is a declaration of these tokens. The theme emits
 them inside `@layer slotted.theme`, and an unlayered rule outranks a layered one
 whatever the selectors are:
 
@@ -161,12 +169,14 @@ whatever the selectors are:
 :root {
   --slotted-font-family-sans: 'X Variable', ui-sans-serif, system-ui, sans-serif;
   --slotted-font-family-mono: 'X Mono Variable', ui-monospace, monospace;
+  --slotted-font-family-heading: 'Y Serif', ui-serif, serif;
 }
 ```
 
-Every family reads one of the two, directly or through
-`--slotted-control-font-family`. No sheet in `packages/styles` names a family
-literally, so the pair is the whole substitution surface.
+Every family reads one of the three, directly, through
+`--slotted-control-font-family`, or through a
+`--slotted-<family>-title-font-family` hook. No sheet in `packages/styles`
+names a family literally, so the three are the whole substitution surface.
 
 ## Border width
 

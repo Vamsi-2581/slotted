@@ -196,4 +196,17 @@ describe('SlHeading', () => {
 
     expect(warn).not.toHaveBeenCalled();
   });
+
+  /**
+   * `typography.css` sets the heading face on the heading element, because the
+   * heading carries the same `data-ui` and `data-part` as a line of text.
+   */
+  it('is the element the stylesheet sets in the heading face, and text is not', () => {
+    const face = "[data-ui='typography']:is(h1, h2, h3, h4, h5, h6)";
+    const headings = mount(HeadingHost);
+    const text = mount(TextHost);
+
+    expect(headings.find('subsection').matches(face)).toBe(true);
+    expect(text.find('paragraph').matches(face)).toBe(false);
+  });
 });

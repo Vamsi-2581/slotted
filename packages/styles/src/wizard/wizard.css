@@ -362,6 +362,10 @@
     > [data-part='step']
     > [data-part='step-header']
     > [data-part='step-title'] {
+    font-family: var(
+      --slotted-font-family-heading,
+      var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
+    );
     font-size: var(--slotted-font-size-2xl, 1.25rem);
     font-weight: var(--slotted-font-weight-semibold, 600);
     line-height: var(--slotted-line-height-2xl, 1.4);

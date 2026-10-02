@@ -876,6 +876,12 @@ export const contract: TokenContract = {
       "root": true
     },
     {
+      "name": "--slotted-font-family-heading",
+      "layer": "semantic",
+      "axis": "base",
+      "type": "font-family"
+    },
+    {
       "name": "--slotted-control-font-family",
       "layer": "semantic",
       "axis": "base",
@@ -2069,6 +2075,7 @@ export type BaseToken =
   | '--slotted-icon-grip-horizontal'
   | '--slotted-icon-star'
   | '--slotted-icon-check-check'
+  | '--slotted-font-family-heading'
   | '--slotted-control-font-family'
   | '--slotted-control-font-weight'
   | '--slotted-control-line-height'
@@ -2351,6 +2358,7 @@ export type ComponentToken =
   | '--slotted-alert-state-layer-active'
   | '--slotted-alert-state-layer-hover'
   | '--slotted-alert-text-gap'
+  | '--slotted-alert-title-font-family'
   | '--slotted-alert-title-font-weight'
   | '--slotted-app-shell-aside-color'
   | '--slotted-app-shell-aside-size-lg'
@@ -2774,6 +2782,7 @@ export type ComponentToken =
   | '--slotted-dashboard-grid-resize-pill-active'
   | '--slotted-dashboard-grid-row-size'
   | '--slotted-dashboard-grid-title-color'
+  | '--slotted-dashboard-grid-title-font-family'
   | '--slotted-dashboard-grid-title-font-size'
   | '--slotted-data-grid-band-surface'
   | '--slotted-data-grid-block-size'
@@ -3070,6 +3079,7 @@ export type ComponentToken =
   | '--slotted-dialog-scrim'
   | '--slotted-dialog-surface'
   | '--slotted-dialog-title-color'
+  | '--slotted-dialog-title-font-family'
   | '--slotted-divider-color'
   | '--slotted-divider-gap'
   | '--slotted-divider-inset'
@@ -3097,6 +3107,7 @@ export type ComponentToken =
   | '--slotted-drawer-sheet-inline-size'
   | '--slotted-drawer-surface'
   | '--slotted-drawer-title-color'
+  | '--slotted-drawer-title-font-family'
   | '--slotted-entity-picker-action-active-background'
   | '--slotted-entity-picker-action-color'
   | '--slotted-entity-picker-action-hover-background'
@@ -3723,6 +3734,7 @@ export type ComponentToken =
   | '--slotted-result-state-padding-inline'
   | '--slotted-result-state-row-gap'
   | '--slotted-result-state-text-gap'
+  | '--slotted-result-state-title-font-family'
   | '--slotted-result-state-title-font-size'
   | '--slotted-result-state-title-font-weight'
   | '--slotted-result-state-title-letter-spacing'
@@ -4292,6 +4304,7 @@ export type ComponentToken =
   | '--slotted-toast-text'
   | '--slotted-toast-text-gap'
   | '--slotted-toast-text-muted'
+  | '--slotted-toast-title-font-family'
   | '--slotted-toast-title-font-weight'
   | '--slotted-toggle-active-background'
   | '--slotted-toggle-border-color'
@@ -4491,6 +4504,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-alert-state-layer-active",
   "--slotted-alert-state-layer-hover",
   "--slotted-alert-text-gap",
+  "--slotted-alert-title-font-family",
   "--slotted-alert-title-font-weight",
   "--slotted-app-shell-aside-color",
   "--slotted-app-shell-aside-size-lg",
@@ -4914,6 +4928,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-dashboard-grid-resize-pill-active",
   "--slotted-dashboard-grid-row-size",
   "--slotted-dashboard-grid-title-color",
+  "--slotted-dashboard-grid-title-font-family",
   "--slotted-dashboard-grid-title-font-size",
   "--slotted-data-grid-band-surface",
   "--slotted-data-grid-block-size",
@@ -5210,6 +5225,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-dialog-scrim",
   "--slotted-dialog-surface",
   "--slotted-dialog-title-color",
+  "--slotted-dialog-title-font-family",
   "--slotted-divider-color",
   "--slotted-divider-gap",
   "--slotted-divider-inset",
@@ -5237,6 +5253,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-drawer-sheet-inline-size",
   "--slotted-drawer-surface",
   "--slotted-drawer-title-color",
+  "--slotted-drawer-title-font-family",
   "--slotted-entity-picker-action-active-background",
   "--slotted-entity-picker-action-color",
   "--slotted-entity-picker-action-hover-background",
@@ -5863,6 +5880,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-result-state-padding-inline",
   "--slotted-result-state-row-gap",
   "--slotted-result-state-text-gap",
+  "--slotted-result-state-title-font-family",
   "--slotted-result-state-title-font-size",
   "--slotted-result-state-title-font-weight",
   "--slotted-result-state-title-letter-spacing",
@@ -6432,6 +6450,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-toast-text",
   "--slotted-toast-text-gap",
   "--slotted-toast-text-muted",
+  "--slotted-toast-title-font-family",
   "--slotted-toast-title-font-weight",
   "--slotted-toggle-active-background",
   "--slotted-toggle-border-color",

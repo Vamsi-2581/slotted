@@ -366,6 +366,10 @@
     -webkit-box-orient: vertical;
     color: var(--_text);
     display: -webkit-box;
+    font-family: var(
+      --slotted-font-family-heading,
+      var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
+    );
     font-size: var(--_heading-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
     letter-spacing: -0.01em;

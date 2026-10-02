@@ -181,6 +181,10 @@
     align-items: center;
     color: var(--_text);
     display: inline-flex;
+    font-family: var(
+      --slotted-font-family-heading,
+      var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
+    );
     font-size: var(--_title-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
     gap: var(--slotted-space-3, 0.375rem);

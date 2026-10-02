@@ -90,6 +90,7 @@
     --slotted-font-weight-regular: 400;
     --slotted-font-weight-medium: 500;
     --slotted-font-weight-semibold: 600;
+    --slotted-font-family-heading: var(--slotted-font-family-sans);
     --slotted-control-font-family: var(--slotted-font-family-sans);
     --slotted-control-font-weight: var(--slotted-font-weight-semibold);
     --slotted-control-line-height: 1;

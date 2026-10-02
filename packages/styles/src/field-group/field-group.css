@@ -126,6 +126,10 @@
    */
   [data-ui='field-group'] > [data-part='legend'] > :is(h1, h2, h3, h4, h5, h6) {
     display: inline;
+    font-family: var(
+      --slotted-font-family-heading,
+      var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
+    );
     margin: 0;
   }
 

@@ -740,6 +740,13 @@
    * tree, and findable by a page search.
    */
   [data-ui='result-state'] [data-part='title'] {
+    font-family: var(
+      --slotted-result-state-title-font-family,
+      var(
+        --slotted-font-family-heading,
+        var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
+      )
+    );
     font-size: var(--_title-font-size);
     font-weight: var(
       --slotted-result-state-title-font-weight,

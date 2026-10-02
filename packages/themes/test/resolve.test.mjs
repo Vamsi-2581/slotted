@@ -33,6 +33,7 @@ const UNCHANGED = {
   '--slotted-control-transition-easing': 'cubic-bezier(0.2, 0, 0, 1)',
   '--slotted-focus-ring-width': '2px',
   '--slotted-focus-ring-offset': '2px',
+  '--slotted-font-family-heading': "'Geist Variable', ui-sans-serif, system-ui, sans-serif",
 };
 
 test('expands a reference to another token in the same map', () => {

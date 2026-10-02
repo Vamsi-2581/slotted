@@ -129,6 +129,10 @@
   }
 
   [data-ui='event-calendar'] > [data-part='header'] > [data-part='title'] {
+    font-family: var(
+      --slotted-font-family-heading,
+      var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
+    );
     font-size: var(--slotted-font-size-lg, 1rem);
     font-weight: var(--slotted-font-weight-semibold, 600);
     grid-area: title;

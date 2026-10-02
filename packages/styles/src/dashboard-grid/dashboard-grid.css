@@ -143,6 +143,13 @@
     -webkit-box-orient: vertical;
     color: var(--slotted-dashboard-grid-title-color, var(--slotted-text, CanvasText));
     display: -webkit-box;
+    font-family: var(
+      --slotted-dashboard-grid-title-font-family,
+      var(
+        --slotted-font-family-heading,
+        var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
+      )
+    );
     font-size: var(
       --slotted-dashboard-grid-title-font-size,
       var(--slotted-font-size-md, 0.8125rem)

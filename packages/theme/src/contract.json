@@ -857,6 +857,12 @@
       "root": true
     },
     {
+      "name": "--slotted-font-family-heading",
+      "layer": "semantic",
+      "axis": "base",
+      "type": "font-family"
+    },
+    {
       "name": "--slotted-control-font-family",
       "layer": "semantic",
       "axis": "base",

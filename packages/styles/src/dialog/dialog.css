@@ -496,6 +496,13 @@
     margin: 0;
     min-inline-size: 0;
     overflow-wrap: anywhere;
+    font-family: var(
+      --slotted-dialog-title-font-family,
+      var(
+        --slotted-font-family-heading,
+        var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
+      )
+    );
     font-size: var(--_title-font-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
     line-height: var(--_title-line-height);

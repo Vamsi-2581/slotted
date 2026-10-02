@@ -302,6 +302,10 @@
   [data-ui='popover'] > [data-part='content'] > [data-part='header'] > [data-part='title'] {
     grid-column: 1;
     margin: 0;
+    font-family: var(
+      --slotted-font-family-heading,
+      var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
+    );
     font-size: var(--_title-font-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
     line-height: var(--slotted-line-height-lg, 1.5);

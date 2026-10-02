@@ -94,6 +94,10 @@
   }
 
   [data-ui='form'][data-part='summary'] > [data-part='summary-title'] {
+    font-family: var(
+      --slotted-font-family-heading,
+      var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
+    );
     font-size: var(--_font-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
     line-height: var(--slotted-line-height-md, 1.5);

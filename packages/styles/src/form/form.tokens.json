@@ -6,6 +6,8 @@
   "--slotted-focus-ring-color",
   "--slotted-focus-ring-offset",
   "--slotted-focus-ring-width",
+  "--slotted-font-family-heading",
+  "--slotted-font-family-sans",
   "--slotted-font-weight-semibold",
   "--slotted-form-color",
   "--slotted-form-summary-background",

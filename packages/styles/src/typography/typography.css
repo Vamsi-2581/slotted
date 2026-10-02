@@ -25,6 +25,18 @@
     overflow-wrap: anywhere;
   }
 
+  /**
+   * A heading is set in the heading face. The element is the only thing that
+   * tells a heading from a line of text here: both carry `data-ui` and
+   * `data-part='root'`, and `Heading` always renders `h1` to `h6`.
+   */
+  [data-ui='typography']:is(h1, h2, h3, h4, h5, h6) {
+    font-family: var(
+      --slotted-font-family-heading,
+      var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
+    );
+  }
+
   /* Each step carries the line height the scale pairs it with. */
   [data-ui='typography'][data-size='xs'] {
     font-size: var(--slotted-font-size-xs, 0.75rem);

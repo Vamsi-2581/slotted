@@ -13,6 +13,7 @@
   "--slotted-easing-standard",
   "--slotted-focus-ring-color",
   "--slotted-focus-ring-width",
+  "--slotted-font-family-heading",
   "--slotted-font-family-sans",
   "--slotted-font-size-lg",
   "--slotted-font-size-md",

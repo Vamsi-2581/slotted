@@ -256,4 +256,21 @@ describe('Heading', () => {
 
     expect(screen.getByRole('heading', { level: 2 })).toHaveAttribute('id', 'billing');
   });
+
+  /**
+   * `typography.css` sets the heading face on the heading element, because the
+   * heading carries the same `data-ui` and `data-part` as a line of text.
+   */
+  it('is the element the stylesheet sets in the heading face, and text is not', () => {
+    const face = "[data-ui='typography']:is(h1, h2, h3, h4, h5, h6)";
+    render(
+      <>
+        <Heading level={4}>Billing</Heading>
+        <Text>Due on receipt</Text>
+      </>,
+    );
+
+    expect(screen.getByText('Billing').matches(face)).toBe(true);
+    expect(screen.getByText('Due on receipt').matches(face)).toBe(false);
+  });
 });

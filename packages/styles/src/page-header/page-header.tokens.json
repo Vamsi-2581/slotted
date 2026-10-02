@@ -15,6 +15,7 @@
   "--slotted-focus-ring-color",
   "--slotted-focus-ring-offset",
   "--slotted-focus-ring-width",
+  "--slotted-font-family-heading",
   "--slotted-font-family-sans",
   "--slotted-font-size-2xl",
   "--slotted-font-size-3xl",

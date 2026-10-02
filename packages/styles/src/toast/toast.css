@@ -494,6 +494,13 @@
     > [data-part='item']
     > [data-part='content']
     > [data-part='title'] {
+    font-family: var(
+      --slotted-toast-title-font-family,
+      var(
+        --slotted-font-family-heading,
+        var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
+      )
+    );
     font-weight: var(--slotted-toast-title-font-weight, var(--slotted-font-weight-semibold, 600));
     margin: 0;
     min-inline-size: 0;

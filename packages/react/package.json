@@ -476,6 +476,7 @@
   },
   "peerDependencies": {
     "@slotted/core": "workspace:*",
+    "@slotted/theme": "workspace:*",
     "react": ">=19.2.0 <20"
   },
   "devDependencies": {

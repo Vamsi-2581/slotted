@@ -17,9 +17,7 @@
     "@angular/common": ">=22.1.0 <23",
     "@angular/core": ">=22.1.0 <23",
     "@angular/forms": ">=22.1.0 <23",
-    "@slotted/core": "workspace:*"
-  },
-  "dependencies": {
+    "@slotted/core": "workspace:*",
     "@slotted/theme": "workspace:*"
   },
   "devDependencies": {
@@ -29,6 +27,7 @@
     "@slotted/core": "workspace:*",
     "@slotted/storybook-workbench": "workspace:*",
     "@slotted/styles": "workspace:*",
+    "@slotted/theme": "workspace:*",
     "@storybook/angular-vite": "10.5.10",
     "marked": "18.0.5",
     "storybook": "10.5.10"

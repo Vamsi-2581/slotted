@@ -108,7 +108,7 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      external: [/^@slotted\/core/, 'react', 'react/jsx-runtime'],
+      external: [/^@slotted\/core/, /^@slotted\/theme(\/|$)/, 'react', 'react/jsx-runtime'],
       output: {
         entryFileNames: '[name].js',
       },

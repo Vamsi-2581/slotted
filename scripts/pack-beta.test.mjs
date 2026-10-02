@@ -64,3 +64,56 @@ test('the Angular package publishes its ng-packagr output', () => {
   const angular = manifests().find((manifest) => manifest.name === '@slotted/angular');
   assert.equal(angular.publishConfig?.directory, 'dist');
 });
+
+/**
+ * A binding imports `@slotted/core` and `@slotted/theme` and leaves both out
+ * of its bundle, so the application installs one copy of each and the binding
+ * names them as peers. A runtime `dependencies` entry would make the packed
+ * manifest fetch them from a registry they are not published to.
+ */
+test('the bindings name the workspace packages they import as peers', () => {
+  for (const name of ['@slotted/react', '@slotted/angular']) {
+    const binding = manifests().find((manifest) => manifest.name === name);
+    for (const peer of ['@slotted/core', '@slotted/theme']) {
+      assert.equal(binding.peerDependencies?.[peer], 'workspace:*', `${name} › ${peer}`);
+      assert.equal(binding.devDependencies?.[peer], 'workspace:*', `${name} › ${peer}`);
+    }
+    assert.deepEqual(
+      Object.keys(binding.dependencies ?? {}).filter((dependency) =>
+        dependency.startsWith('@slotted/'),
+      ),
+      [],
+      name,
+    );
+  }
+});
+
+/**
+ * `demo:refresh` builds and packs what the demo installs from the beta
+ * channel; a peer of one of those tarballs that is neither packed nor
+ * installed leaves the demo unable to resolve it.
+ */
+test('demo:refresh packs every tarball the demo installs, and the demo installs their peers', () => {
+  const root = JSON.parse(readFileSync(join(repositoryRoot, 'package.json'), 'utf8'));
+  const demo = JSON.parse(
+    readFileSync(join(repositoryRoot, 'demos/nexora/angular/package.json'), 'utf8'),
+  );
+  const packed = /--only ([\w@/,-]+)/.exec(root.scripts['demo:refresh'])[1].split(',');
+  const built = [...root.scripts['demo:refresh'].matchAll(/--filter ([\w@/-]+)/g)].map(
+    (match) => match[1],
+  );
+  const installed = Object.entries(demo.dependencies)
+    .filter(([, specifier]) => specifier.startsWith('file:../../.registry/'))
+    .map(([name]) => name);
+
+  assert.deepEqual([...installed].sort(), [...packed].sort());
+  assert.deepEqual([...built].sort(), [...packed].sort());
+  for (const name of installed) {
+    const manifest = manifests().find((candidate) => candidate.name === name);
+    const peers = Object.keys(manifest.peerDependencies ?? {}).filter(
+      (peer) =>
+        peer.startsWith('@slotted/') && !manifest.peerDependenciesMeta?.[peer]?.optional,
+    );
+    for (const peer of peers) assert.ok(installed.includes(peer), `${name} › ${peer}`);
+  }
+});

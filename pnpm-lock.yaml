@@ -214,11 +214,32 @@ importers:
       '@angular/router':
         specifier: ~22.1.7
         version: 22.1.7(@angular/common@22.1.7(@angular/core@22.1.7(@angular/compiler@22.1.7)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.7(@angular/compiler@22.1.7)(rxjs@7.8.2))(@angular/platform-browser@22.1.7(@angular/animations@22.1.7(@angular/core@22.1.7(@angular/compiler@22.1.7)(rxjs@7.8.2)))(@angular/common@22.1.7(@angular/core@22.1.7(@angular/compiler@22.1.7)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.7(@angular/compiler@22.1.7)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@fontsource-variable/fraunces':
+        specifier: 5.3.0
+        version: 5.3.0
       '@fontsource-variable/geist':
         specifier: ^5.3.0
         version: 5.3.0
       '@fontsource-variable/geist-mono':
         specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource-variable/inter':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource-variable/jetbrains-mono':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource-variable/nunito':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource-variable/outfit':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource-variable/source-sans-3':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource-variable/source-serif-4':
+        specifier: 5.3.0
         version: 5.3.0
       '@ng-icons/core':
         specifier: ^36.0.0
@@ -1234,11 +1255,32 @@ packages:
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
 
+  '@fontsource-variable/fraunces@5.3.0':
+    resolution: {integrity: sha512-9BYGySn4AHEJdgp9Z28tQ3X+laJMEOITXkQarZXeloWQZDq5oOvXJ3kDA8c7MGIfpogIaZfjrQBqmda8POOCKA==}
+
   '@fontsource-variable/geist-mono@5.3.0':
     resolution: {integrity: sha512-vBbuwDEo9AkrqADMXOrlAR3DFcJi4/JxeuU43FoiQERnNwsfXNnvxvReZG02cQKmyk4DZkZdBZX3oTDvy2zBAw==}
 
   '@fontsource-variable/geist@5.3.0':
     resolution: {integrity: sha512-j0m+vLQuG5XAYoHtGCVu0spvlGreR3EzpECUVzkFmI1mTVnAO38l/NEPDCFgZ177JxzYJCLSmTQibIiYPilGrA==}
+
+  '@fontsource-variable/inter@5.3.0':
+    resolution: {integrity: sha512-OupL48va4JNofb97w6NYeF9S7W/kHNKM0Er8Dem5nqi4jeOLrVJDoE8tZEpnMJmtkvNbB1EIPPwHcdkF6b1oUA==}
+
+  '@fontsource-variable/jetbrains-mono@5.3.0':
+    resolution: {integrity: sha512-F32xpS2NsGYoQi2ADSkKTgpJj7ozajsGgDJ8woTnqjmIB+dxDIqImjl4pXZVEExu8UFZ2ndhmX18EBS/hdz3Lw==}
+
+  '@fontsource-variable/nunito@5.3.0':
+    resolution: {integrity: sha512-tw0ch7evIDSwoeUy+0XzocYHfbRWLeCRPJy22KgbrLjDLAbNw/fErBiil10Ssrs3Sjr55zaZrr36a975j8cBkQ==}
+
+  '@fontsource-variable/outfit@5.3.0':
+    resolution: {integrity: sha512-fPb5XnYK0k7SbR++HEmm4+ZqDszmLKQ+sPRUr8oQ/KNC0vy6r6hazJFe8iYozv4cqlHbvJ/JECkJWrfDodUMVQ==}
+
+  '@fontsource-variable/source-sans-3@5.3.0':
+    resolution: {integrity: sha512-dpi0GZk7EQe2tYpg6Q0Fx0OmUgnuGu+0rHPgtXqtKhglYmJuP7jZ12Mu1uN+NfRaJRY1Emn8AQJEWzmoZ4wa9g==}
+
+  '@fontsource-variable/source-serif-4@5.3.0':
+    resolution: {integrity: sha512-9vch9WqxjaaA+1o9Ur8pOgIGbCYLjRReOUel23A6lOpD1syptgjtkORevvNmldJ5kGXQL29onQUqI5Ltz0s3bQ==}
 
   '@harperfast/extended-iterable@1.0.3':
     resolution: {integrity: sha512-sSAYhQca3rDWtQUHSAPeO7axFIUJOI6hn1gjRC5APVE1a90tuyT8f5WIgRsFhhWA7htNkju2veB9eWL6YHi/Lw==}
@@ -2736,7 +2778,7 @@ packages:
     engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0, npm: ^6.11.0 || ^7.5.6 || >=8.0.0, yarn: '>= 1.13.0'}
 
   '@slotted/angular@file:demos/.registry/slotted-angular-0.1.0-beta.0.tgz':
-    resolution: {integrity: sha512-CnTIKlcOO8gYq0FlVu3TFdPuYLKXNPkYbPpumxWScKwavFWDXT9U0/3Y7TyFY8qQ7Hnca82AowSwm355P5Fq2Q==, tarball: file:demos/.registry/slotted-angular-0.1.0-beta.0.tgz}
+    resolution: {integrity: sha512-xT2kjmSRpj+OSZBvCgd1A7pKfEvUoJrESgJmQYnxP3drK6lNQcQu7Bh2WSpVyExlSK2vB8o6ZP82uvc4QEpY1w==, tarball: file:demos/.registry/slotted-angular-0.1.0-beta.0.tgz}
     version: 0.1.0-beta.0
     peerDependencies:
       '@angular/common': '>=22.1.0 <23'
@@ -2746,7 +2788,7 @@ packages:
       '@slotted/theme': 0.1.0-beta.0
 
   '@slotted/core@file:demos/.registry/slotted-core-0.1.0-beta.0.tgz':
-    resolution: {integrity: sha512-O0M6aJxwY48+Z0EPbXW1l4LBKMShaZswE//gyEc58RuRtoG6FK8/2/ZmryqVFEbA3IdkPchhRCETN1QbeDArSA==, tarball: file:demos/.registry/slotted-core-0.1.0-beta.0.tgz}
+    resolution: {integrity: sha512-A/LOu2gqlBU0yA8fxI29igaPsRS0ibbNGksNKzybxlWjfi3VAm7T/Ow6pIECHTL/af2tmeE+U5amvAsHO0tpNw==, tarball: file:demos/.registry/slotted-core-0.1.0-beta.0.tgz}
     version: 0.1.0-beta.0
     peerDependencies:
       echarts: ^6.1.0
@@ -2755,12 +2797,12 @@ packages:
         optional: true
 
   '@slotted/theme@file:demos/.registry/slotted-theme-0.1.0-beta.0.tgz':
-    resolution: {integrity: sha512-rD2A1HOitc7iy2iVHIydMZQqQouAMH0dpodRKhkcyJT8kBSxQKHqNJrz0664Gzz2e0RU8cSFGyAeeXmzZkqUJw==, tarball: file:demos/.registry/slotted-theme-0.1.0-beta.0.tgz}
+    resolution: {integrity: sha512-Cs5Ai06uWd3KZTMG21Zib1BU4C/kBQICEEAOU0md8LbGlK6ResgZjRty2jmpafpKsTe7olibeuVdf7rxL/vrxA==, tarball: file:demos/.registry/slotted-theme-0.1.0-beta.0.tgz}
     version: 0.1.0-beta.0
     hasBin: true
 
   '@slotted/themes@file:demos/.registry/slotted-themes-0.1.0-beta.0.tgz':
-    resolution: {integrity: sha512-8tJlx1I6o9Im7CrrpRDN5uuf+Fhkamg9fqOPd1wn4w/zfxh6EMz9G2ooD5iBd7n3V7tiIXBMaKQQLo6EMdzIqg==, tarball: file:demos/.registry/slotted-themes-0.1.0-beta.0.tgz}
+    resolution: {integrity: sha512-S8t4sN9Sqyrc4QwtZ2mBPa0FjzSEvb0fUgPS2Uhc4hbR/N4BR1sPlZrHXHXU+/4EN+Xqs8MtMahnpaXjJAe+3g==, tarball: file:demos/.registry/slotted-themes-0.1.0-beta.0.tgz}
     version: 0.1.0-beta.0
     peerDependencies:
       '@slotted/theme': 0.1.0-beta.0
@@ -6155,9 +6197,23 @@ snapshots:
 
   '@floating-ui/utils@0.2.12': {}
 
+  '@fontsource-variable/fraunces@5.3.0': {}
+
   '@fontsource-variable/geist-mono@5.3.0': {}
 
   '@fontsource-variable/geist@5.3.0': {}
+
+  '@fontsource-variable/inter@5.3.0': {}
+
+  '@fontsource-variable/jetbrains-mono@5.3.0': {}
+
+  '@fontsource-variable/nunito@5.3.0': {}
+
+  '@fontsource-variable/outfit@5.3.0': {}
+
+  '@fontsource-variable/source-sans-3@5.3.0': {}
+
+  '@fontsource-variable/source-serif-4@5.3.0': {}
 
   '@harperfast/extended-iterable@1.0.3':
     optional: true

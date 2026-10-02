@@ -1,4 +1,5 @@
 import { computed, DestroyRef, DOCUMENT, effect, inject, Injectable, signal } from '@angular/core';
+import type { Theme } from '@slotted/theme';
 import { SEED_NAMES, seedStyle } from '@slotted/theme/seeds';
 
 import { DEFAULT_SHELL_PRESET, shellPreset, type ShellPresetId } from '../shell/shell-presets';
@@ -7,11 +8,27 @@ import {
   DEFAULT_BRAND,
   DEFAULT_NEUTRAL,
   isNeutralPreset,
+  NO_STATUS,
   readBrand,
+  readStatus,
   type BrandPreference,
   type NeutralPresetId,
+  type StatusColours,
 } from '../theming/appearance';
-import { catalogueTheme, DEFAULT_THEME_ID, RUNTIME_THEME_IDS } from '../theming/theme-catalogue';
+import { CustomSheet } from '../theming/custom-sheet';
+import {
+  isCustomised,
+  NO_CUSTOMISATION,
+  readCustomisation,
+  type Customisation,
+} from '../theming/customisation';
+import {
+  catalogueTheme,
+  CUSTOM_THEME_ID,
+  DEFAULT_THEME_ID,
+  DRAFT_THEME_ID,
+  RUNTIME_THEME_IDS,
+} from '../theming/theme-catalogue';
 import { SessionStore } from './session.store';
 
 /** The languages the library publishes a catalog for. */
@@ -27,6 +44,10 @@ export interface UserPreferences {
   brand: BrandPreference;
   /** The neutral seed, or `theme` for the theme's own. */
   neutral: NeutralPresetId;
+  /** The success, warning and danger seeds; each `null` keeps the theme's own. */
+  status: StatusColours;
+  /** The builder's axes over `theme`; every axis `null` is the theme as it comes. */
+  customisation: Customisation;
   /** The language the library writes in; the demo's own pages stay in English. */
   locale: NexoraLocale;
   /** The arrangement of the shell, one of the catalogue in `core/shell/shell-presets.ts`. */
@@ -45,6 +66,8 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   theme: DEFAULT_THEME_ID,
   brand: DEFAULT_BRAND,
   neutral: DEFAULT_NEUTRAL,
+  status: NO_STATUS,
+  customisation: NO_CUSTOMISATION,
   locale: 'en-US',
   shell: DEFAULT_SHELL_PRESET,
   startRoute: '/dashboard',
@@ -70,6 +93,12 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
  * declares every token under `[data-slotted-theme='default']`, and a name with
  * no sheet behind it would leave the page without one. Until then it keeps
  * the theme it shows — `default` on a reload — and the seeds apply at once.
+ *
+ * A customised theme is compiled by the builder (`custom-theme.ts`, loaded by
+ * `import()`) under `nexora-custom`, and `html` names it once that sheet
+ * exists. The candidate the appearance section previews compiles under a
+ * second name, `nexora-custom-draft`, after 200 ms without a change, so the
+ * preview never repaints the application and a dragged slider compiles once.
  */
 @Injectable({ providedIn: 'root' })
 export class PreferencesStore {
@@ -85,6 +114,10 @@ export class PreferencesStore {
   private destroyed = false;
   /** The theme `html` names, which trails the preferences while a sheet loads. */
   private shown = DEFAULT_THEME_ID;
+  /** The saved customisation's sheet, compiled as soon as it is asked for. */
+  private readonly saved = new CustomSheet(CUSTOM_THEME_ID, this.document, 0);
+  /** The candidate customisation's sheet, compiled once the changes pause. */
+  private readonly draft = new CustomSheet(DRAFT_THEME_ID, this.document, 200);
 
   readonly preferences = computed<UserPreferences>(() => {
     this.version();
@@ -95,6 +128,8 @@ export class PreferencesStore {
     inject(DestroyRef).onDestroy(() => {
       this.destroyed = true;
       this.disposers.forEach((dispose) => dispose());
+      this.saved.end();
+      this.draft.end();
     });
     effect(() => this.apply(this.preferences()));
     this.media?.addEventListener('change', () => this.apply(this.preferences()));
@@ -114,6 +149,29 @@ export class PreferencesStore {
     return Promise.all(
       ids.filter((id) => RUNTIME_THEME_IDS.includes(id)).map((id) => this.load(id)),
     ).then(() => undefined);
+  }
+
+  /**
+   * Asks for the candidate customisation of `theme` under `nexora-custom-draft`;
+   * a burst of calls compiles the last one, 200 ms after it.
+   */
+  previewCustomisation(theme: string, customisation: Customisation): void {
+    if (isCustomised(customisation)) this.draft.request(theme, customisation);
+    else this.draft.forget();
+  }
+
+  /**
+   * The compiled candidate while it was compiled over `theme` — the last one
+   * during a burst of changes, so a dragged slider never shows the theme
+   * without them — or `null`; a signal read.
+   */
+  previewTheme(theme: string): Theme | null {
+    return this.draft.themeOver(theme);
+  }
+
+  /** Whether the candidate sheet is the one `customisation` of `theme` compiles to; a signal read. */
+  previewHolds(theme: string, customisation: Customisation): boolean {
+    return this.draft.holds(theme, customisation);
   }
 
   private load(theme: string): Promise<void> {
@@ -144,10 +202,15 @@ export class PreferencesStore {
           : 'light'
         : preferences.scheme;
     const theme = catalogueTheme(preferences.theme).id;
-    if (this.hasSheet(theme)) this.shown = theme;
+    if (isCustomised(preferences.customisation)) {
+      this.saved.request(theme, preferences.customisation);
+      if (this.saved.compiled() !== null) this.shown = CUSTOM_THEME_ID;
+    } else if (this.hasSheet(theme)) this.shown = theme;
     else this.useThemes([theme]).catch(() => undefined);
     html.setAttribute('data-slotted-theme', this.shown);
-    const seeds = seedStyle(appearanceSeeds(preferences.brand, preferences.neutral));
+    const seeds = seedStyle(
+      appearanceSeeds(theme, preferences.brand, preferences.neutral, preferences.status),
+    );
     for (const name of SEED_NAMES) {
       const property = `--slotted-seed-${name}`;
       if (property in seeds) html.style.setProperty(property, seeds[property]!);
@@ -194,6 +257,8 @@ export class PreferencesStore {
         theme: catalogueTheme(stored.theme).id,
         brand: readBrand(stored.brand),
         neutral: isNeutralPreset(stored.neutral) ? stored.neutral : DEFAULT_NEUTRAL,
+        status: readStatus(stored.status),
+        customisation: readCustomisation(stored.customisation),
         locale: NEXORA_LOCALES.includes(stored.locale as NexoraLocale)
           ? (stored.locale as NexoraLocale)
           : DEFAULT_PREFERENCES.locale,

@@ -23,6 +23,41 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "inter-latin-wght-normal.woff2",
+                "input": "node_modules/@fontsource-variable/inter/files",
+                "output": "fonts"
+              },
+              {
+                "glob": "nunito-latin-wght-normal.woff2",
+                "input": "node_modules/@fontsource-variable/nunito/files",
+                "output": "fonts"
+              },
+              {
+                "glob": "source-sans-3-latin-wght-normal.woff2",
+                "input": "node_modules/@fontsource-variable/source-sans-3/files",
+                "output": "fonts"
+              },
+              {
+                "glob": "outfit-latin-wght-normal.woff2",
+                "input": "node_modules/@fontsource-variable/outfit/files",
+                "output": "fonts"
+              },
+              {
+                "glob": "source-serif-4-latin-wght-normal.woff2",
+                "input": "node_modules/@fontsource-variable/source-serif-4/files",
+                "output": "fonts"
+              },
+              {
+                "glob": "fraunces-latin-wght-normal.woff2",
+                "input": "node_modules/@fontsource-variable/fraunces/files",
+                "output": "fonts"
+              },
+              {
+                "glob": "jetbrains-mono-latin-wght-normal.woff2",
+                "input": "node_modules/@fontsource-variable/jetbrains-mono/files",
+                "output": "fonts"
               }
             ],
             "styles": ["src/styles.css"]

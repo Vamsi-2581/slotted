@@ -1,5 +1,7 @@
 import { seedStyle, type SeedName } from '@slotted/theme/seeds';
 
+import { catalogueTheme } from './theme-catalogue';
+
 /** The brand colours offered as one press; `custom` keeps a colour of the reader's own. */
 export const BRAND_PRESETS = [
   { id: 'violet', label: 'Violet', color: '#7c3aed' },
@@ -12,28 +14,46 @@ export const BRAND_PRESETS = [
 export type BrandPresetId = (typeof BRAND_PRESETS)[number]['id'];
 
 export interface BrandPreference {
-  readonly preset: BrandPresetId | 'custom';
+  /** `theme` keeps the accent the theme brings. */
+  readonly preset: BrandPresetId | 'custom' | 'theme';
   /** The reader's own colour, `#rrggbb`; kept while a preset is chosen, so Custom brings it back. */
   readonly custom: string;
 }
 
-export const DEFAULT_BRAND: BrandPreference = { preset: 'violet', custom: '#7c3aed' };
+export const DEFAULT_BRAND: BrandPreference = { preset: 'theme', custom: '#7c3aed' };
 
 /**
  * The grey every surface, border and muted text is derived from. `theme`
- * writes no seed, so the theme's own neutral holds; the three colours are
- * apart from every theme's own (`theme-catalogue.spec.ts`).
+ * writes no seed, so the theme's own neutral holds. The four colours carry
+ * enough chroma to tint a ground the reader can see, and stand apart from
+ * every theme's own (`theme-catalogue.spec.ts`).
  */
 export const NEUTRAL_PRESETS = [
-  { id: 'theme', label: 'Theme’s own', color: null },
-  { id: 'cool', label: 'Cool', color: '#64748b' },
-  { id: 'warm', label: 'Warm', color: '#78716c' },
-  { id: 'pure', label: 'Pure', color: '#737373' },
+  { id: 'theme', label: 'Theme', color: null },
+  { id: 'ocean', label: 'Ocean', color: '#0e7490' },
+  { id: 'clay', label: 'Clay', color: '#9c6644' },
+  { id: 'sage', label: 'Sage', color: '#5b7f66' },
+  { id: 'plum', label: 'Plum', color: '#7e5a86' },
 ] as const;
 export type NeutralPresetId = (typeof NEUTRAL_PRESETS)[number]['id'];
 export const DEFAULT_NEUTRAL: NeutralPresetId = 'theme';
 
-export function brandColor(brand: BrandPreference): string {
+/** The three status seeds; `null` keeps the theme's own. */
+export const STATUS_SEEDS = ['success', 'warning', 'danger'] as const;
+export type StatusSeed = (typeof STATUS_SEEDS)[number];
+export type StatusColours = Readonly<Record<StatusSeed, string | null>>;
+export const NO_STATUS: StatusColours = { success: null, warning: null, danger: null };
+
+/** The colours the status fields offer in their panels. */
+export const STATUS_PRESETS: Readonly<Record<StatusSeed, readonly string[]>> = {
+  success: ['#15803d', '#059669', '#0d9488', '#65a30d'],
+  warning: ['#d97706', '#ca8a04', '#ea580c', '#facc15'],
+  danger: ['#dc2626', '#e11d48', '#be123c', '#c2410c'],
+};
+
+/** The accent a brand writes over `theme`, or `null` when the theme's own holds. */
+export function brandColor(brand: BrandPreference, theme: string): string | null {
+  if (brand.preset === 'theme') return catalogueTheme(theme).accent;
   if (brand.preset === 'custom') return brand.custom;
   return BRAND_PRESETS.find((preset) => preset.id === brand.preset)?.color ?? DEFAULT_BRAND.custom;
 }
@@ -42,15 +62,27 @@ export function isNeutralPreset(value: unknown): value is NeutralPresetId {
   return NEUTRAL_PRESETS.some((preset) => preset.id === value);
 }
 
-/** The seeds a brand and a neutral write, in the shape `slThemeScope` and `seedStyle` take. */
+/**
+ * The seeds a reader's colours write over `theme`, in the shape `slThemeScope`
+ * and `seedStyle` take: only the ones the reader chose, so the theme's own
+ * hold for the rest.
+ */
 export function appearanceSeeds(
+  theme: string,
   brand: BrandPreference,
   neutral: NeutralPresetId,
+  status: StatusColours = NO_STATUS,
 ): Partial<Record<SeedName, string>> {
-  const color = NEUTRAL_PRESETS.find((preset) => preset.id === neutral)?.color ?? null;
-  return color === null
-    ? { accent: brandColor(brand) }
-    : { accent: brandColor(brand), neutral: color };
+  const seeds: Partial<Record<SeedName, string>> = {};
+  const accent = brandColor(brand, theme);
+  if (accent !== null) seeds.accent = accent;
+  const grey = NEUTRAL_PRESETS.find((preset) => preset.id === neutral)?.color ?? null;
+  if (grey !== null) seeds.neutral = grey;
+  for (const name of STATUS_SEEDS) {
+    const color = status[name];
+    if (color !== null) seeds[name] = color;
+  }
+  return seeds;
 }
 
 /**
@@ -62,10 +94,21 @@ export function readBrand(value: unknown): BrandPreference {
   if (typeof value !== 'object' || value === null) return DEFAULT_BRAND;
   const { preset, custom } = value as Partial<Record<keyof BrandPreference, unknown>>;
   const color = isSeed(custom) ? custom : null;
-  if (BRAND_PRESETS.some((entry) => entry.id === preset)) {
-    return { preset: preset as BrandPresetId, custom: color ?? DEFAULT_BRAND.custom };
+  if (preset === 'theme' || BRAND_PRESETS.some((entry) => entry.id === preset)) {
+    return { preset: preset as BrandPreference['preset'], custom: color ?? DEFAULT_BRAND.custom };
   }
   return preset === 'custom' && color !== null ? { preset, custom: color } : DEFAULT_BRAND;
+}
+
+/** Status colours read back from storage: each one a seed, or the theme's own. */
+export function readStatus(value: unknown): StatusColours {
+  if (typeof value !== 'object' || value === null) return NO_STATUS;
+  const stored = value as Partial<Record<StatusSeed, unknown>>;
+  return {
+    success: isSeed(stored.success) ? stored.success : null,
+    warning: isSeed(stored.warning) ? stored.warning : null,
+    danger: isSeed(stored.danger) ? stored.danger : null,
+  };
 }
 
 /** Whether `seedStyle` takes `value` as a seed: `#rgb`, `#rrggbb` or `oklch(L C H)`. */

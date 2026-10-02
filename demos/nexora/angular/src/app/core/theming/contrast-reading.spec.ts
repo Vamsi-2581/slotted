@@ -3,10 +3,10 @@ import { describe, expect, it } from 'vitest';
 
 import { CONTRAST_TOKENS, contrastReadings } from './contrast-reading';
 import { nexoraTheme } from './nexora-themes';
-import { catalogueTheme, THEME_CATALOGUE } from './theme-catalogue';
+import { THEME_CATALOGUE } from './theme-catalogue';
 
 describe('contrastReadings', () => {
-  it('reads four pairs in each of the three schemes, against the floors of recipe-checks', () => {
+  it('reads seven pairs in each of the three schemes, against the floors of recipe-checks', () => {
     const readings = contrastReadings('default', { accent: '#7c3aed' });
 
     expect(readings.map((reading) => reading.scheme)).toEqual(['light', 'dark', 'high-contrast']);
@@ -16,13 +16,16 @@ describe('contrastReadings', () => {
         'accent-text',
         'accent-border',
         'on-solid',
+        'on-success',
+        'on-warning',
+        'on-danger',
       ]);
     }
     const floors = (scheme: string) =>
       readings.find((reading) => reading.scheme === scheme)!.pairs.map((pair) => pair.floor);
-    expect(floors('light')).toEqual([4.5, 4.5, 3, 4.5]);
-    expect(floors('dark')).toEqual([4.5, 4.5, 3, 4.5]);
-    expect(floors('high-contrast')).toEqual([7, 7, 3, 7]);
+    expect(floors('light')).toEqual([4.5, 4.5, 3, 4.5, 4.5, 4.5, 4.5]);
+    expect(floors('dark')).toEqual([4.5, 4.5, 3, 4.5, 4.5, 4.5, 4.5]);
+    expect(floors('high-contrast')).toEqual([7, 7, 3, 7, 7, 7, 7]);
     for (const pair of readings.flatMap((reading) => reading.pairs)) {
       expect(pair.ratio).toBeGreaterThan(1);
       expect(pair.passes).toBe(pair.ratio >= pair.floor);
@@ -45,13 +48,54 @@ describe('contrastReadings', () => {
     expect(warm['on-solid']).toBe(violet['on-solid']);
   });
 
-  /** A theme's own neutral holds when the reader writes none. */
+  /** A theme's own seeds hold for every seed the reader writes none of. */
   it('reads the theme’s own seeds under the reader’s', () => {
-    const sage = catalogueTheme('nexora-editorial').neutral!;
-    const own = contrastReadings('nexora-editorial', { accent: '#7c3aed' })[0]!.pairs[0]!.ratio;
-    const same = contrastReadings('default', { accent: '#7c3aed', neutral: sage })[0]!.pairs[0]!
-      .ratio;
-    expect(own).toBe(same);
+    const editorial = nexoraTheme('nexora-editorial');
+    expect(contrastReadings('nexora-editorial', {})).toEqual(
+      contrastReadings('nexora-editorial', { ...editorial.seeds }),
+    );
+    const danger = (seeds: Parameters<typeof contrastReadings>[1]) =>
+      contrastReadings('nexora-editorial', seeds)[0]!.pairs.find((pair) => pair.id === 'on-danger')!
+        .ratio;
+    expect(danger({ danger: '#e11d48' })).not.toBe(danger({}));
+  });
+
+  /**
+   * The readings are the theme's own recipe: Brutalist draws the accent as a
+   * light solid under dark ink, so the same brand reads another ratio there
+   * than on Standard, and both stand at the floor.
+   */
+  it('reads each theme’s own recipe', () => {
+    const onSolid = (theme: string) =>
+      contrastReadings(theme, { accent: '#d97706' })[0]!.pairs.find(
+        (pair) => pair.id === 'on-solid',
+      )!;
+    expect(onSolid('nexora-brutalist').ratio).not.toBe(onSolid('default').ratio);
+    expect(onSolid('nexora-brutalist').passes).toBe(true);
+    expect(onSolid('default').passes).toBe(true);
+  });
+
+  /**
+   * The recipe caps every solid's chroma at 0.25, so a seed past the 0.35 it
+   * was calibrated over still lands at its floor: a sweep of such seeds for
+   * the four tones finds no failing pair. The table's "Below" branch is drawn
+   * from readings written by hand (`contrast-table.spec.ts`).
+   */
+  it('holds the floors for seeds past the calibrated chroma', () => {
+    const failing: string[] = [];
+    for (const tone of ['accent', 'success', 'warning', 'danger'] as const) {
+      for (let hue = 0; hue < 360; hue += 30) {
+        for (const lightness of [0.5, 0.7, 0.9]) {
+          const seed = `oklch(${lightness} 0.4 ${hue})`;
+          for (const reading of contrastReadings('default', { [tone]: seed })) {
+            for (const pair of reading.pairs) {
+              if (!pair.passes) failing.push(`${tone} ${seed} ${reading.scheme} ${pair.id}`);
+            }
+          }
+        }
+      }
+    }
+    expect(failing).toEqual([]);
   });
 
   /**

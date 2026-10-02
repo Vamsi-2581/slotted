@@ -2,16 +2,36 @@ import { ApplicationInitStatus, DOCUMENT } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { CHART_ENGINE } from '@slotted/angular/chart';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { provideTestBackend, resetTestBackend } from '../../../test/testing';
 import { routes } from '../../app.routes';
 import { PreferencesStore } from '../../core/session/preferences.store';
 import { SessionStore } from '../../core/session/session.store';
+import { NO_CUSTOMISATION } from '../../core/theming/customisation';
+
+/**
+ * jsdom has no ResizeObserver and no layout, so the preview's charts are drawn
+ * by an engine that records nothing: the token the family publishes for this.
+ */
+const silentEngine = () => ({
+  update: () => Promise.resolve(),
+  locate: () => null,
+  emphasize: () => undefined,
+  toDataURL: () => null,
+  dispose: () => undefined,
+});
 
 describe('PreferencesPage › Appearance', () => {
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTestBackend(), provideRouter(routes)] });
+    TestBed.configureTestingModule({
+      providers: [
+        provideTestBackend(),
+        provideRouter(routes),
+        { provide: CHART_ENGINE, useValue: silentEngine },
+      ],
+    });
     await TestBed.inject(ApplicationInitStatus).donePromise;
     await resetTestBackend();
     await TestBed.inject(SessionStore).load();
@@ -35,13 +55,14 @@ describe('PreferencesPage › Appearance', () => {
   const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const ratios = (root: HTMLElement) =>
     root.querySelectorAll('[data-contrast] [data-ratio]').length;
+  const counts = (root: HTMLElement) => root.querySelectorAll('[data-anatomy] [data-count]').length;
 
   /** Opens the page and waits for the runtime sheets and the contrast readings the section asks for. */
   async function open(): Promise<{ harness: RouterTestingHarness; root: HTMLElement }> {
     const harness = await RouterTestingHarness.create('/settings/preferences');
     const root = harness.fixture.nativeElement as HTMLElement;
     await TestBed.inject(PreferencesStore).useThemes();
-    await until(harness, () => ratios(root) === 12);
+    await until(harness, () => ratios(root) === 21 && counts(root) === 9);
     return { harness, root };
   }
 
@@ -81,15 +102,15 @@ describe('PreferencesPage › Appearance', () => {
       })),
     );
 
-    choose(root, 'theme', 'nexora-sharp');
+    choose(root, 'theme', 'nexora-brutalist');
     choose(root, 'brand', 'amber');
-    choose(root, 'neutral', 'warm');
+    choose(root, 'neutral', 'clay');
     harness.detectChanges();
 
     for (const region of regions(root)) {
-      expect(region.theme).toBe('nexora-sharp');
+      expect(region.theme).toBe('nexora-brutalist');
       expect(region.accent).toBe('#d97706');
-      expect(region.neutral).toBe('#78716c');
+      expect(region.neutral).toBe('#9c6644');
     }
     expect(html.getAttribute('data-slotted-theme')).toBe('default');
     expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('#7c3aed');
@@ -122,7 +143,7 @@ describe('PreferencesPage › Appearance', () => {
 
     await until(harness, () => !region().hasAttribute('aria-busy'), 2000);
     expect(painted(root)).toBe(0);
-    expect(ratios(root)).toBe(12);
+    expect(ratios(root)).toBe(21);
   });
 
   /**
@@ -152,10 +173,14 @@ describe('PreferencesPage › Appearance', () => {
       'default',
       'default',
       'default',
+      'default',
     ]);
     expect(samples(root).some((sample) => sample.reserved)).toBe(false);
     expect(root.querySelectorAll('[data-contrast] [data-ui=skeleton][data-loading]')).toHaveLength(
-      12,
+      21,
+    );
+    expect(root.querySelectorAll('[data-anatomy] [data-ui=skeleton][data-loading]')).toHaveLength(
+      18,
     );
 
     await wait(500);
@@ -167,12 +192,14 @@ describe('PreferencesPage › Appearance', () => {
     held.mockRestore();
 
     expect(painted(root)).toBe(0);
-    expect(ratios(root)).toBe(12);
+    expect(ratios(root)).toBe(21);
+    expect(counts(root)).toBe(9);
     expect(samples(root).map((sample) => sample.theme)).toEqual([
       'default',
-      'nexora-soft',
-      'nexora-sharp',
+      'nexora-friendly',
+      'nexora-brutalist',
       'nexora-editorial',
+      'nexora-terminal',
     ]);
   });
 
@@ -183,7 +210,7 @@ describe('PreferencesPage › Appearance', () => {
    */
   it('draws nothing in place of a theme whose sheet did not load', async () => {
     const store = TestBed.inject(PreferencesStore);
-    store.update({ theme: 'nexora-sharp' });
+    store.update({ theme: 'nexora-brutalist' });
     const load = vi.spyOn(store, 'useThemes').mockRejectedValue(new Error('chunk'));
     const harness = await RouterTestingHarness.create('/settings/preferences');
     const root = harness.fixture.nativeElement as HTMLElement;
@@ -212,18 +239,24 @@ describe('PreferencesPage › Appearance', () => {
     await until(harness, () => root.querySelector('[data-themes-failed]') !== null);
 
     expect(root.querySelector('[data-contrast]')).toBeNull();
+    expect(root.querySelector('[data-anatomy]')).toBeNull();
     expect(root.querySelector('[data-appearance]')!.hasAttribute('aria-busy')).toBe(false);
     const disabled = [...root.querySelectorAll<HTMLInputElement>('input[name="theme"]')]
       .filter((input) => input.disabled)
       .map((input) => input.value);
-    expect(disabled).toEqual(['nexora-soft', 'nexora-sharp', 'nexora-editorial']);
+    expect(disabled).toEqual([
+      'nexora-friendly',
+      'nexora-brutalist',
+      'nexora-editorial',
+      'nexora-terminal',
+    ]);
 
     load.mockRestore();
     const retry = [...root.querySelectorAll('button')].find(
       (button) => button.textContent?.trim() === 'Try again',
     );
     retry!.click();
-    await until(harness, () => ratios(root) === 12);
+    await until(harness, () => ratios(root) === 21);
 
     expect(root.querySelector('[data-themes-failed]')).toBeNull();
     expect(
@@ -238,7 +271,7 @@ describe('PreferencesPage › Appearance', () => {
     const html = TestBed.inject(DOCUMENT).documentElement;
 
     choose(root, 'brand', 'emerald');
-    choose(root, 'theme', 'nexora-soft');
+    choose(root, 'theme', 'nexora-friendly');
     harness.detectChanges();
     const save = [...root.querySelectorAll('button')].find(
       (button) => button.textContent?.trim() === 'Save preferences',
@@ -249,8 +282,8 @@ describe('PreferencesPage › Appearance', () => {
 
     const preferences = TestBed.inject(PreferencesStore).preferences();
     expect(preferences.brand.preset).toBe('emerald');
-    expect(preferences.theme).toBe('nexora-soft');
-    expect(html.getAttribute('data-slotted-theme')).toBe('nexora-soft');
+    expect(preferences.theme).toBe('nexora-friendly');
+    expect(html.getAttribute('data-slotted-theme')).toBe('nexora-friendly');
     expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('#059669');
   });
 
@@ -333,7 +366,7 @@ describe('PreferencesPage › Appearance', () => {
         return named.textContent?.trim();
       },
     );
-    expect(labels).toEqual(['Standard', 'Soft', 'Sharp', 'Editorial']);
+    expect(labels).toEqual(['Standard', 'Friendly', 'Brutalist', 'Editorial', 'Terminal']);
   });
 
   /** The preview's buttons are samples: the select is the one control a preview region adds to the tab order. */
@@ -343,8 +376,107 @@ describe('PreferencesPage › Appearance', () => {
       const buttons = [...region.querySelectorAll<HTMLElement>('[data-ui=button]')];
       expect(buttons).toHaveLength(4);
       expect(buttons.every((button) => button.closest('[inert]') !== null)).toBe(true);
+      expect(region.querySelector('[data-preview-tabs]')!.hasAttribute('inert')).toBe(true);
       expect(region.querySelector('sl-select')!.closest('[inert]')).toBeNull();
     }
+  });
+
+  const regionThemes = (root: HTMLElement) => new Set(regions(root).map((region) => region.theme));
+
+  /**
+   * A change in the builder is a candidate like any other: once the changes
+   * pause, the candidate is compiled into its own theme, which the three
+   * regions name and `html` does not; Reset brings the theme back as it came.
+   */
+  it('compiles the builder’s changes into the theme the preview names, and resets them', async () => {
+    const { harness, root } = await open();
+    const html = TestBed.inject(DOCUMENT).documentElement;
+    choose(root, 'theme', 'nexora-editorial');
+    harness.detectChanges();
+    choose(root, 'axis-cards', 'flat');
+    harness.detectChanges();
+    choose(root, 'font-body', 'jetbrains-mono');
+    harness.detectChanges();
+
+    await until(harness, () => regionThemes(root).has('nexora-custom-draft'), 3000);
+    expect(regionThemes(root)).toEqual(new Set(['nexora-custom-draft']));
+    expect(html.getAttribute('data-slotted-theme')).toBe('default');
+    const sheet = TestBed.inject(DOCUMENT).head.querySelector(
+      'style[data-slotted-theme-sheet="nexora-custom-draft"]',
+    )!.textContent!;
+    expect(sheet.match(/--slotted-card-background: [^;]+/g)).toEqual([
+      '--slotted-card-background: var(--slotted-surface-sunken)',
+    ]);
+    expect(sheet).toContain("--slotted-font-family-sans: 'JetBrains Mono Variable'");
+    expect(root.querySelector('[data-changes]')!.textContent!.trim()).toBe('2 changes');
+    expect(root.querySelector('[data-anatomy] caption')!.textContent).toContain(
+      'Editorial, customised',
+    );
+
+    (root.querySelector('[data-reset]') as HTMLButtonElement).click();
+    harness.detectChanges();
+    expect(regionThemes(root)).toEqual(new Set(['nexora-editorial']));
+    expect(root.querySelector('[data-changes]')).toBeNull();
+    expect(
+      root.querySelector<HTMLInputElement>('input[name="axis-cards"][value="theme"]')!.checked,
+    ).toBe(true);
+  });
+
+  /**
+   * A saved customisation is part of the opening wait: the region stays busy
+   * until its candidate is compiled. A change made afterwards is no wait — the
+   * preview keeps what it shows until the new candidate lands.
+   */
+  it('waits on opening for a saved customisation, and never for a later change', async () => {
+    const store = TestBed.inject(PreferencesStore);
+    store.update({ customisation: { ...NO_CUSTOMISATION, cards: 'elevated' } });
+    const harness = await RouterTestingHarness.create('/settings/preferences');
+    const root = harness.fixture.nativeElement as HTMLElement;
+    const region = () => root.querySelector<HTMLElement>('[data-appearance]')!;
+    harness.detectChanges();
+    expect(region().getAttribute('aria-busy')).toBe('true');
+
+    await until(harness, () => !region().hasAttribute('aria-busy'), 5000);
+    expect(regionThemes(root)).toEqual(new Set(['nexora-custom-draft']));
+
+    choose(root, 'axis-motion', 'off');
+    harness.detectChanges();
+    expect(region().hasAttribute('aria-busy')).toBe(false);
+    expect(regionThemes(root)).toEqual(new Set(['nexora-custom-draft']));
+  });
+
+  /** The anatomy is the chosen theme object's, layer by layer. */
+  it('reads the anatomy of the chosen theme', async () => {
+    const { harness, root } = await open();
+    const row = (layer: string) => ({
+      count: Number(root.querySelector(`[data-layer="${layer}"] [data-count]`)!.textContent),
+      entries: root.querySelector(`[data-layer="${layer}"] [data-entries]`)!.textContent!,
+    });
+    expect(row('components').count).toBe(0);
+    expect(row('seeds').entries).toContain('accent #1d4ed8');
+
+    choose(root, 'theme', 'nexora-brutalist');
+    harness.detectChanges();
+    expect(root.querySelectorAll('[data-anatomy] [data-layer]')).toHaveLength(9);
+    expect(row('seeds').entries).toContain('accent #ffd400');
+    expect(row('components').count).toBeGreaterThanOrEqual(15);
+    expect(row('rules').count).toBeGreaterThanOrEqual(1);
+    expect(row('fonts').entries).toBe('Inter Variable, JetBrains Mono Variable');
+  });
+
+  /** Save keeps the builder's changes, and `html` names the compiled theme. */
+  it('saves a customisation, which html names once it is compiled', async () => {
+    const { harness, root } = await open();
+    const html = TestBed.inject(DOCUMENT).documentElement;
+    choose(root, 'axis-shadow', 'strong');
+    harness.detectChanges();
+    [...root.querySelectorAll('button')]
+      .find((button) => button.textContent?.trim() === 'Save preferences')!
+      .click();
+    harness.detectChanges();
+
+    expect(TestBed.inject(PreferencesStore).preferences().customisation.shadow).toBe('strong');
+    await until(harness, () => html.getAttribute('data-slotted-theme') === 'nexora-custom', 3000);
   });
 
   /**

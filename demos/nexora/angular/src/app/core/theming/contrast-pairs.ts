@@ -32,6 +32,27 @@ export const CONTRAST_PAIRS = [
     ground: '--slotted-tone-accent-solid',
     text: true,
   },
+  {
+    id: 'on-success',
+    label: 'Text on success',
+    fore: '--slotted-tone-success-on-solid',
+    ground: '--slotted-tone-success-solid',
+    text: true,
+  },
+  {
+    id: 'on-warning',
+    label: 'Text on warning',
+    fore: '--slotted-tone-warning-on-solid',
+    ground: '--slotted-tone-warning-solid',
+    text: true,
+  },
+  {
+    id: 'on-danger',
+    label: 'Text on danger',
+    fore: '--slotted-tone-danger-on-solid',
+    ground: '--slotted-tone-danger-solid',
+    text: true,
+  },
 ] as const;
 
 export type ContrastPairId = (typeof CONTRAST_PAIRS)[number]['id'];

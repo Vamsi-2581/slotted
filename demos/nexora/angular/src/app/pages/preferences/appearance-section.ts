@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DOCUMENT,
+  effect,
   inject,
   input,
   output,
@@ -19,7 +21,7 @@ import { SlButton } from '@slotted/angular/button';
 import { SlColorField } from '@slotted/angular/color-picker';
 import { SlField, SlFieldDescription, SlFieldLabel } from '@slotted/angular/field';
 import { SlInline } from '@slotted/angular/inline';
-import { SlRadio, SlRadioDescription, SlRadioGroup } from '@slotted/angular/radio-group';
+import { SlRadio, SlRadioGroup } from '@slotted/angular/radio-group';
 import {
   SlSection,
   SlSectionBody,
@@ -28,10 +30,12 @@ import {
   SlSectionHeading,
   SlSectionTitle,
 } from '@slotted/angular/section';
+import { SlSegment, SlSegmentedControl } from '@slotted/angular/segmented-control';
 import { SlSkeleton, SlSkeletonRegion } from '@slotted/angular/skeleton';
+import { SlSlider } from '@slotted/angular/slider';
 import { SlStack } from '@slotted/angular/stack';
 import { SlThemeScope } from '@slotted/angular/theme';
-import { SlHeading, SlHeadingLevel } from '@slotted/angular/typography';
+import { SlHeading, SlHeadingLevel, SlText } from '@slotted/angular/typography';
 import type { Scheme } from '@slotted/theme';
 
 import { PreferencesStore, type UserPreferences } from '../../core/session/preferences.store';
@@ -41,38 +45,126 @@ import {
   isNeutralPreset,
   isSeed,
   NEUTRAL_PRESETS,
-  type BrandPresetId,
+  NO_STATUS,
+  STATUS_PRESETS,
+  STATUS_SEEDS,
+  type BrandPreference,
+  type StatusSeed,
 } from '../../core/theming/appearance';
 import type * as ContrastReadingModule from '../../core/theming/contrast-reading';
 import {
+  BORDER_CHOICES,
+  CARD_CHOICES,
+  CHART_CHOICES,
+  customisedAxes,
+  isCustomised,
+  MOTION_CHOICES,
+  NO_CUSTOMISATION,
+  RADIUS_RANGE,
+  readCustomisation,
+  SCALE_CHOICES,
+  SHADOW_CHOICES,
+  type Customisation,
+  type CustomisationAxis,
+} from '../../core/theming/customisation';
+import type * as NexoraThemesModule from '../../core/theming/nexora-themes';
+import { declareFaces, FONT_FAMILIES, fontFamily } from '../../core/theming/theme-faces';
+import type * as ThemeAnatomyModule from '../../core/theming/theme-anatomy';
+import {
+  catalogueTheme,
   DEFAULT_THEME_ID,
+  DRAFT_THEME_ID,
   RUNTIME_THEME_IDS,
   THEME_CATALOGUE,
 } from '../../core/theming/theme-catalogue';
+import { AnatomyTable } from './anatomy-table';
 import { AppearancePreview } from './appearance-preview';
 import { ContrastTable } from './contrast-table';
 
+/** The builder's segmented axes, their words and the words of each value. */
+const AXES = [
+  {
+    axis: 'scale',
+    label: 'Type scale',
+    description: 'Every type size, as a share of the library’s.',
+    options: SCALE_CHOICES.map((value) => ({ value: String(value), label: `${value}%` })),
+  },
+  {
+    axis: 'border',
+    label: 'Lines',
+    description: 'The weight of every border and divider.',
+    options: BORDER_CHOICES.map((value) => ({ value: String(value), label: `${value} px` })),
+  },
+  {
+    axis: 'shadow',
+    label: 'Shadows',
+    description: 'How far raised things stand off the page.',
+    options: SHADOW_CHOICES.map((value) => ({
+      value,
+      label: { none: 'None', soft: 'Soft', strong: 'Deep' }[value],
+    })),
+  },
+  {
+    axis: 'motion',
+    label: 'Motion',
+    description: 'How long transitions take: the theme’s, the library’s, half of it, or none.',
+    options: MOTION_CHOICES.map((value) => ({
+      value,
+      label: { normal: 'Full', reduced: 'Less', off: 'Off' }[value],
+    })),
+  },
+  {
+    axis: 'cards',
+    label: 'Cards',
+    description: 'A card’s and a stat card’s edge: a line, a lift on a shadow, or a sunken fill.',
+    options: CARD_CHOICES.map((value) => ({
+      value,
+      label: { bordered: 'Line', elevated: 'Lift', flat: 'Fill' }[value],
+    })),
+  },
+  {
+    axis: 'chart',
+    label: 'Chart colours',
+    description: 'The series of every chart: the theme’s palette, or shades of the accent.',
+    options: CHART_CHOICES.map((value) => ({
+      value,
+      label: { palette: 'Palette', accent: 'Accent' }[value],
+    })),
+  },
+] as const;
+
+const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
+  success: 'Success',
+  warning: 'Warning',
+  danger: 'Danger',
+};
+
 /**
- * How Nexora is drawn: the theme, the brand colour, the grey, the scheme and
- * the density, each a candidate in the page's draft until Save.
+ * How Nexora is drawn: a theme of the catalogue, the builder's changes over
+ * it, the scheme and the density, each a candidate in the page's draft until
+ * Save.
  *
  * Every sample on this section is a theme region of its own — a theme card
  * names its theme, a swatch carries its seed, both in the candidate scheme —
- * so what it shows is what the recipe derives for that choice, not a colour
- * the page wrote. The preview repeats the candidate in the three schemes, and
- * the contrast table reads the same recipe's numbers.
+ * so what it shows is what the theme derives for that choice, not a colour
+ * the page wrote. A customised candidate is one more theme, compiled in the
+ * browser by `extendTheme` under `nexora-custom-draft` once the changes pause
+ * (`PreferencesStore.previewCustomisation`); the preview repeats it in the
+ * three schemes, the anatomy table reads that theme object layer by layer,
+ * and the contrast table reads its recipe's numbers.
  *
- * The runtime themes' definitions and the contrast arithmetic load by
- * `import()` when the section opens, and the sheets are compiled then: one
- * wait, one skeleton region, on the application's timing. A sample whose
- * sheet is missing and that no placeholder covers keeps its box and draws
- * nothing, since in `default` it would show another theme. A load that fails
- * leaves the themes without a sheet out of the choice, hides the contrast
- * table and offers a retry.
+ * The runtime themes' definitions, the anatomy and the contrast arithmetic
+ * load by `import()` when the section opens, and the sheets are compiled
+ * then: one wait, one skeleton region, on the application's timing. A sample
+ * whose sheet is missing and that no placeholder covers keeps its box and
+ * draws nothing, since in `default` it would show another theme. A load that
+ * fails leaves the themes without a sheet out of the choice, hides the
+ * tables and offers a retry.
  */
 @Component({
   selector: 'app-appearance-section',
   imports: [
+    AnatomyTable,
     AppearancePreview,
     ContrastTable,
     SlAlert,
@@ -90,7 +182,6 @@ import { ContrastTable } from './contrast-table';
     SlHeadingLevel,
     SlInline,
     SlRadio,
-    SlRadioDescription,
     SlRadioGroup,
     SlSection,
     SlSectionBody,
@@ -98,35 +189,86 @@ import { ContrastTable } from './contrast-table';
     SlSectionHeader,
     SlSectionHeading,
     SlSectionTitle,
+    SlSegment,
+    SlSegmentedControl,
     SlSkeleton,
     SlSkeletonRegion,
+    SlSlider,
     SlStack,
+    SlText,
     SlThemeScope,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     /* The choices, as grids of framed tiles of equal width. */
-    .themes {
+    /* A tile is as tall as its own content: a short description leaves no empty band. */
+    .themes,
+    .brands,
+    .fonts,
+    .colours {
       display: grid;
       gap: var(--slotted-space-4);
-      grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+      align-items: start;
+    }
+    .themes {
+      grid-template-columns: repeat(auto-fill, minmax(min(12rem, 100%), 1fr));
     }
     .brands {
-      display: grid;
-      gap: var(--slotted-space-4);
-      grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(8.5rem, 100%), 1fr));
     }
-    /* A theme's own heading face, corner, shadow, case and accent, drawn inside its region. */
-    /* Items keep their own width, so the title's placeholder is as long as the title. */
-    .sample {
+    .fonts {
+      grid-template-columns: repeat(auto-fill, minmax(min(9.5rem, 100%), 1fr));
+    }
+    /* LA-05: colour fields side by side start at the line's top. */
+    .colours {
+      gap: var(--slotted-space-6) var(--slotted-space-7);
+      grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+    }
+    /* A font option: a line of text in its own face, its name, and what kind of face it is. */
+    .specimen {
+      display: block;
+      block-size: var(--slotted-space-9);
+      overflow: hidden;
+      font-size: var(--slotted-font-size-2xl);
+      line-height: var(--slotted-space-9);
+      white-space: nowrap;
+    }
+    .font-option {
       display: grid;
+      gap: var(--slotted-space-2);
+    }
+    .group-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--slotted-space-4);
+    }
+    /* A theme as it comes — its own face, corner, shadow, case, accent and first series — in its region. */
+    /* Items keep their own width, so the title's placeholder is as long as the title. */
+    /*
+     * A fixed box, sized by the page's tokens outside every sample's region:
+     * each card of the group is as tall as the others, whatever its theme's type.
+     */
+    .sample-box {
+      display: block;
+      align-self: stretch;
+      block-size: calc(var(--slotted-space-12) + var(--slotted-space-10));
+    }
+    .sample {
+      box-sizing: border-box;
+      block-size: 100%;
+      overflow: hidden;
+      display: grid;
+      align-content: start;
       justify-items: start;
       gap: var(--slotted-space-3);
       padding: var(--slotted-space-5);
       border: var(--slotted-border-width-thin) solid var(--slotted-border-subtle);
       border-radius: var(--slotted-radius-lg);
-      background: var(--slotted-surface-raised);
+      background: var(--slotted-surface);
       color: var(--slotted-text);
+      font-family: var(--slotted-font-family-sans);
       box-shadow: var(--slotted-shadow-md);
     }
     .sample-title {
@@ -145,7 +287,7 @@ import { ContrastTable } from './contrast-table';
       flex: 1;
       block-size: var(--slotted-space-4);
       border-radius: var(--slotted-radius-sm);
-      background: var(--slotted-border-subtle);
+      background: var(--slotted-data-1);
     }
     .swatch {
       flex: none;
@@ -155,17 +297,16 @@ import { ContrastTable } from './contrast-table';
       background: var(--slotted-tone-accent-solid);
     }
     .swatch[data-neutral] {
-      background: var(--slotted-text-muted);
+      background: var(--slotted-surface-sunken);
+      box-shadow: inset 0 0 0 var(--slotted-space-2) var(--slotted-text-muted);
     }
     /* A sample whose theme's sheet is not on the page keeps its box and draws nothing. */
     .reserved {
       visibility: hidden;
     }
-    /* CP-03: the regions hold tables; a track's minimum is stated, never the table's width. */
     .previews {
       display: grid;
-      gap: var(--slotted-space-5);
-      grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+      gap: var(--slotted-space-6);
     }
   `,
   template: `
@@ -174,8 +315,8 @@ import { ContrastTable } from './contrast-table';
         <div slSectionTitle>
           <h2 slSectionHeading>Appearance</h2>
           <p slSectionDescription>
-            The theme, the brand colour and the grey Nexora is drawn in. The preview shows a choice
-            in every scheme; Save applies it to the whole application.
+            A theme, your changes over it, and the scheme and density Nexora is drawn in. The
+            preview shows the candidate in every scheme; Save applies it to the whole application.
           </p>
         </div>
       </div>
@@ -187,14 +328,14 @@ import { ContrastTable } from './contrast-table';
           [messages]="{ label: 'Loading the themes' }"
           data-appearance
         >
-          <div slStack [gap]="5">
+          <div slStack [gap]="8" slHeadingLevel>
             @if (failed()) {
               <section slAlert tone="danger" live="polite" data-themes-failed>
                 <div slAlertContent>
                   <div slAlertTitle>The themes did not load</div>
                   <p slAlertDescription>
-                    Standard stays available. The other themes and the contrast readings need
-                    definitions that did not arrive.
+                    Standard stays available. The other themes, the builder, the anatomy and the
+                    contrast readings need definitions that did not arrive.
                   </p>
                 </div>
                 <div slAlertActions>
@@ -205,63 +346,103 @@ import { ContrastTable } from './contrast-table';
               </section>
             }
 
-            <div slField>
-              <label slFieldLabel>Theme</label>
-              <div
-                slRadioGroup
-                name="theme"
-                variant="tile"
-                [value]="draft().theme"
-                (valueChange)="patch.emit({ theme: $event.value })"
-              >
-                <div class="themes">
-                  @for (entry of themes; track entry.id) {
-                    <div slRadio [value]="entry.id" [disabled]="unavailable(entry.id)">
-                      <span slStack [gap]="3">
-                        @if (!unavailable(entry.id)) {
-                          <span
-                            class="sample"
-                            aria-hidden="true"
-                            [class.reserved]="reserved(entry.id, wait.painted())"
-                            slThemeScope
-                            [attr.data-theme-sample]="entry.id"
-                            [theme]="drawn(entry.id)"
-                            [scheme]="draft().scheme"
-                            [seeds]="seeds()"
-                          >
-                            <span slSkeleton><span class="sample-title">Orders</span></span>
-                            <span class="sample-row">
-                              <span class="sample-bar"></span>
-                              <span slSkeleton
-                                ><span slBadge tone="accent" variant="solid">New</span></span
+            <div slStack [gap]="5" data-appearance-group="theme">
+              <h3 slHeading size="md">Theme</h3>
+              <div slField>
+                <label slFieldLabel>Theme</label>
+                <span slFieldDescription data-theme-description>
+                  {{ themeLabel() }}: {{ themeDescription() }} Each theme sets its own colours,
+                  type, space, corners, lines, shadows and motion, and dresses the components its
+                  own way.
+                </span>
+                <div
+                  slRadioGroup
+                  name="theme"
+                  variant="tile"
+                  [value]="draft().theme"
+                  (valueChange)="patch.emit({ theme: $event.value })"
+                >
+                  <div class="themes">
+                    @for (entry of themes; track entry.id) {
+                      <div slRadio [value]="entry.id" [disabled]="unavailable(entry.id)">
+                        <span slStack [gap]="3">
+                          @if (!unavailable(entry.id)) {
+                            <span class="sample-box">
+                              <span
+                                class="sample"
+                                aria-hidden="true"
+                                [class.reserved]="reserved(entry.id, wait.painted())"
+                                slThemeScope
+                                [attr.data-theme-sample]="entry.id"
+                                [theme]="drawn(entry.id)"
+                                [scheme]="draft().scheme"
+                                [seeds]="
+                                  entry.accent === null ? undefined : { accent: entry.accent }
+                                "
                               >
+                                <span slSkeleton><span class="sample-title">Orders</span></span>
+                                <span class="sample-row">
+                                  <span class="sample-bar"></span>
+                                  <span slSkeleton
+                                    ><span slBadge tone="accent" variant="solid">New</span></span
+                                  >
+                                </span>
+                              </span>
                             </span>
-                          </span>
-                        }
-                        {{ entry.label }}
-                      </span>
-                      <p slRadioDescription>{{ entry.description }}</p>
-                    </div>
-                  }
+                          }
+                          {{ entry.label }}
+                        </span>
+                      </div>
+                    }
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div slField>
-              <label slFieldLabel>Brand colour</label>
-              <span slFieldDescription>
-                The accent every primary action, link and selection is derived from.
-              </span>
-              <div
-                slRadioGroup
-                name="brand"
-                variant="tile"
-                [value]="draft().brand.preset"
-                (valueChange)="chooseBrand($event.value)"
-              >
-                <div class="brands">
-                  @for (preset of brands; track preset.id) {
-                    <div slRadio [value]="preset.id">
+            <div slStack [gap]="6" data-appearance-group="customise">
+              <div class="group-head">
+                <h3 slHeading size="md">Customise {{ themeLabel() }}</h3>
+                <span slInline [gap]="3" align="center">
+                  @if (changes() > 0) {
+                    <span slBadge tone="accent" variant="soft" data-changes
+                      >{{ changes() }} {{ changes() === 1 ? 'change' : 'changes' }}</span
+                    >
+                  }
+                  <button
+                    slButton
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    tone="secondary"
+                    data-reset
+                    [disabled]="changes() === 0"
+                    (click)="reset()"
+                  >
+                    Reset to {{ themeLabel() }}
+                  </button>
+                </span>
+              </div>
+              <p slText size="sm" tone="muted">
+                Every change compiles a new theme in the browser, laid over {{ themeLabel() }} with
+                the same function the catalogue themes are built with. Anything left on Theme keeps
+                {{ themeLabel() }}’s own value.
+              </p>
+
+              <h4 slHeading size="sm">Colours</h4>
+              <div slField>
+                <label slFieldLabel>Brand colour</label>
+                <span slFieldDescription>
+                  The accent every primary action, link and selection is derived from.
+                </span>
+                <div
+                  slRadioGroup
+                  name="brand"
+                  variant="tile"
+                  [value]="draft().brand.preset"
+                  (valueChange)="chooseBrand($event.value)"
+                >
+                  <div class="brands">
+                    <div slRadio value="theme">
                       <span slInline [gap]="3">
                         <span slSkeleton
                           ><span
@@ -270,112 +451,294 @@ import { ContrastTable } from './contrast-table';
                             slThemeScope
                             [theme]="drawn(draft().theme)"
                             [scheme]="draft().scheme"
-                            [seeds]="{ accent: preset.color }"
+                            [seeds]="themeAccent()"
                           ></span
                         ></span>
-                        {{ preset.label }}
+                        Theme
                       </span>
                     </div>
-                  }
-                  <div slRadio value="custom">
-                    <span slInline [gap]="3">
-                      <span slSkeleton
-                        ><span
-                          class="swatch"
-                          [class.reserved]="reserved(draft().theme, wait.painted())"
-                          slThemeScope
-                          [theme]="drawn(draft().theme)"
-                          [scheme]="draft().scheme"
-                          [seeds]="{ accent: draft().brand.custom }"
-                        ></span
-                      ></span>
-                      Custom
+                    @for (preset of brands; track preset.id) {
+                      <div slRadio [value]="preset.id">
+                        <span slInline [gap]="3">
+                          <span slSkeleton
+                            ><span
+                              class="swatch"
+                              [class.reserved]="reserved(draft().theme, wait.painted())"
+                              slThemeScope
+                              [theme]="drawn(draft().theme)"
+                              [scheme]="draft().scheme"
+                              [seeds]="{ accent: preset.color }"
+                            ></span
+                          ></span>
+                          {{ preset.label }}
+                        </span>
+                      </div>
+                    }
+                    <div slRadio value="custom">
+                      <span slInline [gap]="3">
+                        <span slSkeleton
+                          ><span
+                            class="swatch"
+                            [class.reserved]="reserved(draft().theme, wait.painted())"
+                            slThemeScope
+                            [theme]="drawn(draft().theme)"
+                            [scheme]="draft().scheme"
+                            [seeds]="{ accent: draft().brand.custom }"
+                          ></span
+                        ></span>
+                        Custom
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="colours">
+                <div slField data-brand-custom>
+                  <label slFieldLabel>Custom brand colour</label>
+                  <div
+                    slColorField
+                    format="hex"
+                    [alpha]="false"
+                    [presets]="presetColors"
+                    [value]="draft().brand.custom"
+                    (valueChange)="chooseCustom($event.value)"
+                  ></div>
+                  <span slFieldDescription
+                    >Any colour; the recipe keeps every text on it readable.</span
+                  >
+                </div>
+                @for (status of statuses; track status) {
+                  <div slField [attr.data-status]="status">
+                    <label slFieldLabel>{{ statusLabels[status] }}</label>
+                    <div
+                      slColorField
+                      format="hex"
+                      [alpha]="false"
+                      [presets]="statusPresets[status]"
+                      [value]="statusValue(status)"
+                      (valueChange)="chooseStatus(status, $event.value)"
+                    ></div>
+                    <span slFieldDescription>
+                      @if (draft().status[status] === null) {
+                        {{ themeLabel() }}’s own.
+                      } @else {
+                        Yours.
+                        <button
+                          slButton
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          tone="secondary"
+                          (click)="chooseStatus(status, null)"
+                        >
+                          Use the theme’s
+                        </button>
+                      }
                     </span>
+                  </div>
+                }
+              </div>
+
+              <div slField>
+                <label slFieldLabel>Grey</label>
+                <span slFieldDescription>
+                  The neutral every ground, border and muted text is derived from.
+                </span>
+                <div
+                  slRadioGroup
+                  name="neutral"
+                  variant="tile"
+                  [value]="draft().neutral"
+                  (valueChange)="chooseNeutral($event.value)"
+                >
+                  <div class="brands">
+                    @for (preset of neutrals; track preset.id) {
+                      <div slRadio [value]="preset.id">
+                        <span slInline [gap]="3">
+                          <span slSkeleton
+                            ><span
+                              class="swatch"
+                              data-neutral
+                              [class.reserved]="reserved(draft().theme, wait.painted())"
+                              slThemeScope
+                              [theme]="drawn(draft().theme)"
+                              [scheme]="draft().scheme"
+                              [seeds]="
+                                preset.color === null ? undefined : { neutral: preset.color }
+                              "
+                            ></span
+                          ></span>
+                          {{ preset.label }}
+                        </span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <h4 slHeading size="sm">Type</h4>
+              @for (picker of fontPickers; track picker.axis) {
+                <div slField [attr.data-axis]="picker.axis">
+                  <label slFieldLabel>{{ picker.label }}</label>
+                  <span slFieldDescription>{{ picker.description }}</span>
+                  <div
+                    slRadioGroup
+                    [name]="'font-' + picker.axis"
+                    variant="tile"
+                    [value]="axisValue(picker.axis)"
+                    (valueChange)="chooseAxis(picker.axis, $event.value)"
+                  >
+                    <div class="fonts">
+                      <div slRadio value="theme">
+                        <span class="font-option">
+                          <!-- A specimen is its face: the option's own data, not a theme's choice. -->
+                          <span
+                            class="specimen"
+                            aria-hidden="true"
+                            [style.font-family]="ownFont(picker.axis).stack"
+                            [style.font-weight]="picker.weight"
+                            >Ag 1234</span
+                          >
+                          <span>Theme</span>
+                          <span slText size="xs" tone="muted">{{
+                            ownFont(picker.axis).label
+                          }}</span>
+                        </span>
+                      </div>
+                      @for (family of fonts; track family.id) {
+                        <div slRadio [value]="family.id">
+                          <span class="font-option">
+                            <span
+                              class="specimen"
+                              aria-hidden="true"
+                              [attr.data-specimen]="family.id"
+                              [style.font-family]="family.stack"
+                              [style.font-weight]="picker.weight"
+                              >Ag 1234</span
+                            >
+                            <span>{{ family.label }}</span>
+                            <span slText size="xs" tone="muted">{{ family.kind }}</span>
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+              @for (entry of axes.slice(0, 1); track entry.axis) {
+                <div slField [attr.data-axis]="entry.axis">
+                  <label slFieldLabel>{{ entry.label }}</label>
+                  <div
+                    slSegmentedControl
+                    [name]="'axis-' + entry.axis"
+                    [value]="axisValue(entry.axis)"
+                    (valueChange)="chooseAxis(entry.axis, $event.value)"
+                  >
+                    <label slSegment value="theme">Theme</label>
+                    @for (option of entry.options; track option.value) {
+                      <label slSegment [value]="option.value">{{ option.label }}</label>
+                    }
+                  </div>
+                  <span slFieldDescription>{{ entry.description }}</span>
+                </div>
+              }
+
+              <h4 slHeading size="sm">Shape and depth</h4>
+              <div slField data-axis="radius">
+                <label slFieldLabel>Corner radius</label>
+                <div
+                  slSlider
+                  [min]="radiusRange.min"
+                  [max]="radiusRange.max"
+                  [step]="radiusRange.step"
+                  [value]="radius()"
+                  [marks]="[0, 8, 16, 24]"
+                  (valueChange)="chooseRadius($event.value)"
+                ></div>
+                <span slFieldDescription data-radius-value>
+                  {{ radius() }} px on the largest corner{{
+                    draft().customisation.radius === null ? ', ' + themeLabel() + '’s own' : ''
+                  }}.
+                </span>
+              </div>
+              @for (entry of axes.slice(1, 4); track entry.axis) {
+                <div slField [attr.data-axis]="entry.axis">
+                  <label slFieldLabel>{{ entry.label }}</label>
+                  <div
+                    slSegmentedControl
+                    [name]="'axis-' + entry.axis"
+                    [value]="axisValue(entry.axis)"
+                    (valueChange)="chooseAxis(entry.axis, $event.value)"
+                  >
+                    <label slSegment value="theme">Theme</label>
+                    @for (option of entry.options; track option.value) {
+                      <label slSegment [value]="option.value">{{ option.label }}</label>
+                    }
+                  </div>
+                  <span slFieldDescription>{{ entry.description }}</span>
+                </div>
+              }
+
+              <h4 slHeading size="sm">Components</h4>
+              @for (entry of axes.slice(4); track entry.axis) {
+                <div slField [attr.data-axis]="entry.axis">
+                  <label slFieldLabel>{{ entry.label }}</label>
+                  <div
+                    slSegmentedControl
+                    [name]="'axis-' + entry.axis"
+                    [value]="axisValue(entry.axis)"
+                    (valueChange)="chooseAxis(entry.axis, $event.value)"
+                  >
+                    <label slSegment value="theme">Theme</label>
+                    @for (option of entry.options; track option.value) {
+                      <label slSegment [value]="option.value">{{ option.label }}</label>
+                    }
+                  </div>
+                  <span slFieldDescription>{{ entry.description }}</span>
+                </div>
+              }
+            </div>
+
+            <div slStack [gap]="5" data-appearance-group="scheme">
+              <h3 slHeading size="md">Scheme and density</h3>
+              <div class="colours">
+                <div slField>
+                  <label slFieldLabel>Colour scheme</label>
+                  <div
+                    slRadioGroup
+                    name="scheme"
+                    [value]="draft().scheme"
+                    (valueChange)="patch.emit({ scheme: $any($event.value) })"
+                  >
+                    <div slRadio value="light">Light</div>
+                    <div slRadio value="dark">Dark</div>
+                    <div slRadio value="system">System</div>
+                  </div>
+                </div>
+                <div slField>
+                  <label slFieldLabel>Density</label>
+                  <div
+                    slRadioGroup
+                    name="density"
+                    [value]="draft().density"
+                    (valueChange)="patch.emit({ density: $any($event.value) })"
+                  >
+                    <div slRadio value="comfortable">Comfortable</div>
+                    <div slRadio value="compact">Compact</div>
+                    <div slRadio value="dense">Dense</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div slField data-brand-custom>
-              <label slFieldLabel>Custom colour</label>
-              <div
-                slColorField
-                format="hex"
-                [alpha]="false"
-                [presets]="presetColors"
-                [value]="draft().brand.custom"
-                (valueChange)="chooseCustom($event.value)"
-              ></div>
-              <span slFieldDescription
-                >Any colour; the recipe keeps every text on it readable.</span
-              >
-            </div>
-
-            <div slField>
-              <label slFieldLabel>Grey</label>
-              <div
-                slRadioGroup
-                name="neutral"
-                orientation="horizontal"
-                [value]="draft().neutral"
-                (valueChange)="chooseNeutral($event.value)"
-              >
-                @for (preset of neutrals; track preset.id) {
-                  <div slRadio [value]="preset.id">
-                    <span slInline [gap]="2">
-                      <span slSkeleton
-                        ><span
-                          class="swatch"
-                          data-neutral
-                          [class.reserved]="reserved(draft().theme, wait.painted())"
-                          slThemeScope
-                          [theme]="drawn(draft().theme)"
-                          [scheme]="draft().scheme"
-                          [seeds]="preset.color === null ? undefined : { neutral: preset.color }"
-                        ></span
-                      ></span>
-                      {{ preset.label }}
-                    </span>
-                  </div>
-                }
-              </div>
-            </div>
-
-            <div slField>
-              <label slFieldLabel>Colour scheme</label>
-              <div
-                slRadioGroup
-                name="scheme"
-                [value]="draft().scheme"
-                (valueChange)="patch.emit({ scheme: $any($event.value) })"
-              >
-                <div slRadio value="light">Light</div>
-                <div slRadio value="dark">Dark</div>
-                <div slRadio value="system">System</div>
-              </div>
-            </div>
-
-            <div slField>
-              <label slFieldLabel>Density</label>
-              <div
-                slRadioGroup
-                name="density"
-                [value]="draft().density"
-                (valueChange)="patch.emit({ density: $any($event.value) })"
-              >
-                <div slRadio value="comfortable">Comfortable</div>
-                <div slRadio value="compact">Compact</div>
-                <div slRadio value="dense">Dense</div>
-              </div>
-            </div>
-
-            <div slStack [gap]="4" slHeadingLevel>
+            <div slStack [gap]="5" data-appearance-group="preview">
               <h3 slHeading size="md">Preview</h3>
               <div class="previews">
                 @for (scheme of schemes; track scheme) {
                   <app-appearance-preview
                     [class.reserved]="reserved(draft().theme, wait.painted())"
-                    [theme]="drawn(draft().theme)"
+                    [theme]="previewTheme()"
                     [scheme]="scheme"
                     [density]="draft().density"
                     [seeds]="seeds()"
@@ -384,8 +747,23 @@ import { ContrastTable } from './contrast-table';
               </div>
             </div>
 
+            @if (!failed() || anatomy() !== null) {
+              <div slStack [gap]="5" data-appearance-group="anatomy">
+                <h3 slHeading size="md">Theme anatomy</h3>
+                <p slText size="sm" tone="muted">
+                  A theme is one object of nine layers. These are the entries
+                  {{ anatomyName() }} declares over the library’s own theme; a customised theme is
+                  the same object with your changes in the layers they belong to.
+                </p>
+                <app-anatomy-table [anatomy]="anatomy()" [name]="anatomyName()" />
+              </div>
+            }
+
             @if (!failed() || readings() !== null) {
-              <app-contrast-table [readings]="readings()" />
+              <div slStack [gap]="5" data-appearance-group="contrast">
+                <h3 slHeading size="md">Contrast</h3>
+                <app-contrast-table [readings]="readings()" />
+              </div>
             }
           </div>
         </div>
@@ -398,10 +776,31 @@ export class AppearanceSection {
   readonly patch = output<Partial<UserPreferences>>();
 
   private readonly store = inject(PreferencesStore);
+  private readonly document = inject(DOCUMENT);
 
   protected readonly themes = THEME_CATALOGUE;
   protected readonly brands = BRAND_PRESETS;
   protected readonly neutrals = NEUTRAL_PRESETS;
+  protected readonly statuses = STATUS_SEEDS;
+  protected readonly statusLabels = STATUS_LABELS;
+  protected readonly statusPresets = STATUS_PRESETS;
+  protected readonly axes = AXES;
+  protected readonly fonts = FONT_FAMILIES;
+  protected readonly fontPickers = [
+    {
+      axis: 'body',
+      label: 'Text face',
+      description: 'The face of the text, the tables and the controls.',
+      weight: 'var(--slotted-font-weight-regular)',
+    },
+    {
+      axis: 'heading',
+      label: 'Heading face',
+      description: 'The face of every heading and title.',
+      weight: 'var(--slotted-font-weight-semibold)',
+    },
+  ] as const;
+  protected readonly radiusRange = RADIUS_RANGE;
   protected readonly schemes: readonly Scheme[] = ['light', 'dark', 'high-contrast'];
   protected readonly presetColors = BRAND_PRESETS.map((preset) => preset.color);
 
@@ -409,30 +808,123 @@ export class AppearanceSection {
   protected readonly failed = signal(false);
   /** The contrast arithmetic, once its module has loaded. */
   private readonly contrast = signal<typeof ContrastReadingModule | null>(null);
-  /** Some runtime sheet, or the contrast arithmetic, is still on its way. */
+  /** The theme definitions and the anatomy reader, once their modules have loaded. */
+  private readonly definitions = signal<{
+    readonly themes: typeof NexoraThemesModule;
+    readonly anatomy: typeof ThemeAnatomyModule;
+  } | null>(null);
+
+  private readonly customised = computed(() => isCustomised(this.draft().customisation));
+
+  /** Every runtime sheet and every module the section draws from is here. */
+  private readonly loaded = computed(
+    () =>
+      this.contrast() !== null &&
+      this.definitions() !== null &&
+      RUNTIME_THEME_IDS.every((id) => this.store.hasSheet(id)),
+  );
+  /** The section opened on a saved customisation whose candidate has not been compiled yet. */
+  private readonly opening = signal(true);
+
+  /**
+   * One wait: the sheets and the modules, and on opening the first compile
+   * of a saved customisation. A change made afterwards is no wait: the
+   * preview keeps what it shows until the new candidate is compiled.
+   */
   protected readonly pending = computed(
     () =>
       !this.failed() &&
-      (this.contrast() === null || RUNTIME_THEME_IDS.some((id) => !this.store.hasSheet(id))),
+      (!this.loaded() ||
+        (this.opening() &&
+          this.customised() &&
+          this.store.previewTheme(this.draft().theme) === null)),
   );
 
   constructor() {
     this.load();
+    /* The candidate's sheet follows the draft; the store compiles once the changes pause. */
+    effect(() => this.store.previewCustomisation(this.draft().theme, this.draft().customisation));
+    effect(() => {
+      if (this.loaded() && (!this.customised() || this.store.previewTheme(this.draft().theme))) {
+        this.opening.set(false);
+      }
+    });
   }
 
-  /** The candidate seeds, as the preview regions and the theme cards carry them. */
-  protected readonly seeds = computed(() =>
-    appearanceSeeds(this.draft().brand, this.draft().neutral),
+  protected readonly themeLabel = computed(() => catalogueTheme(this.draft().theme).label);
+  protected readonly themeDescription = computed(
+    () => catalogueTheme(this.draft().theme).description,
   );
+  protected readonly changes = computed(
+    () =>
+      customisedAxes(this.draft().customisation).length +
+      STATUS_SEEDS.filter((status) => this.draft().status[status] !== null).length,
+  );
+
+  /** The candidate seeds, as the preview regions carry them. */
+  protected readonly seeds = computed(() =>
+    appearanceSeeds(
+      this.draft().theme,
+      this.draft().brand,
+      this.draft().neutral,
+      this.draft().status,
+    ),
+  );
+  /** The accent the "Theme's own" swatch draws: Standard's violet, or the theme sheet's seed. */
+  protected readonly themeAccent = computed(() => {
+    const accent = catalogueTheme(this.draft().theme).accent;
+    return accent === null ? undefined : { accent };
+  });
+
   protected readonly readings = computed(
     () => this.contrast()?.contrastReadings(this.draft().theme, this.seeds()) ?? null,
   );
 
-  /** Puts every runtime sheet on the page and loads the contrast arithmetic; the samples wait for both. */
+  /** The theme the preview regions name: the compiled candidate while one is customised. */
+  protected readonly previewTheme = computed(() =>
+    this.customised() && this.store.previewTheme(this.draft().theme) !== null
+      ? DRAFT_THEME_ID
+      : this.drawn(this.draft().theme),
+  );
+
+  protected readonly anatomy = computed(() => {
+    const definitions = this.definitions();
+    if (definitions === null) return null;
+    const compiled = this.customised() ? this.store.previewTheme(this.draft().theme) : null;
+    return definitions.anatomy.themeAnatomy(
+      compiled ?? definitions.themes.nexoraTheme(this.draft().theme),
+    );
+  });
+  protected readonly anatomyName = computed(() =>
+    this.customised() ? `${this.themeLabel()}, customised` : this.themeLabel(),
+  );
+
+  /** The theme's own face for the text or the headings. */
+  protected ownFont(axis: 'body' | 'heading') {
+    return fontFamily(catalogueTheme(this.draft().theme)[axis]);
+  }
+
+  protected readonly radius = computed(
+    () => this.draft().customisation.radius ?? catalogueTheme(this.draft().theme).radius,
+  );
+
+  /**
+   * Puts every runtime sheet on the page and loads the theme definitions, the
+   * anatomy and the contrast arithmetic; the samples wait for all of them.
+   */
   protected load(): void {
     this.failed.set(false);
-    Promise.all([this.store.useThemes(), import('../../core/theming/contrast-reading')]).then(
-      ([, contrast]) => this.contrast.set(contrast),
+    Promise.all([
+      this.store.useThemes(),
+      import('../../core/theming/contrast-reading'),
+      import('../../core/theming/nexora-themes'),
+      import('../../core/theming/theme-anatomy'),
+    ]).then(
+      ([, contrast, themes, anatomy]) => {
+        declareFaces(this.document);
+        this.definitions.set({ themes, anatomy });
+        this.contrast.set(contrast);
+      },
       () => this.failed.set(true),
     );
   }
@@ -456,10 +948,66 @@ export class AppearanceSection {
     return this.failed() && !this.store.hasSheet(theme);
   }
 
-  protected chooseBrand(value: unknown): void {
-    if (value !== 'custom' && !BRAND_PRESETS.some((preset) => preset.id === value)) return;
+  protected axisValue(axis: CustomisationAxis): string {
+    const value = this.draft().customisation[axis];
+    return value === null ? 'theme' : String(value);
+  }
+
+  /** A segment's value, read back through the same check as storage; `theme` clears the axis. */
+  protected chooseAxis(axis: CustomisationAxis, value: unknown): void {
+    const raw = value === 'theme' ? null : /^\d+$/.test(String(value)) ? Number(value) : value;
+    const next = readCustomisation({ ...this.draft().customisation, [axis]: raw });
+    if (raw !== null && next[axis] === null) return;
+    this.patchCustomisation(next);
+  }
+
+  protected chooseRadius(value: number | number[]): void {
+    const radius = Array.isArray(value) ? value[0] : value;
+    const next = readCustomisation({ ...this.draft().customisation, radius });
+    if (next.radius !== null) this.patchCustomisation(next);
+  }
+
+  private patchCustomisation(customisation: Customisation): void {
+    this.patch.emit({ customisation });
+  }
+
+  /** The builder's changes, the reader's colours and grey go; the theme stays. */
+  protected reset(): void {
     this.patch.emit({
-      brand: { ...this.draft().brand, preset: value as BrandPresetId | 'custom' },
+      customisation: NO_CUSTOMISATION,
+      status: NO_STATUS,
+      brand: { ...this.draft().brand, preset: 'theme' },
+      neutral: 'theme',
+    });
+  }
+
+  /** The colour a status field shows: the reader's, or the theme's own once its definition is here. */
+  protected statusValue(status: StatusSeed): string | undefined {
+    return (
+      this.draft().status[status] ??
+      this.definitions()?.themes.nexoraTheme(this.draft().theme).seeds[status]
+    );
+  }
+
+  protected chooseStatus(status: StatusSeed, value: string | null): void {
+    if (value !== null && !isSeed(value)) return;
+    const color = value?.toLowerCase() ?? null;
+    const own = this.definitions()?.themes.nexoraTheme(this.draft().theme).seeds[status];
+    this.patch.emit({
+      status: { ...this.draft().status, [status]: color === own ? null : color },
+    });
+  }
+
+  protected chooseBrand(value: unknown): void {
+    if (
+      value !== 'custom' &&
+      value !== 'theme' &&
+      !BRAND_PRESETS.some((preset) => preset.id === value)
+    ) {
+      return;
+    }
+    this.patch.emit({
+      brand: { ...this.draft().brand, preset: value as BrandPreference['preset'] },
     });
   }
 

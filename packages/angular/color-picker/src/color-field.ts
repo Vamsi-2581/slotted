@@ -109,6 +109,8 @@ function sameColor(a: string, b: string): boolean {
       </ng-template>
     </ng-container>
   `,
+  /* The swatch's stylesheet: carried by the panel alone, it arrived on the first open. */
+  styleUrls: ['../../../styles/src/color-picker/color-picker.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: { '[attr.aria-label]': 'null' },

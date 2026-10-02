@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseSeed, toLinearSrgb } from '../color';
-import { evaluateRecipe, SCHEMES, SEED_NAMES, type SeedName } from '../recipe';
+import { fromSrgb, parseSeed, toLinearSrgb, type Oklch } from '../color';
+import { evaluateRecipe, SCHEMES, SEED_NAMES, type Scheme, type SeedName } from '../recipe';
 import { checkScheme, seedGrid } from '../recipe-checks';
 import { standard } from './standard';
 
@@ -36,40 +36,101 @@ describe('recipes.standard', () => {
     expect([...failures].slice(0, 20)).toEqual([]);
   });
 
-  /**
-   * Every card, popover, dialog, menu, toast and page is painted with one of
-   * these grounds, so a neutral seed that leaves them achromatic recolours the
-   * lines and the text and leaves the panels where they were. The tint is read
-   * where an sRGB screen paints it: inside the gamut, at the seed's hue. The
-   * light inverse ground is the dark tooltip, which follows the seed at 0.95 of
-   * its chroma and is not one of the grounds this holds.
-   */
-  const GROUNDS = [
-    '--slotted-surface',
-    '--slotted-surface-raised',
-    '--slotted-surface-sunken',
-    '--slotted-control-surface',
-  ];
-  const TINTED = { light: GROUNDS, dark: [...GROUNDS, '--slotted-surface-inverse'] };
+  /** The rule a token comes from, through its aliases and its hover mixes. */
+  const origin = (scheme: Scheme, token: string) => {
+    let rule = standard[scheme][token];
+    while (rule && !('seed' in rule))
+      rule = standard[scheme]['alias' in rule ? rule.alias : rule.mix];
+    return rule;
+  };
+  const NEUTRAL = Object.fromEntries(
+    SCHEMES.map((scheme) => [
+      scheme,
+      Object.keys(standard[scheme]).filter((token) => origin(scheme, token)?.seed === 'neutral'),
+    ]),
+  ) as Record<Scheme, string[]>;
+  const inside = (color: Oklch) =>
+    toLinearSrgb(color).every((channel) => channel >= -1e-9 && channel <= 1 + 1e-9);
+  /** What an sRGB screen paints: every channel clipped to 0–1, read back unquantised. */
+  const painted = (color: Oklch) => {
+    const [r, g, b] = toLinearSrgb(color).map((channel) => {
+      const linear = Math.min(1, Math.max(0, channel));
+      return linear <= 0.0031308 ? linear * 12.92 : 1.055 * linear ** (1 / 2.4) - 0.055;
+    });
+    return fromSrgb(r!, g!, b!);
+  };
+  const turn = (color: Oklch, seed: Oklch) => Math.abs(((color.h - seed.h + 540) % 360) - 180);
 
-  it('tints every neutral ground with a strongly tinted neutral seed in light and dark', () => {
+  /**
+   * A neutral seed recolours every line, highlight, ink and ground it derives,
+   * or a page painted with it reads two colours at once: the pink seed of a
+   * Nexora theme left the highlights a fixed slate share of it, and the step
+   * from a pink ground to them read green. Each token is read where an sRGB
+   * screen paints it — inside the gamut, so the hue `evaluateRecipe` computes
+   * is the one on screen — and it carries the seed's hue and some of its chroma.
+   */
+  it('gives every neutral token the hue and a share of the chroma of a tinted neutral seed', () => {
     const misses: string[] = [];
-    for (const neutral of ['#7c3aed', '#0e7490', '#846f6c']) {
+    for (const neutral of ['#e8a0b8', '#db2777', '#846f6c', '#0e7490', '#7c3aed']) {
       const seed = parseSeed(neutral)!;
       for (const scheme of ['light', 'dark'] as const) {
         const values = evaluateRecipe(standard, { ...base, neutral: seed }, scheme);
-        for (const token of TINTED[scheme]) {
-          const ground = values[token]!;
-          const turn = Math.abs(((ground.h - seed.h + 540) % 360) - 180);
-          const inside = toLinearSrgb(ground).every((channel) => channel >= 0 && channel <= 1);
-          if (ground.c < 0.005 || turn > 15 || !inside)
+        for (const token of NEUTRAL[scheme]) {
+          const screen = painted(values[token]!);
+          if (!inside(values[token]!) || screen.c < 0.005 || turn(screen, seed) > 15)
             misses.push(
-              `${neutral} ${scheme} ${token}: c ${ground.c.toFixed(4)}, ${turn.toFixed(0)}° from the seed, ${inside ? 'in' : 'out of'} sRGB`,
+              `${neutral} ${scheme} ${token}: c ${screen.c.toFixed(4)}, ${turn(screen, seed).toFixed(0)}° from the seed, ${inside(values[token]!) ? 'in' : 'out of'} sRGB`,
             );
         }
       }
     }
     expect(misses).toEqual([]);
+  });
+
+  it('keeps every neutral token inside sRGB for every neutral seed of the grid', () => {
+    const misses = new Set<string>();
+    for (const scheme of SCHEMES) {
+      for (const seed of seedGrid()) {
+        const values = evaluateRecipe(standard, { ...base, neutral: seed }, scheme);
+        for (const token of NEUTRAL[scheme])
+          if (!inside(values[token]!)) misses.add(`${scheme} ${token}`);
+      }
+    }
+    expect([...misses]).toEqual([]);
+  });
+
+  /**
+   * The fills and lines drawn over a ground. Each one holds at least the
+   * ground's chroma, so the step from the ground to it points at the seed's
+   * hue: with less, the step points at the opposite hue, and a hover on a pink
+   * ground reads green. A hover mix is the fill it lightens and is not one.
+   */
+  const OVER_GROUNDS = [
+    '--slotted-border-subtle',
+    '--slotted-border-strong',
+    '--slotted-control-border-color',
+    '--slotted-disabled-border',
+    '--slotted-disabled-background',
+    '--slotted-tone-secondary-surface',
+    '--slotted-tone-secondary-solid',
+    '--slotted-tone-secondary-solid-active',
+    '--slotted-tone-secondary-border',
+    '--slotted-tone-secondary-subtle-hover',
+    '--slotted-tone-secondary-subtle-active',
+  ];
+  const GROUNDS = ['--slotted-surface', '--slotted-surface-raised', '--slotted-surface-sunken'];
+
+  it('gives every neutral fill and line at least the chroma of the grounds it is drawn on', () => {
+    const misses = new Set<string>();
+    for (const scheme of ['light', 'dark'] as const) {
+      for (const seed of seedGrid()) {
+        const values = evaluateRecipe(standard, { ...base, neutral: seed }, scheme);
+        const ground = Math.max(...GROUNDS.map((token) => values[token]!.c));
+        for (const token of OVER_GROUNDS)
+          if (values[token]!.c < ground - 1e-9) misses.add(`${scheme} ${token}`);
+      }
+    }
+    expect([...misses]).toEqual([]);
   });
 
   it('keeps the high-contrast grounds achromatic for any neutral seed', () => {
@@ -78,6 +139,7 @@ describe('recipes.standard', () => {
       { ...base, neutral: parseSeed('#7c3aed')! },
       'high-contrast',
     );
-    for (const token of [...GROUNDS, '--slotted-surface-inverse']) expect(values[token]!.c).toBe(0);
+    for (const token of [...GROUNDS, '--slotted-control-surface', '--slotted-surface-inverse'])
+      expect(values[token]!.c).toBe(0);
   });
 });

@@ -14,7 +14,7 @@ export const standard: Recipe = {
       l: 0.898,
       c: {
         scale: 0.313,
-        max: 0.06,
+        max: 0.049,
       },
     },
     '--slotted-text': {
@@ -22,9 +22,8 @@ export const standard: Recipe = {
       l: 0.208,
       c: {
         scale: 0.978,
-        max: 0.06,
+        max: 0.035,
       },
-      h: 8,
     },
     '--slotted-text-muted': {
       seed: 'neutral',
@@ -33,14 +32,13 @@ export const standard: Recipe = {
         scale: 0.913,
         max: 0.06,
       },
-      h: -3,
     },
     '--slotted-disabled-background': {
       seed: 'neutral',
       l: 0.929,
       c: {
         scale: 0.31,
-        max: 0.06,
+        max: 0.033,
       },
     },
     '--slotted-disabled-foreground': {
@@ -197,7 +195,7 @@ export const standard: Recipe = {
       l: 0.929,
       c: {
         scale: 0.31,
-        max: 0.06,
+        max: 0.033,
       },
     },
     '--slotted-tone-secondary-surface': {
@@ -205,7 +203,7 @@ export const standard: Recipe = {
       l: 0.929,
       c: {
         scale: 0.31,
-        max: 0.06,
+        max: 0.033,
       },
     },
     '--slotted-tone-secondary-solid-hover': {
@@ -225,9 +223,8 @@ export const standard: Recipe = {
       l: 0.245,
       c: {
         scale: 0.952,
-        max: 0.06,
+        max: 0.041,
       },
-      h: 7,
     },
     '--slotted-tone-secondary-border': {
       seed: 'neutral',
@@ -242,16 +239,15 @@ export const standard: Recipe = {
       l: 0.245,
       c: {
         scale: 0.952,
-        max: 0.06,
+        max: 0.041,
       },
-      h: 7,
     },
     '--slotted-tone-secondary-subtle-hover': {
       seed: 'neutral',
       l: 0.959,
       c: {
-        scale: 0.168,
-        max: 0.06,
+        scale: 0.22,
+        max: 0.019,
       },
     },
     '--slotted-tone-secondary-subtle-active': {
@@ -259,7 +255,7 @@ export const standard: Recipe = {
       l: 0.929,
       c: {
         scale: 0.31,
-        max: 0.06,
+        max: 0.033,
       },
     },
     '--slotted-tone-success-solid': {
@@ -662,16 +658,15 @@ export const standard: Recipe = {
       l: 0.245,
       c: {
         scale: 0.952,
-        max: 0.06,
+        max: 0.041,
       },
-      h: 7,
     },
     '--slotted-text-inverse': {
       seed: 'neutral',
       l: 0.984,
       c: {
-        scale: 0,
-        max: 0,
+        scale: 0.22,
+        max: 0.007,
       },
     },
     '--slotted-border-strong': {
@@ -681,7 +676,6 @@ export const standard: Recipe = {
         scale: 0.857,
         max: 0.06,
       },
-      h: -6,
     },
     '--slotted-control-border-color': {
       seed: 'neutral',
@@ -706,16 +700,16 @@ export const standard: Recipe = {
       seed: 'neutral',
       l: 0.303,
       c: {
-        scale: 0.219,
-        max: 0.06,
+        scale: 0.22,
+        max: 0.051,
       },
     },
     '--slotted-text': {
       seed: 'neutral',
       l: 0.985,
       c: {
-        scale: 0,
-        max: 0,
+        scale: 0.22,
+        max: 0.006,
       },
     },
     '--slotted-text-muted': {
@@ -730,8 +724,8 @@ export const standard: Recipe = {
       seed: 'neutral',
       l: 0.21,
       c: {
-        scale: 0.144,
-        max: 0.06,
+        scale: 0.22,
+        max: 0.035,
       },
     },
     '--slotted-disabled-foreground': {
@@ -746,8 +740,8 @@ export const standard: Recipe = {
       seed: 'neutral',
       l: 0.274,
       c: {
-        scale: 0.135,
-        max: 0.06,
+        scale: 0.22,
+        max: 0.046,
       },
     },
     '--slotted-tone-accent-solid': {
@@ -887,16 +881,16 @@ export const standard: Recipe = {
       seed: 'neutral',
       l: 0.274,
       c: {
-        scale: 0.135,
-        max: 0.06,
+        scale: 0.22,
+        max: 0.046,
       },
     },
     '--slotted-tone-secondary-surface': {
       seed: 'neutral',
       l: 0.274,
       c: {
-        scale: 0.135,
-        max: 0.06,
+        scale: 0.22,
+        max: 0.046,
       },
     },
     '--slotted-tone-secondary-solid-hover': {
@@ -907,16 +901,16 @@ export const standard: Recipe = {
       seed: 'neutral',
       l: 0.21,
       c: {
-        scale: 0.144,
-        max: 0.06,
+        scale: 0.22,
+        max: 0.035,
       },
     },
     '--slotted-tone-secondary-on-solid': {
       seed: 'neutral',
       l: 0.985,
       c: {
-        scale: 0,
-        max: 0,
+        scale: 0.22,
+        max: 0.006,
       },
     },
     '--slotted-tone-secondary-border': {
@@ -931,24 +925,24 @@ export const standard: Recipe = {
       seed: 'neutral',
       l: 0.985,
       c: {
-        scale: 0,
-        max: 0,
+        scale: 0.22,
+        max: 0.006,
       },
     },
     '--slotted-tone-secondary-subtle-hover': {
       seed: 'neutral',
       l: 0.253,
       c: {
-        scale: 0.137,
-        max: 0.06,
+        scale: 0.22,
+        max: 0.043,
       },
     },
     '--slotted-tone-secondary-subtle-active': {
       seed: 'neutral',
       l: 0.274,
       c: {
-        scale: 0.135,
-        max: 0.06,
+        scale: 0.22,
+        max: 0.046,
       },
     },
     '--slotted-tone-success-solid': {
@@ -1355,8 +1349,8 @@ export const standard: Recipe = {
       seed: 'neutral',
       l: 0.21,
       c: {
-        scale: 0.144,
-        max: 0.06,
+        scale: 0.22,
+        max: 0.035,
       },
     },
     '--slotted-border-strong': {
@@ -1407,7 +1401,7 @@ export const standard: Recipe = {
       l: 0.278,
       c: {
         scale: 0.727,
-        max: 0.06,
+        max: 0.047,
       },
     },
     '--slotted-disabled-background': {

@@ -12,6 +12,7 @@ import {
   SCHEMES,
   SEED_NAMES,
   seedGrid,
+  toLinearSrgb,
 } from '../packages/theme/dist/index.js';
 
 /**
@@ -22,12 +23,16 @@ import {
  *    a `-solid`, `-solid-active`, `-border` or `-text` of a coloured tone
  *    follows the seed's lightness by an offset, every other token keeps a
  *    fixed lightness, a `-solid-hover` mixes its solid, a `var()` stays an alias;
- * 2. chroma is capped: 0.25 where the token follows the seed, 0.06 on the
- *    neutral, the reference chroma + 0.01 (at least 0.06) on a tinted surface;
- *    a reference colour with no chroma keeps none;
- * 3. the neutral grounds and the light neutral highlight take `GROUNDS` in
+ * 2. chroma is capped: 0.25 where the token follows the seed, the reference
+ *    chroma + 0.01 (at least 0.06) on a tinted surface; a reference colour
+ *    with no chroma keeps none;
+ * 3. a token of the neutral seed takes the seed's hue with no offset, and its
+ *    chroma is capped at 0.06 and at the chroma sRGB holds at its lightness
+ *    for every hue; in light and dark it keeps at least `NEUTRAL_SHARE` of the
+ *    seed's chroma, the grounds' share, achromatic reference or not;
+ * 4. the neutral grounds and the light neutral highlight take `GROUNDS` in
  *    place of the fit;
- * 4. each solid, hover, active, tone text and the accent edge gets one bound
+ * 5. each solid, hover, active, tone text and the accent edge gets one bound
  *    per side, against the worst ground or ink of its scheme over `seedGrid()`.
  *
  * Run after `pnpm --filter @slotted/theme build`; rebuild afterwards. The
@@ -51,6 +56,34 @@ const FOLLOWS_SEED = /-(solid|solid-active|border|text)$/;
 const round = (value, digits) => Number(value.toFixed(digits));
 
 /**
+ * The share of the neutral seed's chroma every neutral token of light and dark
+ * keeps at least. The reference is slate, and a fit to it gave each line,
+ * highlight and ink a fixed slate share of the seed and a hue offset slate
+ * has: a dark highlight kept 0.137 of the seed over grounds that keep 0.22,
+ * so the step from a pink ground to it pointed at the opposite hue and read
+ * green, and the near-white inks kept no chroma at all.
+ */
+const NEUTRAL_SHARE = 0.22;
+
+/** The highest chroma, to three decimals, that sRGB holds at lightness `l` for every hue. */
+function gamutCeiling(l) {
+  const inside = (c, h) =>
+    toLinearSrgb({ l, c, h }).every((channel) => channel >= 0 && channel <= 1);
+  let ceiling = 0.4;
+  for (let h = 0; h < 360; h += 0.25) {
+    let low = 0;
+    let high = ceiling;
+    for (let step = 0; step < 30; step += 1) {
+      const middle = (low + high) / 2;
+      if (inside(middle, h)) low = middle;
+      else high = middle;
+    }
+    ceiling = low;
+  }
+  return Math.floor(ceiling * 1000) / 1000;
+}
+
+/**
  * The grounds every panel, page and field is painted with. The reference has
  * them achromatic, and a fit to it gave them none of the neutral seed: a
  * neutral seed recoloured lines and text and left every card, popover, dialog
@@ -61,8 +94,9 @@ const round = (value, digits) => Number(value.toFixed(digits));
  * grounds move to 0.985 and the sunken one to 0.97, where `--slotted-data-8`
  * still reads 3:1 on it; the neutral highlight keeps the 0.011 step below the
  * sunken ground the reference had, and with it the 0.02 step from the grounds.
- * `high-contrast` keeps the fit: every neutral of that scheme is achromatic
- * and every tone ground is the page's own white.
+ * `high-contrast` keeps the fit: its grounds and every tone ground are the
+ * page's own white, its lines and inks are black, and `--slotted-text-muted`
+ * is the one neutral of that scheme that carries the seed.
  */
 export const GROUNDS = {
   light: {
@@ -84,7 +118,7 @@ function seedOf(token) {
   return !match || match[1] === 'secondary' ? 'neutral' : match[1];
 }
 
-function fit(reference, seeds, grounds) {
+function fit(reference, seeds) {
   const recipe = {};
   for (const scheme of SCHEMES) {
     recipe[scheme] = {};
@@ -102,20 +136,24 @@ function fit(reference, seeds, grounds) {
       const seed = seeds[name];
       const target = parseSeed(value);
       if (!target) throw new Error(`${scheme} ${token}: ${value} is not a seed notation`);
-      const follows =
-        name !== 'neutral' &&
-        !token.endsWith('-on-solid') &&
-        FOLLOWS_SEED.test(token) &&
-        target.c > 0.03;
+      const ground = GROUNDS[scheme]?.[token];
+      if (name === 'neutral') {
+        const l = ground?.l ?? round(target.l, 3);
+        const tinted = scheme !== 'high-contrast';
+        const scale = target.c < 0.004 ? 0 : round(target.c / seed.c, 3);
+        recipe[scheme][token] = {
+          seed: name,
+          l,
+          c: tinted
+            ? { scale: Math.max(scale, NEUTRAL_SHARE), max: Math.min(0.06, gamutCeiling(l)) }
+            : { scale, max: scale === 0 ? 0 : Math.min(0.06, gamutCeiling(l)) },
+          ...ground,
+        };
+        continue;
+      }
+      const follows = !token.endsWith('-on-solid') && FOLLOWS_SEED.test(token) && target.c > 0.03;
       const scale = seed.c > 0 ? round(target.c / seed.c, 3) : 0;
-      const max =
-        target.c < 0.004
-          ? 0
-          : name === 'neutral'
-            ? 0.06
-            : follows
-              ? 0.25
-              : round(Math.max(0.06, target.c + 0.01), 3);
+      const max = target.c < 0.004 ? 0 : follows ? 0.25 : round(Math.max(0.06, target.c + 0.01), 3);
       let shift = target.h - seed.h;
       if (shift > 180) shift -= 360;
       if (shift < -180) shift += 360;
@@ -124,7 +162,6 @@ function fit(reference, seeds, grounds) {
         l: follows ? { offset: round(target.l - seed.l, 3) } : round(target.l, 3),
         c: { scale: target.c < 0.004 ? 0 : scale, max },
         ...(target.c >= 0.02 && Math.abs(shift) > 3 ? { h: Math.round(shift) } : {}),
-        ...grounds[scheme]?.[token],
       };
     }
     recipe[scheme]['--slotted-focus-ring-color'] = { alias: '--slotted-tone-accent-border' };
@@ -203,7 +240,7 @@ function addBounds(recipe, seeds) {
   return recipe;
 }
 
-export async function calibrate(grounds = GROUNDS) {
+export async function calibrate() {
   const reference = JSON.parse(
     await readFile(
       new URL('../packages/themes/src/default/reference.json', import.meta.url),
@@ -213,7 +250,7 @@ export async function calibrate(grounds = GROUNDS) {
   const seeds = Object.fromEntries(
     SEED_NAMES.map((name) => [name, parseSeed(DEFAULT_SEEDS[name])]),
   );
-  const recipe = addBounds(fit(reference, seeds, grounds), seeds);
+  const recipe = addBounds(fit(reference, seeds), seeds);
 
   const deviations = [];
   for (const scheme of SCHEMES) {

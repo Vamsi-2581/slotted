@@ -2,7 +2,16 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { contract, deltaE, flattenTheme, parseSeed } from '@slotted/theme';
+import {
+  contrast as colorContrast,
+  contract,
+  deltaE,
+  evaluateRecipe,
+  flattenTheme,
+  parseSeed,
+  SCHEMES,
+  seedGrid,
+} from '@slotted/theme';
 import { contrast, TEXT_RATIO } from '@slotted/theme/conformance';
 
 import defaultTheme from '../src/default/theme.mjs';
@@ -365,6 +374,42 @@ test('keeps every data slot legible against every surface a chart is drawn on', 
       }
     }
   }
+});
+
+/**
+ * The grounds follow the neutral seed and the data slots are literals, so the
+ * ratio above holds for the default seed alone until it is read for every
+ * neutral seed a theme can bring.
+ */
+test('keeps every data slot legible against every ground for every neutral seed of the grid', () => {
+  const seeds = Object.fromEntries(
+    Object.entries(defaultTheme.seeds).map(([name, value]) => [name, parseSeed(value)]),
+  );
+  const misses = new Map();
+  for (const scheme of SCHEMES) {
+    const floor = scheme === 'high-contrast' ? 4.5 : 3;
+    const slots = Object.keys(theme.schemes[scheme])
+      .filter((token) => token.startsWith('--slotted-data-'))
+      .map((token) => [token, parseSeed(theme.schemes[scheme][token])]);
+    for (const neutral of seedGrid()) {
+      const values = evaluateRecipe(defaultTheme.recipe, { ...seeds, neutral }, scheme);
+      for (const ground of [
+        '--slotted-surface',
+        '--slotted-surface-raised',
+        '--slotted-surface-sunken',
+      ]) {
+        for (const [slot, ink] of slots) {
+          const ratio = colorContrast(ink, values[ground]);
+          const key = `${scheme} ${slot} on ${ground}`;
+          if (ratio < floor && !(misses.get(key) <= ratio)) misses.set(key, ratio);
+        }
+      }
+    }
+  }
+  assert.deepEqual(
+    [...misses].map(([key, ratio]) => `${key}: ${ratio.toFixed(3)}:1`),
+    [],
+  );
 });
 
 /** Eight series a reader tells apart; two slots painted alike are one series drawn twice. */

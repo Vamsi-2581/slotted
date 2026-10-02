@@ -65,6 +65,7 @@ export default defineConfig({
         'list-item': resolve(import.meta.dirname, 'src/list-item/index.ts'),
         listbox: resolve(import.meta.dirname, 'src/listbox/index.ts'),
         'multi-select': resolve(import.meta.dirname, 'src/multi-select/index.ts'),
+        'navigation-menu': resolve(import.meta.dirname, 'src/navigation-menu/index.ts'),
         'import-export-center': resolve(import.meta.dirname, 'src/import-export-center/index.ts'),
         'notification-center': resolve(import.meta.dirname, 'src/notification-center/index.ts'),
         'otp-input': resolve(import.meta.dirname, 'src/otp-input/index.ts'),

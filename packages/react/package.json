@@ -259,6 +259,10 @@
       "types": "./dist/types/multi-select/index.d.ts",
       "import": "./dist/multi-select.js"
     },
+    "./navigation-menu": {
+      "types": "./dist/types/navigation-menu/index.d.ts",
+      "import": "./dist/navigation-menu.js"
+    },
     "./import-export-center": {
       "types": "./dist/types/import-export-center/index.d.ts",
       "import": "./dist/import-export-center.js"

@@ -103,12 +103,45 @@ import defaultTheme from '@slotted/themes/default';
 export default extendTheme(defaultTheme, { seeds: { accent: '#e11d48' } }, { name: 'rose' });
 ```
 
-Setting a seed on the document recolours every token derived from it, with no
-build:
+A theme stylesheet declares the seeds on the element that names the theme
+(`data-slotted-theme`), and derives every colour token where a theme and a
+scheme are named. A seed set inline on that element recolours every token
+derived from it, with no build:
 
 ```js
-document.documentElement.style.setProperty('--slotted-seed-accent', '#e11d48');
+document
+  .querySelector('[data-slotted-theme]')
+  .style.setProperty('--slotted-seed-accent', '#e11d48');
 ```
+
+A seed set on an ancestor of that element is redeclared by the theme. On any
+element inside it, a seed recolours the subtree when the element also carries
+`data-slotted-seeds`, which derives every colour again from the seeds that
+element sees:
+
+```html
+<section data-slotted-seeds style="--slotted-seed-accent: #e11d48">…</section>
+```
+
+`ThemeScope` (`@slotted/react/theme`) and the `slThemeScope` directive
+(`@slotted/angular/theme`) write the same attributes on one element: `theme`,
+`scheme` and `density` become `data-slotted-theme`, `data-slotted-scheme` and
+`data-slotted-density`, and `seeds` becomes the seed custom properties plus
+`data-slotted-seeds`. An overlay opened inside the element carries all of them
+to the end of the body.
+
+```tsx
+<ThemeScope scheme="dark" seeds={{ accent: '#e11d48' }}>
+  …
+</ThemeScope>
+```
+
+```html
+<section slThemeScope scheme="dark" [seeds]="{ accent: '#e11d48' }">…</section>
+```
+
+`scheme="system"` resolves to `light`, and to `dark` while
+`prefers-color-scheme: dark` matches.
 
 A theme rule is CSS passed in `rules`, as a string or the URL of a `.css` file
 the build reads:

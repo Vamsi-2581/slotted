@@ -7,7 +7,8 @@ Sublayer order superseded by `0004-theming-architecture.md`.
 
 The library shipped four layer names — `slotted.tokens`, `slotted.theme`,
 `slotted.components`, `slotted.overrides` — declared in one order statement
-emitted by `packages/theme/scripts/build.mjs`. Two of the four held rules.
+emitted by the build of `@slotted/theme`, today
+`packages/theme/scripts/write-styles.mjs`. Two of the four held rules.
 
 The statement reached the document only through `@slotted/theme/styles.css`.
 Angular ships no stylesheet: its component CSS is inlined and injected when a
@@ -47,10 +48,12 @@ later would reorder what already shipped; reserving a position costs a string.
 was already a required import, since every family reads its values from the
 theme.
 
-Three checks hold the contract: `packages/theme/test/layer-order.test.mjs`
-pins the string and the token stylesheet, the theme test pins the theme
-stylesheet, and `packages/react/package-boundary.verify.mjs` fails the React
-build when the bundled stylesheet does not open with it.
+Four checks hold the contract: `packages/theme/src/layer-order.test.ts` pins
+the string, `packages/theme/test/styles.test.mjs` pins
+`@slotted/theme/styles.css` opening with it, `packages/theme/src/render.test.ts`
+pins every theme stylesheet opening with it, and
+`packages/react/package-boundary.verify.mjs` fails the React build when the
+bundled stylesheet does not open with it.
 
 Applications written against `slotted.overrides` before this change move those
 rules to their own layer or leave them unlayered.

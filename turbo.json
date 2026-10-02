@@ -21,7 +21,19 @@
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/packages/themes/src/default/values.json",
         "$TURBO_ROOT$/packages/styles/src/*/*.tokens.json",
+        "$TURBO_ROOT$/packages/styles/src/*/*.css",
         "$TURBO_ROOT$/specs/components/*/contract.json"
+      ]
+    },
+    "@slotted/themes#verify": {
+      "dependsOn": ["^verify"],
+      "outputs": ["dist/**", "coverage/**"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/docs/token-foundation.md",
+        "$TURBO_ROOT$/docs/history/build-log.md",
+        "$TURBO_ROOT$/scripts/generate-icon-glyphs.mjs",
+        "$TURBO_ROOT$/scripts/glyph-ink.mjs"
       ]
     }
   }

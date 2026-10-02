@@ -38,17 +38,17 @@ source removes the artefact from the loop instead of racing it —
 Storybook already did it for `@slotted/angular/*`. Only what cannot be resolved
 to source is left to a build, and that is the table below.
 
-Two artefacts are generated from something else, and a change to their input is
-invisible until they are:
+Each input below reaches what reads it through the step beside it, and a change
+to it is invisible until that step runs:
 
-| Changed                                              | Build                                        | Because                                                                                      |
-| ---------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `packages/theme/src/contract.json`                   | `pnpm build:tokens`                          | the token stylesheet and the layer order are emitted from the contract                       |
-| `packages/themes/src/default/values.json`            | `pnpm build:tokens`                          | the glyphs are drawn into it from `glyphs.json`, and the theme stylesheet is emitted from it |
-| `packages/theme/src/generated/*`                     | `pnpm --filter @slotted/theme generate`      | the contract and the public hooks are generated from a family's `tokens.json`                |
-| `packages/theme/src/recipes/standard.ts`             | `node scripts/calibrate-standard-recipe.mjs` | generated from `reference.json`; run after `pnpm --filter @slotted/theme build`              |
-| `packages/core/src/**`                               | none for Storybook or tests                  | aliased to source by `scripts/source-aliases.mjs`; build only before publishing              |
-| `packages/react/src/**`, `packages/angular/*/src/**` | none for Storybook                           | `pnpm build` before publishing or before reading `dist`; the servers use source              |
+| Changed                                                | Build                                        | Because                                                                                                                                                      |
+| ------------------------------------------------------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `packages/theme/src/contract.json`                     | `pnpm build:tokens`                          | the token stylesheet and the layer order are emitted from the contract                                                                                       |
+| `packages/themes/src/default/theme.mjs`, `values.json` | `pnpm build:tokens`                          | the glyphs are drawn into `values.json` from `glyphs.json`, and `slotted-build-theme` emits the theme stylesheet from `theme.mjs`, which reads `values.json` |
+| `packages/theme/src/generated/*`                       | `pnpm --filter @slotted/theme generate`      | the contract and the public hooks are generated from a family's `tokens.json`                                                                                |
+| `packages/theme/src/recipes/standard.ts`               | `node scripts/calibrate-standard-recipe.mjs` | generated from `reference.json`; run after `pnpm --filter @slotted/theme build`                                                                              |
+| `packages/core/src/**`                                 | none for Storybook or tests                  | aliased to source by `scripts/source-aliases.mjs`; build only before publishing                                                                              |
+| `packages/react/src/**`, `packages/angular/*/src/**`   | none for Storybook                           | `pnpm build` before publishing or before reading `dist`; the servers use source                                                                              |
 
 `pnpm build` covers all of them and is the answer whenever the table is more
 trouble than the wait.

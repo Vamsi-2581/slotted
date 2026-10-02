@@ -3439,6 +3439,21 @@ export type ComponentToken =
   | '--slotted-multi-select-subtle-border-color'
   | '--slotted-multi-select-subtle-hover-background'
   | '--slotted-multi-select-surface'
+  | '--slotted-navigation-menu-active-background'
+  | '--slotted-navigation-menu-border-color'
+  | '--slotted-navigation-menu-color'
+  | '--slotted-navigation-menu-column-size'
+  | '--slotted-navigation-menu-current-background'
+  | '--slotted-navigation-menu-current-color'
+  | '--slotted-navigation-menu-current-edge'
+  | '--slotted-navigation-menu-hover-background'
+  | '--slotted-navigation-menu-muted-color'
+  | '--slotted-navigation-menu-nested-list-size'
+  | '--slotted-navigation-menu-offset'
+  | '--slotted-navigation-menu-radius'
+  | '--slotted-navigation-menu-shadow'
+  | '--slotted-navigation-menu-surface'
+  | '--slotted-navigation-menu-viewport-radius'
   | '--slotted-notification-center-background'
   | '--slotted-notification-center-border'
   | '--slotted-notification-center-description-clamp'
@@ -5564,6 +5579,21 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-multi-select-subtle-border-color",
   "--slotted-multi-select-subtle-hover-background",
   "--slotted-multi-select-surface",
+  "--slotted-navigation-menu-active-background",
+  "--slotted-navigation-menu-border-color",
+  "--slotted-navigation-menu-color",
+  "--slotted-navigation-menu-column-size",
+  "--slotted-navigation-menu-current-background",
+  "--slotted-navigation-menu-current-color",
+  "--slotted-navigation-menu-current-edge",
+  "--slotted-navigation-menu-hover-background",
+  "--slotted-navigation-menu-muted-color",
+  "--slotted-navigation-menu-nested-list-size",
+  "--slotted-navigation-menu-offset",
+  "--slotted-navigation-menu-radius",
+  "--slotted-navigation-menu-shadow",
+  "--slotted-navigation-menu-surface",
+  "--slotted-navigation-menu-viewport-radius",
   "--slotted-notification-center-background",
   "--slotted-notification-center-border",
   "--slotted-notification-center-description-clamp",

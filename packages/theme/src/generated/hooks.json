@@ -2287,6 +2287,24 @@
       "table",
       "trigger"
     ],
+    "navigation-menu": [
+      "arrow",
+      "content",
+      "description",
+      "footer",
+      "group",
+      "group-label",
+      "icon",
+      "indicator",
+      "item",
+      "label",
+      "link",
+      "links",
+      "list",
+      "root",
+      "trigger",
+      "viewport"
+    ],
     "notification-center": [
       "actions",
       "content",

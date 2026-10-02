@@ -2,7 +2,7 @@ import { ApplicationInitStatus, DOCUMENT } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { provideTestBackend, resetTestBackend } from '../../../test/testing';
 import { routes } from '../../app.routes';
@@ -17,8 +17,11 @@ describe('PreferencesPage › Appearance', () => {
     await TestBed.inject(SessionStore).load();
   });
 
+  /** Opens the page and waits for the runtime sheets the section asks for. */
   async function open(): Promise<{ harness: RouterTestingHarness; root: HTMLElement }> {
     const harness = await RouterTestingHarness.create('/settings/preferences');
+    harness.detectChanges();
+    await TestBed.inject(PreferencesStore).useThemes();
     harness.detectChanges();
     return { harness, root: harness.fixture.nativeElement as HTMLElement };
   }
@@ -73,13 +76,73 @@ describe('PreferencesPage › Appearance', () => {
     expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('#7c3aed');
   });
 
-  /** The theme cards and the preview draw every theme, so the page puts every runtime sheet on. */
-  it('applies the sheets of the three runtime themes when it opens', async () => {
-    await open();
-    const names = [
-      ...TestBed.inject(DOCUMENT).head.querySelectorAll('style[data-slotted-theme-sheet]'),
-    ].map((sheet) => sheet.getAttribute('data-slotted-theme-sheet'));
+  /**
+   * The cards and the preview draw every theme, so the section puts every
+   * runtime sheet on the page. Until the sheets are there the section is one
+   * busy skeleton region, and every sample is drawn in `default` under it.
+   */
+  it('waits for the runtime sheets under one skeleton region', async () => {
+    const harness = await RouterTestingHarness.create('/settings/preferences');
+    harness.detectChanges();
+    const root = harness.fixture.nativeElement as HTMLElement;
+    const doc = TestBed.inject(DOCUMENT);
+    const region = () => root.querySelector<HTMLElement>('[data-appearance]')!;
+    const samples = () =>
+      [...root.querySelectorAll<HTMLElement>('[data-theme-sample]')].map((sample) =>
+        sample.getAttribute('data-slotted-theme'),
+      );
+
+    expect(doc.head.querySelectorAll('style[data-slotted-theme-sheet]')).toHaveLength(0);
+    expect(region().getAttribute('aria-busy')).toBe('true');
+    expect(samples()).toEqual(['default', 'default', 'default', 'default']);
+    expect(
+      root.querySelectorAll('[data-theme-sample] [data-ui=skeleton][data-loading]').length,
+    ).toBeGreaterThan(0);
+
+    await TestBed.inject(PreferencesStore).useThemes();
+    harness.detectChanges();
+
+    const names = [...doc.head.querySelectorAll('style[data-slotted-theme-sheet]')].map((sheet) =>
+      sheet.getAttribute('data-slotted-theme-sheet'),
+    );
     expect(names.sort()).toEqual(['nexora-editorial', 'nexora-sharp', 'nexora-soft']);
+    expect(region().hasAttribute('aria-busy')).toBe(false);
+    expect(samples()).toEqual(['default', 'nexora-soft', 'nexora-sharp', 'nexora-editorial']);
+    expect(
+      root.querySelectorAll('[data-appearance] [data-ui=skeleton][data-loading]'),
+    ).toHaveLength(0);
+  });
+
+  /** A load that fails is said once, with a way to try again; the themes it could not draw cannot be chosen. */
+  it('offers a retry when the theme definitions do not arrive', async () => {
+    const store = TestBed.inject(PreferencesStore);
+    const load = vi.spyOn(store, 'useThemes').mockRejectedValueOnce(new Error('chunk'));
+    const harness = await RouterTestingHarness.create('/settings/preferences');
+    await new Promise((resolve) => setTimeout(resolve));
+    harness.detectChanges();
+    const root = harness.fixture.nativeElement as HTMLElement;
+
+    expect(root.querySelector('[data-themes-failed]')).not.toBeNull();
+    expect(root.querySelector('[data-appearance]')!.hasAttribute('aria-busy')).toBe(false);
+    const disabled = [...root.querySelectorAll<HTMLInputElement>('input[name="theme"]')]
+      .filter((input) => input.disabled)
+      .map((input) => input.value);
+    expect(disabled).toEqual(['nexora-soft', 'nexora-sharp', 'nexora-editorial']);
+
+    load.mockRestore();
+    const retry = [...root.querySelectorAll('button')].find(
+      (button) => button.textContent?.trim() === 'Try again',
+    );
+    retry!.click();
+    await store.useThemes();
+    harness.detectChanges();
+
+    expect(root.querySelector('[data-themes-failed]')).toBeNull();
+    expect(
+      [...root.querySelectorAll<HTMLInputElement>('input[name="theme"]')].some(
+        (input) => input.disabled,
+      ),
+    ).toBe(false);
   });
 
   it('saves a brand preset into the store, which writes it onto html', async () => {
@@ -103,20 +166,37 @@ describe('PreferencesPage › Appearance', () => {
     expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('#059669');
   });
 
+  const typeColour = (root: HTMLElement, value: string) => {
+    const field = root.querySelector<HTMLInputElement>('[data-brand-custom] input');
+    expect(field).not.toBeNull();
+    field!.value = value;
+    field!.dispatchEvent(new Event('input', { bubbles: true }));
+    field!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  };
+  const checkedBrand = (root: HTMLElement) =>
+    root.querySelector<HTMLInputElement>('input[name="brand"]:checked')?.value;
+
   /** The reader's own colour is a candidate like a preset, and choosing it selects Custom. */
   it('takes a custom colour from the colour field', async () => {
     const { harness, root } = await open();
-    const field = root.querySelector<HTMLInputElement>('[data-brand-custom] input');
-    expect(field).not.toBeNull();
-    field!.value = '#0f766e';
-    field!.dispatchEvent(new Event('input', { bubbles: true }));
-    field!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    typeColour(root, '#0f766e');
     harness.detectChanges();
 
     expect(regions(root)[0]!.accent).toBe('#0f766e');
-    expect(
-      root.querySelector<HTMLInputElement>('input[name="brand"][value="custom"]')!.checked,
-    ).toBe(true);
+    expect(checkedBrand(root)).toBe('custom');
+  });
+
+  /** A colour typed that is a preset's own chooses the preset, and the custom colour stays as it was. */
+  it('chooses the preset a typed colour equals', async () => {
+    const { harness, root } = await open();
+    typeColour(root, '#E11D48');
+    harness.detectChanges();
+
+    expect(checkedBrand(root)).toBe('rose');
+    expect(regions(root)[0]!.accent).toBe('#e11d48');
+    choose(root, 'brand', 'custom');
+    harness.detectChanges();
+    expect(regions(root)[0]!.accent).toBe('#7c3aed');
   });
 
   it('reads the contrast of the candidate seeds in the three schemes', async () => {
@@ -130,5 +210,74 @@ describe('PreferencesPage › Appearance', () => {
     choose(root, 'brand', 'amber');
     harness.detectChanges();
     expect(root.querySelector('[data-contrast]')!.textContent).not.toBe(before);
+  });
+
+  /**
+   * The samples show the candidate scheme, not the one `html` carries: a theme
+   * card and a swatch are regions naming the draft's scheme.
+   */
+  it('draws the theme cards and the swatches in the candidate scheme', async () => {
+    const { harness, root } = await open();
+    const schemes = () =>
+      [...root.querySelectorAll<HTMLElement>('[data-theme-sample], .swatch')].map((sample) =>
+        sample.getAttribute('data-slotted-scheme'),
+      );
+    expect(new Set(schemes())).toEqual(new Set(['system']));
+
+    choose(root, 'scheme', 'dark');
+    harness.detectChanges();
+    expect(new Set(schemes())).toEqual(new Set(['dark']));
+    expect(TestBed.inject(DOCUMENT).documentElement.getAttribute('data-slotted-scheme')).not.toBe(
+      'dark',
+    );
+  });
+
+  /** A card's sample is decoration: the radio is named by the theme's name alone. */
+  it('names each theme card by its label, not by its sample', async () => {
+    const { root } = await open();
+    const labels = [...root.querySelectorAll<HTMLInputElement>('input[name="theme"]')].map(
+      (input) => {
+        const label = root.querySelector<HTMLElement>(`label[for="${input.id}"]`)!;
+        const sample = label.querySelector('[data-theme-sample]');
+        expect(sample?.getAttribute('aria-hidden'), input.value).toBe('true');
+        const named = label.cloneNode(true) as HTMLElement;
+        named.querySelectorAll('[aria-hidden="true"]').forEach((hidden) => hidden.remove());
+        return named.textContent?.trim();
+      },
+    );
+    expect(labels).toEqual(['Standard', 'Soft', 'Sharp', 'Editorial']);
+  });
+
+  /** The preview's buttons are samples: the select is the one control a preview region adds to the tab order. */
+  it('keeps the preview buttons out of the tab order and the select in it', async () => {
+    const { root } = await open();
+    for (const region of root.querySelectorAll<HTMLElement>('[data-preview-scheme]')) {
+      const buttons = [...region.querySelectorAll<HTMLElement>('[data-ui=button]')];
+      expect(buttons).toHaveLength(4);
+      expect(buttons.every((button) => button.closest('[inert]') !== null)).toBe(true);
+      expect(region.querySelector('sl-select')!.closest('[inert]')).toBeNull();
+    }
+  });
+
+  /**
+   * Each group of preferences is a section with its own heading, so the shell
+   * layout and the notifications are not read as part of Appearance.
+   */
+  it('groups the preferences in three sections, each under its own heading', async () => {
+    const { root } = await open();
+    const sections = [...root.querySelectorAll<HTMLElement>('form [data-ui=section]')]
+      .filter((section) => section.parentElement!.closest('[data-ui=section]') === null)
+      .map((section) => section.querySelector('h2')?.textContent?.trim());
+    expect(sections).toEqual(['Appearance', 'Workspace', 'Notifications']);
+
+    const owner = (selector: string) =>
+      root
+        .querySelector(selector)!
+        .closest('[data-ui=section]')!
+        .querySelector('h2')!
+        .textContent?.trim();
+    expect(owner('input[name="theme"]')).toBe('Appearance');
+    expect(owner('input[name="shell"]')).toBe('Workspace');
+    expect(owner('[data-ui=checkbox]')).toBe('Notifications');
   });
 });

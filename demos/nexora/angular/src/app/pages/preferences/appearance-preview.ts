@@ -5,6 +5,7 @@ import { SlButton } from '@slotted/angular/button';
 import { SlField, SlFieldLabel } from '@slotted/angular/field';
 import { SlInline } from '@slotted/angular/inline';
 import { SlSelect, SlSelectItem } from '@slotted/angular/select';
+import { SlSkeleton } from '@slotted/angular/skeleton';
 import { SlStack } from '@slotted/angular/stack';
 import {
   SlTable,
@@ -19,7 +20,7 @@ import {
 } from '@slotted/angular/table';
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
 import { SlThemeScope } from '@slotted/angular/theme';
-import { SlText } from '@slotted/angular/typography';
+import { SlHeading } from '@slotted/angular/typography';
 import type { Density, Scheme, SeedName } from '@slotted/theme';
 
 const SCHEME_LABELS = { light: 'Light', dark: 'Dark', 'high-contrast': 'High contrast' } as const;
@@ -31,7 +32,9 @@ const SCHEME_LABELS = { light: 'Light', dark: 'Dark', 'high-contrast': 'High con
  * the body — derives its colours there and nowhere else.
  *
  * The region paints its own ground and ink from the scheme it names (CP-05);
- * the families inside are the ones the product's screens use.
+ * the families inside are the ones the product's screens use. Each sample
+ * sits under a placeholder that reads the enclosing skeleton region, so while
+ * the theme's sheet loads the region keeps every box and shows none of them.
  */
 @Component({
   selector: 'app-appearance-preview',
@@ -58,7 +61,8 @@ const SCHEME_LABELS = { light: 'Light', dark: 'Dark', 'high-contrast': 'High con
     SlTableHead,
     SlTableRow,
     SlTableRowHeader,
-    SlText,
+    SlHeading,
+    SlSkeleton,
     SlTextField,
     SlTextFieldInput,
   ],
@@ -90,37 +94,46 @@ const SCHEME_LABELS = { light: 'Light', dark: 'Dark', 'high-contrast': 'High con
       [seeds]="seeds()"
     >
       <div slStack [gap]="5">
-        <span slText size="sm" weight="semibold">{{ label() }}</span>
-        <div slInline [gap]="2" wrap="wrap">
-          <button slButton type="button" data-preview-solid>Approve</button>
-          <button slButton type="button" variant="outline">Export</button>
-          <button slButton type="button" variant="ghost" tone="secondary">Cancel</button>
-          <button slButton type="button" tone="danger">Delete</button>
+        <h4 slHeading size="sm" data-preview-heading>{{ label() }}</h4>
+        <!-- Samples to look at, not actions: out of the tab order and the pointer's reach. -->
+        <div slInline [gap]="2" wrap="wrap" inert>
+          <span slSkeleton><button slButton data-preview-solid>Approve</button></span>
+          <span slSkeleton><button slButton variant="outline">Export</button></span>
+          <span slSkeleton><button slButton variant="ghost" tone="secondary">Cancel</button></span>
+          <span slSkeleton><button slButton tone="danger">Delete</button></span>
         </div>
         <div slInline [gap]="2" wrap="wrap">
-          <span slBadge tone="accent" variant="soft">New</span>
-          <span slBadge tone="success" variant="soft">Paid</span>
-          <span slBadge tone="warning" variant="soft">Due soon</span>
-          <span slBadge tone="danger" variant="solid">Overdue</span>
+          <span slSkeleton><span slBadge tone="accent" variant="soft">New</span></span>
+          <span slSkeleton><span slBadge tone="success" variant="soft">Paid</span></span>
+          <span slSkeleton><span slBadge tone="warning" variant="soft">Due soon</span></span>
+          <span slSkeleton><span slBadge tone="danger" variant="solid">Overdue</span></span>
         </div>
         <div slField>
           <label slFieldLabel>Customer</label>
-          <div slTextField>
-            <input slTextFieldInput placeholder="Search by name or number" />
+          <div slSkeleton shape="block">
+            <div slTextField>
+              <input slTextFieldInput placeholder="Search by name or number" />
+            </div>
           </div>
         </div>
         <div slField>
           <label slFieldLabel>Warehouse</label>
-          <sl-select [value]="warehouse()" (valueChangeRequest)="choose($event.value)">
-            <sl-select-item value="lisbon">Lisbon</sl-select-item>
-            <sl-select-item value="porto">Porto</sl-select-item>
-            <sl-select-item value="madrid">Madrid</sl-select-item>
-          </sl-select>
+          <div slSkeleton shape="block">
+            <sl-select [value]="warehouse()" (valueChangeRequest)="choose($event.value)">
+              <sl-select-item value="lisbon">Lisbon</sl-select-item>
+              <sl-select-item value="porto">Porto</sl-select-item>
+              <sl-select-item value="madrid">Madrid</sl-select-item>
+            </sl-select>
+          </div>
         </div>
         <section slAlert tone="accent" live="off">
           <div slAlertContent>
-            <div slAlertTitle>Cycle count due</div>
-            <p slAlertDescription>Lisbon closes its count on Friday.</p>
+            <div slAlertTitle>
+              <span slSkeleton><span>Cycle count due</span></span>
+            </div>
+            <p slAlertDescription>
+              <span slSkeleton><span>Lisbon closes its count on Friday.</span></span>
+            </p>
           </div>
         </section>
         <div slTable variant="framed" [columns]="2" layout="fixed">
@@ -137,11 +150,17 @@ const SCHEME_LABELS = { light: 'Light', dark: 'Dark', 'high-contrast': 'High con
             <tbody slTableBody>
               @for (order of orders; track order.id) {
                 <tr slTableRow>
-                  <th slTableRowHeader>{{ order.id }}</th>
+                  <th slTableRowHeader>
+                    <span slSkeleton
+                      ><span>{{ order.id }}</span></span
+                    >
+                  </th>
                   <td slTableCell>
-                    <span slBadge [tone]="order.tone" variant="soft" size="sm">{{
-                      order.state
-                    }}</span>
+                    <span slSkeleton
+                      ><span slBadge [tone]="order.tone" variant="soft" size="sm">{{
+                        order.state
+                      }}</span></span
+                    >
                   </td>
                 </tr>
               }

@@ -15,7 +15,16 @@ import {
   SlPageHeaderTitleRow,
 } from '@slotted/angular/page-header';
 import { SlRadio, SlRadioDescription, SlRadioGroup } from '@slotted/angular/radio-group';
+import {
+  SlSection,
+  SlSectionBody,
+  SlSectionDescription,
+  SlSectionHeader,
+  SlSectionHeading,
+  SlSectionTitle,
+} from '@slotted/angular/section';
 import { SlSelect, SlSelectItem } from '@slotted/angular/select';
+import { SlStack } from '@slotted/angular/stack';
 import { SlToastService } from '@slotted/angular/toast';
 
 import { visibleModules } from '../../core/nav/nav.model';
@@ -50,15 +59,18 @@ import { ShellPreview } from './shell-preview';
     SlRadioDescription,
     SlRadioGroup,
     ShellPreview,
+    SlSection,
+    SlSectionBody,
+    SlSectionDescription,
+    SlSectionHeader,
+    SlSectionHeading,
+    SlSectionTitle,
     SlSelect,
     SlSelectItem,
+    SlStack,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
-    form {
-      display: grid;
-      gap: var(--slotted-space-6);
-    }
     .checks {
       display: grid;
       gap: var(--slotted-space-2);
@@ -93,69 +105,98 @@ import { ShellPreview } from './shell-preview';
       </header>
       <div slPageBody>
         <form slForm (submit)="$event.preventDefault(); save()">
-          <app-appearance-section [draft]="draft()" (patch)="patch($event)" />
-          <div slField>
-            <label slFieldLabel>Shell layout</label>
-            <span slFieldDescription>
-              How the bar, the navigation and the page are arranged. Every layout keeps the same
-              destinations, the same keyboard order and the same shortcuts.
-            </span>
-            <div
-              slRadioGroup
-              name="shell"
-              variant="tile"
-              [value]="draft().shell"
-              (valueChange)="patch({ shell: $any($event.value) })"
-            >
-              <div class="shells">
-                @for (preset of presets; track preset.id) {
-                  <div slRadio [value]="preset.id">
-                    <span class="shell-option">
-                      <app-shell-preview [preset]="preset" />
-                      {{ preset.label }}
+          <div slStack [gap]="7">
+            <app-appearance-section [draft]="draft()" (patch)="patch($event)" />
+
+            <section slSection data-preferences-section="workspace">
+              <div slSectionHeader>
+                <div slSectionTitle>
+                  <h2 slSectionHeading>Workspace</h2>
+                  <p slSectionDescription>How the application is laid out and where it opens.</p>
+                </div>
+              </div>
+              <div slSectionBody>
+                <div slStack [gap]="5">
+                  <div slField>
+                    <label slFieldLabel>Shell layout</label>
+                    <span slFieldDescription>
+                      How the bar, the navigation and the page are arranged. Every layout keeps the
+                      same destinations, the same keyboard order and the same shortcuts.
                     </span>
-                    <p slRadioDescription>{{ preset.description }}</p>
+                    <div
+                      slRadioGroup
+                      name="shell"
+                      variant="tile"
+                      [value]="draft().shell"
+                      (valueChange)="patch({ shell: $any($event.value) })"
+                    >
+                      <div class="shells">
+                        @for (preset of presets; track preset.id) {
+                          <div slRadio [value]="preset.id">
+                            <span class="shell-option">
+                              <app-shell-preview [preset]="preset" />
+                              {{ preset.label }}
+                            </span>
+                            <p slRadioDescription>{{ preset.description }}</p>
+                          </div>
+                        }
+                      </div>
+                    </div>
                   </div>
-                }
+                  <div slField>
+                    <label slFieldLabel>Start page</label>
+                    <sl-select
+                      [value]="draft().startRoute"
+                      (valueChangeRequest)="setStart($event.value)"
+                    >
+                      @for (m of startPages(); track m.path) {
+                        <sl-select-item [value]="m.path">{{ m.label }}</sl-select-item>
+                      }
+                    </sl-select>
+                    <span slFieldDescription>Where Nexora opens after sign-in.</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <div slField>
-            <label slFieldLabel>Start page</label>
-            <sl-select [value]="draft().startRoute" (valueChangeRequest)="setStart($event.value)">
-              @for (m of startPages(); track m.path) {
-                <sl-select-item [value]="m.path">{{ m.label }}</sl-select-item>
-              }
-            </sl-select>
-            <span slFieldDescription>Where Nexora opens after sign-in.</span>
-          </div>
-          <div slField>
-            <label slFieldLabel>Notifications</label>
-            <div class="checks">
-              <div
-                slCheckbox
-                [checked]="draft().notifications.emailApprovals"
-                (checkedChange)="patchNotifications({ emailApprovals: $event.value })"
-              >
-                Email me approval requests
+            </section>
+
+            <section slSection data-preferences-section="notifications">
+              <div slSectionHeader>
+                <div slSectionTitle>
+                  <h2 slSectionHeading>Notifications</h2>
+                  <p slSectionDescription>
+                    What reaches you by email and in the application. Approvals and mentions always
+                    reach you in the application.
+                  </p>
+                </div>
               </div>
-              <div
-                slCheckbox
-                [checked]="draft().notifications.emailMentions"
-                (checkedChange)="patchNotifications({ emailMentions: $event.value })"
-              >
-                Email me mentions
+              <div slSectionBody>
+                <div class="checks">
+                  <div
+                    slCheckbox
+                    [checked]="draft().notifications.emailApprovals"
+                    (checkedChange)="patchNotifications({ emailApprovals: $event.value })"
+                  >
+                    Email me approval requests
+                  </div>
+                  <div
+                    slCheckbox
+                    [checked]="draft().notifications.emailMentions"
+                    (checkedChange)="patchNotifications({ emailMentions: $event.value })"
+                  >
+                    Email me mentions
+                  </div>
+                  <div
+                    slCheckbox
+                    [checked]="draft().notifications.inAppOperationalAlerts"
+                    (checkedChange)="patchNotifications({ inAppOperationalAlerts: $event.value })"
+                  >
+                    In-app operational alerts
+                  </div>
+                  <div slCheckbox [checked]="true" disabled>In-app approvals (always on)</div>
+                  <div slCheckbox [checked]="true" disabled>In-app mentions (always on)</div>
+                </div>
               </div>
-              <div
-                slCheckbox
-                [checked]="draft().notifications.inAppOperationalAlerts"
-                (checkedChange)="patchNotifications({ inAppOperationalAlerts: $event.value })"
-              >
-                In-app operational alerts
-              </div>
-              <div slCheckbox [checked]="true" disabled>In-app approvals (always on)</div>
-              <div slCheckbox [checked]="true" disabled>In-app mentions (always on)</div>
-            </div>
+            </section>
           </div>
         </form>
       </div>

@@ -1,6 +1,9 @@
+import { SCHEMES } from '@slotted/theme';
 import { describe, expect, it } from 'vitest';
 
-import { contrastReadings } from './contrast-reading';
+import { CONTRAST_TOKENS, contrastReadings } from './contrast-reading';
+import { nexoraTheme } from './nexora-themes';
+import { catalogueTheme, THEME_CATALOGUE } from './theme-catalogue';
 
 describe('contrastReadings', () => {
   it('reads four pairs in each of the three schemes, against the floors of recipe-checks', () => {
@@ -44,9 +47,30 @@ describe('contrastReadings', () => {
 
   /** A theme's own neutral holds when the reader writes none. */
   it('reads the theme’s own seeds under the reader’s', () => {
+    const sage = catalogueTheme('nexora-editorial').neutral!;
     const own = contrastReadings('nexora-editorial', { accent: '#7c3aed' })[0]!.pairs[0]!.ratio;
-    const stone = contrastReadings('default', { accent: '#7c3aed', neutral: '#78716c' })[0]!
-      .pairs[0]!.ratio;
-    expect(own).toBe(stone);
+    const same = contrastReadings('default', { accent: '#7c3aed', neutral: sage })[0]!.pairs[0]!
+      .ratio;
+    expect(own).toBe(same);
+  });
+
+  /**
+   * The readings are the recipe's arithmetic; a value a theme declares over the
+   * recipe is not in them. Every theme of the catalogue leaves the six tokens
+   * to the recipe, in `base`, in `components` and in every scheme.
+   */
+  it('reads only tokens no catalogue theme declares over the recipe', () => {
+    for (const entry of THEME_CATALOGUE) {
+      const theme = nexoraTheme(entry.id);
+      const declared = [
+        theme.base,
+        theme.components,
+        ...SCHEMES.map((scheme) => theme.schemes?.[scheme]),
+      ].flatMap((values) => Object.keys(values ?? {}));
+      expect(
+        CONTRAST_TOKENS.filter((token) => declared.includes(token)),
+        entry.id,
+      ).toEqual([]);
+    }
   });
 });

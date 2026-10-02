@@ -1,4 +1,4 @@
-import { seedStyle, type SeedName } from '@slotted/theme';
+import { seedStyle, type SeedName } from '@slotted/theme/seeds';
 
 /** The brand colours offered as one press; `custom` keeps a colour of the reader's own. */
 export const BRAND_PRESETS = [
@@ -21,7 +21,8 @@ export const DEFAULT_BRAND: BrandPreference = { preset: 'violet', custom: '#7c3a
 
 /**
  * The grey every surface, border and muted text is derived from. `theme`
- * writes no seed, so the theme's own neutral holds.
+ * writes no seed, so the theme's own neutral holds; the three colours are
+ * apart from every theme's own (`theme-catalogue.spec.ts`).
  */
 export const NEUTRAL_PRESETS = [
   { id: 'theme', label: 'Theme’s own', color: null },
@@ -53,20 +54,26 @@ export function appearanceSeeds(
 }
 
 /**
- * A brand read back from storage, or the default when it is not one: an
- * unknown preset, or a custom colour `seedStyle` refuses.
+ * A brand read back from storage, each half checked on its own. A known preset
+ * holds, and a custom colour `seedStyle` refuses is replaced by the default's.
+ * An unknown preset, or `custom` with a refused colour, reads as the default.
  */
 export function readBrand(value: unknown): BrandPreference {
   if (typeof value !== 'object' || value === null) return DEFAULT_BRAND;
   const { preset, custom } = value as Partial<Record<keyof BrandPreference, unknown>>;
-  const known = preset === 'custom' || BRAND_PRESETS.some((entry) => entry.id === preset);
-  if (!known || typeof custom !== 'string') return DEFAULT_BRAND;
-  const brand = { preset, custom } as BrandPreference;
-  try {
-    seedStyle({ accent: brandColor(brand) });
-    seedStyle({ accent: brand.custom });
-  } catch {
-    return DEFAULT_BRAND;
+  const color = isSeed(custom) ? custom : null;
+  if (BRAND_PRESETS.some((entry) => entry.id === preset)) {
+    return { preset: preset as BrandPresetId, custom: color ?? DEFAULT_BRAND.custom };
   }
-  return brand;
+  return preset === 'custom' && color !== null ? { preset, custom: color } : DEFAULT_BRAND;
+}
+
+function isSeed(value: unknown): value is string {
+  if (typeof value !== 'string') return false;
+  try {
+    seedStyle({ accent: value });
+    return true;
+  } catch {
+    return false;
+  }
 }

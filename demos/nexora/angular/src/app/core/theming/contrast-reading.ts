@@ -46,6 +46,15 @@ const PAIRS = [
   },
 ] as const;
 
+/**
+ * The tokens the readings take from the recipe. A theme that declares one of
+ * them in `base`, `components` or a scheme paints a value the recipe does not
+ * compute, so no catalogue theme does (`contrast-reading.spec.ts`).
+ */
+export const CONTRAST_TOKENS: readonly string[] = [
+  ...new Set(PAIRS.flatMap((pair) => [pair.fore, pair.ground])),
+];
+
 export interface ContrastPair {
   readonly id: (typeof PAIRS)[number]['id'];
   readonly label: string;
@@ -69,7 +78,7 @@ export function contrastReadings(
   themeId: string,
   seeds: Readonly<Partial<Record<SeedName, string>>>,
 ): ContrastReading[] {
-  const theme = nexoraTheme(themeId).theme;
+  const theme = nexoraTheme(themeId);
   const parsed = Object.fromEntries(
     SEED_NAMES.map((name) => [name, parseSeed(seeds[name] ?? theme.seeds[name])!]),
   ) as Record<SeedName, Oklch>;

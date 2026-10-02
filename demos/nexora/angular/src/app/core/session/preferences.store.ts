@@ -1,5 +1,5 @@
 import { computed, DestroyRef, DOCUMENT, effect, inject, Injectable, signal } from '@angular/core';
-import { applyTheme, SEED_NAMES, seedStyle } from '@slotted/theme';
+import { SEED_NAMES, seedStyle } from '@slotted/theme/seeds';
 
 import { DEFAULT_SHELL_PRESET, shellPreset, type ShellPresetId } from '../shell/shell-presets';
 import {
@@ -11,7 +11,7 @@ import {
   type BrandPreference,
   type NeutralPresetId,
 } from '../theming/appearance';
-import { DEFAULT_THEME_ID, nexoraTheme, RUNTIME_THEMES } from '../theming/nexora-themes';
+import { catalogueTheme, DEFAULT_THEME_ID, RUNTIME_THEME_IDS } from '../theming/theme-catalogue';
 import { SessionStore } from './session.store';
 
 /** The languages the library publishes a catalog for. */
@@ -21,7 +21,7 @@ export type NexoraLocale = (typeof NEXORA_LOCALES)[number];
 export interface UserPreferences {
   scheme: 'light' | 'dark' | 'system';
   density: 'comfortable' | 'compact' | 'dense';
-  /** A theme of the catalogue in `core/theming/nexora-themes.ts`. */
+  /** A theme of the catalogue in `core/theming/theme-catalogue.ts`. */
   theme: string;
   /** The accent seed: a preset, or the reader's own colour. */
   brand: BrandPreference;
@@ -62,8 +62,14 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
  * A runtime theme's sheet is compiled once, the first time the theme is
  * used — named by the preferences, or shown by the appearance section — and
  * stays until the application ends; a later change of theme moves only the
- * attribute. A reader who keeps `default` never pays for the other three
- * (179 kB of CSS each, LIBRARY-FEEDBACK.md row "a theme built at runtime").
+ * attribute. The definitions arrive by `import()`, so a reader who keeps
+ * `default` downloads and compiles none of the other three (LIBRARY-FEEDBACK.md
+ * row "a theme built at runtime").
+ *
+ * `html` names a theme only once its sheet is on the page: `default.css`
+ * declares every token under `[data-slotted-theme='default']`, and a name with
+ * no sheet behind it would leave the page without one. Until then it keeps
+ * the theme it shows — `default` on a reload — and the seeds apply at once.
  */
 @Injectable({ providedIn: 'root' })
 export class PreferencesStore {
@@ -71,8 +77,14 @@ export class PreferencesStore {
   private readonly sessionStore = inject(SessionStore);
   private readonly media = this.document.defaultView?.matchMedia?.('(prefers-color-scheme: dark)');
   private readonly version = signal(0);
-  /** The disposer of every runtime theme sheet applied so far, by theme name. */
-  private readonly sheets = new Map<string, () => void>();
+  /** The themes whose sheet is on the page. */
+  private readonly sheets = signal<ReadonlySet<string>>(new Set([DEFAULT_THEME_ID]));
+  /** The load of each runtime theme asked for, settled or not; a failed one is forgotten. */
+  private readonly loads = new Map<string, Promise<void>>();
+  private readonly disposers: (() => void)[] = [];
+  private destroyed = false;
+  /** The theme `html` names, which trails the preferences while a sheet loads. */
+  private shown = DEFAULT_THEME_ID;
 
   readonly preferences = computed<UserPreferences>(() => {
     this.version();
@@ -80,17 +92,47 @@ export class PreferencesStore {
   });
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.sheets.forEach((dispose) => dispose()));
+    inject(DestroyRef).onDestroy(() => {
+      this.destroyed = true;
+      this.disposers.forEach((dispose) => dispose());
+    });
     effect(() => this.apply(this.preferences()));
     this.media?.addEventListener('change', () => this.apply(this.preferences()));
   }
 
-  /** Puts the sheets of the named runtime themes on the page, each once; `default` is in `styles.css`. */
-  useThemes(ids: readonly string[] = RUNTIME_THEMES.map((theme) => theme.name)): void {
-    for (const theme of RUNTIME_THEMES) {
-      if (!ids.includes(theme.name) || this.sheets.has(theme.name)) continue;
-      this.sheets.set(theme.name, applyTheme(theme, { document: this.document }));
+  /** Whether the sheet of `theme` is on the page; a signal read, so a template follows it. */
+  hasSheet(theme: string): boolean {
+    return this.sheets().has(theme);
+  }
+
+  /**
+   * Puts the sheets of the named runtime themes on the page, each once, and
+   * settles when all of them are there; `default` is in `styles.css`. A load
+   * that fails rejects and is tried again by the next call.
+   */
+  useThemes(ids: readonly string[] = RUNTIME_THEME_IDS): Promise<void> {
+    return Promise.all(
+      ids.filter((id) => RUNTIME_THEME_IDS.includes(id)).map((id) => this.load(id)),
+    ).then(() => undefined);
+  }
+
+  private load(theme: string): Promise<void> {
+    let load = this.loads.get(theme);
+    if (load === undefined) {
+      load = import('../theming/nexora-themes').then(
+        ({ applyNexoraTheme }) => {
+          if (this.destroyed) return;
+          this.disposers.push(applyNexoraTheme(theme, this.document));
+          this.sheets.update((sheets) => new Set(sheets).add(theme));
+        },
+        (error: unknown) => {
+          this.loads.delete(theme);
+          throw error;
+        },
+      );
+      this.loads.set(theme, load);
     }
+    return load;
   }
 
   apply(preferences: UserPreferences): void {
@@ -101,9 +143,10 @@ export class PreferencesStore {
           ? 'dark'
           : 'light'
         : preferences.scheme;
-    const theme = nexoraTheme(preferences.theme).id;
-    this.useThemes([theme]);
-    html.setAttribute('data-slotted-theme', theme);
+    const theme = catalogueTheme(preferences.theme).id;
+    if (this.hasSheet(theme)) this.shown = theme;
+    else this.useThemes([theme]).catch(() => undefined);
+    html.setAttribute('data-slotted-theme', this.shown);
     const seeds = seedStyle(appearanceSeeds(preferences.brand, preferences.neutral));
     for (const name of SEED_NAMES) {
       const property = `--slotted-seed-${name}`;
@@ -148,7 +191,7 @@ export class PreferencesStore {
         ...DEFAULT_PREFERENCES,
         ...stored,
         shell: shellPreset(stored.shell).id,
-        theme: nexoraTheme(stored.theme).id,
+        theme: catalogueTheme(stored.theme).id,
         brand: readBrand(stored.brand),
         neutral: isNeutralPreset(stored.neutral) ? stored.neutral : DEFAULT_NEUTRAL,
         locale: NEXORA_LOCALES.includes(stored.locale as NexoraLocale)

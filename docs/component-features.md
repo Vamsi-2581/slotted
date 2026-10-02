@@ -471,6 +471,11 @@ Estas capacidades sustentam componentes públicos e devem possuir testes própri
 - Regiões de marca, navegação, busca, contexto, ajuda, notificações e conta; prioridades definem colapso.
 - Usa landmarks e skip link; não transforma todo header em toolbar com tab stops excessivos.
 
+### Navigation Menu `[Extended]`
+
+- Secções de site em linha ou coluna, cada uma um botão Disclosure com painel de links, grupos e rodapé; links diretos ao lado. Item aberto controlável, hover com atraso e clique.
+- Não usa `menu`/`menubar`; Escape devolve o foco ao gatilho; o painel segue o gatilho na ordem de Tab.
+
 ### Navigation Rail / Bottom Navigation `[Specialized]`
 
 - De três a cinco destinos primários com label persistente e safe areas; seleção segue rota.

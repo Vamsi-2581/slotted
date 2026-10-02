@@ -190,6 +190,24 @@ que três autoavaliações pediram.
   (`page-header`), `menubar` (a advertência do APG), ações extra recolhíveis
   (reabertura se um produto pedir).
 
+- `navigation-menu` — secções de um site ou de uma aplicação numa linha ou
+  coluna, cada uma um `button` Disclosure que mostra um painel de links; links
+  diretos ao lado. Painel no `li` do gatilho e uma superfície partilhada
+  (`viewport`) medida por `@slotted/core/navigation-menu`, que transita
+  tamanho e posição entre secções; `arrow` opcional; hover com atraso,
+  troca sem atraso com uma secção aberta, nunca por toque; setas, `Home` e
+  `End` opcionais do APG sem tabindex rotativo; links ricos (`icon`, `label`,
+  `description`), `group`, `footer`, `data-columns` 1–3 com refluxo por
+  consulta de contentor; vertical com `data-placement` `beside`/`below`;
+  segundo nível pela própria família (`data-nested`). Inventário em
+  `docs/history/designs/2026-10-01-navigation-menu-capability-inventory.md`,
+  decisões em `docs/history/designs/2026-10-01-navigation-menu-design.md`.
+  Recusado por escrito: papel `menu`, backdrop, cartão de destaque (`card`),
+  portar o painel para o viewport.
+  Reabre `top-navigation`: a `nav` da barra é uma raiz desta família e a
+  secção da barra deixa de usar `menu` (`2026-09-15-top-navigation-design.md`
+  §11).
+
 - `command-palette` — `dialog` com `combobox` + `listbox` dentro. Itens com
   `id`, `label`, `keywords`, `group`, `disabled` e handler ou destino; `query`
   controlável; `loading` e `empty`; atalhos, histórico, ações assíncronas e

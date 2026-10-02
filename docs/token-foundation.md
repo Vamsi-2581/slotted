@@ -615,10 +615,10 @@ by forced colours instead.
 | `--slotted-disabled-background`      | `#e2e8f0`                           | `#17181b`                           | `#ffffff`                           |
 | `--slotted-disabled-foreground`      | `#64748b`                           | `#6d737a`                           | `#595959`                           |
 | `--slotted-disabled-border`          | `#ccd5e1`                           | `#26282a`                           | `#595959`                           |
-| `--slotted-surface`                  | `#ffffff`                           | `#121316`                           | `#ffffff`                           |
-| `--slotted-surface-raised`           | `#ffffff`                           | `#171717`                           | `#ffffff`                           |
-| `--slotted-surface-sunken`           | `#f8f8f8`                           | `#0b0c0e`                           | `#ffffff`                           |
-| `--slotted-surface-inverse`          | `#172033`                           | `#fafafa`                           | `#000000`                           |
+| `--slotted-surface`                  | `#f8fafe`                           | `#111417`                           | `#ffffff`                           |
+| `--slotted-surface-raised`           | `#f8fafe`                           | `#15171b`                           | `#ffffff`                           |
+| `--slotted-surface-sunken`           | `#f1f5fb`                           | `#0a0c10`                           | `#ffffff`                           |
+| `--slotted-surface-inverse`          | `#172033`                           | `#f8fafe`                           | `#000000`                           |
 | `--slotted-text-inverse`             | `#fafafa`                           | `#17181b`                           | `#ffffff`                           |
 | `--slotted-border-strong`            | `#78899c`                           | `#6d737a`                           | `#000000`                           |
 | `--slotted-control-border-color`     | `#bfc7d1`                           | `#3d4249`                           | `#000000`                           |
@@ -629,7 +629,7 @@ by forced colours instead.
 `--slotted-border-strong` is the line between two surfaces, and it holds the
 3:1 ratio a non-text element needs against every surface a control can be
 placed on. `--slotted-control-border-color` is the edge of a control at rest,
-and it does not: it reads 1.7:1 in `light` and 1.8:1 in `dark`. The edge at
+and it does not: it reads 1.6:1 in `light` and 1.8:1 in `dark`. The edge at
 3:1 — `#8190a2`, `#6a6a73` — made every field and outline button the darkest
 line on the page and read as a high-contrast scheme in both. A control is
 identified by its fill, `--slotted-control-shadow`, its label and its size,
@@ -640,7 +640,7 @@ stays a step lighter than the control edge in each scheme, so an unavailable
 control still reads as less than an available one.
 
 `--slotted-border-subtle` is the rule inside a surface: a divider, the edge of
-a shell region, the seam under a header. It reads 1.35:1 in `light` and 1.37:1
+a shell region, the seam under a header. It reads 1.30:1 in `light` and 1.37:1
 in `dark`, a step above the 1.2:1 it had, which was one step too quiet next to
 the edge of a control.
 
@@ -653,8 +653,8 @@ the field without moving the card, and so that `forced-colors` can map it to
 mapped to it. `--slotted-surface-sunken` in `light` moved with it, from
 `#fbfbfb` to `#f8f8f8`: at two per cent from white the canvas gave a white
 field nothing to stand on, which is the same fact `app-shell` records as the
-reason `inset` exists. The step is 1.06:1 against the canvas in `light` and
-1.05:1 in `dark` — small, because a field is a place to type and not a card.
+reason `inset` exists. The step is 1.05:1 against the canvas in `light` and
+1.06:1 in `dark` — small, because a field is a place to type and not a card.
 `--slotted-surface-sunken` in `light` moved with it, from `#fbfbfb` to
 `#f8f8f8`: at two per cent from white the canvas gave a white field nothing to
 stand on, which is the same fact `app-shell` records as the reason `inset`
@@ -1138,6 +1138,24 @@ over every seed of the same hue and chroma, so that the text holds 4.5:1 on its
 own tone surface for all of them and not only for the default seed. On the
 default seed the ceiling sits below the seed's own lightness, 0.527, and takes
 the text to 0.494: 5.25:1 on `#dcfce7` where it read 4.57:1.
+
+The neutral grounds left their achromatic values for a tint of the `neutral`
+seed. Fitted to the achromatic values they had, `--slotted-surface`,
+`--slotted-surface-raised` and `--slotted-surface-sunken` in `light`, and
+`--slotted-surface-raised` and `--slotted-surface-inverse` in `dark`, kept none
+of the seed's chroma, so a neutral seed recoloured lines and text while every
+card, popover, dialog, menu and page kept its colour. Each ground now keeps 0.22
+of the seed's chroma, capped at the chroma sRGB holds at its lightness for
+every hue: 0.006 for the light grounds and the dark inverse, 0.012 for the
+light sunken ground, 0.03 for the dark surface and raised grounds, 0.025 for
+the dark sunken one. sRGB holds no chroma at lightness 1, so the light surface
+and raised grounds moved from 1 to 0.985, the light sunken ground from 0.979 to
+0.97, where `--slotted-data-8` still reads 3.02:1 on it, and the light
+`--slotted-tone-secondary-subtle-hover` from 0.968 to 0.959, 0.011 below the
+sunken ground as before. On the default seed the largest move of a ground is
+0.016 in OKLab: the light page, card and field are `#f8fafe` where they were
+`#ffffff`. `high-contrast` keeps white grounds, because every neutral of that
+scheme is achromatic and every tone ground is the page's own white.
 
 Everything else the theme emitted before this foundation resolves to the same
 value, which `packages/themes/test/resolve.test.mjs` holds. A row leaves that

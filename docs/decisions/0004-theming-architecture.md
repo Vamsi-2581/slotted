@@ -21,3 +21,4 @@ A theme was a JSON file of literal token values. It could not carry a rule, a fo
 - Minimum browsers: Chrome 119, Safari 18, Firefox 146.
 - `@slotted/tokens` and `@slotted/theme-default` are gone; `@slotted/theme` and `@slotted/themes` replace them.
 - A family that adds a component token makes `pnpm --filter @slotted/theme generate` necessary; `packages/theme/test/generated.test.mjs` fails until it runs.
+- The neutral grounds follow the `neutral` seed in `light` and `dark` (2026-10-02). `recipes.standard` gives `--slotted-surface`, `--slotted-surface-raised`, `--slotted-surface-sunken` and the dark `--slotted-surface-inverse` 0.22 of the seed's chroma, capped at the chroma sRGB holds at each ground's lightness, and the light grounds stand at lightness 0.985 rather than 1. The default theme's light page, card and field are `#f8fafe`, not `#ffffff`. `high-contrast` keeps achromatic grounds.

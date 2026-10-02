@@ -298,6 +298,20 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-color-picker-previous',
   '--slotted-color-picker-preset',
   '--slotted-color-picker-contrast-with',
+  /**
+   * `navigation-menu` — the open panel's measured size, where the shared
+   * surface stands under the row (or beside the column), where the arrow
+   * points from, and how much room is left before the window's edge. Written
+   * on the root by `@slotted/core/navigation-menu` from the open content and
+   * its trigger; the family also owns theme tokens under the same prefix — its
+   * column size, its offset, its radius — so each is named one by one.
+   */
+  '--slotted-navigation-menu-viewport-inline-size',
+  '--slotted-navigation-menu-viewport-block-size',
+  '--slotted-navigation-menu-viewport-inline-start',
+  '--slotted-navigation-menu-viewport-block-start',
+  '--slotted-navigation-menu-arrow-offset',
+  '--slotted-navigation-menu-available-inline-size',
 ];
 
 /** Whether a custom property is written by script rather than by a theme. */

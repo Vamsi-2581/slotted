@@ -150,6 +150,8 @@
     "./menubar/tokens.json": "./src/menubar/menubar.tokens.json",
     "./multi-select/multi-select.css": "./src/multi-select/multi-select.css",
     "./multi-select/tokens.json": "./src/multi-select/multi-select.tokens.json",
+    "./navigation-menu/navigation-menu.css": "./src/navigation-menu/navigation-menu.css",
+    "./navigation-menu/tokens.json": "./src/navigation-menu/navigation-menu.tokens.json",
     "./number-field/number-field.css": "./src/number-field/number-field.css",
     "./number-field/tokens.json": "./src/number-field/number-field.tokens.json",
     "./notification-center/notification-center.css": "./src/notification-center/notification-center.css",

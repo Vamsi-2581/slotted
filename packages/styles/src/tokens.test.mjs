@@ -153,6 +153,12 @@ test('names every runtime prefix once, where a family can find the reason', () =
     '--slotted-color-picker-previous',
     '--slotted-color-picker-preset',
     '--slotted-color-picker-contrast-with',
+    '--slotted-navigation-menu-viewport-inline-size',
+    '--slotted-navigation-menu-viewport-block-size',
+    '--slotted-navigation-menu-viewport-inline-start',
+    '--slotted-navigation-menu-viewport-block-start',
+    '--slotted-navigation-menu-arrow-offset',
+    '--slotted-navigation-menu-available-inline-size',
   ]);
   assert.equal(isRuntimeProperty('--slotted-positioner-arrow-x'), true);
   assert.equal(isRuntimeProperty('--slotted-space-4'), false);

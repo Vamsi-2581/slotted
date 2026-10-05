@@ -634,10 +634,28 @@
   }
 
   [data-ui='slider'][data-invalid] [data-part='thumb'] {
+    --_invalid-edge: inset 0 0 0
+      var(--slotted-slider-invalid-edge-width, var(--slotted-control-invalid-edge-width, 1px))
+      var(--slotted-slider-invalid-thumb-border-color, var(--slotted-tone-danger-border));
+
     border-color: var(
       --slotted-slider-invalid-thumb-border-color,
       var(--slotted-tone-danger-border)
     );
+    /*
+     * Width as well as colour (WCAG 1.4.1), the edge `text-field` draws: in
+     * `high-contrast` the danger fill and border are the accent's black. The
+     * thumb carries it, as a shadow inside its border, so the thumb keeps its
+     * size and its place on the track; it takes the resting lift's place.
+     */
+    box-shadow: var(--_invalid-edge);
+  }
+
+  [data-ui='slider'][data-invalid] [data-part='thumb']:has(> [data-part='input']:focus-visible) {
+    box-shadow:
+      var(--_invalid-edge),
+      var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
+        var(--slotted-focus-ring-color, Highlight);
   }
 
   /**

@@ -358,6 +358,20 @@
     --slotted-focus-ring-color: var(--slotted-focus-ring-color-invalid);
   }
 
+  /*
+   * Width as well as colour (WCAG 1.4.1): in `high-contrast` the danger pair is
+   * the page's white and the edge's black, which an empty star already wears.
+   * The empty star's outline grows by the edge every invalid control adds. A
+   * stroke grows about its path inside the drawing's own box, so no star and
+   * no label moves.
+   */
+  [data-ui='rating'][data-part='root'][data-invalid] [data-part='symbol'] svg {
+    stroke-width: calc(
+      var(--_stroke) * 1px +
+        var(--slotted-rating-invalid-edge-width, var(--slotted-control-invalid-edge-width, 1px))
+    );
+  }
+
   [data-ui='rating'][data-part='root'][data-readonly] [data-part='input'] {
     cursor: default;
   }

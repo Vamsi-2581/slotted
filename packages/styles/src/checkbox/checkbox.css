@@ -555,11 +555,17 @@
    * scheme the theme paints `--slotted-tone-danger-border` the same black as
    * every other border, so colour alone would make an invalid control identical
    * to a valid one — and `docs/component-features.md` §2.5 refuses a state that
-   * only colour carries. The box keeps its size, because the border box is what
-   * is measured.
+   * only colour carries. It thickens by the edge every invalid control adds,
+   * `--slotted-control-invalid-edge-width`, and as a border rather than the
+   * inset shadow a field draws, because a width survives forced colours and a
+   * shadow does not. The box keeps its size, because the border box is what is
+   * measured.
    */
   [data-ui='checkbox'][data-part='root'][data-invalid] [data-part='control'] {
-    border-width: var(--slotted-border-width-thick, 2px);
+    border-width: calc(
+      var(--slotted-checkbox-border-width, var(--slotted-border-width-medium, 1.5px)) +
+        var(--slotted-checkbox-invalid-edge-width, var(--slotted-control-invalid-edge-width, 1px))
+    );
     border-color: var(--slotted-checkbox-invalid-border-color, var(--slotted-tone-danger-border));
   }
 
@@ -697,7 +703,7 @@
    * the same two reasons.
    */
   [data-ui='checkbox'][data-part='root'][data-variant='tile']::before {
-    border: var(--_tile-edge-width) solid var(--_tile-edge);
+    border: calc(var(--_tile-edge-width) + var(--_tile-invalid-edge, 0px)) solid var(--_tile-edge);
     border-radius: inherit;
     content: '';
     inset: 0;
@@ -815,7 +821,12 @@
       --slotted-checkbox-tile-invalid-border-color,
       var(--slotted-tone-danger-border)
     );
-    --_tile-edge-width: var(--slotted-border-width-thick, 2px);
+    /* Added to whatever width the tile's state draws, chosen or not, so an
+       invalid tile is wider than the same tile valid (WCAG 1.4.1). */
+    --_tile-invalid-edge: var(
+      --slotted-checkbox-invalid-edge-width,
+      var(--slotted-control-invalid-edge-width, 1px)
+    );
   }
 
   [data-ui='checkbox'][data-part='root'][data-variant='tile'][data-invalid]:has(

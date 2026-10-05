@@ -343,9 +343,31 @@ test('transitions the two changes the eye has to follow, from the scale', () => 
  * would be identical to a valid one in exactly the scheme that exists for
  * people who need the difference.
  */
+/**
+ * The edge thickens by `--slotted-control-invalid-edge-width`, the width every
+ * invalid control adds (WCAG 1.4.1), as a border so forced colours keep it. A
+ * tile adds the same width to whatever its state draws, so a chosen invalid
+ * tile is still wider than a chosen valid one.
+ */
 test('says invalid with weight as well as with colour', () => {
   const invalid = rule(`${root}[data-invalid] [data-part='control']`);
-  assert.match(invalid, /border-width:var\(--slotted-border-width-thick,2px\)/);
+  assert.match(
+    invalid,
+    /border-width:calc\(var\(--slotted-radio-group-border-width,var\(--slotted-border-width-medium,1\.5px\)\) \+ var\(--slotted-radio-group-invalid-edge-width,var\(--slotted-control-invalid-edge-width,1px\)\)\)/,
+  );
+  assert.match(
+    rule(`${root}[data-variant='tile'][data-invalid] [data-part='item']`),
+    /--_tile-invalid-edge:var\(--slotted-radio-group-invalid-edge-width,var\(--slotted-control-invalid-edge-width,1px\)\)/,
+  );
+  assert.doesNotMatch(
+    rule(`${root}[data-variant='tile'][data-invalid] [data-part='item']`),
+    /--_tile-edge-width:/,
+    'invalid replaces the width instead of adding to it',
+  );
+  assert.match(
+    rule(`${root}[data-variant='tile'] [data-part='item']::before`),
+    /border:calc\(var\(--_tile-edge-width\) \+ var\(--_tile-invalid-edge,0px\)\) solid var\(--_tile-edge\)/,
+  );
   assert.match(invalid, /border-color:var\(--slotted-radio-group-invalid-border-color/);
 });
 

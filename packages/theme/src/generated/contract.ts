@@ -2652,6 +2652,7 @@ export type ComponentToken =
   | '--slotted-checkbox-hover-border-color'
   | '--slotted-checkbox-invalid-border-color'
   | '--slotted-checkbox-invalid-checked-background'
+  | '--slotted-checkbox-invalid-edge-width'
   | '--slotted-checkbox-invalid-focus-ring-color'
   | '--slotted-checkbox-line-height'
   | '--slotted-checkbox-mark-color'
@@ -3736,6 +3737,7 @@ export type ComponentToken =
   | '--slotted-radio-group-hover-border-color'
   | '--slotted-radio-group-invalid-border-color'
   | '--slotted-radio-group-invalid-checked-border-color'
+  | '--slotted-radio-group-invalid-edge-width'
   | '--slotted-radio-group-invalid-focus-ring-color'
   | '--slotted-radio-group-invalid-mark-color'
   | '--slotted-radio-group-line-height'
@@ -3768,6 +3770,7 @@ export type ComponentToken =
   | '--slotted-rating-gap'
   | '--slotted-rating-hover-background'
   | '--slotted-rating-invalid-color'
+  | '--slotted-rating-invalid-edge-width'
   | '--slotted-rating-lit-color'
   | '--slotted-rating-symbol-size'
   | '--slotted-result-state-actions-block-gap'
@@ -3813,6 +3816,7 @@ export type ComponentToken =
   | '--slotted-segmented-control-indicator-border-color'
   | '--slotted-segmented-control-inset'
   | '--slotted-segmented-control-invalid-border-color'
+  | '--slotted-segmented-control-invalid-edge-width'
   | '--slotted-segmented-control-invalid-focus-ring-color'
   | '--slotted-segmented-control-radius'
   | '--slotted-segmented-control-shadow'
@@ -3905,6 +3909,7 @@ export type ComponentToken =
   | '--slotted-slider-disabled-thumb-color'
   | '--slotted-slider-disabled-track-color'
   | '--slotted-slider-indicator-color'
+  | '--slotted-slider-invalid-edge-width'
   | '--slotted-slider-invalid-focus-ring-color'
   | '--slotted-slider-invalid-indicator-color'
   | '--slotted-slider-invalid-thumb-border-color'
@@ -4042,6 +4047,7 @@ export type ComponentToken =
   | '--slotted-switch-disabled-thumb-background'
   | '--slotted-switch-hover-background'
   | '--slotted-switch-invalid-border-color'
+  | '--slotted-switch-invalid-edge-width'
   | '--slotted-switch-invalid-focus-ring-color'
   | '--slotted-switch-line-height'
   | '--slotted-switch-mark-color'
@@ -4819,6 +4825,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-checkbox-hover-border-color",
   "--slotted-checkbox-invalid-border-color",
   "--slotted-checkbox-invalid-checked-background",
+  "--slotted-checkbox-invalid-edge-width",
   "--slotted-checkbox-invalid-focus-ring-color",
   "--slotted-checkbox-line-height",
   "--slotted-checkbox-mark-color",
@@ -5903,6 +5910,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-radio-group-hover-border-color",
   "--slotted-radio-group-invalid-border-color",
   "--slotted-radio-group-invalid-checked-border-color",
+  "--slotted-radio-group-invalid-edge-width",
   "--slotted-radio-group-invalid-focus-ring-color",
   "--slotted-radio-group-invalid-mark-color",
   "--slotted-radio-group-line-height",
@@ -5935,6 +5943,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-rating-gap",
   "--slotted-rating-hover-background",
   "--slotted-rating-invalid-color",
+  "--slotted-rating-invalid-edge-width",
   "--slotted-rating-lit-color",
   "--slotted-rating-symbol-size",
   "--slotted-result-state-actions-block-gap",
@@ -5980,6 +5989,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-segmented-control-indicator-border-color",
   "--slotted-segmented-control-inset",
   "--slotted-segmented-control-invalid-border-color",
+  "--slotted-segmented-control-invalid-edge-width",
   "--slotted-segmented-control-invalid-focus-ring-color",
   "--slotted-segmented-control-radius",
   "--slotted-segmented-control-shadow",
@@ -6072,6 +6082,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-slider-disabled-thumb-color",
   "--slotted-slider-disabled-track-color",
   "--slotted-slider-indicator-color",
+  "--slotted-slider-invalid-edge-width",
   "--slotted-slider-invalid-focus-ring-color",
   "--slotted-slider-invalid-indicator-color",
   "--slotted-slider-invalid-thumb-border-color",
@@ -6209,6 +6220,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-switch-disabled-thumb-background",
   "--slotted-switch-hover-background",
   "--slotted-switch-invalid-border-color",
+  "--slotted-switch-invalid-edge-width",
   "--slotted-switch-invalid-focus-ring-color",
   "--slotted-switch-line-height",
   "--slotted-switch-mark-color",

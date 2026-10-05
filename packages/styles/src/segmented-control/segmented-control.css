@@ -448,6 +448,22 @@
       --slotted-segmented-control-invalid-border-color,
       var(--slotted-tone-danger-border, ButtonBorder)
     );
+    /*
+     * Width as well as colour (WCAG 1.4.1), the edge `text-field` draws: in
+     * `high-contrast` the danger border is the resting edge's black. The line
+     * is a shadow inside the border, so neither the track nor a segment moves,
+     * and it takes the resting lift's place. Focus is the segment's ring, so
+     * no focus rule repaints it.
+     */
+    box-shadow: inset 0 0 0
+      var(
+        --slotted-segmented-control-invalid-edge-width,
+        var(--slotted-control-invalid-edge-width, 1px)
+      )
+      var(
+        --slotted-segmented-control-invalid-border-color,
+        var(--slotted-tone-danger-border, ButtonBorder)
+      );
   }
 
   /* ── Read-only ────────────────────────────────────────────────────────── */

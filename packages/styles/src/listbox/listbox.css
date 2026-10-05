@@ -190,8 +190,8 @@
      in place of the resting lift — the one `text-field` draws. Disabled keeps
      its own edge, as it keeps its own border colour. */
   [data-ui='listbox'][data-invalid]:not([data-disabled]) {
-    --_shadow: inset 0 0 0 var(--slotted-control-invalid-edge-width, 1px)
-      var(--slotted-tone-danger-border);
+    --_invalid-edge-width: var(--slotted-control-invalid-edge-width, 1px);
+    --_shadow: inset 0 0 0 var(--_invalid-edge-width) var(--slotted-tone-danger-border);
   }
 
   [data-ui='listbox'][data-disabled] {
@@ -649,6 +649,26 @@
 
     [data-ui='listbox'] [data-part='option'][data-disabled] {
       color: GrayText;
+    }
+  }
+
+  /*
+   * Forced colours remove every box shadow, and the edge with them. The width
+   * comes back as an outline inside the border, and where focus draws the ring
+   * on the same box an invalid ring is double, which a valid one is not.
+   */
+  @media (forced-colors: active) {
+    [data-ui='listbox'][data-variant='framed'][data-invalid]:not([data-disabled]) {
+      outline: var(--_invalid-edge-width) solid CanvasText;
+      outline-offset: calc(-1 * (var(--_border-width) + var(--_invalid-edge-width)));
+    }
+
+    [data-ui='listbox'][data-variant='framed'][data-invalid]:not(
+        [data-disabled]
+      )[data-focus-mode='activedescendant']:focus-visible {
+      outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
+        var(--slotted-focus-ring-color, Highlight);
+      outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
   }
 }

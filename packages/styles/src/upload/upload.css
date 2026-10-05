@@ -446,8 +446,9 @@
        shapes, so it carries the edge `text-field` draws — inside the border,
        so nothing moves, in place of the resting lift; its focus is an outline
        and leaves the edge alone. The region keeps its dashed line. */
-    box-shadow: inset 0 0 0 var(--slotted-control-invalid-edge-width, 1px)
-      var(--slotted-tone-danger-border);
+    --_invalid-edge-width: var(--slotted-control-invalid-edge-width, 1px);
+
+    box-shadow: inset 0 0 0 var(--_invalid-edge-width) var(--slotted-tone-danger-border);
   }
 
   /**
@@ -1680,6 +1681,26 @@
       ):enabled:is(:hover, :active) {
       background-color: Highlight;
       color: HighlightText;
+    }
+  }
+
+  /*
+   * Forced colours remove every box shadow, and the edge with them. The width
+   * comes back as an outline inside the border, and where focus draws the ring
+   * on the same box an invalid ring is double, which a valid one is not.
+   */
+  @media (forced-colors: active) {
+    [data-ui='upload'][data-invalid] [data-part='trigger'] {
+      outline: var(--_invalid-edge-width) solid CanvasText;
+      outline-offset: calc(
+        -1 * (var(--slotted-control-border-width, 1px) + var(--_invalid-edge-width))
+      );
+    }
+
+    [data-ui='upload'][data-invalid] [data-part='trigger']:has(:focus-visible) {
+      outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
+        var(--slotted-focus-ring-color, Highlight);
+      outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
   }
 }

@@ -579,6 +579,17 @@
       --slotted-checkbox-invalid-checked-background,
       var(--slotted-tone-danger-solid)
     );
+    /*
+     * A filled box has its border in the fill's colour, so a wider border says
+     * nothing once the box is checked, and the fill's colour alone is what a
+     * colour cannot carry (WCAG 1.4.1). A line of the surface inside the
+     * border, the edge's width, parts the border from the fill: a checked
+     * invalid box is a ring around a smaller fill, a checked valid one is
+     * solid.
+     */
+    box-shadow: inset 0 0 0
+      var(--slotted-checkbox-invalid-edge-width, var(--slotted-control-invalid-edge-width, 1px))
+      var(--slotted-surface, Canvas);
   }
 
   /**
@@ -915,6 +926,47 @@
     [data-ui='checkbox'] [data-part='control']:indeterminate {
       background-color: Highlight;
       border-color: Highlight;
+    }
+
+    /* The parting line is a shadow, which forced colours remove: it comes back
+       as an outline in the page's colour inside the border, and a focused
+       checked invalid box draws its ring double. */
+    [data-ui='checkbox'][data-part='root'][data-invalid] [data-part='control']:checked,
+    [data-ui='checkbox'][data-part='root'][data-invalid] [data-part='control']:indeterminate {
+      outline: var(
+          --slotted-checkbox-invalid-edge-width,
+          var(--slotted-control-invalid-edge-width, 1px)
+        )
+        solid Canvas;
+      outline-offset: calc(
+        -1 *
+          (
+            var(--slotted-checkbox-border-width, var(--slotted-border-width-medium, 1.5px)) +
+              var(
+                --slotted-checkbox-invalid-edge-width,
+                var(--slotted-control-invalid-edge-width, 1px)
+              ) +
+              var(
+                --slotted-checkbox-invalid-edge-width,
+                var(--slotted-control-invalid-edge-width, 1px)
+              )
+          )
+      );
+    }
+
+    [data-ui='checkbox'][data-part='root'][data-invalid]
+      [data-part='control']:checked:focus-visible,
+    [data-ui='checkbox'][data-part='root'][data-invalid]
+      [data-part='control']:indeterminate:focus-visible {
+      outline: calc(
+          var(--slotted-focus-ring-width, 2px) +
+            var(
+              --slotted-checkbox-invalid-edge-width,
+              var(--slotted-control-invalid-edge-width, 1px)
+            )
+        )
+        double var(--slotted-focus-ring-color, Highlight);
+      outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
 
     [data-ui='checkbox'] [data-part='control']:checked + [data-part='indicator'],

@@ -405,6 +405,35 @@ test('keeps only the fade when the reader asked for stillness', () => {
  * people who need the difference.
  */
 /**
+ * A checked box is filled, and its border is the fill's colour, so the wider
+ * border says nothing there: a line of the surface parts the border from the
+ * fill. Forced colours remove that shadow, so it comes back as an outline in
+ * the page's colour, and the ring of a focused one is double.
+ */
+test('parts the border from the fill of a checked invalid box, in forced colours as well', () => {
+  const edge =
+    'var(--slotted-checkbox-invalid-edge-width,var(--slotted-control-invalid-edge-width,1px))';
+  const checked = rule(
+    `${root}[data-invalid] [data-part='control']:checked,${root}[data-invalid] [data-part='control']:indeterminate`,
+  );
+  assert.ok(
+    checked.includes(`box-shadow:inset 0 0 0 ${edge} var(--slotted-surface,Canvas)`),
+    checked,
+  );
+  const forced = normalized.slice(normalized.lastIndexOf('@media (forced-colors:active)'));
+  assert.ok(
+    forced.includes(
+      `${root}[data-invalid] [data-part='control']:checked,${root}[data-invalid] [data-part='control']:indeterminate{outline:${edge} solid Canvas;`,
+    ),
+    forced,
+  );
+  assert.match(
+    forced,
+    /\[data-invalid\] \[data-part='control'\]:checked:focus-visible,[^{]*\{outline:calc\([^;]*\) double/,
+  );
+});
+
+/**
  * The edge thickens by `--slotted-control-invalid-edge-width`, the width every
  * invalid control adds (WCAG 1.4.1), as a border so forced colours keep it. A
  * tile adds the same width to whatever its state draws, so a chosen invalid

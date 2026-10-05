@@ -356,7 +356,8 @@
        border is the resting edge's black. An edge inside the border, so
        nothing moves, in place of the resting lift — the one `text-field`
        draws. */
-    --_shadow: inset 0 0 0 var(--slotted-control-invalid-edge-width, 1px) var(--_edge);
+    --_invalid-edge-width: var(--slotted-control-invalid-edge-width, 1px);
+    --_shadow: inset 0 0 0 var(--_invalid-edge-width) var(--_edge);
   }
 
   [data-ui='transfer'][data-disabled] {
@@ -551,6 +552,20 @@
       > [data-part='reorder'] {
       grid-column: 1 / -1;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /*
+   * Forced colours remove every box shadow, and the edge with them. The width
+   * comes back as an outline inside the border; a pane
+   * draws no focus ring of its own.
+   */
+  @media (forced-colors: active) {
+    [data-ui='transfer'][data-invalid] > [data-part='body'] > [data-part='pane'] {
+      outline: var(--_invalid-edge-width) solid CanvasText;
+      outline-offset: calc(
+        -1 * (var(--slotted-border-width-thin, 1px) + var(--_invalid-edge-width))
+      );
     }
   }
 }

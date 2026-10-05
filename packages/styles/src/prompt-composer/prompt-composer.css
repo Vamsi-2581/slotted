@@ -627,33 +627,33 @@
       --slotted-prompt-composer-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
     );
-    --_invalid-edge: inset 0 0 0
-      var(
-        --slotted-prompt-composer-invalid-edge-width,
-        var(--slotted-control-invalid-edge-width, 1px)
-      )
-      var(--slotted-prompt-composer-invalid-border-color, var(--slotted-tone-danger-border));
+    --_invalid-edge-width: var(
+      --slotted-prompt-composer-invalid-edge-width,
+      var(--slotted-control-invalid-edge-width, 1px)
+    );
 
     border-color: var(
       --slotted-prompt-composer-invalid-border-color,
       var(--slotted-tone-danger-border)
     );
-    /*
-     * Width as well as colour (WCAG 1.4.1), the edge `text-field` draws: in
-     * `high-contrast` the danger border is the resting edge's black. The line
-     * is a shadow inside the border, so neither box nor text moves, and it
-     * takes the resting lift's place.
-     */
-    box-shadow: var(--_invalid-edge);
   }
 
-  [data-ui='prompt-composer'][data-part='root'][data-invalid]:has(
-      > [data-part='input']:focus-visible
-    ) {
-    box-shadow:
-      var(--_invalid-edge),
-      var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
-        var(--slotted-focus-ring-color, Highlight);
+  /*
+   * Width as well as colour (WCAG 1.4.1), the edge `text-field` draws: in
+   * `high-contrast` the danger border is the resting edge's black. It is a
+   * border on a box laid over the frame's padding box rather than a shadow on
+   * the frame, so the frame keeps its own elevation at rest and under focus —
+   * the large one in `raised` — and forced colours, which remove shadows, keep
+   * a border. Nothing moves: the box is out of flow.
+   */
+  [data-ui='prompt-composer'][data-part='root'][data-invalid]::after {
+    border: var(--_invalid-edge-width) solid
+      var(--slotted-prompt-composer-invalid-border-color, var(--slotted-tone-danger-border));
+    border-radius: max(0px, calc(var(--_radius) - var(--slotted-control-border-width, 1px)));
+    content: '';
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
   }
 
   [data-ui='prompt-composer'][data-part='root'][data-readonly] {

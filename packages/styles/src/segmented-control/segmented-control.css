@@ -455,11 +455,12 @@
      * and it takes the resting lift's place. Focus is the segment's ring, so
      * no focus rule repaints it.
      */
-    box-shadow: inset 0 0 0
-      var(
-        --slotted-segmented-control-invalid-edge-width,
-        var(--slotted-control-invalid-edge-width, 1px)
-      )
+    --_invalid-edge-width: var(
+      --slotted-segmented-control-invalid-edge-width,
+      var(--slotted-control-invalid-edge-width, 1px)
+    );
+
+    box-shadow: inset 0 0 0 var(--_invalid-edge-width)
       var(
         --slotted-segmented-control-invalid-border-color,
         var(--slotted-tone-danger-border, ButtonBorder)
@@ -546,6 +547,18 @@
     [data-ui='segmented-control'][data-part='root'][data-condense='icons']
       [data-part='item']:has([data-part='icon']) {
       padding-inline: 0;
+    }
+  }
+
+  /*
+   * Forced colours remove every box shadow, and the edge with them. The width
+   * comes back as an outline inside the border; the
+   * ring belongs to a segment and leaves it alone.
+   */
+  @media (forced-colors: active) {
+    [data-ui='segmented-control'][data-part='root'][data-invalid] {
+      outline: var(--_invalid-edge-width) solid CanvasText;
+      outline-offset: calc(-1 * (var(--_border-width) + var(--_invalid-edge-width)));
     }
   }
 }

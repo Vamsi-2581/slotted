@@ -191,8 +191,9 @@ test('marks a failed file with an edge that survives a scheme with no tint', () 
   assert.match(invalid, /--_surface:var\(--slotted-tone-danger-surface\)/);
   assert.match(
     invalid,
-    /box-shadow:inset 0 0 0 var\(--slotted-control-invalid-edge-width,var\(--_border-width\)\) var\(--_edge\)/,
+    /--_invalid-edge-width:var\(--slotted-control-invalid-edge-width,var\(--_border-width\)\)/,
   );
+  assert.match(invalid, /box-shadow:inset 0 0 0 var\(--_invalid-edge-width\) var\(--_edge\)/);
 });
 
 test('arrives on the motion scale and leaves the platform to collapse it', () => {

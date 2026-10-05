@@ -2,13 +2,24 @@ import { ApplicationInitStatus, DOCUMENT } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideTestBackend, resetTestBackend } from '../../../test/testing';
+import { CUSTOM_THEME_LOADER, type CustomThemeModule } from '../theming/custom-sheet';
 import { NO_CUSTOMISATION } from '../theming/customisation';
 import { appearanceOf, PreferencesStore } from './preferences.store';
 import { SessionStore } from './session.store';
 
+/** The builder's module as the store loads it; a test swaps it for one that fails. */
+const builder = (): Promise<CustomThemeModule> => import('../theming/custom-theme');
+let loadBuilder = builder;
+
 describe('PreferencesStore', () => {
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTestBackend()] });
+    loadBuilder = builder;
+    TestBed.configureTestingModule({
+      providers: [
+        provideTestBackend(),
+        { provide: CUSTOM_THEME_LOADER, useValue: () => loadBuilder() },
+      ],
+    });
     await TestBed.inject(ApplicationInitStatus).donePromise;
     await resetTestBackend();
     await TestBed.inject(SessionStore).load();
@@ -453,6 +464,30 @@ describe('PreferencesStore', () => {
     prefs.preview(null);
     TestBed.flushEffects();
     expect(doc.documentElement.getAttribute('data-slotted-theme')).toBe('default');
+  });
+
+  /**
+   * A customised theme that does not compile is said, not swallowed: `html`
+   * keeps the theme it shows, and a retry compiles it.
+   */
+  it('keeps html on the theme it shows while a customisation does not compile, and retries', async () => {
+    const prefs = TestBed.inject(PreferencesStore);
+    const html = TestBed.inject(DOCUMENT).documentElement;
+    loadBuilder = () => Promise.reject(new Error('chunk'));
+    prefs.update({ customisation: { ...NO_CUSTOMISATION, cards: 'flat' } });
+    TestBed.flushEffects();
+
+    await vi.waitFor(() => expect(prefs.customFailed()).toBe(true));
+    TestBed.flushEffects();
+    expect(html.getAttribute('data-slotted-theme')).toBe('default');
+
+    loadBuilder = builder;
+    prefs.retryCustom();
+    await vi.waitFor(() => {
+      TestBed.flushEffects();
+      expect(html.getAttribute('data-slotted-theme')).toBe('nexora-custom');
+    });
+    expect(prefs.customFailed()).toBe(false);
   });
 
   /** A stored arrangement the catalogue no longer has falls back to the default. */

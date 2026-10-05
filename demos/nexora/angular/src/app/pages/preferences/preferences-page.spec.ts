@@ -8,6 +8,7 @@ import { provideTestBackend, resetTestBackend } from '../../../test/testing';
 import { routes } from '../../app.routes';
 import { PreferencesStore } from '../../core/session/preferences.store';
 import { SessionStore } from '../../core/session/session.store';
+import { CUSTOM_THEME_LOADER, type CustomThemeModule } from '../../core/theming/custom-sheet';
 import { NO_CUSTOMISATION } from '../../core/theming/customisation';
 
 /**
@@ -37,12 +38,18 @@ const scrollIntoView = () => {
   report.forEach((callback) => callback(entries));
 };
 
+/** The builder's module as the store loads it; a test swaps it for one that fails. */
+const builder = (): Promise<CustomThemeModule> => import('../../core/theming/custom-theme');
+let loadBuilder = builder;
+
 describe('PreferencesPage › Appearance', () => {
   beforeEach(async () => {
+    loadBuilder = builder;
     TestBed.configureTestingModule({
       providers: [
         provideTestBackend(),
         provideRouter(routes),
+        { provide: CUSTOM_THEME_LOADER, useValue: () => loadBuilder() },
       ],
     });
     await TestBed.inject(ApplicationInitStatus).donePromise;
@@ -276,8 +283,8 @@ describe('PreferencesPage › Appearance', () => {
       'nexora-terminal',
     ]);
     /* A theme that cannot be drawn keeps the card's anatomy: its sample box holds a placeholder. */
-    const cards = [...root.querySelectorAll<HTMLInputElement>('input[name="theme"]')].map(
-      (input) => input.closest('[data-part=item]')!,
+    const cards = [...root.querySelectorAll<HTMLInputElement>('input[name="theme"]')].map((input) =>
+      input.closest('[data-part=item]')!,
     );
     expect(cards.map((card) => card.querySelectorAll('.sample-box > .sample').length)).toEqual([
       1, 1, 1, 1, 1,
@@ -438,7 +445,10 @@ describe('PreferencesPage › Appearance', () => {
       const items = inputs.map((input) => input.closest<HTMLElement>('[data-part=item]')!);
       const grid = items[0]!.parentElement!;
       expect(grid.classList.contains('choices'), name).toBe(true);
-      expect(items.every((item) => item.parentElement === grid), name).toBe(true);
+      expect(
+        items.every((item) => item.parentElement === grid),
+        name,
+      ).toBe(true);
       expect(grid.closest('[data-ui=radio-group]')!.getAttribute('data-variant'), name).toBe(
         'tile',
       );
@@ -567,7 +577,8 @@ describe('PreferencesPage › Appearance', () => {
     thumb.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     harness.detectChanges();
     const draft = () =>
-      harness.fixture.debugElement.query((node) => node.name === 'app-appearance-section')!
+      harness.fixture.debugElement
+        .query((node) => node.name === 'app-appearance-section')!
         .componentInstance.draft().customisation;
     expect(draft()).toMatchObject({ radius: 10, shadow: 'none' });
     expect(root.querySelector('[data-radius-value]')!.textContent).toMatch(/10 px .*yours/);
@@ -577,6 +588,30 @@ describe('PreferencesPage › Appearance', () => {
     expect(draft()).toMatchObject({ radius: null, shadow: 'none' });
     expect(root.querySelector('[data-radius-value]')!.textContent).toMatch(/8 px .*Standard’s own/);
     expect(root.querySelector('[data-radius-value] button')).toBeNull();
+  });
+
+  /**
+   * A customisation that does not compile is an error state of its own: it
+   * says so once, offers a retry, and the application stays in the theme it
+   * shows; the retry compiles it.
+   */
+  it('says when a customised theme does not compile, and compiles it on retry', async () => {
+    loadBuilder = () => Promise.reject(new Error('chunk'));
+    TestBed.inject(PreferencesStore).update({
+      customisation: { ...NO_CUSTOMISATION, cards: 'flat' },
+    });
+    const harness = await RouterTestingHarness.create('/settings/preferences');
+    const root = harness.fixture.nativeElement as HTMLElement;
+    const alert = () => root.querySelector<HTMLElement>('[data-custom-failed]');
+    await until(harness, () => alert() !== null);
+
+    expect(alert()!.textContent).toContain('did not compile');
+    expect(page().theme).toBe('default');
+    expect(root.querySelector('[data-appearance]')!.hasAttribute('aria-busy')).toBe(false);
+
+    loadBuilder = builder;
+    alert()!.querySelector('button')!.click();
+    await until(harness, () => page().theme === 'nexora-custom' && alert() === null);
   });
 
   /** The anatomy is the chosen theme object's, layer by layer. */

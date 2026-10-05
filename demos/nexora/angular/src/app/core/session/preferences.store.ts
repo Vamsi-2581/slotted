@@ -15,7 +15,7 @@ import {
   type NeutralPreference,
   type StatusColours,
 } from '../theming/appearance';
-import { CustomSheet } from '../theming/custom-sheet';
+import { CUSTOM_THEME_LOADER, CustomSheet } from '../theming/custom-sheet';
 import {
   isCustomised,
   NO_CUSTOMISATION,
@@ -113,8 +113,8 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
  * `import()`): the saved customisation under `nexora-custom`, at once, and a
  * candidate that differs from it under `nexora-custom-draft`, after 200 ms
  * without a change, so a dragged slider compiles once. `html` names either
- * once its sheet holds what the appearance asks for; until then it keeps the
- * theme it shows.
+ * once its sheet holds what the appearance asks for; until then, and while a
+ * compile fails (`customFailed`), it keeps the theme it shows.
  */
 @Injectable({ providedIn: 'root' })
 export class PreferencesStore {
@@ -130,10 +130,17 @@ export class PreferencesStore {
   private destroyed = false;
   /** The theme `html` names, which trails the preferences while a sheet loads. */
   private shown = DEFAULT_THEME_ID;
+  private readonly loadBuilder = inject(CUSTOM_THEME_LOADER);
   /** The saved customisation's sheet, compiled as soon as it is asked for. */
-  private readonly saved = new CustomSheet(CUSTOM_THEME_ID, this.document, 0);
+  private readonly saved = new CustomSheet(CUSTOM_THEME_ID, this.document, 0, this.loadBuilder);
   /** The candidate customisation's sheet, compiled once the changes pause. */
-  private readonly draft = new CustomSheet(DRAFT_THEME_ID, this.document, 200);
+  private readonly draft = new CustomSheet(DRAFT_THEME_ID, this.document, 200, this.loadBuilder);
+
+  /**
+   * A customised theme the appearance asks for did not compile; `html` keeps
+   * the theme it shows meanwhile. A signal read.
+   */
+  readonly customFailed = computed(() => this.saved.failed() || this.draft.failed());
   /** The appearance the preferences page is editing, or `null` outside it. */
   private readonly candidate = signal<Appearance | null>(null);
 
@@ -172,6 +179,12 @@ export class PreferencesStore {
     return Promise.all(
       ids.filter((id) => RUNTIME_THEME_IDS.includes(id)).map((id) => this.load(id)),
     ).then(() => undefined);
+  }
+
+  /** Compiles again the customised themes whose last compile failed. */
+  retryCustom(): void {
+    this.saved.retry();
+    this.draft.retry();
   }
 
   /** Draws `html` in `candidate` until it is cleared with `null`. */

@@ -376,7 +376,37 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                   </p>
                 </div>
                 <div slAlertActions>
-                  <button slButton size="sm" variant="outline" tone="danger" (click)="load()">
+                  <button
+                    slButton
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    tone="danger"
+                    (click)="load()"
+                  >
+                    Try again
+                  </button>
+                </div>
+              </section>
+            }
+
+            @if (store.customFailed()) {
+              <section slAlert tone="danger" live="polite" data-custom-failed>
+                <div slAlertContent>
+                  <div slAlertTitle>Your customised theme did not compile</div>
+                  <p slAlertDescription>
+                    Nexora stays in the theme it is drawn in until it does. Your changes are kept.
+                  </p>
+                </div>
+                <div slAlertActions>
+                  <button
+                    slButton
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    tone="danger"
+                    (click)="store.retryCustom()"
+                  >
                     Try again
                   </button>
                 </div>
@@ -834,7 +864,7 @@ export class AppearanceSection {
   readonly draft = input.required<UserPreferences>();
   readonly patch = output<Partial<UserPreferences>>();
 
-  private readonly store = inject(PreferencesStore);
+  protected readonly store = inject(PreferencesStore);
   private readonly document = inject(DOCUMENT);
 
   protected readonly themes = THEME_CATALOGUE;
@@ -903,9 +933,9 @@ export class AppearanceSection {
     () => !this.failed() && (!this.loaded() || (this.opening() && this.uncompiled())),
   );
 
-  /** The draft is customised and no theme has been compiled for it yet; a signal read. */
+  /** The draft is customised, no theme has been compiled for it yet, and none has failed. */
   private uncompiled(): boolean {
-    return this.customised() && this.compiled() === null;
+    return this.customised() && this.compiled() === null && !this.store.customFailed();
   }
 
   /** The theme the draft's customisation compiled to, or the latest candidate over its theme. */

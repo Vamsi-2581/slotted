@@ -984,6 +984,128 @@
   </div>
 </section>
 
+<section data-scene="edge">
+  <!--
+    The placer's box is a frame over a bordered card: the card's border box,
+    its radius inherited, clipping what it holds. The bar stands on the
+    frame's edge, so it covers the card's border and the card's corners clip
+    it. In the library that frame is app-shell's and page-header's `progress`
+    part.
+  -->
+  <div style="display: grid; gap: var(--slotted-space-6); justify-items: stretch">
+    <div
+      style="
+        border: var(--slotted-border-width-thin) solid var(--slotted-border-subtle);
+        border-radius: var(--slotted-radius-lg);
+        block-size: 4.5rem;
+        padding: var(--slotted-space-6);
+        position: relative;
+      "
+    >
+      Edge start, indeterminate
+      <div
+        style="
+          border-radius: inherit;
+          inset: calc(-1 * var(--slotted-border-width-thin));
+          overflow: clip;
+          pointer-events: none;
+          position: absolute;
+        "
+      >
+        <div
+          aria-label="Refreshing"
+          aria-valuemax="100"
+          aria-valuemin="0"
+          data-indeterminate=""
+          data-part="root"
+          data-placement="edge-start"
+          data-shape="linear"
+          data-size="sm"
+          data-tone="accent"
+          data-ui="progress-indicator"
+          role="progressbar"
+        >
+          <div data-part="track"><div data-part="indicator"></div></div>
+        </div>
+      </div>
+    </div>
+    <div
+      style="
+        border: var(--slotted-border-width-thin) solid var(--slotted-border-subtle);
+        border-radius: var(--slotted-radius-lg);
+        block-size: 4.5rem;
+        padding: var(--slotted-space-6);
+        position: relative;
+      "
+    >
+      Edge end, 62 per cent
+      <div
+        style="
+          border-radius: inherit;
+          inset: calc(-1 * var(--slotted-border-width-thin));
+          overflow: clip;
+          pointer-events: none;
+          position: absolute;
+        "
+      >
+        <div
+          aria-label="Saving"
+          aria-valuemax="100"
+          aria-valuemin="0"
+          aria-valuenow="62"
+          data-part="root"
+          data-placement="edge-end"
+          data-shape="linear"
+          data-size="sm"
+          data-tone="accent"
+          data-ui="progress-indicator"
+          role="progressbar"
+          style="--slotted-progress-indicator-percent: 62"
+        >
+          <div data-part="track"><div data-part="indicator"></div></div>
+        </div>
+      </div>
+    </div>
+    <div
+      style="
+        border: var(--slotted-border-width-thin) solid var(--slotted-border-subtle);
+        border-radius: var(--slotted-radius-lg);
+        block-size: 4.5rem;
+        padding: var(--slotted-space-6);
+        position: relative;
+      "
+    >
+      Edge start, danger
+      <div
+        style="
+          border-radius: inherit;
+          inset: calc(-1 * var(--slotted-border-width-thin));
+          overflow: clip;
+          pointer-events: none;
+          position: absolute;
+        "
+      >
+        <div
+          aria-label="Retrying"
+          aria-valuemax="100"
+          aria-valuemin="0"
+          aria-valuenow="38"
+          data-part="root"
+          data-placement="edge-start"
+          data-shape="linear"
+          data-size="sm"
+          data-tone="danger"
+          data-ui="progress-indicator"
+          role="progressbar"
+          style="--slotted-progress-indicator-percent: 38"
+        >
+          <div data-part="track"><div data-part="indicator"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section data-scene="content">
   <div style="display: grid; gap: var(--slotted-space-7); justify-items: stretch">
     <!-- A label no family chose: four words that have to break, a number that

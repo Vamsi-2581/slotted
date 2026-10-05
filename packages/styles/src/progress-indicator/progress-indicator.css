@@ -529,6 +529,109 @@
     content: none;
   }
 
+  /* ── The edge bar ─────────────────────────────────────────────────────
+   *
+   * The page-level bar on the edge of any box instead of the viewport's: the
+   * block-start edge under `edge-start`, the block-end edge under `edge-end`,
+   * the whole inline size of the nearest positioned box. It is drawn over the
+   * line that edge already draws — a seam, a card's border, a header's
+   * hairline — so it reserves nothing and nothing moves when it comes or
+   * goes. The box is the placer's, and its corners clip the bar: `app-shell`
+   * and `page-header` each render one as their `progress` part.
+   *
+   * No stacking layer of its own. The bar is the last thing its box paints,
+   * and the box decides where it stands among its neighbours.
+   *
+   * `--slotted-progress-indicator-position` is the box's answer when the box
+   * is taller than the screen: `sticky` keeps the bar on the visible part of
+   * the edge. `app-shell` writes it for a content region that scrolls with
+   * the document. It is a composition value, not a design token.
+   */
+  [data-ui='progress-indicator'][data-part='root']:is(
+      [data-placement='edge-start'],
+      [data-placement='edge-end']
+    ) {
+    --_radius: var(--slotted-progress-indicator-radius, var(--slotted-radius-none, 0px));
+    --_track-color: var(--slotted-progress-indicator-track-color, transparent);
+    --_gap: var(--slotted-progress-indicator-gap, 0);
+
+    inset-inline: 0;
+    position: var(--slotted-progress-indicator-position, absolute);
+  }
+
+  [data-ui='progress-indicator'][data-part='root'][data-placement='edge-start'] {
+    inset-block-start: 0;
+  }
+
+  [data-ui='progress-indicator'][data-part='root'][data-placement='edge-end'] {
+    inset-block-end: 0;
+  }
+
+  [data-ui='progress-indicator']:is([data-placement='edge-start'], [data-placement='edge-end'])
+    [data-part='track']::after {
+    content: none;
+  }
+
+  /**
+   * A bar standing on an edge grows out of the line it stands on and goes
+   * back into it, which is M3's `outward` show and `inward` hide for a linear
+   * indicator. It is a clip rather than a scale: the root holds the label,
+   * clipped but read, and a box that holds text is never scaled. The clip
+   * starts from no thickness rather than from most of one, because the line
+   * it grows out of is already drawn, so the bar never comes from nowhere,
+   * and a bar that began at nine tenths of two pixels would be a bar that
+   * blinked on. The opacity travels with it so the first frames are not a
+   * hard sliver of ink.
+   *
+   * `inset()` takes physical sides and has no logical form; the top and the
+   * bottom are the block-start and block-end edges in every horizontal
+   * writing mode, which is every mode the library lays out. The page-level
+   * bar shares the motion, as the edge bar of the viewport.
+   *
+   * Enter is the medium step on the entering curve; exit is the short step on
+   * the leaving one, so a wait that has ended is gone before the eye returns
+   * to it. `display` is transitioned as a discrete property, so `hidden` —
+   * the withheld and withdrawn state — takes effect once the bar has gone
+   * back into its edge rather than on the frame it is asked to. The theme
+   * collapses both steps under `prefers-reduced-motion`.
+   */
+  [data-ui='progress-indicator'][data-part='root']:is(
+      [data-placement='page'],
+      [data-placement='edge-start'],
+      [data-placement='edge-end']
+    ) {
+    --_withdrawn: inset(0 0 100% 0);
+
+    clip-path: inset(0);
+    transition:
+      --slotted-progress-indicator-percent var(--_settle) var(--_spring),
+      --slotted-progress-indicator-buffer-percent var(--_settle) var(--_spring),
+      clip-path var(--slotted-duration-medium) var(--slotted-easing-enter),
+      opacity var(--slotted-duration-medium) var(--slotted-easing-enter);
+
+    @starting-style {
+      clip-path: var(--_withdrawn);
+      opacity: 0;
+    }
+  }
+
+  [data-ui='progress-indicator'][data-part='root'][data-placement='edge-end'] {
+    --_withdrawn: inset(100% 0 0 0);
+  }
+
+  [data-ui='progress-indicator'][data-part='root']:is(
+      [data-placement='page'],
+      [data-placement='edge-start'],
+      [data-placement='edge-end']
+    )[hidden] {
+    clip-path: var(--_withdrawn);
+    opacity: 0;
+    transition:
+      clip-path var(--slotted-duration-short) var(--slotted-easing-exit),
+      opacity var(--slotted-duration-short) var(--slotted-easing-exit),
+      display var(--slotted-duration-short) allow-discrete;
+  }
+
   /* ── Circular ─────────────────────────────────────────────────────────
    *
    * The ring, the name and the number on one line. The number sits beside the
@@ -1430,6 +1533,17 @@
     [data-ui='progress-indicator'][data-shape='linear'] [data-part='track']::before,
     [data-ui='progress-indicator'][data-shape='linear'] [data-part='track']::after {
       content: none;
+    }
+
+    /**
+     * An edge bar keeps no track of its own. The box it stands on already
+     * draws its edge in a system colour, and an outline here would be a
+     * second line beside the first.
+     */
+    [data-ui='progress-indicator']:is([data-placement='edge-start'], [data-placement='edge-end'])
+      [data-part='track'] {
+      background-color: transparent;
+      outline: none;
     }
 
     [data-ui='progress-indicator'] [data-part='indicator'] {

@@ -539,11 +539,51 @@
       var(--slotted-app-shell-color, var(--slotted-text, CanvasText))
     );
     grid-area: 2 / 2 / 3 / 3;
+    /**
+     * Whatever the content stacks, it stacks inside the content: a sticky
+     * page-header raises itself three steps over the sticky layer, and
+     * without a context of its own here it would paint over the wait drawn
+     * on this region's edge.
+     */
+    isolation: isolate;
     min-block-size: 0;
     min-inline-size: 0;
   }
   [data-ui='app-shell'][data-scroll='content'] > [data-part='main'] {
     overflow: auto;
+  }
+
+  /**
+   * The wait for the next page, on the line between the chrome and the
+   * content. The frame is the box of `main` — its grid area here, its margins
+   * and its corners wherever a canvas states them, because every such rule
+   * below names both parts — and it paints nothing: the one progress bar it
+   * holds stands on its block-start edge. It is a frame rather than a strip
+   * so the card's corners clip the bar; a strip two pixels tall given the
+   * card's radius has its radii scaled down to half its height, and its ends
+   * would be square against a rounded card.
+   *
+   * Strict containment keeps the travelling bar's per-frame layout inside
+   * this box, and its paint inside the corners.
+   */
+  [data-ui='app-shell'] > [data-part='progress'] {
+    contain: strict;
+    grid-area: 2 / 2 / 3 / 3;
+    inset-block-start: calc(-1 * var(--_progress-lift, 0px));
+    min-block-size: 0;
+    min-inline-size: 0;
+    overflow: clip;
+    pointer-events: none;
+    position: relative;
+    z-index: 1;
+  }
+  /**
+   * The content scrolls with the document under `document`, and the frame
+   * with it; the bar holds the top of the viewport once the banner, which is
+   * not sticky there, has gone.
+   */
+  [data-ui='app-shell'][data-scroll='document'] > [data-part='progress'] {
+    --slotted-progress-indicator-position: sticky;
   }
 
   /** A skip link's destination takes focus; it draws no ring for a pointer. */
@@ -1076,6 +1116,86 @@
     border-block-start: var(--_rule-width) solid var(--_rule);
   }
 
+  /* ── The line the wait is drawn on ───────────────────────────────────── */
+
+  /**
+   * Where the line between the chrome and the content is the banner's seam
+   * rather than an edge of `main`, the frame of the wait stands that seam's
+   * width higher, so the bar covers the line instead of sitting under it:
+   * every seam of `flush`, the seam inside the card of `primary="main"`, and
+   * the seam inside the `panel` card when the banner is in it. Above a
+   * `panel` card it is the card's own top edge. Under `separation="tone"`
+   * the seam is nought pixels wide and so is the lift. Where `main` keeps an
+   * edge of its own — the inset and floating cards, and the top rule `panel`
+   * gives it once the navigation is a layer — the frame is the box of `main`
+   * and covers that edge already.
+   */
+  [data-ui='app-shell']:is([data-canvas='flush'], [data-primary='main']),
+  [data-ui='app-shell'][data-canvas='panel'][data-primary='nav'] {
+    --_progress-lift: var(--_seam-width);
+  }
+  [data-ui='app-shell'][data-canvas='panel'][data-primary='banner'] {
+    --_progress-lift: var(--_rule-width);
+  }
+  [data-ui='app-shell'][data-canvas='panel'][data-nav-mode='overlay'] {
+    --_progress-lift: 0px;
+  }
+
+  /* ── The frame of the wait, on the box of the content ────────────────── */
+
+  /**
+   * Every margin and every corner `main` takes above, restated for the frame
+   * in the same order and at the same specificity, so the frame is the box of
+   * `main` in every arrangement and the bar on its edge is clipped by the
+   * card's own corners. Only the geometry: the frame draws no edge, no ground
+   * and no lift. The two twins of a shell not yet measured stand beside
+   * their originals in the narrow query below. `app-shell.styles.test.mjs`
+   * holds every rule that gives `main` a margin or a radius to its twin.
+   */
+  [data-ui='app-shell'][data-canvas='floating'] > [data-part='progress'],
+  [data-ui='app-shell'][data-canvas='inset'] > [data-part='progress'] {
+    border-radius: var(--_radius);
+    margin-block: var(--_gutter);
+    margin-inline: var(--_gutter);
+  }
+  [data-ui='app-shell'][data-canvas='floating'][data-nav-mode='overlay'] > [data-part='progress'],
+  [data-ui='app-shell'][data-canvas='inset'][data-nav-mode='overlay'] > [data-part='progress'] {
+    border-radius: 0;
+    margin: 0;
+  }
+  [data-ui='app-shell']:is([data-canvas='floating'], [data-canvas='inset'])[data-primary='main']
+    > [data-part='progress'] {
+    border-radius: 0 0 var(--_inner-radius) var(--_inner-radius);
+    margin-block: 0 calc(var(--_gutter) + var(--_rule-width));
+    margin-inline: calc(var(--_gutter) + var(--_rule-width));
+  }
+  [data-ui='app-shell']:is(
+      [data-canvas='floating'],
+      [data-canvas='inset']
+    )[data-primary='main'][data-nav-mode='overlay']
+    > [data-part='progress'] {
+    border-radius: 0;
+    margin: 0;
+  }
+  [data-ui='app-shell'][data-canvas='panel']:not([data-nav-mode='overlay'])
+    > [data-part='progress'] {
+    border-end-end-radius: var(--_inner-radius);
+    margin-block-end: var(--_rule-width);
+    margin-inline-end: var(--_rule-width);
+  }
+  [data-ui='app-shell'][data-canvas='panel'][data-primary='banner']:not([data-nav-mode='overlay'])
+    > [data-part='progress'] {
+    border-start-end-radius: var(--_inner-radius);
+    margin-block-start: var(--_rule-width);
+  }
+  [data-ui='app-shell'][data-canvas='panel']:not([data-nav-mode='overlay']):has(
+      > [data-part='aside'][data-open]
+    )
+    > [data-part='progress'] {
+    border-end-end-radius: 0;
+    border-start-end-radius: 0;
+    margin-inline-end: 0;
+  }
   /* ── Separation by tone ──────────────────────────────────────────────── */
 
   /**
@@ -1726,6 +1846,14 @@
     }
     [data-ui='app-shell']:not([data-nav-mode])[data-canvas='panel'] > [data-part='main'] {
       border-block-start: var(--_rule-width) solid var(--_rule);
+      border-radius: 0;
+    }
+    [data-ui='app-shell']:not([data-nav-mode])[data-canvas='floating'] > [data-part='progress'],
+    [data-ui='app-shell']:not([data-nav-mode])[data-canvas='inset'] > [data-part='progress'] {
+      border-radius: 0;
+      margin: 0;
+    }
+    [data-ui='app-shell']:not([data-nav-mode])[data-canvas='panel'] > [data-part='progress'] {
       border-radius: 0;
     }
     [data-ui='app-shell']:not([data-aside-mode='overlay']):is(

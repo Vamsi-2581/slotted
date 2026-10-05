@@ -725,7 +725,8 @@
   [data-ui='page-header'] > * > [data-part='controls'] {
     block-size: 0;
     position: relative;
-    z-index: 3;
+    /* Above the title area, and above the wait drawn on the same edge. */
+    z-index: 4;
   }
   /**
    * With tabs under the chrome the edge the pill straddles is above them, and
@@ -947,6 +948,49 @@
     > [data-part='content']
     > [data-part='description'] {
     --slotted-skeleton-inline-size: 40ch;
+  }
+
+  /* ── The wait on the chrome's edge ───────────────────────────────────── */
+
+  /**
+   * A refresh of what is already on screen: the content stays, and the one
+   * thing drawn is a progress bar over the line where the chrome ends. The
+   * frame is a row of the container one hairline tall and given back by its
+   * margin, so it costs the flow nothing, and it runs from `full` to `full` —
+   * the lines the container's own breakout part spans — so the bar is the
+   * header's width, as the line is, and not the measure's.
+   *
+   * Written after the controls and before the tabs, as the controls are, it
+   * stands on the edge the pill straddles; on the root's own edge the bar
+   * would run under the tabs and read as the selected tab's indicator drawn
+   * across the whole row. With no tabs it is the root's own hairline. The bar
+   * stands on the frame's block-end edge and its thickness rises above it,
+   * which is why the frame does not clip.
+   *
+   * A snapped header keeps its edge on screen, and the frame keeps its place
+   * beside the controls, so the bar stays with it. Above the title area,
+   * whose ground would cover the bar's upper pixel once the area has slid
+   * under the title; below the controls, whose pill straddles the same line.
+   */
+  [data-ui='page-header'] > * > [data-part='progress'] {
+    block-size: var(--_rule-size);
+    grid-column: full;
+    margin-block-end: calc(-1 * var(--_rule-size));
+    pointer-events: none;
+    position: relative;
+    z-index: 3;
+  }
+
+  /**
+   * One wait at a time. The title's skeleton is the first load, and a
+   * refresh of nothing is not a refresh; a region around the header that
+   * waits as a whole — a shell between two pages — answers for everything
+   * inside it. The second rule reads an ARIA state rather than another
+   * family's identity, so any region a consumer marks busy takes it.
+   */
+  [data-ui='page-header'][data-loading] > * > [data-part='progress'],
+  [aria-busy='true'] [data-ui='page-header'] > * > [data-part='progress'] {
+    display: none;
   }
 
   /* ── Narrow ──────────────────────────────────────────────────────────── */

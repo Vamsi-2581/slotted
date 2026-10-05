@@ -611,3 +611,59 @@ test('turns the extent into the width of the column and leaves the layer on its 
   );
   assert.ok(tokens.includes('--slotted-app-shell-aside-extent'));
 });
+
+/**
+ * The frame of the wait is the box of `main`, and nothing but a restatement
+ * keeps it so: every rule that gives `main` a margin or a corner has a twin
+ * for `progress` with the same selector and the same values. A new canvas
+ * rule written for `main` alone puts the bar off the edge of the card, in the
+ * one arrangement nobody photographed.
+ */
+test('keeps the frame of the wait on the box of the content in every arrangement', () => {
+  const GEOMETRY =
+    /^(margin(-block|-inline)?(-start|-end)?|border(-(start|end)-(start|end))?-radius)$/;
+  const splitList = (list) => {
+    const out = [];
+    let depth = 0;
+    let from = 0;
+    for (let index = 0; index < list.length; index += 1) {
+      if (list[index] === '(') depth += 1;
+      if (list[index] === ')') depth -= 1;
+      if (list[index] === ',' && depth === 0) {
+        out.push(list.slice(from, index));
+        from = index + 1;
+      }
+    }
+    out.push(list.slice(from));
+    return out.map((selector) => selector.replace(/\s+/g, ' ').replace(/\( /g, '(').trim());
+  };
+  const rules = [];
+  for (const [, list, body] of css
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .matchAll(/([^{};]+)\{([^{}]*)\}/g)) {
+    const geometry = body
+      .split(';')
+      .map((declaration) => declaration.trim())
+      .filter((declaration) => GEOMETRY.test(declaration.split(':')[0].trim()))
+      .map((declaration) => declaration.replace(/\s+/g, ' '))
+      .sort();
+    for (const selector of splitList(list)) rules.push({ selector, geometry });
+  }
+
+  const mains = rules.filter(
+    ({ selector, geometry }) => / > \[data-part='main'\]$/.test(selector) && geometry.length > 0,
+  );
+  assert.ok(mains.length >= 9, `found ${mains.length} rules giving main a box`);
+  for (const { selector, geometry } of mains) {
+    const twin = selector.replace(/\[data-part='main'\]$/, "[data-part='progress']");
+    const found = rules.filter((rule) => rule.selector === twin);
+    assert.ok(found.length > 0, `${twin} is missing`);
+    assert.deepEqual(found.at(-1).geometry, geometry, `${twin} disagrees with main`);
+  }
+
+  const frame = rule("[data-ui='app-shell'] > [data-part='progress'] {").body;
+  assert.match(frame, /grid-area: 2 \/ 2 \/ 3 \/ 3/);
+  assert.match(frame, /pointer-events: none/);
+  assert.match(frame, /overflow: clip/);
+  assert.doesNotMatch(frame, /background|border:|box-shadow/);
+});

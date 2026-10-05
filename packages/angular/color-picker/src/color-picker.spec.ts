@@ -107,6 +107,17 @@ describe('SlColorPicker', () => {
     expect(fixture.componentInstance.changes[0]!.value).toBe('#DC2626');
   });
 
+  it('marks its text input invalid when the picker is, so the frame draws the invalid edge', () => {
+    const fixture = renderTemplate(
+      `<div slColorPicker defaultValue="#2563EB" [invalid]="true"></div>`,
+    );
+    const input = fixture.nativeElement.querySelector(
+      'input[aria-label="Color"]',
+    ) as HTMLInputElement;
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(input.closest('[data-ui="text-field"]')!.hasAttribute('data-invalid')).toBe(true);
+  });
+
   it('chooses a preset with the reason select', () => {
     const fixture = renderTemplate(
       `<div slColorPicker defaultValue="#2563EB" [presets]="presets" (valueChange)="changes.push($event)"></div>`,

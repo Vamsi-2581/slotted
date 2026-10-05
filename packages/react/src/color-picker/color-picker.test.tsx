@@ -80,6 +80,13 @@ describe('ColorPicker', () => {
     expect(onValueChange.mock.calls[0]![0]).toBe('#DC2626');
   });
 
+  it('marks its text input invalid when the picker is, so the frame draws the invalid edge', () => {
+    render(<ColorPicker defaultValue="#2563EB" invalid />);
+    const input = screen.getByRole('textbox', { name: 'Color' });
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input.closest('[data-ui="text-field"]')).toHaveAttribute('data-invalid', '');
+  });
+
   it('puts back the last valid colour when the text is abandoned', () => {
     render(<ColorPicker defaultValue="#2563EB" />);
     const input = screen.getByRole<HTMLInputElement>('textbox', { name: 'Color' });

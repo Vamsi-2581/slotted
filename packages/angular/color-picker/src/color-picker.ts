@@ -172,7 +172,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
         data-size="sm"
         data-variant="outline"
         data-mono=""
-        [attr.data-invalid]="draftValid() ? null : ''"
+        [attr.data-invalid]="inputInvalid() ? '' : null"
         [attr.data-disabled]="resolvedDisabled() ? '' : null"
         [attr.data-readonly]="resolvedReadOnly() ? '' : null"
       >
@@ -182,7 +182,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
           autocomplete="off"
           spellcheck="false"
           [attr.aria-label]="t('input')"
-          [attr.aria-invalid]="draftValid() ? null : 'true'"
+          [attr.aria-invalid]="inputInvalid() ? 'true' : null"
           [disabled]="resolvedDisabled()"
           [readOnly]="resolvedReadOnly()"
           [value]="draft() ?? current()"
@@ -267,7 +267,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
     '[attr.data-format]': 'resolvedFormat()',
     '[attr.data-disabled]': "resolvedDisabled() ? '' : null",
     '[attr.data-readonly]': "resolvedReadOnly() ? '' : null",
-    '[attr.data-invalid]': "invalid() === true || field?.invalid() === true ? '' : null",
+    '[attr.data-invalid]': "resolvedInvalid() ? '' : null",
     '[attr.data-out-of-gamut]': "outOfGamut() ? '' : null",
     '[style.--slotted-color-picker-color]': 'css()',
     '[style.--slotted-color-picker-opaque]': 'opaque()',
@@ -367,6 +367,11 @@ export class SlColorPicker implements ControlValueAccessor {
     const draft = this.draft();
     return draft === null || parseColor(draft) !== null;
   });
+  protected readonly resolvedInvalid = computed(
+    () => this.invalid() === true || this.field?.invalid() === true,
+  );
+  /** The panel has no frame of its own, so a picker the form calls invalid says so on its text. */
+  protected readonly inputInvalid = computed(() => !this.draftValid() || this.resolvedInvalid());
   protected readonly resolvedPresets = computed(
     () => this.presets() ?? this.defaults.presets ?? [],
   );

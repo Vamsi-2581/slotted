@@ -146,6 +146,8 @@ interface PickerContext extends ColorState {
   /** The family's words in the language in force, with this picker's `messages` laid over them. */
   t: FamilyTranslator<ColorPickerMessages>;
   disabled: boolean;
+  /** The picker's own invalid, from its prop or its field, which its text input shows. */
+  invalid: boolean;
   readOnly: boolean;
   previous: string;
   presets: readonly string[] | undefined;
@@ -348,6 +350,8 @@ export function ColorPickerInput(props: ColorPickerPartProps) {
   const [draft, setDraft] = useState<string | null>(null);
   const shown = draft ?? picker.value;
   const valid = draft === null || parseColor(draft) !== null;
+  /* The panel has no frame of its own, so a picker the form calls invalid says so on its text. */
+  const invalid = !valid || picker.invalid;
 
   const commit = (source: unknown) => {
     if (draft === null) return;
@@ -362,7 +366,7 @@ export function ColorPickerInput(props: ColorPickerPartProps) {
     <div
       {...props}
       data-disabled={picker.disabled ? '' : undefined}
-      data-invalid={valid ? undefined : ''}
+      data-invalid={invalid ? '' : undefined}
       data-mono=""
       data-part="root"
       data-readonly={picker.readOnly ? '' : undefined}
@@ -371,7 +375,7 @@ export function ColorPickerInput(props: ColorPickerPartProps) {
       data-variant="outline"
     >
       <input
-        aria-invalid={valid ? undefined : true}
+        aria-invalid={invalid ? true : undefined}
         aria-label={picker.t('input')}
         autoComplete="off"
         data-part="input"
@@ -640,6 +644,7 @@ export function ColorPicker({
     ...state,
     contrastWith,
     disabled: resolvedDisabled,
+    invalid: resolvedInvalid === true,
     presets: presets ?? defaults.presets,
     previous,
     readOnly: resolvedReadOnly,

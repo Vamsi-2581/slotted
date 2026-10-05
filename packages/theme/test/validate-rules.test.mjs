@@ -37,11 +37,18 @@ test('accepts public hooks, theme axes and tokens', () => {
   ok(`[data-ui='card']:is(:hover, [data-disabled]) { color: var(--slotted-seed-accent); }`);
 });
 
-test('names a syntax error', () => {
-  const errors = validateRules(`[data-ui='button' { color: red; }`, 'rules.css');
+test('names a syntax error the policy does not refuse, with its column', () => {
+  const errors = validateRules(`[data-ui='button'] { color red; }`, 'rules.css');
   assert.equal(errors.length, 1);
   assert.match(errors[0], /^rules\.css:\d+:\d+ /);
 });
+
+/**
+ * Text the policy refuses that lightningcss also cannot parse is refused in
+ * the policy's words, which are the words `defineTheme` uses at runtime.
+ */
+test('names what the policy refuses in its own words where lightningcss cannot parse it', () =>
+  fails(`[data-ui='button' { color: red; }`, 'an attribute selector never closed'));
 
 test('names a data-ui no family sets', () =>
   fails(`[data-ui='nope'] { color: red; }`, "[data-ui='nope'] names no family"));
@@ -354,6 +361,8 @@ test('defineTheme refuses exactly what the build refuses, with the same messages
     `[data-ui='card'] { color: v\\61r(--\\5f x); --_card-bg: red; }`,
     `[DATA-UI='card'] [data-ui^='button'] [data-part*='title'] { color: red; }`,
     `& { color: red; }`,
+    `color: red;`,
+    `@media all { color: red; }`,
   ];
   for (const css of corpus) {
     const build = validateRules(css, 'rules.css').map((error) => error.replace(/^rules\.css:/, ''));

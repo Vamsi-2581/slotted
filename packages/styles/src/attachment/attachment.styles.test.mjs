@@ -189,7 +189,10 @@ test('truncates the stem, keeps the extension, and isolates the run', () => {
 test('marks a failed file with an edge that survives a scheme with no tint', () => {
   const invalid = rule(`${ui}[data-part='root'][data-invalid]`);
   assert.match(invalid, /--_surface:var\(--slotted-tone-danger-surface\)/);
-  assert.match(invalid, /box-shadow:inset 0 0 0 var\(--_border-width\) var\(--_edge\)/);
+  assert.match(
+    invalid,
+    /box-shadow:inset 0 0 0 var\(--slotted-control-invalid-edge-width,var\(--_border-width\)\) var\(--_edge\)/,
+  );
 });
 
 test('arrives on the motion scale and leaves the platform to collapse it', () => {

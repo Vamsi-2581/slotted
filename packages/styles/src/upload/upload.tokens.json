@@ -22,6 +22,7 @@
   "--slotted-control-inner-size-lg",
   "--slotted-control-inner-size-md",
   "--slotted-control-inner-size-sm",
+  "--slotted-control-invalid-edge-width",
   "--slotted-control-padding-inline-lg",
   "--slotted-control-padding-inline-md",
   "--slotted-control-padding-inline-sm",

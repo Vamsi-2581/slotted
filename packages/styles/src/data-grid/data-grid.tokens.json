@@ -10,6 +10,7 @@
   "--slotted-control-height-md",
   "--slotted-control-icon-size-md",
   "--slotted-control-inner-size-sm",
+  "--slotted-control-invalid-edge-width",
   "--slotted-control-padding-inline-md",
   "--slotted-control-padding-inline-sm",
   "--slotted-control-transition-duration",

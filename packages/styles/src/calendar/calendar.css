@@ -745,6 +745,27 @@
     );
   }
 
+  /*
+   * Width as well as colour (WCAG 1.4.1): in `high-contrast` the invalid ring
+   * is the valid ring's black. The calendar has no frame to edge, so the ring
+   * is where invalid shows, and it widens by the edge every invalid control
+   * adds — inward, like the ring it replaces, so no neighbouring cell is
+   * covered.
+   */
+  [data-ui='calendar'][data-part='root'][data-invalid] [data-part='day']:focus-visible,
+  [data-ui='calendar'][data-part='root'][data-invalid] [data-part='period']:focus-visible,
+  [data-ui='calendar'][data-part='root'][data-invalid] [data-part='heading']:focus-visible,
+  [data-ui='calendar'][data-part='root'][data-invalid] [data-part='previous']:focus-visible,
+  [data-ui='calendar'][data-part='root'][data-invalid] [data-part='next']:focus-visible {
+    --_invalid-ring: calc(
+      var(--slotted-focus-ring-width, 2px) +
+        var(--slotted-calendar-invalid-edge-width, var(--slotted-control-invalid-edge-width, 1px))
+    );
+
+    outline-offset: calc(var(--_invalid-ring) * -1);
+    outline-width: var(--_invalid-ring);
+  }
+
   /* A calendar the reader may read and not change: the days stop offering
      themselves, and nothing is faded, because the value is still real. */
   [data-ui='calendar'][data-part='root'][data-readonly] [data-part='day'],

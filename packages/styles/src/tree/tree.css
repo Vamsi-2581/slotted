@@ -867,6 +867,12 @@
   [data-ui='tree'][data-invalid] {
     --slotted-focus-ring-color: var(--slotted-focus-ring-color-invalid);
     --_border-color: var(--slotted-tone-danger-border);
+    /* Width as well as colour (WCAG 1.4.1): in `high-contrast` the danger
+       border is the resting edge's black. An edge inside the border, so
+       nothing moves, in place of the resting lift — the one `text-field`
+       draws. */
+    --_shadow: inset 0 0 0 var(--slotted-control-invalid-edge-width, 1px)
+      var(--slotted-tone-danger-border);
   }
 
   [data-ui='tree'][data-disabled] {

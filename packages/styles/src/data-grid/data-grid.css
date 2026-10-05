@@ -1519,10 +1519,15 @@
      only this cell's own trace. */
   [data-ui='data-grid'] [data-part='cell'][data-editing][data-invalid] {
     --slotted-focus-ring-color: var(--slotted-focus-ring-color-invalid);
+    /* Width as well as colour (WCAG 1.4.1): in `high-contrast` the invalid ring
+       is the valid ring's black, and the corner mark is withdrawn while the
+       cell edits. The trace widens inward by the edge every invalid control
+       adds, so the cell's box and its draft stay where they are. */
+    --_invalid-ring: calc(var(--_ring-width) + var(--slotted-control-invalid-edge-width, 1px));
 
     box-shadow: none;
-    outline: var(--_ring-width) solid var(--slotted-focus-ring-color, Highlight);
-    outline-offset: calc(var(--_ring-width) * -1);
+    outline: var(--_invalid-ring) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: calc(var(--_invalid-ring) * -1);
   }
 
   /* The editor of a numeric column keeps the digits at the end, where the

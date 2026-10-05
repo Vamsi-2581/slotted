@@ -2518,6 +2518,7 @@ export type ComponentToken =
   | '--slotted-calendar-disabled-color'
   | '--slotted-calendar-hover-background'
   | '--slotted-calendar-in-range-color'
+  | '--slotted-calendar-invalid-edge-width'
   | '--slotted-calendar-invalid-focus-ring-color'
   | '--slotted-calendar-outside-color'
   | '--slotted-calendar-preview-background'
@@ -4691,6 +4692,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-calendar-disabled-color",
   "--slotted-calendar-hover-background",
   "--slotted-calendar-in-range-color",
+  "--slotted-calendar-invalid-edge-width",
   "--slotted-calendar-invalid-focus-ring-color",
   "--slotted-calendar-outside-color",
   "--slotted-calendar-preview-background",

@@ -649,7 +649,8 @@
      * SC 1.4.1 refuses. A second pixel of edge says it in line, in every
      * scheme, and moves nothing: an inset shadow takes no room.
      */
-    box-shadow: inset 0 0 0 var(--_border-width) var(--_edge);
+    box-shadow: inset 0 0 0 var(--slotted-control-invalid-edge-width, var(--_border-width))
+      var(--_edge);
   }
 
   /**

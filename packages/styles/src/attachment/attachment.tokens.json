@@ -37,6 +37,7 @@
   "--slotted-control-icon-size-lg",
   "--slotted-control-icon-size-md",
   "--slotted-control-icon-size-sm",
+  "--slotted-control-invalid-edge-width",
   "--slotted-control-radius",
   "--slotted-control-transition-duration",
   "--slotted-control-transition-easing",

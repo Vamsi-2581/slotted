@@ -12,6 +12,7 @@
   "--slotted-control-icon-size-lg",
   "--slotted-control-icon-size-md",
   "--slotted-control-icon-size-sm",
+  "--slotted-control-invalid-edge-width",
   "--slotted-control-padding-inline-lg",
   "--slotted-control-padding-inline-md",
   "--slotted-control-padding-inline-sm",

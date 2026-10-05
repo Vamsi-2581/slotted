@@ -185,6 +185,15 @@
     --slotted-focus-ring-color: var(--slotted-focus-ring-color-invalid);
   }
 
+  /* Width as well as colour (WCAG 1.4.1): in `high-contrast` the danger border
+     is the resting edge's black. An edge inside the border, so nothing moves,
+     in place of the resting lift — the one `text-field` draws. Disabled keeps
+     its own edge, as it keeps its own border colour. */
+  [data-ui='listbox'][data-invalid]:not([data-disabled]) {
+    --_shadow: inset 0 0 0 var(--slotted-control-invalid-edge-width, 1px)
+      var(--slotted-tone-danger-border);
+  }
+
   [data-ui='listbox'][data-disabled] {
     --_surface: var(--slotted-disabled-background, #e2e8f0);
     --_text: var(--slotted-disabled-foreground, #64748b);

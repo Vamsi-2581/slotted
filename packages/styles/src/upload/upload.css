@@ -441,6 +441,13 @@
     --slotted-focus-ring-color: var(--slotted-focus-ring-color-invalid);
 
     border-color: var(--slotted-tone-danger-border);
+    /* Width as well as colour (WCAG 1.4.1): in `high-contrast` the danger
+       border is the resting edge's black. The trigger is the control in both
+       shapes, so it carries the edge `text-field` draws — inside the border,
+       so nothing moves, in place of the resting lift; its focus is an outline
+       and leaves the edge alone. The region keeps its dashed line. */
+    box-shadow: inset 0 0 0 var(--slotted-control-invalid-edge-width, 1px)
+      var(--slotted-tone-danger-border);
   }
 
   /**

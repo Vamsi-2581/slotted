@@ -631,10 +631,37 @@
   }
 
   [data-ui='entity-picker'][data-part='root'][data-invalid] > [data-part='control'] {
+    --_invalid-edge: inset 0 0 0
+      var(
+        --slotted-entity-picker-invalid-edge-width,
+        var(--slotted-control-invalid-edge-width, 1px)
+      )
+      var(--slotted-entity-picker-invalid-border-color, var(--slotted-tone-danger-border));
+
     border-color: var(
       --slotted-entity-picker-invalid-border-color,
       var(--slotted-tone-danger-border)
     );
+    /*
+     * Width as well as colour (WCAG 1.4.1), the edge `text-field` draws: in
+     * `high-contrast` the danger border is the resting edge's black. The line
+     * is a shadow inside the border, so neither box nor text moves, and it
+     * takes the resting lift's place.
+     */
+    box-shadow: var(--_invalid-edge);
+  }
+
+  [data-ui='entity-picker'][data-invalid]
+    > [data-part='control']:has([data-part='input']:focus-visible) {
+    box-shadow:
+      var(--_invalid-edge),
+      var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
+        var(--slotted-focus-ring-color, Highlight);
+  }
+
+  [data-ui='entity-picker'][data-part='root'][data-variant='plain'][data-invalid]
+    > [data-part='control']:has([data-part='input']:focus-visible) {
+    box-shadow: var(--_invalid-edge);
   }
 
   [data-ui='entity-picker'][data-part='root'][data-readonly] > [data-part='control'] {

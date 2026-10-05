@@ -2590,6 +2590,7 @@ export type ComponentToken =
   | '--slotted-cascader-icon-size-min'
   | '--slotted-cascader-indent'
   | '--slotted-cascader-invalid-border-color'
+  | '--slotted-cascader-invalid-edge-width'
   | '--slotted-cascader-mark-inset'
   | '--slotted-cascader-open-border-color'
   | '--slotted-cascader-path'
@@ -2731,6 +2732,7 @@ export type ComponentToken =
   | '--slotted-combobox-hover-border-color'
   | '--slotted-combobox-icon-size-min'
   | '--slotted-combobox-invalid-border-color'
+  | '--slotted-combobox-invalid-edge-width'
   | '--slotted-combobox-invalid-focus-ring-color'
   | '--slotted-combobox-item-radius'
   | '--slotted-combobox-measure'
@@ -2919,6 +2921,7 @@ export type ComponentToken =
   | '--slotted-date-range-picker-disabled-color'
   | '--slotted-date-range-picker-hover-border-color'
   | '--slotted-date-range-picker-invalid-border-color'
+  | '--slotted-date-range-picker-invalid-edge-width'
   | '--slotted-date-range-picker-invalid-focus-ring-color'
   | '--slotted-date-range-picker-length-color'
   | '--slotted-date-range-picker-limit-color'
@@ -3030,6 +3033,7 @@ export type ComponentToken =
   | '--slotted-datetime-range-picker-hover-border-color'
   | '--slotted-datetime-range-picker-invalid-border-color'
   | '--slotted-datetime-range-picker-invalid-color'
+  | '--slotted-datetime-range-picker-invalid-edge-width'
   | '--slotted-datetime-range-picker-invalid-focus-ring-color'
   | '--slotted-datetime-range-picker-label-color'
   | '--slotted-datetime-range-picker-length-color'
@@ -3170,6 +3174,7 @@ export type ComponentToken =
   | '--slotted-entity-picker-hover-border-color'
   | '--slotted-entity-picker-icon-size-min'
   | '--slotted-entity-picker-invalid-border-color'
+  | '--slotted-entity-picker-invalid-edge-width'
   | '--slotted-entity-picker-invalid-focus-ring-color'
   | '--slotted-entity-picker-item-radius'
   | '--slotted-entity-picker-measure'
@@ -3473,6 +3478,7 @@ export type ComponentToken =
   | '--slotted-multi-select-hover-border-color'
   | '--slotted-multi-select-icon-size-min'
   | '--slotted-multi-select-invalid-border-color'
+  | '--slotted-multi-select-invalid-edge-width'
   | '--slotted-multi-select-invalid-focus-ring-color'
   | '--slotted-multi-select-item-radius'
   | '--slotted-multi-select-measure'
@@ -3560,6 +3566,7 @@ export type ComponentToken =
   | '--slotted-otp-input-group-gap'
   | '--slotted-otp-input-hover-border-color'
   | '--slotted-otp-input-invalid-border-color'
+  | '--slotted-otp-input-invalid-edge-width'
   | '--slotted-otp-input-invalid-focus-ring-color'
   | '--slotted-otp-input-mask-size'
   | '--slotted-otp-input-placeholder-color'
@@ -3660,6 +3667,7 @@ export type ComponentToken =
   | '--slotted-prompt-composer-drop-border-color'
   | '--slotted-prompt-composer-hover-border-color'
   | '--slotted-prompt-composer-invalid-border-color'
+  | '--slotted-prompt-composer-invalid-edge-width'
   | '--slotted-prompt-composer-invalid-focus-ring-color'
   | '--slotted-prompt-composer-line-height'
   | '--slotted-prompt-composer-max-rows'
@@ -3832,6 +3840,7 @@ export type ComponentToken =
   | '--slotted-select-hover-border-color'
   | '--slotted-select-icon-size-min'
   | '--slotted-select-invalid-border-color'
+  | '--slotted-select-invalid-edge-width'
   | '--slotted-select-invalid-focus-ring-color'
   | '--slotted-select-item-radius'
   | '--slotted-select-measure'
@@ -4128,6 +4137,7 @@ export type ComponentToken =
   | '--slotted-tags-input-hover-border-color'
   | '--slotted-tags-input-icon-size-min'
   | '--slotted-tags-input-invalid-border-color'
+  | '--slotted-tags-input-invalid-edge-width'
   | '--slotted-tags-input-invalid-focus-ring-color'
   | '--slotted-tags-input-placeholder-color'
   | '--slotted-tags-input-plain-hover-background'
@@ -4269,6 +4279,7 @@ export type ComponentToken =
   | '--slotted-time-range-picker-hover-border-color'
   | '--slotted-time-range-picker-invalid-border-color'
   | '--slotted-time-range-picker-invalid-color'
+  | '--slotted-time-range-picker-invalid-edge-width'
   | '--slotted-time-range-picker-invalid-focus-ring-color'
   | '--slotted-time-range-picker-label-color'
   | '--slotted-time-range-picker-length-color'
@@ -4746,6 +4757,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-cascader-icon-size-min",
   "--slotted-cascader-indent",
   "--slotted-cascader-invalid-border-color",
+  "--slotted-cascader-invalid-edge-width",
   "--slotted-cascader-mark-inset",
   "--slotted-cascader-open-border-color",
   "--slotted-cascader-path",
@@ -4887,6 +4899,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-combobox-hover-border-color",
   "--slotted-combobox-icon-size-min",
   "--slotted-combobox-invalid-border-color",
+  "--slotted-combobox-invalid-edge-width",
   "--slotted-combobox-invalid-focus-ring-color",
   "--slotted-combobox-item-radius",
   "--slotted-combobox-measure",
@@ -5075,6 +5088,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-date-range-picker-disabled-color",
   "--slotted-date-range-picker-hover-border-color",
   "--slotted-date-range-picker-invalid-border-color",
+  "--slotted-date-range-picker-invalid-edge-width",
   "--slotted-date-range-picker-invalid-focus-ring-color",
   "--slotted-date-range-picker-length-color",
   "--slotted-date-range-picker-limit-color",
@@ -5186,6 +5200,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-datetime-range-picker-hover-border-color",
   "--slotted-datetime-range-picker-invalid-border-color",
   "--slotted-datetime-range-picker-invalid-color",
+  "--slotted-datetime-range-picker-invalid-edge-width",
   "--slotted-datetime-range-picker-invalid-focus-ring-color",
   "--slotted-datetime-range-picker-label-color",
   "--slotted-datetime-range-picker-length-color",
@@ -5326,6 +5341,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-entity-picker-hover-border-color",
   "--slotted-entity-picker-icon-size-min",
   "--slotted-entity-picker-invalid-border-color",
+  "--slotted-entity-picker-invalid-edge-width",
   "--slotted-entity-picker-invalid-focus-ring-color",
   "--slotted-entity-picker-item-radius",
   "--slotted-entity-picker-measure",
@@ -5629,6 +5645,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-multi-select-hover-border-color",
   "--slotted-multi-select-icon-size-min",
   "--slotted-multi-select-invalid-border-color",
+  "--slotted-multi-select-invalid-edge-width",
   "--slotted-multi-select-invalid-focus-ring-color",
   "--slotted-multi-select-item-radius",
   "--slotted-multi-select-measure",
@@ -5716,6 +5733,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-otp-input-group-gap",
   "--slotted-otp-input-hover-border-color",
   "--slotted-otp-input-invalid-border-color",
+  "--slotted-otp-input-invalid-edge-width",
   "--slotted-otp-input-invalid-focus-ring-color",
   "--slotted-otp-input-mask-size",
   "--slotted-otp-input-placeholder-color",
@@ -5816,6 +5834,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-prompt-composer-drop-border-color",
   "--slotted-prompt-composer-hover-border-color",
   "--slotted-prompt-composer-invalid-border-color",
+  "--slotted-prompt-composer-invalid-edge-width",
   "--slotted-prompt-composer-invalid-focus-ring-color",
   "--slotted-prompt-composer-line-height",
   "--slotted-prompt-composer-max-rows",
@@ -5988,6 +6007,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-select-hover-border-color",
   "--slotted-select-icon-size-min",
   "--slotted-select-invalid-border-color",
+  "--slotted-select-invalid-edge-width",
   "--slotted-select-invalid-focus-ring-color",
   "--slotted-select-item-radius",
   "--slotted-select-measure",
@@ -6284,6 +6304,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-tags-input-hover-border-color",
   "--slotted-tags-input-icon-size-min",
   "--slotted-tags-input-invalid-border-color",
+  "--slotted-tags-input-invalid-edge-width",
   "--slotted-tags-input-invalid-focus-ring-color",
   "--slotted-tags-input-placeholder-color",
   "--slotted-tags-input-plain-hover-background",
@@ -6425,6 +6446,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-time-range-picker-hover-border-color",
   "--slotted-time-range-picker-invalid-border-color",
   "--slotted-time-range-picker-invalid-color",
+  "--slotted-time-range-picker-invalid-edge-width",
   "--slotted-time-range-picker-invalid-focus-ring-color",
   "--slotted-time-range-picker-label-color",
   "--slotted-time-range-picker-length-color",

@@ -56,6 +56,7 @@ test('declares the whole anatomy the field ships, as parts', () => {
     'toggle',
     'pin',
     'tabs',
+    'progress',
   ]);
   assert.match(contract.anatomy.controls, /zero-height row/);
 });
@@ -255,14 +256,28 @@ test('sizes the title on its own scale and takes the level from the outline', ()
 });
 
 test('composes rather than re-implementing', () => {
-  assert.deepEqual(contract.composes, ['container', 'breadcrumb', 'toolbar', 'tabs', 'typography']);
+  assert.deepEqual(contract.composes, [
+    'container',
+    'breadcrumb',
+    'toolbar',
+    'tabs',
+    'typography',
+    'progress-indicator',
+  ]);
   assert.equal(contract.declined.actionOverflow.deferTo, 'toolbar');
   assert.equal(contract.declined.breadcrumbOverflow.deferTo, 'breadcrumb');
 });
 
 test('lets an application set its defaults once', () => {
   assert.deepEqual(contract.provides.pageHeaderDefaults, ['size', 'level', 'collapse']);
-  assert.deepEqual(contract.messages, ['collapse', 'expand', 'headerArea', 'pin', 'unpin']);
+  assert.deepEqual(contract.messages, [
+    'collapse',
+    'expand',
+    'headerArea',
+    'pin',
+    'progress',
+    'unpin',
+  ]);
 });
 
 test('declines with a reason, never silently', () => {
@@ -283,10 +298,28 @@ test('lists every scenario the reference pages have to show', () => {
     'actions',
     'tabs',
     'loading',
+    'progress',
     'content',
     'narrow',
     'composition',
     'defaults',
     'accessibility',
   ]);
+});
+
+/**
+ * A refresh of what is already on screen is not a loading state: the content
+ * stays and the region waits. The bar on the header's hairline is the one
+ * thing drawn for it, and it gives way to the title's skeleton and to any
+ * region around it that waits as a whole.
+ */
+test('draws a refresh on the hairline of the header, and only one wait at a time', () => {
+  assert.equal(member.parts.at(-1), 'progress');
+  assert.match(contract.anatomy.progress, /edge-end/);
+  assert.match(contract.anatomy.progress, /hairline/);
+  assert.match(contract.progress.wait, /already on screen/);
+  assert.match(contract.progress.oneWait, /\[aria-busy='true'\]/);
+  assert.match(contract.progress.oneWait, /loading/);
+  assert.match(contract.progress.timing, /200/);
+  assert.match(contract.progress.timing, /400/);
 });

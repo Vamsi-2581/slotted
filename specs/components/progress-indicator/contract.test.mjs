@@ -153,9 +153,24 @@ test('speaks the five tones the theme owns, and no colour of its own', () => {
  * declarations changed, not a family of its own.
  */
 test('absorbs the page-level bar as a placement rather than a family', () => {
-  assert.deepEqual(contract.axes.placement, ['inline', 'page']);
+  assert.deepEqual(contract.axes.placement, ['inline', 'page', 'edge-start', 'edge-end']);
   assert.equal(member.defaults.placement, 'inline');
   assert.ok(member.capabilities.includes('placement'));
+});
+
+/**
+ * The edge of a box is the same bar again: the viewport is one box, and a card,
+ * the content region of a shell or the foot of a header is another. The edge
+ * is part of the placement rather than a second axis, because an edge without
+ * the placement names nothing.
+ */
+test('stands on an edge of the box that holds it, over the line that edge draws', () => {
+  assert.match(contract.edge.box, /nearest positioned box/);
+  assert.match(contract.edge.line, /covers the line/);
+  assert.match(contract.edge.motion, /grows out of the edge/);
+  assert.match(contract.edge.motion, /--slotted-easing-enter/);
+  assert.match(contract.edge.motion, /--slotted-easing-exit/);
+  assert.match(contract.edge.forcedColors, /no outline of its own/);
 });
 
 /**

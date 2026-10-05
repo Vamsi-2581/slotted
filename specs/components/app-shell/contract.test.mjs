@@ -371,6 +371,7 @@ test('says every string it speaks on the reader behalf', () => {
     'nav',
     'open',
     'openAside',
+    'progress',
     'resizeAside',
     'skipToAside',
     'skipToMain',
@@ -399,10 +400,30 @@ test('lists every scenario the reference pages have to show', () => {
     'primary',
     'sides',
     'scroll',
+    'progress',
     'skipLinks',
     'persistence',
     'defaults',
     'composition',
     'accessibility',
   ]);
+});
+
+/**
+ * The wait for the next page is drawn on the line between the chrome and the
+ * content, and where that line is depends on the arrangement: the top border
+ * of the content card, or the banner's lower seam. The shell knows which; a
+ * consumer placing a bar by hand would have to know it for every canvas.
+ */
+test('draws the wait for the next page on the edge of the content', () => {
+  assert.equal(member.parts.indexOf('progress'), member.parts.indexOf('main') + 1);
+  assert.match(contract.anatomy.progress, /the box of main/);
+  assert.match(contract.anatomy.progress, /edge-start/);
+  assert.match(contract.progress.edge, /--_seam-width/);
+  assert.match(contract.progress.busy, /aria-busy/);
+  assert.match(contract.progress.timing, /200/);
+  assert.match(contract.progress.timing, /400/);
+  assert.ok(member.capabilities.includes('loading'));
+  assert.ok(contract.composes.includes('progress-indicator'));
+  assert.ok(contract.messages.includes('progress'));
 });

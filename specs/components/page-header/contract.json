@@ -12,7 +12,7 @@
   "design": "docs/history/designs/2026-09-10-page-design.md",
   "inventory": "docs/history/designs/2026-09-10-page-capability-inventory.md",
   "reference": "SAP Fiori Dynamic Page: sap.f.DynamicPage, sap.f.DynamicPageTitle, sap.f.DynamicPageHeader, read in the OpenUI5 sources",
-  "composes": ["container", "breadcrumb", "toolbar", "tabs", "typography"],
+  "composes": ["container", "breadcrumb", "toolbar", "tabs", "typography", "progress-indicator"],
   "anatomy": {
     "root": "a header element with a box of its own — background, border, shadow, container query and the element a ref returns. Sticky with a negative offset the size of the header area, see sticky below; in the flow below 600 pixels, see compact",
     "title-area": "the strip that never leaves: the nav row, the title row and the controls. Sticky at 0 inside the root, above the header area in the stack, opaque",
@@ -34,7 +34,8 @@
     "figure": "the picture of the record, a column before the content. Absent when not written",
     "content": "a column of whatever only makes sense at rest — a description, a description-list, filters, indicators",
     "description": "a paragraph with a measure, inside content",
-    "tabs": "the slot a tabs family sits in, last in the root. It stays visible under the title area once the header area has scrolled past, because it is the bottom of the root and the root is what sticks"
+    "tabs": "the slot a tabs family sits in, last in the root. It stays visible under the title area once the header area has scrolled past, because it is the bottom of the root and the root is what sticks",
+    "progress": "a transparent frame one hairline tall and the whole width of the root, which positions it, at its static place in the flow; it holds one progress bar at edge-end, so the bar covers the line where the chrome ends. Written after controls and before tabs, as controls are, that line is the hairline the pill straddles: on the root's own edge the bar would run under the tabs and read as the selected tab's indicator. With no tabs it is the root's own hairline. It draws nothing of its own, takes no pointer and has no role, and it keeps its place beside the controls when the header snaps. The controls pill stands above it"
   },
   "sticky": {
     "root": "calc(-1 * var(--slotted-page-header-collapse, 0px))",
@@ -158,6 +159,11 @@
     "parts": "heading, subheading and description",
     "reason": "While loading, the binding renders skeleton's text shape inside each of the three in place of the text, and this family's stylesheet says only how wide each placeholder is, through --slotted-skeleton-inline-size. The placeholder is skeleton's — packages/styles/src/waiting.test.mjs holds that a family that waits paints none of its own — and each line measures 1lh of the text it replaces, which is what keeps the height stable when the title arrives"
   },
+  "progress": {
+    "wait": "refreshing or saving what is already on screen. The content stays, and the region that waits carries aria-busy — the page body, written by the consumer, as page states. The header writes no aria-busy outside its own root",
+    "oneWait": "one wait at a time. Inside an ancestor that is [aria-busy='true'] — a shell between pages, any region the consumer marks — the bar is not drawn, because the whole region's wait answers it; the rule reads an ARIA state, not another family. While loading is true the bar is not drawn either: the title's skeleton is the first load, and a refresh of nothing is not a refresh",
+    "timing": "delay 200 and minDuration 400 milliseconds. A delay costs no blank space here, because the bar reserves none. The prop wins, then the progress-indicator provider, then these values"
+  },
   "glyphs": {
     "toggle": "chevron-down",
     "pin": "pin",
@@ -174,7 +180,7 @@
     "narrow": "600px",
     "below": "the header is not sticky and scrolls away with the page, see compact; breadcrumbs hide and back remains; navigation leaves the title row and joins the actions row; the actions row wraps under the title, unless the actions hold a toolbar with overflow=menu, which keeps them on the title row and folds what does not fit; the subheading is one line with an ellipsis; the heading size drops one step"
   },
-  "messages": ["collapse", "expand", "headerArea", "pin", "unpin"],
+  "messages": ["collapse", "expand", "headerArea", "pin", "progress", "unpin"],
   "declined": {
     "titleClick": {
       "reason": "sap.f toggles the header when the title area is clicked, and UI5 gives the title a tabindex for it. The title area holds links, breadcrumbs and buttons, and a button may not contain a control: a clickable title would be a nested interactive. The toggle is a dedicated button. Cost: one more target; gain: the strip stays walkable by Tab, control by control"
@@ -289,7 +295,8 @@
         "controls",
         "toggle",
         "pin",
-        "tabs"
+        "tabs",
+        "progress"
       ]
     }
   },
@@ -305,6 +312,7 @@
       "actions",
       "tabs",
       "loading",
+      "progress",
       "content",
       "narrow",
       "composition",

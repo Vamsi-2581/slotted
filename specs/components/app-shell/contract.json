@@ -11,7 +11,15 @@
   "resizePattern": "https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/",
   "design": "docs/history/designs/2026-09-29-app-shell-arrangements-design.md",
   "inventory": "docs/history/designs/2026-09-13-app-shell-capability-inventory.md",
-  "composes": ["presence", "dismissable-layer", "focus", "portal", "measure", "extent"],
+  "composes": [
+    "presence",
+    "dismissable-layer",
+    "focus",
+    "portal",
+    "measure",
+    "extent",
+    "progress-indicator"
+  ],
   "anatomy": {
     "root": "a div, and a grid. It is deliberately not a sectioning element: a main inside an article stops being a landmark, and the root has to be placeable anywhere without changing what the five regions mean. It is the query container the whole family answers",
     "skip": "the links that jump past the chrome. One anchor per region that has a target, so a skip link never points at a region nobody rendered. Not a landmark: a nav here would be a third navigation region the reader has to cross to reach the two that matter",
@@ -27,6 +35,7 @@
     "nav-footer": "the bottom of the navigation column, pinned. The account, the collapse control",
     "scrim": "the veil under the overlay panel, mounted only while the layer is modal",
     "main": "a main with tabindex=-1. Without the tabindex the skip link moves the scroll and leaves focus behind, in Safari and in Firefox",
+    "progress": "a transparent frame with the box of main — its grid area, its margins and its radius — that holds one progress bar at edge-start. It draws nothing of its own, takes no pointer and has no role; it exists so the card's radius clips the bar, because a two-pixel strip given the card's radius has its radii scaled down to half its height. A direct child of the root in any position of the DOM order: the grid area places it, above main and below every layer",
     "aside": "an aside, so it is the complementary landmark. It opens and closes like the navigation region does — a column beside the content or a layer over it, by asideMode — because a pane whose column has a fixed width cannot be closed by anything placed inside it",
     "aside-resizer": "the separator on the pane inner edge, from the WAI-ARIA Window Splitter pattern: focusable, role separator, aria-orientation vertical, aria-controls the aside, aria-valuemin, aria-valuemax and aria-valuenow as whole percentages of the shell, named by the resizeAside message. The consumer places it inside the aside; rendering it is the capability. It stands at the inline-start of an end pane and the inline-end of a start pane, a strip the row inset wide lying inside the pane, because the pane scrolls under scroll=content and a scroll container clips what stands outside it. At rest it draws nothing; under the hand, the drag and the keyboard its outer border becomes a line in --slotted-border-strong, and the keyboard adds the focus ring. Drawn only on the column: a layer keeps its size step and a row under the content has no inline edge",
     "aside-header": "the top of the secondary pane, pinned: the title of what the pane shows and the control that closes it",
@@ -73,6 +82,13 @@
     "default": "content",
     "cost": "under document the banner is not sticky. A sticky banner there would oblige the shell to write --slotted-page-sticky-top, which page-header owns writing, and the two writes would erase each other. A shell that wants a permanent banner uses content, which is the default and what every surveyed implementation does"
   },
+  "progress": {
+    "wait": "the wait for the next page: a navigation, a route's data. Data already on screen being refreshed is page-header's progress",
+    "edge": "the bar covers the line between the chrome and the content. Where main draws that line — the top border of the inset or floating card, the top border main keeps under a layered navigation — the frame is the box of main. Where the banner draws it — flush, primary=main, panel with primary=nav — the frame reaches --_seam-width above main and covers the banner's seam. Under separation=tone --_seam-width is nought and the bar stands on the top of main. Every rule that sets a margin or a radius on main lists the frame beside it, so the two cannot drift",
+    "scroll": "under scroll=content the frame does not scroll. Under scroll=document the bar is sticky at the top of the frame, so it stays at the top of the viewport once the banner has scrolled away",
+    "busy": "while the bar is painted, main carries aria-busy=true, and an aria-busy the consumer wrote on main wins. Focus does not move",
+    "timing": "delay 200 and minDuration 400 milliseconds. A delay costs no blank space here, because the bar reserves none: it covers a line that is already drawn. The prop wins, then the progress-indicator provider, then these values"
+  },
   "overlay": {
     "back": "as dialog: one entry of the session history per modal layer, held by @slotted/core/dismissable-layer, and a popstate that leaves it is the platform's way back, answered by the layer with the reason back — the navigation layer and the pane layer alike, the topmost first. The column and the rail hold none: nothing stands over the page",
     "presence": "@slotted/core/presence holds the panel through its exit",
@@ -100,6 +116,7 @@
     "nav",
     "open",
     "openAside",
+    "progress",
     "resizeAside",
     "skipToAside",
     "skipToMain",
@@ -273,7 +290,7 @@
         "minAsideExtent": 0.16,
         "maxAsideExtent": 0.6
       },
-      "capabilities": ["open", "extent", "arrangement", "size", "appearance", "wiring"],
+      "capabilities": ["open", "extent", "arrangement", "size", "appearance", "wiring", "loading"],
       "states": ["default", "hover", "active", "focus-visible", "open", "dragging"],
       "parts": [
         "root",
@@ -290,6 +307,7 @@
         "nav-footer",
         "scrim",
         "main",
+        "progress",
         "aside",
         "aside-resizer",
         "aside-header",
@@ -319,6 +337,7 @@
       "primary",
       "sides",
       "scroll",
+      "progress",
       "skipLinks",
       "persistence",
       "defaults",

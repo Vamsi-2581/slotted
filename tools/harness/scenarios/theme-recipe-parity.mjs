@@ -12,7 +12,7 @@ import {
   SEED_NAMES,
   seedGrid,
 } from '../../../packages/theme/dist/index.js';
-import { engineArgument, openPage } from '../engines.mjs';
+import { engineArgument, readPage } from '../engines.mjs';
 
 /**
  * The recipe is computed twice: by the browser, from the CSS `renderTheme`
@@ -84,15 +84,7 @@ const READ = `[...document.querySelectorAll('[data-case]')].map((scope) => {
   });
 })`;
 
-const browser = await openPage(engine);
-const { version } = browser;
-let readings;
-try {
-  await browser.goto(pathToFileURL(out.pathname).href);
-  readings = await browser.evaluate(READ);
-} finally {
-  await browser.close();
-}
+const { version, value: readings } = await readPage(engine, pathToFileURL(out.pathname).href, READ);
 
 /**
  * A token whose value the engine cannot parse is invalid at computed-value

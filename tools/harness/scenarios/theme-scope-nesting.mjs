@@ -12,7 +12,7 @@ import {
 } from '../../../packages/theme/dist/index.js';
 import { buildTheme } from '../../../packages/theme/cli/build.mjs';
 import { attachScript, bundleScript } from '../script.mjs';
-import { engineArgument, openPage } from '../engines.mjs';
+import { engineArgument, readPage } from '../engines.mjs';
 
 /**
  * Theme B (`proof`, dark, its own accent seed) inside theme A (`default`,
@@ -160,15 +160,12 @@ const READ = `(() => {
   };
 })()`;
 
-const browser = await openPage(engine);
-let reading;
-try {
-  await browser.goto(pathToFileURL(fileURLToPath(page)).href);
-  reading = await browser.evaluate(READ);
-} finally {
-  await browser.close();
-}
-console.log(`${engine}: ${browser.version}`);
+const { version, value: reading } = await readPage(
+  engine,
+  pathToFileURL(fileURLToPath(page)).href,
+  READ,
+);
+console.log(`${engine}: ${version}`);
 console.log(JSON.stringify(reading, null, 2));
 
 const oklch = (text) => {

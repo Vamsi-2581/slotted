@@ -54,6 +54,8 @@ class Devtools {
   #next = 0;
   #pending = new Map();
   #listeners = new Map();
+  #closed = false;
+  #closing = false;
 
   constructor(socket) {
     this.#socket = socket;
@@ -64,8 +66,23 @@ class Devtools {
         this.#pending.delete(message.id);
         return;
       }
-      this.#listeners.get(message.method)?.forEach((resolve) => resolve(message.params));
+      this.#listeners.get(message.method)?.forEach(({ resolve }) => resolve(message.params));
       this.#listeners.delete(message.method);
+    });
+    /* A browser that dies closes the socket; a command waiting on it fails instead of hanging. */
+    socket.addEventListener('close', () => {
+      this.#closed = true;
+      this.#pending.forEach((settle) =>
+        settle({ error: { message: 'the DevTools connection closed' } }),
+      );
+      this.#pending.clear();
+      if (this.#closing) return;
+      this.#listeners.forEach((waiting, method) =>
+        waiting.forEach(({ reject }) =>
+          reject(new Error(`${method}: the DevTools connection closed`)),
+        ),
+      );
+      this.#listeners.clear();
     });
   }
 
@@ -81,6 +98,7 @@ class Devtools {
   }
 
   send(method, params = {}) {
+    if (this.#closed) return Promise.reject(new Error(`${method}: the DevTools connection closed`));
     const id = (this.#next += 1);
     return new Promise((resolve, reject) => {
       this.#pending.set(id, (message) =>
@@ -93,12 +111,13 @@ class Devtools {
   }
 
   once(method) {
-    return new Promise((resolve) => {
-      this.#listeners.set(method, [...(this.#listeners.get(method) ?? []), resolve]);
+    return new Promise((resolve, reject) => {
+      this.#listeners.set(method, [...(this.#listeners.get(method) ?? []), { resolve, reject }]);
     });
   }
 
   close() {
+    this.#closing = true;
     this.#socket.close();
   }
 }
@@ -154,8 +173,10 @@ export async function launch({ scrollbars = 'hide' } = {}) {
   return {
     devtools: await Devtools.connect(page.webSocketDebuggerUrl),
     async close() {
-      chrome.kill();
-      await once(chrome, 'exit');
+      if (chrome.exitCode === null && chrome.signalCode === null) {
+        chrome.kill();
+        await once(chrome, 'exit');
+      }
       await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
     },
   };

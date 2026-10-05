@@ -22,22 +22,40 @@ import { launch as launchChrome } from './shoot.mjs';
  *   automation but Playwright's own protocol, which is tied to the build of
  *   the same release.
  * - `webkit-18`: `playwright-core` 1.53.0 under the alias
- *   `playwright-core-webkit18`, WebKit 18.5 — the last release with a WebKit
- *   18, and the published minimum is Safari 18.
+ *   `playwright-core-webkit18`, WebKit 18.5, the last release with a WebKit
+ *   18. Safari 18 is the published minimum.
  *
- * A WebKit build is installed with
- * `pnpm --filter @slotted/harness exec playwright-core install webkit` (and
- * `node tools/harness/node_modules/playwright-core-webkit18/cli.js install webkit`);
- * its system libraries with `install-deps webkit` (root). Without root, the
- * libraries a headless run loads are extracted from the distribution's
- * packages and named in `LD_LIBRARY_PATH`; on Ubuntu 24.04 these are
- * libavif16, libenchant-2-2, libflite1, libgstreamer-plugins-bad1.0-0,
+ * The published minimums (`docs/product/prd.md` §33) and how to obtain each
+ * build; every command was run from an empty `PLAYWRIGHT_BROWSERS_PATH`:
+ *
+ * - Chrome 125: Chrome for Testing 125.0.6422.141, unzipped from
+ *   `https://storage.googleapis.com/chrome-for-testing-public/125.0.6422.141/linux64/chrome-linux64.zip`;
+ *   then `CHROME_BIN=<dir>/chrome-linux64/chrome`.
+ * - Firefox 146: Playwright's `firefox-1509` (146.0.1), from
+ *   `npx playwright-core@1.58.0 install firefox`; then
+ *   `FIREFOX=<cache>/firefox-1509/firefox/firefox`. Without `FIREFOX` the
+ *   newest cached build runs, and `pnpm --filter @slotted/harness exec
+ *   playwright-core install firefox` installs Firefox 155.
+ * - Safari 18: WebKit 18.5 (`webkit-2182`), from
+ *   `node tools/harness/node_modules/playwright-core-webkit18/cli.js install webkit`;
+ *   then `--engine webkit-18`. WebKit 26.6 comes from
+ *   `pnpm --filter @slotted/harness exec playwright-core install webkit`.
+ *
+ * WebKit's system libraries come from `install-deps webkit` (root). Without
+ * root, on Ubuntu 24.04, `apt-get download` and `dpkg -x` extract libavif16,
+ * libenchant-2-2, libflite1, libgstreamer-plugins-bad1.0-0,
  * libgstreamer-gl1.0-0, libmanette-0.2-0, libwayland-server0, libwebpdemux2,
  * libwebpmux3, libdav1d7, libgav1-1, librav1e0, libsvtav1enc1d1, libyuv0,
- * libvpx9 and libwoff1. Playwright 1.53 also requires the GTK 4 libraries a
- * headless run does not load; `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1`
- * skips that check. An engine that cannot start fails the scenario with the
- * reason.
+ * libvpx9 and libwoff1; their `usr/lib/x86_64-linux-gnu` goes in
+ * `LD_LIBRARY_PATH` for WebKit 26.6 and is copied into
+ * `webkit-2182/minibrowser-wpe/sys/lib` for WebKit 18.5, whose launcher
+ * replaces `LD_LIBRARY_PATH`. Playwright 1.53 also checks for the GTK 4
+ * libraries a headless run does not load;
+ * `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1` skips that check.
+ *
+ * An engine that cannot start, a browser that exits, a connection that
+ * closes and a Firefox command unanswered for 120 s each fail the scenario
+ * with the reason (`readPage`).
  */
 export const ENGINES = ['chrome', 'firefox', 'webkit', 'webkit-18'];
 
@@ -85,6 +103,7 @@ async function chromePage() {
       version: product,
       async goto(url) {
         const loaded = devtools.once('Page.loadEventFired');
+        loaded.catch(() => {});
         await unlessCrashed(devtools.send('Page.navigate', { url }));
         await unlessCrashed(loaded);
       },
@@ -111,6 +130,26 @@ async function chromePage() {
     await close();
     throw error;
   }
+}
+
+/**
+ * Opens `url` in `engine` and returns the engine's version and the value of
+ * `expression`. Any failure — an engine that cannot start, a browser that
+ * dies, a command that is never answered — prints FAIL with the reason,
+ * closes the browser and exits 1.
+ */
+export async function readPage(engine, url, expression) {
+  let browser;
+  try {
+    browser = await openPage(engine);
+    await browser.goto(url);
+    return { version: browser.version, value: await browser.evaluate(expression) };
+  } catch (error) {
+    console.error(`FAIL ${browser?.version ?? engine}: ${error.message}`);
+  } finally {
+    await browser?.close().catch(() => {});
+  }
+  process.exit(1);
 }
 
 const playwrightCache = () =>
@@ -140,9 +179,75 @@ function firefoxBinary() {
   return builds[0];
 }
 
+/** How long a BiDi command may wait for its answer before it fails the scenario. */
+const COMMAND_TIMEOUT = 120000;
+
+/** The JSON a page wrote, or `undefined` when the expression's value was `undefined`. */
+export function evaluated(text) {
+  return text === undefined ? undefined : JSON.parse(text);
+}
+
 /**
- * The few WebDriver BiDi commands a scenario needs, over the global
- * `WebSocket`. Firefox prints the port it listens on once it is ready.
+ * Commands over a WebDriver BiDi socket. Every command in flight fails, with
+ * the reason, when the browser exits, when the socket closes, or when no
+ * answer arrives within `timeout`; a command sent after that fails at once.
+ * `output()` returns the browser's stderr, whose last lines go into the error.
+ */
+export function bidiConnection(
+  socket,
+  browser,
+  { timeout = COMMAND_TIMEOUT, output = () => '' } = {},
+) {
+  let next = 0;
+  let broken;
+  const pending = new Map();
+  const tail = () => {
+    const text = output().trim();
+    return text ? `:\n${text.split('\n').slice(-20).join('\n')}` : '';
+  };
+  const fail = (error) => {
+    if (broken) return;
+    broken = error;
+    for (const { reject, timer } of pending.values()) {
+      clearTimeout(timer);
+      reject(error);
+    }
+    pending.clear();
+  };
+  browser.on('exit', (code, signal) =>
+    fail(new Error(`firefox exited (${signal ?? `code ${code}`})${tail()}`)),
+  );
+  socket.addEventListener('close', () =>
+    fail(new Error(`the WebDriver BiDi connection closed${tail()}`)),
+  );
+  socket.addEventListener('message', ({ data }) => {
+    const message = JSON.parse(String(data));
+    const entry = message.id === undefined ? undefined : pending.get(message.id);
+    if (!entry) return;
+    pending.delete(message.id);
+    clearTimeout(entry.timer);
+    if (message.type === 'error') {
+      entry.reject(new Error(`${entry.method}: ${message.error}: ${message.message}`));
+    } else entry.resolve(message.result);
+  });
+  const send = (method, params = {}) =>
+    broken
+      ? Promise.reject(broken)
+      : new Promise((resolve, reject) => {
+          const id = (next += 1);
+          const timer = setTimeout(() => {
+            pending.delete(id);
+            reject(new Error(`${method}: no answer from firefox in ${timeout / 1000} s${tail()}`));
+          }, timeout);
+          pending.set(id, { method, resolve, reject, timer });
+          socket.send(JSON.stringify({ id, method, params }));
+        });
+  return { send };
+}
+
+/**
+ * Firefox over WebDriver BiDi, which it speaks natively. It prints the port
+ * it listens on once it is ready.
  */
 async function firefoxPage(binary) {
   const profile = await mkdtemp(join(tmpdir(), 'slotted-firefox-'));
@@ -151,6 +256,10 @@ async function firefoxPage(binary) {
     ['--headless', '--no-remote', '--profile', profile, '--remote-debugging-port=0', 'about:blank'],
     { stdio: ['ignore', 'ignore', 'pipe'] },
   );
+  let output = '';
+  firefox.stderr.on('data', (chunk) => {
+    output = (output + chunk).slice(-16384);
+  });
   const stop = async () => {
     if (firefox.exitCode === null && firefox.signalCode === null) {
       firefox.kill();
@@ -162,7 +271,6 @@ async function firefoxPage(binary) {
   let socket;
   try {
     const url = await new Promise((resolve, reject) => {
-      let output = '';
       const timer = setTimeout(
         () => reject(new Error(`firefox never opened WebDriver BiDi:\n${output}`)),
         30000,
@@ -175,8 +283,7 @@ async function firefoxPage(binary) {
         clearTimeout(timer);
         reject(new Error(`firefox exited with ${code}:\n${output}`));
       });
-      firefox.stderr.on('data', (chunk) => {
-        output += chunk;
+      firefox.stderr.on('data', () => {
         const match = /WebDriver BiDi listening on (ws:\/\/\S+)/.exec(output);
         if (!match) return;
         clearTimeout(timer);
@@ -195,25 +302,7 @@ async function firefoxPage(binary) {
     throw error;
   }
 
-  let next = 0;
-  const pending = new Map();
-  socket.addEventListener('message', ({ data }) => {
-    const message = JSON.parse(String(data));
-    if (message.id === undefined) return;
-    pending.get(message.id)?.(message);
-    pending.delete(message.id);
-  });
-  const send = (method, params = {}) =>
-    new Promise((resolve, reject) => {
-      const id = (next += 1);
-      pending.set(id, (message) =>
-        message.type === 'error'
-          ? reject(new Error(`${method}: ${message.error}: ${message.message}`))
-          : resolve(message.result),
-      );
-      socket.send(JSON.stringify({ id, method, params }));
-    });
-
+  const { send } = bidiConnection(socket, firefox, { output: () => output });
   try {
     const session = await send('session.new', { capabilities: {} });
     const { contexts } = await send('browsingContext.getTree', {});
@@ -230,9 +319,10 @@ async function firefoxPage(binary) {
           awaitPromise: true,
         });
         if (result.type === 'exception') throw new Error(result.exceptionDetails.text);
-        return JSON.parse(result.result.value);
+        return evaluated(result.result.value);
       },
       async close() {
+        /* The exit browser.close causes may reject it before its answer arrives. */
         await send('browser.close').catch(() => {});
         socket.close();
         await stop();
@@ -266,7 +356,7 @@ async function webkitPage(driver) {
         await page.goto(url, { waitUntil: 'load' });
       },
       async evaluate(expression) {
-        return JSON.parse(
+        return evaluated(
           await page.evaluate(`(async () => JSON.stringify(await (${expression})))()`),
         );
       },

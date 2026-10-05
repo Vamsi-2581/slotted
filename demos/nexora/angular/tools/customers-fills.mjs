@@ -3,9 +3,11 @@
 // The coloured-fills scenario: the customers list, the screen where Firefox 146 drew the solid
 // avatar and the "New customer" button with no ground (white text on nothing), the tone badges in
 // the page's grey, and the focus ring in no colour, because the theme's bounded colour tokens were
-// invalid there. The build is served from `dist` with an SPA fallback, and the engine is driven by
-// `tools/harness/engines.mjs` (FIREFOX, CHROME_BIN and the WebKit drivers are named there). With
-// `html` in light, then in dark, it asserts:
+// invalid there. The build is served from `dist` with an SPA fallback. The engine is driven by the
+// repository's `tools/harness/engines.mjs`, imported by path, so the scenario runs only inside this
+// repository with `tools/harness` installed; FIREFOX, CHROME_BIN, the WebKit drivers and how to
+// obtain each minimum build are named there.
+// With `html` in light, then in dark, it asserts:
 // - every colour token of the standard recipe paints a ground on a probe under `html`: a token the
 //   engine cannot parse leaves `background-color` transparent;
 // - every solid button and solid avatar paints an opaque ground, and its text holds 4.5:1 on it;
@@ -130,7 +132,7 @@ try {
 } catch (error) {
   check(false, error.message);
 } finally {
-  await browser?.close();
+  await browser?.close().catch(() => {});
   server.close();
 }
 console.log(failed === 0 ? 'ok — every coloured fill paints' : `${failed} checks failed`);

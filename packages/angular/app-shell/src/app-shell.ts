@@ -38,6 +38,12 @@ import {
 } from '@angular/core';
 import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  injectProgressIndicatorDefaults,
+  SlProgressBar,
+  type ProgressSize,
+  type ProgressTone,
+} from '@slotted/angular/progress-indicator';
 
 import { injectAppShellDefaults } from './app-shell-defaults';
 import type {
@@ -283,6 +289,8 @@ export class SlAppShell {
   );
   /** The family's words in the language in force, with this shell's `messages` laid over them. */
   readonly t = injectMessages(appShellMessages, this.messages);
+  /** Whether the bar on the content's edge is painted, which `main` reports as `aria-busy`. */
+  readonly busy = signal(false);
 
   private readonly wantedMode = computed(() => this.navMode() ?? this.defaults.navMode);
 
@@ -773,16 +781,84 @@ export class SlAppShellNavFooter {}
     'data-part': 'main',
     tabindex: '-1',
     '[attr.id]': 'elementId',
+    '[attr.aria-busy]': 'busy()',
   },
 })
 export class SlAppShellMain {
   private readonly shell = attach('main');
   private readonly writtenId = inject(new HostAttributeToken('id'), { optional: true });
   protected readonly elementId = this.writtenId ?? this.shell.mainId;
+  /** The wait on this region's edge; an `aria-busy` the consumer wrote wins. */
+  private readonly writtenBusy = inject(new HostAttributeToken('aria-busy'), { optional: true });
+  protected readonly busy = computed(() => this.writtenBusy ?? (this.shell.busy() ? 'true' : null));
 
   constructor() {
     const remove = this.shell.registerRegion('main');
     inject(DestroyRef).onDestroy(remove);
+  }
+}
+
+/**
+ * The wait for the next page, on the line between the chrome and the content.
+ * The element is the consumer's, anywhere inside the shell: the stylesheet
+ * lays it over `main` in every arrangement as a frame, and it holds one bar
+ * at `edge-start`. Where the line is — the card's border, the banner's seam —
+ * is the stylesheet's to know, not the consumer's.
+ *
+ * `main` is busy for exactly as long as the bar is painted, which the bar
+ * itself reports: not from the moment `loading` turns, because a fast answer
+ * draws nothing, and not after the bar has gone. `size` defaults to `sm`,
+ * `delay` to 200 and `minDuration` to 400 milliseconds; an input, then
+ * `provideProgressIndicatorDefaults()`, wins.
+ */
+@Component({
+  selector: '[slAppShellProgress]',
+  standalone: true,
+  exportAs: 'slAppShellProgress',
+  imports: [SlProgressBar],
+  template: `<div
+    slProgressBar
+    placement="edge-start"
+    [buffer]="buffer()"
+    [delay]="delay() ?? defaults.delay ?? 200"
+    [label]="label() ?? shell.t('progress')"
+    [loading]="loading()"
+    [max]="max()"
+    [min]="min()"
+    [minDuration]="minDuration() ?? defaults.minDuration ?? 400"
+    [size]="size() ?? 'sm'"
+    [tone]="tone()"
+    [value]="value()"
+    [valueText]="valueText()"
+    (withdraw)="withdraw.emit()"
+  ></div>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  host: { 'data-part': 'progress' },
+})
+export class SlAppShellProgress {
+  protected readonly shell = inject(SlAppShell);
+  protected readonly defaults = injectProgressIndicatorDefaults();
+
+  readonly loading = input(true, { transform: booleanAttribute });
+  readonly value = input<number | null | undefined>(undefined);
+  readonly min = input<number | undefined>(undefined);
+  readonly max = input<number | undefined>(undefined);
+  readonly buffer = input<number | null | undefined>(undefined);
+  readonly valueText = input<string | undefined>(undefined);
+  readonly label = input<string | undefined>(undefined);
+  readonly tone = input<ProgressTone | undefined>(undefined);
+  readonly size = input<ProgressSize | undefined>(undefined);
+  readonly delay = input<number | undefined>(undefined);
+  readonly minDuration = input<number | undefined>(undefined);
+  /** The bar was painted and has been withdrawn. */
+  readonly withdraw = output<void>();
+
+  private readonly bar = viewChild.required(SlProgressBar);
+
+  constructor() {
+    effect(() => this.shell.busy.set(this.bar().painted()));
+    inject(DestroyRef).onDestroy(() => this.shell.busy.set(false));
   }
 }
 

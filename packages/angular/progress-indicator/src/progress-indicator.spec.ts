@@ -416,3 +416,34 @@ describe('the contract this binding answers', () => {
     }
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [SlProgressBar],
+  template: `<div slProgressBar label="Refreshing" [placement]="placement()"></div>`,
+})
+class EdgeHost {
+  readonly placement = signal<'inline' | 'edge-start' | 'edge-end'>('edge-start');
+}
+
+describe('a bar on an edge of its box', () => {
+  it('writes the placement and keeps its name clipped', () => {
+    const fixture = TestBed.createComponent(EdgeHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector(
+      '[data-ui="progress-indicator"]',
+    ) as HTMLElement;
+    expect(root.getAttribute('data-placement')).toBe('edge-start');
+    expect(root.querySelector('[data-part="label"]')?.getAttribute('data-ui')).toBe(
+      'visually-hidden',
+    );
+
+    fixture.componentInstance.placement.set('edge-end');
+    fixture.detectChanges();
+    expect(root.getAttribute('data-placement')).toBe('edge-end');
+
+    fixture.componentInstance.placement.set('inline');
+    fixture.detectChanges();
+    expect(root.hasAttribute('data-placement')).toBe(false);
+  });
+});

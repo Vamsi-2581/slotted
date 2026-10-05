@@ -1,5 +1,7 @@
 import type { FamilyTranslator, PageHeaderMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
+
+import type { ProgressBarProps } from '../progress-indicator';
 import type {
   ButtonHTMLAttributes,
   ComponentPropsWithRef,
@@ -172,6 +174,13 @@ export interface PageHeaderProps extends Omit<ComponentPropsWithRef<'header'>, '
   /** Defaults to the provider, then `md`. */
   size?: PageHeaderSize | undefined;
 }
+
+/**
+ * The bar's own props, less the placement the header decides. `size` defaults
+ * to `sm`, `delay` to 200 and `minDuration` to 400 milliseconds; a value set
+ * here, then one set through `ProgressIndicatorDefaultsProvider`, wins.
+ */
+export type PageHeaderProgressProps = Omit<ProgressBarProps, 'placement'>;
 
 export interface PageHeaderPartComponentProps extends ComponentPropsWithRef<'div'> {
   /** Renders the part into another element. */

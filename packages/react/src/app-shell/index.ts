@@ -18,6 +18,7 @@ export {
   AppShellNavHeader,
   AppShellNavRail,
   AppShellNavToggle,
+  AppShellProgress,
 } from './app-shell-parts';
 export { AppShellDefaultsProvider, useAppShellDefaults } from './app-shell-defaults';
 export type {
@@ -52,6 +53,7 @@ export type {
   AppShellOpenReason,
   AppShellOpenRequest,
   AppShellPrimary,
+  AppShellProgressProps,
   AppShellProps,
   AppShellRootProps,
   AppShellScroll,

@@ -5,5 +5,6 @@ export const ptBR: PageHeaderMessages = {
   expand: 'Expandir cabeçalho',
   headerArea: 'Cabeçalho da página',
   pin: 'Fixar cabeçalho',
+  progress: 'Atualizando página',
   unpin: 'Desafixar cabeçalho',
 };

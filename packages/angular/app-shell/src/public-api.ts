@@ -19,6 +19,7 @@ export {
   SlAppShellNavHeader,
   SlAppShellNavRail,
   SlAppShellNavToggle,
+  SlAppShellProgress,
 } from './app-shell';
 export {
   APP_SHELL_DEFAULTS,

@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, RouterLink } from '@angular/router';
-import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { provideSlotted } from '@slotted/angular/i18n';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
@@ -22,7 +22,9 @@ import {
   SlAppShellNavBody,
   SlAppShellNavRail,
   SlAppShellNavToggle,
+  SlAppShellProgress,
 } from './app-shell';
+import { provideProgressIndicatorDefaults } from '@slotted/angular/progress-indicator';
 import { provideAppShellDefaults } from './app-shell-defaults';
 import type {
   AppShellAsideExtentRequest,
@@ -755,5 +757,70 @@ describe('SlAppShell', () => {
       await choose('Cargas');
       expect(fixture.componentInstance.open()).toBe(true);
     });
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlAppShell, SlAppShellBanner, SlAppShellMain, SlAppShellProgress],
+  template: `<div slAppShell navMode="inline">
+    <header slAppShellBanner></header>
+    <main slAppShellMain>Encomendas</main>
+    <div slAppShellProgress [loading]="loading()" (withdraw)="withdrawals = withdrawals + 1"></div>
+  </div>`,
+})
+class ProgressShellHost {
+  readonly loading = signal(true);
+  withdrawals = 0;
+}
+
+describe('the wait for the next page', () => {
+  const main = (root: HTMLElement) => root.querySelector('main') as HTMLElement;
+  const bar = (root: HTMLElement) =>
+    root.querySelector('[data-part="progress"] > [data-ui="progress-indicator"]') as HTMLElement;
+
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it('marks the content busy for exactly as long as the bar is painted', () => {
+    const fixture = TestBed.createComponent(ProgressShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(bar(root).hasAttribute('hidden')).toBe(true);
+    expect(main(root).hasAttribute('aria-busy')).toBe(false);
+
+    vi.advanceTimersByTime(200);
+    fixture.detectChanges();
+    expect(bar(root).hasAttribute('hidden')).toBe(false);
+    expect(bar(root).getAttribute('data-placement')).toBe('edge-start');
+    expect(bar(root).getAttribute('data-size')).toBe('sm');
+    expect(main(root).getAttribute('aria-busy')).toBe('true');
+
+    fixture.componentInstance.loading.set(false);
+    fixture.detectChanges();
+    expect(main(root).getAttribute('aria-busy')).toBe('true');
+    vi.advanceTimersByTime(400);
+    fixture.detectChanges();
+    expect(bar(root).hasAttribute('hidden')).toBe(true);
+    expect(main(root).hasAttribute('aria-busy')).toBe(false);
+    expect(fixture.componentInstance.withdrawals).toBe(1);
+  });
+
+  it('names the wait from the catalog, and takes the timing an application set once', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } }),
+        provideProgressIndicatorDefaults({ delay: 0, minDuration: 0 }),
+      ],
+    });
+    const fixture = TestBed.createComponent(ProgressShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(bar(root).hasAttribute('hidden')).toBe(false);
+    expect(bar(root).querySelector('[data-part="label"]')?.textContent?.trim()).toBe(
+      'Carregando página',
+    );
+    expect(main(root).getAttribute('aria-busy')).toBe('true');
   });
 });

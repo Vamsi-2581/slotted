@@ -27,6 +27,7 @@ export {
   SlPageHeaderNav,
   SlPageHeaderNavigation,
   SlPageHeaderPin,
+  SlPageHeaderProgress,
   SlPageHeaderSubheading,
   SlPageHeaderTabs,
   SlPageHeaderTitle,

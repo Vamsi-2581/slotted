@@ -5,6 +5,7 @@ import type { ReactElement, ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { SlottedProvider } from '../i18n';
+import { ProgressIndicatorDefaultsProvider } from '../progress-indicator';
 
 import { AppShell } from './app-shell';
 import { AppShellDefaultsProvider } from './app-shell-defaults';
@@ -23,6 +24,7 @@ import {
   AppShellNavBody,
   AppShellNavRail,
   AppShellNavToggle,
+  AppShellProgress,
 } from './app-shell-parts';
 import type { AppShellHandle, AppShellOpenReason, AppShellProps } from './app-shell.types';
 
@@ -901,5 +903,90 @@ describe('AppShell', () => {
       rerender(<Resizable asideOpen={false} />);
       expect(screen.queryByRole('separator')).toBeNull();
     });
+  });
+});
+
+describe('AppShellProgress', () => {
+  function Shell({ children, loading }: { children?: ReactNode; loading: boolean }) {
+    return (
+      <AppShell>
+        <AppShellBanner />
+        <AppShellMain>{children}</AppShellMain>
+        <AppShellProgress loading={loading} />
+      </AppShell>
+    );
+  }
+
+  /**
+   * The content is busy for as long as the reader can see the wait: not from
+   * the moment the prop turns, because a fast answer draws nothing, and not
+   * after the bar has gone.
+   */
+  it('marks the content busy for exactly as long as the bar is painted', () => {
+    vi.useFakeTimers();
+    try {
+      const { container, rerender } = render(<Shell loading />);
+      const main = container.querySelector('main');
+      const bar = () =>
+        container.querySelector('[data-part="progress"] > [data-ui="progress-indicator"]');
+
+      expect(bar()).toHaveAttribute('hidden');
+      expect(main).not.toHaveAttribute('aria-busy');
+
+      act(() => void vi.advanceTimersByTime(200));
+      expect(bar()).not.toHaveAttribute('hidden');
+      expect(bar()).toHaveAttribute('data-placement', 'edge-start');
+      expect(bar()).toHaveAttribute('data-size', 'sm');
+      expect(main).toHaveAttribute('aria-busy', 'true');
+
+      rerender(<Shell loading={false} />);
+      expect(main).toHaveAttribute('aria-busy', 'true');
+      act(() => void vi.advanceTimersByTime(400));
+      expect(bar()).toHaveAttribute('hidden');
+      expect(main).not.toHaveAttribute('aria-busy');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('draws nothing for an answer faster than the delay', () => {
+    vi.useFakeTimers();
+    try {
+      const { container, rerender } = render(<Shell loading />);
+      act(() => void vi.advanceTimersByTime(120));
+      rerender(<Shell loading={false} />);
+      act(() => void vi.advanceTimersByTime(600));
+      expect(container.querySelector('main')).not.toHaveAttribute('aria-busy');
+      expect(
+        container.querySelector('[data-part="progress"] > [data-ui="progress-indicator"]'),
+      ).toHaveAttribute('hidden');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('names the wait from the catalog, and takes the timing an application set once', () => {
+    const { container } = render(
+      <PtBr>
+        <ProgressIndicatorDefaultsProvider delay={0} minDuration={0}>
+          <Shell loading />
+        </ProgressIndicatorDefaultsProvider>
+      </PtBr>,
+    );
+    const bar = screen.getByRole('progressbar');
+    expect(bar).toHaveAccessibleName('Carregando página');
+    expect(bar).not.toHaveAttribute('hidden');
+    expect(container.querySelector('main')).toHaveAttribute('aria-busy', 'true');
+  });
+
+  it('lets an aria-busy the consumer wrote on the content win', () => {
+    render(
+      <AppShell>
+        <AppShellMain aria-busy={false}>content</AppShellMain>
+        <AppShellProgress delay={0} label="Opening the order" />
+      </AppShell>,
+    );
+    expect(screen.getByRole('main')).toHaveAttribute('aria-busy', 'false');
+    expect(screen.getByRole('progressbar')).toHaveAccessibleName('Opening the order');
   });
 });

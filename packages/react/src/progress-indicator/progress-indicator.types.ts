@@ -2,7 +2,7 @@ import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 export type ProgressSize = 'sm' | 'md' | 'lg';
 export type ProgressTone = 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
-export type ProgressPlacement = 'inline' | 'page';
+export type ProgressPlacement = 'inline' | 'page' | 'edge-start' | 'edge-end';
 /** The geometry a component draws. Written to `data-shape`, never chosen. */
 export type ProgressShape = 'linear' | 'circular' | 'morph';
 
@@ -48,7 +48,7 @@ interface ProgressCommonProps {
   onWithdraw?: () => void;
   /** The rendered accessible name. */
   label?: string;
-  /** Clips the label and keeps it as the name. Implied by `placement="page"`. */
+  /** Clips the label and keeps it as the name. Implied by every placement but `inline`. */
   hideLabel?: boolean;
   /**
    * Takes the indicator out of the accessibility tree: no role, no range, no
@@ -105,7 +105,11 @@ export interface ProgressBarProps
   extends Omit<ComponentPropsWithRef<'div'>, 'children'>, ProgressMeasuredProps {
   /** A second, further quantity: received but not yet processed. */
   buffer?: number | null;
-  /** `page` pins the bar to the top edge of the viewport. */
+  /**
+   * `page` pins the bar to the top edge of the viewport; `edge-start` and
+   * `edge-end` stand it on the block-start or block-end edge of the nearest
+   * positioned box, over the line that edge draws.
+   */
   placement?: ProgressPlacement;
   render?: (props: ProgressRootProps) => ReactNode;
 }

@@ -36,6 +36,9 @@ import {
  * was: the same bar pinned to the top edge of the viewport, with no corner to
  * round and a transparent track, because a permanent grey band across the top
  * of a page reads as a rule under the header rather than as a wait.
+ * `edge-start` and `edge-end` are the same bar on an edge of the nearest
+ * positioned box, which is the frame `app-shell` and `page-header` render as
+ * their `progress` part.
  *
  * With `wave` the indicator is an `svg` over the whole track and one stroked
  * path inside it; the stylesheet shows a window of it with a dash, so the bar
@@ -124,7 +127,7 @@ export class SlProgressBar extends SlProgressIndicatorBase {
 
   protected readonly labelUi = computed(() => (this.labelHidden() ? 'visually-hidden' : null));
   protected readonly placementAttribute = computed(() =>
-    this.placement() === 'page' ? 'page' : null,
+    this.placement() === 'inline' ? null : this.placement(),
   );
   protected readonly waveAttribute = computed(() => (this.wave() ? '' : null));
 
@@ -141,12 +144,12 @@ export class SlProgressBar extends SlProgressIndicatorBase {
   );
 
   /**
-   * A page-level bar has no room for a visible name and still needs one, so the
+   * A bar on an edge has no room for a visible name and still needs one, so the
    * placement decides it — and a consumer who states `hideLabel` outright still
    * wins, which is the rule the whole library follows.
    */
   protected override hidesLabelByPlacement(): boolean {
-    return this.placement() === 'page';
+    return this.placement() !== 'inline';
   }
 
   protected override measure() {

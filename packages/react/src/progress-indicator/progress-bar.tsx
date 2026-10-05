@@ -24,6 +24,9 @@ import type { ProgressBarProps, ProgressRootProps } from './progress-indicator.t
  * was: the same bar pinned to the top edge of the viewport, with no corner to
  * round and a transparent track, because a permanent grey band across the top
  * of a page reads as a rule under the header rather than as a wait.
+ * `edge-start` and `edge-end` are the same bar on an edge of the nearest
+ * positioned box, which is the frame `app-shell` and `page-header` render as
+ * their `progress` part.
  *
  * With `wave` the indicator is an `svg` over the whole track and one stroked
  * path inside it, M3's sine from `@slotted/core/progress`: the stylesheet
@@ -68,11 +71,11 @@ export function ProgressBar({
     decorative,
     delay,
     /**
-     * A page-level bar has no room for a visible name and still needs one, so
+     * A bar on an edge has no room for a visible name and still needs one, so
      * the placement decides it — and a consumer who states `hideLabel`
      * outright still wins, which is the rule the whole library follows.
      */
-    hideLabel: hideLabel ?? placement === 'page',
+    hideLabel: hideLabel ?? placement !== 'inline',
     label,
     loading,
     locale,
@@ -117,7 +120,7 @@ export function ProgressBar({
       </>
     ),
     ...(resolved.geometry.buffer === null ? {} : { 'data-buffered': '' }),
-    ...(placement === 'page' ? { 'data-placement': placement } : {}),
+    ...(placement === 'inline' ? {} : { 'data-placement': placement }),
     ...(wave ? { 'data-wave': '' } : {}),
     style: progressStyle(resolved, style),
   };

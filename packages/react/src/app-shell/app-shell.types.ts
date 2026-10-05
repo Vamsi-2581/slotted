@@ -2,6 +2,8 @@ import type { AppShellMessages, FamilyTranslator, PartialMessages } from '@slott
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, RefObject } from 'react';
 
+import type { ProgressBarProps } from '../progress-indicator';
+
 /**
  * Which region reaches the corner of the screen. `banner` spans the full width
  * and the navigation starts below it; `nav` spans the full height and the
@@ -199,6 +201,10 @@ export interface AppShellContextValue {
   root: HTMLElement | null;
   /** A region says it exists, so a skip link is never written to a target nobody rendered. */
   register: (region: 'nav' | 'main' | 'aside') => () => void;
+  /** Whether the bar on the content's edge is painted, which `main` reports as `aria-busy`. */
+  busy: boolean;
+  /** The progress part says when its bar is painted and when it is withdrawn. */
+  setBusy: (busy: boolean) => void;
   /** The nodes the layer and the focus scope need, and nothing else reads. */
   nodes: {
     aside: HTMLElement | null;
@@ -316,6 +322,13 @@ export interface AppShellNavProps extends Native<'nav'>, Common {
 export interface AppShellNavSectionProps extends Native<'div'>, Common {
   render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
 }
+/**
+ * The bar's own props, less the placement the shell decides. `size` defaults
+ * to `sm`, `delay` to 200 and `minDuration` to 400 milliseconds; a value set
+ * here, then one set through `ProgressIndicatorDefaultsProvider`, wins.
+ */
+export type AppShellProgressProps = Omit<ProgressBarProps, 'placement'>;
+
 export interface AppShellMainProps extends Native<'main'>, Common {
   render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
 }

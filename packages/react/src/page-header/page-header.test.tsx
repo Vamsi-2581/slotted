@@ -22,6 +22,7 @@ import {
   PageHeaderNav,
   PageHeaderNavigation,
   PageHeaderPin,
+  PageHeaderProgress,
   PageHeaderSubheading,
   PageHeaderTabs,
   PageHeaderTitle,
@@ -70,8 +71,9 @@ class FakeResizeObserver {
 function Full({
   title = 'Pedido de compra PC-2026-004521',
   withPin = true,
+  refreshing = false,
   ...props
-}: Partial<PageHeaderProps> & { title?: string; withPin?: boolean }) {
+}: Partial<PageHeaderProps> & { title?: string; withPin?: boolean; refreshing?: boolean }) {
   return (
     <PageHeader {...props}>
       <PageHeaderTitleArea>
@@ -107,6 +109,7 @@ function Full({
         <PageHeaderToggle />
         {withPin ? <PageHeaderPin /> : null}
       </PageHeaderControls>
+      <PageHeaderProgress delay={0} loading={refreshing} />
       <PageHeaderTabs>
         <div role="tablist" aria-label="Secções" />
       </PageHeaderTabs>
@@ -128,6 +131,41 @@ describe('PageHeader', () => {
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 });
     vi.unstubAllGlobals();
     FakeIntersectionObserver.last = undefined;
+  });
+
+  /**
+   * A refresh draws one bar on the chrome's edge, named from the catalog, and
+   * writes no aria-busy of its own: the region that waits is the consumer's.
+   */
+  it('draws a refresh on the edge of the chrome, named from the catalog', () => {
+    render(
+      <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+        <Full refreshing />
+      </SlottedProvider>,
+    );
+    const bar = screen.getByRole('progressbar');
+    expect(bar.parentElement).toHaveAttribute('data-part', 'progress');
+    expect(bar).toHaveAttribute('data-placement', 'edge-end');
+    expect(bar).toHaveAttribute('data-size', 'sm');
+    expect(bar).toHaveAccessibleName('Atualizando página');
+    expect(document.querySelector('[aria-busy]')).toBeNull();
+  });
+
+  it('holds the bar back for the delay, so a fast refresh draws nothing', () => {
+    vi.useFakeTimers();
+    try {
+      render(
+        <PageHeader>
+          <PageHeaderProgress />
+        </PageHeader>,
+      );
+      const bar = document.querySelector('[data-part="progress"] > [data-ui="progress-indicator"]');
+      expect(bar).toHaveAttribute('hidden');
+      act(() => void vi.advanceTimersByTime(200));
+      expect(bar).not.toHaveAttribute('hidden');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('renders the anatomy the contract declares', () => {

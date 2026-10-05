@@ -128,6 +128,23 @@ describe('ProgressBar', () => {
     expect(label).not.toHaveAttribute('data-ui');
   });
 
+  /** An edge bar has no more room for its name than a page bar, and keeps it the same way. */
+  it('stands a bar on either edge of its box, with its name clipped', () => {
+    for (const placement of ['edge-start', 'edge-end'] as const) {
+      const { unmount } = render(<ProgressBar label="Refreshing" placement={placement} />);
+      const root = screen.getByRole('progressbar');
+      expect(root).toHaveAttribute('data-placement', placement);
+      expect(root.querySelector('[data-part="label"]')).toHaveAttribute(
+        'data-ui',
+        'visually-hidden',
+      );
+      expect(root).toHaveAccessibleName('Refreshing');
+      unmount();
+    }
+    render(<ProgressBar label="Uploading" />);
+    expect(screen.getByRole('progressbar')).not.toHaveAttribute('data-placement');
+  });
+
   it('passes native attributes and the ref through to the root', () => {
     const ref = createRef<HTMLDivElement>();
     render(<ProgressBar data-testid="bar" id="upload" label="Uploading" ref={ref} value={10} />);

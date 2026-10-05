@@ -31,6 +31,7 @@ import {
   SlPageHeaderTitleRow,
   SlPageHeaderToggle,
   SlPageHeaderVisual,
+  SlPageHeaderProgress,
 } from './page-header-parts';
 
 class FakeIntersectionObserver {
@@ -565,5 +566,33 @@ describe('SlPageHeader language', () => {
     fixture.detectChanges();
     expect(toggle()).toBe('Collapse header');
     vi.unstubAllGlobals();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlPageHeader, SlPageHeaderProgress],
+  template: `<header slPageHeader>
+    <div slPageHeaderProgress [delay]="0"></div>
+  </header>`,
+})
+class RefreshingHeader {}
+
+describe('a refresh on the edge of the chrome', () => {
+  it('draws one bar at edge-end, named from the catalog, and writes no aria-busy of its own', () => {
+    TestBed.configureTestingModule({
+      providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const fixture = TestBed.createComponent(RefreshingHeader);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const bar = root.querySelector('[data-part="progress"] > [data-ui="progress-indicator"]');
+    expect(bar?.getAttribute('data-placement')).toBe('edge-end');
+    expect(bar?.getAttribute('data-size')).toBe('sm');
+    expect(bar?.hasAttribute('hidden')).toBe(false);
+    expect(bar?.querySelector('[data-part="label"]')?.textContent?.trim()).toBe(
+      'Atualizando página',
+    );
+    expect(root.querySelector('[aria-busy]')).toBeNull();
   });
 });

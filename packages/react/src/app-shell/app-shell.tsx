@@ -195,6 +195,8 @@ export function AppShell({
     aside: false,
   });
 
+  const [busy, setBusy] = useState(false);
+
   const register = useCallback<AppShellContextValue['register']>((region) => {
     setRegions((current) => ({ ...current, [region]: true }));
     return () => setRegions((current) => ({ ...current, [region]: false }));
@@ -535,6 +537,7 @@ export function AppShell({
       collapsedTo: resolvedCollapsedTo,
       escape: resolvedEscape,
       back: resolvedBack,
+      busy,
       mainId,
       maxAsideExtent: resolvedMaxAsideExtent,
       minAsideExtent: resolvedMinAsideExtent,
@@ -552,6 +555,7 @@ export function AppShell({
       scroll: resolvedScroll,
       separation: resolvedSeparation,
       setAsideDragging,
+      setBusy,
       setAsideExtent,
       setAsideOpen,
       setOpen,
@@ -562,6 +566,7 @@ export function AppShell({
       asideDragging,
       asideId,
       baseId,
+      busy,
       currentAsideExtent,
       currentAsideOpen,
       currentOpen,

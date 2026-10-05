@@ -21,6 +21,8 @@ import type {
 } from 'react';
 
 import { Glyph, Icon } from '../icon';
+import { ProgressBar, useProgressIndicatorDefaults } from '../progress-indicator';
+import { useLoadingVisibility } from '../progress-indicator/use-loading-visibility';
 import { useAppShell } from './app-shell';
 import type {
   AppShellActionsProps,
@@ -38,6 +40,7 @@ import type {
   AppShellNavProps,
   AppShellNavSectionProps,
   AppShellNavToggleProps,
+  AppShellProgressProps,
 } from './app-shell.types';
 
 /**
@@ -246,6 +249,8 @@ export function AppShellMain({
   useRegion('main');
 
   const rootProps = {
+    /** The wait on this region's edge; an `aria-busy` the consumer wrote wins. */
+    ...(shell.busy ? { 'aria-busy': true } : {}),
     ...nativeProps,
     children,
     className,
@@ -255,6 +260,56 @@ export function AppShellMain({
     tabIndex: tabIndex ?? -1,
   };
   return part(rootProps, render) ?? <main {...rootProps} ref={attach} />;
+}
+
+/**
+ * The wait for the next page, on the line between the chrome and the content.
+ * The frame is a box the stylesheet lays over `main` in every arrangement, and
+ * it holds one bar at `edge-start`; where the line is — the card's border, the
+ * banner's seam — is the stylesheet's to know, not the consumer's.
+ *
+ * The timing machine runs here rather than in the bar, because the shell has
+ * to know when the bar is painted: `main` is busy for exactly as long as the
+ * reader can see the wait, not from the moment the prop turns, and not after
+ * the bar has gone. The bar is then handed a wait that is already decided.
+ */
+export function AppShellProgress({
+  delay,
+  label,
+  loading = true,
+  minDuration,
+  onWithdraw,
+  size,
+  ...barProps
+}: AppShellProgressProps) {
+  const shell = useAppShell();
+  const defaults = useProgressIndicatorDefaults();
+  const painted = useLoadingVisibility({
+    delay: delay ?? defaults.delay ?? 200,
+    loading,
+    minDuration: minDuration ?? defaults.minDuration ?? 400,
+    onWithdraw,
+  });
+
+  const { setBusy } = shell;
+  useEffect(() => {
+    setBusy(painted);
+  }, [painted, setBusy]);
+  useEffect(() => () => setBusy(false), [setBusy]);
+
+  return (
+    <div data-part="progress">
+      <ProgressBar
+        {...barProps}
+        delay={0}
+        label={label ?? shell.t('progress')}
+        loading={painted}
+        minDuration={0}
+        placement="edge-start"
+        size={size ?? 'sm'}
+      />
+    </div>
+  );
 }
 
 /**

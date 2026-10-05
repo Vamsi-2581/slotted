@@ -6,11 +6,20 @@ import {
   Directive,
   effect,
   ElementRef,
+  booleanAttribute,
   HostAttributeToken,
   inject,
+  input,
+  output,
   ViewEncapsulation,
 } from '@angular/core';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+import {
+  injectProgressIndicatorDefaults,
+  SlProgressBar,
+  type ProgressSize,
+  type ProgressTone,
+} from '@slotted/angular/progress-indicator';
 
 import { SlPageHeader } from './page-header';
 
@@ -301,4 +310,58 @@ export class SlPageHeaderPin {
     if (event.defaultPrevented) return;
     this.header.setPinned(!this.header.pinned(), activationReason(event), event);
   }
+}
+
+/**
+ * A refresh of what is already on screen, drawn over the line where the chrome
+ * ends. Written after the controls and before the tabs, as the controls are:
+ * there it is the line the pill straddles, and with no tabs it is the root's
+ * own hairline. The frame is a row of the container one hairline tall; the
+ * stylesheet gives the bar the header's width and draws nothing while the
+ * title is still loading or while a region around the header is busy. `size`
+ * defaults to `sm`, `delay` to 200 and `minDuration` to 400 milliseconds; an
+ * input, then `provideProgressIndicatorDefaults()`, wins.
+ */
+@Component({
+  selector: '[slPageHeaderProgress]',
+  standalone: true,
+  exportAs: 'slPageHeaderProgress',
+  imports: [SlProgressBar],
+  template: `<div
+    slProgressBar
+    placement="edge-end"
+    [buffer]="buffer()"
+    [delay]="delay() ?? defaults.delay ?? 200"
+    [label]="label() ?? header.t('progress')"
+    [loading]="loading()"
+    [max]="max()"
+    [min]="min()"
+    [minDuration]="minDuration() ?? defaults.minDuration ?? 400"
+    [size]="size() ?? 'sm'"
+    [tone]="tone()"
+    [value]="value()"
+    [valueText]="valueText()"
+    (withdraw)="withdraw.emit()"
+  ></div>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  host: { 'data-part': 'progress' },
+})
+export class SlPageHeaderProgress {
+  protected readonly header = inject(SlPageHeader);
+  protected readonly defaults = injectProgressIndicatorDefaults();
+
+  readonly loading = input(true, { transform: booleanAttribute });
+  readonly value = input<number | null | undefined>(undefined);
+  readonly min = input<number | undefined>(undefined);
+  readonly max = input<number | undefined>(undefined);
+  readonly buffer = input<number | null | undefined>(undefined);
+  readonly valueText = input<string | undefined>(undefined);
+  readonly label = input<string | undefined>(undefined);
+  readonly tone = input<ProgressTone | undefined>(undefined);
+  readonly size = input<ProgressSize | undefined>(undefined);
+  readonly delay = input<number | undefined>(undefined);
+  readonly minDuration = input<number | undefined>(undefined);
+  /** The bar was painted and has been withdrawn. */
+  readonly withdraw = output<void>();
 }

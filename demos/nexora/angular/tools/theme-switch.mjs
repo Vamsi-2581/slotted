@@ -15,9 +15,12 @@
 //   as a ruled line (bottom edge only, no corner or ground; focus thickens the line by an inset 2px
 //   in the ring's colour behind a transparent 2px outline; invalid tints the ground and draws the
 //   line in the danger border), each line and focus mark at 3:1 or more on its ground, in light,
-//   dark and high-contrast (html set to it), keeps the library's 2px ring on every other control,
+//   dark and high-contrast (html set to it, read once the field paints it), the invalid line
+//   thicker than the valid one at rest and under focus (2px to 1px, 4px to 3px), keeps the
+//   library's 2px ring on every other control,
 //   and under emulated forced colours draws focus as a 2px outline in a system colour; every other
-//   theme keeps the family's frame (no leak), the default with absolute values;
+//   theme keeps the family's frame (no leak) with an invalid edge thicker than a valid one at rest
+//   and under focus, the default with absolute values;
 // - with two strongly tinted greys (Ocean #0e7490, Clay #9c6644) and a grey of the reader's own, the
 //   page ground, a table ground and the select's layer carry the grey's hue, and the lines and
 //   hovers stay in the ground's family;
@@ -348,6 +351,8 @@ const fieldFacts = () => js(`(() => {
     outline: style.outlineStyle + ' ' + style.outlineWidth,
     outlineColor: style.outlineColor,
     shadow: style.boxShadow,
+    /* The bottom line's thickness, colour aside: the border and every inset shadow that reaches the bottom edge. */
+    line: Number.parseFloat(style.borderBottomWidth) + Math.max(0, ...[...style.boxShadow.matchAll(/(-?[\\d.]+)px (-?[\\d.]+)px (-?[\\d.]+)px (-?[\\d.]+)px inset/g)].map((m) => Math.max(0, -Number(m[2])) + Math.max(0, Number(m[4])))),
     /* WCAG 1.4.11: the line and the focus mark against the ground they are drawn on. */
     lineRatio: T.ratio(style.borderBottomColor, T.ground(root)),
     shadowRatio: T.ratio((style.boxShadow.match(/(?:rgba?|oklch|oklab|lab|lch|color)\\([^)]*\\)/) ?? ['transparent'])[0], T.ground(root)),
@@ -428,8 +433,9 @@ const derived = (theme, scheme, seed, value, tone) => js(`(() => {
  * mark at 3:1 or more on the ground it is drawn on (WCAG 1.4.11); every other control keeps the
  * library's 2px ring.
  */
-const ruledField = (name, field, frame) => {
+const ruledField = (name, field, frame, scheme) => {
   const ratio = (value) => `${value.toFixed(2)}:1`;
+  const lines = `line rest ${field.rest.line}px · invalid ${field.invalid.line}px · focus ${field.focus.line}px · invalid focus ${field.invalidFocus.line}px`;
   check(
     `${name}: a text field is a ruled line — the bottom edge alone, no corner, no ground, the line at 3:1 on the ground`,
     field.rest.widths === '0px 0px 1px 0px' && field.rest.radius === '0px' && field.rest.transparent && field.rest.lineRatio >= 3,
@@ -449,10 +455,33 @@ const ruledField = (name, field, frame) => {
   check(
     `${name}: keyboard focus on an invalid field draws its line in the invalid ring's colour, at 3:1 on the tint`,
     field.invalidFocus.focused && field.invalidFocus.invalid && field.invalidFocus.bottom === field.invalidFocus.ring && field.invalidFocus.shadowColor === field.invalidFocus.ring &&
-      field.invalidFocus.ring === field.invalidFocus.invalidRing && field.invalidFocus.shadowRatio >= 3,
+      field.invalidFocus.ring === field.invalidFocus.invalidRing && (scheme === 'high-contrast' || field.invalidFocus.ring !== field.focus.ring) && field.invalidFocus.shadowRatio >= 3,
     `${field.invalidFocus.focused ? 'focus-visible' : 'not focus-visible'} · ${frame(field.invalidFocus)} · ${field.invalidFocus.shadow} · ring rgb(${field.invalidFocus.ring}) ${ratio(field.invalidFocus.shadowRatio)} · invalid ring rgb(${field.invalidFocus.invalidRing}) · valid ring rgb(${field.focus.ring})`,
   );
+  check(
+    `${name}: an invalid field's line is thicker than a valid one's, at rest (2px to 1px) and under focus (4px to 3px), whatever their colours`,
+    field.rest.line === 1 && field.invalid.line === 2 && field.focus.line === 3 && field.invalidFocus.line === 4,
+    lines,
+  );
   check(`${name}: every other control keeps the library's 2px ring`, field.probeRing === '2px', `probe button ${field.probeRing}`);
+};
+
+/**
+ * Sets the scheme `html` names and waits until the field paints it: its line is the colour its
+ * token resolves to under the new scheme, and no transition is running.
+ */
+const paintScheme = async (scheme) => {
+  await js(`document.documentElement.setAttribute('data-slotted-scheme', ${JSON.stringify(scheme)})`);
+  const painted = await until(`(() => {
+    const root = document.querySelector('${FIELD}');
+    const style = getComputedStyle(root);
+    const T = window.__theme;
+    return document.documentElement.getAttribute('data-slotted-scheme') === ${JSON.stringify(scheme)} &&
+      T.rgb(style.borderBottomColor).join() === T.rgb(style.getPropertyValue('--slotted-text-field-border-color').trim()).join() &&
+      !root.getAnimations().some((a) => a.playState === 'running');
+  })()`, 5000);
+  await fieldSettled();
+  return painted;
 };
 
 /**
@@ -662,7 +691,7 @@ try {
         const field = await fieldStates();
         const frame = (state) => `${state.widths} · r ${state.radius} · ${state.transparent ? 'no ground' : `rgb(${state.background})`} · outline ${state.outline} · line rgb(${state.bottom})`;
         if (theme.id === 'nexora-editorial') {
-          ruledField(name, field, frame);
+          ruledField(name, field, frame, scheme);
         } else {
           const edges = field.rest.widths.split(' ');
           check(
@@ -671,11 +700,16 @@ try {
               field.invalid.invalid && field.invalid.background === field.rest.background && field.invalid.background !== field.invalid.dangerSurface && field.invalid.top === field.invalid.bottom,
             `rest ${frame(field.rest)} · focus ${frame(field.focus)} · invalid ${frame(field.invalid)}`,
           );
+          check(
+            `${name}: an invalid field's edge is thicker than a valid one's, at rest and under focus, whatever their colours`,
+            field.invalid.line > field.rest.line && field.invalidFocus.line > field.focus.line && field.invalidFocus.ring !== field.focus.ring,
+            `line rest ${field.rest.line}px · invalid ${field.invalid.line}px · focus ${field.focus.line}px · invalid focus ${field.invalidFocus.line}px · ring rgb(${field.focus.ring}) · invalid ring rgb(${field.invalidFocus.ring})`,
+          );
           if (theme.id === 'default') {
             check(
               `${name}: the field is the family's own — 1px on four edges, 4px corner, the control ground, a 2px ring, a danger edge when invalid`,
               field.rest.widths === '1px 1px 1px 1px' && field.rest.radius === '4px' && field.rest.background === field.rest.control && field.focus.outline === 'solid 2px' &&
-                field.invalid.top === field.invalid.dangerBorder && field.invalid.bottom === field.invalid.dangerBorder && field.probeRing === '2px',
+                field.invalid.top === field.invalid.dangerBorder && field.invalid.bottom === field.invalid.dangerBorder && field.invalid.shadow.endsWith('0px 0px 0px 1px inset') && field.probeRing === '2px',
               `rest ${frame(field.rest)} · focus ${frame(field.focus)} · invalid ${frame(field.invalid)} · danger border rgb(${field.invalid.dangerBorder}) · probe ${field.probeRing}`,
             );
           }
@@ -690,10 +724,10 @@ try {
       await choose('brand', 'theme');
       await choose('scheme', 'light');
       const before = await js(`document.documentElement.getAttribute('data-slotted-scheme')`);
-      await js(`document.documentElement.setAttribute('data-slotted-scheme', 'high-contrast')`);
       const frame = (state) => `${state.widths} · r ${state.radius} · ${state.transparent ? 'no ground' : `rgb(${state.background})`} · outline ${state.outline} · line rgb(${state.bottom})`;
-      ruledField(`${theme.id} × theme × high-contrast`, await fieldStates(), frame);
-      await js(`document.documentElement.setAttribute('data-slotted-scheme', ${JSON.stringify(before)})`);
+      check(`${theme.id} × theme × high-contrast: html names the scheme and the field paints its line before it is read`, await paintScheme('high-contrast'));
+      ruledField(`${theme.id} × theme × high-contrast`, await fieldStates(), frame, 'high-contrast');
+      check(`${theme.id} × theme: html returns to ${before} and the field paints it`, await paintScheme(before));
       const forced = await forcedFocus();
       check(
         `${theme.id} × theme × light, forced colours: keyboard focus draws a 2px outline in a system colour the field at rest does not have`,

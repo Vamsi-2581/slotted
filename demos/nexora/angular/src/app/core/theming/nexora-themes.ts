@@ -635,6 +635,14 @@ const editorial = extendTheme(
 
 [data-ui='text-field'][data-part='root'][data-invalid] {
   background-color: var(--slotted-tone-danger-surface);
+  box-shadow: inset 0 calc(-1 * var(--slotted-control-invalid-edge-width)) 0
+    var(--slotted-text-field-invalid-border-color);
+}
+
+[data-ui='text-field'][data-part='root'][data-invalid]:has(> [data-part='input']:focus-visible) {
+  box-shadow: inset 0
+    calc(-1 * (var(--slotted-border-width-thick) + var(--slotted-control-invalid-edge-width))) 0
+    var(--slotted-focus-ring-color);
 }`,
     ],
     fonts: facesOf('source-serif', 'fraunces'),

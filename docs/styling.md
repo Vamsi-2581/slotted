@@ -178,6 +178,88 @@ A theme rule lives in `slotted.theme-rules` and may select only `data-ui`,
 `data-part` and the public attributes, reading only tokens. An application
 rule stays outside `slotted`, in its own layer or unlayered.
 
+### Restyling a control
+
+A theme restyles a control at three levels, each one reaching less than the
+one before it:
+
+1. Control tokens (`base`, `schemes`): every control reads them.
+2. Family tokens (`components`): one family reads them, falling back to the
+   control tokens.
+3. Theme rules (`rules`): what no token reaches.
+
+A text field drawn as an underline:
+
+```js
+export default extendTheme(
+  defaultTheme,
+  {
+    base: {
+      '--slotted-focus-ring-width': 'var(--slotted-border-width-thin)',
+    },
+    components: {
+      '--slotted-text-field-radius': 'var(--slotted-radius-none)',
+      '--slotted-text-field-background': 'transparent',
+      '--slotted-text-field-border-color': 'var(--slotted-border-strong)',
+      '--slotted-text-field-invalid-border-color': 'var(--slotted-tone-danger-solid)',
+    },
+    rules: [new URL('./rules.css', import.meta.url)],
+  },
+  { name: 'ruled' },
+);
+```
+
+```css
+/* rules.css */
+[data-ui='text-field'][data-part='root']:not([data-variant='plain']) {
+  border-width: 0 0 var(--slotted-control-border-width);
+}
+
+[data-ui='text-field'][data-part='root']:has(> [data-part='input']:focus-visible) {
+  border-block-end-color: var(--slotted-focus-ring-color);
+  box-shadow: inset 0 calc(-1 * var(--slotted-border-width-thick)) 0 var(--slotted-focus-ring-color);
+  outline: none;
+}
+
+[data-ui='text-field'][data-part='root'][data-invalid] {
+  background-color: var(--slotted-tone-danger-surface);
+}
+```
+
+The family points `--slotted-focus-ring-color` at the invalid colour on an
+invalid root, so the focus rule above draws an invalid field's underline in
+that colour without a rule of its own.
+
+A theme rule selects by these hooks:
+
+- `[data-ui]` naming a family, and `[data-part]` naming a part of the family
+  named in the same compound selector;
+- a `data-*` attribute a family writes to the DOM, spelled as it is written
+  there (`data-toggle-placement`), from the hook index
+  `packages/theme/src/generated/hooks.json`;
+- the theme axes: `data-slotted-theme`, `data-slotted-scheme`,
+  `data-slotted-density` and `data-slotted-seeds`;
+- `&`, inside a nested rule.
+
+Pseudo-classes, pseudo-elements and combinators refine a hook. Each compound
+selector carries a hook; `[data-ui='card'] :first-child` is refused, because
+`:first-child` alone matches elements no family owns. `:is()` and `:where()`
+without a hook of their own carry one in every argument. The arguments of
+`:not()`, `:has()` and `:nth-child(… of …)` filter an element already
+selected, so they need no hook, and follow every other rule here.
+
+Refused: a class, an id, an element type (`input`, `html`, `body`), `*`,
+`:root`, `:scope`, `:host`, `:host-context()`, and an attribute outside
+`data-*` (`aria-*`, `role`). A declaration reads `var()` of a contract token,
+a component token or a seed; `var(--_*)` and any other `--slotted-*` are
+refused.
+
+`slotted-build-theme` checks every rule and names the file, the line and the
+selector (`rules.css:4 [data-ui='text-field'] input: input: an element type is
+not a public selector`). `defineTheme`, `extendTheme`, `renderTheme` and
+`applyTheme` check every rule given as text with the same check and name the
+rule by its index (`rules[0]:4 …`).
+
 ## Angular
 
 Angular components inline their stylesheet and render it with

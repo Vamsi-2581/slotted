@@ -194,14 +194,11 @@ A text field drawn as an underline:
 export default extendTheme(
   defaultTheme,
   {
-    base: {
-      '--slotted-focus-ring-width': 'var(--slotted-border-width-thin)',
-    },
     components: {
       '--slotted-text-field-radius': 'var(--slotted-radius-none)',
       '--slotted-text-field-background': 'transparent',
       '--slotted-text-field-border-color': 'var(--slotted-border-strong)',
-      '--slotted-text-field-invalid-border-color': 'var(--slotted-tone-danger-solid)',
+      '--slotted-text-field-invalid-border-color': 'var(--slotted-tone-danger-border)',
     },
     rules: [new URL('./rules.css', import.meta.url)],
   },
@@ -218,7 +215,7 @@ export default extendTheme(
 [data-ui='text-field'][data-part='root']:has(> [data-part='input']:focus-visible) {
   border-block-end-color: var(--slotted-focus-ring-color);
   box-shadow: inset 0 calc(-1 * var(--slotted-border-width-thick)) 0 var(--slotted-focus-ring-color);
-  outline: none;
+  outline: var(--slotted-border-width-thick) solid transparent;
 }
 
 [data-ui='text-field'][data-part='root'][data-invalid] {
@@ -228,18 +225,24 @@ export default extendTheme(
 
 The family points `--slotted-focus-ring-color` at the invalid colour on an
 invalid root, so the focus rule above draws an invalid field's underline in
-that colour without a rule of its own.
+that colour without a rule of its own. The transparent outline paints
+nothing until forced colours replace its colour with a system colour; there
+the box shadow is dropped and the line takes a system colour, so the outline
+is the only mark of focus.
 
 A theme rule selects by these hooks:
 
 - `[data-ui]` naming a family, and `[data-part]` naming a part of the family
-  named in the same compound selector;
+  named in the same compound selector, each with `=` or with no value;
 - a `data-*` attribute a family writes to the DOM, spelled as it is written
   there (`data-toggle-placement`), from the hook index
   `packages/theme/src/generated/hooks.json`;
 - the theme axes: `data-slotted-theme`, `data-slotted-scheme`,
   `data-slotted-density` and `data-slotted-seeds`;
-- `&`, inside a nested rule.
+- `&`, inside a style rule.
+
+Attribute names match without regard to case, as in HTML: `[DATA-UI='card']`
+is `[data-ui='card']`.
 
 Pseudo-classes, pseudo-elements and combinators refine a hook. Each compound
 selector carries a hook; `[data-ui='card'] :first-child` is refused, because
@@ -249,10 +252,18 @@ without a hook of their own carry one in every argument. The arguments of
 selected, so they need no hook, and follow every other rule here.
 
 Refused: a class, an id, an element type (`input`, `html`, `body`), `*`,
-`:root`, `:scope`, `:host`, `:host-context()`, and an attribute outside
-`data-*` (`aria-*`, `role`). A declaration reads `var()` of a contract token,
-a component token or a seed; `var(--_*)` and any other `--slotted-*` are
-refused.
+`:root`, `:scope`, `:host`, `:host-context()`, `&` outside a style rule
+(there it is the theme's root, as `:scope` is), an attribute outside `data-*`
+(`aria-*`, `role`), and `^=`, `$=`, `*=`, `~=` or `|=` on `data-ui` or
+`data-part`, which match more than one family or part. `@scope`, `@import`
+and `@layer` are refused at any depth, because the compiler writes them
+around the rules. A prelude that starts with `--` is a custom property only
+inside a style rule; anywhere else it is checked as a selector.
+
+A declaration reads `var()` of a contract token, a component token or a seed;
+`var(--_*)` and any other `--slotted-*` are refused. A declaration that writes
+a private property (`--_*`) is refused. Escapes are decoded before any of
+these checks: `var(--\5f x)` and `v\61r(--_x)` read `--_x`.
 
 `slotted-build-theme` checks every rule and names the file, the line and the
 selector (`rules.css:4 [data-ui='text-field'] input: input: an element type is

@@ -334,6 +334,10 @@
     "off": "compact=keep",
     "sheets": "below the threshold the \"+N\" panel and the detail are bottom drawers (side=bottom) inside the root rather than popovers: the whole width, a title, a close and the platform's back; a region that contains fixed layers keeps them; focus returns to the widget that opened them"
   },
+  "partIdentity": {
+    "rule": "with a context menu the body carries data-ui=context-menu and this family's part name",
+    "parts": { "body": "context-menu" }
+  },
   "contextMenu": {
     "family": "context-menu: the body is its one target (data-ui=context-menu, data-part=body); the menu's items are the application's",
     "react": "renderContextMenu(target) returns the items (MenuItem, MenuSeparator, a nested Menu)",

@@ -50,6 +50,7 @@ test('names its halves as parts on button’s own elements', () => {
   assert.deepEqual(member.parts, ['root', 'primary', 'menu-trigger']);
   assert.equal(contract.roles.root, 'group');
   assert.match(contract.partIdentity.rule, /data-ui=button/);
+  assert.deepEqual(contract.partIdentity.parts, { primary: 'button', 'menu-trigger': 'button' });
   assert.deepEqual(contract.axes.tone, button.axes.tone);
   assert.deepEqual(contract.axes.variant, button.axes.variant);
   assert.deepEqual(contract.axes.size, button.axes.size);

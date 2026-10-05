@@ -11,7 +11,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
  *   `<family>.tokens.json` files `packages/styles/src/tokens.test.mjs` holds
  *   equal to the stylesheets.
  * - `src/generated/hooks.json` — the public selectors a theme rule may use:
- *   every `data-ui` value with its parts, and every `data-*` attribute the
+ *   every `data-ui` value with the parts its family contract declares for it
+ *   (members' parts, `rootPart`, and the parts another contract renders as
+ *   that family's root in `partIdentity.parts`), and every `data-*` attribute the
  *   family contracts declare or the family stylesheets select, spelled as it
  *   is in the DOM and kept only when a binding or `@slotted/core` writes it
  *   (`writtenAttributes`).
@@ -115,6 +117,13 @@ export function hooksSource() {
       contract.ui,
       Object.values(contract.members ?? {}).flatMap((member) => member.parts ?? []),
     );
+    // A member whose root is written under another part name: message's bubble is
+    // `data-ui="message" data-part="bubble"`.
+    addParts(contract.ui, Object.values(contract.rootPart ?? {}));
+    // A part rendered as another family's root: split-button's primary is
+    // `data-ui="button" data-part="primary"`.
+    for (const [part, ui] of Object.entries(contract.partIdentity?.parts ?? {}))
+      addParts(ui, [part]);
     for (const axis of Object.keys(contract.axes ?? {})) attributes.add(`data-${kebab(axis)}`);
     for (const attribute of Object.values(contract.stateAttributes ?? {}))
       attributes.add(attribute);
@@ -128,8 +137,8 @@ export function hooksSource() {
   for (const family of families()) {
     for (const file of readdirSync(join(STYLES, family)).filter((name) => name.endsWith('.css'))) {
       const css = readFileSync(join(STYLES, family, file), 'utf8');
-      const parts = [...css.matchAll(/\[data-part=['"]([\w-]+)['"]\]/g)].map((match) => match[1]);
-      for (const [, name] of css.matchAll(/\[data-ui=['"]([\w-]+)['"]\]/g)) addParts(name, parts);
+      // A `data-ui` a stylesheet selects without a contract (spinner) is a family with no parts.
+      for (const [, name] of css.matchAll(/\[data-ui=['"]([\w-]+)['"]\]/g)) addParts(name, []);
       for (const [, attribute] of css.matchAll(/\[(data-[a-z0-9-]+)/g)) attributes.add(attribute);
     }
   }

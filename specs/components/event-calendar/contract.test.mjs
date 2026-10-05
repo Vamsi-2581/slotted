@@ -321,6 +321,7 @@ test('draws month and week as a list below the compact size class without moving
  */
 test('opens the application’s context menu on an event or on a stretch of the grid', () => {
   assert.match(contract.contextMenu.target, /event/);
+  assert.deepEqual(contract.partIdentity.parts, { body: 'context-menu' });
   assert.match(contract.contextMenu.target, /selection/);
   assert.match(contract.contextMenu.opens, /Shift\+F10/);
   assert.match(contract.contextMenu.opens, /long press/);

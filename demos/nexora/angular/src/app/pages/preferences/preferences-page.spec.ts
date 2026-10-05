@@ -2,7 +2,6 @@ import { ApplicationInitStatus, DOCUMENT } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { CHART_ENGINE } from '@slotted/angular/chart';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { provideTestBackend, resetTestBackend } from '../../../test/testing';
@@ -12,19 +11,7 @@ import { SessionStore } from '../../core/session/session.store';
 import { NO_CUSTOMISATION } from '../../core/theming/customisation';
 
 /**
- * jsdom has no ResizeObserver and no layout, so the preview's charts are drawn
- * by an engine that records nothing: the token the family publishes for this.
- */
-const silentEngine = () => ({
-  update: () => Promise.resolve(),
-  locate: () => null,
-  emphasize: () => undefined,
-  toDataURL: () => null,
-  dispose: () => undefined,
-});
-
-/**
- * jsdom has no IntersectionObserver either: this one records what it observes
+ * jsdom has no IntersectionObserver: this one records what it observes
  * and reports it in view only when a test calls `scrollIntoView()`. Angular
  * keeps one observer per option set for the whole run, so it is installed
  * once, for the file.
@@ -56,7 +43,6 @@ describe('PreferencesPage › Appearance', () => {
       providers: [
         provideTestBackend(),
         provideRouter(routes),
-        { provide: CHART_ENGINE, useValue: silentEngine },
       ],
     });
     await TestBed.inject(ApplicationInitStatus).donePromise;
@@ -99,48 +85,63 @@ describe('PreferencesPage › Appearance', () => {
     input!.click();
   };
 
-  const regions = (root: HTMLElement) =>
-    [...root.querySelectorAll<HTMLElement>('[data-preview-scheme]')].map((region) => ({
-      scheme: region.getAttribute('data-slotted-scheme'),
-      theme: region.getAttribute('data-slotted-theme'),
-      density: region.getAttribute('data-slotted-density'),
-      seeds: region.hasAttribute('data-slotted-seeds'),
-      accent: region.style.getPropertyValue('--slotted-seed-accent'),
-      neutral: region.style.getPropertyValue('--slotted-seed-neutral'),
-    }));
+  /** What `html` answers: the theme, the scheme, the density and the seeds it carries. */
+  const page = () => {
+    const html = TestBed.inject(DOCUMENT).documentElement;
+    return {
+      theme: html.getAttribute('data-slotted-theme'),
+      scheme: html.getAttribute('data-slotted-scheme'),
+      density: html.getAttribute('data-slotted-density'),
+      accent: html.style.getPropertyValue('--slotted-seed-accent'),
+      neutral: html.style.getPropertyValue('--slotted-seed-neutral'),
+    };
+  };
+  const button = (root: HTMLElement, text: string) =>
+    [...root.querySelectorAll('button')].find((button) => button.textContent?.trim() === text)!;
 
   /**
-   * The preview is three regions, one per scheme, each naming the candidate
-   * theme and carrying the candidate seeds itself: nothing reaches `html`
-   * before Save.
+   * The application is the preview: a choice draws the whole of it at once,
+   * nothing is saved before Save, and Discard returns the application to the
+   * saved appearance.
    */
-  it('previews the candidate theme and seeds in three scheme regions, leaving html alone', async () => {
+  it('draws the application in the candidate at once, and Discard returns it to the saved one', async () => {
     const { harness, root } = await open();
-    const html = TestBed.inject(DOCUMENT).documentElement;
-
-    expect(regions(root)).toEqual(
-      ['light', 'dark', 'high-contrast'].map((scheme) => ({
-        scheme,
-        theme: 'default',
-        density: 'comfortable',
-        seeds: true,
-        accent: '#7c3aed',
-        neutral: '',
-      })),
-    );
+    const saved = page();
+    expect(saved).toMatchObject({ theme: 'default', density: 'comfortable', accent: '#7c3aed' });
 
     choose(root, 'theme', 'nexora-brutalist');
     choose(root, 'brand', 'amber');
     choose(root, 'neutral', 'clay');
+    choose(root, 'density', 'compact');
     harness.detectChanges();
+    TestBed.flushEffects();
+    expect(page()).toMatchObject({
+      theme: 'nexora-brutalist',
+      density: 'compact',
+      accent: '#d97706',
+      neutral: '#9c6644',
+    });
+    expect(TestBed.inject(PreferencesStore).preferences().theme).toBe('default');
 
-    for (const region of regions(root)) {
-      expect(region.theme).toBe('nexora-brutalist');
-      expect(region.accent).toBe('#d97706');
-      expect(region.neutral).toBe('#9c6644');
-    }
-    expect(html.getAttribute('data-slotted-theme')).toBe('default');
-    expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('#7c3aed');
+    button(root, 'Discard').click();
+    harness.detectChanges();
+    TestBed.flushEffects();
+    expect(page()).toEqual(saved);
+  });
+
+  /** Leaving the page with a candidate unsaved draws the application as it was saved. */
+  it('returns the application to the saved appearance when the page is left', async () => {
+    const { harness, root } = await open();
+    const saved = page();
+    choose(root, 'theme', 'nexora-terminal');
+    choose(root, 'scheme', 'dark');
+    harness.detectChanges();
+    TestBed.flushEffects();
+    expect(page()).toMatchObject({ theme: 'nexora-terminal', scheme: 'dark' });
+
+    await harness.navigateByUrl('/dashboard');
+    TestBed.flushEffects();
+    expect(page()).toEqual(saved);
   });
 
   const samples = (root: HTMLElement) =>
@@ -232,8 +233,8 @@ describe('PreferencesPage › Appearance', () => {
 
   /**
    * A theme whose sheet never arrives is not drawn in `default` in its place:
-   * with no placeholder over them, the preview and the swatches keep their
-   * boxes and draw nothing.
+   * with no placeholder over them, the swatches keep their boxes and draw
+   * nothing, and `html` keeps the theme it shows.
    */
   it('draws nothing in place of a theme whose sheet did not load', async () => {
     const store = TestBed.inject(PreferencesStore);
@@ -243,9 +244,6 @@ describe('PreferencesPage › Appearance', () => {
     const root = harness.fixture.nativeElement as HTMLElement;
     await until(harness, () => root.querySelector('[data-themes-failed]') !== null);
 
-    const previews = [...root.querySelectorAll('app-appearance-preview')];
-    expect(previews).toHaveLength(3);
-    expect(previews.every((preview) => preview.classList.contains('reserved'))).toBe(true);
     expect(
       [...root.querySelectorAll('.swatch')].every((swatch) =>
         swatch.classList.contains('reserved'),
@@ -338,7 +336,8 @@ describe('PreferencesPage › Appearance', () => {
     typeColour(root, '#0f766e');
     harness.detectChanges();
 
-    expect(regions(root)[0]!.accent).toBe('#0f766e');
+    TestBed.flushEffects();
+    expect(page().accent).toBe('#0f766e');
     expect(checkedBrand(root)).toBe('custom');
   });
 
@@ -348,11 +347,13 @@ describe('PreferencesPage › Appearance', () => {
     typeColour(root, '#E11D48');
     harness.detectChanges();
 
+    TestBed.flushEffects();
     expect(checkedBrand(root)).toBe('rose');
-    expect(regions(root)[0]!.accent).toBe('#e11d48');
+    expect(page().accent).toBe('#e11d48');
     choose(root, 'brand', 'custom');
     harness.detectChanges();
-    expect(regions(root)[0]!.accent).toBe('#7c3aed');
+    TestBed.flushEffects();
+    expect(page().accent).toBe('#7c3aed');
   });
 
   it('reads the contrast of the candidate seeds in the three schemes', async () => {
@@ -368,11 +369,8 @@ describe('PreferencesPage › Appearance', () => {
     expect(root.querySelector('[data-contrast]')!.textContent).not.toBe(before);
   });
 
-  /**
-   * The samples show the candidate scheme, not the one `html` carries: a theme
-   * card and a swatch are regions naming the draft's scheme.
-   */
-  it('draws the theme cards and the swatches in the candidate scheme', async () => {
+  /** A theme card and a swatch are regions naming the draft's scheme, as `html` does. */
+  it('draws the theme cards, the swatches and the application in the candidate scheme', async () => {
     const { harness, root } = await open();
     const schemes = () =>
       [...root.querySelectorAll<HTMLElement>('[data-theme-sample], .swatch')].map((sample) =>
@@ -382,10 +380,9 @@ describe('PreferencesPage › Appearance', () => {
 
     choose(root, 'scheme', 'dark');
     harness.detectChanges();
+    TestBed.flushEffects();
     expect(new Set(schemes())).toEqual(new Set(['dark']));
-    expect(TestBed.inject(DOCUMENT).documentElement.getAttribute('data-slotted-scheme')).not.toBe(
-      'dark',
-    );
+    expect(page().scheme).toBe('dark');
   });
 
   const GROUPS = [
@@ -478,37 +475,21 @@ describe('PreferencesPage › Appearance', () => {
     expect(labels).toEqual(['Standard', 'Friendly', 'Brutalist', 'Editorial', 'Terminal']);
   });
 
-  /** The preview's buttons are samples: the select is the one control a preview region adds to the tab order. */
-  it('keeps the preview buttons out of the tab order and the select in it', async () => {
-    const { root } = await open();
-    for (const region of root.querySelectorAll<HTMLElement>('[data-preview-scheme]')) {
-      const buttons = [...region.querySelectorAll<HTMLElement>('[data-ui=button]')];
-      expect(buttons).toHaveLength(4);
-      expect(buttons.every((button) => button.closest('[inert]') !== null)).toBe(true);
-      expect(region.querySelector('[data-preview-tabs]')!.hasAttribute('inert')).toBe(true);
-      expect(region.querySelector('sl-select')!.closest('[inert]')).toBeNull();
-    }
-  });
-
-  const regionThemes = (root: HTMLElement) => new Set(regions(root).map((region) => region.theme));
-
   /**
    * A change in the builder is a candidate like any other: once the changes
-   * pause, the candidate is compiled into its own theme, which the three
-   * regions name and `html` does not; Reset brings the theme back as it came.
+   * pause, the candidate is compiled into its own theme, which `html` names
+   * before anything is saved; Reset brings the theme back as it came.
    */
-  it('compiles the builder’s changes into the theme the preview names, and resets them', async () => {
+  it('compiles the builder’s changes into the theme html names, and resets them', async () => {
     const { harness, root } = await open();
-    const html = TestBed.inject(DOCUMENT).documentElement;
     choose(root, 'theme', 'nexora-editorial');
     harness.detectChanges();
     choose(root, 'axis-cards', 'flat');
     harness.detectChanges();
     choose(root, 'font-body', 'jetbrains-mono');
     harness.detectChanges();
-    await until(harness, () => regionThemes(root).has('nexora-custom-draft'), 8000);
-    expect(regionThemes(root)).toEqual(new Set(['nexora-custom-draft']));
-    expect(html.getAttribute('data-slotted-theme')).toBe('default');
+
+    await until(harness, () => page().theme === 'nexora-custom-draft', 8000);
     const sheet = TestBed.inject(DOCUMENT).head.querySelector(
       'style[data-slotted-theme-sheet="nexora-custom-draft"]',
     )!.textContent!;
@@ -520,10 +501,12 @@ describe('PreferencesPage › Appearance', () => {
     expect(root.querySelector('[data-anatomy] caption')!.textContent).toContain(
       'Editorial, customised',
     );
+    expect(TestBed.inject(PreferencesStore).preferences().customisation).toEqual(NO_CUSTOMISATION);
 
     (root.querySelector('[data-reset]') as HTMLButtonElement).click();
     harness.detectChanges();
-    expect(regionThemes(root)).toEqual(new Set(['nexora-editorial']));
+    TestBed.flushEffects();
+    expect(page().theme).toBe('nexora-editorial');
     expect(root.querySelector('[data-changes]')).toBeNull();
     expect(
       root.querySelector<HTMLInputElement>('input[name="axis-cards"][value="theme"]')!.checked,
@@ -532,8 +515,8 @@ describe('PreferencesPage › Appearance', () => {
 
   /**
    * A saved customisation is part of the opening wait: the region stays busy
-   * until its candidate is compiled. A change made afterwards is no wait — the
-   * preview keeps what it shows until the new candidate lands.
+   * until its theme is compiled. A change made afterwards is no wait — the
+   * application keeps what it shows until the new candidate lands.
    */
   it('waits on opening for a saved customisation, and never for a later change', async () => {
     const store = TestBed.inject(PreferencesStore);
@@ -545,12 +528,14 @@ describe('PreferencesPage › Appearance', () => {
     expect(region().getAttribute('aria-busy')).toBe('true');
 
     await until(harness, () => !region().hasAttribute('aria-busy'), 5000);
-    expect(regionThemes(root)).toEqual(new Set(['nexora-custom-draft']));
+    expect(page().theme).toBe('nexora-custom');
 
     choose(root, 'axis-motion', 'off');
     harness.detectChanges();
+    TestBed.flushEffects();
     expect(region().hasAttribute('aria-busy')).toBe(false);
-    expect(regionThemes(root)).toEqual(new Set(['nexora-custom-draft']));
+    expect(page().theme).toBe('nexora-custom');
+    await until(harness, () => page().theme === 'nexora-custom-draft', 8000);
   });
 
   /** The anatomy is the chosen theme object's, layer by layer. */
@@ -572,15 +557,13 @@ describe('PreferencesPage › Appearance', () => {
     expect(row('fonts').entries).toBe('Inter Variable, JetBrains Mono Variable');
   });
 
-  /** Save keeps the builder's changes, and `html` names the compiled theme. */
+  /** Save keeps the builder's changes, and `html` names the saved compiled theme. */
   it('saves a customisation, which html names once it is compiled', async () => {
     const { harness, root } = await open();
     const html = TestBed.inject(DOCUMENT).documentElement;
     choose(root, 'axis-shadow', 'strong');
     harness.detectChanges();
-    [...root.querySelectorAll('button')]
-      .find((button) => button.textContent?.trim() === 'Save preferences')!
-      .click();
+    button(root, 'Save preferences').click();
     harness.detectChanges();
 
     expect(TestBed.inject(PreferencesStore).preferences().customisation.shadow).toBe('strong');

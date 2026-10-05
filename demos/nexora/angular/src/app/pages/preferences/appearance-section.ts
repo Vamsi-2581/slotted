@@ -36,7 +36,6 @@ import { SlSlider } from '@slotted/angular/slider';
 import { SlStack } from '@slotted/angular/stack';
 import { SlThemeScope } from '@slotted/angular/theme';
 import { SlHeading, SlHeadingLevel, SlText } from '@slotted/angular/typography';
-import type { Scheme } from '@slotted/theme';
 
 import { PreferencesStore, type UserPreferences } from '../../core/session/preferences.store';
 import {
@@ -73,12 +72,10 @@ import type * as ThemeAnatomyModule from '../../core/theming/theme-anatomy';
 import {
   catalogueTheme,
   DEFAULT_THEME_ID,
-  DRAFT_THEME_ID,
   RUNTIME_THEME_IDS,
   THEME_CATALOGUE,
 } from '../../core/theming/theme-catalogue';
 import { AnatomyTable } from './anatomy-table';
-import { AppearancePreview } from './appearance-preview';
 import { ContrastTable } from './contrast-table';
 
 /** The builder's axes of fixed values, their words and the words of each value. */
@@ -145,16 +142,15 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
 /**
  * How Nexora is drawn: a theme of the catalogue, the builder's changes over
  * it, the scheme and the density, each a candidate in the page's draft until
- * Save.
+ * Save. The page hands the draft to `PreferencesStore.preview`, so the whole
+ * application is drawn in the candidate while it is edited.
  *
  * Every sample on this section is a theme region of its own — a theme card
- * names its theme, a swatch carries its seed, both in the candidate scheme —
- * so what it shows is what the theme derives for that choice, not a colour
- * the page wrote. A customised candidate is one more theme, compiled in the
- * browser by `extendTheme` under `nexora-custom-draft` once the changes pause
- * (`PreferencesStore.previewCustomisation`); the preview repeats it in the
- * three schemes, the anatomy table reads that theme object layer by layer,
- * and the contrast table reads its recipe's numbers.
+ * names its theme, a swatch carries its seed — so what it shows is what the
+ * theme derives for that choice, not a colour the page wrote. A customised
+ * candidate is one more theme, compiled in the browser by `extendTheme`; the
+ * anatomy table reads that theme object layer by layer, and the contrast
+ * table reads its recipe's numbers in the three schemes.
  *
  * The runtime themes' definitions, the anatomy and the contrast arithmetic
  * load by `import()` when the section opens, and the sheets are compiled
@@ -168,7 +164,6 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
   selector: 'app-appearance-section',
   imports: [
     AnatomyTable,
-    AppearancePreview,
     ContrastTable,
     NgTemplateOutlet,
     SlAlert,
@@ -339,10 +334,6 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
     .reserved {
       visibility: hidden;
     }
-    .previews {
-      display: grid;
-      gap: var(--slotted-space-6);
-    }
   `,
   template: `
     <section slSection>
@@ -350,8 +341,9 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
         <div slSectionTitle>
           <h2 slSectionHeading>Appearance</h2>
           <p slSectionDescription>
-            A theme, your changes over it, and the scheme and density Nexora is drawn in. The
-            preview shows the candidate in every scheme; Save applies it to the whole application.
+            A theme, your changes over it, and the scheme and density Nexora is drawn in. Every
+            choice draws the whole application at once; Save keeps it, and Discard or leaving
+            this page returns to the saved appearance.
           </p>
         </div>
       </div>
@@ -761,21 +753,6 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
               </div>
             </div>
 
-            <div slStack [gap]="5" data-appearance-group="preview">
-              <h3 slHeading size="md">Preview</h3>
-              <div class="previews">
-                @for (scheme of schemes; track scheme) {
-                  <app-appearance-preview
-                    [class.reserved]="reserved(draft().theme, wait.painted())"
-                    [theme]="previewTheme()"
-                    [scheme]="scheme"
-                    [density]="draft().density"
-                    [seeds]="seeds()"
-                  />
-                }
-              </div>
-            </div>
-
             @if (!failed() || anatomy() !== null) {
               <div slStack [gap]="5" data-appearance-group="anatomy">
                 <h3 slHeading size="md">Theme anatomy</h3>
@@ -837,7 +814,6 @@ export class AppearanceSection {
     axes: longest('Theme', ...AXES.flatMap((entry) => entry.options.map((option) => option.label))),
   };
   protected readonly radiusRange = RADIUS_RANGE;
-  protected readonly schemes: readonly Scheme[] = ['light', 'dark', 'high-contrast'];
   protected readonly presetColors = BRAND_PRESETS.map((preset) => preset.color);
 
   /** The last load of the runtime sheets failed, and nothing has been tried since. */
@@ -859,31 +835,32 @@ export class AppearanceSection {
       this.definitions() !== null &&
       RUNTIME_THEME_IDS.every((id) => this.store.hasSheet(id)),
   );
-  /** The section opened on a saved customisation whose candidate has not been compiled yet. */
+  /** The section opened on a saved customisation whose theme has not been compiled yet. */
   private readonly opening = signal(true);
 
   /**
    * One wait: the sheets and the modules, and on opening the first compile
    * of a saved customisation. A change made afterwards is no wait: the
-   * preview keeps what it shows until the new candidate is compiled.
+   * application keeps what it shows until the new candidate is compiled.
    */
   protected readonly pending = computed(
-    () =>
-      !this.failed() &&
-      (!this.loaded() ||
-        (this.opening() &&
-          this.customised() &&
-          this.store.previewTheme(this.draft().theme) === null)),
+    () => !this.failed() && (!this.loaded() || (this.opening() && this.uncompiled())),
+  );
+
+  /** The draft is customised and no theme has been compiled for it yet; a signal read. */
+  private uncompiled(): boolean {
+    return this.customised() && this.compiled() === null;
+  }
+
+  /** The theme the draft's customisation compiled to, or the latest candidate over its theme. */
+  private readonly compiled = computed(() =>
+    this.store.compiledTheme(this.draft().theme, this.draft().customisation),
   );
 
   constructor() {
     this.load();
-    /* The candidate's sheet follows the draft; the store compiles once the changes pause. */
-    effect(() => this.store.previewCustomisation(this.draft().theme, this.draft().customisation));
     effect(() => {
-      if (this.loaded() && (!this.customised() || this.store.previewTheme(this.draft().theme))) {
-        this.opening.set(false);
-      }
+      if (this.loaded() && !this.uncompiled()) this.opening.set(false);
     });
   }
 
@@ -897,7 +874,7 @@ export class AppearanceSection {
       STATUS_SEEDS.filter((status) => this.draft().status[status] !== null).length,
   );
 
-  /** The candidate seeds, as the preview regions carry them. */
+  /** The candidate seeds, as the contrast readings take them. */
   protected readonly seeds = computed(() =>
     appearanceSeeds(
       this.draft().theme,
@@ -916,17 +893,10 @@ export class AppearanceSection {
     () => this.contrast()?.contrastReadings(this.draft().theme, this.seeds()) ?? null,
   );
 
-  /** The theme the preview regions name: the compiled candidate while one is customised. */
-  protected readonly previewTheme = computed(() =>
-    this.customised() && this.store.previewTheme(this.draft().theme) !== null
-      ? DRAFT_THEME_ID
-      : this.drawn(this.draft().theme),
-  );
-
   protected readonly anatomy = computed(() => {
     const definitions = this.definitions();
     if (definitions === null) return null;
-    const compiled = this.customised() ? this.store.previewTheme(this.draft().theme) : null;
+    const compiled = this.customised() ? this.compiled() : null;
     return definitions.anatomy.themeAnatomy(
       compiled ?? definitions.themes.nexoraTheme(this.draft().theme),
     );

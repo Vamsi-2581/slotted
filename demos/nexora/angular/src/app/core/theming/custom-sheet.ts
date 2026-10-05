@@ -74,6 +74,11 @@ export class CustomSheet {
     this.compiled.set(null);
   }
 
+  /** Whether `customisation` of `theme` is the request pending or compiled. */
+  wants(theme: string, customisation: Customisation): boolean {
+    return this.wanted === CustomSheet.signature(theme, customisation);
+  }
+
   /** Whether the sheet on the page is the one `customisation` of `theme` compiles to. */
   holds(theme: string, customisation: Customisation): boolean {
     return this.compiled()?.signature === CustomSheet.signature(theme, customisation);

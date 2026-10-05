@@ -60,6 +60,17 @@ export interface UserPreferences {
   };
 }
 
+/** The preferences `html` answers: how Nexora is drawn. */
+export type Appearance = Pick<
+  UserPreferences,
+  'scheme' | 'density' | 'theme' | 'brand' | 'neutral' | 'status' | 'customisation'
+>;
+
+export function appearanceOf(preferences: UserPreferences): Appearance {
+  const { scheme, density, theme, brand, neutral, status, customisation } = preferences;
+  return { scheme, density, theme, brand, neutral, status, customisation };
+}
+
 export const DEFAULT_PREFERENCES: UserPreferences = {
   scheme: 'system',
   density: 'comfortable',
@@ -86,7 +97,7 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
  * used — named by the preferences, or shown by the appearance section — and
  * stays until the application ends; a later change of theme moves only the
  * attribute. The definitions arrive by `import()`, so a reader who keeps
- * `default` downloads and compiles none of the other three (LIBRARY-FEEDBACK.md
+ * `default` downloads and compiles none of the other four (LIBRARY-FEEDBACK.md
  * row "a theme built at runtime").
  *
  * `html` names a theme only once its sheet is on the page: `default.css`
@@ -94,11 +105,16 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
  * no sheet behind it would leave the page without one. Until then it keeps
  * the theme it shows — `default` on a reload — and the seeds apply at once.
  *
+ * The application is its own preview: while the preferences page edits a
+ * candidate appearance (`preview`), `html` answers the candidate; Discard and
+ * leaving the page clear it, which brings back the saved one.
+ *
  * A customised theme is compiled by the builder (`custom-theme.ts`, loaded by
- * `import()`) under `nexora-custom`, and `html` names it once that sheet
- * exists. The candidate the appearance section previews compiles under a
- * second name, `nexora-custom-draft`, after 200 ms without a change, so the
- * preview never repaints the application and a dragged slider compiles once.
+ * `import()`): the saved customisation under `nexora-custom`, at once, and a
+ * candidate that differs from it under `nexora-custom-draft`, after 200 ms
+ * without a change, so a dragged slider compiles once. `html` names either
+ * once its sheet holds what the appearance asks for; until then it keeps the
+ * theme it shows.
  */
 @Injectable({ providedIn: 'root' })
 export class PreferencesStore {
@@ -118,11 +134,18 @@ export class PreferencesStore {
   private readonly saved = new CustomSheet(CUSTOM_THEME_ID, this.document, 0);
   /** The candidate customisation's sheet, compiled once the changes pause. */
   private readonly draft = new CustomSheet(DRAFT_THEME_ID, this.document, 200);
+  /** The appearance the preferences page is editing, or `null` outside it. */
+  private readonly candidate = signal<Appearance | null>(null);
 
   readonly preferences = computed<UserPreferences>(() => {
     this.version();
     return this.read(this.sessionStore.user()?.id);
   });
+
+  /** What `html` answers: the candidate while there is one, the saved appearance otherwise. */
+  readonly appearance = computed<Appearance>(
+    () => this.candidate() ?? appearanceOf(this.preferences()),
+  );
 
   constructor() {
     inject(DestroyRef).onDestroy(() => {
@@ -131,8 +154,8 @@ export class PreferencesStore {
       this.saved.end();
       this.draft.end();
     });
-    effect(() => this.apply(this.preferences()));
-    this.media?.addEventListener('change', () => this.apply(this.preferences()));
+    effect(() => this.apply(this.appearance()));
+    this.media?.addEventListener('change', () => this.apply(this.appearance()));
   }
 
   /** Whether the sheet of `theme` is on the page; a signal read, so a template follows it. */
@@ -151,27 +174,19 @@ export class PreferencesStore {
     ).then(() => undefined);
   }
 
-  /**
-   * Asks for the candidate customisation of `theme` under `nexora-custom-draft`;
-   * a burst of calls compiles the last one, 200 ms after it.
-   */
-  previewCustomisation(theme: string, customisation: Customisation): void {
-    if (isCustomised(customisation)) this.draft.request(theme, customisation);
-    else this.draft.forget();
+  /** Draws `html` in `candidate` until it is cleared with `null`. */
+  preview(candidate: Appearance | null): void {
+    this.candidate.set(candidate);
   }
 
   /**
-   * The compiled candidate while it was compiled over `theme` — the last one
-   * during a burst of changes, so a dragged slider never shows the theme
-   * without them — or `null`; a signal read.
+   * The theme a customisation of `theme` compiled to: the saved one when it is
+   * that customisation, else the latest candidate compiled over `theme` — the
+   * last one during a burst of changes — or `null`; a signal read.
    */
-  previewTheme(theme: string): Theme | null {
+  compiledTheme(theme: string, customisation: Customisation): Theme | null {
+    if (this.saved.holds(theme, customisation)) return this.saved.compiled()!.theme;
     return this.draft.themeOver(theme);
-  }
-
-  /** Whether the candidate sheet is the one `customisation` of `theme` compiles to; a signal read. */
-  previewHolds(theme: string, customisation: Customisation): boolean {
-    return this.draft.holds(theme, customisation);
   }
 
   private load(theme: string): Promise<void> {
@@ -193,23 +208,33 @@ export class PreferencesStore {
     return load;
   }
 
-  apply(preferences: UserPreferences): void {
+  apply(appearance: Appearance): void {
     const html = this.document.documentElement;
     const scheme =
-      preferences.scheme === 'system'
+      appearance.scheme === 'system'
         ? this.media?.matches
           ? 'dark'
           : 'light'
-        : preferences.scheme;
-    const theme = catalogueTheme(preferences.theme).id;
-    if (isCustomised(preferences.customisation)) {
-      this.saved.request(theme, preferences.customisation);
-      if (this.saved.compiled() !== null) this.shown = CUSTOM_THEME_ID;
-    } else if (this.hasSheet(theme)) this.shown = theme;
-    else this.useThemes([theme]).catch(() => undefined);
+        : appearance.scheme;
+    const saved = this.preferences();
+    if (isCustomised(saved.customisation)) {
+      this.saved.request(catalogueTheme(saved.theme).id, saved.customisation);
+    }
+    const theme = catalogueTheme(appearance.theme).id;
+    const customisation = appearance.customisation;
+    if (!isCustomised(customisation)) {
+      this.draft.forget();
+      if (this.hasSheet(theme)) this.shown = theme;
+      else this.useThemes([theme]).catch(() => undefined);
+    } else if (this.saved.holds(theme, customisation)) {
+      this.shown = CUSTOM_THEME_ID;
+    } else if (!this.saved.wants(theme, customisation)) {
+      this.draft.request(theme, customisation);
+      if (this.draft.holds(theme, customisation)) this.shown = DRAFT_THEME_ID;
+    }
     html.setAttribute('data-slotted-theme', this.shown);
     const seeds = seedStyle(
-      appearanceSeeds(theme, preferences.brand, preferences.neutral, preferences.status),
+      appearanceSeeds(theme, appearance.brand, appearance.neutral, appearance.status),
     );
     for (const name of SEED_NAMES) {
       const property = `--slotted-seed-${name}`;
@@ -217,8 +242,8 @@ export class PreferencesStore {
       else html.style.removeProperty(property);
     }
     html.setAttribute('data-slotted-scheme', scheme);
-    html.setAttribute('data-slotted-density', preferences.density);
-    html.lang = preferences.locale;
+    html.setAttribute('data-slotted-density', appearance.density);
+    html.lang = saved.locale;
     html.style.colorScheme = scheme;
   }
 

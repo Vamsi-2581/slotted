@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideTestBackend, resetTestBackend } from '../../../test/testing';
 import { NO_CUSTOMISATION } from '../theming/customisation';
-import { PreferencesStore } from './preferences.store';
+import { appearanceOf, PreferencesStore } from './preferences.store';
 import { SessionStore } from './session.store';
 
 describe('PreferencesStore', () => {
@@ -326,11 +326,53 @@ describe('PreferencesStore', () => {
   });
 
   /**
-   * The candidate compiles 200 ms after the last change: a burst of changes —
-   * a slider dragged across its range — compiles once, with its last value,
-   * and asking again for what is on the page compiles nothing.
+   * The application is the preview: a candidate appearance reaches `html` at
+   * once, saved or not, and clearing it brings the saved appearance back.
    */
-  it('compiles a burst of candidate changes once, with the last one', async () => {
+  it('applies a candidate appearance to html, and the saved one once it is cleared', async () => {
+    const prefs = TestBed.inject(PreferencesStore);
+    const html = TestBed.inject(DOCUMENT).documentElement;
+    await prefs.useThemes(['nexora-terminal']);
+    TestBed.flushEffects();
+    const saved = {
+      theme: html.getAttribute('data-slotted-theme'),
+      scheme: html.getAttribute('data-slotted-scheme'),
+      density: html.getAttribute('data-slotted-density'),
+      accent: html.style.getPropertyValue('--slotted-seed-accent'),
+    };
+    expect(saved.theme).toBe('default');
+
+    prefs.preview({
+      ...appearanceOf(prefs.preferences()),
+      theme: 'nexora-terminal',
+      scheme: 'dark',
+      density: 'compact',
+      brand: { preset: 'rose', custom: '#7c3aed' },
+    });
+    TestBed.flushEffects();
+    expect(html.getAttribute('data-slotted-theme')).toBe('nexora-terminal');
+    expect(html.getAttribute('data-slotted-scheme')).toBe('dark');
+    expect(html.getAttribute('data-slotted-density')).toBe('compact');
+    expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('#e11d48');
+    expect(prefs.preferences().theme).toBe('default');
+
+    prefs.preview(null);
+    TestBed.flushEffects();
+    expect({
+      theme: html.getAttribute('data-slotted-theme'),
+      scheme: html.getAttribute('data-slotted-scheme'),
+      density: html.getAttribute('data-slotted-density'),
+      accent: html.style.getPropertyValue('--slotted-seed-accent'),
+    }).toEqual(saved);
+  });
+
+  /**
+   * A customised candidate compiles under `nexora-custom-draft` 200 ms after
+   * the last change, and `html` names it once it is there: a burst of changes
+   * — a slider dragged across its range — compiles once, with its last
+   * value, and asking again for what is on the page compiles nothing.
+   */
+  it('compiles a burst of candidate changes once, with the last one, and html names it', async () => {
     const doc = TestBed.inject(DOCUMENT);
     const prefs = TestBed.inject(PreferencesStore);
     let compiled = 0;
@@ -339,27 +381,39 @@ describe('PreferencesStore', () => {
         compiled += 1;
     });
     const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    const candidate = (radius: number) => ({
+      ...appearanceOf(prefs.preferences()),
+      theme: 'nexora-friendly',
+      customisation: { ...NO_CUSTOMISATION, radius },
+    });
 
     for (let radius = 0; radius <= 18; radius += 2) {
-      prefs.previewCustomisation('nexora-friendly', { ...NO_CUSTOMISATION, radius });
+      prefs.preview(candidate(radius));
+      TestBed.flushEffects();
       await wait(10);
     }
     await wait(150);
     expect(compiled).toBe(0);
 
-    await vi.waitFor(() => expect(compiled).toBe(1));
-    expect(prefs.previewTheme('nexora-friendly')?.base?.['--slotted-radius-lg']).toBe('18px');
-    expect(prefs.previewTheme('nexora-terminal')).toBeNull();
-    expect(prefs.previewHolds('nexora-friendly', { ...NO_CUSTOMISATION, radius: 18 })).toBe(true);
-    expect(doc.documentElement.getAttribute('data-slotted-theme')).toBe('default');
+    await vi.waitFor(() => {
+      TestBed.flushEffects();
+      expect(doc.documentElement.getAttribute('data-slotted-theme')).toBe('nexora-custom-draft');
+    });
+    expect(compiled).toBe(1);
+    const radius18 = { ...NO_CUSTOMISATION, radius: 18 };
+    expect(prefs.compiledTheme('nexora-friendly', radius18)?.base?.['--slotted-radius-lg']).toBe(
+      '18px',
+    );
+    expect(prefs.compiledTheme('nexora-terminal', radius18)).toBeNull();
 
-    prefs.previewCustomisation('nexora-friendly', { ...NO_CUSTOMISATION, radius: 18 });
+    prefs.preview(candidate(18));
+    TestBed.flushEffects();
     await wait(400);
     expect(compiled).toBe(1);
 
-    /* Back to the theme as it came: the candidate is forgotten, so the next one shows nothing older. */
-    prefs.previewCustomisation('nexora-friendly', NO_CUSTOMISATION);
-    expect(prefs.previewTheme('nexora-friendly')).toBeNull();
+    prefs.preview(null);
+    TestBed.flushEffects();
+    expect(doc.documentElement.getAttribute('data-slotted-theme')).toBe('default');
   });
 
   /** A stored arrangement the catalogue no longer has falls back to the default. */

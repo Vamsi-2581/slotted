@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { SlButton } from '@slotted/angular/button';
 import { SlCheckbox } from '@slotted/angular/checkbox';
 import { SlField, SlFieldDescription, SlFieldLabel } from '@slotted/angular/field';
@@ -28,12 +36,22 @@ import { SlStack } from '@slotted/angular/stack';
 import { SlToastService } from '@slotted/angular/toast';
 
 import { visibleModules } from '../../core/nav/nav.model';
-import { PreferencesStore, type UserPreferences } from '../../core/session/preferences.store';
+import {
+  appearanceOf,
+  PreferencesStore,
+  type UserPreferences,
+} from '../../core/session/preferences.store';
 import { SHELL_PRESETS } from '../../core/shell/shell-presets';
 import { SessionStore } from '../../core/session/session.store';
 import { AppearanceSection } from './appearance-section';
 import { ShellPreview } from './shell-preview';
 
+/**
+ * The preferences, edited as a draft until Save. The draft's appearance is
+ * the application's own while the page is open (`PreferencesStore.preview`):
+ * Discard returns the draft, and the application, to the saved preferences,
+ * and leaving the page clears the candidate.
+ */
 @Component({
   selector: 'app-preferences-page',
   imports: [
@@ -87,7 +105,7 @@ import { ShellPreview } from './shell-preview';
     }
   `,
   template: `
-    <!-- CP-07: a form with a preview of three regions side by side, not prose: content width. -->
+    <!-- CP-07: a form of choice grids and tables, not prose: content width. -->
     <div slPage width="content">
       <header slPageHeader>
         <div slPageHeaderTitleArea>
@@ -216,6 +234,12 @@ export class PreferencesPage {
   readonly dirty = computed(
     () => JSON.stringify(this.draft()) !== JSON.stringify(this.preferences.preferences()),
   );
+
+  constructor() {
+    effect(() => this.preferences.preview(appearanceOf(this.draft())));
+    inject(DestroyRef).onDestroy(() => this.preferences.preview(null));
+  }
+
   readonly startPages = computed(() =>
     visibleModules((p) => this.session.can(p)).map((m) => ({
       path: m.destinations[0]?.path ?? m.path,

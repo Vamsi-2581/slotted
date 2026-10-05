@@ -1,26 +1,31 @@
 // usage: node tools/theme-switch.mjs   (after `pnpm build:demo`; PORT optional; ORIGIN=<url> reads a running server)
 // The appearance scenario: one browser session on the built demo, served from `dist` with an SPA
-// fallback, on the preferences page. It waits for the runtime theme sheets, then:
-// - layout, at 1440 and at the compact width (390): no segmented option clips its label; in each
-//   group of choice cards (theme, brand, grey, text face, heading face) every card has the width
-//   and the height of the others, and no label runs onto a second line;
-// - the colour fields paint their colour in the swatch before any interaction;
-// - for each of the five themes, with the theme's own brand and two presets, it reads the three
-//   preview regions (light, dark, high contrast) and asserts absolute values: the region's theme,
-//   scheme and ground; the button's corner, case, face and transition; the heading's face; the
-//   card's line, shadow and inset; the badge's corner and case; the chart's first series in the
-//   theme's palette; the label on the solid at the scheme's floor and the contrast table stating
-//   the ratio painted; the select's layer carrying the region's theme, scheme and seed; and that
-//   each face the theme names is loaded;
-// - with two strongly tinted greys (Ocean #0e7490, Clay #9c6644), a card, the table and the select's
-//   layer carry the grey's hue in light and dark, in every theme;
-// - every builder axis moves the computed value it names: corner, both faces (each of the eight
-//   families, loaded), type scale, lines, shadows, motion, cards, chart colours and a status colour,
-//   and a burst of corner changes compiles one sheet; Reset returns to the theme as it came;
-// - nothing outside the preview moves while only the preview changes — `html` keeps `default`, its
-//   scheme and its seeds, a probe button outside every region keeps the default's violet, 4px corner
-//   and lower case, and the page title its Geist face — read as absolute values before the first
-//   choice and after every theme. Save then moves `html` and the probe.
+// fallback, on the preferences page, where every choice draws the whole application at once. It
+// waits for the runtime theme sheets, then:
+// - the colour fields paint their colour in the swatch before any interaction, and a font specimen
+//   names its face only once it is scrolled into view, in a box that does not move when it does;
+// - for each of the five themes, with the theme's own brand and two presets, in light and dark, it
+//   reads `html` and asserts absolute values: the theme and the scheme `html` names and the ground
+//   they paint; a probe button's corner, case, face and transition; the page heading's face; the
+//   contrast table's badges' corner and case; the first data colour; the label on the solid at the
+//   scheme's floor and the contrast table stating the ratio painted; the start page select's layer
+//   carrying the theme, scheme and seed of `html`; each face the theme names, loaded; and that the
+//   theme cards' specimens draw their own theme without changing the page around them;
+// - with two strongly tinted greys (Ocean #0e7490, Clay #9c6644) and a grey of the reader's own, the
+//   page ground, a table ground and the select's layer carry the grey's hue, and the lines and
+//   hovers stay in the ground's family;
+// - Save keeps a theme: the application's own pages show it — a stat card's line, shadow and inset
+//   on the dashboard, the chart's first series and the table head on the inventory overview, the selected
+//   tab on Notifications; Discard and leaving the page return `html` to the saved appearance;
+// - every builder axis moves the computed value it names on `html`: corner (a burst compiles one
+//   sheet; "Use the theme's" brings it back), both faces (each of the eight families, loaded), type
+//   scale, lines, shadows, motion, cards, tabs (the selected tab's corner and ground on
+//   Notifications), chart colours and a status colour; Reset returns to the theme as it came;
+// - layout, with `html` saved in each of the five themes and in a customised theme in the widest
+//   face, at 1440, 1024, 768, 390 and 360 px: in each group of choice tiles (theme, brand, grey, both
+//   faces, every builder axis) every tile has the width and the height of the others (±1 px), no
+//   label runs onto a second line, no tile or label is cut (scrollWidth ≤ clientWidth), and the page
+//   does not scroll sideways.
 // Prints one PASS or FAIL per check and exits non-zero on a failure. A Chrome that cannot start, or
 // that exits during the run, fails the scenario through the same cleanup. CHROME names the binary
 // (default `google-chrome`).
@@ -39,10 +44,10 @@ if (SERVED === undefined && !existsSync(join(ROOT, 'index.html'))) {
   process.exit(2);
 }
 
-const SCHEMES = ['light', 'dark', 'high-contrast'];
-const FLOOR = { light: 4.5, dark: 4.5, 'high-contrast': 7 };
-/** The ground each scheme paints, as the WCAG luminance of `--slotted-surface`; high contrast is a light scheme. */
-const GROUND = { light: (l) => l > 0.8, dark: (l) => l < 0.2, 'high-contrast': (l) => l > 0.9 };
+const SCHEMES = ['light', 'dark'];
+const FLOOR = { light: 4.5, dark: 4.5 };
+/** The ground each scheme paints, as the WCAG luminance of `--slotted-surface`. */
+const GROUND = { light: (l) => l > 0.8, dark: (l) => l < 0.2 };
 const FACE = {
   geist: 'Geist Variable',
   inter: 'Inter Variable',
@@ -55,53 +60,54 @@ const FACE = {
 };
 /** The first family of a computed `font-family`, unquoted. */
 const first = (stack) => stack.split(',')[0].trim().replace(/^["']|["']$/g, '');
+const WIDTHS = [1440, 1024, 768, 390, 360];
+const PREFERENCES = '/settings/preferences';
 
 /**
  * What each theme draws, as absolute values: the solid button's corner, case, face and transition;
- * the heading's face; the card's top line, shadow (a prefix of the computed value, per light/dark)
- * and inline inset; the badge's corner and case; the first data colour per scheme.
+ * the heading's face; a stat card's top line, shadow in light (a part of the computed value) and
+ * inline inset; the badge's corner and case; the first data colour per scheme.
  */
 const THEMES = [
   {
     id: 'default',
     radius: '4px', transform: 'none', body: 'geist', heading: 'geist', duration: '0.12s',
-    cardLine: '1px', cardShadow: { light: 'none', dark: 'none' }, inset: '16px',
+    statLine: '1px', statShadow: 'none', statInset: '16px',
     badgeRadius: '9999px', badgeCaps: 'normal',
-    data: { light: '#2563eb', dark: '#2563eb', 'high-contrast': '#1d4ed8' },
+    data: { light: '#2563eb', dark: '#2563eb' },
   },
   {
     id: 'nexora-friendly',
     radius: '9999px', transform: 'none', body: 'nunito', heading: 'nunito', duration: '0.18s',
-    cardLine: '0px', cardShadow: { light: 'rgba(190, 70, 110, 0.22) 0px 10px 24px -8px', dark: 'rgba(0, 0, 0, 0.65) 0px 14px 30px -10px' }, inset: '24px',
+    statLine: '0px', statShadow: 'rgba(190, 70, 110, 0.22) 0px 10px 24px -8px', statInset: '24px',
     badgeRadius: '9999px', badgeCaps: 'normal',
-    data: { light: '#d6336c', dark: '#f06595', 'high-contrast': '#a61e4d' },
+    data: { light: '#d6336c', dark: '#f06595' },
   },
   {
     id: 'nexora-brutalist',
     radius: '0px', transform: 'uppercase', body: 'inter', heading: 'jetbrains-mono', duration: '0.001s',
-    cardLine: '2px', cardShadow: { light: '5px 5px 0px 0px', dark: '5px 5px 0px 0px' }, inset: '18px',
+    statLine: '2px', statShadow: '3px 3px 0px 0px', statInset: '18px',
     badgeRadius: '0px', badgeCaps: 'normal',
-    data: { light: '#111111', dark: '#ffd400', 'high-contrast': '#000000' },
+    data: { light: '#111111', dark: '#ffd400' },
   },
   {
     id: 'nexora-editorial',
     radius: '2px', transform: 'none', body: 'source-serif', heading: 'fraunces', duration: '0.16s',
-    cardLine: '1px', cardShadow: { light: 'none', dark: 'none' }, inset: '30px',
+    statLine: '1px', statShadow: 'none', statInset: '25px',
     badgeRadius: '1px', badgeCaps: 'all-small-caps',
-    data: { light: '#8a1538', dark: '#d4708a', 'high-contrast': '#6b0f28' },
+    data: { light: '#8a1538', dark: '#d4708a' },
   },
   {
     id: 'nexora-terminal',
     radius: '2px', transform: 'lowercase', body: 'jetbrains-mono', heading: 'jetbrains-mono', duration: '0.08s',
-    cardLine: '1px', cardShadow: { light: 'none', dark: 'none' }, inset: '12px',
+    statLine: '1px', statShadow: 'none', statInset: '12px',
     badgeRadius: '1px', badgeCaps: 'normal',
-    data: { light: '#0a8f2a', dark: '#39ff14', 'high-contrast': '#005c00' },
+    data: { light: '#0a8f2a', dark: '#39ff14' },
   },
 ];
 const BRANDS = ['theme', 'emerald', 'rose'];
-/** The two tinted greys and their OKLCH hue, for the grounds that must carry it. */
-const GREYS = [{ id: 'ocean', hue: 223 }, { id: 'clay', hue: 52 }];
-const DEFAULT_PROBE = { radius: '4px', transform: 'none', spacing: 'normal' };
+/** The tinted greys and their OKLCH hue, for the grounds that must carry it; `custom` is typed. */
+const GREYS = [{ id: 'ocean', hue: 223 }, { id: 'clay', hue: 52 }, { id: 'custom', value: '#336699', hue: 254 }];
 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2', '.ico': 'image/x-icon' };
 const server = createServer((request, response) => {
@@ -145,7 +151,7 @@ const viewport = (width, height) => send('Emulation.setDeviceMetricsOverride', {
  * Helpers installed in the page once: a colour of any CSS notation read as sRGB through a canvas,
  * its OKLCH, its WCAG luminance, the ratio of two of them, a counter of compiled draft sheets, and a
  * probe — a solid button the button family paints by its attributes, appended to the body, outside
- * every preview region.
+ * every theme card, so it answers `html` alone.
  */
 const install = () => js(`(() => {
   const canvas = document.createElement('canvas');
@@ -171,6 +177,8 @@ const install = () => js(`(() => {
     return { l: L, c: Math.hypot(A, B), h: ((Math.atan2(B, A) * 180) / Math.PI + 360) % 360 };
   };
   const ratio = (a, b) => { const [x, y] = [luminance(a), luminance(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+  /* The first painted ground at or above an element. */
+  const ground = (element) => { let node = element; while (node && getComputedStyle(node).backgroundColor === 'rgba(0, 0, 0, 0)') node = node.parentElement; return node ? getComputedStyle(node).backgroundColor : 'none'; };
   const probe = document.createElement('button');
   probe.type = 'button';
   probe.textContent = 'Probe';
@@ -180,55 +188,80 @@ const install = () => js(`(() => {
   probe.setAttribute('data-size', 'md');
   probe.setAttribute('data-theme-probe', '');
   document.body.append(probe);
-  window.__theme = { rgb, oklch, luminance, ratio, drafts: 0 };
+  window.__theme = { rgb, oklch, luminance, ratio, ground, drafts: 0 };
   document.addEventListener('slotted-themechange', (event) => { if (event.detail.name === 'nexora-custom-draft' && event.detail.applied) window.__theme.drafts += 1; });
   return true;
 })()`);
 
-/** What must not move while only the preview changes, as absolute values. */
-const outside = async () => JSON.parse(await js(`(() => {
+/** What `html` and the page answer, as absolute values: the probe's paint, the faces, the tokens. */
+const facts = () => js(`(() => {
   const html = document.documentElement;
-  const probe = getComputedStyle(document.querySelector('[data-theme-probe]'));
-  const heading = document.querySelector('[data-ui=page-header] [data-part=heading]');
-  return JSON.stringify({
+  const root = getComputedStyle(html);
+  const token = (name) => root.getPropertyValue(name).trim();
+  const T = window.__theme;
+  const probe = document.querySelector('[data-theme-probe]');
+  const style = getComputedStyle(probe);
+  const scheme = html.getAttribute('data-slotted-scheme');
+  const cell = document.querySelector('[data-contrast] td[data-pair="on-solid"][data-scheme="' + scheme + '"] [data-ratio]');
+  const badge = getComputedStyle(document.querySelector('[data-contrast] [data-ui=badge]'));
+  const rows = [...document.querySelectorAll('[data-contrast] [data-part=body] > [data-part=row]')];
+  return {
     theme: html.getAttribute('data-slotted-theme'),
-    scheme: html.getAttribute('data-slotted-scheme'),
-    seeds: html.style.cssText,
-    background: window.__theme.rgb(probe.backgroundColor).join(','),
-    radius: probe.borderTopLeftRadius,
-    transform: probe.textTransform,
-    spacing: probe.letterSpacing,
-    heading: heading ? getComputedStyle(heading).fontFamily : '',
-  });
-})()`));
-const sameOutside = (a, b) => JSON.stringify(a) === JSON.stringify(b);
-const defaultOutside = (facts, violet) =>
-  facts.theme === 'default' && /--slotted-seed-accent:\s*#7c3aed/.test(facts.seeds) && facts.background === violet &&
-  facts.radius === DEFAULT_PROBE.radius && facts.transform === DEFAULT_PROBE.transform && facts.spacing === DEFAULT_PROBE.spacing &&
-  first(facts.heading) === FACE.geist;
+    scheme,
+    ground: T.luminance(token('--slotted-surface')),
+    seed: html.style.getPropertyValue('--slotted-seed-accent').trim(),
+    neutralSeed: html.style.getPropertyValue('--slotted-seed-neutral').trim(),
+    background: T.rgb(style.backgroundColor).join(','),
+    ratio: T.ratio(style.color, style.backgroundColor),
+    stated: Number.parseFloat(cell?.textContent ?? 'NaN'),
+    radius: style.borderTopLeftRadius,
+    transform: style.textTransform,
+    spacing: style.letterSpacing,
+    buttonFace: style.fontFamily,
+    duration: style.transitionDuration.split(',')[0].trim(),
+    buttonShadow: style.boxShadow,
+    fontSize: style.fontSize,
+    headingFace: getComputedStyle(document.querySelector('[data-ui=page-header] [data-part=heading]')).fontFamily,
+    badgeRadius: badge.borderTopLeftRadius,
+    badgeCaps: badge.fontVariantCaps,
+    data1: T.rgb(token('--slotted-data-1')).join(','),
+    chart1: T.rgb(token('--slotted-chart-color-1') || 'transparent').join(','),
+    accentSolid: T.rgb(token('--slotted-tone-accent-solid')).join(','),
+    accentSurface: T.rgb(token('--slotted-tone-accent-surface')).join(','),
+    dangerSolid: T.rgb(token('--slotted-tone-danger-solid')).join(','),
+    fieldLine: getComputedStyle(document.querySelector('[data-brand-custom] [data-ui=text-field]')).borderTopWidth,
+    card: { line: token('--slotted-card-border-width'), shadow: token('--slotted-card-shadow'), ground: token('--slotted-card-background') },
+    shadowMd: token('--slotted-shadow-md'),
+    sunkenToken: token('--slotted-surface-sunken'),
+    stripe: rows[1] ? T.rgb(getComputedStyle(rows[1]).backgroundColor).join(',') : '',
+    stripeExpected: T.rgb('color-mix(in oklab, ' + token('--slotted-border-subtle') + ' 45%, ' + token('--slotted-surface') + ')').join(','),
+    plainRow: rows[0] ? T.rgb(T.ground(rows[0])).join(',') : '',
+  };
+})()`);
 
 /**
- * Waits until the regions have settled: the button family transitions its colours, and a value read
- * mid-transition is neither the old colour nor the new one. Settled is no running animation inside a
- * region, and the solids and the regions' themes reading the same twice, a frame apart.
+ * Waits until the page has settled: the button family transitions its colours, and a value read
+ * mid-transition is neither the old colour nor the new one. Settled is no running transition, and the
+ * theme `html` names and the probe's paint reading the same twice, a frame apart.
  */
 const settle = async (label) => {
   const settled = await until(`new Promise((resolve) => {
-    const read = () => [...document.querySelectorAll('[data-preview-scheme]')].map((r) => r.getAttribute('data-slotted-theme') + getComputedStyle(r.querySelector('[data-preview-solid]')).backgroundColor + getComputedStyle(r.querySelector('[data-preview-card]')).boxShadow).join();
+    const probe = document.querySelector('[data-theme-probe]');
+    const read = () => document.documentElement.getAttribute('data-slotted-theme') + document.documentElement.getAttribute('data-slotted-scheme') + getComputedStyle(probe).backgroundColor + getComputedStyle(probe).borderTopLeftRadius;
     const first = read();
-    const running = document.getAnimations().some((a) => a.playState === 'running' && a.effect?.target?.closest?.('[data-preview-scheme]'));
+    const running = document.getAnimations().some((a) => a.playState === 'running' && a instanceof CSSTransition);
     requestAnimationFrame(() => requestAnimationFrame(() => resolve(!running && read() === first)));
   })`, 5000);
-  if (!settled) throw new Error(`${label}: the preview did not settle in 5 s`);
+  if (!settled) throw new Error(`${label}: the page did not settle in 5 s`);
 };
-/** Chooses a candidate by its native radio, then waits for the preview to settle. */
+/** Chooses a candidate by its native radio, then waits for the page to settle. */
 const choose = async (name, value) => {
   const found = await js(`(() => { const input = document.querySelector('input[name="${name}"][value="${value}"]'); if (!input) return false; input.click(); return true; })()`);
   if (!found) throw new Error(`no radio ${name}=${value}`);
   await settle(`${name}=${value}`);
 };
-/** Waits until the regions name `theme`: a builder change compiles after its pause. */
-const regionsName = (theme) => until(`[...document.querySelectorAll('[data-preview-scheme]')].every((r) => r.getAttribute('data-slotted-theme') === '${theme}')`, 8000);
+/** Waits until `html` names `theme`: a sheet loads, and a builder change compiles after its pause. */
+const htmlNames = (theme) => until(`document.documentElement.getAttribute('data-slotted-theme') === '${theme}'`, 8000);
 /** Waits until a face of `family` has loaded — a theme sheet and the font picker may each declare one — and says which state it reached. */
 const loaded = (family) => js(`(async () => {
   await document.fonts.ready;
@@ -238,122 +271,50 @@ const loaded = (family) => js(`(async () => {
   while (Date.now() < end && !faces.some((f) => f.status === 'loaded')) await new Promise((r) => setTimeout(r, 100));
   return faces.some((f) => f.status === 'loaded') ? 'loaded' : faces.map((f) => f.status).join('/');
 })()`);
+const button = (text) => js(`(() => { const b = [...document.querySelectorAll('button')].find((b) => b.textContent.trim() === ${JSON.stringify(text)}); if (!b) return false; b.click(); return true; })()`);
+/** The preferences page, drawn and done waiting. */
+const preferencesReady = `!!document.querySelector('input[name="theme"]') && document.querySelectorAll('[data-contrast] [data-ratio]').length === 21 && !document.querySelector('[data-appearance]').hasAttribute('aria-busy')`;
+/** Moves the router to `path` without a reload, then waits for `ready`. */
+const go = async (path, ready) => {
+  await js(`(() => { history.pushState(history.state, '', ${JSON.stringify(path)}); dispatchEvent(new PopStateEvent('popstate', { state: history.state })); return true; })()`);
+  return until(ready, 20000);
+};
+const save = async (theme) => {
+  if (!(await button('Save preferences'))) throw new Error('no Save button');
+  if (!(await htmlNames(theme))) throw new Error(`Save: html does not name ${theme}`);
+  await settle('save');
+};
 
-/** One region's facts: its attributes and ground, the samples' paint, the faces and the table's cell. */
-const region = (scheme) => js(`(() => {
-  const region = document.querySelector('[data-preview-scheme="${scheme}"]');
-  const css = (selector, from = region) => getComputedStyle(from.querySelector(selector));
-  const button = region.querySelector('[data-preview-solid]');
-  const style = getComputedStyle(button);
-  const badge = css('[data-ui=badge]');
-  const card = css('[data-preview-card]');
-  const edge = getComputedStyle(region.querySelector('[data-preview-card]'), '::before');
-  const header = css('[data-preview-card] [data-part=header]');
-  const cell = document.querySelector('[data-contrast] td[data-pair="on-solid"][data-scheme="${scheme}"] [data-ratio]');
-  const fills = [...region.querySelectorAll('[data-preview-chart] svg path, [data-preview-chart] svg rect')]
-    .map((shape) => shape.getAttribute('fill')).filter((fill) => fill && fill !== 'none' && !fill.startsWith('url'))
-    .map((fill) => window.__theme.rgb(fill).join(','));
-  return {
-    theme: region.getAttribute('data-slotted-theme'),
-    scheme: region.getAttribute('data-slotted-scheme'),
-    ground: window.__theme.luminance(getComputedStyle(region).getPropertyValue('--slotted-surface').trim()),
-    groundPainted: window.__theme.rgb(getComputedStyle(region).backgroundColor).join(','),
-    seed: getComputedStyle(region).getPropertyValue('--slotted-seed-accent').trim(),
-    solidToken: getComputedStyle(region).getPropertyValue('--slotted-tone-accent-solid').trim(),
-    background: window.__theme.rgb(style.backgroundColor).join(','),
-    ratio: window.__theme.ratio(style.color, style.backgroundColor),
-    stated: Number.parseFloat(cell?.textContent ?? 'NaN'),
-    radius: style.borderTopLeftRadius,
-    transform: style.textTransform,
-    buttonFace: style.fontFamily,
-    duration: style.transitionDuration.split(',')[0].trim(),
-    buttonShadow: style.boxShadow,
-    badgeRadius: badge.borderTopLeftRadius,
-    badgeCaps: badge.fontVariantCaps,
-    headingFace: css('h4[data-ui=typography]').fontFamily,
-    bodyFace: css('[data-preview-figure] [data-part=label]').fontFamily,
-    bodySize: css('[data-ui=alert] [data-part=description]').fontSize,
-    cardLine: edge.borderTopWidth,
-    cardShadow: card.boxShadow,
-    cardRadius: card.borderTopLeftRadius,
-    cardGround: window.__theme.rgb(card.backgroundColor).join(','),
-    sunken: window.__theme.rgb(getComputedStyle(region).getPropertyValue('--slotted-surface-sunken').trim()).join(','),
-    inset: header.paddingLeft,
-    fieldLine: css('[data-ui=text-field]').borderTopWidth,
-    tabItem: (() => { const item = region.querySelector('[data-preview-tabs] [data-part=item][data-selected]'); const s = getComputedStyle(item); return { background: s.backgroundColor, radius: s.borderTopLeftRadius, before: getComputedStyle(item.querySelector('[data-part=label]'), '::before').content }; })(),
-    head: (() => { const h = css('[data-preview-table] [data-part=column-header]'); return { background: window.__theme.rgb(h.backgroundColor).join(','), color: h.color, transform: h.textTransform }; })(),
-    fills,
-    accentSolid: window.__theme.rgb(getComputedStyle(region).getPropertyValue('--slotted-tone-accent-solid').trim()).join(','),
-    dangerSolid: window.__theme.rgb(getComputedStyle(region.querySelector('[data-ui=button][data-tone=danger]')).backgroundColor).join(','),
-  };
-})()`);
-
-/** Opens the region's select, reads the layer it portals to the body's end, and closes it. */
-const overlay = async (scheme) => {
-  await js(`document.querySelector('[data-preview-scheme="${scheme}"] sl-select [data-part=trigger]').click()`);
+/** Opens the start page select, reads the layer it portals to the body's end, and closes it. */
+const overlay = async () => {
+  await js(`document.querySelector('[data-preferences-section=workspace] sl-select [data-part=trigger]').click()`);
   const opened = await until(`!!document.querySelector('[data-slotted-portal] [role=listbox]')`, 5000);
-  const facts = opened
+  const read = opened
     ? await js(`(() => {
         const listbox = document.querySelector('[data-slotted-portal] [role=listbox]');
         const layer = listbox.closest('[data-slotted-theme]');
-        const region = document.querySelector('[data-preview-scheme="${scheme}"]');
-        const style = getComputedStyle(layer);
-        let ground = listbox;
-        while (ground && getComputedStyle(ground).backgroundColor === 'rgba(0, 0, 0, 0)') ground = ground.parentElement;
+        const style = getComputedStyle(listbox);
         return {
-          outsideRegion: !region.contains(listbox),
           theme: layer?.getAttribute('data-slotted-theme') ?? null,
           scheme: layer?.getAttribute('data-slotted-scheme') ?? null,
-          seed: style.getPropertyValue('--slotted-seed-accent').trim(),
-          solidToken: getComputedStyle(listbox).getPropertyValue('--slotted-tone-accent-solid').trim(),
-          ground: ground ? getComputedStyle(ground).backgroundColor : 'none',
+          solidToken: style.getPropertyValue('--slotted-tone-accent-solid').trim(),
+          htmlSolid: getComputedStyle(document.documentElement).getPropertyValue('--slotted-tone-accent-solid').trim(),
+          solid: window.__theme.rgb(style.getPropertyValue('--slotted-tone-accent-solid').trim()).join(','),
+          ground: window.__theme.ground(listbox),
         };
       })()`)
     : null;
   await js(`document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
   await until(`!document.querySelector('[data-slotted-portal] [role=listbox]')`, 5000);
-  return facts;
+  return read;
 };
 
-/** The layout of the builder and the choice cards at the current width. */
-const layout = () => js(`(() => {
-  const clipped = [...document.querySelectorAll('[data-appearance] [data-ui=segmented-control] [data-part=item]')]
-    .filter((item) => { const label = item.querySelector('[data-part=label]'); return item.scrollWidth > item.clientWidth + 0.5 || (label && label.scrollWidth > label.clientWidth + 0.5); })
-    .map((item) => item.textContent.trim());
-  const lines = (node) => { const range = document.createRange(); range.selectNodeContents(node); return new Set([...range.getClientRects()].filter((r) => r.width > 0).map((r) => Math.round(r.top))).size; };
-  const groups = {};
-  for (const name of ['theme', 'brand', 'neutral', 'font-body', 'font-heading']) {
-    const tiles = [...document.querySelectorAll('input[name="' + name + '"]')].map((input) => input.closest('[data-part=item]'));
-    const texts = tiles.flatMap((tile) => { const walker = document.createTreeWalker(tile, NodeFilter.SHOW_TEXT); const found = []; while (walker.nextNode()) { const node = walker.currentNode; if (node.textContent.trim() && !node.parentElement.closest('[aria-hidden=true]')) found.push(node); } return found; });
-    groups[name] = {
-      count: tiles.length,
-      widths: [...new Set(tiles.map((tile) => tile.offsetWidth))],
-      heights: [...new Set(tiles.map((tile) => tile.offsetHeight))],
-      wrapped: texts.filter((node) => lines(node) > 1).map((node) => node.textContent.trim()),
-    };
-  }
-  return { clipped, segments: document.querySelectorAll('[data-appearance] [data-ui=segmented-control] [data-part=item]').length, groups, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
-})()`);
-const spread = (values) => Math.max(...values) - Math.min(...values);
-const checkLayout = async (width) => {
-  const facts = await layout();
-  check(`${width}px: no segmented option clips its label`, facts.segments >= 18 && facts.clipped.length === 0, `${facts.segments} options${facts.clipped.length ? ' · clipped ' + facts.clipped.join(', ') : ''}`);
-  for (const [name, group] of Object.entries(facts.groups)) {
-    check(
-      `${width}px: the ${name} cards share one width and one height, and no label wraps`,
-      group.count >= 5 && spread(group.widths) <= 1 && spread(group.heights) <= 1 && group.wrapped.length === 0,
-      `${group.count} cards · widths ${group.widths.join('/')} · heights ${group.heights.join('/')}${group.wrapped.length ? ' · wrapped ' + group.wrapped.join(', ') : ''}`,
-    );
-  }
-  check(`${width}px: the page does not scroll sideways`, facts.overflow <= 0, `${facts.overflow}px`);
-};
-
-/** The colour fields' swatches as first painted: the colour of the field's text, not a bare button. */
-const swatches = () => js(`[...document.querySelectorAll('[data-appearance] [data-ui=text-field] [data-ui=color-picker][data-part=trigger]')].map((trigger) => {
-  const style = getComputedStyle(trigger);
-  const value = trigger.closest('[data-ui=text-field]').querySelector('input').value;
-  return { value, image: style.backgroundImage, expected: 'rgb(' + window.__theme.rgb(value).join(', ') + ')', appearance: style.appearance, width: trigger.offsetWidth, height: trigger.offsetHeight };
-})`);
+/** The theme cards' specimens: each one's own theme, its title's face and its accent. */
+const samples = () => js(`[...document.querySelectorAll('[data-theme-sample]')].map((sample) => ({
+  id: sample.getAttribute('data-theme-sample'),
+  theme: sample.getAttribute('data-slotted-theme'),
+  face: getComputedStyle(sample.querySelector('.sample-title')).fontFamily,
+}))`);
 
 /** A colour typed into one of the section's colour fields and committed with Enter. */
 const typeColour = (selector, value) => js(`(() => {
@@ -378,6 +339,78 @@ const derived = (theme, scheme, seed, value, tone) => js(`(() => {
 })()`);
 
 const near = (hue, target, within) => { const d = Math.abs(hue - target) % 360; return Math.min(d, 360 - d) <= within; };
+
+/** The colour fields' swatches as first painted: the colour of the field's text, not a bare button. */
+const swatches = () => js(`[...document.querySelectorAll('[data-appearance] [data-ui=text-field] [data-ui=color-picker][data-part=trigger]')].map((trigger) => {
+  const style = getComputedStyle(trigger);
+  const value = trigger.closest('[data-ui=text-field]').querySelector('input').value;
+  return { value, image: style.backgroundImage, expected: 'rgb(' + window.__theme.rgb(value).join(', ') + ')', appearance: style.appearance, width: trigger.offsetWidth, height: trigger.offsetHeight };
+})`);
+
+const GROUPS = ['theme', 'brand', 'neutral', 'font-body', 'font-heading', 'axis-scale', 'axis-border', 'axis-shadow', 'axis-motion', 'axis-cards', 'axis-tabs', 'axis-chart'];
+/** Scrolls each font group into view, so every specimen has named its face, and back to the top. */
+const revealFonts = async () => {
+  await js(`(async () => { for (const name of ['font-body', 'font-heading']) { document.querySelector('input[name="' + name + '"]').closest('[data-ui=radio-group]').scrollIntoView({ block: 'center' }); await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); } window.scrollTo(0, 0); return true; })()`);
+  return until(`[...document.querySelectorAll('.specimen')].every((s) => s.textContent.trim() !== '')`, 5000);
+};
+/** The layout of every group of choice tiles at the current width. */
+const layout = () => js(`(() => {
+  const lines = (node) => { const range = document.createRange(); range.selectNodeContents(node); return new Set([...range.getClientRects()].filter((r) => r.width > 0).map((r) => Math.round(r.top))).size; };
+  const cut = (element) => element.scrollWidth > element.clientWidth + 0.5;
+  const groups = {};
+  for (const name of ${JSON.stringify(GROUPS)}) {
+    const tiles = [...document.querySelectorAll('input[name="' + name + '"]')].map((input) => input.closest('[data-part=item]'));
+    const labels = tiles.flatMap((tile) => [...tile.querySelectorAll('.tile-label')]);
+    groups[name] = {
+      count: tiles.length,
+      widths: tiles.map((tile) => tile.getBoundingClientRect().width),
+      heights: tiles.map((tile) => tile.getBoundingClientRect().height),
+      wrapped: labels.filter((label) => lines(label) > 1).map((label) => label.textContent.trim()),
+      cut: [...tiles.filter(cut), ...labels.filter(cut), ...tiles.flatMap((tile) => [...tile.querySelectorAll('[data-part=label]')]).filter(cut)].map((node) => node.textContent.trim().slice(0, 24)),
+    };
+  }
+  return { groups, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+})()`);
+const spread = (values) => Math.max(...values) - Math.min(...values);
+const checkLayout = async (label) => {
+  const read = await layout();
+  for (const [name, group] of Object.entries(read.groups)) {
+    check(
+      `${label}: the ${name} tiles share one width and one height, every label on one line and uncut`,
+      group.count >= 3 && spread(group.widths) <= 1 && spread(group.heights) <= 1 && group.wrapped.length === 0 && group.cut.length === 0,
+      `${group.count} tiles · w ${Math.min(...group.widths).toFixed(1)}–${Math.max(...group.widths).toFixed(1)} · h ${Math.min(...group.heights).toFixed(1)}–${Math.max(...group.heights).toFixed(1)}${group.wrapped.length ? ' · wrapped ' + group.wrapped.join(', ') : ''}${group.cut.length ? ' · cut ' + group.cut.join(', ') : ''}`,
+    );
+  }
+  check(`${label}: the page does not scroll sideways`, read.overflow <= 0, `${read.overflow}px`);
+};
+
+/** A saved theme on the application's own pages: a stat card, the chart and the table head, the selected tab. */
+const tour = async (theme, scheme) => {
+  const out = {};
+  const dashboard = await go('/dashboard', `!!document.querySelector('[data-ui=stat-card]') && !document.querySelector('[data-ui=stat-card] [data-ui=skeleton][data-loading]')`);
+  if (dashboard) await wait(300);
+  out.card = dashboard
+    ? await js(`(() => { const card = document.querySelector('[data-ui=stat-card]'); const style = getComputedStyle(card); return { line: getComputedStyle(card, '::before').borderTopWidth, shadow: style.boxShadow, inset: style.paddingLeft }; })()`)
+    : null;
+  const overview = await go('/inventory/overview', `!!document.querySelector('[data-ui=chart] svg path, [data-ui=chart] svg rect') && !!document.querySelector('[data-ui=table] [data-part=column-header]')`);
+  out.overview = overview
+    ? await js(`(() => {
+        const fills = [...document.querySelectorAll('[data-ui=chart] svg path, [data-ui=chart] svg rect')].map((s) => s.getAttribute('fill')).filter((f) => f && f !== 'none' && !f.startsWith('url')).map((f) => window.__theme.rgb(f).join(','));
+        const head = getComputedStyle(document.querySelector('[data-ui=table] [data-part=column-header]'));
+        return { fills, head: { ground: window.__theme.rgb(window.__theme.ground(document.querySelector('[data-ui=table] [data-part=column-header]'))).join(','), transform: head.textTransform } };
+      })()`)
+    : null;
+  const notifications = await go('/notifications', `!!document.querySelector('[data-ui=tabs] [data-part=item][data-selected]')`);
+  if (notifications) await wait(300);
+  out.tab = notifications
+    ? await js(`(() => { const item = document.querySelector('[data-ui=tabs] [data-part=item][data-selected]'); const style = getComputedStyle(item); return { radius: style.borderTopLeftRadius, ground: style.backgroundColor, before: getComputedStyle(item.querySelector('[data-part=label]'), '::before').content }; })()`)
+    : null;
+  out.html = await js(`({ theme: document.documentElement.getAttribute('data-slotted-theme'), scheme: document.documentElement.getAttribute('data-slotted-scheme'), solid: window.__theme.rgb(getComputedStyle(document.documentElement).getPropertyValue('--slotted-tone-accent-solid').trim()).join(','), surface: window.__theme.rgb(getComputedStyle(document.documentElement).getPropertyValue('--slotted-tone-accent-surface').trim()).join(',') })`);
+  const back = await go(PREFERENCES, preferencesReady);
+  if (!back) throw new Error(`${theme}: the preferences page did not come back`);
+  await settle('back');
+  return out;
+};
 
 let exitCode = 1;
 try {
@@ -414,77 +447,82 @@ try {
   });
   await viewport(1440, 900);
 
-  await send('Page.navigate', { url: `${ORIGIN}/settings/preferences` });
-  const loadedPage = await until(`document.querySelectorAll('[data-preview-scheme] [data-preview-solid]').length === 3 && !!document.querySelector('input[name="brand"][value="amber"]')`, 40000);
-  check('the preferences page draws three preview regions', loadedPage, loadedPage ? '' : await js(`location.pathname`));
-  const ready = await until(`document.querySelectorAll('style[data-slotted-theme-sheet]').length >= 4 && !document.querySelector('[data-appearance]').hasAttribute('aria-busy')`, 15000);
+  await send('Page.navigate', { url: `${ORIGIN}${PREFERENCES}` });
+  const loadedPage = await until(`!!document.querySelector('input[name="brand"][value="amber"]')`, 40000);
+  check('the preferences page draws its choices', loadedPage, loadedPage ? '' : await js(`location.pathname`));
+  const ready = await until(`document.querySelectorAll('style[data-slotted-theme-sheet]').length >= 4 && ${preferencesReady}`, 15000);
   check('the four runtime sheets arrive and the section stops waiting', ready, await js(`[...document.querySelectorAll('style[data-slotted-theme-sheet]')].map((s) => s.getAttribute('data-slotted-theme-sheet')).join(' ')`));
   await install();
-  await wait(300);
+  await settle('install');
 
   // The colour fields, before anything is touched.
   const fields = await swatches();
   check(
     'every colour field paints its colour in its swatch on first render',
-    fields.length === 4 && fields.every((field) => field.image.includes(field.expected) && field.appearance === 'none' && Math.abs(field.width - field.height) <= 1),
+    fields.length === 5 && fields.every((field) => field.image.includes(field.expected) && field.appearance === 'none' && Math.abs(field.width - field.height) <= 1),
     fields.map((field) => `${field.value} ${field.width}×${field.height} ${field.image.slice(0, 48)}`).join(' | '),
   );
 
-  await checkLayout(1440);
+  // A specimen names its face only once it is seen, in a box that does not move when it does.
+  const boxes = () => js(`[...document.querySelectorAll('.specimen')].map((s) => { const r = s.closest('[data-part=item]').getBoundingClientRect(); return [s.textContent.trim() !== '', Math.round(r.width * 10), Math.round(r.height * 10)]; })`);
+  const unseen = await boxes();
+  const revealed = await revealFonts();
+  const seen = await boxes();
+  check(
+    'a font specimen names its face only once it is in view, and its tile keeps its box',
+    unseen.length === 18 && unseen.every(([drawn]) => !drawn) && revealed && JSON.stringify(unseen.map(([, w, h]) => [w, h])) === JSON.stringify(seen.map(([, w, h]) => [w, h])),
+    `${unseen.filter(([drawn]) => drawn).length}/${unseen.length} drawn before · ${seen.filter(([drawn]) => drawn).length} after`,
+  );
 
   const violet = await derived('default', await js(`document.documentElement.getAttribute('data-slotted-scheme')`), 'accent', '#7c3aed', 'accent');
-  const before = await outside();
-  check('before any choice, html and the outside probe are the default theme in violet', defaultOutside(before, violet), JSON.stringify(before));
+  const start = await facts();
+  check('before any choice, html is the default theme in violet', start.theme === 'default' && /#7c3aed/.test(start.seed) && start.background === violet && start.radius === '4px', `${start.theme} ${start.seed} rgb(${start.background}) ${start.radius}`);
 
   for (const theme of THEMES) {
     await choose('theme', theme.id);
-    const backgrounds = { light: new Set(), dark: new Set(), 'high-contrast': new Set() };
+    const named = await htmlNames(theme.id);
+    check(`${theme.id}: html names the theme as soon as it is chosen, before Save`, named, await js(`document.documentElement.getAttribute('data-slotted-theme')`));
+
+    // The theme cards draw their own themes; the page around them answers html alone.
+    const cards = await samples();
+    const around = await facts();
+    check(
+      `${theme.id}: each theme card draws its own theme and face, and the page around them stays ${theme.id}`,
+      cards.length === 5 && cards.every((card) => card.theme === card.id && first(card.face) === FACE[THEMES.find((t) => t.id === card.id).heading]) &&
+        around.theme === theme.id && around.radius === theme.radius && first(around.headingFace) === FACE[theme.heading],
+      cards.map((card) => `${card.id}→${card.theme} ${first(card.face)}`).join(' · ') + ` · page ${around.radius} ${first(around.headingFace)}`,
+    );
+
+    const backgrounds = { light: new Set(), dark: new Set() };
     for (const brand of BRANDS) {
       await choose('brand', brand);
       for (const scheme of SCHEMES) {
-        const facts = await region(scheme);
+        await choose('scheme', scheme);
+        const read = await facts();
         const name = `${theme.id} × ${brand} × ${scheme}`;
-        backgrounds[scheme].add(facts.background);
-        check(`${name}: the region names the theme and the scheme, and paints the scheme's ground`, facts.theme === theme.id && facts.scheme === scheme && GROUND[scheme](facts.ground), `${facts.theme} ${facts.scheme} L=${facts.ground.toFixed(3)} rgb(${facts.groundPainted})`);
-        check(`${name}: the label stands on the solid at ${FLOOR[scheme]}:1`, facts.ratio >= FLOOR[scheme], `${facts.ratio.toFixed(2)}:1 on rgb(${facts.background})`);
-        check(`${name}: the contrast table states the ratio painted`, Math.abs(facts.stated - facts.ratio) <= 0.05, `table ${facts.stated.toFixed(2)} · paint ${facts.ratio.toFixed(2)}`);
+        backgrounds[scheme].add(read.background);
+        check(`${name}: html names the theme and the scheme, and paints the scheme's ground`, read.theme === theme.id && read.scheme === scheme && GROUND[scheme](read.ground), `${read.theme} ${read.scheme} L=${read.ground.toFixed(3)}`);
+        check(`${name}: the label stands on the solid at ${FLOOR[scheme]}:1`, read.ratio >= FLOOR[scheme], `${read.ratio.toFixed(2)}:1 on rgb(${read.background})`);
+        check(`${name}: the contrast table states the ratio painted`, Math.abs(read.stated - read.ratio) <= 0.05, `table ${read.stated.toFixed(2)} · paint ${read.ratio.toFixed(2)}`);
+        const layer = await overlay();
+        check(
+          `${name}: the select's layer carries the theme, scheme and accent of html`,
+          layer !== null && layer.theme === theme.id && layer.scheme === scheme && layer.solidToken === layer.htmlSolid,
+          layer === null ? 'no layer opened' : `${layer.theme} ${layer.scheme} rgb(${layer.solid})`,
+        );
         if (brand !== 'theme') continue;
         check(
           `${name}: the button's corner, case, face and motion are the theme's`,
-          facts.radius === theme.radius && facts.transform === theme.transform && first(facts.buttonFace) === FACE[theme.body] && facts.duration === theme.duration,
-          `${facts.radius} ${facts.transform} ${first(facts.buttonFace)} ${facts.duration}`,
+          read.radius === theme.radius && read.transform === theme.transform && first(read.buttonFace) === FACE[theme.body] && read.duration === theme.duration,
+          `${read.radius} ${read.transform} ${first(read.buttonFace)} ${read.duration}`,
         );
-        check(
-          `${name}: the heading and the text are set in the theme's faces`,
-          first(facts.headingFace) === FACE[theme.heading] && first(facts.bodyFace) === FACE[theme.body],
-          `${first(facts.headingFace)} · ${first(facts.bodyFace)}`,
-        );
-        if (scheme !== 'high-contrast') {
-          check(
-            `${name}: the card's line, shadow and inset are the theme's`,
-            facts.cardLine === theme.cardLine && (theme.cardShadow[scheme] === 'none' ? facts.cardShadow === 'none' : facts.cardShadow.includes(theme.cardShadow[scheme])) && facts.inset === theme.inset,
-            `${facts.cardLine} · ${facts.cardShadow.slice(0, 60)} · ${facts.inset}`,
-          );
-        }
-        check(`${name}: the badge's corner and case are the theme's`, facts.badgeRadius === theme.badgeRadius && facts.badgeCaps === theme.badgeCaps, `${facts.badgeRadius} ${facts.badgeCaps}`);
+        check(`${name}: the page heading is set in the theme's heading face`, first(read.headingFace) === FACE[theme.heading], first(read.headingFace));
+        check(`${name}: the badge's corner and case are the theme's`, read.badgeRadius === theme.badgeRadius && read.badgeCaps === theme.badgeCaps, `${read.badgeRadius} ${read.badgeCaps}`);
         const series = await js(`window.__theme.rgb('${theme.data[scheme]}').join(',')`);
-        check(`${name}: the chart's first series is the theme's ${theme.data[scheme]}`, facts.fills.includes(series), `${facts.fills.length} shapes · ${[...new Set(facts.fills)].slice(0, 4).map((c) => `rgb(${c})`).join(' ')}`);
-        if (theme.id === 'nexora-friendly') {
-          check(`${name}: the selected tab is a pill on the accent's surface`, facts.tabItem.radius === '9999px' && facts.tabItem.background !== 'rgba(0, 0, 0, 0)', `${facts.tabItem.radius} ${facts.tabItem.background}`);
-        }
-        if (theme.id === 'nexora-brutalist') {
-          check(`${name}: the table's head is a band of the accent's solid, in its ink and capitals`, facts.head.background === facts.accentSolid && facts.head.transform === 'uppercase', `rgb(${facts.head.background}) ${facts.head.color} ${facts.head.transform}`);
-          if (scheme === 'light') check(`${name}: the accent is a yellow solid under dark ink`, facts.background === '255,212,0' && facts.ratio >= 4.5, `rgb(${facts.background}) ${facts.ratio.toFixed(2)}:1`);
-        }
+        check(`${name}: the first data colour is the theme's ${theme.data[scheme]}`, read.data1 === series, `rgb(${read.data1})`);
         if (theme.id === 'nexora-terminal') {
-          check(`${name}: the selected tab reads as a prompt`, facts.tabItem.before === '"> "', facts.tabItem.before);
+          check(`${name}: a striped table bands its rows in a ground mixed from the theme's line`, read.stripe === read.stripeExpected && read.stripe !== read.plainRow, `stripe rgb(${read.stripe}) · expected rgb(${read.stripeExpected}) · plain rgb(${read.plainRow})`);
         }
-        const layer = await overlay(scheme);
-        check(
-          `${name}: the select's layer carries the region's theme, scheme and seed`,
-          layer !== null && layer.outsideRegion && layer.theme === theme.id && layer.scheme === scheme && layer.seed === facts.seed && layer.solidToken === facts.solidToken,
-          layer === null ? 'no layer opened' : `${layer.theme} ${layer.scheme} ${layer.seed || '(theme’s own)'}`,
-        );
       }
     }
     for (const scheme of SCHEMES) {
@@ -495,15 +533,23 @@ try {
       check(`${theme.id}: ${FACE[family]} is loaded`, state === 'loaded', state);
     }
 
-    // The tinted greys: a card, the table and the select's layer carry the grey's hue, and the lines
-    // and hovers stay in the ground's family (±20° of its hue, wherever its chroma reaches 0.01).
+    // The tinted greys: the page ground, a table ground and the select's layer carry the grey's hue,
+    // and the lines and hovers stay in the ground's family (±20° of its hue, wherever its chroma reaches 0.01).
     await choose('brand', 'theme');
-    const grounds = {};
     for (const grey of [{ id: 'theme', hue: null }, ...GREYS]) {
-      if (grey.id !== 'theme') await choose('neutral', grey.id);
-      for (const scheme of ['light', 'dark']) {
+      if (grey.id === 'custom') {
+        /* The field keeps the colour once typed: a later theme chooses it by its tile, as a reader would. */
+        const kept = await js(`document.querySelector('[data-neutral-custom] input').value.toLowerCase() === '${grey.value}'`);
+        if (kept) await choose('neutral', 'custom');
+        else await typeColour('[data-neutral-custom]', grey.value);
+        const typed = await until(`document.documentElement.style.getPropertyValue('--slotted-seed-neutral').trim() === '${grey.value}'`, 5000);
+        check(`${theme.id}: a grey of the reader's own becomes the neutral seed on html`, typed, await js(`document.documentElement.style.getPropertyValue('--slotted-seed-neutral')`));
+        await settle('custom grey');
+      } else if (grey.id !== 'theme') await choose('neutral', grey.id);
+      for (const scheme of SCHEMES) {
+        await choose('scheme', scheme);
         const family = await js(`(() => {
-          const style = getComputedStyle(document.querySelector('[data-preview-scheme="${scheme}"]'));
+          const style = getComputedStyle(document.documentElement);
           const read = (token) => ({ token, ...window.__theme.oklch(style.getPropertyValue(token).trim()) });
           return { ground: read('--slotted-surface'), others: ['--slotted-border-subtle', '--slotted-tone-secondary-subtle-hover', '--slotted-control-border-color'].map(read) };
         })()`);
@@ -515,129 +561,184 @@ try {
           );
         }
         if (grey.id === 'theme') continue;
-        const facts = await js(`(() => {
-          const region = document.querySelector('[data-preview-scheme="${scheme}"]');
-          const read = (element) => { const color = getComputedStyle(element).backgroundColor; return { color, ...window.__theme.oklch(color) }; };
-          return { card: read(region.querySelector('[data-preview-card]')), table: read(region.querySelector('[data-preview-table] [data-part=row]')), figure: read(region.querySelector('[data-preview-figure]')) };
+        const grounds = await js(`(() => {
+          const read = (color) => ({ color, ...window.__theme.oklch(color) });
+          return { page: read(getComputedStyle(document.documentElement).getPropertyValue('--slotted-surface').trim()), table: read(window.__theme.ground(document.querySelector('[data-contrast] [data-part=body] [data-part=cell]'))) };
         })()`);
-        const layer = await overlay(scheme);
-        const listbox = layer ? await js(`window.__theme.oklch(${JSON.stringify(layer.ground)})`) : null;
-        const all = { ...facts, layer: listbox ? { color: layer.ground, ...listbox } : null };
-        grounds[`${grey.id} ${scheme}`] = all;
-        const tinted = Object.values(all).every((ground) => ground !== null && ground.c >= 0.004 && near(ground.h, grey.hue, 35));
+        const layer = await overlay();
+        const all = { ...grounds, layer: layer ? { color: layer.ground, ...(await js(`window.__theme.oklch(${JSON.stringify(layer.ground)})`)) } : null };
         check(
-          `${theme.id} × ${grey.id} × ${scheme}: card, table, stat card and select layer carry the grey's hue`,
-          tinted,
+          `${theme.id} × ${grey.id} grey × ${scheme}: the page, a table and the select's layer carry the grey's hue`,
+          Object.values(all).every((ground) => ground !== null && ground.c >= 0.004 && near(ground.h, grey.hue, 35)),
           Object.entries(all).map(([part, g]) => (g ? `${part} ${g.color} h${g.h.toFixed(0)} c${g.c.toFixed(3)}` : `${part} none`)).join(' · '),
         );
       }
     }
-    for (const scheme of ['light', 'dark']) {
-      check(`${theme.id} × ${scheme}: the card's ground differs between the two greys`, grounds[`ocean ${scheme}`].card.color !== grounds[`clay ${scheme}`].card.color, `${grounds[`ocean ${scheme}`].card.color} | ${grounds[`clay ${scheme}`].card.color}`);
-    }
     await choose('neutral', 'theme');
+    await choose('scheme', 'light');
 
-    const now = await outside();
-    check(`${theme.id}: nothing outside the preview moved, and it is still the default in violet`, sameOutside(now, before) && defaultOutside(now, violet), sameOutside(now, before) ? '' : `${JSON.stringify(before)} → ${JSON.stringify(now)}`);
+    // Save keeps the theme, and the application's own pages draw it.
+    await save(theme.id);
+    const seenOn = await tour(theme.id, 'light');
+    check(`${theme.id}: after Save the other pages keep the theme`, seenOn.html.theme === theme.id && seenOn.html.scheme === 'light', `${seenOn.html.theme} ${seenOn.html.scheme}`);
+    check(
+      `${theme.id}: a stat card on the dashboard draws the theme's line, shadow and inset`,
+      seenOn.card !== null && seenOn.card.line === theme.statLine && (theme.statShadow === 'none' ? seenOn.card.shadow === 'none' : seenOn.card.shadow.includes(theme.statShadow)) && seenOn.card.inset === theme.statInset,
+      seenOn.card === null ? 'no stat card' : `${seenOn.card.line} · ${seenOn.card.shadow.slice(0, 60)} · ${seenOn.card.inset}`,
+    );
+    const series = await js(`window.__theme.rgb('${theme.data.light}').join(',')`);
+    check(`${theme.id}: the inventory chart's first series is the theme's ${theme.data.light}`, seenOn.overview !== null && seenOn.overview.fills.includes(series), seenOn.overview === null ? 'no chart' : `${seenOn.overview.fills.length} shapes · ${[...new Set(seenOn.overview.fills)].slice(0, 4).map((c) => `rgb(${c})`).join(' ')}`);
+    if (theme.id === 'nexora-brutalist') {
+      check(`${theme.id}: the inventory table's head is a band of the accent's solid, in capitals`, seenOn.overview !== null && seenOn.overview.head.ground === seenOn.html.solid && seenOn.overview.head.transform === 'uppercase', seenOn.overview === null ? 'no table' : `rgb(${seenOn.overview.head.ground}) ${seenOn.overview.head.transform}`);
+    }
+    if (theme.id === 'nexora-friendly') {
+      check(`${theme.id}: the selected tab on Notifications is a pill on the accent's surface`, seenOn.tab !== null && seenOn.tab.radius === '9999px' && seenOn.tab.ground !== 'rgba(0, 0, 0, 0)' && (await js(`window.__theme.rgb(${JSON.stringify(seenOn.tab?.ground ?? 'transparent')}).join(',')`)) === seenOn.html.surface, seenOn.tab === null ? 'no tabs' : `${seenOn.tab.radius} ${seenOn.tab.ground}`);
+    }
+    if (theme.id === 'nexora-terminal') {
+      check(`${theme.id}: the selected tab reads as a prompt, out of its accessible name`, seenOn.tab !== null && seenOn.tab.before === '"> " / ""', seenOn.tab === null ? 'no tabs' : seenOn.tab.before);
+    }
   }
 
-  // The builder, over Standard: each axis moves the value it names, in the light region.
+  // Discard and leaving the page return html to the saved appearance (Terminal, saved last).
+  await choose('theme', 'nexora-friendly');
+  await choose('brand', 'rose');
+  const candidate = await facts();
+  await button('Discard');
+  await settle('discard');
+  const discarded = await facts();
+  check('Discard returns html from the candidate to the saved appearance', candidate.theme === 'nexora-friendly' && discarded.theme === 'nexora-terminal' && discarded.radius === '2px' && discarded.seed === '', `${candidate.theme} ${candidate.seed} → ${discarded.theme} ${discarded.seed || '(theme’s own)'}`);
+  await choose('theme', 'nexora-editorial');
+  const left = await go('/dashboard', `!location.pathname.startsWith('/settings')`);
+  await wait(300);
+  const away = await js(`document.documentElement.getAttribute('data-slotted-theme')`);
+  check('leaving the page with a candidate unsaved returns html to the saved appearance', left && away === 'nexora-terminal', away);
+  await go(PREFERENCES, preferencesReady);
+  await settle('back');
+
+  // The builder, over Standard: each axis moves the value it names on html.
   await choose('theme', 'default');
-  const base = await region('light');
-  /** Polls the light region until `expect` holds or 8 s pass: a builder change compiles after its pause. */
-  const awaitRegion = async (expect) => {
+  await save('default');
+  const base = await facts();
+  /** Polls `html` until `expect` holds or 8 s pass: a builder change compiles after its pause. */
+  const awaitHtml = async (expect) => {
     const end = Date.now() + 8000;
-    let facts = await region('light');
-    while (Date.now() < end && !(facts.theme === 'nexora-custom-draft' && expect(facts))) {
+    let read = await facts();
+    while (Date.now() < end && !(read.theme === 'nexora-custom-draft' && expect(read))) {
       await wait(150);
-      facts = await region('light');
+      read = await facts();
     }
-    return facts;
+    return read;
   };
   const axis = async (name, value, read, expect, describe) => {
     await choose(name, value);
-    const facts = await awaitRegion((f) => expect(read(f), f));
-    check(`builder ${name}=${value}: ${describe}`, facts.theme === 'nexora-custom-draft' && expect(read(facts), facts), `${facts.theme} · ${read(facts)}`);
+    const after = await awaitHtml((f) => expect(read(f), f));
+    check(`builder ${name}=${value}: ${describe}`, after.theme === 'nexora-custom-draft' && expect(read(after), after), `${after.theme} · ${read(after)}`);
     await choose(name, 'theme');
-    await regionsName('default');
+    await htmlNames('default');
   };
-  await axis('axis-scale', '112', (f) => f.bodySize, (size) => Math.abs(Number.parseFloat(size) - Number.parseFloat(base.bodySize) * 1.12) < 0.05, `the type is 112% of the library's (${base.bodySize} before)`);
-  await axis('axis-border', '2', (f) => `${f.cardLine} ${f.fieldLine}`, (v) => v === '2px 2px', 'cards and fields draw a 2px line');
+  await axis('axis-scale', '112', (f) => f.fontSize, (size) => Math.abs(Number.parseFloat(size) - Number.parseFloat(base.fontSize) * 1.12) < 0.05, `the controls' type is 112% of the library's (${base.fontSize} before)`);
+  await axis('axis-border', '2', (f) => f.fieldLine, (v) => v === '2px', 'a field draws a 2px line');
   await axis('axis-shadow', 'none', (f) => f.buttonShadow, (v) => v === 'none', 'the button stands on no shadow');
   await axis('axis-shadow', 'strong', (f) => f.buttonShadow, (v) => v.includes('rgba(15, 23, 42, 0.14) 0px 2px 4px'), 'the button stands on the strong shadow');
   await axis('axis-motion', 'off', (f) => f.duration, (v) => v === '0.001s', 'transitions take 1ms');
   await axis('axis-motion', 'reduced', (f) => f.duration, (v) => v === '0.06s', 'transitions take 60ms');
-  await axis('axis-cards', 'elevated', (f) => `${f.cardLine} ${f.cardShadow}`, (v) => v.startsWith('0px rgba(15, 23, 42, 0.08) 0px 4px 6px -1px'), 'a card has no line and the medium shadow');
-  await axis('axis-cards', 'flat', (f) => `${f.cardLine} ${f.cardShadow} rgb(${f.cardGround})`, (v, f) => f.cardLine === '0px' && f.cardShadow === 'none' && f.cardGround === f.sunken, 'a card is a sunken fill');
-  await axis('axis-chart', 'accent', (f) => f.fills.includes(f.accentSolid), (v) => v === true, 'the first series is the accent solid');
+  await axis('axis-cards', 'elevated', (f) => `${f.card.line} ${f.card.shadow}`, (v, f) => f.card.line === '0px' && f.card.shadow === f.shadowMd, 'a card has no line and the medium shadow');
+  await axis('axis-cards', 'flat', (f) => `${f.card.line} ${f.card.shadow} ${f.card.ground}`, (v, f) => f.card.line === '0px' && f.card.shadow === 'none' && f.card.ground === f.sunkenToken, 'a card is a sunken fill');
+  await axis('axis-chart', 'accent', (f) => f.chart1 === f.accentSolid, (v) => v === true, 'the first series is the accent solid');
 
   // Both faces: each of the eight families, set and loaded.
-  for (const [picker, read] of [['font-body', (f) => first(f.bodyFace) + ' / ' + first(f.buttonFace)], ['font-heading', (f) => first(f.headingFace)]]) {
+  for (const [picker, read] of [['font-body', (f) => first(f.buttonFace)], ['font-heading', (f) => first(f.headingFace)]]) {
     for (const [family, face] of Object.entries(FACE)) {
       await choose(picker, family);
-      const facts = await awaitRegion((f) => read(f).split(' / ').every((one) => one === face));
+      const after = await awaitHtml((f) => read(f) === face);
       const state = await loaded(face);
-      const value = read(facts);
       check(
-        `builder ${picker}=${family}: the ${picker === 'font-body' ? 'text and the controls are' : 'heading is'} set in ${face}, loaded`,
-        facts.theme === 'nexora-custom-draft' && value.split(' / ').every((one) => one === face) && state === 'loaded',
-        `${value} · ${state}`,
+        `builder ${picker}=${family}: the ${picker === 'font-body' ? 'controls are' : 'page heading is'} set in ${face}, loaded`,
+        after.theme === 'nexora-custom-draft' && read(after) === face && state === 'loaded',
+        `${read(after)} · ${state}`,
       );
     }
     await choose(picker, 'theme');
   }
+  await htmlNames('default');
 
-  // The corner: a burst of steps compiles one sheet, with the last value.
-  await choose('axis-cards', 'theme');
-  await regionsName('default');
+  // The corner: a burst of steps compiles one sheet, with the last value; "Use the theme's" brings it back.
   /* Twelve steps, one every 40 ms, as a held arrow key repeats: inside the 200 ms pause of the compile. */
   await js(`(async () => { window.__theme.drafts = 0; const thumb = document.querySelector('[data-axis=radius] input[type=range]'); thumb.focus(); for (let i = 0; i < 12; i++) { thumb.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })); await new Promise((r) => setTimeout(r, 40)); } return true; })()`);
-  await until(`getComputedStyle(document.querySelector('[data-preview-scheme="light"] [data-preview-card]')).borderTopLeftRadius === '24px'`, 8000);
+  await until(`getComputedStyle(document.querySelector('[data-theme-probe]')).borderTopLeftRadius === '12px'`, 8000);
   await wait(600);
-  const corner = await region('light');
+  const corner = await facts();
   const compiled = await js(`window.__theme.drafts`);
-  check('builder corner: twelve steps compile one sheet, at 24px', compiled === 1 && corner.cardRadius === '24px' && corner.radius === '12px', `${compiled} compile(s) · card ${corner.cardRadius} · button ${corner.radius}`);
+  check('builder corner: twelve steps compile one sheet, at 24px', compiled === 1 && corner.theme === 'nexora-custom-draft' && corner.radius === '12px', `${compiled} compile(s) · ${corner.theme} · button ${corner.radius}`);
+  await js(`document.querySelector('[data-radius-value] button').click()`);
+  await htmlNames('default');
+  await settle('corner reset');
+  const ownCorner = await facts();
+  check('builder corner: "Use the theme’s" returns the corner, and html, to the theme’s own', ownCorner.theme === 'default' && ownCorner.radius === base.radius, `${ownCorner.theme} ${ownCorner.radius}`);
 
-  // A status colour is a seed: the danger button derives its solid from it.
+  // A status colour is a seed: html's danger solid derives from it.
+  await choose('axis-cards', 'flat');
   await typeColour('[data-status=danger]', '#be123c');
-  await until(`getComputedStyle(document.querySelector('[data-preview-scheme="light"]')).getPropertyValue('--slotted-seed-danger').trim() === '#be123c'`, 5000);
+  await until(`document.documentElement.style.getPropertyValue('--slotted-seed-danger').trim() === '#be123c'`, 5000);
+  await htmlNames('nexora-custom-draft');
   await settle('danger');
-  const danger = await region('light');
-  const expectedDanger = await derived('nexora-custom-draft', 'light', 'danger', '#be123c', 'danger');
-  check('builder danger=#be123c: the danger button paints the solid the seed derives to', danger.dangerSolid === expectedDanger, `rgb(${danger.dangerSolid}) vs rgb(${expectedDanger})`);
+  const danger = await facts();
+  const expectedDanger = await derived('nexora-custom-draft', danger.scheme, 'danger', '#be123c', 'danger');
+  check('builder danger=#be123c: html paints the danger solid the seed derives to', danger.dangerSolid === expectedDanger, `rgb(${danger.dangerSolid}) vs rgb(${expectedDanger})`);
 
   const changes = await js(`document.querySelector('[data-changes]')?.textContent.trim() ?? ''`);
   await js(`document.querySelector('[data-reset]').click()`);
+  await htmlNames('default');
   await settle('reset');
-  const reset = await region('light');
-  check('Reset returns the preview to the theme as it came', changes === '2 changes' && reset.theme === 'default' && reset.cardRadius === base.cardRadius && reset.dangerSolid === base.dangerSolid && !(await js(`!!document.querySelector('[data-changes]')`)), `${changes} → ${reset.theme} ${reset.cardRadius}`);
+  const reset = await facts();
+  check('Reset returns html to the theme as it came', changes === '2 changes' && reset.theme === 'default' && reset.dangerSolid === base.dangerSolid && !(await js(`!!document.querySelector('[data-changes]')`)), `${changes} → ${reset.theme} rgb(${reset.dangerSolid})`);
 
-  const now = await outside();
-  check('after the builder, nothing outside the preview moved', sameOutside(now, before) && defaultOutside(now, violet), sameOutside(now, before) ? '' : `${JSON.stringify(before)} → ${JSON.stringify(now)}`);
-
-  // Save: the same choice now reaches html, and the outside probe sees it.
+  // Tabs: a pill over Standard, an underline over Friendly, on the selected tab of Notifications.
+  await choose('axis-tabs', 'pill');
+  await htmlNames('nexora-custom-draft');
+  await save('nexora-custom');
+  const pill = await tour('custom pill', 'light');
+  check('builder tabs=pill: the selected tab is a pill on the accent’s surface', pill.tab !== null && pill.tab.radius === '9999px' && (await js(`window.__theme.rgb(${JSON.stringify(pill.tab?.ground ?? 'transparent')}).join(',')`)) === pill.html.surface, pill.tab === null ? 'no tabs' : `${pill.tab.radius} ${pill.tab.ground}`);
+  await choose('theme', 'nexora-friendly');
+  await choose('axis-tabs', 'underline');
+  await htmlNames('nexora-custom-draft');
+  await save('nexora-custom');
+  const underline = await tour('custom underline', 'light');
+  check('builder tabs=underline over Friendly: the selected tab is underlined, with no pill', underline.tab !== null && underline.tab.radius === '0px' && underline.tab.ground === 'rgba(0, 0, 0, 0)', underline.tab === null ? 'no tabs' : `${underline.tab.radius} ${underline.tab.ground}`);
+  await js(`document.querySelector('[data-reset]').click()`);
   await choose('theme', 'nexora-brutalist');
   await choose('brand', 'amber');
-  await js(`[...document.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Save preferences').click()`);
-  await until(`document.documentElement.getAttribute('data-slotted-theme') === 'nexora-brutalist'`, 5000);
-  await wait(500);
-  const saved = await outside();
-  check('Save writes the theme and the seed onto html', saved.theme === 'nexora-brutalist' && /--slotted-seed-accent:\s*#d97706/.test(saved.seeds), `${saved.theme} ${saved.seeds}`);
-  check(
-    'Save repaints the outside probe from the default in violet to Brutalist in amber',
-    saved.background !== before.background && saved.radius === '0px' && saved.transform === 'uppercase' && first(saved.heading) === FACE['jetbrains-mono'],
-    `rgb(${before.background}) ${before.radius} ${before.transform} → rgb(${saved.background}) ${saved.radius} ${saved.transform} ${first(saved.heading)}`,
-  );
+  await save('nexora-brutalist');
+  const saved = await facts();
+  check('Save writes the theme and the seed onto html', saved.theme === 'nexora-brutalist' && /#d97706/.test(saved.seed), `${saved.theme} ${saved.seed}`);
+  check('Save repaints the probe from the default in violet to Brutalist in amber', saved.background !== start.background && saved.radius === '0px' && saved.transform === 'uppercase' && first(saved.headingFace) === FACE['jetbrains-mono'], `rgb(${start.background}) ${start.radius} → rgb(${saved.background}) ${saved.radius} ${saved.transform}`);
   await choose('axis-cards', 'flat');
-  await js(`[...document.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Save preferences').click()`);
-  const custom = await until(`document.documentElement.getAttribute('data-slotted-theme') === 'nexora-custom'`, 8000);
+  await button('Save preferences');
+  const custom = await htmlNames('nexora-custom');
   const customSheet = await js(`document.querySelector('style[data-slotted-theme-sheet="nexora-custom"]')?.textContent.includes('--slotted-card-background: var(--slotted-surface-sunken)') ?? false`);
   check('Save of a customised theme names the compiled nexora-custom on html', custom && customSheet, await js(`document.documentElement.getAttribute('data-slotted-theme')`));
+  await js(`document.querySelector('[data-reset]').click()`);
+  await choose('brand', 'theme');
 
-  // The compact width: the builder and the cards hold their layout.
-  await viewport(390, 844);
-  await wait(600);
-  await checkLayout(390);
+  // Layout: html saved in each theme, and in a customised theme in the widest face, at every width.
+  const states = [
+    ...THEMES.map((theme) => ({ label: theme.id, theme: theme.id, axes: [] })),
+    { label: 'custom (Friendly, JetBrains Mono at 112%)', theme: 'nexora-friendly', axes: [['font-body', 'jetbrains-mono'], ['font-heading', 'jetbrains-mono'], ['axis-scale', '112']], html: 'nexora-custom' },
+  ];
+  for (const state of states) {
+    await viewport(1440, 900);
+    await choose('theme', state.theme);
+    for (const [name, value] of state.axes) await choose(name, value);
+    if (state.axes.length > 0) await htmlNames('nexora-custom-draft');
+    await save(state.html ?? state.theme);
+    for (const width of WIDTHS) {
+      await viewport(width, 900);
+      await wait(400);
+      await revealFonts();
+      await checkLayout(`${state.label} @ ${width}px`);
+    }
+    if (state.axes.length > 0) await js(`document.querySelector('[data-reset]').click()`);
+  }
 
   exitCode = results.every(Boolean) ? 0 : 1;
   console.log(`${results.filter(Boolean).length}/${results.length} checks passed`);

@@ -780,8 +780,33 @@
       --slotted-text-field-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
     );
+    --_invalid-edge: inset 0 0 0
+      var(--slotted-text-field-invalid-edge-width, var(--slotted-control-invalid-edge-width, 1px))
+      var(--slotted-text-field-invalid-border-color, var(--slotted-tone-danger-border));
 
     border-color: var(--slotted-text-field-invalid-border-color, var(--slotted-tone-danger-border));
+    /*
+     * Colour alone does not say the field is wrong (WCAG 1.4.1): in
+     * `high-contrast` the edge at rest, the danger border and both rings are
+     * one black. An edge inside the border makes the invalid line thicker in
+     * every scheme. It is a shadow rather than a wider border, so the box and
+     * the text do not move; it replaces the resting lift, which may be `none`
+     * and so cannot be listed beside it.
+     */
+    box-shadow: var(--_invalid-edge);
+  }
+
+  [data-ui='text-field'][data-part='root'][data-invalid]:has(> [data-part='input']:focus-visible) {
+    box-shadow:
+      var(--_invalid-edge),
+      var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
+        var(--slotted-focus-ring-color, Highlight);
+  }
+
+  [data-ui='text-field'][data-part='root'][data-variant='plain'][data-invalid]:has(
+      > [data-part='input']:focus-visible
+    ) {
+    box-shadow: var(--_invalid-edge);
   }
 
   /**

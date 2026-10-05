@@ -227,6 +227,35 @@ test('points the focus ring at the invalid colour rather than repainting it', ()
  * never a mask or a character. The stylesheet only sizes the `icon` box, at
  * the control's own icon step.
  */
+/**
+ * Colour alone does not say a field is wrong (WCAG 1.4.1): in `high-contrast`
+ * the control edge, the danger border and both rings are one black. An
+ * invalid frame adds an inset edge of `--slotted-control-invalid-edge-width`
+ * inside its border, at rest and under focus, so its line is thicker than a
+ * valid one's in every scheme. The edge is a shadow rather than a wider
+ * border, so the field's box and its text do not move.
+ */
+test('draws an invalid frame with a thicker edge, at rest and under focus', () => {
+  const width =
+    'var(--slotted-text-field-invalid-edge-width,var(--slotted-control-invalid-edge-width,1px))';
+  const colour = 'var(--slotted-text-field-invalid-border-color,var(--slotted-tone-danger-border))';
+  const invalid = rule(`${root}[data-invalid]`);
+  assert.ok(invalid.includes(`--_invalid-edge:inset 0 0 0 ${width} ${colour}`), invalid);
+  assert.ok(invalid.includes('box-shadow:var(--_invalid-edge)'), 'no edge at rest');
+  assert.ok(
+    rule(`${root}[data-invalid]:has(>[data-part='input']:focus-visible)`).includes(
+      'box-shadow:var(--_invalid-edge),var(--slotted-control-shadow-focus-geometry,0 1px 4px -1px) var(--slotted-focus-ring-color,Highlight)',
+    ),
+    'no edge under focus',
+  );
+  assert.ok(
+    rule(
+      `${root}[data-variant='plain'][data-invalid]:has(>[data-part='input']:focus-visible)`,
+    ).includes('box-shadow:var(--_invalid-edge)'),
+    'no edge under focus on the plain variant',
+  );
+});
+
 test('paints no glyph itself', () => {
   assert.doesNotMatch(declarations, /mask-image/);
   assert.doesNotMatch(declarations, /content:'[^']+'/, 'a character is drawn as an icon');

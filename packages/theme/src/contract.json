@@ -927,6 +927,12 @@
       "type": "length"
     },
     {
+      "name": "--slotted-control-invalid-edge-width",
+      "layer": "semantic",
+      "axis": "base",
+      "type": "length"
+    },
+    {
       "name": "--slotted-focus-ring-offset",
       "layer": "semantic",
       "axis": "base",

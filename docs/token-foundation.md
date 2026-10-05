@@ -21,7 +21,7 @@ convention.
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
 | `primitive` | A value with no meaning attached: a step on a scale.           | 121    |
-| `semantic`  | What a value is for: a surface, a border, a control, a target. | 116    |
+| `semantic`  | What a value is for: a surface, a border, a control, a target. | 117    |
 | `component` | One family adjusting a semantic value for itself.              | 28     |
 
 A token is a **scale root** when it states a value rather than composing one: a
@@ -582,6 +582,7 @@ adjusts them.
 | `--slotted-control-line-height`           | `1`                                   |
 | `--slotted-control-letter-spacing`        | `0`                                   |
 | `--slotted-control-border-width`          | `var(--slotted-border-width-thin)`    |
+| `--slotted-control-invalid-edge-width`    | `var(--slotted-border-width-thin)`    |
 | `--slotted-control-radius`                | `var(--slotted-radius-sm)`            |
 | `--slotted-control-shadow-focus-geometry` | `0 1px 4px -1px`                      |
 | `--slotted-control-transition-duration`   | `var(--slotted-duration-short)`       |
@@ -675,6 +676,15 @@ it is the only state that changes the ring's colour. A family points
 each rule that draws focus. Under forced colours it maps to `Highlight` like
 the ring it replaces, because a focus indicator is a focus indicator before it
 is an error.
+
+`--slotted-control-invalid-edge-width` is the edge an invalid control adds
+inside its border, drawn as an inset shadow in the invalid border colour at
+rest and under focus; the default theme sets it to
+`--slotted-border-width-thin`, so an invalid edge reads two pixels against one.
+It is what tells an invalid control from a valid one where colour cannot: in
+`high-contrast` the control edge, `--slotted-tone-danger-border` and both rings
+are the same black (WCAG 1.4.1). `text-field` reads it through
+`--slotted-text-field-invalid-edge-width`.
 
 The five tones — `accent`, `secondary`, `success`, `warning` and `danger` —
 each carry the same nine roles: `solid`, `solid-hover`, `solid-active`,

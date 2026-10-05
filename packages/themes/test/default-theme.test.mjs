@@ -112,6 +112,22 @@ test('keeps the corner of a control at the small step', () => {
   assert.equal(theme.base['--slotted-control-radius'], 'var(--slotted-radius-sm)');
 });
 
+/**
+ * In `high-contrast` the edge of a control at rest and the danger border are
+ * one black, and so are the two rings, so an invalid control cannot be told
+ * from a valid one by colour (WCAG 1.4.1). The families draw an invalid frame
+ * with an inset edge of `--slotted-control-invalid-edge-width` inside its
+ * border; the theme gives it a width, so the invalid line is thicker in every
+ * scheme.
+ */
+test('tells an invalid control from a valid one by width where colour cannot', () => {
+  const hc = resolveTokens({ ...theme.base, ...theme.schemes['high-contrast'] });
+  assert.equal(hc['--slotted-tone-danger-border'], hc['--slotted-control-border-color']);
+  const base = resolveTokens(theme.base);
+  assert.equal(base['--slotted-control-invalid-edge-width'], base['--slotted-border-width-thin']);
+  assert.ok(Number.parseFloat(base['--slotted-control-invalid-edge-width']) >= 1);
+});
+
 test('danger remains a strong surface with white text', () => {
   for (const values of Object.values(theme.schemes)) {
     assert.equal(values['--slotted-tone-danger-on-solid'], '#ffffff');

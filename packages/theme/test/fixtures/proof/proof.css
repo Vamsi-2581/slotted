@@ -101,6 +101,7 @@
     --slotted-control-transition-duration: var(--slotted-duration-short);
     --slotted-control-transition-easing: var(--slotted-easing-standard);
     --slotted-focus-ring-width: var(--slotted-border-width-thick);
+    --slotted-control-invalid-edge-width: var(--slotted-border-width-thin);
     --slotted-focus-ring-offset: var(--slotted-border-width-thick);
     --slotted-duration-instant: 1ms;
     --slotted-duration-short: 120ms;

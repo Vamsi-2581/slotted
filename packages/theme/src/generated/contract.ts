@@ -946,6 +946,12 @@ export const contract: TokenContract = {
       "type": "length"
     },
     {
+      "name": "--slotted-control-invalid-edge-width",
+      "layer": "semantic",
+      "axis": "base",
+      "type": "length"
+    },
+    {
       "name": "--slotted-focus-ring-offset",
       "layer": "semantic",
       "axis": "base",
@@ -2108,6 +2114,7 @@ export type BaseToken =
   | '--slotted-control-transition-duration'
   | '--slotted-control-transition-easing'
   | '--slotted-focus-ring-width'
+  | '--slotted-control-invalid-edge-width'
   | '--slotted-focus-ring-offset'
   | '--slotted-target-min'
   | '--slotted-target-comfortable'
@@ -4144,6 +4151,7 @@ export type ComponentToken =
   | '--slotted-text-field-hover-border-color'
   | '--slotted-text-field-icon-size-min'
   | '--slotted-text-field-invalid-border-color'
+  | '--slotted-text-field-invalid-edge-width'
   | '--slotted-text-field-invalid-focus-ring-color'
   | '--slotted-text-field-placeholder-color'
   | '--slotted-text-field-plain-hover-background'
@@ -6293,6 +6301,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-text-field-hover-border-color",
   "--slotted-text-field-icon-size-min",
   "--slotted-text-field-invalid-border-color",
+  "--slotted-text-field-invalid-edge-width",
   "--slotted-text-field-invalid-focus-ring-color",
   "--slotted-text-field-placeholder-color",
   "--slotted-text-field-plain-hover-background",

@@ -12,7 +12,7 @@ import {
 } from '../../../packages/theme/dist/index.js';
 import { buildTheme } from '../../../packages/theme/cli/build.mjs';
 import { attachScript, bundleScript } from '../script.mjs';
-import { launch } from '../shoot.mjs';
+import { engineArgument, openPage } from '../engines.mjs';
 
 /**
  * Theme B (`proof`, dark, its own accent seed) inside theme A (`default`,
@@ -23,7 +23,15 @@ import { launch } from '../shoot.mjs';
  * 3. a layer opened from inside B and moved to the end of the body keeps
  *    B's theme, scheme and seed, and B's rules apply inside it;
  * 4. a layer opened from inside a React `ThemeScope` carries the theme,
- *    scheme and seed the binding wrote.
+ *    scheme and seed the binding wrote;
+ * 5. elements that differ only in the scheme their scope is rooted on each
+ *    take their own scheme: light and dark siblings with the same inline
+ *    seed, followed by an element of no theme; light and dark cousins under
+ *    a scheme parent; two portal layers, light and dark, with the same
+ *    seeds. Firefox (Stylo, 146–155) shared one computed style across each
+ *    pair until the theme named every scheme outside its @scope blocks
+ *    (`renderTheme`). The elements carry no `id`, so nothing but the scheme
+ *    tells them apart.
  *
  * A stand-in family stylesheet gives every `[data-ui]` a border and a radius
  * in `slotted.components`, the layer a theme rule has to win against.
@@ -32,9 +40,12 @@ import { launch } from '../shoot.mjs';
  * React; the binding and React are imported by their paths in the repository,
  * and React resolves from `packages/react`, where it is installed.
  *
- * Run: node tools/harness/scenarios/theme-scope-nesting.mjs
- * Exits non-zero when an assertion fails.
+ * Run: node tools/harness/scenarios/theme-scope-nesting.mjs [--engine chrome|firefox|webkit|webkit-18]
+ * (`tools/harness/engines.mjs` names each engine's binary). Exits non-zero
+ * when an assertion fails or the engine cannot start.
  */
+
+const engine = engineArgument();
 
 const ROOT = new URL('../../../', import.meta.url);
 const inRepository = (path) => JSON.stringify(fileURLToPath(new URL(path, ROOT)));
@@ -48,6 +59,8 @@ const proof = await buildTheme(
 const SCOPE_SEED = '#e11d48';
 /** `--slotted-seed-*` is registered as `<color>`, so its computed value is `rgb()`. */
 const SCOPE_SEED_COMPUTED = 'rgb(225, 29, 72)';
+const SIBLING_SEED = '#ff0000';
+const LAYER_SEED = '#7c3aed';
 
 const html = `<!doctype html><html><head><style>
 ${renderTheme(defaultTheme)}
@@ -69,6 +82,10 @@ ${proof.css}
   </div>
 </div>
 <div id="react-mount"></div>
+<section id="siblings"><div data-slotted-theme="default" data-slotted-scheme="light" style="--slotted-seed-accent: ${SIBLING_SEED}"></div><div data-slotted-theme="default" data-slotted-scheme="dark" style="--slotted-seed-accent: ${SIBLING_SEED}"></div><div></div></section>
+<section id="cousins"><div data-slotted-scheme="dark"><div data-slotted-theme="default"></div></div><div data-slotted-scheme="light"><div data-slotted-theme="default"></div></div></section>
+<main id="layers" data-slotted-portal><div data-slotted-theme="default" data-slotted-scheme="light" data-slotted-seeds style="--slotted-seed-accent: ${LAYER_SEED}"></div><div data-slotted-theme="default" data-slotted-scheme="dark" data-slotted-seeds style="--slotted-seed-accent: ${LAYER_SEED}"></div></main>
+<i id="resolve"></i>
 </body></html>`;
 
 const script = await bundleScript(
@@ -124,28 +141,34 @@ const READ = `(() => {
     accent: { a: accent('a-probe'), b: accent('b-probe'), layer: accent('layer-probe') },
     layer: carried(layer),
     scope: { ...carried(scopeLayer), moved: scopeLayer.closest('#react-mount') === null },
+    shapes: [
+      ...document.querySelectorAll('#siblings > div, #cousins > div > div, #layers > div'),
+    ].map((element) => {
+      const style = getComputedStyle(element);
+      /* An unregistered property computes to its text with every var() replaced, so it resolves anywhere. */
+      const resolve = document.getElementById('resolve');
+      const value = style.getPropertyValue('--slotted-tone-accent-solid').trim();
+      resolve.style.color = '';
+      resolve.style.color = value;
+      return {
+        shape: element.closest('section, main').id,
+        scheme: element.closest('[data-slotted-scheme]')?.getAttribute('data-slotted-scheme') ?? null,
+        colorScheme: style.colorScheme,
+        accent: value ? getComputedStyle(resolve).color : '',
+      };
+    }),
   };
 })()`;
 
-const { devtools, close } = await launch();
+const browser = await openPage(engine);
 let reading;
 try {
-  await devtools.send('Page.enable');
-  await devtools.send('Runtime.enable');
-  const loaded = devtools.once('Page.loadEventFired');
-  await devtools.send('Page.navigate', { url: pathToFileURL(fileURLToPath(page)).href });
-  await loaded;
-  const { result, exceptionDetails } = await devtools.send('Runtime.evaluate', {
-    expression: READ,
-    returnByValue: true,
-  });
-  if (exceptionDetails)
-    throw new Error(exceptionDetails.exception?.description ?? 'the scene did not run');
-  reading = result.value;
+  await browser.goto(pathToFileURL(fileURLToPath(page)).href);
+  reading = await browser.evaluate(READ);
 } finally {
-  devtools.close();
-  await close();
+  await browser.close();
 }
+console.log(`${engine}: ${browser.version}`);
 console.log(JSON.stringify(reading, null, 2));
 
 const oklch = (text) => {
@@ -195,6 +218,41 @@ assert.deepEqual(
   { theme: 'proof', scheme: 'dark', seeds: true, seed: SCOPE_SEED_COMPUTED, moved: true },
   'a layer opened inside a ThemeScope carries the theme, scheme and seed the binding wrote',
 );
+const shapeSeeds = { siblings: SIBLING_SEED, cousins: undefined, layers: LAYER_SEED };
+const expectedShapes = [
+  ['siblings', 'light'],
+  ['siblings', 'dark'],
+  ['siblings', null],
+  ['cousins', 'dark'],
+  ['cousins', 'light'],
+  ['layers', 'light'],
+  ['layers', 'dark'],
+];
+assert.deepEqual(
+  reading.shapes.map(({ shape, scheme }) => [shape, scheme]),
+  expectedShapes,
+  'the sibling shapes are on the page in order',
+);
+reading.shapes.forEach(({ shape, scheme, colorScheme, accent }, index) => {
+  const where = `${shape} #${index} (${scheme ?? 'no theme'})`;
+  if (scheme === null) {
+    assert.equal(accent, '', `${where}: an element of no theme carries no scheme's tokens`);
+    assert.equal(colorScheme, 'normal', `${where}: an element of no theme sets no color-scheme`);
+    return;
+  }
+  assert.equal(colorScheme, scheme, `${where}: takes its own scheme's color-scheme`);
+  const seed = shapeSeeds[shape];
+  const want = evaluateRecipe(
+    defaultTheme.recipe,
+    seedsOf(defaultTheme, seed ? { accent: seed } : {}),
+    scheme,
+  )['--slotted-tone-accent-solid'];
+  assert.ok(
+    deltaE(oklch(accent), want) < 0.005,
+    `${where}: takes its own scheme's accent, not a neighbour's (${accent})`,
+  );
+});
 console.log(
-  'ok — rules stay in their theme, seeds derive per scope, and a layer keeps its region, a ThemeScope included',
+  'ok — rules stay in their theme, seeds derive per scope, a layer keeps its region, a ThemeScope included, ' +
+    'and siblings, cousins and layers that differ only in scheme each take their own',
 );

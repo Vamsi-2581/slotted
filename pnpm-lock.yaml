@@ -562,6 +562,12 @@ importers:
 
   tools/harness:
     devDependencies:
+      playwright-core:
+        specifier: 1.63.0
+        version: 1.63.0
+      playwright-core-webkit18:
+        specifier: npm:playwright-core@1.53.0
+        version: playwright-core@1.53.0
       vite:
         specifier: 8.2.2
         version: 8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(less@4.9.0)(sass@1.103.1)(yaml@2.9.1)
@@ -5477,6 +5483,16 @@ packages:
   pkg-dir@8.0.0:
     resolution: {integrity: sha512-4peoBq4Wks0riS0z8741NVv+/8IiTvqnZAr8QGgtdifrtpdXbNw/FxRS1l6NFqm4EMzuS0EDqNNx4XGaz8cuyQ==}
     engines: {node: '>=18'}
+
+  playwright-core@1.53.0:
+    resolution: {integrity: sha512-mGLg8m0pm4+mmtB7M89Xw/GSqoNC+twivl8ITteqvAndachozYe2ZA7srU6uleV1vEdAHYqjq+SV8SNxRRFYBw==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright-core@1.63.0:
+    resolution: {integrity: sha512-rYCsBF/M5HjUch52bbtVONEFjv6Xu8sm8h72dNlR5bzIE1fvC/bxgspzkjSfU+MweEMmPM8KJebG6nnyxo5mCg==}
+    engines: {node: '>=20'}
+    hasBin: true
 
   polka@0.5.2:
     resolution: {integrity: sha512-FVg3vDmCqP80tOrs+OeNlgXYmFppTXdjD5E7I4ET1NjvtNmQrb1/mJibybKkb/d4NA7YWAr1ojxuhpL3FHqdlw==}
@@ -11483,6 +11499,10 @@ snapshots:
   pkg-dir@8.0.0:
     dependencies:
       find-up-simple: 1.0.1
+
+  playwright-core@1.53.0: {}
+
+  playwright-core@1.63.0: {}
 
   polka@0.5.2:
     dependencies:

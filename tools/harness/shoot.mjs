@@ -141,6 +141,10 @@ export async function launch({ scrollbars = 'hide' } = {}) {
       resolve(Number(match[1]));
     });
     chrome.on('exit', (code) => reject(new Error(`Chrome exited with ${code}:\n${output}`)));
+    chrome.on('error', (error) => {
+      clearTimeout(timer);
+      reject(new Error(`Chrome cannot start: ${error.message}`));
+    });
   });
 
   const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();

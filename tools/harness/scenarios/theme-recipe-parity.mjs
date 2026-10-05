@@ -12,7 +12,7 @@ import {
   SEED_NAMES,
   seedGrid,
 } from '../../../packages/theme/dist/index.js';
-import { launch } from '../shoot.mjs';
+import { engineArgument, openPage } from '../engines.mjs';
 
 /**
  * The recipe is computed twice: by the browser, from the CSS `renderTheme`
@@ -27,9 +27,16 @@ import { launch } from '../shoot.mjs';
  * scopes. Every colour token of the recipe is read through a probe's `color`,
  * whose computed value keeps OKLCH unclipped.
  *
- * Run: node tools/harness/scenarios/theme-recipe-parity.mjs
- * Exits non-zero when an assertion fails.
+ * Two failures are told apart: a token the engine cannot parse (the probe
+ * does not read `oklch()`), and a token more than the tolerance from the
+ * evaluator.
+ *
+ * Run: node tools/harness/scenarios/theme-recipe-parity.mjs [--engine chrome|firefox|webkit|webkit-18]
+ * (`tools/harness/engines.mjs` names each engine's binary). Exits non-zero
+ * when an assertion fails or the engine cannot start.
  */
+
+const engine = engineArgument();
 
 const TOLERANCE = 0.005;
 const samples = seedGrid().filter((_seed, index) => index % 47 === 0);
@@ -77,38 +84,42 @@ const READ = `[...document.querySelectorAll('[data-case]')].map((scope) => {
   });
 })`;
 
-const { devtools, close } = await launch();
+const browser = await openPage(engine);
+const { version } = browser;
 let readings;
 try {
-  await devtools.send('Page.enable');
-  await devtools.send('Runtime.enable');
-  const loaded = devtools.once('Page.loadEventFired');
-  await devtools.send('Page.navigate', { url: pathToFileURL(out.pathname).href });
-  await loaded;
-  const { result, exceptionDetails } = await devtools.send('Runtime.evaluate', {
-    expression: READ,
-    returnByValue: true,
-  });
-  if (exceptionDetails)
-    throw new Error(exceptionDetails.exception?.description ?? 'the read failed');
-  readings = result.value;
+  await browser.goto(pathToFileURL(out.pathname).href);
+  readings = await browser.evaluate(READ);
 } finally {
-  devtools.close();
-  await close();
+  await browser.close();
 }
 
+/**
+ * A token whose value the engine cannot parse is invalid at computed-value
+ * time where it is read: the probe's `color` inherits instead, and the
+ * computed value is not `oklch()`. Firefox 146–152 did this to every bounded
+ * token while its emitter wrote cos() over the hue keyword.
+ */
 function parseComputed(text) {
   const match = /^oklch\(([\d.e-]+|none) ([\d.e-]+|none) ([\d.e-]+|none)/.exec(text);
-  assert.ok(match, `the browser wrote ${text}, not oklch()`);
+  if (!match) return undefined;
   const number = (value) => (value === 'none' ? 0 : Number(value));
   return { l: number(match[1]), c: number(match[2]), h: number(match[3]) };
 }
 
+const invalid = new Set();
 const failures = [];
+let worst = 0;
 cases.forEach(({ scheme, name, sample }, index) => {
   const expected = evaluateRecipe(defaultTheme.recipe, { ...seeds, [name]: sample }, scheme);
   tokens.forEach((token, column) => {
-    const distance = deltaE(parseComputed(readings[index][column]), expected[token]);
+    const read = parseComputed(readings[index][column]);
+    if (!read) {
+      invalid.add(`${scheme} ${token}`);
+      return;
+    }
+    const distance = deltaE(read, expected[token]);
+    worst = Math.max(worst, distance);
     if (distance >= TOLERANCE) {
       failures.push(
         `${scheme} ${name}=${css(sample)} ${token}: ${readings[index][column]} is ${distance.toFixed(4)} from the evaluator`,
@@ -117,9 +128,15 @@ cases.forEach(({ scheme, name, sample }, index) => {
   });
 });
 
-assert.deepEqual(failures.slice(0, 20), [], `${failures.length} tokens disagree`);
+console.log(`${engine}: ${version}`);
+assert.deepEqual(
+  [...invalid].slice(0, 20),
+  [],
+  `${invalid.size} tokens are invalid in ${version}: the probe did not read oklch()`,
+);
+assert.deepEqual(failures.slice(0, 20), [], `${failures.length} tokens disagree in ${version}`);
 console.log(
-  `ok — ${cases.length} scopes × ${tokens.length} tokens agree within ${TOLERANCE} ` +
+  `ok — ${version}: ${cases.length} scopes × ${tokens.length} tokens agree within ${TOLERANCE}, at most ${worst.toFixed(5)} ` +
     `(${samples.length} seeds: ${spread.lightnesses} lightnesses, ${spread.chromas} chromas, ` +
     `${spread.hues} hues, ${spread.achromatic} achromatic)`,
 );

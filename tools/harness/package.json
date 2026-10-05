@@ -8,6 +8,8 @@
     "verify": "pnpm test"
   },
   "devDependencies": {
+    "playwright-core": "1.63.0",
+    "playwright-core-webkit18": "npm:playwright-core@1.53.0",
     "vite": "8.2.2"
   }
 }

@@ -11,7 +11,16 @@ import { validateRules } from './validate-rules.mjs';
  * rule as text and `applyTheme` never fetches.
  */
 export async function buildTheme(modulePath, outDir) {
-  const theme = (await import(pathToFileURL(resolve(modulePath)).href)).default;
+  let theme;
+  try {
+    theme = (await import(pathToFileURL(resolve(modulePath)).href)).default;
+  } catch (error) {
+    // `defineTheme` refuses a rule given as text while the module evaluates, naming it by its
+    // index; the build names the module too, as it does for the rules it validates itself.
+    throw new Error(error.message.replaceAll(/^- rules\[/gm, `- ${modulePath}#rules[`), {
+      cause: error,
+    });
+  }
   if (theme?.kind !== 'slotted-theme') {
     throw new Error(`${modulePath}: the default export is not a theme from defineTheme`);
   }

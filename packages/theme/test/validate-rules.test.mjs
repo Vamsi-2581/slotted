@@ -1,7 +1,21 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { readFileSync } from 'node:fs';
+
 import { validateRules } from '../cli/validate-rules.mjs';
+import { defineTheme, recipes } from '../dist/index.js';
+
+const values = JSON.parse(
+  readFileSync(new URL('../../themes/src/default/values.json', import.meta.url), 'utf8'),
+);
+const SEEDS = {
+  accent: '#1d4ed8',
+  neutral: '#64748b',
+  success: '#15803d',
+  warning: '#facc15',
+  danger: '#dc2626',
+};
 
 const ok = (css) => assert.deepEqual(validateRules(css, 'rules.css'), []);
 const fails = (css, message) => {
@@ -156,4 +170,53 @@ test('accepts pseudo-classes, pseudo-elements, nesting, combinators and :is()/:w
   );
   ok(`@keyframes pulse { from { opacity: 0; } 50% { opacity: 0.5; } to { opacity: 1; } }`);
   ok(`@media (prefers-reduced-motion: reduce) { [data-ui='button'] { transition: none; } }`);
+});
+
+/**
+ * The build and the runtime hold one policy: every rule the CLI refuses,
+ * `defineTheme` refuses with the same messages, and every rule the CLI
+ * accepts, `defineTheme` accepts.
+ */
+test('defineTheme refuses exactly what the build refuses, with the same messages', () => {
+  const corpus = [
+    `[data-ui='button'][data-variant='solid'] [data-part='label'] { font-weight: var(--slotted-font-weight-semibold); }`,
+    `[data-ui='text-field']:has(> [data-part='input']:focus-visible) { outline: 2px solid var(--slotted-tone-accent-solid); }`,
+    `[data-ui='text-field'] input { color: red; }`,
+    `.card, #x, [data-ui='card'] > * { color: red; }`,
+    `:root { --slotted-text: red; }`,
+    `[data-ui='tabs'] [role='tab'][aria-selected] { color: red; }`,
+    `[data-ui='card'] :first-child { margin: 0; }`,
+    `:is([data-ui='card'], div):not(.x):has(span) { color: red; }`,
+    `[data-ui='card'] {\n  & [data-part='title'] { color: red; }\n  background: var(--_ink);\n}`,
+    `@media (width > 40rem) {\n  [data-ui='nope'] [data-part='x'] { color: var(--slotted-nope); }\n}`,
+    `@keyframes pulse { from { opacity: 0; } to { opacity: 1; } }`,
+  ];
+  for (const css of corpus) {
+    const build = validateRules(css, 'rules.css').map((error) => error.replace(/^rules\.css:/, ''));
+    let runtime = [];
+    try {
+      defineTheme({
+        ...values,
+        name: 'parity',
+        seeds: SEEDS,
+        recipe: recipes.standard,
+        rules: [css],
+      });
+    } catch (error) {
+      runtime = error.message
+        .split('\n')
+        .slice(1)
+        .map((line) => line.replace(/^- rules\[0\]:/, ''));
+    }
+    assert.deepEqual(runtime, build, css);
+  }
+});
+
+test('the runtime path imports neither lightningcss nor a Node module', () => {
+  const index = readFileSync(new URL('../dist/index.js', import.meta.url), 'utf8');
+  const imports = [...index.matchAll(/(?:from|import)\s*['"]([^'"]+)['"]/g)].map(([, s]) => s);
+  assert.deepEqual(
+    imports.filter((specifier) => specifier === 'lightningcss' || specifier.startsWith('node:')),
+    [],
+  );
 });

@@ -17,6 +17,8 @@ import {
   type Scheme,
   type SeedName,
 } from './recipe';
+import { ruleErrors } from './rule-policy';
+import { splitTopLevel } from './rules';
 import { hasUnsafeStructuralChar, validateTheme, type FlatTheme } from './validate';
 
 export const DENSITIES = ['comfortable', 'compact', 'dense'] as const;
@@ -104,7 +106,9 @@ export function flattenTheme(theme: ThemeDefinition): FlatTheme {
  * Every reason a definition cannot be rendered: its name lands in selectors,
  * every seed, value, font field and recipe derivation lands in a declaration,
  * so each one is checked against the contract and against the structural
- * characters that would close the rule it is written into.
+ * characters that would close the rule it is written into; every rule given
+ * as text is checked for balance and against what a theme rule may select
+ * and read (`ruleErrors`).
  */
 function themeErrors(definition: ThemeDefinition): string[] {
   const errors: string[] = [];
@@ -149,9 +153,20 @@ function themeErrors(definition: ThemeDefinition): string[] {
       }
     }
   }
-  for (const rule of definition.rules ?? []) {
-    if (typeof rule !== 'string' && !(rule instanceof URL))
-      errors.push('a rule is neither CSS text nor a URL');
+  // A rule given as a URL is read, and held to the same policy, by `slotted-build-theme`.
+  for (const [index, rule] of (definition.rules ?? []).entries()) {
+    if (typeof rule !== 'string') {
+      if (!(rule instanceof URL)) errors.push('a rule is neither CSS text nor a URL');
+      continue;
+    }
+    try {
+      splitTopLevel(rule);
+    } catch (error) {
+      errors.push(`rules[${index}]: ${(error as Error).message}`);
+      continue;
+    }
+    for (const { line, selector, message } of ruleErrors(rule))
+      errors.push(`rules[${index}]:${line} ${selector}: ${message}`);
   }
   // `family` is written through `JSON.stringify` and stays a quoted CSS string whatever
   // it contains; the other fields are interpolated into `@font-face` verbatim.

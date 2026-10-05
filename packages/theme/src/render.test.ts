@@ -98,12 +98,13 @@ describe('renderTheme', () => {
   });
 
   it('refuses a rule whose unbalanced brace would escape the @scope it is compiled into', () => {
-    const malformed = defineTheme({
+    const malformed = {
       ...theme,
       name: 'malformed',
-      rules: ['.a { color: red; } } .evil { color: blue; }'],
-    });
-    expect(() => renderTheme(malformed)).toThrow(/unbalanced `\}`/);
+      rules: ["[data-ui='card'] { color: red; } } [data-ui='button'] { color: blue; }"],
+    };
+    expect(() => defineTheme(malformed)).toThrow(/rules\[0\]: theme rule has an unbalanced `\}`/);
+    expect(() => renderTheme(malformed as Theme)).toThrow(/unbalanced `\}`/);
   });
 
   it('keeps a rule whose comment hides a structural character, and still scopes it', () => {
@@ -127,6 +128,14 @@ describe('renderTheme', () => {
  */
 describe('renderTheme on a theme that did not come from defineTheme', () => {
   const forged = (overrides: Record<string, unknown>) => ({ ...theme, ...overrides }) as Theme;
+
+  it('refuses a rule that selects what no family renders on purpose', () => {
+    expect(() =>
+      renderTheme(forged({ rules: ["[data-ui='text-field'] input { border: 0; }"] })),
+    ).toThrow(
+      "rules[0]:1 [data-ui='text-field'] input: input: an element type is not a public selector",
+    );
+  });
 
   it('refuses a name a selector cannot carry', () => {
     expect(() => renderTheme(forged({ name: 'x"], * { color: red } [x="' }))).toThrow(

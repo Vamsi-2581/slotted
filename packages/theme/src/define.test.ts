@@ -164,6 +164,80 @@ describe('defineTheme', () => {
   });
 });
 
+describe('defineTheme rules', () => {
+  const failsWith = (rules: string[]) => {
+    try {
+      defineTheme(definition({ name: 'ruled', rules }));
+    } catch (error) {
+      return (error as Error).message;
+    }
+    throw new Error('defineTheme accepted the rules');
+  };
+
+  it('holds a rule given as text to the selector policy, naming the rule index, the line and the selector', () => {
+    const message = failsWith([
+      `[data-ui='card'] { gap: 0; }`,
+      `[data-ui='card'] { gap: 0; }\n[data-ui='text-field'] input { color: red; }`,
+    ]);
+    expect(message).toContain(
+      "- rules[1]:2 [data-ui='text-field'] input: input: an element type is not a public selector",
+    );
+  });
+
+  it('refuses each selector the build refuses', () => {
+    for (const [css, reason] of [
+      [`.card { color: red; }`, '.card: a class is not a public selector'],
+      [`[data-ui='card']#total { color: red; }`, '#total: an id is not a public selector'],
+      [`[data-ui='card'] > * { margin: 0; }`, '*: the universal selector is not a public selector'],
+      [`:root { color: red; }`, ':root: a document or scoping root is not a public selector'],
+      [
+        `[data-ui='tabs'] [role='tab'] { color: red; }`,
+        "[role='tab']: an attribute outside data-* is not a public selector",
+      ],
+      [`[data-ui='nope'] { color: red; }`, "[data-ui='nope'] names no family"],
+      [
+        `[data-ui='button'][data-part='nope'] { color: red; }`,
+        "[data-part='nope'] is not a part of button",
+      ],
+      [
+        `[data-addOnPaste] { color: red; }`,
+        '[data-addOnPaste] is not an attribute any family sets',
+      ],
+    ] as const) {
+      expect(failsWith([css]), css).toContain(reason);
+    }
+  });
+
+  it('refuses a rule that reads a property no theme may read', () => {
+    expect(failsWith([`[data-ui='card'] { color: var(--_ink); }`])).toContain(
+      "rules[0]:1 [data-ui='card']: var(--_ink) reads a private property of a family",
+    );
+    expect(failsWith([`[data-ui='card'] { color: var(--slotted-nope); }`])).toContain(
+      'var(--slotted-nope) is not a token',
+    );
+  });
+
+  it('refuses a rule whose braces do not balance before reading its selectors', () => {
+    expect(failsWith(['[data-ui="card"] { color: red; } } .evil { color: blue; }'])).toMatch(
+      /rules\[0\]: theme rule has an unbalanced `\}`/,
+    );
+  });
+
+  it('accepts a rule over public hooks, and leaves a rule given as a URL to the build', () => {
+    expect(() =>
+      defineTheme(
+        definition({
+          rules: [
+            `[data-ui='text-field']:has(> [data-part='input']:focus-visible) { outline-color: var(--slotted-tone-accent-solid); }
+@keyframes pulse { from { opacity: 0; } to { opacity: 1; } }`,
+            new URL('https://example.test/rules.css'),
+          ],
+        }),
+      ),
+    ).not.toThrow();
+  });
+});
+
 describe('flattenTheme', () => {
   const schemes = values.schemes as Record<string, Record<string, string>>;
   const flat = flattenTheme(

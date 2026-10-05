@@ -76,3 +76,84 @@ test('attributes a var() after a nested rule to the outer rule that directly con
   assert.ok(!errors[0].includes("[data-part='label']"), errors[0]);
   assert.ok(errors[0].includes('var(--_ink) reads a private property of a family'), errors[0]);
 });
+
+test('names an element type selector, with the file, the line and the selector', () => {
+  const errors = validateRules(
+    `[data-ui='card'] { gap: 0; }\n[data-ui='text-field'] input { color: red; }`,
+    'rules.css',
+  );
+  assert.deepEqual(errors, [
+    "rules.css:2 [data-ui='text-field'] input: input: an element type is not a public selector",
+  ]);
+});
+test('names html and body as element types', () => {
+  fails(`html [data-ui='card'] { color: red; }`, 'html: an element type is not a public selector');
+  fails(
+    `body > [data-ui='card'] { color: red; }`,
+    'body: an element type is not a public selector',
+  );
+});
+test('names an id selector', () =>
+  fails(`[data-ui='card']#total { color: red; }`, '#total: an id is not a public selector'));
+test('names the universal selector', () =>
+  fails(
+    `[data-ui='card'] > * { margin: 0; }`,
+    '*: the universal selector is not a public selector',
+  ));
+test('names :root and :scope, which select by place in the document', () => {
+  fails(`:root { color: red; }`, ':root: a document or scoping root is not a public selector');
+  fails(
+    `:scope [data-ui='card'] { color: red; }`,
+    ':scope: a document or scoping root is not a public selector',
+  );
+});
+test('names an attribute outside data-*', () => {
+  fails(
+    `[data-ui='text-field'][aria-invalid='true'] { color: red; }`,
+    "[aria-invalid='true']: an attribute outside data-* is not a public selector",
+  );
+  fails(
+    `[data-ui='tabs'] [role='tab'] { color: red; }`,
+    "[role='tab']: an attribute outside data-* is not a public selector",
+  );
+});
+test('names a compound that carries no public hook', () =>
+  fails(
+    `[data-ui='card'] :first-child { margin: 0; }`,
+    ':first-child: a compound selector without data-ui, data-part or a public attribute matches elements no family owns',
+  ));
+test('checks the selectors inside :is(), :where(), :not() and :has()', () => {
+  fails(`[data-ui='card']:not(.x) { color: red; }`, '.x: a class is not a public selector');
+  fails(
+    `[data-ui='field']:has(input) { color: red; }`,
+    'input: an element type is not a public selector',
+  );
+  fails(
+    `:is([data-ui='card'], div) { color: red; }`,
+    'div: an element type is not a public selector',
+  );
+  fails(`:where([data-ui='nope']) { color: red; }`, "[data-ui='nope'] names no family");
+});
+test('checks a rule nested in another rule or in a conditional group', () => {
+  fails(
+    `[data-ui='card'] {\n  & span { color: red; }\n}`,
+    'span: an element type is not a public selector',
+  );
+  fails(
+    `@media (width > 40rem) {\n  [data-ui='card'] .x { color: red; }\n}`,
+    '.x: a class is not a public selector',
+  );
+});
+test('accepts pseudo-classes, pseudo-elements, nesting, combinators and :is()/:where()/:not()/:has() over public hooks', () => {
+  ok(
+    `[data-ui='text-field']:has(> [data-part='input']:focus-visible) { outline: 2px solid var(--slotted-focus-ring-color); }`,
+  );
+  ok(`[data-ui='text-field'][data-invalid] [data-part='input']::placeholder { opacity: 1; }`);
+  ok(`:is([data-ui='button'], [data-ui='badge']) > [data-part='label'] { letter-spacing: 0; }`);
+  ok(`[data-ui='button']:where(:hover, :focus-visible):not([data-disabled]) { opacity: 1; }`);
+  ok(
+    `[data-ui='card'] {\n  & + & { margin: 0; }\n  &:hover [data-part='title'] { color: red; }\n}`,
+  );
+  ok(`@keyframes pulse { from { opacity: 0; } 50% { opacity: 0.5; } to { opacity: 1; } }`);
+  ok(`@media (prefers-reduced-motion: reduce) { [data-ui='button'] { transition: none; } }`);
+});

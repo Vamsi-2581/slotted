@@ -505,14 +505,16 @@ const brutalist = extendTheme(
  * the table's head carries no band, tabs are underlined in ink, and badges
  * and column heads are set in small capitals.
  *
- * A text field is a ruled line, as on a printed form, on all three levels:
- * every control's focus ring is a hairline (control tokens); the field has
- * no ground, and its line is in ink, darker under the pointer and danger
- * when invalid (the family's tokens); the line is only the bottom edge, with
- * no corner whatever corner the builder chooses, focus thickens it in the
- * ring's colour, and an invalid field takes the danger tint under its line
- * (rules). The family points the ring's colour at the invalid one on an
- * invalid field, so focus on it draws the line in that colour.
+ * A text field is a ruled line, as on a printed form: the field has no
+ * ground, and its line is in ink, darker under the pointer and in the danger
+ * border when invalid, at 3:1 or more on its ground in every scheme (the
+ * family's tokens); the line is only the bottom edge, with no corner
+ * whatever corner the builder chooses, focus thickens it in the ring's
+ * colour behind a transparent outline that forced colours paint, and an
+ * invalid field takes the danger tint under its line (rules). The family
+ * points the ring's colour at the invalid one on an invalid field, so focus
+ * on it draws the line in that colour. Every other control keeps the
+ * library's ring.
  */
 const editorial = extendTheme(
   defaultTheme,
@@ -535,7 +537,6 @@ const editorial = extendTheme(
       ...durations('160ms', '260ms', '400ms'),
       '--slotted-easing-standard': 'cubic-bezier(0.4, 0, 0.2, 1)',
       '--slotted-control-font-weight': 'var(--slotted-font-weight-medium)',
-      '--slotted-focus-ring-width': 'var(--slotted-border-width-thin)',
     },
     schemes: {
       light: {
@@ -607,7 +608,7 @@ const editorial = extendTheme(
       '--slotted-text-field-background': 'transparent',
       '--slotted-text-field-border-color': 'var(--slotted-border-strong)',
       '--slotted-text-field-hover-border-color': 'var(--slotted-text)',
-      '--slotted-text-field-invalid-border-color': 'var(--slotted-tone-danger-solid)',
+      '--slotted-text-field-invalid-border-color': 'var(--slotted-tone-danger-border)',
     },
     rules: [
       `[data-ui='badge'],
@@ -629,7 +630,7 @@ const editorial = extendTheme(
 [data-ui='text-field'][data-part='root']:has(> [data-part='input']:focus-visible) {
   border-block-end-color: var(--slotted-focus-ring-color);
   box-shadow: inset 0 calc(-1 * var(--slotted-border-width-thick)) 0 var(--slotted-focus-ring-color);
-  outline: none;
+  outline: var(--slotted-border-width-thick) solid transparent;
 }
 
 [data-ui='text-field'][data-part='root'][data-invalid] {

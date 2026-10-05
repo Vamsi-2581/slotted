@@ -12,10 +12,12 @@
 //   carrying the theme, scheme and seed of `html`; each face the theme names, loaded; and that the
 //   theme cards' specimens draw their own theme without changing the page around them; a text
 //   field at rest, under keyboard focus (Tab), invalid, and invalid under focus: Editorial draws it
-//   as a ruled line (bottom edge only, no corner or ground; focus thickens the line in the ring's
-//   colour with no outline; invalid tints the ground and the line with danger) and gives every
-//   control a 1px ring, while every other theme keeps the family's frame (no leak), the default
-//   with absolute values;
+//   as a ruled line (bottom edge only, no corner or ground; focus thickens the line by an inset 2px
+//   in the ring's colour behind a transparent 2px outline; invalid tints the ground and draws the
+//   line in the danger border), each line and focus mark at 3:1 or more on its ground, in light,
+//   dark and high-contrast (html set to it), keeps the library's 2px ring on every other control,
+//   and under emulated forced colours draws focus as a 2px outline in a system colour; every other
+//   theme keeps the family's frame (no leak), the default with absolute values;
 // - with two strongly tinted greys (Ocean #0e7490, Clay #9c6644) and a grey of the reader's own, the
 //   page ground, a table ground and the select's layer carry the grey's hue, and the lines and
 //   hovers stay in the ground's family;
@@ -344,9 +346,14 @@ const fieldFacts = () => js(`(() => {
     bottom: T.rgb(style.borderBottomColor).join(','),
     top: T.rgb(style.borderTopColor).join(','),
     outline: style.outlineStyle + ' ' + style.outlineWidth,
+    outlineColor: style.outlineColor,
     shadow: style.boxShadow,
+    /* WCAG 1.4.11: the line and the focus mark against the ground they are drawn on. */
+    lineRatio: T.ratio(style.borderBottomColor, T.ground(root)),
+    shadowRatio: T.ratio((style.boxShadow.match(/(?:rgba?|oklch|oklab|lab|lch|color)\\([^)]*\\)/) ?? ['transparent'])[0], T.ground(root)),
     shadowColor: T.rgb((style.boxShadow.match(/(?:rgba?|oklch|oklab|lab|lch|color)\\([^)]*\\)/) ?? ['transparent'])[0]).join(','),
     ring: token('--slotted-focus-ring-color'),
+    invalidRing: token('--slotted-focus-ring-color-invalid'),
     dangerSurface: token('--slotted-tone-danger-surface'),
     dangerSolid: token('--slotted-tone-danger-solid'),
     dangerBorder: token('--slotted-tone-danger-border'),
@@ -413,6 +420,62 @@ const derived = (theme, scheme, seed, value, tone) => js(`(() => {
   scope.remove();
   return color;
 })()`);
+
+/**
+ * Editorial's ruled field in one scheme: the bottom edge alone, no corner and no ground; keyboard
+ * focus thickens the line by an inset 2px shadow in the ring's colour behind a transparent 2px
+ * outline; an invalid field takes the danger tint under the danger border; every line and focus
+ * mark at 3:1 or more on the ground it is drawn on (WCAG 1.4.11); every other control keeps the
+ * library's 2px ring.
+ */
+const ruledField = (name, field, frame) => {
+  const ratio = (value) => `${value.toFixed(2)}:1`;
+  check(
+    `${name}: a text field is a ruled line — the bottom edge alone, no corner, no ground, the line at 3:1 on the ground`,
+    field.rest.widths === '0px 0px 1px 0px' && field.rest.radius === '0px' && field.rest.transparent && field.rest.lineRatio >= 3,
+    `${frame(field.rest)} · line ${ratio(field.rest.lineRatio)}`,
+  );
+  check(
+    `${name}: keyboard focus thickens the field's line by 2px in the ring's colour at 3:1, behind a transparent 2px outline`,
+    field.focus.focused && field.focus.outline === 'solid 2px' && field.focus.outlineColor === 'rgba(0, 0, 0, 0)' && field.focus.shadow.endsWith('0px -2px 0px 0px inset') &&
+      field.focus.shadowColor === field.focus.ring && field.focus.bottom === field.focus.ring && field.focus.shadowRatio >= 3,
+    `${field.focus.focused ? 'focus-visible' : 'not focus-visible'} · ${frame(field.focus)} ${field.focus.outlineColor} · ${field.focus.shadow} · ring rgb(${field.focus.ring}) ${ratio(field.focus.shadowRatio)}`,
+  );
+  check(
+    `${name}: an invalid field takes the danger tint under the danger border, at 3:1 on the tint`,
+    field.invalid.invalid && field.invalid.background === field.invalid.dangerSurface && field.invalid.bottom === field.invalid.dangerBorder && field.invalid.lineRatio >= 3,
+    `${frame(field.invalid)} · danger surface rgb(${field.invalid.dangerSurface}) border rgb(${field.invalid.dangerBorder}) · line ${ratio(field.invalid.lineRatio)}`,
+  );
+  check(
+    `${name}: keyboard focus on an invalid field draws its line in the invalid ring's colour, at 3:1 on the tint`,
+    field.invalidFocus.focused && field.invalidFocus.invalid && field.invalidFocus.bottom === field.invalidFocus.ring && field.invalidFocus.shadowColor === field.invalidFocus.ring &&
+      field.invalidFocus.ring === field.invalidFocus.invalidRing && field.invalidFocus.shadowRatio >= 3,
+    `${field.invalidFocus.focused ? 'focus-visible' : 'not focus-visible'} · ${frame(field.invalidFocus)} · ${field.invalidFocus.shadow} · ring rgb(${field.invalidFocus.ring}) ${ratio(field.invalidFocus.shadowRatio)} · invalid ring rgb(${field.invalidFocus.invalidRing}) · valid ring rgb(${field.focus.ring})`,
+  );
+  check(`${name}: every other control keeps the library's 2px ring`, field.probeRing === '2px', `probe button ${field.probeRing}`);
+};
+
+/**
+ * The field under keyboard focus and at rest with forced colours emulated (Chrome DevTools
+ * Protocol `Emulation.setEmulatedMedia`, `forced-colors: active`), where the box shadow is dropped
+ * and every line takes a system colour.
+ */
+const forcedFocus = async () => {
+  await send('Emulation.setEmulatedMedia', { features: [{ name: 'forced-colors', value: 'active' }] });
+  await until(`matchMedia('(forced-colors: active)').matches`, 3000);
+  const read = () => js(`(() => { const s = getComputedStyle(document.querySelector('${FIELD}')); return { outline: s.outlineStyle + ' ' + s.outlineWidth, color: s.outlineColor, shadow: s.boxShadow, line: s.borderBottomColor, focused: document.activeElement === document.querySelector('${FIELD} [data-part=input]') }; })()`);
+  await fieldSettled();
+  const rest = await read();
+  await js(`document.querySelector('${FIELD} [data-ui=color-picker][data-part=trigger]').focus()`);
+  await press('Tab', 'Tab', 9);
+  await fieldSettled();
+  const focus = await read();
+  await js(`document.activeElement.blur()`);
+  await send('Emulation.setEmulatedMedia', { features: [{ name: 'forced-colors', value: '' }] });
+  await until(`!matchMedia('(forced-colors: active)').matches`, 3000);
+  await fieldSettled();
+  return { rest, focus };
+};
 
 const near = (hue, target, within) => { const d = Math.abs(hue - target) % 360; return Math.min(d, 360 - d) <= within; };
 
@@ -599,27 +662,7 @@ try {
         const field = await fieldStates();
         const frame = (state) => `${state.widths} · r ${state.radius} · ${state.transparent ? 'no ground' : `rgb(${state.background})`} · outline ${state.outline} · line rgb(${state.bottom})`;
         if (theme.id === 'nexora-editorial') {
-          check(
-            `${name}: a text field is a ruled line — the bottom edge alone, no corner, no ground`,
-            field.rest.widths === '0px 0px 1px 0px' && field.rest.radius === '0px' && field.rest.transparent,
-            frame(field.rest),
-          );
-          check(
-            `${name}: keyboard focus thickens the field's line in the ring's colour, with no outline`,
-            field.focus.focused && field.focus.outline.startsWith('none') && field.focus.shadow.includes('inset') && field.focus.shadowColor === field.focus.ring && field.focus.bottom === field.focus.ring,
-            `${field.focus.focused ? 'focus-visible' : 'not focus-visible'} · ${frame(field.focus)} · ${field.focus.shadow} · ring rgb(${field.focus.ring})`,
-          );
-          check(
-            `${name}: an invalid field takes the danger tint under a danger line`,
-            field.invalid.invalid && !field.invalid.transparent && field.invalid.background === field.invalid.dangerSurface && field.invalid.bottom === field.invalid.dangerSolid,
-            `${frame(field.invalid)} · danger surface rgb(${field.invalid.dangerSurface}) solid rgb(${field.invalid.dangerSolid})`,
-          );
-          check(
-            `${name}: keyboard focus on an invalid field draws its line in the invalid ring's colour`,
-            field.invalidFocus.focused && field.invalidFocus.invalid && field.invalidFocus.bottom === field.invalidFocus.ring && field.invalidFocus.shadowColor === field.invalidFocus.ring && field.invalidFocus.ring !== field.focus.ring,
-            `${field.invalidFocus.focused ? 'focus-visible' : 'not focus-visible'} · ${frame(field.invalidFocus)} · ${field.invalidFocus.shadow} · ring rgb(${field.invalidFocus.ring}) · valid ring rgb(${field.focus.ring})`,
-          );
-          check(`${name}: every control's focus ring is a hairline`, field.probeRing === '1px', `probe button ${field.probeRing}`);
+          ruledField(name, field, frame);
         } else {
           const edges = field.rest.widths.split(' ');
           check(
@@ -641,6 +684,22 @@ try {
           check(`${name}: a striped table bands its rows in a ground mixed from the theme's line`, read.stripe === read.stripeExpected && read.stripe !== read.plainRow, `stripe rgb(${read.stripe}) · expected rgb(${read.stripeExpected}) · plain rgb(${read.plainRow})`);
         }
       }
+    }
+    if (theme.id === 'nexora-editorial') {
+      // No choice on the page names high-contrast: html is set to it for the field's reading alone.
+      await choose('brand', 'theme');
+      await choose('scheme', 'light');
+      const before = await js(`document.documentElement.getAttribute('data-slotted-scheme')`);
+      await js(`document.documentElement.setAttribute('data-slotted-scheme', 'high-contrast')`);
+      const frame = (state) => `${state.widths} · r ${state.radius} · ${state.transparent ? 'no ground' : `rgb(${state.background})`} · outline ${state.outline} · line rgb(${state.bottom})`;
+      ruledField(`${theme.id} × theme × high-contrast`, await fieldStates(), frame);
+      await js(`document.documentElement.setAttribute('data-slotted-scheme', ${JSON.stringify(before)})`);
+      const forced = await forcedFocus();
+      check(
+        `${theme.id} × theme × light, forced colours: keyboard focus draws a 2px outline in a system colour the field at rest does not have`,
+        forced.focus.focused && forced.focus.outline === 'solid 2px' && forced.focus.color !== 'rgba(0, 0, 0, 0)' && forced.rest.outline.startsWith('none'),
+        `rest ${forced.rest.outline} ${forced.rest.color} · focus ${forced.focus.outline} ${forced.focus.color} · shadow ${forced.focus.shadow} · line ${forced.focus.line}`,
+      );
     }
     for (const scheme of SCHEMES) {
       check(`${theme.id} × ${scheme}: the solid moves with the brand`, backgrounds[scheme].size === BRANDS.length, [...backgrounds[scheme]].map((c) => `rgb(${c})`).join(' | '));

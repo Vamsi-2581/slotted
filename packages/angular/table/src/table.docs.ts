@@ -497,7 +497,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'table-angular-density',
       language: 'angular',
       label: 'A dense region',
-      source: '<div data-density="dense">\n  <div slTable></div>\n</div>',
+      source: '<div data-slotted-density="dense">\n  <div slTable></div>\n</div>',
     }),
   },
   {

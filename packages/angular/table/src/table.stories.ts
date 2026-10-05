@@ -1618,9 +1618,9 @@ export const Density: Story = {
     'Each region states its own density. The row height, the cell inset and the type step all come from the control scale, so one theme decision moves the rows, the buttons and the fields together.',
     `
   <div class="slotted-demo-stack">
-    <div data-density="comfortable">${table('variant="framed"')}</div>
-    <div data-density="compact">${table('variant="framed"')}</div>
-    <div data-density="dense">${table('variant="framed"')}</div>
+    <div data-slotted-density="comfortable">${table('variant="framed"')}</div>
+    <div data-slotted-density="compact">${table('variant="framed"')}</div>
+    <div data-slotted-density="dense">${table('variant="framed"')}</div>
   </div>`,
   )}
 </div>`,

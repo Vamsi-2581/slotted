@@ -831,7 +831,7 @@ export const Density: Story = {
     props: PROPS,
     template: room(
       'laptop',
-      `<div data-density="dense"><div slEventCalendar ${STUDIO} defaultView="week"></div></div>`,
+      `<div data-slotted-density="dense"><div slEventCalendar ${STUDIO} defaultView="week"></div></div>`,
     ),
   }),
 };

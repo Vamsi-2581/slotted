@@ -783,7 +783,7 @@ export const Density: Story = {
   parameters: scenario('density'),
   render: () => (
     <Laptop>
-      <div data-density="dense">
+      <div data-slotted-density="dense">
         <EventCalendar<StudioEvent> {...STUDIO} defaultView="week" />
       </div>
     </Laptop>

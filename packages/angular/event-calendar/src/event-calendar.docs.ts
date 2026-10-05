@@ -693,7 +693,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'event-calendar-angular-density',
       language: 'angular',
       label: 'The hour is a theme decision',
-      source: `<div data-density="dense">
+      source: `<div data-slotted-density="dense">
   <div slEventCalendar [events]="events" defaultView="week"></div>
 </div>`,
     }),

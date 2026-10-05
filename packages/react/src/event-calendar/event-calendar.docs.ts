@@ -751,7 +751,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'event-calendar-react-density',
       language: 'tsx',
       label: 'The hour is a theme decision',
-      source: `<div data-density="dense">
+      source: `<div data-slotted-density="dense">
   <EventCalendar defaultView="week" events={events} />
 </div>;`,
     }),

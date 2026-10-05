@@ -1636,7 +1636,7 @@ export const Density: Story = {
       >
         <div className="slotted-demo-stack">
           {(['comfortable', 'compact', 'dense'] as const).map((density) => (
-            <div data-density={density} key={density}>
+            <div data-slotted-density={density} key={density}>
               <Invoices rows={INVOICES.slice(0, 2)} variant="framed" />
             </div>
           ))}

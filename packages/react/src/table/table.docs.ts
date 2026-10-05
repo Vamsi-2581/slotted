@@ -495,7 +495,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'table-react-density',
       language: 'tsx',
       label: 'A dense region',
-      source: '<div data-density="dense">\n  <Table>{rows}</Table>\n</div>;',
+      source: '<div data-slotted-density="dense">\n  <Table>{rows}</Table>\n</div>;',
     }),
   },
   {

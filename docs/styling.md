@@ -220,12 +220,24 @@ export default extendTheme(
 
 [data-ui='text-field'][data-part='root'][data-invalid] {
   background-color: var(--slotted-tone-danger-surface);
+  box-shadow: inset 0 calc(-1 * var(--slotted-control-invalid-edge-width)) 0
+    var(--slotted-text-field-invalid-border-color);
+}
+
+[data-ui='text-field'][data-part='root'][data-invalid]:has(> [data-part='input']:focus-visible) {
+  box-shadow: inset 0
+    calc(-1 * (var(--slotted-border-width-thick) + var(--slotted-control-invalid-edge-width))) 0
+    var(--slotted-focus-ring-color);
 }
 ```
 
 The family points `--slotted-focus-ring-color` at the invalid colour on an
 invalid root, so the focus rule above draws an invalid field's underline in
-that colour without a rule of its own. The transparent outline paints
+that colour without a rule of its own. The family draws an invalid frame with
+an inset edge of `--slotted-control-invalid-edge-width` on all four sides; the
+two invalid rules move that edge to the bottom alone, at rest and under focus,
+so an invalid line stays thicker than a valid one where the two share a colour,
+as they do in `high-contrast`. The transparent outline paints
 nothing until forced colours replace its colour with a system colour; there
 the box shadow is dropped and the line takes a system colour, so the outline
 is the only mark of focus.
@@ -261,9 +273,14 @@ around the rules. A prelude that starts with `--` is a custom property only
 inside a style rule; anywhere else it is checked as a selector.
 
 A declaration reads `var()` of a contract token, a component token or a seed;
-`var(--_*)` and any other `--slotted-*` are refused. A declaration that writes
-a private property (`--_*`) is refused. Escapes are decoded before any of
-these checks: `var(--\5f x)` and `v\61r(--_x)` read `--_x`.
+`var(--_*)` and any other `--slotted-*` are refused, and so is a `style()`
+query over them, in a value (`if(style(--_x: …))`) or in `@container`. A
+declaration that writes a private property (`--_*`) is refused, and so is a
+declaration outside a style rule, which inside the compiled `@scope` would
+apply to the theme's root. `@property` is hoisted out of the scope and holds
+for the whole page, so it may register only a property of the theme's own: a
+private property or a `--slotted-*` name is refused. Escapes are decoded
+before any of these checks: `var(--\5f x)` and `v\61r(--_x)` read `--_x`.
 
 `slotted-build-theme` checks every rule and names the file, the line and the
 selector (`rules.css:4 [data-ui='text-field'] input: input: an element type is

@@ -372,6 +372,15 @@ test('shows the control inside the field that places its count', () => {
 });
 
 /**
+ * The two table scenes are compact tables. Density is the theme axis
+ * `data-slotted-density`; no family reads a `data-density` attribute.
+ */
+test('states the tables of its scenes as compact on the theme axis', () => {
+  assert.doesNotMatch(fragment, /\sdata-density=/);
+  assert.equal(fragment.match(/data-ui="table"[^>]*data-slotted-density="compact"/g)?.length, 2);
+});
+
+/**
  * A mark beside words is centred on the band the letters occupy, not on the
  * line box, which keeps room for descenders and drops the mark below the
  * letters (docs/build-briefing.md, _A mark beside a line of text is aligned to

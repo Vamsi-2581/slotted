@@ -683,8 +683,10 @@ rest and under focus; the default theme sets it to
 `--slotted-border-width-thin`, so an invalid edge reads two pixels against one.
 It is what tells an invalid control from a valid one where colour cannot: in
 `high-contrast` the control edge, `--slotted-tone-danger-border` and both rings
-are the same black (WCAG 1.4.1). `text-field` reads it through
-`--slotted-text-field-invalid-edge-width`.
+are the same black (WCAG 1.4.1). Every family that paints an invalid state
+reads it, most through a family token such as
+`--slotted-text-field-invalid-edge-width`; `checkbox` and `radio-group` add it
+to the width of their border, which forced colours keep.
 
 The five tones — `accent`, `secondary`, `success`, `warning` and `danger` —
 each carry the same nine roles: `solid`, `solid-hover`, `solid-active`,

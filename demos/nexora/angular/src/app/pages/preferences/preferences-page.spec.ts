@@ -12,30 +12,32 @@ import { CUSTOM_THEME_LOADER, type CustomThemeModule } from '../../core/theming/
 import { NO_CUSTOMISATION } from '../../core/theming/customisation';
 
 /**
- * jsdom has no IntersectionObserver: this one records what it observes
- * and reports it in view only when a test calls `scrollIntoView()`. Angular
- * keeps one observer per option set for the whole run, so it is installed
- * once, for the file.
+ * jsdom has no IntersectionObserver: this one records what each observer
+ * watches and reports it in view only when a test calls `scrollIntoView()`.
  */
-const observed = new Set<Element>();
-const report: ((entries: { isIntersecting: boolean; target: Element }[]) => void)[] = [];
+type Report = (entries: { isIntersecting: boolean; target: Element }[]) => void;
+const observers = new Set<{ readonly report: Report; readonly targets: Set<Element> }>();
 globalThis.IntersectionObserver = class {
-  constructor(callback: (entries: { isIntersecting: boolean; target: Element }[]) => void) {
-    report.push(callback);
+  readonly targets = new Set<Element>();
+  constructor(readonly report: Report) {
+    observers.add(this);
   }
   observe(target: Element) {
-    observed.add(target);
+    this.targets.add(target);
   }
   unobserve(target: Element) {
-    observed.delete(target);
+    this.targets.delete(target);
   }
   disconnect() {
-    observed.clear();
+    this.targets.clear();
+    observers.delete(this);
   }
 } as unknown as typeof IntersectionObserver;
 const scrollIntoView = () => {
-  const entries = [...observed].map((target) => ({ isIntersecting: true, target }));
-  report.forEach((callback) => callback(entries));
+  for (const observer of [...observers]) {
+    const entries = [...observer.targets].map((target) => ({ isIntersecting: true, target }));
+    if (entries.length > 0) observer.report(entries);
+  }
 };
 
 /** The builder's module as the store loads it; a test swaps it for one that fails. */
@@ -472,8 +474,8 @@ describe('PreferencesPage › Appearance', () => {
   });
 
   /**
-   * A specimen downloads its face: it is drawn once its card reaches the
-   * viewport, and until then a box of the same class holds its place.
+   * A specimen downloads its face: it names the face once its card reaches
+   * the viewport, and until then its box stays empty.
    */
   it('draws the font specimens only once they reach the viewport', async () => {
     const { harness, root } = await open();

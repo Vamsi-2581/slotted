@@ -78,6 +78,7 @@ import {
 } from '../../core/theming/theme-catalogue';
 import { AnatomyTable } from './anatomy-table';
 import { ContrastTable } from './contrast-table';
+import { InView } from './in-view';
 
 /** The builder's axes of fixed values, their words and the words of each value. */
 const AXES = [
@@ -123,7 +124,8 @@ const AXES = [
   {
     axis: 'tabs',
     label: 'Tabs',
-    description: 'The selected tab: underlined on the tab strip’s line, or a pill on the accent’s ground.',
+    description:
+      'The selected tab: underlined on the tab strip’s line, or a pill on the accent’s ground.',
     options: TAB_CHOICES.map((value) => ({
       value,
       label: { underline: 'Underline', pill: 'Pill' }[value],
@@ -175,6 +177,7 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
   imports: [
     AnatomyTable,
     ContrastTable,
+    InView,
     NgTemplateOutlet,
     SlAlert,
     SlAlertActions,
@@ -229,9 +232,7 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
         auto-fill,
         minmax(
           min(
-            calc(
-              max(var(--_floor), var(--_lead) + (var(--longest) + 2) * 1ch) + var(--_frame)
-            ),
+            calc(max(var(--_floor), var(--_lead) + (var(--longest) + 2) * 1ch) + var(--_frame)),
             100%
           ),
           1fr
@@ -352,8 +353,8 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
           <h2 slSectionHeading>Appearance</h2>
           <p slSectionDescription>
             A theme, your changes over it, and the scheme and density Nexora is drawn in. Every
-            choice draws the whole application at once; Save keeps it, and Discard or leaving
-            this page returns to the saved appearance.
+            choice draws the whole application at once; Save keeps it, and Discard or leaving this
+            page returns to the saved appearance.
           </p>
         </div>
       </div>
@@ -615,7 +616,6 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                 </div>
               </div>
 
-
               <div class="colours">
                 <div slField data-brand-custom>
                   <label slFieldLabel>Custom brand colour</label>
@@ -692,18 +692,16 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                     <div class="choices fonts" [style.--longest]="longest.fonts">
                       <div slRadio value="theme">
                         <span class="font-option">
-                          <!-- A specimen downloads its face: drawn once it reaches the viewport. -->
-                          @defer (on viewport) {
-                            <span
-                              class="specimen"
-                              aria-hidden="true"
-                              [style.font-family]="ownFont(picker.axis).stack"
-                              [style.font-weight]="picker.weight"
-                              >Ag 1234</span
-                            >
-                          } @placeholder {
-                            <span class="specimen" aria-hidden="true"></span>
-                          }
+                          <!-- A specimen downloads its face: it names it once it can be seen. -->
+                          <span
+                            class="specimen"
+                            aria-hidden="true"
+                            appInView
+                            #own="inView"
+                            [style.font-family]="own.seen() ? ownFont(picker.axis).stack : null"
+                            [style.font-weight]="picker.weight"
+                            >{{ own.seen() ? 'Ag 1234' : '' }}</span
+                          >
                           <span class="tile-label">Theme</span>
                           <span class="tile-label" slText size="xs" tone="muted">{{
                             ownFont(picker.axis).label
@@ -713,18 +711,16 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                       @for (family of fonts; track family.id) {
                         <div slRadio [value]="family.id">
                           <span class="font-option">
-                            @defer (on viewport) {
-                              <span
-                                class="specimen"
-                                aria-hidden="true"
-                                [attr.data-specimen]="family.id"
-                                [style.font-family]="family.stack"
-                                [style.font-weight]="picker.weight"
-                                >Ag 1234</span
-                              >
-                            } @placeholder {
-                              <span class="specimen" aria-hidden="true"></span>
-                            }
+                            <span
+                              class="specimen"
+                              aria-hidden="true"
+                              appInView
+                              #face="inView"
+                              [attr.data-specimen]="family.id"
+                              [style.font-family]="face.seen() ? family.stack : null"
+                              [style.font-weight]="picker.weight"
+                              >{{ face.seen() ? 'Ag 1234' : '' }}</span
+                            >
                             <span class="tile-label">{{ family.label }}</span>
                             <span class="tile-label" slText size="xs" tone="muted">{{
                               family.kind

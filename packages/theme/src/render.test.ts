@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { transform } from 'lightningcss';
 import { describe, expect, it } from 'vitest';
 
 import { defineTheme, type Theme, type ThemeDefinition } from './define';
@@ -52,7 +53,7 @@ describe('renderTheme', () => {
       '@scope ([data-slotted-theme="test"][data-slotted-scheme="dark"], [data-slotted-theme="test"] [data-slotted-scheme="dark"], [data-slotted-scheme="dark"] [data-slotted-theme="test"]:not([data-slotted-scheme])) to ([data-slotted-scheme], [data-slotted-theme]) {\n    :scope,\n    [data-slotted-seeds] {\n      color-scheme: dark;',
     );
     expect(css).toContain(
-      '--slotted-tone-accent-solid: oklch(from oklch(from var(--slotted-seed-accent)',
+      '--slotted-tone-accent-solid: oklch(from oklab(from oklch(from oklch(from var(--slotted-seed-accent)',
     );
   });
 
@@ -71,6 +72,25 @@ describe('renderTheme', () => {
         `[data-slotted-scheme="${scheme}"] [data-slotted-theme="test"]) to`,
       );
     }
+  });
+
+  /*
+   * Firefox (Stylo, 146–155) lets two siblings share one computed style when
+   * they differ only in the root selector of an @scope: a dark sibling took
+   * the light values. A rule outside every @scope whose rightmost compound
+   * names each scheme makes the attribute a selector the style cache checks.
+   */
+  it('names every scheme outside any @scope, with a declaration a minifier keeps', () => {
+    const anchor =
+      '  [data-slotted-scheme="light"],\n  [data-slotted-scheme="dark"],\n  [data-slotted-scheme="high-contrast"],\n  [data-slotted-scheme="system"] {\n    --_slotted-scheme-anchor: initial;\n  }';
+    const layer = css.indexOf('@layer slotted.theme {');
+    const at = css.indexOf(anchor);
+    expect(at).toBeGreaterThan(layer);
+    expect(at).toBeLessThan(css.indexOf('@scope'));
+    const { code } = transform({ filename: 'test.css', code: Buffer.from(css), minify: true });
+    expect(code.toString()).toContain(
+      '[data-slotted-scheme=light],[data-slotted-scheme=dark],[data-slotted-scheme=high-contrast],[data-slotted-scheme=system]{--_slotted-scheme-anchor:initial}',
+    );
   });
 
   it('follows the operating system under the system scheme', () => {

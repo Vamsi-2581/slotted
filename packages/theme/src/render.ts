@@ -100,6 +100,17 @@ export function renderTheme(theme: Theme): string {
       [themeSelector(name)],
       declarations({ ...seeds, ...(theme.base ?? {}), ...(theme.components ?? {}) }),
     ),
+    /*
+     * Firefox (Stylo, measured 146–155) shares one computed style between
+     * siblings that differ only in the root selector of an @scope: the root
+     * is not among the selectors its style-sharing cache revalidates, so a
+     * dark sibling of a light one took the light values. A rule outside every
+     * @scope whose rightmost compound names each scheme puts the attribute
+     * among those selectors. An empty rule is dropped by esbuild and
+     * lightningcss when they minify; `initial` on a property nothing reads
+     * changes nothing.
+     */
+    block([...SCHEMES, 'system'].map(schemeSelector), '--_slotted-scheme-anchor: initial;'),
   ];
 
   for (const scheme of SCHEMES) {

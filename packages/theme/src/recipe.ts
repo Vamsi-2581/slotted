@@ -1,4 +1,4 @@
-import { applyBounds, boundCss, type Bound } from './bound';
+import { applyBounds, boundColorCss, type Bound } from './bound';
 import type { Oklch } from './color';
 import { fmt } from './format';
 import { SEED_NAMES, type SeedName } from './seeds';
@@ -109,7 +109,7 @@ export function derivationCss(rule: Derivation): string {
     color = `oklch(from var(--slotted-seed-${rule.seed}) ${l} ${c} ${h})`;
   }
   for (const bound of rule.bounds ?? []) {
-    color = `oklch(from ${color} ${bound.side === 'ceiling' ? 'min' : 'max'}(l, ${boundCss(bound)}) c h)`;
+    color = boundColorCss(color, bound);
   }
   return color;
 }

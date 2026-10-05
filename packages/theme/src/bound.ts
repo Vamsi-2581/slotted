@@ -52,22 +52,68 @@ export function applyBounds(color: Oklch, bounds: readonly Bound[] = []): Oklch 
   return { l, c: color.c, h: color.h };
 }
 
-function termCss(bound: Bound, power: number): string {
-  const k = (j: number) => fmt(bound.k[(power - 1) * TERMS + j] ?? 0);
-  const parts = [k(0)];
-  for (let n = 1; n <= BOUND_HARMONICS; n += 1) {
-    parts.push(`${k(2 * n - 1)} * cos(calc(h * ${n}deg))`, `${k(2 * n)} * sin(calc(h * ${n}deg))`);
+/*
+ * The CSS reads the hue through `a` and `b` of an `oklab(from …)`, never
+ * through `h`: Firefox 146–152 refuses sin(), cos(), sqrt(), pow(), exp(),
+ * log() and atan2() over a channel keyword, and the content process of 146
+ * crashes on hypot() of them; WebKit 18 drops the unit of `calc(h * 1deg)`
+ * inside cos(). With u = cos h = a / c and v = sin h = b / c, each harmonic
+ * is a Chebyshev polynomial: cos nh = T_n(u) and sin nh = v · U_{n−1}(u).
+ * `c` cannot come from `a` and `b` without a root, so it rides in the alpha
+ * channel (`/ c`), which holds 0–1; a bound is fitted for chroma 0–0.25.
+ */
+const U = '(a / max(alpha, 0.00001))';
+const V = '(b / max(alpha, 0.00001))';
+
+/** Coefficients of T_n(u), ascending powers. */
+const CHEBYSHEV_T = [[1], [0, 1], [-1, 0, 2], [0, -3, 0, 4], [1, 0, -8, 0, 8]] as const;
+/** Coefficients of U_{n−1}(u), ascending powers, for n = 1…4. */
+const CHEBYSHEV_U = [[], [1], [0, 2], [-1, 0, 4], [0, -4, 0, 8]] as const;
+
+/** `c0 + u·(c1 + u·(…))`, with the zero coefficients of the highest powers left out. */
+function horner(coefficients: readonly number[]): string {
+  let last = coefficients.length - 1;
+  while (last > 0 && Number(fmt(coefficients[last]!)) === 0) last -= 1;
+  let out = fmt(coefficients[last]!);
+  for (let power = last - 1; power >= 0; power -= 1) {
+    out = `${fmt(coefficients[power]!)} + ${U} * (${out})`;
   }
-  return `(${parts.join(' + ')})`;
+  return `(${out})`;
 }
 
-/** The limit as a `calc()` over the `c` and `h` channel keywords of a relative colour. */
+/** One power's Fourier series as `P(u) + v·Q(u)`, from the coefficients rounded as `fmt` writes them. */
+function termCss(bound: Bound, power: number): string {
+  const k = (j: number) => Number(fmt(bound.k[(power - 1) * TERMS + j] ?? 0));
+  const even = Array<number>(BOUND_HARMONICS + 1).fill(0);
+  const odd = Array<number>(BOUND_HARMONICS).fill(0);
+  even[0] = k(0);
+  for (let n = 1; n <= BOUND_HARMONICS; n += 1) {
+    CHEBYSHEV_T[n]!.forEach((t, i) => (even[i]! += k(2 * n - 1) * t));
+    CHEBYSHEV_U[n]!.forEach((t, i) => (odd[i]! += k(2 * n) * t));
+  }
+  return `(${horner(even)} + ${V} * ${horner(odd)})`;
+}
+
+/**
+ * The limit as a `calc()` over the `a`, `b` and `alpha` channel keywords of an
+ * `oklab(from …)` whose alpha holds the chroma; `boundColorCss` builds it.
+ */
 export function boundCss(bound: Bound): string {
-  let inner = `c * ${termCss(bound, BOUND_POWERS)}`;
+  let inner = `alpha * ${termCss(bound, BOUND_POWERS)}`;
   for (let power = BOUND_POWERS - 1; power >= 1; power -= 1) {
-    inner = `c * (${termCss(bound, power)} + ${inner})`;
+    inner = `alpha * (${termCss(bound, power)} + ${inner})`;
   }
   return `calc(${fmt(bound.l)} + ${inner})`;
+}
+
+/**
+ * A colour with its lightness held at the bound: the chroma moves into the
+ * alpha channel, the limit reads it there and the alpha returns to 1, so a
+ * bounded colour is opaque.
+ */
+export function boundColorCss(color: string, bound: Bound): string {
+  const limit = `${bound.side === 'ceiling' ? 'min' : 'max'}(l, ${boundCss(bound)})`;
+  return `oklch(from oklab(from oklch(from ${color} l c h / c) ${limit} a b / 1) l c h)`;
 }
 
 /** The exact limit at one hue and chroma, by bisection on lightness. */

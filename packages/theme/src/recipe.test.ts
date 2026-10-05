@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { parseSeed } from './color';
-import { derivationCss, evaluateRecipe, type Recipe } from './recipe';
+import { derivationCss, evaluateRecipe, SCHEMES, type Recipe } from './recipe';
+import { recipes } from './recipes';
 
 const seeds = {
   accent: parseSeed('#1d4ed8')!,
@@ -102,7 +103,7 @@ describe('derivationCss', () => {
     expect(derivationCss({ alias: '--slotted-surface' })).toBe('var(--slotted-surface)');
   });
 
-  it('wraps a bounded colour in one relative oklch per bound', () => {
+  it('wraps a bounded colour in an oklab whose alpha carries the chroma, once per bound', () => {
     const k = Array(27).fill(0);
     const css = derivationCss({
       seed: 'accent',
@@ -110,8 +111,30 @@ describe('derivationCss', () => {
       c: { scale: 1, max: 0.25 },
       bounds: [{ side: 'floor', l: 0.3, k }],
     });
-    expect(css.startsWith('oklch(from oklch(from var(--slotted-seed-accent) 0.5 ')).toBe(true);
-    expect(css).toContain(' max(l, calc(0.3 + c * (');
-    expect(css.endsWith(') c h)')).toBe(true);
+    expect(
+      css.startsWith('oklch(from oklab(from oklch(from oklch(from var(--slotted-seed-accent) 0.5 '),
+    ).toBe(true);
+    expect(css).toContain(' h) l c h / c) max(l, calc(0.3 + alpha * (');
+    expect(css.endsWith(') a b / 1) l c h)')).toBe(true);
+  });
+
+  /*
+   * Firefox 146–152 refuses sin(), cos(), sqrt(), pow() and the rest over a
+   * channel keyword, and its content process crashes on hypot() of them: the
+   * token stays declared and every property that reads it is invalid at
+   * computed-value time. WebKit 18 drops the unit of calc(h * 1deg) inside
+   * cos(). Every derivation of the standard recipe is arithmetic only.
+   */
+  it('writes no trigonometric, root, power or logarithm function in the standard recipe', () => {
+    let bounded = 0;
+    for (const scheme of SCHEMES) {
+      for (const [name, rule] of Object.entries(recipes.standard[scheme])) {
+        if ('bounds' in rule && rule.bounds?.length) bounded += 1;
+        expect(derivationCss(rule), `${scheme} ${name}`).not.toMatch(
+          /\b(sin|cos|tan|asin|acos|atan|atan2|sqrt|pow|hypot|exp|log)\(/,
+        );
+      }
+    }
+    expect(bounded).toBeGreaterThan(0);
   });
 });

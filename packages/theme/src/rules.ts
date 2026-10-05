@@ -63,7 +63,6 @@ export function splitTopLevel(css: string): string[] {
   return statements.map((statement) => statement.trim()).filter(Boolean);
 }
 
-const REFUSED = /^@(import|layer|scope)\b/i;
 const HOISTED = /^@(font-face|property)\b/i;
 const KEYFRAMES = /^@keyframes\s+([\w-]+)/i;
 
@@ -71,6 +70,8 @@ const KEYFRAMES = /^@keyframes\s+([\w-]+)/i;
  * The rules of one theme, ready for the compiler: `@keyframes`, `@font-face`
  * and `@property` leave the scope they cannot live in, and every keyframes
  * name takes the theme's prefix so two themes on one page never collide.
+ * `renderTheme` calls it only on rules `ruleErrors` accepted, which refuses
+ * `@scope`, `@import` and `@layer` at any depth.
  */
 export function processRules(
   themeName: string,
@@ -92,12 +93,6 @@ export function processRules(
   const hoisted: string[] = [];
   const body: string[] = [];
   for (const statement of statements) {
-    const refused = REFUSED.exec(statement);
-    if (refused) {
-      throw new Error(
-        `${themeName}: @${refused[1]} is written by the compiler; a theme rule cannot carry its own`,
-      );
-    }
     const keyframes = KEYFRAMES.exec(statement);
     if (keyframes)
       hoisted.push(statement.replace(KEYFRAMES, `@keyframes ${names.get(keyframes[1]!)}`));

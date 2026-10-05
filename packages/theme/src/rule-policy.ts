@@ -50,7 +50,9 @@ type Component =
   | {
       readonly type: 'attribute';
       readonly raw: string;
+      /** Lower-cased: an HTML attribute name matches without regard to case. */
       readonly name: string;
+      readonly operator: string | undefined;
       readonly value: string | undefined;
     }
   | {
@@ -65,6 +67,55 @@ type Component =
     };
 
 const isNameChar = (char: string) => /[\w-]/.test(char) || char.charCodeAt(0) >= 0x80;
+
+/**
+ * The identifier that starts at `index`, with its escapes decoded (CSS Syntax
+ * § 4.3.7), and the index after it. `--\5f x` and `--_x` are one name, as are
+ * `v\61r` and `var`. Throws on a `\` that ends the text.
+ */
+function readIdent(text: string, index: number): { name: string; end: number } {
+  let name = '';
+  while (index < text.length) {
+    const char = text[index]!;
+    if (char === '\\') {
+      const hex = /^[0-9a-fA-F]{1,6}\s?/.exec(text.slice(index + 1));
+      if (hex) {
+        name += String.fromCodePoint(Number.parseInt(hex[0].trim(), 16));
+        index += 1 + hex[0].length;
+      } else if (index + 1 < text.length) {
+        name += text[index + 1];
+        index += 2;
+      } else throw new Error('a dangling escape');
+    } else if (isNameChar(char)) {
+      name += char;
+      index += 1;
+    } else break;
+  }
+  return { name, end: index };
+}
+
+/**
+ * The decoded name of the identifier that ends right before `end`, such as
+ * the function name before a `(`, or `undefined` when none does.
+ */
+function identBefore(text: string, end: number): string | undefined {
+  let start = end;
+  while (start > 0) {
+    const char = text[start - 1]!;
+    if (isNameChar(char) || char === '\\') start -= 1;
+    // The whitespace that ends a hex escape belongs to the identifier.
+    else if (/\s/.test(char) && /\\[0-9a-fA-F]{1,6}$/.test(text.slice(0, start - 1))) start -= 1;
+    else break;
+  }
+  if (start === end) return undefined;
+  // A start inside an escape (`\5f` read back to `5f`) is moved to its backslash.
+  try {
+    const { name, end: after } = readIdent(text, start);
+    return after === end ? name : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /**
  * Reads a selector list into its complex selectors, each a run of components
@@ -82,26 +133,15 @@ function parseSelectorList(text: string): Component[][] {
       `cannot read the selector at ${JSON.stringify(text.slice(index, index + 20))}: ${reason}`,
     );
   };
-  /** An identifier with its escapes decoded (CSS Syntax § 4.3.7). */
+  /** An identifier with its escapes decoded. */
   const ident = (): string => {
-    let name = '';
-    while (index < text.length) {
-      const char = text[index]!;
-      if (char === '\\') {
-        const hex = /^[0-9a-fA-F]{1,6}\s?/.exec(text.slice(index + 1));
-        if (hex) {
-          name += String.fromCodePoint(Number.parseInt(hex[0].trim(), 16));
-          index += 1 + hex[0].length;
-        } else if (index + 1 < text.length) {
-          name += text[index + 1];
-          index += 2;
-        } else fail('a dangling escape');
-      } else if (isNameChar(char)) {
-        name += char;
-        index += 1;
-      } else break;
+    try {
+      const { name, end } = readIdent(text, index);
+      index = end;
+      return name;
+    } catch (error) {
+      return fail((error as Error).message);
     }
-    return name;
   };
   const string = (): string => {
     const quote = text[index]!;
@@ -204,7 +244,13 @@ function parseSelectorList(text: string): Component[][] {
       }
       if (text[index] !== ']') fail('an attribute selector never closed');
       index += 1;
-      push({ type: 'attribute', raw: text.slice(start, index), name, value });
+      push({
+        type: 'attribute',
+        raw: text.slice(start, index),
+        name: name.toLowerCase(),
+        operator: operator?.[0],
+        value,
+      });
       continue;
     }
     if (char === '.' || char === '#') {
@@ -273,11 +319,12 @@ const ofSelector = (argument: string) => /\bof\s+([\s\S]+)$/i.exec(argument)?.[1
 function complexErrors(
   components: readonly Component[],
   requireHooks: boolean,
+  nested: boolean,
   report: (message: string) => void,
 ) {
   let compound: Component[] = [];
   const close = () => {
-    if (compound.length > 0) compoundErrors(compound, requireHooks, report);
+    if (compound.length > 0) compoundErrors(compound, requireHooks, nested, report);
     compound = [];
   };
   for (const component of components) {
@@ -287,7 +334,12 @@ function complexErrors(
   close();
 }
 
-function listErrors(text: string, requireHooks: boolean, report: (message: string) => void) {
+function listErrors(
+  text: string,
+  requireHooks: boolean,
+  nested: boolean,
+  report: (message: string) => void,
+) {
   let list: Component[][];
   try {
     list = parseSelectorList(text);
@@ -295,12 +347,13 @@ function listErrors(text: string, requireHooks: boolean, report: (message: strin
     report((error as Error).message);
     return;
   }
-  for (const selector of list) complexErrors(selector, requireHooks, report);
+  for (const selector of list) complexErrors(selector, requireHooks, nested, report);
 }
 
 function compoundErrors(
   compound: readonly Component[],
   requireHooks: boolean,
+  nested: boolean,
   report: (message: string) => void,
 ) {
   let hooked = false;
@@ -328,14 +381,26 @@ function compoundErrors(
         refused = true;
         break;
       case 'nesting':
-        hooked = true;
+        // Outside a style rule `&` is `:scope`: the theme's root, inside the compiled `@scope`.
+        if (nested) hooked = true;
+        else {
+          report(
+            '&: outside a style rule the nesting selector is the scoping root, which is not a public selector',
+          );
+          refused = true;
+        }
         break;
       case 'attribute': {
-        const { name, value, raw } = component;
+        const { name, operator, value, raw } = component;
         hooked = true;
         if (!name.startsWith('data-'))
           report(`${raw}: an attribute outside data-* is not a public selector`);
-        else if (name === 'data-ui') {
+        else if ((name === 'data-ui' || name === 'data-part') && operator && operator !== '=') {
+          report(
+            `${raw}: ${name} matches one ${name === 'data-ui' ? 'family' : 'part'} only with =, not ${operator}`,
+          );
+          refused = true;
+        } else if (name === 'data-ui') {
           if (value !== undefined && !(value in UI)) report(`${raw} names no family`);
           ui = value;
         } else if (name === 'data-part') part = value;
@@ -349,10 +414,10 @@ function compoundErrors(
           refused = true;
         } else if (argument === undefined) break;
         else if (SAME_ELEMENT.has(name)) sameElement.push(argument);
-        else if (name === 'not' || name === 'has') listErrors(argument, false, report);
+        else if (name === 'not' || name === 'has') listErrors(argument, false, nested, report);
         else if (/^nth-(last-)?child$/.test(name)) {
           const of = ofSelector(argument);
-          if (of !== undefined) listErrors(of, false, report);
+          if (of !== undefined) listErrors(of, false, nested, report);
         }
         break;
       }
@@ -364,7 +429,7 @@ function compoundErrors(
     report(`[data-part='${part}'] is not a part of ${ui}`);
   // `:is()` and `:where()` match the element itself: a compound with no hook of its own is
   // hooked when every selector in them is.
-  for (const argument of sameElement) listErrors(argument, requireHooks && !hooked, report);
+  for (const argument of sameElement) listErrors(argument, requireHooks && !hooked, nested, report);
   if (requireHooks && !hooked && !refused && sameElement.length === 0) {
     report(
       `${compound.map((component) => component.raw).join('')}: a compound selector without data-ui, data-part or a public attribute matches elements no family owns`,
@@ -372,12 +437,26 @@ function compoundErrors(
   }
 }
 
-/** The reasons a selector list breaks the policy, each naming the part of the selector at fault. */
-export function selectorErrors(selector: string): string[] {
+/**
+ * The reasons a selector list breaks the policy, each naming the part of the
+ * selector at fault. `nested` is true for a rule inside a style rule, where
+ * `&` is that rule's element.
+ */
+export function selectorErrors(selector: string, nested = false): string[] {
   const errors: string[] = [];
-  listErrors(selector, true, (message) => errors.push(message));
+  listErrors(selector, true, nested, (message) => errors.push(message));
   return errors;
 }
+
+/** The reason a declaration writes a property no theme may write, or `undefined`. */
+export function propertyWriteError(name: string): string | undefined {
+  if (name.startsWith('--_'))
+    return `${name}: a theme rule cannot write a private property of a family`;
+  return undefined;
+}
+
+/** At-rules the compiler writes around a theme's rules, which a rule cannot carry at any depth. */
+const COMPILER_AT_RULES = /^@(scope|import|layer)\b/i;
 
 /** The reason a `var()` reads a property no theme may read, or `undefined`. */
 export function tokenReadError(name: string): string | undefined {
@@ -391,13 +470,42 @@ interface Block {
   readonly selector: string;
   /** `false` inside an at-rule whose block holds no style rule, such as `@keyframes`. */
   readonly styles: boolean;
+  /** The block holds declarations: a style rule, a group inside one, a keyframe, a font face. */
+  readonly declarations: boolean;
+  /** A style rule is this block or encloses it, so `&` names that rule's element. */
+  readonly inStyleRule: boolean;
+  /** Not read: a custom property's `{}` value, or the body of an at-rule already refused. */
+  readonly opaque: boolean;
+}
+
+/** The text after `index` with leading whitespace and comments skipped. */
+function skipBlank(text: string, index: number): number {
+  for (;;) {
+    while (/\s/.test(text[index] ?? '')) index += 1;
+    if (!text.startsWith('/*', index)) return index;
+    const end = text.indexOf('*/', index + 2);
+    if (end === -1) return text.length;
+    index = end + 2;
+  }
+}
+
+/** The property a declaration (`name: value`) sets, decoded, or `undefined` for other text. */
+function declaredProperty(text: string): string | undefined {
+  try {
+    const { name, end } = readIdent(text, 0);
+    return name && text[skipBlank(text, end)] === ':' ? name : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /**
  * Every policy violation in a theme's CSS text: each style rule's selector,
- * nested rules and rules in conditional groups included, and every `var()`
- * the text reads, outside strings and comments. The text is taken to be
- * balanced; `splitTopLevel` refuses one that is not.
+ * nested rules and rules in conditional groups included; every `@scope`,
+ * `@import` and `@layer`, at any depth; every declaration that writes a
+ * private property; and every `var()` the text reads, outside strings and
+ * comments, with escapes in the function and property names decoded. The
+ * text is taken to be balanced; `splitTopLevel` refuses one that is not.
  */
 export function ruleErrors(css: string): RuleError[] {
   const errors: RuleError[] = [];
@@ -418,6 +526,31 @@ export function ruleErrors(css: string): RuleError[] {
     const leading = text.length - text.trimStart().length;
     return { text: text.trim().replace(/\s+/g, ' '), line: lineAt(start + leading) };
   };
+  /** Refuses an at-rule the compiler writes; `true` when it did. */
+  const compilerAtRule = (text: string, line: number): boolean => {
+    let name: string;
+    try {
+      name = readIdent(text, 1).name.toLowerCase();
+    } catch {
+      return false;
+    }
+    if (!COMPILER_AT_RULES.test(`@${name}`)) return false;
+    errors.push({
+      line,
+      selector: text,
+      message: `@${name} is written by the compiler; a theme rule cannot carry its own`,
+    });
+    return true;
+  };
+  /** Refuses a declaration, the text before a `;` or a `}`, that writes a private property. */
+  const declaration = (end: number) => {
+    const block = stack[stack.length - 1];
+    if (!block?.declarations || block.opaque) return;
+    const { text, line } = prelude(end);
+    const name = text.startsWith('@') ? undefined : declaredProperty(text);
+    const message = name === undefined ? undefined : propertyWriteError(name);
+    if (message !== undefined) errors.push({ line, selector: block.selector, message });
+  };
   const varReads: { index: number; block: Block | undefined }[] = [];
 
   scanCssText(css, {
@@ -425,36 +558,63 @@ export function ruleErrors(css: string): RuleError[] {
       comments.push([from, to]);
     },
     onCodeChar(char, index) {
-      if (
-        char === '(' &&
-        css.slice(index - 3, index).toLowerCase() === 'var' &&
-        !isNameChar(css[index - 4] ?? ' ')
-      )
-        varReads.push({ index, block: stack[stack.length - 1] });
+      const parent = stack[stack.length - 1];
+      if (char === '(' && !parent?.opaque && identBefore(css, index)?.toLowerCase() === 'var')
+        varReads.push({ index, block: parent });
       if (char === '{') {
         const { text, line } = prelude(index);
-        const parent = stack[stack.length - 1];
-        if (parent && !parent.styles) stack.push(parent);
+        // Only a custom property takes a `{}` value; `a:hover {` in a style rule is a nested rule.
+        const declared = parent?.declarations ? declaredProperty(text) : undefined;
+        const property = declared?.startsWith('--') ? declared : undefined;
+        if (parent && (!parent.styles || parent.opaque)) stack.push(parent);
         else if (text.startsWith('@')) {
-          stack.push({ selector: parent?.selector ?? text, styles: !NOT_STYLE.test(text) });
-        } else if (text.startsWith('--')) {
-          stack.push({ selector: parent?.selector ?? text, styles: false });
+          const refused = compilerAtRule(text, line);
+          const styles = !NOT_STYLE.test(text);
+          stack.push({
+            selector: parent?.selector ?? text,
+            styles,
+            declarations: styles ? (parent?.declarations ?? false) : true,
+            inStyleRule: parent?.inStyleRule ?? false,
+            opaque: refused,
+          });
+        } else if (property !== undefined) {
+          // A custom property whose value is a `{}` block, inside a block of declarations.
+          const message = propertyWriteError(property);
+          if (message !== undefined) errors.push({ line, selector: parent!.selector, message });
+          stack.push({ ...parent!, styles: false, declarations: false, opaque: true });
         } else {
-          for (const message of selectorErrors(text))
+          for (const message of selectorErrors(text, parent?.inStyleRule ?? false))
             errors.push({ line, selector: text, message });
-          stack.push({ selector: text, styles: true });
+          stack.push({
+            selector: text,
+            styles: true,
+            declarations: true,
+            inStyleRule: true,
+            opaque: false,
+          });
         }
         start = index + 1;
       } else if (char === '}') {
+        declaration(index);
         stack.pop();
         start = index + 1;
-      } else if (char === ';') start = index + 1;
+      } else if (char === ';') {
+        const { text, line } = prelude(index);
+        if (text.startsWith('@') && !parent?.opaque) compilerAtRule(text, line);
+        else declaration(index);
+        start = index + 1;
+      }
     },
   });
 
   for (const { index, block } of varReads) {
-    const name = /^\(\s*(--[\w-]+)/.exec(css.slice(index))?.[1];
-    const message = name === undefined ? undefined : tokenReadError(name);
+    let name: string | undefined;
+    try {
+      name = readIdent(css, skipBlank(css, index + 1)).name;
+    } catch {
+      name = undefined;
+    }
+    const message = name?.startsWith('--') ? tokenReadError(name) : undefined;
     if (message !== undefined)
       errors.push({ line: lineAt(index), selector: block?.selector ?? '', message });
   }

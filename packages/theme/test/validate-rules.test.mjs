@@ -172,6 +172,108 @@ test('accepts pseudo-classes, pseudo-elements, nesting, combinators and :is()/:w
   ok(`@media (prefers-reduced-motion: reduce) { [data-ui='button'] { transition: none; } }`);
 });
 
+const has = (css, ...messages) => {
+  const errors = validateRules(css, 'rules.css');
+  for (const message of messages)
+    assert.ok(
+      errors.some((error) => error.includes(message)),
+      `${message}\n not in:\n${errors.join('\n')}`,
+    );
+};
+
+test('checks a prelude that starts with -- as a selector outside a declaration block', () => {
+  has(`--x, input { color: red; }`, 'input: an element type is not a public selector');
+  has(
+    `@media all { --x, input { color: red; } }`,
+    'input: an element type is not a public selector',
+  );
+  ok(`[data-ui='card'] { --slotted-card-radius: { }; }`);
+  fails(
+    `[data-ui='card'] { input:focus { color: red; } }`,
+    'input: an element type is not a public selector',
+  );
+});
+
+test('refuses @scope, @import and @layer at any depth', () => {
+  fails(
+    `@scope ([data-ui='card']) { & { color: red; } }`,
+    "rules.css:1 @scope ([data-ui='card']): @scope is written by the compiler; a theme rule cannot carry its own",
+  );
+  fails(
+    `@media all {\n  @scope (input) { & { color: red; } }\n}`,
+    'rules.css:2 @scope (input): @scope is written by the compiler',
+  );
+  fails(
+    `[data-ui='card'] {\n  @scope (select) { & { color: red; } }\n}`,
+    'rules.css:2 @scope (select): @scope is written by the compiler',
+  );
+  fails(
+    `@layer x { [data-ui='card'] { color: red; } }`,
+    '@layer x: @layer is written by the compiler',
+  );
+  fails(`@layer x;`, '@layer x: @layer is written by the compiler');
+  fails(`@import url(x.css);`, '@import url(x.css): @import is written by the compiler');
+});
+
+test('decodes escapes in a function name and in the property it reads', () => {
+  fails(
+    `[data-ui='card'] { color: var(--\\5f x); }`,
+    'var(--_x) reads a private property of a family',
+  );
+  fails(
+    `[data-ui='card'] { color: v\\61r(--_x); }`,
+    'var(--_x) reads a private property of a family',
+  );
+  fails(
+    `[data-ui='card'] { color: var(/* a */ --_x); }`,
+    'var(--_x) reads a private property of a family',
+  );
+});
+
+test('refuses writing a private property', () => {
+  fails(
+    `[data-ui='card'] { --_card-bg: red; }`,
+    "rules.css:1 [data-ui='card']: --_card-bg: a theme rule cannot write a private property of a family",
+  );
+  fails(
+    `[data-ui='card'] { color: red; --\\5f card-bg: red }`,
+    '--_card-bg: a theme rule cannot write a private property of a family',
+  );
+  fails(
+    `@keyframes k { to { --_card-bg: red; } }`,
+    '--_card-bg: a theme rule cannot write a private property of a family',
+  );
+});
+
+test('reads an attribute name without regard to case, as HTML does', () => {
+  ok(`[DATA-UI='card'] [Data-Part='title'] { color: var(--slotted-text); }`);
+  fails(`[DATA-UI='card'][DATA-PART='nope'] { color: red; }`, 'is not a part of card');
+});
+
+test('takes data-ui and data-part only with =', () => {
+  fails(
+    `[data-ui^='button'] { color: red; }`,
+    "[data-ui^='button']: data-ui matches one family only with =, not ^=",
+  );
+  fails(
+    `[data-ui='card'] [data-part*='title'] { color: red; }`,
+    "[data-part*='title']: data-part matches one part only with =, not *=",
+  );
+  ok(`[data-ui='card'] [data-part] { color: red; }`);
+});
+
+test('refuses the nesting selector outside a style rule, where it is the scoping root', () => {
+  fails(
+    `& { color: red; }`,
+    '&: outside a style rule the nesting selector is the scoping root, which is not a public selector',
+  );
+  fails(
+    `@media all { & [data-ui='card'] { color: red; } }`,
+    '&: outside a style rule the nesting selector is the scoping root',
+  );
+  ok(`[data-ui='card'] { @media all { & { color: red; } } }`);
+});
+
 /**
  * The build and the runtime hold one policy: every rule the CLI refuses,
  * `defineTheme` refuses with the same messages, and every rule the CLI
@@ -190,6 +292,13 @@ test('defineTheme refuses exactly what the build refuses, with the same messages
     `[data-ui='card'] {\n  & [data-part='title'] { color: red; }\n  background: var(--_ink);\n}`,
     `@media (width > 40rem) {\n  [data-ui='nope'] [data-part='x'] { color: var(--slotted-nope); }\n}`,
     `@keyframes pulse { from { opacity: 0; } to { opacity: 1; } }`,
+    `--x, input { color: red; }`,
+    `@media all {\n  @scope (input) { & { color: red; } }\n}`,
+    `[data-ui='card'] {\n  @scope (select) { & { color: red; } }\n}`,
+    `@layer x { [data-ui='card'] { color: red; } }`,
+    `[data-ui='card'] { color: v\\61r(--\\5f x); --_card-bg: red; }`,
+    `[DATA-UI='card'] [data-ui^='button'] [data-part*='title'] { color: red; }`,
+    `& { color: red; }`,
   ];
   for (const css of corpus) {
     const build = validateRules(css, 'rules.css').map((error) => error.replace(/^rules\.css:/, ''));

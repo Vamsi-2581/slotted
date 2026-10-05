@@ -137,6 +137,19 @@ describe('renderTheme on a theme that did not come from defineTheme', () => {
     );
   });
 
+  it('refuses the at-rules the compiler writes, at any depth, with the line and the at-rule', () => {
+    for (const [rule, message] of [
+      ['@import url(x.css);', 'rules[0]:1 @import url(x.css): @import is written by the compiler'],
+      ['@layer x { }', 'rules[0]:1 @layer x: @layer is written by the compiler'],
+      [
+        "[data-ui='card'] {\n  @scope (select) { & { color: red; } }\n}",
+        'rules[0]:2 @scope (select): @scope is written by the compiler',
+      ],
+    ]) {
+      expect(() => renderTheme(forged({ rules: [rule] })), rule).toThrow(message);
+    }
+  });
+
   it('refuses a name a selector cannot carry', () => {
     expect(() => renderTheme(forged({ name: 'x"], * { color: red } [x="' }))).toThrow(
       /is not \[a-z\]\[a-z0-9-\]\*/,

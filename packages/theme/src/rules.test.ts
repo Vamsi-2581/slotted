@@ -65,10 +65,4 @@ describe('processRules', () => {
       "[data-ui='badge'] { animation: slotted-aura-pulse 1s infinite; animation-name: slotted-aura-pulse; }",
     );
   });
-
-  it('refuses the at-rules the compiler writes itself', () => {
-    for (const rule of ['@import url(x.css);', '@layer x { }', '@scope (.a) { }']) {
-      expect(() => processRules('aura', [rule]), rule).toThrow(/aura: @(import|layer|scope) /);
-    }
-  });
 });

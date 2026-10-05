@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import test from 'node:test';
 
-import { ruleErrors } from '../dist/index.js';
 import { OUTPUTS, writtenAttributes } from '../scripts/generate-sources.mjs';
 
 for (const [path, source] of Object.entries(OUTPUTS)) {
@@ -70,6 +69,23 @@ function* stylesheets() {
   }
 }
 
+/**
+ * Every compound selector in a stylesheet: a run of attribute selectors and
+ * pseudo-classes with no combinator between them. The selectors inside a
+ * functional pseudo-class are read as compounds of their own.
+ */
+function compounds(css) {
+  const pieces = [];
+  let text = css.replace(/\/\*[\s\S]*?\*\//g, ' ');
+  while (/\([^()]*\)/.test(text))
+    text = text.replace(/\(([^()]*)\)/g, (_whole, inner) => {
+      pieces.push(inner);
+      return '';
+    });
+  pieces.push(text);
+  return pieces.flatMap((piece) => piece.match(/(?:\[[^\]]*\]|::?[\w-]+)+/g) ?? []);
+}
+
 test("a family's parts in the hook index are the parts its contract declares", () => {
   const hooks = JSON.parse(
     readFileSync(new URL('../src/generated/hooks.json', import.meta.url), 'utf8'),
@@ -117,10 +133,13 @@ test('every data-ui and data-part pairing a family stylesheet selects is allowed
   const refused = [];
   const unowned = [];
   for (const { family, path, css } of stylesheets()) {
-    // `[data-ui='x'][data-part='y']`: the policy refuses a part the family does not own.
-    for (const error of ruleErrors(css))
-      if (/is not a part of/.test(error.message))
-        refused.push(`${path}:${error.line} ${error.selector}: ${error.message}`);
+    // `[data-ui='x'][data-part='y']`: one element is x's root and the part y, which the
+    // policy allows only when the index lists y under x.
+    for (const compound of compounds(css)) {
+      const ui = /\[data-ui='([\w-]+)'\]/.exec(compound)?.[1];
+      const part = /\[data-part='([\w-]+)'\]/.exec(compound)?.[1];
+      if (ui && part && !partsOf(ui).includes(part)) refused.push(`${path}: ${compound}`);
+    }
     // `[data-ui='x'] [data-part='y']`: y is a part of x, of a family x composes, or of the
     // family whose stylesheet writes the selector (a part it places inside x).
     for (const [, ui, part] of css.matchAll(

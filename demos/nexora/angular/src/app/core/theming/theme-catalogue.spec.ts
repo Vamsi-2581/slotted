@@ -236,6 +236,20 @@ describe('theme catalogue', () => {
   });
 
   /**
+   * Terminal's prompt before the selected tab is decoration: its alternative
+   * text is empty, so the tab's accessible name stays its label. Its tables
+   * are striped in a ground mixed from its own line, the neutral family every
+   * ground and line of the theme shares.
+   */
+  it('draws Terminal’s prompt out of the tab’s name, and its stripe from its line', () => {
+    const terminal = nexoraTheme('nexora-terminal');
+    expect((terminal.rules ?? []).join('\n')).toMatch(/content: '> ' \/ '';/);
+    expect(terminal.components?.['--slotted-table-row-surface-stripe']).toBe(
+      'color-mix(in oklab, var(--slotted-border-subtle) 45%, var(--slotted-surface))',
+    );
+  });
+
+  /**
    * Faces are the contract's tokens, taken from the families the builder
    * offers; each theme declares the `@font-face` of every face it names, and
    * no rule writes a face of its own.

@@ -73,7 +73,7 @@ const SHOWN = 6;
     }
   `,
   template: `
-    <div slTable variant="framed" [columns]="3" layout="fixed" data-anatomy>
+    <div slTable variant="framed" [columns]="3" layout="fixed" striped data-anatomy>
       <div slTableContent>
         <caption slTableCaption>
           {{

@@ -618,7 +618,9 @@ const editorial = extendTheme(
  * dark ink. Built for the dark scheme — grounds darker than the library's in
  * a green-grey neutral, a glow in the
  * accent for elevation, a neon chart — while light and high contrast keep
- * every floor. Labels are lower case; the selected tab reads as a prompt.
+ * every floor. Labels are lower case; the selected tab reads as a prompt,
+ * which stays out of its accessible name; striped tables band their rows in
+ * a ground mixed from the theme's own line.
  */
 const terminal = extendTheme(
   defaultTheme,
@@ -721,6 +723,8 @@ const terminal = extendTheme(
       '--slotted-table-header-surface': 'transparent',
       '--slotted-table-row-min-block-size': '28px',
       '--slotted-table-cell-padding-inline': 'var(--slotted-space-5)',
+      '--slotted-table-row-surface-stripe':
+        'color-mix(in oklab, var(--slotted-border-subtle) 45%, var(--slotted-surface))',
       '--slotted-tabs-marker-color': 'var(--slotted-tone-accent-text)',
       '--slotted-tabs-selected-color': 'var(--slotted-tone-accent-text)',
       '--slotted-badge-radius': 'var(--slotted-radius-xs)',
@@ -739,7 +743,7 @@ const terminal = extendTheme(
 }
 
 [data-ui='tabs'] [data-part='item'][data-selected] [data-part='label']::before {
-  content: '> ';
+  content: '> ' / '';
 }
 
 [data-ui='badge'][data-shape='pill'] {

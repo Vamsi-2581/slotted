@@ -548,6 +548,7 @@ describe('PreferencesPage › Appearance', () => {
       entries: root.querySelector(`[data-layer="${layer}"] [data-entries]`)!.textContent!,
     });
     expect(row('components').count).toBe(0);
+    expect(root.querySelector('[data-anatomy]')!.hasAttribute('data-striped')).toBe(true);
     expect(row('seeds').entries).toContain('accent #1d4ed8');
 
     choose(root, 'theme', 'nexora-brutalist');

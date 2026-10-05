@@ -52,7 +52,7 @@ const SCHEMES = Object.keys(SCHEME_NAMES) as Scheme[];
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div slTable variant="framed" [columns]="4" data-contrast>
+    <div slTable variant="framed" [columns]="4" striped data-contrast>
       <div slTableContent>
         <caption slTableCaption>
           Contrast of the chosen colours, as the theme’s recipe computes them

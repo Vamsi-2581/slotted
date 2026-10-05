@@ -39,5 +39,7 @@ describe('ContrastTable', () => {
     expect(badge('dark').textContent?.trim()).toBe('Meets 4.5:1');
     expect(badge('dark').getAttribute('data-tone')).toBe('success');
     expect(badge('high-contrast').textContent?.trim()).toBe('Meets 7:1');
+    /* A reading table is striped, so a theme's stripe shows on the page that chooses the theme. */
+    expect(root.querySelector('[data-contrast]')!.hasAttribute('data-striped')).toBe(true);
   });
 });

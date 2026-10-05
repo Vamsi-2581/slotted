@@ -458,11 +458,35 @@ export function propertyWriteError(name: string): string | undefined {
 /** At-rules the compiler writes around a theme's rules, which a rule cannot carry at any depth. */
 const COMPILER_AT_RULES = /^@(scope|import|layer)\b/i;
 
-/** The reason a `var()` reads a property no theme may read, or `undefined`. */
-export function tokenReadError(name: string): string | undefined {
-  if (name.startsWith('--_')) return `var(${name}) reads a private property of a family`;
-  if (name.startsWith('--slotted-') && !TOKENS.has(name)) return `var(${name}) is not a token`;
+/**
+ * The reason a `var()`, or a `style()` query in a value or in `@container`,
+ * reads a property no theme may read, or `undefined`.
+ */
+export function tokenReadError(name: string, reader: 'var' | 'style' = 'var'): string | undefined {
+  if (name.startsWith('--_')) return `${reader}(${name}) reads a private property of a family`;
+  if (name.startsWith('--slotted-') && !TOKENS.has(name))
+    return `${reader}(${name}) is not a token`;
   return undefined;
+}
+
+/**
+ * The reason `@property` registers a property no theme may register, or
+ * `undefined`. A registration is hoisted out of the theme's scope and holds
+ * for the whole page, so a theme registers only properties of its own.
+ */
+function registrationError(name: string): string | undefined {
+  if (name.startsWith('--_')) return 'a theme rule cannot register a private property of a family';
+  if (name.startsWith('--slotted-')) return 'a theme rule cannot register a token';
+  return undefined;
+}
+
+/** The decoded, lower-cased name of the at-rule a prelude opens (`@media` → `media`). */
+function atRuleName(text: string): string | undefined {
+  try {
+    return readIdent(text, 1).name.toLowerCase();
+  } catch {
+    return undefined;
+  }
 }
 
 interface Block {
@@ -502,9 +526,11 @@ function declaredProperty(text: string): string | undefined {
 /**
  * Every policy violation in a theme's CSS text: each style rule's selector,
  * nested rules and rules in conditional groups included; every `@scope`,
- * `@import` and `@layer`, at any depth; every declaration that writes a
- * private property; and every `var()` the text reads, outside strings and
- * comments, with escapes in the function and property names decoded. The
+ * `@import` and `@layer`, at any depth; every `@property` naming a private
+ * property or a token; every declaration that writes a private property or
+ * stands outside a style rule; and every `var()` and `style()` query the text
+ * reads, outside strings and comments, with escapes in the function and
+ * property names decoded. The
  * text is taken to be balanced; `splitTopLevel` refuses one that is not.
  */
 export function ruleErrors(css: string): RuleError[] {
@@ -528,13 +554,8 @@ export function ruleErrors(css: string): RuleError[] {
   };
   /** Refuses an at-rule the compiler writes; `true` when it did. */
   const compilerAtRule = (text: string, line: number): boolean => {
-    let name: string;
-    try {
-      name = readIdent(text, 1).name.toLowerCase();
-    } catch {
-      return false;
-    }
-    if (!COMPILER_AT_RULES.test(`@${name}`)) return false;
+    const name = atRuleName(text);
+    if (name === undefined || !COMPILER_AT_RULES.test(`@${name}`)) return false;
     errors.push({
       line,
       selector: text,
@@ -542,16 +563,35 @@ export function ruleErrors(css: string): RuleError[] {
     });
     return true;
   };
-  /** Refuses a declaration, the text before a `;` or a `}`, that writes a private property. */
+  /** Refuses `@property` naming a private property or a token. */
+  const registration = (text: string, line: number) => {
+    if (atRuleName(text) !== 'property') return;
+    let name: string;
+    try {
+      name = readIdent(text, skipBlank(text, readIdent(text, 1).end)).name;
+    } catch {
+      return;
+    }
+    const message = registrationError(name);
+    if (message !== undefined) errors.push({ line, selector: text, message });
+  };
+  /**
+   * Refuses a declaration, the text before a `;` or a `}`, that writes a
+   * private property, or that stands outside a style rule: inside the
+   * compiled `@scope` such a declaration applies to the theme's root.
+   */
   const declaration = (end: number) => {
     const block = stack[stack.length - 1];
-    if (!block?.declarations || block.opaque) return;
+    if (block?.opaque) return;
     const { text, line } = prelude(end);
     const name = text.startsWith('@') ? undefined : declaredProperty(text);
-    const message = name === undefined ? undefined : propertyWriteError(name);
-    if (message !== undefined) errors.push({ line, selector: block.selector, message });
+    if (name === undefined) return;
+    const message = block?.declarations
+      ? propertyWriteError(name)
+      : `${name}: a declaration outside a style rule applies to the theme root`;
+    if (message !== undefined) errors.push({ line, selector: block?.selector ?? '', message });
   };
-  const varReads: { index: number; block: Block | undefined }[] = [];
+  const reads: { index: number; block: Block | undefined; reader: 'var' | 'style' }[] = [];
 
   scanCssText(css, {
     onComment(from, to) {
@@ -559,8 +599,10 @@ export function ruleErrors(css: string): RuleError[] {
     },
     onCodeChar(char, index) {
       const parent = stack[stack.length - 1];
-      if (char === '(' && !parent?.opaque && identBefore(css, index)?.toLowerCase() === 'var')
-        varReads.push({ index, block: parent });
+      if (char === '(' && !parent?.opaque) {
+        const reader = identBefore(css, index)?.toLowerCase();
+        if (reader === 'var' || reader === 'style') reads.push({ index, block: parent, reader });
+      }
       if (char === '{') {
         const { text, line } = prelude(index);
         // Only a custom property takes a `{}` value; `a:hover {` in a style rule is a nested rule.
@@ -569,6 +611,7 @@ export function ruleErrors(css: string): RuleError[] {
         if (parent && (!parent.styles || parent.opaque)) stack.push(parent);
         else if (text.startsWith('@')) {
           const refused = compilerAtRule(text, line);
+          registration(text, line);
           const styles = !NOT_STYLE.test(text);
           stack.push({
             selector: parent?.selector ?? text,
@@ -607,14 +650,17 @@ export function ruleErrors(css: string): RuleError[] {
     },
   });
 
-  for (const { index, block } of varReads) {
+  // A last declaration with no `;` after it, outside every block.
+  declaration(css.length);
+
+  for (const { index, block, reader } of reads) {
     let name: string | undefined;
     try {
       name = readIdent(css, skipBlank(css, index + 1)).name;
     } catch {
       name = undefined;
     }
-    const message = name?.startsWith('--') ? tokenReadError(name) : undefined;
+    const message = name?.startsWith('--') ? tokenReadError(name, reader) : undefined;
     if (message !== undefined)
       errors.push({ line: lineAt(index), selector: block?.selector ?? '', message });
   }

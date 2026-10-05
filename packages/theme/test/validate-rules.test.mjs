@@ -274,6 +274,61 @@ test('refuses the nesting selector outside a style rule, where it is the scoping
   ok(`[data-ui='card'] { @media all { & { color: red; } } }`);
 });
 
+const runtimeErrors = (css) => {
+  try {
+    defineTheme({ ...values, name: 'ruled', seeds: SEEDS, recipe: recipes.standard, rules: [css] });
+  } catch (error) {
+    return error.message.split('\n').slice(1);
+  }
+  return [];
+};
+
+test('refuses a declaration outside a style rule, which would apply to the theme root', () => {
+  for (const css of [
+    `color: red;`,
+    `--_card-bg: red;`,
+    `@media all { color: red; }`,
+    `color: red`,
+  ]) {
+    const errors = runtimeErrors(css);
+    assert.ok(
+      errors.some((error) =>
+        error.includes('a declaration outside a style rule applies to the theme root'),
+      ),
+      `${css}\n${errors.join('\n')}`,
+    );
+  }
+});
+
+test('refuses @property for a private property or a token, and keeps a theme its own', () => {
+  fails(
+    `@property --_x { syntax: '<color>'; inherits: true; initial-value: red; }`,
+    '@property --_x: a theme rule cannot register a private property of a family',
+  );
+  fails(
+    `@property --slotted-text { syntax: '<color>'; inherits: true; initial-value: red; }`,
+    '@property --slotted-text: a theme rule cannot register a token',
+  );
+  ok(`@property --ruled-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }`);
+});
+
+test('refuses a style query over a private property, in a value and in @container', () => {
+  fails(
+    `[data-ui='card'] { color: if(style(--_card-bg: red): blue; else: green); }`,
+    'style(--_card-bg) reads a private property of a family',
+  );
+  fails(
+    `@container style(--_x: 1) { [data-ui='card'] { color: red; } }`,
+    'style(--_x) reads a private property of a family',
+  );
+  ok(`@container style(--slotted-control-height-md: 34px) { [data-ui='card'] { color: red; } }`);
+});
+
+test('does not export processRules, which checks nothing on its own', async () => {
+  const theme = await import('../dist/index.js');
+  assert.equal('processRules' in theme, false);
+});
+
 /**
  * The build and the runtime hold one policy: every rule the CLI refuses,
  * `defineTheme` refuses with the same messages, and every rule the CLI

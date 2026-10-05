@@ -11,8 +11,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
  *   `<family>.tokens.json` files `packages/styles/src/tokens.test.mjs` holds
  *   equal to the stylesheets.
  * - `src/generated/hooks.json` — the public selectors a theme rule may use:
- *   every `data-ui` value with its parts, and every `data-*` attribute, from
- *   the family contracts and the family stylesheets.
+ *   every `data-ui` value with its parts, and every `data-*` attribute the
+ *   family contracts declare or the family stylesheets select, spelled as it
+ *   is in the DOM and kept only when a binding or `@slotted/core` writes it
+ *   (`writtenAttributes`).
  *
  * `--check` writes nothing and exits 1 when either file is stale.
  */
@@ -62,6 +64,44 @@ export function contractSource() {
   );
 }
 
+/** The directories whose modules write a family's attributes to the DOM. */
+const BINDINGS = ['packages/react/src', 'packages/angular', 'packages/core/src'];
+/** Tests, stories and documentation name attributes without writing them. */
+const NOT_SHIPPED = /\.(test|spec|stories|docs)\.[cm]?[jt]sx?$|\.d\.ts$/;
+const kebab = (name) => name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+
+function* sourceFiles(directory) {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    if (entry.name === 'node_modules' || entry.name === 'dist') continue;
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) yield* sourceFiles(path);
+    else if (/\.(ts|tsx|html)$/.test(entry.name) && !NOT_SHIPPED.test(entry.name)) yield path;
+  }
+}
+
+/**
+ * Every `data-*` attribute the React and Angular bindings and `@slotted/core`
+ * name in shipped source — a JSX prop, an Angular `[attr.data-*]` binding or
+ * template attribute, a `setAttribute` argument, or a `dataset` property in
+ * its DOM spelling. A contract option that no module names is never written
+ * to the DOM.
+ */
+export function writtenAttributes() {
+  const written = new Set();
+  for (const root of BINDINGS) {
+    for (const file of sourceFiles(join(REPOSITORY, root))) {
+      const source = readFileSync(file, 'utf8');
+      for (const [name] of source.matchAll(/(?<![\w-])data-[a-z][a-z0-9-]*[a-z0-9]/g))
+        written.add(name);
+      for (const [, property, key] of source.matchAll(
+        /\.dataset(?:\.([A-Za-z]\w*)|\[['"]([A-Za-z]\w*)['"]\])/g,
+      ))
+        written.add(`data-${kebab(property ?? key)}`);
+    }
+  }
+  return written;
+}
+
 export function hooksSource() {
   const ui = new Map();
   const attributes = new Set();
@@ -75,10 +115,15 @@ export function hooksSource() {
       contract.ui,
       Object.values(contract.members ?? {}).flatMap((member) => member.parts ?? []),
     );
-    for (const axis of Object.keys(contract.axes ?? {})) attributes.add(`data-${axis}`);
+    for (const axis of Object.keys(contract.axes ?? {})) attributes.add(`data-${kebab(axis)}`);
     for (const attribute of Object.values(contract.stateAttributes ?? {}))
       attributes.add(attribute);
-    for (const attribute of Object.keys(contract.dataAttributes ?? {})) attributes.add(attribute);
+    // `dataAttributes` is keyed either by attribute (with its meaning as the value) or by
+    // part (with the attributes that part carries as the value).
+    for (const [key, value] of Object.entries(contract.dataAttributes ?? {})) {
+      if (key.startsWith('data-')) attributes.add(key);
+      else for (const attribute of value) attributes.add(attribute);
+    }
   }
   for (const family of families()) {
     for (const file of readdirSync(join(STYLES, family)).filter((name) => name.endsWith('.css'))) {
@@ -93,7 +138,9 @@ export function hooksSource() {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([name, parts]) => [name, [...parts].sort()]),
   );
-  return `${JSON.stringify({ ui: sorted, attributes: [...attributes].sort() }, null, 2)}\n`;
+  const written = writtenAttributes();
+  const reflected = [...attributes].filter((attribute) => written.has(attribute)).sort();
+  return `${JSON.stringify({ ui: sorted, attributes: reflected }, null, 2)}\n`;
 }
 
 export const OUTPUTS = {

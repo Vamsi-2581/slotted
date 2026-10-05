@@ -320,12 +320,12 @@ describe('PreferencesPage › Appearance', () => {
     expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('#059669');
   });
 
-  const typeColour = (root: HTMLElement, value: string) => {
-    const field = root.querySelector<HTMLInputElement>('[data-brand-custom] input');
-    expect(field).not.toBeNull();
-    field!.value = value;
-    field!.dispatchEvent(new Event('input', { bubbles: true }));
-    field!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  const typeColour = (root: HTMLElement, value: string, field = '[data-brand-custom]') => {
+    const input = root.querySelector<HTMLInputElement>(`${field} input`);
+    expect(input).not.toBeNull();
+    input!.value = value;
+    input!.dispatchEvent(new Event('input', { bubbles: true }));
+    input!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
   };
   const checkedBrand = (root: HTMLElement) =>
     root.querySelector<HTMLInputElement>('input[name="brand"]:checked')?.value;
@@ -354,6 +354,23 @@ describe('PreferencesPage › Appearance', () => {
     harness.detectChanges();
     TestBed.flushEffects();
     expect(page().accent).toBe('#7c3aed');
+  });
+
+  /** The grey takes any colour too: typed, it becomes the neutral seed, and Custom is chosen. */
+  it('takes a custom grey from its colour field', async () => {
+    const { harness, root } = await open();
+    typeColour(root, '#336699', '[data-neutral-custom]');
+    harness.detectChanges();
+    TestBed.flushEffects();
+
+    expect(page().neutral).toBe('#336699');
+    expect(root.querySelector<HTMLInputElement>('input[name="neutral"]:checked')?.value).toBe(
+      'custom',
+    );
+    choose(root, 'neutral', 'ocean');
+    harness.detectChanges();
+    TestBed.flushEffects();
+    expect(page().neutral).toBe('#0e7490');
   });
 
   it('reads the contrast of the candidate seeds in the three schemes', async () => {

@@ -66,7 +66,7 @@ describe('PreferencesStore', () => {
     prefs.update({
       theme: 'nexora-brutalist',
       brand: { preset: 'custom', custom: '#0f766e' },
-      neutral: 'clay',
+      neutral: { preset: 'clay', custom: '#64748b' },
     });
     TestBed.flushEffects();
     await prefs.useThemes(['nexora-brutalist']);
@@ -78,10 +78,10 @@ describe('PreferencesStore', () => {
     const userId = TestBed.inject(SessionStore).user()!.id;
     const stored = JSON.parse(localStorage.getItem(`nexora:preferences:${userId}`) ?? '{}') as {
       theme: string;
-      neutral: string;
+      neutral: unknown;
     };
     expect(stored.theme).toBe('nexora-brutalist');
-    expect(stored.neutral).toBe('clay');
+    expect(stored.neutral).toEqual({ preset: 'clay', custom: '#64748b' });
   });
 
   /**
@@ -114,14 +114,52 @@ describe('PreferencesStore', () => {
   it('removes a seed the preferences stop writing', () => {
     const prefs = TestBed.inject(PreferencesStore);
     const html = TestBed.inject(DOCUMENT).documentElement;
-    prefs.update({ neutral: 'plum' });
+    prefs.update({ neutral: { preset: 'plum', custom: '#64748b' } });
     TestBed.flushEffects();
     expect(html.style.getPropertyValue('--slotted-seed-neutral')).toBe('#7e5a86');
 
-    prefs.update({ neutral: 'theme' });
+    prefs.update({ neutral: { preset: 'theme', custom: '#64748b' } });
     TestBed.flushEffects();
     expect(html.style.getPropertyValue('--slotted-seed-neutral')).toBe('');
     expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('#7c3aed');
+  });
+
+  /** A grey of the reader's own is a seed like a preset's; the colour is kept while a preset is chosen. */
+  it('writes a custom grey as the neutral seed', () => {
+    const prefs = TestBed.inject(PreferencesStore);
+    const html = TestBed.inject(DOCUMENT).documentElement;
+    prefs.update({ neutral: { preset: 'custom', custom: '#336699' } });
+    TestBed.flushEffects();
+    expect(html.style.getPropertyValue('--slotted-seed-neutral')).toBe('#336699');
+
+    prefs.update({ neutral: { preset: 'sage', custom: '#336699' } });
+    TestBed.flushEffects();
+    expect(html.style.getPropertyValue('--slotted-seed-neutral')).toBe('#5b7f66');
+    expect(prefs.preferences().neutral.custom).toBe('#336699');
+  });
+
+  /** A stored grey is read like a brand: each half on its own, and an unknown one as the default. */
+  it('reads a stored grey half by half', () => {
+    const prefs = TestBed.inject(PreferencesStore);
+    const userId = TestBed.inject(SessionStore).user()!.id;
+    const read = (neutral: unknown) => {
+      localStorage.setItem(`nexora:preferences:${userId}`, JSON.stringify({ neutral }));
+      prefs.update({});
+      return prefs.preferences().neutral;
+    };
+    expect(read({ preset: 'custom', custom: '#336699' })).toEqual({
+      preset: 'custom',
+      custom: '#336699',
+    });
+    expect(read({ preset: 'sage', custom: 'url(x)' })).toEqual({
+      preset: 'sage',
+      custom: '#64748b',
+    });
+    expect(read({ preset: 'custom', custom: 'red' })).toEqual({
+      preset: 'theme',
+      custom: '#64748b',
+    });
+    expect(read('clay')).toEqual({ preset: 'theme', custom: '#64748b' });
   });
 
   /** `seedStyle` refuses the colour, and the brand is read as the default rather than breaking the page. */
@@ -142,7 +180,7 @@ describe('PreferencesStore', () => {
 
     expect(prefs.preferences().brand).toEqual({ preset: 'theme', custom: '#7c3aed' });
     expect(prefs.preferences().theme).toBe('default');
-    expect(prefs.preferences().neutral).toBe('theme');
+    expect(prefs.preferences().neutral).toEqual({ preset: 'theme', custom: '#64748b' });
     expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('#7c3aed');
     expect(html.getAttribute('data-slotted-theme')).toBe('default');
   });
@@ -180,7 +218,7 @@ describe('PreferencesStore', () => {
         scheme: 'system',
         theme: 'nexora-brutalist',
         brand: { preset: 'amber', custom: '#7c3aed' },
-        neutral: 'ocean',
+        neutral: { preset: 'ocean', custom: '#64748b' },
       });
       await prefs.useThemes(['nexora-brutalist']);
       TestBed.flushEffects();
@@ -225,7 +263,7 @@ describe('PreferencesStore', () => {
     prefs.update({ theme: 'nexora-friendly' });
     TestBed.flushEffects();
     await prefs.useThemes(['nexora-friendly']);
-    prefs.update({ theme: 'nexora-brutalist', neutral: 'ocean' });
+    prefs.update({ theme: 'nexora-brutalist', neutral: { preset: 'ocean', custom: '#64748b' } });
     TestBed.flushEffects();
     await prefs.useThemes(['nexora-brutalist', 'nexora-friendly']);
     expect(names()).toEqual(['nexora-brutalist', 'nexora-friendly']);

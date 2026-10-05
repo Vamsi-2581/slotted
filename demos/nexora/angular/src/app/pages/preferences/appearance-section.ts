@@ -532,6 +532,60 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                 </div>
               </div>
 
+              <div slField>
+                <label slFieldLabel>Grey</label>
+                <span slFieldDescription>
+                  The neutral every ground, border and muted text is derived from.
+                </span>
+                <div
+                  slRadioGroup
+                  name="neutral"
+                  variant="tile"
+                  [value]="draft().neutral.preset"
+                  (valueChange)="chooseNeutral($event.value)"
+                >
+                  <div class="choices swatches" [style.--longest]="longest.neutrals">
+                    @for (preset of neutrals; track preset.id) {
+                      <div slRadio [value]="preset.id">
+                        <span slInline [gap]="3" wrap="nowrap">
+                          <span slSkeleton
+                            ><span
+                              class="swatch"
+                              data-neutral
+                              [class.reserved]="reserved(draft().theme, wait.painted())"
+                              slThemeScope
+                              [theme]="drawn(draft().theme)"
+                              [scheme]="draft().scheme"
+                              [seeds]="
+                                preset.color === null ? undefined : { neutral: preset.color }
+                              "
+                            ></span
+                          ></span>
+                          <span class="tile-label">{{ preset.label }}</span>
+                        </span>
+                      </div>
+                    }
+                    <div slRadio value="custom">
+                      <span slInline [gap]="3" wrap="nowrap">
+                        <span slSkeleton
+                          ><span
+                            class="swatch"
+                            data-neutral
+                            [class.reserved]="reserved(draft().theme, wait.painted())"
+                            slThemeScope
+                            [theme]="drawn(draft().theme)"
+                            [scheme]="draft().scheme"
+                            [seeds]="{ neutral: draft().neutral.custom }"
+                          ></span
+                        ></span>
+                        <span class="tile-label">Custom</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
               <div class="colours">
                 <div slField data-brand-custom>
                   <label slFieldLabel>Custom brand colour</label>
@@ -545,6 +599,20 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                   ></div>
                   <span slFieldDescription
                     >Any colour; the recipe keeps every text on it readable.</span
+                  >
+                </div>
+                <div slField data-neutral-custom>
+                  <label slFieldLabel>Custom grey</label>
+                  <div
+                    slColorField
+                    format="hex"
+                    [alpha]="false"
+                    [presets]="greyColors"
+                    [value]="draft().neutral.custom"
+                    (valueChange)="chooseNeutralCustom($event.value)"
+                  ></div>
+                  <span slFieldDescription
+                    >Any colour; grounds, lines and muted text take a share of its chroma.</span
                   >
                 </div>
                 @for (status of statuses; track status) {
@@ -577,43 +645,6 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                     </span>
                   </div>
                 }
-              </div>
-
-              <div slField>
-                <label slFieldLabel>Grey</label>
-                <span slFieldDescription>
-                  The neutral every ground, border and muted text is derived from.
-                </span>
-                <div
-                  slRadioGroup
-                  name="neutral"
-                  variant="tile"
-                  [value]="draft().neutral"
-                  (valueChange)="chooseNeutral($event.value)"
-                >
-                  <div class="choices swatches" [style.--longest]="longest.neutrals">
-                    @for (preset of neutrals; track preset.id) {
-                      <div slRadio [value]="preset.id">
-                        <span slInline [gap]="3" wrap="nowrap">
-                          <span slSkeleton
-                            ><span
-                              class="swatch"
-                              data-neutral
-                              [class.reserved]="reserved(draft().theme, wait.painted())"
-                              slThemeScope
-                              [theme]="drawn(draft().theme)"
-                              [scheme]="draft().scheme"
-                              [seeds]="
-                                preset.color === null ? undefined : { neutral: preset.color }
-                              "
-                            ></span
-                          ></span>
-                          <span class="tile-label">{{ preset.label }}</span>
-                        </span>
-                      </div>
-                    }
-                  </div>
-                </div>
               </div>
 
               <h4 slHeading size="sm">Type</h4>
@@ -819,12 +850,15 @@ export class AppearanceSection {
   protected readonly longest = {
     themes: longest(...THEME_CATALOGUE.map((entry) => entry.label)),
     brands: longest('Theme', 'Custom', ...BRAND_PRESETS.map((preset) => preset.label)),
-    neutrals: longest(...NEUTRAL_PRESETS.map((preset) => preset.label)),
+    neutrals: longest('Custom', ...NEUTRAL_PRESETS.map((preset) => preset.label)),
     fonts: longest('Theme', ...FONT_FAMILIES.flatMap((family) => [family.label, family.kind])),
     axes: longest('Theme', ...AXES.flatMap((entry) => entry.options.map((option) => option.label))),
   };
   protected readonly radiusRange = RADIUS_RANGE;
   protected readonly presetColors = BRAND_PRESETS.map((preset) => preset.color);
+  protected readonly greyColors = NEUTRAL_PRESETS.flatMap((preset) =>
+    preset.color === null ? [] : [preset.color],
+  );
 
   /** The last load of the runtime sheets failed, and nothing has been tried since. */
   protected readonly failed = signal(false);
@@ -993,7 +1027,7 @@ export class AppearanceSection {
       customisation: NO_CUSTOMISATION,
       status: NO_STATUS,
       brand: { ...this.draft().brand, preset: 'theme' },
-      neutral: 'theme',
+      neutral: { ...this.draft().neutral, preset: 'theme' },
     });
   }
 
@@ -1044,6 +1078,19 @@ export class AppearanceSection {
   }
 
   protected chooseNeutral(value: unknown): void {
-    if (isNeutralPreset(value)) this.patch.emit({ neutral: value });
+    if (value !== 'custom' && !isNeutralPreset(value)) return;
+    this.patch.emit({ neutral: { ...this.draft().neutral, preset: value } });
+  }
+
+  /** A grey typed or picked becomes the custom neutral, or the preset it equals. */
+  protected chooseNeutralCustom(value: string): void {
+    if (!isSeed(value)) return;
+    const color = value.toLowerCase();
+    const preset = NEUTRAL_PRESETS.find((entry) => entry.color === color);
+    this.patch.emit({
+      neutral: preset
+        ? { ...this.draft().neutral, preset: preset.id }
+        : { preset: 'custom', custom: color },
+    });
   }
 }

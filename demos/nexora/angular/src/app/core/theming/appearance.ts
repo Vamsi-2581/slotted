@@ -36,7 +36,15 @@ export const NEUTRAL_PRESETS = [
   { id: 'plum', label: 'Plum', color: '#7e5a86' },
 ] as const;
 export type NeutralPresetId = (typeof NEUTRAL_PRESETS)[number]['id'];
-export const DEFAULT_NEUTRAL: NeutralPresetId = 'theme';
+
+export interface NeutralPreference {
+  /** `theme` keeps the neutral the theme brings. */
+  readonly preset: NeutralPresetId | 'custom';
+  /** The reader's own grey, `#rrggbb`; kept while a preset is chosen, so Custom brings it back. */
+  readonly custom: string;
+}
+
+export const DEFAULT_NEUTRAL: NeutralPreference = { preset: 'theme', custom: '#64748b' };
 
 /** The three status seeds; `null` keeps the theme's own. */
 export const STATUS_SEEDS = ['success', 'warning', 'danger'] as const;
@@ -62,6 +70,12 @@ export function isNeutralPreset(value: unknown): value is NeutralPresetId {
   return NEUTRAL_PRESETS.some((preset) => preset.id === value);
 }
 
+/** The neutral a grey writes, or `null` when the theme's own holds. */
+export function neutralColor(neutral: NeutralPreference): string | null {
+  if (neutral.preset === 'custom') return neutral.custom;
+  return NEUTRAL_PRESETS.find((preset) => preset.id === neutral.preset)?.color ?? null;
+}
+
 /**
  * The seeds a reader's colours write over `theme`, in the shape `slThemeScope`
  * and `seedStyle` take: only the ones the reader chose, so the theme's own
@@ -70,13 +84,13 @@ export function isNeutralPreset(value: unknown): value is NeutralPresetId {
 export function appearanceSeeds(
   theme: string,
   brand: BrandPreference,
-  neutral: NeutralPresetId,
+  neutral: NeutralPreference,
   status: StatusColours = NO_STATUS,
 ): Partial<Record<SeedName, string>> {
   const seeds: Partial<Record<SeedName, string>> = {};
   const accent = brandColor(brand, theme);
   if (accent !== null) seeds.accent = accent;
-  const grey = NEUTRAL_PRESETS.find((preset) => preset.id === neutral)?.color ?? null;
+  const grey = neutralColor(neutral);
   if (grey !== null) seeds.neutral = grey;
   for (const name of STATUS_SEEDS) {
     const color = status[name];
@@ -98,6 +112,19 @@ export function readBrand(value: unknown): BrandPreference {
     return { preset: preset as BrandPreference['preset'], custom: color ?? DEFAULT_BRAND.custom };
   }
   return preset === 'custom' && color !== null ? { preset, custom: color } : DEFAULT_BRAND;
+}
+
+/**
+ * A grey read back from storage, as a brand is: a known preset holds with a
+ * refused custom colour replaced by the default's, and an unknown preset, or
+ * `custom` with a refused colour, reads as the default.
+ */
+export function readNeutral(value: unknown): NeutralPreference {
+  if (typeof value !== 'object' || value === null) return DEFAULT_NEUTRAL;
+  const { preset, custom } = value as Partial<Record<keyof NeutralPreference, unknown>>;
+  const color = isSeed(custom) ? custom : null;
+  if (isNeutralPreset(preset)) return { preset, custom: color ?? DEFAULT_NEUTRAL.custom };
+  return preset === 'custom' && color !== null ? { preset, custom: color } : DEFAULT_NEUTRAL;
 }
 
 /** Status colours read back from storage: each one a seed, or the theme's own. */

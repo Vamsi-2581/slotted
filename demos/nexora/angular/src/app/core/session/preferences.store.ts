@@ -7,12 +7,12 @@ import {
   appearanceSeeds,
   DEFAULT_BRAND,
   DEFAULT_NEUTRAL,
-  isNeutralPreset,
   NO_STATUS,
   readBrand,
+  readNeutral,
   readStatus,
   type BrandPreference,
-  type NeutralPresetId,
+  type NeutralPreference,
   type StatusColours,
 } from '../theming/appearance';
 import { CustomSheet } from '../theming/custom-sheet';
@@ -42,8 +42,8 @@ export interface UserPreferences {
   theme: string;
   /** The accent seed: a preset, or the reader's own colour. */
   brand: BrandPreference;
-  /** The neutral seed, or `theme` for the theme's own. */
-  neutral: NeutralPresetId;
+  /** The neutral seed: a preset, the reader's own grey, or `theme` for the theme's own. */
+  neutral: NeutralPreference;
   /** The success, warning and danger seeds; each `null` keeps the theme's own. */
   status: StatusColours;
   /** The builder's axes over `theme`; every axis `null` is the theme as it comes. */
@@ -281,7 +281,7 @@ export class PreferencesStore {
         shell: shellPreset(stored.shell).id,
         theme: catalogueTheme(stored.theme).id,
         brand: readBrand(stored.brand),
-        neutral: isNeutralPreset(stored.neutral) ? stored.neutral : DEFAULT_NEUTRAL,
+        neutral: readNeutral(stored.neutral),
         status: readStatus(stored.status),
         customisation: readCustomisation(stored.customisation),
         locale: NEXORA_LOCALES.includes(stored.locale as NexoraLocale)

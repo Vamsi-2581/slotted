@@ -1534,6 +1534,7 @@ function RuleEditorPopoverBody({
         condition={condition}
         environment={{ ...environment, apply: done }}
         field={field}
+        invalid={invalid}
         withOperator={withOperator}
         onConditionChange={(next) => change({ ...local, conditions: [next] } as FilterDescriptor)}
       />

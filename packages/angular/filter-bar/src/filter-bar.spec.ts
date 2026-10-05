@@ -524,6 +524,29 @@ describe('SlFilterBar', () => {
     expect(glyph(part('summary'))).toBe('funnel');
   });
 
+  it('marks the field select of a builder rule over an unknown field invalid, so it draws its own edge', () => {
+    const { builder, host, part, settle } = setup();
+    host.value.set({
+      join: 'and',
+      rules: [
+        {
+          field: 'region',
+          filter: {
+            kind: 'set',
+            join: 'and',
+            conditions: [{ operator: 'anyOf', value: ['south'] }],
+          },
+        },
+      ],
+    });
+    settle();
+    part('summary').click();
+    settle();
+    const rule = builder().querySelector('[data-part="rule"][data-invalid]') as HTMLElement;
+    const select = rule.querySelector('[data-part="field"] [data-ui="select"][data-part="root"]');
+    expect(select?.hasAttribute('data-invalid')).toBe(true);
+  });
+
   it('opens the builder from the summary control and reports the reason', () => {
     const { builder, host, root, part, settle } = setup();
     part('summary').click();

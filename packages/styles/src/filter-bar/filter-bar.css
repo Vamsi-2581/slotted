@@ -40,7 +40,8 @@
     --_active: var(--slotted-tone-secondary-subtle-active, ButtonFace);
     --_invalid: var(--slotted-tone-danger-border, GrayText);
     /* Width as well as colour (WCAG 1.4.1): in `high-contrast` the danger edge is the resting edge's black, so every invalid box adds the edge `text-field` draws, inside its border, where nothing moves. */
-    --_invalid-edge: inset 0 0 0 var(--slotted-control-invalid-edge-width, 1px) var(--_invalid);
+    --_invalid-edge-width: var(--slotted-control-invalid-edge-width, 1px);
+    --_invalid-edge: inset 0 0 0 var(--_invalid-edge-width) var(--_invalid);
     --_duration: var(--slotted-control-transition-duration, var(--slotted-duration-short));
     --_easing: var(--slotted-control-transition-easing, var(--slotted-easing-standard));
 
@@ -110,11 +111,6 @@
     display: flex;
     gap: var(--_gap-sm);
     justify-content: flex-end;
-  }
-
-  [data-ui='filter-bar'][data-part='rule'][data-invalid] [data-part='operator'] {
-    --slotted-select-border-color: var(--_invalid);
-    --slotted-select-shadow: var(--_invalid-edge);
   }
 
   /* ── Composition ──────────────────────────────────────────────────────
@@ -798,13 +794,6 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
-  [data-ui='filter-bar'][data-part='builder']
-    [data-part='rule'][data-invalid]
-    > [data-part='field'] {
-    --slotted-select-border-color: var(--_invalid);
-    --slotted-select-shadow: var(--_invalid-edge);
-  }
-
   /** The group's own controls, under its rows and aligned with them. */
   [data-ui='filter-bar'][data-part='builder'] [data-part='group'] > [data-part='actions'] {
     align-items: center;
@@ -944,6 +933,14 @@
     [data-ui='filter-bar'][data-part='builder'] [data-part='rule'][data-invalid] {
       border-color: var(--_invalid);
       box-shadow: var(--_invalid-edge);
+    }
+
+    /* Forced colours remove the shadow; the edge comes back as an outline. */
+    @media (forced-colors: active) {
+      [data-ui='filter-bar'][data-part='builder'] [data-part='rule'][data-invalid] {
+        outline: var(--_invalid-edge-width) solid CanvasText;
+        outline-offset: calc(-1 * (var(--_border-width) + var(--_invalid-edge-width)));
+      }
     }
 
     /* The sentence: the field at the weight of a name, the operator quiet, the value back at weight. It wraps rather than truncates — on a phone the sentence is what is read. */
@@ -1275,6 +1272,21 @@
   }
 
   @media (forced-colors: active) {
+    /* Forced colours remove the invalid edge's shadow; it comes back as an
+       outline inside the border, and a focused invalid pill draws its ring
+       double. A chip's ring belongs to a segment and leaves it alone. */
+    [data-ui='filter-bar'] [data-part='pill'][data-invalid],
+    [data-ui='filter-bar'] [data-part='chip'][data-invalid] {
+      outline: var(--_invalid-edge-width) solid CanvasText;
+      outline-offset: calc(-1 * (var(--_border-width) + var(--_invalid-edge-width)));
+    }
+
+    [data-ui='filter-bar'] [data-part='pill'][data-invalid]:focus-visible {
+      outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
+        var(--slotted-focus-ring-color, Highlight);
+      outline-offset: var(--slotted-focus-ring-offset, 2px);
+    }
+
     /* The seams would read as a second edge in the system palette; the segments keep one line each. */
     [data-ui='filter-bar'] [data-part='chip'] > * + * {
       border-inline-start-color: GrayText;

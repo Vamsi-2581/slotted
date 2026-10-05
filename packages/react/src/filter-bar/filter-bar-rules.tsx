@@ -295,6 +295,8 @@ export interface ConditionEditorProps {
   withOperator?: boolean | undefined;
   /** Ids for the two parts, which a rule card's sentence names in `aria-controls`. */
   ids?: { operator: string; operand: string } | undefined;
+  /** The rule is invalid: the operator select says so itself, edge and ring. */
+  invalid?: boolean | undefined;
 }
 
 /**
@@ -306,6 +308,7 @@ export function ConditionEditor({
   environment,
   field,
   ids,
+  invalid,
   onConditionChange,
   withOperator = true,
 }: ConditionEditorProps) {
@@ -343,6 +346,7 @@ export function ConditionEditor({
         <div data-part="operator" id={ids?.operator}>
           <Select
             fullWidth
+            {...(invalid ? { invalid: true } : {})}
             items={operators.map((operator) => ({
               label: operatorName(t, operator),
               value: operator,
@@ -447,6 +451,7 @@ export function RuleEditor({
       <div data-part="field" id={`${id}field`}>
         <Select
           fullWidth
+          {...(invalid || !field ? { invalid: true } : {})}
           items={list.map((entry) => ({ label: entry.label, value: entry.key }))}
           onValueChange={(next) => changeField(next as string)}
           size={size}
@@ -472,6 +477,7 @@ export function RuleEditor({
           environment={environment}
           field={field}
           ids={{ operand: `${id}operand`, operator: `${id}operator` }}
+          invalid={invalid}
           onConditionChange={(next) =>
             onRuleChange({
               field: rule.field,

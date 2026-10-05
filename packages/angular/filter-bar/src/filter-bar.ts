@@ -374,6 +374,7 @@ export interface FilterBarEnvironment {
         <sl-select
           [size]="size()"
           [fullWidth]="true"
+          [invalid]="invalid() ? true : undefined"
           [items]="operatorItems()"
           [attr.aria-label]="t('operator')"
           [value]="condition().operator"
@@ -498,6 +499,8 @@ export class SlFilterBarCondition {
   readonly operandTemplates = input<readonly SlFilterBarOperand[]>([]);
   /** Draws the operator control. A chip's value popover leaves it to the chip's operator segment. */
   readonly withOperator = input(true, { transform: booleanAttribute });
+  /** The rule is invalid: the operator select says so itself, edge and ring. */
+  readonly invalid = input(false, { transform: booleanAttribute });
   /** Ids for the two parts, which a rule card's sentence names in `aria-controls`. */
   readonly ids = input<{ operator: string; operand: string } | undefined>(undefined);
   readonly applyRequest = output<void>();
@@ -622,6 +625,7 @@ export class SlFilterBarCondition {
       <sl-select
         [size]="size()"
         [fullWidth]="true"
+        [invalid]="invalid() || !field() ? true : undefined"
         [items]="fieldItems()"
         [attr.aria-label]="t('field')"
         [value]="rule().field"
@@ -641,6 +645,7 @@ export class SlFilterBarCondition {
         [size]="size()"
         [operandTemplates]="operandTemplates()"
         [ids]="{ operator: id + '-operator', operand: id + '-operand' }"
+        [invalid]="invalid()"
         (conditionChange)="changeCondition($event)"
         (applyRequest)="applyRequest.emit()"
       ></div>
@@ -951,6 +956,7 @@ export class SlFilterBarGroup {
       [size]="size()"
       [operandTemplates]="operandTemplates()"
       [withOperator]="withOperator()"
+      [invalid]="invalid()"
       (conditionChange)="change($event)"
       (applyRequest)="done()"
     ></div>

@@ -399,6 +399,29 @@ describe('FilterBar', () => {
     expect(onValueChange.mock.calls[0]![0]).toBeNull();
   });
 
+  it('marks the field select of a builder rule over an unknown field invalid, so it draws its own edge', () => {
+    const value: FilterGroup = {
+      join: 'and',
+      rules: [
+        {
+          field: 'region',
+          filter: {
+            kind: 'set',
+            join: 'and',
+            conditions: [{ operator: 'anyOf', value: ['south'] }],
+          },
+        },
+      ],
+    };
+    render(<Orders defaultValue={value} />);
+    fireEvent.click(part('summary'));
+    const rule = document.querySelector(
+      '[data-ui="filter-bar"][data-part="builder"] [data-part="rule"][data-invalid]',
+    ) as HTMLElement;
+    const select = rule.querySelector('[data-part="field"] [data-ui="select"][data-part="root"]');
+    expect(select?.hasAttribute('data-invalid')).toBe(true);
+  });
+
   it('opens the builder from the summary control and reports the reason', () => {
     const onOpenChange = vi.fn();
     render(<Orders defaultValue={TREE} onOpenChange={onOpenChange} />);

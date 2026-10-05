@@ -557,6 +557,28 @@ describe('PreferencesPage › Appearance', () => {
     await until(harness, () => page().theme === 'nexora-custom-draft', 8000);
   });
 
+  /** The corner has a way back to the theme's own of its own, and the other changes stay. */
+  it('returns the corner to the theme’s own without resetting the rest', async () => {
+    const { harness, root } = await open();
+    choose(root, 'axis-shadow', 'none');
+    harness.detectChanges();
+    const thumb = root.querySelector<HTMLInputElement>('[data-axis=radius] input[type=range]')!;
+    thumb.focus();
+    thumb.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    harness.detectChanges();
+    const draft = () =>
+      harness.fixture.debugElement.query((node) => node.name === 'app-appearance-section')!
+        .componentInstance.draft().customisation;
+    expect(draft()).toMatchObject({ radius: 10, shadow: 'none' });
+    expect(root.querySelector('[data-radius-value]')!.textContent).toMatch(/10 px .*yours/);
+
+    button(root, 'Use the theme’s').click();
+    harness.detectChanges();
+    expect(draft()).toMatchObject({ radius: null, shadow: 'none' });
+    expect(root.querySelector('[data-radius-value]')!.textContent).toMatch(/8 px .*Standard’s own/);
+    expect(root.querySelector('[data-radius-value] button')).toBeNull();
+  });
+
   /** The anatomy is the chosen theme object's, layer by layer. */
   it('reads the anatomy of the chosen theme', async () => {
     const { harness, root } = await open();

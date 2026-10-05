@@ -723,9 +723,21 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                   (valueChange)="chooseRadius($event.value)"
                 ></div>
                 <span slFieldDescription data-radius-value>
-                  {{ radius() }} px on the largest corner{{
-                    draft().customisation.radius === null ? ', ' + themeLabel() + '’s own' : ''
-                  }}.
+                  @if (draft().customisation.radius === null) {
+                    {{ radius() }} px on the largest corner, {{ themeLabel() }}’s own.
+                  } @else {
+                    {{ radius() }} px on the largest corner, yours.
+                    <button
+                      slButton
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      tone="secondary"
+                      (click)="chooseAxis('radius', 'theme')"
+                    >
+                      Use the theme’s
+                    </button>
+                  }
                 </span>
               </div>
               <ng-container

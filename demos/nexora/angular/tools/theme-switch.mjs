@@ -10,7 +10,12 @@
 //   contrast table's badges' corner and case; the first data colour; the label on the solid at the
 //   scheme's floor and the contrast table stating the ratio painted; the start page select's layer
 //   carrying the theme, scheme and seed of `html`; each face the theme names, loaded; and that the
-//   theme cards' specimens draw their own theme without changing the page around them;
+//   theme cards' specimens draw their own theme without changing the page around them; a text
+//   field at rest, under keyboard focus (Tab), invalid, and invalid under focus: Editorial draws it
+//   as a ruled line (bottom edge only, no corner or ground; focus thickens the line in the ring's
+//   colour with no outline; invalid tints the ground and the line with danger) and gives every
+//   control a 1px ring, while every other theme keeps the family's frame (no leak), the default
+//   with absolute values;
 // - with two strongly tinted greys (Ocean #0e7490, Clay #9c6644) and a grey of the reader's own, the
 //   page ground, a table ground and the select's layer carry the grey's hue, and the lines and
 //   hovers stay in the ground's family;
@@ -309,6 +314,77 @@ const overlay = async () => {
   return read;
 };
 
+/** The custom brand colour's text field: a colour field draws its value in a `text-field`. */
+const FIELD = '[data-brand-custom] [data-ui=text-field]';
+/** A key pressed and released through the browser's input pipeline, as a keyboard would. */
+const press = async (key, code, keyCode) => {
+  for (const type of ['keyDown', 'keyUp']) await send('Input.dispatchKeyEvent', { type, key, code, windowsVirtualKeyCode: keyCode, nativeVirtualKeyCode: keyCode });
+};
+/** Waits until the field's frame runs no transition and reads the same twice, a frame apart. */
+const fieldSettled = () => until(`new Promise((resolve) => {
+  const root = document.querySelector('${FIELD}');
+  const read = () => { const s = getComputedStyle(root); return s.borderBottomColor + s.boxShadow + s.backgroundColor + s.outlineStyle; };
+  const first = read();
+  const running = root.getAnimations().some((a) => a.playState === 'running');
+  requestAnimationFrame(() => requestAnimationFrame(() => resolve(!running && read() === first)));
+})`, 5000);
+/** The field's frame as painted, the tokens it is checked against, and the probe button's focus ring. */
+const fieldFacts = () => js(`(() => {
+  const T = window.__theme;
+  const root = document.querySelector('${FIELD}');
+  const input = root.querySelector('[data-part=input]');
+  const style = getComputedStyle(root);
+  const token = (name) => T.rgb(style.getPropertyValue(name).trim()).join(',');
+  const probe = document.querySelector('[data-theme-probe]');
+  return {
+    widths: [style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth].join(' '),
+    radius: style.borderTopLeftRadius,
+    transparent: style.backgroundColor === 'rgba(0, 0, 0, 0)',
+    background: T.rgb(style.backgroundColor).join(','),
+    bottom: T.rgb(style.borderBottomColor).join(','),
+    top: T.rgb(style.borderTopColor).join(','),
+    outline: style.outlineStyle + ' ' + style.outlineWidth,
+    shadow: style.boxShadow,
+    shadowColor: T.rgb((style.boxShadow.match(/(?:rgba?|oklch|oklab|lab|lch|color)\\([^)]*\\)/) ?? ['transparent'])[0]).join(','),
+    ring: token('--slotted-focus-ring-color'),
+    dangerSurface: token('--slotted-tone-danger-surface'),
+    dangerSolid: token('--slotted-tone-danger-solid'),
+    dangerBorder: token('--slotted-tone-danger-border'),
+    control: token('--slotted-control-surface'),
+    invalid: root.hasAttribute('data-invalid'),
+    focused: document.activeElement === input && input.matches(':focus-visible'),
+    probeRing: probe.matches(':focus-visible') ? getComputedStyle(probe).outlineWidth : 'unfocused',
+  };
+})()`);
+/**
+ * The field at rest; invalid with a draft that is no colour; invalid under keyboard focus (Tab from
+ * the swatch before it); under keyboard focus with its value back; and the probe button's ring once
+ * keyboard focus moves to it. Focus then leaves, so the field commits the value it already had and
+ * the page stays as it was.
+ */
+const fieldStates = async () => {
+  const draft = (value) => js(`(() => { const input = document.querySelector('${FIELD} [data-part=input]'); const before = input.value; input.value = ${JSON.stringify(value)}; input.dispatchEvent(new Event('input', { bubbles: true })); return before; })()`);
+  const rest = await fieldFacts();
+  const kept = await draft('#zz');
+  await until(`document.querySelector('${FIELD}').hasAttribute('data-invalid')`, 3000);
+  await fieldSettled();
+  const invalid = await fieldFacts();
+  await js(`document.querySelector('${FIELD} [data-ui=color-picker][data-part=trigger]').focus()`);
+  await press('Tab', 'Tab', 9);
+  await fieldSettled();
+  const invalidFocus = await fieldFacts();
+  await draft(kept);
+  await until(`!document.querySelector('${FIELD}').hasAttribute('data-invalid')`, 3000);
+  await fieldSettled();
+  const focus = await fieldFacts();
+  await js(`document.querySelector('[data-theme-probe]').focus()`);
+  await fieldSettled();
+  const probe = await fieldFacts();
+  await js(`document.querySelector('[data-theme-probe]').blur()`);
+  await fieldSettled();
+  return { rest, invalid, invalidFocus, focus, probeRing: probe.probeRing };
+};
+
 /** The theme cards' specimens: each one's own theme, its title's face and its accent. */
 const samples = () => js(`[...document.querySelectorAll('[data-theme-sample]')].map((sample) => ({
   id: sample.getAttribute('data-theme-sample'),
@@ -520,6 +596,47 @@ try {
         check(`${name}: the badge's corner and case are the theme's`, read.badgeRadius === theme.badgeRadius && read.badgeCaps === theme.badgeCaps, `${read.badgeRadius} ${read.badgeCaps}`);
         const series = await js(`window.__theme.rgb('${theme.data[scheme]}').join(',')`);
         check(`${name}: the first data colour is the theme's ${theme.data[scheme]}`, read.data1 === series, `rgb(${read.data1})`);
+        const field = await fieldStates();
+        const frame = (state) => `${state.widths} · r ${state.radius} · ${state.transparent ? 'no ground' : `rgb(${state.background})`} · outline ${state.outline} · line rgb(${state.bottom})`;
+        if (theme.id === 'nexora-editorial') {
+          check(
+            `${name}: a text field is a ruled line — the bottom edge alone, no corner, no ground`,
+            field.rest.widths === '0px 0px 1px 0px' && field.rest.radius === '0px' && field.rest.transparent,
+            frame(field.rest),
+          );
+          check(
+            `${name}: keyboard focus thickens the field's line in the ring's colour, with no outline`,
+            field.focus.focused && field.focus.outline.startsWith('none') && field.focus.shadow.includes('inset') && field.focus.shadowColor === field.focus.ring && field.focus.bottom === field.focus.ring,
+            `${field.focus.focused ? 'focus-visible' : 'not focus-visible'} · ${frame(field.focus)} · ${field.focus.shadow} · ring rgb(${field.focus.ring})`,
+          );
+          check(
+            `${name}: an invalid field takes the danger tint under a danger line`,
+            field.invalid.invalid && !field.invalid.transparent && field.invalid.background === field.invalid.dangerSurface && field.invalid.bottom === field.invalid.dangerSolid,
+            `${frame(field.invalid)} · danger surface rgb(${field.invalid.dangerSurface}) solid rgb(${field.invalid.dangerSolid})`,
+          );
+          check(
+            `${name}: keyboard focus on an invalid field draws its line in the invalid ring's colour`,
+            field.invalidFocus.focused && field.invalidFocus.invalid && field.invalidFocus.bottom === field.invalidFocus.ring && field.invalidFocus.shadowColor === field.invalidFocus.ring && field.invalidFocus.ring !== field.focus.ring,
+            `${field.invalidFocus.focused ? 'focus-visible' : 'not focus-visible'} · ${frame(field.invalidFocus)} · ${field.invalidFocus.shadow} · ring rgb(${field.invalidFocus.ring}) · valid ring rgb(${field.focus.ring})`,
+          );
+          check(`${name}: every control's focus ring is a hairline`, field.probeRing === '1px', `probe button ${field.probeRing}`);
+        } else {
+          const edges = field.rest.widths.split(' ');
+          check(
+            `${name}: no field rule leaks — four equal edges, an outline ring under keyboard focus, the field's own ground when invalid`,
+            new Set(edges).size === 1 && edges[0] !== '0px' && field.focus.focused && field.focus.outline.startsWith('solid') && !field.focus.shadow.includes('inset') &&
+              field.invalid.invalid && field.invalid.background === field.rest.background && field.invalid.background !== field.invalid.dangerSurface && field.invalid.top === field.invalid.bottom,
+            `rest ${frame(field.rest)} · focus ${frame(field.focus)} · invalid ${frame(field.invalid)}`,
+          );
+          if (theme.id === 'default') {
+            check(
+              `${name}: the field is the family's own — 1px on four edges, 4px corner, the control ground, a 2px ring, a danger edge when invalid`,
+              field.rest.widths === '1px 1px 1px 1px' && field.rest.radius === '4px' && field.rest.background === field.rest.control && field.focus.outline === 'solid 2px' &&
+                field.invalid.top === field.invalid.dangerBorder && field.invalid.bottom === field.invalid.dangerBorder && field.probeRing === '2px',
+              `rest ${frame(field.rest)} · focus ${frame(field.focus)} · invalid ${frame(field.invalid)} · danger border rgb(${field.invalid.dangerBorder}) · probe ${field.probeRing}`,
+            );
+          }
+        }
         if (theme.id === 'nexora-terminal') {
           check(`${name}: a striped table bands its rows in a ground mixed from the theme's line`, read.stripe === read.stripeExpected && read.stripe !== read.plainRow, `stripe rgb(${read.stripe}) · expected rgb(${read.stripeExpected}) · plain rgb(${read.plainRow})`);
         }

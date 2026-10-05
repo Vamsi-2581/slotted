@@ -504,6 +504,15 @@ const brutalist = extendTheme(
  * at half the library's chroma, and a wine accent. Cards are open and airy,
  * the table's head carries no band, tabs are underlined in ink, and badges
  * and column heads are set in small capitals.
+ *
+ * A text field is a ruled line, as on a printed form, on all three levels:
+ * every control's focus ring is a hairline (control tokens); the field has
+ * no ground, and its line is in ink, darker under the pointer and danger
+ * when invalid (the family's tokens); the line is only the bottom edge, with
+ * no corner whatever corner the builder chooses, focus thickens it in the
+ * ring's colour, and an invalid field takes the danger tint under its line
+ * (rules). The family points the ring's colour at the invalid one on an
+ * invalid field, so focus on it draws the line in that colour.
  */
 const editorial = extendTheme(
   defaultTheme,
@@ -526,6 +535,7 @@ const editorial = extendTheme(
       ...durations('160ms', '260ms', '400ms'),
       '--slotted-easing-standard': 'cubic-bezier(0.4, 0, 0.2, 1)',
       '--slotted-control-font-weight': 'var(--slotted-font-weight-medium)',
+      '--slotted-focus-ring-width': 'var(--slotted-border-width-thin)',
     },
     schemes: {
       light: {
@@ -594,6 +604,10 @@ const editorial = extendTheme(
       '--slotted-chart-bar-radius': 'var(--slotted-radius-xs)',
       '--slotted-chart-line-width': '1.5px',
       '--slotted-section-heading-size-md': 'var(--slotted-font-size-2xl)',
+      '--slotted-text-field-background': 'transparent',
+      '--slotted-text-field-border-color': 'var(--slotted-border-strong)',
+      '--slotted-text-field-hover-border-color': 'var(--slotted-text)',
+      '--slotted-text-field-invalid-border-color': 'var(--slotted-tone-danger-solid)',
     },
     rules: [
       `[data-ui='badge'],
@@ -605,6 +619,21 @@ const editorial = extendTheme(
 
 [data-ui='badge'][data-shape='pill'] {
   border-radius: var(--slotted-badge-radius);
+}
+
+[data-ui='text-field'][data-part='root']:not([data-variant='plain']) {
+  border-radius: var(--slotted-radius-none);
+  border-width: 0 0 var(--slotted-control-border-width);
+}
+
+[data-ui='text-field'][data-part='root']:has(> [data-part='input']:focus-visible) {
+  border-block-end-color: var(--slotted-focus-ring-color);
+  box-shadow: inset 0 calc(-1 * var(--slotted-border-width-thick)) 0 var(--slotted-focus-ring-color);
+  outline: none;
+}
+
+[data-ui='text-field'][data-part='root'][data-invalid] {
+  background-color: var(--slotted-tone-danger-surface);
 }`,
     ],
     fonts: facesOf('source-serif', 'fraunces'),

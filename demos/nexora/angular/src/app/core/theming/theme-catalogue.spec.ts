@@ -2,6 +2,7 @@ import {
   checkScheme,
   evaluateRecipe,
   parseSeed,
+  ruleErrors,
   SCHEMES,
   SEED_NAMES,
   type Oklch,
@@ -213,24 +214,15 @@ describe('theme catalogue', () => {
   });
 
   /**
-   * ADR 0004: a theme rule selects by the families' own attributes. Once the
-   * attribute selectors, the combinators and the pseudo-classes are taken
-   * out, nothing is left: no element name, no class, no id.
+   * ADR 0004: a theme rule selects by the families' public hooks and reads
+   * only tokens. `defineTheme` holds every rule given as text to that policy,
+   * so each theme here exists only because its rules passed it;
+   * `ruleErrors` is the same check, read directly.
    */
-  it('selects in its rules by the families’ public attributes only', () => {
-    const PUBLIC =
-      /\[data-(ui|part|variant|tone|size|shape|selected|checked|orientation)(='[a-z-]+')?\]/g;
+  it('selects in its rules by the families’ public hooks only, and reads only tokens', () => {
     for (const id of RUNTIME_THEME_IDS) {
       for (const rule of nexoraTheme(id).rules ?? []) {
-        for (const statement of String(rule).split('}')) {
-          const selector = statement.split('{')[0]!.trim();
-          if (selector === '') continue;
-          const rest = selector
-            .replace(PUBLIC, '')
-            .replace(/::?[a-z-]+(\([^)]*\))?/g, '')
-            .replace(/[\s,>+~]/g, '');
-          expect(rest, `${id}: ${selector}`).toBe('');
-        }
+        expect(ruleErrors(String(rule)), id).toEqual([]);
       }
     }
   });

@@ -742,6 +742,30 @@
       color: Highlight;
     }
 
+    /*
+     * A checked invalid option keeps the checked pair. The theme maps the
+     * danger fill to `ButtonFace`, so the invalid rules above painted the edge
+     * and the dot in the page's white and the dot vanished. The dot is
+     * `Highlight` as for a valid option, and the wider invalid edge takes
+     * `CanvasText`, as does a tile's invalid edge.
+     */
+    [data-ui='radio-group'][data-part='root'][data-invalid] [data-part='control']:checked {
+      background-color: Field;
+      border-color: CanvasText;
+    }
+
+    [data-ui='radio-group'][data-part='root'][data-invalid]
+      [data-part='control']:checked
+      + [data-part='indicator'] {
+      color: Highlight;
+    }
+
+    [data-ui='radio-group'][data-part='root'][data-variant='tile'][data-invalid] [data-part='item'],
+    [data-ui='radio-group'][data-part='root'][data-variant='tile'][data-invalid]
+      [data-part='item']:has([data-part='control']:checked) {
+      --_tile-edge: CanvasText;
+    }
+
     [data-ui='radio-group'] [data-part='control']:disabled {
       background-color: Field;
       border-color: GrayText;

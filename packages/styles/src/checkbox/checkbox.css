@@ -928,11 +928,18 @@
       border-color: Highlight;
     }
 
-    /* The parting line is a shadow, which forced colours remove: it comes back
-       as an outline in the page's colour inside the border, and a focused
-       checked invalid box draws its ring double. */
+    /*
+     * A checked invalid box keeps the checked pair. The theme maps the danger
+     * fill to `ButtonFace`, so the invalid rule above painted fill, border and
+     * mark in the page's white and the box looked unchecked. The wider border
+     * takes `CanvasText`, and the parting line, a shadow forced colours remove,
+     * comes back as an outline in the page's colour inside it; a focused one
+     * draws its ring double.
+     */
     [data-ui='checkbox'][data-part='root'][data-invalid] [data-part='control']:checked,
     [data-ui='checkbox'][data-part='root'][data-invalid] [data-part='control']:indeterminate {
+      background-color: Highlight;
+      border-color: CanvasText;
       outline: var(
           --slotted-checkbox-invalid-edge-width,
           var(--slotted-control-invalid-edge-width, 1px)
@@ -972,6 +979,24 @@
     [data-ui='checkbox'] [data-part='control']:checked + [data-part='indicator'],
     [data-ui='checkbox'] [data-part='control']:indeterminate + [data-part='indicator'] {
       color: HighlightText;
+    }
+
+    [data-ui='checkbox'][data-part='root'][data-invalid]
+      [data-part='control']:checked
+      + [data-part='indicator'],
+    [data-ui='checkbox'][data-part='root'][data-invalid]
+      [data-part='control']:indeterminate
+      + [data-part='indicator'] {
+      color: HighlightText;
+    }
+
+    /* A tile's invalid edge is the danger pair, which the theme maps to the
+       page's white; it takes the system's text colour instead. */
+    [data-ui='checkbox'][data-part='root'][data-variant='tile'][data-invalid],
+    [data-ui='checkbox'][data-part='root'][data-variant='tile'][data-invalid]:has(
+        [data-part='control']:is(:checked, :indeterminate)
+      ) {
+      --_tile-edge: CanvasText;
     }
 
     [data-ui='checkbox'] [data-part='control']:disabled {

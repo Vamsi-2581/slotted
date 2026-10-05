@@ -423,7 +423,7 @@ test('parts the border from the fill of a checked invalid box, in forced colours
   const forced = normalized.slice(normalized.lastIndexOf('@media (forced-colors:active)'));
   assert.ok(
     forced.includes(
-      `${root}[data-invalid] [data-part='control']:checked,${root}[data-invalid] [data-part='control']:indeterminate{outline:${edge} solid Canvas;`,
+      `${root}[data-invalid] [data-part='control']:checked,${root}[data-invalid] [data-part='control']:indeterminate{background-color:Highlight;border-color:CanvasText;outline:${edge} solid Canvas;`,
     ),
     forced,
   );
@@ -431,6 +431,31 @@ test('parts the border from the fill of a checked invalid box, in forced colours
     forced,
     /\[data-invalid\] \[data-part='control'\]:checked:focus-visible,[^{]*\{outline:calc\([^;]*\) double/,
   );
+});
+
+/**
+ * Forced colours keep the theme's system colours, and the theme maps the
+ * danger fill to `ButtonFace`: a checked invalid box drew its fill, its border
+ * and its `HighlightText` mark all in the page's white and looked unchecked.
+ * The forced block restates the checked pair for an invalid box too, with the
+ * invalid width in `CanvasText`, and the tile's edge in `CanvasText`.
+ */
+test('keeps a checked invalid box checked under forced colours', () => {
+  const forced = normalized.slice(normalized.lastIndexOf('@media (forced-colors:active)'));
+  const box = `${root}[data-invalid] [data-part='control']`;
+  assert.ok(
+    forced.includes(
+      `${box}:checked,${box}:indeterminate{background-color:Highlight;border-color:CanvasText;`,
+    ),
+    forced,
+  );
+  assert.ok(
+    forced.includes(
+      `${box}:checked + [data-part='indicator'],${box}:indeterminate + [data-part='indicator']{color:HighlightText;}`,
+    ),
+    forced,
+  );
+  assert.match(forced, /\[data-variant='tile'\]\[data-invalid\][^{]*\{--_tile-edge:CanvasText;/);
 });
 
 /**

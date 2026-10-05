@@ -344,6 +344,26 @@ test('transitions the two changes the eye has to follow, from the scale', () => 
  * people who need the difference.
  */
 /**
+ * The theme maps the danger fill to `ButtonFace` under forced colours, and a
+ * checked invalid option painted its edge and its dot in it: the dot vanished
+ * into the field. The forced block restates the checked pair for an invalid
+ * option too, the dot in `Highlight` and the wider edge in `CanvasText`.
+ */
+test('keeps a checked invalid option checked under forced colours', () => {
+  const forced = normalized.slice(normalized.lastIndexOf('@media (forced-colors:active)'));
+  const control = `${root}[data-invalid] [data-part='control']`;
+  assert.ok(
+    forced.includes(`${control}:checked{background-color:Field;border-color:CanvasText;}`),
+    forced,
+  );
+  assert.ok(
+    forced.includes(`${control}:checked + [data-part='indicator']{color:Highlight;}`),
+    forced,
+  );
+  assert.match(forced, /\[data-variant='tile'\]\[data-invalid\][^{]*\{--_tile-edge:CanvasText;/);
+});
+
+/**
  * The edge thickens by `--slotted-control-invalid-edge-width`, the width every
  * invalid control adds (WCAG 1.4.1), as a border so forced colours keep it. A
  * tile adds the same width to whatever its state draws, so a chosen invalid

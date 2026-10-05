@@ -14,14 +14,14 @@ export const CUSTOM_THEME_LOADER = new InjectionToken<() => Promise<CustomThemeM
 
 /**
  * One builder sheet on the page, under one name: the saved customisation that
- * `html` names, or the candidate the preview shows. A request is compiled
- * after `delay` ms in which no other request arrived, so a burst of changes —
- * a slider dragged across its range — compiles once, with its last value. A
- * request for what is already on the page compiles nothing. The compile
- * replaces the sheet in place (`applyTheme`), so the name never goes without
- * one once it has had one. A compile that fails — the module does not load,
- * or the theme does not compile — leaves the sheet as it was and says so in
- * `failed` until `retry` or the next request compiles.
+ * `html` names, or the candidate the preferences page is editing. A request
+ * is compiled after `delay` ms in which no other request arrived, so a burst
+ * of changes — a slider dragged across its range — compiles once, with its
+ * last value. A request for what is already on the page compiles nothing.
+ * The compile replaces the sheet in place (`applyTheme`), so the name never
+ * goes without one once it has had one. A compile that fails — the module
+ * does not load, or the theme does not compile — leaves the sheet as it was
+ * and says so in `failed` until `retry` or the next request compiles.
  */
 export class CustomSheet {
   /** The theme on the page and what it was compiled from; `null` before the first compile. */

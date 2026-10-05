@@ -114,7 +114,9 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
  * candidate that differs from it under `nexora-custom-draft`, after 200 ms
  * without a change, so a dragged slider compiles once. `html` names either
  * once its sheet holds what the appearance asks for; until then, and while a
- * compile fails (`customFailed`), it keeps the theme it shows.
+ * compile fails (`customFailed`), it keeps the theme it shows. A candidate
+ * that is dropped — cleared, or equal to the saved customisation — takes its
+ * compile failure with it.
  */
 @Injectable({ providedIn: 'root' })
 export class PreferencesStore {
@@ -240,8 +242,11 @@ export class PreferencesStore {
       if (this.hasSheet(theme)) this.shown = theme;
       else this.useThemes([theme]).catch(() => undefined);
     } else if (this.saved.holds(theme, customisation)) {
+      this.draft.forget();
       this.shown = CUSTOM_THEME_ID;
-    } else if (!this.saved.wants(theme, customisation)) {
+    } else if (this.saved.wants(theme, customisation)) {
+      this.draft.forget();
+    } else {
       this.draft.request(theme, customisation);
       if (this.draft.holds(theme, customisation)) this.shown = DRAFT_THEME_ID;
     }

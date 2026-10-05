@@ -490,6 +490,34 @@ describe('PreferencesStore', () => {
     expect(prefs.customFailed()).toBe(false);
   });
 
+  /**
+   * A candidate that does not compile fails only while it is the candidate:
+   * once it is dropped, the saved customisation is what `html` names and no
+   * failure is reported.
+   */
+  it('drops the failure of a candidate that does not compile once the candidate is cleared', async () => {
+    const prefs = TestBed.inject(PreferencesStore);
+    const html = TestBed.inject(DOCUMENT).documentElement;
+    prefs.update({ customisation: { ...NO_CUSTOMISATION, cards: 'flat' } });
+    await vi.waitFor(() => {
+      TestBed.flushEffects();
+      expect(html.getAttribute('data-slotted-theme')).toBe('nexora-custom');
+    });
+
+    loadBuilder = () => Promise.reject(new Error('chunk'));
+    prefs.preview({
+      ...appearanceOf(prefs.preferences()),
+      customisation: { ...NO_CUSTOMISATION, cards: 'bordered' },
+    });
+    TestBed.flushEffects();
+    await vi.waitFor(() => expect(prefs.customFailed()).toBe(true));
+
+    prefs.preview(null);
+    TestBed.flushEffects();
+    expect(prefs.customFailed()).toBe(false);
+    expect(html.getAttribute('data-slotted-theme')).toBe('nexora-custom');
+  });
+
   /** A stored arrangement the catalogue no longer has falls back to the default. */
   it('reads an arrangement it does not know as the default', () => {
     const prefs = TestBed.inject(PreferencesStore);

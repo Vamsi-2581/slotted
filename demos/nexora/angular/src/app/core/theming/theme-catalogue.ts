@@ -80,9 +80,10 @@ export const RUNTIME_THEME_IDS: readonly string[] = THEME_CATALOGUE.filter(
 ).map((entry) => entry.id);
 
 /**
- * The builder's output: the saved one, which `html` names, and the
- * candidate the preview shows. Two names, so a candidate never repaints the
- * application before Save.
+ * The builder's output, under two names: the saved customisation, and the
+ * candidate the preferences page is editing. `html` names the candidate while
+ * the page is open, so the whole application is drawn in it before Save;
+ * Discard and leaving the page bring back `html` naming the saved one.
  */
 export const CUSTOM_THEME_ID = 'nexora-custom';
 export const DRAFT_THEME_ID = 'nexora-custom-draft';

@@ -683,10 +683,13 @@ rest and under focus; the default theme sets it to
 `--slotted-border-width-thin`, so an invalid edge reads two pixels against one.
 It is what tells an invalid control from a valid one where colour cannot: in
 `high-contrast` the control edge, `--slotted-tone-danger-border` and both rings
-are the same black (WCAG 1.4.1). Every family that paints an invalid state
-reads it, most through a family token such as
+are the same black (WCAG 1.4.1). Every family that draws an invalid edge reads
+it, most through a family token such as
 `--slotted-text-field-invalid-edge-width`; `checkbox` and `radio-group` add it
-to the width of their border, which forced colours keep.
+to the width of their border, which forced colours keep, and a frame whose edge
+is a shadow restates it under forced colours as an outline. The families that
+state invalid without an edge, `wizard`'s colour-only progress segments among
+them, are listed in `packages/styles/src/invalid-edge.test.mjs`.
 
 The five tones — `accent`, `secondary`, `success`, `warning` and `danger` —
 each carry the same nine roles: `solid`, `solid-hover`, `solid-active`,

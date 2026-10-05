@@ -289,6 +289,7 @@ describe('PreferencesStore', () => {
       shadow: null,
       motion: 'off',
       cards: 'flat',
+      tabs: null,
       chart: null,
     });
     expect(prefs.preferences().status).toEqual({ success: '#16a34a', warning: null, danger: null });

@@ -1356,11 +1356,20 @@
    * shorten, which is what makes stopping the only available answer.
    */
   @media (prefers-reduced-motion: reduce) {
+    /**
+     * Important, and that is the point of the rule: the preference outranks
+     * every animated rule in the family whatever its specificity. Without it
+     * the travelling bar, the turning ring, the sweep, the drift and the
+     * morph all kept moving, because each is started by a selector that names
+     * its shape and its state and so outweighs one that names the part. A
+     * `path` is left out: the wave's paths carry the paused ramp below, which
+     * is a value and survives.
+     */
     [data-ui='progress-indicator'][data-part='root'],
-    [data-ui='progress-indicator'] [data-part='indicator'],
+    [data-ui='progress-indicator'] [data-part='indicator']:not(path),
     [data-ui='progress-indicator'] [data-part='track'],
     [data-ui='progress-indicator'] svg {
-      animation: none;
+      animation: none !important;
     }
 
     /**

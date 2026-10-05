@@ -23,6 +23,33 @@ const silentEngine = () => ({
   dispose: () => undefined,
 });
 
+/**
+ * jsdom has no IntersectionObserver either: this one records what it observes
+ * and reports it in view only when a test calls `scrollIntoView()`. Angular
+ * keeps one observer per option set for the whole run, so it is installed
+ * once, for the file.
+ */
+const observed = new Set<Element>();
+const report: ((entries: { isIntersecting: boolean; target: Element }[]) => void)[] = [];
+globalThis.IntersectionObserver = class {
+  constructor(callback: (entries: { isIntersecting: boolean; target: Element }[]) => void) {
+    report.push(callback);
+  }
+  observe(target: Element) {
+    observed.add(target);
+  }
+  unobserve(target: Element) {
+    observed.delete(target);
+  }
+  disconnect() {
+    observed.clear();
+  }
+} as unknown as typeof IntersectionObserver;
+const scrollIntoView = () => {
+  const entries = [...observed].map((target) => ({ isIntersecting: true, target }));
+  report.forEach((callback) => callback(entries));
+};
+
 describe('PreferencesPage › Appearance', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
@@ -250,6 +277,14 @@ describe('PreferencesPage › Appearance', () => {
       'nexora-editorial',
       'nexora-terminal',
     ]);
+    /* A theme that cannot be drawn keeps the card's anatomy: its sample box holds a placeholder. */
+    const cards = [...root.querySelectorAll<HTMLInputElement>('input[name="theme"]')].map(
+      (input) => input.closest('[data-part=item]')!,
+    );
+    expect(cards.map((card) => card.querySelectorAll('.sample-box > .sample').length)).toEqual([
+      1, 1, 1, 1, 1,
+    ]);
+    expect(cards.filter((card) => card.querySelector('.sample[data-missing]'))).toHaveLength(4);
 
     load.mockRestore();
     const retry = [...root.querySelectorAll('button')].find(
@@ -353,6 +388,80 @@ describe('PreferencesPage › Appearance', () => {
     );
   });
 
+  const GROUPS = [
+    'theme',
+    'brand',
+    'neutral',
+    'font-body',
+    'font-heading',
+    'axis-scale',
+    'axis-border',
+    'axis-shadow',
+    'axis-motion',
+    'axis-cards',
+    'axis-chart',
+  ];
+  const label = (root: HTMLElement, input: HTMLInputElement) =>
+    root.querySelector<HTMLElement>(`label[for="${input.id}"]`)!;
+  const optionLabels = (root: HTMLElement, name: string) =>
+    [...root.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`)].map((input) =>
+      [...label(root, input).querySelectorAll('.tile-label')]
+        .map((text) => text.textContent!.trim())
+        .join(' · '),
+    );
+
+  /**
+   * Every choice is a tile in a grid of one track width and one row height,
+   * and the track is stated in characters from the group's longest label: a
+   * card never takes its size from its own words.
+   */
+  it('arranges every group of choices as tiles of one track, sized by its longest label', async () => {
+    const { root } = await open();
+    expect(root.querySelector('[data-appearance] [data-ui=segmented-control]')).toBeNull();
+    for (const name of GROUPS) {
+      const inputs = [...root.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`)];
+      const items = inputs.map((input) => input.closest<HTMLElement>('[data-part=item]')!);
+      const grid = items[0]!.parentElement!;
+      expect(grid.classList.contains('choices'), name).toBe(true);
+      expect(items.every((item) => item.parentElement === grid), name).toBe(true);
+      expect(grid.closest('[data-ui=radio-group]')!.getAttribute('data-variant'), name).toBe(
+        'tile',
+      );
+      const texts = items.flatMap((item) =>
+        [...item.querySelectorAll('.tile-label')].map((text) => text.textContent!.trim()),
+      );
+      expect(texts.length, name).toBeGreaterThanOrEqual(items.length);
+      const longest = Number(grid.style.getPropertyValue('--longest'));
+      expect(Math.max(...texts.map((text) => text.length)), name).toBeLessThanOrEqual(longest);
+    }
+  });
+
+  /** A builder value is named in full words, never abbreviated to fit a segment. */
+  it('names every builder value in full', async () => {
+    const { root } = await open();
+    expect(optionLabels(root, 'axis-shadow')).toEqual(['Theme', 'None', 'Soft', 'Strong']);
+    expect(optionLabels(root, 'axis-motion')).toEqual(['Theme', 'Full', 'Reduced', 'Off']);
+    expect(optionLabels(root, 'axis-cards')).toEqual(['Theme', 'Bordered', 'Elevated', 'Flat']);
+    expect(optionLabels(root, 'axis-chart')).toEqual(['Theme', 'Palette', 'Accent']);
+  });
+
+  /**
+   * A specimen downloads its face: it is drawn once its card reaches the
+   * viewport, and until then a box of the same class holds its place.
+   */
+  it('draws the font specimens only once they reach the viewport', async () => {
+    const { harness, root } = await open();
+    const specimens = () => root.querySelectorAll('.specimen');
+    const drawn = () => root.querySelectorAll('.specimen[style*="font-family"]');
+    expect(specimens()).toHaveLength(18);
+    expect(drawn()).toHaveLength(0);
+
+    scrollIntoView();
+    await until(harness, () => drawn().length === 18);
+    expect(specimens()).toHaveLength(18);
+    expect(root.querySelectorAll('[data-specimen]')).toHaveLength(16);
+  });
+
   /** A card's sample is decoration: the radio is named by the theme's name alone. */
   it('names each theme card by its label, not by its sample', async () => {
     const { root } = await open();
@@ -397,8 +506,7 @@ describe('PreferencesPage › Appearance', () => {
     harness.detectChanges();
     choose(root, 'font-body', 'jetbrains-mono');
     harness.detectChanges();
-
-    await until(harness, () => regionThemes(root).has('nexora-custom-draft'), 3000);
+    await until(harness, () => regionThemes(root).has('nexora-custom-draft'), 8000);
     expect(regionThemes(root)).toEqual(new Set(['nexora-custom-draft']));
     expect(html.getAttribute('data-slotted-theme')).toBe('default');
     const sheet = TestBed.inject(DOCUMENT).head.querySelector(

@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -30,7 +31,6 @@ import {
   SlSectionHeading,
   SlSectionTitle,
 } from '@slotted/angular/section';
-import { SlSegment, SlSegmentedControl } from '@slotted/angular/segmented-control';
 import { SlSkeleton, SlSkeletonRegion } from '@slotted/angular/skeleton';
 import { SlSlider } from '@slotted/angular/slider';
 import { SlStack } from '@slotted/angular/stack';
@@ -81,7 +81,7 @@ import { AnatomyTable } from './anatomy-table';
 import { AppearancePreview } from './appearance-preview';
 import { ContrastTable } from './contrast-table';
 
-/** The builder's segmented axes, their words and the words of each value. */
+/** The builder's axes of fixed values, their words and the words of each value. */
 const AXES = [
   {
     axis: 'scale',
@@ -101,7 +101,7 @@ const AXES = [
     description: 'How far raised things stand off the page.',
     options: SHADOW_CHOICES.map((value) => ({
       value,
-      label: { none: 'None', soft: 'Soft', strong: 'Deep' }[value],
+      label: { none: 'None', soft: 'Soft', strong: 'Strong' }[value],
     })),
   },
   {
@@ -110,7 +110,7 @@ const AXES = [
     description: 'How long transitions take: the theme’s, the library’s, half of it, or none.',
     options: MOTION_CHOICES.map((value) => ({
       value,
-      label: { normal: 'Full', reduced: 'Less', off: 'Off' }[value],
+      label: { normal: 'Full', reduced: 'Reduced', off: 'Off' }[value],
     })),
   },
   {
@@ -119,7 +119,7 @@ const AXES = [
     description: 'A card’s and a stat card’s edge: a line, a lift on a shadow, or a sunken fill.',
     options: CARD_CHOICES.map((value) => ({
       value,
-      label: { bordered: 'Line', elevated: 'Lift', flat: 'Fill' }[value],
+      label: { bordered: 'Bordered', elevated: 'Elevated', flat: 'Flat' }[value],
     })),
   },
   {
@@ -132,6 +132,9 @@ const AXES = [
     })),
   },
 ] as const;
+
+/** The length, in characters, of the longest of `labels`: a choice grid's narrowest track. */
+const longest = (...labels: readonly string[]) => Math.max(...labels.map((label) => label.length));
 
 const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
   success: 'Success',
@@ -167,6 +170,7 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
     AnatomyTable,
     AppearancePreview,
     ContrastTable,
+    NgTemplateOutlet,
     SlAlert,
     SlAlertActions,
     SlAlertContent,
@@ -189,8 +193,6 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
     SlSectionHeader,
     SlSectionHeading,
     SlSectionTitle,
-    SlSegment,
-    SlSegmentedControl,
     SlSkeleton,
     SlSkeletonRegion,
     SlSlider,
@@ -200,27 +202,54 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
-    /* The choices, as grids of framed tiles of equal width. */
-    /* A tile is as tall as its own content: a short description leaves no empty band. */
-    .themes,
-    .brands,
-    .fonts,
-    .colours {
+    /*
+     * A group of choices is a grid of framed tiles with one track width and
+     * one row height for the whole group: grid-auto-rows: 1fr and the
+     * stretch a grid item takes by default. A track is never narrower than the
+     * group's longest label (--longest, in characters) plus two, set in the
+     * ch of the face the radio group draws its labels in, plus what stands
+     * before the label (--_lead) and the tile's own frame; --_floor is
+     * the narrowest a tile's other content allows. A label stays on one line.
+     */
+    .choices {
+      --_lead: 0px;
+      --_floor: 0px;
+      --_frame: calc(
+        2 * (var(--slotted-control-padding-inline-md) + var(--slotted-control-border-width))
+      );
       display: grid;
       gap: var(--slotted-space-4);
-      align-items: start;
+      grid-auto-rows: 1fr;
+      grid-template-columns: repeat(
+        auto-fill,
+        minmax(
+          min(
+            calc(
+              max(var(--_floor), var(--_lead) + (var(--longest) + 2) * 1ch) + var(--_frame)
+            ),
+            100%
+          ),
+          1fr
+        )
+      );
+    }
+    .tile-label {
+      white-space: nowrap;
     }
     .themes {
-      grid-template-columns: repeat(auto-fill, minmax(min(12rem, 100%), 1fr));
+      --_floor: 12rem;
     }
-    .brands {
-      grid-template-columns: repeat(auto-fill, minmax(min(8.5rem, 100%), 1fr));
+    .swatches {
+      --_lead: calc(var(--slotted-control-icon-size-lg) + var(--slotted-space-3));
     }
+    /* The specimen: seven characters of the second-largest size, in the widest face offered. */
     .fonts {
-      grid-template-columns: repeat(auto-fill, minmax(min(9.5rem, 100%), 1fr));
+      --_floor: calc(5 * var(--slotted-font-size-2xl));
     }
     /* LA-05: colour fields side by side start at the line's top. */
     .colours {
+      display: grid;
+      align-items: start;
       gap: var(--slotted-space-6) var(--slotted-space-7);
       grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
     }
@@ -300,6 +329,12 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
       background: var(--slotted-surface-sunken);
       box-shadow: inset 0 0 0 var(--slotted-space-2) var(--slotted-text-muted);
     }
+    /* A theme that cannot be drawn keeps its sample box, as an empty frame in the page's own theme. */
+    .sample[data-missing] {
+      border-style: dashed;
+      background: var(--slotted-surface-sunken);
+      box-shadow: none;
+    }
     /* A sample whose theme's sheet is not on the page keeps its box and draws nothing. */
     .reserved {
       visibility: hidden;
@@ -362,12 +397,14 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                   [value]="draft().theme"
                   (valueChange)="patch.emit({ theme: $event.value })"
                 >
-                  <div class="themes">
+                  <div class="choices themes" [style.--longest]="longest.themes">
                     @for (entry of themes; track entry.id) {
                       <div slRadio [value]="entry.id" [disabled]="unavailable(entry.id)">
                         <span slStack [gap]="3">
-                          @if (!unavailable(entry.id)) {
-                            <span class="sample-box">
+                          <span class="sample-box">
+                            @if (unavailable(entry.id)) {
+                              <span class="sample" data-missing aria-hidden="true"></span>
+                            } @else {
                               <span
                                 class="sample"
                                 aria-hidden="true"
@@ -388,9 +425,9 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                                   >
                                 </span>
                               </span>
-                            </span>
-                          }
-                          {{ entry.label }}
+                            }
+                          </span>
+                          <span class="tile-label">{{ entry.label }}</span>
                         </span>
                       </div>
                     }
@@ -441,9 +478,9 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                   [value]="draft().brand.preset"
                   (valueChange)="chooseBrand($event.value)"
                 >
-                  <div class="brands">
+                  <div class="choices swatches" [style.--longest]="longest.brands">
                     <div slRadio value="theme">
-                      <span slInline [gap]="3">
+                      <span slInline [gap]="3" wrap="nowrap">
                         <span slSkeleton
                           ><span
                             class="swatch"
@@ -454,12 +491,12 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                             [seeds]="themeAccent()"
                           ></span
                         ></span>
-                        Theme
+                        <span class="tile-label">Theme</span>
                       </span>
                     </div>
                     @for (preset of brands; track preset.id) {
                       <div slRadio [value]="preset.id">
-                        <span slInline [gap]="3">
+                        <span slInline [gap]="3" wrap="nowrap">
                           <span slSkeleton
                             ><span
                               class="swatch"
@@ -470,12 +507,12 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                               [seeds]="{ accent: preset.color }"
                             ></span
                           ></span>
-                          {{ preset.label }}
+                          <span class="tile-label">{{ preset.label }}</span>
                         </span>
                       </div>
                     }
                     <div slRadio value="custom">
-                      <span slInline [gap]="3">
+                      <span slInline [gap]="3" wrap="nowrap">
                         <span slSkeleton
                           ><span
                             class="swatch"
@@ -486,7 +523,7 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                             [seeds]="{ accent: draft().brand.custom }"
                           ></span
                         ></span>
-                        Custom
+                        <span class="tile-label">Custom</span>
                       </span>
                     </div>
                   </div>
@@ -552,10 +589,10 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                   [value]="draft().neutral"
                   (valueChange)="chooseNeutral($event.value)"
                 >
-                  <div class="brands">
+                  <div class="choices swatches" [style.--longest]="longest.neutrals">
                     @for (preset of neutrals; track preset.id) {
                       <div slRadio [value]="preset.id">
-                        <span slInline [gap]="3">
+                        <span slInline [gap]="3" wrap="nowrap">
                           <span slSkeleton
                             ><span
                               class="swatch"
@@ -569,7 +606,7 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                               "
                             ></span
                           ></span>
-                          {{ preset.label }}
+                          <span class="tile-label">{{ preset.label }}</span>
                         </span>
                       </div>
                     }
@@ -589,19 +626,23 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                     [value]="axisValue(picker.axis)"
                     (valueChange)="chooseAxis(picker.axis, $event.value)"
                   >
-                    <div class="fonts">
+                    <div class="choices fonts" [style.--longest]="longest.fonts">
                       <div slRadio value="theme">
                         <span class="font-option">
-                          <!-- A specimen is its face: the option's own data, not a theme's choice. -->
-                          <span
-                            class="specimen"
-                            aria-hidden="true"
-                            [style.font-family]="ownFont(picker.axis).stack"
-                            [style.font-weight]="picker.weight"
-                            >Ag 1234</span
-                          >
-                          <span>Theme</span>
-                          <span slText size="xs" tone="muted">{{
+                          <!-- A specimen downloads its face: drawn once it reaches the viewport. -->
+                          @defer (on viewport) {
+                            <span
+                              class="specimen"
+                              aria-hidden="true"
+                              [style.font-family]="ownFont(picker.axis).stack"
+                              [style.font-weight]="picker.weight"
+                              >Ag 1234</span
+                            >
+                          } @placeholder {
+                            <span class="specimen" aria-hidden="true"></span>
+                          }
+                          <span class="tile-label">Theme</span>
+                          <span class="tile-label" slText size="xs" tone="muted">{{
                             ownFont(picker.axis).label
                           }}</span>
                         </span>
@@ -609,16 +650,22 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                       @for (family of fonts; track family.id) {
                         <div slRadio [value]="family.id">
                           <span class="font-option">
-                            <span
-                              class="specimen"
-                              aria-hidden="true"
-                              [attr.data-specimen]="family.id"
-                              [style.font-family]="family.stack"
-                              [style.font-weight]="picker.weight"
-                              >Ag 1234</span
-                            >
-                            <span>{{ family.label }}</span>
-                            <span slText size="xs" tone="muted">{{ family.kind }}</span>
+                            @defer (on viewport) {
+                              <span
+                                class="specimen"
+                                aria-hidden="true"
+                                [attr.data-specimen]="family.id"
+                                [style.font-family]="family.stack"
+                                [style.font-weight]="picker.weight"
+                                >Ag 1234</span
+                              >
+                            } @placeholder {
+                              <span class="specimen" aria-hidden="true"></span>
+                            }
+                            <span class="tile-label">{{ family.label }}</span>
+                            <span class="tile-label" slText size="xs" tone="muted">{{
+                              family.kind
+                            }}</span>
                           </span>
                         </div>
                       }
@@ -626,23 +673,9 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                   </div>
                 </div>
               }
-              @for (entry of axes.slice(0, 1); track entry.axis) {
-                <div slField [attr.data-axis]="entry.axis">
-                  <label slFieldLabel>{{ entry.label }}</label>
-                  <div
-                    slSegmentedControl
-                    [name]="'axis-' + entry.axis"
-                    [value]="axisValue(entry.axis)"
-                    (valueChange)="chooseAxis(entry.axis, $event.value)"
-                  >
-                    <label slSegment value="theme">Theme</label>
-                    @for (option of entry.options; track option.value) {
-                      <label slSegment [value]="option.value">{{ option.label }}</label>
-                    }
-                  </div>
-                  <span slFieldDescription>{{ entry.description }}</span>
-                </div>
-              }
+              <ng-container
+                *ngTemplateOutlet="axisGroup; context: { $implicit: axes.slice(0, 1) }"
+              />
 
               <h4 slHeading size="sm">Shape and depth</h4>
               <div slField data-axis="radius">
@@ -662,42 +695,38 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                   }}.
                 </span>
               </div>
-              @for (entry of axes.slice(1, 4); track entry.axis) {
-                <div slField [attr.data-axis]="entry.axis">
-                  <label slFieldLabel>{{ entry.label }}</label>
-                  <div
-                    slSegmentedControl
-                    [name]="'axis-' + entry.axis"
-                    [value]="axisValue(entry.axis)"
-                    (valueChange)="chooseAxis(entry.axis, $event.value)"
-                  >
-                    <label slSegment value="theme">Theme</label>
-                    @for (option of entry.options; track option.value) {
-                      <label slSegment [value]="option.value">{{ option.label }}</label>
-                    }
-                  </div>
-                  <span slFieldDescription>{{ entry.description }}</span>
-                </div>
-              }
+              <ng-container
+                *ngTemplateOutlet="axisGroup; context: { $implicit: axes.slice(1, 4) }"
+              />
 
               <h4 slHeading size="sm">Components</h4>
-              @for (entry of axes.slice(4); track entry.axis) {
-                <div slField [attr.data-axis]="entry.axis">
-                  <label slFieldLabel>{{ entry.label }}</label>
-                  <div
-                    slSegmentedControl
-                    [name]="'axis-' + entry.axis"
-                    [value]="axisValue(entry.axis)"
-                    (valueChange)="chooseAxis(entry.axis, $event.value)"
-                  >
-                    <label slSegment value="theme">Theme</label>
-                    @for (option of entry.options; track option.value) {
-                      <label slSegment [value]="option.value">{{ option.label }}</label>
-                    }
+              <ng-container *ngTemplateOutlet="axisGroup; context: { $implicit: axes.slice(4) }" />
+
+              <!-- A builder axis: its theme's own value first, then each value in full words. -->
+              <ng-template #axisGroup let-entries>
+                @for (entry of entries; track entry.axis) {
+                  <div slField [attr.data-axis]="entry.axis">
+                    <label slFieldLabel>{{ entry.label }}</label>
+                    <span slFieldDescription>{{ entry.description }}</span>
+                    <div
+                      slRadioGroup
+                      [name]="'axis-' + entry.axis"
+                      variant="tile"
+                      [value]="axisValue(entry.axis)"
+                      (valueChange)="chooseAxis(entry.axis, $event.value)"
+                    >
+                      <div class="choices" [style.--longest]="longest.axes">
+                        <div slRadio value="theme"><span class="tile-label">Theme</span></div>
+                        @for (option of entry.options; track option.value) {
+                          <div slRadio [value]="option.value">
+                            <span class="tile-label">{{ option.label }}</span>
+                          </div>
+                        }
+                      </div>
+                    </div>
                   </div>
-                  <span slFieldDescription>{{ entry.description }}</span>
-                </div>
-              }
+                }
+              </ng-template>
             </div>
 
             <div slStack [gap]="5" data-appearance-group="scheme">
@@ -800,6 +829,13 @@ export class AppearanceSection {
       weight: 'var(--slotted-font-weight-semibold)',
     },
   ] as const;
+  protected readonly longest = {
+    themes: longest(...THEME_CATALOGUE.map((entry) => entry.label)),
+    brands: longest('Theme', 'Custom', ...BRAND_PRESETS.map((preset) => preset.label)),
+    neutrals: longest(...NEUTRAL_PRESETS.map((preset) => preset.label)),
+    fonts: longest('Theme', ...FONT_FAMILIES.flatMap((family) => [family.label, family.kind])),
+    axes: longest('Theme', ...AXES.flatMap((entry) => entry.options.map((option) => option.label))),
+  };
   protected readonly radiusRange = RADIUS_RANGE;
   protected readonly schemes: readonly Scheme[] = ['light', 'dark', 'high-contrast'];
   protected readonly presetColors = BRAND_PRESETS.map((preset) => preset.color);
@@ -953,7 +989,7 @@ export class AppearanceSection {
     return value === null ? 'theme' : String(value);
   }
 
-  /** A segment's value, read back through the same check as storage; `theme` clears the axis. */
+  /** A choice's value, read back through the same check as storage; `theme` clears the axis. */
   protected chooseAxis(axis: CustomisationAxis, value: unknown): void {
     const raw = value === 'theme' ? null : /^\d+$/.test(String(value)) ? Number(value) : value;
     const next = readCustomisation({ ...this.draft().customisation, [axis]: raw });

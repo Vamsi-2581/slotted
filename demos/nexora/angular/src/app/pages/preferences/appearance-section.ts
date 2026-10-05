@@ -63,6 +63,7 @@ import {
   readCustomisation,
   SCALE_CHOICES,
   SHADOW_CHOICES,
+  TAB_CHOICES,
   type Customisation,
   type CustomisationAxis,
 } from '../../core/theming/customisation';
@@ -117,6 +118,15 @@ const AXES = [
     options: CARD_CHOICES.map((value) => ({
       value,
       label: { bordered: 'Bordered', elevated: 'Elevated', flat: 'Flat' }[value],
+    })),
+  },
+  {
+    axis: 'tabs',
+    label: 'Tabs',
+    description: 'The selected tab: underlined on the tab strip’s line, or a pill on the accent’s ground.',
+    options: TAB_CHOICES.map((value) => ({
+      value,
+      label: { underline: 'Underline', pill: 'Pill' }[value],
     })),
   },
   {

@@ -18,6 +18,7 @@ describe('customisation', () => {
     shadow: 'strong',
     motion: 'off',
     cards: 'elevated',
+    tabs: 'pill',
     chart: 'accent',
   };
 
@@ -42,6 +43,7 @@ describe('customisation', () => {
       shadow: null,
       motion: 'fast',
       cards: 1,
+      tabs: 'segmented',
       chart: 'accent',
     });
     expect(read).toEqual({ ...NO_CUSTOMISATION, chart: 'accent' });

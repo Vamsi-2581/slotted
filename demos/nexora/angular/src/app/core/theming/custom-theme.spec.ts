@@ -11,9 +11,10 @@ import {
   NO_CUSTOMISATION,
   SCALE_CHOICES,
   SHADOW_CHOICES,
+  TAB_CHOICES,
   type Customisation,
 } from './customisation';
-import { nexoraTheme } from './nexora-themes';
+import { nexoraTheme, TAB_STYLES } from './nexora-themes';
 import { THEME_CATALOGUE } from './theme-catalogue';
 
 const set = (axes: Partial<Customisation>): Customisation => ({ ...NO_CUSTOMISATION, ...axes });
@@ -37,6 +38,7 @@ describe('customTheme', () => {
       ...SHADOW_CHOICES.map((shadow) => ({ shadow })),
       ...MOTION_CHOICES.map((motion) => ({ motion })),
       ...CARD_CHOICES.map((cards) => ({ cards })),
+      ...TAB_CHOICES.map((tabs) => ({ tabs })),
       ...CHART_CHOICES.map((chart) => ({ chart })),
       {
         radius: 16,
@@ -47,6 +49,7 @@ describe('customTheme', () => {
         shadow: 'strong',
         motion: 'reduced',
         cards: 'flat',
+        tabs: 'pill',
         chart: 'accent',
       },
     ];
@@ -140,6 +143,37 @@ describe('customTheme', () => {
     expect(customOverrides(set({ chart: 'palette' })).components).toMatchObject({
       '--slotted-chart-color-1': 'var(--slotted-data-1)',
     });
+  });
+
+  /**
+   * The tabs axis is the same two styles a catalogue theme draws its tabs
+   * with: the marker's and the track's tokens, and the rule no token reaches.
+   * Its rule comes after the theme's own in the same layer, so an underline
+   * laid over Friendly's pill undoes it.
+   */
+  it('draws the selected tab as an underline or a pill, over any theme', () => {
+    const pill = customOverrides(set({ tabs: 'pill' }));
+    expect(pill.components).toMatchObject({
+      '--slotted-tabs-marker-color': 'transparent',
+      '--slotted-tabs-hover-marker-color': 'transparent',
+      '--slotted-tabs-track-color': 'transparent',
+    });
+    expect(pill.rules).toEqual([TAB_STYLES.pill.rule]);
+    expect(pill.rules![0]).toMatch(/border-radius: var\(--slotted-radius-full\)/);
+
+    const underline = customOverrides(set({ tabs: 'underline' }));
+    expect(underline.components).toMatchObject({
+      '--slotted-tabs-marker-color': 'var(--slotted-tone-accent-solid)',
+      '--slotted-tabs-track-color': 'var(--slotted-border-subtle)',
+    });
+    expect(underline.rules).toEqual([TAB_STYLES.underline.rule]);
+    expect(underline.rules![0]).toMatch(/background-color: transparent;/);
+
+    expect(nexoraTheme('nexora-friendly').rules).toContain(TAB_STYLES.pill.rule);
+    const css = renderTheme(customTheme('nexora-friendly', set({ tabs: 'underline' }), 'x'));
+    expect(css.lastIndexOf('background-color: transparent;')).toBeGreaterThan(
+      css.indexOf('background-color: var(--slotted-tone-accent-surface);'),
+    );
   });
 
   /**

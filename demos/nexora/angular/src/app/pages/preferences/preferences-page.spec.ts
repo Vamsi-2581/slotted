@@ -396,6 +396,7 @@ describe('PreferencesPage › Appearance', () => {
     'axis-shadow',
     'axis-motion',
     'axis-cards',
+    'axis-tabs',
     'axis-chart',
   ];
   const label = (root: HTMLElement, input: HTMLInputElement) =>
@@ -439,6 +440,7 @@ describe('PreferencesPage › Appearance', () => {
     expect(optionLabels(root, 'axis-shadow')).toEqual(['Theme', 'None', 'Soft', 'Strong']);
     expect(optionLabels(root, 'axis-motion')).toEqual(['Theme', 'Full', 'Reduced', 'Off']);
     expect(optionLabels(root, 'axis-cards')).toEqual(['Theme', 'Bordered', 'Elevated', 'Flat']);
+    expect(optionLabels(root, 'axis-tabs')).toEqual(['Theme', 'Underline', 'Pill']);
     expect(optionLabels(root, 'axis-chart')).toEqual(['Theme', 'Palette', 'Accent']);
   });
 

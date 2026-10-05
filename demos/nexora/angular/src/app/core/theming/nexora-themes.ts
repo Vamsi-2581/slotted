@@ -115,6 +115,39 @@ const LIGHT_SOLID_ACCENT: Edits = Object.fromEntries(
   ]),
 );
 
+/**
+ * The two ways a theme draws the line tabs' selected item: underlined by the
+ * family's marker on its track, or a pill on the accent's surface with no
+ * marker and no track. Each is the marker's and the track's tokens and the
+ * one rule no token reaches, and each rule undoes the other's: the later of
+ * the two in `slotted.theme-rules` wins, so the builder's choice holds over a
+ * theme's own.
+ */
+export const TAB_STYLES = {
+  underline: {
+    components: {
+      '--slotted-tabs-marker-color': 'var(--slotted-tone-accent-solid)',
+      '--slotted-tabs-hover-marker-color': 'var(--slotted-border-strong)',
+      '--slotted-tabs-track-color': 'var(--slotted-border-subtle)',
+    },
+    rule: `[data-ui='tabs'][data-variant='line'] [data-part='item'][data-selected] {
+  background-color: transparent;
+  border-radius: 0;
+}`,
+  },
+  pill: {
+    components: {
+      '--slotted-tabs-marker-color': 'transparent',
+      '--slotted-tabs-hover-marker-color': 'transparent',
+      '--slotted-tabs-track-color': 'transparent',
+    },
+    rule: `[data-ui='tabs'][data-variant='line'] [data-part='item'][data-selected] {
+  background-color: var(--slotted-tone-accent-surface);
+  border-radius: var(--slotted-radius-full);
+}`,
+  },
+} as const;
+
 /** The library's type sizes, in rem, from xs to 4xl. */
 const SIZE_STEPS = ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl'] as const;
 const sizes = (rem: readonly number[]) =>
@@ -278,9 +311,7 @@ const friendly = extendTheme(
       '--slotted-stat-card-padding-inline': 'var(--slotted-space-7)',
       '--slotted-badge-radius': 'var(--slotted-radius-full)',
       '--slotted-badge-font-weight': 'var(--slotted-font-weight-semibold)',
-      '--slotted-tabs-marker-color': 'transparent',
-      '--slotted-tabs-hover-marker-color': 'transparent',
-      '--slotted-tabs-track-color': 'transparent',
+      ...TAB_STYLES.pill.components,
       '--slotted-table-radius': 'var(--slotted-radius-lg)',
       '--slotted-table-header-surface': 'var(--slotted-tone-accent-surface)',
       '--slotted-alert-radius': 'var(--slotted-radius-lg)',
@@ -292,12 +323,8 @@ const friendly = extendTheme(
       '--slotted-chart-card-radius': 'var(--slotted-radius-lg)',
     },
     rules: [
-      `[data-ui='tabs'][data-variant='line'] [data-part='item'][data-selected] {
-  background-color: var(--slotted-tone-accent-surface);
-  border-radius: var(--slotted-radius-full);
-}
-
-[data-ui='button']:active {
+      TAB_STYLES.pill.rule,
+      `[data-ui='button']:active {
   transform: scale(0.97);
 }`,
     ],

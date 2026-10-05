@@ -21,6 +21,7 @@ export const BORDER_CHOICES = [1, 2] as const;
 export const SHADOW_CHOICES = ['none', 'soft', 'strong'] as const;
 export const MOTION_CHOICES = ['normal', 'reduced', 'off'] as const;
 export const CARD_CHOICES = ['bordered', 'elevated', 'flat'] as const;
+export const TAB_CHOICES = ['underline', 'pill'] as const;
 export const CHART_CHOICES = ['palette', 'accent'] as const;
 
 export type FontId = (typeof FONT_IDS)[number];
@@ -29,6 +30,7 @@ export type BorderChoice = (typeof BORDER_CHOICES)[number];
 export type ShadowChoice = (typeof SHADOW_CHOICES)[number];
 export type MotionChoice = (typeof MOTION_CHOICES)[number];
 export type CardChoice = (typeof CARD_CHOICES)[number];
+export type TabChoice = (typeof TAB_CHOICES)[number];
 export type ChartChoice = (typeof CHART_CHOICES)[number];
 
 export interface Customisation {
@@ -46,6 +48,8 @@ export interface Customisation {
   readonly motion: MotionChoice | null;
   /** How a card and a stat card stand off the page: a line, a shadow, or a sunken fill. */
   readonly cards: CardChoice | null;
+  /** The line tabs' selected item: underlined by the marker, or a pill on the accent's ground. */
+  readonly tabs: TabChoice | null;
   /** The chart's series: the theme's data palette, or shades of the accent. */
   readonly chart: ChartChoice | null;
 }
@@ -61,6 +65,7 @@ export const NO_CUSTOMISATION: Customisation = {
   shadow: null,
   motion: null,
   cards: null,
+  tabs: null,
   chart: null,
 };
 
@@ -92,6 +97,7 @@ export function readCustomisation(value: unknown): Customisation {
     shadow: choice(SHADOW_CHOICES, stored.shadow),
     motion: choice(MOTION_CHOICES, stored.motion),
     cards: choice(CARD_CHOICES, stored.cards),
+    tabs: choice(TAB_CHOICES, stored.tabs),
     chart: choice(CHART_CHOICES, stored.chart),
   };
 }

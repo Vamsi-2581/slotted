@@ -9,7 +9,7 @@ import {
 import defaultTheme from '@slotted/themes/default';
 
 import type { Customisation, FontId } from './customisation';
-import { nexoraTheme } from './nexora-themes';
+import { nexoraTheme, TAB_STYLES } from './nexora-themes';
 import { facesOf, fontFamily } from './theme-faces';
 
 /**
@@ -28,6 +28,7 @@ import { facesOf, fontFamily } from './theme-faces';
  * | shadow | per light and dark scheme, `--slotted-shadow-xs…lg` and `--slotted-control-shadow`; high contrast keeps its rings |
  * | motion | `--slotted-duration-*` and the easings |
  * | cards | the card's and the stat card's line, shadow and ground |
+ * | tabs | the tabs' marker and track, and a rule on the selected item (`TAB_STYLES`) |
  * | chart | `--slotted-chart-color-1…8` |
  *
  * An axis writes the whole set, whatever the theme under it declared: a
@@ -252,6 +253,7 @@ export function customOverrides(customisation: Customisation): ThemeOverrides {
   const base: Record<string, string> = {};
   const components: Record<string, string> = {};
   const fonts: FontFaceDefinition[] = [];
+  const rules: string[] = [];
   let schemes: ThemeOverrides['schemes'];
   let densities: ThemeOverrides['densities'];
   if (customisation.radius !== null) {
@@ -281,12 +283,17 @@ export function customOverrides(customisation: Customisation): ThemeOverrides {
   if (customisation.shadow !== null) schemes = shadow(customisation.shadow);
   if (customisation.motion !== null) Object.assign(base, motion(customisation.motion));
   if (customisation.cards !== null) Object.assign(components, cards(customisation.cards));
+  if (customisation.tabs !== null) {
+    Object.assign(components, TAB_STYLES[customisation.tabs].components);
+    rules.push(TAB_STYLES[customisation.tabs].rule);
+  }
   if (customisation.chart !== null) Object.assign(components, chart(customisation.chart));
 
   const overrides: { -readonly [K in keyof ThemeOverrides]: ThemeOverrides[K] } = {};
   if (Object.keys(base).length > 0) overrides.base = base as Base;
   if (Object.keys(components).length > 0) overrides.components = components as Components;
   if (fonts.length > 0) overrides.fonts = fonts;
+  if (rules.length > 0) overrides.rules = rules;
   if (schemes !== undefined) overrides.schemes = schemes;
   if (densities !== undefined) overrides.densities = densities;
   return overrides;

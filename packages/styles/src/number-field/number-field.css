@@ -660,11 +660,36 @@
       --slotted-number-field-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
     );
+    --_invalid-edge: inset 0 0 0
+      var(--slotted-number-field-invalid-edge-width, var(--slotted-control-invalid-edge-width, 1px))
+      var(--slotted-number-field-invalid-border-color, var(--slotted-tone-danger-border));
 
     border-color: var(
       --slotted-number-field-invalid-border-color,
       var(--slotted-tone-danger-border)
     );
+    /*
+     * Width as well as colour (WCAG 1.4.1), the edge `text-field` draws: in
+     * `high-contrast` the danger border is the resting edge's black. The line
+     * is a shadow inside the border, so neither box nor text moves, and it
+     * takes the resting lift's place.
+     */
+    box-shadow: var(--_invalid-edge);
+  }
+
+  [data-ui='number-field'][data-part='root'][data-invalid]:has(
+      > [data-part='input']:focus-visible
+    ) {
+    box-shadow:
+      var(--_invalid-edge),
+      var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
+        var(--slotted-focus-ring-color, Highlight);
+  }
+
+  [data-ui='number-field'][data-part='root'][data-variant='plain'][data-invalid]:has(
+      > [data-part='input']:focus-visible
+    ) {
+    box-shadow: var(--_invalid-edge);
   }
 
   /**

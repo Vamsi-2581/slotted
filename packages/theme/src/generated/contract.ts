@@ -2782,6 +2782,7 @@ export type ComponentToken =
   | '--slotted-currency-field-hover-border-color'
   | '--slotted-currency-field-icon-size-min'
   | '--slotted-currency-field-invalid-border-color'
+  | '--slotted-currency-field-invalid-edge-width'
   | '--slotted-currency-field-invalid-focus-ring-color'
   | '--slotted-currency-field-placeholder-color'
   | '--slotted-currency-field-plain-hover-background'
@@ -2871,6 +2872,7 @@ export type ComponentToken =
   | '--slotted-date-field-hover-border-color'
   | '--slotted-date-field-icon-size-min'
   | '--slotted-date-field-invalid-border-color'
+  | '--slotted-date-field-invalid-edge-width'
   | '--slotted-date-field-invalid-focus-ring-color'
   | '--slotted-date-field-literal-color'
   | '--slotted-date-field-placeholder-color'
@@ -2952,6 +2954,7 @@ export type ComponentToken =
   | '--slotted-datetime-field-icon-size-min'
   | '--slotted-datetime-field-incomplete-border-color'
   | '--slotted-datetime-field-invalid-border-color'
+  | '--slotted-datetime-field-invalid-edge-width'
   | '--slotted-datetime-field-invalid-focus-ring-color'
   | '--slotted-datetime-field-literal-color'
   | '--slotted-datetime-field-padding-block'
@@ -3526,6 +3529,7 @@ export type ComponentToken =
   | '--slotted-number-field-hover-border-color'
   | '--slotted-number-field-icon-size-min'
   | '--slotted-number-field-invalid-border-color'
+  | '--slotted-number-field-invalid-edge-width'
   | '--slotted-number-field-invalid-focus-ring-color'
   | '--slotted-number-field-placeholder-color'
   | '--slotted-number-field-plain-hover-background'
@@ -4169,6 +4173,7 @@ export type ComponentToken =
   | '--slotted-textarea-disabled-color'
   | '--slotted-textarea-hover-border-color'
   | '--slotted-textarea-invalid-border-color'
+  | '--slotted-textarea-invalid-edge-width'
   | '--slotted-textarea-invalid-focus-ring-color'
   | '--slotted-textarea-line-height'
   | '--slotted-textarea-max-rows'
@@ -4195,6 +4200,7 @@ export type ComponentToken =
   | '--slotted-time-field-hover-border-color'
   | '--slotted-time-field-icon-size-min'
   | '--slotted-time-field-invalid-border-color'
+  | '--slotted-time-field-invalid-edge-width'
   | '--slotted-time-field-invalid-focus-ring-color'
   | '--slotted-time-field-literal-color'
   | '--slotted-time-field-period-min-inline-size'
@@ -4932,6 +4938,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-currency-field-hover-border-color",
   "--slotted-currency-field-icon-size-min",
   "--slotted-currency-field-invalid-border-color",
+  "--slotted-currency-field-invalid-edge-width",
   "--slotted-currency-field-invalid-focus-ring-color",
   "--slotted-currency-field-placeholder-color",
   "--slotted-currency-field-plain-hover-background",
@@ -5021,6 +5028,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-date-field-hover-border-color",
   "--slotted-date-field-icon-size-min",
   "--slotted-date-field-invalid-border-color",
+  "--slotted-date-field-invalid-edge-width",
   "--slotted-date-field-invalid-focus-ring-color",
   "--slotted-date-field-literal-color",
   "--slotted-date-field-placeholder-color",
@@ -5102,6 +5110,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-datetime-field-icon-size-min",
   "--slotted-datetime-field-incomplete-border-color",
   "--slotted-datetime-field-invalid-border-color",
+  "--slotted-datetime-field-invalid-edge-width",
   "--slotted-datetime-field-invalid-focus-ring-color",
   "--slotted-datetime-field-literal-color",
   "--slotted-datetime-field-padding-block",
@@ -5676,6 +5685,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-number-field-hover-border-color",
   "--slotted-number-field-icon-size-min",
   "--slotted-number-field-invalid-border-color",
+  "--slotted-number-field-invalid-edge-width",
   "--slotted-number-field-invalid-focus-ring-color",
   "--slotted-number-field-placeholder-color",
   "--slotted-number-field-plain-hover-background",
@@ -6319,6 +6329,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-textarea-disabled-color",
   "--slotted-textarea-hover-border-color",
   "--slotted-textarea-invalid-border-color",
+  "--slotted-textarea-invalid-edge-width",
   "--slotted-textarea-invalid-focus-ring-color",
   "--slotted-textarea-line-height",
   "--slotted-textarea-max-rows",
@@ -6345,6 +6356,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-time-field-hover-border-color",
   "--slotted-time-field-icon-size-min",
   "--slotted-time-field-invalid-border-color",
+  "--slotted-time-field-invalid-edge-width",
   "--slotted-time-field-invalid-focus-ring-color",
   "--slotted-time-field-literal-color",
   "--slotted-time-field-period-min-inline-size",

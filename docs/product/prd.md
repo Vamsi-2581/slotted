@@ -1342,12 +1342,14 @@ The policy should prioritize modern browsers and allow the use of recent platfor
 
 Support should not indefinitely prevent the use of modern capabilities because of obsolete browsers.
 
-The minimum matrix is Chrome 125, Safari 18, Firefox 146, set by the theming
-architecture's dependency on four platform primitives: relative color syntax
-(`oklch(from ...)`, with a `var()` or a `color-mix()` as its origin), `@scope`
-with a lower bound, `@property`, and `color-mix()`. The two theme scenarios of
-`tools/harness` (`theme-recipe-parity`, `theme-scope-nesting`) run in Chrome,
-Firefox and WebKit (`--engine`) and verify the matrix.
+The minimum matrix is Chrome 125, Safari 18 (measured: WebKit 18.5), Firefox
+146, set by the theming architecture's dependency on four platform primitives:
+relative color syntax (`oklch(from ...)`, with a `var()` or a `color-mix()` as
+its origin), `@scope` with a lower bound, `@property`, and `color-mix()`. The
+two theme scenarios of `tools/harness` (`theme-recipe-parity`,
+`theme-scope-nesting`) run in Chrome, Firefox and WebKit (`--engine`) and
+verify the matrix; `tools/harness/engines.mjs` says how to obtain each minimum
+build.
 
 ---
 

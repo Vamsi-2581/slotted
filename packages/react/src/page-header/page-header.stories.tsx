@@ -40,6 +40,7 @@ import {
   PageHeaderNavigation,
   PageHeaderPin,
   PageHeaderSubheading,
+  PageHeaderProgress,
   PageHeaderTabs,
   PageHeaderTitle,
   PageHeaderTitleArea,
@@ -62,6 +63,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     actions: Actions,
     tabs: TabsScene,
     loading: Loading,
+    progress: Progress,
     content: Content,
     narrow: Narrow,
     composition: Composition,
@@ -581,6 +583,60 @@ export const Loading: Story = {
       </Grid>
     );
   },
+};
+
+/* ── Progress ──────────────────────────────────────────────────────────── */
+
+function Refreshing({ tabs }: { tabs: boolean }) {
+  const [refreshing, setRefreshing] = useState(false);
+  return (
+    <Stack gap={4}>
+      <div className="slotted-demo-row">
+        <Button
+          onClick={() => {
+            setRefreshing(true);
+            window.setTimeout(() => setRefreshing(false), 1600);
+          }}
+          size="sm"
+          variant="outline"
+        >
+          Atualizar o pedido
+        </Button>
+      </div>
+      <Viewport size="tall">
+        <Page>
+          <OrderHeader
+            navigation={false}
+            progress={<PageHeaderProgress loading={refreshing} />}
+            tabs={tabs}
+          />
+          <PageBody>
+            <OrderFacts />
+          </PageBody>
+        </Page>
+      </Viewport>
+    </Stack>
+  );
+}
+
+export const Progress: Story = {
+  parameters: scenario('progress'),
+  render: () => (
+    <Grid columns={1}>
+      <Scene
+        label="A refresh, over the edge the pill straddles"
+        note="Press Atualizar: after 200 ms an indeterminate bar grows out of the line the pill straddles, above the tabs and not on the tab strip's own edge, where it would read as the selected tab's indicator. The header and the order stay readable, nothing moves, and the bar holds for at least 400 ms."
+      >
+        <Refreshing tabs />
+      </Scene>
+      <Scene
+        label="With no tabs, on the header's own hairline"
+        note="Without tabs the line where the chrome ends is the root's hairline, and the bar covers it the whole width of the header. Scroll until the header snaps: the bar stays on the snapped edge, because it keeps its place beside the controls."
+      >
+        <Refreshing tabs={false} />
+      </Scene>
+    </Grid>
+  ),
 };
 
 /* ── Content ───────────────────────────────────────────────────────────── */

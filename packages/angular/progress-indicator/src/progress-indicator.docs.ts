@@ -237,14 +237,14 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'page',
-    title: 'The bar a route change draws',
-    note: 'placement="page" pins the bar to the top edge of the viewport, squares its corners, drops its track and reads the sticky stacking token. It is the whole of the old LoadingBar.',
+    title: 'The bar on an edge: the viewport’s, or a box’s',
+    note: 'placement="page" pins the bar to the top edge of the viewport, squares its corners, drops its track and reads the sticky stacking token. edge-start and edge-end stand the same bar on the block-start or block-end edge of the nearest positioned box, over the line that edge draws; slAppShellProgress and slPageHeaderProgress are the boxes the library gives it. Each grows out of its edge and goes back into it.',
     snippet: defineSnippet({
       id: 'progress-indicator-angular-page',
       language: 'angular',
       label: 'A page-level bar',
       source:
-        '<div slProgressBar label="Loading page" placement="page" [loading]="navigating()"></div>\n\n<!-- The name is clipped by the placement, because a page bar has nowhere to show it. -->\n<div slProgressBar label="Loading page" placement="page" [hideLabel]="false"></div>',
+        '<div slProgressBar label="Loading page" placement="page" [loading]="navigating()"></div>\n\n<!-- The same bar on an edge of the nearest positioned box. -->\n<div slProgressBar label="Refreshing" placement="edge-start"></div>\n<div slProgressBar label="Saving" placement="edge-end" [value]="62"></div>\n\n<!-- The name is clipped by the placement, because an edge bar has nowhere to show it. -->\n<div slProgressBar label="Loading page" placement="page" [hideLabel]="false"></div>',
     }),
   },
   {
@@ -391,10 +391,10 @@ export const ANGULAR_PROGRESS_INDICATOR_DOCS = {
       ],
       [
         'placement',
-        'inline | page',
+        'inline | page | edge-start | edge-end',
         'inline',
         'slProgressBar',
-        'page pins the bar to the top edge of the viewport, squares it, drops its track and reads the sticky stacking token',
+        'page pins the bar to the top edge of the viewport, squares it, drops its track and reads the sticky stacking token; edge-start and edge-end stand it on the block-start or block-end edge of the nearest positioned box, over the line that edge draws. Every value but inline clips the label and grows the bar out of its edge',
       ],
       [
         'decorative',

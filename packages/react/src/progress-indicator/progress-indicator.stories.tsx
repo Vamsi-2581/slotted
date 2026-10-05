@@ -545,6 +545,24 @@ export const Page: Story = {
           <ProgressBar label="Loading page" placement="page" value={72} />
         </div>
       </Scene>
+      <Scene
+        label='placement="edge-start", indeterminate'
+        layout="block"
+        note="The same bar on the top edge of the nearest positioned box. In an application that box is AppShellProgress's frame over the content, and the bar covers the line between the chrome and the content."
+      >
+        <div className="slotted-demo-viewport">
+          <ProgressBar label="Refreshing" placement="edge-start" />
+        </div>
+      </Scene>
+      <Scene
+        label='placement="edge-end", with a value'
+        layout="block"
+        note="On the bottom edge instead, the way PageHeaderProgress draws a refresh over the line where the header ends. The value fills from the inline start, so it runs right to left in an Arabic document."
+      >
+        <div className="slotted-demo-viewport">
+          <ProgressBar label="Saving" placement="edge-end" value={62} />
+        </div>
+      </Scene>
     </div>
   ),
 };

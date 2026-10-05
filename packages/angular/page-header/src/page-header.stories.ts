@@ -45,7 +45,7 @@ import { SlTab, SlTabList, SlTabs } from '@slotted/angular/tabs';
 import { SlTag, SlTagBody } from '@slotted/angular/tag';
 import { SlToolbar, SlToolbarItem, SlToolbarOverflow } from '@slotted/angular/toolbar';
 import { SlText } from '@slotted/angular/typography';
-import { Component, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
 
@@ -66,6 +66,7 @@ import {
   SlPageHeaderNav,
   SlPageHeaderNavigation,
   SlPageHeaderPin,
+  SlPageHeaderProgress,
   SlPageHeaderSubheading,
   SlPageHeaderTabs,
   SlPageHeaderTitle,
@@ -574,6 +575,84 @@ class LoadingDemo {
   }
 }
 
+/* ── A refresh on the chrome's edge ────────────────────────────────────── */
+
+@Component({
+  selector: 'sl-page-header-progress-demo',
+  standalone: true,
+  imports: [
+    SlPage,
+    SlPageBody,
+    SlPageHeader,
+    SlPageHeaderTitleArea,
+    SlPageHeaderNav,
+    SlPageHeaderBack,
+    SlPageHeaderTitleRow,
+    SlPageHeaderTitle,
+    SlPageHeaderHeading,
+    SlPageHeaderMarks,
+    SlPageHeaderSubheading,
+    SlPageHeaderActions,
+    SlPageHeaderArea,
+    SlPageHeaderContent,
+    SlPageHeaderDescription,
+    SlPageHeaderControls,
+    SlPageHeaderToggle,
+    SlPageHeaderPin,
+    SlPageHeaderProgress,
+    SlPageHeaderTabs,
+    SlTabs,
+    SlTabList,
+    SlTab,
+    SlStack,
+    SlText,
+    SlTag,
+    SlTagBody,
+    SlButton,
+    SlDescriptionList,
+    SlDescriptionListItem,
+    SlDescriptionListTerm,
+    SlDescriptionListDescription,
+  ],
+  template: `<div slStack [gap]="4">
+    <div class="slotted-demo-row">
+      <button slButton size="sm" variant="outline" (click)="refresh()">Atualizar o pedido</button>
+    </div>
+    ${viewport(
+      `<main slPage>
+      <header slPageHeader>
+        <div slPageHeaderTitleArea>
+          <div slPageHeaderNav><a slPageHeaderBack href="#pedidos">Pedidos de compra</a></div>
+          <div slPageHeaderTitleRow>
+            ${TITLE()}
+            <div slPageHeaderActions>
+              <button slButton variant="outline">Reprovar</button>
+              <button slButton tone="accent">Aprovar</button>
+            </div>
+          </div>
+        </div>
+        ${AREA()}
+        ${CONTROLS()}
+        <div slPageHeaderProgress [loading]="refreshing()"></div>
+        @if (tabs()) {
+          ${TABS}
+        }
+      </header>
+      <div slPageBody>${FACTS}</div>
+    </main>`,
+      'tall',
+    )}
+  </div>`,
+})
+class ProgressDemo {
+  readonly tabs = input(true);
+  readonly refreshing = signal(false);
+  refresh() {
+    this.refreshing.set(true);
+    window.setTimeout(() => this.refreshing.set(false), 1600);
+  }
+}
+
 /* ── The instance's own methods ────────────────────────────────────────── */
 
 @Component({
@@ -633,6 +712,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     actions: Actions,
     tabs: TabsScene,
     loading: Loading,
+    progress: Progress,
     content: Content,
     narrow: Narrow,
     composition: Composition,
@@ -713,6 +793,7 @@ const meta: Meta<PageHeaderStoryArgs> = {
         SlText,
         RecordsDemo,
         LoadingDemo,
+        ProgressDemo,
         EditableDemo,
       ],
       providers: [provideIcons({ lucideClipboardList })],
@@ -1022,6 +1103,25 @@ export const Loading: Story = {
         'The heading, the subheading and the description stand as skeleton text of their own width — 24, 32 and 40 characters — while the actions stay pressable and the root says aria-busy. Press Chegou: nothing under them moves.',
         '<sl-page-header-loading-demo />',
       ),
+    ),
+  }),
+};
+
+export const Progress: Story = {
+  parameters: scenario('progress'),
+  render: () => ({
+    template: grid(
+      1,
+      scene(
+        'A refresh, over the edge the pill straddles',
+        "Press Atualizar: after 200 ms an indeterminate bar grows out of the line the pill straddles, above the tabs and not on the tab strip's own edge, where it would read as the selected tab's indicator. The header and the order stay readable, nothing moves, and the bar holds for at least 400 ms.",
+        '<sl-page-header-progress-demo />',
+      ) +
+        scene(
+          "With no tabs, on the header's own hairline",
+          "Without tabs the line where the chrome ends is the root's hairline, and the bar covers it the whole width of the header. Scroll until the header snaps: the bar stays on the snapped edge, because it keeps its place beside the controls.",
+          '<sl-page-header-progress-demo [tabs]="false" />',
+        ),
     ),
   }),
 };

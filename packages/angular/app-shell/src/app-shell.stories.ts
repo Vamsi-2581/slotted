@@ -64,6 +64,7 @@ import {
   SlPageHeader,
   SlPageHeaderActions,
   SlPageHeaderHeading,
+  SlPageHeaderProgress,
   SlPageHeaderSubheading,
   SlPageHeaderTitle,
   SlPageHeaderTitleArea,
@@ -113,6 +114,7 @@ import {
   SlAppShellNavHeader,
   SlAppShellNavRail,
   SlAppShellNavToggle,
+  SlAppShellProgress,
 } from './app-shell';
 import { provideAppShellDefaults } from './app-shell-defaults';
 import { ANGULAR_APP_SHELL_DOCS, ANGULAR_APP_SHELL_TOKENS } from './app-shell.docs';
@@ -359,6 +361,7 @@ const SHIPMENTS_TABLE = (
 const AURORA_CONTENT = (
   body = SHIPMENTS_TABLE(),
   title = 'Encomendas',
+  headerProgress = '',
 ) => `<main slPage landmark="none" scroll="ancestor" width="full">
   <header slPageHeader level="1" size="md">
     <div slPageHeaderTitleArea>
@@ -370,6 +373,7 @@ const AURORA_CONTENT = (
         <div slPageHeaderActions><button slButton size="sm" tone="secondary" variant="outline">Filtros</button></div>
       </div>
     </div>
+    ${headerProgress}
   </header>
   <div slPageBody>${body}</div>
   <footer slPageFooter>
@@ -417,6 +421,7 @@ const aurora = (
     content = AURORA_CONTENT(),
     footer = false,
     nav = AURORA_NAV(),
+    progress = '',
     room = 'desktop',
     size = 'screen',
     toggle = true,
@@ -427,6 +432,7 @@ const aurora = (
   ${AURORA_BANNER({ centre, toggle })}
   ${nav}
   <main slAppShellMain>${content}</main>
+  ${progress}
   ${aside ? AURORA_PANE : ''}
   ${footer ? AURORA_FOOTER : ''}
 </div>`,
@@ -891,6 +897,7 @@ const DIRECTIVES = [
   SlAppShellNavHeader,
   SlAppShellNavRail,
   SlAppShellNavToggle,
+  SlAppShellProgress,
   SlAvatar,
   SlAvatarFallback,
   SlBadge,
@@ -914,6 +921,7 @@ const DIRECTIVES = [
   SlPageHeader,
   SlPageHeaderActions,
   SlPageHeaderHeading,
+  SlPageHeaderProgress,
   SlPageHeaderSubheading,
   SlPageHeaderTitle,
   SlPageHeaderTitleArea,
@@ -977,6 +985,19 @@ class Data {
   select(keys: readonly string[]) {
     this.selected.set(keys[0]);
   }
+  /** A navigation and a refresh, each ending by itself. */
+  readonly navigating = signal(false);
+  readonly refreshing = signal(false);
+  readonly title = signal('Encomendas');
+  navigate() {
+    this.navigating.set(true);
+    this.title.update((current) => (current === 'Encomendas' ? 'ENC-4521' : 'Encomendas'));
+    setTimeout(() => this.navigating.set(false), 1600);
+  }
+  refresh() {
+    this.refreshing.set(true);
+    setTimeout(() => this.refreshing.set(false), 1400);
+  }
 }
 
 const story = (template: string, extra: Record<string, unknown> = {}): StoryObj<Data> => ({
@@ -1003,6 +1024,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     primary: Primary,
     sides: Sides,
     scroll: Scroll,
+    progress: Progress,
     skipLinks: SkipLinks,
     persistence: Persistence,
     defaults: Defaults,
@@ -1444,6 +1466,76 @@ export const Scroll: StoryObj<Data> = {
     ),
   ),
   parameters: scenario('scroll'),
+};
+
+export const Progress: StoryObj<Data> = {
+  ...story(
+    `${grid(
+      scene(
+        'The next page, then a refresh of this one',
+        "Open another page: after 200 ms the bar grows out of the content card's top border, travels until the page is ready, holds for at least 400 ms and goes back into the border; the content is aria-busy for exactly that long. Refresh the list draws the page header's own bar on its hairline instead. Both at once draws one bar, the shell's, because the header's gives way inside a busy region.",
+        `<div class="slotted-demo-stack">
+  <div class="slotted-demo-row">
+    <button slButton size="sm" tone="accent" (click)="navigate()">Open another page</button>
+    <button slButton size="sm" tone="secondary" variant="outline" (click)="refresh()">Refresh the list</button>
+    <button slButton size="sm" tone="secondary" variant="ghost" (click)="navigate(); refresh()">Both at once</button>
+  </div>
+  ${aurora('navMode="inline"', {
+    aside: false,
+    content: AURORA_CONTENT(
+      SHIPMENTS_TABLE(),
+      '{{ title() }}',
+      '<div slPageHeaderProgress [loading]="refreshing()"></div>',
+    ),
+    progress: '<div slAppShellProgress [loading]="navigating()"></div>',
+    size: 'tall',
+  })}
+</div>`,
+      ),
+    )}<div class="slotted-demo-grid" data-columns="1">${[
+      scene(
+        "canvas='inset'",
+        'The bar covers the top border of the content card and is clipped by its corners.',
+        aurora('canvas="inset" navMode="inline"', {
+          aside: false,
+          centre: false,
+          progress: '<div slAppShellProgress [delay]="0"></div>',
+          size: 'tall',
+        }),
+      ),
+      scene(
+        "canvas='flush'",
+        "The bar covers the banner's seam, from the navigation column's edge to the frame's.",
+        aurora('canvas="flush" navMode="inline"', {
+          aside: false,
+          centre: false,
+          progress: '<div slAppShellProgress [delay]="0"></div>',
+          size: 'tall',
+        }),
+      ),
+      scene(
+        "canvas='floating'",
+        "Two cards on the sunken ground; the bar is the content card's, under its corners.",
+        aurora('canvas="floating" navMode="inline"', {
+          aside: false,
+          centre: false,
+          progress: '<div slAppShellProgress [delay]="0"></div>',
+          size: 'tall',
+        }),
+      ),
+      scene(
+        "canvas='panel'",
+        "One card holds the regions; the bar covers the card's top edge over the content.",
+        aurora('canvas="panel" navMode="inline"', {
+          aside: false,
+          centre: false,
+          progress: '<div slAppShellProgress [delay]="0"></div>',
+          size: 'tall',
+        }),
+      ),
+    ].join('')}</div>`,
+  ),
+  parameters: scenario('progress'),
 };
 
 export const SkipLinks: StoryObj<Data> = {

@@ -25,7 +25,7 @@ export const REACT_PAGE_HEADER_TOKENS = pageHeaderTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { PageHeader, PageHeaderTitleArea, PageHeaderNav, PageHeaderBack, PageHeaderBreadcrumbs, PageHeaderTitleRow, PageHeaderVisual, PageHeaderTitle, PageHeaderHeading, PageHeaderMarks, PageHeaderSubheading, PageHeaderActions, PageHeaderNavigation, PageHeaderArea, PageHeaderFigure, PageHeaderContent, PageHeaderDescription, PageHeaderControls, PageHeaderToggle, PageHeaderPin, PageHeaderTabs, PageHeaderDefaultsProvider } from '@slotted/react';",
+    "import { PageHeader, PageHeaderTitleArea, PageHeaderNav, PageHeaderBack, PageHeaderBreadcrumbs, PageHeaderTitleRow, PageHeaderVisual, PageHeaderTitle, PageHeaderHeading, PageHeaderMarks, PageHeaderSubheading, PageHeaderActions, PageHeaderNavigation, PageHeaderArea, PageHeaderFigure, PageHeaderContent, PageHeaderDescription, PageHeaderControls, PageHeaderToggle, PageHeaderPin, PageHeaderProgress, PageHeaderTabs, PageHeaderDefaultsProvider } from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -174,6 +174,13 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'The slot a Tabs sits in, last in the root. It stays visible under the title once the header area has scrolled past, because the root is what sticks.',
+  },
+  {
+    part: 'progress',
+    element: 'div, holding one ProgressBar at placement="edge-end"',
+    required: false,
+    purpose:
+      'A refresh of what is already on screen. A row one hairline tall and the header’s whole width, written after the controls and before the tabs: there the bar covers the line the pill straddles, and with no tabs the root’s own hairline. It draws nothing while loading is true or inside a region that is aria-busy.',
   },
 ];
 
@@ -385,6 +392,22 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'progress',
+    title: 'A refresh of what is on screen',
+    note: 'PageHeaderProgress draws an indeterminate bar over the line where the chrome ends, after 200 ms and for at least 400 ms. With tabs that line is the one the pill straddles, never the tab strip’s edge; without them it is the root’s hairline. The header writes no aria-busy: the region that waits — the page body — is the consumer’s to mark.',
+    snippet: defineSnippet({
+      id: 'page-header-react-progress',
+      language: 'tsx',
+      label: 'After the controls, before the tabs',
+      source: `<PageHeader>
+  <PageHeaderTitleArea>…</PageHeaderTitleArea>
+  <PageHeaderControls>…</PageHeaderControls>
+  <PageHeaderProgress loading={isRefetching} />
+  <PageHeaderTabs>…</PageHeaderTabs>
+</PageHeader>;`,
+    }),
+  },
+  {
     id: 'content',
     title: 'Content the family did not choose',
     note: 'A nine-word title clamps at two lines with the whole string in title; five marks wrap; a subheading of fifteen words wraps expanded and truncates snapped; a translated description keeps its measure. Scroll to see the bar hold one line.',
@@ -544,7 +567,14 @@ export const REACT_PAGE_HEADER_DOCS = {
         'Partial<PageHeaderMessages>',
         '—',
         'PageHeader',
-        'Words laid over the language in force, key by key — expand, collapse, pin, unpin and headerArea: the names the two controls and the region carry. An aria-label written on the control itself still wins',
+        'Words laid over the language in force, key by key — expand, collapse, pin, unpin, headerArea and progress: the names the two controls, the region and the refresh bar carry. An aria-label written on the control itself still wins',
+      ],
+      [
+        'PageHeaderProgress',
+        'ProgressBar props but placement',
+        'loading true, delay 200, minDuration 400, size sm',
+        'PageHeaderProgress',
+        'A refresh of the data already on screen. Every ProgressBar prop but placement passes through — value for a save that reports its fraction, tone, label — and a value set through ProgressIndicatorDefaultsProvider wins over the header’s timing',
       ],
       [
         'data-when',

@@ -45,6 +45,7 @@ const imports: ReferenceImport = {
   AppShellNavHeader,
   AppShellNavRail,
   AppShellNavToggle,
+  AppShellProgress,
 } from '@slotted/react';`,
 };
 
@@ -145,6 +146,13 @@ const anatomy: AnatomyRow[] = [
     required: true,
     purpose:
       'The main landmark and the skip link’s destination. Without the tabindex the link moves the scroll and leaves the focus behind, in Safari and in Firefox.',
+  },
+  {
+    part: 'progress',
+    element: 'div, holding one ProgressBar at placement="edge-start"',
+    required: false,
+    purpose:
+      'The wait for the next page. A transparent frame the stylesheet lays over main in every arrangement — its grid area, its margins, its corners — so the bar covers the line between the chrome and the content and the card’s corners clip it. Written anywhere inside AppShell; main is aria-busy while the bar is painted.',
   },
   {
     part: 'aside',
@@ -502,6 +510,23 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'progress',
+    title: 'The wait for the next page',
+    note: 'AppShellProgress draws an indeterminate bar on the line between the chrome and the content — wherever the canvas draws that line — after 200 ms, holds it for at least 400 ms, and marks main aria-busy for exactly as long as it is painted. A page header inside a busy content region draws no bar of its own. Pass loading from the router; nothing in the family knows one.',
+    snippet: defineSnippet({
+      id: 'app-shell-react-progress',
+      language: 'tsx',
+      label: 'Driven by React Router',
+      source: `const navigation = useNavigation();
+
+<AppShell>
+  <AppShellBanner>…</AppShellBanner>
+  <AppShellMain>…</AppShellMain>
+  <AppShellProgress loading={navigation.state !== 'idle'} />
+</AppShell>;`,
+    }),
+  },
+  {
     id: 'skipLinks',
     title: 'The first thing a keyboard meets',
     note: 'Press Tab from the top of the frame: a link to the content appears, then one to the navigation, then one to the pane — one per region that rendered and is open, out of the flow until focused. The content region carries tabindex="-1", so the link moves the focus as well as the scroll.',
@@ -777,7 +802,14 @@ export const REACT_APP_SHELL_DOCS = {
         'Partial<AppShellMessages>',
         '—',
         'AppShell',
-        'Words laid over the language in force, key by key — aside, close, closeAside, nav, open, openAside, resizeAside, skipToAside, skipToMain, skipToNav: the two regions’ accessible names, the two controls’ labels in each state, the pane edge’s name, and the three skip links. An aria-label written on the part itself still wins',
+        'Words laid over the language in force, key by key — aside, close, closeAside, nav, open, openAside, progress, resizeAside, skipToAside, skipToMain, skipToNav: the two regions’ accessible names, the two controls’ labels in each state, the wait’s name, the pane edge’s name, and the three skip links. An aria-label written on the part itself still wins',
+      ],
+      [
+        'loading',
+        'boolean',
+        'true',
+        'AppShellProgress',
+        'Whether the next page is on its way. The bar appears once it has lasted delay (200 ms), stays at least minDuration (400 ms), and main carries aria-busy for exactly that long. Every other ProgressBar prop but placement passes through — value for a wait that reports its fraction, tone, label, size (sm by default) — and a value set through ProgressIndicatorDefaultsProvider wins over the shell’s timing',
       ],
     ]),
     composition: apiRows([

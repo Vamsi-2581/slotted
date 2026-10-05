@@ -2,12 +2,14 @@ import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-wo
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Inbox } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '../button';
 import { Container } from '../container';
+import { PageHeaderProgress } from '../page-header';
 import { Drawer, DrawerBody, DrawerPanel, DrawerTrigger } from '../drawer';
 import { Grid, Scene } from '../field/field-demo';
+import { Inline } from '../inline';
 import { Stack } from '../stack';
 import { Text } from '../typography';
 import { AppShell } from './app-shell';
@@ -34,7 +36,7 @@ import {
   Shipments,
   Viewport,
 } from './app-shell-demo';
-import { AppShellMain } from './app-shell-parts';
+import { AppShellMain, AppShellProgress } from './app-shell-parts';
 import { REACT_APP_SHELL_DOCS, REACT_APP_SHELL_TOKENS } from './app-shell.docs';
 import type { AppShellHandle, AppShellOpenReason, AppShellProps } from './app-shell.types';
 
@@ -55,6 +57,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     primary: Primary,
     sides: Sides,
     scroll: Scroll,
+    progress: Progress,
     skipLinks: SkipLinks,
     persistence: Persistence,
     defaults: Defaults,
@@ -620,6 +623,99 @@ export const Scroll: Story = {
         </Viewport>
       </Scene>
     </Grid>
+  ),
+};
+
+/* ── Progress ───────────────────────────────────────────────────────────── */
+
+/** A wait that ends by itself, the way a navigation or a refresh does. */
+function useWait(duration: number): [boolean, () => void] {
+  const [waiting, setWaiting] = useState(false);
+  useEffect(() => {
+    if (!waiting) return undefined;
+    const timer = setTimeout(() => setWaiting(false), duration);
+    return () => clearTimeout(timer);
+  }, [duration, waiting]);
+  return [waiting, () => setWaiting(true)];
+}
+
+function TwoWaits() {
+  const [navigating, navigate] = useWait(1600);
+  const [refreshing, refresh] = useWait(1400);
+  const [order, setOrder] = useState('Encomendas');
+  return (
+    <Stack gap={4}>
+      <Inline gap={3}>
+        <Button
+          onClick={() => {
+            navigate();
+            setOrder((current) => (current === 'Encomendas' ? 'ENC-4521' : 'Encomendas'));
+          }}
+          size="sm"
+          tone="accent"
+        >
+          Open another page
+        </Button>
+        <Button onClick={refresh} size="sm" tone="secondary" variant="outline">
+          Refresh the list
+        </Button>
+        <Button
+          onClick={() => {
+            navigate();
+            refresh();
+          }}
+          size="sm"
+          tone="secondary"
+          variant="ghost"
+        >
+          Both at once
+        </Button>
+      </Inline>
+      <Aurora
+        aside={false}
+        progress={<AppShellProgress loading={navigating} />}
+        shell={{ navMode: 'inline' }}
+        size="tall"
+      >
+        <AuroraContent headerProgress={<PageHeaderProgress loading={refreshing} />} title={order} />
+      </Aurora>
+    </Stack>
+  );
+}
+
+const CANVAS_EDGES = [
+  ['inset', 'The bar covers the top border of the content card and is clipped by its corners.'],
+  ['flush', 'The bar covers the banner’s seam, from the navigation column’s edge to the frame’s.'],
+  ['floating', 'Two cards on the sunken ground; the bar is the content card’s, under its corners.'],
+  ['panel', 'One card holds the regions; the bar covers the card’s top edge over the content.'],
+] as const;
+
+export const Progress: Story = {
+  parameters: scenario('progress'),
+  render: () => (
+    <>
+      <Grid columns={1}>
+        <Scene
+          label="The next page, then a refresh of this one"
+          note="Open another page: after 200 ms the bar grows out of the content card's top border, travels until the page is ready, holds for at least 400 ms and goes back into the border; the content is aria-busy for exactly that long. Refresh the list draws the page header's own bar on its hairline instead. Both at once draws one bar, the shell's, because the header's gives way inside a busy region."
+        >
+          <TwoWaits />
+        </Scene>
+      </Grid>
+      <Grid columns={1}>
+        {CANVAS_EDGES.map(([canvas, note]) => (
+          <Scene key={canvas} label={`canvas='${canvas}'`} note={note}>
+            <Aurora
+              aside={false}
+              centre={false}
+              progress={<AppShellProgress delay={0} />}
+              shell={{ canvas, navMode: 'inline' }}
+              size="tall"
+            />
+          </Scene>
+        ))}
+      </Grid>
+    </>
   ),
 };
 

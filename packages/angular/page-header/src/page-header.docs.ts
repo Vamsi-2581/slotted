@@ -25,11 +25,11 @@ export const ANGULAR_PAGE_HEADER_TOKENS = pageHeaderTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { SlPageHeader, SlPageHeaderTitleArea, SlPageHeaderNav, SlPageHeaderBack, SlPageHeaderBreadcrumbs, SlPageHeaderTitleRow, SlPageHeaderVisual, SlPageHeaderTitle, SlPageHeaderHeading, SlPageHeaderMarks, SlPageHeaderSubheading, SlPageHeaderActions, SlPageHeaderNavigation, SlPageHeaderArea, SlPageHeaderFigure, SlPageHeaderContent, SlPageHeaderDescription, SlPageHeaderControls, SlPageHeaderToggle, SlPageHeaderPin, SlPageHeaderTabs, providePageHeaderDefaults } from '@slotted/angular/page-header';",
+    "import { SlPageHeader, SlPageHeaderTitleArea, SlPageHeaderNav, SlPageHeaderBack, SlPageHeaderBreadcrumbs, SlPageHeaderTitleRow, SlPageHeaderVisual, SlPageHeaderTitle, SlPageHeaderHeading, SlPageHeaderMarks, SlPageHeaderSubheading, SlPageHeaderActions, SlPageHeaderNavigation, SlPageHeaderArea, SlPageHeaderFigure, SlPageHeaderContent, SlPageHeaderDescription, SlPageHeaderControls, SlPageHeaderToggle, SlPageHeaderPin, SlPageHeaderProgress, SlPageHeaderTabs, providePageHeaderDefaults } from '@slotted/angular/page-header';",
   selector:
-    '[slPageHeader], [slPageHeaderTitleArea], [slPageHeaderNav], [slPageHeaderBack], [slPageHeaderBreadcrumbs], [slPageHeaderTitleRow], [slPageHeaderVisual], [slPageHeaderTitle], [slPageHeaderHeading], [slPageHeaderMarks], [slPageHeaderSubheading], [slPageHeaderActions], [slPageHeaderNavigation], [slPageHeaderArea], [slPageHeaderFigure], [slPageHeaderContent], [slPageHeaderDescription], [slPageHeaderControls], button[slPageHeaderToggle], button[slPageHeaderPin], [slPageHeaderTabs]',
+    '[slPageHeader], [slPageHeaderTitleArea], [slPageHeaderNav], [slPageHeaderBack], [slPageHeaderBreadcrumbs], [slPageHeaderTitleRow], [slPageHeaderVisual], [slPageHeaderTitle], [slPageHeaderHeading], [slPageHeaderMarks], [slPageHeaderSubheading], [slPageHeaderActions], [slPageHeaderNavigation], [slPageHeaderArea], [slPageHeaderFigure], [slPageHeaderContent], [slPageHeaderDescription], [slPageHeaderControls], button[slPageHeaderToggle], button[slPageHeaderPin], [slPageHeaderProgress], [slPageHeaderTabs]',
   exportAs:
-    'slPageHeader, slPageHeaderHeading, slPageHeaderArea, slPageHeaderToggle, slPageHeaderPin',
+    'slPageHeader, slPageHeaderHeading, slPageHeaderArea, slPageHeaderToggle, slPageHeaderPin, slPageHeaderProgress',
 };
 
 const anatomy: AnatomyRow[] = [
@@ -179,6 +179,14 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'The slot an slTabs sits in, last in the root. It stays visible under the title once the header area has scrolled past, because the root is what sticks.',
+  },
+  {
+    part: 'progress',
+    element:
+      'the consumer’s element carrying slPageHeaderProgress, holding one [slProgressBar] at placement="edge-end"',
+    required: false,
+    purpose:
+      'A refresh of what is already on screen. A row one hairline tall and the header’s whole width, written after the controls and before the tabs: there the bar covers the line the pill straddles, and with no tabs the root’s own hairline. It draws nothing while loading is true or inside a region that is aria-busy.',
   },
 ];
 
@@ -362,6 +370,22 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'progress',
+    title: 'A refresh of what is on screen',
+    note: 'slPageHeaderProgress draws an indeterminate bar over the line where the chrome ends, after 200 ms and for at least 400 ms. With tabs that line is the one the pill straddles, never the tab strip’s edge; without them it is the root’s hairline. The header writes no aria-busy: the region that waits — the page body — is the consumer’s to mark.',
+    snippet: defineSnippet({
+      id: 'page-header-angular-progress',
+      language: 'angular',
+      label: 'After the controls, before the tabs',
+      source: `<header slPageHeader>
+  <div slPageHeaderTitleArea>…</div>
+  <div slPageHeaderControls>…</div>
+  <div slPageHeaderProgress [loading]="refreshing()"></div>
+  <div slPageHeaderTabs>…</div>
+</header>`,
+    }),
+  },
+  {
     id: 'content',
     title: 'Content the family did not choose',
     note: 'A nine-word title clamps at two lines; five marks wrap; a subheading of fifteen words wraps expanded and truncates snapped; a translated description keeps its measure. Scroll to see the bar hold one line.',
@@ -514,7 +538,14 @@ export const ANGULAR_PAGE_HEADER_DOCS = {
         'Partial<PageHeaderMessages>',
         '—',
         'slPageHeader',
-        'Words laid over the language in force, key by key — expand, collapse, pin, unpin and headerArea: the names the two controls and the region carry. An aria-label written on the control itself still wins',
+        'Words laid over the language in force, key by key — expand, collapse, pin, unpin, headerArea and progress: the names the two controls, the region and the refresh bar carry. An aria-label written on the control itself still wins',
+      ],
+      [
+        'slPageHeaderProgress',
+        'loading, value, min, max, buffer, valueText, label, tone, size, delay, minDuration; (withdraw)',
+        'loading true, delay 200, minDuration 400, size sm',
+        'slPageHeaderProgress',
+        'A refresh of the data already on screen. Each input reaches the bar, (withdraw) reports the moment it goes, and provideProgressIndicatorDefaults() wins over the header’s timing',
       ],
       [
         'data-when',

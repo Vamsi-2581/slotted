@@ -44,12 +44,13 @@ const imports: ReferenceImport = {
   SlAppShellNavHeader,
   SlAppShellNavRail,
   SlAppShellNavToggle,
+  SlAppShellProgress,
   provideAppShellDefaults,
 } from '@slotted/angular/app-shell';`,
   selector:
-    '[slAppShell] on the frame; header[slAppShellBanner], nav[slAppShellNav], main[slAppShellMain], aside[slAppShellAside], footer[slAppShellFooter] on the regions; [slAppShellBrand], [slAppShellCentre], [slAppShellActions], [slAppShellNavRail], [slAppShellNavHeader], [slAppShellNavBody], [slAppShellNavFooter], [slAppShellAsideHeader], [slAppShellAsideBody], [slAppShellAsideFooter] on their parts; button[slAppShellNavToggle] and button[slAppShellAsideToggle] on the controls',
+    '[slAppShell] on the frame; header[slAppShellBanner], nav[slAppShellNav], main[slAppShellMain], aside[slAppShellAside], footer[slAppShellFooter] on the regions; [slAppShellBrand], [slAppShellCentre], [slAppShellActions], [slAppShellNavRail], [slAppShellNavHeader], [slAppShellNavBody], [slAppShellNavFooter], [slAppShellAsideHeader], [slAppShellAsideBody], [slAppShellAsideFooter] on their parts; button[slAppShellNavToggle] and button[slAppShellAsideToggle] on the controls; [slAppShellProgress] on any element inside the frame, for the wait',
   exportAs:
-    'slAppShell, slAppShellBanner, slAppShellBrand, slAppShellCentre, slAppShellActions, slAppShellNav, slAppShellNavRail, slAppShellNavHeader, slAppShellNavBody, slAppShellNavFooter, slAppShellMain, slAppShellAside, slAppShellAsideHeader, slAppShellAsideBody, slAppShellAsideFooter, slAppShellFooter, slAppShellNavToggle, slAppShellAsideToggle',
+    'slAppShell, slAppShellBanner, slAppShellBrand, slAppShellCentre, slAppShellActions, slAppShellNav, slAppShellNavRail, slAppShellNavHeader, slAppShellNavBody, slAppShellNavFooter, slAppShellMain, slAppShellAside, slAppShellAsideHeader, slAppShellAsideBody, slAppShellAsideFooter, slAppShellFooter, slAppShellNavToggle, slAppShellAsideToggle, slAppShellProgress',
 };
 
 const anatomy: AnatomyRow[] = [
@@ -149,6 +150,13 @@ const anatomy: AnatomyRow[] = [
     required: true,
     purpose:
       'The main landmark and the skip link’s destination. Without the tabindex the link moves the scroll and leaves the focus behind, in Safari and in Firefox.',
+  },
+  {
+    part: 'progress',
+    element: 'the consumer’s element, holding one [slProgressBar] at placement="edge-start"',
+    required: false,
+    purpose:
+      'The wait for the next page. A transparent frame the stylesheet lays over main in every arrangement — its grid area, its margins, its corners — so the bar covers the line between the chrome and the content and the card’s corners clip it. Placed anywhere inside the frame; main is aria-busy while the bar is painted.',
   },
   {
     part: 'aside',
@@ -483,6 +491,23 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'progress',
+    title: 'The wait for the next page',
+    note: 'slAppShellProgress draws an indeterminate bar on the line between the chrome and the content — wherever the canvas draws that line — after 200 ms, holds it for at least 400 ms, and marks main aria-busy for exactly as long as it is painted. A page header inside a busy content region draws no bar of its own. Pass loading from the router; nothing in the family knows one.',
+    snippet: defineSnippet({
+      id: 'app-shell-angular-progress',
+      language: 'angular',
+      label: 'Driven by the Angular Router',
+      source: `<div slAppShell>
+  <header slAppShellBanner>…</header>
+  <main slAppShellMain>…</main>
+  <div slAppShellProgress [loading]="navigating()"></div>
+</div>
+
+<!-- navigating = toSignal(router.events.pipe(filter(isStartOrEnd), map((e) => e instanceof NavigationStart))) -->`,
+    }),
+  },
+  {
     id: 'skipLinks',
     title: 'The first thing a keyboard meets',
     note: 'Press Tab from the top of the frame: a link to the content appears, then one to the navigation, then one to the pane — one per region that rendered and is open, out of the flow until focused. The content region carries tabindex="-1", so the link moves the focus as well as the scroll.',
@@ -735,7 +760,14 @@ export const ANGULAR_APP_SHELL_DOCS = {
         'Partial<AppShellMessages>',
         '—',
         'slAppShell',
-        'Words laid over the language in force, key by key — aside, close, closeAside, nav, open, openAside, resizeAside, skipToAside, skipToMain, skipToNav: the two regions’ accessible names, the two controls’ labels in each state, the pane edge’s name, and the three skip links. An aria-label written on the element itself still wins',
+        'Words laid over the language in force, key by key — aside, close, closeAside, nav, open, openAside, progress, resizeAside, skipToAside, skipToMain, skipToNav: the two regions’ accessible names, the two controls’ labels in each state, the wait’s name, the pane edge’s name, and the three skip links. An aria-label written on the element itself still wins',
+      ],
+      [
+        'loading',
+        'boolean',
+        'true',
+        'slAppShellProgress',
+        'Whether the next page is on its way. The bar appears once it has lasted delay (200 ms), stays at least minDuration (400 ms), and main carries aria-busy for exactly that long; an aria-busy written on main wins. value, min, max, buffer, valueText, label, tone, size (sm by default), delay and minDuration reach the bar, (withdraw) reports the moment it goes, and provideProgressIndicatorDefaults() wins over the shell’s timing',
       ],
     ]),
     composition: apiRows([

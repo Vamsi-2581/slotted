@@ -161,6 +161,7 @@ export function OrderHeader({
   marks = true,
   navigation = true,
   pin = true,
+  progress,
   record = ORDER.id,
   tabs = true,
   visual = 'icon',
@@ -173,6 +174,8 @@ export function OrderHeader({
   marks?: boolean;
   navigation?: boolean;
   pin?: boolean;
+  /** A refresh of the order, on the chrome's edge: written after the controls, before the tabs. */
+  progress?: ReactNode;
   record?: string;
   tabs?: boolean;
   /** What stands before the title: the kind of record as an icon, the supplier's mark as an image, or initials. */
@@ -288,6 +291,7 @@ export function OrderHeader({
           {pin ? <PageHeaderPin /> : null}
         </PageHeaderControls>
       ) : null}
+      {progress}
       {tabs ? (
         <PageHeaderTabs>
           <Tabs defaultValue="itens">

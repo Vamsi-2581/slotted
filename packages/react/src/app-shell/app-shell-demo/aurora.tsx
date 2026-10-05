@@ -335,9 +335,12 @@ export function Shipments({
 /** What the content column holds: a page, its header, its table, its footer. */
 export function AuroraContent({
   children,
+  headerProgress,
   title = 'Encomendas',
 }: {
   children?: ReactNode | undefined;
+  /** A refresh of the list, drawn on the header's edge. */
+  headerProgress?: ReactNode | undefined;
   title?: string | undefined;
 }) {
   return (
@@ -372,6 +375,7 @@ export function AuroraContent({
             </PageHeaderActions>
           </PageHeaderTitleRow>
         </PageHeaderTitleArea>
+        {headerProgress}
       </PageHeader>
       <PageBody>{children ?? <Shipments selected="ENC-4521" />}</PageBody>
     </Page>
@@ -448,6 +452,7 @@ export function Aurora({
   children,
   footer = false,
   longLabels = false,
+  progress,
   room = 'desktop',
   shell,
   size = 'screen',
@@ -459,6 +464,8 @@ export function Aurora({
   children?: ReactNode | undefined;
   footer?: boolean | undefined;
   longLabels?: boolean | undefined;
+  /** The wait for the next page, on the content's edge. */
+  progress?: ReactNode | undefined;
   /** The room the window stands in; `false` for a frame measured narrow on purpose. */
   room?: 'desktop' | 'wide' | false | undefined;
   shell?: Partial<AppShellProps> | undefined;
@@ -474,6 +481,7 @@ export function Aurora({
         <AppShellMain>
           {children ?? <AuroraContent {...(title === undefined ? {} : { title })} />}
         </AppShellMain>
+        {progress}
         {aside ? <AuroraPane /> : null}
         {footer ? <AuroraFooter /> : null}
       </AppShell>

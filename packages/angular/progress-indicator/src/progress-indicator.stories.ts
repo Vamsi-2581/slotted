@@ -761,6 +761,22 @@ export const Page: Story = {
      </div>`,
     'block',
   )}
+  ${scene(
+    'placement="edge-start", indeterminate',
+    "The same bar on the top edge of the nearest positioned box. In an application that box is slAppShellProgress's frame over the content, and the bar covers the line between the chrome and the content.",
+    `<div class="slotted-demo-viewport">
+       <div slProgressBar label="Refreshing" placement="edge-start"></div>
+     </div>`,
+    'block',
+  )}
+  ${scene(
+    'placement="edge-end", with a value',
+    'On the bottom edge instead, the way slPageHeaderProgress draws a refresh over the line where the header ends. The value fills from the inline start, so it runs right to left in an Arabic document.',
+    `<div class="slotted-demo-viewport">
+       <div slProgressBar label="Saving" placement="edge-end" [value]="62"></div>
+     </div>`,
+    'block',
+  )}
 </div>`,
   }),
 };

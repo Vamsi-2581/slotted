@@ -631,12 +631,15 @@
   }
 
   [data-ui='entity-picker'][data-part='root'][data-invalid] > [data-part='control'] {
-    --_invalid-edge: inset 0 0 0
-      var(
-        --slotted-entity-picker-invalid-edge-width,
-        var(--slotted-control-invalid-edge-width, 1px)
-      )
-      var(--slotted-entity-picker-invalid-border-color, var(--slotted-tone-danger-border));
+    --_invalid-edge-width: var(
+      --slotted-entity-picker-invalid-edge-width,
+      var(--slotted-control-invalid-edge-width, 1px)
+    );
+    --_invalid-edge-color: var(
+      --slotted-entity-picker-invalid-border-color,
+      var(--slotted-tone-danger-border)
+    );
+    --_invalid-edge: inset 0 0 0 var(--_invalid-edge-width) var(--_invalid-edge-color);
 
     border-color: var(
       --slotted-entity-picker-invalid-border-color,
@@ -661,7 +664,44 @@
 
   [data-ui='entity-picker'][data-part='root'][data-variant='plain'][data-invalid]
     > [data-part='control']:has([data-part='input']:focus-visible) {
-    box-shadow: var(--_invalid-edge);
+    /* The ring lies inside the box here, over the border and an edge as wide as
+       it; the edge reaches past the ring. */
+    box-shadow: inset 0 0 0
+      calc(
+        var(--slotted-focus-ring-offset, 2px) - var(--slotted-control-border-width, 1px) +
+          var(--_invalid-edge-width)
+      )
+      var(--_invalid-edge-color);
+  }
+
+  /*
+   * Forced colours remove every box shadow, and the edge with them. The
+   * width comes back as an outline inside the border, and a focused invalid
+   * control draws its ring double, which a valid ring is not.
+   */
+  @media (forced-colors: active) {
+    [data-ui='entity-picker'][data-part='root'][data-invalid] > [data-part='control'] {
+      outline: var(--_invalid-edge-width) solid CanvasText;
+      outline-offset: calc(
+        -1 * (var(--slotted-control-border-width, 1px) + var(--_invalid-edge-width))
+      );
+    }
+
+    [data-ui='entity-picker'][data-invalid]
+      > [data-part='control']:has([data-part='input']:focus-visible) {
+      outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
+        var(--slotted-focus-ring-color, Highlight);
+      outline-offset: var(--slotted-focus-ring-offset, 2px);
+    }
+
+    [data-ui='entity-picker'][data-part='root'][data-variant='plain'][data-invalid]
+      > [data-part='control']:has([data-part='input']:focus-visible) {
+      outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
+        var(--slotted-focus-ring-color, Highlight);
+      outline-offset: calc(
+        -1 * (var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width))
+      );
+    }
   }
 
   [data-ui='entity-picker'][data-part='root'][data-readonly] > [data-part='control'] {

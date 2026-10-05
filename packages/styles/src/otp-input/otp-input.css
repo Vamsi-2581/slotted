@@ -420,9 +420,15 @@
   }
 
   [data-ui='otp-input'][data-part='root'][data-invalid] [data-part='slot'] {
-    --_invalid-edge: inset 0 0 0
-      var(--slotted-otp-input-invalid-edge-width, var(--slotted-control-invalid-edge-width, 1px))
-      var(--slotted-otp-input-invalid-border-color, var(--slotted-tone-danger-border));
+    --_invalid-edge-width: var(
+      --slotted-otp-input-invalid-edge-width,
+      var(--slotted-control-invalid-edge-width, 1px)
+    );
+    --_invalid-edge-color: var(
+      --slotted-otp-input-invalid-border-color,
+      var(--slotted-tone-danger-border)
+    );
+    --_invalid-edge: inset 0 0 0 var(--_invalid-edge-width) var(--_invalid-edge-color);
 
     border-color: var(--slotted-otp-input-invalid-border-color, var(--slotted-tone-danger-border));
     /*
@@ -440,6 +446,27 @@
       var(--_invalid-edge),
       var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
         var(--slotted-focus-ring-color, Highlight);
+  }
+
+  /*
+   * Forced colours remove every box shadow, and the edge with them. The
+   * width comes back as an outline inside the border, and a focused invalid
+   * control draws its ring double, which a valid ring is not.
+   */
+  @media (forced-colors: active) {
+    [data-ui='otp-input'][data-part='root'][data-invalid] [data-part='slot'] {
+      outline: var(--_invalid-edge-width) solid CanvasText;
+      outline-offset: calc(
+        -1 * (var(--slotted-control-border-width, 1px) + var(--_invalid-edge-width))
+      );
+    }
+
+    [data-ui='otp-input'][data-part='root'][data-invalid]:has(> [data-part='input']:focus-visible)
+      [data-part='slot'][data-current] {
+      outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
+        var(--slotted-focus-ring-color, Highlight);
+      outline-offset: var(--slotted-focus-ring-offset, 2px);
+    }
   }
 
   /**

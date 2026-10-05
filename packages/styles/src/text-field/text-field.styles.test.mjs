@@ -240,7 +240,14 @@ test('draws an invalid frame with a thicker edge, at rest and under focus', () =
     'var(--slotted-text-field-invalid-edge-width,var(--slotted-control-invalid-edge-width,1px))';
   const colour = 'var(--slotted-text-field-invalid-border-color,var(--slotted-tone-danger-border))';
   const invalid = rule(`${root}[data-invalid]`);
-  assert.ok(invalid.includes(`--_invalid-edge:inset 0 0 0 ${width} ${colour}`), invalid);
+  assert.ok(invalid.includes(`--_invalid-edge-width:${width}`), invalid);
+  assert.ok(invalid.includes(`--_invalid-edge-color:${colour}`), invalid);
+  assert.ok(
+    invalid.includes(
+      '--_invalid-edge:inset 0 0 0 var(--_invalid-edge-width) var(--_invalid-edge-color)',
+    ),
+    invalid,
+  );
   assert.ok(invalid.includes('box-shadow:var(--_invalid-edge)'), 'no edge at rest');
   assert.ok(
     rule(`${root}[data-invalid]:has(>[data-part='input']:focus-visible)`).includes(
@@ -248,11 +255,38 @@ test('draws an invalid frame with a thicker edge, at rest and under focus', () =
     ),
     'no edge under focus',
   );
+});
+
+/**
+ * The `plain` ring is drawn inside the box, at minus the ring offset, and it
+ * covered the border and an edge as wide as the border: a focused invalid
+ * cell and a focused valid one were the same pixels. The edge reaches past it.
+ */
+test('takes the plain variant’s edge past the ring drawn inside it', () => {
   assert.ok(
     rule(
       `${root}[data-variant='plain'][data-invalid]:has(>[data-part='input']:focus-visible)`,
-    ).includes('box-shadow:var(--_invalid-edge)'),
-    'no edge under focus on the plain variant',
+    ).includes(
+      'box-shadow:inset 0 0 0 calc(var(--slotted-focus-ring-offset,2px) - var(--slotted-control-border-width,1px) + var(--_invalid-edge-width)) var(--_invalid-edge-color)',
+    ),
+  );
+});
+
+/**
+ * Forced colours remove box shadows, and the edge was one. It comes back as an
+ * outline inside the border; focused, the invalid ring is double.
+ */
+test('keeps the invalid width under forced colours', () => {
+  const forced = normalized.slice(normalized.lastIndexOf('@media (forced-colors:active)'));
+  assert.ok(
+    forced.includes(
+      `${root}[data-invalid]{outline:var(--_invalid-edge-width) solid CanvasText;outline-offset:calc(-1 * (var(--slotted-control-border-width,1px) + var(--_invalid-edge-width)));}`,
+    ),
+    forced,
+  );
+  assert.match(
+    forced,
+    /\[data-variant='plain'\]\[data-invalid\]:has\(>\[data-part='input'\]:focus-visible\)\{outline:calc\(var\(--slotted-focus-ring-width,2px\) \+ var\(--_invalid-edge-width\)\) double/,
   );
 });
 

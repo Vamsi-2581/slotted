@@ -194,7 +194,7 @@ describe('theme catalogue', () => {
 
   /**
    * A grey the reader picks has to read as a choice beside the theme's own:
-   * every pair of greys offered — the three presets and the themes' own — is
+   * every pair of greys offered — the four presets and the themes' own — is
    * apart by 25° of hue or 0.01 of chroma (OKLCH).
    */
   it('offers greys apart from one another and from every theme’s own', () => {

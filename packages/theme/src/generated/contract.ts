@@ -3645,6 +3645,7 @@ export type ComponentToken =
   | '--slotted-progress-indicator-gap'
   | '--slotted-progress-indicator-indicator-color'
   | '--slotted-progress-indicator-percent'
+  | '--slotted-progress-indicator-position'
   | '--slotted-progress-indicator-radius'
   | '--slotted-progress-indicator-size'
   | '--slotted-progress-indicator-stroke'
@@ -5819,6 +5820,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-progress-indicator-gap",
   "--slotted-progress-indicator-indicator-color",
   "--slotted-progress-indicator-percent",
+  "--slotted-progress-indicator-position",
   "--slotted-progress-indicator-radius",
   "--slotted-progress-indicator-size",
   "--slotted-progress-indicator-stroke",

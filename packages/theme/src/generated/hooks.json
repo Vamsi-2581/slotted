@@ -57,6 +57,7 @@
       "nav-header",
       "nav-rail",
       "nav-toggle",
+      "progress",
       "root",
       "scrim",
       "skip"
@@ -1122,6 +1123,7 @@
       "nav",
       "navigation",
       "pin",
+      "progress",
       "root",
       "subheading",
       "tabs",

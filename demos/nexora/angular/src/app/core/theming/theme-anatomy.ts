@@ -1,6 +1,14 @@
 import { SCHEMES, SEED_NAMES, type Theme } from '@slotted/theme';
 import defaultTheme from '@slotted/themes/default';
 
+import { customOverrides } from './custom-theme';
+import {
+  customisedAxes,
+  NO_CUSTOMISATION,
+  type Customisation,
+  type CustomisationAxis,
+} from './customisation';
+
 /**
  * A theme read layer by layer, against the library's own theme: what each
  * layer of the object declares that the library's does not. The appearance
@@ -39,8 +47,9 @@ const changed = (values: Values, reference: Values) =>
 const short = (token: string) => token.replace(/^--slotted-/, '');
 /** The family a component token belongs to: the longest family name the token starts with. */
 const family = (token: string) =>
-  /^--slotted-(stat-card|text-field|segmented-control|select-content|[a-z]+)-/.exec(token)?.[1] ??
-  short(token);
+  /^--slotted-(stat-card|text-field|number-field|currency-field|date-field|date-picker|multi-select|tags-input|segmented-control|select-content|combobox-content|[a-z]+)-/.exec(
+    token,
+  )?.[1] ?? short(token);
 
 export function themeAnatomy(theme: Theme, reference: Theme = defaultTheme): AnatomyLayer[] {
   const recipe = SCHEMES.flatMap((scheme) =>
@@ -110,4 +119,49 @@ export function themeAnatomy(theme: Theme, reference: Theme = defaultTheme): Ana
     },
     { id: 'fonts', count: fonts.length, items: fonts.map((font) => font.family) },
   ];
+}
+
+/** One axis a reader set, and the layers of the model it writes. */
+export interface AxisAnatomy {
+  readonly axis: CustomisationAxis;
+  /** Each layer the axis writes into, with how many entries; no layer it leaves alone. */
+  readonly layers: readonly { readonly id: AnatomyLayerId; readonly count: number }[];
+}
+
+/**
+ * A customisation of `themeId` read axis by axis: the overrides each axis
+ * compiles to on its own, counted by the layer they land in. `base` counts
+ * the scales, `motion` the durations and easings, `schemes` and `densities`
+ * every entry of every scheme or density.
+ */
+export function customisationAnatomy(themeId: string, customisation: Customisation): AxisAnatomy[] {
+  const MOTION = /^--slotted-(duration|easing)-/;
+  const sum = (
+    groups: Readonly<Record<string, Readonly<Record<string, string>> | undefined>> = {},
+  ) => Object.values(groups).reduce((total, group) => total + Object.keys(group ?? {}).length, 0);
+  return customisedAxes(customisation).map((axis) => {
+    const overrides = customOverrides(
+      { ...NO_CUSTOMISATION, [axis]: customisation[axis] },
+      themeId,
+    );
+    const base = Object.keys(overrides.base ?? {});
+    const counts: Record<AnatomyLayerId, number> = {
+      seeds: 0,
+      recipe: 0,
+      base: base.filter((token) => !MOTION.test(token)).length,
+      schemes: sum(overrides.schemes as never),
+      densities: sum(overrides.densities as never),
+      motion: base.filter((token) => MOTION.test(token)).length,
+      components: Object.keys(overrides.components ?? {}).length,
+      rules: overrides.rules?.length ?? 0,
+      fonts: overrides.fonts?.length ?? 0,
+    };
+    return {
+      axis,
+      layers: ANATOMY_LAYERS.filter((id) => counts[id] > 0).map((id) => ({
+        id,
+        count: counts[id],
+      })),
+    };
+  });
 }

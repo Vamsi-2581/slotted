@@ -75,15 +75,15 @@ describe('PreferencesStore', () => {
     expect(html.style.getPropertyValue('--slotted-seed-neutral')).toBe('');
 
     prefs.update({
-      theme: 'nexora-brutalist',
+      theme: 'nexora-corporate',
       brand: { preset: 'custom', custom: '#0f766e' },
       neutral: { preset: 'clay', custom: '#64748b' },
     });
     TestBed.flushEffects();
-    await prefs.useThemes(['nexora-brutalist']);
+    await prefs.useThemes(['nexora-corporate']);
     TestBed.flushEffects();
 
-    expect(html.getAttribute('data-slotted-theme')).toBe('nexora-brutalist');
+    expect(html.getAttribute('data-slotted-theme')).toBe('nexora-corporate');
     expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('#0f766e');
     expect(html.style.getPropertyValue('--slotted-seed-neutral')).toBe('#9c6644');
     const userId = TestBed.inject(SessionStore).user()!.id;
@@ -91,7 +91,7 @@ describe('PreferencesStore', () => {
       theme: string;
       neutral: unknown;
     };
-    expect(stored.theme).toBe('nexora-brutalist');
+    expect(stored.theme).toBe('nexora-corporate');
     expect(stored.neutral).toEqual({ preset: 'clay', custom: '#64748b' });
   });
 
@@ -227,11 +227,11 @@ describe('PreferencesStore', () => {
       const html = TestBed.inject(DOCUMENT).documentElement;
       prefs.update({
         scheme: 'system',
-        theme: 'nexora-brutalist',
+        theme: 'nexora-corporate',
         brand: { preset: 'amber', custom: '#7c3aed' },
         neutral: { preset: 'ocean', custom: '#64748b' },
       });
-      await prefs.useThemes(['nexora-brutalist']);
+      await prefs.useThemes(['nexora-corporate']);
       TestBed.flushEffects();
       expect(html.getAttribute('data-slotted-scheme')).toBe('light');
 
@@ -240,7 +240,7 @@ describe('PreferencesStore', () => {
 
       expect(html.getAttribute('data-slotted-scheme')).toBe('dark');
       expect(html.style.colorScheme).toBe('dark');
-      expect(html.getAttribute('data-slotted-theme')).toBe('nexora-brutalist');
+      expect(html.getAttribute('data-slotted-theme')).toBe('nexora-corporate');
       expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('#d97706');
       expect(html.style.getPropertyValue('--slotted-seed-neutral')).toBe('#0e7490');
     } finally {
@@ -268,24 +268,24 @@ describe('PreferencesStore', () => {
     await prefs.useThemes([]);
     expect(names()).toEqual([]);
 
-    prefs.update({ theme: 'nexora-brutalist' });
+    prefs.update({ theme: 'nexora-corporate' });
     TestBed.flushEffects();
-    await prefs.useThemes(['nexora-brutalist']);
-    prefs.update({ theme: 'nexora-friendly' });
+    await prefs.useThemes(['nexora-corporate']);
+    prefs.update({ theme: 'nexora-expressive' });
     TestBed.flushEffects();
-    await prefs.useThemes(['nexora-friendly']);
-    prefs.update({ theme: 'nexora-brutalist', neutral: { preset: 'ocean', custom: '#64748b' } });
+    await prefs.useThemes(['nexora-expressive']);
+    prefs.update({ theme: 'nexora-corporate', neutral: { preset: 'ocean', custom: '#64748b' } });
     TestBed.flushEffects();
-    await prefs.useThemes(['nexora-brutalist', 'nexora-friendly']);
-    expect(names()).toEqual(['nexora-brutalist', 'nexora-friendly']);
+    await prefs.useThemes(['nexora-corporate', 'nexora-expressive']);
+    expect(names()).toEqual(['nexora-corporate', 'nexora-expressive']);
     expect(announced).toBe(2);
 
     await prefs.useThemes();
     expect(names()).toEqual([
-      'nexora-brutalist',
-      'nexora-friendly',
+      'nexora-corporate',
+      'nexora-expressive',
+      'nexora-precise',
       'nexora-editorial',
-      'nexora-terminal',
     ]);
     expect(announced).toBe(4);
     expect(['default', ...names()].every((name) => prefs.hasSheet(name!))).toBe(true);
@@ -299,14 +299,14 @@ describe('PreferencesStore', () => {
     const prefs = TestBed.inject(PreferencesStore);
     const html = TestBed.inject(DOCUMENT).documentElement;
     prefs.update({
-      theme: 'nexora-terminal',
+      theme: 'nexora-precise',
       status: { success: null, warning: null, danger: '#be123c' },
     });
     TestBed.flushEffects();
-    await prefs.useThemes(['nexora-terminal']);
+    await prefs.useThemes(['nexora-precise']);
     TestBed.flushEffects();
 
-    expect(html.getAttribute('data-slotted-theme')).toBe('nexora-terminal');
+    expect(html.getAttribute('data-slotted-theme')).toBe('nexora-precise');
     expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('');
     expect(html.style.getPropertyValue('--slotted-seed-danger')).toBe('#be123c');
     expect(html.style.getPropertyValue('--slotted-seed-success')).toBe('');
@@ -323,23 +323,28 @@ describe('PreferencesStore', () => {
     localStorage.setItem(
       `nexora:preferences:${userId}`,
       JSON.stringify({
-        customisation: { radius: 12, body: 'papyrus', cards: 'flat', motion: 'off', scale: 300 },
+        customisation: {
+          radius: 12,
+          body: 'papyrus',
+          cards: 'flat',
+          motion: 'off',
+          scale: 300,
+          input: 'filled',
+          focus: 'halo',
+          controlHeight: 8,
+        },
         status: { success: '#16a34a', warning: 'yellow', danger: 42 },
       }),
     );
     prefs.update({});
 
     expect(prefs.preferences().customisation).toEqual({
+      ...NO_CUSTOMISATION,
       radius: 12,
-      body: null,
-      heading: null,
-      scale: null,
-      border: null,
-      shadow: null,
       motion: 'off',
       cards: 'flat',
-      tabs: null,
-      chart: null,
+      input: 'filled',
+      controlHeight: 8,
     });
     expect(prefs.preferences().status).toEqual({ success: '#16a34a', warning: null, danger: null });
   });
@@ -353,9 +358,9 @@ describe('PreferencesStore', () => {
     const doc = TestBed.inject(DOCUMENT);
     const prefs = TestBed.inject(PreferencesStore);
     const html = doc.documentElement;
-    await prefs.useThemes(['nexora-brutalist']);
+    await prefs.useThemes(['nexora-corporate']);
     prefs.update({
-      theme: 'nexora-brutalist',
+      theme: 'nexora-corporate',
       customisation: { ...NO_CUSTOMISATION, cards: 'flat' },
     });
     TestBed.flushEffects();
@@ -368,11 +373,11 @@ describe('PreferencesStore', () => {
     expect(sheet?.textContent).toContain(
       '--slotted-card-background: var(--slotted-surface-sunken)',
     );
-    expect(sheet?.textContent).toContain('text-transform: uppercase');
+    expect(sheet?.textContent).toContain("[data-ui='table'] [data-part='column-header']");
 
     prefs.update({ customisation: NO_CUSTOMISATION });
     TestBed.flushEffects();
-    expect(html.getAttribute('data-slotted-theme')).toBe('nexora-brutalist');
+    expect(html.getAttribute('data-slotted-theme')).toBe('nexora-corporate');
   });
 
   /**
@@ -382,7 +387,7 @@ describe('PreferencesStore', () => {
   it('applies a candidate appearance to html, and the saved one once it is cleared', async () => {
     const prefs = TestBed.inject(PreferencesStore);
     const html = TestBed.inject(DOCUMENT).documentElement;
-    await prefs.useThemes(['nexora-terminal']);
+    await prefs.useThemes(['nexora-precise']);
     TestBed.flushEffects();
     const saved = {
       theme: html.getAttribute('data-slotted-theme'),
@@ -394,13 +399,13 @@ describe('PreferencesStore', () => {
 
     prefs.preview({
       ...appearanceOf(prefs.preferences()),
-      theme: 'nexora-terminal',
+      theme: 'nexora-precise',
       scheme: 'dark',
       density: 'compact',
       brand: { preset: 'rose', custom: '#7c3aed' },
     });
     TestBed.flushEffects();
-    expect(html.getAttribute('data-slotted-theme')).toBe('nexora-terminal');
+    expect(html.getAttribute('data-slotted-theme')).toBe('nexora-precise');
     expect(html.getAttribute('data-slotted-scheme')).toBe('dark');
     expect(html.getAttribute('data-slotted-density')).toBe('compact');
     expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('#e11d48');
@@ -433,7 +438,7 @@ describe('PreferencesStore', () => {
     const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     const candidate = (radius: number) => ({
       ...appearanceOf(prefs.preferences()),
-      theme: 'nexora-friendly',
+      theme: 'nexora-expressive',
       customisation: { ...NO_CUSTOMISATION, radius },
     });
 
@@ -451,10 +456,10 @@ describe('PreferencesStore', () => {
     });
     expect(compiled).toBe(1);
     const radius18 = { ...NO_CUSTOMISATION, radius: 18 };
-    expect(prefs.compiledTheme('nexora-friendly', radius18)?.base?.['--slotted-radius-lg']).toBe(
+    expect(prefs.compiledTheme('nexora-expressive', radius18)?.base?.['--slotted-radius-lg']).toBe(
       '18px',
     );
-    expect(prefs.compiledTheme('nexora-terminal', radius18)).toBeNull();
+    expect(prefs.compiledTheme('nexora-precise', radius18)).toBeNull();
 
     prefs.preview(candidate(18));
     TestBed.flushEffects();

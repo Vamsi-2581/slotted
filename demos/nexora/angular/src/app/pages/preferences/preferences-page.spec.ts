@@ -118,14 +118,14 @@ describe('PreferencesPage › Appearance', () => {
     const saved = page();
     expect(saved).toMatchObject({ theme: 'default', density: 'comfortable', accent: '#7c3aed' });
 
-    choose(root, 'theme', 'nexora-brutalist');
+    choose(root, 'theme', 'nexora-corporate');
     choose(root, 'brand', 'amber');
     choose(root, 'neutral', 'clay');
     choose(root, 'density', 'compact');
     harness.detectChanges();
     TestBed.flushEffects();
     expect(page()).toMatchObject({
-      theme: 'nexora-brutalist',
+      theme: 'nexora-corporate',
       density: 'compact',
       accent: '#d97706',
       neutral: '#9c6644',
@@ -142,11 +142,11 @@ describe('PreferencesPage › Appearance', () => {
   it('returns the application to the saved appearance when the page is left', async () => {
     const { harness, root } = await open();
     const saved = page();
-    choose(root, 'theme', 'nexora-terminal');
+    choose(root, 'theme', 'nexora-precise');
     choose(root, 'scheme', 'dark');
     harness.detectChanges();
     TestBed.flushEffects();
-    expect(page()).toMatchObject({ theme: 'nexora-terminal', scheme: 'dark' });
+    expect(page()).toMatchObject({ theme: 'nexora-precise', scheme: 'dark' });
 
     await harness.navigateByUrl('/dashboard');
     TestBed.flushEffects();
@@ -233,10 +233,10 @@ describe('PreferencesPage › Appearance', () => {
     expect(counts(root)).toBe(9);
     expect(samples(root).map((sample) => sample.theme)).toEqual([
       'default',
-      'nexora-friendly',
-      'nexora-brutalist',
+      'nexora-precise',
       'nexora-editorial',
-      'nexora-terminal',
+      'nexora-corporate',
+      'nexora-expressive',
     ]);
   });
 
@@ -247,7 +247,7 @@ describe('PreferencesPage › Appearance', () => {
    */
   it('draws nothing in place of a theme whose sheet did not load', async () => {
     const store = TestBed.inject(PreferencesStore);
-    store.update({ theme: 'nexora-brutalist' });
+    store.update({ theme: 'nexora-corporate' });
     const load = vi.spyOn(store, 'useThemes').mockRejectedValue(new Error('chunk'));
     const harness = await RouterTestingHarness.create('/settings/preferences');
     const root = harness.fixture.nativeElement as HTMLElement;
@@ -279,10 +279,10 @@ describe('PreferencesPage › Appearance', () => {
       .filter((input) => input.disabled)
       .map((input) => input.value);
     expect(disabled).toEqual([
-      'nexora-friendly',
-      'nexora-brutalist',
+      'nexora-precise',
       'nexora-editorial',
-      'nexora-terminal',
+      'nexora-corporate',
+      'nexora-expressive',
     ]);
     /* A theme that cannot be drawn keeps the card's anatomy: its sample box holds a placeholder. */
     const cards = [...root.querySelectorAll<HTMLInputElement>('input[name="theme"]')].map((input) =>
@@ -313,7 +313,7 @@ describe('PreferencesPage › Appearance', () => {
     const html = TestBed.inject(DOCUMENT).documentElement;
 
     choose(root, 'brand', 'emerald');
-    choose(root, 'theme', 'nexora-friendly');
+    choose(root, 'theme', 'nexora-expressive');
     harness.detectChanges();
     const save = [...root.querySelectorAll('button')].find(
       (button) => button.textContent?.trim() === 'Save preferences',
@@ -324,8 +324,8 @@ describe('PreferencesPage › Appearance', () => {
 
     const preferences = TestBed.inject(PreferencesStore).preferences();
     expect(preferences.brand.preset).toBe('emerald');
-    expect(preferences.theme).toBe('nexora-friendly');
-    expect(html.getAttribute('data-slotted-theme')).toBe('nexora-friendly');
+    expect(preferences.theme).toBe('nexora-expressive');
+    expect(html.getAttribute('data-slotted-theme')).toBe('nexora-expressive');
     expect(html.style.getPropertyValue('--slotted-seed-accent')).toBe('#059669');
   });
 
@@ -424,6 +424,17 @@ describe('PreferencesPage › Appearance', () => {
     'axis-cards',
     'axis-tabs',
     'axis-chart',
+    'axis-input',
+    'axis-focus',
+    'axis-button',
+    'axis-controlRadius',
+    'axis-cardRadius',
+    'axis-overlayRadius',
+    'axis-controlBorder',
+    'axis-labelWeight',
+    'axis-labelSpacing',
+    'axis-controlText',
+    'axis-controlHeight',
   ];
   const label = (root: HTMLElement, input: HTMLInputElement) =>
     root.querySelector<HTMLElement>(`label[for="${input.id}"]`)!;
@@ -471,6 +482,44 @@ describe('PreferencesPage › Appearance', () => {
     expect(optionLabels(root, 'axis-cards')).toEqual(['Theme', 'Bordered', 'Elevated', 'Flat']);
     expect(optionLabels(root, 'axis-tabs')).toEqual(['Theme', 'Underline', 'Pill']);
     expect(optionLabels(root, 'axis-chart')).toEqual(['Theme', 'Palette', 'Accent']);
+    expect(optionLabels(root, 'axis-input')).toEqual([
+      'Theme',
+      'Outlined',
+      'Filled',
+      'Underline',
+      'Borderless',
+    ]);
+    expect(optionLabels(root, 'axis-focus')).toEqual([
+      'Theme',
+      'Ring',
+      'Glow',
+      'Underline',
+      'Offset',
+    ]);
+    expect(optionLabels(root, 'axis-button')).toEqual([
+      'Theme',
+      'Solid',
+      'Soft',
+      'Outline',
+      'Ghost',
+    ]);
+    expect(optionLabels(root, 'axis-controlRadius')).toEqual([
+      'Theme',
+      '0 px',
+      '4 px',
+      '8 px',
+      '12 px',
+      'Pill',
+    ]);
+    expect(optionLabels(root, 'axis-controlBorder')).toEqual(['Theme', 'Thin', 'Thick']);
+    expect(optionLabels(root, 'axis-labelWeight')).toEqual([
+      'Theme',
+      'Regular',
+      'Medium',
+      'Semibold',
+      'Bold',
+    ]);
+    expect(optionLabels(root, 'axis-controlHeight')).toEqual(['Theme', '−4 px', '+4 px', '+8 px']);
   });
 
   /**
@@ -503,7 +552,7 @@ describe('PreferencesPage › Appearance', () => {
         return named.textContent?.trim();
       },
     );
-    expect(labels).toEqual(['Standard', 'Friendly', 'Brutalist', 'Editorial', 'Terminal']);
+    expect(labels).toEqual(['Standard', 'Precise', 'Editorial', 'Corporate', 'Expressive']);
   });
 
   /**
@@ -627,13 +676,109 @@ describe('PreferencesPage › Appearance', () => {
     expect(root.querySelector('[data-anatomy]')!.hasAttribute('data-striped')).toBe(true);
     expect(row('seeds').entries).toContain('accent #1d4ed8');
 
-    choose(root, 'theme', 'nexora-brutalist');
+    choose(root, 'theme', 'nexora-corporate');
     harness.detectChanges();
     expect(root.querySelectorAll('[data-anatomy] [data-layer]')).toHaveLength(9);
-    expect(row('seeds').entries).toContain('accent #ffd400');
+    expect(row('seeds').entries).toContain('accent #0c66e4');
     expect(row('components').count).toBeGreaterThanOrEqual(15);
     expect(row('rules').count).toBeGreaterThanOrEqual(1);
-    expect(row('fonts').entries).toBe('Inter Variable, JetBrains Mono Variable');
+    expect(row('fonts').entries).toBe('Source Sans 3 Variable');
+    expect(root.querySelector('[data-change-anatomy]')).toBeNull();
+  });
+
+  /**
+   * The Controls section: each axis on its own, a candidate like any other
+   * change — the application is drawn in it before Save, Save keeps it, and
+   * Reset controls returns the Controls axes alone to the theme's own. The
+   * anatomy lists each change with the layers of the model it writes.
+   */
+  it('sets each Controls axis on its own, lists it by layer, and resets the Controls alone', async () => {
+    const { harness, root } = await open();
+    const store = TestBed.inject(PreferencesStore);
+    choose(root, 'axis-shadow', 'none');
+    harness.detectChanges();
+    choose(root, 'axis-input', 'underline');
+    harness.detectChanges();
+    choose(root, 'axis-focus', 'glow');
+    harness.detectChanges();
+    choose(root, 'axis-button', 'soft');
+    harness.detectChanges();
+    choose(root, 'axis-controlRadius', '9999');
+    harness.detectChanges();
+    choose(root, 'axis-controlHeight', '-4');
+    harness.detectChanges();
+    choose(root, 'axis-labelWeight', '700');
+    harness.detectChanges();
+
+    await until(harness, () => page().theme === 'nexora-custom-draft', 8000);
+    const sheet = TestBed.inject(DOCUMENT).head.querySelector(
+      'style[data-slotted-theme-sheet="nexora-custom-draft"]',
+    )!.textContent!;
+    expect(sheet).toContain('--slotted-text-field-background: transparent');
+    expect(sheet).toContain('--slotted-control-radius: var(--slotted-radius-full)');
+    expect(sheet).toContain('--slotted-control-height-md: 30px');
+    expect(sheet).toContain(
+      '0 0 0 4px color-mix(in oklab, var(--slotted-focus-ring-color) 28%, transparent)',
+    );
+    expect(root.querySelector('[data-changes]')!.textContent!.trim()).toBe('7 changes');
+
+    const layers = (axis: string) =>
+      root
+        .querySelector(`[data-change-anatomy] [data-change="${axis}"] [data-layers]`)!
+        .textContent!.trim();
+    await until(harness, () => root.querySelector('[data-change-anatomy]') !== null);
+    expect(layers('input')).toBe('Components · 36, Rules · 2');
+    expect(layers('focus')).toBe('Scales · 2, Rules · 3');
+    expect(layers('button')).toBe('Rules · 1');
+    expect(layers('controlRadius')).toBe('Scales · 1, Components · 11');
+    expect(layers('controlHeight')).toBe('Densities · 9');
+    expect(layers('labelWeight')).toBe('Scales · 1');
+    expect(layers('shadow')).toBe('Schemes · 10');
+
+    button(root, 'Save preferences').click();
+    harness.detectChanges();
+    expect(store.preferences().customisation).toMatchObject({
+      shadow: 'none',
+      input: 'underline',
+      focus: 'glow',
+      button: 'soft',
+      controlRadius: 9999,
+      controlHeight: -4,
+      labelWeight: 700,
+    });
+
+    (root.querySelector('[data-reset-controls]') as HTMLButtonElement).click();
+    harness.detectChanges();
+    const draft = harness.fixture.debugElement
+      .query((node) => node.name === 'app-appearance-section')!
+      .componentInstance.draft().customisation;
+    expect(draft).toEqual({ ...NO_CUSTOMISATION, shadow: 'none' });
+    expect(
+      root.querySelector<HTMLInputElement>('input[name="axis-input"][value="theme"]')!.checked,
+    ).toBe(true);
+    expect(root.querySelector<HTMLButtonElement>('[data-reset-controls]')!.disabled).toBe(true);
+  });
+
+  /** A Controls tile draws its style; the "Theme" tile draws the theme's own. */
+  it('draws each field, focus and button style in its tile, and the theme’s own on Theme', async () => {
+    const { harness, root } = await open();
+    const styles = (axis: string) =>
+      [...root.querySelectorAll(`[data-axis="${axis}"] .control-specimen`)].map((specimen) =>
+        specimen.getAttribute('data-style'),
+      );
+    expect(styles('input')).toEqual(['outlined', 'outlined', 'filled', 'underline', 'borderless']);
+    expect(styles('focus')).toEqual(['ring', 'ring', 'glow', 'underline', 'offset']);
+    expect(styles('button')).toEqual(['solid', 'solid', 'soft', 'outline', 'ghost']);
+    choose(root, 'theme', 'nexora-editorial');
+    harness.detectChanges();
+    expect(styles('input')[0]).toBe('underline');
+    expect(styles('focus')[0]).toBe('underline');
+    expect(styles('button')[0]).toBe('outline');
+    expect(
+      [...root.querySelectorAll('[data-axis] .control-stage')].every(
+        (stage) => stage.getAttribute('aria-hidden') === 'true',
+      ),
+    ).toBe(true);
   });
 
   /** Save keeps the builder's changes, and `html` names the saved compiled theme. */

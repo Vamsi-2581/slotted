@@ -8,41 +8,68 @@ import {
 } from '@slotted/theme';
 import defaultTheme from '@slotted/themes/default';
 
-import type { Customisation, FontId } from './customisation';
-import { nexoraTheme, TAB_STYLES } from './nexora-themes';
+import {
+  buttonRules,
+  FIELD_FAMILIES,
+  fieldRules,
+  FOCUS_TOKENS,
+  inputTokens,
+  TAB_STYLES,
+} from './control-styles';
+import type { Customisation, FontId, LabelSpacingChoice, LabelWeightChoice } from './customisation';
+import { nexoraTheme } from './nexora-themes';
 import { facesOf, fontFamily } from './theme-faces';
+import { catalogueTheme, DEFAULT_THEME_ID } from './theme-catalogue';
 
 /**
  * The builder: a customisation is compiled into a theme by `extendTheme` on
  * the chosen catalogue theme, so the result is a theme of the same shape as
  * the five it starts from, validated against the same contract and written
- * by the same `renderTheme`. Each axis writes one set of tokens:
+ * by the same `renderTheme`. Each axis writes one set of entries, at the
+ * level of the model it belongs to:
  *
- * | axis | tokens |
- * | --- | --- |
- * | radius | `--slotted-radius-xs…lg` as ¼, ½, ¾ and 1 of the value; `--slotted-control-radius`; the corner of every family a theme sets |
- * | body | `--slotted-font-family-sans`, `--slotted-control-font-family`, the badge's face; the family's `@font-face` |
- * | heading | `--slotted-font-family-heading`, the alert title's face; the family's `@font-face` |
- * | scale | `--slotted-font-size-xs…4xl` and each density's `--slotted-control-font-size-*`, as a share of the library's |
- * | border | `--slotted-border-width-thin`, `-medium`, `-thick`, `--slotted-control-border-width`, the families' own line widths |
- * | shadow | per light and dark scheme, `--slotted-shadow-xs…lg` and `--slotted-control-shadow`; high contrast keeps its rings |
- * | motion | `--slotted-duration-*` and the easings |
- * | cards | the card's and the stat card's line, shadow and ground |
- * | tabs | the tabs' marker and track, and a rule on the selected item (`TAB_STYLES`) |
- * | chart | `--slotted-chart-color-1…8` |
+ * | axis | level | entries |
+ * | --- | --- | --- |
+ * | radius | base, components | `--slotted-radius-xs…lg` as ¼, ½, ¾ and 1 of the value; `--slotted-control-radius`; the corner of every family a theme sets |
+ * | body | base, components, fonts | `--slotted-font-family-sans`, `--slotted-control-font-family`, the faces of the badge, the table and running text; the family's `@font-face` |
+ * | heading | base, components, fonts | `--slotted-font-family-heading`, the alert title's face; the family's `@font-face` |
+ * | scale | base, densities | `--slotted-font-size-xs…4xl` and each density's `--slotted-control-font-size-*`, as a share of the library's |
+ * | border | base, components | `--slotted-border-width-thin`, `-medium`, `-thick`, `--slotted-control-border-width`, the families' own line widths |
+ * | shadow | schemes | per light and dark scheme, `--slotted-shadow-xs…lg` and `--slotted-control-shadow`; high contrast keeps its rings |
+ * | motion | base | `--slotted-duration-*` and the easings |
+ * | cards | components | the card's and the stat card's line, shadow and ground |
+ * | tabs | components, rules | the tabs' marker and track, and a rule on the selected item (`TAB_STYLES`) |
+ * | chart | components | `--slotted-chart-color-1…8` |
+ * | input | components, rules | each field family's ground, line, hover line and shadow; the frame's edges and corners and the invalid edge |
+ * | focus | base, rules | `--slotted-focus-ring-width` and `-offset`; a field's and a button's focus mark |
+ * | button | rules | the primary button's paint at rest, under the pointer and pressed |
+ * | controlRadius | base, components | `--slotted-control-radius`; every field family's corner, the toggle's and the segmented control's |
+ * | cardRadius | components | the corner of cards, stat cards, chart cards, tables, data grids and alerts |
+ * | overlayRadius | components | the corner of dialogs, drawers, popovers, menus, the select families' panels, tooltips, hover cards, toasts and the command palette |
+ * | controlBorder | base | `--slotted-control-border-width`, as the scale's thin or thick line |
+ * | labelWeight | base | `--slotted-control-font-weight`, on the theme's weight scale |
+ * | labelSpacing | base | `--slotted-control-letter-spacing` |
+ * | controlText | densities | each density's `--slotted-control-font-size-*`, moved by the value |
+ * | controlHeight | densities | each density's `--slotted-control-height-*`, moved by the value, never below 24 px |
  *
  * An axis writes the whole set, whatever the theme under it declared: a
- * corner the theme set on one family follows the slider too.
+ * corner the theme set on one family follows the slider too. The input,
+ * focus and button axes write their rules for the three styles in effect —
+ * each one the reader's, or the theme's own — after the theme's own rules.
  */
 
 type Base = NonNullable<ThemeOverrides['base']>;
 type Components = NonNullable<ThemeOverrides['components']>;
 type SchemeValues = NonNullable<NonNullable<ThemeOverrides['schemes']>['light']>;
 type DensityValues = NonNullable<NonNullable<ThemeOverrides['densities']>[Density]>;
+type Densities = Partial<Record<Density, Record<string, string>>>;
 
 const LIBRARY = defaultTheme.base as Readonly<Record<string, string>>;
 const SIZE_STEPS = ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl'] as const;
+const DENSITIES = ['comfortable', 'compact', 'dense'] as const;
 const round = (value: number) => Math.round(value * 10_000) / 10_000;
+/** The contract's floor: no control is shorter than a 24 px target (WCAG 2.5.8). */
+const TARGET_FLOOR = 24;
 
 function radius(px: number): { base: Base; components: Components } {
   return {
@@ -72,7 +99,11 @@ function body(id: FontId): { base: Base; components: Components; fonts: FontFace
       '--slotted-font-family-sans': fontFamily(id).stack,
       '--slotted-control-font-family': 'var(--slotted-font-family-sans)',
     },
-    components: { '--slotted-badge-font-family': 'var(--slotted-control-font-family)' },
+    components: {
+      '--slotted-badge-font-family': 'var(--slotted-control-font-family)',
+      '--slotted-table-font-family': 'var(--slotted-control-font-family)',
+      '--slotted-typography-font-family': 'var(--slotted-font-family-sans)',
+    },
     fonts: facesOf(id),
   };
 }
@@ -84,15 +115,28 @@ function heading(id: FontId): {
 } {
   return {
     base: { '--slotted-font-family-heading': fontFamily(id).stack },
-    components: { '--slotted-alert-title-font-family': 'var(--slotted-font-family-heading)' },
+    components: {
+      '--slotted-alert-title-font-family': 'var(--slotted-font-family-heading)',
+      '--slotted-dialog-title-font-family': 'var(--slotted-font-family-heading)',
+    },
     fonts: facesOf(id),
   };
 }
 
-function scale(percent: number): {
-  base: Base;
-  densities: Partial<Record<Density, DensityValues>>;
-} {
+/** Each density's control pixel values the theme draws with: its own, else the library's. */
+function themeDensities(theme: Theme): Densities {
+  return Object.fromEntries(
+    DENSITIES.map((density) => [
+      density,
+      {
+        ...(defaultTheme.densities?.[density] as Readonly<Record<string, string>>),
+        ...((theme.densities?.[density] ?? {}) as Readonly<Record<string, string>>),
+      },
+    ]),
+  ) as Densities;
+}
+
+function scale(percent: number): { base: Base; densities: Densities } {
   const factor = percent / 100;
   const base = Object.fromEntries(
     SIZE_STEPS.map((step) => {
@@ -109,8 +153,29 @@ function scale(percent: number): {
           .map(([token, value]) => [token, `${round(Number.parseFloat(value) * factor)}px`]),
       ),
     ]),
-  ) as Partial<Record<Density, DensityValues>>;
+  ) as Densities;
   return { base, densities };
+}
+
+/**
+ * The control tokens of `prefix` in every density, each moved by `px` from
+ * the value it holds so far — the scale axis's when it wrote one, the
+ * theme's otherwise — and kept at `floor` or above.
+ */
+function moved(current: Densities, prefix: string, px: number, floor = 0): Densities {
+  return Object.fromEntries(
+    DENSITIES.map((density) => [
+      density,
+      Object.fromEntries(
+        Object.entries(current[density] ?? {})
+          .filter(([token]) => token.startsWith(prefix))
+          .map(([token, value]) => [
+            token,
+            `${round(Math.max(floor, Number.parseFloat(value) + px))}px`,
+          ]),
+      ),
+    ]),
+  ) as Densities;
 }
 
 function border(px: number): { base: Base; components: Components } {
@@ -248,14 +313,85 @@ function chart(choice: NonNullable<Customisation['chart']>): Components {
   ) as Components;
 }
 
-/** The overrides a customisation writes; an axis left to the theme writes nothing. */
-export function customOverrides(customisation: Customisation): ThemeOverrides {
+/** A corner in px, or the pill. */
+const corner = (px: number) => (px >= 9999 ? 'var(--slotted-radius-full)' : `${px}px`);
+/**
+ * The control corner, a semantic token: the contract has it name a
+ * primitive, so a corner in px is laid on the none corner.
+ */
+const controlCorner = (px: number) =>
+  px >= 9999
+    ? 'var(--slotted-radius-full)'
+    : px === 0
+      ? 'var(--slotted-radius-none)'
+      : `calc(var(--slotted-radius-none) + ${px}px)`;
+
+/** The families whose corner the control radius moves, beside `--slotted-control-radius`. */
+export const CONTROL_RADIUS_TOKENS = [
+  ...FIELD_FAMILIES.map(({ ui }) => `--slotted-${ui}-radius`),
+  '--slotted-toggle-radius',
+  '--slotted-segmented-control-radius',
+] as const;
+/** The surfaces a card radius moves. */
+export const CARD_RADIUS_TOKENS = [
+  '--slotted-card-radius',
+  '--slotted-stat-card-radius',
+  '--slotted-chart-card-radius',
+  '--slotted-table-radius',
+  '--slotted-data-grid-radius',
+  '--slotted-alert-radius',
+] as const;
+/** The layers an overlay radius moves. */
+export const OVERLAY_RADIUS_TOKENS = [
+  '--slotted-dialog-radius',
+  '--slotted-drawer-radius',
+  '--slotted-popover-radius',
+  '--slotted-menu-radius',
+  '--slotted-select-content-radius',
+  '--slotted-combobox-content-radius',
+  '--slotted-multi-select-content-radius',
+  '--slotted-date-picker-content-radius',
+  '--slotted-tooltip-radius',
+  '--slotted-hover-card-radius',
+  '--slotted-toast-radius',
+  '--slotted-command-palette-radius',
+] as const;
+
+const every = (tokens: readonly string[], value: string): Components =>
+  Object.fromEntries(tokens.map((token) => [token, value])) as Components;
+
+/** A label weight on the theme's weight scale; bold is a hundred over its semibold. */
+export const LABEL_WEIGHT: Readonly<Record<LabelWeightChoice, string>> = {
+  400: 'var(--slotted-font-weight-regular)',
+  500: 'var(--slotted-font-weight-medium)',
+  600: 'var(--slotted-font-weight-semibold)',
+  700: 'calc(var(--slotted-font-weight-semibold) + 100)',
+};
+
+export const LABEL_SPACING: Readonly<Record<LabelSpacingChoice, string>> = {
+  tight: '-0.01em',
+  normal: '0em',
+  wide: '0.02em',
+  wider: '0.05em',
+};
+
+/**
+ * The overrides a customisation writes over the catalogue theme `themeId`;
+ * an axis left to the theme writes nothing.
+ */
+export function customOverrides(
+  customisation: Customisation,
+  themeId: string = DEFAULT_THEME_ID,
+): ThemeOverrides {
   const base: Record<string, string> = {};
   const components: Record<string, string> = {};
   const fonts: FontFaceDefinition[] = [];
   const rules: string[] = [];
   let schemes: ThemeOverrides['schemes'];
-  let densities: ThemeOverrides['densities'];
+  let densities: Densities | undefined;
+  const theme = nexoraTheme(themeId);
+  const own = catalogueTheme(themeId).controls;
+
   if (customisation.radius !== null) {
     const written = radius(customisation.radius);
     Object.assign(base, written.base);
@@ -289,19 +425,72 @@ export function customOverrides(customisation: Customisation): ThemeOverrides {
   }
   if (customisation.chart !== null) Object.assign(components, chart(customisation.chart));
 
+  // Controls.
+  const input = customisation.input ?? own.input;
+  const focus = customisation.focus ?? own.focus;
+  const button = customisation.button ?? own.button;
+  if (customisation.input !== null) Object.assign(components, inputTokens(customisation.input));
+  if (customisation.focus !== null) Object.assign(base, FOCUS_TOKENS[customisation.focus]);
+  if (customisation.input !== null || customisation.focus !== null) {
+    rules.push(...fieldRules(input, focus));
+  }
+  if (customisation.button !== null || customisation.focus !== null) {
+    rules.push(...buttonRules(button, focus));
+  }
+  if (customisation.controlRadius !== null) {
+    base['--slotted-control-radius'] = controlCorner(customisation.controlRadius);
+    Object.assign(components, every(CONTROL_RADIUS_TOKENS, 'var(--slotted-control-radius)'));
+  }
+  if (customisation.cardRadius !== null) {
+    Object.assign(components, every(CARD_RADIUS_TOKENS, corner(customisation.cardRadius)));
+  }
+  if (customisation.overlayRadius !== null) {
+    Object.assign(components, every(OVERLAY_RADIUS_TOKENS, corner(customisation.overlayRadius)));
+  }
+  if (customisation.controlBorder !== null) {
+    base['--slotted-control-border-width'] =
+      customisation.controlBorder === 1
+        ? 'var(--slotted-border-width-thin)'
+        : 'var(--slotted-border-width-thick)';
+  }
+  if (customisation.labelWeight !== null) {
+    base['--slotted-control-font-weight'] = LABEL_WEIGHT[customisation.labelWeight];
+  }
+  if (customisation.labelSpacing !== null) {
+    base['--slotted-control-letter-spacing'] = LABEL_SPACING[customisation.labelSpacing];
+  }
+  if (customisation.controlText !== null || customisation.controlHeight !== null) {
+    const current = themeDensities(theme);
+    for (const density of DENSITIES) Object.assign(current[density]!, densities?.[density] ?? {});
+    const merge = (written: Densities) => {
+      densities ??= {};
+      for (const density of DENSITIES) {
+        densities[density] = { ...densities[density], ...written[density] };
+      }
+    };
+    if (customisation.controlText !== null) {
+      merge(moved(current, '--slotted-control-font-size-', customisation.controlText, 1));
+    }
+    if (customisation.controlHeight !== null) {
+      merge(moved(current, '--slotted-control-height-', customisation.controlHeight, TARGET_FLOOR));
+    }
+  }
+
   const overrides: { -readonly [K in keyof ThemeOverrides]: ThemeOverrides[K] } = {};
   if (Object.keys(base).length > 0) overrides.base = base as Base;
   if (Object.keys(components).length > 0) overrides.components = components as Components;
   if (fonts.length > 0) overrides.fonts = fonts;
   if (rules.length > 0) overrides.rules = rules;
   if (schemes !== undefined) overrides.schemes = schemes;
-  if (densities !== undefined) overrides.densities = densities;
+  if (densities !== undefined) {
+    overrides.densities = densities as Partial<Record<Density, DensityValues>>;
+  }
   return overrides;
 }
 
 /** The theme a customisation of a catalogue theme compiles to, under `name`. */
 export function customTheme(themeId: string, customisation: Customisation, name: string): Theme {
-  return extendTheme(nexoraTheme(themeId), customOverrides(customisation), { name });
+  return extendTheme(nexoraTheme(themeId), customOverrides(customisation, themeId), { name });
 }
 
 /**

@@ -19,7 +19,7 @@ describe('CustomSheet', () => {
       .mockResolvedValue(real);
     const sheet = new CustomSheet('nexora-custom', document, 0, load);
 
-    sheet.request('nexora-brutalist', flat);
+    sheet.request('nexora-corporate', flat);
     await vi.waitFor(() => expect(sheet.failed()).toBe(true));
     expect(sheet.compiled()).toBeNull();
     expect(
@@ -27,7 +27,7 @@ describe('CustomSheet', () => {
     ).toBeNull();
 
     sheet.retry();
-    await vi.waitFor(() => expect(sheet.holds('nexora-brutalist', flat)).toBe(true));
+    await vi.waitFor(() => expect(sheet.holds('nexora-corporate', flat)).toBe(true));
     expect(sheet.failed()).toBe(false);
     expect(load).toHaveBeenCalledTimes(2);
     sheet.end();

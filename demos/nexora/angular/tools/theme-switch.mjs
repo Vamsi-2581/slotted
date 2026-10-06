@@ -7,20 +7,19 @@
 // - for each of the five themes, with the theme's own brand and two presets, in light and dark, it
 //   reads `html` and asserts absolute values: the theme and the scheme `html` names and the ground
 //   they paint; a probe button's corner, case, face and transition; the page heading's face; the
-//   contrast table's badges' corner and case; the first data colour; the label on the solid at the
-//   scheme's floor and the contrast table stating the ratio painted; the start page select's layer
+//   square badge's corner and case; the first data colour; the primary button's label on
+//   its ground at the scheme's floor and the contrast table stating the ratio of the accent's label
+//   on its solid; the start page select's layer
 //   carrying the theme, scheme and seed of `html`; each face the theme names, loaded; and that the
 //   theme cards' specimens draw their own theme without changing the page around them; a text
-//   field at rest, under keyboard focus (Tab), invalid, and invalid under focus: Editorial draws it
-//   as a ruled line (bottom edge only, no corner or ground; focus thickens the line by an inset 2px
-//   in the ring's colour behind a transparent 2px outline; invalid tints the ground and draws the
-//   line in the danger border), each line and focus mark at 3:1 or more on its ground, in light,
-//   dark and high-contrast (html set to it, read once the field paints it), the invalid line
-//   thicker than the valid one at rest and under focus (2px to 1px, 4px to 3px), keeps the
-//   library's 2px ring on every other control,
-//   and under emulated forced colours draws focus as a 2px outline in a system colour; every other
-//   theme keeps the family's frame (no leak) with an invalid edge thicker than a valid one at rest
-//   and under focus, the default with absolute values;
+//   field at rest, under keyboard focus (Tab), invalid, and invalid under focus, drawn in the
+//   theme's own input style (outlined, filled, underline or borderless: its edges, corners, ground
+//   and line) and focus style (ring, offset, glow or underline: its outline, shadow and line), every
+//   line the style requires and every focus mark at 3:1 or more on its ground, an invalid edge
+//   thicker than a valid one at rest and under focus, in light, dark and high-contrast (html set to
+//   it, read once the field paints it); the probe button's focus in the theme's focus style; under
+//   emulated forced colours, focus as a 2px outline in a system colour; the default with absolute
+//   values;
 // - with two strongly tinted greys (Ocean #0e7490, Clay #9c6644) and a grey of the reader's own, the
 //   page ground, a table ground and the select's layer carry the grey's hue, and the lines and
 //   hovers stay in the ground's family;
@@ -31,16 +30,20 @@
 //   sheet; "Use the theme's" brings it back), both faces (each of the eight families, loaded), type
 //   scale, lines, shadows, motion, cards, tabs (the selected tab's corner and ground on
 //   Notifications), chart colours and a status colour; Reset returns to the theme as it came;
+// - every Controls axis over Standard: each input style drawn on the text field, each focus style
+//   on the field and on the probe button (and as a system-colour outline under forced colours),
+//   each primary button paint with its label at 4.5:1, and the control, card and overlay corners,
+//   the control line, the label weight and spacing, the control text size and height;
 // - layout, with `html` saved in each of the five themes and in a customised theme in the widest
 //   face, at 1440, 1024, 768, 390 and 360 px: in each group of choice tiles (theme, brand, grey, both
-//   faces, every builder axis) every tile has the width and the height of the others (±1 px), no
+//   faces, every builder and Controls axis) every tile has the width and the height of the others (±1 px), no
 //   label runs onto a second line, no tile or label is cut (scrollWidth ≤ clientWidth), and the page
 //   does not scroll sideways.
 // Prints one PASS or FAIL per check and exits non-zero on a failure. A Chrome that cannot start, or
 // that exits during the run, fails the scenario through the same cleanup. CHROME names the binary
 // (default `google-chrome`).
 import { spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { extname, join, normalize } from 'node:path';
@@ -71,48 +74,58 @@ const FACE = {
 /** The first family of a computed `font-family`, unquoted. */
 const first = (stack) => stack.split(',')[0].trim().replace(/^["']|["']$/g, '');
 const WIDTHS = [1440, 1024, 768, 390, 360];
+/** The demo persona the run signs in as; the screenshot step takes the administrator, who reaches every screen. */
+const PERSONA = process.env.PERSONA ?? 'marcus-lee';
 const PREFERENCES = '/settings/preferences';
 
 /**
  * What each theme draws, as absolute values: the solid button's corner, case, face and transition;
  * the heading's face; a stat card's top line, shadow in light (a part of the computed value) and
- * inline inset; the badge's corner and case; the first data colour per scheme.
+ * inline inset; a square badge's corner and case; the first data colour per scheme; its input and focus
+ * styles (`theme-catalogue.ts` › `controls`); the selected tab on Notifications (`underline`, a
+ * `pill` on the accent's surface, a raised `chip`, or `null` for the family's own); and the
+ * inventory table's head (`band`: the sunken ground; `capitals`; or `null`).
  */
 const THEMES = [
   {
     id: 'default',
     radius: '4px', transform: 'none', body: 'geist', heading: 'geist', duration: '0.12s',
     statLine: '1px', statShadow: 'none', statInset: '16px',
-    badgeRadius: '9999px', badgeCaps: 'normal',
+    badgeRadius: '4px', badgeCaps: 'normal',
     data: { light: '#2563eb', dark: '#2563eb' },
+    input: 'outlined', focus: 'ring', tab: null, head: null,
   },
   {
-    id: 'nexora-friendly',
-    radius: '9999px', transform: 'none', body: 'nunito', heading: 'nunito', duration: '0.18s',
-    statLine: '0px', statShadow: 'rgba(190, 70, 110, 0.22) 0px 10px 24px -8px', statInset: '24px',
-    badgeRadius: '9999px', badgeCaps: 'normal',
-    data: { light: '#d6336c', dark: '#f06595' },
-  },
-  {
-    id: 'nexora-brutalist',
-    radius: '0px', transform: 'uppercase', body: 'inter', heading: 'jetbrains-mono', duration: '0.001s',
-    statLine: '2px', statShadow: '3px 3px 0px 0px', statInset: '18px',
-    badgeRadius: '0px', badgeCaps: 'normal',
-    data: { light: '#111111', dark: '#ffd400' },
+    id: 'nexora-precise',
+    radius: '6px', transform: 'none', body: 'inter', heading: 'inter', duration: '0.1s',
+    statLine: '1px', statShadow: 'none', statInset: '14px',
+    badgeRadius: '5px', badgeCaps: 'normal',
+    data: { light: '#5e6ad2', dark: '#8790e8' },
+    input: 'borderless', focus: 'glow', tab: 'chip', head: null,
   },
   {
     id: 'nexora-editorial',
-    radius: '2px', transform: 'none', body: 'source-serif', heading: 'fraunces', duration: '0.16s',
-    statLine: '1px', statShadow: 'none', statInset: '25px',
-    badgeRadius: '1px', badgeCaps: 'all-small-caps',
-    data: { light: '#8a1538', dark: '#d4708a' },
+    radius: '2px', transform: 'none', body: 'source-sans', heading: 'fraunces', duration: '0.18s',
+    statLine: '2px', statShadow: 'none', statInset: '20px',
+    badgeRadius: '1px', badgeCaps: 'normal',
+    data: { light: '#0d7680', dark: '#4fb3bd' },
+    input: 'underline', focus: 'underline', tab: 'underline', head: 'capitals',
   },
   {
-    id: 'nexora-terminal',
-    radius: '2px', transform: 'lowercase', body: 'jetbrains-mono', heading: 'jetbrains-mono', duration: '0.08s',
-    statLine: '1px', statShadow: 'none', statInset: '12px',
-    badgeRadius: '1px', badgeCaps: 'normal',
-    data: { light: '#0a8f2a', dark: '#39ff14' },
+    id: 'nexora-corporate',
+    radius: '6px', transform: 'none', body: 'source-sans', heading: 'source-sans', duration: '0.08s',
+    statLine: '1px', statShadow: 'rgba(31, 35, 40, 0.04) 0px 1px 0px 0px', statInset: '18px',
+    badgeRadius: '9999px', badgeCaps: 'normal',
+    data: { light: '#0c66e4', dark: '#579dff' },
+    input: 'outlined', focus: 'offset', tab: 'underline', head: 'band',
+  },
+  {
+    id: 'nexora-expressive',
+    radius: '9999px', transform: 'none', body: 'outfit', heading: 'outfit', duration: '0.2s',
+    statLine: '0px', statShadow: 'none', statInset: '20px',
+    badgeRadius: '9999px', badgeCaps: 'normal',
+    data: { light: '#c0267a', dark: '#f48fbf' },
+    input: 'filled', focus: 'ring', tab: 'pill', head: null,
   },
 ];
 const BRANDS = ['theme', 'emerald', 'rose'];
@@ -160,8 +173,8 @@ const viewport = (width, height) => send('Emulation.setDeviceMetricsOverride', {
 /*
  * Helpers installed in the page once: a colour of any CSS notation read as sRGB through a canvas,
  * its OKLCH, its WCAG luminance, the ratio of two of them, a counter of compiled draft sheets, and a
- * probe — a solid button the button family paints by its attributes, appended to the body, outside
- * every theme card, so it answers `html` alone.
+ * probe — a solid button the button family paints by its attributes, and a square badge, appended to
+ * the body, outside every theme card, so they answer `html` alone.
  */
 const install = () => js(`(() => {
   const canvas = document.createElement('canvas');
@@ -187,8 +200,16 @@ const install = () => js(`(() => {
     return { l: L, c: Math.hypot(A, B), h: ((Math.atan2(B, A) * 180) / Math.PI + 360) % 360 };
   };
   const ratio = (a, b) => { const [x, y] = [luminance(a), luminance(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
-  /* The first painted ground at or above an element. */
-  const ground = (element) => { let node = element; while (node && getComputedStyle(node).backgroundColor === 'rgba(0, 0, 0, 0)') node = node.parentElement; return node ? getComputedStyle(node).backgroundColor : 'none'; };
+  /* A colour's opacity, 0 to 1: painted on a cleared pixel. */
+  const alpha = (color) => {
+    context.clearRect(0, 0, 1, 1);
+    context.fillStyle = 'transparent';
+    context.fillStyle = color;
+    context.fillRect(0, 0, 1, 1);
+    return context.getImageData(0, 0, 1, 1).data[3] / 255;
+  };
+  /* The first painted ground at or above an element; the page's surface where nothing above it paints one. */
+  const ground = (element) => { let node = element; while (node && getComputedStyle(node).backgroundColor === 'rgba(0, 0, 0, 0)') node = node.parentElement; return node ? getComputedStyle(node).backgroundColor : getComputedStyle(document.documentElement).getPropertyValue('--slotted-surface').trim(); };
   const probe = document.createElement('button');
   probe.type = 'button';
   probe.textContent = 'Probe';
@@ -198,7 +219,18 @@ const install = () => js(`(() => {
   probe.setAttribute('data-size', 'md');
   probe.setAttribute('data-theme-probe', '');
   document.body.append(probe);
-  window.__theme = { rgb, oklch, luminance, ratio, ground, drafts: 0 };
+  /* A square badge: the one shape whose corner a theme sets (--slotted-badge-radius); a pill is always round. */
+  const badge = document.createElement('span');
+  badge.textContent = 'Probe';
+  badge.setAttribute('data-ui', 'badge');
+  badge.setAttribute('data-part', 'root');
+  badge.setAttribute('data-shape', 'square');
+  badge.setAttribute('data-tone', 'success');
+  badge.setAttribute('data-variant', 'soft');
+  badge.setAttribute('data-size', 'sm');
+  badge.setAttribute('data-badge-probe', '');
+  document.body.append(badge);
+  window.__theme = { rgb, oklch, luminance, ratio, alpha, ground, drafts: 0 };
   document.addEventListener('slotted-themechange', (event) => { if (event.detail.name === 'nexora-custom-draft' && event.detail.applied) window.__theme.drafts += 1; });
   return true;
 })()`);
@@ -212,9 +244,9 @@ const facts = () => js(`(() => {
   const probe = document.querySelector('[data-theme-probe]');
   const style = getComputedStyle(probe);
   const scheme = html.getAttribute('data-slotted-scheme');
+  const field = getComputedStyle(document.querySelector('[data-brand-custom] [data-ui=text-field]'));
   const cell = document.querySelector('[data-contrast] td[data-pair="on-solid"][data-scheme="' + scheme + '"] [data-ratio]');
-  const badge = getComputedStyle(document.querySelector('[data-contrast] [data-ui=badge]'));
-  const rows = [...document.querySelectorAll('[data-contrast] [data-part=body] > [data-part=row]')];
+  const badge = getComputedStyle(document.querySelector('[data-badge-probe]'));
   return {
     theme: html.getAttribute('data-slotted-theme'),
     scheme,
@@ -222,7 +254,10 @@ const facts = () => js(`(() => {
     seed: html.style.getPropertyValue('--slotted-seed-accent').trim(),
     neutralSeed: html.style.getPropertyValue('--slotted-seed-neutral').trim(),
     background: T.rgb(style.backgroundColor).join(','),
-    ratio: T.ratio(style.color, style.backgroundColor),
+    /* The label against the ground it is painted on: the probe's own, or the page's under a transparent paint. */
+    ratio: T.ratio(style.color, T.alpha(style.backgroundColor) === 1 ? style.backgroundColor : T.ground(probe.parentElement)),
+    /* The pair the contrast table reads: the accent's label colour on its solid. */
+    solidRatio: T.ratio(token('--slotted-tone-accent-on-solid'), token('--slotted-tone-accent-solid')),
     stated: Number.parseFloat(cell?.textContent ?? 'NaN'),
     radius: style.borderTopLeftRadius,
     transform: style.textTransform,
@@ -231,6 +266,8 @@ const facts = () => js(`(() => {
     duration: style.transitionDuration.split(',')[0].trim(),
     buttonShadow: style.boxShadow,
     fontSize: style.fontSize,
+    fontWeight: style.fontWeight,
+    height: probe.getBoundingClientRect().height,
     headingFace: getComputedStyle(document.querySelector('[data-ui=page-header] [data-part=heading]')).fontFamily,
     badgeRadius: badge.borderTopLeftRadius,
     badgeCaps: badge.fontVariantCaps,
@@ -239,13 +276,13 @@ const facts = () => js(`(() => {
     accentSolid: T.rgb(token('--slotted-tone-accent-solid')).join(','),
     accentSurface: T.rgb(token('--slotted-tone-accent-surface')).join(','),
     dangerSolid: T.rgb(token('--slotted-tone-danger-solid')).join(','),
-    fieldLine: getComputedStyle(document.querySelector('[data-brand-custom] [data-ui=text-field]')).borderTopWidth,
+    fieldLine: field.borderTopWidth,
+    fieldRadius: field.borderTopLeftRadius,
+    cardRadius: token('--slotted-card-radius'),
+    overlayRadius: token('--slotted-dialog-radius'),
     card: { line: token('--slotted-card-border-width'), shadow: token('--slotted-card-shadow'), ground: token('--slotted-card-background') },
     shadowMd: token('--slotted-shadow-md'),
     sunkenToken: token('--slotted-surface-sunken'),
-    stripe: rows[1] ? T.rgb(getComputedStyle(rows[1]).backgroundColor).join(',') : '',
-    stripeExpected: T.rgb('color-mix(in oklab, ' + token('--slotted-border-subtle') + ' 45%, ' + token('--slotted-surface') + ')').join(','),
-    plainRow: rows[0] ? T.rgb(T.ground(rows[0])).join(',') : '',
   };
 })()`);
 
@@ -344,12 +381,21 @@ const fieldFacts = () => js(`(() => {
   return {
     widths: [style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth].join(' '),
     radius: style.borderTopLeftRadius,
-    transparent: style.backgroundColor === 'rgba(0, 0, 0, 0)',
+    radii: [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius],
+    transparent: T.alpha(style.backgroundColor) === 0,
     background: T.rgb(style.backgroundColor).join(','),
     bottom: T.rgb(style.borderBottomColor).join(','),
+    bottomAlpha: T.alpha(style.borderBottomColor),
     top: T.rgb(style.borderTopColor).join(','),
     outline: style.outlineStyle + ' ' + style.outlineWidth,
     outlineColor: style.outlineColor,
+    outlineAlpha: T.alpha(style.outlineColor),
+    outlineRgb: T.rgb(style.outlineColor).join(','),
+    outlineOffset: style.outlineOffset,
+    /* The ring's colour against the ground the field stands on: what an outline or a halo is seen on. */
+    ringRatio: T.ratio(style.getPropertyValue('--slotted-focus-ring-color').trim(), T.ground(root.parentElement)),
+    /* The ground the field stands on: a fill-drawn field is found only where its fill differs from it. */
+    outer: T.rgb(T.ground(root.parentElement)).join(','),
     shadow: style.boxShadow,
     /* The bottom line's thickness, colour aside: the border and every inset shadow that reaches the bottom edge. */
     line: Number.parseFloat(style.borderBottomWidth) + Math.max(0, ...[...style.boxShadow.matchAll(/(-?[\\d.]+)px (-?[\\d.]+)px (-?[\\d.]+)px (-?[\\d.]+)px inset/g)].map((m) => Math.max(0, -Number(m[2])) + Math.max(0, Number(m[4])))),
@@ -363,6 +409,7 @@ const fieldFacts = () => js(`(() => {
     dangerSolid: token('--slotted-tone-danger-solid'),
     dangerBorder: token('--slotted-tone-danger-border'),
     control: token('--slotted-control-surface'),
+    secondarySurface: token('--slotted-tone-secondary-surface'),
     invalid: root.hasAttribute('data-invalid'),
     focused: document.activeElement === input && input.matches(':focus-visible'),
     probeRing: probe.matches(':focus-visible') ? getComputedStyle(probe).outlineWidth : 'unfocused',
@@ -427,43 +474,92 @@ const derived = (theme, scheme, seed, value, tone) => js(`(() => {
 })()`);
 
 /**
- * Editorial's ruled field in one scheme: the bottom edge alone, no corner and no ground; keyboard
- * focus thickens the line by an inset 2px shadow in the ring's colour behind a transparent 2px
- * outline; an invalid field takes the danger tint under the danger border; every line and focus
- * mark at 3:1 or more on the ground it is drawn on (WCAG 1.4.11); every other control keeps the
- * library's 2px ring.
+ * The text field in one input style and one focus style, in one scheme (`control-styles.ts`):
+ * - the frame at rest — outlined: four equal edges on the control ground; filled: the bottom edge
+ *   alone under rounded top corners, on the secondary surface, the line at 3:1 on it; underline: the
+ *   bottom edge alone, no corner and no ground, the line at 3:1 on the page; borderless: four
+ *   transparent edges on the secondary surface, a fill apart from the ground around the field, and in
+ *   high-contrast, where that surface is the page's white, the control's line at 3:1;
+ * - keyboard focus — ring: a solid outline in the ring's colour, 2px or wider; offset: the same
+ *   outline 4px or more off the field, and no shadow; glow: a transparent outline, the line in the
+ *   ring's colour, a 1px ring and a 4px halo; underline: a transparent outline, the bottom line in
+ *   the ring's colour thickened by an inset 2px shadow at 3:1 on the field's ground. Every ring at 3:1
+ *   on the ground the field stands on (WCAG 1.4.11);
+ * - invalid — an edge thicker than the valid one at rest and under focus, whatever its colour, and
+ *   under focus the invalid ring's colour, apart from the valid ring's outside high-contrast.
  */
-const ruledField = (name, field, frame, scheme) => {
+const fieldStyle = (name, field, input, focus, scheme) => {
   const ratio = (value) => `${value.toFixed(2)}:1`;
-  const lines = `line rest ${field.rest.line}px · invalid ${field.invalid.line}px · focus ${field.focus.line}px · invalid focus ${field.invalidFocus.line}px`;
+  const frame = (state) => `${state.widths} · r ${state.radii.join(' ')} · ${state.transparent ? 'no ground' : `rgb(${state.background})`} · outline ${state.outline} a${state.outlineAlpha} off ${state.outlineOffset} · line rgb(${state.bottom}) a${state.bottomAlpha.toFixed(2)} · ${state.shadow.slice(0, 80)}`;
+  const { rest, focus: at, invalid, invalidFocus } = field;
+  const [top, right, bottom, left] = rest.widths.split(' ');
+  const four = top === right && right === bottom && bottom === left && top !== '0px';
+  const bottomOnly = top === '0px' && right === '0px' && left === '0px' && bottom !== '0px';
+  const frames = {
+    outlined: four && rest.bottomAlpha > 0 && rest.background === rest.control,
+    filled: bottomOnly && rest.background === rest.secondarySurface && rest.radii[0] !== '0px' && rest.radii[1] !== '0px' && rest.radii[2] === '0px' && rest.radii[3] === '0px' && rest.lineRatio >= 3,
+    underline: bottomOnly && rest.transparent && rest.radii.every((r) => r === '0px') && rest.lineRatio >= 3,
+    borderless: four && rest.background === rest.secondarySurface &&
+      (scheme === 'high-contrast' ? rest.bottomAlpha === 1 && rest.lineRatio >= 3 : rest.bottomAlpha === 0 && rest.background !== rest.outer),
+  };
+  check(`${name}: the field is drawn ${input} at rest`, frames[input], `${frame(rest)} · line ${ratio(rest.lineRatio)}`);
+  const width = Number.parseFloat(at.outline.split(' ')[1]);
+  const marks = {
+    ring: at.outline.startsWith('solid') && at.outlineRgb === at.ring && width >= 2,
+    offset: at.outline.startsWith('solid') && at.outlineRgb === at.ring && width >= 2 && Number.parseFloat(at.outlineOffset) >= 4 && at.shadow === 'none',
+    glow: at.outlineAlpha === 0 && at.bottom === at.ring && at.shadow.includes('0px 0px 0px 1px') && at.shadow.includes('0px 0px 0px 4px'),
+    underline: at.outlineAlpha === 0 && at.bottom === at.ring && at.shadow.endsWith('0px -2px 0px 0px inset') && at.shadowColor === at.ring && at.shadowRatio >= 3,
+  };
   check(
-    `${name}: a text field is a ruled line — the bottom edge alone, no corner, no ground, the line at 3:1 on the ground`,
-    field.rest.widths === '0px 0px 1px 0px' && field.rest.radius === '0px' && field.rest.transparent && field.rest.lineRatio >= 3,
-    `${frame(field.rest)} · line ${ratio(field.rest.lineRatio)}`,
+    `${name}: keyboard focus draws the ${focus} mark, its ring at 3:1 on the ground around the field`,
+    at.focused && marks[focus] && at.ringRatio >= 3,
+    `${at.focused ? 'focus-visible' : 'not focus-visible'} · ${frame(at)} · ring rgb(${at.ring}) ${ratio(at.ringRatio)}`,
   );
   check(
-    `${name}: keyboard focus thickens the field's line by 2px in the ring's colour at 3:1, behind a transparent 2px outline`,
-    field.focus.focused && field.focus.outline === 'solid 2px' && field.focus.outlineColor === 'rgba(0, 0, 0, 0)' && field.focus.shadow.endsWith('0px -2px 0px 0px inset') &&
-      field.focus.shadowColor === field.focus.ring && field.focus.bottom === field.focus.ring && field.focus.shadowRatio >= 3,
-    `${field.focus.focused ? 'focus-visible' : 'not focus-visible'} · ${frame(field.focus)} ${field.focus.outlineColor} · ${field.focus.shadow} · ring rgb(${field.focus.ring}) ${ratio(field.focus.shadowRatio)}`,
+    `${name}: an invalid field's edge is thicker than a valid one's, at rest and under focus, in the invalid ring's colour under focus`,
+    invalid.invalid && invalid.line > rest.line && invalidFocus.invalid && invalidFocus.focused && invalidFocus.line > at.line &&
+      invalidFocus.ring === invalidFocus.invalidRing && (scheme === 'high-contrast' || invalidFocus.ring !== at.ring),
+    `line rest ${rest.line}px · invalid ${invalid.line}px · focus ${at.line}px · invalid focus ${invalidFocus.line}px · ring rgb(${at.ring}) · invalid ring rgb(${invalidFocus.ring})`,
   );
+};
+
+/** The probe button under keyboard focus: its outline, its offset and its shadow, and the ring's contrast on the page. */
+const buttonFocus = async () => {
+  await js(`document.querySelector('[data-theme-probe]').focus()`);
+  await until(`!document.querySelector('[data-theme-probe]').getAnimations().some((a) => a.playState === 'running')`, 3000);
+  const read = await js(`(() => {
+    const T = window.__theme;
+    const probe = document.querySelector('[data-theme-probe]');
+    const style = getComputedStyle(probe);
+    const ring = style.getPropertyValue('--slotted-focus-ring-color').trim();
+    return {
+      focused: probe.matches(':focus-visible'),
+      outline: style.outlineStyle + ' ' + style.outlineWidth,
+      outlineAlpha: T.alpha(style.outlineColor),
+      outlineRgb: T.rgb(style.outlineColor).join(','),
+      offset: style.outlineOffset,
+      shadow: style.boxShadow,
+      ring: T.rgb(ring).join(','),
+      ringRatio: T.ratio(ring, T.ground(probe.parentElement)),
+    };
+  })()`);
+  await js(`document.querySelector('[data-theme-probe]').blur()`);
+  return read;
+};
+/** The probe button's focus in each focus style: ring and offset an outline, glow a halo, underline a bar below. */
+const checkButtonFocus = (name, read, focus) => {
+  const width = Number.parseFloat(read.outline.split(' ')[1]);
+  const marks = {
+    ring: read.outline.startsWith('solid') && read.outlineRgb === read.ring && width >= 2,
+    offset: read.outline.startsWith('solid') && read.outlineRgb === read.ring && width >= 2 && Number.parseFloat(read.offset) >= 4,
+    glow: read.outlineAlpha === 0 && read.shadow.includes('0px 0px 0px 4px') && read.shadow.includes('0px 0px 0px 8px'),
+    underline: read.outlineAlpha === 0 && read.shadow.includes('0px 5px 0px 0px'),
+  };
   check(
-    `${name}: an invalid field takes the danger tint under the danger border, at 3:1 on the tint`,
-    field.invalid.invalid && field.invalid.background === field.invalid.dangerSurface && field.invalid.bottom === field.invalid.dangerBorder && field.invalid.lineRatio >= 3,
-    `${frame(field.invalid)} · danger surface rgb(${field.invalid.dangerSurface}) border rgb(${field.invalid.dangerBorder}) · line ${ratio(field.invalid.lineRatio)}`,
+    `${name}: keyboard focus on a button draws the ${focus} mark, its ring at 3:1 on the page`,
+    read.focused && marks[focus] && read.ringRatio >= 3,
+    `${read.focused ? 'focus-visible' : 'not focus-visible'} · outline ${read.outline} a${read.outlineAlpha} rgb(${read.outlineRgb}) off ${read.offset} · ${read.shadow.slice(0, 90)} · ring rgb(${read.ring}) ${read.ringRatio.toFixed(2)}:1`,
   );
-  check(
-    `${name}: keyboard focus on an invalid field draws its line in the invalid ring's colour, at 3:1 on the tint`,
-    field.invalidFocus.focused && field.invalidFocus.invalid && field.invalidFocus.bottom === field.invalidFocus.ring && field.invalidFocus.shadowColor === field.invalidFocus.ring &&
-      field.invalidFocus.ring === field.invalidFocus.invalidRing && (scheme === 'high-contrast' || field.invalidFocus.ring !== field.focus.ring) && field.invalidFocus.shadowRatio >= 3,
-    `${field.invalidFocus.focused ? 'focus-visible' : 'not focus-visible'} · ${frame(field.invalidFocus)} · ${field.invalidFocus.shadow} · ring rgb(${field.invalidFocus.ring}) ${ratio(field.invalidFocus.shadowRatio)} · invalid ring rgb(${field.invalidFocus.invalidRing}) · valid ring rgb(${field.focus.ring})`,
-  );
-  check(
-    `${name}: an invalid field's line is thicker than a valid one's, at rest (2px to 1px) and under focus (4px to 3px), whatever their colours`,
-    field.rest.line === 1 && field.invalid.line === 2 && field.focus.line === 3 && field.invalidFocus.line === 4,
-    lines,
-  );
-  check(`${name}: every other control keeps the library's 2px ring`, field.probeRing === '2px', `probe button ${field.probeRing}`);
 };
 
 /**
@@ -477,7 +573,7 @@ const paintScheme = async (scheme) => {
     const style = getComputedStyle(root);
     const T = window.__theme;
     return document.documentElement.getAttribute('data-slotted-scheme') === ${JSON.stringify(scheme)} &&
-      T.rgb(style.borderBottomColor).join() === T.rgb(style.getPropertyValue('--slotted-text-field-border-color').trim()).join() &&
+      T.rgb(style.borderBottomColor).join() === T.rgb(style.getPropertyValue('--slotted-text-field-border-color').trim() || style.getPropertyValue('--slotted-control-border-color').trim()).join() &&
       !root.getAnimations().some((a) => a.playState === 'running');
   })()`, 5000);
   await fieldSettled();
@@ -506,6 +602,13 @@ const forcedFocus = async () => {
   return { rest, focus };
 };
 
+/** Under forced colours, whatever the focus style: an outline of 2px or more in a system colour that the field at rest does not have. */
+const checkForced = (name, forced) => check(
+  `${name}, forced colours: keyboard focus draws an outline of 2px or more in a system colour the field at rest does not have`,
+  forced.focus.focused && forced.focus.outline.startsWith('solid') && Number.parseFloat(forced.focus.outline.split(' ')[1]) >= 2 && forced.focus.color !== 'rgba(0, 0, 0, 0)' && forced.rest.outline.startsWith('none'),
+  `rest ${forced.rest.outline} ${forced.rest.color} · focus ${forced.focus.outline} ${forced.focus.color} · shadow ${forced.focus.shadow} · line ${forced.focus.line}`,
+);
+
 const near = (hue, target, within) => { const d = Math.abs(hue - target) % 360; return Math.min(d, 360 - d) <= within; };
 
 /** The colour fields' swatches as first painted: the colour of the field's text, not a bare button. */
@@ -515,7 +618,8 @@ const swatches = () => js(`[...document.querySelectorAll('[data-appearance] [dat
   return { value, image: style.backgroundImage, expected: 'rgb(' + window.__theme.rgb(value).join(', ') + ')', appearance: style.appearance, width: trigger.offsetWidth, height: trigger.offsetHeight };
 })`);
 
-const GROUPS = ['theme', 'brand', 'neutral', 'font-body', 'font-heading', 'axis-scale', 'axis-border', 'axis-shadow', 'axis-motion', 'axis-cards', 'axis-tabs', 'axis-chart'];
+const CONTROL_GROUPS = ['input', 'focus', 'button', 'controlRadius', 'cardRadius', 'overlayRadius', 'controlBorder', 'labelWeight', 'labelSpacing', 'controlText', 'controlHeight'].map((axis) => `axis-${axis}`);
+const GROUPS = ['theme', 'brand', 'neutral', 'font-body', 'font-heading', 'axis-scale', 'axis-border', 'axis-shadow', 'axis-motion', 'axis-cards', 'axis-tabs', 'axis-chart', ...CONTROL_GROUPS];
 /** Scrolls each font group into view, so every specimen has named its face, and back to the top. */
 const revealFonts = async () => {
   await js(`(async () => { for (const name of ['font-body', 'font-heading']) { document.querySelector('input[name="' + name + '"]').closest('[data-ui=radio-group]').scrollIntoView({ block: 'center' }); await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); } window.scrollTo(0, 0); return true; })()`);
@@ -552,6 +656,8 @@ const checkLayout = async (label) => {
   check(`${label}: the page does not scroll sideways`, read.overflow <= 0, `${read.overflow}px`);
 };
 
+/** The inventory overview, drawn: a chart shape painted in a series colour, and the table's head. */
+const OVERVIEW_READY = `[...document.querySelectorAll('[data-ui=chart] svg path, [data-ui=chart] svg rect')].some((shape) => { const fill = shape.getAttribute('fill'); return !!fill && fill !== 'none' && !fill.startsWith('url'); }) && !!document.querySelector('[data-ui=table] [data-part=column-header]')`;
 /** A saved theme on the application's own pages: a stat card, the chart and the table head, the selected tab. */
 const tour = async (theme, scheme) => {
   const out = {};
@@ -560,7 +666,7 @@ const tour = async (theme, scheme) => {
   out.card = dashboard
     ? await js(`(() => { const card = document.querySelector('[data-ui=stat-card]'); const style = getComputedStyle(card); return { line: getComputedStyle(card, '::before').borderTopWidth, shadow: style.boxShadow, inset: style.paddingLeft }; })()`)
     : null;
-  const overview = await go('/inventory/overview', `!!document.querySelector('[data-ui=chart] svg path, [data-ui=chart] svg rect') && !!document.querySelector('[data-ui=table] [data-part=column-header]')`);
+  const overview = await go('/inventory/overview', OVERVIEW_READY);
   out.overview = overview
     ? await js(`(() => {
         const fills = [...document.querySelectorAll('[data-ui=chart] svg path, [data-ui=chart] svg rect')].map((s) => s.getAttribute('fill')).filter((f) => f && f !== 'none' && !f.startsWith('url')).map((f) => window.__theme.rgb(f).join(','));
@@ -571,13 +677,72 @@ const tour = async (theme, scheme) => {
   const notifications = await go('/notifications', `!!document.querySelector('[data-ui=tabs] [data-part=item][data-selected]')`);
   if (notifications) await wait(300);
   out.tab = notifications
-    ? await js(`(() => { const item = document.querySelector('[data-ui=tabs] [data-part=item][data-selected]'); const style = getComputedStyle(item); return { radius: style.borderTopLeftRadius, ground: style.backgroundColor, before: getComputedStyle(item.querySelector('[data-part=label]'), '::before').content }; })()`)
+    ? await js(`(() => { const item = document.querySelector('[data-ui=tabs] [data-part=item][data-selected]'); const style = getComputedStyle(item); return { radius: style.borderTopLeftRadius, ground: style.backgroundColor, shadow: style.boxShadow }; })()`)
     : null;
-  out.html = await js(`({ theme: document.documentElement.getAttribute('data-slotted-theme'), scheme: document.documentElement.getAttribute('data-slotted-scheme'), solid: window.__theme.rgb(getComputedStyle(document.documentElement).getPropertyValue('--slotted-tone-accent-solid').trim()).join(','), surface: window.__theme.rgb(getComputedStyle(document.documentElement).getPropertyValue('--slotted-tone-accent-surface').trim()).join(',') })`);
+  out.html = await js(`({ theme: document.documentElement.getAttribute('data-slotted-theme'), scheme: document.documentElement.getAttribute('data-slotted-scheme'), solid: window.__theme.rgb(getComputedStyle(document.documentElement).getPropertyValue('--slotted-tone-accent-solid').trim()).join(','), surface: window.__theme.rgb(getComputedStyle(document.documentElement).getPropertyValue('--slotted-tone-accent-surface').trim()).join(','), sunken: window.__theme.rgb(getComputedStyle(document.documentElement).getPropertyValue('--slotted-surface-sunken').trim()).join(','), raised: window.__theme.rgb(getComputedStyle(document.documentElement).getPropertyValue('--slotted-surface-raised').trim()).join(','), controlRadius: getComputedStyle(document.querySelector('[data-theme-probe]')).borderTopLeftRadius })`);
   const back = await go(PREFERENCES, preferencesReady);
   if (!back) throw new Error(`${theme}: the preferences page did not come back`);
   await settle('back');
   return out;
+};
+
+/**
+ * The screens each theme is judged on, as the reader meets them: the dashboard, a list, a form with
+ * a field under keyboard focus, the tabs of Notifications and the theme choice itself; each one with
+ * the condition that says it has drawn its data. `dark` screens are taken in both schemes.
+ */
+const SCREENS = [
+  { name: 'dashboard', path: '/dashboard', ready: `!!document.querySelector('[data-ui=stat-card]') && !document.querySelector('[data-ui=stat-card] [data-ui=skeleton][data-loading]')`, dark: true },
+  { name: 'overview', path: '/inventory/overview', ready: OVERVIEW_READY, dark: true },
+  { name: 'products', path: '/catalog/products', ready: `document.querySelectorAll('[data-ui=data-grid] [role=row]').length > 3`, dark: false },
+  { name: 'form', path: '/procurement/suppliers/new', ready: `document.querySelectorAll('[data-ui=text-field]').length > 2`, dark: true, focus: true },
+  { name: 'notifications', path: '/notifications', ready: `!!document.querySelector('[data-ui=tabs] [data-part=item][data-selected]')`, dark: false },
+  { name: 'preferences', path: PREFERENCES, ready: preferencesReady, dark: false },
+];
+/** Presses Tab until keyboard focus is in a text field's input, so the field shows its focus mark. */
+const focusField = async () => {
+  await js(`(document.activeElement instanceof HTMLElement && document.activeElement.blur(), document.querySelector('main')?.setAttribute('tabindex', '-1'), document.querySelector('main')?.focus(), true)`);
+  for (let i = 0; i < 40; i++) {
+    await press('Tab', 'Tab', 9);
+    if (await js(`document.activeElement?.matches("[data-ui=text-field] > [data-part=input]:focus-visible") ?? false`)) return true;
+  }
+  return false;
+};
+/**
+ * Saves every theme in turn and writes a PNG of each screen in it, at 1440 × 900, to `dir` —
+ * `<theme>-<screen>-<scheme>.png` — for the design review; each screen is asserted drawn, in the
+ * theme `html` names, before it is taken.
+ */
+const shoot = async (dir) => {
+  mkdirSync(dir, { recursive: true });
+  await js(`document.querySelectorAll('[data-theme-probe], [data-badge-probe]').forEach((probe) => { probe.style.display = 'none'; })`);
+  for (const theme of THEMES) {
+    await go(PREFERENCES, preferencesReady);
+    await settle('shots');
+    await choose('theme', theme.id);
+    await save(theme.id);
+    for (const screen of SCREENS) {
+      for (const scheme of screen.dark ? ['light', 'dark'] : ['light']) {
+        await js(`document.documentElement.setAttribute('data-slotted-scheme', '${scheme}')`);
+        const drawn = await go(screen.path, screen.ready);
+        await wait(700);
+        await js(`(window.scrollTo(0, 0), document.querySelectorAll('[data-ui=app-shell] *').forEach((node) => { if (node.scrollTop > 0) node.scrollTop = 0; }), true)`);
+        /* Save's own toast is no part of a theme's screen: it is hidden, not dismissed, so the screen's state stays as it was. */
+        await js(`(document.querySelectorAll("[data-ui='toast'][data-part='root']").forEach((toast) => { toast.style.visibility = 'hidden'; }), true)`);
+        if (screen.focus) await focusField();
+        await js(`document.documentElement.setAttribute('data-slotted-scheme', '${scheme}')`);
+        await wait(400);
+        const named = await js(`document.documentElement.getAttribute('data-slotted-theme')`);
+        check(`shots ${theme.id} ${screen.name} ${scheme}: the screen drew in the theme html names`, drawn && named === theme.id, `${drawn ? 'drawn' : 'not drawn'} · ${named}`);
+        const shot = await send('Page.captureScreenshot', { format: 'png' });
+        writeFileSync(join(dir, `${theme.id}-${screen.name}-${scheme}.png`), Buffer.from(shot.data, 'base64'));
+      }
+    }
+    await js(`document.documentElement.setAttribute('data-slotted-scheme', 'light')`);
+  }
+  await js(`document.querySelectorAll('[data-theme-probe], [data-badge-probe]').forEach((probe) => { probe.style.display = ''; })`);
+  await go(PREFERENCES, preferencesReady);
+  await settle('shots done');
 };
 
 let exitCode = 1;
@@ -611,7 +776,7 @@ try {
   await new Promise((resolve, reject) => { ws.onopen = resolve; ws.onerror = () => reject(new Error('the DevTools socket did not open')); });
   await send('Page.enable');
   await send('Page.addScriptToEvaluateOnNewDocument', {
-    source: `try { if (!sessionStorage.getItem('t')) { localStorage.clear(); localStorage.setItem('nexora:demo', JSON.stringify({ persona: 'marcus-lee', scenario: 'healthy', scale: 'light' })); sessionStorage.setItem('t', '1'); } } catch {}`,
+    source: `try { if (!sessionStorage.getItem('t')) { localStorage.clear(); localStorage.setItem('nexora:demo', JSON.stringify({ persona: ${JSON.stringify(PERSONA)}, scenario: 'healthy', scale: 'light' })); sessionStorage.setItem('t', '1'); } } catch {}`,
   });
   await viewport(1440, 900);
 
@@ -622,6 +787,12 @@ try {
   check('the four runtime sheets arrive and the section stops waiting', ready, await js(`[...document.querySelectorAll('style[data-slotted-theme-sheet]')].map((s) => s.getAttribute('data-slotted-theme-sheet')).join(' ')`));
   await install();
   await settle('install');
+
+  steps: {
+  if (process.env.SHOTS !== undefined) {
+    await shoot(process.env.SHOTS);
+    if (process.env.STEP === 'shots') break steps;
+  }
 
   // The colour fields, before anything is touched.
   const fields = await swatches();
@@ -668,10 +839,10 @@ try {
         await choose('scheme', scheme);
         const read = await facts();
         const name = `${theme.id} × ${brand} × ${scheme}`;
-        backgrounds[scheme].add(read.background);
+        backgrounds[scheme].add(read.accentSolid);
         check(`${name}: html names the theme and the scheme, and paints the scheme's ground`, read.theme === theme.id && read.scheme === scheme && GROUND[scheme](read.ground), `${read.theme} ${read.scheme} L=${read.ground.toFixed(3)}`);
-        check(`${name}: the label stands on the solid at ${FLOOR[scheme]}:1`, read.ratio >= FLOOR[scheme], `${read.ratio.toFixed(2)}:1 on rgb(${read.background})`);
-        check(`${name}: the contrast table states the ratio painted`, Math.abs(read.stated - read.ratio) <= 0.05, `table ${read.stated.toFixed(2)} · paint ${read.ratio.toFixed(2)}`);
+        check(`${name}: the primary button's label stands on its ground at ${FLOOR[scheme]}:1`, read.ratio >= FLOOR[scheme], `${read.ratio.toFixed(2)}:1 on rgb(${read.background})`);
+        check(`${name}: the contrast table states the ratio of the accent's label on its solid`, Math.abs(read.stated - read.solidRatio) <= 0.05, `table ${read.stated.toFixed(2)} · tokens ${read.solidRatio.toFixed(2)}`);
         const layer = await overlay();
         check(
           `${name}: the select's layer carries the theme, scheme and accent of html`,
@@ -689,52 +860,27 @@ try {
         const series = await js(`window.__theme.rgb('${theme.data[scheme]}').join(',')`);
         check(`${name}: the first data colour is the theme's ${theme.data[scheme]}`, read.data1 === series, `rgb(${read.data1})`);
         const field = await fieldStates();
-        const frame = (state) => `${state.widths} · r ${state.radius} · ${state.transparent ? 'no ground' : `rgb(${state.background})`} · outline ${state.outline} · line rgb(${state.bottom})`;
-        if (theme.id === 'nexora-editorial') {
-          ruledField(name, field, frame, scheme);
-        } else {
-          const edges = field.rest.widths.split(' ');
+        fieldStyle(name, field, theme.input, theme.focus, scheme);
+        checkButtonFocus(name, await buttonFocus(), theme.focus);
+        if (theme.id === 'default') {
+          const frame = (state) => `${state.widths} · r ${state.radius} · rgb(${state.background}) · outline ${state.outline} · line rgb(${state.bottom})`;
           check(
-            `${name}: no field rule leaks — four equal edges, an outline ring under keyboard focus, the field's own ground when invalid`,
-            new Set(edges).size === 1 && edges[0] !== '0px' && field.focus.focused && field.focus.outline.startsWith('solid') && !field.focus.shadow.includes('inset') &&
-              field.invalid.invalid && field.invalid.background === field.rest.background && field.invalid.background !== field.invalid.dangerSurface && field.invalid.top === field.invalid.bottom,
-            `rest ${frame(field.rest)} · focus ${frame(field.focus)} · invalid ${frame(field.invalid)}`,
+            `${name}: the field is the family's own — 1px on four edges, 4px corner, the control ground, a 2px ring, a danger edge when invalid`,
+            field.rest.widths === '1px 1px 1px 1px' && field.rest.radius === '4px' && field.rest.background === field.rest.control && field.focus.outline === 'solid 2px' &&
+              field.invalid.top === field.invalid.dangerBorder && field.invalid.bottom === field.invalid.dangerBorder && field.invalid.shadow.endsWith('0px 0px 0px 1px inset') && field.probeRing === '2px',
+            `rest ${frame(field.rest)} · focus ${frame(field.focus)} · invalid ${frame(field.invalid)} · danger border rgb(${field.invalid.dangerBorder}) · probe ${field.probeRing}`,
           );
-          check(
-            `${name}: an invalid field's edge is thicker than a valid one's, at rest and under focus, whatever their colours`,
-            field.invalid.line > field.rest.line && field.invalidFocus.line > field.focus.line && field.invalidFocus.ring !== field.focus.ring,
-            `line rest ${field.rest.line}px · invalid ${field.invalid.line}px · focus ${field.focus.line}px · invalid focus ${field.invalidFocus.line}px · ring rgb(${field.focus.ring}) · invalid ring rgb(${field.invalidFocus.ring})`,
-          );
-          if (theme.id === 'default') {
-            check(
-              `${name}: the field is the family's own — 1px on four edges, 4px corner, the control ground, a 2px ring, a danger edge when invalid`,
-              field.rest.widths === '1px 1px 1px 1px' && field.rest.radius === '4px' && field.rest.background === field.rest.control && field.focus.outline === 'solid 2px' &&
-                field.invalid.top === field.invalid.dangerBorder && field.invalid.bottom === field.invalid.dangerBorder && field.invalid.shadow.endsWith('0px 0px 0px 1px inset') && field.probeRing === '2px',
-              `rest ${frame(field.rest)} · focus ${frame(field.focus)} · invalid ${frame(field.invalid)} · danger border rgb(${field.invalid.dangerBorder}) · probe ${field.probeRing}`,
-            );
-          }
-        }
-        if (theme.id === 'nexora-terminal') {
-          check(`${name}: a striped table bands its rows in a ground mixed from the theme's line`, read.stripe === read.stripeExpected && read.stripe !== read.plainRow, `stripe rgb(${read.stripe}) · expected rgb(${read.stripeExpected}) · plain rgb(${read.plainRow})`);
         }
       }
     }
-    if (theme.id === 'nexora-editorial') {
-      // No choice on the page names high-contrast: html is set to it for the field's reading alone.
-      await choose('brand', 'theme');
-      await choose('scheme', 'light');
-      const before = await js(`document.documentElement.getAttribute('data-slotted-scheme')`);
-      const frame = (state) => `${state.widths} · r ${state.radius} · ${state.transparent ? 'no ground' : `rgb(${state.background})`} · outline ${state.outline} · line rgb(${state.bottom})`;
-      check(`${theme.id} × theme × high-contrast: html names the scheme and the field paints its line before it is read`, await paintScheme('high-contrast'));
-      ruledField(`${theme.id} × theme × high-contrast`, await fieldStates(), frame, 'high-contrast');
-      check(`${theme.id} × theme: html returns to ${before} and the field paints it`, await paintScheme(before));
-      const forced = await forcedFocus();
-      check(
-        `${theme.id} × theme × light, forced colours: keyboard focus draws a 2px outline in a system colour the field at rest does not have`,
-        forced.focus.focused && forced.focus.outline === 'solid 2px' && forced.focus.color !== 'rgba(0, 0, 0, 0)' && forced.rest.outline.startsWith('none'),
-        `rest ${forced.rest.outline} ${forced.rest.color} · focus ${forced.focus.outline} ${forced.focus.color} · shadow ${forced.focus.shadow} · line ${forced.focus.line}`,
-      );
-    }
+    // No choice on the page names high-contrast: html is set to it for the field's reading alone.
+    await choose('brand', 'theme');
+    await choose('scheme', 'light');
+    const before = await js(`document.documentElement.getAttribute('data-slotted-scheme')`);
+    check(`${theme.id} × theme × high-contrast: html names the scheme and the field paints its line before it is read`, await paintScheme('high-contrast'));
+    fieldStyle(`${theme.id} × theme × high-contrast`, await fieldStates(), theme.input, theme.focus, 'high-contrast');
+    check(`${theme.id} × theme: html returns to ${before} and the field paints it`, await paintScheme(before));
+    checkForced(`${theme.id} × theme × light`, await forcedFocus());
     for (const scheme of SCHEMES) {
       check(`${theme.id} × ${scheme}: the solid moves with the brand`, backgrounds[scheme].size === BRANDS.length, [...backgrounds[scheme]].map((c) => `rgb(${c})`).join(' | '));
     }
@@ -798,30 +944,37 @@ try {
     );
     const series = await js(`window.__theme.rgb('${theme.data.light}').join(',')`);
     check(`${theme.id}: the inventory chart's first series is the theme's ${theme.data.light}`, seenOn.overview !== null && seenOn.overview.fills.includes(series), seenOn.overview === null ? 'no chart' : `${seenOn.overview.fills.length} shapes · ${[...new Set(seenOn.overview.fills)].slice(0, 4).map((c) => `rgb(${c})`).join(' ')}`);
-    if (theme.id === 'nexora-brutalist') {
-      check(`${theme.id}: the inventory table's head is a band of the accent's solid, in capitals`, seenOn.overview !== null && seenOn.overview.head.ground === seenOn.html.solid && seenOn.overview.head.transform === 'uppercase', seenOn.overview === null ? 'no table' : `rgb(${seenOn.overview.head.ground}) ${seenOn.overview.head.transform}`);
+    const tab = seenOn.tab === null ? null : { ...seenOn.tab, rgb: await js(`window.__theme.rgb(${JSON.stringify(seenOn.tab.ground)}).join(',')`), alpha: await js(`window.__theme.alpha(${JSON.stringify(seenOn.tab.ground)})`) };
+    const tabs = {
+      underline: () => tab.radius === '0px' && tab.alpha === 0,
+      pill: () => tab.radius === '9999px' && tab.rgb === seenOn.html.surface,
+      chip: () => tab.radius === seenOn.html.controlRadius && tab.rgb === seenOn.html.raised && tab.shadow !== 'none',
+    };
+    if (theme.tab !== null) {
+      check(`${theme.id}: the selected tab on Notifications is ${theme.tab === 'chip' ? 'a raised chip' : theme.tab === 'pill' ? "a pill on the accent's surface" : 'underlined, with no ground'}`, tab !== null && tabs[theme.tab](), tab === null ? 'no tabs' : `${tab.radius} rgb(${tab.rgb}) a${tab.alpha} · ${tab.shadow.slice(0, 60)}`);
     }
-    if (theme.id === 'nexora-friendly') {
-      check(`${theme.id}: the selected tab on Notifications is a pill on the accent's surface`, seenOn.tab !== null && seenOn.tab.radius === '9999px' && seenOn.tab.ground !== 'rgba(0, 0, 0, 0)' && (await js(`window.__theme.rgb(${JSON.stringify(seenOn.tab?.ground ?? 'transparent')}).join(',')`)) === seenOn.html.surface, seenOn.tab === null ? 'no tabs' : `${seenOn.tab.radius} ${seenOn.tab.ground}`);
+    const head = seenOn.overview?.head ?? null;
+    if (theme.head === 'band') {
+      check(`${theme.id}: the inventory table's head is a band of the sunken ground`, head !== null && head.ground === seenOn.html.sunken, head === null ? 'no table' : `rgb(${head.ground}) · sunken rgb(${seenOn.html.sunken})`);
     }
-    if (theme.id === 'nexora-terminal') {
-      check(`${theme.id}: the selected tab reads as a prompt, out of its accessible name`, seenOn.tab !== null && seenOn.tab.before === '"> " / ""', seenOn.tab === null ? 'no tabs' : seenOn.tab.before);
+    if (theme.head === 'capitals') {
+      check(`${theme.id}: the inventory table's head is set in capitals`, head !== null && head.transform === 'uppercase', head === null ? 'no table' : head.transform);
     }
   }
 
-  // Discard and leaving the page return html to the saved appearance (Terminal, saved last).
-  await choose('theme', 'nexora-friendly');
+  // Discard and leaving the page return html to the saved appearance (Expressive, saved last).
+  await choose('theme', 'nexora-precise');
   await choose('brand', 'rose');
   const candidate = await facts();
   await button('Discard');
   await settle('discard');
   const discarded = await facts();
-  check('Discard returns html from the candidate to the saved appearance', candidate.theme === 'nexora-friendly' && discarded.theme === 'nexora-terminal' && discarded.radius === '2px' && discarded.seed === '', `${candidate.theme} ${candidate.seed} → ${discarded.theme} ${discarded.seed || '(theme’s own)'}`);
+  check('Discard returns html from the candidate to the saved appearance', candidate.theme === 'nexora-precise' && discarded.theme === 'nexora-expressive' && discarded.radius === '9999px' && discarded.seed === '', `${candidate.theme} ${candidate.seed} → ${discarded.theme} ${discarded.seed || '(theme’s own)'}`);
   await choose('theme', 'nexora-editorial');
   const left = await go('/dashboard', `!location.pathname.startsWith('/settings')`);
   await wait(300);
   const away = await js(`document.documentElement.getAttribute('data-slotted-theme')`);
-  check('leaving the page with a candidate unsaved returns html to the saved appearance', left && away === 'nexora-terminal', away);
+  check('leaving the page with a candidate unsaved returns html to the saved appearance', left && away === 'nexora-expressive', away);
   await go(PREFERENCES, preferencesReady);
   await settle('back');
 
@@ -855,6 +1008,79 @@ try {
   await axis('axis-cards', 'elevated', (f) => `${f.card.line} ${f.card.shadow}`, (v, f) => f.card.line === '0px' && f.card.shadow === f.shadowMd, 'a card has no line and the medium shadow');
   await axis('axis-cards', 'flat', (f) => `${f.card.line} ${f.card.shadow} ${f.card.ground}`, (v, f) => f.card.line === '0px' && f.card.shadow === 'none' && f.card.ground === f.sunkenToken, 'a card is a sunken fill');
   await axis('axis-chart', 'accent', (f) => f.chart1 === f.accentSolid, (v) => v === true, 'the first series is the accent solid');
+
+  // Controls, over Standard: each input style on the field, each focus style on the field and on a
+  // button (and under forced colours), each primary button paint, then each corner, line and label axis.
+  const control = async (name, value) => {
+    await choose(name, value);
+    const named = await htmlNames('nexora-custom-draft');
+    await settle(`${name}=${value}`);
+    await fieldSettled();
+    check(`controls ${name}=${value}: html names the compiled draft`, named, await js(`document.documentElement.getAttribute('data-slotted-theme')`));
+  };
+  const release = async (name) => {
+    await choose(name, 'theme');
+    await htmlNames('default');
+    await settle(`${name}=theme`);
+    await fieldSettled();
+  };
+  for (const input of ['outlined', 'filled', 'underline', 'borderless']) {
+    await control('axis-input', input);
+    fieldStyle(`controls input=${input} × light`, await fieldStates(), input, 'ring', 'light');
+    await release('axis-input');
+  }
+  for (const focus of ['ring', 'glow', 'underline', 'offset']) {
+    await control('axis-focus', focus);
+    fieldStyle(`controls focus=${focus} × light`, await fieldStates(), 'outlined', focus, 'light');
+    checkButtonFocus(`controls focus=${focus} × light`, await buttonFocus(), focus);
+    checkForced(`controls focus=${focus} × light`, await forcedFocus());
+    await release('axis-focus');
+  }
+  for (const paint of ['solid', 'soft', 'outline', 'ghost']) {
+    await control('axis-button', paint);
+    const read = await js(`(() => {
+      const T = window.__theme;
+      const probe = document.querySelector('[data-theme-probe]');
+      const style = getComputedStyle(probe);
+      const root = getComputedStyle(document.documentElement);
+      const token = (name) => T.rgb(root.getPropertyValue(name).trim()).join(',');
+      const ground = T.alpha(style.backgroundColor) === 0 ? T.ground(probe.parentElement) : style.backgroundColor;
+      return {
+        ground: T.rgb(style.backgroundColor).join(','),
+        groundAlpha: T.alpha(style.backgroundColor),
+        edge: T.rgb(style.borderTopColor).join(','),
+        edgeAlpha: T.alpha(style.borderTopColor),
+        ink: T.rgb(style.color).join(','),
+        ratio: T.ratio(style.color, ground),
+        solid: token('--slotted-tone-accent-solid'),
+        surface: token('--slotted-tone-accent-surface'),
+        border: token('--slotted-tone-accent-border'),
+        text: token('--slotted-tone-accent-text'),
+      };
+    })()`);
+    const paints = {
+      solid: read.groundAlpha === 1 && read.ground === read.solid,
+      soft: read.groundAlpha === 1 && read.ground === read.surface && read.ink === read.text,
+      outline: read.groundAlpha === 0 && read.edge === read.border && read.ink === read.text,
+      ghost: read.groundAlpha === 0 && read.edgeAlpha === 0 && read.ink === read.text,
+    };
+    check(
+      `controls button=${paint}: the primary button is painted ${paint}, its label at 4.5:1 on its ground`,
+      paints[paint] && read.ratio >= 4.5,
+      `ground rgb(${read.ground}) a${read.groundAlpha} · edge rgb(${read.edge}) a${read.edgeAlpha} · ink rgb(${read.ink}) ${read.ratio.toFixed(2)}:1`,
+    );
+    await release('axis-button');
+  }
+  await axis('axis-controlRadius', '0', (f) => `${f.radius} ${f.fieldRadius}`, (v, f) => f.radius === '0px' && f.fieldRadius === '0px', 'a button and a field have square corners');
+  await axis('axis-controlRadius', '12', (f) => `${f.radius} ${f.fieldRadius}`, (v, f) => f.radius === '12px' && f.fieldRadius === '12px', 'a button and a field round at 12px');
+  await axis('axis-controlRadius', '9999', (f) => f.radius, (v) => Number.parseFloat(v) >= 999, 'a button is a pill');
+  await axis('axis-cardRadius', '16', (f) => f.cardRadius, (v) => Number.parseFloat(v) === 16, 'a card rounds at 16px');
+  await axis('axis-overlayRadius', '24', (f) => f.overlayRadius, (v) => Number.parseFloat(v) === 24, 'a dialog rounds at 24px');
+  await axis('axis-controlBorder', '2', (f) => f.fieldLine, (v) => v === '2px', 'a field draws a 2px line');
+  await axis('axis-labelWeight', '700', (f) => f.fontWeight, (v) => v === '700', 'a button label is set at 700');
+  await axis('axis-labelSpacing', 'wider', (f) => f.spacing, (v, f) => Math.abs(Number.parseFloat(v) - Number.parseFloat(f.fontSize) * 0.05) < 0.05, 'a button label is spaced at 0.05em');
+  await axis('axis-controlText', '2', (f) => f.fontSize, (v) => Math.abs(Number.parseFloat(v) - Number.parseFloat(base.fontSize) - 2) < 0.05, `a button label is 2px over ${base.fontSize}`);
+  await axis('axis-controlHeight', '8', (f) => f.height, (v) => Math.abs(v - base.height - 8) < 0.5, `a button is 8px over ${base.height}px tall`);
 
   // Both faces: each of the eight families, set and loaded.
   for (const [picker, read] of [['font-body', (f) => first(f.buttonFace)], ['font-heading', (f) => first(f.headingFace)]]) {
@@ -903,25 +1129,25 @@ try {
   const reset = await facts();
   check('Reset returns html to the theme as it came', changes === '2 changes' && reset.theme === 'default' && reset.dangerSolid === base.dangerSolid && !(await js(`!!document.querySelector('[data-changes]')`)), `${changes} → ${reset.theme} rgb(${reset.dangerSolid})`);
 
-  // Tabs: a pill over Standard, an underline over Friendly, on the selected tab of Notifications.
+  // Tabs: a pill over Standard, an underline over Expressive's own pills, on the selected tab of Notifications.
   await choose('axis-tabs', 'pill');
   await htmlNames('nexora-custom-draft');
   await save('nexora-custom');
   const pill = await tour('custom pill', 'light');
   check('builder tabs=pill: the selected tab is a pill on the accent’s surface', pill.tab !== null && pill.tab.radius === '9999px' && (await js(`window.__theme.rgb(${JSON.stringify(pill.tab?.ground ?? 'transparent')}).join(',')`)) === pill.html.surface, pill.tab === null ? 'no tabs' : `${pill.tab.radius} ${pill.tab.ground}`);
-  await choose('theme', 'nexora-friendly');
+  await choose('theme', 'nexora-expressive');
   await choose('axis-tabs', 'underline');
   await htmlNames('nexora-custom-draft');
   await save('nexora-custom');
   const underline = await tour('custom underline', 'light');
-  check('builder tabs=underline over Friendly: the selected tab is underlined, with no pill', underline.tab !== null && underline.tab.radius === '0px' && underline.tab.ground === 'rgba(0, 0, 0, 0)', underline.tab === null ? 'no tabs' : `${underline.tab.radius} ${underline.tab.ground}`);
+  check('builder tabs=underline over Expressive: the selected tab is underlined, with no pill', underline.tab !== null && underline.tab.radius === '0px' && (await js(`window.__theme.alpha(${JSON.stringify(underline.tab.ground)})`)) === 0, underline.tab === null ? 'no tabs' : `${underline.tab.radius} ${underline.tab.ground}`);
   await js(`document.querySelector('[data-reset]').click()`);
-  await choose('theme', 'nexora-brutalist');
+  await choose('theme', 'nexora-editorial');
   await choose('brand', 'amber');
-  await save('nexora-brutalist');
+  await save('nexora-editorial');
   const saved = await facts();
-  check('Save writes the theme and the seed onto html', saved.theme === 'nexora-brutalist' && /#d97706/.test(saved.seed), `${saved.theme} ${saved.seed}`);
-  check('Save repaints the probe from the default in violet to Brutalist in amber', saved.background !== start.background && saved.radius === '0px' && saved.transform === 'uppercase' && first(saved.headingFace) === FACE['jetbrains-mono'], `rgb(${start.background}) ${start.radius} → rgb(${saved.background}) ${saved.radius} ${saved.transform}`);
+  check('Save writes the theme and the seed onto html', saved.theme === 'nexora-editorial' && /#d97706/.test(saved.seed), `${saved.theme} ${saved.seed}`);
+  check('Save repaints the probe from the default in violet to Editorial in amber', saved.background !== start.background && saved.radius === '2px' && first(saved.headingFace) === FACE.fraunces, `rgb(${start.background}) ${start.radius} → rgb(${saved.background}) ${saved.radius} ${first(saved.headingFace)}`);
   await choose('axis-cards', 'flat');
   await button('Save preferences');
   const custom = await htmlNames('nexora-custom');
@@ -933,7 +1159,7 @@ try {
   // Layout: html saved in each theme, and in a customised theme in the widest face, at every width.
   const states = [
     ...THEMES.map((theme) => ({ label: theme.id, theme: theme.id, axes: [] })),
-    { label: 'custom (Friendly, JetBrains Mono at 112%)', theme: 'nexora-friendly', axes: [['font-body', 'jetbrains-mono'], ['font-heading', 'jetbrains-mono'], ['axis-scale', '112']], html: 'nexora-custom' },
+    { label: 'custom (Expressive, JetBrains Mono at 112%)', theme: 'nexora-expressive', axes: [['font-body', 'jetbrains-mono'], ['font-heading', 'jetbrains-mono'], ['axis-scale', '112']], html: 'nexora-custom' },
   ];
   for (const state of states) {
     await viewport(1440, 900);
@@ -948,6 +1174,8 @@ try {
       await checkLayout(`${state.label} @ ${width}px`);
     }
     if (state.axes.length > 0) await js(`document.querySelector('[data-reset]').click()`);
+  }
+
   }
 
   exitCode = results.every(Boolean) ? 0 : 1;

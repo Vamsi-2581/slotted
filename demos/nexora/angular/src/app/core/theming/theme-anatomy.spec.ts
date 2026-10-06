@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { customTheme } from './custom-theme';
 import { NO_CUSTOMISATION } from './customisation';
 import { nexoraTheme } from './nexora-themes';
-import { ANATOMY_LAYERS, themeAnatomy } from './theme-anatomy';
+import { ANATOMY_LAYERS, customisationAnatomy, themeAnatomy } from './theme-anatomy';
 import { RUNTIME_THEME_IDS } from './theme-catalogue';
 
 const count = (theme: Parameters<typeof themeAnatomy>[0], layer: string) =>
@@ -46,10 +46,11 @@ describe('themeAnatomy', () => {
     const editorial = nexoraTheme('nexora-editorial');
     expect(count(editorial, 'components')).toBe(Object.keys(editorial.components!).length);
     expect(count(editorial, 'rules')).toBe(editorial.rules!.length);
-    expect(count(editorial, 'fonts')).toBe(2);
+    expect(count(editorial, 'fonts')).toBe(3);
     expect(themeAnatomy(editorial).find((layer) => layer.id === 'fonts')!.items).toEqual([
       'Source Serif 4 Variable',
       'Fraunces Variable',
+      'Source Sans 3 Variable',
     ]);
     const components = themeAnatomy(editorial).find((layer) => layer.id === 'components')!;
     expect(components.items.some((item) => /^card ·/.test(item))).toBe(true);
@@ -62,9 +63,9 @@ describe('themeAnatomy', () => {
 
   /** The builder's output is a theme of the same shape; an axis shows in the layer it writes. */
   it('reads a custom theme as one more theme of the same shape', () => {
-    const base = nexoraTheme('nexora-friendly');
+    const base = nexoraTheme('nexora-expressive');
     const custom = customTheme(
-      'nexora-friendly',
+      'nexora-expressive',
       { ...NO_CUSTOMISATION, cards: 'flat', motion: 'off' },
       'nexora-custom',
     );
@@ -72,5 +73,44 @@ describe('themeAnatomy', () => {
     expect(count(custom, 'rules')).toBe(count(base, 'rules'));
     expect(count(custom, 'components')).toBeGreaterThanOrEqual(count(base, 'components'));
     expect(count(custom, 'base')).toBeGreaterThanOrEqual(count(base, 'base'));
+  });
+
+  /**
+   * A customisation read axis by axis: each axis a reader set, with the layers
+   * of the model it writes and how many entries in each — what the anatomy
+   * shows beside the theme's own.
+   */
+  it('reads each customised axis by the layers it writes', () => {
+    const read = customisationAnatomy('nexora-expressive', {
+      ...NO_CUSTOMISATION,
+      input: 'underline',
+      focus: 'offset',
+      button: 'ghost',
+      cardRadius: 8,
+      labelWeight: 700,
+      controlHeight: 4,
+      motion: 'off',
+    });
+    const layers = (axis: string) =>
+      Object.fromEntries(
+        read.find((entry) => entry.axis === axis)!.layers.map((layer) => [layer.id, layer.count]),
+      );
+    expect(read.map((entry) => entry.axis)).toEqual([
+      'motion',
+      'input',
+      'focus',
+      'button',
+      'cardRadius',
+      'labelWeight',
+      'controlHeight',
+    ]);
+    expect(layers('input')).toEqual({ components: 36, rules: 2 });
+    expect(layers('focus')).toEqual({ base: 2, rules: 3 });
+    expect(layers('button')).toEqual({ rules: 1 });
+    expect(layers('cardRadius')).toEqual({ components: 6 });
+    expect(layers('labelWeight')).toEqual({ base: 1 });
+    expect(layers('controlHeight')).toEqual({ densities: 9 });
+    expect(layers('motion')).toEqual({ motion: 4 });
+    expect(customisationAnatomy('default', NO_CUSTOMISATION)).toEqual([]);
   });
 });

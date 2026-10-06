@@ -66,6 +66,7 @@ import {
   TAB_CHOICES,
   type Customisation,
   type CustomisationAxis,
+  type FontId,
 } from '../../core/theming/customisation';
 import type * as NexoraThemesModule from '../../core/theming/nexora-themes';
 import { declareFaces, FONT_FAMILIES, fontFamily } from '../../core/theming/theme-faces';
@@ -77,6 +78,8 @@ import {
   THEME_CATALOGUE,
 } from '../../core/theming/theme-catalogue';
 import { AnatomyTable } from './anatomy-table';
+import { CHOICE_GRID } from './choice-grid.styles';
+import { CONTROL_GROUPS, ControlsSection } from './controls-section';
 import { ContrastTable } from './contrast-table';
 import { InView } from './in-view';
 
@@ -145,6 +148,33 @@ const AXES = [
 /** The length, in characters, of the longest of `labels`: a choice grid's narrowest track. */
 const longest = (...labels: readonly string[]) => Math.max(...labels.map((label) => label.length));
 
+/** Every axis's name and the words of each of its values, as the anatomy lists a change. */
+function axisWords(axis: CustomisationAxis, value: unknown): { label: string; value: string } {
+  const builder = AXES.find((entry) => entry.axis === axis);
+  if (builder !== undefined) {
+    return {
+      label: builder.label,
+      value: builder.options.find((option) => option.value === String(value))?.label ?? '',
+    };
+  }
+  const control = CONTROL_GROUPS.flatMap(([, groups]) => groups).find(
+    (entry) => entry.axis === axis,
+  );
+  if (control !== undefined) {
+    return {
+      label: control.change ?? control.label,
+      value: control.options.find((option) => option.value === String(value))?.label ?? '',
+    };
+  }
+  if (axis === 'body' || axis === 'heading') {
+    return {
+      label: axis === 'body' ? 'Text face' : 'Heading face',
+      value: fontFamily(value as FontId).label,
+    };
+  }
+  return { label: 'Corner radius', value: `${String(value)} px` };
+}
+
 const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
   success: 'Success',
   warning: 'Warning',
@@ -176,6 +206,7 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
   selector: 'app-appearance-section',
   imports: [
     AnatomyTable,
+    ControlsSection,
     ContrastTable,
     InView,
     NgTemplateOutlet,
@@ -209,145 +240,107 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
     SlThemeScope,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: `
-    /*
-     * A group of choices is a grid of framed tiles with one track width and
-     * one row height for the whole group: grid-auto-rows: 1fr and the
-     * stretch a grid item takes by default. A track is never narrower than the
-     * group's longest label (--longest, in characters) plus two, set in the
-     * ch of the face the radio group draws its labels in, plus what stands
-     * before the label (--_lead) and the tile's own frame: its inset on both
-     * sides, the radio's circle and the gap after it. --_floor is the
-     * narrowest a tile's other content allows. A label stays on one line.
-     */
-    .choices {
-      --_lead: 0px;
-      --_floor: 0px;
-      --_frame: calc(
-        2 * var(--slotted-control-padding-inline-md) + var(--slotted-selection-size-md) +
-          var(--slotted-control-label-gap-md)
-      );
-      display: grid;
-      gap: var(--slotted-space-4);
-      grid-auto-rows: 1fr;
-      grid-template-columns: repeat(
-        auto-fill,
-        minmax(
-          min(
-            calc(max(var(--_floor), var(--_lead) + (var(--longest) + 2) * 1ch) + var(--_frame)),
-            100%
-          ),
-          1fr
-        )
-      );
-    }
-    .tile-label {
-      white-space: nowrap;
-    }
-    .themes {
-      --_floor: 12rem;
-    }
-    .swatches {
-      --_lead: calc(var(--slotted-control-icon-size-lg) + var(--slotted-space-3));
-    }
-    /* The specimen: seven characters of the second-largest size, in the widest face offered. */
-    .fonts {
-      --_floor: calc(5 * var(--slotted-font-size-2xl));
-    }
-    /* LA-05: colour fields side by side start at the line's top. */
-    .colours {
-      display: grid;
-      align-items: start;
-      gap: var(--slotted-space-6) var(--slotted-space-7);
-      grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
-    }
-    /* A font option: a line of text in its own face, its name, and what kind of face it is. */
-    .specimen {
-      display: block;
-      block-size: var(--slotted-space-9);
-      overflow: hidden;
-      font-size: var(--slotted-font-size-2xl);
-      line-height: var(--slotted-space-9);
-      white-space: nowrap;
-    }
-    .font-option {
-      display: grid;
-      gap: var(--slotted-space-2);
-    }
-    .group-head {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--slotted-space-4);
-    }
-    /* A theme as it comes — its own face, corner, shadow, case, accent and first series — in its region. */
-    /* Items keep their own width, so the title's placeholder is as long as the title. */
-    /*
+  styles: [
+    CHOICE_GRID,
+    `
+      .themes {
+        --_floor: 12rem;
+      }
+      .swatches {
+        --_lead: calc(var(--slotted-control-icon-size-lg) + var(--slotted-space-3));
+      }
+      /* The specimen: seven characters of the second-largest size, in the widest face offered. */
+      .fonts {
+        --_floor: calc(5 * var(--slotted-font-size-2xl));
+      }
+      /* LA-05: colour fields side by side start at the line's top. */
+      .colours {
+        display: grid;
+        align-items: start;
+        gap: var(--slotted-space-6) var(--slotted-space-7);
+        grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+      }
+      /* A font option: a line of text in its own face, its name, and what kind of face it is. */
+      .specimen {
+        display: block;
+        block-size: var(--slotted-space-9);
+        overflow: hidden;
+        font-size: var(--slotted-font-size-2xl);
+        line-height: var(--slotted-space-9);
+        white-space: nowrap;
+      }
+      .font-option {
+        display: grid;
+        gap: var(--slotted-space-2);
+      }
+      /* A theme as it comes — its own face, corner, shadow, case, accent and first series — in its region. */
+      /* Items keep their own width, so the title's placeholder is as long as the title. */
+      /*
      * A fixed box, sized by the page's tokens outside every sample's region:
      * each card of the group is as tall as the others, whatever its theme's type.
      */
-    .sample-box {
-      display: block;
-      align-self: stretch;
-      block-size: calc(var(--slotted-space-12) + var(--slotted-space-10));
-    }
-    .sample {
-      box-sizing: border-box;
-      block-size: 100%;
-      overflow: hidden;
-      display: grid;
-      align-content: start;
-      justify-items: start;
-      gap: var(--slotted-space-3);
-      padding: var(--slotted-space-5);
-      border: var(--slotted-border-width-thin) solid var(--slotted-border-subtle);
-      border-radius: var(--slotted-radius-lg);
-      background: var(--slotted-surface);
-      color: var(--slotted-text);
-      font-family: var(--slotted-font-family-sans);
-      box-shadow: var(--slotted-shadow-md);
-    }
-    .sample-title {
-      font-family: var(--slotted-font-family-heading);
-      font-size: var(--slotted-font-size-lg);
-      font-weight: var(--slotted-font-weight-semibold);
-      line-height: var(--slotted-line-height-lg);
-    }
-    .sample-row {
-      justify-self: stretch;
-      display: flex;
-      align-items: center;
-      gap: var(--slotted-space-3);
-    }
-    .sample-bar {
-      flex: 1;
-      block-size: var(--slotted-space-4);
-      border-radius: var(--slotted-radius-sm);
-      background: var(--slotted-data-1);
-    }
-    .swatch {
-      flex: none;
-      inline-size: var(--slotted-control-icon-size-lg);
-      block-size: var(--slotted-control-icon-size-lg);
-      border-radius: var(--slotted-radius-full);
-      background: var(--slotted-tone-accent-solid);
-    }
-    .swatch[data-neutral] {
-      background: var(--slotted-surface-sunken);
-      box-shadow: inset 0 0 0 var(--slotted-space-2) var(--slotted-text-muted);
-    }
-    /* A theme that cannot be drawn keeps its sample box, as an empty frame in the page's own theme. */
-    .sample[data-missing] {
-      border-style: dashed;
-      background: var(--slotted-surface-sunken);
-      box-shadow: none;
-    }
-    /* A sample whose theme's sheet is not on the page keeps its box and draws nothing. */
-    .reserved {
-      visibility: hidden;
-    }
-  `,
+      .sample-box {
+        display: block;
+        align-self: stretch;
+        block-size: calc(var(--slotted-space-12) + var(--slotted-space-10));
+      }
+      .sample {
+        box-sizing: border-box;
+        block-size: 100%;
+        overflow: hidden;
+        display: grid;
+        align-content: start;
+        justify-items: start;
+        gap: var(--slotted-space-3);
+        padding: var(--slotted-space-5);
+        border: var(--slotted-border-width-thin) solid var(--slotted-border-subtle);
+        border-radius: var(--slotted-radius-lg);
+        background: var(--slotted-surface);
+        color: var(--slotted-text);
+        font-family: var(--slotted-font-family-sans);
+        box-shadow: var(--slotted-shadow-md);
+      }
+      .sample-title {
+        font-family: var(--slotted-font-family-heading);
+        font-size: var(--slotted-font-size-lg);
+        font-weight: var(--slotted-font-weight-semibold);
+        line-height: var(--slotted-line-height-lg);
+      }
+      .sample-row {
+        justify-self: stretch;
+        display: flex;
+        align-items: center;
+        gap: var(--slotted-space-3);
+      }
+      .sample-bar {
+        flex: 1;
+        block-size: var(--slotted-space-4);
+        border-radius: var(--slotted-radius-sm);
+        background: var(--slotted-data-1);
+      }
+      .swatch {
+        flex: none;
+        inline-size: var(--slotted-control-icon-size-lg);
+        block-size: var(--slotted-control-icon-size-lg);
+        border-radius: var(--slotted-radius-full);
+        background: var(--slotted-tone-accent-solid);
+      }
+      .swatch[data-neutral] {
+        background: var(--slotted-surface-sunken);
+        box-shadow: inset 0 0 0 var(--slotted-space-2) var(--slotted-text-muted);
+      }
+      /* A theme that cannot be drawn keeps its sample box, as an empty frame in the page's own theme. */
+      .sample[data-missing] {
+        border-style: dashed;
+        background: var(--slotted-surface-sunken);
+        box-shadow: none;
+      }
+      /* A sample whose theme's sheet is not on the page keeps its box and draws nothing. */
+      .reserved {
+        visibility: hidden;
+      }
+    `,
+  ],
   template: `
     <section slSection>
       <div slSectionHeader>
@@ -802,6 +795,8 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
               </ng-template>
             </div>
 
+            <app-controls-section [draft]="draft()" (patch)="patch.emit($event)" />
+
             <div slStack [gap]="5" data-appearance-group="scheme">
               <h3 slHeading size="md">Scheme and density</h3>
               <div class="colours">
@@ -840,9 +835,13 @@ const STATUS_LABELS: Readonly<Record<StatusSeed, string>> = {
                 <p slText size="sm" tone="muted">
                   A theme is one object of nine layers. These are the entries
                   {{ anatomyName() }} declares over the library’s own theme; a customised theme is
-                  the same object with your changes in the layers they belong to.
+                  the same object with your changes in the layers they belong to, listed after it.
                 </p>
-                <app-anatomy-table [anatomy]="anatomy()" [name]="anatomyName()" />
+                <app-anatomy-table
+                  [anatomy]="anatomy()"
+                  [name]="anatomyName()"
+                  [changes]="changeAnatomy()"
+                />
               </div>
             }
 
@@ -957,6 +956,16 @@ export class AppearanceSection {
       customisedAxes(this.draft().customisation).length +
       STATUS_SEEDS.filter((status) => this.draft().status[status] !== null).length,
   );
+  /** Each axis the draft sets, with the layers of the model it writes, as the anatomy lists it. */
+  protected readonly changeAnatomy = computed(() => {
+    const definitions = this.definitions();
+    if (definitions === null) return [];
+    const { theme, customisation } = this.draft();
+    return definitions.anatomy.customisationAnatomy(theme, customisation).map((entry) => ({
+      ...entry,
+      ...axisWords(entry.axis, customisation[entry.axis]),
+    }));
+  });
 
   /** The candidate seeds, as the contrast readings take them. */
   protected readonly seeds = computed(() =>
@@ -1045,7 +1054,7 @@ export class AppearanceSection {
 
   /** A choice's value, read back through the same check as storage; `theme` clears the axis. */
   protected chooseAxis(axis: CustomisationAxis, value: unknown): void {
-    const raw = value === 'theme' ? null : /^\d+$/.test(String(value)) ? Number(value) : value;
+    const raw = value === 'theme' ? null : /^-?\d+$/.test(String(value)) ? Number(value) : value;
     const next = readCustomisation({ ...this.draft().customisation, [axis]: raw });
     if (raw !== null && next[axis] === null) return;
     this.patchCustomisation(next);

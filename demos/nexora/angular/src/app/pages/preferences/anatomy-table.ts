@@ -13,7 +13,13 @@ import {
 } from '@slotted/angular/table';
 import { SlText } from '@slotted/angular/typography';
 
-import type { AnatomyLayer, AnatomyLayerId } from '../../core/theming/theme-anatomy';
+import type { AnatomyLayer, AnatomyLayerId, AxisAnatomy } from '../../core/theming/theme-anatomy';
+
+/** One change a reader made, in words, with the layers it writes. */
+export interface ChangeRow extends AxisAnatomy {
+  readonly label: string;
+  readonly value: string;
+}
 
 /** The layers in the order a theme is built, as the table names them. */
 const LAYERS: readonly {
@@ -71,49 +77,86 @@ const SHOWN = 6;
     .pending-entries {
       inline-size: 24ch;
     }
+    .tables {
+      display: grid;
+      gap: var(--slotted-space-6);
+    }
   `,
   template: `
-    <div slTable variant="framed" [columns]="3" layout="fixed" striped data-anatomy>
-      <div slTableContent>
-        <caption slTableCaption>
-          {{
-            caption()
-          }}
-        </caption>
-        <thead slTableHead>
-          <tr slTableRow>
-            <th slTableColumnHeader>Layer</th>
-            <th slTableColumnHeader data-align="end">Entries</th>
-            <th slTableColumnHeader>What it sets</th>
-          </tr>
-        </thead>
-        <tbody slTableBody>
-          @for (row of rows(); track row.id) {
-            <tr slTableRow [attr.data-layer]="row.id">
-              <th slTableRowHeader>
-                <span class="layer">
-                  <span slText size="sm" weight="medium">{{ row.label }}</span>
-                  <span slText size="xs" tone="muted">{{ row.what }}</span>
-                </span>
-              </th>
-              <td slTableCell data-align="end">
-                @if (row.layer; as layer) {
-                  <span slText size="sm" numeric="tabular" data-count>{{ layer.count }}</span>
-                } @else {
-                  <span class="pending-count" slSkeleton shape="text"></span>
-                }
-              </td>
-              <td slTableCell>
-                @if (row.layer; as layer) {
-                  <span class="entries" slText size="xs" data-entries>{{ row.entries }}</span>
-                } @else {
-                  <span class="pending-entries" slSkeleton shape="text"></span>
-                }
-              </td>
+    <div class="tables">
+      <div slTable variant="framed" [columns]="3" layout="fixed" striped data-anatomy>
+        <div slTableContent>
+          <caption slTableCaption>
+            {{
+              caption()
+            }}
+          </caption>
+          <thead slTableHead>
+            <tr slTableRow>
+              <th slTableColumnHeader>Layer</th>
+              <th slTableColumnHeader data-align="end">Entries</th>
+              <th slTableColumnHeader>What it sets</th>
             </tr>
-          }
-        </tbody>
+          </thead>
+          <tbody slTableBody>
+            @for (row of rows(); track row.id) {
+              <tr slTableRow [attr.data-layer]="row.id">
+                <th slTableRowHeader>
+                  <span class="layer">
+                    <span slText size="sm" weight="medium">{{ row.label }}</span>
+                    <span slText size="xs" tone="muted">{{ row.what }}</span>
+                  </span>
+                </th>
+                <td slTableCell data-align="end">
+                  @if (row.layer; as layer) {
+                    <span slText size="sm" numeric="tabular" data-count>{{ layer.count }}</span>
+                  } @else {
+                    <span class="pending-count" slSkeleton shape="text"></span>
+                  }
+                </td>
+                <td slTableCell>
+                  @if (row.layer; as layer) {
+                    <span class="entries" slText size="xs" data-entries>{{ row.entries }}</span>
+                  } @else {
+                    <span class="pending-entries" slSkeleton shape="text"></span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </div>
       </div>
+      @if (changes().length > 0) {
+        <div slTable variant="framed" [columns]="3" layout="fixed" striped data-change-anatomy>
+          <div slTableContent>
+            <caption slTableCaption>
+              Your changes, and the layers each one writes
+            </caption>
+            <thead slTableHead>
+              <tr slTableRow>
+                <th slTableColumnHeader>Change</th>
+                <th slTableColumnHeader>Value</th>
+                <th slTableColumnHeader>Layers it writes</th>
+              </tr>
+            </thead>
+            <tbody slTableBody>
+              @for (change of changeRows(); track change.axis) {
+                <tr slTableRow [attr.data-change]="change.axis">
+                  <th slTableRowHeader>
+                    <span slText size="sm" weight="medium">{{ change.label }}</span>
+                  </th>
+                  <td slTableCell>
+                    <span slText size="sm">{{ change.value }}</span>
+                  </td>
+                  <td slTableCell>
+                    <span class="entries" slText size="xs" data-layers>{{ change.layers }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </div>
+        </div>
+      }
     </div>
   `,
 })
@@ -122,6 +165,19 @@ export class AnatomyTable {
   readonly anatomy = input.required<readonly AnatomyLayer[] | null>();
   /** The theme the anatomy reads, as the reader knows it. */
   readonly name = input.required<string>();
+  /** The reader's changes over the theme, each with the layers it writes; none for a theme as it comes. */
+  readonly changes = input<readonly ChangeRow[]>([]);
+
+  protected readonly changeRows = computed(() =>
+    this.changes().map((change) => ({
+      axis: change.axis,
+      label: change.label,
+      value: change.value,
+      layers: change.layers
+        .map((layer) => `${LAYERS.find((entry) => entry.id === layer.id)!.label} · ${layer.count}`)
+        .join(', '),
+    })),
+  );
 
   protected readonly caption = computed(
     () => `The layers of ${this.name()}, as its theme object declares them over the library’s`,

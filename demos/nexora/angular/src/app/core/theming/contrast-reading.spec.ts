@@ -61,18 +61,16 @@ describe('contrastReadings', () => {
   });
 
   /**
-   * The readings are the theme's own recipe: Brutalist draws the accent as a
-   * light solid under dark ink, so the same brand reads another ratio there
-   * than on Standard, and both stand at the floor.
+   * The readings are the theme's own recipe: Editorial lays its text on a
+   * warmer, darker paper than Standard's ground, so the same grey reads
+   * another ratio there than on Standard, and both stand at the floor.
    */
   it('reads each theme’s own recipe', () => {
-    const onSolid = (theme: string) =>
-      contrastReadings(theme, { accent: '#d97706' })[0]!.pairs.find(
-        (pair) => pair.id === 'on-solid',
-      )!;
-    expect(onSolid('nexora-brutalist').ratio).not.toBe(onSolid('default').ratio);
-    expect(onSolid('nexora-brutalist').passes).toBe(true);
-    expect(onSolid('default').passes).toBe(true);
+    const text = (theme: string) =>
+      contrastReadings(theme, { neutral: '#64748b' })[0]!.pairs.find((pair) => pair.id === 'text')!;
+    expect(text('nexora-editorial').ratio).not.toBe(text('default').ratio);
+    expect(text('nexora-editorial').passes).toBe(true);
+    expect(text('default').passes).toBe(true);
   });
 
   /**

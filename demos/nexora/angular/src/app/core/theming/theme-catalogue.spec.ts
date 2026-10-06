@@ -5,6 +5,7 @@ import {
   ruleErrors,
   SCHEMES,
   SEED_NAMES,
+  toLinearSrgb,
   type Oklch,
   type SeedName,
   type Theme,
@@ -13,9 +14,15 @@ import defaultTheme from '@slotted/themes/default';
 import { describe, expect, it } from 'vitest';
 
 import { BRAND_PRESETS, NEUTRAL_PRESETS } from './appearance';
+import { controlStyle } from './control-styles';
 import { nexoraTheme } from './nexora-themes';
 import { fontFamily } from './theme-faces';
-import { DEFAULT_THEME_ID, RUNTIME_THEME_IDS, THEME_CATALOGUE } from './theme-catalogue';
+import {
+  DEFAULT_THEME_ID,
+  RUNTIME_THEME_IDS,
+  THEME_CATALOGUE,
+  type ThemeEntry,
+} from './theme-catalogue';
 
 const changed = (
   values: Readonly<Record<string, string>> | undefined,
@@ -23,7 +30,7 @@ const changed = (
 ) => Object.keys(values ?? {}).filter((name) => values![name] !== reference?.[name]);
 
 const familyOf = (token: string) =>
-  /^--slotted-(stat-card|text-field|segmented-control|[a-z]+)-/.exec(token)![1];
+  /^--slotted-(stat-card|text-field|segmented-control|select-content|[a-z]+)-/.exec(token)![1];
 
 const parsed = (seeds: Readonly<Record<SeedName, string>>) =>
   Object.fromEntries(SEED_NAMES.map((name) => [name, parseSeed(seeds[name])!])) as Record<
@@ -39,16 +46,104 @@ const failures = (theme: Theme, seeds: Partial<Record<SeedName, string>>) =>
     ).map((failure) => `${scheme}: ${failure}`),
   );
 
+/**
+ * A theme's value for a base or component token, with every `var()` that
+ * names another declared token replaced by that token's value, the way the
+ * cascade would resolve it on `html`.
+ */
+function resolved(theme: Theme, token: string, density = 'comfortable'): string {
+  const values: Record<string, string | undefined> = {
+    ...(defaultTheme.base as Record<string, string>),
+    ...(defaultTheme.densities?.[density as 'comfortable'] as Record<string, string>),
+    ...(defaultTheme.schemes?.light as Record<string, string>),
+    ...(theme.base as Record<string, string>),
+    ...(theme.densities?.[density as 'comfortable'] as Record<string, string>),
+    ...(theme.schemes?.light as Record<string, string>),
+    ...(theme.components as Record<string, string>),
+  };
+  let value = values[token] ?? 'unset';
+  for (let depth = 0; depth < 6; depth++) {
+    const next = value.replace(/var\((--slotted-[a-z0-9-]+)\)/g, (match, name: string) =>
+      values[name] === undefined ? match : values[name]!,
+    );
+    if (next === value) break;
+    value = next;
+  }
+  return value;
+}
+
+/**
+ * The structural axes a theme is read on: what a reader sees before the
+ * colour — the faces and the size of the text, the height and corner of a
+ * control, a field, a focus mark and a primary button, a card's edge, the
+ * tabs' marker, the table's head, the shadow, the line, the space and the
+ * motion. Colour is not one of them.
+ */
+const STRUCTURE: readonly [string, (theme: Theme, entry: ThemeEntry) => string][] = [
+  ['text face', (theme) => resolved(theme, '--slotted-font-family-sans')],
+  ['heading face', (theme) => resolved(theme, '--slotted-font-family-heading')],
+  [
+    'prose face',
+    (theme) =>
+      theme.components?.['--slotted-typography-font-family' as never] ??
+      resolved(theme, '--slotted-font-family-sans'),
+  ],
+  ['text size', (theme) => resolved(theme, '--slotted-font-size-md')],
+  ['heading scale', (theme) => resolved(theme, '--slotted-font-size-4xl')],
+  ['control height', (theme) => resolved(theme, '--slotted-control-height-md')],
+  ['control corner', (theme) => resolved(theme, '--slotted-control-radius')],
+  ['card corner', (theme) => resolved(theme, '--slotted-card-radius')],
+  ['field', (_, entry) => entry.controls.input],
+  [
+    'focus',
+    (theme, entry) =>
+      `${entry.controls.focus} ${resolved(theme, '--slotted-focus-ring-width')} ${resolved(theme, '--slotted-focus-ring-offset')}`,
+  ],
+  [
+    'button',
+    (theme, entry) =>
+      `${entry.controls.button} ${resolved(theme, '--slotted-control-font-weight')} ${resolved(theme, '--slotted-control-letter-spacing')}`,
+  ],
+  [
+    'card edge',
+    (theme) =>
+      ['border-width', 'shadow', 'background']
+        .map((part) => resolved(theme, `--slotted-card-${part}`))
+        .join(' | '),
+  ],
+  [
+    'tabs',
+    (theme) =>
+      `${resolved(theme, '--slotted-tabs-marker-color')} ${resolved(theme, '--slotted-tabs-track-color')} ${(
+        theme.rules ?? []
+      ).some((rule) => String(rule).includes("[data-part='item'][data-selected]"))}`,
+  ],
+  [
+    'table head',
+    (theme) =>
+      `${resolved(theme, '--slotted-table-header-surface')} ${resolved(theme, '--slotted-table-row-min-block-size')}`,
+  ],
+  ['shadow', (theme) => resolved(theme, '--slotted-shadow-md')],
+  ['space', (theme) => resolved(theme, '--slotted-space-6')],
+  [
+    'motion',
+    (theme) =>
+      `${resolved(theme, '--slotted-duration-medium')} ${resolved(theme, '--slotted-easing-standard')}`,
+  ],
+];
+/** Of the seventeen axes, how many every two themes of the catalogue differ on. */
+const MIN_DIFFERING = 12;
+
 describe('theme catalogue', () => {
   it('names one definition per entry, and only the runtime themes leave `default`', () => {
     expect(THEME_CATALOGUE.map((entry) => nexoraTheme(entry.id).name)).toEqual(
       THEME_CATALOGUE.map((entry) => entry.id),
     );
     expect(RUNTIME_THEME_IDS).toEqual([
-      'nexora-friendly',
-      'nexora-brutalist',
+      'nexora-precise',
       'nexora-editorial',
-      'nexora-terminal',
+      'nexora-corporate',
+      'nexora-expressive',
     ]);
     expect(nexoraTheme(DEFAULT_THEME_ID)).toBe(defaultTheme);
   });
@@ -61,7 +156,7 @@ describe('theme catalogue', () => {
   it('states each theme’s own corner and accent as its definition does', () => {
     for (const entry of THEME_CATALOGUE) {
       expect(`${entry.radius}px`, entry.id).toBe(
-        nexoraTheme(entry.id).base?.['--slotted-radius-lg'],
+        resolved(nexoraTheme(entry.id), '--slotted-radius-lg'),
       );
     }
     expect(THEME_CATALOGUE.map((entry) => entry.accent)).toEqual([
@@ -74,10 +169,10 @@ describe('theme catalogue', () => {
   });
 
   /**
-   * A theme is a personality, not a tint: each one carries its five seeds and
-   * a recipe of its own, rewrites the scales, the schemes and the densities,
-   * dresses the families through their own tokens, adds rules where no token
-   * reaches and brings its typeface.
+   * A theme is a product language, not a tint: each one carries its five
+   * seeds and a recipe of its own, rewrites the scales, the schemes and the
+   * densities, dresses the families through their own tokens, adds rules
+   * where no token reaches and brings its typeface.
    */
   it.each(RUNTIME_THEME_IDS)('%s exercises every layer of the theme model', (id) => {
     const theme = nexoraTheme(id);
@@ -106,6 +201,58 @@ describe('theme catalogue', () => {
     expect(new Set(components.map(familyOf)).size).toBeGreaterThanOrEqual(6);
     expect(theme.rules?.length ?? 0).toBeGreaterThanOrEqual(1);
     expect(theme.fonts?.length ?? 0).toBeGreaterThanOrEqual(1);
+  });
+
+  /**
+   * The input, focus and button styles a catalogue entry names are the ones
+   * its theme draws: the theme carries the rules and the tokens
+   * `controlStyle` writes for them.
+   */
+  it.each(RUNTIME_THEME_IDS)('%s draws the Controls styles its entry names', (id) => {
+    const theme = nexoraTheme(id);
+    const entry = THEME_CATALOGUE.find((candidate) => candidate.id === id)!;
+    const style = controlStyle(entry.controls);
+    const rules = (theme.rules ?? []).map(String);
+    for (const rule of style.rules) expect(rules, id).toContain(rule);
+    expect(theme.base?.['--slotted-focus-ring-offset']).toBe(
+      style.base['--slotted-focus-ring-offset' as never],
+    );
+  });
+
+  /**
+   * Every two themes of the catalogue — Standard among them — differ on at
+   * least twelve of the seventeen structural axes: a reader tells them apart
+   * before reading a colour.
+   */
+  it('keeps every two themes apart on the structural axes', () => {
+    const read = THEME_CATALOGUE.map((entry) => ({
+      id: entry.id,
+      axes: STRUCTURE.map(([axis, value]) => [axis, value(nexoraTheme(entry.id), entry)] as const),
+    }));
+    expect(STRUCTURE).toHaveLength(17);
+    for (const [index, a] of read.entries()) {
+      for (const b of read.slice(index + 1)) {
+        const shared = a.axes
+          .filter(([axis, value]) => b.axes.find(([other]) => other === axis)![1] === value)
+          .map(([axis]) => axis);
+        expect(
+          STRUCTURE.length - shared.length,
+          `${a.id} and ${b.id} share ${shared.join(', ')}`,
+        ).toBeGreaterThanOrEqual(MIN_DIFFERING);
+      }
+    }
+  });
+
+  /** The four rebuilt themes draw a field, and a focus mark, each in a style of its own. */
+  it('draws a field and a focus mark in a different style in each rebuilt theme', () => {
+    const inputs = RUNTIME_THEME_IDS.map(
+      (id) => THEME_CATALOGUE.find((entry) => entry.id === id)!.controls.input,
+    );
+    expect(new Set(inputs).size).toBe(RUNTIME_THEME_IDS.length);
+    const focus = RUNTIME_THEME_IDS.map(
+      (id) => THEME_CATALOGUE.find((entry) => entry.id === id)!.controls.focus,
+    );
+    expect(new Set(focus).size).toBe(RUNTIME_THEME_IDS.length);
   });
 
   it.each(RUNTIME_THEME_IDS)('%s draws the chart in a palette of its own in every scheme', (id) => {
@@ -214,6 +361,41 @@ describe('theme catalogue', () => {
   });
 
   /**
+   * A grey the reader picks reaches every ground, line and hover: each one
+   * derives from the neutral seed. Under a strong grey of any hue (chroma
+   * 0.2, every 15°) each ground stays inside sRGB, so the screen shows the
+   * grey's hue and not the hue clipping leaves, and keeps 0.004 of chroma,
+   * so it still reads as tinted (`tools/theme-switch.mjs`, the greys).
+   */
+  it('derives its grounds, lines and hovers from the neutral seed, tinted and inside sRGB', () => {
+    const grounds = ['--slotted-surface', '--slotted-surface-raised', '--slotted-surface-sunken'];
+    const neutrals = [
+      ...grounds,
+      '--slotted-border-subtle',
+      '--slotted-control-border-color',
+      '--slotted-tone-secondary-subtle-hover',
+    ];
+    const inside = (color: Oklch) => toLinearSrgb(color).every((v) => v >= -0.002 && v <= 1.002);
+    for (const id of RUNTIME_THEME_IDS) {
+      const theme = nexoraTheme(id);
+      for (const scheme of ['light', 'dark'] as const) {
+        for (const token of neutrals) {
+          const rule = theme.recipe[scheme][token];
+          expect(rule !== undefined && 'seed' in rule ? rule.seed : rule, `${id} ${scheme} ${token}`).toBe('neutral');
+        }
+        for (let h = 0; h < 360; h += 15) {
+          const neutral = `oklch(0.5 0.2 ${h})`;
+          const values = evaluateRecipe(theme.recipe, parsed({ ...theme.seeds, neutral }), scheme);
+          for (const token of grounds) {
+            expect(inside(values[token]!), `${id} ${scheme} ${neutral} ${token}`).toBe(true);
+            expect(values[token]!.c, `${id} ${scheme} ${neutral} ${token}`).toBeGreaterThanOrEqual(0.004);
+          }
+        }
+      }
+    }
+  });
+
+  /**
    * ADR 0004: a theme rule selects by the families' public hooks and reads
    * only tokens. `defineTheme` holds every rule given as text to that policy,
    * so each theme here exists only because its rules passed it;
@@ -228,20 +410,6 @@ describe('theme catalogue', () => {
   });
 
   /**
-   * Terminal's prompt before the selected tab is decoration: its alternative
-   * text is empty, so the tab's accessible name stays its label. Its tables
-   * are striped in a ground mixed from its own line, the neutral family every
-   * ground and line of the theme shares.
-   */
-  it('draws Terminal’s prompt out of the tab’s name, and its stripe from its line', () => {
-    const terminal = nexoraTheme('nexora-terminal');
-    expect((terminal.rules ?? []).join('\n')).toMatch(/content: '> ' \/ '';/);
-    expect(terminal.components?.['--slotted-table-row-surface-stripe']).toBe(
-      'color-mix(in oklab, var(--slotted-border-subtle) 45%, var(--slotted-surface))',
-    );
-  });
-
-  /**
    * Faces are the contract's tokens, taken from the families the builder
    * offers; each theme declares the `@font-face` of every face it names, and
    * no rule writes a face of its own.
@@ -249,18 +417,20 @@ describe('theme catalogue', () => {
   it('sets every face through the font tokens, from the builder’s families', () => {
     for (const entry of THEME_CATALOGUE) {
       const theme = nexoraTheme(entry.id);
-      const resolve = (value: string | undefined) =>
-        value === 'var(--slotted-font-family-sans)'
-          ? theme.base?.['--slotted-font-family-sans']
-          : value;
-      expect(theme.base?.['--slotted-font-family-sans'], entry.id).toBe(
+      expect(resolved(theme, '--slotted-font-family-sans'), entry.id).toBe(
         fontFamily(entry.body).stack,
       );
-      expect(resolve(theme.base?.['--slotted-font-family-heading']), entry.id).toBe(
+      expect(resolved(theme, '--slotted-font-family-heading'), entry.id).toBe(
         fontFamily(entry.heading).stack,
       );
+      expect(resolved(theme, '--slotted-control-font-family'), entry.id).toBe(
+        fontFamily(entry.body).stack,
+      );
+      expect(theme.components?.['--slotted-typography-font-family' as never], entry.id).toBe(
+        entry.prose === null ? undefined : fontFamily(entry.prose).stack,
+      );
       expect((theme.fonts ?? []).map((font) => font.family).sort(), entry.id).toEqual(
-        [...new Set([entry.body, entry.heading])]
+        [...new Set([entry.body, entry.heading, ...(entry.prose === null ? [] : [entry.prose])])]
           .flatMap((id) => (fontFamily(id).face === null ? [] : [fontFamily(id).face!.family]))
           .sort(),
       );

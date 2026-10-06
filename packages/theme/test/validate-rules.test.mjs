@@ -281,6 +281,27 @@ test('refuses the nesting selector outside a style rule, where it is the scoping
   ok(`[data-ui='card'] { @media all { & { color: red; } } }`);
 });
 
+test('accepts & outside a style rule as the theme root in a scheme or a density, ahead of a public hook', () => {
+  // The root carries the theme's own scheme: `[data-slotted-scheme] …` asks for
+  // a descendant of the root, which the theme's own `html` never is.
+  ok(
+    `&[data-slotted-scheme='high-contrast'] [data-ui='text-field'] { border-color: var(--slotted-control-border-color); }`,
+  );
+  ok(`&[data-slotted-density='compact'] > [data-ui='card'] { padding: var(--slotted-space-2); }`);
+  fails(
+    `&[data-slotted-scheme='dark'] { color: red; }`,
+    "&[data-slotted-scheme='dark']: the theme root is reached only ahead of a public hook, not styled itself",
+  );
+  fails(
+    `&[data-ui='card'] [data-ui='button'] { color: red; }`,
+    "&[data-ui='card']: outside a style rule the nesting selector is the theme root, which only a scheme, a density or seeds narrow",
+  );
+  fails(
+    `[data-ui='card'] &[data-slotted-scheme='dark'] [data-ui='button'] { color: red; }`,
+    "&[data-slotted-scheme='dark']: outside a style rule the nesting selector is the theme root, which begins a selector",
+  );
+});
+
 const runtimeErrors = (css) => {
   try {
     defineTheme({ ...values, name: 'ruled', seeds: SEEDS, recipe: recipes.standard, rules: [css] });

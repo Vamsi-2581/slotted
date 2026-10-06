@@ -38,6 +38,13 @@ const TOKENS = new Set<string>([
   ...SEED_NAMES.map((seed) => `--slotted-seed-${seed}`),
 ]);
 
+/**
+ * The attributes that narrow the theme's root to one of its axes. Outside a
+ * style rule `&` is that root, and it may carry these alone: the root holds the
+ * theme's own scheme, which `[data-slotted-scheme] …` cannot reach, since that
+ * asks for a descendant of the root.
+ */
+const ROOT_AXES = new Set(['data-slotted-scheme', 'data-slotted-density', 'data-slotted-seeds']);
 /** Pseudo-classes that select by place in the document instead of by a public hook. */
 const ROOTS = new Set(['root', 'scope', 'host', 'host-context']);
 /** Pseudo-classes whose argument is a selector list matching the same element. */
@@ -321,17 +328,21 @@ function complexErrors(
   requireHooks: boolean,
   nested: boolean,
   report: (message: string) => void,
+  top = false,
 ) {
   let compound: Component[] = [];
-  const close = () => {
-    if (compound.length > 0) compoundErrors(compound, requireHooks, nested, report);
+  let first = true;
+  const close = (subject: boolean) => {
+    if (compound.length === 0) return;
+    compoundErrors(compound, requireHooks, nested, report, { top, first, subject });
     compound = [];
+    first = false;
   };
   for (const component of components) {
-    if (component.type === 'combinator') close();
+    if (component.type === 'combinator') close(false);
     else compound.push(component);
   }
-  close();
+  close(true);
 }
 
 function listErrors(
@@ -339,6 +350,7 @@ function listErrors(
   requireHooks: boolean,
   nested: boolean,
   report: (message: string) => void,
+  top = false,
 ) {
   let list: Component[][];
   try {
@@ -347,7 +359,17 @@ function listErrors(
     report((error as Error).message);
     return;
   }
-  for (const selector of list) complexErrors(selector, requireHooks, nested, report);
+  for (const selector of list) complexErrors(selector, requireHooks, nested, report, top);
+}
+
+/**
+ * Where a compound stands: in a selector the rule names itself (`top`), not in
+ * a pseudo-class's argument; as the selector's first compound; as its subject.
+ */
+interface Place {
+  readonly top: boolean;
+  readonly first: boolean;
+  readonly subject: boolean;
 }
 
 function compoundErrors(
@@ -355,8 +377,11 @@ function compoundErrors(
   requireHooks: boolean,
   nested: boolean,
   report: (message: string) => void,
+  place: Place = { top: false, first: false, subject: false },
 ) {
   let hooked = false;
+  /** `&` outside a style rule: the theme's root, judged once the whole compound is read. */
+  let root = false;
   /** A component already reported: the compound is not reported again for lacking a hook. */
   let refused = false;
   let ui: string | undefined;
@@ -383,12 +408,7 @@ function compoundErrors(
       case 'nesting':
         // Outside a style rule `&` is `:scope`: the theme's root, inside the compiled `@scope`.
         if (nested) hooked = true;
-        else {
-          report(
-            '&: outside a style rule the nesting selector is the scoping root, which is not a public selector',
-          );
-          refused = true;
-        }
+        else root = true;
         break;
       case 'attribute': {
         const { name, operator, value, raw } = component;
@@ -425,6 +445,32 @@ function compoundErrors(
         break;
     }
   }
+  if (root) {
+    const raw = compound.map((component) => component.raw).join('');
+    const others = compound.filter((component) => component.type !== 'nesting');
+    const axes = others.every(
+      (component) => component.type === 'attribute' && ROOT_AXES.has(component.name),
+    );
+    refused = true;
+    if (others.length === 0 || !place.top) {
+      report(
+        '&: outside a style rule the nesting selector is the scoping root, which is not a public selector',
+      );
+    } else if (!axes) {
+      report(
+        `${raw}: outside a style rule the nesting selector is the theme root, which only a scheme, a density or seeds narrow`,
+      );
+    } else if (!place.first) {
+      report(
+        `${raw}: outside a style rule the nesting selector is the theme root, which begins a selector`,
+      );
+    } else if (place.subject) {
+      report(`${raw}: the theme root is reached only ahead of a public hook, not styled itself`);
+    } else {
+      refused = false;
+      hooked = true;
+    }
+  }
   if (ui !== undefined && part !== undefined && !(UI[ui] ?? []).includes(part))
     report(`[data-part='${part}'] is not a part of ${ui}`);
   // `:is()` and `:where()` match the element itself: a compound with no hook of its own is
@@ -444,7 +490,7 @@ function compoundErrors(
  */
 export function selectorErrors(selector: string, nested = false): string[] {
   const errors: string[] = [];
-  listErrors(selector, true, nested, (message) => errors.push(message));
+  listErrors(selector, true, nested, (message) => errors.push(message), true);
   return errors;
 }
 

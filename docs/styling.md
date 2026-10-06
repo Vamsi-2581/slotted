@@ -251,7 +251,14 @@ A theme rule selects by these hooks:
   `packages/theme/src/generated/hooks.json`;
 - the theme axes: `data-slotted-theme`, `data-slotted-scheme`,
   `data-slotted-density` and `data-slotted-seeds`;
-- `&`, inside a style rule.
+- `&`, inside a style rule;
+- `&` outside a style rule, which is the theme's root, as the first compound
+  of a selector that goes on to a hook, carrying only `data-slotted-scheme`,
+  `data-slotted-density` or `data-slotted-seeds`:
+  `&[data-slotted-scheme='high-contrast'] [data-ui='text-field']`. The root
+  holds the theme's own scheme, and `[data-slotted-scheme='high-contrast'] …`
+  asks for a descendant of the root, so only this form reaches a theme's own
+  scheme on `html`.
 
 Attribute names match without regard to case, as in HTML: `[DATA-UI='card']`
 is `[data-ui='card']`.
@@ -264,8 +271,8 @@ without a hook of their own carry one in every argument. The arguments of
 selected, so they need no hook, and follow every other rule here.
 
 Refused: a class, an id, an element type (`input`, `html`, `body`), `*`,
-`:root`, `:scope`, `:host`, `:host-context()`, `&` outside a style rule
-(there it is the theme's root, as `:scope` is), an attribute outside `data-*`
+`:root`, `:scope`, `:host`, `:host-context()`, any other `&` outside a style
+rule (there it is the theme's root, as `:scope` is), an attribute outside `data-*`
 (`aria-*`, `role`), and `^=`, `$=`, `*=`, `~=` or `|=` on `data-ui` or
 `data-part`, which match more than one family or part. `@scope`, `@import`
 and `@layer` are refused at any depth, because the compiler writes them

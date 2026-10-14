@@ -585,7 +585,7 @@ export const ANGULAR_NAVIGATION_MENU_DOCS = {
 </nav>`,
       }),
       defineSnippet({
-        id: 'navigation-menu-angular-theming',
+        id: 'navigation-menu-theming',
         language: 'css',
         label: 'Retuning the family for an application',
         source: `[data-ui='navigation-menu'] {

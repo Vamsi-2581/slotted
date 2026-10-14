@@ -1,7 +1,12 @@
 {
   "name": "@slotted/styles",
   "version": "0.1.0-beta.0",
-  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andrelopes-code/slotted.git",
+    "directory": "packages/styles"
+  },
   "type": "module",
   "files": [
     "src",

@@ -1,24 +1,46 @@
 # @slotted/react
 
-Idiomatic React components for Slotted. This workspace package is private and remains unpublished while the initial component system is being built.
+React components for Slotted, a UI library for product web applications.
 
-Import components through their public subpath and load the package stylesheet once in the consuming application:
+This package is a `0.x` beta. Its public API changes between beta releases without deprecation.
+
+## Install
+
+```sh
+npm install @slotted/react @slotted/core @slotted/theme @slotted/themes
+```
+
+`react` `>=19.2.0 <20` is a peer dependency.
+
+## Use
+
+Load the component stylesheet and one theme once, then import each component from its subpath:
 
 ```tsx
-import { Button } from '@slotted/react/button';
+import '@slotted/themes/default.css';
 import '@slotted/react/styles.css';
+import { Button } from '@slotted/react/button';
 
 export function Actions() {
   return <Button>Save</Button>;
 }
 ```
 
-The component structure and behavior belong to this package. Styling comes from `@slotted/react/styles.css` plus a complete installed Slotted theme through CSS custom properties.
+Every rule the library ships lives in the `slotted` cascade layer. An application that keeps its own CSS in layers declares `@layer slotted, app;` before the first import ([styling](https://github.com/andrelopes-code/slotted/blob/main/docs/styling.md)).
 
-| Component      | Supported behavior                                                                              |
-| -------------- | ----------------------------------------------------------------------------------------------- |
-| `Button`       | Native action with loading, `fullWidth`, and structured content.                                |
-| `ButtonLink`   | Native anchor or narrow router render adapter with disabled-link behavior.                      |
-| `IconButton`   | Native icon-only action requiring an explicit accessible name, with loading.                    |
-| `ToggleButton` | Native controlled action using `aria-pressed`.                                                  |
-| `ButtonGroup`  | `div` with `role="group"`, horizontal/vertical orientation, and non-mutating child composition. |
+## Language
+
+Components write English when no provider is present. `SlottedProvider` sets the locale and the catalogs of its subtree:
+
+```tsx
+import { SlottedProvider } from '@slotted/react/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
+<SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
+  {children}
+</SlottedProvider>;
+```
+
+## License
+
+MIT

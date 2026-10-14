@@ -24,7 +24,7 @@ export function validateRules(css, filename) {
   try {
     transform({ filename, code: Buffer.from(css), errorRecovery: false });
   } catch (error) {
-    let refused = [];
+    let refused;
     try {
       refused = policy(css, filename);
     } catch {

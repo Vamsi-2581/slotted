@@ -275,7 +275,7 @@ test('takes the edge past a ring drawn inside the box', () => {
   const failures = [];
   for (const { name, css } of families()) {
     if (name in ELSEWHERE) continue;
-    for (const { selector, body, twin } of focusRules(css).focus) {
+    for (const { body, twin } of focusRules(css).focus) {
       const inward = /outline-offset:calc\(var\(--slotted-focus-ring-offset[^;]*\* -1\)/.test(body);
       if (inward && twin && !/box-shadow:[^;]*var\(--slotted-focus-ring-offset/.test(twin.body)) {
         failures.push(`${name}: ${twin.selector}`);

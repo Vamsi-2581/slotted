@@ -153,7 +153,6 @@ export function useSimulatedStream(text: string = STREAM) {
     timer = window.setTimeout(next, 400);
     return () => window.clearTimeout(timer);
     // The words are derived from `text`; a new run restarts the same text.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, run]);
   const replay = useCallback(() => setRun((value) => value + 1), []);
   return { text: words.slice(0, received).join(''), done: received >= words.length, replay };

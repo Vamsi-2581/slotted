@@ -1,7 +1,12 @@
 {
   "name": "@slotted/react",
   "version": "0.1.0-beta.0",
-  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andrelopes-code/slotted.git",
+    "directory": "packages/react"
+  },
   "type": "module",
   "files": [
     "dist"
@@ -469,7 +474,7 @@
     }
   },
   "scripts": {
-    "build": "vite build && tsc -p tsconfig.build.json && node layer-order.build.mjs && node ../../tools/agent-docs/bin/build.mjs --binding react --out dist/docs && node package-boundary.verify.mjs",
+    "build": "vite build && tsc -p tsconfig.build.json && node declarations.build.mjs && node layer-order.build.mjs && node ../../tools/agent-docs/bin/build.mjs --binding react --out dist/docs && node package-boundary.verify.mjs",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit --pretty false",
     "verify": "pnpm test && pnpm typecheck && pnpm build"

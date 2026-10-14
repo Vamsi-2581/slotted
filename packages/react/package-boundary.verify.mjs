@@ -23,6 +23,37 @@ const violations = collectTextArtifacts(distDirectory).flatMap((path) => {
   return content.match(forbiddenPattern) ? [relative(packageDirectory, path)] : [];
 });
 
+/**
+ * A declaration file is read by the consumer's compiler, which resolves every
+ * module it names — a side-effect import included. A package the manifest
+ * does not install for the consumer, such as the `@slotted/styles`
+ * devDependency, then fails their type check unless `skipLibCheck` hides it.
+ */
+const manifest = JSON.parse(readFileSync(join(packageDirectory, 'package.json'), 'utf8'));
+const installed = new Set([
+  ...Object.keys(manifest.dependencies ?? {}),
+  ...Object.keys(manifest.peerDependencies ?? {}),
+]);
+const specifierPatterns = [
+  /^\s*import\s+['"]([^'"]+)['"]/gm,
+  /^\s*(?:import|export|\})[^'"\n]*\bfrom\s+['"]([^'"]+)['"]/gm,
+  /\bimport\(\s*['"]([^'"]+)['"]\s*\)/g,
+];
+const packageOf = (specifier) =>
+  specifier
+    .split('/')
+    .slice(0, specifier.startsWith('@') ? 2 : 1)
+    .join('/');
+const undeclaredImports = collectTextArtifacts(join(distDirectory, 'types'))
+  .filter((path) => path.endsWith('.d.ts'))
+  .flatMap((path) => {
+    const content = readFileSync(path, 'utf8');
+    return specifierPatterns
+      .flatMap((pattern) => [...content.matchAll(pattern)].map((match) => match[1]))
+      .filter((specifier) => !specifier.startsWith('.') && !installed.has(packageOf(specifier)))
+      .map((specifier) => `${relative(packageDirectory, path)}: ${specifier}`);
+  });
+
 const bundledStyles = readFileSync(join(distDirectory, 'styles.css'), 'utf8');
 /**
  * Canaries for "the bundled stylesheet still carries the families it imports".
@@ -51,5 +82,11 @@ if (missingSelectors.length > 0) {
 if (violations.length > 0) {
   console.error('Private Storybook dependencies leaked into @slotted/react artifacts:');
   for (const path of violations) console.error(`- ${path}`);
+  process.exitCode = 1;
+}
+
+if (undeclaredImports.length > 0) {
+  console.error('Declaration files import packages @slotted/react does not install:');
+  for (const entry of undeclaredImports) console.error(`- ${entry}`);
   process.exitCode = 1;
 }

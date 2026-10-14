@@ -1,8 +1,27 @@
 # @slotted/angular
 
-Idiomatic Angular components for Slotted. This workspace package is private and remains unpublished while the initial component system is being built.
+Angular components for Slotted, a UI library for product web applications.
 
-Import components through their public secondary entrypoint and attach them to their native element:
+This package is a `0.x` beta. Its public API changes between beta releases without deprecation.
+
+## Install
+
+```sh
+npm install @slotted/angular @slotted/core @slotted/theme @slotted/themes
+```
+
+`@angular/core`, `@angular/common` and `@angular/forms` `>=22.1.0 <23` are peer dependencies.
+
+## Use
+
+Load one theme once in the application's global stylesheet:
+
+```css
+@layer slotted, app;
+@import '@slotted/themes/default.css';
+```
+
+Every rule the library ships lives in the `slotted` cascade layer; the `@layer` statement places it before the application's own layer ([styling](https://github.com/andrelopes-code/slotted/blob/main/docs/styling.md)). Each component comes from its secondary entry point and attaches to its native element:
 
 ```ts
 import { Component } from '@angular/core';
@@ -15,30 +34,19 @@ import { SlButton } from '@slotted/angular/button';
 export class Actions {}
 ```
 
-The button family retains native semantics: use `button[slButton]`, `a[slButtonLink]`,
-`button[slIconButton]`, `button[slToggleButton]`, and `div[slButtonGroup]`.
+## Language
 
-`slButton` and `slIconButton` expose `loading`; this blocks activation without making
-the native button disabled, and `loadingText` can replace the visible label. A disabled
-`slButtonLink` exposes `aria-disabled`, prevents activation and navigation, and is removed
-from the tab sequence. `slToggleButton` is controlled through its `pressed` input and
-`pressedChange` output.
+Components write English when no provider is present. `provideSlotted` sets the locale and the catalogs; `locale` accepts a string or a signal:
 
 ```ts
-@Component({
-  imports: [SlButton, SlButtonGroup, SlButtonLink, SlToggleButton],
-  template: `
-    <div slButtonGroup aria-label="Editing actions" orientation="horizontal">
-      <button slButton [loading]="saving">Save</button>
-      <button slToggleButton [pressed]="preview" (pressedChange)="preview = $event">Preview</button>
-      <a slButtonLink href="/discard" [disabled]="saving">Discard</a>
-    </div>
-  `,
-})
-export class Actions {
-  saving = false;
-  preview = false;
-}
+import { provideSlotted } from '@slotted/angular/i18n';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
+
+export const appConfig = {
+  providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
+};
 ```
 
-The component structure and behavior belong to this package. Product-level visual decisions come from an installed Slotted theme through CSS custom properties.
+## License
+
+MIT

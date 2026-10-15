@@ -1,4 +1,6 @@
-import { Field, FieldLabel, Stack, TextField } from '@slotted/react';
+import { Field, FieldLabel } from '@slotted/react/field';
+import { Stack } from '@slotted/react/stack';
+import { TextField } from '@slotted/react/text-field';
 
 export default function FieldNecessity() {
   return (

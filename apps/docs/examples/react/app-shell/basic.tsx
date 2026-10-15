@@ -5,12 +5,14 @@ import {
   AppShellMain,
   AppShellNav,
   AppShellNavToggle,
+} from '@slotted/react/app-shell';
+import {
   SideNavigation,
   SideNavigationItem,
   SideNavigationLabel,
   SideNavigationLink,
   SideNavigationList,
-} from '@slotted/react';
+} from '@slotted/react/side-navigation';
 
 export default function AppShellBasic() {
   return (

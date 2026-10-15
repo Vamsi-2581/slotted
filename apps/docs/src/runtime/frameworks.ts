@@ -6,16 +6,25 @@ import type { CodeLanguage } from '../lib/highlight';
  * exporting `render(id)` for the build and `mount(element, id)` for the
  * browser.
  */
-export const FRAMEWORKS = ['react'] as const;
+export const FRAMEWORKS = ['react', 'angular'] as const;
 
 export type Framework = (typeof FRAMEWORKS)[number];
 
 export const FRAMEWORK_LABELS: Record<Framework, string> = {
   react: 'React',
+  angular: 'Angular',
 };
 
 export const EXAMPLE_LANGUAGES: Record<Framework, CodeLanguage> = {
   react: 'tsx',
+  /* A component file with its template inline: TypeScript around, Angular template inside. */
+  angular: 'angular-ts',
+};
+
+/** The extension of an example file, which is also the extension its code tab names. */
+export const EXAMPLE_EXTENSIONS: Record<Framework, string> = {
+  react: 'tsx',
+  angular: 'ts',
 };
 
 /** `../../examples/react/field/basic.tsx` → `field/basic`. */

@@ -5,7 +5,7 @@ import {
   SideNavigationLabel,
   SideNavigationLink,
   SideNavigationList,
-} from '@slotted/react';
+} from '@slotted/react/side-navigation';
 
 export default function SideNavigationBasic() {
   return (

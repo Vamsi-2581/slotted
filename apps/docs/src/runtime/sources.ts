@@ -9,7 +9,18 @@ const sources: Record<Framework, Map<string, string>> = {
       eager: true,
     }),
   ),
+  angular: byExampleId(
+    import.meta.glob<string>('../../examples/angular/**/*.ts', {
+      query: '?raw',
+      import: 'default',
+      eager: true,
+    }),
+  ),
 };
+
+export function hasExample(framework: Framework, id: string): boolean {
+  return sources[framework].has(id);
+}
 
 export function exampleSource(framework: Framework, id: string): string {
   const source = sources[framework].get(id);

@@ -1,4 +1,5 @@
-import { Button, ToastRegion, toast } from '@slotted/react';
+import { Button } from '@slotted/react/button';
+import { toast, ToastRegion } from '@slotted/react/toast';
 
 export default function ToastBasic() {
   return (

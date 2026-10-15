@@ -1,4 +1,6 @@
-import { Field, FieldError, FieldLabel, Stack, TextField } from '@slotted/react';
+import { Field, FieldDescription, FieldError, FieldLabel } from '@slotted/react/field';
+import { Stack } from '@slotted/react/stack';
+import { TextField } from '@slotted/react/text-field';
 
 export default function FieldStates() {
   return (
@@ -8,13 +10,15 @@ export default function FieldStates() {
         <TextField inputMode="numeric" defaultValue="4242 4242 42" />
         <FieldError>Six digits are missing.</FieldError>
       </Field>
-      <Field disabled>
-        <FieldLabel>Workspace</FieldLabel>
-        <TextField defaultValue="northwind" />
-      </Field>
       <Field readOnly>
         <FieldLabel>Account ID</FieldLabel>
         <TextField defaultValue="acct_9f2c41" />
+        <FieldDescription>Quote this ID when you contact support.</FieldDescription>
+      </Field>
+      <Field disabled>
+        <FieldLabel>Workspace URL</FieldLabel>
+        <TextField defaultValue="northwind.slotted.app" />
+        <FieldDescription>Only the workspace owner can change the URL.</FieldDescription>
       </Field>
     </Stack>
   );

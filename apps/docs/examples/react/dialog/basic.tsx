@@ -1,5 +1,7 @@
+import { useState } from 'react';
+
+import { Button } from '@slotted/react/button';
 import {
-  Button,
   Dialog,
   DialogBody,
   DialogClose,
@@ -9,34 +11,63 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  Field,
-  FieldLabel,
-  TextField,
-} from '@slotted/react';
+} from '@slotted/react/dialog';
+import { Field, FieldLabel } from '@slotted/react/field';
+import { Inline } from '@slotted/react/inline';
+import { TextField } from '@slotted/react/text-field';
+import { Text } from '@slotted/react/typography';
 
 export default function DialogBasic() {
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState('ap@northwindtraders.com');
+  const [draft, setDraft] = useState(email);
+
   return (
-    <Dialog>
-      <DialogTrigger>Edit project</DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit project</DialogTitle>
-          <DialogDescription>The name is visible to the whole workspace.</DialogDescription>
-          <DialogClose />
-        </DialogHeader>
-        <DialogBody>
-          <Field>
-            <FieldLabel>Name</FieldLabel>
-            <TextField defaultValue="Home page redesign" />
-          </Field>
-        </DialogBody>
-        <DialogFooter>
-          <Button variant="ghost" tone="secondary">
-            Cancel
-          </Button>
-          <Button>Save</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <Inline align="center" gap={3}>
+      <Text size="sm">{email}</Text>
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          if (next) setDraft(email);
+          setOpen(next);
+        }}
+      >
+        <DialogTrigger
+          render={(props) => (
+            <Button {...props} size="sm" tone="secondary" variant="outline">
+              Edit billing email
+            </Button>
+          )}
+        />
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Billing email</DialogTitle>
+            <DialogDescription>
+              Invoices and payment receipts for Northwind Traders go to this address.
+            </DialogDescription>
+            <DialogClose />
+          </DialogHeader>
+          <DialogBody>
+            <Field>
+              <FieldLabel>Email</FieldLabel>
+              <TextField type="email" value={draft} onValueChange={setDraft} />
+            </Field>
+          </DialogBody>
+          <DialogFooter>
+            <Button variant="ghost" tone="secondary" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setEmail(draft);
+                setOpen(false);
+              }}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Inline>
   );
 }

@@ -57,7 +57,7 @@ const links = [
     </nav>
     <div class="docs-header-tools">
       <HeaderTools
-        client:idle
+        client:idle={{ timeout: 1500 }}
         framework={framework}
         frameworkHrefs={frameworkHrefs}
         search={search}

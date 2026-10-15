@@ -1,4 +1,5 @@
-import { Field, FieldDescription, FieldLabel, TextField } from '@slotted/react';
+import { Field, FieldDescription, FieldLabel } from '@slotted/react/field';
+import { TextField } from '@slotted/react/text-field';
 
 export default function FieldBasic() {
   return (

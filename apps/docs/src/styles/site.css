@@ -104,10 +104,10 @@
     .docs-header-nav a,
     .docs-nav-list a,
     .docs-crumbs a,
-    .docs-prose a,
+    .docs-prose a:not(.docs-example a),
     .docs-skip,
     .docs-search,
-    .home a
+    .home a:not(.stage a)
   ):focus-visible {
     outline: var(--slotted-focus-ring-width) solid var(--slotted-focus-ring-color);
     outline-offset: var(--slotted-focus-ring-offset);
@@ -362,7 +362,9 @@
     display: none;
   }
 
-  @media (min-width: 80rem) {
+  /* From 90rem: below it, the column beside "On this page" measures 590px
+     at 1280px, and a data grid under 600px moves its columns into pop-ins. */
+  @media (min-width: 90rem) {
     .docs-page {
       display: grid;
       grid-template-columns: minmax(0, var(--docs-prose-w)) var(--docs-toc-w);
@@ -451,7 +453,8 @@
     padding-inline-start: var(--slotted-space-7);
   }
 
-  .docs-prose a {
+  /* The site's links, never a family's inside a running example. */
+  .docs-prose a:not(.docs-example a) {
     color: var(--slotted-text);
     font-weight: var(--slotted-font-weight-medium);
     text-decoration: underline;
@@ -460,11 +463,12 @@
     text-underline-offset: 0.25em;
   }
 
-  .docs-prose a:hover {
+  .docs-prose a:not(.docs-example a):hover {
     text-decoration-color: var(--slotted-text);
   }
 
-  .docs-prose > :is(p, ul, ol, table) code {
+  .docs-prose > :is(p, ul, ol, table) code,
+  .docs-table code {
     padding: var(--slotted-space-1) var(--slotted-space-3);
     border-radius: var(--slotted-radius-sm);
     background: color-mix(in oklab, var(--slotted-text) 5%, transparent);
@@ -474,52 +478,180 @@
     font-weight: var(--slotted-font-weight-medium);
   }
 
-  .docs-prose > table {
-    inline-size: 100%;
+  .docs-prose > h4 {
+    margin: var(--slotted-space-9) 0 var(--slotted-space-3);
+    font-size: var(--slotted-font-size-md);
+    line-height: var(--slotted-line-height-md);
+    font-weight: var(--slotted-font-weight-semibold);
+  }
+
+  /* ── Tables: a region that scrolls on its own when the column is narrow ── */
+
+  .docs-table {
     margin: 0 0 var(--slotted-space-8);
+    overflow-x: auto;
+    border-radius: var(--slotted-radius-xs);
+  }
+
+  .docs-table:focus-visible {
+    outline: var(--slotted-focus-ring-width) solid var(--slotted-focus-ring-color);
+    outline-offset: var(--slotted-focus-ring-offset);
+  }
+
+  .docs-prose > table,
+  .docs-table table {
+    inline-size: 100%;
     border-collapse: collapse;
     font-size: var(--slotted-font-size-md);
     line-height: var(--slotted-line-height-md);
   }
 
-  .docs-prose > table :is(th, td) {
-    padding: var(--slotted-space-5) var(--slotted-space-6) var(--slotted-space-5) 0;
+  .docs-prose > table {
+    margin: 0 0 var(--slotted-space-8);
+  }
+
+  /* Narrower than this, the region scrolls rather than the columns crushing. */
+  .docs-table table {
+    min-inline-size: 36rem;
+  }
+
+  :is(.docs-prose > table, .docs-table) :is(th, td) {
+    padding: var(--slotted-space-4) var(--slotted-space-6) var(--slotted-space-4) 0;
     border-block-end: 1px solid var(--docs-line);
     text-align: start;
     vertical-align: top;
   }
 
-  .docs-prose > table th {
+  :is(.docs-prose > table, .docs-table) th {
     color: var(--slotted-text);
     font-weight: var(--slotted-font-weight-semibold);
   }
 
-  .docs-prose > table td {
+  :is(.docs-prose > table, .docs-table) td {
     color: var(--docs-ink-2);
+    text-wrap: pretty;
+  }
+
+  /* Props and composition: a signature line over a description at full measure. */
+  .docs-props {
+    margin: 0 0 var(--slotted-space-9);
+    border-block-start: 1px solid var(--docs-line);
+  }
+
+  .docs-prop {
+    padding-block: var(--slotted-space-5);
+    border-block-end: 1px solid var(--docs-line);
+  }
+
+  .docs-prop-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--slotted-space-2) var(--slotted-space-4);
+  }
+
+  .docs-prop-head code {
+    padding: var(--slotted-space-1) var(--slotted-space-3);
+    border-radius: var(--slotted-radius-sm);
+    background: color-mix(in oklab, var(--slotted-text) 5%, transparent);
+    font-family: var(--slotted-font-family-mono);
+    font-size: var(--slotted-font-size-sm);
+    line-height: var(--slotted-line-height-sm);
+  }
+
+  .docs-prop-name {
+    color: var(--slotted-text);
+    font-weight: var(--slotted-font-weight-semibold);
+  }
+
+  /* A union keeps each member whole while the line has room; a signature
+     longer than the column still breaks rather than widening the page. */
+  .docs-prop-type {
+    max-inline-size: 100%;
+    color: var(--docs-ink-2);
+    overflow-wrap: anywhere;
+  }
+
+  .docs-prop-default {
+    margin-inline-start: auto;
+    color: var(--slotted-text-muted);
+    font-size: var(--slotted-font-size-sm);
+    line-height: var(--slotted-line-height-sm);
+  }
+
+  .docs-prop-body {
+    margin: var(--slotted-space-3) 0 0;
+    color: var(--docs-ink-2);
+    font-size: var(--slotted-font-size-md);
+    line-height: var(--slotted-line-height-md);
+    text-wrap: pretty;
+  }
+
+  .docs-prop-body .docs-ref-applies {
+    display: block;
+    margin-block-end: var(--slotted-space-1);
+  }
+
+  /* Reference tables: the name never breaks, the type takes a bounded column,
+     and the description takes what is left. */
+  .docs-table td:first-child {
+    white-space: nowrap;
+  }
+
+  .docs-table td.docs-ref-type {
+    inline-size: 13rem;
+    min-inline-size: 10rem;
+  }
+
+  .docs-table td {
+    font-size: var(--slotted-font-size-sm);
+    line-height: var(--slotted-line-height-sm);
+  }
+
+  /* A union type breaks between its members, never inside one. */
+  .docs-ref-type span {
+    white-space: nowrap;
+  }
+
+  /* The parts a row applies to, when they are not the member itself. */
+  .docs-ref-applies {
+    display: block;
+    color: var(--slotted-text-muted);
+    font-size: var(--slotted-font-size-sm);
+    line-height: var(--slotted-line-height-sm);
+  }
+
+  .docs-table kbd {
+    display: inline-block;
+    padding: 0 var(--slotted-space-3);
+    border-radius: var(--slotted-radius-sm);
+    box-shadow: inset 0 0 0 1px var(--docs-line);
+    color: var(--slotted-text);
+    font-family: var(--slotted-font-family-mono);
+    font-size: 0.8125em;
+    white-space: nowrap;
   }
 
   /*
-   * ── Code: a double frame in the dark scheme whatever the page's ───────
+   * ── Code: one card in the dark scheme whatever the page's ────────────
    *
    * `.docs-code` carries `data-slotted-scheme="dark"`, so every token read
-   * here and inside the block is the dark scheme's: the frame is the sunken
-   * surface, the block the base one, its edge the subtle border.
+   * here and inside the block is the dark scheme's. The block is the card:
+   * no second frame is drawn around it.
    */
   .docs-code {
-    --slotted-code-block-radius: var(--slotted-radius-lg);
+    --slotted-code-block-radius: var(--docs-frame-radius);
     --slotted-code-block-surface: var(--slotted-surface);
     --slotted-code-block-border-color: var(--slotted-border-subtle);
     margin: var(--slotted-space-7) 0 var(--slotted-space-9);
-    padding: var(--slotted-space-2);
-    border-radius: var(--docs-frame-radius);
-    background: var(--slotted-surface-sunken);
   }
 
-  :root[data-slotted-scheme='dark'] .docs-code:not([data-joined]) {
-    box-shadow: inset 0 0 0 1px var(--docs-line);
-  }
-
-  /* ── Example: the running example, its code joined underneath ──────── */
+  /*
+   * ── Example: one frame, a Preview and a Code tab ─────────────────────
+   *
+   * The tab bar sits on the frame's surface; the selected tab's marker
+   * stands on the hairline that opens either panel.
+   */
 
   .docs-example {
     margin: var(--slotted-space-9) 0 var(--slotted-space-10);
@@ -529,26 +661,27 @@
     overflow: clip;
   }
 
-  .docs-example-stage {
-    position: relative;
-    display: grid;
-    place-items: center;
-    min-block-size: 14rem;
-    padding: calc(var(--slotted-space-12) - var(--slotted-space-4)) var(--slotted-space-8);
-    background-color: var(--slotted-surface);
-    color: var(--slotted-text);
+  .docs-example-frame {
+    padding-block-start: var(--slotted-space-2);
   }
 
-  .docs-example-bar {
-    position: absolute;
-    inset-block-start: var(--slotted-space-4);
-    inset-inline-end: var(--slotted-space-4);
-    z-index: 2;
+  /* One track with a zero minimum: a wide table inside scrolls in its own
+     region instead of widening the frame past the column at 390px. */
+  .docs-example-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    place-items: center;
+    min-block-size: 14rem;
+    padding: var(--slotted-space-10) var(--slotted-space-8);
+    border-block-start: 1px solid var(--docs-line);
+    background-color: var(--slotted-surface);
+    color: var(--slotted-text);
   }
 
   /* The element the example renders into: the width an example is read at. */
   .docs-example-preview {
     inline-size: min(100%, 24rem);
+    min-inline-size: 0;
   }
 
   .docs-example[data-wide] .docs-example-preview {
@@ -556,15 +689,39 @@
   }
 
   /*
-   * Joined to an example, the code keeps its own card — corners, edge — and
-   * sits on the example card's surface, inset by the same step that makes
-   * the two radii concentric (outer = inner + inset). No dark ground of its
-   * own shows around it.
+   * At least as tall as the preview last measured (`ExampleFrame`), so the
+   * frame keeps its height across a switch; the code block scrolls inside
+   * its own line limit.
+   */
+  .docs-example-code {
+    display: grid;
+    box-sizing: border-box;
+    min-block-size: var(--docs-example-h, 14rem);
+    border-block-start: 1px solid var(--docs-line);
+  }
+
+  /*
+   * Inside an example, the code is the Code panel itself: no corners and no
+   * edge of its own inside the example's card, which clips it to its radius.
    */
   .docs-code[data-joined] {
+    display: grid;
     margin: 0;
-    padding: 0 var(--slotted-space-2) var(--slotted-space-2);
-    border-radius: 0;
-    background: transparent;
+    --slotted-code-block-radius: 0;
+    --slotted-code-block-border-color: transparent;
+  }
+
+  /*
+   * The expanded code (`ExampleFrame`): the block is the panel's body, so it
+   * takes the panel's ground and edge instead of drawing a card inside it.
+   */
+  .docs-code-dialog {
+    --slotted-code-block-radius: 0;
+    --slotted-code-block-surface: var(--slotted-dialog-surface, var(--slotted-surface));
+    --slotted-code-block-border-color: transparent;
+  }
+
+  .docs-code-dialog > [data-part='body'] {
+    padding: 0;
   }
 }

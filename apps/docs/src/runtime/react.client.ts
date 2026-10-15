@@ -1,8 +1,9 @@
-import { createElement } from 'react';
+import { createElement, type ComponentType } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 
-import { loadReactExample } from './react';
+import { exampleIdPrefix } from './react-ids';
 
-export async function mount(element: HTMLElement, id: string): Promise<void> {
-  hydrateRoot(element, createElement(await loadReactExample(id)));
+export async function mount(element: HTMLElement, module: unknown, id: string): Promise<void> {
+  const component = (module as { default: ComponentType }).default;
+  hydrateRoot(element, createElement(component), { identifierPrefix: exampleIdPrefix(id) });
 }

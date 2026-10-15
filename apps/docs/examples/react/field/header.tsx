@@ -1,14 +1,7 @@
-import {
-  Badge,
-  Field,
-  FieldAction,
-  FieldHeader,
-  FieldHelp,
-  FieldIndicator,
-  FieldLabel,
-  Stack,
-  TextField,
-} from '@slotted/react';
+import { Badge } from '@slotted/react/badge';
+import { Field, FieldAction, FieldHeader, FieldIndicator, FieldLabel } from '@slotted/react/field';
+import { Stack } from '@slotted/react/stack';
+import { TextField } from '@slotted/react/text-field';
 
 export default function FieldHeaderExample() {
   return (
@@ -16,12 +9,11 @@ export default function FieldHeaderExample() {
       <Field required>
         <FieldHeader>
           <FieldLabel>Password</FieldLabel>
-          <FieldHelp>At least eight characters, with letters and numbers.</FieldHelp>
-          <FieldAction render={(props) => <a {...props} href="#reset" />}>
+          <FieldAction render={(props) => <a {...props} href="#reset-password" />}>
             Forgot password?
           </FieldAction>
         </FieldHeader>
-        <TextField type="password" />
+        <TextField type="password" autoComplete="current-password" />
       </Field>
       <Field>
         <FieldHeader>
@@ -31,8 +23,9 @@ export default function FieldHeaderExample() {
               Beta
             </Badge>
           </FieldIndicator>
+          <FieldAction>Send test event</FieldAction>
         </FieldHeader>
-        <TextField type="url" placeholder="https://" />
+        <TextField type="url" defaultValue="https://hooks.northwind.example/orders" />
       </Field>
     </Stack>
   );

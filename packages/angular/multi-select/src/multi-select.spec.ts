@@ -620,11 +620,11 @@ describe('SlMultiSelect, the language in force', () => {
     fixture.componentInstance.defaultValue.set(['blueberry', 'raspberry']);
     await settle(fixture);
 
-    expect(grid().getAttribute('aria-label')).toBe('2 escolhidos');
+    expect(grid().getAttribute('aria-label')).toBe('Fruit, 2 escolhidos');
 
     locale.set('en-US');
     await settle(fixture);
-    expect(grid().getAttribute('aria-label')).toBe('2 chosen');
+    expect(grid().getAttribute('aria-label')).toBe('Fruit, 2 chosen');
   });
 });
 
@@ -641,6 +641,21 @@ describe('SlMultiSelect, the accessible name', () => {
 
     expect(field().getAttribute('aria-label')).toBe('Fruit');
     expect(root().hasAttribute('aria-label')).toBe(false);
+  });
+
+  /**
+   * The contract's wiring: the control carries the field's label and the count
+   * of chips. Both bindings wrote the count alone, and a reader who entered the
+   * grid heard "2 chosen" with nothing saying of what.
+   */
+  it('names the grid with the label and the count of chips', async () => {
+    await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.defaultValue.set(['blueberry', 'raspberry']);
+    await settle(fixture);
+
+    expect(grid().getAttribute('aria-label')).toBe('Fruit, 2 chosen');
+    expect(grid().hasAttribute('aria-labelledby')).toBe(false);
   });
 });
 

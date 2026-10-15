@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/multi-select/contract.json';
+import { Field, FieldLabel } from '../field';
 import { SlottedProvider } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { MultiSelect } from './multi-select';
@@ -71,12 +72,31 @@ describe('MultiSelect', () => {
     expect(contract.roles).toMatchObject({ control: 'grid', chips: 'row', chip: 'gridcell' });
   });
 
-  /** The contract's wiring puts the count on the control, as `SlMultiSelect` writes it. */
-  it('names the grid with the count of chips, and leaves the row unnamed', () => {
+  /**
+   * The contract's wiring: the control carries the field's label and the count
+   * of chips. Both bindings wrote the count alone, and a reader who entered the
+   * grid heard "2 chosen" with nothing saying of what.
+   */
+  it('names the grid with the field’s label and the count of chips, and leaves the row unnamed', () => {
     render(<Basic defaultValue={['fig', 'plum']} />);
-    expect(screen.getByRole('grid')).toHaveAttribute('aria-label', '2 chosen');
+    expect(screen.getByRole('grid', { name: 'Fruit, 2 chosen' })).toBeInTheDocument();
     expect(screen.getByRole('row')).not.toHaveAttribute('aria-label');
-    expect(contract.wiring['aria-label']).toMatch(/^on the control/);
+    expect(contract.wiring['aria-label']).toMatch(/^on the control, carrying the field's label/);
+  });
+
+  it('names the grid from a field’s label and the count', () => {
+    render(
+      <Field>
+        <FieldLabel>Fruit</FieldLabel>
+        <MultiSelect defaultValue={['fig']}>
+          <MultiSelectControl />
+          <MultiSelectContent aria-label="Fruit">
+            <MultiSelectItem value="fig">Fig</MultiSelectItem>
+          </MultiSelectContent>
+        </MultiSelect>
+      </Field>,
+    );
+    expect(screen.getByRole('grid', { name: 'Fruit 1 chosen' })).toBeInTheDocument();
   });
 
   /**

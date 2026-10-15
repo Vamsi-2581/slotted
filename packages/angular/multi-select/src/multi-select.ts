@@ -164,7 +164,13 @@ const same = (a: readonly string[], b: readonly string[]) =>
     '[attr.data-narrow]': "narrow() ? '' : null",
   },
   template: `
-    <div data-part="control" role="grid" [attr.aria-label]="gridLabel()">
+    <span hidden [id]="chosenId()">{{ gridLabel() }}</span>
+    <div
+      data-part="control"
+      role="grid"
+      [attr.aria-label]="gridName().label"
+      [attr.aria-labelledby]="gridName().labelledBy"
+    >
       <div data-part="chips" role="row" #row>
         @for (chip of value(); track chip; let index = $index) {
           @if (editingValue() === chip) {
@@ -620,6 +626,20 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
   );
 
   readonly gridLabel = computed(() => this.t('chosen', { count: this.value().length }));
+  readonly chosenId = computed(() => `${this.controlId()}-chosen`);
+  /**
+   * The contract's wiring: the grid carries the field's label and the count of
+   * chips. A label written as text is joined to the count; a field's label is
+   * read through `aria-labelledby` with the count beside it.
+   */
+  readonly gridName = computed((): { label: string | null; labelledBy: string | null } => {
+    const written = this.ariaLabel();
+    if (written !== undefined)
+      return { label: `${written}, ${this.gridLabel()}`, labelledBy: null };
+    const field = this.field?.ids().label;
+    if (field !== undefined) return { label: null, labelledBy: `${field} ${this.chosenId()}` };
+    return { label: this.gridLabel(), labelledBy: null };
+  });
 
   readonly counterText = computed(() => {
     const limit = this.resolvedMax();

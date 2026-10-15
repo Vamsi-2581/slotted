@@ -358,13 +358,25 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
     ...(multiSelect.narrow ? { 'data-narrow': '' } : {}),
   };
 
+  /* The contract's wiring: the grid carries the field's label and the count
+     of chips. A label written by id is read through `aria-labelledby` with the
+     count beside it; a label written as text is joined to the count. */
+  const chosen = multiSelect.t('chosen', { count: multiSelect.value.length });
+  const chosenId = `${nativeProps.id ?? field?.ids.control ?? multiSelect.inputId}-chosen`;
+  const labelledBy = nativeProps['aria-labelledby'] ?? field?.ids.label;
+  const gridName =
+    nativeProps['aria-label'] !== undefined
+      ? { 'aria-label': `${nativeProps['aria-label']}, ${chosen}` }
+      : labelledBy !== undefined
+        ? { 'aria-labelledby': `${labelledBy} ${chosenId}` }
+        : { 'aria-label': chosen };
+
   const inner = (
     <>
-      <div
-        aria-label={multiSelect.t('chosen', { count: multiSelect.value.length })}
-        data-part="control"
-        role="grid"
-      >
+      <span hidden id={chosenId}>
+        {chosen}
+      </span>
+      <div {...gridName} data-part="control" role="grid">
         <ChipRow>
           <span data-part="field" role="gridcell">
             <input

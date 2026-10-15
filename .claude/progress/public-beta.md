@@ -14,11 +14,16 @@
 - CI do PR (run 38740088079): sucesso, 15m51s. CI de `main` (run 38742374500): sucesso.
 - Local, árvore completa antes dos commits: `pnpm check:full` exit 0, 12/12 tarefas.
 
+## Publicação
+
+- 2026-10-15, a partir de `main` em `5a6940ef` (pacotes idênticos a `8e5a3c27`), pelo terminal do usuário (OTP): `@slotted/{styles,theme,core,themes,angular,react}@0.1.0-beta.0`, dist-tags `beta` e `latest` em `0.1.0-beta.0`, peers `@slotted/*` fixadas em `0.1.0-beta.0`. O registry criou `0.0.0-stage` na primeira publicação de cada pacote; a versão real ficou visível até 2 minutos depois.
+- Documentação alinhada em `67f597db` (README, AGENTS, CONTRIBUTING › Publishing to npm, docs/README, build-schedule, build-briefing).
+
 ## Problemas conhecidos
 
-- Publicação recusada: `[E404] 404 Not Found - PUT https://registry.npmjs.org/@slotted%2fstyles`. Nenhum pacote publicado (`npm view @slotted/<pacote>` → E404 nos seis). `npm whoami` → `dreco`; `npm org ls slotted` → `dreco - owner`. Um 404 no PUT de um pacote novo com autenticação válida é a resposta do npm a um token sem escrita no escopo.
 - Runner `ubuntu-latest` migra para Ubuntu 26 a partir de 2026-10-19.
+- `docs/history/build-log.md` termina em 2026-09-11; as sessões seguintes registaram em `.claude/progress/`.
 
 ## Próxima ação
 
-Depois de um token com escrita em todos os pacotes do escopo `@slotted`: `cd /home/dreco/dev/slotted && pnpm -r --filter './packages/*' publish --tag beta --access public`, e conferir com `npm view @slotted/react dist-tags`.
+Passo 4 do plano: páginas de docs das famílias que a Nexora usa, com a skill `docs-page`.

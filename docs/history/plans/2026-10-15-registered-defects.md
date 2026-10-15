@@ -48,8 +48,29 @@ defeito com o teste que o reproduz antes da correção.
 - tabs e data-grid num telemóvel: rótulos curtos e controlos do cabeçalho filtrado
   (`demos/nexora` 68, 72).
 
-## Fatias
+## Resultado (2026-10-15)
 
-- Fatia 1 (concluída 2026-10-15): itens 1 e 2; `apps/docs/LIBRARY-FEEDBACK.md` marca os oito já corrigidos e o item 2, e ganha a linha do item 1.
-- Fatia 2: itens 3, 4 e 5.
-- Fatia 3: itens 6, 7 e 8; item 9.
+| Item | Estado |
+| ---- | ------ |
+| 1 data-grid (Angular) tabindex | corrigido, `6e2d3b08` |
+| 2 event-calendar `now` | corrigido, `98bfd5a9` |
+| 3 combobox `scrollIntoView` e `[hidden]` | corrigido, `c7f5b79f`; `revealWithin` em `@slotted/core/collection` |
+| 4 calendar (React) `focusedDate` | já corrigido e testado |
+| 5 date-picker (React) `reset()` | já corrigido e testado |
+| 6 alvos de toque | `stat-card` corrigido, `9faca9dc`; `filter-bar` e `page-header` já corrigidos |
+| 7 table, identificador partido | defeito da demo: `text="nowrap"`, `9936ba65` |
+| 8 side-navigation sobre `inset` | corrigido no `app-shell`, `e4162557` |
+| 9 number-field `scrub` em rtl | corrigido, `8c20f397` |
+| menu, tipagem de `render` | corrigido, `eb7712ad` |
+| dialog (Angular), camadas empilhadas | já corrigido e testado |
+| drawer inline, nome | corrigido, `cb9d5b0f`; contrato `wiring.aria-labelledby` |
+| drawer não modal, scrim | decidido pelo contrato (`anatomy.backdrop`, `scrimFrom`) |
+| multi-select, nome do grid | corrigido, `6dc1b417` |
+
+## Abertos, que não são defeitos
+
+- tabs num telemóvel: a faixa rola com um chevron, a resposta da família; rótulos curtos são
+  conteúdo do consumidor (`demos/nexora` 72).
+- data-grid num ponteiro grosso: dois controlos visíveis no cabeçalho filtrado estreitam o nome
+  (`demos/nexora` 68); pede uma decisão de desenho.
+- data-grid na página de referência (`apps/docs` 14): documentação, pausada pelo utilizador.

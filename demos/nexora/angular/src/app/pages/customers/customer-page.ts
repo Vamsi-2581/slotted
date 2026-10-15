@@ -608,7 +608,7 @@ type View = 'overview' | 'contacts' | 'orders' | 'invoices' | 'tickets' | 'notes
                       <tbody slTableBody>
                         @for (o of detail()!.recentOrders; track o.id) {
                           <tr slTableRow>
-                            <th slTableRowHeader>
+                            <th slTableRowHeader text="nowrap">
                               <a slLink variant="neutral" [routerLink]="'/sales/orders/' + o.id">{{
                                 o.orderNumber
                               }}</a>
@@ -670,7 +670,7 @@ type View = 'overview' | 'contacts' | 'orders' | 'invoices' | 'tickets' | 'notes
                       <tbody slTableBody>
                         @for (i of detail()!.openInvoices; track i.id) {
                           <tr slTableRow>
-                            <th slTableRowHeader>
+                            <th slTableRowHeader text="nowrap">
                               <a
                                 slLink
                                 variant="neutral"
@@ -745,7 +745,7 @@ type View = 'overview' | 'contacts' | 'orders' | 'invoices' | 'tickets' | 'notes
                       <tbody slTableBody>
                         @for (t of detail()!.openTickets; track t.id) {
                           <tr slTableRow>
-                            <th slTableRowHeader>
+                            <th slTableRowHeader text="nowrap">
                               @if (session.can('support.view')) {
                                 <a slLink variant="neutral" [routerLink]="[inboxRoute, t.id]">{{
                                   t.ticketNumber

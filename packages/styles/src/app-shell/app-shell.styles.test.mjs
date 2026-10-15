@@ -667,3 +667,21 @@ test('keeps the frame of the wait on the box of the content in every arrangement
   assert.match(frame, /overflow: clip/);
   assert.doesNotMatch(frame, /background|border:|box-shadow/);
 });
+
+/**
+ * Under `canvas="inset"` the navigation stands on the sunken frame, and the
+ * secondary tone's hover is 0.011 lighter than it in the light scheme: a
+ * side-navigation row's hover was the frame itself. The tokens are recomputed
+ * from the ground the navigation stands on, as the tone separation does.
+ */
+test('recalibrates the hover of controls on an inset navigation', () => {
+  const inset = rule("[data-canvas='inset'] > [data-part='nav'] {").body;
+  assert.match(
+    inset,
+    /--slotted-tone-secondary-subtle-hover:\s*color-mix\(\s*in oklab,\s*var\(--slotted-app-shell-nav-surface, var\(--_frame\)\),\s*var\(--slotted-text\) 4%/,
+  );
+  assert.match(
+    inset,
+    /--slotted-tone-secondary-subtle-active:\s*color-mix\(\s*in oklab,\s*var\(--slotted-app-shell-nav-surface, var\(--_frame\)\),\s*var\(--slotted-text\) 7%/,
+  );
+});

@@ -787,6 +787,20 @@
    * content card begins, and nothing to its left.
    */
   [data-ui='app-shell'][data-canvas='inset'] > [data-part='nav'] {
+    /* The navigation stands on the sunken frame, which the secondary tone's
+       hover is 0.011 lighter than in the light scheme: a row's hover was the
+       frame itself. Both steps are recomputed from the ground it stands on. */
+    --slotted-tone-secondary-subtle-hover: color-mix(
+      in oklab,
+      var(--slotted-app-shell-nav-surface, var(--_frame)),
+      var(--slotted-text) 4%
+    );
+    --slotted-tone-secondary-subtle-active: color-mix(
+      in oklab,
+      var(--slotted-app-shell-nav-surface, var(--_frame)),
+      var(--slotted-text) 7%
+    );
+
     /* Invisible on the transparent default; a product that paints the column
        gets a region with the plane's corners rather than a square block. */
     border-radius: var(--_radius);

@@ -305,3 +305,22 @@ test('exercises every axis value, the loading state and both statuses', () => {
   assert.ok(fragment.includes('data-loading=""'));
   assert.ok(fragment.includes('data-ui="skeleton" data-part="region"'), 'one region per card');
 });
+
+/**
+ * On a finger the card's one control is a full target among controls grown to
+ * 44 pixels: the link or button in `action` gets a transparent halo that
+ * reaches the comfortable size, and the header keeps its height (Nexora's
+ * phone overview measured the link at 21 pixels).
+ */
+test('gives the action a comfortable target on a coarse pointer', () => {
+  const coarse = rules.filter(
+    (entry) =>
+      entry.scope.includes('pointer:coarse') &&
+      entry.selector.startsWith(ui) &&
+      entry.selector.includes("[data-part='action']") &&
+      entry.selector.includes('::before'),
+  );
+  assert.equal(coarse.length, 1, 'no halo on the action under a coarse pointer');
+  assert.match(coarse[0].body, /--slotted-target-comfortable/);
+  assert.match(coarse[0].body, /position:absolute/);
+});

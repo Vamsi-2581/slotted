@@ -383,6 +383,24 @@
     margin-inline-start: auto;
   }
 
+  /* On a finger the card's one control is a full target among 44-pixel
+     controls: a transparent `::before` centred on the link or button — the
+     part itself when `render` made it one — reaches
+     the comfortable size in both axes, and the header keeps its height. */
+  @media (pointer: coarse) {
+    [data-ui='stat-card']
+      :is([data-part='action']:is(a, button), [data-part='action'] > :is(a, button)) {
+      position: relative;
+    }
+
+    [data-ui='stat-card']
+      :is([data-part='action']:is(a, button), [data-part='action'] > :is(a, button))::before {
+      content: '';
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+      position: absolute;
+    }
+  }
+
   /* ── Figure: the value, its unit, the delta ───────────────────────────── */
 
   /**

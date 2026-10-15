@@ -273,6 +273,13 @@
     opacity: 0;
   }
 
+  /* While the plot waits, fails or has no data the toolbar keeps its width —
+     the title and the description wrap where they will wrap once it is ready —
+     and draws nothing: an action nobody can press yet is absent. */
+  [data-ui='chart'] > [data-part='header'] > [data-part='toolbar'][data-waiting] {
+    visibility: hidden;
+  }
+
   /* A chart has no disabled state; the guard is the precedence rule every
      hover in the library states (`packages/styles/src/states.test.mjs`). */
   [data-ui='chart'][data-toolbar='hover']:is(:hover, :focus-within):not([data-disabled])

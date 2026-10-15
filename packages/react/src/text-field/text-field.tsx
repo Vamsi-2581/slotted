@@ -9,6 +9,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ChangeEvent, FocusEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 import { useField } from '../field';
+import { countsInField } from '../field/field-context';
 import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useTextFieldDefaults } from './text-field-defaults';
@@ -362,3 +363,12 @@ export function TextFieldAction({ render, type = 'button', ...nativeProps }: Tex
   const props: TextFieldActionRootProps = { ...nativeProps, 'data-part': 'action', type };
   return render === undefined ? <button {...props} /> : render(props);
 }
+
+/** The count `TextField` publishes, as the field reads it before the effect runs. */
+countsInField(
+  TextField,
+  ({ countMax, defaultValue, maxLength, showCount, value }: TextFieldProps) =>
+    showCount === true
+      ? { length: (value ?? defaultValue ?? '').length, max: countMax ?? maxLength ?? undefined }
+      : undefined,
+);

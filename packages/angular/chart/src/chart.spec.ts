@@ -257,13 +257,17 @@ describe('SlChart', () => {
     expect(host.zoom()).toEqual({ start: 0, end: 1 });
   });
 
-  it('stands a skeleton in the plot while it waits, with no toolbar', async () => {
+  it('stands a skeleton in the plot while it waits, and holds the toolbar’s box out of reach', async () => {
     const { root, part } = await mount((h) => h.loading.set(true));
 
     expect(root.hasAttribute('data-loading')).toBe(true);
     expect(part('plot')?.getAttribute('aria-busy')).toBe('true');
     expect(part('skeleton')?.getAttribute('data-kind')).toBe('bar');
-    expect(part('toolbar')).toBeNull();
+    // The header keeps the width its words wrap in; nothing in the box can be reached.
+    expect(part('toolbar')?.hasAttribute('data-waiting')).toBe(true);
+    expect(part('toolbar')?.hasAttribute('inert')).toBe(true);
+    expect(part('toolbar')?.getAttribute('aria-hidden')).toBe('true');
+    expect(part('toolbar')?.getAttribute('role')).toBeNull();
   });
 
   it('fails with a retry the consumer handles', async () => {

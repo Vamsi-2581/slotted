@@ -1,6 +1,5 @@
 import { isClipped } from '@slotted/core/overflow';
 import { createControllable } from '@slotted/core/state';
-import type { ChangeRequest } from '@slotted/core/state';
 import {
   booleanAttribute,
   computed,
@@ -12,6 +11,7 @@ import {
   model,
   numberAttribute,
   output,
+  type OnInit,
   signal,
   untracked,
 } from '@angular/core';
@@ -19,6 +19,7 @@ import {
 import { injectTooltipDefaults, SlTooltipGroup, SlTooltipIdFactory } from './tooltip-defaults';
 import type {
   TooltipAlign,
+  TooltipChangeRequest,
   TooltipDescribes,
   TooltipMount,
   TooltipOpenOn,
@@ -31,6 +32,7 @@ import type {
 
 export type {
   TooltipAlign,
+  TooltipChangeRequest,
   TooltipDefaults,
   TooltipDescribes,
   TooltipMount,
@@ -68,9 +70,11 @@ const optionalNumber = (value: number | string | undefined) =>
   standalone: true,
   exportAs: 'slTooltip',
 })
-export class SlTooltip {
+export class SlTooltip implements OnInit {
   /** Whether the hint is showing. Two-way, so a template may bind it directly. */
   readonly open = model<boolean>(false);
+  /** The state an uncontrolled tooltip starts in, read once in `ngOnInit`. */
+  readonly defaultOpen = input(false, { transform: booleanAttribute });
   /** The tooltip never opens. The trigger's own `disabled` is the consumer's. */
   readonly disabled = input(false, { transform: booleanAttribute });
   /**
@@ -137,7 +141,7 @@ export class SlTooltip {
   });
 
   /** One output for one transition, carrying the reason and the event. */
-  readonly openChangeRequest = output<ChangeRequest<boolean>>();
+  readonly openChangeRequest = output<TooltipChangeRequest>();
 
   private readonly defaults = injectTooltipDefaults();
   private readonly group = inject(SlTooltipGroup);
@@ -208,6 +212,14 @@ export class SlTooltip {
         if (this.open()) this.open.set(false);
       });
     });
+  }
+
+  /**
+   * Read here rather than in the constructor, because inputs are not set yet
+   * there, and once: a later change to it is not new state.
+   */
+  ngOnInit() {
+    if (this.defaultOpen() && !this.open()) this.open.set(true);
   }
 
   cancelPending() {

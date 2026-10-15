@@ -35,8 +35,17 @@ resolvedToolbar() !== 'none') {
     }
   </div>
   <div data-part="actions"><ng-content select="[slChartActions]" /></div>
-  @if (resolvedToolbar() !== 'none' && usable() && current) {
-  <div data-part="toolbar" role="toolbar" [attr.aria-label]="t('toolbar')">
+  <!-- The box stands in every state, so the header's words wrap at one width; it
+       holds nothing a reader can reach until the plot has something to act on. -->
+  @if (resolvedToolbar() !== 'none') { @let ready = usable();
+  <div
+    data-part="toolbar"
+    [attr.role]="ready ? 'toolbar' : null"
+    [attr.aria-label]="ready ? t('toolbar') : null"
+    [attr.aria-hidden]="ready ? null : 'true'"
+    [attr.inert]="ready ? null : ''"
+    [attr.data-waiting]="ready ? null : ''"
+  >
     @if (zoomed()) {
     <button
       type="button"

@@ -95,7 +95,7 @@ export const REACT_SPLITTER_DOCS = {
       'number',
       '0.5',
       'Splitter',
-      'Where an uncontrolled bar starts, and where a double click returns it',
+      'Where an uncontrolled bar starts, and where a double click and reset() return it, brought inside min and max',
     ],
     [
       'min',
@@ -255,8 +255,8 @@ export const REACT_SPLITTER_DOCS = {
     },
     {
       id: 'reset',
-      title: 'Double click puts it back where it started',
-      note: 'Move the bar anywhere, then double click it. The pattern assigns double click nothing, and every surveyed implementation that ships a reset puts it there; the same action is on the handle as reset().',
+      title: 'Double click puts it back at defaultValue',
+      note: 'Move the bar anywhere, then double click it: it returns to defaultValue, inside min and max. The pattern assigns double click nothing, and every surveyed implementation that ships a reset puts it there; the same action is on the handle as reset().',
       snippet: defineSnippet({
         id: 'splitter-react-reset',
         language: 'tsx',

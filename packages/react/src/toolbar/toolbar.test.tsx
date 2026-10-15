@@ -50,6 +50,30 @@ describe('Toolbar', () => {
     expect(screen.getByRole('separator')).toBeInTheDocument();
   });
 
+  /**
+   * The contract writes `aria-orientation` on a separator always, and
+   * perpendicular to the bar: the rule of a horizontal bar stands upright.
+   */
+  it('states the axis of a separator, perpendicular to the bar', () => {
+    const { rerender } = render(
+      <Toolbar aria-label="Pedido">
+        <button type="button">Copiar</button>
+        <ToolbarSeparator />
+        <button type="button">Imprimir</button>
+      </Toolbar>,
+    );
+    expect(screen.getByRole('separator')).toHaveAttribute('aria-orientation', 'vertical');
+
+    rerender(
+      <Toolbar aria-label="Pedido" orientation="vertical">
+        <button type="button">Copiar</button>
+        <ToolbarSeparator />
+        <button type="button">Imprimir</button>
+      </Toolbar>,
+    );
+    expect(screen.getByRole('separator')).toHaveAttribute('aria-orientation', 'horizontal');
+  });
+
   /** One stop for the whole bar, however many controls it holds. */
   it('holds one tab stop', () => {
     render(<Bar />);

@@ -1,7 +1,8 @@
 import { plainDate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/calendar/contract.json';
@@ -617,5 +618,43 @@ describe('the composition surface', () => {
     /* The consumer never wrote a new value back, so the reader is still on the
        ninth the next time it is read. */
     expect(roving().textContent).toBe('9');
+  });
+});
+
+describe('the page it opens on with nothing stated', () => {
+  it('starts two months on today’s month', () => {
+    const thisMonth = new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(
+      new Date(),
+    );
+    render(<Calendar locale="en-US" months={2} />);
+
+    expect(document.querySelector('[data-part="heading"]')?.textContent).toMatch(
+      new RegExp(`^${thisMonth} – `),
+    );
+  });
+});
+
+describe('a focused date the consumer owns', () => {
+  /**
+   * The page follows `focusedDate` in an effect, one render after the key, so
+   * the cell that took focus on the old page was replaced by the new one and
+   * focus fell to the document. Found by datetime-picker, which owns the
+   * focused date to answer the day its list shows.
+   */
+  it('keeps focus on the grid when a key moves it onto another month', async () => {
+    function Owned() {
+      const [focused, setFocused] = useState<PlainDate>(plainDate(2026, 9, 30));
+      return <Calendar focusedDate={focused} locale="en-US" onFocusedDateChange={setFocused} />;
+    }
+    render(<Owned />);
+    const start = document.querySelector('[data-part="day"][tabindex="0"]') as HTMLElement;
+    expect(start.textContent?.trim()).toBe('30');
+    act(() => start.focus());
+
+    fireEvent.keyDown(start, { key: 'ArrowRight' });
+
+    await waitFor(() => expect(document.activeElement?.textContent?.trim()).toBe('1'));
+    expect(document.activeElement?.getAttribute('data-part')).toBe('day');
+    expect(document.activeElement?.closest('[data-outside-month]')).toBeNull();
   });
 });

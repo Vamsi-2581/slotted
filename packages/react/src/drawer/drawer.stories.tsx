@@ -27,7 +27,7 @@ import { REACT_DRAWER_DOCS, REACT_DRAWER_TOKENS } from './drawer.docs';
 import type { DrawerHandle, DrawerProps } from './drawer.types';
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
-  bindScenes(REACT_DRAWER_DOCS.scenes, {
+  bindScenes(REACT_DRAWER_DOCS.drawer.scenes, {
     playground: Playground,
     mode: Mode,
     side: Side,
@@ -59,7 +59,7 @@ const meta = {
         description:
           'A panel that comes in from an edge, and either covers the page or stands beside it. One axis decides which, so a breakpoint can change it without taking the panel’s scroll position and focus with it; one cancellable request covers every way it closes; and the edge a reader drags is a separator a keyboard can move.',
         framework: 'React',
-        ...REACT_DRAWER_DOCS,
+        ...REACT_DRAWER_DOCS.drawer,
         tokens: REACT_DRAWER_TOKENS,
         scenes: referenceScenes,
       }),

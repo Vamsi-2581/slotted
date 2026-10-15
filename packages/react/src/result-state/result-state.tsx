@@ -1,9 +1,10 @@
 import '@slotted/styles/result-state/result-state.css';
 
-import { useCallback, useId, useMemo, useState } from 'react';
+import { isValidElement, useCallback, useId, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import { useResultStateDefaults } from './result-state-defaults';
-import { ResultStateProvider } from './result-state-parts';
+import { ResultStateProvider, ResultStateTitle } from './result-state-parts';
 import type { ResultStateProps, ResultStateRootProps } from './result-state.types';
 
 /**
@@ -37,6 +38,26 @@ import type { ResultStateProps, ResultStateRootProps } from './result-state.type
  * through the ref. The family never moves focus by itself — that would be a
  * change of context nobody asked for.
  */
+/**
+ * The identifier of the title written among the children, read from the
+ * element tree so the server HTML is already named; the title's own effect
+ * reports one a component of the page's renders. A nested state is not read.
+ */
+function readTitleId(node: ReactNode, fallback: string): string | null {
+  if (Array.isArray(node)) {
+    for (const child of node as ReactNode[]) {
+      const found = readTitleId(child, fallback);
+      if (found !== null) return found;
+    }
+    return null;
+  }
+  if (!isValidElement<{ children?: ReactNode; id?: string }>(node) || node.type === ResultState) {
+    return null;
+  }
+  if (node.type === ResultStateTitle) return node.props.id ?? fallback;
+  return readTitleId(node.props.children, fallback);
+}
+
 export function ResultState({
   align,
   children,
@@ -55,6 +76,8 @@ export function ResultState({
   const id = useId();
   const titleId = `${id}title`;
 
+  const named = labelId ?? readTitleId(children, titleId);
+
   const registerTitle = useCallback((next: string | null) => setLabelId(next), []);
 
   const context = useMemo(
@@ -63,7 +86,7 @@ export function ResultState({
   );
 
   const rootProps: ResultStateRootProps = {
-    ...(labelId === null ? {} : { 'aria-labelledby': labelId }),
+    ...(named === null ? {} : { 'aria-labelledby': named }),
     ...nativeProps,
     children: (
       <ResultStateProvider value={context}>

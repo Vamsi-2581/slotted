@@ -37,6 +37,27 @@ describe('createArrowNavigation', () => {
     handle.destroy();
   });
 
+  /**
+   * `focus()` scrolls every scroller above the item, the page included, and
+   * Chrome centres an item it has to reveal. A list that scrolls inside a
+   * layer anchored to a control takes focus its own way.
+   */
+  it('lets the caller say how an item takes focus', () => {
+    const { container, items } = mount(three);
+    const focus = vi.fn((item: HTMLElement) => item.focus({ preventScroll: true }));
+    const handle = createArrowNavigation(container, {
+      focus,
+      itemSelector: 'button',
+      orientation: () => 'vertical',
+    });
+
+    press(items[0]!, 'End');
+
+    expect(focus).toHaveBeenCalledWith(items[2]);
+    expect(document.activeElement).toBe(items[2]);
+    handle.destroy();
+  });
+
   it('moves along the axis and reports every move', () => {
     const { container, items } = mount(three);
     const onMove = vi.fn();

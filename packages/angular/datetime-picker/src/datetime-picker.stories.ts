@@ -21,8 +21,8 @@ import {
   SlDateTimePickerPresets,
 } from './datetime-picker-parts';
 import {
-  ANGULAR_DATE_TIME_PICKER_DOCS,
-  ANGULAR_DATE_TIME_PICKER_TOKENS,
+  ANGULAR_DATETIME_PICKER_DOCS,
+  ANGULAR_DATETIME_PICKER_TOKENS,
 } from './datetime-picker.docs';
 
 interface DateTimePickerStoryArgs {
@@ -61,7 +61,7 @@ const isSaturday = (date: PlainDate) =>
   new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay() === 6;
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
-  bindScenes(ANGULAR_DATE_TIME_PICKER_DOCS.dateTimePicker.scenes, {
+  bindScenes(ANGULAR_DATETIME_PICKER_DOCS.dateTimePicker.scenes, {
     playground: Playground,
     panel: Panel,
     'open-to': OpenTo,
@@ -108,8 +108,8 @@ const meta: Meta<DateTimePickerStoryArgs> = {
         description:
           'The only family in the library that holds two surfaces at once: a month and a list of times, inside one dialog, over a field that still types every segment. The decision it owes is which of the two focus opens on — and what happens to the other when the reader finishes the first. The answer is the value’s own completeness: the press that leaves it half written carries focus to the missing half, and the press that finishes it closes the panel.',
         framework: 'Angular',
-        ...ANGULAR_DATE_TIME_PICKER_DOCS.dateTimePicker,
-        tokens: ANGULAR_DATE_TIME_PICKER_TOKENS,
+        ...ANGULAR_DATETIME_PICKER_DOCS.dateTimePicker,
+        tokens: ANGULAR_DATETIME_PICKER_TOKENS,
         scenes: referenceScenes,
       }),
     },

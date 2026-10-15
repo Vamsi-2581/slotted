@@ -25,8 +25,6 @@ import { SlMenuItem } from './menu-items';
     '[attr.aria-controls]': 'menu().isOpen() ? menu().contentId : null',
     '[attr.id]': 'menu().triggerId',
     '[attr.type]': 'isButton ? "button" : null',
-    '[attr.role]': 'role',
-    '[attr.data-part]': 'part',
     '[attr.data-open]': 'menu().isOpen() ? "" : null',
     '[attr.data-disabled]': 'menu().resolvedDisabled() ? "" : null',
     '[attr.aria-disabled]': 'menu().resolvedDisabled() ? true : null',
@@ -49,16 +47,6 @@ export class SlMenuTrigger {
   protected readonly isButton = this.element.tagName === 'BUTTON';
   protected readonly onBar = this.parent === null && this.bar !== null;
 
-  /**
-   * Two directives on one element write host attributes into the same slot, and
-   * the last one wins: a binding of `null` here erased the `data-part` and the
-   * `role` the item component had already written, so a submenu's trigger
-   * stopped being an item of the surface above it. Both are stated once, for
-   * all three places the trigger can sit.
-   */
-  protected readonly part = this.onBar ? 'trigger' : this.item !== null ? 'item' : null;
-  protected readonly role = this.onBar || this.item !== null ? 'menuitem' : null;
-
   private timer: ReturnType<typeof setTimeout> | undefined;
   private intent: PointerIntentHandle | null = null;
 
@@ -67,6 +55,18 @@ export class SlMenuTrigger {
   constructor() {
     const destroyRef = inject(DestroyRef);
     this.item?.opensSubmenu.set(true);
+    /* The trigger binds no `data-part` and no `role`. Two directives binding one
+       attribute on one element race, and the order they run in is the
+       compiler's: a `null` erased the part `slMenuItem` writes on a submenu's
+       trigger, and the attribute's first value overwrote the `menu-trigger` part
+       the split button binds. On a plain control both stay the control's own, so
+       `slButton` stays the root of its family; on a submenu's item they are
+       `slMenuItem`'s; only a bar's trigger takes them from here, written once
+       because a bar's trigger is the bar's own element. */
+    if (this.onBar) {
+      this.element.setAttribute('data-part', 'trigger');
+      this.element.setAttribute('role', 'menuitem');
+    }
 
     /* The menu is told which control anchors it, and a bar is told which
        trigger answers to which menu, both as soon as the input resolves. */

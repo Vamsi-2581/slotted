@@ -20,6 +20,7 @@ export type {
   DrawerDefaultsProviderProps,
   DrawerDescriptionProps,
   DrawerDismissPolicy,
+  DrawerDrag,
   DrawerExtentReason,
   DrawerExtentRequest,
   DrawerFinalFocus,

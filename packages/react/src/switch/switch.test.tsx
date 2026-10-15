@@ -150,6 +150,29 @@ describe('Switch', () => {
     await waitFor(() => expect(control()).toBeChecked());
   });
 
+  /**
+   * A press by a person is a trusted event: the browser drains the microtasks
+   * queued by the click's listeners before it reverts the cancelled
+   * activation. The revert therefore lands after React has committed the
+   * consumer's answer, and the element must be put back after it.
+   */
+  it('keeps the consumer’s answer after the platform reverts a cancelled press', async () => {
+    function Controlled() {
+      const [on, setOn] = useState(false);
+      return <Switch checked={on} onCheckedChange={(next) => setOn(next)} />;
+    }
+    render(<Controlled />);
+
+    fireEvent.click(control(), { detail: 1 });
+    await Promise.resolve();
+    await Promise.resolve();
+    // The cancelled-activation revert of a trusted click, which jsdom does not perform.
+    (control() as HTMLInputElement).checked = false;
+
+    expect(root()).toHaveAttribute('data-checked', '');
+    await waitFor(() => expect(control()).toBeChecked());
+  });
+
   it('commits nothing when the request is cancelled', async () => {
     render(<Switch onCheckedChange={(_next, request) => request.cancel()} />);
 

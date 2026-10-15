@@ -1,10 +1,21 @@
 import '@slotted/styles/field-group/field-group.css';
 
 import { fieldMessages } from '@slotted/core/i18n';
-import { createContext, useCallback, useContext, useId, useMemo, useState } from 'react';
+import {
+  createContext,
+  isValidElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+} from 'react';
+import type { ReactNode } from 'react';
 
 import { FieldDefaultsProvider, useFieldDefaults } from '../field';
 import { useMessages } from '../i18n';
+import { FieldGroupDescription, FieldGroupError, hasContent } from './field-group-parts';
 import type {
   FieldGroupContextValue,
   FieldGroupIds,
@@ -26,6 +37,30 @@ export function deriveFieldGroupIds(base: string): FieldGroupIds {
     error: `${base}-error`,
     legend: `${base}-legend`,
   };
+}
+
+type FieldGroupMessageSlot = 'description' | 'error';
+
+/**
+ * The description and the error written among a group's children, read from
+ * the element tree rather than from the effects that register them. A group
+ * nested inside is not read: its messages are its own. A message a component
+ * of the page's renders is not in the tree, and arrives by registration.
+ */
+function readMessages(node: ReactNode, found: Set<FieldGroupMessageSlot>) {
+  if (Array.isArray(node)) {
+    for (const child of node as ReactNode[]) readMessages(child, found);
+    return found;
+  }
+  if (!isValidElement<{ children?: ReactNode }>(node) || node.type === FieldGroup) return found;
+  const { props, type } = node;
+  if (type === FieldGroupDescription || type === FieldGroupError) {
+    if (hasContent(props.children)) {
+      found.add(type === FieldGroupDescription ? 'description' : 'error');
+    }
+    return found;
+  }
+  return readMessages(props.children, found);
 }
 
 /**
@@ -78,8 +113,22 @@ export function FieldGroup({
     [generatedId, id],
   );
 
-  const [messages, setMessages] = useState<readonly ('description' | 'error')[]>([]);
-  const registerMessage = useCallback((slot: 'description' | 'error', present: boolean) => {
+  const [registeredMessages, setMessages] = useState<readonly FieldGroupMessageSlot[]>([]);
+  const [registered, setRegistered] = useState(false);
+
+  /**
+   * The messages register in effects, and the group's own effect runs after
+   * theirs in the same commit. Until it has — on the server, and in the render
+   * hydration compares against it — the group is described by the messages
+   * written among its children, so both renders agree; registration then
+   * takes over.
+   */
+  useEffect(() => setRegistered(true), []);
+  const messages: readonly FieldGroupMessageSlot[] = registered
+    ? registeredMessages
+    : [...readMessages(children, new Set())];
+
+  const registerMessage = useCallback((slot: FieldGroupMessageSlot, present: boolean) => {
     setMessages((current) => {
       if (present === current.includes(slot)) return current;
       return present ? [...current, slot] : current.filter((candidate) => candidate !== slot);
@@ -107,6 +156,7 @@ export function FieldGroup({
      * a whole set read as the help under the control above it.
      */
     messageSize: resolvedSize === 'sm' ? 'sm' : 'md',
+    invalid,
     necessity: resolvedNecessity,
     registerMessage,
     required,

@@ -206,6 +206,21 @@ describe('readStickyTop', () => {
     scroller.style.setProperty('--slotted-page-sticky-top', '96px');
     expect(readStickyTop(scroller, document)).toBe(96);
   });
+
+  /* The spy reads the line on every scrolled frame. A computed style there
+     forced a style recalc of the whole document each frame — 54ms on the docs'
+     data-grid page, with a loading example's 72 skeleton loops in it — for a
+     value `page` writes inline. */
+  it('reads the inline value page writes, without computing a style', () => {
+    const scroller = document.createElement('div');
+    document.body.append(scroller);
+    scroller.style.setProperty('--slotted-page-sticky-top', '64px');
+    const computed = vi.spyOn(window, 'getComputedStyle');
+    expect(readStickyTop(scroller, document)).toBe(64);
+    expect(readStickyTop(null, document)).toBe(0);
+    expect(computed).not.toHaveBeenCalled();
+    computed.mockRestore();
+  });
 });
 
 describe('landingLine', () => {

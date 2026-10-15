@@ -14,6 +14,7 @@ import { Glyph, Icon } from '../icon';
 import { Skeleton } from '../skeleton';
 import { Tooltip } from '../tooltip';
 import { TooltipContent, TooltipLayer, TooltipTrigger } from '../tooltip/tooltip-parts';
+import { VisuallyHidden } from '../visually-hidden';
 import { useTable } from './table';
 import type {
   TableBodyProps,
@@ -355,7 +356,9 @@ export function TableColumnActions({ ref, ...props }: TableColumnActionsProps) {
 /**
  * A row's own checkbox, in the cell the family lays out. The control is
  * `checkbox`'s: the cell is this family's and the chooser is not, which is the
- * division `list-item` recorded.
+ * division `list-item` recorded. Its name is the checkbox's own label, visually
+ * hidden — the label `checkbox` associates with its control and `data-grid`
+ * writes for its own chooser.
  *
  * `Shift` while pressing selects every row from the anchor to this one, by
  * pointer and with `Space` alike — the gesture a file list, a mail client and
@@ -385,7 +388,6 @@ export function TableSelect({
       ref={ref}
     >
       <Checkbox
-        aria-label={table.t('selectRow', { row: key ?? '' }).trim()}
         checked={key !== undefined && table.isSelected(key)}
         disabled={row.disabled}
         onCheckedChange={(_checked, request) => {
@@ -393,7 +395,9 @@ export function TableSelect({
           const source = request.source as { shiftKey?: boolean } | undefined;
           table.toggleSelected(key, { range: source?.shiftKey === true, source: request.source });
         }}
-      />
+      >
+        <VisuallyHidden>{table.t('selectRow', { row: key ?? '' }).trim()}</VisuallyHidden>
+      </Checkbox>
     </td>
   );
 }
@@ -427,11 +431,12 @@ export function TableSelectAll({
       scope="col"
     >
       <Checkbox
-        aria-label={table.t('selectAll', { count: selected })}
         checked={selected > 0 && selected === table.rows().length}
         indeterminate={selected > 0 && selected < table.rows().length}
         onCheckedChange={(_checked, request) => table.toggleSelectAll(request.source)}
-      />
+      >
+        <VisuallyHidden>{table.t('selectAll', { count: selected })}</VisuallyHidden>
+      </Checkbox>
     </th>
   );
 }
@@ -455,7 +460,8 @@ export function TableExpander({ onClick, ref, value, ...nativeProps }: TableExpa
   return (
     <button
       {...nativeProps}
-      aria-controls={row.detailId}
+      /* The detail row exists only while open, and aria-controls names only what exists. */
+      aria-controls={open ? row.detailId : undefined}
       aria-expanded={open}
       aria-label={nativeProps['aria-label'] ?? (open ? table.t('collapse') : table.t('expand'))}
       /* The chevron is drawn unless the consumer wrote content of their own. */

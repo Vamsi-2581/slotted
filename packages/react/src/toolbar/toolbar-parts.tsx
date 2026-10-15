@@ -110,8 +110,10 @@ export function ToolbarGroup({
  * which is perpendicular to the one the controls run along.
  */
 export function ToolbarSeparator({ ref, render, ...nativeProps }: ToolbarSeparatorProps) {
+  const { orientation } = useToolbarOverflow();
   const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string; role: 'separator' } = {
     ...nativeProps,
+    'aria-orientation': orientation === 'vertical' ? 'horizontal' : 'vertical',
     'data-part': 'separator',
     role: 'separator',
   };

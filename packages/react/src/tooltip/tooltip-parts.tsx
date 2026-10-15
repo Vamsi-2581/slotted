@@ -123,7 +123,7 @@ export function TooltipTrigger({ children, ref, render, ...nativeProps }: Toolti
     ...nativeProps,
     children,
     ...(names && described ? { 'aria-describedby': tooltip.contentId } : {}),
-    ...(names && !described ? { 'aria-labelledby': tooltip.contentId } : {}),
+    'aria-labelledby': names && !described ? tooltip.contentId : nativeProps['aria-labelledby'],
     ...(tooltip.open ? { 'data-open': '' } : {}),
     onBlur: compose(nativeProps.onBlur, onBlur),
     onClick: compose(nativeProps.onClick, onClick),

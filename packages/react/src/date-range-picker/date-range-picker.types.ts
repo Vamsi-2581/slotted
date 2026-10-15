@@ -102,8 +102,9 @@ export interface DateRangePickerProps extends Omit<
   isDateUnavailable?: ((date: PlainDate) => boolean) | undefined;
   /**
    * Whether a run may cross an unavailable day. On, and with a start chosen,
-   * the days beyond the first unavailable one are unavailable too; off, the
-   * run may jump over it. A typed run that crosses one is invalid either way.
+   * the days beyond the first unavailable one are unavailable too, and a typed
+   * run that crosses one is invalid; off, the run may jump over it and only
+   * its two ends are checked.
    */
   contiguous?: boolean | undefined;
   /** The shortest and longest run allowed, in the unit `count` names. */

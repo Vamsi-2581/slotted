@@ -88,6 +88,33 @@ type Entry = 'selected' | 'first' | 'last' | 'none';
    which is the selector `combobox` already writes for the same reason. */
 const OPTION_SELECTOR = "[data-part='item']:not([hidden])";
 
+/**
+ * Brings an option into view without moving the page: the nearest scrolling
+ * box between the option and the popup surface is scrolled, by the least
+ * distance that shows the whole row, and nothing past it. `scrollIntoView`
+ * would scroll every ancestor too, and on the first open it runs before the
+ * popup is positioned — a select far down a page sent the page to its top.
+ */
+function revealWithin(option: HTMLElement, surface: HTMLElement) {
+  let box: HTMLElement = surface;
+  for (
+    let node = option.parentElement;
+    node !== null && node !== surface;
+    node = node.parentElement
+  ) {
+    const overflow = getComputedStyle(node).overflowY;
+    if (overflow === 'auto' || overflow === 'scroll') {
+      box = node;
+      break;
+    }
+  }
+  const row = option.getBoundingClientRect();
+  const top = box.getBoundingClientRect().top + box.clientTop;
+  const bottom = top + box.clientHeight;
+  if (row.top < top) box.scrollTop -= top - row.top;
+  else if (row.bottom > bottom) box.scrollTop += Math.min(row.bottom - bottom, row.top - top);
+}
+
 const isGroup = (entry: SelectItems[number]): entry is SelectOptionGroup => 'options' in entry;
 
 const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
@@ -127,6 +154,10 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
   host: {
     'data-ui': 'select',
     'data-part': 'root',
+    /* The name a page writes on the element is forwarded to the control, and
+       the root keeps none: ARIA 1.2 does not name a generic element. */
+    '[attr.aria-label]': 'null',
+    '[attr.aria-labelledby]': 'null',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-full-width]': "resolvedFullWidth() ? '' : null",
@@ -258,7 +289,7 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
         "
       >
         <option value=""></option>
-        @for (held of selection(); track held) {
+        @for (held of selection(); track $index) {
           <option [value]="held" selected>{{ labelFor(held) ?? held }}</option>
         }
       </select>
@@ -503,7 +534,8 @@ export class SlSelect implements ControlValueAccessor, Validator {
    */
   readonly listId = `sl-select-list-${this.identifier}`;
   readonly searchId = `sl-select-search-${this.identifier}`;
-  readonly triggerId = `sl-select-trigger-${this.identifier}`;
+  /** The field's control identifier inside a field, so its label's `for` reaches the trigger. */
+  readonly triggerId = this.field?.ids().control ?? `sl-select-trigger-${this.identifier}`;
 
   private readonly registry = signal(new Map<SelectOptionValue, string>());
   private readonly optionCount = signal(0);
@@ -697,10 +729,19 @@ export class SlSelect implements ControlValueAccessor, Validator {
       untracked(() => {
         this.collapse?.destroy();
         this.collapse = null;
+        this.widthGate?.destroy();
+        this.widthGate = null;
+        this.narrow.set(false);
         if (row === null) {
           this.collapsedCount.set(0);
           return;
         }
+        /* The swap is the chips' alone (contract `chips.narrowWidth`): a
+           control drawing none has nothing to give way. */
+        this.widthGate = createWidthGate(host.nativeElement as HTMLElement, {
+          at: NARROW_WIDTH,
+          onChange: (narrow) => this.narrow.set(narrow),
+        });
         this.collapse = createCollapse(row, {
           collapsible: () => true,
           onChange: (units) => this.collapsedCount.set(units.length),
@@ -714,11 +755,6 @@ export class SlSelect implements ControlValueAccessor, Validator {
     effect(() => {
       this.selection();
       untracked(() => this.collapse?.refresh());
-    });
-
-    this.widthGate = createWidthGate(host.nativeElement as HTMLElement, {
-      at: NARROW_WIDTH,
-      onChange: (narrow) => this.narrow.set(narrow),
     });
 
     effect(() => {
@@ -785,9 +821,19 @@ export class SlSelect implements ControlValueAccessor, Validator {
     this.triggerRef().nativeElement.focus({ preventScroll: true });
   }
 
+  /**
+   * Whether a click landed on the control's frame. A click a `label` elsewhere
+   * forwards to the button carries the label's coordinates, which lie outside it.
+   */
+  private pressedOnFrame(x: number, y: number): boolean {
+    const button = this.triggerRef().nativeElement;
+    const box = (button.parentElement ?? button).getBoundingClientRect();
+    return x >= box.left && x <= box.right && y >= box.top && y <= box.bottom;
+  }
+
   scrollToKey(value: SelectOptionValue) {
     const option = this.options().find((candidate) => candidate.dataset['value'] === value);
-    if (typeof option?.scrollIntoView === 'function') option.scrollIntoView({ block: 'nearest' });
+    if (option !== undefined && this.surfaceNode !== null) revealWithin(option, this.surfaceNode);
   }
 
   /** Asks to open or close, and reports the reason before anything moves. */
@@ -885,6 +931,15 @@ export class SlSelect implements ControlValueAccessor, Validator {
   }
 
   protected onTriggerClick(event: MouseEvent) {
+    /* A press on the field's label arrives here as the click the label
+       forwards: a pointer click at the label's coordinates, outside the frame.
+       It focuses the control and does not open the list — the select-only
+       example's label only focuses, and so does a native select's. A keyboard
+       or assistive-technology click carries detail 0 and opens. */
+    if (event.detail > 0 && !this.pressedOnFrame(event.clientX, event.clientY)) {
+      this.focus();
+      return;
+    }
     if (this.resolvedDisabled() || this.resolvedReadOnly()) return;
     this.entry = 'selected';
     this.setOpen(!this.isOpen(), 'pointer', event);
@@ -1180,7 +1235,9 @@ export class SlSelect implements ControlValueAccessor, Validator {
         strategy: this.strategy() ?? this.defaults.strategy,
       },
     );
-    void this.positioner.update();
+    /* The height that bounds the list arrives with the position, after the
+       highlight has landed, so the highlighted row is revealed again. */
+    void this.positioner.update().then(() => this.reveal(this.highlightedValue()));
   }
 
   private bind() {

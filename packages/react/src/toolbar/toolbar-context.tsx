@@ -30,12 +30,15 @@ export interface ToolbarOverflowValue {
   registerTrigger: (element: HTMLElement | null) => void;
   /** The units that gave way, in the order the bar held them. */
   collapsed: readonly ToolbarCollapsedUnit[];
+  /** The axis the controls run along, which a separator stands across. */
+  orientation: 'horizontal' | 'vertical';
 }
 
 const NOTHING: ToolbarOverflowValue = {
   collapsed: [],
   counterpart: () => null,
   declare: () => undefined,
+  orientation: 'horizontal',
   registerTrigger: () => undefined,
   release: () => undefined,
 };

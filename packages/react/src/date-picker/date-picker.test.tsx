@@ -4,6 +4,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/date-picker/contract.json';
+import { Field, FieldLabel } from '../field';
 import { SlottedProvider } from '../i18n';
 import { DatePicker, DatePickerDefaultsProvider } from './index';
 import type { DatePickerHandle } from './index';
@@ -191,6 +192,33 @@ describe('choosing a date', () => {
     fireEvent.click(dayFor(17));
     expect(surface()).toBeInTheDocument();
   });
+
+  it('returns to its default value when its form is reset', () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <form>
+        <DatePicker
+          defaultOpen
+          defaultValue={NINTH}
+          locale="pt-BR"
+          name="data"
+          onValueChange={onValueChange}
+        />
+      </form>,
+    );
+    const hidden = () => container.querySelector<HTMLInputElement>('[data-part="hidden-input"]');
+
+    fireEvent.click(dayFor(17));
+    expect(hidden()?.value).toBe(toISODate(plainDate(2026, 9, 17)));
+
+    act(() => container.querySelector('form')?.reset());
+
+    expect(hidden()?.value).toBe(toISODate(NINTH));
+    expect(onValueChange).toHaveBeenLastCalledWith(
+      NINTH,
+      expect.objectContaining({ reason: 'programmatic' }),
+    );
+  });
 });
 
 describe('the keyboard', () => {
@@ -326,5 +354,64 @@ describe('the composition surface', () => {
 
     expect(screen.getByRole('button', { name: 'Hoje' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Aplicar' })).toBeInTheDocument();
+  });
+});
+
+describe('where focus and the page go when it opens', () => {
+  it('opens on the month of a controlled value', () => {
+    render(<DatePicker defaultOpen locale="en-US" value={plainDate(2024, 3, 15)} />);
+
+    expect(document.querySelector('[data-part="heading"]')?.textContent).toContain('March 2024');
+  });
+
+  it('moves focus to the chosen day when the trigger opens it', () => {
+    render(<DatePicker defaultValue={NINTH} locale="en-US" />);
+
+    open();
+
+    expect(document.activeElement?.getAttribute('data-part')).toBe('day');
+    expect(document.activeElement?.textContent).toBe('9');
+  });
+
+  it('leaves focus alone when it is rendered open', () => {
+    render(<DatePicker defaultOpen defaultValue={NINTH} locale="en-US" />);
+
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it('keeps Tab inside the surface while it is open', () => {
+    render(
+      <DatePicker
+        defaultOpen
+        defaultValue={NINTH}
+        footer={<button type="button">Done</button>}
+        locale="en-US"
+        presets={<button type="button">Today</button>}
+      />,
+    );
+    const first = screen.getByRole('button', { name: 'Today' });
+    const last = screen.getByRole('button', { name: 'Done' });
+
+    act(() => last.focus());
+    fireEvent.keyDown(last, { key: 'Tab' });
+    expect(first).toHaveFocus();
+
+    fireEvent.keyDown(first, { key: 'Tab', shiftKey: true });
+    expect(last).toHaveFocus();
+  });
+});
+
+describe('inside a field', () => {
+  it('registers as the field’s control, so the field does not warn', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    render(
+      <Field>
+        <FieldLabel>Ship date</FieldLabel>
+        <DatePicker locale="en-US" />
+      </Field>,
+    );
+
+    expect(warn).not.toHaveBeenCalledWith(expect.stringContaining('without a control'));
+    warn.mockRestore();
   });
 });

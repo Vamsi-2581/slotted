@@ -53,7 +53,9 @@ export type { FieldIds, FieldLabelPlacement, FieldNecessity, FieldSize } from '.
  * renders itself, with the identifier, the step and the disabled state already
  * resolved. `SlInlineMessage` takes its values as `input()` signals, and nothing
  * outside the template that instantiates it can write one; a directive sharing
- * the element could only set attributes its host bindings would overwrite.
+ * the element could only set attributes its host bindings would overwrite. A
+ * message the page did not write is not drawn, which is the DOM React's
+ * `FieldDescription` and `FieldError` produce.
  */
 @Component({
   selector: '[slField]',
@@ -71,34 +73,38 @@ export type { FieldIds, FieldLabelPlacement, FieldNecessity, FieldSize } from '.
       >
     }
     <ng-content />
-    <p
-      slInlineMessage
-      [id]="ids().description"
-      [size]="messageSize()"
-      [disabled]="resolvedDisabled()"
-      [mark]="description()?.mark() ?? 'none'"
-      [tone]="description()?.tone() ?? 'secondary'"
-      [live]="description()?.live() ?? 'off'"
-      [hideIcon]="description()?.hideIcon() ?? false"
-      [reserve]="description()?.reserve() ?? false"
-      [prefix]="description()?.prefix()"
-    >
-      <ng-content select="[slFieldDescription]" />
-    </p>
-    <p
-      slInlineMessage
-      [id]="ids().error"
-      [size]="messageSize()"
-      [disabled]="resolvedDisabled()"
-      [mark]="error()?.mark() ?? 'none'"
-      [tone]="error()?.tone() ?? 'danger'"
-      [live]="error()?.live() ?? 'off'"
-      [hideIcon]="error()?.hideIcon() ?? false"
-      [reserve]="error()?.reserve() ?? false"
-      [prefix]="error()?.prefix()"
-    >
-      <ng-content select="[slFieldError]" />
-    </p>`,
+    @if (description(); as message) {
+      <p
+        slInlineMessage
+        [id]="ids().description"
+        [size]="messageSize()"
+        [disabled]="resolvedDisabled()"
+        [mark]="message.mark() ?? 'none'"
+        [tone]="message.tone() ?? 'secondary'"
+        [live]="message.live() ?? 'off'"
+        [hideIcon]="message.hideIcon() ?? false"
+        [reserve]="message.reserve() ?? false"
+        [prefix]="message.prefix()"
+      >
+        <ng-content select="[slFieldDescription]" />
+      </p>
+    }
+    @if (error(); as message) {
+      <p
+        slInlineMessage
+        [id]="ids().error"
+        [size]="messageSize()"
+        [disabled]="resolvedDisabled()"
+        [mark]="message.mark() ?? 'none'"
+        [tone]="message.tone() ?? 'danger'"
+        [live]="message.live() ?? 'off'"
+        [hideIcon]="message.hideIcon() ?? false"
+        [reserve]="message.reserve() ?? false"
+        [prefix]="message.prefix()"
+      >
+        <ng-content select="[slFieldError]" />
+      </p>
+    }`,
   styleUrl: '../../../styles/src/field/field.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -241,8 +247,8 @@ export class SlField {
   readonly describedBy = computed(() => {
     const present = {
       counter: this.writtenCounter() !== undefined || this.countState() !== undefined,
-      description: this.description() !== undefined,
-      error: this.error() !== undefined,
+      description: this.description()?.hasContent() === true,
+      error: this.error()?.hasContent() === true,
       help: this.help() !== undefined,
       indicator: this.indicator() !== undefined,
     };

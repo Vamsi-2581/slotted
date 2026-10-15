@@ -27,6 +27,7 @@
   "readOnlyAttribute": "aria-readonly",
   "wiring": {
     "id": "never",
+    "aria-labelledby": "the field's label, inside a field, unless the consumer writes aria-label or aria-labelledby",
     "aria-describedby": "merged",
     "aria-invalid": "invalid",
     "aria-required": "required",

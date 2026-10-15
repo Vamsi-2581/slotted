@@ -15,6 +15,7 @@ import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '../menu
 import { Popover, PopoverBody, PopoverContent, PopoverLayer, PopoverTrigger } from '../popover';
 import { Tooltip } from '../tooltip';
 import { TooltipContent, TooltipLayer, TooltipTrigger } from '../tooltip/tooltip-parts';
+import { VisuallyHidden } from '../visually-hidden';
 import {
   cellStyle,
   columnAttributes,
@@ -211,12 +212,13 @@ function SelectAllCell() {
     >
       {grid.selectionMode === 'multiple' ? (
         <Checkbox
-          aria-label={name}
           checked={grid.allState === 'all'}
           indeterminate={grid.allState === 'some'}
           onCheckedChange={(_checked, request) => grid.toggleAll(request.source)}
           tabIndex={current ? 0 : -1}
-        />
+        >
+          <VisuallyHidden>{name}</VisuallyHidden>
+        </Checkbox>
       ) : null}
     </div>
   );

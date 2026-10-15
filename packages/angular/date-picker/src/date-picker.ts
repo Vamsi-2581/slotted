@@ -1,6 +1,7 @@
 import { createDateFormat, isDateInRange } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { tabbables } from '@slotted/core/focus';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createPositioner } from '@slotted/core/positioner';
 import type { PositionerHandle } from '@slotted/core/positioner';
@@ -15,6 +16,7 @@ import {
   DestroyRef,
   effect,
   ElementRef,
+  forwardRef,
   inject,
   Injector,
   input,
@@ -25,6 +27,13 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import type { OnInit } from '@angular/core';
+import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type {
+  AbstractControl,
+  ControlValueAccessor,
+  ValidationErrors,
+  Validator,
+} from '@angular/forms';
 import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import {
@@ -45,6 +54,12 @@ import type {
   DatePickerSize,
   DatePickerVariant,
 } from './date-picker-defaults';
+
+/** The reasons the contract's `stateModel.open` lists, and no other. */
+type OpenReason = Extract<
+  ChangeReason,
+  'pointer' | 'keyboard' | 'escape' | 'outsidePress' | 'select'
+>;
 
 /**
  * Below this width, on a finger, the surface is a sheet rather than a popover.
@@ -84,6 +99,8 @@ let sequence = 0;
         #field="slDateField"
         [locale]="resolvedLocale()"
         [timeZone]="resolvedTimeZone()"
+        [firstDayOfWeek]="firstDayOfWeek()"
+        [yearPivot]="yearPivot()"
         [calendar]="resolvedCalendar()"
         [size]="resolvedSize()"
         [variant]="resolvedVariant()"
@@ -92,11 +109,13 @@ let sequence = 0;
         [isDateUnavailable]="isDateUnavailable()"
         [clearable]="clearable()"
         [name]="name()"
-        [disabled]="disabled()"
+        [disabled]="resolvedDisabled()"
         [readOnly]="readOnly()"
+        [invalid]="invalid()"
         [required]="required()"
         [value]="singleValue()"
         (valueChange)="onFieldValue($event)"
+        (focusout)="onControlFocusOut($event)"
       >
         <span slDateFieldEnd>
           <button
@@ -130,12 +149,14 @@ let sequence = 0;
           role="dialog"
           [attr.id]="contentId"
           [attr.aria-label]="triggerLabel()"
+          (keydown)="onContentKeyDown($event)"
         >
           <ng-content select="[slDatePickerPresets]" />
           <div
             slCalendar
             [locale]="resolvedLocale()"
             [timeZone]="resolvedTimeZone()"
+            [firstDayOfWeek]="firstDayOfWeek()"
             [min]="min()"
             [max]="max()"
             [isDateUnavailable]="isDateUnavailable()"
@@ -156,6 +177,10 @@ let sequence = 0;
   styleUrl: '../../../styles/src/date-picker/date-picker.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  providers: [
+    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SlDatePicker), multi: true },
+    { provide: NG_VALIDATORS, useExisting: forwardRef(() => SlDatePicker), multi: true },
+  ],
   host: {
     'data-ui': 'date-picker',
     'data-part': 'root',
@@ -169,7 +194,7 @@ let sequence = 0;
     '[attr.data-required]': "resolvedRequired() === true ? '' : null",
   },
 })
-export class SlDatePicker implements OnInit {
+export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
   readonly value = input<CalendarValue | undefined>(undefined);
   readonly defaultValue = input<CalendarValue | undefined>(undefined);
   /** Present means the consumer owns whether the surface is showing. */
@@ -201,6 +226,16 @@ export class SlDatePicker implements OnInit {
   /** BCP 47. Writes the field, the grid and the trigger's date. Unset, the language in force decides. */
   readonly locale = input<string | undefined>(undefined);
   readonly timeZone = input<string | undefined>(undefined);
+  /** 0 is Sunday. Unset, the locale decides. */
+  readonly firstDayOfWeek = input<number | undefined, unknown>(undefined, {
+    transform: (value) =>
+      value === undefined || value === null ? undefined : numberAttribute(value),
+  });
+  /** How a two-digit typed year resolves in the field. */
+  readonly yearPivot = input<number | undefined, unknown>(undefined, {
+    transform: (value) =>
+      value === undefined || value === null ? undefined : numberAttribute(value),
+  });
   readonly calendar = input<DatePickerCalendar | undefined>(undefined);
 
   readonly size = input<DatePickerSize | undefined>(undefined);
@@ -252,7 +287,21 @@ export class SlDatePicker implements OnInit {
   protected readonly view = signal<CalendarView>('day');
   protected readonly positioned = signal(false);
   protected readonly sheet = signal(false);
+  private readonly formDisabled = signal<boolean | undefined>(undefined);
 
+  private onChangeFn: (value: CalendarValue) => void = () => undefined;
+  /** Whether a form model holds the value, and answers a reset through `writeValue`. */
+  private formBound = false;
+  private onTouchedFn: () => void = () => undefined;
+  private onValidatorChangeFn: () => void = () => undefined;
+
+  /**
+   * Whether the next opening moves focus into the calendar. Set by a request
+   * to open — the trigger, the chord, `openSurface()` — and never by a first
+   * render that starts open, which would take focus from wherever the page put
+   * it.
+   */
+  private focusOnOpen = false;
   private positioner: PositionerHandle | null = null;
   private dismissable: DismissableLayerHandle | null = null;
 
@@ -270,7 +319,7 @@ export class SlDatePicker implements OnInit {
     () => this.placement() ?? this.defaults.placement,
   );
   protected readonly resolvedDisabled = computed(
-    () => this.disabled() ?? this.enclosing?.resolvedDisabled(),
+    () => this.disabled() ?? this.formDisabled() ?? this.enclosing?.resolvedDisabled(),
   );
   protected readonly resolvedReadOnly = computed(
     () => this.readOnly() ?? this.enclosing?.resolvedReadOnly(),
@@ -297,10 +346,14 @@ export class SlDatePicker implements OnInit {
     () => this.resolvedDisabled() !== true && this.resolvedReadOnly() !== true,
   );
 
-  /** The value the field shows, which is a single date or nothing at all. */
+  /**
+   * The value the field shows, which is a single date or nothing at all. `null`
+   * reaches the field as `null`, so a value emptied from outside — a form
+   * reset, a controlled clear — empties the segments too.
+   */
   protected readonly singleValue = computed(() => {
     const held = this.held();
-    if (held === null || Array.isArray(held) || 'start' in held) return undefined;
+    if (held !== null && (Array.isArray(held) || 'start' in held)) return undefined;
     return held;
   });
 
@@ -333,13 +386,73 @@ export class SlDatePicker implements OnInit {
       afterNextRender(() => this.attach(), { injector: this.injector });
     });
 
+    /* A bound that changed is a validity that changed, and the form is told. */
+    effect(() => {
+      this.min();
+      this.max();
+      this.isDateUnavailable();
+      this.onValidatorChangeFn();
+    });
+
     this.destroyRef.onDestroy(() => this.release());
+  }
+
+  /* ── Forms ─────────────────────────────────────────────────────────── */
+
+  writeValue(value: CalendarValue | undefined) {
+    this.ownValue.set(value ?? null);
+  }
+
+  registerOnChange(fn: (value: CalendarValue) => void) {
+    this.onChangeFn = fn;
+    this.formBound = true;
+  }
+
+  registerOnTouched(fn: () => void) {
+    this.onTouchedFn = fn;
+  }
+
+  setDisabledState(isDisabled: boolean) {
+    this.formDisabled.set(isDisabled);
+  }
+
+  registerOnValidatorChange(fn: () => void) {
+    this.onValidatorChangeFn = fn;
+  }
+
+  /**
+   * The rules no other validator can see, under the names `date-field` reports
+   * them with. `required` is left to Angular's own.
+   */
+  validate(control: AbstractControl): ValidationErrors | null {
+    const dates = asDates((control.value as CalendarValue | undefined) ?? null);
+    const min = this.min();
+    const max = this.max();
+    const outside = dates.find((date) => !isDateInRange(date, min, max));
+    if (outside !== undefined) return { slottedDateRange: { min, max, actual: outside } };
+    const refused = dates.find((date) => this.isDateUnavailable()?.(date) === true);
+    if (refused !== undefined) return { slottedDateUnavailable: { actual: refused } };
+    return null;
   }
 
   ngOnInit() {
     this.ownOpen.set(this.defaultOpen());
     this.ownValue.set(this.defaultValue() ?? null);
     this.view.set(this.defaultView() ?? 'day');
+
+    /* A native reset restores the hidden input and tells nothing, so the
+       picker would keep the last date chosen in a form that had been reset.
+       The value returns to `defaultValue` through `valueChange`, reason
+       `programmatic`. A picker bound to a form model takes the model's reset
+       value through `writeValue` instead. */
+    const form = this.element.closest('form');
+    if (form !== null) {
+      const onReset = (event: Event) => {
+        if (!this.formBound) this.commit(this.defaultValue() ?? null, 'programmatic', event);
+      };
+      form.addEventListener('reset', onReset);
+      this.destroyRef.onDestroy(() => form.removeEventListener('reset', onReset));
+    }
 
     /* `matchMedia` is absent in a server render and in some test environments,
        and the popover is the right answer wherever it cannot be asked. */
@@ -357,11 +470,11 @@ export class SlDatePicker implements OnInit {
   }
 
   openSurface(source?: Event) {
-    this.setOpen(true, 'programmatic', source);
+    this.setOpen(true, 'keyboard', source);
   }
 
   closeSurface(source?: Event) {
-    this.setOpen(false, 'programmatic', source);
+    this.setOpen(false, 'keyboard', source);
   }
 
   protected toggle(source: Event) {
@@ -377,6 +490,30 @@ export class SlDatePicker implements OnInit {
       event.preventDefault();
       this.setOpen(true, 'keyboard', event);
     }
+  }
+
+  /** Tab and Shift+Tab wrap inside the surface while it is open. */
+  protected onContentKeyDown(event: KeyboardEvent) {
+    if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) return;
+    const content = event.currentTarget as HTMLElement;
+    const items = tabbables(content);
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (first === undefined || last === undefined) return;
+    const current = content.ownerDocument.activeElement;
+    if (event.shiftKey && current === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && current === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  protected onControlFocusOut(event: FocusEvent) {
+    const next = event.relatedTarget;
+    if (next instanceof Node && this.element.contains(next)) return;
+    this.onTouchedFn();
   }
 
   protected onFieldValue(request: {
@@ -406,14 +543,19 @@ export class SlDatePicker implements OnInit {
       },
     });
     state.request(next, reason, source);
-    if (!cancelled && this.value() === undefined) this.ownValue.set(next);
+    if (cancelled) return;
+    if (this.value() === undefined) this.ownValue.set(next);
+    this.onChangeFn(next);
   }
 
-  private setOpen(next: boolean, reason: ChangeReason, source: unknown) {
+  private setOpen(next: boolean, reason: OpenReason, source: unknown) {
     const state = createControllable<boolean>({
       controlled: this.open(),
       initial: this.isOpen(),
-      onRequest: (request) => this.openChange.emit(request),
+      onRequest: (request) => {
+        this.openChange.emit(request);
+        this.focusOnOpen = request.value && !request.cancelled;
+      },
     });
     if (state.request(next, reason, source)) this.ownOpen.set(next);
   }
@@ -433,6 +575,15 @@ export class SlDatePicker implements OnInit {
       ];
       this.positioner = createPositioner(anchor, layer, { align: align ?? 'center', side });
       void this.positioner.update().then(() => this.positioned.set(true));
+    }
+
+    /* The dialog takes focus when it opens, on the day that holds the roving
+       tab stop: the chosen date, or today. */
+    if (this.focusOnOpen) {
+      this.focusOnOpen = false;
+      layer
+        .querySelector<HTMLElement>('[data-part="day"][tabindex="0"]')
+        ?.focus({ preventScroll: true });
     }
 
     const trigger = this.triggerRef?.nativeElement;

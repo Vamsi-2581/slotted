@@ -1,23 +1,3 @@
-/**
- * The phase every placeholder on the page reads, registered so it can be
- * animated at all: an unregistered custom property has no type and interpolates
- * by discrete jumps.
- *
- * `inherits: true` is the whole mechanism. One animation on a region drives the
- * number, every placeholder inside it reads the same value, and a box that
- * mounts halfway through a load inherits the phase the others are already at.
- * React Spectrum reaches the same result with the Web Animations API and
- * `animation.startTime = 0`; HeroUI asks the consumer to put a class on the
- * parent and to switch every child's animation off by hand. This costs one
- * declaration and no script, and a hundred rows animate one property rather
- * than a hundred timelines.
- */
-@property --slotted-skeleton-phase {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 0;
-}
-
 @layer slotted.components {
   /* ── The box, and the row inside a paragraph ────────────────────────────
    *
@@ -102,20 +82,6 @@
       --slotted-skeleton-trough-color,
       color-mix(in oklab, var(--_fill) 60%, var(--slotted-surface-sunken, Canvas))
     );
-    /**
-     * The loop, eased. Zero at both ends of the cycle and one in the middle,
-     * so the seam where the phase wraps from one back to zero carries the same
-     * value on both sides and there is nothing to see there.
-     */
-    --_p: calc(0.5 - 0.5 * cos(var(--slotted-skeleton-phase) * 1turn));
-    /**
-     * The sweep runs with the text. `background-position` has no logical form,
-     * so the direction lives in which end of the phase the band starts from
-     * rather than in a sign multiplied onto a percentage — a negative position
-     * moves the image the wrong way rather than the mirrored way.
-     */
-    --_sweep-phase: calc(1 - var(--slotted-skeleton-phase));
-
     background-color: var(--_fill);
     border: var(--slotted-skeleton-border-width, var(--slotted-border-width-thin, 1px)) solid
       var(--_edge);
@@ -125,11 +91,6 @@
     /* A placeholder is furniture, not text: nothing in it should be
        selectable, and a drag across a loading list should not highlight it. */
     user-select: none;
-  }
-
-  [data-ui='skeleton'][data-part='root'][data-loading]:dir(rtl),
-  [data-ui='skeleton'][data-part='text'][data-loading] [data-part='line']:dir(rtl) {
-    --_sweep-phase: var(--slotted-skeleton-phase);
   }
 
   /* ── Shapes ─────────────────────────────────────────────────────────────
@@ -331,66 +292,112 @@
 
   /* ── Motion ─────────────────────────────────────────────────────────────
    *
-   * A region drives the phase for everything inside it; a placeholder standing
-   * on its own drives its own. The second rule is what stops the two from
-   * running at once, and it is why a region of twelve boxes pulses as one
-   * surface rather than as twelve independent blinks.
-   */
-  [data-ui='skeleton'][data-part='region'][data-loading],
-  [data-ui='skeleton'][data-part='root'][data-loading],
-  [data-ui='skeleton'][data-part='text'][data-loading] {
-    animation: slotted-skeleton-phase var(--slotted-duration-loop-slow) linear infinite;
-  }
-
-  [data-ui='skeleton'][data-part='region'] [data-ui='skeleton'] {
-    animation: none;
-  }
-
-  [data-ui='skeleton'][data-animation='none'] {
-    animation: none;
-  }
-
-  /**
-   * The quiet one: the fill travels to the trough and back, and nothing else
-   * on the box moves. It paints `background-color` rather than `opacity`, for
-   * the reason recorded on `--_trough`.
-   */
-  [data-ui='skeleton'][data-part='root'][data-animation='pulse'][data-loading],
-  [data-ui='skeleton'][data-animation='pulse'][data-loading] [data-part='line'] {
-    background-color: color-mix(in oklab, var(--_trough) calc(var(--_p) * 100%), var(--_fill));
-  }
-
-  /**
-   * A band crossing the box, and the geometry is the whole of it. A
-   * `background-position` percentage places the image inside the box minus the
-   * image, so a background three times the box's width gives a positioning
-   * range two boxes wide: a phase running the full `0%`–`100%` carries a band
-   * a third of that width in at one edge, across, and out at the other, with a
-   * rest between passes. That rest is what makes it read as something crossing
-   * the placeholder rather than as a gradient painted on it.
+   * Both loops run on a layer drawn over the fill, and animate only `opacity`
+   * and `transform`, which the compositor runs without the page. The first
+   * version animated a registered, inherited custom property, which restyled
+   * every placeholder — and every descendant of a region — on every frame:
+   * on the docs' data-grid page the 72 boxes of one loading grid took 2.7
+   * seconds of style in every 3 with nothing else moving.
    *
-   * The first version multiplied a percentage by three and by a direction
-   * sign, which put the band outside the box for most of every cycle: the
-   * sweep was in the stylesheet and almost never on the screen. The gradient
-   * angle stays physical because a gradient has no logical one; the direction
-   * it travels is carried by `--_sweep-phase`.
+   * The layer sits inside the rim (`inset: 0` of an absolute box is the
+   * padding box), and the box clips it to its own corners, so neither loop
+   * touches the edge or the outline of the shape.
+   *
+   * Boxes drawn in one render start their loops in one frame and move as one
+   * surface. A box mounted later starts its own cycle; `--slotted-skeleton-phase`
+   * (0 to 1, a point in the cycle) is where a box starts, so a consumer that
+   * needs a late box in step, and a capture that needs one moment, can name it.
    */
-  [data-ui='skeleton'][data-part='root'][data-animation='shimmer'][data-loading],
-  [data-ui='skeleton'][data-animation='shimmer'][data-loading] [data-part='line'] {
+  [data-ui='skeleton'][data-part='root'][data-loading]:not([data-animation='none']),
+  [data-ui='skeleton'][data-part='text'][data-loading]:not([data-animation='none'])
+    [data-part='line'] {
+    overflow: clip;
+    position: relative;
+  }
+
+  [data-ui='skeleton'][data-part='root'][data-animation='pulse'][data-loading]::after,
+  [data-ui='skeleton'][data-part='root'][data-animation='shimmer'][data-loading]::after,
+  [data-ui='skeleton'][data-animation='pulse'][data-loading] [data-part='line']::after,
+  [data-ui='skeleton'][data-animation='shimmer'][data-loading] [data-part='line']::after {
+    animation-delay: calc(
+      var(--slotted-skeleton-phase, 0) * var(--slotted-duration-loop-slow) * -1
+    );
+    animation-duration: var(--slotted-duration-loop-slow);
+    animation-iteration-count: infinite;
+    content: '';
+    inset-block: 0;
+    inset-inline: 0;
+    pointer-events: none;
+    position: absolute;
+  }
+
+  /**
+   * The quiet one: the trough laid over the fill, faded in and out. The box
+   * itself never fades, for the reason recorded on `--_trough` — the rim stays
+   * at full strength and the shape never leaves the page. Zero at both ends of
+   * the cycle, so the seam where it wraps carries nothing to see.
+   */
+  [data-ui='skeleton'][data-part='root'][data-animation='pulse'][data-loading]::after,
+  [data-ui='skeleton'][data-animation='pulse'][data-loading] [data-part='line']::after {
+    animation-timing-function: ease-in-out;
+    background-color: var(--_trough);
+    opacity: 0;
+  }
+
+  /**
+   * A band crossing the box, and the geometry is the whole of it. The band is
+   * the middle 72 per cent of a layer the size of the box, and the layer
+   * travels from one box before it to one box past it, so the band comes in at
+   * one edge, crosses, and leaves at the other, with a rest between passes.
+   * That rest is what makes it read as something crossing the placeholder
+   * rather than as a gradient painted on it.
+   *
+   * The travel is symmetric about the box, so a right-to-left box runs the same
+   * travel backwards; `transform` and the gradient have no logical form.
+   */
+  [data-ui='skeleton'][data-part='root'][data-animation='shimmer'][data-loading]::after,
+  [data-ui='skeleton'][data-animation='shimmer'][data-loading] [data-part='line']::after {
+    animation-timing-function: linear;
     background-image: linear-gradient(
       90deg,
-      transparent 38%,
+      transparent 14%,
       var(--_highlight) 50%,
-      transparent 62%
+      transparent 86%
     );
-    background-position: calc(var(--_sweep-phase) * 100%) 0;
-    background-repeat: no-repeat;
-    background-size: 300% 100%;
   }
 
-  @keyframes slotted-skeleton-phase {
+  [data-ui='skeleton'][data-part='root'][data-animation='shimmer'][data-loading]:dir(rtl)::after,
+  [data-ui='skeleton'][data-animation='shimmer'][data-loading]:dir(rtl) [data-part='line']::after {
+    animation-direction: reverse;
+  }
+
+  /* Started only here: a reset under `reduce` is one attribute against the
+     four that select a layer, and lost, so the loop ran under reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    [data-ui='skeleton'][data-part='root'][data-animation='pulse'][data-loading]::after,
+    [data-ui='skeleton'][data-animation='pulse'][data-loading] [data-part='line']::after {
+      animation-name: slotted-skeleton-pulse;
+    }
+
+    [data-ui='skeleton'][data-part='root'][data-animation='shimmer'][data-loading]::after,
+    [data-ui='skeleton'][data-animation='shimmer'][data-loading] [data-part='line']::after {
+      animation-name: slotted-skeleton-sweep;
+    }
+  }
+
+  @keyframes slotted-skeleton-pulse {
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slotted-skeleton-sweep {
+    from {
+      transform: translateX(-100%);
+    }
+
     to {
-      --slotted-skeleton-phase: 1;
+      transform: translateX(100%);
     }
   }
 
@@ -399,10 +406,12 @@
    * and has nothing left to say once it is still; a placeholder reports
    * through its shape, which does not move — so stillness costs this family
    * nothing, and `docs/token-foundation.md` requires it of every infinite
-   * animation regardless.
+   * animation regardless. Still, the pulse layer is transparent and the band
+   * stands outside the box, so the reader sees the fill alone.
    */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='skeleton'] {
+    [data-ui='skeleton']::after,
+    [data-ui='skeleton'] [data-part='line']::after {
       animation: none;
     }
   }
@@ -414,8 +423,8 @@
    * would go on painting a mixed colour over a forced one.
    */
   @media (forced-colors: active) {
-    [data-ui='skeleton'][data-part='root'][data-loading],
-    [data-ui='skeleton'][data-part='text'][data-loading] [data-part='line'] {
+    [data-ui='skeleton'][data-part='root'][data-loading]::after,
+    [data-ui='skeleton'][data-part='text'][data-loading] [data-part='line']::after {
       background-image: none;
     }
   }

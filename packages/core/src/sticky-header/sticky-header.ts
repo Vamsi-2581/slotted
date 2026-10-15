@@ -73,9 +73,17 @@ export interface StickyHeaderOptions {
   /** The engine asks `pinned` to move. The binding requests it with the reason `programmatic`. */
   onPinRequest?: (pinned: boolean) => void;
   /**
+   * The title area or the root holds at its sticky offset with the scroll
+   * past its rest position, so content passes under the chrome. The binding writes
+   * `data-stuck`; a variant with no ground of its own paints one there.
+   * Never true while compact, nor in a page whose body scrolls on its own.
+   */
+  onStuck?: (stuck: boolean) => void;
+  /**
    * The element whose scrolling descendants drive the collapse, when the
    * header's own scroller does not move — a page that fills its height.
-   * Read on every scroll, so it may be `null` until the element exists.
+   * Read on every scroll, so it may be `null` until the element exists. While
+   * the header has no area, a contained scroll never collapses it.
    */
   contained?: () => HTMLElement | null;
 }
@@ -87,7 +95,7 @@ export interface StickyHeaderHandle {
   revealed: () => boolean;
   /** The element the header scrolls inside, or `null` for the viewport. */
   scroller: () => HTMLElement | null;
-  /** Whether the root is stuck at the top of its scroller with the scroll past its rest position. */
+  /** Whether the root is stuck at its own sticky offset with the scroll past its rest position. */
   stuck: () => boolean;
   /** Whether the header is too much of the screen to hold; see `onTall`. */
   tall: () => boolean;
@@ -222,6 +230,9 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   let collapsedByContained = false;
   let lastTop = scrollTop();
   let frame = 0;
+  /** The fact last reported through `onStuck`. */
+  let stuckChrome = false;
+  let stuckFrame = 0;
   let destroyed = false;
 
   let intersections: IntersectionObserver | undefined;
@@ -254,13 +265,52 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     return scroller?.clientHeight ?? view?.innerHeight ?? 0;
   }
 
+  /** The edge things stick against: the scroller's padding box, or the viewport's top. */
+  function stickyEdge() {
+    /* A bordered scroller holds what sticks `clientTop` pixels below its border box. */
+    return scroller ? scroller.getBoundingClientRect().top + scroller.clientTop : 0;
+  }
+
+  /** An element's resolved `top`: the offset it sticks at, below the edge. */
+  function offset(element: HTMLElement) {
+    return Number.parseFloat(view?.getComputedStyle(element).top ?? '') || 0;
+  }
+
   function stuck() {
     if (compact) return false;
     const rootTop = root.getBoundingClientRect().top;
-    /* The sticky edge is the scroller's padding box: a bordered scroller
-       holds the root `clientTop` pixels below its border box. */
-    const top = scroller ? scroller.getBoundingClientRect().top + scroller.clientTop : 0;
-    return Math.abs(rootTop - top) < 1 && scrollTop() > 0;
+    return Math.abs(rootTop - stickyEdge() - offset(root)) < 1 && scrollTop() > 0;
+  }
+
+  /**
+   * The chrome holds with the scroll past rest; see `onStuck`. The title area
+   * at its offset covers the header area sliding under it; the root at its
+   * own covers a floating title area, which stands a border below the root.
+   */
+  function chromeStuck() {
+    const title = options.chrome()[0];
+    if (compact || title === undefined || scrollTop() <= 0) return false;
+    return (
+      stuck() || Math.abs(title.getBoundingClientRect().top - stickyEdge() - offset(title)) < 1
+    );
+  }
+
+  function measureStuck() {
+    if (destroyed) return;
+    const next = chromeStuck();
+    if (next === stuckChrome) return;
+    stuckChrome = next;
+    options.onStuck?.(next);
+    /* A floating header takes its inset once stuck: the sticky top moves with it. */
+    schedule();
+  }
+
+  function scheduleStuck() {
+    if (stuckFrame !== 0 || view === null) return;
+    stuckFrame = view.requestAnimationFrame(() => {
+      stuckFrame = 0;
+      measureStuck();
+    });
   }
 
   function setScrolled(next: boolean) {
@@ -344,12 +394,15 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     if (folding === null) measuredArea = area;
     root.style.setProperty(COLLAPSE_PROPERTY, `${area}px`);
     const chrome = options.chrome().reduce((sum, part) => sum + height(part), 0);
+    /* A floating header holds its title area an inset below the edge. */
+    const title = options.chrome()[0];
+    const inset = title === undefined ? 0 : offset(title);
     const width = root.clientWidth;
     const narrow = width > 0 && width < COMPACT_BELOW;
     if (narrow !== compact) setCompact(narrow);
     const held = pinned || revealed || collapse === 'manual';
     /* Compact, nothing of the header stays at the top for anything to stop under. */
-    const stays = compact ? 0 : chrome + (held ? area : 0);
+    const stays = compact ? 0 : inset + chrome + (held ? area : 0);
     target.style.setProperty(STICKY_TOP_PROPERTY, `${stays}px`);
     /* Too much of the screen to hold: on a phone, pinned, the header took
        nearly the whole height and left nothing to read. */
@@ -361,6 +414,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     if (tall && pinned) options.onPinRequest?.(false);
     /* The title grew or shrank: the observer's margin is stale. */
     if (aboveArea() !== observedAbove) observeArea();
+    measureStuck();
   }
 
   /**
@@ -485,6 +539,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   /* ── The reveal ends on the next scroll ────────────────────────────────── */
 
   function onScroll() {
+    scheduleStuck();
     const top = scrollTop();
     const delta = top - lastTop;
     lastTop = top;
@@ -518,6 +573,8 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     options.onScrollRequest(false);
   }
   scrollSource?.addEventListener('scroll', onScroll, { passive: true });
+  /* A floating title area slides to its inset: the offset is read once it lands. */
+  root.addEventListener('transitionend', schedule);
   /* The viewport as scroller has no box to observe; its size arrives as a resize. */
   if (scroller === null) view?.addEventListener('resize', schedule);
 
@@ -536,7 +593,9 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     const { collapse, expanded, pinned } = options.state();
     if (collapse !== 'scroll' || pinned) return;
     if (!principal(element, contained)) return;
-    if (expanded && top > CONTAINED_COLLAPSE_AT && top > previous) {
+    /* With no header area a collapse hides nothing: it only steps the title
+       down and resizes every pane under the header. */
+    if (expanded && options.area() !== null && top > CONTAINED_COLLAPSE_AT && top > previous) {
       collapsedByContained = true;
       options.onScrollRequest(false);
       return;
@@ -621,10 +680,12 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   function destroy() {
     destroyed = true;
     if (frame !== 0) view?.cancelAnimationFrame(frame);
+    if (stuckFrame !== 0) view?.cancelAnimationFrame(stuckFrame);
     releaseFold();
     sizes?.disconnect();
     intersections?.disconnect();
     scrollSource?.removeEventListener('scroll', onScroll);
+    root.removeEventListener('transitionend', schedule);
     if (scroller === null) view?.removeEventListener('resize', schedule);
     doc.removeEventListener('scroll', onContainedScroll, { capture: true });
     root.style.removeProperty(COLLAPSE_PROPERTY);

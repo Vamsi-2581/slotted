@@ -5,6 +5,12 @@ import { describe, expect, it, vi } from 'vitest';
 import contract from '../../../../specs/components/radio-group/contract.json';
 import { Field, FieldLabel } from '../field';
 import { FieldGroup, FieldGroupLegend } from '../field-group';
+import type {
+  RadioGroupLabelPlacement,
+  RadioGroupOrientation,
+  RadioGroupSize,
+  RadioGroupVariant,
+} from '../index';
 import { RadioGroup } from './radio-group';
 import type { RadioGroupProps } from './radio-group.types';
 import { RadioGroupDefaultsProvider } from './radio-group-defaults';
@@ -29,6 +35,21 @@ function Shipping(props: Partial<RadioGroupProps>) {
 }
 
 describe('RadioGroup', () => {
+  it('names every axis the contract lists as a type the entry point exports', () => {
+    const axes: {
+      size: readonly RadioGroupSize[];
+      variant: readonly RadioGroupVariant[];
+      orientation: readonly RadioGroupOrientation[];
+      labelPlacement: readonly RadioGroupLabelPlacement[];
+    } = {
+      size: ['sm', 'md', 'lg'],
+      variant: ['plain', 'tile'],
+      orientation: ['vertical', 'horizontal'],
+      labelPlacement: ['end', 'start'],
+    };
+    expect(axes).toEqual(contract.axes);
+  });
+
   it('is selected in public by the family identifier and its parts', () => {
     render(<Shipping className="page-set" />);
 
@@ -194,6 +215,57 @@ describe('RadioGroup', () => {
     expect(contract.roleWithdrawnInside).toBe('field-group');
   });
 
+  it('takes disabled and read-only from the field group around it', () => {
+    const onValueChange = vi.fn();
+    const { unmount } = render(
+      <FieldGroup readOnly>
+        <FieldGroupLegend>Envio</FieldGroupLegend>
+        <RadioGroup defaultValue="standard" onValueChange={onValueChange}>
+          <Radio value="standard">standard</Radio>
+          <Radio value="express">express</Radio>
+        </RadioGroup>
+      </FieldGroup>,
+    );
+
+    fireEvent.click(item(1));
+    const root = item(0).closest('[data-ui="radio-group"]');
+    expect(root).toHaveAttribute('data-readonly', '');
+    expect(root).toHaveAttribute('aria-readonly', 'true');
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(item(0).checked).toBe(true);
+    unmount();
+
+    render(
+      <FieldGroup disabled>
+        <FieldGroupLegend>Envio</FieldGroupLegend>
+        <RadioGroup>
+          <Radio value="standard">standard</Radio>
+          <Radio value="express">express</Radio>
+        </RadioGroup>
+      </FieldGroup>,
+    );
+
+    expect(item(0).closest('[data-ui="radio-group"]')).toHaveAttribute('data-disabled', '');
+    expect(items().every((input) => input.disabled)).toBe(true);
+  });
+
+  /** An unset state defers to the group (2026-09-02 field design), `invalid` as `required` does. */
+  it('takes invalid and required from the field group around it', () => {
+    render(
+      <FieldGroup invalid required>
+        <FieldGroupLegend>Envio</FieldGroupLegend>
+        <RadioGroup>
+          <Radio value="standard">standard</Radio>
+        </RadioGroup>
+      </FieldGroup>,
+    );
+
+    const root = item(0).closest('[data-ui="radio-group"]');
+    expect(root).toHaveAttribute('data-invalid', '');
+    expect(root).toHaveAttribute('aria-invalid', 'true');
+    expect(root).toHaveAttribute('aria-required', 'true');
+  });
+
   it('takes its state from the field around it and never its identifier', () => {
     render(
       <Field invalid required>
@@ -207,6 +279,30 @@ describe('RadioGroup', () => {
     expect(root).toHaveAttribute('aria-required', 'true');
     expect(item(0).getAttribute('id')).toMatch(/^slotted-radio-/);
     expect(contract.wiring.id).toBe('never');
+  });
+
+  it('takes its name from the label of the field around it', () => {
+    render(
+      <Field id="shipping">
+        <FieldLabel>Envio</FieldLabel>
+        <Shipping aria-label={undefined} />
+      </Field>,
+    );
+
+    expect(group()).toHaveAttribute('aria-labelledby', 'shipping-label');
+    expect(group()).toHaveAccessibleName('Envio');
+  });
+
+  it('keeps a name the consumer wrote over the field’s label', () => {
+    render(
+      <Field id="shipping">
+        <FieldLabel>Envio</FieldLabel>
+        <Shipping aria-label="Forma de envio" />
+      </Field>,
+    );
+
+    expect(group()).not.toHaveAttribute('aria-labelledby');
+    expect(group()).toHaveAccessibleName('Forma de envio');
   });
 
   it('lets an application decide once how its sets of choices flow', () => {

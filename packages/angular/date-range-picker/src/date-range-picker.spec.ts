@@ -1,10 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { By } from '@angular/platform-browser';
 import { provideSlotted } from '@slotted/angular/i18n';
 import { plainDate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
+import { SlField, SlFieldLabel } from '@slotted/angular/field';
 import type { ChangeRequest } from '@slotted/core/state';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -21,6 +23,8 @@ const RUN: DateRange = { start: d(7), end: d(11) };
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    SlField,
+    SlFieldLabel,
     SlDateRangePicker,
     SlDateRangePickerFooter,
     SlDateRangePickerPresets,
@@ -218,7 +222,11 @@ describe('choosing a run', () => {
     expect(text(fixture, 'head-start')).toContain('7');
 
     click(fixture, dayFor(fixture, 11));
-    expect(fixture.componentInstance.values).toEqual([RUN]);
+    /* The grid opens on today's month, so the run is read by its days. */
+    const [run] = fixture.componentInstance.values;
+    expect(fixture.componentInstance.values).toHaveLength(1);
+    expect([run?.start?.day, run?.end?.day]).toEqual([7, 11]);
+    expect(run?.start?.month).toBe(run?.end?.month);
     expect(fixture.componentInstance.positions.at(-1)).toBe('start');
   });
 
@@ -421,6 +429,40 @@ describe('what a form sees', () => {
     expect(fixture.componentInstance.control.value).toEqual({ start: d(20), end: d(24) });
   });
 
+  it('returns to its default value when its form is reset', () => {
+    const fixture = renderTemplate(
+      `<form>
+         <div slDateRangePicker clearable locale="pt-BR" [defaultValue]="run" startName="inicio" endName="fim" (valueChange)="onValue($event)"></div>
+       </form>`,
+    );
+    const input = (name: string) =>
+      fixture.nativeElement.querySelector(`[name="${name}"]`) as HTMLInputElement;
+
+    click(fixture, part(fixture, 'clear'));
+    expect(input('inicio').value).toBe('');
+
+    (fixture.nativeElement.querySelector('form') as HTMLFormElement).reset();
+    fixture.detectChanges();
+
+    expect(input('inicio').value).toBe('2026-09-07');
+    expect(input('fim').value).toBe('2026-09-11');
+    expect(fixture.componentInstance.onValue).toHaveBeenLastCalledWith(
+      expect.objectContaining({ value: RUN, reason: 'programmatic' }),
+    );
+  });
+
+  it('takes the value the form writes and empties on reset', () => {
+    const fixture = renderTemplate(
+      `<div slDateRangePicker locale="pt-BR" startName="inicio" [formControl]="control"></div>`,
+    );
+    const start = () => fixture.nativeElement.querySelector('[name="inicio"]') as HTMLInputElement;
+    expect(start().value).toBe('2026-09-07');
+
+    fixture.componentInstance.control.reset();
+    fixture.detectChanges();
+    expect(start().value).toBe('');
+  });
+
   it('reports the family’s own errors', () => {
     const fixture = renderTemplate(
       `<div slDateRangePicker locale="pt-BR" count="nights" [maxLength]="2" [isDateUnavailable]="refuseNinth" [formControl]="control"></div>`,
@@ -499,6 +541,30 @@ describe('the composition surface', () => {
     expect(document.activeElement).toBe(segments(fixture)[3]);
   });
 
+  /**
+   * The contract's open reasons are pointer, keyboard, escape, outsidePress and
+   * select; React's handle reports keyboard, and so does this one.
+   */
+  it('reports the handle’s open and close with a reason its contract lists', () => {
+    const fixture = renderTemplate(
+      `<div slDateRangePicker locale="pt-BR" (openChange)="onOpen($event)"></div>`,
+    );
+    const picker = fixture.debugElement
+      .query(By.directive(SlDateRangePicker))
+      .injector.get(SlDateRangePicker);
+
+    picker.openSurface();
+    fixture.detectChanges();
+    picker.closeSurface();
+    fixture.detectChanges();
+
+    const reasons = fixture.componentInstance.onOpen.mock.calls.map(
+      ([request]) => (request as ChangeRequest<boolean>).reason,
+    );
+    expect(reasons).toEqual(['keyboard', 'keyboard']);
+    expect(contract.stateModel.open.reasons).toEqual(expect.arrayContaining(reasons));
+  });
+
   it('takes the consumer’s own slots into the surface', () => {
     const fixture = renderTemplate(
       `<div slDateRangePicker defaultOpen locale="pt-BR">
@@ -508,5 +574,103 @@ describe('the composition surface', () => {
     );
     expect(text(fixture, 'presets')).toContain('Hoje');
     expect(text(fixture, 'footer')).toContain('Aplicar');
+  });
+});
+
+describe('where focus goes when it opens', () => {
+  const focusedDay = () =>
+    document.activeElement?.getAttribute('data-part') === 'day'
+      ? (document.activeElement.textContent ?? '').trim()
+      : null;
+
+  it('moves focus to the cell of the current end when the trigger opens it', async () => {
+    const fixture = renderTemplate(
+      `<div slDateRangePicker locale="en-US" defaultPosition="end" [defaultValue]="run"></div>`,
+    );
+    click(fixture, trigger(fixture));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(focusedDay()).toBe('11');
+  });
+
+  it('moves focus into the calendar when the handle opens it', async () => {
+    const fixture = renderTemplate(
+      `<div slDateRangePicker #picker="slDateRangePicker" locale="en-US" [defaultValue]="run"></div>
+       <button type="button" id="open" (click)="picker.openSurface()">open</button>`,
+    );
+    click(fixture, fixture.nativeElement.querySelector('#open') as HTMLElement);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(focusedDay()).toBe('7');
+  });
+
+  it('leaves focus in the field when the chord opens it', async () => {
+    const fixture = renderTemplate(
+      `<div slDateRangePicker locale="en-US" [defaultValue]="run"></div>`,
+    );
+    const segment = segments(fixture)[0] as HTMLElement;
+    segment.focus();
+    segment.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', altKey: true, bubbles: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(surface(fixture)).not.toBeNull();
+    expect(document.activeElement).toBe(segment);
+  });
+
+  it('leaves focus alone when it is rendered open', async () => {
+    (document.activeElement as HTMLElement | null)?.blur();
+    const fixture = renderTemplate(
+      `<div slDateRangePicker defaultOpen locale="en-US" [defaultValue]="run"></div>`,
+    );
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it('keeps Tab inside the surface while it is open', () => {
+    const fixture = renderTemplate(
+      `<div slDateRangePicker defaultOpen locale="en-US" [defaultValue]="run">
+         <div slDateRangePickerPresets><button [slDateRangePickerPreset]="run">This week</button></div>
+         <div slDateRangePickerFooter><button type="button" id="apply">Apply</button></div>
+       </div>`,
+    );
+    const first = part(fixture, 'preset');
+    const last = fixture.nativeElement.querySelector('#apply') as HTMLElement;
+
+    last.focus();
+    last.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(first);
+
+    first.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(last);
+  });
+});
+
+describe('inside a field', () => {
+  it('names the frame after the field’s label and gives each end its own identifier', () => {
+    const fixture = renderTemplate(
+      `<div slField>
+         <label slFieldLabel>Stay</label>
+         <div slDateRangePicker locale="en-US"></div>
+       </div>`,
+    );
+    const element = fixture.nativeElement as HTMLElement;
+    const frame = part(fixture, 'control');
+    const label = element.querySelector('label') as HTMLLabelElement;
+    expect(frame.getAttribute('role')).toBe('group');
+    expect(frame.getAttribute('aria-labelledby')).toBe(label.id);
+    expect(label.getAttribute('for')).toBe(frame.id);
+    const ends = [...element.querySelectorAll('[data-part="segments"]')] as HTMLElement[];
+    expect(ends.map((end) => end.getAttribute('aria-label'))).toEqual(['Start', 'End']);
+    const ids = [frame.id, ...ends.map((end) => end.id)];
+    expect(ids.every((id) => id !== '')).toBe(true);
+    expect(new Set(ids).size).toBe(3);
   });
 });

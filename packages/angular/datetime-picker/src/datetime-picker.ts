@@ -22,6 +22,7 @@ import type {
 } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
+import { tabbables } from '@slotted/core/focus';
 import { createPositioner } from '@slotted/core/positioner';
 import type { PositionerHandle } from '@slotted/core/positioner';
 import { createControllable } from '@slotted/core/state';
@@ -38,6 +39,7 @@ import {
   DestroyRef,
   effect,
   ElementRef,
+  forwardRef,
   inject,
   Injector,
   input,
@@ -49,8 +51,15 @@ import {
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
-import type { OnInit } from '@angular/core';
+import type { AfterViewInit, OnInit } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type {
+  AbstractControl,
+  ControlValueAccessor,
+  ValidationErrors,
+  Validator,
+} from '@angular/forms';
 import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import {
@@ -75,6 +84,12 @@ import type {
   DateTimePickerVariant,
 } from './datetime-picker-defaults';
 import { SlDateTimePickerOption } from './datetime-picker-parts';
+
+/** The reasons the contract's `stateModel.open` lists, and no other. */
+type OpenReason = Extract<
+  ChangeReason,
+  'pointer' | 'keyboard' | 'escape' | 'outsidePress' | 'select'
+>;
 
 /**
  * Below this width, on a finger, the surface is a sheet rather than a popover.
@@ -136,11 +151,13 @@ export interface DateTimePickerHighlight {
         [clearable]="clearable()"
         [relative]="relative()"
         [name]="name()"
-        [disabled]="disabled()"
+        [disabled]="resolvedDisabled()"
         [readOnly]="readOnly()"
+        [invalid]="invalid()"
         [required]="required()"
         [value]="held()"
         (valueChange)="onFieldValue($event)"
+        (focusout)="onControlFocusOut($event)"
       >
         <span slDateTimeFieldEnd>
           <button
@@ -178,6 +195,7 @@ export interface DateTimePickerHighlight {
           [attr.aria-description]="truncated() ? t('truncated') : null"
           [attr.data-granularity]="resolvedGranularity()"
           [attr.data-open-to]="resolvedOpenTo()"
+          (keydown)="onContentKeyDown($event)"
         >
           <div data-part="head">
             <span data-part="head-value">
@@ -185,7 +203,11 @@ export interface DateTimePickerHighlight {
                 {{ headValue() }}
               } @else {
                 {{ headDate() }},
-                <span data-placeholder>{{ headPlaceholder() }}</span>
+                @if (headTime(); as time) {
+                  {{ time }}
+                } @else {
+                  <span data-placeholder>{{ headPlaceholder() }}</span>
+                }
               }
             </span>
             <ng-content select="[slDateTimePickerPresets]" />
@@ -265,6 +287,10 @@ export interface DateTimePickerHighlight {
   styleUrl: '../../../styles/src/datetime-picker/datetime-picker.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  providers: [
+    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SlDateTimePicker), multi: true },
+    { provide: NG_VALIDATORS, useExisting: forwardRef(() => SlDateTimePicker), multi: true },
+  ],
   host: {
     'data-ui': 'datetime-picker',
     'data-part': 'root',
@@ -278,7 +304,7 @@ export interface DateTimePickerHighlight {
     '[attr.data-required]': "resolvedRequired() === true ? '' : null",
   },
 })
-export class SlDateTimePicker implements OnInit {
+export class SlDateTimePicker implements AfterViewInit, ControlValueAccessor, Validator, OnInit {
   readonly value = input<PlainDateTime | null | undefined>(undefined);
   readonly defaultValue = input<PlainDateTime | null | undefined>(undefined);
   /** Present means the consumer owns whether the surface is showing. */
@@ -387,6 +413,13 @@ export class SlDateTimePicker implements OnInit {
 
   private readonly ownOpen = signal(false);
   private readonly ownValue = signal<PlainDateTime | null>(null);
+  /**
+   * The half pressed in the panel while the other half is missing. The value
+   * stays `null` until the second press writes both, so the half lives here and
+   * is forgotten when the panel closes.
+   */
+  private readonly pendingDate = signal<PlainDate | null>(null);
+  private readonly pendingTime = signal<PlainTime | null>(null);
   private readonly ownHighlight = signal<DateTimePickerHighlight>({
     date: { year: 2000, month: 1, day: 1 },
     time: null,
@@ -398,6 +431,21 @@ export class SlDateTimePicker implements OnInit {
   protected readonly view = signal<CalendarView>('day');
   protected readonly positioned = signal(false);
   protected readonly sheet = signal(false);
+  private readonly formDisabled = signal<boolean | undefined>(undefined);
+
+  private onChangeFn: (value: PlainDateTime | null) => void = () => undefined;
+  /** Whether a form model holds the value, and answers a reset through `writeValue`. */
+  private formBound = false;
+  private onTouchedFn: () => void = () => undefined;
+  private onValidatorChangeFn: () => void = () => undefined;
+
+  /**
+   * Whether the next opening moves focus into the panel. Set by a request to
+   * open from the trigger or from `openSurface()`, and never by Alt+ArrowDown,
+   * which leaves focus in the field, or by a first render that starts open,
+   * which would take focus from wherever the page put it.
+   */
+  private focusOnOpen = false;
 
   /**
    * Whether the reader has moved the highlight themselves. Until they have, the
@@ -431,7 +479,7 @@ export class SlDateTimePicker implements OnInit {
   );
   protected readonly resolvedOpenTo = computed(() => this.openTo() ?? this.defaults.openTo);
   protected readonly resolvedDisabled = computed(
-    () => this.disabled() ?? this.enclosing?.resolvedDisabled(),
+    () => this.disabled() ?? this.formDisabled() ?? this.enclosing?.resolvedDisabled(),
   );
   protected readonly resolvedReadOnly = computed(
     () => this.readOnly() ?? this.enclosing?.resolvedReadOnly(),
@@ -464,7 +512,9 @@ export class SlDateTimePicker implements OnInit {
 
   protected readonly dateMin = computed(() => dateBoundsOf(this.bounds()).min);
   protected readonly dateMax = computed(() => dateBoundsOf(this.bounds()).max);
-  protected readonly dateValue = computed<CalendarValue>(() => this.held()?.date ?? null);
+  protected readonly dateValue = computed<CalendarValue>(
+    () => this.held()?.date ?? this.pendingDate(),
+  );
 
   /**
    * Validity the family owns, beside the validity the consumer states: both
@@ -489,7 +539,9 @@ export class SlDateTimePicker implements OnInit {
    * the day the calendar has focused when there is not — so a reader moving
    * through the month sees the times of the day under their cursor.
    */
-  private readonly listDate = computed(() => this.held()?.date ?? this.highlight().date);
+  private readonly listDate = computed(
+    () => this.held()?.date ?? this.pendingDate() ?? this.highlight().date,
+  );
 
   private readonly window = computed(() => dayWindow(this.listDate(), this.bounds()));
 
@@ -539,7 +591,13 @@ export class SlDateTimePicker implements OnInit {
     const value = this.held();
     return value === null ? '' : this.format().describe(value);
   });
-  protected readonly headDate = computed(() => this.format().describeDate(this.highlight().date));
+  protected readonly headDate = computed(() =>
+    this.format().describeDate(this.pendingDate() ?? this.highlight().date),
+  );
+  protected readonly headTime = computed(() => {
+    const time = this.pendingTime();
+    return time === null ? null : this.format().time.format(time);
+  });
   protected readonly headPlaceholder = computed(() => {
     const granularity = this.resolvedGranularity();
     if (granularity === 'hour') return '--';
@@ -563,6 +621,11 @@ export class SlDateTimePicker implements OnInit {
     effect(() => {
       if (!this.isOpen()) {
         this.release();
+        /* A half pressed and never completed does not outlive the panel. */
+        untracked(() => {
+          this.pendingDate.set(null);
+          this.pendingTime.set(null);
+        });
         return;
       }
       afterNextRender(() => this.attach(), { injector: this.injector });
@@ -624,8 +687,60 @@ export class SlDateTimePicker implements OnInit {
       untracked(() => this.revealHighlight());
     });
 
+    /* A bound that changed is a validity that changed, and the form is told. */
+    effect(() => {
+      this.min();
+      this.max();
+      this.minTime();
+      this.maxTime();
+      this.isDateUnavailable();
+      this.isTimeUnavailable();
+      this.onValidatorChangeFn();
+    });
+
     this.destroyRef.onDestroy(() => this.release());
     this.destroyRef.onDestroy(() => this.listResize?.disconnect());
+  }
+
+  /* ── Forms ───────────────────────────────────────────────────────────── */
+
+  writeValue(value: PlainDateTime | null | undefined) {
+    this.ownValue.set(value ?? null);
+  }
+
+  registerOnChange(fn: (value: PlainDateTime | null) => void) {
+    this.onChangeFn = fn;
+    this.formBound = true;
+  }
+
+  registerOnTouched(fn: () => void) {
+    this.onTouchedFn = fn;
+  }
+
+  setDisabledState(isDisabled: boolean) {
+    this.formDisabled.set(isDisabled);
+  }
+
+  registerOnValidatorChange(fn: () => void) {
+    this.onValidatorChangeFn = fn;
+  }
+
+  /**
+   * The rules no other validator can see, under the names `datetime-field`
+   * reports them with, because the field holds the bounds, the predicates and
+   * the half the reader has not written. `required` is left to Angular's own.
+   */
+  validate(control: AbstractControl): ValidationErrors | null {
+    return this.field?.validate(control) ?? null;
+  }
+
+  /**
+   * A day typed without a time leaves the value `null`, so the picker's own
+   * value never moves; the field's validity does. The field says so on every
+   * edit, and the form is told.
+   */
+  ngAfterViewInit() {
+    this.field?.registerOnValidatorChange(() => this.onValidatorChangeFn());
   }
 
   ngOnInit() {
@@ -641,6 +756,24 @@ export class SlDateTimePicker implements OnInit {
     this.clock.set(nowDateTimeIn(this.resolvedTimeZone()));
     this.typeahead = createTypeahead({ locale: () => this.resolvedLocale() });
     this.destroyRef.onDestroy(() => this.typeahead?.destroy());
+
+    /* A native reset restores the hidden input and tells nothing, so the
+       picker would keep the last moment chosen in a form that had been reset.
+       The value returns to `defaultValue` through `valueChange`, reason
+       `programmatic`, and a half pressed in the panel without the other is
+       dropped with it. A picker bound to a form model takes the model's reset
+       value through `writeValue` instead. */
+    const form = this.element.closest('form');
+    if (form !== null) {
+      const onReset = (event: Event) => {
+        if (this.formBound) return;
+        this.pendingDate.set(null);
+        this.pendingTime.set(null);
+        this.commit(this.defaultValue() ?? null, 'programmatic', event);
+      };
+      form.addEventListener('reset', onReset);
+      this.destroyRef.onDestroy(() => form.removeEventListener('reset', onReset));
+    }
 
     /* `matchMedia` is absent in a server render and in some test environments,
        and the popover is the right answer wherever it cannot be asked. */
@@ -658,11 +791,11 @@ export class SlDateTimePicker implements OnInit {
   }
 
   openSurface(source?: Event) {
-    this.setOpen(true, 'programmatic', source);
+    this.setOpen(true, 'keyboard', source);
   }
 
   closeSurface(source?: Event) {
-    this.setOpen(false, 'programmatic', source);
+    this.setOpen(false, 'keyboard', source);
   }
 
   /* ── What the template reads ─────────────────────────────────────────── */
@@ -673,11 +806,8 @@ export class SlDateTimePicker implements OnInit {
 
   protected isSelected(option: TimeOption): boolean {
     const value = this.held();
-    return (
-      value !== null &&
-      isSameDate(value.date, this.listDate()) &&
-      isSameTime(option.time, value.time)
-    );
+    if (value === null) return isSameTime(option.time, this.pendingTime());
+    return isSameDate(value.date, this.listDate()) && isSameTime(option.time, value.time);
   }
 
   protected contextFor(option: TimeOption, index: number) {
@@ -694,14 +824,40 @@ export class SlDateTimePicker implements OnInit {
   /* ── Focus follows the missing half ──────────────────────────────────── */
 
   protected toggle(source: Event) {
-    const next = !this.isOpen();
-    this.setOpen(next, 'pointer', source);
-    if (next) this.enterSurface(this.resolvedOpenTo());
+    this.setOpen(!this.isOpen(), 'pointer', source);
+  }
+
+  /** Tab and Shift+Tab wrap inside the panel while it is open. */
+  protected onContentKeyDown(event: KeyboardEvent) {
+    if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) return;
+    const content = event.currentTarget as HTMLElement;
+    const items = tabbables(content);
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (first === undefined || last === undefined) return;
+    const current = content.ownerDocument.activeElement;
+    if (event.shiftKey && current === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && current === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  protected onControlFocusOut(event: FocusEvent) {
+    const next = event.relatedTarget;
+    if (next instanceof Node && this.element.contains(next)) return;
+    this.onTouchedFn();
   }
 
   protected chooseNow(source: Event) {
     const wasWhole = this.held() !== null;
-    const now = this.anchor();
+    /* The clock, read at the press: `referenceDateTime` says where an empty
+       field starts, not what time it is. */
+    const now = nowDateTimeIn(this.resolvedTimeZone());
+    this.pendingDate.set(null);
+    this.pendingTime.set(null);
     this.commit(now, 'select', source);
     this.setHighlight({ date: now.date, time: now.time }, 'pointer', source);
     this.afterPress(now, wasWhole, 'time', source);
@@ -728,24 +884,47 @@ export class SlDateTimePicker implements OnInit {
   }
 
   /**
-   * A day pressed in the calendar. The time half is the one the value already
-   * holds, or `referenceDateTime`'s — midnight is the platform's answer and it
-   * is wrong for every booking flow.
+   * A day pressed in the calendar. The time half is the one the value holds,
+   * or the one pressed in the list. With neither, the day waits for a time:
+   * focus moves to the list, onto the option nearest `referenceDateTime`, and
+   * the value does not move.
    */
   private selectDate(date: PlainDate, source: Event | undefined) {
     const wasWhole = this.held() !== null;
-    const next: PlainDateTime = { date, time: this.held()?.time ?? this.anchor().time };
+    const time = this.held()?.time ?? this.pendingTime();
+    if (time === null) {
+      this.pendingDate.set(date);
+      this.setHighlight({ date, time: null }, 'pointer', source);
+      this.enterSurface('time');
+      return;
+    }
+    const next: PlainDateTime = { date, time };
+    this.pendingDate.set(null);
+    this.pendingTime.set(null);
     this.commit(next, 'select', source);
     this.setHighlight({ date, time: this.highlight().time }, 'pointer', source);
     this.afterPress(next, wasWhole, 'date', source);
   }
 
+  /**
+   * A time pressed in the list. The date half is the one the value holds, or
+   * the day pressed in the calendar; with neither, the time waits for a day and
+   * focus moves to the calendar.
+   */
   protected selectTime(option: TimeOption, source: Event) {
     if (option.unavailable || !this.editable()) return;
     const wasWhole = this.held() !== null;
-    const next: PlainDateTime = { date: this.listDate(), time: option.time };
-    this.commit(next, 'select', source);
+    const date = this.held()?.date ?? this.pendingDate();
     this.setHighlight({ date: this.listDate(), time: option.time }, 'pointer', source);
+    if (date === null) {
+      this.pendingTime.set(option.time);
+      this.enterSurface('date');
+      return;
+    }
+    const next: PlainDateTime = { date, time: option.time };
+    this.pendingDate.set(null);
+    this.pendingTime.set(null);
+    this.commit(next, 'select', source);
     this.afterPress(next, wasWhole, 'time', source);
   }
 
@@ -781,20 +960,19 @@ export class SlDateTimePicker implements OnInit {
   }
 
   private enterSurface(surface: 'date' | 'time') {
-    if (surface === 'time') this.enterList();
-    else this.enterCalendar();
+    afterNextRender(() => this.enterSurfaceNow(surface), { injector: this.injector });
   }
 
-  private enterCalendar() {
-    afterNextRender(
-      () => {
-        const day = this.datePanelRef?.nativeElement.querySelector<HTMLElement>(
-          '[data-part="day"][tabindex="0"]',
-        );
-        day?.focus();
-      },
-      { injector: this.injector },
+  /** Focus into one surface, on a panel that is already rendered. */
+  private enterSurfaceNow(surface: 'date' | 'time') {
+    if (surface === 'time') {
+      this.enterList();
+      return;
+    }
+    const day = this.datePanelRef?.nativeElement.querySelector<HTMLElement>(
+      '[data-part="day"][tabindex="0"]',
     );
+    day?.focus({ preventScroll: true });
   }
 
   /**
@@ -812,18 +990,13 @@ export class SlDateTimePicker implements OnInit {
   }
 
   private enterList() {
-    afterNextRender(
-      () => {
-        const index = this.highlightIndex() >= 0 ? this.highlightIndex() : this.openingIndex();
-        if (index < 0) return;
-        const option = this.list()[index];
-        if (option !== undefined) {
-          this.setHighlight({ date: this.listDate(), time: option.time }, 'keyboard', undefined);
-        }
-        this.focusOption(index);
-      },
-      { injector: this.injector },
-    );
+    const index = this.highlightIndex() >= 0 ? this.highlightIndex() : this.openingIndex();
+    if (index < 0) return;
+    const option = this.list()[index];
+    if (option !== undefined) {
+      this.setHighlight({ date: this.listDate(), time: option.time }, 'keyboard', undefined);
+    }
+    this.focusOption(index);
   }
 
   /** Watches the list's own box, which is what "the layer has been measured" looks like from inside it. */
@@ -869,7 +1042,7 @@ export class SlDateTimePicker implements OnInit {
        is always drawn and this is only a shortcut. Focus stays in the field. */
     if (event.altKey && event.key === 'ArrowDown') {
       event.preventDefault();
-      this.setOpen(true, 'keyboard', event);
+      this.setOpen(true, 'keyboard', event, false);
     }
   }
 
@@ -877,8 +1050,8 @@ export class SlDateTimePicker implements OnInit {
     if (!this.editable()) return;
     if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
     event.preventDefault();
-    if (!this.isOpen()) this.setOpen(true, 'keyboard', event);
-    this.enterSurface(this.resolvedOpenTo());
+    if (this.isOpen()) this.enterSurface(this.resolvedOpenTo());
+    else this.setOpen(true, 'keyboard', event);
   }
 
   protected onListKeyDown(event: KeyboardEvent) {
@@ -961,7 +1134,9 @@ export class SlDateTimePicker implements OnInit {
       },
     });
     const moved = state.request(next, reason, source);
-    if (!cancelled && moved && this.value() === undefined) this.ownValue.set(next);
+    if (cancelled || !moved) return;
+    if (this.value() === undefined) this.ownValue.set(next);
+    this.onChangeFn(next);
   }
 
   private setHighlight(next: DateTimePickerHighlight, reason: ChangeReason, source: unknown) {
@@ -975,11 +1150,14 @@ export class SlDateTimePicker implements OnInit {
     if (state.request(next, reason, source)) this.ownHighlight.set(next);
   }
 
-  private setOpen(next: boolean, reason: ChangeReason, source: unknown) {
+  private setOpen(next: boolean, reason: OpenReason, source: unknown, enter = true) {
     const state = createControllable<boolean>({
       controlled: this.open(),
       initial: this.isOpen(),
-      onRequest: (request) => this.openChange.emit(request),
+      onRequest: (request) => {
+        this.openChange.emit(request);
+        this.focusOnOpen = enter && request.value && !request.cancelled;
+      },
     });
     if (state.request(next, reason, source)) this.ownOpen.set(next);
   }
@@ -999,6 +1177,12 @@ export class SlDateTimePicker implements OnInit {
       ];
       this.positioner = createPositioner(anchor, layer, { align: align ?? 'center', side });
       void this.positioner.update().then(() => this.positioned.set(true));
+    }
+
+    /* The dialog takes focus when it opens, in the surface `openTo` names. */
+    if (this.focusOnOpen) {
+      this.focusOnOpen = false;
+      this.enterSurfaceNow(this.resolvedOpenTo());
     }
 
     const trigger = this.triggerRef?.nativeElement;

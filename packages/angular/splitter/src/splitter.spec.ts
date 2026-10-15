@@ -48,6 +48,20 @@ class Host {
   readonly onCollapsedRequest = vi.fn();
 }
 
+@Component({
+  imports: [SlSplitter],
+  template: `
+    <div id="workspace">
+      <aside>Contas</aside>
+      <div slSplitter [defaultValue]="0.3" [(value)]="value"></div>
+      <main>NF-e 20 483</main>
+    </div>
+  `,
+})
+class ResetHost {
+  readonly value = signal(0.7);
+}
+
 function mount() {
   const fixture = TestBed.createComponent(Host);
   const workspace = fixture.nativeElement.querySelector('#workspace') as HTMLElement;
@@ -241,7 +255,7 @@ describe('the request', () => {
 });
 
 describe('reset', () => {
-  it('returns to where it started on a double click', () => {
+  it('returns to defaultValue on a double click', () => {
     const { bar, fixture, host } = mount();
 
     press(bar, 'End');
@@ -251,6 +265,125 @@ describe('reset', () => {
     bar.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
     fixture.detectChanges();
     expect(host.value()).toBe(0.5);
+  });
+
+  /**
+   * The value the consumer bound is not where a double click returns: a layout
+   * restored from storage would otherwise become the reset, and the family's
+   * own 0.5 was what the bar returned to whatever the consumer opened it at.
+   */
+  it('returns to the defaultValue the consumer names, not to the value it was opened at', () => {
+    const fixture = TestBed.createComponent(ResetHost);
+    fixture.detectChanges();
+    const bar = fixture.nativeElement.querySelector('[data-ui="splitter"]') as HTMLElement;
+    bar.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toBe(0.3);
+  });
+
+  it('returns inside the limits: a defaultValue beyond max lands on max', () => {
+    const { bar, fixture, host } = mount();
+    host.max.set(0.4);
+    fixture.detectChanges();
+    host.value.set(0.2);
+    fixture.detectChanges();
+
+    bar.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.value()).toBe(0.4);
+  });
+});
+
+describe('the limits, held', () => {
+  /** The contract's `extent.clamped`: the reported value is always the clamped one. */
+  it('moves the value inside the limits when the limits move under it', () => {
+    const { fixture, host } = mount();
+    expect(host.value()).toBe(0.5);
+
+    host.max.set(0.3);
+    fixture.detectChanges();
+    expect(host.value()).toBe(0.3);
+    expect(host.onValueRequest).toHaveBeenLastCalledWith(
+      expect.objectContaining({ reason: 'programmatic', value: 0.3 }),
+    );
+  });
+
+  it('moves the value inside the limits when the container shrinks under a length limit', () => {
+    let notify: (() => void) | null = null;
+    class ManualObserver {
+      constructor(callback: () => void) {
+        notify = callback;
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', ManualObserver);
+    try {
+      const { fixture, host, workspace } = mount();
+      // jsdom lays nothing out: a length is measured as the probe's box, which the stub gives.
+      const probeWidth = 300;
+      const create = document.createElement.bind(document);
+      vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+        const element = create(tag);
+        element.getBoundingClientRect = () => ({ width: probeWidth, height: 0 }) as DOMRect;
+        return element;
+      });
+      host.min.set('300px');
+      fixture.detectChanges();
+      expect(host.value()).toBe(0.5);
+
+      const span = 500;
+      workspace.getBoundingClientRect = () =>
+        ({
+          x: 0,
+          y: 0,
+          width: span,
+          height: span,
+          top: 0,
+          left: 0,
+          right: span,
+          bottom: span,
+        }) as DOMRect;
+      notify!();
+      fixture.detectChanges();
+      expect(host.value()).toBeCloseTo(0.6, 5);
+    } finally {
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
+describe('the drag', () => {
+  function drag(bar: HTMLElement, from: number, to: number) {
+    bar.setPointerCapture = () => undefined;
+    bar.dispatchEvent(
+      new MouseEvent('pointerdown', { bubbles: true, button: 0, clientX: from, clientY: 10 }),
+    );
+    bar.dispatchEvent(new MouseEvent('pointermove', { bubbles: true, clientX: to, clientY: 10 }));
+    bar.dispatchEvent(new MouseEvent('pointerup', { bubbles: true, clientX: to, clientY: 10 }));
+  }
+
+  /**
+   * The bar follows the hand from where it was taken: a bar grabbed twelve
+   * pixels from the edge it marks does not leap twelve pixels on the first move.
+   */
+  it('keeps the point it was grabbed at under the pointer', () => {
+    const { bar, fixture, host } = mount();
+    // 0.5 of 800 is 400: grabbed at 412, moved 100 to the right.
+    drag(bar, 412, 512);
+    fixture.detectChanges();
+    expect(host.value()).toBeCloseTo(500 / SPAN, 5);
+  });
+
+  it('settles with the value the drag left it at', () => {
+    const { bar, fixture } = mount();
+    const settled: number[] = [];
+    fixture.componentInstance.bar().resizeEnd.subscribe((value) => settled.push(value));
+    drag(bar, 400, 200);
+    fixture.detectChanges();
+    expect(settled).toEqual([0.25]);
   });
 });
 

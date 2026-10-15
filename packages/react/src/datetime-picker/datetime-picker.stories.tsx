@@ -13,7 +13,7 @@ import { SlottedProvider } from '../i18n';
 import { DateTimePicker } from './datetime-picker';
 import { DateTimePickerDefaultsProvider } from './datetime-picker-defaults';
 import { Grid, Measure, Scene } from './datetime-picker-demo';
-import { REACT_DATE_TIME_PICKER_DOCS, REACT_DATE_TIME_PICKER_TOKENS } from './datetime-picker.docs';
+import { REACT_DATETIME_PICKER_DOCS, REACT_DATETIME_PICKER_TOKENS } from './datetime-picker.docs';
 import type { DateTimePickerHandle } from './datetime-picker.types';
 
 /** A consultation on a Thursday afternoon, and the clinic it belongs to. */
@@ -32,7 +32,7 @@ const isSaturday = (date: PlainDate) =>
   new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay() === 6;
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
-  bindScenes(REACT_DATE_TIME_PICKER_DOCS.dateTimePicker.scenes, {
+  bindScenes(REACT_DATETIME_PICKER_DOCS.dateTimePicker.scenes, {
     playground: Playground,
     panel: Panel,
     'open-to': OpenTo,
@@ -66,8 +66,8 @@ const meta = {
         description:
           'The only family in the library that holds two surfaces at once: a month and a list of times, inside one dialog, over a field that still types every segment. The decision it owes is which of the two focus opens on — and what happens to the other when the reader finishes the first. The answer is the value’s own completeness: the press that leaves it half written carries focus to the missing half, and the press that finishes it closes the panel. No confirmation button, and none declined by accident.',
         framework: 'React',
-        ...REACT_DATE_TIME_PICKER_DOCS.dateTimePicker,
-        tokens: REACT_DATE_TIME_PICKER_TOKENS,
+        ...REACT_DATETIME_PICKER_DOCS.dateTimePicker,
+        tokens: REACT_DATETIME_PICKER_TOKENS,
         scenes: referenceScenes,
       }),
     },

@@ -1050,9 +1050,18 @@ export function Chart(props: ChartProps) {
           ) : null}
         </div>
         {actions !== undefined ? <div data-part="actions">{actions}</div> : null}
-        {resolved.toolbar !== 'none' && usable && model ? (
-          <div aria-label={t('toolbar')} data-part="toolbar" role="toolbar">
-            {zoomable && !isFullZoom(zoomValue) && model.shape === 'cartesian' ? (
+        {/* The box stands in every state, so the header's words wrap at one width; it
+            holds nothing a reader can reach until the plot has something to act on. */}
+        {resolved.toolbar !== 'none' ? (
+          <div
+            aria-hidden={usable ? undefined : true}
+            aria-label={usable ? t('toolbar') : undefined}
+            data-part="toolbar"
+            data-waiting={usable ? undefined : ''}
+            inert={!usable}
+            role={usable ? 'toolbar' : undefined}
+          >
+            {model && zoomable && !isFullZoom(zoomValue) && model.shape === 'cartesian' ? (
               <ToolbarButton
                 label={t('resetZoom')}
                 onPress={(_, source) => {
@@ -1111,6 +1120,7 @@ export function Chart(props: ChartProps) {
                 label={t('downloadCsv')}
                 onPress={() => {
                   menu.close();
+                  if (!model) return;
                   download(
                     `${fileName}.csv`,
                     `data:text/csv;charset=utf-8,${encodeURIComponent(chartToCsv(model, t))}`,

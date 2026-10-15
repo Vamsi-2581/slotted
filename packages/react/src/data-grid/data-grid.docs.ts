@@ -866,7 +866,7 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'content',
-    title: 'Content the family did not choose',
+    title: 'Content the grid did not choose',
     note: 'A hundred-character customer name, an unbroken identifier, a right-to-left name, a disabled row, an empty cell in a numeric column and a value with a dash: each holds where the family says it holds.',
     snippet: defineSnippet({
       id: 'data-grid-react-content',
@@ -1006,7 +1006,7 @@ const api = apiRows([
     'readonly Row[]',
     '—',
     'DataGrid',
-    'The records; the family never mutates them. Left out when a dataSource answers for them.',
+    'The records; the grid never mutates them. Left out when a dataSource answers for them.',
   ],
   [
     'rowKey',
@@ -1486,14 +1486,14 @@ const api = apiRows([
     '(status) => ReactNode',
     '—',
     'DataGrid',
-    'The empty, no-results or error state in place of the family’s result-state.',
+    'The empty, no-results or error state in place of the grid’s result state.',
   ],
   [
     'renderFilterOperand',
     '(context) => ReactNode',
     '—',
     'DataGrid',
-    'The operand control in the panel and the row, for a kind the library has no field for.',
+    'The operand control in the panel and the row, for a kind the grid has no field for.',
   ],
   [
     'footer',
@@ -1612,7 +1612,7 @@ const composition = apiRows([
     'ReactNode',
     '—',
     'DataGrid',
-    'Pagination, a page-size select, a count: the consumer’s own controls in the bar the family draws.',
+    'Pagination, a page-size select, a count: the consumer’s own controls in the bar the grid draws.',
   ],
   [
     'handle',
@@ -1626,7 +1626,7 @@ const composition = apiRows([
     'attributes',
     '—',
     'DataGrid',
-    'Anything a div takes reaches the root; a consumer’s onKeyDown runs before the family’s and preventDefault stops it. ref reaches the root element.',
+    'Anything a div takes reaches the root; a consumer’s onKeyDown runs before the grid’s and preventDefault stops it. ref reaches the root element.',
   ],
   [
     'FilterBar, Pagination, ColumnManager',
@@ -1643,7 +1643,7 @@ const accessibility = [
   'aria-sort is written on the first sort key’s header only — the practice says more than one is ambiguous — and the whole order is announced through the live announcer: “Sorted by Carrier ascending, Weight descending”. A resize announces the column and its width; a filter announces its sentence through describeFilter; a copy announces the count.',
   'A cell that does not edit while others do carries aria-readonly="true"; a draft that fails carries aria-invalid and its message in the title. A selected row carries aria-selected; a cell in a range carries it too, and the root aria-multiselectable in multiple and range.',
   'A column with a description is described by it: the header carries aria-describedby to a visually hidden span, and the column menu points at the same span while showing the text aria-hidden, so the words are heard once. The column help is a button with a name — “About ARR” — reached by F2 on the header; Tab cycles the header’s widgets and Escape returns to the cell. Hiding a column is announced as “Carrier hidden”.',
-  'The header checkbox names what it covers — “Select all 3,412 rows”, or the page in server mode — because a selection over a whole result set is a decision only the query can make. Every control the family draws has a name: the column menu, the filter trigger, the expander, the group toggle, the operator symbol.',
+  'The header checkbox names what it covers — “Select all 3,412 rows”, or the page in server mode — because a selection over a whole result set is a decision only the query can make. Every control the grid draws has a name: the column menu, the filter trigger, the expander, the group toggle, the operator symbol.',
 ];
 
 const code = defineSnippet({

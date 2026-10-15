@@ -34,63 +34,77 @@ const anatomy: AnatomyRow[] = [
     element: 'div, or the element render returns',
     required: true,
     purpose:
-      'The family. A four-column, two-row grid carrying data-ui="tabs", the five axes, data-disabled, data-overflowing and data-activation-direction. It renders the two paging controls itself, because it owns the observer that knows whether they are needed.',
+      'The Tabs root: a grid of four columns and two rows that carries data-ui="tabs", the axes (data-size, data-variant, data-track, data-orientation, data-fit), data-disabled, data-overflowing and data-activation-direction. It renders the two paging controls itself, because it observes whether the list overflows.',
   },
   {
     part: 'list',
-    element: 'div[role="tablist"]',
+    element: 'div[role="tablist"], or the element render returns',
     required: true,
     purpose:
-      'The scroll container and the one tab stop. Its accessible name is the aria-label or aria-labelledby the consumer writes; the family writes neither, because only the page knows what the set of views is for.',
+      'The scroll container, and the single Tab stop of the list. Name it with aria-label or aria-labelledby: Tabs writes neither, because only the page knows what the set of views is for.',
   },
   {
     part: 'item',
-    element: 'div[role="presentation"], or the element Tab’s render returns',
+    element: 'div[role="presentation"], or the element the render of Tab returns',
     required: true,
     purpose:
-      'One tab and its optional dismiss control. It exists for two reasons a button cannot answer: a button may not contain a button, and the marker has to span the pair rather than only the label. className and style reach it.',
+      'One tab and its optional close button. It exists because a button cannot contain a button, and because the marker spans the tab and its close button together. className and style reach it.',
   },
   {
     part: 'tab',
     element: 'button[role="tab"], or a[role="tab"] with href',
     required: true,
     purpose:
-      'The control. Holds aria-selected, aria-controls, the identifier, data-value — which is what the keyboard reads — and every native prop and ref the consumer wrote.',
+      'The control. It holds aria-selected, aria-controls, the generated id and data-value, which the keyboard reads. Every other native prop and the ref reach it.',
+  },
+  {
+    part: 'start',
+    element: 'span',
+    required: false,
+    purpose:
+      'The content of start, before the label: an icon, as a flex item of the tab that never shrinks and that sizes an icon to the tab’s icon step.',
   },
   {
     part: 'label',
     element: 'span',
     required: true,
     purpose:
-      'The words. A box of their own, so text-overflow has something to clip when fit="equal" makes a share too narrow, and so a label in another script reads its own way inside a page that reads the other.',
+      'The words, in a box of their own: text-overflow cuts it when fit="equal" leaves too little room, and unicode-bidi: plaintext lets a label in another script read in its own direction.',
+  },
+  {
+    part: 'end',
+    element: 'span',
+    required: false,
+    purpose:
+      'The content of end, after the label: a count or a status, as a flex item of the tab that never shrinks.',
   },
   {
     part: 'dismiss',
     element: 'button',
     required: false,
     purpose:
-      'Closes the tab. tabindex="-1", so the arrow model stays the pattern’s, and inside the accessibility tree, so it is not a control only a mouse can reach — the keyboard path is Delete, announced by aria-keyshortcuts on the tab.',
+      'The close button. It has tabindex="-1", so the arrow keys move between tabs only, and it stays in the accessibility tree, so a screen reader can press it. From the keyboard, Delete closes the focused tab, which aria-keyshortcuts on the tab announces.',
   },
   {
     part: 'panel',
     element: 'div[role="tabpanel"]',
     required: true,
     purpose:
-      'The content of one tab: aria-labelledby its tab, tabindex="0", and hidden while another tab is selected. Whether it exists at all is what mount decides.',
+      'The content of one tab, with aria-labelledby pointing at its tab and tabindex="0". It carries the hidden attribute while another tab is selected. The panel element always exists, so every tab’s aria-controls names an element; mount decides whether its content exists.',
   },
   {
     part: 'scroll',
     element: 'button',
     required: false,
     purpose:
-      'One paging control per end, drawn only while the list overflows. aria-hidden and out of the tab sequence: the arrows already reach every tab and bring it into view.',
+      'One paging control at each end, drawn only while the list overflows. It is aria-hidden and outside the Tab sequence, because the arrow keys reach every tab and scroll it into view.',
   },
   {
     part: 'actions',
     element: 'div, or the element render returns',
     required: false,
     purpose:
-      'A slot beside the list, on the same row. What belongs in it is a Toolbar: one tab stop for however many actions the page puts there.',
+      'A slot at the end of the tab row, for controls that act on what the tabs show. Put a Toolbar in it: one Tab stop however many buttons it holds.',
   },
 ];
 
@@ -232,7 +246,7 @@ const scenes: ReferenceSceneMeta[] = [
 >
   <TabList aria-label="Queries">
     {queries.map((query) => (
-      <Tab dismissLabel={\`Fechar \${query}\`} dismissible key={query} value={query}>
+      <Tab dismissLabel={\`Close \${query}\`} dismissible key={query} value={query}>
         {query}
       </Tab>
     ))}
@@ -263,7 +277,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'tabs-react-links',
       language: 'tsx',
       label: 'Selection and navigation in one control',
-      source: `<Tabs onValueChange={(value) => navigate(\`/pedido/\${value}\`)} value={view}>
+      source: `<Tabs onValueChange={(value) => navigate(\`/order/\${value}\`)} value={view}>
   <TabList aria-label="Order">
     <Tab href="/order/summary" value="summary">
       Summary
@@ -335,17 +349,17 @@ const events: EventRow[] = [
   {
     name: 'onValueChange',
     payload: '(value: string, request: ChangeRequest<string | undefined>)',
-    when: 'Before the selection moves. The request carries the new value, the value it replaces — undefined while nothing has been selected — the reason (pointer, keyboard, remove or programmatic), the originating event, and cancel(), which refuses the move before anything commits.',
+    when: 'Before the selection moves. The request carries the new value, the previous value (undefined while no tab is selected), the reason (pointer, keyboard, remove or programmatic), the originating event, and cancel(), which keeps the current tab.',
   },
   {
     name: 'onTabDismiss',
     payload: '(value: string, request: TabsDismissRequest)',
-    when: 'Before a tab is closed, by Delete or by its control. Cancelling it stops both the dismissal and the selection that would have followed. The family removes nothing itself: the consumer owns the collection.',
+    when: 'Before a tab is closed, by Delete or by its close button. The request carries the reason (pointer or keyboard) and cancel(), which stops both the dismissal and the selection move that would follow it. Tabs removes nothing itself: remove the tab from your own data.',
   },
   {
-    name: 'onClick, onKeyDown, onFocus, on each tab',
+    name: 'onClick, onKeyDown, onFocus, on each Tab',
     payload: 'the element’s own events',
-    when: 'Whenever that tab’s control fires them. The family composes with a consumer’s handler rather than replacing it: the consumer’s runs first, and preventDefault() in onClick stops the selection as well.',
+    when: 'When the tab’s control fires them. Your handler runs first, and preventDefault() in onClick also stops the selection.',
   },
 ];
 
@@ -361,119 +375,140 @@ export const REACT_TABS_DOCS = {
         'string',
         '—',
         'Tabs',
-        'Present means the consumer owns the selection, for the life of the component. Absent, the family owns it and starts from defaultValue',
+        'The value of the selected tab. Passing it makes the selection controlled for the life of the component; without it, Tabs keeps the selection and starts from defaultValue.',
       ],
       [
         'defaultValue',
         'string',
         '—',
         'Tabs',
-        'The value an uncontrolled family starts from, read once. Left unset, nothing is selected and no panel is shown',
+        'The value an uncontrolled Tabs starts from, read once. When it is unset, no tab is selected and no panel is shown.',
       ],
       [
         'activation',
         "'automatic' | 'manual'",
         'automatic',
         'Tabs, TabsDefaultsProvider',
-        'Whether moving focus to a tab also selects it. The APG recommends automatic while panels are displayed without noticeable latency, and manual when the panel has to be fetched',
+        'Whether moving focus to a tab also selects it. The APG recommends automatic when panels show without a noticeable delay, and manual when a panel has to be fetched.',
       ],
       [
         'orientation',
         "'horizontal' | 'vertical'",
         'horizontal',
         'Tabs, TabsDefaultsProvider',
-        'Which way the list runs, and therefore which arrow pair moves the selection. A horizontal list does not listen for the up and down arrows, so the page keeps scrolling',
+        'Which way the list runs, and so which arrow keys move between tabs. A horizontal list ignores Up and Down, so those keys keep scrolling the page.',
       ],
       [
         'size',
         "'sm' | 'md' | 'lg'",
         'md',
         'Tabs, TabsDefaultsProvider',
-        'The control step the list sits at: height, type, padding and inner gap, all from the control scales the theme restates per density',
+        'The control step of the list: height, type, padding and inner gap, all from the control scales the theme restates per density.',
       ],
       [
         'variant',
         "'line' | 'contained'",
         'line',
         'Tabs, TabsDefaultsProvider',
-        'How the list is drawn. Both variants paint the accent marker, which is what says which view is open once the high-contrast scheme flattens every surface',
+        'How the list is drawn. Both variants paint the accent marker, which keeps the selected tab visible in the high-contrast scheme, where every surface is flattened.',
       ],
       [
         'track',
         "'line' | 'none'",
         'line',
         'Tabs, TabsDefaultsProvider',
-        'Whether the list draws the line its tabs stand on. none is for a list that sits on a line the page already drew — a card header’s edge, a table’s own rule — where two hairlines a pixel apart read as one smudge. The marker then sits on the item’s own edge, so it lands on the line that is there',
+        'Whether the list draws the line its tabs stand on. none is for a list placed on a line the page already draws, such as a card header’s edge or a table’s rule, where two hairlines a pixel apart read as one smudge. The marker then sits on the item’s own edge, on the line that is there.',
       ],
       [
         'fit',
         "'auto' | 'equal'",
         'auto',
         'Tabs, TabsDefaultsProvider',
-        'Whether each tab is as wide as its label or takes an equal share of the line. equal truncates a label that outgrows its share; auto never truncates and scrolls instead',
+        'Whether each tab is as wide as its label or takes an equal share of the line. equal cuts a label longer than its share with an ellipsis; auto never cuts a label and scrolls the list instead.',
       ],
       [
         'mount',
         "'active' | 'lazy' | 'eager'",
         'active',
         'Tabs, TabsDefaultsProvider',
-        'When a panel exists: only while selected, from its first selection onward, or from the start. Hidden panels carry the hidden attribute rather than a class',
+        'When a panel’s content exists: only while its tab is selected (active), from its first selection on (lazy), or from the start (eager). A panel that is not selected carries the hidden attribute.',
       ],
       [
         'loop',
         'boolean',
         'true',
         'Tabs, TabsDefaultsProvider',
-        'Whether the arrows wrap past the ends of the list',
+        'Whether the arrow keys wrap past the ends of the list.',
       ],
       [
         'disabled',
         'boolean',
         'false',
         'Tabs',
-        'Reaches every tab as the native attribute, which is also what makes the browser skip it with the arrow keys, and dims the track',
+        'Disables every tab with the native attribute, which also makes the arrow keys skip them, and dims the track.',
       ],
       [
         'value, on Tab',
         'string',
         '—',
         'Tab',
-        'What this tab selects, and what the family’s value holds. It reaches the DOM as data-value, which is what the keyboard reads',
+        'What this tab selects, and what the value of Tabs holds. It reaches the DOM as data-value, which the keyboard reads.',
       ],
       [
         'disabled, on Tab',
         'boolean',
-        'from the family, or false',
+        'from Tabs, or false',
         'Tab',
-        'Unstated rather than false, so one tab may be unavailable in an otherwise live list',
+        'Disables this tab only, so one tab can be unavailable in a working list. Unset rather than false, so the tab follows Tabs.',
       ],
       [
         'dismissible',
         'boolean',
         'false',
         'Tab',
-        'Draws the dismiss control and binds Delete on the tab, announced through aria-keyshortcuts',
+        'Draws the close button and binds Delete on the tab, announced through aria-keyshortcuts.',
       ],
       [
         'dismissLabel',
         'string',
         '—',
         'Tab',
-        'The accessible name of that control. Required whenever it is drawn: “Close customers.sql” says what closes, where “Close” alone says only that something does',
+        'The accessible name of the close button, required whenever it is drawn. Name what closes: “Close customers.sql” rather than “Close”.',
+      ],
+      [
+        'start',
+        'ReactNode',
+        '—',
+        'Tab',
+        'Content before the label, such as an Icon, placed in the start part beside the words.',
+      ],
+      [
+        'end',
+        'ReactNode',
+        '—',
+        'Tab',
+        'Content after the label, such as a Badge with a count, placed in the end part beside the words.',
+      ],
+      [
+        'controls',
+        'string',
+        '—',
+        'Tab',
+        'The id of the region this tab controls when it is not a TabPanel, such as a table the selected value filters. aria-controls names that region.',
       ],
       [
         'href',
         'string',
         '—',
         'Tab',
-        'Makes the control an anchor. A plain click selects; a click carrying a modifier key is left to the browser, so the view opens in a new browser tab',
+        'Renders the tab as a link. A plain click selects the tab without navigating; a click with a modifier key is left to the browser, which opens the address in a new browser tab or window.',
       ],
       [
         'value, on TabPanel',
         'string',
         '—',
         'TabPanel',
-        'The tab this panel belongs to. The pair is wired by identifiers the family generates from the value',
+        'The tab this panel belongs to. Tabs wires the pair with ids generated from the value.',
       ],
     ]),
     composition: apiRows([
@@ -482,45 +517,46 @@ export const REACT_TABS_DOCS = {
         '(props) => ReactNode',
         '—',
         'Tabs, TabList, Tab, TabPanel, TabActions',
-        'Substitutes any of the five roots and hands it every attribute — a list can be a real nav, a family a section. The tab control itself is fixed: substituting the element that holds the role, the value and the keyboard would leave the family with nothing to be, and href covers the one substitution that matters',
+        'Replaces the root element of any of the five and passes it every attribute, so a list can be a nav and Tabs a section. The tab control itself cannot be replaced: it holds the role, the value and the keyboard, and href covers the substitution that matters.',
       ],
       [
         'ref',
         'Ref<HTMLElement>',
         '—',
         'Tab, TabPanel, Tabs',
-        'Reaches the tab’s own control, so focus() and click() are the element’s own and no imperative handle is invented for what the platform already ships',
+        'On Tab, reaches the tab’s own control, so focus() and click() are the element’s own methods and no imperative handle stands in for them.',
       ],
       [
         'useTabs()',
         '() => TabsContextValue',
         '—',
         'inside Tabs',
-        'What a tab and a panel read: the value, the mount strategy, the identifiers, and select(value, reason) for a view a page changes on its own. It throws outside a family rather than rendering a control that looks right and does nothing',
+        'What a tab and a panel read: the value, the mount strategy, the ids, and select(value, reason, source) for a view the page changes on its own. It throws outside Tabs instead of rendering a control that looks right and does nothing.',
       ],
       [
         'TabsDefaultsProvider',
-        '{ activation, orientation, size, variant, fit, mount, loop }',
+        '{ activation, orientation, size, variant, track, fit, mount, loop }',
         '—',
         'a subtree',
-        'The seven decisions an application takes once. A family that states any of them itself still wins',
+        'The eight settings an application decides once. A value set on one Tabs still wins.',
       ],
       [
         'aria-label, on TabList',
         'string',
         '—',
         'TabList',
-        'The name of the set of views. The family writes none of its own, because only the page knows what the set is for; aria-labelledby works the same way',
+        'The name of the set of views. Tabs writes no name of its own; aria-labelledby works the same way.',
       ],
     ]),
     accessibility: [
-      'The pattern is the WAI-ARIA APG’s Tabs (w3.org/WAI/ARIA/apg/patterns/tabs/), and the whole keyboard table is implemented: Tab enters the list on the selected tab and leaves to the panel, the arrows of the flow axis move focus and wrap at both ends, Home and End reach the first and last enabled tab, Enter and Space activate under manual activation, and Delete closes a dismissible tab. A horizontal list deliberately does not listen for the up and down arrows, so those keys keep scrolling the page while focus is inside the list.',
-      'Focus after a dismissal is the pattern’s own rule: the tab that followed the closed one, the tab before it when the closed one was last, and the list itself when none is left — which is why the list carries tabindex="-1". The selection follows the same rule, with the reason "remove", which is the half Carbon and Cloudscape leave to the consumer.',
-      'The dismiss control is out of the arrow ring and inside the accessibility tree. A screen reader reaches and presses it; a keyboard reader uses Delete, which the tab announces with aria-keyshortcuts. Putting it in the ring would double the number of arrow presses it takes to cross a list.',
-      'The paging controls are aria-hidden and out of the tab sequence, because every tab is already reachable through the roving stop and the arrows bring each one into view. Cloudscape’s own guidance warns against extra stops between a tab list and its panel, and this is that warning taken literally.',
-      'Each tab names its panel with aria-controls and each panel names its tab with aria-labelledby; the identifiers are generated from the value, escaping the characters an identifier refuses rather than replacing them, so two values that differ only in a space never wire one panel.',
-      'The selected tab is never said with colour alone: the marker is a border-width bar, which is what survives the high-contrast scheme, where the theme paints every surface Canvas and the contained variant’s fill disappears.',
-      'A panel carries tabindex="0" so the tab sequence reaches it from the list. That is one stop for a panel whose first content is already focusable, which the pattern permits and every surveyed implementation ships.',
+      'Tabs implements the WAI-ARIA APG Tabs pattern (w3.org/WAI/ARIA/apg/patterns/tabs/) and its whole keyboard table: Tab enters the list on the selected tab and leaves to the panel, the arrow keys of the list’s direction move focus and wrap at both ends, Home and End reach the first and last enabled tab, Enter and Space select under manual activation, and Delete closes a dismissible tab. A horizontal list does not listen for Up and Down, so those keys keep scrolling the page while focus is in the list.',
+      'After a dismissal, focus follows the pattern: the next tab, the previous one when the closed tab was last, or the list itself when no tab is left, which is why the list carries tabindex="-1". The selection follows the same rule, with the reason remove.',
+      'The close button is outside the arrow-key sequence and inside the accessibility tree. A screen reader reaches and presses it; from the keyboard, Delete closes the focused tab, and the tab announces the key with aria-keyshortcuts. In the arrow-key sequence, close buttons would double the presses it takes to cross the list.',
+      'The paging controls are aria-hidden and outside the Tab sequence, because the arrow keys reach every tab and scroll it into view. Cloudscape’s guidance warns against extra Tab stops between a tab list and its panel.',
+      'A list that starts to overflow scrolls the selected tab into view once its paging controls are drawn, so the selected tab is not left behind the end control.',
+      'Each tab names its panel with aria-controls and each panel names its tab with aria-labelledby. The ids come from the value, with the characters an id cannot hold escaped rather than replaced, so two values that differ only by a space never share a panel.',
+      'The selected tab is never shown by colour alone: the marker is a bar the width of a thick border, which stays visible in the high-contrast scheme, where the theme paints every surface Canvas and the fill of the contained variant disappears.',
+      'A panel carries tabindex="0", so the Tab key reaches it from the list. The pattern permits that stop even when the panel’s first content is focusable.',
     ],
     snippets: [
       defineSnippet({

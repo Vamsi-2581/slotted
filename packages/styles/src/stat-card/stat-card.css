@@ -242,7 +242,16 @@
     grid-template-rows: auto minmax(0, 1fr) auto auto;
   }
 
+  /**
+   * The header, the comparison and the message hold text a consumer writes,
+   * and a line set on one row (`nowrap` with an ellipsis) has the whole line
+   * as its min-content. The figure's column is floored at its min-content, so
+   * that line would widen the column past the card. Size containment on the
+   * inline axis gives these regions no intrinsic width: the figure alone
+   * decides the column, and the text is cut or wrapped by the card's width.
+   */
   [data-ui='stat-card'] [data-part='header'] {
+    contain: inline-size;
     grid-area: header;
   }
 
@@ -283,6 +292,7 @@
   }
 
   [data-ui='stat-card'] [data-part='message'] {
+    contain: inline-size;
     grid-area: message;
   }
 
@@ -390,6 +400,7 @@
   }
 
   [data-ui='stat-card'] [data-part='comparison'] {
+    contain: inline-size;
     flex: 1 1 100%;
   }
 

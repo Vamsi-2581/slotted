@@ -106,12 +106,13 @@ export function Toolbar({
       declare: (id, node) => {
         counterparts.current.set(id, node);
       },
+      orientation: resolvedOrientation,
       registerTrigger,
       release: (id) => {
         counterparts.current.delete(id);
       },
     }),
-    [collapsed, registerTrigger],
+    [collapsed, registerTrigger, resolvedOrientation],
   );
 
   const attach = useCallback(

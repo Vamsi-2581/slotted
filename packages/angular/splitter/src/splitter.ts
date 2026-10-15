@@ -27,6 +27,7 @@ import {
   model,
   output,
   signal,
+  untracked,
   ViewEncapsulation,
 } from '@angular/core';
 
@@ -92,6 +93,12 @@ export class SlSplitter {
   readonly value = model<number>(0.5);
   /** Whether the region before the bar is collapsed. */
   readonly collapsed = model<boolean>(false);
+  /**
+   * Where a double click and `reset()` return the bar, inside the limits. Not
+   * the value the bar was opened at: a layout restored from storage is where
+   * the reader left it, never where a reset should go.
+   */
+  readonly defaultValue = input<number>(0.5);
 
   readonly orientation = input<SplitterOrientation | undefined>(undefined);
   readonly min = input<SplitterLimit | undefined>(undefined);
@@ -139,10 +146,8 @@ export class SlSplitter {
 
   protected readonly dragging = signal(false);
   private readonly regionId = signal<string | undefined>(undefined);
-  /** Where the bar started, and where a double click returns it. */
-  private readonly initial = this.value();
-  /** The fraction to come back to after a collapse. */
-  private restore = this.value();
+  /** The fraction to come back to after a collapse; the value at the moment of the collapse. */
+  private restore = 0.5;
   private release: (() => void) | null = null;
 
   protected readonly resolvedOrientation = computed(
@@ -206,6 +211,28 @@ export class SlSplitter {
       if (target.id === '') target.id = this.ids.next();
       this.regionId.set(target.id);
     });
+
+    /**
+     * The contract's `extent.clamped`: the reported value is always the
+     * clamped one. Limits move under a value — a length limit when the
+     * container is resized, a fraction when the consumer binds another — and a
+     * value restored from another window's layout can lie outside them, so the
+     * bar brings it back inside, as a programmatic request. A collapsed region
+     * stands below its floor on purpose and is left there.
+     */
+    effect(() => {
+      const { min, max } = this.bounds();
+      const value = this.value();
+      if (this.collapsed() || this.dragging()) return;
+      const held = Math.min(Math.max(value, min), max);
+      if (held !== value) untracked(() => this.requestValue(held, 'programmatic', undefined));
+    });
+  }
+
+  /** A fraction brought inside the limits as they resolve now. */
+  private clamp(value: number) {
+    const { min, max } = this.bounds();
+    return Math.min(Math.max(value, min), max);
   }
 
   /** The box the fraction is a fraction *of*: whatever holds the bar. */
@@ -247,7 +274,7 @@ export class SlSplitter {
   private resolve(limit: SplitterLimit, box: HTMLElement | null, span: number, fallback: number) {
     if (typeof limit === 'number') return Math.min(Math.max(limit, 0), 1);
     if (box === null || span <= 0) return fallback;
-    return extentFromLength({ pixels: measureLength(limit, box), span });
+    return extentFromLength({ pixels: measureLength(limit, box, span), span });
   }
 
   protected readonly bounds = computed(() => {
@@ -351,9 +378,9 @@ export class SlSplitter {
     this.toggle('programmatic', undefined);
   }
 
-  /** Returns the bar to where it started, which is what a double click does. */
+  /** Returns the bar to `defaultValue`, inside the limits, which is what a double click does. */
   reset() {
-    this.requestValue(this.initial, 'programmatic', undefined);
+    this.requestValue(this.clamp(this.defaultValue()), 'programmatic', undefined);
   }
 
   /** Moves focus to the bar. */
@@ -387,11 +414,18 @@ export class SlSplitter {
       });
     };
 
+    /*
+     * Where on the bar the hand took it, as a fraction: the bar keeps that point
+     * under the pointer for the whole drag. Read as an absolute position, a bar
+     * taken a few pixels from the edge it marks leapt those pixels on the first
+     * move — and a bar whose region is followed by a gap leapt the gap.
+     */
+    const grab = (at(event) ?? this.value()) - this.value();
+
     const move = (moved: PointerEvent) => {
       const raw = at(moved);
       if (raw === undefined) return;
-      const limits = this.bounds();
-      this.requestValue(Math.min(Math.max(raw, limits.min), limits.max), 'pointer', moved);
+      this.requestValue(this.clamp(raw - grab), 'pointer', moved);
     };
 
     const up = (ended: PointerEvent) => {
@@ -407,8 +441,7 @@ export class SlSplitter {
       const stops = this.snapPoints();
       const raw = at(ended);
       if (stops.length > 0 && raw !== undefined) {
-        const limits = this.bounds();
-        const snapped = Math.min(Math.max(nearestSnap(raw, stops), limits.min), limits.max);
+        const snapped = this.clamp(nearestSnap(raw - grab, stops));
         this.requestValue(snapped, 'pointer', ended);
         this.resizeEnd.emit(snapped);
         return;
@@ -484,6 +517,6 @@ export class SlSplitter {
 
   protected onDoubleClick(event: MouseEvent) {
     if (event.defaultPrevented || this.disabled()) return;
-    this.requestValue(this.initial, 'pointer', event);
+    this.requestValue(this.clamp(this.defaultValue()), 'pointer', event);
   }
 }

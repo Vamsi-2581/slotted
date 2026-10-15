@@ -13,7 +13,15 @@ import {
   stepExtent,
 } from '@slotted/core/extent';
 import { createControllable } from '@slotted/core/state';
-import { useCallback, useEffect, useId, useImperativeHandle, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { useSplitterDefaults } from './splitter-defaults';
 import type {
@@ -53,7 +61,7 @@ function resolveLimit(
 ): number {
   if (typeof limit === 'number') return Math.min(Math.max(limit, 0), 1);
   if (container === null || span <= 0) return fallback;
-  return extentFromLength({ pixels: measureLength(limit, container), span });
+  return extentFromLength({ pixels: measureLength(limit, container, span), span });
 }
 
 /**
@@ -129,6 +137,18 @@ export function Splitter({
    */
   const restore = useRef(defaultValue);
   const release = useRef<(() => void) | null>(null);
+  /**
+   * The value as it stands now, for the listeners a drag adds. They are made
+   * when the pointer goes down and live until it comes up, so a value read from
+   * their render is the value the drag started from: the drag's own requests
+   * compared against it, and `onResizeEnd` reported it as where the drag ended.
+   */
+  const latest = useRef(currentValue);
+  useLayoutEffect(() => {
+    latest.current = currentValue;
+  }, [currentValue]);
+  /** Bumped when the container's measure changes, which no prop can say. */
+  const [measured, setMeasured] = useState(0);
 
   /** The box the fraction is a fraction *of*: whatever holds the bar. */
   const container = useCallback(() => bar.current?.parentElement ?? null, []);
@@ -160,11 +180,11 @@ export function Splitter({
 
   const requestValue = useCallback(
     (next: number, reason: SplitterValueReason, source: unknown) => {
-      if (next === currentValue) return;
+      if (next === latest.current) return;
 
       const state = createControllable<number>({
         controlled: value,
-        initial: currentValue,
+        initial: latest.current,
         onRequest: (raw) => {
           onValueChange?.(raw.value, {
             get cancelled() {
@@ -182,9 +202,12 @@ export function Splitter({
       /* The return value, and not a flag read inside `onRequest`: a flag
          assigned there is assigned before the consumer has been handed the
          request and had the chance to refuse it. */
-      if (state.request(next, reason, source)) setOwnValue(next);
+      if (state.request(next, reason, source)) {
+        latest.current = next;
+        setOwnValue(next);
+      }
     },
-    [currentValue, onValueChange, value],
+    [onValueChange, value],
   );
 
   const requestCollapsed = useCallback(
@@ -277,6 +300,42 @@ export function Splitter({
 
   useEffect(() => () => release.current?.(), []);
 
+  /** A fraction brought inside the limits as they resolve now. */
+  const clamp = useCallback(
+    (fraction: number) => {
+      const bounds = limits();
+      return Math.min(Math.max(fraction, bounds.min), bounds.max);
+    },
+    [limits],
+  );
+
+  /**
+   * The container's measure, watched: a length limit is a different fraction
+   * of a container that was resized. Guarded, because `ResizeObserver` is
+   * absent from a server render and from jsdom.
+   */
+  useEffect(() => {
+    const box = container();
+    if (typeof ResizeObserver === 'undefined' || box === null) return;
+    const observer = new ResizeObserver(() => setMeasured((count) => count + 1));
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, [container]);
+
+  /**
+   * The contract's `extent.clamped`: the reported value is always the clamped
+   * one. Limits move under a value — a length limit when the container is
+   * resized, a fraction when the consumer passes another — and a value
+   * restored from another window's layout can lie outside them, so the bar
+   * brings it back inside, as a programmatic request. A collapsed region stands
+   * below its floor on purpose and is left there.
+   */
+  useEffect(() => {
+    if (currentCollapsed || dragging) return;
+    const held = clamp(currentValue);
+    if (held !== currentValue) requestValue(held, 'programmatic', undefined);
+  }, [clamp, currentCollapsed, currentValue, dragging, measured, requestValue]);
+
   useImperativeHandle(
     ref,
     (): SplitterHandle => ({
@@ -297,9 +356,10 @@ export function Splitter({
         }
       },
       focus: () => bar.current?.focus(),
-      reset: () => requestValue(defaultValue, 'programmatic', undefined),
+      reset: () => requestValue(clamp(defaultValue), 'programmatic', undefined),
     }),
     [
+      clamp,
       collapsible,
       currentCollapsed,
       currentValue,
@@ -329,6 +389,16 @@ export function Splitter({
     const side = sideFor(resolvedOrientation);
     const target = event.currentTarget;
 
+    /*
+     * Where on the bar the hand took it, as a fraction: the bar keeps that point
+     * under the pointer for the whole drag. Read as an absolute position, a bar
+     * taken a few pixels from the edge it marks leapt those pixels on the first
+     * move — and a bar whose region is followed by a gap leapt the gap.
+     */
+    const grab =
+      extentAtPoint({ point: { x: event.clientX, y: event.clientY }, rect, rtl, side }) -
+      latest.current;
+
     const move = (moved: PointerEvent) => {
       const live = container()?.getBoundingClientRect();
       if (live === undefined) return;
@@ -339,8 +409,7 @@ export function Splitter({
         rtl,
         side,
       });
-      const bounds = limits();
-      requestValue(Math.min(Math.max(raw, bounds.min), bounds.max), 'pointer', moved);
+      requestValue(clamp(raw - grab), 'pointer', moved);
     };
 
     const up = (ended: PointerEvent) => {
@@ -361,14 +430,13 @@ export function Splitter({
           rtl,
           side,
         });
-        const bounds = limits();
-        const snapped = nearestSnap(raw, stops);
-        requestValue(Math.min(Math.max(snapped, bounds.min), bounds.max), 'pointer', ended);
+        const snapped = clamp(nearestSnap(raw - grab, stops));
+        requestValue(snapped, 'pointer', ended);
         onResizeEnd?.(snapped);
         return;
       }
 
-      onResizeEnd?.(currentValue);
+      onResizeEnd?.(latest.current);
     };
 
     target.addEventListener('pointermove', move);
@@ -440,7 +508,7 @@ export function Splitter({
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     onDoubleClick?.(event);
     if (event.defaultPrevented || disabled) return;
-    requestValue(defaultValue, 'pointer', event);
+    requestValue(clamp(defaultValue), 'pointer', event);
   };
 
   const props = {

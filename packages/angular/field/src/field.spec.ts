@@ -108,6 +108,47 @@ describe('SlField', () => {
     );
   });
 
+  /**
+   * A message is drawn where the page wrote one, as React's `FieldDescription`
+   * and `FieldError` are: an unwritten error is no `inline-message` at all,
+   * not an empty one the stylesheet hides.
+   */
+  it('draws only the messages the page actually wrote', () => {
+    const fixture = renderTemplate(
+      `<div slField id="cnpj">
+         <input slFieldControl />
+         <span slFieldDescription>Somente números.</span>
+       </div>`,
+    );
+
+    const messages = root(fixture).querySelectorAll('[data-ui="inline-message"]');
+    expect([...messages].map((message) => message.id)).toEqual(['cnpj-description']);
+
+    const bare = renderTemplate(`<div slField><input slFieldControl /></div>`);
+    expect(root(bare).querySelector('[data-ui="inline-message"]')).toBeNull();
+  });
+
+  /**
+   * React's `FieldError` registers only when its children have content: a
+   * reserved message with nothing in it keeps its box and describes nothing,
+   * until its text arrives.
+   */
+  it('names a reserved message only while it has something to say', () => {
+    const fixture = TestBed.createComponent(Notice);
+    fixture.detectChanges();
+    const control = root(fixture, 'input');
+    expect(root(fixture, '#cnpj-error').hasAttribute('data-reserve')).toBe(true);
+    expect(control.getAttribute('aria-describedby')).toBe('cnpj-description');
+
+    fixture.componentInstance.notice.set('Faltam dois dígitos.');
+    fixture.detectChanges();
+    expect(control.getAttribute('aria-describedby')).toBe('cnpj-description cnpj-error');
+
+    fixture.componentInstance.notice.set('');
+    fixture.detectChanges();
+    expect(control.getAttribute('aria-describedby')).toBe('cnpj-description');
+  });
+
   it('merges the field’s description after a value the consumer wrote', () => {
     const fixture = renderTemplate(
       `<div slField id="cnpj">
@@ -456,3 +497,16 @@ describe('SlField', () => {
     expect(counters[0].textContent?.trim()).toBe('3/14');
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [SlField, SlFieldControl, SlFieldDescription, SlFieldError],
+  template: `<div slField id="cnpj">
+    <input slFieldControl />
+    <span slFieldDescription>Somente números.</span>
+    <span slFieldError reserve>{{ notice() }}</span>
+  </div>`,
+})
+class Notice {
+  readonly notice = signal('');
+}

@@ -23,8 +23,8 @@ import type { SelectDefaults, SelectDefaultsProviderProps } from './select.types
  * of its own options once a reader has chosen; a combobox holds whatever was
  * typed, and taking it back is the commonest thing a reader does to one.
  *
- * `width` is `anchor` because a select's popup is a list of the values its
- * control shows, so the control's width is the honest one.
+ * `width` is `content`: the popup is never narrower than its control and grows
+ * when an option needs it, so a narrow control does not wrap its option labels.
  *
  * `search` is `false`. It is the one capability here that changes the popup's
  * role, moves DOM focus into the layer and takes three keys back from the key
@@ -63,7 +63,7 @@ export const SELECT_FALLBACK: SelectDefaults = {
   typeahead: true,
   typeaheadTimeout: 500,
   variant: 'outline',
-  width: 'anchor',
+  width: 'content',
 };
 
 const SelectDefaultsContext = createContext<SelectDefaults>(SELECT_FALLBACK);

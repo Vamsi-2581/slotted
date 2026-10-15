@@ -301,8 +301,8 @@ export const ANGULAR_PAGE_DOCS = {
         '--slotted-page-sticky-top, --slotted-page-sticky-bottom',
         'runtime properties on the scroller',
         '—',
-        'every family under the page',
-        'The height of the chrome that stays at the top, written by the header, and of the footer, written by the page. A section’s sticky header reads the first; a table with stickyTo="page" reads both through the bridge the page writes on its root',
+        'every family under the page, and the consumer’s own sticky elements inside it',
+        'The height of the chrome that stays at the top, written by the header, and of the footer, written by the page. A section’s sticky header reads the first; a table with stickyTo="page" reads both through the bridge the page writes on its root. A consumer’s own position: sticky element reads the first as well: inset-block-start: calc(var(--slotted-page-sticky-top, 0px) + gap) stops it under the chrome instead of behind the stuck header, and max-block-size: calc(100dvh - var(--slotted-page-sticky-top, 0px) - gap) bounds one that may be taller than the viewport',
       ],
       [
         'native attributes',
@@ -337,6 +337,17 @@ export const ANGULAR_PAGE_DOCS = {
     </div>
   </footer>
 </main>`,
+      }),
+      defineSnippet({
+        id: 'page-sticky-offset',
+        language: 'css',
+        label: 'A consumer’s own sticky element under the page’s chrome',
+        source: `.order-summary {
+  position: sticky;
+  inset-block-start: calc(var(--slotted-page-sticky-top, 0px) + var(--slotted-space-4));
+  max-block-size: calc(100dvh - var(--slotted-page-sticky-top, 0px) - var(--slotted-space-4));
+  overflow-y: auto;
+}`,
       }),
       defineSnippet({
         id: 'page-theming',

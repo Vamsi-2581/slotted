@@ -1,6 +1,6 @@
 import buttonTokens from '@slotted/styles/button/tokens.json';
 import { defineSnippet } from '@slotted/storybook-workbench';
-import type { ApiRow } from '@slotted/storybook-workbench';
+import type { AnatomyRow, ApiRow, ReferenceImport } from '@slotted/storybook-workbench';
 
 type ApiTuple = readonly [string, string, string, string, string];
 const apiRows = (rows: readonly ApiTuple[]): ApiRow[] =>
@@ -14,17 +14,38 @@ const apiRows = (rows: readonly ApiTuple[]): ApiRow[] =>
 
 export const ANGULAR_BUTTON_TOKENS = buttonTokens.map((name) => ({
   name,
-  purpose: 'Foundation token the Button family reads',
+  purpose: 'A theme token the Button stylesheet reads.',
 }));
+
+const SOURCE =
+  "import {\n  provideButtonDefaults,\n  SlButton,\n  SlButtonEnd,\n  SlButtonLink,\n  SlButtonStart,\n  SlIconButton,\n  SlToggleButton,\n} from '@slotted/angular/button';";
+
+const imports = (selector: string, exportAs: string): ReferenceImport => ({
+  source: SOURCE,
+  selector,
+  exportAs,
+});
 
 const TONE = 'accent | secondary | success | warning | danger';
 const VARIANT = 'solid | outline | ghost';
 const SIZE = 'sm | md | lg';
 
 const appearance = (member: string, tone: string, variant: string): ApiTuple[] => [
-  ['tone', TONE, tone, member, 'Which of the five semantic colours the control speaks in'],
-  ['variant', VARIANT, variant, member, 'How the tone is painted'],
-  ['size', SIZE, 'md', member, 'Step of the control scale'],
+  [
+    'tone',
+    TONE,
+    tone,
+    member,
+    'The semantic colour: accent for the primary action, secondary for a neutral one, and success, warning or danger for what the action does.',
+  ],
+  ['variant', VARIANT, variant, member, 'How the tone is painted: solid, outline or ghost.'],
+  [
+    'size',
+    SIZE,
+    'md',
+    member,
+    'The step of the control scale. Each step reads the --slotted-control-* tokens, so the density of the theme sets the height.',
+  ],
 ];
 
 /** Being unavailable and being unreachable are two decisions, not one. */
@@ -34,58 +55,141 @@ const unavailable = (member: string): ApiTuple[] => [
     'boolean',
     'false',
     member,
-    'Refuses the action and says the control is unavailable',
+    'Refuses the action and marks the control unavailable. On its own, it sets the native disabled property, which also removes the control from the tab sequence.',
   ],
   [
     'focusableWhenDisabled',
     'boolean',
     'false',
     member,
-    'Keeps an unavailable control in the tab sequence, announcing aria-disabled instead',
+    'Keeps a disabled control in the tab sequence: aria-disabled replaces the native property, and activation is still refused.',
   ],
 ];
 
 const waiting = (member: string): ApiTuple[] => [
-  ['loading', 'boolean', 'false', member, 'Waits: refuses activation and shows an indicator'],
+  [
+    'loading',
+    'boolean',
+    'false',
+    member,
+    'Refuses activation, keeps focus, and shows a progress indicator named by messages.loading.',
+  ],
   [
     'loadingDelay',
     'number',
     '0',
     member,
-    'Milliseconds before the indicator appears; the refusal is immediate',
+    'Milliseconds before the indicator appears. Activation is refused from the start of the wait.',
   ],
   [
     'messages',
     'Partial<ButtonMessages>',
     '—',
     member,
-    'Words laid over the language in force, key by key: what the indicator announces itself as (loading)',
+    'Overrides for the strings of the active locale, key by key. loading names the progress indicator.',
   ],
 ];
 
 const CONTENT = (member: string): ApiTuple[] => [
-  ['start', '[slButtonStart]', '—', member, 'Content projected before the label'],
-  ['end', '[slButtonEnd]', '—', member, 'Content projected after the label'],
+  [
+    'start',
+    '[slButtonStart]',
+    '—',
+    member,
+    'Content projected before the label, such as an icon, on the element you mark with slButtonStart. It mirrors in a right-to-left document.',
+  ],
+  [
+    'end',
+    '[slButtonEnd]',
+    '—',
+    member,
+    'Content projected after the label, on the element you mark with slButtonEnd. It mirrors in a right-to-left document.',
+  ],
 ];
+
+const root = (element: string, carries: string): AnatomyRow => ({
+  part: 'root',
+  element,
+  required: true,
+  purpose: `The control. Carries data-ui="button", data-tone, data-variant and data-size. It also carries ${carries}`,
+});
+
+const content = (indicator: boolean): AnatomyRow[] => [
+  {
+    part: 'start',
+    element: 'the element you mark with slButtonStart',
+    required: false,
+    purpose: indicator
+      ? 'Holds the start content. Absent when nothing is marked. While loading, it holds the indicator.'
+      : 'Holds the start content. Absent when nothing is marked.',
+  },
+  {
+    part: 'label',
+    element: 'span',
+    required: true,
+    purpose: indicator
+      ? 'Wraps the projected text. Always rendered, because the accessible name is computed from it. With reduced motion or forced colours, a loading button with no icon fades it in place, and it keeps its size.'
+      : 'Wraps the projected text. Always rendered, because the accessible name is computed from it.',
+  },
+  {
+    part: 'end',
+    element: 'the element you mark with slButtonEnd',
+    required: false,
+    purpose: indicator
+      ? 'Holds the end content. Absent when nothing is marked. While loading, it holds the indicator when there is no start content.'
+      : 'Holds the end content. Absent when nothing is marked.',
+  },
+];
+
+const indicatorRow = (where: string): AnatomyRow => ({
+  part: 'indicator',
+  element: 'span with role="progressbar"',
+  required: false,
+  purpose: `The loading indicator. Carries data-ui="spinner", is named by messages.loading, and has no value, so it reads as indeterminate. Rendered ${where} once loadingDelay has passed.`,
+});
 
 export const ANGULAR_BUTTON_DOCS = {
   button: {
+    imports: imports('button[slButton], [slButtonStart], [slButtonEnd]', 'slButton'),
+    anatomy: [
+      root(
+        'the button element you write',
+        'data-full-width, data-disabled and data-loading when they apply.',
+      ),
+      ...content(true),
+      indicatorRow('in the start box, else in the end box, else centred over the label,'),
+    ],
+    composition: apiRows([
+      [
+        'provideButtonDefaults',
+        '(defaults: ButtonDefaults) => Provider',
+        '—',
+        'SlButton',
+        'Sets the default size, tone and variant of every button under the injector, SlButtonLink, SlIconButton and SlToggleButton included. An explicit input wins, and an axis left unset keeps each member’s own default.',
+      ],
+    ]),
     api: apiRows([
       ...appearance('SlButton', 'accent', 'solid'),
       ...CONTENT('SlButton'),
-      ['fullWidth', 'boolean', 'false', 'SlButton', 'Fills the inline size of its container'],
+      ['fullWidth', 'boolean', 'false', 'SlButton', 'Fills the inline size of the container.'],
       ...unavailable('SlButton'),
       ...waiting('SlButton'),
-      ['type', 'button | submit | reset', 'button', 'SlButton', 'The native button type'],
+      [
+        'type',
+        'button | submit | reset',
+        'button',
+        'SlButton',
+        'The native button type. Set submit only for a button that submits its form.',
+      ],
     ]),
     accessibility: [
-      'It is a directive on the consumer’s own button element, so Space, Enter, focus, form submission and the disabled state are the platform’s.',
-      'While loading, the indicator is a named progress bar in the accessibility tree and the control announces aria-disabled while keeping focus — the shape React Aria’s pending button and Primer’s loading button both take. aria-busy is not used: it is not reliably announced on a button, and two mechanisms for one fact is one too many.',
-      'A control with a projected start or end icon gives the indicator that box and keeps its label. One with neither renders the label at zero opacity: it stays in the accessibility tree, so the name survives the wait, and it stays in the flow, so the control never changes size.',
-      'loading refuses activation on a capture-phase listener, before any handler the template attached, so a submit button cannot submit twice.',
-      'focusableWhenDisabled keeps an unavailable control reachable. Use it when the control carries a tooltip or an explanation a keyboard user would otherwise never reach, such as one inside a toolbar. A control that can be reached is painted to be read: muted text on the neutral subtle ground, at 4.5:1 or better, where a natively disabled control keeps the disabled grey.',
-      'There is no render input, and none is needed: the component is a directive on the element the template wrote, so substituting the element is done by writing a different one.',
-      'Project a start or end icon with aria-hidden so it does not repeat the label.',
+      'SlButton applies to the button element in your template, so Space, Enter, focus, form submission and the disabled state come from the platform. The visible label supplies the accessible name.',
+      'While loading, the indicator is a progress bar named by messages.loading, and the button announces aria-disabled while it keeps focus. React Aria’s pending button and Primer’s loading button use the same pattern. aria-busy is not set: screen readers do not announce it reliably on a button, and one mechanism already carries the state.',
+      'Where motion is allowed, the indicator is not drawn: once loadingDelay has passed, a band in the button’s own ink sweeps behind the label and the icon, which stay visible. With reduced motion or forced colours, the indicator is a ring drawn in the start or end icon’s box; a button with neither draws it over the label, which drops to zero opacity but stays in the accessibility tree and in the layout, so the accessible name survives the wait and the button keeps its size.',
+      'loading refuses activation on a capture-phase listener, before any click handler in your template, so a submit button cannot submit its form twice.',
+      'focusableWhenDisabled keeps a disabled button reachable. Use it when the button has a tooltip or an explanation a keyboard user needs, such as inside a toolbar. A reachable disabled button uses muted text on the subtle neutral background, at a contrast of 4.5:1 or more; a natively disabled button keeps the disabled grey.',
+      'SlButton has no render input: it applies to the element you write, so writing a different element replaces it.',
+      'A projected start or end icon repeats the label, so mark it aria-hidden. slGlyph sets aria-hidden itself.',
     ],
     snippets: [
       defineSnippet({
@@ -112,24 +216,35 @@ export const ANGULAR_BUTTON_DOCS = {
     ],
   },
   buttonLink: {
+    imports: imports('a[slButtonLink]', 'slButtonLink'),
+    anatomy: [
+      root('the anchor element you write', 'data-full-width and data-disabled when they apply.'),
+      ...content(false),
+    ],
     api: apiRows([
-      ['href', 'string', '—', 'SlButtonLink', 'The navigation destination'],
+      [
+        'href',
+        'string',
+        '—',
+        'SlButtonLink',
+        'The destination. A disabled SlButtonLink does not render it.',
+      ],
       ...appearance('SlButtonLink', 'accent', 'solid'),
       ...CONTENT('SlButtonLink'),
-      ['fullWidth', 'boolean', 'false', 'SlButtonLink', 'Fills the inline size of its container'],
+      ['fullWidth', 'boolean', 'false', 'SlButtonLink', 'Fills the inline size of the container.'],
       [
         'disabled',
         'boolean',
         'false',
         'SlButtonLink',
-        'Removes the destination and refuses activation',
+        'Removes the href and refuses activation. The link stays focusable with role="link" and aria-disabled.',
       ],
     ]),
     accessibility: [
-      'It is a directive on an anchor, so it is announced as a link and activates on Enter. Space does not activate it, because Space does not activate a link.',
-      'routerLink works on the same element and writes the href itself; leave [href] unset then.',
-      'A disabled link renders no href at all: an anchor that keeps its destination and only blocks click still navigates on a middle click and on a modified click.',
-      'It stays in the tab sequence when disabled, with role="link" and aria-disabled, because a control a keyboard user cannot reach is one they cannot discover is unavailable.',
+      'SlButtonLink applies to an anchor, so it is announced as a link and activates on Enter. Space does not activate it, as it does not activate any link.',
+      'routerLink works on the same anchor and writes its href. Do not also set href.',
+      'A disabled SlButtonLink renders no href. An anchor that kept its destination and only blocked click would still navigate on a middle click or a modified click.',
+      'A disabled SlButtonLink stays in the tab sequence with role="link" and aria-disabled, so a keyboard user can discover that it is unavailable.',
     ],
     snippets: [
       defineSnippet({
@@ -147,16 +262,37 @@ export const ANGULAR_BUTTON_DOCS = {
     ],
   },
   iconButton: {
+    imports: imports('button[slIconButton]', 'slIconButton'),
+    anatomy: [
+      root(
+        'the button element you write',
+        'data-shape, and data-disabled, data-loading and data-pressed when they apply.',
+      ),
+      {
+        part: 'icon',
+        element: 'span',
+        required: true,
+        purpose:
+          'Wraps the projected icon. While loading, it holds the indicator drawn over the icon, so the control keeps its size.',
+      },
+      indicatorRow('inside the icon box'),
+    ],
     api: apiRows([
       [
         'aria-label | aria-labelledby',
         'string',
         'required',
         'SlIconButton',
-        'The accessible name, which no content can supply',
+        'The accessible name. Required, because an icon supplies no text.',
       ],
       ...appearance('SlIconButton', 'secondary', 'ghost'),
-      ['shape', 'square | circle', 'square', 'SlIconButton', 'How the square control is cornered'],
+      [
+        'shape',
+        'square | circle',
+        'square',
+        'SlIconButton',
+        'The corners of the control: square keeps the radius of the control scale, circle rounds it fully. Both are as wide as they are tall.',
+      ],
       ...unavailable('SlIconButton'),
       ...waiting('SlIconButton'),
       [
@@ -164,30 +300,37 @@ export const ANGULAR_BUTTON_DOCS = {
         'boolean',
         '—',
         'SlIconButton',
-        'The consumer’s value; passing it controls the state',
+        'The pressed state, controlled. Binding it makes the button a toggle whose value you own.',
       ],
       [
         'defaultPressed',
         'boolean',
         '—',
         'SlIconButton',
-        'The value an uncontrolled toggle starts from',
+        'The initial pressed state when the button owns it. Binding it makes the button a toggle.',
       ],
       [
         'pressedChange',
         'ChangeRequest<boolean>',
         '—',
         'SlIconButton',
-        'The request: value, previous, reason, event and cancel()',
+        'Emits the request: value, previous value, reason (pointer or keyboard), event and cancel().',
       ],
-      ['type', 'button | submit | reset', 'button', 'SlIconButton', 'The native button type'],
+      [
+        'type',
+        'button | submit | reset',
+        'button',
+        'SlIconButton',
+        'The native button type. Set submit only for a button that submits its form.',
+      ],
     ]),
     accessibility: [
       'The accessible name is required: the development build throws when neither aria-label nor aria-labelledby is present, because a template cannot make an attribute mandatory.',
-      'aria-pressed appears only once [pressed] or [defaultPressed] is bound. A plain icon button that announced itself as a toggle would be announcing a state it does not have.',
-      'The name must not change with the pressed state. The APG is explicit that a toggle keeps its label and lets the state be announced beside it.',
-      'On is painted the way the foundation paints selected: the accent selection ground under accent text, inside the accent edge, whatever tone and variant the toggle was written as. A toggle that is on hovers on that ground’s own hover step, never on the neutral one a toggle that is off hovers with.',
-      'The square control is the control height in both axes and never falls below the WCAG 2.2 minimum of 24 by 24 CSS pixels, at any density.',
+      'aria-pressed is rendered only when pressed or defaultPressed is bound, so a plain icon button does not announce a toggle state it does not have.',
+      'Keep the name the same in both pressed states. The APG toggle button pattern announces the state beside an unchanging label.',
+      'A pressed icon button uses the selected colours of the theme — accent text on the accent selection background, inside the accent edge — whatever its tone and variant. On hover it uses the hover step of that background, not the neutral hover of an unpressed button.',
+      'The control is as wide as it is tall, at the control height, and never smaller than the WCAG 2.2 minimum target of 24 by 24 CSS pixels at any density.',
+      'Add a tooltip when the icon alone does not say what the action does. The accessible name does not replace a visible label.',
     ],
     snippets: [
       defineSnippet({
@@ -207,10 +350,25 @@ export const ANGULAR_BUTTON_DOCS = {
     ],
   },
   toggleButton: {
+    imports: imports('button[slToggleButton]', 'slToggleButton'),
+    anatomy: [
+      root(
+        'the button element you write',
+        'data-full-width, data-disabled, data-loading and data-pressed when they apply.',
+      ),
+      ...content(true),
+      indicatorRow('in the start box, else in the end box, else centred over the label,'),
+    ],
     api: apiRows([
       ...appearance('SlToggleButton', 'secondary', 'outline'),
       ...CONTENT('SlToggleButton'),
-      ['fullWidth', 'boolean', 'false', 'SlToggleButton', 'Fills the inline size of its container'],
+      [
+        'fullWidth',
+        'boolean',
+        'false',
+        'SlToggleButton',
+        'Fills the inline size of the container.',
+      ],
       ...unavailable('SlToggleButton'),
       ...waiting('SlToggleButton'),
       [
@@ -218,29 +376,37 @@ export const ANGULAR_BUTTON_DOCS = {
         'boolean',
         '—',
         'SlToggleButton',
-        'The consumer’s value; passing it controls the state',
+        'The pressed state, controlled. Binding it makes you the owner of the value.',
       ],
       [
         'defaultPressed',
         'boolean',
         'false',
         'SlToggleButton',
-        'The value an uncontrolled toggle starts from, read once',
+        'The initial pressed state when the button owns it, read once.',
       ],
       [
         'pressedChange',
         'ChangeRequest<boolean>',
         '—',
         'SlToggleButton',
-        'The request: value, previous, reason, event and cancel()',
+        'Emits the request: value, previous value, reason (pointer or keyboard), event and cancel().',
       ],
-      ['type', 'button | submit | reset', 'button', 'SlToggleButton', 'The native button type'],
+      [
+        'type',
+        'button | submit | reset',
+        'button',
+        'SlToggleButton',
+        'The native button type. Set submit only for a button that submits its form.',
+      ],
     ]),
     accessibility: [
-      'It is a native button carrying aria-pressed, so it is announced as a toggle and activates on Space and Enter.',
-      'The label must not change with the state: "Mute" stays "Mute" and the state is announced beside it.',
-      'There is no [(pressed)]: a two-way binding has one slot and cannot carry the reason or the cancellation, and a second output for the same transition would be the same failure stated twice.',
-      'Calling preventDefault on the click refuses the activation, and a refused activation moves nothing.',
+      'SlToggleButton applies to a native button and sets aria-pressed, so it is announced as a toggle button and activates on Space and Enter.',
+      'Keep the label the same in both states: "Mute" stays "Mute" and the state is announced beside it. When the label has to change, use SlButton.',
+      'There is no [(pressed)]: a two-way binding carries only the value, and the change request also carries the reason and cancel(). One output, pressedChange, carries the whole request.',
+      'The reason is pointer when the click reports a click count and keyboard when it reports none, because a native button fires the same click for a pointer, Space and Enter.',
+      'Calling preventDefault on the click refuses the activation, and the pressed state does not change.',
+      'Use a checkbox, not SlToggleButton, for a value a form submits.',
     ],
     snippets: [
       defineSnippet({

@@ -514,6 +514,31 @@ describe('SlNumberField', () => {
       expect(input(fixture).value).toBe('40');
     });
 
+    it('reports a value it leaves outside the range as invalid', () => {
+      const fixture = renderTemplate(
+        `<div slNumberField><input slNumberFieldInput min="0" max="10" clamp="none" /></div>`,
+      );
+      type(input(fixture), '40');
+      input(fixture).dispatchEvent(new FocusEvent('blur'));
+      fixture.detectChanges();
+      expect(input(fixture).getAttribute('aria-invalid')).toBe('true');
+      expect(query(fixture, '[data-ui="number-field"]').getAttribute('data-invalid')).toBe('');
+
+      type(input(fixture), '5');
+      fixture.detectChanges();
+      expect(input(fixture).hasAttribute('aria-invalid')).toBe(false);
+      expect(query(fixture, '[data-ui="number-field"]').hasAttribute('data-invalid')).toBe(false);
+    });
+
+    it('lets a stated [invalid]="false" win over the range report', () => {
+      const fixture = renderTemplate(
+        `<div slNumberField>
+           <input slNumberFieldInput defaultValue="40" min="0" max="10" clamp="none" [invalid]="false" />
+         </div>`,
+      );
+      expect(input(fixture).hasAttribute('aria-invalid')).toBe(false);
+    });
+
     it('snaps to the multiples measured from the minimum when asked', () => {
       const fixture = renderTemplate(
         `<div slNumberField>
@@ -523,6 +548,23 @@ describe('SlNumberField', () => {
       key(input(fixture), { key: 'ArrowUp' });
       fixture.detectChanges();
       expect(input(fixture).value).toBe('5');
+    });
+
+    it('commits a typed value to the nearest multiple, not one step past it', () => {
+      const fixture = renderTemplate(
+        `<div slNumberField>
+           <input slNumberFieldInput min="2" step="3" snapToStep />
+         </div>`,
+      );
+      type(input(fixture), '7');
+      input(fixture).dispatchEvent(new FocusEvent('blur'));
+      fixture.detectChanges();
+      expect(input(fixture).value).toBe('8');
+
+      type(input(fixture), '11');
+      input(fixture).dispatchEvent(new FocusEvent('blur'));
+      fixture.detectChanges();
+      expect(input(fixture).value).toBe('11');
     });
   });
 
@@ -610,6 +652,20 @@ describe('SlNumberField', () => {
       const hidden = query(fixture, 'input[type="hidden"]') as HTMLInputElement;
       expect(hidden.getAttribute('name')).toBe('amount');
       expect(hidden.value).toBe('1480');
+    });
+
+    it('commits the number it shows, at the precision the format states', () => {
+      const fixture = renderTemplate(
+        `<div slNumberField>
+           <input slNumberFieldInput name="amount" [format]="{ maximumFractionDigits: 2 }" />
+         </div>`,
+      );
+      type(input(fixture), '10.555');
+      input(fixture).dispatchEvent(new FocusEvent('blur'));
+      fixture.detectChanges();
+      expect(input(fixture).value).toBe('10.56');
+      expect((query(fixture, 'input[type="hidden"]') as HTMLInputElement).value).toBe('10.56');
+      expect(input(fixture).getAttribute('aria-valuenow')).toBe('10.56');
     });
   });
 

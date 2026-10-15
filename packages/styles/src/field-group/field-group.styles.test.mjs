@@ -171,3 +171,17 @@ test('sets the type of what the group says the way the field does', () => {
   );
   assert.equal(contract.messageMark, 'none', 'the group asks for a mark again (F2)');
 });
+
+/**
+ * `inline-message` zeroes its root's margin with two attributes, the weight of
+ * `root > * + *`, so at equal weight the stylesheet loaded last decided the gap:
+ * on the site the Angular error sat 4px nearer its legend than React's. The
+ * message's own rule carries a third attribute and wins in any load order.
+ */
+test('spaces its messages from the legend whatever order the message stylesheet loads in', () => {
+  const selector = `${root}>* + [data-ui='inline-message']`;
+  const body = rule(selector);
+  assert.match(body, /margin-block-start:var\(--_message-gap\)/, `${selector} sets no message gap`);
+  const weight = (selector.match(/\[/g) ?? []).length;
+  assert.ok(weight > 2, 'the message gap does not outweigh the message family root rule');
+});

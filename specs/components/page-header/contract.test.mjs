@@ -268,8 +268,20 @@ test('composes rather than re-implementing', () => {
   assert.equal(contract.declined.breadcrumbOverflow.deferTo, 'breadcrumb');
 });
 
+/**
+ * The ground and the frame: a strip across the top, no ground of its own
+ * until content passes under it, or a box of its own.
+ */
+test('declares three variants, band by default, and the stuck fact they read', () => {
+  assert.deepEqual(contract.axes.variant, ['band', 'plain', 'floating']);
+  assert.deepEqual(contract.resolution.variant, ['prop', 'defaults', 'band']);
+  assert.equal(member.defaults.variant, 'band');
+  assert.ok(member.capabilities.includes('appearance'));
+  assert.equal(contract.stuck.fact, 'data-stuck');
+});
+
 test('lets an application set its defaults once', () => {
-  assert.deepEqual(contract.provides.pageHeaderDefaults, ['size', 'level', 'collapse']);
+  assert.deepEqual(contract.provides.pageHeaderDefaults, ['size', 'level', 'collapse', 'variant']);
   assert.deepEqual(contract.messages, [
     'collapse',
     'expand',

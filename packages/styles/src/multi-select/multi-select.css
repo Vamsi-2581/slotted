@@ -401,8 +401,15 @@
     text-box: auto; /* refine the alignment */
     align-self: center;
     color: var(--slotted-multi-select-counter-color, var(--slotted-text-muted, GrayText));
-    flex: none;
+    /* It gives way before the buttons do: under 120 pixels the counter, the
+       clear button and the trigger needed 127 pixels of a 112-pixel frame, and
+       the trigger ran past the border. The grid's aria-label carries the count
+       whole. */
+    flex: 0 1 auto;
     font-size: var(--slotted-font-size-xs, 0.75rem);
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-variant-numeric: tabular-nums;
     line-height: var(--slotted-line-height-sm, 1.45);
     padding-inline: var(--slotted-space-1, 0.125rem);
@@ -427,6 +434,12 @@
   /* Too narrow for a chip: the count is the whole answer. */
   [data-ui='multi-select'][data-narrow] [data-part='chips'] > :not([data-part='field']) {
     display: none;
+  }
+
+  /* The row takes only the room the count and the buttons leave, so the count
+     is what shortens when even that room runs out. */
+  [data-ui='multi-select'][data-narrow] > [data-part='control'] {
+    flex-basis: 0;
   }
 
   /* ── The two buttons inside the frame ─────────────────────────────────── */
@@ -1093,6 +1106,19 @@
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
+  }
+
+  /**
+   * An option the query rejected, and a group whose options all went. Both
+   * carry `hidden` — Angular hides each rejected option rather than leaving the
+   * list, and both bindings hide an emptied group — and `display: grid` on
+   * either beats the user agent's own `[hidden] { display: none }`, because an
+   * author rule wins over the user agent sheet. Without this the search
+   * filtered nothing the reader could see.
+   */
+  [data-ui='multi-select'] [data-part='item'][hidden],
+  [data-ui='multi-select'] [data-part='group'][hidden] {
+    display: none;
   }
 
   [data-ui='multi-select'] [data-part='group-label'] {

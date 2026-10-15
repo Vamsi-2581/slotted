@@ -1,8 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { SlButton } from '@slotted/angular/button';
 import { provideSlotted } from '@slotted/angular/i18n';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
@@ -138,6 +139,32 @@ function press(node: Element, detail = 1) {
 function escape() {
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 }
+
+/**
+ * Each test starts at the end of the session history, as a page just loaded
+ * does. A modal layer that closes takes its entry back with `history.back()`
+ * (`@slotted/core/dismissable-layer`), which leaves that entry ahead of the
+ * current one: the next layer's `pushState` replaces it rather than adding
+ * one, and the next test reads a history one entry short. jsdom lands the
+ * traversal two tasks after the call, so a test that ends while it is on its
+ * way — the current entry still carries a layer's token, and no layer is open
+ * — first waits for it, and then a fresh entry drops whatever stands ahead.
+ */
+beforeEach(async () => {
+  const state: unknown = window.history.state;
+  if (typeof state === 'object' && state !== null && '__slottedLayer' in state) {
+    await new Promise<void>((resolve) => {
+      const done = () => {
+        window.removeEventListener('popstate', done);
+        clearTimeout(timer);
+        resolve();
+      };
+      const timer = setTimeout(done, 100);
+      window.addEventListener('popstate', done);
+    });
+  }
+  window.history.pushState(null, '');
+});
 
 describe('SlDialog', () => {
   let fixture: ComponentFixture<DialogHost>;
@@ -525,6 +552,31 @@ describe('SlDialog', () => {
     expect(document.activeElement).toBe(trigger);
   });
 
+  /**
+   * A browser refuses focus on an element inside an `inert` subtree, and the
+   * background of a modal layer is inert until the layer is taken down. jsdom
+   * does not refuse it, so the test records where the background stood at the
+   * moment focus was handed back.
+   */
+  it('gives focus back to the trigger once the background is no longer inert', () => {
+    const trigger = document.querySelector('[data-part="trigger"]') as HTMLElement;
+    trigger.focus();
+    press(trigger);
+    fixture.detectChanges();
+    expect(trigger.closest('[inert]')).not.toBeNull();
+
+    let inertWhenFocused: boolean | undefined;
+    const focus = vi.spyOn(trigger, 'focus').mockImplementation(function (this: HTMLElement) {
+      inertWhenFocused = this.closest('[inert]') !== null;
+      HTMLElement.prototype.focus.call(this);
+    });
+
+    escape();
+    fixture.detectChanges();
+    expect(focus).toHaveBeenCalled();
+    expect(inertWhenFocused).toBe(false);
+  });
+
   it('marks the row that is still loading as busy without locking the way out', () => {
     fixture.componentInstance.loading.set(true);
     fixture.componentInstance.open.set(true);
@@ -722,6 +774,151 @@ describe('SlDialog words', () => {
     fixture.detectChanges();
     expect(part('fullscreen').getAttribute('aria-label')).toBe('Full screen');
     expect(part('close').getAttribute('aria-label')).toBe('Close');
+    fixture.destroy();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlButton, SlDialog, SlDialogTrigger],
+  template: `<button slButton [slDialogTrigger]="d">Edit project</button>
+    <sl-dialog #d="slDialog"></sl-dialog>`,
+})
+class ButtonTrigger {}
+
+/**
+ * The trigger's part names the control the family draws for itself. On the
+ * library's button the element is the root of that family, which is what
+ * React's `DialogTrigger render={(props) => <Button {...props} />}` renders:
+ * the button's own props are spread after the trigger's.
+ */
+describe('SlDialogTrigger on the library button', () => {
+  it('leaves the button the root of its own family', () => {
+    TestBed.configureTestingModule({ imports: [ButtonTrigger] });
+    const fixture = TestBed.createComponent(ButtonTrigger);
+    fixture.detectChanges();
+
+    const control = fixture.nativeElement.querySelector('[data-ui="button"]') as HTMLElement;
+    expect(control.getAttribute('data-part')).toBe('root');
+    expect(control.getAttribute('aria-haspopup')).toBe('dialog');
+    fixture.destroy();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [
+    SlAlertDialog,
+    SlAlertDialogAction,
+    SlAlertDialogCancel,
+    SlButton,
+    SlDialogDescription,
+    SlDialogFooter,
+    SlDialogHeader,
+    SlDialogTitle,
+  ],
+  template: `<sl-alert-dialog [open]="true">
+    <header slDialogHeader>
+      <h2 slDialogTitle>Delete this project?</h2>
+      <p slDialogDescription>This cannot be undone.</p>
+    </header>
+    <footer slDialogFooter>
+      <button slButton slAlertDialogCancel>Keep project</button>
+      <button slButton slAlertDialogAction>Delete project</button>
+    </footer>
+  </sl-alert-dialog>`,
+})
+class ButtonAnswers {}
+
+/**
+ * React's `AlertDialogCancel render={(props) => <Button {...props} />}` spreads
+ * the button's own props after the part's, so the element stays the root of
+ * the button family. The directive on `slButton` keeps the same rule the
+ * trigger keeps.
+ */
+describe('SlAlertDialogCancel and SlAlertDialogAction on the library button', () => {
+  it('leave each button the root of its own family', () => {
+    TestBed.configureTestingModule({ imports: [ButtonAnswers] });
+    const fixture = TestBed.createComponent(ButtonAnswers);
+    fixture.detectChanges();
+
+    const buttons = [...document.querySelectorAll<HTMLElement>('[data-ui="button"]')];
+    expect(buttons.map((button) => button.getAttribute('data-part'))).toEqual(['root', 'root']);
+    expect(document.activeElement).toBe(buttons[0]);
+    fixture.destroy();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [
+    SlAlertDialog,
+    SlAlertDialogAction,
+    SlAlertDialogCancel,
+    SlDialog,
+    SlDialogDescription,
+    SlDialogFooter,
+    SlDialogHeader,
+    SlDialogTitle,
+    SlDialogTrigger,
+  ],
+  template: `<button [slDialogTrigger]="outer">Change address</button>
+    <sl-dialog #outer="slDialog" [(open)]="open" (closed)="closed.push('outer')">
+      <header slDialogHeader><h2 slDialogTitle>Delivery address</h2></header>
+      <footer slDialogFooter>
+        <button type="button" (click)="confirming.set(true)">Cancel</button>
+      </footer>
+      <sl-alert-dialog [(open)]="confirming" (closed)="closed.push('inner')">
+        <header slDialogHeader>
+          <h2 slDialogTitle>Discard the new address?</h2>
+          <p slDialogDescription>The order keeps the previous one.</p>
+        </header>
+        <footer slDialogFooter>
+          <button slAlertDialogCancel>Keep editing</button>
+          <button slAlertDialogAction (click)="open.set(false)">Discard changes</button>
+        </footer>
+      </sl-alert-dialog>
+    </sl-dialog>`,
+})
+class StackedHost {
+  readonly open = signal(false);
+  readonly confirming = signal(false);
+  readonly closed: string[] = [];
+}
+
+/**
+ * An action in a confirmation that closes the dialog under it closes both in
+ * one change. The layers come down from the top, as React's effects do: the
+ * confirmation gives focus back to the dialog's control that opened it, and
+ * the dialog then gives it back to its own trigger. Taken down from the
+ * bottom, the dialog found focus in the confirmation and restored nothing,
+ * and the confirmation handed it to a control in a layer already leaving —
+ * `body` once that layer was gone.
+ */
+describe('stacked layers that close in one change', () => {
+  it('come down from the top, and focus returns to the trigger of the outermost', () => {
+    TestBed.configureTestingModule({ imports: [StackedHost] });
+    const fixture = TestBed.createComponent(StackedHost);
+    fixture.detectChanges();
+
+    const trigger = document.querySelector('[data-part="trigger"]') as HTMLElement;
+    trigger.focus();
+    press(trigger);
+    fixture.detectChanges();
+    const cancel = [...document.querySelectorAll('button')].find(
+      (button) => button.textContent === 'Cancel',
+    ) as HTMLElement;
+    cancel.focus();
+    press(cancel);
+    fixture.detectChanges();
+    expect(document.activeElement?.textContent?.trim()).toBe('Keep editing');
+
+    press(part('action'));
+    fixture.detectChanges();
+
+    expect(document.activeElement).toBe(trigger);
+    expect(fixture.componentInstance.closed).toEqual(['inner', 'outer']);
+    expect(trigger.closest('[inert]')).toBeNull();
     fixture.destroy();
   });
 });

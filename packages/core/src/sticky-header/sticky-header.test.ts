@@ -64,10 +64,13 @@ function sized(element: HTMLElement, height: number) {
 function scene({
   scrollerHeight = 400,
   contained,
+  withArea = true,
 }: {
   scrollerHeight?: number;
   /** Given the page body, returns what the header is told is contained. */
   contained?: (body: HTMLElement) => HTMLElement | null;
+  /** Whether the header has a header area: a header of a title alone has none. */
+  withArea?: boolean;
 } = {}) {
   const scroller = document.createElement('div');
   scroller.style.overflowY = 'auto';
@@ -87,18 +90,20 @@ function scene({
   const state: StickyHeaderState = { expanded: true, pinned: false, collapse: 'scroll' };
   const onScrolled = vi.fn();
   const onRevealed = vi.fn();
+  const onStuck = vi.fn();
   const onScrollRequest = vi.fn((expanded: boolean) => {
     state.expanded = expanded;
     handle.expandedChanged(expanded, 'scroll');
   });
   const handle: StickyHeaderHandle = createStickyHeader({
     root,
-    area: () => area,
+    area: () => (withArea ? area : null),
     chrome: () => [title, tabs],
     state: () => state,
     onScrolled,
     onRevealed,
     onScrollRequest,
+    onStuck,
     ...(contained === undefined ? {} : { contained: () => contained(body) }),
   });
   const io = FakeIntersectionObserver.instances.at(-1) as FakeIntersectionObserver;
@@ -110,6 +115,7 @@ function scene({
     onRevealed,
     onScrollRequest,
     onScrolled,
+    onStuck,
     root,
     scroller,
     state,
@@ -586,6 +592,123 @@ describe('createStickyHeader', () => {
     handle.destroy();
   });
 
+  describe('stuck', () => {
+    function at(element: HTMLElement, top: number) {
+      vi.spyOn(element, 'getBoundingClientRect').mockImplementation(() => ({ top }) as DOMRect);
+    }
+
+    /**
+     * Content passes under the chrome once the title area holds at its sticky
+     * offset with the scroll past its rest position: what a variant with
+     * no ground of its own reads to paint one.
+     */
+    it('reports the title area held at the top, and lets it go back at rest', () => {
+      const { handle, onStuck, scroller, title } = scene();
+      at(scroller, 0);
+      at(title, 0);
+      scroller.scrollTop = 50;
+      scroller.dispatchEvent(new Event('scroll'));
+      expect(onStuck).toHaveBeenLastCalledWith(true);
+
+      scroller.scrollTop = 0;
+      scroller.dispatchEvent(new Event('scroll'));
+      expect(onStuck).toHaveBeenLastCalledWith(false);
+      handle.destroy();
+    });
+
+    it('does not report a title area that has not reached its offset yet', () => {
+      const { handle, onStuck, root, scroller, title } = scene();
+      at(scroller, 0);
+      at(root, 80);
+      at(title, 80);
+      scroller.scrollTop = 50;
+      scroller.dispatchEvent(new Event('scroll'));
+      expect(onStuck).not.toHaveBeenCalledWith(true);
+      handle.destroy();
+    });
+
+    /** A floating header holds its title area an inset below the scroller's edge. */
+    it('measures the hold against the title area’s own offset, and counts it into the sticky top', () => {
+      const { handle, onStuck, root, scroller, title } = scene();
+      title.style.top = '12px';
+      handle.refresh();
+      /* The root is still travelling: only the title area can be held. */
+      at(root, 30);
+      expect(scroller.style.getPropertyValue(STICKY_TOP_PROPERTY)).toBe('112px');
+
+      at(scroller, 0);
+      at(title, 0);
+      scroller.scrollTop = 50;
+      scroller.dispatchEvent(new Event('scroll'));
+      expect(onStuck).not.toHaveBeenCalledWith(true);
+
+      at(title, 12);
+      scroller.dispatchEvent(new Event('scroll'));
+      expect(onStuck).toHaveBeenLastCalledWith(true);
+      handle.destroy();
+    });
+
+    /**
+     * A floating header takes its inset once stuck: flush with the edge at
+     * rest, it would otherwise sit an inset over the content under it. The
+     * offset moves with the fact, so the sticky top is published again.
+     */
+    it('publishes the sticky top again when the fact moves the title area’s offset', () => {
+      const { handle, onStuck, scroller, title } = scene();
+      expect(scroller.style.getPropertyValue(STICKY_TOP_PROPERTY)).toBe('100px');
+      at(scroller, 0);
+      /* Held, the title area stands at whatever offset it is given. */
+      vi.spyOn(title, 'getBoundingClientRect').mockImplementation(
+        () => ({ top: Number.parseFloat(title.style.top) || 0 }) as DOMRect,
+      );
+      onStuck.mockImplementation((stuck: boolean) => {
+        title.style.top = stuck ? '12px' : '0px';
+      });
+      scroller.scrollTop = 50;
+      scroller.dispatchEvent(new Event('scroll'));
+      expect(onStuck).toHaveBeenLastCalledWith(true);
+      expect(scroller.style.getPropertyValue(STICKY_TOP_PROPERTY)).toBe('112px');
+      handle.destroy();
+    });
+
+    /**
+     * A floating root has a border all round: stuck at its offset, its title
+     * area stands a border below it, short of its own offset by a pixel.
+     */
+    it('reports the root held at its offset when the title area stands a border below', () => {
+      const { handle, onStuck, root, scroller, title } = scene();
+      at(scroller, 0);
+      at(root, 0);
+      at(title, 1);
+      scroller.scrollTop = 200;
+      scroller.dispatchEvent(new Event('scroll'));
+      expect(onStuck).toHaveBeenLastCalledWith(true);
+      handle.destroy();
+    });
+
+    /** The inset is reached through a transition: its end publishes the sticky top again. */
+    it('publishes the sticky top again when a transition in the root ends', () => {
+      const { handle, scroller, title } = scene();
+      expect(scroller.style.getPropertyValue(STICKY_TOP_PROPERTY)).toBe('100px');
+      title.style.top = '8px';
+      title.dispatchEvent(new Event('transitionend', { bubbles: true }));
+      expect(scroller.style.getPropertyValue(STICKY_TOP_PROPERTY)).toBe('108px');
+      handle.destroy();
+    });
+
+    it('reports the root stuck at its own offset, an inset below the edge', () => {
+      const { handle, root, scroller } = scene();
+      root.style.top = '12px';
+      at(scroller, 0);
+      at(root, 12);
+      scroller.scrollTop = 50;
+      expect(handle.stuck()).toBe(true);
+      at(root, 0);
+      expect(handle.stuck()).toBe(false);
+      handle.destroy();
+    });
+  });
+
   describe('contained', () => {
     function scrollTo(element: HTMLElement, top: number) {
       element.scrollTop = top;
@@ -746,6 +869,22 @@ describe('createStickyHeader', () => {
       expect(onScrollRequest).toHaveBeenCalledTimes(1);
       scrollTo(list, 0);
       expect(onScrollRequest).toHaveBeenLastCalledWith(true);
+      handle.destroy();
+    });
+
+    /**
+     * Collapsed, a header of a title alone hides nothing: the title only steps
+     * down a size and every pane under it moves. In a split inbox that was
+     * each scroll of the queue, the thread or the context resizing the panes.
+     */
+    it('leaves a header with no header area expanded, whatever the list scrolls', () => {
+      const { handle, list, onScrollRequest, state } = scene({
+        contained: (body) => body,
+        withArea: false,
+      });
+      scrollTo(list, 400);
+      expect(onScrollRequest).not.toHaveBeenCalled();
+      expect(state.expanded).toBe(true);
       handle.destroy();
     });
   });

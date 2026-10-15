@@ -104,6 +104,7 @@ test('owns the radiogroup role only where nothing else grouped it', () => {
 test('reads the field for state and never takes its identifier', () => {
   assert.equal(contract.stateSource, field.family);
   assert.equal(contract.wiring.id, 'never');
+  assert.match(contract.wiring['aria-labelledby'], /field's label/);
   assert.equal(contract.requiredAttribute, 'aria-required');
   assert.equal(contract.disabledAttribute, 'disabled');
   assert.equal(contract.readOnlyAttribute, 'aria-readonly');

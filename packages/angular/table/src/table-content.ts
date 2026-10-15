@@ -31,6 +31,11 @@ import { SlTable } from './table';
  * for nothing, and a wide table with no tab stop is unreachable without a
  * pointer. Nothing is measured until the first render after mount, so the
  * server renders a plain scroller and hydration finds the same DOM.
+ *
+ * **The host's `aria-label` names the table.** An instance with no caption
+ * names itself with it, and the template writes it on the `table`, the
+ * element whose name it is. The region takes the catalog's name, or
+ * `scrollLabel`.
  */
 @Component({
   selector: 'div[slTableContent]',
@@ -38,6 +43,7 @@ import { SlTable } from './table';
   exportAs: 'slTableContent',
   template: `<table
     data-part="table"
+    [attr.aria-label]="tableLabel"
     [attr.aria-busy]="table.loading() ? 'true' : null"
     [attr.aria-rowcount]="totalRowCount() ?? null"
   >
@@ -65,20 +71,22 @@ export class SlTableContent {
   readonly totalRowCount = input<number | undefined, number | string | undefined>(undefined, {
     transform: (count) => (count === undefined ? undefined : numberAttribute(count)),
   });
+  /** The name the region takes while it overflows, over the catalog's. */
+  readonly scrollLabel = input<string | undefined>(undefined);
   /** The element that names it instead, which is usually the caption. */
   readonly scrollLabelledBy = input<string | undefined>(undefined);
 
   readonly table = inject(SlTable);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  /** The host's own `aria-label`, which wins over the catalog's name for the region. */
-  private readonly ownLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
+  /** The host's own `aria-label`: the table's name, moved onto the `table`. */
+  protected readonly tableLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
   private affordance: ScrollAffordanceHandle | null = null;
 
   readonly state = signal<OverflowState>({ overflowing: false, atStart: true, atEnd: true });
 
   readonly regionLabel = computed(() =>
     this.state().overflowing && this.scrollLabelledBy() === undefined
-      ? (this.ownLabel ?? this.table.t('scroll'))
+      ? (this.scrollLabel() ?? this.table.t('scroll'))
       : null,
   );
 

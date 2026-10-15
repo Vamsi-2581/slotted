@@ -1,17 +1,38 @@
 import '@slotted/styles/field/field.css';
 
 import { fieldMessages } from '@slotted/core/i18n';
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import {
+  Children,
+  isValidElement,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import type { ReactNode } from 'react';
 
 import { useMessages } from '../i18n';
 import {
   deriveFieldIds,
   FIELD_DESCRIBED_ORDER,
   FieldContext,
+  fieldCountReader,
   formatFieldCount,
+  hasFieldContent,
   isFieldCountOver,
 } from './field-context';
 import { useFieldDefaults } from './field-defaults';
+import {
+  FieldCounter,
+  FieldDescription,
+  FieldError,
+  FieldHeader,
+  FieldHelp,
+  FieldIndicator,
+  FieldLabel,
+} from './field-parts';
 import type {
   FieldContextValue,
   FieldCount,
@@ -21,6 +42,42 @@ import type {
 } from './field.types';
 
 const isDevelopment = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV === true;
+
+/** What a field learns from its parts, by registration or by reading what it was given. */
+interface FieldParts {
+  count: FieldCount | undefined;
+  hasCounter: boolean;
+  hasHeader: boolean;
+  messages: FieldDescribedSlot[];
+}
+
+const MESSAGE_PARTS = new Map<unknown, FieldDescribedSlot>([
+  [FieldDescription, 'description'],
+  [FieldError, 'error'],
+  [FieldHelp, 'help'],
+  [FieldIndicator, 'indicator'],
+]);
+
+/**
+ * The parts and the counting control written among a field's children, read
+ * from the element tree rather than from the effects that register them. A
+ * field nested inside is not read: its parts are its own. A part a component
+ * of the page's renders is not in the tree, and arrives by registration.
+ */
+function readParts(node: ReactNode, parts: FieldParts): FieldParts {
+  if (Array.isArray(node)) {
+    for (const child of node as ReactNode[]) readParts(child, parts);
+    return parts;
+  }
+  if (!isValidElement<{ children?: ReactNode }>(node) || node.type === Field) return parts;
+  const { props, type } = node;
+  const slot = MESSAGE_PARTS.get(type);
+  if (slot !== undefined && hasFieldContent(props.children)) parts.messages.push(slot);
+  if (type === FieldCounter) parts.hasCounter = true;
+  if (type === FieldHeader) parts.hasHeader = true;
+  parts.count ??= fieldCountReader(type)?.(props);
+  return readParts(props.children, parts);
+}
 
 /**
  * One control, its name, its necessity, its help and its error — and the
@@ -72,11 +129,28 @@ export function Field({
     [generatedId, id],
   );
 
-  const [messages, setMessages] = useState<readonly FieldDescribedSlot[]>([]);
-  const [count, setCount] = useState<FieldCount | undefined>(undefined);
-  const [hasCounter, setHasCounter] = useState(false);
-  const [hasHeader, setHasHeader] = useState(false);
+  const [registeredMessages, setMessages] = useState<readonly FieldDescribedSlot[]>([]);
+  const [registeredCount, setCount] = useState<FieldCount | undefined>(undefined);
+  const [registeredCounter, setHasCounter] = useState(false);
+  const [registeredHeader, setHasHeader] = useState(false);
+  const [registered, setRegistered] = useState(false);
   const hasControl = useRef(false);
+
+  /**
+   * The parts register in effects, and the field's own effect runs after
+   * theirs in the same commit. Until it has — on the server, and in the render
+   * hydration compares against it — the field is what it was given: the parts
+   * and the counting control written among its children. Both renders read the
+   * same tree, so hydration agrees, and registration then takes over.
+   */
+  useEffect(() => setRegistered(true), []);
+  const given = registered
+    ? undefined
+    : readParts(children, { count: undefined, hasCounter: false, hasHeader: false, messages: [] });
+  const messages = given?.messages ?? registeredMessages;
+  const count = given === undefined ? registeredCount : given.count;
+  const hasCounter = given?.hasCounter ?? registeredCounter;
+  const hasHeader = given?.hasHeader ?? registeredHeader;
 
   const registerMessage = useCallback((slot: FieldDescribedSlot, present: boolean) => {
     setMessages((current) => {
@@ -143,9 +217,10 @@ export function Field({
 
   /**
    * Drawn by the field only when the page drew none and wrote no header — a
-   * header draws it at its own end. Its place in the DOM does not matter here —
-   * the stylesheet puts it in the label row's spare column — so it is written
-   * last rather than woven into the page's own children.
+   * header draws it at its own end. The stylesheet puts it in the label row's
+   * spare column wherever it stands; in the DOM it follows the label, where
+   * `SlField` writes it, so a reader meets it in the order it is seen. A label
+   * the page nested in an element of its own leaves it last.
    */
   const drawnCounter =
     count === undefined || hasCounter || hasHeader ? null : (
@@ -158,12 +233,24 @@ export function Field({
       </span>
     );
 
+  let placed = false;
+  const content = Children.map(children, (child) => {
+    if (placed || !isValidElement(child) || child.type !== FieldLabel) return child;
+    placed = true;
+    return (
+      <>
+        {child}
+        {drawnCounter}
+      </>
+    );
+  });
+
   const rootProps: FieldRootProps = {
     ...nativeProps,
     children: (
       <>
-        {children}
-        {drawnCounter}
+        {content}
+        {placed ? null : drawnCounter}
       </>
     ),
     ...(resolvedDisabled === true ? { 'data-disabled': '' } : {}),

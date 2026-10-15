@@ -88,3 +88,34 @@ export function formatFieldCount(count: FieldCount): string {
 export function isFieldCountOver(count: FieldCount): boolean {
   return count.max !== undefined && count.length > count.max;
 }
+
+/** Whether a message part has anything to say, which decides whether it describes the control. */
+export const hasFieldContent = (children: unknown) =>
+  children !== undefined && children !== null && children !== false && children !== '';
+
+type FieldCountReader = (props: never) => FieldCount | undefined;
+
+const countReaders = new WeakMap<object, FieldCountReader>();
+
+/**
+ * Declares that a control counts its value, and how to read the count from its
+ * props. The control still publishes through `setCount` in an effect; the field
+ * reads the props of a control written among its children for the render
+ * before that effect runs — on the server, and in the render hydration
+ * compares against it.
+ */
+export function countsInField<P>(
+  component: (props: P) => unknown,
+  read: (props: P) => FieldCount | undefined,
+): void {
+  countReaders.set(component, read as FieldCountReader);
+}
+
+/** How a control counts from its props, if it is one that counts. */
+export function fieldCountReader(
+  type: unknown,
+): ((props: unknown) => FieldCount | undefined) | undefined {
+  return typeof type === 'function'
+    ? (countReaders.get(type) as ((props: unknown) => FieldCount | undefined) | undefined)
+    : undefined;
+}

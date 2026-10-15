@@ -687,9 +687,9 @@ export const REACT_ENTITY_PICKER_DOCS = {
       [
         'width',
         "'anchor' | 'content'",
-        'anchor',
+        'content',
         'EntityPicker',
-        'The popup as wide as the frame, or as its rows',
+        'The popup at least as wide as the frame and as wide as its longest row (content), or pinned to the width of the frame (anchor)',
       ],
       [
         'strategy',

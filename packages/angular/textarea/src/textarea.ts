@@ -76,6 +76,7 @@ export type { TextareaResize, TextareaSize, TextareaVariant } from './textarea-d
     '[attr.aria-required]': 'ariaRequired()',
     '[attr.disabled]': 'disabledAttribute()',
     '[attr.readonly]': 'readonlyAttribute()',
+    '[attr.maxlength]': 'maxLengthAttribute()',
     '[style.--slotted-textarea-rows]': 'rows()',
     '[style.--slotted-textarea-max-rows]': 'maxRows()',
     '(input)': 'onInput($event)',
@@ -120,6 +121,15 @@ export class SlTextarea implements ControlValueAccessor, OnInit {
   });
   /** Publishes the length of the value to the field, which draws the count. */
   readonly showCount = input(false, { transform: booleanAttribute });
+  /**
+   * The native limit, as a binding. Without this input `[maxLength]` would set
+   * the element's property and the count would never see it; a static
+   * `maxlength` attribute is read as written.
+   */
+  readonly maxLength = input<number | undefined, unknown>(undefined, {
+    transform: (value) =>
+      value === undefined || value === null ? undefined : numberAttribute(value),
+  });
   /** The limit the count is measured against. Defaults to `maxlength`. */
   readonly countMax = input<number | undefined, unknown>(undefined, {
     transform: (value) =>
@@ -197,10 +207,16 @@ export class SlTextarea implements ControlValueAccessor, OnInit {
     this.resolvedReadOnly() === true ? '' : null,
   );
 
+  protected readonly maxLengthAttribute = computed(
+    () => this.maxLength() ?? this.writtenMaxLength ?? null,
+  );
+
   private readonly limit = computed(() => {
     const written = this.writtenMaxLength === null ? undefined : Number(this.writtenMaxLength);
     return (
-      this.countMax() ?? (written === undefined || Number.isNaN(written) ? undefined : written)
+      this.countMax() ??
+      this.maxLength() ??
+      (written === undefined || Number.isNaN(written) ? undefined : written)
     );
   });
 

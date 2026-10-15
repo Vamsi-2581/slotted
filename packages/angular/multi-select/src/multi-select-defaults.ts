@@ -154,7 +154,7 @@ export const MULTI_SELECT_FALLBACK: MultiSelectDefaults = {
   size: 'md',
   strategy: 'absolute',
   variant: 'outline',
-  width: 'anchor',
+  width: 'content',
 };
 
 export const MULTI_SELECT_DEFAULTS = new InjectionToken<MultiSelectDefaults>(

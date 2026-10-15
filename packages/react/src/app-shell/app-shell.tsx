@@ -10,6 +10,7 @@ import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { createControllable } from '@slotted/core/state';
 import {
   createContext,
+  isValidElement,
   useCallback,
   useContext,
   useEffect,
@@ -23,6 +24,7 @@ import type { MouseEvent, ReactNode } from 'react';
 
 import { useMessages } from '../i18n';
 import { useAppShellDefaults } from './app-shell-defaults';
+import { AppShellAside, AppShellMain, AppShellNav } from './app-shell-parts';
 import type {
   AppShellAsideExtentReason,
   AppShellAsideOpenReason,
@@ -44,6 +46,27 @@ import type {
 export const APP_SHELL_OVERLAY_AT = COMPACT_BELOW;
 
 const AppShellContext = createContext<AppShellContextValue | undefined>(undefined);
+
+type AppShellRegions = { nav: boolean; main: boolean; aside: boolean };
+
+/**
+ * The regions written among a shell's children, read from the element tree
+ * rather than from the effects that register them. A shell nested inside is
+ * not read: its regions are its own. A region a component of the page's
+ * renders is not in the tree, and arrives by registration.
+ */
+function readRegions(node: ReactNode, found: AppShellRegions): AppShellRegions {
+  if (Array.isArray(node)) {
+    for (const child of node as ReactNode[]) readRegions(child, found);
+    return found;
+  }
+  if (!isValidElement<{ children?: ReactNode }>(node) || node.type === AppShell) return found;
+  if (node.type === AppShellMain) found.main = true;
+  else if (node.type === AppShellNav) found.nav = true;
+  else if (node.type === AppShellAside) found.aside = true;
+  else readRegions(node.props.children, found);
+  return found;
+}
 
 /**
  * What the shell around this part says. A part outside one has no regions to
@@ -189,11 +212,24 @@ export function AppShell({
     toggle: null as HTMLElement | null,
   });
 
-  const [regions, setRegions] = useState<{ nav: boolean; main: boolean; aside: boolean }>({
+  const [registeredRegions, setRegions] = useState<AppShellRegions>({
     nav: false,
     main: false,
     aside: false,
   });
+  const [registered, setRegistered] = useState(false);
+
+  /**
+   * The regions register in effects, and the shell's own effect runs after
+   * theirs in the same commit. Until it has — on the server, and in the render
+   * hydration compares against it — the skip links come from the regions
+   * written among the children, so both renders agree; registration then
+   * takes over.
+   */
+  useEffect(() => setRegistered(true), []);
+  const regions = registered
+    ? registeredRegions
+    : readRegions(children, { nav: false, main: false, aside: false });
 
   const [busy, setBusy] = useState(false);
 

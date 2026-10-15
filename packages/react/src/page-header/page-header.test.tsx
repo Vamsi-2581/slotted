@@ -400,13 +400,14 @@ describe('PageHeader', () => {
 
   it('takes its defaults from the provider, and its own props over them', () => {
     render(
-      <PageHeaderDefaultsProvider collapse="manual" level="2" size="lg">
+      <PageHeaderDefaultsProvider collapse="manual" level="2" size="lg" variant="floating">
         <Full messages={{ collapse: 'Fechar' }} size="sm" />
       </PageHeaderDefaultsProvider>,
     );
     expect(root()).toHaveAttribute('data-collapse', 'manual');
     expect(root()).toHaveAttribute('data-level', '2');
     expect(root()).toHaveAttribute('data-size', 'sm');
+    expect(root()).toHaveAttribute('data-variant', 'floating');
     expect(screen.getByRole('button', { name: 'Fechar' })).toBeInTheDocument();
   });
 
@@ -498,6 +499,27 @@ describe('PageHeader parts', () => {
    * reads `data-compact` and takes the root out of `sticky`, and nothing is
    * left for another family to stop under.
    */
+  it('writes band by default, and data-stuck once the title area holds with the page scrolled', () => {
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+      callback(0);
+      return 0;
+    });
+    render(<Full />);
+    expect(root()).toHaveAttribute('data-variant', 'band');
+    expect(root()).not.toHaveAttribute('data-stuck');
+    const title = document.querySelector('[data-part="title-area"]') as HTMLElement;
+    vi.spyOn(title, 'getBoundingClientRect').mockImplementation(() => ({ top: 0 }) as DOMRect);
+    const scrollTo = (top: number) =>
+      act(() => {
+        Object.defineProperty(window, 'scrollY', { configurable: true, value: top });
+        window.dispatchEvent(new Event('scroll'));
+      });
+    scrollTo(120);
+    expect(root()).toHaveAttribute('data-stuck');
+    scrollTo(0);
+    expect(root()).not.toHaveAttribute('data-stuck');
+  });
+
   it('writes data-compact below the compact size class, and takes it off above it', () => {
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
       callback(0);

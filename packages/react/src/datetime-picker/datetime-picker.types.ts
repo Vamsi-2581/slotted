@@ -162,8 +162,9 @@ export interface DateTimePickerProps extends Omit<
   months?: number | undefined;
   weekNumbers?: boolean | undefined;
   /**
-   * The datetime an empty field steps from, and the time a day pressed in the
-   * calendar takes. One prop for both, because they are the same question:
+   * The datetime an empty field steps from, and the option the list opens on
+   * when a day is pressed with the time half empty. One prop for both, because
+   * they are the same question:
    * which datetime the family assumes where the reader has stated nothing.
    */
   referenceDateTime?: PlainDateTime | undefined;

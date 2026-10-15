@@ -71,6 +71,14 @@ describe('MultiSelect', () => {
     expect(contract.roles).toMatchObject({ control: 'grid', chips: 'row', chip: 'gridcell' });
   });
 
+  /** The contract's wiring puts the count on the control, as `SlMultiSelect` writes it. */
+  it('names the grid with the count of chips, and leaves the row unnamed', () => {
+    render(<Basic defaultValue={['fig', 'plum']} />);
+    expect(screen.getByRole('grid')).toHaveAttribute('aria-label', '2 chosen');
+    expect(screen.getByRole('row')).not.toHaveAttribute('aria-label');
+    expect(contract.wiring['aria-label']).toMatch(/^on the control/);
+  });
+
   /**
    * The grid pattern puts one element of a layout grid in the page tab
    * sequence, and the combobox pattern excludes the popup indicator from it.
@@ -377,6 +385,30 @@ describe('MultiSelect', () => {
     ]);
   });
 
+  /**
+   * A native reset puts the hidden inputs back and tells nothing, so the chips
+   * kept the last set chosen in a form that had been reset. The contract's
+   * form wiring says a native reset() restores the values.
+   */
+  it('returns to its default value when its form is reset', async () => {
+    render(
+      <form data-testid="form">
+        <Basic defaultValue={['raspberry']} name="fruit" />
+      </form>,
+    );
+    await openByArrow();
+    pressOption(optionNamed('Pomelo'));
+    type('blue');
+    expect(chipLabels()).toEqual(['Raspberry', 'Pomelo']);
+
+    act(() => (screen.getByTestId('form') as HTMLFormElement).reset());
+    expect(chips()).toHaveLength(1);
+    expect(input()).toHaveValue('');
+    const hidden = document.querySelectorAll<HTMLInputElement>('input[name="fruit"]');
+    expect([...hidden].map((element) => element.value)).toEqual(['raspberry']);
+    expect(contract.form.reason).toContain('a native reset() restore them');
+  });
+
   it('hides an option already held when the consumer asks for it', async () => {
     render(<Basic chosenOptions="hide" defaultValue={['blueberry']} />);
     await openByArrow();
@@ -398,6 +430,93 @@ describe('MultiSelect', () => {
   });
 
   /**
+   * `scrollIntoView` scrolls every ancestor as well, and on the first open it
+   * runs before the popup is positioned — so a control far down a page sent the
+   * page to its top, and the popup, its control now out of view, hid itself.
+   */
+  it('scrolls the list to the highlight, and never the page', async () => {
+    const original = Element.prototype.scrollIntoView;
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    try {
+      const handle = { current: null as MultiSelectHandle | null };
+      render(<Basic ref={(node: MultiSelectHandle | null) => void (handle.current = node)} />);
+      const listbox = await openByArrow();
+      Object.defineProperty(listbox, 'clientHeight', { configurable: true, value: 100 });
+      Object.defineProperty(listbox, 'scrollTop', { configurable: true, writable: true, value: 0 });
+      listbox.getBoundingClientRect = () =>
+        DOMRect.fromRect({ x: 0, y: 0, width: 200, height: 100 });
+      optionNamed('Pomelo').getBoundingClientRect = () =>
+        DOMRect.fromRect({ x: 0, y: 130, width: 200, height: 30 });
+      for (let step = 0; step < FRUIT.length; step += 1) {
+        if (input().getAttribute('aria-activedescendant') === optionNamed('Pomelo').id) break;
+        press('ArrowDown');
+      }
+      expect(input()).toHaveAttribute('aria-activedescendant', optionNamed('Pomelo').id);
+      expect(listbox.scrollTop).toBe(60);
+
+      listbox.scrollTop = 0;
+      act(() => handle.current?.scrollToKey('pomelo'));
+      expect(listbox.scrollTop).toBe(60);
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
+  });
+
+  /**
+   * Opened from the end, the highlight lands on the last option before the
+   * popup has a position, so the list has not yet taken the height that bounds
+   * it. Revealed only then, the option stayed below the fold.
+   */
+  it('shows the highlighted option once the popup has taken its height', async () => {
+    const bounded = (element: Element) =>
+      element
+        .closest<HTMLElement>("[data-part='positioner']")
+        ?.style.getPropertyValue('--slotted-positioner-available-height') !== '';
+    const rect = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: Element,
+    ) {
+      if (this.getAttribute('role') === 'listbox') {
+        return DOMRect.fromRect({ x: 0, y: 0, width: 200, height: bounded(this) ? 100 : 400 });
+      }
+      if (this.getAttribute('data-value') === 'pomelo') {
+        return DOMRect.fromRect({ x: 0, y: 130, width: 200, height: 30 });
+      }
+      return DOMRect.fromRect({ x: 0, y: 0, width: 0, height: 0 });
+    });
+    const height = vi
+      .spyOn(HTMLElement.prototype, 'clientHeight', 'get')
+      .mockImplementation(function (this: HTMLElement) {
+        if (this.getAttribute('role') !== 'listbox') return 0;
+        return bounded(this) ? 100 : 400;
+      });
+    const scrolled = new Map<Element, number>();
+    const scrollTop = vi.spyOn(Element.prototype, 'scrollTop', 'get').mockImplementation(function (
+      this: Element,
+    ) {
+      return scrolled.get(this) ?? 0;
+    });
+    const setScrollTop = vi
+      .spyOn(Element.prototype, 'scrollTop', 'set')
+      .mockImplementation(function (this: Element, next: number) {
+        scrolled.set(this, next);
+      });
+    try {
+      render(<Basic />);
+      input().focus();
+      press('ArrowUp');
+      const listbox = await screen.findByRole('listbox');
+      await waitFor(() => expect(listbox.scrollTop).toBe(60));
+    } finally {
+      rect.mockRestore();
+      height.mockRestore();
+      scrollTop.mockRestore();
+      setScrollTop.mockRestore();
+    }
+  });
+
+  /**
    * The contract's `opening`: `input` opens on typing and on a press, `focus`
    * on every focus, `manual` only on the trigger and the arrows. A press on the
    * input opens a closed popup and never closes an open one.
@@ -415,6 +534,49 @@ describe('MultiSelect', () => {
         expect.objectContaining({ reason: 'pointer' }),
       );
       expect(contract.members['multi-select'].defaults.openOn).toBe('input');
+    });
+
+    /** The contract's ArrowDown: open, it moves the highlight to the next option. */
+    it('highlights the first option on the first ArrowDown after a press opened the popup', async () => {
+      render(<Basic />);
+      input().focus();
+      fireEvent.click(input());
+      await screen.findByRole('listbox');
+      press('ArrowDown');
+      await waitFor(() =>
+        expect(input()).toHaveAttribute('aria-activedescendant', optionNamed('Blueberry').id),
+      );
+    });
+
+    /**
+     * The surface mounts a render or two after the popup opens, and later on a
+     * busy page. An arrow pressed in between found no option and was lost; it
+     * now waits for the surface, as the arrow that opens a closed popup does.
+     */
+    it('keeps an arrow pressed before the surface has mounted', async () => {
+      function Late({ surface }: { surface: boolean }) {
+        return (
+          <MultiSelect defaultOpen>
+            <MultiSelectControl aria-label="Fruit" />
+            {surface ? (
+              <MultiSelectContent aria-label="Fruit">
+                {FRUIT.map((label) => (
+                  <MultiSelectItem key={label} value={label.toLowerCase()}>
+                    {label}
+                  </MultiSelectItem>
+                ))}
+              </MultiSelectContent>
+            ) : null}
+          </MultiSelect>
+        );
+      }
+      const { rerender } = render(<Late surface={false} />);
+      input().focus();
+      press('ArrowDown');
+      rerender(<Late surface />);
+      await waitFor(() =>
+        expect(input()).toHaveAttribute('aria-activedescendant', optionNamed('Blueberry').id),
+      );
     });
 
     it('keeps an open popup open on a press on the input', async () => {

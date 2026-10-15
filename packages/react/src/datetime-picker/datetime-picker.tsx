@@ -17,6 +17,7 @@ import {
 } from '@slotted/core/date';
 import type { PlainDate, PlainDateTime, PlainTime, TimeOption } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { tabbables } from '@slotted/core/focus';
 import { datetimePickerMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
@@ -161,9 +162,25 @@ export function DateTimePicker({
   const [view, setView] = useState<CalendarView>('day');
 
   const [ownOpen, setOwnOpen] = useState(defaultOpen);
+  /**
+   * Whether the next opening moves focus into the panel. Set by a request to
+   * open from the trigger or from `open()`, and never by Alt+ArrowDown, which
+   * leaves focus in the field, or by a first render that starts open, which
+   * would take focus from wherever the page put it.
+   */
+  const focusOnOpen = useRef(false);
   const isOpen = open ?? ownOpen;
   const [ownValue, setOwnValue] = useState<PlainDateTime | null>(defaultValue ?? null);
   const held = value ?? ownValue;
+  /**
+   * The half pressed in the panel while the other half is missing. The value
+   * stays `null` until the second press writes both, so the half lives here and
+   * is forgotten when the panel closes.
+   */
+  const [pendingDate, setPendingDate] = useState<PlainDate | null>(null);
+  const [pendingTime, setPendingTime] = useState<PlainTime | null>(null);
+  /** The surface focus moves to after the render that drew a pending half. */
+  const enterAfterRender = useRef<'date' | 'time' | null>(null);
 
   const resolvedLocale = locale ?? appLocale;
   const resolvedTimeZone = timeZone ?? defaults.timeZone;
@@ -244,7 +261,7 @@ export function DateTimePicker({
    * times of the day under their cursor rather than the times of a day they
    * have not chosen.
    */
-  const listDate = held?.date ?? highlight.date;
+  const listDate = held?.date ?? pendingDate ?? highlight.date;
 
   const requestHighlight = useCallback(
     (
@@ -345,11 +362,15 @@ export function DateTimePicker({
       next: boolean,
       reason: 'pointer' | 'keyboard' | 'escape' | 'outsidePress' | 'select',
       source: unknown,
+      enter = true,
     ) => {
       const state = createControllable<boolean>({
         controlled: open,
         initial: isOpen,
-        onRequest: (request) => onOpenChange?.(request.value, request),
+        onRequest: (request) => {
+          onOpenChange?.(request.value, request);
+          focusOnOpen.current = enter && request.value && !request.cancelled;
+        },
       });
       if (state.request(next, reason, source)) setOwnOpen(next);
     },
@@ -368,6 +389,27 @@ export function DateTimePicker({
     },
     [held, onValueChange, value],
   );
+
+  /* `defaultValue` is read once, and a form reset returns to what it was then. */
+  const [initialValue] = useState<PlainDateTime | null>(() => defaultValue ?? null);
+
+  /**
+   * A native reset restores the hidden input and tells nothing, so the picker
+   * would keep the last moment chosen in a form that had been reset. The value
+   * returns to `defaultValue` through `onValueChange`, reason `programmatic`,
+   * and a half pressed in the panel without the other is dropped with it.
+   */
+  useEffect(() => {
+    const owner = rootRef.current?.closest('form');
+    if (owner === null || owner === undefined) return;
+    const onReset = (event: Event) => {
+      setPendingDate(null);
+      setPendingTime(null);
+      requestValue(initialValue, { reason: 'programmatic', source: event });
+    };
+    owner.addEventListener('reset', onReset);
+    return () => owner.removeEventListener('reset', onReset);
+  }, [initialValue, requestValue]);
 
   /** The presence of the layer, so an exit animation is allowed to finish. */
   const presence = useRef<PresenceHandle | null>(null);
@@ -574,6 +616,36 @@ export function DateTimePicker({
     [enterCalendar, enterList],
   );
 
+  /* A pending half moves focus once the render that drew it has run, so the
+     list it lands in is the list of the pressed day. */
+  useEffect(() => {
+    const surface = enterAfterRender.current;
+    if (surface === null) return;
+    enterAfterRender.current = null;
+    enterSurface(surface, undefined);
+  });
+
+  /* A half pressed and never completed does not outlive the panel. */
+  useEffect(() => {
+    if (isOpen) return;
+    setPendingDate(null);
+    setPendingTime(null);
+  }, [isOpen]);
+
+  /**
+   * The panel takes focus when it opens, in the surface `openTo` names. Left on
+   * the trigger, the panel in its portal was not the next stop in the page's
+   * sequence, and a keyboard reader could open it and not reach it.
+   */
+  useEffect(() => {
+    /* The surface renders in place before the portal exists and moves into it
+       once it does; focus waits for the node that stays. */
+    if (layerNode === null || container === null || !isOpen || !focusOnOpen.current) return;
+    if (!container.contains(layerNode)) return;
+    focusOnOpen.current = false;
+    enterSurface(resolvedOpenTo, undefined);
+  }, [container, isOpen, layerNode]);
+
   /**
    * The rule, in one place.
    *
@@ -604,32 +676,54 @@ export function DateTimePicker({
   /**
    * A day pressed in the calendar.
    *
-   * The time half is the one the value already holds, or `referenceDateTime`'s
-   * — midnight is the platform's answer and it is wrong for every booking flow,
-   * which is the conclusion Ant reached with `showTime.defaultOpenValue`.
+   * The time half is the one the value holds, or the one pressed in the list.
+   * With neither, the day waits for a time: focus moves to the list, onto the
+   * option nearest `referenceDateTime`, and the value does not move.
    */
   const selectDate = useCallback(
     (date: PlainDate, source: unknown) => {
       if (!editable) return;
       const wasWhole = held !== null;
-      const next: PlainDateTime = { date, time: held?.time ?? anchor.time };
+      const time = held?.time ?? pendingTime;
+      if (time === null) {
+        setPendingDate(date);
+        requestHighlight({ date, time: null }, 'pointer', source);
+        enterAfterRender.current = 'time';
+        return;
+      }
+      const next: PlainDateTime = { date, time };
+      setPendingDate(null);
+      setPendingTime(null);
       requestValue(next, { reason: 'select', source });
       requestHighlight({ date, time: highlight.time }, 'pointer', source);
       afterPress(next, wasWhole, 'date', source);
     },
-    [afterPress, anchor, editable, held, highlight, requestHighlight, requestValue],
+    [afterPress, editable, held, highlight, pendingTime, requestHighlight, requestValue],
   );
 
+  /**
+   * A time pressed in the list. The date half is the one the value holds, or
+   * the day pressed in the calendar; with neither, the time waits for a day and
+   * focus moves to the calendar.
+   */
   const selectTime = useCallback(
     (option: TimeOption, source: unknown) => {
       if (option.unavailable || !editable) return;
       const wasWhole = held !== null;
-      const next: PlainDateTime = { date: listDate, time: option.time };
-      requestValue(next, { reason: 'select', source });
+      const date = held?.date ?? pendingDate;
       requestHighlight({ date: listDate, time: option.time }, 'pointer', source);
+      if (date === null) {
+        setPendingTime(option.time);
+        enterAfterRender.current = 'date';
+        return;
+      }
+      const next: PlainDateTime = { date, time: option.time };
+      setPendingDate(null);
+      setPendingTime(null);
+      requestValue(next, { reason: 'select', source });
       afterPress(next, wasWhole, 'time', source);
     },
-    [afterPress, editable, held, listDate, requestHighlight, requestValue],
+    [afterPress, editable, held, listDate, pendingDate, requestHighlight, requestValue],
   );
 
   /* ── Keyboard ────────────────────────────────────────────────────────── */
@@ -640,8 +734,8 @@ export function DateTimePicker({
 
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
-      if (!isOpen) setOpen(true, 'keyboard', event);
-      enterSurface(resolvedOpenTo, event);
+      if (isOpen) enterSurface(resolvedOpenTo, event);
+      else setOpen(true, 'keyboard', event);
     }
   };
 
@@ -719,7 +813,24 @@ export function DateTimePicker({
     if (event.defaultPrevented || !editable) return;
     if (event.altKey && event.key === 'ArrowDown') {
       event.preventDefault();
-      setOpen(true, 'keyboard', event);
+      setOpen(true, 'keyboard', event, false);
+    }
+  };
+
+  /** Tab and Shift+Tab wrap inside the panel while it is open. */
+  const onContentKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) return;
+    const items = tabbables(event.currentTarget);
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (first === undefined || last === undefined) return;
+    const current = event.currentTarget.ownerDocument.activeElement;
+    if (event.shiftKey && current === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && current === last) {
+      event.preventDefault();
+      first.focus();
     }
   };
 
@@ -731,9 +842,13 @@ export function DateTimePicker({
       format.describe(held)
     ) : (
       <>
-        {format.describeDate(highlight.date)}
+        {format.describeDate(pendingDate ?? highlight.date)}
         {', '}
-        <span data-placeholder="">{placeholderTime(format.granularity)}</span>
+        {pendingTime === null ? (
+          <span data-placeholder="">{placeholderTime(format.granularity)}</span>
+        ) : (
+          format.time.format(pendingTime)
+        )}
       </>
     );
 
@@ -752,6 +867,7 @@ export function DateTimePicker({
         data-open-to={resolvedOpenTo}
         data-part="content"
         id={contentId}
+        onKeyDown={onContentKeyDown}
         role="dialog"
         {...(truncated ? { 'aria-description': t('truncated') } : {})}
       >
@@ -761,10 +877,15 @@ export function DateTimePicker({
           <button
             data-part="now"
             onClick={(event) => {
+              /* The clock, read at the press: `referenceDateTime` says where an
+                 empty field starts, not what time it is. */
+              const now = nowDateTimeIn(resolvedTimeZone);
               const wasWhole = held !== null;
-              requestValue(anchor, { reason: 'select', source: event });
-              requestHighlight({ date: anchor.date, time: anchor.time }, 'pointer', event);
-              afterPress(anchor, wasWhole, 'time', event);
+              setPendingDate(null);
+              setPendingTime(null);
+              requestValue(now, { reason: 'select', source: event });
+              requestHighlight({ date: now.date, time: now.time }, 'pointer', event);
+              afterPress(now, wasWhole, 'time', event);
             }}
             type="button"
           >
@@ -799,7 +920,7 @@ export function DateTimePicker({
               readOnly={resolvedReadOnly}
               selectionMode="single"
               timeZone={resolvedTimeZone}
-              value={held?.date ?? null}
+              value={held?.date ?? pendingDate}
               view={view}
               weekNumbers={weekNumbers}
               {...dateBoundsOf(bounds)}
@@ -824,9 +945,9 @@ export function DateTimePicker({
                 {list.map((option, index) => {
                   const label = labels[index] ?? '';
                   const selected =
-                    held !== null &&
-                    isSameDate(held.date, listDate) &&
-                    isSameTime(option.time, held.time);
+                    held === null
+                      ? isSameTime(option.time, pendingTime)
+                      : isSameDate(held.date, listDate) && isSameTime(option.time, held.time);
                   const current = index === highlightIndex;
                   return (
                     <div
@@ -880,10 +1001,7 @@ export function DateTimePicker({
               aria-label={spoken}
               data-part="trigger"
               disabled={!editable}
-              onClick={(event) => {
-                setOpen(!isOpen, 'pointer', event);
-                if (!isOpen) enterSurface(resolvedOpenTo, event);
-              }}
+              onClick={(event) => setOpen(!isOpen, 'pointer', event)}
               onKeyDown={onTriggerKeyDown}
               ref={triggerRef}
               type="button"

@@ -8,7 +8,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { SlCombobox } from './combobox';
 import type { ComboboxOpenOn } from './combobox-defaults';
-import { SlComboboxItem } from './combobox-items';
+import { SlComboboxItem, SlComboboxItemIcon } from './combobox-items';
 
 @Component({
   standalone: true,
@@ -501,6 +501,157 @@ describe('SlCombobox, the icon column', () => {
     );
     expect(column?.textContent?.trim()).toBe('');
     expect(item('norman')?.querySelector("[data-part='icon']")).toBeNull();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlCombobox, SlComboboxItem, SlComboboxItemIcon],
+  template: `
+    <sl-combobox aria-label="Reviewer" [portal]="false">
+      <sl-combobox-item value="amanda" label="Amanda Okoro">
+        <span slComboboxItemIcon><span data-ui="avatar">AO</span></span>
+      </sl-combobox-item>
+      <sl-combobox-item value="norman" label="Norman Vaz" />
+    </sl-combobox>
+  `,
+})
+class ProjectedIconHost {}
+
+/**
+ * The first column also takes an element of the consumer's own, as React's
+ * `icon` prop does: an avatar beside a person's name is artwork no glyph names.
+ */
+describe("SlCombobox, an icon of the consumer's own", () => {
+  it('projects the element marked slComboboxItemIcon into the first column', async () => {
+    await TestBed.configureTestingModule({ imports: [ProjectedIconHost] }).compileComponents();
+    const fixture = TestBed.createComponent(ProjectedIconHost);
+    fixture.detectChanges();
+    field().focus();
+    field().dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowDown' }));
+    fixture.detectChanges();
+
+    const item = (value: string) =>
+      document.querySelector(`[data-part='item'][data-value='${value}']`);
+    const first = item('amanda')?.firstElementChild;
+    expect(first?.getAttribute('data-part')).toBe('icon');
+    expect(first?.querySelector(":scope > [data-ui='avatar']")?.textContent).toBe('AO');
+    expect(item('amanda')?.querySelectorAll("[data-part='icon']").length).toBe(1);
+    expect(item('norman')?.querySelector("[data-part='icon']")).toBeNull();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlCombobox, SlComboboxItem],
+  template: `
+    <sl-combobox aria-label="Fruit" autoHighlight [portal]="false">
+      <sl-combobox-item value="blueberry" label="Blueberry" />
+      <sl-combobox-item value="raspberry" label="Raspberry" />
+      <sl-combobox-item value="grapefruit" label="Grapefruit" />
+    </sl-combobox>
+  `,
+})
+class AutoHighlightHost {}
+
+/**
+ * The contract's focus.onOpen: the highlight goes to the selected option, to
+ * the first when autoHighlight is set. A press opens the popup before the
+ * reader types, so the typing after it must still leave a match under Enter.
+ */
+describe('SlCombobox, autoHighlight after a press', () => {
+  it('highlights the first option on a press, and the first match as the reader types', async () => {
+    await TestBed.configureTestingModule({ imports: [AutoHighlightHost] }).compileComponents();
+    const fixture = TestBed.createComponent(AutoHighlightHost);
+    fixture.detectChanges();
+    field().focus();
+    field().click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(field().getAttribute('aria-activedescendant')).toBe(option('blueberry').id);
+
+    field().value = 'fruit';
+    field().dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(field().getAttribute('aria-activedescendant')).toBe(option('grapefruit').id);
+
+    field().dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
+    fixture.detectChanges();
+    expect(field().value).toBe('Grapefruit');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlCombobox, SlComboboxItem],
+  template: `
+    <sl-combobox aria-label="Time zone" autocomplete="both" [portal]="false">
+      <sl-combobox-item value="america-chicago" label="America/Chicago" />
+      <sl-combobox-item value="europe-london" label="Europe/London" />
+      <sl-combobox-item value="europe-berlin" label="Europe/Berlin" />
+    </sl-combobox>
+  `,
+})
+class CompletionHost {}
+
+/**
+ * autocomplete="both" completes the first match on every character the reader
+ * adds, including the ones typed while the popup is already open: the first
+ * match is read from the options the new query kept, not from the list before
+ * it.
+ */
+describe('SlCombobox, inline completion while the popup is open', () => {
+  const typeInto = async (fixture: ComponentFixture<unknown>, text: string) => {
+    field().value = text;
+    field().dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    await Promise.resolve();
+  };
+
+  it('completes the first match after a press opened the popup', async () => {
+    await TestBed.configureTestingModule({ imports: [CompletionHost] }).compileComponents();
+    const fixture = TestBed.createComponent(CompletionHost);
+    fixture.detectChanges();
+    field().focus();
+    field().click();
+    fixture.detectChanges();
+
+    await typeInto(fixture, 'eu');
+    expect(field().value).toBe('Europe/London');
+    expect(field().selectionStart).toBe(2);
+  });
+
+  it('completes again on the second character typed', async () => {
+    await TestBed.configureTestingModule({ imports: [CompletionHost] }).compileComponents();
+    const fixture = TestBed.createComponent(CompletionHost);
+    fixture.detectChanges();
+    field().focus();
+
+    await typeInto(fixture, 'e');
+    await typeInto(fixture, 'eu');
+    expect(field().value).toBe('Europe/London');
+  });
+});
+
+/**
+ * The name is the input's: it is the element with the combobox role. The root
+ * is a generic element, which ARIA 1.2 does not let be named, and React's
+ * \`Combobox\` root carries no name.
+ */
+describe('SlCombobox, the accessible name', () => {
+  it('names the input and leaves the root unnamed', async () => {
+    await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.detectChanges();
+
+    const root = document.querySelector('[data-ui="combobox"]') as HTMLElement;
+    expect(field().getAttribute('aria-label')).toBe('Fruit');
+    expect(root.hasAttribute('aria-label')).toBe(false);
   });
 });
 

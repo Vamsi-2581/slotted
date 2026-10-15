@@ -4,6 +4,7 @@ import type { Ref } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/tooltip/contract.json';
+import { IconButton } from '../button';
 import { Tooltip } from './tooltip';
 import { TooltipDefaultsProvider } from './tooltip-defaults';
 import { TooltipArrow, TooltipContent, TooltipLayer, TooltipTrigger } from './tooltip-parts';
@@ -318,6 +319,42 @@ describe('Tooltip', () => {
     );
     hover(trigger());
     expect(own).toHaveBeenCalledTimes(1);
+  });
+
+  /**
+   * The icon-only button is the most common tooltip trigger, and under
+   * describes="label" its only name is the tooltip. IconButton requires a name
+   * at the type level, so the trigger's props have to state the reference they
+   * carry: the composition below is checked by `tsc` as well as here.
+   */
+  it('names an IconButton under describes="label", with no aria-label written', () => {
+    render(
+      <Tooltip describes="label">
+        <TooltipTrigger
+          render={(props) => (
+            <IconButton {...props}>
+              <svg />
+            </IconButton>
+          )}
+        />
+        <TooltipLayer>
+          <TooltipContent>Copy tracking number</TooltipContent>
+        </TooltipLayer>
+      </Tooltip>,
+    );
+    expect(screen.getByRole('button', { name: 'Copy tracking number' })).toBeInTheDocument();
+  });
+
+  it('keeps an aria-labelledby the consumer wrote on the trigger', () => {
+    render(
+      <Tooltip>
+        <TooltipTrigger aria-labelledby="own-name">Copy</TooltipTrigger>
+        <TooltipLayer>
+          <TooltipContent>Copies the order number</TooltipContent>
+        </TooltipLayer>
+      </Tooltip>,
+    );
+    expect(trigger().getAttribute('aria-labelledby')).toBe('own-name');
   });
 
   it('renders the trigger into an element the consumer supplies', () => {

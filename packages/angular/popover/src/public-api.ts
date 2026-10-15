@@ -1,6 +1,7 @@
 export { SlPopover } from './popover';
 export type {
   PopoverAlign,
+  PopoverChangeRequest,
   PopoverDefaults,
   PopoverFocusTarget,
   PopoverMount,

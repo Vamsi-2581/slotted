@@ -139,6 +139,9 @@ export class SlDetailPanelSection {
           get size() {
             return panel.resolvedSize();
           },
+          get variant() {
+            return inherited.variant;
+          },
         };
       },
     },

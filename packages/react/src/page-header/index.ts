@@ -50,4 +50,5 @@ export type {
   PageHeaderSubheadingProps,
   PageHeaderToggleProps,
   PageHeaderToggleRootProps,
+  PageHeaderVariant,
 } from './page-header.types';

@@ -449,7 +449,9 @@ test('stops the ring under reduced motion rather than slowing it', () => {
  * no visual slot, so the reader lost the name of the action they pressed.
  */
 test('waits behind the label rather than over it', () => {
-  const sweep = dense.split(`${ui}:not([data-shape])[data-loading]::after{`)[1]?.split('}')[0];
+  const sweep = dense
+    .split(`${ui}:not([data-shape])[data-loading]:has([data-part='indicator'])::after{`)[1]
+    ?.split('}')[0];
   assert.ok(sweep, 'no band is drawn');
   assert.ok(sweep.includes('position:absolute'), 'the band is in the flow');
   assert.ok(sweep.includes('inset:0'));
@@ -473,6 +475,25 @@ test('waits behind the label rather than over it', () => {
     ?.split('}')[0];
   assert.ok(stepped?.includes('opacity:0'), 'the ring is drawn under the band');
   assert.ok(stepped.includes('position:absolute'), 'the ring keeps the width of the glyph');
+});
+
+/**
+ * `loadingDelay` holds the picture back without letting the action through
+ * (contract invariant). The band is the picture of a control with words in
+ * it, so it waits for the indicator the delay holds back, rather than for
+ * `data-loading`, which the refusal sets at once.
+ */
+test('holds the band back for as long as loadingDelay holds the ring', () => {
+  const sweeps = [...dense.matchAll(/([^{}]*::after)\{/g)].map(([, selector]) =>
+    selector.slice(selector.lastIndexOf('}') + 1),
+  );
+  assert.ok(sweeps.length > 0, 'no band is drawn');
+  for (const selector of sweeps) {
+    assert.ok(
+      selector.includes(":has([data-part='indicator'])"),
+      `${selector} sweeps before the delay has passed`,
+    );
+  }
 });
 
 /**

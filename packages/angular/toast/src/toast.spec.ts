@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, PLATFORM_ID, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -117,6 +117,56 @@ describe('SlToastRegion', () => {
     vi.advanceTimersByTime(1000);
     fixture.detectChanges();
     expect(items(fixture)[0]?.hasAttribute('data-open')).toBe(false);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlToastRegion],
+  template: `<sl-toast-region />`,
+})
+class PortalHost {}
+
+/**
+ * The move into the portal is a change to the document the browser shows.
+ * On the server the region stays where it was written: Angular's server
+ * document is not the page, and a node moved out of its host is a node
+ * hydration does not find where the view left it.
+ */
+describe('the portal', () => {
+  const mount = (platform: 'browser' | 'server') => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [{ provide: PLATFORM_ID, useValue: platform }] });
+    const fixture = TestBed.createComponent(PortalHost);
+    fixture.detectChanges();
+    return fixture;
+  };
+
+  it('moves the region to the end of the document in the browser', () => {
+    const fixture = mount('browser');
+    expect(fixture.nativeElement.querySelector('[data-ui="toast"]')).toBeNull();
+    expect(document.querySelector('[data-slotted-portal] [data-ui="toast"]')).not.toBeNull();
+    fixture.destroy();
+  });
+
+  it('leaves the region in its host while rendering on the server', () => {
+    const fixture = mount('server');
+    const section = fixture.nativeElement.querySelector('[data-ui="toast"]') as HTMLElement;
+    expect(section?.closest('sl-toast-region')).not.toBeNull();
+    expect(section.getAttribute('data-attach')).toBe('portal');
+    expect(document.querySelector('[data-slotted-portal] [data-ui="toast"]')).toBeNull();
+    fixture.destroy();
+  });
+
+  it('binds no key to the server’s document', () => {
+    const fixture = mount('server');
+    TestBed.inject(SlToastService).show({ id: 'one', title: 'Draft saved' });
+    fixture.detectChanges();
+    const before = document.activeElement;
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'F6', bubbles: true }));
+    expect(document.activeElement).toBe(before);
+    fixture.destroy();
   });
 });
 

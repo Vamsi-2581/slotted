@@ -6,6 +6,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  Directive,
   ElementRef,
   inject,
   input,
@@ -20,6 +21,18 @@ import { SlHighlight } from '@slotted/angular/highlight';
 
 import { SlCombobox } from './combobox';
 import type { ComboboxOptionValue } from './combobox-defaults';
+
+/**
+ * The first column, holding an element of the consumer's own — an avatar, a
+ * logo — where the `icon` input names only a glyph. React's `icon` prop takes
+ * any element, and this is the same column in the same part.
+ */
+@Directive({
+  selector: '[slComboboxItemIcon]',
+  standalone: true,
+  host: { 'data-part': 'icon' },
+})
+export class SlComboboxItemIcon {}
 
 /**
  * One option, and the one that decides whether it belongs in the results.
@@ -60,6 +73,7 @@ import type { ComboboxOptionValue } from './combobox-defaults';
     '(pointerenter)': 'onPointerEnter($event)',
   },
   template: `
+    <ng-content select="[slComboboxItemIcon]" />
     @if (icon(); as glyph) {
       <span data-part="icon"
         ><span slIcon><svg slGlyph [name]="glyph"></svg></span
@@ -86,7 +100,10 @@ export class SlComboboxItem {
   readonly label = input.required<string>();
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly description = input<string | undefined>(undefined);
-  /** The glyph drawn in the first column, as a `Glyph` inside an `Icon` box. */
+  /**
+   * The glyph drawn in the first column, as a `Glyph` inside an `Icon` box. An
+   * element of the consumer's own goes there through `slComboboxItemIcon`.
+   */
   readonly icon = input<GlyphName | undefined>(undefined);
   readonly position = input(undefined, {
     transform: (given: number | string | undefined) =>

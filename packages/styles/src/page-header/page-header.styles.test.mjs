@@ -54,23 +54,75 @@ test('renders every part the contract declares, in at least one scene', () => {
 
 /**
  * The mechanics of the contract's `sticky`: the root sticks with a negative
- * offset the size of the header area, the title area at 0 inside it, and
- * pinned or revealed the root's offset is 0.
+ * offset the size of the header area, the title area at the inset inside it,
+ * and pinned or revealed the root's offset is the inset — 0 unless floating.
  */
-test('sticks the root with a negative offset and the title area at zero', () => {
+test('sticks the root with a negative offset and the title area at the inset', () => {
   const root = rule(ui);
+  assert.match(root, /--_sticky-inset:0px/);
   assert.match(root, /position:sticky/);
-  assert.match(root, /inset-block-start:calc\(-1 \* var\(--slotted-page-header-collapse,0px\)\)/);
+  assert.match(
+    root,
+    /inset-block-start:calc\(var\(--_sticky-inset\) - var\(--slotted-page-header-collapse,0px\)\)/,
+  );
   assert.match(root, /overflow-anchor:none/);
   const titleArea = rule(`${ui}>*>[data-part='title-area']`);
   assert.match(titleArea, /position:sticky/);
-  assert.match(titleArea, /inset-block-start:0/);
+  assert.match(titleArea, /inset-block-start:var\(--_sticky-inset\)/);
   assert.match(titleArea, /z-index:2/);
-  /* Revealed, manual, or pinned: the root's offset is zero and the whole header stays. */
+  /* Revealed, manual, or pinned: the root's offset is the inset and the whole header stays. */
   const held = rule(
     `${ui}[data-revealed],${ui}[data-collapse='manual'],${ui}:has([data-part='pin'][data-pressed])`,
   );
-  assert.match(held, /inset-block-start:0/);
+  assert.match(held, /inset-block-start:var\(--_sticky-inset\)/);
+  /* Compact, the root and the title area are in the flow at nought, whatever the inset. */
+  assert.match(rule(`${ui}[data-compact]`), /inset-block-start:0/);
+  assert.match(rule(`${ui}[data-compact]>*>[data-part='title-area']`), /inset-block-start:0/);
+});
+
+/**
+ * The contract's `variant`. `plain` paints no ground at rest and takes the
+ * surface back once content passes under the chrome; `floating` is a box with
+ * the hairline all round, rounded, held an inset below the edge, and lifted
+ * by a shadow only while stuck. The pill keeps the surface in every one.
+ */
+/**
+ * The title area sits inside the container the family renders, and a private
+ * property the container also declares reaches it as the container's value:
+ * `--_inset` there is the container's 16-pixel gutter, and a floating title
+ * area read it as its sticky offset and never counted as stuck.
+ */
+test('reads its sticky inset under a name the container does not declare', () => {
+  const container = readFileSync(new URL('../container/container.css', import.meta.url), 'utf8');
+  assert.doesNotMatch(container, /--_sticky-inset\s*:/);
+  assert.match(
+    rule(`${ui}>*>[data-part='title-area']`),
+    /inset-block-start:var\(--_sticky-inset\)/,
+  );
+});
+
+test('paints the three variants', () => {
+  assert.match(rule(ui), /--_ground:var\(--_surface\)/);
+  assert.match(rule(`${ui}[data-variant='plain']:not([data-stuck])`), /--_ground:transparent/);
+  const floating = rule(`${ui}[data-variant='floating']`);
+  /* Flush with the scroller's edge at rest, an inset would sit the box over the content under it. */
+  assert.doesNotMatch(floating, /--_sticky-inset/);
+  assert.match(floating, /border:var\(--_rule-size\) solid var\(--_rule\)/);
+  assert.match(floating, /border-radius:var\(--_radius\)/);
+  assert.match(floating, /box-sizing:border-box/);
+  assert.doesNotMatch(floating, /box-shadow/);
+  const title = rule(`${ui}[data-variant='floating']>*>[data-part='title-area']`);
+  assert.match(title, /border-start-start-radius:calc\(var\(--_radius\) - var\(--_rule-size\)\)/);
+  assert.match(title, /border-start-end-radius:calc\(var\(--_radius\) - var\(--_rule-size\)\)/);
+  const stuck = rule(`${ui}[data-variant='floating'][data-stuck]`);
+  assert.match(
+    stuck,
+    /--_sticky-inset:var\(--slotted-page-header-inset,var\(--slotted-space-4,0\.5rem\)\)/,
+  );
+  assert.match(stuck, /box-shadow:var\(--slotted-page-header-shadow,var\(--slotted-shadow-sm\)\)/);
+  /* The title area slides to the inset with the root, not a frame before it. */
+  assert.match(title, /transition:inset-block-start var\(--_duration\) var\(--_easing\)/);
+  assert.match(rule(`${ui}>*>[data-part='controls']>*`), /background-color:var\(--_surface\)/);
 });
 
 /** The root keeps its box. */
@@ -103,14 +155,19 @@ test('collapses by the control as a grid track, and never while scrolled out', (
 /**
  * The chrome's edge is one hairline the whole width of the header, in every
  * state, and no shadow: the reviewer read the shadow as ugly and the rule
- * inside the container as one that stopped short of the header's edge.
+ * inside the container as one that stopped short of the header's edge. The
+ * one shadow is a floating header's while stuck, a box lying on the content.
  */
 test('draws one full-width edge on the root and no shadow', () => {
   const root = rule(ui);
   assert.match(root, /border-block-end:var\(--_rule-size\) solid var\(--_rule\)/);
   assert.match(root, /overflow-x:clip/);
   assert.match(root, /z-index:calc\(var\(--slotted-z-index-sticky,100\)\s*\+\s*3\)/);
-  assert.doesNotMatch(css, /box-shadow/);
+  const floatingStuck = `${ui}[data-variant='floating'][data-stuck]{`;
+  assert.doesNotMatch(
+    normalized.replace(floatingStuck + rule(floatingStuck.slice(0, -1)), ''),
+    /box-shadow/,
+  );
   /* With tabs under it the edge the pill straddles is above them, drawn wider than the container. */
   const above = rule(
     `${ui}:has(>*>[data-part='tabs']:not(:empty))>*>[data-part='controls']::before`,
@@ -485,4 +542,30 @@ test('gives the marks a line of their own on a phone, whatever they say', () => 
     /@container page-header \(width < 600px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
   const marks = narrow.split(`[data-part='title']>[data-part='marks']{`)[1]?.split('}')[0] ?? '';
   assert.match(marks, /flex-basis:100%/);
+});
+
+/**
+ * A wrapping flex row's own width is the sum of its items as if on one line:
+ * the title of a record beside a folding toolbar measured its heading, its
+ * marks and its subheading end to end — 769 pixels for two lines of 420 — and
+ * the toolbar, left 61 pixels, folded every command into its menu beside empty
+ * room. Beside a folding toolbar the title is a grid whose own width is its
+ * widest line.
+ */
+test('measures a title beside a folding toolbar by its widest line, not its parts end to end', () => {
+  const folding = ":has(>[data-part='actions']>[data-ui='toolbar'][data-overflow='menu'])";
+  const title = `${ui}>*>[data-part='title-area']>[data-part='title-row']${folding}>[data-part='title']`;
+  const grid = rule(title);
+  assert.match(grid, /display:grid/);
+  assert.match(grid, /grid-template-columns:minmax\(0,auto\) auto/);
+  assert.match(rule(`${title}>[data-part='heading']`), /grid-column:1/);
+  assert.match(rule(`${title}>[data-part='subheading']`), /grid-column:1 \/ -1/);
+  const narrow =
+    /@container page-header \(width < 600px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
+  assert.match(
+    narrow,
+    new RegExp(
+      `${title.replace(/[[\]()*+?.\\^$|]/g, '\\$&')}>\\[data-part='marks'\\]\\{grid-column:1 \\/ -1`,
+    ),
+  );
 });

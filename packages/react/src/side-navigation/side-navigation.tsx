@@ -357,9 +357,12 @@ export function SideNavigation({
     ],
   );
 
+  /* The name belongs to the landmark: the div inside the shell carries none,
+     written or not, because the shell's nav region already says it. */
+  const { 'aria-label': writtenLabel, ...unnamedProps } = nativeProps;
   const rootProps: SideNavigationRootProps = {
-    ...nativeProps,
-    ...(resolvedLandmark ? { 'aria-label': nativeProps['aria-label'] ?? t('navigation') } : {}),
+    ...unnamedProps,
+    ...(resolvedLandmark ? { 'aria-label': writtenLabel ?? t('navigation') } : {}),
     children,
     className,
     ...(compact ? { 'data-compact': '' as const } : {}),

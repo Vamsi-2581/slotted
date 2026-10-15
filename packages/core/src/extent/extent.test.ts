@@ -338,6 +338,35 @@ describe('measureLength', () => {
     expect(measured?.style.pointerEvents).toBe('none');
     host.remove();
   });
+
+  /**
+   * A probe out of flow resolves a percentage against its containing block,
+   * the nearest positioned ancestor, and not against the element it was put in:
+   * "25%" and "calc(100% - 36rem)" of a splitter's container came out against
+   * whatever box happened to be positioned above it. Given the length a
+   * percentage is of, the probe is measured inside a box of that length.
+   */
+  it('resolves a percentage against the basis it is given', () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+
+    let wrapper: HTMLElement | undefined;
+    const append = host.append.bind(host);
+    host.append = (...nodes: (Node | string)[]) => {
+      wrapper = nodes[0] as HTMLElement;
+      append(...nodes);
+    };
+
+    measureLength('calc(100% - 36rem)', host, 1000);
+
+    expect(wrapper?.style.position).toBe('absolute');
+    expect(wrapper?.style.inlineSize).toBe('1000px');
+    const probe = wrapper?.firstElementChild as HTMLElement | null;
+    expect(probe?.style.inlineSize).toBe('calc(100% - 36rem)');
+    expect(probe?.style.position).toBe('');
+    expect(host.childElementCount).toBe(0);
+    host.remove();
+  });
 });
 
 describe('extentVelocity', () => {

@@ -1328,7 +1328,7 @@ export const Expansion: Story = {
 
 const WIDE = `
   <div slTable [columns]="5" variant="framed" [stickyHeader]="sticky">
-    <div slTableContent aria-label="Invoices, scrollable">
+    <div slTableContent scrollLabel="Invoices, scrollable">
       <thead slTableHead>
         <tr slTableRow>
           <th slTableColumnHeader sticky="start" text="nowrap">Invoice</th>

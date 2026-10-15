@@ -265,8 +265,9 @@ function Item({
     surface?.node?.focus({ preventScroll: true });
   };
 
+  /* `type` is the family's own button's: the element `render` returns is the
+     consumer's, and on the anchor a link item renders it would be a MIME type. */
   const rootProps: MenuItemRootProps = {
-    type: 'button',
     ...nativeProps,
     children: (
       <>
@@ -304,7 +305,7 @@ function Item({
   };
 
   if (render !== undefined) return render({ ...rootProps, ref: attach });
-  return <button {...rootProps} ref={ref} />;
+  return <button type="button" {...rootProps} ref={ref} />;
 }
 
 export function MenuItem(props: MenuItemProps) {

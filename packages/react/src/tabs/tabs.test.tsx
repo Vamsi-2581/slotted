@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -81,7 +81,7 @@ describe('Tabs', () => {
     render(
       <Tabs defaultValue="a">
         <TabList aria-label="Pedido">
-          <Tab dismissLabel="Fechar" dismissible value="a">
+          <Tab dismissLabel="Fechar" dismissible end="3" start="•" value="a">
             A
           </Tab>
         </TabList>
@@ -106,12 +106,88 @@ describe('Tabs', () => {
     ).not.toBeNull();
   });
 
-  /** `mount="active"` is the default: only the selected panel exists. */
-  it('builds one panel at a time by default', () => {
+  /**
+   * A list laid out after mount — its stylesheet arriving late, a drawer
+   * opening, a panel shown that was hidden — starts to overflow with the
+   * selected tab out of sight. The tab is brought into view when the list
+   * starts to overflow, not only when the selection moves.
+   */
+  it('brings the selected tab into view when the list starts to overflow', () => {
+    const resized: Array<() => void> = [];
+    const Original = globalThis.ResizeObserver;
+    globalThis.ResizeObserver = class {
+      constructor(callback: ResizeObserverCallback) {
+        resized.push(() => callback([], this as unknown as ResizeObserver));
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+
+    try {
+      render(<Basic defaultValue="c" />);
+      const list = screen.getByRole('tablist');
+      const scrollBy = vi.fn();
+      Object.assign(list, { scrollBy });
+      Object.defineProperty(list, 'clientWidth', { configurable: true, value: 200 });
+      Object.defineProperty(list, 'scrollWidth', { configurable: true, value: 480 });
+      list.getBoundingClientRect = () => ({ left: 0, right: 200, top: 0, bottom: 30 }) as DOMRect;
+      tab(2).getBoundingClientRect = () =>
+        ({ left: 400, right: 480, top: 0, bottom: 30 }) as DOMRect;
+
+      act(() => resized.forEach((notify) => notify()));
+
+      expect(scrollBy).toHaveBeenCalledWith(expect.objectContaining({ left: 280 }));
+    } finally {
+      globalThis.ResizeObserver = Original;
+    }
+  });
+
+  /**
+   * An icon and a count stand beside the words, inside the control, so the
+   * tab's gap spaces them and the label alone is clipped under fit=equal.
+   */
+  it('places start and end beside the label, inside the tab', () => {
+    render(
+      <Tabs defaultValue="orders">
+        <TabList aria-label="Customer">
+          <Tab end={<b>12</b>} start={<i>icon</i>} value="orders">
+            Orders
+          </Tab>
+          <Tab value="files">Files</Tab>
+        </TabList>
+        <TabPanel value="orders">Orders</TabPanel>
+        <TabPanel value="files">Files</TabPanel>
+      </Tabs>,
+    );
+
+    const parts = [...tab(0).children].map((node) => node.getAttribute('data-part'));
+    expect(parts).toEqual(['start', 'label', 'end']);
+    expect(tab(0).querySelector('[data-part="label"]')).toHaveTextContent(/^Orders$/);
+    expect(tab(0).querySelector('[data-part="start"] > i')).not.toBeNull();
+    expect(tab(0).querySelector('[data-part="end"] > b')).toHaveTextContent('12');
+    expect([...tab(1).children].map((node) => node.getAttribute('data-part'))).toEqual(['label']);
+  });
+
+  /**
+   * `mount` decides what a panel holds, not whether it exists: every tab's
+   * `aria-controls` names a panel in the document (tabs contract, `wiring`),
+   * and `mount="active"`, the default, fills only the selected one.
+   */
+  const filled = () => [...panels()].filter((panel) => panel.textContent !== '');
+
+  it('builds one panel at a time by default, and every tab names a panel', () => {
     render(<Basic />);
 
-    expect(panels()).toHaveLength(1);
+    expect(panels()).toHaveLength(3);
+    expect(filled()).toHaveLength(1);
     expect(screen.getByRole('tabpanel')).toHaveTextContent('painel a');
+    for (const control of tabs()) {
+      expect(document.getElementById(control.getAttribute('aria-controls') ?? '')).toHaveAttribute(
+        'data-part',
+        'panel',
+      );
+    }
   });
 
   it('keeps every panel once it has been seen, under lazy', () => {
@@ -119,15 +195,15 @@ describe('Tabs', () => {
 
     fireEvent.click(tab(1), { detail: 1 });
 
-    expect(panels()).toHaveLength(2);
-    expect(panels()[0]).toHaveAttribute('hidden');
-    expect(panels()[1]).not.toHaveAttribute('hidden');
+    expect(filled()).toHaveLength(2);
+    expect(filled()[0]).toHaveAttribute('hidden');
+    expect(filled()[1]).not.toHaveAttribute('hidden');
   });
 
   it('builds every panel up front, under eager', () => {
     render(<Basic mount="eager" />);
 
-    expect(panels()).toHaveLength(3);
+    expect(filled()).toHaveLength(3);
     expect(screen.getAllByRole('tabpanel')).toHaveLength(1);
   });
 

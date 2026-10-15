@@ -26,4 +26,9 @@ export type {
   ComboboxVariant,
   ComboboxWidth,
 } from './combobox-defaults';
-export { SlComboboxGroup, SlComboboxItem, SlComboboxSeparator } from './combobox-items';
+export {
+  SlComboboxGroup,
+  SlComboboxItem,
+  SlComboboxItemIcon,
+  SlComboboxSeparator,
+} from './combobox-items';

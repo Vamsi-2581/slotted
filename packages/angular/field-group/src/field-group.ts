@@ -50,11 +50,13 @@ export interface FieldGroupIds {
  * **What is said about the set is said before the set.** The description and
  * the error come between the legend and the fields, which is where GOV.UK's
  * fieldset example puts a hint and an error, and the opposite of where a single
- * field puts its own.
+ * field puts its own. A message the page did not write is not drawn, which is
+ * the DOM React's `FieldGroupDescription` and `FieldGroupError` produce.
  *
  * **`aria-describedby` goes on the fieldset.** A reader entering any control in
  * the group hears the group's hint and its error once, from the element that
- * names them both.
+ * names them both. A message with no text — a reserved line waiting for its
+ * text — keeps its box and is not named until the text arrives.
  *
  * **The group provides for its fields.** It answers `SlFieldDefaultsSource` for
  * its own subtree, so `size`, `labelPlacement`, `necessity`, the necessity
@@ -68,32 +70,36 @@ export interface FieldGroupIds {
   exportAs: 'slFieldGroup',
   imports: [SlInlineMessage],
   template: `<ng-content select="[slFieldGroupLegend]" />
-    <p
-      slInlineMessage
-      [id]="ids().description"
-      [size]="messageSize()"
-      [mark]="description()?.mark() ?? 'none'"
-      [tone]="description()?.tone() ?? 'secondary'"
-      [live]="description()?.live() ?? 'off'"
-      [hideIcon]="description()?.hideIcon() ?? false"
-      [reserve]="description()?.reserve() ?? false"
-      [prefix]="description()?.prefix()"
-    >
-      <ng-content select="[slFieldGroupDescription]" />
-    </p>
-    <p
-      slInlineMessage
-      [id]="ids().error"
-      [size]="messageSize()"
-      [mark]="error()?.mark() ?? 'none'"
-      [tone]="error()?.tone() ?? 'danger'"
-      [live]="error()?.live() ?? 'off'"
-      [hideIcon]="error()?.hideIcon() ?? false"
-      [reserve]="error()?.reserve() ?? false"
-      [prefix]="error()?.prefix()"
-    >
-      <ng-content select="[slFieldGroupError]" />
-    </p>
+    @if (description(); as message) {
+      <p
+        slInlineMessage
+        [id]="ids().description"
+        [size]="messageSize()"
+        [mark]="message.mark() ?? 'none'"
+        [tone]="message.tone() ?? 'secondary'"
+        [live]="message.live() ?? 'off'"
+        [hideIcon]="message.hideIcon() ?? false"
+        [reserve]="message.reserve() ?? false"
+        [prefix]="message.prefix()"
+      >
+        <ng-content select="[slFieldGroupDescription]" />
+      </p>
+    }
+    @if (error(); as message) {
+      <p
+        slInlineMessage
+        [id]="ids().error"
+        [size]="messageSize()"
+        [mark]="message.mark() ?? 'none'"
+        [tone]="message.tone() ?? 'danger'"
+        [live]="message.live() ?? 'off'"
+        [hideIcon]="message.hideIcon() ?? false"
+        [reserve]="message.reserve() ?? false"
+        [prefix]="message.prefix()"
+      >
+        <ng-content select="[slFieldGroupError]" />
+      </p>
+    }
     <div data-part="content"><ng-content /></div>`,
   styleUrl: '../../../styles/src/field-group/field-group.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -198,8 +204,8 @@ export class SlFieldGroup extends SlFieldDefaultsSource {
   protected readonly describedBy = computed(() => {
     const parts = [
       this.writtenDescribedBy,
-      this.description() === undefined ? undefined : this.ids().description,
-      this.error() === undefined ? undefined : this.ids().error,
+      this.description()?.hasContent() ? this.ids().description : undefined,
+      this.error()?.hasContent() ? this.ids().error : undefined,
     ].filter(Boolean);
     return parts.length === 0 ? null : parts.join(' ');
   });

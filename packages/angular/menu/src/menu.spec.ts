@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, Directive, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
+import { SlButton } from '@slotted/angular/button';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -575,5 +576,125 @@ describe('SlMenu header and meta', () => {
   it('projects the meta into its own part on an item and on a submenu trigger', () => {
     expect(item('Inbox')?.querySelector("[data-part='meta']")?.textContent).toBe('12');
     expect(item('Status')?.querySelector("[data-part='meta']")?.textContent).toBe('Available');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlButton, SlMenu, SlMenuItem, SlMenuTrigger],
+  template: `
+    <button slButton variant="outline" [slMenuTriggerFor]="document">Document</button>
+    <sl-menu #document>
+      <button slMenuItem>Duplicate</button>
+    </sl-menu>
+  `,
+})
+class ButtonTrigger {}
+
+/**
+ * On a plain control the trigger has no part of its own, so the part is the
+ * control's: the library's button stays the root of its family, as React's
+ * `MenuTrigger render={(props) => <Button {...props} />}` leaves it.
+ */
+describe('SlMenuTrigger on the library button', () => {
+  it('leaves the button the root of its own family', () => {
+    TestBed.configureTestingModule({ imports: [ButtonTrigger] });
+    const fixture = TestBed.createComponent(ButtonTrigger);
+    fixture.detectChanges();
+
+    const control = fixture.nativeElement.querySelector('[data-ui="button"]') as HTMLElement;
+    expect(control.getAttribute('data-part')).toBe('root');
+    expect(control.getAttribute('aria-haspopup')).toBe('menu');
+    expect(control.hasAttribute('role')).toBe(false);
+  });
+});
+
+/** Another family's part, bound by a directive Angular runs before the trigger. */
+@Directive({
+  selector: '[probePart]',
+  standalone: true,
+  host: { '[attr.data-part]': '"menu-trigger"' },
+})
+class ProbePart {}
+
+@Component({
+  standalone: true,
+  imports: [ProbePart, SlMenu, SlMenuItem, SlMenuTrigger],
+  template: `
+    <button probePart aria-label="More ways to ship" [slMenuTriggerFor]="ship"></button>
+    <sl-menu #ship>
+      <button slMenuItem>Ship and print label</button>
+    </sl-menu>
+  `,
+})
+class BoundPartTrigger {}
+
+/**
+ * The trigger writes no part and no role on a plain control, so a part another
+ * directive binds survives whichever order the two host bindings run in — the
+ * split button's menu trigger is one, and the docs site's compiler runs its
+ * binding before the trigger's.
+ */
+describe('SlMenuTrigger beside a directive that binds the part', () => {
+  it('keeps the part the other directive binds', () => {
+    TestBed.configureTestingModule({ imports: [BoundPartTrigger] });
+    const fixture = TestBed.createComponent(BoundPartTrigger);
+    fixture.detectChanges();
+
+    const control = fixture.nativeElement.querySelector('button') as HTMLElement;
+    expect(control.getAttribute('data-part')).toBe('menu-trigger');
+    expect(control.getAttribute('aria-haspopup')).toBe('menu');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlMenu, SlMenuItem, SlMenuTrigger],
+  template: `
+    <button [slMenuTriggerFor]="move">Move to</button>
+    <sl-menu #move>
+      <button slMenuItem>Amsterdam</button>
+      <button slMenuItem>Berlin</button>
+      <button slMenuItem>Zürich</button>
+    </sl-menu>
+  `,
+})
+class LongMenu {}
+
+/**
+ * The surface scrolls inside the room the positioner gives it, so an item the
+ * arrows, Home, End or typeahead reach is brought into the surface rather than
+ * by the browser's own focus scroll, which centres it in the window and
+ * carried the whole layer off its trigger.
+ */
+describe('SlMenu in a surface that scrolls', () => {
+  it('reveals the item it moves to inside the surface, without scrolling the page', async () => {
+    TestBed.configureTestingModule({ imports: [LongMenu] });
+    const fixture = TestBed.createComponent(LongMenu);
+    fixture.detectChanges();
+    const control = fixture.nativeElement.querySelector('button') as HTMLElement;
+    control.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const focus = vi.spyOn(HTMLElement.prototype, 'focus');
+
+    const key = (name: string) =>
+      document.activeElement?.dispatchEvent(
+        new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: name }),
+      );
+    const named = (label: string) =>
+      [...document.querySelectorAll<HTMLElement>("[data-part='item']")].find(
+        (node) => node.textContent?.trim() === label,
+      );
+
+    key('End');
+    expect(document.activeElement).toBe(named('Zürich'));
+    expect(focus.mock.contexts.at(-1)).toBe(named('Zürich'));
+    expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
+
+    key('b');
+    expect(document.activeElement).toBe(named('Berlin'));
+    expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
+    focus.mockRestore();
   });
 });

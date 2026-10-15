@@ -1,5 +1,7 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
+import { hydrateRoot } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/checkbox-group/contract.json';
@@ -158,6 +160,21 @@ describe('CheckboxGroup', () => {
     expect(contract.roleWithdrawnInside).toBe('field-group');
   });
 
+  it('takes invalid and required from the field group around it', () => {
+    render(
+      <FieldGroup invalid required>
+        <FieldGroupLegend>Dias</FieldGroupLegend>
+        <Days />
+      </FieldGroup>,
+    );
+
+    const root = box(0).closest('[data-ui="checkbox-group"]');
+    expect(root).toHaveAttribute('data-invalid', '');
+    expect(root).toHaveAttribute('aria-invalid', 'true');
+    expect(root).toHaveAttribute('aria-required', 'true');
+    for (const box of boxes()) expect(box).toHaveAttribute('aria-invalid', 'true');
+  });
+
   it('keeps a role the consumer wrote themselves', () => {
     render(<Days role="presentation" />);
     expect(box(0).closest('[data-ui="checkbox-group"]')).toHaveAttribute('role', 'presentation');
@@ -177,6 +194,30 @@ describe('CheckboxGroup', () => {
 
     expect(screen.getByText('2/3')).toBeInTheDocument();
     expect(contract.counter.placedBy).toBe('field');
+  });
+
+  it('takes its name from the label of the field around it', () => {
+    render(
+      <Field id="days">
+        <FieldLabel>Dias</FieldLabel>
+        <Days />
+      </Field>,
+    );
+
+    expect(group()).toHaveAttribute('aria-labelledby', 'days-label');
+    expect(group()).toHaveAccessibleName('Dias');
+  });
+
+  it('keeps a name the consumer wrote over the field’s label', () => {
+    render(
+      <Field id="days">
+        <FieldLabel>Dias</FieldLabel>
+        <Days aria-label="Dias de coleta" />
+      </Field>,
+    );
+
+    expect(group()).not.toHaveAttribute('aria-labelledby');
+    expect(group()).toHaveAccessibleName('Dias de coleta');
   });
 
   it('lets an application decide once how its sets of choices flow', () => {
@@ -212,5 +253,57 @@ describe('CheckboxGroup', () => {
     render(<Controlled />);
     fireEvent.click(screen.getByRole('button'));
     for (const box of boxes()) expect(box).toBeChecked();
+  });
+});
+
+/**
+ * The server renders once and runs no effect, so a count published in an
+ * effect is missing from its markup, and hydration then disagrees with it.
+ * The field reads the count from the group's props written among its children.
+ */
+describe('CheckboxGroup on the server', () => {
+  const tree = (
+    <Field id="days">
+      <FieldLabel>Dias</FieldLabel>
+      <CheckboxGroup allValues={DAYS} defaultValue={['mon']} showCount>
+        <Checkbox value="mon">mon</Checkbox>
+        <Checkbox value="tue">tue</Checkbox>
+        <Checkbox value="wed">wed</Checkbox>
+      </CheckboxGroup>
+    </Field>
+  );
+
+  it('draws the count it publishes in the field, and is described by it', () => {
+    const host = document.createElement('div');
+    host.innerHTML = renderToString(tree);
+
+    expect(host.querySelector('[data-part="counter"]')).toHaveTextContent('1/3');
+    expect(host.querySelector('[data-ui="checkbox-group"]')).toHaveAttribute(
+      'aria-describedby',
+      'days-counter',
+    );
+  });
+
+  it('hydrates without a mismatch and keeps the markup it was served', async () => {
+    const html = renderToString(tree);
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    const served = host.innerHTML;
+    document.body.append(host);
+    const onRecoverableError = vi.fn();
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    try {
+      await act(async () => {
+        hydrateRoot(host, tree, { onRecoverableError });
+      });
+
+      expect(onRecoverableError).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+      expect(host.innerHTML).toBe(served);
+    } finally {
+      error.mockRestore();
+      host.remove();
+    }
   });
 });

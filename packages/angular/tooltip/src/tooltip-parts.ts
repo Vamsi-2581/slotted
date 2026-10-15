@@ -6,6 +6,7 @@ import { createPositioner } from '@slotted/core/positioner';
 import type { PositionerHandle } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceStatus } from '@slotted/core/presence';
+import { isPlatformBrowser } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,6 +16,7 @@ import {
   effect,
   ElementRef,
   inject,
+  PLATFORM_ID,
   signal,
   TemplateRef,
   ViewContainerRef,
@@ -23,6 +25,7 @@ import {
 import type { EmbeddedViewRef } from '@angular/core';
 
 import { SlTooltip } from './tooltip';
+import { SLOTTED_PORTAL_CONTAINER } from './tooltip-defaults';
 
 /**
  * The element the hint is about.
@@ -163,6 +166,14 @@ export class SlTooltipLayer {
   private readonly template = inject(TemplateRef<unknown>);
   private readonly viewContainer = inject(ViewContainerRef);
   private readonly comment: Comment = this.viewContainer.element.nativeElement;
+  /**
+   * Angular's server document is not the page. There the layer stays where the
+   * template wrote it, as React's server markup has it, and nothing measures,
+   * stacks or moves it into a portal.
+   */
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
+  /** Where the arrow stood in the layer while `arrow` is false. */
+  private arrowPlace: Comment | null = null;
 
   /**
    * A signal rather than a field, and the reason is a defect the first spec run
@@ -197,6 +208,11 @@ export class SlTooltipLayer {
   });
 
   constructor() {
+    /* Injected for its side effect: the factory of
+       `provideSlottedPortalContainer` names the document's portal container,
+       and runs only when something asks for its token — before the first layer
+       asks `createPortalRoot` for a container. */
+    inject(SLOTTED_PORTAL_CONTAINER, { optional: true });
     effect(() => this.presence.sync(this.tooltip.isOpen()));
     effect(() => (this.mounted() ? this.build() : this.teardown()));
     effect(() => this.place());
@@ -226,11 +242,13 @@ export class SlTooltipLayer {
     view.detectChanges();
     for (const node of view.rootNodes as Node[]) layer.appendChild(node);
 
-    const portal = createPortalRoot({
-      origin: this.tooltip.triggerNode(),
-      disabled: !this.tooltip.resolvedPortal(),
-    });
-    const container = portal.container ?? this.comment.parentNode;
+    const portal = this.browser
+      ? createPortalRoot({
+          origin: this.tooltip.triggerNode(),
+          disabled: !this.tooltip.resolvedPortal(),
+        })
+      : null;
+    const container = portal?.container ?? this.comment.parentNode;
     if (container === this.comment.parentNode) container?.insertBefore(layer, this.comment);
     else container?.appendChild(layer);
 
@@ -255,6 +273,7 @@ export class SlTooltipLayer {
     this.view = null;
     this.portal?.release();
     this.portal = null;
+    this.arrowPlace = null;
     this.positioned.set(false);
   }
 
@@ -273,11 +292,11 @@ export class SlTooltipLayer {
       sideOffset: this.tooltip.resolvedSideOffset(),
       strategy: this.tooltip.resolvedStrategy(),
     };
-    const arrow = this.tooltip.arrowNode();
+    const arrow = this.tooltip.resolvedArrow() ? this.tooltip.arrowNode() : null;
 
     this.positioner?.destroy();
     this.positioner = null;
-    if (layer === null || anchor === null) return;
+    if (layer === null || anchor === null || !this.browser) return;
 
     this.positioner = createPositioner(anchor, layer, {
       ...options,
@@ -299,7 +318,7 @@ export class SlTooltipLayer {
 
     this.dismissable?.destroy();
     this.dismissable = null;
-    if (layer === null || !open) return;
+    if (layer === null || !open || !this.browser) return;
 
     this.dismissable = createDismissableLayer(layer, {
       escape: true,
@@ -328,6 +347,25 @@ export class SlTooltipLayer {
     layer.setAttribute('data-variant', this.tooltip.resolvedVariant());
     toggleAttribute(layer, 'data-hoverable', this.tooltip.resolvedHoverable());
     toggleAttribute(layer, 'data-open', this.tooltip.isOpen() && this.positioned());
+    this.showArrow(layer);
+  }
+
+  /**
+   * The arrow is the consumer's element inside the template, so under
+   * `arrow="false"` the layer takes it out — React's arrow renders nothing
+   * then — and puts it back in the same place under `true`.
+   */
+  private showArrow(layer: HTMLElement) {
+    const arrow = this.tooltip.arrowNode();
+    if (arrow === null) return;
+    if (this.tooltip.resolvedArrow()) {
+      this.arrowPlace?.replaceWith(arrow);
+      this.arrowPlace = null;
+      return;
+    }
+    if (this.arrowPlace !== null || !layer.contains(arrow)) return;
+    this.arrowPlace = layer.ownerDocument.createComment('');
+    arrow.replaceWith(this.arrowPlace);
   }
 }
 

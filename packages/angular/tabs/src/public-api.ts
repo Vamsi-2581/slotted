@@ -17,4 +17,12 @@ export type {
   TabsTrack,
   TabsVariant,
 } from './tabs-defaults';
-export { SlTab, SlTabActions, SlTabList, SlTabPanel } from './tabs-parts';
+export {
+  SlTab,
+  SlTabActions,
+  SlTabEnd,
+  SlTabList,
+  SlTabPanel,
+  SlTabPanelContent,
+  SlTabStart,
+} from './tabs-parts';

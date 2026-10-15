@@ -22,6 +22,7 @@ import {
   forwardRef,
   HostAttributeToken,
   inject,
+  Injector,
   input,
   model,
   numberAttribute,
@@ -111,6 +112,9 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
   host: {
     'data-ui': 'combobox',
     'data-part': 'root',
+    /* The name a page writes on the element is forwarded to the control, and
+       the root keeps none: ARIA 1.2 does not name a generic element. */
+    '[attr.aria-label]': 'null',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-full-width]': "resolvedFullWidth() ? '' : null",
@@ -357,6 +361,7 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
   /** The locale the default filter compares in: the `locale` input, or the language in force. */
   readonly resolvedLocale = computed(() => this.locale() ?? this.inForceLocale());
   private readonly viewContainer = inject(ViewContainerRef);
+  private readonly injector = inject(Injector);
   private readonly template = viewChild.required<TemplateRef<unknown>>('layer');
   private readonly controlRef = viewChild.required<{ nativeElement: HTMLInputElement }>('control');
 
@@ -550,6 +555,7 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
     );
     this.applyCompletion();
     this.dropStaleHighlight();
+    if (this.isOpen() && this.resolvedAutoHighlight()) this.land();
   }
 
   options(): HTMLElement[] {
@@ -642,7 +648,10 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
       this.entry = this.resolvedAutoHighlight() ? 'first' : 'none';
       this.setOpen(true, 'keyboard', event);
     } else {
-      this.recount();
+      /* After the render the new query causes: read now, the surface still
+         holds the options the previous query kept, and the completion — which
+         is consumed once — would be measured against the wrong first match. */
+      afterNextRender(() => this.recount(), { injector: this.injector });
     }
   }
 
@@ -1011,10 +1020,24 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
 
   private enter() {
     this.recount();
+    this.land();
+  }
+
+  /**
+   * Where the highlight lands: the chosen option, or — with `autoHighlight`,
+   * when none is showing — the first match. The contract's `focus.onOpen`
+   * asks it of every opening, a press or a focus included, and of every query
+   * typed while the popup stays open, so `Enter` always has a match under it.
+   */
+  private land() {
     if (this.entry === 'none') return;
     if (this.entry === 'selected') {
       const held = this.value();
-      if (held !== null) this.setHighlighted(held, 'keyboard');
+      const shown = this.options().some(
+        (option) => option.dataset['value'] === held && option.dataset['disabled'] === undefined,
+      );
+      if (held !== null && shown) this.setHighlighted(held, 'keyboard');
+      else if (this.resolvedAutoHighlight()) this.move('first');
       return;
     }
     this.move(this.entry);

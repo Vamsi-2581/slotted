@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { SlField, SlFieldControl, SlFieldLabel } from '@slotted/angular/field';
 import { describe, expect, it } from 'vitest';
 
@@ -99,6 +100,28 @@ describe('SlFieldGroup', () => {
       contract.messageTones.description,
     );
     expect(root(fixture, '#nat-error').getAttribute('data-tone')).toBe(contract.messageTones.error);
+  });
+
+  /**
+   * A message is drawn where the page wrote one, as React's
+   * `FieldGroupDescription` and `FieldGroupError` are: an unwritten error is
+   * no `inline-message` at all, not an empty one the stylesheet hides.
+   */
+  it('draws only the messages the page actually wrote', () => {
+    const fixture = renderTemplate(
+      `<fieldset slFieldGroup id="nat">
+         <legend slFieldGroupLegend>Nacionalidade</legend>
+         <span slFieldGroupDescription>Marque todas as que se aplicam.</span>
+       </fieldset>`,
+    );
+
+    const messages = root(fixture).querySelectorAll('[data-ui="inline-message"]');
+    expect([...messages].map((message) => message.id)).toEqual(['nat-description']);
+
+    const bare = renderTemplate(
+      `<fieldset slFieldGroup><legend slFieldGroupLegend>Nacionalidade</legend></fieldset>`,
+    );
+    expect(root(bare).querySelector('[data-ui="inline-message"]')).toBeNull();
   });
 
   it('merges the group’s description after a value the consumer wrote', () => {
@@ -208,4 +231,69 @@ describe('SlFieldGroup', () => {
 
     expect(fixture.nativeElement.querySelector('a').getAttribute('href')).toBe('#nat-legend');
   });
+
+  /**
+   * A message written with `reserve` and nothing in it keeps its box, so the
+   * layout does not move when the text arrives, and describes nothing — React's
+   * `FieldGroupError` registers only when its children have content.
+   */
+  it('keeps the box of an empty reserved message and leaves it out of the description', () => {
+    const fixture = renderTemplate(
+      `<fieldset slFieldGroup id="nat">
+         <legend slFieldGroupLegend>Nacionalidade</legend>
+         <span slFieldGroupError reserve></span>
+       </fieldset>`,
+    );
+
+    expect(root(fixture, '#nat-error').hasAttribute('data-reserve')).toBe(true);
+    expect(root(fixture).getAttribute('aria-describedby')).toBeNull();
+  });
+
+  /**
+   * The first change detection is all a server render has: the text a binding
+   * writes there is read before the fieldset's own attributes are, with no
+   * observer to report it later.
+   */
+  it('names a bound message on the first render, as a server render does', () => {
+    const fixture = TestBed.createComponent(Notice);
+    fixture.componentInstance.notice.set('Escolha ao menos uma.');
+    fixture.detectChanges();
+
+    expect(root(fixture).getAttribute('aria-describedby')).toBe('nat-error');
+  });
+
+  it('names a live message once its text arrives, and drops it once the text is gone', async () => {
+    const fixture = TestBed.createComponent(Notice);
+    fixture.detectChanges();
+    expect(root(fixture).getAttribute('aria-describedby')).toBeNull();
+
+    fixture.componentInstance.notice.set('Escolha ao menos uma.');
+    fixture.detectChanges();
+    expect(root(fixture).getAttribute('aria-describedby')).toBe('nat-error');
+
+    fixture.componentInstance.notice.set('');
+    fixture.detectChanges();
+    expect(root(fixture).getAttribute('aria-describedby')).toBeNull();
+
+    // Text written by code outside the template reaches the message through
+    // the observer alone, before any change detection runs.
+    const error = fixture.debugElement.query(By.directive(SlFieldGroupError));
+    error.nativeElement.textContent = 'Escrito por outro código.';
+    await fixture.whenStable();
+    expect(error.injector.get(SlFieldGroupError).hasContent()).toBe(true);
+    fixture.detectChanges();
+    expect(root(fixture).getAttribute('aria-describedby')).toBe('nat-error');
+  });
 });
+
+@Component({
+  standalone: true,
+  imports: [SlFieldGroup, SlFieldGroupError, SlFieldGroupLegend],
+  template: `<fieldset slFieldGroup id="nat">
+    <legend slFieldGroupLegend>Nacionalidade</legend>
+    <span slFieldGroupError tone="warning" live="polite" reserve>{{ notice() }}</span>
+  </fieldset>`,
+})
+class Notice {
+  readonly notice = signal('');
+}

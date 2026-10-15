@@ -1,9 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { By } from '@angular/platform-browser';
 import { plainDate, plainDateTime, plainTime, toISODateTime } from '@slotted/core/date';
 import type { PlainDate, PlainDateTime, PlainTime } from '@slotted/core/date';
 import { provideSlotted } from '@slotted/angular/i18n';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
+import type { ChangeRequest } from '@slotted/core/state';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/datetime-picker/contract.json';
@@ -23,6 +26,7 @@ const REFERENCE = plainDateTime(plainDate(2026, 9, 10), plainTime(12, 0));
 @Component({
   standalone: true,
   imports: [
+    ReactiveFormsModule,
     SlDateTimePicker,
     SlDateTimePickerFooter,
     SlDateTimePickerOption,
@@ -32,6 +36,7 @@ const REFERENCE = plainDateTime(plainDate(2026, 9, 10), plainTime(12, 0));
 })
 class Host {
   readonly value = signal<PlainDateTime | null | undefined>(undefined);
+  readonly control = new FormControl<PlainDateTime | null>(null);
   readonly tenth = TENTH;
   readonly reference = REFERENCE;
   readonly irregular = [plainTime(9, 0), plainTime(9, 20), plainTime(13, 45)];
@@ -162,13 +167,40 @@ describe('focus follows the missing half', () => {
    * value incomplete carries focus to the half that is missing, and the press
    * that completes the value closes the panel.
    */
-  it('closes on the press that completed the value', () => {
+  it('carries focus to the list when a day leaves the value incomplete', async () => {
     const fixture = renderTemplate(`<div slDateTimePicker ${OPEN}></div>`);
+
+    click(fixture, dayCell(fixture, 11));
+    await fixture.whenStable();
+
+    expect(panel(fixture)).not.toBeNull();
+    expect(hidden(fixture).value).toBe('');
+    expect(document.activeElement?.getAttribute('role')).toBe('option');
+    expect(document.activeElement?.textContent?.trim()).toBe('12:00');
+
+    const half = options(fixture).find((option) => option.textContent?.trim() === '14:30');
+    click(fixture, half as HTMLElement);
+
+    expect(panel(fixture)).toBeNull();
+    expect(hidden(fixture).value).toBe('2026-09-11T14:30:00');
+  });
+
+  it('carries focus to the calendar when a time leaves the value incomplete', async () => {
+    const fixture = renderTemplate(`<div slDateTimePicker ${OPEN}></div>`);
+
+    const half = options(fixture).find((option) => option.textContent?.trim() === '14:30');
+    click(fixture, half as HTMLElement);
+    await fixture.whenStable();
+
+    expect(panel(fixture)).not.toBeNull();
+    expect(hidden(fixture).value).toBe('');
+    expect(half?.getAttribute('aria-selected')).toBe('true');
+    expect(document.activeElement?.getAttribute('data-part')).toBe('day');
 
     click(fixture, dayCell(fixture, 11));
 
     expect(panel(fixture)).toBeNull();
-    expect(hidden(fixture).value).toBe('2026-09-11T12:00:00');
+    expect(hidden(fixture).value).toBe('2026-09-11T14:30:00');
   });
 
   /**
@@ -342,11 +374,19 @@ describe('the contract with the consumer', () => {
     expect(panel(fixture)).toBeNull();
   });
 
-  it('writes the current datetime from the head', () => {
-    const fixture = renderTemplate(`<div slDateTimePicker ${OPEN}></div>`);
+  /**
+   * `referenceDateTime` answers where an empty field steps from and which time
+   * a pressed day takes. It does not answer what time it is: a booking flow
+   * whose reference is tomorrow at nine still means now when it says now.
+   */
+  it('writes the current datetime from the head, not the reference', () => {
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.UTC(2026, 8, 30, 14, 5, 0));
+    const fixture = renderTemplate(`<div slDateTimePicker ${OPEN} timeZone="UTC"></div>`);
     const now = panel(fixture)?.querySelector('[data-part="now"]') as HTMLButtonElement;
     click(fixture, now);
-    expect(hidden(fixture).value).toBe(toISODateTime(REFERENCE));
+    expect(hidden(fixture).value).toBe('2026-09-30T14:05:00');
+    expect(hidden(fixture).value).not.toBe(toISODateTime(REFERENCE));
+    clock.mockRestore();
   });
 
   it('takes its defaults from a provider, and its words from the language in force', () => {
@@ -427,5 +467,201 @@ describe('the contract with the consumer', () => {
         [min]="{ date: { year: 2026, month: 9, day: 11 }, time: { hour: 9, minute: 0, second: 0 } }"></div>`,
     );
     expect(root(fixture).dataset['invalid']).toBe('');
+  });
+});
+
+describe('where focus goes when it opens', () => {
+  it('moves focus to the chosen day when the trigger opens it', async () => {
+    const fixture = renderTemplate(
+      `<div slDateTimePicker locale="pt-BR" [referenceDateTime]="reference" [defaultValue]="tenth"></div>`,
+    );
+
+    click(fixture, trigger(fixture));
+    await fixture.whenStable();
+
+    expect(document.activeElement?.getAttribute('data-part')).toBe('day');
+    expect(document.activeElement?.textContent?.trim()).toBe('10');
+  });
+
+  it('moves focus to the chosen time when openTo is time', async () => {
+    const fixture = renderTemplate(
+      `<div slDateTimePicker locale="pt-BR" openTo="time" [referenceDateTime]="reference" [defaultValue]="tenth"></div>`,
+    );
+
+    click(fixture, trigger(fixture));
+    await fixture.whenStable();
+
+    expect(document.activeElement?.getAttribute('role')).toBe('option');
+    expect(document.activeElement?.textContent?.trim()).toBe('15:15');
+  });
+
+  it('moves focus into the panel when openSurface() opens it', async () => {
+    const fixture = renderTemplate(
+      `<div slDateTimePicker #picker="slDateTimePicker" locale="pt-BR" [referenceDateTime]="reference" [defaultValue]="tenth"></div>
+       <button type="button" id="edit" (click)="picker.openSurface()">Edit</button>`,
+    );
+
+    click(fixture, fixture.nativeElement.querySelector('#edit') as HTMLElement);
+    await fixture.whenStable();
+
+    expect(document.activeElement?.getAttribute('data-part')).toBe('day');
+  });
+
+  /**
+   * The contract's open reasons are pointer, keyboard, escape, outsidePress and
+   * select; React's handle reports keyboard, and so does this one.
+   */
+  it('reports the handle’s open and close with a reason its contract lists', () => {
+    const fixture = renderTemplate(
+      `<div slDateTimePicker locale="pt-BR" (openChange)="onOpen($event)"></div>`,
+    );
+    const picker = fixture.debugElement
+      .query(By.directive(SlDateTimePicker))
+      .injector.get(SlDateTimePicker);
+
+    picker.openSurface();
+    fixture.detectChanges();
+    picker.closeSurface();
+    fixture.detectChanges();
+
+    const reasons = fixture.componentInstance.onOpen.mock.calls.map(
+      ([request]) => (request as ChangeRequest<boolean>).reason,
+    );
+    expect(reasons).toEqual(['keyboard', 'keyboard']);
+    expect(contract.stateModel.open.reasons).toEqual(expect.arrayContaining(reasons));
+  });
+
+  it('leaves focus in the field when Alt+ArrowDown opens it', async () => {
+    const fixture = renderTemplate(
+      `<div slDateTimePicker locale="pt-BR" [referenceDateTime]="reference" [defaultValue]="tenth"></div>`,
+    );
+    const segment = fixture.nativeElement.querySelector('[data-part="segment"]') as HTMLElement;
+    segment.focus();
+
+    key(fixture, segment, 'ArrowDown', { altKey: true });
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(segment);
+  });
+
+  it('keeps Tab inside the panel while it is open', () => {
+    const fixture = renderTemplate(
+      `<div slDateTimePicker ${OPEN} [defaultValue]="tenth">
+         <div slDateTimePickerPresets><button type="button" id="first">Amanhã</button></div>
+         <div slDateTimePickerFooter><button type="button" id="last">Aplicar</button></div>
+       </div>`,
+    );
+    const first = fixture.nativeElement.querySelector('#first') as HTMLButtonElement;
+    const last = fixture.nativeElement.querySelector('#last') as HTMLButtonElement;
+
+    last.focus();
+    last.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    expect(document.activeElement).toBe(first);
+
+    first.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true }),
+    );
+    expect(document.activeElement).toBe(last);
+  });
+});
+
+describe('the inputs it passes on', () => {
+  it('marks the field invalid when the picker is', () => {
+    const fixture = renderTemplate(`<div slDateTimePicker invalid locale="pt-BR"></div>`);
+    const field = fixture.nativeElement.querySelector('[data-ui="datetime-field"]') as HTMLElement;
+    expect(field.hasAttribute('data-invalid')).toBe(true);
+  });
+});
+
+describe('in an Angular form', () => {
+  it('takes the value the form writes and empties on reset', () => {
+    const fixture = renderTemplate(
+      `<div slDateTimePicker locale="pt-BR" name="quando" [formControl]="control"></div>`,
+    );
+    fixture.componentInstance.control.setValue(TENTH);
+    fixture.detectChanges();
+    expect(hidden(fixture).value).toBe('2026-09-10T15:20:00');
+
+    fixture.componentInstance.control.reset();
+    fixture.detectChanges();
+    expect(hidden(fixture).value).toBe('');
+  });
+
+  it('returns to its default value when its form is reset', () => {
+    const fixture = renderTemplate(
+      `<form>
+         <div slDateTimePicker defaultOpen locale="pt-BR" name="quando" [step]="3600" [referenceDateTime]="reference" [defaultValue]="tenth" (valueChange)="onValue($event)"></div>
+       </form>`,
+    );
+
+    click(fixture, options(fixture)[8] as HTMLElement);
+    expect(hidden(fixture).value).toBe('2026-09-10T08:00:00');
+
+    (fixture.nativeElement.querySelector('form') as HTMLFormElement).reset();
+    fixture.detectChanges();
+
+    expect(hidden(fixture).value).toBe('2026-09-10T15:20:00');
+    expect(fixture.componentInstance.onValue).toHaveBeenLastCalledWith(
+      expect.objectContaining({ value: TENTH, reason: 'programmatic' }),
+    );
+  });
+
+  it('reports the time chosen in the list to the form', () => {
+    const fixture = renderTemplate(
+      `<div slDateTimePicker locale="pt-BR" [step]="3600" [referenceDateTime]="reference" [formControl]="control"></div>`,
+    );
+    fixture.componentInstance.control.setValue(TENTH);
+    fixture.detectChanges();
+    click(fixture, trigger(fixture));
+    click(fixture, options(fixture)[8] as HTMLElement);
+    expect(fixture.componentInstance.control.value).toEqual(
+      plainDateTime(plainDate(2026, 9, 10), plainTime(8, 0)),
+    );
+  });
+
+  it('takes the trigger out when the form disables it', () => {
+    const fixture = renderTemplate(
+      `<div slDateTimePicker locale="pt-BR" [formControl]="control"></div>`,
+    );
+    fixture.componentInstance.control.disable();
+    fixture.detectChanges();
+    expect(trigger(fixture).disabled).toBe(true);
+    expect(root(fixture).hasAttribute('data-disabled')).toBe(true);
+  });
+
+  /**
+   * A day typed without a time keeps the value null, so the picker's own
+   * value never moves; the field's validity does, and the form is told.
+   */
+  it('reports a half-typed value as incomplete', () => {
+    const fixture = renderTemplate(
+      `<div slDateTimePicker locale="pt-BR" [formControl]="control"></div>`,
+    );
+    let target = fixture.nativeElement.querySelector('[data-part="segment"]') as HTMLElement;
+    target.focus();
+    for (const digit of '10092026') {
+      target.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: digit }));
+      fixture.detectChanges();
+      const focused = document.activeElement as HTMLElement | null;
+      if (focused?.dataset['part'] === 'segment') target = focused;
+    }
+    target.dispatchEvent(new FocusEvent('blur', { bubbles: false }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.control.value).toBeNull();
+    expect(fixture.componentInstance.control.errors?.['slottedDateTimeIncomplete']).toEqual({
+      missing: 'time',
+    });
+  });
+
+  it('reports a value outside the bounds as a form error', () => {
+    const fixture = renderTemplate(
+      `<div slDateTimePicker locale="pt-BR" [min]="reference" [formControl]="control"></div>`,
+    );
+    fixture.componentInstance.control.setValue(
+      plainDateTime(plainDate(2026, 1, 1), plainTime(9, 0)),
+    );
+    fixture.detectChanges();
+    expect(fixture.componentInstance.control.errors?.['slottedDateTimeRange']).toBeDefined();
   });
 });

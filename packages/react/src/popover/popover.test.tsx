@@ -114,6 +114,53 @@ describe('Popover', () => {
   });
 
   /**
+   * An `aria-controls` naming an id that is not in the document references
+   * nothing, so the trigger names the panel only while the panel exists.
+   */
+  it('names the panel in aria-controls only while the panel exists', async () => {
+    render(<Basic />);
+    expect(trigger().hasAttribute('aria-controls')).toBe(false);
+
+    fireEvent.click(trigger());
+    await waitFor(() => expect(panel()).not.toBeNull());
+    expect(trigger().getAttribute('aria-controls')).toBe(panel()?.id);
+
+    fireEvent.click(trigger());
+    await waitFor(() => expect(layer()).toBeNull());
+    expect(trigger().hasAttribute('aria-controls')).toBe(false);
+  });
+
+  /**
+   * The layer's padding is the gap around the panel, so a layer aligned to
+   * the anchor's start edge would leave the panel one gap inside it. The layer
+   * moves out by its own padding, and the panel's edge meets the anchor's.
+   * In jsdom every rectangle is empty, so `left` is that offset alone.
+   */
+  it.each([
+    ['start', '-8px'],
+    ['center', '0px'],
+    ['end', '8px'],
+  ] as const)('lines the panel up with the anchor under align="%s"', async (align, left) => {
+    render(
+      <Popover align={align} defaultOpen flip={false} shift={false}>
+        <PopoverTrigger>Filters</PopoverTrigger>
+        <PopoverLayer style={{ padding: '8px' }}>
+          <PopoverContent aria-label="Filters">
+            <PopoverBody>Unpaid invoices.</PopoverBody>
+          </PopoverContent>
+        </PopoverLayer>
+      </Popover>,
+    );
+    await waitFor(() => expect((layer() as HTMLElement | null)?.style.left).toBe(left));
+  });
+
+  it('draws no arrow when arrow is off', async () => {
+    render(<Basic arrow={false} defaultOpen />);
+    await waitFor(() => expect(layer()).not.toBeNull());
+    expect(document.querySelector('[data-part="arrow"]')).toBeNull();
+  });
+
+  /**
    * A dialog with no accessible name is one a reader cannot identify, and a
    * name the family invented would be worse than none.
    */
@@ -236,6 +283,82 @@ describe('Popover', () => {
     expect(screen.getByTestId('row')).not.toBeNull();
   });
 
+  /**
+   * The anchor's `render` hands a callback ref, as the trigger's does, so the
+   * consumer's own element — a table row here — takes it without a cast. A
+   * press on that row is a press inside the layer.
+   */
+  it('anchors to the consumer’s own element through render', async () => {
+    render(
+      <table>
+        <tbody>
+          <Popover defaultOpen>
+            <PopoverAnchor
+              render={(props) => (
+                <tr {...props} data-testid="row">
+                  <td>
+                    <PopoverTrigger>Tracking</PopoverTrigger>
+                  </td>
+                </tr>
+              )}
+            />
+            <PopoverLayer>
+              <PopoverContent aria-label="Shipment">
+                <PopoverBody>Federal Shipping, FS-4471-0921.</PopoverBody>
+              </PopoverContent>
+            </PopoverLayer>
+          </Popover>
+        </tbody>
+      </table>,
+    );
+    await waitFor(() => expect(layer()).not.toBeNull());
+
+    fireEvent.pointerDown(screen.getByTestId('row'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(layer()).not.toBeNull();
+  });
+
+  /**
+   * A portalled layer is drawn only once the portal root is known. Drawn in
+   * place first, it lands for one commit wherever the Popover was written —
+   * a `div` inside a `tbody`, which the HTML parser forbids.
+   */
+  it('never draws a portalled layer where the Popover is written', async () => {
+    const placed: Element[] = [];
+    const observer = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (node instanceof Element && node.matches('[data-ui="popover"]')) placed.push(node);
+        }
+      }
+    });
+    const { container } = render(
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <Popover>
+                <PopoverTrigger>Tracking</PopoverTrigger>
+                <PopoverLayer>
+                  <PopoverContent aria-label="Shipment">
+                    <PopoverBody>Federal Shipping, FS-4471-0921.</PopoverBody>
+                  </PopoverContent>
+                </PopoverLayer>
+              </Popover>
+            </td>
+          </tr>
+        </tbody>
+      </table>,
+    );
+    observer.observe(container, { childList: true, subtree: true });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Tracking' }));
+    await waitFor(() => expect(layer()).not.toBeNull());
+    observer.disconnect();
+    expect(placed).toEqual([]);
+    expect(container.contains(layer())).toBe(false);
+  });
+
   it('never opens while it is disabled', () => {
     render(<Basic defaultOpen disabled />);
     expect(layer()).toBeNull();
@@ -276,6 +399,44 @@ describe('Popover', () => {
     render(<Basic defaultOpen messages={{ close: 'Close the filters' }} />);
     await waitFor(() => expect(layer()).not.toBeNull());
     expect(screen.getByRole('button', { name: 'Close the filters' })).not.toBeNull();
+  });
+
+  /**
+   * The catalog's word names a close control that shows none of its own. A
+   * button that says "Done" is announced "Done": an `aria-label` would replace
+   * the text a sighted reader sees with a word they do not.
+   */
+  it('writes the catalog label only on a close control with no text', async () => {
+    const onOpenChange = vi.fn();
+    render(
+      <Popover defaultOpen onOpenChange={onOpenChange}>
+        <PopoverTrigger>Assign</PopoverTrigger>
+        <PopoverLayer>
+          <PopoverContent aria-label="Assign">
+            <PopoverClose>Done</PopoverClose>
+            <PopoverClose data-testid="icon">
+              <svg aria-hidden="true" />
+            </PopoverClose>
+            <PopoverClose aria-label="Dismiss the panel" data-testid="named">
+              Done
+            </PopoverClose>
+          </PopoverContent>
+        </PopoverLayer>
+      </Popover>,
+    );
+    await waitFor(() => expect(layer()).not.toBeNull());
+
+    const [text, icon, named] = [...document.querySelectorAll('[data-part="close"]')];
+    expect(text).not.toHaveAttribute('aria-label');
+    expect(text).toHaveAccessibleName('Done');
+    expect(icon).toHaveAttribute('aria-label', 'Close');
+    expect(named).toHaveAttribute('aria-label', 'Dismiss the panel');
+
+    fireEvent.click(text as HTMLElement);
+    expect(onOpenChange).toHaveBeenCalledWith(
+      false,
+      expect.objectContaining({ reason: 'dismiss' }),
+    );
   });
 
   it('runs the consumer own handler beside the family one', () => {

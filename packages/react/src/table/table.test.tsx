@@ -698,13 +698,18 @@ describe('the column filter', () => {
     const frame = screen.getByRole('button', { name: /^Change range, 10:00 PM/ });
     fireEvent.keyDown(frame, { key: 'Enter' });
     expect(onValueChange).not.toHaveBeenCalled();
+    /* One end at a time: the From and To tabs, and the field and the list of
+       the end the picker is on, which opens on the start. */
     const start = await waitFor(() => {
-      const found = document.querySelector('[data-part="start"] [role="spinbutton"]');
+      const found = document.querySelector(
+        '[data-part="field"][data-position="start"] [role="spinbutton"]',
+      );
       expect(found).not.toBeNull();
       return found as HTMLElement;
     });
-    expect(screen.getByRole('listbox', { name: 'From' })).toBeInTheDocument();
-    expect(screen.getByRole('listbox', { name: 'To' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /^From/ })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: /^To/ })).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByRole('listbox', { name: /^From/ })).toBeInTheDocument();
 
     /* The start field's hour segment, stepped once: the picker writes the
        minute it is set to, and the descriptor receives `HH:MM` rather than a
@@ -966,6 +971,19 @@ describe('selection', () => {
     expect(header.closest('[data-ui="checkbox"]')).toHaveAttribute('data-indeterminate', '');
   });
 
+  it('names each checkbox with a visually hidden label, as the Angular binding does', () => {
+    render(<Invoices selectionMode="multiple" />);
+
+    for (const name of [/Select all rows/, /INV-1042/]) {
+      const control = screen.getByRole('checkbox', { name });
+      expect(control).not.toHaveAttribute('aria-label');
+      const box = control.closest('[data-ui="checkbox"]') as HTMLElement;
+      const hidden = box.querySelector('[data-part="label"] [data-ui="visually-hidden"]');
+      expect(hidden?.textContent).toMatch(name);
+      expect(box).toHaveAttribute('data-label-hidden');
+    }
+  });
+
   it('leaves a disabled row out of the set the header covers', () => {
     render(<Invoices disabledRow="INV-1043" selectionMode="multiple" />);
 
@@ -1007,6 +1025,8 @@ describe('expansion', () => {
 
     const expander = screen.getByRole('button');
     expect(expander).toHaveAttribute('aria-expanded', 'false');
+    // A closed detail row is not rendered, so the expander names nothing yet.
+    expect(expander).not.toHaveAttribute('aria-controls');
     expect(expander.querySelector('[data-ui="icon"] > svg[data-glyph]')).toHaveAttribute(
       'data-glyph',
       'chevron-right',

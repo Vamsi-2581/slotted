@@ -18,9 +18,9 @@ const apiRows = (rows: readonly ApiTuple[]): ApiRow[] =>
     description,
   }));
 
-export const ANGULAR_DATE_TIME_PICKER_TOKENS = dateTimePickerTokens.map((name) => ({
+export const ANGULAR_DATETIME_PICKER_TOKENS = dateTimePickerTokens.map((name) => ({
   name,
-  purpose: 'Theme-owned DateTime Picker decision',
+  purpose: 'A Datetime Picker value the theme sets.',
 }));
 
 const imports: ReferenceImport = {
@@ -36,112 +36,112 @@ const anatomy: AnatomyRow[] = [
     element: 'the element the directive is on',
     required: true,
     purpose:
-      'The frame. Carries data-ui="datetime-picker", the axes and the state attributes. It has no role: the control inside holds the field and the trigger, and the panel is a layer of its own.',
+      'The outer box, carrying data-ui="datetime-picker", the size, variant and granularity axes, data-open and the state attributes. It has no role: the control inside holds the field and the trigger, and the panel is a layer of its own.',
   },
   {
     part: 'control',
     element: 'div',
     required: true,
     purpose:
-      'The box the positioner measures, and nothing else. It draws no frame — the datetime-field inside draws its own — and it is where Alt+ArrowDown is heard.',
+      'The box the panel is positioned against, and where Alt+ArrowDown is handled. It draws no frame: the datetime field inside it draws its own border, focus ring and states.',
   },
   {
     part: 'trigger',
     element: 'button',
     required: true,
     purpose:
-      'Opens the panel, from inside the field’s end slot. aria-haspopup="dialog", aria-expanded while the panel is showing, and an accessible name that carries the chosen datetime — because focus returns here when the panel closes, so this is where the reader is told what was chosen. It draws the calendar mark, which is the mark input[type=datetime-local] draws for the same control.',
+      'The calendar button, in the end slot of the datetime field. It has aria-haspopup="dialog", aria-expanded while the panel is open, and an accessible name that carries the chosen date and time, because focus returns to it when the panel closes. It draws the calendar icon, the icon input[type=datetime-local] draws for the same control.',
   },
   {
     part: 'positioner',
-    element: 'div',
+    element: 'div, after the control inside the root',
     required: false,
     purpose:
-      'The layer, portalled to the end of the document. It carries data-ui as well, because a stylesheet cannot reach a subtree that is no longer inside the root. data-placement says where the positioner put it and data-presentation says whether it is a popover or a sheet.',
+      'The layer the panel stands on, drawn while the panel is open. It carries data-ui="datetime-picker" again, plus data-placement for the side the positioner chose and data-presentation (popover or sheet).',
   },
   {
     part: 'content',
-    element: 'div',
+    element: 'div with role="dialog"',
     required: false,
     purpose:
-      'role="dialog", which is the role the APG’s own Date Picker Combobox example gives its popup. It holds a grid and a listbox, and its accessible name is the same one the trigger carries.',
+      'The painted panel, with the same accessible name as the trigger. It holds a grid and a listbox, the arrangement the APG Date Picker Combobox example uses for its popup. data-open-to names the surface that takes focus on open.',
   },
   {
     part: 'head',
     element: 'div',
     required: false,
     purpose:
-      'The band above both surfaces, with a rule under it: what the reader has chosen so far, the consumer’s own shortcuts, and now. It renders at the panel’s width and contributes nothing to it, so a row of shortcuts cannot stretch the month.',
+      'The band above both surfaces, with a rule under it: the value so far, your shortcuts and the Now button. It takes the panel’s width and does not widen it, so a row of shortcuts wraps instead of stretching the calendar.',
   },
   {
     part: 'head-value',
     element: 'span',
     required: false,
     purpose:
-      'The value as it stands, with the half the reader has not written drawn as its placeholder beside the half they have. It is the one thing neither surface can show: a reader who chose a day and is now reading a column of times otherwise has nothing telling them which day those times belong to.',
+      'The value in words. While no value is set, it shows the day the calendar has focused and a placeholder for the time, so the reader knows which day the times in the list belong to.',
   },
   {
     part: 'now',
     element: 'button',
     required: false,
     purpose:
-      'Writes the current datetime, both halves at once. It carries the clock — the second of the family’s two marks — and it is the zero case of the field’s own relative expression, for a reader who never discovers that + opens one.',
+      'Writes the current date and time, read from the clock in timeZone when pressed. It draws the clock icon. It does the same as the relative expression 0 in the field, for a reader who does not know the expression.',
   },
   {
     part: 'presets',
-    element: 'the consumer’s own element, marked slDateTimePickerPresets',
+    element: 'your own element, marked slDateTimePickerPresets',
     required: false,
     purpose:
-      'The consumer’s own shortcuts, in the head beside now. This family ships no list of them: "tomorrow at nine" is a business clock, and a library that guessed at one would be guessing at an industry.',
+      'A row in the head, beside Now, for your own shortcuts. The Datetime Picker ships no list of shortcuts: the labels and times belong to your product.',
   },
   {
     part: 'panels',
     element: 'div',
     required: false,
     purpose:
-      'The two tracks, as a wrapping flex row. Two columns where the positioner measured room for both, one where it did not — and no container query, because a surface shrink-wrapped from a calendar has no width of its own to ask about.',
+      'The two surfaces, as a wrapping flex row: side by side when the panel has room for both, stacked with the calendar first when it does not. Nothing is hidden at any width.',
   },
   {
     part: 'date-panel',
     element: 'div',
     required: false,
     purpose:
-      'Holds SlCalendar, unredrawn: its grid, its three views, its roving focus and its own keyboard. The column never shrinks below the month, so it is the time panel that wraps when the room runs out.',
+      'Holds SlCalendar with its grid, its month and year views and its keyboard. It never shrinks below one month, so the time panel is the one that wraps.',
   },
   {
     part: 'time-panel',
     element: 'div',
     required: false,
     purpose:
-      'Holds the list. Beside the month it is the narrow column; wrapped onto a line of its own it takes the whole line, so the times read as a section rather than as a strip.',
+      'Holds the list of times. Beside the calendar it is a narrow column; on a line of its own it takes the whole line.',
   },
   {
     part: 'list',
-    element: 'div',
+    element: 'div with role="listbox"',
     required: false,
     purpose:
-      'role="listbox" over the times available on the day the reader is on, with its own accessible name naming that day. It is the only thing in the panel that scrolls, and data-truncated says the configuration asked for more rows than maxOptions allows.',
+      'The times available on the day the reader is on, with an accessible name that names that day. It is the only part of the panel that scrolls. data-truncated is set when the configuration asks for more rows than maxOptions.',
   },
   {
     part: 'option',
-    element: 'div',
+    element: 'div with role="option"',
     required: false,
     purpose:
-      'role="option", one whole time. It carries the time and nothing else: the day is the calendar’s to say, and repeating it ninety-six times would spend the whole column on one word. A slDateTimePickerOption template draws what is inside it.',
+      'One time. It carries aria-selected, data-selected on the chosen time, data-current on the highlighted time and aria-disabled with data-disabled on a refused time. It shows the time only: the calendar shows the day.',
   },
   {
     part: 'empty',
     element: 'div',
     required: false,
     purpose:
-      'Drawn when the day the reader is on offers no time at all — a closed Saturday, a window the two bounds leave empty, a predicate that refuses every step. It is a sentence rather than an empty box: MUI draws nothing here and Ant draws an empty column, and both read as a broken component.',
+      'Drawn in place of the list when the day the reader is on offers no time: an unavailable day, a window the bounds leave empty, or a day on which isTimeUnavailable refuses every time. It says so in a sentence, the empty message.',
   },
   {
     part: 'footer',
-    element: 'the consumer’s own element, marked slDateTimePickerFooter',
+    element: 'your own element, marked slDateTimePickerFooter',
     required: false,
     purpose:
-      'The consumer’s own actions, under both surfaces. The family needs none — the value’s own completeness closes the panel — and the slot is here for a flow that wants a deliberate confirmation anyway.',
+      'A row under both surfaces for your own actions. The panel closes on the press that completes the value, so a confirm button is optional; add one here for a flow that asks for it.',
   },
 ];
 
@@ -149,44 +149,44 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'playground',
     title: 'Playground',
-    note: 'One control with every axis on it, driven by the controls below the canvas. Open it: the calendar and the list are both there, the head says what you have so far, and the panel closes on the press that finishes the value.',
+    note: 'One Datetime Picker driven by the controls below the canvas. Open it: the calendar and the list are both in the panel, the head shows the value so far, and the panel closes on the press that completes the value.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-playground',
       label: 'Usage',
       language: 'angular',
       source: `<div slField>
-  <label slFieldLabel>Início da consulta</label>
-  <div slDateTimePicker name="inicio" locale="pt-BR" [clearable]="true"></div>
-  <span slFieldDescription>A consulta começa nesta data e hora.</span>
+  <label slFieldLabel>Pickup date and time</label>
+  <div slDateTimePicker name="pickupAt" [clearable]="true"></div>
+  <span slFieldDescription>The carrier collects at this date and time.</span>
 </div>`,
     }),
   },
   {
     id: 'panel',
-    title: 'Two surfaces, one dialog',
-    note: 'The only panel in the library that holds two widgets: a grid that SlCalendar draws and a listbox that this family draws. Both are in the DOM at every width — a tablist that exists on a narrow container and not on a wide one tells assistive technology two different stories about the same component, which is the arrangement Kendo and MUI ship and this family declines.',
+    title: 'Two surfaces in one dialog',
+    note: 'The panel holds a grid drawn by SlCalendar and a listbox drawn by the Datetime Picker. Both are in the DOM at every width; no tabs switch between them, so assistive technology reads the same structure on a wide and a narrow screen.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-panel',
       label: 'The panel',
       language: 'angular',
-      source: `<div slDateTimePicker locale="pt-BR" [defaultOpen]="true"></div>`,
+      source: `<div slDateTimePicker [defaultOpen]="true"></div>`,
     }),
   },
   {
     id: 'open-to',
-    title: 'Which surface focus opens on',
-    note: 'openTo decides where focus lands, not what is drawn. Both surfaces are present either way, and the reading order is the value’s own — moving a whole calendar because focus starts elsewhere would make one setting look like a different component.',
+    title: 'Which surface takes focus on open',
+    note: 'openTo decides where focus lands when the panel opens, not what the panel draws. Both surfaces are present either way, in the same order: the calendar, then the list.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-open-to',
       label: 'Opening on the time',
       language: 'angular',
-      source: `<div slDateTimePicker openTo="time" locale="pt-BR"></div>`,
+      source: `<div slDateTimePicker openTo="time"></div>`,
     }),
   },
   {
     id: 'completeness',
-    title: 'Completeness closes the panel, not a button',
-    note: 'The press that leaves the value incomplete carries focus to the half that is missing; the press that completes it closes the panel; and a press on a value that was already whole changes one half and leaves the panel where it is — so a reader who opened a filled field to change both is not shut out by their first press. Ant adds needConfirm for this and Kendo adds Set.',
+    title: 'The value closes the panel, not a button',
+    note: 'With closeOnSelect="auto", the press that completes the value closes the panel. A press on a value that was already whole changes one half and leaves the panel open, so the reader can change the day and then the time. always closes on every press that changes the value; never closes on none.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-completeness',
       label: 'The three closings',
@@ -199,7 +199,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'seconds',
     title: 'Seconds',
-    note: 'The field writes every second and the panel offers a half-minute step, which is eleven rows inside a bounded window rather than the 86 400 a whole day would be. The guard is on the length of the list — maxOptions — and not on the size of the step.',
+    note: 'granularity="second" writes seconds in the field, and a step of 30 offers a time every half minute. The list stops at maxOptions rows, so a step in seconds needs a window from minTime to maxTime to stay short.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-seconds',
       label: 'A half-minute step',
@@ -209,8 +209,8 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'step',
-    title: 'The step, and what it counts from',
-    note: 'The base is min’s own time when min is stated and midnight when it is not — the platform’s rule for input[type=time], which no surveyed panel states at all. A step of 900 with a min of 09:07 offers 09:07, 09:22, 09:37, and the field still accepts 09:15 by typing.',
+    title: 'The step, and where it counts from',
+    note: 'The list counts from min’s time when min is set and from midnight when it is not, the rule input[type=time] uses. A step of 900 from 09:07 offers 09:07, 09:22 and 09:37; the field still accepts 09:15 by typing.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-step',
       label: 'A quarter hour from 09:07',
@@ -220,16 +220,16 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'range-bounds',
-    title: 'Two pairs of bounds, at the same time',
-    note: 'min and max fence the whole value; minTime and maxTime fence every day inside the range. On min’s own day the list starts at min’s time, on max’s own day it stops at max’s, and on every day between it runs the repeating window — the rule MDN states for the platform and no surveyed script implements. MUI’s own validation page records that it cannot combine the two.',
+    title: 'Two pairs of bounds together',
+    note: 'min and max bound the whole value; minTime and maxTime bound the times of every day inside the range. On the day of min the list starts at min’s time, on the day of max it stops at max’s time, and on every day between it runs from minTime to maxTime.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-range-bounds',
       label: 'A booking window',
       language: 'angular',
       source: `<div
   slDateTimePicker
-  [min]="clinicOpens"
-  [max]="clinicCloses"
+  [min]="bookingOpens"
+  [max]="bookingCloses"
   [minTime]="nine"
   [maxTime]="six"
 ></div>`,
@@ -237,8 +237,8 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'day-window',
-    title: 'The list answers the day the reader is on',
-    note: 'Not a day already committed. Arrow across the month and the list recomputes under the cursor, so a fully booked Saturday empties while the reader is still deciding. Ant recomputes disabledTime(date) only for a date already chosen, and cannot say this.',
+    title: 'The list follows the day the reader is on',
+    note: 'Before a day is chosen, the list answers the day the calendar has focused. Moving through the month recomputes it, so a Saturday that closes early shows its shorter list, or the empty state, while the reader is still deciding.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-day-window',
       label: 'A Saturday that closes early',
@@ -248,8 +248,8 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'unavailable',
-    title: 'A refused row stays, unless the consumer hides it',
-    note: 'A list that silently drops rows is a list whose step the reader cannot infer, so disabling is the default and hiding is the consumer’s choice. A day that offers nothing at all gets a sentence rather than an empty box.',
+    title: 'Refused times are disabled or hidden',
+    note: 'A refused time stays in the list, disabled, so the reader can still see the step. unavailableOptions="hide" removes refused times instead. A day that offers no time shows the empty message.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-unavailable',
       label: 'Disable, and hide',
@@ -260,41 +260,41 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'now',
-    title: 'One press for the current datetime',
-    note: 'Now writes both halves, and it is the zero case of the field’s own relative expression — drawn as a labelled control so a reader who never discovers that + opens one still has the press. It carries the clock, which is the second of the family’s two marks.',
+    title: 'One press for the current date and time',
+    note: 'Now writes both halves from the clock in timeZone. It does the same as the relative expression 0 in the field, for a reader who does not know the expression. messages.now replaces its label.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-now',
       label: 'The head control',
       language: 'angular',
-      source: `<div slDateTimePicker [messages]="{ now: 'Agora' }" locale="pt-BR"></div>`,
+      source: `<div slDateTimePicker [messages]="{ now: 'Right now' }"></div>`,
     }),
   },
   {
     id: 'relative',
-    title: 'The expression, with the panel open',
-    note: 'Alt+ArrowDown opens the panel and leaves focus in the field, so every key the segments had still works — section 6 of the feature guide asks for exactly that, the panel complementing the typing rather than blocking it. Escape is staged: it abandons the expression first and the panel stays.',
+    title: 'Typing with the panel open',
+    note: 'Alt+ArrowDown opens the panel and leaves focus in the field, so every key the segments take still works, including +, - and = for a relative expression. Escape closes the expression first and leaves the panel open.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-relative',
-      label: 'Typing while the panel shows',
+      label: 'Typing while the panel is open',
       language: 'angular',
-      source: `<div slDateTimePicker locale="pt-BR" [defaultOpen]="true" [referenceDateTime]="reference"></div>`,
+      source: `<div slDateTimePicker [defaultOpen]="true" [referenceDateTime]="reference"></div>`,
     }),
   },
   {
     id: 'presets',
-    title: 'The consumer’s own shortcuts',
-    note: 'They sit in the head beside now, and they wrap inside the panel’s own width rather than stretching it — the band renders at the panel’s width and contributes nothing to it, so a long shortcut cannot widen the month.',
+    title: 'Your own shortcuts',
+    note: 'An element with slDateTimePickerPresets adds a row in the head beside Now. The row wraps inside the panel’s width instead of widening it.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-presets',
       label: 'Two shortcuts',
       language: 'angular',
-      source: `<div slDateTimePicker locale="pt-BR">
+      source: `<div slDateTimePicker>
   <div slDateTimePickerPresets>
     <button slButton size="sm" variant="ghost" type="button" (click)="tomorrowAtNine()">
-      Amanhã 09:00
+      Tomorrow, 9:00 AM
     </button>
     <button slButton size="sm" variant="ghost" type="button" (click)="mondayAtTwo()">
-      Segunda 14:00
+      Monday, 2:00 PM
     </button>
   </div>
 </div>`,
@@ -303,7 +303,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'sizes',
     title: 'Size',
-    note: 'The three steps the control can be. A picker inside a field takes the field’s step, and the panel’s rows follow the control scale so a dense panel shrinks its rows and its cap together.',
+    note: 'The three steps of the control scale. Inside a field, an unset size follows the field. The rows of the list follow the same scale.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-sizes',
       label: 'The three steps',
@@ -316,7 +316,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'variants',
     title: 'Variant',
-    note: 'The frame is the field’s, so a form holding a name and a datetime shows one frame twice. plain shows nothing until it is used, which is what a dense table of appointments needs.',
+    note: 'The frame is the datetime field’s, the same frame every field in a form draws. plain draws no frame at rest, for a table cell or a toolbar, and still shows hover and focus.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-variants',
       label: 'The three frames',
@@ -329,18 +329,18 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'placement',
     title: 'Placement',
-    note: 'Where the panel hangs from the control. The layer arrives along the axis it opens on and never along the inline one, and the positioner flips it when there is no room — data-placement says what it resolved.',
+    note: 'Where the panel opens relative to the control. It is a preference: when the panel does not fit on that side, the positioner opens it on the other, and data-placement says which side it chose.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-placement',
       label: 'Above the control',
       language: 'angular',
-      source: `<div slDateTimePicker placement="top-start" locale="pt-BR"></div>`,
+      source: `<div slDateTimePicker placement="top-start"></div>`,
     }),
   },
   {
     id: 'states',
     title: 'States',
-    note: 'Read-only stays focusable and copyable and never looks disabled; disabled answers no key and no pointer and its trigger is a disabled button; invalid keeps its focus ring and retargets its colour. In the list, the chosen row outranks the highlight, the highlight outranks the pointer, and each weaker rule is guarded by specificity rather than by source order.',
+    note: 'Read-only stays focusable and legible. Disabled takes no key and no press, and its trigger is a disabled button. Invalid draws the frame and the focus ring in the danger tone. In the list, the chosen time outranks the highlighted time, which outranks hover.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-states',
       label: 'The four states',
@@ -354,16 +354,16 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'forms',
     title: 'In a form',
-    note: 'The control belongs in a reactive form through the field it composes, and the value also reaches a plain form post as YYYY-MM-DDTHH:mm:ss through that field’s hidden input. The field around it supplies the label, the description and the error, and the control takes its size, its disabled state and its validity from that field unless it states its own.',
+    note: 'The Datetime Picker is a form control: formControlName, formControl and ngModel bind the value, and name adds a hidden input that submits it as YYYY-MM-DDTHH:mm:ss. The field around it supplies the label, the description and the error, and passes its size, disabled state and validity to the Datetime Picker unless it sets its own.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-forms',
-      label: 'A real form row',
+      label: 'A form row',
       language: 'angular',
       source: `<form [formGroup]="form">
   <div slField>
-    <label slFieldLabel>Início da consulta</label>
-    <div slDateTimePicker formControlName="inicio" locale="pt-BR"></div>
-    <span slFieldDescription>Horário de atendimento: das 9h às 18h.</span>
+    <label slFieldLabel>Pickup date and time</label>
+    <div slDateTimePicker formControlName="pickupAt"></div>
+    <span slFieldDescription>The dock is open from 9:00 AM to 6:00 PM.</span>
   </div>
 </form>`,
     }),
@@ -371,39 +371,39 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'narrow',
     title: 'Narrow',
-    note: 'The two panels wrap in the value’s own order, with nothing hidden and no switch drawn. The time column takes the whole line it lands on, so the times read as a section rather than as a strip under a wide month — one flex rule answers both arrangements.',
+    note: 'With too little room for both surfaces, the list wraps under the calendar, in the value’s own order. Nothing is hidden and no switch is drawn.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-narrow',
       label: 'A narrow panel',
       language: 'angular',
-      source: `<div slDateTimePicker locale="pt-BR" [defaultOpen]="true"></div>`,
+      source: `<div slDateTimePicker [defaultOpen]="true"></div>`,
     }),
   },
   {
     id: 'composition',
-    title: 'Composition and escape hatches',
-    note: 'provideDateTimePickerDefaults sets the clock and the step once, provideSlotted the language and every word; a slDateTimePickerOption template draws one row the consumer’s own way; slDateTimePickerFooter takes their actions; and exportAs reaches focus(), openSurface() and closeSurface(). A control that states any default itself still wins.',
+    title: 'Composition',
+    note: 'provideDateTimePickerDefaults sets the step and the clock once; provideSlotted sets the language and the words; an ng-template with slDateTimePickerOption draws the content of one row; slDateTimePickerFooter takes your actions; and exportAs reaches focus(), openSurface() and closeSurface(). A value set on one Datetime Picker still wins over the provider.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-composition',
-      label: 'A row of its own',
+      label: 'A row of your own',
       language: 'angular',
-      source: `<div slDateTimePicker locale="pt-BR">
+      source: `<div slDateTimePicker>
   <ng-template slDateTimePickerOption let-time let-label="label">
     <span>{{ label }}</span>
-    <span>{{ seatsLeft(time) }} vagas</span>
+    <span>{{ seatsLeft(time) }} seats left</span>
   </ng-template>
 </div>`,
     }),
   },
   {
     id: 'keyboard',
-    title: 'The keyboard',
-    note: 'Alt+ArrowDown opens the panel from a segment and leaves focus in the field. From the trigger, ArrowDown opens it and moves focus into the surface openTo names. Inside the list: the arrows, Home, End, type-ahead, and PageUp/PageDown across an hour boundary. Tab is contained inside the layer, and only one element of the grid is in the sequence — so the two surfaces are two stops rather than forty-three.',
+    title: 'Keyboard',
+    note: 'Alt+ArrowDown opens the panel from a segment and leaves focus in the field. ArrowDown on the trigger opens it and moves focus into the surface openTo names. In the list: the arrow keys, Home, End, type-ahead, and PageUp and PageDown to the previous or next hour. Tab stays inside the panel while it is open, and each surface is one Tab stop.',
     snippet: defineSnippet({
       id: 'datetime-picker-angular-keyboard',
-      label: 'A listener that runs before the family',
+      label: 'Your own key listener',
       language: 'angular',
-      source: `<div slDateTimePicker locale="pt-BR" (keydown)="note($event)"></div>`,
+      source: `<div slDateTimePicker (keydown)="recordKey($event)"></div>`,
     }),
   },
 ];
@@ -414,154 +414,154 @@ const api: ApiRow[] = apiRows([
     'PlainDateTime | null',
     '—',
     'SlDateTimePicker',
-    'Present means the consumer owns the value. The control asks and waits rather than moving it.',
+    'The value, when you control it. Update it from (valueChange).',
   ],
   [
     'defaultValue',
     'PlainDateTime | null',
     '—',
     'SlDateTimePicker',
-    'The value the control starts from when nobody else writes one. Read once, in ngOnInit.',
+    'The starting value when the Datetime Picker holds its own state. Read once, on init.',
   ],
   [
     'open',
     'boolean',
     '—',
     'SlDateTimePicker',
-    'Present means the consumer owns whether the panel is showing.',
+    'Whether the panel is open, when you control it. Update it from (openChange).',
   ],
   [
     'defaultOpen',
     'boolean',
     'false',
     'SlDateTimePicker',
-    'Whether the panel is showing before anyone presses anything.',
+    'Whether the panel starts open. A panel that starts open does not take focus.',
   ],
   [
     'highlighted',
     'DateTimePickerHighlight',
     '—',
     'SlDateTimePicker',
-    'Where the reader is in the panel: one highlight for both surfaces, as { date, time }.',
+    'Where the reader is in the panel, as { date, time }: the day the calendar has focused and the time the list has highlighted. Set it to control the highlight; update it from (highlightedChange).',
   ],
   [
     'defaultHighlighted',
     'DateTimePickerHighlight',
     '—',
     'SlDateTimePicker',
-    'Where the reader starts. Unset, the panel opens on the value’s day and the nearest step to the reference.',
+    'Where the highlight starts. Unset, the panel opens on the day of the value, or of referenceDateTime, and on the time nearest to it.',
   ],
   [
     'min',
     'PlainDateTime',
     '—',
     'SlDateTimePicker',
-    'The earliest whole value: where the range starts.',
+    'The earliest whole value. The calendar disables the days before its date, and on its date the list starts at its time.',
   ],
   [
     'max',
     'PlainDateTime',
     '—',
     'SlDateTimePicker',
-    'The latest whole value: where the range ends.',
+    'The latest whole value. The calendar disables the days after its date, and on its date the list stops at its time.',
   ],
   [
     'minTime',
     'PlainTime',
     '—',
     'SlDateTimePicker',
-    'The earliest time of every day inside the range, beside min rather than instead of it.',
+    'The earliest time on every day inside the range. It applies together with min.',
   ],
   [
     'maxTime',
     'PlainTime',
     '—',
     'SlDateTimePicker',
-    'The latest time of every day inside the range, beside max.',
+    'The latest time on every day inside the range. It applies together with max.',
   ],
   [
     'isDateUnavailable',
     '(date: PlainDate) => boolean',
     '—',
     'SlDateTimePicker',
-    'Refuses a whole day. It reaches the calendar, which needs one answer per cell.',
+    'Returns true for a day the reader cannot choose. The calendar disables it, its list is empty, and a typed value on it marks the Datetime Picker invalid.',
   ],
   [
     'isTimeUnavailable',
     '(time: PlainTime, date: PlainDate) => boolean',
     '—',
     'SlDateTimePicker',
-    'Refuses one time on one day. It takes the date so a Saturday can close earlier.',
+    'Returns true for a time the reader cannot choose on a given day, so the rule can differ by day. A typed value it refuses marks the Datetime Picker invalid.',
   ],
   [
     'step',
     'number',
     '900',
     'SlDateTimePicker',
-    'Seconds between two offered times. The base is min’s own time, or midnight.',
+    'Seconds between two times in the list, counted from the earliest time of the day, or from midnight. It applies to the list only; the field accepts any time. Ignored when options is set.',
   ],
   [
     'options',
     'readonly PlainTime[]',
     '—',
     'SlDateTimePicker',
-    'The times the panel offers, stated rather than stepped, in the consumer’s own order. A clinic open at 09:00, 09:20 and 13:45 cannot be written as a step.',
+    'The times the list offers, in the order given, in place of step. Bounds and predicates still refuse times in it.',
   ],
   [
     'maxOptions',
     'number',
     '1440',
     'SlDateTimePicker',
-    'How many rows the list may reach — a whole day at a one-minute step. Beyond it the list is cut and says so.',
+    'The most rows the list draws, a whole day at a one-minute step. Past it, the list is cut, carries data-truncated, and the panel’s accessible description says the remaining times are typed into the field.',
   ],
   [
     'unavailableOptions',
     "'disable' | 'hide'",
     'disable',
     'SlDateTimePicker',
-    'What a refused row does. Disabling is the default because a list that drops rows hides its own step.',
+    'What the list does with a refused time: shows it disabled, or leaves it out.',
   ],
   [
     'locale',
     'string',
-    'the language in force',
+    'the provider’s locale, then en-US',
     'SlDateTimePicker',
-    'BCP 47. Reaches the field, the calendar and the list.',
+    'A BCP 47 tag. It sets the segments, the clock, the calendar’s month and weekday names, the times in the list and the date and time in words.',
   ],
   [
     'timeZone',
     'string',
-    'runtime',
+    'the browser’s time zone',
     'SlDateTimePicker',
-    'Which zone answers "what is the datetime now", and nothing else.',
+    'The IANA time zone that decides today in the calendar and what Now and the default referenceDateTime read from the clock. The value itself has no time zone.',
   ],
   [
     'hourCycle',
     '12 | 24',
-    'locale',
+    'the locale’s',
     'SlDateTimePicker',
-    'The question a consumer asks about the clock.',
+    'A 12-hour clock with a day period, or a 24-hour clock, in the field and the list.',
   ],
   [
     'granularity',
     "'hour' | 'minute' | 'second'",
     'minute',
     'SlDateTimePicker',
-    'How much of the time half is written.',
+    'The smallest unit the field writes.',
   ],
   [
     'calendar',
     "'gregory'",
     'gregory',
     'SlDateTimePicker',
-    'One value today. The axis exists so a second calendar can arrive.',
+    'The calendar system. gregory is the only value today.',
   ],
   [
     'firstDayOfWeek',
     'number',
-    'locale',
+    'the locale’s',
     'SlDateTimePicker',
-    '0 is Sunday. It reaches the calendar.',
+    'The first day of the calendar’s week, from 0 for Sunday to 6 for Saturday.',
   ],
   ['months', 'number', '1', 'SlDateTimePicker', 'How many months the calendar draws side by side.'],
   [
@@ -569,131 +569,137 @@ const api: ApiRow[] = apiRows([
     'boolean',
     'false',
     'SlDateTimePicker',
-    'Whether the calendar draws a column of week numbers.',
+    'Adds a column of ISO 8601 week numbers to the calendar.',
   ],
   [
     'referenceDateTime',
     'PlainDateTime',
-    'now',
+    'the current date and time',
     'SlDateTimePicker',
-    'The datetime an empty field steps from, and the time a day pressed in the calendar takes. One input for both, because they are the same question.',
+    'The date and time assumed where the reader has given none: the month the calendar opens on, the time the list opens on after a day is pressed on an empty value, and the point a relative expression and the arrow keys on an empty field count from.',
   ],
   [
     'size',
     "'sm' | 'md' | 'lg'",
     'md',
     'SlDateTimePicker',
-    'The type step, matching the field around it.',
+    'One step of the control scale for the field, the trigger and the rows of the list. Inside a field, an unset size follows the field.',
   ],
   [
     'variant',
     "'outline' | 'subtle' | 'plain'",
     'outline',
     'SlDateTimePicker',
-    'How much frame the control shows.',
+    'The frame of the field: a border, a fill, or none at rest.',
   ],
   [
     'placement',
     "'bottom-start' | 'bottom' | 'bottom-end' | 'top-start' | 'top' | 'top-end'",
     'bottom-start',
     'SlDateTimePicker',
-    'Where the panel hangs from the control. The positioner flips it when there is no room.',
+    'Where the panel opens relative to the control. When it does not fit on that side, it opens on the other.',
   ],
   [
     'openTo',
     "'date' | 'time'",
     'date',
     'SlDateTimePicker',
-    'Which surface focus lands on when the panel opens. It decides focus, not what is drawn.',
+    'The surface that takes focus when the trigger or openSurface() opens the panel. Both surfaces are drawn either way.',
   ],
   [
     'closeOnSelect',
     "'auto' | 'always' | 'never'",
     'auto',
     'SlDateTimePicker',
-    'auto closes on the press that completed the value and stays open otherwise; always closes on any press that changes it; never closes on none.',
+    'When a press closes the panel: auto on the press that completes the value, always on every press that changes the value, never on none.',
   ],
   [
     'disabled',
     'boolean',
-    '—',
+    'the field’s',
     'SlDateTimePicker',
-    'Unstated rather than false, so an unset value defers to the surrounding field.',
+    'Disables the field and the trigger. Unset, it follows the form control, then the enclosing field.',
   ],
   [
     'readOnly',
     'boolean',
-    '—',
+    'the field’s',
     'SlDateTimePicker',
-    'Focusable, readable and copyable, and never mistakable for disabled.',
+    'Keeps the value focusable and legible, and disables the trigger. Unset, it follows the enclosing field.',
   ],
   [
     'invalid',
     'boolean',
-    '—',
+    'the field’s',
     'SlDateTimePicker',
-    'Beside the validity the field owns: a value either pair of bounds or either predicate refuses is invalid whatever this says.',
+    'Marks the value invalid. A value outside the bounds or refused by a predicate is invalid whatever this says.',
   ],
-  ['required', 'boolean', '—', 'SlDateTimePicker', 'Reaches the field’s group as aria-required.'],
+  [
+    'required',
+    'boolean',
+    'the field’s',
+    'SlDateTimePicker',
+    'Sets aria-required on the field. Unset, it follows the enclosing field. Validators.required checks the value in a form.',
+  ],
   [
     'clearable',
     'boolean',
     'false',
     'SlDateTimePicker',
-    'Draws the field’s clear button, which empties both halves.',
+    'Adds a clear button to the field while it holds any part of a value. The button empties both halves.',
   ],
   [
     'relative',
     'boolean',
     'true',
     'SlDateTimePicker',
-    'Whether +, - and = open the duration expression in the field.',
+    'Whether +, - and = on a segment open a relative expression in the field, such as +2h.',
   ],
   [
     'name',
     'string',
     '—',
     'SlDateTimePicker',
-    'The name a plain form post carries the ISO string under.',
+    'Adds a hidden input with this name that submits the value as YYYY-MM-DDTHH:mm:ss.',
   ],
   [
     'messages',
     'Partial<DatetimePickerMessages>',
     '—',
     'SlDateTimePicker',
-    'Words laid over the language in force, key by key: the trigger’s name while nothing is chosen (choose) and once something is (change, with the value in its {date} slot), the head control (now), what an empty day says (empty), and the accessible description of a list cut at maxOptions (truncated), which says the rest of the times are typed into the field.',
+    'Replaces the words of the language in force, key by key: the trigger’s name with no value (choose) and with one (change, with the value in its {date} slot), the Now button (now), the sentence for a day with no time (empty), and the panel’s description when the list is cut at maxOptions (truncated).',
   ],
   [
     'slDateTimePickerPresets',
     'directive',
     '—',
     'SlDateTimePickerPresets',
-    'The consumer’s own shortcuts, in the head beside now, on their own element.',
+    'Marks your own element as the shortcuts row in the head, beside Now.',
   ],
   [
     'slDateTimePickerFooter',
     'directive',
     '—',
     'SlDateTimePickerFooter',
-    'The consumer’s own actions, under both surfaces, on their own element.',
+    'Marks your own element as the row of actions under both surfaces.',
   ],
 ]);
 
 const events: EventRow[] = [
   {
     name: 'valueChange',
-    payload: 'ChangeRequest<PlainDateTime | null> with the field’s own segments',
-    when: 'Before the value moves, and cancellable. It arrives from a press in either surface, from now, and from the field under the trigger — carrying the segments and the missing half when the field is what moved it. A value that has not moved emits nothing.',
+    payload: 'DateTimeFieldChangeRequest | ChangeRequest<PlainDateTime | null>',
+    when: 'Before the value changes. reason is keyboard for typing, select for a press in the calendar, the list or Now, clear for the clear button and blur for a value completed when the field loses focus. When the field moved the value, the request also carries segments and incomplete, the half still missing. A value that does not change emits nothing.',
   },
   {
     name: 'openChange',
     payload: 'ChangeRequest<boolean>',
-    when: 'Before the panel opens or closes, with the reason: pointer for the trigger, keyboard for Alt+ArrowDown, escape and outsidePress for a dismissal, and select for the press that completed the value.',
+    when: 'Before the panel opens or closes. reason is pointer for the trigger, keyboard for Alt+ArrowDown and ArrowDown on the trigger, programmatic for openSurface() and closeSurface(), escape and outsidePress for a dismissal, and select for the press that closed it.',
   },
   {
     name: 'highlightedChange',
     payload: 'ChangeRequest<DateTimePickerHighlight>',
-    when: 'When the reader moves through either surface — the day the calendar has focused or the time the list has highlighted, as one value. Moving the highlight never moves the value: the listbox pattern lists selection-following-focus as optional and warns it can degrade accessibility, and here it would fire one request per option.',
+    when: 'When the reader moves through either surface: the day the calendar has focused and the time the list has highlighted, as one value. Moving the highlight never changes the value.',
   },
 ];
 
@@ -703,47 +709,48 @@ const composition: ApiRow[] = apiRows([
     'provider',
     '—',
     'application',
-    'Sets timeZone, hourCycle, granularity, step, maxOptions, placement, openTo, closeOnSelect, unavailableOptions, size and variant once for everything under it. A control that states any of them itself still wins.',
+    'Sets timeZone, hourCycle, granularity, calendar, step, maxOptions, placement, openTo, closeOnSelect, unavailableOptions, size and variant once for every Datetime Picker under it. A value set on one Datetime Picker still wins.',
   ],
   [
     'slDateTimePickerOption',
     'ng-template',
     '—',
     'SlDateTimePickerOption',
-    'Draws one row, through NgTemplateOutlet — the case a per-item template is for. The context carries the time as $implicit, plus date, label, selected, current and unavailable. The row itself stays the family’s: its role, its states, its keyboard and its target size.',
+    'Draws the content of one row of the list. The context carries the time as $implicit, plus date, label, selected, current and unavailable. The row keeps its role, states and keyboard.',
   ],
   [
     'exportAs',
     'slDateTimePicker',
     '—',
     'SlDateTimePicker',
-    'A template reaches the instance for focus(), openSurface() and closeSurface(), and reads the derived value and highlight signals.',
+    'Gives a template the instance: focus() moves focus to the first segment of the field, openSurface() opens the panel and moves focus into it, as the trigger does, and closeSurface() closes it.',
   ],
   [
     'ControlValueAccessor',
     'interface',
     '—',
-    'SlDateTimeField',
-    'Reached through the field this family composes: the picker writes the same control a bare datetime field would, so formControlName works on the picker without a second accessor.',
+    'SlDateTimePicker',
+    'formControlName, formControl and ngModel bind the value. As a validator it reports slottedDateTimeRange outside min and max, slottedDateTimeWindow outside minTime and maxTime, slottedDateTimeUnavailable for a refused date or time, and slottedDateTimeIncomplete while only one half is typed. Validators.required covers an empty value.',
   ],
   [
     '(keydown)',
     'EventListener',
     '—',
     'SlDateTimePicker',
-    'The family handles the keys on the host, so a consumer’s own listener on the same element runs first — which is the composition React gets by calling the consumer’s handler before acting.',
+    'A listener on the host runs before the Datetime Picker handles keys on the control, the trigger and the list.',
   ],
 ]);
 
 const accessibility: string[] = [
-  'The panel is one role="dialog" holding a role="grid" and a role="listbox", which is the arrangement the APG’s own Date Picker Combobox example uses for its popup — and the trigger says aria-haspopup="dialog" to match. Both surfaces are in the DOM at every width, because a tablist whose membership depends on the viewport tells assistive technology one story on a wide screen and another on a narrow one.',
-  'Only one element of the calendar grid is in the Tab sequence, which the Grid Pattern requires and SlCalendar already implements, and the listbox is one stop for the same reason — so the two surfaces are two Tab stops rather than forty-three, and Tab is contained inside the layer while the panel is open.',
-  'The trigger’s accessible name carries the chosen datetime, because focus returns to it when the panel closes: that is where the reader is told what was chosen, and the APG names it as an accessibility feature of its own example. The listbox carries its own name as well — the day its times belong to — because a dialog holding two widgets gives neither of them a name by position.',
-  'Moving the highlight never moves the value. The listbox pattern lists selection-following-focus as optional and warns it can severely degrade accessibility; here a reader arrowing through ninety-six quarter-hours would emit ninety-six requests, each one a value a consumer may be writing to a server.',
-  'Escape is staged in three steps rather than two: the field abandons an open expression first, then the calendar’s view walks down from year or month, and only then does the panel close and return focus to the trigger. The dismissable layer asks in the capture phase, so the decision is taken where the family can still refuse it.',
+  'The panel has role="dialog" and holds a role="grid" and a role="listbox", the arrangement the APG Date Picker Combobox example uses for its popup. The trigger has aria-haspopup="dialog" and aria-expanded, and aria-controls only while the panel exists. Both surfaces are in the DOM at every width.',
+  'The trigger’s accessible name carries the chosen date and time in words, such as “Change date and time, September 30, 2026 at 9:00 AM”. Focus returns to the trigger when the panel closes from a press or from Escape, so a screen reader announces the value there. The listbox has its own accessible name, the day its times belong to.',
+  'Opening the panel from the trigger or from openSurface() moves focus into the surface openTo names: the focused day in the calendar, or the chosen or nearest time in the list. Alt+ArrowDown opens the panel and leaves focus in the field. While the panel is open, Tab and Shift+Tab cycle through the head, the calendar, the list and the footer; each surface is one Tab stop.',
+  'Moving the highlight through the list never changes the value; Enter, Space or a press does. Changing the value on every highlight would send one change per time the reader passes.',
+  'Escape closes in steps: an open relative expression in the field closes first, then the calendar returns from the month or year grid to the day grid, and then the panel closes and focus returns to the trigger.',
+  'Alt+ArrowDown is a shortcut, never the only way in. ChromeOS turns it into PageDown before the browser receives it, so the trigger is always drawn.',
 ];
 
-export const ANGULAR_DATE_TIME_PICKER_DOCS = {
+export const ANGULAR_DATETIME_PICKER_DOCS = {
   dateTimePicker: {
     accessibility,
     anatomy,

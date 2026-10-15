@@ -204,6 +204,12 @@ export interface TooltipContentRootProps extends HTMLAttributes<HTMLElement> {
 export interface TooltipTriggerRootProps extends HTMLAttributes<HTMLElement> {
   ref?: PartRef | undefined;
   'data-open'?: '' | undefined;
+  /**
+   * Always present, and the content's identifier under `describes="label"`.
+   * A required key is what lets an `IconButton` take these props whole as its
+   * name source: under `label` the tooltip is the only name it has.
+   */
+  'aria-labelledby': string | undefined;
 }
 
 export interface TooltipProps {

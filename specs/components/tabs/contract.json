@@ -17,6 +17,10 @@
     "part": "label",
     "reason": "The words get a box of their own, as they do in `tag`: it is what `text-overflow` needs to clip a share that fit=equal made too narrow, what `unicode-bidi: plaintext` needs to let one right-to-left label read its own way, and what an icon beside the label is aligned against."
   },
+  "adornments": {
+    "parts": ["start", "end"],
+    "reason": "An icon before the words and a count after them stand beside the label, inside the tab, as `tag` places its own: inside the label they would be clipped with the words under fit=equal and turned with them by `unicode-bidi: plaintext`, and the tab's gap would not reach them."
+  },
   "controlElement": {
     "default": "button",
     "withHref": "a"
@@ -197,7 +201,19 @@
         "wiring"
       ],
       "states": ["default", "hover", "active", "focus-visible", "selected", "disabled"],
-      "parts": ["root", "list", "item", "tab", "label", "dismiss", "panel", "scroll", "actions"]
+      "parts": [
+        "root",
+        "list",
+        "item",
+        "tab",
+        "start",
+        "label",
+        "end",
+        "dismiss",
+        "panel",
+        "scroll",
+        "actions"
+      ]
     }
   },
   "scenarios": {

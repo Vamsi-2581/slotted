@@ -293,10 +293,8 @@ export function ChipRow({ children }: ChipRowProps) {
     collapse.current?.refresh();
   }, [multiSelect.value]);
 
-  const label = multiSelect.t('chosen', { count: multiSelect.value.length });
-
   return (
-    <div aria-label={label} data-part="chips" ref={row} role="row">
+    <div data-part="chips" ref={row} role="row">
       {multiSelect.value.map((value, index) => (
         <Chip
           count={multiSelect.value.length}

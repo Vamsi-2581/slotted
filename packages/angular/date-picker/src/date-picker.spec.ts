@@ -1,10 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { By } from '@angular/platform-browser';
 import { plainDate, toISODate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { CalendarValue } from '@slotted/angular/calendar';
+import { SlDateField } from '@slotted/angular/date-field';
 import { provideSlotted } from '@slotted/angular/i18n';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -17,10 +20,12 @@ const NINTH = plainDate(2026, 9, 9);
 
 @Component({
   standalone: true,
-  imports: [SlDatePicker, SlDatePickerFooter, SlDatePickerPresets],
+  imports: [ReactiveFormsModule, SlDatePicker, SlDatePickerFooter, SlDatePickerPresets],
   template: `<div slDatePicker></div>`,
 })
 class Host {
+  readonly held = signal<PlainDate | null>(NINTH);
+  readonly control = new FormControl<PlainDate | null>(null);
   readonly ninth = NINTH;
   readonly january = plainDate(2026, 1, 1);
   readonly values: CalendarValue[] = [];
@@ -347,6 +352,30 @@ describe('the composition surface', () => {
     expect(surface(fixture)).not.toBeNull();
   });
 
+  /**
+   * The contract's open reasons are pointer, keyboard, escape, outsidePress and
+   * select; React's handle reports keyboard, and so does this one.
+   */
+  it('reports the handle’s open and close with a reason its contract lists', () => {
+    const fixture = renderTemplate(
+      `<div slDatePicker locale="pt-BR" (openChange)="onOpen($event)"></div>`,
+    );
+    const picker = fixture.debugElement
+      .query(By.directive(SlDatePicker))
+      .injector.get(SlDatePicker);
+
+    picker.openSurface();
+    fixture.detectChanges();
+    picker.closeSurface();
+    fixture.detectChanges();
+
+    const reasons = fixture.componentInstance.onOpen.mock.calls.map(
+      ([request]) => (request as ChangeRequest<boolean>).reason,
+    );
+    expect(reasons).toEqual(['keyboard', 'keyboard']);
+    expect(contract.stateModel.open.reasons).toEqual(expect.arrayContaining(reasons));
+  });
+
   it('takes the consumer’s own slots into the surface', () => {
     const fixture = renderTemplate(
       `<div slDatePicker defaultOpen locale="pt-BR">
@@ -361,5 +390,151 @@ describe('the composition surface', () => {
     expect(fixture.nativeElement.querySelector('[data-part="footer"]')?.textContent).toContain(
       'Aplicar',
     );
+  });
+});
+
+describe('the inputs it passes on', () => {
+  const segmentText = (fixture: Fixture) =>
+    [...fixture.nativeElement.querySelectorAll('[data-part="segment"]')]
+      .map((element: Element) => (element as HTMLElement).textContent?.trim())
+      .join('/');
+
+  it('starts the week on the day firstDayOfWeek names', () => {
+    const fixture = renderTemplate(
+      `<div slDatePicker defaultOpen locale="en-US" [firstDayOfWeek]="1" [defaultValue]="ninth"></div>`,
+    );
+    const first = fixture.nativeElement.querySelector('[data-part="week-header"]') as HTMLElement;
+    expect(first.getAttribute('abbr')).toBe('Monday');
+  });
+
+  it('hands the field the yearPivot it is given', () => {
+    const fixture = renderTemplate(`<div slDatePicker locale="en-US" [yearPivot]="0"></div>`);
+    const field = fixture.debugElement.query(By.directive(SlDateField)).componentInstance;
+    expect((field as SlDateField).yearPivot()).toBe(0);
+  });
+
+  it('marks the field invalid when the picker is', () => {
+    const fixture = renderTemplate(`<div slDatePicker invalid locale="en-US"></div>`);
+    const field = fixture.nativeElement.querySelector('[data-ui="date-field"]') as HTMLElement;
+    expect(field.hasAttribute('data-invalid')).toBe(true);
+  });
+
+  it('empties the field when a controlled value becomes null', () => {
+    const fixture = renderTemplate(`<div slDatePicker locale="en-US" [value]="held()"></div>`);
+    expect(segmentText(fixture)).toBe('09/09/2026');
+
+    fixture.componentInstance.held.set(null);
+    fixture.detectChanges();
+    expect(segmentText(fixture)).not.toContain('2026');
+  });
+});
+
+describe('in an Angular form', () => {
+  const hidden = (fixture: Fixture) =>
+    (fixture.nativeElement.querySelector('[data-part="hidden-input"]') as HTMLInputElement).value;
+
+  it('takes the value the form writes and empties on reset', () => {
+    const fixture = renderTemplate(
+      `<div slDatePicker locale="en-US" [formControl]="control"></div>`,
+    );
+    fixture.componentInstance.control.setValue(NINTH);
+    fixture.detectChanges();
+    expect(hidden(fixture)).toBe('2026-09-09');
+
+    fixture.componentInstance.control.reset();
+    fixture.detectChanges();
+    expect(hidden(fixture)).toBe('');
+  });
+
+  it('returns to its default value when its form is reset', () => {
+    const fixture = renderTemplate(
+      `<form>
+         <div slDatePicker defaultOpen locale="pt-BR" name="data" [defaultValue]="ninth" (valueChange)="onValue($event)"></div>
+       </form>`,
+    );
+
+    click(fixture, dayFor(fixture, 17));
+    expect(hidden(fixture)).toBe('2026-09-17');
+
+    (fixture.nativeElement.querySelector('form') as HTMLFormElement).reset();
+    fixture.detectChanges();
+
+    expect(hidden(fixture)).toBe('2026-09-09');
+    expect(fixture.componentInstance.onValue).toHaveBeenLastCalledWith(
+      expect.objectContaining({ value: NINTH, reason: 'programmatic' }),
+    );
+  });
+
+  it('reports the date chosen in the grid to the form', () => {
+    const fixture = renderTemplate(
+      `<div slDatePicker locale="en-US" [formControl]="control"></div>`,
+    );
+    fixture.componentInstance.control.setValue(NINTH);
+    fixture.detectChanges();
+    click(fixture, trigger(fixture));
+    click(fixture, dayFor(fixture, 17));
+    expect(fixture.componentInstance.control.value).toEqual(plainDate(2026, 9, 17));
+  });
+
+  it('takes the trigger out when the form disables it', () => {
+    const fixture = renderTemplate(
+      `<div slDatePicker locale="en-US" [formControl]="control"></div>`,
+    );
+    fixture.componentInstance.control.disable();
+    fixture.detectChanges();
+    expect(trigger(fixture).disabled).toBe(true);
+    expect(root(fixture).hasAttribute('data-disabled')).toBe(true);
+  });
+
+  it('reports a date outside the bounds as a form error', () => {
+    const fixture = renderTemplate(
+      `<div slDatePicker locale="en-US" [min]="ninth" [formControl]="control"></div>`,
+    );
+    fixture.componentInstance.control.setValue(plainDate(2026, 1, 1));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.control.errors?.['slottedDateRange']).toBeDefined();
+  });
+});
+
+describe('where focus goes when it opens', () => {
+  it('moves focus to the chosen day when the trigger opens it', async () => {
+    const fixture = renderTemplate(
+      `<div slDatePicker locale="en-US" [defaultValue]="ninth"></div>`,
+    );
+
+    click(fixture, trigger(fixture));
+    await fixture.whenStable();
+
+    expect(document.activeElement?.getAttribute('data-part')).toBe('day');
+    expect(document.activeElement?.textContent?.trim()).toBe('9');
+  });
+
+  it('leaves focus alone when it is rendered open', async () => {
+    const fixture = renderTemplate(
+      `<div slDatePicker defaultOpen locale="en-US" [defaultValue]="ninth"></div>`,
+    );
+    await fixture.whenStable();
+
+    expect(document.activeElement?.getAttribute('data-part')).not.toBe('day');
+  });
+
+  it('keeps Tab inside the surface while it is open', () => {
+    const fixture = renderTemplate(
+      `<div slDatePicker defaultOpen locale="en-US" [defaultValue]="ninth">
+         <div slDatePickerPresets><button type="button" id="first">Today</button></div>
+         <div slDatePickerFooter><button type="button" id="last">Done</button></div>
+       </div>`,
+    );
+    const first = fixture.nativeElement.querySelector('#first') as HTMLButtonElement;
+    const last = fixture.nativeElement.querySelector('#last') as HTMLButtonElement;
+
+    last.focus();
+    last.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    expect(document.activeElement).toBe(first);
+
+    first.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true }),
+    );
+    expect(document.activeElement).toBe(last);
   });
 });

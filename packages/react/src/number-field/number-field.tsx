@@ -7,6 +7,7 @@ import {
   createScrub,
   STEP_REPEAT_DELAY,
   STEP_REPEAT_DELAY_COARSE,
+  snapToStep as snapToGrid,
   STEP_REPEAT_INTERVAL,
   stepNumber,
 } from '@slotted/core/number';
@@ -139,7 +140,6 @@ export function NumberField({
   const resolvedLocale = locale ?? appLocale;
   const resolvedDisabled = disabled ?? field?.disabled;
   const resolvedReadOnly = readOnly ?? field?.readOnly;
-  const resolvedInvalid = invalid ?? field?.invalid;
 
   /**
    * One formatter, rebuilt only when the locale or the format actually changes.
@@ -163,6 +163,16 @@ export function NumberField({
   /** What the family knows about the number, which in controlled mode is not it. */
   const [own, setOwn] = useState<number | null>(defaultValue);
   const current = value === undefined ? own : value;
+
+  /**
+   * Unstated, the control asks the field. Under `clamp="none"` nothing returns
+   * a number outside `min`…`max` to the range, so the control reports it.
+   */
+  const outsideRange =
+    resolvedClamp === 'none' &&
+    current !== null &&
+    ((min !== undefined && current < min) || (max !== undefined && current > max));
+  const resolvedInvalid = invalid ?? (outsideRange ? true : field?.invalid);
 
   /** What the element is showing. Never a second copy of the number. */
   const [text, setText] = useState(() => formatter.format(current));
@@ -210,17 +220,11 @@ export function NumberField({
     (reason: ChangeReason, source: unknown) => {
       let next = formatter.parse(text);
       if (next !== null) {
-        if (snapToStep) {
-          next = stepNumber({
-            value: next,
-            direction: 1,
-            step,
-            ...(min === undefined ? {} : { min }),
-            ...(max === undefined ? {} : { max }),
-            stepFrom: next,
-            snapToStep: false,
-          });
-        }
+        /* The number committed is the number shown: rounded to the precision
+           the format states, through the same formatter. */
+        next = formatter.parse(formatter.format(next)) ?? next;
+        /* A typed value goes to the nearest multiple of the grid. */
+        if (snapToStep) next = snapToGrid(next, step, min ?? 0);
         if (resolvedClamp !== 'none') {
           next = clampNumber(
             next,

@@ -18,6 +18,7 @@ import type { CalendarDay, CalendarWeek, PlainDate } from '@slotted/core/date';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import {
+  afterNextRender,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
@@ -25,6 +26,7 @@ import {
   effect,
   ElementRef,
   inject,
+  Injector,
   input,
   numberAttribute,
   output,
@@ -309,6 +311,7 @@ export class SlCalendar implements OnInit {
   readonly previewChange = output<PlainDate | null>();
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly injector = inject(Injector);
   private readonly defaults = injectCalendarDefaults();
   private readonly appLocale = injectLocale();
   /** The family's words in the language in force, with this calendar's `messages` laid over them. */
@@ -669,7 +672,45 @@ export class SlCalendar implements OnInit {
     });
     this.restoreFocus = reason === 'keyboard';
     if (state.request(bounded, reason, source)) this.ownFocused.set(bounded);
-    if (this.restoreFocus) queueMicrotask(() => this.focus());
-    this.restoreFocus = false;
+    if (this.restoreFocus) this.followFocus();
+  }
+
+  /**
+   * Focus follows a key onto the cell that holds the roving tab stop, once the
+   * page holding it is rendered.
+   *
+   * A key that crosses the month edge lands on the old page's trailing day
+   * first, and the page follows one render later. Focused before that, the
+   * cell was replaced under the reader and focus fell to the document — which
+   * a consumer owning `focusedDate` met on every crossing. Focus is moved only
+   * while it is still in the calendar or was lost to the document, so a
+   * consumer that refused the move never has focus taken from elsewhere.
+   */
+  private followFocus() {
+    afterNextRender(
+      () => {
+        if (!this.restoreFocus) return;
+        const active = this.element.ownerDocument.activeElement;
+        const lost = active === null || active === this.element.ownerDocument.body;
+        if (!lost && !this.element.contains(active)) {
+          this.restoreFocus = false;
+          return;
+        }
+        const stop = this.element.querySelector<HTMLElement>(
+          '[data-part="cell"]:not([data-outside-month]) [data-part="day"][tabindex="0"]',
+        );
+        if (stop !== null) {
+          this.restoreFocus = false;
+          stop.focus();
+          return;
+        }
+        if (this.element.querySelector('[data-part="day"][tabindex="0"]') === null) {
+          this.restoreFocus = false;
+          return;
+        }
+        this.followFocus();
+      },
+      { injector: this.injector },
+    );
   }
 }

@@ -3595,7 +3595,10 @@ export type ComponentToken =
   | '--slotted-page-header-heading-size-lg'
   | '--slotted-page-header-heading-size-md'
   | '--slotted-page-header-heading-size-sm'
+  | '--slotted-page-header-inset'
   | '--slotted-page-header-padding-block'
+  | '--slotted-page-header-radius'
+  | '--slotted-page-header-shadow'
   | '--slotted-page-header-snapped-heading-size-lg'
   | '--slotted-page-header-snapped-heading-size-md'
   | '--slotted-page-header-snapped-heading-size-sm'
@@ -5770,7 +5773,10 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-page-header-heading-size-lg",
   "--slotted-page-header-heading-size-md",
   "--slotted-page-header-heading-size-sm",
+  "--slotted-page-header-inset",
   "--slotted-page-header-padding-block",
+  "--slotted-page-header-radius",
+  "--slotted-page-header-shadow",
   "--slotted-page-header-snapped-heading-size-lg",
   "--slotted-page-header-snapped-heading-size-md",
   "--slotted-page-header-snapped-heading-size-sm",

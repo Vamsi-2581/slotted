@@ -18,6 +18,8 @@ export interface FieldGroupContextValue {
   messageSize: 'sm' | 'md';
   registerMessage: (slot: 'description' | 'error', present: boolean) => void;
   necessity: FieldNecessity;
+  /** Unset unless the page states it; a member with no `invalid` of its own defers to it. */
+  invalid: boolean | undefined;
   required: boolean | undefined;
   size: FieldSize;
   /** The field family's words in the language in force, with the group's `messages` laid over them. */

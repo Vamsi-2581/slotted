@@ -173,6 +173,49 @@ describe('SlCheckbox', () => {
     expect(root(fixture).getAttribute('data-checked')).toBeNull();
   });
 
+  it('restores what an uncontrolled box started from when the form resets', () => {
+    const fixture = renderTemplate(
+      `<form>
+         <div slCheckbox defaultChecked name="terms">Aceito</div>
+         <div slCheckbox name="news">Novidades</div>
+       </form>`,
+    );
+    const terms = query(fixture, 'input[name="terms"]') as HTMLInputElement;
+    const news = query(fixture, 'input[name="news"]') as HTMLInputElement;
+
+    click(terms);
+    click(news);
+    fixture.detectChanges();
+    expect(terms.checked).toBe(false);
+    expect(news.checked).toBe(true);
+
+    (terms.form as HTMLFormElement).reset();
+    fixture.detectChanges();
+    expect(terms.checked).toBe(true);
+    expect(terms.closest('[data-ui="checkbox"]')?.getAttribute('data-checked')).toBe('');
+    expect(news.checked).toBe(false);
+    expect(news.closest('[data-ui="checkbox"]')?.getAttribute('data-checked')).toBeNull();
+  });
+
+  /**
+   * A native reset puts a box back to its default content attribute. A box
+   * whose state belongs to a form control keeps showing that control's value,
+   * because nothing resets the control unless a form directive does.
+   */
+  it('keeps showing its form control’s value when the native form resets', () => {
+    const fixture = renderTemplate(
+      `<form><div slCheckbox [formControl]="control">Aceito</div></form>`,
+    );
+    fixture.componentInstance.control.setValue(true);
+    fixture.detectChanges();
+
+    (control(fixture).form as HTMLFormElement).reset();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.control.value).toBe(true);
+    expect(control(fixture).checked).toBe(true);
+    expect(root(fixture).getAttribute('data-checked')).toBe('');
+  });
+
   it('commits nothing when the request is cancelled', () => {
     const fixture = renderTemplate(`<div slCheckbox (checkedChange)="$event.cancel()">A</div>`);
 

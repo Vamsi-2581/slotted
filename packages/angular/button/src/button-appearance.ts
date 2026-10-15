@@ -163,11 +163,12 @@ export const BUTTON_WAIT = new InjectionToken<ButtonWait>('slotted button wait')
     @if (drawsRing()) {
       <span
         data-part="indicator"
+        data-ui="spinner"
         role="progressbar"
         [attr.aria-label]="wait?.t('loading') ?? null"
       ></span>
     }`,
-  styleUrl: '../../../styles/src/button/button.css',
+  styleUrls: ['../../../styles/src/button/button.css', '../../../styles/src/spinner/spinner.css'],
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slButtonStart',
   host: { 'data-part': 'start' },
@@ -184,11 +185,12 @@ export class SlButtonStart {
     @if (drawsRing()) {
       <span
         data-part="indicator"
+        data-ui="spinner"
         role="progressbar"
         [attr.aria-label]="wait?.t('loading') ?? null"
       ></span>
     }`,
-  styleUrl: '../../../styles/src/button/button.css',
+  styleUrls: ['../../../styles/src/button/button.css', '../../../styles/src/spinner/spinner.css'],
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slButtonEnd',
   host: { 'data-part': 'end' },

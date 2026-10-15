@@ -11,6 +11,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Checkbox } from '../checkbox';
 import { Glyph, Icon } from '../icon';
 import { Skeleton } from '../skeleton';
+import { VisuallyHidden } from '../visually-hidden';
 import {
   cellStyle,
   columnAttributes,
@@ -216,7 +217,6 @@ function SelectionCell<Row>({ rowKey }: { rowKey: string }) {
       {...(current ? { 'data-current': '' } : {})}
     >
       <Checkbox
-        aria-label={grid.t('selectRow', { row: rowKey })}
         checked={grid.isSelected(rowKey)}
         disabled={disabled || undefined}
         onCheckedChange={(_checked, request) => {
@@ -224,7 +224,9 @@ function SelectionCell<Row>({ rowKey }: { rowKey: string }) {
           grid.toggleSelected(rowKey, { range: source?.shiftKey === true, source: request.source });
         }}
         tabIndex={current ? 0 : -1}
-      />
+      >
+        <VisuallyHidden>{grid.t('selectRow', { row: rowKey })}</VisuallyHidden>
+      </Checkbox>
     </div>
   );
 }

@@ -131,7 +131,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button, inside span[slTableSetFilter] and its four siblings',
     required: false,
     purpose:
-      'The trigger the family draws in that slot, and everything behind it. It marks itself while the column is filtered and states what is applied in its own name.',
+      'The trigger the table draws in that slot, and everything behind it. It marks itself while the column is filtered and states what is applied in its own name.',
   },
   {
     part: 'filter-panel',
@@ -213,7 +213,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button[slTableExpander]',
     required: false,
     purpose:
-      'Opens and closes one row detail, carrying aria-expanded and aria-controls. It is the APG Disclosure pattern, borrowed whole.',
+      'Opens and closes one row detail. It carries aria-expanded, and aria-controls naming the detail row while that row is open. It is the APG Disclosure pattern, borrowed whole.',
   },
   {
     part: 'detail',
@@ -438,7 +438,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'table-angular-scroll',
       language: 'angular',
       label: 'Naming the region',
-      source: '<div slTableContent aria-label="Invoices, scrollable"></div>',
+      source: '<div slTableContent scrollLabel="Invoices, scrollable"></div>',
     }),
   },
   {
@@ -526,7 +526,7 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'composition',
-    title: 'Setting the family once, and reaching past it',
+    title: 'Setting the table once, and reaching past it',
     note: 'provideTableDefaults sets the frame and the layout for everything under that injector, provideSlotted the language, and a table that states an axis itself still wins. Every part is a directive on your own element, so nothing is wrapped that you did not write.',
     snippet: defineSnippet({
       id: 'table-angular-composition',
@@ -539,13 +539,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'keyboard',
     title: 'Every control is its own tab stop',
-    note: 'A table is not a composite widget, so the family binds no key: Tab reaches the scroller, then each sort button, checkbox and expander in DOM order. Shift with Space on a checkbox takes the range, which is the one gesture the family adds.',
+    note: 'A table is not a composite widget, so the table binds no key: Tab reaches the scroller, then each sort button, checkbox and expander in DOM order. Shift with Space on a checkbox takes the range, which is the one gesture the family adds.',
     snippet: defineSnippet({
       id: 'table-angular-keyboard',
       language: 'angular',
       label: 'Nothing to wire',
       source:
-        '<!-- Enter and Space activate the buttons the family renders. -->\n<!-- Shift + Space on a row checkbox selects from the anchor. -->\n<!-- The scroller answers the arrow, Page, Home and End keys. -->',
+        '<!-- Enter and Space activate the buttons the table renders. -->\n<!-- Shift + Space on a row checkbox selects from the anchor. -->\n<!-- The scroller answers the arrow, Page, Home and End keys. -->',
     }),
   },
   {
@@ -778,6 +778,13 @@ export const ANGULAR_TABLE_DOCS = {
         'string',
         '—',
         'slTableContent',
+        'The table’s name when it has no caption, written on the table element',
+      ],
+      [
+        'scrollLabel',
+        'string',
+        '—',
+        'slTableContent',
         'The name the scrolling region takes while it overflows, over the catalog’s',
       ],
       [
@@ -910,7 +917,7 @@ export const ANGULAR_TABLE_DOCS = {
       'A row is not selectable under this role, so it carries no aria-selected. The state is painted with data-selected and announced by the checkbox that owns it, whose name is a visually hidden label rather than an aria-label on the wrapper — the wrapper is not the control.',
       'aria-rowcount and aria-rowindex are written exactly when you state a total larger than the DOM, which is what the Grid and Table Properties practice requires. The practice warns that writing aria-rowindex on some rows and not others has devastating effects, so the family writes neither unless you state both.',
       'The scroller becomes a region with a tab stop and a name only while the table overflows, measured after the first render rather than assumed. A wide table with no tab stop is unreachable without a pointer — a WCAG 2.2 level A failure — and a tab stop on a table that fits is one a reader presses for nothing.',
-      'The expander is the Disclosure pattern: a button with aria-expanded and aria-controls naming the detail row. Your own @if keeps a closed detail out of the DOM, because a component whose host is the tr cannot remove that tr from inside itself and an empty row is a row a screen reader still counts.',
+      'The expander is the Disclosure pattern: a button with aria-expanded, and with aria-controls naming the detail row while it is open. Your own @if keeps a closed detail out of the DOM, because a component whose host is the tr cannot remove that tr from inside itself and an empty row is a row a screen reader still counts.',
       'A selected row is said by its ground and its ink together, and by the checkbox mark. R1 of this repository forbids the rail two families reached for, and in the high-contrast scheme every tone ground is the page own white — so the mark is what survives.',
     ],
     snippets: [
@@ -924,7 +931,7 @@ export const ANGULAR_TABLE_DOCS = {
       defineSnippet({
         id: 'table-theming',
         language: 'css',
-        label: 'Retuning the family for an application',
+        label: 'Retuning the table for an application',
         source:
           "[data-ui='table'] {\n  --slotted-table-row-min-block-size: 40px;\n  --slotted-table-row-surface-hover: var(--slotted-tone-accent-subtle-hover);\n  --slotted-table-header-surface: var(--slotted-surface-sunken);\n  --slotted-table-border-color: var(--slotted-border-strong);\n}",
       }),

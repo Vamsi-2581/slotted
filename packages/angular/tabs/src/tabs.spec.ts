@@ -1,13 +1,21 @@
-import { Component, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ChangeRequest } from '@slotted/core/state';
 import { SlTabs } from './tabs';
 import type { TabsDismissRequest } from './tabs';
 import { provideTabsDefaults } from './tabs-defaults';
-import { SlTab, SlTabActions, SlTabList, SlTabPanel } from './tabs-parts';
+import {
+  SlTab,
+  SlTabActions,
+  SlTabEnd,
+  SlTabList,
+  SlTabPanel,
+  SlTabPanelContent,
+  SlTabStart,
+} from './tabs-parts';
 
 @Component({
   standalone: true,
@@ -357,6 +365,183 @@ describe('SlTabs', () => {
     const parts = new Set(all('[data-part]').map((node) => node.getAttribute('data-part')));
     for (const part of ['root', 'list', 'item', 'tab', 'label', 'panel', 'actions']) {
       expect(parts).toContain(part);
+    }
+  });
+});
+
+/** Counts the instances a panel builds, which is what `mount` is about. */
+let built = 0;
+let destroyed = 0;
+
+@Component({ selector: 'app-heavy', standalone: true, template: `<textarea></textarea>` })
+class Heavy {
+  constructor() {
+    built += 1;
+    inject(DestroyRef).onDestroy(() => (destroyed += 1));
+  }
+}
+
+@Component({
+  standalone: true,
+  imports: [SlTabs, SlTabList, SlTab, SlTabPanel, SlTabPanelContent, Heavy],
+  template: `<div slTabs defaultValue="a" [mount]="mount()">
+    <div slTabList aria-label="Order">
+      <div slTab value="a">Summary</div>
+      <div slTab value="b">Notes</div>
+    </div>
+    <div slTabPanel value="a">Summary</div>
+    <div slTabPanel value="b">
+      <ng-template slTabPanelContent><app-heavy /></ng-template>
+    </div>
+  </div>`,
+})
+class DeferredHost {
+  readonly mount = signal<'active' | 'lazy' | 'eager'>('active');
+}
+
+describe('SlTabPanelContent', () => {
+  let fixture: ComponentFixture<DeferredHost>;
+
+  const tab = (index: number) =>
+    fixture.nativeElement.querySelectorAll('[data-part="tab"]')[index] as HTMLElement;
+  const select = async (index: number) => {
+    tab(index).dispatchEvent(
+      new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }),
+    );
+    await fixture.whenStable();
+  };
+
+  async function create(mount: 'active' | 'lazy' | 'eager') {
+    built = 0;
+    destroyed = 0;
+    TestBed.configureTestingModule({ imports: [DeferredHost] });
+    fixture = TestBed.createComponent(DeferredHost);
+    fixture.componentInstance.mount.set(mount);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+  }
+
+  /** Projected markup is built by the consumer's view whether a panel shows it or not. */
+  it('builds nothing for a closed panel under active, and a fresh instance on each selection', async () => {
+    await create('active');
+    expect(built).toBe(0);
+
+    await select(1);
+    expect(built).toBe(1);
+    expect(fixture.nativeElement.querySelector('app-heavy')).toBeTruthy();
+
+    await select(0);
+    expect(destroyed).toBe(1);
+    expect(fixture.nativeElement.querySelector('app-heavy')).toBeNull();
+
+    await select(1);
+    expect(built).toBe(2);
+  });
+
+  it('keeps the instance once built under lazy', async () => {
+    await create('lazy');
+    expect(built).toBe(0);
+
+    await select(1);
+    await select(0);
+    await select(1);
+    expect(built).toBe(1);
+    expect(destroyed).toBe(0);
+  });
+
+  it('builds every panel up front under eager', async () => {
+    await create('eager');
+    expect(built).toBe(1);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlTabs, SlTabList, SlTab, SlTabStart, SlTabEnd, SlTabPanel],
+  template: `<div slTabs defaultValue="orders">
+    <div slTabList aria-label="Customer">
+      <div slTab value="orders">
+        <span slTabStart><i>icon</i></span>
+        Orders
+        <span slTabEnd><b>12</b></span>
+      </div>
+      <div slTab value="files" href="#files">
+        <span slTabStart><i>icon</i></span>
+        Files
+      </div>
+      <div slTab value="notes">Notes</div>
+    </div>
+    <div slTabPanel value="orders">Orders</div>
+    <div slTabPanel value="files">Files</div>
+    <div slTabPanel value="notes">Notes</div>
+  </div>`,
+})
+class AdornedHost {}
+
+describe('SlTabStart and SlTabEnd', () => {
+  /** An icon and a count stand beside the words, inside the control. */
+  it('places start and end beside the label, inside the tab', async () => {
+    TestBed.configureTestingModule({ imports: [AdornedHost] });
+    const fixture = TestBed.createComponent(AdornedHost);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+
+    const tabs = [
+      ...(fixture.nativeElement.querySelectorAll('[data-part="tab"]') as NodeListOf<HTMLElement>),
+    ];
+    const parts = (element: HTMLElement) =>
+      [...element.children].map((node) => node.getAttribute('data-part'));
+
+    expect(parts(tabs[0] as HTMLElement)).toEqual(['start', 'label', 'end']);
+    expect(tabs[0]?.querySelector('[data-part="label"]')?.textContent?.trim()).toBe('Orders');
+    expect(tabs[0]?.querySelector('[data-part="end"] > b')?.textContent).toBe('12');
+    expect(parts(tabs[1] as HTMLElement)).toEqual(['start', 'label']);
+    expect(parts(tabs[2] as HTMLElement)).toEqual(['label']);
+  });
+});
+
+describe('SlTabs overflow', () => {
+  /**
+   * A list laid out after mount — its stylesheet arriving late, a drawer
+   * opening, a panel shown that was hidden — starts to overflow with the
+   * selected tab out of sight. The tab is brought into view when the list
+   * starts to overflow, not only when the selection moves.
+   */
+  it('brings the selected tab into view when the list starts to overflow', async () => {
+    const resized: Array<() => void> = [];
+    const Original = globalThis.ResizeObserver;
+    globalThis.ResizeObserver = class {
+      constructor(callback: ResizeObserverCallback) {
+        resized.push(() => callback([], this as unknown as ResizeObserver));
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+
+    try {
+      TestBed.configureTestingModule({ imports: [Host] });
+      const fixture = TestBed.createComponent(Host);
+      fixture.componentInstance.defaultValue.set('c');
+      fixture.autoDetectChanges();
+      await fixture.whenStable();
+
+      const list = fixture.nativeElement.querySelector('[role="tablist"]') as HTMLElement;
+      const third = fixture.nativeElement.querySelectorAll('[data-part="tab"]')[2] as HTMLElement;
+      const scrollBy = vi.fn();
+      Object.assign(list, { scrollBy });
+      Object.defineProperty(list, 'clientWidth', { configurable: true, value: 200 });
+      Object.defineProperty(list, 'scrollWidth', { configurable: true, value: 480 });
+      list.getBoundingClientRect = () => ({ left: 0, right: 200, top: 0, bottom: 30 }) as DOMRect;
+      third.getBoundingClientRect = () =>
+        ({ left: 400, right: 480, top: 0, bottom: 30 }) as DOMRect;
+
+      resized.forEach((notify) => notify());
+      await fixture.whenStable();
+
+      expect(scrollBy).toHaveBeenCalledWith(expect.objectContaining({ left: 280 }));
+    } finally {
+      globalThis.ResizeObserver = Original;
     }
   });
 });

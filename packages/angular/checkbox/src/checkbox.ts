@@ -101,6 +101,7 @@ function showsNothing(label: HTMLElement): boolean {
       [attr.disabled]="disabledAttribute()"
       [attr.required]="requiredAttribute()"
       [checked]="resolvedChecked()"
+      [attr.checked]="defaultAttribute()"
       (click)="onClick($event)"
       (blur)="onBlur()"
     />
@@ -196,6 +197,8 @@ export class SlCheckbox implements ControlValueAccessor, OnInit {
 
   private readonly own = signal(false);
   private readonly formDisabled = signal<boolean | undefined>(undefined);
+  /** Whether a form directive owns the value through `ControlValueAccessor`. */
+  private readonly formBound = signal(false);
   private onChangeFn: (checked: boolean) => void = () => undefined;
   private onTouchedFn: () => void = () => undefined;
 
@@ -268,6 +271,24 @@ export class SlCheckbox implements ControlValueAccessor, OnInit {
     () => this.field?.required() ?? this.group?.resolvedRequired() ?? this.fieldGroup?.required(),
   );
 
+  /**
+   * Whether the box keeps its own state and starts it from `defaultChecked`:
+   * nobody passed `checked`, no group holds it, and no form directive bound it.
+   */
+  private readonly ownsDefault = computed(
+    () => this.checked() === undefined && this.group === null && !this.formBound(),
+  );
+  /**
+   * The content attribute `checked`, which is what a native form reset puts
+   * the element back to. A box that owns its state writes `defaultChecked`
+   * there, the attribute React writes for the same prop. A box whose state
+   * belongs to a consumer, a group or a form directive writes its current
+   * state, so a native reset leaves the element showing what its owner holds.
+   */
+  protected readonly defaultAttribute = computed(() =>
+    (this.ownsDefault() ? this.defaultChecked() : this.resolvedChecked()) ? '' : null,
+  );
+
   protected readonly resolvedName = computed(() => this.name() ?? this.group?.name() ?? null);
   protected readonly describedBy = computed(() => {
     const merged = [
@@ -305,6 +326,18 @@ export class SlCheckbox implements ControlValueAccessor, OnInit {
 
     const destroy = inject(DestroyRef);
     afterNextRender(() => {
+      /* A native reset restores the element and tells nothing, so a box that
+         owns its state puts it back to where it started. The form is reached
+         through the element, because `form` may name a form anywhere. */
+      const form = this.element().nativeElement.form;
+      if (form !== null) {
+        const onReset = () => {
+          if (this.ownsDefault()) this.own.set(this.defaultChecked());
+        };
+        form.addEventListener('reset', onReset);
+        destroy.onDestroy(() => form.removeEventListener('reset', onReset));
+      }
+
       const label = this.label().nativeElement;
       const read = () => this.labelHidden.set(showsNothing(label));
       read();
@@ -330,6 +363,7 @@ export class SlCheckbox implements ControlValueAccessor, OnInit {
 
   registerOnChange(fn: (checked: boolean) => void) {
     this.onChangeFn = fn;
+    this.formBound.set(true);
   }
 
   registerOnTouched(fn: () => void) {

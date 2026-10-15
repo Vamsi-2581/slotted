@@ -234,7 +234,7 @@
     "prop": "referenceDateTime",
     "answers": [
       "the datetime an empty field steps from",
-      "the time a day pressed in the calendar takes"
+      "the option the list opens on when a day is pressed with the time half empty"
     ],
     "why": "Ant answers the second with showTime.defaultOpenValue and MUI answers the first with referenceDate; they are the same question — which datetime the family assumes where the reader has stated nothing — and one prop answers both. Midnight is the platform's answer to the second and is wrong for every booking flow.",
     "default": "now, read in an effect and never during render"

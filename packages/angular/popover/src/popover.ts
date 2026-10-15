@@ -1,6 +1,5 @@
 import { type PartialMessages, popoverMessages, type PopoverMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
-import type { ChangeRequest } from '@slotted/core/state';
 import {
   booleanAttribute,
   computed,
@@ -9,6 +8,7 @@ import {
   input,
   model,
   numberAttribute,
+  type OnInit,
   output,
   signal,
 } from '@angular/core';
@@ -17,6 +17,7 @@ import { injectMessages } from '@slotted/angular/i18n';
 import { injectPopoverDefaults, SlPopoverIdFactory } from './popover-defaults';
 import type {
   PopoverAlign,
+  PopoverChangeRequest,
   PopoverFocusTarget,
   PopoverMount,
   PopoverOpenReason,
@@ -28,6 +29,7 @@ import type {
 
 export type {
   PopoverAlign,
+  PopoverChangeRequest,
   PopoverDefaults,
   PopoverFocusTarget,
   PopoverMount,
@@ -60,9 +62,11 @@ const optionalNumber = (value: number | string | undefined) =>
   standalone: true,
   exportAs: 'slPopover',
 })
-export class SlPopover {
+export class SlPopover implements OnInit {
   /** Whether the panel is showing. Two-way, so a template may bind it directly. */
   readonly open = model<boolean>(false);
+  /** The state an uncontrolled popover starts in, read once in `ngOnInit`. */
+  readonly defaultOpen = input(false, { transform: booleanAttribute });
   /** The popover never opens. The trigger's own `disabled` is the consumer's. */
   readonly disabled = input(false, { transform: booleanAttribute });
 
@@ -123,7 +127,7 @@ export class SlPopover {
   });
 
   /** One output for one transition, carrying the reason and the event. */
-  readonly openChangeRequest = output<ChangeRequest<boolean>>();
+  readonly openChangeRequest = output<PopoverChangeRequest>();
 
   private readonly defaults = injectPopoverDefaults();
   /** The family's words in the language in force, with this popover's `messages` laid over them. */
@@ -181,6 +185,17 @@ export class SlPopover {
 
   private readonly everOpened = signal(false);
   readonly seen = computed(() => this.everOpened() || this.isOpen());
+
+  /**
+   * Read here rather than in the constructor, because inputs are not set yet
+   * there, and once: a later change to it is not new state.
+   */
+  ngOnInit() {
+    if (this.defaultOpen() && !this.open()) {
+      this.everOpened.set(true);
+      this.open.set(true);
+    }
+  }
 
   /** Opens now. One of the two imperative actions a template cannot express. */
   show() {

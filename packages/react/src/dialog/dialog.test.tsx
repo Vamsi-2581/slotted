@@ -460,6 +460,31 @@ describe('Dialog', () => {
     expect(document.activeElement).toBe(opener);
   });
 
+  /**
+   * A browser refuses focus on an element inside an `inert` subtree, and the
+   * background of a modal layer is inert until the layer is taken down. jsdom
+   * does not refuse it, so the test records where the background stood at the
+   * moment focus was handed back.
+   */
+  it('gives focus back to the trigger once the background is no longer inert', () => {
+    render(<Basic />);
+    const opener = trigger();
+    opener.focus();
+    press(opener);
+    expect(opener.closest('[inert]')).not.toBeNull();
+
+    const focus = vi.spyOn(opener, 'focus');
+    let inertWhenFocused: boolean | undefined;
+    focus.mockImplementation(function (this: HTMLElement) {
+      inertWhenFocused = this.closest('[inert]') !== null;
+      HTMLElement.prototype.focus.call(this);
+    });
+
+    escape();
+    expect(focus).toHaveBeenCalled();
+    expect(inertWhenFocused).toBe(false);
+  });
+
   it('moves focus to the element the consumer names', () => {
     function Named() {
       const target = useRef<HTMLInputElement>(null);
@@ -761,5 +786,63 @@ describe('AlertDialog', () => {
         </AlertDialog>,
       ),
     ).toThrow(/DialogDescription|aria-describedby/i);
+  });
+});
+
+/**
+ * An action in a confirmation that closes the dialog under it closes both in
+ * one change. The confirmation gives focus back to the dialog's control that
+ * opened it, and the dialog then gives it back to its own trigger.
+ */
+describe('stacked layers that close in one change', () => {
+  function Stacked() {
+    const [open, setOpen] = useState(false);
+    const [confirming, setConfirming] = useState(false);
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger>Change address</DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delivery address</DialogTitle>
+          </DialogHeader>
+          <DialogFooter>
+            <button type="button" onClick={() => setConfirming(true)}>
+              Cancel
+            </button>
+          </DialogFooter>
+          <AlertDialog open={confirming} onOpenChange={setConfirming}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Discard the new address?</DialogTitle>
+                <DialogDescription>The order keeps the previous one.</DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <AlertDialogCancel>Keep editing</AlertDialogCancel>
+                <AlertDialogAction onClick={() => setOpen(false)}>
+                  Discard changes
+                </AlertDialogAction>
+              </DialogFooter>
+            </DialogContent>
+          </AlertDialog>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  it('returns focus to the trigger of the outermost', () => {
+    render(<Stacked />);
+    const opener = screen.getByRole('button', { name: 'Change address' });
+    opener.focus();
+    fireEvent.click(opener);
+    const cancel = screen.getByRole('button', { name: 'Cancel' });
+    cancel.focus();
+    fireEvent.click(cancel);
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Keep editing' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Discard changes' }));
+
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(document.activeElement).toBe(opener);
+    expect(opener.closest('[inert]')).toBeNull();
   });
 });

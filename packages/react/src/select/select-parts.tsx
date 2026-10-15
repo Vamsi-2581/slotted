@@ -67,6 +67,15 @@ function moveTabFrom(trigger: HTMLElement | null, layer: HTMLElement | null, bac
   (next ?? trigger).focus({ preventScroll: true });
 }
 
+/**
+ * Whether a click landed on the control's frame. A click a `label` elsewhere
+ * forwards to the button carries the label's coordinates, which lie outside it.
+ */
+function pressedOnFrame(button: HTMLElement, x: number, y: number) {
+  const box = (button.parentElement ?? button).getBoundingClientRect();
+  return x >= box.left && x <= box.right && y >= box.top && y <= box.bottom;
+}
+
 function attach<T>(node: T, ...refs: (Ref<T> | undefined)[]) {
   for (const ref of refs) {
     if (typeof ref === 'function') ref(node);
@@ -92,6 +101,8 @@ function attach<T>(node: T, ...refs: (Ref<T> | undefined)[]) {
 export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectTriggerProps) {
   const select = useSelect();
   const field = useField();
+  const register = field?.registerControl;
+  useEffect(() => register?.(), [register]);
   const [node, setNode] = useState<HTMLButtonElement | null>(null);
   /**
    * The frame, and whether it is under the width a chip needs (SL4). The
@@ -272,6 +283,15 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
   };
 
   const onClick = (event: MouseEvent<HTMLButtonElement>) => {
+    /* A press on the field's label arrives here as the click the label
+       forwards: a pointer click at the label's coordinates, outside the frame.
+       It focuses the control and does not open the list — the select-only
+       example's label only focuses, and so does a native select's. A keyboard
+       or assistive-technology click carries detail 0 and opens. */
+    if (event.detail > 0 && !pressedOnFrame(event.currentTarget, event.clientX, event.clientY)) {
+      event.currentTarget.focus({ preventScroll: true });
+      return;
+    }
     if (select.disabled || select.readOnly) return;
     select.entry.current = 'selected';
     select.setOpen(!select.open, 'pointer', event.nativeEvent);
@@ -381,6 +401,7 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
       >
         {children}
       </button>
+      {chips}
       {showClear ? (
         <button aria-label={select.t('clear')} data-part="clear" onClick={clear} type="button">
           <Icon>
@@ -394,7 +415,6 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
         anything yet (SL6). The arc is `spinner`'s, worn as `data-ui` beside
         this family's own part.
       */}
-      {chips}
       {select.loading ? (
         <span aria-hidden="true" data-part="busy" data-ui="spinner" />
       ) : (
@@ -430,6 +450,23 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
  */
 function NativeSelect() {
   const select = useSelect();
+  const [node, setNode] = useState<HTMLSelectElement | null>(null);
+  const { restore } = select;
+
+  /**
+   * A native reset restores the hidden select's own options and tells nothing,
+   * so the control would keep the last value chosen in a form that had been
+   * reset. The form is reached through the element rather than through a prop,
+   * because `form` may name a form anywhere in the document.
+   */
+  useEffect(() => {
+    const owner = node?.form;
+    if (owner === null || owner === undefined) return;
+    const onReset = (event: Event) => restore(event);
+    owner.addEventListener('reset', onReset);
+    return () => owner.removeEventListener('reset', onReset);
+  }, [node, restore, select.form]);
+
   if (select.name === undefined) return null;
 
   return (
@@ -440,6 +477,7 @@ function NativeSelect() {
       multiple={select.multiple}
       name={select.name}
       onChange={() => undefined}
+      ref={setNode}
       required={select.required}
       style={{
         border: 0,
@@ -851,10 +889,14 @@ export function SelectContent({
     setCount((held) => (held === measured ? held : measured));
   });
 
-  /** A browser scrolls a focused element into view; nothing here is focused. */
+  /**
+   * A browser scrolls a focused element into view; nothing here is focused.
+   * It runs again once the popup is positioned: the height that bounds the
+   * list arrives with the position, after the highlight has landed.
+   */
   useEffect(() => {
     revealOption(surfaceNode, select.highlighted);
-  }, [select.highlighted, surfaceNode]);
+  }, [positioned, select.highlighted, surfaceNode]);
 
   /**
    * The field takes focus as the popup opens, however it was opened — a press

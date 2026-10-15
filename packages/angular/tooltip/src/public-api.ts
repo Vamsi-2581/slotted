@@ -1,6 +1,7 @@
 export { SlTooltip } from './tooltip';
 export type {
   TooltipAlign,
+  TooltipChangeRequest,
   TooltipDefaults,
   TooltipDescribes,
   TooltipMount,

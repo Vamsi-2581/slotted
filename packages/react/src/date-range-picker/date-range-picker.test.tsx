@@ -5,6 +5,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/date-range-picker/contract.json';
+import { Field, FieldLabel } from '../field';
 import { SlottedProvider } from '../i18n';
 import { DateRangePicker, DateRangePickerDefaultsProvider, DateRangePickerPreset } from './index';
 import type { DateRange, DateRangePickerHandle } from './index';
@@ -203,10 +204,11 @@ describe('choosing a run', () => {
 
     fireEvent.click(dayFor(11));
     expect(onValueChange).toHaveBeenCalledTimes(1);
-    expect(onValueChange).toHaveBeenLastCalledWith(
-      { start: d(7), end: d(11) },
-      expect.objectContaining({ reason: 'select' }),
-    );
+    /* The calendar opens on today's month, so the run is read by its days. */
+    const [run, request] = onValueChange.mock.lastCall as [DateRange, { reason: string }];
+    expect([run.start?.day, run.end?.day]).toEqual([7, 11]);
+    expect(run.start?.month).toBe(run.end?.month);
+    expect(request.reason).toBe('select');
     expect(onPositionChange).toHaveBeenLastCalledWith(
       'start',
       expect.objectContaining({ reason: 'select' }),
@@ -362,6 +364,35 @@ describe('choosing a run', () => {
     expect(onValueChange).toHaveBeenLastCalledWith(
       null,
       expect.objectContaining({ reason: 'clear' }),
+    );
+  });
+
+  it('returns to its default value when its form is reset', () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <form>
+        <DateRangePicker
+          clearable
+          defaultValue={RUN}
+          endName="fim"
+          locale="pt-BR"
+          onValueChange={onValueChange}
+          startName="inicio"
+        />
+      </form>,
+    );
+    const input = (name: string) => container.querySelector<HTMLInputElement>(`[name="${name}"]`);
+
+    fireEvent.click(part('clear'));
+    expect(input('inicio')?.value).toBe('');
+
+    act(() => container.querySelector('form')?.reset());
+
+    expect(input('inicio')?.value).toBe('2026-09-07');
+    expect(input('fim')?.value).toBe('2026-09-11');
+    expect(onValueChange).toHaveBeenLastCalledWith(
+      RUN,
+      expect.objectContaining({ reason: 'programmatic' }),
     );
   });
 });
@@ -599,5 +630,112 @@ describe('the composition surface', () => {
     );
     fireEvent.click(part('preset'));
     expect(onClick).toHaveBeenCalled();
+  });
+});
+
+describe('where focus goes when it opens', () => {
+  it('moves focus to the cell of the current end when the trigger opens it', () => {
+    render(<DateRangePicker defaultPosition="end" defaultValue={RUN} locale="en-US" />);
+
+    open();
+
+    expect(document.activeElement?.getAttribute('data-part')).toBe('day');
+    expect(document.activeElement?.textContent).toBe('11');
+  });
+
+  it('moves focus into the calendar when the handle opens it', () => {
+    const handle = { current: null as DateRangePickerHandle | null };
+    render(<DateRangePicker defaultValue={RUN} locale="en-US" ref={handle} />);
+
+    act(() => handle.current?.open());
+
+    expect(document.activeElement?.getAttribute('data-part')).toBe('day');
+    expect(document.activeElement?.textContent).toBe('7');
+  });
+
+  it('leaves focus in the field when the chord opens it', () => {
+    render(<DateRangePicker defaultValue={RUN} locale="en-US" />);
+    const segment = segments()[0] as HTMLElement;
+    act(() => segment.focus());
+
+    fireEvent.keyDown(segment, { key: 'ArrowDown', altKey: true });
+
+    expect(surface()).toBeInTheDocument();
+    expect(segment).toHaveFocus();
+  });
+
+  it('leaves focus alone when it is rendered open', () => {
+    render(<DateRangePicker defaultOpen defaultValue={RUN} locale="en-US" />);
+
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it('keeps Tab inside the surface while it is open', () => {
+    render(
+      <DateRangePicker
+        defaultOpen
+        defaultValue={RUN}
+        footer={<button type="button">Apply</button>}
+        locale="en-US"
+        presets={<DateRangePickerPreset value={RUN}>This week</DateRangePickerPreset>}
+      />,
+    );
+    const first = screen.getByRole('button', { name: 'This week' });
+    const last = screen.getByRole('button', { name: 'Apply' });
+
+    act(() => last.focus());
+    fireEvent.keyDown(last, { key: 'Tab' });
+    expect(first).toHaveFocus();
+
+    fireEvent.keyDown(first, { key: 'Tab', shiftKey: true });
+    expect(last).toHaveFocus();
+  });
+});
+
+describe('where it opens with nothing chosen', () => {
+  const now = new Date();
+  const thisMonth = new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(
+    now,
+  );
+
+  it('starts its two months on today’s month', () => {
+    render(<DateRangePicker locale="en-US" />);
+
+    open();
+
+    expect(document.querySelector('[data-part="heading"]')?.textContent).toMatch(
+      new RegExp(`^${thisMonth} – `),
+    );
+  });
+
+  it('moves focus to today when the trigger opens it', () => {
+    render(<DateRangePicker locale="en-US" />);
+
+    open();
+
+    expect(document.activeElement?.getAttribute('data-part')).toBe('day');
+    expect(document.activeElement?.textContent).toBe(String(now.getDate()));
+  });
+});
+
+describe('inside a field', () => {
+  it('names the frame after the field’s label and gives each end its own identifier', () => {
+    render(
+      <Field>
+        <FieldLabel>Stay</FieldLabel>
+        <DateRangePicker locale="en-US" />
+      </Field>,
+    );
+
+    const frame = screen.getByRole('group', { name: 'Stay' });
+    expect(frame).toHaveAttribute('data-part', 'control');
+    expect(screen.getByText('Stay')).toHaveAttribute('for', frame.id);
+    const ends = [
+      screen.getByRole('group', { name: 'Start' }),
+      screen.getByRole('group', { name: 'End' }),
+    ];
+    expect(ends.every((end) => frame.contains(end))).toBe(true);
+    const ids = [frame.id, ...ends.map((end) => end.id)];
+    expect(new Set(ids).size).toBe(3);
   });
 });

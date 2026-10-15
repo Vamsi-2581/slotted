@@ -99,7 +99,8 @@
     "aria-activedescendant": "the trigger names the highlighted option, and nothing while there is none. With search it is the search input that names it, because that is the element holding focus.",
     "aria-selected": "true on every committed option, false on every other selectable one, which is what the listbox pattern requires",
     "aria-multiselectable": "true on the content when multiple is set",
-    "aria-labelledby": "the trigger takes the field's label, because a button is not reliably reached by a label element",
+    "id": "inside a field the trigger carries the field's control identifier (field › wiring.id), so the label's for names it and a press on the label focuses it: a button is labelable content in HTML. Outside a field the identifier is generated.",
+    "aria-labelledby": "the trigger also takes the field's label, because the name a label element gives a button is not reliably carried to a button whose role is combobox",
     "aria-describedby": "the trigger takes the field's description and error",
     "aria-disabled": "never written. The trigger is a real button and carries the native attribute, which a disabled fieldset can also set on its own.",
     "aria-readonly": "on the trigger, because neither a button nor role=combobox has a readonly the platform enforces",
@@ -297,9 +298,9 @@
     "reason": "The same bound menu takes, for the same reason: Radix, Base UI and React Aria each publish the remaining height and none of them bounds itself, so a list of a hundred options runs off the bottom of the screen."
   },
   "measure": {
-    "value": "the anchor's width by default, and the content's own width when width is content",
+    "value": "the content's own width by default, never narrower than the anchor's width and capped by the measure and the available width; exactly the anchor's width when width is anchor",
     "property": "--slotted-positioner-anchor-width",
-    "reason": "A select's popup is a list of the values the control shows, so it is the control's width; a menu's is a list of commands and hangs at its own. width=\"content\" is for a popup with descriptions, which needs more room than the field it fills."
+    "reason": "A popup pinned to the control's width wraps its option labels under a narrow control: a filter-bar select of 120 pixels breaks \"Paused · 1\" over two lines. The control's width is the floor, so the popup never reads as a second, smaller control. width=\"anchor\" pins it to the control's width exactly."
   },
   "value": {
     "part": "value",
@@ -339,7 +340,7 @@
     "sideOffset": 4,
     "alignOffset": 0,
     "collisionPadding": 8,
-    "reason": "The popup hangs from the start edge of the control and is as wide as it, so the value in the control and the labels in the list share one edge. The offset is four rather than menu's zero: a menu's gap is its layer's own padding, needed so a pointer travelling into a submenu never crosses page, and this family has no submenu and no grace area to protect."
+    "reason": "The popup hangs from the start edge of the control and is never narrower than it, so the value in the control and the labels in the list share one edge. The offset is four rather than menu's zero: a menu's gap is its layer's own padding, needed so a pointer travelling into a submenu never crosses page, and this family has no submenu and no grace area to protect."
   },
   "declined": {
     "itemAligned": {
@@ -355,7 +356,7 @@
     },
     "arrow": {
       "deferTo": "popover",
-      "reason": "Base UI and Ark both ship an arrow on a select. The popup is as wide as its control and hangs directly under it, so the control already says where it came from; the anchored surface that points at something is popover. Declining it is also what frees the part name arrow for the chevron on the trigger."
+      "reason": "Base UI and Ark both ship an arrow on a select. The popup is never narrower than its control and hangs directly under it, so the control already says where it came from; the anchored surface that points at something is popover. Declining it is also what frees the part name arrow for the chevron on the trigger."
     },
     "chips": {
       "deferTo": "multi-select",
@@ -406,7 +407,7 @@
     "variant": ["prop", "defaults", "outline"],
     "side": ["prop", "defaults", "bottom"],
     "align": ["prop", "defaults", "start"],
-    "width": ["prop", "defaults", "anchor"],
+    "width": ["prop", "defaults", "content"],
     "mount": ["prop", "defaults", "active"],
     "strategy": ["prop", "defaults", "absolute"],
     "multiple": ["prop", "defaults", false],
@@ -526,7 +527,7 @@
         "variant": "outline",
         "side": "bottom",
         "align": "start",
-        "width": "anchor",
+        "width": "content",
         "mount": "active",
         "strategy": "absolute",
         "multiple": false,

@@ -1458,12 +1458,14 @@
     "tabs": [
       "actions",
       "dismiss",
+      "end",
       "item",
       "label",
       "list",
       "panel",
       "root",
       "scroll",
+      "start",
       "tab"
     ],
     "tag": [
@@ -2061,6 +2063,7 @@
     "data-striped",
     "data-stroke",
     "data-structure",
+    "data-stuck",
     "data-surface",
     "data-swipe",
     "data-tall",
@@ -2092,6 +2095,7 @@
     "data-veil",
     "data-view",
     "data-visited",
+    "data-waiting",
     "data-wave",
     "data-week-numbers",
     "data-weight",

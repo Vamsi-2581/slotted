@@ -57,7 +57,7 @@ export const COMBOBOX_FALLBACK: ComboboxDefaults = {
   size: 'md',
   strategy: 'absolute',
   variant: 'outline',
-  width: 'anchor',
+  width: 'content',
 };
 
 const ComboboxDefaultsContext = createContext<ComboboxDefaults>(COMBOBOX_FALLBACK);

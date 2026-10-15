@@ -24,7 +24,8 @@ function useRegisterMessage(slot: 'description' | 'error', present: boolean) {
   }, [present, register, slot]);
 }
 
-const hasContent = (children: unknown) =>
+/** Whether a message has anything to say; an empty one describes nothing. */
+export const hasContent = (children: unknown) =>
   children !== undefined && children !== null && children !== false && children !== '';
 
 /**

@@ -149,6 +149,29 @@ describe('SideNavigation', () => {
     expect(root().tagName).toBe('DIV');
   });
 
+  /**
+   * The anatomy names the root only while it is the landmark. A name written
+   * on the div inside the shell would repeat the nav region's own on an
+   * element that is not a landmark, which `SlSideNavigation` never writes.
+   */
+  it('drops a written name when the root is not the landmark', () => {
+    const { unmount } = render(
+      <AppShell navMode="inline">
+        <AppShellNav>
+          <AppShellNavBody>
+            <Column aria-label="Main navigation" />
+          </AppShellNavBody>
+        </AppShellNav>
+      </AppShell>,
+    );
+    expect(root().tagName).toBe('DIV');
+    expect(root()).not.toHaveAttribute('aria-label');
+    unmount();
+
+    render(<Column aria-label="Main navigation" landmark={false} />);
+    expect(root()).not.toHaveAttribute('aria-label');
+  });
+
   it('wires each trigger to its group, and names the group by the row', () => {
     render(<Column />);
     const group = item('entregas').querySelector('[data-part="group"]') as HTMLElement;

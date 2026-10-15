@@ -4,6 +4,7 @@ export type {
   NumberFieldClamp,
   NumberFieldDefaults,
   NumberFieldDefaultsProviderProps,
+  NumberFieldFormatOn,
   NumberFieldHandle,
   NumberFieldProps,
   NumberFieldRootProps,

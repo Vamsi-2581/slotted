@@ -23,7 +23,7 @@
     "source": "@slotted/core/extent",
     "limitUnits": ["fraction", "length"],
     "limitReason": "min and max take a fraction or a CSS length string, resolved against the container measured at the moment of the clamp. Not one of the seven surveyed implementations can express a pixel floor — Zag states outright that it only supports percentage values — and this navigation panel never goes below two hundred pixels is the commonest real constraint the family has",
-    "clamped": "The reported value is always the clamped one, so the announcement and the layout cannot disagree. A limit resolving outside [0, 1] is itself clamped to it, so a container narrower than min reports a reachable number rather than one nothing can produce",
+    "clamped": "The reported value is always the clamped one, so the announcement and the layout cannot disagree. A limit resolving outside [0, 1] is itself clamped to it, so a container narrower than min reports a reachable number rather than one nothing can produce. The bar holds it there: when the limits move under the value — a length limit as the container is resized, a fraction the consumer changes — or a restored value lies outside them, the bar requests the clamped value with the reason programmatic. A collapsed region stands below its floor on purpose and is left there",
     "step": "EXTENT_STEP_PX per arrow press and EXTENT_LARGE_STEP_PX with Shift, converted against the container measured at the moment of the press. A distance and not a proportion: five per cent of a wide container is a jump rather than an adjustment",
     "snapPoints": "an array of fractions, empty by default. With them an arrow moves to the adjacent stop, Home and End go to the first and last, and a drag releases onto the nearest",
     "collapsedValue": "where Enter collapses to, nought by default. The fraction held before the collapse is stored by the family and returned by the restore"
@@ -97,8 +97,8 @@
     }
   ],
   "pointer": {
-    "drag": "carries pointer, and the cursor is held across the whole drag by holdResizeGesture, so a drag that reached the region beside the bar does not show a text caret over it",
-    "doubleClick": "returns the bar to defaultValue. The pattern assigns double click nothing, and every surveyed implementation that ships a reset puts it there",
+    "drag": "carries pointer, and the cursor is held across the whole drag by holdResizeGesture, so a drag that reached the region beside the bar does not show a text caret over it. The bar keeps the point it was taken at under the pointer for the whole drag, so a bar taken a few pixels from the edge it marks, or one whose region is followed by a gap, does not leap on the first move; onResizeEnd reports the value the drag left it at",
+    "doubleClick": "returns the bar to defaultValue, brought inside min and max. The pattern assigns double click nothing, and every surveyed implementation that ships a reset puts it there. defaultValue is never the value the bar was opened at: a layout restored from storage is where the reader left the bar, not where a reset goes",
     "reach": "--slotted-target-min, drawn by a transparent pseudo-element centred on the track, which is what makes a thin picture a WCAG 2.2 target"
   },
   "reasons": ["pointer", "keyboard", "programmatic"],

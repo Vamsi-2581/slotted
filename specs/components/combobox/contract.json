@@ -294,7 +294,7 @@
     "sideOffset": 4,
     "alignOffset": 0,
     "collisionPadding": 8,
-    "reason": "The same placement select takes, and for the same reason: the popup is as wide as the control and hangs under it, so the typed text and the labels share one edge."
+    "reason": "The same placement select takes, and for the same reason: the popup is never narrower than the control and hangs under it, so the typed text and the labels share one edge."
   },
   "overflow": {
     "part": "content",
@@ -302,7 +302,7 @@
     "reason": "The same bound menu and select take."
   },
   "measure": {
-    "value": "the anchor's width by default, and the content's own width when width is content",
+    "value": "the content's own width by default, never narrower than the anchor's width and capped by the measure and the available width; exactly the anchor's width when width is anchor",
     "property": "--slotted-positioner-anchor-width",
     "reason": "As select records it."
   },
@@ -321,7 +321,7 @@
     },
     "arrow": {
       "deferTo": "popover",
-      "reason": "The popup is as wide as its control and hangs under it. Declining the positioner arrow frees the part name arrow for the chevron inside the trigger button."
+      "reason": "The popup is never narrower than its control and hangs under it. Declining the positioner arrow frees the part name arrow for the chevron inside the trigger button."
     },
     "debounce": {
       "reason": "docs/component-features.md §6 lists it in the contract and it is refused as a prop, in writing. A debounce belongs to the consumer's fetch: a family that delayed its own onInputValueChange would delay a controlled consumer's re-render and drop characters between them. The three lines that debounce a fetch are on both reference pages."
@@ -372,7 +372,7 @@
     "variant": ["prop", "defaults", "outline"],
     "side": ["prop", "defaults", "bottom"],
     "align": ["prop", "defaults", "start"],
-    "width": ["prop", "defaults", "anchor"],
+    "width": ["prop", "defaults", "content"],
     "mount": ["prop", "defaults", "active"],
     "strategy": ["prop", "defaults", "absolute"],
     "autocomplete": ["prop", "defaults", "list"],
@@ -484,7 +484,7 @@
         "variant": "outline",
         "side": "bottom",
         "align": "start",
-        "width": "anchor",
+        "width": "content",
         "mount": "active",
         "strategy": "absolute",
         "autocomplete": "list",

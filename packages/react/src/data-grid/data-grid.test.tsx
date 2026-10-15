@@ -327,6 +327,10 @@ describe('DataGrid, the query', () => {
     expect(grid().querySelector('[data-part="empty"]')).toHaveTextContent(
       'No rows match the current filters',
     );
+    // The message is inside the result state's announcing region, as in Angular.
+    expect(grid().querySelector('[data-part="empty"] [role="status"]')).toHaveTextContent(
+      'No rows match the current filters',
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
     expect(grid().querySelectorAll('[data-part="row"]')).toHaveLength(4);
   });
@@ -394,6 +398,31 @@ describe('DataGrid, selection', () => {
     expect(onValueChange).toHaveBeenLastCalledWith(
       ['S1', 'S2', 'S3', 'S4'],
       expect.objectContaining({ reason: 'select' }),
+    );
+  });
+
+  /**
+   * checkbox's contract names the control through its label (`labelAssociation:
+   * for`), and a bare box's label holds hidden text (`labelHidden`), which is
+   * the DOM `SlDataGrid` draws for the same column.
+   */
+  it('names each selection box through its label, in hidden text', () => {
+    render(<Shipments selectionMode="multiple" />);
+    const boxes = grid().querySelectorAll<HTMLElement>(
+      '[data-part="selection"] [data-ui="checkbox"]',
+    );
+    expect(boxes.length).toBeGreaterThan(1);
+    for (const box of boxes) {
+      const control = box.querySelector('input') as HTMLInputElement;
+      const label = box.querySelector('[data-part="label"]') as HTMLLabelElement;
+      expect(control).not.toHaveAttribute('aria-label');
+      expect(label.querySelector('[data-ui="visually-hidden"]')?.textContent).toBe(
+        control.labels?.[0]?.textContent,
+      );
+      expect(box).toHaveAttribute('data-label-hidden');
+    }
+    expect(within(cell('S1', '__selection')).getByRole('checkbox')).toHaveAccessibleName(
+      'Select row S1',
     );
   });
 

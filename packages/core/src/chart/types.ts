@@ -98,6 +98,7 @@ export interface ChartAnnotation {
   readonly kind: 'line' | 'band';
   /** Which axis the value is on: the category axis, or a value axis by its side. */
   readonly axis?: 'x' | 'start' | 'end' | undefined;
+  /** On the category axis, a category's key or its x value; a value that names none is not drawn. */
   readonly value?: number | string | undefined;
   readonly from?: number | string | undefined;
   readonly to?: number | string | undefined;

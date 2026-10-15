@@ -167,7 +167,8 @@ export interface PopoverContentRootProps extends HTMLAttributes<HTMLElement> {
 /** What `render` receives for the trigger, which is the consumer's own element. */
 export interface PopoverTriggerRootProps extends HTMLAttributes<HTMLElement> {
   ref?: PartRef | undefined;
-  'aria-controls': string;
+  /** The panel's id, written only while the panel is in the document. */
+  'aria-controls'?: string | undefined;
   'aria-expanded': boolean;
   'aria-haspopup': 'dialog';
   'data-open'?: '' | undefined;
@@ -225,8 +226,8 @@ export interface PopoverTriggerProps extends ComponentPropsWithRef<'button'> {
 }
 
 export interface PopoverAnchorProps extends ComponentPropsWithRef<'div'> {
-  render?:
-    ((props: HTMLAttributes<HTMLElement> & { ref?: Ref<HTMLElement> }) => ReactNode) | undefined;
+  /** Receives a callback ref, as the trigger's `render` does, so any element takes it. */
+  render?: ((props: HTMLAttributes<HTMLElement> & { ref?: PartRef }) => ReactNode) | undefined;
 }
 
 export interface PopoverLayerProps extends ComponentPropsWithRef<'div'> {
@@ -258,7 +259,8 @@ export interface PopoverFooterProps extends ComponentPropsWithRef<'div'> {
 }
 
 export interface PopoverCloseProps extends ComponentPropsWithRef<'button'> {
-  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+  /** Receives a callback ref, which is how the family reads whether the element shows text. */
+  render?: ((props: HTMLAttributes<HTMLElement> & { ref?: PartRef }) => ReactNode) | undefined;
 }
 
 export interface PopoverArrowProps extends ComponentPropsWithRef<'div'> {

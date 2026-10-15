@@ -22,7 +22,7 @@ import type {
   Validator,
 } from '@angular/forms';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { SlField } from '@slotted/angular/field';
+import { injectFieldDefaults, SlField, SlFieldDefaultsSource } from '@slotted/angular/field';
 import { SlFieldGroup } from '@slotted/angular/field-group';
 
 import { injectCheckboxGroupDefaults } from './checkbox-group-defaults';
@@ -87,6 +87,7 @@ function sameSelection(a: readonly string[], b: readonly string[]): boolean {
     '[attr.data-disabled]': "resolvedDisabled() === true ? '' : null",
     '[attr.data-invalid]': "resolvedInvalid() === true ? '' : null",
     '[attr.data-readonly]': "resolvedReadOnly() === true ? '' : null",
+    '[attr.aria-labelledby]': 'labelledBy()',
     '[attr.aria-describedby]': 'describedBy()',
     '[attr.aria-invalid]': 'ariaInvalid()',
     '[attr.aria-required]': 'ariaRequired()',
@@ -135,8 +136,22 @@ export class SlCheckboxGroup implements ControlValueAccessor, OnInit, Validator 
   private readonly field = inject(SlField, { optional: true });
   private readonly fieldGroup = inject(SlFieldGroup, { optional: true });
   private readonly defaults = injectCheckboxGroupDefaults();
+  /**
+   * The field defaults in force: a field group's, or the application's own.
+   * A group outside a field reads disabled and read-only from them, as React's
+   * reads them from FieldDefaultsProvider.
+   */
+  private readonly fieldDefaultsSource = inject(SlFieldDefaultsSource, { optional: true });
+  private readonly fieldDefaultsToken = injectFieldDefaults();
+  private readonly fieldDefaults = computed(
+    () => this.fieldDefaultsSource?.fieldDefaults() ?? this.fieldDefaultsToken,
+  );
   private readonly writtenRole = inject(new HostAttributeToken('role'), { optional: true });
   private readonly writtenDescribedBy = inject(new HostAttributeToken('aria-describedby'), {
+    optional: true,
+  });
+  private readonly writtenLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
+  private readonly writtenLabelledBy = inject(new HostAttributeToken('aria-labelledby'), {
     optional: true,
   });
 
@@ -162,15 +177,30 @@ export class SlCheckboxGroup implements ControlValueAccessor, OnInit, Validator 
       set nobody meant to write. */
   readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   readonly resolvedDisabled = computed(
-    () => this.disabled() ?? this.formDisabled() ?? this.field?.resolvedDisabled(),
+    () =>
+      this.disabled() ??
+      this.formDisabled() ??
+      this.field?.resolvedDisabled() ??
+      this.fieldDefaults().disabled,
   );
-  readonly resolvedReadOnly = computed(() => this.readOnly() ?? this.field?.resolvedReadOnly());
-  readonly resolvedInvalid = computed(() => this.invalid() ?? this.field?.invalid());
+  readonly resolvedReadOnly = computed(
+    () => this.readOnly() ?? this.field?.resolvedReadOnly() ?? this.fieldDefaults().readOnly,
+  );
+  readonly resolvedInvalid = computed(
+    () => this.invalid() ?? this.field?.invalid() ?? this.fieldGroup?.invalid(),
+  );
   readonly resolvedRequired = computed(
     () => this.required() ?? this.field?.required() ?? this.fieldGroup?.required(),
   );
   protected readonly resolvedRole = computed(
     () => this.writtenRole ?? (this.fieldGroup === null ? 'group' : null),
+  );
+  /* A group has no element a label's for can reach, so inside a field the
+     field's label names it, unless the consumer named it themselves. */
+  protected readonly labelledBy = computed(
+    () =>
+      this.writtenLabelledBy ??
+      (this.writtenLabel === null ? (this.field?.ids().label ?? null) : null),
   );
   protected readonly describedBy = computed(() => {
     const merged = [this.writtenDescribedBy, this.field?.describedBy()].filter(Boolean);

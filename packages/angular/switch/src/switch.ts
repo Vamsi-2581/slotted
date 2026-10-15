@@ -192,6 +192,8 @@ export class SlSwitch implements ControlValueAccessor, OnInit {
   private readonly formDisabled = signal<boolean | undefined>(undefined);
   private onChangeFn: (checked: boolean) => void = () => undefined;
   private onTouchedFn: () => void = () => undefined;
+  /** A form model owns the value, so a native reset takes the model's value. */
+  private formBound = false;
 
   /**
    * The identifier the label points at. A consumer's own wins, then the
@@ -273,10 +275,20 @@ export class SlSwitch implements ControlValueAccessor, OnInit {
 
     /* A native reset restores the element and tells nothing, so the mirror
        would keep the last thing toggled and the track would disagree with the
-       control inside it. */
-    const form = this.control().nativeElement.form;
+       control inside it. A switch bound to a form model takes the model's
+       reset value through writeValue instead, and its own default does not
+       apply. The form resets its elements after this event, to a default no
+       attribute wrote, so the element is put back after it — in a task,
+       because a reset pressed by a person drains the microtasks first. */
+    const element = this.control().nativeElement;
+    const form = element.form;
     if (form !== null) {
-      const onReset = () => this.own.set(this.defaultChecked());
+      const onReset = () => {
+        if (!this.formBound) this.own.set(this.defaultChecked());
+        setTimeout(() => {
+          if (element.checked !== this.checked()) element.checked = this.checked();
+        });
+      };
       form.addEventListener('reset', onReset);
       this.destroyRef.onDestroy(() => form.removeEventListener('reset', onReset));
     }
@@ -302,6 +314,7 @@ export class SlSwitch implements ControlValueAccessor, OnInit {
 
   registerOnChange(fn: (checked: boolean) => void) {
     this.onChangeFn = fn;
+    this.formBound = true;
   }
 
   registerOnTouched(fn: () => void) {

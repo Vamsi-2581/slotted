@@ -94,3 +94,25 @@ describe('SlGrid', () => {
     expect(element('list').getAttribute('lang')).toBe('pt-BR');
   });
 });
+
+@Component({
+  imports: [SlGrid],
+  template: `<div slGrid id="static" align="center">Draft</div>`,
+})
+class GridStaticAlignHost {}
+
+describe('SlGrid with a static align', () => {
+  /*
+   * `align` is also an obsolete HTML attribute that browsers still honour on
+   * a div — it centres the text inside. Written statically for the input, it
+   * stayed on the element and every line of the content was centred.
+   */
+  it('keeps the decision in data-align and leaves no align attribute on the element', () => {
+    TestBed.configureTestingModule({ imports: [GridStaticAlignHost] });
+    const fixture = TestBed.createComponent(GridStaticAlignHost);
+    fixture.detectChanges();
+    const element = fixture.nativeElement.querySelector('#static') as HTMLElement;
+    expect(element.getAttribute('data-align')).toBe('center');
+    expect(element.hasAttribute('align')).toBe(false);
+  });
+});

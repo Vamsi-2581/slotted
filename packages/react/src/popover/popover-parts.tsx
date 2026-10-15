@@ -3,8 +3,16 @@ import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { HTMLAttributes, MouseEvent, Ref } from 'react';
+import {
+  Children,
+  isValidElement,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+import type { HTMLAttributes, MouseEvent, ReactNode, Ref } from 'react';
 import { createPortal } from 'react-dom';
 
 import { Glyph, Icon } from '../icon';
@@ -16,6 +24,7 @@ import type {
   PopoverCloseProps,
   PopoverContentProps,
   PopoverContentRootProps,
+  PopoverContextValue,
   PopoverDescriptionProps,
   PopoverFocusTarget,
   PopoverFooterProps,
@@ -65,6 +74,27 @@ function resolveFocus(
 }
 
 /**
+ * How far the layer moves along its alignment axis so the panel's edge, not
+ * the layer's, meets the anchor's. The layer's padding is the gap around the
+ * panel, the same on every side, so a layer aligned to the anchor's start edge
+ * leaves the panel one gap inside it. A centred layer needs nothing, and
+ * neither does one as wide as its anchor, which the positioner centres.
+ */
+function alignInset(
+  layer: HTMLElement,
+  side: PopoverContextValue['side'],
+  align: PopoverContextValue['align'],
+  width: PopoverContextValue['width'],
+): number {
+  if (align === 'center') return 0;
+  if (width === 'anchor' && (side === 'top' || side === 'bottom')) return 0;
+  const gap =
+    Number.parseFloat(layer.ownerDocument.defaultView?.getComputedStyle(layer).paddingTop ?? '') ||
+    0;
+  return align === 'start' ? -gap : gap;
+}
+
+/**
  * The control that opens the panel.
  *
  * It renders a `button`, which is what gives `Enter` and `Space` for free, and
@@ -83,7 +113,10 @@ export function PopoverTrigger({ children, ref, render, ...nativeProps }: Popove
   const rootProps: PopoverTriggerRootProps = {
     ...nativeProps,
     children,
-    'aria-controls': popover.contentId,
+    /* An id the document does not hold references nothing: the panel is
+       named only while it exists, which under `mount="active"` is while it
+       is open. */
+    ...(popover.contentNode !== null ? { 'aria-controls': popover.contentId } : {}),
     'aria-expanded': popover.open,
     'aria-haspopup': 'dialog',
     ...(popover.open ? { 'data-open': '' } : {}),
@@ -209,7 +242,7 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
 
     const handle = createPositioner(anchor, node, {
       align,
-      alignOffset,
+      alignOffset: alignOffset + alignInset(node, side, align, width),
       boundaryPadding: collisionPadding,
       flip,
       hideWhenDetached,
@@ -331,7 +364,9 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
     [ref],
   );
 
-  if (!mounted) return null;
+  /* A portalled layer waits for its portal root: drawn in place first, it would
+     land for one commit wherever the Popover was written, such as a tbody. */
+  if (!mounted || (popover.portal && container === null)) return null;
 
   const guard = (
     <span aria-hidden="true" data-part="focus-guard" onFocus={onGuardFocus} tabIndex={0} />
@@ -485,19 +520,38 @@ export function PopoverFooter({ children, ref, render, ...nativeProps }: Popover
 
 /**
  * The pointer's way out. The keyboard has Escape, and a reader on a touch
- * device has no Escape key at all. Its accessible name comes from the defaults
- * provider, so an application translates it once.
+ * device has no Escape key at all. A close control with no text of its own —
+ * the drawn cross, or the consumer's icon — is named by the catalog's `close`;
+ * one that shows words, such as "Done", is named by them, and an `aria-label`
+ * the consumer wrote wins over both.
  */
 export function PopoverClose({ children, ref, render, ...nativeProps }: PopoverCloseProps) {
   const popover = usePopover();
+  const node = useRef<HTMLElement | null>(null);
+  /* What the rendered button shows, once it exists; until then, what the
+     children write. A component that renders its own words is seen only in
+     the document. */
+  const [shown, setShown] = useState<boolean | null>(null);
+  useLayoutEffect(() => {
+    if (node.current !== null) setShown((node.current.textContent ?? '').trim() !== '');
+  });
+  const hasText = shown ?? writesText(children);
 
   const onClick = (event: MouseEvent<HTMLElement>) => {
     popover.toggle(false, 'dismiss', event.nativeEvent);
   };
 
+  const setNode = useCallback(
+    (element: HTMLElement | null) => {
+      node.current = element;
+      attach(element, ref as Ref<HTMLElement> | undefined);
+    },
+    [ref],
+  );
+
   const rootProps = {
     ...nativeProps,
-    'aria-label': nativeProps['aria-label'] ?? popover.t('close'),
+    'aria-label': nativeProps['aria-label'] ?? (hasText ? undefined : popover.t('close')),
     children: children ?? (
       <Icon size="sm">
         <Glyph name="x" />
@@ -507,8 +561,17 @@ export function PopoverClose({ children, ref, render, ...nativeProps }: PopoverC
     onClick: compose(nativeProps.onClick, onClick),
   };
 
-  if (render !== undefined) return render(rootProps);
-  return <button type="button" {...rootProps} ref={ref} />;
+  if (render !== undefined) return render({ ...rootProps, ref: setNode });
+  return <button type="button" {...rootProps} ref={setNode} />;
+}
+
+/** Whether a tree of children writes text a reader sees, at any depth. */
+function writesText(children: ReactNode): boolean {
+  return Children.toArray(children).some((child) =>
+    typeof child === 'string' || typeof child === 'number'
+      ? String(child).trim() !== ''
+      : isValidElement<{ children?: ReactNode }>(child) && writesText(child.props.children),
+  );
 }
 
 /**

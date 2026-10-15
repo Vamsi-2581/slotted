@@ -17,6 +17,7 @@ import type { MutableRefObject } from 'react';
 
 import { useField } from '../field';
 import { useLocale, useMessages } from '../i18n';
+import { revealWithin } from './select-collection';
 import { useSelectDefaults } from './select-defaults';
 import type {
   SelectAlign,
@@ -80,6 +81,8 @@ export interface SelectContextValue {
   readOnly: boolean;
   registerLabel: (value: SelectOptionValue, label: string) => void;
   required: boolean;
+  /** Returns the selection to `defaultValue`, which is what a native form reset does. */
+  restore: (source?: unknown) => void;
   search: boolean;
   searchId: string;
   searchNode: HTMLInputElement | null;
@@ -235,12 +238,13 @@ export function Select({
    */
   const listId = `${generated}list`;
   const searchId = `${generated}search`;
-  const triggerId = `${generated}trigger`;
+  /** The field's control identifier inside a field, so its label's `for` reaches the trigger. */
+  const triggerId = field?.ids.control ?? `${generated}trigger`;
 
   const [ownOpen, setOwnOpen] = useState(defaultOpen);
-  const [ownSelection, setOwnSelection] = useState<readonly SelectOptionValue[]>(() =>
-    normalize(defaultValue),
-  );
+  /* `defaultValue` is read once, and a form reset returns to what it was then. */
+  const [initialSelection] = useState<readonly SelectOptionValue[]>(() => normalize(defaultValue));
+  const [ownSelection, setOwnSelection] = useState<readonly SelectOptionValue[]>(initialSelection);
   const [ownHighlighted, setOwnHighlighted] = useState<SelectOptionValue | null>(
     defaultHighlightedValue,
   );
@@ -478,6 +482,11 @@ export function Select({
     [commit],
   );
 
+  const restore = useCallback(
+    (source?: unknown) => commit(initialSelection, 'programmatic', source),
+    [commit, initialSelection],
+  );
+
   useImperativeHandle(
     ref,
     () => ({
@@ -496,7 +505,9 @@ export function Select({
         const option = contentNode?.querySelector<HTMLElement>(
           `[data-part='item'][data-value="${CSS.escape(optionValue)}"]`,
         );
-        option?.scrollIntoView({ block: 'nearest' });
+        if (option !== null && option !== undefined && contentNode !== null) {
+          revealWithin(option, contentNode);
+        }
       },
     }),
     [contentNode, setOpen],
@@ -538,6 +549,7 @@ export function Select({
     readOnly: resolvedReadOnly,
     registerLabel,
     required: required ?? field?.required ?? defaults.required,
+    restore,
     search: resolvedSearch,
     searchId,
     searchNode,

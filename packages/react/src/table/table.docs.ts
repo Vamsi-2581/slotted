@@ -129,7 +129,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'The trigger the family draws in that slot, and everything behind it. It marks itself while the column is filtered and states what is applied in its own name.',
+      'The trigger the table draws in that slot, and everything behind it. It marks itself while the column is filtered and states what is applied in its own name.',
   },
   {
     part: 'filter-panel',
@@ -211,7 +211,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'Opens and closes one row detail, carrying aria-expanded and aria-controls. It is the APG Disclosure pattern, borrowed whole.',
+      'Opens and closes one row detail. It carries aria-expanded, and aria-controls naming the detail row while that row is open. It is the APG Disclosure pattern, borrowed whole.',
   },
   {
     part: 'detail',
@@ -352,7 +352,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A date-time filter over a wall-clock column',
       source:
-        'const [scheduled, setScheduled] = useState<DateTimeFilter | null>(null);\nconst keep = useMemo(\n  () => createFilterPredicate(scheduled, { timeZone: \'Europe/Lisbon\' }),\n  [scheduled],\n);\n\n<TableDateTimeFilter\n  columnLabel="scheduled"\n  onValueChange={setScheduled}\n  presets={<DateTimeRangePickerPreset value={EARLY_OCTOBER}>Early October</DateTimeRangePickerPreset>}\n  value={scheduled}\n/>;',
+        'const [scheduled, setScheduled] = useState<DateTimeFilter | null>(null);\nconst keep = useMemo(\n  () => createFilterPredicate(scheduled, { timeZone: \'Europe/Lisbon\' }),\n  [scheduled],\n);\n\n<TableDateTimeFilter\n  columnLabel="scheduled"\n  onValueChange={setScheduled}\n  presets={\n    <DateTimeRangePickerPreset value={EARLY_OCTOBER}>Early October</DateTimeRangePickerPreset>\n  }\n  value={scheduled}\n/>;',
     }),
   },
   {
@@ -524,7 +524,7 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'composition',
-    title: 'Setting the family once, and reaching past it',
+    title: 'Setting the table once, and reaching past it',
     note: 'The provider sets the frame and the layout for everything below it, SlottedProvider the language, and a table that states an axis itself still wins. Every part takes render, a ref and native props, so a part can become your own element without losing a data attribute.',
     snippet: defineSnippet({
       id: 'table-react-composition',
@@ -537,13 +537,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'keyboard',
     title: 'Every control is its own tab stop',
-    note: 'A table is not a composite widget, so the family binds no key: Tab reaches the scroller, then each sort button, checkbox and expander in DOM order. Shift with Space on a checkbox takes the range, which is the one gesture the family adds.',
+    note: 'A table is not a composite widget, so the table binds no key: Tab reaches the scroller, then each sort button, checkbox and expander in DOM order. Shift with Space on a checkbox takes the range, which is the one gesture the family adds.',
     snippet: defineSnippet({
       id: 'table-react-keyboard',
       language: 'tsx',
       label: 'Nothing to wire',
       source:
-        '// Enter and Space activate the buttons the family renders.\n// Shift + Space on a row checkbox selects from the anchor.\n// The scroller answers the arrow, Page, Home and End keys.',
+        '// Enter and Space activate the buttons the table renders.\n// Shift + Space on a row checkbox selects from the anchor.\n// The scroller answers the arrow, Page, Home and End keys.',
     }),
   },
   {
@@ -710,7 +710,7 @@ export const REACT_TABLE_DOCS = {
         '(props: TableFilterOperandProps) => ReactNode',
         '—',
         'Table*Filter',
-        'Replaces the field the family would have drawn, and keeps the draft, the chooser, the join, the actions and the announcements.',
+        'Replaces the field the table would have drawn, and keeps the draft, the chooser, the join, the actions and the announcements.',
       ],
       [
         'searchThreshold',
@@ -894,7 +894,7 @@ export const REACT_TABLE_DOCS = {
       'A row is not selectable under this role, so it carries no aria-selected. The state is painted with data-selected and announced by the checkbox that owns it — the division list-item recorded — and the header checkbox states in its own name how many rows it covers.',
       'aria-rowcount and aria-rowindex are written exactly when you state a total larger than the DOM, which is what the Grid and Table Properties practice requires: the pair exists to say the DOM is not the whole set. The practice warns that writing aria-rowindex on some rows and not others has devastating effects, so the family writes neither unless you state both.',
       'The scroller becomes a region with a tab stop and a name only while the table overflows, measured rather than assumed. A wide table with no tab stop is unreachable without a pointer — a WCAG 2.2 level A failure — and a tab stop on a table that fits is one a reader presses for nothing.',
-      'The expander is the Disclosure pattern: a button with aria-expanded and aria-controls naming the detail row. A closed detail is not rendered at all, so nothing is announced that a reader cannot reach.',
+      'The expander is the Disclosure pattern: a button with aria-expanded, and with aria-controls naming the detail row while it is open. A closed detail is not rendered at all, so nothing is announced that a reader cannot reach.',
       'A selected row is said by its ground and its ink together, and by the checkbox mark. R1 of this repository forbids the rail two families reached for, and in the high-contrast scheme every tone ground is the page own white — so the mark is what survives, which is where WCAG 2.2 SC 1.4.1 puts the requirement.',
     ],
     snippets: [
@@ -908,7 +908,7 @@ export const REACT_TABLE_DOCS = {
       defineSnippet({
         id: 'table-theming',
         language: 'css',
-        label: 'Retuning the family for an application',
+        label: 'Retuning the table for an application',
         source:
           "[data-ui='table'] {\n  --slotted-table-row-min-block-size: 40px;\n  --slotted-table-row-surface-hover: var(--slotted-tone-accent-subtle-hover);\n  --slotted-table-header-surface: var(--slotted-surface-sunken);\n  --slotted-table-border-color: var(--slotted-border-strong);\n}",
       }),

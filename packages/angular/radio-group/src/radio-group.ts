@@ -21,7 +21,7 @@ import type {
   ValidationErrors,
   Validator,
 } from '@angular/forms';
-import { SlField } from '@slotted/angular/field';
+import { injectFieldDefaults, SlField, SlFieldDefaultsSource } from '@slotted/angular/field';
 import { SlFieldGroup } from '@slotted/angular/field-group';
 
 import { injectRadioGroupDefaults, SlRadioGroupIdFactory } from './radio-group-defaults';
@@ -97,6 +97,7 @@ export interface SlRadioGroupItem {
     '[attr.data-disabled]': "resolvedDisabled() === true ? '' : null",
     '[attr.data-invalid]': "resolvedInvalid() === true ? '' : null",
     '[attr.data-readonly]': "resolvedReadOnly() === true ? '' : null",
+    '[attr.aria-labelledby]': 'labelledBy()',
     '[attr.aria-describedby]': 'describedBy()',
     '[attr.aria-invalid]': 'ariaInvalid()',
     '[attr.aria-readonly]': 'ariaReadOnly()',
@@ -143,9 +144,23 @@ export class SlRadioGroup implements ControlValueAccessor, OnInit, Validator {
   private readonly field = inject(SlField, { optional: true });
   private readonly fieldGroup = inject(SlFieldGroup, { optional: true });
   private readonly defaults = injectRadioGroupDefaults();
+  /**
+   * The field defaults in force: a field group's, or the application's own.
+   * A group outside a field reads disabled and read-only from them, as React's
+   * reads them from FieldDefaultsProvider.
+   */
+  private readonly fieldDefaultsSource = inject(SlFieldDefaultsSource, { optional: true });
+  private readonly fieldDefaultsToken = injectFieldDefaults();
+  private readonly fieldDefaults = computed(
+    () => this.fieldDefaultsSource?.fieldDefaults() ?? this.fieldDefaultsToken,
+  );
   private readonly generatedName = inject(SlRadioGroupIdFactory).next();
   private readonly writtenRole = inject(new HostAttributeToken('role'), { optional: true });
   private readonly writtenDescribedBy = inject(new HostAttributeToken('aria-describedby'), {
+    optional: true,
+  });
+  private readonly writtenLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
+  private readonly writtenLabelledBy = inject(new HostAttributeToken('aria-labelledby'), {
     optional: true,
   });
 
@@ -173,16 +188,31 @@ export class SlRadioGroup implements ControlValueAccessor, OnInit, Validator {
       set nobody meant to write. */
   readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   readonly resolvedDisabled = computed(
-    () => this.disabled() ?? this.formDisabled() ?? this.field?.resolvedDisabled(),
+    () =>
+      this.disabled() ??
+      this.formDisabled() ??
+      this.field?.resolvedDisabled() ??
+      this.fieldDefaults().disabled,
   );
-  readonly resolvedReadOnly = computed(() => this.readOnly() ?? this.field?.resolvedReadOnly());
-  readonly resolvedInvalid = computed(() => this.invalid() ?? this.field?.invalid());
+  readonly resolvedReadOnly = computed(
+    () => this.readOnly() ?? this.field?.resolvedReadOnly() ?? this.fieldDefaults().readOnly,
+  );
+  readonly resolvedInvalid = computed(
+    () => this.invalid() ?? this.field?.invalid() ?? this.fieldGroup?.invalid(),
+  );
   readonly resolvedRequired = computed(
     () => this.required() ?? this.field?.required() ?? this.fieldGroup?.required(),
   );
 
   protected readonly resolvedRole = computed(
     () => this.writtenRole ?? (this.fieldGroup === null ? 'radiogroup' : null),
+  );
+  /* A group has no element a label's for can reach, so inside a field the
+     field's label names it, unless the consumer named it themselves. */
+  protected readonly labelledBy = computed(
+    () =>
+      this.writtenLabelledBy ??
+      (this.writtenLabel === null ? (this.field?.ids().label ?? null) : null),
   );
   protected readonly describedBy = computed(() => {
     const merged = [this.writtenDescribedBy, this.field?.describedBy()].filter(Boolean);

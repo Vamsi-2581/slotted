@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -302,6 +302,109 @@ describe('reset', () => {
       0.3,
       expect.objectContaining({ reason: 'pointer' }),
     );
+  });
+});
+
+describe('reset, inside the limits', () => {
+  it('lands on max when defaultValue lies beyond it', () => {
+    const onValueChange = vi.fn();
+    render(<Workspace value={0.2} defaultValue={0.5} max={0.4} onValueChange={onValueChange} />);
+
+    fireEvent.doubleClick(bar());
+    expect(onValueChange).toHaveBeenLastCalledWith(
+      0.4,
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+});
+
+describe('the limits, held', () => {
+  /** The contract's `extent.clamped`: the reported value is always the clamped one. */
+  it('moves the value inside the limits when the limits move under it', () => {
+    const onValueChange = vi.fn();
+    const { rerender } = render(<Workspace value={0.5} onValueChange={onValueChange} />);
+    expect(onValueChange).not.toHaveBeenCalled();
+
+    rerender(<Workspace value={0.5} max={0.3} onValueChange={onValueChange} />);
+    expect(onValueChange).toHaveBeenLastCalledWith(
+      0.3,
+      expect.objectContaining({ reason: 'programmatic' }),
+    );
+  });
+
+  it('moves the value inside the limits when the container shrinks under a length limit', () => {
+    let notify: (() => void) | null = null;
+    class ManualObserver {
+      constructor(callback: () => void) {
+        notify = callback;
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', ManualObserver);
+    // jsdom lays nothing out: a length is measured as the probe's box, which the stub gives.
+    const create = document.createElement.bind(document);
+    vi.spyOn(document, 'createElement').mockImplementation(((tag: string) => {
+      const element = create(tag);
+      element.getBoundingClientRect = () => ({ width: 300, height: 0 }) as DOMRect;
+      return element;
+    }) as typeof document.createElement);
+    try {
+      const onValueChange = vi.fn();
+      render(<Workspace value={0.5} min="300px" onValueChange={onValueChange} />);
+      expect(onValueChange).not.toHaveBeenCalled();
+
+      const workspace = bar().parentElement!;
+      workspace.getBoundingClientRect = () =>
+        ({
+          x: 0,
+          y: 0,
+          width: 500,
+          height: 500,
+          top: 0,
+          left: 0,
+          right: 500,
+          bottom: 500,
+        }) as DOMRect;
+      act(() => notify!());
+      const [value, request] = onValueChange.mock.lastCall!;
+      expect(value).toBeCloseTo(0.6, 5);
+      expect(request).toEqual(expect.objectContaining({ reason: 'programmatic' }));
+    } finally {
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
+describe('the drag', () => {
+  function drag(from: number, to: number) {
+    bar().setPointerCapture = () => undefined;
+    fireEvent.pointerDown(bar(), { button: 0, clientX: from, clientY: 10 });
+    bar().dispatchEvent(new MouseEvent('pointermove', { bubbles: true, clientX: to, clientY: 10 }));
+    act(() => {
+      bar().dispatchEvent(new MouseEvent('pointerup', { bubbles: true, clientX: to, clientY: 10 }));
+    });
+  }
+
+  /**
+   * The bar follows the hand from where it was taken: a bar grabbed twelve
+   * pixels from the edge it marks does not leap twelve pixels on the first move.
+   */
+  it('keeps the point it was grabbed at under the pointer', () => {
+    const onValueChange = vi.fn();
+    render(<Workspace defaultValue={0.5} onValueChange={onValueChange} />);
+    // 0.5 of 800 is 400: grabbed at 412, moved 100 to the right.
+    drag(412, 512);
+    expect(onValueChange.mock.lastCall![0]).toBeCloseTo(500 / 800, 5);
+  });
+
+  it('settles with the value the drag left it at, not the one it started from', () => {
+    const onResizeEnd = vi.fn();
+    render(<Workspace defaultValue={0.5} onResizeEnd={onResizeEnd} />);
+    drag(400, 200);
+    expect(onResizeEnd).toHaveBeenCalledWith(0.25);
   });
 });
 

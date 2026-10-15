@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { SlField, SlFieldError, SlFieldLabel } from '@slotted/angular/field';
 import { provideSlotted } from '@slotted/angular/i18n';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
@@ -29,6 +29,7 @@ class Host {
   readonly seen = signal<string[]>([]);
   readonly cancel = signal(false);
   readonly control = new FormControl(true);
+  readonly group = new FormGroup({ alerts: new FormControl(true, { nonNullable: true }) });
 
   record(reason: string, cancelled: () => void) {
     this.seen.update((all) => [...all, reason]);
@@ -317,7 +318,7 @@ describe('SlSwitch', () => {
     expect(control(fixture).disabled).toBe(true);
   });
 
-  it('restores what an uncontrolled switch started from when the form resets', () => {
+  it('restores what an uncontrolled switch started from when the form resets', async () => {
     const fixture = renderTemplate(
       `<form><span slSwitch defaultChecked name="alerts">Alertas</span></form>`,
     );
@@ -330,6 +331,32 @@ describe('SlSwitch', () => {
     fixture.detectChanges();
 
     expect(root(fixture).getAttribute('data-checked')).toBe('');
+    // The form resets the element to a default no attribute wrote; the switch puts it back.
+    await new Promise((resolve) => setTimeout(resolve));
+    expect(control(fixture).checked).toBe(true);
+  });
+
+  /**
+   * In a form bound to a model the reset value is the model's, written through
+   * the value accessor, and the switch's own default does not apply.
+   */
+  it('shows the form model’s value after the form resets', async () => {
+    const fixture = renderTemplate(
+      `<form [formGroup]="group"><span slSwitch formControlName="alerts">Alertas</span></form>`,
+    );
+
+    press(control(fixture));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.group.value.alerts).toBe(false);
+
+    (control(fixture).form as HTMLFormElement).reset();
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.group.value.alerts).toBe(true);
+    expect(root(fixture).getAttribute('data-checked')).toBe('');
+    expect(control(fixture).checked).toBe(true);
   });
 
   it('reaches the instance, the element and the imperative toggle from a template', () => {

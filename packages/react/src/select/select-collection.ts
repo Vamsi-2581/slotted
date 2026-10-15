@@ -91,9 +91,11 @@ export function entryHighlight(
 }
 
 /**
- * Brings the highlighted option into view without moving the page. `nearest`
- * rather than `center`, because a list that recentres on every arrow makes the
- * reader lose the rows they have already read.
+ * Brings the highlighted option into view without moving the page: the nearest
+ * scrolling box between the option and the popup is scrolled, by the least
+ * distance that shows the whole row, and nothing past it. `scrollIntoView`
+ * would scroll every ancestor too, and on the first open it runs before the
+ * popup is positioned — a select far down a page sent the page to its top.
  *
  * A browser scrolls a *focused* element into view on its own; nothing here is
  * focused, which is the price of the `aria-activedescendant` model and the
@@ -102,9 +104,26 @@ export function entryHighlight(
 export function revealOption(content: HTMLElement | null, value: SelectOptionValue | null) {
   if (content === null || value === null) return;
   const option = options(content).find((candidate) => valueOf(candidate) === value);
-  /* `scrollIntoView` is not in jsdom and is not in every engine the library is
-     asked to render in. The highlight is correct without it; only the view is
-     not, and a family that threw here would take the whole popup down with it. */
-  if (typeof option?.scrollIntoView !== 'function') return;
-  option.scrollIntoView({ block: 'nearest' });
+  if (option !== undefined) revealWithin(option, content);
+}
+
+/** Scrolls the nearest scrolling box between `option` and `surface` to show the row. */
+export function revealWithin(option: HTMLElement, surface: HTMLElement) {
+  let box: HTMLElement = surface;
+  for (
+    let node = option.parentElement;
+    node !== null && node !== surface;
+    node = node.parentElement
+  ) {
+    const overflow = getComputedStyle(node).overflowY;
+    if (overflow === 'auto' || overflow === 'scroll') {
+      box = node;
+      break;
+    }
+  }
+  const row = option.getBoundingClientRect();
+  const top = box.getBoundingClientRect().top + box.clientTop;
+  const bottom = top + box.clientHeight;
+  if (row.top < top) box.scrollTop -= top - row.top;
+  else if (row.bottom > bottom) box.scrollTop += Math.min(row.bottom - bottom, row.top - top);
 }

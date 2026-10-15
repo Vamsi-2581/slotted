@@ -51,7 +51,8 @@ export function holdResizeGesture(
  *
  * `18rem`, `200px`, `25%` and `10vw` are all limits a consumer may reasonably
  * write, and only the browser knows what any of them come to: `rem` against the
- * root, `em` and percentages against the element the probe is placed in. So the
+ * root, `em` against the element the probe is placed in, percentages against
+ * `basis` — the length they are a percentage of — when it is given. So the
  * probe is placed in that element rather than in the document, and every unit
  * resolves the way the consumer's own stylesheet would resolve it.
  *
@@ -63,16 +64,32 @@ export function holdResizeGesture(
  * The probe is removed before the value is returned, and it is out of flow and
  * invisible while it is there, so nothing the consumer can see moves.
  */
-export function measureLength(value: string, against: HTMLElement): number {
-  const probe = against.ownerDocument.createElement('div');
-  probe.style.position = 'absolute';
-  probe.style.visibility = 'hidden';
-  probe.style.pointerEvents = 'none';
+export function measureLength(value: string, against: HTMLElement, basis?: number): number {
+  const document = against.ownerDocument;
+  const probe = document.createElement('div');
   probe.style.inlineSize = value;
 
-  against.append(probe);
+  /*
+   * A probe out of flow resolves a percentage against its containing block —
+   * the nearest positioned ancestor, not the element it stands in. Given the
+   * length a percentage is of, the probe stands in flow inside a box of that
+   * length, so "25%" and "calc(100% - 36rem)" are of the basis; the box takes
+   * the font of the element it is put in, so `em` still resolves there.
+   */
+  let outer = probe;
+  if (basis !== undefined) {
+    outer = document.createElement('div');
+    outer.style.inlineSize = `${basis}px`;
+    outer.style.blockSize = '0';
+    outer.append(probe);
+  }
+  outer.style.position = 'absolute';
+  outer.style.visibility = 'hidden';
+  outer.style.pointerEvents = 'none';
+
+  against.append(outer);
   const pixels = probe.getBoundingClientRect().width;
-  probe.remove();
+  outer.remove();
 
   return pixels;
 }

@@ -1,12 +1,15 @@
+import { NgTemplateOutlet } from '@angular/common';
 import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChild,
   Directive,
   ElementRef,
   inject,
   input,
+  TemplateRef,
   ViewEncapsulation,
 } from '@angular/core';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
@@ -58,6 +61,28 @@ export class SlTabList {
 }
 
 /**
+ * What precedes the label inside a tab, such as an icon. It stands beside the
+ * words rather than inside them, so the tab's gap spaces it and only the words
+ * are clipped under `fit="equal"`; the part sizes an icon to the tab's icon step.
+ */
+@Directive({
+  selector: '[slTabStart]',
+  standalone: true,
+  exportAs: 'slTabStart',
+  host: { 'data-part': 'start' },
+})
+export class SlTabStart {}
+
+/** What follows the label inside a tab, such as a count. */
+@Directive({
+  selector: '[slTabEnd]',
+  standalone: true,
+  exportAs: 'slTabEnd',
+  host: { 'data-part': 'end' },
+})
+export class SlTabEnd {}
+
+/**
  * One tab, in the box that holds it.
  *
  * The host is that box, and it is presentational for two reasons a `button`
@@ -71,9 +96,16 @@ export class SlTabList {
 @Component({
   selector: '[slTab]',
   standalone: true,
-  imports: [SlGlyph, SlIcon],
+  imports: [NgTemplateOutlet, SlGlyph, SlIcon],
   exportAs: 'slTab',
-  template: `@if (href(); as destination) {
+  /* The words and what stands beside them are written once and placed in
+     whichever control the tab renders: a selecting `ng-content` repeated in
+     both branches left the button branch without its icon and its count. */
+  template: `<ng-template #content
+      ><ng-content select="[slTabStart]" /><span data-part="label"><ng-content /></span
+      ><ng-content select="[slTabEnd]"
+    /></ng-template>
+    @if (href(); as destination) {
       <a
         #control
         data-part="tab"
@@ -88,8 +120,8 @@ export class SlTabList {
         [attr.tabindex]="selected() ? 0 : -1"
         (click)="onClick($event)"
         (keydown)="onKeydown($event)"
-        ><span data-part="label"><ng-content /></span
-      ></a>
+        ><ng-container [ngTemplateOutlet]="content"
+      /></a>
     } @else {
       <button
         #control
@@ -106,7 +138,7 @@ export class SlTabList {
         (click)="onClick($event)"
         (keydown)="onKeydown($event)"
       >
-        <span data-part="label"><ng-content /></span>
+        <ng-container [ngTemplateOutlet]="content" />
       </button>
     }
     @if (dismissible()) {
@@ -205,23 +237,49 @@ export class SlTab {
 }
 
 /**
+ * The content of a panel, as a template the panel instantiates.
+ *
+ * Projected markup is built by the consumer's own view whether a panel shows it
+ * or not: a component inside a closed panel is constructed, change-detected and
+ * keeps its state, and only its DOM is detached. A template is what `mount` can
+ * act on. Under `active` it is instantiated on selection and destroyed after,
+ * under `lazy` it is instantiated on first selection and kept, under `eager` it
+ * is instantiated up front. It is the shape of Angular Material's `matTabContent`.
+ *
+ * It must be a direct child of the panel, so a panel never takes the template of
+ * a family nested inside it.
+ */
+@Directive({
+  selector: 'ng-template[slTabPanelContent]',
+  standalone: true,
+})
+export class SlTabPanelContent {
+  readonly template = inject(TemplateRef);
+}
+
+/**
  * The content of one tab.
  *
  * It is in the page's tab sequence, which is where `Tab` from the list goes, and
  * it is hidden with the attribute rather than with a class: a screen reader,
  * find-in-page and `:target` all already understand `hidden`.
  *
- * Whether its content exists at all is what `mount` decides. `active` renders it
- * only while the tab is selected, which is why the content is a template rather
- * than projected markup: projected markup is built by the consumer's own view
- * whether this panel shows it or not.
+ * The panel itself always exists, so every tab's `aria-controls` names an
+ * element. Whether its content is in the DOM is what `mount` decides. Content
+ * written inside `<ng-template slTabPanelContent>` is also only built when
+ * `mount` says so; projected markup is built by the consumer's view regardless.
  */
 @Component({
   selector: '[slTabPanel]',
   standalone: true,
+  imports: [NgTemplateOutlet],
   exportAs: 'slTabPanel',
   template: `@if (present()) {
-    <ng-content />
+    @if (content(); as deferred) {
+      <ng-container [ngTemplateOutlet]="deferred.template" />
+    } @else {
+      <ng-content />
+    }
   }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -239,6 +297,9 @@ export class SlTabPanel {
   readonly value = input.required<string>();
 
   private readonly tabs = inject(SlTabs);
+
+  /** The deferred content, when the consumer wrote one. */
+  protected readonly content = contentChild(SlTabPanelContent, { descendants: false });
 
   readonly selected = computed(() => this.tabs.holds(this.value()));
 

@@ -86,11 +86,13 @@ export function Tab({
   disabled,
   dismissLabel,
   dismissible = false,
+  end,
   href,
   onClick,
   onKeyDown,
   ref,
   render,
+  start,
   style,
   value,
   ...nativeProps
@@ -135,6 +137,17 @@ export function Tab({
     tabs.dismiss(value, 'keyboard', event);
   }
 
+  /* An icon before the words and a count after them stand beside the label,
+     so the tab's gap spaces them and only the words are clipped under
+     fit="equal". */
+  const content = (
+    <>
+      {start === undefined ? null : <span data-part="start">{start}</span>}
+      <span data-part="label">{children}</span>
+      {end === undefined ? null : <span data-part="end">{end}</span>}
+    </>
+  );
+
   const control =
     href === undefined ? (
       <button
@@ -153,7 +166,7 @@ export function Tab({
         tabIndex={selected ? 0 : -1}
         type="button"
       >
-        <span data-part="label">{children}</span>
+        {content}
       </button>
     ) : (
       <a
@@ -172,7 +185,7 @@ export function Tab({
         role="tab"
         tabIndex={selected ? 0 : -1}
       >
-        <span data-part="label">{children}</span>
+        {content}
       </a>
     );
 
@@ -224,8 +237,10 @@ export function Tab({
  * and it is hidden with the attribute rather than with a class: a screen
  * reader, find-in-page and `:target` all already understand `hidden`.
  *
- * Whether it exists at all is what `mount` decides — `active` builds it on
- * selection, `lazy` keeps it once built, `eager` builds every panel up front.
+ * The panel itself always exists, so every tab's `aria-controls` names an
+ * element. Whether its content exists is what `mount` decides — `active`
+ * builds it on selection, `lazy` keeps it once built, `eager` builds every
+ * panel's content up front.
  */
 export function TabPanel({ children, ref, render, value, ...nativeProps }: TabPanelProps) {
   const tabs = useTabs();
@@ -233,12 +248,11 @@ export function TabPanel({ children, ref, render, value, ...nativeProps }: TabPa
 
   const selected = tabs.value === value;
   const present = selected || tabs.mount === 'eager' || (tabs.mount === 'lazy' && tabs.seen(value));
-  if (!present) return null;
 
   const rootProps: TabPanelRootProps = {
     ...nativeProps,
     'aria-labelledby': tabId,
-    children,
+    children: present ? children : null,
     'data-part': 'panel',
     hidden: !selected,
     id: panelId,

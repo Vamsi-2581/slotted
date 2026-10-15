@@ -63,17 +63,34 @@ const enabled = (item: HTMLElement) => item.dataset['disabled'] === undefined;
 
 type Entry = 'first' | 'last';
 
+/**
+ * Focus without the browser's own scroll, which reveals an item by scrolling
+ * the page as well as the surface and centres it in the window, carrying the
+ * layer off its trigger. The surface scrolls inside the room the positioner
+ * gives it, so the item is brought into the surface and nothing further.
+ */
+function reveal(item: HTMLElement) {
+  item.focus({ preventScroll: true });
+  const surface = item.closest<HTMLElement>("[data-part='content']");
+  if (surface === null) return;
+  const box = surface.getBoundingClientRect();
+  const own = item.getBoundingClientRect();
+  if (own.top < box.top) surface.scrollTop -= box.top - own.top;
+  else if (own.bottom > box.bottom) surface.scrollTop += own.bottom - box.bottom;
+}
+
 function focusItem(surface: HTMLElement | null, index: number) {
   const list = items(surface);
   const item = list[index < 0 ? list.length + index : index];
-  item?.focus({ preventScroll: true });
+  if (item !== undefined) reveal(item);
 }
 
 /** The first item a reader can act on, or the first one if none can. */
 function focusEntry(surface: HTMLElement | null, entry: Entry) {
   const list = items(surface);
   const ordered = entry === 'first' ? list : [...list].reverse();
-  (ordered.find(enabled) ?? ordered[0])?.focus({ preventScroll: true });
+  const item = ordered.find(enabled) ?? ordered[0];
+  if (item !== undefined) reveal(item);
 }
 
 /** Which way the surface is read, asked of the element rather than assumed. */
@@ -479,6 +496,7 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
   useEffect(() => {
     if (surfaceNode === null) return;
     const navigation = createArrowNavigation(surfaceNode, {
+      focus: reveal,
       includeAriaDisabled: true,
       itemSelector: ITEM_SELECTOR,
       loop: () => latest.current.menu.loop,

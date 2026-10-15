@@ -71,7 +71,12 @@ function offencesIn(path) {
         found.push(`${path}: a colour of its own — ${text}`);
       if (/font-size\s*:/.test(text) && !text.includes('var(--slotted-'))
         found.push(`${path}: a type size of its own — ${text}`);
-      if (/box-shadow\s*:/.test(text) && !text.includes('var(--slotted-'))
+      // `none` takes a shadow away and paints nothing, as `0px` is the absence of a length.
+      if (
+        /box-shadow\s*:/.test(text) &&
+        !text.includes('var(--slotted-') &&
+        !/box-shadow\s*:\s*none\s*;/.test(text)
+      )
         found.push(`${path}: a shadow of its own — ${text}`);
       for (const [, value] of text.matchAll(/(\d+(?:\.\d+)?px)/g))
         if (!ALLOWED_PX.has(value)) found.push(`${path}: a length in pixels — ${text}`);

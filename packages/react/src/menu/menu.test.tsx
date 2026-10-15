@@ -176,6 +176,50 @@ describe('Menu', () => {
     expect(item('Share')).toHaveFocus();
   });
 
+  /**
+   * The surface scrolls inside the room the positioner gives it, so an item
+   * the arrows, Home, End or typeahead reach is brought into the surface
+   * rather than by the browser's own focus scroll, which centres it in the
+   * window and carried the whole layer off its trigger.
+   */
+  it('reveals the item it moves to inside the surface, without scrolling the page', async () => {
+    render(
+      <Basic>
+        <MenuItem>Amsterdam</MenuItem>
+        <MenuItem>Berlin</MenuItem>
+        <MenuItem>Zürich</MenuItem>
+      </Basic>,
+    );
+    await open();
+    await waitFor(() => expect(item('Amsterdam')).toHaveFocus());
+    const focus = vi.spyOn(HTMLElement.prototype, 'focus');
+
+    press('End');
+    expect(document.activeElement).toBe(item('Zürich'));
+    expect(focus.mock.contexts.at(-1)).toBe(item('Zürich'));
+    expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
+
+    press('b');
+    expect(document.activeElement).toBe(item('Berlin'));
+    expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
+    focus.mockRestore();
+  });
+
+  /* `type="button"` belongs to the family's own button; on an anchor it is a MIME type. */
+  it('renders a link item as an anchor that carries no button type', async () => {
+    render(
+      <Basic>
+        <MenuItem render={(props) => <a {...props} href="#order" />}>Order page</MenuItem>
+      </Basic>,
+    );
+    await open();
+
+    const link = item('Order page');
+    expect(link.tagName).toBe('A');
+    expect(link.getAttribute('href')).toBe('#order');
+    expect(link.hasAttribute('type')).toBe(false);
+  });
+
   it('runs an item and closes, saying the menu closed because one ran', async () => {
     const onSelect = vi.fn();
     const onOpenChange = vi.fn();

@@ -71,7 +71,7 @@ export const MULTI_SELECT_FALLBACK: MultiSelectDefaults = {
   size: 'md',
   strategy: 'absolute',
   variant: 'outline',
-  width: 'anchor',
+  width: 'content',
 };
 
 const MultiSelectDefaultsContext = createContext<MultiSelectDefaults>(MULTI_SELECT_FALLBACK);

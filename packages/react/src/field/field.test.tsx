@@ -1,6 +1,8 @@
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useEffect } from 'react';
+import { hydrateRoot } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/field/contract.json';
@@ -18,6 +20,8 @@ import {
   FieldLabel,
 } from './index';
 import { SlottedProvider } from '../i18n';
+import { TextField } from '../text-field';
+import { Textarea } from '../textarea';
 import { useField as useFieldForTest } from './field-context';
 
 describe('Field', () => {
@@ -564,5 +568,123 @@ describe('Field', () => {
     expect(counter.parentElement).toBe(screen.getByTestId('header'));
     expect(counter).toHaveAttribute('id', 'nif-counter');
     expect(document.querySelectorAll('[data-part="counter"]')).toHaveLength(1);
+  });
+});
+
+/**
+ * The server renders once and runs no effect, so whatever the field learns in
+ * an effect is missing from its markup. What the page wrote is known at render
+ * time, and the server markup is the markup the client settles on.
+ */
+describe('Field on the server', () => {
+  const parse = (html: string) => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    return host;
+  };
+
+  it('describes the control by the messages written after it', () => {
+    const host = parse(
+      renderToString(
+        <Field id="email">
+          <FieldLabel>E-mail</FieldLabel>
+          <FieldControl />
+          <FieldDescription>Usaremos para a cobrança.</FieldDescription>
+          <FieldError>Falta o domínio.</FieldError>
+        </Field>,
+      ),
+    );
+
+    expect(host.querySelector('input')).toHaveAttribute(
+      'aria-describedby',
+      'email-description email-error',
+    );
+  });
+
+  it('describes the control by the help, the indicator and the counter in its header', () => {
+    const host = parse(
+      renderToString(
+        <Field id="tags">
+          <FieldHeader>
+            <FieldLabel>Tags</FieldLabel>
+            <FieldIndicator>Beta</FieldIndicator>
+            <FieldHelp>Separadas por vírgulas.</FieldHelp>
+            <FieldCounter>3/5 tags</FieldCounter>
+          </FieldHeader>
+          <FieldControl />
+        </Field>,
+      ),
+    );
+
+    expect(host.querySelector('input')).toHaveAttribute(
+      'aria-describedby',
+      'tags-indicator tags-help tags-counter',
+    );
+    expect(host.querySelectorAll('[data-part="counter"]')).toHaveLength(1);
+  });
+
+  it('draws the count a textarea publishes, and describes the textarea by it', () => {
+    const host = parse(
+      renderToString(
+        <Field id="bio">
+          <FieldLabel>Bio</FieldLabel>
+          <Textarea countMax={140} defaultValue="Ships in two days." showCount />
+        </Field>,
+      ),
+    );
+
+    expect(host.querySelector('textarea')).toHaveAttribute('aria-describedby', 'bio-counter');
+    expect(host.querySelector('[data-part="counter"]')).toHaveTextContent('18/140');
+    expect(host.querySelector('label')?.nextElementSibling).toHaveAttribute('data-part', 'counter');
+  });
+
+  it('draws the count a text field publishes in the header, and describes the input by it', () => {
+    const host = parse(
+      renderToString(
+        <Field id="nif">
+          <FieldHeader>
+            <FieldLabel>NIF</FieldLabel>
+          </FieldHeader>
+          <TextField maxLength={9} showCount value="123" />
+          <FieldDescription>Nove dígitos.</FieldDescription>
+        </Field>,
+      ),
+    );
+
+    expect(host.querySelector('input')).toHaveAttribute(
+      'aria-describedby',
+      'nif-description nif-counter',
+    );
+    const counter = host.querySelector('[data-part="counter"]');
+    expect(counter).toHaveTextContent('3/9');
+    expect(counter?.parentElement).toHaveAttribute('data-part', 'header');
+  });
+
+  it('hydrates without a mismatch and keeps the markup it was served', async () => {
+    const tree = (
+      <Field id="bio">
+        <FieldLabel>Bio</FieldLabel>
+        <Textarea countMax={140} defaultValue="Ships in two days." showCount />
+        <FieldDescription>Shown on the profile.</FieldDescription>
+      </Field>
+    );
+    const html = renderToString(tree);
+    const host = parse(html);
+    document.body.append(host);
+    const onRecoverableError = vi.fn();
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    try {
+      await act(async () => {
+        hydrateRoot(host, tree, { onRecoverableError });
+      });
+
+      expect(onRecoverableError).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+      expect(host.innerHTML).toBe(html);
+    } finally {
+      error.mockRestore();
+      host.remove();
+    }
   });
 });

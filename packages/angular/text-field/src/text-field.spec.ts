@@ -31,6 +31,7 @@ import { SlTextFieldAction, SlTextFieldEnd, SlTextFieldStart } from './text-fiel
 class Host {
   readonly value = signal<string | undefined>(undefined);
   readonly loading = signal<boolean | undefined>(true);
+  readonly kind = signal('password');
   readonly copies: unknown[] = [];
   readonly clicks: unknown[] = [];
   readonly control = new FormControl('Ada');
@@ -223,6 +224,21 @@ describe('SlTextField', () => {
     expect(query(fixture, '[data-part="reveal"] svg[data-glyph]').getAttribute('data-glyph')).toBe(
       'eye-off',
     );
+  });
+
+  it('reads a bound type as it reads a written one', () => {
+    const fixture = renderTemplate(
+      `<div slTextField revealable><input slTextFieldInput [type]="kind()" /></div>`,
+    );
+    expect(input(fixture).getAttribute('type')).toBe('password');
+    (query(fixture, '[data-part="reveal"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(input(fixture).getAttribute('type')).toBe('text');
+
+    fixture.componentInstance.kind.set('email');
+    fixture.detectChanges();
+    expect(query(fixture, '[data-part="reveal"]')).toBeNull();
+    expect(input(fixture).getAttribute('type')).toBe('email');
   });
 
   it('offers no reveal toggle on a control that is not a password', () => {

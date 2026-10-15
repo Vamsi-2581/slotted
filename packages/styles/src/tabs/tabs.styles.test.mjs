@@ -16,7 +16,27 @@ const normalized = declarations
 
 const ui = `[data-ui='${contract.ui}']`;
 const member = contract.members.tabs;
-const part = (name) => `${ui} [data-part='${name}']`;
+/**
+ * Each part as the stylesheet reaches it: down the family's own chain of
+ * children, never by descent, so a family inside a panel that names its own
+ * parts `list`, `item` or `label` is not drawn as a tab list. The intermediate
+ * steps sit in `:where()`, which keeps every selector at the specificity the
+ * descendant form had.
+ */
+const PATHS = {
+  list: `${ui}>[data-part='list']`,
+  item: `${ui}>:where([data-part='list'])>[data-part='item']`,
+  tab: `${ui}>:where([data-part='list'])>:where([data-part='item'])>[data-part='tab']`,
+  label: `${ui}>:where([data-part='list'])>:where([data-part='item'])>:where([data-part='tab'])>[data-part='label']`,
+  dismiss: `${ui}>:where([data-part='list'])>:where([data-part='item'])>[data-part='dismiss']`,
+  panel: `${ui}>[data-part='panel']`,
+  actions: `${ui}>[data-part='actions']`,
+};
+const part = (name) => PATHS[name];
+/** The same chain from a root carrying modifiers, such as `[data-fit='equal']`. */
+const at = (modifiers, name) => `${ui}${modifiers}${PATHS[name].slice(ui.length)}`;
+/** The paging controls are the root's own children; see the test that says why. */
+const scroll = `${ui}>[data-part='scroll']`;
 
 /**
  * Every declaration the selector receives, across every rule whose selector
@@ -86,8 +106,8 @@ test('writes the pattern roles in every scene', () => {
 test('places every part in a grid cell rather than over one', () => {
   assert.match(rule(ui), /grid-template-columns:auto minmax\(0,1fr\) auto auto/);
   assert.match(rule(part('list')), /grid-column:2/);
-  assert.match(rule(`${part('scroll')}[data-direction='start']`), /grid-column:1/);
-  assert.match(rule(`${part('scroll')}[data-direction='end']`), /grid-column:3/);
+  assert.match(rule(`${scroll}[data-direction='start']`), /grid-column:1/);
+  assert.match(rule(`${scroll}[data-direction='end']`), /grid-column:3/);
   assert.match(rule(part('actions')), /grid-column:4/);
   assert.match(rule(part('panel')), /grid-column:1 \/ -1/);
   /* The things positioned over a cell are the marker and the hover bar under
@@ -125,7 +145,7 @@ test('answers every size the contract declares from the control scales', () => {
 test('scrolls a list that does not fit instead of wrapping it', () => {
   assert.match(rule(part('list')), /overflow-x:auto/);
   assert.doesNotMatch(rule(part('list')), /flex-wrap:wrap/);
-  assert.match(rule(`${ui}[data-fit='equal'] [data-part='label']`), /text-overflow:ellipsis/);
+  assert.match(rule(at("[data-fit='equal']", 'label')), /text-overflow:ellipsis/);
 });
 
 /**
@@ -135,7 +155,7 @@ test('scrolls a list that does not fit instead of wrapping it', () => {
  */
 test('keeps a scrollbar until the paging controls replace it', () => {
   assert.match(rule(part('list')), /scrollbar-width:thin/);
-  assert.match(rule(`${ui}[data-overflowing] [data-part='list']`), /scrollbar-width:none/);
+  assert.match(rule(at('[data-overflowing]', 'list')), /scrollbar-width:none/);
 });
 
 /**
@@ -170,7 +190,7 @@ test('mirrors the one rule that cannot be written logically', () => {
  * that exists for the people who need it most.
  */
 test('says the selection with a mark as well as with a fill', () => {
-  const selected = rule(`${ui}[data-variant='contained'] [data-part='item'][data-selected]`);
+  const selected = rule(`${at("[data-variant='contained']", 'item')}[data-selected]`);
   assert.match(selected, /background-color:var\(--slotted-tabs-contained-selected-background/);
   assert.match(rule(`${part('item')}[data-selected]::after`), /opacity:1/);
   assert.match(declarations, /@media \(forced-colors: active\)/);
@@ -197,12 +217,12 @@ test('gives the two glyph controls the target their glyphs are too small to be',
      capped at the inner-control size and never below the minimum target. The
      paging control is as tall as the row it pages and that wide; the closing
      control is that square. */
-  const scroll = rule(part('scroll'));
+  const paging = rule(scroll);
   assert.match(
-    scroll,
+    paging,
     /inline-size:max\(var\(--slotted-target-min,24px\),min\(calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\),var\(--_inner-size\)\)\)/,
   );
-  assert.match(scroll, /min-block-size:var\(--_height\)/);
+  assert.match(paging, /min-block-size:var\(--_height\)/);
   assert.match(
     rule(ui),
     /--_dismiss-size:max\(var\(--slotted-target-min,24px\),min\(calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\),var\(--_inner-size\)\)\)/,
@@ -230,7 +250,7 @@ test('gives the two glyph controls the target their glyphs are too small to be',
  * pointer's way.
  */
 test('keeps the track of a paging control that has reached its end', () => {
-  const disabled = rule(`${part('scroll')}:disabled`);
+  const disabled = rule(`${scroll}:disabled`);
   assert.match(disabled, /visibility:hidden/);
   assert.ok(
     !/display:none/.test(disabled),
@@ -259,7 +279,7 @@ test('aligns the closing control by its mark rather than by its box', () => {
     /margin-inline-start:max\(0px,calc\(var\(--_inner-gap\) - var\(--_dismiss-overhang\)\)\)/,
   );
   assert.match(
-    rule(`${ui} [data-part='item']:has([data-part='dismiss']) [data-part='tab']`),
+    rule(`${part('item')}:has(>[data-part='dismiss'])>[data-part='tab']`),
     /padding-inline-end:0/,
   );
 });
@@ -287,10 +307,8 @@ test('rings the closing control from outside and the tab from inside', () => {
  * Cloudscape ships a whole `container` variant for the same case.
  */
 test('can stand on a line the page already drew', () => {
-  assert.ok(
-    normalized.includes(`${ui}[data-variant='line'][data-track='line'] [data-part='list']{`),
-  );
-  assert.match(rule(`${ui}[data-track='none'] [data-part='item']::after`), /inset-block-end:0/);
+  assert.ok(normalized.includes(`${at("[data-variant='line'][data-track='line']", 'list')}{`));
+  assert.match(rule(`${at("[data-track='none']", 'item')}::after`), /inset-block-end:0/);
   assert.match(fragment, /data-track="none"/);
 });
 
@@ -300,7 +318,7 @@ test('paints no glyph of its own, and never draws one as a character', () => {
   assert.doesNotMatch(declarations, /--slotted-icon-(x|chevron-right)\b/);
   assert.doesNotMatch(declarations, /\[data-part='(dismiss|scroll)'\]::before/);
   assert.match(rule(part('dismiss')), /--slotted-icon-size:var\(--_icon-size\)/);
-  assert.match(rule(part('scroll')), /--slotted-icon-size:var\(--_icon-size\)/);
+  assert.match(rule(scroll), /--slotted-icon-size:var\(--_icon-size\)/);
   /* An empty `content` materialises a box; what is refused is a character
      standing in for artwork, so the pattern is a string with something in it. */
   assert.doesNotMatch(declarations, /content:\s*['"][^'"]/);
@@ -311,10 +329,7 @@ test('paints no glyph of its own, and never draws one as a character', () => {
  * and the box's own `directional` mirror handles a right-to-left document.
  */
 test('points each paging control along the reading direction', () => {
-  assert.match(
-    rule(`${part('scroll')}[data-direction='start']>[data-ui='icon']`),
-    /rotate:0\.5turn/,
-  );
+  assert.match(rule(`${scroll}[data-direction='start']>[data-ui='icon']`), /rotate:0\.5turn/);
   assert.ok(!normalized.includes(`${ui}:dir(rtl) [data-part='scroll']`));
 });
 
@@ -344,13 +359,10 @@ test('turns the whole family for a vertical list rather than rearranging it', ()
     rule(`${ui}[data-orientation='vertical']`),
     /grid-template-columns:auto minmax\(0,1fr\)/,
   );
+  assert.match(rule(at("[data-orientation='vertical']", 'list')), /flex-direction:column/);
+  assert.match(rule(`${ui}[data-orientation='vertical']>[data-part='scroll']`), /display:none/);
   assert.match(
-    rule(`${ui}[data-orientation='vertical'] [data-part='list']`),
-    /flex-direction:column/,
-  );
-  assert.match(rule(`${ui}[data-orientation='vertical'] [data-part='scroll']`), /display:none/);
-  assert.match(
-    rule(`${ui}[data-orientation='vertical'] [data-part='item']::after`),
+    rule(`${at("[data-orientation='vertical']", 'item')}::after`),
     /transform:scale\(1,0\)/,
   );
 });
@@ -384,4 +396,44 @@ test('keeps no row gap under a list that has no panel', () => {
   const root = /\[data-ui='tabs'\]\s*\{([\s\S]*?)\n\s*\}/.exec(css)?.[1] ?? '';
   assert.match(root, /grid-template-rows:\s*auto;/);
   assert.doesNotMatch(root, /grid-template-rows:\s*auto auto/);
+});
+
+/**
+ * The paging controls are the root's own children, and every rule keys them
+ * that way. A descendant selector reached any `scroll` part inside a panel: a
+ * table's scroller in a tab panel was drawn as a 24-pixel paging button, and
+ * the table squeezed into it one word per line.
+ */
+test('draws only its own paging controls, not a scroll part inside a panel', () => {
+  assert.ok(!normalized.includes(`${ui} [data-part='scroll']`), 'a descendant scroll selector');
+  assert.ok(!normalized.includes(`${ui}[data-orientation='vertical'] [data-part='scroll']`));
+  assert.ok(!/:has\(\[data-part='scroll'\]/.test(normalized), 'a :has() that reaches into panels');
+});
+
+/**
+ * Every part is reached down the family's own chain of children. A descendant
+ * selector reached the parts of any family inside a panel or the actions slot:
+ * a description list's `list` part was drawn as a scrolling flex row with the
+ * tab track under it, and a badge's `label` inside a tab took the tab label's
+ * clipping. Neither a descendant combinator before a part nor a `:has()` that
+ * descends is left.
+ */
+test('reaches only its own parts, never the parts of a family inside it', () => {
+  assert.ok(!normalized.includes(' [data-part='), 'a descendant combinator before a part');
+  assert.ok(!/:has\(\[data-part=/.test(normalized), 'a :has() that descends');
+  for (const [name, path] of Object.entries(PATHS)) {
+    assert.ok(normalized.includes(path), `no rule reaches ${name} down the chain`);
+  }
+});
+
+/**
+ * A vertical list stands beside its panel, and the root's row gap is the
+ * distance between the two in a horizontal family. With no column gap the
+ * panel's first letter touched the track the list draws on its end edge.
+ */
+test('keeps a vertical list as far from its panel as a horizontal one', () => {
+  assert.match(
+    rule(`${ui}[data-orientation='vertical']`),
+    /column-gap:var\(--slotted-tabs-gap,var\(--slotted-space-6,1rem\)\)/,
+  );
 });

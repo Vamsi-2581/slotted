@@ -21,7 +21,14 @@ import type { ExtentSample } from '@slotted/core/extent';
 import { createFocusScope } from '@slotted/core/focus';
 import { clamp, observeKeyboardInset } from '@slotted/core/measure';
 import { createPortalRoot } from '@slotted/core/portal';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import type { CSSProperties, KeyboardEvent, MouseEvent, PointerEvent, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -66,7 +73,34 @@ function isRtl(node: HTMLElement | null): boolean {
  */
 function measuringBox(layer: HTMLElement | null, mode: DrawerContextValue['mode']) {
   if (layer === null) return null;
-  return mode === 'inline' ? layer.parentElement : layer;
+  if (mode !== 'inline') return layer;
+  /* The layer sits in the `display: contents` boxes `DrawerPanel` moves it
+     through, which lay nothing out: the box is the first ancestor past them. */
+  let box = layer.parentElement;
+  while (box !== null && HOSTS.has(box)) box = box.parentElement;
+  return box;
+}
+
+/**
+ * The `display: contents` boxes the layer is rendered through: the host it is
+ * portalled into, and the anchor that holds the host in the consumer's layout
+ * under `inline`. Neither lays anything out, so neither is measured.
+ */
+const HOSTS = new WeakSet<Element>();
+
+const subscribeNothing = () => () => {};
+
+/**
+ * Whether this render is the client's own: `false` on the server and while
+ * the client hydrates what the server wrote, `true` afterwards and from the
+ * start of a tree the client mounts itself. Only the client can portal.
+ */
+function useClientRender(): boolean {
+  return useSyncExternalStore(
+    subscribeNothing,
+    () => true,
+    () => false,
+  );
 }
 
 /**
@@ -247,6 +281,46 @@ export function DrawerPanel({
   const extentLength = useExtentLength(drawer, layer);
 
   const overlay = drawer.mode === 'overlay';
+  const client = useClientRender();
+
+  /**
+   * One element the layer is always portalled into, in both modes, and which
+   * is itself moved: into the anchor below under `inline`, into the portal
+   * root under `overlay`. A portal into a different container, or a portal in
+   * place of an element, is a different subtree to React, and switching `mode`
+   * then destroyed the panel's fields, scroll position and focus — the cost the
+   * axis exists to avoid (contract `mode.reason`). Moving the container keeps
+   * the subtree, as Angular keeps it by moving the layer element.
+   */
+  const [host] = useState<HTMLDivElement | null>(() => {
+    if (typeof document === 'undefined') return null;
+    const node = document.createElement('div');
+    node.style.display = 'contents';
+    HOSTS.add(node);
+    return node;
+  });
+  const placeHost = useCallback(
+    (anchor: HTMLDivElement | null) => {
+      if (anchor === null || host === null) return;
+      HOSTS.add(anchor);
+      /* An overlay layer waiting for its portal root stays where it is for
+         that one render, rather than being unmounted and built again. */
+      if (!overlay) anchor.append(host);
+      else if (portal !== null) portal.append(host);
+    },
+    [host, overlay, portal],
+  );
+  /* Whether the layer is in the host now, so a switch to `overlay` holds it
+     there until the portal root exists instead of dropping it. */
+  const portalled = useRef(false);
+  const inHost =
+    client && host !== null && drawer.mounted && (!overlay || portal !== null || portalled.current);
+  useIsomorphicLayoutEffect(() => {
+    portalled.current = inHost;
+  });
+  /* Where the layer is now: what it stands over, what it makes inert and
+     where focus goes all depend on it. */
+  const placed = !overlay || portal !== null;
   const labelled = drawer.titleId !== '' && nativeProps['aria-label'] === undefined;
 
   /**
@@ -282,7 +356,7 @@ export function DrawerPanel({
    * `body`. What it calls later is read from `current`.
    */
   useEffect(() => {
-    if (panel === null || layer === null || !drawer.open) return;
+    if (panel === null || layer === null || !drawer.open || !placed) return;
 
     const branches = drawer.nodes.trigger === null ? [] : [drawer.nodes.trigger];
     const dismissable = overlay
@@ -370,6 +444,7 @@ export function DrawerPanel({
     layer,
     overlay,
     panel,
+    placed,
   ]);
 
   /**
@@ -486,7 +561,12 @@ export function DrawerPanel({
   }, [isOpen, layer, panel, sheet]);
 
   if (!drawer.mounted) return null;
-  if (overlay && portal === null) return null;
+  /* The server, and the hydration of what it wrote, cannot portal: an overlay
+     layer has nowhere to be yet, and an inline one is written in place, inside
+     the anchor it is moved through once the client renders. */
+  if (!client || host === null) {
+    if (overlay) return null;
+  } else if (!inHost) return null;
 
   const panelProps: DrawerPanelRootProps = {
     ...nativeProps,
@@ -545,8 +625,17 @@ export function DrawerPanel({
     </div>
   );
 
-  return overlay && portal !== null ? createPortal(layerNode, portal) : layerNode;
+  if (!client || host === null) return <div style={ANCHOR_STYLE}>{layerNode}</div>;
+
+  return (
+    <>
+      <div ref={placeHost} style={ANCHOR_STYLE} />
+      {createPortal(layerNode, host)}
+    </>
+  );
 }
+
+const ANCHOR_STYLE: CSSProperties = { display: 'contents' };
 
 /**
  * The separator the reader moves, from the WAI-ARIA Window Splitter pattern.

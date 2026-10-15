@@ -74,6 +74,19 @@ describe('Select', () => {
   });
 
   /**
+   * A popup pinned to the control's width wrapped its option labels under a
+   * narrow control. The default sizes it to its options, never narrower than
+   * the control.
+   */
+  it('sizes the popup to its options by default', async () => {
+    render(<Basic />);
+    const listbox = await open();
+    const positioner = listbox.closest("[data-ui='select'][data-part='positioner']");
+    expect(positioner).toHaveAttribute('data-width', 'content');
+    expect(contract.members.select.defaults.width).toBe('content');
+  });
+
+  /**
    * The whole of the family's focus model in one assertion: the popup opens,
    * the highlight moves, options are announced — and the button never lets go.
    */
@@ -388,6 +401,19 @@ describe('Select', () => {
     expect(onValueChange).toHaveBeenCalledWith(null, expect.objectContaining({ reason: 'clear' }));
   });
 
+  /**
+   * The chips stand over the start of the trigger and the clear button at its
+   * end, so the chips' remove buttons come first in the tab order. Angular
+   * renders the same order, and the documentation's parity check compares it.
+   */
+  it('puts the chips before the clear button, in reading and tab order', () => {
+    const { container } = render(<Basic clearable defaultValue={['apple', 'cherry']} multiple />);
+    const parts = [...container.querySelectorAll("[data-ui='select'] > [data-part]")].map(
+      (element) => element.getAttribute('data-part'),
+    );
+    expect(parts).toEqual(['trigger', 'tags', 'clear', 'arrow']);
+  });
+
   /** Every icon the family owns is a `Glyph` element inside an `Icon` box, never a mask. */
   it('draws the chevron, the cross and the tick as glyph elements', async () => {
     const { container } = render(<Basic clearable defaultValue="apple" />);
@@ -512,12 +538,178 @@ describe('Select', () => {
     expect(trigger().closest("[data-ui='select']")).toHaveAttribute('data-size', 'lg');
   });
 
+  /**
+   * Field › wiring.id: the control carries the field's identifier, so the
+   * label's `for` reaches the trigger — a button is labelable — and a press on
+   * the label focuses it. The popup names the trigger by the same identifier.
+   */
+  it('is the control the field’s label is for', () => {
+    render(
+      <Field id="fruit">
+        <FieldLabel>Fruit</FieldLabel>
+        <Select defaultOpen>
+          <SelectTrigger>
+            <SelectValue placeholder="Choose a fruit" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="apple">Apple</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>,
+    );
+    const label = screen.getByText('Fruit') as HTMLLabelElement;
+    expect(label.control).toBe(trigger());
+    expect(trigger()).toHaveAttribute('id', 'fruit-control');
+    expect(screen.getByRole('listbox')).toHaveAttribute('aria-labelledby', 'fruit-control');
+  });
+
+  /**
+   * A press on the field's label reaches the trigger as a click the label
+   * forwards: a pointer click (detail 1) at the label's coordinates, outside
+   * the button. It focuses the control and leaves the list closed, as the
+   * select-only example's label does and as a native select does.
+   */
+  it('focuses without opening when its field label is pressed', () => {
+    render(
+      <Field>
+        <FieldLabel>Fruit</FieldLabel>
+        <Basic />
+      </Field>,
+    );
+    fireEvent.click(trigger(), { detail: 1, clientX: -40, clientY: -20 });
+    expect(trigger()).toHaveFocus();
+    expect(trigger()).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(trigger(), { detail: 1, clientX: 0, clientY: 0 });
+    expect(trigger()).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  /**
+   * The highlight is brought into view by scrolling the list alone. A
+   * `scrollIntoView` scrolls every ancestor as well, and on the first open it
+   * runs before the popup is positioned — so a select far down a page sent the
+   * page to its top, and the popup, its control now out of view, hid itself.
+   */
+  it('scrolls the list to the highlight, and never the page', async () => {
+    const original = Element.prototype.scrollIntoView;
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    try {
+      render(<Basic />);
+      const listbox = await open();
+      Object.defineProperty(listbox, 'clientHeight', { configurable: true, value: 100 });
+      Object.defineProperty(listbox, 'scrollTop', { configurable: true, writable: true, value: 0 });
+      listbox.getBoundingClientRect = () =>
+        DOMRect.fromRect({ x: 0, y: 0, width: 200, height: 100 });
+      optionNamed('Cherry').getBoundingClientRect = () =>
+        DOMRect.fromRect({ x: 0, y: 130, width: 200, height: 30 });
+      press('End');
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      expect(listbox.scrollTop).toBe(60);
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
+  });
+
+  /**
+   * The popup is bounded by the height the positioner reports, and that height
+   * arrives after the highlight lands on the selected option. Revealed only
+   * then, the row was measured inside an unbounded list and stayed below the
+   * fold once the list took its height.
+   */
+  it('shows the selected option once the popup has taken its height', async () => {
+    const bounded = (element: Element) =>
+      element
+        .closest<HTMLElement>("[data-part='positioner']")
+        ?.style.getPropertyValue('--slotted-positioner-available-height') !== '';
+    const rect = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: Element,
+    ) {
+      if (this.getAttribute('role') === 'listbox') {
+        return DOMRect.fromRect({ x: 0, y: 0, width: 200, height: bounded(this) ? 100 : 400 });
+      }
+      if (this.getAttribute('data-value') === 'cherry') {
+        return DOMRect.fromRect({ x: 0, y: 130, width: 200, height: 30 });
+      }
+      return DOMRect.fromRect({ x: 0, y: 0, width: 0, height: 0 });
+    });
+    const height = vi
+      .spyOn(HTMLElement.prototype, 'clientHeight', 'get')
+      .mockImplementation(function (this: HTMLElement) {
+        if (this.getAttribute('role') !== 'listbox') return 0;
+        return bounded(this) ? 100 : 400;
+      });
+    const scrolled = new Map<Element, number>();
+    const scrollTop = vi.spyOn(Element.prototype, 'scrollTop', 'get').mockImplementation(function (
+      this: Element,
+    ) {
+      return scrolled.get(this) ?? 0;
+    });
+    const setScrollTop = vi
+      .spyOn(Element.prototype, 'scrollTop', 'set')
+      .mockImplementation(function (this: Element, next: number) {
+        scrolled.set(this, next);
+      });
+    try {
+      render(<Basic defaultValue="cherry" />);
+      const listbox = await open();
+      await waitFor(() => expect(listbox.scrollTop).toBe(60));
+    } finally {
+      rect.mockRestore();
+      height.mockRestore();
+      scrollTop.mockRestore();
+      setScrollTop.mockRestore();
+    }
+  });
+
+  /** The trigger is the field's control, so the field has nothing to warn about. */
+  it('registers with the field as its control', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    render(
+      <Field>
+        <FieldLabel>Fruit</FieldLabel>
+        <Select>
+          <SelectTrigger>
+            <SelectValue placeholder="Choose a fruit" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="apple">Apple</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>,
+    );
+    const warnings = warn.mock.calls.map((call) => String(call[0]));
+    warn.mockRestore();
+    expect(warnings.filter((message) => message.includes('without a control'))).toEqual([]);
+  });
+
   it('submits through a real select, so a plain form and reset() both work', async () => {
     render(<Basic defaultValue="apple" name="fruit" />);
     const native = document.querySelector<HTMLSelectElement>("select[name='fruit']");
     expect(native).not.toBeNull();
     expect(native?.value).toBe('apple');
     expect(native).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  /**
+   * A native reset puts the hidden select's own options back and tells nothing,
+   * so the control kept the last value chosen while the form it belongs to had
+   * been reset. The select listens for its form's reset and returns to
+   * `defaultValue`, as a native select does.
+   */
+  it('returns to its default value when its form is reset', async () => {
+    render(
+      <form data-testid="form">
+        <Basic defaultValue="apple" name="fruit" />
+      </form>,
+    );
+    await open();
+    pressOption(optionNamed('Cherry'));
+    expect(trigger()).toHaveTextContent('Cherry');
+
+    act(() => (screen.getByTestId('form') as HTMLFormElement).reset());
+    expect(trigger()).toHaveTextContent('Apple');
+    expect(document.querySelector<HTMLSelectElement>("select[name='fruit']")?.value).toBe('apple');
   });
 
   it('speaks the language in force, and lays its own messages over it', () => {

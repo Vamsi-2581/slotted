@@ -62,7 +62,7 @@ function activationReason(event: MouseEvent): DrawerOpenReason {
   standalone: true,
   exportAs: 'slDrawerTrigger',
   host: {
-    'data-part': 'trigger',
+    '[attr.data-part]': 'part',
     type: 'button',
     '[attr.aria-haspopup]': 'haspopup()',
     '[attr.aria-expanded]': 'drawer().open()',
@@ -77,6 +77,16 @@ export class SlDrawerTrigger implements OnInit, OnDestroy {
   readonly drawer = input.required<SlDrawer>({ alias: 'slDrawerTrigger' });
 
   private readonly native: HTMLElement = inject(ElementRef).nativeElement;
+
+  /**
+   * `trigger` names the control when it belongs to no family of its own. On
+   * `slButton` the element is that family's root, and the part stays `root`:
+   * two directives write one attribute, and the family the element is drawn by
+   * keeps it, as React's `render` does by spreading the button's props last.
+   */
+  protected readonly part = this.native.hasAttribute('data-ui')
+    ? this.native.getAttribute('data-part')
+    : 'trigger';
 
   protected readonly controls = computed(() =>
     this.drawer().mounted() ? this.drawer().panelId : null,

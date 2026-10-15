@@ -37,7 +37,11 @@
    * — and a descendant rule would restyle theirs.
    */
   [data-ui='page-header'] {
-    --_ground: var(--slotted-page-header-background, var(--slotted-surface, Canvas));
+    --_surface: var(--slotted-page-header-background, var(--slotted-surface, Canvas));
+    /* What the root and the title area paint; `plain` takes it away at rest. */
+    --_ground: var(--_surface);
+    /* How far below the scroller's edge the chrome holds; `floating` sets it. */
+    --_sticky-inset: 0px;
     --_rule: var(--slotted-page-header-border, var(--slotted-border-subtle, ButtonBorder));
     --_text: var(--slotted-text, CanvasText);
     --_muted: var(--slotted-text-muted, GrayText);
@@ -80,7 +84,7 @@
     container-type: inline-size;
     font-family: var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif);
     inline-size: 100%;
-    inset-block-start: calc(-1 * var(--slotted-page-header-collapse, 0px));
+    inset-block-start: calc(var(--_sticky-inset) - var(--slotted-page-header-collapse, 0px));
     min-inline-size: 0;
     /**
      * Scroll anchoring would move the scroll position to keep the content
@@ -149,7 +153,48 @@
   [data-ui='page-header'][data-revealed],
   [data-ui='page-header'][data-collapse='manual'],
   [data-ui='page-header']:has([data-part='pin'][data-pressed]) {
-    inset-block-start: 0;
+    inset-block-start: var(--_sticky-inset);
+  }
+
+  /* ── Variant ─────────────────────────────────────────────────────────── */
+
+  /**
+   * `band`, the default, is the chrome as a strip of the surface with one
+   * hairline under it. `plain` paints no ground of its own at rest and takes
+   * the one it stands on; once content passes under the chrome — the binding
+   * writes `data-stuck` — the surface comes back, because a header with no
+   * ground would show the page through its title. The hairline stays in
+   * both: it is where the chrome ends.
+   */
+  [data-ui='page-header'][data-variant='plain']:not([data-stuck]) {
+    --_ground: transparent;
+  }
+
+  /**
+   * `floating` is a box of its own for a header that stands inside padding:
+   * the hairline goes all the way round, the corners are a card's step,
+   * and stuck it slides to an inset below the scroller's edge with a shadow,
+   * as a thing lying on the content and not a strip across it. The inset is
+   * the stuck state's alone: a header flush with its scroller's edge at rest
+   * sat an inset down over the content under it. The title area paints its
+   * own ground, so its top corners follow the root's, and it slides with it.
+   */
+  [data-ui='page-header'][data-variant='floating'] {
+    --_radius: var(--slotted-page-header-radius, var(--slotted-radius-lg, 8px));
+
+    border: var(--_rule-size) solid var(--_rule);
+    border-radius: var(--_radius);
+    box-sizing: border-box;
+  }
+  [data-ui='page-header'][data-variant='floating'] > * > [data-part='title-area'] {
+    border-start-end-radius: calc(var(--_radius) - var(--_rule-size));
+    border-start-start-radius: calc(var(--_radius) - var(--_rule-size));
+    transition: inset-block-start var(--_duration) var(--_easing);
+  }
+  [data-ui='page-header'][data-variant='floating'][data-stuck] {
+    --_sticky-inset: var(--slotted-page-header-inset, var(--slotted-space-4, 0.5rem));
+
+    box-shadow: var(--slotted-page-header-shadow, var(--slotted-shadow-sm));
   }
 
   /**
@@ -166,6 +211,7 @@
     position: relative;
   }
   [data-ui='page-header'][data-compact] > * > [data-part='title-area'] {
+    inset-block-start: 0;
     position: relative;
   }
 
@@ -181,7 +227,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--slotted-space-3, 0.375rem);
-    inset-block-start: 0;
+    inset-block-start: var(--_sticky-inset);
     overflow-anchor: none;
     padding-block: var(--_padding-block) var(--slotted-space-4, 0.5rem);
     position: sticky;
@@ -528,7 +574,12 @@
   }
   /* The title starts from its own width, not from the basis a wrapping row gives it, at every
      width, and does not grow past it: the room it does not use is the cluster's. It shrinks only
-     once the cluster is down to its menu's trigger, because nothing else in the row can. */
+     once the cluster is down to its menu's trigger, because nothing else in the row can.
+     Its own width is its widest line. A wrapping flex row measures its items end to end, as if on
+     one line: a heading, its marks and the subheading under them came to 769 pixels for two lines
+     of 420, and the toolbar beside them folded every command into its menu next to empty room. As
+     a grid — the heading and its marks on the first line, the subheading across both columns
+     under them — the title is as wide as its widest line. */
   [data-ui='page-header']
     > *
     > [data-part='title-area']
@@ -536,7 +587,31 @@
       > [data-part='actions'] > [data-ui='toolbar'][data-overflow='menu']
     )
     > [data-part='title'] {
+    align-items: center;
+    display: grid;
     flex: 0 1 auto;
+    grid-template-columns: minmax(0, auto) auto;
+    justify-content: start;
+  }
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']:has(
+      > [data-part='actions'] > [data-ui='toolbar'][data-overflow='menu']
+    )
+    > [data-part='title']
+    > [data-part='heading'] {
+    grid-column: 1;
+  }
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']:has(
+      > [data-part='actions'] > [data-ui='toolbar'][data-overflow='menu']
+    )
+    > [data-part='title']
+    > [data-part='subheading'] {
+    grid-column: 1 / -1;
   }
   /* The cluster starts from nothing and grows into what the title leaves, so its width follows
      the row's in both directions. It never gives way below its menu's trigger, a medium control,
@@ -745,7 +820,8 @@
     position: absolute;
   }
   [data-ui='page-header'] > * > [data-part='controls'] > * {
-    background-color: var(--_ground);
+    /* The pill is a control on the hairline: it keeps the surface in every variant. */
+    background-color: var(--_surface);
     border: var(--_rule-size) solid var(--_rule);
     border-radius: var(--slotted-radius-full, 9999px);
     display: inline-flex;
@@ -1064,6 +1140,16 @@
       > [data-part='title']
       > [data-part='marks'] {
       flex-basis: 100%;
+    }
+    [data-ui='page-header']
+      > *
+      > [data-part='title-area']
+      > [data-part='title-row']:has(
+        > [data-part='actions'] > [data-ui='toolbar'][data-overflow='menu']
+      )
+      > [data-part='title']
+      > [data-part='marks'] {
+      grid-column: 1 / -1;
     }
     /* One line, as snapped: the phone has no second one to give it. */
     [data-ui='page-header']

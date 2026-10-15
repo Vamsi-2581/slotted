@@ -437,7 +437,7 @@ export class SlTableSelectAll {
     'data-part': 'expander',
     type: 'button',
     '[attr.aria-expanded]': 'row.expanded()',
-    '[attr.aria-controls]': 'row.detailId()',
+    '[attr.aria-controls]': 'row.expanded() ? row.detailId() : null',
     '[attr.aria-label]': 'name()',
     '(click)': 'press($event)',
   },

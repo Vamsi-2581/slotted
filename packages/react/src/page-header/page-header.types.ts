@@ -24,6 +24,14 @@ export type PageHeaderLevel = '1' | '2' | '3';
  */
 export type PageHeaderCollapse = 'scroll' | 'manual';
 
+/**
+ * The ground and the frame. `band` is a strip of the surface with a hairline
+ * under it; `plain` paints no ground at rest and takes the surface back once
+ * content passes under it; `floating` is a box of its own, rounded, that
+ * slides to an inset below the scroller's edge once stuck.
+ */
+export type PageHeaderVariant = 'band' | 'plain' | 'floating';
+
 /** Why the header area opened or closed. */
 export type PageHeaderExpandedReason = Extract<
   ChangeRequest<boolean>['reason'],
@@ -44,6 +52,7 @@ export interface PageHeaderDefaults {
   collapse: PageHeaderCollapse;
   level: PageHeaderLevel;
   size: PageHeaderSize;
+  variant: PageHeaderVariant;
 }
 
 export interface PageHeaderDefaultsProviderProps extends Partial<PageHeaderDefaults> {
@@ -97,7 +106,9 @@ export interface PageHeaderRootProps extends HTMLAttributes<HTMLElement> {
   'data-revealed'?: '' | undefined;
   'data-scrolled'?: '' | undefined;
   'data-size': PageHeaderSize;
+  'data-stuck'?: '' | undefined;
   'data-ui': string;
+  'data-variant': PageHeaderVariant;
 }
 
 /** What `render` receives for a plain part. */
@@ -173,6 +184,8 @@ export interface PageHeaderProps extends Omit<ComponentPropsWithRef<'header'>, '
   render?: ((props: PageHeaderRootProps) => ReactNode) | undefined;
   /** Defaults to the provider, then `md`. */
   size?: PageHeaderSize | undefined;
+  /** Defaults to the provider, then `band`. */
+  variant?: PageHeaderVariant | undefined;
 }
 
 /**

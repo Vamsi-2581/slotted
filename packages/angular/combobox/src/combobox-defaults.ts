@@ -122,7 +122,7 @@ export const COMBOBOX_FALLBACK: ComboboxDefaults = {
   size: 'md',
   strategy: 'absolute',
   variant: 'outline',
-  width: 'anchor',
+  width: 'content',
 };
 
 export const COMBOBOX_DEFAULTS = new InjectionToken<ComboboxDefaults>('COMBOBOX_DEFAULTS', {

@@ -220,9 +220,12 @@ export function DialogContent({
     });
     scope.enter();
 
+    /* The layer first: it lifts the `inert` it wrote on the background, and a
+       browser refuses focus inside an inert subtree, so a scope taken down
+       first hands focus back to a trigger that cannot take it. */
     return () => {
-      scope.destroy();
       layerHandle.destroy();
+      scope.destroy();
     };
   }, [content, dialog]);
 

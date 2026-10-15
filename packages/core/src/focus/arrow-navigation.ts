@@ -14,6 +14,13 @@ export interface ArrowNavigationOptions {
   loop?: boolean | (() => boolean);
   /** Reports movement, after focus has landed. The caller decides what it means. */
   onMove?: (index: number, item: HTMLElement) => void;
+  /**
+   * How an item takes focus. `item.focus()` by default, which scrolls every
+   * scroller above the item, the page included; a list that scrolls inside a
+   * layer anchored to a control focuses without scrolling and reveals the item
+   * inside itself.
+   */
+  focus?: (item: HTMLElement) => void;
   /** Read at the time of each key, so a consumer may change it at runtime. */
   orientation?: () => Orientation;
   /**
@@ -193,7 +200,8 @@ export function createArrowNavigation(
   function moveTo(index: number, from: number) {
     if (index === -1 || index === from) return;
     const item = items[index]!;
-    item.focus();
+    if (options.focus === undefined) item.focus();
+    else options.focus(item);
     options.onMove?.(index, item);
   }
 

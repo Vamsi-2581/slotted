@@ -683,6 +683,114 @@
         </div>
       </div>
     </div>
+    <p data-demo-label>an icon before the label and a count after it</p>
+    <div data-demo-frame>
+      <div
+        data-ui="tabs"
+        data-part="root"
+        data-variant="line"
+        data-size="md"
+        data-fit="auto"
+        data-orientation="horizontal"
+        data-track="line"
+        data-activation-direction="none"
+      >
+        <div data-part="list" role="tablist" aria-label="Customer">
+          <div data-part="item" role="presentation">
+            <button
+              data-part="tab"
+              role="tab"
+              id="a-a"
+              aria-controls="ap-a"
+              aria-selected="false"
+              tabindex="-1"
+              type="button"
+            >
+              <span data-part="start"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="file-text"></svg></span
+              ></span>
+              <span data-part="label">Overview</span>
+            </button>
+          </div>
+          <div data-part="item" role="presentation" data-selected>
+            <button
+              data-part="tab"
+              role="tab"
+              id="a-b"
+              aria-controls="ap-b"
+              aria-selected="true"
+              tabindex="0"
+              type="button"
+            >
+              <span data-part="start"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="inbox"></svg></span
+              ></span>
+              <span data-part="label">Orders</span>
+              <span data-part="end"
+                ><span
+                  data-ui="badge"
+                  data-part="root"
+                  data-tone="secondary"
+                  data-variant="soft"
+                  data-size="sm"
+                  data-shape="pill"
+                  ><span data-part="label">12</span></span
+                ></span
+              >
+            </button>
+          </div>
+          <div data-part="item" role="presentation">
+            <button
+              data-part="tab"
+              role="tab"
+              id="a-c"
+              aria-controls="ap-c"
+              aria-selected="false"
+              tabindex="-1"
+              type="button"
+            >
+              <span data-part="start"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="person"></svg></span
+              ></span>
+              <span data-part="label">Contacts</span>
+              <span data-part="end"
+                ><span
+                  data-ui="badge"
+                  data-part="root"
+                  data-tone="secondary"
+                  data-variant="soft"
+                  data-size="sm"
+                  data-shape="pill"
+                  ><span data-part="label">3</span></span
+                ></span
+              >
+            </button>
+          </div>
+        </div>
+        <div
+          data-part="panel"
+          role="tabpanel"
+          id="ap-a"
+          aria-labelledby="a-a"
+          tabindex="0"
+          hidden
+        ></div>
+        <div data-part="panel" role="tabpanel" id="ap-b" aria-labelledby="a-b" tabindex="0">
+          <p data-demo-body>12 open orders.</p>
+        </div>
+        <div
+          data-part="panel"
+          role="tabpanel"
+          id="ap-c"
+          aria-labelledby="a-c"
+          tabindex="0"
+          hidden
+        ></div>
+      </div>
+    </div>
   </div>
 </section>
 

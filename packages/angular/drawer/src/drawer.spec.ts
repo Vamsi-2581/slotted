@@ -1,8 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, PLATFORM_ID, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { SlButton } from '@slotted/angular/button';
 import { provideSlotted } from '@slotted/angular/i18n';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
@@ -798,6 +799,111 @@ describe('SlDrawer words', () => {
     locale.set('en-US');
     fixture.detectChanges();
     expect(close()?.getAttribute('aria-label')).toBe('Close');
+    fixture.destroy();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlButton, SlDrawer, SlDrawerTrigger],
+  template: `<button slButton [slDrawerTrigger]="d">View order</button>
+    <sl-drawer #d="slDrawer"></sl-drawer>`,
+})
+class ButtonTrigger {}
+
+/**
+ * The trigger's part names the control the family draws for itself. On the
+ * library's button the element is the root of that family, which is what
+ * React's `DrawerTrigger render={(props) => <Button {...props} />}` renders:
+ * the button's own props are spread after the trigger's.
+ */
+describe('SlDrawerTrigger on the library button', () => {
+  it('leaves the button the root of its own family', () => {
+    TestBed.configureTestingModule({ imports: [ButtonTrigger] });
+    const fixture = TestBed.createComponent(ButtonTrigger);
+    fixture.detectChanges();
+
+    const control = fixture.nativeElement.querySelector('[data-ui="button"]') as HTMLElement;
+    expect(control.getAttribute('data-part')).toBe('root');
+    expect(control.getAttribute('aria-haspopup')).toBe('dialog');
+    fixture.destroy();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlDrawer, SlDrawerHeader, SlDrawerTitle, SlDrawerBody],
+  template: `<sl-drawer mode="inline" side="start" [open]="true" [extent]="0.4">
+    <header slDrawerHeader><h2 slDrawerTitle>Filters</h2></header>
+    <div slDrawerBody>Status</div>
+  </sl-drawer>`,
+})
+class OpenInline {}
+
+/**
+ * The server lays nothing out, and its DOM has no `getBoundingClientRect`: an
+ * inline drawer rendered open there threw from the effects that measure it,
+ * and the application's error handler logged one error per drawer.
+ */
+describe('SlDrawer on the server', () => {
+  it('measures nothing while it renders an open inline drawer', () => {
+    TestBed.configureTestingModule({
+      imports: [OpenInline],
+      providers: [{ provide: PLATFORM_ID, useValue: 'server' }],
+    });
+    const measure = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect');
+    const fixture = TestBed.createComponent(OpenInline);
+    fixture.detectChanges();
+    TestBed.tick();
+
+    expect(fixture.nativeElement.querySelector('[data-part="panel"]')).not.toBeNull();
+    expect(measure).not.toHaveBeenCalled();
+    measure.mockRestore();
+    fixture.destroy();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlDrawer, SlDrawerBody],
+  template: `<div class="layout">
+    <sl-drawer mode="inline" side="start" [open]="true" [extent]="0.4">
+      <div slDrawerBody>Status</div>
+    </sl-drawer>
+  </div>`,
+})
+class MeasuredInline {}
+
+/**
+ * An inline drawer's measure is a fraction of the box it stands in. The host
+ * renders `display: contents` and lays nothing out, so that box is the host's
+ * own parent: the consumer's layout.
+ */
+describe('SlDrawer inline extent', () => {
+  it('is a fraction of the consumer’s layout, not of its own host', () => {
+    TestBed.configureTestingModule({ imports: [MeasuredInline] });
+    const measure = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        const width = this.classList.contains('layout') ? 1000 : 0;
+        return {
+          bottom: 600,
+          height: 600,
+          left: 0,
+          right: width,
+          top: 0,
+          width,
+          x: 0,
+          y: 0,
+        } as DOMRect;
+      });
+    const fixture = TestBed.createComponent(MeasuredInline);
+    fixture.detectChanges();
+    TestBed.tick();
+
+    const root = fixture.nativeElement.querySelector('[data-ui="drawer"]') as HTMLElement;
+    expect(root.style.getPropertyValue('--slotted-drawer-extent')).toBe('400px');
+    measure.mockRestore();
     fixture.destroy();
   });
 });

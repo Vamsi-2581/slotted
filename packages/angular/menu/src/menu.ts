@@ -60,6 +60,22 @@ const textOf = (item: HTMLElement) =>
 const enabled = (item: HTMLElement) => item.dataset['disabled'] === undefined;
 
 /**
+ * Focus without the browser's own scroll, which reveals an item by scrolling
+ * the page as well as the surface and centres it in the window, carrying the
+ * layer off its trigger. The surface scrolls inside the room the positioner
+ * gives it, so the item is brought into the surface and nothing further.
+ */
+const reveal = (item: HTMLElement) => {
+  item.focus({ preventScroll: true });
+  const surface = item.closest<HTMLElement>("[data-part='content']");
+  if (surface === null) return;
+  const box = surface.getBoundingClientRect();
+  const own = item.getBoundingClientRect();
+  if (own.top < box.top) surface.scrollTop -= box.top - own.top;
+  else if (own.bottom > box.bottom) surface.scrollTop += own.bottom - box.bottom;
+};
+
+/**
  * A list of commands on a layer.
  *
  * The component renders **nothing where it is written**: its content lives in a
@@ -328,7 +344,8 @@ export class SlMenu {
   /** Moves focus onto an item of this surface. */
   focusItem(index: number) {
     const list = this.items();
-    list[index < 0 ? list.length + index : index]?.focus({ preventScroll: true });
+    const item = list[index < 0 ? list.length + index : index];
+    if (item !== undefined) reveal(item);
   }
 
   items(): HTMLElement[] {
@@ -433,6 +450,7 @@ export class SlMenu {
     });
 
     this.navigation = createArrowNavigation(this.surfaceNode, {
+      focus: reveal,
       includeAriaDisabled: true,
       itemSelector: MENU_ITEM_SELECTOR,
       loop: () => this.resolvedLoop(),
@@ -456,7 +474,8 @@ export class SlMenu {
 
     const list = this.items();
     const ordered = entry === 'first' ? list : [...list].reverse();
-    (ordered.find(enabled) ?? ordered[0])?.focus({ preventScroll: true });
+    const item = ordered.find(enabled) ?? ordered[0];
+    if (item !== undefined) reveal(item);
   }
 
   private hide() {

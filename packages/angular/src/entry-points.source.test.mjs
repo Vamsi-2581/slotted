@@ -64,3 +64,19 @@ test('names every stylesheet with a literal a compiler can resolve', () => {
     `A stylesheet named by an identifier is dropped by the Storybook compiler:\n  ${violations.join('\n  ')}`,
   );
 });
+
+/**
+ * A family folder is an entry point only through its `ng-package.json`.
+ * `switch` lost the file in a sweep that removed several and restored the
+ * others, and the package then shipped without `@slotted/angular/switch`:
+ * the documentation site, which compiles from source, still worked, and every
+ * consumer's import failed.
+ */
+test('publishes every family folder as an entry point', () => {
+  const missing = readdirSync(packageRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && !['dist', 'node_modules', 'src'].includes(entry.name))
+    .filter((entry) => existsSync(join(packageRoot, entry.name, 'src', 'public-api.ts')))
+    .filter((entry) => !existsSync(join(packageRoot, entry.name, 'ng-package.json')))
+    .map((entry) => entry.name);
+  assert.deepEqual(missing, []);
+});

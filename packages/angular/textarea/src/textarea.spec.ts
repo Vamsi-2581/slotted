@@ -16,6 +16,7 @@ import { provideTextareaDefaults } from './textarea-defaults';
 class Host {
   readonly value = signal<string | undefined>(undefined);
   readonly control = new FormControl('Ada');
+  readonly limit = signal(140);
 }
 
 function renderTemplate(template: string, providers: unknown[] = []) {
@@ -175,5 +176,22 @@ describe('SlTextarea', () => {
     type(control(fixture), 'oi tudo bem');
     fixture.detectChanges();
     expect(query(fixture, '[data-part="counter"]').textContent?.trim()).toBe('11/280');
+  });
+
+  it('counts against a bound maxLength, and the element enforces it', () => {
+    const fixture = renderTemplate(
+      `<div slField>
+         <textarea slTextarea showCount [maxLength]="limit()" defaultValue="oi"></textarea>
+       </div>`,
+    );
+    const host = fixture.componentInstance;
+
+    expect(query(fixture, '[data-part="counter"]').textContent?.trim()).toBe('2/140');
+    expect(control(fixture).maxLength).toBe(140);
+
+    host.limit.set(60);
+    fixture.detectChanges();
+    expect(query(fixture, '[data-part="counter"]').textContent?.trim()).toBe('2/60');
+    expect(control(fixture).getAttribute('maxlength')).toBe('60');
   });
 });

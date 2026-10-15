@@ -109,6 +109,12 @@ export class SlTextFieldInput implements ControlValueAccessor, OnInit, SlTextFie
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
   });
   readonly defaultRevealed = input(false, { transform: booleanAttribute });
+  /**
+   * The element's own `type`, written or bound. An input rather than a host
+   * attribute read once, because a bound `[type]` would otherwise go to the
+   * element's property and the host binding below would never see it.
+   */
+  readonly type = input<TextFieldType | string | undefined>(undefined);
 
   /**
    * One output for one transition, carrying the value, the value it replaces,
@@ -133,7 +139,6 @@ export class SlTextFieldInput implements ControlValueAccessor, OnInit, SlTextFie
   private readonly field = inject(SlField, { optional: true });
 
   private readonly writtenId = inject(new HostAttributeToken('id'), { optional: true });
-  private readonly writtenType = inject(new HostAttributeToken('type'), { optional: true });
   private readonly writtenDescribedBy = inject(new HostAttributeToken('aria-describedby'), {
     optional: true,
   });
@@ -160,7 +165,8 @@ export class SlTextFieldInput implements ControlValueAccessor, OnInit, SlTextFie
   readonly currentValue = this.mirror.asReadonly();
   readonly empty = computed(() => this.mirror() === '');
   readonly revealed = computed(() => this.revealedValue() ?? this.ownRevealed());
-  readonly password = computed(() => (this.writtenType ?? 'text') === 'password');
+  private readonly ownType = computed(() => this.type() ?? 'text');
+  readonly password = computed(() => this.ownType() === 'password');
 
   readonly resolvedDisabled = computed(
     () => this.disabled() ?? this.formDisabled() ?? this.field?.resolvedDisabled(),
@@ -182,7 +188,7 @@ export class SlTextFieldInput implements ControlValueAccessor, OnInit, SlTextFie
    * on the element would otherwise write over.
    */
   protected readonly resolvedType = computed<TextFieldType | string>(() =>
-    this.password() && this.revealed() ? 'text' : (this.writtenType ?? 'text'),
+    this.password() && this.revealed() ? 'text' : this.ownType(),
   );
   /** Merged after the consumer's own, so a tour step is read before the help. */
   protected readonly describedBy = computed(() => {

@@ -34,14 +34,11 @@ import type {
 import type { GridColumn, ResolvedGridColumn } from '@slotted/core/grid';
 import { NgTemplateOutlet } from '@angular/common';
 import {
-  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
-  Directive,
   effect,
-  ElementRef,
   inject,
   input,
   output,
@@ -189,7 +186,7 @@ function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
           [fullWidth]="true"
           [items]="truths()"
           [placeholder]="t()('filterAny')"
-          [attr.aria-label]="label()"
+          [aria-label]="label()"
           [value]="value() === true ? 'true' : value() === false ? 'false' : null"
           (valueChange)="
             valueChange.emit($event === 'true' ? true : $event === 'false' ? false : null)
@@ -209,7 +206,7 @@ function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
           [items]="setItems()"
           [locale]="locale()"
           [placeholder]="t()('filterAny')"
-          [attr.aria-label]="label()"
+          [aria-label]="label()"
           [value]="setValue()"
           (valueChange)="valueChange.emit([...$event])"
         >
@@ -1014,21 +1011,5 @@ export class SlDataGridEditor {
   }
   protected isoDateTime(value: unknown) {
     return isPlainDateTime(value) ? toISODateTime(value) : null;
-  }
-}
-
-/**
- * `slMenuTriggerFor` binds `[attr.data-part]` and resolves it to `null` on a
- * trigger that is neither a bar's item nor a submenu's; a host binding of
- * `null` removes the part the template wrote. The part is written back after
- * the first change detection, where the constant binding is not applied again.
- */
-@Directive({ selector: '[slDataGridPart]', standalone: true })
-export class SlDataGridPart {
-  readonly slDataGridPart = input.required<string>();
-
-  constructor() {
-    const element: HTMLElement = inject(ElementRef).nativeElement;
-    afterNextRender(() => element.setAttribute('data-part', this.slDataGridPart()));
   }
 }

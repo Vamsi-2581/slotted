@@ -18,13 +18,13 @@ describe('SlDrawer stories', () => {
    * `defaultOpen` row would document an input this binding does not have.
    */
   it('documents each public component API', () => {
-    expect(apiMetadataErrors(contract.members.drawer, ANGULAR_DRAWER_DOCS.api)).toEqual([]);
+    expect(apiMetadataErrors(contract.members.drawer, ANGULAR_DRAWER_DOCS.drawer.api)).toEqual([]);
   });
 
   it('answers the reference-page contract', () => {
     expect(
       referencePageErrors({
-        docs: ANGULAR_DRAWER_DOCS,
+        docs: ANGULAR_DRAWER_DOCS.drawer,
         framework: 'Angular',
         member: contract.members.drawer,
         scenarioIds: contract.scenarios.drawer,
@@ -35,8 +35,8 @@ describe('SlDrawer stories', () => {
 
   it('keeps curated snippets formatted', async () => {
     const snippets = [
-      ...ANGULAR_DRAWER_DOCS.snippets,
-      ...ANGULAR_DRAWER_DOCS.scenes.map((scene) => scene.snippet),
+      ...ANGULAR_DRAWER_DOCS.drawer.snippets,
+      ...ANGULAR_DRAWER_DOCS.drawer.scenes.map((scene) => scene.snippet),
     ];
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });

@@ -11,5 +11,6 @@ export type {
   RadioGroupLabelPlacement,
   RadioGroupOrientation,
   RadioGroupSize,
+  RadioGroupVariant,
 } from './radio-group-defaults';
 export { SlRadio, SlRadioDescription } from './radio-group-parts';

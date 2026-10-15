@@ -155,6 +155,23 @@ describe('Combobox', () => {
     await waitFor(() => expect(highlighted()).toBe(optionNamed('Blueberry').id));
   });
 
+  /**
+   * The contract's focus.onOpen: the highlight goes to the selected option, to
+   * the first when autoHighlight is set. A press opens the popup before the
+   * reader types, so the typing after it must still leave a match under Enter.
+   */
+  it('highlights the first match after a press opened the popup, and as the reader types', async () => {
+    render(<Basic autoHighlight />);
+    input().focus();
+    fireEvent.click(input());
+    await screen.findByRole('listbox');
+    await waitFor(() => expect(highlighted()).toBe(optionNamed('Blueberry').id));
+    type('fruit');
+    await waitFor(() => expect(highlighted()).toBe(optionNamed('Grapefruit').id));
+    press('Enter');
+    expect(input()).toHaveValue('Grapefruit');
+  });
+
   it('commits the highlighted option into both contracts, each with its own request', async () => {
     const onValueChange = vi.fn();
     const onInputValueChange = vi.fn();

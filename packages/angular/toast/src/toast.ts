@@ -1,4 +1,4 @@
-import { NgTemplateOutlet } from '@angular/common';
+import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import {
   afterRenderEffect,
   booleanAttribute,
@@ -13,6 +13,7 @@ import {
   Injector,
   input,
   output,
+  PLATFORM_ID,
   signal,
   viewChild,
   ViewEncapsulation,
@@ -394,6 +395,7 @@ export class SlToastRegion {
   private readonly service = inject(SlToastService);
   private readonly layer = viewChild.required<ElementRef<HTMLElement>>('layer');
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
 
   /**
    * A region the page's own array feeds cannot share the injected service: the
@@ -445,10 +447,14 @@ export class SlToastRegion {
      * A portalled region inherits nothing from where it was written, so the
      * layer carries the theme, the scheme, the density and the direction of the
      * host it came from. Every surveyed implementation loses them.
+     *
+     * Only in the browser, as the focus effects below: the server's document is
+     * not the page. The region is drawn in its host there, where hydration
+     * expects the view's nodes, and nothing on the server holds focus.
      */
     effect((onCleanup) => {
       const section = this.layer().nativeElement;
-      if (this.resolvedAttach() !== 'portal') return;
+      if (this.resolvedAttach() !== 'portal' || !this.browser) return;
 
       const handle = createPortalRoot({
         origin: this.host.nativeElement,
@@ -470,6 +476,7 @@ export class SlToastRegion {
      */
     effect((onCleanup) => {
       const section = this.layer().nativeElement;
+      if (!this.browser) return;
       const handle = createRemovalFocus(section, {
         itemSelector: '[data-part="item"]',
         fallback: () => this.cameFrom,
@@ -482,6 +489,7 @@ export class SlToastRegion {
       const section = this.layer().nativeElement;
       const doc = section.ownerDocument;
       const hotkey = this.resolvedHotkey();
+      if (!this.browser) return;
 
       const onKeyDown = (event: KeyboardEvent) => {
         const parts = hotkey.toLowerCase().split('+');

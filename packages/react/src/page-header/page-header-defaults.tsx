@@ -6,6 +6,7 @@ const FALLBACK: PageHeaderDefaults = {
   collapse: 'scroll',
   level: '1',
   size: 'md',
+  variant: 'band',
 };
 
 const PageHeaderDefaultsContext = createContext<PageHeaderDefaults>(FALLBACK);
@@ -33,6 +34,7 @@ export function PageHeaderDefaultsProvider({
         collapse: defaults.collapse ?? inherited.collapse,
         level: defaults.level ?? inherited.level,
         size: defaults.size ?? inherited.size,
+        variant: defaults.variant ?? inherited.variant,
       }}
     >
       {children}

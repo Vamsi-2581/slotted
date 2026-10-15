@@ -42,73 +42,73 @@ const alertImports: ReferenceImport = {
 const sharedAnatomy: AnatomyRow[] = [
   {
     part: 'root',
-    element: 'div, in a portal — not the sl-dialog host, which stays where it was written',
+    element: 'div, in a portal; the sl-dialog host stays where it is written',
     required: true,
     purpose:
-      'The layer. Fixed to the viewport, carrying data-ui="dialog", every axis, data-open and data-loading, and a z-index that is --slotted-z-index-overlay plus the depth dismissable-layer writes on it. It is also the query container, so full screen answers the layer’s own inline size rather than the window’s.',
+      'The layer, fixed over the viewport. It carries data-ui="dialog", one attribute per axis, data-open and data-loading, and a z-index of --slotted-z-index-overlay plus the depth of the layer stack, so a dialog opened over another sits above it. It is also the container that fullScreen="narrow" measures, so full screen follows the width of the layer rather than the width of the window.',
   },
   {
     part: 'trigger',
-    element: 'the consumer’s own element, with slDialogTrigger on it',
+    element: 'your own element, with slDialogTrigger on it',
     required: false,
     purpose:
-      'The control that opens it, rendered where it is written rather than in the portal. It carries aria-haspopup, aria-expanded and aria-controls, and it is the layer’s branch — a press on it is inside the layer, or opening would be read as a press outside and close what it just opened.',
+      'The control that opens the dialog. It stays where it is written while the layer is rendered in a portal, and carries aria-haspopup, aria-expanded and aria-controls. A press on it does not count as a press outside the dialog. On slButton, the element keeps the button’s data-part="root".',
   },
   {
     part: 'backdrop',
     element: 'div',
     required: true,
     purpose:
-      'The scrim, painted from --slotted-scrim. One of the two things placed in the layer’s single grid cell, and the one that never scrolls.',
+      'The scrim behind the panel, painted from --slotted-scrim. It does not scroll. A non-modal dialog does not paint it and lets the pointer through to the page.',
   },
   {
     part: 'viewport',
     element: 'div',
     required: true,
     purpose:
-      'The box that centres the panel and, under scroll="viewport", the box that scrolls. It is separate from the layer because a scrim inside a scrolling box scrolls away with it. It centres with safe center, so a panel taller than the layer keeps its title on screen instead of overflowing at both ends.',
+      'The box that positions the panel and, with scroll="viewport", the box that scrolls. A panel taller than the layer aligns to the top edge, so its title stays on screen.',
   },
   {
     part: 'content',
     element: 'div',
     required: true,
     purpose:
-      'The panel: role="dialog", aria-modal while modal, and a three-row grid — auto, minmax(0, 1fr), auto. That grid is what keeps the actions on screen when the body is long.',
+      'The panel. It carries role="dialog" and, while modal, aria-modal="true". It is a grid of three rows, header, body and footer, and only the body row shrinks, so the actions stay on screen when the body is long.',
   },
   {
     part: 'header',
-    element: 'header, with the directive on it',
+    element: 'your own header, with slDialogHeader on it',
     required: false,
     purpose:
-      'Three columns: the mark, the words, and the close button. The mark and the button each keep a column of their own, so a title that wraps grows the row instead of pushing either off the line. Anything else you write here — a status indicator, a badge, a line of your own — lands in the words column under the description, aligned with the title.',
+      'Three columns: the mark, the words and the corner buttons. A title that wraps makes the row taller and never pushes the close button off the line. Any other content written in the header, such as a badge, is placed in the words column under the description.',
   },
   {
     part: 'title',
-    element: 'the consumer’s own heading, with slDialogTitle on it',
+    element: 'your own heading, with slDialogTitle on it',
     required: false,
     purpose:
-      'The visible name. aria-labelledby points at it, and only when it is actually rendered — a reference to an id nothing carries is worse than no accessible name at all.',
+      'The visible name of the dialog. The panel points aria-labelledby at it only while it is rendered.',
   },
   {
     part: 'description',
-    element: 'the consumer’s own element, with slDialogDescription on it',
+    element: 'your own element, with slDialogDescription on it',
     required: false,
     purpose:
-      'The sentence that says what the dialog is about. aria-describedby points at it. Optional here and required in AlertDialog, which is the difference between the two patterns.',
+      'The sentence that says what the dialog is for. The panel points aria-describedby at it only while it is rendered. It is optional in sl-dialog and required in sl-alert-dialog.',
   },
   {
     part: 'body',
-    element: 'div, with the directive on it',
+    element: 'your own element, with slDialogBody on it',
     required: false,
     purpose:
-      'The one row that scrolls, and the row aria-busy belongs to while the content is still on its way. overscroll-behavior keeps a wheel that reaches its end from scrolling the page behind a non-modal layer.',
+      'The row that scrolls. It carries aria-busy while loading is set. Scrolling it to the end does not scroll the page behind a non-modal dialog.',
   },
   {
     part: 'footer',
-    element: 'footer, with the directive on it',
+    element: 'your own footer, with slDialogFooter on it',
     required: false,
     purpose:
-      'The actions. A wrapping row aligned to the end, on the sunken surface, with a rule above it — every rule in the panel belongs to the row below it, so a panel with no body draws one line rather than two.',
+      'The actions: a row aligned to the end that wraps when the buttons do not fit, on the sunken surface. Each row of the panel draws the rule above itself, so a panel without a body draws one rule, not two.',
   },
 ];
 
@@ -116,17 +116,17 @@ const anatomy: AnatomyRow[] = [
   ...sharedAnatomy,
   {
     part: 'close',
-    element: 'button',
+    element: 'your own button, with slDialogClose on it',
     required: false,
     purpose:
-      'The ✕. An icon-only control the size of a medium control rather than of its mark, so the target clears the WCAG minimum in both axes. It closes with reason dismiss and carries whatever value it names as the result.',
+      'The ✕ button. Its target is at least 24 by 24 pixels. It closes the dialog with the reason dismiss, carrying its value as the result.',
   },
   {
     part: 'fullscreen',
     element: 'button',
     required: false,
     purpose:
-      'The control that hands the layer to the panel and takes it back, appended to the header by slDialogHeader when fullscreenToggle is set. The same inner control the close is, in the column before it, with aria-pressed for which way it is set and a mark that says what the next press does.',
+      'The button that expands the panel to the whole layer and restores it, appended by slDialogHeader when fullscreenToggle is set. It sits before the close button, carries aria-pressed, and its mark shows what the next press does.',
   },
 ];
 
@@ -142,30 +142,30 @@ const alertAnatomy: AnatomyRow[] = [
             ...row,
             required: true,
             purpose:
-              'The sentence that says what is about to happen. Required: the alertdialog pattern makes aria-describedby mandatory, and the family throws without it rather than shipping a confirmation announced as a title and two buttons.',
+              'The sentence that says what is about to happen. Required: the alertdialog pattern makes aria-describedby mandatory, and sl-alert-dialog throws an error when it is missing.',
           }
         : row,
   ),
   {
     part: 'icon',
-    element: 'span',
+    element: 'your own element, with slAlertDialogIcon on it',
     required: false,
     purpose:
-      'The tone’s own mark, drawn as a mask from a glyph token. It is what answers WCAG 2.2 SC 1.4.1 for a confirmation, and under forced colours it is the only thing left once every tone ground becomes one system colour.',
+      'The mark of the tone, drawn from a glyph, so the kind of decision does not depend on colour alone. Under forced colours it is the only signal of the tone.',
   },
   {
     part: 'cancel',
-    element: 'button',
+    element: 'your own button, with slAlertDialogCancel on it',
     required: true,
     purpose:
-      'The least destructive action, and where focus lands when the layer opens — the APG’s own advice for a step that is not easily reversible. It closes with reason dismiss and the result "cancel".',
+      'The least destructive answer, and where focus lands when the dialog opens. It closes with the reason dismiss and the result "cancel". On slButton, the element keeps the button’s data-part="root".',
   },
   {
     part: 'action',
-    element: 'button',
+    element: 'your own button, with slAlertDialogAction on it',
     required: true,
     purpose:
-      'The action being confirmed. It closes with reason submit and the result "confirm", because confirming is what the reader came to do and dismiss is what the other two controls mean.',
+      'The action being confirmed. It closes with the reason submit and the result "confirm". On slButton, the element keeps the button’s data-part="root".',
   },
 ];
 
@@ -494,92 +494,92 @@ const events: EventRow[] = [
   {
     name: '(openChangeRequest)',
     payload: 'DialogChangeRequest',
-    when: 'Before the layer moves, for all six ways it can. It carries the new value, the value it replaces, reason — pointer, keyboard, dismiss, escape, outsidePress, submit or programmatic — result, the originating event, and cancel(), which refuses the move before anything commits. One handler therefore covers Escape, an outside press, the close button and the instance together.',
+    when: 'Before the dialog opens or closes, whatever caused it. The request carries the new value, the previous value, the reason (pointer, keyboard, dismiss, escape, outsidePress, back, submit or programmatic), the result of the close, the originating event, and cancel(), which keeps the dialog as it is. One handler therefore guards the ✕, Escape, a press outside, the way back and close() together.',
   },
   {
     name: '(openChange)',
     payload: 'boolean',
-    when: 'After the value moved, from the model() signal, so a template may write [(open)] and nothing else. It says what the state is and not why it got there; the reason is on the request above.',
+    when: 'After the open state changed, so a template can bind [(open)]. It carries the new state only; the reason is on (openChangeRequest).',
   },
   {
     name: '(fullscreenChangeRequest)',
     payload: 'DialogFullscreenRequest',
-    when: 'Before the panel takes the layer or gives it back. It carries the new value, the value it replaces, reason — pointer, keyboard or programmatic — the originating event, and cancel(), which refuses the move before anything commits.',
+    when: 'Before the panel expands to the whole layer or is restored. The request carries the new value, the previous value, the reason (pointer, keyboard or programmatic), the originating event, and cancel(), which keeps the panel as it is.',
   },
   {
     name: '(fullscreenChange)',
     payload: 'boolean',
-    when: 'After the state moved, from the model() signal, so a template may write [(fullscreen)] and nothing else.',
+    when: 'After the expanded state changed, so a template can bind [(fullscreen)].',
   },
   {
     name: '(closed)',
     payload: 'string | undefined',
-    when: 'Once the layer has actually closed, with the result the close carried. It is afterClosed() from Angular Material, as an output rather than as an observable a service hands back.',
+    when: 'Once the dialog has closed, with the result of the close: the value of the button that closed it, the argument of close(result), or undefined.',
   },
 ];
 
 const composition = apiRows([
   [
-    'the directive on your own element',
+    'directives on your own elements',
     'attribute selector',
     '—',
     'slDialogTrigger, slDialogHeader, slDialogTitle, slDialogDescription, slDialogBody, slDialogFooter, slDialogClose, slAlertDialogIcon, slAlertDialogCancel, slAlertDialogAction',
-    'Every part but the layer itself is a directive on the element the consumer wrote, which is what this ecosystem composes with. React reaches the same place with render, because there the component owns the tag',
+    'Every part except the layer is a directive on an element you write, so the trigger, the cancel and the action can be a slButton.',
   ],
   [
     'exportAs',
     "'slDialog' | 'slAlertDialog'",
     '—',
     'sl-dialog, sl-alert-dialog',
-    'A template reference variable reaches the instance, which is what links a trigger to a dialog anywhere in the template. It is also why this binding needs no provider component around the two, where React does',
+    'A template reference variable reaches the instance. [slDialogTrigger]="dialog" links a trigger to it from anywhere in the same template.',
   ],
   [
     'openDialog(), close(result), focus()',
     '() => void',
     '—',
     'the instance',
-    'The three actions a consumer cannot express declaratively. MatDialog.open(Component) is declined: with @if and signals the declarative form is three lines, and what is genuinely lost — opening from a service with no template in scope — is named rather than hidden',
+    'Open the dialog, close it with a result, or move focus into the panel, from the template or from code. There is no service that opens a component as a dialog: render sl-dialog in the template, under @if when it should exist only while open.',
   ],
   [
     '--slotted-dialog-measure',
     'length',
     'from size',
     'the root part',
-    'The panel’s measure, for the width the five steps do not hold — a two-column form at 46rem, a media viewer at the width of its own image. A family token rather than a prop, so it is set per instance with a style attribute, per region with a rule, or once for an application in the theme; every step reads it, so an explicit measure wins over the step whichever step is asked for',
+    'The maximum width of the panel, for a width the five sizes do not hold, such as a two-column form at 46rem. Set it with a style attribute on one dialog, with a rule for a region, or once in the theme. It takes precedence over size.',
   ],
   [
     'container',
     'Element | null',
     '—',
     'sl-dialog, sl-alert-dialog',
-    'A parent for this layer alone instead of the shared portal root. The sl-dialog host stays where it was written and is the portal’s origin, so the layer inherits the scheme, density, theme and direction of the region around it whether a trigger exists or not',
+    'The element this dialog is rendered into, instead of the shared portal root. The layer takes the theme, scheme, density and direction of the place where sl-dialog is written, with or without a trigger.',
   ],
   [
     'provideDialogDefaults()',
-    '{ size, placement, scroll, mount, fullScreen, modal, escape, outsidePress }',
+    '{ size, placement, scroll, surface, mount, fullScreen, modal, escape, outsidePress, back }',
     '—',
     'an injector',
-    'The eight decisions an application takes once, through DIALOG_DEFAULTS. A dialog that states any of them itself still wins, because an explicit consumer value always does',
+    'Sets these ten values once for every dialog under the injector, through DIALOG_DEFAULTS. A value set on one dialog takes precedence.',
   ],
 ]);
 
 const accessibility = [
-  'The pattern is the WAI-ARIA APG’s Dialog (Modal) — w3.org/WAI/ARIA/apg/patterns/dialog-modal/ — and its whole keyboard table is answered: Tab moves to the next tabbable element inside the layer and wraps from the last to the first, Shift+Tab wraps the other way, and Escape closes. Escape reaches the topmost layer only, and a layer that refuses it stops the request reaching the one beneath, so one press never closes two.',
-  'The panel carries role="dialog", aria-labelledby its title and aria-describedby its description — each written only when that part was actually rendered, because a reference to an id nothing carries is worse than no accessible name at all. A consumer’s own aria-label survives and suppresses aria-labelledby rather than competing with it.',
-  'aria-modal="true" appears only while the layer is modal, which is the only state in which the background is genuinely unreachable: dismissable-layer writes inert on every sibling up to the document root, which takes the page out of the accessibility tree as well as out of the pointer’s reach. The APG warns that marking a dialog modal without doing both has severe consequences for the readers who rely on the mark, so modal={false} writes neither.',
-  'Focus moves into the layer on open — the first tabbable element by default, or the panel itself for content whose structure has to be read first, which is the APG’s own note — and returns to the element that held it when the layer opened. A trigger that has since left the document, because the dialog deleted the row it was opened from, falls back to that row’s nearest connected ancestor rather than dropping focus on the body.',
-  'The platform’s own dialog element is declined, and the cost is written rather than hidden: containment, inertness and Escape are all JavaScript here, and a page with scripting disabled has no dialog at all. What it buys is one z-index stack shared with every other overlay in the library — an element in the browser’s top layer paints above everything regardless of z-index, so a Select opened inside one would render behind the dialog it belongs to.',
-  'The close button is an inner control rather than a Button (R2): its box is the mark plus a step of air on each side, floored at --slotted-target-min, so the target clears the WCAG 2.2 minimum of 24 by 24 pixels in both axes. Its mark is a mask from a glyph token, never a character.',
-  'The panel carries a border as well as a shadow. Every shadow token is none under forced colours and --slotted-scrim becomes an opaque Canvas, so a panel separated only by elevation would sit on an opaque ground with nothing marking its edge.',
+  'sl-dialog follows the WAI-ARIA dialog (modal) pattern. While a modal dialog is open, Tab and Shift+Tab move through the focusable elements inside it and wrap from the last to the first and back. Escape closes the topmost dialog only; a dialog that refuses the close keeps the Escape from reaching the dialog beneath it.',
+  'The panel carries role="dialog", aria-labelledby pointing at the title and aria-describedby pointing at the description, each only while that part is rendered. An aria-label of your own on sl-dialog moves to the panel and replaces aria-labelledby.',
+  'aria-modal="true" is written only while the dialog is modal. A modal dialog makes everything outside it inert, which removes the page from the accessibility tree and from the pointer, and locks the page scroll. [modal]="false" does none of this and writes no aria-modal.',
+  'When the dialog opens, focus moves to its first focusable element, to the element initialFocus names, or to the panel itself with initialFocus="container", for content that is read before it is used. When it closes, focus returns to the element that had it when the dialog opened, or to the element finalFocus names. If that element has left the document, focus goes to its nearest ancestor still in the document.',
+  'Containment, inertness and Escape are implemented in JavaScript rather than with the native dialog element, so every overlay of the library shares one stacking order: a select opened inside a dialog paints above it. Without JavaScript, there is no dialog.',
+  'The close button’s target is at least 24 by 24 pixels, and its mark is drawn from a glyph, not a character.',
+  'The panel has a border as well as a shadow, so its edge stays visible under forced colours, where shadows are removed and the scrim becomes opaque.',
 ];
 
 const alertAccessibility = [
-  'The pattern is the WAI-ARIA APG’s Alert and Message Dialogs — w3.org/WAI/ARIA/apg/patterns/alertdialog/ — which is the modal dialog pattern with two additions. The keyboard is unchanged: Tab and Shift+Tab wrap inside the layer and Escape closes it.',
-  'The panel carries role="alertdialog" and aria-describedby is mandatory rather than optional. The family throws when no description part is rendered, because a confirmation announced as a title and two buttons, with the sentence saying what is about to be destroyed left out, is exactly the failure the requirement exists for.',
-  'Focus lands on the cancel action rather than on the first tabbable element. That is the APG’s note for a dialog holding the final step of a process that is not easily reversible, and it is a default of the member rather than something a consumer sets — Ark and React Aria make the role a prop, so a consumer who sets it and forgets ships a destructive confirmation focused on the destructive button.',
-  'An outside press never closes it, whatever is asked for, and the layer is always modal. Escape stays an axis: it is accepted because a member that requires a cancel action can always cancel, and a consumer whose cancel is not safe writes escape="none".',
-  'There is no close part. A ✕ in the corner beside a Cancel button is two controls for one outcome, and the one in the corner says nothing about which outcome it takes; the family throws rather than rendering it.',
-  'The tone is carried by a mark as well as by a colour, which is WCAG 2.2 SC 1.4.1. Under forced colours the mark is the only thing left, because every tone ground becomes one system colour there.',
+  'sl-alert-dialog follows the WAI-ARIA alert dialog pattern: the modal dialog pattern with role="alertdialog" and a required description. The keyboard is the same: Tab and Shift+Tab wrap inside the panel, and Escape closes it.',
+  'aria-describedby is required. sl-alert-dialog throws an error when no slDialogDescription is rendered while it is open, so a confirmation is never announced without the sentence that says what it does.',
+  'Focus starts on slAlertDialogCancel, the least destructive answer, as the pattern advises for a step that cannot be undone easily.',
+  'A press outside never closes an alert dialog, and it is always modal. Escape closes it, which answers with the cancel; set escape="none" when cancelling is not safe either.',
+  'There is no close part: the reader answers with the cancel or the action. slDialogClose inside sl-alert-dialog throws an error.',
+  'The tone is carried by the icon’s shape as well as by its colour, so it survives forced colours and readers who cannot tell the colours apart.',
 ];
 
 const snippets = [
@@ -638,86 +638,79 @@ const sharedApi: ApiTuple[] = [
   [
     'open',
     'boolean',
-    '—',
+    'false',
     'sl-dialog, sl-alert-dialog',
-    'Present at all means the consumer owns the state, for the life of the component. The family then asks and waits rather than moving itself',
-  ],
-  [
-    'defaultOpen',
-    'boolean',
-    '—',
-    'sl-dialog, sl-alert-dialog',
-    'The value an uncontrolled layer starts from, read once. A later change to it does not silently become new state',
+    'Whether the dialog is open. A model: bind [(open)] to a signal, whose initial value is the starting state. (openChangeRequest) can refuse a change before it is written.',
   ],
   [
     'size',
     "'sm' | 'md' | 'lg' | 'xl' | 'full'",
     'md',
     'sl-dialog, provideDialogDefaults',
-    'The panel’s measure. Five named steps rather than a pixel string, because a theme can retune a step; a consumer needing an exact measure still writes max-inline-size on the content part',
+    'The maximum width of the panel: 24rem, 32rem, 42rem, 56rem, or the whole layer less its padding. For another width, set --slotted-dialog-measure.',
   ],
   [
     'placement',
     "'center' | 'top'",
     'center',
     'sl-dialog, sl-alert-dialog, provideDialogDefaults',
-    'Where the panel sits. top is for a panel that grows as the reader types, because a centred one moves under the cursor with every new line',
+    'Where the panel sits in the layer. Use top for content that grows while the reader types, so the panel does not move with each new line.',
   ],
   [
     'scroll',
     "'content' | 'viewport'",
     'content',
     'sl-dialog, sl-alert-dialog, provideDialogDefaults',
-    'content bounds the panel to the layer and scrolls its body, so the actions stay on screen; viewport scrolls the whole panel. The viewport also scrolls as a last resort under content, for a panel with no row that can shrink',
+    'What scrolls when the content is long. content keeps the panel inside the layer and scrolls the body, so the actions stay on screen; viewport lets the panel grow and scrolls the layer. With content, the layer still scrolls when the header and footer alone are taller than it.',
   ],
   [
     'mount',
     "'active' | 'lazy' | 'eager'",
     'active',
     'sl-dialog, sl-alert-dialog, provideDialogDefaults',
-    'When the layer exists. active drops it once the exit is over, lazy builds it on the first open and keeps it, eager builds it up front and hides it with content-visibility and inert',
+    'When the layer is in the document. active renders it while open and removes it after the closing animation, lazy renders it on the first open and keeps it, eager renders it from the start and hides it with content-visibility and inert while closed.',
   ],
   [
     'escape',
     "'close' | 'none'",
     'close',
     'sl-dialog, sl-alert-dialog, provideDialogDefaults',
-    'Whether Escape asks to close. It reaches the topmost layer only, and a layer that refuses stops the request reaching the one beneath it',
+    'Whether Escape asks the dialog to close. Escape reaches the topmost dialog only.',
   ],
   [
     'loading',
     'boolean',
     'false',
     'sl-dialog, sl-alert-dialog',
-    'The body carries aria-busy and keeps a floor so the panel does not jump to size when the content lands. Nothing is disabled: a dialog a reader cannot leave is the worse failure',
+    'Marks the body with aria-busy and gives it a minimum height while the content is on its way. The header, the close button and Escape stay available.',
   ],
   [
     'messages',
     'Partial<DialogMessages>',
     '—',
     'sl-dialog, sl-alert-dialog',
-    'Words laid over the language in force, key by key: the names of the corner controls (close, fullScreen). A native aria-label on slDialogClose still wins',
+    'Replaces words of the language in force, key by key: the accessible names of the close and full-screen buttons (close, fullScreen). An aria-label on slDialogClose takes precedence.',
   ],
   [
     'initialFocus',
-    "'first' | 'container' | 'cancel' | RefObject | false",
+    "'first' | 'container' | 'cancel' | HTMLElement | false",
     'first',
     'sl-dialog',
-    'Where focus goes on open. container is the panel itself, for content whose structure has to be read before it is operated — the APG’s own note for a dialog holding a list or a table',
+    'Where focus goes when the dialog opens: the first focusable element, the panel itself (container), the cancel part, an element such as a template reference to an input, or nowhere (false). Use container for content that is read before it is used, such as a list or a table.',
   ],
   [
     'finalFocus',
-    'RefObject | false',
+    'HTMLElement | false',
     '—',
     'sl-dialog, sl-alert-dialog',
-    'Where focus goes on close. Unstated returns it to the element that held it when the layer opened, which is the trigger in the ordinary case',
+    'Where focus goes when the dialog closes. Unset, focus returns to the element that had it when the dialog opened, usually the trigger. false leaves focus where it is.',
   ],
   [
     'value',
     'string',
     '—',
     'slDialogClose, slAlertDialogCancel, slAlertDialogAction',
-    'The result the close carries out on the request, which is what the platform calls returnValue and what Angular Material returns from afterClosed()',
+    'The result this button closes the dialog with, read from request.result in (openChangeRequest) and from (closed). slAlertDialogCancel defaults to "cancel" and slAlertDialogAction to "confirm".',
   ],
 ];
 
@@ -734,56 +727,49 @@ export const ANGULAR_DIALOG_DOCS = {
         'boolean',
         'true',
         'sl-dialog, provideDialogDefaults',
-        'Whether the background is inert, the scroll is locked and focus is contained. false writes no aria-modal, because the APG requires the mark only where all of that is actually true',
+        'Whether the page behind is inert, its scroll locked and focus kept inside the panel. false does none of this, paints no scrim, lets the pointer reach the page and writes no aria-modal.',
       ],
       [
         'outsidePress',
         "'close' | 'none'",
         'close',
         'sl-dialog, provideDialogDefaults',
-        'Whether a press outside the layer asks to close it. AlertDialog fixes it at none',
+        'Whether a press outside the panel asks the dialog to close. sl-alert-dialog fixes it at none.',
       ],
       [
         'back',
         "'close' | 'none'",
         'close',
         'sl-dialog, provideDialogDefaults',
-        "The platform's way back — a phone's gesture, a browser's button — closes the layer instead of leaving the page, while it is modal: @slotted/core/dismissable-layer holds one history entry per modal layer and answers the popstate that leaves it with the reason back",
+        'Whether the browser’s way back, a back button or a phone’s back gesture, closes a modal dialog instead of leaving the page. Each open modal dialog adds one history entry, and the close request carries the reason back.',
       ],
       [
         'surface',
         "'panel' | 'plain'",
         'panel',
         'sl-dialog, provideDialogDefaults',
-        'Whether the family paints the panel. plain turns off the ground, the border, the radius, the shadow, the rows and the padding, and keeps everything that is not paint — so the layer can be wrapped around a slCard, a media viewer or an image at its own aspect ratio. The cost is that a plain panel does not keep its footer on screen for a long body, because the rows go with the paint',
+        'Whether sl-dialog paints the panel. plain removes the background, border, radius, shadow, rows and padding, and keeps the portal, the scrim, focus handling and the dismissal policy, for a panel of your own such as a slCard or an image viewer. A plain panel does not keep its footer on screen for a long body.',
       ],
       [
         'fullScreen',
         "'never' | 'narrow' | 'always'",
         'narrow',
         'sl-dialog, provideDialogDefaults',
-        'When the panel spends the whole layer, losing its radius, its margins and its measure. narrow is a container query on the layer’s own inline size, at a literal breakpoint, because a container condition cannot hold a custom property',
+        'When the panel fills the whole layer, without margins or radius. narrow does so while the layer is narrower than 480 pixels, measured with a container query on the layer.',
       ],
       [
         'fullscreenToggle',
         'boolean',
         'false',
         'sl-dialog',
-        'Whether slDialogHeader appends the control that hands the layer to the panel. Off: a dialog holds one task and most tasks are the size the consumer chose. It is the reader’s question, where fullScreen is the consumer’s',
+        'Adds a button to slDialogHeader that expands the panel to the whole layer and restores it, for content the reader wants more room for.',
       ],
       [
         'fullscreen',
         'boolean',
         'false',
         'sl-dialog',
-        'The state the control sets. Two-way, as open is, so a template writes [(fullscreen)] and the consumer owns it as soon as they bind it',
-      ],
-      [
-        'defaultFullscreen',
-        'boolean',
-        'false',
-        'sl-dialog',
-        'The state an uncontrolled layer opens in. In Angular it is the initial value of [(fullscreen)]: one model rather than a pair, the shape open already has',
+        'Whether the panel is expanded by the toggle. A model: bind [(fullscreen)] to a signal, whose initial value is the starting state.',
       ],
     ]),
     composition,
@@ -803,15 +789,15 @@ export const ANGULAR_DIALOG_DOCS = {
               "'sm' | 'md' | 'lg' | 'xl' | 'full'",
               'sm',
               'sl-alert-dialog',
-              'The panel’s measure. A confirmation defaults one step narrower than a dialog, because a question with two answers does not need the width of a form',
+              'The maximum width of the panel. sl-alert-dialog defaults to sm, 24rem.',
             ] as ApiTuple)
           : row[0] === 'initialFocus'
             ? ([
                 'initialFocus',
-                "'first' | 'container' | 'cancel' | RefObject | false",
+                "'first' | 'container' | 'cancel' | HTMLElement | false",
                 'cancel',
                 'sl-alert-dialog',
-                'Where focus goes on open. cancel is the default and the APG’s own advice for a step that is not easily reversible',
+                'Where focus goes when the dialog opens. The default, cancel, is the least destructive answer.',
               ] as ApiTuple)
             : row,
       ),
@@ -820,42 +806,36 @@ export const ANGULAR_DIALOG_DOCS = {
         "'accent' | 'secondary' | 'success' | 'warning' | 'danger'",
         'danger',
         'sl-alert-dialog',
-        'What kind of decision this is. It decides the mark AlertDialogIcon draws and the colour it takes, so the register survives forced colours and a reader who cannot tell the colours apart',
+        'The kind of decision. It sets the mark slAlertDialogIcon draws and its colour.',
       ],
-      [
-        'modal',
-        'boolean',
-        'true',
-        'sl-alert-dialog',
-        'Fixed. A confirmation whose background is reachable is a confirmation a stray click can walk away from',
-      ],
+      ['modal', 'boolean', 'true', 'sl-alert-dialog', 'Fixed: an alert dialog is always modal.'],
       [
         'outsidePress',
         "'close' | 'none'",
         'none',
         'sl-alert-dialog',
-        'Fixed. An outside press never closes an alert dialog, which is one of the two rules the pattern gives the member',
+        'Fixed: a press outside never closes an alert dialog.',
       ],
       [
         'back',
         "'close' | 'none'",
         'close',
         'sl-alert-dialog',
-        "The platform's way back cancels a confirmation as Escape does: a modal layer holds one history entry, and the popstate that leaves it closes the layer with the reason back",
+        'Whether the browser’s way back cancels the confirmation, as Escape does. The close request carries the reason back.',
       ],
       [
         'surface',
         "'panel' | 'plain'",
         'panel',
         'sl-alert-dialog',
-        'Whether the family paints the panel. A confirmation almost never wants plain — the panel is the interruption — but the axis is here because the member declares the same default',
+        'Whether sl-alert-dialog paints the panel. plain removes the paint and keeps the behaviour.',
       ],
       [
         'fullScreen',
         "'never' | 'narrow' | 'always'",
         'never',
         'sl-alert-dialog',
-        'A confirmation keeps its margins at every width. Taking the whole screen for a question with two answers reads as a page rather than as an interruption',
+        'When the panel fills the whole layer. sl-alert-dialog keeps its margins at every width by default.',
       ],
     ]),
     composition,

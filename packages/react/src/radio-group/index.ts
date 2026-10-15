@@ -11,6 +11,7 @@ export type {
   RadioGroupRootProps,
   RadioGroupSelectionReason,
   RadioGroupSize,
+  RadioGroupVariant,
   RadioProps,
   RadioRootProps,
 } from './radio-group.types';

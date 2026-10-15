@@ -159,6 +159,10 @@ export function DateTimeField({
   ...nativeProps
 }: DateTimeFieldProps) {
   const field = useField();
+  /* The field resolves its label through the control it holds, and warns when
+     no control says it is there. */
+  const register = field?.registerControl;
+  useEffect(() => register?.(), [register]);
   const defaults = useDateTimeFieldDefaults();
   const appLocale = useLocale();
   const t = useMessages(datetimeFieldMessages, messages);

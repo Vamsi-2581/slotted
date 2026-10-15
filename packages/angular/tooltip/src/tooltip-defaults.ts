@@ -40,6 +40,13 @@ export type TooltipMount = 'active' | 'lazy' | 'eager';
 /** `fixed` for a layer inside `overflow: hidden`, `absolute` for one inside a transform. */
 export type TooltipStrategy = 'absolute' | 'fixed';
 
+/**
+ * What `openChangeRequest` carries: the value asked for, the previous one, the
+ * reason, the originating event and `cancel()`. The name React's binding gives
+ * the same request.
+ */
+export type TooltipChangeRequest = ChangeRequest<boolean>;
+
 /** Why the hint opened or closed. */
 export type TooltipOpenReason = Extract<
   ChangeRequest<boolean>['reason'],
@@ -160,6 +167,13 @@ export function injectTooltipDefaults(): TooltipDefaults {
 }
 
 /**
+ * Whether `provideSlottedPortalContainer` named a container in this injector.
+ * A factory runs only when something injects its token, so `slTooltipLayer`
+ * injects this one before it builds a layer.
+ */
+export const SLOTTED_PORTAL_CONTAINER = new InjectionToken<boolean>('slotted portal container');
+
+/**
  * Where every layer is rendered, for the whole application. It calls
  * `setPortalContainer` from `@slotted/core/portal`, which is per document, so
  * an application shell that builds its own stacking context names it once.
@@ -173,8 +187,6 @@ export function provideSlottedPortalContainer(container: () => Element | null): 
     },
   };
 }
-
-const SLOTTED_PORTAL_CONTAINER = new InjectionToken<boolean>('slotted portal container');
 
 /**
  * Application-scoped rather than module-scoped, for the reason `field` records:

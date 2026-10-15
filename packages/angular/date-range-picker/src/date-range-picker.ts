@@ -10,6 +10,7 @@ import {
 } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { tabbables } from '@slotted/core/focus';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createPositioner } from '@slotted/core/positioner';
 import type { PositionerHandle } from '@slotted/core/positioner';
@@ -66,6 +67,12 @@ import type {
   DateRangePickerVariant,
 } from './date-range-picker-defaults';
 
+/** The reasons the contract's `stateModel.open` lists, and no other. */
+type OpenReason = Extract<
+  ChangeReason,
+  'pointer' | 'keyboard' | 'escape' | 'outsidePress' | 'select'
+>;
+
 /**
  * Below this width, on a finger, the surface is a sheet rather than a popover.
  * The query is here as well as in the stylesheet because the DOM has to say
@@ -111,6 +118,9 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
   ],
   template: `<div
       data-part="control"
+      [attr.role]="enclosing === null ? null : 'group'"
+      [attr.id]="enclosing?.ids()?.control ?? null"
+      [attr.aria-labelledby]="enclosing?.ids()?.label ?? null"
       (keydown)="onControlKeyDown($event)"
       (pointerdown)="pointerFocus = true"
       (focusout)="onControlFocusOut($event)"
@@ -125,6 +135,7 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
           #startField="slDateField"
           variant="plain"
           [label]="t('start')"
+          [groupId]="contentId + '-start'"
           [locale]="resolvedLocale()"
           [timeZone]="resolvedTimeZone()"
           [firstDayOfWeek]="firstDayOfWeek()"
@@ -153,6 +164,7 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
           #endField="slDateField"
           variant="plain"
           [label]="t('end')"
+          [groupId]="contentId + '-end'"
           [locale]="resolvedLocale()"
           [timeZone]="resolvedTimeZone()"
           [firstDayOfWeek]="firstDayOfWeek()"
@@ -211,6 +223,7 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
           role="dialog"
           [attr.id]="contentId"
           [attr.aria-label]="triggerLabel()"
+          (keydown)="onContentKeyDown($event)"
         >
           <div data-part="head">
             <span
@@ -297,8 +310,9 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
   readonly isDateUnavailable = input<((date: PlainDate) => boolean) | undefined>(undefined);
   /**
    * Whether a run may cross an unavailable day. On, and with a start chosen,
-   * the days beyond the first unavailable one are unavailable too; off, the
-   * run may jump over it. A typed run that crosses one is invalid either way.
+   * the days beyond the first unavailable one are unavailable too, and a typed
+   * run that crosses one is invalid; off, the run may jump over it and only
+   * its two ends are checked.
    */
   readonly contiguous = input(true, { transform: booleanAttribute });
   /** The shortest and longest run allowed, in the unit `count` names. */
@@ -382,7 +396,13 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
   readonly t = injectMessages(dateRangePickerMessages, this.messages);
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly enclosing = inject(SlField, { optional: true });
+  /**
+   * The field around it. Inside one, the frame takes the field's control
+   * identifier and its label, and the two ends inside it keep their own
+   * names: two date fields each taking the field's identifier wrote it twice
+   * and left the label naming neither.
+   */
+  protected readonly enclosing = inject(SlField, { optional: true });
 
   protected readonly contentId = `sl-date-range-picker-${String((sequence += 1))}`;
 
@@ -403,13 +423,20 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
   protected readonly preview = signal<PlainDate | null>(null);
   /** A pointer press before focus names the reason a field became current. */
   protected pointerFocus = false;
-  /** Opened from the trigger, focus lands in the grid once it is drawn. */
+  /**
+   * Whether the next opening moves focus into the calendar. Set by the trigger
+   * and by `openSurface()`; the chord leaves focus in the field so typing keeps
+   * working, and a first render that starts open leaves focus where the page
+   * put it.
+   */
   private focusOnOpen = false;
 
   private positioner: PositionerHandle | null = null;
   private dismissable: DismissableLayerHandle | null = null;
 
   private onChangeFn: (value: DateRange | null) => void = () => undefined;
+  /** Whether a form model holds the value, and answers a reset through `writeValue`. */
+  private formBound = false;
   private onTouchedFn: () => void = () => undefined;
   private onValidatorChangeFn: () => void = () => undefined;
 
@@ -637,6 +664,23 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
     this.ownValue.set(normalize(this.defaultValue()));
     this.ownPosition.set(this.defaultPosition());
 
+    /* A native reset restores the hidden inputs and tells nothing, so the
+       picker would keep the last run chosen in a form that had been reset. The
+       value returns to `defaultValue` through `valueChange`, reason
+       `programmatic`, and a start pressed in the grid without its end is
+       dropped with it. A picker bound to a form model takes the model's reset
+       value through `writeValue` instead. */
+    const form = this.element.closest('form');
+    if (form !== null) {
+      const onReset = (event: Event) => {
+        if (this.formBound) return;
+        this.draft.set(null);
+        this.commit(this.defaultValue() ?? null, 'programmatic', event);
+      };
+      form.addEventListener('reset', onReset);
+      this.destroyRef.onDestroy(() => form.removeEventListener('reset', onReset));
+    }
+
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
     const query = window.matchMedia(SHEET_QUERY);
     const read = () => this.sheet.set(query.matches);
@@ -653,6 +697,7 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
 
   registerOnChange(fn: (value: DateRange | null) => void) {
     this.onChangeFn = fn;
+    this.formBound = true;
   }
 
   registerOnTouched(fn: () => void) {
@@ -710,11 +755,11 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
   }
 
   openSurface(source?: Event) {
-    this.setOpen(true, 'programmatic', source);
+    this.setOpen(true, 'keyboard', source, true);
   }
 
   closeSurface(source?: Event) {
-    this.setOpen(false, 'programmatic', source);
+    this.setOpen(false, 'keyboard', source);
   }
 
   /** A preset writes its range through here, with the `select` reason. */
@@ -732,8 +777,25 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
   }
 
   protected toggle(source: Event) {
-    this.focusOnOpen = !this.isOpen();
-    this.setOpen(!this.isOpen(), 'pointer', source);
+    this.setOpen(!this.isOpen(), 'pointer', source, true);
+  }
+
+  /** Tab and Shift+Tab wrap inside the surface while it is open. */
+  protected onContentKeyDown(event: KeyboardEvent) {
+    if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) return;
+    const content = event.currentTarget as HTMLElement;
+    const items = tabbables(content);
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (first === undefined || last === undefined) return;
+    const current = content.ownerDocument.activeElement;
+    if (event.shiftKey && current === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && current === last) {
+      event.preventDefault();
+      first.focus();
+    }
   }
 
   protected clear(source: Event) {
@@ -824,11 +886,14 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
     if (state.request(next, reason, source)) this.ownPosition.set(next);
   }
 
-  private setOpen(next: boolean, reason: ChangeReason, source: unknown) {
+  private setOpen(next: boolean, reason: OpenReason, source: unknown, moveFocus = false) {
     const state = createControllable<boolean>({
       controlled: this.open(),
       initial: this.isOpen(),
-      onRequest: (request) => this.openChange.emit(request),
+      onRequest: (request) => {
+        this.openChange.emit(request);
+        this.focusOnOpen = moveFocus && request.value && !request.cancelled;
+      },
     });
     if (state.request(next, reason, source)) this.ownOpen.set(next);
   }
@@ -876,14 +941,22 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
       },
     });
 
-    /* Opened from the trigger, focus lands on the cell of the current end, or
-       on today when it is empty — the APG's rule for its "Choose Date" button.
-       Opened with the chord, focus stays in the field so typing keeps working. */
+    /* Opened from the trigger or the handle, focus lands on the cell of the
+       current end, or on today when it is empty — the APG's rule for its
+       "Choose Date" button. The grid pages to that cell first, and focus waits
+       for the render that draws it. Opened with the chord, focus stays in the
+       field so typing keeps working. */
     if (this.focusOnOpen) {
       this.focusOnOpen = false;
       const target = this.currentPosition() === 'end' ? this.end() : this.start();
       if (target !== null) this.calendarRef?.focusDate(target);
-      this.calendarRef?.focus();
+      afterNextRender(
+        () =>
+          layer
+            .querySelector<HTMLElement>('[data-part="day"][tabindex="0"]')
+            ?.focus({ preventScroll: true }),
+        { injector: this.injector },
+      );
     }
   }
 

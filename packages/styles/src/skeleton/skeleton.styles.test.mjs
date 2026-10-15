@@ -246,20 +246,65 @@ test('steps out of layout once the content has arrived', () => {
   );
 });
 
+const layers = (animation) =>
+  `${root}[data-animation='${animation}'][data-loading]::after,${ui}[data-animation='${animation}'][data-loading] [data-part='line']::after`;
+
+/** The body of a `@keyframes` block, which the one-level walk does not reach. */
+function keyframes(name) {
+  const start = normalized.indexOf(`@keyframes ${name}{`);
+  assert.ok(start !== -1, `@keyframes ${name} is declared`);
+  let depth = 0;
+  for (let index = start; index < normalized.length; index += 1) {
+    if (normalized[index] === '{') depth += 1;
+    if (normalized[index] === '}' && --depth === 0) return normalized.slice(start, index + 1);
+  }
+  return '';
+}
+
 /**
- * One animation per region rather than one per box. The second rule is the
- * whole mechanism: without it a box inside a region would run its own loop and
- * the region's phase would be overwritten by a value only that box can see.
+ * The first loop animated a registered, inherited custom property, and every
+ * placeholder restyled on every frame — 2.7 seconds of style in every 3 on the docs'
+ * data-grid page with one loading grid on it. A keyframe that holds only
+ * `opacity` or `transform` is one the compositor runs without the page.
  */
-test('drives one phase from the region and stops every box driving its own', () => {
-  assert.match(css, /@property --slotted-skeleton-phase/);
-  assert.match(css, /inherits: true/);
+test('animates only what the compositor runs, on a layer over the fill', () => {
+  assert.ok(!/@property/.test(css), 'an animated custom property restyles every frame');
+  const frames = keyframes('slotted-skeleton-pulse') + keyframes('slotted-skeleton-sweep');
+  for (const declaration of frames.match(/[\w-]+(?=:)/g) ?? []) {
+    assert.ok(['opacity', 'transform'].includes(declaration), `a keyframe animates ${declaration}`);
+  }
+  for (const animation of ['pulse', 'shimmer']) {
+    const body = rule(
+      `${root}[data-animation='pulse'][data-loading]::after,${root}[data-animation='shimmer'][data-loading]::after,${ui}[data-animation='pulse'][data-loading] [data-part='line']::after,${ui}[data-animation='shimmer'][data-loading] [data-part='line']::after`,
+    );
+    assert.ok(
+      body.includes('position:absolute'),
+      `the ${animation} layer is not drawn over the box`,
+    );
+    assert.ok(
+      body.includes('inset-block:0;inset-inline:0'),
+      'the layer covers the box inside its rim',
+    );
+  }
+  assert.ok(
+    rule(
+      `${root}[data-loading]:not([data-animation='none']),${text}[data-loading]:not([data-animation='none']) [data-part='line']`,
+    ).includes('overflow:clip'),
+    'the band would draw past the corners of the box',
+  );
+});
+
+/**
+ * Boxes drawn in one render start in one frame. A box mounted later starts its
+ * own cycle, and the phase is how a consumer — or a capture — names the point
+ * it starts at.
+ */
+test('starts a box at the phase it is given', () => {
   assert.ok(
     normalized.includes(
-      `${region}[data-loading],${root}[data-loading],${text}[data-loading]{animation:slotted-skeleton-phase var(--slotted-duration-loop-slow) linear infinite`,
+      'animation-delay:calc(var(--slotted-skeleton-phase,0) * var(--slotted-duration-loop-slow) * -1)',
     ),
   );
-  assert.ok(rule(`${region} ${ui}`).includes('animation:none'));
 });
 
 test('takes its duration from the motion scale rather than stating one', () => {
@@ -267,9 +312,34 @@ test('takes its duration from the motion scale rather than stating one', () => {
   assert.ok(css.includes('--slotted-duration-loop-slow'));
 });
 
+/**
+ * A reset under `reduce` loses on specificity to the rules that select a
+ * layer (`[data-ui][data-part][data-animation][data-loading]::after` against
+ * `[data-ui]::after`), so the loop ran under reduced motion. The loop is named
+ * only where motion is allowed.
+ */
+test('starts the loop only where reduced motion is not asked for', () => {
+  const starts = normalized.match(/animation-name:slotted-skeleton-/g) ?? [];
+  const query = normalized.slice(
+    normalized.indexOf('@media (prefers-reduced-motion:no-preference)'),
+  );
+  const guarded =
+    query.slice(0, query.indexOf('}}') + 2).match(/animation-name:slotted-skeleton-/g) ?? [];
+  assert.equal(starts.length, 2, 'the pulse and the sweep are named');
+  assert.equal(guarded.length, starts.length, 'a loop starts outside no-preference');
+  assert.ok(
+    !/animation:slotted-skeleton/.test(normalized),
+    'a shorthand would name a loop unguarded',
+  );
+});
+
 test('stops the endless loop under reduced motion rather than shortening it', () => {
   const query = normalized.slice(normalized.indexOf('@media (prefers-reduced-motion:reduce)'));
-  assert.ok(query.startsWith(`@media (prefers-reduced-motion:reduce){${ui}{animation:none`));
+  assert.ok(
+    query.startsWith(
+      `@media (prefers-reduced-motion:reduce){${ui}::after,${ui} [data-part='line']::after{animation:none`,
+    ),
+  );
 });
 
 /**
@@ -279,47 +349,51 @@ test('stops the endless loop under reduced motion rather than shortening it', ()
  */
 test('withdraws the sweep under forced colours, where a gradient is not replaced', () => {
   const query = normalized.slice(normalized.indexOf('@media (forced-colors:active)'));
-  assert.ok(query.includes('background-image:none'));
+  assert.ok(
+    query.includes(
+      `${root}[data-loading]::after,${text}[data-loading] [data-part='line']::after{background-image:none`,
+    ),
+  );
 });
 
-/** The sweep runs with the text; `background-position` has no logical form. */
+/** The sweep runs with the text; neither `transform` nor a gradient has a logical form. */
 test('mirrors the sweep instead of shipping a second stylesheet', () => {
   assert.ok(
     rule(
-      `${root}[data-loading]:dir(rtl),${text}[data-loading] [data-part='line']:dir(rtl)`,
-    ).includes('--_sweep-phase:var(--slotted-skeleton-phase)'),
+      `${root}[data-animation='shimmer'][data-loading]:dir(rtl)::after,${ui}[data-animation='shimmer'][data-loading]:dir(rtl) [data-part='line']::after`,
+    ).includes('animation-direction:reverse'),
   );
-  assert.ok(rule(paint).includes('--_sweep-phase:calc(1 - var(--slotted-skeleton-phase))'));
 });
 
 /**
- * The band has to be on the box for most of the cycle. With a background twice
- * the box's width the positioning range is one box wide, so a phase spanning
- * the whole `0%`–`100%` carries the band across it. The rule this replaced
- * multiplied a percentage by three and by a direction sign, and the sweep was
- * almost never on screen.
+ * The band has to be on the box for most of the cycle. The band is the middle
+ * 72 per cent of a layer the box's size, travelling one box either side, so it
+ * enters at one edge and leaves at the other. A first version of the sweep
+ * moved the band outside the box for most of every cycle.
  */
 test('carries the band across the box rather than past it', () => {
-  const body = rule(
-    `${root}[data-animation='shimmer'][data-loading],${ui}[data-animation='shimmer'][data-loading] [data-part='line']`,
-  );
-  assert.ok(body.includes('background-size:300% 100%'));
-  assert.ok(body.includes('background-position:calc(var(--_sweep-phase) * 100%) 0'));
+  const body = rule(layers('shimmer'));
+  assert.ok(body.includes('transparent 14%,var(--_highlight) 50%,transparent 86%'));
+  const sweep = keyframes('slotted-skeleton-sweep');
+  assert.match(sweep, /from\{transform:translateX\(-100%\);?\}/);
+  assert.match(sweep, /to\{transform:translateX\(100%\);?\}/);
 });
 
 /**
- * The pulse paints rather than fades. Fading the box took its rim with it, and
- * in the dark scheme the shape came within a hair of the ground once a cycle
- * and back — which is what a reader sees as a flicker.
+ * The pulse fades the trough over the fill, never the box. Fading the box took
+ * its rim with it, and in the dark scheme the shape came within a hair of the
+ * ground once a cycle and back — which is what a reader sees as a flicker.
  */
 test('dims the fill without fading the box off the page', () => {
-  const body = rule(
-    `${root}[data-animation='pulse'][data-loading],${ui}[data-animation='pulse'][data-loading] [data-part='line']`,
+  const body = rule(layers('pulse'));
+  assert.ok(body.includes('background-color:var(--_trough)'));
+  assert.ok(body.includes('opacity:0'));
+  const boxes = rules.filter(
+    (entry) => !entry.selector.includes('::after') && !/^(from|to|\d+%)$/.test(entry.selector),
   );
-  assert.ok(
-    body.includes('background-color:color-mix(in oklab,var(--_trough) calc(var(--_p) * 100%)'),
-  );
-  assert.ok(!/opacity/.test(declarations), 'a placeholder that fades takes its own rim with it');
+  for (const entry of boxes) {
+    assert.ok(!/opacity/.test(entry.body), `${entry.selector} fades the box and its rim`);
+  }
 });
 
 /**

@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/field-group/contract.json';
@@ -194,5 +195,55 @@ describe('FieldGroup', () => {
 
     expect(screen.getByTestId('content').tagName).toBe('UL');
     expect(screen.getByTestId('legend').querySelector('h2')).toBeInTheDocument();
+  });
+});
+
+/**
+ * The server renders once and runs no effect, so a description or an error
+ * the group learned only by registration would be missing from its markup,
+ * and hydration would keep that markup.
+ */
+describe('FieldGroup on the server', () => {
+  const parse = (html: string) => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    return host.querySelector('fieldset') as HTMLFieldSetElement;
+  };
+
+  it('is described by the description and the error written in it', () => {
+    const fieldset = parse(
+      renderToString(
+        <FieldGroup id="terms">
+          <FieldGroupLegend>Prazo de pagamento</FieldGroupLegend>
+          <FieldGroupDescription>Vale para todas as faturas.</FieldGroupDescription>
+          <FieldGroupError>Escolha um prazo.</FieldGroupError>
+          <FieldGroupContent>
+            <Field>
+              <FieldLabel>Dias</FieldLabel>
+              <FieldControl />
+            </Field>
+          </FieldGroupContent>
+        </FieldGroup>,
+      ),
+    );
+
+    expect(fieldset).toHaveAttribute('aria-describedby', 'terms-description terms-error');
+  });
+
+  it('is not described by an empty error, nor by a nested group’s messages', () => {
+    const fieldset = parse(
+      renderToString(
+        <FieldGroup id="outer">
+          <FieldGroupLegend>Entrega</FieldGroupLegend>
+          <FieldGroupError reserve>{''}</FieldGroupError>
+          <FieldGroup id="inner">
+            <FieldGroupLegend>Janela</FieldGroupLegend>
+            <FieldGroupDescription>Das 8h às 18h.</FieldGroupDescription>
+          </FieldGroup>
+        </FieldGroup>,
+      ),
+    );
+
+    expect(fieldset).not.toHaveAttribute('aria-describedby');
   });
 });

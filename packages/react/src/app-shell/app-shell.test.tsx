@@ -1,6 +1,7 @@
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render as renderBase, screen } from '@testing-library/react';
 import { useRef, useState } from 'react';
+import { renderToString } from 'react-dom/server';
 import type { ReactElement, ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -117,6 +118,35 @@ describe('AppShell', () => {
       </AppShell>,
     );
     expect(links()).toHaveLength(1);
+  });
+
+  /**
+   * The regions register in effects, which the server never runs. The skip
+   * links a server draws come from the regions written among the shell's
+   * children, so a reader who tabs before hydration still finds them.
+   */
+  it('writes the skip links on the server, before any region has registered', () => {
+    const page = new DOMParser().parseFromString(
+      renderToString(
+        <AppShell navMode="inline">
+          <AppShellNav>
+            <a href="/a">A</a>
+          </AppShellNav>
+          <AppShellMain>
+            <p>Conteúdo</p>
+          </AppShellMain>
+        </AppShell>,
+      ),
+      'text/html',
+    );
+    const hrefs = [...page.querySelectorAll('[data-part="skip"] a')].map((link) =>
+      link.getAttribute('href'),
+    );
+
+    expect(hrefs).toEqual([
+      `#${page.querySelector('[data-part="main"]')?.id}`,
+      `#${page.querySelector('[data-part="nav"]')?.id}`,
+    ]);
   });
 
   it('wires the toggle to the region it controls, by the Disclosure pattern', () => {

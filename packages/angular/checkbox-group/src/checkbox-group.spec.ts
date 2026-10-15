@@ -164,6 +164,44 @@ describe('SlCheckboxGroup', () => {
     }
   });
 
+  it('takes read-only and disabled from the field group around it', () => {
+    const readOnly = renderTemplate(
+      `<fieldset slFieldGroup readOnly>
+         <legend slFieldGroupLegend>Dias</legend>
+         <div slCheckboxGroup [defaultValue]="['mon']">${SET}</div>
+       </fieldset>`,
+    );
+
+    expect(group(readOnly).getAttribute('data-readonly')).toBe('');
+    for (const box of boxes(readOnly)) expect(box.getAttribute('aria-readonly')).toBe('true');
+    click(boxes(readOnly)[1] as HTMLInputElement);
+    readOnly.detectChanges();
+    expect(boxes(readOnly)[1]?.checked).toBe(false);
+
+    const disabled = renderTemplate(
+      `<fieldset slFieldGroup disabled>
+         <legend slFieldGroupLegend>Dias</legend>
+         <div slCheckboxGroup>${SET}</div>
+       </fieldset>`,
+    );
+
+    expect(group(disabled).getAttribute('data-disabled')).toBe('');
+  });
+
+  it('takes invalid and required from the field group around it', () => {
+    const fixture = renderTemplate(
+      `<fieldset slFieldGroup invalid required>
+         <legend slFieldGroupLegend>Dias</legend>
+         <div slCheckboxGroup>${SET}</div>
+       </fieldset>`,
+    );
+
+    expect(group(fixture).getAttribute('data-invalid')).toBe('');
+    expect(group(fixture).getAttribute('aria-invalid')).toBe('true');
+    expect(group(fixture).getAttribute('aria-required')).toBe('true');
+    for (const box of boxes(fixture)) expect(box.getAttribute('aria-invalid')).toBe('true');
+  });
+
   it('hands its submission name to every box in the set', () => {
     const fixture = renderTemplate(`<div slCheckboxGroup name="days">${SET}</div>`);
     for (const box of boxes(fixture)) expect(box.getAttribute('name')).toBe('days');
@@ -200,6 +238,30 @@ describe('SlCheckboxGroup', () => {
       (fixture.nativeElement.querySelector('[data-part="counter"]') as HTMLElement).textContent,
     ).toContain('2/3');
     expect(contract.counter.placedBy).toBe('field');
+  });
+
+  it('takes its name from the label of the field around it', () => {
+    const fixture = renderTemplate(
+      `<div slField id="days">
+         <label slFieldLabel>Dias</label>
+         <div slCheckboxGroup>${SET}</div>
+       </div>`,
+    );
+
+    expect(group(fixture).getAttribute('aria-labelledby')).toBe('days-label');
+    expect(fixture.nativeElement.querySelector('#days-label')?.textContent).toBe('Dias');
+  });
+
+  it('keeps a name the consumer wrote over the field’s label', () => {
+    const fixture = renderTemplate(
+      `<div slField id="days">
+         <label slFieldLabel>Dias</label>
+         <div slCheckboxGroup aria-label="Dias de coleta">${SET}</div>
+       </div>`,
+    );
+
+    expect(group(fixture).getAttribute('aria-labelledby')).toBeNull();
+    expect(group(fixture).getAttribute('aria-label')).toBe('Dias de coleta');
   });
 
   it('lets an application decide once how its sets of choices flow', () => {

@@ -59,8 +59,9 @@ export const RUNTIME_PROPERTY_PREFIXES = [
    * that many pixels leave the scrollport and the title area stays.
    * `--slotted-page-sticky-top` is the height of everything that stays at the
    * top, and `--slotted-page-sticky-bottom` the height of the footer, both
-   * written on the scroll container so a section's sticky header and a table's
-   * sticky column header can stop under the chrome rather than behind it. No
+   * written on the scroll container so a section's sticky header, a table's
+   * sticky column header and a consumer's own sticky element inside the page
+   * can stop under the chrome rather than behind it. No
    * theme can know any of the three: they are what the header turned out to
    * be, measured.
    */

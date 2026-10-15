@@ -415,12 +415,12 @@
     "sideOffset": 4,
     "alignOffset": 0,
     "collisionPadding": 8,
-    "reason": "The popup hangs from the start edge of the control and is as wide as it, so the query in the control and the labels in the list share one edge."
+    "reason": "The popup hangs from the start edge of the control and is never narrower than it, so the query in the control and the labels in the list share one edge."
   },
   "measure": {
-    "value": "the anchor's width by default, and the content's own width when width is content",
+    "value": "the content's own width by default, never narrower than the anchor's width and capped by the measure and the available width; exactly the anchor's width when width is anchor",
     "property": "--slotted-positioner-anchor-width",
-    "reason": "The popup is a list of the values the control holds, so it is the control's width. width=\"content\" is for a popup with descriptions, which needs more room than the field it fills."
+    "reason": "As select records it."
   },
   "declined": {
     "reorderByPointer": {
@@ -445,7 +445,7 @@
     },
     "arrow": {
       "deferTo": "popover",
-      "reason": "The popup is as wide as its control and hangs directly under it, so the control already says where it came from. Declining it is also what frees the part name arrow for the chevron on the trigger."
+      "reason": "The popup is never narrower than its control and hangs directly under it, so the control already says where it came from. Declining it is also what frees the part name arrow for the chevron on the trigger."
     },
     "inlineCompletion": {
       "deferTo": "combobox",
@@ -491,7 +491,7 @@
     "variant": ["prop", "defaults", "outline"],
     "side": ["prop", "defaults", "bottom"],
     "align": ["prop", "defaults", "start"],
-    "width": ["prop", "defaults", "anchor"],
+    "width": ["prop", "defaults", "content"],
     "mount": ["prop", "defaults", "active"],
     "strategy": ["prop", "defaults", "absolute"],
     "openOn": ["prop", "defaults", "input"],
@@ -627,7 +627,7 @@
         "variant": "outline",
         "side": "bottom",
         "align": "start",
-        "width": "anchor",
+        "width": "content",
         "mount": "active",
         "strategy": "absolute",
         "openOn": "input",

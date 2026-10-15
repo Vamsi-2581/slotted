@@ -195,13 +195,16 @@ export function Switch({
      * `element.click()` and not for a dispatched one, and a switch showing a
      * state nobody committed is the whole defect this path exists to prevent.
      *
-     * It is a microtask rather than a line here: the revert the platform does
-     * perform happens after the dispatch returns, so a value written now
-     * would be the one overwritten. `latest` rather than `current`, so a
-     * consumer who accepted the move in the same tick keeps their answer.
+     * It is a task rather than a line here or a microtask: the revert happens
+     * after the dispatch returns, and for a trusted press the browser drains
+     * the microtasks queued by the listeners before it reverts. A microtask
+     * would write the consumer's answer and the revert would then overwrite
+     * it. `latest` rather than `current`, so a consumer who accepted the move
+     * keeps their answer. The painted state reads the root, so the one task
+     * the element spends reverted is never drawn.
      */
     event.preventDefault();
-    queueMicrotask(() => {
+    setTimeout(() => {
       const element = controlRef.current;
       if (element !== null && element.checked !== latest.current) {
         element.checked = latest.current;

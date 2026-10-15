@@ -394,6 +394,29 @@ describe('SlPageHeader', () => {
     expect(host.pinnedRequests.at(-1)?.reason).toBe('programmatic');
   });
 
+  it('writes band by default, and data-stuck once the title area holds with the page scrolled', async () => {
+    expect(root().getAttribute('data-variant')).toBe('band');
+    /* Earlier cases leave the window scrolled: this one starts at rest. */
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 });
+    window.dispatchEvent(new Event('scroll'));
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    fixture.detectChanges();
+    expect(root().hasAttribute('data-stuck')).toBe(false);
+    const title = query('[data-part="title-area"]');
+    vi.spyOn(title, 'getBoundingClientRect').mockImplementation(() => ({ top: 0 }) as DOMRect);
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 120 });
+    window.dispatchEvent(new Event('scroll'));
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    fixture.detectChanges();
+    expect(root().hasAttribute('data-stuck')).toBe(true);
+
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 });
+    window.dispatchEvent(new Event('scroll'));
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    fixture.detectChanges();
+    expect(root().hasAttribute('data-stuck')).toBe(false);
+  });
+
   /**
    * Below the compact size class the header is in the flow: the stylesheet
    * reads `data-compact` and takes the root out of `sticky`, and nothing is
@@ -514,6 +537,7 @@ describe('SlPageHeader defaults', () => {
         collapse: 'manual',
         level: '2',
         size: 'lg',
+        variant: 'floating',
       }),
     ],
     template: `<header slPageHeader size="sm" [messages]="{ collapse: 'Fechar' }">
@@ -531,6 +555,7 @@ describe('SlPageHeader defaults', () => {
     expect(root.getAttribute('data-collapse')).toBe('manual');
     expect(root.getAttribute('data-level')).toBe('2');
     expect(root.getAttribute('data-size')).toBe('sm');
+    expect(root.getAttribute('data-variant')).toBe('floating');
     expect(root.querySelector('[data-part="toggle"]')?.getAttribute('aria-label')).toBe('Fechar');
     vi.unstubAllGlobals();
   });

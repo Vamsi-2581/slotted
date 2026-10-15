@@ -161,13 +161,36 @@ function axisX(model: ChartModel, index: number): number | string {
   return model.xType === 'category' ? index : (model.categories[index]!.x as number);
 }
 
-/** A value an annotation names on the category axis, in the axis' own terms. */
+/**
+ * A value an annotation names on the category axis, in the axis' own terms: a
+ * category's key or its x value, which differ once records are keyed. A value
+ * that names no category is undefined, and the annotation is not drawn.
+ */
 function annotationX(model: ChartModel, value: number | string | undefined) {
   if (value === undefined) return undefined;
   if (model.xType === 'time') return chartTime(value) ?? undefined;
   if (model.xType === 'value') return Number(value);
-  const index = categoryIndex(model, String(value));
-  return index >= 0 ? index : undefined;
+  const byKey = categoryIndex(model, String(value));
+  if (byKey >= 0) return byKey;
+  const byValue = model.categories.findIndex((category) => String(category.x) === String(value));
+  return byValue >= 0 ? byValue : undefined;
+}
+
+/** Where on the category axis a place falls, as left, centre or right of the plot. */
+function inwardAlign(model: ChartModel, placed: number): 'left' | 'center' | 'right' {
+  const count = model.categories.length;
+  if (count <= 1) return 'center';
+  let fraction: number;
+  if (model.xType === 'category') fraction = placed / (count - 1);
+  else {
+    const xs = model.categories
+      .map((category) => annotationX(model, category.x as number | string))
+      .filter((x): x is number => typeof x === 'number' && !Number.isNaN(x));
+    const low = Math.min(...xs);
+    const high = Math.max(...xs);
+    fraction = high === low ? 0.5 : (placed - low) / (high - low);
+  }
+  return fraction > 2 / 3 ? 'right' : fraction < 1 / 3 ? 'left' : 'center';
 }
 
 export function buildChartOption(view: ChartEngineView, width = 0): ChartOptionResult {
@@ -558,6 +581,15 @@ export function buildChartOption(view: ChartEngineView, width = 0): ChartOptionR
     const key = onValueAxis ? (horizontal ? 'xAxis' : 'yAxis') : horizontal ? 'yAxis' : 'xAxis';
     const read = (value: number | string | undefined) =>
       onValueAxis ? Number(value) : annotationX(model, value);
+    // An end the axis cannot place would reach the engine as nothing, and its mark filter throws.
+    const ends = annotation.kind === 'line' ? [annotation.value] : [annotation.from, annotation.to];
+    if (
+      ends.some((end) => {
+        const placed = read(end);
+        return placed === undefined || Number.isNaN(placed);
+      })
+    )
+      continue;
     const color = annotation.tone ? theme.tones[annotation.tone] : theme.reference;
     /* A line across the value axis carries its label above its end; a line
        across the category axis stands upright, and its label sits over its
@@ -570,6 +602,11 @@ export function buildChartOption(view: ChartEngineView, width = 0): ChartOptionR
       fontSize: theme.labelSize,
       position: onValueAxis || annotation.kind === 'band' ? 'insideEndTop' : 'end',
       distance: theme.inset / 2,
+      /* An upright line's label is level over its top: near either end of the
+         axis it leans inward, so its words stay inside the plot. */
+      ...(!onValueAxis && annotation.kind === 'line' && !horizontal
+        ? { align: inwardAlign(model, read(annotation.value) as number) }
+        : {}),
     };
     const target = host as Record<string, unknown>;
     if (annotation.kind === 'line') {

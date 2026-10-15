@@ -195,6 +195,11 @@ export interface TabProps extends Omit<ComponentPropsWithRef<'button'>, 'value'>
   disabled?: boolean | undefined;
   /** Whether this tab carries a control that closes it. */
   dismissible?: boolean | undefined;
+  /**
+   * What follows the label inside the tab, such as a count: wrapped in the
+   * `end` part, beside the words rather than inside them.
+   */
+  end?: ReactNode | undefined;
   /** The accessible name of that control. Required whenever it is drawn. */
   dismissLabel?: string | undefined;
   /**
@@ -205,6 +210,11 @@ export interface TabProps extends Omit<ComponentPropsWithRef<'button'>, 'value'>
   href?: string | undefined;
   /** Renders the item — the box around the tab and its dismiss control. */
   render?: ((props: TabRootProps) => ReactNode) | undefined;
+  /**
+   * What precedes the label inside the tab, such as an icon: wrapped in the
+   * `start` part, which sizes an icon to the tab's icon step.
+   */
+  start?: ReactNode | undefined;
   /** What this tab selects. It is what the family's value holds. */
   value: string;
 }

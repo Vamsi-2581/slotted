@@ -25,7 +25,7 @@ export const ENTITY_PICKER_FALLBACK: EntityPickerDefaults = {
   size: 'md',
   strategy: 'absolute',
   variant: 'outline',
-  width: 'anchor',
+  width: 'content',
 };
 
 const EntityPickerDefaultsContext = createContext<EntityPickerDefaults>(ENTITY_PICKER_FALLBACK);

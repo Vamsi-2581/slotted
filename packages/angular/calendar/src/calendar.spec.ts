@@ -21,6 +21,7 @@ const NINTH = plainDate(2026, 9, 9);
 })
 class Host {
   readonly ninth = NINTH;
+  readonly owned = signal(plainDate(2026, 9, 30));
   readonly january = plainDate(2026, 1, 31);
   readonly february = plainDate(2026, 2, 1);
   readonly june = plainDate(2026, 6, 1);
@@ -657,5 +658,34 @@ describe('the composition surface', () => {
       `<div slCalendar locale="pt-BR" disabled [defaultFocusedDate]="ninth"></div>`,
     );
     expect(days(fixture).filter((element) => element.tabIndex === 0)).toHaveLength(0);
+  });
+});
+
+describe('a focused date the consumer owns', () => {
+  /**
+   * Focus was put back on the old page's tab stop before the page followed
+   * the date, so the cell it took was replaced and focus fell to the
+   * document. Found by datetime-picker, which owns the focused date to answer
+   * the day its list shows.
+   */
+  it('keeps focus on the grid when a key moves it onto another month', async () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="en-US" [focusedDate]="owned()" (focusedDateChange)="owned.set($event.value)"></div>`,
+    );
+    const start = fixture.nativeElement.querySelector(
+      '[data-part="day"][tabindex="0"]',
+    ) as HTMLElement;
+    expect(start.textContent?.trim()).toBe('30');
+    start.focus();
+
+    start.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(document.activeElement?.textContent?.trim()).toBe('1');
+    expect(document.activeElement?.getAttribute('data-part')).toBe('day');
+    expect(document.activeElement?.closest('[data-outside-month]')).toBeNull();
   });
 });

@@ -50,6 +50,8 @@ export function useRadioGroup(): RadioGroupContextValue {
 export function RadioGroup({
   'aria-describedby': describedBy,
   'aria-invalid': ariaInvalid,
+  'aria-label': ariaLabel,
+  'aria-labelledby': labelledBy,
   'aria-readonly': ariaReadOnly,
   'aria-orientation': ariaOrientation,
   'aria-required': ariaRequired,
@@ -88,7 +90,7 @@ export function RadioGroup({
   const resolvedVariant = variant ?? defaults.variant;
   const resolvedDisabled = disabled ?? field?.disabled ?? fieldDefaults.disabled;
   const resolvedReadOnly = readOnly ?? field?.readOnly ?? fieldDefaults.readOnly;
-  const resolvedInvalid = invalid ?? field?.invalid;
+  const resolvedInvalid = invalid ?? field?.invalid ?? fieldGroup?.invalid;
   const resolvedRequired = required ?? field?.required ?? fieldGroup?.required;
   const resolvedRole = role ?? (fieldGroup === undefined ? 'radiogroup' : undefined);
 
@@ -126,6 +128,10 @@ export function RadioGroup({
 
   const rootProps: RadioGroupRootProps = {
     ...nativeProps,
+    'aria-label': ariaLabel,
+    /* A group has no element a label's for can reach, so inside a field the
+       field's label names it, unless the consumer named it themselves. */
+    'aria-labelledby': labelledBy ?? (ariaLabel === undefined ? field?.ids.label : undefined),
     'aria-describedby': [describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined,
     'aria-invalid': ariaInvalid ?? (resolvedInvalid === true ? true : undefined),
     /**

@@ -13,7 +13,13 @@ import {
   TooltipTrigger,
   useTooltip,
 } from '../tooltip';
-import { formatFieldCount, isFieldCountOver, necessityMark, useField } from './field-context';
+import {
+  formatFieldCount,
+  hasFieldContent,
+  isFieldCountOver,
+  necessityMark,
+  useField,
+} from './field-context';
 import type {
   FieldActionProps,
   FieldActionRootProps,
@@ -54,10 +60,6 @@ function useRegisterMessage(slot: FieldDescribedSlot, present: boolean) {
     return () => register(slot, false);
   }, [present, register, slot]);
 }
-
-/** Whether there is anything to say, which is what decides both of the above. */
-const hasContent = (children: unknown) =>
-  children !== undefined && children !== null && children !== false && children !== '';
 
 /**
  * Names the control, and says whether it has to be answered.
@@ -158,7 +160,7 @@ export function FieldControl({
  */
 export function FieldDescription({ children, mark, tone, ...rest }: FieldMessageProps) {
   const field = useField();
-  useRegisterMessage('description', hasContent(children));
+  useRegisterMessage('description', hasFieldContent(children));
 
   return (
     <InlineMessage
@@ -189,7 +191,7 @@ export function FieldDescription({ children, mark, tone, ...rest }: FieldMessage
  */
 export function FieldError({ children, mark, tone, ...rest }: FieldMessageProps) {
   const field = useField();
-  useRegisterMessage('error', hasContent(children));
+  useRegisterMessage('error', hasFieldContent(children));
 
   return (
     <InlineMessage
@@ -303,7 +305,7 @@ export function FieldHeader({ children, ref, render, ...nativeProps }: FieldHead
  */
 export function FieldIndicator({ children, id, ref, render, ...nativeProps }: FieldIndicatorProps) {
   const field = useField();
-  useRegisterMessage('indicator', hasContent(children));
+  useRegisterMessage('indicator', hasFieldContent(children));
 
   const rootProps: FieldIndicatorRootProps = {
     ...nativeProps,
@@ -363,7 +365,7 @@ export function FieldHelp({
   const own = useMessages(fieldMessages);
   const fallbackId = useId();
   const textId = field?.ids.help ?? `slotted-field-help-${fallbackId}`;
-  useRegisterMessage('help', hasContent(children));
+  useRegisterMessage('help', hasFieldContent(children));
 
   return (
     <>

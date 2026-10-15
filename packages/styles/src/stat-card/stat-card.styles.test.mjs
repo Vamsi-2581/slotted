@@ -261,6 +261,19 @@ test('keeps the value the height of one of its own lines while it loads', () => 
  * arrived and every card under it moved. It takes the label's size and line,
  * the line of the header it stands in.
  */
+/**
+ * Text a consumer sets on one line — `white-space: nowrap` with an ellipsis —
+ * has the whole line as its min-content. The message spans both columns and
+ * the figure's column is floored at its min-content, so that line widened the
+ * column past the card and the header, figure and message left it by the
+ * difference. The three text regions give the grid no intrinsic width.
+ */
+test('keeps a consumer’s one-line text out of the width of the grid', () => {
+  for (const part of ['header', 'message', 'comparison']) {
+    assert.match(body(`${ui} [data-part='${part}']`), /contain:inline-size/, part);
+  }
+});
+
 test('sets the action on the label’s own line, whatever face has arrived', () => {
   const action = body(`${ui} [data-part='action']`);
   assert.match(action, /font-size:var\(--_label-size\)/);

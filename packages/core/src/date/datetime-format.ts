@@ -38,7 +38,7 @@ import { plainDateTime } from './plain-date-time';
 import type { PlainDateTime } from './plain-date-time';
 import type { PlainDate } from './plain-date';
 import type { TimeGranularity } from './plain-time';
-import { createTimeFormat } from './time-format';
+import { createTimeFormat, plainSpaces } from './time-format';
 import type { DisplayHour, HourCycle, TimeFormat } from './time-format';
 
 /** Which half of the value a field belongs to. */
@@ -189,7 +189,9 @@ export function createDateTimeFormat(options: DateTimeFormatOptions = {}): DateT
       ),
     );
 
-  const raw = new Intl.DateTimeFormat(locale, shape).formatToParts(at(REFERENCE));
+  const raw = new Intl.DateTimeFormat(locale, shape)
+    .formatToParts(at(REFERENCE))
+    .map((part) => (part.type === 'literal' ? { ...part, value: plainSpaces(part.value) } : part));
 
   /**
    * The placeholder of every field comes from the half that owns it, so
@@ -344,11 +346,13 @@ export function createDateTimeFormat(options: DateTimeFormatOptions = {}): DateT
     },
 
     describe(value) {
-      return new Intl.DateTimeFormat(locale, {
-        dateStyle: 'long',
-        timeStyle: granularity === 'second' ? 'medium' : 'short',
-        timeZone: 'UTC',
-      }).format(at(value));
+      return plainSpaces(
+        new Intl.DateTimeFormat(locale, {
+          dateStyle: 'long',
+          timeStyle: granularity === 'second' ? 'medium' : 'short',
+          timeZone: 'UTC',
+        }).format(at(value)),
+      );
     },
 
     describeDate(date, style = 'long') {

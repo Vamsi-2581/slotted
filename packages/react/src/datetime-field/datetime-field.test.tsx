@@ -599,3 +599,18 @@ describe('states', () => {
     expect(spoken).toContain('15:20');
   });
 });
+
+describe('inside a field', () => {
+  it('registers as the field’s control, so the field does not warn', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    render(
+      <Field>
+        <FieldLabel>Pickup</FieldLabel>
+        <DateTimeField locale="en-US" />
+      </Field>,
+    );
+
+    expect(warn).not.toHaveBeenCalledWith(expect.stringContaining('without a control'));
+    warn.mockRestore();
+  });
+});

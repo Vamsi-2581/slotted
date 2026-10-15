@@ -2,6 +2,7 @@ import '@slotted/styles/date-picker/date-picker.css';
 
 import { createDateFormat, isDateInRange } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { tabbables } from '@slotted/core/focus';
 import { datePickerMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
@@ -112,6 +113,12 @@ export function DatePicker({
   const [sheet, setSheet] = useState(false);
 
   const [ownOpen, setOwnOpen] = useState(defaultOpen);
+  /**
+   * Whether the next opening moves focus into the calendar. Set by a request
+   * to open — the trigger, the chord, `open()` — and never by a first render
+   * that starts open, which would take focus from wherever the page put it.
+   */
+  const focusOnOpen = useRef(false);
   const isOpen = open ?? ownOpen;
   const [ownValue, setOwnValue] = useState<CalendarValue>(defaultValue ?? null);
   const held = value ?? ownValue;
@@ -150,7 +157,10 @@ export function DatePicker({
       const state = createControllable<boolean>({
         controlled: open,
         initial: isOpen,
-        onRequest: (request) => onOpenChange?.(request.value, request),
+        onRequest: (request) => {
+          onOpenChange?.(request.value, request);
+          focusOnOpen.current = request.value && !request.cancelled;
+        },
       });
       if (state.request(next, reason, source)) setOwnOpen(next);
     },
@@ -169,6 +179,23 @@ export function DatePicker({
     },
     [held, onValueChange, value],
   );
+
+  /* `defaultValue` is read once, and a form reset returns to what it was then. */
+  const [initialValue] = useState<CalendarValue>(() => defaultValue ?? null);
+
+  /**
+   * A native reset restores the hidden input and tells nothing, so the picker
+   * would keep the last date chosen in a form that had been reset. The value
+   * returns to `defaultValue` through `onValueChange`, reason `programmatic`.
+   */
+  useEffect(() => {
+    const owner = rootRef.current?.closest('form');
+    if (owner === null || owner === undefined) return;
+    const onReset = (event: Event) =>
+      requestValue(initialValue, { reason: 'programmatic', source: event });
+    owner.addEventListener('reset', onReset);
+    return () => owner.removeEventListener('reset', onReset);
+  }, [initialValue, requestValue]);
 
   /** The presence of the layer, so an exit animation is allowed to finish. */
   const presence = useRef<PresenceHandle | null>(null);
@@ -275,6 +302,40 @@ export function DatePicker({
     return () => layer.destroy();
   }, [isOpen, layerNode, setOpen]);
 
+  /**
+   * The dialog takes focus when it opens, on the day that holds the roving tab
+   * stop: the chosen date, or today. Left on the trigger, the calendar in its
+   * portal was not the next stop in the page's sequence, and a keyboard reader
+   * could open the surface and not reach it.
+   */
+  useEffect(() => {
+    /* The surface renders in place before the portal exists and moves into it
+       once it does; focus waits for the node that stays. */
+    if (layerNode === null || container === null || !isOpen || !focusOnOpen.current) return;
+    if (!container.contains(layerNode)) return;
+    focusOnOpen.current = false;
+    layerNode
+      .querySelector<HTMLElement>('[data-part="day"][tabindex="0"]')
+      ?.focus({ preventScroll: true });
+  }, [container, isOpen, layerNode]);
+
+  /** Tab and Shift+Tab wrap inside the surface while it is open. */
+  const onContentKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) return;
+    const items = tabbables(event.currentTarget);
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (first === undefined || last === undefined) return;
+    const current = event.currentTarget.ownerDocument.activeElement;
+    if (event.shiftKey && current === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && current === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
   useImperativeHandle(
     ref,
     () => ({
@@ -323,7 +384,13 @@ export function DatePicker({
       {...(isOpen ? { 'data-open': '' } : {})}
       {...(positioned ? { 'data-positioned': '' } : {})}
     >
-      <div aria-label={spoken} data-part="content" id={contentId} role="dialog">
+      <div
+        aria-label={spoken}
+        data-part="content"
+        id={contentId}
+        onKeyDown={onContentKeyDown}
+        role="dialog"
+      >
         {presets === undefined ? null : <div data-part="presets">{presets}</div>}
         <Calendar
           fixedWeeks={fixedWeeks}

@@ -3,7 +3,7 @@ import { referencePageErrors, snippetFormatErrors } from '@slotted/storybook-wor
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/datetime-picker/contract.json';
-import { REACT_DATE_TIME_PICKER_DOCS } from './datetime-picker.docs';
+import { REACT_DATETIME_PICKER_DOCS } from './datetime-picker.docs';
 import * as dateTimePickerStories from './datetime-picker.stories';
 
 describe('DateTimePicker stories', () => {
@@ -15,12 +15,12 @@ describe('DateTimePicker stories', () => {
 
   it('documents each public component API', () => {
     for (const member of Object.keys(contract.members) as Array<
-      keyof typeof REACT_DATE_TIME_PICKER_DOCS
+      keyof typeof REACT_DATETIME_PICKER_DOCS
     >) {
       expect(
         apiMetadataErrors(
           contract.members[member],
-          REACT_DATE_TIME_PICKER_DOCS[member].api,
+          REACT_DATETIME_PICKER_DOCS[member].api,
           contract.stateModel,
         ),
       ).toEqual([]);
@@ -36,7 +36,7 @@ describe('DateTimePicker stories', () => {
   it('answers the reference-page contract', () => {
     expect(
       referencePageErrors({
-        docs: REACT_DATE_TIME_PICKER_DOCS.dateTimePicker,
+        docs: REACT_DATETIME_PICKER_DOCS.dateTimePicker,
         framework: 'React',
         member: contract.members.dateTimePicker,
         scenarioIds: contract.scenarios.dateTimePicker,
@@ -46,7 +46,7 @@ describe('DateTimePicker stories', () => {
   });
 
   it('keeps curated snippets formatted', async () => {
-    const snippets = Object.values(REACT_DATE_TIME_PICKER_DOCS).flatMap((docs) => [
+    const snippets = Object.values(REACT_DATETIME_PICKER_DOCS).flatMap((docs) => [
       ...docs.snippets,
       ...docs.scenes.map((scene) => scene.snippet),
     ]);

@@ -5,6 +5,7 @@ import {
   computed,
   Directive,
   effect,
+  ElementRef,
   HostAttributeToken,
   inject,
   input,
@@ -255,6 +256,8 @@ abstract class SlPaginationTrigger {
   protected abstract usable(): boolean;
   protected abstract defaultLabel(): string;
 
+  /** A button says it cannot move with the native `disabled`; only an anchor needs `aria-disabled`. */
+  readonly anchor = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.tagName === 'A';
   readonly accessibleLabel = computed(() => this.ownLabel ?? this.defaultLabel());
   readonly unavailable = computed(() => !this.usable());
   readonly href = computed(() =>
@@ -281,7 +284,7 @@ const END_TRIGGER_TEMPLATE = `<ng-content
 
 const triggerHost = {
   '[attr.aria-label]': 'accessibleLabel()',
-  '[attr.aria-disabled]': 'unavailable() ? "true" : null',
+  '[attr.aria-disabled]': 'anchor && unavailable() ? "true" : null',
   '[attr.data-loading]': 'pagination.loading() ? "" : null',
   '[attr.href]': 'href()',
   '[disabled]': 'unavailable()',

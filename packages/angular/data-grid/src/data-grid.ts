@@ -128,7 +128,6 @@ import {
   SlDataGridEditor,
   SlDataGridFilterPanel,
   SlDataGridFilterRowOperand,
-  SlDataGridPart,
 } from './data-grid-controls';
 import {
   injectDataGridDefaults,
@@ -322,7 +321,6 @@ function contentWidth(cell: HTMLElement): number {
     SlDataGridEditor,
     SlDataGridFilterPanel,
     SlDataGridFilterRowOperand,
-    SlDataGridPart,
     SlGlyph,
     SlIcon,
     SlMenu,
@@ -550,7 +548,7 @@ function contentWidth(cell: HTMLElement): number {
                     </button>
                   }
                   <button
-                    slDataGridPart="column-menu"
+                    data-part="column-menu"
                     type="button"
                     tabindex="-1"
                     [slMenuTriggerFor]="columnMenu"

@@ -222,6 +222,27 @@ describe('SlButton', () => {
     expect(button.querySelector(':scope > [data-part="indicator"]')).toBeNull();
   });
 
+  /* The ring is the shared spinner, drawn once for every family that waits. */
+  it('draws the ring in a start slot with the shared spinner', () => {
+    const { button, fixture, host } = mount();
+    host.withIcons.set(true);
+    host.loading.set(true);
+    fixture.detectChanges();
+
+    const indicator = button.querySelector('[data-part="start"] > [data-part="indicator"]');
+    expect(indicator?.getAttribute('data-ui')).toBe('spinner');
+  });
+
+  it('draws the ring in an end slot with the shared spinner', () => {
+    TestBed.overrideComponent(TestHost, {
+      set: { template: '<button slButton loading>Save<span slButtonEnd>E</span></button>' },
+    });
+    const { button } = mount();
+
+    const indicator = button.querySelector('[data-part="end"] > [data-part="indicator"]');
+    expect(indicator?.getAttribute('data-ui')).toBe('spinner');
+  });
+
   it('centres a ring of its own when the control has no visual slot', () => {
     const { button, fixture, host } = mount();
     host.loading.set(true);

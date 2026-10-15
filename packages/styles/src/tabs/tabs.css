@@ -106,8 +106,13 @@
    * column, the panels the second, and the actions sit under the list. The
    * paging controls are not drawn at all — a vertical list stacks and the page
    * scrolls, which is the answer Carbon gives for the same case.
+   *
+   * Both columns are filled, so a column gap stands only between the list and
+   * the panel: the distance the row gap keeps in a horizontal family. Without
+   * it the panel's first letter touched the track on the list's end edge.
    */
   [data-ui='tabs'][data-orientation='vertical'] {
+    column-gap: var(--slotted-tabs-gap, var(--slotted-space-6, 1rem));
     grid-template-columns: auto minmax(0, 1fr);
     grid-template-rows: auto auto;
   }
@@ -119,7 +124,7 @@
    * which is on the border box and therefore does not scroll with the tabs —
    * a track drawn on the content would slide away with the first tab.
    */
-  [data-ui='tabs'] [data-part='list'] {
+  [data-ui='tabs'] > [data-part='list'] {
     align-items: stretch;
     display: flex;
     gap: var(--slotted-tabs-list-gap, var(--_list-gap));
@@ -144,11 +149,11 @@
     scrollbar-width: thin;
   }
 
-  [data-ui='tabs'][data-overflowing] [data-part='list'] {
+  [data-ui='tabs'][data-overflowing] > [data-part='list'] {
     scrollbar-width: none;
   }
 
-  [data-ui='tabs'][data-variant='line'][data-track='line'] [data-part='list'] {
+  [data-ui='tabs'][data-variant='line'][data-track='line'] > [data-part='list'] {
     border-block-end: var(--_track-size) solid
       var(--slotted-tabs-track-color, var(--slotted-border-subtle, ButtonBorder));
   }
@@ -168,13 +173,17 @@
    * below it, so it lands on the line the page already drew. Where that line is
    * is the page's business: the family stops at its own box.
    */
-  [data-ui='tabs'][data-track='none'] [data-part='item']::before,
-  [data-ui='tabs'][data-track='none'] [data-part='item']::after {
+  [data-ui='tabs'][data-track='none'] > :where([data-part='list']) > [data-part='item']::before,
+  [data-ui='tabs'][data-track='none'] > :where([data-part='list']) > [data-part='item']::after {
     inset-block-end: 0;
   }
 
-  [data-ui='tabs'][data-track='none'][data-orientation='vertical'] [data-part='item']::before,
-  [data-ui='tabs'][data-track='none'][data-orientation='vertical'] [data-part='item']::after {
+  [data-ui='tabs'][data-track='none'][data-orientation='vertical']
+    > :where([data-part='list'])
+    > [data-part='item']::before,
+  [data-ui='tabs'][data-track='none'][data-orientation='vertical']
+    > :where([data-part='list'])
+    > [data-part='item']::after {
     inset-block-end: auto;
     inset-inline-end: 0;
   }
@@ -184,12 +193,15 @@
    * horizontal rule wants — a row of equal shares has a middle — and in a
    * column it produces a ragged left edge nobody can scan.
    */
-  [data-ui='tabs'][data-orientation='vertical'] [data-part='tab'] {
+  [data-ui='tabs'][data-orientation='vertical']
+    > :where([data-part='list'])
+    > :where([data-part='item'])
+    > [data-part='tab'] {
     justify-content: start;
     text-align: start;
   }
 
-  [data-ui='tabs'][data-orientation='vertical'] [data-part='list'] {
+  [data-ui='tabs'][data-orientation='vertical'] > [data-part='list'] {
     flex-direction: column;
     grid-column: 1;
     grid-row: 1;
@@ -198,7 +210,7 @@
   }
 
   [data-ui='tabs'][data-orientation='vertical'][data-variant='line'][data-track='line']
-    [data-part='list'] {
+    > [data-part='list'] {
     border-block-end: 0;
     border-inline-end: var(--_track-size) solid
       var(--slotted-tabs-track-color, var(--slotted-border-subtle, ButtonBorder));
@@ -213,7 +225,7 @@
    * label is what gives way, and it is the only place a horizontal label ever
    * truncates.
    */
-  [data-ui='tabs'][data-fit='equal'] [data-part='list'] {
+  [data-ui='tabs'][data-fit='equal'] > [data-part='list'] {
     display: grid;
     grid-auto-columns: minmax(0, 1fr);
     grid-auto-flow: column;
@@ -222,11 +234,15 @@
   }
 
   /** Equal shares are shares of the line, so each item takes the one it is given. */
-  [data-ui='tabs'][data-fit='equal'] [data-part='item'] {
+  [data-ui='tabs'][data-fit='equal'] > :where([data-part='list']) > [data-part='item'] {
     min-inline-size: 0;
   }
 
-  [data-ui='tabs'][data-fit='equal'] [data-part='label'] {
+  [data-ui='tabs'][data-fit='equal']
+    > :where([data-part='list'])
+    > :where([data-part='item'])
+    > :where([data-part='tab'])
+    > [data-part='label'] {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -240,7 +256,7 @@
    * needs a box for its second control, and the marker has to span the pair
    * rather than only the label.
    */
-  [data-ui='tabs'] [data-part='item'] {
+  [data-ui='tabs'] > :where([data-part='list']) > [data-part='item'] {
     align-items: stretch;
     display: grid;
     grid-auto-flow: column;
@@ -254,7 +270,7 @@
     position: relative;
   }
 
-  [data-ui='tabs'] [data-part='tab'] {
+  [data-ui='tabs'] > :where([data-part='list']) > :where([data-part='item']) > [data-part='tab'] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -286,7 +302,10 @@
    * inset there: the control carries it instead, measured from the mark rather
    * than from the box.
    */
-  [data-ui='tabs'] [data-part='item']:has([data-part='dismiss']) [data-part='tab'] {
+  [data-ui='tabs']
+    > :where([data-part='list'])
+    > [data-part='item']:has(> [data-part='dismiss'])
+    > [data-part='tab'] {
     padding-inline-end: 0;
   }
 
@@ -296,9 +315,32 @@
    * needs something to be aligned against, and a label in another script needs
    * to read its own way inside a page that reads the other.
    */
-  [data-ui='tabs'] [data-part='label'] {
+  [data-ui='tabs']
+    > :where([data-part='list'])
+    > :where([data-part='item'])
+    > :where([data-part='tab'])
+    > [data-part='label'] {
     min-inline-size: 0;
     unicode-bidi: plaintext;
+  }
+
+  /**
+   * What stands beside the words: an icon before them, a count after them.
+   * Each is a flex item of the tab, so the tab's inner gap spaces it and the
+   * row centres it, and neither shrinks: under `fit="equal"` the label is what
+   * gives way. An icon box reads `--slotted-icon-size` from the slot, so it
+   * takes the tab's icon step.
+   */
+  [data-ui='tabs']
+    > :where([data-part='list'])
+    > :where([data-part='item'])
+    > :where([data-part='tab'])
+    > :is([data-part='start'], [data-part='end']) {
+    --slotted-icon-size: var(--_icon-size);
+
+    align-items: center;
+    display: inline-flex;
+    flex: none;
   }
 
   /**
@@ -312,7 +354,10 @@
    * meeting a line that runs under all of them. What that variant says on
    * hover is where the mark would go, and it says it on the item, below.
    */
-  [data-ui='tabs'] [data-part='tab']:not(:disabled):not([aria-selected='true']):hover {
+  [data-ui='tabs']
+    > :where([data-part='list'])
+    > :where([data-part='item'])
+    > [data-part='tab']:not(:disabled):not([aria-selected='true']):hover {
     color: var(--slotted-tabs-hover-color, var(--slotted-text, CanvasText));
   }
 
@@ -323,14 +368,19 @@
    * the fill has a box to belong to and no line to meet.
    */
   [data-ui='tabs'][data-variant='contained']
-    [data-part='tab']:not(:disabled):not([aria-selected='true']):hover {
+    > :where([data-part='list'])
+    > :where([data-part='item'])
+    > [data-part='tab']:not(:disabled):not([aria-selected='true']):hover {
     background-color: var(
       --slotted-tabs-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='tabs'][data-variant='contained'] [data-part='tab']:not(:disabled):active {
+  [data-ui='tabs'][data-variant='contained']
+    > :where([data-part='list'])
+    > :where([data-part='item'])
+    > [data-part='tab']:not(:disabled):active {
     background-color: var(
       --slotted-tabs-active-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -348,7 +398,10 @@
    * focus became one blue shape that said neither of the two things — the
    * capture is what showed it.
    */
-  [data-ui='tabs'] [data-part='tab']:focus-visible {
+  [data-ui='tabs']
+    > :where([data-part='list'])
+    > :where([data-part='item'])
+    > [data-part='tab']:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * (var(--slotted-focus-ring-offset, 2px) + var(--_marker-size)));
   }
@@ -359,16 +412,25 @@
    * and nothing about it reaches the edge the scroller clips at — and an inset
    * ring on a twenty-four pixel box would be drawn through the mark.
    */
-  [data-ui='tabs'] [data-part='dismiss']:focus-visible {
+  [data-ui='tabs']
+    > :where([data-part='list'])
+    > :where([data-part='item'])
+    > [data-part='dismiss']:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
-  [data-ui='tabs'] [data-part='item'][data-selected] [data-part='tab'] {
+  [data-ui='tabs']
+    > :where([data-part='list'])
+    > [data-part='item'][data-selected]
+    > [data-part='tab'] {
     color: var(--slotted-tabs-selected-color, var(--slotted-tone-accent-text));
   }
 
-  [data-ui='tabs'] [data-part='tab']:disabled {
+  [data-ui='tabs']
+    > :where([data-part='list'])
+    > :where([data-part='item'])
+    > [data-part='tab']:disabled {
     color: var(--slotted-disabled-foreground, GrayText);
     cursor: not-allowed;
   }
@@ -392,8 +454,8 @@
    * travelling animation with nothing travelling — and it is never on the
    * selected item, where the mark already is.
    */
-  [data-ui='tabs'] [data-part='item']::before,
-  [data-ui='tabs'] [data-part='item']::after {
+  [data-ui='tabs'] > :where([data-part='list']) > [data-part='item']::before,
+  [data-ui='tabs'] > :where([data-part='list']) > [data-part='item']::after {
     border-start-end-radius: var(--slotted-radius-xs, 2px);
     border-start-start-radius: var(--slotted-radius-xs, 2px);
     block-size: var(--_marker-size);
@@ -405,7 +467,7 @@
     position: absolute;
   }
 
-  [data-ui='tabs'] [data-part='item']::before {
+  [data-ui='tabs'] > :where([data-part='list']) > [data-part='item']::before {
     /* No system colour as a last resort: unthemed, the bar disappears rather
        than shouts, as the mark beside it already does. */
     background-color: var(--slotted-tabs-hover-marker-color, var(--slotted-border-strong));
@@ -415,7 +477,7 @@
       opacity var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
   }
 
-  [data-ui='tabs'] [data-part='item']::after {
+  [data-ui='tabs'] > :where([data-part='list']) > [data-part='item']::after {
     background-color: var(--slotted-tabs-marker-color, var(--slotted-tone-accent-solid));
     transform: scale(0, 1);
     transform-origin: var(--_marker-origin) 50%;
@@ -425,17 +487,23 @@
   }
 
   [data-ui='tabs'][data-variant='line']
-    [data-part='item']:not([data-selected]):has([data-part='tab']:not(:disabled):hover)::before {
+    > :where([data-part='list'])
+    > [data-part='item']:not([data-selected]):has(
+      > [data-part='tab']:not(:disabled):hover
+    )::before {
     opacity: 1;
   }
 
   /** Press takes the bar to the label's own ink: the two say one thing. */
   [data-ui='tabs'][data-variant='line']
-    [data-part='item']:not([data-selected]):has([data-part='tab']:not(:disabled):active)::before {
+    > :where([data-part='list'])
+    > [data-part='item']:not([data-selected]):has(
+      > [data-part='tab']:not(:disabled):active
+    )::before {
     background-color: var(--slotted-tabs-active-marker-color, var(--slotted-text));
   }
 
-  [data-ui='tabs'] [data-part='item'][data-selected]::after {
+  [data-ui='tabs'] > :where([data-part='list']) > [data-part='item'][data-selected]::after {
     opacity: 1;
     transform: scale(1, 1);
     transform-origin: var(--_marker-origin-selected) 50%;
@@ -469,8 +537,12 @@
   }
 
   /** A quarter turn: the bar stands on the list's own edge and grows in block. */
-  [data-ui='tabs'][data-orientation='vertical'] [data-part='item']::before,
-  [data-ui='tabs'][data-orientation='vertical'] [data-part='item']::after {
+  [data-ui='tabs'][data-orientation='vertical']
+    > :where([data-part='list'])
+    > [data-part='item']::before,
+  [data-ui='tabs'][data-orientation='vertical']
+    > :where([data-part='list'])
+    > [data-part='item']::after {
     block-size: auto;
     border-start-end-radius: var(--slotted-radius-xs, 2px);
     border-start-start-radius: 0;
@@ -480,12 +552,16 @@
     inset-inline: auto calc(-1 * var(--_track-size));
   }
 
-  [data-ui='tabs'][data-orientation='vertical'] [data-part='item']::after {
+  [data-ui='tabs'][data-orientation='vertical']
+    > :where([data-part='list'])
+    > [data-part='item']::after {
     transform: scale(1, 0);
     transform-origin: 50% var(--_marker-origin);
   }
 
-  [data-ui='tabs'][data-orientation='vertical'] [data-part='item'][data-selected]::after {
+  [data-ui='tabs'][data-orientation='vertical']
+    > :where([data-part='list'])
+    > [data-part='item'][data-selected]::after {
     transform: scale(1, 1);
     transform-origin: 50% var(--_marker-origin-selected);
   }
@@ -505,7 +581,7 @@
    * the first capture showed; the `line` variant keeps the full width, because
    * there the track is the edge of the panel below it.
    */
-  [data-ui='tabs'][data-variant='contained'] [data-part='list'] {
+  [data-ui='tabs'][data-variant='contained'] > [data-part='list'] {
     background-color: var(--slotted-tabs-contained-background, var(--slotted-surface-sunken));
     border-radius: var(--slotted-radius-md, 6px);
     justify-self: start;
@@ -513,13 +589,15 @@
     padding: var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='tabs'][data-variant='contained'] [data-part='item'] {
+  [data-ui='tabs'][data-variant='contained'] > :where([data-part='list']) > [data-part='item'] {
     border-radius: var(--slotted-radius-sm, 4px);
     transition: background-color var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);
   }
 
-  [data-ui='tabs'][data-variant='contained'] [data-part='item'][data-selected] {
+  [data-ui='tabs'][data-variant='contained']
+    > :where([data-part='list'])
+    > [data-part='item'][data-selected] {
     background-color: var(--slotted-tabs-contained-selected-background, var(--slotted-surface));
     box-shadow: var(--slotted-shadow-xs);
   }
@@ -530,13 +608,16 @@
    * edge, it read as a second border of a different colour, and the capture
    * showed a pill with one blue side.
    */
-  [data-ui='tabs'][data-variant='contained'] [data-part='item']::after {
+  [data-ui='tabs'][data-variant='contained']
+    > :where([data-part='list'])
+    > [data-part='item']::after {
     inset-block-end: var(--slotted-space-1, 0.125rem);
     inset-inline: var(--slotted-radius-sm, 4px);
   }
 
   [data-ui='tabs'][data-variant='contained'][data-orientation='vertical']
-    [data-part='item']::after {
+    > :where([data-part='list'])
+    > [data-part='item']::after {
     inset-block: var(--slotted-radius-sm, 4px);
     inset-inline: auto var(--slotted-space-1, 0.125rem);
   }
@@ -557,7 +638,10 @@
    * the control, hard against the words, with the whole tab's padding on the
    * far side of it.
    */
-  [data-ui='tabs'] [data-part='dismiss'] {
+  [data-ui='tabs']
+    > :where([data-part='list'])
+    > :where([data-part='item'])
+    > [data-part='dismiss'] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -586,18 +670,27 @@
      is the one a mouse sees: a transparent box centred on the control reaches
      44 pixels, and the ground and the ring stay square. */
   @media (pointer: coarse) {
-    [data-ui='tabs'] [data-part='dismiss'] {
+    [data-ui='tabs']
+      > :where([data-part='list'])
+      > :where([data-part='item'])
+      > [data-part='dismiss'] {
       position: relative;
     }
 
-    [data-ui='tabs'] [data-part='dismiss']::after {
+    [data-ui='tabs']
+      > :where([data-part='list'])
+      > :where([data-part='item'])
+      > [data-part='dismiss']::after {
       content: '';
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
       position: absolute;
     }
   }
 
-  [data-ui='tabs'] [data-part='dismiss']:not(:disabled):hover {
+  [data-ui='tabs']
+    > :where([data-part='list'])
+    > :where([data-part='item'])
+    > [data-part='dismiss']:not(:disabled):hover {
     background-color: var(
       --slotted-tabs-dismiss-hover-background,
       var(--slotted-tone-danger-surface)
@@ -605,7 +698,10 @@
     color: var(--slotted-tabs-dismiss-hover-color, var(--slotted-tone-danger-text));
   }
 
-  [data-ui='tabs'] [data-part='dismiss']:not(:disabled):active {
+  [data-ui='tabs']
+    > :where([data-part='list'])
+    > :where([data-part='item'])
+    > [data-part='dismiss']:not(:disabled):active {
     background-color: var(
       --slotted-tabs-dismiss-active-background,
       var(--slotted-tone-danger-border)
@@ -613,7 +709,10 @@
     color: var(--slotted-tabs-dismiss-active-color, var(--slotted-text-inverse));
   }
 
-  [data-ui='tabs'] [data-part='dismiss']:disabled {
+  [data-ui='tabs']
+    > :where([data-part='list'])
+    > :where([data-part='item'])
+    > [data-part='dismiss']:disabled {
     color: var(--slotted-disabled-foreground, GrayText);
     cursor: not-allowed;
   }
@@ -636,7 +735,7 @@
    * list as they move, and Cloudscape's own guidance warns against extra
    * stops before a tab list.
    */
-  [data-ui='tabs'] [data-part='scroll'] {
+  [data-ui='tabs'] > [data-part='scroll'] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -668,31 +767,31 @@
    * is read from the control itself — a paging control at its end is
    * disabled — so the family needs no second signal for it.
    */
-  [data-ui='tabs']:has([data-part='scroll'][data-direction='start']:not(:disabled))
-    [data-part='list'] {
+  [data-ui='tabs']:has(> [data-part='scroll'][data-direction='start']:not(:disabled))
+    > [data-part='list'] {
     mask-image: linear-gradient(to right, transparent, black var(--_fade));
   }
 
-  [data-ui='tabs']:has([data-part='scroll'][data-direction='end']:not(:disabled))
-    [data-part='list'] {
+  [data-ui='tabs']:has(> [data-part='scroll'][data-direction='end']:not(:disabled))
+    > [data-part='list'] {
     mask-image: linear-gradient(to left, transparent, black var(--_fade));
   }
 
   /* The start edge is the right one in a right-to-left document. */
-  [data-ui='tabs']:dir(rtl):has([data-part='scroll'][data-direction='start']:not(:disabled))
-    [data-part='list'] {
+  [data-ui='tabs']:dir(rtl):has(> [data-part='scroll'][data-direction='start']:not(:disabled))
+    > [data-part='list'] {
     mask-image: linear-gradient(to left, transparent, black var(--_fade));
   }
 
-  [data-ui='tabs']:dir(rtl):has([data-part='scroll'][data-direction='end']:not(:disabled))
-    [data-part='list'] {
+  [data-ui='tabs']:dir(rtl):has(> [data-part='scroll'][data-direction='end']:not(:disabled))
+    > [data-part='list'] {
     mask-image: linear-gradient(to right, transparent, black var(--_fade));
   }
 
-  [data-ui='tabs']:has([data-part='scroll'][data-direction='start']:not(:disabled)):has(
-      [data-part='scroll'][data-direction='end']:not(:disabled)
+  [data-ui='tabs']:has(> [data-part='scroll'][data-direction='start']:not(:disabled)):has(
+      > [data-part='scroll'][data-direction='end']:not(:disabled)
     )
-    [data-part='list'] {
+    > [data-part='list'] {
     mask-image: linear-gradient(
       to right,
       transparent,
@@ -706,19 +805,19 @@
      for both axes. As wide as its glyph and as tall as the row, it stood 24
      wide and 44 tall beside tabs grown to the comfortable height. */
   @media (pointer: coarse) {
-    [data-ui='tabs'] [data-part='scroll'] {
+    [data-ui='tabs'] > [data-part='scroll'] {
       min-block-size: max(var(--slotted-target-comfortable, 44px), var(--_height));
       min-inline-size: max(var(--slotted-target-comfortable, 44px), var(--_height));
     }
   }
 
-  [data-ui='tabs'] [data-part='scroll'][data-direction='start'] {
+  [data-ui='tabs'] > [data-part='scroll'][data-direction='start'] {
     grid-column: 1;
     grid-row: 1;
     margin-inline-end: var(--slotted-tabs-actions-gap, var(--slotted-space-4, 0.5rem));
   }
 
-  [data-ui='tabs'] [data-part='scroll'][data-direction='end'] {
+  [data-ui='tabs'] > [data-part='scroll'][data-direction='end'] {
     grid-column: 3;
     margin-inline-start: var(--slotted-tabs-actions-gap, var(--slotted-space-4, 0.5rem));
     grid-row: 1;
@@ -733,26 +832,26 @@
    * own mirror holds: the two compose, so the start control points back in
    * both directions.
    */
-  [data-ui='tabs'] [data-part='scroll'][data-direction='start'] > [data-ui='icon'] {
+  [data-ui='tabs'] > [data-part='scroll'][data-direction='start'] > [data-ui='icon'] {
     rotate: 0.5turn;
   }
 
   /* The ground moves under the pointer and nothing else does (R2). */
-  [data-ui='tabs'] [data-part='scroll']:not(:disabled):hover {
+  [data-ui='tabs'] > [data-part='scroll']:not(:disabled):hover {
     background-color: var(
       --slotted-tabs-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='tabs'] [data-part='scroll']:not(:disabled):active {
+  [data-ui='tabs'] > [data-part='scroll']:not(:disabled):active {
     background-color: var(
       --slotted-tabs-active-background,
       var(--slotted-tone-secondary-subtle-active)
     );
   }
 
-  [data-ui='tabs'] [data-part='scroll']:focus-visible {
+  [data-ui='tabs'] > [data-part='scroll']:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
   }
@@ -763,18 +862,18 @@
    * not removed — so the list never moves under the pointer that is using
    * the other one.
    */
-  [data-ui='tabs'] [data-part='scroll']:disabled {
+  [data-ui='tabs'] > [data-part='scroll']:disabled {
     cursor: default;
     visibility: hidden;
   }
 
-  [data-ui='tabs'][data-orientation='vertical'] [data-part='scroll'] {
+  [data-ui='tabs'][data-orientation='vertical'] > [data-part='scroll'] {
     display: none;
   }
 
   /* ── Actions, and the panels ──────────────────────────────────────────── */
 
-  [data-ui='tabs'] [data-part='actions'] {
+  [data-ui='tabs'] > [data-part='actions'] {
     align-items: center;
     align-self: center;
     display: flex;
@@ -784,7 +883,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='tabs'][data-orientation='vertical'] [data-part='actions'] {
+  [data-ui='tabs'][data-orientation='vertical'] > [data-part='actions'] {
     grid-column: 1;
     grid-row: 2;
   }
@@ -803,14 +902,14 @@
    * their own element, which is one declaration against a layout that
    * otherwise breaks for every reader on a narrow screen.
    */
-  [data-ui='tabs'] [data-part='panel'] {
+  [data-ui='tabs'] > [data-part='panel'] {
     grid-column: 1 / -1;
     grid-row: 2;
     min-inline-size: 0;
     overflow-wrap: anywhere;
   }
 
-  [data-ui='tabs'][data-orientation='vertical'] [data-part='panel'] {
+  [data-ui='tabs'][data-orientation='vertical'] > [data-part='panel'] {
     grid-column: 2;
     grid-row: 1 / -1;
   }
@@ -821,7 +920,7 @@
    * than relied on. It is the attribute and not a class because a screen
    * reader, find-in-page and `:target` all already understand it.
    */
-  [data-ui='tabs'] [data-part='panel'][hidden] {
+  [data-ui='tabs'] > [data-part='panel'][hidden] {
     display: none;
   }
 
@@ -831,7 +930,7 @@
    * own content and has no padding of its own, so an inset ring is drawn
    * through the first line of it.
    */
-  [data-ui='tabs'] [data-part='panel']:focus-visible {
+  [data-ui='tabs'] > [data-part='panel']:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -844,7 +943,7 @@
    * panel instead, which needs a clipping viewport that traps horizontal
    * scrolling and fights the list's own scroll.
    */
-  [data-ui='tabs'] [data-part='panel']:not([hidden]) {
+  [data-ui='tabs'] > [data-part='panel']:not([hidden]) {
     animation: slotted-tabs-panel-in var(--slotted-duration-short) var(--slotted-easing-enter);
   }
 
@@ -862,11 +961,11 @@
    * adds is the track: a disabled family should not read as a live one with
    * grey labels.
    */
-  [data-ui='tabs'][data-disabled][data-variant='line'][data-track='line'] [data-part='list'] {
+  [data-ui='tabs'][data-disabled][data-variant='line'][data-track='line'] > [data-part='list'] {
     border-color: var(--slotted-disabled-border, GrayText);
   }
 
-  [data-ui='tabs'][data-disabled][data-variant='contained'] [data-part='list'] {
+  [data-ui='tabs'][data-disabled][data-variant='contained'] > [data-part='list'] {
     background-color: var(--slotted-disabled-background, Canvas);
   }
 
@@ -875,7 +974,9 @@
    * decoration in an unthemed page should disappear rather than shout, and a
    * marker painted `GrayText` with no theme would be the loudest thing on it.
    */
-  [data-ui='tabs'][data-disabled] [data-part='item'][data-selected]::after {
+  [data-ui='tabs'][data-disabled]
+    > :where([data-part='list'])
+    > [data-part='item'][data-selected]::after {
     background-color: var(--slotted-disabled-border);
   }
 
@@ -888,7 +989,9 @@
    * track it stands in.
    */
   @media (forced-colors: active) {
-    [data-ui='tabs'][data-variant='contained'] [data-part='item'][data-selected] {
+    [data-ui='tabs'][data-variant='contained']
+      > :where([data-part='list'])
+      > [data-part='item'][data-selected] {
       border: var(--slotted-border-width-thin, 1px) solid Highlight;
     }
   }

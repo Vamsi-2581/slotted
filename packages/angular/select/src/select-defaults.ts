@@ -124,7 +124,7 @@ export const SELECT_FALLBACK: SelectDefaults = {
   typeahead: true,
   typeaheadTimeout: 500,
   variant: 'outline',
-  width: 'anchor',
+  width: 'content',
 };
 
 export const SELECT_DEFAULTS = new InjectionToken<SelectDefaults>('SELECT_DEFAULTS', {

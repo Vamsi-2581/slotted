@@ -115,10 +115,32 @@ describe('focus follows the missing half', () => {
 
     fireEvent.click(dayCell(11));
 
-    /* The value is whole — the time half took `referenceDateTime`'s — but it
-       was not whole before, so the press completed it and the panel closes. */
+    await waitFor(() => expect(document.activeElement?.getAttribute('role')).toBe('option'));
+    expect(document.activeElement?.textContent).toBe('12:00');
+    expect(panel()).not.toBeNull();
+    expect(hidden()).toHaveValue('');
+
+    fireEvent.click(options().find((option) => option.textContent === '14:30') as HTMLElement);
+
     await waitFor(() => expect(panel()).toBeNull());
-    expect(hidden()).toHaveValue('2026-09-11T12:00:00');
+    expect(hidden()).toHaveValue('2026-09-11T14:30:00');
+  });
+
+  it('carries focus to the calendar when a time leaves the value incomplete', async () => {
+    render(<DateTimePicker {...base} defaultOpen />);
+
+    const half = options().find((option) => option.textContent === '14:30') as HTMLElement;
+    fireEvent.click(half);
+
+    await waitFor(() => expect(document.activeElement?.getAttribute('data-part')).toBe('day'));
+    expect(panel()).not.toBeNull();
+    expect(hidden()).toHaveValue('');
+    expect(half).toHaveAttribute('aria-selected', 'true');
+
+    fireEvent.click(dayCell(11));
+
+    await waitFor(() => expect(panel()).toBeNull());
+    expect(hidden()).toHaveValue('2026-09-11T14:30:00');
   });
 
   /**
@@ -369,6 +391,32 @@ describe('the contract with the consumer', () => {
     await waitFor(() => expect(hidden()).toHaveValue('2026-09-10T08:00:00'));
   });
 
+  it('returns to its default value when its form is reset', async () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <form>
+        <DateTimePicker
+          {...base}
+          defaultOpen
+          defaultValue={TENTH}
+          onValueChange={onValueChange}
+          step={3600}
+        />
+      </form>,
+    );
+
+    fireEvent.click(options()[8] as HTMLElement);
+    await waitFor(() => expect(hidden()).toHaveValue('2026-09-10T08:00:00'));
+
+    act(() => container.querySelector('form')?.reset());
+
+    await waitFor(() => expect(hidden()).toHaveValue(toISODateTime(TENTH)));
+    expect(onValueChange).toHaveBeenLastCalledWith(
+      TENTH,
+      expect.objectContaining({ reason: 'programmatic' }),
+    );
+  });
+
   it('owns the open state in both modes', () => {
     const onOpenChange = vi.fn();
     render(<DateTimePicker {...base} onOpenChange={onOpenChange} open={false} value={TENTH} />);
@@ -387,10 +435,18 @@ describe('the contract with the consumer', () => {
     await waitFor(() => expect(panel()).toBeNull());
   });
 
-  it('writes the current datetime from the head', async () => {
-    render(<DateTimePicker {...base} defaultOpen />);
+  /**
+   * `referenceDateTime` answers where an empty field steps from and which time
+   * the list opens on after a day is pressed. It does not answer what time it is: a booking flow
+   * whose reference is tomorrow at nine still means now when it says now.
+   */
+  it('writes the current datetime from the head, not the reference', async () => {
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.UTC(2026, 8, 30, 14, 5, 0));
+    render(<DateTimePicker {...base} defaultOpen timeZone="UTC" />);
     fireEvent.click(screen.getByRole('button', { name: 'Now' }));
-    await waitFor(() => expect(hidden()).toHaveValue(toISODateTime(REFERENCE)));
+    await waitFor(() => expect(hidden()).toHaveValue('2026-09-30T14:05:00'));
+    expect(hidden()).not.toHaveValue(toISODateTime(REFERENCE));
+    clock.mockRestore();
   });
 
   it('takes its defaults from a provider, and its words from the language in force', () => {
@@ -478,5 +534,69 @@ describe('states', () => {
 
     rerender(inLocale('en-US'));
     expect(name()).toMatch(/^Change date and time, .*September/);
+  });
+});
+
+describe('where focus goes when it opens', () => {
+  /**
+   * The panel is portalled to the end of the document, so left on the trigger
+   * it is not the next stop in the page's sequence: a keyboard reader could
+   * open it and not reach it.
+   */
+  it('moves focus to the chosen day when the trigger opens it', async () => {
+    render(<DateTimePicker {...base} value={TENTH} />);
+
+    openPanel();
+
+    await waitFor(() => expect(document.activeElement?.getAttribute('data-part')).toBe('day'));
+    expect(document.activeElement?.textContent?.trim()).toBe('10');
+  });
+
+  it('moves focus to the chosen time when openTo is time', async () => {
+    render(<DateTimePicker {...base} openTo="time" value={TENTH} />);
+
+    openPanel();
+
+    await waitFor(() => expect(document.activeElement?.getAttribute('role')).toBe('option'));
+    expect(document.activeElement?.textContent).toBe('15:15');
+  });
+
+  it('moves focus into the panel when open() opens it', async () => {
+    const handle = { current: null as DateTimePickerHandle | null };
+    render(<DateTimePicker {...base} ref={handle} value={TENTH} />);
+
+    act(() => handle.current?.open());
+
+    await waitFor(() => expect(document.activeElement?.getAttribute('data-part')).toBe('day'));
+  });
+
+  it('leaves focus alone when it is rendered open', async () => {
+    render(<DateTimePicker {...base} defaultOpen value={TENTH} />);
+
+    await act(async () => {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    });
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it('keeps Tab inside the panel while it is open', () => {
+    render(
+      <DateTimePicker
+        {...base}
+        defaultOpen
+        footer={<button type="button">Aplicar</button>}
+        presets={<button type="button">Amanhã</button>}
+        value={TENTH}
+      />,
+    );
+    const first = screen.getByRole('button', { name: 'Amanhã' });
+    const last = screen.getByRole('button', { name: 'Aplicar' });
+
+    act(() => last.focus());
+    fireEvent.keyDown(last, { key: 'Tab' });
+    expect(first).toHaveFocus();
+
+    fireEvent.keyDown(first, { key: 'Tab', shiftKey: true });
+    expect(last).toHaveFocus();
   });
 });

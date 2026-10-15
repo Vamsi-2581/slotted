@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { SlField, SlFieldLabel } from '@slotted/angular/field';
 import { provideSlotted } from '@slotted/angular/i18n';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -74,6 +75,85 @@ function pressOption(fixture: ComponentFixture<unknown>, option: HTMLElement) {
   fixture.detectChanges();
 }
 
+@Component({
+  standalone: true,
+  imports: [SlSelect, SlSelectItem],
+  template: `<span id="fruit-label">Fruit</span>
+    <sl-select aria-labelledby="fruit-label">
+      <sl-select-item value="apple">Apple</sl-select-item>
+    </sl-select>`,
+})
+class LabelledHost {}
+
+describe('SlSelect, named by another element', () => {
+  it('carries a written aria-labelledby to the trigger, not the root', async () => {
+    await TestBed.configureTestingModule({ imports: [LabelledHost] }).compileComponents();
+    const fixture = TestBed.createComponent(LabelledHost);
+    fixture.detectChanges();
+
+    const root = document.querySelector('[data-ui="select"]') as HTMLElement;
+    expect(trigger().getAttribute('aria-labelledby')).toBe('fruit-label');
+    expect(root.hasAttribute('aria-labelledby')).toBe(false);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlField, SlFieldLabel, SlSelect, SlSelectItem],
+  template: `<div slField id="fruit">
+    <label slFieldLabel>Fruit</label>
+    <sl-select placeholder="Choose a fruit">
+      <sl-select-item value="apple">Apple</sl-select-item>
+    </sl-select>
+  </div>`,
+})
+class FieldHost {}
+
+/**
+ * Field › wiring.id: the control carries the field's identifier, so the label's
+ * `for` reaches the trigger — a button is labelable — and a press on the label
+ * focuses it. The popup names the trigger by the same identifier.
+ */
+describe('SlSelect, inside a field', () => {
+  it('is the control the field’s label is for', async () => {
+    await TestBed.configureTestingModule({ imports: [FieldHost] }).compileComponents();
+    const fixture = TestBed.createComponent(FieldHost);
+    fixture.detectChanges();
+
+    const label = document.querySelector('label') as HTMLLabelElement;
+    expect(label.control).toBe(trigger());
+    expect(trigger().id).toBe('fruit-control');
+    press('ArrowDown');
+    fixture.detectChanges();
+    expect(listbox()?.getAttribute('aria-labelledby')).toBe('fruit-control');
+  });
+
+  /**
+   * A press on the label reaches the trigger as the click the label forwards: a
+   * pointer click (detail 1) at the label's coordinates, outside the frame. It
+   * focuses the control and leaves the list closed, as the select-only
+   * example's label does and as a native select does.
+   */
+  it('focuses without opening when the label is pressed', async () => {
+    await TestBed.configureTestingModule({ imports: [FieldHost] }).compileComponents();
+    const fixture = TestBed.createComponent(FieldHost);
+    fixture.detectChanges();
+
+    const click = (clientX: number, clientY: number) =>
+      trigger().dispatchEvent(
+        new MouseEvent('click', { bubbles: true, detail: 1, clientX, clientY }),
+      );
+    click(-40, -20);
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(trigger());
+    expect(trigger().getAttribute('aria-expanded')).toBe('false');
+
+    click(0, 0);
+    fixture.detectChanges();
+    expect(trigger().getAttribute('aria-expanded')).toBe('true');
+  });
+});
+
 describe('SlSelect', () => {
   let fixture: ComponentFixture<Host>;
 
@@ -88,6 +168,92 @@ describe('SlSelect', () => {
     fixture.detectChanges();
   });
 
+  /**
+   * The highlight is brought into view by scrolling the list alone. A
+   * `scrollIntoView` scrolls every ancestor as well, and on the first open it
+   * runs before the popup is positioned — so a select far down a page sent the
+   * page to its top, and the popup, its control now out of view, hid itself.
+   */
+  it('scrolls the list to the highlight, and never the page', () => {
+    const original = Element.prototype.scrollIntoView;
+    let calls = 0;
+    Element.prototype.scrollIntoView = () => {
+      calls += 1;
+    };
+    try {
+      open();
+      const surface = listbox() as HTMLElement;
+      Object.defineProperty(surface, 'clientHeight', { configurable: true, value: 100 });
+      Object.defineProperty(surface, 'scrollTop', { configurable: true, writable: true, value: 0 });
+      surface.getBoundingClientRect = () =>
+        DOMRect.fromRect({ x: 0, y: 0, width: 200, height: 100 });
+      named('Cherry').getBoundingClientRect = () =>
+        DOMRect.fromRect({ x: 0, y: 130, width: 200, height: 30 });
+      press('End');
+      fixture.detectChanges();
+      expect(calls).toBe(0);
+      expect(surface.scrollTop).toBe(60);
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
+  });
+
+  /**
+   * The popup is bounded by the height the positioner reports, and that height
+   * arrives after the highlight lands on the selected option. Revealed only
+   * then, the row was measured inside an unbounded list and stayed below the
+   * fold once the list took its height.
+   */
+  it('shows the selected option once the popup has taken its height', async () => {
+    const bounded = (element: Element) =>
+      element
+        .closest<HTMLElement>("[data-part='positioner']")
+        ?.style.getPropertyValue('--slotted-positioner-available-height') !== '';
+    const rect = Element.prototype.getBoundingClientRect;
+    const height = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientHeight');
+    const top = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollTop');
+    const scrolled = new Map<Element, number>();
+    Element.prototype.getBoundingClientRect = function (this: Element) {
+      if (this.getAttribute('role') === 'listbox') {
+        return DOMRect.fromRect({ x: 0, y: 0, width: 200, height: bounded(this) ? 100 : 400 });
+      }
+      if (this.getAttribute('data-value') === 'cherry') {
+        return DOMRect.fromRect({ x: 0, y: 130, width: 200, height: 30 });
+      }
+      return DOMRect.fromRect({ x: 0, y: 0, width: 0, height: 0 });
+    };
+    Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+      configurable: true,
+      get(this: HTMLElement) {
+        if (this.getAttribute('role') !== 'listbox') return 0;
+        return bounded(this) ? 100 : 400;
+      },
+    });
+    Object.defineProperty(Element.prototype, 'scrollTop', {
+      configurable: true,
+      get(this: Element) {
+        return scrolled.get(this) ?? 0;
+      },
+      set(this: Element, next: number) {
+        scrolled.set(this, next);
+      },
+    });
+    try {
+      fixture.componentInstance.value.set('cherry');
+      fixture.detectChanges();
+      open();
+      const surface = listbox() as HTMLElement;
+      for (let attempt = 0; attempt < 20 && surface.scrollTop !== 60; attempt += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      expect(surface.scrollTop).toBe(60);
+    } finally {
+      Element.prototype.getBoundingClientRect = rect;
+      if (height) Object.defineProperty(HTMLElement.prototype, 'clientHeight', height);
+      if (top) Object.defineProperty(Element.prototype, 'scrollTop', top);
+    }
+  });
+
   it('is a combobox that opens a listbox, and says so before it does', () => {
     expect(trigger().getAttribute('role')).toBe('combobox');
     expect(trigger().getAttribute('aria-haspopup')).toBe('listbox');
@@ -96,6 +262,17 @@ describe('SlSelect', () => {
     expect(listbox()).not.toBeNull();
     expect(trigger().getAttribute('aria-expanded')).toBe('true');
     expect(trigger().getAttribute('aria-controls')).toBe(listbox()?.id);
+  });
+
+  /**
+   * The name is the trigger's (contract: \`aria-labelledby\` on the trigger).
+   * The root is a generic element, which ARIA 1.2 does not let be named, and
+   * React's \`Select\` root carries no name.
+   */
+  it('names the trigger and leaves the root unnamed', () => {
+    const root = document.querySelector('[data-ui="select"]') as HTMLElement;
+    expect(trigger().getAttribute('aria-label')).toBe('Fruit');
+    expect(root.hasAttribute('aria-label')).toBe(false);
   });
 
   it('keeps DOM focus on the trigger for the whole interaction', () => {
@@ -375,6 +552,58 @@ describe('SlSelect', () => {
     open();
     expect(root?.hasAttribute('data-open')).toBe(true);
   });
+
+  /**
+   * A popup pinned to the control's width wrapped its option labels under a
+   * narrow control. The default sizes it to its options, never narrower than
+   * the control.
+   */
+  it('sizes the popup to its options by default', () => {
+    open();
+    const positioner = document.querySelector<HTMLElement>(
+      "[data-ui='select'][data-part='positioner']",
+    );
+    expect(positioner?.getAttribute('data-width')).toBe('content');
+  });
+});
+
+/**
+ * Contract `chips.narrowWidth`: under 120px of control a multiple select's
+ * chips give way to the summary sentence. A single select draws no chips, so
+ * nothing swaps and nothing is written.
+ */
+describe('SlSelect, narrower than a chip', () => {
+  it('writes data-narrow only while a multiple select draws its chips', async () => {
+    const original = HTMLElement.prototype.getBoundingClientRect;
+    HTMLElement.prototype.getBoundingClientRect = () =>
+      ({ bottom: 32, height: 32, left: 0, right: 100, top: 0, width: 100, x: 0, y: 0 }) as DOMRect;
+    try {
+      await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+      const fixture = TestBed.createComponent(Host);
+      const root = () => document.querySelector("[data-ui='select'][data-part='root']");
+      const settle = async () => {
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+      };
+      await settle();
+
+      fixture.componentInstance.value.set('apple');
+      await settle();
+      expect(root()?.hasAttribute('data-narrow')).toBe(false);
+
+      fixture.componentInstance.multiple.set(true);
+      fixture.componentInstance.value.set(['apple', 'cherry']);
+      await settle();
+      expect(root()?.hasAttribute('data-narrow')).toBe(true);
+
+      fixture.componentInstance.value.set([]);
+      await settle();
+      expect(root()?.hasAttribute('data-narrow')).toBe(false);
+    } finally {
+      HTMLElement.prototype.getBoundingClientRect = original;
+    }
+  });
 });
 
 describe('SlSelect in a form', () => {
@@ -404,6 +633,43 @@ describe('SlSelect in a form', () => {
     fixture.detectChanges();
     expect(fixture.componentInstance.control.errors).toBeNull();
     expect(trigger().textContent?.trim()).toBe('Apple');
+  });
+
+  /**
+   * The hidden native select holds one option per chosen value. Tracked by the
+   * value itself, a single select that moved from one value to another
+   * re-created its whole collection on every change, and Angular said so in
+   * the console (NG0956) each time.
+   */
+  it('changes the value its hidden select submits without re-creating it', async () => {
+    @Component({
+      standalone: true,
+      imports: [SlSelect, SlSelectItem],
+      template: `
+        <sl-select aria-label="Fruit" name="fruit" [(value)]="value">
+          <sl-select-item value="apple">Apple</sl-select-item>
+          <sl-select-item value="cherry">Cherry</sl-select-item>
+        </sl-select>
+      `,
+    })
+    class NamedHost {
+      readonly value = signal<string | readonly string[] | null>('apple');
+    }
+    await TestBed.configureTestingModule({ imports: [NamedHost] }).compileComponents();
+    const fixture = TestBed.createComponent(NamedHost);
+    fixture.detectChanges();
+
+    const warnings: string[] = [];
+    const warn = console.warn;
+    console.warn = (...args: unknown[]) => warnings.push(args.map(String).join(' '));
+    try {
+      fixture.componentInstance.value.set('cherry');
+      fixture.detectChanges();
+    } finally {
+      console.warn = warn;
+    }
+    expect(document.querySelector<HTMLSelectElement>("select[name='fruit']")?.value).toBe('cherry');
+    expect(warnings.filter((message) => message.includes('NG0956'))).toEqual([]);
   });
 
   it('takes its disabled state from the form', async () => {

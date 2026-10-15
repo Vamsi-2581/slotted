@@ -52,13 +52,18 @@
     "rootMargin": "the observer's top edge moves down by what stands above the header area inside the root, plus one pixel",
     "rootMarginReason": "stuck at -H the area's bottom edge lands exactly under the title, inside the scrollport and covered; an observer over the whole scrollport never reported it out, and the header never snapped in a browser while every fake said it did. Rebuilt whenever the title changes height; a rebuilt observer's first report repeats the fact it knew and never asks the area to collapse again",
     "fact": "data-scrolled",
-    "contained": "inside a page with data-fill, the binding passes the page's body as contained to @slotted/core/sticky-header: the body's principal scroller scrolling down past 16 pixels asks expanded to move to false with the reason scroll, and the same scroller back at its top asks it back to true. A collapse by the toggle or the application is not undone. A scroller is principal when it is not a form control — input, select, textarea or contenteditable — and its client block size is at least half the body's (PRINCIPAL_SCROLL_FRACTION, 0.5): the rows of a list that fills the body pass, a textarea and a short scroll area beside the list do not, because what the reader types into or glances at is not the content the header heads. Resolved on every scroll, so a page that turns fill on or off, or a pane a splitter resizes, is followed",
+    "contained": "inside a page with data-fill, the binding passes the page's body as contained to @slotted/core/sticky-header: the body's principal scroller scrolling down past 16 pixels asks expanded to move to false with the reason scroll, and the same scroller back at its top asks it back to true. A collapse by the toggle or the application is not undone. A header with no header area is never collapsed by a contained scroll: collapsed, it would hide nothing, and the title stepping down would resize every pane under it. A scroller is principal when it is not a form control — input, select, textarea or contenteditable — and its client block size is at least half the body's (PRINCIPAL_SCROLL_FRACTION, 0.5): the rows of a list that fills the body pass, a textarea and a short scroll area beside the list do not, because what the reader types into or glances at is not the content the header heads. Resolved on every scroll, so a page that turns fill on or off, or a pane a splitter resizes, is followed",
     "reason": "Stuck at -H, the header area is entirely above the scrollport and isIntersecting is false, which the binding writes as data-scrolled on the root — a measured fact like toolbar's data-overflowing, not a state the vocabulary holds. No pixel bias, because the observed element is not the one that animates — Sirius observed the hero it also animated and needed SNAP_BIAS_PX to settle the edge. While revealed the fact is frozen, because a root moved to 0 brings the area back into the scrollport and the observer would otherwise undo the reveal it just caused"
   },
   "tall": {
     "fact": "data-tall",
     "meaning": "the header is too much of the screen to hold: expanded it would take more than six tenths of the scrollport, or the root is narrower than 600 pixels. The stylesheet hides the pin, and a header held when the fact turns true is let go with the reason programmatic",
     "reason": "on a phone a pinned header took nearly the whole height and left nothing to read. sap.f does not offer the pin on phones; the fraction covers a short landscape screen and a tall header alike. Measured by the engine from the chrome, the area and the scrollport, and written by the binding as a fact like data-scrolled"
+  },
+  "stuck": {
+    "fact": "data-stuck",
+    "meaning": "the title area or the root holds at its sticky offset — 0, or the floating inset — with the scroll position past its rest, so content passes under the chrome. The root counts because a floating title area stands a border below it. Measured by @slotted/core/sticky-header on the header's own scroller once a frame, and never true while compact or in a page whose body scrolls on its own, where the header's scroller does not move",
+    "reason": "plain paints a ground only while something passes under it, and floating lifts by a shadow only then; the root's own offset is not the fact, because while the header area slides under the title the root is still travelling and the title already covers content"
   },
   "compact": {
     "fact": "data-compact",
@@ -214,9 +219,17 @@
     }
   },
   "axes": {
+    "variant": ["band", "plain", "floating"],
     "size": ["sm", "md", "lg"],
     "level": ["1", "2", "3"],
     "collapse": ["scroll", "manual"]
+  },
+  "variant": {
+    "band": "the chrome as a strip of the surface (--slotted-page-header-background) with one hairline under it, the whole width of the header. The page's own header, across the top of the screen",
+    "plain": "no ground of its own at rest: the header takes the ground it stands on, and the hairline under it stays. Once content passes under the chrome (data-stuck) the surface comes back, because a header with no ground would show the page through its title. A header inside a region that has a ground of its own — a pane, a card",
+    "floating": "a box of its own: the surface, the hairline all round, corners at --slotted-page-header-radius (the card step, --slotted-radius-lg). At rest it stands where the flow puts it; stuck, it slides to --slotted-page-header-inset (--slotted-space-4) below the scroller's edge, the title area with it, and carries --slotted-page-header-shadow (--slotted-shadow-sm), the one shadow the family draws. The inset is the stuck state's alone, because a header flush with its scroller's edge sat an inset down over the content under it at rest. Compact, it keeps the box and is in the flow at nought. A header that stands inside padding, above content set as cards",
+    "default": "band",
+    "reason": "a header nested in a padded pane painted the surface as a strip with one hairline on a sunken page, and read as a slab the padding cut. sap.f.DynamicPage has backgroundDesign Transparent and Ant's PageHeader has ghost for the first answer; the second is a box for a body made of cards, where the header is the first card. Changing the page's ground instead changes every other region on the screen"
   },
   "collapse": {
     "scroll": "the header area collapses when it scrolls out of the scrollport and expands when it scrolls back in, each with the reason scroll; the toggle and the pin work as well",
@@ -226,10 +239,11 @@
   "resolution": {
     "size": ["prop", "defaults", "md"],
     "level": ["prop", "defaults", "1"],
-    "collapse": ["prop", "defaults", "scroll"]
+    "collapse": ["prop", "defaults", "scroll"],
+    "variant": ["prop", "defaults", "band"]
   },
   "provides": {
-    "pageHeaderDefaults": ["size", "level", "collapse"]
+    "pageHeaderDefaults": ["size", "level", "collapse", "variant"]
   },
   "stateAttributes": {
     "expanded": "data-expanded",
@@ -259,11 +273,12 @@
         "size": "md",
         "level": "1",
         "collapse": "scroll",
+        "variant": "band",
         "expanded": true,
         "pinned": false,
         "loading": false
       },
-      "capabilities": ["open", "pressed", "size", "loading", "wiring"],
+      "capabilities": ["open", "pressed", "appearance", "size", "loading", "wiring"],
       "states": [
         "default",
         "hover",

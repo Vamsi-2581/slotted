@@ -160,6 +160,26 @@
     pointer-events: none;
   }
 
+  /**
+   * A non-modal layer leaves the page reachable, and that includes the pointer
+   * and the wheel. The layer is fixed over the whole viewport, so it lets the
+   * pointer through and paints no scrim: the scrim says the page is out of
+   * reach, which is what a non-modal layer is not. The panel alone takes the
+   * pointer, and a press on the page is the outside press the dismissal policy
+   * answers.
+   */
+  [data-ui='dialog']:not([data-modal]) {
+    pointer-events: none;
+  }
+
+  [data-ui='dialog']:not([data-modal]) > [data-part='backdrop'] {
+    visibility: hidden;
+  }
+
+  [data-ui='dialog']:not([data-modal]) > [data-part='viewport'] > [data-part='content'] {
+    pointer-events: auto;
+  }
+
   [data-ui='dialog'][data-size='sm'] {
     --_measure: var(--slotted-dialog-measure, 24rem);
     --_padding-inline: var(--slotted-space-7, 1.25rem);

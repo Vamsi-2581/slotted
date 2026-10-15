@@ -249,8 +249,23 @@ export abstract class SlDialogBase {
   private portal: PortalRootHandle | null = null;
   private layer: DismissableLayerHandle | null = null;
   private scope: FocusScopeHandle | null = null;
+  /** Whether the layer, the focus scope and the `closed` owed are standing. */
+  private engaged = false;
+
+  /**
+   * The layer this one was written inside, and the layers written inside this
+   * one. A confirmation whose action also closes the dialog under it closes
+   * both in one change, and Angular runs the dialog's effect first: taken down
+   * from the bottom, the dialog found focus in the confirmation and restored
+   * nothing, and the confirmation then handed focus to a control in a layer
+   * already leaving — `body`, once that layer was gone. The layers come down
+   * from the top instead, as React's effects take them down.
+   */
+  private readonly parent = inject(SlDialogBase, { optional: true, skipSelf: true });
+  private readonly nested = new Set<SlDialogBase>();
 
   constructor() {
+    this.parent?.nested.add(this);
     effect(() => {
       if (this.open()) this.seen.set(true);
       this.presence.sync(this.open());
@@ -327,23 +342,38 @@ export abstract class SlDialogBase {
           : { restore: returnTo === false ? (false as const) : () => returnTo }),
       });
       this.scope.enter();
+      this.engaged = true;
 
-      onCleanup(() => {
-        this.scope?.destroy();
-        this.scope = null;
-        this.layer?.destroy();
-        this.layer = null;
-        this.closed.emit(this.result());
-        this.result.set(undefined);
-      });
+      onCleanup(() => this.takeDown());
     });
 
     this.destroyRef.onDestroy(() => {
-      this.scope?.destroy();
+      this.parent?.nested.delete(this);
       this.layer?.destroy();
+      this.scope?.destroy();
       this.presence.destroy();
       this.releasePortal();
     });
+  }
+
+  /**
+   * Takes down what the layer does while it is open, once per opening. The
+   * nested layers that closed in the same change go first.
+   *
+   * The layer before the scope: it lifts the `inert` it wrote on the
+   * background, and a browser refuses focus inside an inert subtree, so a
+   * scope taken down first hands focus back to a trigger that cannot take it.
+   */
+  private takeDown() {
+    if (!this.engaged) return;
+    this.engaged = false;
+    for (const layer of this.nested) if (!layer.open()) layer.takeDown();
+    this.layer?.destroy();
+    this.layer = null;
+    this.scope?.destroy();
+    this.scope = null;
+    this.closed.emit(this.result());
+    this.result.set(undefined);
   }
 
   /**

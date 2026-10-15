@@ -85,7 +85,28 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
     return () => gate.destroy();
   }, [setNarrow]);
 
+  /**
+   * A native reset puts the hidden inputs back and tells nothing, so the chips
+   * would keep the last set chosen in a form that had been reset. The form is
+   * the one `form` names, or the one the input sits in.
+   */
+  const { form: formId, restore } = multiSelect;
+  useEffect(() => {
+    if (node === null) return;
+    const owner = formId === undefined ? node.form : node.ownerDocument.getElementById(formId);
+    if (!(owner instanceof HTMLFormElement)) return;
+    const onReset = (event: Event) => restore(event);
+    owner.addEventListener('reset', onReset);
+    return () => owner.removeEventListener('reset', onReset);
+  }, [formId, node, restore]);
+
   const move = (intent: Parameters<typeof moveHighlight>[2], source: unknown) => {
+    /* Open, but the surface has not mounted yet: the arrow waits for it, as
+       the arrow that opens a closed popup does, instead of finding no option. */
+    if (multiSelect.contentNode === null) {
+      multiSelect.entry.current = intent === 'previous' || intent === 'pageUp' ? 'last' : 'first';
+      return;
+    }
     const next = moveHighlight(
       multiSelect.contentNode,
       multiSelect.highlighted,
@@ -339,7 +360,11 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
 
   const inner = (
     <>
-      <div data-part="control" id={multiSelect.controlId} role="grid">
+      <div
+        aria-label={multiSelect.t('chosen', { count: multiSelect.value.length })}
+        data-part="control"
+        role="grid"
+      >
         <ChipRow>
           <span data-part="field" role="gridcell">
             <input
@@ -626,9 +651,14 @@ export function MultiSelectContent({
     if (!held) state.setHighlighted(null, 'keyboard');
   }, [multiSelect.open, count, surfaceNode]);
 
+  /**
+   * A browser scrolls a focused element into view; nothing here is focused.
+   * It runs again once the popup is positioned: the height that bounds the
+   * list arrives with the position, after the highlight has landed.
+   */
   useEffect(() => {
     revealOption(surfaceNode, multiSelect.highlighted);
-  }, [multiSelect.highlighted, surfaceNode]);
+  }, [multiSelect.highlighted, positioned, surfaceNode]);
 
   useEffect(() => {
     const target = sentinel.current;

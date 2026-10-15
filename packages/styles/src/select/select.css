@@ -937,10 +937,10 @@
   }
 
   /**
-   * As wide as the control, which is the default, or as wide as its own
-   * content up to the cap. A select's popup is a list of the values the
-   * control shows, so the control's width is the honest one; `content` is for
-   * a list with descriptions, which needs more room than the field it fills.
+   * `content` is the default: never narrower than the control, and wider
+   * when an option needs it, up to the measure and the available width, so a
+   * narrow control does not wrap its option labels. `anchor` pins the popup to
+   * the control's width exactly.
    */
   [data-ui='select'][data-part='positioner'][data-width='anchor'] {
     inline-size: var(--slotted-positioner-anchor-width, auto);
@@ -1184,6 +1184,19 @@
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
+  }
+
+  /**
+   * An option the query rejected, and a group whose options all went. Both
+   * carry `hidden` — Angular hides each rejected option rather than leaving the
+   * list, and both bindings hide an emptied group — and `display: grid` on
+   * either beats the user agent's own `[hidden] { display: none }`, because an
+   * author rule wins over the user agent sheet. Without this the search
+   * filtered nothing the reader could see.
+   */
+  [data-ui='select'] [data-part='item'][hidden],
+  [data-ui='select'] [data-part='group'][hidden] {
+    display: none;
   }
 
   [data-ui='select'] [data-part='group-label'] {

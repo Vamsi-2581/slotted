@@ -559,19 +559,26 @@ export function ComboboxContent({
    * Where the highlight lands as the popup opens, and where it goes when the
    * filter takes the highlighted option away. Idempotent, because React invokes
    * a layout effect twice per mount under StrictMode.
+   *
+   * With `autoHighlight`, a popup that opened onto no chosen option — a press,
+   * a focus, the trigger — lands on the first match, and so does every query
+   * typed after it: the contract's `focus.onOpen` sends the highlight to the
+   * selected option, and to the first when `autoHighlight` is set.
    */
   useLayoutEffect(() => {
     const state = latest.current;
     if (!state.open || surfaceNode === null) return;
     if (state.entry.current !== 'none') {
-      const next = entryHighlight(surfaceNode, state.value, state.entry.current, state.loop);
+      const next =
+        entryHighlight(surfaceNode, state.value, state.entry.current, state.loop) ??
+        (state.autoHighlight ? entryHighlight(surfaceNode, null, 'first', state.loop) : null);
       if (next !== null) state.setHighlighted(next, 'keyboard');
       return;
     }
     if (state.highlighted === null) return;
     const held = options(surfaceNode).some((option) => valueOf(option) === state.highlighted);
     if (!held) state.setHighlighted(null, 'keyboard');
-  }, [combobox.open, count, surfaceNode]);
+  }, [combobox.open, combobox.query, count, surfaceNode]);
 
   useEffect(() => {
     revealOption(surfaceNode, combobox.highlighted);

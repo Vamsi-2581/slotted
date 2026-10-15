@@ -4,6 +4,7 @@ import { createControllable } from '@slotted/core/state';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 import { useField, useFieldDefaults } from '../field';
+import { countsInField } from '../field/field-context';
 import { useFieldGroup } from '../field-group';
 import { useCheckboxGroupDefaults } from './checkbox-group-defaults';
 import type {
@@ -51,6 +52,8 @@ export function CheckboxGroup({
   allValues,
   'aria-describedby': describedBy,
   'aria-invalid': ariaInvalid,
+  'aria-label': ariaLabel,
+  'aria-labelledby': labelledBy,
   'aria-required': ariaRequired,
   children,
   className,
@@ -87,7 +90,7 @@ export function CheckboxGroup({
   const resolvedVariant = variant ?? defaults.variant;
   const resolvedDisabled = disabled ?? field?.disabled ?? fieldDefaults.disabled;
   const resolvedReadOnly = readOnly ?? field?.readOnly ?? fieldDefaults.readOnly;
-  const resolvedInvalid = invalid ?? field?.invalid;
+  const resolvedInvalid = invalid ?? field?.invalid ?? fieldGroup?.invalid;
   const resolvedRequired = required ?? field?.required ?? fieldGroup?.required;
 
   const register = field?.registerControl;
@@ -146,6 +149,10 @@ export function CheckboxGroup({
 
   const rootProps: CheckboxGroupRootProps = {
     ...nativeProps,
+    'aria-label': ariaLabel,
+    /* A group has no element a label's for can reach, so inside a field the
+       field's label names it, unless the consumer named it themselves. */
+    'aria-labelledby': labelledBy ?? (ariaLabel === undefined ? field?.ids.label : undefined),
     'aria-describedby': [describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined,
     'aria-invalid': ariaInvalid ?? (resolvedInvalid === true ? true : undefined),
     'aria-required': ariaRequired ?? (resolvedRequired === true ? true : undefined),
@@ -169,3 +176,9 @@ export function CheckboxGroup({
     </CheckboxGroupContext.Provider>
   );
 }
+
+countsInField(CheckboxGroup, ({ allValues, defaultValue, showCount, value }: CheckboxGroupProps) =>
+  showCount === true
+    ? { length: (value ?? defaultValue ?? []).length, max: allValues?.length }
+    : undefined,
+);

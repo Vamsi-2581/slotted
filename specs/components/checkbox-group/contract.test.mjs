@@ -87,6 +87,7 @@ test('binds no key of its own, because every item is its own tab stop', () => {
 test('reads the field for state and never takes its identifier', () => {
   assert.equal(contract.stateSource, field.family);
   assert.equal(contract.wiring.id, 'never');
+  assert.match(contract.wiring['aria-labelledby'], /field's label/);
   assert.equal(contract.readOnlyAttribute, 'aria-readonly');
   assert.deepEqual(Object.keys(contract.stateAttributes), ['disabled', 'invalid', 'readonly']);
 });

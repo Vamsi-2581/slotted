@@ -114,7 +114,7 @@ export const ANGULAR_SPLITTER_DOCS = {
       'number',
       '0.5',
       'slSplitter',
-      'Where the bar starts, and where reset() and a double click return it. Angular states it as the model’s initial value — [value]="0.34" — rather than as a second input, because a model already carries both halves',
+      'Where reset() and a double click return the bar, brought inside min and max. An input of its own and not the model’s first value: the value bound on arrival is where the reader left the bar, restored from storage, and never where a reset should go',
     ],
     [
       'snapPoints',
@@ -244,14 +244,14 @@ export const ANGULAR_SPLITTER_DOCS = {
     },
     {
       id: 'reset',
-      title: 'Double click puts it back where it started',
-      note: 'Move the bar anywhere, then double click it. The pattern assigns double click nothing, and every surveyed implementation that ships a reset puts it there; the same action is on the instance as reset().',
+      title: 'Double click puts it back at defaultValue',
+      note: 'Move the bar anywhere, then double click it: it returns to defaultValue, inside min and max. The pattern assigns double click nothing, and every surveyed implementation that ships a reset puts it there; the same action is on the instance as reset().',
       snippet: defineSnippet({
         id: 'splitter-angular-reset',
         language: 'angular',
         label: 'Where a reset goes back to',
         source:
-          '<div slSplitter #bar="slSplitter" [(value)]="width"></div>\n<button (click)="bar.reset()">Repor</button>',
+          '<div slSplitter #bar="slSplitter" [defaultValue]="0.34" [(value)]="width"></div>\n<button (click)="bar.reset()">Repor</button>',
       }),
     },
     {

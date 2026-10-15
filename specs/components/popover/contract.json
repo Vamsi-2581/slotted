@@ -25,7 +25,7 @@
   "wiring": {
     "aria-expanded": "true on the trigger while the panel is open, false while it is closed",
     "aria-haspopup": "dialog on the trigger, which says what the button discloses",
-    "aria-controls": "the trigger names the panel",
+    "aria-controls": "the trigger names the panel while the panel is in the document; an id the document does not hold references nothing",
     "aria-labelledby": "the panel names its title, when a title part is present",
     "aria-describedby": "the panel names its description, when a description part is present",
     "aria-modal": "never written. It is not modal, and writing it would tell a reader the rest of the page is gone while it is still there.",

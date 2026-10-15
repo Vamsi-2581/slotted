@@ -35,6 +35,7 @@ import type {
   PageHeaderLevel,
   PageHeaderPinnedReason,
   PageHeaderSize,
+  PageHeaderVariant,
 } from './page-header-defaults';
 
 export type {
@@ -44,6 +45,7 @@ export type {
   PageHeaderLevel,
   PageHeaderPinnedReason,
   PageHeaderSize,
+  PageHeaderVariant,
 } from './page-header-defaults';
 
 type MovedBy = 'control' | 'pin' | 'programmatic' | 'scroll';
@@ -80,6 +82,7 @@ type MovedBy = 'control' | 'pin' | 'programmatic' | 'scroll';
   host: {
     'data-ui': 'page-header',
     'data-part': 'root',
+    '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-level]': 'resolvedLevel()',
     '[attr.data-collapse]': 'resolvedCollapse()',
@@ -88,6 +91,7 @@ type MovedBy = 'control' | 'pin' | 'programmatic' | 'scroll';
     '[attr.data-scrolled]': "scrolled() ? '' : null",
     '[attr.data-tall]': "tall() ? '' : null",
     '[attr.data-compact]': "compact() ? '' : null",
+    '[attr.data-stuck]': "stuck() ? '' : null",
     '[attr.data-loading]': "loading() ? '' : null",
     '[attr.aria-busy]': "loading() ? 'true' : null",
   },
@@ -97,6 +101,7 @@ export class SlPageHeader {
   readonly expanded = model<boolean>(true);
   /** Whether the pin holds the area open. Two-way. */
   readonly pinned = model<boolean>(false);
+  readonly variant = input<PageHeaderVariant | undefined>(undefined);
   readonly size = input<PageHeaderSize | undefined>(undefined);
   readonly level = input<PageHeaderLevel | undefined>(undefined);
   readonly collapse = input<PageHeaderCollapse | undefined>(undefined);
@@ -123,6 +128,7 @@ export class SlPageHeader {
   private readonly native: HTMLElement = inject(ElementRef).nativeElement;
   private readonly generated = inject(SlPageHeaderIdFactory).next();
 
+  readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   readonly resolvedLevel = computed(() => this.level() ?? this.defaults.level);
   readonly resolvedCollapse = computed(() => this.collapse() ?? this.defaults.collapse);
@@ -140,6 +146,8 @@ export class SlPageHeader {
   readonly compact = signal(false);
   /** Whether the area is shown whole in place although the scroll has passed it. */
   readonly revealed = signal(false);
+  /** Whether content passes under the chrome — a measured fact `plain` and `floating` read. */
+  readonly stuck = signal(false);
 
   private engine: StickyHeaderHandle | null = null;
   /** Who asked for the move the next change detection will show. */
@@ -189,6 +197,7 @@ export class SlPageHeader {
           }),
           onScrolled: (next) => this.scrolled.set(next),
           onRevealed: (next) => this.revealed.set(next),
+          onStuck: (next) => this.stuck.set(next),
           onScrollRequest: (next) => this.request(next, 'scroll', undefined, 'scroll'),
           onTall: (next) => this.tall.set(next),
           onCompact: (next) => this.compact.set(next),

@@ -12,6 +12,7 @@ export type {
   PageHeaderLevel,
   PageHeaderPinnedReason,
   PageHeaderSize,
+  PageHeaderVariant,
 } from './page-header-defaults';
 export {
   SlPageHeaderActions,

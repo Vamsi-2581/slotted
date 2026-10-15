@@ -250,6 +250,16 @@ describe('SlDataGrid', () => {
     expect(stops[0]).toBe(header('id'));
   });
 
+  it('names the set and yes-or-no filters in the filter row, as React does', () => {
+    host.filterRow.set(true);
+    fixture.detectChanges();
+    const named = [
+      ...root().querySelectorAll<HTMLElement>('[data-part="filter-cell"] [aria-label]'),
+    ].map((node) => node.getAttribute('aria-label'));
+    expect(named).toContain('Filter Priority');
+    expect(named).toContain('Filter Carrier');
+  });
+
   it('declares every part the contract names on the elements it names', () => {
     host.selectionMode.set('multiple');
     host.filterRow.set(true);
@@ -870,6 +880,24 @@ class Localized {
   readonly rows = ROWS;
   readonly columns = COLUMNS;
 }
+
+/**
+ * The first view, before any render hook has run — the markup a server sends.
+ * A part written by `afterNextRender` is missing from it, and so is every rule
+ * the stylesheet keys on that part.
+ */
+describe('SlDataGrid, first view', () => {
+  it('names the column menu trigger as its part before any render hook runs', async () => {
+    await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentRef.changeDetectorRef.detectChanges();
+
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector(
+      '[data-part="column-header"][data-column="weight"] button[aria-haspopup="menu"]',
+    );
+    expect(trigger?.getAttribute('data-part')).toBe('column-menu');
+  });
+});
 
 describe('SlDataGrid, defaults', () => {
   it('fits every column in one request, each to its own content', async () => {

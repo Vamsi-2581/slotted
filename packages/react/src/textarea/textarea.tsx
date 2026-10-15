@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, CSSProperties } from 'react';
 
 import { useField } from '../field';
+import { countsInField } from '../field/field-context';
 import { useTextareaDefaults } from './textarea-defaults';
 import type { TextareaProps, TextareaRootProps } from './textarea.types';
 
@@ -104,11 +105,13 @@ export function Textarea({
    * The two row counts CSS cannot read from the attribute, written as custom
    * properties the stylesheet turns into a minimum and a maximum block size in
    * line boxes. `rows` stays on the element as well, because it is what the
-   * platform uses while `field-sizing` is off or unsupported.
+   * platform uses while `field-sizing` is off or unsupported. Strings, because
+   * the server writes a number as text and the browser hands it back as text:
+   * a number here made every hydrated textarea report a style mismatch.
    */
   const rowVariables = {
-    '--slotted-textarea-rows': rows,
-    '--slotted-textarea-max-rows': maxRows,
+    '--slotted-textarea-rows': String(rows),
+    '--slotted-textarea-max-rows': String(maxRows),
   } as CSSProperties;
 
   const rootProps: TextareaRootProps = {
@@ -153,3 +156,10 @@ export function Textarea({
     />
   );
 }
+
+/** The count `Textarea` publishes, as the field reads it before the effect runs. */
+countsInField(Textarea, ({ countMax, defaultValue, maxLength, showCount, value }: TextareaProps) =>
+  showCount === true
+    ? { length: (value ?? defaultValue ?? '').length, max: countMax ?? maxLength ?? undefined }
+    : undefined,
+);

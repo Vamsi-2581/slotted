@@ -35,6 +35,7 @@ import {
   forwardRef,
   HostAttributeToken,
   inject,
+  Injector,
   input,
   model,
   numberAttribute,
@@ -89,6 +90,33 @@ type Entry = 'first' | 'last' | 'none';
  * the result set, and every count and every move has to skip it.
  */
 const OPTION_SELECTOR = "[data-part='item']:not([hidden])";
+
+/**
+ * Brings an option into view without moving the page: the nearest scrolling
+ * box between the option and the popup surface is scrolled, by the least
+ * distance that shows the whole row, and nothing past it. `scrollIntoView`
+ * would scroll every ancestor too, and on the first open it runs before the
+ * popup is positioned — a control far down a page sent the page to its top.
+ */
+function revealWithin(option: HTMLElement, surface: HTMLElement) {
+  let box: HTMLElement = surface;
+  for (
+    let node = option.parentElement;
+    node !== null && node !== surface;
+    node = node.parentElement
+  ) {
+    const overflow = getComputedStyle(node).overflowY;
+    if (overflow === 'auto' || overflow === 'scroll') {
+      box = node;
+      break;
+    }
+  }
+  const row = option.getBoundingClientRect();
+  const top = box.getBoundingClientRect().top + box.clientTop;
+  const bottom = top + box.clientHeight;
+  if (row.top < top) box.scrollTop -= top - row.top;
+  else if (row.bottom > bottom) box.scrollTop += Math.min(row.bottom - bottom, row.top - top);
+}
 
 /** The chips in the row, which are every cell but the one holding the caret. */
 const CHIP_SELECTOR = "[data-part='chips'] > [role='gridcell']:not([data-part='field'])";
@@ -146,6 +174,9 @@ const same = (a: readonly string[], b: readonly string[]) =>
   host: {
     'data-ui': 'multi-select',
     'data-part': 'root',
+    /* The name is the input's and the listbox's; on the host it would name a
+       generic element, which is a role that prohibits one. */
+    '[attr.aria-label]': 'null',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-overflow]': 'resolvedOverflow()',
@@ -500,6 +531,7 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
   readonly resolvedLocale = computed(() => this.locale() ?? this.inForceLocale());
   private readonly viewContainer = inject(ViewContainerRef);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
   private readonly template = viewChild.required<TemplateRef<unknown>>('layer');
   private readonly controlRef = viewChild.required<{ nativeElement: HTMLInputElement }>('control');
   private readonly rowRef = viewChild.required<{ nativeElement: HTMLElement }>('row');
@@ -748,7 +780,7 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
 
   scrollToKey(value: MultiSelectOptionValue) {
     const option = this.options().find((candidate) => candidate.dataset['value'] === value);
-    if (typeof option?.scrollIntoView === 'function') option.scrollIntoView({ block: 'nearest' });
+    if (option !== undefined && this.surfaceNode !== null) revealWithin(option, this.surfaceNode);
   }
 
   private announce(message: string) {
@@ -792,7 +824,13 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
       initial: this.inputValue(),
       onRequest: (request) => this.inputValueChangeRequest.emit(request),
     });
-    if (state.request(next, reason, source)) this.inputValue.set(next);
+    if (!state.request(next, reason, source)) return;
+    this.inputValue.set(next);
+    /* The binding writes the input at the next render, and a key that arrives
+       before it types into what the browser still holds: a commit left its
+       text in the input, and the next character joined it. */
+    const element = this.host.nativeElement.querySelector<HTMLInputElement>("[data-part='input']");
+    if (element !== null && element.value !== next) element.value = next;
   }
 
   /** One request for one transition, whatever moved the set. */
@@ -942,8 +980,9 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
     if (!this.commit(next, 'keyboard', source)) return;
     this.announce(`${this.labelFor(moved as string) ?? moved}, ${target + 1}, ${next.length}`);
     /* The chip travelled with the reader's focus; the ring has to be told the
-       cells moved under it. */
-    queueMicrotask(() => {
+       cells moved under it. After the render rather than after a microtask:
+       a browser runs microtasks first, and the chip has not moved yet. */
+    this.afterRender(() => {
       this.ring?.refresh();
       this.focusChip(moved as string);
     });
@@ -951,6 +990,11 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
 
   private chips(): HTMLElement[] {
     return [...this.host.nativeElement.querySelectorAll<HTMLElement>(CHIP_SELECTOR)];
+  }
+
+  /** Runs once the change in hand has reached the DOM. */
+  private afterRender(callback: () => void) {
+    afterNextRender(callback, { injector: this.injector });
   }
 
   private focusChip(value: MultiSelectOptionValue) {
@@ -1023,7 +1067,7 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
     if (event.key === 'Escape') {
       event.preventDefault();
       this.editingValue.set(null);
-      queueMicrotask(() => this.focusChip(value));
+      this.afterRender(() => this.focusChip(value));
     }
   }
 
@@ -1032,7 +1076,7 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
     const text = this.editingText();
     this.editingValue.set(null);
     this.replace(value, text, event);
-    queueMicrotask(() => this.focusChip(text.trim() === '' ? value : text.trim()));
+    this.afterRender(() => this.focusChip(text.trim() === '' ? value : text.trim()));
   }
 
   protected onPaste(event: ClipboardEvent) {
@@ -1175,7 +1219,7 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
         event.preventDefault();
         this.editingText.set(this.labelFor(value) ?? value);
         this.editingValue.set(value);
-        queueMicrotask(() => {
+        this.afterRender(() => {
           const field = this.host.nativeElement.querySelector<HTMLInputElement>(
             `[data-value="${CSS.escape(value)}"] input`,
           );
@@ -1357,7 +1401,12 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
       sideOffset: this.sideOffset() ?? this.defaults.sideOffset,
       strategy: this.strategy() ?? this.defaults.strategy,
     });
-    void this.positioner.update();
+    /* The height that bounds the list arrives with the position, after the
+       highlight has landed, so the highlighted row is revealed again. */
+    void this.positioner.update().then(() => {
+      const held = this.highlightedValue();
+      if (held !== null) this.scrollToKey(held);
+    });
   }
 
   private bind() {

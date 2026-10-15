@@ -1,11 +1,14 @@
-import { Component, signal } from '@angular/core';
+import { Component, PLATFORM_ID, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { setPortalContainer } from '@slotted/core/portal';
+
 import contract from '../../../../specs/components/tooltip/contract.json';
 import { SlTooltip } from './tooltip';
-import { provideTooltipDefaults } from './tooltip-defaults';
+import type { TooltipChangeRequest } from './public-api';
+import { provideSlottedPortalContainer, provideTooltipDefaults } from './tooltip-defaults';
 import {
   SlTooltipArrow,
   SlTooltipContent,
@@ -26,7 +29,8 @@ import {
       [openDelay]="openDelay()"
       [closeDelay]="closeDelay()"
       [size]="size()"
-      (openChangeRequest)="reasons.push($event.reason)"
+      [arrow]="arrow()"
+      (openChangeRequest)="record($event)"
     >
       <button slTooltipTrigger type="button">Save draft</button>
       <ng-template slTooltipLayer>
@@ -44,7 +48,13 @@ class Host {
   readonly openDelay = signal(0);
   readonly closeDelay = signal(0);
   readonly size = signal<'sm' | 'md'>('md');
+  readonly arrow = signal(true);
   readonly reasons: string[] = [];
+
+  /** Typed with the binding's own name for the request, as a consumer writes it. */
+  record(request: TooltipChangeRequest) {
+    this.reasons.push(request.reason);
+  }
 }
 
 const layer = () => document.querySelector('[data-ui="tooltip"]');
@@ -90,6 +100,25 @@ describe('SlTooltip', () => {
 
     const arrow = document.querySelector('[data-part="arrow"]');
     expect(arrow?.parentElement).toBe(layer() as HTMLElement);
+  });
+
+  /**
+   * `arrow` is an axis of the contract, and React draws no arrow under
+   * `false`. The arrow part is written by the consumer inside the template, so
+   * the layer is what has to leave it out.
+   */
+  it('draws no arrow under arrow false, and draws it again under true', async () => {
+    fixture.componentInstance.arrow.set(false);
+    fixture.componentInstance.open.set(true);
+    await settle(fixture);
+    expect(layer()).not.toBeNull();
+    expect(document.querySelector('[data-part="arrow"]')).toBeNull();
+
+    fixture.componentInstance.arrow.set(true);
+    await settle(fixture);
+    expect(document.querySelector('[data-part="arrow"]')?.parentElement).toBe(
+      layer() as HTMLElement,
+    );
   });
 
   it('renders the anatomy the contract declares', async () => {
@@ -249,6 +278,71 @@ describe('SlTooltip', () => {
   });
 });
 
+@Component({
+  standalone: true,
+  imports: [SlTooltip, SlTooltipTrigger, SlTooltipLayer, SlTooltipContent],
+  template: `
+    <ng-container slTooltip defaultOpen>
+      <button slTooltipTrigger type="button">Save draft</button>
+      <ng-template slTooltipLayer>
+        <div slTooltipContent>Saves without publishing</div>
+      </ng-template>
+    </ng-container>
+  `,
+})
+class OpenHost {}
+
+/** The contract's uncontrolled state, as `slSwitch` and `sl-dialog` take theirs. */
+describe('defaultOpen', () => {
+  it('starts an uncontrolled tooltip open, and it still closes', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({ imports: [OpenHost] }).compileComponents();
+    const fixture = TestBed.createComponent(OpenHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fixture.detectChanges();
+
+    expect(hint()?.textContent).toBe('Saves without publishing');
+    expect(contract.stateModel.open.uncontrolled).toBe('defaultOpen');
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('button')?.hasAttribute('data-open'),
+    ).toBe(false);
+    fixture.destroy();
+  });
+});
+
+/**
+ * Under `label` the layer is the trigger's accessible name and is built before
+ * it opens, so it is built on the server too. Angular's server document is not
+ * the page: the layer stays where the template wrote it, as React's server
+ * markup has it, and nothing is moved into a portal there.
+ */
+describe('on the server', () => {
+  it('builds the naming layer in place and names the trigger', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [{ provide: PLATFORM_ID, useValue: 'server' }],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.describes.set('label');
+    await settle(fixture);
+
+    const host = fixture.nativeElement as HTMLElement;
+    const content = host.querySelector('[role="tooltip"]');
+    expect(content?.parentElement?.getAttribute('data-ui')).toBe('tooltip');
+    expect(trigger(fixture).getAttribute('aria-labelledby')).toBe(content?.id);
+    expect(document.querySelector('[data-slotted-portal] [data-ui="tooltip"]')).toBeNull();
+    fixture.destroy();
+  });
+});
+
 describe('provideTooltipDefaults', () => {
   it('sets the defaults once, and the instance still wins', async () => {
     TestBed.resetTestingModule();
@@ -263,5 +357,34 @@ describe('provideTooltipDefaults', () => {
 
     expect(layer()?.getAttribute('data-variant')).toBe('surface');
     expect(layer()?.getAttribute('data-size')).toBe('md');
+  });
+});
+
+/**
+ * The provider names the element every layer renders into. Nothing else asks
+ * for it, so the tooltip does: a provider no one reads never runs.
+ */
+describe('provideSlottedPortalContainer', () => {
+  it('renders the layer into the element it names', async () => {
+    const outlet = document.createElement('div');
+    outlet.id = 'overlays';
+    document.body.append(outlet);
+
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideSlottedPortalContainer(() => outlet)],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.open.set(true);
+    await settle(fixture);
+
+    expect(layer()).not.toBeNull();
+    expect(outlet.contains(layer())).toBe(true);
+
+    fixture.destroy();
+    setPortalContainer(null);
+    outlet.remove();
   });
 });

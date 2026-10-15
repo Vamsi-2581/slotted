@@ -2,6 +2,7 @@ import '@slotted/styles/date-range-picker/date-range-picker.css';
 
 import {
   blockedAround,
+  clampDate,
   compareDate,
   createDateFormat,
   isDateRefusedInRun,
@@ -9,9 +10,11 @@ import {
   orderedRun,
   rangeLength,
   rangeProblems,
+  todayIn,
 } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { tabbables } from '@slotted/core/focus';
 import { dateRangePickerMessages } from '@slotted/core/i18n';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
@@ -224,16 +227,28 @@ export function DateRangePicker({
   const writeShort = (date: PlainDate) =>
     short.format(Date.UTC(date.year, date.month - 1, date.day));
 
+  /**
+   * Whether the next opening moves focus into the calendar. Set by the trigger
+   * and by `open()`; the chord leaves focus in the field so typing keeps
+   * working, and a first render that starts open leaves focus where the page
+   * put it.
+   */
+  const focusOnOpen = useRef(false);
+
   const setOpen = useCallback(
     (
       next: boolean,
       reason: 'pointer' | 'keyboard' | 'escape' | 'outsidePress' | 'select',
       source: unknown,
+      moveFocus = false,
     ) => {
       const state = createControllable<boolean>({
         controlled: open,
         initial: isOpen,
-        onRequest: (request) => onOpenChange?.(request.value, request),
+        onRequest: (request) => {
+          onOpenChange?.(request.value, request);
+          focusOnOpen.current = moveFocus && request.value && !request.cancelled;
+        },
       });
       if (state.request(next, reason, source)) setOwnOpen(next);
       /* Closed by anything, the draft is abandoned. */
@@ -255,6 +270,26 @@ export function DateRangePicker({
     },
     [held, onValueChange, value],
   );
+
+  /* `defaultValue` is read once, and a form reset returns to what it was then. */
+  const [initialValue] = useState<DateRange | null>(() => normalize(defaultValue ?? null));
+
+  /**
+   * A native reset restores the hidden inputs and tells nothing, so the picker
+   * would keep the last run chosen in a form that had been reset. The value
+   * returns to `defaultValue` through `onValueChange`, reason `programmatic`,
+   * and a start pressed in the grid without its end is dropped with it.
+   */
+  useEffect(() => {
+    const owner = rootRef.current?.closest('form');
+    if (owner === null || owner === undefined) return;
+    const onReset = (event: Event) => {
+      setDraft(null);
+      requestValue(initialValue, 'programmatic', event);
+    };
+    owner.addEventListener('reset', onReset);
+    return () => owner.removeEventListener('reset', onReset);
+  }, [initialValue, requestValue]);
 
   const requestPosition = useCallback(
     (next: DateRangePickerPosition, reason: PositionReason, source: unknown) => {
@@ -357,20 +392,40 @@ export function DateRangePicker({
   }, [isOpen, layerNode, setOpen]);
 
   /**
-   * Opened from the trigger, focus lands on the cell of the current end, or
-   * on today when it is empty — the APG's rule for its "Choose Date" button.
-   * Opened with the chord, focus stays in the field so typing keeps working.
+   * Opened from the trigger or the handle, focus lands on the cell of the
+   * current end, or on today when it is empty — the APG's rule for its "Choose
+   * Date" button. Opened with the chord, focus stays in the field so typing
+   * keeps working.
    */
-  const focusOnOpen = useRef(false);
   useEffect(() => {
-    if (!isOpen || layerNode === null || !focusOnOpen.current) return;
+    /* The surface renders in place before the portal exists and moves into it
+       once it does; focus waits for the node that stays. */
+    if (!isOpen || layerNode === null || container === null || !focusOnOpen.current) return;
+    if (!container.contains(layerNode)) return;
     focusOnOpen.current = false;
-    const target = currentPosition === 'end' ? end : start;
     const handle = calendarHandle.current;
     if (handle === null) return;
+    const target = currentPosition === 'end' ? end : start;
     if (target !== null) handle.focusDate(target);
     handle.focus();
-  }, [currentPosition, end, isOpen, layerNode, start]);
+  }, [container, currentPosition, end, isOpen, layerNode, start]);
+
+  /** Tab and Shift+Tab wrap inside the surface while it is open. */
+  const onContentKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) return;
+    const items = tabbables(event.currentTarget);
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (first === undefined || last === undefined) return;
+    const current = event.currentTarget.ownerDocument.activeElement;
+    if (event.shiftKey && current === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && current === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
 
   const focusField = useCallback(
     (which: DateRangePickerPosition) =>
@@ -382,7 +437,7 @@ export function DateRangePicker({
     ref,
     () => ({
       focus: (which?: DateRangePickerPosition) => focusField(which ?? currentPosition),
-      open: () => setOpen(true, 'keyboard', undefined),
+      open: () => setOpen(true, 'keyboard', undefined, true),
       close: () => setOpen(false, 'keyboard', undefined),
     }),
     [currentPosition, focusField, setOpen],
@@ -534,7 +589,13 @@ export function DateRangePicker({
       {...(isOpen ? { 'data-open': '' } : {})}
       {...(positioned ? { 'data-positioned': '' } : {})}
     >
-      <div aria-label={spoken} data-part="content" id={contentId} role="dialog">
+      <div
+        aria-label={spoken}
+        data-part="content"
+        id={contentId}
+        onKeyDown={onContentKeyDown}
+        role="dialog"
+      >
         <div data-part="head">
           <span
             data-part="head-start"
@@ -567,6 +628,16 @@ export function DateRangePicker({
             </PresetContext.Provider>
           )}
           <Calendar
+            /* The page opens on the current end, or today, from its first
+               render: left to the calendar, today resolved a render later and
+               the surface showed the placeholder month first. The surface
+               never renders on the server, so reading the clock here cannot
+               split a hydration. */
+            defaultFocusedDate={clampDate(
+              (currentPosition === 'end' ? end : start) ?? todayIn(resolvedTimeZone),
+              min,
+              max,
+            )}
             fixedWeeks={fixedWeeks}
             isDateUnavailable={gridUnavailable}
             locale={resolvedLocale}
@@ -615,6 +686,13 @@ export function DateRangePicker({
     <>
       <div
         data-part="control"
+        /* Inside a field, the frame takes the field's control identifier and
+           its label, and the two ends inside it keep their own names; two
+           fields each taking the field's identifier wrote it twice and left
+           the label naming neither. */
+        {...(field === undefined
+          ? {}
+          : { 'aria-labelledby': field.ids.label, id: field.ids.control, role: 'group' })}
         onKeyDown={onControlKeyDown}
         onPointerDownCapture={() => {
           pointerFocus.current = true;
@@ -628,6 +706,7 @@ export function DateRangePicker({
           <DateField
             {...fieldProps}
             aria-label={t('start')}
+            id={`${contentId}-start`}
             max={startMax}
             min={min}
             name={startName}
@@ -653,6 +732,7 @@ export function DateRangePicker({
           <DateField
             {...fieldProps}
             aria-label={t('end')}
+            id={`${contentId}-end`}
             invalid={problems.includes('order') ? true : undefined}
             max={max}
             min={endMin}
@@ -692,10 +772,7 @@ export function DateRangePicker({
           aria-label={spoken}
           data-part="trigger"
           disabled={!editable}
-          onClick={(event) => {
-            focusOnOpen.current = !isOpen;
-            setOpen(!isOpen, 'pointer', event);
-          }}
+          onClick={(event) => setOpen(!isOpen, 'pointer', event, true)}
           ref={triggerRef}
           type="button"
         >

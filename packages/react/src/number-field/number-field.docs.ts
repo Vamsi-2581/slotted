@@ -34,55 +34,55 @@ const anatomy: AnatomyRow[] = [
     element: 'div, or the element render returns',
     required: true,
     purpose:
-      'The frame. Carries data-ui="number-field", the three axes, and data-disabled, data-invalid and data-readonly. It has no role: a spinbutton may hold only non-interactive children, so the two steppers are the control’s siblings and the box around them announces nothing. className and style reach this element.',
+      'The frame. It carries data-ui="number-field", data-size, data-variant and data-stepper, and data-disabled, data-invalid, data-readonly and data-scrubbing while they apply. It has no role: a spinbutton may hold only non-interactive children, so the two buttons are siblings of the input inside a box that announces nothing. className and style reach this element.',
   },
   {
     part: 'input',
     element: 'input[type=text][role=spinbutton]',
     required: true,
     purpose:
-      'The control. Holds the formatted text, the identifier, aria-valuenow, aria-valuemin, aria-valuemax and aria-valuetext. It is type="text" because type="number" empties itself whenever the text is not a valid floating-point number, so no grouping separator and no currency affix survives it. ref reaches it.',
+      'The control. It holds the formatted text, the id, and aria-valuenow, aria-valuemin, aria-valuemax and aria-valuetext. It is type="text" because type="number" empties itself whenever the text is not a plain decimal number, so no grouping separator or currency symbol would survive it. ref reaches this element.',
   },
   {
     part: 'start',
     element: 'span',
     required: false,
     purpose:
-      'An adornment before the value in the reading direction, and a sibling of the number rather than part of it. A symbol that belongs inside the value is format’s job instead.',
+      'Content before the value in the reading direction. It sits beside the number and is never selected, copied or parsed with it. A symbol that belongs inside the value comes from format instead.',
   },
   {
     part: 'end',
     element: 'span',
     required: false,
-    purpose: 'An adornment after the value in the reading direction: a unit, a currency code.',
+    purpose: 'Content after the value in the reading direction, such as a unit or a currency code.',
   },
   {
     part: 'scrub',
     element: 'span (NumberFieldScrub)',
     required: false,
     purpose:
-      'A mark in start or end that moves the number when it is dragged sideways: one step per sensitivity pixels towards the inline end, largeStep with Shift, smallStep with Alt. It carries data-scrubbing while dragged, as the frame does, and is hidden from assistive technology because the arrow keys on the input are the same movement.',
+      'A mark in start or end that moves the value when it is dragged sideways: one step per sensitivity pixels towards the inline end, largeStep with Shift and smallStep with Alt. The mark and the frame carry data-scrubbing while it is dragged. It is hidden from assistive technology, because the arrow keys in the input make the same change.',
   },
   {
     part: 'stepper',
     element: 'span',
     required: false,
     purpose:
-      'The column the two buttons share under stepper="stacked", inset one step from the frame with no rule of its own; each half gives that inset back to the pointer. It is not rendered at all under split, where the buttons are direct children of the frame.',
+      'The column that holds both buttons under stepper="stacked", inset from the frame and drawn without a border of its own; each button takes the inset back as hit area. It is not rendered under split, where the buttons are direct children of the frame.',
   },
   {
     part: 'decrement',
     element: 'button[type=button][tabindex=-1]',
     required: false,
     purpose:
-      'Steps down by step, by largeStep with Shift and by smallStep with Alt. Held, it repeats. It is disabled at min, and out of the tab order because the arrow keys reach the same behaviour from the control.',
+      'Steps down by step, by largeStep with Shift and by smallStep with Alt, and repeats while it is held. It is disabled at min, and it is out of the tab order because the arrow keys in the input make the same change.',
   },
   {
     part: 'increment',
     element: 'button[type=button][tabindex=-1]',
     required: false,
     purpose:
-      'Steps up by the same three amounts, disabled at max. Both buttons carry a translatable name and aria-controls pointing at the value they move.',
+      'Steps up by the same amounts and is disabled at max. Both buttons carry a translatable accessible name and aria-controls pointing at the input.',
   },
 ];
 
@@ -344,12 +344,12 @@ const events: EventRow[] = [
   {
     name: 'onValueChange',
     payload: '(value: number | null, request: ChangeRequest<number | null>)',
-    when: 'Before the number moves. The request carries the new value, the value it replaces, the reason — "keyboard" for typing, an arrow, a page key, Home or End; "pointer" for a stepper press or a wheel turn; "blur" for the commit that formats and clamps; "programmatic" for handle.increment() — the originating event, and cancel(), which refuses the move before anything commits. A request for the value the family already holds is not emitted.',
+    when: 'Before the value changes. request.value is the new number and request.previous the number it replaces. request.reason is keyboard for typing, an arrow, a page key, Home, End or Enter; pointer for a stepper press, a wheel turn or a scrub; blur for the commit that formats, rounds and clamps on blur; programmatic for handle.increment() and handle.decrement(). request.source is the originating event, and request.cancel() refuses the change before it is applied. A request for the number NumberField already holds is not emitted.',
   },
   {
     name: 'onChange, onBlur, onKeyDown, onFocus',
     payload: 'the element’s own events',
-    when: 'Whenever the element fires them. The family composes with a consumer’s handler rather than replacing it: the consumer’s runs first, always runs, and calling preventDefault() on a key stops the family from acting on it.',
+    when: 'Whenever the input fires them. NumberField composes your handler with its own instead of replacing it: yours runs first and always runs, and calling preventDefault() on a key stops NumberField from acting on it.',
   },
 ];
 
@@ -365,170 +365,176 @@ export const REACT_NUMBER_FIELD_DOCS = {
         'number | null',
         '—',
         'NumberField',
-        'Present means the consumer owns the number, for the life of the component. null is empty, and empty is not nought: a required amount left blank and an amount of nought are different facts',
+        'Makes the value controlled for the life of the component. null is empty, and empty is not zero: a required amount left blank and an amount of zero are different values.',
       ],
       [
         'defaultValue',
         'number | null',
         '—',
         'NumberField',
-        'What an uncontrolled control starts from, read once. A native form reset returns to it',
+        'The value an uncontrolled number field starts from. It is read once, and a native form reset returns to it.',
       ],
       [
         'min',
         'number',
         '—',
         'NumberField',
-        'The smallest value the control holds. It disables the decrement button at the bound, gives Home somewhere to go, and is where the step grid starts when snapToStep is set',
+        'The smallest value. The decrement button is disabled at it, Home moves to it, and the snapToStep grid is counted from it.',
       ],
       [
         'max',
         'number',
         '—',
         'NumberField',
-        'The largest value the control holds, and where End goes',
+        'The largest value. The increment button is disabled at it, and End moves to it.',
       ],
-      ['step', 'number', '1', 'NumberField', 'What the arrows and the two buttons move by'],
+      [
+        'step',
+        'number',
+        '1',
+        'NumberField',
+        'What the arrow keys and the two buttons add or subtract.',
+      ],
       [
         'largeStep',
         'number',
         'step × 10',
         'NumberField',
-        'What Shift and the page keys move by, so a range of ten thousand is crossable without holding a key',
+        'What Shift with an arrow, Page Up and Page Down add or subtract, so a wide range is crossed without holding a key.',
       ],
-      ['smallStep', 'number', 'step ÷ 10', 'NumberField', 'What Alt moves by'],
+      [
+        'smallStep',
+        'number',
+        'step ÷ 10',
+        'NumberField',
+        'What Alt with an arrow adds or subtracts.',
+      ],
       [
         'stepFrom',
         'number',
         'min, or 0',
         'NumberField',
-        'Where an empty control starts stepping from. Pressing increment on a blank amount has to produce a number, and this is the number it produces',
+        'The value the first step produces when the number field is empty.',
       ],
       [
         'snapToStep',
         'boolean',
         'false',
         'NumberField',
-        'Steps to the multiples of step measured from min, so with min 2 and step 3 the valid values are 2, 5, 8, 11',
+        'Steps to multiples of step counted from min, so with min 2 and step 3 the values are 2, 5, 8 and 11. A typed value moves to the nearest multiple when the number field commits.',
       ],
       [
         'clamp',
         "'blur' | 'strict' | 'none'",
         'blur',
         'NumberField, NumberFieldDefaultsProvider',
-        'Where a value outside the range goes and when. blur returns it at the commit, strict refuses the keystroke, none keeps it and reports aria-invalid',
+        'What happens to a value outside min and max. blur returns it to the range when the number field commits, strict refuses the keystroke that would leave the range, and none keeps the value and sets aria-invalid and data-invalid while it is out of range.',
       ],
       [
         'format',
         'Intl.NumberFormatOptions',
         '—',
         'NumberField',
-        'How the value is written and read back. Currency, percent and unit are formattings of one numeric type, and precision is maximumFractionDigits rather than a prop of its own',
+        'How the value is written and read back. Currency, percent and unit are formats of one number, and precision is set with minimumFractionDigits and maximumFractionDigits. When the number field commits, the number is rounded to the precision the input shows.',
       ],
       [
         'formatOn',
         "'change' | 'commit'",
         'change',
         'NumberField, NumberFieldDefaultsProvider',
-        'When the text takes that shape. change regroups on every keystroke, so a long number is scannable while it is being typed; commit holds the reader’s own text until blur, Enter or a step. Neither decides when the number moves — it moves on every keystroke that parses',
+        'When the text takes the format. change regroups it on every keystroke; commit keeps the typed text until blur, Enter, a stepper press or an arrow key. Under both, the number changes on every keystroke that parses.',
       ],
       [
         'locale',
         'string',
-        'the language in force',
+        'the locale of SlottedProvider, then en-US',
         'NumberField',
-        'BCP 47. It decides the decimal separator, the grouping and the numbering system, on the way out and on the way back in',
+        'A BCP 47 tag. It sets the decimal separator, the grouping and the digits, for the text written and the text read back.',
       ],
       [
         'stepper',
         "'stacked' | 'split' | 'none'",
         'stacked',
         'NumberField, NumberFieldDefaultsProvider',
-        'Where the two buttons sit. split is the quantity picker’s arrangement and the only one whose targets clear 24 CSS pixels in both axes',
+        'Where the two buttons sit. split places them at either end of the frame, and its targets are at least 24 CSS pixels in both directions; none removes them.',
       ],
       [
         'wheel',
         'boolean',
         'false',
         'NumberField',
-        'Lets the wheel move the value while the control has focus and the pointer is over it. Off by default: a reader scrolling a form must not change an amount by passing over it',
+        'Lets the mouse wheel step the value while the input has focus and the pointer is over it. It is off by default, so scrolling a form never changes an amount.',
       ],
       [
         'size',
         "'sm' | 'md' | 'lg'",
         'md',
         'NumberField, NumberFieldDefaultsProvider',
-        'The type step, read from the field first when there is one, then from the provider. Height, padding, type and glyph all come from the control scales the theme restates per density',
+        'The step of the control scale. When unset, the number field takes the size of its field, then of the provider. Height, padding, type and glyphs come from the control scale the theme sets per density.',
       ],
       [
         'variant',
         "'outline' | 'subtle' | 'plain'",
         'outline',
         'NumberField, NumberFieldDefaultsProvider',
-        'How much frame the control shows. plain paints no border at rest and keeps the same box, which is what a dense table cell needs',
+        'How much frame the number field draws. plain draws no border at rest and keeps the same box, for a dense table cell.',
       ],
       [
         'start',
         'ReactNode',
         '—',
         'NumberField',
-        'An adornment before the value in the reading direction. It is a sibling of the number, never selected, copied or parsed',
+        'Content before the value in the reading direction. It is never selected, copied or parsed with the number.',
       ],
-      [
-        'end',
-        'ReactNode',
-        '—',
-        'NumberField',
-        'An adornment after the value in the reading direction',
-      ],
+      ['end', 'ReactNode', '—', 'NumberField', 'Content after the value in the reading direction.'],
       [
         'NumberFieldScrub sensitivity',
         'number',
         '2',
         'NumberFieldScrub',
-        'Pixels of horizontal travel per step. A wide range wants fewer pixels per step; a fine one, more',
+        'Pixels of horizontal drag per step. Use fewer pixels for a wide range and more for a fine one.',
       ],
       [
         'disabled',
         'boolean',
         'from the field, or false',
         'NumberField',
-        'Unstated rather than false, so the control defers to the field around it. Stated, it wins, and it is the native attribute: out of the tab order and out of submission',
+        'Unset rather than false, so the number field follows the field around it. When set, it wins over the field and writes the native disabled, which removes the input from the tab order and from form submission.',
       ],
       [
         'readOnly',
         'boolean',
         'from the field, or false',
         'NumberField',
-        'Unstated rather than false. The native readonly, which stays focusable, selectable and submitted, and which disables both steppers',
+        'Unset rather than false, so the number field follows the field around it. Writes the native readonly: the input stays focusable, selectable and submitted, and both buttons are disabled.',
       ],
       [
         'invalid',
         'boolean',
         'from the field, or false',
         'NumberField',
-        'Unstated rather than false. Writes aria-invalid on the control and data-invalid on the frame',
+        'Unset rather than false, so the number field follows the field around it. Writes aria-invalid on the input and data-invalid on the frame.',
       ],
       [
         'required',
         'boolean',
         '—',
         'NumberField',
-        'The element’s own attribute, passed straight through and never written by the family. A field marks necessity with aria-required instead, because the native attribute engages browser constraint validation',
+        'The element’s own attribute, passed through unchanged; NumberField never writes it. Inside a required field, the input receives aria-required instead, because the native attribute turns on the browser’s constraint validation.',
       ],
       [
         'name / form',
         'string',
         '—',
         'NumberField',
-        'Reach a hidden input beside the visible one, which carries the raw number. Submitting "R$ 1.480,00" to a server expecting 1480 is the defect this avoids',
+        'Reach a hidden input beside the visible one, which submits the raw number: 1480, not "$1,480.00".',
       ],
       [
         'messages',
         'Partial<NumberFieldMessages>',
         '—',
         'NumberField',
-        'Words laid over the language in force, key by key: increment and decrement are what the two buttons announce',
+        'Replaces words of the active language, key by key: increment and decrement are the accessible names of the two buttons.',
       ],
     ]),
     composition: apiRows([
@@ -537,53 +543,53 @@ export const REACT_NUMBER_FIELD_DOCS = {
         '(props: NumberFieldRootProps) => ReactNode',
         '—',
         'NumberField',
-        'Substitutes the frame and hands it every attribute. The props are typed against HTMLAttributes<HTMLElement>, so they can be spread onto a label or a fieldset. The control and the two buttons are fixed: substituting the element that holds the value and the role would leave the family with nothing to be',
+        'Renders another element in place of the frame and passes it every attribute. The props are typed as HTMLAttributes<HTMLElement>, so they spread onto any element. The input and the two buttons cannot be replaced.',
       ],
       [
         'ref',
         'Ref<HTMLInputElement>',
         '—',
         'NumberField',
-        'Reaches the input. focus(), select() and setSelectionRange() are the element’s own, so no imperative handle is invented for what the platform already ships',
+        'Reaches the input element. focus(), select() and setSelectionRange() are the element’s own.',
       ],
       [
         'handle',
         'Ref<NumberFieldHandle>',
         '—',
         'NumberField',
-        'increment() and decrement(), the two actions a consumer cannot express by passing a value — a keyboard shortcut elsewhere on the page that steps this field. Both report reason "programmatic"',
+        'Reaches increment() and decrement(), for a shortcut or a button elsewhere on the page. Both move by one step within the bounds and report the reason programmatic.',
       ],
       [
         'className / style',
         'string / CSSProperties',
         '—',
         'NumberField',
-        'Reach the frame, because the frame is what a consumer sees. Every other native prop reaches the input',
+        'Reach the frame. Every other native prop reaches the input.',
       ],
       [
         'NumberFieldDefaultsProvider',
         '{ size, variant, stepper, formatOn, clamp }',
         '—',
         'a subtree',
-        'The five decisions an application takes once. The locale comes from SlottedProvider, for the whole application: a form where one field reads 1.234 as a thousand and another as one point two three four is a form that loses money',
+        'Sets size, variant, stepper, formatOn and clamp once for every number field under it. A number field that states a value keeps it. The locale comes from SlottedProvider, so every amount in the application is written and read the same way.',
       ],
       [
         'useField()',
         '() => FieldContextValue | undefined',
         '—',
         'inside a Field',
-        'What the control reads to wire itself: the identifier, the description and the four shared states. A control that wires itself cannot be written wrong',
+        'What the number field reads to wire itself: the id, the description and the four shared states.',
       ],
     ]),
     accessibility: [
-      'The pattern is the WAI-ARIA APG’s Spinbutton (w3.org/WAI/ARIA/apg/patterns/spinbutton/), taken whole: role="spinbutton" on the focusable element with aria-valuenow, aria-valuemin, aria-valuemax and aria-valuetext, Up and Down stepping, Home and End reaching the bounds, and Page Up and Page Down as the larger step the pattern lists as optional.',
-      'aria-valuetext carries the formatted string, because aria-valuenow alone announces 1480 for a control showing R$ 1.480,00. When the control is empty neither property is set: no value is not the value nought.',
-      'The frame carries no role. WAI-ARIA requires the children of a spinbutton to be non-interactive and presentational, so the two steppers are the control’s siblings inside a box that announces nothing, rather than children of the control.',
-      'The steppers are out of the tab order — the APG’s “the text field is usually the only focusable component” — and stay in the accessibility tree with translatable names and aria-controls pointing at the value. A screen-reader cursor reaches them; twenty amounts in a form would otherwise cost forty extra tab stops. A stepper at its bound is disabled rather than silently inert, so its name still announces and its appearance says why nothing happens.',
-      'aria-required, never the native required. The native attribute engages browser constraint validation and changes submit behaviour, which the library must not impose as a side effect of describing a field. disabled and readonly are native, because that is what those two words mean.',
-      'The element is type="text" with inputMode derived from the props rather than from the user agent: numeric for a positive integer, decimal when the format admits a fraction, and text when a negative is possible, because neither numeric keypad offers a minus sign on every platform. A user-agent check during render would be a hydration mismatch.',
-      'The wheel is not bound unless a consumer asks for it, and nothing is bound to Escape. MDN’s own note on type="number" names accidental increment as the reason the platform’s spinner is worth avoiding, and WCAG 2.1.4 exists for the class of defect a single-key shortcut produces.',
-      'The invalid state is never colour alone: aria-invalid announces it and the field’s error says it in words. In the high-contrast scheme the border cannot carry it at all, which is why it never has to.',
+      'NumberField follows the WAI-ARIA APG Spinbutton pattern: role="spinbutton" on the input with aria-valuenow, aria-valuemin, aria-valuemax and aria-valuetext, ArrowUp and ArrowDown to step, Home and End to reach the bounds, and Page Up and Page Down for the larger step.',
+      'aria-valuetext carries the formatted text, so a screen reader announces "$1,480.00" rather than 1480. When the number field is empty, neither aria-valuenow nor aria-valuetext is set: no value is not the value zero.',
+      'The frame has no role. WAI-ARIA requires the children of a spinbutton to be non-interactive, so the two buttons are siblings of the input inside a box that announces nothing.',
+      'The buttons are out of the tab order, as the APG pattern recommends, and stay in the accessibility tree with translatable names and aria-controls pointing at the input. A form of twenty amounts keeps twenty tab stops instead of sixty. A button at a bound is disabled, so its name is still announced and its appearance shows why it does nothing.',
+      'Inside a required field the input receives aria-required, never the native required, which would turn on the browser’s constraint validation. disabled and readonly are the native attributes.',
+      'The input is type="text", and its inputMode comes from the props: numeric for a whole number at or above zero, decimal when the format allows a fraction, and text when min allows a negative, because neither numeric keypad offers a minus sign on every platform.',
+      'The mouse wheel is not bound unless wheel is set, and Escape is not bound at all, so scrolling a form never changes an amount.',
+      'The invalid state is never conveyed by color alone: aria-invalid announces it and the field’s error states it in words. In the high-contrast scheme the border does not carry it.',
     ],
     snippets: [
       defineSnippet({
@@ -591,17 +597,17 @@ export const REACT_NUMBER_FIELD_DOCS = {
         language: 'tsx',
         label: 'Anatomy, as it reaches the DOM',
         source: `<div data-ui="number-field" data-part="root" data-size="md" data-stepper="stacked">
-  <span data-part="start">R$</span>
+  <span data-part="start">$</span>
   <input
     data-part="input"
     type="text"
     role="spinbutton"
-    id="valor-control"
+    id="amount-control"
     aria-valuenow="1480"
-    aria-valuetext="R$ 1.480,00"
+    aria-valuetext="$1,480.00"
     aria-valuemin="0"
   />
-  <span data-part="end">BRL</span>
+  <span data-part="end">USD</span>
   <span data-part="stepper">
     <button data-part="increment" type="button" tabIndex={-1} aria-label="Increase">
       <span data-ui="icon" data-part="root" aria-hidden="true">
@@ -614,7 +620,7 @@ export const REACT_NUMBER_FIELD_DOCS = {
       </span>
     </button>
   </span>
-  <input type="hidden" name="valor" value="1480" />
+  <input type="hidden" name="amount" value="1480" />
 </div>;`,
       }),
       defineSnippet({

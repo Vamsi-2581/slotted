@@ -49,6 +49,13 @@
     margin-block-start: var(--_message-gap);
   }
 
+  /* `inline-message` zeroes its root's margin at the weight of the rule above,
+     so the order the two stylesheets load in decided the gap; a third
+     attribute decides it here. */
+  [data-ui='field-group'][data-part='root'] > * + [data-ui='inline-message'] {
+    margin-block-start: var(--_message-gap);
+  }
+
   [data-ui='field-group'][data-part='root'] > [data-part='content'] {
     margin-block-start: var(--_content-gap);
   }

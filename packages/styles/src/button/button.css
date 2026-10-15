@@ -539,6 +539,10 @@
    * spare, and a sweep across a box the size of one glyph is a flicker rather
    * than a direction.
    *
+   * The band waits for the ring to be in the document, not for
+   * `data-loading`: the refusal starts at once, and `loadingDelay` holds back
+   * every picture of the wait, so a wait that ends inside the delay shows none.
+   *
    * `currentColor` is what makes the band answer every tone and every variant
    * without a token of its own: it is the ink the control is already painting
    * its own label with, so it contrasts with that control's ground by
@@ -547,7 +551,7 @@
    */
   @media (prefers-reduced-motion: no-preference) {
     @media not (forced-colors: active) {
-      [data-ui='button']:not([data-shape])[data-loading]::after {
+      [data-ui='button']:not([data-shape])[data-loading]:has([data-part='indicator'])::after {
         /**
          * The tile is crossed once per cycle, so the pair sets the speed the
          * band travels rather than the time it takes: two heights per loop
@@ -571,7 +575,9 @@
        * A band that travels against the reading direction reads as undoing
        * rather than as progressing, so it is mirrored rather than reused.
        */
-      [data-ui='button']:not([data-shape])[data-loading]:dir(rtl)::after {
+      [data-ui='button']:not([data-shape])[data-loading]:has([data-part='indicator']):dir(
+          rtl
+        )::after {
         animation-direction: reverse;
         background-image: linear-gradient(to left, transparent, currentColor 40%, transparent 80%);
       }

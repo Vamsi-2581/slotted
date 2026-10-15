@@ -34,6 +34,7 @@ import type { MutableRefObject } from 'react';
 
 import { useField } from '../field';
 import { useLocale, useMessages } from '../i18n';
+import { revealWithin } from './multi-select-collection';
 import { useMultiSelectDefaults } from './multi-select-defaults';
 import type {
   MultiSelectAlign,
@@ -78,7 +79,6 @@ export interface MultiSelectContextValue {
   commitOnBlur: boolean;
   contentId: string;
   contentNode: HTMLElement | null;
-  controlId: string;
   creatable: boolean;
   delimiters: readonly string[];
   disabled: boolean;
@@ -122,6 +122,8 @@ export interface MultiSelectContextValue {
   remove: (value: MultiSelectOptionValue, source?: unknown) => void;
   /** Puts one value in another's place, as one transition. */
   replace: (value: MultiSelectOptionValue, text: string, source?: unknown) => void;
+  /** Returns to the set the control started from, which is what a form reset asks. */
+  restore: (source?: unknown) => void;
   reorderable: boolean;
   required: boolean;
   seen: boolean;
@@ -229,11 +231,12 @@ export function MultiSelect({
 
   const generated = useId();
   const contentId = `${generated}listbox`;
-  const controlId = `${generated}grid`;
   const inputId = `${generated}input`;
 
   const [ownOpen, setOwnOpen] = useState(defaultOpen);
   const [ownValue, setOwnValue] = useState<readonly MultiSelectOptionValue[]>(defaultValue);
+  /* What a form reset returns to: the set the control started from, read once. */
+  const [initialValue] = useState<readonly MultiSelectOptionValue[]>(defaultValue);
   const [ownInput, setOwnInput] = useState(defaultInputValue);
   const [ownHighlighted, setOwnHighlighted] = useState<MultiSelectOptionValue | null>(
     defaultHighlightedValue,
@@ -577,6 +580,14 @@ export function MultiSelect({
     [commit, setInputValue],
   );
 
+  const restore = useCallback(
+    (source?: unknown) => {
+      commit(initialValue, 'programmatic', source);
+      setInputValue('', 'programmatic', source);
+    },
+    [commit, initialValue, setInputValue],
+  );
+
   /**
    * Reorder, and the only shape it has: one value moving to one index. The set
    * is the same and the request carries `keyboard`, which is what lets a
@@ -609,8 +620,9 @@ export function MultiSelect({
         const option = contentNode?.querySelector<HTMLElement>(
           `[data-part='item'][data-value="${CSS.escape(optionValue)}"]`,
         );
-        if (typeof option?.scrollIntoView === 'function')
-          option.scrollIntoView({ block: 'nearest' });
+        if (option !== null && option !== undefined && contentNode !== null) {
+          revealWithin(option, contentNode);
+        }
       },
       setValue: (values, reason = 'programmatic') => commit([...values], reason),
     }),
@@ -633,7 +645,6 @@ export function MultiSelect({
     commitOnBlur: axes.commitOnBlur ?? defaults.commitOnBlur,
     contentId,
     contentNode,
-    controlId,
     creatable: axes.creatable ?? defaults.creatable,
     delimiters: axes.delimiters ?? defaults.delimiters,
     disabled: resolvedDisabled,
@@ -672,6 +683,7 @@ export function MultiSelect({
     registerLabel,
     remove,
     replace,
+    restore,
     reorderable: axes.reorderable ?? defaults.reorderable,
     required: axes.required ?? field?.required ?? defaults.required,
     seen: seen.current,

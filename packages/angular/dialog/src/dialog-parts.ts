@@ -26,6 +26,16 @@ function activationReason(event: MouseEvent): DialogOpenReason {
 }
 
 /**
+ * The part a control names. On an element another family draws — `slButton` —
+ * that family's root stays its part: two directives write one attribute, and
+ * the family the element is drawn by keeps it, as React's `render` does by
+ * spreading the button's props last.
+ */
+function ownPart(native: HTMLElement, part: string): string | null {
+  return native.hasAttribute('data-ui') ? native.getAttribute('data-part') : part;
+}
+
+/**
  * The control that opens a layer.
  *
  * It is the consumer's own element, which is what this ecosystem composes with:
@@ -42,7 +52,7 @@ function activationReason(event: MouseEvent): DialogOpenReason {
   standalone: true,
   exportAs: 'slDialogTrigger',
   host: {
-    'data-part': 'trigger',
+    '[attr.data-part]': 'part',
     type: 'button',
     '[attr.aria-haspopup]': "'dialog'",
     '[attr.aria-expanded]': 'dialog().open()',
@@ -57,6 +67,9 @@ export class SlDialogTrigger implements OnInit, OnDestroy {
   readonly dialog = input.required<SlDialogBase>({ alias: 'slDialogTrigger' });
 
   private readonly native: HTMLElement = inject(ElementRef).nativeElement;
+
+  /** `trigger`, unless the element is another family's root. */
+  protected readonly part = ownPart(this.native, 'trigger');
 
   protected readonly controls = computed(() =>
     this.dialog().mounted() ? this.dialog().contentId : null,
@@ -292,13 +305,16 @@ export class SlAlertDialogIcon {
   selector: '[slAlertDialogCancel]',
   standalone: true,
   exportAs: 'slAlertDialogCancel',
-  host: { 'data-part': 'cancel', type: 'button', '(click)': 'press($event)' },
+  host: { '[attr.data-part]': 'part', type: 'button', '(click)': 'press($event)' },
 })
 export class SlAlertDialogCancel implements OnInit, OnDestroy {
   readonly value = input<string>('cancel');
 
   private readonly dialog = inject(SlDialogBase);
   private readonly native: HTMLElement = inject(ElementRef).nativeElement;
+
+  /** `cancel`, unless the element is another family's root. */
+  protected readonly part = ownPart(this.native, 'cancel');
 
   ngOnInit() {
     this.dialog.cancelNode.set(this.native);
@@ -322,12 +338,15 @@ export class SlAlertDialogCancel implements OnInit, OnDestroy {
   selector: '[slAlertDialogAction]',
   standalone: true,
   exportAs: 'slAlertDialogAction',
-  host: { 'data-part': 'action', type: 'button', '(click)': 'press($event)' },
+  host: { '[attr.data-part]': 'part', type: 'button', '(click)': 'press($event)' },
 })
 export class SlAlertDialogAction {
   readonly value = input<string>('confirm');
 
   private readonly dialog = inject(SlDialogBase);
+
+  /** `action`, unless the element is another family's root. */
+  protected readonly part = ownPart(inject(ElementRef).nativeElement as HTMLElement, 'action');
 
   protected press(event: MouseEvent) {
     if (event.defaultPrevented) return;

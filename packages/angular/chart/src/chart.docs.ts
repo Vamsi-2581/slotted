@@ -82,7 +82,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'role="toolbar": zoom reset, the table view, full screen and the menu. Absent while loading, failed or with toolbar="none".',
+      'role="toolbar": zoom reset, the table view, full screen and the menu. While loading, failed or with no data it keeps its box, hidden, inert and out of the accessibility tree (data-waiting), so the header wraps at one width; absent with toolbar="none".',
   },
   {
     part: 'zoom-reset',
@@ -911,7 +911,7 @@ export const ANGULAR_CHART_DOCS = {
         'readonly ChartAnnotation[]',
         '—',
         'slChart',
-        'Lines and bands on either axis, labelled, in a tone',
+        'Lines and bands on either axis, labelled, in a tone. On the category axis a value names a category by its key or its x value; one that names none is not drawn',
       ],
       [
         'recordKey',

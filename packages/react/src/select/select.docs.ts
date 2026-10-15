@@ -20,7 +20,7 @@ const apiRows = (rows: readonly ApiTuple[]): ApiRow[] =>
 
 export const REACT_SELECT_TOKENS = selectTokens.map((name) => ({
   name,
-  purpose: 'Theme-owned Select decision',
+  purpose: 'A Select value the theme sets.',
 }));
 
 const imports: ReferenceImport = {
@@ -34,187 +34,187 @@ const anatomy: AnatomyRow[] = [
     element: 'div, rendered by SelectTrigger',
     required: true,
     purpose:
-      'The frame the reader sees, carrying data-ui="select". It draws the border, the shadow, the focus ring and every state, exactly as text-field\'s frame does — a ring can only be drawn by an ancestor of whatever took focus.',
+      'The frame, carrying data-ui="select". It draws the border, the shadow, the focus ring and every state, as the text field frame does: a focus ring can only be drawn by an ancestor of the focused element.',
   },
   {
     part: 'trigger',
     element: 'button with role="combobox"',
     required: true,
     purpose:
-      'The control. It fills the frame, keeps DOM focus for the whole interaction, and carries aria-expanded, aria-controls and aria-activedescendant.',
+      'The button with role="combobox". It fills the frame, keeps DOM focus for the whole interaction, and carries aria-expanded, aria-controls and aria-activedescendant. Inside a field it carries the field’s control id, so a press on the label focuses it.',
   },
   {
     part: 'value',
     element: 'span, rendered by SelectValue',
     required: true,
     purpose:
-      'What the control shows: the chosen label, a summary of several, or the placeholder. data-placeholder while nothing is chosen; data-unmatched when a value could not be resolved to a label.',
+      'What the control shows: the chosen label, a summary of several, or the placeholder. It carries data-placeholder while nothing is chosen, and data-unmatched when a value has no known label.',
   },
   {
     part: 'arrow',
     element: 'span',
     required: true,
     purpose:
-      "The chevron, a `Glyph` inside an `Icon` box, turned over while the popup is open. It is placed against the frame's end and is inert: the trigger's own padding runs underneath it, so a press there still opens the popup.",
+      'The chevron, a Glyph inside an Icon box, turned over while the list is open. It sits against the end of the frame and takes no pointer events, so a press on it reaches the trigger.',
   },
   {
     part: 'busy',
     element: 'span',
     required: false,
     purpose:
-      "The ring, standing where the chevron stands while an answer is travelling: the chevron says the popup opens, and it does not open onto anything yet. The arc is the shared `spinner` sheet's, worn as `data-ui` beside this part, so the family says only where it stands and how big it is.",
+      'The spinner, drawn in place of the chevron while loading is set. It carries data-ui="spinner", so its ring comes from the spinner stylesheet.',
   },
   {
     part: 'tags',
     element: 'span',
     required: false,
     purpose:
-      'The chosen values, as the chips they are, standing over the trigger rather than inside it — a remove control inside a button is a control inside a control. Each chip is a `tag`, and one more chip counts what did not fit, measured by `createCollapse`. Only a multiple selection draws it.',
+      'The chosen values of a multiple select, one tag each, laid over the trigger rather than inside it: a remove button inside a button would be a control inside a control. Tags that do not fit collapse into one +N tag.',
   },
   {
     part: 'summary',
     element: 'span',
     required: false,
     purpose:
-      "What a control under 120px says instead of chips — '3 selected'. It lives inside the value, so the trigger is named by it whichever of the two is drawn, and it is taken out of sight rather than out of the tree while the chips are shown.",
+      'The text a multiple select shows under 120 pixels instead of tags, such as ‘3 selected’. It sits inside the value, so it names the trigger whichever of the two is drawn, and it is visually hidden rather than removed while the tags are shown.',
   },
   {
     part: 'clear',
     element: 'button',
     required: false,
     purpose:
-      'Takes the selection back. Present only while clearable is set and something is chosen, and a sibling of the trigger rather than a child — a focusable descendant of a combobox is a widget inside a widget.',
+      'The clear button. It is drawn while clearable is set and something is chosen, as a sibling of the trigger rather than a child: a focusable element inside a combobox would be a widget inside a widget.',
   },
   {
     part: 'positioner',
     element: 'div, rendered by SelectContent',
     required: true,
     purpose:
-      'The layer, portalled to the end of the document. It carries data-ui="select" a second time, because a stylesheet cannot reach a subtree that has left its own root; the positioner writes its position onto it, and it is what scales and fades.',
+      'The layer, portalled to the end of the document. It carries data-ui="select" again, because a stylesheet cannot reach the portalled list through the root. The positioner writes its position on this element, and this element scales and fades.',
   },
   {
     part: 'content',
     element: 'div with role="listbox", or role="dialog" under search',
     required: true,
     purpose:
-      'The painted surface. It owns the three columns every option passes through, is bounded by the height the positioner reports, and scrolls inside it. Under search it becomes a dialog holding a field and a list, because a listbox holds options and groups and a text field is neither — the combobox pattern names dialog as one of the four roles a popup may carry.',
+      'The list surface. It defines the three columns every option uses, is bounded by the height the positioner reports, and scrolls inside it. With search it becomes a dialog that holds the search field and the list, because a listbox may hold only options and groups.',
   },
   {
     part: 'search',
     element: 'div, drawn only under search',
     required: false,
     purpose:
-      'The row the query is typed into, at the top of the popup and fixed there: a field that scrolled away with its own results is a field a reader loses on the fourth row. The control itself never takes typed text, which is what keeps this family apart from combobox.',
+      'The search row, fixed at the top of the list so it stays in view while the results scroll. The control itself never takes typed text; a value the reader types belongs in a combobox.',
   },
   {
     part: 'search-icon',
     element: 'span, aria-hidden',
     required: false,
     purpose:
-      'The magnifier, a `Glyph` inside an `Icon` box. It is what makes the row a field rather than a heading, and searchProps.icon replaces it or removes it.',
+      'The magnifier, a Glyph inside an Icon box. searchProps.icon replaces it, and null removes it.',
   },
   {
     part: 'search-input',
     element: 'input with role="combobox"',
     required: false,
     purpose:
-      'The field. It carries aria-controls naming the list, aria-autocomplete="list" and aria-activedescendant, and it holds DOM focus for the whole time the popup is open — the pattern says a dialog popup does not support aria-activedescendant, so focus moves into it.',
+      'The search field. It carries aria-controls naming the list, aria-autocomplete="list" and aria-activedescendant, and holds DOM focus while the list is open, because a dialog popup does not support aria-activedescendant on the trigger.',
   },
   {
     part: 'list',
     element: 'div with role="listbox", drawn only under search',
     required: false,
     purpose:
-      'The listbox, one element inside the dialog. It is the scroller under a field that stays, and it owns the three columns the surface owns when there is no field.',
+      'The listbox inside the dialog when search is set. It scrolls under the fixed search row and defines the option columns in place of the surface.',
   },
   {
     part: 'chosen',
     element: 'div, aria-hidden, drawn while several values are chosen',
     required: false,
     purpose:
-      'Everything that is chosen, at the top of the popup. The control holds one line, so twelve values are three chips and a count; the band holds all of them, wraps, and scrolls at two rows of its own. It is aria-hidden and holds no widget, and the reason is keyboard reach: without search focus never enters this layer, and with it the layer spends its one Tab on leaving the control — so a remove control here would answer the pointer and nothing else. A value is taken back from its option or from the focusable chips in the control.',
+      'Every chosen value of a multiple select, as tags at the top of the list. The control holds one line, so it may show three tags and a count; this band shows them all, wraps, and scrolls after two rows. It is aria-hidden and holds no buttons: without search focus never reaches the list, and with search Tab leaves the control, so a remove button here would answer only the pointer. A value is removed from its option or from its tag in the control.',
   },
   {
     part: 'match',
     element: 'mark, the match part of the highlight family, whose root sits inside label',
     required: false,
     purpose:
-      'The span of a label the query matched, found by the same collator the filter used — an indexOf beside a locale-sensitive filter marks nothing on the row it has just matched. The mark is the shared highlight sheet\u2019s, so every list a reader types into says the same thing about the same span, and it changes no metric of the text around it.',
+      'The span of a label that the query matched, found with the same comparison the filter used. The mark comes from the highlight stylesheet and changes no metric of the surrounding text.',
   },
   {
     part: 'group',
     element: 'div with role="group"',
     required: false,
     purpose:
-      "A set of options with a name. It spans every column and inherits them, so its options keep the list's columns rather than starting a second set.",
+      'A run of options under a heading. It spans every column and inherits them, so its options align with the options outside it.',
   },
   {
     part: 'group-label',
     element: 'div',
     required: false,
     purpose:
-      'The name of a group, which the group points at with aria-labelledby — required of every option group by the listbox pattern.',
+      'The group’s heading. The group references it with aria-labelledby, as the listbox pattern requires of every option group.',
   },
   {
     part: 'item',
     element: 'div with role="option"',
     required: true,
     purpose:
-      "One option. Not a button: the pattern's option is not separately focusable, and a button here would add a tab stop the pattern excludes by name. data-current is the highlight, data-selected is the choice.",
+      'One option, not a button: an option is not separately focusable, and a button would add a tab stop. data-current marks the highlight and data-selected the chosen option.',
   },
   {
     part: 'indicator',
     element: 'span',
     required: true,
     purpose:
-      'The check in the last column. Its box is reserved whether or not the mark is drawn, so a list does not shift as the reader moves through it.',
+      'The check mark in the last column. Its box is reserved whether or not the mark is drawn, so rows do not shift as the highlight moves.',
   },
   {
     part: 'icon',
     element: 'span',
     required: false,
     purpose:
-      "The artwork in the first column: an Icon holding a Glyph, or the consumer's own element. It is not the check: a country's flag and the mark saying it is chosen are two facts about one row.",
+      'The artwork in the first column: an Icon holding a Glyph, or any element. It is separate from the check mark, which says whether the option is chosen.',
   },
   {
     part: 'label',
     element: 'span',
     required: true,
     purpose:
-      "The option's words, and the only column that gives way. It wraps to two lines and then truncates, with the whole string still in the DOM.",
+      'The option’s text, and the only column that shrinks. It wraps to two lines and then truncates, with the whole text still in the DOM.',
   },
   {
     part: 'description',
     element: 'span',
     required: false,
-    purpose: 'The line under the label, for the qualifier a label has no room for.',
+    purpose: 'A second line under the label, for detail the label has no room for.',
   },
   {
     part: 'separator',
     element: 'div with role="separator"',
     required: false,
-    purpose: 'A line between two runs of options. Not focusable and not interactive.',
+    purpose: 'A line between two runs of options. It is not focusable and not interactive.',
   },
   {
     part: 'empty',
     element: 'div',
     required: false,
     purpose:
-      'What the popup says when it holds no options. It opens onto a sentence rather than onto nothing, and the empty message has a default so a family that says nothing still says something.',
+      'The text the list shows when it holds no options: the empty message, or the empty prop of SelectContent.',
   },
   {
     part: 'status',
     element: 'div with role="status"',
     required: false,
     purpose:
-      "What the popup says while an answer is travelling. It keeps the popup's measure, so nothing jumps when the options land.",
+      'The live region that announces the loading message, and the number of results while searching. It keeps the width of the list, so nothing shifts when the options arrive.',
   },
   {
     part: 'placeholder',
     element: 'div',
     required: false,
     purpose:
-      'Three rows the height of an option, drawn by the shared `skeleton` sheet while an answer is travelling, so the surface a reader is looking at is the shape of the list that is coming. Hidden from assistive technology: the status row beside it is the live region.',
+      'Three rows the height of an option, drawn with the skeleton stylesheet while loading is set. They are hidden from assistive technology, because the status row announces the wait.',
   },
 ];
 
@@ -428,12 +428,12 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'placement',
     title: 'Placement and width',
-    note: 'The popup hangs from the start edge of its control and is as wide as it. width="content" lets it size to its own options, for a list with descriptions.',
+    note: 'The popup hangs from the start edge of its control. It is never narrower than the control and grows when an option needs more room, so a narrow control does not wrap its labels. width="anchor" pins it to the width of the control.',
     snippet: defineSnippet({
       id: 'select-react-placement',
       language: 'tsx',
       label: 'Where the popup goes, and how wide it is',
-      source: `<Select align="end" side="top" width="content">
+      source: `<Select align="end" side="top" width="anchor">
   …
 </Select>;`,
     }),
@@ -479,7 +479,7 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'select-react-composition',
       language: 'tsx',
       label: 'What a consumer can replace',
-      source: `<SelectDefaultsProvider size="sm" variant="subtle" width="content">
+      source: `<SelectDefaultsProvider size="sm" variant="subtle" width="anchor">
   <Select ref={handle}>
     <SelectTrigger render={(props) => <label {...props} />}>
       <SelectValue>{(values, labels) => labels.join(', ')}</SelectValue>
@@ -497,70 +497,70 @@ const api = apiRows([
     'boolean',
     'false',
     'Select',
-    'Opens the popup onto a field the reader filters the options with. It changes the popup\u2019s role to dialog, moves DOM focus into the layer, and turns typeahead off — a reader typing into a field cannot also be driving one.',
+    'Puts a search field at the top of the list. The list becomes a dialog, DOM focus moves into the search field, and typeahead turns off.',
   ],
   [
     'searchValue',
     'string',
     '—',
     'Select',
-    'The query. Present means the consumer owns it. It is never the selection, and no request carries both.',
+    'The search query. Passing it makes the query controlled. It is never the selection.',
   ],
   [
     'defaultSearchValue',
     'string',
     "''",
     'Select',
-    'What an uncontrolled query starts from, read once.',
+    'The query an uncontrolled search field starts with. Read once.',
   ],
   [
     'filter',
     '((label: string, query: string) => boolean) | null',
     'createFilter',
     'Select',
-    'Whether an option answers the query. Unset asks for the library\u2019s locale-sensitive contains; null turns filtering off, which is what a list a server has already filtered needs; a function replaces the comparison.',
+    'Decides whether an option matches the query. Unset uses a locale-sensitive contains that ignores case and accents. null turns filtering off, for a list a server has already filtered. A function replaces the comparison.',
   ],
   [
     'highlightMatch',
     'boolean',
     'true',
     'Select',
-    'Whether the span a query matched is marked inside the label, by the same collator the filter used.',
+    'Whether the span of a label that matched the query is marked.',
   ],
   [
     'locale',
     'string',
     '—',
     'Select',
-    'BCP 47, for the comparison the default filter makes. The language in force when absent.',
+    'The BCP 47 language the default filter compares in. Defaults to the language in force.',
   ],
   [
     'searchProps',
     'SelectSearchProps',
     '—',
     'SelectContent',
-    'The field\u2019s own props: every native attribute of the input, its icon, and a render that replaces the row around it.',
+    'Props for the search field: every native input attribute, icon, and render to replace the row around the field.',
   ],
   [
     'value',
     'string | string[] | null',
     '—',
     'Select',
-    'The chosen value, or values. Present means the consumer owns it.',
+    'The chosen value, or values when multiple is set. Passing it makes the selection controlled.',
   ],
   [
     'defaultValue',
     'string | string[] | null',
     '—',
     'Select',
-    'What an uncontrolled select starts from, read once.',
+    'The value an uncontrolled select starts with, and the value a form reset restores. Read once.',
   ],
   [
     'open',
     'boolean',
     '—',
     'Select',
-    'Whether the popup is showing. Present means the consumer owns it.',
+    'Whether the list is open. Passing it makes the open state controlled.',
   ],
   ['defaultOpen', 'boolean', 'false', 'Select', 'Whether an uncontrolled select starts open.'],
   [
@@ -568,197 +568,221 @@ const api = apiRows([
     'string | null',
     '—',
     'Select',
-    'The option the highlight is on, which is not the option that is chosen.',
+    'The highlighted option. Passing it makes the highlight controlled. The highlight is where the keyboard is, not what is chosen.',
   ],
   [
     'defaultHighlightedValue',
     'string | null',
     '—',
     'Select',
-    'Where an uncontrolled highlight starts.',
+    'The option an uncontrolled highlight starts on.',
   ],
   [
     'items',
     'SelectItems',
     '—',
     'Select',
-    'Labels for values, so a closed control can name one the popup never rendered.',
+    'Values with their labels, so the closed control can show the label of a value whose option has not been rendered. Options are rendered only while the list is open.',
   ],
   [
     'name',
     'string',
     '—',
     'Select',
-    'The submission name. Renders a hidden native select carrying it.',
+    'The name the value is submitted under. It renders a hidden native select, which FormData reads and a form reset restores.',
   ],
   [
     'form',
     'string',
     '—',
     'Select',
-    'The form this control submits with, when it is not the enclosing one.',
+    'The id of the form the control belongs to, when it is not the enclosing form.',
   ],
   [
     'total',
     'number',
     '—',
     'Select',
-    'How many options the whole collection holds, for aria-setsize.',
+    'The size of the whole collection when only part of it is rendered. Options with position then carry aria-setsize and aria-posinset.',
   ],
   [
     'size',
     "'sm' | 'md' | 'lg'",
     'md',
     'Select',
-    'The control step. Unset asks the field around it.',
+    'The step of the control scale. When unset, the select takes the size of its field.',
   ],
   [
     'variant',
     "'outline' | 'subtle' | 'plain'",
     'outline',
     'Select',
-    'How much frame the control shows.',
+    'How much frame the control draws: an outline, a filled subtle frame, or plain, with no frame at rest.',
   ],
   [
     'side',
-    "'bottom' | 'top' | 'inline-start' | 'inline-end'",
+    "'bottom' | 'top' | 'inline-start' | 'inline-end' | 'left' | 'right'",
     'bottom',
     'Select',
-    'Which edge of the control the popup hangs from.',
+    'The edge of the control the list opens from.',
   ],
   [
     'align',
     "'start' | 'center' | 'end'",
     'start',
     'Select',
-    'Where the popup lines up along that edge.',
+    'Where the list aligns along that edge.',
   ],
   [
     'width',
     "'anchor' | 'content'",
-    'anchor',
+    'content',
     'Select',
-    'As wide as the control, or as wide as its own options.',
+    'content keeps the list at least as wide as the control and widens it to its longest option; anchor pins it to the width of the control.',
   ],
   [
     'mount',
     "'active' | 'lazy' | 'eager'",
     'active',
     'Select',
-    'When the layer exists: only while open, from the first open, or from the start.',
+    'When the list exists in the DOM: active while it is open, lazy from the first open on, eager from the start.',
   ],
   [
     'strategy',
     "'absolute' | 'fixed'",
     'absolute',
     'Select',
-    'How the positioner places the layer.',
+    'The CSS position the positioner gives the list.',
   ],
-  ['multiple', 'boolean', 'false', 'Select', 'Whether more than one option may be chosen.'],
   [
-    'clearable',
+    'multiple',
     'boolean',
     'false',
     'Select',
-    'Whether a clear button appears once something is chosen.',
+    'Allows several values. The value becomes an array, and the list stays open as options are chosen.',
   ],
-  ['loop', 'boolean', 'false', 'Select', 'Whether the arrows wrap at the ends of the list.'],
-  ['typeahead', 'boolean', 'true', 'Select', 'Whether typing jumps to the first matching option.'],
+  ['clearable', 'boolean', 'false', 'Select', 'Draws a clear button once something is chosen.'],
+  [
+    'loop',
+    'boolean',
+    'false',
+    'Select',
+    'Whether the arrow keys wrap from the last option to the first.',
+  ],
+  [
+    'typeahead',
+    'boolean',
+    'true',
+    'Select',
+    'Whether typing the first letters of a label highlights the matching option. Off while search is set.',
+  ],
   [
     'typeaheadTimeout',
     'number',
     '500',
     'Select',
-    'How long a typed sequence stays open, in milliseconds.',
+    'How long typed letters keep building one search, in milliseconds.',
   ],
   [
     'closeOnSelect',
     'boolean',
     'true',
     'Select',
-    'Whether taking an option closes the popup. Ignored while multiple is set.',
+    'Whether choosing an option closes the list. A multiple select stays open regardless.',
   ],
-  ['closeOnEscape', 'boolean', 'true', 'Select', 'Whether Escape closes the popup.'],
-  ['closeOnOutsidePress', 'boolean', 'true', 'Select', 'Whether a press outside closes the popup.'],
+  ['closeOnEscape', 'boolean', 'true', 'Select', 'Whether Escape closes the list.'],
+  [
+    'closeOnOutsidePress',
+    'boolean',
+    'true',
+    'Select',
+    'Whether a press outside the list closes it.',
+  ],
   [
     'flip',
     'boolean',
     'true',
     'Select',
-    'Whether the popup may move to the opposite side when it does not fit.',
+    'Whether the list may open on the opposite side when it does not fit.',
   ],
   [
     'shift',
     'boolean',
     'true',
     'Select',
-    'Whether the popup may slide along its side to stay in view.',
+    'Whether the list may slide along its edge to stay in view.',
   ],
   [
     'hideWhenDetached',
     'boolean',
     'true',
     'Select',
-    'Whether the popup hides once its control has scrolled out of view.',
+    'Whether the list hides while its control is scrolled out of view.',
   ],
   [
     'portal',
     'boolean',
     'true',
     'Select',
-    'Whether the layer is portalled out of the control’s subtree.',
+    'Whether the list renders at the end of the document instead of inside the control.',
   ],
   [
     'fullWidth',
     'boolean',
     'true',
     'Select',
-    'Whether the control fills its field, or shrinks to its widest value.',
+    'Whether the control fills its container. false sizes it to its widest value.',
   ],
-  ['disabled', 'boolean', 'false', 'Select', 'Answers nothing. Unset asks the field around it.'],
+  [
+    'disabled',
+    'boolean',
+    'false',
+    'Select',
+    'Disables the control and takes it out of the tab order. When unset, the select takes the state of its field.',
+  ],
   [
     'readOnly',
     'boolean',
     'false',
     'Select',
-    'Keeps its value legible and refuses to open. Unset asks the field.',
+    'Keeps the value visible and focusable and never opens the list. When unset, the select takes the state of its field.',
   ],
-  ['required', 'boolean', 'false', 'Select', 'Announced with aria-required. Unset asks the field.'],
+  [
+    'required',
+    'boolean',
+    'false',
+    'Select',
+    'Sets aria-required, and the required attribute of the hidden native select. When unset, the select takes the state of its field.',
+  ],
   [
     'invalid',
     'boolean',
     'false',
     'Select',
-    'Retargets the focus ring and the border. Unset asks the field.',
+    'Sets aria-invalid and draws the border and the focus ring in the danger tone. When unset, the select takes the state of its field.',
   ],
   [
     'loading',
     'boolean',
     'false',
     'Select',
-    'Paints the status row and sets aria-busy on the listbox.',
+    'Shows the spinner, three placeholder rows and the loading message, and sets aria-busy on the listbox.',
   ],
-  ['sideOffset', 'number', '4', 'Select', 'The gap between the control and the popup, in pixels.'],
-  [
-    'alignOffset',
-    'number',
-    '0',
-    'Select',
-    'How far the popup slides along its own side, in pixels.',
-  ],
+  ['sideOffset', 'number', '4', 'Select', 'The gap between the control and the list, in pixels.'],
+  ['alignOffset', 'number', '0', 'Select', 'How far the list shifts along its edge, in pixels.'],
   [
     'collisionPadding',
     'number',
     '8',
     'Select',
-    'How close to the viewport edge the popup may come.',
+    'The distance the list keeps from the edges of the viewport, in pixels.',
   ],
   [
     'messages',
     'Partial<SelectMessages>',
     '—',
     'Select',
-    'Words laid over the language in force, key by key: clear, remove ({label}), summary ({count}), search, searchPlaceholder, count ({count}), empty, loading',
+    'Replaces any of the phrases the select writes: clear, remove ({label}), summary ({count}), search, searchPlaceholder, count ({count}), empty and loading. Phrases left out come from the language in force.',
   ],
   [
     'placeholder',
@@ -772,46 +796,52 @@ const api = apiRows([
     '(values, labels) => ReactNode',
     '—',
     'SelectValue',
-    'The summary, when the family’s own is not the right one.',
+    'A function of the chosen values and their labels that returns what the control shows, in place of the built-in summary.',
   ],
-  ['empty', 'ReactNode', '—', 'SelectContent', 'Replaces the empty message for this popup.'],
-  ['status', 'ReactNode', '—', 'SelectContent', 'Replaces the loading message for this popup.'],
+  ['empty', 'ReactNode', '—', 'SelectContent', 'Replaces the empty message for this list.'],
+  ['status', 'ReactNode', '—', 'SelectContent', 'Replaces the loading message for this list.'],
   [
     'value',
     'string',
     '—',
     'SelectItem',
-    'The option’s key: what is submitted and what the request carries.',
+    'The option’s value: what is submitted and what a change request carries.',
   ],
   [
     'disabled',
     'boolean',
     'false',
     'SelectItem',
-    'Announced, kept in the collection, skipped by every movement key.',
+    'Announces the option as unavailable, keeps it in the list, and skips it with every movement key.',
   ],
-  ['description', 'ReactNode', '—', 'SelectItem', 'The line under the label.'],
-  ['icon', 'ReactNode', '—', 'SelectItem', 'The artwork in the first column.'],
+  ['description', 'ReactNode', '—', 'SelectItem', 'A second line under the label.'],
+  [
+    'icon',
+    'ReactNode',
+    '—',
+    'SelectItem',
+    'An element for the first column, such as an Icon holding a Glyph.',
+  ],
   [
     'textValue',
     'string',
     '—',
     'SelectItem',
-    'What typeahead matches on, when the label is not plain text.',
+    'The text typeahead and the filter match on, when the label is not plain text.',
   ],
   [
     'position',
     'number',
     '—',
     'SelectItem',
-    'This option’s place in the whole collection, for aria-posinset.',
+    'The option’s one-based place in the whole collection, written as aria-posinset.',
   ],
   [
     'label',
     'ReactNode',
     '—',
     'SelectGroup',
-    'The group’s name, which it points at with aria-labelledby.',
+    'The group’s heading, which names the group through aria-labelledby.',
   ],
 ]);
 
@@ -819,22 +849,22 @@ const events: EventRow[] = [
   {
     name: 'onValueChange',
     payload: '(value: string | string[] | null, request: ChangeRequest)',
-    when: 'Before the selection moves. request.reason is pointer, keyboard, clear, select or programmatic, and request.cancel() refuses the change.',
+    when: 'Before the selection changes. request.reason is pointer, keyboard, clear, select or programmatic, and request.cancel() refuses the change. A form reset reports programmatic.',
   },
   {
     name: 'onOpenChange',
     payload: '(open: boolean, request: ChangeRequest)',
-    when: 'Before the popup opens or closes. The reason separates a selection from a dismissal: select, escape, outsidePress, pointer, keyboard, dismiss, blur or programmatic.',
+    when: 'Before the list opens or closes. request.reason tells a choice from a dismissal: select, escape, outsidePress, pointer, keyboard, dismiss, blur or programmatic.',
   },
   {
     name: 'onHighlightedValueChange',
     payload: '(value: string | null, request: ChangeRequest)',
-    when: 'Before the highlight moves, whether the pointer or a key moved it. The reason is pointer, keyboard or programmatic.',
+    when: 'Before the highlight moves. request.reason is pointer, keyboard or programmatic.',
   },
   {
     name: 'onSearchValueChange',
     payload: '(value: string, request: ChangeRequest)',
-    when: 'Before the query moves. keyboard is the reader typing, select is an option being taken while the popup stays open, and clear covers both Escape and the emptying the popup does as it opens and closes.',
+    when: 'Before the query changes. request.reason is keyboard for typing, select when an option is chosen while the list stays open, and clear when Escape empties the field or the list empties it as it opens and closes.',
   },
 ];
 
@@ -844,44 +874,39 @@ const composition = apiRows([
     'component',
     '—',
     'Application',
-    'Every axis, set once in a bootstrap; the words come from the language in force (SlottedProvider). A select that states one of them itself still wins.',
+    'Sets any axis once for every select below it. The words come from the language in force, set by SlottedProvider. A prop set on one select still wins.',
   ],
   [
     'render',
     '(props) => ReactNode',
     '—',
     'SelectTrigger, SelectContent',
-    'Replaces the frame, or the layer. The button and the listbox carry the role and the wiring, and are not replaceable for that reason.',
+    'Replaces the frame of SelectTrigger or the layer of SelectContent. The button and the listbox carry the role and the wiring, so they cannot be replaced.',
   ],
   [
     'ref',
     'Ref<SelectHandle>',
     '—',
     'Select',
-    'focus(), open(), close() and scrollToKey(value) — the actions a consumer cannot express declaratively, and no more.',
+    'A handle with focus(), open(), close(), focusSearch() and scrollToKey(value).',
   ],
-  [
-    'ref',
-    'Ref<HTMLButtonElement>',
-    '—',
-    'SelectTrigger',
-    'The button itself, for a consumer who needs the element rather than the behaviour.',
-  ],
+  ['ref', 'Ref<HTMLButtonElement>', '—', 'SelectTrigger', 'The button element.'],
   [
     'native props',
     'ComponentPropsWithRef<…>',
     '—',
     'every part',
-    'Each part extends its own element’s props. A consumer’s onClick, onKeyDown or aria-label reaches the element that owns it, and the family’s handler composes with it rather than replacing it.',
+    'Each part accepts the props of its own element. Your onClick, onKeyDown or aria-label reaches that element, and the select’s own handler runs alongside yours instead of replacing it.',
   ],
 ]);
 
 const accessibility = [
-  'The control is a button with role="combobox", aria-haspopup="listbox" and aria-expanded, and the popup is role="listbox" with role="option" on every row — the three pages of the pattern this family cites.',
-  'DOM focus never leaves the button. The highlighted option is named by aria-activedescendant and carries data-current; the chosen options carry aria-selected and data-selected, which is the distinction the listbox pattern draws between where the reader is and what they chose.',
-  'A disabled option is announced with aria-disabled, keeps its place in the collection, and is skipped by every movement key including typeahead — so a reader cannot reach by typing a row the family would refuse.',
-  'The trigger takes its accessible name from the field’s label through aria-labelledby, because a button is not reliably reached by a label element; a select outside a field takes aria-label.',
-  'Tab commits the highlighted option and moves on, which the APG’s select-only example states and notes differs from a native select. Escape closes without committing anything.',
+  'The trigger is a button with role="combobox", aria-haspopup="listbox" and aria-expanded. The list is a listbox with an option for each row.',
+  'DOM focus stays on the trigger. aria-activedescendant names the highlighted option, which also carries data-current; chosen options carry aria-selected and data-selected. The highlight is where the keyboard is; the selection is what was chosen.',
+  'A disabled option carries aria-disabled, keeps its place in the list, and is skipped by every movement key, typeahead included.',
+  'Inside a field, the trigger carries the field’s control id, so a press on the label focuses it without opening the list. The trigger also takes the label through aria-labelledby, because the name a label gives a button does not reliably reach a button with role="combobox". Outside a field, give SelectTrigger an aria-label.',
+  'With search, the list is a dialog that holds a search field and a listbox, the trigger sets aria-haspopup="dialog", and focus moves into the search field while the list is open.',
+  'Tab chooses the highlighted option and moves focus on, as the APG select-only example specifies; a native select only closes. Escape closes without choosing.',
 ];
 
 const code = defineSnippet({
@@ -916,7 +941,7 @@ const code = defineSnippet({
   data-part="positioner"
   data-side="bottom"
   data-align="start"
-  data-width="anchor"
+  data-width="content"
   data-open
 >
   <div data-part="content" role="listbox" id="listbox-id">

@@ -141,10 +141,15 @@ export type ButtonLinkProps = NativeButtonLinkProps | AdaptedButtonLinkProps;
  * props type `aria-labelledby` as an optional string, and forbidding it would
  * refuse every trigger an icon button is composed onto. When both arrive,
  * `aria-labelledby` names the button, as accessible-name computation says.
+ *
+ * The second branch takes a stated `aria-labelledby` whose value may be
+ * `undefined`: a tooltip trigger always states the key, and under
+ * `describes="label"` fills it with the tooltip, which is then the button's
+ * only name. Leaving both keys out is still refused.
  */
 type IconButtonAccessibleName =
   | { 'aria-label': string; 'aria-labelledby'?: string | undefined }
-  | { 'aria-label'?: string | undefined; 'aria-labelledby': string };
+  | { 'aria-label'?: string | undefined; 'aria-labelledby': string | undefined };
 
 export type IconButtonProps = Omit<
   ComponentPropsWithRef<'button'>,

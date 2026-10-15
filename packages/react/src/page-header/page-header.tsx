@@ -95,6 +95,7 @@ export function PageHeader({
   render,
   size,
   style,
+  variant,
   ...nativeProps
 }: PageHeaderProps) {
   const defaults = usePageHeaderDefaults();
@@ -104,6 +105,7 @@ export function PageHeader({
   const resolvedCollapse = collapse ?? defaults.collapse;
   const resolvedLevel = level ?? defaults.level;
   const resolvedSize = size ?? defaults.size;
+  const resolvedVariant = variant ?? defaults.variant;
   const t = useMessages(pageHeaderMessages, messages);
 
   const [ownExpanded, setOwnExpanded] = useState<boolean>(defaultExpanded ?? true);
@@ -115,6 +117,7 @@ export function PageHeader({
   const [revealed, setRevealed] = useState(false);
   const [tall, setTall] = useState(false);
   const [compact, setCompact] = useState(false);
+  const [stuck, setStuck] = useState(false);
   const [root, setRoot] = useState<HTMLElement | null>(null);
   const engine = useRef<StickyHeaderHandle | null>(null);
 
@@ -252,6 +255,7 @@ export function PageHeader({
       onScrollRequest: (next) => requestExpanded(next, 'scroll', undefined, 'scroll'),
       onTall: setTall,
       onCompact: setCompact,
+      onStuck: setStuck,
       onPinRequest: (next) => requestPinned(next, 'programmatic', undefined),
       contained: () => filledBody(root),
     });
@@ -302,7 +306,9 @@ export function PageHeader({
     ...(tall ? { 'data-tall': '' } : {}),
     ...(compact ? { 'data-compact': '' } : {}),
     'data-size': resolvedSize,
+    ...(stuck ? { 'data-stuck': '' } : {}),
     'data-ui': 'page-header',
+    'data-variant': resolvedVariant,
     style,
   };
 

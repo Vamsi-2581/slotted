@@ -327,6 +327,63 @@ describe('Drawer', () => {
     expect(layer()?.dataset['mode']).toBe('inline');
   });
 
+  /**
+   * `mode` is an axis rather than two components so that an application can
+   * switch it at a breakpoint without the panel's subtree being destroyed: its
+   * uncontrolled fields, its scroll position and its focus survive the switch
+   * (contract `mode.reason`).
+   */
+  it('keeps the panel’s content across a switch of mode', () => {
+    const { rerender } = render(<Basic defaultOpen mode="inline" />);
+    const note = screen.getByRole('textbox', { name: 'Note' }) as HTMLInputElement;
+    fireEvent.change(note, { target: { value: 'Dock 4' } });
+
+    rerender(<Basic defaultOpen mode="overlay" />);
+    expect(layer()?.dataset['mode']).toBe('overlay');
+    expect(screen.getByRole('textbox', { name: 'Note' })).toBe(note);
+    expect(note.value).toBe('Dock 4');
+
+    rerender(<Basic defaultOpen mode="inline" />);
+    expect(layer()?.dataset['mode']).toBe('inline');
+    expect(screen.getByRole('textbox', { name: 'Note' })).toBe(note);
+    expect(note.value).toBe('Dock 4');
+  });
+
+  /**
+   * An inline drawer's measure is a fraction of the consumer's layout. The
+   * layer is rendered through `display: contents` boxes, which lay nothing
+   * out, so the box measured is the first ancestor past them.
+   */
+  it('measures an inline drawer against the consumer’s layout', () => {
+    const measure = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        const width = this.classList.contains('layout') ? 1000 : 0;
+        return {
+          bottom: 600,
+          height: 600,
+          left: 0,
+          right: width,
+          top: 0,
+          width,
+          x: 0,
+          y: 0,
+        } as DOMRect;
+      });
+    render(
+      <div className="layout">
+        <Drawer defaultOpen extent={0.4} mode="inline" side="start">
+          <DrawerPanel>
+            <DrawerBody>Status</DrawerBody>
+          </DrawerPanel>
+        </Drawer>
+      </div>,
+    );
+
+    expect(layer()?.style.getPropertyValue('--slotted-drawer-extent')).toBe('400px');
+    measure.mockRestore();
+  });
+
   it('keeps an inline drawer in the document and makes it inert when closed', () => {
     render(<Basic mode="inline" />);
 

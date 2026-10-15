@@ -310,13 +310,17 @@ describe('Chart', () => {
       expect(part('table')!.querySelectorAll('tbody tr')).toHaveLength(3);
     });
 
-    it('stands a skeleton of its kind in the plot while it waits, with no toolbar', () => {
+    it('stands a skeleton of its kind in the plot while it waits, and holds the toolbar’s box out of reach', () => {
       render(<Chart {...base} loading />);
 
       expect(root()).toHaveAttribute('data-loading');
       expect(part('plot')).toHaveAttribute('aria-busy', 'true');
       expect(part('skeleton')).toHaveAttribute('data-kind', 'bar');
-      expect(part('toolbar')).toBeNull();
+      // The header keeps the width its words wrap in; nothing in the box can be reached.
+      expect(part('toolbar')).toHaveAttribute('data-waiting');
+      expect(part('toolbar')).toHaveAttribute('inert');
+      expect(part('toolbar')).toHaveAttribute('aria-hidden', 'true');
+      expect(part('toolbar')).not.toHaveAttribute('role');
       expect(part('summary')).toHaveTextContent('Loading chart');
       expect(engine.views).toHaveLength(0);
     });

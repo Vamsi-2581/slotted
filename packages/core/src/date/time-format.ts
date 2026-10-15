@@ -203,7 +203,7 @@ export function createTimeFormat(options: TimeFormatOptions = {}): TimeFormat {
     .filter((part) => part.type === 'literal' || part.type in FIELD_WIDTH)
     .map((part) =>
       part.type === 'literal'
-        ? { type: 'literal' as const, value: part.value }
+        ? { type: 'literal' as const, value: plainSpaces(part.value) }
         : {
             type: part.type as TimeFieldName,
             value:
@@ -336,11 +336,13 @@ export function createTimeFormat(options: TimeFormatOptions = {}): TimeFormat {
     },
 
     describe(time) {
-      return new Intl.DateTimeFormat(locale, {
-        ...shape,
-        hour: 'numeric',
-        ...(units.includes('minute') ? { minute: '2-digit' } : {}),
-      }).format(at(time));
+      return plainSpaces(
+        new Intl.DateTimeFormat(locale, {
+          ...shape,
+          hour: 'numeric',
+          ...(units.includes('minute') ? { minute: '2-digit' } : {}),
+        }).format(at(time)),
+      );
     },
 
     toDisplay,
@@ -348,4 +350,16 @@ export function createTimeFormat(options: TimeFormatOptions = {}): TimeFormat {
   };
 
   return format;
+}
+
+/**
+ * The text with every no-break space written as a plain one.
+ *
+ * ICU writes U+202F before the day period in Node and in some browsers, and
+ * U+0020 in others. A time rendered on a server and again in a browser then
+ * differed by one character, and React discarded the server's tree. One space
+ * in every engine is the same text everywhere.
+ */
+export function plainSpaces(text: string): string {
+  return text.replace(/[\u00a0\u202f]/g, ' ');
 }

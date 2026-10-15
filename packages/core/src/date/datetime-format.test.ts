@@ -192,3 +192,28 @@ describe('delegation', () => {
     expect(format.resolveYear(30)).toBe(format.date.resolveYear(30));
   });
 });
+
+describe('the spaces it writes', () => {
+  /**
+   * ICU writes U+202F before the day period in Node and some browsers, and
+   * U+0020 in others, so a value rendered on a server and again in a browser
+   * differed by one character and React threw the server's tree away.
+   */
+  it('writes plain spaces in the pattern and in words, whatever the engine writes', () => {
+    const format = createDateTimeFormat({ locale: 'en-US', hourCycle: 12 });
+    const value = {
+      date: { year: 2026, month: 9, day: 30 },
+      time: { hour: 18, minute: 45, second: 0 },
+    };
+    const written = [
+      ...format.pattern.filter((part) => part.type === 'literal').map((part) => part.value),
+      ...format.time.pattern.filter((part) => part.type === 'literal').map((part) => part.value),
+      format.describe(value),
+      format.time.describe(value.time),
+      format.time.format(value.time),
+    ];
+
+    for (const text of written) expect(text).not.toMatch(/[\u00a0\u202f]/);
+    expect(format.describe(value)).toBe('September 30, 2026 at 6:45 PM');
+  });
+});

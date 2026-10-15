@@ -86,3 +86,21 @@ test('hides the layer only while it is inert, never in the entering frame', () =
   assert.match(rule(`${ui}[inert]`), /content-visibility:hidden/);
   assert.equal(rule(`${ui}:not([data-open])`).includes('content-visibility'), false);
 });
+
+/**
+ * A non-modal layer leaves the page reachable (contract › `back.modalOnly`,
+ * `focus.contain`), and that includes the pointer and the wheel. The layer is
+ * fixed over the whole viewport, so a layer that takes the pointer and paints
+ * the scrim over a non-modal panel puts the page out of reach while
+ * `aria-modal` says it is not: every press lands on the scrim, and a wheel
+ * over it scrolls nothing.
+ */
+test('leaves the page under a non-modal layer reachable by the pointer', () => {
+  const modeless = `${ui}:not([data-modal])`;
+  assert.match(rule(modeless), /pointer-events:none/);
+  assert.match(rule(`${modeless}>[data-part='backdrop']`), /visibility:hidden/);
+  assert.match(
+    rule(`${modeless}>[data-part='viewport']>[data-part='content']`),
+    /pointer-events:auto/,
+  );
+});

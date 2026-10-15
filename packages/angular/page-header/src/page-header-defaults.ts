@@ -14,6 +14,14 @@ export type PageHeaderLevel = '1' | '2' | '3';
  */
 export type PageHeaderCollapse = 'scroll' | 'manual';
 
+/**
+ * The ground and the frame. `band` is a strip of the surface with a hairline
+ * under it; `plain` paints no ground at rest and takes the surface back once
+ * content passes under it; `floating` is a box of its own, rounded, that
+ * slides to an inset below the scroller's edge once stuck.
+ */
+export type PageHeaderVariant = 'band' | 'plain' | 'floating';
+
 /** Why the header area opened or closed. */
 export type PageHeaderExpandedReason = 'pointer' | 'keyboard' | 'scroll' | 'programmatic';
 
@@ -24,12 +32,14 @@ export interface PageHeaderDefaults {
   collapse: PageHeaderCollapse;
   level: PageHeaderLevel;
   size: PageHeaderSize;
+  variant: PageHeaderVariant;
 }
 
 const FALLBACK: PageHeaderDefaults = {
   collapse: 'scroll',
   level: '1',
   size: 'md',
+  variant: 'band',
 };
 
 export const PAGE_HEADER_DEFAULTS = new InjectionToken<PageHeaderDefaults>(

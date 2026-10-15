@@ -130,7 +130,7 @@ class Host {
   readonly valueRequests: ChangeRequest<readonly string[]>[] = [];
 }
 
-function query(fixture: ComponentFixture<Host>, selector: string) {
+function query(fixture: ComponentFixture<unknown>, selector: string) {
   return fixture.nativeElement.querySelector(selector) as HTMLElement;
 }
 
@@ -251,6 +251,8 @@ describe('SlTable', () => {
   it('opens a row detail through the disclosure pattern', () => {
     const expander = query(fixture, '[data-part="expander"]');
     expect(expander.getAttribute('aria-expanded')).toBe('false');
+    // A closed detail row is not rendered, so the expander names nothing yet.
+    expect(expander.hasAttribute('aria-controls')).toBe(false);
     expect(
       expander.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph'),
     ).toBe('chevron-right');
@@ -282,6 +284,59 @@ describe('SlTable', () => {
     const scroll = query(fixture, '[data-part="scroll"]');
     expect(scroll.hasAttribute('tabindex')).toBe(false);
     expect(scroll.hasAttribute('role')).toBe(false);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlTable, SlTableBody, SlTableCell, SlTableContent, SlTableRow],
+  template: `<div slTable [columns]="1">
+    <div slTableContent aria-label="Orders" [scrollLabel]="scrollLabel()" #content="slTableContent">
+      <tbody slTableBody>
+        <tr slTableRow>
+          <td slTableCell>A</td>
+        </tr>
+      </tbody>
+    </div>
+  </div>`,
+})
+class NamedHost {
+  readonly scrollLabel = signal<string | undefined>(undefined);
+}
+
+/**
+ * The consumer's `aria-label` names the table (table contract, `wiring`): an
+ * instance with no caption names itself with it. The region the scroller
+ * becomes while it overflows takes the catalog's name, or `scrollLabel`.
+ */
+describe('SlTableContent naming', () => {
+  let fixture: ComponentFixture<NamedHost>;
+  const content = () =>
+    fixture.debugElement
+      .query((node) => node.nativeElement?.hasAttribute?.('slTableContent'))
+      .injector.get(SlTableContent);
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [NamedHost] }).compileComponents();
+    fixture = TestBed.createComponent(NamedHost);
+    fixture.detectChanges();
+  });
+
+  it('names the table with the consumer aria-label, and not the scroller', () => {
+    expect(query(fixture, 'table').getAttribute('aria-label')).toBe('Orders');
+    expect(query(fixture, '[data-part="scroll"]').hasAttribute('aria-label')).toBe(false);
+  });
+
+  it('names the overflowing region with the catalog, or with scrollLabel', () => {
+    content().state.set({ overflowing: true, atStart: true, atEnd: false });
+    fixture.detectChanges();
+    const scroll = query(fixture, '[data-part="scroll"]');
+    expect(scroll.getAttribute('aria-label')).toBe(tableMessages.base.scroll);
+
+    fixture.componentInstance.scrollLabel.set('Orders, scrollable');
+    fixture.detectChanges();
+    expect(scroll.getAttribute('aria-label')).toBe('Orders, scrollable');
+    expect(query(fixture, 'table').getAttribute('aria-label')).toBe('Orders');
   });
 });
 
@@ -832,7 +887,10 @@ describe('the column filter', () => {
     await fixture.whenStable();
     expect(document.querySelector('[data-part="filter-panel"]')).not.toBeNull();
 
-    const hour = document.querySelector('[data-part="start"] [role="spinbutton"]') as HTMLElement;
+    /* One end at a time: the surface opens on the start's field. */
+    const hour = document.querySelector(
+      '[data-part="field"][data-position="start"] [role="spinbutton"]',
+    ) as HTMLElement;
     hour.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowUp' }));
     fixture.detectChanges();
     panelButton('Apply').click();

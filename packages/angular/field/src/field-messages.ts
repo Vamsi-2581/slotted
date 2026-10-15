@@ -1,4 +1,14 @@
-import { booleanAttribute, Directive, input } from '@angular/core';
+import {
+  afterNextRender,
+  type AfterContentChecked,
+  booleanAttribute,
+  DestroyRef,
+  Directive,
+  ElementRef,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 
 import type {
   InlineMessageLive,
@@ -17,7 +27,7 @@ import type {
  * identifier the field derives is exactly such a value.
  */
 @Directive()
-export abstract class SlFieldMessage {
+export abstract class SlFieldMessage implements AfterContentChecked {
   /** Replaces the message's own tone. `inline-message` owns the five. */
   readonly tone = input<InlineMessageTone | undefined>(undefined);
   /** Whether the message announces itself when it arrives. */
@@ -33,6 +43,39 @@ export abstract class SlFieldMessage {
   readonly hideIcon = input(false, { transform: booleanAttribute });
   /** Holds one line box open so nothing below moves when the message arrives. */
   readonly reserve = input(false, { transform: booleanAttribute });
+
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly content = signal(false);
+
+  /**
+   * Whether the message has text to say. An empty one — a `reserve` line
+   * waiting for its text — keeps its box and describes nothing, which is what
+   * React's messages register.
+   *
+   * It is read after the template that declares the message writes its text
+   * and before the host bindings of that template run, so the first render,
+   * the only one a server performs, names exactly the messages that have text.
+   * In the browser an observer also reports text that arrives from anywhere
+   * else.
+   */
+  readonly hasContent = this.content.asReadonly();
+
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    afterNextRender(() => {
+      const observer = new MutationObserver(() => this.read());
+      observer.observe(this.host, { characterData: true, childList: true, subtree: true });
+      destroyRef.onDestroy(() => observer.disconnect());
+    });
+  }
+
+  ngAfterContentChecked() {
+    this.read();
+  }
+
+  private read() {
+    this.content.set((this.host.textContent ?? '').trim() !== '');
+  }
 }
 
 /**

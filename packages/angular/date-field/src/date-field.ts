@@ -239,6 +239,12 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
    * static attribute to write.
    */
   readonly label = input<string | undefined>(undefined);
+  /**
+   * The group's identifier, when it is bound rather than written: a family
+   * holding two of these inside one field — `date-range-picker` — gives each
+   * its own, where both would otherwise take the field's.
+   */
+  readonly groupId = input<string | undefined>(undefined);
 
   /**
    * One output for one transition, carrying the value, the value it replaces,
@@ -333,7 +339,7 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
   });
 
   protected readonly controlId = computed(
-    () => this.writtenId ?? this.field?.ids().control ?? null,
+    () => this.groupId() ?? this.writtenId ?? this.field?.ids().control ?? null,
   );
   protected readonly labelledBy = computed(() => {
     if (this.label() !== undefined || this.writtenLabel !== null) return null;

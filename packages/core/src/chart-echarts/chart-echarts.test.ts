@@ -196,6 +196,55 @@ describe('the engine draws the option', () => {
     expect(svg.match(/<path/g)?.length ?? 0).toBeGreaterThan(5);
   });
 
+  /* With `recordKey` the categories are keyed by the record and named by the x
+     field: an annotation that named a category by its x value matched no key,
+     went to the engine as `{ xAxis: undefined }`, and the mark line's filter
+     threw — the whole chart drew its error state for one line it could not place. */
+  it('places a line on the category its x value names when records are keyed, and drops one that names none', async () => {
+    const keyed: ChartSpec = {
+      x: { field: 'm' },
+      recordKey: 'id',
+      data: [
+        { id: 'w1', m: 'Week of Aug 8', a: 1 },
+        { id: 'w2', m: 'Week of Aug 15', a: 3 },
+      ],
+      series: [{ kind: 'bar', field: 'a' }],
+      annotations: [
+        { kind: 'line', axis: 'x', value: 'Week of Aug 15', label: 'Month end' },
+        { kind: 'line', axis: 'x', value: 'w1', label: 'By key' },
+        { kind: 'line', axis: 'x', value: 'Week of Sep 1', label: 'Nowhere' },
+      ],
+    };
+    const model = createChartModel(keyed);
+    const { option } = buildChartOption({ model, theme });
+    const marks = (option['series'] as { markLine?: { data: Record<string, unknown>[] } }[])[0]!
+      .markLine!.data;
+    expect(marks.map((mark) => mark['xAxis'])).toEqual([1, 0]);
+    const svg = await render(model, requiredChunks({ model, theme }));
+    expect(svg).toContain('Month end');
+    expect(svg).not.toContain('Nowhere');
+  });
+
+  /* The label of an upright line sat centred over it: on the last category of a
+     narrow plot half of "Month end Aug 31" stood past the plot's end and was cut. */
+  it('keeps the label of a line on an end category inside the plot', () => {
+    const model = createChartModel({
+      x: { field: 'm' },
+      data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map((m, index) => ({ m, a: index })),
+      series: [{ kind: 'bar', field: 'a' }],
+      annotations: [
+        { kind: 'line', axis: 'x', value: 'Jan', label: 'Opened' },
+        { kind: 'line', axis: 'x', value: 'Mar', label: 'Mid' },
+        { kind: 'line', axis: 'x', value: 'Jun', label: 'Month end' },
+      ],
+    });
+    const { option } = buildChartOption({ model, theme });
+    const marks = (
+      option['series'] as { markLine?: { data: { label: { align?: string } }[] } }[]
+    )[0]!.markLine!.data;
+    expect(marks.map((mark) => mark.label.align)).toEqual(['left', 'center', 'right']);
+  });
+
   it('draws every slice of a pie in its own slot', async () => {
     const model = createChartModel({
       x: { field: 'k' },

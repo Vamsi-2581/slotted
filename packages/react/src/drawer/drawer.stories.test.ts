@@ -13,14 +13,14 @@ describe('Drawer stories', () => {
 
   it('documents each public component API', () => {
     expect(
-      apiMetadataErrors(contract.members.drawer, REACT_DRAWER_DOCS.api, contract.stateModel),
+      apiMetadataErrors(contract.members.drawer, REACT_DRAWER_DOCS.drawer.api, contract.stateModel),
     ).toEqual([]);
   });
 
   it('answers the reference-page contract', () => {
     expect(
       referencePageErrors({
-        docs: REACT_DRAWER_DOCS,
+        docs: REACT_DRAWER_DOCS.drawer,
         framework: 'React',
         member: contract.members.drawer,
         scenarioIds: contract.scenarios.drawer,
@@ -31,8 +31,8 @@ describe('Drawer stories', () => {
 
   it('keeps curated snippets formatted', async () => {
     const snippets = [
-      ...REACT_DRAWER_DOCS.snippets,
-      ...REACT_DRAWER_DOCS.scenes.map((scene) => scene.snippet),
+      ...REACT_DRAWER_DOCS.drawer.snippets,
+      ...REACT_DRAWER_DOCS.drawer.scenes.map((scene) => scene.snippet),
     ];
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });

@@ -476,10 +476,38 @@ describe('NumberField', () => {
       expect(control()).toHaveValue('40');
     });
 
+    it('reports a value it leaves outside the range as invalid', () => {
+      render(<NumberField clamp="none" max={10} min={0} />);
+      type('40');
+      fireEvent.blur(control());
+      expect(control()).toHaveAttribute('aria-invalid', 'true');
+      expect(frameOf(control())).toHaveAttribute('data-invalid', '');
+
+      type('5');
+      expect(control()).not.toHaveAttribute('aria-invalid');
+      expect(frameOf(control())).not.toHaveAttribute('data-invalid');
+    });
+
+    it('lets a stated invalid={false} win over the range report', () => {
+      render(<NumberField clamp="none" defaultValue={40} invalid={false} max={10} min={0} />);
+      expect(control()).not.toHaveAttribute('aria-invalid');
+    });
+
     it('snaps to the multiples measured from the minimum when asked', () => {
       render(<NumberField defaultValue={4} min={2} snapToStep step={3} />);
       fireEvent.keyDown(control(), { key: 'ArrowUp' });
       expect(control()).toHaveValue('5');
+    });
+
+    it('commits a typed value to the nearest multiple, not one step past it', () => {
+      render(<NumberField min={2} snapToStep step={3} />);
+      type('7');
+      fireEvent.blur(control());
+      expect(control()).toHaveValue('8');
+
+      type('11');
+      fireEvent.blur(control());
+      expect(control()).toHaveValue('11');
     });
   });
 
@@ -569,6 +597,16 @@ describe('NumberField', () => {
       expect(hidden.name).toBe('amount');
       expect(hidden.value).toBe('1480');
       expect(control()).not.toHaveAttribute('name');
+    });
+
+    it('commits the number it shows, at the precision the format states', () => {
+      render(<NumberField format={{ maximumFractionDigits: 2 }} name="amount" />);
+      type('10.555');
+      fireEvent.blur(control());
+      expect(control()).toHaveValue('10.56');
+      const hidden = frameOf(control()).querySelector('input[type="hidden"]') as HTMLInputElement;
+      expect(hidden.value).toBe('10.56');
+      expect(control()).toHaveAttribute('aria-valuenow', '10.56');
     });
 
     it('submits nothing for an empty control', () => {

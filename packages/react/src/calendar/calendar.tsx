@@ -154,14 +154,25 @@ export function Calendar({
   const [ownValue, setOwnValue] = useState<CalendarValue>(defaultValue ?? null);
   const held = value ?? ownValue;
 
-  const anchor =
-    defaultFocusedDate ??
-    focusedDate ??
-    (defaultValue !== undefined && defaultValue !== null && !Array.isArray(defaultValue)
-      ? 'start' in defaultValue
-        ? (defaultValue.start ?? plainDate(2026, 1, 1))
-        : defaultValue
-      : plainDate(2026, 1, 1));
+  /**
+   * The date the first page opens on: the one stated, else the first date held
+   * — controlled or not — else today, once the effect below resolves it. A
+   * controlled `value` counts: a date picker hands its calendar the value
+   * rather than a default, and opened on today's month it showed a page that
+   * did not hold the chosen date.
+   */
+  const heldAtStart = defaultValue ?? value ?? null;
+  const firstHeld =
+    heldAtStart === null
+      ? null
+      : Array.isArray(heldAtStart)
+        ? (heldAtStart[0] ?? null)
+        : 'start' in heldAtStart
+          ? heldAtStart.start
+          : heldAtStart;
+  const anchored =
+    defaultFocusedDate !== undefined || focusedDate !== undefined || firstHeld !== null;
+  const anchor = defaultFocusedDate ?? focusedDate ?? firstHeld ?? plainDate(2026, 1, 1);
 
   const [ownFocused, setOwnFocused] = useState<PlainDate>(anchor);
   const focused = focusedDate ?? ownFocused;
@@ -224,9 +235,16 @@ export function Calendar({
   /* The reader's first calendar opens on today rather than on an arbitrary
      month, and only while nobody has said otherwise. */
   useEffect(() => {
-    if (today === null || defaultFocusedDate !== undefined || focusedDate !== undefined) return;
-    setOwnFocused((previous) =>
-      isSameDate(previous, anchor) ? clampDate(today, min, max) : previous,
+    if (today === null || anchored) return;
+    const start = clampDate(today, min, max);
+    setOwnFocused((previous) => (isSameDate(previous, anchor) ? start : previous));
+    /* The page starts on today's month, as it would on a stated date. Left to
+       follow focus from the placeholder month, two months paged in whole pages
+       from January and opened in October on September and October. */
+    setPage((held) =>
+      held.year === anchor.year && held.month === anchor.month
+        ? { year: start.year, month: start.month }
+        : held,
     );
     /* Only on the first resolution of today: the anchor and the bounds are
        read once, and a later change to either is the consumer's to apply. */
@@ -284,8 +302,23 @@ export function Calendar({
    */
   useEffect(() => {
     if (!shouldRestoreFocus.current) return;
+    const root = rootRef.current;
+    const stop = root?.querySelector<HTMLElement>(
+      '[data-part="cell"]:not([data-outside-month]) [data-part="day"][tabindex="0"]',
+    );
+    /* A key that crossed the month edge lands on the old page's trailing day
+       first, and the page follows one render later. Focus waits for the page
+       that holds the date, or the cell it took would be replaced under it —
+       which a consumer owning `focusedDate` met as focus falling to the
+       document. */
+    if (stop === null || stop === undefined) {
+      if (root?.querySelector('[data-part="day"][tabindex="0"]') == null) {
+        shouldRestoreFocus.current = false;
+      }
+      return;
+    }
     shouldRestoreFocus.current = false;
-    rootRef.current?.querySelector<HTMLElement>('[data-part="day"][tabindex="0"]')?.focus();
+    stop.focus();
   });
 
   useImperativeHandle(

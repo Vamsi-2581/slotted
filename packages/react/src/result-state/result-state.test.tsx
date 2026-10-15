@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
+import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/result-state/contract.json';
@@ -332,5 +333,16 @@ describe('ResultState', () => {
     expect(() => render(<ResultStateTitle>Solto</ResultStateTitle>)).toThrow(
       /has to be rendered inside a ResultState/,
     );
+  });
+
+  it('is named by its title in the server HTML, before any effect runs', () => {
+    const html = renderToString(
+      <ResultState status="empty">
+        <ResultStateContent>
+          <ResultStateTitle id="returns-title">No returns this week</ResultStateTitle>
+        </ResultStateContent>
+      </ResultState>,
+    );
+    expect(html).toMatch(/<section[^>]*aria-labelledby="returns-title"/);
   });
 });

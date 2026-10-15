@@ -1,11 +1,17 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { SlField, SlFieldLabel } from '@slotted/angular/field';
+import { provideFieldDefaults, SlField, SlFieldLabel } from '@slotted/angular/field';
 import { SlFieldGroup, SlFieldGroupLegend } from '@slotted/angular/field-group';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/radio-group/contract.json';
+import type {
+  RadioGroupLabelPlacement,
+  RadioGroupOrientation,
+  RadioGroupSize,
+  RadioGroupVariant,
+} from './public-api';
 import { SlRadioGroup } from './radio-group';
 import { provideRadioGroupDefaults } from './radio-group-defaults';
 import { SlRadio, SlRadioDescription } from './radio-group-parts';
@@ -54,6 +60,21 @@ const SET = `<div slRadio value="standard">Padrão</div>
              <div slRadio value="pickup">Retirar</div>`;
 
 describe('SlRadioGroup', () => {
+  it('names every axis the contract lists as a type the entry point exports', () => {
+    const axes: {
+      size: readonly RadioGroupSize[];
+      variant: readonly RadioGroupVariant[];
+      orientation: readonly RadioGroupOrientation[];
+      labelPlacement: readonly RadioGroupLabelPlacement[];
+    } = {
+      size: ['sm', 'md', 'lg'],
+      variant: ['plain', 'tile'],
+      orientation: ['vertical', 'horizontal'],
+      labelPlacement: ['end', 'start'],
+    };
+    expect(axes).toEqual(contract.axes);
+  });
+
   it('is selected in public by the family identifier and its parts', () => {
     const fixture = renderTemplate(`<div slRadioGroup aria-label="Envio">${SET}</div>`);
 
@@ -227,6 +248,55 @@ describe('SlRadioGroup', () => {
     expect(contract.roleWithdrawnInside).toBe('field-group');
   });
 
+  it('takes disabled and read-only from the field group around it', () => {
+    const readOnly = renderTemplate(
+      `<fieldset slFieldGroup readOnly>
+         <legend slFieldGroupLegend>Envio</legend>
+         <div slRadioGroup defaultValue="standard" (valueChange)="requests.push($event)">${SET}</div>
+       </fieldset>`,
+    );
+
+    click(items(readOnly)[1] as HTMLInputElement);
+    readOnly.detectChanges();
+    expect(group(readOnly).getAttribute('data-readonly')).toBe('');
+    expect(group(readOnly).getAttribute('aria-readonly')).toBe('true');
+    expect(readOnly.componentInstance.requests).toHaveLength(0);
+    expect(items(readOnly)[0]?.checked).toBe(true);
+
+    const disabled = renderTemplate(
+      `<fieldset slFieldGroup disabled>
+         <legend slFieldGroupLegend>Envio</legend>
+         <div slRadioGroup>${SET}</div>
+       </fieldset>`,
+    );
+
+    expect(group(disabled).getAttribute('data-disabled')).toBe('');
+    expect(items(disabled).every((item) => item.hasAttribute('disabled'))).toBe(true);
+  });
+
+  /** An unset state defers to the group (2026-09-02 field design), `invalid` as `required` does. */
+  it('takes invalid and required from the field group around it', () => {
+    const fixture = renderTemplate(
+      `<fieldset slFieldGroup invalid required>
+         <legend slFieldGroupLegend>Envio</legend>
+         <div slRadioGroup>${SET}</div>
+       </fieldset>`,
+    );
+
+    expect(group(fixture).getAttribute('data-invalid')).toBe('');
+    expect(group(fixture).getAttribute('aria-invalid')).toBe('true');
+    expect(group(fixture).getAttribute('aria-required')).toBe('true');
+  });
+
+  it('takes disabled and read-only from the application’s field defaults', () => {
+    const fixture = renderTemplate(`<div slRadioGroup>${SET}</div>`, [
+      provideFieldDefaults({ disabled: true, readOnly: true }),
+    ]);
+
+    expect(group(fixture).getAttribute('data-disabled')).toBe('');
+    expect(group(fixture).getAttribute('data-readonly')).toBe('');
+  });
+
   it('takes its state from the field around it and never its identifier', () => {
     const fixture = renderTemplate(
       `<div slField invalid required>
@@ -239,6 +309,32 @@ describe('SlRadioGroup', () => {
     expect(group(fixture).getAttribute('aria-required')).toBe('true');
     expect(items(fixture)[0]?.getAttribute('id')).toMatch(/^slotted-radio-group-/);
     expect(contract.wiring.id).toBe('never');
+  });
+
+  it('takes its name from the label of the field around it', () => {
+    const fixture = renderTemplate(
+      `<div slField id="shipping">
+         <label slFieldLabel>Envio</label>
+         <div slRadioGroup>${SET}</div>
+       </div>`,
+    );
+
+    expect(group(fixture).getAttribute('aria-labelledby')).toBe('shipping-label');
+    expect(fixture.nativeElement.querySelector('#shipping-label')?.textContent?.trim()).toBe(
+      'Envio',
+    );
+  });
+
+  it('keeps a name the consumer wrote over the field’s label', () => {
+    const fixture = renderTemplate(
+      `<div slField id="shipping">
+         <label slFieldLabel>Envio</label>
+         <div slRadioGroup aria-label="Forma de envio">${SET}</div>
+       </div>`,
+    );
+
+    expect(group(fixture).hasAttribute('aria-labelledby')).toBe(false);
+    expect(group(fixture).getAttribute('aria-label')).toBe('Forma de envio');
   });
 
   it('lets an application decide once how its sets of choices flow', () => {

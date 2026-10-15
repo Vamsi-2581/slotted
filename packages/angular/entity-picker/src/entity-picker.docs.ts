@@ -603,9 +603,9 @@ export const ANGULAR_ENTITY_PICKER_DOCS = {
       [
         'width',
         "'anchor' | 'content'",
-        'anchor',
+        'content',
         'sl-entity-picker',
-        'The popup as wide as the frame or its rows',
+        'The popup at least as wide as the frame and as wide as its longest row (content), or pinned to the width of the frame (anchor)',
       ],
       [
         'strategy',

@@ -106,6 +106,97 @@ describe('SlMultiSelect', () => {
     expect(field().getAttribute('aria-controls')).toBe(listbox.id);
   });
 
+  /**
+   * The highlight is brought into view by scrolling the list alone. A
+   * `scrollIntoView` scrolls every ancestor as well, and on the first open it
+   * runs before the popup is positioned — so a control far down a page sent the
+   * page to its top, and the popup, its control now out of view, hid itself.
+   */
+  it('scrolls the list to the highlight, and never the page', async () => {
+    const original = Element.prototype.scrollIntoView;
+    let calls = 0;
+    Element.prototype.scrollIntoView = () => {
+      calls += 1;
+    };
+    try {
+      await open(fixture);
+      const surface = document.querySelector<HTMLElement>("[data-part='content']")!;
+      Object.defineProperty(surface, 'clientHeight', { configurable: true, value: 100 });
+      Object.defineProperty(surface, 'scrollTop', { configurable: true, writable: true, value: 0 });
+      surface.getBoundingClientRect = () =>
+        DOMRect.fromRect({ x: 0, y: 0, width: 200, height: 100 });
+      optionFor('raspberry').getBoundingClientRect = () =>
+        DOMRect.fromRect({ x: 0, y: 130, width: 200, height: 30 });
+      for (let step = 0; step < 3; step += 1) {
+        if (field().getAttribute('aria-activedescendant') === optionFor('raspberry').id) break;
+        press(field(), 'ArrowDown');
+        await settle(fixture);
+      }
+      expect(field().getAttribute('aria-activedescendant')).toBe(optionFor('raspberry').id);
+      expect(calls).toBe(0);
+      expect(surface.scrollTop).toBe(60);
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
+  });
+
+  /**
+   * Opened from the end, the highlight lands on the last option before the
+   * popup has a position, so the list has not yet taken the height that bounds
+   * it. Revealed only then, the option stayed below the fold.
+   */
+  it('shows the highlighted option once the popup has taken its height', async () => {
+    const bounded = (element: Element) =>
+      element
+        .closest<HTMLElement>("[data-part='positioner']")
+        ?.style.getPropertyValue('--slotted-positioner-available-height') !== '';
+    const rect = Element.prototype.getBoundingClientRect;
+    const height = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientHeight');
+    const top = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollTop');
+    const scrolled = new Map<Element, number>();
+    Element.prototype.getBoundingClientRect = function (this: Element) {
+      if (this.getAttribute('role') === 'listbox') {
+        return DOMRect.fromRect({ x: 0, y: 0, width: 200, height: bounded(this) ? 100 : 400 });
+      }
+      if (this.getAttribute('data-value') === 'raspberry') {
+        return DOMRect.fromRect({ x: 0, y: 130, width: 200, height: 30 });
+      }
+      return DOMRect.fromRect({ x: 0, y: 0, width: 0, height: 0 });
+    };
+    Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+      configurable: true,
+      get(this: HTMLElement) {
+        if (this.getAttribute('role') !== 'listbox') return 0;
+        return bounded(this) ? 100 : 400;
+      },
+    });
+    Object.defineProperty(Element.prototype, 'scrollTop', {
+      configurable: true,
+      get(this: Element) {
+        return scrolled.get(this) ?? 0;
+      },
+      set(this: Element, next: number) {
+        scrolled.set(this, next);
+      },
+    });
+    try {
+      fixture.detectChanges();
+      field().focus();
+      press(field(), 'ArrowUp');
+      await settle(fixture);
+      const surface = document.querySelector<HTMLElement>("[data-part='content']")!;
+      for (let attempt = 0; attempt < 20 && surface.scrollTop !== 60; attempt += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      expect(field().getAttribute('aria-activedescendant')).toBe(optionFor('raspberry').id);
+      expect(surface.scrollTop).toBe(60);
+    } finally {
+      Element.prototype.getBoundingClientRect = rect;
+      if (height) Object.defineProperty(HTMLElement.prototype, 'clientHeight', height);
+      if (top) Object.defineProperty(Element.prototype, 'scrollTop', top);
+    }
+  });
+
   it('is one tab stop, whatever the row holds', async () => {
     fixture.componentInstance.defaultValue.set(['blueberry', 'raspberry']);
     await settle(fixture);
@@ -534,5 +625,99 @@ describe('SlMultiSelect, the language in force', () => {
     locale.set('en-US');
     await settle(fixture);
     expect(grid().getAttribute('aria-label')).toBe('2 chosen');
+  });
+});
+
+/**
+ * The name belongs to the input and the listbox. Left on the host as well, it
+ * named a generic element — a role that prohibits a name — and gave the root an
+ * attribute `MultiSelect` never writes there.
+ */
+describe('SlMultiSelect, the accessible name', () => {
+  it('names the input, and leaves no aria-label on the host', async () => {
+    await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    await settle(fixture);
+
+    expect(field().getAttribute('aria-label')).toBe('Fruit');
+    expect(root().hasAttribute('aria-label')).toBe(false);
+  });
+});
+
+/**
+ * A browser runs microtasks before the next render. Focus that waits only for a
+ * microtask reaches a DOM the change has not reached yet: the field a chip
+ * turns into does not exist, and the moved chip has not moved. Each test lets
+ * the microtasks run before rendering, as a page does.
+ */
+describe('SlMultiSelect, focus after a chip changes', () => {
+  const microtasks = () => new Promise<void>((resolve) => queueMicrotask(resolve));
+  const focusedValue = () => document.activeElement?.getAttribute('data-value');
+
+  it('keeps focus on the moved chip', async () => {
+    await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.defaultValue.set(['blueberry', 'raspberry', 'cloudberry']);
+    fixture.componentInstance.reorderable.set(true);
+    await settle(fixture);
+
+    chips()[2]!.focus();
+    press(chips()[2]!, 'Home', { altKey: true });
+    await microtasks();
+    await settle(fixture);
+
+    expect(chipValues()).toEqual(['cloudberry', 'blueberry', 'raspberry']);
+    expect(focusedValue()).toBe('cloudberry');
+  });
+
+  it('focuses the field a chip turns into, and the chip again once it is committed', async () => {
+    await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.creatable.set(true);
+    fixture.componentInstance.editable.set(true);
+    fixture.componentInstance.defaultValue.set(['fig']);
+    await settle(fixture);
+
+    chips()[0]!.focus();
+    press(chips()[0]!, 'Enter');
+    await microtasks();
+    await settle(fixture);
+    const editor = document.querySelector<HTMLInputElement>(
+      "[data-part='chips'] input:not([data-part='input'])",
+    )!;
+    expect(document.activeElement).toBe(editor);
+
+    editor.value = 'figs';
+    editor.dispatchEvent(new Event('input'));
+    press(editor, 'Enter');
+    await microtasks();
+    await settle(fixture);
+    expect(focusedValue()).toBe('figs');
+  });
+});
+
+/**
+ * A key that arrives before the next render — a fast typist, a barcode scanner
+ * — types into the input as the browser holds it. A commit that empties the
+ * query only in the model left the committed text in the input until the
+ * render, and the next character joined it.
+ */
+describe('SlMultiSelect, typing faster than the render', () => {
+  it('empties the input the moment a delimiter commits its text', async () => {
+    await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.creatable.set(true);
+    await settle(fixture);
+
+    field().focus();
+    field().value = 'kiwi';
+    field().dispatchEvent(new Event('input', { bubbles: true }));
+    press(field(), ',');
+    field().value += 'l';
+    field().dispatchEvent(new Event('input', { bubbles: true }));
+    await settle(fixture);
+
+    expect(chipValues()).toEqual(['kiwi']);
+    expect(field().value).toBe('l');
   });
 });

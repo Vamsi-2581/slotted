@@ -7,6 +7,8 @@ import type { PositionerHandle } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceStatus } from '@slotted/core/presence';
 import {
+  afterEveryRender,
+  type AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -25,7 +27,12 @@ import type { EmbeddedViewRef } from '@angular/core';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlPopover } from './popover';
-import type { PopoverFocusTarget } from './popover-defaults';
+import type {
+  PopoverAlign,
+  PopoverFocusTarget,
+  PopoverSide,
+  PopoverWidth,
+} from './popover-defaults';
 
 /** An element, or a selector read inside the panel. */
 function resolveFocus(
@@ -35,6 +42,26 @@ function resolveFocus(
   if (target === undefined) return null;
   if (typeof target === 'string') return scope?.querySelector<HTMLElement>(target) ?? null;
   return target as HTMLElement;
+}
+
+/**
+ * How far the layer moves along its alignment axis so the panel's edge, not
+ * the layer's, meets the anchor's. The layer's padding is the gap around the
+ * panel, the same on every side, so a layer aligned to the anchor's start edge
+ * leaves the panel one gap inside it. A centred layer needs nothing, and
+ * neither does one as wide as its anchor, which the positioner centres.
+ */
+function alignInset(
+  layer: HTMLElement,
+  side: PopoverSide,
+  align: PopoverAlign,
+  width: PopoverWidth,
+): number {
+  if (align === 'center') return 0;
+  if (width === 'anchor' && (side === 'top' || side === 'bottom')) return 0;
+  const style = layer.ownerDocument.defaultView?.getComputedStyle(layer);
+  const gap = Number.parseFloat(style?.paddingTop ?? '') || 0;
+  return align === 'start' ? -gap : gap;
 }
 
 /**
@@ -50,24 +77,36 @@ function resolveFocus(
   standalone: true,
   exportAs: 'slPopoverTrigger',
   host: {
-    '[attr.aria-controls]': 'popover.contentId',
+    '[attr.aria-controls]': 'popover.contentNode() !== null ? popover.contentId : null',
     '[attr.aria-expanded]': 'popover.isOpen()',
     'aria-haspopup': 'dialog',
     '[attr.data-open]': "popover.isOpen() ? '' : null",
-    '(click)': 'onClick($event)',
   },
 })
-export class SlPopoverTrigger {
+export class SlPopoverTrigger implements AfterViewInit {
   protected readonly popover = inject(SlPopover);
+  private readonly native: HTMLElement = inject(ElementRef).nativeElement;
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
-    const native: HTMLElement = inject(ElementRef).nativeElement;
-    this.popover.triggerNode.set(native);
-    inject(DestroyRef).onDestroy(() => this.popover.triggerNode.set(null));
+    this.popover.triggerNode.set(this.native);
+    this.destroyRef.onDestroy(() => this.popover.triggerNode.set(null));
   }
 
-  protected onClick(event: MouseEvent) {
-    this.popover.toggle(!this.popover.isOpen(), event.detail === 0 ? 'keyboard' : 'pointer', event);
+  /**
+   * After the view, not as a host listener. A `(click)` the consumer wrote on
+   * the same element is bound when the view is created, so a listener bound any
+   * earlier runs first and reads `defaultPrevented` before the consumer has had
+   * the chance to set it — the order `slIconButton` records.
+   */
+  ngAfterViewInit() {
+    const onClick = (event: MouseEvent) => {
+      if (event.defaultPrevented) return;
+      const reason = event.detail === 0 ? 'keyboard' : 'pointer';
+      this.popover.toggle(!this.popover.isOpen(), reason, event);
+    };
+    this.native.addEventListener('click', onClick);
+    this.destroyRef.onDestroy(() => this.native.removeEventListener('click', onClick));
   }
 }
 
@@ -111,6 +150,8 @@ export class SlPopoverLayer {
   private readonly template = inject(TemplateRef<unknown>);
   private readonly viewContainer = inject(ViewContainerRef);
   private readonly comment: Comment = this.viewContainer.element.nativeElement;
+  private readonly arrowPlaceholder: Comment =
+    this.comment.ownerDocument.createComment('slPopoverArrow');
 
   /** A signal, so every effect that reads it re-runs when the layer arrives. */
   private readonly layerNode = signal<HTMLElement | null>(null);
@@ -140,6 +181,7 @@ export class SlPopoverLayer {
     effect(() => this.place());
     effect(() => this.stack());
     effect(() => this.paint());
+    effect(() => this.showArrow());
     effect(() => this.moveFocus());
 
     inject(DestroyRef).onDestroy(() => {
@@ -212,19 +254,24 @@ export class SlPopoverLayer {
   private place() {
     const layer = this.layerNode();
     const anchor = this.popover.anchorNode() ?? this.popover.triggerNode();
+    const align = this.popover.resolvedAlign();
+    const side = this.popover.resolvedSide();
+    const width = this.popover.resolvedWidth();
     const options = {
-      align: this.popover.resolvedAlign(),
-      alignOffset: this.popover.resolvedAlignOffset(),
+      align,
+      alignOffset:
+        this.popover.resolvedAlignOffset() +
+        (layer === null ? 0 : alignInset(layer, side, align, width)),
       boundaryPadding: this.popover.resolvedCollisionPadding(),
       flip: this.popover.resolvedFlip(),
       hideWhenDetached: this.popover.resolvedHideWhenDetached(),
-      matchWidth: this.popover.resolvedWidth() === 'anchor',
+      matchWidth: width === 'anchor',
       shift: this.popover.resolvedShift(),
-      side: this.popover.resolvedSide(),
+      side,
       sideOffset: this.popover.resolvedSideOffset(),
       strategy: this.popover.resolvedStrategy(),
     };
-    const arrow = this.popover.arrowNode();
+    const arrow = this.popover.resolvedArrow() ? this.popover.arrowNode() : null;
 
     this.positioner?.destroy();
     this.positioner = null;
@@ -279,6 +326,23 @@ export class SlPopoverLayer {
     layer.setAttribute('data-width', this.popover.resolvedWidth());
     if (this.popover.isOpen() && this.positioned()) layer.setAttribute('data-open', '');
     else layer.removeAttribute('data-open');
+  }
+
+  /**
+   * The arrow the consumer wrote leaves the layer while `arrow` resolves to
+   * false, and a comment holds its place, so the layer holds no arrow — as
+   * React's `PopoverArrow` renders none — and the positioner measures none.
+   */
+  private showArrow() {
+    const layer = this.layerNode();
+    const arrow = this.popover.arrowNode();
+    if (layer === null || arrow === null) return;
+
+    if (this.popover.resolvedArrow()) {
+      if (this.arrowPlaceholder.parentNode === layer) this.arrowPlaceholder.replaceWith(arrow);
+    } else if (arrow.parentNode === layer) {
+      arrow.replaceWith(this.arrowPlaceholder);
+    }
   }
 
   /**
@@ -434,8 +498,10 @@ export class SlPopoverFooter {}
 
 /**
  * The pointer's way out. The keyboard has Escape, and a reader on a touch
- * device has no Escape key at all. Its accessible name comes from the defaults
- * provider, and a name the consumer wrote on the element wins over it.
+ * device has no Escape key at all. A close control with no text of its own —
+ * the drawn cross, or the consumer's icon — is named by the catalog's `close`;
+ * one that shows words, such as "Done", is named by them, and a name the
+ * consumer wrote on the element wins over both.
  */
 @Component({
   selector: 'button[slPopoverClose]',
@@ -457,13 +523,23 @@ export class SlPopoverFooter {}
 export class SlPopoverClose {
   protected readonly popover = inject(SlPopover);
   private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
+  private readonly native: HTMLElement = inject(ElementRef).nativeElement;
+  /** Whether the content shows text, read after every render because it may change. */
+  private readonly hasText = signal(false);
 
-  protected readonly label = computed(() => this.written ?? this.popover.t('close'));
+  protected readonly label = computed(
+    () => this.written ?? (this.hasText() ? null : this.popover.t('close')),
+  );
+
+  constructor() {
+    afterEveryRender(() => this.hasText.set((this.native.textContent ?? '').trim() !== ''));
+  }
 }
 
 /**
  * The mark that points at the anchor. The family draws it; the positioner
  * measures it and says where it goes. It is hidden from assistive technology.
+ * While `arrow` resolves to false the layer takes it out (`slPopoverLayer`).
  */
 @Directive({
   selector: '[slPopoverArrow]',

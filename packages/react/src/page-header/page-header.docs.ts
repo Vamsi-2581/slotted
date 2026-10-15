@@ -34,7 +34,7 @@ const anatomy: AnatomyRow[] = [
     element: 'header, or the element render returns',
     required: true,
     purpose:
-      'The family: sticky with a negative offset the size of the header area, carrying data-ui="page-header", the three axes, data-expanded, data-revealed, data-loading and the measured facts data-scrolled and data-compact. Below 600 pixels of its own width it carries data-compact, is not sticky and scrolls away with the page. It is its own container, so the rows reflow on its own inline size.',
+      'The family: sticky with a negative offset the size of the header area, carrying data-ui="page-header", the four axes, data-expanded, data-revealed, data-loading and the measured facts data-scrolled, data-stuck and data-compact. Below 600 pixels of its own width it carries data-compact, is not sticky and scrolls away with the page. It is its own container, so the rows reflow on its own inline size.',
   },
   {
     part: 'title-area',
@@ -260,7 +260,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'collapse',
     title: 'What a scroll does, and what the control does',
-    note: 'Scroll the left screen: the area leaves with the reason scroll and the toggle offers to bring it back in place. Press the toggle at rest: the area folds as a grid track. The right screen is collapse="manual": the whole header stays while the page scrolls. In a Page with fill nothing scrolls outside the body: a scroller inside it snaps the area shut once it is past 16 pixels down, and opens it again back at its top.',
+    note: 'Scroll the left screen: the area leaves with the reason scroll and the toggle offers to bring it back in place. Press the toggle at rest: the area folds as a grid track. The right screen is collapse="manual": the whole header stays while the page scrolls. In a Page with fill nothing scrolls outside the body: a scroller inside it snaps the area shut once it is past 16 pixels down, and opens it again back at its top. A header with no header area stays expanded: collapsed, it would hide nothing and only step the title down.',
     snippet: defineSnippet({
       id: 'page-header-react-collapse',
       language: 'tsx',
@@ -533,6 +533,13 @@ export const REACT_PAGE_HEADER_DOCS = {
         '—',
         'PageHeader',
         'The value an uncontrolled pin starts from, read once',
+      ],
+      [
+        'variant',
+        "'band' | 'plain' | 'floating'",
+        'band',
+        'PageHeader, PageHeaderDefaultsProvider',
+        'band is a strip of the surface with a hairline under it, the page’s own header; plain paints no ground at rest and takes the surface back once content passes under the chrome (data-stuck), for a header inside a region with a ground of its own; floating is a box with the hairline all round and rounded corners that, once stuck, slides to an inset below the scroller’s edge and lifts by a shadow, for a header that stands inside padding',
       ],
       [
         'size',

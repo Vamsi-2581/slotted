@@ -111,7 +111,7 @@ export const ENTITY_PICKER_FALLBACK: EntityPickerDefaults = {
   size: 'md',
   strategy: 'absolute',
   variant: 'outline',
-  width: 'anchor',
+  width: 'content',
 };
 
 export const ENTITY_PICKER_DEFAULTS = new InjectionToken<EntityPickerDefaults>(

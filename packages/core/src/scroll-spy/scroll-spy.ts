@@ -89,12 +89,14 @@ function scrollerTop(scroller: HTMLElement | null): number {
  * Where the page's chrome ends, read from the property `page` publishes on
  * the element that scrolls — on the document element when the viewport
  * scrolls. Zero outside a page, and zero when the page has not measured yet.
+ *
+ * Read from the inline style `page` writes it to, not from the computed style:
+ * the spy reads it on every scrolled frame, and a computed style there forced
+ * a style recalc of the whole document each frame.
  */
 export function readStickyTop(scroller: HTMLElement | null, doc: Document): number {
-  const view = doc.defaultView;
-  if (view === null) return 0;
   const target = scroller ?? doc.documentElement;
-  const value = Number.parseFloat(view.getComputedStyle(target).getPropertyValue(STICKY_TOP));
+  const value = Number.parseFloat(target.style.getPropertyValue(STICKY_TOP));
   return Number.isFinite(value) ? value : 0;
 }
 

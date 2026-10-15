@@ -204,6 +204,14 @@ describe('SlPagination', () => {
     expect(part('next').hasAttribute('disabled')).toBe(false);
   });
 
+  it('leaves a button at a bound to the native disabled, as React does', () => {
+    const { part, settle } = setup();
+    settle();
+
+    expect(part('previous').hasAttribute('disabled')).toBe(true);
+    expect(part('previous').hasAttribute('aria-disabled')).toBe(false);
+  });
+
   it('refuses every move while a page change is in flight', () => {
     const { host, root, part, settle } = setup();
     host.loading.set(true);

@@ -1,3 +1,4 @@
+import { isPlatformBrowser } from '@angular/common';
 import { injectMessages } from '@slotted/angular/i18n';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
@@ -34,6 +35,7 @@ import {
   model,
   OnInit,
   output,
+  PLATFORM_ID,
   signal,
   untracked,
   viewChild,
@@ -196,6 +198,8 @@ export class SlDrawer implements OnInit {
   /** The family's words in the language in force, with this drawer's `messages` laid over them. */
   readonly t = injectMessages(drawerMessages, this.messages);
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
+  /** The server lays nothing out, and its DOM cannot be measured. */
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly destroyRef = inject(DestroyRef);
   private readonly baseId = inject(SlDrawerIdFactory).next();
 
@@ -418,7 +422,7 @@ export class SlDrawer implements OnInit {
       const fraction = this.currentExtent();
       const inline = isInlineSide(this.resolvedSide());
 
-      if (box === null || fraction === undefined) {
+      if (box === null || fraction === undefined || !this.browser) {
         this.measured.set(null);
         return;
       }
@@ -529,6 +533,7 @@ export class SlDrawer implements OnInit {
       const box = this.measuringBox();
       const panel = this.panelRef()?.nativeElement;
       if (
+        !this.browser ||
         box === null ||
         panel === undefined ||
         !this.open() ||
@@ -681,7 +686,10 @@ export class SlDrawer implements OnInit {
   measuringBox(): HTMLElement | null {
     const node = this.layerRef()?.nativeElement ?? null;
     if (node === null) return null;
-    return this.resolvedMode() === 'inline' ? node.parentElement : node;
+    /* Under `inline` the layer's parent is the host, which renders
+       `display: contents` and lays nothing out: the box is the host's own
+       parent, the consumer's layout. */
+    return this.resolvedMode() === 'inline' ? this.host.parentElement : node;
   }
 
   /**

@@ -124,6 +124,10 @@ export function DateField({
   ...nativeProps
 }: DateFieldProps) {
   const field = useField();
+  /* The field resolves its label through the control it holds, and warns when
+     no control says it is there. */
+  const register = field?.registerControl;
+  useEffect(() => register?.(), [register]);
   const defaults = useDateFieldDefaults();
   const appLocale = useLocale();
   const t = useMessages(dateFieldMessages, messages);

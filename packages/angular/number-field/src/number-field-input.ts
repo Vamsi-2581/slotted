@@ -17,7 +17,7 @@ import type { OnInit } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor } from '@angular/forms';
 import { clamp as clampNumber } from '@slotted/core/measure';
-import { createNumberFormat, stepNumber } from '@slotted/core/number';
+import { createNumberFormat, snapToStep as snapToGrid, stepNumber } from '@slotted/core/number';
 import type { NumberFormat } from '@slotted/core/number';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
@@ -221,7 +221,23 @@ export class SlNumberFieldInput implements ControlValueAccessor, OnInit, SlNumbe
       (this.writtenReadonly === null ? undefined : true) ??
       this.field?.resolvedReadOnly(),
   );
-  readonly resolvedInvalid = computed(() => this.invalid() ?? this.field?.invalid());
+  /**
+   * Unstated, the control asks the field. Under `clamp="none"` nothing returns
+   * a number outside `min`…`max` to the range, so the control reports it.
+   */
+  private readonly outsideRange = computed(() => {
+    const current = this.numberValue();
+    const min = this.min();
+    const max = this.max();
+    return (
+      this.resolvedClamp() === 'none' &&
+      current !== null &&
+      ((min !== undefined && current < min) || (max !== undefined && current > max))
+    );
+  });
+  readonly resolvedInvalid = computed(
+    () => this.invalid() ?? (this.outsideRange() ? true : this.field?.invalid()),
+  );
 
   readonly controlId = computed(() => this.writtenId ?? this.field?.ids().control ?? null);
   readonly submissionName = computed(() => this.writtenName);
@@ -492,17 +508,11 @@ export class SlNumberFieldInput implements ControlValueAccessor, OnInit, SlNumbe
     const max = this.max();
 
     if (next !== null) {
-      if (this.snapToStep()) {
-        next = stepNumber({
-          value: next,
-          direction: 1,
-          step: this.step(),
-          ...(min === undefined ? {} : { min }),
-          ...(max === undefined ? {} : { max }),
-          stepFrom: next,
-          snapToStep: false,
-        });
-      }
+      /* The number committed is the number shown: rounded to the precision
+         the format states, through the same formatter. */
+      next = formatter.parse(formatter.format(next)) ?? next;
+      /* A typed value goes to the nearest multiple of the grid. */
+      if (this.snapToStep()) next = snapToGrid(next, this.step(), min ?? 0);
       if (this.resolvedClamp() !== 'none') {
         next = clampNumber(next, min ?? Number.NEGATIVE_INFINITY, max ?? Number.POSITIVE_INFINITY);
       }

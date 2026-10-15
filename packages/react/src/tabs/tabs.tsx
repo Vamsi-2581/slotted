@@ -204,9 +204,9 @@ export function Tabs({
    * written in an effect is what keeps them reading the current one without
    * tearing the handle down on every render.
    */
-  const latest = useRef({ activation: resolvedActivation, select });
+  const latest = useRef({ activation: resolvedActivation, select, value: current });
   useEffect(() => {
-    latest.current = { activation: resolvedActivation, select };
+    latest.current = { activation: resolvedActivation, select, value: current };
   });
 
   useEffect(() => {
@@ -283,6 +283,22 @@ export function Tabs({
        would fight a reader who has just scrolled the list by hand. */
   }, [current, list]);
 
+  const paging = overflow.overflowing && resolvedOrientation === 'horizontal';
+
+  /**
+   * A list that starts to overflow — on mount, or later when its stylesheet
+   * arrives, a drawer opens or a hidden panel is shown — draws its paging
+   * controls, and they narrow it: a tab revealed against the wider list ended
+   * behind the end control. The selected tab is revealed again once the
+   * controls are in the layout, on that transition and on no other, so a reader
+   * scrolling the list keeps control.
+   */
+  useEffect(() => {
+    if (!paging) return;
+    const item = tabElements()[indexOf(latest.current.value)];
+    if (item !== undefined) affordance.current?.reveal(item);
+  }, [paging]);
+
   const context: TabsContextValue = {
     activation: resolvedActivation,
     attachList: setList,
@@ -298,8 +314,6 @@ export function Tabs({
     select,
     value: current,
   };
-
-  const paging = overflow.overflowing && resolvedOrientation === 'horizontal';
 
   const rootProps: TabsRootProps = {
     ...nativeProps,

@@ -29,6 +29,9 @@ export type PopoverOpenReason = Extract<
   'pointer' | 'keyboard' | 'escape' | 'outsidePress' | 'dismiss' | 'programmatic'
 >;
 
+/** The request `openChangeRequest` emits before the panel moves, as React's `PopoverChangeRequest`. */
+export type PopoverChangeRequest = ChangeRequest<boolean>;
+
 /** Somewhere to put the focus: an element, or a selector read inside the panel. */
 export type PopoverFocusTarget = Element | string;
 
@@ -89,11 +92,18 @@ export const POPOVER_DEFAULTS = new InjectionToken<PopoverDefaults>('slotted pop
  * An application decides once how its popovers behave and look. The close
  * control's accessible name comes from the language in force
  * (`provideSlotted`).
+ *
+ * What is stated here is written over the defaults already in force rather than
+ * over the fallback, which is what React's provider does: a section that sets
+ * `width` for itself keeps the application's `size`.
  */
 export function providePopoverDefaults(defaults: Partial<PopoverDefaults>): Provider {
   return {
     provide: POPOVER_DEFAULTS,
-    useFactory: (): PopoverDefaults => ({ ...POPOVER_FALLBACK, ...defaults }),
+    useFactory: (): PopoverDefaults => ({
+      ...(inject(POPOVER_DEFAULTS, { optional: true, skipSelf: true }) ?? POPOVER_FALLBACK),
+      ...defaults,
+    }),
   };
 }
 

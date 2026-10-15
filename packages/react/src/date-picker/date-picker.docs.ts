@@ -20,7 +20,7 @@ const apiRows = (rows: readonly ApiTuple[]): ApiRow[] =>
 
 export const REACT_DATE_PICKER_TOKENS = datePickerTokens.map((name) => ({
   name,
-  purpose: 'Theme-owned Date Picker decision',
+  purpose: 'A Date Picker value the theme sets.',
 }));
 
 const imports: ReferenceImport = {
@@ -33,48 +33,48 @@ const anatomy: AnatomyRow[] = [
     element: 'div, or the element render returns',
     required: true,
     purpose:
-      'The box the family is selected by. Carries data-ui="date-picker", the axes, data-open and the state attributes. className, style and every native attribute reach it.',
+      'The outer box, carrying data-ui="date-picker", the size, variant and calendar axes, data-open and the state attributes. className, style and every native attribute reach it.',
   },
   {
     part: 'control',
     element: 'div',
     required: true,
     purpose:
-      'What the positioner measures, and nothing else. It draws no frame: the date-field inside draws its own, and a second border here would be a second place to fix one defect.',
+      'The box the calendar is positioned against. It draws no frame: the date field inside it draws its own border, focus ring and states.',
   },
   {
     part: 'trigger',
     element: 'button',
     required: true,
     purpose:
-      'Opens the surface, from inside the field’s end slot. Its accessible name carries the chosen date in words, because focus returns here when the surface closes and this is where the reader is told what happened. Always drawn: ChromeOS eats the Alt+ArrowDown chord before the browser sees it.',
+      'The calendar button, in the end slot of the date field. Its accessible name carries the chosen date in words, because focus returns to it when the calendar closes. It is always drawn, because ChromeOS turns Alt+ArrowDown into PageDown before the browser receives it.',
   },
   {
     part: 'positioner',
-    element: 'div',
+    element: 'div, portalled to the end of the document',
     required: true,
     purpose:
-      'The layer the surface stands on, and what packages/core/src/positioner writes its position and custom properties onto. It takes no pointer of its own, so a press meant for the page is not swallowed by the frame around the surface.',
+      'The layer the calendar stands on. It carries data-ui="date-picker" again, data-presentation (popover or sheet) and the position the positioner writes. It takes no pointer events of its own, so a press on the page around the surface reaches the page.',
   },
   {
     part: 'content',
-    element: 'div',
+    element: 'div with role="dialog"',
     required: true,
     purpose:
-      'The painted surface, carrying role="dialog" and the same name as the trigger. It is sized by the calendar inside it rather than by the control it hangs from: a month is seven columns wide and a field is as wide as the form.',
+      'The painted surface, with the same accessible name as the trigger. Its width comes from the calendar inside it, not from the field it opens from.',
   },
   {
     part: 'presets',
     element: 'div',
     required: false,
     purpose:
-      'The consumer’s own shortcuts, in a column beside the grid. This family ships no list of them — "last 7 days" is a business calendar, and a library that guessed at one would be guessing at a fiscal year.',
+      'A column beside the calendar for your own shortcuts, drawn when presets is set. The Date Picker ships no list of shortcuts: the labels and dates belong to your product.',
   },
   {
     part: 'footer',
     element: 'div',
     required: false,
-    purpose: 'The consumer’s own actions, under whatever the surface is holding.',
+    purpose: 'A row under the calendar for your own actions, drawn when footer is set.',
   },
 ];
 
@@ -82,21 +82,21 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'playground',
     title: 'Playground',
-    note: 'A field, a trigger and a calendar, driven by the controls below the canvas. Type into the field, or press the trigger and arrow around the grid — both write the same value.',
+    note: 'A field, a trigger and a calendar, driven by the controls below the canvas. Type into the field, or press the trigger and move through the calendar with the arrow keys: both write the same value.',
     snippet: defineSnippet({
       id: 'date-picker-react-playground',
       label: 'Usage',
       language: 'tsx',
       source: `<Field>
-  <FieldLabel>Vencimento</FieldLabel>
-  <DatePicker locale="pt-BR" name="vencimento" onValueChange={setValue} value={value} />
+  <FieldLabel>Due date</FieldLabel>
+  <DatePicker name="dueDate" onValueChange={setValue} value={value} />
 </Field>;`,
     }),
   },
   {
     id: 'sizes',
     title: 'Size',
-    note: 'The three steps the field takes, with the trigger following: its box is the glyph plus a step of air, bounded by the frame, exactly as every other inner control in the library.',
+    note: 'The three steps of the control scale. The trigger follows the field: its box is the icon plus one step of space, inside the frame, as in every other control with an inner button.',
     snippet: defineSnippet({
       id: 'date-picker-react-sizes',
       label: 'The three steps',
@@ -111,7 +111,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'variants',
     title: 'Variant',
-    note: 'How much frame the control shows at rest. The trigger keeps its mark in all three, because what it says — this holds a date — does not change with how much border there is.',
+    note: 'How much frame the field draws at rest. The trigger keeps its calendar icon in all three.',
     snippet: defineSnippet({
       id: 'date-picker-react-variants',
       label: 'The three frames',
@@ -126,7 +126,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'placement',
     title: 'Where the surface opens',
-    note: 'A preference rather than a promise: the positioner reads the room and flips the surface when it would not fit, and data-placement on the layer says where it ended up.',
+    note: 'A preference: when the calendar does not fit on that side, it opens on the other, and data-placement on the positioner records the side it took.',
     snippet: defineSnippet({
       id: 'date-picker-react-placement',
       label: 'Placement',
@@ -140,7 +140,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'range-bounds',
     title: 'Bounds',
-    note: 'min and max fence both halves at once: the field refuses a date outside them and the grid stops the reader at the edge, from one pair of props.',
+    note: 'min and max bound the field and the calendar together: the calendar disables the days outside them, and a typed date outside them marks the date picker invalid.',
     snippet: defineSnippet({
       id: 'date-picker-react-range-bounds',
       label: 'min and max',
@@ -151,7 +151,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'unavailable',
     title: 'Days that are refused',
-    note: 'One predicate reaches the field and the grid. A refused date makes the control invalid when it is typed, and cannot be pressed when it is shown.',
+    note: 'One function reaches the field and the calendar. A refused date marks the date picker invalid when it is typed, and is disabled in the calendar.',
     snippet: defineSnippet({
       id: 'date-picker-react-unavailable',
       label: 'A predicate',
@@ -162,21 +162,21 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'presets',
     title: 'Shortcuts and actions',
-    note: 'The two slots the consumer fills. This family ships no preset list: the labels and the ranges are the product’s, and a list in the contract would be the library guessing at a business calendar.',
+    note: 'The two slots you fill: shortcuts beside the calendar and actions under it. The Date Picker ships no list of shortcuts, because the labels and dates belong to your product.',
     snippet: defineSnippet({
       id: 'date-picker-react-presets',
       label: 'Presets and footer',
       language: 'tsx',
       source: `<DatePicker
-  footer={<Button onClick={apply}>Aplicar</Button>}
-  presets={<Button onClick={() => setValue(today)}>Hoje</Button>}
+  footer={<Button onClick={apply}>Apply</Button>}
+  presets={<Button onClick={() => setValue(today)}>Today</Button>}
 />;`,
     }),
   },
   {
     id: 'states',
     title: 'States',
-    note: 'Disabled and read-only both take the trigger out of the tab sequence, because a surface that opens onto a grid nothing answers is worse than no surface. Invalid retargets the ring on both halves at once.',
+    note: 'Disabled and read-only both disable the trigger, so the calendar cannot open. Invalid draws the frame and the focus ring in the danger tone.',
     snippet: defineSnippet({
       id: 'date-picker-react-states',
       label: 'The four states',
@@ -192,21 +192,21 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'forms',
     title: 'In a form',
-    note: 'The field’s hidden input carries the value as an ISO string under the name prop, so a plain form post sends 2026-09-09 whether the reader typed it or pressed it.',
+    note: 'name adds a hidden input that submits the date as an ISO 8601 string, so a plain form post sends 2026-09-09 whether the reader typed the date or chose it.',
     snippet: defineSnippet({
       id: 'date-picker-react-forms',
       label: 'A plain form post',
       language: 'tsx',
-      source: `<form action="/reservas" method="post">
-  <DatePicker name="entrada" required />
-  <Button type="submit">Reservar</Button>
+      source: `<form action="/bookings" method="post">
+  <DatePicker name="checkIn" required />
+  <Button type="submit">Book</Button>
 </form>;`,
     }),
   },
   {
     id: 'narrow',
-    title: 'On a finger, in a narrow viewport',
-    note: 'Below 480 pixels on a coarse pointer the surface becomes a sheet attached to the bottom edge. The DOM does not change — data-presentation says which one it is — so the decision is testable without a device.',
+    title: 'On a narrow touch screen',
+    note: 'Under 480 pixels on a coarse pointer, the calendar opens as a sheet attached to the bottom of the viewport. The markup stays the same, and data-presentation on the positioner records which presentation is showing.',
     snippet: defineSnippet({
       id: 'date-picker-react-narrow',
       label: 'Sheet',
@@ -217,7 +217,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'composition',
     title: 'Composition and escape hatches',
-    note: 'A provider sets the zone and the placement once, SlottedProvider the language and the two trigger names; the ref hands back focus(), open() and close(); and the value is a request a consumer may refuse before anything commits.',
+    note: 'DatePickerDefaultsProvider sets the time zone and the placement once, SlottedProvider sets the language and the trigger’s names, the ref returns focus(), open() and close(), and request.cancel() refuses a value before it is applied.',
     snippet: defineSnippet({
       id: 'date-picker-react-composition',
       label: 'Provider and handle',
@@ -230,14 +230,14 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'keyboard',
     title: 'The keyboard',
-    note: 'Alt+ArrowDown opens from the field and Escape closes and returns focus to the trigger — unless the calendar is showing months or years, in which case Escape walks it down a view and the surface stays.',
+    note: 'Alt+ArrowDown opens the calendar from the field and moves focus to the chosen day. Escape closes it and returns focus to the trigger; while the calendar shows months or years, Escape first returns to the day grid.',
     snippet: defineSnippet({
       id: 'date-picker-react-keyboard',
       label: 'The keys',
       language: 'tsx',
       source: `// Alt + ArrowDown  opens the surface from the field
-// Escape           walks a view down, or closes and returns focus
-// Tab              stays inside the surface while it is open
+// Escape           returns to the day grid, or closes and returns focus
+// Tab              cycles inside the surface while it is open
 // the grid's own keys, once focus is in it`,
     }),
   },
@@ -249,145 +249,217 @@ const api: ApiRow[] = apiRows([
     'PlainDate | DateRange | PlainDate[] | null',
     '—',
     'DatePicker',
-    'What the picker holds, which depends on selectionMode. Present means the consumer owns it.',
+    'The selected value, whose shape follows selectionMode. Setting it makes the value controlled.',
   ],
   [
     'defaultValue',
     'PlainDate | DateRange | PlainDate[] | null',
     '—',
     'DatePicker',
-    'What it starts from when nobody else writes one. Read once.',
+    'The starting value of an uncontrolled date picker. Read once, on the first render.',
   ],
   [
     'open',
     'boolean',
     '—',
     'DatePicker',
-    'Whether the surface is showing. Present means the consumer owns it.',
+    'Whether the calendar is showing. Setting it makes the open state controlled.',
   ],
-  ['defaultOpen', 'boolean', 'false', 'DatePicker', 'Whether it opens already showing.'],
+  [
+    'defaultOpen',
+    'boolean',
+    'false',
+    'DatePicker',
+    'Whether the calendar shows on the first render. Focus does not move into it.',
+  ],
   [
     'min',
     'PlainDate',
     '—',
     'DatePicker',
-    'The earliest date either half accepts. One prop fences the field and the grid.',
+    'The earliest date the field and the calendar accept. Earlier days are disabled in the calendar, and an earlier typed date marks the date picker invalid.',
   ],
-  ['max', 'PlainDate', '—', 'DatePicker', 'The latest date either half accepts.'],
+  [
+    'max',
+    'PlainDate',
+    '—',
+    'DatePicker',
+    'The latest date the field and the calendar accept. Later days are disabled in the calendar, and a later typed date marks the date picker invalid.',
+  ],
   [
     'isDateUnavailable',
     '(date: PlainDate) => boolean',
     '—',
     'DatePicker',
-    'Refuses particular dates in both halves: typed, it makes the control invalid; shown, it cannot be pressed.',
+    'Returns true for a date the reader cannot choose. The calendar disables it, and a typed unavailable date marks the date picker invalid.',
   ],
   [
     'selectionMode',
     "'single' | 'range' | 'multiple'",
     'single',
     'DatePicker',
-    'How many dates the reader may choose, and what the value then is.',
+    'How many dates the calendar selects, and so the shape of the value. The field shows a single date only; for a start and an end, use DateRangePicker.',
   ],
-  ['months', 'number', '1', 'DatePicker', 'How many months the surface draws side by side.'],
+  ['months', 'number', '1', 'DatePicker', 'How many months the calendar draws side by side.'],
   [
     'defaultView',
     "'day' | 'month' | 'year'",
     'day',
     'DatePicker',
-    'The view the surface opens on.',
+    'The grid the calendar opens on.',
   ],
-  ['weekNumbers', 'boolean', 'false', 'DatePicker', 'Draws the ISO week number in the grid.'],
+  [
+    'weekNumbers',
+    'boolean',
+    'false',
+    'DatePicker',
+    'Adds a column of ISO 8601 week numbers to the calendar.',
+  ],
   [
     'fixedWeeks',
     'boolean',
     'true',
     'DatePicker',
-    'Six rows whatever the month needs. On by default here, because a surface that grows a row under the pointer moves the target.',
+    'Draws six rows for every month, so the surface keeps its height as the reader pages between months.',
   ],
   [
     'placement',
     "'bottom-start' | 'bottom' | 'bottom-end' | 'top-start' | 'top' | 'top-end'",
     'bottom-start',
     'DatePicker',
-    'Where the surface prefers to open. The positioner flips it when it would not fit.',
+    'Where the calendar opens relative to the field. When it does not fit on that side, it opens on the other.',
   ],
   [
     'closeOnSelect',
     "'auto' | 'always' | 'never'",
     'auto',
     'DatePicker',
-    'auto closes for one date and stays open for a range or a set, which is the only combination that is not a trap.',
+    'Whether choosing a day closes the calendar. auto closes it for a single date and keeps it open for a range or several dates, which need more than one press.',
   ],
   [
     'locale',
     'string',
-    'the language in force',
+    'the SlottedProvider locale, else en-US',
     'DatePicker',
-    'BCP 47. Reaches both halves: the field’s order and the grid’s month names.',
+    'A BCP 47 tag. Sets the order, separators and placeholders of the segments, the month and weekday names, the first day of the week and the date the trigger announces.',
   ],
-  ['timeZone', 'string', 'the runtime’s', 'DatePicker', 'Which zone answers "what is today".'],
-  ['firstDayOfWeek', 'number', 'the locale’s', 'DatePicker', '0 is Sunday.'],
-  ['yearPivot', 'number', '20', 'DatePicker', 'How a two-digit typed year resolves in the field.'],
+  [
+    'timeZone',
+    'string',
+    'the browser’s time zone',
+    'DatePicker',
+    'The IANA time zone that decides which day is today. The value itself has no time zone.',
+  ],
+  [
+    'firstDayOfWeek',
+    'number',
+    'the locale’s',
+    'DatePicker',
+    'The day the calendar starts each week on, from 0 for Sunday to 6 for Saturday.',
+  ],
+  [
+    'yearPivot',
+    'number',
+    '20',
+    'DatePicker',
+    'How a two-digit typed year resolves: a year up to this many years ahead of today is read in this century, and a later one in the previous century.',
+  ],
   [
     'calendar',
     "'gregory'",
     'gregory',
     'DatePicker',
-    'The calendar system. One value today, and an axis rather than a silence.',
+    'The calendar system. gregory is the only value today.',
   ],
   [
     'size',
     "'sm' | 'md' | 'lg'",
     'md',
     'DatePicker',
-    'The type step, matching the field around it.',
+    'One step of the control scale for the field and the trigger. Inside a Field, an unset size follows the field.',
   ],
   [
     'variant',
     "'outline' | 'subtle' | 'plain'",
     'outline',
     'DatePicker',
-    'How much frame the control shows at rest.',
+    'How much frame the field draws at rest: a border, a filled ground, or neither.',
   ],
   [
     'disabled',
     'boolean',
     '—',
     'DatePicker',
-    'Takes the trigger out of the tab sequence as well as the segments.',
+    'Disables the segments and the trigger, and takes both out of the tab order. Read from the enclosing Field when unset.',
   ],
   [
     'readOnly',
     'boolean',
     '—',
     'DatePicker',
-    'Readable and not changeable, and the trigger is out: a surface onto a grid nothing answers is worse than no surface.',
+    'Keeps the date legible and focusable and disables the trigger, so the calendar cannot open. Read from the enclosing Field when unset.',
   ],
-  ['invalid', 'boolean', '—', 'DatePicker', 'Retargets the focus ring on both halves.'],
-  ['required', 'boolean', '—', 'DatePicker', 'Reaches the field’s group as aria-required.'],
-  ['clearable', 'boolean', 'false', 'DatePicker', 'Draws the field’s clear button.'],
-  ['name', 'string', '—', 'DatePicker', 'The name the hidden input carries the ISO string under.'],
+  [
+    'invalid',
+    'boolean',
+    '—',
+    'DatePicker',
+    'Draws the frame and the focus ring in the danger tone and sets aria-invalid. A date outside min and max, or refused by isDateUnavailable, sets it on its own.',
+  ],
+  [
+    'required',
+    'boolean',
+    '—',
+    'DatePicker',
+    'Sets aria-required on the field. Read from the enclosing Field when unset.',
+  ],
+  [
+    'clearable',
+    'boolean',
+    'false',
+    'DatePicker',
+    'Adds a clear button to the field while it holds a date. It sets the value to null and returns focus to the field.',
+  ],
+  [
+    'name',
+    'string',
+    '—',
+    'DatePicker',
+    'Adds a hidden input with this name that submits the date as an ISO 8601 string, such as 2026-09-30.',
+  ],
   [
     'messages',
     'Partial<DatePickerMessages>',
     '—',
     'DatePicker',
-    'Words laid over the language in force, key by key: the trigger’s name while nothing is chosen (choose), and once a date is (change, with the date in its {date} slot).',
+    'Replaces the trigger’s accessible name, key by key: choose while no date is set, and change, with the date in its {date} slot, once one is.',
   ],
-  ['presets', 'ReactNode', '—', 'DatePicker', 'The consumer’s own shortcuts, beside the grid.'],
-  ['footer', 'ReactNode', '—', 'DatePicker', 'The consumer’s own actions, under the surface.'],
+  [
+    'presets',
+    'ReactNode',
+    '—',
+    'DatePicker',
+    'Your own shortcuts, drawn in a column beside the calendar.',
+  ],
+  [
+    'footer',
+    'ReactNode',
+    '—',
+    'DatePicker',
+    'Your own actions, drawn in a row under the calendar.',
+  ],
 ]);
 
 const events: EventRow[] = [
   {
     name: 'onValueChange',
     payload: '(value: CalendarValue, request: ChangeRequest<CalendarValue>)',
-    when: 'Before the value moves, and cancellable, whichever half moved it: the request’s reason is keyboard when it was typed and pointer or keyboard when it was chosen in the grid.',
+    when: 'Before the value changes, from the field or the calendar. request.reason is keyboard for typing and for the calendar’s keys, pointer for a press on a day, clear for the clear button and blur for a date completed when the field loses focus. request.cancel() keeps the current value.',
   },
   {
     name: 'onOpenChange',
     payload: '(open: boolean, request: ChangeRequest<boolean>)',
-    when: 'Before the surface opens or closes, and cancellable. The reason says which: pointer for the trigger, keyboard for the chord, escape for the key, outsidePress for a press elsewhere, and select for a date that closed it.',
+    when: 'Before the calendar opens or closes. request.reason is pointer for the trigger, keyboard for Alt+ArrowDown and for the handle’s open() and close(), escape for the Escape key, outsidePress for a press outside the surface and select for a chosen day. request.cancel() keeps the current state.',
   },
 ];
 
@@ -397,37 +469,38 @@ const composition: ApiRow[] = apiRows([
     'component',
     '—',
     'application',
-    'Sets timeZone, placement, closeOnSelect, calendar, size and variant once for everything under it.',
+    'Sets timeZone, placement, closeOnSelect, calendar, size and variant for every DatePicker under it. A prop on one DatePicker wins.',
   ],
   [
     'render',
     '(props: DatePickerRootProps) => ReactNode',
     '—',
     'DatePicker',
-    'Substitutes the element the root renders. The props carry the ref, which the positioner measures its anchor through.',
+    'Renders the root as another element. Spread the props onto it: they carry the ref the calendar is positioned against.',
   ],
   [
     'ref',
     'Ref<DatePickerHandle>',
     '—',
     'DatePicker',
-    'focus() puts the reader on the first segment; open() and close() move the surface without a controlled prop.',
+    'A handle with focus(), which focuses the first segment, and open() and close(), which show and hide the calendar without a controlled open prop. open() moves focus into the calendar.',
   ],
   [
     'onKeyDown',
     'KeyboardEventHandler',
     '—',
     'DatePicker',
-    'Runs before the chord is read, and calling preventDefault stops it — which is how a page keeps Alt+ArrowDown for itself.',
+    'Runs before Alt+ArrowDown is read. Calling event.preventDefault() keeps the shortcut for the page.',
   ],
 ]);
 
 const accessibility: string[] = [
-  'The trigger’s accessible name carries the chosen date in words. Focus returns to it when the surface closes, so it is where a screen-reader user is told what happened — which the APG names as an accessibility feature of its own example.',
-  'Escape is staged. dismissable-layer listens in the capture phase, so a handler inside the surface would already have lost it; the family decides there instead, and walks the calendar down a view rather than closing while a month or year grid is showing.',
-  'The chord is a shortcut and never the only way in. Angular Material records why: ChromeOS turns Alt+ArrowDown into PageDown before the browser sees it, so the trigger button is always drawn.',
-  'The surface is a role="dialog" with the same name as the trigger, and the trigger points aria-controls at it only while it is showing — an idref to an element that is not there is worse than none.',
-  'Both halves refuse the same dates from one predicate and one pair of bounds, so a date the grid will not accept is not one the field quietly takes.',
+  'The trigger’s accessible name carries the chosen date in words, such as “Change date, Wednesday, September 30, 2026”. Focus returns to the trigger when the calendar closes from a chosen day or from Escape, so a screen reader announces the date there.',
+  'Opening the calendar from the trigger, from Alt+ArrowDown or from open() moves focus to the chosen day, or to today when no date is set. While the calendar is open, Tab and Shift+Tab cycle through the shortcuts, the calendar and the footer.',
+  'Escape closes in steps: while the calendar shows the month or year grid, Escape returns to the day grid; on the day grid, it closes the calendar and returns focus to the trigger.',
+  'Alt+ArrowDown is a shortcut, never the only way in. ChromeOS turns it into PageDown before the browser receives it, so the trigger is always drawn.',
+  'The surface has role="dialog" and the same accessible name as the trigger. The trigger sets aria-expanded, and sets aria-controls only while the surface exists.',
+  'The field and the calendar refuse the same dates, from the same min, max and isDateUnavailable, so a date the calendar disables marks the field invalid when it is typed.',
 ];
 
 export const REACT_DATE_PICKER_DOCS = {

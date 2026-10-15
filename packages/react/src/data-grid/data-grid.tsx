@@ -75,6 +75,7 @@ import { useLocale, useMessages } from '../i18n';
 import {
   ResultState,
   ResultStateActions,
+  ResultStateContent,
   ResultStateDescription,
   ResultStateTitle,
 } from '../result-state';
@@ -2956,10 +2957,12 @@ export function DataGrid<Row>({
       kind === 'error' ? t('error') : kind === 'no-results' ? t('noResults') : t('empty');
     return (
       <ResultState reach="section" status={kind} tabIndex={-1}>
-        <ResultStateTitle>{title}</ResultStateTitle>
-        {kind === 'error' && error ? (
-          <ResultStateDescription>{error}</ResultStateDescription>
-        ) : null}
+        <ResultStateContent>
+          <ResultStateTitle>{title}</ResultStateTitle>
+          {kind === 'error' && error ? (
+            <ResultStateDescription>{error}</ResultStateDescription>
+          ) : null}
+        </ResultStateContent>
         {kind === 'no-results' || (kind === 'error' && onRetry) ? (
           <ResultStateActions>
             {kind === 'no-results' ? (

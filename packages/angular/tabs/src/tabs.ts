@@ -12,6 +12,7 @@ import {
   computed,
   DestroyRef,
   inject,
+  Injector,
   input,
   output,
   signal,
@@ -174,6 +175,7 @@ export class SlTabs implements OnInit {
   private readonly defaults = injectTabsDefaults();
   private readonly baseId = inject(SlTabsIdFactory).next();
   private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
 
   private readonly own = signal<string | undefined>(undefined);
   private readonly listElement = signal<HTMLElement | null>(null);
@@ -360,8 +362,23 @@ export class SlTabs implements OnInit {
     const removal: RemovalFocusHandle = createRemovalFocus(list, {
       itemSelector: TAB_SELECTOR,
     });
+    /**
+     * A list that starts to overflow — on its first render, or later when its
+     * stylesheet arrives, a drawer opens or a hidden panel is shown — draws its
+     * paging controls, and they narrow it: a tab revealed against the wider list
+     * ended behind the end control. The selected tab is revealed again once the
+     * controls are in the layout, on that transition and on no other, so a
+     * reader scrolling the list keeps control.
+     */
+    let overflowing = false;
     const affordance = createScrollAffordance(list, {
-      onChange: (state) => this.overflow.set(state),
+      onChange: (state) => {
+        this.overflow.set(state);
+        if (state.overflowing && !overflowing) {
+          afterNextRender(() => this.revealSelected(), { injector: this.injector });
+        }
+        overflowing = state.overflowing;
+      },
     });
     this.affordance = affordance;
     this.overflow.set(affordance.state());

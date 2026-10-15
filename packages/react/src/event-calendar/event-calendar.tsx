@@ -257,6 +257,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
   date,
   dayHours,
   defaultDate,
+  now: ownedNow,
   defaultOpenEvent,
   defaultSelection,
   defaultView,
@@ -348,16 +349,19 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
    * Now, ticked on the minute after the first paint, so a server and a
    * browser in different zones never disagree about the markup they drew.
    */
-  const [now, setNow] = useState<PlainDateTime | null>(null);
+  const [clock, setClock] = useState<PlainDateTime | null>(null);
+  const clockRuns = ownedNow === undefined;
   useEffect(() => {
+    if (!clockRuns) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const tick = () => {
-      setNow(nowDateTimeIn(resolvedZone));
+      setClock(nowDateTimeIn(resolvedZone));
       timer = setTimeout(tick, 60_000 - (Date.now() % 60_000));
     };
     tick();
     return () => clearTimeout(timer);
-  }, [resolvedZone]);
+  }, [resolvedZone, clockRuns]);
+  const now = ownedNow ?? clock;
   const today = now?.date ?? null;
 
   /* ── The five models ─────────────────────────────────────────────────── */

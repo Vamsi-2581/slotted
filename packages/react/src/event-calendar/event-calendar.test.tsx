@@ -268,6 +268,35 @@ describe('the view', () => {
     expect(review.style.getPropertyValue('--slotted-event-length')).toBe('120');
   });
 
+  /**
+   * A page dated by its content — a docs console, a screenshot — names its
+   * own now: the runtime's clock marked 1 October in a week dated 30 September.
+   */
+  it('reads now from the now prop, which stops the clock', async () => {
+    render(
+      <EventCalendar
+        defaultDate={day(30)}
+        defaultView="week"
+        events={[]}
+        locale="en-US"
+        now={at(30, 9, 30)}
+        timeZone="UTC"
+      />,
+    );
+    await act(async () => {});
+    const line = () => document.querySelector("[data-part='now']") as HTMLElement;
+    expect(line().closest("[data-part='column']")).toHaveAttribute('data-date', '2026-09-30');
+    expect(line().style.getPropertyValue('--slotted-event-start')).toBe('570');
+    expect(document.querySelectorAll('[data-today]')).not.toHaveLength(0);
+    for (const marked of document.querySelectorAll('[data-today]')) {
+      expect(marked).toHaveAttribute('data-date', '2026-09-30');
+    }
+    await act(async () => {
+      vi.advanceTimersByTime(5 * 60_000);
+    });
+    expect(line().style.getPropertyValue('--slotted-event-start')).toBe('570');
+  });
+
   it('marks now in today’s column, and the minute a zone changes its clocks', async () => {
     render(
       <EventCalendar

@@ -935,6 +935,12 @@ export class SlEventCalendar implements OnInit {
   /** The day the calendar is on. Two-way. */
   readonly date = model<PlainDate | undefined>(undefined);
   readonly defaultDate = input<PlainDate | undefined>(undefined);
+  /**
+   * Now, in the calendar's zone. Bound means the consumer owns it: the clock
+   * is no longer read, so a page dated by its content marks the same today on
+   * every machine and at every minute.
+   */
+  readonly now = input<PlainDateTime | undefined>(undefined);
   readonly view = model<EventCalendarView | undefined>(undefined);
   readonly defaultView = input<EventCalendarView | undefined>(undefined);
   /** Keys of the calendars drawn. Unbound starts with all of them. */
@@ -1115,8 +1121,9 @@ export class SlEventCalendar implements OnInit {
 
   /* ── Time ──────────────────────────────────────────────────────────── */
 
-  private readonly now = signal<PlainDateTime | null>(null);
-  private readonly today = computed(() => this.now()?.date ?? null);
+  private readonly clock = signal<PlainDateTime | null>(null);
+  private readonly resolvedNow = computed(() => this.now() ?? this.clock());
+  private readonly today = computed(() => this.resolvedNow()?.date ?? null);
   protected readonly narrow = signal(false);
   private readonly row = signal<GridRow>('timed');
   private readonly pending = signal<EventCalendarSelection | null>(null);
@@ -1203,7 +1210,7 @@ export class SlEventCalendar implements OnInit {
     view: this.currentView(),
     date: this.currentDate(),
     today: this.today(),
-    now: this.now(),
+    now: this.resolvedNow(),
     calendars: this.calendars(),
     openKey: this.currentOpen(),
     selection: this.pending() ?? this.contextSlot() ?? this.currentSelection(),
@@ -1341,7 +1348,7 @@ export class SlEventCalendar implements OnInit {
     afterNextRender(() => {
       let timer: ReturnType<typeof setTimeout> | undefined;
       const tick = () => {
-        this.now.set(nowDateTimeIn(this.zoneValue()));
+        if (this.now() === undefined) this.clock.set(nowDateTimeIn(this.zoneValue()));
         timer = setTimeout(tick, 60_000 - (Date.now() % 60_000));
       };
       tick();

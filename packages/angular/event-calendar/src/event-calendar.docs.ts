@@ -786,6 +786,13 @@ export const ANGULAR_EVENT_CALENDAR_DOCS = {
         'Read once; pass it when rendering on a server',
       ],
       [
+        'now',
+        'PlainDateTime',
+        'the clock in timeZone, ticked each minute',
+        'slEventCalendar',
+        'Present means the consumer owns it: the clock is no longer read, and today and the now line follow it. A page dated by its content passes it.',
+      ],
+      [
         'view',
         'model<EventCalendarView | undefined>',
         'month',

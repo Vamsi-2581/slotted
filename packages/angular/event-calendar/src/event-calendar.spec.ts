@@ -95,6 +95,8 @@ class Host {
     this.changes.push(request.value);
   }
   readonly twentyThird = day(23);
+  readonly thirtieth = day(30);
+  readonly morningOfTheThirtieth = at(30, 9, 30);
   readonly firstOfNovember = day(1, 11);
   readonly working = [
     {
@@ -149,6 +151,27 @@ afterEach(() => {
 });
 
 describe('SlEventCalendar', () => {
+  /**
+   * A page dated by its content — a docs console, a screenshot — names its
+   * own now: the runtime's clock marked 1 October in a week dated 30 September.
+   */
+  it('reads now from the now input, which stops the clock', async () => {
+    const fixture = renderTemplate(
+      `<div slEventCalendar [events]="[]" [defaultDate]="thirtieth" defaultView="week" [now]="morningOfTheThirtieth" locale="en-US" timeZone="UTC"></div>`,
+    );
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const line = () => query(fixture, "[data-part='now']");
+    expect(line().closest("[data-part='column']")?.getAttribute('data-date')).toBe('2026-09-30');
+    expect(line().style.getPropertyValue('--slotted-event-start')).toBe('570');
+    const marked = [...fixture.nativeElement.querySelectorAll('[data-today]')] as HTMLElement[];
+    expect(marked.length).toBeGreaterThan(0);
+    expect(marked.every((node) => node.getAttribute('data-date') === '2026-09-30')).toBe(true);
+    vi.advanceTimersByTime(5 * 60_000);
+    fixture.detectChanges();
+    expect(line().style.getPropertyValue('--slotted-event-start')).toBe('570');
+  });
+
   it('is selected by the family identifier and draws the month as a labelled grid', () => {
     const fixture = renderTemplate(
       `<div slEventCalendar [calendars]="calendars" [events]="events" [defaultDate]="twentyFourth" locale="en-US" timeZone="UTC"></div>`,

@@ -162,6 +162,13 @@ export interface EventCalendarProps<E extends CalendarEvent = CalendarEvent> ext
   defaultDate?: PlainDate | undefined;
   onDateChange?: ((date: PlainDate, request: ChangeRequest<PlainDate>) => void) | undefined;
 
+  /**
+   * Now, in the calendar's zone. Present means the consumer owns it: the
+   * calendar stops reading the clock, so a page dated by its content marks
+   * the same today on every machine and at every minute.
+   */
+  now?: PlainDateTime | undefined;
+
   view?: EventCalendarView | undefined;
   defaultView?: EventCalendarView | undefined;
   onViewChange?:

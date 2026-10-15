@@ -394,6 +394,7 @@ function contentWidth(cell: HTMLElement): number {
                   slCheckbox
                   [checked]="allState() === 'all'"
                   [indeterminate]="allState() === 'some'"
+                  [tabIndex]="isCurrent(HEADER, SELECTION) ? 0 : -1"
                   (checkedChange)="toggleAll($event.source)"
                 >
                   <span data-ui="visually-hidden" data-part="root">{{ selectAllName() }}</span>
@@ -807,6 +808,7 @@ function contentWidth(cell: HTMLElement): number {
                 slCheckbox
                 [checked]="isSelected(entry.node.key)"
                 [disabled]="isDisabled(entry.node.key) || undefined"
+                [tabIndex]="isCurrent(entry.node.key, SELECTION) ? 0 : -1"
                 (checkedChange)="
                   toggleSelected(entry.node.key, {
                     range: shiftHeld($event.source),

@@ -22,7 +22,7 @@ import { provideSlotted } from '@slotted/angular/i18n';
 import { SlMenu } from '@slotted/angular/menu';
 import { provideTooltipDefaults } from '@slotted/angular/tooltip';
 import contract from '../../../../specs/components/data-grid/contract.json';
-import { SlDataGrid } from './data-grid';
+import { SELECTION_COLUMN, SlDataGrid } from './data-grid';
 import { provideDataGridDefaults } from './data-grid-defaults';
 import type {
   DataGridActivateEvent,
@@ -248,6 +248,25 @@ describe('SlDataGrid', () => {
     const stops = root().querySelectorAll('[tabindex="0"]');
     expect(stops).toHaveLength(1);
     expect(stops[0]).toBe(header('id'));
+  });
+
+  /**
+   * A native input is a tab stop without a tabindex attribute: counting
+   * `[tabindex="0"]` missed every selection box, and Tab walked the rows.
+   */
+  it('keeps one tab stop with a selection column, the boxes included', () => {
+    host.selectionMode.set('multiple');
+    fixture.detectChanges();
+    const stops = () =>
+      [
+        ...root().querySelectorAll<HTMLElement>(
+          'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"]',
+        ),
+      ].filter((node) => node.tabIndex >= 0 && !node.matches(':disabled'));
+    expect(stops()).toHaveLength(1);
+    host.current.set({ row: 'S2', column: SELECTION_COLUMN });
+    fixture.detectChanges();
+    expect(stops().every((node) => node.closest('[data-row="S2"]') !== null)).toBe(true);
   });
 
   it('names the set and yes-or-no filters in the filter row, as React does', () => {

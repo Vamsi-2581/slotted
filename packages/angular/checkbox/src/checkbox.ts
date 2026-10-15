@@ -98,6 +98,7 @@ function showsNothing(label: HTMLElement): boolean {
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-readonly]="ariaReadOnly()"
       [attr.aria-required]="ariaRequired()"
+      [attr.tabindex]="tabIndex() ?? null"
       [attr.disabled]="disabledAttribute()"
       [attr.required]="requiredAttribute()"
       [checked]="resolvedChecked()"
@@ -151,6 +152,12 @@ export class SlCheckbox implements ControlValueAccessor, OnInit {
   /** What this box selects inside a group, and what it submits in a form. */
   readonly value = input<string | undefined>(undefined);
   readonly name = input<string | undefined>(undefined);
+  /**
+   * The input's `tabindex`. A composite widget that owns the tab sequence — a
+   * grid row's selection box — writes -1 until its cell is current; unset
+   * leaves the native order.
+   */
+  readonly tabIndex = input<number | undefined>(undefined);
   readonly size = input<CheckboxSize | undefined>(undefined);
   readonly labelPlacement = input<CheckboxLabelPlacement | undefined>(undefined);
   readonly variant = input<CheckboxVariant | undefined>(undefined);

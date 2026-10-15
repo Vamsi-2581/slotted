@@ -336,6 +336,13 @@ export const ANGULAR_CHECKBOX_DOCS = {
         'Unset rather than false. Writes aria-invalid on the input and data-invalid on the root, which draws a thicker border in the danger tone.',
       ],
       [
+        'tabIndex',
+        'number',
+        '—',
+        'SlCheckbox',
+        'Written to the input as tabindex. A composite widget that owns the tab sequence, such as a data grid, passes -1 until the box’s cell is current. Unset leaves the native order.',
+      ],
+      [
         'required',
         'boolean',
         '—',

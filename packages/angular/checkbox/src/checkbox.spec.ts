@@ -55,6 +55,23 @@ function click(element: HTMLInputElement, detail = 1) {
 
 describe('SlCheckbox', () => {
   /**
+   * A composite widget — a grid row's selection box — keeps the box out of the
+   * tab sequence until its cell is current; React's `tabIndex` reaches the
+   * input the same way.
+   */
+  it('writes tabIndex on the input, and nothing when it is unset', async () => {
+    const unset = renderTemplate(`<div slCheckbox>Archive</div>`);
+    await unset.whenStable();
+    expect(control(unset).hasAttribute('tabindex')).toBe(false);
+
+    const set = renderTemplate(`<div slCheckbox [tabIndex]="-1">Archive</div>`);
+    await set.whenStable();
+    set.detectChanges();
+    expect(control(set).getAttribute('tabindex')).toBe('-1');
+    expect(control(set).tabIndex).toBe(-1);
+  });
+
+  /**
    * Hidden words are as wide as none: the root says so, and the wash closes
    * around the box. Visible words beside hidden ones are a label.
    */

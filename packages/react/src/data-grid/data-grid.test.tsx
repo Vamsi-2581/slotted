@@ -137,6 +137,25 @@ describe('DataGrid, the pattern', () => {
     expect(stops[0]).toBe(header('id'));
   });
 
+  /**
+   * A native input is a tab stop without a tabindex attribute: counting
+   * `[tabindex="0"]` misses a selection box that stayed in the sequence.
+   */
+  it('keeps one tab stop with a selection column, the boxes included', () => {
+    const stops = () =>
+      [
+        ...grid().querySelectorAll<HTMLElement>(
+          'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"]',
+        ),
+      ].filter((node) => node.tabIndex >= 0 && !node.matches(':disabled'));
+    const { rerender } = render(<Shipments selectionMode="multiple" />);
+    expect(stops()).toHaveLength(1);
+    rerender(
+      <Shipments selectionMode="multiple" current={{ row: 'S2', column: SELECTION_COLUMN }} />,
+    );
+    expect(stops().every((node) => node.closest('[data-row="S2"]') !== null)).toBe(true);
+  });
+
   it('declares every part the contract names on the elements it names', () => {
     render(<Shipments selectionMode="multiple" renderDetail={() => <p>detail</p>} filterRow />);
     const parts = new Set(

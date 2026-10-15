@@ -68,8 +68,8 @@ not need. That import is gone; the Angular preview never had one. Do not add a
 ## Repository layout
 
 ```
-apps/       storybook-react, storybook-angular
-demos/      nexora/{angular,backend,domain.md}; .registry/ (beta tarballs, ignored)
+apps/       docs (the documentation site), storybook-react, storybook-angular
+demos/      nexora/{angular,backend,domain.md}, its own pnpm workspace; .registry/ (beta tarballs, ignored)
 packages/   core, react, angular, styles, theme, themes — the published set
 tools/      harness, storybook-workbench — workspace packages, never published
 specs/      one contract.json and its test per family
@@ -110,6 +110,21 @@ it is written by:
 A demo names the version it consumes in its own `package.json` and moves to a
 newer one deliberately, the way a consumer would. `pnpm test:release` checks
 that the published set and the shared version stay what this section says.
+
+## Publishing to npm
+
+The six packages under `packages/` are published together, at one shared
+version, under the `beta` tag:
+
+1. `pnpm release:beta` moves every package to the next `0.x.y-beta.N`. The
+   version change is committed on `main`, and CI passes on it.
+2. From a clean `main` equal to `origin/main`: `rm -rf packages/*/dist && pnpm build`.
+3. `pnpm -r --filter './packages/*' publish --tag beta --access public`. pnpm
+   replaces `workspace:*` with the shared version. The npm account requires a
+   one-time password, so the command runs in an interactive terminal.
+
+A version appears on the registry up to two minutes after the command returns;
+`npm view @slotted/<package> dist-tags` confirms it.
 
 ## Adding a locale
 

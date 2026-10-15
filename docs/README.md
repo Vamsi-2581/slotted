@@ -35,19 +35,23 @@ pela skill `/component`. Cada subdiretório tem uma classe de leitura própria.
 
 ## Operacional
 
-| Ficheiro                                      | Conteúdo                                                                                                       |
-| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `process/build-order.md`                      | Famílias entregues no passe 1, reaberturas prometidas e ondas 9 a 12 com escopo por família.                   |
-| `process/build-schedule.md`                   | Rodadas do passe 2: o bloco a colar em cada sessão, o que corre em paralelo e o que nunca corre.               |
-| `process/implementation-review.md`            | Passe de revisão 2: triagem por família, regras transversais R1–R7 e itens `[ ]` para o loop.                  |
-| `process/implementation-review-log.md`        | Uma entrada por item fechado no passe 2.                                                                       |
-| `process/review-prompt.md`                    | Prompt que `scripts/review-loop.sh` entrega a cada sessão do loop de revisão.                                  |
-| `process/nexora-vertical-slice-prompts.md`    | Preâmbulo e cinco prompts, um por sessão, para a fatia vertical da demo Nexora (`domain.md` §44, Fase 2).      |
-| `process/nexora-inventory-module-prompt.md`   | Prompt do módulo Inventory da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.   |
-| `process/nexora-procurement-module-prompt.md` | Prompt do módulo Procurement da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`. |
-| `process/nexora-finance-module-prompt.md`     | Prompt do módulo Finance da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.     |
-| `process/nexora-support-module-prompt.md`     | Prompt do módulo Support da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.     |
-| `process/nexora-analytics-module-prompt.md`   | Prompt do módulo Analytics da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.   |
+| Ficheiro                                      | Conteúdo                                                                                                                 |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `process/build-order.md`                      | Famílias entregues no passe 1, reaberturas prometidas e ondas 9 a 12 com escopo por família.                             |
+| `process/build-schedule.md`                   | Rodadas do passe 2: o bloco a colar em cada sessão, o que corre em paralelo e o que nunca corre.                         |
+| `process/implementation-review.md`            | Passe de revisão 2: triagem por família, regras transversais R1–R7 e itens `[ ]` para o loop.                            |
+| `process/implementation-review-log.md`        | Uma entrada por item fechado no passe 2.                                                                                 |
+| `process/review-prompt.md`                    | Prompt que `scripts/review-loop.sh` entrega a cada sessão do loop de revisão.                                            |
+| `process/nexora-vertical-slice-prompts.md`    | Preâmbulo e cinco prompts, um por sessão, para a fatia vertical da demo Nexora (`domain.md` §44, Fase 2).                |
+| `process/nexora-inventory-module-prompt.md`   | Prompt do módulo Inventory da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.             |
+| `process/nexora-procurement-module-prompt.md` | Prompt do módulo Procurement da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.           |
+| `process/nexora-finance-module-prompt.md`     | Prompt do módulo Finance da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.               |
+| `process/nexora-support-module-prompt.md`     | Prompt do módulo Support da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.               |
+| `process/nexora-analytics-module-prompt.md`   | Prompt do módulo Analytics da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.             |
+| `process/nexora-automation-module-prompt.md`  | Prompt do módulo Workflow & Automation da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`. |
+| `process/nexora-catalog-module-prompt.md`     | Prompt do módulo Catalog da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.               |
+| `process/nexora-crm-module-prompt.md`         | Prompt do módulo CRM da demo Nexora; substitui os prompts 1 e 2 de `nexora-vertical-slice-prompts.md`.                   |
+| `process/i18n-inventory.json`                 | Inventário de chaves de texto por binding e família, emitido por `scripts/extract-i18n.mjs`.                             |
 
 ## Histórico
 
@@ -78,6 +82,8 @@ pela skill `/component`. Cada subdiretório tem uma classe de leitura própria.
 | Localização                | Conteúdo                                                                     |
 | -------------------------- | ---------------------------------------------------------------------------- |
 | `specs/components/<f>/`    | Contrato público de cada família (`contract.json`) e o teste que o verifica. |
+| `apps/docs/`               | Site de documentação: páginas de componente, exemplos React e Angular.       |
+| `packages/*/README.md`     | Instalação e uso de cada pacote, publicados no npm com o pacote.             |
 | `demos/nexora/domain.md`   | Domínio e especificação de produto da demo Nexora. Normativo para o backend. |
 | `demos/*/LIBRARY-FEEDBACK` | Ledger de defeitos e lacunas do pacote observados a partir de uma demo.      |
 | `.claude/progress/`        | Checkpoints de sessão. Artefactos de trabalho, fora do `format:check`.       |

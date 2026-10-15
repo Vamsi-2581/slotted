@@ -6,7 +6,7 @@
 
 React and Angular must remain idiomatic to their frameworks. Share specifications and contracts when useful; do not force shared implementation without demonstrated need.
 
-The packages have zero consumers and are not published. The only consumer is `demos/*`, built inside this repository to exercise the library and surface defects. Nothing outside this repository imports the packages.
+The packages are published on npm as `0.x` betas under the `beta` tag, and every package README states that the public API changes between beta releases without deprecation. Inside this repository the only consumer is `demos/*`, built to exercise the library and surface defects.
 
 Backward compatibility is therefore not a constraint, and must not be treated as one. No deprecation aliases, no compatibility shims, no migration layers, no staged renames, no reasoning about "breaking existing users". When a public API is wrong, change it to the correct shape in one pass and update the demo. Compatibility cost never enters a design decision, and never narrows the design space considered.
 

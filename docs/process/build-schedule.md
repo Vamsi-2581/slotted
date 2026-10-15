@@ -24,24 +24,24 @@ As rodadas 1 a 12 do passe 1 estão em `docs/archive/build-schedule-pass-1.md`.
 - Uma rodada de **revisão** não invoca `/component`. O bloco é o comando que
   a inicia.
 
-## Onde estamos — 2026-09-15
+## Onde estamos — 2026-10-15
 
-O passe 1 terminou: 79 famílias em `specs/components/`, ondas 0 a 8, rodadas 1
-a 12. A rodada 12 (operandos `time`, `datetime`, `date-range-picker` e
-`tags-input` no filtro do `table`) foi commitada em 2026-09-15.
+`specs/components/` tem 124 famílias. As ondas 9 a 12 estão entregues, exceto
+as famílias abaixo, sem contrato em `specs/components/`:
 
-A sessão `filter-bar code-block` da rodada 11 fechou em `8db03ea`; a decisão
-transversal da variante `plain` fechou em `bad653d`. A árvore está limpa.
+- rodada 20: `data-entry-form`, `crud-list`;
+- rodada 21: `hierarchical-picker`, `master-detail`;
+- rodada 22: `audit-log`, `workflow-tracker`, `search-results`;
+- `selection-toolbar` e `drag-and-drop`, que `docs/process/build-order.md` lista.
 
-Seis famílias da onda 8 não foram construídas: `side-navigation`,
-`top-navigation`, `command-palette`, `data-grid`, `time-range-picker` e
-`datetime-range-picker`. Estão na onda 9.
+A rodada 23 (`drawer` como bottom sheet) não começou: nenhuma família lê
+`panelDrag`.
 
-Duas passagens de revisão ficaram devidas por escrito e não são sessão de
-família: as páginas de referência entregues antes da barra de _Demonstrations_
-(`.claude/skills/component/references/stories.md`), e o refino das famílias
-que o passe 1 deixou instáveis (`docs/process/implementation-review.md`, passe 2). A
-segunda depende da triagem por família registrada nesse arquivo.
+O passe de revisão 2 (`docs/process/implementation-review.md`) não começou: a
+triagem tem 66 famílias e nenhum veredito.
+
+Os seis pacotes foram publicados no npm em `0.1.0-beta.0`, tag `beta`, a partir
+de `main` em `8e5a3c27` (CONTRIBUTING.md › Publishing to npm).
 
 ## Rodada 13 — fechar o passe 1 · 1 sessão
 

@@ -373,10 +373,11 @@ not recoverable from the index, so:
    Another family's file is never yours to fix, however plainly broken.
 2. **Treat the registries as append-only**, re-reading each immediately before
    writing: `packages/react/package.json`, `packages/react/src/index.ts`,
-   `packages/react/vite.config.ts`, the path mapping in
-   `packages/angular/tsconfig.base.json`, `packages/styles/package.json`,
-   `docs/history/build-log.md` and `docs/process/build-order.md`. Insert your entry; reorder and
-   reformat nothing.
+   `packages/styles/package.json`, `docs/history/build-log.md` and
+   `docs/process/build-order.md`. Insert your entry; reorder and reformat
+   nothing. The React build entries (`packages/react/vite.config.ts`) and the
+   Angular path mapping (`tsconfig.base.json`) are derived from the family
+   folders and take no entry.
 3. **Keep git narrow.** Stage explicit paths. No `git add -A`, `commit -a`,
    `checkout`, `restore`, `stash` or `clean`. Format with
    `pnpm exec prettier --write <your paths>`, never `pnpm format`. Stage and

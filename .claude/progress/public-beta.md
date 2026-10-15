@@ -26,4 +26,4 @@
 
 ## Próxima ação
 
-Passo 4 do plano: páginas de docs das famílias que a Nexora usa, com a skill `docs-page`.
+Passo 4 (páginas de docs das famílias que a Nexora usa) pausado pelo usuário em 2026-10-15. Nenhuma ação pendente neste plano.

@@ -1,0 +1,1071 @@
+<!--
+  The controls in the bar are the real `button` markup, and the page carries its
+  stylesheet: the subject of this family is what it does to a set of controls it
+  does not own, so a page without them would show an empty box. The builder
+  reads the families to load from the `data-ui` values below.
+
+  One domain throughout — a purchase order waiting for approval — because a
+  bar's defects only appear against real labels: `Aprovar` is two syllables and
+  `Devolver ao requisitante` is eight, and only one of them is in the mock.
+-->
+<section data-scene="variant">
+  <style>
+    [data-demo-column] {
+      display: grid;
+      gap: var(--slotted-space-8);
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    [data-demo-label] {
+      color: var(--slotted-text-muted);
+      font-family: ui-monospace, monospace;
+      font-size: 11px;
+      margin: 0;
+    }
+
+    /* No inline padding: the framed bar and the bare one below it have to be
+       the same width, or the comparison is between two container widths
+       rather than between two variants. */
+    [data-demo-frame] {
+      background-color: var(--slotted-surface-sunken);
+      border: 1px dashed var(--slotted-border-strong);
+      border-radius: var(--slotted-radius-md);
+      padding-block: var(--slotted-space-3);
+    }
+
+    [data-demo-narrow] {
+      inline-size: 21rem;
+      max-inline-size: 100%;
+    }
+  </style>
+
+  <div data-demo-column>
+    <p data-demo-label>plain — dentro do rodapé de uma página, que já pinta o chão</p>
+    <div data-demo-frame>
+      <div
+        data-ui="action-bar"
+        data-part="root"
+        role="group"
+        aria-label="Ações do pedido"
+        data-variant="plain"
+        data-size="md"
+        data-align="end"
+      >
+        <div data-part="status">Rascunho guardado às 14:07</div>
+        <div data-part="actions">
+          <div data-part="action" data-priority="pinned">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="ghost"
+              data-tone="secondary"
+              data-size="md"
+              type="button"
+            >
+              <span data-part="label">Cancelar</span>
+            </button>
+          </div>
+          <div data-part="action" data-priority="pinned">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="solid"
+              data-tone="accent"
+              data-size="md"
+              type="button"
+            >
+              <span data-part="label">Submeter para aprovação</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p data-demo-label>raised — sem página à volta: gaveta, diálogo, cartão</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="md"
+      data-align="end"
+    >
+      <div data-part="status">Rascunho guardado às 14:07</div>
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Cancelar</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Submeter para aprovação</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="stability">
+  <!--
+    The third line of the scope paragraph, photographed rather than asserted.
+    Four bars, one stage, and the confirming action on the same pixel in all
+    four: no message, a short message, a message that fills the bar, and one
+    secondary action removed by a permission filter.
+  -->
+  <div data-demo-column>
+    <p data-demo-label>sem mensagem</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="md"
+      data-align="end"
+    >
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Devolver</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Aprovar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p data-demo-label>mensagem curta</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="md"
+      data-align="end"
+    >
+      <div data-part="status">3 alterações por guardar</div>
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Devolver</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Aprovar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p data-demo-label>mensagem que enche a barra</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="md"
+      data-align="end"
+    >
+      <div data-part="status">
+        Este pedido excede o limite de aprovação do centro de custo 4120 e segue para o diretor
+        financeiro depois de si
+      </div>
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Devolver</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Aprovar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p data-demo-label>uma ação retirada por permissões, e a de confirmar não se move</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="md"
+      data-align="end"
+    >
+      <div data-part="status">3 alterações por guardar</div>
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Aprovar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="priority" data-widths="420 720">
+  <!--
+    The bar as the collapse leaves it: three units given way, the trigger drawn,
+    and the count on the root. `hide` is the one that is gone without becoming a
+    row in the surface.
+  -->
+  <div data-demo-column>
+    <p data-demo-label>os quatro postos, com espaço para todos</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="md"
+      data-align="end"
+      data-collapsed="0"
+    >
+      <div data-part="status">Rascunho guardado às 14:07</div>
+      <div data-part="actions">
+        <div data-part="action" data-priority="hide">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Pré-visualizar</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="low">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Duplicar</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="high">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="outline"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Devolver</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Aprovar</span>
+          </button>
+        </div>
+        <button
+          data-part="overflow"
+          type="button"
+          aria-label="Mais 0 ações"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          hidden
+        >
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="ellipsis"></svg
+          ></span>
+        </button>
+      </div>
+    </div>
+
+    <p data-demo-label>não cabe — `hide` e `low` cederam, `high` seguiu, e a de confirmar ficou</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="md"
+      data-align="end"
+      data-collapsed="2"
+    >
+      <div data-part="actions">
+        <div data-part="action" data-priority="hide" hidden>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Pré-visualizar</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="low" hidden>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Duplicar</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="high">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="outline"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Devolver</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Aprovar</span>
+          </button>
+        </div>
+        <button
+          data-part="overflow"
+          type="button"
+          aria-label="Mais 1 ação"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="ellipsis"></svg
+          ></span>
+        </button>
+      </div>
+    </div>
+
+    <p data-demo-label>a superfície aberta, e o gatilho a dizê-lo</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="md"
+      data-align="end"
+      data-collapsed="2"
+    >
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Aprovar</span>
+          </button>
+        </div>
+        <button
+          data-part="overflow"
+          type="button"
+          aria-label="Mais 2 ações"
+          aria-haspopup="menu"
+          aria-expanded="true"
+          data-open
+        >
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="ellipsis"></svg
+          ></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="danger">
+  <!--
+    `docs/component-features.md` §5 asks that a destructive action does not sit
+    flush against a frequent one and names no mechanism. The rule is the
+    mechanism, and the second bar is the case nobody writes down: the action
+    that confirms *is* the destructive one.
+  -->
+  <div data-demo-column>
+    <p data-demo-label>a destrutiva ao lado das frequentes, com a régua entre elas</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações da fatura"
+      data-variant="raised"
+      data-size="md"
+      data-align="end"
+    >
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="danger"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Anular fatura</span>
+          </button>
+        </div>
+        <div data-part="separator" role="separator" aria-orientation="vertical"></div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Cancelar</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Guardar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p data-demo-label>a que confirma é a destrutiva</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Eliminar fornecedor"
+      data-variant="raised"
+      data-size="md"
+      data-align="end"
+    >
+      <div data-part="status">
+        O fornecedor tem 14 faturas em aberto. A eliminação não pode ser desfeita.
+      </div>
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Manter</span>
+          </button>
+        </div>
+        <div data-part="separator" role="separator" aria-orientation="vertical"></div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="danger"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Eliminar fornecedor</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="bulk">
+  <!--
+    The bar `table`'s contract deferred its batch actions to. The count and the
+    select-all are the consumer's own markup in the status slot, because `table`
+    owns the selection; what this family supplies is the place, the rank and the
+    entry.
+  -->
+  <div
+    data-ui="action-bar"
+    data-part="root"
+    role="group"
+    aria-label="Ações sobre a seleção"
+    data-variant="raised"
+    data-size="md"
+    data-align="end"
+  >
+    <div data-part="status">
+      <strong>12 faturas selecionadas</strong>
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="accent"
+        data-size="sm"
+        type="button"
+      >
+        <span data-part="label">Selecionar as 248 do filtro</span>
+      </button>
+    </div>
+    <div data-part="actions">
+      <div data-part="action" data-priority="low">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="ghost"
+          data-tone="secondary"
+          data-size="md"
+          type="button"
+        >
+          <span data-part="label">Exportar</span>
+        </button>
+      </div>
+      <div data-part="action" data-priority="high">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="outline"
+          data-tone="secondary"
+          data-size="md"
+          type="button"
+        >
+          <span data-part="label">Reatribuir</span>
+        </button>
+      </div>
+      <div data-part="separator" role="separator" aria-orientation="vertical"></div>
+      <div data-part="action" data-priority="pinned">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="solid"
+          data-tone="danger"
+          data-size="md"
+          type="button"
+        >
+          <span data-part="label">Anular</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="align">
+  <div data-demo-column>
+    <p data-demo-label>end — a omissão</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="md"
+      data-align="end"
+    >
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Cancelar</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Guardar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p data-demo-label>start</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="md"
+      data-align="start"
+    >
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Cancelar</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Guardar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p data-demo-label>center</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="md"
+      data-align="center"
+    >
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Cancelar</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Guardar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="sizes">
+  <div data-demo-column>
+    <p data-demo-label>sm</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="sm"
+      data-align="end"
+    >
+      <div data-part="status">Guardado às 14:07</div>
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Cancelar</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Guardar</span>
+          </button>
+        </div>
+        <button
+          data-part="overflow"
+          type="button"
+          aria-label="Mais 2 ações"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="ellipsis"></svg
+          ></span>
+        </button>
+      </div>
+    </div>
+
+    <p data-demo-label>md</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="md"
+      data-align="end"
+    >
+      <div data-part="status">Guardado às 14:07</div>
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Cancelar</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Guardar</span>
+          </button>
+        </div>
+        <button
+          data-part="overflow"
+          type="button"
+          aria-label="Mais 2 ações"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="ellipsis"></svg
+          ></span>
+        </button>
+      </div>
+    </div>
+
+    <p data-demo-label>lg</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="lg"
+      data-align="end"
+    >
+      <div data-part="status">Guardado às 14:07</div>
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="lg"
+            type="button"
+          >
+            <span data-part="label">Cancelar</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="lg"
+            type="button"
+          >
+            <span data-part="label">Guardar</span>
+          </button>
+        </div>
+        <button
+          data-part="overflow"
+          type="button"
+          aria-label="Mais 2 ações"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="ellipsis"></svg
+          ></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="stacked">
+  <!--
+    Under 24rem of container the run becomes a full-width column with the action
+    that confirms on top. `column-reverse` paints it there without moving it in
+    the DOM, so the tab order stays the order the form is read in.
+  -->
+  <div data-demo-column>
+    <p data-demo-label>21rem de contentor — a fila é uma coluna</p>
+    <div data-demo-narrow>
+      <div
+        data-ui="action-bar"
+        data-part="root"
+        role="group"
+        aria-label="Ações do pedido"
+        data-variant="raised"
+        data-size="md"
+        data-align="end"
+      >
+        <div data-part="status">3 alterações por guardar</div>
+        <div data-part="actions">
+          <div data-part="action" data-priority="pinned">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="ghost"
+              data-tone="secondary"
+              data-size="md"
+              type="button"
+            >
+              <span data-part="label">Descartar alterações</span>
+            </button>
+          </div>
+          <div data-part="action" data-priority="pinned">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="solid"
+              data-tone="accent"
+              data-size="md"
+              type="button"
+            >
+              <span data-part="label">Guardar alterações</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="content">
+  <!--
+    Content the family did not choose: a German string twice the length of the
+    Portuguese one, an unbroken reference number, and an action mid-flight. The
+    bar never truncates a label — it wraps, or the action goes to the surface,
+    where there is a whole row for it.
+  -->
+  <div data-demo-column>
+    <p data-demo-label>rótulos traduzidos longos</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Bestellaktionen"
+      data-variant="raised"
+      data-size="md"
+      data-align="end"
+    >
+      <div data-part="status">Entwurf um 14:07 gespeichert</div>
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Änderungen verwerfen</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Zur Genehmigung einreichen</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p data-demo-label>uma referência sem espaços, e uma ação a decorrer</p>
+    <div
+      data-ui="action-bar"
+      data-part="root"
+      role="group"
+      aria-label="Ações do pedido"
+      data-variant="raised"
+      data-size="md"
+      data-align="end"
+    >
+      <div data-part="status">PO-2026-0004821-REV-C-AGUARDA-CENTRO-DE-CUSTO-4120</div>
+      <div data-part="actions">
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Cancelar</span>
+          </button>
+        </div>
+        <div data-part="action" data-priority="pinned">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+            aria-disabled="true"
+            data-loading
+          >
+            <span data-part="start">
+              <span
+                data-part="indicator"
+                data-ui="spinner"
+                role="progressbar"
+                aria-label="A submeter"
+              ></span>
+            </span>
+            <span data-part="label">Submeter</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

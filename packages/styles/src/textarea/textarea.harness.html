@@ -1,0 +1,194 @@
+<!--
+  `rows` and `maxRows` reach the stylesheet as two custom properties, because
+  CSS cannot read an HTML attribute and `field-sizing: content` stops `rows`
+  from being the floor. The bindings write them; this page writes them by hand
+  so the same arithmetic is on screen.
+-->
+
+<section data-scene="default">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <textarea data-ui="textarea" data-part="root" data-size="md" data-variant="outline" rows="3">
+Precisamos revisar o prazo de entrega antes de aprovar a nota.</textarea>
+    <textarea
+      data-ui="textarea"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      rows="3"
+      placeholder="Descreva o que aconteceu"
+    ></textarea>
+  </div>
+</section>
+
+<section data-scene="sizes">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <textarea data-ui="textarea" data-part="root" data-size="sm" data-variant="outline" rows="2">
+Compacto</textarea>
+    <textarea data-ui="textarea" data-part="root" data-size="md" data-variant="outline" rows="2">
+Padrão</textarea>
+    <textarea data-ui="textarea" data-part="root" data-size="lg" data-variant="outline" rows="2">
+Confortável</textarea>
+  </div>
+</section>
+
+<section data-scene="variants">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <textarea data-ui="textarea" data-part="root" data-size="md" data-variant="outline" rows="2">
+outline</textarea>
+    <textarea data-ui="textarea" data-part="root" data-size="md" data-variant="subtle" rows="2">
+subtle</textarea>
+    <textarea data-ui="textarea" data-part="root" data-size="md" data-variant="plain" rows="2">
+plain</textarea>
+    <textarea
+      data-ui="textarea"
+      data-part="root"
+      data-size="md"
+      data-variant="subtle"
+      data-mono
+      rows="3"
+    >
+{ "pedido": 20260442, "status": "pendente" }</textarea>
+  </div>
+</section>
+
+<section data-scene="auto-size">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <textarea
+      data-ui="textarea"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-auto-size
+      data-resize="none"
+      style="--slotted-textarea-rows: 1; --slotted-textarea-max-rows: 4"
+    >
+Uma linha</textarea>
+    <textarea
+      data-ui="textarea"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-auto-size
+      data-resize="none"
+      style="--slotted-textarea-rows: 1; --slotted-textarea-max-rows: 4"
+    >
+O controle cresce com o conteúdo até o teto de quatro linhas e passa a rolar depois dele, em vez de empurrar a página para fora de baixo do cursor.</textarea>
+    <textarea data-ui="textarea" data-part="root" data-size="md" data-variant="outline" rows="3">
+Sem auto-size: a altura é a que rows dá, e a alça continua disponível.</textarea>
+  </div>
+</section>
+
+<section data-scene="resize">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <textarea
+      data-ui="textarea"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-resize="block"
+      rows="2"
+    >
+block: a alça só cresce para baixo</textarea>
+    <textarea
+      data-ui="textarea"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-resize="none"
+      rows="2"
+    >
+none: sem alça</textarea>
+    <textarea
+      data-ui="textarea"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-resize="both"
+      rows="2"
+    >
+both: a alça também alarga</textarea>
+  </div>
+</section>
+
+<section data-scene="states">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <textarea data-ui="textarea" data-part="root" data-size="md" data-variant="outline" rows="2">
+Padrão</textarea>
+    <textarea
+      data-ui="textarea"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-invalid
+      aria-invalid="true"
+      rows="2"
+    >
+Faltam os dados da transportadora.</textarea>
+    <textarea
+      data-ui="textarea"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-readonly
+      readonly
+      rows="2"
+    >
+Somente leitura: o valor continua selecionável e copiável.</textarea>
+    <textarea
+      data-ui="textarea"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-disabled
+      disabled
+      rows="2"
+    >
+Desativado</textarea>
+    <fieldset disabled style="border: 0; margin: 0; padding: 0">
+      <textarea data-ui="textarea" data-part="root" data-size="md" data-variant="outline" rows="2">
+Dentro de um fieldset desativado</textarea>
+    </fieldset>
+  </div>
+</section>
+
+<section data-scene="count">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-necessity="mark"
+    >
+      <label data-part="label" for="textarea-count">Observações</label>
+      <span data-part="counter">62/280</span>
+      <textarea
+        data-ui="textarea"
+        data-part="root"
+        data-size="md"
+        data-variant="outline"
+        id="textarea-count"
+        maxlength="280"
+        rows="3"
+      >
+Retirar na doca 3, das 8h às 11h. Falar com a portaria antes.</textarea>
+    </div>
+  </div>
+</section>
+
+<section data-scene="content">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <textarea data-ui="textarea" data-part="root" data-size="md" data-variant="outline" rows="3">
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFkYSJ9</textarea>
+    <textarea
+      data-ui="textarea"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      rows="3"
+      placeholder="Descreva o ocorrido com o máximo de detalhes possível, incluindo datas"
+    ></textarea>
+    <textarea data-ui="textarea" data-part="root" data-size="sm" data-variant="subtle" rows="3">
+مرحبا بالعالم. هذا نص طويل بما يكفي لينتقل إلى السطر التالي.</textarea>
+  </div>
+</section>

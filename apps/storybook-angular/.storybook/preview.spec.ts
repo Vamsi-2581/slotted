@@ -10,9 +10,10 @@ vi.mock('@slotted/storybook-workbench', () => ({
     scheme: { toolbar: { icon: 'contrast', items: ['light', 'dark'] } },
     theme: { toolbar: { icon: 'paintbrush', items: ['default'] } },
   },
-  INITIAL_GLOBALS: { density: 'comfortable', scheme: 'light', theme: 'default' },
+  INITIAL_GLOBALS: { density: 'comfortable', locale: 'en-US', scheme: 'light', theme: 'default' },
   resolveWorkbenchGlobals: (globals: Record<string, unknown> | undefined) => ({
     density: globals?.['density'] === 'compact' ? 'compact' : 'comfortable',
+    locale: globals?.['locale'] === 'pt-BR' ? 'pt-BR' : 'en-US',
     scheme: globals?.['scheme'] === 'dark' ? 'dark' : 'light',
     theme: 'default',
   }),
@@ -62,6 +63,14 @@ describe('Angular Storybook preview', () => {
     expect(render(undefined)).toMatchObject({
       props: { slottedDensity: 'comfortable', slottedScheme: 'light', slottedTheme: 'default' },
     });
+  });
+
+  /** Every family is read in each published language: the toolbar's locale reaches the document. */
+  it('writes the toolbar language onto the document', () => {
+    render({ globals: { locale: 'pt-BR' } });
+    expect(document.documentElement.lang).toBe('pt-BR');
+    render({ globals: {} });
+    expect(document.documentElement.lang).toBe('en-US');
   });
 
   it('uses a compact wrapper for stories embedded in docs', () => {

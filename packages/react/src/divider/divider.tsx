@@ -3,28 +3,50 @@ import '@slotted/styles/divider/divider.css';
 import type { DividerProps, DividerRootProps } from './divider.types';
 
 /**
- * An `hr` already means separation, so nothing here announces a role in the
- * common case. Only the two departures from the element's own semantics are
- * written: `role="none"` when the rule is decoration, and `aria-orientation`
- * when it runs the other way, which a separator does not otherwise imply.
+ * A rule between two regions. `hr` already means separation, so the plain rule
+ * writes no role at all; every departure from the element's own semantics is
+ * written and nothing else is.
+ *
+ * A label changes the element. `hr` takes no content, so a labelled rule is a
+ * `div` carrying `role="separator"`, and the name comes from `aria-label`
+ * rather than from the text inside it: the separator role makes its children
+ * presentational, so the visible label never reaches the accessibility tree.
  */
 export function Divider({
-  className,
+  align = 'center',
   decorative = false,
+  inset = false,
+  label,
   orientation = 'horizontal',
   render,
   role,
   ...nativeProps
 }: DividerProps) {
+  const labelled = label !== undefined;
+  /** The one case where the element already says everything the family means. */
+  const rendersOwnRule = render === undefined && !labelled;
+
   const rootProps: DividerRootProps = {
     ...nativeProps,
-    'aria-orientation': orientation === 'vertical' ? 'vertical' : undefined,
-    className: ['slotted-divider', className].filter(Boolean).join(' '),
+    /* A rule that is decoration has no name to give: role="none" prohibits one. */
+    ...(labelled && !decorative ? { 'aria-label': label } : {}),
+    /* A separator is horizontal unless it says otherwise. */
+    ...(orientation === 'vertical' && !decorative ? { 'aria-orientation': 'vertical' } : {}),
+    ...(labelled ? { 'data-align': align, 'data-labelled': '' } : {}),
+    ...(inset ? { 'data-inset': '' } : {}),
     'data-orientation': orientation,
     'data-part': 'root',
-    'data-slotted-component': 'divider',
-    role: role ?? (decorative ? 'none' : undefined),
+    'data-ui': 'divider',
+    role: role ?? (decorative ? 'none' : rendersOwnRule ? undefined : 'separator'),
   };
 
-  return render === undefined ? <hr {...rootProps} /> : render(rootProps);
+  if (render !== undefined) {
+    return render(labelled ? { ...rootProps, children: labelContent(label) } : rootProps);
+  }
+
+  return labelled ? <div {...rootProps}>{labelContent(label)}</div> : <hr {...rootProps} />;
+}
+
+function labelContent(label: string) {
+  return <span data-part="label">{label}</span>;
 }

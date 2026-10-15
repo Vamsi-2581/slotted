@@ -1,58 +1,88 @@
-import { ButtonContentLayer } from './button-content';
-import { TOGGLE_BUTTON_DEFAULTS } from './button.constants';
-import { appearanceData, blockActivation, buttonClassName } from './button-root';
-import type { ToggleButtonProps } from './button.types';
+import { buttonMessages } from '@slotted/core/i18n';
 
+import { useMessages } from '../i18n';
+import { ButtonContent } from './button-content';
+import { TOGGLE_BUTTON_DEFAULTS } from './button.constants';
+import {
+  blockActivation,
+  inertness,
+  rootData,
+  useAppearance,
+  useLoadingIndicator,
+  usePressed,
+} from './button-root';
+import { ButtonIndicator } from './button-indicator';
+import type { ButtonRootProps, ToggleButtonProps } from './button.types';
+
+/**
+ * A two-state action. The APG is explicit that the label of a toggle must not
+ * change with its state — "Mute" stays "Mute" and the state is announced
+ * beside it — so this is a member of its own rather than a prop on Button:
+ * reaching for it is what makes that obligation visible to the consumer.
+ *
+ * It waits, because a toggle that persists is the common one: "Follow",
+ * "Subscribe" and "Watch" all reach a server before the state is true. While
+ * it waits it holds the state it still has, so the person is never shown a
+ * value that has not been agreed to.
+ */
 export function ToggleButton({
-  'aria-disabled': ariaDisabled,
   children,
-  className,
+  defaultPressed,
   disabled = false,
-  fill = TOGGLE_BUTTON_DEFAULTS.fill,
+  end,
+  focusableWhenDisabled = false,
   fullWidth = false,
-  leading,
+  loading = false,
+  loadingDelay = 0,
+  messages,
   onClick,
   onClickCapture,
   onPressedChange,
-  pressed = false,
-  size = TOGGLE_BUTTON_DEFAULTS.size,
-  trailing,
+  pressed,
+  render,
+  size,
+  start,
+  tone,
   type = 'button',
-  variant = TOGGLE_BUTTON_DEFAULTS.variant,
+  variant,
   ...nativeProps
 }: ToggleButtonProps) {
-  const interactionBlocked = ariaDisabled === true || ariaDisabled === 'true';
+  const appearance = useAppearance({ size, tone, variant }, TOGGLE_BUTTON_DEFAULTS);
+  const inert = inertness({ disabled, focusableWhenDisabled, loading });
+  const waiting = useLoadingIndicator({ loading, loadingDelay });
+  const t = useMessages(buttonMessages, messages);
+  const state = usePressed({ defaultPressed, onPressedChange, pressed });
 
-  return (
-    <button
-      {...nativeProps}
-      {...appearanceData({
-        component: 'toggle-button',
-        disabled,
-        fill,
-        fullWidth,
-        pressed,
-        size,
-        variant,
-      })}
-      aria-disabled={ariaDisabled}
-      aria-pressed={pressed}
-      className={buttonClassName(className)}
-      disabled={disabled}
-      onClick={(event) => {
-        if (interactionBlocked) return blockActivation(event);
-        onClick?.(event);
-        if (!event.defaultPrevented) onPressedChange?.(!pressed);
-      }}
-      onClickCapture={(event) => {
-        if (interactionBlocked) return blockActivation(event);
-        onClickCapture?.(event);
-      }}
-      type={type}
-    >
-      <ButtonContentLayer leading={leading} loading={false} trailing={trailing}>
+  const rootProps: ButtonRootProps = {
+    ...nativeProps,
+    ...rootData({ disabled, fullWidth, loading, pressed: state.pressed, ...appearance }),
+    'aria-disabled': inert.ariaDisabled,
+    'aria-pressed': state.pressed,
+    children: (
+      <ButtonContent
+        end={end}
+        indicator={waiting ? <ButtonIndicator label={t('loading')} /> : null}
+        start={start}
+      >
         {children}
-      </ButtonContentLayer>
-    </button>
-  );
+      </ButtonContent>
+    ),
+    disabled: inert.nativelyDisabled,
+    onClick: (event) => {
+      if (inert.refuses) return blockActivation(event);
+      onClick?.(event);
+      /*
+        A consumer that calls preventDefault has refused the activation, and
+        a refused activation moves nothing.
+      */
+      if (!event.defaultPrevented) state.requestToggle(event);
+    },
+    onClickCapture: (event) => {
+      if (inert.refuses) return blockActivation(event);
+      onClickCapture?.(event);
+    },
+    type,
+  };
+
+  return render === undefined ? <button {...rootProps} /> : render(rootProps);
 }

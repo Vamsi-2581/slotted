@@ -1,9 +1,8 @@
 [
-  "--slotted-spinner-duration",
-  "--slotted-spinner-radius",
-  "--slotted-spinner-reduced-motion-duration",
-  "--slotted-spinner-size-lg",
-  "--slotted-spinner-size-md",
-  "--slotted-spinner-size-sm",
-  "--slotted-spinner-stroke-width"
+  "--slotted-border-width-medium",
+  "--slotted-control-icon-size-md",
+  "--slotted-control-transition-duration",
+  "--slotted-control-transition-easing",
+  "--slotted-duration-loop-slow",
+  "--slotted-spinner-size"
 ]

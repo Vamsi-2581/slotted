@@ -1,9 +1,8 @@
+import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
+import { referencePageErrors, snippetFormatErrors } from '@slotted/storybook-workbench/testing';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/textarea/contract.json';
-import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
-import { snippetFormatErrors } from '@slotted/storybook-workbench/testing';
-
 import { REACT_TEXTAREA_DOCS } from './textarea.docs';
 import * as textareaStories from './textarea.stories';
 
@@ -20,8 +19,23 @@ describe('Textarea stories', () => {
     }
   });
 
+  it('answers the reference-page contract', () => {
+    expect(
+      referencePageErrors({
+        docs: REACT_TEXTAREA_DOCS.textarea,
+        framework: 'React',
+        member: contract.members.textarea,
+        scenarioIds: contract.scenarios.textarea,
+        stateModel: contract.stateModel,
+      }),
+    ).toEqual([]);
+  });
+
   it('keeps curated snippets formatted', async () => {
-    const snippets = Object.values(REACT_TEXTAREA_DOCS).flatMap((docs) => docs.snippets);
+    const snippets = Object.values(REACT_TEXTAREA_DOCS).flatMap((docs) => [
+      ...docs.snippets,
+      ...docs.scenes.map((scene) => scene.snippet),
+    ]);
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });
 });

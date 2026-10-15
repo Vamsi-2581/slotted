@@ -1,12 +1,18 @@
-import { GLOBALS_UPDATED } from 'storybook/internal/core-events';
+import { GLOBALS_UPDATED, SET_GLOBALS } from 'storybook/internal/core-events';
 import { create, type ThemeVars } from 'storybook/theming';
 
-export type SlottedScheme = 'light' | 'dark';
+import { WORKBENCH_FONT_CODE, WORKBENCH_FONT_SANS } from '@slotted/storybook-workbench/fonts';
+
+export type SlottedScheme = 'light' | 'dark' | 'high-contrast';
+
+export type SlottedDirection = 'ltr' | 'rtl';
 
 export type SchemeRoot = {
   dataset: Record<string, string | undefined>;
   style: { colorScheme: string };
 };
+
+export type DirectionRoot = { dir: string };
 
 type SchemePayload = { globals: Record<string, unknown> };
 
@@ -26,8 +32,8 @@ const lightTheme = create({
   appPreviewBg: '#eef1f5',
   appBorderColor: '#cbd5e1',
   appBorderRadius: 8,
-  fontBase: 'ui-sans-serif, system-ui, sans-serif',
-  fontCode: 'ui-monospace, SFMono-Regular, Consolas, monospace',
+  fontBase: WORKBENCH_FONT_SANS,
+  fontCode: WORKBENCH_FONT_CODE,
   textColor: '#0f172a',
   textInverseColor: '#ffffff',
   textMutedColor: '#475569',
@@ -56,8 +62,8 @@ const darkTheme = create({
   appPreviewBg: '#09090b',
   appBorderColor: '#27272a',
   appBorderRadius: 8,
-  fontBase: 'ui-sans-serif, system-ui, sans-serif',
-  fontCode: 'ui-monospace, SFMono-Regular, Consolas, monospace',
+  fontBase: WORKBENCH_FONT_SANS,
+  fontCode: WORKBENCH_FONT_CODE,
   textColor: '#fafafa',
   textInverseColor: '#18181b',
   textMutedColor: '#a1a1aa',
@@ -76,7 +82,17 @@ const darkTheme = create({
 });
 
 export const normalizeScheme = (scheme: unknown): SlottedScheme =>
-  scheme === 'dark' ? 'dark' : 'light';
+  scheme === 'dark' || scheme === 'high-contrast' ? scheme : 'light';
+
+export const normalizeDirection = (direction: unknown): SlottedDirection =>
+  direction === 'rtl' ? 'rtl' : 'ltr';
+
+/**
+ * `color-scheme` accepts light and dark and nothing else, so the high-contrast
+ * scheme — which the theme paints on a white ground — renders its form controls
+ * and scrollbars as light ones.
+ */
+const nativeColorScheme = (scheme: SlottedScheme) => (scheme === 'dark' ? 'dark' : 'light');
 
 export const getStorybookTheme = (scheme: unknown): ThemeVars =>
   normalizeScheme(scheme) === 'dark' ? darkTheme : lightTheme;
@@ -84,16 +100,33 @@ export const getStorybookTheme = (scheme: unknown): ThemeVars =>
 export const getPreviewStyle = (scheme: unknown) => ({
   background: 'var(--slotted-workbench-canvas)',
   color: 'var(--slotted-workbench-text)',
-  colorScheme: normalizeScheme(scheme),
+  colorScheme: nativeColorScheme(normalizeScheme(scheme)),
 });
 
 export const applyRootScheme = (root: SchemeRoot, scheme: unknown) => {
   const normalizedScheme = normalizeScheme(scheme);
 
   root.dataset['slottedScheme'] = normalizedScheme;
-  root.style.colorScheme = normalizedScheme;
+  root.style.colorScheme = nativeColorScheme(normalizedScheme);
 
   return normalizedScheme;
+};
+
+export const applyRootDirection = (root: DirectionRoot, direction: unknown) => {
+  const normalizedDirection = normalizeDirection(direction);
+
+  root.dir = normalizedDirection;
+
+  return normalizedDirection;
+};
+
+const SCHEME_EVENTS = [SET_GLOBALS, GLOBALS_UPDATED];
+
+export const readSchemeFromSearch = (search: string): SlottedScheme => {
+  const serializedGlobals = new URLSearchParams(search).get('globals') ?? '';
+  const entry = serializedGlobals.split(';').find((part) => part.startsWith('scheme:'));
+
+  return normalizeScheme(entry?.slice('scheme:'.length));
 };
 
 export const subscribeToScheme = (
@@ -101,14 +134,19 @@ export const subscribeToScheme = (
   initialScheme: unknown,
   applyScheme: (scheme: SlottedScheme) => void,
 ) => {
-  const handleGlobalsUpdated = ({ globals }: SchemePayload) => {
+  const handleGlobals = ({ globals }: SchemePayload) => {
     applyScheme(normalizeScheme(globals['scheme']));
   };
 
   applyScheme(normalizeScheme(initialScheme));
-  channel.on(GLOBALS_UPDATED, handleGlobalsUpdated);
+
+  for (const event of SCHEME_EVENTS) {
+    channel.on(event, handleGlobals);
+  }
 
   return () => {
-    channel.off(GLOBALS_UPDATED, handleGlobalsUpdated);
+    for (const event of SCHEME_EVENTS) {
+      channel.off(event, handleGlobals);
+    }
   };
 };

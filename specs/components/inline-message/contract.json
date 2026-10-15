@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 5,
+  "family": "inline-message",
+  "ui": "inline-message",
+  "catalog": {
+    "group": "Feedback",
+    "summary": "Short status message next to content."
+  },
+  "axes": {
+    "tone": ["accent", "secondary", "success", "warning", "danger"],
+    "size": ["sm", "md"],
+    "mark": ["glyph", "dot", "none"],
+    "live": ["off", "polite", "assertive"]
+  },
+  "toneGlyphs": {
+    "accent": "circle-info",
+    "secondary": null,
+    "success": "circle-check",
+    "warning": "triangle-alert",
+    "danger": "circle-alert"
+  },
+  "tonePrefixes": {
+    "accent": null,
+    "secondary": null,
+    "success": "Success:",
+    "warning": "Warning:",
+    "danger": "Error:"
+  },
+  "liveRoles": {
+    "off": null,
+    "polite": "status",
+    "assertive": "alert"
+  },
+  "stateAttributes": {
+    "loading": "data-loading",
+    "disabled": "data-disabled"
+  },
+  "members": {
+    "inlineMessage": {
+      "nativeElement": "p",
+      "defaults": {
+        "tone": "secondary",
+        "size": "sm",
+        "live": "off",
+        "mark": "glyph",
+        "hideIcon": false,
+        "loading": false,
+        "reserve": false
+      },
+      "capabilities": ["appearance", "size", "live", "loading", "disabled"],
+      "states": ["default", "loading", "disabled"],
+      "parts": ["root", "prefix", "icon", "text"]
+    }
+  },
+  "scenarios": {
+    "inlineMessage": [
+      "playground",
+      "tones",
+      "sizes",
+      "pending",
+      "wiring",
+      "live",
+      "reserve",
+      "content",
+      "composition",
+      "accessibility"
+    ]
+  }
+}

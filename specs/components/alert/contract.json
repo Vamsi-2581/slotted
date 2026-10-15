@@ -1,55 +1,71 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "family": "alert",
-  "axes": {
-    "variant": ["accent", "secondary", "success", "warning", "danger"],
-    "fill": ["subtle", "outline", "solid"],
-    "size": ["sm", "md"]
+  "ui": "alert",
+  "catalog": {
+    "group": "Feedback",
+    "summary": "Static message with a tone, icon and actions."
   },
-  "liveness": ["off", "polite", "assertive"],
+  "axes": {
+    "tone": ["accent", "secondary", "success", "warning", "danger"],
+    "variant": ["soft", "outline", "solid"],
+    "reach": ["inline", "section", "page"],
+    "live": ["off", "polite", "assertive"]
+  },
+  "toneGlyphs": {
+    "accent": "circle-info",
+    "secondary": null,
+    "success": "circle-check",
+    "warning": "circle-alert",
+    "danger": "circle-x"
+  },
+  "liveRoles": {
+    "off": null,
+    "polite": "status",
+    "assertive": "alert"
+  },
+  "stateAttributes": {
+    "open": "data-open"
+  },
+  "stateModel": {
+    "open": {
+      "controlled": "open",
+      "uncontrolled": "defaultOpen",
+      "request": "onOpenChange",
+      "reasons": ["dismiss", "programmatic"]
+    }
+  },
+  "messages": ["dismiss"],
   "members": {
     "alert": {
-      "nativeElement": "div",
+      "nativeElement": "section",
       "defaults": {
-        "variant": "accent",
-        "fill": "subtle",
-        "size": "md",
-        "live": "off"
+        "tone": "accent",
+        "variant": "soft",
+        "reach": "section",
+        "live": "off",
+        "hideIcon": false,
+        "dismissible": false,
+        "defaultOpen": true,
+        "restoreFocus": true
       },
-      "capabilities": ["appearance", "live"],
-      "states": ["default"],
-      "parts": ["root"]
-    },
-    "alertIcon": {
-      "nativeElement": "span",
-      "defaults": {},
-      "capabilities": ["wiring"],
-      "states": ["default"],
-      "parts": ["icon"]
-    },
-    "alertTitle": {
-      "nativeElement": "div",
-      "defaults": {},
-      "capabilities": ["wiring"],
-      "states": ["default"],
-      "parts": ["title"]
-    },
-    "alertDescription": {
-      "nativeElement": "p",
-      "defaults": {},
-      "capabilities": ["wiring"],
-      "states": ["default"],
-      "parts": ["description"]
-    },
-    "alertActions": {
-      "nativeElement": "div",
-      "defaults": {},
-      "capabilities": ["wiring"],
-      "states": ["default"],
-      "parts": ["actions"]
+      "capabilities": ["appearance", "live", "open"],
+      "states": ["default", "hover", "active", "focus-visible", "open"],
+      "parts": ["root", "icon", "content", "title", "description", "actions", "dismiss"]
     }
   },
   "scenarios": {
-    "alert": ["playground", "appearance", "live", "composition"]
+    "alert": [
+      "playground",
+      "tones",
+      "variants",
+      "reach",
+      "dismissal",
+      "actions",
+      "live",
+      "content",
+      "composition",
+      "accessibility"
+    ]
   }
 }

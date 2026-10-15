@@ -1,0 +1,295 @@
+<!--
+  The family paints two things: the summary a reader is sent to after a failed
+  submit, and the row of actions. Everything between them belongs to `field`,
+  to `field-group` and to `stack`, which already own arrangement.
+
+  The summary's markup is the GOV.UK error summary's, item for item: a
+  focusable region with `role="alert"`, a heading, a list, and a link per error
+  pointing at the control's own identifier. An error the form has no control
+  for keeps its place in the list and loses its link.
+-->
+
+<section data-scene="summary">
+  <form data-ui="form" data-part="root" data-invalid novalidate>
+    <div
+      data-ui="form"
+      data-part="summary"
+      role="alert"
+      tabindex="-1"
+      aria-labelledby="form-harness-summary-title"
+    >
+      <h2 data-part="summary-title" id="form-harness-summary-title">Há um problema</h2>
+      <ul data-part="summary-list">
+        <li><a data-part="summary-item" href="#form-harness-name">Informe seu nome completo</a></li>
+        <li>
+          <a data-part="summary-item" href="#form-harness-email"
+            >O endereço de e-mail precisa conter um arroba</a
+          >
+        </li>
+        <li><span data-part="summary-item">O cupom informado expirou</span></li>
+      </ul>
+    </div>
+  </form>
+</section>
+
+<section data-scene="actions">
+  <div data-ui="stack" data-part="root" data-gap="9">
+    <form data-ui="form" data-part="root" novalidate>
+      <div data-ui="form" data-part="actions" data-align="end">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="secondary"
+          data-variant="ghost"
+          data-size="md"
+          type="button"
+        >
+          <span data-part="label">Cancelar</span>
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="accent"
+          data-variant="solid"
+          data-size="md"
+          type="submit"
+        >
+          <span data-part="label">Salvar alterações</span>
+        </button>
+      </div>
+    </form>
+
+    <form data-ui="form" data-part="root" novalidate>
+      <div data-ui="form" data-part="actions" data-align="between">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="danger"
+          data-variant="ghost"
+          data-size="md"
+          type="button"
+        >
+          <span data-part="label">Excluir</span>
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="accent"
+          data-variant="solid"
+          data-size="md"
+          type="submit"
+        >
+          <span data-part="label">Salvar</span>
+        </button>
+      </div>
+    </form>
+
+    <form data-ui="form" data-part="root" novalidate>
+      <div data-ui="form" data-part="actions" data-align="stretch">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="secondary"
+          data-variant="outline"
+          data-size="md"
+          type="button"
+        >
+          <span data-part="label">Voltar</span>
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="accent"
+          data-variant="solid"
+          data-size="md"
+          type="submit"
+        >
+          <span data-part="label">Continuar</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section data-scene="states">
+  <div data-ui="stack" data-part="root" data-gap="9">
+    <form data-ui="form" data-part="root" data-loading aria-busy="true" novalidate>
+      <div data-ui="form" data-part="actions" data-align="end">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="secondary"
+          data-variant="ghost"
+          data-size="md"
+          type="button"
+          disabled
+        >
+          <span data-part="label">Cancelar</span>
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="accent"
+          data-variant="solid"
+          data-size="md"
+          data-loading
+          type="submit"
+        >
+          <span data-part="label">Enviando…</span>
+        </button>
+      </div>
+    </form>
+
+    <form data-ui="form" data-part="root" data-disabled novalidate>
+      <fieldset disabled style="border: 0; margin: 0; padding: 0">
+        <div data-ui="form" data-part="actions" data-align="end">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="accent"
+            data-variant="solid"
+            data-size="md"
+            type="submit"
+          >
+            <span data-part="label">Salvar</span>
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+</section>
+
+<section data-scene="composition">
+  <form data-ui="form" data-part="root" data-invalid novalidate>
+    <div
+      data-ui="form"
+      data-part="summary"
+      role="alert"
+      tabindex="-1"
+      aria-labelledby="form-harness-checkout-title"
+    >
+      <h2 data-part="summary-title" id="form-harness-checkout-title">Há um problema</h2>
+      <ul data-part="summary-list">
+        <li>
+          <a data-part="summary-item" href="#form-harness-checkout-email"
+            >O endereço de e-mail precisa conter um arroba</a
+          >
+        </li>
+      </ul>
+    </div>
+
+    <div data-ui="stack" data-part="root" data-gap="6">
+      <div data-ui="field" data-part="root" data-size="md" data-label-placement="top">
+        <label data-part="label" for="form-harness-checkout-name">Nome completo</label>
+        <div data-part="control">
+          <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+            <input
+              data-part="input"
+              id="form-harness-checkout-name"
+              name="nome"
+              value="Ana Ribeiro"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div data-ui="field" data-part="root" data-size="md" data-label-placement="top" data-invalid>
+        <label data-part="label" for="form-harness-checkout-email">E-mail</label>
+        <div data-part="control">
+          <div
+            data-ui="text-field"
+            data-part="root"
+            data-size="md"
+            data-variant="outline"
+            data-invalid
+          >
+            <input
+              data-part="input"
+              id="form-harness-checkout-email"
+              name="email"
+              value="ana.ribeiro"
+              aria-invalid="true"
+              aria-describedby="form-harness-checkout-email-error"
+            />
+          </div>
+        </div>
+        <p
+          data-ui="inline-message"
+          data-part="root"
+          data-tone="danger"
+          id="form-harness-checkout-email-error"
+        >
+          <span data-part="content">O endereço de e-mail precisa conter um arroba.</span>
+        </p>
+      </div>
+    </div>
+
+    <div data-ui="form" data-part="actions" data-align="end">
+      <button
+        data-ui="button"
+        data-part="root"
+        data-tone="secondary"
+        data-variant="ghost"
+        data-size="md"
+        type="button"
+      >
+        <span data-part="label">Cancelar</span>
+      </button>
+      <button
+        data-ui="button"
+        data-part="root"
+        data-tone="accent"
+        data-variant="solid"
+        data-size="md"
+        type="submit"
+      >
+        <span data-part="label">Finalizar pedido</span>
+      </button>
+    </div>
+  </form>
+</section>
+
+<section data-scene="content">
+  <form data-ui="form" data-part="root" data-invalid novalidate>
+    <div
+      data-ui="form"
+      data-part="summary"
+      role="alert"
+      tabindex="-1"
+      aria-labelledby="form-harness-many-title"
+    >
+      <h2 data-part="summary-title" id="form-harness-many-title">Há um problema</h2>
+      <ul data-part="summary-list">
+        <li>
+          <a data-part="summary-item" href="#a"
+            >O número do cartão precisa ter dezesseis dígitos, sem espaços e sem traços, exatamente
+            como aparece impresso no cartão</a
+          >
+        </li>
+        <li><a data-part="summary-item" href="#b">Informe o mês de validade</a></li>
+        <li><a data-part="summary-item" href="#c">Informe o ano de validade</a></li>
+        <li><a data-part="summary-item" href="#d">Informe o código de segurança</a></li>
+        <li><a data-part="summary-item" href="#e">Informe o nome impresso no cartão</a></li>
+        <li><a data-part="summary-item" href="#f">Informe o CEP de cobrança</a></li>
+        <li><a data-part="summary-item" href="#g">Informe o logradouro de cobrança</a></li>
+        <li><a data-part="summary-item" href="#h">Informe o número do endereço</a></li>
+        <li><a data-part="summary-item" href="#i">Informe a cidade de cobrança</a></li>
+        <li><a data-part="summary-item" href="#j">Informe o estado de cobrança</a></li>
+        <li><a data-part="summary-item" href="#k">Aceite os termos de uso para continuar</a></li>
+      </ul>
+    </div>
+
+    <div data-ui="form" data-part="actions" data-align="end">
+      <button
+        data-ui="button"
+        data-part="root"
+        data-tone="accent"
+        data-variant="solid"
+        data-size="md"
+        type="submit"
+      >
+        <span data-part="label">Tentar novamente</span>
+      </button>
+    </div>
+  </form>
+</section>

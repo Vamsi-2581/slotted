@@ -1,38 +1,49 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "family": "avatar",
+  "ui": "avatar",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Image or initials that stand for a person."
+  },
+  "fallbackOrder": ["image", "initials", "glyph"],
+  "autoTonePalette": ["accent", "secondary", "success", "warning", "danger"],
   "axes": {
-    "size": ["sm", "md", "lg"]
+    "size": ["xs", "sm", "md", "lg", "xl"],
+    "shape": ["circle", "square"],
+    "tone": ["auto", "accent", "secondary", "success", "warning", "danger"],
+    "variant": ["soft", "solid"],
+    "status": ["idle", "loading", "loaded", "error"]
   },
   "stateAttributes": {
-    "loaded": "data-loaded"
+    "disabled": "data-disabled"
   },
   "members": {
     "avatar": {
       "nativeElement": "span",
       "defaults": {
-        "size": "md"
+        "size": "md",
+        "shape": "circle",
+        "tone": "auto",
+        "variant": "soft",
+        "decorative": false,
+        "disabled": false
       },
-      "capabilities": ["size"],
-      "states": ["default", "loaded"],
-      "parts": ["root"]
-    },
-    "avatarImage": {
-      "nativeElement": "img",
-      "defaults": {},
-      "capabilities": ["wiring"],
-      "states": ["default"],
-      "parts": ["image"]
-    },
-    "avatarFallback": {
-      "nativeElement": "span",
-      "defaults": {},
-      "capabilities": ["wiring"],
-      "states": ["default"],
-      "parts": ["fallback"]
+      "capabilities": ["appearance", "size", "shape", "status", "disabled", "decorative"],
+      "states": ["default", "hover", "focus-visible", "disabled"],
+      "parts": ["root", "image", "fallback"]
     }
   },
   "scenarios": {
-    "avatar": ["playground", "sizes", "fallback", "composition"]
+    "avatar": [
+      "playground",
+      "sizes",
+      "fallback",
+      "identity",
+      "shapes",
+      "status",
+      "interactive",
+      "accessibility"
+    ]
   }
 }

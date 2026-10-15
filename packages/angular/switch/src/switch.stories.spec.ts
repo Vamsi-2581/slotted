@@ -1,9 +1,8 @@
+import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
+import { referencePageErrors, snippetFormatErrors } from '@slotted/storybook-workbench/testing';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/switch/contract.json';
-import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
-import { snippetFormatErrors } from '@slotted/storybook-workbench/testing';
-
 import { ANGULAR_SWITCH_DOCS } from './switch.docs';
 import * as switchStories from './switch.stories';
 
@@ -20,8 +19,23 @@ describe('Angular Switch stories', () => {
     }
   });
 
+  it('answers the reference-page contract', () => {
+    expect(
+      referencePageErrors({
+        docs: ANGULAR_SWITCH_DOCS.switch,
+        framework: 'Angular',
+        member: contract.members.switch,
+        scenarioIds: contract.scenarios.switch,
+        stateModel: contract.stateModel,
+      }),
+    ).toEqual([]);
+  });
+
   it('keeps curated Angular snippets formatted', async () => {
-    const snippets = Object.values(ANGULAR_SWITCH_DOCS).flatMap((docs) => docs.snippets);
+    const snippets = Object.values(ANGULAR_SWITCH_DOCS).flatMap((docs) => [
+      ...docs.snippets,
+      ...docs.scenes.map((scene) => scene.snippet),
+    ]);
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });
 });

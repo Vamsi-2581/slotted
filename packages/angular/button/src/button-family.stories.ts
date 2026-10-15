@@ -3,51 +3,39 @@ import {
   lucideArrowRight,
   lucideBold,
   lucideChevronDown,
+  lucideEllipsis,
   lucideExternalLink,
   lucideItalic,
   lucidePlus,
-  lucideRedo2,
+  lucideRefreshCw,
   lucideSave,
+  lucideStar,
   lucideTrash2,
   lucideUnderline,
-  lucideUndo2,
 } from '@ng-icons/lucide';
+import { scenario } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
-import { scenario } from '@slotted/storybook-workbench';
 
 import { SlButton } from './button';
-import { SlButtonGroup } from './button-group';
+import { SlButtonEnd, SlButtonStart } from './button-appearance';
 import { SlButtonLink } from './button-link';
+import { BUTTON_SIZES, BUTTON_TONES, BUTTON_VARIANTS } from './button.constants';
+import type { ButtonTone, ButtonVariant } from './button.constants';
 import { SlIconButton } from './icon-button';
 import { SlToggleButton } from './toggle-button';
 
-const demoIconNames = {
-  'arrow-right': 'lucideArrowRight',
-  bold: 'lucideBold',
-  'chevron-down': 'lucideChevronDown',
-  'external-link': 'lucideExternalLink',
-  italic: 'lucideItalic',
-  plus: 'lucidePlus',
-  redo: 'lucideRedo2',
-  save: 'lucideSave',
-  trash: 'lucideTrash2',
-  underline: 'lucideUnderline',
-  undo: 'lucideUndo2',
-} as const;
-const variants = ['accent', 'secondary', 'success', 'warning', 'danger'] as const;
-const fills = ['solid', 'outline', 'ghost'] as const;
-const sizes = ['sm', 'md', 'lg'] as const;
-
-type Variant = (typeof variants)[number];
-type Fill = (typeof fills)[number];
-
 const titleCase = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
-const sizeLabels = { sm: 'Small', md: 'Medium', lg: 'Large' } as const;
-
-const demoIcon = (name: keyof typeof demoIconNames, marker = '') =>
-  `<ng-icon ${marker} aria-hidden="true" name="${demoIconNames[name]}"></ng-icon>`;
+/**
+ * A slot marker is a component, so it cannot sit on `ng-icon` — two components
+ * on one element is NG0300. It goes on an element the template writes, which
+ * is also the tree the React binding renders: the glyph inside `[data-part]`.
+ */
+const icon = (name: string, marker = '') => {
+  const glyph = `<ng-icon aria-hidden="true" name="${name}"></ng-icon>`;
+  return marker ? `<span ${marker}>${glyph}</span>` : glyph;
+};
 
 const scene = (label: string, note: string, content: string) => `
   <section class="slotted-demo-scene">
@@ -67,26 +55,22 @@ const section = (title: string, description: string, body: string, columns?: '2'
     <div class="slotted-component-lab__body${columns ? ' slotted-demo-grid' : ''}"${columns ? ` data-columns="${columns}"` : ''}>${body}</div>
   </section>`;
 
-const matrix = (name: string, renderCell: (variant: Variant, fill: Fill) => string) => `
+const matrix = (name: string, renderCell: (tone: ButtonTone, variant: ButtonVariant) => string) => `
   <div data-slotted-matrix="${name}">
-    <div aria-label="${titleCase(name)} comparison" class="slotted-matrix-scroll" role="region" tabindex="0">
+    <div aria-label="Component comparison" class="slotted-matrix-scroll" role="region" tabindex="0">
       <table class="slotted-matrix">
         <thead><tr>
           <th aria-hidden="true" class="slotted-matrix__corner"></th>
-          ${variants.map((variant) => `<th class="slotted-matrix__heading" scope="col">${titleCase(variant)}</th>`).join('')}
+          ${BUTTON_TONES.map((tone) => `<th class="slotted-matrix__heading" scope="col">${titleCase(tone)}</th>`).join('')}
         </tr></thead>
-        <tbody>${fills
-          .map(
-            (fill) => `<tr>
-              <th class="slotted-matrix__row-label" scope="row">${titleCase(fill)}</th>
-              ${variants
-                .map(
-                  (variant) => `<td class="slotted-matrix__cell">${renderCell(variant, fill)}</td>`,
-                )
-                .join('')}
+        <tbody>${BUTTON_VARIANTS.map(
+          (variant) => `<tr>
+              <th class="slotted-matrix__row-label" scope="row">${titleCase(variant)}</th>
+              ${BUTTON_TONES.map(
+                (tone) => `<td class="slotted-matrix__cell">${renderCell(tone, variant)}</td>`,
+              ).join('')}
             </tr>`,
-          )
-          .join('')}</tbody>
+        ).join('')}</tbody>
       </table>
     </div>
   </div>`;
@@ -95,20 +79,29 @@ const meta: Meta = {
   title: 'Components/Button family/Overview',
   decorators: [
     moduleMetadata({
-      imports: [NgIcon, SlButton, SlButtonGroup, SlButtonLink, SlIconButton, SlToggleButton],
+      imports: [
+        NgIcon,
+        SlButton,
+        SlButtonEnd,
+        SlButtonLink,
+        SlButtonStart,
+        SlIconButton,
+        SlToggleButton,
+      ],
       providers: [
         provideIcons({
           lucideArrowRight,
           lucideBold,
           lucideChevronDown,
+          lucideEllipsis,
           lucideExternalLink,
           lucideItalic,
           lucidePlus,
-          lucideRedo2,
+          lucideRefreshCw,
           lucideSave,
+          lucideStar,
           lucideTrash2,
           lucideUnderline,
-          lucideUndo2,
         }),
       ],
     }),
@@ -122,178 +115,198 @@ type Story = StoryObj;
 export const Matrix: Story = {
   parameters: scenario('matrix'),
   render: () => ({
-    template: `
-<main class="slotted-component-lab">
-  ${section(
-    'Appearance system',
-    'Five semantic variants across three fills. ButtonLink, IconButton and ToggleButton read from the same axes, so this matrix is shown once.',
-    scene(
-      'Appearance matrix',
-      'Rendered with Button. The same tokens drive every component below.',
-      matrix(
-        'button',
-        (variant, fill) =>
-          `<button slButton fill="${fill}" variant="${variant}">${titleCase(variant)}</button>`,
-      ),
-    ),
-  )}
-
-  ${section(
-    'Button',
-    'The native action primitive: scale, interaction state, and consumer content.',
-    [
-      scene(
-        'Sizes',
-        'Three explicit control heights.',
-        `<div class="slotted-demo-row">${sizes
-          .map((size) => `<button slButton size="${size}">${sizeLabels[size]}</button>`)
-          .join('')}</div>`,
-      ),
-      scene(
-        'States',
-        'Default, unavailable, and in progress.',
-        '<div class="slotted-demo-row"><button slButton>Default</button><button slButton disabled>Disabled</button><button slButton loading loadingText="Saving">Save</button></div>',
-      ),
-      scene(
-        'Content',
-        'Replaceable icon slots and full-width layout.',
-        `<div class="slotted-demo-stack slotted-demo-measure"><button slButton>${demoIcon('save', 'slButtonLeading')}Save draft${demoIcon('chevron-down', 'slButtonTrailing')}</button><button slButton fullWidth>${demoIcon('plus', 'slButtonLeading')}Create document</button></div>`,
-      ),
-      scene(
-        'Hierarchy',
-        'Primary and secondary actions remain unmistakable.',
-        '<div class="slotted-demo-row"><button slButton>Primary action</button><button slButton fill="outline" variant="secondary">Secondary action</button></div>',
-      ),
-    ].join(''),
-    '2',
-  )}
-
-  ${section(
-    'ButtonLink',
-    'Navigation that reads as an action. What differs from Button is the element it renders, not the appearance.',
-    [
-      scene(
-        'Anchor semantics',
-        'Renders a real anchor. Middle-click, copy link, and browser navigation all work.',
-        `<div class="slotted-demo-row"><a slButtonLink href="/docs/button">Read the guide${demoIcon('arrow-right', 'slButtonTrailing')}</a><a slButtonLink fill="ghost" href="https://developer.mozilla.org/docs/Web/HTML/Element/a" rel="noreferrer" target="_blank" variant="secondary">MDN reference${demoIcon('external-link', 'slButtonTrailing')}</a></div>`,
-      ),
-      scene(
-        'Unavailable',
-        'disabled keeps the anchor in the DOM, sets aria-disabled, and removes it from the tab order.',
-        '<div class="slotted-demo-row"><a slButtonLink disabled fill="outline" href="/billing/upgrade" variant="secondary">Upgrade plan</a></div>',
-      ),
-      scene(
-        'Beside an action',
-        'Submission stays a button; navigation stays a link at a quieter fill.',
-        `<div class="slotted-demo-row"><button slButton>${demoIcon('save', 'slButtonLeading')}Save changes</button><a slButtonLink fill="ghost" href="/documents" variant="secondary">Back to documents</a></div>`,
-      ),
-    ].join(''),
-    '3',
-  )}
-
-  ${section(
-    'IconButton',
-    'Icon-only actions. The footprint is square and the accessible name is mandatory.',
-    [
-      scene(
-        'Square footprint',
-        'Inline size tracks the control height at every size — no label padding.',
-        `<div class="slotted-demo-row">${sizes
-          .map(
-            (size) =>
-              `<button slIconButton aria-label="Add item (${size})" fill="outline" size="${size}" variant="secondary">${demoIcon('plus')}</button>`,
-          )
-          .join('')}</div>`,
-      ),
-      scene(
-        'Fills',
-        'The same three fills, carried without a text label.',
-        `<div class="slotted-demo-row">${fills
-          .map(
-            (fill) =>
-              `<button slIconButton aria-label="Save ${fill}" fill="${fill}" variant="accent">${demoIcon('save')}</button>`,
-          )
-          .join('')}</div>`,
-      ),
-      scene(
-        'Accessible name',
-        'aria-label is required; development builds throw when it is missing.',
-        `<div class="slotted-demo-row"><button slIconButton aria-label="Undo">${demoIcon('undo')}</button><button slIconButton aria-label="Redo">${demoIcon('redo')}</button><button slIconButton aria-label="Delete" variant="danger">${demoIcon('trash')}</button></div>`,
-      ),
-    ].join(''),
-    '3',
-  )}
-
-  ${section(
-    'ToggleButton',
-    'A persistent on/off action. Its contract is the pressed state, so every appearance is shown as an Off and On pair.',
-    scene(
-      'State matrix',
-      'Off and On stay distinguishable in all fifteen appearances.',
-      matrix(
-        'toggle-state',
-        (variant, fill) =>
-          `<div class="slotted-demo-row"><button slToggleButton [pressed]="false" fill="${fill}" variant="${variant}">Off</button><button slToggleButton [pressed]="true" fill="${fill}" variant="${variant}">On</button></div>`,
-      ),
-    ),
-  )}
-
-  ${section(
-    'Composition',
-    'Grouped actions share one seam system across all four components.',
-    [
-      scene(
-        'Formatting toolbar',
-        'Independent toggles keep their pressed state inside a group.',
-        `<div slButtonGroup aria-label="Text formatting"><button slToggleButton [pressed]="true">${demoIcon('bold', 'slButtonLeading')}Bold</button><button slToggleButton>${demoIcon('italic', 'slButtonLeading')}Italic</button><button slToggleButton>${demoIcon('underline', 'slButtonLeading')}Underline</button></div>`,
-      ),
-      scene(
-        'Editing history',
-        'A compact icon-only toolbar with one seam system.',
-        `<div slButtonGroup aria-label="Editing history"><button slIconButton aria-label="Undo" fill="outline" variant="secondary">${demoIcon('undo')}</button><button slIconButton aria-label="Redo" fill="outline" variant="secondary">${demoIcon('redo')}</button><button slIconButton aria-label="Delete" fill="outline" variant="secondary">${demoIcon('trash')}</button></div>`,
-      ),
-      scene(
-        'Split action',
-        'One primary action and its related options.',
-        `<div slButtonGroup aria-label="Publish actions" class="slotted-split-action"><button slButton fill="solid" size="md" variant="accent">${demoIcon('save', 'slButtonLeading')}Publish</button><button slIconButton aria-label="More publish options" fill="solid" size="md" variant="accent">${demoIcon('chevron-down')}</button></div>`,
-      ),
-    ].join(''),
-    '3',
-  )}
-</main>`,
+    template: `<main class="slotted-component-lab">
+      ${section(
+        'Appearance system',
+        'Four members, one surface. Button acts, ButtonLink navigates, IconButton acts without room for a label, and ToggleButton stays on. They share the tone, variant and size axes, so the appearance is decided once.',
+        scene(
+          'Tone by variant',
+          'Five semantic colours across four ways of painting them.',
+          matrix(
+            'button',
+            (tone, variant) =>
+              `<button slButton size="sm" tone="${tone}" variant="${variant}">${titleCase(tone)}</button>`,
+          ),
+        ),
+      )}
+      ${section(
+        'Button',
+        'A momentary action. It waits without changing size, and it wraps rather than pushing past a narrow container.',
+        [
+          scene(
+            'Emphasis',
+            'One primary action per region.',
+            `<div class="slotted-demo-row">
+              <button slButton>${icon('lucideSave', 'slButtonStart')}Publish</button>
+              <button slButton tone="secondary" variant="outline">Save draft</button>
+              <button slButton variant="ghost">Discard</button>
+            </div>`,
+          ),
+          scene(
+            'Waiting',
+            'The label stays, so the width and the name do too.',
+            `<div class="slotted-demo-row">
+              <button slButton>${icon('lucideSave', 'slButtonStart')}Save changes</button>
+              <button slButton loading>Save changes</button>
+            </div>`,
+          ),
+          scene(
+            'Sizes',
+            'Three steps of the control scale, at every density.',
+            `<div class="slotted-demo-row">${BUTTON_SIZES.map(
+              (size) =>
+                `<button slButton size="${size}">${size}${icon('lucideChevronDown', 'slButtonEnd')}</button>`,
+            ).join('')}</div>`,
+          ),
+          scene(
+            'Extreme content',
+            'A long label wraps; a long token breaks.',
+            `<div class="slotted-demo-measure"><div class="slotted-demo-stack">
+              <button slButton fullWidth>Export every invoice issued this quarter</button>
+              <button slButton size="sm" tone="secondary" variant="outline">reconciliation_2026_Q3_final.xlsx</button>
+            </div></div>`,
+          ),
+        ].join(''),
+        '2',
+      )}
+      ${section(
+        'ButtonLink',
+        'An anchor wearing the action surface. It is announced as a link, activates on Enter alone, and loses its destination entirely when disabled.',
+        [
+          scene(
+            'Navigation',
+            'Internal, external, and a router’s own link.',
+            `<div class="slotted-demo-row">
+              <a slButtonLink href="/settings">Open settings${icon('lucideArrowRight', 'slButtonEnd')}</a>
+              <a slButtonLink href="https://example.com" rel="noreferrer" target="_blank" variant="outline">Status page${icon('lucideExternalLink', 'slButtonEnd')}</a>
+              <a slButtonLink href="/billing" data-router-link="true" variant="ghost">Billing</a>
+            </div>`,
+          ),
+          scene(
+            'Unavailable',
+            'No href at all, and still reachable by keyboard.',
+            '<div class="slotted-demo-row"><a slButtonLink href="/settings" disabled>Open settings</a></div>',
+          ),
+        ].join(''),
+        '2',
+      )}
+      ${section(
+        'IconButton',
+        'The same control with no room for a label, so the accessible name is an explicit attribute. Its box is square from the control height, which keeps the target at or above 24 by 24 at every density.',
+        [
+          scene(
+            'Shape and size',
+            'Square or circular, at all three steps.',
+            `<div class="slotted-demo-row">${BUTTON_SIZES.map(
+              (size) =>
+                `<button slIconButton aria-label="Add, ${size}" size="${size}" tone="accent" variant="solid">${icon('lucidePlus')}</button>`,
+            ).join('')}${BUTTON_SIZES.map(
+              (size) =>
+                `<button slIconButton aria-label="Add, circle, ${size}" shape="circle" size="${size}" tone="accent" variant="solid">${icon('lucidePlus')}</button>`,
+            ).join('')}</div>`,
+          ),
+          scene(
+            'A toolbar',
+            'Icon toggles keep their name while their state moves.',
+            `<div class="slotted-demo-row">
+              <button slIconButton aria-label="Bold" size="sm" defaultPressed>${icon('lucideBold')}</button>
+              <button slIconButton aria-label="Italic" size="sm" [defaultPressed]="false">${icon('lucideItalic')}</button>
+              <button slIconButton aria-label="Underline" size="sm" [defaultPressed]="false">${icon('lucideUnderline')}</button>
+              <button slIconButton aria-label="More formatting" size="sm">${icon('lucideEllipsis')}</button>
+              <button slIconButton aria-label="Delete" size="sm" tone="danger">${icon('lucideTrash2')}</button>
+            </div>`,
+          ),
+          scene(
+            'Waiting',
+            'The icon fades and the ring takes its place, in its size.',
+            `<div class="slotted-demo-row">
+              <button slIconButton aria-label="Refresh" variant="outline">${icon('lucideRefreshCw')}</button>
+              <button slIconButton aria-label="Refresh" variant="outline" loading>${icon('lucideRefreshCw')}</button>
+            </div>`,
+          ),
+          scene(
+            'Unavailable',
+            'A disabled toggle still says whether it is on.',
+            `<div class="slotted-demo-row">
+              <button slIconButton aria-label="Favourite" defaultPressed shape="circle" tone="warning">${icon('lucideStar')}</button>
+              <button slIconButton aria-label="Favourite, unavailable" defaultPressed disabled shape="circle" tone="warning">${icon('lucideStar')}</button>
+            </div>`,
+          ),
+        ].join(''),
+        '2',
+      )}
+      ${section(
+        'ToggleButton',
+        'A two-state action. The label never changes with the state, and the request that moves it carries whether a pointer or the keyboard asked.',
+        [
+          scene(
+            'On and off',
+            'The fill and a heavier edge, so neither scheme flattens it.',
+            `<div class="slotted-demo-row">
+              <button slToggleButton>${icon('lucideStar', 'slButtonStart')}Favourite</button>
+              <button slToggleButton defaultPressed>${icon('lucideStar', 'slButtonStart')}Favourite</button>
+            </div>`,
+          ),
+          scene(
+            'Unavailable',
+            'Disabled wins over pressed, and pressed still shows.',
+            `<div class="slotted-demo-row">
+              <button slToggleButton disabled>Favourite</button>
+              <button slToggleButton defaultPressed disabled>Favourite</button>
+            </div>`,
+          ),
+        ].join(''),
+        '2',
+      )}
+      ${section(
+        'Composition',
+        'Members side by side, in the composition an application actually writes.',
+        scene(
+          'A page header',
+          'One primary action, one secondary, one destructive.',
+          `<div class="slotted-demo-row">
+            <button slButton>${icon('lucideSave', 'slButtonStart')}Publish</button>
+            <a slButtonLink href="/preview" variant="outline">Preview</a>
+            <button slIconButton aria-label="More actions" variant="outline">${icon('lucideEllipsis')}</button>
+            <button slButton tone="danger" variant="ghost">Delete</button>
+          </div>`,
+        ),
+      )}
+    </main>`,
   }),
 };
 
-export const Themes: Story = {
-  parameters: scenario('themes'),
+/** Every tone in every variant, at one size, for comparing the palette itself. */
+export const Tones: Story = {
+  parameters: scenario('tones'),
   render: () => ({
-    template: `
-<div class="slotted-demo-grid">
-  ${(['light', 'dark'] as const)
-    .map(
-      (scheme) => `<section class="slotted-demo-scene">
-        <header class="slotted-demo-scene__header"><span class="slotted-demo-scene__label">${titleCase(scheme)} scheme</span><span class="slotted-demo-scene__note">The same semantic contract.</span></header>
-        <div class="slotted-demo-stage" data-slotted-scheme="${scheme}"><div class="slotted-demo-row"><button slButton>${demoIcon('save', 'slButtonLeading')}Save draft</button><button slButton variant="secondary">Explore</button><button slIconButton aria-label="Add item" fill="outline" variant="secondary">${demoIcon('plus')}</button></div></div>
-      </section>`,
-    )
-    .join('')}
-</div>`,
+    template: `<div class="slotted-demo-stage">${BUTTON_TONES.map(
+      (tone) =>
+        `<div class="slotted-demo-row">${BUTTON_VARIANTS.map(
+          (variant) =>
+            `<button slButton tone="${tone}" variant="${variant}">${titleCase(tone)}</button>`,
+        ).join(
+          '',
+        )}<button slIconButton aria-label="Add, ${tone}" tone="${tone}" variant="solid">${icon('lucidePlus')}</button></div>`,
+    ).join('')}</div>`,
   }),
 };
 
+/**
+ * Density changes the size of a control and nothing about its meaning. The
+ * toolbar switches it; this scene is what shows the three steps against each
+ * other at whichever one is selected.
+ */
 export const Densities: Story = {
   parameters: scenario('densities'),
   render: () => ({
-    template: `
-<div class="slotted-demo-grid">
-  ${(['comfortable', 'compact'] as const)
-    .map(
-      (density) => `<section class="slotted-demo-scene" data-slotted-density="${density}">
-        <header class="slotted-demo-scene__header"><span class="slotted-demo-scene__label">${titleCase(density)}</span><span class="slotted-demo-scene__note">Spacing changes, semantics do not.</span></header>
-        <div class="slotted-demo-stage"><div class="slotted-demo-row"><button slButton>${demoIcon('save', 'slButtonLeading')}Save</button><button slButton fill="outline" variant="secondary">Cancel</button></div></div>
-      </section>`,
-    )
-    .join('')}
-</div>`,
+    template: `<div class="slotted-demo-stage">${BUTTON_SIZES.map(
+      (size) => `<div class="slotted-demo-row">
+        <button slButton size="${size}">${icon('lucideSave', 'slButtonStart')}Save changes</button>
+        <button slButton size="${size}" variant="outline">Cancel</button>
+        <button slIconButton aria-label="More, ${size}" size="${size}" variant="outline">${icon('lucideEllipsis')}</button>
+        <button slToggleButton size="${size}" defaultPressed>Pinned</button>
+      </div>`,
+    ).join('')}</div>`,
   }),
 };

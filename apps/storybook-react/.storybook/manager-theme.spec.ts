@@ -40,4 +40,28 @@ describe('React Storybook manager theme', () => {
       style: { colorScheme: 'dark' },
     });
   });
+  it('boots the manager in the scheme the query string carries', async () => {
+    type Listener = (payload: { globals: Record<string, unknown> }) => void;
+    const listeners = new Set<Listener>();
+    const channel = {
+      on: (_event: string, listener: Listener) => listeners.add(listener),
+      off: (_event: string, listener: Listener) => listeners.delete(listener),
+    };
+    const themes: string[] = [];
+    const root = { dataset: {} as Record<string, string>, style: { colorScheme: '' } };
+    const manager = {
+      ready: () => Promise.resolve(channel),
+      setConfig: ({ theme }: { theme: { base: string } }) => {
+        themes.push(theme.base);
+      },
+    };
+
+    await registerManagerTheme(manager, root, '?path=/story/button--primary&globals=scheme:dark');
+
+    expect(themes).toEqual(['dark']);
+    expect(root).toMatchObject({
+      dataset: { slottedScheme: 'dark' },
+      style: { colorScheme: 'dark' },
+    });
+  });
 });

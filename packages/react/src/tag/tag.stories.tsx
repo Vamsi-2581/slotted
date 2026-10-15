@@ -3,17 +3,14 @@ import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 
+import { Text } from '../typography';
 import { Tag } from './tag';
+import { DemoScene, GLYPH_TAG } from './tag-demo';
+import { TagGroup } from './tag-group';
 import { REACT_TAG_DOCS, REACT_TAG_TOKENS } from './tag.docs';
-import { TagRemove } from './tag-remove';
-import type { TagFill, TagVariant } from './tag.types';
-
-const VARIANTS: readonly TagVariant[] = ['accent', 'secondary', 'success', 'warning', 'danger'];
-const FILLS: readonly TagFill[] = ['solid', 'outline', 'subtle'];
 
 const referenceStories: ReferencePageConfig['stories'] = () => ({
   essential: Playground as never,
-  matrix: Appearance as never,
 });
 
 const meta = {
@@ -24,7 +21,8 @@ const meta = {
     docs: {
       page: createReferencePage({
         title: 'Tag',
-        description: 'A short value the reader can take back out.',
+        description:
+          'An entity, a filter or a compact value. Static here; a chip that acts, navigates or holds a selection is one of the other three members.',
         framework: 'React',
         ...REACT_TAG_DOCS.tag,
         tokens: REACT_TAG_TOKENS,
@@ -38,7 +36,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
-  args: { children: 'Design', fill: 'subtle', size: 'md', variant: 'accent' },
+  args: { children: 'Design', shape: 'pill', size: 'md', tone: 'secondary', variant: 'soft' },
   parameters: { ...scenario('playground'), controls: { disable: false } },
   render: (args) => (
     <div className="slotted-demo-measure">
@@ -49,94 +47,112 @@ export const Playground: Story = {
   ),
 };
 
-export const Appearance: Story = {
-  parameters: scenario('appearance'),
-  render: () => (
-    <div className="slotted-demo-grid" data-columns="3">
-      {FILLS.map((fill) => (
-        <section className="slotted-demo-scene" key={fill}>
-          <header className="slotted-demo-scene__header">
-            <span className="slotted-demo-scene__label">{fill}</span>
-            <span className="slotted-demo-scene__note">
-              The five tones the library names, in one fill.
-            </span>
-          </header>
-          <div className="slotted-demo-stage">
-            <div className="slotted-demo-row">
-              {VARIANTS.map((variant) => (
-                <Tag fill={fill} key={variant} variant={variant}>
-                  {variant}
-                  <TagRemove aria-label={`Remove ${variant}`} />
-                </Tag>
-              ))}
-            </div>
-          </div>
-        </section>
-      ))}
-    </div>
-  ),
-};
-
-function RemovableList() {
-  const [values, setValues] = useState(['Design', 'Research', 'Accessibility']);
+/**
+ * A real list, because a removal that removes nothing demonstrates nothing.
+ * The reviewer can press the X, press Backspace on a focused chip, and watch
+ * where the keyboard lands when the last one goes.
+ */
+export function RemovableStoryAdapter() {
+  const [labels, setLabels] = useState([
+    'Aberto',
+    'Prioridade alta',
+    'Time de plataforma',
+    'Vencendo em 7 dias',
+  ]);
 
   return (
     <div className="slotted-demo-stack">
-      <ul className="slotted-demo-row" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-        {values.map((value) => (
-          <li key={value}>
-            <Tag fill="subtle" variant="accent">
-              {value}
-              <TagRemove
-                aria-label={`Remove ${value}`}
-                onClick={() => setValues((current) => current.filter((item) => item !== value))}
-              />
-            </Tag>
-          </li>
+      <TagGroup aria-label="Filtros ativos">
+        {labels.map((label) => (
+          <Tag key={label} onRemove={() => setLabels(labels.filter((it) => it !== label))}>
+            {label}
+          </Tag>
         ))}
-      </ul>
-      {values.length === 0 ? <p>Every tag has been removed.</p> : null}
+      </TagGroup>
+      <Text tone="muted">
+        {labels.length === 0
+          ? 'A última etiqueta saiu e o foco ficou no grupo: a próxima tabulação continua daqui.'
+          : `${labels.length} filtros. Backspace ou Delete sobre uma etiqueta remove a mesma que o X remove.`}
+      </Text>
+      <button onClick={() => setLabels(['Aberto', 'Prioridade alta'])} type="button">
+        Repor
+      </button>
     </div>
   );
 }
 
-export const Removable: Story = {
-  parameters: scenario('removable'),
+export const Removal: Story = {
+  parameters: scenario('removal'),
   render: () => (
-    <div className="slotted-demo-measure">
-      <RemovableList />
-      <p>
-        The list is a ul of li elements: the tags are values, and only the page knows they are a
-        list. Each remove control names the value it removes, so three controls do not all read
-        &ldquo;Remove&rdquo;.
-      </p>
+    <div className="slotted-demo-grid" data-columns="1">
+      <DemoScene
+        label="removal"
+        note="The X, and Backspace or Delete on the chip. Focus goes to the control that took the removed one’s place, then to the last one, then to the group itself."
+      >
+        <RemovableStoryAdapter />
+      </DemoScene>
+      <DemoScene
+        label="refused"
+        note="A removal is a request. Refusing it leaves the chip and the keyboard where they were."
+      >
+        <TagGroup aria-label="Etiquetas protegidas">
+          <Tag onRemove={(request) => request.cancel()} tone="danger" variant="outline">
+            Produção
+          </Tag>
+          <Tag onRemove={() => undefined} removeDisabled tone="secondary">
+            Somente leitura
+          </Tag>
+        </TagGroup>
+      </DemoScene>
     </div>
   ),
 };
 
-export const Composition: Story = {
-  parameters: scenario('composition'),
+export const Content: Story = {
+  parameters: scenario('content'),
   render: () => (
-    <div className="slotted-demo-measure">
-      <div className="slotted-demo-stack">
-        <div className="slotted-demo-row">
-          <Tag fill="outline" size="sm" variant="secondary">
-            Read only
-          </Tag>
-          <Tag fill="subtle" size="sm" variant="warning">
-            Expiring
-            <TagRemove aria-label="Remove expiring" disabled />
-          </Tag>
-          <Tag fill="solid" size="sm" variant="danger">
-            Blocked
-            <TagRemove aria-label="Remove blocked" />
-          </Tag>
+    <div className="slotted-demo-grid" data-columns="1">
+      <DemoScene
+        label="long"
+        note="One line, clipped with an ellipsis. The whole value stays in the DOM, in the accessibility tree, and findable by page search."
+      >
+        <div style={{ maxInlineSize: '18rem' }}>
+          <TagGroup aria-label="Valores longos">
+            <Tag onRemove={() => undefined}>
+              Solicitações de aprovação pendentes na diretoria regional
+            </Tag>
+            <Tag variant="outline">
+              Rindfleischetikettierungsüberwachungsaufgabenübertragungsgesetz
+            </Tag>
+          </TagGroup>
         </div>
-        <p>
-          A tag with no remove control is just a value. A disabled control stays visible and leaves
-          the tab order, which says the value exists and cannot be taken back out.
-        </p>
-      </div>
+      </DemoScene>
+      <DemoScene
+        label="glyphs"
+        note="A glyph before or after the words, in a box the family sizes and centres. The artwork is the consumer’s."
+      >
+        <TagGroup aria-label="Com glifos" role="list">
+          <Tag start={GLYPH_TAG} tone="accent">
+            entidade
+          </Tag>
+          <Tag start={GLYPH_TAG} onRemove={() => undefined} tone="success">
+            entregue
+          </Tag>
+          <Tag shape="square" tone="warning" variant="outline">
+            em revisão
+          </Tag>
+        </TagGroup>
+      </DemoScene>
+      <DemoScene
+        label="direction"
+        note="The label is a bidi isolate: its direction comes from its own first strong character, not from the page."
+      >
+        <TagGroup aria-label="Direção" role="list">
+          <Tag>مرحبا</Tag>
+          <Tag>#platform</Tag>
+          <Tag onRemove={() => undefined}>עברית</Tag>
+        </TagGroup>
+      </DemoScene>
     </div>
   ),
 };

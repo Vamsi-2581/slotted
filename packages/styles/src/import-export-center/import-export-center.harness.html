@@ -1,0 +1,1382 @@
+<!--
+  The jobs of Marina Duarte, operations at Vale Norte Distribuidora, in every
+  state the family draws: the page at md with every status and one job's
+  details open; the popover at sm; files that expire, expired and are denied;
+  the history growing by button; the first wait; an empty view; a list that
+  could not load; and content the family did not choose. The bar, the
+  buttons, the tabs, the table, the skeleton, the upload trigger and the
+  result-state are their families'; this fragment shows how the centre
+  arranges them.
+-->
+<section data-scene="page">
+  <section
+    data-ui="import-export-center"
+    data-part="root"
+    data-size="md"
+    data-level="2"
+    data-growing="none"
+    data-time-format="relative"
+    data-view="all"
+    aria-labelledby="iec-title"
+  >
+    <div data-part="header">
+      <h2 data-part="title" id="iec-title">
+        Importações e exportações
+        <span data-part="count">2 em andamento</span>
+      </h2>
+      <div data-part="tools">
+        <span data-part="clear">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Limpar concluídos</span>
+          </button>
+        </span>
+        <div data-part="actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="outline"
+            data-tone="secondary"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Importar</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="outline"
+            data-tone="secondary"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Exportar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div data-part="views">
+      <div
+        data-ui="tabs"
+        data-part="root"
+        data-variant="line"
+        data-orientation="horizontal"
+        data-size="md"
+        data-fit="auto"
+        data-track="none"
+        data-activation-direction="none"
+      >
+        <div data-part="list" role="tablist" aria-label="Vistas">
+          <div data-part="item" role="presentation" data-selected>
+            <button
+              data-part="tab"
+              role="tab"
+              aria-selected="true"
+              tabindex="0"
+              type="button"
+              aria-controls="iec-list"
+            >
+              <span data-part="label">Todos</span>
+            </button>
+          </div>
+          <div data-part="item" role="presentation">
+            <button
+              data-part="tab"
+              role="tab"
+              aria-selected="false"
+              tabindex="-1"
+              type="button"
+              aria-controls="iec-list"
+            >
+              <span data-part="label">Importações</span>
+            </button>
+          </div>
+          <div data-part="item" role="presentation">
+            <button
+              data-part="tab"
+              role="tab"
+              aria-selected="false"
+              tabindex="-1"
+              type="button"
+              aria-controls="iec-list"
+            >
+              <span data-part="label">Exportações</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul data-part="list" id="iec-list" aria-labelledby="iec-title" aria-busy="false" tabindex="-1">
+      <li data-part="job" data-direction="import" data-status="running">
+        <span data-part="visual" data-kind="spreadsheet" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
+        ></span>
+        <div data-part="body">
+          <div data-part="heading">
+            <a data-part="job-title" id="j1-t" href="#j1">Contatos do CRM</a>
+            <p data-part="meta">
+              <span>Importação</span>
+              <span>CSV</span>
+              <span
+                ><span data-part="file-name" dir="auto"
+                  ><span data-part="name">contatos-crm-2026-09-24</span
+                  ><span data-part="extension">.csv</span></span
+                ></span
+              >
+              <span>4,2 MB</span>
+              <time data-part="time" datetime="2026-09-25T13:58:00">há 2 min</time>
+            </p>
+          </div>
+          <div data-part="status" id="j1-s">
+            <span data-part="mark" aria-hidden="true"><span data-ui="spinner"></span></span>
+            <span data-part="status-label"
+              ><span>Em andamento</span> <span data-part="stage">Gravando registros</span></span
+            >
+          </div>
+          <div data-part="progress">
+            <div
+              data-ui="progress-indicator"
+              data-part="root"
+              data-shape="linear"
+              data-size="sm"
+              data-tone="accent"
+              role="progressbar"
+              aria-labelledby="j1-t"
+              aria-valuemin="0"
+              aria-valuemax="5000"
+              aria-valuenow="1204"
+              aria-valuetext="1.204 de 5.000 linhas"
+              style="--slotted-progress-indicator-percent: 24"
+            >
+              <div data-part="track"><div data-part="indicator"></div></div>
+            </div>
+            <span data-part="progress-text"
+              ><span>1.204 de 5.000 linhas</span><span>24%</span
+              ><span>cerca de 3 min restantes</span></span
+            >
+          </div>
+        </div>
+        <div data-part="controls">
+          <span data-part="cancel">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="outline"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+              id="j1-cancel"
+              aria-labelledby="j1-cancel j1-t"
+              aria-describedby="j1-s"
+            >
+              <span data-part="label">Cancelar</span>
+            </button>
+          </span>
+          <span data-part="toggle">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="ghost"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+              id="j1-toggle"
+              aria-expanded="false"
+              aria-controls="j1-d"
+              aria-labelledby="j1-toggle j1-t"
+            >
+              <span data-part="label">Detalhes</span>
+              <span data-part="end" aria-hidden="true"
+                ><span data-part="chevron"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
+              ></span>
+            </button>
+          </span>
+        </div>
+      </li>
+
+      <li data-part="job" data-direction="export" data-status="queued">
+        <span data-part="visual" data-kind="spreadsheet" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
+        ></span>
+        <div data-part="body">
+          <div data-part="heading">
+            <span data-part="job-title" id="j2-t">Movimentos de estoque — setembro</span>
+            <p data-part="meta">
+              <span>Exportação</span>
+              <span>XLSX</span>
+              <span>Marina Duarte</span>
+              <time data-part="time" datetime="2026-09-25T13:59:00">há 1 min</time>
+            </p>
+          </div>
+          <div data-part="status" id="j2-s">
+            <span data-part="mark" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="clock"></svg></span
+            ></span>
+            <span data-part="status-label"
+              ><span>Na fila</span>
+              <span data-part="stage">Começa depois de Contatos do CRM</span></span
+            >
+          </div>
+        </div>
+        <div data-part="controls">
+          <span data-part="cancel">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="outline"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+              id="j2-cancel"
+              aria-labelledby="j2-cancel j2-t"
+              aria-describedby="j2-s"
+            >
+              <span data-part="label">Cancelar</span>
+            </button>
+          </span>
+          <span data-part="toggle">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="ghost"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+              id="j2-toggle"
+              aria-expanded="false"
+              aria-controls="j2-d"
+              aria-labelledby="j2-toggle j2-t"
+            >
+              <span data-part="label">Detalhes</span>
+              <span data-part="end" aria-hidden="true"
+                ><span data-part="chevron"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
+              ></span>
+            </button>
+          </span>
+        </div>
+      </li>
+
+      <li
+        data-part="job"
+        data-direction="import"
+        data-status="succeeded"
+        data-outcome="partial"
+        data-expanded
+      >
+        <span data-part="visual" data-kind="spreadsheet" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
+        ></span>
+        <div data-part="body">
+          <div data-part="heading">
+            <span data-part="job-title" id="j3-t">Catálogo de produtos</span>
+            <p data-part="meta">
+              <span>Importação</span>
+              <span>XLSX</span>
+              <span
+                ><span data-part="file-name" dir="auto"
+                  ><span data-part="name">catalogo-outono-2026</span
+                  ><span data-part="extension">.xlsx</span></span
+                ></span
+              >
+              <span>1,8 MB</span>
+              <time data-part="time" datetime="2026-09-25T11:12:00">há 3 h</time>
+            </p>
+          </div>
+          <div data-part="status" id="j3-s">
+            <span data-part="mark" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="circle-alert"></svg></span
+            ></span>
+            <span data-part="status-label"><span>Concluído com 12 erros</span></span>
+          </div>
+          <p data-part="summary">
+            <span>2.988 de 3.000 linhas</span><span>2.210 criadas</span><span>778 atualizadas</span>
+          </p>
+        </div>
+        <div data-part="controls">
+          <span data-part="download">
+            <a
+              data-ui="button"
+              data-part="root"
+              data-variant="outline"
+              data-tone="secondary"
+              data-size="sm"
+              href="#relatorio"
+              download="catalogo-outono-2026-erros.csv"
+              id="j3-download"
+              aria-labelledby="j3-download j3-t"
+              aria-describedby="j3-s"
+            >
+              <span data-part="label">Baixar erros</span>
+            </a>
+          </span>
+          <span data-part="toggle" data-expanded>
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="ghost"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+              id="j3-toggle"
+              aria-expanded="true"
+              aria-controls="j3-d"
+              aria-labelledby="j3-toggle j3-t"
+            >
+              <span data-part="label">Detalhes</span>
+              <span data-part="end" aria-hidden="true"
+                ><span data-part="chevron"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
+              ></span>
+            </button>
+          </span>
+          <button
+            data-part="remove"
+            type="button"
+            id="j3-remove"
+            aria-label="Remover do histórico"
+            aria-describedby="j3-t"
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+        <div data-part="details" id="j3-d" role="region" aria-labelledby="j3-toggle">
+          <dl data-part="counts">
+            <div data-count="total">
+              <dt>Total</dt>
+              <dd>3.000</dd>
+            </div>
+            <div data-count="created">
+              <dt>Criadas</dt>
+              <dd>2.210</dd>
+            </div>
+            <div data-count="updated">
+              <dt>Atualizadas</dt>
+              <dd>778</dd>
+            </div>
+            <div data-count="failed">
+              <dt>Com erro</dt>
+              <dd>12</dd>
+            </div>
+          </dl>
+          <ul data-part="files">
+            <li data-part="file">
+              <span data-part="meta">
+                <strong>Arquivo original</strong>
+                <span
+                  ><span data-part="file-name" dir="auto"
+                    ><span data-part="name">catalogo-outono-2026</span
+                    ><span data-part="extension">.xlsx</span></span
+                  ></span
+                >
+                <span>Disponível até 2 de out., 23:59</span>
+              </span>
+              <span data-part="download">
+                <a
+                  data-ui="button"
+                  data-part="root"
+                  data-variant="ghost"
+                  data-tone="secondary"
+                  data-size="sm"
+                  href="#original"
+                  download
+                >
+                  <span data-part="label">Baixar</span>
+                </a>
+              </span>
+            </li>
+            <li data-part="file">
+              <span data-part="meta">
+                <strong>Relatório de erros</strong>
+                <span
+                  ><span data-part="file-name" dir="auto"
+                    ><span data-part="name">catalogo-outono-2026-erros</span
+                    ><span data-part="extension">.csv</span></span
+                  ></span
+                >
+                <span>2 kB</span>
+              </span>
+              <span data-part="download">
+                <a
+                  data-ui="button"
+                  data-part="root"
+                  data-variant="ghost"
+                  data-tone="secondary"
+                  data-size="sm"
+                  href="#relatorio"
+                  download
+                >
+                  <span data-part="label">Baixar</span>
+                </a>
+              </span>
+            </li>
+          </ul>
+          <div data-part="errors">
+            <div data-ui="table" data-part="root" data-variant="framed">
+              <div data-part="scroll">
+                <table data-part="table">
+                  <caption data-part="caption">
+                    Linhas com erro
+                  </caption>
+                  <thead data-part="head">
+                    <tr data-part="row">
+                      <th data-part="column-header" scope="col" data-numeric>Linha</th>
+                      <th data-part="column-header" scope="col">Erro</th>
+                      <th data-part="column-header" scope="col">Coluna</th>
+                      <th data-part="column-header" scope="col">Valor</th>
+                    </tr>
+                  </thead>
+                  <tbody data-part="body">
+                    <tr data-part="row">
+                      <td data-part="cell" data-numeric>14</td>
+                      <td data-part="cell">Campo obrigatório vazio</td>
+                      <td data-part="cell">SKU</td>
+                      <td data-part="cell">—</td>
+                    </tr>
+                    <tr data-part="row">
+                      <td data-part="cell" data-numeric>208</td>
+                      <td data-part="cell">Não é um número</td>
+                      <td data-part="cell">Preço</td>
+                      <td data-part="cell">12,5O</td>
+                    </tr>
+                    <tr data-part="row">
+                      <td data-part="cell" data-numeric>391</td>
+                      <td data-part="cell">Código com 8 dígitos esperado</td>
+                      <td data-part="cell">NCM</td>
+                      <td data-part="cell">8471.3</td>
+                    </tr>
+                    <tr data-part="row">
+                      <td data-part="cell" data-numeric>1.027</td>
+                      <td data-part="cell">Categoria inexistente</td>
+                      <td data-part="cell">Categoria</td>
+                      <td data-part="cell">Ferragens</td>
+                    </tr>
+                    <tr data-part="row">
+                      <td data-part="cell" data-numeric>2.640</td>
+                      <td data-part="cell">SKU duplicado na linha 2.588</td>
+                      <td data-part="cell">SKU</td>
+                      <td data-part="cell">VN-00431</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <p data-part="errors-note">
+              <span>Mostrando 5 de 12</span>
+            </p>
+          </div>
+        </div>
+      </li>
+
+      <li data-part="job" data-direction="export" data-status="succeeded" data-outcome="success">
+        <span data-part="visual" data-kind="spreadsheet" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
+        ></span>
+        <div data-part="body">
+          <div data-part="heading">
+            <span data-part="job-title" id="j4-t">Faturas do 3.º trimestre</span>
+            <p data-part="meta">
+              <span>Exportação</span>
+              <span>CSV</span>
+              <span
+                ><span data-part="file-name" dir="auto"
+                  ><span data-part="name">faturas-t3-2026</span
+                  ><span data-part="extension">.csv</span></span
+                ></span
+              >
+              <span>640 kB</span>
+              <time data-part="time" datetime="2026-09-25T09:40:00">há 4 h</time>
+            </p>
+          </div>
+          <div data-part="status" id="j4-s">
+            <span data-part="mark" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="circle-check"></svg></span
+            ></span>
+            <span data-part="status-label"><span>Concluído</span></span>
+          </div>
+          <p data-part="message">Disponível até 2 de out., 09:40</p>
+        </div>
+        <div data-part="controls">
+          <span data-part="download">
+            <a
+              data-ui="button"
+              data-part="root"
+              data-variant="outline"
+              data-tone="secondary"
+              data-size="sm"
+              href="#faturas"
+              download="faturas-t3-2026.csv"
+              id="j4-download"
+              aria-labelledby="j4-download j4-t"
+              aria-describedby="j4-s"
+            >
+              <span data-part="label">Baixar</span>
+            </a>
+          </span>
+          <span data-part="toggle">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="ghost"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+              id="j4-toggle"
+              aria-expanded="false"
+              aria-controls="j4-d"
+              aria-labelledby="j4-toggle j4-t"
+            >
+              <span data-part="label">Detalhes</span>
+              <span data-part="end" aria-hidden="true"
+                ><span data-part="chevron"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
+              ></span>
+            </button>
+          </span>
+          <button
+            data-part="remove"
+            type="button"
+            aria-label="Remover do histórico"
+            aria-describedby="j4-t"
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+      </li>
+
+      <li data-part="job" data-direction="export" data-status="failed" data-outcome="failed">
+        <span data-part="visual" data-kind="pdf" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file-text"></svg></span
+        ></span>
+        <div data-part="body">
+          <div data-part="heading">
+            <span data-part="job-title" id="j5-t">Extrato de clientes inadimplentes</span>
+            <p data-part="meta">
+              <span>Exportação</span>
+              <span>PDF</span>
+              <time data-part="time" datetime="2026-09-25T08:05:00">há 6 h</time>
+            </p>
+          </div>
+          <div data-part="status" id="j5-s">
+            <span data-part="mark" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="circle-x"></svg></span
+            ></span>
+            <span data-part="status-label"><span>Falhou</span></span>
+          </div>
+          <p data-part="message">O serviço de relatórios não respondeu em 10 minutos.</p>
+        </div>
+        <div data-part="controls">
+          <span data-part="retry">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="outline"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+              id="j5-retry"
+              aria-labelledby="j5-retry j5-t"
+              aria-describedby="j5-s"
+            >
+              <span data-part="label">Tentar de novo</span>
+            </button>
+          </span>
+          <span data-part="toggle">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="ghost"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+              id="j5-toggle"
+              aria-expanded="false"
+              aria-controls="j5-d"
+              aria-labelledby="j5-toggle j5-t"
+            >
+              <span data-part="label">Detalhes</span>
+              <span data-part="end" aria-hidden="true"
+                ><span data-part="chevron"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
+              ></span>
+            </button>
+          </span>
+          <button
+            data-part="remove"
+            type="button"
+            aria-label="Remover do histórico"
+            aria-describedby="j5-t"
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+      </li>
+
+      <li data-part="job" data-direction="import" data-status="canceled" data-outcome="canceled">
+        <span data-part="visual" data-kind="document" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file-type"></svg></span
+        ></span>
+        <div data-part="body">
+          <div data-part="heading">
+            <span data-part="job-title" id="j6-t">Tabela de fretes</span>
+            <p data-part="meta">
+              <span>Importação</span>
+              <span>JSON</span>
+              <span>Rui Tavares</span>
+              <time data-part="time" datetime="2026-09-24T17:30:00">ontem</time>
+            </p>
+          </div>
+          <div data-part="status" id="j6-s">
+            <span data-part="mark" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="circle"></svg></span
+            ></span>
+            <span data-part="status-label"
+              ><span>Cancelado</span> <span data-part="stage">Nenhum registro gravado</span></span
+            >
+          </div>
+        </div>
+        <div data-part="controls">
+          <span data-part="retry">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="outline"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+              id="j6-retry"
+              aria-labelledby="j6-retry j6-t"
+              aria-describedby="j6-s"
+            >
+              <span data-part="label">Tentar de novo</span>
+            </button>
+          </span>
+          <span data-part="toggle">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="ghost"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+              id="j6-toggle"
+              aria-expanded="false"
+              aria-controls="j6-d"
+              aria-labelledby="j6-toggle j6-t"
+            >
+              <span data-part="label">Detalhes</span>
+              <span data-part="end" aria-hidden="true"
+                ><span data-part="chevron"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
+              ></span>
+            </button>
+          </span>
+          <button
+            data-part="remove"
+            type="button"
+            aria-label="Remover do histórico"
+            aria-describedby="j6-t"
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+      </li>
+    </ul>
+  </section>
+</section>
+
+<!-- The popover under the top bar: sm, three jobs, the footer link to the page. -->
+<section data-scene="popover">
+  <section
+    data-ui="import-export-center"
+    data-part="root"
+    data-size="sm"
+    data-level="2"
+    data-growing="none"
+    data-time-format="relative"
+    data-view="all"
+    aria-labelledby="iec-p-title"
+  >
+    <div data-part="header">
+      <h2 data-part="title" id="iec-p-title">
+        Importações e exportações
+        <span data-part="count">1 em andamento</span>
+      </h2>
+    </div>
+    <ul data-part="list" aria-labelledby="iec-p-title" aria-busy="false" tabindex="-1">
+      <li data-part="job" data-direction="export" data-status="running">
+        <span data-part="visual" data-kind="spreadsheet" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
+        ></span>
+        <div data-part="body">
+          <div data-part="heading">
+            <span data-part="job-title" id="p1-t">Pedidos em aberto</span>
+            <p data-part="meta">
+              <span>Exportação</span>
+              <span>XLSX</span>
+              <time data-part="time" datetime="2026-09-25T13:59:00">há 1 min</time>
+            </p>
+          </div>
+          <div data-part="status" id="p1-s">
+            <span data-part="mark" aria-hidden="true"><span data-ui="spinner"></span></span>
+            <span data-part="status-label"><span>Em andamento</span></span>
+          </div>
+          <div data-part="progress">
+            <div
+              data-ui="progress-indicator"
+              data-part="root"
+              data-shape="linear"
+              data-size="sm"
+              data-tone="accent"
+              data-indeterminate=""
+              role="progressbar"
+              aria-labelledby="p1-t"
+            >
+              <div data-part="track"><div data-part="indicator"></div></div>
+            </div>
+            <span data-part="progress-text"><span>Preparando o arquivo</span></span>
+          </div>
+        </div>
+        <div data-part="controls">
+          <span data-part="cancel">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="outline"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+              id="p1-cancel"
+              aria-labelledby="p1-cancel p1-t"
+            >
+              <span data-part="label">Cancelar</span>
+            </button>
+          </span>
+        </div>
+      </li>
+      <li data-part="job" data-direction="export" data-status="succeeded" data-outcome="success">
+        <span data-part="visual" data-kind="spreadsheet" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
+        ></span>
+        <div data-part="body">
+          <div data-part="heading">
+            <span data-part="job-title" id="p2-t">Faturas do 3.º trimestre</span>
+            <p data-part="meta">
+              <span>Exportação</span>
+              <span>CSV</span>
+              <span>640 kB</span>
+              <time data-part="time" datetime="2026-09-25T09:40:00">há 4 h</time>
+            </p>
+          </div>
+          <div data-part="status" id="p2-s">
+            <span data-part="mark" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="circle-check"></svg></span
+            ></span>
+            <span data-part="status-label"><span>Concluído</span></span>
+          </div>
+        </div>
+        <div data-part="controls">
+          <span data-part="download">
+            <a
+              data-ui="button"
+              data-part="root"
+              data-variant="outline"
+              data-tone="secondary"
+              data-size="sm"
+              href="#faturas"
+              download
+              id="p2-download"
+              aria-labelledby="p2-download p2-t"
+            >
+              <span data-part="label">Baixar</span>
+            </a>
+          </span>
+          <button
+            data-part="remove"
+            type="button"
+            aria-label="Remover do histórico"
+            aria-describedby="p2-t"
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+      </li>
+      <li data-part="job" data-direction="import" data-status="failed" data-outcome="failed">
+        <span data-part="visual" data-kind="spreadsheet" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
+        ></span>
+        <div data-part="body">
+          <div data-part="heading">
+            <span data-part="job-title" id="p3-t">Contatos do CRM</span>
+            <p data-part="meta">
+              <span>Importação</span>
+              <span>CSV</span>
+              <time data-part="time" datetime="2026-09-24T16:10:00">ontem</time>
+            </p>
+          </div>
+          <div data-part="status" id="p3-s">
+            <span data-part="mark" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="circle-x"></svg></span
+            ></span>
+            <span data-part="status-label"><span>Falhou</span></span>
+          </div>
+          <p data-part="message">A coluna E-mail não foi encontrada no arquivo.</p>
+        </div>
+        <div data-part="controls">
+          <span data-part="retry">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="outline"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+              id="p3-retry"
+              aria-labelledby="p3-retry p3-t"
+            >
+              <span data-part="label">Tentar de novo</span>
+            </button>
+          </span>
+          <button
+            data-part="remove"
+            type="button"
+            aria-label="Remover do histórico"
+            aria-describedby="p3-t"
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+      </li>
+    </ul>
+    <div data-part="footer">
+      <a data-ui="link" data-part="root" data-underline="hover" data-variant="accent" href="#jobs"
+        >Ver todos os jobs</a
+      >
+    </div>
+  </section>
+</section>
+
+<!-- Files: one that expires, one that expired, one the reader may not download. -->
+<section data-scene="files">
+  <section
+    data-ui="import-export-center"
+    data-part="root"
+    data-size="md"
+    data-level="3"
+    data-growing="none"
+    data-time-format="absolute"
+    data-view="export"
+    aria-labelledby="iec-f-title"
+  >
+    <div data-part="header">
+      <h3 data-part="title" id="iec-f-title">Exportações</h3>
+    </div>
+    <ul data-part="list" aria-labelledby="iec-f-title" aria-busy="false" tabindex="-1">
+      <li
+        data-part="job"
+        data-direction="export"
+        data-status="succeeded"
+        data-outcome="success"
+        data-expired
+      >
+        <span data-part="visual" data-kind="archive" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file-archive"></svg></span
+        ></span>
+        <div data-part="body">
+          <div data-part="heading">
+            <span data-part="job-title" id="f1-t">Notas fiscais de agosto</span>
+            <p data-part="meta">
+              <span>Exportação</span>
+              <span>ZIP</span>
+              <span>312 MB</span>
+              <time data-part="time" datetime="2026-09-01T10:00:00">1 de set., 10:00</time>
+            </p>
+          </div>
+          <div data-part="status" id="f1-s">
+            <span data-part="mark" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="circle-check"></svg></span
+            ></span>
+            <span data-part="status-label"><span>Concluído</span></span>
+          </div>
+          <p data-part="message">Expirou em 8 de set., 10:00</p>
+        </div>
+        <div data-part="controls">
+          <span data-part="retry">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="outline"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+              id="f1-retry"
+              aria-labelledby="f1-retry f1-t"
+              aria-describedby="f1-s"
+            >
+              <span data-part="label">Gerar novamente</span>
+            </button>
+          </span>
+          <button
+            data-part="remove"
+            type="button"
+            aria-label="Remover do histórico"
+            aria-describedby="f1-t"
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+      </li>
+      <li data-part="job" data-direction="import" data-status="succeeded" data-outcome="success">
+        <span data-part="visual" data-kind="spreadsheet" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
+        ></span>
+        <div data-part="body">
+          <div data-part="heading">
+            <span data-part="job-title" id="f2-t">Tabela de preços do atacado</span>
+            <p data-part="meta">
+              <span>Importação</span>
+              <span>CSV</span>
+              <span>Rui Tavares</span>
+              <time data-part="time" datetime="2026-09-20T15:30:00">20 de set., 15:30</time>
+            </p>
+          </div>
+          <div data-part="status" id="f2-s">
+            <span data-part="mark" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="circle-check"></svg></span
+            ></span>
+            <span data-part="status-label"><span>Concluído</span></span>
+          </div>
+          <p data-part="summary"><span>860 de 860 linhas</span><span>860 atualizadas</span></p>
+          <p data-part="message">
+            Só quem importou o arquivo ou um administrador pode baixar o original.
+          </p>
+        </div>
+        <div data-part="controls">
+          <button
+            data-part="remove"
+            type="button"
+            aria-label="Remover do histórico"
+            aria-describedby="f2-t"
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+      </li>
+    </ul>
+  </section>
+</section>
+
+<!-- The history growing by button, with the next page on its way. -->
+<section data-scene="growing">
+  <section
+    data-ui="import-export-center"
+    data-part="root"
+    data-size="md"
+    data-level="2"
+    data-growing="button"
+    data-time-format="relative"
+    data-view="import"
+    data-loading
+    aria-labelledby="iec-g-title"
+  >
+    <div data-part="header">
+      <h2 data-part="title" id="iec-g-title">Importações</h2>
+    </div>
+    <ul data-part="list" aria-labelledby="iec-g-title" aria-busy="true" tabindex="-1">
+      <li data-part="job" data-direction="import" data-status="succeeded" data-outcome="success">
+        <span data-part="visual" data-kind="spreadsheet" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
+        ></span>
+        <div data-part="body">
+          <div data-part="heading">
+            <span data-part="job-title" id="g1-t">Fornecedores</span>
+            <p data-part="meta">
+              <span>Importação</span>
+              <span>CSV</span>
+              <time data-part="time" datetime="2026-09-18T10:00:00">há 1 semana</time>
+            </p>
+          </div>
+          <div data-part="status">
+            <span data-part="mark" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="circle-check"></svg></span
+            ></span>
+            <span data-part="status-label"><span>Concluído</span></span>
+          </div>
+          <p data-part="summary">
+            <span>214 de 214 linhas</span><span>12 criadas</span><span>202 atualizadas</span>
+          </p>
+        </div>
+        <div data-part="controls">
+          <button
+            data-part="remove"
+            type="button"
+            aria-label="Remover do histórico"
+            aria-describedby="g1-t"
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+      </li>
+    </ul>
+    <button data-part="more" type="button" data-loading aria-disabled="true">Carregando…</button>
+  </section>
+</section>
+
+<!-- The first wait: skeleton jobs in the boxes the loaded jobs occupy. -->
+<section data-scene="loading">
+  <section
+    data-ui="import-export-center"
+    data-part="root"
+    data-size="md"
+    data-level="2"
+    data-growing="none"
+    data-time-format="relative"
+    data-view="all"
+    data-loading
+    aria-labelledby="iec-l-title"
+  >
+    <div data-part="header">
+      <h2 data-part="title" id="iec-l-title">Importações e exportações</h2>
+    </div>
+    <ul data-part="list" aria-labelledby="iec-l-title" aria-busy="true" tabindex="-1">
+      <li data-part="job" aria-hidden="true">
+        <span data-part="visual"
+          ><span
+            data-ui="skeleton"
+            data-part="root"
+            data-shape="block"
+            data-animation="shimmer"
+            data-loading
+          ></span
+        ></span>
+        <div data-part="body">
+          <span data-ui="skeleton" data-part="text" data-animation="shimmer" data-loading
+            ><span data-part="line"></span><span data-part="line"></span
+          ></span>
+          <span data-ui="skeleton" data-part="text" data-animation="shimmer" data-loading
+            ><span data-part="line"></span
+          ></span>
+        </div>
+      </li>
+      <li data-part="job" aria-hidden="true">
+        <span data-part="visual"
+          ><span
+            data-ui="skeleton"
+            data-part="root"
+            data-shape="block"
+            data-animation="shimmer"
+            data-loading
+          ></span
+        ></span>
+        <div data-part="body">
+          <span data-ui="skeleton" data-part="text" data-animation="shimmer" data-loading
+            ><span data-part="line"></span><span data-part="line"></span
+          ></span>
+          <span data-ui="skeleton" data-part="text" data-animation="shimmer" data-loading
+            ><span data-part="line"></span
+          ></span>
+        </div>
+      </li>
+      <li data-part="job" aria-hidden="true">
+        <span data-part="visual"
+          ><span
+            data-ui="skeleton"
+            data-part="root"
+            data-shape="block"
+            data-animation="shimmer"
+            data-loading
+          ></span
+        ></span>
+        <div data-part="body">
+          <span data-ui="skeleton" data-part="text" data-animation="shimmer" data-loading
+            ><span data-part="line"></span><span data-part="line"></span
+          ></span>
+          <span data-ui="skeleton" data-part="text" data-animation="shimmer" data-loading
+            ><span data-part="line"></span
+          ></span>
+        </div>
+      </li>
+    </ul>
+  </section>
+</section>
+
+<!-- A view with nothing in it. -->
+<section data-scene="empty">
+  <section
+    data-ui="import-export-center"
+    data-part="root"
+    data-size="md"
+    data-level="2"
+    data-growing="none"
+    data-time-format="relative"
+    data-view="export"
+    aria-labelledby="iec-e-title"
+  >
+    <div data-part="header">
+      <h2 data-part="title" id="iec-e-title">Importações e exportações</h2>
+    </div>
+    <div data-part="empty">
+      <section
+        data-ui="result-state"
+        data-part="root"
+        data-status="empty"
+        data-reach="section"
+        data-align="center"
+        data-live="off"
+      >
+        <div data-part="media" aria-hidden="true"></div>
+        <div data-part="content">
+          <div data-part="title">Nenhuma exportação</div>
+          <p data-part="description">Uma exportação iniciada em qualquer lista aparece aqui.</p>
+        </div>
+      </section>
+    </div>
+  </section>
+</section>
+
+<!-- A list that could not load. -->
+<section data-scene="error">
+  <section
+    data-ui="import-export-center"
+    data-part="root"
+    data-size="md"
+    data-level="2"
+    data-growing="none"
+    data-time-format="relative"
+    data-view="all"
+    data-status="error"
+    aria-labelledby="iec-x-title"
+  >
+    <div data-part="header">
+      <h2 data-part="title" id="iec-x-title">Importações e exportações</h2>
+    </div>
+    <div data-part="error">
+      <section
+        data-ui="result-state"
+        data-part="root"
+        data-status="error"
+        data-reach="section"
+        data-align="center"
+        data-live="off"
+      >
+        <div data-part="media" aria-hidden="true"></div>
+        <div data-part="content">
+          <div data-part="title">Não foi possível carregar os jobs</div>
+          <p data-part="description">Verifique a ligação e tente de novo.</p>
+        </div>
+        <div data-part="actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="secondary"
+            data-variant="outline"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Tentar de novo</span>
+          </button>
+        </div>
+      </section>
+    </div>
+  </section>
+</section>
+
+<!-- Content the family did not choose: a long name, an Arabic file name, a long stage. -->
+<section data-scene="long">
+  <section
+    data-ui="import-export-center"
+    data-part="root"
+    data-size="md"
+    data-level="2"
+    data-growing="none"
+    data-time-format="relative"
+    data-view="all"
+    aria-labelledby="iec-long-title"
+  >
+    <div data-part="header">
+      <h2 data-part="title" id="iec-long-title">Importações e exportações</h2>
+    </div>
+    <ul data-part="list" aria-labelledby="iec-long-title" aria-busy="false" tabindex="-1">
+      <li data-part="job" data-direction="import" data-status="running">
+        <span data-part="visual" data-kind="spreadsheet" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
+        ></span>
+        <div data-part="body">
+          <div data-part="heading">
+            <span data-part="job-title" id="l1-t"
+              >Consolidação anual de lançamentos contábeis das filiais do Nordeste e do
+              Centro-Oeste</span
+            >
+            <p data-part="meta">
+              <span>Importação</span>
+              <span>CSV</span>
+              <span
+                ><span data-part="file-name" dir="auto"
+                  ><span data-part="name"
+                    >lancamentos_contabeis_consolidados_filiais_nordeste_centro_oeste_2025_versao_final_revisada</span
+                  ><span data-part="extension">.csv</span></span
+                ></span
+              >
+              <span>184 MB</span>
+            </p>
+          </div>
+          <div data-part="status" id="l1-s">
+            <span data-part="mark" aria-hidden="true"><span data-ui="spinner"></span></span>
+            <span data-part="status-label"
+              ><span>Em andamento</span>
+              <span data-part="stage"
+                >Validando as referências cruzadas entre centros de custo e plano de contas</span
+              ></span
+            >
+          </div>
+          <div data-part="progress">
+            <div
+              data-ui="progress-indicator"
+              data-part="root"
+              data-shape="linear"
+              data-size="sm"
+              data-tone="accent"
+              role="progressbar"
+              aria-labelledby="l1-t"
+              aria-valuemin="0"
+              aria-valuemax="1250000"
+              aria-valuenow="912400"
+              style="--slotted-progress-indicator-percent: 73"
+            >
+              <div data-part="track"><div data-part="indicator"></div></div>
+            </div>
+            <span data-part="progress-text"
+              ><span>912.400 de 1.250.000 linhas</span><span>73%</span></span
+            >
+          </div>
+        </div>
+        <div data-part="controls">
+          <span data-part="cancel">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="outline"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+              id="l1-cancel"
+              aria-labelledby="l1-cancel l1-t"
+            >
+              <span data-part="label">Cancelar</span>
+            </button>
+          </span>
+        </div>
+      </li>
+      <li data-part="job" data-direction="export" data-status="succeeded" data-outcome="success">
+        <span data-part="visual" data-kind="document" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file-type"></svg></span
+        ></span>
+        <div data-part="body">
+          <div data-part="heading">
+            <span data-part="job-title" id="l2-t">تقرير المبيعات الشهري</span>
+            <p data-part="meta">
+              <span>Exportação</span>
+              <span>DOCX</span>
+              <span
+                ><span data-part="file-name" dir="auto"
+                  ><span data-part="name">تقرير-المبيعات-سبتمبر</span
+                  ><span data-part="extension">.docx</span></span
+                ></span
+              >
+              <span>88 kB</span>
+            </p>
+          </div>
+          <div data-part="status">
+            <span data-part="mark" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="circle-check"></svg></span
+            ></span>
+            <span data-part="status-label"><span>Concluído</span></span>
+          </div>
+        </div>
+        <div data-part="controls">
+          <span data-part="download">
+            <a
+              data-ui="button"
+              data-part="root"
+              data-variant="outline"
+              data-tone="secondary"
+              data-size="sm"
+              href="#r"
+              download
+              id="l2-download"
+              aria-labelledby="l2-download l2-t"
+            >
+              <span data-part="label">Baixar</span>
+            </a>
+          </span>
+          <span data-part="job-actions">
+            <a
+              data-ui="link"
+              data-part="root"
+              data-underline="hover"
+              data-variant="accent"
+              href="#partilhar"
+              >Partilhar</a
+            >
+          </span>
+        </div>
+      </li>
+    </ul>
+  </section>
+</section>

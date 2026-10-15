@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 5,
+  "family": "status-indicator",
+  "ui": "status-indicator",
+  "catalog": {
+    "group": "Data display",
+    "summary": "Colored mark and label for a status."
+  },
+  "axes": {
+    "status": ["neutral", "info", "success", "warning", "danger", "unknown"],
+    "mark": ["dot", "icon"],
+    "size": ["sm", "md", "lg"],
+    "live": ["off", "polite", "assertive"]
+  },
+  "statusTones": {
+    "neutral": "secondary",
+    "info": "accent",
+    "success": "success",
+    "warning": "warning",
+    "danger": "danger",
+    "unknown": "secondary"
+  },
+  "statusGlyphs": {
+    "neutral": "circle",
+    "info": "circle-info",
+    "success": "circle-check",
+    "warning": "circle-alert",
+    "danger": "circle-x",
+    "unknown": "circle-question"
+  },
+  "messages": ["danger", "info", "neutral", "success", "unknown", "warning"],
+  "members": {
+    "statusIndicator": {
+      "nativeElement": "span",
+      "defaults": {
+        "status": "neutral",
+        "mark": "dot",
+        "size": "md",
+        "live": "off",
+        "pulse": false
+      },
+      "capabilities": ["appearance", "size", "status", "live"],
+      "states": ["default", "focus-visible"],
+      "parts": ["root", "mark", "label", "announcement"]
+    }
+  },
+  "scenarios": {
+    "statusIndicator": [
+      "playground",
+      "statuses",
+      "marks",
+      "sizes",
+      "pulse",
+      "announcements",
+      "context",
+      "content",
+      "composition",
+      "accessibility"
+    ]
+  }
+}

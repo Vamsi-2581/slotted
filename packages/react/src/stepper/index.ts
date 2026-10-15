@@ -1,13 +1,29 @@
-export { Stepper } from './stepper';
-export { StepperLabel } from './stepper-label';
-export { StepperMarker } from './stepper-marker';
-export { StepperStep } from './stepper-step';
+export { Stepper, useStepper } from './stepper';
+export { StepperDefaultsProvider, useStepperDefaults } from './stepper-defaults';
+export {
+  StepperList,
+  StepperNext,
+  StepperPanel,
+  StepperPrevious,
+  StepperStep,
+} from './stepper-parts';
+export type { StepperAdvanceProps } from './stepper-parts';
 export type {
-  StepperLabelProps,
-  StepperMarkerProps,
+  StepperChangeRequest,
+  StepperContextValue,
+  StepperDefaults,
+  StepperDefaultsProviderProps,
+  StepperLabelPlacement,
+  StepperListProps,
+  StepperListRootProps,
+  StepperNavigation,
   StepperOrientation,
+  StepperPanelProps,
+  StepperPanelRootProps,
   StepperProps,
   StepperRootProps,
-  StepperStatus,
   StepperStepProps,
+  StepperStepReason,
+  StepperStepRootProps,
+  StepStatus,
 } from './stepper.types';

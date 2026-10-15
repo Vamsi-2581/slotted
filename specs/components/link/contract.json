@@ -1,23 +1,45 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "family": "link",
-  "axes": {
-    "underline": ["always", "hover", "none"]
+  "ui": "link",
+  "catalog": {
+    "group": "Navigation",
+    "summary": "Text link to another page or resource."
   },
+  "axes": {
+    "underline": ["always", "hover", "none"],
+    "variant": ["accent", "neutral", "inverse"]
+  },
+  "stateAttributes": {
+    "disabled": "data-disabled"
+  },
+  "messages": ["externalHint"],
   "members": {
     "link": {
       "nativeElement": "a",
       "defaults": {
         "underline": "always",
+        "variant": "accent",
+        "visited": false,
         "external": false,
-        "externalHint": "(opens in a new tab)"
+        "disabled": false
       },
-      "capabilities": ["underline", "external"],
-      "states": ["default", "hover", "active", "focus-visible"],
-      "parts": ["root", "external-hint"]
+      "capabilities": ["appearance", "underline", "external", "disabled"],
+      "states": ["default", "hover", "active", "focus-visible", "disabled"],
+      "parts": ["root", "external-icon", "external-hint"]
     }
   },
   "scenarios": {
-    "link": ["playground", "underline", "external", "composition"]
+    "link": [
+      "playground",
+      "underline",
+      "variants",
+      "external",
+      "states",
+      "current",
+      "content",
+      "composition",
+      "accessibility"
+    ]
   }
 }

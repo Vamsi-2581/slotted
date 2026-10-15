@@ -1,4 +1,15 @@
 export { SlSplitter } from './splitter';
-export type { SplitterOrientation } from './splitter';
-export { SlSplitterHandle } from './splitter-handle';
-export { SlSplitterPane } from './splitter-pane';
+export {
+  injectSplitterDefaults,
+  provideSplitterDefaults,
+  SPLITTER_DEFAULTS,
+  SlSplitterIdFactory,
+} from './splitter-defaults';
+export type {
+  SplitterCollapsedRequest,
+  SplitterDefaults,
+  SplitterLimit,
+  SplitterOrientation,
+  SplitterValueReason,
+  SplitterValueRequest,
+} from './splitter-defaults';

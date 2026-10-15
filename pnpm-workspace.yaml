@@ -1,7 +1,7 @@
 packages:
   - apps/*
   - packages/*
-  - packages/themes/*
+  - tools/*
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true

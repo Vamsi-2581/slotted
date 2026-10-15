@@ -1,0 +1,39 @@
+import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
+import { referencePageErrors, snippetFormatErrors } from '@slotted/storybook-workbench/testing';
+import { describe, expect, it } from 'vitest';
+
+import contract from '../../../../specs/components/scroll-area/contract.json';
+import { REACT_SCROLL_AREA_DOCS } from './scroll-area.docs';
+import * as scrollAreaStories from './scroll-area.stories';
+
+describe('ScrollArea stories', () => {
+  it('covers every required scenario', () => {
+    expect(scenarioCoverageErrors(contract.scenarios.scrollArea, scrollAreaStories)).toEqual([]);
+  });
+
+  it('documents each public component API', () => {
+    expect(
+      apiMetadataErrors(contract.members.scrollArea, REACT_SCROLL_AREA_DOCS.api, undefined),
+    ).toEqual([]);
+  });
+
+  it('answers the reference-page contract', () => {
+    expect(
+      referencePageErrors({
+        docs: REACT_SCROLL_AREA_DOCS,
+        framework: 'React',
+        member: contract.members.scrollArea,
+        scenarioIds: contract.scenarios.scrollArea,
+        stateModel: undefined,
+      }),
+    ).toEqual([]);
+  });
+
+  it('keeps curated snippets formatted', async () => {
+    const snippets = [
+      ...REACT_SCROLL_AREA_DOCS.snippets,
+      ...REACT_SCROLL_AREA_DOCS.scenes.map((scene) => scene.snippet),
+    ];
+    expect(await snippetFormatErrors(snippets)).toEqual([]);
+  });
+});

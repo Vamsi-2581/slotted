@@ -1,9 +1,8 @@
+import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
+import { referencePageErrors, snippetFormatErrors } from '@slotted/storybook-workbench/testing';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/switch/contract.json';
-import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
-import { snippetFormatErrors } from '@slotted/storybook-workbench/testing';
-
 import { REACT_SWITCH_DOCS } from './switch.docs';
 import * as switchStories from './switch.stories';
 
@@ -20,8 +19,28 @@ describe('Switch stories', () => {
     }
   });
 
+  /**
+   * The family holds one mutable value, so the page owes an event table as
+   * well as the import, the anatomy and one captioned demonstration per
+   * scenario with the code that produced it.
+   */
+  it('answers the reference-page contract', () => {
+    expect(
+      referencePageErrors({
+        docs: REACT_SWITCH_DOCS.switch,
+        framework: 'React',
+        member: contract.members.switch,
+        scenarioIds: contract.scenarios.switch,
+        stateModel: contract.stateModel,
+      }),
+    ).toEqual([]);
+  });
+
   it('keeps curated snippets formatted', async () => {
-    const snippets = Object.values(REACT_SWITCH_DOCS).flatMap((docs) => docs.snippets);
+    const snippets = Object.values(REACT_SWITCH_DOCS).flatMap((docs) => [
+      ...docs.snippets,
+      ...docs.scenes.map((scene) => scene.snippet),
+    ]);
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });
 });

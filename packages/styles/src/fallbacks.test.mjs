@@ -17,6 +17,8 @@ const FOUNDATION_PREFIXES = [
   '--slotted-border-',
   '--slotted-control-',
   '--slotted-text',
+  '--slotted-surface',
+  '--slotted-scrim',
   '--_',
 ];
 

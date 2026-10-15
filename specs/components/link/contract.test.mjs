@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { assertContractShape } from '../../contract.schema.mjs';
+import { assertContractShape, MUTABLE_CAPABILITIES } from '../../contract.schema.mjs';
 
 const contract = JSON.parse(await readFile(new URL('./contract.json', import.meta.url), 'utf8'));
+const link = contract.members.link;
 
 test('satisfies the shared contract schema', () => {
   assertContractShape(contract);
@@ -12,34 +13,84 @@ test('satisfies the shared contract schema', () => {
 
 test('declares one member, because the family is one primitive', () => {
   assert.equal(contract.family, 'link');
+  assert.equal(contract.ui, 'link');
   assert.deepEqual(Object.keys(contract.members), ['link']);
 });
 
 test('renders an anchor, the only element that navigates', () => {
-  assert.equal(contract.members.link.nativeElement, 'a');
+  assert.equal(link.nativeElement, 'a');
 });
 
 test('names the underline axis and defaults to the web convention', () => {
-  assert.deepEqual(contract.axes, { underline: ['always', 'hover', 'none'] });
-  assert.equal(contract.members.link.defaults.underline, 'always');
+  assert.deepEqual(contract.axes.underline, ['always', 'hover', 'none']);
+  assert.equal(link.defaults.underline, 'always');
 });
 
-test('carries a part for the warning an external link owes the reader', () => {
-  assert.deepEqual(contract.members.link.parts, ['root', 'external-hint']);
-  assert.equal(contract.members.link.defaults.external, false);
-  assert.equal(contract.members.link.defaults.externalHint, '(opens in a new tab)');
+/**
+ * `accent` is the link, `neutral` is the link that takes the colour of the
+ * text around it, and `inverse` is the link on a solid surface. The five tones
+ * are not here: tone marks an action's consequence, navigation has none, and a
+ * destructive command is a Button.
+ */
+test('names three variants and no tone scale', () => {
+  assert.deepEqual(contract.axes.variant, ['accent', 'neutral', 'inverse']);
+  assert.equal(link.defaults.variant, 'accent');
+  assert.ok(!('tone' in contract.axes));
+  assert.ok(!('size' in contract.axes));
 });
 
-test('reacts to the pointer and the keyboard, and holds no attribute state', () => {
-  assert.deepEqual(contract.members.link.states, ['default', 'hover', 'active', 'focus-visible']);
-  assert.ok(!('stateAttributes' in contract));
+test('carries the two parts an external link owes the reader', () => {
+  assert.deepEqual(link.parts, ['root', 'external-icon', 'external-hint']);
+  assert.equal(link.defaults.external, false);
 });
 
-test('exposes underline and external as its capabilities', () => {
-  assert.deepEqual(contract.members.link.capabilities, ['underline', 'external']);
+test('paints a disabled link and holds the weaker states back for it', () => {
+  assert.ok(link.capabilities.includes('disabled'));
+  assert.equal(link.defaults.disabled, false);
+  assert.deepEqual(link.states, ['default', 'hover', 'active', 'focus-visible', 'disabled']);
+  assert.deepEqual(contract.stateAttributes, { disabled: 'data-disabled' });
+});
+
+/**
+ * `visited` is opt-in because `:visited` is restricted to colour and cannot be
+ * read back by script: a family that turned it on by default would ship a rule
+ * no test in this repository can assert.
+ */
+test('makes the visited colour a decision the application takes', () => {
+  assert.equal(link.defaults.visited, false);
+});
+
+/**
+ * The family holds no state it can move. `aria-current` is the router's or the
+ * consumer's, so the stylesheet paints the platform attribute and the contract
+ * declares neither the mutable capability nor a `data-current` mirror of it.
+ */
+test('holds no mutable capability, and therefore no state model', () => {
+  for (const capability of link.capabilities) {
+    assert.ok(
+      !MUTABLE_CAPABILITIES.includes(capability),
+      `${capability} holds state a link cannot move`,
+    );
+  }
+  assert.ok(!('stateModel' in contract));
+  assert.ok(!link.states.includes('current'));
+});
+
+test('exposes appearance, underline, external and disabled as its capabilities', () => {
+  assert.deepEqual(link.capabilities, ['appearance', 'underline', 'external', 'disabled']);
 });
 
 test('names one scenario page for the family', () => {
   assert.deepEqual(Object.keys(contract.scenarios), ['link']);
-  assert.deepEqual(contract.scenarios.link, ['playground', 'underline', 'external', 'composition']);
+  assert.deepEqual(contract.scenarios.link, [
+    'playground',
+    'underline',
+    'variants',
+    'external',
+    'states',
+    'current',
+    'content',
+    'composition',
+    'accessibility',
+  ]);
 });

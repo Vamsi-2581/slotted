@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { getPreviewStyle, getStorybookTheme, subscribeToScheme } from './theme';
+import { GLOBALS_UPDATED, SET_GLOBALS } from 'storybook/internal/core-events';
+
+import {
+  getPreviewStyle,
+  getStorybookTheme,
+  readSchemeFromSearch,
+  subscribeToScheme,
+} from './theme';
 
 const relativeLuminance = (hex: string) => {
   const channels = hex
@@ -101,33 +108,46 @@ describe('React Storybook theme', () => {
     });
   });
 
-  it('synchronizes global scheme changes and removes its listener on cleanup', () => {
-    const listeners = new Set<(payload: { globals: Record<string, unknown> }) => void>();
+  it('reads the scheme the manager query string carries on boot', () => {
+    expect(readSchemeFromSearch('')).toBe('light');
+    expect(readSchemeFromSearch('?path=/story/button--primary')).toBe('light');
+    expect(readSchemeFromSearch('?globals=scheme:light')).toBe('light');
+    expect(readSchemeFromSearch('?globals=scheme:dark')).toBe('dark');
+    expect(readSchemeFromSearch('?path=/docs/button&globals=density:compact;scheme:dark')).toBe(
+      'dark',
+    );
+  });
+
+  it('adopts the preview boot globals and later changes, then unsubscribes on cleanup', () => {
+    type Listener = (payload: { globals: Record<string, unknown> }) => void;
+    const listeners = new Map<string, Set<Listener>>();
     const channel = {
-      on: (_event: string, listener: (payload: { globals: Record<string, unknown> }) => void) => {
-        listeners.add(listener);
+      on: (event: string, listener: Listener) => {
+        listeners.set(event, (listeners.get(event) ?? new Set()).add(listener));
       },
-      off: (_event: string, listener: (payload: { globals: Record<string, unknown> }) => void) => {
-        listeners.delete(listener);
+      off: (event: string, listener: Listener) => {
+        listeners.get(event)?.delete(listener);
       },
+    };
+    const emit = (event: string, scheme: string) => {
+      for (const listener of listeners.get(event) ?? []) {
+        listener({ globals: { scheme } });
+      }
     };
     const appliedSchemes: string[] = [];
     const unsubscribe = subscribeToScheme(channel, 'light', (scheme) => {
       appliedSchemes.push(scheme);
     });
 
-    for (const listener of listeners) {
-      listener({ globals: { scheme: 'dark' } });
-    }
+    emit(SET_GLOBALS, 'dark');
+    emit(GLOBALS_UPDATED, 'light');
 
-    expect(appliedSchemes).toEqual(['light', 'dark']);
+    expect(appliedSchemes).toEqual(['light', 'dark', 'light']);
 
     unsubscribe();
+    emit(SET_GLOBALS, 'dark');
+    emit(GLOBALS_UPDATED, 'dark');
 
-    for (const listener of listeners) {
-      listener({ globals: { scheme: 'light' } });
-    }
-
-    expect(appliedSchemes).toEqual(['light', 'dark']);
+    expect(appliedSchemes).toEqual(['light', 'dark', 'light']);
   });
 });

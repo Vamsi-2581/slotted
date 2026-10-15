@@ -1,6 +1,28 @@
 export { SlField } from './field';
-export { SlFieldControl } from './field-control';
-export { SlFieldDescription } from './field-description';
-export { SlFieldError } from './field-error';
-export { SlFieldIdFactory } from './field-id';
-export { SlFieldLabel } from './field-label';
+export {
+  deriveFieldIds,
+  FIELD_DEFAULTS,
+  FIELD_DESCRIBED_ORDER,
+  injectFieldDefaults,
+  necessityMark,
+  provideFieldDefaults,
+  SlFieldContext,
+  SlFieldDefaultsSource,
+  SlFieldHeaderSlot,
+  SlFieldHelpSlot,
+  SlFieldIdFactory,
+  SlFieldIndicatorSlot,
+} from './field-defaults';
+export type {
+  FieldDefaults,
+  FieldDescribedSlot,
+  FieldIds,
+  FieldLabelPlacement,
+  FieldNecessity,
+  FieldSize,
+} from './field-defaults';
+export { formatFieldCount, isFieldCountOver, SlFieldCounter } from './field-counter';
+export type { FieldCount } from './field-counter';
+export { SlFieldDescription, SlFieldError, SlFieldMessage } from './field-messages';
+export { SlFieldAction, SlFieldControl, SlFieldLabel } from './field-parts';
+export { SlFieldHeader, SlFieldHelp, SlFieldIndicator } from './field-header';

@@ -1,6 +1,17 @@
 export { SlAlert } from './alert';
-export type { AlertFill, AlertLive, AlertSize, AlertVariant } from './alert';
-export { SlAlertActions } from './alert-actions';
-export { SlAlertDescription } from './alert-description';
-export { SlAlertIcon } from './alert-icon';
-export { SlAlertTitle } from './alert-title';
+export type { AlertCloseReason } from './alert';
+export { ALERT_DEFAULTS, injectAlertDefaults, provideAlertDefaults } from './alert-defaults';
+export type {
+  AlertDefaults,
+  AlertLive,
+  AlertReach,
+  AlertTone,
+  AlertVariant,
+} from './alert-defaults';
+export {
+  SlAlertActions,
+  SlAlertContent,
+  SlAlertDescription,
+  SlAlertIcon,
+  SlAlertTitle,
+} from './alert-parts';

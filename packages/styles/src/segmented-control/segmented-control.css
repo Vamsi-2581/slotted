@@ -1,0 +1,564 @@
+@layer slotted.components {
+  /**
+   * ── One choice out of a few, applied at once, on a track ───────────────
+   *
+   * The root is a `div` carrying `role="radiogroup"`; each segment is a
+   * `label` wrapping a real `input[type=radio]`. The whole keyboard model is
+   * therefore the platform's, because the radios share a `name`: Tab lands on
+   * the checked segment, the arrows move focus and the selection together in
+   * both axes and in both writing directions, the set wraps, and a disabled
+   * segment is skipped. `radio-group` records the same decision, and this is
+   * the family that wears it as a track.
+   *
+   * It is a radio group and not a row of buttons. Primer builds the row of
+   * buttons and pays one tab stop per segment where the Radio Group pattern
+   * gives one for the set; Angular Material writes `radiogroup` around
+   * children carrying `aria-pressed`, which is a group whose role and children
+   * disagree. The family whose items are buttons is `toggle-group`, and the
+   * difference a reader feels is the arrows: here they move the value.
+   *
+   * ── The control is exactly as tall as a control ───────────────────────
+   *
+   * The root is `--slotted-control-height-*` to the pixel, and everything
+   * inside it is measured back from that: the track's own edge, the ring of
+   * ground around the thumb, and the thumb. A segmented control is put in
+   * forms beside a text field and a select, so a family that added its padding
+   * to the control height would stand two or six pixels prouder than every
+   * other control on the row. `--_inner` is what is left for the thumb, and
+   * the segments take it.
+   *
+   * ── The thumb's place is arithmetic ───────────────────────────────────
+   *
+   * The track is a grid whose columns are equal, so the widest label decides
+   * the width of every segment — which is Carbon's stated rule, taken from the
+   * layout rather than measured. The thumb is one column wide and moves by its
+   * own width times the checked index, so nothing is read from layout and the
+   * first server-rendered paint is already right. Mantine measures the checked
+   * node with a ref and Ark's machine measures too; both paint the thumb in
+   * the wrong place until hydration.
+   *
+   * `--slotted-segmented-control-count` and `-index` are runtime values under
+   * the name that says so, which is the convention `docs/build-briefing.md`
+   * sets. They are not design tokens and no theme writes them.
+   */
+  [data-ui='segmented-control'][data-part='root'] {
+    --_count: var(--slotted-segmented-control-count, 1);
+    --_index: var(--slotted-segmented-control-index, 0);
+    --_height: var(--slotted-control-height-md, 34px);
+    --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
+    --_font-size: var(--slotted-control-font-size-md, 13px);
+    --_icon-size: var(--slotted-control-icon-size-md, 16px);
+    --_gap: var(--slotted-control-gap-md, 8px);
+    --_radius: var(--slotted-segmented-control-radius, var(--slotted-control-radius, 4px));
+    --_border-width: var(--slotted-control-border-width, 1px);
+    /**
+     * The ring of track left visible around the thumb. It is what says the
+     * thumb sits *in* the control rather than being the control, and it is one
+     * step on the space scale rather than a number chosen here.
+     */
+    --_inset: var(--slotted-segmented-control-inset, var(--slotted-space-1, 0.125rem));
+    /** What is left for a segment once the track has taken its edge and ring. */
+    --_inner: calc(var(--_height) - (var(--_inset) + var(--_border-width)) * 2);
+    /** The thumb's corner, kept concentric with the track's own. */
+    --_thumb-radius: max(calc(var(--_radius) - var(--_inset)), var(--slotted-radius-xs, 2px));
+    /**
+     * How long the thumb takes to cross. One step above the control's own
+     * interaction feedback, because a thing that travels needs longer than a
+     * thing that changes colour, and every value on the scale collapses to a
+     * single frame under `prefers-reduced-motion`.
+     */
+    --_travel: var(--slotted-duration-medium);
+
+    /* A control in a row of controls: the fill, edge and lift a field has. */
+    background: var(--slotted-segmented-control-background, var(--slotted-control-surface, Field));
+    border: var(--_border-width) solid
+      var(
+        --slotted-segmented-control-border-color,
+        var(--slotted-control-border-color, ButtonBorder)
+      );
+    border-radius: var(--_radius);
+    box-shadow: var(--slotted-segmented-control-shadow, var(--slotted-control-shadow, none));
+    box-sizing: border-box;
+    display: inline-grid;
+    font-family: var(--slotted-control-font-family, system-ui, sans-serif);
+    font-size: var(--_font-size);
+    /**
+     * Equal columns, sized by the widest segment. `1fr` in an intrinsically
+     * sized grid resolves every track to the largest content contribution, so
+     * the rule Carbon states — base the width on the longest label, and give
+     * every segment that width — falls out of the layout.
+     */
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    isolation: isolate;
+    min-inline-size: 0;
+    padding: var(--_inset);
+    position: relative;
+  }
+
+  [data-ui='segmented-control'][data-part='root']:empty {
+    display: none;
+  }
+
+  /* ── Size ─────────────────────────────────────────────────────────────── */
+
+  [data-ui='segmented-control'][data-part='root'][data-size='sm'] {
+    --_height: var(--slotted-control-height-sm, 30px);
+    --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
+    --_font-size: var(--slotted-control-font-size-sm, 12px);
+    --_icon-size: var(--slotted-control-icon-size-sm, 14px);
+    --_gap: var(--slotted-control-gap-sm, 6px);
+  }
+
+  [data-ui='segmented-control'][data-part='root'][data-size='lg'] {
+    --_height: var(--slotted-control-height-lg, 38px);
+    --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
+    --_font-size: var(--slotted-control-font-size-lg, 14px);
+    --_icon-size: var(--slotted-control-icon-size-lg, 18px);
+    --_gap: var(--slotted-control-gap-lg, 8px);
+  }
+
+  /* ── Orientation and width ────────────────────────────────────────────── */
+
+  [data-ui='segmented-control'][data-part='root'][data-orientation='vertical'] {
+    grid-auto-columns: auto;
+    grid-auto-flow: row;
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  [data-ui='segmented-control'][data-part='root'][data-full-width] {
+    display: grid;
+    inline-size: 100%;
+  }
+
+  /**
+   * ── Who is the query container, and why it is not always the root ─────
+   *
+   * `container-type: inline-size` contains the inline axis, so the element's
+   * own width is computed as though it had no contents — and a control that
+   * shrinks to its labels then shrinks to nothing. Measured: every
+   * content-width scene on this page stood about one character wide and broke
+   * its labels one letter per line, which is the same defect
+   * `docs/build-briefing.md` records for `collapsible`, `pagination` and
+   * `stepper`, arriving from the other direction.
+   *
+   * So the container is declared on the one shape that has a width of its own
+   * to be asked about: a control told to condense is a control whose width its
+   * parent decides, and it takes that width. Asking a control to give up its
+   * words at a width it chose for itself is a question with no answer — it
+   * chose a width that fits them.
+   */
+  [data-ui='segmented-control'][data-part='root'][data-condense='icons'] {
+    container-name: slotted-segmented-control;
+    container-type: inline-size;
+    display: grid;
+    inline-size: 100%;
+  }
+
+  /* ── The segment ──────────────────────────────────────────────────────── */
+
+  [data-ui='segmented-control'] [data-part='item'] {
+    align-items: center;
+    block-size: var(--_inner);
+    border-radius: var(--_thumb-radius);
+    box-sizing: border-box;
+    /**
+     * A segment that is not checked is still a live control, so it takes the
+     * page's own ink rather than the muted step. The muted step was tried
+     * first and it put an available segment and an unavailable one within a
+     * hair of each other — `#5b6b7f` against `#64748b` — so the one state a
+     * reader has to be able to tell apart was the one they could not.
+     */
+    color: var(--slotted-segmented-control-color, var(--slotted-text, ButtonText));
+    cursor: pointer;
+    display: flex;
+    font-weight: var(--slotted-control-font-weight, 600);
+    gap: var(--_gap);
+    justify-content: center;
+    letter-spacing: var(--slotted-control-letter-spacing, 0);
+    line-height: var(--slotted-control-line-height, 1);
+    /**
+     * The thumb is shorter than the control it lives in, so at the smallest
+     * step and the tightest density it is eighteen pixels tall. The WCAG
+     * minimum is the floor across the segment, and the radio below reaches the
+     * track's own edge to meet it in the other axis.
+     */
+    min-inline-size: max(var(--_inner), var(--slotted-target-min, 24px));
+    padding-inline: var(--_padding-inline);
+    position: relative;
+    transition:
+      background-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+    /* Above the thumb, which is painted behind every segment. */
+    z-index: 1;
+  }
+
+  /* An empty label is no label: a binding that always renders the span must
+     not leave a flex gap after the icon of a segment without words. */
+  [data-ui='segmented-control'] [data-part='item']:not(:has([data-part='label']:not(:empty))) {
+    padding-inline: 0;
+  }
+
+  [data-ui='segmented-control'] [data-part='label']:empty {
+    display: none;
+  }
+
+  /**
+   * ── The rule between two segments ─────────────────────────────────────
+   *
+   * A track of words with nothing between them reads as a sentence. The rule
+   * is what says the control is divided, and it is what Mantine ships on by
+   * default, Apple draws, and Carbon draws. It is shorter than the segment, so
+   * it reads as a divider rather than as a second frame, and it gives way
+   * around the thumb — a grey line touching the accent edge is the "border
+   * inside a border" this family had to correct elsewhere.
+   */
+  [data-ui='segmented-control'] [data-part='item'] + [data-part='item']::before {
+    /* No system colour behind it: an unthemed decoration disappears rather
+       than shouting, which is what `fallbacks.test.mjs` holds a pseudo-element
+       to. The rule is a decoration — what divides the segments in forced
+       colours is the thumb's own border. */
+    background: var(--slotted-segmented-control-divider-color, var(--slotted-border-subtle));
+    content: '';
+    inline-size: var(--_border-width);
+    inset-block: 22%;
+    inset-inline-start: 0;
+    position: absolute;
+    transition: opacity var(--_travel) var(--slotted-easing-standard);
+  }
+
+  [data-ui='segmented-control'][data-part='root'][data-orientation='vertical']
+    [data-part='item']
+    + [data-part='item']::before {
+    block-size: var(--_border-width);
+    inline-size: auto;
+    inset-block: auto;
+    inset-block-start: 0;
+    inset-inline: 22%;
+  }
+
+  [data-ui='segmented-control'] [data-part='item'][data-checked]::before,
+  [data-ui='segmented-control'] [data-part='item'][data-checked] + [data-part='item']::before {
+    opacity: 0;
+  }
+
+  /**
+   * The radio itself, carrying the focus the platform gives it and the whole
+   * hit area of the segment. It reaches past the thumb and over the ring of
+   * track around it, so the target is the control's own height rather than the
+   * thumb's — which is what keeps the smallest step at the tightest density
+   * above the WCAG minimum.
+   */
+  [data-ui='segmented-control'] [data-part='control'] {
+    appearance: none;
+    background: none;
+    border: 0;
+    border-radius: inherit;
+    cursor: inherit;
+    inset-block: calc(-1 * (var(--_inset) + var(--_border-width)));
+    inset-inline: 0;
+    margin: 0;
+    opacity: 0;
+    padding: 0;
+    position: absolute;
+  }
+
+  [data-ui='segmented-control'] [data-part='icon'] {
+    block-size: var(--_icon-size);
+    display: inline-flex;
+    flex: none;
+    inline-size: var(--_icon-size);
+  }
+
+  /**
+   * The words get a box of their own, so a label an equal column made too
+   * narrow clips rather than wrapping the segment onto a second line. The
+   * string stays whole in the DOM: truncation never removes content.
+   */
+  [data-ui='segmented-control'] [data-part='label'] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /**
+   * ── The thumb ─────────────────────────────────────────────────────────
+   *
+   * One column wide, moved by its own width times the checked index. The
+   * percentage is of the thumb itself, so the arithmetic needs no width in it
+   * and no measurement behind it; `:dir(rtl)` negates the step, because the
+   * reading direction is which way "the next segment" is.
+   *
+   * The edge is a border rather than an inset ring, so the same declaration
+   * leaves room for the elevation beside it: a framed control carries
+   * `--slotted-control-shadow`, which is `none` in `high-contrast` — and a
+   * shadow list may not contain `none`, so the two could not have shared one
+   * `box-shadow`.
+   *
+   * The movement is the one thing in this family a reader's eye follows: it
+   * says which segment was left, which a fill appearing in a new place does
+   * not. It takes a step above the control's own transition, because a thing
+   * that travels needs longer than a thing that changes colour, and the theme
+   * collapses every step to a single frame under `prefers-reduced-motion`.
+   *
+   * The thumb is absent while nothing is checked, so the first selection fades
+   * it in where it belongs rather than sliding it from an edge the reader has
+   * never seen — which is what Mantine does.
+   */
+  [data-ui='segmented-control'] [data-part='indicator'] {
+    background: var(
+      --slotted-segmented-control-indicator-background,
+      var(--slotted-tone-accent-subtle-active, Highlight)
+    );
+    block-size: calc(100% - var(--_inset) * 2);
+    border: var(--_border-width) solid
+      var(
+        --slotted-segmented-control-indicator-border-color,
+        var(--slotted-tone-accent-border, Highlight)
+      );
+    border-radius: var(--_thumb-radius);
+    box-shadow: var(--slotted-control-shadow, none);
+    box-sizing: border-box;
+    inline-size: calc((100% - var(--_inset) * 2) / var(--_count));
+    inset-block-start: var(--_inset);
+    inset-inline-start: var(--_inset);
+    pointer-events: none;
+    position: absolute;
+    transition:
+      opacity var(--slotted-control-transition-duration) var(--slotted-easing-standard),
+      translate var(--_travel) var(--slotted-easing-standard);
+    translate: calc(var(--_index) * 100%);
+    z-index: 0;
+
+    @starting-style {
+      opacity: 0;
+    }
+  }
+
+  [data-ui='segmented-control'] [data-part='indicator']:dir(rtl) {
+    translate: calc(var(--_index) * -100%);
+  }
+
+  [data-ui='segmented-control'][data-part='root'][data-orientation='vertical']
+    [data-part='indicator'] {
+    block-size: calc((100% - var(--_inset) * 2) / var(--_count));
+    inline-size: calc(100% - var(--_inset) * 2);
+    translate: 0 calc(var(--_index) * 100%);
+  }
+
+  /**
+   * ── Checked ──────────────────────────────────────────────────────────
+   *
+   * The thumb carries the ground and the edge; the segment carries the text.
+   * Nothing about the segment's geometry changes — the weight stays where it
+   * was, because a label that thickens when it is chosen moves every label
+   * beside it.
+   */
+  [data-ui='segmented-control'] [data-part='item'][data-checked] {
+    color: var(
+      --slotted-segmented-control-checked-color,
+      var(--slotted-tone-accent-text, HighlightText)
+    );
+  }
+
+  /* ── Hover and press, held back for every stronger state ──────────────── */
+
+  /**
+   * A segment that is not checked answers the pointer with a ground rather
+   * than with a shade of its own ink. Ink alone was the first attempt: with
+   * the unchecked label already at the page's own colour there was nowhere
+   * darker for it to go, and a hover that changes nothing is a hover a reader
+   * cannot see. The ground is the neutral one, for the reason `button`
+   * records — a tinted hover on a row of choices reads as a row of status
+   * chips before it reads as one of them being pointed at.
+   */
+  [data-ui='segmented-control'][data-part='root']:not([data-readonly])
+    [data-part='item']:hover:not([data-disabled]):not([data-checked]):has(
+      [data-part='control']:enabled
+    ) {
+    background: var(
+      --slotted-segmented-control-hover-background,
+      var(--slotted-tone-secondary-subtle-hover, ButtonFace)
+    );
+  }
+
+  /**
+   * A press answers on the frame it went down on and releases at the control's
+   * own pace, which is the rule every activating family here writes: the
+   * duration belongs to the state being entered.
+   */
+  [data-ui='segmented-control'][data-part='root']:not([data-readonly])
+    [data-part='item']:active:not([data-disabled]):not([data-checked]):has(
+      [data-part='control']:enabled
+    ) {
+    background: var(
+      --slotted-segmented-control-active-background,
+      var(--slotted-tone-secondary-subtle-active, ButtonFace)
+    );
+    transition-duration: var(--slotted-duration-instant);
+  }
+
+  /* ── Focus ────────────────────────────────────────────────────────────── */
+
+  /**
+   * The element holding focus is the radio, and the ring belongs around the
+   * segment. A family that moves its ring has to put out the one the browser
+   * draws where focus actually is, or it paints two rings in two colours —
+   * the rule `checkbox`, `switch` and `radio-group` each record.
+   *
+   * The ring is drawn *inside* the segment, with its outer edge on the
+   * segment's own border box — which is what a negative offset of exactly the
+   * ring's width gives. An outline is painted outward, and the segments are
+   * flush inside a track that keeps only two pixels of ground around them, so
+   * an outward ring has nowhere of its own to go: at offset zero it crossed
+   * into the neighbour and stacked with that neighbour's thumb edge, which
+   * read as three pixels of ink at one seam and one pixel at every other.
+   * Measured at 300% zoom, between a focused segment and the checked one
+   * beside it.
+   *
+   * Inside, the ring lands exactly where the thumb's edge lands and replaces
+   * it, so a segment that is both checked and focused shows one ring rather
+   * than a ring and a border a pixel apart.
+   */
+  [data-ui='segmented-control'] [data-part='item']:has([data-part='control']:focus-visible) {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
+    z-index: 2;
+  }
+
+  [data-ui='segmented-control'] [data-part='control']:focus-visible {
+    outline: none;
+  }
+
+  /* ── Invalid ──────────────────────────────────────────────────────────── */
+
+  /**
+   * The ring is retargeted on the element rather than repainted in every rule
+   * that draws one, which is what `--slotted-focus-ring-color-invalid` exists
+   * for and what keeps the outline and its shadow the same colour.
+   */
+  [data-ui='segmented-control'][data-part='root'][data-invalid] {
+    --slotted-focus-ring-color: var(
+      --slotted-segmented-control-invalid-focus-ring-color,
+      var(--slotted-focus-ring-color-invalid, Highlight)
+    );
+
+    border-color: var(
+      --slotted-segmented-control-invalid-border-color,
+      var(--slotted-tone-danger-border, ButtonBorder)
+    );
+    /*
+     * Width as well as colour (WCAG 1.4.1), the edge `text-field` draws: in
+     * `high-contrast` the danger border is the resting edge's black. The line
+     * is a shadow inside the border, so neither the track nor a segment moves,
+     * and it takes the resting lift's place. Focus is the segment's ring, so
+     * no focus rule repaints it.
+     */
+    --_invalid-edge-width: var(
+      --slotted-segmented-control-invalid-edge-width,
+      var(--slotted-control-invalid-edge-width, 1px)
+    );
+
+    box-shadow: inset 0 0 0 var(--_invalid-edge-width)
+      var(
+        --slotted-segmented-control-invalid-border-color,
+        var(--slotted-tone-danger-border, ButtonBorder)
+      );
+  }
+
+  /* ── Read-only ────────────────────────────────────────────────────────── */
+
+  /**
+   * A read-only control keeps its colours and loses its cursor: it is still
+   * legible, still focusable and still copyable, and it must not be mistaken
+   * for a disabled one — which is what `docs/component-features.md` §2.5 asks.
+   */
+  [data-ui='segmented-control'][data-part='root'][data-readonly] [data-part='item'],
+  [data-ui='segmented-control'][data-part='root'][data-readonly] [data-part='control'] {
+    cursor: default;
+  }
+
+  /* ── Disabled ─────────────────────────────────────────────────────────── */
+
+  [data-ui='segmented-control'] [data-part='item'][data-disabled] {
+    color: var(
+      --slotted-segmented-control-disabled-color,
+      var(--slotted-disabled-foreground, GrayText)
+    );
+    cursor: default;
+  }
+
+  [data-ui='segmented-control'] [data-part='control']:disabled {
+    cursor: default;
+  }
+
+  /**
+   * A whole control that is unavailable greys its edge and its words and keeps
+   * its track. Painting the track in the disabled ground as well was the first
+   * attempt, and it made the thumb the same colour as what it sits on: the
+   * reader could no longer tell which of the three had been chosen. The track
+   * is the ground the thumb is read against, so it is the one thing that has
+   * to stay.
+   */
+  [data-ui='segmented-control'][data-part='root'][data-disabled] {
+    border-color: var(
+      --slotted-segmented-control-disabled-border-color,
+      var(--slotted-disabled-border, GrayText)
+    );
+  }
+
+  [data-ui='segmented-control'][data-part='root'][data-disabled] [data-part='indicator'] {
+    background: var(
+      --slotted-segmented-control-disabled-indicator-background,
+      var(--slotted-disabled-background, ButtonFace)
+    );
+    border-color: var(
+      --slotted-segmented-control-disabled-border-color,
+      var(--slotted-disabled-border, GrayText)
+    );
+    box-shadow: none;
+  }
+
+  /* ── Condensed ────────────────────────────────────────────────────────── */
+
+  /**
+   * Below the width its labels need, a control asked to condense keeps its
+   * icons and hides its words — Primer's `hideLabels`, asked of the control's
+   * own inline size rather than of the viewport, because the viewport is not
+   * what the control is narrow inside.
+   *
+   * The words are hidden and not removed, so the accessible name of every
+   * segment is the same at every width. A container breakpoint is a literal
+   * because `@container (max-inline-size: var(--x))` is invalid CSS.
+   */
+  @container slotted-segmented-control (max-inline-size: 20rem) {
+    [data-ui='segmented-control'][data-part='root'][data-condense='icons']
+      [data-part='item']:has([data-part='icon'])
+      [data-part='label'] {
+      block-size: 1px;
+      clip-path: inset(50%);
+      inline-size: 1px;
+      overflow: hidden;
+      position: absolute;
+      white-space: nowrap;
+    }
+
+    [data-ui='segmented-control'][data-part='root'][data-condense='icons']
+      [data-part='item']:has([data-part='icon']) {
+      padding-inline: 0;
+    }
+  }
+
+  /*
+   * Forced colours remove every box shadow, and the edge with them. The width
+   * comes back as an outline inside the border; the
+   * ring belongs to a segment and leaves it alone.
+   */
+  @media (forced-colors: active) {
+    [data-ui='segmented-control'][data-part='root'][data-invalid] {
+      outline: var(--_invalid-edge-width) solid CanvasText;
+      outline-offset: calc(-1 * (var(--_border-width) + var(--_invalid-edge-width)));
+    }
+  }
+}

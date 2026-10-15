@@ -16,5 +16,5 @@
     "strictInjectionParameters": true,
     "strictTemplates": true
   },
-  "exclude": ["**/*.spec.ts", "**/*.stories.ts"]
+  "exclude": ["**/*.docs.ts", "**/*.spec.ts", "**/*.stories.ts"]
 }

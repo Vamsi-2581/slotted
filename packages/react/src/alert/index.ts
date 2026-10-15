@@ -1,17 +1,19 @@
 export { Alert } from './alert';
-export { AlertActions } from './alert-actions';
-export { AlertDescription } from './alert-description';
-export { AlertIcon } from './alert-icon';
-export { AlertTitle } from './alert-title';
+export { AlertDefaultsProvider, useAlertDefaults } from './alert-defaults';
+export { AlertActions, AlertContent, AlertDescription, AlertTitle } from './alert-parts';
 export type {
   AlertActionsProps,
+  AlertCloseReason,
+  AlertContentProps,
+  AlertDefaults,
+  AlertDefaultsProviderProps,
   AlertDescriptionProps,
-  AlertFill,
-  AlertIconProps,
   AlertLive,
+  AlertPartProps,
   AlertProps,
+  AlertReach,
   AlertRootProps,
-  AlertSize,
   AlertTitleProps,
+  AlertTone,
   AlertVariant,
 } from './alert.types';

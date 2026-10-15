@@ -1,205 +1,175 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { createRef, type ComponentProps } from 'react';
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
+import contract from '../../../../specs/components/button/contract.json';
 import { ToggleButton } from './toggle-button';
 
+const defaults = contract.members.toggleButton.defaults;
+
 describe('ToggleButton', () => {
-  it('keeps the pressed value visible while disabled', () => {
-    render(
-      <ToggleButton disabled pressed>
-        Pin
-      </ToggleButton>,
-    );
-
+  it('is a native button announced as a toggle', () => {
+    render(<ToggleButton>Pin</ToggleButton>);
     const button = screen.getByRole('button', { name: 'Pin' });
-    expect(button).toHaveAttribute('data-pressed', '');
-    expect(button).toHaveAttribute('data-disabled', '');
-    expect(button).not.toHaveAttribute('data-state');
+
+    expect(button.localName).toBe(contract.members.toggleButton.nativeElement);
+    expect(button).toHaveAttribute('data-ui', contract.ui);
+    expect(button).toHaveAttribute('aria-pressed', String(defaults.defaultPressed));
+    expect(button).toHaveAttribute('data-tone', defaults.tone);
+    expect(button).toHaveAttribute('data-variant', defaults.variant);
   });
 
-  it('accepts pressed as the only aria-pressed state input', () => {
-    const rawAriaPressed = (
-      <ToggleButton
-        {...({
-          // @ts-expect-error ToggleButton derives aria-pressed from its pressed prop.
-          'aria-pressed': 'mixed',
-        } satisfies ComponentProps<typeof ToggleButton>)}
-      >
-        Pin
-      </ToggleButton>
-    );
-    expect(rawAriaPressed).toBeDefined();
-  });
+  it('owns its state when the consumer passes only an initial value', () => {
+    render(<ToggleButton defaultPressed>Pin</ToggleButton>);
+    const button = screen.getByRole('button', { name: 'Pin' });
 
-  it('uses controlled defaults and logical content parts', () => {
-    render(
-      <ToggleButton leading="L" trailing="T">
-        Pin
-      </ToggleButton>,
-    );
-
-    const button = screen.getByRole('button', { name: 'LPinT' });
-    expect(button).toHaveAttribute('type', 'button');
+    expect(button).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(button);
     expect(button).toHaveAttribute('aria-pressed', 'false');
-    expect(button).toHaveAttribute('data-slotted-component', 'toggle-button');
-    expect(button).toHaveAttribute('data-variant', 'secondary');
-    expect(button).toHaveAttribute('data-fill', 'outline');
-    expect(button).toHaveAttribute('data-size', 'md');
-    expect(
-      [...button.querySelectorAll('[data-part]')].map((part) => part.getAttribute('data-part')),
-    ).toEqual(['leading', 'label', 'trailing']);
+    expect(button).not.toHaveAttribute('data-pressed');
   });
 
-  it('forwards native button props and refs', () => {
-    const ref = createRef<HTMLButtonElement>();
-    render(
-      <ToggleButton ref={ref} name="pin" type="submit">
-        Pin
-      </ToggleButton>,
-    );
+  /** A later change to the initial value is not new state arriving silently. */
+  it('reads the initial value once', () => {
+    const { rerender } = render(<ToggleButton defaultPressed={false}>Pin</ToggleButton>);
+    rerender(<ToggleButton defaultPressed>Pin</ToggleButton>);
 
-    const button = screen.getByRole('button', { name: 'Pin' });
-    expect(ref.current).toBe(button);
-    expect(button).toHaveAttribute('name', 'pin');
-    expect(button).toHaveAttribute('type', 'submit');
+    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('reflects controlled pressed state without mutating itself', () => {
+  it('never moves state the consumer owns', () => {
     const onPressedChange = vi.fn();
-    const { rerender } = render(
-      <ToggleButton pressed={false} onPressedChange={onPressedChange}>
+    render(
+      <ToggleButton onPressedChange={onPressedChange} pressed={false}>
         Pin
       </ToggleButton>,
     );
-    const button = screen.getByRole('button', { name: 'Pin' });
+    const button = screen.getByRole('button');
+
     fireEvent.click(button);
-    expect(onPressedChange).toHaveBeenCalledWith(true);
     expect(button).toHaveAttribute('aria-pressed', 'false');
-    rerender(
-      <ToggleButton pressed onPressedChange={onPressedChange}>
-        Pin
-      </ToggleButton>,
-    );
-    expect(button).toHaveAttribute('aria-pressed', 'true');
-    expect(button).toHaveAttribute('data-pressed', '');
-    fireEvent.click(button);
-    expect(onPressedChange).toHaveBeenLastCalledWith(false);
-    expect(button).toHaveAttribute('aria-pressed', 'true');
+    expect(onPressedChange).toHaveBeenCalledOnce();
   });
 
-  it('runs the consumer click handler before requesting a state change and honors preventDefault', () => {
-    const calls: string[] = [];
-    const onPressedChange = vi.fn(() => calls.push('pressed'));
-    const { rerender } = render(
-      <ToggleButton onClick={() => calls.push('click')} onPressedChange={onPressedChange}>
+  it('moves when the consumer hands the new value back', () => {
+    function Controlled() {
+      const [pressed, setPressed] = useState(false);
+      return (
+        <ToggleButton onPressedChange={(next) => setPressed(next)} pressed={pressed}>
+          Pin
+        </ToggleButton>
+      );
+    }
+    render(<Controlled />);
+    const button = screen.getByRole('button');
+
+    fireEvent.click(button);
+    expect(button).toHaveAttribute('aria-pressed', 'true');
+    expect(button).toHaveAttribute('data-pressed', '');
+  });
+
+  it('carries the value, the value it replaces, the reason and the event', () => {
+    const onPressedChange = vi.fn();
+    render(
+      <ToggleButton defaultPressed onPressedChange={onPressedChange}>
         Pin
       </ToggleButton>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Pin' }));
-    expect(calls).toEqual(['click', 'pressed']);
-    expect(onPressedChange).toHaveBeenCalledWith(true);
+    fireEvent.click(screen.getByRole('button'), { detail: 1 });
+    const [pressed, request] = onPressedChange.mock.calls[0] ?? [];
+    expect(pressed).toBe(false);
+    expect(request.value).toBe(false);
+    expect(request.previous).toBe(true);
+    expect(request.reason).toBe('pointer');
+    expect(request.source).toBeDefined();
+  });
 
-    rerender(
+  it('says keyboard when the click carried no pointer', () => {
+    const onPressedChange = vi.fn();
+    render(<ToggleButton onPressedChange={onPressedChange}>Pin</ToggleButton>);
+
+    fireEvent.click(screen.getByRole('button'), { detail: 0 });
+    expect(onPressedChange.mock.calls[0]?.[1].reason).toBe('keyboard');
+  });
+
+  it('commits nothing when the request is cancelled', () => {
+    render(
+      <ToggleButton onPressedChange={(_pressed, request) => request.cancel()}>Pin</ToggleButton>,
+    );
+    const button = screen.getByRole('button');
+
+    fireEvent.click(button);
+    expect(button).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('treats a refused activation as no activation', () => {
+    const onPressedChange = vi.fn();
+    render(
       <ToggleButton onClick={(event) => event.preventDefault()} onPressedChange={onPressedChange}>
         Pin
       </ToggleButton>,
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Pin' }));
-    expect(onPressedChange).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('button'));
+    expect(onPressedChange).not.toHaveBeenCalled();
+    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('does not request a state change when the consumer cancels in click capture', () => {
-    const onClick = vi.fn();
+  it('leaves the disabled state to the platform and keeps saying whether it is on', () => {
+    const onPressedChange = vi.fn();
+    render(
+      <ToggleButton defaultPressed disabled onPressedChange={onPressedChange}>
+        Pin
+      </ToggleButton>,
+    );
+    const button = screen.getByRole('button');
+
+    fireEvent.click(button);
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('aria-pressed', 'true');
+    expect(button).toHaveAttribute('data-disabled', '');
+    expect(onPressedChange).not.toHaveBeenCalled();
+  });
+
+  it('renders the content parts the contract names', () => {
+    render(
+      <ToggleButton end="E" start="S">
+        Pin
+      </ToggleButton>,
+    );
+    const parts = [...screen.getByRole('button').querySelectorAll('[data-part]')].map((part) =>
+      part.getAttribute('data-part'),
+    );
+
+    expect(parts).toEqual(['start', 'label', 'end']);
+  });
+
+  /**
+   * A toggle that persists reaches a server before the state is true, so it
+   * holds the state it still has while it waits and refuses to move.
+   */
+  it('holds its state while it waits, and refuses to move', () => {
     const onPressedChange = vi.fn();
     render(
       <ToggleButton
-        onClick={onClick}
-        onClickCapture={(event) => event.preventDefault()}
+        defaultPressed
+        loading
+        messages={{ loading: 'Saving' }}
         onPressedChange={onPressedChange}
       >
         Pin
       </ToggleButton>,
     );
+    const button = screen.getByRole('button', { name: /Pin/ });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Pin' }));
-    expect(onClick).toHaveBeenCalledOnce();
-    expect(onPressedChange).not.toHaveBeenCalled();
-  });
+    expect(button).toHaveAttribute('aria-pressed', 'true');
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    expect(button).not.toBeDisabled();
+    expect(screen.getByRole('progressbar', { name: 'Saving' })).not.toBeNull();
 
-  it.each([true, 'true'] as const)(
-    'blocks capture and bubble callbacks plus state requests for aria-disabled=%s',
-    (ariaDisabled) => {
-      const onClick = vi.fn();
-      const onClickCapture = vi.fn();
-      const onPressedChange = vi.fn();
-      render(
-        <ToggleButton
-          aria-disabled={ariaDisabled}
-          onClick={onClick}
-          onClickCapture={onClickCapture}
-          onPressedChange={onPressedChange}
-        >
-          Pin
-        </ToggleButton>,
-      );
-
-      const button = screen.getByRole('button', { name: 'Pin' });
-      fireEvent.click(button);
-      expect(onClickCapture).not.toHaveBeenCalled();
-      expect(onClick).not.toHaveBeenCalled();
-      expect(onPressedChange).not.toHaveBeenCalled();
-      expect(button).not.toHaveAttribute('data-disabled');
-      expect(button).not.toBeDisabled();
-    },
-  );
-
-  it.each([false, 'false'] as const)(
-    'keeps aria-disabled=%s interactive through capture, bubble, and state request',
-    (ariaDisabled) => {
-      const calls: string[] = [];
-      const onPressedChange = vi.fn((pressed: boolean) => calls.push(`pressed:${pressed}`));
-      render(
-        <ToggleButton
-          aria-disabled={ariaDisabled}
-          onClick={() => calls.push('bubble')}
-          onClickCapture={() => calls.push('capture')}
-          onPressedChange={onPressedChange}
-        >
-          Pin
-        </ToggleButton>,
-      );
-
-      fireEvent.click(screen.getByRole('button', { name: 'Pin' }));
-      expect(onPressedChange).toHaveBeenCalledWith(true);
-      expect(calls).toEqual(['capture', 'bubble', 'pressed:true']);
-    },
-  );
-
-  it('does not request a state change when disabled', () => {
-    const onPressedChange = vi.fn();
-    render(
-      <ToggleButton disabled pressed={false} onPressedChange={onPressedChange}>
-        Pin
-      </ToggleButton>,
-    );
-    const button = screen.getByRole('button', { name: 'Pin' });
     fireEvent.click(button);
     expect(onPressedChange).not.toHaveBeenCalled();
-    expect(button).toBeDisabled();
-    expect(button).toHaveAttribute('data-disabled', '');
-  });
-
-  it('gives explicit disabled state priority over pressed state', () => {
-    render(
-      <ToggleButton disabled pressed>
-        Pin
-      </ToggleButton>,
-    );
-
-    const button = screen.getByRole('button', { name: 'Pin' });
     expect(button).toHaveAttribute('aria-pressed', 'true');
-    expect(button).toHaveAttribute('data-disabled', '');
   });
 });

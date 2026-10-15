@@ -1,0 +1,632 @@
+<!--
+  The composer's own glyphs are the empty `Glyph` element the build draws. The
+  attachments in the header are the real `attachment` family markup, and the
+  page carries its stylesheet, read from the `data-ui` written here.
+-->
+
+<section data-scene="default">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="raised"
+      data-status="ready"
+    >
+      <textarea
+        data-part="input"
+        rows="1"
+        placeholder="Pergunte ao assistente"
+        aria-label="Mensagem"
+      ></textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="action" type="button" aria-haspopup="menu" aria-expanded="false">
+          Claude Opus
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Enviar" disabled>
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="arrow-up"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="raised"
+      data-status="ready"
+    >
+      <textarea
+        data-part="input"
+        rows="1"
+        placeholder="Pergunte ao assistente"
+        aria-label="Mensagem"
+      >
+Qual é o prazo de pré-aviso do contrato?</textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="action" type="button" aria-haspopup="menu" aria-expanded="false">
+          Claude Opus
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span>
+        </button>
+        <button data-part="action" type="button" aria-label="Pesquisar na web">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="search"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Enviar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="arrow-up"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section data-scene="comment">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-status="ready"
+      style="--slotted-prompt-composer-rows: 3"
+    >
+      <textarea
+        data-part="input"
+        placeholder="Escreva um comentário"
+        aria-label="Mensagem"
+        rows="3"
+      >
+Concordo com a proposta, mas o reajuste deveria seguir o IPCA e não o IGP-M.</textarea>
+      <div data-part="footer">
+        <button data-part="action" type="button">Cancelar</button>
+        <button data-part="submit" type="submit">Comentar</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section data-scene="attachments">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="raised"
+      data-status="ready"
+    >
+      <div data-part="header">
+        <ul
+          data-ui="attachment"
+          data-part="group"
+          data-layout="strip"
+          data-size="sm"
+          data-orientation="horizontal"
+          tabindex="-1"
+          aria-label="Anexos"
+        >
+          <li
+            data-ui="attachment"
+            data-part="root"
+            data-kind="pdf"
+            data-size="sm"
+            data-orientation="horizontal"
+          >
+            <span data-part="preview" data-kind="pdf" data-extension="PDF" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="file-text"></svg></span
+            ></span>
+            <div data-part="body">
+              <button data-part="trigger" type="button">
+                <span data-part="filename" dir="auto"
+                  ><span data-part="name">contrato-sirius-2026</span
+                  ><span data-part="extension">.pdf</span></span
+                >
+              </button>
+              <p data-part="detail">248 kB</p>
+            </div>
+            <div data-part="actions">
+              <button
+                data-part="remove"
+                type="button"
+                aria-label="Remover contrato-sirius-2026.pdf"
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="x"></svg
+                ></span>
+              </button>
+            </div>
+          </li>
+          <li
+            data-ui="attachment"
+            data-part="root"
+            data-kind="spreadsheet"
+            data-size="sm"
+            data-orientation="horizontal"
+          >
+            <span
+              data-part="preview"
+              data-kind="spreadsheet"
+              data-extension="XLSX"
+              aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
+            ></span>
+            <div data-part="body">
+              <button data-part="trigger" type="button">
+                <span data-part="filename" dir="auto"
+                  ><span data-part="name">faturas-q3</span
+                  ><span data-part="extension">.xlsx</span></span
+                >
+              </button>
+              <p data-part="detail">1,2 MB</p>
+            </div>
+            <div data-part="actions">
+              <button data-part="remove" type="button" aria-label="Remover faturas-q3.xlsx">
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="x"></svg
+                ></span>
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <textarea
+        data-part="input"
+        rows="1"
+        placeholder="Pergunte ao assistente"
+        aria-label="Mensagem"
+      >
+Compara estes dois ficheiros.</textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Enviar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="arrow-up"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section data-scene="status">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="raised"
+      data-status="submitted"
+      data-loading=""
+    >
+      <textarea
+        data-part="input"
+        rows="1"
+        placeholder="Pergunte ao assistente"
+        aria-label="Mensagem"
+      >
+Qual é o prazo de pré-aviso?</textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="action" type="button" aria-haspopup="menu" aria-expanded="false">
+          Claude Opus
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="button" aria-label="A enviar" aria-disabled="true">
+          <span data-ui="spinner" aria-hidden="true"></span>
+        </button>
+      </div>
+    </form>
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="raised"
+      data-status="streaming"
+      data-loading=""
+    >
+      <textarea
+        data-part="input"
+        rows="1"
+        placeholder="Pergunte ao assistente"
+        aria-label="Mensagem"
+      ></textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="action" type="button" aria-haspopup="menu" aria-expanded="false">
+          Claude Opus
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="button" aria-label="Parar">
+          <span data-ui="spinner" aria-hidden="true"></span>
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="stop"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="raised"
+      data-status="error"
+    >
+      <textarea
+        data-part="input"
+        rows="1"
+        placeholder="Pergunte ao assistente"
+        aria-label="Mensagem"
+      >
+Qual é o prazo de pré-aviso?</textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="action" type="button" aria-haspopup="menu" aria-expanded="false">
+          Claude Opus
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Tentar de novo">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section data-scene="sizes">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="sm"
+      data-variant="raised"
+      data-status="ready"
+    >
+      <textarea
+        data-part="input"
+        rows="1"
+        placeholder="Pergunte ao assistente"
+        aria-label="Mensagem"
+      >
+Tamanho sm</textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Enviar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="arrow-up"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="raised"
+      data-status="ready"
+    >
+      <textarea
+        data-part="input"
+        rows="1"
+        placeholder="Pergunte ao assistente"
+        aria-label="Mensagem"
+      >
+Tamanho md</textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Enviar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="arrow-up"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="lg"
+      data-variant="raised"
+      data-status="ready"
+    >
+      <textarea
+        data-part="input"
+        rows="1"
+        placeholder="Pergunte ao assistente"
+        aria-label="Mensagem"
+      >
+Tamanho lg</textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Enviar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="arrow-up"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section data-scene="states">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="raised"
+      data-status="ready"
+      data-invalid=""
+    >
+      <textarea
+        data-part="input"
+        rows="1"
+        placeholder="Pergunte ao assistente"
+        aria-label="Mensagem"
+      >
+Mensagem longa demais</textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Enviar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="arrow-up"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="raised"
+      data-status="ready"
+      data-readonly=""
+    >
+      <textarea
+        data-part="input"
+        rows="1"
+        placeholder="Pergunte ao assistente"
+        aria-label="Mensagem"
+        readonly
+      >
+Somente leitura</textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Enviar" disabled>
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="arrow-up"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="raised"
+      data-status="ready"
+      data-disabled=""
+    >
+      <textarea
+        data-part="input"
+        rows="1"
+        placeholder="Pergunte ao assistente"
+        aria-label="Mensagem"
+        disabled
+      >
+Desativado</textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" disabled aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Enviar" disabled>
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="arrow-up"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="raised"
+      data-status="ready"
+      data-drop-target=""
+    >
+      <textarea
+        data-part="input"
+        rows="1"
+        placeholder="Solte os ficheiros para anexar"
+        aria-label="Mensagem"
+      ></textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Enviar" disabled>
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="arrow-up"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section data-scene="content">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="raised"
+      data-status="ready"
+    >
+      <textarea
+        data-part="input"
+        rows="1"
+        placeholder="Pergunte ao assistente"
+        aria-label="Mensagem"
+      >
+Resume o contrato em anexo em cinco pontos, com as datas de renovação, as multas por rescisão antecipada, o prazo de pré-aviso e quem assina por cada parte. Compara com a proposta de setembro e diz o que mudou nas cláusulas de reajuste. Depois escreve um e-mail curto para o jurídico a pedir revisão das diferenças, em tom formal, e sugere três perguntas para a reunião de quinta-feira.</textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="action" type="button" aria-haspopup="menu" aria-expanded="false">
+          Claude Opus
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          ></span>
+        </button>
+        <button data-part="action" type="button" aria-label="Pesquisar na web">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="search"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Enviar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="arrow-up"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section data-scene="variants">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="raised"
+      data-status="ready"
+    >
+      <textarea data-part="input" rows="1" aria-label="Mensagem">raised</textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Enviar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="arrow-up"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-status="ready"
+    >
+      <textarea data-part="input" rows="1" aria-label="Mensagem">outline</textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Enviar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="arrow-up"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+    <form
+      data-ui="prompt-composer"
+      data-part="root"
+      data-size="md"
+      data-variant="subtle"
+      data-status="ready"
+    >
+      <textarea data-part="input" rows="1" aria-label="Mensagem">subtle</textarea>
+      <div data-part="footer">
+        <button data-part="attach" type="button" aria-label="Anexar ficheiros">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="paperclip"></svg
+          ></span>
+        </button>
+        <button data-part="submit" type="submit" aria-label="Enviar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="arrow-up"></svg
+          ></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>

@@ -1,0 +1,35 @@
+export { SlEntityPicker, SlEntityPickerChip, SlEntityPickerOption } from './entity-picker';
+export {
+  ENTITY_PICKER_DEFAULTS,
+  ENTITY_PICKER_FALLBACK,
+  injectEntityPickerDefaults,
+  provideEntityPickerDefaults,
+} from './entity-picker-defaults';
+export type {
+  Entity,
+  EntityAvatar,
+  EntityPickerChipContext,
+  EntityPickerDefaults,
+  EntityPickerHighlightReason,
+  EntityPickerInputReason,
+  EntityPickerMedia,
+  EntityPickerOpenOn,
+  EntityPickerOpenReason,
+  EntityPickerOptionContext,
+  EntityPickerOverflow,
+  EntityPickerScope,
+  EntityPickerScopeReason,
+  EntityPickerSelectionMode,
+  EntityPickerSide,
+  EntityPickerSize,
+  EntityPickerStrategy,
+  EntityPickerValue,
+  EntityPickerValueReason,
+  EntityPickerValueRequest,
+  EntityPickerVariant,
+  EntityPickerWidth,
+  EntitySearchRequest,
+  EntitySearchResult,
+  EntitySource,
+} from './entity-picker-defaults';
+export { localEntitySource, rememberRecent } from '@slotted/core/entity-picker';

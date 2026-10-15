@@ -1,0 +1,93 @@
+import { existsSync, mkdtempSync, readFileSync, readdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+
+import { describe, expect, it } from 'vitest';
+
+import { buildDocs } from './build.ts';
+import { nonEnglishSnippets } from './language-report.ts';
+import { loadFamilies } from './load.ts';
+
+const root = resolve(import.meta.dirname, '../../..');
+const contracts = readdirSync(join(root, 'specs/components'), { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name);
+
+describe('loadFamilies', () => {
+  it('loads one input per contract, with the reference docs of the binding', async () => {
+    const families = await loadFamilies('react', root);
+    expect(families.map((family) => family.contract.family).sort()).toEqual([...contracts].sort());
+    const field = families.find((family) => family.contract.family === 'field')!;
+    expect(Object.keys(field.docs)).toContain('field');
+    expect(field.tokens).toContain('--slotted-field-label-inline-size');
+    expect(field.examples.map((example) => example.id)).toContain('basic');
+  });
+
+  it('a family without a tokens file loads with no tokens', async () => {
+    const families = await loadFamilies('angular', root);
+    const withoutFile = families.filter(
+      (family) =>
+        !existsSync(
+          join(
+            root,
+            `packages/styles/src/${family.contract.family}/${family.contract.family}.tokens.json`,
+          ),
+        ),
+    );
+    for (const family of withoutFile) expect(family.tokens).toEqual([]);
+  });
+});
+
+describe('nonEnglishSnippets', () => {
+  it('reports characters outside printable ASCII and typographic punctuation, and nothing else', () => {
+    const family = {
+      binding: 'react' as const,
+      contract: {
+        family: 'x',
+        ui: 'x',
+        catalog: { group: 'Forms', summary: 'X.' },
+        members: { x: { nativeElement: 'div' } },
+      },
+      docs: {
+        x: {
+          accessibility: [],
+          api: [],
+          snippets: [
+            {
+              id: 'a',
+              label: 'a',
+              language: 'tsx' as const,
+              source: '<Button>Loading…</Button> — “ok”\n',
+            },
+            { id: 'b', label: 'b', language: 'tsx' as const, source: '<Field>Endereço</Field>\n' },
+          ],
+        },
+      },
+      tokens: [],
+      examples: [],
+    };
+    expect(nonEnglishSnippets([family]).map((entry) => entry.key)).toEqual(['b']);
+  });
+});
+
+describe('buildDocs', () => {
+  it('writes one Markdown and one JSON file per contract, the index and the snippet, identically twice', async () => {
+    const a = mkdtempSync(join(tmpdir(), 'docs-'));
+    const b = mkdtempSync(join(tmpdir(), 'docs-'));
+    const result = await buildDocs({ binding: 'react', root, out: a });
+    await buildDocs({ binding: 'react', root, out: b });
+
+    const files = readdirSync(a);
+    expect(result.families).toBe(contracts.length);
+    expect(files).toContain('index.md');
+    expect(files).toContain('AGENTS.snippet.md');
+    for (const family of contracts) {
+      expect(files).toContain(`${family}.md`);
+      expect(files).toContain(`${family}.json`);
+    }
+    expect(readdirSync(b).sort()).toEqual(files.sort());
+    for (const file of files) {
+      expect(readFileSync(join(b, file), 'utf8'), file).toBe(readFileSync(join(a, file), 'utf8'));
+    }
+  });
+});

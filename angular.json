@@ -27,7 +27,8 @@
         "test": {
           "builder": "@angular/build:unit-test",
           "options": {
-            "tsConfig": "packages/angular/tsconfig.spec.json"
+            "tsConfig": "packages/angular/tsconfig.spec.json",
+            "isolate": true
           }
         }
       }

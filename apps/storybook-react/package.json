@@ -11,10 +11,11 @@
     "verify": "pnpm test && pnpm typecheck"
   },
   "dependencies": {
+    "@slotted/core": "workspace:*",
     "@slotted/react": "workspace:*",
     "@slotted/storybook-workbench": "workspace:*",
-    "@slotted/theme-default": "workspace:*",
-    "@slotted/tokens": "workspace:*",
+    "@slotted/themes": "workspace:*",
+    "@slotted/theme": "workspace:*",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },

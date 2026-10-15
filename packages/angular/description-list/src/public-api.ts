@@ -1,4 +1,29 @@
-export { SlDescriptionDetails } from './description-details';
-export { SlDescriptionList } from './description-list';
-export type { DescriptionListOrientation } from './description-list';
-export { SlDescriptionTerm } from './description-term';
+export {
+  SlDescriptionList,
+  SlDescriptionListAction,
+  SlDescriptionListDescription,
+  SlDescriptionListHint,
+  SlDescriptionListItem,
+  SlDescriptionListTerm,
+} from './description-list';
+export {
+  COPIED_FOR,
+  copyToClipboard,
+  DESCRIPTION_LIST_DEFAULTS_TOKEN,
+  DESCRIPTION_LIST_DEFAULT_COLUMNS,
+  DESCRIPTION_LIST_DEFAULT_LAYOUT,
+  DESCRIPTION_LIST_DEFAULT_VARIANT,
+  injectDescriptionListDefaults,
+  overflowsClamp,
+  provideDescriptionListDefaults,
+  selectValue,
+  SlDescriptionListIdFactory,
+  spanWithin,
+} from './description-list.constants';
+export type {
+  DescriptionListColumns,
+  DescriptionListCopyRequest,
+  DescriptionListDefaults,
+  DescriptionListLayout,
+  DescriptionListVariant,
+} from './description-list.constants';

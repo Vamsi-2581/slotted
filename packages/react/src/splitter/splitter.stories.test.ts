@@ -1,9 +1,8 @@
+import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
+import { referencePageErrors, snippetFormatErrors } from '@slotted/storybook-workbench/testing';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/splitter/contract.json';
-import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
-import { snippetFormatErrors } from '@slotted/storybook-workbench/testing';
-
 import { REACT_SPLITTER_DOCS } from './splitter.docs';
 import * as splitterStories from './splitter.stories';
 
@@ -13,15 +12,28 @@ describe('Splitter stories', () => {
   });
 
   it('documents each public component API', () => {
-    for (const member of Object.keys(contract.members) as Array<keyof typeof REACT_SPLITTER_DOCS>) {
-      expect(apiMetadataErrors(contract.members[member], REACT_SPLITTER_DOCS[member].api)).toEqual(
-        [],
-      );
-    }
+    expect(
+      apiMetadataErrors(contract.members.splitter, REACT_SPLITTER_DOCS.api, contract.stateModel),
+    ).toEqual([]);
+  });
+
+  it('answers the reference-page contract', () => {
+    expect(
+      referencePageErrors({
+        docs: REACT_SPLITTER_DOCS,
+        framework: 'React',
+        member: contract.members.splitter,
+        scenarioIds: contract.scenarios.splitter,
+        stateModel: contract.stateModel,
+      }),
+    ).toEqual([]);
   });
 
   it('keeps curated snippets formatted', async () => {
-    const snippets = Object.values(REACT_SPLITTER_DOCS).flatMap((docs) => docs.snippets);
+    const snippets = [
+      ...REACT_SPLITTER_DOCS.snippets,
+      ...REACT_SPLITTER_DOCS.scenes.map((scene) => scene.snippet),
+    ];
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });
 });

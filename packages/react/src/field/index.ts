@@ -1,13 +1,48 @@
+export {
+  deriveFieldIds,
+  FIELD_DESCRIBED_ORDER,
+  formatFieldCount,
+  isFieldCountOver,
+  necessityMark,
+  useField,
+} from './field-context';
 export { Field } from './field';
-export { FieldControl } from './field-control';
-export { FieldDescription } from './field-description';
-export { FieldError } from './field-error';
-export { FieldLabel } from './field-label';
+export {
+  FieldAction,
+  FieldControl,
+  FieldCounter,
+  FieldDescription,
+  FieldError,
+  FieldHeader,
+  FieldHelp,
+  FieldIndicator,
+  FieldLabel,
+} from './field-parts';
+export { FieldDefaultsProvider, useFieldDefaults } from './field-defaults';
 export type {
+  FieldActionProps,
+  FieldActionRootProps,
+  FieldContextValue,
   FieldControlProps,
   FieldControlRootProps,
+  FieldCount,
+  FieldCounterProps,
+  FieldCounterRootProps,
+  FieldDefaults,
+  FieldDefaultsProviderProps,
+  FieldDescribedSlot,
+  FieldHeaderProps,
+  FieldHeaderRootProps,
+  FieldHelpProps,
+  FieldIds,
+  FieldIndicatorProps,
+  FieldIndicatorRootProps,
+  FieldLabelPlacement,
   FieldLabelProps,
+  FieldLabelRootProps,
   FieldMessageProps,
+  FieldNecessity,
   FieldProps,
   FieldRootProps,
+  FieldSize,
 } from './field.types';

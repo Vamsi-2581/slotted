@@ -1,14 +1,31 @@
-export { Pagination } from './pagination';
-export { PaginationEllipsis } from './pagination-ellipsis';
-export { PaginationItem } from './pagination-item';
-export { PaginationList } from './pagination-list';
-export { PaginationPage } from './pagination-page';
+export { Pagination, usePagination } from './pagination';
+export { PaginationDefaultsProvider, usePaginationDefaults } from './pagination-defaults';
+export {
+  PaginationFirst,
+  PaginationItems,
+  PaginationLast,
+  PaginationNext,
+  PaginationPageSize,
+  PaginationPrevious,
+  PaginationStatus,
+} from './pagination-parts';
 export type {
-  PaginationEllipsisProps,
-  PaginationItemProps,
-  PaginationListProps,
-  PaginationPageProps,
-  PaginationPageRootProps,
+  PaginationContextValue,
+  PaginationDefaults,
+  PaginationDefaultsProviderProps,
+  PaginationItemsProps,
+  PaginationItemsRootProps,
+  PaginationLive,
+  PaginationPageReason,
+  PaginationPageRequest,
+  PaginationPageSizeProps,
+  PaginationPageSizeReason,
+  PaginationPageSizeRequest,
+  PaginationPageSizeRootProps,
   PaginationProps,
   PaginationRootProps,
+  PaginationStatusProps,
+  PaginationStatusRootProps,
+  PaginationTriggerProps,
+  PaginationTriggerRootProps,
 } from './pagination.types';

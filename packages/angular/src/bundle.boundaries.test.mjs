@@ -5,13 +5,13 @@ import test from 'node:test';
 const packageRoot = new URL('..', import.meta.url);
 
 /**
- * One entry point may depend on another — Input injects the Field. It must do
- * so by the published path, `@slotted/angular/field`, and never by a relative
- * path into the other entry point's source.
+ * One entry point may depend on another — a control that injects the family
+ * beside it. It must do so by the published path, `@slotted/angular/<name>`,
+ * and never by a relative path into the other entry point's source.
  *
  * ng-packagr refuses the relative form outright, and the refusal is the useful
  * kind: were it to succeed, each entry point would compile its own copy of the
- * class, and two copies of a class are two injection tokens. `inject(SlField)`
+ * class, and two copies of a class are two injection tokens. `inject()`
  * would find nothing, in a build reporting no error. This test states the
  * property that failure would break, against the artefacts rather than the
  * source.

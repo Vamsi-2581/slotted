@@ -1,9 +1,8 @@
+import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
+import { referencePageErrors, snippetFormatErrors } from '@slotted/storybook-workbench/testing';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/skeleton/contract.json';
-import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
-import { snippetFormatErrors } from '@slotted/storybook-workbench/testing';
-
 import { ANGULAR_SKELETON_DOCS } from './skeleton.docs';
 import * as skeletonStories from './skeleton.stories';
 
@@ -22,8 +21,27 @@ describe('Angular Skeleton stories', () => {
     }
   });
 
+  /**
+   * What the page owes a reader who has never seen the family: what to import,
+   * which element the directive attaches to, what it is made of, and one
+   * captioned demonstration per scenario with the code that produced it.
+   */
+  it('answers the reference-page contract', () => {
+    expect(
+      referencePageErrors({
+        docs: ANGULAR_SKELETON_DOCS.skeleton,
+        framework: 'Angular',
+        member: contract.members.skeleton,
+        scenarioIds: contract.scenarios.skeleton,
+      }),
+    ).toEqual([]);
+  });
+
   it('keeps curated Angular snippets formatted', async () => {
-    const snippets = Object.values(ANGULAR_SKELETON_DOCS).flatMap((docs) => docs.snippets);
+    const snippets = Object.values(ANGULAR_SKELETON_DOCS).flatMap((docs) => [
+      ...docs.snippets,
+      ...docs.scenes.map((scene) => scene.snippet),
+    ]);
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });
 });

@@ -1,10 +1,13 @@
 export { Splitter } from './splitter';
-export { SplitterHandle } from './splitter-handle';
-export { SplitterPane } from './splitter-pane';
+export { SplitterDefaultsProvider, useSplitterDefaults } from './splitter-defaults';
 export type {
-  SplitterHandleProps,
+  SplitterCollapsedRequest,
+  SplitterDefaults,
+  SplitterDefaultsProviderProps,
+  SplitterHandle,
+  SplitterLimit,
   SplitterOrientation,
-  SplitterPaneProps,
   SplitterProps,
-  SplitterRootProps,
+  SplitterValueReason,
+  SplitterValueRequest,
 } from './splitter.types';

@@ -1,2 +1,15 @@
 export { Kbd } from './kbd';
-export type { KbdProps, KbdRootProps, KbdSize } from './kbd.types';
+export { KbdDefaultsProvider, useKbdDefaults } from './kbd-defaults';
+export { Shortcut } from './shortcut';
+export type {
+  KbdDefaults,
+  KbdDefaultsProviderProps,
+  KbdPlatform,
+  KbdPlatformInput,
+  KbdProps,
+  KbdRootProps,
+  KbdShortcutRootProps,
+  KbdSize,
+  KbdVariant,
+  ShortcutProps,
+} from './kbd.types';

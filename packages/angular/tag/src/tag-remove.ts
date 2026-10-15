@@ -1,33 +1,54 @@
-import { booleanAttribute, Directive, ElementRef, inject, input, isDevMode } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  ViewEncapsulation,
+} from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
+
+import { SlTag } from './tag';
 
 /**
- * The cross is drawn by the stylesheet, so the control projects nothing: a
- * glyph placed here would sit beside the drawn one rather than replacing it.
- * The name is the consumer's, because "Remove" alone does not say what.
+ * The control at the end of the chip, on the consumer's own button so its
+ * listeners and its attributes stay theirs. The glyph is the family's `x`,
+ * drawn as the `Glyph` element unless the consumer wrote content of their own:
+ * a character is never an icon.
+ *
+ * Its name is composed rather than repeated. The hidden word and the tag's own
+ * label are joined by `aria-labelledby`, so it announces "Remove Design"
+ * without the consumer writing the value a second time — the string four of
+ * the surveyed implementations make the consumer keep in step with the value
+ * by hand. Text referenced by `aria-labelledby` counts even when the element
+ * holding it is hidden, which is what lets the word cost no space.
  */
-@Directive({
+@Component({
   selector: 'button[slTagRemove]',
   standalone: true,
+  exportAs: 'slTagRemove',
+  imports: [SlGlyph, SlIcon],
+  template: `<ng-content
+      ><span slIcon><svg slGlyph name="x"></svg></span></ng-content
+    ><span hidden [id]="tag.removeWordId">{{ tag.t('remove') }}</span>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'remove',
     type: 'button',
-    '[attr.data-disabled]': "disabled() ? '' : null",
-    '[attr.disabled]': "disabled() ? '' : null",
+    '[attr.aria-labelledby]': 'labelledBy()',
+    '[attr.disabled]': "tag.removeRefused() ? '' : null",
+    '(click)': 'onClick($event)',
   },
 })
 export class SlTagRemove {
-  readonly disabled = input(false, { transform: booleanAttribute });
+  protected readonly tag = inject(SlTag);
 
-  private readonly element = inject(ElementRef<HTMLElement>).nativeElement;
+  protected readonly labelledBy = computed(() => `${this.tag.removeWordId} ${this.tag.labelId}`);
 
-  constructor() {
-    if (!isDevMode()) return;
-    const ariaLabel = this.element.getAttribute('aria-label');
-    const ariaLabelledBy = this.element.getAttribute('aria-labelledby');
-    if (!ariaLabel?.trim() && !ariaLabelledBy?.trim()) {
-      console.warn(
-        'TagRemove has no accessible name. Give it aria-label naming the value it removes, such as "Remove design".',
-      );
-    }
+  protected onClick(event: MouseEvent) {
+    /* The X is its own target. A handler the consumer put on the chip is about
+       the chip, and a removal is not a press of it. */
+    event.stopPropagation();
+    this.tag.requestRemoval('remove', event);
   }
 }

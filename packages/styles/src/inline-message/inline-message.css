@@ -1,0 +1,396 @@
+@layer slotted.components {
+  /**
+   * ── The message ────────────────────────────────────────────────────────
+   *
+   * One sentence about something else: a field, a section, an action. It has a
+   * mark saying how serious it is, a word saying the same thing to a reader who
+   * cannot see the mark, and the sentence itself.
+   *
+   * The box is a paragraph with no ground and no border. That is the whole
+   * difference from `alert`, which is a box a message sits inside; this is the
+   * message with nothing around it, so it inherits the rhythm of whatever
+   * placed it — a field, a `Stack`, a table cell.
+   *
+   * Two facts the layout rests on:
+   *
+   * - The mark is one line box tall rather than centred on the whole message,
+   *   so it stays on the first line when the sentence wraps to three.
+   * - The severity word is out of flow. It is a real element with real text,
+   *   clipped by the WCAG 2.2 technique C7 rule set and placed first in the
+   *   DOM so it is read first; `position: absolute` is what keeps it from
+   *   taking a grid cell or adding a line.
+   */
+  [data-ui='inline-message'][data-part='root'] {
+    /**
+     * The default is the help tone, which is what most fields carry. It is the
+     * one tone that paints in the neutral muted ink rather than in a tone's
+     * own `text` role: `--slotted-tone-secondary-text` is a label colour
+     * calibrated for that tone's tinted ground — `#172033` in the light scheme
+     * — and text at that strength under a field reads as loud as the label
+     * above it. `--slotted-text-muted` is the ink the theme already darkened to
+     * meet 4.5 : 1 against the sunken surface.
+     */
+    --_text: var(--slotted-text-muted);
+
+    /**
+     * Type comes from the control scales, the only ones the theme restates per
+     * density, so a message under a dense field shrinks with it. The leading
+     * does not: a control's `line-height` of `1` is for a box holding one
+     * line, and this box holds a sentence.
+     *
+     * The mark is the sentence's own size (R5), the rule `alert` draws its
+     * mark with: `1em` resolves against this box, so the mark steps with the
+     * size and the density through the type rather than through a second
+     * scale. A fourteen-pixel glyph beside twelve-pixel type was two pixels
+     * taller than the capitals it stood next to.
+     */
+    --_font-size: var(--slotted-control-font-size-sm, 12px);
+    --_mark-size: 1em;
+    /**
+     * The distance from the mark to its own sentence: eight pixels, the step
+     * `alert` uses (R5). It does not step with the size — the mark already
+     * does, through `em`, and a gap that shrank beside a smaller mark pulled
+     * the two apart twice.
+     */
+    --_column-gap: var(--slotted-inline-message-column-gap, var(--slotted-space-4, 0.5rem));
+
+    color: var(--_text);
+    /**
+     * Two columns, both placed explicitly. Auto-placement would drop the
+     * sentence into the first column whenever the message has no mark, and the
+     * sentence would then be sized by a track that shrinks to its content
+     * with an empty `1fr` beside it.
+     */
+    display: grid;
+    font-family: var(
+      --slotted-inline-message-font-family,
+      var(--slotted-control-font-family, sans-serif)
+    );
+    font-size: var(--_font-size);
+    grid-template-columns: auto minmax(0, 1fr);
+    line-height: var(--slotted-inline-message-line-height, var(--slotted-line-height-md, 1.5));
+    /* A `p` arrives with the user agent's block margins; the distance between a
+       control and its message belongs to whatever placed the two. */
+    margin: 0;
+    /* The containing block for the clipped severity word. */
+    position: relative;
+  }
+
+  /* ── Tone: what the message is about ──────────────────────────────────
+   *
+   * Four severities and one absence of severity. Each severity takes its own
+   * `text` role, which is the pair `packages/themes/test/default-theme.test.mjs`
+   * measures against the three neutral surfaces — this family paints on the
+   * page's own surface, so that is the pair that applies.
+   *
+   * The glyph is the binding's, from the map in
+   * `specs/components/inline-message/contract.json` — the same map
+   * `status-indicator` and `alert` declare, so a status light and an alert
+   * about the same thing draw the same silhouette, and an error under a field
+   * the same as the alert about it (F1). Help draws none, because help is not
+   * a severity.
+   */
+
+  [data-ui='inline-message'][data-part='root'][data-tone='accent'] {
+    --_text: var(--slotted-tone-accent-text);
+  }
+
+  [data-ui='inline-message'][data-part='root'][data-tone='secondary'] {
+    --_text: var(--slotted-text-muted);
+  }
+
+  [data-ui='inline-message'][data-part='root'][data-tone='success'] {
+    --_text: var(--slotted-tone-success-text);
+  }
+
+  [data-ui='inline-message'][data-part='root'][data-tone='warning'] {
+    --_text: var(--slotted-tone-warning-text);
+  }
+
+  [data-ui='inline-message'][data-part='root'][data-tone='danger'] {
+    --_text: var(--slotted-tone-danger-text);
+  }
+
+  /* ── Size: the step the control it belongs to is at ────────────────────
+   *
+   * Two values rather than three. A message is quieter than the thing it is
+   * about, so the family starts one step below the control's own type and has
+   * one step to grow into when the message is about a section rather than a
+   * field. Both are restated per density by the theme.
+   */
+
+  [data-ui='inline-message'][data-part='root'][data-size='sm'] {
+    --_font-size: var(--slotted-control-font-size-sm, 12px);
+  }
+
+  [data-ui='inline-message'][data-part='root'][data-size='md'] {
+    --_font-size: var(--slotted-control-font-size-md, 13px);
+  }
+
+  /**
+   * The line held open for a message that has not arrived. `1lh` is one line
+   * box of the family's own leading, so it follows the size step and the
+   * density rather than a number — and an application renders the message
+   * unconditionally without the field below it moving when the error appears.
+   *
+   * Material UI reserves the same line by asking the consumer to pass a space
+   * character as the message. A space is content: it defeats `:empty` below, so
+   * the mark and the severity word would be drawn beside nothing.
+   */
+  [data-ui='inline-message'][data-part='root'][data-reserve] {
+    min-block-size: 1lh;
+  }
+
+  /* ── The severity, in words ───────────────────────────────────────────
+   *
+   * The defect this family exists to fix. A reader who cannot see the message
+   * hears the sentence and nothing else: neither the red ink nor the mark
+   * reaches the accessibility tree, so “Informe um CNPJ válido” carries
+   * no evidence that it is an error rather than a hint.
+   *
+   * GOV.UK's Error message component answers it with a hidden “Error:” before
+   * the text. This is that answer, generalised to every severity and to a table
+   * an application replaces once.
+   *
+   * The rule set is WCAG 2.2 technique C7, as `visually-hidden` publishes it:
+   * a one-pixel box, clipped, out of flow, on a single line, with the negative
+   * margin that keeps it from adding a pixel of scrollable overflow.
+   */
+  [data-ui='inline-message'] > [data-part='prefix'] {
+    block-size: 1px;
+    border: 0;
+    clip-path: inset(50%);
+    inline-size: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
+  }
+
+  /* ── The mark ─────────────────────────────────────────────────────────
+   *
+   * A square the sentence's own size, on its first line (R5), and the rule
+   * `alert` draws its mark with. The box is exactly the glyph — no line box
+   * around it, no ground behind it — pushed down from the start of the row by
+   * half the difference between one line and the mark. `1lh` and `1em` both
+   * resolve against the root, so the mark's centre is the first line's centre
+   * at every size, every density and every type step without a number saying
+   * how, and it stays there when the sentence wraps to three.
+   *
+   * The glyph is the binding's `Glyph` in an `icon` box, chosen from the tone
+   * and stroked in `currentcolor`; the slot sizes it through the icon token.
+   * A mark the page supplies instead takes the same box and its place on the
+   * first line, centred in it.
+   */
+  [data-ui='inline-message'] > [data-part='icon'] {
+    --slotted-icon-size: var(--_mark-size);
+
+    align-items: center;
+    align-self: start;
+    block-size: var(--_mark-size);
+    box-sizing: border-box;
+    display: flex;
+    grid-column: 1;
+    grid-row: 1;
+    inline-size: var(--_mark-size);
+    justify-content: center;
+    margin-block-start: calc((1lh - var(--_mark-size)) / 2);
+    margin-inline-end: var(--_column-gap);
+  }
+
+  /**
+   * ── A bullet instead of a silhouette ──────────────────────────────────
+   *
+   * `mark='dot'` is for a page that wants a column of sentences rather than a
+   * column of silhouettes — a checklist, a changelog. The dot is the same for
+   * every tone, including the help tone that draws no mark at all otherwise,
+   * so every message in the column starts on one left edge and only the ink
+   * changes between them. `field` asked for it once and no longer does (F1):
+   * help under a field draws no mark, and an error draws the tone's own.
+   *
+   * The disc is a third of the mark — 4 pixels under 12-pixel type — so it
+   * steps with the size step and with the density like every other mark. The
+   * slot is the disc's own width and the glyph's box is twice that, because
+   * the `dot` glyph draws a circle half the width of its own viewBox: at twice
+   * the slot the disc fills the slot exactly, the box overhanging it equally
+   * on both sides, and the bullet sits on the message's left edge under the
+   * label above it rather than inside a column sized for a circled glyph.
+   *
+   * The rule keys on the `dot` glyph the binding draws, which leaves the
+   * page's own artwork alone: a supplied mark keeps the full box it was
+   * measured for.
+   */
+  [data-ui='inline-message'][data-part='root'][data-mark='dot'] {
+    --_dot-size: calc(var(--_mark-size) / 3);
+  }
+
+  [data-ui='inline-message'][data-mark='dot']
+    > [data-part='icon']:has(> [data-ui='icon'] > [data-glyph='dot']) {
+    --slotted-icon-size: calc(var(--_dot-size) * 2);
+
+    inline-size: var(--_dot-size);
+  }
+
+  /**
+   * Help draws no mark, so the binding draws no glyph, and the empty box is
+   * withdrawn rather than left holding a column open for nothing.
+   *
+   * `:empty` keeps the page's own artwork, and `:not([data-loading])` keeps the
+   * ring below — a help message can be waiting for something like any other.
+   * `:not([data-mark='dot'])` keeps the bullet: the dot is a mark help has,
+   * and it is stated as an absence rather than as `[data-mark='glyph']` so
+   * markup written without the attribute keeps the rule.
+   */
+  [data-ui='inline-message'][data-tone='secondary']:not([data-loading]):not([data-mark='dot'])
+    > [data-part='icon']:empty {
+    display: none;
+  }
+
+  /**
+   * ── No mark at all ────────────────────────────────────────────────────
+   *
+   * `mark='none'` is the third value, and the one a form asks for. A
+   * silhouette per severity is right for a message that stands alone and
+   * wrong for a column of them: four fields in error draw four circled
+   * exclamations one under the other, and what was there to catch the eye
+   * becomes texture — the limit R5 draws, and the reason `field` and
+   * `field-group` default to this value. What says the tone there is the ink
+   * and the weight of the sentence, which is what F1 settled.
+   *
+   * The box is withdrawn for the reason help's is, and the same two
+   * exceptions hold: `:empty` leaves the page's own artwork alone, and
+   * `:not([data-loading])` keeps the ring, because a message with no mark can
+   * be waiting for something like any other.
+   */
+  [data-ui='inline-message'][data-mark='none']:not([data-loading]) > [data-part='icon']:empty {
+    display: none;
+  }
+
+  /* ── The sentence ─────────────────────────────────────────────────────
+   *
+   * Written by the family around the consumer's content rather than by the
+   * consumer. Two things follow from that, and both are why the part exists:
+   * a message holding a link is one grid item instead of two, and `:empty`
+   * below is an exact question in both bindings.
+   *
+   * `overflow-wrap: anywhere` breaks the one string a field message is likeliest
+   * to carry that no language can break — a token, a container digest, a host
+   * name without a hyphen. Nothing is removed: the whole string stays in the
+   * DOM, in the accessibility tree, and findable by a page search.
+   */
+  [data-ui='inline-message'] > [data-part='text'] {
+    grid-column: 2;
+    grid-row: 1;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /**
+   * Nothing to say, so nothing is drawn. This is the half of `reserve` that
+   * makes it usable: the line is held open, and a mark and a severity word
+   * standing beside an empty sentence would be the layout shift moved rather
+   * than removed.
+   */
+  [data-ui='inline-message']:has([data-part='text']:empty) > [data-part='icon'],
+  [data-ui='inline-message']:has([data-part='text']:empty) > [data-part='prefix'] {
+    display: none;
+  }
+
+  /* ── The wait ─────────────────────────────────────────────────────────
+   *
+   * The guide names “progresso” as one of the kinds of inline message, and not
+   * one of the thirteen surveyed implementations ships it. It is a state of the
+   * same message rather than a sixth tone: the mark becomes a ring turning in
+   * the same place, and the tone, the size and every distance stay where they
+   * were — so “Verificando disponibilidade…” becomes “Nome disponível” with no
+   * geometry moving under the reader's eye.
+   *
+   * It is the ring `button` draws for the same reason, at the same duration,
+   * in the mark's own square on the first line where the mark it replaced was.
+   */
+  [data-ui='inline-message'][data-loading] > [data-part='icon'] {
+    animation: slotted-inline-message-spin var(--slotted-duration-loop-fast) linear infinite;
+    block-size: var(--_mark-size);
+    border: max(var(--slotted-border-width-thin, 1px), calc(var(--_mark-size) / 8)) solid
+      currentcolor;
+    /* One missing quarter, named logically so the gap leads the turn in both
+       directions. */
+    border-inline-end-color: transparent;
+    border-radius: var(--slotted-radius-full, 9999px);
+    display: block;
+    /* Restated for the bullet: a ring drawn in a column sized for a 4-pixel
+       dot is an ellipse. The text moves by the difference for as long as the
+       message is waiting, which is the cost of a bullet that starts at the
+       message's own left edge. */
+    inline-size: var(--_mark-size);
+    margin-block-start: calc((1lh - var(--_mark-size)) / 2);
+  }
+
+  /* The page's own artwork withdraws for the ring rather than sitting inside
+     it, because the ring is the mark while the message is waiting. */
+  [data-ui='inline-message'][data-loading] > [data-part='icon'] > * {
+    display: none;
+  }
+
+  /* ── Disabled ─────────────────────────────────────────────────────────
+   *
+   * Muted rather than faded: `--slotted-disabled-foreground` is a colour the
+   * theme measures, and lowering opacity until the sentence is unreadable is
+   * how a message beside a disabled control stops being a message.
+   *
+   * The mark is painted in `currentcolor`, so it follows without a rule of its
+   * own. The ring does need one: `STATE_PRECEDENCE` puts `disabled` above
+   * `loading`, and a control nobody can use is not waiting for anything.
+   */
+  [data-ui='inline-message'][data-part='root'][data-disabled] {
+    color: var(--slotted-disabled-foreground);
+  }
+
+  [data-ui='inline-message'][data-disabled] > [data-part='icon'] {
+    animation: none;
+  }
+
+  /**
+   * A frozen ring still says that something is in progress. Stopping it is less
+   * distracting than replacing one continuous motion with a slower one, which
+   * is the decision `button` recorded for the same ring.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    [data-ui='inline-message'][data-loading] > [data-part='icon'] {
+      animation: none;
+    }
+  }
+
+  /* ── Forced colours ───────────────────────────────────────────────────
+   *
+   * The theme remaps every colour this family reads, so the ink needs no rule
+   * here. The mark takes a system colour of its own, so the silhouette keeps
+   * the ink that says it is a mark and not a word, and the muted one when the
+   * message is disabled.
+   *
+   * The ring is the same problem from the other side: its missing quarter is
+   * `transparent`, which survives, but its border would otherwise be forced to
+   * one colour and the turn would be a complete circle turning invisibly.
+   */
+  @media (forced-colors: active) {
+    [data-ui='inline-message'] > [data-part='icon'] {
+      color: CanvasText;
+    }
+
+    [data-ui='inline-message'][data-part='root'][data-disabled] > [data-part='icon'] {
+      color: GrayText;
+    }
+
+    [data-ui='inline-message'][data-loading] > [data-part='icon'] {
+      border-color: CanvasText;
+      border-inline-end-color: Canvas;
+    }
+  }
+}
+
+@keyframes slotted-inline-message-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}

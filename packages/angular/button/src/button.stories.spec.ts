@@ -1,16 +1,14 @@
+import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
+import { snippetFormatErrors } from '@slotted/storybook-workbench/testing';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/button/contract.json';
-import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
-import { snippetFormatErrors } from '@slotted/storybook-workbench/testing';
-
+import * as buttonLinkStories from './button-link.stories';
 import { ANGULAR_BUTTON_DOCS } from './button.docs';
 import * as overviewStories from './button-family.stories';
 import * as buttonStories from './button.stories';
-import * as buttonLinkStories from './button-link.stories';
 import * as iconButtonStories from './icon-button.stories';
 import * as toggleButtonStories from './toggle-button.stories';
-import * as buttonGroupStories from './button-group.stories';
 
 const storyModules = {
   overview: overviewStories,
@@ -18,8 +16,12 @@ const storyModules = {
   buttonLink: buttonLinkStories,
   iconButton: iconButtonStories,
   toggleButton: toggleButtonStories,
-  buttonGroup: buttonGroupStories,
 };
+
+/** The template a story renders, so the markup can be read without a browser. */
+function template(story: { render?: (...args: never[]) => { template?: string } }) {
+  return story.render?.(...([] as never[]))?.template ?? '';
+}
 
 describe('Angular Button family stories', () => {
   it('covers every required scenario', () => {
@@ -29,9 +31,28 @@ describe('Angular Button family stories', () => {
   });
 
   it('documents each public component API', () => {
-    for (const page of Object.keys(contract.members) as Array<keyof typeof contract.members>) {
-      expect(apiMetadataErrors(contract.members[page], ANGULAR_BUTTON_DOCS[page].api)).toEqual([]);
+    for (const member of Object.keys(contract.members) as Array<keyof typeof contract.members>) {
+      expect(apiMetadataErrors(contract.members[member], ANGULAR_BUTTON_DOCS[member].api)).toEqual(
+        [],
+      );
     }
+  });
+
+  it('spells every appearance axis in the reference API', () => {
+    const spelled = {
+      tone: contract.axes.tone.join(' | '),
+      variant: contract.axes.variant.join(' | '),
+      size: contract.axes.size.join(' | '),
+    };
+
+    for (const member of Object.keys(contract.members) as Array<keyof typeof contract.members>) {
+      for (const [axis, type] of Object.entries(spelled)) {
+        expect(ANGULAR_BUTTON_DOCS[member].api.find((row) => row.name === axis)?.type).toBe(type);
+      }
+    }
+    expect(ANGULAR_BUTTON_DOCS.iconButton.api.find((row) => row.name === 'shape')?.type).toBe(
+      contract.axes.shape.join(' | '),
+    );
   });
 
   it('keeps curated Angular snippets formatted', async () => {
@@ -39,68 +60,11 @@ describe('Angular Button family stories', () => {
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });
 
-  it('uses resolvable descriptions in accessibility templates', () => {
-    const templates = [
-      buttonStories.Accessibility.render?.({} as never, {} as never)?.template,
-      buttonLinkStories.Accessibility.render?.({} as never, {} as never)?.template,
-      toggleButtonStories.Accessibility.render?.({} as never, {} as never)?.template,
-    ].join('\n');
-
-    for (const id of ['save-help', 'settings-help', 'pin-help']) {
-      expect(templates).toContain(`id="${id}"`);
-    }
-  });
-
-  it('renders the overview as a structured lab with real icons and no empty icon controls', () => {
-    const template = overviewStories.Matrix.render?.({} as never, {} as never)?.template ?? '';
-    const host = document.createElement('div');
-    host.innerHTML = template;
-
-    expect(host.querySelectorAll('.slotted-component-lab__section')).toHaveLength(6);
-    expect(host.querySelectorAll('.slotted-demo-scene')).toHaveLength(15);
-
-    const appearanceMatrix = host.querySelector('[data-slotted-matrix="button"]');
-    expect(appearanceMatrix).not.toBeNull();
-    expect(appearanceMatrix?.querySelectorAll('button[slbutton]')).toHaveLength(15);
-    for (const variant of ['accent', 'secondary', 'success', 'warning', 'danger']) {
-      expect(appearanceMatrix?.querySelectorAll(`[variant="${variant}"]`)).toHaveLength(3);
-    }
-    for (const fill of ['solid', 'outline', 'ghost']) {
-      expect(appearanceMatrix?.querySelectorAll(`[fill="${fill}"]`)).toHaveLength(5);
-    }
-
-    expect(host.querySelectorAll('[data-slotted-matrix]')).toHaveLength(2);
-
-    const toggleStateMatrix = host.querySelector('[data-slotted-matrix="toggle-state"]');
-    expect(toggleStateMatrix?.querySelectorAll('button[sltogglebutton]')).toHaveLength(30);
-    expect(toggleStateMatrix?.querySelectorAll('[\\[pressed\\]="true"]')).toHaveLength(15);
-    expect(toggleStateMatrix?.querySelectorAll('[\\[pressed\\]="false"]')).toHaveLength(15);
-    for (const variant of ['accent', 'secondary', 'success', 'warning', 'danger']) {
-      expect(toggleStateMatrix?.querySelectorAll(`[variant="${variant}"]`)).toHaveLength(6);
-    }
-    for (const fill of ['solid', 'outline', 'ghost']) {
-      expect(toggleStateMatrix?.querySelectorAll(`[fill="${fill}"]`)).toHaveLength(10);
-    }
-    expect(host.querySelector('.slotted-matrix button[tone]')).toBeNull();
-
-    const iconButtons = host.querySelectorAll('button[sliconbutton]');
-    expect(iconButtons.length).toBeGreaterThan(0);
-    for (const iconButton of iconButtons) {
-      expect(iconButton.querySelector('ng-icon[name][aria-hidden="true"]')).not.toBeNull();
-      expect(iconButton.getAttribute('aria-label')?.trim()).toBeTruthy();
-    }
-
-    expect(template).not.toMatch(/[+⌄⌘]/u);
-  });
-
-  it('demonstrates each family member with something Button alone does not show', () => {
-    const template = overviewStories.Matrix.render?.({} as never, {} as never)?.template ?? '';
-    const host = document.createElement('div');
-    host.innerHTML = template;
-
-    const headings = [...host.querySelectorAll('.slotted-component-lab__intro h2')].map(
-      (heading) => heading.textContent,
+  it('gives the overview one section per member, plus the axes and a composition', () => {
+    const headings = [...template(overviewStories.Matrix).matchAll(/<h2>([^<]+)<\/h2>/g)].map(
+      ([, heading]) => heading,
     );
+
     expect(headings).toEqual([
       'Appearance system',
       'Button',
@@ -109,53 +73,49 @@ describe('Angular Button family stories', () => {
       'ToggleButton',
       'Composition',
     ]);
+  });
 
-    const links = host.querySelectorAll('a[slbuttonlink]');
-    expect(links.length).toBeGreaterThan(0);
-    for (const link of links) {
-      expect(link.getAttribute('href')).toBeTruthy();
+  it('shows every tone against every variant in the overview matrix', () => {
+    const markup = template(overviewStories.Matrix);
+
+    for (const tone of contract.axes.tone) {
+      expect(markup).toContain(`tone="${tone}"`);
     }
-    expect(host.querySelector('a[slbuttonlink][disabled]')).not.toBeNull();
-
-    const sizedIconButtons = [...host.querySelectorAll('button[sliconbutton]')].map((iconButton) =>
-      iconButton.getAttribute('size'),
-    );
-    for (const size of ['sm', 'md', 'lg']) {
-      expect(sizedIconButtons).toContain(size);
+    for (const variant of contract.axes.variant) {
+      expect(markup).toContain(`variant="${variant}"`);
     }
   });
 
-  it('exposes every IconButton appearance axis in its playground', () => {
-    const meta = iconButtonStories.default;
+  it('demonstrates each member with something Button alone does not show', () => {
+    const markup = template(overviewStories.Matrix);
 
-    expect(meta.args).toMatchObject({
-      disabled: false,
-      fill: 'ghost',
-      loading: false,
-      size: 'md',
-      variant: 'secondary',
-    });
-    expect(meta.argTypes?.['variant']).toMatchObject({
-      options: ['accent', 'secondary', 'success', 'warning', 'danger'],
-    });
-    expect(meta.argTypes?.['fill']).toMatchObject({ options: ['solid', 'outline', 'ghost'] });
+    expect(markup).toContain('slButtonLink');
+    expect(markup).toContain('disabled>Open settings');
+    expect(markup).toContain('slIconButton');
+    expect(markup).toContain('shape="circle"');
+    expect(markup).toContain('slToggleButton');
+    expect(markup).toContain('loading');
+    expect(markup).toContain('defaultPressed');
   });
 
-  it('renders split actions as one coherent control with matching segments', () => {
-    const template = buttonGroupStories.SplitAction.render?.({} as never, {} as never)?.template;
-    const host = document.createElement('div');
-    host.innerHTML = template ?? '';
-
-    const group = host.querySelector('[slbuttongroup]');
-    const buttons = group?.querySelectorAll('button') ?? [];
-    expect(group?.classList.contains('slotted-split-action')).toBe(true);
-    expect(group?.getAttribute('aria-label')).toBe('Publish actions');
-    expect(buttons).toHaveLength(2);
-    for (const button of buttons) {
-      expect(button.getAttribute('size')).toBe('md');
-      expect(button.getAttribute('variant')).toBe('accent');
-      expect(button.getAttribute('fill')).toBe('solid');
+  /** Every icon-only control needs a name, and no template can make one mandatory. */
+  it('names every icon-only control in every story', () => {
+    for (const module of Object.values(storyModules)) {
+      for (const [name, story] of Object.entries(module)) {
+        if (name === 'default' || typeof story !== 'object' || story === null) continue;
+        const markup = template(story as { render?: () => { template?: string } });
+        for (const [, tag] of markup.matchAll(/<button([^>]*slIconButton[^>]*)>/g)) {
+          expect(tag).toMatch(/aria-label|aria-labelledby|attr\.aria-label/);
+        }
+      }
     }
-    expect(group?.querySelector('ng-icon[name="lucideChevronDown"]')).not.toBeNull();
+  });
+
+  it('shows the densities scene at all three steps of the control scale', () => {
+    const markup = template(overviewStories.Densities);
+
+    for (const size of contract.axes.size) {
+      expect(markup).toContain(`size="${size}"`);
+    }
   });
 });

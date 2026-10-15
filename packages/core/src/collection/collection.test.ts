@@ -12,7 +12,7 @@ const list = {
 
 describe('virtualWindow', () => {
   it('renders the rows the viewport covers, and no more', () => {
-    expect(virtualWindow(list)).toEqual({
+    expect(virtualWindow(list)).toMatchObject({
       startIndex: 0,
       endIndex: 10,
       startOffset: 0,
@@ -81,7 +81,14 @@ describe('virtualWindow', () => {
   });
 
   it('empties the window when there is nothing to show yet', () => {
-    const empty = { startIndex: 0, endIndex: 0, startOffset: 0, totalSize: 0 };
+    const empty = {
+      startIndex: 0,
+      endIndex: 0,
+      startOffset: 0,
+      totalSize: 0,
+      pinnedBefore: [],
+      pinnedAfter: [],
+    };
     expect(virtualWindow({ ...list, itemCount: 0 })).toEqual(empty);
     expect(virtualWindow({ ...list, itemSize: 0 })).toEqual(empty);
     expect(virtualWindow({ ...list, itemCount: -3 })).toEqual(empty);

@@ -22,6 +22,16 @@ import {
 } from './helpers';
 
 const PRIORITIES: TicketPriority[] = ['low', 'normal', 'high', 'urgent'];
+
+export interface TicketUpdateInput {
+  subject?: string;
+  priority?: TicketPriority;
+  category?: string;
+  tags?: string[];
+  relatedOrderId?: string;
+  relatedInvoiceId?: string;
+  relatedSkuId?: string;
+}
 const CHANNELS: TicketChannel[] = ['email', 'phone', 'portal', 'chat', 'internal'];
 
 export function createSupportCommands(runtime: ApiRuntime) {
@@ -65,6 +75,24 @@ export function createSupportCommands(runtime: ApiRuntime) {
     return record;
   };
 
+  /**
+   * Section 68.5 "Escalate" — the manager an escalation goes to when none is named: the support
+   * lead, whom the persona switcher offers, then any active Support Manager; never the one who
+   * escalates.
+   */
+  const escalationTarget = (actorId: string): string | undefined => {
+    const lead = runtime.store.seed.personaUserIds.get('support-lead');
+    if (lead && lead !== actorId && runtime.authorization.hasRole(lead, 'support_manager'))
+      return lead;
+    for (const assignment of runtime.store.dataset.roleAssignments.values()) {
+      if (runtime.store.dataset.roles.get(assignment.roleId)?.name !== 'Support Manager') continue;
+      if (assignment.userId === actorId) continue;
+      if (runtime.store.dataset.users.get(assignment.userId)?.status !== 'active') continue;
+      return assignment.userId;
+    }
+    return undefined;
+  };
+
   const supportTeamId = (): string =>
     [...runtime.store.dataset.teams.values()].find((team) => team.type === 'support')?.id ?? '';
 
@@ -79,7 +107,91 @@ export function createSupportCommands(runtime: ApiRuntime) {
     return getTicket(runtime, ticket.id);
   };
 
+  /** Section 68.5: edits a ticket's subject, priority, category, tags and links — the command and a workflow's tag actions. */
+  const updateTicket = (
+    tx: Transaction,
+    id: string,
+    input: TicketUpdateInput,
+    options?: MutationOptions,
+  ): TicketDetail => {
+    tx.require('support.change_status');
+    const ticket = open(tx, 'tickets', id, 'Ticket', options);
+    if (ticket.status === 'closed')
+      throw domainError('TICKET_CLOSED', `Ticket ${ticket.ticketNumber} is closed`, 409);
+    new Validator().oneOf('priority', input.priority, PRIORITIES).throwIfAny();
+    const changed: string[] = [];
+    if (trimmed(input.subject)) {
+      ticket.subject = trimmed(input.subject) as string;
+      changed.push('subject');
+    }
+    if (input.priority && input.priority !== ticket.priority) {
+      ticket.priority = input.priority;
+      const targets = SLA_TARGETS[input.priority];
+      ticket.firstResponseDueAt = addBusinessMinutes(
+        ticket.metadata.createdAt,
+        targets.firstResponseMinutes,
+      );
+      ticket.resolutionDueAt = addBusinessMinutes(
+        ticket.metadata.createdAt,
+        targets.resolutionMinutes,
+      );
+      changed.push('priority');
+    }
+    if (trimmed(input.category)) {
+      ticket.category = trimmed(input.category) as string;
+      changed.push('category');
+    }
+    if (input.tags) {
+      ticket.tags = input.tags;
+      changed.push('tags');
+    }
+    if (input.relatedOrderId !== undefined) {
+      if (input.relatedOrderId)
+        ticket.relatedOrderId = load(runtime, 'salesOrders', input.relatedOrderId, 'Order').id;
+      else delete ticket.relatedOrderId;
+      changed.push('relatedOrderId');
+    }
+    if (input.relatedInvoiceId !== undefined) {
+      if (input.relatedInvoiceId)
+        ticket.relatedInvoiceId = load(runtime, 'invoices', input.relatedInvoiceId, 'Invoice').id;
+      else delete ticket.relatedInvoiceId;
+      changed.push('relatedInvoiceId');
+    }
+    if (input.relatedSkuId !== undefined) {
+      if (input.relatedSkuId)
+        ticket.relatedSkuId = load(runtime, 'skus', input.relatedSkuId, 'SKU').id;
+      else delete ticket.relatedSkuId;
+      changed.push('relatedSkuId');
+    }
+    return finish(tx, ticket, 'ticket.updated', changed);
+  };
+
+  /** Section 68.5 "Assign/open" — the interactive command and a workflow's assignment. */
+  const assignTicket = (
+    tx: Transaction,
+    id: string,
+    input: { assigneeId: string },
+    options?: MutationOptions,
+  ): TicketDetail => {
+    tx.require('support.assign');
+    const assignee = load(runtime, 'users', input.assigneeId, 'User');
+    const ticket = open(tx, 'tickets', id, 'Ticket', options);
+    if (ticket.status === 'closed')
+      throw domainError('TICKET_CLOSED', `Ticket ${ticket.ticketNumber} is closed`, 409);
+    ticket.assigneeId = assignee.id;
+    if (ticket.status === 'new') ticket.status = 'open';
+    tx.notify(
+      assignee.id,
+      'action_required',
+      `Ticket ${ticket.ticketNumber} assigned to you`,
+      ticket.subject,
+      { type: 'support_ticket', id },
+    );
+    return finish(tx, ticket, 'ticket.assigned', ['assigneeId', 'status']);
+  };
+
   return {
+    services: { updateTicket, assignTicket },
     create: (
       input: {
         customerId: string;
@@ -181,97 +293,21 @@ export function createSupportCommands(runtime: ApiRuntime) {
 
     update: (
       id: string,
-      input: {
-        subject?: string;
-        priority?: TicketPriority;
-        category?: string;
-        tags?: string[];
-        relatedOrderId?: string;
-        relatedInvoiceId?: string;
-        relatedSkuId?: string;
-      },
+      input: TicketUpdateInput,
       options?: MutationOptions,
     ): Promise<TicketDetail> =>
-      runtime.command('PATCH /support/tickets/:id', options, { id, input }, (tx) => {
-        runtime.require('support.change_status');
-        const ticket = open(tx, 'tickets', id, 'Ticket', options);
-        if (ticket.status === 'closed')
-          throw domainError('TICKET_CLOSED', `Ticket ${ticket.ticketNumber} is closed`, 409);
-        new Validator().oneOf('priority', input.priority, PRIORITIES).throwIfAny();
-        const changed: string[] = [];
-        if (trimmed(input.subject)) {
-          ticket.subject = trimmed(input.subject) as string;
-          changed.push('subject');
-        }
-        if (input.priority && input.priority !== ticket.priority) {
-          ticket.priority = input.priority;
-          const targets = SLA_TARGETS[input.priority];
-          ticket.firstResponseDueAt = addBusinessMinutes(
-            ticket.metadata.createdAt,
-            targets.firstResponseMinutes,
-          );
-          ticket.resolutionDueAt = addBusinessMinutes(
-            ticket.metadata.createdAt,
-            targets.resolutionMinutes,
-          );
-          changed.push('priority');
-        }
-        if (trimmed(input.category)) {
-          ticket.category = trimmed(input.category) as string;
-          changed.push('category');
-        }
-        if (input.tags) {
-          ticket.tags = input.tags;
-          changed.push('tags');
-        }
-        if (input.relatedOrderId !== undefined) {
-          if (input.relatedOrderId)
-            ticket.relatedOrderId = load(runtime, 'salesOrders', input.relatedOrderId, 'Order').id;
-          else delete ticket.relatedOrderId;
-          changed.push('relatedOrderId');
-        }
-        if (input.relatedInvoiceId !== undefined) {
-          if (input.relatedInvoiceId)
-            ticket.relatedInvoiceId = load(
-              runtime,
-              'invoices',
-              input.relatedInvoiceId,
-              'Invoice',
-            ).id;
-          else delete ticket.relatedInvoiceId;
-          changed.push('relatedInvoiceId');
-        }
-        if (input.relatedSkuId !== undefined) {
-          if (input.relatedSkuId)
-            ticket.relatedSkuId = load(runtime, 'skus', input.relatedSkuId, 'SKU').id;
-          else delete ticket.relatedSkuId;
-          changed.push('relatedSkuId');
-        }
-        return finish(tx, ticket, 'ticket.updated', changed);
-      }),
+      runtime.command('PATCH /support/tickets/:id', options, { id, input }, (tx) =>
+        updateTicket(tx, id, input, options),
+      ),
 
     assign: (
       id: string,
       input: { assigneeId: string },
       options?: MutationOptions,
     ): Promise<TicketDetail> =>
-      runtime.command('POST /support/tickets/:id/assign', options, { id, input }, (tx) => {
-        runtime.require('support.assign');
-        const assignee = load(runtime, 'users', input.assigneeId, 'User');
-        const ticket = open(tx, 'tickets', id, 'Ticket', options);
-        if (ticket.status === 'closed')
-          throw domainError('TICKET_CLOSED', `Ticket ${ticket.ticketNumber} is closed`, 409);
-        ticket.assigneeId = assignee.id;
-        if (ticket.status === 'new') ticket.status = 'open';
-        tx.notify(
-          assignee.id,
-          'action_required',
-          `Ticket ${ticket.ticketNumber} assigned to you`,
-          ticket.subject,
-          { type: 'support_ticket', id },
-        );
-        return finish(tx, ticket, 'ticket.assigned', ['assigneeId', 'status']);
-      }),
+      runtime.command('POST /support/tickets/:id/assign', options, { id, input }, (tx) =>
+        assignTicket(tx, id, input, options),
+      ),
 
     /** Section 68.5 "Reply" — a public reply records the first response. */
     reply: (
@@ -453,12 +489,8 @@ export function createSupportCommands(runtime: ApiRuntime) {
           throw transition('Ticket', ticket.status, 'be escalated');
         ticket.status = 'escalated';
         ticket.escalationReason = input.reason.trim();
-        const target =
-          input.assigneeId ??
-          [...runtime.store.dataset.roleAssignments.values()].find(
-            (assignment) =>
-              runtime.store.dataset.roles.get(assignment.roleId)?.name === 'Support Manager',
-          )?.userId;
+        tx.emit('ticket.escalated', { ticketId: id, customerId: ticket.customerId });
+        const target = input.assigneeId ?? escalationTarget(tx.actor.id);
         if (target) {
           ticket.assigneeId = target;
           tx.notify(

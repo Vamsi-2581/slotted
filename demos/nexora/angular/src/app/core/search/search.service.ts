@@ -17,7 +17,7 @@ const ROUTE_BY_TYPE: Record<SearchHit['type'], string> = {
   invoice: '/finance/invoices',
   supplier: '/procurement/suppliers',
   purchase_order: '/procurement/purchase-orders',
-  ticket: '/support/tickets',
+  ticket: '/support/inbox',
 };
 
 @Injectable({ providedIn: 'root' })

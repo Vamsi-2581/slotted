@@ -54,12 +54,18 @@ export class PermissionGate {
 
   readonly page = computed(() => {
     const declared = this.declared();
-    return isLazy(declared) ? this.loaded() : declared;
+    if (!isLazy(declared)) return declared;
+    // The route resolves a lazy page's chunk before it activates: the page draws with the route.
+    return (this.data()['pageComponent'] as Type<unknown> | undefined) ?? this.loaded();
   });
 
   readonly missing = computed(() => {
     const permissions = (this.data()['permissions'] ?? []) as string[];
+    const requires = (this.data()['requires'] ?? []) as string[];
     void this.sessionStore.session();
+    // What every reader of the destination needs is named first: it is what the reader asks for.
+    const lacking = requires.find((p) => !this.sessionStore.can(p));
+    if (lacking !== undefined) return lacking;
     if (permissions.length === 0 || permissions.some((p) => this.sessionStore.can(p))) return null;
     return permissions[0] ?? null;
   });

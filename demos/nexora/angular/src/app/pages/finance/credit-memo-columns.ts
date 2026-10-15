@@ -7,6 +7,7 @@ import {
   CREDIT_MEMO_REASON_LABEL,
   type CreditMemoListItem,
 } from '../../core/finance/finance.model';
+import { regionField, segmentField } from '../../core/backend/door';
 
 /**
  * The credit memos' columns. The amounts are drawn in the memo's own currency
@@ -119,5 +120,7 @@ export function creditMemoFilterFields(): readonly FilterBarField[] {
       operators: ['greaterThanOrEqual', 'lessThanOrEqual', 'between'],
       section: 'Amounts',
     },
+    regionField('Customer') as FilterBarField,
+    segmentField('Customer') as FilterBarField,
   ];
 }

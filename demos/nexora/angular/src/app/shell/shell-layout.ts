@@ -49,6 +49,7 @@ import { SlSkeleton } from '@slotted/angular/skeleton';
 import { filter, map, startWith } from 'rxjs';
 
 import { ApprovalsStore } from '../core/activity/approvals.store';
+import { SupportQueuesStore } from '../core/support/tickets.store';
 import { NotificationsStore } from '../core/activity/notifications.store';
 import { TasksStore } from '../core/activity/tasks.store';
 import { TransportHealth } from '../core/backend/transport-health';
@@ -120,6 +121,7 @@ interface Section {
 export class ShellLayout implements OnInit {
   readonly session = inject(SessionStore);
   readonly approvals = inject(ApprovalsStore);
+  private readonly supportQueues = inject(SupportQueuesStore);
   readonly tasks = inject(TasksStore);
   readonly notifications = inject(NotificationsStore);
   private readonly router = inject(Router);
@@ -240,7 +242,10 @@ export class ShellLayout implements OnInit {
   }
 
   countFor(destination: NavDestination): number | null {
-    return destination.count === 'approvals' ? this.approvals.pending() : null;
+    if (destination.count === 'approvals') return this.approvals.pending();
+    // The reader's own open tickets, the number the inbox's "Assigned to me" queue opens on.
+    if (destination.count === 'support') return this.supportQueues.mine();
+    return null;
   }
 
   retry(): void {

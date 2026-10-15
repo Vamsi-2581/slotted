@@ -9,7 +9,7 @@ import {
   money,
   regionByCode,
 } from '../../domain';
-import type { ApiRuntime, MutationOptions } from '../runtime';
+import type { ApiRuntime, MutationOptions, Transaction } from '../runtime';
 import {
   dollars,
   domainError,
@@ -93,7 +93,155 @@ export function createCrmCommands(runtime: ApiRuntime) {
     );
   };
 
+  /**
+   * Section 56: edits a customer. The interactive command and a workflow's
+   * tag and assignment actions write through it (section 69.3).
+   */
+  const updateCustomer = (
+    tx: Transaction,
+    id: string,
+    input: UpdateCustomerInput,
+    options?: MutationOptions,
+  ): CustomerListItem => {
+    const customer = load(runtime, 'customers', id, 'Customer');
+    tx.require('customers.edit', {
+      ownerId: customer.accountOwnerId,
+      teamId: customer.salesTeamId,
+    });
+    if (customer.status === 'closed') throw transition('Customer', customer.status, 'be edited');
+    if (input.creditLimitMinor !== undefined) tx.require('customers.credit_edit');
+    const validator = new Validator();
+    if (input.displayName !== undefined) validator.required('displayName', input.displayName);
+    if (input.segment !== undefined)
+      validator.oneOf('segment', input.segment, [
+        'smb',
+        'mid_market',
+        'enterprise',
+        'strategic',
+      ] as const);
+    if (input.status !== undefined)
+      validator.oneOf('status', input.status, ['prospect', 'active', 'inactive'] as const);
+    if (input.primaryContactId !== undefined)
+      validator.check(
+        runtime.indexes.contactsByCustomer
+          .get(id)
+          .some((contact) => contact.id === input.primaryContactId),
+        'primaryContactId',
+        'NOT_FOUND',
+        'primaryContactId must belong to the customer',
+      );
+    validator.throwIfAny();
+    const before = { ...customer };
+    open(tx, 'customers', id, 'Customer', options);
+    const changed: string[] = [];
+    const assign = <K extends keyof Customer>(key: K, value: Customer[K] | undefined): void => {
+      if (value === undefined || value === customer[key]) return;
+      customer[key] = value;
+      changed.push(key);
+    };
+    assign('displayName', trimmed(input.displayName));
+    assign('legalName', trimmed(input.legalName));
+    assign('segment', input.segment);
+    assign('industry', trimmed(input.industry));
+    assign('paymentTermsCode', input.paymentTermsCode);
+    assign('priceListId', input.priceListId);
+    assign('accountOwnerId', input.accountOwnerId);
+    assign('salesTeamId', input.salesTeamId);
+    assign('website', trimmed(input.website));
+    assign('employeeBand', trimmed(input.employeeBand));
+    assign('tags', input.tags);
+    assign('billingAddressId', input.billingAddressId);
+    assign('defaultShippingAddressId', input.defaultShippingAddressId);
+    if (
+      input.creditLimitMinor !== undefined &&
+      input.creditLimitMinor !== customer.creditLimit.minor
+    ) {
+      customer.creditLimit = money(input.creditLimitMinor, customer.preferredCurrency);
+      changed.push('creditLimit');
+    }
+    if (input.taxExempt !== undefined) {
+      const next = input.taxExempt
+        ? { type: 'exempt' as const, exemptionReason: 'Exemption certificate on file' }
+        : { type: 'taxable' as const };
+      if (next.type !== customer.taxProfile.type) {
+        customer.taxProfile = next;
+        changed.push('taxProfile');
+      }
+    }
+    if (input.status !== undefined && input.status !== customer.status) {
+      if (customer.status === 'on_hold')
+        throw transition('Customer', 'on_hold', 'change status without releasing the hold');
+      tx.emit('customer.status_changed', { customerId: id, previousStatus: customer.status });
+      customer.status = input.status;
+      changed.push('status');
+      tx.activityEvent({
+        type: 'customer.status_changed',
+        subjectType: 'customer',
+        subjectId: id,
+        subjectLabel: customer.displayName,
+        customerId: id,
+        summary: `${customer.displayName} is now ${input.status}`,
+      });
+    }
+    if (
+      input.primaryContactId !== undefined &&
+      input.primaryContactId !== customer.primaryContactId
+    ) {
+      for (const contact of runtime.indexes.contactsByCustomer.get(id)) {
+        if (contact.isPrimary && contact.id !== input.primaryContactId) {
+          tx.touch('contacts', contact).isPrimary = false;
+        }
+        if (contact.id === input.primaryContactId) tx.touch('contacts', contact).isPrimary = true;
+      }
+      tx.dirty('contacts');
+      customer.primaryContactId = input.primaryContactId;
+      changed.push('primaryContactId');
+    }
+    finalize(tx, 'customers', customer, 'customer.updated', 'customer', changed, before);
+    return customerListItem(runtime, customer);
+  };
+
+  /** Section 56.2: places a customer on hold — the interactive command and a workflow's action. */
+  const holdCustomer = (
+    tx: Transaction,
+    id: string,
+    reason: string,
+    options?: MutationOptions,
+  ): CustomerListItem => {
+    tx.require('customers.credit_edit');
+    new Validator().required('reason', reason).throwIfAny();
+    const customer = open(tx, 'customers', id, 'Customer', options);
+    if (customer.status !== 'active' && customer.status !== 'prospect')
+      throw transition('Customer', customer.status, 'be placed on hold');
+    tx.emit('customer.status_changed', { customerId: id, previousStatus: customer.status });
+    customer.status = 'on_hold';
+    customer.holdReason = reason.trim();
+    customer.health = 'at_risk';
+    finalize(tx, 'customers', customer, 'customer.hold_placed', 'customer', [
+      'status',
+      'holdReason',
+      'health',
+    ]);
+    tx.activityEvent({
+      type: 'customer.status_changed',
+      subjectType: 'customer',
+      subjectId: id,
+      subjectLabel: customer.displayName,
+      customerId: id,
+      summary: `${customer.displayName} placed on hold — ${reason.trim()}`,
+    });
+    tx.notify(
+      customer.accountOwnerId,
+      'warning',
+      `${customer.displayName} placed on hold`,
+      reason.trim(),
+      { type: 'customer', id },
+    );
+    return customerListItem(runtime, customer);
+  };
+
   return {
+    services: { updateCustomer, holdCustomer },
     create: (input: CreateCustomerInput, options?: MutationOptions): Promise<CustomerListItem> =>
       runtime.command('POST /customers', options, input, (tx) => {
         const actor = runtime.require('customers.create');
@@ -227,105 +375,9 @@ export function createCrmCommands(runtime: ApiRuntime) {
       input: UpdateCustomerInput,
       options?: MutationOptions,
     ): Promise<CustomerListItem> =>
-      runtime.command('PATCH /customers/:id', options, { id, input }, (tx) => {
-        const customer = load(runtime, 'customers', id, 'Customer');
-        runtime.require('customers.edit', {
-          ownerId: customer.accountOwnerId,
-          teamId: customer.salesTeamId,
-        });
-        if (customer.status === 'closed')
-          throw transition('Customer', customer.status, 'be edited');
-        if (input.creditLimitMinor !== undefined) runtime.require('customers.credit_edit');
-        const validator = new Validator();
-        if (input.displayName !== undefined) validator.required('displayName', input.displayName);
-        if (input.segment !== undefined)
-          validator.oneOf('segment', input.segment, [
-            'smb',
-            'mid_market',
-            'enterprise',
-            'strategic',
-          ] as const);
-        if (input.status !== undefined)
-          validator.oneOf('status', input.status, ['prospect', 'active', 'inactive'] as const);
-        if (input.primaryContactId !== undefined)
-          validator.check(
-            runtime.indexes.contactsByCustomer
-              .get(id)
-              .some((contact) => contact.id === input.primaryContactId),
-            'primaryContactId',
-            'NOT_FOUND',
-            'primaryContactId must belong to the customer',
-          );
-        validator.throwIfAny();
-        const before = { ...customer };
-        open(tx, 'customers', id, 'Customer', options);
-        const changed: string[] = [];
-        const assign = <K extends keyof Customer>(key: K, value: Customer[K] | undefined): void => {
-          if (value === undefined || value === customer[key]) return;
-          customer[key] = value;
-          changed.push(key);
-        };
-        assign('displayName', trimmed(input.displayName));
-        assign('legalName', trimmed(input.legalName));
-        assign('segment', input.segment);
-        assign('industry', trimmed(input.industry));
-        assign('paymentTermsCode', input.paymentTermsCode);
-        assign('priceListId', input.priceListId);
-        assign('accountOwnerId', input.accountOwnerId);
-        assign('salesTeamId', input.salesTeamId);
-        assign('website', trimmed(input.website));
-        assign('employeeBand', trimmed(input.employeeBand));
-        assign('tags', input.tags);
-        assign('billingAddressId', input.billingAddressId);
-        assign('defaultShippingAddressId', input.defaultShippingAddressId);
-        if (
-          input.creditLimitMinor !== undefined &&
-          input.creditLimitMinor !== customer.creditLimit.minor
-        ) {
-          customer.creditLimit = money(input.creditLimitMinor, customer.preferredCurrency);
-          changed.push('creditLimit');
-        }
-        if (input.taxExempt !== undefined) {
-          const next = input.taxExempt
-            ? { type: 'exempt' as const, exemptionReason: 'Exemption certificate on file' }
-            : { type: 'taxable' as const };
-          if (next.type !== customer.taxProfile.type) {
-            customer.taxProfile = next;
-            changed.push('taxProfile');
-          }
-        }
-        if (input.status !== undefined && input.status !== customer.status) {
-          if (customer.status === 'on_hold')
-            throw transition('Customer', 'on_hold', 'change status without releasing the hold');
-          customer.status = input.status;
-          changed.push('status');
-          tx.activityEvent({
-            type: 'customer.status_changed',
-            subjectType: 'customer',
-            subjectId: id,
-            subjectLabel: customer.displayName,
-            customerId: id,
-            summary: `${customer.displayName} is now ${input.status}`,
-          });
-        }
-        if (
-          input.primaryContactId !== undefined &&
-          input.primaryContactId !== customer.primaryContactId
-        ) {
-          for (const contact of runtime.indexes.contactsByCustomer.get(id)) {
-            if (contact.isPrimary && contact.id !== input.primaryContactId) {
-              tx.touch('contacts', contact).isPrimary = false;
-            }
-            if (contact.id === input.primaryContactId)
-              tx.touch('contacts', contact).isPrimary = true;
-          }
-          tx.dirty('contacts');
-          customer.primaryContactId = input.primaryContactId;
-          changed.push('primaryContactId');
-        }
-        finalize(tx, 'customers', customer, 'customer.updated', 'customer', changed, before);
-        return customerListItem(runtime, customer);
-      }),
+      runtime.command('PATCH /customers/:id', options, { id, input }, (tx) =>
+        updateCustomer(tx, id, input, options),
+      ),
 
     /** Section 91.5 — archive rules. */
     archive: (id: string, options?: MutationOptions): Promise<CustomerListItem> =>
@@ -359,6 +411,7 @@ export function createCrmCommands(runtime: ApiRuntime) {
           );
         }
         open(tx, 'customers', id, 'Customer', options);
+        tx.emit('customer.status_changed', { customerId: id, previousStatus: customer.status });
         customer.status = 'closed';
         customer.metadata.archivedAt = tx.occurredAt;
         finalize(tx, 'customers', customer, 'customer.archived', 'customer', [
@@ -377,37 +430,9 @@ export function createCrmCommands(runtime: ApiRuntime) {
       }),
 
     hold: (id: string, reason: string, options?: MutationOptions): Promise<CustomerListItem> =>
-      runtime.command('POST /customers/:id/hold', options, { id, reason }, (tx) => {
-        runtime.require('customers.credit_edit');
-        new Validator().required('reason', reason).throwIfAny();
-        const customer = open(tx, 'customers', id, 'Customer', options);
-        if (customer.status !== 'active' && customer.status !== 'prospect')
-          throw transition('Customer', customer.status, 'be placed on hold');
-        customer.status = 'on_hold';
-        customer.holdReason = reason.trim();
-        customer.health = 'at_risk';
-        finalize(tx, 'customers', customer, 'customer.hold_placed', 'customer', [
-          'status',
-          'holdReason',
-          'health',
-        ]);
-        tx.activityEvent({
-          type: 'customer.status_changed',
-          subjectType: 'customer',
-          subjectId: id,
-          subjectLabel: customer.displayName,
-          customerId: id,
-          summary: `${customer.displayName} placed on hold — ${reason.trim()}`,
-        });
-        tx.notify(
-          customer.accountOwnerId,
-          'warning',
-          `${customer.displayName} placed on hold`,
-          reason.trim(),
-          { type: 'customer', id },
-        );
-        return customerListItem(runtime, customer);
-      }),
+      runtime.command('POST /customers/:id/hold', options, { id, reason }, (tx) =>
+        holdCustomer(tx, id, reason, options),
+      ),
 
     releaseHold: (id: string, options?: MutationOptions): Promise<CustomerListItem> =>
       runtime.command('POST /customers/:id/release-hold', options, { id }, (tx) => {
@@ -415,6 +440,7 @@ export function createCrmCommands(runtime: ApiRuntime) {
         const customer = open(tx, 'customers', id, 'Customer', options);
         if (customer.status !== 'on_hold')
           throw transition('Customer', customer.status, 'be released from hold');
+        tx.emit('customer.status_changed', { customerId: id, previousStatus: customer.status });
         customer.status = 'active';
         delete customer.holdReason;
         customer.health = runtime.projections.computeHealth(customer);

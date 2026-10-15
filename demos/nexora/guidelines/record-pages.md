@@ -178,3 +178,14 @@ Do: Give the list a segment under the destination (the invoices' credit memos), 
 Don't: Add a destination the navigation's map does not hold, or reach the documents only through one record's tab.
 Seen in: Nexora · credit memos and refunds under Invoices · corrected
 Check: Spec: the Finance routes suite, "declares /new and credit-memos before :id, so neither is read as a record id"; the credit memo suite, "opens a draft, refuses as typed an application above what the invoice owes or the memo holds, and applies it whole".
+
+### RP-13 · An entry a workflow wrote names the workflow and opens its run
+
+Level: SHOULD
+Applies to: a record's activity, where an automation's action and a person's command both write entries
+Rule: An entry written by a workflow's action names the workflow as its actor and, for a reader of workflows, opens the run that wrote it; it never reads as the work of the person whose command set the workflow off.
+Why: A hold placed by a workflow and drawn under the name of the agent who escalated a ticket blames the agent for a rule they never saw, and leaves the reader no way to the rule.
+Do: Read the actor from the entry's workflow, say it as "Workflow “name”", and put "Open the run" in the timeline item's actions where the reader holds `workflows.view`.
+Don't: Draw the automation actor's bare name, or the name of the person whose command produced the event.
+Seen in: Nexora · Customer 360's activity, a customer held by a workflow · corrected
+Check: Spec: the automation module suite, "names the workflow that wrote an activity entry, and opens its run".

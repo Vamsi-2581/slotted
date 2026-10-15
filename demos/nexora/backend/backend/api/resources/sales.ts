@@ -1,7 +1,11 @@
 import {
+  addMoney,
+  businessDateOf,
+  diffDays,
   notFound,
   money,
   roundHalfUp,
+  usdMinor,
   type ApprovalRequest,
   type Contact,
   type CurrencyCode,
@@ -35,6 +39,7 @@ export interface OrderListItem {
   customerId: string;
   customerName: string;
   customerSegment: Customer['segment'];
+  regionCode: Customer['regionCode'];
   currency: CurrencyCode;
   ownerId: string;
   ownerName: string;
@@ -51,8 +56,14 @@ export interface OrderListItem {
   riskFlags: SalesOrder['riskFlags'];
   subtotal: Money;
   total: Money;
+  /** Section 72.4's booked value: net merchandise plus freight, excluding tax, in USD at the order's rate. */
+  netUsd: Money;
   grossMarginBps: number;
   lineCount: number;
+  /** The SKUs the order's lines name; empty for the historical tier, which keeps no lines. */
+  skuIds: string[];
+  /** Days from the order date to the shipment that completed it; absent until it ships complete. */
+  cycleDays?: number;
   customerPoNumber?: string;
   sourceQuoteId?: string;
   updatedAt: string;
@@ -128,17 +139,39 @@ export class SalesReadModels {
   private names(
     customerId: string,
     ownerId: string,
-  ): { customerName: string; customerSegment: Customer['segment']; ownerName: string } {
+  ): {
+    customerName: string;
+    customerSegment: Customer['segment'];
+    regionCode: Customer['regionCode'];
+    ownerName: string;
+  } {
     const { dataset } = this.runtime.store;
     const customer = dataset.customers.get(customerId);
     return {
       customerName: customer?.displayName ?? customerId,
       customerSegment: customer?.segment ?? 'smb',
+      regionCode: customer?.regionCode ?? 'US',
       ownerName: dataset.users.get(ownerId)?.displayName ?? ownerId,
     };
   }
 
+  /** The days an order took from its date to the shipment that completed it (section 16 "order cycle time"). */
+  cycleDaysOf(order: SalesOrder): number | undefined {
+    if (
+      order.fulfillmentStatus === 'unfulfilled' ||
+      order.fulfillmentStatus === 'partially_fulfilled'
+    )
+      return undefined;
+    let last: string | undefined;
+    for (const shipment of this.runtime.indexes.shipmentsByOrder.get(order.id))
+      if (shipment.shippedAt && (last === undefined || shipment.shippedAt > last))
+        last = shipment.shippedAt;
+    return last === undefined ? undefined : diffDays(businessDateOf(last), order.orderDate);
+  }
+
   orderListItem(order: SalesOrder): OrderListItem {
+    const lines = this.runtime.indexes.linesByOrder.get(order.id);
+    const cycleDays = this.cycleDaysOf(order);
     return {
       id: order.id,
       orderNumber: order.orderNumber,
@@ -158,8 +191,10 @@ export class SalesReadModels {
       riskFlags: order.riskFlags,
       subtotal: order.subtotal,
       total: order.total,
+      netUsd: money(usdMinor(addMoney(order.subtotal, order.freight), order.fxRateToUsd), 'USD'),
       grossMarginBps: order.grossMarginBps,
-      lineCount: this.runtime.indexes.linesByOrder.get(order.id).length,
+      lineCount: lines.length,
+      skuIds: [...new Set(lines.map((line) => line.skuId))],
       updatedAt: order.metadata.updatedAt,
       version: order.metadata.version,
       historical: false,
@@ -168,6 +203,7 @@ export class SalesReadModels {
         : {}),
       ...(order.customerPoNumber ? { customerPoNumber: order.customerPoNumber } : {}),
       ...(order.sourceQuoteId ? { sourceQuoteId: order.sourceQuoteId } : {}),
+      ...(cycleDays !== undefined ? { cycleDays } : {}),
     };
   }
 
@@ -215,6 +251,11 @@ export class SalesReadModels {
         riskFlags: [],
         subtotal: money(summary.subtotalMinor, summary.currency),
         total: money(summary.totalMinor, summary.currency),
+        netUsd: money(
+          roundHalfUp((summary.subtotalMinor + summary.freightMinor) * Number(summary.fxRateToUsd)),
+          'USD',
+        ),
+        skuIds: [],
         grossMarginBps:
           summary.subtotalMinor === 0
             ? 0
@@ -245,6 +286,7 @@ export const orderResource: ResourceDefinition<OrderListItem> = {
     customerId: ['string', (item) => item.customerId],
     customerName: ['string', (item) => item.customerName],
     customerSegment: ['enum', (item) => item.customerSegment],
+    regionCode: ['enum', (item) => item.regionCode],
     currency: ['enum', (item) => item.currency],
     ownerId: ['string', (item) => item.ownerId],
     ownerName: ['string', (item) => item.ownerName],
@@ -262,8 +304,11 @@ export const orderResource: ResourceDefinition<OrderListItem> = {
     total: ['money', (item) => item.total],
     totalMinor: ['number', (item) => item.total.minor],
     subtotal: ['money', (item) => item.subtotal],
+    netUsd: ['money', (item) => item.netUsd],
     grossMarginBps: ['number', (item) => item.grossMarginBps],
     lineCount: ['number', (item) => item.lineCount],
+    skuIds: ['array', (item) => item.skuIds],
+    cycleDays: ['number', (item) => item.cycleDays],
     customerPoNumber: ['string', (item) => item.customerPoNumber],
     historical: ['boolean', (item) => item.historical],
     updatedAt: ['datetime', (item) => item.updatedAt],
@@ -390,6 +435,8 @@ export function getOrder(runtime: ApiRuntime, models: SalesReadModels, id: strin
 
 export interface QuoteListItem extends Quote {
   customerName: string;
+  customerSegment: Customer['segment'];
+  regionCode: Customer['regionCode'];
   ownerName: string;
   lineCount: number;
   daysToExpiry: number;
@@ -408,9 +455,12 @@ export function quoteListItem(runtime: ApiRuntime, quote: Quote): QuoteListItem 
   const { dataset } = runtime.store;
   const today = runtime.store.today;
   const days = Math.round((Date.parse(quote.expirationDate) - Date.parse(today)) / 86_400_000);
+  const customer = dataset.customers.get(quote.customerId);
   return {
     ...quote,
-    customerName: dataset.customers.get(quote.customerId)?.displayName ?? quote.customerId,
+    customerName: customer?.displayName ?? quote.customerId,
+    customerSegment: customer?.segment ?? 'smb',
+    regionCode: customer?.regionCode ?? 'US',
     ownerName: dataset.users.get(quote.ownerId)?.displayName ?? quote.ownerId,
     lineCount: runtime.indexes.quoteLinesByQuote.get(quote.id).length,
     daysToExpiry: days,
@@ -423,6 +473,8 @@ export const quoteResource: ResourceDefinition<QuoteListItem> = {
     quoteNumber: ['string', (item) => item.quoteNumber],
     customerId: ['string', (item) => item.customerId],
     customerName: ['string', (item) => item.customerName],
+    customerSegment: ['enum', (item) => item.customerSegment],
+    regionCode: ['enum', (item) => item.regionCode],
     ownerId: ['string', (item) => item.ownerId],
     ownerName: ['string', (item) => item.ownerName],
     currency: ['enum', (item) => item.currency],

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SlBadge } from '@slotted/angular/badge';
 import { SlButtonLink } from '@slotted/angular/button';
@@ -31,6 +31,7 @@ import type { FilterGroup } from '@slotted/core/filter';
 import { emptyQuery, withPageIndex, withPageSize } from '@slotted/core/grid';
 import type { InventoryListItem } from '@slotted/demo-nexora-backend';
 
+import { doorFilter as reportDoor, fieldsWithDoor, type Door } from '../../core/backend/door';
 import { LIST_PAGE_SIZE, LIST_PAGE_SIZES } from '../../core/backend/list-query';
 import { formatQuantity } from '../../core/catalog/catalog.model';
 import { WarehousesStore } from '../../core/catalog/warehouses.store';
@@ -46,6 +47,7 @@ import { listView } from '../list-view/list-view';
 import { ListViewTools } from '../list-view/list-view-tools';
 import {
   doorFilter,
+  STOCK_DOOR_FIELDS,
   STOCK_HIDDEN_BY_DEFAULT,
   stockColumns,
   stockFilterFields,
@@ -303,9 +305,12 @@ export class StockPage {
   );
 
   readonly columns = computed(() => stockColumns((permission) => this.session.can(permission)));
-  readonly fields = computed(() =>
+  /** A report's door, whose ids the bar shows by the words the door carries. */
+  private readonly door = signal<Door | null>(null);
+  private readonly ownFields = computed(() =>
     stockFilterFields((permission) => this.session.can(permission), this.warehouses.inScope()),
   );
+  readonly fields = computed(() => fieldsWithDoor(this.ownFields(), STOCK_DOOR_FIELDS, this.door()));
 
   readonly scope = computed(() => {
     const scope = this.warehouses.inScope();
@@ -336,7 +341,11 @@ export class StockPage {
   constructor() {
     let opened = false;
     this.route.queryParamMap.subscribe((params) => {
-      const door = doorFilter(params.get('exception'), params.get('warehouse'));
+      const own = doorFilter(params.get('exception'), params.get('warehouse'));
+      // A report's door names its condition field by field (OV-01).
+      const report = own === null ? reportDoor(params, [...this.ownFields(), ...STOCK_DOOR_FIELDS]) : null;
+      this.door.set(report);
+      const door = own ?? report?.filter ?? null;
       // A door names its pills; a plain visit may start from the reader's saved view.
       if (door !== null) {
         void this.warehouses.open();

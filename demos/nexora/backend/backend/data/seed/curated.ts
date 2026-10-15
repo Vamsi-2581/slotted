@@ -184,6 +184,7 @@ export function curateMasterData(
 
 export interface CurationResult {
   overrides: Map<number, OrderOverride>;
+  /** -1 where the tenant holds no order old enough for the narrative. */
   meridianOrderIndex: number;
   fixtureIndexes: Map<string, number>;
 }
@@ -242,50 +243,53 @@ export function curateOrders(
   const is18 = catalog.flagshipSkuIds.get('Inductive Sensor IS-18') as string;
   const ic900 = catalog.flagshipSkuIds.get('Industrial Controller IC-900') as string;
   const mx240 = catalog.flagshipSkuIds.get('Servo Motor MX-240') as string;
-  const meridianOrder = pick(61) as OrderSkeleton;
-  meridianOrder.customerId = meridianId;
-  meridianOrder.warehouseId = chi;
-  meridianOrder.kind = 'normal';
-  overrides.set(meridianOrder.index, {
-    orderNumber: MERIDIAN.orderNumber,
-    kind: 'normal',
-    customerPoNumber: 'MCG-77410',
-    requestedDeliveryDate: addDays(today, -30),
-    freightMinor: 168_000,
-    paymentDelayDays: { mean: -6, spread: 4 },
-    lineSpecs: [
-      { skuId: vx7, quantity: '10', unitPriceMinor: 234_000, taxRateBps: 0 },
-      { skuId: sr420, quantity: '40', unitPriceMinor: 31_200, taxRateBps: 0 },
-      { skuId: is18, quantity: '50', unitPriceMinor: 8_600, taxRateBps: 0 },
-      { skuId: ic900, quantity: '6', unitPriceMinor: 412_000, taxRateBps: 0 },
-      {
-        skuId: mx240,
-        quantity: '10',
-        unitPriceMinor: MERIDIAN.mx240ContractPriceMinor,
-        taxRateBps: 0,
-      },
-    ],
-    waves: [
-      {
-        daysAgo: 59,
-        quantities: { 0: '10', 1: '40', 2: '50' },
-        status: 'delivered',
-        invoiceNumber: MERIDIAN.invoiceNumber,
-        invoiceOverdueDays: MERIDIAN.invoiceOverdueDays,
-        noPayment: true,
-      },
-      {
-        daysAgo: 2,
-        quantities: { 3: '6', 4: '4' },
-        status: 'in_transit',
-        shipmentNumber: MERIDIAN.shipmentNumber,
-        noPayment: true,
-      },
-    ],
-    backorder: { 4: String(MERIDIAN.backorderedUnits) },
-  });
-  fixtureIndexes.set('flagship.order.meridian', meridianOrder.index);
-  fixtureIndexes.set('edge.order.partially_fulfilled', meridianOrder.index);
+  // The narrative order is 61 days old: a tenant with less history (§77.2) has no order to hold it.
+  const meridianOrder = pick(61);
+  if (meridianOrder) {
+    meridianOrder.customerId = meridianId;
+    meridianOrder.warehouseId = chi;
+    meridianOrder.kind = 'normal';
+    overrides.set(meridianOrder.index, {
+      orderNumber: MERIDIAN.orderNumber,
+      kind: 'normal',
+      customerPoNumber: 'MCG-77410',
+      requestedDeliveryDate: addDays(today, -30),
+      freightMinor: 168_000,
+      paymentDelayDays: { mean: -6, spread: 4 },
+      lineSpecs: [
+        { skuId: vx7, quantity: '10', unitPriceMinor: 234_000, taxRateBps: 0 },
+        { skuId: sr420, quantity: '40', unitPriceMinor: 31_200, taxRateBps: 0 },
+        { skuId: is18, quantity: '50', unitPriceMinor: 8_600, taxRateBps: 0 },
+        { skuId: ic900, quantity: '6', unitPriceMinor: 412_000, taxRateBps: 0 },
+        {
+          skuId: mx240,
+          quantity: '10',
+          unitPriceMinor: MERIDIAN.mx240ContractPriceMinor,
+          taxRateBps: 0,
+        },
+      ],
+      waves: [
+        {
+          daysAgo: 59,
+          quantities: { 0: '10', 1: '40', 2: '50' },
+          status: 'delivered',
+          invoiceNumber: MERIDIAN.invoiceNumber,
+          invoiceOverdueDays: MERIDIAN.invoiceOverdueDays,
+          noPayment: true,
+        },
+        {
+          daysAgo: 2,
+          quantities: { 3: '6', 4: '4' },
+          status: 'in_transit',
+          shipmentNumber: MERIDIAN.shipmentNumber,
+          noPayment: true,
+        },
+      ],
+      backorder: { 4: String(MERIDIAN.backorderedUnits) },
+    });
+    fixtureIndexes.set('flagship.order.meridian', meridianOrder.index);
+    fixtureIndexes.set('edge.order.partially_fulfilled', meridianOrder.index);
+  }
 
   const assign = (
     key: string,
@@ -363,7 +367,7 @@ export function curateOrders(
     dataset.fixtures.set('edge.sku.discontinued', discontinued.id);
   }
 
-  return { overrides, meridianOrderIndex: meridianOrder.index, fixtureIndexes };
+  return { overrides, meridianOrderIndex: meridianOrder?.index ?? -1, fixtureIndexes };
 }
 
 /** Curated purchase orders (section 82 items 7, 18–20 and the MX-240 replenishment). */
@@ -518,10 +522,9 @@ export function tuneMeridianReceivables(
   const finance = tenant.personaUserIds.get('priya-shah') as string;
   const random = context.random('curated/receivables');
   let counter = 0;
-  const maxPaymentSequence = Math.max(
-    0,
-    ...[...dataset.payments.values()].map((payment) => Number(payment.paymentNumber.slice(4)) || 0),
-  );
+  let maxPaymentSequence = 0;
+  for (const payment of dataset.payments.values())
+    maxPaymentSequence = Math.max(maxPaymentSequence, Number(payment.paymentNumber.slice(4)) || 0);
   for (const invoice of open) {
     if (outstanding <= MERIDIAN.grossReceivablesTargetMinor) break;
     if (invoice.invoiceNumber === MERIDIAN.invoiceNumber) continue;

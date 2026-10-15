@@ -1,9 +1,10 @@
-import { compareDates, diffDays, type Customer } from '../../domain';
+import { addDays, compareDates, diffDays, isBusinessDay, type Customer } from '../../domain';
 import type { CatalogSeedResult } from './catalog';
 import type { SeedContext } from './context';
 import type { CustomerSeedResult } from './customers';
 import {
   buildOrderGraph,
+  buildPipelineQuote,
   plainNumber,
   summarizeOrder,
   yearlyNumber,
@@ -202,6 +203,7 @@ export function seedSales(
   }
 
   assignOperationalNumbers(environment, firstOperationalIndex, materializedIndexes);
+  seedPipelineQuotes(context, environment, skeletons.length);
   let historySummaries: OrderSummary[] | undefined;
   return {
     environment,
@@ -214,6 +216,36 @@ export function seedSales(
     materializedIndexes,
     firstOperationalIndex,
   };
+}
+
+/**
+ * The quotes that did not become orders, from the operational window on
+ * (section 75.3's 52,000 quotes are 48,000 converted ones and 4,000 more).
+ * Each business day draws from its own namespace, so no other record's
+ * sequence moves.
+ */
+function seedPipelineQuotes(context: SeedContext, env: OrderEnvironment, firstIndex: number): void {
+  const { dataset, scale, operationalStart, today } = context;
+  const perBusinessDay = (scale.quotesPerYear / 365) * (7 / 5) * (4_000 / 52_000);
+  const customers = [...dataset.customers.values()].filter(
+    (customer) => customer.status === 'active' && env.customers.contactsByCustomer.has(customer.id),
+  );
+  if (customers.length === 0) return;
+  let index = firstIndex;
+  for (let date = operationalStart; compareDates(date, today) <= 0; date = addDays(date, 1)) {
+    if (!isBusinessDay(date)) continue;
+    const random = context.random(`quote-pipeline/${date}`);
+    const count = Math.max(
+      0,
+      Math.round(perBusinessDay + random.normal(0, Math.sqrt(Math.max(perBusinessDay, 1)))),
+    );
+    for (let position = 0; position < count; position += 1) {
+      const { quote, lines } = buildPipelineQuote(env, index, date, random.pick(customers), random);
+      index += 1;
+      dataset.quotes.set(quote.id, quote);
+      for (const line of lines) dataset.quoteLines.set(line.id, line);
+    }
+  }
 }
 
 /**

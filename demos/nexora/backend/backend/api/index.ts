@@ -12,6 +12,10 @@ import * as finance from './resources/finance';
 import * as support from './resources/support';
 import * as platform from './resources/platform';
 import * as analytics from './resources/analytics';
+import type { ReportQuery } from './resources/reports';
+
+/** The reports load when first read: a client that never opens one never downloads them. */
+const reports = () => import('./resources/reports');
 import { createCommands, type Commands } from './commands';
 import { applyScenario, SCENARIOS, scenarioScale, type ScenarioId } from './scenarios';
 
@@ -184,6 +188,8 @@ function buildSurface(
       },
       metrics: () =>
         request('GET /support/metrics', 'analytics', () => support.supportMetrics(runtime)),
+      agents: () =>
+        request('GET /support/agents', 'read', () => support.listSupportAgents(runtime)),
       macros: () =>
         request('GET /support/macros', 'read', () => [
           ...runtime.store.dataset.supportMacros.values(),
@@ -205,6 +211,8 @@ function buildSurface(
         request('GET /workflows/:id/runs', 'read', () =>
           platform.listWorkflowRuns(runtime, id, query),
         ),
+      catalog: () =>
+        request('GET /workflows/catalog', 'read', () => platform.workflowCatalog(runtime)),
       create: commands.workflows.create,
       update: commands.workflows.update,
       activate: commands.workflows.activate,
@@ -248,6 +256,31 @@ function buildSurface(
       dashboard: () =>
         request('GET /analytics/dashboard', 'analytics', () =>
           analytics.executiveDashboard(runtime),
+        ),
+      // Section 16's report types: a period, its comparison and the segments each accepts.
+      executive: (query: ReportQuery = {}) =>
+        request('GET /analytics/executive', 'analytics', async () =>
+          (await reports()).executiveReport(runtime, models, query),
+        ),
+      sales: (query: ReportQuery = {}) =>
+        request('GET /analytics/sales', 'analytics', async () =>
+          (await reports()).salesReport(runtime, models, query),
+        ),
+      inventory: (query: ReportQuery = {}) =>
+        request('GET /analytics/inventory', 'analytics', async () =>
+          (await reports()).inventoryReport(runtime, models, query),
+        ),
+      procurement: (query: ReportQuery = {}) =>
+        request('GET /analytics/procurement', 'analytics', async () =>
+          (await reports()).procurementReport(runtime, query),
+        ),
+      finance: (query: ReportQuery = {}) =>
+        request('GET /analytics/finance', 'analytics', async () =>
+          (await reports()).financeReport(runtime, query),
+        ),
+      support: (query: ReportQuery = {}) =>
+        request('GET /analytics/support', 'analytics', async () =>
+          (await reports()).supportReport(runtime, query),
         ),
     },
     demo: {
@@ -353,7 +386,10 @@ export class NexoraApi {
     this.runtime = new ApiRuntime(store, this.options);
     const models = new sales.SalesReadModels(this.runtime);
     this.commands = createCommands(this.runtime, models);
-    if (scenario !== 'healthy') applyScenario(this.runtime, scenario);
+    const events = scenario !== 'healthy' ? applyScenario(this.runtime, scenario) : [];
+    if (scenario !== 'healthy') store.metadata.scenarioAppliedOn = store.today;
+    // Section 69.5: scheduled workflows are evaluated on initialization.
+    this.commands.onInitialized(events);
     Object.assign(this, buildSurface(this, this.runtime, models, this.commands));
   }
 
@@ -403,6 +439,7 @@ export * from './resources/finance';
 export * from './resources/support';
 export * from './resources/platform';
 export * from './resources/analytics';
+export type * from './resources/reports';
 export type { InventoryPosition } from './projections';
 export type { Commands } from './commands';
 export type { CreateCustomerInput, UpdateCustomerInput } from './commands/crm';

@@ -11,6 +11,7 @@ import {
   UNIT_LABEL,
 } from '../../core/catalog/catalog.model';
 import type { WarehouseListItem } from '../../core/inventory/inventory.model';
+import { doorOnlyField } from '../../core/backend/door';
 
 type QuantityField =
   | 'onHand'
@@ -203,6 +204,13 @@ export function stockFilterFields(
       operators: ['contains', 'equals'],
       section: 'Catalogue',
     },
+    {
+      key: 'lastShippedOn',
+      label: 'Last shipped',
+      kind: 'date',
+      operators: ['after', 'before', 'between', 'empty'],
+      section: 'Stock',
+    },
     ...(can('cost.view')
       ? [
           {
@@ -216,6 +224,12 @@ export function stockFilterFields(
       : []),
   ];
 }
+
+/** What a report's door may name that the bar has no list of: offered while the door names it. */
+export const STOCK_DOOR_FIELDS: readonly FilterBarField[] = [
+  doorOnlyField('warehouseId', 'Warehouse') as FilterBarField,
+  doorOnlyField('categoryId', 'Category in') as FilterBarField,
+];
 
 /** The exceptions the overview's figures open the list on, as the bar's own pills. */
 export type StockException = 'below_safety' | 'below_reorder' | 'nothing_available' | 'backordered';

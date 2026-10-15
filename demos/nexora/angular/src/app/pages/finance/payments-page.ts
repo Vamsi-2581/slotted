@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SlBadge } from '@slotted/angular/badge';
 import { SlButtonLink } from '@slotted/angular/button';
@@ -29,6 +29,7 @@ import { SlToolbar, SlToolbarItem, SlToolbarOverflow } from '@slotted/angular/to
 import { emptyQuery, withPageIndex, withPageSize, type GridQuery } from '@slotted/core/grid';
 
 import { formatMoney } from '../../core/catalog/catalog.model';
+import { doorFilter, fieldsWithDoor, type Door } from '../../core/backend/door';
 import { LIST_PAGE_SIZE, LIST_PAGE_SIZES } from '../../core/backend/list-query';
 import {
   FINANCE_HOLDERS,
@@ -43,7 +44,7 @@ import { phoneSignal } from '../../core/layout/phone';
 import { SessionStore } from '../../core/session/session.store';
 import { listView } from '../list-view/list-view';
 import { ListViewTools } from '../list-view/list-view-tools';
-import { paymentColumns, paymentDoorFilter, paymentFilterFields } from './finance-columns';
+import { FINANCE_DOOR_FIELDS, paymentColumns, paymentDoorFilter, paymentFilterFields } from './finance-columns';
 
 /**
  * Payments received (§66.7). A payment is posted, allocated to invoices of its
@@ -148,7 +149,7 @@ import { paymentColumns, paymentDoorFilter, paymentFilterFields } from './financ
             slFilterBar
             aria-label="Payment filters"
             shortcut="/"
-            [fields]="fields"
+            [fields]="fields()"
             [value]="store.filter()"
             (valueChangeRequest)="store.setFilter($event.value)"
             [query]="store.search()"
@@ -269,7 +270,9 @@ export class PaymentsPage {
   readonly newRoute = NEW_PAYMENT_ROUTE;
   readonly pageSizes = LIST_PAGE_SIZES;
   readonly phone = phoneSignal();
-  readonly fields = paymentFilterFields();
+  /** A report's door, whose ids the bar shows by the words the door carries. */
+  private readonly door = signal<Door | null>(null);
+  readonly fields = computed(() => fieldsWithDoor(paymentFilterFields(), FINANCE_DOOR_FIELDS, this.door()));
   readonly columns = paymentColumns();
 
   private readonly today = computed(() => this.session.session()?.demo.today ?? '');
@@ -309,7 +312,11 @@ export class PaymentsPage {
     let first = true;
     // The overview's cash figure opens the list on what it counted, as the bar's pills (OV-01).
     const subscription = this.route$.queryParamMap.subscribe((params) => {
-      const filter = paymentDoorFilter(params, this.today());
+      const own = paymentDoorFilter(params, this.today());
+      // A report's door names its condition and its period field by field (OV-01).
+      const door = own === null ? doorFilter(params, [...paymentFilterFields(), ...FINANCE_DOOR_FIELDS]) : null;
+      this.door.set(door);
+      const filter = own ?? door?.filter ?? null;
       if (filter !== null) {
         const query: GridQuery = {
           ...emptyQuery({ index: 0, size: this.store.page().size }),

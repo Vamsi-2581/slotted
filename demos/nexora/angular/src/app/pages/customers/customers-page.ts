@@ -229,7 +229,7 @@ import { HoldDialog } from './hold-dialog';
               </a>
             </ng-template>
             <ng-template slDataGridCell="status" let-row="row">
-              <span slBadge variant="soft" [tone]="statusTone(row)">{{ statusLabel(row) }}</span>
+              <span slBadge variant="soft" size="sm" [tone]="statusTone(row)">{{ statusLabel(row) }}</span>
             </ng-template>
             <ng-template slDataGridCell="health" let-row="row">
               <span slStatusIndicator size="sm" [status]="healthStatus(row)">

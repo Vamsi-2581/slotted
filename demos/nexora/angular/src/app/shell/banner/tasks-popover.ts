@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { SlList } from '@slotted/angular/list';
 import {
@@ -20,13 +21,16 @@ import {
 import { SlSkeleton, SlSkeletonRegion } from '@slotted/angular/skeleton';
 import { SlTopNavigationAction, SlTopNavigationCount } from '@slotted/angular/top-navigation';
 
+import { entityRoute } from '../../core/activity/entity-route';
 import { TasksStore } from '../../core/activity/tasks.store';
 import { ClockService } from '../../core/session/clock.service';
+import type { TaskListItem } from '@slotted/demo-nexora-backend';
 
 @Component({
   selector: 'app-tasks-popover',
   imports: [
     NgIcon,
+    RouterLink,
     SlList,
     SlListItem,
     SlListItemBody,
@@ -89,18 +93,23 @@ import { ClockService } from '../../core/session/clock.service';
             } @else {
               <ul slList [attr.aria-busy]="store.loading() ? 'true' : null">
                 @for (t of store.items().slice(0, 6); track t.id) {
-                  <li slListItem size="sm" [tone]="t.overdue ? 'danger' : undefined">
-                    <div slListItemContent>
-                      <div slListItemBody>
-                        <span slListItemLabel>{{ t.title }}</span>
-                        <span slListItemDescription>
-                          @if (t.dueDate) {
-                            {{ t.overdue ? 'Overdue' : 'Due' }} {{ clock.formatDate(t.dueDate) }} ·
-                          }
-                          {{ t.priority }} priority
-                        </span>
+                  <li slListItem size="sm" [tone]="t.overdue ? 'danger' : undefined" [attr.data-task]="t.id">
+                    <!-- A task about a record opens it: the work is done there (§70.4). -->
+                    @if (routeOf(t); as route) {
+                      <a slListItemContent [routerLink]="route">
+                        <div slListItemBody>
+                          <span slListItemLabel>{{ t.title }}</span>
+                          <span slListItemDescription>{{ describe(t) }}</span>
+                        </div>
+                      </a>
+                    } @else {
+                      <div slListItemContent>
+                        <div slListItemBody>
+                          <span slListItemLabel>{{ t.title }}</span>
+                          <span slListItemDescription>{{ describe(t) }}</span>
+                        </div>
                       </div>
-                    </div>
+                    }
                   </li>
                 }
               </ul>
@@ -116,6 +125,17 @@ export class TasksPopover {
   readonly placeholders = [1, 2, 3];
   readonly store = inject(TasksStore);
   readonly clock = inject(ClockService);
+
+  routeOf(task: TaskListItem): string | null {
+    return entityRoute(task.relatedEntityType, task.relatedEntityId);
+  }
+
+  /** When it is due, how pressing, and who set it when it was not a person. */
+  describe(task: TaskListItem): string {
+    const due = task.dueDate ? `${task.overdue ? 'Overdue' : 'Due'} ${this.clock.formatDate(task.dueDate)} · ` : '';
+    const from = task.createdBy === 'usr_system_automation' ? ' · from a workflow' : '';
+    return `${due}${task.priority} priority${from}`;
+  }
 
   opened(open: boolean): void {
     if (open) void this.store.refresh();

@@ -294,7 +294,7 @@ import { SKU_HIDDEN_BY_DEFAULT, skuColumns, skuFilterFields } from './sku-column
               </a>
             </ng-template>
             <ng-template slDataGridCell="status" let-row="row">
-              <span slBadge variant="soft" [tone]="statusTone(row)">{{ statusLabel(row) }}</span>
+              <span slBadge variant="soft" size="sm" [tone]="statusTone(row)">{{ statusLabel(row) }}</span>
             </ng-template>
             <ng-template slDataGridCell="available" let-row="row">
               <span class="cell-quantity" [class.short]="short(row)" [title]="availableTitle(row)">

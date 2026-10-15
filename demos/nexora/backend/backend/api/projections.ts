@@ -1,6 +1,7 @@
 import {
   addDays,
   allocationStatusOf,
+  businessDateOf,
   compareDates,
   diffDays,
   fulfillmentStatusOf,
@@ -24,6 +25,7 @@ import {
   type Money,
   type SalesOrder,
   type Sku,
+  type StockMovement,
   type SupplierPerformance,
 } from '../domain';
 import type { Indexes } from './indexes';
@@ -61,6 +63,7 @@ export class Projections {
       >
     | undefined;
   private supplierCache = new Map<string, SupplierPerformance>();
+  private lastShipmentCache: Map<string, string> | undefined;
 
   constructor(
     private readonly store: Store,
@@ -71,6 +74,7 @@ export class Projections {
         case 'reservations':
         case 'stockMovements': {
           const record = entity as { skuId?: string; warehouseId?: string } | undefined;
+          if (collection === 'stockMovements') this.noteShipment(entity as StockMovement, kind);
           if (record?.skuId && record.warehouseId)
             this.refreshInventoryKey(`${record.skuId}:${record.warehouseId}`);
           else this.inventoryCache = undefined;
@@ -124,6 +128,49 @@ export class Projections {
       )
         this.supplierCache.clear();
     });
+  }
+
+  /** A shipment written keeps the last-shipment date current; anything else read again from nothing. */
+  private noteShipment(
+    movement: StockMovement | undefined,
+    kind: 'put' | 'delete' | 'invalidate',
+  ): void {
+    if (!this.lastShipmentCache) return;
+    if (kind !== 'put' || !movement) {
+      this.lastShipmentCache = undefined;
+      return;
+    }
+    if (movement.type !== 'shipment') return;
+    const key = `${movement.skuId}:${movement.warehouseId}`;
+    const date = businessDateOf(movement.occurredAt);
+    const known = this.lastShipmentCache.get(key);
+    if (known === undefined || compareDates(date, known) > 0) this.lastShipmentCache.set(key, date);
+  }
+
+  /**
+   * The business date of the last shipment out of a position, among the movements Nexora keeps
+   * (section 75.4): absent when nothing shipped from it since the operational window opened.
+   */
+  lastShipmentOn(skuId: string, warehouseId: string): string | undefined {
+    if (!this.lastShipmentCache) {
+      const cache = new Map<string, string>();
+      // The business day of an instant depends on its hour alone: one conversion per hour, not per movement.
+      const byHour = new Map<string, string>();
+      for (const movement of this.store.dataset.stockMovements.values()) {
+        if (movement.type !== 'shipment') continue;
+        const key = `${movement.skuId}:${movement.warehouseId}`;
+        const hour = movement.occurredAt.slice(0, 13);
+        let date = byHour.get(hour);
+        if (date === undefined) {
+          date = businessDateOf(`${hour}:00:00Z`);
+          byHour.set(hour, date);
+        }
+        const known = cache.get(key);
+        if (known === undefined || compareDates(date, known) > 0) cache.set(key, date);
+      }
+      this.lastShipmentCache = cache;
+    }
+    return this.lastShipmentCache.get(`${skuId}:${warehouseId}`);
   }
 
   /** Recomputes one sku:warehouse position from indexes (incremental cache maintenance). */
@@ -465,14 +512,18 @@ export class Projections {
   }
 
   /** Re-evaluates overdue state for every open invoice (demo clock changes). */
-  refreshCollectionStates(): void {
+  /** Re-derives each open invoice's collection state; answers the invoices that became overdue. */
+  refreshCollectionStates(): Invoice[] {
+    const becameOverdue: Invoice[] = [];
     for (const invoice of this.store.dataset.invoices.values()) {
       if (invoice.lifecycle !== 'open' || invoice.collectionState === 'disputed') continue;
       const overdue =
         invoice.outstanding.minor > 0 && compareDates(this.store.today, invoice.dueDate) > 0;
+      if (overdue && invoice.collectionState !== 'overdue') becameOverdue.push(invoice);
       invoice.collectionState = overdue ? 'overdue' : 'current';
     }
     this.summaryCache.clear();
+    return becameOverdue;
   }
 
   // ---------------------------------------------------------------------------
@@ -689,14 +740,22 @@ export class Projections {
         defective += damaged + rejected;
         if (accepted >= ordered * 0.95) {
           completed += 1;
-          let firstReceipt: string | undefined;
-          for (const receiptLine of this.indexes.receiptLinesByPoLine.get(line.id)) {
-            const receipt = this.store.dataset.goodsReceipts.get(receiptLine.goodsReceiptId);
-            if (receipt && (!firstReceipt || receipt.receivedAt < firstReceipt))
-              firstReceipt = receipt.receivedAt;
-          }
-          if (firstReceipt) {
-            const receivedDate = firstReceipt.slice(0, 10);
+          // Section 72.10: the line is on time when the receipt that satisfies it arrives by its
+          // expected date — the receipt whose accepted quantity reaches the line, not the first.
+          const receipts = this.indexes.receiptLinesByPoLine
+            .get(line.id)
+            .map((receiptLine) => ({
+              accepted: quantityToMilli(receiptLine.acceptedQuantity),
+              at: this.store.dataset.goodsReceipts.get(receiptLine.goodsReceiptId)?.receivedAt,
+            }))
+            .filter((entry): entry is { accepted: number; at: string } => entry.at !== undefined)
+            .sort((a, b) => a.at.localeCompare(b.at));
+          let cumulative = 0;
+          const completing = receipts.find(
+            (entry) => (cumulative += entry.accepted) >= ordered * 0.95,
+          );
+          if (completing) {
+            const receivedDate = businessDateOf(completing.at);
             if (compareDates(receivedDate, line.expectedDate) <= 0) onTime += 1;
             leadSum += diffDays(receivedDate, po.createdBusinessDate);
             leadCount += 1;
@@ -708,6 +767,8 @@ export class Projections {
     const performance: SupplierPerformance = {
       supplierId,
       onTimeDeliveryBps: completed === 0 ? 0 : ratioBps(onTime, completed),
+      completedLines: completed,
+      onTimeLines: onTime,
       qualityScore: Math.max(0, 100 - defectRateBps / 100),
       defectRateBps,
       averageLeadTimeDays: leadCount === 0 ? 0 : Math.round(leadSum / leadCount),
@@ -828,6 +889,9 @@ export class Projections {
         week.count += 1;
       }
     }
+    // Section 75.4: invoices and payments are kept from the operational window on.
+    const keptFrom = this.store.seed.context.operationalStart;
+    const dsoKept = compareDates(keptFrom, cutoff90) <= 0;
     let unmatched = 0;
     for (const transaction of dataset.bankTransactions.values())
       if (
@@ -854,7 +918,13 @@ export class Projections {
       unappliedCredit: usd(unapplied),
       invoicedRevenueTrailing30Days: usd(revenue30),
       invoicedRevenueTrailing90Days: usd(revenue90),
-      dsoDays: revenue90 <= 0 ? null : Math.round((receivables / revenue90) * 90),
+      dsoDays: !dsoKept || revenue90 <= 0 ? null : Math.round((receivables / revenue90) * 90),
+      ...(!dsoKept
+        ? { dsoUndefined: 'not-kept' as const }
+        : revenue90 <= 0
+          ? { dsoUndefined: 'no-revenue' as const }
+          : {}),
+      keptFrom,
       openInvoiceCount: openCount,
       overdueInvoiceCount: overdueCount,
       disputedInvoiceCount: disputedCount,
@@ -865,6 +935,7 @@ export class Projections {
         weekStart: week.weekStart,
         amount: usd(week.amount),
         count: week.count,
+        kept: compareDates(week.weekStart, keptFrom) >= 0,
       })),
       invoicesDueWithin5Days: dueSoon,
       unmatchedBankTransactions: unmatched,

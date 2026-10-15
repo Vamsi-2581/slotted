@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, type OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { SlBadge } from '@slotted/angular/badge';
 import { SlButtonLink } from '@slotted/angular/button';
@@ -28,7 +28,7 @@ import { SlToolbar, SlToolbarItem, SlToolbarOverflow } from '@slotted/angular/to
 import { SlText } from '@slotted/angular/typography';
 import type { FilterBarField } from '@slotted/angular/filter-bar';
 import type { FilterGroup } from '@slotted/core/filter';
-import { withPageIndex, withPageSize, type GridColumn } from '@slotted/core/grid';
+import { emptyQuery, withPageIndex, withPageSize, type GridColumn } from '@slotted/core/grid';
 import type { QuoteListItem } from '@slotted/demo-nexora-backend';
 
 import { LIST_PAGE_SIZES } from '../../core/backend/list-query';
@@ -38,6 +38,8 @@ import { OPEN_QUOTES_QUERY, QuotesStore } from '../../core/sales/quotes.store';
 import { listView } from '../list-view/list-view';
 import { ListViewTools } from '../list-view/list-view-tools';
 import { formatMoney, QUOTE_STATUS_LABEL, QUOTE_STATUS_TONE } from '../orders/order-labels';
+import { doorOnlyField, regionField, segmentField } from '../../core/backend/door';
+import { listDoor } from '../list-view/list-door';
 
 const options = (labels: Record<string, string>) =>
   Object.entries(labels).map(([value, label]) => ({ value, label }));
@@ -90,7 +92,7 @@ const COLUMNS: readonly GridColumn<QuoteListItem>[] = [
 
 const HIDDEN_COLUMN_IDS = ['lineCount', 'ownerName', 'createdBusinessDate'];
 
-const FIELDS: readonly FilterBarField[] = [
+export const QUOTE_FILTER_FIELDS: readonly FilterBarField[] = [
   {
     key: 'status',
     label: 'Status',
@@ -105,7 +107,13 @@ const FIELDS: readonly FilterBarField[] = [
   { key: 'expirationDate', label: 'Expires', kind: 'date' },
   { key: 'total', label: 'Total', kind: 'number' },
   { key: 'grossMarginBps', label: 'Margin %', kind: 'number' },
+  { key: 'createdBusinessDate', label: 'Written', kind: 'date' },
+  regionField('Customer') as FilterBarField,
+  segmentField('Customer') as FilterBarField,
 ];
+
+/** What a report's door may name that the bar has no list of: offered while the door names it. */
+export const QUOTE_DOOR_FIELDS: readonly FilterBarField[] = [doorOnlyField('ownerId', 'Owned by') as FilterBarField];
 
 /**
  * The quotes of the tenant. What a sales operator reads here is which ones
@@ -193,7 +201,7 @@ const FIELDS: readonly FilterBarField[] = [
             slFilterBar
             aria-label="Quote filters"
             shortcut="/"
-            [fields]="fields"
+            [fields]="door.fields()"
             [value]="store.filter()"
             (valueChangeRequest)="filterRequest($event)"
             [query]="store.search()"
@@ -309,13 +317,12 @@ const FIELDS: readonly FilterBarField[] = [
     </div>
   `,
 })
-export class QuotesPage implements OnInit {
+export class QuotesPage {
   readonly store = inject(QuotesStore);
   readonly session = inject(SessionStore);
   private readonly router = inject(Router);
 
   readonly columns = COLUMNS;
-  readonly fields = FIELDS;
   readonly pageSizes = LIST_PAGE_SIZES;
   /** The compact size class: the pager leaves its page size at the default. */
   readonly phone = phoneSignal();
@@ -337,9 +344,17 @@ export class QuotesPage implements OnInit {
     applyQuery: (query) => void this.store.load(query),
   });
 
-  ngOnInit(): void {
-    void this.store.open(this.view.openingQuery);
-  }
+  /** A report's door opens the list on its condition and period, as the bar's pills (OV-01). */
+  readonly door = listDoor({
+    fields: () => QUOTE_FILTER_FIELDS,
+    doorOnly: QUOTE_DOOR_FIELDS,
+    open: (filter, first) => {
+      if (filter !== null) {
+        void this.store.load({ ...emptyQuery({ index: 0, size: this.store.page().size }), filter });
+        void this.store.loadGrandTotal();
+      } else if (first) void this.store.open(this.view.openingQuery);
+    },
+  });
 
   status(row: QuoteListItem): string {
     return QUOTE_STATUS_LABEL[row.status] ?? row.status;

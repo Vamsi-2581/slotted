@@ -548,6 +548,145 @@ function paymentMethod(random: Random, customer: Customer): PaymentMethod {
  * and independent of other orders, which is what lets the historical tier be
  * expanded on demand.
  */
+/**
+ * A quote that did not become an order (section 75.3: 52,000 quotes against
+ * 48,000 converted ones, the 30% of orders a quote precedes). Its state
+ * follows its age: a recent quote is a draft or sent, one inside its 30 days
+ * may have been viewed, accepted or rejected, and an older one expired or was
+ * rejected. `index` is past the last order's, so the quote's id, lines and
+ * number follow the ones orders hold.
+ */
+export function buildPipelineQuote(
+  env: OrderEnvironment,
+  index: number,
+  quoteDate: string,
+  customer: Customer,
+  random: Random,
+): { quote: Quote; lines: QuoteLine[] } {
+  const { context } = env;
+  const addresses = env.customers.addressesByCustomer.get(customer.id) ?? [];
+  const shipping =
+    addresses.find((address) => address.id === customer.defaultShippingAddressId) ?? addresses[0];
+  const contacts = env.customers.contactsByCustomer.get(customer.id) ?? [];
+  const contact = contacts.find((entry) => entry.isPrimary) ?? contacts[0];
+  const built = buildLines(env, random, customer, quoteDate, shipping?.region ?? 'IL', undefined);
+  const currency = customer.preferredCurrency;
+  const fxRateToUsd = FX_RATES_TO_USD[currency];
+  const freight = money(freightFor(random, built, currency), currency);
+  const totals = documentTotals(
+    built.map((line) => line.priced),
+    freight,
+    currency,
+  );
+  const maxDiscount = built.reduce((max, line) => Math.max(max, line.priced.discountBps), 0);
+  const approval = evaluateQuoteApproval({
+    approvalValueUsdMinor: roundHalfUp(
+      (totals.subtotal.minor + freight.minor) * Number(fxRateToUsd),
+    ),
+    grossMarginBps: totals.grossMarginBps,
+    maxLineDiscountBps: maxDiscount,
+  });
+  const age = diffDays(context.today, quoteDate);
+  const status: Quote['status'] =
+    age <= 3
+      ? random.weighted<Quote['status']>([
+          { value: 'draft', weight: 30 },
+          { value: approval.required ? 'pending_approval' : 'sent', weight: 70 },
+        ])
+      : age <= 30
+        ? random.weighted<Quote['status']>([
+            { value: 'sent', weight: 35 },
+            { value: 'viewed', weight: 30 },
+            { value: 'accepted', weight: 10 },
+            { value: 'rejected', weight: 25 },
+          ])
+        : random.weighted<Quote['status']>([
+            { value: 'expired', weight: 70 },
+            { value: 'rejected', weight: 30 },
+          ]);
+  const createdAt = instantOn(quoteDate, random);
+  const year = Number(quoteDate.slice(0, 4));
+  const id = formatId('quote', index + 1);
+  const sentAt =
+    status === 'draft' || status === 'pending_approval'
+      ? undefined
+      : addMs(createdAt, random.int(1, 6) * 3_600_000);
+  const viewedAt =
+    sentAt && status !== 'sent' && status !== 'expired'
+      ? addMs(sentAt, random.int(1, 72) * 3_600_000)
+      : undefined;
+  const decidedAt = viewedAt ?? sentAt;
+  const quote: Quote = {
+    id,
+    organizationId: ORGANIZATION_ID,
+    quoteNumber: yearlyNumber(
+      env,
+      'quote',
+      year,
+      index - (env.firstIndexOfYear.get(year) ?? 0) + 1,
+    ),
+    customerId: customer.id,
+    contactId: contact?.id ?? '',
+    ownerId: customer.accountOwnerId,
+    createdBusinessDate: quoteDate,
+    expirationDate: addDays(quoteDate, 30),
+    currency,
+    fxRateToUsd,
+    priceListId: customer.priceListId,
+    status,
+    subtotal: totals.subtotal,
+    discountTotal: totals.discountTotal,
+    taxTotal: totals.taxTotal,
+    freight,
+    total: totals.total,
+    costTotal: totals.costTotal,
+    grossMargin: totals.grossMargin,
+    grossMarginBps: totals.grossMarginBps,
+    metadata: metadataAt(
+      createdAt,
+      customer.accountOwnerId,
+      decidedAt ?? createdAt,
+      customer.accountOwnerId,
+      sentAt ? 3 : 1,
+    ),
+    ...(sentAt ? { sentAt } : {}),
+    ...(viewedAt ? { viewedAt } : {}),
+    ...(status === 'accepted' && decidedAt
+      ? { acceptedAt: addMs(decidedAt, random.int(1, 48) * 3_600_000) }
+      : {}),
+    ...(status === 'rejected'
+      ? {
+          rejectionReason: random.pick([
+            'Price above the competing bid',
+            'Project postponed by the customer',
+            'Lead time too long for the site schedule',
+            'Customer sourced from an existing supplier',
+          ]),
+        }
+      : {}),
+  };
+  const lines: QuoteLine[] = built.map((line, position) => ({
+    id: formatId('quoteLine', index * LINE_BLOCK + position + 1),
+    organizationId: ORGANIZATION_ID,
+    quoteId: id,
+    lineNumber: position + 1,
+    skuId: line.sku.id,
+    skuCode: line.sku.sku,
+    description: line.sku.name,
+    unitOfMeasure: line.sku.unitOfMeasure,
+    quantity: line.priced.quantity,
+    listUnitPrice: line.priced.listUnitPrice,
+    unitPrice: line.priced.unitPrice,
+    discountBps: line.priced.discountBps,
+    taxRateBps: line.priced.taxRateBps,
+    unitCost: line.priced.unitCost,
+    netAmount: line.priced.netAmount,
+    taxAmount: line.priced.taxAmount,
+    totalAmount: line.priced.totalAmount,
+  }));
+  return { quote, lines };
+}
+
 export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton): OrderGraph {
   const { context } = env;
   const { dataset, today } = context;

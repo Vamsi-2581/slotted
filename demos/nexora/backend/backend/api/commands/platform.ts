@@ -1,6 +1,6 @@
 import {
-  AUTOMATION_ACTOR_ID,
-  WORKFLOW_LIMITS,
+  validationFailed,
+  workflowIssues,
   type ConditionNode,
   type ImportJob,
   type Notification,
@@ -8,10 +8,16 @@ import {
   type Task,
   type Workflow,
   type WorkflowAction,
-  type WorkflowRun,
+  type WorkflowCheck,
+  type WorkflowIssue,
 } from '../../domain';
 import type { ApiRuntime, MutationOptions, Transaction } from '../runtime';
-import { getWorkflow, workflowListItem, type WorkflowListItem } from '../resources/platform';
+import {
+  buildWorkflowCatalog,
+  getWorkflow,
+  workflowListItem,
+  type WorkflowListItem,
+} from '../resources/platform';
 import {
   domainError,
   finalize,
@@ -29,112 +35,54 @@ export interface WorkflowInput {
   trigger: Workflow['trigger'];
   conditions: ConditionNode;
   actions: WorkflowAction[];
+  /** The person the workflow answers to; the author when absent. A holder of workflows.view. */
+  ownerId?: string;
 }
 
-/** Section 69.2 — condition tree limits. */
-export function validateConditions(
-  node: ConditionNode,
-  depth = 1,
-  counter = { count: 0 },
-): string[] {
-  const errors: string[] = [];
-  if (depth > WORKFLOW_LIMITS.maxConditionDepth)
-    errors.push(`condition nesting exceeds ${WORKFLOW_LIMITS.maxConditionDepth}`);
-  if (node.type === 'group') {
-    if (node.children.length === 0) errors.push('condition groups cannot be empty');
-    for (const child of node.children)
-      errors.push(...validateConditions(child, depth + 1, counter));
-  } else {
-    counter.count += 1;
-    if (!node.field) errors.push('condition field is required');
-  }
-  if (depth === 1 && counter.count > WORKFLOW_LIMITS.maxConditions)
-    errors.push(`workflows allow at most ${WORKFLOW_LIMITS.maxConditions} conditions`);
-  return errors;
-}
-
-/** Evaluates a condition tree against a flat record (dot paths supported). */
-export function evaluateConditions(node: ConditionNode, subject: Record<string, unknown>): boolean {
-  if (node.type === 'group') {
-    return node.operator === 'and'
-      ? node.children.every((child) => evaluateConditions(child, subject))
-      : node.children.some((child) => evaluateConditions(child, subject));
-  }
-  const value = node.field
-    .split('.')
-    .reduce<unknown>(
-      (current, key) =>
-        current && typeof current === 'object'
-          ? (current as Record<string, unknown>)[key]
-          : undefined,
-      subject,
-    );
-  const expected = node.value;
-  const asNumber = (input: unknown): number =>
-    typeof input === 'object' && input !== null && 'minor' in input
-      ? Number((input as { minor: number }).minor)
-      : Number(input);
-  switch (node.operator) {
-    case 'eq':
-      return value === expected || asNumber(value) === asNumber(expected);
-    case 'neq':
-      return !(value === expected || asNumber(value) === asNumber(expected));
-    case 'gt':
-      return asNumber(value) > asNumber(expected);
-    case 'gte':
-      return asNumber(value) >= asNumber(expected);
-    case 'lt':
-      return asNumber(value) < asNumber(expected);
-    case 'lte':
-      return asNumber(value) <= asNumber(expected);
-    case 'contains':
-      return Array.isArray(value)
-        ? value.includes(expected)
-        : String(value ?? '').includes(String(expected));
-    case 'not_contains':
-      return Array.isArray(value)
-        ? !value.includes(expected)
-        : !String(value ?? '').includes(String(expected));
-    case 'in':
-      return Array.isArray(expected) && expected.includes(value);
-    case 'not_in':
-      return Array.isArray(expected) && !expected.includes(value);
-    case 'is_empty':
-      return (
-        value === undefined ||
-        value === null ||
-        value === '' ||
-        (Array.isArray(value) && value.length === 0)
-      );
-    case 'is_not_empty':
-      return !(
-        value === undefined ||
-        value === null ||
-        value === '' ||
-        (Array.isArray(value) && value.length === 0)
-      );
-  }
+export interface TaskInput {
+  title: string;
+  description?: string;
+  assigneeId?: string;
+  dueDate?: string;
+  priority?: Task['priority'];
+  relatedEntityType?: string;
+  relatedEntityId?: string;
 }
 
 export function createPlatformCommands(runtime: ApiRuntime) {
+  /**
+   * Sections 69.2 and 69.3 — every issue of the definition, at the level the
+   * command needs (`workflowIssues`), and the owner's: a person who can read
+   * what they own. The conditions' issues travel under `conditions` with
+   * `INVALID_CONDITIONS`; the client marks their nodes before the request.
+   */
+  const refuseIssues = (
+    definition: Omit<WorkflowInput, 'ownerId'>,
+    ownerId: string,
+    check: WorkflowCheck,
+    message: string,
+  ): void => {
+    const catalog = buildWorkflowCatalog(runtime);
+    const issues: WorkflowIssue[] = workflowIssues(definition, catalog, check);
+    if (!catalog.owners.some((owner) => owner.id === ownerId))
+      issues.push({
+        field: 'ownerId',
+        code: 'INVALID_VALUE',
+        message: 'The owner must be an active person who holds workflows.view',
+      });
+    if (issues.length > 0)
+      throw validationFailed(
+        issues.map(({ field, code, message: text }) => ({ field, code, message: text })),
+        message,
+      );
+  };
+
   const workflows = {
     create: (input: WorkflowInput, options?: MutationOptions): Promise<WorkflowListItem> =>
       runtime.command('POST /workflows', options, input, (tx) => {
-        const actor = runtime.require('workflows.create');
-        const validator = new Validator().required('name', input.name);
-        for (const error of validateConditions(input.conditions))
-          validator.errors.push({
-            field: 'conditions',
-            code: 'INVALID_CONDITIONS',
-            message: error,
-          });
-        if (!input.actions || input.actions.length === 0)
-          validator.errors.push({
-            field: 'actions',
-            code: 'REQUIRED',
-            message: 'At least one action is required',
-          });
-        validator.throwIfAny();
+        const actor = tx.require('workflows.create');
+        const ownerId = input.ownerId ?? actor.id;
+        refuseIssues(input, ownerId, 'structure', 'The workflow cannot be saved as it stands');
         const id = runtime.store.nextId('workflow');
         const workflow: Workflow = {
           id,
@@ -144,7 +92,7 @@ export function createPlatformCommands(runtime: ApiRuntime) {
           trigger: input.trigger,
           conditions: input.conditions,
           actions: input.actions,
-          ownerId: actor.id,
+          ownerId,
           runCount: 0,
           metadata: metadata(tx, id),
           ...(trimmed(input.description)
@@ -156,52 +104,79 @@ export function createPlatformCommands(runtime: ApiRuntime) {
         return workflowListItem(runtime, workflow);
       }),
 
+    /**
+     * Section 69 — an edit is checked as a save, and as a run while the
+     * workflow is active: what it does next happens without anyone before it.
+     * A workflow in error is paused by the edit; it runs again once activated.
+     */
     update: (
       id: string,
       input: Partial<WorkflowInput>,
       options?: MutationOptions,
     ): Promise<WorkflowListItem> =>
       runtime.command('PATCH /workflows/:id', options, { id, input }, (tx) => {
-        runtime.require('workflows.edit');
+        tx.require('workflows.edit');
         const workflow = open(tx, 'workflows', id, 'Workflow', options);
         if (workflow.status === 'archived')
           throw transition('Workflow', workflow.status, 'be edited');
+        const next = {
+          name: input.name ?? workflow.name,
+          trigger: input.trigger ?? workflow.trigger,
+          conditions: input.conditions ?? workflow.conditions,
+          actions: input.actions ?? workflow.actions,
+        };
+        const ownerId = input.ownerId ?? workflow.ownerId;
+        refuseIssues(
+          next,
+          ownerId,
+          workflow.status === 'active' ? 'run' : 'structure',
+          workflow.status === 'active'
+            ? 'An active workflow keeps running: the edit must leave it able to run'
+            : 'The workflow cannot be saved as it stands',
+        );
         const changed: string[] = [];
-        if (input.conditions) {
-          const errors = validateConditions(input.conditions);
-          if (errors.length > 0) throw domainError('VALIDATION_FAILED', errors.join('; '));
-          workflow.conditions = input.conditions;
-          changed.push('conditions');
-        }
-        if (trimmed(input.name)) {
-          workflow.name = trimmed(input.name) as string;
+        if (input.name !== undefined && input.name.trim() !== workflow.name) {
+          workflow.name = input.name.trim();
           changed.push('name');
         }
         if (input.description !== undefined) {
-          workflow.description = trimmed(input.description) ?? '';
+          const description = trimmed(input.description);
+          if (description) workflow.description = description;
+          else delete workflow.description;
           changed.push('description');
         }
         if (input.trigger) {
           workflow.trigger = input.trigger;
           changed.push('trigger');
         }
+        if (input.conditions) {
+          workflow.conditions = input.conditions;
+          changed.push('conditions');
+        }
         if (input.actions) {
-          if (input.actions.length === 0)
-            throw domainError('VALIDATION_FAILED', 'At least one action is required');
           workflow.actions = input.actions;
           changed.push('actions');
         }
-        if (workflow.status === 'error') workflow.status = 'paused';
+        if (ownerId !== workflow.ownerId) {
+          workflow.ownerId = ownerId;
+          changed.push('ownerId');
+        }
+        if (workflow.status === 'error') {
+          workflow.status = 'paused';
+          changed.push('status');
+        }
         finalize(tx, 'workflows', workflow, 'workflow.updated', 'workflow', changed);
         return workflowListItem(runtime, workflow);
       }),
 
+    /** Activation runs the whole check: what would stop a run is refused now, not met at the first event. */
     activate: (id: string, options?: MutationOptions): Promise<WorkflowListItem> =>
       runtime.command('POST /workflows/:id/activate', options, { id }, (tx) => {
-        runtime.require('workflows.activate');
+        tx.require('workflows.activate');
         const workflow = open(tx, 'workflows', id, 'Workflow', options);
-        if (workflow.status === 'archived')
+        if (workflow.status === 'archived' || workflow.status === 'active')
           throw transition('Workflow', workflow.status, 'be activated');
+        refuseIssues(workflow, workflow.ownerId, 'run', 'The workflow cannot run as it stands');
         workflow.status = 'active';
         finalize(tx, 'workflows', workflow, 'workflow.activated', 'workflow', ['status']);
         return workflowListItem(runtime, workflow);
@@ -209,7 +184,7 @@ export function createPlatformCommands(runtime: ApiRuntime) {
 
     pause: (id: string, options?: MutationOptions): Promise<WorkflowListItem> =>
       runtime.command('POST /workflows/:id/pause', options, { id }, (tx) => {
-        runtime.require('workflows.activate');
+        tx.require('workflows.activate');
         const workflow = open(tx, 'workflows', id, 'Workflow', options);
         if (workflow.status !== 'active' && workflow.status !== 'error')
           throw transition('Workflow', workflow.status, 'be paused');
@@ -220,7 +195,7 @@ export function createPlatformCommands(runtime: ApiRuntime) {
 
     archive: (id: string, options?: MutationOptions): Promise<WorkflowListItem> =>
       runtime.command('POST /workflows/:id/archive', options, { id }, (tx) => {
-        runtime.require('workflows.archive');
+        tx.require('workflows.archive');
         const workflow = open(tx, 'workflows', id, 'Workflow', options);
         if (workflow.status === 'archived')
           throw transition('Workflow', workflow.status, 'be archived again');
@@ -229,166 +204,42 @@ export function createPlatformCommands(runtime: ApiRuntime) {
         finalize(tx, 'workflows', workflow, 'workflow.archived', 'workflow', ['status']);
         return workflowListItem(runtime, workflow);
       }),
-
-    /** Section 69.4 — runs a workflow against a subject once per event (idempotency key workflowId:eventId). */
-    execute: (
-      tx: Transaction,
-      workflow: Workflow,
-      eventId: string,
-      subject: Record<string, unknown>,
-      affected?: { type: string; id: string },
-    ): WorkflowRun | undefined => {
-      if (workflow.status !== 'active') return undefined;
-      const key = `${workflow.id}:${eventId}`;
-      if (
-        runtime.indexes.runsByWorkflow
-          .get(workflow.id)
-          .some((run) => run.triggerEventId === eventId)
-      )
-        return undefined;
-      void key;
-      const matched = evaluateConditions(workflow.conditions, subject);
-      const run: WorkflowRun = {
-        id: runtime.store.nextId('workflowRun'),
-        organizationId: workflow.organizationId,
-        workflowId: workflow.id,
-        triggerEventId: eventId,
-        status: matched ? 'running' : 'skipped',
-        startedAt: tx.occurredAt,
-        completedAt: tx.occurredAt,
-        actionResults: [],
-        ...(affected ? { affectedEntityType: affected.type, affectedEntityId: affected.id } : {}),
-      };
-      if (matched) {
-        let failed = 0;
-        for (const [index, action] of workflow.actions.entries()) {
-          try {
-            runAction(tx, action, subject, affected);
-            run.actionResults.push({ actionIndex: index, status: 'succeeded' });
-          } catch (error) {
-            failed += 1;
-            run.actionResults.push({
-              actionIndex: index,
-              status: 'failed',
-              errorCode: 'ACTION_FAILED',
-              message: error instanceof Error ? error.message : String(error),
-            });
-          }
-        }
-        run.status =
-          failed === 0
-            ? 'succeeded'
-            : failed === workflow.actions.length
-              ? 'failed'
-              : 'partially_failed';
-        if (run.status === 'failed') run.errorCode = 'ACTION_FAILED';
-      }
-      tx.create('workflowRuns', run);
-      tx.touch('workflows', workflow);
-      workflow.runCount += 1;
-      workflow.lastRunAt = tx.occurredAt;
-      if (run.status === 'failed') workflow.status = 'error';
-      tx.dirty('workflows', workflow);
-      return run;
-    },
   };
 
-  const runAction = (
-    tx: Transaction,
-    action: WorkflowAction,
-    subject: Record<string, unknown>,
-    affected?: { type: string; id: string },
-  ): void => {
-    const config = action.config;
-    const resolveUser = (value: unknown): string | undefined => {
-      if (typeof value !== 'string') return undefined;
-      if (value === 'account_owner' || value === 'quote_owner') {
-        const customer =
-          (subject['customer'] as { accountOwnerId?: string } | undefined) ?? undefined;
-        return (
-          (subject['order'] as { ownerId?: string } | undefined)?.ownerId ??
-          customer?.accountOwnerId
-        );
-      }
-      return runtime.store.dataset.users.has(value) ? value : undefined;
+  /**
+   * Section 70.4 — a task, written by a person or by a workflow's action. The
+   * assignee is told unless they wrote it; the notification opens the record
+   * the task is about, or the task when it is about none.
+   */
+  const createTask = (tx: Transaction, input: TaskInput): Task => {
+    new Validator().required('title', input.title).throwIfAny();
+    const task: Task = {
+      id: runtime.store.nextId('task'),
+      organizationId: runtime.store.dataset.organization.id,
+      title: input.title.trim(),
+      assigneeId: input.assigneeId ?? tx.actor.id,
+      createdBy: tx.actor.id,
+      priority: input.priority ?? 'normal',
+      status: 'open',
+      createdAt: tx.occurredAt,
+      ...(trimmed(input.description) ? { description: trimmed(input.description) as string } : {}),
+      ...(input.dueDate ? { dueDate: input.dueDate } : {}),
+      ...(input.relatedEntityType && input.relatedEntityId
+        ? { relatedEntityType: input.relatedEntityType, relatedEntityId: input.relatedEntityId }
+        : {}),
     };
-    switch (action.type) {
-      case 'send_notification': {
-        const userId = resolveUser(config['userId'] ?? config['target']);
-        if (!userId) throw new Error('Notification target unresolved');
-        tx.notify(
-          userId,
-          'info',
-          String(config['title'] ?? 'Workflow notification'),
-          String(config['body'] ?? ''),
-          affected,
-        );
-        return;
-      }
-      case 'create_task': {
-        const assigneeId = resolveUser(config['assignee']) ?? tx.actor.id;
-        const task: Task = {
-          id: runtime.store.nextId('task'),
-          organizationId: runtime.store.dataset.organization.id,
-          title: String(config['title'] ?? 'Workflow task'),
-          assigneeId,
-          createdBy: AUTOMATION_ACTOR_ID,
-          priority: (config['priority'] as Task['priority']) ?? 'normal',
-          status: 'open',
-          createdAt: tx.occurredAt,
-          ...(affected ? { relatedEntityType: affected.type, relatedEntityId: affected.id } : {}),
-        };
-        tx.create('tasks', task);
-        return;
-      }
-      case 'add_tag':
-      case 'remove_tag': {
-        if (!affected) return;
-        const collection =
-          affected.type === 'customer'
-            ? 'customers'
-            : affected.type === 'sales_order'
-              ? undefined
-              : affected.type === 'support_ticket'
-                ? 'tickets'
-                : undefined;
-        if (!collection) return;
-        const entity = runtime.store.get(collection, affected.id) as { tags: string[] } | undefined;
-        if (!entity) return;
-        const tag = String(config['tag'] ?? '');
-        entity.tags =
-          action.type === 'add_tag'
-            ? [...new Set([...entity.tags, tag])]
-            : entity.tags.filter((existing) => existing !== tag);
-        tx.dirty(collection);
-        return;
-      }
-      case 'place_customer_on_hold': {
-        const customerId = (subject['customer'] as { id?: string } | undefined)?.id;
-        const customer = customerId ? runtime.store.dataset.customers.get(customerId) : undefined;
-        if (!customer || customer.status === 'on_hold') return;
-        tx.touch('customers', customer);
-        customer.status = 'on_hold';
-        customer.holdReason = String(config['reason'] ?? 'Placed on hold by workflow');
-        finalize(tx, 'customers', customer, 'customer.hold_placed', 'customer', ['status']);
-        return;
-      }
-      case 'place_order_on_hold': {
-        const orderId = affected?.type === 'sales_order' ? affected.id : undefined;
-        const order = orderId ? runtime.store.dataset.salesOrders.get(orderId) : undefined;
-        if (!order || (order.status !== 'confirmed' && order.status !== 'pending_approval')) return;
-        tx.touch('salesOrders', order);
-        order.status = 'on_hold';
-        order.holdReason = String(config['reason'] ?? 'Placed on hold by workflow');
-        finalize(tx, 'salesOrders', order, 'order.held', 'sales_order', ['status']);
-        return;
-      }
-      case 'assign_user':
-      case 'request_approval':
-      case 'create_purchase_order_draft':
-        // Delegated to the interactive commands; recorded as succeeded for the simulation.
-        return;
-    }
+    tx.create('tasks', task);
+    if (task.assigneeId !== tx.actor.id)
+      tx.notify(
+        task.assigneeId,
+        'action_required',
+        `New task: ${task.title}`,
+        task.description ?? '',
+        task.relatedEntityType && task.relatedEntityId
+          ? { type: task.relatedEntityType, id: task.relatedEntityId }
+          : { type: 'task', id: task.id },
+      );
+    return task;
   };
 
   const notifications = {
@@ -435,45 +286,8 @@ export function createPlatformCommands(runtime: ApiRuntime) {
   };
 
   const tasks = {
-    create: (input: {
-      title: string;
-      description?: string;
-      assigneeId?: string;
-      dueDate?: string;
-      priority?: Task['priority'];
-      relatedEntityType?: string;
-      relatedEntityId?: string;
-    }): Promise<Task> =>
-      runtime.command('POST /tasks', undefined, input, (tx) => {
-        new Validator().required('title', input.title).throwIfAny();
-        const task: Task = {
-          id: runtime.store.nextId('task'),
-          organizationId: runtime.store.dataset.organization.id,
-          title: input.title.trim(),
-          assigneeId: input.assigneeId ?? tx.actor.id,
-          createdBy: tx.actor.id,
-          priority: input.priority ?? 'normal',
-          status: 'open',
-          createdAt: tx.occurredAt,
-          ...(trimmed(input.description)
-            ? { description: trimmed(input.description) as string }
-            : {}),
-          ...(input.dueDate ? { dueDate: input.dueDate } : {}),
-          ...(input.relatedEntityType && input.relatedEntityId
-            ? { relatedEntityType: input.relatedEntityType, relatedEntityId: input.relatedEntityId }
-            : {}),
-        };
-        tx.create('tasks', task);
-        if (task.assigneeId !== tx.actor.id)
-          tx.notify(
-            task.assigneeId,
-            'action_required',
-            `New task: ${task.title}`,
-            task.description ?? '',
-            { type: 'task', id: task.id },
-          );
-        return task;
-      }),
+    create: (input: TaskInput): Promise<Task> =>
+      runtime.command('POST /tasks', undefined, input, (tx) => createTask(tx, input)),
     complete: (id: string): Promise<Task> =>
       runtime.command('POST /tasks/:id/complete', undefined, { id }, (tx) => {
         const task = load(runtime, 'tasks', id, 'Task');
@@ -745,7 +559,7 @@ export function createPlatformCommands(runtime: ApiRuntime) {
       ),
   };
 
-  return { workflows, notifications, tasks, savedViews, imports };
+  return { workflows, notifications, tasks, savedViews, imports, services: { createTask } };
 }
 
 export type PlatformCommands = ReturnType<typeof createPlatformCommands>;

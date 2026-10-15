@@ -1,4 +1,5 @@
 import {
+  businessDateOf,
   notFound,
   quantityToMilli,
   type CycleCount,
@@ -235,8 +236,11 @@ export interface InventoryListItem extends InventoryPosition {
   unitOfMeasure: string;
   standardCost: { currency: 'USD'; minor: number };
   onHandValue: { currency: 'USD'; minor: number };
+  categoryId: string;
   categoryName: string;
   skuStatus: string;
+  /** The last shipment out of the position among the movements Nexora keeps (section 75.4). */
+  lastShippedOn?: string;
 }
 
 export function inventoryListItem(
@@ -245,6 +249,7 @@ export function inventoryListItem(
 ): InventoryListItem {
   const { dataset } = runtime.store;
   const sku = dataset.skus.get(position.skuId);
+  const lastShippedOn = runtime.projections.lastShipmentOn(position.skuId, position.warehouseId);
   return {
     ...position,
     skuCode: sku?.sku ?? position.skuId,
@@ -256,8 +261,10 @@ export function inventoryListItem(
       currency: 'USD',
       minor: Math.round(((sku?.standardCost.minor ?? 0) * quantityToMilli(position.onHand)) / 1000),
     },
+    categoryId: sku?.categoryId ?? '',
     categoryName: sku ? (dataset.categories.get(sku.categoryId)?.name ?? '') : '',
     skuStatus: sku?.status ?? 'active',
+    ...(lastShippedOn ? { lastShippedOn } : {}),
   };
 }
 
@@ -269,7 +276,9 @@ export const inventoryResource: ResourceDefinition<InventoryListItem> = {
     skuStatus: ['enum', (item) => item.skuStatus],
     warehouseId: ['string', (item) => item.warehouseId],
     warehouseCode: ['string', (item) => item.warehouseCode],
+    categoryId: ['string', (item) => item.categoryId],
     categoryName: ['string', (item) => item.categoryName],
+    lastShippedOn: ['date', (item) => item.lastShippedOn],
     onHand: ['quantity', (item) => item.onHand],
     available: ['quantity', (item) => item.available],
     reserved: ['quantity', (item) => item.reserved],
@@ -347,6 +356,10 @@ export function getInventoryForSku(
 }
 
 export interface MovementListItem extends StockMovement {
+  /** Business date of the movement, the day a report counts it on. */
+  occurredOn: string;
+  /** The SKU's category, a leaf of the tree. */
+  categoryId: string;
   skuCode: string;
   skuName: string;
   warehouseCode: string;
@@ -362,6 +375,8 @@ export const movementResource: ResourceDefinition<MovementListItem> = {
     warehouseId: ['string', (item) => item.warehouseId],
     warehouseCode: ['string', (item) => item.warehouseCode],
     occurredAt: ['datetime', (item) => item.occurredAt],
+    occurredOn: ['date', (item) => businessDateOf(item.occurredAt)],
+    categoryId: ['string', (item) => item.categoryId],
     sourceEntityType: ['string', (item) => item.sourceEntityType],
     sourceEntityId: ['string', (item) => item.sourceEntityId],
     actorId: ['string', (item) => item.actorId],
@@ -397,6 +412,8 @@ export function listStockMovements(
     const sku = dataset.skus.get(movement.skuId);
     items.push({
       ...movement,
+      occurredOn: businessDateOf(movement.occurredAt),
+      categoryId: sku?.categoryId ?? '',
       skuCode: sku?.sku ?? movement.skuId,
       skuName: sku?.name ?? movement.skuId,
       warehouseCode: dataset.warehouses.get(movement.warehouseId)?.code ?? movement.warehouseId,

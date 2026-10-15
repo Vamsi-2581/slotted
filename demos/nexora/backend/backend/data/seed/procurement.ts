@@ -64,6 +64,11 @@ export interface ExtraPurchaseOrder extends PurchaseOrderOverride {
   fixtureKey?: string;
 }
 
+/** The first business date from which every purchase order of the tenant is materialized. */
+export function purchaseOrderWindowStart(context: Pick<SeedContext, 'today' | 'scale'>): string {
+  return addDays(context.today, -Math.max(context.scale.operationalDays * 2, 180));
+}
+
 export function seedProcurement(
   context: SeedContext,
   tenant: TenantSeedResult,
@@ -154,7 +159,7 @@ export function seedProcurement(
       weightedWarehouses.push(warehouse);
 
   // Skeleton: materialize twice the operational window (at least 180 days) for supplier performance, plus curated overrides.
-  const materializeStart = addDays(today, -Math.max(scale.operationalDays * 2, 180));
+  const materializeStart = purchaseOrderWindowStart(context);
   const perDay = scale.purchaseOrdersPerYear / 365;
   const skeletons: PurchaseOrderSkeleton[] = [];
   for (let date = context.historyStart; compareDates(date, today) <= 0; date = addDays(date, 1)) {

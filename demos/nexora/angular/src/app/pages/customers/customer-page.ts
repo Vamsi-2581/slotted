@@ -66,7 +66,7 @@ import {
 } from '@slotted/angular/table';
 import { SlTag, SlTagBody } from '@slotted/angular/tag';
 import { SlTextarea } from '@slotted/angular/textarea';
-import { SlTimeline, SlTimelineItem, SlTimelineList } from '@slotted/angular/timeline';
+import { SlTimeline, SlTimelineActions, SlTimelineItem, SlTimelineList } from '@slotted/angular/timeline';
 import { SlToastService } from '@slotted/angular/toast';
 import {
   SlToolbar,
@@ -87,7 +87,9 @@ import { AddressFormStore } from '../../core/crm/address-form.store';
 import { ContactFormStore } from '../../core/crm/contact-form.store';
 import { CustomerEditStore } from '../../core/crm/customer-edit.store';
 import { CustomerStore } from '../../core/crm/customer.store';
+import { activityActor, activityRun } from '../../core/activity/activity-actor';
 import { NEW_PAYMENT_ROUTE } from '../../core/finance/finance.model';
+import { INBOX_ROUTE, NEW_TICKET_ROUTE } from '../../core/support/support.model';
 import { SessionStore } from '../../core/session/session.store';
 import {
   formatMoney,
@@ -177,6 +179,7 @@ type View = 'overview' | 'contacts' | 'orders' | 'invoices' | 'tickets' | 'notes
     SlTimeline,
     SlTimelineItem,
     SlTimelineList,
+    SlTimelineActions,
     SlToolbar,
     SlToolbarItem,
     SlToolbarOverflow,
@@ -402,6 +405,19 @@ type View = 'overview' | 'contacts' | 'orders' | 'invoices' | 'tickets' | 'notes
                           [queryParams]="{ customer: c.id }"
                         >
                           Record payment
+                        </a>
+                      </div>
+                    }
+                    @if (view() === 'tickets' && session.can('support.create')) {
+                      <div slToolbarItem [slToolbarItemCounterpart]="ticketItem">
+                        <a
+                          slButtonLink
+                          variant="ghost"
+                          data-testid="new-ticket"
+                          [routerLink]="newTicketRoute"
+                          [queryParams]="{ customer: c.id }"
+                        >
+                          New ticket
                         </a>
                       </div>
                     }
@@ -730,12 +746,13 @@ type View = 'overview' | 'contacts' | 'orders' | 'invoices' | 'tickets' | 'notes
                         @for (t of detail()!.openTickets; track t.id) {
                           <tr slTableRow>
                             <th slTableRowHeader>
-                              <a
-                                slLink
-                                variant="neutral"
-                                [routerLink]="'/support/tickets/' + t.id"
-                                >{{ t.ticketNumber }}</a
-                              >
+                              @if (session.can('support.view')) {
+                                <a slLink variant="neutral" [routerLink]="[inboxRoute, t.id]">{{
+                                  t.ticketNumber
+                                }}</a>
+                              } @else {
+                                {{ t.ticketNumber }}
+                              }
                             </th>
                             <td slTableCell>{{ t.subject }}</td>
                             @if (!phone()) {
@@ -837,10 +854,16 @@ type View = 'overview' | 'contacts' | 'orders' | 'invoices' | 'tickets' | 'notes
                         <li
                           slTimelineItem
                           [title]="e.summary"
-                          [actor]="e.actorName"
+                          [actor]="actorOf(e)"
                           [time]="e.occurredAt"
                           [tone]="activityTone(e.type)"
-                        ></li>
+                        >
+                          @if (runOf(e); as run) {
+                            <div slTimelineActions>
+                              <a slLink [routerLink]="run.path" [queryParams]="{ run: run.run }">Open the run</a>
+                            </div>
+                          }
+                        </li>
                       }
                     </ol>
                   </div>
@@ -871,6 +894,11 @@ type View = 'overview' | 'contacts' | 'orders' | 'invoices' | 'tickets' | 'notes
         </div>
         <ng-template #contactItem>
           <button slMenuItem type="button" (click)="newContact()">New contact</button>
+        </ng-template>
+        <ng-template #ticketItem>
+          <a slMenuItem [routerLink]="newTicketRoute" [queryParams]="{ customer: customer()?.id }"
+            >New ticket</a
+          >
         </ng-template>
         <ng-template #paymentItem>
           <a slMenuItem [routerLink]="newPaymentRoute" [queryParams]="{ customer: customer()?.id }"
@@ -924,6 +952,8 @@ export class CustomerPage {
   readonly figureLabels = ['Credit used', 'Exposure', 'Overdue', 'Revenue, 12 months'];
   /** The payment form on its own route, opened on this customer (FM-01). */
   readonly newPaymentRoute = NEW_PAYMENT_ROUTE;
+  readonly inboxRoute = INBOX_ROUTE;
+  readonly newTicketRoute = NEW_TICKET_ROUTE;
   readonly holdDialogOpen = signal(false);
   readonly noteBody = signal('');
   readonly noteVisibility = signal<NoteVisibility>('organization');
@@ -1024,6 +1054,15 @@ export class CustomerPage {
 
   visibilityLabel(visibility: NoteVisibility): string {
     return visibility === 'organization' ? 'Everyone' : visibility === 'team' ? 'Team' : 'Only me';
+  }
+
+  /** An entry a workflow wrote names its workflow, and opens its run for a reader of workflows. */
+  actorOf(event: Parameters<typeof activityActor>[0]): string {
+    return activityActor(event);
+  }
+
+  runOf(event: Parameters<typeof activityRun>[0]): { path: string; run: string } | null {
+    return this.session.can('workflows.view') ? activityRun(event) : null;
   }
 
   activityTone(type: string): 'secondary' | 'accent' | 'success' | 'warning' | 'danger' {

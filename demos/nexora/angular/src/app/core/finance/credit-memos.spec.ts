@@ -177,7 +177,7 @@ describe('credit memos and refunds', () => {
 
   it('filters and sorts by the resource’s own fields only', () => {
     const fields = creditMemoFilterFields().map((field) => field.key);
-    expect(fields).toEqual(['lifecycle', 'reason', 'customerName', 'issueDate', 'unappliedAmount', 'total']);
+    expect(fields).toEqual(['lifecycle', 'reason', 'customerName', 'issueDate', 'unappliedAmount', 'total', 'regionCode', 'customerSegment']);
     const joined = creditMemoColumns().find((column) => column.id === 'source')!;
     expect(joined.filterable).toBe(false);
     expect(joined.sortable).toBe(false);

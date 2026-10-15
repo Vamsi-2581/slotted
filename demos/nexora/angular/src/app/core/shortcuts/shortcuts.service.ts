@@ -30,6 +30,8 @@ export class ShortcutsService {
     { keys: 'g s', label: 'Go to Sales' },
     { keys: 'g i', label: 'Go to Inventory' },
     { keys: 'g f', label: 'Go to Finance' },
+    { keys: 'j', label: 'Next ticket, in the support inbox' },
+    { keys: 'k', label: 'Previous ticket, in the support inbox' },
     { keys: 'esc', label: 'Close what is open' },
   ];
 

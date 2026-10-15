@@ -255,59 +255,64 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
     },
   };
 
+  /** Section 65.6 "Create" — the interactive command and a workflow's purchase-order draft. */
+  const createPurchaseOrder = (tx: Transaction, input: PurchaseOrderInput): PurchaseOrderDetail => {
+    const actor = tx.require('purchase_orders.create');
+    const supplier = load(runtime, 'suppliers', input.supplierId, 'Supplier');
+    if (supplier.status !== 'active')
+      throw domainError(
+        supplier.status === 'on_hold' ? 'SUPPLIER_ON_HOLD' : 'SUPPLIER_INACTIVE',
+        `${supplier.displayName} is ${supplier.status} and cannot receive purchase orders`,
+        409,
+      );
+    const warehouse = load(runtime, 'warehouses', input.destinationWarehouseId, 'Warehouse');
+    if (warehouse.status === 'closed')
+      throw domainError('WAREHOUSE_CLOSED', `${warehouse.code} is closed`, 409);
+    const poCurrency = supplier.supportedCurrencies[0] ?? 'USD';
+    if (!input.lines || input.lines.length === 0)
+      throw domainError('VALIDATION_FAILED', 'A purchase order needs at least one line');
+    const id = runtime.store.nextId('purchaseOrder');
+    const today = runtime.store.today;
+    const po: PurchaseOrder = {
+      id,
+      organizationId: supplier.organizationId,
+      purchaseOrderNumber: runtime.store.nextBusinessNumber('purchaseOrder'),
+      supplierId: supplier.id,
+      buyerId: actor.id,
+      destinationWarehouseId: warehouse.id,
+      status: 'draft',
+      exceptionFlags: [],
+      createdBusinessDate: today,
+      expectedDate: input.expectedDate ?? addBusinessDays(today, 10),
+      currency: poCurrency,
+      fxRateToUsd: FX_RATES_TO_USD[poCurrency],
+      subtotal: money(0, poCurrency),
+      taxTotal: money(0, poCurrency),
+      freight: money(input.freightMinor ?? 0, poCurrency),
+      total: money(0, poCurrency),
+      metadata: metadata(tx, id),
+      ...(trimmed(input.notes) ? { notes: trimmed(input.notes) as string } : {}),
+    };
+    tx.create('purchaseOrders', po);
+    const { subtotal } = buildLines(tx, po, input.lines);
+    recalcTotals(po, subtotal, input.freightMinor ?? 0);
+    tx.dirty('purchaseOrders', po);
+    tx.audit('purchase_order.created', 'purchase_order', id, { nextVersion: 1 });
+    tx.activityEvent({
+      type: 'purchase_order.created',
+      subjectType: 'purchase_order',
+      subjectId: id,
+      subjectLabel: po.purchaseOrderNumber,
+      summary: `Purchase order ${po.purchaseOrderNumber} drafted for ${supplier.displayName} (${dollars(po.total)})`,
+    });
+    return getPurchaseOrder(runtime, id);
+  };
+
   const purchaseOrders = {
     create: (input: PurchaseOrderInput, options?: MutationOptions): Promise<PurchaseOrderDetail> =>
-      runtime.command('POST /purchase-orders', options, input, (tx) => {
-        const actor = runtime.require('purchase_orders.create');
-        const supplier = load(runtime, 'suppliers', input.supplierId, 'Supplier');
-        if (supplier.status !== 'active')
-          throw domainError(
-            supplier.status === 'on_hold' ? 'SUPPLIER_ON_HOLD' : 'SUPPLIER_INACTIVE',
-            `${supplier.displayName} is ${supplier.status} and cannot receive purchase orders`,
-            409,
-          );
-        const warehouse = load(runtime, 'warehouses', input.destinationWarehouseId, 'Warehouse');
-        if (warehouse.status === 'closed')
-          throw domainError('WAREHOUSE_CLOSED', `${warehouse.code} is closed`, 409);
-        const poCurrency = supplier.supportedCurrencies[0] ?? 'USD';
-        if (!input.lines || input.lines.length === 0)
-          throw domainError('VALIDATION_FAILED', 'A purchase order needs at least one line');
-        const id = runtime.store.nextId('purchaseOrder');
-        const today = runtime.store.today;
-        const po: PurchaseOrder = {
-          id,
-          organizationId: supplier.organizationId,
-          purchaseOrderNumber: runtime.store.nextBusinessNumber('purchaseOrder'),
-          supplierId: supplier.id,
-          buyerId: actor.id,
-          destinationWarehouseId: warehouse.id,
-          status: 'draft',
-          exceptionFlags: [],
-          createdBusinessDate: today,
-          expectedDate: input.expectedDate ?? addBusinessDays(today, 10),
-          currency: poCurrency,
-          fxRateToUsd: FX_RATES_TO_USD[poCurrency],
-          subtotal: money(0, poCurrency),
-          taxTotal: money(0, poCurrency),
-          freight: money(input.freightMinor ?? 0, poCurrency),
-          total: money(0, poCurrency),
-          metadata: metadata(tx, id),
-          ...(trimmed(input.notes) ? { notes: trimmed(input.notes) as string } : {}),
-        };
-        tx.create('purchaseOrders', po);
-        const { subtotal } = buildLines(tx, po, input.lines);
-        recalcTotals(po, subtotal, input.freightMinor ?? 0);
-        tx.dirty('purchaseOrders', po);
-        tx.audit('purchase_order.created', 'purchase_order', id, { nextVersion: 1 });
-        tx.activityEvent({
-          type: 'purchase_order.created',
-          subjectType: 'purchase_order',
-          subjectId: id,
-          subjectLabel: po.purchaseOrderNumber,
-          summary: `Purchase order ${po.purchaseOrderNumber} drafted for ${supplier.displayName} (${dollars(po.total)})`,
-        });
-        return getPurchaseOrder(runtime, id);
-      }),
+      runtime.command('POST /purchase-orders', options, input, (tx) =>
+        createPurchaseOrder(tx, input),
+      ),
 
     update: (
       id: string,
@@ -689,7 +694,12 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
       }),
   };
 
-  return { suppliers, purchaseOrders, hooks: { purchase_order: poHooks } };
+  return {
+    suppliers,
+    purchaseOrders,
+    services: { createPurchaseOrder },
+    hooks: { purchase_order: poHooks },
+  };
 }
 
 export type ProcurementCommands = ReturnType<typeof createProcurementCommands>;

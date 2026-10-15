@@ -15,8 +15,20 @@ import {
   type Team,
   type User,
   type Workflow,
+  type WorkflowCatalog,
+  type WorkflowField,
+  type WorkflowPerson,
   type WorkflowRun,
+  type WorkflowRunErrorCode,
+  type WorkflowRunStatus,
+  addDays,
+  businessDateOf,
+  WORKFLOW_ACTIONS,
+  WORKFLOW_LIMITS,
+  WORKFLOW_RELATIVE_PEOPLE,
+  WORKFLOW_TRIGGERS,
 } from '../../domain';
+import { TICKET_CATEGORIES } from '../../data/vocabulary';
 import {
   fields,
   runListQuery,
@@ -321,9 +333,27 @@ export function getApproval(runtime: ApiRuntime, id: string): ApprovalListItem {
 // ---------------------------------------------------------------------------
 // Workflows
 
+/** Runs a workflow's row draws as marks, newest last. */
+export const WORKFLOW_RECENT_OUTCOMES = 12;
+
+/** Failures counted on a workflow's row: the runs of the last seven days of the demo clock. */
+export const WORKFLOW_RECENT_DAYS = 7;
+
 export interface WorkflowListItem extends Workflow {
   ownerName: string;
+  /** The outcomes of the newest runs, oldest first: at most `WORKFLOW_RECENT_OUTCOMES`. */
+  recentOutcomes: WorkflowRunStatus[];
+  /** Failed and partially failed runs of the last `WORKFLOW_RECENT_DAYS` days. */
   recentFailures: number;
+  /** The latest failed or partially failed run: what put a workflow in error, said once. */
+  lastFailure?: {
+    runId: string;
+    startedAt: string;
+    status: 'failed' | 'partially_failed';
+    errorCode?: WorkflowRunErrorCode;
+    actionIndex?: number;
+    message?: string;
+  };
 }
 
 export const workflowResource: ResourceDefinition<WorkflowListItem> = {
@@ -344,13 +374,46 @@ export const workflowResource: ResourceDefinition<WorkflowListItem> = {
 };
 
 export function workflowListItem(runtime: ApiRuntime, workflow: Workflow): WorkflowListItem {
+  const since = Date.parse(runtime.store.now) - WORKFLOW_RECENT_DAYS * 86_400_000;
+  let recentFailures = 0;
+  let latest: WorkflowRun | undefined;
+  for (const run of runtime.indexes.runsByWorkflow.get(workflow.id)) {
+    if (run.status !== 'failed' && run.status !== 'partially_failed') continue;
+    if (Date.parse(run.startedAt) >= since) recentFailures += 1;
+    if (!latest || compareRuns(run, latest) < 0) latest = run;
+  }
+  const failed = latest?.actionResults.find((result) => result.status === 'failed');
+  const message = failed?.message ?? latest?.actionResults[0]?.message;
+  const recentOutcomes = runtime.indexes.runsByWorkflow
+    .get(workflow.id)
+    .slice()
+    .sort(compareRuns)
+    .slice(0, WORKFLOW_RECENT_OUTCOMES)
+    .reverse()
+    .map((run) => run.status);
   return {
     ...workflow,
+    recentOutcomes,
     ownerName: runtime.store.dataset.users.get(workflow.ownerId)?.displayName ?? workflow.ownerId,
-    recentFailures: runtime.indexes.runsByWorkflow
-      .get(workflow.id)
-      .filter((run) => run.status === 'failed' || run.status === 'partially_failed').length,
+    recentFailures,
+    ...(latest
+      ? {
+          lastFailure: {
+            runId: latest.id,
+            startedAt: latest.startedAt,
+            status: latest.status as 'failed' | 'partially_failed',
+            ...(latest.errorCode ? { errorCode: latest.errorCode } : {}),
+            ...(failed ? { actionIndex: failed.actionIndex } : {}),
+            ...(message ? { message } : {}),
+          },
+        }
+      : {}),
   };
+}
+
+/** Newest first; runs of one instant by their id, the later written first. */
+function compareRuns(a: WorkflowRun, b: WorkflowRun): number {
+  return b.startedAt.localeCompare(a.startedAt) || b.id.localeCompare(a.id);
 }
 
 export function listWorkflows(
@@ -364,39 +427,213 @@ export function listWorkflows(
   return runListQuery(items, workflowResource, query);
 }
 
-export function getWorkflow(
-  runtime: ApiRuntime,
-  id: string,
-): { workflow: WorkflowListItem; runs: WorkflowRun[] } {
+/** The runs a workflow's page lists before the history: the newest. */
+export const WORKFLOW_RECENT_RUNS = 5;
+
+export interface WorkflowDetail {
+  workflow: WorkflowListItem;
+  /** The newest `WORKFLOW_RECENT_RUNS` runs; the history pages through the rest. */
+  runs: WorkflowRunListItem[];
+  runTotal: number;
+  /** The display name of every person the definition names, the owner included. */
+  people: Record<string, string>;
+  insight: WorkflowInsight;
+}
+
+/** Days the insight of a workflow reads back from the demo clock's today. */
+export const WORKFLOW_INSIGHT_DAYS = 14;
+
+/**
+ * What a workflow did over the last `WORKFLOW_INSIGHT_DAYS` business days:
+ * its runs per day by outcome, how many of the events its conditions
+ * matched, and each action's outcomes — the numbers its map draws.
+ */
+export interface WorkflowInsight {
+  days: {
+    date: string;
+    succeeded: number;
+    partially_failed: number;
+    failed: number;
+    skipped: number;
+  }[];
+  events: number;
+  matched: number;
+  actions: { actionIndex: number; succeeded: number; failed: number; skipped: number }[];
+}
+
+export function workflowInsight(runtime: ApiRuntime, workflow: Workflow): WorkflowInsight {
+  const today = runtime.store.today;
+  const days = Array.from({ length: WORKFLOW_INSIGHT_DAYS }, (_, index) => ({
+    date: addDays(today, index - WORKFLOW_INSIGHT_DAYS + 1),
+    succeeded: 0,
+    partially_failed: 0,
+    failed: 0,
+    skipped: 0,
+  }));
+  const byDate = new Map(days.map((day) => [day.date, day]));
+  const actions = workflow.actions.map((_, actionIndex) => ({
+    actionIndex,
+    succeeded: 0,
+    failed: 0,
+    skipped: 0,
+  }));
+  let events = 0;
+  let matched = 0;
+  for (const run of runtime.indexes.runsByWorkflow.get(workflow.id)) {
+    const day = byDate.get(businessDateOf(run.startedAt));
+    if (!day) continue;
+    events += 1;
+    if (run.conditionsMet) matched += 1;
+    if (
+      run.status === 'succeeded' ||
+      run.status === 'partially_failed' ||
+      run.status === 'failed' ||
+      run.status === 'skipped'
+    )
+      day[run.status] += 1;
+    if (!run.conditionsMet) continue;
+    for (const result of run.actionResults) {
+      const entry = actions[result.actionIndex];
+      if (entry) entry[result.status] += 1;
+    }
+  }
+  return { days, events, matched, actions };
+}
+
+export function getWorkflow(runtime: ApiRuntime, id: string): WorkflowDetail {
   runtime.require('workflows.view');
   const workflow = runtime.store.dataset.workflows.get(id);
   if (!workflow) throw notFound('Workflow', id);
+  const runs = runtime.indexes.runsByWorkflow.get(id).slice().sort(compareRuns);
+  const people: Record<string, string> = {};
+  const name = (userId: string): void => {
+    const user = runtime.store.dataset.users.get(userId);
+    if (user) people[userId] = user.displayName;
+  };
+  name(workflow.ownerId);
+  for (const action of workflow.actions)
+    for (const value of Object.values(action.config ?? {}))
+      if (typeof value === 'string' && value.startsWith('usr_')) name(value);
   return {
     workflow: workflowListItem(runtime, workflow),
-    runs: runtime.indexes.runsByWorkflow
-      .get(id)
-      .slice()
-      .sort((a, b) => b.startedAt.localeCompare(a.startedAt)),
+    runs: runs.slice(0, WORKFLOW_RECENT_RUNS).map((run) => workflowRunListItem(runtime, run)),
+    runTotal: runs.length,
+    people,
+    insight: workflowInsight(runtime, workflow),
   };
 }
+
+export interface WorkflowRunListItem extends WorkflowRun {
+  causedByName: string;
+  /** `completedAt − startedAt` in milliseconds; absent while a run has not completed. */
+  durationMs?: number;
+}
+
+export function workflowRunListItem(runtime: ApiRuntime, run: WorkflowRun): WorkflowRunListItem {
+  return {
+    ...run,
+    causedByName: runtime.store.dataset.users.get(run.causedBy)?.displayName ?? run.causedBy,
+    ...(run.completedAt
+      ? { durationMs: Date.parse(run.completedAt) - Date.parse(run.startedAt) }
+      : {}),
+  };
+}
+
+export const workflowRunResource: ResourceDefinition<WorkflowRunListItem> = {
+  fields: fields<WorkflowRunListItem>({
+    id: ['string', (run) => run.id],
+    status: ['enum', (run) => run.status],
+    startedAt: ['datetime', (run) => run.startedAt],
+    // The business day a run started on, as the insight's days count it.
+    startedOn: ['date', (run) => businessDateOf(run.startedAt)],
+    affectedEntityType: ['enum', (run) => run.affectedEntityType],
+    durationMs: ['number', (run) => run.durationMs],
+    conditionsMet: ['boolean', (run) => run.conditionsMet],
+  }),
+  search: (run) => [run.affectedLabel, run.causedByName],
+  defaultSort: '-startedAt,-id',
+};
 
 export function listWorkflowRuns(
   runtime: ApiRuntime,
   workflowId: string,
   query: ListQuery,
-): ListResponse<WorkflowRun> {
+): ListResponse<WorkflowRunListItem> {
   runtime.require('workflows.view');
   if (!runtime.store.dataset.workflows.has(workflowId)) throw notFound('Workflow', workflowId);
-  const definition: ResourceDefinition<WorkflowRun> = {
-    fields: fields<WorkflowRun>({
-      id: ['string', (run) => run.id],
-      status: ['enum', (run) => run.status],
-      startedAt: ['datetime', (run) => run.startedAt],
-      affectedEntityType: ['string', (run) => run.affectedEntityType],
-    }),
-    defaultSort: '-startedAt',
+  return runListQuery(
+    runtime.indexes.runsByWorkflow.get(workflowId).map((run) => workflowRunListItem(runtime, run)),
+    workflowRunResource,
+    query,
+  );
+}
+
+const capitalized = (value: string): string =>
+  value.charAt(0).toUpperCase() + value.slice(1).replace(/_/g, ' ');
+
+/**
+ * Sections 69.1–69.3 — what an editor offers and the validation reads: every
+ * trigger with its subject's fields (the tenant's warehouses, categories and
+ * ticket categories filled in), every action, the limits, the active people an
+ * action can name, and the people who may own a workflow.
+ */
+export function buildWorkflowCatalog(runtime: ApiRuntime): WorkflowCatalog {
+  const { dataset } = runtime.store;
+  const fill = (field: WorkflowField): WorkflowField => {
+    switch (field.optionsFrom) {
+      case 'warehouses':
+        return {
+          ...field,
+          options: [...dataset.warehouses.values()]
+            .filter((warehouse) => warehouse.status !== 'closed')
+            .map((warehouse) => ({
+              value: warehouse.code,
+              label: `${warehouse.code} · ${warehouse.name}`,
+            })),
+        };
+      case 'categories':
+        return {
+          ...field,
+          options: [...dataset.categories.values()]
+            .filter((category) => category.status === 'active')
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((category) => ({ value: category.id, label: category.name })),
+        };
+      case 'ticketCategories':
+        return {
+          ...field,
+          options: TICKET_CATEGORIES.map((category) => ({
+            value: category,
+            label: capitalized(category),
+          })),
+        };
+      default:
+        return field;
+    }
   };
-  return runListQuery(runtime.indexes.runsByWorkflow.get(workflowId), definition, query);
+  const people: WorkflowPerson[] = [...dataset.users.values()]
+    .filter((user) => user.status === 'active' && !user.id.startsWith('usr_system'))
+    .sort((a, b) => a.displayName.localeCompare(b.displayName))
+    .map((user) => ({ id: user.id, name: user.displayName, title: user.title ?? '' }));
+  return {
+    triggers: WORKFLOW_TRIGGERS.map((trigger) => ({
+      ...trigger,
+      fields: trigger.fields.map(fill),
+    })),
+    actions: WORKFLOW_ACTIONS,
+    relativePeople: WORKFLOW_RELATIVE_PEOPLE,
+    limits: WORKFLOW_LIMITS,
+    people,
+    owners: people.filter((person) => {
+      const user = dataset.users.get(person.id);
+      return user !== undefined && runtime.authorization.can(user, 'workflows.view');
+    }),
+  };
+}
+
+export function workflowCatalog(runtime: ApiRuntime): WorkflowCatalog {
+  runtime.require('workflows.view');
+  return buildWorkflowCatalog(runtime);
 }
 
 // ---------------------------------------------------------------------------

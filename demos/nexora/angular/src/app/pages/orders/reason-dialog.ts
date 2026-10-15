@@ -33,6 +33,9 @@ import { SlTextarea } from '@slotted/angular/textarea';
     SlFieldLabel,
     SlTextarea,
   ],
+  /* Only an overlay lives here: the host takes no box, as sl-dialog's own does not, so it adds
+     no row or gap to its parent's layout. */
+  host: { style: 'display: contents' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <sl-dialog size="sm" [(open)]="open" [loading]="busy()" (closed)="reason.set('')">

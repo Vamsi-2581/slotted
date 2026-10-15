@@ -1,11 +1,4 @@
-import {
-  SCHEMA_VERSION,
-  businessDateOf,
-  idSequence,
-  formatId,
-  type AuditEvent,
-  type IdEntity,
-} from '../domain';
+import { SCHEMA_VERSION, businessDateOf, idSequence, formatId, type IdEntity } from '../domain';
 import type { CollectionName, Dataset } from '../data/dataset';
 import type { SeedResult } from '../data/seed';
 import {
@@ -89,9 +82,13 @@ export interface DemoDatabaseMetadata {
   schemaVersion: number;
   seedVersion: string;
   scenarioId: string;
+  /** Business date a structural scenario was applied on: a fact a report marks on its charts. */
+  scenarioAppliedOn?: string;
   demoClock: string;
   activePersonaId: string;
   initializedAt: string;
+  /** Section 69.5: the instant scheduled workflows were last evaluated up to. */
+  schedulesEvaluatedAt: string;
 }
 
 export interface HistoricalTier {
@@ -146,6 +143,7 @@ export class Store {
       demoClock: options.demoClock ?? seed.context.now,
       activePersonaId: options.activePersonaId,
       initializedAt: seed.context.now,
+      schedulesEvaluatedAt: seed.context.now,
     };
     this.seedIdSequences();
   }
@@ -476,19 +474,5 @@ export class Store {
 
   historicalOrderId(index: number): string {
     return orderId(index);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Audit
-
-  appendAudit(event: Omit<AuditEvent, 'id' | 'organizationId'>): AuditEvent {
-    const record: AuditEvent = {
-      id: this.nextId('auditEvent'),
-      organizationId: this.dataset.organization.id,
-      ...event,
-    };
-    this.dataset.auditEvents.set(record.id, record);
-    this.invalidate('auditEvents');
-    return record;
   }
 }

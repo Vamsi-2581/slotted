@@ -42,9 +42,11 @@ import {
 } from '../../core/finance/finance.model';
 import { phoneSignal } from '../../core/layout/phone';
 import { SessionStore } from '../../core/session/session.store';
+import { listDoor } from '../list-view/list-door';
 import { listView } from '../list-view/list-view';
 import { ListViewTools } from '../list-view/list-view-tools';
 import { creditMemoColumns, creditMemoFilterFields } from './credit-memo-columns';
+import { FINANCE_DOOR_FIELDS } from './finance-columns';
 
 /**
  * Credit memos (§66.11). They have no destination in the navigation: a memo
@@ -154,7 +156,7 @@ import { creditMemoColumns, creditMemoFilterFields } from './credit-memo-columns
             slFilterBar
             aria-label="Credit memo filters"
             shortcut="/"
-            [fields]="fields"
+            [fields]="door.fields()"
             [value]="store.filter()"
             (valueChangeRequest)="store.setFilter($event.value)"
             [query]="store.search()"
@@ -253,7 +255,6 @@ export class CreditMemosPage {
   readonly pageSizes = LIST_PAGE_SIZES;
   readonly phone = phoneSignal();
   readonly columns = creditMemoColumns();
-  readonly fields = creditMemoFilterFields();
 
   readonly canCreate = computed(() => {
     void this.session.session();
@@ -276,9 +277,17 @@ export class CreditMemosPage {
     applyQuery: (query) => void this.store.load(query),
   });
 
-  constructor() {
-    void this.store.open(this.view.openingQuery);
-  }
+  /** A report's door opens the list on its condition and period, as the bar's pills (OV-01). */
+  readonly door = listDoor({
+    fields: creditMemoFilterFields,
+    doorOnly: FINANCE_DOOR_FIELDS,
+    open: (filter, first) => {
+      if (filter !== null) {
+        void this.store.load({ ...emptyQuery({ index: 0, size: this.store.page().size }), filter });
+        void this.store.loadGrandTotal();
+      } else if (first) void this.store.open(this.view.openingQuery);
+    },
+  });
 
   word(row: CreditMemoListItem): string {
     return CREDIT_MEMO_LIFECYCLE_LABEL[row.lifecycle];

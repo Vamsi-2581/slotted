@@ -127,6 +127,9 @@ export interface Supplier {
 export interface SupplierPerformance {
   supplierId: string;
   onTimeDeliveryBps: number;
+  /** Section 72.10's counts: lines received in full, and those of them satisfied by their date. */
+  completedLines: number;
+  onTimeLines: number;
   qualityScore: number;
   defectRateBps: number;
   averageLeadTimeDays: number;

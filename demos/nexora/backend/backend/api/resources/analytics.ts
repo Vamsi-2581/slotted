@@ -17,7 +17,8 @@ import { supportMetrics } from './support';
 
 export interface MonthlyPoint {
   month: string;
-  invoicedRevenue: Money;
+  /** Section 72.2; null for a month before invoices are kept (section 75.4). */
+  invoicedRevenue: Money | null;
   grossMargin: Money;
   bookedValue: Money;
   orders: number;
@@ -69,8 +70,10 @@ export function executiveDashboard(runtime: ApiRuntime): ExecutiveDashboard {
   runtime.require('analytics.view');
   const { store, indexes, projections } = runtime;
   const today = store.today;
-  const from30 = addDays(today, -30);
-  const from60 = addDays(today, -60);
+  const keptFrom = store.seed.context.operationalStart;
+  // Thirty days to today and the thirty before them: the reports' default period and its comparison.
+  const from30 = addDays(today, -29);
+  const from60 = addDays(today, -59);
   const from365 = addDays(today, -365);
 
   // Monthly series over the logical history: materialized invoices plus history summaries.
@@ -89,13 +92,11 @@ export function executiveDashboard(runtime: ApiRuntime): ExecutiveDashboard {
   // Consolidated figures are USD at each document's rate (section 53.7).
   const summaryUsd = (minor: number, summary: OrderSummary): number =>
     roundHalfUp(minor * Number(summary.fxRateToUsd));
+  // A historical order is booked value by its date; its invoice is not kept, so it is no revenue (section 75.4).
   for (const summary of store.history.summaries) {
     if (summary.kind === 'cancelled' || summary.kind === 'draft') continue;
     const entry = bucket(monthKey(summary.orderDate));
-    const net = summaryUsd(summary.subtotalMinor + summary.freightMinor, summary);
-    entry.revenue += net;
-    entry.margin += summaryUsd(summary.subtotalMinor - summary.costMinor, summary);
-    entry.booked += net;
+    entry.booked += summaryUsd(summary.subtotalMinor + summary.freightMinor, summary);
     entry.orders += 1;
   }
   for (const invoice of store.dataset.invoices.values()) {
@@ -163,23 +164,31 @@ export function executiveDashboard(runtime: ApiRuntime): ExecutiveDashboard {
     .slice(-24)
     .map(([month, entry]) => ({
       month,
-      invoicedRevenue: usd(entry.revenue),
-      grossMargin: usd(entry.margin),
+      invoicedRevenue: month < monthKey(keptFrom) ? null : usd(entry.revenue),
+      grossMargin: month < monthKey(keptFrom) ? usd(0) : usd(entry.margin),
       bookedValue: usd(entry.booked),
       orders: entry.orders,
     }));
 
   const finance = projections.financeOverview();
   let revenue30 = 0;
+  let merchandise30 = 0;
   let margin30 = 0;
   let revenuePrev30 = 0;
   for (const invoice of store.dataset.invoices.values()) {
     if (invoice.lifecycle !== 'open' && invoice.lifecycle !== 'written_off') continue;
     if (compareDates(invoice.issueDate, from30) >= 0) {
       revenue30 += usdMinor(addMoney(invoice.subtotal, invoice.freight), invoice.fxRateToUsd);
+      merchandise30 += usdMinor(invoice.subtotal, invoice.fxRateToUsd);
       margin30 += usdMinor(subtractMoney(invoice.subtotal, invoice.costTotal), invoice.fxRateToUsd);
     } else if (compareDates(invoice.issueDate, from60) >= 0)
       revenuePrev30 += usdMinor(addMoney(invoice.subtotal, invoice.freight), invoice.fxRateToUsd);
+  }
+  // Section 72.2: credit memos opened in the same days come off the period's revenue.
+  for (const memo of store.dataset.creditMemos.values()) {
+    if (memo.lifecycle === 'draft' || memo.lifecycle === 'voided') continue;
+    if (compareDates(memo.issueDate, from30) >= 0) revenue30 -= usdMinor(memo.subtotal);
+    else if (compareDates(memo.issueDate, from60) >= 0) revenuePrev30 -= usdMinor(memo.subtotal);
   }
   const inventoryValue = projections.inventoryValue();
   let shippedCost12 = 0;
@@ -209,8 +218,9 @@ export function executiveDashboard(runtime: ApiRuntime): ExecutiveDashboard {
     const performance = projections.supplierPerformance(supplier.id);
     if (performance.openPurchaseOrderCount === 0 && performance.annualSpendUsd.minor === 0)
       continue;
-    completedLines += 1;
-    onTimeLines += performance.onTimeDeliveryBps / 10_000;
+    // Section 72.10 counts lines, not suppliers: a supplier of one line weighs one line.
+    completedLines += performance.completedLines;
+    onTimeLines += performance.onTimeLines;
   }
   const support = supportMetrics(runtime);
 
@@ -322,7 +332,8 @@ export function executiveDashboard(runtime: ApiRuntime): ExecutiveDashboard {
     },
     {
       label: 'Gross margin (30d)',
-      value: revenue30 === 0 ? 0 : Math.round((margin30 / revenue30) * 10_000),
+      // Section 72.3: over net merchandise; freight and tax are no part of it.
+      value: merchandise30 === 0 ? 0 : Math.round((margin30 / merchandise30) * 10_000),
       format: 'percent',
       hint: 'Invoiced net merchandise minus snapshotted cost.',
     },
@@ -371,7 +382,7 @@ export function executiveDashboard(runtime: ApiRuntime): ExecutiveDashboard {
       label: 'Supplier on-time delivery',
       value: completedLines === 0 ? 0 : Math.round((onTimeLines / completedLines) * 10_000),
       format: 'percent',
-      hint: 'Average across suppliers with completed lines.',
+      hint: 'On-time completed lines over completed lines, every supplier.',
     },
     { label: 'Support first-response SLA', value: support.firstResponseSlaBps, format: 'percent' },
   ];

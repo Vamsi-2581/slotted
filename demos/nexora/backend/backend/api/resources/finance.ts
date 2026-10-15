@@ -9,6 +9,7 @@ import {
   type CreditMemo,
   type CreditMemoApplication,
   type CreditMemoLine,
+  type Customer,
   type FinanceOverview,
   type Invoice,
   type InvoiceLine,
@@ -38,6 +39,8 @@ function inUsd(value: import('../../domain').Money, fxRateToUsd?: string) {
 
 export interface InvoiceListItem extends Invoice {
   customerName: string;
+  customerSegment: Customer['segment'];
+  regionCode: Customer['regionCode'];
   orderNumber?: string;
   daysOverdue: number;
   lineCount: number;
@@ -67,9 +70,12 @@ export function invoiceDisplayStatus(invoice: Invoice): InvoiceListItem['display
 export function invoiceListItem(runtime: ApiRuntime, invoice: Invoice): InvoiceListItem {
   const { dataset } = runtime.store;
   const order = invoice.sourceOrderId ? dataset.salesOrders.get(invoice.sourceOrderId) : undefined;
+  const customer = dataset.customers.get(invoice.customerId);
   return {
     ...invoice,
-    customerName: dataset.customers.get(invoice.customerId)?.displayName ?? invoice.customerId,
+    customerName: customer?.displayName ?? invoice.customerId,
+    customerSegment: customer?.segment ?? 'smb',
+    regionCode: customer?.regionCode ?? 'US',
     daysOverdue:
       invoice.lifecycle === 'open' && invoice.outstanding.minor > 0
         ? Math.max(0, diffDays(runtime.store.today, invoice.dueDate))
@@ -86,6 +92,8 @@ export const invoiceResource: ResourceDefinition<InvoiceListItem> = {
     invoiceNumber: ['string', (item) => item.invoiceNumber],
     customerId: ['string', (item) => item.customerId],
     customerName: ['string', (item) => item.customerName],
+    customerSegment: ['enum', (item) => item.customerSegment],
+    regionCode: ['enum', (item) => item.regionCode],
     sourceOrderId: ['string', (item) => item.sourceOrderId],
     orderNumber: ['string', (item) => item.orderNumber],
     currency: ['enum', (item) => item.currency],
@@ -188,6 +196,8 @@ export function getInvoice(runtime: ApiRuntime, id: string): InvoiceDetail {
 
 export interface PaymentListItem extends Payment {
   customerName: string;
+  customerSegment: Customer['segment'];
+  regionCode: Customer['regionCode'];
   allocatedAmount: Payment['amount'];
   invoiceNumbers: string[];
 }
@@ -197,9 +207,12 @@ export function paymentListItem(runtime: ApiRuntime, payment: Payment): PaymentL
   const allocations = runtime.indexes.allocationsByPayment
     .get(payment.id)
     .filter((allocation) => allocation.status === 'active');
+  const customer = dataset.customers.get(payment.customerId);
   return {
     ...payment,
-    customerName: dataset.customers.get(payment.customerId)?.displayName ?? payment.customerId,
+    customerName: customer?.displayName ?? payment.customerId,
+    customerSegment: customer?.segment ?? 'smb',
+    regionCode: customer?.regionCode ?? 'US',
     allocatedAmount: {
       currency: payment.amount.currency,
       minor: allocations.reduce((sum, allocation) => sum + allocation.amount.minor, 0),
@@ -217,6 +230,8 @@ export const paymentResource: ResourceDefinition<PaymentListItem> = {
     paymentNumber: ['string', (item) => item.paymentNumber],
     customerId: ['string', (item) => item.customerId],
     customerName: ['string', (item) => item.customerName],
+    customerSegment: ['enum', (item) => item.customerSegment],
+    regionCode: ['enum', (item) => item.regionCode],
     method: ['enum', (item) => item.method],
     currency: ['enum', (item) => item.amount.currency],
     status: ['enum', (item) => item.status],
@@ -272,6 +287,8 @@ export function getPayment(
 
 export interface CreditMemoListItem extends CreditMemo {
   customerName: string;
+  customerSegment: Customer['segment'];
+  regionCode: Customer['regionCode'];
   sourceInvoiceNumber?: string;
   sourceReturnNumber?: string;
 }
@@ -280,9 +297,12 @@ export function creditMemoListItem(runtime: ApiRuntime, memo: CreditMemo): Credi
   const { dataset } = runtime.store;
   const invoice = memo.sourceInvoiceId ? dataset.invoices.get(memo.sourceInvoiceId) : undefined;
   const ret = memo.sourceReturnId ? dataset.returns.get(memo.sourceReturnId) : undefined;
+  const customer = dataset.customers.get(memo.customerId);
   return {
     ...memo,
-    customerName: dataset.customers.get(memo.customerId)?.displayName ?? memo.customerId,
+    customerName: customer?.displayName ?? memo.customerId,
+    customerSegment: customer?.segment ?? 'smb',
+    regionCode: customer?.regionCode ?? 'US',
     ...(invoice?.invoiceNumber ? { sourceInvoiceNumber: invoice.invoiceNumber } : {}),
     ...(ret ? { sourceReturnNumber: ret.returnNumber } : {}),
   };
@@ -294,6 +314,8 @@ export const creditMemoResource: ResourceDefinition<CreditMemoListItem> = {
     creditMemoNumber: ['string', (item) => item.creditMemoNumber],
     customerId: ['string', (item) => item.customerId],
     customerName: ['string', (item) => item.customerName],
+    customerSegment: ['enum', (item) => item.customerSegment],
+    regionCode: ['enum', (item) => item.regionCode],
     reason: ['enum', (item) => item.reason],
     lifecycle: ['enum', (item) => item.lifecycle],
     issueDate: ['date', (item) => item.issueDate],

@@ -53,6 +53,7 @@ import { emptyQuery, withPageIndex, withPageSize, type GridQuery } from '@slotte
 import type { MovementListItem } from '@slotted/demo-nexora-backend';
 
 import { isApiError } from '../../core/backend/api-error';
+import { doorFilter, fieldsWithDoor, type Door } from '../../core/backend/door';
 import { LIST_PAGE_SIZE, LIST_PAGE_SIZES } from '../../core/backend/list-query';
 import {
   formatDateTime,
@@ -75,6 +76,7 @@ import { ListViewTools } from '../list-view/list-view-tools';
 import {
   MOVEMENT_HIDDEN_BY_DEFAULT,
   movementColumns,
+  MOVEMENT_DOOR_FIELDS,
   movementFilterFields,
 } from './movement-columns';
 
@@ -435,7 +437,11 @@ export class MovementsPage {
   readonly pageSizes = LIST_PAGE_SIZES;
   readonly phone = phoneSignal();
   readonly columns = movementColumns();
-  readonly fields = computed(() => movementFilterFields(this.warehouses.inScope()));
+  /** A report's door, whose ids the bar shows by the words the door carries. */
+  private readonly door = signal<Door | null>(null);
+  readonly fields = computed(() =>
+    fieldsWithDoor(movementFilterFields(this.warehouses.inScope()), MOVEMENT_DOOR_FIELDS, this.door()),
+  );
 
   readonly movementId = signal<string | null>(null);
   readonly movement = signal<MovementListItem | null>(null);
@@ -488,13 +494,21 @@ export class MovementsPage {
         Object.fromEntries(params.keys.map((key) => [key, params.get(key) ?? ''])),
       );
       const warehouse = params.get('warehouse');
+      // A report's door names its condition and its days field by field (OV-01).
+      const report = warehouse
+        ? null
+        : doorFilter(params, [...movementFilterFields(this.warehouses.inScope()), ...MOVEMENT_DOOR_FIELDS]);
+      this.door.set(report);
       const initial: GridQuery | null = warehouse
         ? { ...emptyQuery({ index: 0, size: LIST_PAGE_SIZE }), filter: warehouseFilter(warehouse) }
-        : first
+        : report
+          ? { ...emptyQuery({ index: 0, size: LIST_PAGE_SIZE }), filter: report.filter }
+          : first
           ? this.view.openingQuery
           : null;
       first = false;
-      void this.store.openAt({ skuId: params.get('sku'), sourceId: params.get('source') }, initial);
+      if (report) void this.store.openDoor({ ...emptyQuery({ index: 0, size: LIST_PAGE_SIZE }), filter: report.filter });
+      else void this.store.openAt({ skuId: params.get('sku'), sourceId: params.get('source') }, initial);
     });
     this.route.paramMap.subscribe((params) => {
       const id = params.get('id');

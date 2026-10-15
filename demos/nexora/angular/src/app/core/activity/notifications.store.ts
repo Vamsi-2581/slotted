@@ -3,21 +3,9 @@ import type { Notification } from '@slotted/demo-nexora-backend';
 
 import { NEXORA_BACKEND } from '../backend/nexora-backend.provider';
 import { TransportHealth } from '../backend/transport-health';
+import { entityRoute } from './entity-route';
 
 export type NotificationsView = 'all' | 'unread' | 'archived';
-
-/** Keyed by the entity types the backend writes on a notification (`tx.notify` and the seed). */
-const ROUTE_BY_ENTITY: Record<string, string> = {
-  customer: '/crm/customers',
-  sales_order: '/sales/orders',
-  quote: '/sales/quotes',
-  invoice: '/finance/invoices',
-  product: '/catalog/products',
-  sku: '/catalog/products',
-  support_ticket: '/support/inbox',
-  purchase_order: '/procurement/purchase-orders',
-  supplier: '/procurement/suppliers',
-};
 
 @Injectable({ providedIn: 'root' })
 export class NotificationsStore {
@@ -100,13 +88,6 @@ export class NotificationsStore {
 
   /** The backend records what a notification is about, not where it lives; the route is the client's. */
   routeFor(notification: Notification): string | null {
-    if (notification.entityType === undefined || notification.entityId === undefined) return null;
-    // A shipment has no screen of its own: it opens the ledger narrowed to what it moved.
-    if (notification.entityType === 'shipment')
-      return `/inventory/movements?source=${encodeURIComponent(notification.entityId)}`;
-    // An approval request has no page of its own: it is decided in the approvals queue.
-    if (notification.entityType === 'approval_request') return '/sales/approvals';
-    const base = ROUTE_BY_ENTITY[notification.entityType];
-    return base === undefined ? null : `${base}/${notification.entityId}`;
+    return entityRoute(notification.entityType, notification.entityId);
   }
 }

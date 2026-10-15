@@ -2,7 +2,10 @@ export interface NavDestination {
   id: string;
   label: string;
   path: string;
+  /** Any one of them opens the destination. */
   permissions?: string[];
+  /** Every one of them is needed as well: a report reads its records under `analytics.view`. */
+  requires?: string[];
   count?: 'approvals' | 'support';
   /** False where the destination has no record of its own to open: no `:id` route is made. */
   record?: false;
@@ -184,9 +187,36 @@ export const NAV_MODULES: readonly NavModule[] = [
     path: '/analytics',
     permissions: ['analytics.view'],
     slice: 'Analytics',
-    destinations: ['executive', 'sales', 'inventory', 'finance', 'support'].map((k) =>
-      d('analytics', k, k[0]!.toUpperCase() + k.slice(1), `/analytics/${k}`),
-    ),
+    // Section 16's report types. Each reads one area's records beside `analytics.view`, so a
+    // reader who cannot read the area is not offered its report; a report has no record of its own.
+    destinations: [
+      d('analytics', 'executive', 'Executive', '/analytics/executive', { record: false }),
+      d('analytics', 'sales', 'Sales', '/analytics/sales', {
+        permissions: ['orders.view'],
+        requires: ['analytics.view'],
+        record: false,
+      }),
+      d('analytics', 'inventory', 'Inventory', '/analytics/inventory', {
+        permissions: ['inventory.view'],
+        requires: ['analytics.view'],
+        record: false,
+      }),
+      d('analytics', 'procurement', 'Procurement', '/analytics/procurement', {
+        permissions: ['purchase_orders.view'],
+        requires: ['analytics.view'],
+        record: false,
+      }),
+      d('analytics', 'finance', 'Finance', '/analytics/finance', {
+        permissions: ['invoices.view', 'payments.view', 'finance.dashboard'],
+        requires: ['analytics.view'],
+        record: false,
+      }),
+      d('analytics', 'support', 'Support', '/analytics/support', {
+        permissions: ['support.view'],
+        requires: ['analytics.view'],
+        record: false,
+      }),
+    ],
   },
   {
     id: 'automations',
@@ -251,13 +281,13 @@ export const SECTION_LABELS: Record<NavModule['section'], string | null> = {
   manage: 'Manage',
 };
 
-const allowed = (can: (p: string) => boolean, permissions?: string[]) =>
-  permissions === undefined || permissions.some(can);
+const allowed = (can: (p: string) => boolean, permissions?: string[], requires?: string[]) =>
+  (permissions === undefined || permissions.some(can)) && (requires ?? []).every(can);
 
 export function visibleModules(can: (p: string) => boolean): NavModule[] {
   return NAV_MODULES.filter((m) => allowed(can, m.permissions)).map((m) => ({
     ...m,
-    destinations: m.destinations.filter((x) => allowed(can, x.permissions)),
+    destinations: m.destinations.filter((x) => allowed(can, x.permissions, x.requires)),
   }));
 }
 

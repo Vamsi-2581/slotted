@@ -5,22 +5,6 @@ import { sessionReady, signedOut } from './core/nav/guards';
 import { SessionStore } from './core/session/session.store';
 import { NAV_MODULES } from './core/nav/nav.model';
 import { isLazy, lazyPage, PermissionGate, type LazyPage } from './core/nav/permission-gate';
-import { CategoriesPage } from './pages/catalog/categories-page';
-import { PriceListsPage } from './pages/catalog/price-lists-page';
-import { ProductsPage } from './pages/catalog/products-page';
-import { SkusPage } from './pages/catalog/skus-page';
-import { CustomerPage } from './pages/customers/customer-page';
-import { CustomersPage } from './pages/customers/customers-page';
-import { NewCustomerPage } from './pages/customers/new-customer-page';
-import { ContactsPage } from './pages/contacts/contacts-page';
-import { ImportPage } from './pages/imports/import-page';
-import { ApprovalsPage } from './pages/approvals/approvals-page';
-import { OrderPage } from './pages/orders/order-page';
-import { OrdersPage } from './pages/orders/orders-page';
-import { NewQuotePage } from './pages/quotes/new-quote-page';
-import { QuotePage } from './pages/quotes/quote-page';
-import { QuotesPage } from './pages/quotes/quotes-page';
-import { DashboardPage } from './pages/dashboard/dashboard-page';
 import { NotFoundPage } from './pages/not-found/not-found-page';
 import { PlaceholderPage } from './pages/placeholder/placeholder-page';
 import { SignInPage } from './pages/sign-in/sign-in-page';
@@ -30,28 +14,28 @@ const strip = (path: string) => path.replace(/^\//, '');
 
 /**
  * The destinations with a screen; the rest open on the placeholder until their
- * slice. The inventory's, procurement's and finance's screens, and the catalogue's
- * records, are fetched when first opened, so they stay out of the initial bundle.
+ * slice. Every screen is fetched when first opened, so the initial bundle holds the shell and the
+ * backend and stays inside the budget `angular.json` states.
  */
 const PAGES: Record<string, Type<unknown> | LazyPage> = {
-  '/crm/customers': CustomersPage,
-  '/crm/customers/new': NewCustomerPage,
-  '/crm/customers/:id': CustomerPage,
-  '/crm/contacts': ContactsPage,
-  '/crm/imports': ImportPage,
-  '/crm/imports/:id': ImportPage,
-  '/sales/orders': OrdersPage,
-  '/sales/orders/:id': OrderPage,
-  '/sales/approvals': ApprovalsPage,
-  '/sales/quotes': QuotesPage,
-  '/sales/quotes/new': NewQuotePage,
-  '/sales/quotes/:id': QuotePage,
-  '/catalog/products': ProductsPage,
+  '/crm/customers': lazyPage(() => import('./pages/customers/customers-page').then((m) => m.CustomersPage)),
+  '/crm/customers/new': lazyPage(() => import('./pages/customers/new-customer-page').then((m) => m.NewCustomerPage)),
+  '/crm/customers/:id': lazyPage(() => import('./pages/customers/customer-page').then((m) => m.CustomerPage)),
+  '/crm/contacts': lazyPage(() => import('./pages/contacts/contacts-page').then((m) => m.ContactsPage)),
+  '/crm/imports': lazyPage(() => import('./pages/imports/import-page').then((m) => m.ImportPage)),
+  '/crm/imports/:id': lazyPage(() => import('./pages/imports/import-page').then((m) => m.ImportPage)),
+  '/sales/orders': lazyPage(() => import('./pages/orders/orders-page').then((m) => m.OrdersPage)),
+  '/sales/orders/:id': lazyPage(() => import('./pages/orders/order-page').then((m) => m.OrderPage)),
+  '/sales/approvals': lazyPage(() => import('./pages/approvals/approvals-page').then((m) => m.ApprovalsPage)),
+  '/sales/quotes': lazyPage(() => import('./pages/quotes/quotes-page').then((m) => m.QuotesPage)),
+  '/sales/quotes/new': lazyPage(() => import('./pages/quotes/new-quote-page').then((m) => m.NewQuotePage)),
+  '/sales/quotes/:id': lazyPage(() => import('./pages/quotes/quote-page').then((m) => m.QuotePage)),
+  '/catalog/products': lazyPage(() => import('./pages/catalog/products-page').then((m) => m.ProductsPage)),
   '/catalog/products/:id': lazyPage(() => import('./pages/catalog/product-page').then((m) => m.ProductPage)),
-  '/catalog/skus': SkusPage,
+  '/catalog/skus': lazyPage(() => import('./pages/catalog/skus-page').then((m) => m.SkusPage)),
   '/catalog/skus/:id': lazyPage(() => import('./pages/catalog/sku-page').then((m) => m.SkuPage)),
-  '/catalog/categories': CategoriesPage,
-  '/catalog/price-lists': PriceListsPage,
+  '/catalog/categories': lazyPage(() => import('./pages/catalog/categories-page').then((m) => m.CategoriesPage)),
+  '/catalog/price-lists': lazyPage(() => import('./pages/catalog/price-lists-page').then((m) => m.PriceListsPage)),
   '/inventory/overview': lazyPage(() => import('./pages/inventory/overview-page').then((m) => m.OverviewPage)),
   '/inventory/stock': lazyPage(() => import('./pages/inventory/stock-page').then((m) => m.StockPage)),
   '/inventory/stock/:id': lazyPage(() => import('./pages/inventory/position-page').then((m) => m.PositionPage)),
@@ -87,6 +71,22 @@ const PAGES: Record<string, Type<unknown> | LazyPage> = {
   '/finance/reconciliation': lazyPage(() => import('./pages/finance/reconciliation-page').then((m) => m.ReconciliationPage)),
   // A bank transaction is read in the workspace: its `:id` is the one the workspace has open.
   '/finance/reconciliation/:id': lazyPage(() => import('./pages/finance/reconciliation-page').then((m) => m.ReconciliationPage)),
+  '/support/inbox': lazyPage(() => import('./pages/support/inbox-page').then((m) => m.InboxPage)),
+  // A ticket is read in the inbox: its `:id` is the one the inbox has open.
+  '/support/inbox/:id': lazyPage(() => import('./pages/support/inbox-page').then((m) => m.InboxPage)),
+  '/support/inbox/new': lazyPage(() => import('./pages/support/new-ticket-page').then((m) => m.NewTicketPage)),
+  '/automations/workflows': lazyPage(() => import('./pages/automations/workflows-page').then((m) => m.WorkflowsPage)),
+  '/automations/workflows/new': lazyPage(() => import('./pages/automations/new-workflow-page').then((m) => m.NewWorkflowPage)),
+  '/automations/workflows/:id': lazyPage(() => import('./pages/automations/workflow-page').then((m) => m.WorkflowPage)),
+  // The execution history of §15, one workflow's runs under its record.
+  '/automations/workflows/:id/runs': lazyPage(() => import('./pages/automations/workflow-runs-page').then((m) => m.WorkflowRunsPage)),
+  // Section 16's reports: one page draws the six, by the route it stands on.
+  ...Object.fromEntries(
+    ['executive', 'sales', 'inventory', 'procurement', 'finance', 'support'].map((key) => [
+      `/analytics/${key}`,
+      lazyPage(() => import('./pages/analytics/report-page').then((m) => m.ReportPage)),
+    ]),
+  ),
 };
 
 /**
@@ -117,15 +117,32 @@ const RESOLVERS: Record<string, Record<string, ResolveFn<unknown>>> = {
     chart: () =>
       import('@slotted/core/chart-echarts').then((engine) => engine.preloadChartEngine(['bar'])),
   },
+  ...Object.fromEntries(
+    ['executive', 'sales', 'inventory', 'procurement', 'finance', 'support'].map((key) => [
+      `/analytics/${key}`,
+      {
+        chart: () =>
+          import('@slotted/core/chart-echarts').then((engine) => engine.preloadChartEngine(['bar', 'line'])),
+      },
+    ]),
+  ),
 };
 
-const gate = (path: string, title: string, permissions: string[] = []) => ({
-  path: strip(path),
-  component: PermissionGate,
-  title,
-  data: { permissions, page: PAGES[path] ?? PlaceholderPage, title, path },
-  ...(RESOLVERS[path] ? { resolve: RESOLVERS[path] } : {}),
-});
+const gate = (path: string, title: string, permissions: string[] = [], requires: string[] = []) => {
+  const page = PAGES[path] ?? PlaceholderPage;
+  // A lazy page's chunk is a resolver: the route activates with its page, and never draws an empty gate.
+  const resolve = {
+    ...(RESOLVERS[path] ?? {}),
+    ...(isLazy(page) ? { pageComponent: () => page.load() } : {}),
+  };
+  return {
+    path: strip(path),
+    component: PermissionGate,
+    title,
+    data: { permissions, requires, page, title, path },
+    ...(Object.keys(resolve).length > 0 ? { resolve } : {}),
+  };
+};
 
 /** Every destination of the Appendix A route map, gated by the module's or its own permission. */
 const moduleRoutes: Routes = NAV_MODULES.flatMap((m) => {
@@ -140,17 +157,19 @@ const moduleRoutes: Routes = NAV_MODULES.flatMap((m) => {
       redirectTo: () => {
         const session = inject(SessionStore);
         const open = m.destinations.find(
-          (x) => (x.permissions ?? m.permissions ?? []).length === 0 || session.canAny(...(x.permissions ?? m.permissions ?? [])),
+          (x) =>
+            ((x.permissions ?? m.permissions ?? []).length === 0 || session.canAny(...(x.permissions ?? m.permissions ?? []))) &&
+            (x.requires ?? []).every((p) => session.can(p)),
         );
         return strip((open ?? m.destinations[0]!).path);
       },
     },
     ...m.destinations.flatMap((x) => [
-      gate(x.path, x.label, x.permissions ?? m.permissions),
+      gate(x.path, x.label, x.permissions ?? m.permissions, x.requires),
       // A destination with no record of its own leaves `:id` to the not-found page.
       ...(x.record === false
         ? []
-        : [gate(`${x.path}/:id`, x.label, x.permissions ?? m.permissions)]),
+        : [gate(`${x.path}/:id`, x.label, x.permissions ?? m.permissions, x.requires)]),
     ]),
   ];
 });
@@ -163,7 +182,11 @@ export const routes: Routes = [
     canMatch: [sessionReady],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-      { path: 'dashboard', component: DashboardPage, title: 'Dashboard' },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/dashboard/dashboard-page').then((m) => m.DashboardPage),
+        title: 'Dashboard',
+      },
       {
         path: 'notifications',
         loadComponent: () =>
@@ -192,6 +215,9 @@ export const routes: Routes = [
       gate('/finance/invoices/credit-memos/new', 'New credit memo', ['credit_memos.create']),
       gate('/finance/invoices/credit-memos', 'Credit memos', ['credit_memos.view']),
       gate('/finance/invoices/credit-memos/:id', 'Credit memo', ['credit_memos.view']),
+      gate('/support/inbox/new', 'New ticket', ['support.create']),
+      gate('/automations/workflows/new', 'New workflow', ['workflows.create']),
+      gate('/automations/workflows/:id/runs', 'Run history', ['workflows.view']),
       ...moduleRoutes,
       { path: '**', component: NotFoundPage, title: 'Not found' },
     ],

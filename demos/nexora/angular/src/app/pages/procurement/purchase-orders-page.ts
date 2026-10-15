@@ -46,9 +46,10 @@ import {
 } from '../../core/procurement/procurement.model';
 import { PurchaseOrdersStore } from '../../core/procurement/purchase-orders.store';
 import { SessionStore } from '../../core/session/session.store';
+import { listDoor } from '../list-view/list-door';
 import { listView } from '../list-view/list-view';
 import { ListViewTools } from '../list-view/list-view-tools';
-import { purchaseOrderColumns, purchaseOrderFilterFields } from './procurement-columns';
+import { PURCHASE_ORDER_DOOR_FIELDS, purchaseOrderColumns, purchaseOrderFilterFields } from './procurement-columns';
 
 /** The orders still to arrive and past their expected date, as the bar's own pills (OV-01). */
 export function lateFilter(): FilterGroup {
@@ -184,7 +185,7 @@ export function lateFilter(): FilterGroup {
             slFilterBar
             aria-label="Purchase order filters"
             shortcut="/"
-            [fields]="fields()"
+            [fields]="door.fields()"
             [value]="store.filter()"
             (valueChangeRequest)="store.setFilter($event.value)"
             [query]="store.search()"
@@ -302,7 +303,7 @@ export class PurchaseOrdersPage {
 
   readonly canCreate = computed(() => this.can('purchase_orders.create'));
   readonly columns = computed(() => purchaseOrderColumns(this.can));
-  readonly fields = computed(() => purchaseOrderFilterFields(this.warehouses.inScope()));
+
 
   readonly description = computed(() => {
     const scope = this.warehouses.inScope();
@@ -333,11 +334,24 @@ export class PurchaseOrdersPage {
     applyQuery: (query) => void this.store.load(query),
   });
 
+  /** A report's door opens the list on its condition and period, as the bar's pills (OV-01). */
+  readonly door = listDoor({
+    fields: () => purchaseOrderFilterFields(this.warehouses.inScope()),
+    doorOnly: PURCHASE_ORDER_DOOR_FIELDS,
+    open: (filter, first) => {
+      if (filter !== null) {
+        void this.store.load({ ...emptyQuery({ index: 0, size: this.store.page().size }), filter });
+        void this.store.loadGrandTotal();
+      } else if (first) {
+        // The page's own door counts late orders and opens the list on them (OV-01).
+        if (this.route$.snapshot.queryParamMap.get('late') === '1') this.showLate();
+        else void this.store.open(this.view.openingQuery);
+      }
+    },
+  });
+
   constructor() {
     void this.warehouses.open();
-    // A door that counts late orders opens the list on them, as the bar's own pills (OV-01).
-    if (this.route$.snapshot.queryParamMap.get('late') === '1') this.showLate();
-    else void this.store.open(this.view.openingQuery);
     void this.countLate();
   }
 

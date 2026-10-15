@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, type OnInit } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal, type OnInit } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SlBadge } from '@slotted/angular/badge';
 import { SlDataGrid, SlDataGridCellTemplate, SlDataGridFooter } from '@slotted/angular/data-grid';
 import { SlFilterBar, SlFilterBarEnd } from '@slotted/angular/filter-bar';
@@ -26,6 +26,7 @@ import { emptyQuery, withPageIndex, withPageSize } from '@slotted/core/grid';
 import type { FilterGroup } from '@slotted/core/filter';
 import type { OrderListItem } from '@slotted/demo-nexora-backend';
 
+import { doorFilter, fieldsWithDoor, type Door } from '../../core/backend/door';
 import { LIST_PAGE_SIZE, LIST_PAGE_SIZES } from '../../core/backend/list-query';
 import { phoneSignal } from '../../core/layout/phone';
 import { OrdersStore } from '../../core/sales/orders.store';
@@ -36,6 +37,7 @@ import {
   FULFILLMENT_LABEL,
   formatMoney,
   ORDER_COLUMNS,
+  ORDER_DOOR_FIELDS,
   ORDER_FILTER_FIELDS,
   ORDER_HIDDEN_COLUMN_IDS,
   ORDER_STATUS_LABEL,
@@ -117,7 +119,7 @@ import { OrderProgress } from './order-progress';
             slFilterBar
             aria-label="Order filters"
             shortcut="/"
-            [fields]="fields"
+            [fields]="fields()"
             [value]="store.filter()"
             (valueChangeRequest)="filterRequest($event)"
             [query]="store.search()"
@@ -252,8 +254,13 @@ export class OrdersPage implements OnInit {
   readonly store = inject(OrdersStore);
   private readonly router = inject(Router);
 
+  private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
+
   readonly columns = ORDER_COLUMNS;
-  readonly fields = ORDER_FILTER_FIELDS;
+  /** The door the address names, whose ids the bar shows by the words the door carries. */
+  private readonly door = signal<Door | null>(null);
+  readonly fields = computed(() => fieldsWithDoor(ORDER_FILTER_FIELDS, ORDER_DOOR_FIELDS, this.door()));
   readonly pageSizes = LIST_PAGE_SIZES;
   /** The compact size class: the pager leaves its page size at the default. */
   readonly phone = phoneSignal();
@@ -277,7 +284,18 @@ export class OrdersPage implements OnInit {
   });
 
   ngOnInit(): void {
-    void this.store.open(this.view.openingQuery);
+    let first = true;
+    // A report's door opens the list on its condition and its period, as the bar's own pills (OV-01).
+    const subscription = this.route.queryParamMap.subscribe((params) => {
+      const door = doorFilter(params, [...ORDER_FILTER_FIELDS, ...ORDER_DOOR_FIELDS]);
+      this.door.set(door);
+      if (door !== null) {
+        void this.store.load({ ...emptyQuery({ index: 0, size: this.store.page().size }), filter: door.filter });
+        void this.store.loadGrandTotal();
+      } else if (first) void this.store.open(this.view.openingQuery);
+      first = false;
+    });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
   approval(row: OrderListItem): string {

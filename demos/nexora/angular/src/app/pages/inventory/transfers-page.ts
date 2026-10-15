@@ -44,6 +44,7 @@ import { phoneSignal } from '../../core/layout/phone';
 import { SessionStore } from '../../core/session/session.store';
 import { listView } from '../list-view/list-view';
 import { ListViewTools } from '../list-view/list-view-tools';
+import { listDoor } from '../list-view/list-door';
 
 /**
  * The columns are named by the fields `transferResource` sorts and filters
@@ -113,6 +114,50 @@ function transferColumns(codeOf: (id: string) => string): readonly GridColumn<Tr
       filterable: false,
       accessor: (row) => row.metadata.updatedAt,
       format: (value) => formatDateTime(String(value)),
+    },
+  ];
+}
+
+/** The fields `transferResource` filters by, each warehouse a choice of `all`. */
+export function transferFilterFields(all: readonly { value: string; label: string }[]): readonly FilterBarField[] {
+  return [
+    {
+      key: 'status',
+      label: 'Status',
+      kind: 'set',
+      options: options(TRANSFER_STATUS_LABEL),
+      pinned: true,
+      operators: ['anyOf'],
+    },
+    {
+      key: 'sourceWarehouseId',
+      label: 'From',
+      kind: 'set',
+      options: all,
+      pinned: true,
+      operators: ['anyOf'],
+    },
+    {
+      key: 'destinationWarehouseId',
+      label: 'To',
+      kind: 'set',
+      options: all,
+      pinned: true,
+      operators: ['anyOf'],
+    },
+    {
+      key: 'requestedDate',
+      label: 'Requested',
+      kind: 'date',
+      operators: ['after', 'before', 'is', 'between'],
+      section: 'Transfer',
+    },
+    {
+      key: 'lineCount',
+      label: 'Lines',
+      kind: 'number',
+      operators: ['greaterThanOrEqual', 'lessThanOrEqual'],
+      section: 'Transfer',
     },
   ];
 }
@@ -209,7 +254,7 @@ function transferColumns(codeOf: (id: string) => string): readonly GridColumn<Tr
             slFilterBar
             aria-label="Transfer filters"
             shortcut="/"
-            [fields]="fields()"
+            [fields]="door.fields()"
             [value]="store.filter()"
             (valueChangeRequest)="store.setFilter($event.value)"
             [query]="store.search()"
@@ -313,52 +358,10 @@ export class TransfersPage {
 
   readonly columns = computed(() => transferColumns((id) => this.warehouses.code(id)));
 
-  /** The fields `transferResource` filters by; a warehouse is offered where the scope holds several. */
-  readonly fields = computed<readonly FilterBarField[]>(() => {
-    const all = this.warehouses
-      .rows()
-      .map((row) => ({ value: row.id, label: `${row.code} — ${row.name}` }));
-    return [
-      {
-        key: 'status',
-        label: 'Status',
-        kind: 'set',
-        options: options(TRANSFER_STATUS_LABEL),
-        pinned: true,
-        operators: ['anyOf'],
-      },
-      {
-        key: 'sourceWarehouseId',
-        label: 'From',
-        kind: 'set',
-        options: all,
-        pinned: true,
-        operators: ['anyOf'],
-      },
-      {
-        key: 'destinationWarehouseId',
-        label: 'To',
-        kind: 'set',
-        options: all,
-        pinned: true,
-        operators: ['anyOf'],
-      },
-      {
-        key: 'requestedDate',
-        label: 'Requested',
-        kind: 'date',
-        operators: ['after', 'before', 'is'],
-        section: 'Transfer',
-      },
-      {
-        key: 'lineCount',
-        label: 'Lines',
-        kind: 'number',
-        operators: ['greaterThanOrEqual', 'lessThanOrEqual'],
-        section: 'Transfer',
-      },
-    ];
-  });
+  /** The fields `transferResource` filters by. */
+  readonly fields = computed<readonly FilterBarField[]>(() =>
+    transferFilterFields(this.warehouses.rows().map((row) => ({ value: row.id, label: `${row.code} — ${row.name}` }))),
+  );
 
   readonly description = computed(() => {
     const scope = this.warehouses.inScope();
@@ -384,8 +387,22 @@ export class TransfersPage {
     applyQuery: (query) => void this.store.load(query),
   });
 
+  /** A report's door opens the list on its condition and period, as the bar's pills (OV-01). */
+  readonly door = listDoor({
+    fields: () => (this.route.snapshot.queryParamMap.get('status') === 'in_flight' ? [] : this.fields()),
+    open: (filter, first) => {
+      if (filter !== null) {
+        void this.store.load({ ...emptyQuery({ index: 0, size: this.store.page().size }), filter });
+        void this.store.loadGrandTotal();
+      } else if (first) this.openOwn();
+    },
+  });
+
   constructor() {
     void this.warehouses.open();
+  }
+
+  private openOwn(): void {
     // The overview's figure opens the list on the transfers still moving, as the bar's own pill (OV-01).
     if (this.route.snapshot.queryParamMap.get('status') === 'in_flight') {
       void this.store.load({

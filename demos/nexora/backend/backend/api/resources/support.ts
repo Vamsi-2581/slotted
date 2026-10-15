@@ -1,5 +1,6 @@
 import {
   SLA_TARGETS,
+  businessDateOf,
   businessMinutesBetween,
   notFound,
   type ConversationMessage,
@@ -19,6 +20,14 @@ import type { ApiRuntime } from '../runtime';
 export interface TicketListItem extends SupportTicket {
   customerName: string;
   customerSegment: string;
+  regionCode: string;
+  /** Business dates of the ticket's opening and resolution, the days a report counts it on. */
+  createdDate: string;
+  resolvedDate?: string;
+  /** Escalated at any point, whether or not it still is. */
+  escalated: boolean;
+  /** Business minutes from opening to resolution; absent until resolved. */
+  resolutionMinutes?: number;
   assigneeName?: string;
   contactName?: string;
   relatedOrderNumber?: string;
@@ -89,6 +98,15 @@ export function ticketListItem(runtime: ApiRuntime, ticket: SupportTicket): Tick
     ...ticket,
     customerName: customer?.displayName ?? ticket.customerId,
     customerSegment: customer?.segment ?? 'smb',
+    regionCode: customer?.regionCode ?? 'US',
+    createdDate: businessDateOf(ticket.metadata.createdAt),
+    escalated: ticket.escalationReason !== undefined || ticket.status === 'escalated',
+    ...(ticket.resolvedAt
+      ? {
+          resolvedDate: businessDateOf(ticket.resolvedAt),
+          resolutionMinutes: businessMinutesBetween(ticket.metadata.createdAt, ticket.resolvedAt),
+        }
+      : {}),
     resolutionMinutesRemaining: targets.resolutionMinutes - resolutionUsed,
     firstResponseMinutesRemaining: targets.firstResponseMinutes - firstUsed,
     ageBusinessMinutes: age,
@@ -106,8 +124,10 @@ export const ticketResource: ResourceDefinition<TicketListItem> = {
     customerId: ['string', (item) => item.customerId],
     customerName: ['string', (item) => item.customerName],
     customerSegment: ['enum', (item) => item.customerSegment],
+    regionCode: ['enum', (item) => item.regionCode],
     assigneeId: ['string', (item) => item.assigneeId],
     assigneeName: ['string', (item) => item.assigneeName],
+    assigned: ['boolean', (item) => item.assigneeId !== undefined],
     assignedTeamId: ['string', (item) => item.assignedTeamId],
     channel: ['enum', (item) => item.channel],
     category: ['enum', (item) => item.category],
@@ -122,6 +142,11 @@ export const ticketResource: ResourceDefinition<TicketListItem> = {
     tags: ['array', (item) => item.tags],
     relatedOrderId: ['string', (item) => item.relatedOrderId],
     createdAt: ['datetime', (item) => item.metadata.createdAt],
+    createdDate: ['date', (item) => item.createdDate],
+    resolvedDate: ['date', (item) => item.resolvedDate],
+    escalated: ['boolean', (item) => item.escalated],
+    resolutionMinutes: ['number', (item) => item.resolutionMinutes],
+    satisfactionScore: ['number', (item) => item.satisfactionScore],
     updatedAt: ['datetime', (item) => item.metadata.updatedAt],
   }),
   search: (item) => [
@@ -254,6 +279,52 @@ export function getTicket(runtime: ApiRuntime, id: string): TicketDetail {
         }
       : {}),
   };
+}
+
+/** A person a ticket can be assigned to (section 14 "assignment controls"). */
+export interface SupportAgent {
+  id: string;
+  displayName: string;
+  title?: string;
+  role: 'support_agent' | 'support_manager';
+  /** Tickets assigned to them that are neither resolved nor closed. */
+  openTicketCount: number;
+}
+
+/**
+ * The active holders of a support role, the people an assignment or an
+ * escalation names. A support agent holds no `users.view`, so the support
+ * module answers its own roster under `support.view`.
+ */
+export function listSupportAgents(runtime: ApiRuntime): SupportAgent[] {
+  runtime.require('support.view');
+  const { dataset } = runtime.store;
+  const open = new Map<string, number>();
+  for (const ticket of dataset.tickets.values()) {
+    if (!ticket.assigneeId || ticket.status === 'resolved' || ticket.status === 'closed') continue;
+    open.set(ticket.assigneeId, (open.get(ticket.assigneeId) ?? 0) + 1);
+  }
+  const agents: SupportAgent[] = [];
+  for (const user of dataset.users.values()) {
+    if (user.status !== 'active') continue;
+    const roles = runtime.indexes.roleAssignmentsByUser
+      .get(user.id)
+      .map((assignment) => dataset.roles.get(assignment.roleId)?.name);
+    const role = roles.includes('Support Manager')
+      ? 'support_manager'
+      : roles.includes('Support Agent')
+        ? 'support_agent'
+        : undefined;
+    if (!role) continue;
+    agents.push({
+      id: user.id,
+      displayName: user.displayName,
+      ...(user.title ? { title: user.title } : {}),
+      role,
+      openTicketCount: open.get(user.id) ?? 0,
+    });
+  }
+  return agents.sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
 
 export interface SupportMetrics {

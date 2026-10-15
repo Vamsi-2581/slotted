@@ -30,6 +30,9 @@ export interface AuditEvent {
   before?: unknown;
   after?: unknown;
   correlationId: string;
+  /** Written by a workflow run's action: the workflow and the run (section 69.3). */
+  workflowId?: string;
+  workflowRunId?: string;
 }
 
 export type NotificationType = 'info' | 'success' | 'warning' | 'action_required';

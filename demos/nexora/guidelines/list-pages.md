@@ -24,8 +24,10 @@ triggers:
     truncate,
     phone,
     narrow,
+    badge,
+    tag,
   ]
-families: [data-grid, filter-bar, action-bar, pagination, page, page-header, link]
+families: [data-grid, filter-bar, action-bar, pagination, page, page-header, link, badge, tag]
 ---
 
 # List pages
@@ -162,3 +164,14 @@ Do: Write the page with `fill`; make the region a column (`display: flex; flex-d
 Don't: Keep the zero basis below 600 pixels, which collapses the listing to nothing once the column loses its height, or give it an `auto` basis above 600, where its rows' height climbs the column and the page scrolls again.
 Seen in: Nexora · Contacts, a grid of sixty-two rows that scrolled the page under the pointer and its own rows over it; Suppliers at 375×667, rows in 23% of the screen (ledger row "page, page-header, data-grid") · corrected
 Check: At 1280 with a full page of rows, the document's scroll height equals its client height and the wheel over a row moves the rows; at 375×667 the document scrolls and the grid is as tall as its rows.
+
+### LP-13 · A mark in a cell is the small step
+
+Level: SHOULD
+Applies to: a `badge` or a `tag` drawn in a cell of a `data-grid` or a `table`
+Rule: The mark takes `size="sm"`; the default `md` belongs to a record's header and to a region with room around it.
+Why: A row sets its text at the small type step, 13 pixels in a 34-pixel row; an `md` badge sets 13-pixel words in a 24-pixel box and stands taller and louder than the cells beside it, so a state column outweighs the record's name.
+Do: Write `size="sm"` on every mark a cell holds — a state, a flag, a warning — the 12-pixel words in a 19-pixel box that every other Nexora list draws.
+Don't: Leave a cell's mark at the family's default, or size it up to make a state stand out; a tone says that.
+Seen in: Nexora · Products, SKUs and Customers, the state column at `md` beside lists at `sm` (review of the screens) · corrected
+Check: On every list, every `[data-ui=badge]` and `[data-ui=tag]` inside a grid's cell or a table's cell reads `data-size="sm"`.

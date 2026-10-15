@@ -10,8 +10,8 @@ import { QuotesStore } from './quotes.store';
 
 /**
  * The quote's own road (§58): written, submitted, sent, accepted, and then an
- * order. The seed ships only converted quotes, so every state past the first
- * is reached by writing one.
+ * order. Every state is reached by writing a quote, so no seeded quote's
+ * state decides the walk.
  */
 describe('the life of a quote', () => {
   let api: NexoraApi;

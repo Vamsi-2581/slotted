@@ -1,4 +1,5 @@
 import {
+  businessDateOf,
   diffDays,
   money,
   notFound,
@@ -160,6 +161,20 @@ export interface PurchaseOrderListItem extends PurchaseOrder {
   lineCount: number;
   receivedShareBps: number;
   daysLate: number;
+  /** Business date of the receipt that completed the order; absent until it is received in full. */
+  receivedOn?: string;
+}
+
+/** The business date an order was received in full: its last receipt, once nothing is left open. */
+export function purchaseOrderReceivedOn(
+  runtime: ApiRuntime,
+  po: PurchaseOrder,
+): string | undefined {
+  if (po.status !== 'received' && po.status !== 'closed') return undefined;
+  let last: string | undefined;
+  for (const receipt of runtime.indexes.receiptsByPo.get(po.id))
+    if (last === undefined || receipt.receivedAt > last) last = receipt.receivedAt;
+  return last === undefined ? undefined : businessDateOf(last);
 }
 
 export function purchaseOrderListItem(
@@ -179,8 +194,10 @@ export function purchaseOrderListItem(
   }
   const open =
     po.status === 'sent' || po.status === 'acknowledged' || po.status === 'partially_received';
+  const receivedOn = purchaseOrderReceivedOn(runtime, po);
   return {
     ...po,
+    ...(receivedOn ? { receivedOn } : {}),
     ...(hidesCost(runtime)
       ? {
           subtotal: nought(po.subtotal),
@@ -214,6 +231,7 @@ export const purchaseOrderResource: ResourceDefinition<PurchaseOrderListItem> = 
     exceptionFlags: ['array', (item) => item.exceptionFlags],
     createdBusinessDate: ['date', (item) => item.createdBusinessDate],
     expectedDate: ['date', (item) => item.expectedDate],
+    receivedOn: ['date', (item) => item.receivedOn],
     // Compared in US dollars, so an order in reais and one in dollars sort by what they are worth.
     total: ['money', (item) => money(usdMinor(item.total, item.fxRateToUsd), 'USD')],
     lineCount: ['number', (item) => item.lineCount],

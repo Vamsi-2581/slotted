@@ -56,7 +56,7 @@ Rule: Before writing an element next to a family, the family's anatomy is read; 
 Why: The slot is where the family's promises hold — the header's tabs stay pinned, the bar's search folds, the column's header takes the row inset; a block written beside the family carries none of them and reads as a defect of the family.
 Do: Open the reference page's anatomy table and match the element to a part described as "the slot a … sits in". Compose with the family's own members; wrap a family's part in a component of the page's own only when the host has no box.
 Don't: Place a family's content as the first block of a body, a sibling of the family or a child of the wrong part because the markup is shorter that way.
-Seen in: Nexora · Notifications tabs in the body (LA-04); the workspace text in the bar's `context` slot, which holds a control (ledger row "context is a slot for a control"); the search trigger in the bar's `search` slot, which holds a field (SC-01); a page's prose in `page-header`'s `title`, which is a wrapping row and put the paragraph beside the heading, instead of in `content` (ledger row "description is a part of content") · corrected
+Seen in: Nexora · Notifications tabs in the body (LA-04); the workspace text in the bar's `context` slot, which holds a control (ledger row "context is a slot for a control"); the search trigger in the bar's `search` slot, which holds a field (SC-01); a page's prose in `page-header`'s `title`, which is a wrapping row and put the paragraph beside the heading, instead of in `content` (ledger row "description is a part of content"); a report's period controls written as the body's first block, where the header's `content` names filters (RE-06) · corrected
 Check: For every element of the page's own inside a family's root, the family's anatomy names the part it stands in; every "slot a … sits in" the page needs is used rather than imitated.
 
 ### CP-02 · Siblings of the page's own stand in a layout family
@@ -124,3 +124,14 @@ Do: Set the width on the page and nowhere else; a form with a table of lines kee
 Don't: Cap a form's body with a width of the screen's own, or leave a form at `wide` so its fields run the length of a monitor.
 Seen in: Nexora · twelve forms capped at 40, 46, 48 and 64rem or not at all · corrected
 Check: On every form the header's end edge and the body's end edge are the same line.
+
+### CP-08 · A control that changes mode keeps every box where it was
+
+Level: MUST
+Applies to: a segmented control, a tab or a toggle that switches what one region holds — a reply or an internal note, one view or another — and the text beside it
+Rule: Switching the mode changes the words and the values in the region, never the size, the line count or the position of any box in it or around it; text whose length differs between modes stands on one line, cut with an ellipsis and read whole from its title.
+Why: The line beside Reply and Internal note was longer in one mode and wrapped under the control at narrow widths, so every switch moved the composer and the conversation above it under the reader's eyes and pointer.
+Do: Give the varying text `flex: 1 1 0`, `min-inline-size: 0` and a one-line cut, write the two texts to similar lengths, and keep a control's label set fixed across modes.
+Don't: Let a mode add or remove a line, a hint or a control that changes the region's height, or let a row wrap differently in one mode than in the other.
+Seen in: Nexora · the ticket composer's mode line · corrected
+Check: At 1280, 570 and 390 pixels, `tools/look.mjs` with an expression that switches the mode reports the same top for the composer's textarea in both modes.

@@ -269,7 +269,11 @@ function buildTicket(
   const subject =
     override?.subject ??
     fill(random.pick(TICKET_SUBJECTS[category] ?? (TICKET_SUBJECTS['other'] as string[])), tokens);
-  const createdAt = instantOn(date, random, 7, 19);
+  // A ticket opened today is never opened after the demo clock: an hour drawn past it is
+  // mirrored to before it, with no draw of its own, so the random sequence is the one it was.
+  const drawn = instantOn(date, random, 7, 19);
+  const overshoot = instantMs(drawn) - instantMs(now);
+  const createdAt = overshoot > 0 ? addMs(now, -overshoot) : drawn;
   const age = diffDays(today, date);
   const targets = SLA_TARGETS[priority];
   const firstResponseDueAt = addBusinessMinutes(createdAt, targets.firstResponseMinutes);

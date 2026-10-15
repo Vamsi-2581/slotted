@@ -1,15 +1,19 @@
 import {
+  AUTOMATION_ACTOR_ID,
+  AUTOMATION_PERMISSIONS,
   NexoraApiError,
   forbidden,
   isPermission,
   preconditionRequired,
   staleVersion,
   type ActivityEvent,
+  type AuditEvent,
   type EntityMetadata,
   type Notification,
   type Permission,
   type PermissionScope,
   type User,
+  type WorkflowTriggerType,
 } from '../domain';
 import type { CollectionName } from '../data/dataset';
 import { createIndexes, type Indexes } from './indexes';
@@ -54,6 +58,8 @@ export class Authorization {
     const cached = this.cache.get(userId);
     if (cached) return cached;
     const result = new Map<string, PermissionScope[]>();
+    if (userId === AUTOMATION_ACTOR_ID)
+      for (const permission of AUTOMATION_PERMISSIONS) result.set(permission, [{ type: 'all' }]);
     for (const assignment of this.indexes.roleAssignmentsByUser.get(userId)) {
       const role = this.store.dataset.roles.get(assignment.roleId);
       if (!role) continue;
@@ -134,6 +140,12 @@ function hashFingerprint(value: string): number {
   return (hash >>> 0) / 4294967296;
 }
 
+const REPORT_ENDPOINTS = new Set(
+  ['executive', 'sales', 'inventory', 'procurement', 'finance', 'support'].map(
+    (report) => `GET /analytics/${report}`,
+  ),
+);
+
 /** Section 78 — latency and failure profiles. */
 export class Latency {
   profile: LatencyProfile;
@@ -168,6 +180,8 @@ export class Latency {
     if (this.profile !== 'degraded') return false;
     const roll = hashFingerprint(`fail:${this.seed}:${fingerprint}:${this.counter}`);
     if (endpoint === 'GET /finance/overview') return roll < 0.35;
+    // The section 16 reports are analytics reads like the finance overview, and fail as it does.
+    if (REPORT_ENDPOINTS.has(endpoint)) return roll < 0.35;
     if (endpoint === 'GET /activity') return roll < 0.15;
     if (kind === 'write') return roll < 0.05;
     return false;
@@ -195,22 +209,73 @@ interface Snapshot {
   before: unknown | undefined;
 }
 
+/** The records an event names; the automation engine reads its subject from them. */
+export interface WorkflowEventRefs {
+  orderId?: string;
+  customerId?: string;
+  invoiceId?: string;
+  ticketId?: string;
+  skuId?: string;
+  warehouseId?: string;
+  /** `order.value_changed`: the order's total before the change, in US-dollar minor units. */
+  previousTotalUsd?: number;
+  /** `customer.status_changed`: the status before the change. */
+  previousStatus?: string;
+}
+
+/** One event of section 69.1, queued by the command that produced it. */
+export interface WorkflowEvent {
+  /** With the workflow id, the run's idempotency key (section 69.4). */
+  id: string;
+  type: WorkflowTriggerType;
+  refs: WorkflowEventRefs;
+  /** The chain depth of the runs this event starts: 1 for a person's command. */
+  depth: number;
+  causedBy: string;
+  parentRunId?: string;
+  /** A scheduled event runs one workflow, the one whose schedule fell due. */
+  workflowId?: string;
+  /** A scheduled event: the occurrence it stands for, and how many it collapses. */
+  schedule?: { date: string; weekday: string; hour: number; occurrences: number };
+}
+
+/** The run an automation action is written under, for its activity and its chained events. */
+export interface AutomationContext {
+  workflowId: string;
+  workflowName: string;
+  runId: string;
+  depth: number;
+}
+
 /**
  * Atomic command scope (section 74.3). Entities touched through the
  * transaction are snapshotted; a thrown error restores every snapshot.
+ * A savepoint restores only what was touched after it: an automation action
+ * that fails takes back its own writes and leaves the command's.
  */
 export class Transaction {
-  private readonly snapshots: Snapshot[] = [];
+  private snapshots: Snapshot[] = [];
   private readonly touched = new Set<string>();
   readonly correlationId: string;
   readonly occurredAt: string;
   private readonly activity: ActivityEvent[] = [];
+  private current: User;
+  /** The person whose command opened the transaction, whoever acts inside it. */
+  readonly origin: User;
+  /** Section 69.1 events the command produced, in order; the engine drains them. */
+  readonly events: WorkflowEvent[] = [];
+  private eventCount = 0;
+  private automation: AutomationContext | null = null;
+  /** sku:warehouse → whether the position was below its reorder point before the command touched it. */
+  private readonly positions = new Map<string, boolean>();
 
   constructor(
     readonly runtime: ApiRuntime,
-    readonly actor: User,
+    actor: User,
     correlationId: string,
   ) {
+    this.current = actor;
+    this.origin = actor;
     this.correlationId = correlationId;
     this.occurredAt = runtime.store.now;
     /* The historical summaries read the live customers and catalog: they are
@@ -218,10 +283,74 @@ export class Transaction {
     void runtime.store.history.summaries;
   }
 
+  /** Who acts: the signed-in person, or the automation actor while a workflow's actions run. */
+  get actor(): User {
+    return this.current;
+  }
+
+  get automationContext(): AutomationContext | null {
+    return this.automation;
+  }
+
+  /** Runs `work` as another actor under a workflow run: audit, activity and versions name that actor. */
+  runAs<T>(actor: User, context: AutomationContext, work: () => T): T {
+    const previous = { actor: this.current, automation: this.automation };
+    this.current = actor;
+    this.automation = context;
+    try {
+      return work();
+    } finally {
+      this.current = previous.actor;
+      this.automation = previous.automation;
+    }
+  }
+
+  /** Authorizes the acting actor, who inside a workflow run is the automation actor (section 69.3). */
+  require(permission: Permission, resource?: ResourceScope): User {
+    this.runtime.authorization.require(this.current, permission, resource);
+    return this.current;
+  }
+
+  /** Queues a section 69.1 event; inside a run it is one link further down the chain. */
+  emit(type: WorkflowTriggerType, refs: WorkflowEventRefs): void {
+    this.eventCount += 1;
+    this.events.push({
+      id: `evt_${this.correlationId}_${this.eventCount}`,
+      type,
+      refs,
+      depth: (this.automation?.depth ?? 0) + 1,
+      causedBy: this.origin.id,
+      ...(this.automation ? { parentRunId: this.automation.runId } : {}),
+    });
+  }
+
+  /** Queues an event the engine built itself: a schedule or a clock-derived state. */
+  enqueue(event: WorkflowEvent): void {
+    this.events.push(event);
+  }
+
+  /** The positions the command moved, each with whether it stood below its reorder point before. */
+  movedPositions(): ReadonlyMap<string, boolean> {
+    return this.positions;
+  }
+
+  private notePosition(collection: CollectionName, entity: unknown): void {
+    if (collection !== 'reservations' && collection !== 'stockMovements') return;
+    const record = entity as { skuId?: string; warehouseId?: string };
+    if (!record.skuId || !record.warehouseId) return;
+    const key = `${record.skuId}:${record.warehouseId}`;
+    if (this.positions.has(key)) return;
+    this.positions.set(
+      key,
+      this.runtime.projections.inventoryAt(record.skuId, record.warehouseId).belowReorderPoint,
+    );
+  }
+
   /** Snapshots an existing entity before mutation and returns it. */
   touch<K extends CollectionName>(collection: K, entity: EntityOf<K>): EntityOf<K> {
     const id = (entity as { id: string }).id;
     const key = `${collection}:${id}`;
+    this.notePosition(collection, entity);
     if (!this.touched.has(key)) {
       this.touched.add(key);
       this.snapshots.push({ collection, id, before: structuredClone(entity) });
@@ -237,6 +366,7 @@ export class Transaction {
   create<K extends CollectionName>(collection: K, entity: EntityOf<K>): EntityOf<K> {
     const id = (entity as { id: string }).id;
     const key = `${collection}:${id}`;
+    this.notePosition(collection, entity);
     if (!this.touched.has(key)) {
       this.touched.add(key);
       this.snapshots.push({ collection, id, before: undefined });
@@ -257,6 +387,24 @@ export class Transaction {
       });
     }
     this.runtime.store.delete(collection, id);
+  }
+
+  /**
+   * A point the transaction can be taken back to. Every entity is snapshotted
+   * again on its first touch after it, so a rollback to it restores the state
+   * the savepoint saw, including entities the command had already changed.
+   */
+  savepoint(): number {
+    this.touched.clear();
+    return this.snapshots.length;
+  }
+
+  /** Restores every entity touched since `mark`, newest first, and forgets those snapshots. */
+  rollbackTo(mark: number): void {
+    const undone = this.snapshots.slice(mark);
+    this.restore(undone);
+    this.snapshots = this.snapshots.slice(0, mark);
+    this.touched.clear();
   }
 
   /** Bumps version/updatedAt on an aggregate after a successful mutation. */
@@ -282,6 +430,7 @@ export class Transaction {
       throw staleVersion(entityLabel, options.ifMatch, metadata.version);
   }
 
+  /** Section 70.2 — written through the transaction, so a command that fails leaves no audit behind. */
   audit(
     action: string,
     entityType: string,
@@ -294,7 +443,9 @@ export class Transaction {
       after?: unknown;
     } = {},
   ): void {
-    this.runtime.store.appendAudit({
+    const record: AuditEvent = {
+      id: this.runtime.store.nextId('auditEvent'),
+      organizationId: this.runtime.store.dataset.organization.id,
       occurredAt: this.occurredAt,
       actorId: this.actor.id,
       action,
@@ -306,7 +457,11 @@ export class Transaction {
       ...(detail.changedFields ? { changedFields: detail.changedFields } : {}),
       ...(detail.before !== undefined ? { before: detail.before } : {}),
       ...(detail.after !== undefined ? { after: detail.after } : {}),
-    });
+      ...(this.automation
+        ? { workflowId: this.automation.workflowId, workflowRunId: this.automation.runId }
+        : {}),
+    };
+    this.create('auditEvents', record);
   }
 
   activityEvent(event: {
@@ -321,6 +476,15 @@ export class Transaction {
     actorId?: string | undefined;
     occurredAt?: string | undefined;
   }): ActivityEvent {
+    // An action a workflow ran says which workflow and which run, beside the automation actor.
+    const metadata = this.automation
+      ? {
+          ...(event.metadata ?? {}),
+          workflowId: this.automation.workflowId,
+          workflowName: this.automation.workflowName,
+          workflowRunId: this.automation.runId,
+        }
+      : event.metadata;
     const record: ActivityEvent = {
       id: this.runtime.store.nextId('activityEvent'),
       organizationId: this.runtime.store.dataset.organization.id,
@@ -333,7 +497,7 @@ export class Transaction {
       ...(event.subjectLabel ? { subjectLabel: event.subjectLabel } : {}),
       ...(event.customerId ? { customerId: event.customerId } : {}),
       ...(event.orderId ? { orderId: event.orderId } : {}),
-      ...(event.metadata ? { metadata: event.metadata } : {}),
+      ...(metadata ? { metadata } : {}),
     };
     this.create('activityEvents', record);
     this.activity.push(record);
@@ -362,9 +526,13 @@ export class Transaction {
   }
 
   rollback(): void {
+    this.restore(this.snapshots);
+  }
+
+  private restore(snapshots: readonly Snapshot[]): void {
     const store = this.runtime.store;
     store.batch(() => {
-      for (const snapshot of [...this.snapshots].reverse()) {
+      for (const snapshot of [...snapshots].reverse()) {
         const map = store.dataset[snapshot.collection] as Map<string, unknown>;
         if (snapshot.before === undefined) map.delete(snapshot.id);
         else map.set(snapshot.id, snapshot.before);
@@ -384,6 +552,11 @@ export class ApiRuntime {
   readonly latency: Latency;
   private readonly idempotency = new Map<string, IdempotencyRecord>();
   private readonly conflictFixturesFired = new Set<string>();
+  /**
+   * Section 69.1: runs the workflows the command's events trigger, inside the
+   * command's transaction, after its own work. The automation engine sets it.
+   */
+  afterCommand: ((tx: Transaction) => void) | undefined;
 
   constructor(
     readonly store: Store,
@@ -470,7 +643,11 @@ export class ApiRuntime {
       const tx = new Transaction(this, this.actor, this.correlationId());
       let result: T;
       try {
-        result = this.store.batch(() => work(tx));
+        result = this.store.batch(() => {
+          const value = work(tx);
+          this.afterCommand?.(tx);
+          return value;
+        });
       } catch (error) {
         tx.rollback();
         throw error;

@@ -566,7 +566,10 @@ export const DEFAULT_PERSONA_KEY = 'sofia-ramirez';
  * who asks for a write-off above US$5,000 (section 66.5), which a requester
  * never decides (section 67.4): the finance controller is the Finance team's
  * other Finance Manager. No persona is an Accountant, whose write-off
- * authority stops at US$500: the staff accountant is the team's own. A
+ * authority stops at US$500: the staff accountant is the team's own. No
+ * persona is a Support Manager, who receives an escalation by default and
+ * alone reopens a ticket past the seven-day window or from closed (section
+ * 68.5): the support lead is the Support team's own. A
  * stand-in is the team's active holder of the role, never one of the nine,
  * found after the users are seeded: it creates no user and draws nothing from
  * the seed's random sequence, so every other record keeps its identity.
@@ -597,6 +600,30 @@ export const STAND_IN_PERSONAS: readonly StandInPersona[] = [
     teamCode: 'FIN',
     context: 'Receivables and reconciliation',
   },
+  {
+    key: 'support-lead',
+    role: 'support_manager',
+    teamCode: 'SUPPORT',
+    context: 'Escalations and reopened tickets',
+  },
+];
+
+/**
+ * Section 69.3 — the automation actor (`usr_system_automation`) holds only the
+ * permissions its supported actions use, in every scope: assigning a ticket or
+ * an account, tagging a ticket or a customer, holding a customer or an order,
+ * sending a confirmed order back for approval, and drafting a purchase order.
+ * Notifications and tasks need none. It holds no role: no person can sign in
+ * as it, and no role listing counts it.
+ */
+export const AUTOMATION_PERMISSIONS: readonly Permission[] = [
+  'support.assign',
+  'support.change_status',
+  'customers.edit',
+  'customers.credit_edit',
+  'orders.edit_confirmed',
+  'orders.hold',
+  'purchase_orders.create',
 ];
 
 /** Approval policy role names referenced by section 58.3, 59.4, 65.5, 66.5 and 62.2. */

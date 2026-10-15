@@ -237,10 +237,18 @@ export function financeFigures(
       label: 'Days sales outstanding',
       value: o ? (o.dsoDays === null ? '—' : o.dsoDays.toLocaleString('en-US')) : null,
       ...(o?.dsoDays !== null && o !== null ? { unit: o.dsoDays === 1 ? 'day' : 'days' } : {}),
-      comparison: o?.dsoDays === null ? 'nothing invoiced in 90 days' : 'on 90 days of invoicing',
+      // §72.7 over a base the window does not hold is no ratio: the figure says which of the two it lacks.
+      comparison:
+        o?.dsoDays === null
+          ? o.dsoUndefined === 'not-kept'
+            ? `needs 90 days of invoices`
+            : 'nothing invoiced in 90 days'
+          : 'on 90 days of invoicing',
       description:
         o?.dsoDays === null
-          ? 'undefined: nothing was invoiced in the last 90 days'
+          ? o.dsoUndefined === 'not-kept'
+            ? `undefined: invoices are kept from ${formatDate(`${o.keptFrom}T12:00:00Z`)}, fewer than 90 days`
+            : 'undefined: nothing was invoiced in the last 90 days'
           : 'receivables against the last 90 days invoiced',
       tone: 'neutral',
       door: null,
@@ -758,7 +766,7 @@ export function financeFigures(
                 slChart
                 data-testid="cash-chart"
                 title="Cash collected, week by week"
-                description="Posted payments by the week they were received, each week named by its first day, the last eight weeks to today, in US dollars"
+                [description]="cashDescription()"
                 [size]="phone() ? 'sm' : 'md'"
                 locale="en-US"
                 toolbar="hover"
@@ -951,13 +959,22 @@ export class FinanceOverviewPage {
     })),
   );
 
+  readonly cashDescription = computed(() => {
+    const overview = this.store.overview().value;
+    const base = 'Posted payments by the week they were received, each week named by its first day, the last eight weeks to today, in US dollars';
+    return overview && overview.cashCollectedByWeek.some((week) => !week.kept)
+      ? `${base}; payments are kept from ${formatDate(`${overview.keptFrom}T12:00:00Z`)}, and a week before that draws no bar`
+      : base;
+  });
+
   readonly cashData = computed(() =>
+    // A week before payments are kept draws no bar: its cash is not known, and nought would say it is (§75.4).
     (this.store.overview().value?.cashCollectedByWeek ?? []).map((week) => ({
       // Eight labels share a phone's plot: the short form keeps them from overlapping.
       label: this.phone()
         ? `${Number(week.weekStart.slice(5, 7))}/${Number(week.weekStart.slice(8, 10))}`
         : formatDate(`${week.weekStart}T12:00:00Z`).replace(/, \d{4}$/, ''),
-      amount: week.amount.minor / 100,
+      amount: week.kept ? week.amount.minor / 100 : null,
     })),
   );
 

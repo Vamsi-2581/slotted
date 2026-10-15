@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   inject,
   signal,
@@ -13,7 +14,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SlButton, SlButtonLink } from '@slotted/angular/button';
-import { SlSplitter, type SplitterValueRequest } from '@slotted/angular/splitter';
+import { SlSplitter } from '@slotted/angular/splitter';
 import {
   SlDescriptionList,
   SlDescriptionListDescription,
@@ -103,6 +104,7 @@ import {
   type CandidateView,
 } from '../../core/finance/reconciliation.store';
 import { toneFor } from '../../core/inventory/inventory-failure';
+import { PaneSplit } from '../../core/layout/pane-split';
 import { phoneSignal } from '../../core/layout/phone';
 import { SessionStore } from '../../core/session/session.store';
 import { ConfirmDialog } from '../inventory/confirm-dialog';
@@ -115,18 +117,6 @@ type Pending =
       readonly invoice: Pick<InvoiceListItem, 'id' | 'invoiceNumber' | 'outstanding'>;
     }
   | { readonly kind: 'customer'; readonly customerId: string; readonly customerName: string };
-
-const SPLIT_KEY = 'nexora.reconciliation.split';
-
-/** The fraction the reader last left the queue at, or null when they never moved it. */
-function storedSplit(): number | null {
-  try {
-    const value = Number(localStorage.getItem(SPLIT_KEY));
-    return value > 0 && value < 1 ? value : null;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * The reconciliation workspace (§13, §34.5, §66.13): the deposits still to
@@ -221,21 +211,22 @@ function storedSplit(): number | null {
     .reconcile {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
-      grid-template-rows: minmax(0, 1fr);
       gap: var(--slotted-space-6);
-      block-size: 100%;
       min-block-size: 0;
-      contain: size;
     }
     /*
      * literal: the compact size class (COMPACT_BELOW in @slotted/core/measure). Above it the queue
-     * stands beside the deposit at the width the splitter holds, 17rem to 32rem: the reader widens
-     * it to read the descriptions, or narrows it to give the deposit its third column.
+     * stands beside the deposit at the width the splitter holds: from 17rem, up to what leaves the
+     * deposit 30rem. The reader widens it to read the descriptions, or narrows it to give the
+     * deposit its third column.
      */
+    /* Below it the page scrolls and the body grows with its content: a contained size would be nought. */
     @media (width >= 600px) {
       .reconcile {
         display: flex;
         gap: var(--slotted-space-3);
+        block-size: 100%;
+        contain: size;
       }
       .queue {
         flex: none;
@@ -475,10 +466,12 @@ function storedSplit(): number | null {
                 slSplitter
                 aria-label="Queue width"
                 min="17rem"
-                max="32rem"
-                [(value)]="split"
-                (resizeEnd)="keepSplit($event)"
-                (valueChangeRequest)="keyed($event)"
+                max="calc(100% - 30rem)"
+                [defaultValue]="split.opening()"
+                [(value)]="split.value"
+                (resizeEnd)="split.keep($event)"
+                (valueChangeRequest)="split.keyed($event)"
+                (dblclick)="split.reset()"
               ></div>
             }
           }
@@ -501,7 +494,9 @@ function storedSplit(): number | null {
                 [recordKey]="id() ?? undefined"
                 [messages]="{ aside: asideLabel(), loading: 'Reading the bank transaction' }"
               >
-                <header slPageHeader>
+                <!-- Beside the queue the deposit's header stands inside the page's padding: a box of
+                     its own. On a phone the deposit is the page, and its header is the page's band. -->
+                <header slPageHeader [variant]="phone() ? 'band' : 'floating'">
                   <div slPageHeaderTitleArea>
                     @if (phone()) {
                       <div slPageHeaderNav>
@@ -911,8 +906,8 @@ export class ReconciliationPage {
   readonly paymentsRoute = PAYMENTS_ROUTE;
   readonly invoicesRoute = INVOICES_ROUTE;
   readonly phone = phoneSignal();
-  /** The queue's share of the row, kept across visits once the reader has moved it. */
-  readonly split = signal(storedSplit() ?? 0.3);
+  /** The queue's width, kept in pixels as the window changes; it opens at 24rem. */
+  readonly split = new PaneSplit('nexora.reconciliation.queue-width', 24);
   private readonly reconcile = viewChild<ElementRef<HTMLElement>>('reconcile');
   readonly ignoreOpen = signal(false);
   readonly pending = signal<Pending | null>(null);
@@ -1099,26 +1094,12 @@ export class ReconciliationPage {
     return `${created} ${formatMoney(preview.allocated)} is allocated to ${invoice}: ${owes}.${rest}`;
   });
 
-  /** A key press is a settled move of its own: `resizeEnd` answers a drag only. */
-  keyed(request: SplitterValueRequest): void {
-    if (request.reason === 'keyboard') this.keepSplit(request.value);
-  }
-
-  keepSplit(value: number): void {
-    try {
-      localStorage.setItem(SPLIT_KEY, String(value));
-    } catch {
-      // Storage refused (a private window): the width lasts for this visit only.
-    }
-  }
-
   constructor() {
     // Unmoved, the queue opens 24rem wide, the reading measure it had before it could be moved.
+    const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
       const row = this.reconcile()?.nativeElement;
-      if (storedSplit() !== null || !row?.clientWidth) return;
-      const rem = parseFloat(getComputedStyle(row.ownerDocument.documentElement).fontSize) || 16;
-      this.split.set(Math.min(1, (24 * rem) / row.clientWidth));
+      if (row) this.split.observe(row, destroyRef);
     });
     void this.queue.open(this.queue.total() === null ? queueQuery() : null);
     effect(() => {

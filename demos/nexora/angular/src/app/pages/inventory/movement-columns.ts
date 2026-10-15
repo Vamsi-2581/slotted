@@ -11,6 +11,7 @@ import {
   options,
 } from '../../core/catalog/catalog.model';
 import { signed, type WarehouseListItem } from '../../core/inventory/inventory.model';
+import { doorOnlyField } from '../../core/backend/door';
 
 /**
  * The ledger's columns. The movement is named by when it happened — it has no
@@ -140,5 +141,18 @@ export function movementFilterFields(
       operators: ['greaterThan', 'lessThan', 'between'],
       section: 'Movement',
     },
+    {
+      key: 'occurredOn',
+      label: 'Day',
+      kind: 'date',
+      operators: ['is', 'between'],
+      section: 'Movement',
+    },
   ];
 }
+
+/** What a report's door may name that the bar has no list of: offered while the door names it. */
+export const MOVEMENT_DOOR_FIELDS: readonly FilterBarField[] = [
+  doorOnlyField('warehouseId', 'Warehouse') as FilterBarField,
+  doorOnlyField('categoryId', 'Category in') as FilterBarField,
+];

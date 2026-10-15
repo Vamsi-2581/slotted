@@ -56,6 +56,16 @@ export class MovementsStore extends ListStore<MovementListItem> {
     await this.open(initial);
   }
 
+  /** A door's query read in the whole ledger, whatever the list held before (OV-01). */
+  async openDoor(query: GridQuery): Promise<void> {
+    const current = this.place();
+    if (current.skuId !== null || current.sourceId !== null) {
+      this.place.set({ skuId: null, sourceId: null });
+      this.forget();
+    }
+    await Promise.all([this.load(query), this.loadGrandTotal()]);
+  }
+
   /** One movement by its id: the resource has no `GET /stock-movements/:id`, so it is a filter of one. */
   async one(id: string): Promise<MovementListItem | null> {
     const api = await this.backend.ready();

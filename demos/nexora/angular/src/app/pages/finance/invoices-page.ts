@@ -43,6 +43,7 @@ import {
 } from '@slotted/core/grid';
 import type { InvoiceListItem } from '@slotted/demo-nexora-backend';
 
+import { doorFilter, fieldsWithDoor, type Door } from '../../core/backend/door';
 import { LIST_PAGE_SIZE, LIST_PAGE_SIZES } from '../../core/backend/list-query';
 import { NEXORA_BACKEND } from '../../core/backend/nexora-backend.provider';
 import { TransportHealth } from '../../core/backend/transport-health';
@@ -58,7 +59,7 @@ import { phoneSignal } from '../../core/layout/phone';
 import { SessionStore } from '../../core/session/session.store';
 import { listView } from '../list-view/list-view';
 import { ListViewTools } from '../list-view/list-view-tools';
-import { invoiceColumns, invoiceFilterFields } from './finance-columns';
+import { FINANCE_DOOR_FIELDS, invoiceColumns, invoiceFilterFields } from './finance-columns';
 
 /** The order a door's rows are read in: what is most late, most owed or soonest due first. */
 function doorSort(params: { get(name: string): string | null }): SortKey[] {
@@ -206,7 +207,7 @@ function doorSort(params: { get(name: string): string | null }): SortKey[] {
             slFilterBar
             aria-label="Invoice filters"
             shortcut="/"
-            [fields]="fields"
+            [fields]="fields()"
             [value]="store.filter()"
             (valueChangeRequest)="store.setFilter($event.value)"
             [query]="store.search()"
@@ -329,7 +330,9 @@ export class InvoicesPage {
   readonly creditMemosRoute = CREDIT_MEMOS_ROUTE;
   readonly pageSizes = LIST_PAGE_SIZES;
   readonly phone = phoneSignal();
-  readonly fields = invoiceFilterFields();
+  /** A report's door, whose ids the bar shows by the words the door carries. */
+  private readonly door = signal<Door | null>(null);
+  readonly fields = computed(() => fieldsWithDoor(invoiceFilterFields(), FINANCE_DOOR_FIELDS, this.door()));
   /** Overdue invoices in the tenant, for the door in the description; null before the answer, -1 when none came. */
   readonly overdue = signal<number | null>(null);
 
@@ -374,12 +377,16 @@ export class InvoicesPage {
 
   /** Loads the door the address names, if it names one; says whether it did. */
   private openDoor(params: { get(name: string): string | null }): boolean {
-    const filter = invoiceDoorFilter(params, this.today());
+    const own = invoiceDoorFilter(params, this.today());
+    // A report's door names its condition and its period field by field (OV-01).
+    const door = own === null ? doorFilter(params, [...invoiceFilterFields(), ...FINANCE_DOOR_FIELDS]) : null;
+    this.door.set(door);
+    const filter = own ?? door?.filter ?? null;
     if (filter === null) return false;
     const query: GridQuery = {
       ...emptyQuery({ index: 0, size: this.store.page().size }),
       filter,
-      sort: doorSort(params),
+      sort: own === null ? [] : doorSort(params),
     };
     void this.store.load(query);
     void this.store.loadGrandTotal();

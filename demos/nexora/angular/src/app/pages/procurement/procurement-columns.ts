@@ -16,6 +16,7 @@ import {
   SUPPLIER_STATUS_LABEL,
   SUPPLIER_TIER_LABEL,
 } from '../../core/procurement/procurement.model';
+import { doorOnlyField } from '../../core/backend/door';
 
 type Can = (permission: string) => boolean;
 
@@ -294,6 +295,12 @@ export function purchaseOrderColumns(
   ];
 }
 
+/** What a report's door may name that the bar has no list of: offered while the door names it. */
+export const PURCHASE_ORDER_DOOR_FIELDS: readonly FilterBarField[] = [
+  doorOnlyField('supplierId', 'Supplier') as FilterBarField,
+  doorOnlyField('warehouseId', 'Deliver to') as FilterBarField,
+];
+
 /** The fields `purchaseOrderResource` filters by; a warehouse is offered where the scope holds several. */
 export function purchaseOrderFilterFields(
   warehouses: readonly WarehouseListItem[],
@@ -350,6 +357,13 @@ export function purchaseOrderFilterFields(
       label: 'Received (%)',
       kind: 'number',
       operators: ['greaterThanOrEqual', 'lessThanOrEqual', 'between'],
+      section: 'Arrival',
+    },
+    {
+      key: 'receivedOn',
+      label: 'Received in full',
+      kind: 'date',
+      operators: ['after', 'before', 'between'],
       section: 'Arrival',
     },
     {

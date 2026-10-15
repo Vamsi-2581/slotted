@@ -161,10 +161,9 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
   );
   let paymentCounter = dataset.payments.size + 10_000;
   const unappliedCount = Math.max(2, Math.round(payments.length * 0.012));
-  const maxPaymentSequence = Math.max(
-    0,
-    ...[...dataset.payments.values()].map((payment) => Number(payment.paymentNumber.slice(4)) || 0),
-  );
+  let maxPaymentSequence = 0;
+  for (const payment of dataset.payments.values())
+    maxPaymentSequence = Math.max(maxPaymentSequence, Number(payment.paymentNumber.slice(4)) || 0);
   for (let index = 0; index < unappliedCount; index += 1) {
     const customer = random.pick(activeCustomers);
     const currency = customer.preferredCurrency;
@@ -226,10 +225,9 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
   const creditCandidates = [...dataset.invoices.values()].filter(
     (invoice) => invoice.lifecycle === 'open' && diffDays(today, invoice.issueDate) < 90,
   );
-  const maxCreditSequence = Math.max(
-    0,
-    ...[...dataset.creditMemos.values()].map((memo) => Number(memo.creditMemoNumber.slice(3)) || 0),
-  );
+  let maxCreditSequence = 0;
+  for (const memo of dataset.creditMemos.values())
+    maxCreditSequence = Math.max(maxCreditSequence, Number(memo.creditMemoNumber.slice(3)) || 0);
   let creditCounter = dataset.creditMemos.size + 10_000;
   for (const [index, invoice] of random
     .sample(creditCandidates, Math.min(creditCandidates.length, 24))
@@ -406,12 +404,11 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
     metadata: metadataAt(zeroAt, financeActors[0] as string, zeroAt, financeActors[0] as string, 2),
   };
   delete (zeroInvoice as { invoiceNumber?: string }).invoiceNumber;
-  const lastInvoiceNumber = Math.max(
-    0,
-    ...[...dataset.invoices.values()]
-      .filter((invoice) => invoice.invoiceNumber?.startsWith(`INV-${today.slice(0, 4)}`))
-      .map((invoice) => Number(invoice.invoiceNumber?.slice(9)) || 0),
-  );
+  // A fold, not a spread: an enterprise tenant's invoices are more arguments than a call takes.
+  let lastInvoiceNumber = 0;
+  for (const invoice of dataset.invoices.values())
+    if (invoice.invoiceNumber?.startsWith(`INV-${today.slice(0, 4)}`))
+      lastInvoiceNumber = Math.max(lastInvoiceNumber, Number(invoice.invoiceNumber.slice(9)) || 0);
   zeroInvoice.invoiceNumber = formatBusinessNumber(
     'invoice',
     lastInvoiceNumber + 1,

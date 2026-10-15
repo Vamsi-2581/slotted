@@ -200,7 +200,15 @@ export interface FinanceOverview {
   unappliedCredit: Money;
   invoicedRevenueTrailing30Days: Money;
   invoicedRevenueTrailing90Days: Money;
+  /**
+   * Section 72.7; null when undefined. `no-revenue`: nothing was invoiced in
+   * the trailing 90 days; `not-kept`: invoices are not kept for all of them
+   * (section 75.4), so the base would be a part of the 90 days.
+   */
   dsoDays: number | null;
+  dsoUndefined?: 'no-revenue' | 'not-kept';
+  /** First business date from which every invoice and payment is kept (section 75.4). */
+  keptFrom: string;
   openInvoiceCount: number;
   overdueInvoiceCount: number;
   disputedInvoiceCount: number;
@@ -210,7 +218,7 @@ export interface FinanceOverview {
   cashCollectedMonthToDate: Money;
   paymentsReceivedMonthToDate: number;
   /** The payment trend (section 13): eight seven-day weeks ending today, oldest first, in USD. */
-  cashCollectedByWeek: { weekStart: string; amount: Money; count: number }[];
+  cashCollectedByWeek: { weekStart: string; amount: Money; count: number; kept: boolean }[];
   invoicesDueWithin5Days: number;
   unmatchedBankTransactions: number;
   pendingApprovals: number;

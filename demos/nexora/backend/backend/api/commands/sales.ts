@@ -296,9 +296,11 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
     order.status = 'confirmed';
     order.confirmedAt = tx.occurredAt;
     if (customer.status === 'prospect') {
+      tx.emit('customer.status_changed', { customerId: customer.id, previousStatus: 'prospect' });
       tx.touch('customers', customer).status = 'active';
       tx.dirty('customers');
     }
+    tx.emit('order.confirmed', { orderId: order.id, customerId: order.customerId });
     const result = allocateOrder(tx, order);
     tx.activityEvent({
       type: 'order.confirmed',
@@ -805,6 +807,7 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
             : {}),
         };
         tx.create('salesOrders', order);
+        tx.emit('order.created', { orderId, customerId: customer.id });
         for (const quoteLine of runtime.indexes.quoteLinesByQuote
           .get(id)
           .slice()
@@ -872,6 +875,88 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       }
       return count;
     },
+  };
+
+  /** Section 59.6 "Place on hold" — the interactive command and a workflow's action. */
+  const holdOrder = (
+    tx: Transaction,
+    id: string,
+    reason: string,
+    options?: MutationOptions,
+  ): SalesOrder => {
+    new Validator().required('reason', reason).throwIfAny();
+    tx.require('orders.hold');
+    const order = open(tx, 'salesOrders', id, 'Order', options);
+    if (order.status !== 'confirmed' && order.status !== 'pending_approval')
+      throw transition('Order', order.status, 'be placed on hold');
+    order.status = 'on_hold';
+    order.holdReason = reason.trim();
+    finalize(tx, 'salesOrders', order, 'order.held', 'sales_order', ['status', 'holdReason']);
+    tx.activityEvent({
+      type: 'order.held',
+      subjectType: 'sales_order',
+      subjectId: id,
+      subjectLabel: order.orderNumber,
+      customerId: order.customerId,
+      orderId: id,
+      summary: `Order ${order.orderNumber} placed on hold — ${reason.trim()}`,
+    });
+    tx.notify(order.ownerId, 'warning', `${order.orderNumber} placed on hold`, reason.trim(), {
+      type: 'sales_order',
+      id,
+    });
+    return order;
+  };
+
+  /**
+   * A confirmed order sent back to wait on an approval by one role: what an
+   * edit of a confirmed order does when the policy asks for one (section 59.6
+   * "Edit confirmed"), with the role a workflow names (section 69.3
+   * `request_approval`). Its reservations are released until the approval.
+   */
+  const requestOrderApproval = (
+    tx: Transaction,
+    id: string,
+    role: string,
+    reason: string,
+    options?: MutationOptions,
+  ): SalesOrder => {
+    tx.require('orders.edit_confirmed');
+    const order = open(tx, 'salesOrders', id, 'Order', options);
+    if (order.status !== 'confirmed')
+      throw transition('Order', order.status, 'be sent for approval');
+    releaseReservations(tx, order);
+    const request = createApprovalRequest(tx, {
+      targetType: 'sales_order',
+      targetId: id,
+      targetNumber: order.orderNumber,
+      evaluation: {
+        required: true,
+        policyCode: 'WORKFLOW_REVIEW',
+        reasons: [reason],
+        steps: [{ sequence: 1, requiredRole: role, reason }],
+      },
+      requestedBy: tx.actor.id,
+      amount: addMoney(order.subtotal, order.freight),
+    });
+    order.status = 'pending_approval';
+    order.approvalStatus = 'pending';
+    order.approvalRequestId = request.id;
+    runtime.projections.recalculateOrder(order);
+    finalize(tx, 'salesOrders', order, 'order.approval_requested', 'sales_order', [
+      'status',
+      'approvalStatus',
+    ]);
+    tx.activityEvent({
+      type: 'order.submitted',
+      subjectType: 'sales_order',
+      subjectId: id,
+      subjectLabel: order.orderNumber,
+      customerId: order.customerId,
+      orderId: id,
+      summary: `Order ${order.orderNumber} sent for approval — ${reason}`,
+    });
+    return order;
   };
 
   const orders = {
@@ -947,6 +1032,7 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
         tx.create('salesOrders', order);
         for (const line of orderLinesFrom(id, priced.lines, warehouseId, today))
           tx.create('salesOrderLines', line);
+        tx.emit('order.created', { orderId: id, customerId: customer.id });
         tx.audit('order.created', 'sales_order', id, { nextVersion: 1 });
         tx.activityEvent({
           type: 'order.created',
@@ -994,6 +1080,7 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
             409,
           );
         open(tx, 'salesOrders', id, 'Order', options);
+        const totalBefore = usdMinor(order.total, order.fxRateToUsd);
         const changed: string[] = [];
         if (input.requestedDeliveryDate !== undefined) {
           order.requestedDeliveryDate = input.requestedDeliveryDate;
@@ -1099,6 +1186,12 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
         }
         runtime.projections.recalculateOrder(order);
         finalize(tx, 'salesOrders', order, 'order.updated', 'sales_order', changed);
+        if (usdMinor(order.total, order.fxRateToUsd) !== totalBefore)
+          tx.emit('order.value_changed', {
+            orderId: id,
+            customerId: order.customerId,
+            previousTotalUsd: totalBefore,
+          });
         return getOrder(runtime, models, id);
       }),
 
@@ -1131,30 +1224,7 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       options?: MutationOptions,
     ): Promise<OrderDetail> =>
       runtime.command('POST /orders/:id/hold', options, { id, input }, (tx) => {
-        new Validator().required('reason', input.reason).throwIfAny();
-        runtime.require('orders.hold');
-        const order = open(tx, 'salesOrders', id, 'Order', options);
-        if (order.status !== 'confirmed' && order.status !== 'pending_approval')
-          throw transition('Order', order.status, 'be placed on hold');
-        order.status = 'on_hold';
-        order.holdReason = input.reason.trim();
-        finalize(tx, 'salesOrders', order, 'order.held', 'sales_order', ['status', 'holdReason']);
-        tx.activityEvent({
-          type: 'order.held',
-          subjectType: 'sales_order',
-          subjectId: id,
-          subjectLabel: order.orderNumber,
-          customerId: order.customerId,
-          orderId: id,
-          summary: `Order ${order.orderNumber} placed on hold — ${input.reason.trim()}`,
-        });
-        tx.notify(
-          order.ownerId,
-          'warning',
-          `${order.orderNumber} placed on hold`,
-          input.reason.trim(),
-          { type: 'sales_order', id },
-        );
+        holdOrder(tx, id, input.reason, options);
         return getOrder(runtime, models, id);
       }),
 
@@ -1415,6 +1485,7 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
   return {
     quotes,
     orders,
+    services: { holdOrder, requestOrderApproval },
     hooks: { sales_order: orderHooks, quote: quoteHooks },
     closeIfEligible,
     allocateOrder,

@@ -25,7 +25,14 @@ import {
 } from '../domain';
 import { createRandom } from '../data/random';
 import type { ScaleProfile } from '../data/scale';
-import type { ApiRuntime } from './runtime';
+import type { ApiRuntime, WorkflowEventRefs } from './runtime';
+import type { WorkflowTriggerType } from '../domain';
+
+/** A section 69.1 event a scenario wrote as a fact; the engine runs it once the scenario stands. */
+export interface ScenarioEvent {
+  type: WorkflowTriggerType;
+  refs: WorkflowEventRefs;
+}
 
 export type ScenarioId =
   | 'healthy'
@@ -136,25 +143,29 @@ export function scenarioScale(scenario: ScenarioId | undefined): ScaleProfile['i
 }
 
 /** Applies a deterministic overlay on top of the canonical seed. */
-export function applyScenario(runtime: ApiRuntime, scenario: ScenarioId): void {
+export function applyScenario(runtime: ApiRuntime, scenario: ScenarioId): ScenarioEvent[] {
   /* Taken before the scenario rewrites the dataset, as `Transaction` does. */
   if (scenario !== 'healthy') void runtime.store.history.summaries;
   switch (scenario) {
     case 'month_end':
-      return applyMonthEnd(runtime);
+      applyMonthEnd(runtime);
+      return [];
     case 'inventory_crisis':
-      return applyInventoryCrisis(runtime);
+      applyInventoryCrisis(runtime);
+      return [];
     case 'collections_pressure':
-      return applyCollectionsPressure(runtime);
+      applyCollectionsPressure(runtime);
+      return [];
     case 'support_incident':
       return applySupportIncident(runtime);
     case 'heavy_data':
-      return applyHeavyData(runtime);
+      applyHeavyData(runtime);
+      return [];
     case 'system_degraded':
       runtime.latency.profile = 'degraded';
-      return;
+      return [];
     default:
-      return;
+      return [];
   }
 }
 
@@ -502,10 +513,12 @@ function applyCollectionsPressure(runtime: ApiRuntime): void {
   });
 }
 
-function applySupportIncident(runtime: ApiRuntime): void {
+/** Section 77.9 — the incident's tickets; its one escalation is answered as an escalation (section 69.1). */
+function applySupportIncident(runtime: ApiRuntime): ScenarioEvent[] {
   const { store, indexes } = runtime;
   const random = createRandom(store.metadata.seedVersion, 'scenario/support-incident');
   const now = store.now;
+  const events: ScenarioEvent[] = [];
   store.batch(() => {
     const strategic =
       [...store.dataset.customers.values()].find(
@@ -638,6 +651,11 @@ function applySupportIncident(runtime: ApiRuntime): void {
       };
       ticket.metadata.id = ticket.id;
       store.put('tickets', ticket);
+      if (ticket.status === 'escalated')
+        events.push({
+          type: 'ticket.escalated',
+          refs: { ticketId: ticket.id, customerId: ticket.customerId },
+        });
       const message: ConversationMessage = {
         id: formatId('conversationMessage', 700_000 + index + 1),
         organizationId: ORGANIZATION_ID,
@@ -661,6 +679,7 @@ function applySupportIncident(runtime: ApiRuntime): void {
       createdAt: now,
     });
   });
+  return events;
 }
 
 function applyHeavyData(runtime: ApiRuntime): void {

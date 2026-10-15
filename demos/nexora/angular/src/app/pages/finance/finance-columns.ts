@@ -3,6 +3,7 @@ import type { FilterGroup } from '@slotted/core/filter';
 import type { GridColumn } from '@slotted/core/grid';
 import type { InvoiceListItem } from '@slotted/demo-nexora-backend';
 
+import { doorOnlyField, regionField, segmentField } from '../../core/backend/door';
 import { formatDate, formatDateTime, formatMoney, options } from '../../core/catalog/catalog.model';
 import {
   agingWords,
@@ -202,6 +203,8 @@ export function invoiceFilterFields(): readonly FilterBarField[] {
       operators: ['greaterThanOrEqual', 'lessThanOrEqual', 'between'],
       section: 'Amounts',
     },
+    regionField('Customer') as FilterBarField,
+    segmentField('Customer') as FilterBarField,
   ];
 }
 
@@ -325,8 +328,13 @@ export function paymentFilterFields(): readonly FilterBarField[] {
       operators: ['greaterThan', 'greaterThanOrEqual', 'lessThanOrEqual', 'between'],
       section: 'Amounts',
     },
+    regionField('Customer') as FilterBarField,
+    segmentField('Customer') as FilterBarField,
   ];
 }
+
+/** What a report's door may name that a finance list has no list of: offered while the door names it. */
+export const FINANCE_DOOR_FIELDS: readonly FilterBarField[] = [doorOnlyField('customerId', 'Customer') as FilterBarField];
 
 /**
  * The overview's doors into the payments (OV-01): `received=month` is what

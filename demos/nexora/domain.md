@@ -1361,7 +1361,7 @@ Fields:
 - trigger;
 - conditions;
 - actions;
-- owner;
+- owner — the person the workflow answers to, told when a run stops it; a holder of `workflows.view`;
 - created date;
 - last modified;
 - last run;
@@ -4136,7 +4136,7 @@ The default signed-in persona is:
 Sofia Ramirez — Sales Manager
 ```
 
-A stand-in persona covers a role, or a decision, the table leaves to no one. `procurement-lead` is the Procurement team's own active Procurement Manager, offered so a purchase order that waits on that role (§65.5) can be approved in the demo. `finance-controller` is the Finance team's other active Finance Manager: Priya Shah asks for a write-off above $5,000 (§66.5) and a requester never decides it (§67.4), so the step is assigned to the controller. `staff-accountant` is the Finance team's own active Accountant, whose write-off authority stops at $500 (§66.5). Each is a seeded user rather than a new one, never one of the nine personas; a stand-in creates no user and draws nothing from the seed's random sequence, and a scale whose team holds no such user offers none.
+A stand-in persona covers a role, or a decision, the table leaves to no one. `procurement-lead` is the Procurement team's own active Procurement Manager, offered so a purchase order that waits on that role (§65.5) can be approved in the demo. `finance-controller` is the Finance team's other active Finance Manager: Priya Shah asks for a write-off above $5,000 (§66.5) and a requester never decides it (§67.4), so the step is assigned to the controller. `staff-accountant` is the Finance team's own active Accountant, whose write-off authority stops at $500 (§66.5). `support-lead` is the Support team's own active Support Manager: an escalation names no manager by default and goes to them, and only a Support Manager reopens a ticket past the seven-day window or from `closed` (§68.5). Each is a seeded user rather than a new one, never one of the nine personas; a stand-in creates no user and draws nothing from the seed's random sequence, and a scale whose team holds no such user offers none.
 
 ---
 
@@ -6273,7 +6273,11 @@ Automation actor:
 usr_system_automation
 ```
 
-It has only the permissions required for supported actions.
+It has only the permissions required for supported actions: `support.assign`, `support.change_status`, `customers.edit`, `customers.credit_edit`, `orders.edit_confirmed`, `orders.hold` and `purchase_orders.create`. Its writes carry the workflow and the run in their audit and activity.
+
+`request_approval` sends a confirmed order back to pending approval with one step for the named role, releasing its reservations, as an edit of a confirmed order does when its policy asks for one.
+
+A workflow's definition is checked at two levels: a save checks its structure (the tree of section 69.2, fields its trigger's subject carries, operators its field types answer, actions its trigger has a record for); activation, and any edit of an active workflow, also checks what would stop a run.
 
 ## 69.4 Workflow execution
 
@@ -6308,6 +6312,16 @@ If exceeded, stop execution with:
 WORKFLOW_RECURSION_LIMIT
 ```
 
+A run executes inside the transaction of the command that produced its event, after that command's own work; an action that fails is taken back alone and the run continues with the next. A run whose actions all fail sets the workflow to `error` and notifies its owner. Run and action codes are one vocabulary:
+
+```text
+ACTION_TARGET_NOT_FOUND
+ACTION_REFUSED
+ACTION_NOT_PERMITTED
+ACTION_INVALID
+WORKFLOW_RECURSION_LIMIT
+```
+
 ## 69.5 Scheduled workflow simulation
 
 Because the reference backend is browser-local, scheduled triggers are evaluated:
@@ -6316,7 +6330,7 @@ Because the reference backend is browser-local, scheduled triggers are evaluated
 - when the demo clock changes;
 - when the scenario engine explicitly advances time.
 
-Missed schedule occurrences since the previous evaluation MAY be collapsed into one run per workflow/day to avoid runaway catch-up.
+Missed schedule occurrences since the previous evaluation MAY be collapsed into one run per workflow/day to avoid runaway catch-up. The reference backend collapses them: an evaluation runs each active scheduled workflow once, for the last occurrence that fell due, keyed by that occurrence's date, and the run states how many occurrences it stands for.
 
 ---
 
@@ -6621,6 +6635,8 @@ receivables / invoiced revenue in trailing 90 days * 90
 ```
 
 If trailing revenue is zero, DSO is undefined.
+
+If the trailing 90 days start before the invoices the backend keeps (§75.4), DSO is undefined: a ratio over the kept part of the 90 days is not the ratio over 90 days.
 
 ## 72.8 Inventory value
 
@@ -7568,6 +7584,7 @@ Runtime transport profile:
 base latency: 700ms
 jitter: 0–900ms
 GET /finance/overview: 35% 503
+GET /analytics/{executive,sales,inventory,procurement,finance,support}: 35% 503
 GET /activity: 15% 503
 mutation failure rate: 5% retryable 503
 ```

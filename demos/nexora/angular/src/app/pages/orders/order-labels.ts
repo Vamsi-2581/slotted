@@ -1,4 +1,6 @@
 import type { FilterBarField } from '@slotted/angular/filter-bar';
+
+import { doorOnlyField, regionField, segmentField } from '../../core/backend/door';
 import type { GridColumn } from '@slotted/core/grid';
 import type { Money, OrderListItem } from '@slotted/demo-nexora-backend';
 
@@ -264,6 +266,17 @@ export const ORDER_FILTER_FIELDS: readonly FilterBarField[] = [
   { key: 'total', label: 'Total', kind: 'number' },
   { key: 'grossMarginBps', label: 'Margin %', kind: 'number' },
   { key: 'lineCount', label: 'Lines', kind: 'number' },
+  regionField('Account') as FilterBarField,
+  segmentField('Account') as FilterBarField,
+  { key: 'cycleDays', label: 'Days to ship complete', kind: 'number' },
+];
+
+/** What a report's door may name that the bar has no list of: offered while the door names it. */
+export const ORDER_DOOR_FIELDS: readonly FilterBarField[] = [
+  doorOnlyField('customerId', 'Account') as FilterBarField,
+  doorOnlyField('ownerId', 'Owned by') as FilterBarField,
+  doorOnlyField('skuIds', 'Has product') as FilterBarField,
+  doorOnlyField('warehouseId', 'Ships from') as FilterBarField,
 ];
 
 export const ORDER_FILTER_KINDS: Readonly<Record<string, 'set' | 'text' | 'number' | 'date'>> = {
@@ -279,4 +292,7 @@ export const ORDER_FILTER_KINDS: Readonly<Record<string, 'set' | 'text' | 'numbe
   total: 'number',
   grossMarginBps: 'number',
   lineCount: 'number',
+  regionCode: 'set',
+  customerSegment: 'set',
+  cycleDays: 'number',
 };

@@ -95,13 +95,18 @@ describe('the finance overview', () => {
     expect(figures.find((figure) => figure.key === 'overdue')!.door).not.toBeNull();
   });
 
-  it('draws nothing as a number before the first answer, and says DSO is undefined without revenue (§72.7)', async () => {
+  it('draws nothing as a number before the first answer, and says why DSO is undefined: no revenue, or invoices not kept (§72.7)', async () => {
     expect(financeFigures(null, '2026-09-04', all).every((figure) => figure.value === null)).toBe(true);
     const overview = await api.finance.overview();
-    const dso = financeFigures({ ...overview, dsoDays: null }, '2026-09-04', all).find((figure) => figure.key === 'dso')!;
+    const dso = financeFigures({ ...overview, dsoDays: null, dsoUndefined: 'no-revenue' }, '2026-09-04', all).find((figure) => figure.key === 'dso')!;
     expect(dso.value).toBe('—');
     expect(dso.unit).toBeUndefined();
     expect(dso.comparison).toBe('nothing invoiced in 90 days');
+    // The light window keeps 30 days of invoices: a ratio over 90 would be over a third of them (§75.4).
+    expect(overview).toMatchObject({ dsoDays: null, dsoUndefined: 'not-kept' });
+    const unkept = financeFigures(overview, '2026-09-04', all).find((figure) => figure.key === 'dso')!;
+    expect(unkept.comparison).toBe('needs 90 days of invoices');
+    expect(unkept.description).toContain('invoices are kept from');
     const days = financeFigures({ ...overview, dsoDays: 84 }, '2026-09-04', all).find((figure) => figure.key === 'dso')!;
     expect(days.value).toBe('84');
     expect(days.unit).toBe('days');

@@ -21,6 +21,8 @@ triggers:
     row,
     avatar,
     workspace,
+    sticky,
+    preview,
   ]
 families: [pagination, page, page-header, app-shell, side-navigation, list]
 ---
@@ -86,3 +88,14 @@ Do: Declare `cellAlign="start"` on a `table` whose cells hold fields, and `align
 Don't: Keep the table's centred cells for a row of fields, where a quantity with help stood 21 pixels above the cost beside it. Align a grid of fields with `align-items: end` to bring a button level with the controls: the field with help lifts its control by the help's height.
 Seen in: Nexora · new purchase order, the lines table (ledger row "table, field") · corrected. Nexora · new quote, the line picker: Discount with "Percent off the list price." stood 24 pixels above Item and Quantity · corrected
 Check: On a line where one field carries help and another does not, every control and the button share one top and one height, measured by bounding box.
+
+### LA-06 · A sticky element of the screen's own stops under the page's chrome
+
+Level: MUST
+Applies to: an element a screen makes `position: sticky` inside a page — a preview beside a form, a summary beside a list, a column's own header
+Rule: The element's offset starts at the page's published `--slotted-page-sticky-top`, the measured height of the chrome that stays (the stuck page-header's title area, a sticky section's header), and an element that may be taller than what stays visible caps its height by the same property and scrolls inside.
+Why: An offset from the scroller's edge alone — `inset-block-start: var(--slotted-space-4)` — sticks the element behind the stuck header, which is painted above it: its top is hidden for as long as it is stuck.
+Do: Write `inset-block-start: calc(var(--slotted-page-sticky-top, 0px) + <gap>)` and, when the element can outgrow the view, `max-block-size: calc(100dvh - var(--slotted-page-sticky-top, 0px) - <room for the app's own bars>)` with `overflow: auto`.
+Don't: Measure the header in the screen's own code, or hard-code its height: the header collapses, wraps and changes with the density, and the page already measures it.
+Seen in: Nexora · the workflow editor, its "As it will run" preview stuck under the page header · corrected
+Check: `tools/look.mjs` on `/automations/workflows/wfl_000001?edit=1` at 1440×900, the shell's `main` scrolled to 500 and 700: the preview's top stands under the title area's bottom (208 against 176) each time.

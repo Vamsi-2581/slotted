@@ -275,7 +275,7 @@ import { ListViewTools } from '../list-view/list-view-tools';
               </a>
             </ng-template>
             <ng-template slDataGridCell="status" let-row="row">
-              <span slBadge variant="soft" [tone]="statusTone(row)">{{ statusLabel(row) }}</span>
+              <span slBadge variant="soft" size="sm" [tone]="statusTone(row)">{{ statusLabel(row) }}</span>
             </ng-template>
             <nav
               slDataGridFooter

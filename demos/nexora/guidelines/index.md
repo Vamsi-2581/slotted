@@ -21,6 +21,7 @@ task matches its `triggers`.
 | SC-06 | SHOULD | Where the primary input is a touch screen, a shortcut drawn as a hint is not shown                                                                                            | `shell-composition.md` |
 | LA-04 | SHOULD | Tabs that change the page's content stand in the header's `tabs` slot, not in the body                                                                                        | `layout-alignment.md`  |
 | LA-05 | MUST   | Fields on one line align to the start of the block axis, so every control and the line's button share one top and height whatever stands under them                           | `layout-alignment.md`  |
+| LA-06 | MUST   | A screen's own sticky element offsets from the page's `--slotted-page-sticky-top`, so it stops under the stuck header instead of behind it                                    | `layout-alignment.md`  |
 | CP-01 | MUST   | Before writing an element beside a family, its anatomy is read; a slot the family names for it is where it stands                                                             | `composition.md`       |
 | LP-01 | SHOULD | Below 600 pixels, or on a touch screen below 1024, a grid shows the selection column, the row header and the columns of highest priority; the rest move into the row's pop-in | `list-pages.md`        |
 | LP-02 | SHOULD | Search, filter pills and saved views stand in one `filter-bar` above the grid; the header keeps the title and the actions that create or leave the list                       | `list-pages.md`        |
@@ -82,6 +83,7 @@ task matches its `triggers`.
 | RP-10 | SHOULD | A score is compared with its peers' median and says what it counts; a score with nothing behind it is not drawn as a number | `record-pages.md` |
 | LP-11 | SHOULD | Where the primary input is touch, the list tools leave out the density, which the theme makes a no-op, and keep sort, views and columns on one line | `list-pages.md` |
 | LP-12 | MUST | One scroller: from 600 pixels the grid fills the body and scrolls its rows; below 600 the page scrolls and the grid is as tall as its rows | `list-pages.md` |
+| LP-13 | SHOULD | A `badge` or `tag` in a grid or table cell is `size="sm"`; `md` is for a record's header | `list-pages.md` |
 | RP-11 | MUST | A command whose authority depends on an amount states the authority the current value needs, in the policy's unit, before any control, and is drawn only in that authority's form | `record-pages.md` |
 | RP-12 | SHOULD | A document with no destination lives under the destination whose records it changes, before its record address, and those records link to it | `record-pages.md` |
 | FM-15 | SHOULD | An action no command writes is written through the record that says the same, with a prefix naming its document, and read back by it | `forms.md` |
@@ -90,3 +92,23 @@ task matches its `triggers`.
 | OV-05 | SHOULD | A chart is `card` only as one of two or more peer tiles with no section heading; the body of a titled section or a tab stays `plain` | `overviews.md` |
 | WS-01 | SHOULD | Below 600 pixels a three-region workspace shows the queue; a row opens its own address holding the other two regions; the back gesture returns | `workspaces.md` |
 | WS-02 | SHOULD | A score a person confirms is a table of its criteria and points ending in the sum, with one band mark and one sentence of thresholds | `workspaces.md` |
+| CP-08 | MUST | A control that changes mode keeps every box where it was: text that differs between modes is one line, cut, read whole from its title | `composition.md` |
+| CV-01 | MUST | A conversation scrolls on its own with the composer under it; on a phone the composer sticks to the screen's bottom and the record opens on its last message | `conversations.md` |
+| CV-02 | SHOULD | A service-level clock is said in business time with the hour it falls due; passed by how much; paused as stopped; never raw minutes | `conversations.md` |
+| CV-03 | SHOULD | A queue is a view of the list's filter bar, counted by the rows it opens on, never a second filter | `conversations.md` |
+| RE-01 | SHOULD | A report's figures are flows over its period; a state of today is the overview's own read, said as of today, with the overview's door | `reports.md` |
+| RE-02 | SHOULD | A report's period, comparison and filters are its address; a report opened without them takes the last chosen, and the back gesture returns to them | `reports.md` |
+| RE-03 | MUST | A period the records are not kept for is not offered, and a measure they do not cover says not kept and from when, never a number | `reports.md` |
+| RE-04 | SHOULD | A change names its base value and period; an amount moves by a percentage, a share by points | `reports.md` |
+| RE-05 | SHOULD | An anomaly is flagged only by a rule the page states, and the flag opens the records of the range it flags | `reports.md` |
+| RE-06 | SHOULD | A report's filters stand in the header's content under its toggle and pin; on a phone the area opens collapsed | `reports.md` |
+| RE-07 | SHOULD | Every figure, bar and cell of a report opens the list it counts, with its condition and period as pills and its ids by name | `reports.md` |
+| RE-08 | SHOULD | A ranking chart draws at most ten categories and says so; the table under it holds them all and stands last | `reports.md` |
+| RE-09 | SHOULD | A report's download is the table on screen, built from the same answer, for every reader of the report | `reports.md` |
+| RP-13 | SHOULD | An entry a workflow wrote names the workflow as its actor and opens its run; it never reads as the work of the person who set it off | `record-pages.md` |
+| BD-01 | SHOULD | A stored rule reads as When, If, Then, Otherwise, each later condition led by its join in words, before it is edited in place; a reader without edit is shown no editor | `builders.md` |
+| BD-02 | SHOULD | A builder states what each structural limit holds and leaves, and disables the control that would cross one with the limit as its reason | `builders.md` |
+| BD-03 | MUST | A refusal the backend gives with no node is computed in the browser by the backend's own check and marked at the node before the request | `builders.md` |
+| BD-04 | SHOULD | A node's menu and its grip's drag make the same moves and refuse the same places, with the reason said | `builders.md` |
+| BD-05 | SHOULD | A nested builder narrows by stepping in one space step per level and stacking a row's controls; it never scrolls sideways | `builders.md` |
+| BD-06 | SHOULD | A rule's record opens on what flowed through it, split by volume where the conditions decide, and sets the rule with each step's figure at the end of its line; a run is its trace on the same rule | `builders.md` |

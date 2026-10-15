@@ -85,6 +85,7 @@ import {
 } from '../../core/finance/finance.model';
 
 import { phoneSignal } from '../../core/layout/phone';
+import { INBOX_ROUTE, NEW_TICKET_ROUTE } from '../../core/support/support.model';
 import { OrderStore } from '../../core/sales/order.store';
 import { SessionStore } from '../../core/session/session.store';
 import { ApprovalPanel } from './approval-panel';
@@ -425,6 +426,19 @@ type View = 'lines' | 'shipments' | 'invoices' | 'tickets';
                         >
                           Create invoice
                         </button>
+                      </div>
+                    }
+                    @if (view() === 'tickets' && session.can('support.create')) {
+                      <div slToolbarItem [slToolbarItemCounterpart]="ticketItem">
+                        <a
+                          slButtonLink
+                          variant="ghost"
+                          data-testid="new-ticket"
+                          [routerLink]="newTicketRoute"
+                          [queryParams]="{ customer: o.customerId, order: o.id }"
+                        >
+                          New ticket
+                        </a>
                       </div>
                     }
                     <sl-toolbar-overflow />
@@ -777,7 +791,15 @@ type View = 'lines' | 'shipments' | 'invoices' | 'tickets';
                       <tbody slTableBody>
                         @for (ticket of detail()!.tickets; track ticket.id) {
                           <tr slTableRow>
-                            <th slTableRowHeader>{{ ticket.ticketNumber }}</th>
+                            <th slTableRowHeader>
+                              @if (session.can('support.view')) {
+                                <a slLink variant="neutral" [routerLink]="[inboxRoute, ticket.id]">{{
+                                  ticket.ticketNumber
+                                }}</a>
+                              } @else {
+                                {{ ticket.ticketNumber }}
+                              }
+                            </th>
                             <td slTableCell>{{ ticket.subject }}</td>
                             @if (!phone()) {
                               <td slTableCell>{{ words(ticket.priority) }}</td>
@@ -858,6 +880,14 @@ type View = 'lines' | 'shipments' | 'invoices' | 'tickets';
         </ng-template>
         <ng-template #cancelItem>
           <button slMenuItem type="button" (click)="cancelOpen.set(true)">Cancel order</button>
+        </ng-template>
+        <ng-template #ticketItem>
+          <a
+            slMenuItem
+            [routerLink]="newTicketRoute"
+            [queryParams]="{ customer: order()?.customerId, order: order()?.id }"
+            >New ticket</a
+          >
         </ng-template>
         <ng-template #invoiceItem>
           <button slMenuItem type="button" (click)="createInvoice()">Create invoice</button>
@@ -1011,6 +1041,8 @@ export class OrderPage {
   });
 
   readonly invoicesRoute = INVOICES_ROUTE;
+  readonly inboxRoute = INBOX_ROUTE;
+  readonly newTicketRoute = NEW_TICKET_ROUTE;
 
   /** Shipped and not invoiced, for a reader who invoices, while the Invoices tab is open (RP-05, RP-09). */
   readonly canInvoice = computed(
@@ -1042,7 +1074,9 @@ export class OrderPage {
       const id = params.get('id');
       if (id === null || id === opened) return;
       opened = id;
-      this.view.set('lines');
+      // A link may name the tab it is about: a ticket's shipment opens the order on its shipments.
+      const view = this.route.snapshot.queryParamMap.get('view');
+      this.view.set(view === 'shipments' || view === 'invoices' || view === 'tickets' ? view : 'lines');
       void this.store.open(id);
     });
   }

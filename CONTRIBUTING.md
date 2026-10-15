@@ -133,7 +133,17 @@ one-time password exist. Each package lists `andrelopes-code/slotted` and
 `release.yml` as its trusted publisher on npmjs.com. npm configures a trusted
 publisher only on a package that exists, so a package added to `packages/`
 publishes its first version by hand from an interactive terminal, and is
-configured before the next release. Every version of the `0.x` line goes to
+configured before the next release, from a terminal logged in with
+`npm login --auth-type=web` (a token that bypasses two-factor authentication is
+refused):
+
+```sh
+npx -y npm@11.21.1 trust github @slotted/<package> --file release.yml --repo andrelopes-code/slotted --allow-publish -y
+```
+
+npm older than 11.21 sends no `--allow-publish` permission and the registry
+answers `400 permissions is required`; `npm trust list @slotted/<package>`
+shows the configuration. Every version of the `0.x` line goes to
 `latest`; after `1.0.0`, a prerelease goes to its own tag (`beta`, `rc`).
 
 A version appears on the registry up to two minutes after the workflow ends;

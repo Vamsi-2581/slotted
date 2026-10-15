@@ -580,9 +580,14 @@ export function ComboboxContent({
     if (!held) state.setHighlighted(null, 'keyboard');
   }, [combobox.open, combobox.query, count, surfaceNode]);
 
+  /**
+   * A browser scrolls a focused element into view; nothing here is focused.
+   * It runs again once the popup is positioned: the height that bounds the
+   * list arrives with the position, after the highlight has landed.
+   */
   useEffect(() => {
     revealOption(surfaceNode, combobox.highlighted);
-  }, [combobox.highlighted, surfaceNode]);
+  }, [combobox.highlighted, positioned, surfaceNode]);
 
   /**
    * The completion string, written into the input as a **selected range** and

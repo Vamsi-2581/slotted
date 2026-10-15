@@ -1,4 +1,4 @@
-import { createFilter, moveIndex } from '@slotted/core/collection';
+import { createFilter, moveIndex, revealWithin } from '@slotted/core/collection';
 import type { MoveIntent } from '@slotted/core/collection';
 import { tabbables } from '@slotted/core/focus';
 import { createWidthGate } from '@slotted/core/measure';
@@ -87,33 +87,6 @@ type Entry = 'selected' | 'first' | 'last' | 'none';
    the movement keys, the count, the entry highlight — takes the visible ones,
    which is the selector `combobox` already writes for the same reason. */
 const OPTION_SELECTOR = "[data-part='item']:not([hidden])";
-
-/**
- * Brings an option into view without moving the page: the nearest scrolling
- * box between the option and the popup surface is scrolled, by the least
- * distance that shows the whole row, and nothing past it. `scrollIntoView`
- * would scroll every ancestor too, and on the first open it runs before the
- * popup is positioned — a select far down a page sent the page to its top.
- */
-function revealWithin(option: HTMLElement, surface: HTMLElement) {
-  let box: HTMLElement = surface;
-  for (
-    let node = option.parentElement;
-    node !== null && node !== surface;
-    node = node.parentElement
-  ) {
-    const overflow = getComputedStyle(node).overflowY;
-    if (overflow === 'auto' || overflow === 'scroll') {
-      box = node;
-      break;
-    }
-  }
-  const row = option.getBoundingClientRect();
-  const top = box.getBoundingClientRect().top + box.clientTop;
-  const bottom = top + box.clientHeight;
-  if (row.top < top) box.scrollTop -= top - row.top;
-  else if (row.bottom > bottom) box.scrollTop += Math.min(row.bottom - bottom, row.top - top);
-}
 
 const isGroup = (entry: SelectItems[number]): entry is SelectOptionGroup => 'options' in entry;
 

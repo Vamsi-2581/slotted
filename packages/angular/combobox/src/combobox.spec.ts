@@ -176,6 +176,57 @@ describe('SlCombobox', () => {
     });
   });
 
+  /**
+   * `scrollIntoView` scrolls every ancestor, and on the first open it runs
+   * before the popup is positioned: a control far down a page sent the page to
+   * its top. The fix select and multi-select took.
+   */
+  describe('revealing the highlight', () => {
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    });
+
+    it('scrolls the list to the highlight, and never the page', async () => {
+      const original = Element.prototype.scrollIntoView;
+      let calls = 0;
+      Element.prototype.scrollIntoView = () => {
+        calls += 1;
+      };
+      try {
+        const fixture = TestBed.createComponent(Host);
+        fixture.detectChanges();
+        field().focus();
+        field().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+        const surface = document.querySelector<HTMLElement>("[data-part='content']")!;
+        Object.defineProperty(surface, 'clientHeight', { configurable: true, value: 100 });
+        Object.defineProperty(surface, 'scrollTop', {
+          configurable: true,
+          writable: true,
+          value: 0,
+        });
+        surface.getBoundingClientRect = () =>
+          DOMRect.fromRect({ x: 0, y: 0, width: 200, height: 100 });
+        option('raspberry').getBoundingClientRect = () =>
+          DOMRect.fromRect({ x: 0, y: 130, width: 200, height: 30 });
+        for (let step = 0; step < 3; step += 1) {
+          if (field().getAttribute('aria-activedescendant') === option('raspberry').id) break;
+          field().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+          fixture.detectChanges();
+          await fixture.whenStable();
+          fixture.detectChanges();
+        }
+        expect(field().getAttribute('aria-activedescendant')).toBe(option('raspberry').id);
+        expect(calls).toBe(0);
+        expect(surface.scrollTop).toBe(60);
+      } finally {
+        Element.prototype.scrollIntoView = original;
+      }
+    });
+  });
+
   /** Every icon the family owns is a `Glyph` element inside an `Icon` box, never a mask. */
   describe('the glyph elements', () => {
     beforeEach(async () => {

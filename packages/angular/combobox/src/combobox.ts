@@ -1,4 +1,4 @@
-import { createFilter, moveIndex } from '@slotted/core/collection';
+import { createFilter, moveIndex, revealWithin } from '@slotted/core/collection';
 import type { Filter, MoveIntent } from '@slotted/core/collection';
 import { createDismissableLayer, pressOrigin } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
@@ -568,7 +568,7 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
 
   scrollToKey(value: ComboboxOptionValue) {
     const option = this.options().find((candidate) => candidate.dataset['value'] === value);
-    if (typeof option?.scrollIntoView === 'function') option.scrollIntoView({ block: 'nearest' });
+    if (option !== undefined && this.surfaceNode !== null) revealWithin(option, this.surfaceNode);
   }
 
   setOpen(next: boolean, reason: ComboboxOpenReason, source?: Event) {
@@ -969,7 +969,12 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
       sideOffset: this.sideOffset() ?? this.defaults.sideOffset,
       strategy: this.strategy() ?? this.defaults.strategy,
     });
-    void this.positioner.update();
+    /* The height that bounds the list arrives with the position, after the
+       highlight has landed, so the highlighted row is revealed again. */
+    void this.positioner.update().then(() => {
+      const held = this.highlightedValue();
+      if (held !== null) this.scrollToKey(held);
+    });
   }
 
   private bind() {

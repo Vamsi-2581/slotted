@@ -20,6 +20,7 @@ export {
 } from './filter';
 export type { Filter, FilterOptions, Ranker } from './filter';
 export { createCollection } from './items';
+export { revealWithin } from './reveal';
 export type {
   Collection,
   CollectionOption,

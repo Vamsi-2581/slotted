@@ -1,4 +1,4 @@
-import { moveIndex } from '@slotted/core/collection';
+import { moveIndex, revealWithin } from '@slotted/core/collection';
 import type { MoveIntent } from '@slotted/core/collection';
 
 import type { ComboboxOptionValue } from './combobox.types';
@@ -85,11 +85,9 @@ export function valueForLabel(content: HTMLElement | null, label: string) {
   return option === undefined ? null : valueOf(option);
 }
 
+/** Brings the option into view by scrolling the list, never the page (`revealWithin`). */
 export function revealOption(content: HTMLElement | null, value: ComboboxOptionValue | null) {
   if (content === null || value === null) return;
   const option = options(content).find((candidate) => valueOf(candidate) === value);
-  /* Not in jsdom, and not in every engine the library renders in. The highlight
-     is correct without it; only the view is not. */
-  if (typeof option?.scrollIntoView !== 'function') return;
-  option.scrollIntoView({ block: 'nearest' });
+  if (option !== undefined) revealWithin(option, content);
 }

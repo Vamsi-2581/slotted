@@ -1,6 +1,6 @@
 import '@slotted/styles/select/select.css';
 
-import { createFilter } from '@slotted/core/collection';
+import { createFilter, revealWithin } from '@slotted/core/collection';
 import { selectMessages, type FamilyTranslator, type SelectMessages } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import {
@@ -17,7 +17,6 @@ import type { MutableRefObject } from 'react';
 
 import { useField } from '../field';
 import { useLocale, useMessages } from '../i18n';
-import { revealWithin } from './select-collection';
 import { useSelectDefaults } from './select-defaults';
 import type {
   SelectAlign,

@@ -1,6 +1,6 @@
 import '@slotted/styles/combobox/combobox.css';
 
-import { createFilter } from '@slotted/core/collection';
+import { createFilter, revealWithin } from '@slotted/core/collection';
 import { comboboxMessages, type ComboboxMessages, type FamilyTranslator } from '@slotted/core/i18n';
 import { createControllable } from '@slotted/core/state';
 import {
@@ -521,8 +521,9 @@ export function Combobox({
         const option = contentNode?.querySelector<HTMLElement>(
           `[data-part='item'][data-value="${CSS.escape(optionValue)}"]`,
         );
-        if (typeof option?.scrollIntoView === 'function')
-          option.scrollIntoView({ block: 'nearest' });
+        if (option !== null && option !== undefined && contentNode !== null) {
+          revealWithin(option, contentNode);
+        }
       },
     }),
     [contentNode, setOpen],

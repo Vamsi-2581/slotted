@@ -1,4 +1,4 @@
-import { moveIndex } from '@slotted/core/collection';
+import { moveIndex, revealWithin } from '@slotted/core/collection';
 import type { MoveIntent } from '@slotted/core/collection';
 
 import type { MultiSelectOptionValue } from './multi-select.types';
@@ -89,27 +89,6 @@ export function revealOption(content: HTMLElement | null, value: MultiSelectOpti
   if (content === null || value === null) return;
   const option = options(content).find((candidate) => valueOf(candidate) === value);
   if (option !== undefined) revealWithin(option, content);
-}
-
-/** Scrolls the nearest scrolling box between `option` and `surface` to show the row. */
-export function revealWithin(option: HTMLElement, surface: HTMLElement) {
-  let box: HTMLElement = surface;
-  for (
-    let node = option.parentElement;
-    node !== null && node !== surface;
-    node = node.parentElement
-  ) {
-    const overflow = getComputedStyle(node).overflowY;
-    if (overflow === 'auto' || overflow === 'scroll') {
-      box = node;
-      break;
-    }
-  }
-  const row = option.getBoundingClientRect();
-  const top = box.getBoundingClientRect().top + box.clientTop;
-  const bottom = top + box.clientHeight;
-  if (row.top < top) box.scrollTop -= top - row.top;
-  else if (row.bottom > bottom) box.scrollTop += Math.min(row.bottom - bottom, row.top - top);
 }
 
 /** The chips in the control, in the order the row holds them. */

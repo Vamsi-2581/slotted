@@ -11,7 +11,7 @@ import { Combobox } from './combobox';
 import { ComboboxDefaultsProvider } from './combobox-defaults';
 import { ComboboxGroup, ComboboxItem } from './combobox-items';
 import { ComboboxContent, ComboboxInput } from './combobox-parts';
-import type { ComboboxProps } from './combobox.types';
+import type { ComboboxHandle, ComboboxProps } from './combobox.types';
 
 const FRUIT = ['Blueberry', 'Raspberry', 'Cloudberry', 'Grapefruit', 'Pomelo'];
 
@@ -68,6 +68,41 @@ describe('Combobox', () => {
     const listbox = await openByArrow();
     expect(input()).toHaveAttribute('aria-controls', listbox.id);
     expect(contract.roles.input).toBe('combobox');
+  });
+
+  /**
+   * `scrollIntoView` scrolls every ancestor, and on the first open it runs
+   * before the popup is positioned: a control far down a page sent the page to
+   * its top. The fix select and multi-select took.
+   */
+  it('scrolls the list to the highlight, and never the page', async () => {
+    const original = Element.prototype.scrollIntoView;
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    try {
+      const handle = { current: null as ComboboxHandle | null };
+      render(<Basic ref={(node: ComboboxHandle | null) => void (handle.current = node)} />);
+      const listbox = await openByArrow();
+      Object.defineProperty(listbox, 'clientHeight', { configurable: true, value: 100 });
+      Object.defineProperty(listbox, 'scrollTop', { configurable: true, writable: true, value: 0 });
+      listbox.getBoundingClientRect = () =>
+        DOMRect.fromRect({ x: 0, y: 0, width: 200, height: 100 });
+      optionNamed('Pomelo').getBoundingClientRect = () =>
+        DOMRect.fromRect({ x: 0, y: 130, width: 200, height: 30 });
+      for (let step = 0; step < FRUIT.length; step += 1) {
+        if (highlighted() === optionNamed('Pomelo').id) break;
+        press('ArrowDown');
+      }
+      expect(highlighted()).toBe(optionNamed('Pomelo').id);
+      expect(listbox.scrollTop).toBe(60);
+
+      listbox.scrollTop = 0;
+      act(() => handle.current?.scrollToKey('pomelo'));
+      expect(listbox.scrollTop).toBe(60);
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
   });
 
   it('keeps DOM focus on the input for the whole interaction', async () => {

@@ -12,7 +12,7 @@ import '@slotted/styles/tag/tag.css';
 import '@slotted/styles/spinner/spinner.css';
 import '@slotted/styles/skeleton/skeleton.css';
 
-import { createFilter } from '@slotted/core/collection';
+import { createFilter, revealWithin } from '@slotted/core/collection';
 import {
   multiSelectMessages,
   type FamilyTranslator,
@@ -34,7 +34,6 @@ import type { MutableRefObject } from 'react';
 
 import { useField } from '../field';
 import { useLocale, useMessages } from '../i18n';
-import { revealWithin } from './multi-select-collection';
 import { useMultiSelectDefaults } from './multi-select-defaults';
 import type {
   MultiSelectAlign,

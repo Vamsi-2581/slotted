@@ -1,4 +1,4 @@
-import { createFilter, moveIndex } from '@slotted/core/collection';
+import { createFilter, moveIndex, revealWithin } from '@slotted/core/collection';
 import type { Filter, MoveIntent } from '@slotted/core/collection';
 import { createDismissableLayer, pressOrigin } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
@@ -90,33 +90,6 @@ type Entry = 'first' | 'last' | 'none';
  * the result set, and every count and every move has to skip it.
  */
 const OPTION_SELECTOR = "[data-part='item']:not([hidden])";
-
-/**
- * Brings an option into view without moving the page: the nearest scrolling
- * box between the option and the popup surface is scrolled, by the least
- * distance that shows the whole row, and nothing past it. `scrollIntoView`
- * would scroll every ancestor too, and on the first open it runs before the
- * popup is positioned — a control far down a page sent the page to its top.
- */
-function revealWithin(option: HTMLElement, surface: HTMLElement) {
-  let box: HTMLElement = surface;
-  for (
-    let node = option.parentElement;
-    node !== null && node !== surface;
-    node = node.parentElement
-  ) {
-    const overflow = getComputedStyle(node).overflowY;
-    if (overflow === 'auto' || overflow === 'scroll') {
-      box = node;
-      break;
-    }
-  }
-  const row = option.getBoundingClientRect();
-  const top = box.getBoundingClientRect().top + box.clientTop;
-  const bottom = top + box.clientHeight;
-  if (row.top < top) box.scrollTop -= top - row.top;
-  else if (row.bottom > bottom) box.scrollTop += Math.min(row.bottom - bottom, row.top - top);
-}
 
 /** The chips in the row, which are every cell but the one holding the caret. */
 const CHIP_SELECTOR = "[data-part='chips'] > [role='gridcell']:not([data-part='field'])";

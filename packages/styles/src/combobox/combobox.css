@@ -746,6 +746,18 @@
 
   /* ── Options ──────────────────────────────────────────────────────────── */
 
+  /**
+   * An option the query rejected, and a group whose options all went. Both
+   * carry `hidden` — Angular hides each rejected option rather than leaving the
+   * list, and both bindings hide an emptied group — and `display: grid` on
+   * either beats the user agent's own `[hidden] { display: none }`, because an
+   * author rule wins over the user agent sheet.
+   */
+  [data-ui='combobox'] [data-part='item'][hidden],
+  [data-ui='combobox'] [data-part='group'][hidden] {
+    display: none;
+  }
+
   [data-ui='combobox'] [data-part='item'] {
     align-content: center;
     border-radius: var(--_item-radius);

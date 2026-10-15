@@ -50,6 +50,8 @@ Anything a person waits in front of — a skeleton, a spinner, a progress bar, a
 
 ## Restraint
 
-Do not add dependencies, abstractions, packages, planning artifacts, reviewers, or subagents by default. Introduce them only when current scope or risk justifies them.
+Do not add dependencies, abstractions, packages, planning artifacts, or reviewers by default. Introduce them only when current scope or risk justifies them.
+
+Subagents are dispatched only after the user approves the batch (count, model, deliverable, estimated cost), and each runs bounded: one narrow deliverable, a tool-call budget, no browser or screenshot loops, verification of the changed surface only, a short report. No scope, risk, skill, or plan replaces the approval.
 
 Do not run every available check merely for reassurance. Completion means the requested result is present, relevant checks pass, and remaining limitations are explicit.

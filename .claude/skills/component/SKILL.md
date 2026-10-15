@@ -43,7 +43,7 @@ Execution constraints:
 - Do not offer to explain work in a browser, to draw mockups or diagrams in chat, or to open a local URL for visuals. Report the project artifacts and test results the steps require.
 - Treat each invocation as one-family scope; finish Step 15 for that family and then reset for the next family.
 - If multiple `/component` tasks are running, queue them unless the request is explicitly independent and file-disjoint.
-- Do not spawn subagents by default for standard component rebuilds. Use them only for independent, parallelizable work (for example, parallel proofing of shared docs/tests) on disjoint paths.
+- Do not spawn subagents without the user's approval (`AGENTS.md` › Restraint).
 
 Ship the capability the inventory justifies, including one nobody asked for. Adding a well-argued capability is not scope creep, and it is not a question for the reviewer: it is a decision, recorded like every other decision, and a decision to include needs no more justification than a decision to exclude.
 

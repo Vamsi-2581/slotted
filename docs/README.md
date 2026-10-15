@@ -46,6 +46,8 @@ pela skill `/component`. Cada subdiretório tem uma classe de leitura própria.
 | `process/nexora-inventory-module-prompt.md`   | Prompt do módulo Inventory da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.   |
 | `process/nexora-procurement-module-prompt.md` | Prompt do módulo Procurement da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`. |
 | `process/nexora-finance-module-prompt.md`     | Prompt do módulo Finance da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.     |
+| `process/nexora-support-module-prompt.md`     | Prompt do módulo Support da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.     |
+| `process/nexora-analytics-module-prompt.md`   | Prompt do módulo Analytics da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.   |
 
 ## Histórico
 

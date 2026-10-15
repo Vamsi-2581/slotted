@@ -347,8 +347,12 @@ export class SlDrawer implements OnInit {
    */
   protected readonly showBackdrop = computed(() => this.resolvedMode() === 'overlay');
   protected readonly extentLength = computed(() => this.measured());
+  /* An inline panel writes no role, and a name on a generic element names
+     nothing: the consumer's landmark around it carries the name. */
   protected readonly labelledBy = computed(() =>
-    this.hasTitle() && this.writtenLabel === null ? this.titleId : null,
+    this.resolvedMode() === 'overlay' && this.hasTitle() && this.writtenLabel === null
+      ? this.titleId
+      : null,
   );
   protected readonly describedBy = computed(() =>
     this.hasDescription() ? this.descriptionId : null,

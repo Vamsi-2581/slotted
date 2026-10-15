@@ -333,6 +333,32 @@ describe('Drawer', () => {
    * uncontrolled fields, its scroll position and its focus survive the switch
    * (contract `mode.reason`).
    */
+  /**
+   * An inline panel writes no role (contract `wiring.role`), and a name on a
+   * generic element names nothing: the consumer's landmark around it carries
+   * the name. React registered the title in an effect, so the server wrote no
+   * `aria-labelledby` and the client did, and Angular wrote it at once. A panel
+   * the consumer gives a role is named by the title again.
+   */
+  it('names an inline panel only when the consumer gives it a role', () => {
+    render(<Basic defaultOpen mode="inline" />);
+    expect(panel()).not.toHaveAttribute('aria-labelledby');
+    expect(panel()).not.toHaveAttribute('role');
+
+    render(
+      <Drawer defaultOpen mode="inline">
+        <DrawerPanel role="complementary">
+          <DrawerHeader>
+            <DrawerTitle>Filters</DrawerTitle>
+          </DrawerHeader>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    const complementary = screen.getByRole('complementary');
+    const title = screen.getByText('Filters');
+    expect(complementary).toHaveAttribute('aria-labelledby', title.id);
+  });
+
   it('keeps the panel’s content across a switch of mode', () => {
     const { rerender } = render(<Basic defaultOpen mode="inline" />);
     const note = screen.getByRole('textbox', { name: 'Note' }) as HTMLInputElement;

@@ -16,7 +16,7 @@
   "wiring": {
     "role": "dialog on the panel part under mode=overlay. Under mode=inline the panel writes no role: a navigation drawer is a navigation landmark and a filter panel is complementary, and a family that cannot know which one guesses wrong half the time. The consumer names it with render or with their own element",
     "aria-modal": "true on the panel only while modal is true, which is the only state in which the family makes the background inert. modal is fixed at false under mode=inline",
-    "aria-labelledby": "the panel names its title part; a consumer who writes their own aria-label instead keeps it",
+    "aria-labelledby": "the panel names its title part under mode=overlay; a consumer who writes their own aria-label instead keeps it. Under mode=inline the panel has no role and writes no name, because a name on a generic element names nothing: the consumer's landmark around it carries the name, and a panel the consumer gives a role is named by its title again",
     "aria-describedby": "the panel names its description part when a description part is present",
     "aria-haspopup": "dialog on the trigger under mode=overlay only. An inline drawer is a disclosure, not a popup, and the property would promise a layer that never arrives",
     "aria-expanded": "true on the trigger while the drawer is open, in both modes",

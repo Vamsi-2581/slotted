@@ -235,6 +235,20 @@ describe('SlDrawer', () => {
     expect(panel()?.hasAttribute('aria-describedby')).toBe(false);
   });
 
+  /**
+   * An inline panel writes no role (contract `wiring.role`), and a name on a
+   * generic element names nothing: the consumer's landmark around it carries
+   * the name, as React's inline panel leaves it.
+   */
+  it('names an inline panel with no role by nothing', () => {
+    host.mode.set('inline');
+    host.open.set(true);
+    fixture.detectChanges();
+
+    expect(panel()?.hasAttribute('role')).toBe(false);
+    expect(panel()?.hasAttribute('aria-labelledby')).toBe(false);
+  });
+
   /* -------------------------------------------------------------- closing - */
 
   it('closes from the close button, carrying dismiss and its value', () => {

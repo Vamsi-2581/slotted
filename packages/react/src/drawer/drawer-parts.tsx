@@ -321,7 +321,13 @@ export function DrawerPanel({
   /* Where the layer is now: what it stands over, what it makes inert and
      where focus goes all depend on it. */
   const placed = !overlay || portal !== null;
-  const labelled = drawer.titleId !== '' && nativeProps['aria-label'] === undefined;
+  /* An inline panel writes no role, and a name on a generic element names
+     nothing: the consumer's landmark around it carries the name, unless the
+     consumer gave the panel a role of its own. */
+  const labelled =
+    drawer.titleId !== '' &&
+    nativeProps['aria-label'] === undefined &&
+    (overlay || nativeProps.role !== undefined);
 
   /**
    * One stable callback, because an inline one is re-run with `null` on every

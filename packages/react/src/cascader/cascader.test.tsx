@@ -194,7 +194,7 @@ describe('Cascader', () => {
     fireEvent.change(field, { target: { value: 'bel' } });
     const hit = node('Belém');
     expect(hit.querySelector("[data-part='description']")?.textContent).toBe('Portugal / Lisboa');
-    expect(hit.querySelector("[data-part='match']")?.textContent).toBe('Bel');
+    expect(hit.querySelector("[data-ui='highlight'] [data-part='match']")?.textContent).toBe('Bel');
     expect(trigger()).toHaveAttribute('aria-haspopup', 'dialog');
   });
 

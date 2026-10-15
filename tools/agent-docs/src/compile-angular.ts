@@ -33,6 +33,10 @@ export function readNgcResult({ output, exitCode, errorCode }: NgcRun): Set<stri
     // A truncated output names too few failures, and the rest would pass as examples.
     throw new Error('ngc output was truncated at the buffer limit');
   }
+  if (errorCode !== undefined) {
+    // The process never started — a missing binary is `ENOENT` — so there is no output to read.
+    throw new Error(`ngc could not run: ${errorCode}`);
+  }
   const failed = new Set<string>();
   // ngc colours its diagnostics whatever `pretty` says; the codes would hide every error.
   const plain = stripVTControlCharacters(output);
@@ -74,7 +78,8 @@ export async function compileAngular(
       writeFileSync(file, block.source);
       return { file, key: block.key };
     });
-    const ngc = join(root, 'packages/angular/node_modules/.bin/ngc');
+    // `@angular/compiler-cli` is a devDependency of the repository root, not of the package.
+    const ngc = join(root, 'node_modules/.bin/ngc');
     const compile = async (remaining: readonly { file: string }[]): Promise<Set<string>> => {
       writeFileSync(
         join(dir, 'tsconfig.json'),

@@ -209,6 +209,9 @@ describe('SlCascader', () => {
     expect(node('Belém')?.querySelector("[data-part='description']")?.textContent?.trim()).toBe(
       'Portugal / Lisboa',
     );
+    expect(
+      node('Belém')?.querySelector("[data-ui='highlight'] [data-part='match']")?.textContent,
+    ).toBe('Bel');
   });
 
   it('reports required when nothing is chosen', async () => {

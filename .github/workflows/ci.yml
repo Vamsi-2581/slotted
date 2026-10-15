@@ -33,5 +33,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # `pnpm typecheck` reads each package's declarations through `exports`,
+      # which a clean checkout has not built yet.
+      - name: Build packages
+        run: pnpm build
+
       - name: Validate repository
         run: pnpm check:full

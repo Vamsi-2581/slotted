@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -89,30 +89,39 @@ describe('compileReact candidates', () => {
   });
 
   it('excerpts an import from a subpath the package does not export', async () => {
-    const exported = new Set(
-      Object.keys(
-        (
-          JSON.parse(readFileSync(resolve(root, 'packages/react/package.json'), 'utf8')) as {
-            exports: Record<string, unknown>;
-          }
-        ).exports,
-      ),
+    /*
+     * Declarations that exist on disk under a name `exports` does not carry:
+     * the import has to fail on the map, not on a missing file. The package
+     * exports every family it builds (`packages/react/src/entry-points.test.ts`),
+     * so the test writes its own unexported folder.
+     */
+    const name = 'agent-docs-unexported';
+    const exported = Object.keys(
+      (
+        JSON.parse(readFileSync(resolve(root, 'packages/react/package.json'), 'utf8')) as {
+          exports: Record<string, unknown>;
+        }
+      ).exports,
     );
-    const unexported = readdirSync(resolve(root, 'packages/react/dist/types'), {
-      withFileTypes: true,
-    }).find((entry) => entry.isDirectory() && !exported.has(`./${entry.name}`));
-    expect(unexported, 'a types directory without an exports entry').toBeDefined();
-    const verdicts = await compileReact(
-      [
-        {
-          key: 'unexported',
-          language: 'tsx',
-          source: `import * as Family from '@slotted/react/${unexported!.name}';\n\nexport const used = Family;\n`,
-        },
-      ],
-      root,
-    );
-    expect(verdicts.get('unexported')).toBe('excerpt');
+    expect(exported).not.toContain(`./${name}`);
+    const folder = resolve(root, 'packages/react/dist/types', name);
+    mkdirSync(folder, { recursive: true });
+    writeFileSync(resolve(folder, 'index.d.ts'), 'export declare const value: number;\n');
+    try {
+      const verdicts = await compileReact(
+        [
+          {
+            key: 'unexported',
+            language: 'tsx',
+            source: `import * as Family from '@slotted/react/${name}';\n\nexport const used = Family;\n`,
+          },
+        ],
+        root,
+      );
+      expect(verdicts.get('unexported')).toBe('excerpt');
+    } finally {
+      rmSync(folder, { recursive: true, force: true });
+    }
   });
 });
 
@@ -156,6 +165,12 @@ describe('readNgcResult', () => {
     expect(() =>
       readNgcResult({ output: '', exitCode: 1, errorCode: 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER' }),
     ).toThrow(/truncated/);
+  });
+
+  it('names the reason ngc never ran, which leaves no output to read', () => {
+    expect(() => readNgcResult({ output: '\n', exitCode: 1, errorCode: 'ENOENT' })).toThrow(
+      /ngc could not run: ENOENT/,
+    );
   });
 
   it('names the blocks with an error and throws on an error outside them', () => {

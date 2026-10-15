@@ -42,6 +42,7 @@ const NOT_FIELDS = new Map([
     "[data-ui='split-button'][data-part='root'] > [data-ui='button'][data-variant='outline'][data-pressed]",
     'a pressed outline button',
   ],
+  ["[data-ui='kbd']", 'a key cap: the raised ground above its rim is what says the word is a key'],
   ["[data-ui='listbox']", 'a list on the page surface, not a field'],
   ["[data-ui='tree']", 'a list on the page surface, not a field'],
   ["[data-ui='slider'] [data-part='track']", 'a track, whose sunken ground is the unfilled range'],

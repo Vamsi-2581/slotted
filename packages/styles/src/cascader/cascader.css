@@ -1064,12 +1064,6 @@
     -webkit-line-clamp: 2;
   }
 
-  [data-ui='cascader'] [data-part='match'] {
-    background-color: transparent;
-    color: inherit;
-    font-weight: var(--slotted-font-weight-semibold, 600);
-  }
-
   /**
    * The path of a search hit, or the line under a label. Quieter by the
    * secondary step and never in the way of the label above it.

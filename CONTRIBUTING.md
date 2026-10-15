@@ -84,8 +84,12 @@ indexes every document.
 
 `demos/` holds applications that consume the library as a published
 package: a separate pnpm installation each, no workspace link, every
-`@slotted/*` installed from a tarball in `demos/.registry/`. The
-directory is not committed; it is written by:
+`@slotted/*` installed from a tarball in `demos/.registry/`.
+`demos/nexora` is its own pnpm workspace (`angular`, `backend`) with its own
+lockfile, outside the repository's workspace, so a clean clone installs and
+checks the library without any tarball; `pnpm --dir demos/nexora install`
+installs the demo once the tarballs exist. `demos/.registry/` is not committed;
+it is written by:
 
 - `pnpm pack:beta`: builds every package and packs the ones that declare a
   published surface (`files` or `publishConfig.directory`) at their current
@@ -95,7 +99,7 @@ directory is not committed; it is written by:
 
 - `pnpm demo:refresh`: the loop after one library change — builds
   `@slotted/angular`, `@slotted/core`, `@slotted/theme` and `@slotted/themes`,
-  repacks only those four at the current version, reinstalls and deletes
+  repacks only those four at the current version, reinstalls `demos/nexora` and deletes
   `demos/nexora/angular/.angular/cache`, so `demos/nexora/angular` sees the
   change on its next `pnpm start` (a running dev server is restarted). The
   dev server pre-bundles the packages into that cache and would otherwise
@@ -124,6 +128,8 @@ The catalogs live in `packages/core/src/i18n` (`docs/decisions/0003-internationa
 - `pnpm check:full`: all task-bearing packages and root checks.
 - `pnpm test:i18n`: no family writes words outside the catalog; every locale matches `en-US`.
 - `pnpm format`: explicitly rewrite supported files with Prettier.
+
+`pnpm typecheck`, and every command above that runs it, reads the packages' declarations from `dist`: a clean clone runs `pnpm build` once first.
 
 Choose the smallest command that covers the changed surface. Pull requests that alter toolchain or cross-package contracts should use `pnpm check:full`.
 

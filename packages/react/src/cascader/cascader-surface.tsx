@@ -1,9 +1,10 @@
 import type { CascaderColumnView, CascaderCrumb, CascaderNodeView } from '@slotted/core/cascader';
-import { splitByMatch } from '@slotted/core/collection';
+import { matchRanges } from '@slotted/core/highlight';
 import { useEffect, useRef } from 'react';
 import type { CSSProperties, MouseEvent, ReactNode, Ref } from 'react';
 
 import { Button } from '../button';
+import { Highlight } from '../highlight';
 import { Glyph, Icon } from '../icon';
 import type { CascaderState } from './cascader-state';
 import type { CascaderDataProps } from './cascader.types';
@@ -102,15 +103,10 @@ export function CascaderSurfaceBody<T>({
     const item = state.itemFor(node.key);
     if (item !== undefined && data.renderNode !== undefined) return data.renderNode(item, node);
     if (!view.searching || state.query === '') return node.label;
-    return splitByMatch(node.label, state.query, { locale: state.locale }).map((run, index) =>
-      run.matched ? (
-        <mark data-part="match" key={index}>
-          {run.text}
-        </mark>
-      ) : (
-        <span key={index}>{run.text}</span>
-      ),
-    );
+    /* The `highlight` family draws the match, from the collator the search
+       used, so the mark reads the same here as in every other filtered list. */
+    const ranges = matchRanges(node.label, state.query, { locale: state.locale });
+    return <Highlight ranges={ranges} text={node.label} />;
   };
 
   const renderNode = (node: CascaderNodeView) => {

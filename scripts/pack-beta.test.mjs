@@ -111,8 +111,7 @@ test('demo:refresh packs every tarball the demo installs, and the demo installs 
   for (const name of installed) {
     const manifest = manifests().find((candidate) => candidate.name === name);
     const peers = Object.keys(manifest.peerDependencies ?? {}).filter(
-      (peer) =>
-        peer.startsWith('@slotted/') && !manifest.peerDependenciesMeta?.[peer]?.optional,
+      (peer) => peer.startsWith('@slotted/') && !manifest.peerDependenciesMeta?.[peer]?.optional,
     );
     for (const peer of peers) assert.ok(installed.includes(peer), `${name} › ${peer}`);
   }

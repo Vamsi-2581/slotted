@@ -11,9 +11,10 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { SlButton } from '@slotted/angular/button';
+import { SlHighlight } from '@slotted/angular/highlight';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import type { CascaderCrumb, CascaderNodeView } from '@slotted/core/cascader';
-import { splitByMatch } from '@slotted/core/collection';
+import { matchRanges } from '@slotted/core/highlight';
 
 import type { CascaderEngine } from './cascader-engine';
 
@@ -49,7 +50,7 @@ export class SlCascaderNode<T = unknown> {
 @Component({
   selector: 'sl-cascader-body',
   standalone: true,
-  imports: [NgTemplateOutlet, SlButton, SlGlyph, SlIcon],
+  imports: [NgTemplateOutlet, SlButton, SlGlyph, SlHighlight, SlIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: { style: 'display: contents' },
@@ -193,13 +194,7 @@ export class SlCascaderNode<T = unknown> {
               "
             />
           } @else if (view.searching && engine().query !== '') {
-            @for (run of runs(node.label); track $index) {
-              @if (run.matched) {
-                <mark data-part="match">{{ run.text }}</mark>
-              } @else {
-                <span>{{ run.text }}</span>
-              }
-            }
+            <span slHighlight [text]="node.label" [ranges]="ranges(node.label)"></span>
           } @else {
             {{ node.label }}
           }
@@ -250,8 +245,12 @@ export class SlCascaderBody<T> {
     inject(DestroyRef).onDestroy(() => clearTimeout(this.hover));
   }
 
-  protected runs(label: string) {
-    return splitByMatch(label, this.engine().query, { locale: this.locale() });
+  /**
+   * The `highlight` family draws the match, from the collator the search used,
+   * so the mark reads the same here as in every other filtered list.
+   */
+  protected ranges(label: string) {
+    return matchRanges(label, this.engine().query, { locale: this.locale() });
   }
 
   protected backLabel(key: string | undefined) {

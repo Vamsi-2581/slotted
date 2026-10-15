@@ -72,7 +72,8 @@ describe('recipes.standard', () => {
     const offenders: string[] = [];
     for (const scheme of SCHEMES) {
       for (const [token, rule] of Object.entries(standard[scheme])) {
-        if ('seed' in rule && rule.seed === 'neutral' && 'h' in rule) offenders.push(`${scheme} ${token}`);
+        if ('seed' in rule && rule.seed === 'neutral' && 'h' in rule)
+          offenders.push(`${scheme} ${token}`);
       }
     }
     expect(offenders).toEqual([]);

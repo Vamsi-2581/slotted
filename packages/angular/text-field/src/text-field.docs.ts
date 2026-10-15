@@ -230,7 +230,9 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'Reveal, and the Caps Lock mark every password gets',
       source: `<div slTextField revealable>
-  <span slTextFieldStart><span slIcon><svg slGlyph name="lock"></svg></span></span>
+  <span slTextFieldStart
+    ><span slIcon><svg slGlyph name="lock"></svg></span
+  ></span>
   <input slTextFieldInput type="password" autocomplete="current-password" />
 </div>`,
     }),

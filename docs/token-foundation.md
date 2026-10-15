@@ -1025,20 +1025,20 @@ in. It is the third scale in the component layer, and it is there for the
 reason the second is: a family met a palette no semantic token can be retuned
 to give.
 
-| Token                        | Light     | Dark      | High contrast |
-| ---------------------------- | --------- | --------- | ------------- |
-| `--slotted-code-comment`     | `var(--slotted-text-muted)` | `var(--slotted-text-muted)` | `#1f2937` |
-| `--slotted-code-keyword`     | `#a21caf` | `#e879f9` | `#701a75`     |
-| `--slotted-code-string`      | `#15803d` | `#4ade80` | `#14532d`     |
-| `--slotted-code-number`      | `#b45309` | `#fbbf24` | `#713f12`     |
-| `--slotted-code-function`    | `#1d4ed8` | `#60a5fa` | `#1e3a8a`     |
-| `--slotted-code-type`        | `#0e7490` | `#22d3ee` | `#164e63`     |
-| `--slotted-code-variable`    | `#4338ca` | `#a5b4fc` | `#312e81`     |
-| `--slotted-code-property`    | `#6d28d9` | `#c4b5fd` | `#4c1d95`     |
-| `--slotted-code-punctuation` | `#475569` | `#cbd5e1` | `#1e293b`     |
-| `--slotted-code-tag`         | `#be123c` | `#fb7185` | `#881337`     |
-| `--slotted-code-attribute`   | `#0369a1` | `#7dd3fc` | `#0c4a6e`     |
-| `--slotted-code-constant`    | `#9a3412` | `#fb923c` | `#7c2d12`     |
+| Token                        | Light                       | Dark                        | High contrast |
+| ---------------------------- | --------------------------- | --------------------------- | ------------- |
+| `--slotted-code-comment`     | `var(--slotted-text-muted)` | `var(--slotted-text-muted)` | `#1f2937`     |
+| `--slotted-code-keyword`     | `#a21caf`                   | `#e879f9`                   | `#701a75`     |
+| `--slotted-code-string`      | `#15803d`                   | `#4ade80`                   | `#14532d`     |
+| `--slotted-code-number`      | `#b45309`                   | `#fbbf24`                   | `#713f12`     |
+| `--slotted-code-function`    | `#1d4ed8`                   | `#60a5fa`                   | `#1e3a8a`     |
+| `--slotted-code-type`        | `#0e7490`                   | `#22d3ee`                   | `#164e63`     |
+| `--slotted-code-variable`    | `#4338ca`                   | `#a5b4fc`                   | `#312e81`     |
+| `--slotted-code-property`    | `#6d28d9`                   | `#c4b5fd`                   | `#4c1d95`     |
+| `--slotted-code-punctuation` | `#475569`                   | `#cbd5e1`                   | `#1e293b`     |
+| `--slotted-code-tag`         | `#be123c`                   | `#fb7185`                   | `#881337`     |
+| `--slotted-code-attribute`   | `#0369a1`                   | `#7dd3fc`                   | `#0c4a6e`     |
+| `--slotted-code-constant`    | `#9a3412`                   | `#fb923c`                   | `#7c2d12`     |
 
 The five tones give five hues and a language has more than five kinds of
 word. Reaching for `danger` to paint a keyword would make one tone mean two

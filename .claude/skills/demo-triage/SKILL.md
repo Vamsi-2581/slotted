@@ -54,7 +54,7 @@ with `<markup>`" or "demo — the family expects `<x>` and the app wrote `<y>`".
 - rebuild the tarballs and reinstall: `pnpm demo:refresh` at the repository root (three
   packages, current version), or `pnpm pack:beta` for all; restart the demo's dev server;
 - in `demos/<app>/LIBRARY-FEEDBACK.md`, the entry gains the commit that fixed it. A fix
-  that changes public API is a beta bump (`pnpm release:beta`) and the demo moves its
+  that changes public API ships in a beta release (`pnpm release`) and the demo moves its
   `file:` versions deliberately.
 
 **Demo mistake** — fix the demo. When the mistake came from an API that was easy to misuse

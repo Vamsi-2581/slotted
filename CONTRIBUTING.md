@@ -94,8 +94,6 @@ it is written by:
 - `pnpm pack:beta`: builds every package and packs the ones that declare a
   published surface (`files` or `publishConfig.directory`) at their current
   version.
-- `pnpm release:beta`: moves every published package to the next
-  `0.x.y-beta.N`, then does the above.
 
 - `pnpm demo:refresh`: the loop after one library change — builds
   `@slotted/angular`, `@slotted/core`, `@slotted/theme` and `@slotted/themes`,
@@ -113,17 +111,32 @@ that the published set and the shared version stay what this section says.
 
 ## Publishing to npm
 
-The six packages under `packages/` are published together, at one shared
-version, under the `beta` tag:
+The six packages under `packages/` are released together, at one shared
+version. A release is one command on a clean `main` and a workflow:
 
-1. `pnpm release:beta` moves every package to the next `0.x.y-beta.N`. The
-   version change is committed on `main`, and CI passes on it.
-2. From a clean `main` equal to `origin/main`: `rm -rf packages/*/dist && pnpm build`.
-3. `pnpm -r --filter './packages/*' publish --tag beta --access public`. pnpm
-   replaces `workspace:*` with the shared version. The npm account requires a
-   one-time password, so the command runs in an interactive terminal.
+1. `pnpm release --dry-run` prints the next version, its dist-tag and the
+   `CHANGELOG.md` entry. `pnpm release` without an argument moves a beta to the
+   next beta (`0.1.0-beta.0` → `0.1.0-beta.1`); `pnpm release 0.2.0-beta.0`
+   names the version.
+2. `pnpm release` refuses a branch other than `main`, a dirty tree, a `main`
+   behind or ahead of `origin/main`, and a commit whose CI has not passed. It
+   writes the version into the six manifests and the entry into
+   `CHANGELOG.md`, commits `chore(release): v<version>`, tags `v<version>` and
+   pushes both.
+3. The tag starts `.github/workflows/release.yml`, which builds, runs
+   `pnpm check:full` and runs `node scripts/release.mjs --publish`. The step
+   publishes in dependency order and skips a version already on the registry,
+   so re-running a failed workflow finishes the release.
 
-A version appears on the registry up to two minutes after the command returns;
+The workflow authenticates by npm Trusted Publishing (OIDC): no npm token and no
+one-time password exist. Each package lists `andrelopes-code/slotted` and
+`release.yml` as its trusted publisher on npmjs.com. npm configures a trusted
+publisher only on a package that exists, so a package added to `packages/`
+publishes its first version by hand from an interactive terminal, and is
+configured before the next release. Every version of the `0.x` line goes to
+`latest`; after `1.0.0`, a prerelease goes to its own tag (`beta`, `rc`).
+
+A version appears on the registry up to two minutes after the workflow ends;
 `npm view @slotted/<package> dist-tags` confirms it.
 
 ## Adding a locale

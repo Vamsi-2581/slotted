@@ -63,9 +63,10 @@ does the same for every package, after a full build.
 
 ## Moving to a newer beta
 
-1. At the repository root: `pnpm release:beta`.
-2. Here: replace the version in the three `file:` specifiers in `package.json`, then
-   `pnpm install` at the root.
+1. At the repository root: `pnpm release` (CONTRIBUTING.md › Publishing to npm), then
+   `pnpm pack:beta`, which packs the new version into `demos/.registry/`.
+2. Here: replace the version in the `file:` specifiers in `package.json`, then
+   `pnpm --dir demos/nexora install` at the root.
 3. Build. What broke is an API change the library has to answer for — in
    `LIBRARY-FEEDBACK.md`, in a migration note, or by reverting it.
 

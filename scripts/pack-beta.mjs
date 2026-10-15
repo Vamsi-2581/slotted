@@ -15,10 +15,6 @@ import { fileURLToPath } from 'node:url';
  * `files` or `publishConfig.directory`. Tooling that declares neither, such as
  * the Storybook workbench, stays out without a list somebody has to maintain.
  *
- * `--bump` moves every published package to the next `beta` prerelease and
- * stops; the build that follows is what writes the new version into the
- * Angular `dist/package.json`, so bumping and packing are two steps.
- *
  * `--only a,b` packs those packages and leaves the other tarballs in place:
  * the loop a demo runs after one library change, without the whole build.
  */
@@ -50,7 +46,6 @@ function run(command, args, cwd) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const repositoryRoot = fileURLToPath(new URL('..', import.meta.url));
   const registry = join(repositoryRoot, REGISTRY_DIRECTORY);
-  const bump = process.argv.includes('--bump');
   const onlyIndex = process.argv.indexOf('--only');
   const only =
     onlyIndex === -1 ? null : (process.argv[onlyIndex + 1] ?? '').split(',').filter(Boolean);
@@ -67,15 +62,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     throw new Error(
       `--only names a package that is not published: ${only.filter((n) => !found.includes(n)).join(', ')}`,
     );
-  }
-
-  if (bump) {
-    for (const { directory } of packages) {
-      run('pnpm', ['version', 'prerelease', '--preid', 'beta', '--no-git-tag-version'], directory);
-      const { name, version } = JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8'));
-      console.log(`${name}@${version}`);
-    }
-    process.exit(0);
   }
 
   if (only === null) rmSync(registry, { recursive: true, force: true });

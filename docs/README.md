@@ -79,11 +79,12 @@ pela skill `/component`. Cada subdiretório tem uma classe de leitura própria.
 
 ## Fora de `docs/`
 
-| Localização                | Conteúdo                                                                     |
-| -------------------------- | ---------------------------------------------------------------------------- |
-| `specs/components/<f>/`    | Contrato público de cada família (`contract.json`) e o teste que o verifica. |
-| `apps/docs/`               | Site de documentação: páginas de componente, exemplos React e Angular.       |
-| `packages/*/README.md`     | Instalação e uso de cada pacote, publicados no npm com o pacote.             |
-| `demos/nexora/domain.md`   | Domínio e especificação de produto da demo Nexora. Normativo para o backend. |
-| `demos/*/LIBRARY-FEEDBACK` | Ledger de defeitos e lacunas do pacote observados a partir de uma demo.      |
-| `.claude/progress/`        | Checkpoints de sessão. Artefactos de trabalho, fora do `format:check`.       |
+| Localização                | Conteúdo                                                                                            |
+| -------------------------- | --------------------------------------------------------------------------------------------------- |
+| `specs/components/<f>/`    | Contrato público de cada família (`contract.json`) e o teste que o verifica.                        |
+| `apps/docs/`               | Site de documentação: páginas de componente, exemplos React e Angular.                              |
+| `packages/*/README.md`     | Instalação e uso de cada pacote, publicados no npm com o pacote.                                    |
+| `CHANGELOG.md`             | Uma entrada por versão publicada, escrita por `pnpm release` (CONTRIBUTING.md › Publishing to npm). |
+| `demos/nexora/domain.md`   | Domínio e especificação de produto da demo Nexora. Normativo para o backend.                        |
+| `demos/*/LIBRARY-FEEDBACK` | Ledger de defeitos e lacunas do pacote observados a partir de uma demo.                             |
+| `.claude/progress/`        | Checkpoints de sessão. Artefactos de trabalho, fora do `format:check`.                              |

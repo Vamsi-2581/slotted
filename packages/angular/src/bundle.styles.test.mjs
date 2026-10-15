@@ -11,12 +11,17 @@ const ledger = JSON.parse(
  * Every directory holding an ng-package.json is a published entry point, so
  * the list grows with the library rather than with this file. The earlier
  * version of this test named `button` and therefore proved nothing about the
- * three families added after it.
+ * three families added after it. An entry point is a family when
+ * `specs/components` holds its contract; `i18n` is a provider with no
+ * stylesheet and no element of its own.
  */
 function entryPoints() {
   return readdirSync(new URL('.', packageRoot), { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && !['dist', 'node_modules', 'src'].includes(entry.name))
     .filter((entry) => existsSync(new URL(`${entry.name}/ng-package.json`, packageRoot)))
+    .filter((entry) =>
+      existsSync(new URL(`../../specs/components/${entry.name}/contract.json`, packageRoot)),
+    )
     .map((entry) => ({
       name: entry.name,
       legacy: ledger.includes(entry.name),
@@ -76,7 +81,9 @@ test('carries the family stylesheet into its own bundle', () => {
  * renders its root inside its template, behind `@if (mounted())`, and the
  * partial compiler keeps that template as a string — a template literal
  * verbatim, a folded constant with its quotes escaped. A family that builds
- * its layer by hand writes the attribute with `setAttribute`. Each spelling is
+ * its layer by hand writes the attribute with `setAttribute`. A directive that
+ * yields to an identifier the host already carries binds `[attr.data-ui]` to
+ * `writtenUi ?? 'name'`, so its own name is the fallback. Each spelling is
  * the family selecting itself; a bundle carrying none renders nothing the
  * stylesheet can find.
  */
@@ -89,7 +96,7 @@ test('writes the identifier a rebuilt family is selected by', () => {
     assert.match(
       source,
       new RegExp(
-        `"data-ui": "${name}"|data-ui=\\\\?"${name}\\\\?"|setAttribute\\('data-ui', '${name}'\\)`,
+        `"data-ui": "${name}"|data-ui=\\\\?"${name}\\\\?"|setAttribute\\('data-ui', '${name}'\\)|\\?\\? '${name}';`,
       ),
       `${name} renders no element carrying its own identifier`,
     );

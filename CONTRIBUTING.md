@@ -131,6 +131,8 @@ The catalogs live in `packages/core/src/i18n` (`docs/decisions/0003-internationa
 
 `pnpm typecheck`, and every command above that runs it, reads the packages' declarations from `dist`: a clean clone runs `pnpm build` once first.
 
+The Angular specs run with `isolate: true` (`angular.json`). The builder's default shares one module state across the spec files of a worker, and 24 of 3178 tests then failed only in the full run, never alone.
+
 Choose the smallest command that covers the changed surface. Pull requests that alter toolchain or cross-package contracts should use `pnpm check:full`.
 
 ## Product Direction

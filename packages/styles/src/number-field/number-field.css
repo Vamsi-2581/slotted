@@ -323,6 +323,9 @@
     touch-action: none;
     transition: color var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);
+    /* Its own bidi run: as a flex container its text is a new block, and a
+       mark of more than one character read backwards in a right-to-left page. */
+    unicode-bidi: plaintext;
     user-select: none;
     -webkit-user-select: none;
   }

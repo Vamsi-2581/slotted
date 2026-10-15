@@ -322,3 +322,13 @@ test('renders every attribute state the contract declares', () => {
   assert.match(fragment, /<fieldset disabled/, 'no scene shows a control disabled by an ancestor');
   assert.match(fragment, /<button\b[^>]*\bdisabled\s*>/, 'no scene shows a stepper at its bound');
 });
+
+/**
+ * The drag mark is a flex container, so its text is a new block with the
+ * document's direction: a mark of more than one character — `kg`, `°C`, `R$` —
+ * read backwards in a right-to-left page until it became its own bidi run, the
+ * rule currency-field took first.
+ */
+test('keeps the scrub mark in its own reading order', () => {
+  assert.match(rule(`${ui} [data-part='scrub']`), /unicode-bidi:plaintext/);
+});

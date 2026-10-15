@@ -145,7 +145,9 @@ export interface MenuProps extends Partial<MenuDefaults> {
  * measured against, so the family has to reach the element however the consumer
  * rendered it.
  */
-export interface MenuTriggerRootProps extends HTMLAttributes<HTMLElement> {
+export interface MenuTriggerRootProps extends Omit<HTMLAttributes<HTMLElement>, 'children'> {
+  /** The trigger's label, always handed on: a rendered `Button` requires it. */
+  children: ReactNode;
   ref?: PartRef | undefined;
   'data-disabled'?: '' | undefined;
   'data-open'?: '' | undefined;

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/menu/contract.json';
+import { Button } from '../button';
 import { Glyph, Icon } from '../icon';
 import { Menu } from './menu';
 import { MenuDefaultsProvider } from './menu-defaults';
@@ -491,6 +492,29 @@ describe('Menu', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Document' }), { detail: 1 });
     expect(screen.queryByRole('menu')).toBeNull();
+  });
+});
+
+/**
+ * The reference page's pattern: the trigger's label reaches a `Button` through
+ * `render`. `ButtonProps` requires `children`, and the render props carried it
+ * as optional, so the page's example did not compile.
+ */
+describe('a trigger rendered as a button', () => {
+  it('hands its label to the rendered button, which compiles against ButtonProps', () => {
+    render(
+      <Menu>
+        <MenuTrigger render={(props) => <Button {...props} variant="outline" />}>
+          Document
+        </MenuTrigger>
+        <MenuContent aria-label="Document">
+          <MenuItem value="rename">Rename</MenuItem>
+        </MenuContent>
+      </Menu>,
+    );
+    const trigger = screen.getByRole('button', { name: 'Document' });
+    expect(trigger).toHaveAttribute('data-ui', 'button');
+    expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
   });
 });
 

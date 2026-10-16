@@ -15,6 +15,7 @@ import {
   siteExampleErrors,
 } from './render.ts';
 import { renderContent } from './skills.ts';
+import { loadTokenSource, renderTokens } from './tokens.ts';
 import type { Binding, BlockVerdict, FamilyInput } from './types.ts';
 
 export interface BuildResult {
@@ -64,6 +65,7 @@ export async function buildDocs({
   const content = loadContent(root);
   writeFileSync(join(out, 'index.md'), renderIndex(families, binding, content));
   writeFileSync(join(out, 'AGENTS.snippet.md'), renderAgentsSnippet(binding));
+  writeFileSync(join(out, 'tokens.md'), renderTokens(loadTokenSource(root)));
   for (const family of families) {
     for (const file of renderFamily(family).files)
       writeFileSync(join(out, file.path), file.content);

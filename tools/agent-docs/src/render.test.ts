@@ -163,6 +163,10 @@ describe('renderIndex', () => {
         '## Layout',
         '- legacy: A family with an old page.',
         '',
+        '## Tokens',
+        '',
+        "What each theme token is for, with its default value: `./tokens.md`. An element of the application's own reads only these.",
+        '',
       ].join('\n'),
     );
   });

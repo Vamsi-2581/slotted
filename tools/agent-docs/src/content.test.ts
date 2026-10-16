@@ -9,6 +9,7 @@ import { loadCatalog, unresolvedNames } from './references.ts';
 import { previousRegistry, registryErrors, type Registry } from './registry.ts';
 import { renderAgentsSnippet } from './render.ts';
 import { skillErrors } from './skills.ts';
+import { loadTokenSource, renderTokens } from './tokens.ts';
 
 /**
  * The published guidelines and skills, read from `tools/agent-docs/content`:
@@ -26,6 +27,7 @@ const active = new Set(
 const published = [
   ...content.topics.map((topic) => [topic.file, renderTopic(topic)] as const),
   ['README.md', content.readme] as const,
+  ['tokens.md', renderTokens(loadTokenSource(root))] as const,
   ...[...content.skills].map(([name, skill]) => [`skills/${name}`, skill.source] as const),
 ];
 /** What the source may name besides the library: placeholders, docs paths that exist, topic files. */
@@ -35,6 +37,8 @@ const local = new Set([
   '{{docsDir}}',
   '{{package}}',
   '{{docsDir}}/<family>.md',
+  'tokens.md',
+  '{{docsDir}}/tokens.md',
   ...families.map((family) => `{{docsDir}}/${family}.md`),
   ...guidelineFiles,
   ...guidelineFiles.map((file) => `{{docsDir}}/guidelines/${file}`),

@@ -85,6 +85,8 @@ describe('buildDocs', () => {
     expect(result.families).toBe(contracts.length);
     expect(files).toContain('index.md');
     expect(files).toContain('AGENTS.snippet.md');
+    expect(files).toContain('tokens.md');
+    expect(readFileSync(join(a, 'tokens.md'), 'utf8')).toContain('`--slotted-space-6`');
     for (const family of contracts) {
       expect(files).toContain(`${family}.md`);
       expect(files).toContain(`${family}.json`);

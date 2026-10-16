@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { loadContent } from './content.ts';
 import { PUBLISHED_FORBIDDEN, renderTopic, topicErrors } from './guidelines.ts';
 import { loadCatalog, unresolvedNames } from './references.ts';
-import { previousRegistry, registryErrors, registryOf } from './registry.ts';
+import { previousRegistry, registryErrors, registryOf, rewriteErrors } from './registry.ts';
 import { renderAgentsSnippet } from './render.ts';
 import { skillErrors } from './skills.ts';
 import { loadTokenSource, renderTokens } from './tokens.ts';
@@ -70,6 +70,24 @@ describe('guidelines', () => {
 
   it('every id the last release carried is still in a topic, at its level or retired', () => {
     expect(registryErrors(registryOf(content.topics), previousRegistry(root))).toEqual([]);
+  });
+
+  it('every rewrite names an active rule in words the release notes read', () => {
+    expect(rewriteErrors(content.topics)).toEqual([]);
+  });
+});
+
+describe('own elements', () => {
+  it('OE-02 lists the states that paint over weaker ones, in the order the contracts declare', () => {
+    const schema = readFileSync(join(root, 'specs/contract.schema.mjs'), 'utf8');
+    const order = [.../STATE_PRECEDENCE = \[([^\]]*)\]/.exec(schema)![1]!.matchAll(/'([a-z-]+)'/g)]
+      .map(([, state]) => state)
+      .filter((state) => state !== 'focus-visible' && state !== 'default');
+    const rule = content.topics
+      .flatMap((topic) => topic.rules)
+      .find((entry) => entry.id === 'OE-02')!
+      .fields.find(([key]) => key === 'Rule')![1];
+    expect([...rule.matchAll(/`([a-z-]+)`/g)].map(([, state]) => state)).toEqual(order);
   });
 });
 

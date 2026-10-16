@@ -248,7 +248,7 @@
         "--slotted-control-transition-easing": "The curve of a control's change of state.",
         "--slotted-control-invalid-edge-width": "The edge an invalid control adds inside its border, so the state reads where colour cannot.",
         "--slotted-control-border-color": "The edge colour of a control at rest.",
-        "--slotted-control-surface": "The ground of a control at rest: a field, an outline button.",
+        "--slotted-control-surface": "The ground of a control at rest: a field, a select, a segmented control.",
         "--slotted-control-shadow": "The shadow of a control at rest."
       }
     },

@@ -35,6 +35,22 @@ export function registryOf(topics: readonly Topic[]): Registry {
   return registry;
 }
 
+/** A retired rule whose status names a rewrite the release notes cannot read, or a replacement that is not active. */
+export function rewriteErrors(topics: readonly Topic[]): string[] {
+  const registry = registryOf(topics);
+  const errors: string[] = [];
+  for (const topic of topics)
+    for (const rule of topic.rules) {
+      if (rule.status !== 'retired' || !/rewrit/i.test(rule.statusText ?? '')) continue;
+      const replacedBy = REWRITTEN.exec(rule.statusText ?? '')?.[1];
+      if (replacedBy === undefined)
+        errors.push(`${rule.id}: the status names a rewrite; write it as "rewritten as XX-NN"`);
+      else if (registry[replacedBy]?.status !== 'active')
+        errors.push(`${rule.id}: rewritten as ${replacedBy}, which is not an active rule`);
+    }
+  return errors.sort();
+}
+
 export function registryErrors(current: Registry, previous: Registry | undefined): string[] {
   const errors: string[] = [];
   for (const [id, before] of Object.entries(previous ?? {})) {
@@ -58,20 +74,25 @@ function git(root: string, args: string[]): string {
   });
 }
 
-/** The registry of the topics `ref` holds; none when `ref` has no guidelines. */
+/**
+ * The registry of the topics `ref` holds; none when `ref` or the repository
+ * has no guidelines. A topic the parser refuses is an error, never a missing
+ * registry: a check against the last release would pass with nothing to check.
+ */
 export function registryAt(root: string, ref: string): Registry | undefined {
+  let files: string[];
   try {
-    const files = git(root, ['ls-tree', '--name-only', ref, `${GUIDELINES}/`])
+    files = git(root, ['ls-tree', '--name-only', ref, `${GUIDELINES}/`])
       .split('\n')
       .map((path) => path.slice(GUIDELINES.length + 1))
       .filter((file) => file.endsWith('.md') && !NOT_TOPICS.has(file));
-    if (files.length === 0) return undefined;
-    return registryOf(
-      files.map((file) => parseTopic(file, git(root, ['show', `${ref}:${GUIDELINES}/${file}`]))),
-    );
   } catch {
     return undefined;
   }
+  if (files.length === 0) return undefined;
+  return registryOf(
+    files.map((file) => parseTopic(file, git(root, ['show', `${ref}:${GUIDELINES}/${file}`]))),
+  );
 }
 
 /** The registry of the last `v*` tag; none before the first release that carries guidelines. */

@@ -115,6 +115,33 @@ describe('renderTokens', () => {
   });
 });
 
+describe('reduced motion', () => {
+  it('a value that reaches a reduced-motion token states its reduced value', () => {
+    const page = renderTokens({
+      tokens: [{ name: '--slotted-control-transition-duration', layer: 'semantic', axis: 'base' }],
+      groups: [
+        {
+          id: 'control',
+          reader: 'application',
+          purpose: 'C.',
+          tokens: { '--slotted-control-transition-duration': 'How long.' },
+        },
+      ],
+      values: {
+        base: {
+          '--slotted-control-transition-duration': 'var(--slotted-duration-short)',
+          '--slotted-duration-short': '120ms',
+        },
+        densities: {},
+        reducedMotion: { '--slotted-duration-short': '1ms' },
+      },
+    });
+    expect(page).toContain(
+      '| `--slotted-control-transition-duration` | How long. | 120ms; 1ms under reduced motion |',
+    );
+  });
+});
+
 describe('the theme', () => {
   it('every application token of the contract is on the page', () => {
     const real = loadTokenSource(resolve(import.meta.dirname, '../../..'));

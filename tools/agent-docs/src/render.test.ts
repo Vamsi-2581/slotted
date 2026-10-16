@@ -165,7 +165,7 @@ describe('renderIndex', () => {
         '',
         '## Tokens',
         '',
-        "What each theme token is for, with its default value: `./tokens.md`. An element of the application's own reads only these.",
+        'What each theme token is for, with its default value: `./tokens.md`.',
         '',
       ].join('\n'),
     );

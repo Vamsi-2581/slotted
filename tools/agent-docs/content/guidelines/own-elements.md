@@ -28,11 +28,11 @@ Check: Every custom property of the element's own CSS that starts with --slotted
 
 Level: MUST
 Applies to: an interactive element of the application's own
-Rule: Where two states hold at once, the element draws the stronger, in the order `disabled`, `loading`, `readonly`, `invalid`, `checked`, `selected`, `pressed`, `current`, `complete`, `active`, `hover`, `focus-visible`.
+Rule: Where two states hold at once, the element paints the ground, the edge and the text colour of the stronger, in the order `disabled`, `loading`, `readonly`, `invalid`, `checked`, `selected`, `pressed`, `current`, `complete`, `active`, `hover`; the focus ring of OE-03 is drawn over every state.
 Why: A disabled element that lights under the pointer reads as operable and answers nothing.
 Do: The hover rule of a day cell excludes the disabled and the selected cell, so a selected day keeps its ground under the pointer.
 Don't: A hover ground declared after the selected ground repaints the chosen day while the pointer crosses it.
-Check: Put the pointer over a disabled, a selected and a current instance: each keeps the appearance of its stronger state.
+Check: Put the pointer over a disabled, a selected and a current instance: each keeps the appearance of its stronger state; move focus to each: the ring is drawn on all three.
 
 ### OE-03 · Focus draws the theme's ring
 
@@ -78,7 +78,7 @@ Check: Emulate forced colours and step through every state: each reads different
 
 Level: MUST
 Applies to: every transition and animation of an element of the application's own
-Rule: A transition takes its duration from the `duration` group and its curve from the `easing` group, and an animation that repeats stops under `prefers-reduced-motion: reduce`.
+Rule: A transition takes its duration from the `duration` group or `--slotted-control-transition-duration`, its curve from the `easing` group or `--slotted-control-transition-easing`, and an animation that repeats stops under `prefers-reduced-motion: reduce`.
 Why: The theme collapses transition durations under reduced motion; a literal duration and a loop stay outside that collapse.
 Do: A cell eases its ground over `--slotted-duration-short` with `--slotted-easing-standard`; its pulsing marker stops under reduced motion and keeps its shape.
 Don't: A 300 ms transition written as a literal, and a pulse that only slows down.

@@ -67,8 +67,12 @@ function valueCell(token: ThemeToken, values: ThemeValues): string {
     }).join(', ');
   const value = values.base[token.name];
   const resolved = value === undefined ? '—' : resolveValue(value, {}, values.base);
-  const reduced = values.reducedMotion[token.name];
-  return reduced === undefined ? resolved : `${resolved}; ${reduced} under reduced motion`;
+  const reduced =
+    value === undefined
+      ? resolved
+      : (values.reducedMotion[token.name] ??
+        resolveValue(value, values.reducedMotion, values.base));
+  return reduced === resolved ? resolved : `${resolved}; ${reduced} under reduced motion`;
 }
 
 function meaningCell(group: TokenGroup, name: string): string {

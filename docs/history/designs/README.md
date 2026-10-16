@@ -76,6 +76,7 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `internationalization` | — | [2026-09-22](2026-09-22-internationalization-design.md) | — |
 | `internationalization` | — | [2026-10-01](2026-10-01-internationalization-design.md) | — |
 | `theming-architecture` | — | [2026-10-01](2026-10-01-theming-architecture-design.md) | — |
+| `product-agent-material` (guidelines e skills de produto em `dist/docs`) | — | [2026-10-16](2026-10-16-product-agent-material-design.md) | — |
 | `column-management` (`column-manager`, `saved-views`, `data-grid`) | [2026-09-23 §1](2026-09-23-column-management-design.md) | [2026-09-23](2026-09-23-column-management-design.md) | [2026-09-23](2026-09-23-column-management-self-assessment.md) |
 | `narrow-layout` (classes de tamanho, pop-in de `data-grid`, `page`, `page-header`) | [2026-09-23 §2](2026-09-23-narrow-layout-design.md) | [2026-09-23](2026-09-23-narrow-layout-design.md) | — |
 | `data-list` | [2026-09-24](2026-09-24-data-list-capability-inventory.md) | [2026-09-24](2026-09-24-data-list-design.md) | [2026-09-24](2026-09-24-data-list-self-assessment.md) |

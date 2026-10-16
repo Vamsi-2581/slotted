@@ -225,8 +225,8 @@ reached.
 
 ## Glyph
 
-A family draws
-it with the `Glyph` element — `<Icon><Glyph name="x" /></Icon>` in React,
+A family draws a component-owned icon with the `Glyph` element —
+`<Icon><Glyph name="x" /></Icon>` in React,
 `<span slIcon><svg slGlyph name="x"></svg></span>` in Angular — a real `<svg>`
 whose paths `scripts/generate-icon-glyphs.mjs` writes into
 `packages/core/src/glyph/glyphs.ts` from the same manifest as the tokens below.

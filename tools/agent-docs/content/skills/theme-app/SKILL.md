@@ -69,5 +69,6 @@ new seed keeps the ratios of every scheme. A colour of the `tone`, `surface`,
 ## 5. Done
 
 1. The application's own CSS declares no token of the `tone`, `surface`,
-   `text` or `border` groups, and selects no `data-part`.
+   `text` or `border` groups, and sets no colour, border, radius, padding or
+   type on a family's `data-ui` or `data-part`.
 2. `themeConformance` passes for the theme.

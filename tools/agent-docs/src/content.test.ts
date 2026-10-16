@@ -37,6 +37,8 @@ const local = new Set([
   '{{docsDir}}',
   '{{package}}',
   '{{docsDir}}/<family>.md',
+  '{{docsDir}}/index.md',
+  '{{docsDir}}/skills/index.md',
   'tokens.md',
   '{{docsDir}}/tokens.md',
   ...families.map((family) => `{{docsDir}}/${family}.md`),

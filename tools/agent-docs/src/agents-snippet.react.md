@@ -17,3 +17,4 @@ Read the skill before the task:
 - Compose or change a screen — a list, a record, a form, an overview: `{{docsDir}}/skills/compose-screen/SKILL.md`
 - Show what a screen draws while it waits, and its empty and error states: `{{docsDir}}/skills/waiting-states/SKILL.md`
 - Review a screen against the guidelines, or fix what a review found: `{{docsDir}}/skills/review-screen/SKILL.md`
+- Write a component or element that no family draws: `{{docsDir}}/skills/build-own-element/SKILL.md`

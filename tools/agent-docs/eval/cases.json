@@ -105,6 +105,17 @@
         { "kind": "absent", "pattern": "data-part=" },
         { "kind": "mentions", "pattern": "loading" }
       ]
+    },
+    {
+      "id": "seat-map",
+      "skill": "build-own-element",
+      "prompt": "Write a seat picker in src/: a map of 8 rows by 12 seats read from fetchSeats() in src/api.ts, which you also write as a stub returning a Promise. Each seat is free, taken or selected; a free seat toggles its selection by pointer and by keyboard, a taken seat cannot be chosen, and the number of selected seats shows under the map.",
+      "assertions": [
+        { "kind": "no-literal" },
+        { "kind": "mentions", "pattern": "focus-visible[\\s\\S]{0,400}--slotted-focus-ring-" },
+        { "kind": "mentions", "pattern": "--slotted-target-" },
+        { "kind": "mentions", "pattern": "forced-colors" }
+      ]
     }
   ]
 }

@@ -15,6 +15,7 @@ material published with it: guidelines, product skills and the token page.
 | New topic                     | a file in `content/guidelines/` with a new two-letter prefix                                                                                                                                                               | same                                                     | yes                       |
 | New or changed skill          | `content/skills/<name>/SKILL.md`, by `content/skills/writing-skills.md`; a case in `eval/cases.json`, and its starting files in `eval/seeds/<seed>/<binding>/` when the task changes existing code; a line in each snippet | same                                                     | yes                       |
 | New theme token               | `packages/theme/src/contract.json`: the token and its group                                                                                                                                                                | `pnpm --filter @slotted/theme test`, then the line above | no                        |
+| Design system book or cover   | `content/design-system/README.md`, `content/design-system/cover.html`                                                                                                                                                      | same                                                     | no                        |
 | Snippet                       | `agents-snippet.react.md`, `agents-snippet.angular.md`                                                                                                                                                                     | `pnpm --filter @slotted/agent-docs verify`               | yes                       |
 
 ## Generated, never edited
@@ -28,6 +29,24 @@ material published with it: guidelines, product skills and the token page.
   `@slotted/theme` and `@slotted/themes`.
 - The release notes' guideline block, from the topics at the last tag and now.
 - The site routes and `llms.txt` of `apps/docs`, from the built packages.
+
+## Design System export
+
+The design system on Claude (`content/design-system/system.json` names its
+URL) is generated from the repository: tokens from the theme, one folder per
+family from the React docs, the book and the cover from
+`content/design-system/`.
+
+1. `pnpm --filter @slotted/react build`.
+2. `pnpm --filter @slotted/agent-docs design-system --out <dir>/design-system`.
+   It prints the tokens it left out and the families without a preview: a
+   family gains a preview when its site example compiles as a complete module.
+3. In a session with the Artifact tool, read `project/design-system.json` of
+   the system. Keys the page added since the last export (`sections`,
+   `assetGroups`, `groups`) go into the generated index.
+4. Publish to the system's URL with `root` = `<dir>/design-system`, every file
+   under `project/` in `files`, and `project/design-system.json` as
+   `file_path`.
 
 ## Release
 

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "design-system": "node bin/design-system.mjs",
     "report:language": "node bin/build.mjs --report-language",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit --pretty false",

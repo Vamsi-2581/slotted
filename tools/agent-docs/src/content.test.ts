@@ -28,6 +28,10 @@ const published = [
   ...content.topics.map((topic) => [topic.file, renderTopic(topic)] as const),
   ['README.md', content.readme] as const,
   ['tokens.md', renderTokens(loadTokenSource(root))] as const,
+  [
+    'design-system/README.md',
+    readFileSync(join(root, 'tools/agent-docs/content/design-system/README.md'), 'utf8'),
+  ] as const,
   ...[...content.skills].map(([name, skill]) => [`skills/${name}`, skill.source] as const),
 ];
 /** What the source may name besides the library: placeholders, docs paths that exist, topic files. */
@@ -79,17 +83,29 @@ describe('guidelines', () => {
   });
 });
 
+const schema = readFileSync(join(root, 'specs/contract.schema.mjs'), 'utf8');
+/** The states that paint over weaker ones, in the order the contracts declare. */
+const precedence = [.../STATE_PRECEDENCE = \[([^\]]*)\]/.exec(schema)![1]!.matchAll(/'([a-z-]+)'/g)]
+  .map(([, state]) => state)
+  .filter((state) => state !== 'focus-visible' && state !== 'default');
+
 describe('own elements', () => {
   it('OE-02 lists the states that paint over weaker ones, in the order the contracts declare', () => {
-    const schema = readFileSync(join(root, 'specs/contract.schema.mjs'), 'utf8');
-    const order = [.../STATE_PRECEDENCE = \[([^\]]*)\]/.exec(schema)![1]!.matchAll(/'([a-z-]+)'/g)]
-      .map(([, state]) => state)
-      .filter((state) => state !== 'focus-visible' && state !== 'default');
+    const order = precedence;
     const rule = content.topics
       .flatMap((topic) => topic.rules)
       .find((entry) => entry.id === 'OE-02')!
       .fields.find(([key]) => key === 'Rule')![1];
     expect([...rule.matchAll(/`([a-z-]+)`/g)].map(([, state]) => state)).toEqual(order);
+  });
+
+  it('the design system book lists the states in the same order', () => {
+    const book = readFileSync(
+      join(root, 'tools/agent-docs/content/design-system/README.md'),
+      'utf8',
+    );
+    const line = book.split('\n').find((entry) => entry.includes('(OE-02)'))!;
+    expect([...line.matchAll(/`([a-z-]+)`/g)].map(([, state]) => state)).toEqual(precedence);
   });
 });
 

@@ -105,6 +105,15 @@ export function loadCatalog(root: string): Catalog {
   for (const token of theme.tokens) add(token.name, 'token');
   for (const group of theme.groups ?? []) add(group.id, 'token-group');
   addThemeApi(root, add);
+  for (const binding of ['react', 'angular'])
+    add(
+      (
+        JSON.parse(readFileSync(join(root, 'packages', binding, 'package.json'), 'utf8')) as {
+          name: string;
+        }
+      ).name,
+      'package',
+    );
   for (const file of walk(join(root, 'packages/styles/src'))) {
     if (file.endsWith('.tokens.json'))
       for (const [token] of readFileSync(file, 'utf8').matchAll(/--slotted-[a-z0-9-]+/g))

@@ -44,6 +44,8 @@ describe('nameKind', () => {
     ['densities', 'theme-option'],
     ['reducedMotion', 'theme-option'],
     ['seeds', 'theme-option'],
+    ['@slotted/react', 'package'],
+    ['@slotted/angular', 'package'],
   ])('%s resolves as %s', (name, kind) => {
     expect(nameKind(name, catalog, rules)).toBe(kind);
   });

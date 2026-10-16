@@ -44,25 +44,36 @@ export function loadFamilyDocs(docsDir: string, family: string): FamilyDocs {
   };
 }
 
+/** The size the type reads of a component's `README.md`. */
+export const README_CAP = 64 * 1024;
+
 /**
  * `components/<Comp>/README.md`: the summary as the first sentence, then the
  * family's page without its index comment and title. A section the page moved
- * to a linked file is inlined from that file.
+ * to a linked file is inlined while the guidelines stay within the type's
+ * cap; past it, the guidelines name the file in the installed package.
  */
 export function componentReadme(docs: FamilyDocs, docsDir: string): string {
-  const body = docs.page
+  let text = `${docs.summary}\n\n${docs.page
     .split('\n')
     .filter((line) => !line.startsWith('<!-- index:') && line !== `# ${docs.family}`)
     .join('\n')
-    .replace(/See \[([a-z0-9.-]+\.md)\]\(\.\/[a-z0-9.-]+\.md\)\./g, (_, file: string) =>
-      readFileSync(join(docsDir, file), 'utf8')
-        .split('\n')
-        .filter((line) => !line.startsWith('<!-- index:') && !line.startsWith('# '))
-        .join('\n')
-        .trim(),
-    )
-    .trim();
-  return `${docs.summary}\n\n${body}\n`;
+    .trim()}\n`;
+  for (const [link, file] of [
+    ...text.matchAll(/See \[([a-z0-9.-]+\.md)\]\(\.\/[a-z0-9.-]+\.md\)\./g),
+  ].map((match) => [match[0], match[1]!] as const)) {
+    const section = readFileSync(join(docsDir, file), 'utf8')
+      .split('\n')
+      .filter((line) => !line.startsWith('<!-- index:') && !line.startsWith('# '))
+      .join('\n')
+      .trim();
+    const inlined = text.replace(link, section);
+    text =
+      Buffer.byteLength(inlined) <= README_CAP
+        ? inlined
+        : text.replace(link, `In the package: \`node_modules/@slotted/react/dist/docs/${file}\`.`);
+  }
+  return text;
 }
 
 /** `components/<Comp>/preview.html`: the card marker, the markup in the default theme, and the scheme kept in step with the page's theme. */

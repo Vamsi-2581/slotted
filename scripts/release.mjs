@@ -97,11 +97,37 @@ export function publishOrder(manifests) {
 
 const BOOKKEEPING = [/^Merge /, /^docs\(progress\)/];
 
-export function changelogEntry(version, date, subjects) {
+/** The guideline ids a release adds, retires and rewrites, read from two `ids.json`. */
+export function guidelineChanges(previous, current) {
+  // Only a rule released as active can be retired or rewritten in a release.
+  const newlyRetired = Object.keys(current)
+    .filter((id) => current[id].status === 'retired' && previous[id]?.status === 'active')
+    .sort();
+  const retired = newlyRetired.filter((id) => current[id].replacedBy === undefined);
+  const rewritten = newlyRetired.filter((id) => current[id].replacedBy !== undefined);
+  const replacements = new Set(rewritten.map((id) => current[id].replacedBy));
+  const added = Object.keys(current)
+    .filter(
+      (id) =>
+        current[id].status === 'active' && previous[id] === undefined && !replacements.has(id),
+    )
+    .sort();
+  const lines = [];
+  if (added.length > 0) lines.push(`- Added: ${added.join(', ')}`);
+  if (retired.length > 0) lines.push(`- Retired: ${retired.join(', ')}`);
+  if (rewritten.length > 0)
+    lines.push(
+      `- Rewritten: ${rewritten.map((id) => `${id} → ${current[id].replacedBy}`).join(', ')}`,
+    );
+  return lines;
+}
+
+export function changelogEntry(version, date, subjects, guidelines = []) {
   const lines = subjects
     .filter((subject) => !BOOKKEEPING.some((pattern) => pattern.test(subject)))
     .map((subject) => `- ${subject.split(' — ')[0].trim()}`);
-  return [`## ${version} — ${date}`, '', ...lines, ''].join('\n');
+  const block = guidelines.length > 0 ? ['', '### Guidelines', '', ...guidelines] : [];
+  return [`## ${version} — ${date}`, '', ...lines, ...block, ''].join('\n');
 }
 
 export function setManifestVersion(source, version) {
@@ -175,7 +201,21 @@ function prepare(requested, dryRun) {
   const subjects = output('git', ['log', `${previous}..HEAD`, '--format=%s'])
     .split('\n')
     .filter(Boolean);
-  const entry = changelogEntry(version, new Date().toISOString().slice(0, 10), subjects);
+  const idsPath = 'tools/agent-docs/content/guidelines/ids.json';
+  const before = spawnSync('git', ['show', `${previous}:${idsPath}`], {
+    cwd: repositoryRoot,
+    encoding: 'utf8',
+  });
+  const guidelines = guidelineChanges(
+    before.status === 0 ? JSON.parse(before.stdout) : {},
+    JSON.parse(readFileSync(join(repositoryRoot, idsPath), 'utf8')),
+  );
+  const entry = changelogEntry(
+    version,
+    new Date().toISOString().slice(0, 10),
+    subjects,
+    guidelines,
+  );
 
   console.log(`${previous} → ${tag}, dist-tag ${distTag(version)}\n\n${entry}`);
   if (dryRun) return;

@@ -5,6 +5,7 @@ import test from 'node:test';
 import {
   changelogEntry,
   distTag,
+  guidelineChanges,
   nextVersion,
   publishOrder,
   setManifestVersion,
@@ -92,5 +93,50 @@ test('changes only the version field of a manifest, keeping its formatting', () 
   assert.equal(
     changed.replace('"version": "9.9.9-beta.9"', ''),
     source.replace(`"version": "${JSON.parse(source).version}"`, ''),
+  );
+});
+test('lists the guideline ids a release adds, retires and rewrites', () => {
+  const previous = {
+    'AF-01': { level: 'MUST', status: 'active' },
+    'LP-07': { level: 'SHOULD', status: 'active' },
+    'PM-03': { level: 'MUST', status: 'active' },
+  };
+  const current = {
+    'AF-01': { level: 'MUST', status: 'active' },
+    'AF-08': { level: 'SHOULD', status: 'active' },
+    'LP-07': { level: 'SHOULD', status: 'retired', replacedBy: 'LP-12' },
+    'LP-12': { level: 'SHOULD', status: 'active' },
+    'PM-03': { level: 'MUST', status: 'retired' },
+  };
+  assert.deepEqual(guidelineChanges(previous, current), [
+    '- Added: AF-08',
+    '- Retired: PM-03',
+    '- Rewritten: LP-07 → LP-12',
+  ]);
+  assert.deepEqual(guidelineChanges(current, current), []);
+});
+
+test('the first release with ids.json lists its active rules as added, and no retired one', () => {
+  const current = {
+    'AF-01': { level: 'MUST', status: 'active' },
+    'LP-07': { level: 'SHOULD', status: 'retired', replacedBy: 'LP-12' },
+    'LP-12': { level: 'SHOULD', status: 'active' },
+  };
+  assert.deepEqual(guidelineChanges({}, current), ['- Added: AF-01, LP-12']);
+});
+
+test('an entry carries the guideline block when there is one', () => {
+  assert.equal(
+    changelogEntry('0.1.0-beta.2', '2026-10-20', ['feat(x): y'], ['- Added: AF-08']),
+    [
+      '## 0.1.0-beta.2 — 2026-10-20',
+      '',
+      '- feat(x): y',
+      '',
+      '### Guidelines',
+      '',
+      '- Added: AF-08',
+      '',
+    ].join('\n'),
   );
 });

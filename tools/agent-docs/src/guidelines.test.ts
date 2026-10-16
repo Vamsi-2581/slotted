@@ -110,6 +110,20 @@ describe('PUBLISHED_FORBIDDEN', () => {
   });
 });
 
+describe('retired rules', () => {
+  it('joins a wrapped Status line, and reports prose left in a retired rule', () => {
+    const wrapped = source.replace(
+      'Status: retired · rewritten as AF-03',
+      'Status: retired · rewritten as AF-03, which keeps\n  one scroller\n\nA paragraph left behind.',
+    );
+    const topic = parseTopic('async-feedback.md', wrapped);
+    expect(topic.rules[1]!.statusText).toBe('rewritten as AF-03, which keeps one scroller');
+    expect(topicErrors(topic, wrapped)).toContain(
+      'async-feedback.md AF-02: a retired rule keeps only its Status',
+    );
+  });
+});
+
 describe('renderTopic', () => {
   it('drops the source-only fields and keeps a retired rule as heading and status', () => {
     const out = renderTopic(parseTopic('async-feedback.md', source));

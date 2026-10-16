@@ -4,6 +4,7 @@ import type { ReferenceDocs } from '@slotted/storybook-workbench';
 
 import type { Content } from './content.ts';
 import { cell, code, fence, table } from './markdown.ts';
+import { renderContent } from './skills.ts';
 import {
   BUDGETS,
   DOCS_DIR,
@@ -407,7 +408,8 @@ export function renderIndex(
       '## Skills',
       '',
       ...[...content.skills.values()].map(
-        (skill) => `- ${skill.name}: \`./skills/${skill.name}/SKILL.md\` — ${skill.description}`,
+        (skill) =>
+          `- ${skill.name}: \`./skills/${skill.name}/SKILL.md\` — ${renderContent(skill.description, binding)}`,
       ),
       '',
     );

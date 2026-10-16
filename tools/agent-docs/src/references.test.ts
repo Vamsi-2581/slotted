@@ -54,6 +54,17 @@ describe('unresolvedNames', () => {
     ).toEqual(['rowHeader: true', 'x.y']);
   });
 
+  it('resolves each token inside a CSS declaration', () => {
+    expect(nameKind('gap: var(--slotted-nonexistent-9)', catalog, rules)).toBeUndefined();
+    expect(
+      nameKind(
+        'inset-block-start: calc(var(--slotted-page-sticky-top, 0px) + 1rem)',
+        catalog,
+        rules,
+      ),
+    ).toBe('css-declaration');
+  });
+
   it('accepts the local names the caller passes: docs paths and topic files', () => {
     const local = new Set(['{{docsDir}}/skeleton.md', 'list-pages.md']);
     expect(

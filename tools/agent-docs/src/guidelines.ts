@@ -87,6 +87,7 @@ export function parseTopic(file: string, source: string): Topic {
 
   const rules: Rule[] = [];
   let current: Rule | undefined;
+  let previousBlank = true;
   for (const line of firstRule === -1 ? [] : body.slice(firstRule)) {
     const heading = HEADING.exec(line);
     if (heading !== null) {
@@ -94,9 +95,20 @@ export function parseTopic(file: string, source: string): Topic {
       rules.push(current);
       continue;
     }
-    if (current === undefined || line.trim() === '') continue;
+    const blank = line.trim() === '';
+    const continues = !previousBlank;
+    previousBlank = blank;
+    if (current === undefined || blank) continue;
     const field = FIELD.exec(line);
     if (field === null) {
+      // A wrapped line continues the field above it; in a retired rule, anything else is a body
+      // the rule should not keep, held as a field so validation reports it.
+      if (current.status === 'retired') {
+        if (continues && current.fields.length === 0)
+          current.statusText = `${current.statusText ?? ''} ${line.trim()}`;
+        else current.fields.push(['Body', line.trim()]);
+        continue;
+      }
       const last = current.fields.at(-1);
       if (last !== undefined) last[1] = `${last[1]} ${line.trim()}`;
       continue;

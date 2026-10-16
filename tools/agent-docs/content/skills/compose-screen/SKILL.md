@@ -43,7 +43,7 @@ element stands in that slot.
   preferences read as prose are `measure` (CP-07).
 - Siblings of the screen's own stand in `inline` (one row) or `stack` (one
   column) with a gap from the space scale; text of the screen's own takes its
-  size from the `text` family (CP-02).
+  size from the `typography` family's `text` member (CP-02).
 - A track that holds a family which scrolls states a zero minimum, so the
   family's scroller is what scrolls (CP-03).
 - An element of the screen's own paints only with theme tokens; a literal is

@@ -11,6 +11,8 @@ What a procurement screen reads under the cost permission. The rules for any
 value a permission withholds ship in the library's `reading-permissions.md`
 (PM-01, PM-02).
 
+PC-01 replaces the library's PM-03, retired there as a rule of this domain.
+
 ### PC-01 · A price paid is a cost
 
 Level: MUST

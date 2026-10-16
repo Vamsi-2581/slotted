@@ -94,6 +94,9 @@ downward, never a box that shrinks.
 - Placeholders are out of the accessibility tree. They describe nothing; the
   region says what is happening.
 - One announcement per region, `polite`, once — not one per placeholder.
+  `skeleton` and `loading-overlay` announce through their `live` axis, `polite`
+  by default: keep it on the one that stands for the region and set it to `off`
+  on every other placeholder in that region.
 - The region carries `aria-busy` while it waits and drops it when the answer
   arrives.
 - Focus does not move, on entry or on arrival. Content that lands under the

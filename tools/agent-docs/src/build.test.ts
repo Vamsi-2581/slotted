@@ -125,6 +125,11 @@ describe('buildDocs', () => {
     }
     const index = readFileSync(join(react, 'index.md'), 'utf8');
     expect(index).toContain('## Guidelines');
+    for (const [name, text] of [
+      ['index.md', index],
+      ...files.map((file) => [file, readFileSync(join(react, file), 'utf8')]),
+    ])
+      expect(text, name).not.toMatch(/\{\{\w+\}\}/);
     for (const name of content.skills.keys()) expect(index).toContain(`./skills/${name}/SKILL.md`);
   });
 });

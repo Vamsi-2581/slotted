@@ -127,7 +127,12 @@ export function nameKind(
     return catalog.tokens.some((token) => token.startsWith(wildcard[1]!))
       ? 'token-wildcard'
       : undefined;
-  if (/^[a-z-]+: [^;:]+$/.test(name)) return 'css-declaration';
+  if (/^[a-z-]+: [^;:]+$/.test(name))
+    return [...name.matchAll(/--slotted-[a-z0-9-]+/g)].every(([token]) =>
+      catalog.tokens.includes(token),
+    )
+      ? 'css-declaration'
+      : undefined;
   if (name in REFERENCE_EXCEPTIONS) return 'exception';
   return undefined;
 }

@@ -9,6 +9,14 @@ export interface Skill {
 
 export const SKILL_MAX_LINES = 500;
 
+/** What `{{themeScope}}` reads in each binding: the element that names a theme, scheme, density and seeds. */
+export const THEME_SCOPE: Readonly<Record<Binding, string>> = {
+  react: 'the `ThemeScope` component from `@slotted/react/theme`',
+  angular: 'the `slThemeScope` directive from `@slotted/angular/theme`',
+};
+
+const PLACEHOLDERS = new Set(['docsDir', 'package', 'themeScope']);
+
 export function parseSkill(source: string): Skill {
   const end = source.indexOf('\n---\n', 4);
   const frontmatter = source.startsWith('---\n') && end !== -1 ? source.slice(4, end) : '';
@@ -33,13 +41,13 @@ export function skillErrors(
     if (!activeRuleIds.has(id)) errors.push(`${dir}: cites ${id}, which is not an active rule`);
   const placeholders = [...skill.source.matchAll(/\{\{(\w+)\}\}/g)].map(([, name]) => name);
   for (const name of placeholders)
-    if (name !== 'docsDir' && name !== 'package')
-      errors.push(`${dir}: unknown placeholder {{${name}}}`);
+    if (!PLACEHOLDERS.has(name!)) errors.push(`${dir}: unknown placeholder {{${name}}}`);
   return errors;
 }
 
 export function renderContent(source: string, binding: Binding): string {
   return source
     .replaceAll('{{docsDir}}', DOCS_DIR[binding])
-    .replaceAll('{{package}}', `@slotted/${binding}`);
+    .replaceAll('{{package}}', `@slotted/${binding}`)
+    .replaceAll('{{themeScope}}', THEME_SCOPE[binding]);
 }

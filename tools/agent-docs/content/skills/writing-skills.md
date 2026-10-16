@@ -21,12 +21,16 @@ description does not start with "Use when", or when the file passes 500 lines.
 
 ## What a skill may write
 
-- `{{docsDir}}`, replaced by the docs directory of the binding, and
-  `{{package}}`, replaced by the package name. No other placeholder.
+- `{{docsDir}}`, replaced by the docs directory of the binding;
+  `{{package}}`, replaced by the package name; `{{themeScope}}`, replaced by
+  the binding's element that sets a theme, scheme, density and seeds on a
+  subtree. No other placeholder.
 - Rule ids of active rules only (`AF-05`). A rule retired later fails the
   content test until the skill cites its replacement.
 - Between backticks, only what the catalog resolves: families, parts, states,
-  axes, tokens, token groups, topic files, `{{docsDir}}/…` paths that exist.
+  axes, tokens, token groups, the public API of `@slotted/theme` and
+  `@slotted/themes`, theme attributes, seeds, cascade layers, topic files,
+  `{{docsDir}}/…` paths that exist.
 - No code block, no relative link, no name of the repository's demo.
 
 ## Evaluation

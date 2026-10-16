@@ -29,6 +29,18 @@ describe('nameKind', () => {
     ['triggers', 'guideline-format'],
     ['Check', 'guideline-format'],
     ['Status: retired', 'guideline-format'],
+    ['extendTheme', 'theme-api'],
+    ['applyTheme', 'theme-api'],
+    ['themeConformance', 'theme-api'],
+    ['slotted-build-theme', 'theme-api'],
+    ['@slotted/theme/seeds', 'theme-api'],
+    ['@slotted/themes/default.css', 'theme-api'],
+    ['data-slotted-seeds', 'theme-attribute'],
+    ['--slotted-seed-accent', 'seed'],
+    ['slotted', 'layer'],
+    ['slotted.theme-rules', 'layer'],
+    ['high-contrast', 'theme-axis-value'],
+    ['system', 'theme-axis-value'],
   ])('%s resolves as %s', (name, kind) => {
     expect(nameKind(name, catalog, rules)).toBe(kind);
   });
@@ -39,6 +51,9 @@ describe('nameKind', () => {
     'customers.credit_view',
     'AF-99',
     '--slotted-nope-*',
+    'ThemeDefinition',
+    '--slotted-seed-brand',
+    'slotted.overrides',
   ])('%s does not resolve', (name) => {
     expect(nameKind(name, catalog, rules)).toBeUndefined();
   });

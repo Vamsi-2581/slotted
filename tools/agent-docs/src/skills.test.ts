@@ -1,6 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
-import { parseSkill, renderContent, skillErrors } from './skills.ts';
+import { parseSkill, renderContent, skillErrors, THEME_SCOPE } from './skills.ts';
+
+const root = resolve(import.meta.dirname, '../../..');
 
 const source = `---
 name: waiting-states
@@ -40,5 +45,21 @@ describe('skills', () => {
     expect(renderContent(source, 'react')).toContain(
       '`node_modules/@slotted/react/dist/docs/skeleton.md`',
     );
+  });
+
+  it('substitutes the theme scope of each binding, and accepts the placeholder', () => {
+    const scoped = source.replace('AF-01 applies.', 'Set the scheme on {{themeScope}}.');
+    expect(skillErrors('waiting-states', parseSkill(scoped), new Set())).toEqual([]);
+    expect(renderContent(scoped, 'react')).toContain(`Set the scheme on ${THEME_SCOPE.react}.`);
+    expect(renderContent(scoped, 'angular')).toContain(`Set the scheme on ${THEME_SCOPE.angular}.`);
+  });
+
+  it('names a theme scope each binding exports', () => {
+    const react = readFileSync(join(root, 'packages/react/src/theme/index.ts'), 'utf8');
+    expect(THEME_SCOPE.react).toBe('the `ThemeScope` component from `@slotted/react/theme`');
+    expect(react).toMatch(/export \{ ThemeScope \}/);
+    const angular = readFileSync(join(root, 'packages/angular/theme/src/theme-scope.ts'), 'utf8');
+    expect(THEME_SCOPE.angular).toBe('the `slThemeScope` directive from `@slotted/angular/theme`');
+    expect(angular).toContain("selector: '[slThemeScope]'");
   });
 });

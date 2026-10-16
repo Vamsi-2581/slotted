@@ -104,6 +104,7 @@ export function loadCatalog(root: string): Catalog {
   };
   for (const token of theme.tokens) add(token.name, 'token');
   for (const group of theme.groups ?? []) add(group.id, 'token-group');
+  addThemeApi(root, add);
   for (const file of walk(join(root, 'packages/styles/src'))) {
     if (file.endsWith('.tokens.json'))
       for (const [token] of readFileSync(file, 'utf8').matchAll(/--slotted-[a-z0-9-]+/g))
@@ -113,6 +114,61 @@ export function loadCatalog(root: string): Catalog {
         add(property!, 'token');
   }
   return { names, tokens: [...names].filter(([, kind]) => kind === 'token').map(([name]) => name) };
+}
+
+/** The single-quoted strings of the array literal `name` declares in `source`. */
+function constArray(source: string, name: string): string[] {
+  const body = new RegExp(`${name}\\s*=\\s*\\[([^\\]]*)\\]`).exec(source)?.[1];
+  if (body === undefined) throw new Error(`no array literal ${name}`);
+  return [...body.matchAll(/'([^']+)'/g)].map(([, value]) => value!);
+}
+
+/**
+ * The public API of the theme packages, read from their sources: the value
+ * exports of `@slotted/theme` and its conformance module, its command, the
+ * subpaths of both packages, the attributes that select a theme, the seed
+ * properties, the cascade layers, and the scheme and density values.
+ */
+function addThemeApi(root: string, add: (name: string, kind: string) => void): void {
+  const theme = join(root, 'packages/theme');
+  const read = (path: string) => readFileSync(join(theme, path), 'utf8');
+  for (const [, names] of read('src/index.ts').matchAll(/^export \{([^}]*)\} from/gm))
+    for (const name of names!.split(','))
+      if (name.trim() !== '')
+        add(
+          name
+            .trim()
+            .split(/\s+as\s+/)
+            .at(-1)!,
+          'theme-api',
+        );
+  for (const [, name] of read('conformance/theme-conformance.mjs').matchAll(
+    /^export (?:const|function) (\w+)/gm,
+  ))
+    add(name!, 'theme-api');
+  for (const dir of ['packages/theme', 'packages/themes']) {
+    const manifest = JSON.parse(readFileSync(join(root, dir, 'package.json'), 'utf8')) as {
+      name: string;
+      bin?: Record<string, string>;
+      exports: Record<string, unknown>;
+    };
+    for (const command of Object.keys(manifest.bin ?? {})) add(command, 'theme-api');
+    for (const subpath of Object.keys(manifest.exports))
+      add(manifest.name + subpath.slice(1), 'theme-api');
+  }
+  for (const [, attribute] of read('src/rule-policy.ts').matchAll(/'(data-slotted-[a-z-]+)'/g))
+    add(attribute!, 'theme-attribute');
+  for (const seed of constArray(read('src/seeds.ts'), 'SEED_NAMES'))
+    add(`--slotted-seed-${seed}`, 'seed');
+  add('slotted', 'layer');
+  for (const layer of constArray(read('src/layer-order.ts'), 'LAYER_NAMES'))
+    add(`slotted.${layer}`, 'layer');
+  for (const value of [
+    ...constArray(read('src/recipe.ts'), 'SCHEMES'),
+    ...(/'system'/.test(read('src/render.ts')) ? ['system'] : []),
+    ...constArray(read('src/define.ts'), 'DENSITIES'),
+  ])
+    add(value, 'theme-axis-value');
 }
 
 export function nameKind(

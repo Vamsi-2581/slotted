@@ -17,16 +17,11 @@ observation is not written; an observation without a rule is a row in
 
 ## Files
 
-| File                   | Prefix | Holds                                                                          |
-| ---------------------- | ------ | ------------------------------------------------------------------------------ |
-| `index.md`             | —      | Every active rule in one line each. The only file a reader always loads        |
-| `writing-rules.md`     | —      | How a rule is written, numbered, evidenced and retired                         |
-| `procurement-costs.md` | `PC`   | What a procurement screen reads under the cost permission                      |
-| `ledgers.md`           | `LG`   | How an immutable record of changes reads: the movement, its cause, the balance |
-| `workspaces.md`        | `WS`   | How a queue worked against candidates reads on a phone and shows its scores    |
-| `conversations.md`     | `CV`   | How a conversation with a clock is read and answered, and its queues kept      |
-| `reports.md`           | `RE`   | How a report reads a period, says what is not kept, opens what it counts       |
-| `builders.md`          | `BD`   | How a rule a person writes reads, states its limits, moves and narrows         |
+| File                   | Prefix | Holds                                                                   |
+| ---------------------- | ------ | ----------------------------------------------------------------------- |
+| `index.md`             | —      | Every active rule in one line each. The only file a reader always loads |
+| `writing-rules.md`     | —      | How a rule is written, numbered, evidenced and retired                  |
+| `procurement-costs.md` | `PC`   | What a procurement screen reads under the cost permission               |
 
 ## Reading protocol
 
@@ -54,5 +49,6 @@ observation on a Nexora screen
 ```
 
 A rule that stops being true is retired, not deleted: `writing-rules.md`
-says how. Rules promoted to library law move to `docs/` at the repository
-root and leave a retired entry here that names the destination.
+says how. A rule that holds for any application moves, with its id, to
+`tools/agent-docs/content/guidelines/` and ships with the library; its prefix
+leaves this directory. `LG`, `WS`, `CV`, `RE` and `BD` moved on 2026-10-16.

@@ -2,7 +2,18 @@
 topic: ledgers
 prefix: LG
 triggers:
-  [ledger, movement, stock movement, history, audit trail, delta, balance, source, immutable]
+  [
+    ledger,
+    movement,
+    stock movement,
+    posting,
+    history,
+    audit trail,
+    delta,
+    balance,
+    source,
+    immutable,
+  ]
 families: [data-grid, table, drawer, description-list, link]
 ---
 
@@ -16,13 +27,14 @@ when a running balance can be trusted.
 ### LG-01 · A movement names its change, its cause and its place
 
 Level: SHOULD
-Applies to: a row of a ledger — a stock movement, a posting
+Applies to: a row of a ledger — a stock movement, a posting, an entry of an audit trail
 Rule: The row states the signed change at the unit's own precision, what caused it as words that lead to that record, where and when it happened and who did it; a cause without a screen leads to the ledger narrowed to what that cause moved, and no identifier is shown raw.
 Why: A ledger is read to answer "why did this change", and a row that shows an id or no way to the cause answers only "that it changed".
-Do: Write the change with its sign and the ledger's two tones, keep a word for every cause type the backend writes and a word for an unknown one, and link a cause to its record or to the ledger filtered by the cause's id. Open one movement over the ledger it belongs to, so the list stays under it and the address names it.
-Don't: Print `manual_adjustment`, a correlation id or an entity id as the cause, or link a cause to a screen that does not exist yet.
-Seen in: Nexora · Movements, `manual_adjustment` and `return` printed raw on the SKU record · corrected
-Check: Spec: the inventory module suite, "names every source the backend writes and never shows a raw type" and "leads a source to its record, or to what it moved where it has no screen".
+Do: Write the change with its sign, and give the tone as a second signal beside the sign. Keep a word for every cause type the backend writes and a word for an unknown one, and link a cause to its record or to the ledger filtered by the cause's id. Open one movement over the ledger it belongs to, so the list stays under it and the address names it.
+Don't: Print a cause type as the backend spells it, a correlation id or an entity id as the cause, or link a cause to a screen that does not exist.
+Seen in: Nexora · Movements, the adjustment and return causes printed raw on the SKU record · corrected
+Verified in: the inventory module suite, "names every source the backend writes and never shows a raw type" and "leads a source to its record, or to what it moved where it has no screen"
+Check: Read the cause of a row of each cause type: it is words, it leads to the record that caused the movement or to the ledger narrowed to what that cause moved, and no row shows an identifier.
 
 ### LG-02 · A running balance is drawn where one position is read
 
@@ -33,4 +45,5 @@ Why: A balance over many items or places is a sum of unrelated quantities, and a
 Do: Take the current quantity from the position the page already reads, subtract each newer change in turn, and say under the table how the balance was derived.
 Don't: Add a balance column to the whole ledger, or compute it forward from the oldest row on screen.
 Seen in: Nexora · the stock of one SKU, its warehouse's movements · corrected
-Check: Spec: the inventory module suite, "writes the movement into the ledger and finds it there" — the first row's balance is the new on-hand quantity.
+Verified in: the inventory module suite, "writes the movement into the ledger and finds it there"
+Check: Record a movement on one item in one place: the first row's balance equals the position's new quantity, and the unfiltered ledger shows no balance column.

@@ -1,6 +1,6 @@
 ---
 name: compose-screen
-description: Use when writing or changing a screen of an application built with {{package}} — a list of records, the page of one record, a form that writes one, an overview, or a tree beside a list. Applies the Slotted guidelines in order and ends with each Check of the rules read.
+description: Use when writing or changing a screen of an application built with {{package}} — a list of records, the page of one record, a form that writes one, an overview, a report, a tree beside a list, a rule builder, a conversation or a ledger. Applies the Slotted guidelines in order and ends with each Check of the rules read.
 ---
 
 # Compose a screen
@@ -10,13 +10,18 @@ screen's own exists only where no family names a place for it.
 
 ## 1. Classify the screen
 
-| The screen                                            | Topic             |
-| ----------------------------------------------------- | ----------------- |
-| Lists records, searches, filters, pages               | `list-pages.md`   |
-| Shows one record, its figures and its related records | `record-pages.md` |
-| Creates or edits a record                             | `forms.md`        |
-| Summarises a domain in figures and charts             | `overviews.md`    |
-| Places a list beside a tree of its places             | `browsing.md`     |
+| The screen                                            | Topic              |
+| ----------------------------------------------------- | ------------------ |
+| Lists records, searches, filters, pages               | `list-pages.md`    |
+| Shows one record, its figures and its related records | `record-pages.md`  |
+| Creates or edits a record                             | `forms.md`         |
+| Summarises a domain in figures and charts             | `overviews.md`     |
+| Places a list beside a tree of its places             | `browsing.md`      |
+| Reads records over a chosen period                    | `reports.md`       |
+| Writes or reads a rule the system runs later          | `builders.md`      |
+| Holds a conversation the reader answers               | `conversations.md` |
+| Works a queue against candidates in three regions     | `workspaces.md`    |
+| Lists immutable changes with their cause and balance  | `ledgers.md`       |
 
 A screen can be two of these: a record with an edit form in place reads both
 topics.

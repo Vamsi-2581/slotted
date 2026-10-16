@@ -50,6 +50,8 @@ const union = (names) =>
 
 export function contractSource() {
   const contract = readJson(join(PACKAGE, 'src/contract.json'));
+  // `groups` documents the tokens for the published page; no theme reads it at run time.
+  delete contract.groups;
   const names = (predicate) => contract.tokens.filter(predicate).map((token) => token.name);
   const component = componentTokens(contract);
   return (

@@ -176,7 +176,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'waveSizes',
     title: 'The wave is measured in thicknesses',
-    note: 'One wavelength is ten thicknesses and a crest is three quarters of one at every size, so the small bar’s wave is twenty pixels long and the large bar’s eighty. Every ring carries eight crests, because the wave is wound on the viewBox and the viewBox scales.',
+    note: 'One wavelength is ten thicknesses and a crest is three quarters of one at every size, so the small bar’s wave is forty pixels long and the large bar’s eighty. Every ring carries eight crests, because the wave is wound on the viewBox and the viewBox scales.',
     snippet: defineSnippet({
       id: 'progress-indicator-react-wave-sizes',
       language: 'tsx',
@@ -489,7 +489,7 @@ export const REACT_PROGRESS_INDICATOR_DOCS = {
         language: 'css',
         label: 'Retuning the family for an application',
         source:
-          "[data-ui='progress-indicator'] {\n  --slotted-progress-indicator-thickness: var(--slotted-space-3);\n  --slotted-progress-indicator-radius: var(--slotted-radius-xs);\n  --slotted-progress-indicator-track-color: var(--slotted-surface-sunken);\n}\n\n/* One ring in an icon slot, at the size that slot already has. */\n[data-ui='button'] [data-ui='progress-indicator'] {\n  --slotted-progress-indicator-size: var(--slotted-control-icon-size-md);\n}",
+          "[data-ui='progress-indicator'] {\n  --slotted-progress-indicator-thickness: var(--slotted-space-4);\n  --slotted-progress-indicator-radius: var(--slotted-radius-xs);\n  --slotted-progress-indicator-track-color: var(--slotted-surface-sunken);\n}\n\n/* One ring in an icon slot, at the size that slot already has. */\n[data-ui='button'] [data-ui='progress-indicator'] {\n  --slotted-progress-indicator-size: var(--slotted-control-icon-size-md);\n}",
       }),
     ],
   },

@@ -123,8 +123,9 @@
      * scheme instead, because the ink is the far end of each scheme's own
      * range. Twenty-four per cent is measured rather than chosen: it is the
      * lowest ratio at which the track separates from the page in all three
-     * schemes at the 2-pixel `sm` thickness, and low enough that a column of
-     * bars does not read as a column of filled bars.
+     * schemes at a 2-pixel bar, half the thinnest one this family draws,
+     * and low enough that a column of bars does not read as a column of
+     * filled bars.
      */
     --_track-color: var(
       --slotted-progress-indicator-track-color,
@@ -152,14 +153,14 @@
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_text-gap: var(--slotted-space-4, 0.5rem);
     --_row-gap: var(--slotted-space-3, 0.375rem);
-    --_thickness: var(--slotted-progress-indicator-thickness, var(--slotted-space-2, 0.25rem));
+    --_thickness: var(--slotted-progress-indicator-thickness, var(--slotted-space-3, 0.375rem));
     --_size: var(--slotted-progress-indicator-size, var(--slotted-control-height-md, 34px));
     --_radius: var(--slotted-progress-indicator-radius, var(--slotted-radius-full, 9999px));
     /**
      * M3's indicator–track gap, and the stop indicator's diameter, are both
      * 4dp at the 4dp track. Making them one thickness is the proportional form
-     * of that decision rather than a copy of the number: a 4-pixel gap in a
-     * 2-pixel bar would be wider than the bar is tall.
+     * of that decision rather than a copy of the number: a fixed 4-pixel gap
+     * would be the whole `sm` bar and half the `lg` one.
      */
     --_gap: var(--slotted-progress-indicator-gap, var(--_thickness));
 
@@ -278,7 +279,7 @@
   /* ── Size ─────────────────────────────────────────────────────────────
    *
    * One axis, three geometries. The bar reads a thickness from the space
-   * scale — 2, 4 and 8 pixels, and M3's own default track is the middle one —
+   * scale — 4, 6 and 8 pixels, so no step draws a hairline in a table cell —
    * while the circle and the loader read the control height scale, so a
    * spinner standing beside a button is the same height as the button at
    * every density. Neither needs a scale of this family's own, and the
@@ -288,7 +289,7 @@
   [data-ui='progress-indicator'][data-part='root'][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_text-gap: var(--slotted-space-3, 0.375rem);
-    --_thickness: var(--slotted-progress-indicator-thickness, var(--slotted-space-1, 0.125rem));
+    --_thickness: var(--slotted-progress-indicator-thickness, var(--slotted-space-2, 0.25rem));
     --_size: var(--slotted-progress-indicator-size, var(--slotted-control-height-sm, 30px));
   }
 

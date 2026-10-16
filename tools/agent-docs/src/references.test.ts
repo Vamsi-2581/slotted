@@ -13,6 +13,8 @@ describe('nameKind', () => {
     ['data-grid', 'family'],
     ['body', 'part'],
     ['nav-header', 'part'],
+    ['minDuration', 'option'],
+    ['loadingDelay', 'option'],
     ['action', 'part'],
     ['data-loading', 'state'],
     ['bleed', 'axis-value'],

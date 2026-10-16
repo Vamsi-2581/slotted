@@ -8,3 +8,9 @@ Before writing or changing UI, read `{{docsDir}}/index.md`, then the file of eac
 - Change a family's appearance through its inputs (`size`, `variant`, `tone` where it has them), not with CSS that targets its parts.
 - Application CSS uses `var(--slotted-*)` tokens for color, spacing and radius, inside a layer declared after the library's: `@layer slotted, app;`.
 - In CSS and tests, select a family by `[data-ui="<family>"]` and its parts by `[data-part="<part>"]`.
+
+### Tasks
+
+| Task                                                                    | Read first                                   |
+| ----------------------------------------------------------------------- | -------------------------------------------- |
+| Show what a screen draws while it waits, and its empty and error states | `{{docsDir}}/skills/waiting-states/SKILL.md` |

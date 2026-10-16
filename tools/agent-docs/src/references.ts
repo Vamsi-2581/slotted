@@ -67,11 +67,17 @@ export function loadCatalog(root: string): Catalog {
     for (const member of Object.keys((contract['members'] as object) ?? {})) add(member, 'family');
   }
   for (const contract of contracts) {
-    // A family declares its parts per member, and some also under `anatomy` or `elements`.
+    // A family declares its parts, states and options per member, and some parts also under
+    // `anatomy` or `elements`.
     for (const member of Object.values((contract['members'] as Record<string, unknown>) ?? {})) {
-      const { parts, states } = member as { parts?: unknown; states?: unknown };
+      const { parts, states, defaults } = member as {
+        parts?: unknown;
+        states?: unknown;
+        defaults?: object;
+      };
       if (Array.isArray(parts)) for (const part of parts) add(String(part), 'part');
       if (Array.isArray(states)) for (const state of states) add(String(state), 'state');
+      for (const option of Object.keys(defaults ?? {})) add(option, 'option');
     }
     for (const part of Object.keys((contract['anatomy'] as object) ?? {})) add(part, 'part');
     for (const part of Object.keys((contract['elements'] as object) ?? {})) add(part, 'part');

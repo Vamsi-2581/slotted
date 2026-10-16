@@ -1,0 +1,68 @@
+---
+name: compose-screen
+description: Use when writing or changing a screen of an application built with {{package}} — a list of records, the page of one record, a form that writes one, an overview, or a tree beside a list. Applies the Slotted guidelines in order and ends with each Check of the rules read.
+---
+
+# Compose a screen
+
+A screen is composed from the families' own parts first. An element of the
+screen's own exists only where no family names a place for it.
+
+## 1. Classify the screen
+
+| The screen                                            | Topic             |
+| ----------------------------------------------------- | ----------------- |
+| Lists records, searches, filters, pages               | `list-pages.md`   |
+| Shows one record, its figures and its related records | `record-pages.md` |
+| Creates or edits a record                             | `forms.md`        |
+| Summarises a domain in figures and charts             | `overviews.md`    |
+| Places a list beside a tree of its places             | `browsing.md`     |
+
+A screen can be two of these: a record with an edit form in place reads both
+topics.
+
+## 2. Read
+
+1. `{{docsDir}}/guidelines/index.md`.
+2. `{{docsDir}}/guidelines/composition.md`, always.
+3. The topic of step 1. Add `layout-alignment.md` and `shell-composition.md`
+   when the screen places controls in a row or in the application frame.
+4. Add `errors-and-conflicts.md` and `reading-permissions.md` when the screen
+   writes data or reads under a role.
+
+## 3. Read each family before writing beside it
+
+For each family the screen uses, read `{{docsDir}}/<family>.md` — its anatomy,
+its slots, its axes (CP-01). When the family names a slot for an element, the
+element stands in that slot.
+
+## 4. Compose
+
+- The page's width follows its type: a list is `bleed` with `fill`; a record,
+  a dashboard and an overview keep `wide`; a create or edit form is `content`;
+  preferences read as prose are `measure` (CP-07).
+- Siblings of the screen's own stand in `inline` (one row) or `stack` (one
+  column) with a gap from the space scale; text of the screen's own takes its
+  size from the `text` family (CP-02).
+- A track that holds a family which scrolls states a zero minimum, so the
+  family's scroller is what scrolls (CP-03).
+- An element of the screen's own paints only with theme tokens; a literal is
+  written only beside a comment that says why no token covers it (CP-05).
+- A state a family already draws is set on the family and stated once, with
+  nothing louder beside it (CP-06).
+- A control that switches what a region holds changes words and values, never
+  the size or the position of a box (CP-08).
+- Where no anatomy answers the problem, the screen writes an element of its
+  own instead of bending a family into a shape it does not have (CP-04).
+
+## 5. Waits
+
+Every region filled by a request and every control that starts one follow
+`{{docsDir}}/skills/waiting-states/SKILL.md`.
+
+## 6. Done
+
+1. Each `MUST` rule of the topics read: its `Check` passes.
+2. Each `SHOULD` rule not followed is listed with its reason.
+3. No CSS of the screen's own targets a family's parts; a family's appearance
+   changes through its axes.

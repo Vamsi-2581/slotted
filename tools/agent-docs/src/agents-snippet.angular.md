@@ -13,4 +13,5 @@ Before writing or changing UI, read `{{docsDir}}/index.md`, then the file of eac
 
 | Task                                                                    | Read first                                   |
 | ----------------------------------------------------------------------- | -------------------------------------------- |
+| Compose or change a screen: a list, a record, a form, an overview       | `{{docsDir}}/skills/compose-screen/SKILL.md` |
 | Show what a screen draws while it waits, and its empty and error states | `{{docsDir}}/skills/waiting-states/SKILL.md` |

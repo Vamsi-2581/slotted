@@ -2,7 +2,8 @@
 /**
  * Runs the agent-material evaluation: each case, per binding, with and without
  * the snippet, `runs` times, through `claude -p`, in a fresh copy of a fixture
- * that installs the beta tarballs of `demos/.registry`.
+ * that installs the beta tarballs of `demos/.registry`; a case with a `seed`
+ * starts from `eval/seeds/<seed>/<binding>/`, copied over `src/`.
  *   pnpm eval:agent-docs --dry-run
  *   pnpm eval:agent-docs --case orders-list --binding react --runs 1 --condition with
  * Prerequisite: `node scripts/pack-beta.mjs --only @slotted/react,@slotted/angular,@slotted/core,@slotted/theme,@slotted/themes`.
@@ -95,6 +96,10 @@ for (const binding of bindings) {
       for (let run = 0; run < runs; run += 1) {
         const dir = mkdtempSync(join(tmpdir(), `slotted-eval-${entry.id}-`));
         cpSync(base, dir, { recursive: true });
+        if (entry.seed)
+          cpSync(join(evalDir, 'seeds', entry.seed, binding), join(dir, 'src'), {
+            recursive: true,
+          });
         writeFileSync(
           join(dir, 'CLAUDE.md'),
           condition === 'with' ? renderAgentsSnippet(binding) : '',

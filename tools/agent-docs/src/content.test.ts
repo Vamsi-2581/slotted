@@ -127,6 +127,23 @@ describe('skills', () => {
     );
   });
 
+  it('every seed a case names exists for each binding the evaluation runs', () => {
+    const config = JSON.parse(
+      readFileSync(join(root, 'tools/agent-docs/eval/cases.json'), 'utf8'),
+    ) as { bindings: string[]; cases: { id: string; seed?: string }[] };
+    const missing = config.cases.flatMap((entry) =>
+      entry.seed === undefined
+        ? []
+        : config.bindings
+            .filter(
+              (binding) =>
+                !existsSync(join(root, 'tools/agent-docs/eval/seeds', entry.seed!, binding)),
+            )
+            .map((binding) => `${entry.id}: ${entry.seed}/${binding}`),
+    );
+    expect(missing).toEqual([]);
+  });
+
   it('the snippet of each binding names every skill', () => {
     for (const binding of ['react', 'angular'] as const) {
       const snippet = renderAgentsSnippet(binding);

@@ -83,6 +83,15 @@ describe('assertionPasses', () => {
     );
   });
 
+  it('absent passes only when no file matches the pattern', () => {
+    expect(assertionPasses({ kind: 'absent', pattern: 'DataGrid style' }, 'react', react)).toBe(
+      false,
+    );
+    expect(assertionPasses({ kind: 'absent', pattern: '\\[data-part=' }, 'react', react)).toBe(
+      true,
+    );
+  });
+
   it('no-literal fails on a hex colour, and passes on 0px and 1px', () => {
     expect(assertionPasses({ kind: 'no-literal' }, 'react', react)).toBe(false);
     expect(

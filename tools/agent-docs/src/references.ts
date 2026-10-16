@@ -97,8 +97,10 @@ export function loadCatalog(root: string): Catalog {
     readFileSync(join(root, 'packages/theme/src/contract.json'), 'utf8'),
   ) as {
     tokens: { name: string }[];
+    groups?: { id: string }[];
   };
   for (const token of theme.tokens) add(token.name, 'token');
+  for (const group of theme.groups ?? []) add(group.id, 'token-group');
   for (const file of walk(join(root, 'packages/styles/src'))) {
     if (file.endsWith('.tokens.json'))
       for (const [token] of readFileSync(file, 'utf8').matchAll(/--slotted-[a-z0-9-]+/g))

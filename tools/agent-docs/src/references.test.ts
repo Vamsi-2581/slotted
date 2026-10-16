@@ -20,6 +20,8 @@ describe('nameKind', () => {
     ['bleed', 'axis-value'],
     ['--slotted-app-shell-row-inset', 'token'],
     ['--slotted-space-*', 'token-wildcard'],
+    ['z-index', 'token-group'],
+    ['easing', 'token-group'],
     ['aria-busy', 'aria'],
     ['AF-01', 'rule'],
     ['min-inline-size: 0', 'css-declaration'],

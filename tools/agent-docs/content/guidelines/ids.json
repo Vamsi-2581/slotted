@@ -232,6 +232,46 @@
     "level": "SHOULD",
     "status": "active"
   },
+  "OE-01": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "OE-02": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "OE-03": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "OE-04": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "OE-05": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "OE-06": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "OE-07": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "OE-08": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "OE-09": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "OE-10": {
+    "level": "SHOULD",
+    "status": "active"
+  },
   "OV-01": {
     "level": "SHOULD",
     "status": "active"

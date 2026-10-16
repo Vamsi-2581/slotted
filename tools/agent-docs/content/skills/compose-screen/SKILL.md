@@ -29,6 +29,7 @@ topics.
    when the screen places controls in a row or in the application frame.
 4. Add `errors-and-conflicts.md` and `reading-permissions.md` when the screen
    writes data or reads under a role.
+5. Add `own-elements.md` when the screen writes an element of its own.
 
 ## 3. Read each family before writing beside it
 
@@ -53,7 +54,9 @@ element stands in that slot.
 - A control that switches what a region holds changes words and values, never
   the size or the position of a box (CP-08).
 - Where no anatomy answers the problem, the screen writes an element of its
-  own instead of bending a family into a shape it does not have (CP-04).
+  own instead of bending a family into a shape it does not have (CP-04). That
+  element follows `own-elements.md` and reads its tokens from
+  `{{docsDir}}/tokens.md`.
 
 ## 5. Waits
 

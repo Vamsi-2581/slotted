@@ -14,7 +14,8 @@ screen:
 2. Match the task against the `triggers` in each topic file's front matter.
    Read the topic files that match, and `composition.md` always.
 3. Before writing an element beside a family, read that family's page in
-   `{{docsDir}}`.
+   `{{docsDir}}`. Before writing an element no family draws, read
+   `own-elements.md` and `{{docsDir}}/tokens.md`.
 4. Apply the rules by level: a `MUST` broken is a defect, a `SHOULD` broken is
    stated with its reason, a `MAY` is a permission.
 5. A screen is done when each `Check` of the rules read passes.

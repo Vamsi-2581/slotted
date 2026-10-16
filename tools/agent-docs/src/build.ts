@@ -77,7 +77,10 @@ export async function buildDocs({
   if (content.topics.length > 0) {
     mkdirSync(join(out, 'guidelines'));
     writeFileSync(join(out, 'guidelines/README.md'), renderContent(content.readme, binding));
-    writeFileSync(join(out, 'guidelines/index.md'), renderGuidelinesIndex(content.topics));
+    writeFileSync(
+      join(out, 'guidelines/index.md'),
+      renderContent(renderGuidelinesIndex(content.topics), binding),
+    );
     for (const topic of content.topics)
       writeFileSync(
         join(out, 'guidelines', topic.file),

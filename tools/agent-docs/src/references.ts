@@ -42,6 +42,9 @@ export const REFERENCE_EXCEPTIONS: Readonly<Record<string, string>> = {
   'minmax(0, 1fr)': 'the CSS grid track with a zero minimum that lets a family scroll (CP-03)',
   '(hover: none) and (pointer: coarse)':
     'the media query that identifies a touch-primary device (SC-06)',
+  'data-ui': 'the attribute that names a family on its root (OE-08)',
+  'data-part': 'the attribute that names a part of a family (OE-08)',
+  'container-name': 'the CSS property an element of its own names its container with (OE-09)',
 };
 
 function walk(dir: string): string[] {

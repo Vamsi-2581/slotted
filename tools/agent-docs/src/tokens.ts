@@ -75,7 +75,7 @@ function valueCell(token: ThemeToken, values: ThemeValues): string {
   return reduced === resolved ? resolved : `${resolved}; ${reduced} under reduced motion`;
 }
 
-function meaningCell(group: TokenGroup, name: string): string {
+export function meaningCell(group: TokenGroup, name: string): string {
   if (group.tokens !== undefined) return group.tokens[name] ?? '—';
   const meanings = Object.entries(dimensionValues(group, name)).flatMap(([slot, value]) => {
     const dimension = group.dimensions?.[slot];

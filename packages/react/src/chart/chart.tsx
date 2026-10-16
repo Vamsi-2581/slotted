@@ -90,6 +90,36 @@ const sameList = (a: readonly string[], b: readonly string[]) =>
   a.length === b.length && a.every((value, index) => value === b[index]);
 const sameZoom = (a: ChartZoom, b: ChartZoom) => a.start === b.start && a.end === b.end;
 
+const isPlain = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && Object.getPrototypeOf(value) === Object.prototype;
+
+/** Arrays and plain objects by their content; anything else, a formatter among them, by identity. */
+function sameShape(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (Array.isArray(a)) {
+    return (
+      Array.isArray(b) && a.length === b.length && a.every((value, i) => sameShape(value, b[i]))
+    );
+  }
+  if (!isPlain(a) || !isPlain(b)) return false;
+  const keys = Object.keys(a);
+  return (
+    keys.length === Object.keys(b).length &&
+    keys.every((key) => Object.hasOwn(b, key) && sameShape(a[key], b[key]))
+  );
+}
+
+/**
+ * A configuration a parent writes as a literal, kept as the one before while
+ * its content is the same. Read by identity, a parent that drew again rebuilt
+ * the model, measured the legend and redrew the engine for an unchanged chart.
+ */
+function useSameShape<T>(value: T): T {
+  const kept = useRef(value);
+  if (!sameShape(kept.current, value)) kept.current = value;
+  return kept.current;
+}
+
 /**
  * One value in the library's two modes (`docs/state-and-events.md`): the
  * consumer's value when it states one, the family's own otherwise, and every
@@ -445,19 +475,34 @@ export function Chart(props: ChartProps) {
     Object.is,
   );
 
+  const sameSeries = useSameShape(series);
+  const sameX = useSameShape(x);
+  const sameY = useSameShape(y);
+  const sameAnnotations = useSameShape(annotations);
   const spec = useMemo<ChartSpec>(
     () => ({
       data,
-      series,
-      x,
-      y,
+      series: sameSeries,
+      x: sameX,
+      y: sameY,
       orientation,
       stackMode,
-      annotations,
+      annotations: sameAnnotations,
       recordKey,
       locale: locale ?? appLocale,
     }),
-    [data, series, x, y, orientation, stackMode, annotations, recordKey, locale, appLocale],
+    [
+      data,
+      sameSeries,
+      sameX,
+      sameY,
+      orientation,
+      stackMode,
+      sameAnnotations,
+      recordKey,
+      locale,
+      appLocale,
+    ],
   );
   const built = useMemo(() => {
     try {

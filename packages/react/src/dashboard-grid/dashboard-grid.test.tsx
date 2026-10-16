@@ -1,6 +1,6 @@
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { createRef, useState } from 'react';
+import { createRef, useEffect, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { SlottedProvider } from '../i18n';
@@ -86,6 +86,19 @@ const place = (key: string) => {
     Number(style.getPropertyValue(name)),
   );
 };
+/* jsdom lays nothing out: the list gets the width and the row a browser would measure. */
+const lay = () => {
+  const list = part('grid');
+  list.style.gridAutoRows = '80px';
+  list.style.columnGap = '16px';
+  list.style.rowGap = '16px';
+  Object.defineProperty(list, 'clientWidth', { configurable: true, value: 1200 });
+  const frame = { left: 0, top: 0, right: 1200, bottom: 800, width: 1200, height: 800, x: 0, y: 0 };
+  Object.defineProperty(list, 'getBoundingClientRect', {
+    configurable: true,
+    value: () => ({ ...frame, toJSON: () => frame }),
+  });
+};
 const itemOf = (layout: DashboardLayout, key: string) => layout.find((item) => item.key === key);
 
 describe('DashboardGrid', () => {
@@ -163,6 +176,150 @@ describe('DashboardGrid', () => {
     expect(edges).toEqual(['start', 'end', 'bottom', 'bottom-start', 'bottom-end']);
   });
 
+  /**
+   * A custom property written on the widget in hand restyles everything under
+   * it, every frame: on a page carrying a theme, one write cost 12 ms where a
+   * `translate` cost 0.3. The pointer moves the widget by its own geometry.
+   */
+  it('carries a widget by its translate, never by a custom property, and clears it on drop', () => {
+    mount({ defaultEditing: true });
+    lay();
+    const card = widget('revenue').querySelector<HTMLElement>('[data-ui="card"]')!;
+    const pointer = (type: string, x: number, y: number) =>
+      new PointerEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+        clientX: x,
+        clientY: y,
+      });
+    act(() => {
+      card.dispatchEvent(pointer('pointerdown', 10, 10));
+      document.dispatchEvent(pointer('pointermove', 30, 25));
+      document.dispatchEvent(pointer('pointermove', 50, 40));
+    });
+    const style = widget('revenue').style;
+    expect(widget('revenue').hasAttribute('data-dragging')).toBe(true);
+    expect(part('grid').hasAttribute('data-gesture')).toBe(true);
+    expect(root().hasAttribute('data-gesture')).toBe(false);
+    expect(style.translate).toBe('40px 30px');
+    expect([...style].filter((name) => name.startsWith('--_dg-lift'))).toEqual([]);
+    act(() => {
+      document.dispatchEvent(pointer('pointerup', 50, 40));
+    });
+    expect(widget('revenue').style.translate).toBe('');
+    expect(widget('revenue').style.inlineSize).toBe('');
+    expect(part('grid').hasAttribute('data-gesture')).toBe(false);
+  });
+
+  /**
+   * Each cell the pointer crosses previews a layout. A widget the preview
+   * leaves where it was is not drawn again: drawing all of them — card, menu,
+   * handle and edges — cost 40 ms a crossing on an eleven-widget dashboard.
+   */
+  it('draws again only the widgets a preview moves', () => {
+    let renders = 0;
+    let ordersRenders = 0;
+    const children = widgets().map((element) =>
+      element.key === 'orders' ? (
+        <DashboardWidget
+          key="orders"
+          value="orders"
+          title="Orders"
+          defaultColumns={3}
+          render={(props) => {
+            ordersRenders += 1;
+            return <li {...props} />;
+          }}
+        >
+          <p>3,914</p>
+        </DashboardWidget>
+      ) : element.key === 'trend' ? (
+        <DashboardWidget
+          key="trend"
+          value="trend"
+          title="Revenue by week"
+          defaultColumns={12}
+          defaultRows={3}
+          render={(props) => {
+            renders += 1;
+            return <li {...props} />;
+          }}
+        >
+          <p>chart</p>
+        </DashboardWidget>
+      ) : (
+        element
+      ),
+    );
+    mount({ defaultEditing: true, children });
+    lay();
+    const card = widget('revenue').querySelector<HTMLElement>('[data-ui="card"]')!;
+    const pointer = (type: string, x: number, y: number) =>
+      new PointerEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+        clientX: x,
+        clientY: y,
+      });
+    act(() => {
+      card.dispatchEvent(pointer('pointerdown', 10, 10));
+      document.dispatchEvent(pointer('pointermove', 30, 10));
+    });
+    expect(widget('revenue').hasAttribute('data-dragging')).toBe(true);
+    const before = renders;
+    const ordersBefore = ordersRenders;
+    act(() => {
+      document.dispatchEvent(pointer('pointermove', 618, 10));
+    });
+    /* Revenue previews its move past Orders; Orders keeps its cell, and a
+       grid of explicit cells has no order to rewrite. */
+    expect(place('orders')).toEqual([4, 1, 3, 2]);
+    expect(ordersRenders - ordersBefore).toBe(0);
+    expect(document.querySelector('[data-part="placeholder"]')).not.toBeNull();
+    expect(renders - before).toBe(0);
+    act(() => {
+      document.dispatchEvent(pointer('pointerup', 618, 10));
+    });
+  });
+
+  it('pulls a widget by its size, never by a custom property', () => {
+    mount({ defaultEditing: true });
+    lay();
+    const edge = widget('revenue').querySelector<HTMLElement>(
+      '[data-part="resize-handle"][data-edge="bottom-end"]',
+    )!;
+    const pointer = (type: string, x: number, y: number) =>
+      new PointerEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+        clientX: x,
+        clientY: y,
+      });
+    act(() => {
+      edge.dispatchEvent(pointer('pointerdown', 0, 0));
+      edge.dispatchEvent(pointer('pointermove', 80, 120));
+    });
+    const style = widget('revenue').style;
+    expect(widget('revenue').hasAttribute('data-resizing')).toBe(true);
+    expect(part('grid').hasAttribute('data-gesture')).toBe(true);
+    expect(style.inlineSize).toMatch(/px$/);
+    expect(style.blockSize).toBe('120px');
+    expect([...style].filter((name) => name.startsWith('--_dg-origin'))).toEqual([]);
+    act(() => {
+      edge.dispatchEvent(pointer('pointerup', 80, 120));
+    });
+    expect(widget('revenue').style.blockSize).toBe('');
+  });
+
   it('keeps the instructions for the handles when the edit bar is off', () => {
     mount({ defaultEditing: true, editBar: false });
     expect(document.querySelector('[data-part="edit-bar"]')).toBeNull();
@@ -190,6 +347,50 @@ describe('DashboardGrid', () => {
     expect(itemOf(layout, 'trend')).toMatchObject({ y: 0 });
     expect(itemOf(layout, 'revenue')?.y).toBe(3);
     expect(order()).toEqual(['trend', 'revenue', 'orders']);
+  });
+
+  /**
+   * A dashboard is usually written as static JSX, with no key on a widget.
+   * Drawn by position, a widget that changed places took the content of the
+   * one before it: every chart was destroyed and built again on each drop,
+   * with its state and its focus.
+   */
+  it('keeps each widget’s content mounted when the layout changes its order', () => {
+    const mounts: string[] = [];
+    function Probe({ name }: { name: string }) {
+      useEffect(() => {
+        mounts.push(name);
+      }, [name]);
+      return <p>{name}</p>;
+    }
+    function Board() {
+      const [layout, setLayout] = useState<DashboardLayout | undefined>(undefined);
+      return (
+        <DashboardGrid
+          aria-label="Sales"
+          defaultEditing
+          {...(layout === undefined ? {} : { layout })}
+          onLayoutChange={setLayout}
+        >
+          <DashboardWidget value="revenue" title="Revenue" defaultColumns={3}>
+            <Probe name="revenue" />
+          </DashboardWidget>
+          <DashboardWidget value="orders" title="Orders" defaultColumns={3}>
+            <Probe name="orders" />
+          </DashboardWidget>
+          <DashboardWidget value="trend" title="Trend" defaultColumns={12} defaultRows={3}>
+            <section>
+              <Probe name="trend" />
+            </section>
+          </DashboardWidget>
+        </DashboardGrid>
+      );
+    }
+    render(<Board />);
+    expect(mounts).toEqual(['revenue', 'orders', 'trend']);
+    fireEvent.keyDown(handle('revenue'), { key: 'ArrowDown', altKey: true });
+    expect(order()).toEqual(['trend', 'revenue', 'orders']);
+    expect(mounts).toEqual(['revenue', 'orders', 'trend']);
   });
 
   it('mirrors the inline arrows in a right-to-left document', () => {

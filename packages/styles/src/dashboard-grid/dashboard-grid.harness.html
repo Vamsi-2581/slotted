@@ -2,13 +2,13 @@
   The third place this family's DOM is written, after React and Angular. Every
   `data-part` the contract declares appears here:
 
-    div[data-ui='dashboard-grid'][data-part='root']      data-editing, data-gesture; --_dg-columns-*
+    div[data-ui='dashboard-grid'][data-part='root']      data-editing; --_dg-columns-*
       div[data-part='edit-bar'][role='group']            only while editing, editBar true
         p[data-part='edit-status']                       the handles' description
         div[data-part='edit-actions']
           button[data-part='add']                        only while a widget is hidden; a menu trigger
           button[data-part='reset'] · button[data-part='cancel'] · button[data-part='done']
-      ul[data-part='grid'][role='list']                  the lattice is its ::before
+      ul[data-part='grid'][role='list']                  data-gesture; the lattice is its ::before
         li[data-part='widget']                           --_dg-x, --_dg-y, --_dg-w, --_dg-h, --_dg-span-medium;
                                                          data-key, data-status, data-loading, data-movable,
                                                          data-resizable, data-dragging, data-resizing
@@ -872,7 +872,6 @@
       data-ui="dashboard-grid"
       data-part="root"
       data-editing
-      data-gesture
       style="--_dg-columns-expanded: 12; --_dg-columns-medium: 6; --_dg-columns-compact: 1"
     >
       <div data-part="edit-bar" role="group" aria-label="Layout">
@@ -911,7 +910,7 @@
           </button>
         </div>
       </div>
-      <ul data-part="grid" role="list" aria-label="Sales overview">
+      <ul data-part="grid" role="list" aria-label="Sales overview" data-gesture>
         <li
           data-part="widget"
           data-key="revenue"
@@ -1370,7 +1369,6 @@
       data-ui="dashboard-grid"
       data-part="root"
       data-editing
-      data-gesture
       style="--_dg-columns-expanded: 12; --_dg-columns-medium: 6; --_dg-columns-compact: 1"
     >
       <div data-part="edit-bar" role="group" aria-label="Layout">
@@ -1409,7 +1407,7 @@
           </button>
         </div>
       </div>
-      <ul data-part="grid" role="list" aria-label="Sales overview">
+      <ul data-part="grid" role="list" aria-label="Sales overview" data-gesture>
         <li
           data-part="widget"
           data-key="revenue"

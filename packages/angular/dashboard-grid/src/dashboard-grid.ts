@@ -176,25 +176,21 @@ function originOf(element: HTMLElement, list: HTMLElement, rtl: boolean): Origin
   };
 }
 
+/* The widget in hand is placed and moved by its own geometry, never by a
+   custom property: one restyles everything under the widget, and it is
+   written every frame. */
+const LIFT = ['inset-inline-start', 'inset-block-start', 'inline-size', 'block-size', 'translate'];
+
 function writeOrigin(element: HTMLElement, origin: Origin) {
-  element.style.setProperty('--_dg-origin-inline-start', `${origin.inlineStart}px`);
-  element.style.setProperty('--_dg-origin-block-start', `${origin.blockStart}px`);
-  element.style.setProperty('--_dg-origin-inline-size', `${origin.inlineSize}px`);
-  element.style.setProperty('--_dg-origin-block-size', `${origin.blockSize}px`);
+  element.style.setProperty('inset-inline-start', `${origin.inlineStart}px`);
+  element.style.setProperty('inset-block-start', `${origin.blockStart}px`);
+  element.style.setProperty('inline-size', `${origin.inlineSize}px`);
+  element.style.setProperty('block-size', `${origin.blockSize}px`);
 }
 
 function clearLift(element: HTMLElement | undefined) {
   if (element === undefined) return;
-  for (const name of [
-    '--_dg-origin-inline-start',
-    '--_dg-origin-block-start',
-    '--_dg-origin-inline-size',
-    '--_dg-origin-block-size',
-    '--_dg-lift-x',
-    '--_dg-lift-y',
-  ]) {
-    element.style.removeProperty(name);
-  }
+  for (const name of LIFT) element.style.removeProperty(name);
 }
 
 function boxOf(element: HTMLElement): MeasuredTile {
@@ -286,7 +282,6 @@ interface Slot {
     'data-ui': 'dashboard-grid',
     'data-part': 'root',
     '[attr.data-editing]': 'isEditing() ? "" : null',
-    '[attr.data-gesture]': 'gesture() === null ? null : ""',
     '[attr.aria-label]': 'null',
     '[attr.aria-labelledby]': 'null',
     '[style.--_dg-columns-expanded]': 'grid().expanded',
@@ -361,6 +356,7 @@ interface Slot {
     <ul
       #list
       data-part="grid"
+      [attr.data-gesture]="gesture() === null ? null : ''"
       role="list"
       [attr.aria-label]="ariaLabel() ?? null"
       [attr.aria-labelledby]="ariaLabelledBy() ?? null"
@@ -1151,12 +1147,12 @@ export class SlDashboardGrid {
       const blockSize = pullsBottom
         ? Math.max(tracks.row, origin.blockSize + dy)
         : origin.blockSize;
-      element.style.setProperty('--_dg-origin-inline-size', `${inlineSize}px`);
-      element.style.setProperty('--_dg-origin-block-size', `${blockSize}px`);
+      element.style.setProperty('inline-size', `${inlineSize}px`);
+      element.style.setProperty('block-size', `${blockSize}px`);
       /* Pulled by its start, the widget keeps its end still: the element is
          anchored at its start, so it moves by what it grew. */
       const shift = pullsStart ? origin.inlineSize - inlineSize : 0;
-      element.style.setProperty('--_dg-lift-x', `${rtl ? -shift : shift}px`);
+      element.style.setProperty('translate', `${rtl ? -shift : shift}px 0px`);
 
       const w = spanFromTravel({
         span,
@@ -1406,8 +1402,10 @@ export class SlDashboardGrid {
         this.setGesture({ kind: 'move', key, preview: this.full(this.currentLayout()) });
       }
       if (state.point !== null) {
-        element.style.setProperty('--_dg-lift-x', `${state.point.x - press.x}px`);
-        element.style.setProperty('--_dg-lift-y', `${state.point.y - press.y}px`);
+        element.style.setProperty(
+          'translate',
+          `${state.point.x - press.x}px ${state.point.y - press.y}px`,
+        );
       }
     });
 

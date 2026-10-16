@@ -350,8 +350,11 @@
   }
 
   /* While a widget is carried or pulled the lattice is what it snaps to, so
-     it comes forward. */
-  [data-ui='dashboard-grid'][data-gesture] > [data-part='grid']::before {
+     it comes forward. The attribute is on the grid, in the compound it styles:
+     a browser invalidates by attribute name, and on the root ahead of
+     `> [data-part='grid']` it restyled every element with a `data-part`
+     under the root as a widget was picked up and as it was dropped. */
+  [data-ui='dashboard-grid'] > [data-part='grid'][data-gesture]::before {
     opacity: 1;
   }
 
@@ -654,20 +657,18 @@
   /* ── Editing: a widget in hand ───────────────────────────────────────── */
 
   /**
-   * A widget carried or pulled leaves its cell and floats over the grid: it
-   * is placed where it was picked up, `--_dg-origin-*`, and follows the pointer
-   * by `--_dg-lift-*`, all written by script. The cell it would land in is the
-   * placeholder, and the widgets around it make room as the placeholder moves.
+   * A widget carried or pulled leaves its cell and floats over the grid. The
+   * script writes where it was picked up (`inset-inline-start`,
+   * `inset-block-start`, `inline-size`, `block-size`) and how far the pointer
+   * took it (`translate`) on the widget itself. A custom property in their
+   * place restyled everything under the widget on every frame. The cell it
+   * would land in is the placeholder, and the widgets around it make room as
+   * the placeholder moves.
    */
   [data-ui='dashboard-grid'] [data-part='widget']:is([data-dragging], [data-resizing]) {
-    block-size: var(--_dg-origin-block-size);
     grid-column: auto;
     grid-row: auto;
-    inline-size: var(--_dg-origin-inline-size);
-    inset-block-start: var(--_dg-origin-block-start);
-    inset-inline-start: var(--_dg-origin-inline-start);
     position: absolute;
-    translate: var(--_dg-lift-x, 0) var(--_dg-lift-y, 0);
     z-index: 3;
   }
 
@@ -745,4 +746,38 @@
   [data-ui='dashboard-grid'] > [data-part='empty'] {
     min-block-size: calc(var(--_row) * 2 + var(--_gap));
   }
+}
+
+/**
+ * A widget's cell, written on the widget by script and read only by the
+ * widget's own placement. Unregistered, each one inherited into the card and
+ * everything in it, and a preview that moved a widget restyled its whole
+ * content. Registered without inheritance and without a type, a widget no
+ * script placed still takes the fallback of `var()`. These sit outside
+ * `@layer slotted.components` because `@property` is a registration, not a
+ * rule a cascade layer holds.
+ */
+@property --_dg-x {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --_dg-y {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --_dg-w {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --_dg-h {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --_dg-span-medium {
+  syntax: '*';
+  inherits: false;
 }

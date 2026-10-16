@@ -153,6 +153,24 @@ const place = (key: string) => {
   );
 };
 const itemOf = (layout: DashboardLayout, key: string) => layout.find((item) => item.key === key);
+/* jsdom lays nothing out: the list gets the width and the row a browser would measure. */
+const lay = () => {
+  const list = part('grid');
+  list.style.gridAutoRows = '80px';
+  list.style.columnGap = '16px';
+  list.style.rowGap = '16px';
+  Object.defineProperty(list, 'clientWidth', { configurable: true, value: 1200 });
+};
+const pointer = (type: string, x: number, y: number) =>
+  new PointerEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    pointerId: 1,
+    pointerType: 'mouse',
+    button: 0,
+    clientX: x,
+    clientY: y,
+  });
 const press = (target: HTMLElement, init: KeyboardEventInit) =>
   target.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init }));
 
@@ -224,6 +242,52 @@ describe('SlDashboardGrid', () => {
     const status = part('edit-status');
     expect(status.getAttribute('data-ui')).toBe('visually-hidden');
     expect(handle('orders').getAttribute('aria-describedby')).toBe(status.id);
+  });
+
+  /**
+   * A custom property written on the widget in hand restyles everything under
+   * it, every frame: on a page carrying a theme, one write cost 12 ms where a
+   * `translate` cost 0.3. The pointer moves the widget by its own geometry.
+   */
+  it('carries a widget by its translate, never by a custom property, and clears it on drop', async () => {
+    const fixture = await setup((host) => host.editing.set(true));
+    lay();
+    const card = widget('revenue').querySelector<HTMLElement>('[data-ui="card"]')!;
+    card.dispatchEvent(pointer('pointerdown', 10, 10));
+    document.dispatchEvent(pointer('pointermove', 30, 25));
+    document.dispatchEvent(pointer('pointermove', 50, 40));
+    await settle(fixture);
+    const style = widget('revenue').style;
+    expect(widget('revenue').hasAttribute('data-dragging')).toBe(true);
+    expect(part('grid').hasAttribute('data-gesture')).toBe(true);
+    expect(root().hasAttribute('data-gesture')).toBe(false);
+    expect(style.translate).toBe('40px 30px');
+    expect([...style].filter((name) => name.startsWith('--_dg-lift'))).toEqual([]);
+    document.dispatchEvent(pointer('pointerup', 50, 40));
+    await settle(fixture);
+    expect(widget('revenue').style.translate).toBe('');
+    expect(widget('revenue').style.inlineSize).toBe('');
+    expect(part('grid').hasAttribute('data-gesture')).toBe(false);
+  });
+
+  it('pulls a widget by its size, never by a custom property', async () => {
+    const fixture = await setup((host) => host.editing.set(true));
+    lay();
+    const edge = widget('revenue').querySelector<HTMLElement>(
+      '[data-part="resize-handle"][data-edge="bottom-end"]',
+    )!;
+    edge.dispatchEvent(pointer('pointerdown', 0, 0));
+    edge.dispatchEvent(pointer('pointermove', 80, 120));
+    await settle(fixture);
+    const style = widget('revenue').style;
+    expect(widget('revenue').hasAttribute('data-resizing')).toBe(true);
+    expect(part('grid').hasAttribute('data-gesture')).toBe(true);
+    expect(style.inlineSize).toMatch(/px$/);
+    expect(style.blockSize).toBe('120px');
+    expect([...style].filter((name) => name.startsWith('--_dg-origin'))).toEqual([]);
+    edge.dispatchEvent(pointer('pointerup', 80, 120));
+    await settle(fixture);
+    expect(widget('revenue').style.blockSize).toBe('');
   });
 
   it('moves a widget a column on Alt and an arrow, and keeps focus on its handle', async () => {

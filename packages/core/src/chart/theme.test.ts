@@ -37,4 +37,52 @@ describe('observeChartTheme', () => {
     element.remove();
     expect(reads).toBe(1);
   });
+
+  /**
+   * A container carried or pulled writes its geometry every frame: a widget
+   * in hand, a pane being resized. Re-reading the theme on each write cost a
+   * probe and two dozen computed styles a frame for a theme that had not
+   * moved. Only a declaration that can reach the plot's colours reads again:
+   * a private property (`--_*`) is a family's own wiring, never a theme input.
+   */
+  it('leaves the theme alone when an ancestor writes only its geometry or private wiring', async () => {
+    /* Mutation records arrive on a microtask, before the frame they schedule. */
+    const settle = async () => {
+      await Promise.resolve();
+      vi.advanceTimersToNextFrame();
+    };
+    const ancestor = document.createElement('div');
+    const element = document.createElement('div');
+    ancestor.append(element);
+    document.body.append(ancestor);
+    let reads = 0;
+    const stop = observeChartTheme(element, () => {
+      reads += 1;
+    });
+
+    ancestor.style.translate = '40px 30px';
+    ancestor.style.inlineSize = '320px';
+    ancestor.style.insetBlockStart = '12px';
+    ancestor.style.order = '4';
+    ancestor.style.gridColumn = '2 / span 3';
+    /* A family's private wiring: a dashboard widget's cell. */
+    ancestor.style.setProperty('--_dg-x', '3');
+    await settle();
+    expect(reads).toBe(0);
+
+    ancestor.style.setProperty('--slotted-seed-accent', 'red');
+    await settle();
+    expect(reads).toBe(1);
+
+    ancestor.style.color = 'blue';
+    await settle();
+    expect(reads).toBe(2);
+
+    ancestor.style.removeProperty('translate');
+    await settle();
+    expect(reads).toBe(2);
+
+    stop();
+    ancestor.remove();
+  });
 });

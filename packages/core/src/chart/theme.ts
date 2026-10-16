@@ -166,6 +166,10 @@ export function readChartTheme(element: Element): ChartTheme {
   }
 }
 
+/** Inline declarations that place or size a box and inherit nothing a theme reads. */
+const GEOMETRY =
+  /^(?:translate|transform|transform-origin|rotate|scale|inset(?:-.+)?|top|right|bottom|left|(?:min-|max-)?(?:width|height|inline-size|block-size)|grid-(?:area|row|column)(?:-start|-end)?|order|z-index|will-change)$/;
+
 export function sameTheme(a: ChartTheme | null, b: ChartTheme | null) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
@@ -181,7 +185,10 @@ export function sameTheme(a: ChartTheme | null, b: ChartTheme | null) {
  * to the chart's own ancestors: a token inherits down the tree and nowhere
  * else, and the engine, the tooltip and the probe rewrite `style` inside the
  * chart on every pointer move, which would otherwise re-read the theme sixty
- * times a second.
+ * times a second. An ancestor's inline style counts only when it changes a
+ * declaration other than its geometry and a family's private wiring (`--_*`):
+ * a widget carried across a dashboard writes its `translate` every frame and
+ * its cell on every preview, and none of it reaches a colour.
  */
 export function observeChartTheme(element: Element, onChange: () => void): () => void {
   const document = element.ownerDocument;
@@ -195,11 +202,32 @@ export function observeChartTheme(element: Element, onChange: () => void): () =>
         onChange();
       }) ?? 0;
   };
+  const scratch = document.createElement('div');
+  const declarationsOf = (text: string | null) => {
+    scratch.setAttribute('style', text ?? '');
+    const declarations = new Map<string, string>();
+    for (const name of Array.from(scratch.style)) {
+      if (!GEOMETRY.test(name) && !name.startsWith('--_')) {
+        declarations.set(name, scratch.style.getPropertyValue(name));
+      }
+    }
+    return declarations;
+  };
+  const restyled = (record: MutationRecord) => {
+    const before = declarationsOf(record.oldValue);
+    const after = declarationsOf((record.target as Element).getAttribute('style'));
+    if (before.size !== after.size) return true;
+    for (const [name, value] of after) if (before.get(name) !== value) return true;
+    return false;
+  };
   const observer = new MutationObserver((records) => {
-    if (records.some((record) => record.target.contains(element))) schedule();
+    const relevant = (record: MutationRecord) =>
+      record.target.contains(element) && (record.attributeName !== 'style' || restyled(record));
+    if (records.some(relevant)) schedule();
   });
   observer.observe(document.documentElement, {
     attributes: true,
+    attributeOldValue: true,
     subtree: true,
     attributeFilter: [
       'data-slotted-scheme',

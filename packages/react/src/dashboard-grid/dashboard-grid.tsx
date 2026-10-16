@@ -35,6 +35,7 @@ import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable, type ChangeReason, type ChangeRequest } from '@slotted/core/state';
 import {
   Children,
+  Fragment,
   isValidElement,
   useCallback,
   useEffect,
@@ -191,25 +192,35 @@ function originOf(element: HTMLElement, list: HTMLElement, rtl: boolean): Origin
   };
 }
 
+/* The widget in hand is placed and moved by its own geometry, never by a
+   custom property: one restyles everything under the widget, and it is
+   written every frame. */
+const LIFT = ['inset-inline-start', 'inset-block-start', 'inline-size', 'block-size', 'translate'];
+
 function writeOrigin(element: HTMLElement, origin: Origin) {
-  element.style.setProperty('--_dg-origin-inline-start', `${origin.inlineStart}px`);
-  element.style.setProperty('--_dg-origin-block-start', `${origin.blockStart}px`);
-  element.style.setProperty('--_dg-origin-inline-size', `${origin.inlineSize}px`);
-  element.style.setProperty('--_dg-origin-block-size', `${origin.blockSize}px`);
+  element.style.setProperty('inset-inline-start', `${origin.inlineStart}px`);
+  element.style.setProperty('inset-block-start', `${origin.blockStart}px`);
+  element.style.setProperty('inline-size', `${origin.inlineSize}px`);
+  element.style.setProperty('block-size', `${origin.blockSize}px`);
 }
 
 function clearLift(element: HTMLElement | undefined) {
   if (element === undefined) return;
-  for (const name of [
-    '--_dg-origin-inline-start',
-    '--_dg-origin-block-start',
-    '--_dg-origin-inline-size',
-    '--_dg-origin-block-size',
-    '--_dg-lift-x',
-    '--_dg-lift-y',
-  ]) {
-    element.style.removeProperty(name);
-  }
+  for (const name of LIFT) element.style.removeProperty(name);
+}
+
+function sameSlot(a: DashboardSlot, b: DashboardSlot): boolean {
+  const tile = Object.keys(a.tile) as (keyof DashboardSlot['tile'])[];
+  const can = Object.keys(a.can) as (keyof DashboardSlot['can'])[];
+  return (
+    a.order === b.order &&
+    a.dragging === b.dragging &&
+    a.resizing === b.resizing &&
+    a.edge === b.edge &&
+    a.readout === b.readout &&
+    tile.every((name) => a.tile[name] === b.tile[name]) &&
+    can.every((name) => a.can[name] === b.can[name])
+  );
 }
 
 /** What a gesture has reached, as the grid draws it. */
@@ -620,12 +631,12 @@ export function DashboardGrid({
         const blockSize = pullsBottom
           ? Math.max(tracks.row, origin.blockSize + dy)
           : origin.blockSize;
-        element.style.setProperty('--_dg-origin-inline-size', `${inlineSize}px`);
-        element.style.setProperty('--_dg-origin-block-size', `${blockSize}px`);
+        element.style.setProperty('inline-size', `${inlineSize}px`);
+        element.style.setProperty('block-size', `${blockSize}px`);
         /* Pulled by its start, the widget keeps its end still: the element is
            anchored at its start, so it moves by what it grew. */
         const shift = pullsStart ? origin.inlineSize - inlineSize : 0;
-        element.style.setProperty('--_dg-lift-x', `${rtl ? -shift : shift}px`);
+        element.style.setProperty('translate', `${rtl ? -shift : shift}px 0px`);
 
         const w = spanFromTravel({
           span,
@@ -844,7 +855,6 @@ export function DashboardGrid({
           }, 0);
           dragging = null;
           target = null;
-          root.removeAttribute('data-gesture');
           if (gestureRef.current?.kind === 'move') setGesture(null);
         }
         return;
@@ -859,7 +869,6 @@ export function DashboardGrid({
         rtl = directionOf(list) === 'rtl';
         tracks = tracksOf(list, live.current.grid[drawnIn]);
         writeOrigin(element, originOf(element, list, rtl));
-        root.setAttribute('data-gesture', '');
         setGesture({
           kind: 'move',
           key,
@@ -867,8 +876,10 @@ export function DashboardGrid({
         });
       }
       if (state.point !== null) {
-        element.style.setProperty('--_dg-lift-x', `${state.point.x - press.x}px`);
-        element.style.setProperty('--_dg-lift-y', `${state.point.y - press.y}px`);
+        element.style.setProperty(
+          'translate',
+          `${state.point.x - press.x}px ${state.point.y - press.y}px`,
+        );
       }
     });
 
@@ -987,24 +998,48 @@ export function DashboardGrid({
   );
   const drawnVisible = useMemo(() => drawn.filter((tile) => !tile.hidden), [drawn]);
 
-  const slots = useMemo(() => {
-    const map = new Map<string, DashboardSlot>();
-    const order = new Map(drawnVisible.map((tile, index) => [tile.key, index]));
+  /* What each widget's menu can do, from the committed layout: eight trial
+     layouts a widget, which no preview changes. */
+  const abilities = useMemo(() => {
+    const map = new Map<string, DashboardSlot['can']>();
     const committed = materializeLayout(layout, widgets, grid);
     const differs = (next: DashboardLayout) =>
       !layoutsEqual(materializeLayout(next, widgets, grid), committed);
     for (const tile of visible) {
-      const shown = drawn.find((each) => each.key === tile.key) ?? tile;
-      const inHand = gesture !== null && gesture.key === tile.key;
-      const resizingThis = inHand && gesture.kind === 'resize';
       const at = (direction: 'up' | 'down' | 'left' | 'right') =>
         editing && differs(moveTileBy(layout, widgets, grid, tile.key, direction, drawnClass));
       const by = (columns: number, rows: number) =>
         editing &&
         differs(resizeTileBy(layout, widgets, grid, tile.key, { columns, rows }, drawnClass));
       map.set(tile.key, {
+        up: at('up'),
+        down: at('down'),
+        left: at('left'),
+        right: at('right'),
+        wider: by(1, 0),
+        narrower: by(-1, 0),
+        taller: by(0, 1),
+        shorter: by(0, -1),
+      });
+    }
+    return map;
+  }, [visible, editing, layout, widgets, grid, drawnClass]);
+
+  /* A slot that says what it said before is the same object, so a widget the
+     preview leaves where it was is not drawn again. */
+  const drawnSlots = useRef(new Map<string, DashboardSlot>());
+  const slots = useMemo(() => {
+    const map = new Map<string, DashboardSlot>();
+    const order = new Map(drawnVisible.map((tile, index) => [tile.key, index]));
+    for (const tile of visible) {
+      const shown = drawn.find((each) => each.key === tile.key) ?? tile;
+      const inHand = gesture !== null && gesture.key === tile.key;
+      const resizingThis = inHand && gesture.kind === 'resize';
+      const next: DashboardSlot = {
         tile: shown,
-        order: gesture === null ? undefined : order.get(tile.key),
+        /* Only a flow reads an order; cells placed explicitly would be drawn
+           again for an order nothing reads. */
+        order: gesture === null || drawnClass === 'expanded' ? undefined : order.get(tile.key),
         dragging: inHand && gesture.kind === 'move',
         resizing: resizingThis,
         edge: resizingThis ? gesture.edge : null,
@@ -1014,20 +1049,16 @@ export function DashboardGrid({
               rows: shown.h,
             })
           : null,
-        can: {
-          up: at('up'),
-          down: at('down'),
-          left: at('left'),
-          right: at('right'),
-          wider: by(1, 0),
-          narrower: by(-1, 0),
-          taller: by(0, 1),
-          shorter: by(0, -1),
-        },
-      });
+        can: abilities.get(tile.key)!,
+      };
+      const before = drawnSlots.current.get(tile.key);
+      map.set(tile.key, before !== undefined && sameSlot(before, next) ? before : next);
     }
     return map;
-  }, [drawn, drawnVisible, visible, gesture, t, editing, layout, widgets, grid, drawnClass]);
+  }, [drawn, drawnVisible, visible, gesture, t, abilities, drawnClass]);
+  useLayoutEffect(() => {
+    drawnSlots.current = slots;
+  }, [slots]);
 
   const context = useMemo<DashboardGridContextValue>(
     () => ({
@@ -1155,12 +1186,18 @@ export function DashboardGrid({
         <ul
           ref={listRef}
           data-part="grid"
+          {...(gesture === null ? {} : { 'data-gesture': '' })}
           role="list"
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledBy}
           hidden={visible.length === 0 || undefined}
         >
-          {visible.map((tile) => elements.get(tile.key))}
+          {/* Keyed by value: a dashboard written as static JSX carries no key,
+              and drawn by position a widget that changed places remounted the
+              content of the one before it. */}
+          {visible.map((tile) => (
+            <Fragment key={tile.key}>{elements.get(tile.key)}</Fragment>
+          ))}
           {placeholderTile ? (
             <li
               ref={placeholderRef}
@@ -1169,7 +1206,11 @@ export function DashboardGrid({
               style={
                 {
                   ...tileStyle(placeholderTile),
-                  order: drawnVisible.findIndex((tile) => tile.key === placeholderTile.key),
+                  ...(drawnClass === 'expanded'
+                    ? {}
+                    : {
+                        order: drawnVisible.findIndex((tile) => tile.key === placeholderTile.key),
+                      }),
                 } as CSSProperties
               }
             />

@@ -1,5 +1,6 @@
 import { handleShortcuts, tileStyle } from '@slotted/core/dashboard-grid';
 import {
+  memo,
   useCallback,
   useId,
   useRef,
@@ -30,8 +31,14 @@ import {
 } from '../result-state';
 import { Skeleton, useSkeletonDefaults } from '../skeleton';
 import { useLoadingVisibility } from '../skeleton/use-loading-visibility';
-import { useDashboardGrid, type DashboardEdge } from './dashboard-grid-context';
+import {
+  useDashboardGrid,
+  type DashboardEdge,
+  type DashboardGridContextValue,
+  type DashboardSlot,
+} from './dashboard-grid-context';
 import type {
+  DashboardHeadingLevel,
   DashboardLayoutReason,
   DashboardWidgetProps,
   DashboardWidgetRootProps,
@@ -87,10 +94,6 @@ function HandleButton({
  * state it is in — waiting, empty or failed.
  */
 export function DashboardWidget({
-  value,
-  title,
-  description,
-  children,
   headingLevel,
   /* The widget's own declaration: the grid reads these from the element. */
   defaultColumns: _defaultColumns,
@@ -103,26 +106,10 @@ export function DashboardWidget({
   resizable: _resizable,
   removable: _removable,
   loading = false,
-  busy = false,
-  status = 'ready',
-  skeleton,
-  emptyTitle,
-  emptyDescription,
-  emptyAction,
-  errorTitle,
-  errorDescription,
-  onRetry,
-  detailHref,
-  onDetail,
-  actions,
-  footer,
-  fill,
-  size,
-  render,
   ref,
-  style,
-  ...nativeProps
+  ...props
 }: DashboardWidgetProps) {
+  const { value } = props;
   const grid = useDashboardGrid('DashboardWidget');
   const slot = grid.slots.get(value);
   const titleId = `${useId()}-title`;
@@ -152,9 +139,115 @@ export function DashboardWidget({
   );
 
   if (slot === undefined) return null;
+  return (
+    <WidgetView
+      {...props}
+      headingLevel={headingLevel ?? grid.headingLevel}
+      drawnSlot={slot}
+      painted={painted}
+      titleId={titleId}
+      descriptionId={descriptionId}
+      setWidget={setWidget}
+      setCard={setCard}
+      setHandle={setHandle}
+      t={grid.t}
+      editing={grid.editing}
+      sizeClass={grid.sizeClass}
+      statusId={grid.statusId}
+      move={grid.move}
+      resize={grid.resize}
+      hide={grid.hide}
+      onHandleKeyDown={grid.onHandleKeyDown}
+      onResizePointerDown={grid.onResizePointerDown}
+    />
+  );
+}
+
+type WidgetViewProps = Omit<
+  DashboardWidgetProps,
+  | 'ref'
+  | 'headingLevel'
+  | 'loading'
+  | 'defaultColumns'
+  | 'defaultRows'
+  | 'minColumns'
+  | 'maxColumns'
+  | 'minRows'
+  | 'maxRows'
+  | 'movable'
+  | 'resizable'
+  | 'removable'
+> &
+  Pick<
+    DashboardGridContextValue,
+    | 't'
+    | 'editing'
+    | 'sizeClass'
+    | 'statusId'
+    | 'move'
+    | 'resize'
+    | 'hide'
+    | 'onHandleKeyDown'
+    | 'onResizePointerDown'
+  > & {
+    headingLevel: DashboardHeadingLevel;
+    drawnSlot: DashboardSlot;
+    painted: boolean;
+    titleId: string;
+    descriptionId: string;
+    setWidget: (element: HTMLLIElement | null) => void;
+    setCard: (element: HTMLElement | null) => void;
+    setHandle: (element: HTMLButtonElement | null) => void;
+  };
+
+/**
+ * What a widget draws, from props the grid keeps stable: a widget the preview
+ * leaves where it was gets the same slot, and its card, menu, handle and edges
+ * are not drawn again for each cell the pointer crosses.
+ */
+const WidgetView = memo(function WidgetView({
+  value,
+  title,
+  description,
+  children,
+  headingLevel,
+  busy = false,
+  status = 'ready',
+  skeleton,
+  emptyTitle,
+  emptyDescription,
+  emptyAction,
+  errorTitle,
+  errorDescription,
+  onRetry,
+  detailHref,
+  onDetail,
+  actions,
+  footer,
+  fill,
+  size,
+  render,
+  style,
+  drawnSlot: slot,
+  painted,
+  titleId,
+  descriptionId,
+  setWidget,
+  setCard,
+  setHandle,
+  t,
+  editing,
+  sizeClass,
+  statusId,
+  move: moveTo,
+  resize: resizeBy,
+  hide,
+  onHandleKeyDown,
+  onResizePointerDown,
+  ...nativeProps
+}: WidgetViewProps) {
   const { tile, can } = slot;
-  const { t, editing, sizeClass } = grid;
-  const Heading = `h${headingLevel ?? grid.headingLevel}` as const;
+  const Heading = `h${headingLevel}` as const;
   const named = { title };
   const flows = sizeClass !== 'expanded';
 
@@ -190,21 +283,21 @@ export function DashboardWidget({
     ) : null;
 
   const move = (direction: 'up' | 'down' | 'left' | 'right') => (event: MenuSelectEvent) =>
-    grid.move(value, direction, reasonOf(event), event.source);
+    moveTo(value, direction, reasonOf(event), event.source);
   const resize = (columns: number, rows: number) => (event: MenuSelectEvent) =>
-    grid.resize(value, { columns, rows }, reasonOf(event), event.source);
+    resizeBy(value, { columns, rows }, reasonOf(event), event.source);
   const sizable = tile.resizable && sizeClass !== 'compact';
 
   const handle =
     editing && (tile.movable || sizable || tile.removable) ? (
       <Menu>
         <MenuTrigger
-          onKeyDown={(event) => grid.onHandleKeyDown(value, event)}
+          onKeyDown={(event) => onHandleKeyDown(value, event)}
           render={({ ref: triggerRef, ...props }) => (
             <HandleButton
               {...(props as ComponentPropsWithRef<'button'>)}
               aria-label={t('handle', named)}
-              aria-describedby={grid.statusId}
+              aria-describedby={statusId}
               aria-keyshortcuts={handleShortcuts(tile.removable)}
               register={setHandle}
               triggerRef={triggerRef as Ref<HTMLButtonElement> | undefined}
@@ -260,10 +353,7 @@ export function DashboardWidget({
           {tile.removable ? (
             <>
               {tile.movable || sizable ? <MenuSeparator /> : null}
-              <MenuItem
-                tone="danger"
-                onSelect={(event) => grid.hide(value, 'remove', event.source)}
-              >
+              <MenuItem tone="danger" onSelect={(event) => hide(value, 'remove', event.source)}>
                 <MenuItemLabel>{t('hide')}</MenuItemLabel>
                 <MenuItemShortcut keys="Delete" />
               </MenuItem>
@@ -388,7 +478,7 @@ export function DashboardWidget({
                 data-edge={edge}
                 {...(slot.edge === edge ? { 'data-active': '' } : {})}
                 aria-hidden="true"
-                onPointerDown={(event) => grid.onResizePointerDown(value, edge, event)}
+                onPointerDown={(event) => onResizePointerDown(value, edge, event)}
               />
             ))
           : null}
@@ -402,4 +492,4 @@ export function DashboardWidget({
   };
 
   return render === undefined ? <li {...rootProps} /> : render(rootProps);
-}
+});

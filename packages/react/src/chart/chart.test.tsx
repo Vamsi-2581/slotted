@@ -106,6 +106,45 @@ describe('Chart', () => {
     expect(view.renderer).toBe('svg');
   });
 
+  /**
+   * A parent that draws again writes its axes and series as new literals with
+   * the same content. Read by identity, each was a new model: a dashboard that
+   * saved its layout rebuilt every chart on it, its legend measured and its
+   * engine redrawn, for nothing that had changed.
+   */
+  it('keeps its model when a parent draws it again with the same axes and series', () => {
+    const view = (title: string) => (
+      <Chart
+        data={data}
+        title={title}
+        locale="en-US"
+        x={{ field: 'month' }}
+        y={{ format: { style: 'currency', currency: 'USD' } }}
+        series={[
+          { kind: 'line', field: 'revenue', label: 'Revenue' },
+          { kind: 'bar', field: 'cost', label: 'Cost' },
+        ]}
+      />
+    );
+    const { rerender } = render(view('Revenue and cost'));
+    const drawn = engine.views.length;
+    const model = engine.views.at(-1)!.model;
+    rerender(view('Revenue and cost'));
+    expect(engine.views.length).toBe(drawn);
+
+    rerender(
+      <Chart
+        data={data}
+        title="Revenue"
+        locale="en-US"
+        x={{ field: 'month' }}
+        series={[{ kind: 'line', field: 'revenue', label: 'Revenue' }]}
+      />,
+    );
+    expect(engine.views.at(-1)!.model).not.toBe(model);
+    expect(engine.views.at(-1)!.model.series.map((entry) => entry.id)).toEqual(['revenue']);
+  });
+
   it('writes the axes a stylesheet selects on', () => {
     render(<Chart {...base} palette="focus" size="lg" toolbar="hover" variant="card" />);
 

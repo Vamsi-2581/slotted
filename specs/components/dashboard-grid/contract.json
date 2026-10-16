@@ -85,7 +85,7 @@
     "resizable": "data-resizable: the widget carries a resize handle while editing",
     "edge": "data-edge on a resize handle and on the size readout: start, end, bottom, bottom-start, bottom-end",
     "active": "data-active on the resize handle a pointer is pulling",
-    "gesture": "data-gesture on the root while a widget is carried or pulled: the lattice comes forward"
+    "gesture": "data-gesture on the grid while a widget is carried or pulled: the lattice comes forward"
   },
   "keyboard": [
     {

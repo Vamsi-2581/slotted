@@ -11,6 +11,7 @@ import {
   renderFamily,
   renderFamilyJson,
   renderIndex,
+  renderSkillsIndex,
 } from './render.ts';
 import { collectStrings, untraceableLines } from './trace.ts';
 import { parseSkill } from './skills.ts';
@@ -203,12 +204,31 @@ describe('renderIndex', () => {
       '## Guidelines\n\nRules for composing screens from these families: `./guidelines/index.md`.',
     );
     expect(index).toContain(
-      '## Skills\n\n- waiting-states: `./skills/waiting-states/SKILL.md` — Use when a screen waits.',
+      '## Skills\n\nProcedures for whole tasks, each with when it applies: `./skills/index.md`.',
     );
+    expect(index).not.toContain('Use when a screen waits.');
   });
 
   it('uses the shelves the contract schema declares', () => {
     expect([...GROUPS]).toEqual(SCHEMA_GROUPS);
+  });
+});
+
+describe('renderSkillsIndex', () => {
+  it('lists each skill with its path and its description, for the binding', () => {
+    const skill = parseSkill(
+      '---\nname: waiting-states\ndescription: Use when a screen of {{package}} waits.\n---\n',
+    );
+    expect(renderSkillsIndex(new Map([['waiting-states', skill]]), 'angular')).toBe(
+      [
+        '# Skills index',
+        '',
+        'Each skill, with when it applies. Read a skill before its task.',
+        '',
+        '- waiting-states: `./waiting-states/SKILL.md` — Use when a screen of @slotted/angular waits.',
+        '',
+      ].join('\n'),
+    );
   });
 });
 

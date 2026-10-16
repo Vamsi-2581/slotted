@@ -112,7 +112,10 @@ describe('buildDocs', () => {
     const content = loadContent(root);
     const guidelines = ['README.md', 'index.md', ...content.topics.map((topic) => topic.file)];
     expect(readdirSync(join(react, 'guidelines')).sort()).toEqual([...guidelines].sort());
-    const skills = [...content.skills.keys()].map((name) => `skills/${name}/SKILL.md`);
+    const skills = [
+      'skills/index.md',
+      ...[...content.skills.keys()].map((name) => `skills/${name}/SKILL.md`),
+    ];
     const files = [...guidelines.map((file) => `guidelines/${file}`), ...skills];
     for (const file of files) {
       const a = readFileSync(join(react, file), 'utf8');
@@ -132,6 +135,8 @@ describe('buildDocs', () => {
       ...files.map((file) => [file, readFileSync(join(react, file), 'utf8')]),
     ])
       expect(text, name).not.toMatch(/\{\{\w+\}\}/);
-    for (const name of content.skills.keys()) expect(index).toContain(`./skills/${name}/SKILL.md`);
+    expect(index).toContain('`./skills/index.md`');
+    const skillsIndex = readFileSync(join(react, 'skills/index.md'), 'utf8');
+    for (const name of content.skills.keys()) expect(skillsIndex).toContain(`./${name}/SKILL.md`);
   });
 });

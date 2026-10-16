@@ -12,6 +12,7 @@ import {
   renderFamily,
   renderFamilyJson,
   renderIndex,
+  renderSkillsIndex,
   siteExampleErrors,
 } from './render.ts';
 import { renderContent } from './skills.ts';
@@ -86,6 +87,10 @@ export async function buildDocs({
         join(out, 'guidelines', topic.file),
         renderContent(renderTopic(topic), binding),
       );
+  }
+  if (content.skills.size > 0) {
+    mkdirSync(join(out, 'skills'));
+    writeFileSync(join(out, 'skills/index.md'), renderSkillsIndex(content.skills, binding));
   }
   for (const [name, skill] of content.skills) {
     mkdirSync(join(out, 'skills', name), { recursive: true });

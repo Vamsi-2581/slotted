@@ -4,7 +4,7 @@ import type { ReferenceDocs } from '@slotted/storybook-workbench';
 
 import type { Content } from './content.ts';
 import { cell, code, fence, table } from './markdown.ts';
-import { renderContent } from './skills.ts';
+import { renderContent, type Skill } from './skills.ts';
 import {
   BUDGETS,
   DOCS_DIR,
@@ -413,10 +413,7 @@ export function renderIndex(
     lines.push(
       '## Skills',
       '',
-      ...[...content.skills.values()].map(
-        (skill) =>
-          `- ${skill.name}: \`./skills/${skill.name}/SKILL.md\` — ${renderContent(skill.description, binding)}`,
-      ),
+      'Procedures for whole tasks, each with when it applies: `./skills/index.md`.',
       '',
     );
   const text = lines.join('\n');
@@ -426,6 +423,21 @@ export function renderIndex(
     );
   }
   return text;
+}
+
+/** `skills/index.md`: every skill, with the description that says when it applies. */
+export function renderSkillsIndex(skills: ReadonlyMap<string, Skill>, binding: Binding): string {
+  return [
+    '# Skills index',
+    '',
+    'Each skill, with when it applies. Read a skill before its task.',
+    '',
+    ...[...skills.values()].map(
+      (skill) =>
+        `- ${skill.name}: \`./${skill.name}/SKILL.md\` — ${renderContent(skill.description, binding)}`,
+    ),
+    '',
+  ].join('\n');
 }
 
 export function renderAgentsSnippet(binding: Binding): string {

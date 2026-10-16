@@ -49,7 +49,10 @@ test('the served Markdown is the package file, pointing at llms.txt instead of t
 
 const guidelinePages = (binding) =>
   readdirSync(`${packageDocs[binding]}guidelines`).filter((file) => file.endsWith('.md'));
-const skillNames = (binding) => readdirSync(`${packageDocs[binding]}skills`);
+const skillNames = (binding) =>
+  readdirSync(`${packageDocs[binding]}skills`, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name);
 
 test('every guideline page and skill is served per binding, as the package ships it', () => {
   for (const binding of ['react', 'angular']) {
@@ -66,6 +69,15 @@ test('every guideline page and skill is served per binding, as the package ships
         `${binding}/skills/${skill}`,
       );
   }
+});
+
+test('skills/index.md is served per binding, as the package ships it', () => {
+  for (const binding of ['react', 'angular'])
+    assert.equal(
+      readFileSync(`${dist}${binding}/skills/index.md`, 'utf8'),
+      readFileSync(`${packageDocs[binding]}skills/index.md`, 'utf8'),
+      `${binding}/skills/index.md`,
+    );
 });
 
 test('tokens.md is served per binding, as the package ships it', () => {

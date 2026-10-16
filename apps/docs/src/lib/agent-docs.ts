@@ -81,7 +81,17 @@ export function agentGuideline(binding: AgentBinding, page: string): string {
 /** The product skills a binding ships: `skills/<name>/SKILL.md`. */
 export function agentSkills(binding: AgentBinding): string[] {
   const dir = resolve(docsDir(binding), 'skills');
-  return existsSync(dir) ? readdirSync(dir).sort() : [];
+  return existsSync(dir)
+    ? readdirSync(dir, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name)
+        .sort()
+    : [];
+}
+
+/** The skills index a binding ships: `skills/index.md`. */
+export function agentSkillsIndex(binding: AgentBinding): string {
+  return readFileSync(resolve(docsDir(binding), 'skills', 'index.md'), 'utf8');
 }
 
 export function agentSkill(binding: AgentBinding, skill: string): string {

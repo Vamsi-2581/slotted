@@ -43,13 +43,14 @@ keeps, or whether a phone is offered a page size.
 ### LP-01 · A phone keeps the row header and the columns of highest priority; the rest move into the row
 
 Level: SHOULD
-Applies to: a `data-grid` of many columns that uses the pop-in: narrower than 600 pixels, or on a touch screen narrower than 1024 (`columnOverflow: 'auto'`, the default)
-Rule: The grid shows the selection column, the row header (`rowHeader: true`) and the columns of highest priority that fit; the others move into the row's pop-in as labelled values, by `priority`, outside the column state, and no row is wider than the frame.
+Applies to: a `data-grid` of many columns that uses the pop-in: narrower than 600 pixels, or on a touch screen narrower than 1024 (the pop-in is the default)
+Rule: The grid shows the selection column, the row header and the columns of highest priority that fit; the others move into the row's pop-in as labelled values, by `priority`, outside the column state, and no row is wider than the frame.
 Why: A grid that scrolls sideways on a phone hides the value the reader came for behind a gesture the page also answers, a grid that shrinks twelve columns into 390 pixels shows none of them, and a grid that drops the columns it cannot fit leaves the screen without the facts it exists to show.
-Do: Mark the identity column `rowHeader: true` and give the key columns a `priority`, lowest for the one fact that says where to look first (for customers, the health). Columns without a priority move first. Set `popin: false` only on a column another column already repeats. Keep the selection column: the bulk action is still the phone's. The column manager marks moved columns "Shown in row". Offer the list's sort from the list tools while the pop-in holds columns, since their headers are gone.
+Do: Mark the identity column as the row header and give the key columns a `priority`, lowest for the one fact that says where to look first (for customers, the health). Columns without a priority move first. Turn the pop-in off only on a column another column already repeats. Keep the selection column: the bulk action is still the phone's. The column manager marks moved columns "Shown in row". Offer the list's sort from the list tools while the pop-in holds columns, since their headers are gone.
 Don't: Let the frame scroll sideways on a phone, compute a phone column set from a media query into the column state, draw a column's value under the row header by hand, or give the row header a priority.
 Seen in: Nexora · Customers list at 390 pixels, twelve columns scrolling inside the frame; then a phone column set that dropped ten of them; Contacts and SKUs drawing a second value under the name by hand · corrected
-Check: `tools/column-scenarios.mjs` at 390 pixels: the grid carries `data-popin`, the first row holds its `popin-field`s, the Sort trigger is present, and the phone audit prints an empty overflow list.
+Verified in: tools/column-scenarios.mjs at 390 pixels and the phone audit
+Check: At 390 pixels no row is wider than the frame, the first row's pop-in holds the moved columns as labelled `popin-field`s, and the list's sort is reachable from the list tools.
 
 ### LP-02 · The bar above the grid holds search, filters and views
 
@@ -71,7 +72,8 @@ Why: The footer is the page's own bar for what finishes a task and stays at the 
 Do: Open the footer on the selection; the bar takes its `plain` variant because the footer already paints a ground. Rank the actions so that the confirming one never moves and the rest give way to the overflow. On a phone the bar becomes a column; offer the mutations only — a file export is a desk's task.
 Don't: Draw the selection bar inside the grid's footer beside the pager, or leave the export in the phone's column.
 Seen in: Nexora · Customers list, the bar in the page footer · corrected (the bar's width in a flex footer is the ledger row "action-bar shrank to nothing in the page footer")
-Check: Select two rows: the footer opens with "2 customers selected", Clear, and the actions end-aligned; clear the selection and the footer leaves.
+Verified in: Select two rows: the footer opens with "2 customers selected", Clear, and the actions end-aligned; clear the selection and the footer leaves
+Check: Select two rows: the footer opens with the selection count, Clear, and the actions end-aligned; clear the selection and the footer leaves.
 
 ### LP-04 · A value that does not fit truncates, and the row does not grow
 
@@ -82,7 +84,8 @@ Why: A row that grows with its longest value pushes every other column out of th
 Do: Leave the column's text mode at its default, `truncate`, and let the family cut the value. Where the cell is a template — a link on the name, a name over a second line — the template carries three things and not one: the cut, the title, and a maximum of the whole width. The maximum is the part that is easy to leave out and the only one that fails silently: the families that draw a name size their box to their content, a value that never wraps has its whole string as its minimum, and the grid bounds the cell's own child and reaches no further. Give near-duplicate names (§31) a column that tells them apart: the account number.
 Don't: Put a name column in its `wrap` mode, ask for a cut without an ellipsis, or let a template's value keep its content's width inside a layout family the template wrapped it in.
 Seen in: Nexora · Customers list, "Alimentos Continental do Brasil" on two lines in a cell template · corrected; SKUs list, a code drawn over the Name column once its own column was dragged narrower than the code (ledger row "a value drawn in a cell keeps its content's width")
-Check: Drag the column narrower than its longest value: the value ends in an ellipsis at the column's edge and nothing of it stands in the next column. Spec: the catalogue list screens suite, "a value drawn in a cell states its maximum as well as its cut" and "no catalogue column asks for a cut without an ellipsis".
+Verified in: the catalogue list screens suite, "a value drawn in a cell states its maximum as well as its cut" and "no catalogue column asks for a cut without an ellipsis".
+Check: Drag the column narrower than its longest value: the value ends in an ellipsis at the column's edge and nothing of it stands in the next column.
 
 ### LP-05 · The count is the bar's; the range is the pager's
 
@@ -104,7 +107,8 @@ Why: AF-04 and AF-02 applied to the grid: the family draws placeholders when it 
 Do: In the store, empty the rows when the incoming query differs from the current one and keep them when it is the same; keep one request sequence and discard an answer that a later request has overtaken.
 Don't: Empty the rows on every request, or keep the previous page's rows under a new page while the answer is on its way.
 Seen in: Nexora · Customers list · corrected
-Check: Spec: the customers store suite, "empties the rows on a different query" and "keeps the rows while the same query is read back". With the transport degraded, a page change shows skeleton rows at once and a hold keeps the rows dimmed.
+Verified in: the customers store suite, "empties the rows on a different query" and "keeps the rows while the same query is read back". With the transport degraded, a page change shows skeleton rows at once and a hold keeps the rows dimmed.
+Check: With the network throttled to a slow profile, a page change shows placeholder rows at once, and a mutation read back keeps the rows on screen, dimmed, in the grid's loading state.
 
 ### LP-07 · The grid fills the body and scrolls its own rows
 
@@ -116,10 +120,11 @@ Level: SHOULD
 Applies to: a list page whose rows and whose pages count different things — contacts read account by account, lines read order by order
 Rule: The bar's count, the pager's range and its page size name their unit in words.
 Why: "62 of 62" above "1–25 of 1,146" reads as one number that contradicts itself; a reader cannot tell that one counts people and the other accounts.
-Do: Pass the words to the families that draw the numbers — `filter-bar`'s `count` label and `pagination`'s `range` and `pageSize` labels — and write one sentence between them that says what the page holds and what the pager turns.
+Do: Pass the words to the families that draw the numbers — `filter-bar`'s `count` label and `pagination`'s `range` and page-size labels — and write one sentence between them that says what the page holds and what the pager turns.
 Don't: Leave two bare ranges on one screen, or explain the difference only in a tooltip.
 Seen in: Nexora · Contacts · corrected
-Check: Read the screen's numbers aloud: "62 contacts", "Accounts per page 25", "Accounts 1–25 of 1,146".
+Verified in: Read the screen's numbers aloud: "62 contacts", "Accounts per page 25", "Accounts 1–25 of 1,146"
+Check: Read the screen's numbers aloud: each names what it counts — the query's count, the page size, the range.
 
 ### LP-09 · A queue with no endpoint is the list its work is written against
 
@@ -130,7 +135,8 @@ Why: A queue drawn from a resource that is not the work — a list of receipts a
 Do: Read the records' own list with the states as the page's place (BR-01), sort the flagged records first and then by what should already be done, let the bar's pills narrow within the place, and name the record the form writes where it is read — its address under the queue's destination.
 Don't: Draw the states as the bar's pills a reader can remove, or open a row on the record and make the reader find the form.
 Seen in: Nexora · Receiving, the purchase orders sent, acknowledged or partly received, with no list of goods receipts in the backend · corrected
-Check: Spec: the procurement module suite, "queues for Jordan only what CHI-01 can receive".
+Verified in: the procurement module suite, "queues for Jordan only what CHI-01 can receive".
+Check: Open the queue as a reader with a narrowed scope: every row is a record in a state where the work can be done within that scope, the page's place states the narrowing, and opening a row opens the form that does the work.
 
 ### LP-10 · A chart about the list's records is the page's second tab
 
@@ -141,7 +147,8 @@ Why: A chart above a list that fills the page takes the height the rows need: at
 Do: Give the header two tabs — the list and the comparison — and draw the chart at its own size in its tab; where the comparison has one category, drop the tab and state its numbers in one sentence above the bar (OV-03).
 Don't: Shrink the chart's plot under the family's smallest step to make room, or let the page scroll to reach the rows.
 Seen in: Nexora · Receiving at 1280 by 800, the chart by warehouse over the queue · corrected
-Check: At 1280 by 800 the receiving queue shows its rows from the top of the body; "By warehouse" draws the chart and Jordan Wells sees one sentence and no tabs.
+Verified in: At 1280 by 800 the receiving queue shows its rows from the top of the body; "By warehouse" draws the chart and Jordan Wells sees one sentence and no tabs.
+Check: At 1280 by 800 the list shows its rows from the top of the body; the header's second tab draws the chart, and no chart stands above the list.
 
 ### LP-11 · A control that changes nothing under the pointer is not offered
 
@@ -160,7 +167,7 @@ Level: MUST
 Applies to: a page whose body is a `data-grid` or a `table` over a store, with a bar or a message above it
 Rule: From 600 pixels of the page's width the listing takes the height the bar and the messages leave and scrolls its own rows while the page does not scroll; below 600 the page's `fill` does not apply, the listing is as tall as its rows and the page scrolls.
 Why: Two scrollers on one screen let the wheel answer whichever is under the pointer; and on a phone a filled page left the rows 155 pixels of a 667-pixel screen under a header, a banner and the tools.
-Do: Write the page with `fill`; make the region a column (`display: flex; flex-direction: column; min-block-size: 0; block-size: 100%`) and give the listing `flex: 1 1 0` with `min-block-size: 0`, and below 600 pixels a `flex-basis` of `auto`, so the listing fills a column that has a height and takes its rows' height in one that has none. The page's footer bar (LP-03) stays outside it.
+Do: Write the page with `fill`; make the region a flex column that takes its parent's full height with a zero minimum, and give the listing `flex: 1 1 0` with `min-block-size: 0`, and below 600 pixels a flex basis of auto, so the listing fills a column that has a height and takes its rows' height in one that has none. The page's footer bar (LP-03) stays outside it.
 Don't: Keep the zero basis below 600 pixels, which collapses the listing to nothing once the column loses its height, or give it an `auto` basis above 600, where its rows' height climbs the column and the page scrolls again.
 Seen in: Nexora · Contacts, a grid of sixty-two rows that scrolled the page under the pointer and its own rows over it; Suppliers at 375×667, rows in 23% of the screen (ledger row "page, page-header, data-grid") · corrected
 Check: At 1280 with a full page of rows, the document's scroll height equals its client height and the wheel over a row moves the rows; at 375×667 the document scrolls and the grid is as tall as its rows.
@@ -169,9 +176,9 @@ Check: At 1280 with a full page of rows, the document's scroll height equals its
 
 Level: SHOULD
 Applies to: a `badge` or a `tag` drawn in a cell of a `data-grid` or a `table`
-Rule: The mark takes `size="sm"`; the default `md` belongs to a record's header and to a region with room around it.
+Rule: The mark takes the `sm` `size`; the default `md` belongs to a record's header and to a region with room around it.
 Why: A row sets its text at the small type step, 13 pixels in a 34-pixel row; an `md` badge sets 13-pixel words in a 24-pixel box and stands taller and louder than the cells beside it, so a state column outweighs the record's name.
-Do: Write `size="sm"` on every mark a cell holds — a state, a flag, a warning — the 12-pixel words in a 19-pixel box that every other Nexora list draws.
+Do: Give every mark a cell holds — a state, a flag, a warning — the `sm` `size`: 12-pixel words in a 19-pixel box.
 Don't: Leave a cell's mark at the family's default, or size it up to make a state stand out; a tone says that.
 Seen in: Nexora · Products, SKUs and Customers, the state column at `md` beside lists at `sm` (review of the screens) · corrected
-Check: On every list, every `[data-ui=badge]` and `[data-ui=tag]` inside a grid's cell or a table's cell reads `data-size="sm"`.
+Check: On every list, every `badge` and `tag` inside a cell of a `data-grid` or a `table` carries the `sm` `size`.

@@ -56,7 +56,8 @@ Why: A reader arriving from a list or a search asks three things first — which
 Do: Every mark is a `tag` at the small size — the state the reader can change (active, on hold) and the health the system computes (healthy, watch, at risk) each carry their tone — so the marks read as one row of one form beside a heading that is larger than any of them. The subheading joins the account number, the owner and the city with a middle dot. The back link names the list it returns to.
 Don't: Mix a `tag` and a `status-indicator` in the marks — two forms of indication at two heights, 4 pixels apart — or leave a mark at the medium size, which stands 28 pixels tall beside the heading. Do not put the state in the subheading as words.
 Seen in: Nexora · Customer 360, a medium tag beside a status indicator · corrected
-Check: With the record loaded, the title row reads name, then two small tags, then "CUS-… · owner · city"; "Customers" with the back arrow stands above it.
+Verified in: With the record loaded, the title row reads name, then two small tags, then "CUS-… · owner · city"; "Customers" with the back arrow stands above it.
+Check: With the record loaded, the title row reads the visual, the name, two small tags, then one subheading of identifier, owner and place; the list's name with the back arrow stands above it.
 
 ### RP-02 · The figures stand in the body, on every section
 
@@ -67,7 +68,8 @@ Why: The header's content part is a column with a measure for prose; four figure
 Do: Four cards at the small size in a grid that drops to two columns on a phone; each card carries the figure, its unit and one comparison line ("of R$135,000", "3 of 4 open invoices"). A threshold the domain states is said in the card's comparison line once it is crossed ("above 90% of $500,000", "under 22%: Sales approval"), in words that keep the line to one: the family's `tone` is the tone it hands to its trend and paints nothing on a card without one.
 Don't: Draw the figures in the header area, or under one section only.
 Seen in: Nexora · Customer 360, four cards stacked in the header's content at 160 pixels · corrected; thirty cards across the modules bound a `tone` that painted nothing (ledger row "stat-card, tone is the trend's") · corrected
-Check: Switch sections: the four cards stay; at 390 pixels they stand two by two. Open an account above 90 percent of its limit: the credit card's comparison says so.
+Verified in: Switch sections: the four cards stay; at 390 pixels they stand two by two. Open an account above 90 percent of its limit: the credit card's comparison says so
+Check: Switch sections: the figures stay; at 390 pixels they stand two by two. A figure past a threshold the domain states says so in its comparison line.
 
 ### RP-03 · Related records are the header's tabs, each a table
 
@@ -89,7 +91,8 @@ Why: A deep link a colleague pasted still says where it was pointing, and a read
 Do: Read the error's code: not found has no retry, only the way back; every other failure offers Try again and the way back.
 Don't: Redirect to the list, or show the list's empty state.
 Seen in: Nexora · Customer 360 · corrected
-Check: Open `/crm/customers/cus_does_not_exist`: the header says Customer with the back link, the body says the customer does not exist; the address bar keeps the id.
+Verified in: /crm/customers/cus_does_not_exist
+Check: Open a record address whose id does not exist: the header names the record type with the way back, the body's `result-state` says the record does not exist, and the address keeps the id.
 
 ### RP-05 · The action that adds to a tab stands in the record's toolbar
 
@@ -100,7 +103,8 @@ Why: The tab's content is a `table` with a caption (RP-03) and no slot for a con
 Do: Show the action only while its tab is open, and word it for what it adds ("New contact"). The form replaces the table in the tab, keeping the header, the figures and the tabs where they are (FM-07). A section that is not a tab — the addresses on the overview — uses `section`'s own `actions` instead.
 Don't: Draw a toolbar of the page's own above a tab's table, or leave the action in the header while another tab is open.
 Seen in: Nexora · Customer 360, New contact on the Contacts tab · corrected
-Check: Open the Contacts tab: the action appears in the header's toolbar and folds into its menu at phone width; open another tab and it leaves.
+Verified in: Open the Contacts tab: the action appears in the header's toolbar and folds into its menu at phone width; open another tab and it leaves
+Check: Open a tab that can be added to: the action appears in the header's toolbar and folds into its menu at phone width; open another tab and it leaves.
 
 ### RP-06 · A record with a lifecycle shows where it stands before what it holds
 
@@ -111,7 +115,8 @@ Why: A reader opening an order is asking what is holding it up, not what is on l
 Do: Draw the steps as the record's own element (CP-04) with the state each one is in, and give the stopped record its own tone — a hold and a cancellation are not the same colour as progress. The figures stay above it (RP-02) and the related records below (RP-03).
 Don't: Leave the lifecycle to a status `tag` in the header, or bury it under the lines.
 Seen in: Nexora · the sales order workspace and its five steps · corrected
-Check: Open an order waiting on an approval: the page says the step, who it is waiting on and what happens next, above the lines.
+Verified in: Open an order waiting on an approval: the page says the step, who it is waiting on and what happens next, above the lines
+Check: Open a record waiting on a step: the page says the step, who it waits on and what happens next, above its contents.
 
 ### RP-07 · A table that takes a figure apart ends in the total it adds back up
 
@@ -122,7 +127,8 @@ Why: A row of figures and a table of parts are two statements about one number, 
 Do: Sum each column the figures state and put the sums in the table's summary row, naming how many rows were added and in what unit. A column the rows carry but the whole has no total for — a threshold, a rate — leaves its summary cell empty rather than adding thresholds together.
 Don't: Leave the table without its summary, or sum a column whose total means nothing.
 Seen in: Nexora · the SKU record, stock by warehouse under the availability figures · corrected
-Check: Open a SKU held in several warehouses: the summary row's numbers equal the figures above it. Spec: the SKU page suite, "the warehouse rows add up to the figure the card states".
+Verified in: the SKU page suite, "the warehouse rows add up to the figure the card states"; Open a SKU held in several warehouses: the summary row's numbers equal the figures above it
+Check: Open a record whose table takes a figure apart: the summary row's numbers equal the figure above it.
 
 ### RP-08 · A figure over records of mixed units counts records
 
@@ -133,7 +139,8 @@ Why: A total over each, metres and kilograms is a number of nothing, and it is r
 Do: Count what the reader would act on — how many are out of stock, how many are below their reorder point — and put the units question under the table as one sentence: the unit when there is one, and that the rows are read one at a time when there is not.
 Don't: Add quantities across units, or leave a summed figure without naming its unit.
 Seen in: Nexora · the product record, its SKUs counted rather than their stock summed · corrected
-Check: A product whose SKUs are counted in one unit says so under its table; its figures are counts of SKUs, not quantities.
+Verified in: A product whose SKUs are counted in one unit says so under its table; its figures are counts of SKUs, not quantities
+Check: Read a figure over rows of different units: it counts rows and says so under its table; a quantity is summed only where every row shares one unit.
 
 ### RP-09 · A step waiting on someone else says who, and offers nothing it gates
 
@@ -144,7 +151,8 @@ Why: A control the backend will refuse until someone else acts is a refusal the 
 Do: Put the role in the step's detail and in the record's sentence (RP-06), show the approval chain under it, and derive the gated command's presence from the approval's own status.
 Don't: Draw the gated command disabled with no reason, or draw it enabled and translate the refusal afterwards.
 Seen in: Nexora · a cycle count submitted above US$2,500, waiting on a warehouse manager · corrected
-Check: Spec: the inventory module suite, "asks for an approval when the variance is worth US$2,500 or more, and offers no Complete meanwhile".
+Verified in: the inventory module suite, "asks for an approval when the variance is worth US$2,500 or more, and offers no Complete meanwhile".
+Check: Open a record waiting on a decision as a reader without the deciding role: the step names the role and no control for the gated command is drawn; open it in the state the backend accepts the command: the control is drawn.
 
 ### RP-10 · A score is read against its peers and says what it counts
 
@@ -155,7 +163,8 @@ Why: A score alone does not say whether it is good, and a backend that writes no
 Do: Read the peers once — the records of the same category — leave out of each median the peers with nothing behind that score, say "under median" in the comparison line only where the score falls under it by a margin the product states, and state that margin in the sentence under the figures, and draw a dash with the words "no line received in full yet" where the record has no history.
 Don't: Compare with the whole tenant, draw a chart of every peer to answer one record's question, or show 100 for a supplier that has delivered nothing.
 Seen in: Nexora · the supplier record's scorecard, and the supplier list's "No delivery yet" · corrected
-Check: Spec: the procurement module suite, "reads the scorecard against the median of the supplier's own category".
+Verified in: the procurement module suite, "reads the scorecard against the median of the supplier's own category".
+Check: Read a scored figure: its comparison line gives the peers' median, one sentence names what each score counts and who the peers are, and a score with nothing behind it shows no number.
 
 ### RP-11 · Authority that depends on an amount is said first
 
@@ -166,7 +175,8 @@ Why: A control drawn the same for every balance is refused for the balances abov
 Do: Compute the value the backend measures — the balance in the policy's currency at the document's own rate — and name the tier it falls in with the threshold ("above US$500: only a Finance Manager writes it off"). Name the control for what it does in that tier ("Request write-off approval" where an approval follows), draw none where the reader's role is below the tier, and let the sentence name the role that decides. While an approval the command asked for is pending, the control is not drawn (RP-09).
 Don't: Draw the command for every holder of its permission and translate the refusal, or state the threshold in the document's currency when the policy states it in another.
 Seen in: Nexora · the invoice record's write-off, a balance in reais measured in dollars (ledger row "invoices.writeOff measured the balance … in the invoice's own minor units") · corrected
-Check: Spec: the invoice suite, "measures a balance in reais in US dollars, and lets an accountant write off up to US$500", "tells an accountant that a balance above US$500 is a Finance Manager’s, and draws no control" and "asks for an approval above US$5,000, hides the control while it waits, and the controller’s approval writes it off".
+Verified in: the invoice suite, "measures a balance in reais in US dollars, and lets an accountant write off up to US$500", "tells an accountant that a balance above US$500 is a Finance Manager’s, and draws no control" and "asks for an approval above US$5,000, hides the control while it waits, and the controller’s approval writes it off".
+Check: Open a record whose value needs more authority than the reader holds: before any control, the sentence names that authority and the measure in the policy's unit, and the command is not drawn.
 
 ### RP-12 · A document without a destination lives under what it changes
 
@@ -177,7 +187,8 @@ Why: A document of its own destination is a list nobody walks to, and a document
 Do: Give the list a segment under the destination (the invoices' credit memos), make its way back name the destination, open its create form from the record with the record and its customer chosen, and link each application or refund from the records it touched. A refund, which changes a credit, is written from the credit memo or the payment whose credit it spends.
 Don't: Add a destination the navigation's map does not hold, or reach the documents only through one record's tab.
 Seen in: Nexora · credit memos and refunds under Invoices · corrected
-Check: Spec: the Finance routes suite, "declares /new and credit-memos before :id, so neither is read as a record id"; the credit memo suite, "opens a draft, refuses as typed an application above what the invoice owes or the memo holds, and applies it whole".
+Verified in: the Finance routes suite, "declares /new and credit-memos before :id, so neither is read as a record id"; the credit memo suite, "opens a draft, refuses as typed an application above what the invoice owes or the memo holds, and applies it whole".
+Check: Open the document's create route and a record address of the same destination: neither is read as the other, and each record that issued or took a document links to it.
 
 ### RP-13 · An entry a workflow wrote names the workflow and opens its run
 
@@ -185,7 +196,8 @@ Level: SHOULD
 Applies to: a record's activity, where an automation's action and a person's command both write entries
 Rule: An entry written by a workflow's action names the workflow as its actor and, for a reader of workflows, opens the run that wrote it; it never reads as the work of the person whose command set the workflow off.
 Why: A hold placed by a workflow and drawn under the name of the agent who escalated a ticket blames the agent for a rule they never saw, and leaves the reader no way to the rule.
-Do: Read the actor from the entry's workflow, say it as "Workflow “name”", and put "Open the run" in the timeline item's actions where the reader holds `workflows.view`.
+Do: Read the actor from the entry's workflow, say it as "Workflow “name”", and put "Open the run" in the timeline item's actions where the reader holds the permission to read workflows.
 Don't: Draw the automation actor's bare name, or the name of the person whose command produced the event.
 Seen in: Nexora · Customer 360's activity, a customer held by a workflow · corrected
-Check: Spec: the automation module suite, "names the workflow that wrote an activity entry, and opens its run".
+Verified in: the automation module suite, "names the workflow that wrote an activity entry, and opens its run".
+Check: Read an entry a workflow wrote: its actor is the workflow, and for a reader of workflows it opens the run that wrote it.

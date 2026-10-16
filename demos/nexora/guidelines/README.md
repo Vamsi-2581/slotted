@@ -21,9 +21,6 @@ observation is not written; an observation without a rule is a row in
 | ------------------------- | ------ | ------------------------------------------------------------------------------ |
 | `index.md`                | —      | Every active rule in one line each. The only file a reader always loads        |
 | `writing-rules.md`        | —      | How a rule is written, numbered, evidenced and retired                         |
-| `list-pages.md`           | `LP`   | How a screen that lists records is composed: bar, grid, footer, phone          |
-| `record-pages.md`         | `RP`   | How the page of one record is composed: header, figures, sections, missing     |
-| `forms.md`                | `FM`   | How a form that writes a record is placed, refused, read-only and left         |
 | `errors-and-conflicts.md` | `ER`   | How a refusal is classed, and what a conflict re-reads before it speaks        |
 | `browsing.md`             | `BR`   | How a tree and a list share a place, and one concept reads at two grains       |
 | `reading-permissions.md`  | `PM`   | What a screen draws when the reader's role shaped the answer                   |

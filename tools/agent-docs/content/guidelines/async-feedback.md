@@ -114,4 +114,5 @@ Why: Without it the reader reloads the browser, which loses the scroll, the open
 Do: Put an icon button named "Refresh" in the header's actions toolbar with its menu counterpart, in its `loading` state until the answer (AF-03); bind the page's `loading` to "reading again while a record is shown", so the body takes `aria-busy` and draws no placeholder.
 Don't: Offer Refresh on a record nothing else writes, or clear the record and draw its skeleton on every read after the first.
 Seen in: Nexora · customer, quote, purchase order, order, invoice and cycle count records · corrected
-Check: Press Refresh on an order: the values stay, the page body is busy until the answer, and the button waits on it.
+Verified in: Press Refresh on an order: the values stay, the page body is busy until the answer, and the button waits on it
+Check: Press Refresh on a record another writer changes: the values stay, the page body is busy until the answer, and the button waits on it.

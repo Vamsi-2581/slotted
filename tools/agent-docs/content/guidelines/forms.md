@@ -37,21 +37,23 @@ Level: SHOULD
 Applies to: a form that creates a record a module lists — an account, an order, a ticket
 Rule: The form stands on its own route under the list it returns to, and the way back is the header's `back` part; a layer holds a form of one or two fields over a record already on screen.
 Why: A form of several sections has a link a colleague can paste, a place in the history the phone's back gesture answers, and the whole height of a phone; a layer has none of the three.
-Do: Give the route a segment of its own before the list's `:id`, gate it on the permission the command requires, and name the list in the back link. The page header carries the title and the sentence that says what the record will be on arrival; the actions that confirm stand in the form's own action row.
+Do: Give the route a segment of its own before the list's record segment, gate it on the permission the command requires, and name the list in the back link. The page header carries the title and the sentence that says what the record will be on arrival; the actions that confirm stand in the form's own action row.
 Don't: Open the create form as a dialog over the list, or route it through the record page under a reserved id.
 Seen in: Nexora · New customer · corrected
-Check: `/crm/customers/new` draws the form with "Customers" and the arrow above the title, and the system back gesture returns to the list. Spec: the new customer suite, "opens the form on its own route rather than the record page".
+Verified in: the new customer suite, "opens the form on its own route rather than the record page".; /crm/customers/new
+Check: Open the create route: the form draws with the list's name and the arrow above the title, and the system back gesture returns to the list.
 
 ### FM-02 · A control is named as the backend names the field
 
 Level: MUST
 Applies to: every control in a form whose value a command validates
 Rule: The control's `name` is the field name the command answers with, and the page's error map is keyed by the same name; a nested field is the leaf name the backend uses, prefixed by its group.
-Why: A server answers `fieldErrors` keyed by its own field names, and a map keyed by anything else needs a translation table that drifts from the backend on the first rename.
-Do: Write `name="displayName"` beside the value the command calls `displayName`, and translate only the leaf of a nested group — the contact's `firstName` becomes the control `contact.firstName` — in one place the store owns.
+Why: A server answers field errors keyed by its own field names, and a map keyed by anything else needs a translation table that drifts from the backend on the first rename.
+Do: Name each control as the command names the value it writes, and translate only the leaf of a nested group — a contact's first name becomes the group's name, a dot and the leaf — in one place the store owns.
 Don't: Name controls after the label a reader sees, or after the shape of the draft.
 Seen in: Nexora · New customer · corrected
-Check: Every `name` in the form is a field of the command's input. Spec: the new customer suite, "puts the backend's refusal on the control the backend named".
+Verified in: the new customer suite, "puts the backend's refusal on the control the backend named".
+Check: Every `name` in the form is a field of the command's input.
 
 ### FM-03 · A refusal is said at the control and in the summary
 
@@ -62,18 +64,20 @@ Why: A refusal that lives only in a toast leaves the reader to find which of twe
 Do: Hold the map in the screen's store, bind it to the form, accept the form's own request back into it — the family drops a field's error the moment that field is edited — and render the message as the field's `error` part. Where the backend answers a code the product has words for, the words are the product's; where it does not, the server's sentence is shown as it came.
 Don't: Report a failed submit through a toast alone, or write a second sentence beside the control that does not match the summary's.
 Seen in: Nexora · New customer, a 422 on a name of spaces · corrected
-Check: A submit the backend refuses shows the message under its control and in "This account was not created". Spec: the new customer suite, "puts the backend's refusal on the control the backend named".
+Verified in: the new customer suite, "puts the backend's refusal on the control the backend named"; A submit the backend refuses shows the message under its control and in "This account was not created"
+Check: A submit the backend refuses shows the message under its control and in the form's summary.
 
 ### FM-04 · A value read but not written is a read-only field
 
 Level: SHOULD
-Applies to: a field whose value one permission lets a persona see and another lets them change — a credit limit under `customers.credit_view` and `customers.credit_edit`
+Applies to: a field whose value one permission lets a persona see and another lets them change — a credit limit under a permission to read it and a permission to change it
 Rule: The field stands in its read-only state with the value and one sentence naming who does change it; a value the persona may not see at all is not drawn.
 Why: A field that disappears reads as a fact the record does not hold, and a disabled control reads as something that could become available by trying again.
 Do: Bind the field's read-only state to the permission that writes, and its presence to the permission that reads. The sentence under it names the holder of the other permission, not the permission.
 Don't: Hide a value the reader is allowed to see, or leave a control the reader can type into and the backend will refuse.
 Seen in: Nexora · New customer, the credit limit for Noah Bennett · corrected
-Check: Signed in as a Sales Representative, the Credit limit field is present, read-only, and says Finance sets it. Spec: the new customer suite, "shows a representative the credit limit as a value they cannot write".
+Verified in: the new customer suite, "shows a representative the credit limit as a value they cannot write"; signed in as a Sales Representative, the Credit limit field is present, read-only, and says Finance sets it.
+Check: Signed in as a reader who may read the value and not change it, the field is present, read-only, and says who sets it.
 
 ### FM-05 · A draft outlives the page
 
@@ -84,7 +88,8 @@ Why: On a phone the back gesture is the way out of everything, and a form that e
 Do: Keep the draft in the module's store, read it from the component, and clear it on the answer that made the record. Offer no guard that refuses to leave: the draft is not lost, so there is nothing to warn about.
 Don't: Hold the values in the component's own signals, or register an unsaved-changes guard over a draft that survives.
 Seen in: Nexora · New customer · corrected
-Check: Type a name, return to the list, open the form again: the name is there. Spec: the new customer suite, "keeps the draft when the reader leaves the form and opens it again".
+Verified in: the new customer suite, "keeps the draft when the reader leaves the form and opens it again"; Type a name, return to the list, open the form again: the name is there
+Check: Type a value, leave for the list, open the form again: the value is there.
 
 ### FM-06 · An optional group is opened by a choice
 
@@ -95,7 +100,8 @@ Why: A group half filled is a record the backend accepts and nobody meant — a 
 Do: Word the choice as what it adds ("Add the primary contact now"), keep it closed at first, and send the group only while it is open.
 Don't: Draw the optional fields open and guess intent from which of them were filled.
 Seen in: Nexora · New customer, the contact and the billing address · corrected
-Check: The groups are closed on arrival; opening one makes its fields required. Spec: the new customer suite, "opens the optional groups closed, and requires what an opened group holds".
+Verified in: the new customer suite, "opens the optional groups closed, and requires what an opened group holds".
+Check: The groups are closed on arrival; opening one makes its fields required.
 
 ### FM-07 · A record's facts are edited where they are read
 
@@ -106,18 +112,20 @@ Why: The reader came to this record for these values; a page of its own or a lay
 Do: Put the control that opens the form in the section's `actions`, keep the heading, and let the form's own action row carry Save and Cancel. A create form is the other case, and FM-01 says where it stands.
 Don't: Route to a page of its own for one section of a record, or open a layer that covers the record's figures.
 Seen in: Nexora · Customer 360, the Account section · corrected
-Check: Press Edit: the title row, the four `stat-card`s and the tabs stay, and the form stands in the section. Spec: the account section suite, "reads the account, and writes it in the section it was read in".
+Verified in: the account section suite, "reads the account, and writes it in the section it was read in"; Press Edit: the title row, the four `stat-card`s and the tabs stay, and the form stands in the section
+Check: Press Edit: the title row, the figures and the tabs stay, and the form stands in the section.
 
 ### FM-08 · A version someone else moved past is answered field by field
 
 Level: MUST
 Applies to: any command carrying the last observed version (§53.11)
-Rule: A `STALE_VERSION` answer re-reads the record and states which fields moved under the open form, what the record holds now and what the form holds; the reader keeps what they wrote and chooses between writing it over the version now stored and starting again from the record.
+Rule: A stale-version refusal re-reads the record and states which fields moved under the open form, what the record holds now and what the form holds; the reader keeps what they wrote and chooses between writing it over the version now stored and starting again from the record.
 Why: A conflict the screen answers with "try again" makes the reader guess what they would overwrite, and a form that reloads itself throws away what they typed.
 Do: Compare the values the form opened on with the values now stored, list only what differs, and mark the fields the reader also changed. Offer two controls with the two outcomes named.
 Don't: Show the server's sentence alone, reload the form, or re-send the same command on the new version without saying what changed.
 Seen in: Nexora · Customer 360, two writers on one account · corrected
-Check: Write to the record from elsewhere while a form is open, then save: the panel names the field, both values and the two answers. Spec: the account section suite, "says what the other writer changed, and offers the two answers".
+Verified in: the account section suite, "says what the other writer changed, and offers the two answers".
+Check: Write to the record from elsewhere while a form is open, then save: the panel names the field, both values and the two answers.
 
 ### FM-09 · A command carries only what the reader changed
 
@@ -128,7 +136,8 @@ Why: A whole-form patch writes a colleague's change back to what it was, and a v
 Do: Keep the values the form opened on and compare against them, including after a conflict: "keep what I wrote" writes the reader's own fields over the newer version and leaves the rest as the other writer left them.
 Don't: Send the draft whole, or re-base the comparison on the record read back after a conflict.
 Seen in: Nexora · Customer 360, a representative saving an account without `customers.credit_edit` · corrected
-Check: Spec: the customer edit suite, "lets a representative save their own account without writing the credit limit" and "answers a version someone else moved past with what they changed".
+Verified in: the customer edit suite, "lets a representative save their own account without writing the credit limit" and "answers a version someone else moved past with what they changed".
+Check: Change one field of an edit form and submit: the request carries that field alone.
 
 ### FM-10 · Partial success is reported row by row
 
@@ -139,7 +148,8 @@ Why: "Some rows failed" leaves the reader to find which, and a screen that repor
 Do: Draw the counts as figures — written, written with a value changed, refused, read — and the refusals as a table keyed by the row number the file has. Say what the reader does next, including what happens if they import the same file again.
 Don't: Report a partial result as an error, as a success, or as a toast.
 Seen in: Nexora · Import customers, three rows written and three refused · corrected
-Check: Import the example file: the figures say 3 of 6 written, and the table names rows 3, 4 and 6 with their reasons. Spec: the import store suite, "writes the rows it can read and lists the rest with the reason".
+Verified in: the import store suite, "writes the rows it can read and lists the rest with the reason"; Import the example file: the figures say 3 of 6 written, and the table names rows 3, 4 and 6 with their reasons
+Check: Import a file in which some rows are refused: the figures state both counts, and the table names each refused row with its position and reason.
 
 ### FM-11 · A threshold the backend enforces is said before the submit
 
@@ -150,7 +160,8 @@ Why: A requirement the reader meets only as a refusal is a form filled twice, an
 Do: Compute the size the backend measures — the quantity, and the value at standard cost where the reader holds the permission — and bind the field's `required` and its description to it. Where the value is withheld (PM-01), state the rule and who sees the value, and let the backend's refusal land on the same field (FM-03).
 Don't: Leave the field optional until the backend refuses, or compute the value from a cost the backend handed to a reader who may not see it.
 Seen in: Nexora · the stock adjustment's note, and the cycle count's approval threshold read by a warehouse operator · corrected
-Check: Spec: the inventory module suite, "asks for a note from ten units, before the backend does" and "tells a counter without cost.view the rule and not the figure".
+Verified in: the inventory module suite, "asks for a note from ten units, before the backend does" and "tells a counter without cost.view the rule and not the figure".
+Check: Type a value across the threshold: before the submit the field becomes required and its sentence names the threshold and the value; for a reader who may not see the value, the sentence states the rule in words.
 
 ### FM-12 · A form written in place is a query parameter
 
@@ -172,7 +183,8 @@ Why: A buyer who learns after the submit that an order waits on a manager has se
 Do: Run the backend's own policy on what the form holds as it changes, list the reasons in the product's sentence form, give the value the threshold is measured in with its currency, and name the control "Submit for approval" while one is needed.
 Don't: Announce the approval only in the toast after the submit, or state the thresholds without saying which of them the order crosses.
 Seen in: Nexora · New purchase order and the draft purchase order's submit · corrected
-Check: Spec: the procurement module suite, "asks for a Procurement Manager from US$25,000, and the submit asks for what the form said".
+Verified in: the procurement module suite, "asks for a Procurement Manager from US$25,000, and the submit asks for what the form said".
+Check: Fill the form with values that need an approval: before the submit the screen lists the steps' roles in order with each reason, and the submit control's label says it asks for approval.
 
 ### FM-14 · A quantity sent to several places says where each part goes
 
@@ -183,7 +195,8 @@ Why: The three numbers of a line are typed one at a time and read as one; the re
 Do: Count the lines per destination (RP-08: the units differ), say what a destination does with what it receives — into the stock, into its damaged bucket, back to the supplier — and say whether the record closes, with the rule that closes it.
 Don't: Leave the outcome to the answer after the confirm, or sum the quantities of different units into one number.
 Seen in: Nexora · the goods receipt of a purchase order, which closes the order once every line reaches 95% · corrected
-Check: Spec: the procurement module suite, "receives in part with damaged and rejected units, reports the partial success and writes the movements".
+Verified in: the procurement module suite, "receives in part with damaged and rejected units, reports the partial success and writes the movements".
+Check: Before the confirm of a command that splits a quantity, the form states in lines what each destination receives and the state the record takes after it.
 
 ### FM-15 · An action no command writes is the record that says it
 
@@ -191,10 +204,11 @@ Level: SHOULD
 Applies to: an action the domain names and the backend has no command for — a contact attempt on an invoice, a call logged against an account
 Rule: The action is written through the command whose record says the same thing, with a fixed prefix that names the document it is about, and the document reads its own entries back by that prefix; no endpoint is invented in the client.
 Why: An action a screen fakes in its own state is lost on the next read, and one written as a free note cannot be found from the document it was about.
-Do: Name the nearest record the domain gives the action — a collection note is a customer note (§47) — write it with the prefix, the document's identifier and the fields the action carries (channel, what was agreed, a promised date), and read it back on the document's own tab. The control's holders are the command's: the note's permission at the note's scope.
+Do: Name the nearest record the domain gives the action — a collection note is a customer note — write it with the prefix, the document's identifier and the fields the action carries (channel, what was agreed, a promised date), and read it back on the document's own tab. The control's holders are the command's: the note's permission at the note's scope.
 Don't: Keep the attempt in the page's state, write it as a note with no prefix, or draw the control for a reader the note command refuses.
 Seen in: Nexora · the invoice record's contact attempt, a customer note read back in its Collection tab · corrected
-Check: Spec: the invoice suite, "records a contact attempt as the customer’s note and reads it back on the invoice".
+Verified in: the invoice suite, "records a contact attempt as the customer’s note and reads it back on the invoice".
+Check: Write the action and read the document: the entry reads back by its fixed prefix, and the client calls no endpoint the backend does not declare.
 
 ### FM-16 · A date chosen in a form opens a calendar
 
@@ -202,7 +216,7 @@ Level: SHOULD
 Applies to: a date a form asks for — a due date, a promised date, a day of receipt, a validity
 Rule: A date entered in a form is a `date-picker`, which keeps typing in its field and adds the calendar behind its trigger; a `date-field` alone is not used in a form.
 Why: A reader who has to type a date they could have pointed at is doing what the calendar exists to spare them, and the weekday the calendar shows is often the fact the date is chosen by.
-Do: Write the picker with the limits the backend enforces as `min` and `max` — a due date not before the issue date — and read the one date a single-mode picker reports.
-Don't: Write `date-field` for every date because it is the smaller family; eight Nexora forms did, and none had a reason.
+Do: Write the picker with the limits the backend enforces as the picker's minimum and maximum — a due date not before the issue date — and read the one date a single-mode picker reports.
+Don't: Write `date-field` for every date because it is the smaller family; a form that does so states no reason for it.
 Seen in: Nexora · invoice, payment, purchase order, cycle count and quote forms (ledger row "date-picker, date-field") · corrected
 Check: Every date control of a form opens a calendar from its trigger, and a date the backend limits refuses the days outside the limit.

@@ -59,6 +59,70 @@
     "level": "MUST",
     "status": "active"
   },
+  "FM-01": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "FM-02": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "FM-03": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "FM-04": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "FM-05": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "FM-06": {
+    "level": "MAY",
+    "status": "active"
+  },
+  "FM-07": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "FM-08": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "FM-09": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "FM-10": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "FM-11": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "FM-12": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "FM-13": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "FM-14": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "FM-15": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "FM-16": {
+    "level": "SHOULD",
+    "status": "active"
+  },
   "LA-01": {
     "level": "SHOULD",
     "status": "active"
@@ -81,6 +145,111 @@
   },
   "LA-06": {
     "level": "MUST",
+    "status": "active"
+  },
+  "LP-01": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "LP-02": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "LP-03": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "LP-04": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "LP-05": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "LP-06": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "LP-07": {
+    "level": "SHOULD",
+    "status": "retired",
+    "replacedBy": "LP-12"
+  },
+  "LP-08": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "LP-09": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "LP-10": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "LP-11": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "LP-12": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "LP-13": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "RP-01": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "RP-02": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "RP-03": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "RP-04": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "RP-05": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "RP-06": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "RP-07": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "RP-08": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "RP-09": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "RP-10": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "RP-11": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "RP-12": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "RP-13": {
+    "level": "SHOULD",
     "status": "active"
   },
   "SC-01": {

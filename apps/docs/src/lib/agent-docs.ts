@@ -57,3 +57,28 @@ export function agentSummary(binding: AgentBinding, family: string): string {
   return (JSON.parse(agentJson(binding, family)) as { catalog: { summary: string } }).catalog
     .summary;
 }
+
+/** The guideline pages a binding ships: `guidelines/*.md`. */
+export function agentGuidelines(binding: AgentBinding): string[] {
+  const dir = resolve(docsDir(binding), 'guidelines');
+  return existsSync(dir)
+    ? readdirSync(dir)
+        .filter((file) => file.endsWith('.md'))
+        .map((file) => file.slice(0, -'.md'.length))
+        .sort()
+    : [];
+}
+
+export function agentGuideline(binding: AgentBinding, page: string): string {
+  return readFileSync(resolve(docsDir(binding), 'guidelines', `${page}.md`), 'utf8');
+}
+
+/** The product skills a binding ships: `skills/<name>/SKILL.md`. */
+export function agentSkills(binding: AgentBinding): string[] {
+  const dir = resolve(docsDir(binding), 'skills');
+  return existsSync(dir) ? readdirSync(dir).sort() : [];
+}
+
+export function agentSkill(binding: AgentBinding, skill: string): string {
+  return readFileSync(resolve(docsDir(binding), 'skills', skill, 'SKILL.md'), 'utf8');
+}

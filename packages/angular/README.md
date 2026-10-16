@@ -47,6 +47,10 @@ export const appConfig = {
 };
 ```
 
+## Agents
+
+`docs/AGENTS.snippet.md` is the section an application adds to the instructions its coding agent reads: `AGENTS.md`, or `CLAUDE.md` for Claude Code, directly or through `@AGENTS.md`. It points the agent at the family pages, the guidelines and the skills of the installed version.
+
 ## License
 
 MIT

@@ -5,11 +5,13 @@ import {
   AGENT_BINDING_LABELS,
   AGENT_BINDINGS,
   agentFamilies,
+  agentGuidelines,
+  agentSkills,
   agentSummary,
 } from '../lib/agent-docs';
 import { SITE_NAME } from '../lib/site';
 
-/** The index an agent reads first (llmstxt.org): one line per family and binding. */
+/** The index an agent reads first (llmstxt.org): one line per family, guideline page and skill, per binding. */
 export const GET: APIRoute = async () => {
   const introduction = await getEntry('foundations', 'introduction');
   if (introduction === undefined) throw new Error('the introduction foundation page is missing');
@@ -22,6 +24,12 @@ export const GET: APIRoute = async () => {
         `- [${family}](/${binding}/components/${family}.md): ${agentSummary(binding, family)}`,
       );
     }
+    lines.push('', `## ${AGENT_BINDING_LABELS[binding]} guidelines`, '');
+    for (const page of agentGuidelines(binding))
+      lines.push(`- [${page}](/${binding}/guidelines/${page}.md)`);
+    lines.push('', `## ${AGENT_BINDING_LABELS[binding]} skills`, '');
+    for (const skill of agentSkills(binding))
+      lines.push(`- [${skill}](/${binding}/skills/${skill}/SKILL.md)`);
     lines.push('');
   }
   return new Response(lines.join('\n'), {

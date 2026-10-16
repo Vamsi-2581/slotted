@@ -47,12 +47,38 @@ test('the served Markdown is the package file, pointing at llms.txt instead of t
   assert.deepEqual(served.slice(1), shipped.slice(1));
 });
 
-test('llms.txt links only routes that exist, every family once per binding', () => {
+const guidelinePages = (binding) =>
+  readdirSync(`${packageDocs[binding]}guidelines`).filter((file) => file.endsWith('.md'));
+const skillNames = (binding) => readdirSync(`${packageDocs[binding]}skills`);
+
+test('every guideline page and skill is served per binding, as the package ships it', () => {
+  for (const binding of ['react', 'angular']) {
+    for (const file of guidelinePages(binding))
+      assert.equal(
+        readFileSync(`${dist}${binding}/guidelines/${file}`, 'utf8'),
+        readFileSync(`${packageDocs[binding]}guidelines/${file}`, 'utf8'),
+        `${binding}/guidelines/${file}`,
+      );
+    for (const skill of skillNames(binding))
+      assert.equal(
+        readFileSync(`${dist}${binding}/skills/${skill}/SKILL.md`, 'utf8'),
+        readFileSync(`${packageDocs[binding]}skills/${skill}/SKILL.md`, 'utf8'),
+        `${binding}/skills/${skill}`,
+      );
+  }
+});
+
+test('llms.txt links only routes that exist, every family, guideline page and skill once per binding', () => {
   const llms = readFileSync(`${dist}llms.txt`, 'utf8');
   assert.match(llms, /^# Slotted\n\n> /);
   const hrefs = [...llms.matchAll(/\]\((\/[^)]+)\)/g)].map((match) => match[1]);
   for (const href of hrefs) assert.ok(existsSync(`${dist}${href.slice(1)}`), href);
-  assert.equal(hrefs.length, families.length * 2);
+  const expected = ['react', 'angular'].reduce(
+    (sum, binding) =>
+      sum + families.length + guidelinePages(binding).length + skillNames(binding).length,
+    0,
+  );
+  assert.equal(hrefs.length, expected);
 });
 
 test('a component page declares its Markdown and the index', () => {

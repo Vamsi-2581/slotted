@@ -27,7 +27,8 @@ export function loadContent(root: string): Content {
       topicSources.set(file, readFileSync(join(guidelines, file), 'utf8'));
   const skills = new Map<string, Skill>();
   for (const name of existsSync(skillsDir) ? readdirSync(skillsDir).sort() : [])
-    skills.set(name, parseSkill(readFileSync(join(skillsDir, name, 'SKILL.md'), 'utf8')));
+    if (existsSync(join(skillsDir, name, 'SKILL.md')))
+      skills.set(name, parseSkill(readFileSync(join(skillsDir, name, 'SKILL.md'), 'utf8')));
   const readmePath = join(guidelines, 'README.md');
   return {
     readme: existsSync(readmePath) ? readFileSync(readmePath, 'utf8') : '',

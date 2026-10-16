@@ -14,7 +14,7 @@ Backward compatibility is therefore not a constraint, and must not be treated as
 
 One top-level directory holds one type of content (`docs/decisions/0002-repository-layout.md`). `docs/README.md` indexes every document by reading class: law at the root, `process/` edited each session, `history/` append-only, `archive/` closed. Session design documents go to `docs/history/designs/`, plans to `docs/history/plans/`, checkpoints to `.claude/progress/`.
 
-Agent material published to consumers — guidelines and product skills — has its source in `tools/agent-docs/content/`; `.claude/skills/` holds the repository's own development skills. A release that changes `tools/agent-docs/content/` runs `pnpm eval:agent-docs` first and commits the report in `docs/history/evals/`.
+Agent material published to consumers — guidelines and product skills — has its source in `tools/agent-docs/content/`; `.claude/skills/` holds the repository's own development skills. A release that changes `tools/agent-docs/content/` runs `pnpm eval:agent-docs` first and commits the report in `docs/history/evals/`. What to edit for each change, what is generated, and the release sequence are in `tools/agent-docs/README.md`.
 
 ## Working Loop
 

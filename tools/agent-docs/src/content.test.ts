@@ -95,6 +95,20 @@ describe('skills', () => {
     ).toEqual([]);
   });
 
+  it('every skill has an evaluation case, and every case names a skill', () => {
+    const cases = (
+      JSON.parse(readFileSync(join(root, 'tools/agent-docs/eval/cases.json'), 'utf8')) as {
+        cases: { skill: string }[];
+      }
+    ).cases;
+    expect(
+      [...content.skills.keys()].filter((name) => !cases.some((entry) => entry.skill === name)),
+    ).toEqual([]);
+    expect(cases.map((entry) => entry.skill).filter((skill) => !content.skills.has(skill))).toEqual(
+      [],
+    );
+  });
+
   it('the snippet of each binding names every skill', () => {
     for (const binding of ['react', 'angular'] as const) {
       const snippet = renderAgentsSnippet(binding);

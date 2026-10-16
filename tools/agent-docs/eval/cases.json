@@ -84,6 +84,16 @@
         { "kind": "uses-family", "family": "progress-indicator" },
         { "kind": "no-literal" }
       ]
+    },
+    {
+      "id": "own-element",
+      "skill": "compose-screen",
+      "prompt": "Write the team capacity screen in src/: a strip of the next 30 days, one focusable and selectable cell per day, each cell tinted by the day's load (low, normal, high, over), with the selected day's assignments listed below the strip; read from fetchCapacity() in src/api.ts, which you also write as a stub returning a Promise.",
+      "assertions": [
+        { "kind": "no-literal" },
+        { "kind": "mentions", "pattern": "focus-visible[\\s\\S]{0,400}--slotted-focus-ring-" },
+        { "kind": "mentions", "pattern": "--slotted-tone-" }
+      ]
     }
   ]
 }

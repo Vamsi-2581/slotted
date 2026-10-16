@@ -83,6 +83,11 @@ describe('published text', () => {
 });
 
 describe('skills', () => {
+  it('the Nexora instructions carry the Angular snippet as published', () => {
+    const agents = readFileSync(join(root, 'demos/nexora/angular/AGENTS.md'), 'utf8');
+    expect(agents).toContain(renderAgentsSnippet('angular'));
+  });
+
   it('every skill is well formed and cites active rules', () => {
     expect(
       [...content.skills].flatMap(([name, skill]) => skillErrors(name, skill, active)),

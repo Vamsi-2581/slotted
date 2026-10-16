@@ -4,12 +4,12 @@ Reference application for the library: an operations product built only from
 the published `@slotted/*` packages, used to calibrate the kit against a real
 screen and to demonstrate it.
 
-| Directory     | Package                        | Role                                                                                                                   |
-| ------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `angular/`    | `@slotted/demo-nexora-angular` | The Angular application. Installs the library from `../../.registry`                                                   |
-| `backend/`    | `@slotted/demo-nexora-backend` | In-process simulated API and deterministic seed. Workspace package.                                                    |
-| `domain.md`   | —                              | Domain and product specification. Part II is normative for `backend`                                                   |
-| `guidelines/` | —                              | Composition rules the library does not state, one per observed screen. `guidelines/README.md` has the reading protocol |
+| Directory     | Package                        | Role                                                                                                                                                                |
+| ------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `angular/`    | `@slotted/demo-nexora-angular` | The Angular application. Installs the library from `../../.registry`                                                                                                |
+| `backend/`    | `@slotted/demo-nexora-backend` | In-process simulated API and deterministic seed. Workspace package.                                                                                                 |
+| `domain.md`   | —                              | Domain and product specification. Part II is normative for `backend`                                                                                                |
+| `guidelines/` | —                              | Rules of the Nexora domain. Rules for any application ship in the package (`tools/agent-docs/content/guidelines/`). `guidelines/README.md` has the reading protocol |
 
 ## Families available to screens
 

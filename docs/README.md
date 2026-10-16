@@ -60,6 +60,7 @@ pela skill `/component`. Cada subdiretório tem uma classe de leitura própria.
 | `history/build-log.md` | Uma entrada por família ou correção, na ordem em que aterrou, desde 2026-08-31.      |
 | `history/designs/`     | Inventário, desenho e autoavaliação por tema. Índice em `history/designs/README.md`. |
 | `history/plans/`       | Planos de implementação executados, datados.                                         |
+| `history/evals/`       | Resultado de cada rodada de `pnpm eval:agent-docs`.                                  |
 
 `history/designs/` e `history/plans/` recebem ficheiros novos da skill
 `/component` e do fluxo de planeamento; o nome segue `AAAA-MM-DD-<tema>-<tipo>.md`.

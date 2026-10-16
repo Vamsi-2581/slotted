@@ -11,7 +11,7 @@ import {
 } from '../lib/agent-docs';
 import { SITE_NAME } from '../lib/site';
 
-/** The index an agent reads first (llmstxt.org): one line per family, guideline page and skill, per binding. */
+/** The index an agent reads first (llmstxt.org): one line per family, token page, guideline page and skill, per binding. */
 export const GET: APIRoute = async () => {
   const introduction = await getEntry('foundations', 'introduction');
   if (introduction === undefined) throw new Error('the introduction foundation page is missing');
@@ -24,6 +24,8 @@ export const GET: APIRoute = async () => {
         `- [${family}](/${binding}/components/${family}.md): ${agentSummary(binding, family)}`,
       );
     }
+    lines.push('', `## ${AGENT_BINDING_LABELS[binding]} tokens`, '');
+    lines.push(`- [tokens](/${binding}/tokens.md)`);
     lines.push('', `## ${AGENT_BINDING_LABELS[binding]} guidelines`, '');
     for (const page of agentGuidelines(binding))
       lines.push(`- [${page}](/${binding}/guidelines/${page}.md)`);

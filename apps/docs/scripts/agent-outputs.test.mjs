@@ -68,6 +68,15 @@ test('every guideline page and skill is served per binding, as the package ships
   }
 });
 
+test('tokens.md is served per binding, as the package ships it', () => {
+  for (const binding of ['react', 'angular'])
+    assert.equal(
+      readFileSync(`${dist}${binding}/tokens.md`, 'utf8'),
+      readFileSync(`${packageDocs[binding]}tokens.md`, 'utf8'),
+      `${binding}/tokens.md`,
+    );
+});
+
 test('llms.txt links only routes that exist, every family, guideline page and skill once per binding', () => {
   const llms = readFileSync(`${dist}llms.txt`, 'utf8');
   assert.match(llms, /^# Slotted\n\n> /);
@@ -75,7 +84,7 @@ test('llms.txt links only routes that exist, every family, guideline page and sk
   for (const href of hrefs) assert.ok(existsSync(`${dist}${href.slice(1)}`), href);
   const expected = ['react', 'angular'].reduce(
     (sum, binding) =>
-      sum + families.length + guidelinePages(binding).length + skillNames(binding).length,
+      sum + families.length + guidelinePages(binding).length + skillNames(binding).length + 1,
     0,
   );
   assert.equal(hrefs.length, expected);

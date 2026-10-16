@@ -15,7 +15,7 @@ export const AGENT_BINDING_LABELS: Readonly<Record<AgentBinding, string>> = {
 
 const PACKAGE_INDEX_LINE = '<!-- index: ./index.md -->';
 const SITE_INDEX_LINE = '<!-- index: /llms.txt -->';
-const NOT_PAGES = new Set(['index', 'AGENTS.snippet']);
+const NOT_PAGES = new Set(['index', 'AGENTS.snippet', 'tokens']);
 
 function docsDir(binding: AgentBinding): string {
   const dir = resolve(process.cwd(), '../../packages', binding, 'dist/docs');
@@ -56,6 +56,11 @@ export function agentJson(binding: AgentBinding, family: string): string {
 export function agentSummary(binding: AgentBinding, family: string): string {
   return (JSON.parse(agentJson(binding, family)) as { catalog: { summary: string } }).catalog
     .summary;
+}
+
+/** The token page a binding ships: `tokens.md`. */
+export function agentTokens(binding: AgentBinding): string {
+  return readFileSync(resolve(docsDir(binding), 'tokens.md'), 'utf8');
 }
 
 /** The guideline pages a binding ships: `guidelines/*.md`. */

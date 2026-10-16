@@ -32,17 +32,17 @@ A review answers one question per rule read: does the screen pass the rule's
 
 Each search below finds a defect without running the screen.
 
-| Search the screen's files for                                                                                           | Defect                              | Rule         |
-| ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ------------ |
-| A colour literal (hex, rgb, hsl, oklch), a length in pixels or rem other than zero, or a font size, in the screen's CSS | a value the theme has a token for   | CP-05, OE-01 |
-| A selector on `data-ui`, `data-part` or a class of a family, in the application's CSS                                   | the screen restyles a family's part | OE-08        |
-| A control that starts a request and is not in its `loading` state until the answer                                      | a control that fires twice          | AF-03        |
-| An empty state drawn from the initial value of the data, before the first answer                                        | a wait shown as nothing             | AF-01        |
-| A spinner standing in a region that has no items yet                                                                    | placeholders missing                | AF-02        |
-| Siblings of the page's own spaced by margins, or text with a font size of its own                                       | layout outside the primitives       | CP-02        |
-| A grid or flex track around a family that scrolls, with no zero minimum                                                 | the page scrolls, not the family    | CP-03        |
-| A badge, a tag or a colour beside a family that already draws the same state                                            | a state stated twice                | CP-06        |
-| An element of the screen's own that takes focus with no ring in its `focus-visible` state                               | focus not drawn                     | OE-03        |
+| Search the screen's files for                                                                                            | Defect                                                   | Rule         |
+| ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- | ------------ |
+| A colour literal (hex, rgb, hsl, oklch), a length in pixels or rem other than zero, or a font size, in the screen's CSS  | a value the theme has a token for                        | CP-05, OE-01 |
+| A rule of the application's CSS that sets colour, border, radius, padding or type on a family's `data-ui` or `data-part` | the screen restyles a family instead of setting its axes | OE-08        |
+| A control that starts a request and is not in its `loading` state until the answer                                       | a control that fires twice                               | AF-03        |
+| An empty state drawn from the initial value of the data, before the first answer                                         | a wait shown as nothing                                  | AF-01        |
+| A spinner standing in a region that has no items yet                                                                     | placeholders missing                                     | AF-02        |
+| Siblings of the page's own spaced by margins, or text with a font size of its own                                        | layout outside the primitives                            | CP-02        |
+| A grid or flex track around a family that scrolls, with no zero minimum                                                  | the page scrolls, not the family                         | CP-03        |
+| A badge, a tag or a colour beside a family that already draws the same state                                             | a state stated twice                                     | CP-06        |
+| An element of the screen's own that takes focus with no ring in its `focus-visible` state                                | focus not drawn                                          | OE-03        |
 
 A rule whose `Check` needs the screen running — a size class, a throttled
 network, the accessibility tree — is run when the environment can run it, and

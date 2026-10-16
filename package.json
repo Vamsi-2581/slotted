@@ -28,7 +28,7 @@
     "test:contracts": "node --test specs/*.test.mjs specs/components/*/*.test.mjs",
     "test:package-layers": "node --test scripts/verify-package-layers.test.mjs && node scripts/verify-package-layers.mjs",
     "test:release": "node --test scripts/pack-beta.test.mjs scripts/release.test.mjs",
-    "test:docs": "node --test scripts/verify-docs-snippets.test.mjs scripts/verify-typecheck-projects.test.mjs",
+    "test:docs": "node --test scripts/verify-docs-snippets.test.mjs scripts/verify-typecheck-projects.test.mjs && pnpm --filter @slotted/agent-docs exec vitest run src/content.test.ts src/guidelines.test.ts src/references.test.ts src/registry.test.ts src/skills.test.ts",
     "test:i18n": "node --test scripts/verify-i18n.test.mjs && node scripts/verify-i18n.mjs",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:contracts && pnpm test:package-layers && pnpm test:release && pnpm test:docs && pnpm test:i18n",
     "check:affected": "pnpm check && turbo run verify --affected",

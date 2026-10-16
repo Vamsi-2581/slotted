@@ -1,6 +1,9 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
-import type { TokenDefinition } from './contract-types';
+import type { TokenContract, TokenDefinition } from './contract-types';
 import { dimensionValues, groupCovers, groupErrors, type TokenGroup } from './token-groups';
 
 const token = (name: string, layer: TokenDefinition['layer'] = 'semantic'): TokenDefinition => ({
@@ -106,5 +109,14 @@ describe('groupErrors', () => {
       'space: slot {step} has no dimension',
       'surface: has a pattern or tokens, not both',
     ]);
+  });
+});
+
+describe('the contract', () => {
+  it('every token is in exactly one group, every meaning stated', () => {
+    const contract = JSON.parse(
+      readFileSync(join(import.meta.dirname, 'contract.json'), 'utf8'),
+    ) as TokenContract & { groups?: TokenGroup[] };
+    expect(groupErrors(contract.tokens, contract.groups ?? [])).toEqual([]);
   });
 });

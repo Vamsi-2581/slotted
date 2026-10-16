@@ -4,6 +4,356 @@
   "axes": ["base", "scheme", "density"],
   "requiredSchemes": ["light", "dark", "high-contrast"],
   "requiredDensities": ["comfortable", "compact", "dense"],
+  "groups": [
+    {
+      "id": "space",
+      "reader": "application",
+      "purpose": "How much separation or inset a layout needs, smallest first; a gap or an inset is one step.",
+      "pattern": "--slotted-space-{step}",
+      "dimensions": {
+        "step": "open"
+      }
+    },
+    {
+      "id": "radius",
+      "reader": "application",
+      "purpose": "How rounded a box or a part is drawn, from none to full.",
+      "pattern": "--slotted-radius-{step}",
+      "dimensions": {
+        "step": "open"
+      }
+    },
+    {
+      "id": "font-family",
+      "reader": "application",
+      "purpose": "The typeface text is set in.",
+      "pattern": "--slotted-font-family-{family}",
+      "dimensions": {
+        "family": {
+          "sans": "The typeface of the interface's text.",
+          "mono": "The typeface of code and of values read character by character.",
+          "heading": "The typeface of headings; a theme may point it at a face of its own."
+        }
+      }
+    },
+    {
+      "id": "font-size",
+      "reader": "application",
+      "purpose": "What size text is set in, smallest first; text of the application's own takes its size from the `typography` family before this scale.",
+      "pattern": "--slotted-font-size-{step}",
+      "dimensions": {
+        "step": "open"
+      }
+    },
+    {
+      "id": "line-height",
+      "reader": "application",
+      "purpose": "The line height that pairs with the font-size step of the same name.",
+      "pattern": "--slotted-line-height-{step}",
+      "dimensions": {
+        "step": "open"
+      }
+    },
+    {
+      "id": "font-weight",
+      "reader": "application",
+      "purpose": "How much typographic emphasis text carries.",
+      "pattern": "--slotted-font-weight-{weight}",
+      "dimensions": {
+        "weight": {
+          "regular": "Running text.",
+          "medium": "Text that stands out from running text without heading it.",
+          "semibold": "A heading, a control's label, a figure that leads."
+        }
+      }
+    },
+    {
+      "id": "border-width",
+      "reader": "application",
+      "purpose": "How thick an edge or a ring is drawn.",
+      "pattern": "--slotted-border-width-{width}",
+      "dimensions": {
+        "width": {
+          "thin": "The edge of a box, a control or a divider.",
+          "medium": "The weight between thin and thick.",
+          "thick": "The heaviest edge."
+        }
+      }
+    },
+    {
+      "id": "duration",
+      "reader": "application",
+      "purpose": "How long a transition or one cycle of a loop takes. The steps from instant to long collapse under reduced motion; the loops do not, so a repeating animation stops there instead.",
+      "pattern": "--slotted-duration-{step}",
+      "dimensions": {
+        "step": {
+          "instant": "A change that must not read as motion.",
+          "short": "A control changing state: a ground, a border, a mark.",
+          "medium": "A part appearing or leaving: a popover, a menu, a tooltip.",
+          "long": "A surface entering or leaving over a larger distance: a drawer, a dialog.",
+          "loop-fast": "One cycle of a fast repeating animation.",
+          "loop": "One cycle of a repeating animation.",
+          "loop-slow": "One cycle of a slow repeating animation."
+        }
+      }
+    },
+    {
+      "id": "easing",
+      "reader": "application",
+      "purpose": "How the velocity of a transition changes.",
+      "pattern": "--slotted-easing-{curve}",
+      "dimensions": {
+        "curve": {
+          "standard": "A change within the screen.",
+          "enter": "A part arriving.",
+          "exit": "A part leaving.",
+          "emphasized": "A change meant to be noticed; it overshoots its end."
+        }
+      }
+    },
+    {
+      "id": "z-index",
+      "reader": "application",
+      "purpose": "Which layer an element occupies above the page.",
+      "pattern": "--slotted-z-index-{layer}",
+      "dimensions": {
+        "layer": {
+          "sticky": "A header or a column that stays in place while its region scrolls.",
+          "overlay": "A modal surface and the scrim under it.",
+          "popover": "A popover, a menu or a tooltip; above an overlay, so one opens from a dialog.",
+          "toast": "A toast; above every other layer."
+        }
+      }
+    },
+    {
+      "id": "shadow",
+      "reader": "application",
+      "purpose": "What elevation a surface has above the one under it, smallest first; under forced colours every step is none.",
+      "pattern": "--slotted-shadow-{step}",
+      "dimensions": {
+        "step": "open"
+      }
+    },
+    {
+      "id": "surface",
+      "reader": "application",
+      "purpose": "The grounds content stands on.",
+      "tokens": {
+        "--slotted-surface": "The ground of the page's content and of a card.",
+        "--slotted-surface-raised": "The ground of a surface above another: a popover, a menu, a dialog; paired with a step of `shadow`.",
+        "--slotted-surface-sunken": "The canvas under the content: the ground a card and a field stand out from.",
+        "--slotted-surface-inverse": "A ground in the opposite lightness, with `--slotted-text-inverse` on it."
+      }
+    },
+    {
+      "id": "text",
+      "reader": "application",
+      "purpose": "The colours text is painted in.",
+      "tokens": {
+        "--slotted-text": "Text on a surface.",
+        "--slotted-text-muted": "Text that ranks below the text beside it: a caption, a hint, a secondary value.",
+        "--slotted-text-inverse": "Text on `--slotted-surface-inverse`."
+      }
+    },
+    {
+      "id": "border",
+      "reader": "application",
+      "purpose": "The colours of lines between and inside surfaces.",
+      "tokens": {
+        "--slotted-border-subtle": "A rule inside a surface: a divider, the edge of a region, the seam under a header.",
+        "--slotted-border-strong": "The line between two surfaces; it holds 3:1 against every surface a control stands on."
+      }
+    },
+    {
+      "id": "disabled",
+      "reader": "application",
+      "purpose": "How an unavailable control is painted.",
+      "pattern": "--slotted-disabled-{role}",
+      "dimensions": {
+        "role": {
+          "background": "The ground of an unavailable control.",
+          "foreground": "The text and icons of an unavailable control.",
+          "border": "The edge of an unavailable control, a step lighter than the edge of an available one."
+        }
+      }
+    },
+    {
+      "id": "focus-ring",
+      "reader": "application",
+      "purpose": "The outline every focused element draws.",
+      "tokens": {
+        "--slotted-focus-ring-width": "The thickness of the focus outline.",
+        "--slotted-focus-ring-offset": "The distance between the element and its focus outline.",
+        "--slotted-focus-ring-color": "The colour of the focus outline.",
+        "--slotted-focus-ring-color-invalid": "The colour of the focus outline of a control in error; an element in error points `--slotted-focus-ring-color` at it."
+      }
+    },
+    {
+      "id": "target",
+      "reader": "application",
+      "purpose": "How small an interactive target may be.",
+      "tokens": {
+        "--slotted-target-min": "The smallest target in both axes: 24 by 24 CSS pixels.",
+        "--slotted-target-comfortable": "The size a target grows to under a coarse pointer."
+      }
+    },
+    {
+      "id": "tone",
+      "reader": "application",
+      "purpose": "What an element carrying an intent is painted with: five tones, each with the same nine roles.",
+      "pattern": "--slotted-tone-{tone}-{role}",
+      "dimensions": {
+        "tone": {
+          "accent": "The product's intent: the primary action, the chosen option, the current place.",
+          "secondary": "A second intent beside accent, for an action or a mark that must not compete with it.",
+          "success": "A result that completed or a state that is healthy.",
+          "warning": "A state that needs attention before it becomes a failure.",
+          "danger": "A failure, an error or an action that destroys data."
+        },
+        "role": {
+          "solid": "A filled ground: the primary button of the tone.",
+          "solid-hover": "The filled ground under the pointer.",
+          "solid-active": "The filled ground while pressed.",
+          "on-solid": "Text and icons on the filled ground.",
+          "surface": "A tinted ground; a state that must be seen pairs it with the tone's border.",
+          "subtle-hover": "The tint under the pointer of an element with no filled ground.",
+          "subtle-active": "That tint while pressed.",
+          "border": "An edge in the tone, at the non-text contrast ratio against the page and against its own surface.",
+          "text": "Text in the tone on a surface."
+        }
+      }
+    },
+    {
+      "id": "data",
+      "reader": "application",
+      "purpose": "What a series of data is painted with: a line, a bar, a slice. Slots are assigned in order and never skipped.",
+      "pattern": "--slotted-data-{slot}",
+      "dimensions": {
+        "slot": "open"
+      }
+    },
+    {
+      "id": "control",
+      "reader": "application",
+      "purpose": "What a control's text and frame look like at every size.",
+      "tokens": {
+        "--slotted-control-font-family": "The typeface of a control's text.",
+        "--slotted-control-font-weight": "The weight of a control's label.",
+        "--slotted-control-line-height": "The line height of a control's text.",
+        "--slotted-control-letter-spacing": "The letter spacing of a control's text.",
+        "--slotted-control-border-width": "The edge width of a control at rest.",
+        "--slotted-control-radius": "The corner of a control.",
+        "--slotted-control-shadow-focus-geometry": "Offset, blur and spread of the shadow a focused control draws, with no colour; drawn with `--slotted-focus-ring-color`.",
+        "--slotted-control-transition-duration": "How long a control takes to change state.",
+        "--slotted-control-transition-easing": "The curve of a control's change of state.",
+        "--slotted-control-invalid-edge-width": "The edge an invalid control adds inside its border, so the state reads where colour cannot.",
+        "--slotted-control-border-color": "The edge colour of a control at rest.",
+        "--slotted-control-surface": "The ground of a control at rest: a field, an outline button.",
+        "--slotted-control-shadow": "The shadow of a control at rest."
+      }
+    },
+    {
+      "id": "control-size",
+      "reader": "application",
+      "purpose": "The size and inner spacing of a control at each size step; every value follows density.",
+      "pattern": "--slotted-control-{part}-{size}",
+      "dimensions": {
+        "part": {
+          "height": "The block size of the control.",
+          "padding-inline": "The inline space between the control's edge and its content.",
+          "font-size": "The size of the control's text.",
+          "icon-size": "The size of an icon inside the control.",
+          "gap": "The space between items inside the control, and between one choice and the next in a group.",
+          "label-gap": "The space between a binary control — a box, a circle, a switch — and its own label.",
+          "inner-size": "The block size of what stands inside the control: a key, a chip, a clear mark."
+        },
+        "size": {
+          "sm": "The small step.",
+          "md": "The medium step.",
+          "lg": "The large step."
+        }
+      }
+    },
+    {
+      "id": "selection",
+      "reader": "application",
+      "purpose": "The size of a selection control and of the halo behind it.",
+      "tokens": {
+        "--slotted-selection-size-sm": "The box of a checkbox and the circle of a radio at the small step.",
+        "--slotted-selection-size-md": "The box and the circle at the medium step.",
+        "--slotted-selection-size-lg": "The box and the circle at the large step.",
+        "--slotted-selection-halo-opacity": "The share of `--slotted-tone-accent-text` in the halo behind a selection control under the pointer."
+      }
+    },
+    {
+      "id": "highlight",
+      "reader": "application",
+      "purpose": "How strong the band behind a matched span is.",
+      "tokens": {
+        "--slotted-highlight-tint-opacity": "The share of `--slotted-tone-accent-text` in the band behind a matched span."
+      }
+    },
+    {
+      "id": "current",
+      "reader": "application",
+      "purpose": "How the place the reader is on is marked.",
+      "tokens": {
+        "--slotted-current-edge": "The edge of the row the reader is on, drawn over its tone ground."
+      }
+    },
+    {
+      "id": "scrim",
+      "reader": "application",
+      "purpose": "The veil under a modal surface.",
+      "tokens": {
+        "--slotted-scrim": "The veil between the page and a modal surface above it."
+      }
+    },
+    {
+      "id": "icon",
+      "reader": "family",
+      "purpose": "The geometry of an icon a family draws itself; an icon of the application's own is drawn with the `icon` family.",
+      "pattern": "--slotted-icon-{glyph}",
+      "dimensions": {
+        "glyph": "open"
+      }
+    },
+    {
+      "id": "upload-kind",
+      "reader": "family",
+      "purpose": "The tile colours of file kinds in `upload` and `attachment`.",
+      "pattern": "--slotted-upload-kind-{kind}",
+      "dimensions": {
+        "kind": "open"
+      }
+    },
+    {
+      "id": "code",
+      "reader": "family",
+      "purpose": "The colours of syntax scopes in `code-block`.",
+      "pattern": "--slotted-code-{scope}",
+      "dimensions": {
+        "scope": "open"
+      }
+    },
+    {
+      "id": "rating",
+      "reader": "family",
+      "purpose": "The edge of a star in `rating`.",
+      "tokens": {
+        "--slotted-rating-edge": "The edge of a star."
+      }
+    },
+    {
+      "id": "avatar-size",
+      "reader": "family",
+      "purpose": "The sizes of `avatar`, smallest first.",
+      "pattern": "--slotted-avatar-size-{size}",
+      "dimensions": {
+        "size": "open"
+      }
+    }
+  ],
   "tokens": [
     {
       "name": "--slotted-radius-none",

@@ -61,9 +61,11 @@ held before the recipe existed, and from the script's own rules for the
 `neutral` seed: the share of its chroma and its hue every neutral token keeps,
 and the `GROUNDS` table.
 
-## Space
+What each group of tokens is for is stated once, in `groups` of
+`packages/theme/src/contract.json`; the published `tokens.md` of each binding
+is generated from it.
 
-This scale answers how much separation or inset a layout needs.
+## Space
 
 | Token                | Default value |
 | -------------------- | ------------- |
@@ -82,8 +84,6 @@ This scale answers how much separation or inset a layout needs.
 
 ## Radius
 
-This scale answers how rounded a component or part should be.
-
 | Token                   | Default value |
 | ----------------------- | ------------- |
 | `--slotted-radius-none` | `0px`         |
@@ -94,8 +94,6 @@ This scale answers how rounded a component or part should be.
 | `--slotted-radius-full` | `9999px`      |
 
 ## Type size
-
-This scale answers what text size a component needs.
 
 | Token                     | Default value |
 | ------------------------- | ------------- |
@@ -109,8 +107,6 @@ This scale answers what text size a component needs.
 | `--slotted-font-size-4xl` | `2rem`        |
 
 ## Line height
-
-This scale answers how much vertical rhythm a text size needs.
 
 | Token                       | Default value |
 | --------------------------- | ------------- |
@@ -133,8 +129,6 @@ the type grows — because a figure is one line and needs no room for a second.
 
 ## Font weight
 
-This scale answers how much typographic emphasis text needs.
-
 | Token                            | Default value |
 | -------------------------------- | ------------- |
 | `--slotted-font-weight-regular`  | `400`         |
@@ -142,8 +136,6 @@ This scale answers how much typographic emphasis text needs.
 | `--slotted-font-weight-semibold` | `600`         |
 
 ## Font family
-
-This scale answers which typeface a component sets text in.
 
 | Token                           | Default value                                                           |
 | ------------------------------- | ----------------------------------------------------------------------- |
@@ -185,8 +177,6 @@ names a family literally, so the three are the whole substitution surface.
 
 ## Border width
 
-This scale answers how thick a border or ring is drawn.
-
 | Token                           | Default value |
 | ------------------------------- | ------------- |
 | `--slotted-border-width-thin`   | `1px`         |
@@ -198,8 +188,6 @@ circle — whose box is sixteen pixels and reads too light at one pixel and too
 heavy at two.
 
 ## Motion
-
-This scale answers how long a transition takes and how its velocity changes.
 
 | Token                          | Default value                     | Reduced-motion value |
 | ------------------------------ | --------------------------------- | -------------------- |
@@ -228,8 +216,6 @@ reached.
 
 ## Stacking
 
-This scale answers which layer an element occupies relative to the application.
-
 | Token                       | Default value |
 | --------------------------- | ------------- |
 | `--slotted-z-index-sticky`  | `100`         |
@@ -239,7 +225,7 @@ This scale answers which layer an element occupies relative to the application.
 
 ## Glyph
 
-This scale answers which geometry a component-owned icon draws. A family draws
+A family draws
 it with the `Glyph` element — `<Icon><Glyph name="x" /></Icon>` in React,
 `<span slIcon><svg slGlyph name="x"></svg></span>` in Angular — a real `<svg>`
 whose paths `scripts/generate-icon-glyphs.mjs` writes into
@@ -511,8 +497,6 @@ set does: a result state gives its mark no box.
 
 ## Target size
 
-This scale answers how small an interactive target may be.
-
 | Token                          | Default value |
 | ------------------------------ | ------------- |
 | `--slotted-target-min`         | `24px`        |
@@ -535,9 +519,7 @@ the family's behalf.
 
 ## Selection geometry
 
-This scale answers the size of a selection control — the box `checkbox` draws
-and the circle `radio-group` draws — and the halo that answers the pointer
-behind it. It varies by the family's `size` step and by nothing else: the
+This scale varies by the family's `size` step and by nothing else: the
 control glyph scale shrinks with density, and a box that followed it fell to
 twelve pixels at `dense`, below the size a mark can be drawn in. The touch
 target is not the box either; it is a transparent square of
@@ -557,7 +539,7 @@ reached past the gap in seven of the nine size-and-density pairs.
 
 ## Highlight
 
-This scale answers how strong the band behind a matched span is. The band is
+The band is
 mixed from `--slotted-tone-accent-text` rather than taken from
 `--slotted-tone-accent-surface`, for the reason the halo above is: a tone's
 `surface` role is a ground and does not separate from the surface it sits on.
@@ -726,8 +708,7 @@ for the band behind a matched span (CB10).
 
 ## Data
 
-This scale answers what a series of data is painted with: a line, a bar, a
-dot, an area. It is the first palette in the semantic layer, and it is there
+This scale is the first palette in the semantic layer, and it is there
 rather than in the component layer because two families read it as one
 object — `sparkline` opens it in wave 10 and `chart` reads it as a set in
 wave 12 — and a palette two families share is what a value is _for_, not one
@@ -784,8 +765,6 @@ one series, and identity is then said by shape, texture or label, which is
 `chart`'s decision to make.
 
 ## Shadow
-
-This scale answers what elevation a surface needs in each colour scheme.
 
 | Token                      | Light                                                                        | Dark                                                                   | High contrast       |
 | -------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------- |
@@ -882,8 +861,7 @@ takes `Highlight` and `HighlightText`; the other four take `ButtonFace` and
 
 ## Control geometry
 
-This scale answers the physical size and internal spacing of a control at each
-density. Every control reads it directly: Button aliased it until the family was
+Every control reads it directly: Button aliased it until the family was
 rebuilt, and nothing aliases it now.
 
 | Token                                 | Comfortable | Compact | Dense  |
@@ -936,7 +914,7 @@ reads the scale at the family's own size step as the cap on its box:
 
 ## Avatar size
 
-This scale answers how large the box holding a person's picture is. It is the
+This scale is the
 whole of the component layer.
 
 | Token                      | Comfortable | Compact | Dense  |
@@ -967,7 +945,7 @@ token.
 
 ## File kind
 
-This scale answers what colour a file of a given kind is drawn in. It is the
+This scale is the
 second scale in the component layer, and it is there for the reason the first one
 is: a family met a value no semantic token can be retuned to give.
 
@@ -1020,8 +998,7 @@ alone.
 
 ## Code scope
 
-This scale answers what colour a kind of word in a block of source is drawn
-in. It is the third scale in the component layer, and it is there for the
+This scale is the third scale in the component layer, and it is there for the
 reason the second is: a family met a palette no semantic token can be retuned
 to give.
 

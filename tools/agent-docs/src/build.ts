@@ -3,6 +3,8 @@ import { basename, join } from 'node:path';
 
 import { compileAngular } from './compile-angular.ts';
 import { compileReact } from './compile-react.ts';
+import { loadContent } from './content.ts';
+import { renderGuidelinesIndex, renderTopic } from './guidelines.ts';
 import { loadFamilies } from './load.ts';
 import {
   compileBlocks,
@@ -12,6 +14,7 @@ import {
   renderIndex,
   siteExampleErrors,
 } from './render.ts';
+import { renderContent } from './skills.ts';
 import type { Binding, BlockVerdict, FamilyInput } from './types.ts';
 
 export interface BuildResult {
@@ -58,7 +61,8 @@ export async function buildDocs({
   mkdirSync(out, { recursive: true });
   for (const entry of readdirSync(out)) rmSync(join(out, entry), { recursive: true, force: true });
 
-  writeFileSync(join(out, 'index.md'), renderIndex(families, binding));
+  const content = loadContent(root);
+  writeFileSync(join(out, 'index.md'), renderIndex(families, binding, content));
   writeFileSync(join(out, 'AGENTS.snippet.md'), renderAgentsSnippet(binding));
   for (const family of families) {
     for (const file of renderFamily(family).files)
@@ -67,6 +71,20 @@ export async function buildDocs({
       join(out, `${family.contract.family}.json`),
       `${JSON.stringify(renderFamilyJson(family), null, 2)}\n`,
     );
+  }
+  if (content.topics.length > 0) {
+    mkdirSync(join(out, 'guidelines'));
+    writeFileSync(join(out, 'guidelines/README.md'), renderContent(content.readme, binding));
+    writeFileSync(join(out, 'guidelines/index.md'), renderGuidelinesIndex(content.topics));
+    for (const topic of content.topics)
+      writeFileSync(
+        join(out, 'guidelines', topic.file),
+        renderContent(renderTopic(topic), binding),
+      );
+  }
+  for (const [name, skill] of content.skills) {
+    mkdirSync(join(out, 'skills', name), { recursive: true });
+    writeFileSync(join(out, 'skills', name, 'SKILL.md'), renderContent(skill.source, binding));
   }
 
   const verdicts = [...compiled.values()];

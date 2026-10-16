@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { buildDocs } from './build.ts';
+import { loadContent } from './content.ts';
 import { nonEnglishSnippets } from './language-report.ts';
 import { loadFamilies } from './load.ts';
 
@@ -89,5 +90,38 @@ describe('buildDocs', () => {
     for (const file of files) {
       expect(readFileSync(join(b, file), 'utf8'), file).toBe(readFileSync(join(a, file), 'utf8'));
     }
+  });
+  it('writes the guidelines and the skills, identically twice, the same text in both bindings but the package', async () => {
+    const react = mkdtempSync(join(tmpdir(), 'docs-'));
+    const again = mkdtempSync(join(tmpdir(), 'docs-'));
+    const angular = mkdtempSync(join(tmpdir(), 'docs-'));
+    await buildDocs({ binding: 'react', root, out: react });
+    await buildDocs({ binding: 'react', root, out: again });
+    await buildDocs({ binding: 'angular', root, out: angular });
+
+    const content = loadContent(root);
+    // No topics, no guidelines directory: the guards fall away once content/ has topics (Task 7).
+    const guidelines =
+      content.topics.length > 0
+        ? ['README.md', 'index.md', ...content.topics.map((topic) => topic.file)]
+        : [];
+    if (content.topics.length > 0)
+      expect(readdirSync(join(react, 'guidelines')).sort()).toEqual(guidelines.sort());
+    const skills = [...content.skills.keys()].map((name) => `skills/${name}/SKILL.md`);
+    const files = [...guidelines.map((file) => `guidelines/${file}`), ...skills];
+    for (const file of files) {
+      const a = readFileSync(join(react, file), 'utf8');
+      expect(readFileSync(join(again, file), 'utf8'), file).toBe(a);
+      const b = readFileSync(join(angular, file), 'utf8');
+      expect(
+        b
+          .replaceAll('node_modules/@slotted/angular/docs', 'node_modules/@slotted/react/dist/docs')
+          .replaceAll('@slotted/angular', '@slotted/react'),
+        file,
+      ).toBe(a);
+    }
+    const index = readFileSync(join(react, 'index.md'), 'utf8');
+    if (content.topics.length > 0) expect(index).toContain('## Guidelines');
+    for (const name of content.skills.keys()) expect(index).toContain(`./skills/${name}/SKILL.md`);
   });
 });

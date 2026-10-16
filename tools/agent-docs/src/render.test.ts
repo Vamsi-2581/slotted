@@ -13,9 +13,11 @@ import {
   renderIndex,
 } from './render.ts';
 import { collectStrings, untraceableLines } from './trace.ts';
+import { parseSkill } from './skills.ts';
 import { BUDGETS, GROUPS } from './types.ts';
 
 const main = (input = fieldInput) => renderFamily(input).files[0]!.content;
+const NO_CONTENT = { readme: '', topics: [], topicSources: new Map(), skills: new Map() };
 
 describe('renderFamily', () => {
   it('writes the fixed sections in order and omits those without data', () => {
@@ -148,7 +150,7 @@ describe('renderFamily', () => {
 
 describe('renderIndex', () => {
   it('groups families in the shelf order and lists one line each', () => {
-    const index = renderIndex([fieldInput, legacyInput], 'react');
+    const index = renderIndex([fieldInput, legacyInput], 'react', NO_CONTENT);
     expect(index).toBe(
       [
         '# Slotted for React',
@@ -170,7 +172,35 @@ describe('renderIndex', () => {
       ...fieldInput,
       contract: { ...fieldInput.contract, family: `family-${i}` },
     }));
-    expect(() => renderIndex(many, 'react')).toThrow(BudgetError);
+    expect(() => renderIndex(many, 'react', NO_CONTENT)).toThrow(BudgetError);
+  });
+
+  it('points at the guidelines index and lists each skill when the content has them', () => {
+    const skill = parseSkill(
+      '---\nname: waiting-states\ndescription: Use when a screen waits.\n---\n',
+    );
+    const topic = {
+      file: 'x.md',
+      topic: 'x',
+      prefix: 'AF',
+      triggers: [],
+      families: [],
+      frontmatter: '',
+      title: 'X',
+      intro: '',
+      rules: [],
+    };
+    const index = renderIndex([fieldInput], 'react', {
+      ...NO_CONTENT,
+      topics: [topic],
+      skills: new Map([['waiting-states', skill]]),
+    });
+    expect(index).toContain(
+      '## Guidelines\n\nRules for composing screens from these families: `./guidelines/index.md`.',
+    );
+    expect(index).toContain(
+      '## Skills\n\n- waiting-states: `./skills/waiting-states/SKILL.md` — Use when a screen waits.',
+    );
   });
 
   it('uses the shelves the contract schema declares', () => {

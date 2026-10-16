@@ -14,7 +14,8 @@
         "$TURBO_ROOT$/packages/styles/src/*/*.tokens.json",
         "$TURBO_ROOT$/apps/docs/examples/**",
         "$TURBO_ROOT$/tools/agent-docs/src/**",
-        "$TURBO_ROOT$/tools/agent-docs/bin/**"
+        "$TURBO_ROOT$/tools/agent-docs/bin/**",
+        "$TURBO_ROOT$/tools/agent-docs/content/**"
       ]
     },
     "@slotted/react#build": {
@@ -26,7 +27,8 @@
         "$TURBO_ROOT$/packages/styles/src/*/*.tokens.json",
         "$TURBO_ROOT$/apps/docs/examples/**",
         "$TURBO_ROOT$/tools/agent-docs/src/**",
-        "$TURBO_ROOT$/tools/agent-docs/bin/**"
+        "$TURBO_ROOT$/tools/agent-docs/bin/**",
+        "$TURBO_ROOT$/tools/agent-docs/content/**"
       ]
     },
     "@slotted/docs#build": {

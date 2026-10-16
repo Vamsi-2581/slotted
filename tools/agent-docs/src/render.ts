@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import type { ReferenceDocs } from '@slotted/storybook-workbench';
 
+import type { Content } from './content.ts';
 import { cell, code, fence, table } from './markdown.ts';
 import {
   BUDGETS,
@@ -372,7 +373,11 @@ export function siteExampleErrors(families: readonly FamilyInput[]): string[] {
   );
 }
 
-export function renderIndex(inputs: readonly FamilyInput[], binding: Binding): string {
+export function renderIndex(
+  inputs: readonly FamilyInput[],
+  binding: Binding,
+  content: Content,
+): string {
   const lines = [
     `# Slotted for ${FIXED_TEXT.bindingTitle[binding]}`,
     '',
@@ -390,13 +395,29 @@ export function renderIndex(inputs: readonly FamilyInput[], binding: Binding): s
       '',
     );
   }
-  const content = lines.join('\n');
-  if (Buffer.byteLength(content) > BUDGETS.index) {
+  if (content.topics.length > 0)
+    lines.push(
+      '## Guidelines',
+      '',
+      'Rules for composing screens from these families: `./guidelines/index.md`. Read it before writing a screen.',
+      '',
+    );
+  if (content.skills.size > 0)
+    lines.push(
+      '## Skills',
+      '',
+      ...[...content.skills.values()].map(
+        (skill) => `- ${skill.name}: \`./skills/${skill.name}/SKILL.md\` — ${skill.description}`,
+      ),
+      '',
+    );
+  const text = lines.join('\n');
+  if (Buffer.byteLength(text) > BUDGETS.index) {
     throw new BudgetError(
-      `index.md is ${Buffer.byteLength(content)} bytes; the budget is ${BUDGETS.index}`,
+      `index.md is ${Buffer.byteLength(text)} bytes; the budget is ${BUDGETS.index}`,
     );
   }
-  return content;
+  return text;
 }
 
 export function renderAgentsSnippet(binding: Binding): string {

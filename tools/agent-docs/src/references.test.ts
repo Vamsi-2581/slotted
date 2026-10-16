@@ -1,0 +1,48 @@
+import { resolve } from 'node:path';
+
+import { describe, expect, it } from 'vitest';
+
+import { loadCatalog, nameKind, unresolvedNames } from './references.ts';
+
+const root = resolve(import.meta.dirname, '../../..');
+const catalog = loadCatalog(root);
+const rules = new Set(['AF-01']);
+
+describe('nameKind', () => {
+  it.each([
+    ['data-grid', 'family'],
+    ['body', 'part'],
+    ['data-loading', 'state'],
+    ['bleed', 'axis-value'],
+    ['--slotted-app-shell-row-inset', 'token'],
+    ['--slotted-space-*', 'token-wildcard'],
+    ['aria-busy', 'aria'],
+    ['AF-01', 'rule'],
+    ['min-inline-size: 0', 'css-declaration'],
+  ])('%s resolves as %s', (name, kind) => {
+    expect(nameKind(name, catalog, rules)).toBe(kind);
+  });
+
+  it.each([
+    'size="sm"',
+    '/crm/customers/new',
+    'customers.credit_view',
+    'AF-99',
+    '--slotted-nope-*',
+  ])('%s does not resolve', (name) => {
+    expect(nameKind(name, catalog, rules)).toBeUndefined();
+  });
+});
+
+describe('unresolvedNames', () => {
+  // `css-declaration` takes a lowercase, hyphenated property: binding API in camelCase stays unresolved.
+  it('returns each unresolved backticked name once, in order', () => {
+    expect(
+      unresolvedNames(
+        'A `data-grid` with `rowHeader: true` and `rowHeader: true`, then `x.y`.',
+        catalog,
+        rules,
+      ),
+    ).toEqual(['rowHeader: true', 'x.y']);
+  });
+});

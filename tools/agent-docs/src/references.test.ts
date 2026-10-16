@@ -19,6 +19,10 @@ describe('nameKind', () => {
     ['aria-busy', 'aria'],
     ['AF-01', 'rule'],
     ['min-inline-size: 0', 'css-declaration'],
+    ['MUST', 'guideline-format'],
+    ['triggers', 'guideline-format'],
+    ['Check', 'guideline-format'],
+    ['Status: retired', 'guideline-format'],
   ])('%s resolves as %s', (name, kind) => {
     expect(nameKind(name, catalog, rules)).toBe(kind);
   });
@@ -44,5 +48,17 @@ describe('unresolvedNames', () => {
         rules,
       ),
     ).toEqual(['rowHeader: true', 'x.y']);
+  });
+
+  it('accepts the local names the caller passes: docs paths and topic files', () => {
+    const local = new Set(['{{docsDir}}/skeleton.md', 'list-pages.md']);
+    expect(
+      unresolvedNames(
+        'Read `{{docsDir}}/skeleton.md`, then `list-pages.md`, not `{{docsDir}}/nope.md`.',
+        catalog,
+        rules,
+        local,
+      ),
+    ).toEqual(['{{docsDir}}/nope.md']);
   });
 });

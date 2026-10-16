@@ -18,6 +18,25 @@ const ARIA = new Set(
     .map((name) => `aria-${name}`),
 );
 
+/** The words of the guideline format itself (`writing-rules.md`): levels, fields, front matter. */
+const GUIDELINE_FORMAT = new Set([
+  'MUST',
+  'SHOULD',
+  'MAY',
+  'Level',
+  'Applies to',
+  'Rule',
+  'Why',
+  'Do',
+  "Don't",
+  'Check',
+  'Status: retired',
+  'topic',
+  'prefix',
+  'triggers',
+  'families',
+]);
+
 /** A name that resolves against nothing above and stays, with the reason it stays. */
 export const REFERENCE_EXCEPTIONS: Readonly<Record<string, string>> = {};
 
@@ -78,11 +97,14 @@ export function nameKind(
   name: string,
   catalog: Catalog,
   ruleIds: ReadonlySet<string>,
+  local: ReadonlySet<string> = new Set(),
 ): string | undefined {
+  if (local.has(name)) return 'local';
   const known = catalog.names.get(name);
   if (known !== undefined) return known;
   if (/^[A-Z]{2}-\d{2}$/.test(name)) return ruleIds.has(name) ? 'rule' : undefined;
   if (ARIA.has(name)) return 'aria';
+  if (GUIDELINE_FORMAT.has(name)) return 'guideline-format';
   const wildcard = /^(--slotted-[a-z0-9-]+-)\*$/.exec(name);
   if (wildcard !== null)
     return catalog.tokens.some((token) => token.startsWith(wildcard[1]!))
@@ -97,10 +119,11 @@ export function unresolvedNames(
   markdown: string,
   catalog: Catalog,
   ruleIds: ReadonlySet<string>,
+  local: ReadonlySet<string> = new Set(),
 ): string[] {
   const found: string[] = [];
   for (const [, name] of markdown.matchAll(/`([^`\n]+)`/g))
-    if (nameKind(name!, catalog, ruleIds) === undefined && !found.includes(name!))
+    if (nameKind(name!, catalog, ruleIds, local) === undefined && !found.includes(name!))
       found.push(name!);
   return found;
 }

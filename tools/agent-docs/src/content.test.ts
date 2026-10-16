@@ -8,7 +8,7 @@ import { PUBLISHED_FORBIDDEN, renderTopic, topicErrors } from './guidelines.ts';
 import { loadCatalog, unresolvedNames } from './references.ts';
 import { previousRegistry, registryErrors, type Registry } from './registry.ts';
 import { renderAgentsSnippet } from './render.ts';
-import { renderContent, skillErrors } from './skills.ts';
+import { skillErrors } from './skills.ts';
 
 /**
  * The published guidelines and skills, read from `tools/agent-docs/content`:
@@ -26,10 +26,20 @@ const active = new Set(
 const published = [
   ...content.topics.map((topic) => [topic.file, renderTopic(topic)] as const),
   ['README.md', content.readme] as const,
-  ...[...content.skills].map(
-    ([name, skill]) => [`skills/${name}`, renderContent(skill.source, 'react')] as const,
-  ),
+  ...[...content.skills].map(([name, skill]) => [`skills/${name}`, skill.source] as const),
 ];
+/** What the source may name besides the library: placeholders, docs paths that exist, topic files. */
+const families = [...catalog.names].filter(([, kind]) => kind === 'family').map(([name]) => name);
+const guidelineFiles = ['index.md', 'README.md', ...content.topics.map((topic) => topic.file)];
+const local = new Set([
+  '{{docsDir}}',
+  '{{package}}',
+  '{{docsDir}}/<family>.md',
+  ...families.map((family) => `{{docsDir}}/${family}.md`),
+  ...guidelineFiles,
+  ...guidelineFiles.map((file) => `{{docsDir}}/guidelines/${file}`),
+  ...[...content.skills.keys()].map((name) => `{{docsDir}}/skills/${name}/SKILL.md`),
+]);
 
 describe('guidelines', () => {
   it('every topic is well formed', () => {
@@ -64,7 +74,7 @@ describe('guidelines', () => {
 
 describe('published text', () => {
   it.each(published)('%s names only what the library publishes', (_file, text) => {
-    expect(unresolvedNames(text, catalog, active)).toEqual([]);
+    expect(unresolvedNames(text, catalog, active, local)).toEqual([]);
   });
 
   it.each(published)('%s names neither the demo nor its tests', (_file, text) => {

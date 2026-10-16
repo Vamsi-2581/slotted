@@ -7,6 +7,10 @@ shows before its first answer, or which family a bar's search slot is for.
 Those are product decisions, and this directory records the ones the Nexora
 demo has settled.
 
+Rules that hold for any application ship in `@slotted/angular/docs/guidelines/`
+and are read from `node_modules`; this directory keeps the rules of the Nexora
+domain.
+
 Every rule here was met on a Nexora screen first. A rule without an
 observation is not written; an observation without a rule is a row in
 `../angular/LIBRARY-FEEDBACK.md`.

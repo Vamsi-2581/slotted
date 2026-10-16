@@ -42,7 +42,8 @@ Why: The bar's fold is written for a text field — open the region, move focus 
 Do: Answer the bar's request to open the search by cancelling it and opening the palette. Above the step the region shows the trigger as it always did.
 Don't: Let the region open, or hide the magnifier and leave a narrow bar with no way to the palette.
 Seen in: Nexora · banner at phone width · ledger row "search-toggle opens the region and moves focus to its first input"
-Check: At a width under the medium step, one press on the magnifier shows the palette and the bar does not carry the open-search state. Spec: the banner suite, "opens the command palette from the magnifier".
+Verified in: the banner suite, "opens the command palette from the magnifier"
+Check: At a width under the medium step, one press on the magnifier shows the palette and the bar does not carry the open-search state.
 
 ### SC-02 · Layer hosts leave the banner's row
 
@@ -53,7 +54,8 @@ Why: The banner is a flex row with a gap; an empty host is still a flex item and
 Do: Give such a host no box — the library's own layer hosts have none — or place the component outside the banner.
 Don't: Leave a consumer host in the row because its content is portalled anyway.
 Seen in: Nexora · banner, two of the row's gaps more air at the end than at the start · ledger row "a consumer component's host in it is an empty box"
-Check: The bar's first and last controls stand the same distance from the frame's two edges. Spec: the banner suite, "leaves nothing but the bar in the banner row".
+Verified in: the banner suite, "leaves nothing but the bar in the banner row"
+Check: The bar's first and last controls stand the same distance from the frame's two edges.
 
 ### SC-03 · A panel around a query container states its measure
 

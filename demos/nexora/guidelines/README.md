@@ -21,10 +21,6 @@ observation is not written; an observation without a rule is a row in
 | ------------------------- | ------ | ------------------------------------------------------------------------------ |
 | `index.md`                | —      | Every active rule in one line each. The only file a reader always loads        |
 | `writing-rules.md`        | —      | How a rule is written, numbered, evidenced and retired                         |
-| `async-feedback.md`       | `AF`   | What a screen shows while a request is in flight                               |
-| `layout-alignment.md`     | `LA`   | Where a control stands in its row or region                                    |
-| `shell-composition.md`    | `SC`   | How the application frame is composed from `app-shell` and its bars            |
-| `composition.md`          | `CP`   | Where a consumer's element goes: a family's slot before a block of one's own   |
 | `list-pages.md`           | `LP`   | How a screen that lists records is composed: bar, grid, footer, phone          |
 | `record-pages.md`         | `RP`   | How the page of one record is composed: header, figures, sections, missing     |
 | `forms.md`                | `FM`   | How a form that writes a record is placed, refused, read-only and left         |

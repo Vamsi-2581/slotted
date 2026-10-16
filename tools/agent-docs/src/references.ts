@@ -38,7 +38,11 @@ const GUIDELINE_FORMAT = new Set([
 ]);
 
 /** A name that resolves against nothing above and stays, with the reason it stays. */
-export const REFERENCE_EXCEPTIONS: Readonly<Record<string, string>> = {};
+export const REFERENCE_EXCEPTIONS: Readonly<Record<string, string>> = {
+  'minmax(0, 1fr)': 'the CSS grid track with a zero minimum that lets a family scroll (CP-03)',
+  '(hover: none) and (pointer: coarse)':
+    'the media query that identifies a touch-primary device (SC-06)',
+};
 
 function walk(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
@@ -63,6 +67,13 @@ export function loadCatalog(root: string): Catalog {
     for (const member of Object.keys((contract['members'] as object) ?? {})) add(member, 'family');
   }
   for (const contract of contracts) {
+    // A family declares its parts per member, and some also under `anatomy` or `elements`.
+    for (const member of Object.values((contract['members'] as Record<string, unknown>) ?? {})) {
+      const { parts, states } = member as { parts?: unknown; states?: unknown };
+      if (Array.isArray(parts)) for (const part of parts) add(String(part), 'part');
+      if (Array.isArray(states)) for (const state of states) add(String(state), 'state');
+    }
+    for (const part of Object.keys((contract['anatomy'] as object) ?? {})) add(part, 'part');
     for (const part of Object.keys((contract['elements'] as object) ?? {})) add(part, 'part');
     const states = contract['stateAttributes'];
     for (const state of Array.isArray(states) ? states : Object.keys((states as object) ?? {})) {

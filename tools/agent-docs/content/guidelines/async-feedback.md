@@ -32,10 +32,10 @@ families:
 What a screen shows between a request starting and its answer arriving. The
 library gives the states — `skeleton` for a region, `loading` on a control,
 `data-loading` and `aria-busy` on the families that fill themselves — and does
-not say which one a screen owes at which moment. The simulated backend answers
-in 120–650 ms under its normal transport and in 700–1600 ms degraded; a
-screen that shows nothing for that long reads as a stall, and a screen that
-shows its empty state reads as an answer.
+not say which one a screen owes at which moment. A request answers within a
+second on a fast network and takes several on a slow one; a screen that shows
+nothing for that long reads as a stall, and a screen that shows its empty
+state reads as an answer.
 
 ### AF-01 · Pending is not empty
 
@@ -44,9 +44,10 @@ Applies to: any region filled by a request — a `popover` body, a `list`, a `da
 Rule: A region whose first answer has not arrived shows its pending state; the empty state appears only after an answer holding zero items.
 Why: An empty state is a statement about the data, and before the answer there is no data to state anything about.
 Do: Keep a loading fact beside the items, set before the request and cleared after it. Render placeholders while the fact is true and the items are none; render the empty state while the fact is false and the items are none.
-Don't: Branch on the items alone. A region that opens on "Nothing waiting for you" while the request is in flight tells the reader the queue is clear, for as long as the transport takes.
+Don't: Branch on the items alone. A region that opens on "Nothing waiting for you" while the request is in flight tells the reader the queue is clear, for as long as the request takes.
 Seen in: Nexora · approvals and tasks panels under the banner · corrected
-Check: Set the transport to degraded in the demo panel, open the region cold; the empty words must not appear before the answer. Spec: the banner suite, "pending, not empty".
+Verified in: the banner suite, "pending, not empty"; the demo panel's degraded transport
+Check: Throttle the network to a slow profile and open the region cold; the empty words do not appear before the answer.
 
 ### AF-02 · First answer draws placeholders, later answers keep the rows
 
@@ -57,18 +58,19 @@ Why: Placeholders in place of rows the reader was looking at erase their place; 
 Do: Placeholders are the family `skeleton`: a region carrying the state and, inside it, the rows' own boxes — the mark, the label line, the description line — so the answer lands without a layout shift. A placeholder line is a fraction of its row, never a length: a length wider than a phone's row overflows the page and scrolls it sideways. While items are shown and a request runs, the list carries `aria-busy` and the rows stay.
 Don't: Draw placeholders on every request, or clear the items before every request. Reading a list back after marking one row is a refresh, not a first load.
 Seen in: Nexora · notifications panel under the bell, approvals and tasks panels, demo controls · corrected
-Check: Open the panel twice with the transport degraded: placeholders on the first open, the previous rows and no placeholders on the second.
+Check: Open the region twice with the network throttled to a slow profile: placeholders on the first open, the previous rows and no placeholders on the second.
 
 ### AF-03 · The control that starts a request waits on it
 
 Level: MUST
-Applies to: any `button`, `icon-button` or `toggle-button` whose activation runs a request — mark as read, archive, approve, save, submit
+Applies to: any `button` member — button, icon button, toggle button — whose activation runs a request — mark as read, archive, approve, save, submit
 Rule: From activation until the answer, the control is in its `loading` state: it refuses a second activation and shows the family's indicator.
 Why: A control that looks idle invites a second press, and the second request is a duplicate the backend has to refuse or the reader has to undo.
 Do: Keep, beside the data, the identity of what is in flight — the row's key for a row action, one fact for a list-wide action — and bind the control's `loading` to it. The family refuses activation on its own and names the wait for assistive technology through its loading label.
 Don't: Disable the control by hand, hide it, or leave it as it was until the row disappears. Disabled says "not allowed"; loading says "working on it".
 Seen in: Nexora · Notifications page, mark as read, archive, mark all as read · corrected
-Check: Press the control with the transport degraded: the indicator appears, a second press does nothing, the row changes once. Spec: the notifications store suite, "busy while its mutation is in flight".
+Verified in: the notifications store suite, "busy while its mutation is in flight"
+Check: Press the control with the network throttled to a slow profile: the indicator appears, a second press does nothing, the row changes once.
 
 ### AF-04 · A change of view or page draws placeholders
 
@@ -79,7 +81,7 @@ Why: The rows on screen are the previous answer; leaving them under the new tab 
 Do: Empty the items on the change and let AF-01 draw the placeholders. Keep what does not change — the tab strip, the pager, the header — where it is.
 Don't: Keep the old rows until the new ones arrive, or replace the whole region including the tab strip with a placeholder block.
 Seen in: Nexora · Notifications page, All / Unread / Archived and the pager · corrected
-Check: Switch the view with the transport degraded: placeholders at once, the tab strip and the pager still in place, rows on the answer.
+Check: Switch the view with the network throttled to a slow profile: placeholders at once, the tab strip and the pager still in place, rows on the answer.
 
 ### AF-05 · An indicator may wait for the request to be slow
 
@@ -90,18 +92,18 @@ Why: An indicator that appears and leaves within one frame is a flicker, and a r
 Do: Use the family's delay on a control whose request is short in the normal case and leave the control refusing activation from the first instant, which the family does regardless of the delay.
 Don't: Delay a region's placeholders, or delay a control's refusal of activation.
 Seen in: —
-Check: With the transport normal, a short request shows no indicator and still ignores a second press; with the transport degraded, the indicator appears.
+Check: On an unthrottled network a short request shows no indicator and still ignores a second press; with the network throttled to a slow profile, the indicator appears.
 
 ### AF-06 · Placeholders are held once they are drawn
 
 Level: SHOULD
 Applies to: every region under AF-01, through the application's own defaults for the family
 Rule: The application states one minimum duration for the whole product: once placeholders are painted they stay for it, even when the answer has already arrived.
-Why: The backend answers between 120 and 650 milliseconds under its normal transport, so an undelayed region paints and is replaced inside a few frames — a blink the reader reads as a fault rather than as a wait.
+Why: A request on a fast network answers within a few hundred milliseconds, so an undelayed region paints and is replaced inside a few frames — a blink the reader reads as a fault rather than as a wait.
 Do: State the minimum where the application states its other family defaults, and leave the delay at nothing: AF-05 keeps a region's placeholders undelayed, and the minimum is the other half of the same decision.
 Don't: Set the minimum per screen, or reach for a delay to stop the blink — a delay is a region showing nothing for as long as it lasts.
 Seen in: Nexora · the catalogue screens, whose tab changes and category reads answer inside one frame · corrected
-Check: With the transport normal, open a catalogue screen twice: the placeholders are visible on both, and no region paints and empties within one frame.
+Check: On an unthrottled network, open a screen of placeholders twice: the placeholders are visible on both, and no region paints and empties within one frame.
 
 ### AF-07 · A record another actor changes offers Refresh
 

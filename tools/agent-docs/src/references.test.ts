@@ -12,6 +12,8 @@ describe('nameKind', () => {
   it.each([
     ['data-grid', 'family'],
     ['body', 'part'],
+    ['nav-header', 'part'],
+    ['action', 'part'],
     ['data-loading', 'state'],
     ['bleed', 'axis-value'],
     ['--slotted-app-shell-row-inset', 'token'],

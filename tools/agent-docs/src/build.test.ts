@@ -78,7 +78,10 @@ describe('buildDocs', () => {
     const result = await buildDocs({ binding: 'react', root, out: a });
     await buildDocs({ binding: 'react', root, out: b });
 
-    const files = readdirSync(a);
+    // The directories (guidelines/, skills/) have their own test below.
+    const files = readdirSync(a, { withFileTypes: true })
+      .filter((entry) => entry.isFile())
+      .map((entry) => entry.name);
     expect(result.families).toBe(contracts.length);
     expect(files).toContain('index.md');
     expect(files).toContain('AGENTS.snippet.md');
@@ -86,7 +89,12 @@ describe('buildDocs', () => {
       expect(files).toContain(`${family}.md`);
       expect(files).toContain(`${family}.json`);
     }
-    expect(readdirSync(b).sort()).toEqual(files.sort());
+    expect(
+      readdirSync(b, { withFileTypes: true })
+        .filter((entry) => entry.isFile())
+        .map((entry) => entry.name)
+        .sort(),
+    ).toEqual(files.sort());
     for (const file of files) {
       expect(readFileSync(join(b, file), 'utf8'), file).toBe(readFileSync(join(a, file), 'utf8'));
     }
@@ -100,13 +108,8 @@ describe('buildDocs', () => {
     await buildDocs({ binding: 'angular', root, out: angular });
 
     const content = loadContent(root);
-    // No topics, no guidelines directory: the guards fall away once content/ has topics (Task 7).
-    const guidelines =
-      content.topics.length > 0
-        ? ['README.md', 'index.md', ...content.topics.map((topic) => topic.file)]
-        : [];
-    if (content.topics.length > 0)
-      expect(readdirSync(join(react, 'guidelines')).sort()).toEqual(guidelines.sort());
+    const guidelines = ['README.md', 'index.md', ...content.topics.map((topic) => topic.file)];
+    expect(readdirSync(join(react, 'guidelines')).sort()).toEqual([...guidelines].sort());
     const skills = [...content.skills.keys()].map((name) => `skills/${name}/SKILL.md`);
     const files = [...guidelines.map((file) => `guidelines/${file}`), ...skills];
     for (const file of files) {
@@ -121,7 +124,7 @@ describe('buildDocs', () => {
       ).toBe(a);
     }
     const index = readFileSync(join(react, 'index.md'), 'utf8');
-    if (content.topics.length > 0) expect(index).toContain('## Guidelines');
+    expect(index).toContain('## Guidelines');
     for (const name of content.skills.keys()) expect(index).toContain(`./skills/${name}/SKILL.md`);
   });
 });

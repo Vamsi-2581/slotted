@@ -1,5 +1,5 @@
 /**
- * CP-05 of `demos/nexora/guidelines/composition.md`: an element a screen
+ * CP-05 of `tools/agent-docs/content/guidelines/composition.md`: an element a screen
  * writes for itself paints with the theme's tokens, and with nothing else.
  *
  * The check lives here rather than in the demo's own suite because it reads

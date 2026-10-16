@@ -12,7 +12,7 @@ screen:
 
 1. Read `index.md`: every active rule in one line, with its level and its file.
 2. Match the task against the `triggers` in each topic file's front matter.
-   Read the topic files that match, and composition.md always.
+   Read the topic files that match, and `composition.md` always.
 3. Before writing an element beside a family, read that family's page in
    `{{docsDir}}`.
 4. Apply the rules by level: a `MUST` broken is a defect, a `SHOULD` broken is
@@ -21,6 +21,6 @@ screen:
 
 ## Rule identity
 
-An id (AF-03) never changes meaning. A rule whose meaning or level changes
+An id (`AF-03`) never changes meaning. A rule whose meaning or level changes
 is retired, keeps its heading with `Status: retired`, and is rewritten under a
 new id. The release notes of each version list the ids added and retired.

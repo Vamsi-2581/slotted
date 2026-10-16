@@ -66,7 +66,7 @@ Applies to: two or more elements a page writes beside each other with no family 
 Rule: Sibling elements of the page's own stand in `inline` (one row) or `stack` (one column) with a gap from the space scale, and text of the page's own takes its size from the typography family; bare inline siblings and bare text are not written.
 Why: Two inline elements with nothing between them touch, and a badge beside a word sits on the text baseline rather than the row's centre; bare text takes the document's 16-pixel body size inside a region whose families set 13.
 Do: Wrap the run in `inline` (centre-aligned by default, a two-step gap for marks beside a word) and each line of a block in `stack`; give every span of the page's own the typography family's `size`. The families' own parts — a list item's label, a cell's value, a description — already carry their size and gap and need none of this.
-Don't: Write `{{ name }} <badge>` in a cell, a `dd` holding three tags with nothing between them, or address lines as plain spans.
+Don't: Write a name and a `badge` run together as text in a cell, a `description-list` value holding three tags with nothing between them, or address lines as plain spans.
 Seen in: Nexora · Customer 360 — tags touching in the Account list, "Primary" hanging off a contact's name, addresses at 16 pixels beside a 13-pixel description list · corrected
 Check: Every element of the page's own that has a sibling is a child of `inline` or `stack`; no bare span inside a family's part carries the body size.
 
@@ -98,21 +98,23 @@ Level: MUST
 Applies to: any CSS a screen writes for an element of its own, under CP-04 or beside a family
 Rule: Every value the element paints comes from the theme — space, type, ink, border, radius, elevation and motion — where the theme has a token for it; a literal is written only beside a comment that says what decided it and why no token covers it.
 Why: A literal is what makes a screen look adjacent to the product rather than part of it: it ignores the scheme switch, the three densities and the theme's own retuning, and it is the first thing that drifts when the theme moves.
-Do: Read `--slotted-space-*` for every gap and inset, `--slotted-text-*` and `--slotted-surface-*` for ink and ground, the typography family's `size` for every word, and the published measures of the family the element stands in — `--slotted-app-shell-row-inset` inside the navigation column, the control heights beside a control. Some values have no token and never will: a measure a column is capped at, a container query's step, an optical nudge of a pixel, the geometry of a shape the screen draws. Write those, in `rem` where the value scales with the type and in pixels where it does not, and put the reason beside them — the check reads that comment and passes. The escape is for a value the theme does not hold, not for a value it does.
-Don't: Write a hex colour, a `font-size` or a gap the theme already holds a token for, and do not read another family's private custom property. A literal with no reason beside it is the defect this rule is about; a reasoned one is a decision the next reader can weigh.
+Do: Read `--slotted-space-*` for every gap and inset, `--slotted-text-*` and `--slotted-surface-*` for ink and ground, the typography family's `size` for every word, and the published measures of the family the element stands in — `--slotted-app-shell-row-inset` inside the navigation column, the control heights beside a control. Some values have no token and never will: a measure a column is capped at, a container query's step, an optical nudge of a pixel, the geometry of a shape the screen draws. Write those, in rem where the value scales with the type and in pixels where it does not, and put the reason beside them — the check reads that comment and passes. The escape is for a value the theme does not hold, not for a value it does.
+Don't: Write a hex colour, a font size or a gap the theme already holds a token for, and do not read another family's private custom property. A literal with no reason beside it is the defect this rule is about; a reasoned one is a decision the next reader can weigh.
 Seen in: Nexora · Customer 360 and Import customers, every element of the page's own · corrected
-Check: Spec: `specs/demo-screen-tokens.test.mjs`, "no screen paints with a literal a token covers" — it reads every `styles` block, skips queries, hairlines and any line carrying a `literal:` comment, and names what is left.
+Verified in: specs/demo-screen-tokens.test.mjs, "no screen paints with a literal a token covers"
+Check: Read every stylesheet of the screen, skipping media and container queries, hairlines and any line whose comment gives its reason: no colour, type size or gap remains that a theme token covers.
 
 ### CP-06 · A state the family already draws is not drawn again
 
 Level: SHOULD
 Applies to: the axes a screen passes to a family — `variant`, `tone`, `size`, `current`, `complete` — and any mark a screen adds beside a part the family fills
 Rule: A screen states a state once. Where the family has a state for it, the screen sets that state and adds nothing louder beside it.
-Why: The second statement is never the same size as the first: `current` on a `timeline` item draws a target, and `variant="solid"` over it adds a halo two rules wide that crowds the title; a `badge` beside a description that already says "Waiting on this role" says it twice at two weights.
+Why: The second statement is never the same size as the first: `current` on a `timeline` item draws a target, and the `solid` `variant` over it adds a halo two rules wide that crowds the title; a `badge` beside a description that already says "Waiting on this role" says it twice at two weights.
 Do: Set the state the family names, read what it draws, and stop. Where an axis is passed as well, the screen can say what that axis adds which the state does not already carry.
 Don't: Reach for the loudest variant to make a state visible, or add a mark beside a part that already carries the words.
 Seen in: Nexora · the approval chain — a solid marker on the current step, and a status badge beside the sentence that said the same thing · corrected
-Check: For every axis a screen passes to a family, the screen can name what it adds beyond the family's own state. Spec: the approval panel suite, "leaves the marker to the family and asks for no louder variant" and "says the role and what the step waits on, once each".
+Verified in: the approval panel suite, "leaves the marker to the family and asks for no louder variant" and "says the role and what the step waits on, once each"
+Check: For every axis a screen passes to a family, the screen can name what it adds beyond the family's own state.
 
 ### CP-07 · A page's width is its type's
 
@@ -134,4 +136,5 @@ Why: The line beside Reply and Internal note was longer in one mode and wrapped 
 Do: Give the varying text `flex: 1 1 0`, `min-inline-size: 0` and a one-line cut, write the two texts to similar lengths, and keep a control's label set fixed across modes.
 Don't: Let a mode add or remove a line, a hint or a control that changes the region's height, or let a row wrap differently in one mode than in the other.
 Seen in: Nexora · the ticket composer's mode line · corrected
-Check: At 1280, 570 and 390 pixels, `tools/look.mjs` with an expression that switches the mode reports the same top for the composer's textarea in both modes.
+Verified in: tools/look.mjs at 1280, 570 and 390 pixels on the ticket composer
+Check: At 1280, 570 and 390 pixels, switch the mode and read the bounding box of each box in the region: every top and height is the same in both modes.

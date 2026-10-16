@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { currentRegistry, registryAt } from '../tools/agent-docs/src/registry.ts';
 import { isPublishable, readPackageDirectories, tarballName } from './pack-beta.mjs';
 
 /**
@@ -97,7 +98,7 @@ export function publishOrder(manifests) {
 
 const BOOKKEEPING = [/^Merge /, /^docs\(progress\)/];
 
-/** The guideline ids a release adds, retires and rewrites, read from two `ids.json`. */
+/** The guideline ids a release adds, retires and rewrites, read from the topics at the last tag and now. */
 export function guidelineChanges(previous, current) {
   // Only a rule released as active can be retired or rewritten in a release.
   const newlyRetired = Object.keys(current)
@@ -201,14 +202,9 @@ function prepare(requested, dryRun) {
   const subjects = output('git', ['log', `${previous}..HEAD`, '--format=%s'])
     .split('\n')
     .filter(Boolean);
-  const idsPath = 'tools/agent-docs/content/guidelines/ids.json';
-  const before = spawnSync('git', ['show', `${previous}:${idsPath}`], {
-    cwd: repositoryRoot,
-    encoding: 'utf8',
-  });
   const guidelines = guidelineChanges(
-    before.status === 0 ? JSON.parse(before.stdout) : {},
-    JSON.parse(readFileSync(join(repositoryRoot, idsPath), 'utf8')),
+    registryAt(repositoryRoot, previous) ?? {},
+    currentRegistry(repositoryRoot),
   );
   const entry = changelogEntry(
     version,

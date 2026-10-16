@@ -3,10 +3,10 @@ import { join, resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { contentDir, loadContent } from './content.ts';
+import { loadContent } from './content.ts';
 import { PUBLISHED_FORBIDDEN, renderTopic, topicErrors } from './guidelines.ts';
 import { loadCatalog, unresolvedNames } from './references.ts';
-import { previousRegistry, registryErrors, type Registry } from './registry.ts';
+import { previousRegistry, registryErrors, registryOf } from './registry.ts';
 import { renderAgentsSnippet } from './render.ts';
 import { skillErrors } from './skills.ts';
 import { loadTokenSource, renderTokens } from './tokens.ts';
@@ -68,11 +68,8 @@ describe('guidelines', () => {
     expect(demoPrefixes.filter((prefix) => prefixes.includes(prefix))).toEqual([]);
   });
 
-  it('ids.json matches the topics and the last release', () => {
-    const registry = JSON.parse(
-      readFileSync(join(contentDir(root), 'guidelines/ids.json'), 'utf8'),
-    ) as Registry;
-    expect(registryErrors(content.topics, registry, previousRegistry(root))).toEqual([]);
+  it('every id the last release carried is still in a topic, at its level or retired', () => {
+    expect(registryErrors(registryOf(content.topics), previousRegistry(root))).toEqual([]);
   });
 });
 

@@ -1,74 +1,91 @@
 import { execFileSync } from 'node:child_process';
 
-import type { Level, Topic } from './guidelines.ts';
+import { loadContent, NOT_TOPICS } from './content.ts';
+import { parseTopic, type Level, type Topic } from './guidelines.ts';
 
 /**
- * Every rule id ever issued, with its level and status. An id is never removed
- * or reused, and an active rule keeps its level: a change of meaning or level
- * retires the rule and issues a new id.
+ * Every rule id the topics hold, with its status, its level while active, and
+ * the id that rewrote it. Read from the topics themselves: the heading is the
+ * id, `Level` the level, `Status: retired · rewritten as XX-NN` the rewrite.
+ * Against the last release, an id is never removed or reused, and an active
+ * rule keeps its level.
  */
 export interface RegistryEntry {
-  level: Level;
   status: 'active' | 'retired';
+  level?: Level;
   replacedBy?: string;
 }
 export type Registry = Record<string, RegistryEntry>;
 
-export const REGISTRY_PATH = 'tools/agent-docs/content/guidelines/ids.json';
+const GUIDELINES = 'tools/agent-docs/content/guidelines';
+const REWRITTEN = /\brewritten as ([A-Z]{2}-\d{2})\b/;
 
-export function registryErrors(
-  topics: readonly Topic[],
-  current: Registry,
-  previous: Registry | undefined,
-): string[] {
+export function registryOf(topics: readonly Topic[]): Registry {
+  const registry: Registry = {};
+  for (const topic of topics)
+    for (const rule of topic.rules) {
+      if (rule.status === 'active') {
+        registry[rule.id] = { status: 'active', level: rule.level! };
+        continue;
+      }
+      const replacedBy = REWRITTEN.exec(rule.statusText ?? '')?.[1];
+      registry[rule.id] =
+        replacedBy === undefined ? { status: 'retired' } : { status: 'retired', replacedBy };
+    }
+  return registry;
+}
+
+export function registryErrors(current: Registry, previous: Registry | undefined): string[] {
   const errors: string[] = [];
-  const rules = new Map(
-    topics.flatMap((topic) => topic.rules.map((rule) => [rule.id, rule] as const)),
-  );
-  for (const [id, rule] of rules) {
-    const entry = current[id];
-    if (entry === undefined) {
-      errors.push(`${id}: in a topic, not in ids.json`);
-      continue;
-    }
-    if (entry.status !== rule.status)
-      errors.push(`${id}: ids.json says ${entry.status}, the topic says ${rule.status}`);
-    else if (rule.status === 'active' && entry.level !== rule.level)
-      errors.push(`${id}: ids.json says ${entry.level}, the topic says ${rule.level}`);
-  }
-  for (const id of Object.keys(current))
-    if (!rules.has(id)) errors.push(`${id}: in ids.json, in no topic`);
-  if (previous !== undefined) {
-    for (const [id, before] of Object.entries(previous)) {
-      const now = current[id];
-      if (now === undefined) errors.push(`${id}: released before, gone from ids.json`);
-      else if (before.status === 'retired' && now.status === 'active')
-        errors.push(`${id}: retired before, active again`);
-      else if (before.status === 'active' && now.status === 'active' && before.level !== now.level)
-        errors.push(
-          `${id}: level changed from ${before.level} to ${now.level}; retire it and issue a new id`,
-        );
-    }
+  for (const [id, before] of Object.entries(previous ?? {})) {
+    const now = current[id];
+    if (now === undefined) errors.push(`${id}: released before, gone from the topics`);
+    else if (before.status === 'retired' && now.status === 'active')
+      errors.push(`${id}: retired before, active again`);
+    else if (before.status === 'active' && now.status === 'active' && before.level !== now.level)
+      errors.push(
+        `${id}: level changed from ${before.level} to ${now.level}; retire it and issue a new id`,
+      );
   }
   return errors.sort();
 }
 
-/** `ids.json` as the last `v*` tag has it; none before the first release that carries it. */
-export function previousRegistry(root: string): Registry | undefined {
+function git(root: string, args: string[]): string {
+  return execFileSync('git', args, {
+    cwd: root,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore'],
+  });
+}
+
+/** The registry of the topics `ref` holds; none when `ref` has no guidelines. */
+export function registryAt(root: string, ref: string): Registry | undefined {
   try {
-    const tag = execFileSync('git', ['describe', '--tags', '--abbrev=0', '--match', 'v*'], {
-      cwd: root,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-    return JSON.parse(
-      execFileSync('git', ['show', `${tag}:${REGISTRY_PATH}`], {
-        cwd: root,
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'ignore'],
-      }),
-    ) as Registry;
+    const files = git(root, ['ls-tree', '--name-only', ref, `${GUIDELINES}/`])
+      .split('\n')
+      .map((path) => path.slice(GUIDELINES.length + 1))
+      .filter((file) => file.endsWith('.md') && !NOT_TOPICS.has(file));
+    if (files.length === 0) return undefined;
+    return registryOf(
+      files.map((file) => parseTopic(file, git(root, ['show', `${ref}:${GUIDELINES}/${file}`]))),
+    );
   } catch {
     return undefined;
   }
+}
+
+/** The registry of the last `v*` tag; none before the first release that carries guidelines. */
+export function previousRegistry(root: string): Registry | undefined {
+  try {
+    return registryAt(
+      root,
+      git(root, ['describe', '--tags', '--abbrev=0', '--match', 'v*']).trim(),
+    );
+  } catch {
+    return undefined;
+  }
+}
+
+export function currentRegistry(root: string): Registry {
+  return registryOf(loadContent(root).topics);
 }

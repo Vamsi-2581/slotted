@@ -116,7 +116,7 @@ test('lists the guideline ids a release adds, retires and rewrites', () => {
   assert.deepEqual(guidelineChanges(current, current), []);
 });
 
-test('the first release with ids.json lists its active rules as added, and no retired one', () => {
+test('the first release with guidelines lists its active rules as added, and no retired one', () => {
   const current = {
     'AF-01': { level: 'MUST', status: 'active' },
     'LP-07': { level: 'SHOULD', status: 'retired', replacedBy: 'LP-12' },

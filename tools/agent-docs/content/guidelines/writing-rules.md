@@ -69,6 +69,9 @@ RFC 2119, three words:
 destination>` as its first field, and loses its body. It leaves `index.md`.
 - A rule that changes meaning is retired and rewritten under a new number. A
   rule whose wording improves keeps its number.
+- A rule rewritten under a new number says so in its status:
+  `Status: retired · rewritten as LP-12, which …`. The release notes read the
+  new id from those words.
 
 ## What a rule does not contain
 
@@ -125,5 +128,5 @@ picture, never of the rule.
    demo test goes to `Verified in`.
 3. No word in the forbidden list above appears in the body.
 4. The demo satisfies the rule, or the rule says which ledger row blocks it.
-5. `ids.json` gains the id with its level and `active`; `index.md` is
-   generated.
+5. The heading's id is new in its topic; `index.md` and the release notes
+   are generated from the topics.

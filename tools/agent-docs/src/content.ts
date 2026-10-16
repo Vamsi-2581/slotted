@@ -5,7 +5,7 @@ import { parseTopic, type Topic } from './guidelines.ts';
 import { parseSkill, type Skill } from './skills.ts';
 
 /** Files of `content/guidelines` that are not topics; `writing-rules.md` is never published. */
-const NOT_TOPICS = new Set(['README.md', 'writing-rules.md', 'index.md']);
+export const NOT_TOPICS = new Set(['README.md', 'writing-rules.md', 'index.md']);
 
 export interface Content {
   readme: string;

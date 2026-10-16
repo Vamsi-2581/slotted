@@ -126,8 +126,9 @@ function constArray(source: string, name: string): string[] {
 /**
  * The public API of the theme packages, read from their sources: the value
  * exports of `@slotted/theme` and its conformance module, its command, the
- * subpaths of both packages, the attributes that select a theme, the seed
- * properties, the cascade layers, and the scheme and density values.
+ * subpaths of both packages, the keys of a theme definition, the attributes
+ * that select a theme, the seed properties, the cascade layers, and the scheme
+ * and density values.
  */
 function addThemeApi(root: string, add: (name: string, kind: string) => void): void {
   const theme = join(root, 'packages/theme');
@@ -156,6 +157,9 @@ function addThemeApi(root: string, add: (name: string, kind: string) => void): v
     for (const subpath of Object.keys(manifest.exports))
       add(manifest.name + subpath.slice(1), 'theme-api');
   }
+  const definition = /interface ThemeDefinition \{([^}]*)\}/.exec(read('src/define.ts'))?.[1];
+  if (definition === undefined) throw new Error('no interface ThemeDefinition');
+  for (const [, key] of definition.matchAll(/readonly (\w+)\??:/g)) add(key!, 'theme-option');
   for (const [, attribute] of read('src/rule-policy.ts').matchAll(/'(data-slotted-[a-z-]+)'/g))
     add(attribute!, 'theme-attribute');
   for (const seed of constArray(read('src/seeds.ts'), 'SEED_NAMES'))

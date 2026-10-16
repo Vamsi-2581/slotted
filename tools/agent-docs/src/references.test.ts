@@ -41,6 +41,9 @@ describe('nameKind', () => {
     ['slotted.theme-rules', 'layer'],
     ['high-contrast', 'theme-axis-value'],
     ['system', 'theme-axis-value'],
+    ['densities', 'theme-option'],
+    ['reducedMotion', 'theme-option'],
+    ['seeds', 'theme-option'],
   ])('%s resolves as %s', (name, kind) => {
     expect(nameKind(name, catalog, rules)).toBe(kind);
   });

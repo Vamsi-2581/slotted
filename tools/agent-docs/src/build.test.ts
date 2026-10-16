@@ -8,6 +8,7 @@ import { buildDocs } from './build.ts';
 import { loadContent } from './content.ts';
 import { nonEnglishSnippets } from './language-report.ts';
 import { loadFamilies } from './load.ts';
+import { THEME_SCOPE } from './skills.ts';
 
 const root = resolve(import.meta.dirname, '../../..');
 const contracts = readdirSync(join(root, 'specs/components'), { withFileTypes: true })
@@ -123,6 +124,7 @@ describe('buildDocs', () => {
       const b = readFileSync(join(angular, file), 'utf8');
       expect(
         b
+          .replaceAll(THEME_SCOPE.angular, THEME_SCOPE.react)
           .replaceAll('node_modules/@slotted/angular/docs', 'node_modules/@slotted/react/dist/docs')
           .replaceAll('@slotted/angular', '@slotted/react'),
         file,

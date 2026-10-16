@@ -11,10 +11,11 @@ Before writing or changing UI, read `node_modules/@slotted/angular/docs/index.md
 
 ### Tasks
 
-| Task                                                                    | Read first                                   |
-| ----------------------------------------------------------------------- | -------------------------------------------- |
-| Compose or change a screen: a list, a record, a form, an overview       | `node_modules/@slotted/angular/docs/skills/compose-screen/SKILL.md` |
-| Show what a screen draws while it waits, and its empty and error states | `node_modules/@slotted/angular/docs/skills/waiting-states/SKILL.md` |
+Read the skill before the task:
+
+- Compose or change a screen — a list, a record, a form, an overview: `node_modules/@slotted/angular/docs/skills/compose-screen/SKILL.md`
+- Show what a screen draws while it waits, and its empty and error states: `node_modules/@slotted/angular/docs/skills/waiting-states/SKILL.md`
+- Review a screen against the guidelines, or fix what a review found: `node_modules/@slotted/angular/docs/skills/review-screen/SKILL.md`
 
 ## Nexora domain rules
 

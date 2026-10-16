@@ -94,6 +94,17 @@
         { "kind": "mentions", "pattern": "focus-visible[\\s\\S]{0,400}--slotted-focus-ring-" },
         { "kind": "mentions", "pattern": "--slotted-tone-" }
       ]
+    },
+    {
+      "id": "review-orders",
+      "skill": "review-screen",
+      "seed": "review-orders",
+      "prompt": "Review the orders screen in src/ against the library's guidelines and fix every defect you find.",
+      "assertions": [
+        { "kind": "no-literal" },
+        { "kind": "absent", "pattern": "data-part=" },
+        { "kind": "mentions", "pattern": "loading" }
+      ]
     }
   ]
 }

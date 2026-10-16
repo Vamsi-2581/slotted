@@ -1,7 +1,0 @@
-interface:
-  display_name: 'Component craft'
-  short_description: 'Build a complete Slotted component family'
-  default_prompt: 'Use $component to build or rebuild the Slotted <family> component family.'
-
-policy:
-  allow_implicit_invocation: false

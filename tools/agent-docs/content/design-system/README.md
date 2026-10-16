@@ -1,4 +1,4 @@
-Slotted is a library of component families for React (`@slotted/react`) and Angular (`@slotted/angular`). Each family draws one kind of interface — a button, a field, a data grid, a page header — and reads every value it paints from the theme. These rules hold for a screen built from the families and for anything built beside them.
+Slotted is a library of component families for React (`@slotted/react`) and Angular (`@slotted/angular`). Each family draws one kind of interface — a button, a field, a data grid, a page header — and reads every value it paints from the theme. These rules hold for a screen built from the families and for anything built beside them. An id such as CP-01 names a rule of the Slotted guidelines; each package ships them in the guidelines index of its documentation directory: dist/docs in the React package, docs in the Angular one.
 
 ## Build with the families
 

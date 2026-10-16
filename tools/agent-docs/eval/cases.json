@@ -1,0 +1,89 @@
+{
+  "model": "claude-sonnet-5-5",
+  "runs": 3,
+  "bindings": ["react", "angular"],
+  "cases": [
+    {
+      "id": "orders-list",
+      "skill": "compose-screen",
+      "prompt": "Write the orders list screen in src/: a searchable, filterable, paged list of orders (number, customer, status, total, date) read from fetchOrders(query) in src/api.ts, which you also write as a stub returning a Promise.",
+      "assertions": [
+        { "kind": "uses-family", "family": "data-grid" },
+        { "kind": "uses-family", "family": "filter-bar" },
+        { "kind": "uses-family", "family": "pagination" },
+        { "kind": "no-literal" }
+      ]
+    },
+    {
+      "id": "customer-record",
+      "skill": "compose-screen",
+      "prompt": "Write the page of one customer in src/: its name, status, three figures (open orders, lifetime revenue, overdue balance) and two related lists, orders and activity, read from fetchCustomer(id) in src/api.ts, which you also write as a stub.",
+      "assertions": [
+        { "kind": "uses-family", "family": "page-header" },
+        { "kind": "uses-family", "family": "stat-card" },
+        { "kind": "uses-family", "family": "tabs" },
+        { "kind": "no-literal" }
+      ]
+    },
+    {
+      "id": "customer-form",
+      "skill": "compose-screen",
+      "prompt": "Write the create-customer form in src/: name, email, phone, credit limit; submit calls createCustomer(input) in src/api.ts, a stub that can reject with field errors keyed by field name.",
+      "assertions": [
+        { "kind": "uses-family", "family": "form" },
+        { "kind": "uses-family", "family": "field" },
+        { "kind": "mentions", "pattern": "loading" },
+        { "kind": "no-literal" }
+      ]
+    },
+    {
+      "id": "sales-overview",
+      "skill": "compose-screen",
+      "prompt": "Write a sales overview screen in src/: four figures for this month and a chart of revenue per week, read from fetchOverview() in src/api.ts, a stub.",
+      "assertions": [
+        { "kind": "uses-family", "family": "stat-card" },
+        { "kind": "uses-family", "family": "chart" },
+        { "kind": "no-literal" }
+      ]
+    },
+    {
+      "id": "metrics-card-loading",
+      "skill": "waiting-states",
+      "prompt": "In src/, write a card that shows three metrics read from fetchMetrics() in src/api.ts (a stub that resolves after two seconds). Show what the card draws while it waits.",
+      "assertions": [
+        { "kind": "uses-family", "family": "skeleton" },
+        { "kind": "uses-family", "family": "card" },
+        { "kind": "no-literal" }
+      ]
+    },
+    {
+      "id": "save-button-wait",
+      "skill": "waiting-states",
+      "prompt": "In src/, write a settings panel with a Save button that calls saveSettings(values) in src/api.ts, a stub that resolves after one second. A second press while saving must do nothing.",
+      "assertions": [
+        { "kind": "uses-family", "family": "button" },
+        { "kind": "mentions", "pattern": "loading" },
+        { "kind": "no-literal" }
+      ]
+    },
+    {
+      "id": "notifications-empty",
+      "skill": "waiting-states",
+      "prompt": "In src/, write a notifications list read from fetchNotifications() in src/api.ts, a stub that can resolve to an empty array or reject. Handle every state the list can be in.",
+      "assertions": [
+        { "kind": "uses-family", "family": "skeleton" },
+        { "kind": "uses-family", "family": "result-state" },
+        { "kind": "no-literal" }
+      ]
+    },
+    {
+      "id": "report-export-progress",
+      "skill": "waiting-states",
+      "prompt": "In src/, write an Export button for a report; exportReport(onProgress) in src/api.ts is a stub that reports percent done ten times over three seconds.",
+      "assertions": [
+        { "kind": "uses-family", "family": "progress-indicator" },
+        { "kind": "no-literal" }
+      ]
+    }
+  ]
+}

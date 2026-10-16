@@ -261,11 +261,24 @@ test('keeps the track of a paging control that has reached its end', () => {
   assert.match(rule(ui), /grid-template-columns:auto minmax\(0,1fr\) auto auto/);
 });
 
+/*
+ * Closing a tab closes a view and destroys nothing: the closing control takes
+ * the neutral ground of the dialog's close, on a round box.
+ */
+test('draws the closing control neutral and round', () => {
+  assert.match(rule(part('dismiss')), /border-radius:var\(--slotted-radius-full,9999px\)/);
+  const hover = rule(`${part('dismiss')}:not(:disabled):hover`);
+  const active = rule(`${part('dismiss')}:not(:disabled):active`);
+  assert.match(hover, /--slotted-tone-secondary-subtle-hover/);
+  assert.match(active, /--slotted-tone-secondary-subtle-active/);
+  assert.doesNotMatch(hover + active, /danger|text-inverse/);
+});
+
 /**
  * The box overhangs the mark on every side, so a box set flush against the
  * label leaves a hole where the overhang is. Both margins take the overhang
- * back, which puts the mark one inner gap from the last letter and the tab's
- * own inset from the end of the item.
+ * back, which puts the mark the tab's own inset from the last letter and from
+ * the end of the item.
  */
 test('aligns the closing control by its mark rather than by its box', () => {
   const dismiss = rule(part('dismiss'));
@@ -276,7 +289,7 @@ test('aligns the closing control by its mark rather than by its box', () => {
   );
   assert.match(
     dismiss,
-    /margin-inline-start:max\(0px,calc\(var\(--_inner-gap\) - var\(--_dismiss-overhang\)\)\)/,
+    /margin-inline-start:calc\(var\(--_padding-inline\) - var\(--_dismiss-overhang\)\)/,
   );
   assert.match(
     rule(`${part('item')}:has(>[data-part='dismiss'])>[data-part='tab']`),

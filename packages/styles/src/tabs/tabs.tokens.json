@@ -36,6 +36,7 @@
   "--slotted-focus-ring-color",
   "--slotted-focus-ring-offset",
   "--slotted-focus-ring-width",
+  "--slotted-radius-full",
   "--slotted-radius-md",
   "--slotted-radius-sm",
   "--slotted-radius-xs",
@@ -70,13 +71,9 @@
   "--slotted-target-comfortable",
   "--slotted-target-min",
   "--slotted-text",
-  "--slotted-text-inverse",
   "--slotted-text-muted",
   "--slotted-tone-accent-solid",
   "--slotted-tone-accent-text",
-  "--slotted-tone-danger-border",
-  "--slotted-tone-danger-surface",
-  "--slotted-tone-danger-text",
   "--slotted-tone-secondary-subtle-active",
   "--slotted-tone-secondary-subtle-hover"
 ]

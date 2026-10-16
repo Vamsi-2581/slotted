@@ -631,12 +631,14 @@
    * through `aria-keyshortcuts`.
    *
    * It is aligned by its mark rather than by its box. The box overhangs the X
-   * on every side, so a box set flush against the label leaves a hole where the
-   * overhang is; both margins take the overhang back, which puts the mark one
-   * inner gap from the last letter and the tab's own inset from the end of the
-   * item. The first capture showed the other arrangement: a square the height of
-   * the control, hard against the words, with the whole tab's padding on the
-   * far side of it.
+   * on every side, and both margins take the overhang back, which puts the mark
+   * the tab's own inset from the last letter and from the end of the item. An
+   * inner gap before the mark left the round ground of the hover touching the
+   * words; the first capture showed a square the height of the control, hard
+   * against the words, with the whole tab's padding on the far side of it.
+   *
+   * Neutral, as the dialog's close and the paging controls: removing a tab
+   * closes a view and destroys nothing, so the danger tone overstated it.
    */
   [data-ui='tabs']
     > :where([data-part='list'])
@@ -650,7 +652,7 @@
     background-color: transparent;
     block-size: var(--_dismiss-size);
     border: 0;
-    border-radius: var(--slotted-control-radius, 4px);
+    border-radius: var(--slotted-radius-full, 9999px);
     color: var(--slotted-tabs-dismiss-color, var(--slotted-text-muted, GrayText));
     cursor: pointer;
     display: inline-flex;
@@ -658,7 +660,7 @@
     inline-size: var(--_dismiss-size);
     justify-content: center;
     margin-inline-end: calc(var(--_padding-inline) - var(--_dismiss-overhang));
-    margin-inline-start: max(0px, calc(var(--_inner-gap) - var(--_dismiss-overhang)));
+    margin-inline-start: calc(var(--_padding-inline) - var(--_dismiss-overhang));
     padding: 0;
     transition:
       background-color var(--slotted-control-transition-duration)
@@ -693,9 +695,9 @@
     > [data-part='dismiss']:not(:disabled):hover {
     background-color: var(
       --slotted-tabs-dismiss-hover-background,
-      var(--slotted-tone-danger-surface)
+      var(--slotted-tone-secondary-subtle-hover)
     );
-    color: var(--slotted-tabs-dismiss-hover-color, var(--slotted-tone-danger-text));
+    color: var(--slotted-tabs-dismiss-hover-color, var(--slotted-text, CanvasText));
   }
 
   [data-ui='tabs']
@@ -704,9 +706,9 @@
     > [data-part='dismiss']:not(:disabled):active {
     background-color: var(
       --slotted-tabs-dismiss-active-background,
-      var(--slotted-tone-danger-border)
+      var(--slotted-tone-secondary-subtle-active)
     );
-    color: var(--slotted-tabs-dismiss-active-color, var(--slotted-text-inverse));
+    color: var(--slotted-tabs-dismiss-active-color, var(--slotted-text, CanvasText));
   }
 
   [data-ui='tabs']

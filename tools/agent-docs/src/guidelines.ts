@@ -23,12 +23,13 @@ const LEVELS = new Set(['MUST', 'SHOULD', 'MAY']);
 /** Qualifiers `writing-rules.md` names as untestable. */
 const FORBIDDEN_WORDS = ['generous', 'clean', 'modern'];
 
-/** Text that names the repository's demo or its tests; never in a published file. */
+/** Text that names the repository's demo, its tests or its spec sections; never in a published file. */
 export const PUBLISHED_FORBIDDEN: readonly RegExp[] = [
   /\bNexora\b/,
   /\bthe demo\b/i,
   /\bsimulated backend\b/i,
   /\bSpec:/,
+  /§\d/,
   /^```/m,
   /\]\((?!https:\/\/)[^)]+\)/,
 ];

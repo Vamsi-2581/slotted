@@ -17,18 +17,16 @@ observation is not written; an observation without a rule is a row in
 
 ## Files
 
-| File                      | Prefix | Holds                                                                          |
-| ------------------------- | ------ | ------------------------------------------------------------------------------ |
-| `index.md`                | —      | Every active rule in one line each. The only file a reader always loads        |
-| `writing-rules.md`        | —      | How a rule is written, numbered, evidenced and retired                         |
-| `errors-and-conflicts.md` | `ER`   | How a refusal is classed, and what a conflict re-reads before it speaks        |
-| `browsing.md`             | `BR`   | How a tree and a list share a place, and one concept reads at two grains       |
-| `reading-permissions.md`  | `PM`   | What a screen draws when the reader's role shaped the answer                   |
-| `ledgers.md`              | `LG`   | How an immutable record of changes reads: the movement, its cause, the balance |
-| `workspaces.md`           | `WS`   | How a queue worked against candidates reads on a phone and shows its scores    |
-| `conversations.md`        | `CV`   | How a conversation with a clock is read and answered, and its queues kept      |
-| `reports.md`              | `RE`   | How a report reads a period, says what is not kept, opens what it counts       |
-| `builders.md`             | `BD`   | How a rule a person writes reads, states its limits, moves and narrows         |
+| File                   | Prefix | Holds                                                                          |
+| ---------------------- | ------ | ------------------------------------------------------------------------------ |
+| `index.md`             | —      | Every active rule in one line each. The only file a reader always loads        |
+| `writing-rules.md`     | —      | How a rule is written, numbered, evidenced and retired                         |
+| `procurement-costs.md` | `PC`   | What a procurement screen reads under the cost permission                      |
+| `ledgers.md`           | `LG`   | How an immutable record of changes reads: the movement, its cause, the balance |
+| `workspaces.md`        | `WS`   | How a queue worked against candidates reads on a phone and shows its scores    |
+| `conversations.md`     | `CV`   | How a conversation with a clock is read and answered, and its queues kept      |
+| `reports.md`           | `RE`   | How a report reads a period, says what is not kept, opens what it counts       |
+| `builders.md`          | `BD`   | How a rule a person writes reads, states its limits, moves and narrows         |
 
 ## Reading protocol
 

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseTopic, renderGuidelinesIndex, renderTopic, topicErrors } from './guidelines.ts';
+import {
+  PUBLISHED_FORBIDDEN,
+  parseTopic,
+  renderGuidelinesIndex,
+  renderTopic,
+  topicErrors,
+} from './guidelines.ts';
 
 const source = `---
 topic: async feedback
@@ -79,6 +85,28 @@ describe('topicErrors', () => {
     const errors = topicErrors(parseTopic('async-feedback.md', broken), broken);
     expect(errors).toContain('async-feedback.md: fenced code block');
     expect(errors).toContain('async-feedback.md: forbidden word "clean"');
+  });
+});
+
+describe('PUBLISHED_FORBIDDEN', () => {
+  it.each([
+    'Seen on Nexora',
+    'in the demo panel',
+    'Spec: the banner suite',
+    'every command under §53.11',
+    'see [the page](./x.md)',
+  ])('rejects %s', (text) => {
+    expect(PUBLISHED_FORBIDDEN.some((pattern) => pattern.test(text))).toBe(true);
+  });
+
+  it('accepts a rule that names only the library', () => {
+    expect(
+      PUBLISHED_FORBIDDEN.some((pattern) =>
+        pattern.test(
+          'A `data-grid` region waits; see [WAI-ARIA](https://www.w3.org/WAI/ARIA/apg/).',
+        ),
+      ),
+    ).toBe(false);
   });
 });
 

@@ -27,6 +27,22 @@
     "level": "SHOULD",
     "status": "active"
   },
+  "BR-01": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "BR-02": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "BR-03": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "BR-04": {
+    "level": "SHOULD",
+    "status": "active"
+  },
   "CP-01": {
     "level": "MUST",
     "status": "active"
@@ -57,6 +73,22 @@
   },
   "CP-08": {
     "level": "MUST",
+    "status": "active"
+  },
+  "ER-01": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "ER-02": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "ER-03": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "ER-04": {
+    "level": "SHOULD",
     "status": "active"
   },
   "FM-01": {
@@ -199,6 +231,38 @@
   "LP-13": {
     "level": "SHOULD",
     "status": "active"
+  },
+  "OV-01": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "OV-02": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "OV-03": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "OV-04": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "OV-05": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "PM-01": {
+    "level": "MUST",
+    "status": "active"
+  },
+  "PM-02": {
+    "level": "SHOULD",
+    "status": "active"
+  },
+  "PM-03": {
+    "level": "MUST",
+    "status": "retired"
   },
   "RP-01": {
     "level": "SHOULD",

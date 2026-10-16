@@ -42,7 +42,8 @@ Why: A place is where the reader is and a facet is what they asked for; a branch
 Do: Name the list after the branch, put the trail from the catalogue's root in the header's breadcrumb with every ancestor a link, and narrow the query from the place rather than from the bar. The way out is the trail's first crumb, which names the whole set.
 Don't: Write the branch into the bar's tree, or leave the list titled after the resource while its rows come from one branch.
 Seen in: Nexora · Products opened from the category tree · corrected
-Check: Open a branch from the tree: the heading is the branch's name, the trail stands above it, and the bar's pill count is unchanged. Spec: the catalogue list screens suite, "a place names the list and the bar keeps only the facets".
+Verified in: the catalogue list screens suite, "a place names the list and the bar keeps only the facets".
+Check: Open a branch from the tree: the heading is the branch's name, the trail stands above it, and the bar's pill count is unchanged.
 
 ### BR-02 · A place holds what is under it, and says how much of it there is
 
@@ -53,7 +54,8 @@ Why: A backend that files a record on a leaf answers nothing for the branch abov
 Do: Read the hierarchy before the rows, send the branch and its descendants as one condition, and write the sentence under the title: how many records the place holds, how many nodes it covers, and how many the whole set holds.
 Don't: Narrow to the chosen node alone, or state a count without saying what it is counted over.
 Seen in: Nexora · Products in a category · corrected
-Check: Open a branch whose own records are none: the list is not empty and the sentence names the nodes it covers. Spec: the catalogue listings suite, "a place holds what is under it, not only what is filed on it".
+Verified in: the catalogue listings suite, "a place holds what is under it, not only what is filed on it".
+Check: Open a branch whose own records are none: the list is not empty and the sentence names the nodes it covers.
 
 ### BR-03 · A node's own count and its branch's count are two numbers
 
@@ -64,7 +66,8 @@ Why: The two answer different questions — how big this branch is, and how much
 Do: Put the branch's whole count in the row's trailing cell, the one the family keeps at its intrinsic width, and say in the region's own words what that number counts. Where a node also holds records directly, say how many on the row's second line, which the family already draws in the muted step.
 Don't: Draw the backend's own field without adding the descendants, or print two bare numbers on one row.
 Seen in: Nexora · Categories · corrected
-Check: A branch whose records are all on its leaves shows the leaves' total, not nought. Spec: the categories store suite, "separates what a category holds itself from what its branch holds".
+Verified in: the categories store suite, "separates what a category holds itself from what its branch holds".
+Check: A branch whose records are all on its leaves shows the leaves' total, not nought.
 
 ### BR-04 · One concept at two grains is two lists that name each other
 

@@ -23,7 +23,7 @@ type Can = (permission: string) => boolean;
 /**
  * The supplier directory's columns. The spend is money paid to the supplier —
  * a cost, which the module reads under `cost.view` (the decision the rule
- * PM-03 records) — so it is absent from the model for a reader without it
+ * PC-01 records) — so it is absent from the model for a reader without it
  * (PM-01). The on-time share leads the phone's row (LP-01): it is the figure a
  * buyer chooses a supplier by.
  */
@@ -195,7 +195,7 @@ export function supplierFilterFields(can: Can): readonly FilterBarField[] {
 
 /**
  * The purchase orders' columns. The total is what is paid to the supplier, so
- * it is absent without `cost.view` (PM-01, PM-03). It is drawn in the order's
+ * it is absent without `cost.view` (PM-01, PC-01). It is drawn in the order's
  * own currency and sorted by `purchaseOrderResource` in US dollars, so an
  * order in reais takes its place by what it is worth.
  */

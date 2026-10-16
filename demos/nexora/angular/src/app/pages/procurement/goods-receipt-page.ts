@@ -66,7 +66,7 @@ type ReceiptLine = GoodsReceiptDetail['lines'][number];
  * movements it wrote and from the notice after it was written. It says where
  * each line went — accepted and damaged into the stock, damaged on to its
  * bucket, rejected back to the supplier — and leads to the movements it wrote
- * (LG-01). The unit cost is a cost (PM-01, PM-03).
+ * (LG-01). The unit cost is a cost (PM-01, PC-01).
  */
 @Component({
   selector: 'app-goods-receipt-page',

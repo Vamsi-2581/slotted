@@ -163,7 +163,7 @@ const plainDate = (iso: string): PlainDate | null => {
  *
  * The receipt and the edit are written in the lines' own tab (FM-07), each a
  * query parameter the back gesture closes (FM-12). The prices and the totals
- * are costs, drawn for a holder of `cost.view` only (PM-01, PM-03).
+ * are costs, drawn for a holder of `cost.view` only (PM-01, PC-01).
  */
 @Component({
   selector: 'app-purchase-order-page',

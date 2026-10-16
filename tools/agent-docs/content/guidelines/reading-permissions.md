@@ -39,7 +39,8 @@ Why: A redacted value drawn as a value is the screen lying with the backend's ow
 Do: Decide the column model and the filter fields from the permissions, so the value is absent from the model rather than hidden in it — a hidden column is one the reader restores through the family's own column control, and what would come back is the redaction. Where a whole section is empty for the same reason, leave the section out with its tab.
 Don't: Hide the column, grey the number, or draw an em dash where a value the reader may not see would have been: an em dash says the record has no value, and the record has one.
 Seen in: Nexora · the SKU record and the SKU list, a representative's cost of nought and a warehouse operator's empty price list · corrected
-Check: Sign in as a representative and read the SKU: no margin figure, no cost column, no currency amount of nought anywhere. Spec: the SKU store suite, "a representative may be shown the price and never the cost"; the catalogue list screens suite, "the price and the cost are absent from the model, not hidden in it".
+Verified in: the SKU store suite, "a representative may be shown the price and never the cost"; the catalogue list screens suite, "the price and the cost are absent from the model, not hidden in it"; Sign in as a representative and read the SKU: no margin figure, no cost column, no currency amount of nought anywhere
+Check: Sign in as a reader without the cost permission and open a record that carries costs: no margin figure, no cost column, and no currency amount of zero anywhere.
 
 ### PM-02 · What is missing is named once, with who sees it
 
@@ -50,15 +51,9 @@ Why: A figure row with a hole in it reads as a screen that failed rather than as
 Do: Put the statement where the absence changes the reading — under the figures on a record, above the rows on a list — and use the permission's own name, which is what a reader asks an administrator for.
 Don't: Repeat the statement per tab, per column or per card, or leave the absence unexplained where the rest of the numbers depend on it.
 Seen in: Nexora · the SKU record read as a warehouse operator · corrected
-Check: A reader holding neither pricing nor cost sees one sentence naming both. Spec: the SKU page suite, "a warehouse operator is shown neither price nor cost, and the page says so once".
+Verified in: the SKU page suite, "a warehouse operator is shown neither price nor cost, and the page says so once"; A reader holding neither pricing nor cost sees one sentence naming both
+Check: Sign in as a reader holding neither the price nor the cost permission: one sentence names both permissions and the roles that hold them.
 
 ### PM-03 · A price paid is a cost
 
-Level: MUST
-Applies to: every value that states what is paid to a supplier — a purchase order's unit costs, line totals and total, a supplier's price list and its spend, a goods receipt's unit cost
-Rule: A price paid to a supplier is read under the cost permission on every screen that draws it, and PM-01 and PM-02 apply to it as to a standard cost.
-Why: The catalogue already withholds a supplier's unit cost from a reader without the cost permission, and the same number on an order or a receipt would hand back what the catalogue withheld.
-Do: Decide the money columns, figures and summary rows of a procurement screen from the cost permission, never from the answer; state once, with the roles, who sees them. A preview that needs the cost — the approval an order will ask for — states its rule in words for a reader without it (FM-11).
-Don't: Treat the purchase-order permission as a licence to read its money, or draw an order's total because the list answer carries it.
-Seen in: Nexora · purchase orders, suppliers and goods receipts read by a warehouse operator · corrected, and the backend writes the money down to nought for that reader (ledger row "the money of an order")
-Check: Spec: the procurement module suite, "leaves the spend and the totals out of the models without cost.view" and "never reads the totals GET /purchase-orders hands a warehouse operator".
+Status: retired · a domain rule, kept by the application that observed it

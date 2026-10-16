@@ -114,7 +114,7 @@ type View = 'skus' | 'orders' | 'details';
  * own category, and each saying what it counts (RP-10): §12's "supplier
  * comparison" is answered on the record rather than by a chart of four
  * hundred bars. The spend is money paid to the supplier, drawn for a holder of
- * `cost.view` only (PM-01, PM-03).
+ * `cost.view` only (PM-01, PC-01).
  *
  * A holder of `suppliers.manage` edits the facts where they are read (FM-07)
  * and moves the status; an inactivation the backend would refuse because of

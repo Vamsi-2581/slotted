@@ -118,7 +118,7 @@ Check: Press Edit: the title row, the figures and the tabs stay, and the form st
 ### FM-08 · A version someone else moved past is answered field by field
 
 Level: MUST
-Applies to: any command carrying the last observed version (§53.11)
+Applies to: any command carrying the last observed version
 Rule: A stale-version refusal re-reads the record and states which fields moved under the open form, what the record holds now and what the form holds; the reader keeps what they wrote and chooses between writing it over the version now stored and starting again from the record.
 Why: A conflict the screen answers with "try again" makes the reader guess what they would overwrite, and a form that reloads itself throws away what they typed.
 Do: Compare the values the form opened on with the values now stored, list only what differs, and mark the fields the reader also changed. Offer two controls with the two outcomes named.

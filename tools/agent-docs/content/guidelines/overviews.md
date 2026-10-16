@@ -46,7 +46,8 @@ Why: A bar chart of one category compares nothing, and it takes a chart's height
 Do: Decide the chart from the scope the page already reads, and write the sentence with the numbers and their unit.
 Don't: Draw one group of bars, or leave an empty chart region for a reader scoped to one place.
 Seen in: Nexora · Inventory overview read by a warehouse operator scoped to CHI-01 · corrected
-Check: Sign in as Jordan Wells: the overview has no warehouse chart and says CHI-01's three counts in one sentence.
+Verified in: Sign in as Jordan Wells: the overview has no warehouse chart and says CHI-01's three counts in one sentence
+Check: Sign in as a reader whose scope holds one category: the overview draws no comparison chart, and one sentence states that category's numbers.
 
 ### OV-04 · A threshold is said, not painted
 
@@ -57,13 +58,14 @@ Why: The figure card's tone is the trend's and paints nothing on a card without 
 Do: Keep the shares in one place of the page's code and one sentence on screen ("a warning from 20 percent of receivables and a danger from 33"), and end the crossed figure's comparison with the threshold it passed ("26% of receivables, above 20%").
 Don't: Set a tone on a card with no trend and expect it to read, or add a badge to the card's header for the crossing.
 Seen in: Nexora · Finance overview, overdue receivables in healthy and in collections pressure (ledger row "stat-card, tone is the trend's") · corrected
-Check: Spec: the finance overview suite, "turns the overdue figure to a warning and a danger at the shares the page states" and "reads differently under collections pressure: the overdue share crosses the danger".
+Verified in: the finance overview suite, "turns the overdue figure to a warning and a danger at the shares the page states" and "reads differently under collections pressure: the overdue share crosses the danger".
+Check: Bring a figure past each stated threshold: the threshold sentence stands beside the figures, and the figure's own comparison line says it crossed, on the line its placeholder reserved.
 
 ### OV-05 · A chart is framed only as a tile
 
 Level: SHOULD
 Applies to: `chart` and `stat-card` on an overview, a record's figures or a list's chart tab
-Rule: A chart takes `variant="card"` when it is one of two or more peer tiles in one grid with no section heading of its own, and stays `plain` when it is the body of a titled section or the only content of a tab.
+Rule: A chart takes the `card` `variant` when it is one of two or more peer tiles in one grid with no section heading of its own, and stays `plain` when it is the body of a titled section or the only content of a tab.
 Why: The section's heading and its space already frame a chart that is its body, and a card around it draws a second frame; peer tiles without headings need the frame to read as separate answers of the same height.
 Do: Give a plain chart a `title` that names the measure and not the section's words again; in a grid of peer tiles, let the chart's title be the tile's title and share the row's height, as `stat-card` always does.
 Don't: Frame every chart by habit, or leave a chart plain among framed tiles where it reads as the page's background.

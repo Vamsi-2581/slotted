@@ -2309,7 +2309,7 @@ const poDoor = (filter: Record<string, FilterValue>): ReportDoor => ({
   filter,
 });
 
-/** Committed spend: what the period's approved and later orders cost, excluding tax (PM-03). */
+/** Committed spend: what the period's approved and later orders cost, excluding tax (PC-01). */
 function spendFigure(frame: Frame): ReportFigure {
   const of = (range: ReportRange): ReportValue => {
     let spend = 0;

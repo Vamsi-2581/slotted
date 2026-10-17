@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { assertionPasses } from './assertions.ts';
+import { assertionPasses, familyComponents } from './assertions.ts';
 import { parseStream, triggered } from './stream.ts';
 import { renderReport, summarize, type RunResult } from './summary.ts';
 
@@ -81,6 +81,30 @@ describe('assertionPasses', () => {
     expect(assertionPasses({ kind: 'uses-family', family: 'skeleton' }, 'react', react)).toBe(
       false,
     );
+  });
+
+  it('uses-family in React accepts any component of the family, or its subpath', () => {
+    const components = new Map([['skeleton', ['Skeleton', 'SkeletonText']]]);
+    const text = new Map([
+      ['src/a.tsx', "import { SkeletonText } from '@slotted/react';\n<SkeletonText lines={2} />"],
+    ]);
+    expect(
+      assertionPasses({ kind: 'uses-family', family: 'skeleton' }, 'react', text, components),
+    ).toBe(true);
+    const subpath = new Map([
+      ['src/a.tsx', "import { ProgressBar } from '@slotted/react/progress-indicator';"],
+    ]);
+    expect(
+      assertionPasses({ kind: 'uses-family', family: 'progress-indicator' }, 'react', subpath),
+    ).toBe(true);
+  });
+
+  it('familyComponents lists the value exports of a family entry point', () => {
+    expect(
+      familyComponents(
+        "export { Loader } from './loader';\nexport { ProgressBar, useProgress } from './progress-bar';\nexport type { LoaderProps } from './types';",
+      ),
+    ).toEqual(['Loader', 'ProgressBar']);
   });
 
   it('absent passes only when no file matches the pattern', () => {

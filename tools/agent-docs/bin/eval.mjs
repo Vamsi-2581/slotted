@@ -6,11 +6,14 @@
  * starts from `eval/seeds/<seed>/<binding>/`, copied over `src/`.
  *   pnpm eval:agent-docs --dry-run
  *   pnpm eval:agent-docs --case orders-list --binding react --runs 1 --condition with
+ *   pnpm eval:agent-docs --case orders-list --binding react --runs 1 --condition with --keep
+ *     (keeps each session's directory and prints its path)
  * Prerequisite: `node scripts/pack-beta.mjs --only @slotted/react,@slotted/angular,@slotted/core,@slotted/theme,@slotted/themes`.
  */
 import { spawnSync } from 'node:child_process';
 import {
   cpSync,
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -23,7 +26,7 @@ import { tmpdir } from 'node:os';
 import { join, relative, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
-import { assertionPasses } from '../src/eval/assertions.ts';
+import { assertionPasses, familyComponents } from '../src/eval/assertions.ts';
 import { parseStream, triggered } from '../src/eval/stream.ts';
 import { renderReport, summarize } from '../src/eval/summary.ts';
 import { renderAgentsSnippet } from '../src/render.ts';
@@ -37,6 +40,7 @@ const { values } = parseArgs({
     condition: { type: 'string' },
     runs: { type: 'string' },
     'dry-run': { type: 'boolean', default: false },
+    keep: { type: 'boolean', default: false },
   },
 });
 
@@ -86,6 +90,13 @@ function sourceFiles(dir) {
   return files;
 }
 
+const components = new Map(
+  readdirSync(join(root, 'packages/react/src'), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => [entry.name, join(root, 'packages/react/src', entry.name, 'index.ts')])
+    .filter(([, index]) => existsSync(index))
+    .map(([family, index]) => [family, familyComponents(readFileSync(index, 'utf8'))]),
+);
 const env = { ...process.env };
 delete env.CLAUDECODE;
 // Every install runs before the first session, so a failed one costs no session.
@@ -133,7 +144,7 @@ for (const binding of bindings) {
           );
         const files = sourceFiles(dir);
         const failed = entry.assertions.filter(
-          (assertion) => !assertionPasses(assertion, binding, files),
+          (assertion) => !assertionPasses(assertion, binding, files, components),
         );
         const passed = entry.assertions.length - failed.length;
         results.push({
@@ -149,7 +160,8 @@ for (const binding of bindings) {
         console.log(
           `${binding} ${entry.id} ${condition} #${run + 1}: triggered=${triggered(trace, entry.skill)} ${passed}/${entry.assertions.length} $${trace.costUsd.toFixed(2)}${failed.length > 0 ? ` failed: ${failed.map((assertion) => JSON.stringify(assertion)).join(' ')}` : ''}`,
         );
-        rmSync(dir, { recursive: true, force: true });
+        if (values.keep) console.log(`kept: ${dir}`);
+        else rmSync(dir, { recursive: true, force: true });
       }
 }
 

@@ -69,11 +69,13 @@ why no token covers it (CP-05).
    ARIA only where no element carries the role.
 2. List the element's states, and paint each pair that can hold at once in the
    order of OE-02.
-3. Draw focus with the theme's ring (OE-03), size every target to the minimum
-   (OE-04), and take the control step of the controls beside it (OE-05).
-4. Under forced colours, tell each state from rest by a border, an outline or
-   text (OE-06). Move with the motion tokens, and stop a repeating animation
-   under reduced motion (OE-07).
+3. Draw focus on `:focus-visible` as an outline of `--slotted-focus-ring-width`
+   in `--slotted-focus-ring-color`, offset by `--slotted-focus-ring-offset`
+   (OE-03). Size every target to `--slotted-target-min` (OE-04), and take the
+   control step of the controls beside it (OE-05).
+4. Under `forced-colors: active`, tell each state from rest by a border,
+   an outline or text (OE-06). Move with the motion tokens, and stop a
+   repeating animation under `prefers-reduced-motion: reduce` (OE-07).
 5. Write the CSS in a layer of the application after the library's, on class
    names of the element's own (OE-08). Reflow by a container query on a
    container of its own (OE-09). Float with a raised surface and one shadow

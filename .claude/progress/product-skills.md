@@ -1,0 +1,28 @@
+# Checkpoint — skills de produto e exportação do design system
+
+- Desenhos: `docs/history/designs/2026-10-16-product-skills-design.md` e `docs/history/designs/2026-10-16-design-system-export-design.md`; ambos concluídos.
+- Enviado com push até a46c003f. Depois: dda7a812 (livro diz onde um id se resolve), 7d73a567 (theme-app alinhada ao snippet); sem push.
+- Revisão final: própria, sem subagente (a regra de lote do CLAUDE.md não aceita "siga" como aprovação). Achados corrigidos: os dois commits acima. Minor adiados: chaves genéricas de ThemeDefinition (`name`, `base`, `rules`) passam a resolver no catálogo; `renderExamples` deixa `globalThis.require` definido no processo; `llms.txt` não lista `skills/index.md`.
+- Design system republicado (versão 4) a partir de 7d73a567: https://claude.ai/artifact/4TKQdNKUXAXwzTDmk8buS1.
+- Pushed até 89923f41 (fixture Angular fixa @angular/forms; instalações antes da primeira sessão).
+- Segunda avaliação concluída, mas inválida: 59 das 144 sessões (Angular, a partir da linha 92 do log, customer-form with #2) custaram US$ 0,00 — o `claude -p` não executou (limite de uso). O relatório gerado misturava essas sessões e marcava todas as skills abaixo; foi removido. Log salvo em /tmp/claude-1000/-home-dreco-dev-slotted/fec95c45-3d45-4f4a-9ac1-8ee78442a735/scratchpad/eval-2026-10-17.log.
+- ef100a9b: o runner para quando uma sessão sai com status ≠ 0 ou custo 0.
+- Diagnóstico das falhas 3/3 do log válido (sessões com custo > 0): disparo 1,00 em todas as skills com snippet; as falhas recorrentes eram três asserções defeituosas e uma lacuna de skill.
+  - 4e7292e6: uses-family no React aceita qualquer componente exportado pela família ou o subcaminho (skeleton, progress-indicator); runner ganhou --keep.
+  - 06827a93: no-literal ignora o passo de media/container query e comentários, como specs/demo-screen-tokens.test.mjs (orders-list, 600px).
+  - c49ef2b9: brand-theme aceita seedStyle({ accent }).
+  - b59ab10b: build-own-element nomeia :focus-visible, os tokens do anel, --slotted-target-min e forced-colors: active.
+- React e Angular reconstruídos e betas reempacotados em c49ef2b9; verify do agent-docs: 199 testes verdes.
+- `.claude/progress/current.md` e `.claude/progress/product-agent-material.md` são de outra sessão; não commitar.
+- 845d53c2: runner com --jobs (4) e timeout de 15 min por sessão; avaliação sequencial bkn9i734o parada em 22/144 (US$ 12,26 perdidos). Push até 845d53c2.
+- Avaliação b02i4cjpj (4 simultâneas) parou em 133/144 sessões (US$ 55,60): angular seat-map with #2 recebeu usage_limit_reached ("resets 7:50am (UTC)"). A guarda funcionou; nenhum relatório gravado. Log: /tmp/claude-1000/-home-dreco-dev-slotted/fec95c45-3d45-4f4a-9ac1-8ee78442a735/scratchpad/eval-run4.log.
+- 8bb4b306 (push feito): diário de sessões em /tmp/slotted-eval-journal.jsonl; uma execução interrompida retoma com o mesmo comando; `--fresh` ignora o diário. Retomada conferida com interrupção real.
+- Avaliação bkpm3s4fc (144/144): compose-screen 0,99, review-screen 1,00, waiting-states 0,91 atendem; build-own-element 0,54 e theme-app 0,83 abaixo; disparo 1,00 em todas com snippet. Diagnóstico com --keep: as sessões estavam certas, os casos não.
+  - c8a36275: seat-map aceita assentos desenhados por toggle/toggle-group/checkbox (asserção any).
+  - 5dabb8c7: brand-theme aceita o seed accent em qualquer forma (ThemeScope seeds); execução parcial não grava relatório.
+- Avaliação concluída (retomada do diário): compose-screen 1,00, review-screen 1,00, theme-app 0,92 atendem; waiting-states 0,83 e build-own-element 0,79 abaixo. Diagnóstico com --keep: sessões corretas, casos errados.
+  - 0ff63c43: c8a36275 tinha alterado own-element em vez de seat-map (primeira ocorrência); corrigido. notifications-empty e report-export-progress aceitam o loading da própria família (notification-center desenha skeleton; tabela de waiting-states põe o loading do controle antes do progresso, igual a .claude/skills/loading-states).
+- Laço de espera bmv9ugu8j (anterior à compactação, 18,7 h sem timeout) parado. Toda espera nova usa `timeout`.
+- Concluído. Relatório `docs/history/evals/2026-10-17-agent-docs.md` commitado em a0176fba (push feito): as cinco skills atendem; disparo 1,00 com snippet; conformidade com snippet 0,96 a 1,00 (theme-app reexecutada depois de o runner passar a ler .mjs/.js/.json).
+- Minor adiados: chaves genéricas de ThemeDefinition resolvem no catálogo; `renderExamples` deixa `globalThis.require` no processo; `llms.txt` não lista `skills/index.md`.
+- Nenhum processo em segundo plano desta sessão.

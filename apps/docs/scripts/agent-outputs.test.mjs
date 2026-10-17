@@ -89,17 +89,19 @@ test('tokens.md is served per binding, as the package ships it', () => {
     );
 });
 
-test('llms.txt links only routes that exist, every family, guideline page and skill once per binding', () => {
+test('llms.txt links only routes that exist, every family, guideline page, skill and the skills index once per binding', () => {
   const llms = readFileSync(`${dist}llms.txt`, 'utf8');
   assert.match(llms, /^# Slotted\n\n> /);
   const hrefs = [...llms.matchAll(/\]\((\/[^)]+)\)/g)].map((match) => match[1]);
   for (const href of hrefs) assert.ok(existsSync(`${dist}${href.slice(1)}`), href);
   const expected = ['react', 'angular'].reduce(
     (sum, binding) =>
-      sum + families.length + guidelinePages(binding).length + skillNames(binding).length + 1,
+      sum + families.length + guidelinePages(binding).length + skillNames(binding).length + 2,
     0,
   );
   assert.equal(hrefs.length, expected);
+  for (const binding of ['react', 'angular'])
+    assert.ok(hrefs.includes(`/${binding}/skills/index.md`), `${binding}/skills/index.md`);
 });
 
 test('a component page declares its Markdown and the index', () => {

@@ -8,9 +8,10 @@
  *   pnpm eval:agent-docs --case orders-list --binding react --runs 1 --condition with
  *   pnpm eval:agent-docs --case orders-list --binding react --runs 1 --condition with --keep
  *     (keeps each session's directory and prints its path)
+ *   pnpm eval:agent-docs --jobs 2   (sessions at once; 4 by default)
  * Prerequisite: `node scripts/pack-beta.mjs --only @slotted/react,@slotted/angular,@slotted/core,@slotted/theme,@slotted/themes`.
  */
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import {
   cpSync,
   existsSync,
@@ -41,6 +42,7 @@ const { values } = parseArgs({
     runs: { type: 'string' },
     'dry-run': { type: 'boolean', default: false },
     keep: { type: 'boolean', default: false },
+    jobs: { type: 'string', default: '4' },
   },
 });
 
@@ -49,6 +51,7 @@ const runs = Number(values.runs ?? config.runs);
 const bindings = values.binding ? [values.binding] : config.bindings;
 const conditions = values.condition ? [values.condition] : ['with', 'without'];
 const cases = config.cases.filter((entry) => !values.case || entry.id === values.case);
+if (!(Number(values.jobs) >= 1)) throw new Error(`--jobs must be 1 or more, not ${values.jobs}`);
 const sessions = bindings.length * cases.length * runs * conditions.length;
 console.log(`${sessions} session(s), model ${config.model}`);
 if (values['dry-run']) process.exit(0);
@@ -97,73 +100,102 @@ const components = new Map(
     .filter(([, index]) => existsSync(index))
     .map(([family, index]) => [family, familyComponents(readFileSync(index, 'utf8'))]),
 );
+const SESSION_TIMEOUT_MS = 15 * 60 * 1000;
 const env = { ...process.env };
 delete env.CLAUDECODE;
 // Every install runs before the first session, so a failed one costs no session.
 const bases = Object.fromEntries(bindings.map((binding) => [binding, template(binding)]));
-const results = [];
-for (const binding of bindings) {
-  const base = bases[binding];
-  for (const entry of cases)
-    for (const condition of conditions)
-      for (let run = 0; run < runs; run += 1) {
-        const dir = mkdtempSync(join(tmpdir(), `slotted-eval-${entry.id}-`));
-        cpSync(base, dir, { recursive: true });
-        if (entry.seed)
-          cpSync(join(evalDir, 'seeds', entry.seed, binding), join(dir, 'src'), {
-            recursive: true,
-          });
-        writeFileSync(
-          join(dir, 'CLAUDE.md'),
-          condition === 'with' ? renderAgentsSnippet(binding) : '',
-        );
-        const session = spawnSync(
-          'claude',
-          [
-            '-p',
-            entry.prompt,
-            '--output-format',
-            'stream-json',
-            '--verbose',
-            '--model',
-            config.model,
-            '--setting-sources',
-            'project,local',
-            '--permission-mode',
-            'acceptEdits',
-            '--allowedTools',
-            'Read,Write,Edit,Glob,Grep,Bash(ls:*),Bash(cat:*)',
-          ],
-          { cwd: dir, env, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
-        );
-        const trace = parseStream(session.stdout.split('\n'));
-        // A session the CLI refused (a usage limit, a login) costs nothing and must not count.
-        if (session.status !== 0 || trace.costUsd === 0)
-          throw new Error(
-            `${binding} ${entry.id} ${condition} #${run + 1} did not run (status ${session.status}): ${(session.stdout + session.stderr).trim().slice(-400)}`,
-          );
-        const files = sourceFiles(dir);
-        const failed = entry.assertions.filter(
-          (assertion) => !assertionPasses(assertion, binding, files, components),
-        );
-        const passed = entry.assertions.length - failed.length;
-        results.push({
-          caseId: entry.id,
-          binding,
-          skill: entry.skill,
-          condition,
-          triggered: triggered(trace, entry.skill),
-          passed,
-          total: entry.assertions.length,
-          trace,
-        });
-        console.log(
-          `${binding} ${entry.id} ${condition} #${run + 1}: triggered=${triggered(trace, entry.skill)} ${passed}/${entry.assertions.length} $${trace.costUsd.toFixed(2)}${failed.length > 0 ? ` failed: ${failed.map((assertion) => JSON.stringify(assertion)).join(' ')}` : ''}`,
-        );
-        if (values.keep) console.log(`kept: ${dir}`);
-        else rmSync(dir, { recursive: true, force: true });
-      }
+const jobs = bindings.flatMap((binding) =>
+  cases.flatMap((entry) =>
+    conditions.flatMap((condition) =>
+      Array.from({ length: runs }, (_, run) => ({ binding, entry, condition, run })),
+    ),
+  ),
+);
+
+/** Resolves with the session's exit status and output; a session past `SESSION_TIMEOUT_MS` is killed. */
+function claude(args, cwd) {
+  return new Promise((resolveSession) => {
+    const child = spawn('claude', args, { cwd, env, timeout: SESSION_TIMEOUT_MS });
+    let stdout = '';
+    let stderr = '';
+    child.stdout.on('data', (chunk) => (stdout += chunk));
+    child.stderr.on('data', (chunk) => (stderr += chunk));
+    child.on('close', (status, signal) => resolveSession({ status, signal, stdout, stderr }));
+  });
 }
+
+async function runSession({ binding, entry, condition, run }) {
+  const dir = mkdtempSync(join(tmpdir(), `slotted-eval-${entry.id}-`));
+  cpSync(bases[binding], dir, { recursive: true });
+  if (entry.seed)
+    cpSync(join(evalDir, 'seeds', entry.seed, binding), join(dir, 'src'), { recursive: true });
+  writeFileSync(join(dir, 'CLAUDE.md'), condition === 'with' ? renderAgentsSnippet(binding) : '');
+  const session = await claude(
+    [
+      '-p',
+      entry.prompt,
+      '--output-format',
+      'stream-json',
+      '--verbose',
+      '--model',
+      config.model,
+      '--setting-sources',
+      'project,local',
+      '--permission-mode',
+      'acceptEdits',
+      '--allowedTools',
+      'Read,Write,Edit,Glob,Grep,Bash(ls:*),Bash(cat:*)',
+    ],
+    dir,
+  );
+  const label = `${binding} ${entry.id} ${condition} #${run + 1}`;
+  const trace = parseStream(session.stdout.split('\n'));
+  // A session the CLI refused (a usage limit, a login) or that timed out costs nothing usable and must not count.
+  if (session.status !== 0 || trace.costUsd === 0)
+    throw new Error(
+      `${label} did not run (status ${session.status}, signal ${session.signal}): ${(session.stdout + session.stderr).trim().slice(-400)}`,
+    );
+  const files = sourceFiles(dir);
+  const failed = entry.assertions.filter(
+    (assertion) => !assertionPasses(assertion, binding, files, components),
+  );
+  const passed = entry.assertions.length - failed.length;
+  results.push({
+    caseId: entry.id,
+    binding,
+    skill: entry.skill,
+    condition,
+    triggered: triggered(trace, entry.skill),
+    passed,
+    total: entry.assertions.length,
+    trace,
+  });
+  console.log(
+    `${label}: triggered=${triggered(trace, entry.skill)} ${passed}/${entry.assertions.length} $${trace.costUsd.toFixed(2)}${failed.length > 0 ? ` failed: ${failed.map((assertion) => JSON.stringify(assertion)).join(' ')}` : ''}`,
+  );
+  if (values.keep) console.log(`kept: ${dir}`);
+  else rmSync(dir, { recursive: true, force: true });
+}
+
+// `--jobs` sessions run at once; after the first failure no session starts, and the run fails.
+const results = [];
+let next = 0;
+let failure;
+await Promise.all(
+  Array.from({ length: Math.min(Number(values.jobs), jobs.length) }, async () => {
+    while (failure === undefined && next < jobs.length) {
+      const job = jobs[next];
+      next += 1;
+      try {
+        await runSession(job);
+      } catch (error) {
+        failure ??= error;
+      }
+    }
+  }),
+);
+if (failure !== undefined) throw failure;
 
 const date = new Date().toISOString().slice(0, 10);
 const out = join(root, 'docs/history/evals');

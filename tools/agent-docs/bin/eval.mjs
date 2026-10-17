@@ -126,6 +126,11 @@ for (const binding of bindings) {
           { cwd: dir, env, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
         );
         const trace = parseStream(session.stdout.split('\n'));
+        // A session the CLI refused (a usage limit, a login) costs nothing and must not count.
+        if (session.status !== 0 || trace.costUsd === 0)
+          throw new Error(
+            `${binding} ${entry.id} ${condition} #${run + 1} did not run (status ${session.status}): ${(session.stdout + session.stderr).trim().slice(-400)}`,
+          );
         const files = sourceFiles(dir);
         const failed = entry.assertions.filter(
           (assertion) => !assertionPasses(assertion, binding, files),

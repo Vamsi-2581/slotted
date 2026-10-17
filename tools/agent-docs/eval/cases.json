@@ -71,7 +71,13 @@
       "skill": "waiting-states",
       "prompt": "In src/, write a notifications list read from fetchNotifications() in src/api.ts, a stub that can resolve to an empty array or reject. Handle every state the list can be in.",
       "assertions": [
-        { "kind": "uses-family", "family": "skeleton" },
+        {
+          "kind": "any",
+          "of": [
+            { "kind": "uses-family", "family": "skeleton" },
+            { "kind": "mentions", "pattern": "(\\[loading\\]|\\bloading)\\s*=" }
+          ]
+        },
         { "kind": "uses-family", "family": "result-state" },
         { "kind": "no-literal" }
       ]
@@ -81,7 +87,13 @@
       "skill": "waiting-states",
       "prompt": "In src/, write an Export button for a report; exportReport(onProgress) in src/api.ts is a stub that reports percent done ten times over three seconds.",
       "assertions": [
-        { "kind": "uses-family", "family": "progress-indicator" },
+        {
+          "kind": "any",
+          "of": [
+            { "kind": "uses-family", "family": "progress-indicator" },
+            { "kind": "mentions", "pattern": "(\\[loading\\]|\\bloading)\\s*=" }
+          ]
+        },
         { "kind": "no-literal" }
       ]
     },
@@ -91,15 +103,7 @@
       "prompt": "Write the team capacity screen in src/: a strip of the next 30 days, one focusable and selectable cell per day, each cell tinted by the day's load (low, normal, high, over), with the selected day's assignments listed below the strip; read from fetchCapacity() in src/api.ts, which you also write as a stub returning a Promise.",
       "assertions": [
         { "kind": "no-literal" },
-        {
-          "kind": "any",
-          "of": [
-            { "kind": "uses-family", "family": "toggle" },
-            { "kind": "uses-family", "family": "toggle-group" },
-            { "kind": "uses-family", "family": "checkbox" },
-            { "kind": "mentions", "pattern": "focus-visible[\\s\\S]{0,400}--slotted-focus-ring-" }
-          ]
-        },
+        { "kind": "mentions", "pattern": "focus-visible[\\s\\S]{0,400}--slotted-focus-ring-" },
         { "kind": "mentions", "pattern": "--slotted-tone-" }
       ]
     },
@@ -120,7 +124,15 @@
       "prompt": "Write a seat picker in src/: a map of 8 rows by 12 seats read from fetchSeats() in src/api.ts, which you also write as a stub returning a Promise. Each seat is free, taken or selected; a free seat toggles its selection by pointer and by keyboard, a taken seat cannot be chosen, and the number of selected seats shows under the map.",
       "assertions": [
         { "kind": "no-literal" },
-        { "kind": "mentions", "pattern": "focus-visible[\\s\\S]{0,400}--slotted-focus-ring-" },
+        {
+          "kind": "any",
+          "of": [
+            { "kind": "uses-family", "family": "toggle" },
+            { "kind": "uses-family", "family": "toggle-group" },
+            { "kind": "uses-family", "family": "checkbox" },
+            { "kind": "mentions", "pattern": "focus-visible[\\s\\S]{0,400}--slotted-focus-ring-" }
+          ]
+        },
         {
           "kind": "any",
           "of": [

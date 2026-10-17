@@ -9,10 +9,13 @@
  *   pnpm eval:agent-docs --case orders-list --binding react --runs 1 --condition with --keep
  *     (keeps each session's directory and prints its path)
  *   pnpm eval:agent-docs --jobs 2   (sessions at once; 4 by default)
+ *   pnpm eval:agent-docs --fresh    (ignores the journal of an interrupted run)
  * Prerequisite: `node scripts/pack-beta.mjs --only @slotted/react,@slotted/angular,@slotted/core,@slotted/theme,@slotted/themes`.
  */
 import { spawn, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import {
+  appendFileSync,
   cpSync,
   existsSync,
   mkdirSync,
@@ -43,6 +46,7 @@ const { values } = parseArgs({
     'dry-run': { type: 'boolean', default: false },
     keep: { type: 'boolean', default: false },
     jobs: { type: 'string', default: '4' },
+    fresh: { type: 'boolean', default: false },
   },
 });
 
@@ -112,6 +116,39 @@ const jobs = bindings.flatMap((binding) =>
     ),
   ),
 );
+const keyOf = ({ binding, entry, condition, run }) =>
+  `${binding} ${entry.id} ${condition} #${run + 1}`;
+
+// The journal keeps each finished session, so a run stopped by a usage limit resumes
+// where it stopped. A line counts only while the tarballs, the cases, the snippets and
+// the model are the ones it was measured on.
+const journal = join(tmpdir(), 'slotted-eval-journal.jsonl');
+const fingerprint = createHash('sha256')
+  .update(config.model)
+  .update(readFileSync(join(evalDir, 'cases.json')))
+  .update(bindings.map((binding) => renderAgentsSnippet(binding)).join('\n'))
+  .update(
+    Buffer.concat(
+      [...new Set(Object.values(PACKAGES).flat())].map((name) =>
+        readFileSync(join(root, 'demos/.registry', registry[name].tarball)),
+      ),
+    ),
+  )
+  .digest('hex');
+const keys = new Set(jobs.map(keyOf));
+const kept =
+  values.fresh || !existsSync(journal)
+    ? []
+    : readFileSync(journal, 'utf8')
+        .split('\n')
+        .filter(Boolean)
+        .map((line) => JSON.parse(line))
+        .filter((line) => line.fingerprint === fingerprint && keys.has(line.key));
+writeFileSync(journal, kept.map((line) => `${JSON.stringify(line)}\n`).join(''));
+const results = kept.map((line) => line.result);
+const done = new Set(kept.map((line) => line.key));
+const pending = jobs.filter((job) => !done.has(keyOf(job)));
+if (kept.length > 0) console.log(`resumed ${kept.length} session(s) from ${journal}`);
 
 /** Resolves with the session's exit status and output; a session past `SESSION_TIMEOUT_MS` is killed. */
 function claude(args, cwd) {
@@ -149,7 +186,7 @@ async function runSession({ binding, entry, condition, run }) {
     ],
     dir,
   );
-  const label = `${binding} ${entry.id} ${condition} #${run + 1}`;
+  const label = keyOf({ binding, entry, condition, run });
   const trace = parseStream(session.stdout.split('\n'));
   // A session the CLI refused (a usage limit, a login) or that timed out costs nothing usable and must not count.
   if (session.status !== 0 || trace.costUsd === 0)
@@ -161,7 +198,7 @@ async function runSession({ binding, entry, condition, run }) {
     (assertion) => !assertionPasses(assertion, binding, files, components),
   );
   const passed = entry.assertions.length - failed.length;
-  results.push({
+  const result = {
     caseId: entry.id,
     binding,
     skill: entry.skill,
@@ -170,7 +207,9 @@ async function runSession({ binding, entry, condition, run }) {
     passed,
     total: entry.assertions.length,
     trace,
-  });
+  };
+  results.push(result);
+  appendFileSync(journal, `${JSON.stringify({ fingerprint, key: label, result })}\n`);
   console.log(
     `${label}: triggered=${triggered(trace, entry.skill)} ${passed}/${entry.assertions.length} $${trace.costUsd.toFixed(2)}${failed.length > 0 ? ` failed: ${failed.map((assertion) => JSON.stringify(assertion)).join(' ')}` : ''}`,
   );
@@ -179,13 +218,12 @@ async function runSession({ binding, entry, condition, run }) {
 }
 
 // `--jobs` sessions run at once; after the first failure no session starts, and the run fails.
-const results = [];
 let next = 0;
 let failure;
 await Promise.all(
-  Array.from({ length: Math.min(Number(values.jobs), jobs.length) }, async () => {
-    while (failure === undefined && next < jobs.length) {
-      const job = jobs[next];
+  Array.from({ length: Math.min(Number(values.jobs), pending.length) }, async () => {
+    while (failure === undefined && next < pending.length) {
+      const job = pending[next];
       next += 1;
       try {
         await runSession(job);
@@ -202,4 +240,5 @@ const out = join(root, 'docs/history/evals');
 mkdirSync(out, { recursive: true });
 const file = join(out, `${date}-agent-docs.md`);
 writeFileSync(file, renderReport(date, config.model, summarize(results)));
+rmSync(journal, { force: true });
 console.log(`report: ${relative(root, file)}`);

@@ -130,6 +130,19 @@ describe('assertionPasses', () => {
     ).toBe(false);
   });
 
+  it('no-literal skips the step of a media or container query, and comments', () => {
+    const css =
+      '/* From 600px the grid fills. */\n@media (min-width: 600px) { a { flex-basis: 0; } }\n@container list (inline-size > 40rem) and (width < 900px) { b { gap: var(--slotted-space-2); } }';
+    expect(assertionPasses({ kind: 'no-literal' }, 'react', new Map([['a.css', css]]))).toBe(true);
+    expect(
+      assertionPasses(
+        { kind: 'no-literal' },
+        'react',
+        new Map([['a.css', '@media (min-width: 600px) { a { padding: 12px; } }']]),
+      ),
+    ).toBe(false);
+  });
+
   it('mentions matches a pattern in any file', () => {
     expect(
       assertionPasses(

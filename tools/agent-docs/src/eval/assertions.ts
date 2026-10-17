@@ -8,6 +8,10 @@ export type Assertion =
 
 /** Lengths the library itself writes as literals (`specs/demo-screen-tokens.test.mjs`). */
 const ALLOWED_PX = new Set(['0px', '1px', '0.5px']);
+/** A container or media query's own step is a literal in the library as well (same spec). */
+const QUERY = /@(container|media)[^{]*\{/g;
+/** A comment paints nothing. */
+const COMMENT = /\/\*[\s\S]*?\*\//g;
 
 function pascal(family: string): string {
   return family.replace(/(^|-)([a-z])/g, (_, __, letter: string) => letter.toUpperCase());
@@ -42,8 +46,11 @@ export function assertionPasses(
       return names.some((name) => new RegExp(`<${name}[\\s>/.]`).test(all));
     }
     case 'no-literal': {
-      if (/#[0-9a-fA-F]{3,8}\b/.test(all) || /\b(rgba?|hsla?)\(/.test(all)) return false;
-      return [...all.matchAll(/(\d+(?:\.\d+)?px)/g)].every(([, value]) => ALLOWED_PX.has(value!));
+      const painted = all.replace(COMMENT, '').replace(QUERY, '');
+      if (/#[0-9a-fA-F]{3,8}\b/.test(painted) || /\b(rgba?|hsla?)\(/.test(painted)) return false;
+      return [...painted.matchAll(/(\d+(?:\.\d+)?px)/g)].every(([, value]) =>
+        ALLOWED_PX.has(value!),
+      );
     }
     case 'mentions':
       return new RegExp(assertion.pattern).test(all);

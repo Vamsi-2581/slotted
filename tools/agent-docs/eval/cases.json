@@ -122,7 +122,10 @@
       "skill": "theme-app",
       "prompt": "Give this application the brand colour #0f766e on every family, and let each reader switch between light, dark and the system's preference from a control in the header; write the change in src/.",
       "assertions": [
-        { "kind": "mentions", "pattern": "seed-accent|accent['\"]?\\s*:\\s*['\"]#0f766e" },
+        {
+          "kind": "mentions",
+          "pattern": "seed-accent|seedStyle\\(\\s*\\{[^}]*\\baccent\\b|accent['\"]?\\s*:\\s*['\"]#0f766e"
+        },
         { "kind": "mentions", "pattern": "system" },
         { "kind": "absent", "pattern": "--slotted-tone-accent-[a-z-]+\\s*:" }
       ]

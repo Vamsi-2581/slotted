@@ -89,7 +89,7 @@ function sourceFiles(dir) {
       if (entry === 'node_modules') continue;
       const path = join(current, entry);
       if (statSync(path).isDirectory()) walk(path);
-      else if (/\.(tsx?|html|css|scss)$/.test(entry))
+      else if (/\.([cm]?[jt]sx?|html|css|scss|json)$/.test(entry))
         files.set(relative(dir, path), readFileSync(path, 'utf8'));
     }
   };

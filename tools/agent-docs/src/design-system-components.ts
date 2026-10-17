@@ -113,6 +113,7 @@ export async function renderExamples(
   );
   const markup = new Map<string, string>();
   const errors = new Map<string, string>();
+  const hadRequire = 'require' in globalThis;
   try {
     for (const [family, source] of examples) {
       try {
@@ -141,6 +142,7 @@ export async function renderExamples(
       }
     }
   } finally {
+    if (!hadRequire) delete (globalThis as { require?: unknown }).require;
     rmSync(dir, { recursive: true, force: true });
   }
   return { markup, errors };

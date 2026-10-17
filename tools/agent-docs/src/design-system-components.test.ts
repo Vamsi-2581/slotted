@@ -58,5 +58,6 @@ describe('component folders', () => {
     expect(markup.get('button')).toContain('data-ui="button"');
     expect(markup.get('text-field')).toContain('data-ui="text-field"');
     expect(errors.get('broken')).toBe('no');
+    expect('require' in globalThis).toBe(false);
   });
 });

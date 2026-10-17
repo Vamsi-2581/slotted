@@ -4,7 +4,8 @@ export type Assertion =
   | { kind: 'uses-family'; family: string }
   | { kind: 'no-literal' }
   | { kind: 'mentions'; pattern: string }
-  | { kind: 'absent'; pattern: string };
+  | { kind: 'absent'; pattern: string }
+  | { kind: 'any'; of: readonly Assertion[] };
 
 /** Lengths the library itself writes as literals (`specs/demo-screen-tokens.test.mjs`). */
 const ALLOWED_PX = new Set(['0px', '1px', '0.5px']);
@@ -56,5 +57,7 @@ export function assertionPasses(
       return new RegExp(assertion.pattern).test(all);
     case 'absent':
       return !new RegExp(assertion.pattern).test(all);
+    case 'any':
+      return assertion.of.some((each) => assertionPasses(each, binding, files, components));
   }
 }

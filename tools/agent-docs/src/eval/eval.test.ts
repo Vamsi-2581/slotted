@@ -143,6 +143,23 @@ describe('assertionPasses', () => {
     ).toBe(false);
   });
 
+  it('any passes when one of its assertions passes', () => {
+    const seats = new Map([
+      ['src/seats.ts', "import { SlToggle } from '@slotted/angular/toggle';"],
+    ]);
+    const focus = {
+      kind: 'any',
+      of: [
+        { kind: 'uses-family', family: 'toggle' },
+        { kind: 'mentions', pattern: 'focus-visible' },
+      ],
+    } as const;
+    expect(assertionPasses(focus, 'angular', seats)).toBe(true);
+    expect(
+      assertionPasses(focus, 'angular', new Map([['src/a.css', '.seat { color: red }']])),
+    ).toBe(false);
+  });
+
   it('mentions matches a pattern in any file', () => {
     expect(
       assertionPasses(

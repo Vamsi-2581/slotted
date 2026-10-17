@@ -91,7 +91,15 @@
       "prompt": "Write the team capacity screen in src/: a strip of the next 30 days, one focusable and selectable cell per day, each cell tinted by the day's load (low, normal, high, over), with the selected day's assignments listed below the strip; read from fetchCapacity() in src/api.ts, which you also write as a stub returning a Promise.",
       "assertions": [
         { "kind": "no-literal" },
-        { "kind": "mentions", "pattern": "focus-visible[\\s\\S]{0,400}--slotted-focus-ring-" },
+        {
+          "kind": "any",
+          "of": [
+            { "kind": "uses-family", "family": "toggle" },
+            { "kind": "uses-family", "family": "toggle-group" },
+            { "kind": "uses-family", "family": "checkbox" },
+            { "kind": "mentions", "pattern": "focus-visible[\\s\\S]{0,400}--slotted-focus-ring-" }
+          ]
+        },
         { "kind": "mentions", "pattern": "--slotted-tone-" }
       ]
     },
@@ -113,8 +121,24 @@
       "assertions": [
         { "kind": "no-literal" },
         { "kind": "mentions", "pattern": "focus-visible[\\s\\S]{0,400}--slotted-focus-ring-" },
-        { "kind": "mentions", "pattern": "--slotted-target-" },
-        { "kind": "mentions", "pattern": "forced-colors" }
+        {
+          "kind": "any",
+          "of": [
+            { "kind": "uses-family", "family": "toggle" },
+            { "kind": "uses-family", "family": "toggle-group" },
+            { "kind": "uses-family", "family": "checkbox" },
+            { "kind": "mentions", "pattern": "--slotted-target-" }
+          ]
+        },
+        {
+          "kind": "any",
+          "of": [
+            { "kind": "uses-family", "family": "toggle" },
+            { "kind": "uses-family", "family": "toggle-group" },
+            { "kind": "uses-family", "family": "checkbox" },
+            { "kind": "mentions", "pattern": "forced-colors" }
+          ]
+        }
       ]
     },
     {

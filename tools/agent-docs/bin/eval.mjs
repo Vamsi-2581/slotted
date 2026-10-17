@@ -236,9 +236,14 @@ await Promise.all(
 if (failure !== undefined) throw failure;
 
 const date = new Date().toISOString().slice(0, 10);
-const out = join(root, 'docs/history/evals');
-mkdirSync(out, { recursive: true });
-const file = join(out, `${date}-agent-docs.md`);
-writeFileSync(file, renderReport(date, config.model, summarize(results)));
+const report = renderReport(date, config.model, summarize(results));
 rmSync(journal, { force: true });
-console.log(`report: ${relative(root, file)}`);
+// Only a run of every case, binding, condition and run is a report of record.
+if (values.case || values.binding || values.condition || values.runs) console.log(report);
+else {
+  const out = join(root, 'docs/history/evals');
+  mkdirSync(out, { recursive: true });
+  const file = join(out, `${date}-agent-docs.md`);
+  writeFileSync(file, report);
+  console.log(`report: ${relative(root, file)}`);
+}

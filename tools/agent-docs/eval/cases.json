@@ -148,8 +148,9 @@
       "assertions": [
         {
           "kind": "mentions",
-          "pattern": "seed-accent|seedStyle\\(\\s*\\{[^}]*\\baccent\\b|accent['\"]?\\s*:\\s*['\"]#0f766e"
+          "pattern": "seed-accent|\\baccent['\"]?\\s*:\\s*(['\"]#0f766e|[A-Za-z_$])"
         },
+        { "kind": "mentions", "pattern": "0f766e" },
         { "kind": "mentions", "pattern": "system" },
         { "kind": "absent", "pattern": "--slotted-tone-accent-[a-z-]+\\s*:" }
       ]

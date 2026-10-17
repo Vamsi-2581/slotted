@@ -88,9 +88,11 @@ function sourceFiles(dir) {
 
 const env = { ...process.env };
 delete env.CLAUDECODE;
+// Every install runs before the first session, so a failed one costs no session.
+const bases = Object.fromEntries(bindings.map((binding) => [binding, template(binding)]));
 const results = [];
 for (const binding of bindings) {
-  const base = template(binding);
+  const base = bases[binding];
   for (const entry of cases)
     for (const condition of conditions)
       for (let run = 0; run < runs; run += 1) {

@@ -2,6 +2,28 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.3 — 2026-10-19
+
+- docs(evals): theme-app atende após o passo dos materiais
+- feat(react): usePressSelection
+- feat(button): justify between
+- feat(theme): material translúcido
+- perf(filter-bar): o modo compacto e o sticky medem só no relatório do observer
+- perf(page-header): o sticky-header mede no primeiro relatório do ResizeObserver
+- perf(chart): o tema lê-se uma vez por contexto e nunca dentro da montagem
+- fix(agent-docs): o export do design system lê uma camada de estado como cor com alfa
+- fix(theme): fontes geradas e snapshot proof a par dos contratos
+- fix(react): o pacote deixa de embutir o react-dom
+- docs(dialog): quem tem o inset do painel
+- feat(chart): rótulos de anotações sem sobreposição
+- feat(currency-field): appearance display
+- feat(list): fim do cabeçalho de grupo e variante ruled
+- feat(segmented-control): variante underline
+- feat(table): linha de grupo, linha atual e ação na linha
+- feat(theme): tom neutral, camadas de estado e tracking
+- perf(positioner): um cálculo para os pedidos feitos na mesma tarefa
+- fix(app-shell): a navegação volta aberta ao sair de overlay
+
 ## 0.1.0-beta.2 — 2026-10-17
 
 - fix(docs): llms.txt lista o skills/index.md de cada binding

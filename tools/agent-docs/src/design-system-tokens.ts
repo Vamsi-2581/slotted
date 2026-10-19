@@ -68,6 +68,18 @@ const THEME_NAMES: Record<Scheme, string> = {
 const COLOR =
   /^(?:#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|(?:rgba?|hsla?|oklch|oklab|lab|lch)\([0-9.%\s,/+-]+\))$/;
 
+/**
+ * A share of a colour over transparency, as a state layer is written, read as
+ * the colour itself at that alpha: interpolation is premultiplied, so mixing
+ * with `transparent` keeps the hue and scales only the alpha.
+ */
+function overTransparency(value: string): string {
+  const match = /^color-mix\(in [a-z]+, #([0-9a-f]{6}) ([0-9.]+)%, transparent\)$/.exec(value);
+  if (match === null) return value;
+  const [r, g, b] = [0, 2, 4].map((at) => Number.parseInt(match[1]!.slice(at, at + 2), 16));
+  return `rgb(${r} ${g} ${b} / ${Number(match[2]) / 100})`;
+}
+
 export async function loadFlatTheme(root: string): Promise<FlatTheme> {
   const url = (path: string) => pathToFileURL(join(root, path)).href;
   const { flattenTheme } = (await import(url('packages/theme/dist/index.js'))) as {
@@ -122,7 +134,10 @@ export function designTokens(input: {
       (candidate) => candidate.axis === 'scheme' && groupCovers(entry, candidate.name),
     )) {
       const value = Object.fromEntries(
-        SCHEMES.map((scheme) => [scheme, inScheme(token.name, scheme).toLowerCase()]),
+        SCHEMES.map((scheme) => [
+          scheme,
+          overTransparency(inScheme(token.name, scheme).toLowerCase()),
+        ]),
       ) as Record<Scheme, string>;
       if (Object.values(value).every((one) => COLOR.test(one)))
         colors.push({ name: token.name.slice(2), value, usage: usage(entry, token.name) });

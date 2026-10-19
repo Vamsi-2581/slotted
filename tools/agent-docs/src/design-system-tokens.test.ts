@@ -56,6 +56,10 @@ describe('designTokens', () => {
       'rgb(0 0 0 / 0.62)',
     );
     expect(dropped).toEqual(['--slotted-control-shadow', '--slotted-current-edge']);
+    /* A state layer is the text colour at a share over transparency. */
+    expect(
+      tokens.color.tokens.find((token) => token.name === 'slotted-state-hover')?.value.light,
+    ).toMatch(/^rgb\(\d+ \d+ \d+ \/ 0\.05\)$/);
   });
 
   it('carries every colour token the application reads, by scheme', () => {

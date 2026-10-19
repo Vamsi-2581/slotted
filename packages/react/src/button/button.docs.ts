@@ -22,7 +22,7 @@ const imports: ReferenceImport = {
     "import {\n  Button,\n  ButtonDefaultsProvider,\n  ButtonLink,\n  IconButton,\n  ToggleButton,\n} from '@slotted/react';",
 };
 
-const TONE = 'accent | secondary | success | warning | danger';
+const TONE = 'accent | secondary | neutral | success | warning | danger';
 const VARIANT = 'solid | outline | ghost';
 const SIZE = 'sm | md | lg';
 
@@ -32,7 +32,7 @@ const appearance = (member: string, tone: string, variant: string): ApiTuple[] =
     TONE,
     tone,
     member,
-    'The semantic colour: accent for the primary action, secondary for a neutral one, and success, warning or danger for what the action does.',
+    'The semantic colour: accent for the primary action, secondary for a neutral one, neutral for a primary action drawn in ink where the accent is kept for data, and success, warning or danger for what the action does.',
   ],
   ['variant', VARIANT, variant, member, 'How the tone is painted: solid, outline or ghost.'],
   [

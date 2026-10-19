@@ -446,7 +446,9 @@
     font-size: var(--_value-size);
     font-variant-numeric: proportional-nums;
     font-weight: var(--slotted-font-weight-semibold, 600);
-    letter-spacing: -0.02em;
+    /* The figure is set at the 3xl or 4xl step, where the theme's tighter
+       tracking applies. */
+    letter-spacing: var(--slotted-letter-spacing-tighter, -0.03em);
     unicode-bidi: plaintext;
     line-height: var(--_value-line);
     margin: 0;

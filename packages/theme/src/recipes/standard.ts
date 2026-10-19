@@ -661,6 +661,41 @@ export const standard: Recipe = {
         max: 0.041,
       },
     },
+    '--slotted-tone-neutral-solid': {
+      alias: '--slotted-surface-inverse',
+    },
+    '--slotted-tone-neutral-solid-hover': {
+      alias: '--slotted-surface-inverse-hover',
+    },
+    '--slotted-tone-neutral-solid-active': {
+      alias: '--slotted-surface-inverse-active',
+    },
+    '--slotted-tone-neutral-on-solid': {
+      alias: '--slotted-text-inverse',
+    },
+    '--slotted-tone-neutral-surface': {
+      alias: '--slotted-tone-secondary-surface',
+    },
+    '--slotted-tone-neutral-subtle-hover': {
+      alias: '--slotted-tone-secondary-subtle-hover',
+    },
+    '--slotted-tone-neutral-subtle-active': {
+      alias: '--slotted-tone-secondary-subtle-active',
+    },
+    '--slotted-tone-neutral-border': {
+      alias: '--slotted-border-strong',
+    },
+    '--slotted-tone-neutral-text': {
+      alias: '--slotted-text',
+    },
+    '--slotted-surface-inverse-hover': {
+      mix: '--slotted-surface-inverse',
+      share: 0.08,
+    },
+    '--slotted-surface-inverse-active': {
+      mix: '--slotted-surface-inverse',
+      share: 0.15,
+    },
     '--slotted-text-inverse': {
       seed: 'neutral',
       l: 0.984,
@@ -1345,6 +1380,41 @@ export const standard: Recipe = {
         max: 0.006,
       },
     },
+    '--slotted-tone-neutral-solid': {
+      alias: '--slotted-surface-inverse',
+    },
+    '--slotted-tone-neutral-solid-hover': {
+      alias: '--slotted-surface-inverse-hover',
+    },
+    '--slotted-tone-neutral-solid-active': {
+      alias: '--slotted-surface-inverse-active',
+    },
+    '--slotted-tone-neutral-on-solid': {
+      alias: '--slotted-text-inverse',
+    },
+    '--slotted-tone-neutral-surface': {
+      alias: '--slotted-tone-secondary-surface',
+    },
+    '--slotted-tone-neutral-subtle-hover': {
+      alias: '--slotted-tone-secondary-subtle-hover',
+    },
+    '--slotted-tone-neutral-subtle-active': {
+      alias: '--slotted-tone-secondary-subtle-active',
+    },
+    '--slotted-tone-neutral-border': {
+      alias: '--slotted-border-strong',
+    },
+    '--slotted-tone-neutral-text': {
+      alias: '--slotted-text',
+    },
+    '--slotted-surface-inverse-hover': {
+      mix: '--slotted-surface-inverse',
+      share: 0.08,
+    },
+    '--slotted-surface-inverse-active': {
+      mix: '--slotted-surface-inverse',
+      share: 0.15,
+    },
     '--slotted-text-inverse': {
       seed: 'neutral',
       l: 0.21,
@@ -2014,6 +2084,41 @@ export const standard: Recipe = {
         scale: 0,
         max: 0,
       },
+    },
+    '--slotted-tone-neutral-solid': {
+      alias: '--slotted-surface-inverse',
+    },
+    '--slotted-tone-neutral-solid-hover': {
+      alias: '--slotted-surface-inverse-hover',
+    },
+    '--slotted-tone-neutral-solid-active': {
+      alias: '--slotted-surface-inverse-active',
+    },
+    '--slotted-tone-neutral-on-solid': {
+      alias: '--slotted-text-inverse',
+    },
+    '--slotted-tone-neutral-surface': {
+      alias: '--slotted-tone-secondary-surface',
+    },
+    '--slotted-tone-neutral-subtle-hover': {
+      alias: '--slotted-tone-secondary-subtle-hover',
+    },
+    '--slotted-tone-neutral-subtle-active': {
+      alias: '--slotted-tone-secondary-subtle-active',
+    },
+    '--slotted-tone-neutral-border': {
+      alias: '--slotted-border-strong',
+    },
+    '--slotted-tone-neutral-text': {
+      alias: '--slotted-text',
+    },
+    '--slotted-surface-inverse-hover': {
+      mix: '--slotted-surface-inverse',
+      share: 0.08,
+    },
+    '--slotted-surface-inverse-active': {
+      mix: '--slotted-surface-inverse',
+      share: 0.15,
     },
     '--slotted-text-inverse': {
       seed: 'neutral',

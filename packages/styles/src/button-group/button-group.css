@@ -341,6 +341,10 @@
     --_seam: var(--slotted-tone-secondary-solid-active);
   }
 
+  [data-ui='button-group'] > [data-tone='neutral'] {
+    --_seam: var(--slotted-tone-neutral-solid-active);
+  }
+
   [data-ui='button-group'] > [data-tone='success'] {
     --_seam: var(--slotted-tone-success-solid-active);
   }

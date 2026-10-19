@@ -13,6 +13,7 @@
   "--slotted-font-size-xs",
   "--slotted-font-weight-medium",
   "--slotted-font-weight-semibold",
+  "--slotted-letter-spacing-tighter",
   "--slotted-line-height-2xl",
   "--slotted-line-height-3xl",
   "--slotted-line-height-4xl",

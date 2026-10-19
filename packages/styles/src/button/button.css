@@ -158,6 +158,19 @@
     --_edge: var(--_solid-active);
   }
 
+  /**
+   * Ink: the theme's `neutral` tone fills with the inverse surface and labels
+   * with the inverse text. A product that keeps the accent for data draws its
+   * primary action in it.
+   */
+  [data-ui='button'][data-tone='neutral'] {
+    --_solid: var(--slotted-tone-neutral-solid);
+    --_solid-hover: var(--slotted-tone-neutral-solid-hover);
+    --_solid-active: var(--slotted-tone-neutral-solid-active);
+    --_on-solid: var(--slotted-tone-neutral-on-solid);
+    --_text: var(--slotted-tone-neutral-text);
+  }
+
   [data-ui='button'][data-tone='success'] {
     --_solid: var(--slotted-tone-success-solid);
     --_solid-hover: var(--slotted-tone-success-solid-hover);

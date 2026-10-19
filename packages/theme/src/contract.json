@@ -55,6 +55,15 @@
       }
     },
     {
+      "id": "letter-spacing",
+      "reader": "application",
+      "purpose": "The tracking large type takes: the tight step at the md and lg display steps, the tighter step at 3xl and 4xl. Text at the body steps reads the face as drawn.",
+      "tokens": {
+        "--slotted-letter-spacing-tight": "The tracking of a display figure or a wordmark at the md and lg font-size steps.",
+        "--slotted-letter-spacing-tighter": "The tracking of a display figure at the 3xl and 4xl font-size steps."
+      }
+    },
+    {
       "id": "font-weight",
       "reader": "application",
       "purpose": "How much typographic emphasis text carries.",
@@ -142,7 +151,9 @@
         "--slotted-surface": "The ground of the page's content and of a card.",
         "--slotted-surface-raised": "The ground of a surface above another: a popover, a menu, a dialog; paired with a step of `shadow`.",
         "--slotted-surface-sunken": "The canvas under the content: the ground a card and a field stand out from.",
-        "--slotted-surface-inverse": "A ground in the opposite lightness, with `--slotted-text-inverse` on it."
+        "--slotted-surface-inverse": "A ground in the opposite lightness, with `--slotted-text-inverse` on it.",
+        "--slotted-surface-inverse-hover": "The inverse ground under the pointer: `--slotted-surface-inverse` moved a share toward the opposite lightness.",
+        "--slotted-surface-inverse-active": "The inverse ground while pressed, a step beyond the hover."
       }
     },
     {
@@ -200,12 +211,13 @@
     {
       "id": "tone",
       "reader": "application",
-      "purpose": "What an element carrying an intent is painted with: five tones, each with the same nine roles.",
+      "purpose": "What an element carrying an intent is painted with: six tones, each with the same nine roles.",
       "pattern": "--slotted-tone-{tone}-{role}",
       "dimensions": {
         "tone": {
           "accent": "The product's intent: the primary action, the chosen option, the current place.",
           "secondary": "A second intent beside accent, for an action or a mark that must not compete with it.",
+          "neutral": "Ink: the inverse surface as a fill and the text colour as a label, for a primary action in a product that keeps the accent for data.",
           "success": "A result that completed or a state that is healthy.",
           "warning": "A state that needs attention before it becomes a failure.",
           "danger": "A failure, an error or an action that destroys data."
@@ -299,6 +311,16 @@
       "purpose": "How the place the reader is on is marked.",
       "tokens": {
         "--slotted-current-edge": "The edge of the row the reader is on, drawn over its tone ground."
+      }
+    },
+    {
+      "id": "state",
+      "reader": "application",
+      "purpose": "Translucent layers laid over whatever surface an element stands on, so a hovered, pressed or selected row reads the same on the page and on a raised surface. Each is the scheme's text colour at a small share over transparency. Under forced colours every layer is the Canvas system colour: the state is carried by the system colours the family draws, Highlight for selection and an outline for focus.",
+      "tokens": {
+        "--slotted-state-hover": "The layer under the pointer.",
+        "--slotted-state-pressed": "The layer while the element is pressed; the strongest of the three.",
+        "--slotted-state-selected": "The layer of a selected or open element, between hover and pressed."
       }
     },
     {
@@ -647,6 +669,20 @@
       "layer": "primitive",
       "axis": "base",
       "type": "number",
+      "root": true
+    },
+    {
+      "name": "--slotted-letter-spacing-tight",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "length",
+      "root": true
+    },
+    {
+      "name": "--slotted-letter-spacing-tighter",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "length",
       "root": true
     },
     {
@@ -1545,6 +1581,78 @@
       "forcedColor": "Canvas"
     },
     {
+      "name": "--slotted-tone-neutral-solid",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-tone-neutral-solid-hover",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-tone-neutral-solid-active",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-tone-neutral-on-solid",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-tone-neutral-surface",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-tone-neutral-subtle-hover",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-tone-neutral-subtle-active",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-tone-neutral-border",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonBorder"
+    },
+    {
+      "name": "--slotted-tone-neutral-text",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
       "name": "--slotted-tone-success-solid",
       "layer": "semantic",
       "axis": "scheme",
@@ -1825,6 +1933,22 @@
       "forcedColor": "CanvasText"
     },
     {
+      "name": "--slotted-surface-inverse-hover",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-surface-inverse-active",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
       "name": "--slotted-text-inverse",
       "layer": "semantic",
       "axis": "scheme",
@@ -1862,6 +1986,30 @@
       "type": "color",
       "root": true,
       "forcedColor": "Highlight"
+    },
+    {
+      "name": "--slotted-state-hover",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-state-pressed",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-state-selected",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
     },
     {
       "name": "--slotted-control-shadow",

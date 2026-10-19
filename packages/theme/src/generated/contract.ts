@@ -319,6 +319,20 @@ export const contract: TokenContract = {
       "root": true
     },
     {
+      "name": "--slotted-letter-spacing-tight",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "length",
+      "root": true
+    },
+    {
+      "name": "--slotted-letter-spacing-tighter",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "length",
+      "root": true
+    },
+    {
       "name": "--slotted-font-weight-regular",
       "layer": "primitive",
       "axis": "base",
@@ -1214,6 +1228,78 @@ export const contract: TokenContract = {
       "forcedColor": "Canvas"
     },
     {
+      "name": "--slotted-tone-neutral-solid",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-tone-neutral-solid-hover",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-tone-neutral-solid-active",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-tone-neutral-on-solid",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-tone-neutral-surface",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-tone-neutral-subtle-hover",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-tone-neutral-subtle-active",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-tone-neutral-border",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonBorder"
+    },
+    {
+      "name": "--slotted-tone-neutral-text",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
       "name": "--slotted-tone-success-solid",
       "layer": "semantic",
       "axis": "scheme",
@@ -1494,6 +1580,22 @@ export const contract: TokenContract = {
       "forcedColor": "CanvasText"
     },
     {
+      "name": "--slotted-surface-inverse-hover",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-surface-inverse-active",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
       "name": "--slotted-text-inverse",
       "layer": "semantic",
       "axis": "scheme",
@@ -1531,6 +1633,30 @@ export const contract: TokenContract = {
       "type": "color",
       "root": true,
       "forcedColor": "Highlight"
+    },
+    {
+      "name": "--slotted-state-hover",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-state-pressed",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-state-selected",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
     },
     {
       "name": "--slotted-control-shadow",
@@ -2024,6 +2150,8 @@ export type BaseToken =
   | '--slotted-line-height-2xl'
   | '--slotted-line-height-3xl'
   | '--slotted-line-height-4xl'
+  | '--slotted-letter-spacing-tight'
+  | '--slotted-letter-spacing-tighter'
   | '--slotted-font-weight-regular'
   | '--slotted-font-weight-medium'
   | '--slotted-font-weight-semibold'
@@ -2151,6 +2279,15 @@ export type SchemeToken =
   | '--slotted-tone-secondary-text'
   | '--slotted-tone-secondary-subtle-hover'
   | '--slotted-tone-secondary-subtle-active'
+  | '--slotted-tone-neutral-solid'
+  | '--slotted-tone-neutral-solid-hover'
+  | '--slotted-tone-neutral-solid-active'
+  | '--slotted-tone-neutral-on-solid'
+  | '--slotted-tone-neutral-surface'
+  | '--slotted-tone-neutral-subtle-hover'
+  | '--slotted-tone-neutral-subtle-active'
+  | '--slotted-tone-neutral-border'
+  | '--slotted-tone-neutral-text'
   | '--slotted-tone-success-solid'
   | '--slotted-tone-success-surface'
   | '--slotted-tone-success-solid-hover'
@@ -2186,11 +2323,16 @@ export type SchemeToken =
   | '--slotted-surface-raised'
   | '--slotted-surface-sunken'
   | '--slotted-surface-inverse'
+  | '--slotted-surface-inverse-hover'
+  | '--slotted-surface-inverse-active'
   | '--slotted-text-inverse'
   | '--slotted-border-strong'
   | '--slotted-control-border-color'
   | '--slotted-control-surface'
   | '--slotted-current-edge'
+  | '--slotted-state-hover'
+  | '--slotted-state-pressed'
+  | '--slotted-state-selected'
   | '--slotted-control-shadow'
   | '--slotted-scrim'
   | '--slotted-data-1'
@@ -2286,6 +2428,15 @@ export type ColorToken =
   | '--slotted-tone-secondary-text'
   | '--slotted-tone-secondary-subtle-hover'
   | '--slotted-tone-secondary-subtle-active'
+  | '--slotted-tone-neutral-solid'
+  | '--slotted-tone-neutral-solid-hover'
+  | '--slotted-tone-neutral-solid-active'
+  | '--slotted-tone-neutral-on-solid'
+  | '--slotted-tone-neutral-surface'
+  | '--slotted-tone-neutral-subtle-hover'
+  | '--slotted-tone-neutral-subtle-active'
+  | '--slotted-tone-neutral-border'
+  | '--slotted-tone-neutral-text'
   | '--slotted-tone-success-solid'
   | '--slotted-tone-success-surface'
   | '--slotted-tone-success-solid-hover'
@@ -2317,11 +2468,16 @@ export type ColorToken =
   | '--slotted-surface-raised'
   | '--slotted-surface-sunken'
   | '--slotted-surface-inverse'
+  | '--slotted-surface-inverse-hover'
+  | '--slotted-surface-inverse-active'
   | '--slotted-text-inverse'
   | '--slotted-border-strong'
   | '--slotted-control-border-color'
   | '--slotted-control-surface'
   | '--slotted-current-edge'
+  | '--slotted-state-hover'
+  | '--slotted-state-pressed'
+  | '--slotted-state-selected'
   | '--slotted-scrim'
   | '--slotted-data-1'
   | '--slotted-data-2'

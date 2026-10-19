@@ -17,8 +17,8 @@ const base = Object.fromEntries(
 ) as Record<SeedName, NonNullable<ReturnType<typeof parseSeed>>>;
 
 describe('recipes.standard', () => {
-  it('derives the same 61 tokens in every scheme', () => {
-    for (const scheme of SCHEMES) expect(Object.keys(standard[scheme])).toHaveLength(61);
+  it('derives the same 72 tokens in every scheme', () => {
+    for (const scheme of SCHEMES) expect(Object.keys(standard[scheme])).toHaveLength(72);
   });
 
   it('meets every ratio for every seed of the grid, one seed varied at a time', () => {

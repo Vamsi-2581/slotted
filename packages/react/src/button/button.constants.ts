@@ -3,7 +3,14 @@
  * selects one is `tone`. `variant` names what it actually selects: how the
  * chosen tone is painted.
  */
-export const BUTTON_TONES = ['accent', 'secondary', 'success', 'warning', 'danger'] as const;
+export const BUTTON_TONES = [
+  'accent',
+  'secondary',
+  'neutral',
+  'success',
+  'warning',
+  'danger',
+] as const;
 export const BUTTON_VARIANTS = ['solid', 'outline', 'ghost'] as const;
 export const BUTTON_SIZES = ['sm', 'md', 'lg'] as const;
 export const BUTTON_SHAPES = ['square', 'circle'] as const;

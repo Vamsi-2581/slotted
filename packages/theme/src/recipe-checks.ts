@@ -12,7 +12,7 @@ const NON_TEXT = 3;
 const CONTROL_EDGE = 1.5;
 const HIGHLIGHT_STEP = 0.02;
 const SURFACES = ['--slotted-surface', '--slotted-surface-raised', '--slotted-surface-sunken'];
-const TONES = ['accent', 'secondary', 'success', 'warning', 'danger'];
+const TONES = ['accent', 'secondary', 'neutral', 'success', 'warning', 'danger'];
 
 /**
  * The ratios of `theme-conformance` over evaluated colours, as messages. A
@@ -45,6 +45,8 @@ export function checkScheme(values: Readonly<Record<string, Oklch>>, scheme: Sch
       failures.push(`the pressed highlight is not beyond the hover on ${surface}`);
   }
   pair('--slotted-text-inverse', '--slotted-surface-inverse', text);
+  pair('--slotted-text-inverse', '--slotted-surface-inverse-hover', text);
+  pair('--slotted-text-inverse', '--slotted-surface-inverse-active', text);
   if (scheme !== 'high-contrast') {
     const edge = contrast(values['--slotted-surface']!, values['--slotted-control-border-color']!);
     const strong = contrast(values['--slotted-surface']!, values['--slotted-border-strong']!);

@@ -484,3 +484,49 @@ test('gives every data slot a colour of its own in every scheme', () => {
     assert.equal(new Set(painted).size, painted.length, `${scheme} paints two slots alike`);
   }
 });
+
+/**
+ * A state layer is laid over whatever surface the element stands on, so the
+ * same token reads on the page and on a raised sidebar. It is the scheme's
+ * text colour at a small share over transparency, and it never resolves to an
+ * opaque colour: an opaque hover ground is the one that changes nothing when
+ * the surface under it changes.
+ */
+test('ships hover, pressed and selected state layers, translucent in every scheme', () => {
+  const css = theme.schemes;
+  for (const scheme of SCHEMES) {
+    for (const [token, share] of [
+      [
+        '--slotted-state-hover',
+        /^color-mix\(in oklab, var\(--slotted-text\) (\d+)%, transparent\)$/,
+      ],
+      [
+        '--slotted-state-pressed',
+        /^color-mix\(in oklab, var\(--slotted-text\) (\d+)%, transparent\)$/,
+      ],
+      [
+        '--slotted-state-selected',
+        /^color-mix\(in oklab, var\(--slotted-text\) (\d+)%, transparent\)$/,
+      ],
+    ]) {
+      const value = css[scheme][token];
+      assert.ok(value, `${scheme} has no ${token}`);
+      const match = share.exec(value);
+      assert.ok(
+        match,
+        `${scheme} ${token} is ${value}, not a translucent share of the text colour`,
+      );
+      const percent = Number(match[1]);
+      assert.ok(percent > 0 && percent < 30, `${scheme} ${token} is ${percent}%`);
+    }
+    const percent = (token) => Number(/(\d+)%/.exec(css[scheme][token])[1]);
+    assert.ok(percent('--slotted-state-hover') < percent('--slotted-state-selected'));
+    assert.ok(percent('--slotted-state-selected') <= percent('--slotted-state-pressed'));
+  }
+});
+
+test('ships the two tracking steps large type takes, in the built CSS', async () => {
+  const css = await readFile(new URL('../dist/default.css', import.meta.url), 'utf8');
+  assert.match(css, /--slotted-letter-spacing-tight:\s*-0\.02em/);
+  assert.match(css, /--slotted-letter-spacing-tighter:\s*-0\.03em/);
+});

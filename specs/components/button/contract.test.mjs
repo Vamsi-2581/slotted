@@ -39,7 +39,14 @@ test('names the members the family publishes, in order', () => {
  * selects: how the tone is painted.
  */
 test('separates the tone from the way it is painted', () => {
-  assert.deepEqual(contract.axes.tone, ['accent', 'secondary', 'success', 'warning', 'danger']);
+  assert.deepEqual(contract.axes.tone, [
+    'accent',
+    'secondary',
+    'neutral',
+    'success',
+    'warning',
+    'danger',
+  ]);
   assert.deepEqual(contract.axes.variant, ['solid', 'outline', 'ghost']);
   assert.deepEqual(contract.axes.size, ['sm', 'md', 'lg']);
   assert.ok(!('fill' in contract.axes), 'fill was the old name of variant and may not survive it');

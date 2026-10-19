@@ -392,6 +392,56 @@
     transition-duration: var(--slotted-duration-instant);
   }
 
+  /**
+   * ── Chips ──────────────────────────────────────────────────────────────
+   *
+   * A short list of choices as separate rounded items that wrap onto a second
+   * line rather than overflow, never joined into a bar. A chip at rest has the
+   * control edge; the pressed one is the neutral tone's ink — its solid ground
+   * under its own label — which is the one state a chip has to say at a
+   * glance. Hover and press move the ground of a chip at rest only.
+   */
+  [data-ui='toggle-group'][data-part='root'][data-variant='chips'] {
+    flex-wrap: wrap;
+    gap: var(--slotted-toggle-group-chips-gap, var(--slotted-space-3, 0.375rem));
+  }
+
+  [data-ui='toggle-group'][data-part='root'][data-variant='chips'] [data-part='item'] {
+    border-color: var(--_border-color);
+    border-radius: var(--slotted-toggle-group-chips-radius, var(--slotted-radius-full, 9999px));
+    font-weight: var(--slotted-font-weight-medium, 500);
+  }
+
+  [data-ui='toggle-group'][data-part='root'][data-variant='chips']
+    [data-part='item'][data-pressed]:not(:disabled):not([data-disabled]),
+  [data-ui='toggle-group'][data-part='root'][data-variant='chips']
+    [data-part='item'][data-pressed]:active:not(:disabled):not([data-disabled]) {
+    background: var(
+      --slotted-toggle-group-chips-pressed-background,
+      var(--slotted-tone-neutral-solid, CanvasText)
+    );
+    border-color: var(
+      --slotted-toggle-group-chips-pressed-background,
+      var(--slotted-tone-neutral-solid, CanvasText)
+    );
+    color: var(
+      --slotted-toggle-group-chips-pressed-color,
+      var(--slotted-tone-neutral-on-solid, Canvas)
+    );
+  }
+
+  [data-ui='toggle-group'][data-part='root'][data-variant='chips']
+    [data-part='item'][data-pressed]:hover:not(:disabled):not([data-disabled]) {
+    background: var(--slotted-tone-neutral-solid-hover, CanvasText);
+    border-color: var(--slotted-tone-neutral-solid-hover, CanvasText);
+  }
+
+  [data-ui='toggle-group'][data-part='root'][data-variant='chips'] [data-part='item']:disabled,
+  [data-ui='toggle-group'][data-part='root'][data-variant='chips']
+    [data-part='item'][data-disabled] {
+    border-color: var(--slotted-disabled-border, GrayText);
+  }
+
   /* ── Focus ────────────────────────────────────────────────────────────── */
 
   /**

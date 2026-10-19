@@ -11,6 +11,7 @@ export {
 } from './segmented-control-defaults';
 export type {
   SegmentedControlCondense,
+  SegmentedControlVariant,
   SegmentedControlDefaults,
   SegmentedControlOrientation,
   SegmentedControlSize,

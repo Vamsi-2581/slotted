@@ -34,6 +34,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     orientation: Orientation,
     states: States,
     iconOnly: IconOnly,
+    variants: Variants,
     condense: Condense,
     width: Width,
     field: InsideAField,
@@ -239,6 +240,36 @@ export const IconOnly: Story = {
         <SegmentedControl aria-label="Alinhamento, pequeno" defaultValue="center" size="sm">
           <Segment aria-label="Início" icon={<AlignLeft size={14} />} value="start" />
           <Segment aria-label="Centro" icon={<AlignCenter size={14} />} value="center" />
+        </SegmentedControl>
+      </Scene>
+    </Grid>
+  ),
+};
+
+export const Variants: Story = {
+  parameters: scenario('variants'),
+  render: () => (
+    <Grid columns={2}>
+      <Scene
+        label="A track"
+        note="The box with a thumb behind the chosen segment, every segment as wide as the widest."
+        layout="block"
+      >
+        <SegmentedControl aria-label="Período, trilho" defaultValue="month">
+          <Segment value="day">Dia</Segment>
+          <Segment value="week">Semana</Segment>
+          <Segment value="month">Mês</Segment>
+        </SegmentedControl>
+      </Scene>
+      <Scene
+        label="The words alone"
+        note="The same radio group with no track: the chosen word in the text colour and underlined, the others muted."
+        layout="block"
+      >
+        <SegmentedControl aria-label="Período, sublinhado" defaultValue="month" variant="underline">
+          <Segment value="day">Dia</Segment>
+          <Segment value="week">Semana</Segment>
+          <Segment value="month">Mês</Segment>
         </SegmentedControl>
       </Scene>
     </Grid>

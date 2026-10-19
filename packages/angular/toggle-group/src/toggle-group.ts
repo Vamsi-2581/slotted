@@ -20,6 +20,8 @@ import {
 } from '@angular/core';
 import type { OnInit } from '@angular/core';
 
+import { SlField } from '@slotted/angular/field';
+
 import { injectToggleGroupDefaults } from './toggle-group-defaults';
 import type {
   ToggleGroupOrientation,
@@ -78,6 +80,7 @@ const ITEM_SELECTOR = '[data-part="item"]';
     '[attr.data-attached]': "resolvedAttached() ? '' : null",
     '[attr.data-full-width]': "fullWidth() ? '' : null",
     '[attr.aria-orientation]': 'ariaOrientation()',
+    '[attr.aria-labelledby]': 'labelledBy()',
   },
 })
 export class SlToggleGroup implements OnInit {
@@ -122,6 +125,18 @@ export class SlToggleGroup implements OnInit {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly defaults = injectToggleGroupDefaults();
   private readonly writtenRole = inject(new HostAttributeToken('role'), { optional: true });
+  private readonly field = inject(SlField, { optional: true });
+  private readonly writtenLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
+  private readonly writtenLabelledBy = inject(new HostAttributeToken('aria-labelledby'), {
+    optional: true,
+  });
+  /* A group has no element a label's for can reach, so inside a field the
+     field's label names it, unless the consumer named it themselves. */
+  protected readonly labelledBy = computed(
+    () =>
+      this.writtenLabelledBy ??
+      (this.writtenLabel === null ? (this.field?.ids().label ?? null) : null),
+  );
   private readonly writtenOrientation = inject(new HostAttributeToken('aria-orientation'), {
     optional: true,
   });
@@ -134,7 +149,10 @@ export class SlToggleGroup implements OnInit {
   readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   readonly resolvedOrientation = computed(() => this.orientation() ?? this.defaults.orientation);
-  readonly resolvedAttached = computed(() => this.attached() ?? this.defaults.attached);
+  /* Chips stand apart by definition: a joined row of them is a bar. */
+  readonly resolvedAttached = computed(
+    () => this.resolvedVariant() !== 'chips' && (this.attached() ?? this.defaults.attached),
+  );
   readonly resolvedDeselectable = computed(() => this.deselectable() ?? this.defaults.deselectable);
   readonly resolvedLoop = computed(() => this.loop() ?? this.defaults.loop);
   readonly resolvedDisabled = computed(() => this.disabled());

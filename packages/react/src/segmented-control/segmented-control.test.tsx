@@ -336,3 +336,46 @@ describe('SegmentedControl', () => {
     noise.mockRestore();
   });
 });
+
+/**
+ * A few words, the chosen one underlined in the text colour: the same radio
+ * group — one tab stop, the arrows move the value — drawn with no track.
+ */
+describe('the underline variant', () => {
+  function Period(props: Partial<SegmentedControlProps>) {
+    return (
+      <SegmentedControl {...props}>
+        {['Dia', 'Semana', 'Mês'].map((option) => (
+          <Segment key={option} value={option}>
+            {option}
+          </Segment>
+        ))}
+      </SegmentedControl>
+    );
+  }
+
+  it('draws the radio group as words and keeps its semantics', () => {
+    render(<Period aria-label="Período" defaultValue="Semana" variant="underline" />);
+    expect(control()).toHaveAttribute('data-variant', 'underline');
+    expect(control()).toHaveAccessibleName('Período');
+    expect(radios()).toHaveLength(3);
+    expect(new Set(radios().map((input) => input.name)).size).toBe(1);
+    expect(radio(1)).toBeChecked();
+    expect(segmentOf(radio(1))).toHaveAttribute('data-checked');
+  });
+
+  it('writes the track variant by default', () => {
+    render(<Period aria-label="Período" />);
+    expect(control()).toHaveAttribute('data-variant', 'track');
+  });
+
+  it('is named by the label of the field around it', () => {
+    render(
+      <Field>
+        <FieldLabel>Período</FieldLabel>
+        <Period variant="underline" />
+      </Field>,
+    );
+    expect(control()).toHaveAccessibleName('Período');
+  });
+});

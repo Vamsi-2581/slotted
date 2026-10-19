@@ -311,10 +311,10 @@ export const ANGULAR_TOGGLE_GROUP_DOCS = {
       ],
       [
         'variant',
-        "'outline' | 'ghost'",
+        "'outline' | 'ghost' | 'chips'",
         'outline',
         'slToggleGroup',
-        'Whether the bar draws its own edge. There is no tone axis: “on” is one colour across the system',
+        'Whether the bar draws its own edge, or draws its items as chips: separate rounded items that wrap, never joined, the pressed one in the neutral tone ink. There is no tone axis: “on” is one colour across the system',
       ],
       [
         'orientation',

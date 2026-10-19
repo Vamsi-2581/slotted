@@ -32,6 +32,7 @@ import type {
   SegmentedControlCondense,
   SegmentedControlOrientation,
   SegmentedControlSize,
+  SegmentedControlVariant,
 } from './segmented-control-defaults';
 
 export type {
@@ -39,6 +40,7 @@ export type {
   SegmentedControlDefaults,
   SegmentedControlOrientation,
   SegmentedControlSize,
+  SegmentedControlVariant,
 } from './segmented-control-defaults';
 
 /** Why the value moved. A segmented control can produce exactly these two. */
@@ -104,6 +106,8 @@ export interface SlSegmentedControlSegment {
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-orientation]': 'resolvedOrientation()',
     '[attr.data-condense]': 'resolvedCondense()',
+    '[attr.data-variant]': 'resolvedVariant()',
+    '[attr.aria-labelledby]': 'labelledBy()',
     '[attr.data-full-width]': "resolvedFullWidth() ? '' : null",
     '[attr.data-disabled]': "resolvedDisabled() === true ? '' : null",
     '[attr.data-invalid]': "resolvedInvalid() === true ? '' : null",
@@ -131,6 +135,8 @@ export class SlSegmentedControl implements ControlValueAccessor, OnInit, Validat
   readonly size = input<SegmentedControlSize | undefined>(undefined);
   readonly orientation = input<SegmentedControlOrientation | undefined>(undefined);
   readonly condense = input<SegmentedControlCondense | undefined>(undefined);
+  /** Defaults to the provider, then to `track`. */
+  readonly variant = input<SegmentedControlVariant | undefined>(undefined);
   readonly fullWidth = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
   });
@@ -159,6 +165,20 @@ export class SlSegmentedControl implements ControlValueAccessor, OnInit, Validat
   private readonly defaults = injectSegmentedControlDefaults();
   private readonly generatedName = inject(SlSegmentedControlIdFactory).next();
   private readonly writtenRole = inject(new HostAttributeToken('role'), { optional: true });
+  private readonly writtenLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
+  private readonly writtenLabelledBy = inject(new HostAttributeToken('aria-labelledby'), {
+    optional: true,
+  });
+  /* A group has no element a label's for can reach, so inside a field the
+     field's label names it where the root owns the role, unless the consumer
+     named it themselves. */
+  protected readonly labelledBy = computed(
+    () =>
+      this.writtenLabelledBy ??
+      (this.writtenLabel === null && this.resolvedRole() !== null
+        ? (this.field?.ids().label ?? null)
+        : null),
+  );
   private readonly writtenDescribedBy = inject(new HostAttributeToken('aria-describedby'), {
     optional: true,
   });
@@ -193,6 +213,7 @@ export class SlSegmentedControl implements ControlValueAccessor, OnInit, Validat
   );
   readonly resolvedOrientation = computed(() => this.orientation() ?? this.defaults.orientation);
   readonly resolvedCondense = computed(() => this.condense() ?? this.defaults.condense);
+  readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   readonly resolvedFullWidth = computed(() => this.fullWidth() ?? this.defaults.fullWidth);
   readonly resolvedDisabled = computed(
     () => this.disabled() ?? this.formDisabled() ?? this.field?.resolvedDisabled(),

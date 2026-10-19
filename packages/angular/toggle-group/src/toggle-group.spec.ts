@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { SlField, SlFieldLabel } from '@slotted/angular/field';
 import { SlToolbar } from '@slotted/angular/toolbar';
 import { describe, expect, it } from 'vitest';
 
@@ -236,5 +237,37 @@ describe('SlToggleGroup', () => {
     expect(items(fixture)[0]?.getAttribute('aria-label')).toBe('Negrito');
     const icon = items(fixture)[0]?.querySelector('[data-part="icon"]');
     expect(icon?.getAttribute('aria-hidden')).toBe('true');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlToggleGroup, SlToggleGroupItem, SlField, SlFieldLabel],
+  template: `<div slField>
+    <label slFieldLabel>Categoria</label>
+    <div slToggleGroup variant="chips" [defaultValue]="['Lazer']">
+      <button slToggleGroupItem value="Casa">Casa</button>
+      <button slToggleGroupItem value="Lazer">Lazer</button>
+      <button slToggleGroupItem value="Outros" disabled>Outros</button>
+    </div>
+  </div>`,
+})
+class ChipsHost {}
+
+describe('the chips variant', () => {
+  it('draws separate chips with one pressed, never joined, named by the field label', () => {
+    TestBed.configureTestingModule({ imports: [ChipsHost] });
+    const fixture = TestBed.createComponent(ChipsHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector('[data-ui="toggle-group"]') as HTMLElement;
+    const label = fixture.nativeElement.querySelector('[data-ui="field"] label') as HTMLElement;
+    const items = [...root.querySelectorAll('button')] as HTMLButtonElement[];
+
+    expect(root.getAttribute('data-variant')).toBe('chips');
+    expect(root.hasAttribute('data-attached')).toBe(false);
+    expect(root.getAttribute('aria-labelledby')).toBe(label.id);
+    expect(items[1]?.getAttribute('aria-pressed')).toBe('true');
+    expect(items[0]?.getAttribute('aria-pressed')).toBe('false');
+    expect(items[2]?.disabled).toBe(true);
   });
 });

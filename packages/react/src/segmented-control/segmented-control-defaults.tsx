@@ -10,6 +10,7 @@ const FALLBACK: SegmentedControlDefaults = {
   fullWidth: false,
   orientation: 'horizontal',
   size: 'md',
+  variant: 'track',
 };
 
 const SegmentedControlDefaultsContext = createContext<SegmentedControlDefaults>(FALLBACK);
@@ -38,6 +39,7 @@ export function SegmentedControlDefaultsProvider({
         fullWidth: defaults.fullWidth ?? inherited.fullWidth,
         orientation: defaults.orientation ?? inherited.orientation,
         size: defaults.size ?? inherited.size,
+        variant: defaults.variant ?? inherited.variant,
       }}
     >
       {children}

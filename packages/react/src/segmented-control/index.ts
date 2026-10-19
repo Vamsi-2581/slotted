@@ -9,6 +9,7 @@ export type {
   SegmentRootProps,
   SegmentedControlChangeRequest,
   SegmentedControlCondense,
+  SegmentedControlVariant,
   SegmentedControlContextValue,
   SegmentedControlDefaults,
   SegmentedControlDefaultsProviderProps,

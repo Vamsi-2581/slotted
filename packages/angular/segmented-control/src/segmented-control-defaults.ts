@@ -13,11 +13,19 @@ export type SegmentedControlOrientation = 'horizontal' | 'vertical';
  */
 export type SegmentedControlCondense = 'none' | 'icons';
 
+/**
+ * How the choice is drawn. `track` is a box with a thumb behind the chosen
+ * segment; `underline` is the words alone, the chosen one in the text colour
+ * and underlined. The semantics are the same radio group in both.
+ */
+export type SegmentedControlVariant = 'track' | 'underline';
+
 export interface SegmentedControlDefaults {
   condense: SegmentedControlCondense;
   fullWidth: boolean;
   orientation: SegmentedControlOrientation;
   size: SegmentedControlSize;
+  variant: SegmentedControlVariant;
 }
 
 const FALLBACK: SegmentedControlDefaults = {
@@ -25,6 +33,7 @@ const FALLBACK: SegmentedControlDefaults = {
   fullWidth: false,
   orientation: 'horizontal',
   size: 'md',
+  variant: 'track',
 };
 
 export const SEGMENTED_CONTROL_DEFAULTS = new InjectionToken<SegmentedControlDefaults>(

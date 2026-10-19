@@ -3,6 +3,7 @@ import { createRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/toggle-group/contract.json';
+import { Field, FieldLabel } from '../field';
 import { Toolbar } from '../toolbar';
 import { ToggleGroup } from './toggle-group';
 import { ToggleGroupDefaultsProvider } from './toggle-group-defaults';
@@ -327,5 +328,52 @@ describe('ToggleGroup', () => {
       /must be rendered inside a ToggleGroup/,
     );
     noise.mockRestore();
+  });
+});
+
+/**
+ * A short list of choices drawn as chips, the chosen one in ink: separate
+ * items that wrap, never joined, inside a field named by its label.
+ */
+describe('the chips variant', () => {
+  function Categories(props: Partial<ToggleGroupProps>) {
+    return (
+      <ToggleGroup {...props}>
+        {['Casa', 'Lazer', 'Saúde'].map((option) => (
+          <ToggleGroupItem key={option} value={option}>
+            {option}
+          </ToggleGroupItem>
+        ))}
+        <ToggleGroupItem disabled value="Outros">
+          Outros
+        </ToggleGroupItem>
+      </ToggleGroup>
+    );
+  }
+
+  it('draws separate chips with one pressed, and never joins them', () => {
+    render(<Categories aria-label="Categoria" defaultValue={['Lazer']} variant="chips" />);
+    expect(group()).toHaveAttribute('data-variant', 'chips');
+    expect(group()).not.toHaveAttribute('data-attached');
+    expect(item(1)).toHaveAttribute('aria-pressed', 'true');
+    expect(item(0)).toHaveAttribute('aria-pressed', 'false');
+    expect(item(3)).toBeDisabled();
+  });
+
+  it('keeps one value at a time', () => {
+    render(<Categories aria-label="Categoria" defaultValue={['Lazer']} variant="chips" />);
+    fireEvent.click(item(0));
+    expect(item(0)).toHaveAttribute('aria-pressed', 'true');
+    expect(item(1)).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('is named by the label of the field around it', () => {
+    render(
+      <Field>
+        <FieldLabel>Categoria</FieldLabel>
+        <Categories variant="chips" />
+      </Field>,
+    );
+    expect(group()).toHaveAccessibleName('Categoria');
   });
 });

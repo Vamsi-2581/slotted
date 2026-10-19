@@ -271,10 +271,10 @@ export const ANGULAR_TOGGLE_DOCS = {
       ],
       [
         'variant',
-        "'outline' | 'ghost'",
+        "'outline' | 'ghost' | 'chips'",
         'outline',
         'slToggle',
-        'Whether the control draws its own edge before it is on. There is no tone axis: a mode is one colour when it is on, and an action that persists in one of five tones is button’s ToggleButton',
+        'Whether the control draws its own edge before it is on, or is a chip pressed in the neutral tone ink. There is no tone axis: a mode is one colour when it is on, and an action that persists in one of five tones is button’s ToggleButton',
       ],
       [
         'disabled',

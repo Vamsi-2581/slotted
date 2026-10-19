@@ -320,10 +320,10 @@ export const REACT_TOGGLE_GROUP_DOCS = {
       ],
       [
         'variant',
-        "'outline' | 'ghost'",
+        "'outline' | 'ghost' | 'chips'",
         'outline',
         'ToggleGroup',
-        'Whether the bar draws its own edge. There is no tone axis: “on” is one colour across the system, and a bar that wants the whole palette is button-group around ToggleButtons',
+        'Whether the bar draws its own edge, or draws its items as chips: separate rounded items that wrap, never joined, the pressed one in the neutral tone ink. There is no tone axis: “on” is one colour across the system, and a bar that wants the whole palette is button-group around ToggleButtons',
       ],
       [
         'orientation',

@@ -123,7 +123,7 @@
   },
   "axes": {
     "size": ["sm", "md", "lg"],
-    "variant": ["outline", "ghost"],
+    "variant": ["outline", "ghost", "chips"],
     "orientation": ["horizontal", "vertical"]
   },
   "resolution": {
@@ -192,5 +192,10 @@
       "composition",
       "keyboard"
     ]
+  },
+  "chips": {
+    "layout": "Separate rounded items that wrap onto the next line; attached never applies.",
+    "pressed": "The neutral tone: its solid ground under its on-solid label.",
+    "labelledBy": "Inside a field the root is named by the field label through aria-labelledby, unless the consumer names it."
   }
 }

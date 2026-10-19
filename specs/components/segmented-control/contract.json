@@ -134,15 +134,17 @@
   "axes": {
     "size": ["sm", "md", "lg"],
     "orientation": ["horizontal", "vertical"],
-    "condense": ["none", "icons"]
+    "condense": ["none", "icons"],
+    "variant": ["track", "underline"]
   },
   "resolution": {
     "size": ["prop", "field", "defaults", "md"],
     "orientation": ["prop", "defaults", "horizontal"],
-    "condense": ["prop", "defaults", "none"]
+    "condense": ["prop", "defaults", "none"],
+    "variant": ["prop", "defaults", "track"]
   },
   "provides": {
-    "segmentedControlDefaults": ["size", "orientation", "condense", "fullWidth"],
+    "segmentedControlDefaults": ["size", "orientation", "condense", "fullWidth", "variant"],
     "toSegments": ["disabled", "invalid", "name", "readOnly", "size"]
   },
   "stateAttributes": {
@@ -167,7 +169,8 @@
         "orientation": "horizontal",
         "condense": "none",
         "fullWidth": false,
-        "disabled": false
+        "disabled": false,
+        "variant": "track"
       },
       "capabilities": [
         "selection",
@@ -202,6 +205,7 @@
       "orientation",
       "states",
       "iconOnly",
+      "variants",
       "condense",
       "width",
       "field",
@@ -210,5 +214,10 @@
       "composition",
       "keyboard"
     ]
+  },
+  "variant": {
+    "track": "A box with a thumb behind the chosen segment; the segments share the width of the widest.",
+    "underline": "The words alone, each as wide as itself, the chosen one in the text colour and underlined, the others muted. No thumb, no dividers, no ground; the semantics, the keyboard and the single tab stop are the same radio group.",
+    "labelledBy": "Inside a field the root is named by the field label through aria-labelledby, unless the consumer names it; the root is a div, which a label element cannot label."
   }
 }

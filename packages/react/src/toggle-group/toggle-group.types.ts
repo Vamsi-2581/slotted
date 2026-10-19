@@ -10,7 +10,12 @@ export type ToggleGroupSize = 'sm' | 'md' | 'lg';
  * "on" is one colour across the system, and a bar that wants the whole palette
  * is `button-group` around ToggleButtons.
  */
-export type ToggleGroupVariant = 'outline' | 'ghost';
+/**
+ * How the items are drawn. `outline` and `ghost` are toggle buttons, joined
+ * into one bar when `attached`; `chips` are separate rounded items that wrap,
+ * the pressed one in the neutral tone's ink, and never join.
+ */
+export type ToggleGroupVariant = 'outline' | 'ghost' | 'chips';
 
 /** How the items flow. The arrows follow the same axis. */
 export type ToggleGroupOrientation = 'horizontal' | 'vertical';

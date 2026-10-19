@@ -14,6 +14,13 @@ export type SegmentedControlOrientation = 'horizontal' | 'vertical';
  */
 export type SegmentedControlCondense = 'none' | 'icons';
 
+/**
+ * How the choice is drawn. `track` is a box with a thumb behind the chosen
+ * segment; `underline` is the words alone, the chosen one in the text colour
+ * and underlined. The semantics are the same radio group in both.
+ */
+export type SegmentedControlVariant = 'track' | 'underline';
+
 /** Why the value moved. A segmented control can produce exactly these two. */
 export type SegmentedControlSelectionReason = Extract<
   ChangeRequest<string>['reason'],
@@ -33,6 +40,7 @@ export interface SegmentedControlDefaults {
   fullWidth: boolean;
   orientation: SegmentedControlOrientation;
   size: SegmentedControlSize;
+  variant: SegmentedControlVariant;
 }
 
 export interface SegmentedControlDefaultsProviderProps extends Partial<SegmentedControlDefaults> {
@@ -66,6 +74,7 @@ export interface SegmentedControlRootProps extends HTMLAttributes<HTMLElement> {
   'data-readonly'?: '' | undefined;
   'data-size': SegmentedControlSize;
   'data-ui': string;
+  'data-variant': SegmentedControlVariant;
 }
 
 /** What `render` receives for one segment. */
@@ -115,6 +124,8 @@ export interface SegmentedControlProps extends Omit<ComponentPropsWithRef<'div'>
   size?: SegmentedControlSize | undefined;
   /** Present means controlled, for the life of the component. */
   value?: string | undefined;
+  /** Defaults to the provider, then to `track`. */
+  variant?: SegmentedControlVariant | undefined;
 }
 
 export interface SegmentProps extends Omit<

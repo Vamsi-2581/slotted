@@ -78,7 +78,7 @@
   },
   "axes": {
     "size": ["sm", "md", "lg"],
-    "variant": ["outline", "ghost"]
+    "variant": ["outline", "ghost", "chips"]
   },
   "resolution": {
     "size": ["prop", "defaults", "md"],

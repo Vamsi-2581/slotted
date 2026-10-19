@@ -4,6 +4,7 @@ import { createRovingTabindex } from '@slotted/core/focus';
 import { createControllable } from '@slotted/core/state';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 
+import { useField } from '../field';
 import { useToggleGroupDefaults } from './toggle-group-defaults';
 import type {
   ToggleGroupContextValue,
@@ -73,6 +74,7 @@ export function ToggleGroup({
   ...nativeProps
 }: ToggleGroupProps) {
   const defaults = useToggleGroupDefaults();
+  const field = useField();
   const element = useRef<HTMLElement | null>(null);
   const [own, setOwn] = useState<readonly string[]>(defaultValue ?? []);
   const [insideToolbar, setInsideToolbar] = useState(false);
@@ -81,7 +83,8 @@ export function ToggleGroup({
   const resolvedSize = size ?? defaults.size;
   const resolvedVariant = variant ?? defaults.variant;
   const resolvedOrientation = orientation ?? defaults.orientation;
-  const resolvedAttached = attached ?? defaults.attached;
+  /* Chips stand apart by definition: a joined row of them is a bar. */
+  const resolvedAttached = resolvedVariant !== 'chips' && (attached ?? defaults.attached);
   const resolvedDeselectable = deselectable ?? defaults.deselectable;
   const resolvedLoop = loop ?? defaults.loop;
   const resolvedRoving = rovingFocus ?? !insideToolbar;
@@ -146,6 +149,11 @@ export function ToggleGroup({
     'aria-orientation':
       nativeProps['aria-orientation'] ??
       (resolvedOrientation === 'vertical' ? 'vertical' : undefined),
+    /* Named by the field's label when the consumer named it no other way:
+       a `div` is not labelable, so the label's `for` reaches nothing. */
+    'aria-labelledby':
+      nativeProps['aria-labelledby'] ??
+      (nativeProps['aria-label'] === undefined ? field?.ids.label : undefined),
     children: <ToggleGroupContext.Provider value={context}>{children}</ToggleGroupContext.Provider>,
     className,
     ...(resolvedAttached ? { 'data-attached': '' } : {}),

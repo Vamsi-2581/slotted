@@ -235,6 +235,47 @@
     transition-duration: var(--slotted-duration-instant);
   }
 
+  /**
+   * ── Chips ──────────────────────────────────────────────────────────────
+   *
+   * The same chip `toggle-group` draws: a rounded item with the control edge,
+   * pressed in the neutral tone's ink.
+   */
+  [data-ui='toggle'][data-part='root'][data-variant='chips'] {
+    border-color: var(--_border-color);
+    border-radius: var(--slotted-toggle-chips-radius, var(--slotted-radius-full, 9999px));
+    font-weight: var(--slotted-font-weight-medium, 500);
+  }
+
+  [data-ui='toggle'][data-part='root'][data-variant='chips'][data-pressed]:not(:disabled):not(
+      [data-disabled]
+    ),
+  [data-ui='toggle'][data-part='root'][data-variant='chips'][data-pressed]:active:not(
+      :disabled
+    ):not([data-disabled]) {
+    background: var(
+      --slotted-toggle-chips-pressed-background,
+      var(--slotted-tone-neutral-solid, CanvasText)
+    );
+    border-color: var(
+      --slotted-toggle-chips-pressed-background,
+      var(--slotted-tone-neutral-solid, CanvasText)
+    );
+    color: var(--slotted-toggle-chips-pressed-color, var(--slotted-tone-neutral-on-solid, Canvas));
+  }
+
+  [data-ui='toggle'][data-part='root'][data-variant='chips'][data-pressed]:hover:not(:disabled):not(
+      [data-disabled]
+    ) {
+    background: var(--slotted-tone-neutral-solid-hover, CanvasText);
+    border-color: var(--slotted-tone-neutral-solid-hover, CanvasText);
+  }
+
+  [data-ui='toggle'][data-part='root'][data-variant='chips']:disabled,
+  [data-ui='toggle'][data-part='root'][data-variant='chips'][data-disabled] {
+    border-color: var(--slotted-disabled-border, GrayText);
+  }
+
   /* ── Focus ────────────────────────────────────────────────────────────── */
 
   /**

@@ -10,7 +10,7 @@ export type ToggleSize = 'sm' | 'md' | 'lg';
  * tone axis: a mode is one colour when it is on, and an action that persists
  * in one of five tones is `button`'s ToggleButton.
  */
-export type ToggleVariant = 'outline' | 'ghost';
+export type ToggleVariant = 'outline' | 'ghost' | 'chips';
 
 /** Why the state moved. A toggle can produce exactly these two. */
 export type TogglePressedReason = Extract<ChangeRequest<boolean>['reason'], 'pointer' | 'keyboard'>;

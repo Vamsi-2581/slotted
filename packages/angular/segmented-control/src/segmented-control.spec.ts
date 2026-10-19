@@ -271,3 +271,36 @@ describe('SlSegmentedControl', () => {
     expect(icon?.getAttribute('aria-hidden')).toBe('true');
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [SlSegmentedControl, SlSegment, SlField, SlFieldLabel],
+  template: `<div slField>
+    <label slFieldLabel>Período</label>
+    <div slSegmentedControl variant="underline" defaultValue="Semana">
+      <label slSegment value="Dia">Dia</label>
+      <label slSegment value="Semana">Semana</label>
+      <label slSegment value="Mês">Mês</label>
+    </div>
+  </div>`,
+})
+class UnderlineHost {}
+
+describe('the underline variant', () => {
+  it('draws the radio group as words, keeps its semantics and is named by the field label', () => {
+    TestBed.configureTestingModule({ imports: [UnderlineHost] });
+    const fixture = TestBed.createComponent(UnderlineHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector(
+      '[data-ui="segmented-control"]',
+    ) as HTMLElement;
+    const label = fixture.nativeElement.querySelector('[data-ui="field"] label') as HTMLElement;
+    const radios = [...root.querySelectorAll('input[type="radio"]')] as HTMLInputElement[];
+
+    expect(root.getAttribute('data-variant')).toBe('underline');
+    expect(root.getAttribute('role')).toBe('radiogroup');
+    expect(root.getAttribute('aria-labelledby')).toBe(label.id);
+    expect(radios).toHaveLength(3);
+    expect(new Set(radios.map((radio) => radio.name)).size).toBe(1);
+  });
+});

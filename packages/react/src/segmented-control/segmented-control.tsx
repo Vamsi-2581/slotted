@@ -112,6 +112,7 @@ export function SegmentedControl({
   size,
   style,
   value,
+  variant,
   ...nativeProps
 }: SegmentedControlProps) {
   const field = useField();
@@ -126,6 +127,7 @@ export function SegmentedControl({
   const resolvedSize = size ?? field?.size ?? fieldGroup?.size ?? defaults.size;
   const resolvedOrientation = orientation ?? defaults.orientation;
   const resolvedCondense = condense ?? defaults.condense;
+  const resolvedVariant = variant ?? defaults.variant;
   const resolvedFullWidth = fullWidth ?? defaults.fullWidth;
   const resolvedDisabled = disabled ?? field?.disabled ?? fieldDefaults.disabled;
   const resolvedReadOnly = readOnly ?? field?.readOnly ?? fieldDefaults.readOnly;
@@ -170,6 +172,14 @@ export function SegmentedControl({
     ...nativeProps,
     'aria-describedby': [describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined,
     'aria-invalid': ariaInvalid ?? (resolvedInvalid === true ? true : undefined),
+    /* Named by the field's label where the root owns the group role and the
+       consumer named it no other way; a `div` is not labelable, so the
+       label's `for` reaches nothing. */
+    'aria-labelledby':
+      nativeProps['aria-labelledby'] ??
+      (resolvedRole !== undefined && nativeProps['aria-label'] === undefined
+        ? field?.ids.label
+        : undefined),
     /**
      * Only where the root owns the role. On an element with no role the
      * attribute describes nothing, and `radiogroup` already implies
@@ -201,6 +211,7 @@ export function SegmentedControl({
     ...(resolvedReadOnly === true ? { 'data-readonly': '' } : {}),
     'data-size': resolvedSize,
     'data-ui': 'segmented-control',
+    'data-variant': resolvedVariant,
     role: resolvedRole,
     /**
      * The two numbers the thumb's geometry is made of. They are runtime values

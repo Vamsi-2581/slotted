@@ -149,6 +149,21 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'variants',
+    title: 'A track, or the words alone',
+    note: 'underline draws the same radio group as words: each as wide as itself, the chosen one in the text colour and underlined, the others muted. One tab stop, the arrows move the value, and inside a field the label names the set.',
+    snippet: defineSnippet({
+      id: 'segmented-control-angular-variants',
+      language: 'angular',
+      label: 'The underline variant',
+      source: `<div slSegmentedControl aria-label="Período" defaultValue="month" variant="underline">
+  <label slSegment value="day">Dia</label>
+  <label slSegment value="week">Semana</label>
+  <label slSegment value="month">Mês</label>
+</div>`,
+    }),
+  },
+  {
     id: 'condense',
     title: 'Narrower than its words',
     note: 'Below the width its labels need, a control told to condense keeps its marks and hides its words — hidden, never removed, so every segment is announced the same at every width.',
@@ -305,6 +320,13 @@ export const ANGULAR_SEGMENTED_CONTROL_DOCS = {
         'horizontal',
         'slSegmentedControl',
         'How the segments flow and which way the thumb travels. A horizontal set writes aria-orientation, because radiogroup already implies vertical',
+      ],
+      [
+        'variant',
+        "'track' | 'underline'",
+        'track',
+        'slSegmentedControl',
+        'How the choice is drawn: a track with a thumb, or the words alone with the chosen one underlined',
       ],
       [
         'condense',

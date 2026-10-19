@@ -520,6 +520,86 @@
     box-shadow: none;
   }
 
+  /**
+   * ── Underline ──────────────────────────────────────────────────────────
+   *
+   * The same radio group with no track: the words alone, sized to their own
+   * width, the chosen one in the text colour and underlined. Every other word
+   * is muted and takes the text colour under the pointer. No thumb, no
+   * dividers, no ground — the underline is the mark, and it sits under the
+   * word rather than on an edge of a box (R1).
+   */
+  [data-ui='segmented-control'][data-part='root'][data-variant='underline'] {
+    --_inner: var(--_height);
+
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    column-gap: var(--slotted-segmented-control-underline-gap, var(--slotted-space-6, 1rem));
+    grid-auto-columns: auto;
+    padding: 0;
+  }
+
+  [data-ui='segmented-control'][data-part='root'][data-variant='underline'] [data-part='indicator'],
+  [data-ui='segmented-control'][data-part='root'][data-variant='underline']
+    [data-part='item']
+    + [data-part='item']::before {
+    display: none;
+  }
+
+  [data-ui='segmented-control'][data-part='root'][data-variant='underline'] [data-part='item'] {
+    color: var(--slotted-segmented-control-underline-color, var(--slotted-text-muted, GrayText));
+    font-weight: var(--slotted-font-weight-medium, 500);
+    min-inline-size: var(--slotted-target-min, 24px);
+    padding-inline: 0;
+  }
+
+  [data-ui='segmented-control'][data-part='root'][data-variant='underline']
+    [data-part='item'][data-checked] {
+    color: var(
+      --slotted-segmented-control-underline-checked-color,
+      var(--slotted-text, CanvasText)
+    );
+  }
+
+  [data-ui='segmented-control'][data-part='root'][data-variant='underline']
+    [data-part='item'][data-checked]
+    [data-part='label'] {
+    text-decoration-color: currentColor;
+    text-decoration-line: underline;
+    text-decoration-thickness: var(--slotted-border-width-thick, 2px);
+    text-underline-offset: 0.35em;
+  }
+
+  [data-ui='segmented-control'][data-part='root'][data-variant='underline'][data-invalid]
+    [data-part='item'][data-checked]
+    [data-part='label'] {
+    text-decoration-color: var(--slotted-tone-danger-border, CanvasText);
+  }
+
+  [data-ui='segmented-control'][data-part='root'][data-variant='underline']:not([data-readonly])
+    [data-part='item']:hover:not([data-disabled]):not([data-checked]):has(
+      [data-part='control']:enabled
+    ),
+  [data-ui='segmented-control'][data-part='root'][data-variant='underline']:not([data-readonly])
+    [data-part='item']:active:not([data-disabled]):not([data-checked]):has(
+      [data-part='control']:enabled
+    ) {
+    background: none;
+    color: var(--slotted-text, CanvasText);
+  }
+
+  [data-ui='segmented-control'][data-part='root'][data-variant='underline']
+    [data-part='item']:has([data-part='control']:focus-visible) {
+    outline-offset: var(--slotted-focus-ring-offset, 2px);
+  }
+
+  [data-ui='segmented-control'][data-part='root'][data-variant='underline']
+    [data-part='item'][data-disabled] {
+    color: var(--slotted-disabled-foreground, GrayText);
+  }
+
   /* ── Condensed ────────────────────────────────────────────────────────── */
 
   /**

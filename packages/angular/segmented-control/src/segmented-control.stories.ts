@@ -48,6 +48,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     orientation: Orientation,
     states: States,
     iconOnly: IconOnly,
+    variants: Variants,
     condense: Condense,
     width: Width,
     field: InsideAField,
@@ -297,6 +298,33 @@ export const IconOnly: Story = {
              <label slSegment value="center" aria-label="Centro">
                <ng-icon slSegmentIcon name="lucideAlignCenter" />
              </label>
+           </div>`,
+        ),
+    ),
+  }),
+};
+
+export const Variants: Story = {
+  parameters: scenario('variants'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'A track',
+        'The box with a thumb behind the chosen segment, every segment as wide as the widest.',
+        `<div slSegmentedControl aria-label="Período, trilho" defaultValue="month">
+           <label slSegment value="day">Dia</label>
+           <label slSegment value="week">Semana</label>
+           <label slSegment value="month">Mês</label>
+         </div>`,
+      ) +
+        scene(
+          'The words alone',
+          'The same radio group with no track: the chosen word in the text colour and underlined, the others muted.',
+          `<div slSegmentedControl aria-label="Período, sublinhado" defaultValue="month" variant="underline">
+             <label slSegment value="day">Dia</label>
+             <label slSegment value="week">Semana</label>
+             <label slSegment value="month">Mês</label>
            </div>`,
         ),
     ),

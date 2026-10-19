@@ -5,11 +5,13 @@ export type ToggleGroupSize = 'sm' | 'md' | 'lg';
 
 /**
  * Whether the items are framed or bare. `ghost` is the bar that sits inside
- * something already framed — a toolbar, a card header. There is no tone axis:
+ * something already framed — a toolbar, a card header. `chips` are separate
+ * rounded items that wrap, the pressed one in the neutral tone's ink, and
+ * never join. There is no tone axis:
  * "on" is one colour across the system, and a bar that wants the whole palette
  * is `button-group` around toggle buttons.
  */
-export type ToggleGroupVariant = 'outline' | 'ghost';
+export type ToggleGroupVariant = 'outline' | 'ghost' | 'chips';
 
 /** How the items flow. The arrows follow the same axis. */
 export type ToggleGroupOrientation = 'horizontal' | 'vertical';

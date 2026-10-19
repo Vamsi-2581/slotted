@@ -106,6 +106,8 @@ function scene({
     onStuck,
     ...(contained === undefined ? {} : { contained: () => contained(body) }),
   });
+  /* The size observer's first report, after layout: the engine's first measurement. */
+  FakeResizeObserver.instances.at(-1)?.fire();
   const io = FakeIntersectionObserver.instances.at(-1) as FakeIntersectionObserver;
   return {
     area,
@@ -533,6 +535,48 @@ describe('createStickyHeader', () => {
     handle.destroy();
   });
 
+  /**
+   * Started inside the binding's mount, the engine read the boxes of a page
+   * just committed and forced a synchronous layout of it. The first
+   * measurement waits for the size observer's first report.
+   */
+  it('reads no box before the size observer first reports', () => {
+    const rects = vi.spyOn(Element.prototype, 'getBoundingClientRect');
+    const heights = vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get');
+    const offsets = vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get');
+    const scroller = document.createElement('div');
+    scroller.style.overflowY = 'auto';
+    const root = document.createElement('header');
+    const area = document.createElement('div');
+    root.append(area);
+    scroller.append(root);
+    document.body.append(scroller);
+    const state: StickyHeaderState = { expanded: true, pinned: false, collapse: 'scroll' };
+    const handle = createStickyHeader({
+      root,
+      area: () => area,
+      chrome: () => [],
+      state: () => state,
+      onScrolled: vi.fn(),
+      onRevealed: vi.fn(),
+      onScrollRequest: vi.fn(),
+    });
+    handle.refresh();
+    handle.expandedChanged(true, 'programmatic');
+    expect(rects).not.toHaveBeenCalled();
+    expect(heights).not.toHaveBeenCalled();
+    expect(offsets).not.toHaveBeenCalled();
+    expect(FakeIntersectionObserver.instances).toHaveLength(0);
+
+    (FakeResizeObserver.instances.at(-1) as FakeResizeObserver).fire();
+    expect(FakeIntersectionObserver.instances).toHaveLength(1);
+    expect(scroller.style.getPropertyValue(STICKY_TOP_PROPERTY)).toBe('0px');
+    handle.destroy();
+    rects.mockRestore();
+    heights.mockRestore();
+    offsets.mockRestore();
+  });
+
   it('attaches no intersection observer under manual collapse', () => {
     FakeIntersectionObserver.instances = [];
     const scroller = document.createElement('div');
@@ -551,6 +595,7 @@ describe('createStickyHeader', () => {
       onRevealed: vi.fn(),
       onScrollRequest: vi.fn(),
     });
+    (FakeResizeObserver.instances.at(-1) as FakeResizeObserver).fire();
     expect(FakeIntersectionObserver.instances).toHaveLength(0);
     expect(scroller.style.getPropertyValue(STICKY_TOP_PROPERTY)).toBe('80px');
     handle.destroy();
@@ -919,6 +964,7 @@ describe('createStickyHeader', () => {
         ...(contained ? { contained: () => built.list.parentElement as HTMLElement } : {}),
       });
       const resize = () => (FakeResizeObserver.instances.at(-1) as FakeResizeObserver).fire();
+      resize();
       const observers = () => FakeIntersectionObserver.instances.length - observersBefore;
       return { ...built, handle, observers, onCompact, onRevealed, onScrollRequest, resize };
     }

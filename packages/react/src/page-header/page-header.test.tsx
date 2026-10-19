@@ -68,6 +68,12 @@ class FakeResizeObserver {
   unobserve() {}
 }
 
+/** Every size observer's first report, after layout: the engine's first measurement. */
+const laidOut = () =>
+  act(() => {
+    for (const observer of FakeResizeObserver.all) observer.callback([], observer as never);
+  });
+
 function Full({
   title = 'Pedido de compra PC-2026-004521',
   withPin = true,
@@ -125,6 +131,7 @@ describe('PageHeader', () => {
   beforeEach(() => {
     vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver);
     vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+    FakeResizeObserver.all = [];
   });
 
   afterEach(() => {
@@ -219,9 +226,30 @@ describe('PageHeader', () => {
     expect(area()).not.toHaveAttribute('inert');
   });
 
+  /**
+   * Started inside the mount, the engine read the boxes of the page just
+   * committed and forced a synchronous layout of it on every route. The first
+   * measurement waits for the size observer's first report.
+   */
+  it('reads no box while it mounts, and measures on the first size report', () => {
+    const rects = vi.spyOn(Element.prototype, 'getBoundingClientRect');
+    const heights = vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get');
+    render(<Full />);
+    expect(rects).not.toHaveBeenCalled();
+    expect(heights).not.toHaveBeenCalled();
+    expect(FakeIntersectionObserver.last).toBeUndefined();
+    expect(root()).toHaveAttribute('data-expanded');
+
+    laidOut();
+    expect(FakeIntersectionObserver.last).toBeDefined();
+    rects.mockRestore();
+    heights.mockRestore();
+  });
+
   it('collapses with the reason scroll when the area leaves the scrollport, and writes the fact', () => {
     const onExpandedChange = vi.fn();
     render(<Full onExpandedChange={onExpandedChange} />);
+    laidOut();
 
     /* The document has scrolled: only then can the area have left. */
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 300 });
@@ -245,6 +273,7 @@ describe('PageHeader', () => {
 
   it('reveals in place when the toggle opens the area after the scroll has passed it', () => {
     render(<Full />);
+    laidOut();
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 300 });
     act(() => FakeIntersectionObserver.last?.report(false));
     const control = screen.getByRole('button', { name: 'Expand header' });
@@ -505,6 +534,7 @@ describe('PageHeader parts', () => {
       return 0;
     });
     render(<Full />);
+    laidOut();
     expect(root()).toHaveAttribute('data-variant', 'band');
     expect(root()).not.toHaveAttribute('data-stuck');
     const title = document.querySelector('[data-part="title-area"]') as HTMLElement;
@@ -598,6 +628,7 @@ describe('PageHeader in a page that fills', () => {
   it('collapses when a scroller in the body passes sixteen pixels, and re-opens at its top', () => {
     const onExpandedChange = vi.fn();
     render(<Filled fill onExpandedChange={onExpandedChange} />);
+    laidOut();
 
     scrollList(10);
     expect(onExpandedChange).not.toHaveBeenCalled();

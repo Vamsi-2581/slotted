@@ -177,6 +177,8 @@ describe('SlPageHeader', () => {
     host = fixture.componentInstance;
     fixture.detectChanges();
     await fixture.whenStable();
+    /* The size observer's first report, after layout: the engine's first measurement. */
+    FakeResizeObserver.last?.callback([], {} as ResizeObserver);
     fixture.detectChanges();
   });
 
@@ -244,6 +246,30 @@ describe('SlPageHeader', () => {
     expect(host.expandedRequests.at(-1)?.reason).toBe('keyboard');
     expect(host.expanded()).toBe(true);
     expect(area().hasAttribute('inert')).toBe(false);
+  });
+
+  /**
+   * Started inside the first render, the engine read the boxes of the page
+   * just rendered and forced a synchronous layout of it on every route. The
+   * first measurement waits for the size observer's first report.
+   */
+  it('reads no box while it renders, and measures on the first size report', async () => {
+    const rects = vi.spyOn(Element.prototype, 'getBoundingClientRect');
+    const heights = vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get');
+    FakeIntersectionObserver.last = undefined;
+    const second = TestBed.createComponent(Host);
+    second.detectChanges();
+    await second.whenStable();
+    second.detectChanges();
+    expect(rects).not.toHaveBeenCalled();
+    expect(heights).not.toHaveBeenCalled();
+    expect(FakeIntersectionObserver.last).toBeUndefined();
+
+    FakeResizeObserver.last?.callback([], {} as ResizeObserver);
+    expect(FakeIntersectionObserver.last).toBeDefined();
+    second.destroy();
+    rects.mockRestore();
+    heights.mockRestore();
   });
 
   it('collapses with the reason scroll when the area leaves the scrollport, and writes the fact', () => {
@@ -491,6 +517,7 @@ describe('SlPageHeader in a page that fills', () => {
     host = fixture.componentInstance;
     fixture.detectChanges();
     await fixture.whenStable();
+    FakeResizeObserver.last?.callback([], {} as ResizeObserver);
     fixture.detectChanges();
   });
 

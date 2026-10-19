@@ -228,12 +228,21 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   const containedTops = new WeakMap<Element, number>();
   /** The area was shut by a contained scroll, the only collapse a contained return re-opens. */
   let collapsedByContained = false;
-  let lastTop = scrollTop();
+  /** Read when the engine starts: reading it forces a layout. */
+  let lastTop = 0;
   let frame = 0;
   /** The fact last reported through `onStuck`. */
   let stuckChrome = false;
   let stuckFrame = 0;
   let destroyed = false;
+  /**
+   * Whether the first measurement was taken. Nothing is measured while the
+   * binding mounts: reading a box there forced a synchronous layout of the
+   * page just committed. The first measurement waits for the size observer's
+   * first report, delivered after layout, and the header stays as rendered —
+   * expanded, not scrolled — until then.
+   */
+  let started = false;
 
   let intersections: IntersectionObserver | undefined;
   /** The margin the observer was built with, so a change in the title re-builds it. */
@@ -277,7 +286,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   }
 
   function stuck() {
-    if (compact) return false;
+    if (compact || !started) return false;
     const rootTop = root.getBoundingClientRect().top;
     return Math.abs(rootTop - stickyEdge() - offset(root)) < 1 && scrollTop() > 0;
   }
@@ -388,7 +397,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
    * write waits for the frame and happens once per frame at most.
    */
   function publish() {
-    if (destroyed) return;
+    if (destroyed || !started) return;
     const { collapse, pinned } = options.state();
     const area = height(options.area());
     if (folding === null) measuredArea = area;
@@ -455,6 +464,10 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     typeof ResizeObserver === 'undefined'
       ? undefined
       : new ResizeObserver(() => {
+          if (!started) {
+            start();
+            return;
+          }
           landFold();
           schedule();
         });
@@ -469,7 +482,6 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     if (scroller !== null) sizes.observe(scroller);
   }
   observeSizes();
-  publish();
 
   /* ── The fact ──────────────────────────────────────────────────────────── */
 
@@ -534,11 +546,21 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     });
     intersections.observe(area);
   }
-  observeArea();
+
+  function start() {
+    if (started || destroyed) return;
+    started = true;
+    lastTop = scrollTop();
+    /* Publishing observes the area: the observer's margin is a measurement. */
+    publish();
+  }
+  /* With no size observer, the first frame stands in for its first report. */
+  const startFrame = sizes === undefined ? (view?.requestAnimationFrame(start) ?? 0) : 0;
 
   /* ── The reveal ends on the next scroll ────────────────────────────────── */
 
   function onScroll() {
+    if (!started) return;
     scheduleStuck();
     const top = scrollTop();
     const delta = top - lastTop;
@@ -581,7 +603,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   /* ── A scroll inside the contained element ─────────────────────────────── */
 
   function onContainedScroll(event: Event) {
-    if (destroyed) return;
+    if (destroyed || !started) return;
     const element = event.target;
     if (!(element instanceof Element) || element === scroller) return;
     const contained = options.contained?.();
@@ -622,6 +644,8 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   /* ── What the binding tells us ─────────────────────────────────────────── */
 
   function expandedChanged(expanded: boolean, by: 'control' | 'pin' | 'programmatic' | 'scroll') {
+    /* Before the first measurement nothing is scrolled: the start reads the state as it stands. */
+    if (!started) return;
     /* Opened by anything, or shut by someone other than a scroll: a contained
        return no longer has a collapse of its own to undo. */
     if (expanded || by !== 'scroll') collapsedByContained = false;
@@ -660,6 +684,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   }
 
   function pinnedChanged(pinned: boolean) {
+    if (!started) return;
     if (pinned) {
       setRevealed(false);
     } else if (stuck() && options.state().expanded) {
@@ -672,6 +697,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   }
 
   function refresh() {
+    if (!started) return;
     observeSizes();
     observeArea();
     schedule();
@@ -679,6 +705,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
 
   function destroy() {
     destroyed = true;
+    if (startFrame !== 0) view?.cancelAnimationFrame(startFrame);
     if (frame !== 0) view?.cancelAnimationFrame(frame);
     if (stuckFrame !== 0) view?.cancelAnimationFrame(stuckFrame);
     releaseFold();

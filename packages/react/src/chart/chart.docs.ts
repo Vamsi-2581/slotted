@@ -241,6 +241,13 @@ const anatomy: AnatomyRow[] = [
     purpose: 'The value in the series’ format, with the share of the whole on a pie.',
   },
   {
+    part: 'tooltip-note',
+    element: 'div',
+    required: false,
+    purpose:
+      'The label of an upright line on this category, under the title. A label the plot had no room to draw is read here.',
+  },
+  {
     part: 'tooltip-total',
     element: 'div',
     required: false,

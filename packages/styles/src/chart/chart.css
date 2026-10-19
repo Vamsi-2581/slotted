@@ -877,6 +877,13 @@
     overflow-wrap: anywhere;
   }
 
+  /* The label of a line on this category, the plot's own words for it. */
+  [data-ui='chart'] [data-part='tooltip-note'] {
+    color: var(--slotted-text-muted, GrayText);
+    grid-column: 1 / -1;
+    overflow-wrap: anywhere;
+  }
+
   [data-ui='chart'] :is([data-part='tooltip-item'], [data-part='tooltip-total']) {
     align-items: center;
     display: grid;

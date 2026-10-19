@@ -104,6 +104,15 @@ export interface ChartAnnotation {
   readonly to?: number | string | undefined;
   readonly label?: string | undefined;
   readonly tone?: ChartTone | undefined;
+  /**
+   * Which side of an upright line its label hangs on: `start` ends at the
+   * line, `end` begins at it, `auto` centres it and moves it inward at an edge
+   * of the plot. Labels that would overlap take a second row; past it, the
+   * lowest `priority` is hidden and still named by the tooltip.
+   */
+  readonly labelPlacement?: 'start' | 'end' | 'auto' | undefined;
+  /** Which label keeps its place when two collide. Higher wins; defaults to 0. */
+  readonly priority?: number | undefined;
 }
 
 export interface ChartSpec {

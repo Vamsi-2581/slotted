@@ -27,6 +27,11 @@ export interface ChartTooltipContext {
   readonly title: string;
   readonly items: readonly ChartTooltipItem[];
   readonly total: { readonly value: number; readonly formatted: string } | null;
+  /**
+   * The labels of the upright lines that stand on this category. A label the
+   * plot had no room to draw is read here, where the reader's pointer is.
+   */
+  readonly notes: readonly string[];
 }
 
 export interface ChartTooltipOptions {
@@ -53,6 +58,16 @@ export function tooltipContext(
   if (index < 0 || !active) return null;
   const trigger = options.trigger ?? defaultTrigger(model);
   const category = model.categories[index]!;
+  const notes = model.annotations
+    .filter(
+      (annotation) =>
+        annotation.kind === 'line' &&
+        annotation.axis === 'x' &&
+        annotation.label !== undefined &&
+        annotation.value !== undefined &&
+        (String(annotation.value) === point.key || String(annotation.value) === String(category.x)),
+    )
+    .map((annotation) => annotation.label as string);
   const percent = createNumberFormatter(
     { style: 'percent', maximumFractionDigits: 1 },
     model.locale,
@@ -78,6 +93,7 @@ export function tooltipContext(
         },
       ],
       total: null,
+      notes: [],
     };
   }
 
@@ -117,6 +133,7 @@ export function tooltipContext(
     items,
     total:
       wantsTotal && items.length > 1 ? { value: summed, formatted: active.format(summed) } : null,
+    notes,
   };
 }
 

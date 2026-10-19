@@ -312,6 +312,22 @@ describe('legend', () => {
 describe('tooltip', () => {
   const model = createChartModel(revenue);
 
+  /* A label the plot has no room for is still read where the pointer is. */
+  it('names the upright lines that stand on the category', () => {
+    const marked = createChartModel({
+      ...revenue,
+      annotations: [
+        { kind: 'line', axis: 'x', value: 'Feb', label: 'Card statement' },
+        { kind: 'line', axis: 'x', value: 'Mar', label: 'Payday' },
+        { kind: 'line', value: 100, label: 'Target' },
+      ],
+    });
+    expect(tooltipContext(marked, { series: 'cost', key: 'Feb' })?.notes).toEqual([
+      'Card statement',
+    ]);
+    expect(tooltipContext(model, { series: 'cost', key: 'Feb' })?.notes).toEqual([]);
+  });
+
   it('lists every visible series at the key under an axis trigger', () => {
     const context = tooltipContext(model, { series: 'cost', key: 'Feb' });
     expect(context?.trigger).toBe('axis');

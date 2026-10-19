@@ -304,6 +304,11 @@ export function ChartTooltipContent({
   return (
     <>
       <div data-part="tooltip-title">{context.title}</div>
+      {context.notes.map((note) => (
+        <div data-part="tooltip-note" key={note}>
+          {note}
+        </div>
+      ))}
       {context.items.map((item) => {
         const series = seriesOf(model, item.series);
         const kind =

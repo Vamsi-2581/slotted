@@ -304,7 +304,9 @@ resolvedToolbar() !== 'none') {
     />
     } @else {
     <div data-part="tooltip-title">{{ overlayNow.tooltip.title }}</div>
-    @for (item of overlayNow.tooltip.items; track item.series + item.label) { @let itemColor =
+    @for (note of overlayNow.tooltip.notes; track note) {
+    <div data-part="tooltip-note">{{ note }}</div>
+    } @for (item of overlayNow.tooltip.items; track item.series + item.label) { @let itemColor =
     colorOf(item.color);
     <div
       data-part="tooltip-item"

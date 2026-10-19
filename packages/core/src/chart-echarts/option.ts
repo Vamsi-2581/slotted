@@ -10,6 +10,8 @@ import {
   type ChartZoom,
 } from '../chart/index';
 
+import { placeLineLabels } from './annotation-labels';
+
 /**
  * The model, translated into an ECharts `option`. Pure: the same view gives
  * the same object, so it is tested without a renderer and diffed by ECharts
@@ -174,6 +176,26 @@ function annotationX(model: ChartModel, value: number | string | undefined) {
   if (byKey >= 0) return byKey;
   const byValue = model.categories.findIndex((category) => String(category.x) === String(value));
   return byValue >= 0 ? byValue : undefined;
+}
+
+/**
+ * How far along the plot a place on the category axis falls, from 0 to 1. A
+ * category axis with bars centres each category in its band; one without puts
+ * the first and last categories on the plot's edges.
+ */
+function plotFraction(model: ChartModel, placed: number | undefined, banded: boolean): number {
+  if (placed === undefined || Number.isNaN(placed)) return 0.5;
+  const count = model.categories.length;
+  if (model.xType === 'category') {
+    if (banded) return (placed + 0.5) / Math.max(1, count);
+    return count <= 1 ? 0.5 : placed / (count - 1);
+  }
+  const xs = model.categories
+    .map((category) => annotationX(model, category.x as number | string))
+    .filter((x): x is number => typeof x === 'number' && !Number.isNaN(x));
+  const low = Math.min(...xs);
+  const high = Math.max(...xs);
+  return high === low ? 0.5 : (placed - low) / (high - low);
 }
 
 /** Where on the category axis a place falls, as left, centre or right of the plot. */
@@ -568,6 +590,39 @@ export function buildChartOption(view: ChartEngineView, width = 0): ChartOptionR
     };
   });
 
+  /**
+   * The labels of upright lines, laid out before they are drawn: each takes a
+   * row where it overlaps no other, rows rise from the plot's top edge, and a
+   * label past the last row is hidden — the lowest priority first — and still
+   * named by the tooltip at its category. Only with a width: without one there
+   * is no plot to measure against, and the inward alignment stands.
+   */
+  const upright = (annotation: ChartModel['annotations'][number]) =>
+    !horizontal &&
+    annotation.axis === 'x' &&
+    annotation.kind === 'line' &&
+    Boolean(annotation.label);
+  const rowHeight = Math.round(theme.labelSize * 1.4);
+  const plotStart = theme.inset + theme.labelSize * 3;
+  const plotEnd = width - theme.inset - (model.xType !== 'category' ? theme.labelSize * 2 : 0);
+  const uprightLines = model.annotations.filter(upright);
+  const boxes =
+    width > 0 && uprightLines.length > 0
+      ? placeLineLabels(
+          uprightLines.map((annotation) => ({
+            at:
+              plotStart +
+              plotFraction(model, annotationX(model, annotation.value), hasBars) *
+                (plotEnd - plotStart),
+            text: annotation.label ?? '',
+            priority: annotation.priority ?? 0,
+            placement: annotation.labelPlacement ?? 'auto',
+          })),
+          { start: plotStart, end: plotEnd, charWidth: theme.labelSize * 0.6, maxRows: 2 },
+        )
+      : [];
+  const labelRows = boxes.reduce((rows, box) => Math.max(rows, box.hidden ? 0 : box.row + 1), 0);
+
   /* Annotations ride on the first visible series of the axis they name,
      because ECharts draws a mark line only as part of a series. */
   for (const annotation of model.annotations) {
@@ -608,6 +663,17 @@ export function buildChartOption(view: ChartEngineView, width = 0): ChartOptionR
         ? { align: inwardAlign(model, read(annotation.value) as number) }
         : {}),
     };
+    const box = upright(annotation) ? boxes[uprightLines.indexOf(annotation)] : undefined;
+    if (box !== undefined) {
+      const at =
+        plotStart +
+        plotFraction(model, annotationX(model, annotation.value), hasBars) * (plotEnd - plotStart);
+      Object.assign(label, {
+        show: !box.hidden,
+        align: 'center',
+        offset: [Math.round((box.left + box.right) / 2 - at), -box.row * rowHeight],
+      });
+    }
     const target = host as Record<string, unknown>;
     if (annotation.kind === 'line') {
       const mark = (target['markLine'] as { data: unknown[] } | undefined) ?? {
@@ -662,7 +728,10 @@ export function buildChartOption(view: ChartEngineView, width = 0): ChartOptionR
         theme.inset +
         (horizontal && labelled.length ? labelRoom : 0) +
         (!horizontal && model.xType !== 'category' ? theme.labelSize * 2 : 0),
-      top: top + (!horizontal && labelled.length ? theme.labelSize * 1.5 : 0),
+      top:
+        top +
+        (!horizontal && labelled.length ? theme.labelSize * 1.5 : 0) +
+        Math.max(0, labelRows - 1) * rowHeight,
       bottom:
         theme.inset +
         (horizontal && model.axes.some((axis) => axis.label) ? theme.labelSize * 1.5 : 0),

@@ -335,6 +335,10 @@
       "types": "./dist/types/popover/index.d.ts",
       "import": "./dist/popover.js"
     },
+    "./press-selection": {
+      "types": "./dist/types/press-selection/index.d.ts",
+      "import": "./dist/press-selection.js"
+    },
     "./progress-indicator": {
       "types": "./dist/types/progress-indicator/index.d.ts",
       "import": "./dist/progress-indicator.js"

@@ -299,15 +299,30 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'current',
     title: 'Where the reader is',
-    note: 'value on the root names the destination and a press asks it to move; a link that states current itself wins. The parent of a hidden destination is marked until its group opens, and autoExpand opens it.',
+    note: 'value on the root names the destination and a press asks it to move; a link that states current itself wins. The parent of a hidden destination is marked until its group opens, and autoExpand opens it. With a router, usePressSelection paints the press before the route renders: the item is current at once, and the navigation runs after the frame that shows it. A click carrying a modifier key is left to the browser.',
     snippet: defineSnippet({
       id: 'side-navigation-react-current',
       language: 'tsx',
-      label: 'The destination owned by the application',
-      source: `const [value, setValue] = useState<string | null>('orders');
+      label: 'The destination owned by the router',
+      source: `const { pathname } = useLocation();
+const navigate = useNavigate();
+const { selected, select } = usePressSelection(pathname);
 
-<SideNavigation value={value} onValueChange={(next) => setValue(next)}>
+const press = (to: string) => (event: MouseEvent) => {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return;
+  }
+  event.preventDefault();
+  select(to, () => navigate(to));
+};
+
+<SideNavigation value={selected ?? null}>
   …
+  <SideNavigationItem value="/orders">
+    <SideNavigationLink href="/orders" onClick={press('/orders')}>
+      Orders
+    </SideNavigationLink>
+  </SideNavigationItem>
 </SideNavigation>;`,
     }),
   },

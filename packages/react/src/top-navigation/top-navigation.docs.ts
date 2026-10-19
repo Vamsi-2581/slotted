@@ -361,15 +361,33 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'current',
     title: 'Where the reader is',
-    note: 'value on the root names the destination and a press asks it to move with the device’s reason; a link that states current itself wins. Where the current destination has folded, more carries the mark in its place.',
+    note: 'value on the root names the destination and a press asks it to move with the device’s reason; a link that states current itself wins. Where the current destination has folded, more carries the mark in its place. With a router, usePressSelection paints the press before the route renders: the item is current at once, and the navigation runs after the frame that shows it. A click carrying a modifier key is left to the browser.',
     snippet: defineSnippet({
       id: 'top-navigation-react-current',
       language: 'tsx',
-      label: 'The destination owned by the application',
-      source: `const [value, setValue] = useState<string | null>('cargas');
+      label: 'The destination owned by the router',
+      source: `const { pathname } = useLocation();
+const navigate = useNavigate();
+const { selected, select } = usePressSelection(pathname);
 
-<TopNavigation value={value} onValueChange={(next) => setValue(next)}>
-  …
+const press = (to: string) => (event: MouseEvent) => {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return;
+  }
+  event.preventDefault();
+  select(to, () => navigate(to));
+};
+
+<TopNavigation value={selected ?? null}>
+  <TopNavigationNav>
+    <TopNavigationList>
+      <TopNavigationItem value="/cargas">
+        <TopNavigationLink href="/cargas" onClick={press('/cargas')}>
+          Cargas
+        </TopNavigationLink>
+      </TopNavigationItem>
+    </TopNavigationList>
+  </TopNavigationNav>
 </TopNavigation>;`,
     }),
   },

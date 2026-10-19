@@ -272,12 +272,14 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'links',
     title: 'A view a router can deep-link to',
-    note: 'href makes the control an anchor, so the destination is real: a plain click selects, and a click carrying a modifier key is left to the browser, which opens the view in a new browser tab.',
+    note: 'href makes the control an anchor, so the destination is real: a plain click selects, and a click carrying a modifier key is left to the browser, which opens the view in a new browser tab. usePressSelection paints the press before the route renders: the tab is selected at once, and the navigation runs after the frame that shows it.',
     snippet: defineSnippet({
       id: 'tabs-react-links',
       language: 'tsx',
       label: 'Selection and navigation in one control',
-      source: `<Tabs onValueChange={(value) => navigate(\`/order/\${value}\`)} value={view}>
+      source: `const { selected, select } = usePressSelection(view);
+
+<Tabs onValueChange={(value) => select(value, () => navigate(\`/order/\${value}\`))} value={selected}>
   <TabList aria-label="Order">
     <Tab href="/order/summary" value="summary">
       Summary

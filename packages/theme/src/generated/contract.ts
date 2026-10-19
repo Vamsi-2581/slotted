@@ -1596,6 +1596,23 @@ export const contract: TokenContract = {
       "forcedColor": "CanvasText"
     },
     {
+      "name": "--slotted-surface-material",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas",
+      "reducedTransparency": "var(--slotted-surface)"
+    },
+    {
+      "name": "--slotted-material-backdrop",
+      "layer": "semantic",
+      "axis": "base",
+      "type": "filter",
+      "literal": "a filter function names no other token",
+      "reducedTransparency": "none"
+    },
+    {
       "name": "--slotted-text-inverse",
       "layer": "semantic",
       "axis": "scheme",
@@ -2250,7 +2267,8 @@ export type BaseToken =
   | '--slotted-selection-size-md'
   | '--slotted-selection-size-lg'
   | '--slotted-selection-halo-opacity'
-  | '--slotted-highlight-tint-opacity';
+  | '--slotted-highlight-tint-opacity'
+  | '--slotted-material-backdrop';
 
 export type SchemeToken =
   | '--slotted-focus-ring-color'
@@ -2325,6 +2343,7 @@ export type SchemeToken =
   | '--slotted-surface-inverse'
   | '--slotted-surface-inverse-hover'
   | '--slotted-surface-inverse-active'
+  | '--slotted-surface-material'
   | '--slotted-text-inverse'
   | '--slotted-border-strong'
   | '--slotted-control-border-color'
@@ -2470,6 +2489,7 @@ export type ColorToken =
   | '--slotted-surface-inverse'
   | '--slotted-surface-inverse-hover'
   | '--slotted-surface-inverse-active'
+  | '--slotted-surface-material'
   | '--slotted-text-inverse'
   | '--slotted-border-strong'
   | '--slotted-control-border-color'

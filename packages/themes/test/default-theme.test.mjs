@@ -530,3 +530,32 @@ test('ships the two tracking steps large type takes, in the built CSS', async ()
   assert.match(css, /--slotted-letter-spacing-tight:\s*-0\.02em/);
   assert.match(css, /--slotted-letter-spacing-tighter:\s*-0\.03em/);
 });
+
+/**
+ * A bar that floats over scrolling content is drawn as a material: the
+ * surface at a partial share over transparency, behind a backdrop blur. A
+ * reader who asks for less transparency, and forced colours, get the opaque
+ * surface and no blur.
+ */
+test('ships a translucent surface material and makes it opaque under reduced transparency', async () => {
+  for (const scheme of ['light', 'dark']) {
+    const value = theme.schemes[scheme]['--slotted-surface-material'];
+    const match = /^color-mix\(in oklab, var\(--slotted-surface\) (\d+)%, transparent\)$/.exec(
+      value ?? '',
+    );
+    assert.ok(match, `${scheme} --slotted-surface-material is ${value}, not a translucent surface`);
+    const percent = Number(match[1]);
+    assert.ok(percent > 0 && percent < 100, `${scheme} material is ${percent}%`);
+  }
+  assert.equal(theme.base['--slotted-material-backdrop'], 'saturate(1.6) blur(20px)');
+
+  const css = await readFile(new URL('../dist/default.css', import.meta.url), 'utf8');
+  const start = css.indexOf('@media (prefers-reduced-transparency: reduce)');
+  assert.ok(start >= 0, 'no reduced-transparency block');
+  const block = css.slice(start, css.indexOf('@media', start + 1));
+  assert.match(block, /\[data-slotted-scheme="light"\]/);
+  assert.match(block, /--slotted-surface-material:\s*var\(--slotted-surface\);/);
+  assert.match(block, /--slotted-material-backdrop:\s*none;/);
+  /* Forced colours come later in source and win over it. */
+  assert.ok(css.indexOf('@media (forced-colors: active)') > start);
+});

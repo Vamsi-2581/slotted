@@ -21,7 +21,7 @@ convention.
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
 | `primitive` | A value with no meaning attached: a step on a scale.           | 123    |
-| `semantic`  | What a value is for: a surface, a border, a control, a target. | 131    |
+| `semantic`  | What a value is for: a surface, a border, a control, a target. | 133    |
 | `component` | One family adjusting a semantic value for itself.              | 28     |
 
 A token is a **scale root** when it states a value rather than composing one: a
@@ -31,11 +31,13 @@ what the three layers exist to prevent — a component deciding, on its own, wha
 `4px` means.
 
 A non-root token may still state a literal when the contract records why, in
-its `literal` field. There are three such tokens, each carrying its reason. Two
+its `literal` field. There are four such tokens, each carrying its reason. Two
 describe the absence of a value a scale could hold — no tracking, and a line
 box that is the control's own height. The third, `--slotted-font-family-heading`,
-holds a typeface that neither primitive face names. A fourth described the
-absence of elevation until `--slotted-control-shadow` was given one.
+holds a typeface that neither primitive face names. The fourth,
+`--slotted-material-backdrop`, holds a filter function, which no token names.
+An earlier one described the absence of elevation until
+`--slotted-control-shadow` was given one.
 
 The component layer holds two scales, and holds each for the reason the layer
 exists: a family met a value a semantic token cannot be retuned to give. Button
@@ -601,31 +603,32 @@ suite hold the ratios. `high-contrast` is a scheme an application selects, held
 to the AAA text ratio; the operating system's own high-contrast mode is handled
 by forced colours instead.
 
-| Token                                | Light                                                       | Dark                                                        | High contrast                                               |
-| ------------------------------------ | ----------------------------------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------- |
-| `--slotted-focus-ring-color`         | `var(--slotted-tone-accent-border)`                         | `var(--slotted-tone-accent-border)`                         | `var(--slotted-tone-accent-border)`                         |
-| `--slotted-focus-ring-color-invalid` | `var(--slotted-tone-danger-border)`                         | `var(--slotted-tone-danger-border)`                         | `var(--slotted-tone-danger-border)`                         |
-| `--slotted-border-subtle`            | `#d8dee6`                                                   | `#2c2f33`                                                   | `#000000`                                                   |
-| `--slotted-text`                     | `#0d1828`                                                   | `#f8fafe`                                                   | `#000000`                                                   |
-| `--slotted-text-muted`               | `#5c6b7f`                                                   | `#9da3aa`                                                   | `#1f2937`                                                   |
-| `--slotted-disabled-background`      | `#e2e8f0`                                                   | `#16181c`                                                   | `#ffffff`                                                   |
-| `--slotted-disabled-foreground`      | `#64748b`                                                   | `#6d737a`                                                   | `#595959`                                                   |
-| `--slotted-disabled-border`          | `#ccd5e1`                                                   | `#25282c`                                                   | `#595959`                                                   |
-| `--slotted-surface`                  | `#f8fafe`                                                   | `#111417`                                                   | `#ffffff`                                                   |
-| `--slotted-surface-raised`           | `#f8fafe`                                                   | `#15171b`                                                   | `#ffffff`                                                   |
-| `--slotted-surface-sunken`           | `#f1f5fb`                                                   | `#0a0c10`                                                   | `#ffffff`                                                   |
-| `--slotted-surface-inverse`          | `#142133`                                                   | `#f8fafe`                                                   | `#000000`                                                   |
-| `--slotted-surface-inverse-hover`    | `#243041`                                                   | `#dee0e4`                                                   | `#020202`                                                   |
-| `--slotted-surface-inverse-active`   | `#323d4e`                                                   | `#c7cacd`                                                   | `#0b0b0b`                                                   |
-| `--slotted-text-inverse`             | `#f7faff`                                                   | `#16181c`                                                   | `#ffffff`                                                   |
-| `--slotted-border-strong`            | `#7a889c`                                                   | `#6d737a`                                                   | `#000000`                                                   |
-| `--slotted-control-border-color`     | `#bfc7d1`                                                   | `#3d4249`                                                   | `#000000`                                                   |
-| `--slotted-control-surface`          | `var(--slotted-surface)`                                    | `var(--slotted-surface)`                                    | `var(--slotted-surface)`                                    |
-| `--slotted-current-edge`             | `transparent`                                               | `transparent`                                               | `#000000`                                                   |
-| `--slotted-state-hover`              | `color-mix(in oklab, var(--slotted-text) 5%, transparent)`  | `color-mix(in oklab, var(--slotted-text) 6%, transparent)`  | `color-mix(in oklab, var(--slotted-text) 10%, transparent)` |
-| `--slotted-state-pressed`            | `color-mix(in oklab, var(--slotted-text) 10%, transparent)` | `color-mix(in oklab, var(--slotted-text) 12%, transparent)` | `color-mix(in oklab, var(--slotted-text) 20%, transparent)` |
-| `--slotted-state-selected`           | `color-mix(in oklab, var(--slotted-text) 8%, transparent)`  | `color-mix(in oklab, var(--slotted-text) 10%, transparent)` | `color-mix(in oklab, var(--slotted-text) 16%, transparent)` |
-| `--slotted-scrim`                    | `rgb(0 0 0 / 0.41)`                                         | `rgb(0 0 0 / 0.62)`                                         | `rgb(0 0 0 / 0.75)`                                         |
+| Token                                | Light                                                          | Dark                                                           | High contrast                                               |
+| ------------------------------------ | -------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------- |
+| `--slotted-focus-ring-color`         | `var(--slotted-tone-accent-border)`                            | `var(--slotted-tone-accent-border)`                            | `var(--slotted-tone-accent-border)`                         |
+| `--slotted-focus-ring-color-invalid` | `var(--slotted-tone-danger-border)`                            | `var(--slotted-tone-danger-border)`                            | `var(--slotted-tone-danger-border)`                         |
+| `--slotted-border-subtle`            | `#d8dee6`                                                      | `#2c2f33`                                                      | `#000000`                                                   |
+| `--slotted-text`                     | `#0d1828`                                                      | `#f8fafe`                                                      | `#000000`                                                   |
+| `--slotted-text-muted`               | `#5c6b7f`                                                      | `#9da3aa`                                                      | `#1f2937`                                                   |
+| `--slotted-disabled-background`      | `#e2e8f0`                                                      | `#16181c`                                                      | `#ffffff`                                                   |
+| `--slotted-disabled-foreground`      | `#64748b`                                                      | `#6d737a`                                                      | `#595959`                                                   |
+| `--slotted-disabled-border`          | `#ccd5e1`                                                      | `#25282c`                                                      | `#595959`                                                   |
+| `--slotted-surface`                  | `#f8fafe`                                                      | `#111417`                                                      | `#ffffff`                                                   |
+| `--slotted-surface-raised`           | `#f8fafe`                                                      | `#15171b`                                                      | `#ffffff`                                                   |
+| `--slotted-surface-sunken`           | `#f1f5fb`                                                      | `#0a0c10`                                                      | `#ffffff`                                                   |
+| `--slotted-surface-inverse`          | `#142133`                                                      | `#f8fafe`                                                      | `#000000`                                                   |
+| `--slotted-surface-inverse-hover`    | `#243041`                                                      | `#dee0e4`                                                      | `#020202`                                                   |
+| `--slotted-surface-inverse-active`   | `#323d4e`                                                      | `#c7cacd`                                                      | `#0b0b0b`                                                   |
+| `--slotted-surface-material`         | `color-mix(in oklab, var(--slotted-surface) 72%, transparent)` | `color-mix(in oklab, var(--slotted-surface) 68%, transparent)` | `var(--slotted-surface)`                                    |
+| `--slotted-text-inverse`             | `#f7faff`                                                      | `#16181c`                                                      | `#ffffff`                                                   |
+| `--slotted-border-strong`            | `#7a889c`                                                      | `#6d737a`                                                      | `#000000`                                                   |
+| `--slotted-control-border-color`     | `#bfc7d1`                                                      | `#3d4249`                                                      | `#000000`                                                   |
+| `--slotted-control-surface`          | `var(--slotted-surface)`                                       | `var(--slotted-surface)`                                       | `var(--slotted-surface)`                                    |
+| `--slotted-current-edge`             | `transparent`                                                  | `transparent`                                                  | `#000000`                                                   |
+| `--slotted-state-hover`              | `color-mix(in oklab, var(--slotted-text) 5%, transparent)`     | `color-mix(in oklab, var(--slotted-text) 6%, transparent)`     | `color-mix(in oklab, var(--slotted-text) 10%, transparent)` |
+| `--slotted-state-pressed`            | `color-mix(in oklab, var(--slotted-text) 10%, transparent)`    | `color-mix(in oklab, var(--slotted-text) 12%, transparent)`    | `color-mix(in oklab, var(--slotted-text) 20%, transparent)` |
+| `--slotted-state-selected`           | `color-mix(in oklab, var(--slotted-text) 8%, transparent)`     | `color-mix(in oklab, var(--slotted-text) 10%, transparent)`    | `color-mix(in oklab, var(--slotted-text) 16%, transparent)` |
+| `--slotted-scrim`                    | `rgb(0 0 0 / 0.41)`                                            | `rgb(0 0 0 / 0.62)`                                            | `rgb(0 0 0 / 0.75)`                                         |
 
 `--slotted-border-strong` is the line between two surfaces, and it holds the
 3:1 ratio a non-text element needs against every surface a control can be
@@ -665,6 +668,15 @@ colour at a share over transparency, so one token reads the same on
 `--slotted-surface` and on `--slotted-surface-raised`. The shares rise from
 hover to selected to pressed. Under forced colours each layer is `Canvas`, and
 the family carries the state with `Highlight` and an outline.
+
+`--slotted-surface-material` is the ground of a bar that floats over scrolling
+content — a phone tab bar, a sticky banner — drawn as a material: the surface
+at a share over transparency, with `backdrop-filter:
+var(--slotted-material-backdrop)` (`saturate(1.6) blur(20px)`, a `base` token)
+behind it. `high-contrast` keeps it opaque. Under
+`prefers-reduced-transparency: reduce` the theme sets it to
+`var(--slotted-surface)` and the backdrop to `none`, from the contract's
+`reducedTransparency` field; under forced colours it is `Canvas`.
 
 `--slotted-current-edge` is the edge of the row the reader is on — the
 destination `side-navigation` and `top-navigation` mark `aria-current` — and it
@@ -844,6 +856,7 @@ that reads a semantic token keeps working without writing a rule of its own.
 | `--slotted-surface-inverse`          | `CanvasText`   |
 | `--slotted-surface-inverse-hover`    | `CanvasText`   |
 | `--slotted-surface-inverse-active`   | `CanvasText`   |
+| `--slotted-surface-material`         | `Canvas`       |
 | `--slotted-text-inverse`             | `Canvas`       |
 | `--slotted-border-strong`            | `CanvasText`   |
 | `--slotted-control-border-color`     | `ButtonBorder` |

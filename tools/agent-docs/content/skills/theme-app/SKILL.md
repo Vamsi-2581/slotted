@@ -55,6 +55,11 @@ new seed keeps the ratios of every scheme. A colour of the `tone`, `surface`,
 3. A colour the reader picks at runtime: write the seed property on the element
    that carries `data-slotted-theme`, with `seedStyle` from
    `@slotted/theme/seeds`, which leaves the token contract out of the bundle.
+4. A bar of the application's own that floats over scrolling content — a phone
+   tab bar, a sticky banner — is a material: its background reads
+   `--slotted-surface-material` and its backdrop filter reads
+   `--slotted-material-backdrop`. The theme makes both opaque under reduced
+   transparency and forced colours.
 
 ## 4. Restyle a control
 

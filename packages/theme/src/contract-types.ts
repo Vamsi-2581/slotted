@@ -7,6 +7,8 @@ export interface TokenDefinition {
   readonly literal?: string;
   readonly forcedColor?: string;
   readonly reducedMotion?: boolean;
+  /** The value under `prefers-reduced-transparency: reduce`, the same in every theme. */
+  readonly reducedTransparency?: string;
 }
 
 export interface TokenContract {

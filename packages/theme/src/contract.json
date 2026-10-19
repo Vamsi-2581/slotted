@@ -153,7 +153,9 @@
         "--slotted-surface-sunken": "The canvas under the content: the ground a card and a field stand out from.",
         "--slotted-surface-inverse": "A ground in the opposite lightness, with `--slotted-text-inverse` on it.",
         "--slotted-surface-inverse-hover": "The inverse ground under the pointer: `--slotted-surface-inverse` moved a share toward the opposite lightness.",
-        "--slotted-surface-inverse-active": "The inverse ground while pressed, a step beyond the hover."
+        "--slotted-surface-inverse-active": "The inverse ground while pressed, a step beyond the hover.",
+        "--slotted-surface-material": "The ground of a bar that floats over scrolling content, drawn as a material: `--slotted-surface` at a partial share over transparency, behind `--slotted-material-backdrop`. Under `prefers-reduced-transparency: reduce` it is `--slotted-surface`, and under forced colours the Canvas system colour.",
+        "--slotted-material-backdrop": "The backdrop filter a material is drawn with: the content scrolling under it, saturated and blurred. Under `prefers-reduced-transparency: reduce` it is `none`."
       }
     },
     {
@@ -1947,6 +1949,23 @@
       "type": "color",
       "root": true,
       "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-surface-material",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas",
+      "reducedTransparency": "var(--slotted-surface)"
+    },
+    {
+      "name": "--slotted-material-backdrop",
+      "layer": "semantic",
+      "axis": "base",
+      "type": "filter",
+      "literal": "a filter function names no other token",
+      "reducedTransparency": "none"
     },
     {
       "name": "--slotted-text-inverse",

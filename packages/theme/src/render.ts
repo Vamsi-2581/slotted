@@ -168,6 +168,23 @@ export function renderTheme(theme: Theme): string {
     )}\n}`,
   );
 
+  /* Reduced transparency makes a material opaque, in the scopes that set it; forced colours, later, win. */
+  const opaque = declarations(
+    Object.fromEntries(
+      contract.tokens
+        .filter((token) => token.reducedTransparency !== undefined)
+        .map((token) => [token.name, token.reducedTransparency!]),
+    ),
+  );
+  blocks.push(
+    `@media (prefers-reduced-transparency: reduce) {\n${indent(
+      [
+        block([themeSelector(name)], opaque),
+        ...[...SCHEMES, 'system'].map((scheme) => schemeScope(name, scheme, opaque)),
+      ].join('\n\n'),
+    )}\n}`,
+  );
+
   /* Forced colours replace the palette; the same scopes carry the system colours, later in source. */
   const forced = declarations(
     Object.fromEntries(

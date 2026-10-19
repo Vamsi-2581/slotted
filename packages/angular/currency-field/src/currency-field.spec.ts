@@ -890,3 +890,34 @@ describe('slCurrencyFieldScrub', () => {
     expect(input(fixture).value).toBe('5,00');
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [SlCurrencyField, SlCurrencyFieldInput, SlField, SlFieldLabel],
+  template: `<div slField [invalid]="invalid">
+    <label slFieldLabel>Valor</label>
+    <div slCurrencyField appearance="display">
+      <input slCurrencyFieldInput currency="BRL" locale="pt-BR" [value]="12.34" />
+    </div>
+  </div>`,
+})
+class DisplayHost {
+  invalid = false;
+}
+
+describe('the display appearance', () => {
+  it('draws the mark apart from the digits and carries it in the value text', () => {
+    TestBed.configureTestingModule({ imports: [DisplayHost] });
+    const fixture = TestBed.createComponent(DisplayHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector('[data-ui="currency-field"]') as HTMLElement;
+    const input = root.querySelector('input[data-part="input"]') as HTMLInputElement;
+    const mark = root.querySelector('[data-part="symbol"]') as HTMLElement;
+
+    expect(root.getAttribute('data-appearance')).toBe('display');
+    expect(input.value.replace(/\u00a0/g, ' ')).toBe('12,34');
+    expect(mark.textContent).toBe('R$');
+    expect(mark.nextElementSibling).toBe(input);
+    expect(input.getAttribute('aria-valuetext')?.replace(/\u00a0/g, ' ')).toBe('R$ 12,34');
+  });
+});

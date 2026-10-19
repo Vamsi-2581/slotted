@@ -1,6 +1,11 @@
 import '@slotted/styles/currency-field/currency-field.css';
 
-import { createCurrencyFormat, MAX_AMOUNT_DIGITS, withAmount } from '@slotted/core/currency';
+import {
+  createCurrencyFormat,
+  currencyAffix,
+  MAX_AMOUNT_DIGITS,
+  withAmount,
+} from '@slotted/core/currency';
 import { currencyFieldMessages } from '@slotted/core/i18n';
 import { clamp as clampNumber } from '@slotted/core/measure';
 import {
@@ -83,6 +88,7 @@ export function CurrencyField({
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
   align,
+  appearance,
   allowEmpty = false,
   className,
   clamp,
@@ -134,6 +140,7 @@ export function CurrencyField({
   const resolvedSize = size ?? field?.size ?? defaults.size;
   const resolvedVariant = variant ?? defaults.variant;
   const resolvedAlign = align ?? defaults.align;
+  const resolvedAppearance = appearance ?? 'control';
   const resolvedEntry = entry ?? defaults.entry;
   const resolvedFormatOn = formatOn ?? defaults.formatOn;
   const resolvedStepper = stepper ?? defaults.stepper;
@@ -160,18 +167,34 @@ export function CurrencyField({
    * hands a new object on every render.
    */
   const formatKey = format === undefined ? '' : JSON.stringify(format);
+  /**
+   * At the display step the mark is drawn apart from the digits, so it can be
+   * muted at a smaller step: the text carries the amount alone, and the mark
+   * stands on the side the locale writes it on.
+   */
+  const affix = useMemo(
+    () =>
+      resolvedAppearance === 'display'
+        ? currencyAffix({
+            currency: resolvedCurrency,
+            currencyDisplay: resolvedDisplay,
+            locale: resolvedLocale,
+          })
+        : null,
+    [resolvedAppearance, resolvedCurrency, resolvedDisplay, resolvedLocale],
+  );
   const formatter = useMemo(
     () =>
       createCurrencyFormat({
         currency: resolvedCurrency,
-        currencyDisplay: resolvedDisplay,
+        currencyDisplay: affix === null ? resolvedDisplay : 'none',
         locale: resolvedLocale,
         ...(fractionDigits === undefined ? {} : { fractionDigits }),
         ...(format === undefined ? {} : { options: format }),
       }),
     /* `formatKey` stands in for `format`: the options are compared by content,
        so an inline object is not a new format. */
-    [resolvedCurrency, resolvedDisplay, resolvedLocale, fractionDigits, formatKey, format],
+    [resolvedCurrency, resolvedDisplay, resolvedLocale, fractionDigits, formatKey, format, affix],
   );
 
   /**
@@ -661,7 +684,15 @@ export function CurrencyField({
       aria-valuemax={max}
       aria-valuemin={min}
       aria-valuenow={parsed ?? undefined}
-      aria-valuetext={text === '' ? undefined : text}
+      aria-valuetext={
+        text === ''
+          ? undefined
+          : affix === null
+            ? text
+            : affix.position === 'start'
+              ? `${affix.text} ${text}`
+              : `${text} ${affix.text}`
+      }
       data-part="input"
       disabled={resolvedDisabled}
       id={id ?? field?.ids.control}
@@ -764,7 +795,9 @@ export function CurrencyField({
     <CurrencyFieldScrubContext.Provider value={scrubContext}>
       {resolvedStepper === 'split' ? steppers?.[0] : null}
       {start === undefined ? null : <span data-part="start">{start}</span>}
+      {affix?.position === 'start' ? <span data-part="symbol">{affix.text}</span> : null}
       {control}
+      {affix?.position === 'end' ? <span data-part="symbol">{affix.text}</span> : null}
       {end === undefined ? null : <span data-part="end">{end}</span>}
       {resolvedStepper === 'split' ? steppers?.[1] : steppers}
       {name === undefined ? null : (
@@ -789,6 +822,7 @@ export function CurrencyField({
     ...(resolvedReadOnly === true ? { 'data-readonly': '' } : {}),
     ...(scrubbing ? { 'data-scrubbing': '' } : {}),
     'data-align': resolvedAlign,
+    'data-appearance': resolvedAppearance,
     'data-entry': resolvedEntry,
     'data-part': 'root',
     'data-size': resolvedSize,

@@ -6,6 +6,14 @@ import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'reac
 export type CurrencyFieldSize = 'sm' | 'md' | 'lg';
 
 /**
+ * `control` is a field among fields, on the control scale. `display` is the
+ * headline amount of an entry sheet: the figure at the 4xl step, the
+ * currency's mark drawn apart from it and muted at a smaller step, and a rule
+ * under it instead of a box.
+ */
+export type CurrencyFieldAppearance = 'control' | 'display';
+
+/**
  * How much frame the control shows. The three every framed control in this
  * library ships: `outline` takes the ground it is placed on, `subtle` sinks
  * into the page, and `plain` shows nothing at rest, which is what a dense
@@ -105,6 +113,7 @@ export interface CurrencyFieldDefaultsProviderProps extends Partial<CurrencyFiel
  */
 export interface CurrencyFieldRootProps extends HTMLAttributes<HTMLElement> {
   'data-align': CurrencyFieldAlign;
+  'data-appearance': CurrencyFieldAppearance;
   'data-disabled'?: '' | undefined;
   'data-entry': CurrencyFieldEntry;
   'data-invalid'?: '' | undefined;
@@ -133,6 +142,12 @@ export interface CurrencyFieldProps extends Omit<
 > {
   /** Which edge the amount is set against. Defaults to the provider, then `end`. */
   align?: CurrencyFieldAlign | undefined;
+  /**
+   * A field among fields, or the headline amount of an entry sheet. Defaults
+   * to `control`. `display` sets its own type step and draws a rule rather
+   * than a box, so `size` and `variant` do not apply to it.
+   */
+  appearance?: CurrencyFieldAppearance | undefined;
   /**
    * Whether an emptied control holds nothing, or nought.
    *

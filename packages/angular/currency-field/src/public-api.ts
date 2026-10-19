@@ -14,6 +14,7 @@ export type {
   CurrencyFieldEntry,
   CurrencyFieldSize,
   CurrencyFieldStepper,
+  CurrencyFieldAppearance,
   CurrencyFieldVariant,
 } from './currency-field-defaults';
 export { SlCurrencyFieldInput } from './currency-field-input';

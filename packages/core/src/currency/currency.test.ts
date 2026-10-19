@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import { createControllable } from '../state';
-import { createCurrencyFormat, MAX_AMOUNT_DIGITS, shiftIntoRun, withAmount } from './index';
+import {
+  createCurrencyFormat,
+  currencyAffix,
+  MAX_AMOUNT_DIGITS,
+  shiftIntoRun,
+  withAmount,
+} from './index';
 
 describe('createCurrencyFormat', () => {
   it('writes the symbol the currency names and the separators the locale writes', () => {
@@ -405,5 +411,26 @@ describe('the request an amount carries', () => {
 
     expect(state.request(1480.5, 'keyboard')).toBe(false);
     expect(state.value).toBe(null);
+  });
+});
+
+describe('currencyAffix', () => {
+  it('says what the locale writes for the currency and on which side of the amount', () => {
+    expect(currencyAffix({ currency: 'BRL', locale: 'pt-BR' })).toEqual({
+      text: 'R$',
+      position: 'start',
+    });
+    expect(currencyAffix({ currency: 'EUR', locale: 'de-DE' })).toEqual({
+      text: '€',
+      position: 'end',
+    });
+    expect(currencyAffix({ currency: 'USD', currencyDisplay: 'code', locale: 'en-US' })).toEqual({
+      text: 'USD',
+      position: 'start',
+    });
+  });
+
+  it('has nothing to say under none', () => {
+    expect(currencyAffix({ currency: 'BRL', currencyDisplay: 'none', locale: 'pt-BR' })).toBeNull();
   });
 });

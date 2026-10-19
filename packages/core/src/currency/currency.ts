@@ -197,6 +197,39 @@ function unwrapAccounting(text: string) {
   return { text: wrapped ? trimmed.slice(1, -1) : trimmed, negative: wrapped };
 }
 
+/** What a locale writes for a currency beside an amount, and on which side. */
+export interface CurrencyAffix {
+  readonly text: string;
+  readonly position: 'start' | 'end';
+}
+
+/**
+ * The currency's mark as the locale writes it, and the side of the amount it
+ * stands on: `R$` before the amount in `pt-BR`, `€` after it in `de-DE`. A
+ * field that draws the mark apart from the digits — at a smaller step, in a
+ * muted ink — reads it here rather than splitting a formatted string.
+ */
+export function currencyAffix({
+  currency,
+  currencyDisplay,
+  locale,
+}: {
+  currency: string;
+  currencyDisplay?: CurrencyDisplay | undefined;
+  locale?: string | undefined;
+}): CurrencyAffix | null {
+  if (currencyDisplay === 'none') return null;
+  const parts = new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency,
+    ...(currencyDisplay === undefined ? {} : { currencyDisplay }),
+  }).formatToParts(1);
+  const mark = parts.findIndex((part) => part.type === 'currency');
+  const amount = parts.findIndex((part) => part.type === 'integer');
+  if (mark < 0) return null;
+  return { text: parts[mark]!.value, position: mark < amount ? 'start' : 'end' };
+}
+
 export function createCurrencyFormat({
   currency,
   currencyDisplay,

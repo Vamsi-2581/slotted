@@ -959,3 +959,89 @@ describe('CurrencyFieldScrub', () => {
     expect(scrubPart()).toHaveAttribute('title', 'Arraste');
   });
 });
+
+/**
+ * The headline amount of an entry sheet: the figure at the display step, the
+ * currency's mark apart from it so it can be muted at a smaller step, a rule
+ * under it instead of a box — and the same cents-first typing, the same
+ * request and the same field around it.
+ */
+describe('the display appearance', () => {
+  it('draws the mark apart from the digits, on the side the locale writes it', () => {
+    render(
+      <CurrencyField
+        aria-label="Valor"
+        currency="BRL"
+        defaultValue={12.34}
+        locale="pt-BR"
+        appearance="display"
+      />,
+    );
+    const root = frameOf(control());
+    expect(root).toHaveAttribute('data-appearance', 'display');
+    expect(plain(control().value)).toBe('12,34');
+    const mark = root.querySelector('[data-part="symbol"]') as HTMLElement;
+    expect(mark).toHaveTextContent('R$');
+    expect(mark.nextElementSibling).toBe(control());
+    expect(plain(control().getAttribute('aria-valuetext') ?? '')).toBe('R$ 12,34');
+  });
+
+  it('puts the mark after the amount where the locale does', () => {
+    render(
+      <CurrencyField
+        aria-label="Betrag"
+        currency="EUR"
+        defaultValue={5}
+        locale="de-DE"
+        appearance="display"
+      />,
+    );
+    const mark = frameOf(control()).querySelector('[data-part="symbol"]') as HTMLElement;
+    expect(mark.previousElementSibling).toBe(control());
+  });
+
+  it('types cents first and carries the integer of minor units at the display appearance', () => {
+    const onValueChange = vi.fn();
+    render(
+      <CurrencyField
+        aria-label="Valor"
+        currency="BRL"
+        locale="pt-BR"
+        onValueChange={onValueChange}
+        appearance="display"
+      />,
+    );
+    typeDigits('5840');
+    expect(plain(control().value)).toBe('58,40');
+    expect(onValueChange).toHaveBeenLastCalledWith(
+      58.4,
+      expect.objectContaining({ currency: 'BRL', minorUnits: 5840, reason: 'keyboard' }),
+    );
+  });
+
+  it('is named by the field and states invalid from it', () => {
+    render(
+      <Field invalid>
+        <FieldLabel>Valor</FieldLabel>
+        <CurrencyField currency="BRL" locale="pt-BR" appearance="display" />
+        <FieldError>Informe um valor</FieldError>
+      </Field>,
+    );
+    expect(control()).toHaveAccessibleName('Valor');
+    expect(control()).toHaveAttribute('aria-invalid', 'true');
+    expect(frameOf(control())).toHaveAttribute('data-invalid');
+  });
+
+  it('draws no separate mark under none', () => {
+    render(
+      <CurrencyField
+        aria-label="Valor"
+        currency="BRL"
+        currencyDisplay="none"
+        locale="pt-BR"
+        appearance="display"
+      />,
+    );
+    expect(frameOf(control()).querySelector('[data-part="symbol"]')).toBeNull();
+  });
+});

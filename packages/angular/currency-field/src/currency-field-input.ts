@@ -16,8 +16,13 @@ import {
 import type { OnInit } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor } from '@angular/forms';
-import { createCurrencyFormat, MAX_AMOUNT_DIGITS, withAmount } from '@slotted/core/currency';
-import type { CurrencyChangeRequest, CurrencyFormat } from '@slotted/core/currency';
+import {
+  createCurrencyFormat,
+  currencyAffix,
+  MAX_AMOUNT_DIGITS,
+  withAmount,
+} from '@slotted/core/currency';
+import type { CurrencyAffix, CurrencyChangeRequest, CurrencyFormat } from '@slotted/core/currency';
 import { clamp as clampNumber } from '@slotted/core/measure';
 import { stepNumber } from '@slotted/core/number';
 import { createControllable } from '@slotted/core/state';
@@ -238,6 +243,22 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
    * options object is read through a signal, so an inline object handed on
    * every change detection does not rebuild the parser.
    */
+  /**
+   * At the display appearance the mark is drawn apart from the digits, so the
+   * frame can mute it at a smaller step: the text carries the amount alone,
+   * and the mark stands on the side the locale writes it on.
+   */
+  readonly affix = computed<CurrencyAffix | null>(() => {
+    const currency = this.currency() ?? this.defaults.currency;
+    if (currency === undefined || this.currencyField.resolvedAppearance() !== 'display')
+      return null;
+    return currencyAffix({
+      currency,
+      currencyDisplay: this.currencyDisplay() ?? this.defaults.currencyDisplay,
+      locale: this.locale() ?? this.appLocale(),
+    });
+  });
+
   private readonly formatter = computed<CurrencyFormat>(() => {
     const currency = this.currency() ?? this.defaults.currency;
     if (currency === undefined) {
@@ -251,7 +272,8 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
     const options = this.format();
     return createCurrencyFormat({
       currency,
-      currencyDisplay: this.currencyDisplay() ?? this.defaults.currencyDisplay,
+      currencyDisplay:
+        this.affix() === null ? (this.currencyDisplay() ?? this.defaults.currencyDisplay) : 'none',
       locale: this.locale() ?? this.appLocale(),
       ...(fractionDigits === undefined ? {} : { fractionDigits }),
       ...(options === undefined ? {} : { options }),
@@ -270,7 +292,10 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
   });
   readonly valueText = computed(() => {
     const shown = this.text();
-    return shown === '' ? null : shown;
+    if (shown === '') return null;
+    const affix = this.affix();
+    if (affix === null) return shown;
+    return affix.position === 'start' ? `${affix.text} ${shown}` : `${shown} ${affix.text}`;
   });
 
   readonly resolvedEntry = computed(() => this.entry() ?? this.defaults.entry);

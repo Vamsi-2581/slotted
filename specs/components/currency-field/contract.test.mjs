@@ -34,7 +34,12 @@ test('names the identifier a consumer selects the family by', () => {
  */
 test('draws the same frame the sibling numeric control draws', () => {
   assert.deepEqual(Object.keys(contract.members), ['currencyField']);
-  assert.deepEqual(member.parts, numberField.members.numberField.parts);
+  /* The one part of its own is the currency mark the display appearance
+     draws apart from the digits; every other part is the numeric frame's. */
+  assert.deepEqual(
+    member.parts.filter((part) => part !== 'symbol'),
+    numberField.members.numberField.parts,
+  );
   assert.equal(member.nativeElement, 'input');
   assert.equal(contract.controlPart, 'input');
   assert.equal(contract.rootRole, null, 'the frame carries no role of its own');

@@ -46,6 +46,13 @@ const anatomy: AnatomyRow[] = [
       'The control. Holds the formatted amount, the identifier, aria-valuenow in major units and aria-valuetext as the reader sees it. It is type="text" because type="number" empties itself whenever the text is not a valid floating-point number. exportAs="slCurrencyFieldInput" reaches inputElement, increment() and decrement().',
   },
   {
+    part: 'symbol',
+    element: 'span',
+    required: false,
+    purpose:
+      'The currency mark at the display appearance, drawn apart from the digits on the side the locale writes it, muted at the xl step. The input then holds the amount alone and its aria-valuetext carries the mark. Absent under currencyDisplay none and at the control appearance.',
+  },
+  {
     part: 'start',
     element: 'the element carrying slCurrencyFieldStart',
     required: false,
@@ -504,6 +511,13 @@ export const ANGULAR_CURRENCY_FIELD_DOCS = {
         'change',
         'slCurrencyField, provideCurrencyFieldDefaults',
         'When the text takes the locale’s shape under entry="natural". change regroups on every keystroke; commit holds the reader’s own text until blur, Enter or a step. Cents-first entry generates the text after every edit, so it decides nothing there',
+      ],
+      [
+        'appearance',
+        "'control' | 'display'",
+        'control',
+        'slCurrencyField',
+        'A field among fields, or the headline amount of an entry sheet: the 4xl step, the mark apart and muted, a rule under the amount instead of a box. size and variant do not apply to display',
       ],
       [
         'align',

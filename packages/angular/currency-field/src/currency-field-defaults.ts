@@ -1,5 +1,6 @@
 import { inject, InjectionToken } from '@angular/core';
 import type { Signal } from '@angular/core';
+import type { CurrencyAffix } from '@slotted/core/currency';
 
 /** The type step the control sits at, matching the field around it. */
 export type CurrencyFieldSize = 'sm' | 'md' | 'lg';
@@ -11,6 +12,14 @@ export type CurrencyFieldSize = 'sm' | 'md' | 'lg';
  * table of amounts needs.
  */
 export type CurrencyFieldVariant = 'outline' | 'subtle' | 'plain';
+
+/**
+ * `control` is a field among fields, on the control scale. `display` is the
+ * headline amount of an entry sheet: the figure at the 4xl step, the
+ * currency's mark drawn apart from it and muted at a smaller step, and a rule
+ * under it instead of a box.
+ */
+export type CurrencyFieldAppearance = 'control' | 'display';
 
 /**
  * How the reader types the amount.
@@ -151,4 +160,6 @@ export abstract class SlCurrencyFieldControl {
   abstract scrubBy(steps: number, source: PointerEvent): void;
   /** The native element, which a scrub focuses and reads the direction from. */
   abstract readonly inputElement: HTMLInputElement;
+  /** The currency's mark the frame draws apart from the digits, at the display appearance. */
+  abstract readonly affix: Signal<CurrencyAffix | null>;
 }

@@ -26,6 +26,7 @@ import { SlField } from '@slotted/angular/field';
 import { injectCurrencyFieldDefaults, SlCurrencyFieldControl } from './currency-field-defaults';
 import type {
   CurrencyFieldAlign,
+  CurrencyFieldAppearance,
   CurrencyFieldSize,
   CurrencyFieldStepper,
   CurrencyFieldVariant,
@@ -33,6 +34,7 @@ import type {
 
 export type {
   CurrencyFieldAlign,
+  CurrencyFieldAppearance,
   CurrencyFieldClamp,
   CurrencyFieldDisplay,
   CurrencyFieldEntry,
@@ -82,7 +84,17 @@ export type {
       </button>
     }
     <ng-content select="[slCurrencyFieldStart]" />
+    @if (control()?.affix(); as affix) {
+      @if (affix.position === 'start') {
+        <span data-part="symbol">{{ affix.text }}</span>
+      }
+    }
     <ng-content />
+    @if (control()?.affix(); as affix) {
+      @if (affix.position === 'end') {
+        <span data-part="symbol">{{ affix.text }}</span>
+      }
+    }
     <ng-content select="[slCurrencyFieldEnd]" />
     @if (resolvedStepper() === 'split') {
       <button
@@ -150,6 +162,7 @@ export type {
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-align]': 'resolvedAlign()',
+    '[attr.data-appearance]': 'resolvedAppearance()',
     '[attr.data-entry]': 'resolvedEntry()',
     '[attr.data-stepper]': 'resolvedStepper()',
     '[attr.data-disabled]': "control()?.resolvedDisabled() === true ? '' : null",
@@ -163,6 +176,13 @@ export class SlCurrencyField {
   readonly size = input<CurrencyFieldSize | undefined>(undefined);
   /** Defaults to the token, then to `outline`. */
   readonly variant = input<CurrencyFieldVariant | undefined>(undefined);
+  /**
+   * A field among fields, or the headline amount of an entry sheet. Defaults
+   * to `control`. `display` sets its own type step and draws a rule rather
+   * than a box, so `size` and `variant` do not apply to it.
+   */
+  readonly appearance = input<CurrencyFieldAppearance | undefined>(undefined);
+  readonly resolvedAppearance = computed(() => this.appearance() ?? 'control');
   /** Which edge the amount is set against. Defaults to the token, then `end`. */
   readonly align = input<CurrencyFieldAlign | undefined>(undefined);
   /** Where the two steppers sit. Defaults to the token, then `none`. */

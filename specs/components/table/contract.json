@@ -43,6 +43,11 @@
     "selection": "th|td",
     "expander": "button",
     "detail": "tr",
+    "group-row": "tr",
+    "group-header": "th",
+    "group-content": "div",
+    "group-start": "span",
+    "group-end": "span",
     "empty": "td",
     "loader": "tbody"
   },
@@ -71,7 +76,7 @@
     "to": {
       "scroll": "The default. The header sticks to the family's own scroller, which is what keeps it correct inside a drawer, a dialog or a split pane — the box the reader is scrolling is the box the header stays in. It needs the scroller to have a height; without one there is nothing to scroll past and nothing to stick to.",
       "page": "The header sticks to the nearest scrolling ancestor outside the family: the page, an app shell, a scroll area. The family gives up its own scroll container to do it, because a box that scrolls one axis scrolls both — CSS computes a visible axis to auto the moment the other is auto — so a table cannot both scroll sideways inside its frame and let its header stick to the page. What a wide table does in this mode is push the page sideways, or state layout fixed and truncate.",
-      "offset": "--slotted-table-sticky-offset, which is where the header stops. An application with a bar of its own sets it once and every table under it stops below the bar rather than under it.",
+      "offset": "--slotted-table-sticky-offset, which is where the header stops under stickyTo page. An application with a bar of its own sets it once and every table under it stops below the bar rather than under it. Under stickyTo scroll the header stops at the top of the family's own scroller and reads no offset, because page binds the offset to its own chrome for every table inside it. A stickyTo page table inside a scrolling box of the consumer's own sets the offset on that box: 0 for the box's top edge.",
       "reason": "Carbon and Ant stick to the page and Material sticks to its own container; each is right for one screen and wrong for the other. The axis names the two rather than choosing, and the cost of the second is written where the choice is made.",
       "offsetEnd": "--slotted-table-sticky-offset-end, which is where the summary stops. It answers stickyTo page the way the offset answers it at the top: a page with a bar of its own across the bottom sets it once, and every summary under it stops above the bar."
     },
@@ -573,7 +578,8 @@
     "selected": "data-selected",
     "expanded": "data-expanded",
     "disabled": "data-disabled",
-    "loading": "data-loading"
+    "loading": "data-loading",
+    "current": "data-current"
   },
   "stateModel": {
     "sort": {
@@ -643,6 +649,7 @@
         "active",
         "focus-visible",
         "selected",
+        "current",
         "expanded",
         "disabled",
         "loading"
@@ -675,6 +682,11 @@
         "selection",
         "expander",
         "detail",
+        "group-row",
+        "group-header",
+        "group-content",
+        "group-start",
+        "group-end",
         "empty",
         "loader",
         "footer"
@@ -711,5 +723,10 @@
       "keyboard",
       "accessibility"
     ]
+  },
+  "rows": {
+    "group": "TableGroupRow opens a group of rows: a tr holding one th with scope rowgroup that spans the table's columns, its name at the start and an optional end, the group's total or net. A grouped listing writes one body per group, so the header names the rows of its own tbody. sticky holds the band under the header while its rows scroll past, at --slotted-table-group-sticky-offset.",
+    "current": "current marks the row the page shows elsewhere, the record open in a detail pane beside the table: aria-current true and a ground of its own, neutral and stronger than hover. It is not selection, which the checkbox owns and the accent ground paints, and it draws no edge on the start side (R1); under forced colours it is an outline in Highlight.",
+    "action": "onAction is called by a click anywhere in the row that lands on no control of its own: a link, a button, a field, a label, or an element with the role of one. A click that reaches the row through a portal never landed in it, and a click that ends a text selection inside it selects. The row takes no tab stop and no role: the keyboard reaches the record through the first link or button in it. interactive paints the row as pressable and is on by default once onAction is given."
   }
 }

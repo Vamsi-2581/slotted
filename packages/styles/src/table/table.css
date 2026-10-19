@@ -462,6 +462,84 @@
   }
 
   /**
+   * The row the page shows elsewhere — the record open in a detail pane. A
+   * neutral ground a step beyond hover, so the pointer passing over it changes
+   * nothing, and no edge on the start side (R1). It is opaque, because a
+   * pinned cell copies the row's ground and a translucent one shows the
+   * scrolled cells through it. Selection is stronger and paints over it.
+   */
+  [data-ui='table'] [data-part='body'] > [data-part='row'][data-current]:not([data-selected]) {
+    background-color: var(
+      --slotted-table-row-surface-current,
+      var(--slotted-tone-secondary-subtle-active, ButtonFace)
+    );
+  }
+
+  /* A row with an action of its own is a thing the pointer presses. */
+  [data-ui='table'] [data-part='body'] > [data-part='row'][data-interactive]:not([data-disabled]) {
+    cursor: pointer;
+  }
+
+  /**
+   * ── The band that opens a group ────────────────────────────────────────
+   *
+   * One header cell across every column: the group's name at the start and
+   * its total at the end, in tabular figures so a column of daily nets lines
+   * up. The ground is the stripe's step, opaque for the same reason a pinned
+   * cell's is, and the band stays where it is when the pointer passes.
+   */
+  [data-ui='table'] [data-part='group-header'] {
+    background-color: var(--slotted-table-group-surface, var(--_stripe));
+    border-block-end: var(--_rule-width) solid var(--_rule);
+    color: var(--slotted-table-group-color, var(--_text));
+    font-weight: var(--slotted-font-weight-semibold, 600);
+    padding-block: var(--_pad-block);
+    padding-inline: var(--_pad-inline);
+    text-align: start;
+  }
+
+  [data-ui='table'] [data-part='group-content'] {
+    align-items: baseline;
+    display: flex;
+    gap: var(--_gap);
+    justify-content: space-between;
+    min-inline-size: 0;
+  }
+
+  [data-ui='table'] [data-part='group-end'] {
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+    white-space: nowrap;
+  }
+
+  /**
+   * A sticky band stops under the header when the header sticks too. The
+   * header's height is one row of the control scale and its rule; a header
+   * that wraps sets `--slotted-table-group-sticky-offset` itself.
+   */
+  [data-ui='table'] [data-part='group-row'][data-sticky] > [data-part='group-header'] {
+    inset-block-start: var(--slotted-table-group-sticky-offset, 0);
+    position: sticky;
+    z-index: var(--slotted-z-index-sticky, 100);
+  }
+
+  [data-ui='table'][data-sticky-header]
+    [data-part='group-row'][data-sticky]
+    > [data-part='group-header'] {
+    inset-block-start: var(
+      --slotted-table-group-sticky-offset,
+      calc(var(--_row-min-block) + var(--_rule-width))
+    );
+  }
+
+  @media (forced-colors: active) {
+    [data-ui='table'] [data-part='body'] > [data-part='row'][data-current] {
+      outline: var(--_rule-width) solid Highlight;
+      outline-offset: calc(var(--_rule-width) * -1);
+    }
+  }
+
+  /**
    * ── Alignment and numerals ─────────────────────────────────────────────
    *
    * Two facts rather than one axis: a number is set in tabular figures
@@ -542,18 +620,30 @@
    * written where the choice is made: a table wider than the page pushes the
    * page sideways instead of scrolling inside its frame.
    *
-   * The offset is where the header stops. An application with a bar of its own
-   * sets `--slotted-table-sticky-offset` once, and every table under it stops
-   * below the bar rather than under it.
+   * The offset is where the header stops under `page`. An application with a
+   * bar of its own sets `--slotted-table-sticky-offset` once, and every table
+   * under it stops below the bar rather than under it. Under `scroll` the
+   * header stops at the top of the family's own scroller and reads no offset:
+   * `page.css` binds the offset to the page's chrome for every table inside
+   * the page, and a header reading it stood that far below its own scroller's
+   * top, over the first rows. A `page` table inside a scrolling box of the
+   * consumer's own sets the offset on that box, `0` for its top edge.
    */
   [data-ui='table'][data-sticky-header] [data-part='column-header'],
   /* The chooser's own header is a `selection` cell and not a `column-header`,
      and a rule naming only the second left the select-all scrolling away while
      every column beside it stayed. */
   [data-ui='table'][data-sticky-header] [data-part='head'] [data-part='selection'] {
-    inset-block-start: var(--slotted-table-sticky-offset, 0);
+    inset-block-start: 0;
     position: sticky;
     z-index: calc(var(--slotted-z-index-sticky, 100) + 1);
+  }
+
+  [data-ui='table'][data-sticky-to='page'][data-sticky-header] [data-part='column-header'],
+  [data-ui='table'][data-sticky-to='page'][data-sticky-header]
+    [data-part='head']
+    [data-part='selection'] {
+    inset-block-start: var(--slotted-table-sticky-offset, 0);
   }
 
   [data-ui='table'][data-sticky-to='page'] [data-part='scroll'] {
@@ -572,9 +662,16 @@
    * sibling of the scroller and never leaves it in the first place.
    */
   [data-ui='table'][data-sticky-footer] [data-part='summary'] > [data-part='row'] > * {
-    inset-block-end: var(--slotted-table-sticky-offset-end, 0);
+    inset-block-end: 0;
     position: sticky;
     z-index: calc(var(--slotted-z-index-sticky, 100) + 1);
+  }
+
+  [data-ui='table'][data-sticky-to='page'][data-sticky-footer]
+    [data-part='summary']
+    > [data-part='row']
+    > * {
+    inset-block-end: var(--slotted-table-sticky-offset-end, 0);
   }
 
   /* The corner again, at the bottom: a summary cell that is also a pinned

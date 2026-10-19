@@ -223,6 +223,40 @@ const anatomy: AnatomyRow[] = [
       'The open row detail, one cell spanning every column. Control flow in the template keeps a closed one out of the DOM, which a host element cannot do for itself.',
   },
   {
+    part: 'group-row',
+    element: 'tr[slTableGroupRow]',
+    required: false,
+    purpose:
+      'The band that opens a group of rows: a day of a ledger with its net at the end. One header cell spans every column, and sticky holds the band under the header while its rows scroll past.',
+  },
+  {
+    part: 'group-header',
+    element: 'th',
+    required: false,
+    purpose:
+      'The one cell of the band, scope="rowgroup", spanning the columns of the table. It names the rows of its own tbody, so a grouped listing writes one body per group.',
+  },
+  {
+    part: 'group-content',
+    element: 'div',
+    required: false,
+    purpose:
+      'The line inside the band that sets the name at the start and the end content at the end.',
+  },
+  {
+    part: 'group-start',
+    element: 'span',
+    required: false,
+    purpose: 'The name of the group.',
+  },
+  {
+    part: 'group-end',
+    element: 'span',
+    required: false,
+    purpose:
+      'The end of the band, the element marked slTableGroupRowEnd: the total or net of the group, in tabular figures.',
+  },
+  {
     part: 'empty',
     element: 'td[slTableEmpty]',
     required: false,
@@ -421,7 +455,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'sticky',
     title: 'A header, a summary and a column that stay',
-    note: 'stickyHeader holds the head against the top of the scroller and stickyFooter holds the summary against the bottom of it, so the total is on screen at the first row and the last. stickyTo says which box that is: this table own scroller, or whatever scrolls outside it. A pinned column darkens its edge exactly while something is hidden under it, and all of it mirrors in a right-to-left document.',
+    note: 'stickyHeader holds the head against the top of the scroller and stickyFooter holds the summary against the bottom of it, so the total is on screen at the first row and the last. stickyTo says which box that is: this table own scroller, or whatever scrolls outside it. Under stickyTo="page" the head stops at --slotted-table-sticky-offset, which a page binds to its own chrome; a table inside a scrolling box of its own sets that token to 0 on the box. A pinned column darkens its edge exactly while something is hidden under it, and all of it mirrors in a right-to-left document.',
     snippet: defineSnippet({
       id: 'table-angular-sticky',
       language: 'angular',
@@ -816,6 +850,27 @@ export const ANGULAR_TABLE_DOCS = {
         'The record position in the whole set, written as aria-rowindex',
       ],
       [
+        'current',
+        'boolean',
+        'false',
+        'slTableRow',
+        'The record open elsewhere on the page, a detail pane beside the table, written as aria-current',
+      ],
+      [
+        'interactive',
+        'boolean',
+        'false',
+        'slTableRow',
+        'Paints the row as a thing the pointer presses; stated beside (action)',
+      ],
+      [
+        '(action)',
+        'MouseEvent',
+        '—',
+        'slTableRow',
+        'A click anywhere in the row that lands on no control of its own; the first link or button in the row is the keyboard way in',
+      ],
+      [
         'column',
         'string',
         '—',
@@ -856,6 +911,13 @@ export const ANGULAR_TABLE_DOCS = {
         'start',
         'the three cell parts and both selection cells',
         'Which edge the column is pinned to while the table scrolls past it',
+      ],
+      [
+        'sticky',
+        'boolean',
+        'false',
+        'slTableGroupRow',
+        'Holds the band under the header while its rows scroll past; the end of the band is the element marked slTableGroupRowEnd',
       ],
       [
         'stickyOffset',

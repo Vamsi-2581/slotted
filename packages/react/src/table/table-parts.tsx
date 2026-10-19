@@ -1,3 +1,4 @@
+import { isRowAction } from '@slotted/core/pointer-intent';
 import {
   createContext,
   useContext,
@@ -27,6 +28,7 @@ import type {
   TableEmptyProps,
   TableExpanderProps,
   TableFooterProps,
+  TableGroupRowProps,
   TableHeadProps,
   TableLoaderProps,
   TableRowContextValue,
@@ -130,7 +132,11 @@ export function TableFooter({ ref, ...props }: TableFooterProps) {
  */
 export function TableRow({
   children,
+  current,
   disabled,
+  interactive,
+  onAction,
+  onClick,
   ref,
   render,
   rowIndex,
@@ -140,12 +146,28 @@ export function TableRow({
   const table = useTable();
   const selected = value !== undefined && table.isSelected(value);
   const expanded = value !== undefined && table.isExpanded(value);
+  const pressable = interactive ?? onAction !== undefined;
+
+  /* A click on a control inside the row is that control's, and a click that
+     reaches the row through a portal — a menu opened from a cell — never
+     landed in it: `isRowAction` answers both for both bindings. */
+  const click =
+    onAction === undefined
+      ? onClick
+      : (event: MouseEvent<HTMLTableRowElement>) => {
+          onClick?.(event);
+          if (event.defaultPrevented || disabled === true) return;
+          if (isRowAction(event.currentTarget, event.target)) onAction(event);
+        };
 
   const rowProps = {
     ...nativeProps,
     children,
+    ...(current === true ? { 'aria-current': 'true' as const, 'data-current': '' } : {}),
     ...(disabled === true ? { 'data-disabled': '' } : {}),
     ...(expanded ? { 'data-expanded': '' } : {}),
+    ...(pressable ? { 'data-interactive': '' } : {}),
+    ...(click === undefined ? {} : { onClick: click }),
     'data-part': 'row',
     ...(selected ? { 'data-selected': '' } : {}),
     ...(value === undefined ? {} : { 'data-value': value }),
@@ -500,6 +522,37 @@ export function TableDetail({
       <td colSpan={colSpan ?? table.columns} data-part="cell">
         {children}
       </td>
+    </tr>
+  );
+}
+
+/**
+ * The band that opens a group of rows — a day of a ledger, with its net at the
+ * end. One header cell spans every column; `scope="rowgroup"` names the rows
+ * of the `tbody` it opens, so a ledger writes one `TableBody` per group.
+ */
+export function TableGroupRow({
+  children,
+  colSpan,
+  end,
+  ref,
+  sticky,
+  ...nativeProps
+}: TableGroupRowProps) {
+  const table = useTable();
+  return (
+    <tr
+      {...nativeProps}
+      data-part="group-row"
+      {...(sticky === true ? { 'data-sticky': '' } : {})}
+      ref={ref}
+    >
+      <th colSpan={colSpan ?? table.columns} data-part="group-header" scope="rowgroup">
+        <div data-part="group-content">
+          <span data-part="group-start">{children}</span>
+          {end === undefined || end === null ? null : <span data-part="group-end">{end}</span>}
+        </div>
+      </th>
     </tr>
   );
 }

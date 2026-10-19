@@ -45,6 +45,8 @@ export {
   SlTableEmpty,
   SlTableExpander,
   SlTableFooter,
+  SlTableGroupRow,
+  SlTableGroupRowEnd,
   SlTableHead,
   SlTableLoader,
   SlTableRow,

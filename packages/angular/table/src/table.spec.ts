@@ -38,6 +38,8 @@ import {
   SlTableColumnHeader,
   SlTableDetail,
   SlTableExpander,
+  SlTableGroupRow,
+  SlTableGroupRowEnd,
   SlTableHead,
   SlTableRow,
   SlTableRowHeader,
@@ -1048,5 +1050,103 @@ describe('the selection as a form value', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.chosen.value).toEqual([]);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [
+    SlTable,
+    SlTableContent,
+    SlTableCaption,
+    SlTableHead,
+    SlTableBody,
+    SlTableRow,
+    SlTableColumnHeader,
+    SlTableCell,
+    SlTableGroupRow,
+    SlTableGroupRowEnd,
+  ],
+  template: `<div slTable [columns]="3">
+    <table slTableContent>
+      <caption slTableCaption>
+        Lançamentos
+      </caption>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader>Descrição</th>
+          <th slTableColumnHeader>Categoria</th>
+          <th slTableColumnHeader numeric>Valor</th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        <tr slTableGroupRow>
+          Hoje<span slTableGroupRowEnd>−R$ 58,40</span>
+        </tr>
+        @for (value of values; track value) {
+          <tr
+            slTableRow
+            [value]="value"
+            [current]="current() === value"
+            interactive
+            (action)="acted.push(value)"
+          >
+            <td slTableCell>
+              <a [attr.href]="'#' + value">{{ value }}</a>
+            </td>
+            <td slTableCell>
+              <button type="button">Categoria de {{ value }}</button>
+            </td>
+            <td slTableCell numeric>29,20</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>`,
+})
+class LedgerHost {
+  readonly values = ['mercado', 'farmacia'];
+  readonly current = signal<string | undefined>('farmacia');
+  readonly acted: string[] = [];
+}
+
+describe('rows of a ledger', () => {
+  let fixture: ComponentFixture<LedgerHost>;
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [LedgerHost] }).compileComponents();
+    fixture = TestBed.createComponent(LedgerHost);
+    fixture.detectChanges();
+  });
+  const rows = () =>
+    [
+      ...fixture.nativeElement.querySelectorAll('[data-part="body"] > [data-part="row"]'),
+    ] as HTMLElement[];
+
+  it('draws a band row whose one header spans every column and names the group', () => {
+    const band = fixture.nativeElement.querySelector('[data-part="group-row"]') as HTMLElement;
+    const header = band.querySelector('th') as HTMLTableCellElement;
+    expect(band.children).toHaveLength(1);
+    expect(header.colSpan).toBe(3);
+    expect(header.getAttribute('scope')).toBe('rowgroup');
+    expect(header.getAttribute('data-part')).toBe('group-header');
+    expect(header.querySelector('[data-part="group-start"]')?.textContent?.trim()).toBe('Hoje');
+    expect(header.querySelector('[data-part="group-end"]')?.textContent?.trim()).toBe('−R$ 58,40');
+  });
+
+  it('marks the row the detail pane shows as current, and no other', () => {
+    expect(rows()[0]?.hasAttribute('aria-current')).toBe(false);
+    expect(rows()[1]?.getAttribute('aria-current')).toBe('true');
+    expect(rows()[1]?.hasAttribute('data-current')).toBe(true);
+  });
+
+  it('acts on a click on a plain cell, and not on a click on a control inside the row', () => {
+    const [first] = rows();
+    expect(first?.hasAttribute('data-interactive')).toBe(true);
+    (first?.lastElementChild as HTMLElement).click();
+    expect(fixture.componentInstance.acted).toEqual(['mercado']);
+    (first?.querySelector('button') as HTMLElement).click();
+    (first?.querySelector('a') as HTMLElement).click();
+    expect(fixture.componentInstance.acted).toEqual(['mercado']);
+    expect(first?.hasAttribute('tabindex')).toBe(false);
   });
 });

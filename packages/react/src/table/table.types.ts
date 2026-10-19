@@ -24,6 +24,7 @@ import type { PopoverChangeRequest, PopoverProps } from '../popover/popover.type
 import type {
   ComponentPropsWithRef,
   HTMLAttributes,
+  MouseEvent,
   ReactNode,
   RefCallback,
   RefObject,
@@ -459,7 +460,24 @@ export interface TableRowContextValue {
 }
 
 export interface TableRowProps extends ComponentPropsWithRef<'tr'> {
+  /**
+   * The row the page is showing elsewhere — the record open in a detail pane
+   * beside the table. Written as `aria-current="true"` and painted with a
+   * ground of its own; it is not the selection, which the checkbox owns.
+   */
+  current?: boolean | undefined;
   disabled?: boolean | undefined;
+  /**
+   * Paints the row as a thing the pointer can press. On by default once
+   * `onAction` is given.
+   */
+  interactive?: boolean | undefined;
+  /**
+   * Called by a click anywhere in the row that does not land on a control of
+   * its own — a link, a button, a field, a label. The row takes no tab stop:
+   * the keyboard reaches the record through the first link or button in it.
+   */
+  onAction?: ((event: MouseEvent<HTMLTableRowElement>) => void) | undefined;
   render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
   /**
    * The row's position in the whole set, one-based. Written as
@@ -531,6 +549,17 @@ export interface TableDetailProps extends ComponentPropsWithRef<'tr'> {
   colSpan?: number | undefined;
   /** The row the detail belongs to. */
   value: string;
+}
+
+export interface TableGroupRowProps extends Omit<ComponentPropsWithRef<'tr'>, 'children'> {
+  /** The group's name: a day, a period, a category. */
+  children?: ReactNode | undefined;
+  /** How many columns the band spans. Defaults to the table's own count. */
+  colSpan?: number | undefined;
+  /** What stands at the end of the band: the group's total or net. */
+  end?: ReactNode | undefined;
+  /** Holds the band under the header while its rows scroll past. */
+  sticky?: boolean | undefined;
 }
 
 export interface TableEmptyProps extends ComponentPropsWithRef<'td'> {

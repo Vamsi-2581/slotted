@@ -178,3 +178,62 @@ test('stands on the ground its container publishes before the page surface', () 
     /--_surface:var\(--slotted-table-surface,var\(--slotted-ground,var\(--slotted-surface,Canvas\)\)\)/,
   );
 });
+
+/**
+ * `page.css` binds `--slotted-table-sticky-offset` to the page's fixed chrome
+ * for every table under it. A header that sticks to the family's own scroller
+ * read that offset too and stood the chrome's height below the scroller's top,
+ * over the first rows. The offsets belong to `stickyTo="page"` alone.
+ */
+test('reads the sticky offsets only under stickyTo page', () => {
+  const header = normalize(
+    "[data-ui='table'][data-sticky-header] [data-part='column-header'],[data-ui='table'][data-sticky-header] [data-part='head'] [data-part='selection']{inset-block-start:0;",
+  );
+  assert.ok(normalized.includes(header), 'the header sticks at the top of its own scroller');
+  assert.ok(
+    normalized.includes(
+      "[data-ui='table'][data-sticky-to='page'][data-sticky-header] [data-part='column-header'],[data-ui='table'][data-sticky-to='page'][data-sticky-header] [data-part='head'] [data-part='selection']{inset-block-start:var(--slotted-table-sticky-offset,0);}",
+    ),
+    'the header stops under the page chrome under stickyTo page',
+  );
+  assert.ok(
+    normalized.includes(
+      "[data-ui='table'][data-sticky-to='page'][data-sticky-footer] [data-part='summary'] > [data-part='row'] > *{inset-block-end:var(--slotted-table-sticky-offset-end,0);}",
+    ),
+    'the summary stops over the page chrome under stickyTo page',
+  );
+  const scrollRules = normalized
+    .split('}')
+    .filter((rule) => !rule.includes("[data-sticky-to='page']"));
+  assert.ok(
+    !scrollRules.some((rule) =>
+      /inset-block-(start|end):var\(--slotted-table-sticky-offset/.test(rule),
+    ),
+    'a rule outside stickyTo page reads a sticky offset',
+  );
+});
+
+/**
+ * The row open in a detail pane is said by a ground and `aria-current`, and
+ * never by an edge on the start side (R1). The band that opens a group carries
+ * its total in tabular figures, so a column of daily nets lines up.
+ */
+test('paints the current row with a ground and the group band with tabular figures', () => {
+  const current = normalized
+    .split('}')
+    .filter((rule) => rule.includes('[data-current]') && !rule.includes('@media'));
+  assert.ok(
+    current.some((rule) =>
+      rule.includes('background-color:var(--slotted-table-row-surface-current'),
+    ),
+  );
+  for (const rule of current) {
+    assert.doesNotMatch(rule, /border-inline-start|box-shadow|::before|::after/, rule);
+  }
+  assert.ok(
+    normalized.includes(
+      "[data-ui='table'] [data-part='group-end']{font-variant-numeric:tabular-nums;",
+    ),
+  );
+  assert.ok(normalized.includes("[data-ui='table'] [data-part='group-header']{"));
+});

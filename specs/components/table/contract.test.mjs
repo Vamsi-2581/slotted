@@ -22,7 +22,7 @@ test('declares one member, because every part reads one table', () => {
   assert.deepEqual(Object.keys(contract.members), ['table']);
 });
 
-test('names the thirty parts a table is made of', () => {
+test('names the thirty-five parts a table is made of', () => {
   assert.deepEqual(table.parts, [
     'root',
     'scroll',
@@ -51,6 +51,11 @@ test('names the thirty parts a table is made of', () => {
     'selection',
     'expander',
     'detail',
+    'group-row',
+    'group-header',
+    'group-content',
+    'group-start',
+    'group-end',
     'empty',
     'loader',
     'footer',
@@ -305,6 +310,11 @@ test('takes the whole structure from the platform and writes no role', () => {
     selection: 'th|td',
     expander: 'button',
     detail: 'tr',
+    'group-row': 'tr',
+    'group-header': 'th',
+    'group-content': 'div',
+    'group-start': 'span',
+    'group-end': 'span',
     empty: 'td',
     loader: 'tbody',
   });

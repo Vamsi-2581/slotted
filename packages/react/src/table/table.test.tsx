@@ -28,6 +28,7 @@ import {
   TableColumnHeader,
   TableDetail,
   TableExpander,
+  TableGroupRow,
   TableHead,
   TableRow,
   TableRowHeader,
@@ -1147,5 +1148,96 @@ describe('the contract', () => {
       expect(rendered.has(part), part).toBe(true);
     }
     expect(contract.members.table.parts).toContain('footer');
+  });
+});
+
+/**
+ * A ledger grouped by day: a band row per day that spans every column, a
+ * current row beside a detail pane, and a row a click anywhere opens while its
+ * link stays the keyboard's way in.
+ */
+describe('rows of a ledger', () => {
+  function Ledger({
+    current,
+    onAction,
+  }: {
+    current?: string | undefined;
+    onAction?: ((value: string) => void) | undefined;
+  }) {
+    return (
+      <Table columns={3}>
+        <TableContent>
+          <TableCaption>Lançamentos</TableCaption>
+          <TableHead>
+            <TableRow>
+              <TableColumnHeader>Descrição</TableColumnHeader>
+              <TableColumnHeader>Categoria</TableColumnHeader>
+              <TableColumnHeader numeric>Valor</TableColumnHeader>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableGroupRow end="−R$ 58,40">Hoje</TableGroupRow>
+            {['mercado', 'farmacia'].map((value) => (
+              <TableRow
+                current={current === value}
+                key={value}
+                {...(onAction === undefined ? {} : { onAction: () => onAction(value) })}
+                value={value}
+              >
+                <TableCell>
+                  <a href={`#${value}`}>{value}</a>
+                </TableCell>
+                <TableCell>
+                  <button type="button">Categoria de {value}</button>
+                </TableCell>
+                <TableCell numeric>29,20</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </TableContent>
+      </Table>
+    );
+  }
+
+  it('draws a band row whose one header spans every column and names the group', () => {
+    render(<Ledger />);
+    const band = document.querySelector('[data-part="group-row"]') as HTMLElement;
+    const header = band.querySelector('th') as HTMLTableCellElement;
+    expect(band.children).toHaveLength(1);
+    expect(header.colSpan).toBe(3);
+    expect(header).toHaveAttribute('scope', 'rowgroup');
+    expect(header).toHaveAttribute('data-part', 'group-header');
+    expect(header.querySelector('[data-part="group-start"]')).toHaveTextContent('Hoje');
+    expect(header.querySelector('[data-part="group-end"]')).toHaveTextContent('−R$ 58,40');
+  });
+
+  it('marks the row the detail pane shows as current, and no other', () => {
+    render(<Ledger current="farmacia" />);
+    const rows = document.querySelectorAll('[data-part="body"] > [data-part="row"]');
+    expect(rows[0]).not.toHaveAttribute('aria-current');
+    expect(rows[1]).toHaveAttribute('aria-current', 'true');
+    expect(rows[1]).toHaveAttribute('data-current');
+  });
+
+  it('acts on a click on a plain cell, and not on a click on a control inside the row', () => {
+    const onAction = vi.fn();
+    render(<Ledger onAction={onAction} />);
+    const rows = document.querySelectorAll('[data-part="body"] > [data-part="row"]');
+    expect(rows[0]).toHaveAttribute('data-interactive');
+
+    fireEvent.click(rows[0]!.querySelector('[data-numeric]') ?? rows[0]!.lastElementChild!);
+    expect(onAction).toHaveBeenCalledTimes(1);
+    expect(onAction).toHaveBeenLastCalledWith('mercado');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Categoria de mercado' }));
+    fireEvent.click(screen.getByRole('link', { name: 'mercado' }));
+    expect(onAction).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the row out of the tab order: its link is the way in', () => {
+    render(<Ledger onAction={() => {}} />);
+    const row = document.querySelector('[data-part="body"] > [data-part="row"]');
+    expect(row).not.toHaveAttribute('tabindex');
+    expect(row).not.toHaveAttribute('role');
   });
 });

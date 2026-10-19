@@ -3,13 +3,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChild,
   Directive,
   ElementRef,
   inject,
   input,
   numberAttribute,
+  output,
   ViewEncapsulation,
 } from '@angular/core';
+import { isRowAction } from '@slotted/core/pointer-intent';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlCheckbox } from '@slotted/angular/checkbox';
 import { SlSkeleton } from '@slotted/angular/skeleton';
@@ -134,12 +137,33 @@ export class SlTableFooter {}
     '[attr.data-expanded]': "expanded() ? '' : null",
     '[attr.data-disabled]': "disabled() ? '' : null",
     '[attr.aria-rowindex]': 'rowIndex() ?? null',
+    '[attr.aria-current]': "current() ? 'true' : null",
+    '[attr.data-current]': "current() ? '' : null",
+    '[attr.data-interactive]': "interactive() ? '' : null",
+    '(click)': 'onClick($event)',
   },
 })
 export class SlTableRow {
   /** The row's key, required wherever selection or expansion is on. */
   readonly value = input<string | undefined>(undefined);
   readonly disabled = input(false, { transform: booleanAttribute });
+  /**
+   * The row the page is showing elsewhere — the record open in a detail pane
+   * beside the table. Written as `aria-current="true"`; it is not the
+   * selection, which the checkbox owns.
+   */
+  readonly current = input(false, { transform: booleanAttribute });
+  /**
+   * Paints the row as a thing the pointer can press. Stated beside `(action)`,
+   * because an output does not say whether anything listens to it.
+   */
+  readonly interactive = input(false, { transform: booleanAttribute });
+  /**
+   * A click anywhere in the row that does not land on a control of its own — a
+   * link, a button, a field, a label. The row takes no tab stop: the keyboard
+   * reaches the record through the first link or button in it.
+   */
+  readonly action = output<MouseEvent>();
   /**
    * The row's position in the whole set, one-based, written only where the
    * table states a total: the practice warns that setting `aria-rowindex` on
@@ -162,6 +186,13 @@ export class SlTableRow {
   });
 
   readonly detailId = computed(() => `${this.table.id}-detail-${this.value() ?? ''}`);
+
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  protected onClick(event: MouseEvent) {
+    if (event.defaultPrevented || this.disabled()) return;
+    if (isRowAction(this.host.nativeElement, event.target)) this.action.emit(event);
+  }
 }
 
 /**
@@ -492,6 +523,48 @@ export class SlTableDetail {
   readonly detailId = computed(() => `${this.table.id}-detail-${this.value()}`);
 }
 
+/** Marks what stands at the end of a group's band: its total or net. */
+@Directive({
+  selector: '[slTableGroupRowEnd]',
+  standalone: true,
+})
+export class SlTableGroupRowEnd {}
+
+/**
+ * The band that opens a group of rows — a day of a ledger, with its net at the
+ * end. One header cell spans every column; `scope="rowgroup"` names the rows
+ * of the `tbody` it opens, so a ledger writes one body per group.
+ */
+@Component({
+  selector: 'tr[slTableGroupRow]',
+  standalone: true,
+  exportAs: 'slTableGroupRow',
+  template: `<th [attr.colspan]="span()" data-part="group-header" scope="rowgroup">
+    <div data-part="group-content">
+      <span data-part="group-start"><ng-content /></span>
+      @if (end()) {
+        <span data-part="group-end"><ng-content select="[slTableGroupRowEnd]" /></span>
+      }
+    </div>
+  </th>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  host: { 'data-part': 'group-row', '[attr.data-sticky]': "sticky() ? '' : null" },
+})
+export class SlTableGroupRow {
+  /** How many columns the band spans. Defaults to the table's own count. */
+  readonly colSpan = input<number | undefined, number | string | undefined>(undefined, {
+    transform: (count) => (count === undefined ? undefined : numberAttribute(count)),
+  });
+  /** Holds the band under the header while its rows scroll past. */
+  readonly sticky = input(false, { transform: booleanAttribute });
+
+  private readonly table = inject(SlTable);
+
+  protected readonly end = contentChild(SlTableGroupRowEnd);
+  readonly span = computed(() => this.colSpan() ?? this.table.resolvedColumns());
+}
+
 /**
  * What is shown when there is nothing. It takes a `result-state`, whose status
  * axis already separates an empty set from a set a filter emptied.
@@ -560,6 +633,8 @@ export const SL_TABLE_PARTS = [
   SlTableEmpty,
   SlTableExpander,
   SlTableFooter,
+  SlTableGroupRow,
+  SlTableGroupRowEnd,
   SlTableHead,
   SlTableLoader,
   SlTableRow,

@@ -67,7 +67,7 @@ const sharedAnatomy: AnatomyRow[] = [
     element: 'div',
     required: true,
     purpose:
-      'The panel. It carries role="dialog" and, while modal, aria-modal="true". It is a grid of three rows, header, body and footer, and only the body row shrinks, so the actions stay on screen when the body is long.',
+      'The panel. It carries role="dialog" and, while modal, aria-modal="true". It is a grid of three rows, header, body and footer, and only the body row shrinks, so the actions stay on screen when the body is long. It draws no padding: DialogHeader, DialogBody and DialogFooter carry the panel inset. A layout that skips them reads --slotted-dialog-inset-inline and --slotted-dialog-inset-block, which the panel states, and a theme sets the inset with --slotted-dialog-padding-inline and --slotted-dialog-padding-block.',
   },
   {
     part: 'header',
@@ -391,6 +391,33 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'The trigger is the consumer’s own button',
       source: `<DialogTrigger render={(props) => <Button {...props}>Edit project</Button>} />;`,
+    }),
+  },
+  {
+    id: 'layout',
+    title: 'A layout of its own',
+    note: 'DialogContent draws no padding: the header, the body and the footer carry the inset. A layout of its own — one field, a preview, a footer — reads --slotted-dialog-inset-inline and --slotted-dialog-inset-block, so it stands in the column the parts stand in.',
+    snippet: defineSnippet({
+      id: 'dialog-react-layout',
+      language: 'tsx',
+      label: 'One field, a preview and a footer, at the panel inset',
+      source: `<DialogContent>
+  <div
+    style={{
+      display: 'grid',
+      gap: 'var(--slotted-space-5)',
+      paddingBlock: 'var(--slotted-dialog-inset-block)',
+      paddingInline: 'var(--slotted-dialog-inset-inline)',
+    }}
+  >
+    <DialogTitle>Rename file</DialogTitle>
+    <TextField aria-label="Name" defaultValue="report-q3.pdf" />
+    <img alt="First page of report-q3.pdf" src={preview} />
+  </div>
+  <DialogFooter>
+    <Button size="sm">Rename</Button>
+  </DialogFooter>
+</DialogContent>;`,
     }),
   },
   {

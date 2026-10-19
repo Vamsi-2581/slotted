@@ -3,6 +3,7 @@ import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import { SlButton } from '@slotted/angular/button';
 import { SlCard } from '@slotted/angular/card';
 import { SlSkeleton } from '@slotted/angular/skeleton';
+import { SlStack } from '@slotted/angular/stack';
 import { SlTextField } from '@slotted/angular/text-field';
 import { SlText } from '@slotted/angular/typography';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
@@ -57,6 +58,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     nested: Nested,
     content: Content,
     composition: Composition,
+    layout: Layout,
     defaults: Defaults,
     accessibility: Accessibility,
   }) as never;
@@ -79,6 +81,7 @@ export const DIALOG_IMPORTS = [
   SlText,
   SlTextField,
   SlSkeleton,
+  SlStack,
 ];
 
 const meta: Meta<DialogStoryArgs> = {
@@ -575,6 +578,31 @@ export const Composition: Story = {
           </sl-dialog>`),
           'stack',
         ),
+    ),
+  }),
+};
+
+export const Layout: Story = {
+  parameters: scenario('layout'),
+  render: () => ({
+    template: scene(
+      'One field, a preview and a footer',
+      'The panel draws no padding. The layout reads the inset the panel states, so its edges line up with the footer’s.',
+      layer(`<button slButton variant="outline" tone="secondary" [slDialogTrigger]="d">
+          Rename file
+        </button>
+        <sl-dialog #d="slDialog" [container]="box" size="sm" fullScreen="never">
+          <div
+            slStack
+            [gap]="5"
+            [style.padding-block]="'var(--slotted-dialog-inset-block)'"
+            [style.padding-inline]="'var(--slotted-dialog-inset-inline)'"
+          >
+            <h2 slDialogTitle>Rename file</h2>
+            <input slTextField aria-label="Name" value="report-q3.pdf" />
+          </div>
+          <footer slDialogFooter><button slButton size="sm">Rename</button></footer>
+        </sl-dialog>`),
     ),
   }),
 };

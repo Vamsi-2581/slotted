@@ -78,7 +78,7 @@ const anatomy: AnatomyRow[] = [
     element: '[slTourContent]',
     required: true,
     purpose:
-      'The card: role="dialog" unless you wrote a role, named by the title unless you wrote aria-label, aria-modal on a modal step. Reads the arrow keys.',
+      'The card: role="dialog" unless you wrote a role, named by the title unless you wrote aria-label, aria-modal on a modal step. Reads the arrow keys. It draws no padding: slTourHeader, slTourBody and slTourFooter carry the card inset, set by --slotted-tour-padding-inline and --slotted-tour-padding-block.',
   },
   {
     part: 'media',

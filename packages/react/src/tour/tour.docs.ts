@@ -75,7 +75,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div role="dialog"',
     required: true,
     purpose:
-      'TourContent. The card: named by the title, described by the description, aria-modal on a modal step. Takes focus and reads the arrow keys.',
+      'TourContent. The card: named by the title, described by the description, aria-modal on a modal step. Takes focus and reads the arrow keys. It draws no padding: TourHeader, TourBody and TourFooter carry the card inset, set by --slotted-tour-padding-inline and --slotted-tour-padding-block.',
   },
   {
     part: 'media',

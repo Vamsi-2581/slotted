@@ -41,7 +41,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: true,
     purpose:
-      'The panel, with role="dialog" and tabindex="-1". It is named by its title and described by its description when those parts are present. aria-modal is never written, because the popover is not modal.',
+      'The panel, with role="dialog" and tabindex="-1". It is named by its title and described by its description when those parts are present. aria-modal is never written, because the popover is not modal. It draws no padding: PopoverHeader, PopoverBody and PopoverFooter carry the panel inset, set by --slotted-popover-padding-inline and --slotted-popover-padding-block.',
   },
   {
     part: 'header',

@@ -73,7 +73,7 @@ const sharedAnatomy: AnatomyRow[] = [
     element: 'div',
     required: true,
     purpose:
-      'The panel. It carries role="dialog" and, while modal, aria-modal="true". It is a grid of three rows, header, body and footer, and only the body row shrinks, so the actions stay on screen when the body is long.',
+      'The panel. It carries role="dialog" and, while modal, aria-modal="true". It is a grid of three rows, header, body and footer, and only the body row shrinks, so the actions stay on screen when the body is long. It draws no padding: slDialogHeader, slDialogBody and slDialogFooter carry the panel inset. A layout that skips them reads --slotted-dialog-inset-inline and --slotted-dialog-inset-block, which the panel states, and a theme sets the inset with --slotted-dialog-padding-inline and --slotted-dialog-padding-block.',
   },
   {
     part: 'header',
@@ -349,6 +349,27 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'The trigger is the consumer’s own button',
       source: `<button slButton variant="outline" [slDialogTrigger]="d">Edit project</button>`,
+    }),
+  },
+  {
+    id: 'layout',
+    title: 'A layout of its own',
+    note: 'The panel draws no padding: the header, the body and the footer carry the inset. A layout of its own — one field, a preview, a footer — reads --slotted-dialog-inset-inline and --slotted-dialog-inset-block, so it stands in the column the parts stand in.',
+    snippet: defineSnippet({
+      id: 'dialog-angular-layout',
+      language: 'angular',
+      label: 'One field, a preview and a footer, at the panel inset',
+      source: `<sl-dialog #d="slDialog">
+  <div class="rename">
+    <h2 slDialogTitle>Rename file</h2>
+    <input slTextField aria-label="Name" value="report-q3.pdf" />
+    <img alt="First page of report-q3.pdf" [src]="preview" />
+  </div>
+  <footer slDialogFooter><button slButton size="sm">Rename</button></footer>
+</sl-dialog>
+<!-- .rename { display: grid; gap: var(--slotted-space-5);
+     padding-block: var(--slotted-dialog-inset-block);
+     padding-inline: var(--slotted-dialog-inset-inline); } -->`,
     }),
   },
   {

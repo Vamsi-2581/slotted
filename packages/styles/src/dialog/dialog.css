@@ -52,8 +52,12 @@
     --_measure: var(--slotted-dialog-measure, 32rem);
     /** The air between the panel and the edge of the layer. */
     --_layer-padding: var(--slotted-space-8, 1.5rem);
-    /** The panel's own inset, which every row reads. */
-    --_padding-inline: var(--slotted-space-8, 1.5rem);
+    /**
+     * The panel's own inset, which every row reads. The panel draws none of it
+     * itself: the header, the body and the footer carry it, and a layout of the
+     * consumer's own that skips them reads the same two public tokens.
+     */
+    --_padding-inline: var(--slotted-dialog-padding-inline, var(--slotted-space-8, 1.5rem));
     /**
      * Three insets, not one number used three times, because the three rows
      * hold three different things.
@@ -72,7 +76,7 @@
      * paragraph reads as a slab around a button: twenty above and below a
      * thirty-four pixel control is a seventy-four pixel bar for one line.
      */
-    --_padding-block: var(--slotted-space-7, 1.25rem);
+    --_padding-block: var(--slotted-dialog-padding-block, var(--slotted-space-7, 1.25rem));
     --_header-padding-block: var(--slotted-space-6, 1rem);
     --_footer-padding-block: var(--slotted-space-5, 0.75rem);
     --_gap: var(--slotted-space-5, 0.75rem);
@@ -182,8 +186,8 @@
 
   [data-ui='dialog'][data-size='sm'] {
     --_measure: var(--slotted-dialog-measure, 24rem);
-    --_padding-inline: var(--slotted-space-7, 1.25rem);
-    --_padding-block: var(--slotted-space-6, 1rem);
+    --_padding-inline: var(--slotted-dialog-padding-inline-sm, var(--slotted-space-7, 1.25rem));
+    --_padding-block: var(--slotted-dialog-padding-block-sm, var(--slotted-space-6, 1rem));
     --_header-padding-block: var(--slotted-space-5, 0.75rem);
     --_footer-padding-block: var(--slotted-space-4, 0.5rem);
     --_title-font-size: var(--slotted-font-size-lg, 1rem);
@@ -281,6 +285,15 @@
   /* ── The panel ────────────────────────────────────────────────────────── */
 
   [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] {
+    /**
+     * The inset the rows carry, stated where a layout of the consumer's own can
+     * read it: the panel draws no padding, so content written straight inside
+     * it reads `--slotted-dialog-inset-inline` for its padding and stands
+     * in the column the header, the body and the footer stand in.
+     */
+    --slotted-dialog-inset-inline: var(--_padding-inline);
+    --slotted-dialog-inset-block: var(--_padding-block);
+
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
     inline-size: 100%;

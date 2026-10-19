@@ -11,7 +11,7 @@ import { Skeleton } from '../skeleton';
 import { TextField } from '../text-field';
 import { Text } from '../typography';
 import { AlertDialog, Dialog } from './dialog';
-import { Layer } from './dialog-demo';
+import { Layer, OwnLayout } from './dialog-demo';
 import { DialogDefaultsProvider } from './dialog-defaults';
 import {
   AlertDialogAction,
@@ -44,6 +44,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     nested: Nested,
     content: Content,
     composition: Composition,
+    layout: Layout,
     defaults: Defaults,
     accessibility: Accessibility,
   }) as never;
@@ -712,6 +713,40 @@ export const Composition: Story = {
         <Layer>{(container) => <Imperative container={container} />}</Layer>
       </Scene>
     </Grid>
+  ),
+};
+
+export const Layout: Story = {
+  parameters: scenario('layout'),
+  render: () => (
+    <Scene
+      label="One field, a preview and a footer"
+      note="The panel draws no padding. The layout reads the inset the panel states, so its edges line up with the footer's."
+    >
+      <Layer>
+        {(container) => (
+          <Dialog container={container} fullScreen="never" size="sm">
+            <DialogTrigger
+              render={(props) => (
+                <Button {...props} tone="secondary" variant="outline">
+                  Rename file
+                </Button>
+              )}
+            />
+            <DialogContent>
+              <OwnLayout>
+                <DialogTitle>Rename file</DialogTitle>
+                <TextField aria-label="Name" defaultValue="report-q3.pdf" />
+                <Skeleton blockSize="7rem" inlineSize="100%" loading />
+              </OwnLayout>
+              <DialogFooter>
+                <Button size="sm">Rename</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+      </Layer>
+    </Scene>
   ),
 };
 

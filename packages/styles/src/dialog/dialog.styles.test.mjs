@@ -104,3 +104,29 @@ test('leaves the page under a non-modal layer reachable by the pointer', () => {
     /pointer-events:auto/,
   );
 });
+
+/**
+ * The panel draws no padding; the header, the body and the footer carry its
+ * inset. A layout of the consumer's own that skips those parts reads the same
+ * inset from the public tokens, at every size step — the names popover, tour
+ * and card already give theirs.
+ */
+test('states the panel inset as public tokens the three rows read', () => {
+  const source = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+  assert.match(
+    source,
+    /--_padding-inline: var\(--slotted-dialog-padding-inline, var\(--slotted-space-8/,
+  );
+  assert.match(
+    source,
+    /--_padding-block: var\(--slotted-dialog-padding-block, var\(--slotted-space-7/,
+  );
+  assert.match(
+    source,
+    /--_padding-inline: var\(--slotted-dialog-padding-inline-sm, var\(--slotted-space-7/,
+  );
+  assert.match(
+    source,
+    /--_padding-block: var\(--slotted-dialog-padding-block-sm, var\(--slotted-space-6/,
+  );
+});

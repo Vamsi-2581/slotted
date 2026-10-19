@@ -23,3 +23,23 @@ export function Layer({ children }: { children: (container: Element) => ReactNod
     </div>
   );
 }
+
+/**
+ * A layout of the consumer's own inside the panel, which skips the header and
+ * the body: it reads the inset the panel states, which is what the scene
+ * demonstrates, so the padding is the subject and not a paint.
+ */
+export function OwnLayout({ children }: { children: ReactNode }) {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gap: 'var(--slotted-space-5)',
+        paddingBlock: 'var(--slotted-dialog-inset-block)',
+        paddingInline: 'var(--slotted-dialog-inset-inline)',
+      }}
+    >
+      {children}
+    </div>
+  );
+}

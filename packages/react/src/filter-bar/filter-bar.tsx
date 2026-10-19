@@ -167,20 +167,22 @@ const useIsomorphicLayoutEffect = typeof document === 'undefined' ? useEffect : 
  * Whether the bar is under its narrow breakpoint. The stylesheet draws the
  * phone's row from the same width with a container query; the binding reads it
  * to send an edit to the builder instead of a popover.
+ *
+ * Read only in the observer's reports, the first of which arrives after
+ * layout: a read in the mount forced a layout of the page just committed and
+ * a second render before the first paint.
  */
 function useNarrow(root: { current: HTMLElement | null }) {
   const [narrow, setNarrow] = useState(false);
-  useIsomorphicLayoutEffect(() => {
+  useEffect(() => {
     const element = root.current;
     if (!element || typeof ResizeObserver === 'undefined') return;
     /* A bar with no width has not been laid out, and is not narrow. */
-    const read = () => {
+    const observer = new ResizeObserver(() => {
       const width = element.getBoundingClientRect().width;
       setNarrow(width > 0 && width < remToPx(element, NARROW_REM));
-    };
-    const observer = new ResizeObserver(read);
+    });
     observer.observe(element);
-    read();
     return () => observer.disconnect();
   }, []);
   return narrow;
@@ -621,9 +623,9 @@ export function FilterBar({
       element.style.setProperty(STICKY_TOP, above);
       parent.style.setProperty(STICKY_TOP, `calc(${above} + ${height}px)`);
     };
+    /* Its first report, after layout, is the first measurement. */
     const observer = new ResizeObserver(publish);
     observer.observe(element);
-    publish();
     return () => {
       observer.disconnect();
       element.style.removeProperty(STICKY_TOP);

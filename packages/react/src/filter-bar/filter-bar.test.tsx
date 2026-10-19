@@ -652,6 +652,35 @@ describe('FilterBar', () => {
     expect(part('chip-value').querySelector('[data-value]')?.textContent).toBe('Paid, Refunded');
   });
 
+  /**
+   * Measured inside the mount, the bar forced a layout of the page just
+   * committed and a second render before the first paint, although the
+   * observer reports a first size after layout anyway.
+   */
+  it('measures nothing while it mounts, and reads its box in the observer’s first report', () => {
+    const reports: (() => void)[] = [];
+    class Observer {
+      constructor(callback: () => void) {
+        reports.push(callback);
+      }
+      observe() {}
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', Observer);
+    const rects = vi
+      .spyOn(Element.prototype, 'getBoundingClientRect')
+      .mockReturnValue({ height: 48, width: 320 } as DOMRect);
+    try {
+      render(<FilterBar fields={FIELDS} sticky />);
+      expect(rects).not.toHaveBeenCalled();
+      act(() => reports.forEach((report) => report()));
+      expect(rects).toHaveBeenCalled();
+    } finally {
+      rects.mockRestore();
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('under sticky reads the page offset for itself and publishes the sum for what follows, once', () => {
     let notify: (() => void) | undefined;
     class Observer {

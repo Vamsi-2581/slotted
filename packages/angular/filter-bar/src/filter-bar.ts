@@ -1966,14 +1966,14 @@ export class SlFilterBar {
     afterNextRender(() => {
       const element = this.host.nativeElement;
       const view = element.ownerDocument.defaultView;
+      /* Read only in the observer's reports, the first of which arrives
+         after layout: a read here forced a layout of the page just rendered. */
       if (typeof ResizeObserver !== 'undefined') {
-        const read = () => {
+        const observer = new ResizeObserver(() => {
           const width = element.getBoundingClientRect().width;
           this.narrow.set(width > 0 && width < remToPx(element, NARROW_REM));
-        };
-        const observer = new ResizeObserver(read);
+        });
         observer.observe(element);
-        read();
         this.destroyRef.onDestroy(() => observer.disconnect());
       }
       if (view?.matchMedia) {
@@ -2021,9 +2021,9 @@ export class SlFilterBar {
         element.style.setProperty(STICKY_TOP, above);
         parent.style.setProperty(STICKY_TOP, `calc(${above} + ${height}px)`);
       };
+      /* Its first report, after layout, is the first measurement. */
       const observer = new ResizeObserver(publish);
       observer.observe(element);
-      publish();
       onCleanup(() => {
         observer.disconnect();
         element.style.removeProperty(STICKY_TOP);

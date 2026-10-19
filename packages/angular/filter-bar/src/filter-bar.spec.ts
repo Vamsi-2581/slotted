@@ -876,6 +876,46 @@ describe('SlFilterBar', () => {
     expect(bar.hasAttribute('data-revealed')).toBe(false);
   });
 
+  /**
+   * Measured right after the first render, the bar forced a layout of the
+   * page just rendered, although the observer reports a first size after
+   * layout anyway.
+   */
+  it('measures nothing while it renders, and reads its box in the observer’s first report', async () => {
+    const reports: (() => void)[] = [];
+    class Observer {
+      constructor(callback: () => void) {
+        reports.push(callback);
+      }
+      observe() {}
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', Observer);
+    const rects = vi
+      .spyOn(Element.prototype, 'getBoundingClientRect')
+      .mockReturnValue({ height: 48, width: 320 } as DOMRect);
+    @Component({
+      imports: [SlFilterBar],
+      template: `<div slFilterBar [fields]="fields" sticky></div>`,
+    })
+    class Measured {
+      readonly fields = FIELDS;
+    }
+    try {
+      TestBed.configureTestingModule({ imports: [Measured] });
+      const fixture = TestBed.createComponent(Measured);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(rects).not.toHaveBeenCalled();
+      reports.forEach((report) => report());
+      expect(rects).toHaveBeenCalled();
+      fixture.destroy();
+    } finally {
+      rects.mockRestore();
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('under sticky reads the page offset for itself and publishes the sum for what follows, once', () => {
     const notify: (() => void)[] = [];
     class Observer {

@@ -50,7 +50,14 @@ const anatomy: AnatomyRow[] = [
     element: 'h1 to h6, or a div',
     required: false,
     purpose:
-      'The group name. It carries the id the nested list names itself by, and data-sticky when it has to hold still while its own rows scroll past.',
+      'The group name. It carries the id the nested list names itself by, data-sticky when it has to hold still while its own rows scroll past, and data-variant: caption, the small muted name, or ruled, the name in the text colour over a rule with no ground behind it.',
+  },
+  {
+    part: 'section-end',
+    element: 'span',
+    required: false,
+    purpose:
+      'What stands at the end of the heading, on the line of the name: a day balance, a count. Set in tabular figures. It is the element inside the heading marked slListSectionEnd.',
   },
   {
     part: 'section-list',
@@ -263,6 +270,13 @@ export const ANGULAR_LIST_DOCS = {
         'false',
         'slListSectionLabel',
         'Keeps a group name in place while its own rows scroll past it',
+      ],
+      [
+        'variant',
+        "'caption' | 'ruled'",
+        'caption',
+        'slListSectionLabel',
+        'How the group heading is drawn: the small muted name, or the name over a rule with no ground; an element inside it marked slListSectionEnd stands at the end, in tabular figures',
       ],
       [
         'id',

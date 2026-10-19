@@ -15,8 +15,10 @@ import type { ListEmptyProps, ListSectionProps, ListSectionRootProps } from './l
  */
 export function ListSection({
   children,
+  end,
   label,
   labelProps,
+  labelVariant = 'caption',
   level = '3',
   listProps,
   render,
@@ -42,9 +44,11 @@ export function ListSection({
           data-part="section-label"
           id={labelId}
           {...(sticky ? { 'data-sticky': '' } : {})}
+          data-variant={labelVariant}
           {...labelProps}
         >
           {label}
+          {end === undefined || end === null ? null : <span data-part="section-end">{end}</span>}
         </Heading>
         <NestedList aria-labelledby={labelId} data-part="section-list" role="list" {...listProps}>
           {children}

@@ -212,3 +212,50 @@ describe('List', () => {
     expect(contract.declined.selection.deferTo).toBe('listbox');
   });
 });
+
+/**
+ * A phone day list: the day on the left, its balance on the right, over a
+ * rule, with no band behind it.
+ */
+describe('a group heading with an end', () => {
+  function Days({ sticky = false }: { sticky?: boolean }) {
+    return (
+      <List aria-label="Lançamentos">
+        <ListSection end="−R$ 58,40" label="Hoje" labelVariant="ruled" sticky={sticky}>
+          <ListItem>
+            <ListItemContent>
+              <ListItemLabel>Mercado</ListItemLabel>
+            </ListItemContent>
+          </ListItem>
+        </ListSection>
+      </List>
+    );
+  }
+
+  it('sets the name at the start and the end content after it, in the ruled variant', () => {
+    render(<Days />);
+    const heading = screen.getByRole('heading', { name: /Hoje/ });
+    expect(heading).toHaveAttribute('data-part', 'section-label');
+    expect(heading).toHaveAttribute('data-variant', 'ruled');
+    expect(heading.querySelector('[data-part="section-end"]')).toHaveTextContent('−R$ 58,40');
+    expect(screen.getByRole('list', { name: /Hoje/ })).toBeInTheDocument();
+  });
+
+  it('writes the caption variant by default and keeps sticky', () => {
+    render(
+      <List aria-label="Recentes">
+        <ListSection label="Recent" sticky>
+          <ListItem>
+            <ListItemContent>
+              <ListItemLabel>Mercado</ListItemLabel>
+            </ListItemContent>
+          </ListItem>
+        </ListSection>
+      </List>,
+    );
+    const heading = screen.getByRole('heading', { name: 'Recent' });
+    expect(heading).toHaveAttribute('data-variant', 'caption');
+    expect(heading).toHaveAttribute('data-sticky');
+    expect(heading.querySelector('[data-part="section-end"]')).toBeNull();
+  });
+});

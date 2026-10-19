@@ -21,6 +21,9 @@ import { SlListIdFactory } from './list-defaults';
  * heading element off a `level` input instead, because there the component owns
  * the tag; both reach the same accessibility tree.
  */
+/** How a group heading is drawn. */
+export type ListSectionLabelVariant = 'caption' | 'ruled';
+
 @Directive({
   selector: 'li[slListSection]',
   standalone: true,
@@ -49,9 +52,15 @@ export class SlListSection {
     'data-part': 'section-label',
     '[attr.id]': 'id',
     '[attr.data-sticky]': "sticky() ? '' : null",
+    '[attr.data-variant]': 'variant()',
   },
 })
 export class SlListSectionLabel {
+  /**
+   * How the heading is drawn. `caption` is the small muted name; `ruled` is the
+   * name in the text colour over a rule, with no ground behind it.
+   */
+  readonly variant = input<ListSectionLabelVariant>('caption');
   /**
    * Keeps the name in place while its own rows scroll past it. It takes the
    * set's surface and the library's sticky stack level, which is what a
@@ -69,6 +78,17 @@ export class SlListSectionLabel {
     this.section?.labelId.set(this.id);
   }
 }
+
+/**
+ * What stands at the end of a group heading, on the line of the name: a day's
+ * balance, a count. Set in tabular figures.
+ */
+@Directive({
+  selector: '[slListSectionEnd]',
+  standalone: true,
+  host: { 'data-part': 'section-end' },
+})
+export class SlListSectionEnd {}
 
 /**
  * The rows of one group. `role="list"` for the same reason the set writes it:

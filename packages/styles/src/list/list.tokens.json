@@ -5,6 +5,7 @@
   "--slotted-control-padding-inline-md",
   "--slotted-control-padding-inline-sm",
   "--slotted-font-size-xs",
+  "--slotted-font-weight-medium",
   "--slotted-font-weight-semibold",
   "--slotted-line-height-sm",
   "--slotted-list-background",
@@ -28,6 +29,8 @@
   "--slotted-list-section-padding-block",
   "--slotted-list-section-padding-block-lg",
   "--slotted-list-section-padding-block-sm",
+  "--slotted-list-section-rule-color",
+  "--slotted-list-section-ruled-color",
   "--slotted-radius-md",
   "--slotted-space-2",
   "--slotted-space-3",
@@ -37,6 +40,7 @@
   "--slotted-space-8",
   "--slotted-space-9",
   "--slotted-surface",
+  "--slotted-text",
   "--slotted-text-muted",
   "--slotted-z-index-sticky"
 ]

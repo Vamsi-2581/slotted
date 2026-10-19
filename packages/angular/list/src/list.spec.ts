@@ -7,7 +7,13 @@ import { SlListItem, SlListItemContent } from '@slotted/angular/list-item';
 import { SlList } from './list';
 import type { ListMarker, ListVariant } from './list-defaults';
 import { provideListDefaults } from './list-defaults';
-import { SlListEmpty, SlListSection, SlListSectionLabel, SlListSectionList } from './list-parts';
+import {
+  SlListEmpty,
+  SlListSection,
+  SlListSectionEnd,
+  SlListSectionLabel,
+  SlListSectionList,
+} from './list-parts';
 
 @Component({
   imports: [
@@ -168,5 +174,32 @@ describe('SlList', () => {
 
     expect(el(fixture, 'row').getAttribute('data-variant')).toBe('ruled');
     expect(el(fixture, 'row').getAttribute('data-marker')).toBe('bullet');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlList, SlListSection, SlListSectionLabel, SlListSectionList, SlListSectionEnd],
+  template: `<ul slList aria-label="Lançamentos">
+    <li slListSection>
+      <h3 slListSectionLabel variant="ruled" sticky>Hoje<span slListSectionEnd>−R$ 58,40</span></h3>
+      <ul slListSectionList>
+        <li>Mercado</li>
+      </ul>
+    </li>
+  </ul>`,
+})
+class DaysHost {}
+
+describe('a group heading with an end', () => {
+  it('sets the name at the start and the end content after it, in the ruled variant', () => {
+    TestBed.configureTestingModule({ imports: [DaysHost] });
+    const fixture = TestBed.createComponent(DaysHost);
+    fixture.detectChanges();
+    const heading = fixture.nativeElement.querySelector('h3') as HTMLElement;
+    expect(heading.getAttribute('data-part')).toBe('section-label');
+    expect(heading.getAttribute('data-variant')).toBe('ruled');
+    expect(heading.hasAttribute('data-sticky')).toBe(true);
+    expect(heading.querySelector('[data-part="section-end"]')?.textContent).toBe('−R$ 58,40');
   });
 });

@@ -127,7 +127,7 @@
       },
       "capabilities": ["appearance", "size", "loading", "wiring"],
       "states": ["default", "loading"],
-      "parts": ["root", "section", "section-label", "section-list", "empty"]
+      "parts": ["root", "section", "section-label", "section-end", "section-list", "empty"]
     }
   },
   "scenarios": {
@@ -142,5 +142,12 @@
       "composition",
       "accessibility"
     ]
+  },
+  "sectionLabel": {
+    "variants": ["caption", "ruled"],
+    "default": "caption",
+    "caption": "The small muted name of the group.",
+    "ruled": "The name in the text colour over a rule, with no ground behind it.",
+    "end": "What stands at the end of the heading on the line of the name, a day balance or a count, in tabular figures. React takes it as the end prop of ListSection; Angular marks an element of the heading with slListSectionEnd."
   }
 }

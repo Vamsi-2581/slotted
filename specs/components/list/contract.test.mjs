@@ -27,6 +27,7 @@ test('is one set whose groups are parts rather than families', () => {
     'root',
     'section',
     'section-label',
+    'section-end',
     'section-list',
     'empty',
   ]);

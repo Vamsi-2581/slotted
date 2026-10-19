@@ -85,11 +85,24 @@ export interface ListSectionRootProps extends HTMLAttributes<HTMLElement> {
   'data-part': string;
 }
 
+export type ListSectionLabelVariant = 'caption' | 'ruled';
+
 export interface ListSectionProps extends Omit<ComponentPropsWithRef<'li'>, 'children'> {
   /** The rows of this group. They are nested in a list of their own. */
   children?: ReactNode | undefined;
+  /**
+   * What stands at the end of the heading, on the line of the name: a day's
+   * balance, a count. Set in tabular figures.
+   */
+  end?: ReactNode | undefined;
   /** The group's name. */
   label: ReactNode;
+  /**
+   * How the heading is drawn. `caption` is the small muted name; `ruled` is the
+   * name in the text colour over a rule, with no ground behind it. Defaults to
+   * `caption`.
+   */
+  labelVariant?: ListSectionLabelVariant | undefined;
   /** Reaches the heading element, for an id or a class the page owns. */
   labelProps?: HTMLAttributes<HTMLElement> | undefined;
   /** The heading this group's name is set as. Defaults to `3`. */

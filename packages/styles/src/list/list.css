@@ -193,6 +193,33 @@
    * level is the library's own sticky step, so a heading never rises above an
    * overlay that is above the page.
    */
+  /* A heading with an end sets the name at the start and the end content on
+     the same line, at the end. */
+  [data-ui='list'] [data-part='section-label']:has(> [data-part='section-end']) {
+    align-items: baseline;
+    display: flex;
+    gap: var(--slotted-space-4, 0.5rem);
+    justify-content: space-between;
+  }
+
+  [data-ui='list'] [data-part='section-end'] {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /**
+   * `ruled`: the name in the text colour over a rule, with no ground behind it
+   * — a day of a phone list with its balance at the end. The sticky ground is
+   * still the set's surface, so the rows passing under it are covered.
+   */
+  [data-ui='list'] [data-part='section-label'][data-variant='ruled'] {
+    border-block-end: var(--slotted-border-width-thin, 1px) solid
+      var(--slotted-list-section-rule-color, var(--slotted-border-subtle, GrayText));
+    color: var(--slotted-list-section-ruled-color, var(--slotted-text, CanvasText));
+    font-weight: var(--slotted-font-weight-medium, 500);
+  }
+
   [data-ui='list'] [data-part='section-label'][data-sticky] {
     background-color: var(--_surface);
     inset-block-start: 0;

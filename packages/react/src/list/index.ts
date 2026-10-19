@@ -9,6 +9,7 @@ export type {
   ListMarker,
   ListProps,
   ListRootProps,
+  ListSectionLabelVariant,
   ListSectionLevel,
   ListSectionProps,
   ListSectionRootProps,

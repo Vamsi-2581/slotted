@@ -33,6 +33,7 @@ import {
 import type { ButtonWait } from './button-appearance';
 import {
   TOGGLE_BUTTON_DEFAULTS,
+  type ButtonJustify,
   type ButtonSize,
   type ButtonTone,
   type ButtonType,
@@ -78,6 +79,7 @@ import {
     '[attr.data-variant]': 'appearance.variant()',
     '[attr.data-size]': 'appearance.size()',
     '[attr.data-full-width]': 'stateAttribute(fullWidth())',
+    '[attr.data-justify]': 'justify()',
     '[attr.data-disabled]': 'stateAttribute(disabled())',
     '[attr.data-loading]': 'stateAttribute(loading())',
     '[attr.data-pressed]': 'stateAttribute(isPressed())',
@@ -89,6 +91,12 @@ export class SlToggleButton implements AfterViewInit, ButtonWait {
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly focusableWhenDisabled = input(false, { transform: booleanAttribute });
   readonly fullWidth = input(false, { transform: booleanAttribute });
+  /**
+   * Where the content sits along the inline axis. `between` sets the label at
+   * the start and the end slot at the inline end, as a field trigger reads;
+   * the start slot stays beside the label.
+   */
+  readonly justify = input<ButtonJustify>('center');
   readonly loading = input(false, { transform: booleanAttribute });
   readonly loadingDelay = input(0, { transform: numberAttribute });
   /**

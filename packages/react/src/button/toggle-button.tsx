@@ -32,6 +32,7 @@ export function ToggleButton({
   end,
   focusableWhenDisabled = false,
   fullWidth = false,
+  justify = 'center',
   loading = false,
   loadingDelay = 0,
   messages,
@@ -55,7 +56,7 @@ export function ToggleButton({
 
   const rootProps: ButtonRootProps = {
     ...nativeProps,
-    ...rootData({ disabled, fullWidth, loading, pressed: state.pressed, ...appearance }),
+    ...rootData({ disabled, fullWidth, justify, loading, pressed: state.pressed, ...appearance }),
     'aria-disabled': inert.ariaDisabled,
     'aria-pressed': state.pressed,
     children: (

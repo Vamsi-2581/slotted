@@ -14,6 +14,7 @@ export const BUTTON_TONES = [
 export const BUTTON_VARIANTS = ['solid', 'outline', 'ghost'] as const;
 export const BUTTON_SIZES = ['sm', 'md', 'lg'] as const;
 export const BUTTON_SHAPES = ['square', 'circle'] as const;
+export const BUTTON_JUSTIFICATIONS = ['center', 'between'] as const;
 
 export const BUTTON_DEFAULTS = { tone: 'accent', variant: 'solid', size: 'md' } as const;
 export const BUTTON_LINK_DEFAULTS = BUTTON_DEFAULTS;
@@ -33,4 +34,5 @@ export type ButtonTone = (typeof BUTTON_TONES)[number];
 export type ButtonVariant = (typeof BUTTON_VARIANTS)[number];
 export type ButtonSize = (typeof BUTTON_SIZES)[number];
 export type ButtonShape = (typeof BUTTON_SHAPES)[number];
+export type ButtonJustify = (typeof BUTTON_JUSTIFICATIONS)[number];
 export type ButtonType = 'button' | 'submit' | 'reset';

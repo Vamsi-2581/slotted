@@ -1,14 +1,22 @@
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { createRef } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/button/contract.json';
 import { SlottedProvider } from '../i18n';
+import { Kbd } from '../kbd';
 import { Button } from './button';
 import { ButtonDefaultsProvider } from './button-defaults';
 
 const defaults = contract.members.button.defaults;
+/** The family stylesheet as written; jsdom applies no layered sheet, so its rules are matched by hand. */
+const stylesheet = readFileSync(
+  join(import.meta.dirname, '../../../styles/src/button/button.css'),
+  'utf8',
+);
 
 describe('Button', () => {
   it('is the platform’s own button, carrying the family identity', () => {
@@ -22,6 +30,33 @@ describe('Button', () => {
     expect(button).toHaveAttribute('data-tone', defaults.tone);
     expect(button).toHaveAttribute('data-variant', defaults.variant);
     expect(button).toHaveAttribute('data-size', defaults.size);
+  });
+
+  /**
+   * A field trigger — a command launcher, an entry with its shortcut — sets
+   * its label at the start and its end slot at the inline end. Centred
+   * together, the two read as one word.
+   */
+  it('spreads the label and the end slot to opposite edges under justify between', () => {
+    render(
+      <Button fullWidth justify="between" end={<Kbd>N</Kbd>}>
+        New
+      </Button>,
+    );
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('data-justify', 'between');
+    const spread = [
+      ...stylesheet
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .matchAll(/([^{}]+)\{[^{}]*justify-content:\s*space-between/g),
+    ].map(([, selector]) => selector!.trim());
+    expect(spread.some((selector) => button.matches(selector))).toBe(true);
+
+    render(<Button>Save</Button>);
+    expect(screen.getByRole('button', { name: 'Save' })).toHaveAttribute(
+      'data-justify',
+      defaults.justify,
+    );
   });
 
   it('never announces itself as a toggle', () => {

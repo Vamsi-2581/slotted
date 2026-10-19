@@ -584,6 +584,21 @@ test('lets the label wrap instead of pushing the control past its container', ()
  * the medium step to the same 27.4 pixels: the density stopped meaning the
  * height the theme states, and two steps of the scale collapsed into one.
  */
+/**
+ * A field trigger — a command launcher, an entry with its shortcut — reads
+ * with the label at the start and the end slot at the inline end. Centred
+ * together, the two read as one word.
+ */
+test('spreads the label and the end slot to opposite edges under justify between', () => {
+  assert.match(rule(`${ui}[data-justify='between']`), /justify-content:space-between/);
+  const label = rule(`${ui}[data-justify='between'] > [data-part='label']`);
+  assert.match(label, /flex:1 1 auto/);
+  assert.match(label, /text-align:start/);
+  assert.match(rule(`${ui}[data-justify='between'] > [data-part='end']`), /inline-size:auto/);
+  /* The default centres, from the base rule. */
+  assert.match(rule(ui), /justify-content:center/);
+});
+
 test('is the height its density states, at every step of the scale', () => {
   assert.ok(rule(ui).includes('padding-block:0'), 'block padding inflates the control');
 

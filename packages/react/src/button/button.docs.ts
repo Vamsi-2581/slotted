@@ -143,7 +143,7 @@ export const REACT_BUTTON_DOCS = {
     anatomy: [
       root(
         'button, or the element render returns',
-        'data-full-width, data-disabled and data-loading when they apply.',
+        'data-justify, and data-full-width, data-disabled and data-loading when they apply.',
       ),
       ...content(true),
       indicatorRow('in the start box, else in the end box, else centred over the label,'),
@@ -174,6 +174,13 @@ export const REACT_BUTTON_DOCS = {
         'Content after the label, such as an icon. It mirrors in a right-to-left document.',
       ],
       ['fullWidth', 'boolean', 'false', 'Button', 'Fills the inline size of the container.'],
+      [
+        'justify',
+        'center | between',
+        'center',
+        'Button',
+        'Where the content sits along the inline axis: center keeps the label and end together in the middle; between sets the label at the start and end at the inline end, as a field trigger reads, with start beside the label. It mirrors in a right-to-left document.',
+      ],
       ...unavailable('Button'),
       ...waiting('Button'),
       ...substitutable('Button'),
@@ -229,7 +236,7 @@ export const REACT_BUTTON_DOCS = {
     anatomy: [
       root(
         'a, or the element render returns',
-        'data-full-width and data-disabled when they apply.',
+        'data-justify, and data-full-width and data-disabled when they apply.',
       ),
       ...content(false),
     ],
@@ -264,6 +271,13 @@ export const REACT_BUTTON_DOCS = {
         'Content after the label, such as an icon. It mirrors in a right-to-left document.',
       ],
       ['fullWidth', 'boolean', 'false', 'ButtonLink', 'Fills the inline size of the container.'],
+      [
+        'justify',
+        'center | between',
+        'center',
+        'ButtonLink',
+        'Where the content sits along the inline axis: center keeps the label and end together in the middle; between sets the label at the start and end at the inline end, as a field trigger reads, with start beside the label. It mirrors in a right-to-left document.',
+      ],
       [
         'disabled',
         'boolean',
@@ -389,7 +403,7 @@ export const REACT_BUTTON_DOCS = {
     anatomy: [
       root(
         'button, or the element render returns',
-        'data-full-width, data-disabled, data-loading and data-pressed when they apply.',
+        'data-justify, and data-full-width, data-disabled, data-loading and data-pressed when they apply.',
       ),
       ...content(true),
       indicatorRow('in the start box, else in the end box, else centred over the label,'),
@@ -411,6 +425,13 @@ export const REACT_BUTTON_DOCS = {
         'Content after the label, such as an icon. It mirrors in a right-to-left document.',
       ],
       ['fullWidth', 'boolean', 'false', 'ToggleButton', 'Fills the inline size of the container.'],
+      [
+        'justify',
+        'center | between',
+        'center',
+        'ToggleButton',
+        'Where the content sits along the inline axis: center keeps the label and end together in the middle; between sets the label at the start and end at the inline end, as a field trigger reads, with start beside the label. It mirrors in a right-to-left document.',
+      ],
       ...unavailable('ToggleButton'),
       ...waiting('ToggleButton'),
       ...substitutable('ToggleButton'),

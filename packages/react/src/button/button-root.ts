@@ -9,6 +9,7 @@ import { useButtonDefaults } from './button-defaults';
 import type {
   ButtonAppearanceProps,
   ButtonDisabledProps,
+  ButtonJustify,
   ButtonLoadingProps,
   ButtonPressedProps,
   ButtonShape,
@@ -20,6 +21,7 @@ import type {
 interface RootDataOptions {
   disabled?: boolean;
   fullWidth?: boolean;
+  justify?: ButtonJustify;
   loading?: boolean;
   pressed?: boolean | undefined;
   shape?: ButtonShape;
@@ -42,6 +44,7 @@ export function rootData(options: RootDataOptions) {
     'data-size': options.size,
     'data-shape': options.shape,
     'data-full-width': options.fullWidth ? '' : undefined,
+    'data-justify': options.justify,
     'data-disabled': options.disabled ? '' : undefined,
     'data-loading': options.loading ? '' : undefined,
     'data-pressed': options.pressed ? '' : undefined,

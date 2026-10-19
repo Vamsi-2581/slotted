@@ -24,6 +24,7 @@ export function ButtonLink({
   end,
   fullWidth = false,
   href,
+  justify = 'center',
   onAuxClick,
   onAuxClickCapture,
   onClick,
@@ -47,7 +48,7 @@ export function ButtonLink({
 
   const rootProps: ButtonLinkRootProps = {
     ...anchorProps,
-    ...rootData({ disabled, fullWidth, ...appearance }),
+    ...rootData({ disabled, fullWidth, justify, ...appearance }),
     'aria-disabled': disabled || undefined,
     children: (
       <ButtonContent end={end} start={start}>

@@ -14,6 +14,7 @@ export const BUTTON_TONES = [
 export const BUTTON_VARIANTS = ['solid', 'outline', 'ghost'] as const;
 export const BUTTON_SIZES = ['sm', 'md', 'lg'] as const;
 export const BUTTON_SHAPES = ['square', 'circle'] as const;
+export const BUTTON_JUSTIFICATIONS = ['center', 'between'] as const;
 
 export const BUTTON_DEFAULTS = { tone: 'accent', variant: 'solid', size: 'md' } as const;
 export const BUTTON_LINK_DEFAULTS = BUTTON_DEFAULTS;

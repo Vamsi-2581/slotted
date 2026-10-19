@@ -10,7 +10,13 @@ import { SlButton } from './button';
 import { SlButtonEnd, SlButtonStart } from './button-appearance';
 import { provideButtonDefaults } from './button-defaults';
 import { BUTTON_SIZES, BUTTON_TONES, BUTTON_VARIANTS } from './button.constants';
-import type { ButtonSize, ButtonTone, ButtonType, ButtonVariant } from './button.constants';
+import type {
+  ButtonJustify,
+  ButtonSize,
+  ButtonTone,
+  ButtonType,
+  ButtonVariant,
+} from './button.constants';
 
 const defaults = contract.members.button.defaults;
 
@@ -25,6 +31,7 @@ const defaults = contract.members.button.defaults;
     [disabled]="disabled()"
     [focusableWhenDisabled]="focusableWhenDisabled()"
     [fullWidth]="fullWidth()"
+    [justify]="justify()"
     [loading]="loading()"
     [loadingDelay]="loadingDelay()"
     [messages]="{ loading: loadingMessage() }"
@@ -47,6 +54,7 @@ class TestHost {
   readonly disabled = signal(false);
   readonly focusableWhenDisabled = signal(false);
   readonly fullWidth = signal(false);
+  readonly justify = signal<ButtonJustify>('center');
   readonly loading = signal(false);
   readonly loadingDelay = signal(0);
   readonly loadingMessage = signal('Loading');
@@ -311,6 +319,21 @@ describe('SlButton', () => {
     host.fullWidth.set(true);
     fixture.detectChanges();
     expect(button.getAttribute('data-full-width')).toBe('');
+  });
+
+  /**
+   * A field trigger sets its label at the start and its end slot at the
+   * inline end; the stylesheet spreads the two under `data-justify`.
+   */
+  it('writes how its content is justified, centred unless asked to spread', () => {
+    const { button, fixture, host } = mount();
+    expect(button.getAttribute('data-justify')).toBe(defaults.justify);
+
+    host.fullWidth.set(true);
+    host.justify.set('between');
+    host.withIcons.set(true);
+    fixture.detectChanges();
+    expect(button.getAttribute('data-justify')).toBe('between');
   });
 
   /**

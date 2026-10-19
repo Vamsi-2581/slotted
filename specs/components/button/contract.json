@@ -10,7 +10,8 @@
     "tone": ["accent", "secondary", "neutral", "success", "warning", "danger"],
     "variant": ["solid", "outline", "ghost"],
     "size": ["sm", "md", "lg"],
-    "shape": ["square", "circle"]
+    "shape": ["square", "circle"],
+    "justify": ["center", "between"]
   },
   "spinner": {
     "ui": "spinner",
@@ -40,6 +41,7 @@
         "size": "md",
         "type": "button",
         "fullWidth": false,
+        "justify": "center",
         "disabled": false,
         "focusableWhenDisabled": false,
         "loading": false,
@@ -56,6 +58,7 @@
         "variant": "solid",
         "size": "md",
         "fullWidth": false,
+        "justify": "center",
         "disabled": false
       },
       "capabilities": ["appearance", "content", "fullWidth", "disabled"],
@@ -87,6 +90,7 @@
         "size": "md",
         "type": "button",
         "fullWidth": false,
+        "justify": "center",
         "disabled": false,
         "focusableWhenDisabled": false,
         "loading": false,

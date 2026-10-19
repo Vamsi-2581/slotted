@@ -154,7 +154,7 @@ export const ANGULAR_BUTTON_DOCS = {
     anatomy: [
       root(
         'the button element you write',
-        'data-full-width, data-disabled and data-loading when they apply.',
+        'data-justify, and data-full-width, data-disabled and data-loading when they apply.',
       ),
       ...content(true),
       indicatorRow('in the start box, else in the end box, else centred over the label,'),
@@ -172,6 +172,13 @@ export const ANGULAR_BUTTON_DOCS = {
       ...appearance('SlButton', 'accent', 'solid'),
       ...CONTENT('SlButton'),
       ['fullWidth', 'boolean', 'false', 'SlButton', 'Fills the inline size of the container.'],
+      [
+        'justify',
+        'center | between',
+        'center',
+        'SlButton',
+        'Where the content sits along the inline axis: center keeps the label and end together in the middle; between sets the label at the start and end at the inline end, as a field trigger reads, with start beside the label. It mirrors in a right-to-left document.',
+      ],
       ...unavailable('SlButton'),
       ...waiting('SlButton'),
       [
@@ -218,7 +225,10 @@ export const ANGULAR_BUTTON_DOCS = {
   buttonLink: {
     imports: imports('a[slButtonLink]', 'slButtonLink'),
     anatomy: [
-      root('the anchor element you write', 'data-full-width and data-disabled when they apply.'),
+      root(
+        'the anchor element you write',
+        'data-justify, and data-full-width and data-disabled when they apply.',
+      ),
       ...content(false),
     ],
     api: apiRows([
@@ -232,6 +242,13 @@ export const ANGULAR_BUTTON_DOCS = {
       ...appearance('SlButtonLink', 'accent', 'solid'),
       ...CONTENT('SlButtonLink'),
       ['fullWidth', 'boolean', 'false', 'SlButtonLink', 'Fills the inline size of the container.'],
+      [
+        'justify',
+        'center | between',
+        'center',
+        'SlButtonLink',
+        'Where the content sits along the inline axis: center keeps the label and end together in the middle; between sets the label at the start and end at the inline end, as a field trigger reads, with start beside the label. It mirrors in a right-to-left document.',
+      ],
       [
         'disabled',
         'boolean',
@@ -354,7 +371,7 @@ export const ANGULAR_BUTTON_DOCS = {
     anatomy: [
       root(
         'the button element you write',
-        'data-full-width, data-disabled, data-loading and data-pressed when they apply.',
+        'data-justify, and data-full-width, data-disabled, data-loading and data-pressed when they apply.',
       ),
       ...content(true),
       indicatorRow('in the start box, else in the end box, else centred over the label,'),
@@ -368,6 +385,13 @@ export const ANGULAR_BUTTON_DOCS = {
         'false',
         'SlToggleButton',
         'Fills the inline size of the container.',
+      ],
+      [
+        'justify',
+        'center | between',
+        'center',
+        'SlToggleButton',
+        'Where the content sits along the inline axis: center keeps the label and end together in the middle; between sets the label at the start and end at the inline end, as a field trigger reads, with start beside the label. It mirrors in a right-to-left document.',
       ],
       ...unavailable('SlToggleButton'),
       ...waiting('SlToggleButton'),

@@ -3,6 +3,7 @@ import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactElement, ReactNode } from 'react';
 
 import type {
+  BUTTON_JUSTIFICATIONS,
   BUTTON_SHAPES,
   BUTTON_SIZES,
   BUTTON_TONES,
@@ -13,11 +14,18 @@ export type ButtonTone = (typeof BUTTON_TONES)[number];
 export type ButtonVariant = (typeof BUTTON_VARIANTS)[number];
 export type ButtonSize = (typeof BUTTON_SIZES)[number];
 export type ButtonShape = (typeof BUTTON_SHAPES)[number];
+export type ButtonJustify = (typeof BUTTON_JUSTIFICATIONS)[number];
 export type ButtonType = 'button' | 'submit' | 'reset';
 
 /** The three axes every member paints itself from. */
 export interface ButtonAppearanceProps {
   fullWidth?: boolean | undefined;
+  /**
+   * Where the content sits along the inline axis. `between` sets the label at
+   * the start and `end` at the inline end, as a field trigger reads; `start`
+   * stays beside the label.
+   */
+  justify?: ButtonJustify | undefined;
   size?: ButtonSize | undefined;
   tone?: ButtonTone | undefined;
   variant?: ButtonVariant | undefined;
@@ -155,7 +163,7 @@ export type IconButtonProps = Omit<
   ComponentPropsWithRef<'button'>,
   'aria-label' | 'aria-labelledby' | 'aria-pressed' | 'children' | 'type'
 > &
-  Omit<ButtonAppearanceProps, 'fullWidth'> &
+  Omit<ButtonAppearanceProps, 'fullWidth' | 'justify'> &
   ButtonDisabledProps &
   ButtonLoadingProps &
   ButtonPressedProps &

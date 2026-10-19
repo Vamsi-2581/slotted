@@ -25,6 +25,7 @@ export type { ButtonDefaults } from './button-defaults';
 export { SlIconButton } from './icon-button';
 export { SlToggleButton } from './toggle-button';
 export type {
+  ButtonJustify,
   ButtonShape,
   ButtonSize,
   ButtonTone,

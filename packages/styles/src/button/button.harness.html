@@ -823,6 +823,41 @@
 </section>
 
 <!--
+  Two full-width triggers: the first centres its label and end slot together;
+  the second sets the label at the start and the end slot at the inline end.
+-->
+<section data-scene="justify">
+  <div style="display: grid; gap: var(--slotted-space-4); inline-size: 280px">
+    <button
+      data-ui="button"
+      data-part="root"
+      data-tone="secondary"
+      data-variant="outline"
+      data-size="md"
+      data-justify="center"
+      type="button"
+      data-full-width
+    >
+      <span data-part="label">New transaction</span>
+      <span data-part="end"><kbd>N</kbd></span>
+    </button>
+    <button
+      data-ui="button"
+      data-part="root"
+      data-tone="secondary"
+      data-variant="outline"
+      data-size="md"
+      data-justify="between"
+      type="button"
+      data-full-width
+    >
+      <span data-part="label">New transaction</span>
+      <span data-part="end"><kbd>N</kbd></span>
+    </button>
+  </div>
+</section>
+
+<!--
   What a narrow container does to a long label. The first fills its container;
   the second is an ordinary button whose label is longer than the 240-pixel
   stage; the third holds a single token no space can break.

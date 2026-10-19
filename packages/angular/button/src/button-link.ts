@@ -13,6 +13,7 @@ import {
 import { blockActivation, resolveAppearance, stateAttribute } from './button-appearance';
 import {
   BUTTON_LINK_DEFAULTS,
+  type ButtonJustify,
   type ButtonSize,
   type ButtonTone,
   type ButtonVariant,
@@ -52,12 +53,19 @@ import {
     '[attr.data-variant]': 'appearance.variant()',
     '[attr.data-size]': 'appearance.size()',
     '[attr.data-full-width]': 'stateAttribute(fullWidth())',
+    '[attr.data-justify]': 'justify()',
     '[attr.data-disabled]': 'stateAttribute(disabled())',
   },
 })
 export class SlButtonLink {
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly fullWidth = input(false, { transform: booleanAttribute });
+  /**
+   * Where the content sits along the inline axis. `between` sets the label at
+   * the start and the end slot at the inline end, as a field trigger reads;
+   * the start slot stays beside the label.
+   */
+  readonly justify = input<ButtonJustify>('center');
   readonly size = input<ButtonSize | undefined>(undefined);
   readonly tone = input<ButtonTone | undefined>(undefined);
   readonly variant = input<ButtonVariant | undefined>(undefined);

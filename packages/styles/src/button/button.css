@@ -695,6 +695,26 @@
   }
 
   /**
+   * A field trigger: the label at the start and `end` at the inline end. The
+   * label takes the free space, so `start` stays beside it and the end slot is
+   * pushed to the edge; flex follows the writing direction, so it mirrors.
+   */
+  [data-ui='button'][data-justify='between'] {
+    justify-content: space-between;
+  }
+
+  [data-ui='button'][data-justify='between'] > [data-part='label'] {
+    flex: 1 1 auto;
+    text-align: start;
+  }
+
+  /* What a trigger holds at its end — a shortcut, a count — is as wide as it is. */
+  [data-ui='button'][data-justify='between'] > [data-part='end'] {
+    inline-size: auto;
+    min-inline-size: var(--_icon-size);
+  }
+
+  /**
    * An icon-only control is square from the control height, so its visual box
    * and its target are the same box. The two minimums are the WCAG 2.2 floor
    * stated by the family rather than inferred from the theme: a target this

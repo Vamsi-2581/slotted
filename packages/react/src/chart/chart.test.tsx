@@ -67,6 +67,13 @@ const legendItems = () => [
   ...document.querySelectorAll<HTMLElement>('[data-part="legend"] > [data-part="legend-item"]'),
 ];
 
+/**
+ * A context no chart read before has its theme read on the next frame, and
+ * the engine draws only with a theme.
+ */
+const nextFrame = () =>
+  act(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+
 beforeEach(() => {
   engine.views = [];
   engine.callbacks = null;
@@ -96,8 +103,9 @@ describe('Chart', () => {
     expect(part('tooltip')).toHaveAttribute('aria-hidden', 'true');
   });
 
-  it('hands the engine the model and the theme it reads from the stylesheet', () => {
+  it('hands the engine the model and the theme it reads from the stylesheet', async () => {
     render(<Chart {...base} zoomable renderer="svg" />);
+    await nextFrame();
 
     const view = engine.views.at(-1)!;
     expect(view.model.series.map((entry) => entry.id)).toEqual(['revenue', 'cost']);
@@ -107,12 +115,44 @@ describe('Chart', () => {
   });
 
   /**
+   * A read appends a probe and computes two dozen styles. Inside the mount
+   * commit it forced a style recalculation of the page just committed, then a
+   * second render before the first paint — on every chart, for the values the
+   * chart beside it had already read.
+   */
+  it('reads the theme once per context, never inside the mount commit', async () => {
+    const styles = vi.spyOn(window, 'getComputedStyle');
+    /* One read is one computed style of the plot part; the probe's follows it. */
+    const reads = () =>
+      styles.mock.calls.filter(([element]) => element.matches('[data-part="plot"]')).length;
+    const mount = () =>
+      render(
+        <div data-context="theme-once">
+          <Chart {...base} />
+        </div>,
+      );
+
+    mount();
+    expect(reads()).toBe(0);
+    await nextFrame();
+    expect(reads()).toBe(1);
+
+    const drawn = engine.views.length;
+    mount();
+    expect(reads()).toBe(1);
+    expect(engine.views.length).toBe(drawn + 1);
+    await nextFrame();
+    expect(reads()).toBe(1);
+    styles.mockRestore();
+  });
+
+  /**
    * A parent that draws again writes its axes and series as new literals with
    * the same content. Read by identity, each was a new model: a dashboard that
    * saved its layout rebuilt every chart on it, its legend measured and its
    * engine redrawn, for nothing that had changed.
    */
-  it('keeps its model when a parent draws it again with the same axes and series', () => {
+  it('keeps its model when a parent draws it again with the same axes and series', async () => {
     const view = (title: string) => (
       <Chart
         data={data}
@@ -127,6 +167,7 @@ describe('Chart', () => {
       />
     );
     const { rerender } = render(view('Revenue and cost'));
+    await nextFrame();
     const drawn = engine.views.length;
     const model = engine.views.at(-1)!.model;
     rerender(view('Revenue and cost'));
@@ -176,9 +217,10 @@ describe('Chart', () => {
   });
 
   describe('legend', () => {
-    it('toggles a series and says which input asked', () => {
+    it('toggles a series and says which input asked', async () => {
       const onHiddenChange = vi.fn();
       render(<Chart {...base} onHiddenChange={onHiddenChange} />);
+      await nextFrame();
 
       const [revenue, cost] = legendItems();
       expect(revenue).toHaveAttribute('aria-pressed', 'true');
@@ -309,7 +351,7 @@ describe('Chart', () => {
       expect(parts('marker')).toHaveLength(1);
     });
 
-    it('renders a custom tooltip from the context', () => {
+    it('renders a custom tooltip from the context', async () => {
       render(
         <Chart
           {...base}
@@ -319,6 +361,7 @@ describe('Chart', () => {
           )}
         />,
       );
+      await nextFrame();
       expect(screen.getByTestId('custom')).toHaveTextContent('2 series');
     });
 

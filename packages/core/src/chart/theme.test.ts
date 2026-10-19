@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { observeChartTheme } from './theme';
+import { cachedChartTheme, chartThemeKey, observeChartTheme, readChartTheme } from './theme';
 
 /**
  * `observeChartTheme` schedules its re-read on `requestAnimationFrame`, which
@@ -84,5 +84,51 @@ describe('observeChartTheme', () => {
 
     stop();
     ancestor.remove();
+  });
+});
+
+describe('the theme cache', () => {
+  it('gives a chart the theme another chart read in the same context', () => {
+    const first = document.createElement('div');
+    const second = document.createElement('div');
+    document.body.append(first, second);
+
+    expect(cachedChartTheme(second)).toBeNull();
+    const theme = readChartTheme(first);
+    expect(cachedChartTheme(second)).toBe(theme);
+
+    first.remove();
+    second.remove();
+  });
+
+  /**
+   * A wrapper that overrides a token paints the chart under it differently
+   * from the one beside it; a wrapper that only places its chart does not.
+   */
+  it('keys the context by what can reach a colour', () => {
+    const wrapper = document.createElement('div');
+    const element = document.createElement('div');
+    wrapper.append(element);
+    document.body.append(wrapper);
+    const key = chartThemeKey(element);
+
+    wrapper.style.gridColumn = '2 / span 3';
+    wrapper.style.setProperty('--_dg-x', '3');
+    expect(chartThemeKey(element)).toBe(key);
+
+    wrapper.style.setProperty('--slotted-seed-accent', 'red');
+    expect(chartThemeKey(element)).not.toBe(key);
+    wrapper.style.removeProperty('--slotted-seed-accent');
+
+    wrapper.setAttribute('data-slotted-scheme', 'dark');
+    expect(chartThemeKey(element)).not.toBe(key);
+    wrapper.removeAttribute('data-slotted-scheme');
+
+    document.dispatchEvent(
+      new CustomEvent('slotted-themechange', { detail: { name: 'x', applied: true } }),
+    );
+    expect(chartThemeKey(element)).not.toBe(key);
+
+    wrapper.remove();
   });
 });

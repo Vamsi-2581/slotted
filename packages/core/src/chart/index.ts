@@ -35,6 +35,8 @@ export type { ChartTable, ChartTableColumn, ChartTableRow } from './table';
 export {
   CHART_THEME_PROPERTIES,
   colorOf,
+  cachedChartTheme,
+  chartThemeKey,
   observeChartTheme,
   readChartTheme,
   sameTheme,

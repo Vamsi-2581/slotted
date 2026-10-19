@@ -7,6 +7,7 @@ import '@slotted/styles/skeleton/skeleton.css';
 import '@slotted/styles/chart/chart.css';
 
 import {
+  cachedChartTheme,
   categoryIndex,
   chartKeyAction,
   chartTable,
@@ -540,16 +541,32 @@ export function Chart(props: ChartProps) {
 
   /* ── The theme, read from the stylesheet at the plot ─────────────────── */
 
-  useLayoutEffect(() => {
+  /* Not a layout effect: a read computes styles, and inside the mount commit
+     it forced a style recalculation of the whole page just committed, then a
+     second render before the first paint. A context another chart already
+     read takes the stored theme; otherwise the read waits for the frame. The
+     engine draws after paint either way. */
+  useEffect(() => {
     const node = plot.current;
     if (!node) return undefined;
-    const read = () =>
-      setTheme((previous) => {
-        const next = readChartTheme(node);
-        return sameTheme(previous, next) ? previous : next;
+    const view = node.ownerDocument.defaultView;
+    const apply = (next: ChartTheme) =>
+      setTheme((previous) => (sameTheme(previous, next) ? previous : next));
+    const read = () => apply(readChartTheme(node));
+    const cached = cachedChartTheme(node);
+    let frame = 0;
+    if (cached) apply(cached);
+    else if (view) {
+      frame = view.requestAnimationFrame(() => {
+        frame = 0;
+        read();
       });
-    read();
-    return observeChartTheme(node, read);
+    }
+    const stop = observeChartTheme(node, read);
+    return () => {
+      stop();
+      if (frame) view?.cancelAnimationFrame(frame);
+    };
     /* A palette, a variant or the full screen repaint the root's tokens,
        which the document observer does not see because they are the chart's
        own attributes. */

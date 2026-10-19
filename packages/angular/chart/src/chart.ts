@@ -24,6 +24,7 @@ import {
 import { injectLocale, injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import {
+  cachedChartTheme,
   categoryIndex,
   chartKeyAction,
   chartTable,
@@ -407,20 +408,39 @@ export class SlChart implements ChartHandle {
   );
   protected readonly repeat = (count: number) => Array.from({ length: count }, (_, index) => index);
 
+  /** The frame a theme read waits for; see `loadTheme`. */
+  private themeFrame = 0;
+
+  /**
+   * The theme at the plot: the one another chart already read in the same
+   * context, or a read on the next frame. A read computes styles, and right
+   * after a render it forced a style recalculation of everything rendered.
+   */
+  private loadTheme(plot: HTMLElement) {
+    const cached = cachedChartTheme(plot);
+    if (cached) {
+      if (this.themeFrame) cancelAnimationFrame(this.themeFrame);
+      this.themeFrame = 0;
+      this.applyTheme(cached);
+      return;
+    }
+    if (this.themeFrame) return;
+    this.themeFrame = requestAnimationFrame(() => {
+      this.themeFrame = 0;
+      this.applyTheme(readChartTheme(plot));
+    });
+  }
+
+  private applyTheme(next: ChartTheme) {
+    if (!sameTheme(untracked(this.theme), next)) this.theme.set(next);
+  }
+
   constructor() {
-    /* The theme at the plot, re-read when a palette, a variant or the full
-       screen repaint the root's tokens, which are the chart's own attributes
-       and outside what the document observer watches. */
     afterNextRender(() => {
       const plot = this.plotRef()?.nativeElement;
       const canvas = this.canvasRef()?.nativeElement;
       if (!plot || !canvas) return;
-      const read = () => {
-        const next = readChartTheme(plot);
-        if (!sameTheme(this.theme(), next)) this.theme.set(next);
-      };
-      read();
-      const stop = observeChartTheme(plot, read);
+      const stop = observeChartTheme(plot, () => this.applyTheme(readChartTheme(plot)));
       this.engine = this.mountEngine(canvas, {
         onPointer: (point, source) => {
           if (point) this.requestActive(point, 'pointer', source);
@@ -453,6 +473,7 @@ export class SlChart implements ChartHandle {
       document.addEventListener('fullscreenchange', onFullscreen);
       this.destroyRef.onDestroy(() => {
         stop();
+        if (this.themeFrame) cancelAnimationFrame(this.themeFrame);
         observer?.disconnect();
         document.removeEventListener('fullscreenchange', onFullscreen);
         this.engine?.dispose();
@@ -461,14 +482,16 @@ export class SlChart implements ChartHandle {
       });
     });
 
-    effect(() => {
+    /* The theme at the plot, loaded again when a palette, a variant or the
+       full screen repaint the root's tokens, which are the chart's own
+       attributes and outside what the document observer watches. After the
+       render, because the context a cached theme is found by includes them. */
+    afterRenderEffect(() => {
       this.resolvedPalette();
       this.resolvedVariant();
       this.fullscreen();
       const plot = untracked(() => this.plotRef()?.nativeElement);
-      if (!plot) return;
-      const next = readChartTheme(plot);
-      if (!sameTheme(untracked(this.theme), next)) this.theme.set(next);
+      if (plot) untracked(() => this.loadTheme(plot));
     });
 
     /* What the engine draws. */

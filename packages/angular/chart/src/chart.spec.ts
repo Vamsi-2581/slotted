@@ -5,7 +5,7 @@ import type { ChartPoint, ChartZoom } from '@slotted/core/chart';
 import type { ChartEngineCallbacks, ChartEngineRenderView } from '@slotted/core/chart-echarts';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CHART_ENGINE, SlChart } from './chart';
 import { provideChartDefaults } from './chart-defaults';
@@ -107,6 +107,10 @@ async function mount(configure?: (host: TestHost) => void, providers: unknown[] 
   configure?.(fixture.componentInstance);
   fixture.detectChanges();
   await fixture.whenStable();
+  /* A context no chart read before has its theme read on the next frame. */
+  await nextFrame();
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
   const root = fixture.nativeElement.querySelector('[data-ui="chart"]') as HTMLElement;
   const part = (name: string) => root.querySelector<HTMLElement>(`[data-part="${name}"]`);
@@ -121,6 +125,8 @@ async function mount(configure?: (host: TestHost) => void, providers: unknown[] 
   };
   return { fixture, host: fixture.componentInstance, root, part, parts, legendItems, settle };
 }
+
+const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
 /** The glyph a part draws, as the `Glyph` element inside its icon box. */
 const glyphOf = (element: HTMLElement | null) =>
@@ -152,6 +158,44 @@ describe('SlChart', () => {
       'Combined chart with 2 series and 3 points, from Jan to Mar.',
     );
     expect(part('tooltip')?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  /**
+   * A read appends a probe and computes two dozen styles. Right after the
+   * first render it forced a style recalculation of everything rendered — on
+   * every chart, for the values the chart beside it had already read.
+   */
+  it('reads the theme once per context, never right after a render', async () => {
+    const styles = vi.spyOn(window, 'getComputedStyle');
+    /* One read is one computed style of the plot part; the probe's follows it. */
+    const reads = () =>
+      styles.mock.calls.filter(([element]) => element.matches('[data-part="plot"]')).length;
+    TestBed.configureTestingModule({
+      imports: [TestHost],
+      providers: [{ provide: CHART_ENGINE, useValue: recordingEngine }],
+    });
+    const create = async () => {
+      const fixture = TestBed.createComponent(TestHost);
+      fixture.nativeElement.setAttribute('data-context', 'theme-once');
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      return fixture;
+    };
+
+    await create();
+    expect(reads()).toBe(0);
+    await nextFrame();
+    expect(reads()).toBe(1);
+
+    await create();
+    expect(reads()).toBe(1);
+    /* Each chart drew once, both with the one theme read. */
+    expect(engine.views).toHaveLength(2);
+    expect(engine.views[1]!.theme).toBe(engine.views[0]!.theme);
+    await nextFrame();
+    expect(reads()).toBe(1);
+    styles.mockRestore();
   });
 
   it('hands the engine the model and the theme it reads from the stylesheet', async () => {

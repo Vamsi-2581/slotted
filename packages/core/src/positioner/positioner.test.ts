@@ -200,6 +200,33 @@ describe('createPositioner', () => {
     document.body.innerHTML = '';
   });
 
+  /**
+   * Every measurement walks the anchor's scrolling ancestors and reads a style
+   * from each, so its cost grows with the depth of the anchor: a trigger in a
+   * table cell has six more ancestors than one in the page. The first watch and
+   * the family's own first `update()` arrive in the same task, and one
+   * measurement answers both.
+   */
+  it('measures once for every request made in the same task', async () => {
+    const { anchor, floating } = scene(ANCHOR);
+    let reads = 0;
+    const read = anchor.getBoundingClientRect.bind(anchor);
+    anchor.getBoundingClientRect = () => {
+      reads += 1;
+      return read();
+    };
+
+    const positioner = createPositioner(anchor, floating);
+    await Promise.all([positioner.update(), positioner.update()]);
+    const opening = reads;
+
+    reads = 0;
+    await positioner.update();
+    expect(opening).toBe(reads);
+    expect(floating.style.top).toBe('120px');
+    positioner.destroy();
+  });
+
   it('places the layer under its anchor and says where it went', async () => {
     const { anchor, floating } = scene(ANCHOR);
     const positioner = createPositioner(anchor, floating);

@@ -154,7 +154,25 @@ export function createPositioner(
     return { width: rect.width, height: rect.height };
   }
 
-  async function update(): Promise<void> {
+  /**
+   * A measurement requested and not yet begun. Every request made before it
+   * begins shares it: the first watch and the family's own first `update()`
+   * arrive in the same task, and each measurement walks every scrolling
+   * ancestor of the anchor. A request made while one is running schedules the
+   * next, so the newest state of the document is always measured.
+   */
+  let scheduled: Promise<void> | null = null;
+
+  function update(): Promise<void> {
+    if (destroyed) return Promise.resolve();
+    scheduled ??= Promise.resolve().then(() => {
+      scheduled = null;
+      return measureAndWrite();
+    });
+    return scheduled;
+  }
+
+  async function measureAndWrite(): Promise<void> {
     if (destroyed) return;
     const token = ++generation;
 

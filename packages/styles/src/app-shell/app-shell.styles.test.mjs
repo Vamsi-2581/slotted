@@ -685,3 +685,15 @@ test('recalibrates the hover of controls on an inset navigation', () => {
     /--slotted-tone-secondary-subtle-active:\s*color-mix\(\s*in oklab,\s*var\(--slotted-app-shell-nav-surface, var\(--_frame\)\),\s*var\(--slotted-text\) 7%/,
   );
 });
+
+/**
+ * A region holding one column taller than itself — no `nav-body` to scroll —
+ * lost the column's foot under `overflow: hidden`. The region clips its inline
+ * axis, which the width transition needs, and scrolls its block axis.
+ */
+test('the navigation region scrolls what overflows it along the block axis', () => {
+  const { body } = rule("[data-ui='app-shell'] > [data-part='nav'] {");
+  assert.match(body, /overflow-x: hidden;/);
+  assert.match(body, /overflow-y: auto;/);
+  assert.doesNotMatch(body, /overflow: hidden;/);
+});

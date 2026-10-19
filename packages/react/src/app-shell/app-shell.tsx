@@ -367,14 +367,25 @@ export function AppShell({
    * `if (reason !== 'resize') persist(next)` and keeps the wide preference
    * through every narrow window the reader ever opens.
    */
+  /**
+   * Crossing back out restores what the crossing in closed, and says `resize`
+   * again. The flag records only a close the width made: a region the reader
+   * closed while wide stays closed through a narrow window and back.
+   */
   const wasOverlay = useRef(resolvedMode === 'overlay');
+  const closedByResize = useRef(false);
   useEffect(() => {
     const overlay = resolvedMode === 'overlay';
     const entered = overlay && !wasOverlay.current;
+    const left = !overlay && wasOverlay.current;
     wasOverlay.current = overlay;
     if (resolvedMode === undefined) return;
     if (overlay && currentOpen && (entered || narrow === true)) {
+      closedByResize.current = true;
       setOpen(false, 'resize');
+    } else if (left && closedByResize.current) {
+      closedByResize.current = false;
+      if (!currentOpen) setOpen(true, 'resize');
     }
     /* Only the crossing matters: re-running on every open would close a region
        the reader had just asked for, so the list is deliberately the mode
@@ -382,13 +393,19 @@ export function AppShell({
   }, [resolvedMode]);
 
   const asideWasOverlay = useRef(resolvedAsideMode === 'overlay');
+  const asideClosedByResize = useRef(false);
   useEffect(() => {
     const overlay = resolvedAsideMode === 'overlay';
     const entered = overlay && !asideWasOverlay.current;
+    const left = !overlay && asideWasOverlay.current;
     asideWasOverlay.current = overlay;
     if (resolvedAsideMode === undefined) return;
     if (overlay && currentAsideOpen && (entered || narrow === true)) {
+      asideClosedByResize.current = true;
       setAsideOpen(false, 'resize');
+    } else if (left && asideClosedByResize.current) {
+      asideClosedByResize.current = false;
+      if (!currentAsideOpen) setAsideOpen(true, 'resize');
     }
   }, [resolvedAsideMode]);
 
@@ -405,8 +422,17 @@ export function AppShell({
    * No surveyed implementation inerts anything: Vaadin and PatternFly draw the
    * veil and leave what is under it operable.
    */
-  const overlay = resolvedMode === 'overlay' && currentOpen;
-  const asideOverlay = resolvedAsideMode === 'overlay' && currentAsideOpen;
+  /**
+   * A region nobody rendered has no open state to draw: no `data-open`, no
+   * layer and no veil. Until the regions have registered — the server render
+   * and the render hydration compares against — `data-open` takes the region
+   * as present, so a navigation a component of the page renders is not drawn
+   * closed for one frame; the layer and the veil read the regions written
+   * among the children, so a veil is never mounted for a region that is not.
+   */
+  const navShownOpen = currentOpen && (!registered || registeredRegions.nav);
+  const overlay = resolvedMode === 'overlay' && currentOpen && regions.nav;
+  const asideOverlay = resolvedAsideMode === 'overlay' && currentAsideOpen && regions.aside;
 
   /**
    * The veil has a presence of its own, as a dialog's backdrop does. The
@@ -684,7 +710,7 @@ export function AppShell({
     ...(resolvedMode === undefined ? {} : { 'data-nav-mode': resolvedMode }),
     'data-nav-side': resolvedNavSide,
     'data-nav-size': resolvedNavSize,
-    ...(currentOpen ? { 'data-open': '' as const } : {}),
+    ...(navShownOpen ? { 'data-open': '' as const } : {}),
     'data-part': 'root',
     'data-primary': resolvedPrimary,
     'data-scroll': resolvedScroll,

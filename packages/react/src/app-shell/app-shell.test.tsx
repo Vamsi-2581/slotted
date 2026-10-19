@@ -934,6 +934,140 @@ describe('AppShell', () => {
       expect(screen.queryByRole('separator')).toBeNull();
     });
   });
+
+  /**
+   * The frame's width moves under an uncontrolled shell: jsdom lays nothing
+   * out, so the width is a variable the measurement reads and the observer is
+   * a list of callbacks the test calls.
+   */
+  describe('across the breakpoint', () => {
+    let width = 1280;
+    const observers: (() => void)[] = [];
+
+    function resizeTo(next: number) {
+      width = next;
+      act(() => {
+        for (const notify of observers) notify();
+      });
+    }
+
+    function setup() {
+      width = 1280;
+      observers.length = 0;
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(callback: () => void) {
+            observers.push(callback);
+          }
+          observe() {}
+          unobserve() {}
+          disconnect() {}
+        },
+      );
+      vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(
+        () =>
+          ({
+            bottom: 800,
+            height: 800,
+            left: 0,
+            right: width,
+            toJSON: () => ({}),
+            top: 0,
+            width,
+            x: 0,
+            y: 0,
+          }) as DOMRect,
+      );
+    }
+
+    const root = () => document.querySelector('[data-ui="app-shell"]') as HTMLElement;
+
+    it('restores the open region when the frame widens back into inline', () => {
+      setup();
+      const onNavOpenChange = vi.fn();
+      render(
+        <AppShell onNavOpenChange={onNavOpenChange}>
+          <AppShellNav>
+            <AppShellNavBody>
+              <a href="#painel">Painel</a>
+            </AppShellNavBody>
+          </AppShellNav>
+          <AppShellMain>
+            <p>Encomendas</p>
+          </AppShellMain>
+        </AppShell>,
+      );
+      expect(root()).toHaveAttribute('data-nav-mode', 'inline');
+      expect(root()).toHaveAttribute('data-open');
+
+      resizeTo(360);
+      expect(root()).toHaveAttribute('data-nav-mode', 'overlay');
+      expect(root()).not.toHaveAttribute('data-open');
+
+      resizeTo(1280);
+      expect(root()).toHaveAttribute('data-nav-mode', 'inline');
+      expect(root()).toHaveAttribute('data-open');
+      expect(onNavOpenChange).toHaveBeenLastCalledWith(
+        true,
+        expect.objectContaining({ reason: 'resize' }),
+      );
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    it('keeps a region the reader closed while wide closed after a narrow window', () => {
+      setup();
+      render(
+        <AppShell defaultNavOpen={false}>
+          <AppShellNav>
+            <AppShellNavBody>
+              <a href="#painel">Painel</a>
+            </AppShellNavBody>
+          </AppShellNav>
+          <AppShellMain>
+            <p>Encomendas</p>
+          </AppShellMain>
+        </AppShell>,
+      );
+      resizeTo(360);
+      resizeTo(1280);
+      expect(root()).not.toHaveAttribute('data-open');
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    it('draws no veil and no open state when no navigation region is rendered', () => {
+      setup();
+      width = 360;
+      const { container } = render(
+        <AppShell navMode="overlay" navOpen>
+          <AppShellMain>
+            <p>Encomendas</p>
+          </AppShellMain>
+        </AppShell>,
+      );
+      expect(root()).not.toHaveAttribute('data-open');
+      expect(container.querySelector('[data-part="scrim"]')).toBeNull();
+      expect(container.querySelector('[data-part="main"]')).not.toHaveAttribute('inert');
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    it('draws no veil for an overlaid pane that is not rendered', () => {
+      setup();
+      const { container } = render(
+        <AppShell asideMode="overlay" asideOpen navOpen={false}>
+          <AppShellMain>
+            <p>Encomendas</p>
+          </AppShellMain>
+        </AppShell>,
+      );
+      expect(container.querySelector('[data-part="scrim"]')).toBeNull();
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+  });
 });
 
 describe('AppShellProgress', () => {

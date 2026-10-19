@@ -460,7 +460,18 @@
      * for fifty pixels stood at whatever the longest destination measured.
      */
     min-inline-size: 0;
-    overflow: hidden;
+    /**
+     * The inline axis clips, which the width transition between open and rail
+     * needs. The block axis scrolls: a region holding one column taller than
+     * itself instead of `nav-header`, `nav-body` and `nav-footer` keeps its
+     * foot reachable. With the three parts the body scrolls and the region
+     * never overflows.
+     */
+    overflow-x: hidden;
+    overflow-y: auto;
+    overflow-inline: hidden;
+    overflow-block: auto;
+    overscroll-behavior: contain;
     transition:
       inline-size var(--_duration) var(--_easing),
       visibility var(--_duration) step-start;

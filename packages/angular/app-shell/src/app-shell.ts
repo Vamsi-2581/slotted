@@ -141,7 +141,7 @@ let nextId = 0;
     '[attr.data-collapsed-to]': 'resolvedCollapsedTo()',
     '[attr.data-scroll]': 'resolvedScroll()',
     '[attr.data-separation]': 'resolvedSeparation()',
-    '[attr.data-open]': "navOpen() ? '' : null",
+    '[attr.data-open]': "navShownOpen() ? '' : null",
     '[attr.data-dragging]': "asideDragging() ? '' : null",
     '(click)': 'onClick($event)',
   },
@@ -275,7 +275,7 @@ export class SlAppShell {
     return narrow === undefined ? null : narrow ? 'overlay' : 'inline';
   });
   readonly asideOverlay = computed(
-    () => this.resolvedAsideMode() === 'overlay' && this.asideOpen(),
+    () => this.resolvedAsideMode() === 'overlay' && this.asideOpen() && this.regions().aside,
   );
   readonly resolvedCollapsedTo = computed(() => this.collapsedTo() ?? this.defaults.collapsedTo);
   readonly resolvedScroll = computed(() => this.scroll() ?? this.defaults.scroll);
@@ -307,7 +307,13 @@ export class SlAppShell {
     return narrow === undefined ? null : narrow ? 'overlay' : 'inline';
   });
 
-  readonly overlay = computed(() => this.resolvedMode() === 'overlay' && this.navOpen());
+  /**
+   * A region nobody rendered has no open state to draw: no `data-open`, no
+   * layer and no veil. The regions register in their constructors, so the
+   * first render already knows which of them are written.
+   */
+  readonly navShownOpen = computed(() => this.navOpen() && this.regions().nav);
+  readonly overlay = computed(() => this.resolvedMode() === 'overlay' && this.navShownOpen());
 
   /**
    * The veil has a presence of its own, as a dialog's backdrop does. The
@@ -387,31 +393,54 @@ export class SlAppShell {
        overlay is the region's starting point, not a crossing, and the first
        run closed a region the template had just opened. Only a mode the width
        decided — `auto` resolving narrow — is a crossing on first sight. */
+    /* Crossing back out restores what the crossing in closed, and says
+       `resize` again. The flag records only a close the width made: a region
+       the reader closed while wide stays closed through a narrow window. */
     let wasOverlay: boolean | undefined;
+    let closedByResize = false;
     effect(() => {
       const mode = this.resolvedMode();
       if (mode === null) return;
       const overlay = mode === 'overlay';
       const first = wasOverlay === undefined;
       const entered = overlay && (first ? this.wantedMode() === 'auto' : !wasOverlay);
+      const left = !overlay && wasOverlay === true;
       wasOverlay = overlay;
-      if (!entered) return;
-      queueMicrotask(() => {
-        if (this.navOpen()) this.request(false, 'resize', undefined);
-      });
+      if (entered) {
+        queueMicrotask(() => {
+          if (!this.navOpen()) return;
+          closedByResize = true;
+          this.request(false, 'resize', undefined);
+        });
+      } else if (left && closedByResize) {
+        closedByResize = false;
+        queueMicrotask(() => {
+          if (!this.navOpen()) this.request(true, 'resize', undefined);
+        });
+      }
     });
     let asideWasOverlay: boolean | undefined;
+    let asideClosedByResize = false;
     effect(() => {
       const mode = this.resolvedAsideMode();
       if (mode === null) return;
       const overlay = mode === 'overlay';
       const first = asideWasOverlay === undefined;
       const entered = overlay && (first ? this.wantedAsideMode() === 'auto' : !asideWasOverlay);
+      const left = !overlay && asideWasOverlay === true;
       asideWasOverlay = overlay;
-      if (!entered) return;
-      queueMicrotask(() => {
-        if (this.asideOpen()) this.requestAside(false, 'resize', undefined);
-      });
+      if (entered) {
+        queueMicrotask(() => {
+          if (!this.asideOpen()) return;
+          asideClosedByResize = true;
+          this.requestAside(false, 'resize', undefined);
+        });
+      } else if (left && asideClosedByResize) {
+        asideClosedByResize = false;
+        queueMicrotask(() => {
+          if (!this.asideOpen()) this.requestAside(true, 'resize', undefined);
+        });
+      }
     });
 
     /**

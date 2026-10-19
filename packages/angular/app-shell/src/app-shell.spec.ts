@@ -824,3 +824,143 @@ describe('the wait for the next page', () => {
     expect(main(root).getAttribute('aria-busy')).toBe('true');
   });
 });
+
+@Component({
+  standalone: true,
+  imports: PARTS,
+  template: `<div slAppShell [navOpen]="defaultOpen" (navOpenChangeRequest)="requests.push($event)">
+    <nav slAppShellNav>
+      <div slAppShellNavBody><a href="#painel">Painel</a></div>
+    </nav>
+    <main slAppShellMain>Encomendas</main>
+  </div>`,
+})
+class AutoHost {
+  defaultOpen = true;
+  readonly requests: AppShellOpenRequest[] = [];
+}
+
+@Component({
+  standalone: true,
+  imports: PARTS,
+  template: `<div
+    slAppShell
+    navMode="overlay"
+    asideMode="overlay"
+    [navOpen]="true"
+    [asideOpen]="true"
+  >
+    <main slAppShellMain>Encomendas</main>
+  </div>`,
+})
+class RegionlessHost {}
+
+/**
+ * The frame's width moves under an uncontrolled shell: jsdom lays nothing out,
+ * so the width is a variable the measurement reads and the observer is a list
+ * of callbacks the test calls.
+ */
+describe('across the breakpoint', () => {
+  let width = 1280;
+  const observers: (() => void)[] = [];
+
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    width = 1280;
+    observers.length = 0;
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          observers.push(callback);
+        }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      },
+    );
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(
+      () =>
+        ({
+          bottom: 800,
+          height: 800,
+          left: 0,
+          right: width,
+          toJSON: () => ({}),
+          top: 0,
+          width,
+          x: 0,
+          y: 0,
+        }) as DOMRect,
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  async function resizeTo(
+    fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+    next: number,
+  ) {
+    width = next;
+    for (const notify of observers) notify();
+    fixture.detectChanges();
+    await Promise.resolve();
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
+
+  function mount<T>(host: new () => T, configure?: (instance: T) => void) {
+    TestBed.configureTestingModule({
+      imports: [host as never],
+      providers: [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })],
+    });
+    const fixture = TestBed.createComponent(host);
+    configure?.(fixture.componentInstance);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  const root = (element: HTMLElement) =>
+    element.querySelector('[data-ui="app-shell"]') as HTMLElement;
+
+  it('restores the open region when the frame widens back into inline', async () => {
+    const fixture = mount(AutoHost);
+    await resizeTo(fixture, 1280);
+    expect(root(fixture.nativeElement).getAttribute('data-nav-mode')).toBe('inline');
+    expect(root(fixture.nativeElement).hasAttribute('data-open')).toBe(true);
+
+    await resizeTo(fixture, 360);
+    expect(root(fixture.nativeElement).getAttribute('data-nav-mode')).toBe('overlay');
+    expect(root(fixture.nativeElement).hasAttribute('data-open')).toBe(false);
+
+    await resizeTo(fixture, 1280);
+    expect(root(fixture.nativeElement).getAttribute('data-nav-mode')).toBe('inline');
+    expect(root(fixture.nativeElement).hasAttribute('data-open')).toBe(true);
+    expect(fixture.componentInstance.requests.at(-1)).toMatchObject({
+      value: true,
+      reason: 'resize',
+    });
+  });
+
+  it('keeps a region the reader closed while wide closed after a narrow window', async () => {
+    const fixture = mount(AutoHost, (host) => (host.defaultOpen = false));
+    await resizeTo(fixture, 360);
+    await resizeTo(fixture, 1280);
+    expect(root(fixture.nativeElement).hasAttribute('data-open')).toBe(false);
+  });
+
+  it('draws no veil and no open state for regions that are not rendered', async () => {
+    width = 360;
+    const fixture = mount(RegionlessHost);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(root(fixture.nativeElement).hasAttribute('data-open')).toBe(false);
+    expect(fixture.nativeElement.querySelector('[data-part="scrim"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-part="main"]').hasAttribute('inert')).toBe(
+      false,
+    );
+  });
+});

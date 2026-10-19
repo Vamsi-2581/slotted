@@ -108,7 +108,7 @@ const anatomy: AnatomyRow[] = [
     element: 'nav',
     required: false,
     purpose:
-      'The navigation landmark, and one element across all three modes: the rail is this nav at another inline size, which keeps the focus and the scroll position where the reader left them. A query container of its own, named slotted-app-shell-nav, so the rows inside answer the rail without the shell telling them anything.',
+      'The navigation landmark, and one element across all three modes: the rail is this nav at another inline size, which keeps the focus and the scroll position where the reader left them. Its inline axis clips and its block axis scrolls, so a single column taller than the region keeps its foot reachable. A footer that must stay visible goes in nav-footer, between nav-header and a nav-body that scrolls. A query container of its own, named slotted-app-shell-nav, so the rows inside answer the rail without the shell telling them anything.',
   },
   {
     part: 'nav-rail',

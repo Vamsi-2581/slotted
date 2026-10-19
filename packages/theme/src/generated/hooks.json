@@ -231,6 +231,7 @@
       "tooltip-item",
       "tooltip-label",
       "tooltip-marker",
+      "tooltip-note",
       "tooltip-title",
       "tooltip-total",
       "tooltip-value",
@@ -391,7 +392,8 @@
       "root",
       "scrub",
       "start",
-      "stepper"
+      "stepper",
+      "symbol"
     ],
     "dashboard-grid": [
       "add",
@@ -903,6 +905,7 @@
       "empty",
       "root",
       "section",
+      "section-end",
       "section-label",
       "section-list"
     ],
@@ -1430,6 +1433,11 @@
       "filter-panel",
       "filter-search",
       "footer",
+      "group-content",
+      "group-end",
+      "group-header",
+      "group-row",
+      "group-start",
       "head",
       "loader",
       "root",
@@ -1793,6 +1801,7 @@
     "data-all-day",
     "data-anchor",
     "data-animation",
+    "data-appearance",
     "data-apply",
     "data-arrivals",
     "data-arrows",
@@ -1912,6 +1921,7 @@
     "data-index",
     "data-indicator",
     "data-inset",
+    "data-interactive",
     "data-invalid",
     "data-justify",
     "data-key",

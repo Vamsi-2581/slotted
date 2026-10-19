@@ -2939,6 +2939,7 @@ export type ComponentToken =
   | '--slotted-currency-field-disabled-background'
   | '--slotted-currency-field-disabled-border-color'
   | '--slotted-currency-field-disabled-color'
+  | '--slotted-currency-field-display-font-size'
   | '--slotted-currency-field-hover-border-color'
   | '--slotted-currency-field-icon-size-min'
   | '--slotted-currency-field-invalid-border-color'
@@ -2960,6 +2961,9 @@ export type ComponentToken =
   | '--slotted-currency-field-subtle-background'
   | '--slotted-currency-field-subtle-border-color'
   | '--slotted-currency-field-subtle-hover-background'
+  | '--slotted-currency-field-symbol-color'
+  | '--slotted-currency-field-symbol-font-size'
+  | '--slotted-currency-field-underline-color'
   | '--slotted-dashboard-grid-accent'
   | '--slotted-dashboard-grid-description-color'
   | '--slotted-dashboard-grid-edit-bar-background'
@@ -3273,6 +3277,10 @@ export type ComponentToken =
   | '--slotted-dialog-description-color'
   | '--slotted-dialog-footer-surface'
   | '--slotted-dialog-measure'
+  | '--slotted-dialog-padding-block'
+  | '--slotted-dialog-padding-block-sm'
+  | '--slotted-dialog-padding-inline'
+  | '--slotted-dialog-padding-inline-sm'
   | '--slotted-dialog-radius'
   | '--slotted-dialog-rule-color'
   | '--slotted-dialog-scrim'
@@ -3540,6 +3548,8 @@ export type ComponentToken =
   | '--slotted-list-section-padding-block'
   | '--slotted-list-section-padding-block-lg'
   | '--slotted-list-section-padding-block-sm'
+  | '--slotted-list-section-rule-color'
+  | '--slotted-list-section-ruled-color'
   | '--slotted-listbox-border-color'
   | '--slotted-listbox-columns'
   | '--slotted-listbox-group-border-color'
@@ -3981,6 +3991,9 @@ export type ComponentToken =
   | '--slotted-segmented-control-invalid-focus-ring-color'
   | '--slotted-segmented-control-radius'
   | '--slotted-segmented-control-shadow'
+  | '--slotted-segmented-control-underline-checked-color'
+  | '--slotted-segmented-control-underline-color'
+  | '--slotted-segmented-control-underline-gap'
   | '--slotted-select-action-active-background'
   | '--slotted-select-action-color'
   | '--slotted-select-action-hover-background'
@@ -4233,6 +4246,9 @@ export type ComponentToken =
   | '--slotted-table-font-family'
   | '--slotted-table-font-size'
   | '--slotted-table-gap'
+  | '--slotted-table-group-color'
+  | '--slotted-table-group-sticky-offset'
+  | '--slotted-table-group-surface'
   | '--slotted-table-header-surface'
   | '--slotted-table-header-surface-hover'
   | '--slotted-table-icon-size'
@@ -4246,6 +4262,7 @@ export type ComponentToken =
   | '--slotted-table-radius'
   | '--slotted-table-row-color-selected'
   | '--slotted-table-row-min-block-size'
+  | '--slotted-table-row-surface-current'
   | '--slotted-table-row-surface-hover'
   | '--slotted-table-row-surface-selected'
   | '--slotted-table-row-surface-selected-hover'
@@ -4528,12 +4545,19 @@ export type ComponentToken =
   | '--slotted-toast-title-font-weight'
   | '--slotted-toggle-active-background'
   | '--slotted-toggle-border-color'
+  | '--slotted-toggle-chips-pressed-background'
+  | '--slotted-toggle-chips-pressed-color'
+  | '--slotted-toggle-chips-radius'
   | '--slotted-toggle-color'
   | '--slotted-toggle-disabled-border-color'
   | '--slotted-toggle-disabled-color'
   | '--slotted-toggle-disabled-pressed-background'
   | '--slotted-toggle-group-active-background'
   | '--slotted-toggle-group-border-color'
+  | '--slotted-toggle-group-chips-gap'
+  | '--slotted-toggle-group-chips-pressed-background'
+  | '--slotted-toggle-group-chips-pressed-color'
+  | '--slotted-toggle-group-chips-radius'
   | '--slotted-toggle-group-color'
   | '--slotted-toggle-group-disabled-border-color'
   | '--slotted-toggle-group-disabled-color'
@@ -5117,6 +5141,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-currency-field-disabled-background",
   "--slotted-currency-field-disabled-border-color",
   "--slotted-currency-field-disabled-color",
+  "--slotted-currency-field-display-font-size",
   "--slotted-currency-field-hover-border-color",
   "--slotted-currency-field-icon-size-min",
   "--slotted-currency-field-invalid-border-color",
@@ -5138,6 +5163,9 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-currency-field-subtle-background",
   "--slotted-currency-field-subtle-border-color",
   "--slotted-currency-field-subtle-hover-background",
+  "--slotted-currency-field-symbol-color",
+  "--slotted-currency-field-symbol-font-size",
+  "--slotted-currency-field-underline-color",
   "--slotted-dashboard-grid-accent",
   "--slotted-dashboard-grid-description-color",
   "--slotted-dashboard-grid-edit-bar-background",
@@ -5451,6 +5479,10 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-dialog-description-color",
   "--slotted-dialog-footer-surface",
   "--slotted-dialog-measure",
+  "--slotted-dialog-padding-block",
+  "--slotted-dialog-padding-block-sm",
+  "--slotted-dialog-padding-inline",
+  "--slotted-dialog-padding-inline-sm",
   "--slotted-dialog-radius",
   "--slotted-dialog-rule-color",
   "--slotted-dialog-scrim",
@@ -5718,6 +5750,8 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-list-section-padding-block",
   "--slotted-list-section-padding-block-lg",
   "--slotted-list-section-padding-block-sm",
+  "--slotted-list-section-rule-color",
+  "--slotted-list-section-ruled-color",
   "--slotted-listbox-border-color",
   "--slotted-listbox-columns",
   "--slotted-listbox-group-border-color",
@@ -6159,6 +6193,9 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-segmented-control-invalid-focus-ring-color",
   "--slotted-segmented-control-radius",
   "--slotted-segmented-control-shadow",
+  "--slotted-segmented-control-underline-checked-color",
+  "--slotted-segmented-control-underline-color",
+  "--slotted-segmented-control-underline-gap",
   "--slotted-select-action-active-background",
   "--slotted-select-action-color",
   "--slotted-select-action-hover-background",
@@ -6411,6 +6448,9 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-table-font-family",
   "--slotted-table-font-size",
   "--slotted-table-gap",
+  "--slotted-table-group-color",
+  "--slotted-table-group-sticky-offset",
+  "--slotted-table-group-surface",
   "--slotted-table-header-surface",
   "--slotted-table-header-surface-hover",
   "--slotted-table-icon-size",
@@ -6424,6 +6464,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-table-radius",
   "--slotted-table-row-color-selected",
   "--slotted-table-row-min-block-size",
+  "--slotted-table-row-surface-current",
   "--slotted-table-row-surface-hover",
   "--slotted-table-row-surface-selected",
   "--slotted-table-row-surface-selected-hover",
@@ -6706,12 +6747,19 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-toast-title-font-weight",
   "--slotted-toggle-active-background",
   "--slotted-toggle-border-color",
+  "--slotted-toggle-chips-pressed-background",
+  "--slotted-toggle-chips-pressed-color",
+  "--slotted-toggle-chips-radius",
   "--slotted-toggle-color",
   "--slotted-toggle-disabled-border-color",
   "--slotted-toggle-disabled-color",
   "--slotted-toggle-disabled-pressed-background",
   "--slotted-toggle-group-active-background",
   "--slotted-toggle-group-border-color",
+  "--slotted-toggle-group-chips-gap",
+  "--slotted-toggle-group-chips-pressed-background",
+  "--slotted-toggle-group-chips-pressed-color",
+  "--slotted-toggle-group-chips-radius",
   "--slotted-toggle-group-color",
   "--slotted-toggle-group-disabled-border-color",
   "--slotted-toggle-group-disabled-color",

@@ -90,3 +90,23 @@ if (undeclaredImports.length > 0) {
   for (const entry of undeclaredImports) console.error(`- ${entry}`);
   process.exitCode = 1;
 }
+
+/**
+ * A CommonJS module bundled into the library reaches its own dependencies
+ * through a `require` shim, and a browser has no `require`: the copy of
+ * `react-dom` the build once bundled threw "Calling `require` for "react"" in
+ * every consumer's browser bundle the moment a portal rendered. The
+ * frameworks the consumer installs stay external, and no shim may ship.
+ */
+const bundledCommonJs = collectTextArtifacts(distDirectory)
+  .filter((path) => path.endsWith('.js'))
+  .filter((path) => readFileSync(path, 'utf8').includes('Calling `require` for'))
+  .map((path) => relative(packageDirectory, path));
+
+if (bundledCommonJs.length > 0) {
+  console.error(
+    'A CommonJS module was bundled into @slotted/react, with a require shim a browser cannot run:',
+  );
+  for (const path of bundledCommonJs) console.error(`- ${path}`);
+  process.exitCode = 1;
+}

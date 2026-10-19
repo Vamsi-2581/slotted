@@ -25,7 +25,9 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      external: [/^@slotted\/core/, /^@slotted\/theme(\/|$)/, 'react', 'react/jsx-runtime'],
+      /* The frameworks are the consumer's: `react-dom` bundled in was a
+         CommonJS copy that required `react` at runtime, which a browser cannot. */
+      external: [/^@slotted\/core/, /^@slotted\/theme(\/|$)/, /^react(\/|$)/, /^react-dom(\/|$)/],
       output: {
         entryFileNames: '[name].js',
       },

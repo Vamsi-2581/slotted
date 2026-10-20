@@ -6,6 +6,7 @@ import { cascaderFit, cascaderMeasure, pathTo } from '@slotted/core/cascader';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
+import type { PositionerHandle } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { createTypeahead, isPrintable } from '@slotted/core/typeahead';
@@ -168,7 +169,13 @@ export function Cascader<T>(props: CascaderProps<T>) {
   const [searchNode, setSearchNode] = useState<HTMLInputElement | null>(null);
   const [container, setContainer] = useState<Element | null>(null);
   const [status, setStatus] = useState<PresenceStatus>('unmounted');
-  const [positioned, setPositioned] = useState(false);
+  /**
+   * The reader is about to open the layer: the trigger took focus or a press.
+   * The portal's layer is made then, because making it reads the trigger's
+   * computed style, and a read in the open's own task is a style recalculation
+   * the first frame waits for.
+   */
+  const [warm, setWarm] = useState(false);
   const [narrow, setNarrow] = useState(false);
   const [room, setRoom] = useState<Room>({ available: undefined, columnMeasure: 192, inset: 2 });
 
@@ -298,18 +305,31 @@ export function Cascader<T>(props: CascaderProps<T>) {
   useEffect(() => presence.current?.sync(currentOpen), [currentOpen]);
   useEffect(() => presence.current?.setNode(layerNode), [layerNode]);
 
-  const mounted = status !== 'unmounted';
+  /** Open renders the layer in the commit that opens it. */
+  const mounted = currentOpen || status !== 'unmounted';
   const resolvedPortal = portal ?? defaults.portal;
 
   useEffect(() => {
-    if (!mounted) {
+    if (trigger === null || warm) return undefined;
+    const prepare = () => setWarm(true);
+    trigger.addEventListener('focusin', prepare);
+    trigger.addEventListener('pointerdown', prepare);
+    return () => {
+      trigger.removeEventListener('focusin', prepare);
+      trigger.removeEventListener('pointerdown', prepare);
+    };
+  }, [trigger, warm]);
+
+  const layered = mounted || warm;
+  useLayoutEffect(() => {
+    if (!layered) {
       setContainer(null);
       return;
     }
     const handle = createPortalRoot({ origin: trigger, disabled: !resolvedPortal });
     setContainer(handle.container);
     return () => handle.release();
-  }, [mounted, resolvedPortal, trigger]);
+  }, [layered, resolvedPortal, trigger]);
 
   useLayoutEffect(() => {
     if (surfaceNode === null) return;
@@ -322,9 +342,23 @@ export function Cascader<T>(props: CascaderProps<T>) {
   }, [surfaceNode, resolvedSize]);
 
   const layoutForPlacement = state.layout;
-  useEffect(() => {
+  const positioner = useRef<PositionerHandle | null>(null);
+
+  /**
+   * `data-open` is written by the measurement that places the layer, on the
+   * element, in the task that opened it: the position, the side and the open
+   * state reach one style update together. A render to say "positioned" was a
+   * frame of its own.
+   */
+  const place = useCallback((handle: PositionerHandle, layer: HTMLElement) => {
+    void handle.update().then(() => {
+      if (positioner.current !== handle || !latestOpen.current.currentOpen) return;
+      layer.setAttribute('data-open', '');
+    });
+  }, []);
+
+  useLayoutEffect(() => {
     if (layerNode === null || frame === null) return;
-    let live = true;
     /* One level at a time and the tree are as wide as the control; columns
        take the window's width, reserved below. */
     const handle = createPositioner(frame, layerNode, {
@@ -341,15 +375,21 @@ export function Cascader<T>(props: CascaderProps<T>) {
         );
       },
     });
-    void handle.update().then(() => {
-      if (live) setPositioned(true);
-    });
+    positioner.current = handle;
+    if (latestOpen.current.currentOpen) place(handle, layerNode);
     return () => {
-      live = false;
       handle.destroy();
-      setPositioned(false);
+      positioner.current = null;
+      layerNode.removeAttribute('data-open');
     };
-  }, [frame, layerNode, layoutForPlacement]);
+  }, [frame, layerNode, layoutForPlacement, place]);
+
+  useLayoutEffect(() => {
+    const handle = positioner.current;
+    if (handle === null || layerNode === null) return;
+    if (currentOpen) place(handle, layerNode);
+    else layerNode.removeAttribute('data-open');
+  }, [currentOpen, layerNode, place]);
 
   /**
    * The widest the window can reach, reserved on the layer as it opens, so the
@@ -549,7 +589,6 @@ export function Cascader<T>(props: CascaderProps<T>) {
   const layer = mounted ? (
     <div
       data-layout={state.layout}
-      data-open={currentOpen && positioned ? '' : undefined}
       data-part="positioner"
       data-selection={state.multiple ? 'multiple' : undefined}
       data-size={resolvedSize}

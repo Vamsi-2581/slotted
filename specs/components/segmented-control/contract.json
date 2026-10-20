@@ -77,7 +77,7 @@
     "reason": "A segmented control is put in forms beside a text field and a select. A family that added its padding to the control height would stand two or six pixels prouder than every other control on the row."
   },
   "spacing": {
-    "between": "the ring's own step, --slotted-segmented-control-gap, defaulting to the track's inset",
+    "between": "a step above the ring, --slotted-segmented-control-gap, defaulting to --slotted-space-2",
     "reason": "Segments stand apart so each one, its hover ground and the thumb on it, is a shape of its own on the track. Set flush, a hover ground ran into its neighbour's edge."
   },
   "divider": {

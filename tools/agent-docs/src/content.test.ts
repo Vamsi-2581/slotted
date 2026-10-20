@@ -170,3 +170,55 @@ describe('skills', () => {
     }
   });
 });
+
+/**
+ * The time a switch takes: a control that switches a region paints its own
+ * state first and renders the region from a deferred value. The rule and the
+ * skill that composes screens both say so, and the skill checks it in a
+ * throttled browser before it calls a screen done.
+ */
+describe('interaction cost', () => {
+  const ruleText = (id: string) =>
+    content.topics
+      .flatMap((topic) => topic.rules)
+      .find((rule) => rule.id === id && rule.status === 'active')
+      ?.fields.map(([, value]) => value)
+      .join('\n') ?? '';
+
+  it('composition has a rule that renders a switched region from a deferred value', () => {
+    const composition = content.topics.find((topic) => topic.prefix === 'CP');
+    const named = composition?.rules.filter(
+      (rule) =>
+        rule.status === 'active' &&
+        /useDeferredValue|startTransition/.test(rule.fields.map(([, value]) => value).join('\n')),
+    );
+    expect(named?.map((rule) => rule.id)).toEqual(['CP-09']);
+    expect(ruleText('CP-09')).toMatch(/aria-busy/);
+  });
+
+  it('compose-screen names the switch in Compose and the throttled check in Done', () => {
+    const source = content.skills.get('compose-screen')?.source ?? '';
+    const section = (heading: string) =>
+      source.split(/^## /m).find((part) => part.startsWith(heading)) ?? '';
+
+    expect(section('4. Compose')).toMatch(/CP-09/);
+    expect(section('4. Compose')).toMatch(/useDeferredValue|startTransition/);
+    expect(section('6. Done')).toMatch(/throttled 4×/);
+    expect(section('6. Done')).toMatch(/long task/);
+  });
+});
+
+describe('the choice between a table and a data-grid', () => {
+  it('list pages say when a list is a data-grid rather than a table', () => {
+    const lists = content.topics.find((topic) => topic.prefix === 'LP');
+    const choice = lists?.rules.find(
+      (rule) =>
+        rule.status === 'active' &&
+        /data-grid/.test(rule.title) &&
+        /hundred rows/.test(rule.fields.map(([, value]) => value).join('\n')) &&
+        /`table` is for/.test(rule.fields.map(([, value]) => value).join('\n')),
+    );
+    expect(choice?.id).toBe('LP-14');
+    expect(content.skills.get('compose-screen')?.source).toMatch(/LP-14/);
+  });
+});

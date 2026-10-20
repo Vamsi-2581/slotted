@@ -27,7 +27,8 @@ triggers:
     badge,
     tag,
   ]
-families: [data-grid, filter-bar, action-bar, pagination, page, page-header, link, badge, tag]
+families:
+  [data-grid, table, filter-bar, action-bar, pagination, page, page-header, link, badge, tag]
 ---
 
 # List pages
@@ -182,3 +183,13 @@ Do: Give every mark a cell holds — a state, a flag, a warning — the `sm` `si
 Don't: Leave a cell's mark at the family's default, or size it up to make a state stand out; a tone says that.
 Seen in: Nexora · Products, SKUs and Customers, the state column at `md` beside lists at `sm` (review of the screens) · corrected
 Check: On every list, every `badge` and `tag` inside a cell of a `data-grid` or a `table` carries the `sm` `size`.
+
+### LP-14 · A list that can pass a hundred rows is a data-grid
+
+Level: MUST
+Applies to: a list of records whose count the reader does not bound — transactions, postings, imports
+Rule: A list that can hold more than a hundred rows, or more than twenty columns, is a `data-grid`, which windows rows and middle columns under its default `virtualize` of `auto`; `table` is for sets the page bounds, such as a statement's lines or a record's related rows.
+Why: `table` mounts every cell: a hundred rows of twenty columns measured 93 ms in one task with a production build of React in Chrome and 160 ms with a development build, and the count of rows the store returns sets that cost.
+Do: Give the store's list a `data-grid` with its query, and keep `table` for the bounded sets inside a record or a document.
+Don't: Render an unbounded store into a `table`, or page a `table` to keep it under a hundred rows where the grid's window would have kept the whole set reachable.
+Check: Every list over an unbounded store is a `data-grid`; every `table` on a page renders a set the page bounds.

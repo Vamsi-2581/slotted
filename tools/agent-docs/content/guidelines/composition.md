@@ -138,3 +138,13 @@ Don't: Let a mode add or remove a line, a hint or a control that changes the reg
 Seen in: Nexora · the ticket composer's mode line · corrected
 Verified in: tools/look.mjs at 1280, 570 and 390 pixels on the ticket composer
 Check: At 1280, 570 and 390 pixels, switch the mode and read the bounding box of each box in the region: every top and height is the same in both modes.
+
+### CP-09 · A control that switches a region does not render the region in its own frame
+
+Level: MUST
+Applies to: tabs, a segmented control, a route link or a filter whose change mounts a region holding tables, grids, charts or forms
+Rule: The control's own state — the selected tab, the pressed segment — updates in the interaction's frame; the region renders from a deferred value (in React, useDeferredValue or startTransition) and states aria-busy while the shown value lags the selected one.
+Why: Mounting a region of families in the click's task blocks the next paint, and Interaction to Next Paint above 200 ms is "needs improvement" and above 500 ms "poor": a table of a hundred rows of twenty cells measured 160 ms in one task in a development build, and a 4× CPU throttle takes its 93 ms in a production build past the first threshold.
+Do: Keep the selection state urgent and hand the region the deferred value; mount only the selected panel, with mount active.
+Don't: Set the selection and the region from one state update inside the click handler, or mount every panel to make switching look instant.
+Check: Switch the control with the CPU throttled 4× in Chrome: the selection marker moves in the next frame, and the Performance panel shows no long task between the click and that paint.

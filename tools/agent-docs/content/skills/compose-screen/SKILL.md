@@ -59,6 +59,10 @@ element stands in that slot.
   nothing louder beside it (CP-06).
 - A control that switches what a region holds changes words and values, never
   the size or the position of a box (CP-08).
+- A control that switches a region — tabs, a route, a filter — updates its
+  own state at once and renders the region from a deferred value (in React,
+  useDeferredValue or startTransition) (CP-09). A list longer than a hundred
+  rows is a `data-grid`, which windows its rows (LP-14).
 - Where no anatomy answers the problem, the screen writes an element of its
   own instead of bending a family into a shape it does not have (CP-04). That
   element is built with `{{docsDir}}/skills/build-own-element/SKILL.md`.
@@ -74,3 +78,6 @@ Every region filled by a request and every control that starts one follow
 2. Each `SHOULD` rule not followed is listed with its reason.
 3. No CSS of the screen's own targets a family's parts; a family's appearance
    changes through its axes.
+4. In a browser with the CPU throttled 4×, each control that switches a region
+   paints its new state in the next frame, with no long task between the input
+   and that paint.

@@ -2,6 +2,7 @@ import { createDismissableLayer, pressOrigin } from '@slotted/core/dismissable-l
 import { createWidthGate } from '@slotted/core/measure';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
+import type { PositionerHandle } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -504,7 +505,14 @@ export function MultiSelectContent({
   const [surfaceNode, setSurfaceNode] = useState<HTMLElement | null>(null);
   const [container, setContainer] = useState<Element | null>(null);
   const [status, setStatus] = useState<PresenceStatus>('unmounted');
-  const [positioned, setPositioned] = useState(false);
+  /**
+   * The reader is about to open the popup: the control took focus or a press.
+   * The portal's layer is made then, because making it reads the control's
+   * computed style, and a read in the open's own task is a style recalculation
+   * the first frame waits for. A press focuses before it clicks, in a task of
+   * its own.
+   */
+  const [warm, setWarm] = useState(false);
   const [count, setCount] = useState(0);
 
   const presence = useRef<PresenceHandle | null>(null);
@@ -526,13 +534,31 @@ export function MultiSelectContent({
   useEffect(() => presence.current?.setNode(layerNode), [layerNode]);
   useEffect(() => multiSelect.setContentNode(surfaceNode), [multiSelect, surfaceNode]);
 
+  /**
+   * Open renders the popup in the commit that opens it, rather than once the
+   * presence has reported `entering` in a render of its own.
+   */
   const mounted =
     multiSelect.mount === 'eager' ||
     (multiSelect.mount === 'lazy' && multiSelect.seen) ||
+    multiSelect.open ||
     status !== 'unmounted';
 
   useEffect(() => {
-    if (!mounted) {
+    const control = multiSelect.inputNode;
+    if (control === null || warm) return undefined;
+    const prepare = () => setWarm(true);
+    control.addEventListener('focusin', prepare);
+    control.addEventListener('pointerdown', prepare);
+    return () => {
+      control.removeEventListener('focusin', prepare);
+      control.removeEventListener('pointerdown', prepare);
+    };
+  }, [multiSelect.inputNode, warm]);
+
+  const layered = mounted || warm;
+  useLayoutEffect(() => {
+    if (!layered) {
       setContainer(null);
       return;
     }
@@ -542,7 +568,7 @@ export function MultiSelectContent({
     });
     setContainer(handle.container);
     return () => handle.release();
-  }, [multiSelect.inputNode, multiSelect.portal, mounted]);
+  }, [multiSelect.inputNode, multiSelect.portal, layered]);
 
   const {
     align,
@@ -557,9 +583,33 @@ export function MultiSelectContent({
     width,
   } = multiSelect;
 
-  useEffect(() => {
+  const positioner = useRef<PositionerHandle | null>(null);
+  const revealFrame = useRef(0);
+
+  /**
+   * `data-open` is written by the measurement that places the popup, on the
+   * element, in the task that opened it: the position, the side and the open
+   * state reach one style update together, and the first frame after the
+   * click shows the popup where it belongs. A render to say "positioned" was
+   * a frame of its own. The highlighted option is revealed in the next frame,
+   * whose layout the browser computes anyway, rather than by a read here
+   * after the writes.
+   */
+  const place = useCallback((handle: PositionerHandle, layer: HTMLElement) => {
+    void handle.update().then(() => {
+      if (positioner.current !== handle || !latest.current.open) return;
+      layer.setAttribute('data-open', '');
+      const view = layer.ownerDocument.defaultView;
+      if (view === null || revealFrame.current !== 0) return;
+      revealFrame.current = view.requestAnimationFrame(() => {
+        revealFrame.current = 0;
+        revealOption(latest.current.contentNode, latest.current.highlighted);
+      });
+    });
+  }, []);
+
+  useLayoutEffect(() => {
     if (layerNode === null || multiSelect.inputNode === null) return;
-    let live = true;
 
     /* The anchor is the frame rather than the field, so the popup is as wide as
        the control the reader sees and not as wide as the caret's cell. */
@@ -579,14 +629,13 @@ export function MultiSelectContent({
       strategy,
     });
 
-    void handle.update().then(() => {
-      if (live) setPositioned(true);
-    });
+    positioner.current = handle;
+    if (latest.current.open) place(handle, layerNode);
 
     return () => {
-      live = false;
       handle.destroy();
-      setPositioned(false);
+      positioner.current = null;
+      layerNode.removeAttribute('data-open');
     };
   }, [
     align,
@@ -601,7 +650,22 @@ export function MultiSelectContent({
     sideOffset,
     strategy,
     width,
+    place,
   ]);
+
+  useLayoutEffect(() => {
+    const handle = positioner.current;
+    if (handle === null || layerNode === null) return;
+    if (multiSelect.open) {
+      place(handle, layerNode);
+      return;
+    }
+    layerNode.removeAttribute('data-open');
+    if (revealFrame.current !== 0) {
+      layerNode.ownerDocument.defaultView?.cancelAnimationFrame(revealFrame.current);
+      revealFrame.current = 0;
+    }
+  }, [layerNode, place, multiSelect.open]);
 
   useEffect(() => {
     if (layerNode === null || !multiSelect.open) return;
@@ -665,12 +729,13 @@ export function MultiSelectContent({
 
   /**
    * A browser scrolls a focused element into view; nothing here is focused.
-   * It runs again once the popup is positioned: the height that bounds the
-   * list arrives with the position, after the highlight has landed.
+   * On open the reveal waits for the position (above): the height that bounds
+   * the list arrives with it.
    */
   useEffect(() => {
+    if (layerNode?.hasAttribute('data-open') !== true) return;
     revealOption(surfaceNode, multiSelect.highlighted);
-  }, [multiSelect.highlighted, positioned, surfaceNode]);
+  }, [layerNode, multiSelect.highlighted, surfaceNode]);
 
   useEffect(() => {
     const target = sentinel.current;
@@ -694,7 +759,6 @@ export function MultiSelectContent({
   const rootProps: MultiSelectPositionerProps = {
     'data-align': align,
     ...(multiSelect.open ? {} : { inert: true }),
-    ...(multiSelect.open && positioned ? { 'data-open': '' } : {}),
     'data-part': 'positioner',
     'data-size': multiSelect.size,
     'data-ui': 'multi-select',

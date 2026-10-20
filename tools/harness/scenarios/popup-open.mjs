@@ -2,22 +2,25 @@ import { buildReactPage } from '../react-page.mjs';
 import { launch } from '../shoot.mjs';
 
 /**
- * Opening a React select of 62 options, measured in Chrome: from the click to
- * the frame where the popup carries `data-open` and paints at an opacity above
- * nought, and how many style recalculations the click's task chain runs.
+ * Opening a React popup family, measured in Chrome: from the click on its
+ * trigger to the frame where the layer carries `data-open`, the entrance
+ * animation's state in each frame, and how many style recalculations script
+ * forced in the click's task chain.
  *
  * The request came from an application whose 62-option select set
  * `data-open` some 600 milliseconds after a 16-millisecond click event: the
  * attribute waited for a promise and a render, behind a chain of passive
  * effects whose reads each forced a style recalculation.
  *
- * The page is the binding from source (`tools/harness/react-page.mjs`). The
+ * The page is the binding from source (`tools/harness/react-page.mjs`): the
+ * select with 62 options, every other family its documentation site's `basic`
+ * example. The
  * click is a real input event through the DevTools protocol, so the event and
  * the frames after it are the browser's own. Each frame after the click is
  * recorded by a `requestAnimationFrame` loop that reads the positioner's
  * attributes and its computed opacity.
  *
- * Run: node tools/harness/scenarios/select-open.mjs [--mode development] [--assert]
+ * Run: node tools/harness/scenarios/popup-open.mjs [--family select] [--mode development] [--assert]
  * With `--assert`, exits non-zero unless the first frame after the click
  * shows the popup open with its entrance animation running, and the click's
  * chain forces at most one style recalculation. The opacity is reported and
@@ -31,9 +34,21 @@ const mode = process.argv.includes('--mode')
   ? process.argv[process.argv.indexOf('--mode') + 1]
   : 'production';
 const strict = process.argv.includes('--assert');
+const family = process.argv.includes('--family')
+  ? process.argv[process.argv.indexOf('--family') + 1]
+  : 'select';
+const examples = new URL('../../../apps/docs/examples/react/', import.meta.url).pathname;
+
+/**
+ * The trigger is the element whose `aria-expanded` the open changes — inside
+ * the family's root, or, for a family whose trigger is the consumer's own
+ * element, the first popup trigger on the page; the layer is the family's.
+ */
+const TRIGGER = `[data-ui="${family}"] [aria-expanded], [data-ui="${family}"][aria-expanded]`;
+const LAYER = `[data-ui="${family}"]:is([data-part="positioner"], [data-part="root"]):not(:has([aria-expanded]))`;
 
 const OPTIONS = 62;
-const entry = `
+const selectEntry = `
 import { createElement as h } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@slotted/react/select';
@@ -63,12 +78,26 @@ function App() {
 createRoot(document.getElementById('root')).render(h(App));
 `;
 
-const url = await buildReactPage(`select-open-${mode}`, entry, { mode });
+const exampleEntry = `
+import { createElement as h } from 'react';
+import { createRoot } from 'react-dom/client';
+import Example from '${examples}${family}/basic.tsx';
+
+createRoot(document.getElementById('root')).render(
+  h('div', { style: { padding: '40px', inlineSize: '420px' } }, h(Example)),
+);
+`;
+
+const url = await buildReactPage(
+  `${family}-open-${mode}`,
+  family === 'select' ? selectEntry : exampleEntry,
+  { mode },
+);
 
 const ARM = `(() => {
   const frames = [];
   let clicked = null;
-  const positioner = () => document.querySelector('[data-ui="select"][data-part="positioner"]');
+  const positioner = () => document.querySelector(${JSON.stringify(LAYER)});
   document.addEventListener('click', (event) => { clicked = { at: event.timeStamp, now: performance.now() }; }, true);
   const loop = (time) => {
     if (clicked !== null) {
@@ -89,8 +118,10 @@ const ARM = `(() => {
     if (frames.length < 120) requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
-  window.__select = () => ({ clicked, frames });
-  const trigger = document.querySelector('[data-ui="select"] [data-part="trigger"]');
+  window.__popup = () => ({ clicked, frames });
+  const trigger =
+    document.querySelector(${JSON.stringify(TRIGGER)}) ??
+    document.querySelector('[aria-haspopup][aria-expanded]');
   const box = trigger.getBoundingClientRect();
   return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
 })()`;
@@ -148,7 +179,7 @@ try {
 
   const { clicked, frames } = (
     await devtools.send('Runtime.evaluate', {
-      expression: 'window.__select()',
+      expression: 'window.__popup()',
       returnByValue: true,
     })
   ).result.value;
@@ -219,8 +250,8 @@ try {
   const firstOpen = frames.findIndex((frame) => frame.open);
   const firstOpaque = frames.findIndex((frame) => frame.open && frame.opacity > 0);
   report = {
+    family,
     mode,
-    options: OPTIONS,
     firstFrames: frames
       .slice(0, 5)
       .map(

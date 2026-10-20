@@ -1,6 +1,7 @@
 import { createDismissableLayer, pressOrigin } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
+import type { PositionerHandle } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -418,7 +419,14 @@ export function ComboboxContent({
   const [surfaceNode, setSurfaceNode] = useState<HTMLElement | null>(null);
   const [container, setContainer] = useState<Element | null>(null);
   const [status, setStatus] = useState<PresenceStatus>('unmounted');
-  const [positioned, setPositioned] = useState(false);
+  /**
+   * The reader is about to open the popup: the control took focus or a press.
+   * The portal's layer is made then, because making it reads the control's
+   * computed style, and a read in the open's own task is a style recalculation
+   * the first frame waits for. A press focuses before it clicks, in a task of
+   * its own.
+   */
+  const [warm, setWarm] = useState(false);
   const [count, setCount] = useState(0);
 
   const presence = useRef<PresenceHandle | null>(null);
@@ -440,20 +448,38 @@ export function ComboboxContent({
   useEffect(() => presence.current?.setNode(layerNode), [layerNode]);
   useEffect(() => combobox.setContentNode(surfaceNode), [combobox, surfaceNode]);
 
+  /**
+   * Open renders the popup in the commit that opens it, rather than once the
+   * presence has reported `entering` in a render of its own.
+   */
   const mounted =
     combobox.mount === 'eager' ||
     (combobox.mount === 'lazy' && combobox.seen) ||
+    combobox.open ||
     status !== 'unmounted';
 
   useEffect(() => {
-    if (!mounted) {
+    const control = combobox.inputNode;
+    if (control === null || warm) return undefined;
+    const prepare = () => setWarm(true);
+    control.addEventListener('focusin', prepare);
+    control.addEventListener('pointerdown', prepare);
+    return () => {
+      control.removeEventListener('focusin', prepare);
+      control.removeEventListener('pointerdown', prepare);
+    };
+  }, [combobox.inputNode, warm]);
+
+  const layered = mounted || warm;
+  useLayoutEffect(() => {
+    if (!layered) {
       setContainer(null);
       return;
     }
     const handle = createPortalRoot({ origin: combobox.inputNode, disabled: !combobox.portal });
     setContainer(handle.container);
     return () => handle.release();
-  }, [combobox.inputNode, combobox.portal, mounted]);
+  }, [combobox.inputNode, combobox.portal, layered]);
 
   const {
     align,
@@ -468,9 +494,33 @@ export function ComboboxContent({
     width,
   } = combobox;
 
-  useEffect(() => {
+  const positioner = useRef<PositionerHandle | null>(null);
+  const revealFrame = useRef(0);
+
+  /**
+   * `data-open` is written by the measurement that places the popup, on the
+   * element, in the task that opened it: the position, the side and the open
+   * state reach one style update together, and the first frame after the
+   * click shows the popup where it belongs. A render to say "positioned" was
+   * a frame of its own. The highlighted option is revealed in the next frame,
+   * whose layout the browser computes anyway, rather than by a read here
+   * after the writes.
+   */
+  const place = useCallback((handle: PositionerHandle, layer: HTMLElement) => {
+    void handle.update().then(() => {
+      if (positioner.current !== handle || !latest.current.open) return;
+      layer.setAttribute('data-open', '');
+      const view = layer.ownerDocument.defaultView;
+      if (view === null || revealFrame.current !== 0) return;
+      revealFrame.current = view.requestAnimationFrame(() => {
+        revealFrame.current = 0;
+        revealOption(latest.current.contentNode, latest.current.highlighted);
+      });
+    });
+  }, []);
+
+  useLayoutEffect(() => {
     if (layerNode === null || combobox.inputNode === null) return;
-    let live = true;
 
     /* The anchor is the frame rather than the input, so the popup is as wide as
        the control the reader sees and not as wide as the text inside it. */
@@ -490,14 +540,13 @@ export function ComboboxContent({
       strategy,
     });
 
-    void handle.update().then(() => {
-      if (live) setPositioned(true);
-    });
+    positioner.current = handle;
+    if (latest.current.open) place(handle, layerNode);
 
     return () => {
-      live = false;
       handle.destroy();
-      setPositioned(false);
+      positioner.current = null;
+      layerNode.removeAttribute('data-open');
     };
   }, [
     align,
@@ -512,7 +561,22 @@ export function ComboboxContent({
     sideOffset,
     strategy,
     width,
+    place,
   ]);
+
+  useLayoutEffect(() => {
+    const handle = positioner.current;
+    if (handle === null || layerNode === null) return;
+    if (combobox.open) {
+      place(handle, layerNode);
+      return;
+    }
+    layerNode.removeAttribute('data-open');
+    if (revealFrame.current !== 0) {
+      layerNode.ownerDocument.defaultView?.cancelAnimationFrame(revealFrame.current);
+      revealFrame.current = 0;
+    }
+  }, [layerNode, place, combobox.open]);
 
   useEffect(() => {
     if (layerNode === null || !combobox.open) return;
@@ -582,12 +646,13 @@ export function ComboboxContent({
 
   /**
    * A browser scrolls a focused element into view; nothing here is focused.
-   * It runs again once the popup is positioned: the height that bounds the
-   * list arrives with the position, after the highlight has landed.
+   * On open the reveal waits for the position (above): the height that bounds
+   * the list arrives with it.
    */
   useEffect(() => {
+    if (layerNode?.hasAttribute('data-open') !== true) return;
     revealOption(surfaceNode, combobox.highlighted);
-  }, [combobox.highlighted, positioned, surfaceNode]);
+  }, [layerNode, combobox.highlighted, surfaceNode]);
 
   /**
    * The completion string, written into the input as a **selected range** and
@@ -636,7 +701,6 @@ export function ComboboxContent({
   const rootProps: ComboboxPositionerProps = {
     'data-align': align,
     ...(combobox.open ? {} : { inert: true }),
-    ...(combobox.open && positioned ? { 'data-open': '' } : {}),
     'data-part': 'positioner',
     'data-size': combobox.size,
     'data-ui': 'combobox',

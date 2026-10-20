@@ -1,9 +1,10 @@
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
+import type { PositionerHandle } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { FocusEvent, MouseEvent, PointerEvent, Ref } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -165,7 +166,13 @@ export function TooltipLayer({ children, ref, render, ...nativeProps }: TooltipL
   const [node, setNode] = useState<HTMLElement | null>(null);
   const [container, setContainer] = useState<Element | null>(null);
   const [status, setStatus] = useState<PresenceStatus>('unmounted');
-  const [positioned, setPositioned] = useState(false);
+  /**
+   * The reader is about to see the tip: the pointer reached the trigger or
+   * focus did. The portal's layer is made then, because making it reads the
+   * trigger's computed style, and a read in the open's own task is a style
+   * recalculation the first frame waits for.
+   */
+  const [warm, setWarm] = useState(false);
 
   const presence = useRef<PresenceHandle | null>(null);
   const latest = useRef(tooltip);
@@ -209,10 +216,24 @@ export function TooltipLayer({ children, ref, render, ...nativeProps }: TooltipL
   const mounted =
     tooltip.mount === 'eager' ||
     (tooltip.mount === 'lazy' && tooltip.seen) ||
+    tooltip.open ||
     status !== 'unmounted';
 
   useEffect(() => {
-    if (!mounted) {
+    const trigger = tooltip.triggerNode;
+    if (trigger === null || warm) return undefined;
+    const prepare = () => setWarm(true);
+    trigger.addEventListener('focusin', prepare);
+    trigger.addEventListener('pointerover', prepare);
+    return () => {
+      trigger.removeEventListener('focusin', prepare);
+      trigger.removeEventListener('pointerover', prepare);
+    };
+  }, [tooltip.triggerNode, warm]);
+
+  const layered = mounted || warm;
+  useLayoutEffect(() => {
+    if (!layered) {
       setContainer(null);
       return;
     }
@@ -222,7 +243,7 @@ export function TooltipLayer({ children, ref, render, ...nativeProps }: TooltipL
     });
     setContainer(handle.container);
     return () => handle.release();
-  }, [mounted, tooltip.portal, tooltip.triggerNode]);
+  }, [layered, tooltip.portal, tooltip.triggerNode]);
 
   const {
     align,
@@ -238,9 +259,23 @@ export function TooltipLayer({ children, ref, render, ...nativeProps }: TooltipL
     strategy,
   } = tooltip;
 
-  useEffect(() => {
+  const positioner = useRef<PositionerHandle | null>(null);
+
+  /**
+   * `data-open` is written by the measurement that places the tip, on the
+   * element, in the task that opened it: the position, the side and the open
+   * state reach one style update together. A render to say "positioned" was a
+   * frame of its own. The open delay is the trigger's, and is not this.
+   */
+  const place = useCallback((handle: PositionerHandle, layer: HTMLElement) => {
+    void handle.update().then(() => {
+      if (positioner.current !== handle || !latest.current.open) return;
+      layer.setAttribute('data-open', '');
+    });
+  }, []);
+
+  useLayoutEffect(() => {
     if (node === null || tooltip.triggerNode === null) return;
-    let live = true;
 
     const handle = createPositioner(tooltip.triggerNode, node, {
       align,
@@ -256,15 +291,14 @@ export function TooltipLayer({ children, ref, render, ...nativeProps }: TooltipL
     });
 
     reposition.current = () => void handle.update();
-    void handle.update().then(() => {
-      if (live) setPositioned(true);
-    });
+    positioner.current = handle;
+    if (latest.current.open) place(handle, node);
 
     return () => {
-      live = false;
       reposition.current = undefined;
       handle.destroy();
-      setPositioned(false);
+      positioner.current = null;
+      node.removeAttribute('data-open');
     };
   }, [
     align,
@@ -281,7 +315,15 @@ export function TooltipLayer({ children, ref, render, ...nativeProps }: TooltipL
     sideOffset,
     strategy,
     tooltip.triggerNode,
+    place,
   ]);
+
+  useLayoutEffect(() => {
+    const handle = positioner.current;
+    if (handle === null || node === null) return;
+    if (tooltip.open) place(handle, node);
+    else node.removeAttribute('data-open');
+  }, [node, place, tooltip.open]);
 
   /**
    * The layer joins the single stack only while it is open, so its depth is its
@@ -332,7 +374,6 @@ export function TooltipLayer({ children, ref, render, ...nativeProps }: TooltipL
     children,
     'data-align': align,
     ...(tooltip.hoverable ? { 'data-hoverable': '' } : {}),
-    ...(tooltip.open && positioned ? { 'data-open': '' } : {}),
     'data-part': 'root',
     'data-size': tooltip.size,
     'data-ui': 'tooltip',

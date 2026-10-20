@@ -311,6 +311,14 @@ class NamedHost {
  * instance with no caption names itself with it. The region the scroller
  * becomes while it overflows takes the catalog's name, or `scrollLabel`.
  */
+/** A pointer press focuses the nearest focusable ancestor, as a browser does. */
+const press = (target: Element) => {
+  target.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+  target.closest<HTMLElement>('[tabindex], a[href], button')?.focus();
+};
+const key = (target: Element, name: string) =>
+  target.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: name }));
+
 describe('SlTableContent naming', () => {
   let fixture: ComponentFixture<NamedHost>;
   const content = () =>
@@ -327,6 +335,22 @@ describe('SlTableContent naming', () => {
   it('names the table with the consumer aria-label, and not the scroller', () => {
     expect(query(fixture, 'table').getAttribute('aria-label')).toBe('Orders');
     expect(query(fixture, '[data-part="scroll"]').hasAttribute('aria-label')).toBe(false);
+  });
+
+  it('draws its ring for a focus from the keyboard, and not for a click followed by Shift', () => {
+    content().state.set({ overflowing: true, atStart: true, atEnd: false });
+    fixture.detectChanges();
+    const scroll = query(fixture, '[data-part="scroll"]');
+
+    press(scroll.querySelector('td')!);
+    key(scroll, 'Shift');
+    expect(document.activeElement).toBe(scroll);
+    expect(scroll.getAttribute('data-focus-origin')).not.toBe('keyboard');
+
+    scroll.blur();
+    key(document.body, 'Tab');
+    scroll.focus();
+    expect(scroll.getAttribute('data-focus-origin')).toBe('keyboard');
   });
 
   it('names the overflowing region with the catalog, or with scrollLabel', () => {

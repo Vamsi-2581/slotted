@@ -173,6 +173,13 @@ export const REACT_SCROLL_AREA_DOCS = {
       'Composed, never replaced: the consumer’s handler runs and the family measures from the same event',
     ],
     [
+      'data-focus-origin',
+      'attribute',
+      '—',
+      'viewport',
+      'keyboard or pointer while the viewport holds focus. The ring is drawn for keyboard only: a click on the content focuses the viewport, and the next Shift would make it match :focus-visible. createFocusOrigin in @slotted/core/focus writes it',
+    ],
+    [
       'data-overflowing, data-at-block-start, data-at-block-end, data-at-inline-start, data-at-inline-end',
       'attribute',
       '—',

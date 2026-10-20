@@ -268,7 +268,6 @@ describe('SlAppShell', () => {
       else focusable.focus();
     };
     const fixture = setup();
-    document.body.appendChild(fixture.nativeElement);
     const main = query(fixture, '[data-part="main"]');
 
     press(main);
@@ -281,7 +280,6 @@ describe('SlAppShell', () => {
     press(main);
     expect(document.activeElement).not.toBe(main);
     expect(main.hasAttribute('tabindex')).toBe(false);
-    fixture.nativeElement.remove();
   });
 
   it('keeps a tabindex the consumer wrote on the content region', () => {

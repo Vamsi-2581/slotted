@@ -1,3 +1,4 @@
+import { createFocusOrigin } from '@slotted/core/focus';
 import { createScrollAffordance } from '@slotted/core/overflow';
 import type { ScrollAffordanceHandle } from '@slotted/core/overflow';
 import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
@@ -70,6 +71,9 @@ export function TableContent({
       affordance.current = null;
     };
   }, [element, table.stickyTo]);
+
+  /** A click on a cell focuses the scroller; its ring is for the keyboard (`createFocusOrigin`). */
+  useEffect(() => (element === null ? undefined : createFocusOrigin(element).destroy), [element]);
 
   useImperativeHandle<TableHandle, TableHandle>(
     handleRef,

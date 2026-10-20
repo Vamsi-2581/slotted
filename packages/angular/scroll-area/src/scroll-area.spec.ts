@@ -184,6 +184,14 @@ describe('the measurement in the DOM', () => {
  * `scrollable-region-focusable` rule, and what the tab stop then owes is a
  * name — SC 4.1.2, which Base UI and Zag both answer with `role="presentation"`.
  */
+/** A pointer press focuses the nearest focusable ancestor, as a browser does. */
+const press = (target: Element) => {
+  target.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+  target.closest<HTMLElement>('[tabindex], a[href], button')?.focus();
+};
+const key = (target: Element, name: string) =>
+  target.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: name }));
+
 describe('the region', () => {
   it('is a named region with a tab stop while the content overflows', () => {
     const { host, viewport, fixture } = mount();
@@ -193,6 +201,20 @@ describe('the region', () => {
     expect(viewport.getAttribute('role')).toBe('region');
     expect(viewport.getAttribute('tabindex')).toBe('0');
     expect(viewport.getAttribute('aria-label')).toBe('Notas de versão');
+  });
+
+  it('draws its ring for a focus from the keyboard, and not for a click followed by Shift', () => {
+    const { viewport } = mount();
+
+    press(viewport.firstElementChild ?? viewport);
+    key(viewport, 'Shift');
+    expect(document.activeElement).toBe(viewport);
+    expect(viewport.getAttribute('data-focus-origin')).not.toBe('keyboard');
+
+    viewport.blur();
+    key(document.body, 'Tab');
+    viewport.focus();
+    expect(viewport.getAttribute('data-focus-origin')).toBe('keyboard');
   });
 
   it('is nothing at all while the content fits', () => {

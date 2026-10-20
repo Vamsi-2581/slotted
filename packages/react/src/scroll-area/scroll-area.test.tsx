@@ -114,6 +114,26 @@ describe('the measurement in the DOM', () => {
     }
   });
 
+  it('draws its ring for a focus from the keyboard, and not for a click followed by Shift', () => {
+    /** A pointer press focuses the nearest focusable ancestor, as a browser does. */
+    const press = (target: Element) => {
+      fireEvent.pointerDown(target);
+      target.closest<HTMLElement>('[tabindex], a[href], button')?.focus();
+    };
+    render(<Area />);
+    expect(viewport()).toHaveAttribute('tabindex', '0');
+
+    press(viewport().firstElementChild ?? viewport());
+    fireEvent.keyDown(viewport(), { key: 'Shift' });
+    expect(document.activeElement).toBe(viewport());
+    expect(viewport()).not.toHaveAttribute('data-focus-origin', 'keyboard');
+
+    viewport().blur();
+    fireEvent.keyDown(document.body, { key: 'Tab' });
+    viewport().focus();
+    expect(viewport()).toHaveAttribute('data-focus-origin', 'keyboard');
+  });
+
   it('follows a scroll to the end', () => {
     render(<Area />);
 

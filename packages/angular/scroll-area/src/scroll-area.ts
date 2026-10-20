@@ -1,3 +1,4 @@
+import { createFocusOrigin } from '@slotted/core/focus';
 import {
   createScrollEdges,
   NO_SCROLL_EDGES,
@@ -211,6 +212,10 @@ export class SlScrollArea {
       this.edges = handle;
       this.measured.set(handle.state());
       this.sideways.set(handle.sideways());
+
+      /** A click on the content focuses the scrollport; its ring is for the keyboard (`createFocusOrigin`). */
+      const origin = createFocusOrigin(viewport);
+      this.destroyRef.onDestroy(origin.destroy);
     });
 
     this.destroyRef.onDestroy(() => {

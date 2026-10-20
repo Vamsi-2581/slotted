@@ -45,6 +45,7 @@ import type {
   ChartZoom,
 } from '@slotted/core/chart';
 import { mountChartEngine } from '@slotted/core/chart-echarts';
+import { createFocusOrigin } from '@slotted/core/focus';
 import { chartMessages } from '@slotted/core/i18n';
 import type { ChartEngine, ChartPointLocation } from '@slotted/core/chart-echarts';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
@@ -776,6 +777,12 @@ export function Chart(props: ChartProps) {
     }
   };
 
+  /** A click on a cell focuses the region; its ring is for the keyboard (`createFocusOrigin`). */
+  const attachTableRegion = useCallback(
+    (node: HTMLDivElement | null) => (node === null ? undefined : createFocusOrigin(node).destroy),
+    [],
+  );
+
   const onPlotFocus = (event: ReactFocusEvent<HTMLDivElement>) => {
     if (!model || !drawable || tableValue || activeValue) return;
     if (!focusVisible(event.currentTarget)) return;
@@ -1361,6 +1368,7 @@ export function Chart(props: ChartProps) {
             <div
               aria-labelledby={title !== undefined ? titleId : undefined}
               data-part="table-region"
+              ref={attachTableRegion}
               role="region"
               tabIndex={0}
             >

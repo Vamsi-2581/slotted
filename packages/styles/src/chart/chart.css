@@ -1258,8 +1258,14 @@
     direction: rtl;
   }
 
-  /* The region scrolls, so it takes focus to be scrolled by keyboard. */
-  [data-ui='chart'] [data-part='table-region']:focus-visible {
+  /* The region scrolls, so it takes focus to be scrolled by keyboard. The ring
+     is drawn for a focus from the keyboard: a click on a cell focuses the region
+     too, and the next Shift would make it match `:focus-visible`
+     (`createFocusOrigin`). The browser's own ring is suppressed for the same focus. */
+  [data-ui='chart'] [data-part='table-region']:focus {
+    outline: none;
+  }
+  [data-ui='chart'] [data-part='table-region']:focus-visible[data-focus-origin='keyboard'] {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-width, 2px) * -1);
   }

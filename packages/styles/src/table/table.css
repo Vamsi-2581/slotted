@@ -189,8 +189,14 @@
   }
 
   /* The ring is drawn inside, because a scroller flush against the frame would
-     otherwise draw half its ring outside it. */
-  [data-ui='table'] [data-part='scroll']:focus-visible {
+     otherwise draw half its ring outside it. It is drawn for a focus from the
+     keyboard: a click on a cell focuses the scroller too, and the next Shift
+     would make it match `:focus-visible` (`createFocusOrigin`). The browser's own
+     ring is suppressed for the same focus. */
+  [data-ui='table'] [data-part='scroll']:focus {
+    outline: none;
+  }
+  [data-ui='table'] [data-part='scroll']:focus-visible[data-focus-origin='keyboard'] {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }

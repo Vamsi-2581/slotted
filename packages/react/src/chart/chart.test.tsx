@@ -373,6 +373,27 @@ describe('Chart', () => {
   });
 
   describe('views and states', () => {
+    it('draws the table region’s ring for a focus from the keyboard, and not for a click followed by Shift', () => {
+      /** A pointer press focuses the nearest focusable ancestor, as a browser does. */
+      const press = (target: Element) => {
+        fireEvent.pointerDown(target);
+        target.closest<HTMLElement>('[tabindex], a[href], button')?.focus();
+      };
+      render(<Chart {...base} />);
+      fireEvent.click(part('view-toggle')!);
+      const region = part('table-region') as HTMLElement;
+
+      press(region.querySelector('td')!);
+      fireEvent.keyDown(region, { key: 'Shift' });
+      expect(document.activeElement).toBe(region);
+      expect(region).not.toHaveAttribute('data-focus-origin', 'keyboard');
+
+      region.blur();
+      fireEvent.keyDown(document.body, { key: 'Tab' });
+      region.focus();
+      expect(region).toHaveAttribute('data-focus-origin', 'keyboard');
+    });
+
     it('opens the table inside the plot and says so', () => {
       const onTableOpenChange = vi.fn();
       render(<Chart {...base} help="Monthly totals." onTableOpenChange={onTableOpenChange} />);

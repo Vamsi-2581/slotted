@@ -142,6 +142,12 @@ beforeEach(() => {
   engine.callbacks = null;
 });
 
+/** A pointer press focuses the nearest focusable ancestor, as a browser does. */
+const press = (target: Element) => {
+  target.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+  target.closest<HTMLElement>('[tabindex], a[href], button')?.focus();
+};
+
 describe('SlChart', () => {
   it('is a figure its caption names, with a plot named by the title and described in words', async () => {
     const { root, part } = await mount();
@@ -271,6 +277,23 @@ describe('SlChart', () => {
       h.activePoint.set({ series: 'cost', key: 'Mar' });
     });
     expect(root.querySelector('.custom')?.textContent).toBe('2 series');
+  });
+
+  it('draws the table region’s ring for a focus from the keyboard, and not for a click followed by Shift', async () => {
+    const { part, settle } = await mount();
+    part('view-toggle')!.click();
+    await settle();
+    const region = part('table-region') as HTMLElement;
+
+    press(region.querySelector('td')!);
+    key(region, 'Shift');
+    expect(document.activeElement).toBe(region);
+    expect(region.getAttribute('data-focus-origin')).not.toBe('keyboard');
+
+    region.blur();
+    key(document.body as HTMLElement, 'Tab');
+    region.focus();
+    expect(region.getAttribute('data-focus-origin')).toBe('keyboard');
   });
 
   it('opens the table inside the plot', async () => {

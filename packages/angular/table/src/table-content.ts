@@ -1,3 +1,4 @@
+import { createFocusOrigin } from '@slotted/core/focus';
 import { createScrollAffordance } from '@slotted/core/overflow';
 import type { OverflowState, ScrollAffordanceHandle } from '@slotted/core/overflow';
 import {
@@ -78,6 +79,7 @@ export class SlTableContent {
 
   readonly table = inject(SlTable);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
   /** The host's own `aria-label`: the table's name, moved onto the `table`. */
   protected readonly tableLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
   private affordance: ScrollAffordanceHandle | null = null;
@@ -95,6 +97,12 @@ export class SlTableContent {
   );
 
   constructor() {
+    /** A click on a cell focuses the scroller; its ring is for the keyboard (`createFocusOrigin`). */
+    afterNextRender(() => {
+      const origin = createFocusOrigin(this.host.nativeElement);
+      this.destroyRef.onDestroy(origin.destroy);
+    });
+
     afterNextRender(() => {
       /**
        * Nothing is measured under `stickyTo="page"`: the family has released its
@@ -111,7 +119,7 @@ export class SlTableContent {
       this.state.set(handle.state());
     });
 
-    inject(DestroyRef).onDestroy(() => {
+    this.destroyRef.onDestroy(() => {
       this.affordance?.destroy();
       this.affordance = null;
     });

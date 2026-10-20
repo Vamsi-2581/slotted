@@ -410,8 +410,18 @@
    *
    * `:has()` rather than `:focus-within`, because a link inside the content is
    * focus *within* the area and is not the area being focused.
+   *
+   * The ring is drawn for a focus from the keyboard: a click on the content
+   * focuses the viewport too, and the next Shift would make it match
+   * `:focus-visible` (`createFocusOrigin`). The browser's own ring on the
+   * viewport is suppressed: the frame draws the one ring.
    */
-  [data-ui='scroll-area']:has(> [data-part='viewport']:focus-visible) {
+  [data-ui='scroll-area'] > [data-part='viewport']:focus {
+    outline: none;
+  }
+  [data-ui='scroll-area']:has(
+    > [data-part='viewport']:focus-visible[data-focus-origin='keyboard']
+  ) {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }

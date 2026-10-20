@@ -50,6 +50,7 @@ import {
   tooltipContext,
   trackModality,
 } from '@slotted/core/chart';
+import { createFocusOrigin } from '@slotted/core/focus';
 import { chartMessages, type ChartMessages, type PartialMessages } from '@slotted/core/i18n';
 import type {
   ChartAnnotation,
@@ -279,6 +280,7 @@ export class SlChart implements ChartHandle {
 
   protected readonly plotRef = viewChild<ElementRef<HTMLDivElement>>('plot');
   protected readonly canvasRef = viewChild<ElementRef<HTMLDivElement>>('canvas');
+  protected readonly tableRegionRef = viewChild<ElementRef<HTMLDivElement>>('tableRegion');
   protected readonly tooltipRef = viewChild<ElementRef<HTMLDivElement>>('tooltipBox');
   protected readonly legendRef = viewChild<ElementRef<HTMLDivElement>>('legendRow');
   protected readonly menuRef = viewChild<ElementRef<HTMLDivElement>>('menu');
@@ -492,6 +494,13 @@ export class SlChart implements ChartHandle {
       this.fullscreen();
       const plot = untracked(() => this.plotRef()?.nativeElement);
       if (plot) untracked(() => this.loadTheme(plot));
+    });
+
+    /** A click on a cell focuses the table region; its ring is for the keyboard (`createFocusOrigin`). */
+    effect((onCleanup) => {
+      const region = this.tableRegionRef()?.nativeElement;
+      if (region === undefined) return;
+      onCleanup(createFocusOrigin(region).destroy);
     });
 
     /* What the engine draws. */

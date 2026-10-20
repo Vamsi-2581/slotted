@@ -120,9 +120,11 @@ test('a family that moves its ring suppresses the one the browser would draw', (
     for (const [, focused, , body] of flat.matchAll(moved)) {
       if (!/outline\s*:\s*(?!none|0)/.test(body)) continue;
       /* `:has(> [data-part='control']:focus-visible)` leaves a closing paren on
-         the compound; the element it names is the same one either way. */
+         the compound, and `[data-focus-origin]` narrows the focus without
+         naming another element; the element is the same one either way. */
       const holder = (focused.trim().split(' ').pop() ?? '')
         .replace(':focus-visible', '')
+        .replace("[data-focus-origin='keyboard']", '')
         .replace(/\)+$/, '');
       if (!holder.startsWith('[')) continue;
       const escaped = holder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

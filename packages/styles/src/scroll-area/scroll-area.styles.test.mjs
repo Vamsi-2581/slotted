@@ -71,7 +71,7 @@ test('keeps the veil off the frame and off the focus ring', () => {
   );
 
   const focus =
-    /\[data-ui='scroll-area'\]:has\(> \[data-part='viewport'\]:focus-visible\) \{[^}]*outline:/;
+    /\[data-ui='scroll-area'\]:has\(\s*> \[data-part='viewport'\]:focus-visible\[data-focus-origin='keyboard'\]\s*\) \{[^}]*outline:/;
   assert.match(css, focus, 'the ring is drawn by the element the mask is not on');
   assert.doesNotMatch(
     css,
@@ -190,4 +190,28 @@ test('lets the wheel through on the axis it does not scroll', () => {
     flat.lastIndexOf("[data-overscroll='none']"),
   );
   assert.ok(flat.indexOf(inline) > lastChaining, 'the axis rule wins over a chosen `none`');
+});
+
+/**
+ * A click on a non-interactive descendant focuses the region, and the next
+ * Shift makes it match `:focus-visible`; the ring follows the origin the
+ * binding writes (`createFocusOrigin`), not the browser heuristic.
+ */
+test('draws the viewport ring for a focus from the keyboard only', () => {
+  const rules = [...css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{/g)].map((m) =>
+    m[1].replace(/\s+/g, ' ').trim(),
+  );
+  const ring = rules.filter(
+    (selector) =>
+      selector.includes("[data-part='viewport']") && selector.includes(':focus-visible'),
+  );
+  assert.ok(ring.length > 0, 'the region has a ring');
+  for (const selector of ring) {
+    assert.match(selector, /:focus-visible\[data-focus-origin='keyboard'\]/, selector);
+  }
+  const flat = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+  assert.ok(
+    flat.includes("[data-part='viewport']:focus { outline: none; }"),
+    'the browser’s own ring is suppressed for a focus from the pointer',
+  );
 });

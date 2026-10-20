@@ -166,6 +166,13 @@ export const ANGULAR_SCROLL_AREA_DOCS = {
       'The frame is the consumer’s own element, with its own class, border and attributes; the family writes its wiring on the scrollport it renders inside, so nothing on the host is written over',
     ],
     [
+      'data-focus-origin',
+      'attribute',
+      '—',
+      'viewport',
+      'keyboard or pointer while the viewport holds focus. The ring is drawn for keyboard only: a click on the content focuses the viewport, and the next Shift would make it match :focus-visible. createFocusOrigin in @slotted/core/focus writes it',
+    ],
+    [
       'data-overflowing, data-at-block-start, data-at-block-end, data-at-inline-start, data-at-inline-end',
       'attribute',
       '—',

@@ -1,4 +1,5 @@
 import '@slotted/styles/scroll-area/scroll-area.css';
+import { createFocusOrigin } from '@slotted/core/focus';
 import { scrollAreaMessages } from '@slotted/core/i18n';
 import {
   createScrollEdges,
@@ -7,7 +8,7 @@ import {
   type ScrollEdgesHandle,
   type ScrollEdgesState,
 } from '@slotted/core/overflow';
-import { useCallback, useImperativeHandle, useRef, useState } from 'react';
+import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import type { Ref, UIEvent } from 'react';
 
 import { useMessages } from '../i18n';
@@ -146,6 +147,12 @@ export function ScrollArea({
       refresh: () => edges.current?.refresh(),
       focus: () => viewport?.focus(),
     }),
+    [viewport],
+  );
+
+  /** A click on the content focuses the scrollport; its ring is for the keyboard (`createFocusOrigin`). */
+  useEffect(
+    () => (viewport === null ? undefined : createFocusOrigin(viewport).destroy),
     [viewport],
   );
 

@@ -1092,6 +1092,33 @@ describe('the scrolling region', () => {
     expect(scroll).toHaveAttribute('data-overflowing', '');
     expect(scroll).toHaveAccessibleName('Table, scrollable');
   });
+
+  it('draws its ring for a focus from the keyboard, and not for a click followed by Shift', () => {
+    /** A pointer press focuses the nearest focusable ancestor, as a browser does. */
+    const press = (target: Element) => {
+      fireEvent.pointerDown(target);
+      target.closest<HTMLElement>('[tabindex], a[href], button')?.focus();
+    };
+    const { container, rerender } = render(<Invoices />);
+    const scroll = container.querySelector('[data-part="scroll"]') as HTMLElement;
+    measure(scroll, { client: 320, scroll: 900 });
+    rerender(<Invoices striped />);
+    fireEvent.scroll(scroll);
+
+    press(scroll.querySelector('td')!);
+    fireEvent.keyDown(scroll, { key: 'Shift' });
+    expect(document.activeElement).toBe(scroll);
+    expect(scroll).not.toHaveAttribute('data-focus-origin', 'keyboard');
+
+    fireEvent.keyDown(scroll, { key: 'ArrowRight' });
+    expect(scroll).toHaveAttribute('data-focus-origin', 'keyboard');
+
+    scroll.blur();
+    expect(scroll).not.toHaveAttribute('data-focus-origin');
+    fireEvent.keyDown(document.body, { key: 'Tab' });
+    scroll.focus();
+    expect(scroll).toHaveAttribute('data-focus-origin', 'keyboard');
+  });
 });
 
 describe('an application setting the family once', () => {

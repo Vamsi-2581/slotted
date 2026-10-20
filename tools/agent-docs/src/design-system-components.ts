@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -103,9 +103,10 @@ export async function renderExamples(
   root: string,
   examples: ReadonlyMap<string, string>,
 ): Promise<{ markup: Map<string, string>; errors: Map<string, string> }> {
-  const dir = join(root, 'apps/docs/node_modules/.cache/slotted-design-system');
-  rmSync(dir, { recursive: true, force: true });
-  mkdirSync(dir, { recursive: true });
+  /* A directory of its own per call: two calls running at once each delete theirs. */
+  const cache = join(root, 'apps/docs/node_modules/.cache');
+  mkdirSync(cache, { recursive: true });
+  const dir = mkdtempSync(join(cache, 'slotted-design-system-'));
   // The package's chunks load a CommonJS dependency through `require`, which an ES module lacks.
   writeFileSync(
     join(dir, 'require.mjs'),

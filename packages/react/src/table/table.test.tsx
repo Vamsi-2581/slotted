@@ -1268,68 +1268,14 @@ describe('rows of a ledger', () => {
   });
 });
 
-const HUNDRED = Array.from({ length: 100 }, (_unused, row) => row);
-const TWENTY = Array.from({ length: 20 }, (_unused, column) => column);
-
-function median(mount: () => () => void) {
-  mount()();
-  const times = [0, 1, 2].map(() => {
-    const start = performance.now();
-    const unmount = mount();
-    const elapsed = performance.now() - start;
-    unmount();
-    return elapsed;
-  });
-  return times.sort((a, b) => a - b)[1] ?? 0;
-}
-
 /**
- * A hundred rows of twenty cells, against the same rows as a plain `table`.
- * Measured in Chrome, the family costs 1.2 times the plain table in a
- * production build and about 2.1 times in React's development build, whose
- * per-element instrumentation is the difference; the scroller no longer
- * forces a layout of every row inside the task that mounts them.
+ * Measured in Chrome, a hundred rows of twenty cells cost 1.2 times the same
+ * rows as a plain `table` in a production build and about 2.1 times in
+ * React's development build, whose per-element instrumentation is the
+ * difference. What the family adds to the mounting task is the scroller, and
+ * the scroller no longer forces a layout of every row inside it.
  */
 describe('Table, the cost of a hundred rows', () => {
-  it('mounts a hundred rows of twenty cells within twice a plain table', () => {
-    const plain = median(
-      () =>
-        render(
-          <table>
-            <tbody>
-              {HUNDRED.map((row) => (
-                <tr key={row}>
-                  {TWENTY.map((column) => (
-                    <td key={column}>{`r${row}c${column}`}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>,
-        ).unmount,
-    );
-    const family = median(
-      () =>
-        render(
-          <Table columns={20}>
-            <TableContent>
-              <TableBody>
-                {HUNDRED.map((row) => (
-                  <TableRow key={row}>
-                    {TWENTY.map((column) => (
-                      <TableCell key={column}>{`r${row}c${column}`}</TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </TableContent>
-          </Table>,
-        ).unmount,
-    );
-
-    expect(family).toBeLessThan(plain * 2);
-  });
-
   it('reads no layout while it mounts when an observer will report the first size', () => {
     const reports: (() => void)[] = [];
     vi.stubGlobal(

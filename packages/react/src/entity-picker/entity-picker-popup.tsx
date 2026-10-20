@@ -4,9 +4,10 @@ import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
+import type { PositionerHandle } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { MouseEvent, PointerEvent } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -56,7 +57,13 @@ export function EntityPickerPopup() {
   const [surfaceNode, setSurfaceNode] = useState<HTMLElement | null>(null);
   const [container, setContainer] = useState<Element | null>(null);
   const [status, setStatus] = useState<PresenceStatus>('unmounted');
-  const [positioned, setPositioned] = useState(false);
+  /**
+   * The reader is about to open the popup: the field took focus or a press.
+   * The portal's layer is made then, because making it reads the field's
+   * computed style, and a read in the open's own task is a style recalculation
+   * the first frame waits for.
+   */
+  const [warm, setWarm] = useState(false);
   const presence = useRef<PresenceHandle | null>(null);
   const sentinel = useRef<HTMLDivElement | null>(null);
   const latest = useRef(picker);
@@ -75,25 +82,53 @@ export function EntityPickerPopup() {
   useEffect(() => presence.current?.sync(picker.open), [picker.open]);
   useEffect(() => presence.current?.setNode(layerNode), [layerNode]);
 
-  const mounted = status !== 'unmounted';
+  /** Open renders the popup in the commit that opens it. */
+  const mounted = picker.open || status !== 'unmounted';
 
   useEffect(() => {
-    if (!mounted) {
+    const field = picker.inputNode;
+    if (field === null || warm) return undefined;
+    const prepare = () => setWarm(true);
+    field.addEventListener('focusin', prepare);
+    field.addEventListener('pointerdown', prepare);
+    return () => {
+      field.removeEventListener('focusin', prepare);
+      field.removeEventListener('pointerdown', prepare);
+    };
+  }, [picker.inputNode, warm]);
+
+  const layered = mounted || warm;
+  useLayoutEffect(() => {
+    if (!layered) {
       setContainer(null);
       return;
     }
     const handle = createPortalRoot({ origin: picker.inputNode, disabled: !picker.portal });
     setContainer(handle.container);
     return () => handle.release();
-  }, [mounted, picker.inputNode, picker.portal]);
+  }, [layered, picker.inputNode, picker.portal]);
 
   const { side, strategy, width, controlNode } = picker;
 
   /* The anchor is the frame, not the root: the popup lines up with the text
      and not with the scope in front of it. */
-  useEffect(() => {
+  const positioner = useRef<PositionerHandle | null>(null);
+
+  /**
+   * `data-open` is written by the measurement that places the popup, on the
+   * element, in the task that opened it: the position, the side and the open
+   * state reach one style update together. A render to say "positioned" was a
+   * frame of its own.
+   */
+  const place = useCallback((handle: PositionerHandle, layer: HTMLElement) => {
+    void handle.update().then(() => {
+      if (positioner.current !== handle || !latest.current.open) return;
+      layer.setAttribute('data-open', '');
+    });
+  }, []);
+
+  useLayoutEffect(() => {
     if (layerNode === null || controlNode === null) return;
-    let live = true;
     const handle = createPositioner(controlNode, layerNode, {
       align: 'start',
       alignOffset: 0,
@@ -106,15 +141,21 @@ export function EntityPickerPopup() {
       sideOffset: 4,
       strategy,
     });
-    void handle.update().then(() => {
-      if (live) setPositioned(true);
-    });
+    positioner.current = handle;
+    if (latest.current.open) place(handle, layerNode);
     return () => {
-      live = false;
       handle.destroy();
-      setPositioned(false);
+      positioner.current = null;
+      layerNode.removeAttribute('data-open');
     };
-  }, [controlNode, layerNode, side, strategy, width]);
+  }, [controlNode, layerNode, place, side, strategy, width]);
+
+  useLayoutEffect(() => {
+    const handle = positioner.current;
+    if (handle === null || layerNode === null) return;
+    if (picker.open) place(handle, layerNode);
+    else layerNode.removeAttribute('data-open');
+  }, [layerNode, picker.open, place]);
 
   useEffect(() => {
     if (layerNode === null || !picker.open || controlNode === null) return;
@@ -328,7 +369,6 @@ export function EntityPickerPopup() {
       data-width={picker.width}
       ref={setLayerNode}
       {...(picker.open ? {} : { inert: true })}
-      {...(picker.open && positioned ? { 'data-open': '' } : {})}
     >
       <div
         aria-busy={search.status === 'loading' ? true : undefined}

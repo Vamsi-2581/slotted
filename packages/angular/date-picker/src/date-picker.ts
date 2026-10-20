@@ -204,13 +204,16 @@ let sequence = 0;
     '[attr.data-required]': "resolvedRequired() === true ? '' : null",
   },
 })
-export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
+export class SlDatePicker<V extends CalendarValue | PlainYearMonth = CalendarValue>
+  implements ControlValueAccessor, Validator, OnInit
+{
   /**
    * The date, the run or the set; under `granularity="month"`, a
-   * `PlainYearMonth`. Present means the consumer owns it.
+   * `PlainYearMonth`. Present means the consumer owns it. Its type is the
+   * type `valueChange` reports.
    */
-  readonly value = input<CalendarValue | PlainYearMonth | undefined>(undefined);
-  readonly defaultValue = input<CalendarValue | PlainYearMonth | undefined>(undefined);
+  readonly value = input<V | undefined>(undefined);
+  readonly defaultValue = input<V | undefined>(undefined);
   /**
    * What a choice is. `month` opens the calendar on the months of a year and
    * chooses a month cell; the field shows the month and the year; `value`,
@@ -285,7 +288,7 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
    */
   readonly messages = input<PartialMessages<DatePickerMessages> | undefined>(undefined);
 
-  readonly valueChange = output<ChangeRequest<CalendarValue | PlainYearMonth | null>>();
+  readonly valueChange = output<ChangeRequest<V | null>>();
   readonly openChange = output<ChangeRequest<boolean>>();
 
   @ViewChild('layer') protected layer?: ElementRef<HTMLElement>;
@@ -310,7 +313,7 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
   protected readonly sheet = signal(false);
   private readonly formDisabled = signal<boolean | undefined>(undefined);
 
-  private onChangeFn: (value: CalendarValue | PlainYearMonth | null) => void = () => undefined;
+  private onChangeFn: (value: V | null) => void = () => undefined;
   /** Whether a form model holds the value, and answers a reset through `writeValue`. */
   private formBound = false;
   private onTouchedFn: () => void = () => undefined;
@@ -354,9 +357,9 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
   }
 
   /** What leaves the picker: the month under `month`, the value otherwise. */
-  private outward(value: CalendarValue): CalendarValue | PlainYearMonth | null {
-    if (!this.monthly()) return value;
-    return isPlainDate(value) ? yearMonthOf(value) : null;
+  private outward(value: CalendarValue): V | null {
+    if (!this.monthly()) return value as V | null;
+    return (isPlainDate(value) ? yearMonthOf(value) : null) as V | null;
   }
 
   protected readonly resolvedLocale = computed(() => this.locale() ?? this.appLocale());
@@ -457,7 +460,7 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
     this.ownValue.set(this.toDay(value));
   }
 
-  registerOnChange(fn: (value: CalendarValue | PlainYearMonth | null) => void) {
+  registerOnChange(fn: (value: V | null) => void) {
     this.onChangeFn = fn;
     this.formBound = true;
   }
@@ -603,8 +606,8 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
           ? (Object.create(request, {
               previous: { enumerable: true, value: this.outward(request.previous) },
               value: { enumerable: true, value: this.outward(request.value) },
-            }) as ChangeRequest<CalendarValue | PlainYearMonth | null>)
-          : request;
+            }) as ChangeRequest<V | null>)
+          : (request as ChangeRequest<V | null>);
         this.valueChange.emit(asked);
         cancelled = request.cancelled;
       },

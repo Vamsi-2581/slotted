@@ -2,6 +2,25 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.6 — 2026-10-20
+
+- ci(release): uma só validação
+- style(harness): formata tabs-marker.mjs
+- Revert "feat(segmented-control): intervalo entre segmentos de --slotted-space-2, um passo acima do anel; o polegar mantém a altura"
+- Revert "docs(plans): sexta iteração
+- docs(plans): sexta iteração
+- feat(segmented-control): intervalo entre segmentos de --slotted-space-2, um passo acima do anel; o polegar mantém a altura
+- docs(plans): sexta iteração
+- feat(segmented-control): divisores de volta, refinados
+- docs(plans): sexta iteração
+- feat(segmented-control): segmentos afastados pelo passo do anel e sem divisores; o polegar anda uma coluna e um intervalo, e o rádio cobre metade do intervalo de cada lado
+- docs(plans): sexta iteração
+- feat(segmented-control): visual neutro
+- docs(plans): sexta iteração
+- fix(stat-card): limite do @scope ancorado em :scope
+- fix(tabs): o marcador desliza só quando a seleção muda, com duração média numa curva que começa e acaba devagar; uma nova medição da mesma tab já não o anima
+- feat(tabs): --slotted-tabs-marker-offset
+
 ## 0.1.0-beta.5 — 2026-10-20
 
 - docs(evals): caminhos relativos do material de agente

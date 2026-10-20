@@ -41,6 +41,7 @@ import { calendarMessages, type CalendarMessages, type PartialMessages } from '@
 import { injectCalendarDefaults } from './calendar-defaults';
 import type {
   CalendarCalendar,
+  CalendarGranularity,
   CalendarOutsideDays,
   CalendarSelectionMode,
   CalendarValue,
@@ -198,19 +199,40 @@ let sequence = 0;
         </div>
       }
       @case ('month') {
-        <div data-part="months">
-          @for (name of monthNames(); track $index) {
-            <button
-              data-part="period"
-              type="button"
-              [attr.data-selected]="focused().month === $index + 1 ? '' : null"
-              [attr.aria-selected]="focused().month === $index + 1 ? 'true' : null"
-              (click)="pickMonth($index + 1, $event)"
-            >
-              {{ name }}
-            </button>
-          }
-        </div>
+        @if (monthly()) {
+          <div data-part="months">
+            @for (name of monthNames(); track $index) {
+              <button
+                data-part="period"
+                type="button"
+                [attr.aria-label]="monthLabel($index + 1)"
+                [attr.data-selected]="heldMonth($index + 1) ? '' : null"
+                [attr.aria-selected]="heldMonth($index + 1) ? 'true' : null"
+                [attr.aria-disabled]="monthUnavailable($index + 1) ? 'true' : null"
+                [attr.data-unavailable]="monthUnavailable($index + 1) ? '' : null"
+                [attr.data-focused]="focused().month === $index + 1 ? '' : null"
+                [tabindex]="focused().month === $index + 1 ? 0 : -1"
+                (click)="selectMonth(focused().year, $index + 1, 'pointer', $event)"
+              >
+                {{ name }}
+              </button>
+            }
+          </div>
+        } @else {
+          <div data-part="months">
+            @for (name of monthNames(); track $index) {
+              <button
+                data-part="period"
+                type="button"
+                [attr.data-selected]="focused().month === $index + 1 ? '' : null"
+                [attr.aria-selected]="focused().month === $index + 1 ? 'true' : null"
+                (click)="pickMonth($index + 1, $event)"
+              >
+                {{ name }}
+              </button>
+            }
+          </div>
+        }
       }
       @default {
         <div data-part="years">
@@ -264,6 +286,8 @@ export class SlCalendar implements OnInit {
   /** Present means the consumer owns which grid is showing. */
   readonly view = input<CalendarView | undefined>(undefined);
   readonly defaultView = input<CalendarView | undefined>(undefined);
+  /** What a choice is: a day, or a month of a year. Defaults to `day`. */
+  readonly granularity = input<CalendarGranularity | undefined>(undefined);
 
   readonly weekNumbers = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
@@ -337,8 +361,17 @@ export class SlCalendar implements OnInit {
 
   protected readonly held = computed(() => this.value() ?? this.ownValue());
   protected readonly focused = computed(() => this.focusedDate() ?? this.ownFocused());
+  /**
+   * Under `granularity="month"` the months of a year are where a choice is
+   * made: the calendar opens there and never goes below it, so a view asked
+   * for as `day` is read as `month`.
+   */
+  protected readonly monthly = computed(() => this.granularity() === 'month');
   /** Which grid is showing. Public, so a template reaches it through `exportAs`. */
-  readonly currentView = computed(() => this.view() ?? this.ownView());
+  readonly currentView = computed((): CalendarView => {
+    const asked = this.view() ?? this.ownView();
+    return this.monthly() && asked === 'day' ? 'month' : asked;
+  });
 
   protected readonly resolvedMonths = computed(() =>
     Math.max(1, this.months() ?? this.defaults.months),
@@ -433,7 +466,7 @@ export class SlCalendar implements OnInit {
 
   ngOnInit() {
     this.ownValue.set(this.defaultValue() ?? null);
-    this.ownView.set(this.defaultView() ?? 'day');
+    this.ownView.set(this.defaultView() ?? (this.monthly() ? 'month' : 'day'));
     this.today.set(todayIn(this.timeZone() ?? this.defaults.timeZone));
     const start = this.startingDate();
     this.ownFocused.set(start);
@@ -442,7 +475,11 @@ export class SlCalendar implements OnInit {
 
   /** Puts focus on the cell holding the roving tab stop. */
   focus() {
-    this.element.querySelector<HTMLElement>('[data-part="day"][tabindex="0"]')?.focus();
+    this.element
+      .querySelector<HTMLElement>(
+        '[data-part="day"][tabindex="0"], [data-part="period"][tabindex="0"]',
+      )
+      ?.focus();
   }
 
   /** Moves the reader to a date, paging the grid to reach it. */
@@ -536,6 +573,45 @@ export class SlCalendar implements OnInit {
     this.requestFocused(date, reason, source);
   }
 
+  /** A month cell's name: the month and the year, which the cell alone does not say. */
+  protected monthLabel(month: number): string {
+    return this.format().monthYear(plainDate(this.focused().year, month, 1));
+  }
+
+  /** Whether the value's month is this cell of the year on screen. */
+  protected heldMonth(month: number): boolean {
+    const held = this.held();
+    if (held === null || Array.isArray(held) || isRange(held)) return false;
+    return held.year === this.focused().year && held.month === month;
+  }
+
+  /**
+   * A month the bounds leave no day of. The bounds are days, so a month is
+   * refused only when it ends before `min` or starts after `max`.
+   */
+  protected monthUnavailable(month: number, year = this.focused().year): boolean {
+    const at = year * 12 + month;
+    const min = this.min();
+    const max = this.max();
+    return (
+      (min !== undefined && at < min.year * 12 + min.month) ||
+      (max !== undefined && at > max.year * 12 + max.month)
+    );
+  }
+
+  /** The value of a month cell is the first day of the month. */
+  protected selectMonth(
+    year: number,
+    month: number,
+    reason: ChangeReason,
+    source: Event | undefined,
+  ) {
+    if (!this.editable() || this.monthUnavailable(month, year)) return;
+    const date = plainDate(year, month, 1);
+    this.requestValue(date, reason, source);
+    this.requestFocused(date, reason, source);
+  }
+
   /** The reader moves with the page rather than staying behind it. */
   protected turnPage(direction: 1 | -1, source: Event) {
     const focused = this.focused();
@@ -588,6 +664,44 @@ export class SlCalendar implements OnInit {
       this.requestFocused(next, 'keyboard', event);
     };
 
+    /**
+     * The months of a year, as a grid of four columns: the arrows move one
+     * month or one row, Home and End reach January and December, the page
+     * keys move a year, and Enter or Space chooses. Escape is left alone, so
+     * the surface above the calendar may close on it.
+     */
+    if (this.monthly() && this.currentView() === 'month') {
+      const toMonth = (delta: number) => {
+        const index = focused.year * 12 + (focused.month - 1) + delta;
+        return plainDate(Math.floor(index / 12), (index % 12) + 1, 1);
+      };
+      switch (event.key) {
+        case forward:
+          return move(toMonth(1));
+        case backward:
+          return move(toMonth(-1));
+        case 'ArrowUp':
+          return move(toMonth(-4));
+        case 'ArrowDown':
+          return move(toMonth(4));
+        case 'Home':
+          return move(plainDate(focused.year, 1, 1));
+        case 'End':
+          return move(plainDate(focused.year, 12, 1));
+        case 'PageUp':
+          return move(toMonth(-12));
+        case 'PageDown':
+          return move(toMonth(12));
+        case 'Enter':
+        case ' ':
+          consume();
+          this.selectMonth(focused.year, focused.month, 'keyboard', event);
+          return;
+        default:
+          break;
+      }
+    }
+
     switch (event.key) {
       case forward:
         return move(addDays(focused, 1));
@@ -616,7 +730,9 @@ export class SlCalendar implements OnInit {
            passed on, and no layer is asked to close. */
         /* In the day view the key is left alone, so a surface above the
            calendar may still close on it. */
-        if (this.currentView() === 'day') return;
+        if (this.currentView() === 'day' || (this.monthly() && this.currentView() === 'month')) {
+          return;
+        }
         consume();
         this.setView(this.currentView() === 'year' ? 'month' : 'day');
         return;
@@ -697,7 +813,7 @@ export class SlCalendar implements OnInit {
           return;
         }
         const stop = this.element.querySelector<HTMLElement>(
-          '[data-part="cell"]:not([data-outside-month]) [data-part="day"][tabindex="0"]',
+          '[data-part="cell"]:not([data-outside-month]) [data-part="day"][tabindex="0"], [data-part="period"][tabindex="0"]',
         );
         if (stop !== null) {
           this.restoreFocus = false;

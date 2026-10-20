@@ -85,6 +85,10 @@ Pass `value` and update it from `onValueChange` in React, or bind `[value]` and 
 
 <Example name="controlled" />
 
+An API that carries dates as ISO 8601 text, such as `"2026-10-19"`, converts at the boundary with `@slotted/core/date`, which also exports the `PlainDate` type. `parseISODate(text)` returns a `PlainDate` or `null`, `toISODate(date)` returns `'YYYY-MM-DD'`, and `isPlainDate(value)` narrows the `CalendarValue` the change handler reports.
+
+<Example name="iso-date" />
+
 ## Clearing
 
 `clearable` adds a clear button to the field while it holds a date. The button sets the value to `null` with the reason `clear` and returns focus to the field.

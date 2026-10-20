@@ -23,6 +23,20 @@ export {
 } from './plain-date';
 export type { DateStep, PlainDate } from './plain-date';
 export {
+  compareYearMonth,
+  firstDayOf,
+  isInYearMonth,
+  isPlainYearMonth,
+  isSameYearMonth,
+  isYearMonthInRange,
+  lastDayOf,
+  parseISOYearMonth,
+  plainYearMonth,
+  toISOYearMonth,
+  yearMonthOf,
+} from './plain-year-month';
+export type { PlainYearMonth } from './plain-year-month';
+export {
   addSeconds,
   clampTime,
   compareTime,
@@ -69,7 +83,7 @@ export type {
   TimeRangeRules,
   TimeRangeValue,
 } from './time-range';
-export { createDateFormat, fieldRange } from './format';
+export { createDateFormat, fieldRange, yearMonthPattern } from './format';
 export type {
   DateFieldName,
   DateFormat,

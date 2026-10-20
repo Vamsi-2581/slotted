@@ -244,14 +244,14 @@ const scenes: ReferenceSceneMeta[] = [
 const api: ApiRow[] = apiRows([
   [
     'value',
-    'PlainDate | DateRange | PlainDate[] | null',
+    'PlainDate | DateRange | PlainDate[] | PlainYearMonth | null',
     '—',
     'SlDatePicker',
-    'The selected value, whose shape follows selectionMode. Binding it makes the value controlled.',
+    "The selected value, whose shape follows selectionMode. Binding it makes the value controlled. PlainDate is exported by @slotted/core/date. parseISODate(text) returns a PlainDate or null, toISODate(date) returns 'YYYY-MM-DD', and isPlainDate(value) narrows the CalendarValue (valueChange) reports.",
   ],
   [
     'defaultValue',
-    'PlainDate | DateRange | PlainDate[] | null',
+    'PlainDate | DateRange | PlainDate[] | PlainYearMonth | null',
     '—',
     'SlDatePicker',
     'The starting value of an uncontrolled date picker. Read once, when the date picker initializes.',
@@ -272,14 +272,14 @@ const api: ApiRow[] = apiRows([
   ],
   [
     'min',
-    'PlainDate',
+    'PlainDate | PlainYearMonth',
     '—',
     'SlDatePicker',
     'The earliest date the field and the calendar accept. Earlier days are disabled in the calendar, an earlier typed date marks the date picker invalid, and a form reports slottedDateRange.',
   ],
   [
     'max',
-    'PlainDate',
+    'PlainDate | PlainYearMonth',
     '—',
     'SlDatePicker',
     'The latest date the field and the calendar accept. Later days are disabled in the calendar, a later typed date marks the date picker invalid, and a form reports slottedDateRange.',
@@ -290,6 +290,13 @@ const api: ApiRow[] = apiRows([
     '—',
     'SlDatePicker',
     'Returns true for a date the reader cannot choose. The calendar disables it, a typed unavailable date marks the date picker invalid, and a form reports slottedDateUnavailable.',
+  ],
+  [
+    'granularity',
+    "'day' | 'month'",
+    'day',
+    'SlDatePicker',
+    'What a choice is. month opens the calendar on the months of a year and chooses a month cell; the field shows the month and the year segments; value, defaultValue, min and max are PlainYearMonth from @slotted/core/date ({ year, month }), (valueChange) reports one, and name submits YYYY-MM. parseISOYearMonth and toISOYearMonth convert to and from that text. selectionMode, months, isDateUnavailable and the week inputs do not apply.',
   ],
   [
     'selectionMode',

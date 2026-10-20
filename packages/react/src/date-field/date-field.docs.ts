@@ -277,7 +277,7 @@ const api: ApiRow[] = apiRows([
     'PlainDate | null',
     '—',
     'DateField',
-    'The date the control shows. Present means the consumer owns it: the control asks and waits rather than moving it.',
+    "The date the control shows. Present means the consumer owns it: the control asks and waits rather than moving it. PlainDate is exported by @slotted/core/date. parseISODate(text) returns a PlainDate or null, and toISODate(date) returns 'YYYY-MM-DD': value={parseISODate(iso)} onValueChange={(v) => setIso(v === null ? '' : toISODate(v))}.",
   ],
   [
     'defaultValue',
@@ -285,6 +285,13 @@ const api: ApiRow[] = apiRows([
     '—',
     'DateField',
     'The date the control starts from when nobody else writes one. Read once; a later change to it is not new state.',
+  ],
+  [
+    'granularity',
+    "'day' | 'month'",
+    'day',
+    'DateField',
+    'What the control holds. month shows the month and the year segments in the locale’s order, takes the first day of the month as its value, and submits YYYY-MM through name.',
   ],
   [
     'min',

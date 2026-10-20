@@ -1,4 +1,4 @@
-import { plainDate, toISODate } from '@slotted/core/date';
+import { plainDate, plainYearMonth, toISODate } from '@slotted/core/date';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
@@ -413,5 +413,98 @@ describe('inside a field', () => {
 
     expect(warn).not.toHaveBeenCalledWith(expect.stringContaining('without a control'));
     warn.mockRestore();
+  });
+});
+
+/**
+ * A card statement, a budget month: the form asks for a month and no day. The
+ * calendar opens on the months of a year, a month cell is the choice, the
+ * field shows only the month and the year, and the form submits "YYYY-MM".
+ */
+describe('month granularity', () => {
+  it('chooses a month cell and reports the month, and submits YYYY-MM', () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <form>
+        <DatePicker
+          defaultValue={plainYearMonth(2026, 10)}
+          granularity="month"
+          locale="en-US"
+          name="statement"
+          onValueChange={onValueChange}
+        />
+      </form>,
+    );
+
+    const segments = [...container.querySelectorAll('[data-part="segment"]')].map((segment) =>
+      segment.getAttribute('data-field'),
+    );
+    expect(segments).toEqual(['month', 'year']);
+    const hidden = () =>
+      container.querySelector<HTMLInputElement>('[data-part="hidden-input"]')?.value;
+    expect(hidden()).toBe('2026-10');
+
+    open();
+    expect(document.querySelector('[data-ui="calendar"]')).toHaveAttribute('data-view', 'month');
+    expect(document.querySelector('[data-part="grid"]')).toBeNull();
+    const november = screen.getByRole('button', { name: 'November 2026' });
+    expect(screen.getByRole('button', { name: 'October 2026' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+
+    fireEvent.click(november);
+
+    expect(onValueChange).toHaveBeenCalledTimes(1);
+    expect(onValueChange.mock.calls[0]?.[0]).toEqual({ year: 2026, month: 11 });
+    expect(hidden()).toBe('2026-11');
+    expect(root()).not.toHaveAttribute('data-open');
+  });
+
+  it('refuses a month outside min and max, which are months', () => {
+    render(
+      <DatePicker
+        defaultOpen
+        defaultValue={plainYearMonth(2026, 10)}
+        granularity="month"
+        locale="en-US"
+        max={plainYearMonth(2026, 11)}
+        min={plainYearMonth(2026, 3)}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'February 2026' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+    expect(screen.getByRole('button', { name: 'November 2026' })).not.toHaveAttribute(
+      'aria-disabled',
+    );
+    expect(screen.getByRole('button', { name: 'December 2026' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+  });
+
+  it('moves the month with the arrow keys and chooses it with Enter', () => {
+    const onValueChange = vi.fn();
+    render(
+      <DatePicker
+        defaultValue={plainYearMonth(2026, 10)}
+        granularity="month"
+        locale="en-US"
+        onValueChange={onValueChange}
+      />,
+    );
+    open();
+    const october = screen.getByRole('button', { name: 'October 2026' });
+    expect(document.activeElement).toBe(october);
+
+    fireEvent.keyDown(october, { key: 'ArrowRight' });
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'November 2026' }));
+    fireEvent.keyDown(document.activeElement as Element, { key: 'ArrowDown' });
+    fireEvent.keyDown(document.activeElement as Element, { key: 'Enter' });
+
+    expect(onValueChange.mock.calls[0]?.[0]).toEqual({ year: 2027, month: 3 });
   });
 });

@@ -87,6 +87,7 @@ export function Calendar({
   firstDayOfWeek,
   fixedWeeks,
   focusedDate,
+  granularity,
   invalid,
   isDateUnavailable,
   locale,
@@ -179,8 +180,15 @@ export function Calendar({
   /** The focus is only moved into the DOM after a key, never on a render. */
   const shouldRestoreFocus = useRef(false);
 
-  const [ownView, setOwnView] = useState<CalendarView>(defaultView ?? 'day');
-  const currentView = view ?? ownView;
+  /**
+   * Under `granularity="month"` the months of a year are where a choice is
+   * made: the calendar opens there and never goes below it, so a view asked
+   * for as `day` is read as `month`.
+   */
+  const monthly = granularity === 'month';
+  const [ownView, setOwnView] = useState<CalendarView>(defaultView ?? (monthly ? 'month' : 'day'));
+  const askedView = view ?? ownView;
+  const currentView: CalendarView = monthly && askedView === 'day' ? 'month' : askedView;
 
   /**
    * The day under the pointer, held only to name the pending end of an open
@@ -304,7 +312,7 @@ export function Calendar({
     if (!shouldRestoreFocus.current) return;
     const root = rootRef.current;
     const stop = root?.querySelector<HTMLElement>(
-      '[data-part="cell"]:not([data-outside-month]) [data-part="day"][tabindex="0"]',
+      '[data-part="cell"]:not([data-outside-month]) [data-part="day"][tabindex="0"], [data-part="period"][tabindex="0"]',
     );
     /* A key that crossed the month edge lands on the old page's trailing day
        first, and the page follows one render later. Focus waits for the page
@@ -325,7 +333,11 @@ export function Calendar({
     ref,
     () => ({
       focus: () => {
-        rootRef.current?.querySelector<HTMLElement>('[data-part="day"][tabindex="0"]')?.focus();
+        rootRef.current
+          ?.querySelector<HTMLElement>(
+            '[data-part="day"][tabindex="0"], [data-part="period"][tabindex="0"]',
+          )
+          ?.focus();
       },
       focusDate: (date: PlainDate) => requestFocused(date, 'keyboard', undefined),
     }),
@@ -342,6 +354,34 @@ export function Calendar({
     requestValue(nextValue(date, held, selectionMode), reason, source);
     requestFocused(date, reason, source);
   };
+
+  /**
+   * A month the bounds leave no day of. The bounds are days, so a month is
+   * refused only when it ends before `min` or starts after `max`; a month
+   * `min` falls inside is still a month the reader may choose.
+   */
+  const monthUnavailable = (year: number, month: number) =>
+    (min !== undefined && year * 12 + month < min.year * 12 + min.month) ||
+    (max !== undefined && year * 12 + month > max.year * 12 + max.month);
+
+  /** The value of a month cell is the first day of the month. */
+  const selectMonth = (
+    year: number,
+    month: number,
+    reason: 'pointer' | 'keyboard',
+    source: unknown,
+  ) => {
+    if (!editable || monthUnavailable(year, month)) return;
+    const date = plainDate(year, month, 1);
+    requestValue(date, reason, source);
+    requestFocused(date, reason, source);
+  };
+
+  /** The value's month, which is the month cell marked as chosen. */
+  const heldMonth =
+    held === null || Array.isArray(held) || isRange(held)
+      ? null
+      : { year: held.year, month: held.month };
 
   const onGridKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     /* The reader's own handler first, and it always runs. */
@@ -367,6 +407,45 @@ export function Calendar({
       consume();
       requestFocused(next, 'keyboard', event);
     };
+
+    /**
+     * The months of a year, as a grid of four columns: the arrows move one
+     * month or one row, Home and End reach January and December, the page
+     * keys move a year, and Enter or Space chooses. Escape is left alone, so
+     * the surface above the calendar may close on it.
+     */
+    if (monthly && currentView === 'month') {
+      const toMonth = (delta: number) => {
+        const index = focused.year * 12 + (focused.month - 1) + delta;
+        return plainDate(Math.floor(index / 12), (index % 12) + 1, 1);
+      };
+      const columns = VIEW_COLUMNS.month;
+      switch (event.key) {
+        case forward:
+          return move(toMonth(1));
+        case backward:
+          return move(toMonth(-1));
+        case 'ArrowUp':
+          return move(toMonth(-columns));
+        case 'ArrowDown':
+          return move(toMonth(columns));
+        case 'Home':
+          return move(plainDate(focused.year, 1, 1));
+        case 'End':
+          return move(plainDate(focused.year, 12, 1));
+        case 'PageUp':
+          return move(toMonth(-12));
+        case 'PageDown':
+          return move(toMonth(12));
+        case 'Enter':
+        case ' ':
+          consume();
+          selectMonth(focused.year, focused.month, 'keyboard', event);
+          return;
+        default:
+          break;
+      }
+    }
 
     switch (event.key) {
       case forward:
@@ -396,7 +475,7 @@ export function Calendar({
            passed on, and no layer is asked to close. */
         /* In the day view the key is left alone, so a surface above the
            calendar may still close on it. */
-        if (currentView === 'day') return;
+        if (currentView === 'day' || (monthly && currentView === 'month')) return;
         consume();
         changeView(currentView === 'year' ? 'month' : 'day');
         return;
@@ -454,6 +533,29 @@ export function Calendar({
             weekNumbers={resolvedWeekNumbers}
           />
         ))}
+      </div>
+    ) : currentView === 'month' && monthly ? (
+      <div data-part="months">
+        {format.monthNames('short').map((name, index) => {
+          const month = index + 1;
+          const refused = monthUnavailable(focused.year, month);
+          const chosen = heldMonth?.year === focused.year && heldMonth.month === month;
+          return (
+            <button
+              aria-label={format.monthYear(plainDate(focused.year, month, 1))}
+              data-part="period"
+              key={name}
+              onClick={(event) => selectMonth(focused.year, month, 'pointer', event)}
+              tabIndex={focused.month === month ? 0 : -1}
+              type="button"
+              {...(chosen ? { 'aria-selected': true, 'data-selected': '' } : {})}
+              {...(refused ? { 'aria-disabled': true, 'data-unavailable': '' } : {})}
+              {...(focused.month === month ? { 'data-focused': '' } : {})}
+            >
+              {name}
+            </button>
+          );
+        })}
       </div>
     ) : currentView === 'month' ? (
       <div data-part="months">

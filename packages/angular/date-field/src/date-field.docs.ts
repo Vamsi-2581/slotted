@@ -264,7 +264,7 @@ const api: ApiRow[] = apiRows([
     'PlainDate | null',
     '—',
     'SlDateField',
-    'The date the control shows. Present means the consumer owns it: the control asks and waits rather than moving it.',
+    "The date the control shows. Present means the consumer owns it: the control asks and waits rather than moving it. PlainDate is exported by @slotted/core/date. parseISODate(text) returns a PlainDate or null, and toISODate(date) returns 'YYYY-MM-DD'.",
   ],
   [
     'defaultValue',
@@ -272,6 +272,13 @@ const api: ApiRow[] = apiRows([
     '—',
     'SlDateField',
     'The date the control starts from when nobody else writes one. Read once, in ngOnInit, because Angular binds inputs after it constructs a component.',
+  ],
+  [
+    'granularity',
+    "'day' | 'month'",
+    'day',
+    'SlDateField',
+    'What the control holds. month shows the month and the year segments in the locale’s order, takes the first day of the month as its value, and submits YYYY-MM through name.',
   ],
   [
     'min',

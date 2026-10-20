@@ -117,6 +117,23 @@ function placeholderFor(locale: string, field: DateFieldName, width: number): st
 }
 
 /**
+ * The locale's pattern without its day, for a field that holds a month: the
+ * day goes with the one separator that joined it to its neighbour — the one
+ * after it when it leads or sits in the middle, the one before it when it
+ * ends the pattern — so `MM/DD/YYYY` reads `MM/YYYY` and `YYYY/MM/DD` reads
+ * `YYYY/MM`.
+ */
+export function yearMonthPattern(pattern: readonly DatePatternPart[]): DatePatternPart[] {
+  const index = pattern.findIndex((part) => part.type === 'day');
+  if (index === -1) return [...pattern];
+  const after = pattern[index + 1]?.type === 'literal' && index + 2 < pattern.length;
+  const drop = after ? index + 1 : index - 1;
+  return pattern.filter(
+    (_part, at) => at !== index && !(at === drop && pattern[at]?.type === 'literal'),
+  );
+}
+
+/**
  * Which day the locale starts its week on, in the numbering `dayOfWeek` uses.
  * `getWeekInfo` answers 1 to 7 with Monday first and Sunday last, so `% 7`
  * turns Sunday's 7 into 0 and leaves every other day alone.

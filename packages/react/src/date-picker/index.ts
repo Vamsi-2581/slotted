@@ -3,9 +3,11 @@ export { DatePickerDefaultsProvider, useDatePickerDefaults } from './date-picker
 export type {
   DatePickerCalendar,
   DatePickerCloseOnSelect,
+  DatePickerDayProps,
   DatePickerDefaults,
   DatePickerDefaultsProviderProps,
   DatePickerHandle,
+  DatePickerMonthProps,
   DatePickerPlacement,
   DatePickerProps,
   DatePickerRootProps,

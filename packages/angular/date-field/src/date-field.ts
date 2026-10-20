@@ -8,12 +8,15 @@ import {
   fieldRange,
   isDateInRange,
   isSameDate,
+  parseISOYearMonth,
   plainDate,
   segmentsOf,
   stepSegment,
   toISODate,
+  toISOYearMonth,
   todayIn,
   typeDigit,
+  yearMonthPattern,
 } from '@slotted/core/date';
 import type { DateFieldName, PlainDate, SegmentState } from '@slotted/core/date';
 import { createControllable } from '@slotted/core/state';
@@ -119,7 +122,7 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
       [attr.aria-disabled]="ariaDisabled()"
       (paste)="onPaste($event)"
     >
-      @for (part of format().pattern; track $index) {
+      @for (part of pattern(); track $index) {
         @if (part.type === 'literal') {
           <span data-part="literal" aria-hidden="true">{{ part.value }}</span>
         } @else {
@@ -184,6 +187,14 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
   readonly value = input<PlainDate | null | undefined>(undefined);
   /** The value the control starts from when nobody else writes one. */
   readonly defaultValue = input<PlainDate | null | undefined>(undefined);
+
+  /**
+   * What the control holds: a day, or a month of a year. Under `month` the
+   * field shows the month and the year segments in the locale's order, its
+   * value is the first day of that month, and the hidden input submits
+   * `YYYY-MM`. Defaults to `day`.
+   */
+  readonly granularity = input<'day' | 'month' | undefined>(undefined);
 
   /** The earliest date the control accepts. Also a form validity rule. */
   readonly min = input<PlainDate | undefined>(undefined);
@@ -298,9 +309,15 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
     }),
   );
 
+  /** A field that holds a month draws the locale's pattern without its day. */
+  protected readonly monthly = computed(() => this.granularity() === 'month');
+  protected readonly pattern = computed(() =>
+    this.monthly() ? yearMonthPattern(this.format().pattern) : this.format().pattern,
+  );
+
   protected readonly fields = computed(() =>
-    this.format()
-      .pattern.filter((part) => part.type !== 'literal')
+    this.pattern()
+      .filter((part) => part.type !== 'literal')
       .map((part) => part.type as DateFieldName),
   );
 
@@ -308,11 +325,15 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
   readonly date = computed(() => dateOf(this.segments()));
   protected readonly iso = computed(() => {
     const date = this.date();
-    return date === null ? '' : toISODate(date);
+    if (date === null) return '';
+    return this.monthly()
+      ? toISOYearMonth({ year: date.year, month: date.month })
+      : toISODate(date);
   });
   protected readonly spokenDate = computed(() => {
     const date = this.date();
-    return date === null ? '' : this.format().describe(date);
+    if (date === null) return '';
+    return this.monthly() ? this.format().monthYear(date) : this.format().describe(date);
   });
 
   readonly resolvedSize = computed(
@@ -372,7 +393,7 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
   protected readonly showClear = computed(() => {
     if (!this.clearable() || !this.editable()) return false;
     const held = this.segments();
-    return held.year !== null || held.month !== null || held.day !== null;
+    return this.fields().some((name) => held[name] !== null);
   });
 
   /**
@@ -613,7 +634,10 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
    */
   protected onPaste(event: ClipboardEvent) {
     if (!this.editable()) return;
-    const parsed = this.format().parse(event.clipboardData?.getData('text/plain') ?? '');
+    const text = event.clipboardData?.getData('text/plain') ?? '';
+    const month = this.monthly() ? parseISOYearMonth(text) : null;
+    const parsed =
+      month === null ? this.format().parse(text) : plainDate(month.year, month.month, 1);
     if (parsed === null) return;
     event.preventDefault();
     this.commit(segmentsOf(parsed), 'keyboard', event);
@@ -710,7 +734,9 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
    * digit would ask a consumer's server about the year 2. The request is
    * emitted when the run ends.
    */
-  private commit(next: SegmentState, reason: ChangeReason, source: Event | undefined) {
+  private commit(given: SegmentState, reason: ChangeReason, source: Event | undefined) {
+    /* A month has no day segment to fill, so the day is the first of it. */
+    const next = this.monthly() && given.day !== 1 ? { ...given, day: 1, intendedDay: 1 } : given;
     const previous = this.date();
     this.segments.set(next);
     if (next.typing !== null) return;

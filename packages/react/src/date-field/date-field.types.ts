@@ -100,6 +100,14 @@ export interface DateFieldProps extends Omit<
   /** Asked before the value moves, and able to cancel it. */
   onValueChange?: ((value: PlainDate | null, request: DateFieldChangeRequest) => void) | undefined;
 
+  /**
+   * What the control holds: a day, or a month of a year. Under `month` the
+   * field shows the month and the year segments in the locale's order, its
+   * value is the first day of that month, and the hidden input submits
+   * `YYYY-MM`. Defaults to `day`.
+   */
+  granularity?: 'day' | 'month' | undefined;
+
   /** The earliest date the control accepts. Reported through `aria-valuemin`. */
   min?: PlainDate | undefined;
   /** The latest date the control accepts. Reported through `aria-valuemax`. */

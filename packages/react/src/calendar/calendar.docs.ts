@@ -357,6 +357,13 @@ const api: ApiRow[] = apiRows([
   ],
   ['defaultView', "'day' | 'month' | 'year'", 'day', 'Calendar', 'The view it opens on.'],
   [
+    'granularity',
+    "'day' | 'month'",
+    'day',
+    'Calendar',
+    'What a choice is. month opens on the months of a year and never shows the day grid: a month cell is the value, written as the first day of that month, the arrow keys move one month or one row of four, Home and End reach January and December, Page Up and Page Down move a year, and Enter or Space chooses. A month the bounds leave no day of carries aria-disabled.',
+  ],
+  [
     'min',
     'PlainDate',
     '—',

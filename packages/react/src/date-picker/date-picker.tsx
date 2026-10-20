@@ -1,6 +1,14 @@
 import '@slotted/styles/date-picker/date-picker.css';
 
-import { createDateFormat, isDateInRange } from '@slotted/core/date';
+import {
+  createDateFormat,
+  firstDayOf,
+  isDateInRange,
+  isPlainDate,
+  lastDayOf,
+  yearMonthOf,
+} from '@slotted/core/date';
+import type { PlainYearMonth } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { tabbables } from '@slotted/core/focus';
 import { datePickerMessages } from '@slotted/core/i18n';
@@ -29,7 +37,18 @@ import { useField } from '../field';
 import { useLocale, useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { useDatePickerDefaults } from './date-picker-defaults';
-import type { DatePickerProps, DatePickerRootProps } from './date-picker.types';
+import type { ChangeRequest } from '@slotted/core/state';
+import type {
+  DatePickerDayProps,
+  DatePickerMonthProps,
+  DatePickerProps,
+  DatePickerRootProps,
+} from './date-picker.types';
+
+/** The day picker's own props, with the granularity a month picker hands it. */
+type PickerProps = Omit<DatePickerDayProps, 'granularity'> & {
+  granularity?: 'day' | 'month' | undefined;
+};
 
 /**
  * Below this width, on a finger, the surface is a sheet rather than a popover.
@@ -56,8 +75,54 @@ const SHEET_QUERY = '(max-width: 480px) and (pointer: coarse)';
  * handler inside the surface is too late; the family decides there instead, and
  * walks the calendar's view down rather than closing while a month or year grid
  * is showing.
+ *
+ * **A month is its own value.** Under `granularity="month"` the picker holds a
+ * `PlainYearMonth`; the field and the calendar below it hold the first day of
+ * that month, and the conversion happens here, at the one boundary.
  */
-export function DatePicker({
+export function DatePicker(props: DatePickerProps) {
+  return props.granularity === 'month' ? <MonthPicker {...props} /> : <Picker {...props} />;
+}
+
+/**
+ * The month picker, as the day picker over the first day of each month. The
+ * bounds become the first day of `min` and the last day of `max`, so a month
+ * the bounds touch is a month the reader may choose.
+ */
+function MonthPicker({
+  defaultValue,
+  granularity: _granularity,
+  max,
+  min,
+  onValueChange,
+  value,
+  ...rest
+}: DatePickerMonthProps) {
+  const toDate = (month: PlainYearMonth | null) => (month === null ? null : firstDayOf(month));
+  return (
+    <Picker
+      {...rest}
+      granularity="month"
+      {...(value === undefined ? {} : { value: toDate(value) })}
+      {...(defaultValue === undefined ? {} : { defaultValue: toDate(defaultValue) })}
+      {...(min === undefined ? {} : { min: firstDayOf(min) })}
+      {...(max === undefined ? {} : { max: lastDayOf(max) })}
+      onValueChange={(next, request) => {
+        if (onValueChange === undefined) return;
+        const toMonth = (date: unknown) => (isPlainDate(date) ? yearMonthOf(date) : null);
+        /* The request keeps its own `cancel` and `cancelled`, which are what
+           the picker reads back, and carries the months instead of the days. */
+        const asked = Object.create(request, {
+          previous: { enumerable: true, value: toMonth(request.previous) },
+          value: { enumerable: true, value: toMonth(next) },
+        }) as ChangeRequest<PlainYearMonth | null>;
+        onValueChange(asked.value, asked);
+      }}
+    />
+  );
+}
+
+function Picker({
   calendar,
   className,
   clearable = false,
@@ -69,6 +134,7 @@ export function DatePicker({
   firstDayOfWeek,
   fixedWeeks = true,
   footer,
+  granularity,
   invalid,
   isDateUnavailable,
   locale,
@@ -96,8 +162,9 @@ export function DatePicker({
   weekNumbers,
   yearPivot,
   ...nativeProps
-}: DatePickerProps) {
+}: PickerProps) {
   const field = useField();
+  const monthly = granularity === 'month';
   const defaults = useDatePickerDefaults();
   const appLocale = useLocale();
   const t = useMessages(datePickerMessages, messages);
@@ -122,7 +189,9 @@ export function DatePicker({
   const isOpen = open ?? ownOpen;
   const [ownValue, setOwnValue] = useState<CalendarValue>(defaultValue ?? null);
   const held = value ?? ownValue;
-  const [view, setView] = useState<CalendarView>(defaultView ?? 'day');
+  /* The lowest view is where a choice is made: the days, or the months. */
+  const lowestView: CalendarView = monthly ? 'month' : 'day';
+  const [view, setView] = useState<CalendarView>(defaultView ?? lowestView);
 
   const resolvedLocale = locale ?? appLocale;
   const resolvedTimeZone = timeZone ?? defaults.timeZone;
@@ -289,7 +358,7 @@ export function DatePicker({
          * surface by the time it ran; the decision is taken here, and the
          * layer is simply not asked to close.
          */
-        if (request.reason === 'escape' && viewRef.current !== 'day') {
+        if (request.reason === 'escape' && viewRef.current !== lowestView) {
           setView(viewRef.current === 'year' ? 'month' : 'day');
           return;
         }
@@ -300,7 +369,7 @@ export function DatePicker({
       },
     });
     return () => layer.destroy();
-  }, [isOpen, layerNode, setOpen]);
+  }, [isOpen, layerNode, lowestView, setOpen]);
 
   /**
    * The dialog takes focus when it opens, on the day that holds the roving tab
@@ -315,7 +384,9 @@ export function DatePicker({
     if (!container.contains(layerNode)) return;
     focusOnOpen.current = false;
     layerNode
-      .querySelector<HTMLElement>('[data-part="day"][tabindex="0"]')
+      .querySelector<HTMLElement>(
+        '[data-part="day"][tabindex="0"], [data-part="period"][tabindex="0"]',
+      )
       ?.focus({ preventScroll: true });
   }, [container, isOpen, layerNode]);
 
@@ -355,7 +426,11 @@ export function DatePicker({
   const spoken =
     chosen.length === 0
       ? t('choose')
-      : t('change', { date: chosen.map((date) => format.describe(date)).join(' – ') });
+      : t('change', {
+          date: chosen
+            .map((date) => (monthly ? format.monthYear(date) : format.describe(date)))
+            .join(' – '),
+        });
 
   const closesOnSelect =
     resolvedCloseOnSelect === 'always' ||
@@ -394,6 +469,7 @@ export function DatePicker({
         {presets === undefined ? null : <div data-part="presets">{presets}</div>}
         <Calendar
           fixedWeeks={fixedWeeks}
+          granularity={granularity}
           isDateUnavailable={isDateUnavailable}
           locale={resolvedLocale}
           max={max}
@@ -427,6 +503,7 @@ export function DatePicker({
           calendar={resolvedCalendar}
           clearable={clearable}
           disabled={resolvedDisabled}
+          granularity={granularity}
           end={
             <button
               aria-controls={isOpen ? contentId : undefined}

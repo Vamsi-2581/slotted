@@ -1,4 +1,4 @@
-import type { PlainDate } from '@slotted/core/date';
+import type { PlainDate, PlainYearMonth } from '@slotted/core/date';
 import type { DatePickerMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
@@ -58,10 +58,13 @@ export interface DatePickerHandle {
   close(): void;
 }
 
-export interface DatePickerProps extends Omit<
+/** A date picker that chooses a day, a range of days or several days. */
+export interface DatePickerDayProps extends Omit<
   ComponentPropsWithRef<'div'>,
   'defaultValue' | 'onChange' | 'ref'
 > {
+  /** What a choice is. Defaults to `day`. */
+  granularity?: 'day' | undefined;
   value?: CalendarValue | undefined;
   defaultValue?: CalendarValue | undefined;
   onValueChange?:
@@ -120,3 +123,37 @@ export interface DatePickerProps extends Omit<
   render?: ((props: DatePickerRootProps) => ReactNode) | undefined;
   ref?: Ref<DatePickerHandle> | undefined;
 }
+
+/**
+ * A date picker that chooses a month of a year: a card statement, a budget
+ * month. The calendar opens on the months of the year, the field shows the
+ * month and the year segments, and `name` submits `YYYY-MM`. The bounds are
+ * months; a day-based predicate, several months and a range do not apply.
+ */
+export interface DatePickerMonthProps extends Omit<
+  DatePickerDayProps,
+  | 'defaultValue'
+  | 'defaultView'
+  | 'firstDayOfWeek'
+  | 'fixedWeeks'
+  | 'granularity'
+  | 'isDateUnavailable'
+  | 'max'
+  | 'min'
+  | 'months'
+  | 'onValueChange'
+  | 'selectionMode'
+  | 'value'
+  | 'weekNumbers'
+> {
+  granularity: 'month';
+  value?: PlainYearMonth | null | undefined;
+  defaultValue?: PlainYearMonth | null | undefined;
+  onValueChange?:
+    | ((value: PlainYearMonth | null, request: ChangeRequest<PlainYearMonth | null>) => void)
+    | undefined;
+  min?: PlainYearMonth | undefined;
+  max?: PlainYearMonth | undefined;
+}
+
+export type DatePickerProps = DatePickerDayProps | DatePickerMonthProps;

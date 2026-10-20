@@ -19,6 +19,14 @@ export type CalendarSelectionMode = 'single' | 'range' | 'multiple';
 /** Which grid the calendar is showing. The heading walks up; Escape walks down. */
 export type CalendarView = 'day' | 'month' | 'year';
 
+/**
+ * The smallest thing the reader chooses. `month` makes the months of a year
+ * the grid a choice is made in: the calendar opens there, a month cell is the
+ * value, written as the first day of that month, and the day grid is never
+ * shown.
+ */
+export type CalendarGranularity = 'day' | 'month';
+
 /** What happens to a day belonging to the month either side. */
 export type CalendarOutsideDays = 'shown' | 'selectable' | 'hidden';
 

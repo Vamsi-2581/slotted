@@ -249,7 +249,7 @@ const api: ApiRow[] = apiRows([
     'PlainDate | DateRange | PlainDate[] | null',
     '—',
     'DatePicker',
-    'The selected value, whose shape follows selectionMode. Setting it makes the value controlled.',
+    "The selected value, whose shape follows selectionMode. Setting it makes the value controlled. PlainDate is exported by @slotted/core/date. parseISODate(text) returns a PlainDate or null, toISODate(date) returns 'YYYY-MM-DD', and isPlainDate(value) narrows the CalendarValue onValueChange reports: value={parseISODate(iso)} onValueChange={(v) => setIso(isPlainDate(v) ? toISODate(v) : '')}.",
   ],
   [
     'defaultValue',
@@ -292,6 +292,13 @@ const api: ApiRow[] = apiRows([
     '—',
     'DatePicker',
     'Returns true for a date the reader cannot choose. The calendar disables it, and a typed unavailable date marks the date picker invalid.',
+  ],
+  [
+    'granularity',
+    "'day' | 'month'",
+    'day',
+    'DatePicker',
+    'What a choice is. month opens the calendar on the months of a year and chooses a month cell; the field shows the month and the year segments; value, defaultValue, min and max are PlainYearMonth from @slotted/core/date ({ year, month }), onValueChange reports one, and name submits YYYY-MM. parseISOYearMonth and toISOYearMonth convert to and from that text. selectionMode, months, isDateUnavailable and the week props do not apply.',
   ],
   [
     'selectionMode',

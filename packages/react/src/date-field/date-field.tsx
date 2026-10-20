@@ -10,12 +10,15 @@ import {
   fieldRange,
   isDateInRange,
   isSameDate,
+  parseISOYearMonth,
   plainDate,
   segmentsOf,
   stepSegment,
   toISODate,
+  toISOYearMonth,
   todayIn,
   typeDigit,
+  yearMonthPattern,
 } from '@slotted/core/date';
 import type { DateFieldName, PlainDate, SegmentState } from '@slotted/core/date';
 import { dateFieldMessages } from '@slotted/core/i18n';
@@ -99,6 +102,7 @@ export function DateField({
   disabled,
   end,
   firstDayOfWeek,
+  granularity,
   id,
   invalid,
   isDateUnavailable,
@@ -199,12 +203,17 @@ export function DateField({
   const segments = ownSegments;
   const current = dateOf(segments);
 
+  /** A field that holds a month draws the locale's pattern without its day. */
+  const monthly = granularity === 'month';
+  const pattern = useMemo(
+    () => (monthly ? yearMonthPattern(format.pattern) : format.pattern),
+    [format, monthly],
+  );
+
   const fields = useMemo(
     () =>
-      format.pattern
-        .filter((part) => part.type !== 'literal')
-        .map((part) => part.type as DateFieldName),
-    [format],
+      pattern.filter((part) => part.type !== 'literal').map((part) => part.type as DateFieldName),
+    [pattern],
   );
 
   /**
@@ -215,7 +224,9 @@ export function DateField({
    * The value is a request, cancellable, and it carries the segments beside it.
    */
   const commit = useCallback(
-    (next: SegmentState, reason: DateFieldValueReason, source: unknown) => {
+    (given: SegmentState, reason: DateFieldValueReason, source: unknown) => {
+      /* A month has no day segment to fill, so the day is the first of it. */
+      const next = monthly && given.day !== 1 ? { ...given, day: 1, intendedDay: 1 } : given;
       const previous = dateOf(segmentsRef.current);
       segmentsRef.current = next;
       setOwnSegments(next);
@@ -240,7 +251,7 @@ export function DateField({
       });
       state.request(dateOf(next), reason, source);
     },
-    [onValueChange, value],
+    [monthly, onValueChange, value],
   );
 
   const focusField = useCallback((name: DateFieldName) => {
@@ -395,7 +406,9 @@ export function DateField({
   const onPaste = (event: ClipboardEvent<HTMLDivElement>) => {
     onPasteProp?.(event as never);
     if (event.defaultPrevented || !editable) return;
-    const parsed = format.parse(event.clipboardData.getData('text/plain'));
+    const text = event.clipboardData.getData('text/plain');
+    const month = monthly ? parseISOYearMonth(text) : null;
+    const parsed = month === null ? format.parse(text) : plainDate(month.year, month.month, 1);
     if (parsed === null) return;
     event.preventDefault();
     commit(segmentsOf(parsed), 'keyboard', event);
@@ -436,7 +449,8 @@ export function DateField({
    * buttons and remembering each.
    */
   const valueTextId = `${generatedId}-value`;
-  const spoken = current === null ? undefined : format.describe(current);
+  const spoken =
+    current === null ? undefined : monthly ? format.monthYear(current) : format.describe(current);
 
   /**
    * Validity the family owns, beside the validity the consumer states. A date
@@ -447,7 +461,7 @@ export function DateField({
   const outOfRange = current !== null && !isDateInRange(current, min, max);
   const isInvalid = resolvedInvalid === true || unavailable || outOfRange;
 
-  const empty = segments.year === null && segments.month === null && segments.day === null;
+  const empty = fields.every((name) => segments[name] === null);
   const showClear = clearable && !empty && editable;
 
   const children: ReactNode = (
@@ -470,7 +484,7 @@ export function DateField({
         onPaste={onPaste}
         role="group"
       >
-        {format.pattern.map((part, index) => {
+        {pattern.map((part, index) => {
           if (part.type === 'literal') {
             return (
               <span aria-hidden="true" data-part="literal" key={`literal-${String(index)}`}>
@@ -515,7 +529,13 @@ export function DateField({
         name={name}
         readOnly
         type="hidden"
-        value={current === null ? '' : toISODate(current)}
+        value={
+          current === null
+            ? ''
+            : monthly
+              ? toISOYearMonth({ year: current.year, month: current.month })
+              : toISODate(current)
+        }
       />
     </>
   );

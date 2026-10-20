@@ -19,6 +19,7 @@ export type {
   CalendarSelectionMode,
   CalendarValue,
   CalendarValueReason,
+  CalendarGranularity,
   CalendarView,
   DateRange,
 } from './calendar.types';

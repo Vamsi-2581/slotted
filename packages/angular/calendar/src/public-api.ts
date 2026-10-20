@@ -10,6 +10,7 @@ export type {
   CalendarOutsideDays,
   CalendarSelectionMode,
   CalendarValue,
+  CalendarGranularity,
   CalendarView,
   DateRange,
 } from './calendar-defaults';

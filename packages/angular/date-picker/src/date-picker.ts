@@ -1,5 +1,13 @@
-import { createDateFormat, isDateInRange } from '@slotted/core/date';
-import type { PlainDate } from '@slotted/core/date';
+import {
+  createDateFormat,
+  firstDayOf,
+  isDateInRange,
+  isPlainDate,
+  isPlainYearMonth,
+  lastDayOf,
+  yearMonthOf,
+} from '@slotted/core/date';
+import type { PlainDate, PlainYearMonth } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { tabbables } from '@slotted/core/focus';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
@@ -104,8 +112,9 @@ let sequence = 0;
         [calendar]="resolvedCalendar()"
         [size]="resolvedSize()"
         [variant]="resolvedVariant()"
-        [min]="min()"
-        [max]="max()"
+        [min]="minDay()"
+        [max]="maxDay()"
+        [granularity]="granularity()"
         [isDateUnavailable]="isDateUnavailable()"
         [clearable]="clearable()"
         [name]="name()"
@@ -157,8 +166,9 @@ let sequence = 0;
             [locale]="resolvedLocale()"
             [timeZone]="resolvedTimeZone()"
             [firstDayOfWeek]="firstDayOfWeek()"
-            [min]="min()"
-            [max]="max()"
+            [min]="minDay()"
+            [max]="maxDay()"
+            [granularity]="granularity()"
             [isDateUnavailable]="isDateUnavailable()"
             [selectionMode]="selectionMode()"
             [months]="months()"
@@ -195,16 +205,27 @@ let sequence = 0;
   },
 })
 export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
-  readonly value = input<CalendarValue | undefined>(undefined);
-  readonly defaultValue = input<CalendarValue | undefined>(undefined);
+  /**
+   * The date, the run or the set; under `granularity="month"`, a
+   * `PlainYearMonth`. Present means the consumer owns it.
+   */
+  readonly value = input<CalendarValue | PlainYearMonth | undefined>(undefined);
+  readonly defaultValue = input<CalendarValue | PlainYearMonth | undefined>(undefined);
+  /**
+   * What a choice is. `month` opens the calendar on the months of a year and
+   * chooses a month cell; the field shows the month and the year; `value`,
+   * `defaultValue`, `min` and `max` are `PlainYearMonth`, `valueChange`
+   * reports one, and `name` submits `YYYY-MM`.
+   */
+  readonly granularity = input<'day' | 'month' | undefined>(undefined);
   /** Present means the consumer owns whether the surface is showing. */
   readonly open = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
   });
   readonly defaultOpen = input(false, { transform: booleanAttribute });
 
-  readonly min = input<PlainDate | undefined>(undefined);
-  readonly max = input<PlainDate | undefined>(undefined);
+  readonly min = input<PlainDate | PlainYearMonth | undefined>(undefined);
+  readonly max = input<PlainDate | PlainYearMonth | undefined>(undefined);
   readonly isDateUnavailable = input<((date: PlainDate) => boolean) | undefined>(undefined);
 
   readonly selectionMode = input<CalendarSelectionMode>('single');
@@ -264,7 +285,7 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
    */
   readonly messages = input<PartialMessages<DatePickerMessages> | undefined>(undefined);
 
-  readonly valueChange = output<ChangeRequest<CalendarValue>>();
+  readonly valueChange = output<ChangeRequest<CalendarValue | PlainYearMonth | null>>();
   readonly openChange = output<ChangeRequest<boolean>>();
 
   @ViewChild('layer') protected layer?: ElementRef<HTMLElement>;
@@ -289,7 +310,7 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
   protected readonly sheet = signal(false);
   private readonly formDisabled = signal<boolean | undefined>(undefined);
 
-  private onChangeFn: (value: CalendarValue) => void = () => undefined;
+  private onChangeFn: (value: CalendarValue | PlainYearMonth | null) => void = () => undefined;
   /** Whether a form model holds the value, and answers a reset through `writeValue`. */
   private formBound = false;
   private onTouchedFn: () => void = () => undefined;
@@ -306,7 +327,37 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
   private dismissable: DismissableLayerHandle | null = null;
 
   protected readonly isOpen = computed(() => this.open() ?? this.ownOpen());
-  protected readonly held = computed(() => this.value() ?? this.ownValue());
+  /**
+   * A month is its own value. Under `granularity="month"` the picker holds a
+   * `PlainYearMonth`; the field and the calendar below it hold the first day of
+   * that month, and the bounds become the first day of `min` and the last day
+   * of `max`, so a month the bounds touch is a month the reader may choose.
+   */
+  protected readonly monthly = computed(() => this.granularity() === 'month');
+  protected readonly held = computed(() => {
+    const value = this.value();
+    return value === undefined ? this.ownValue() : this.toDay(value);
+  });
+  protected readonly minDay = computed(() => {
+    const min = this.min();
+    return isPlainYearMonth(min) ? firstDayOf(min) : min;
+  });
+  protected readonly maxDay = computed(() => {
+    const max = this.max();
+    return isPlainYearMonth(max) ? lastDayOf(max) : max;
+  });
+
+  /** A month as the day the field and the calendar hold for it. */
+  private toDay(value: CalendarValue | PlainYearMonth | null | undefined): CalendarValue {
+    if (value === undefined || value === null) return null;
+    return isPlainYearMonth(value) ? firstDayOf(value) : value;
+  }
+
+  /** What leaves the picker: the month under `month`, the value otherwise. */
+  private outward(value: CalendarValue): CalendarValue | PlainYearMonth | null {
+    if (!this.monthly()) return value;
+    return isPlainDate(value) ? yearMonthOf(value) : null;
+  }
 
   protected readonly resolvedLocale = computed(() => this.locale() ?? this.appLocale());
   protected readonly resolvedTimeZone = computed(() => this.timeZone() ?? this.defaults.timeZone);
@@ -336,7 +387,8 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
   protected readonly resolvedInvalid = computed(() => {
     const refused = asDates(this.held()).some(
       (date) =>
-        !isDateInRange(date, this.min(), this.max()) || this.isDateUnavailable()?.(date) === true,
+        !isDateInRange(date, this.minDay(), this.maxDay()) ||
+        this.isDateUnavailable()?.(date) === true,
     );
     if (refused) return true;
     return this.invalid() ?? this.enclosing?.invalid();
@@ -365,7 +417,9 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
     const chosen = asDates(this.held());
     if (chosen.length === 0) return this.t('choose');
     const format = createDateFormat({ locale: this.resolvedLocale() });
-    return this.t('change', { date: chosen.map((date) => format.describe(date)).join(' – ') });
+    const words = (date: PlainDate) =>
+      this.monthly() ? format.monthYear(date) : format.describe(date);
+    return this.t('change', { date: chosen.map(words).join(' – ') });
   });
 
   private readonly closesOnSelect = computed(() => {
@@ -399,11 +453,11 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
 
   /* ── Forms ─────────────────────────────────────────────────────────── */
 
-  writeValue(value: CalendarValue | undefined) {
-    this.ownValue.set(value ?? null);
+  writeValue(value: CalendarValue | PlainYearMonth | undefined) {
+    this.ownValue.set(this.toDay(value));
   }
 
-  registerOnChange(fn: (value: CalendarValue) => void) {
+  registerOnChange(fn: (value: CalendarValue | PlainYearMonth | null) => void) {
     this.onChangeFn = fn;
     this.formBound = true;
   }
@@ -425,9 +479,9 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
    * them with. `required` is left to Angular's own.
    */
   validate(control: AbstractControl): ValidationErrors | null {
-    const dates = asDates((control.value as CalendarValue | undefined) ?? null);
-    const min = this.min();
-    const max = this.max();
+    const dates = asDates(this.toDay(control.value as CalendarValue | PlainYearMonth | undefined));
+    const min = this.minDay();
+    const max = this.maxDay();
     const outside = dates.find((date) => !isDateInRange(date, min, max));
     if (outside !== undefined) return { slottedDateRange: { min, max, actual: outside } };
     const refused = dates.find((date) => this.isDateUnavailable()?.(date) === true);
@@ -437,8 +491,8 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
 
   ngOnInit() {
     this.ownOpen.set(this.defaultOpen());
-    this.ownValue.set(this.defaultValue() ?? null);
-    this.view.set(this.defaultView() ?? 'day');
+    this.ownValue.set(this.toDay(this.defaultValue()));
+    this.view.set(this.defaultView() ?? this.lowestView());
 
     /* A native reset restores the hidden input and tells nothing, so the
        picker would keep the last date chosen in a form that had been reset.
@@ -448,7 +502,7 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
     const form = this.element.closest('form');
     if (form !== null) {
       const onReset = (event: Event) => {
-        if (!this.formBound) this.commit(this.defaultValue() ?? null, 'programmatic', event);
+        if (!this.formBound) this.commit(this.toDay(this.defaultValue()), 'programmatic', event);
       };
       form.addEventListener('reset', onReset);
       this.destroyRef.onDestroy(() => form.removeEventListener('reset', onReset));
@@ -531,21 +585,34 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
     this.triggerRef?.nativeElement.focus({ preventScroll: true });
   }
 
+  /** The lowest view is where a choice is made: the days, or the months. */
+  protected lowestView(): CalendarView {
+    return this.monthly() ? 'month' : 'day';
+  }
+
   private commit(next: CalendarValue, reason: ChangeReason, source: unknown) {
     let cancelled = false;
     const state = createControllable<CalendarValue>({
-      controlled: this.value(),
+      controlled: this.value() === undefined ? undefined : this.held(),
       initial: this.held(),
       equals: () => false,
       onRequest: (request) => {
-        this.valueChange.emit(request);
+        /* The request keeps its own `cancel` and `cancelled`, and carries the
+           months instead of the days under `month`. */
+        const asked = this.monthly()
+          ? (Object.create(request, {
+              previous: { enumerable: true, value: this.outward(request.previous) },
+              value: { enumerable: true, value: this.outward(request.value) },
+            }) as ChangeRequest<CalendarValue | PlainYearMonth | null>)
+          : request;
+        this.valueChange.emit(asked);
         cancelled = request.cancelled;
       },
     });
     state.request(next, reason, source);
     if (cancelled) return;
     if (this.value() === undefined) this.ownValue.set(next);
-    this.onChangeFn(next);
+    this.onChangeFn(this.outward(next));
   }
 
   private setOpen(next: boolean, reason: OpenReason, source: unknown) {
@@ -582,7 +649,9 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
     if (this.focusOnOpen) {
       this.focusOnOpen = false;
       layer
-        .querySelector<HTMLElement>('[data-part="day"][tabindex="0"]')
+        .querySelector<HTMLElement>(
+          '[data-part="day"][tabindex="0"], [data-part="period"][tabindex="0"]',
+        )
         ?.focus({ preventScroll: true });
     }
 
@@ -601,7 +670,7 @@ export class SlDatePicker implements ControlValueAccessor, Validator, OnInit {
          * surface by the time it ran; the decision is taken here, and the layer
          * is simply not asked to close.
          */
-        if (request.reason === 'escape' && this.view() !== 'day') {
+        if (request.reason === 'escape' && this.view() !== this.lowestView()) {
           this.view.set(this.view() === 'year' ? 'month' : 'day');
           return;
         }

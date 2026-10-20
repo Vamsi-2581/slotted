@@ -2,8 +2,8 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
-import { plainDate, toISODate } from '@slotted/core/date';
-import type { PlainDate } from '@slotted/core/date';
+import { plainDate, plainYearMonth, toISODate } from '@slotted/core/date';
+import type { PlainDate, PlainYearMonth } from '@slotted/core/date';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { CalendarValue } from '@slotted/angular/calendar';
@@ -28,9 +28,12 @@ class Host {
   readonly control = new FormControl<PlainDate | null>(null);
   readonly ninth = NINTH;
   readonly january = plainDate(2026, 1, 1);
-  readonly values: CalendarValue[] = [];
+  readonly values: (CalendarValue | PlainYearMonth | null)[] = [];
+  readonly october = plainYearMonth(2026, 10);
+  readonly march = plainYearMonth(2026, 3);
+  readonly november = plainYearMonth(2026, 11);
   readonly opens: boolean[] = [];
-  readonly onValue = vi.fn((request: ChangeRequest<CalendarValue>) => {
+  readonly onValue = vi.fn((request: ChangeRequest<CalendarValue | PlainYearMonth | null>) => {
     this.values.push(request.value);
   });
   readonly onOpen = vi.fn((request: ChangeRequest<boolean>) => {
@@ -536,5 +539,54 @@ describe('where focus goes when it opens', () => {
       new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true }),
     );
     expect(document.activeElement).toBe(last);
+  });
+});
+
+/**
+ * A card statement, a budget month: the form asks for a month and no day. The
+ * calendar opens on the months of a year, a month cell is the choice, the
+ * field shows only the month and the year, and the form submits "YYYY-MM".
+ */
+describe('month granularity', () => {
+  const month = (fixture: Fixture, name: string) =>
+    fixture.nativeElement.querySelector(
+      `[data-part="period"][aria-label="${name}"]`,
+    ) as HTMLElement;
+
+  it('chooses a month cell and reports the month, and submits YYYY-MM', () => {
+    const fixture = renderTemplate(
+      `<form><div slDatePicker granularity="month" locale="en-US" name="statement"
+        [defaultValue]="october" (valueChange)="onValue($event)"></div></form>`,
+    );
+    const segments = [...fixture.nativeElement.querySelectorAll('[data-part="segment"]')].map(
+      (segment: Element) => segment.getAttribute('data-field'),
+    );
+    expect(segments).toEqual(['month', 'year']);
+    const hidden = () =>
+      (fixture.nativeElement.querySelector('[data-part="hidden-input"]') as HTMLInputElement).value;
+    expect(hidden()).toBe('2026-10');
+
+    click(fixture, trigger(fixture));
+    expect(
+      fixture.nativeElement.querySelector('[data-ui="calendar"]').getAttribute('data-view'),
+    ).toBe('month');
+    expect(fixture.nativeElement.querySelector('[data-part="grid"]')).toBeNull();
+    expect(month(fixture, 'October 2026').getAttribute('aria-selected')).toBe('true');
+
+    click(fixture, month(fixture, 'November 2026'));
+
+    expect(fixture.componentInstance.values).toEqual([{ year: 2026, month: 11 }]);
+    expect(hidden()).toBe('2026-11');
+    expect(root(fixture).hasAttribute('data-open')).toBe(false);
+  });
+
+  it('refuses a month outside min and max, which are months', () => {
+    const fixture = renderTemplate(
+      `<div slDatePicker granularity="month" locale="en-US" [defaultOpen]="true"
+        [defaultValue]="october" [min]="march" [max]="november"></div>`,
+    );
+    expect(month(fixture, 'February 2026').getAttribute('aria-disabled')).toBe('true');
+    expect(month(fixture, 'November 2026').hasAttribute('aria-disabled')).toBe(false);
+    expect(month(fixture, 'December 2026').getAttribute('aria-disabled')).toBe('true');
   });
 });

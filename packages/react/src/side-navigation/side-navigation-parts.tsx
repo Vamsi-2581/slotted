@@ -1,6 +1,7 @@
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
+import type { PositionerHandle } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { truncateMiddle } from '@slotted/core/text';
@@ -635,10 +636,9 @@ function FlyoutLayer({
   const [node, setNode] = useState<HTMLElement | null>(null);
   const [container, setContainer] = useState<Element | null>(null);
   const [status, setStatus] = useState<PresenceStatus>('unmounted');
-  const [positioned, setPositioned] = useState(false);
   const presence = useRef<PresenceHandle | null>(null);
-  const latest = useRef({ navigation, onExited });
-  latest.current = { navigation, onExited };
+  const latest = useRef({ navigation, onExited, open });
+  latest.current = { navigation, onExited, open };
 
   useEffect(() => {
     const handle = createPresence({ present: open, onStatusChange: setStatus });
@@ -666,15 +666,30 @@ function FlyoutLayer({
   }, [status]);
 
   const anchor = item.triggerNode;
-  useEffect(() => {
+  /* Before the first paint, so the flyout is in its layer in the frame that shows it. */
+  useLayoutEffect(() => {
     const handle = createPortalRoot({ origin: anchor });
     setContainer(handle.container);
     return () => handle.release();
   }, [anchor]);
 
-  useEffect(() => {
+  const positioner = useRef<PositionerHandle | null>(null);
+
+  /**
+   * `data-open` is written by the measurement that places the flyout, on the
+   * element, in the task that opened it: the position, the side and the open
+   * state reach one style update together. A render to say "positioned" was a
+   * frame of its own.
+   */
+  const place = useCallback((handle: PositionerHandle, layer: HTMLElement) => {
+    void handle.update().then(() => {
+      if (positioner.current !== handle || !latest.current.open) return;
+      layer.setAttribute('data-open', '');
+    });
+  }, []);
+
+  useLayoutEffect(() => {
     if (node === null || anchor === null) return undefined;
-    let live = true;
     const handle = createPositioner(anchor, node, {
       align: 'start',
       flip: true,
@@ -683,15 +698,21 @@ function FlyoutLayer({
       sideOffset: 0,
       strategy: 'fixed',
     });
-    void handle.update().then(() => {
-      if (live) setPositioned(true);
-    });
+    positioner.current = handle;
+    if (latest.current.open) place(handle, node);
     return () => {
-      live = false;
       handle.destroy();
-      setPositioned(false);
+      positioner.current = null;
+      node.removeAttribute('data-open');
     };
-  }, [anchor, node]);
+  }, [anchor, node, place]);
+
+  useLayoutEffect(() => {
+    const handle = positioner.current;
+    if (handle === null || node === null) return;
+    if (open) place(handle, node);
+    else node.removeAttribute('data-open');
+  }, [node, open, place]);
 
   useEffect(() => {
     if (node === null || !open) return undefined;
@@ -730,7 +751,6 @@ function FlyoutLayer({
   return createPortal(
     <div
       {...(navigation.guides ? { 'data-guides': '' } : {})}
-      {...(open && positioned ? { 'data-open': '' } : {})}
       data-part="flyout"
       data-size={navigation.size}
       data-truncate={navigation.truncate}

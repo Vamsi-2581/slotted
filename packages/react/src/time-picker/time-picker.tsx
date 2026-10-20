@@ -26,6 +26,7 @@ import {
   useId,
   useImperativeHandle,
   useMemo,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -126,7 +127,13 @@ export function TimePicker({
   const [layerNode, setLayerNode] = useState<HTMLElement | null>(null);
   const [container, setContainer] = useState<HTMLElement | null>(null);
   const [status, setStatus] = useState<PresenceStatus>('unmounted');
-  const [positioned, setPositioned] = useState(false);
+  /**
+   * The reader is about to open the surface: the control took focus or a
+   * press. The portal's layer is made then, because making it reads the
+   * trigger's computed style, and a read in the open's own task is a style
+   * recalculation the first frame waits for.
+   */
+  const [warm, setWarm] = useState(false);
   const [sheet, setSheet] = useState(false);
 
   const [ownOpen, setOwnOpen] = useState(defaultOpen);
@@ -286,17 +293,32 @@ export function TimePicker({
   useEffect(() => presence.current?.sync(isOpen), [isOpen]);
   useEffect(() => presence.current?.setNode(layerNode), [layerNode]);
 
-  const mounted = status !== 'unmounted';
+  /** Open renders the surface in the commit that opens it. */
+  const mounted = isOpen || status !== 'unmounted';
 
   useEffect(() => {
-    if (!mounted) {
+    const root = rootRef.current;
+    if (root === null || warm) return undefined;
+    const prepare = () => setWarm(true);
+    root.addEventListener('focusin', prepare);
+    root.addEventListener('pointerdown', prepare);
+    return () => {
+      root.removeEventListener('focusin', prepare);
+      root.removeEventListener('pointerdown', prepare);
+    };
+  }, [warm]);
+
+  const layered = mounted || warm;
+
+  useLayoutEffect(() => {
+    if (!layered) {
       setContainer(null);
       return;
     }
     const handle = createPortalRoot({ origin: triggerRef.current, disabled: false });
     setContainer(handle.container as HTMLElement);
     return () => handle.release();
-  }, [mounted]);
+  }, [layered]);
 
   /** Which presentation the surface is in, as a fact the DOM carries. */
   useEffect(() => {
@@ -308,9 +330,9 @@ export function TimePicker({
     return () => query.removeEventListener('change', read);
   }, []);
 
-  useEffect(() => {
+  /* Placed before the first paint: the positioner writes `data-positioned` with the side. */
+  useLayoutEffect(() => {
     if (layerNode === null || rootRef.current === null || sheet) return;
-    let live = true;
 
     const anchorElement =
       rootRef.current.querySelector<HTMLElement>('[data-part="control"]') ?? rootRef.current;
@@ -320,14 +342,11 @@ export function TimePicker({
     ];
 
     const handle = createPositioner(anchorElement, layerNode, { align, side });
-    void handle.update().then(() => {
-      if (live) setPositioned(true);
-    });
+    void handle.update();
 
     return () => {
-      live = false;
       handle.destroy();
-      setPositioned(false);
+      layerNode.removeAttribute('data-positioned');
     };
   }, [layerNode, resolvedPlacement, sheet]);
 
@@ -529,7 +548,6 @@ export function TimePicker({
       data-ui="time-picker"
       ref={setLayerNode}
       {...(isOpen ? { 'data-open': '' } : {})}
-      {...(positioned ? { 'data-positioned': '' } : {})}
     >
       <div
         aria-label={spoken}

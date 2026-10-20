@@ -9,6 +9,10 @@ import { SlottedProvider } from '../i18n';
 import { DatePicker, DatePickerDefaultsProvider } from './index';
 import type { DatePickerHandle } from './index';
 
+/** Focus moves into the surface in the frame after it opens. */
+const nextFrame = () =>
+  act(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+
 const NINTH = plainDate(2026, 9, 9);
 
 const root = () =>
@@ -364,10 +368,12 @@ describe('where focus and the page go when it opens', () => {
     expect(document.querySelector('[data-part="heading"]')?.textContent).toContain('March 2024');
   });
 
-  it('moves focus to the chosen day when the trigger opens it', () => {
+  it('moves focus to the chosen day when the trigger opens it', async () => {
     render(<DatePicker defaultValue={NINTH} locale="en-US" />);
 
     open();
+
+    await nextFrame();
 
     expect(document.activeElement?.getAttribute('data-part')).toBe('day');
     expect(document.activeElement?.textContent).toBe('9');
@@ -486,7 +492,7 @@ describe('month granularity', () => {
     );
   });
 
-  it('moves the month with the arrow keys and chooses it with Enter', () => {
+  it('moves the month with the arrow keys and chooses it with Enter', async () => {
     const onValueChange = vi.fn();
     render(
       <DatePicker
@@ -497,6 +503,7 @@ describe('month granularity', () => {
       />,
     );
     open();
+    await nextFrame();
     const october = screen.getByRole('button', { name: 'October 2026' });
     expect(document.activeElement).toBe(october);
 

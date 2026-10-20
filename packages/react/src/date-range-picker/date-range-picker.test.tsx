@@ -10,6 +10,10 @@ import { SlottedProvider } from '../i18n';
 import { DateRangePicker, DateRangePickerDefaultsProvider, DateRangePickerPreset } from './index';
 import type { DateRange, DateRangePickerHandle } from './index';
 
+/** Focus moves into the surface in the frame after it opens. */
+const nextFrame = () =>
+  act(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+
 const d = (day: number, month = 9) => plainDate(2026, month, day);
 const SEVENTH = d(7);
 const RUN: DateRange = { start: d(7), end: d(11) };
@@ -260,7 +264,7 @@ describe('choosing a run', () => {
   });
 
   /** The gap no surveyed implementation closes well: a panel closed with one end chosen. */
-  it('abandons the draft when the surface closes', () => {
+  it('abandons the draft when the surface closes', async () => {
     const onValueChange = vi.fn();
     render(
       <DateRangePicker
@@ -277,6 +281,8 @@ describe('choosing a run', () => {
     expect(document.querySelector('input[data-part="hidden-input"]')).toHaveValue('2026-09-07');
 
     open();
+
+    await nextFrame();
     expect(part('head-start')).toHaveTextContent('7');
     expect(part('head-end')).toHaveTextContent('11');
   });
@@ -634,20 +640,24 @@ describe('the composition surface', () => {
 });
 
 describe('where focus goes when it opens', () => {
-  it('moves focus to the cell of the current end when the trigger opens it', () => {
+  it('moves focus to the cell of the current end when the trigger opens it', async () => {
     render(<DateRangePicker defaultPosition="end" defaultValue={RUN} locale="en-US" />);
 
     open();
+
+    await nextFrame();
 
     expect(document.activeElement?.getAttribute('data-part')).toBe('day');
     expect(document.activeElement?.textContent).toBe('11');
   });
 
-  it('moves focus into the calendar when the handle opens it', () => {
+  it('moves focus into the calendar when the handle opens it', async () => {
     const handle = { current: null as DateRangePickerHandle | null };
     render(<DateRangePicker defaultValue={RUN} locale="en-US" ref={handle} />);
 
     act(() => handle.current?.open());
+
+    await nextFrame();
 
     expect(document.activeElement?.getAttribute('data-part')).toBe('day');
     expect(document.activeElement?.textContent).toBe('7');
@@ -708,10 +718,12 @@ describe('where it opens with nothing chosen', () => {
     );
   });
 
-  it('moves focus to today when the trigger opens it', () => {
+  it('moves focus to today when the trigger opens it', async () => {
     render(<DateRangePicker locale="en-US" />);
 
     open();
+
+    await nextFrame();
 
     expect(document.activeElement?.getAttribute('data-part')).toBe('day');
     expect(document.activeElement?.textContent).toBe(String(now.getDate()));

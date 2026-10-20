@@ -235,7 +235,7 @@
   },
   "measure": {
     "value": "14rem / 16rem / 20rem by size",
-    "reason": "Wide enough for a command with a shortcut beside it, narrow enough to hang off a button. The label column wraps at the cap and the shortcut column never shrinks, which is what stops a long translated label from eating its own shortcut."
+    "reason": "Wide enough for a command with a shortcut beside it, narrow enough to hang off a button. The label column wraps at the cap and the shortcut column never shrinks, which is what stops a long translated label from eating its own shortcut. `width: 'anchor'` replaces the floor and the cap with the trigger's measured width, capped by the available width, as popover's does: an account switcher as wide as the sidebar row that opens it. A submenu is always `content`."
   },
   "declined": {
     "modal": {
@@ -272,6 +272,7 @@
   },
   "axes": {
     "size": ["sm", "md", "lg"],
+    "width": ["content", "anchor"],
     "side": ["bottom", "top", "inline-start", "inline-end", "left", "right"],
     "align": ["start", "center", "end"],
     "mount": ["active", "lazy", "eager"],
@@ -290,6 +291,7 @@
   },
   "resolution": {
     "size": ["prop", "defaults", "md"],
+    "width": ["prop", "defaults", "content"],
     "side": ["prop", "defaults", "bottom"],
     "align": ["prop", "defaults", "start"],
     "mount": ["prop", "defaults", "active"],
@@ -309,6 +311,7 @@
   "provides": {
     "menuDefaults": [
       "size",
+      "width",
       "side",
       "align",
       "mount",
@@ -371,6 +374,7 @@
       "nativeElement": "div",
       "defaults": {
         "size": "md",
+        "width": "content",
         "side": "bottom",
         "align": "start",
         "mount": "active",

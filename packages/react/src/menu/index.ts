@@ -58,6 +58,7 @@ export type {
   MenuSeparatorProps,
   MenuSide,
   MenuSize,
+  MenuWidth,
   MenuStrategy,
   MenuSurfaceValue,
   MenuTone,

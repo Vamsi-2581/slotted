@@ -114,6 +114,7 @@ export function Menu({
   typeahead,
   typeaheadTimeout,
   value,
+  width,
 }: MenuProps) {
   const defaults = useMenuDefaults();
   const parent = useMenuSurface();
@@ -267,6 +268,8 @@ export function Menu({
     triggerNode,
     typeahead: typeahead ?? defaults.typeahead,
     typeaheadTimeout: typeaheadTimeout ?? defaults.typeaheadTimeout,
+    /* A submenu hangs from an item, and an item's width is not a measure. */
+    width: parent === null ? (width ?? defaults.width) : 'content',
   };
 
   return <MenuContext.Provider value={context}>{children}</MenuContext.Provider>;

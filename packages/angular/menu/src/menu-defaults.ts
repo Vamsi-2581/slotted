@@ -3,6 +3,13 @@ import { inject, InjectionToken } from '@angular/core';
 /** The surface's measure and the geometry of its items. */
 export type MenuSize = 'sm' | 'md' | 'lg';
 
+/**
+ * How wide the surface is. `content` is its own measure, between the family's
+ * floor and cap; `anchor` is the trigger's width, capped by the room the
+ * positioner reports. A submenu is always `content`.
+ */
+export type MenuWidth = 'content' | 'anchor';
+
 /** Where the surface hangs. The two logical values mirror; the rest do not. */
 export type MenuSide = 'top' | 'bottom' | 'inline-start' | 'inline-end' | 'left' | 'right';
 
@@ -41,6 +48,7 @@ export interface MenuDefaults {
   side: MenuSide;
   sideOffset: number;
   size: MenuSize;
+  width: MenuWidth;
   strategy: MenuStrategy;
   submenuCloseDelay: number;
   submenuOpenDelay: number;
@@ -74,6 +82,7 @@ const FALLBACK: MenuDefaults = {
   side: 'bottom',
   sideOffset: 0,
   size: 'md',
+  width: 'content',
   strategy: 'absolute',
   submenuCloseDelay: 300,
   submenuOpenDelay: 150,

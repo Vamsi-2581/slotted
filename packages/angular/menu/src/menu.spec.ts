@@ -449,6 +449,32 @@ describe('SlMenu', () => {
 
     expect(document.querySelector("[data-ui='menu']")?.getAttribute('data-size')).toBe('lg');
   });
+
+  it('stands at its content width, or at the anchor width an application set once', async () => {
+    (fixture.nativeElement.querySelector('button') as HTMLElement).dispatchEvent(
+      new MouseEvent('click', { bubbles: true, detail: 1 }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.querySelector("[data-ui='menu']")?.getAttribute('data-width')).toBe('content');
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideMenuDefaults({ width: 'anchor' })],
+    });
+    const scoped = TestBed.createComponent(Host);
+    scoped.detectChanges();
+    await scoped.whenStable();
+
+    (scoped.nativeElement.querySelector('button') as HTMLElement).dispatchEvent(
+      new MouseEvent('click', { bubbles: true, detail: 1 }),
+    );
+    scoped.detectChanges();
+    await scoped.whenStable();
+
+    expect(document.querySelector("[data-ui='menu']")?.getAttribute('data-width')).toBe('anchor');
+  });
 });
 
 @Component({

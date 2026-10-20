@@ -13,6 +13,14 @@ export type PartRef = (node: HTMLElement | null) => void;
 /** The surface's measure and the geometry of its items. */
 export type MenuSize = 'sm' | 'md' | 'lg';
 
+/**
+ * How wide the surface is. `content` is its own measure, between the family's
+ * floor and cap; `anchor` is the trigger's width, capped by the room the
+ * positioner reports — an account switcher at the foot of a sidebar, as wide
+ * as the row that opens it. A submenu is always `content`.
+ */
+export type MenuWidth = 'content' | 'anchor';
+
 /** Where the surface hangs. The two logical values mirror; the rest do not. */
 export type MenuSide = 'top' | 'bottom' | 'inline-start' | 'inline-end' | 'left' | 'right';
 
@@ -98,6 +106,7 @@ export interface MenuDefaults {
   submenuOpenDelay: number;
   typeahead: boolean;
   typeaheadTimeout: number;
+  width: MenuWidth;
 }
 
 export interface MenuDefaultsProviderProps extends Partial<MenuDefaults> {
@@ -175,6 +184,7 @@ export interface MenuContentRootProps extends HTMLAttributes<HTMLElement> {
   'data-part': string;
   'data-size': MenuSize;
   'data-ui': string;
+  'data-width': MenuWidth;
 }
 
 export interface MenuContentProps extends ComponentPropsWithRef<'div'> {
@@ -314,6 +324,7 @@ export interface MenuContextValue {
   triggerNode: HTMLElement | null;
   typeahead: boolean;
   typeaheadTimeout: number;
+  width: MenuWidth;
   /**
    * Where focus lands when the surface opens. `trigger` is the pattern's
    * recommended answer for a menu opened by arrowing along a bar: the menu

@@ -500,6 +500,47 @@ describe('Menu', () => {
  * `render`. `ButtonProps` requires `children`, and the render props carried it
  * as optional, so the page's example did not compile.
  */
+describe('width', () => {
+  const layer = () => screen.getByRole('menu').parentElement;
+
+  it('writes the measure it stands at on the layer, content by default', () => {
+    render(
+      <Menu defaultOpen>
+        <MenuTrigger>Account</MenuTrigger>
+        <MenuContent aria-label="Account">
+          <MenuItem value="switch">Switch</MenuItem>
+        </MenuContent>
+      </Menu>,
+    );
+    expect(layer()).toHaveAttribute('data-width', 'content');
+  });
+
+  it('takes anchor from the prop and from the defaults', () => {
+    const { unmount } = render(
+      <Menu defaultOpen width="anchor">
+        <MenuTrigger>Account</MenuTrigger>
+        <MenuContent aria-label="Account">
+          <MenuItem value="switch">Switch</MenuItem>
+        </MenuContent>
+      </Menu>,
+    );
+    expect(layer()).toHaveAttribute('data-width', 'anchor');
+    unmount();
+
+    render(
+      <MenuDefaultsProvider width="anchor">
+        <Menu defaultOpen>
+          <MenuTrigger>Account</MenuTrigger>
+          <MenuContent aria-label="Account">
+            <MenuItem value="switch">Switch</MenuItem>
+          </MenuContent>
+        </Menu>
+      </MenuDefaultsProvider>,
+    );
+    expect(layer()).toHaveAttribute('data-width', 'anchor');
+  });
+});
+
 describe('a trigger rendered as a button', () => {
   it('hands its label to the rendered button, which compiles against ButtonProps', () => {
     render(

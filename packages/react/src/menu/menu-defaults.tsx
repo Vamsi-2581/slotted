@@ -43,6 +43,7 @@ export const MENU_FALLBACK: MenuDefaults = {
   submenuOpenDelay: 150,
   typeahead: true,
   typeaheadTimeout: 500,
+  width: 'content',
 };
 
 const MenuDefaultsContext = createContext<MenuDefaults>(MENU_FALLBACK);
@@ -95,6 +96,7 @@ export function MenuDefaultsProvider({
     submenuOpenDelay: overrides.submenuOpenDelay ?? inherited.submenuOpenDelay,
     typeahead: overrides.typeahead ?? inherited.typeahead,
     typeaheadTimeout: overrides.typeaheadTimeout ?? inherited.typeaheadTimeout,
+    width: overrides.width ?? inherited.width,
   };
 
   return <MenuDefaultsContext.Provider value={value}>{children}</MenuDefaultsContext.Provider>;

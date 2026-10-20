@@ -290,6 +290,28 @@
     visibility: hidden;
   }
 
+  /**
+   * The surface as wide as its trigger: an account switcher at the foot of a
+   * sidebar, opened from a row the column's full width. The content takes the
+   * anchor's width as its size and its floor, as `popover`'s `width="anchor"`
+   * does, and the room the positioner reports caps both. The layer drops the
+   * family's floor and cap, which would hold it narrower or wider than the
+   * row. Opened above or below, the layer has no inline padding, so the
+   * content and the trigger share both edges.
+   */
+  [data-ui='menu'][data-width='anchor'] {
+    max-inline-size: var(--slotted-positioner-available-width, 100vw);
+    min-inline-size: 0;
+  }
+  [data-ui='menu'][data-width='anchor'] > [data-part='content'] {
+    inline-size: var(--slotted-positioner-anchor-width, auto);
+    max-inline-size: var(--slotted-positioner-available-width, 100vw);
+    min-inline-size: min(
+      var(--slotted-positioner-anchor-width, 0px),
+      var(--slotted-positioner-available-width, 100vw)
+    );
+  }
+
   [data-ui='menu'][data-size='sm'] {
     --_item-padding: var(--slotted-control-padding-inline-sm, 0.625rem);
     --_item-height: var(--slotted-control-height-sm, 30px);

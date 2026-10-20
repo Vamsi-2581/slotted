@@ -42,6 +42,7 @@ import type {
   MenuSide,
   MenuSize,
   MenuStrategy,
+  MenuWidth,
 } from './menu-defaults';
 import { MENUBAR_SURFACE } from './menu-context';
 
@@ -105,6 +106,7 @@ const reveal = (item: HTMLElement) => {
         data-part="root"
         [attr.data-align]="resolvedAlign()"
         [attr.data-size]="resolvedSize()"
+        [attr.data-width]="resolvedWidth()"
         [attr.data-open]="isOpen() ? '' : null"
         [attr.inert]="isOpen() ? null : ''"
       >
@@ -148,6 +150,7 @@ export class SlMenu {
   readonly align = input<MenuAlign | undefined>(undefined);
   readonly side = input<MenuSide | undefined>(undefined);
   readonly size = input<MenuSize | undefined>(undefined);
+  readonly width = input<MenuWidth | undefined>(undefined);
   readonly mount = input<MenuMount | undefined>(undefined);
   readonly strategy = input<MenuStrategy | undefined>(undefined);
   readonly sideOffset = input<number | undefined, number | string | undefined>(undefined, {
@@ -246,6 +249,10 @@ export class SlMenu {
   });
   readonly resolvedSize = computed(
     () => this.size() ?? (this.onBar ? this.bar?.size() : undefined) ?? this.defaults.size,
+  );
+  /* A submenu hangs from an item, and an item's width is not a measure. */
+  readonly resolvedWidth = computed<MenuWidth>(() =>
+    this.parent === null ? (this.width() ?? this.defaults.width) : 'content',
   );
   readonly resolvedDisabled = computed(
     () =>

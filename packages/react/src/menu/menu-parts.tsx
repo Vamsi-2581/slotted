@@ -699,6 +699,7 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
     'data-part': 'root',
     'data-size': menu.size,
     'data-ui': 'menu',
+    'data-width': menu.width,
   };
 
   const element = (

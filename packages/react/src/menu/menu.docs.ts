@@ -487,6 +487,13 @@ const api = apiRows([
     'The width of the surface and the height of its items.',
   ],
   [
+    'width',
+    "'content' | 'anchor'",
+    'content',
+    'Menu',
+    'content: the surface takes its own measure; anchor: it is exactly as wide as its trigger, capped by the available width. A submenu is always content.',
+  ],
+  [
     'side',
     "'top' | 'bottom' | 'inline-start' | 'inline-end' | 'left' | 'right'",
     'bottom',

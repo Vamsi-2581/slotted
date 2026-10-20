@@ -3,11 +3,12 @@ import { createArrowNavigation, tabbables } from '@slotted/core/focus';
 import { createPointerIntent } from '@slotted/core/pointer-intent';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner, submenuOffsets } from '@slotted/core/positioner';
+import type { PositionerHandle } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { createTypeahead, isPrintable } from '@slotted/core/typeahead';
 import type { TypeaheadHandle } from '@slotted/core/typeahead';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, PointerEvent, Ref } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -337,7 +338,14 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
   const [surfaceNode, setSurfaceNode] = useState<HTMLElement | null>(null);
   const [container, setContainer] = useState<Element | null>(null);
   const [status, setStatus] = useState<PresenceStatus>('unmounted');
-  const [positioned, setPositioned] = useState(false);
+  /**
+   * The reader is about to open the menu: the trigger took focus or a press.
+   * The portal's layer is made then, because making it reads the trigger's
+   * computed style, and a read in the open's own task is a style recalculation
+   * the first frame waits for. A press focuses before it clicks, in a task of
+   * its own.
+   */
+  const [warm, setWarm] = useState(false);
   const [openItem, setOpenItem] = useState<HTMLElement | null>(null);
   const [headerId, setHeaderId] = useState<string | null>(null);
 
@@ -368,11 +376,31 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
     menu.setContentNode(surfaceNode);
   }, [menu, surfaceNode]);
 
+  /**
+   * Open renders the menu in the commit that opens it, rather than once the
+   * presence has reported `entering` in a render of its own.
+   */
   const mounted =
-    menu.mount === 'eager' || (menu.mount === 'lazy' && menu.seen) || status !== 'unmounted';
+    menu.mount === 'eager' ||
+    (menu.mount === 'lazy' && menu.seen) ||
+    menu.open ||
+    status !== 'unmounted';
 
   useEffect(() => {
-    if (!mounted) {
+    const trigger = menu.triggerNode;
+    if (trigger === null || warm) return undefined;
+    const prepare = () => setWarm(true);
+    trigger.addEventListener('focusin', prepare);
+    trigger.addEventListener('pointerdown', prepare);
+    return () => {
+      trigger.removeEventListener('focusin', prepare);
+      trigger.removeEventListener('pointerdown', prepare);
+    };
+  }, [menu.triggerNode, warm]);
+
+  const layered = mounted || warm;
+  useLayoutEffect(() => {
+    if (!layered) {
       setContainer(null);
       return;
     }
@@ -382,7 +410,7 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
     });
     setContainer(handle.container);
     return () => handle.release();
-  }, [menu.portal, menu.triggerNode, mounted]);
+  }, [layered, menu.portal, menu.triggerNode]);
 
   const {
     align,
@@ -400,9 +428,48 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
      point a context menu was opened at. */
   const anchor = menu.anchor ?? menu.triggerNode;
 
-  useEffect(() => {
+  const positioner = useRef<PositionerHandle | null>(null);
+  const focusFrame = useRef(0);
+
+  /**
+   * `data-open` is written by the measurement that places the menu, on the
+   * element, in the task that opened it: the position, the side and the open
+   * state reach one style update together, and the first frame after the
+   * click shows the menu where it belongs. A render to say "positioned" was a
+   * frame of its own.
+   *
+   * Focus enters the surface as it opens, and the pattern says which item. It
+   * moves in the next frame: after the measurement, because focusing an item
+   * still at the origin scrolls the page to it, and not in the open's own task,
+   * because `focus()` after the writes is a style recalculation the first frame
+   * waits for.
+   */
+  const place = useCallback((handle: PositionerHandle, layer: HTMLElement) => {
+    void handle.update().then(() => {
+      if (positioner.current !== handle || !latest.current.menu.open) return;
+      const wasOpen = layer.hasAttribute('data-open');
+      layer.setAttribute('data-open', '');
+      const view = layer.ownerDocument.defaultView;
+      if (wasOpen || view === null || focusFrame.current !== 0) return;
+      focusFrame.current = view.requestAnimationFrame(() => {
+        focusFrame.current = 0;
+        const { menu, surfaceNode } = latest.current;
+        if (!menu.open || surfaceNode === null) return;
+        const bar = menu.onBar ? menu.menubar : null;
+        const entry = bar === null ? menu.entry.current : bar.entry.current;
+        menu.entry.current = 'first';
+        if (bar !== null) bar.entry.current = 'first';
+        /* `trigger` is a menu opened by arrowing along a bar: it appears and
+           takes no focus, so the next arrow moves along the bar rather than
+           down a list. */
+        if (entry === 'trigger') return;
+        focusEntry(surfaceNode, entry);
+      });
+    });
+  }, []);
+
+  useLayoutEffect(() => {
     if (layerNode === null || anchor === null) return;
-    let live = true;
 
     /* A submenu is anchored to its item and placed from the parent's edge: the
        parent surface's inset is added along the side, and the submenu's own
@@ -429,14 +496,13 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
       strategy,
     });
 
-    void handle.update().then(() => {
-      if (live) setPositioned(true);
-    });
+    positioner.current = handle;
+    if (latest.current.menu.open) place(handle, layerNode);
 
     return () => {
-      live = false;
       handle.destroy();
-      setPositioned(false);
+      positioner.current = null;
+      layerNode.removeAttribute('data-open');
     };
   }, [
     align,
@@ -453,7 +519,22 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
     sideOffset,
     strategy,
     surfaceNode,
+    place,
   ]);
+
+  useLayoutEffect(() => {
+    const handle = positioner.current;
+    if (handle === null || layerNode === null) return;
+    if (menu.open) {
+      place(handle, layerNode);
+      return;
+    }
+    layerNode.removeAttribute('data-open');
+    if (focusFrame.current !== 0) {
+      layerNode.ownerDocument.defaultView?.cancelAnimationFrame(focusFrame.current);
+      focusFrame.current = 0;
+    }
+  }, [layerNode, menu.open, place]);
 
   /**
    * One layer in the single stack. The trigger is a branch, so pressing it is
@@ -514,19 +595,6 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
       typeahead.current = null;
     };
   }, [menu.typeahead, menu.typeaheadTimeout]);
-
-  /** Focus enters the surface as it opens, and the pattern says which item. */
-  useEffect(() => {
-    if (!menu.open || surfaceNode === null || !positioned) return;
-    const bar = menu.onBar ? menu.menubar : null;
-    const entry = bar === null ? menu.entry.current : bar.entry.current;
-    menu.entry.current = 'first';
-    if (bar !== null) bar.entry.current = 'first';
-    /* `trigger` is a menu opened by arrowing along a bar: it appears and takes
-       no focus, so the next arrow moves along the bar rather than down a list. */
-    if (entry === 'trigger') return;
-    focusEntry(surfaceNode, entry);
-  }, [menu.entry, menu.menubar, menu.onBar, menu.open, positioned, surfaceNode]);
 
   useEffect(() => {
     if (!menu.open) {
@@ -628,7 +696,6 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
      * leaves the exit transition to run.
      */
     ...(menu.open ? {} : { inert: true }),
-    ...(menu.open && positioned ? { 'data-open': '' } : {}),
     'data-part': 'root',
     'data-size': menu.size,
     'data-ui': 'menu',

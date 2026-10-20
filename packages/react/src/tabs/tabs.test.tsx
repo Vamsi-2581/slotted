@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { useState } from 'react';
+import { Suspense, use, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/tabs/contract.json';
@@ -654,5 +654,87 @@ describe('Tabs', () => {
 
     expect(tab(0).getAttribute('aria-controls')).not.toBe(tab(1).getAttribute('aria-controls'));
     expect(screen.getByText('primeiro')).toBeInTheDocument();
+  });
+});
+
+/**
+ * A panel that reads a promise, the way a panel holding a table reads its rows.
+ * Suspending stands in for a render slow enough to block the click's frame.
+ */
+function Ledger({ rows }: { rows: Promise<string> }) {
+  return <p>{use(rows)}</p>;
+}
+
+/* The boundary is the page's, outside the tabs — a route's own — so a panel
+   that suspends reaches a boundary that has already shown its content. */
+function Statement({ rows, deferPanels }: { rows: Promise<string>; deferPanels?: boolean }) {
+  return (
+    <Suspense fallback={<p>Loading</p>}>
+      <Tabs defaultValue="summary" {...(deferPanels === undefined ? {} : { deferPanels })}>
+        <TabList aria-label="Statement">
+          <Tab value="summary">Summary</Tab>
+          <Tab value="ledger">Ledger</Tab>
+        </TabList>
+        <TabPanel value="summary">
+          <p>Totals</p>
+        </TabPanel>
+        <TabPanel value="ledger">
+          <Ledger rows={rows} />
+        </TabPanel>
+      </Tabs>
+    </Suspense>
+  );
+}
+
+/**
+ * Selecting a tab never waits for its panel. The tab paints its selection in
+ * the click's frame and the panel renders from the deferred value; while the
+ * shown panel lags the selected tab it says so, with aria-busy.
+ */
+describe('Tabs, deferred panels', () => {
+  it('selects the tab at once and keeps the shown panel, busy, until the new one renders', async () => {
+    let resolve: (value: string) => void = () => undefined;
+    const rows = new Promise<string>((done) => {
+      resolve = done;
+    });
+    render(<Statement deferPanels rows={rows} />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: 'Ledger' }));
+    });
+
+    expect(screen.getByRole('tab', { name: 'Ledger' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText('Totals')).toBeVisible();
+    expect(screen.queryByText('Loading')).toBeNull();
+    const shown = screen.getByText('Totals').closest('[role="tabpanel"]');
+    expect(shown).toHaveAttribute('aria-busy', 'true');
+    expect(shown).toHaveAttribute('data-pending', '');
+
+    await act(async () => {
+      resolve('Twelve postings');
+      await rows;
+    });
+
+    expect(screen.getByText('Twelve postings')).toBeVisible();
+    expect(screen.queryByText('Totals')).toBeNull();
+    const ledger = screen.getByText('Twelve postings').closest('[role="tabpanel"]');
+    expect(ledger).not.toHaveAttribute('aria-busy');
+    expect(ledger).not.toHaveAttribute('data-pending');
+  });
+
+  it('defers by default under mount="active", and not when the consumer says false', async () => {
+    const rows = new Promise<string>(() => undefined);
+    const { unmount } = render(<Statement rows={rows} />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: 'Ledger' }));
+    });
+    expect(screen.getByText('Totals')).toBeVisible();
+    unmount();
+
+    render(<Statement deferPanels={false} rows={rows} />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: 'Ledger' }));
+    });
+    expect(screen.getByText('Loading')).toBeVisible();
   });
 });

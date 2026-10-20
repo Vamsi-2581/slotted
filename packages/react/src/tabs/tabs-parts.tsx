@@ -246,15 +246,19 @@ export function TabPanel({ children, ref, render, value, ...nativeProps }: TabPa
   const tabs = useTabs();
   const { panelId, tabId } = tabs.identify(value);
 
-  const selected = tabs.value === value;
-  const present = selected || tabs.mount === 'eager' || (tabs.mount === 'lazy' && tabs.seen(value));
+  /* The panel on screen is the shown value's, which lags the selected tab
+     under `deferPanels` while the selected panel renders; it says so. */
+  const shown = tabs.shownValue === value;
+  const pending = shown && tabs.value !== tabs.shownValue;
+  const present = shown || tabs.mount === 'eager' || (tabs.mount === 'lazy' && tabs.seen(value));
 
   const rootProps: TabPanelRootProps = {
     ...nativeProps,
     'aria-labelledby': tabId,
+    ...(pending ? { 'aria-busy': true, 'data-pending': '' } : {}),
     children: present ? children : null,
     'data-part': 'panel',
-    hidden: !selected,
+    hidden: !shown,
     id: panelId,
     role: 'tabpanel',
     tabIndex: 0,

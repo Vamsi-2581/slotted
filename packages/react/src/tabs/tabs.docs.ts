@@ -436,6 +436,13 @@ export const REACT_TABS_DOCS = {
         'When a panel’s content exists: only while its tab is selected (active), from its first selection on (lazy), or from the start (eager). A panel that is not selected carries the hidden attribute.',
       ],
       [
+        'deferPanels',
+        'boolean',
+        'true under mount="active", false otherwise',
+        'Tabs',
+        'Whether the panels render from useDeferredValue(value). The selected tab paints in the click’s frame and its panel renders after it; until it is ready the panel on screen stays, with aria-busy and data-pending. A panel that suspends keeps the shown one when its Suspense boundary is outside Tabs; a boundary inside the new panel shows its own fallback.',
+      ],
+      [
         'loop',
         'boolean',
         'true',
@@ -533,7 +540,7 @@ export const REACT_TABS_DOCS = {
         '() => TabsContextValue',
         '—',
         'inside Tabs',
-        'What a tab and a panel read: the value, the mount strategy, the ids, and select(value, reason, source) for a view the page changes on its own. It throws outside Tabs instead of rendering a control that looks right and does nothing.',
+        'What a tab and a panel read: the value, shownValue (the value the panels render, deferred under deferPanels), the mount strategy, the ids, and select(value, reason, source) for a view the page changes on its own. A region rendered outside the panels — a page header’s tab with controls= — renders from shownValue. It throws outside Tabs instead of rendering a control that looks right and does nothing.',
       ],
       [
         'TabsDefaultsProvider',
@@ -551,6 +558,7 @@ export const REACT_TABS_DOCS = {
       ],
     ]),
     accessibility: [
+      'Selecting a tab never waits for its panel: keep value urgent and render the region from useDeferredValue(value), which deferPanels does for the panels and useTabs().shownValue hands a region outside them. Wrapping the setter in startTransition delays the marker too.',
       'Tabs implements the WAI-ARIA APG Tabs pattern (w3.org/WAI/ARIA/apg/patterns/tabs/) and its whole keyboard table: Tab enters the list on the selected tab and leaves to the panel, the arrow keys of the list’s direction move focus and wrap at both ends, Home and End reach the first and last enabled tab, Enter and Space select under manual activation, and Delete closes a dismissible tab. A horizontal list does not listen for Up and Down, so those keys keep scrolling the page while focus is in the list.',
       'After a dismissal, focus follows the pattern: the next tab, the previous one when the closed tab was last, or the list itself when no tab is left, which is why the list carries tabindex="-1". The selection follows the same rule, with the reason remove.',
       'The close button is outside the arrow-key sequence and inside the accessibility tree. A screen reader reaches and presses it; from the keyboard, Delete closes the focused tab, and the tab announces the key with aria-keyshortcuts. In the arrow-key sequence, close buttons would double the presses it takes to cross the list.',

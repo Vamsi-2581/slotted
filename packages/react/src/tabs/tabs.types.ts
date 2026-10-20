@@ -100,6 +100,14 @@ export interface TabsContextValue {
   select: (value: string, reason: TabsSelectionReason, source: unknown) => void;
   /** Asks for a tab to be dismissed, and moves the selection when it held it. */
   dismiss: (value: string, reason: TabsDismissReason, source: unknown) => void;
+  /**
+   * The value the panels render. It is `value` itself, or under `deferPanels`
+   * its deferred copy, which lags while the selected panel is still rendering.
+   * A panel rendered outside `Tabs` — a page header's tabs whose region is the
+   * page body — renders from this one.
+   */
+  shownValue: string | undefined;
+  /** The selected tab, which moves in the interaction's own frame. */
   value: string | undefined;
 }
 
@@ -133,6 +141,8 @@ export interface TabRootProps extends HTMLAttributes<HTMLElement> {
 /** What `render` receives for one panel. */
 export interface TabPanelRootProps extends HTMLAttributes<HTMLElement> {
   'data-part': string;
+  /** Written while this panel is on screen and the selected tab's panel is still rendering. */
+  'data-pending'?: '' | undefined;
   role: 'tabpanel';
 }
 
@@ -152,6 +162,14 @@ export interface TabsProps extends Omit<ComponentPropsWithRef<'div'>, 'defaultVa
   loop?: boolean | undefined;
   /** Defaults to the provider, then to `active`. */
   mount?: TabsMount | undefined;
+  /**
+   * Whether the panels render from a deferred copy of the value. The selected
+   * tab then paints in the click's frame while the panel it opens renders
+   * after it, and the panel on screen carries `aria-busy` and `data-pending`
+   * until the new one is ready. On by default under `mount="active"`, where
+   * selecting a tab mounts its panel; off under `lazy` and `eager`.
+   */
+  deferPanels?: boolean | undefined;
   /** Called before the value moves, with the request that carries the reason. */
   onValueChange?: ((value: string, request: TabsChangeRequest) => void) | undefined;
   /**

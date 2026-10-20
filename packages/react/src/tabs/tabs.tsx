@@ -5,7 +5,15 @@ import type { RovingTabindexHandle } from '@slotted/core/focus';
 import { createScrollAffordance, NOT_OVERFLOWING } from '@slotted/core/overflow';
 import type { OverflowState, ScrollAffordanceHandle } from '@slotted/core/overflow';
 import { createControllable } from '@slotted/core/state';
-import { createContext, useContext, useEffect, useId, useRef, useState } from 'react';
+import {
+  createContext,
+  useContext,
+  useDeferredValue,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from 'react';
 
 import { Glyph, Icon } from '../icon';
 import { useTabsDefaults } from './tabs-defaults';
@@ -90,6 +98,7 @@ export function Tabs({
   children,
   className,
   defaultValue,
+  deferPanels,
   disabled,
   fit,
   loop,
@@ -125,6 +134,15 @@ export function Tabs({
   const resolvedTrack = track ?? defaults.track;
   const resolvedVariant = variant ?? defaults.variant;
   const resolvedDisabled = disabled === true;
+
+  /**
+   * The tab is urgent and the panel is not. Under `mount="active"` selecting a
+   * tab mounts its panel, and a panel holding a table or a form is a render
+   * long enough to delay the next paint; rendering it from the deferred value
+   * lets the selection paint in the click's frame and the panel follow.
+   */
+  const deferred = useDeferredValue(current);
+  const shownValue = (deferPanels ?? resolvedMount === 'active') ? deferred : current;
 
   /** Every value that has been selected at least once, which is what `lazy` reads. */
   const seen = useRef(new Set<string>(current === undefined ? [] : [current]));
@@ -312,6 +330,7 @@ export function Tabs({
     orientation: resolvedOrientation,
     seen: (candidate) => seen.current.has(candidate),
     select,
+    shownValue,
     value: current,
   };
 

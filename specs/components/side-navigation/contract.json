@@ -189,9 +189,10 @@
     "--slotted-app-shell-row-gap",
     "--slotted-app-shell-row-height",
     "--slotted-app-shell-row-font-size",
-    "--slotted-app-shell-row-line-height"
+    "--slotted-app-shell-row-line-height",
+    "--slotted-app-shell-row-ring-inset"
   ],
-  "readsReason": "app-shell publishes the geometry of a row so that every row in its frame stands on the same left edge as its toggle and its account control. size=md reads it, with the control scale as the fallback outside the shell; sm and lg read their own steps of the control scale, because an explicit size is an explicit consumer value",
+  "readsReason": "app-shell publishes the geometry of a row so that every row in its frame stands on the same left edge as its toggle and its account control. size=md reads it, with the control scale as the fallback outside the shell; sm and lg read their own steps of the control scale, because an explicit size is an explicit consumer value. The ring inset is read at every size: a row reaches back into the padding the navigation parts add for an outward focus ring, so its box keeps its edge",
   "messages": ["navigation"],
   "declined": {
     "drawer": {

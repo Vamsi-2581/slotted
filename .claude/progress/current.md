@@ -1,10 +1,9 @@
 # Checkpoint
 
-- Plano: `docs/history/plans/2026-10-20-fifth-iteration.md` (dez itens, cinco fatias).
-- Concluído: fatia 1 (itens 1, 2, 3), fatia 2 (itens 7, 8, 9), fatia 3 (itens 6, 10). HEAD da fatia 3: `754210fa`.
-- Em curso: gate `pnpm check:affected` da fatia 3; depois, fatia 4 (item 5).
-- Git: ramo `main`, à frente de `origin/main`; árvore limpa após o commit deste checkpoint.
-- Testes: fatia 2 — `pnpm check` exit 0 (após rebuild de `@slotted/theme`, cujo `dist/types` faltava). Fatia 3 — `@slotted/styles` verify exit 0, `test:contracts` exit 0, `typecheck` exit 0, tabs React 42/42, tabs Angular 33/33, core measure+focus 110/110, cenários `page-header-glass.mjs` e `tabs-marker.mjs` passam e falham com o CSS anterior.
-- Ajustes de âmbito: `createIndicator` em `@slotted/core/measure`; exceção física de `logical.test.mjs` estendida ao marcador das tabs; exceção `tabs/item::after` removida de `text-scale.test.mjs`; a faixa das tabs passou de borda a sombra interna.
+- Plano: `docs/history/plans/2026-10-20-fifth-iteration.md` (onze itens, seis fatias).
+- Concluído: fatias 1–4 (itens 1, 2, 3, 6, 7, 8, 9, 10, 11; item 5 no select, React e Angular). HEAD `0e6f1f92` antes deste checkpoint.
+- Em curso: fatia 5 — item 5 nas outras quinze famílias.
+- Git: ramo `main`, à frente de `origin/main`.
+- Testes: verificação escopada por mudança (pedido do utilizador); `pnpm check` e o verify completo ficam para antes do push. Últimos verdes: core positioner 37/37, React select+field 124/124, Angular select 60/60, Angular stat-card 14/14, styles raiz+stat-card 282/282, cenários `select-open.mjs --assert`, `stat-card-nested.mjs`, `tabs-marker.mjs`.
 - Problemas conhecidos: ver o plano.
-- Próxima ação: item 5 — medir no Chrome a abertura de um select de 62 itens (clique → `data-open`, `UpdateLayoutTree` na cadeia do clique) com um cenário em `tools/harness/scenarios/` sobre a página da demo ou um bundle React mínimo; ler `packages/core/src/positioner/positioner.ts`, `presence/presence.ts`, `portal/portal.ts` e `packages/react/src/select/select-parts.tsx:700-800`.
+- Próxima ação: generalizar `tools/harness/scenarios/select-open.mjs` para uma tabela de famílias (entrada React, seletor do gatilho e do positioner) e medir multi-select, combobox, popover, menu; aplicar a cada uma o padrão do select (`packages/react/src/select/select-parts.tsx`, função `place` e efeitos vizinhos).

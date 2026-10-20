@@ -1,6 +1,6 @@
 # Quinta iteração — foco por ponteiro, marcador das tabs, abertura de popovers, CSS por família e material de agente
 
-Fonte: dez pedidos recebidos em 2026-10-20 sobre `main` (`af73b553`, `v0.1.0-beta.4`). Uma fatia
+Fonte: onze pedidos recebidos em 2026-10-20 sobre `main` (`af73b553`, `v0.1.0-beta.4`). Uma fatia
 fecha até três tarefas. Cada defeito, melhoria e feature leva o teste que falha antes da mudança.
 React e Angular recebem a mesma mudança de contrato quando a família existe nos dois.
 
@@ -18,14 +18,16 @@ React e Angular recebem a mesma mudança de contrato quando a família existe no
 | 8   | agent-docs (bin `instructions`)            | feature  | O bin não existe. O build escreve `dist/docs/AGENTS.snippet.md`; `@slotted/react` publica `dist`.                                                                                                                                                                                                                                                                   |
 | 9   | agent-docs (bin `skills`)                  | feature  | O bin não existe. As skills publicadas estão em `dist/docs/skills/<name>/SKILL.md`.                                                                                                                                                                                                                                                                                |
 | 10  | page-header                                | feature  | Confirmado: a raiz e `title-area` pintam `--_ground` (alfa 0,5 compõe 0,75); não existe `backdrop-filter`. A `title-area` pinta o fundo para tapar a `header-area` que passa sob ela no colapso (`page-header.css`, "How it collapses"). |
+| 11  | stat-card                                  | defeito  | Confirmado no Chrome: o `label` de um badge `success` em `StatCardStatus` computava `oklch(0.522 0.037 257)` a 13px, contra `oklch(0.493 0.137 150)` a 12px fora do card; as regras de parte usam seletores descendentes `[data-ui='stat-card'] [data-part=…]`. |
 
 ## Fatias
 
 1. Foco e tipos: 1, 2, 3.
 2. Material de agente: 7, 8, 9.
 3. Marcador das tabs e fundo do page-header: 6, 10.
-4. Caminho de abertura dos popovers: 5.
-5. CSS por família: 4.
+4. Abertura do select e seletores do stat-card: 5 (select), 11.
+5. Abertura das outras quinze famílias: 5.
+6. CSS por família: 4.
 
 ## Resultado
 
@@ -39,6 +41,8 @@ React e Angular recebem a mesma mudança de contrato quando a família existe no
 | 9   | Feito: `skills link\|check` com `--dir` e `--mode link\|copy`. O alvo dos links é o `node_modules/<pacote>` encontrado a subir do diretório corrente (caminho estável entre versões), com recurso ao caminho do próprio bin. Entradas já certas ficam; entradas de skills Slotted desatualizadas são substituídas; links do pacote para skills que saíram são removidos. Teste do pacote ausente: apaga `dist/docs/skills` (o bin vive no pacote); `check` sai com 1 por links pendentes. |
 | 10  | Feito: a `title-area` fica transparente quando o page-header não tem `header-area`; com `header-area` mantém o fundo. `--slotted-page-header-backdrop-filter` (`none` por omissão) em `backdrop-filter` e `-webkit-backdrop-filter` da raiz sob `[data-stuck]`; `none` sob `prefers-reduced-transparency: reduce` e `forced-colors: active`. Cenário `tools/harness/scenarios/page-header-glass.mjs` (cena `glass`, `createStickyHeader` num scroller próprio): antes, alfa efetivo 0,750 e `backdrop-filter: none`; depois, 0,500 e `blur(8px)`. Teste de estilo em `page-header.styles.test.mjs`. |
 | 6   | Feito: `createIndicator` (`@slotted/core/measure`) cria a parte `marker` na lista e escreve `--_indicator-start` e `--_indicator-length` da tab selecionada (coordenadas de scroll da lista), `hidden` sem alvo e `data-positioned` um frame depois da primeira posição; mede em mutações sob a lista e em redimensionamentos. React (layout effect na raiz) e Angular (`observe`). CSS: um marcador com `translate` e `inline-size`, na caixa de conteúdo da tab (`--slotted-tabs-marker-inset`, `--_end-inset` 0 diante do botão de fechar), comprimento mínimo `--slotted-space-6` centrado, sobre a borda da lista; a faixa passa de borda a sombra interna com `padding-block-end` (a lista recorta na caixa de padding); hover em `item::before` com a mesma geometria e `--slotted-tabs-hover-marker-opacity`; vertical na borda inline-end; `prefers-reduced-motion` sem transição; cores forçadas repõem a borda e pintam o marcador `Highlight`. Tokens novos: `marker-size` (3px, nunca abaixo de `--slotted-border-width-thick`), `marker-radius`, `marker-inset`, `hover-marker-opacity`. Contrato: parte `marker`, `measured: true`. Cenário `tools/harness/scenarios/tabs-marker.mjs` (cena `marker`, quatro listas): espessura e raio do token, extensão igual à caixa de conteúdo, borda na borda da lista, `translate` muda sem `transform`; falha com o CSS anterior. Testes de marcador nos dois bindings falham antes. Auditoria do harness das tabs: 63 cenas sem achados. |
+| 11  | Feito: cada regra de parte de `stat-card.css` dentro de `@scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *)`, no lugar e com `:scope` no seletor (especificidade igual); o limite exclui o conteúdo de uma família aninhada e não a sua raiz, que o card dimensiona (`trend > *`). Cenário `tools/harness/scenarios/stat-card-nested.mjs` (React do código-fonte, `tools/harness/react-page.mjs`): falha antes, passa depois. Teste de estilo do limite; o leitor de regras do teste traduz `:scope` para a raiz. |
+| 5   | Em curso. Select feito: React — conteúdo montado no commit da abertura, camada do portal criada no `focusin`/`pointerdown` do gatilho, posicionador num layout effect, `data-open` escrito no DOM depois do `update()` (o React deixou de o renderizar), destaque revelado no frame seguinte, clique de label reconhecido pela pressão registada em vez da caixa do frame; core — o `autoUpdate` do posicionador começa no frame seguinte à criação (todas as 32 chamadas chamam `update()` antes). Cenário `tools/harness/scenarios/select-open.mjs --assert` (62 opções, produção): antes `data-open` no 3.º frame e 2 recálculos forçados; depois `data-open` e a animação de entrada no 1.º frame e 1 recálculo forçado (a leitura do posicionamento). Angular — as mesmas três medidas; sem medição no Chrome (o harness não monta Angular). |
 
 ## Problemas conhecidos
 
@@ -49,3 +53,6 @@ React e Angular recebem a mesma mudança de contrato quando a família existe no
 - Item 10: com `header-area`, a `title-area` mantém o fundo, e um fundo com alfa compõe duas vezes sob o título; uma `title-area` transparente mostraria as palavras da `header-area` sob o título.
 - Item 6: com `--slotted-tabs-marker-inset: 0`, o marcador cobre a tab mas não o botão de fechar; o aspeto anterior só se reproduz em tabs sem esse botão. `--slotted-tabs-marker-size` não desce abaixo de `--slotted-border-width-thick` em nenhum esquema.
 - `tools/agent-docs/content/` mudou (item 7): a próxima release corre `pnpm eval:agent-docs` antes.
+- Item 5: o aceite pede opacidade acima de 0 no primeiro frame; a entrada é uma animação de keyframes de 0 no compositor, e o Chrome mantém o tempo corrente em 0 até o compositor confirmar o início (dois a três frames). O cenário afirma `data-open` e a animação a correr no 1.º frame e reporta a opacidade.
+- Item 5: as famílias Angular não têm medição no Chrome; o harness monta só páginas React.
+- `bb1a19de`: a bissecção mostrou que o `requestAnimationFrame` de `createIndicator` fazia falhar o teste de tooltip do notification-center; o mecanismo exato não foi isolado.

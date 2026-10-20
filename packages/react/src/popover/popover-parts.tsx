@@ -1,6 +1,7 @@
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
+import type { PositionerHandle } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import {
@@ -175,7 +176,14 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
   const [node, setNode] = useState<HTMLElement | null>(null);
   const [container, setContainer] = useState<Element | null>(null);
   const [status, setStatus] = useState<PresenceStatus>('unmounted');
-  const [positioned, setPositioned] = useState(false);
+  /**
+   * The reader is about to open the panel: the trigger took focus or a press.
+   * The portal's layer is made then, because making it reads the trigger's
+   * computed style, and a read in the open's own task is a style recalculation
+   * the first frame waits for. A press focuses before it clicks, in a task of
+   * its own.
+   */
+  const [warm, setWarm] = useState(false);
 
   const presence = useRef<PresenceHandle | null>(null);
   const latest = useRef(popover);
@@ -202,13 +210,31 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
     presence.current?.setNode(node);
   }, [node]);
 
+  /**
+   * Open renders the panel in the commit that opens it, rather than once the
+   * presence has reported `entering` in a render of its own.
+   */
   const mounted =
     popover.mount === 'eager' ||
     (popover.mount === 'lazy' && popover.seen) ||
+    popover.open ||
     status !== 'unmounted';
 
   useEffect(() => {
-    if (!mounted) {
+    const trigger = popover.triggerNode;
+    if (trigger === null || warm) return undefined;
+    const prepare = () => setWarm(true);
+    trigger.addEventListener('focusin', prepare);
+    trigger.addEventListener('pointerdown', prepare);
+    return () => {
+      trigger.removeEventListener('focusin', prepare);
+      trigger.removeEventListener('pointerdown', prepare);
+    };
+  }, [popover.triggerNode, warm]);
+
+  const layered = mounted || warm;
+  useLayoutEffect(() => {
+    if (!layered) {
       setContainer(null);
       return;
     }
@@ -218,7 +244,7 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
     });
     setContainer(handle.container);
     return () => handle.release();
-  }, [mounted, popover.anchorNode, popover.portal, popover.triggerNode]);
+  }, [layered, popover.anchorNode, popover.portal, popover.triggerNode]);
 
   const {
     align,
@@ -236,9 +262,44 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
   } = popover;
   const anchor = popover.anchorNode ?? popover.triggerNode;
 
-  useEffect(() => {
+  const positioner = useRef<PositionerHandle | null>(null);
+  const focusFrame = useRef(0);
+  const wasOpen = useRef(false);
+
+  /**
+   * `data-open` is written by the measurement that places the panel, on the
+   * element, in the task that opened it: the position, the side and the open
+   * state reach one style update together, and the first frame after the
+   * click shows the panel where it belongs. A render to say "positioned" was
+   * a frame of its own.
+   *
+   * Focus goes to the panel itself rather than to its first control, so a
+   * reader hears the panel's name before its contents. It moves in the next
+   * frame: after the measurement, because focusing a layer still at the
+   * origin scrolls the page to it, and not in the open's own task, because
+   * `focus()` after the writes is a style recalculation the first frame waits
+   * for.
+   */
+  const place = useCallback((handle: PositionerHandle, layer: HTMLElement) => {
+    void handle.update().then(() => {
+      if (positioner.current !== handle || !latest.current.open) return;
+      layer.setAttribute('data-open', '');
+      if (wasOpen.current) return;
+      wasOpen.current = true;
+      const view = layer.ownerDocument.defaultView;
+      if (view === null || !latest.current.autoFocus || focusFrame.current !== 0) return;
+      focusFrame.current = view.requestAnimationFrame(() => {
+        focusFrame.current = 0;
+        const { contentNode, initialFocus, open } = latest.current;
+        if (!open) return;
+        const target = resolveFocus(initialFocus, contentNode) ?? contentNode;
+        target?.focus();
+      });
+    });
+  }, []);
+
+  useLayoutEffect(() => {
     if (node === null || anchor === null) return;
-    let live = true;
 
     const handle = createPositioner(anchor, node, {
       align,
@@ -255,15 +316,14 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
     });
 
     reposition.current = () => void handle.update();
-    void handle.update().then(() => {
-      if (live) setPositioned(true);
-    });
+    positioner.current = handle;
+    if (latest.current.open) place(handle, node);
 
     return () => {
-      live = false;
       reposition.current = undefined;
       handle.destroy();
-      setPositioned(false);
+      positioner.current = null;
+      node.removeAttribute('data-open');
     };
   }, [
     align,
@@ -281,7 +341,22 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
     sideOffset,
     strategy,
     width,
+    place,
   ]);
+
+  useLayoutEffect(() => {
+    const handle = positioner.current;
+    if (handle === null || node === null) return;
+    if (popover.open) {
+      place(handle, node);
+      return;
+    }
+    node.removeAttribute('data-open');
+    if (focusFrame.current !== 0) {
+      node.ownerDocument.defaultView?.cancelAnimationFrame(focusFrame.current);
+      focusFrame.current = 0;
+    }
+  }, [node, place, popover.open]);
 
   /**
    * The layer joins the single stack only while it is open. It is not modal:
@@ -318,23 +393,9 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
     popover.triggerNode,
   ]);
 
-  /**
-   * Focus goes to the panel itself rather than to its first control, so a
-   * reader hears the panel's name before its contents. It waits for the first
-   * measurement, because focusing a layer still at the origin scrolls the page
-   * to it.
-   */
-  const wasOpen = useRef(false);
+  /** Focus returns on close; the open moves it in `place`, above. */
   useEffect(() => {
-    const { autoFocus, contentNode, finalFocus, initialFocus, open, triggerNode } = latest.current;
-
-    if (open && positioned && !wasOpen.current) {
-      wasOpen.current = true;
-      if (!autoFocus) return;
-      const target = resolveFocus(initialFocus, contentNode) ?? contentNode;
-      target?.focus();
-      return;
-    }
+    const { contentNode, finalFocus, open, triggerNode } = latest.current;
 
     if (!open && wasOpen.current) {
       wasOpen.current = false;
@@ -348,7 +409,7 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
       const target = resolveFocus(finalFocus, contentNode) ?? triggerNode;
       target?.focus();
     }
-  }, [node, popover.open, positioned]);
+  }, [node, popover.open]);
 
   const onGuardFocus = () => {
     const { toggle, triggerNode } = latest.current;
@@ -382,7 +443,6 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
       </>
     ),
     'data-align': align,
-    ...(popover.open && positioned ? { 'data-open': '' } : {}),
     'data-part': 'root',
     'data-size': popover.size,
     'data-ui': 'popover',

@@ -625,12 +625,27 @@
     position: relative;
   }
 
-  [data-ui='button'] [data-part='start'] > *:not([data-part='indicator']),
-  [data-ui='button'] [data-part='end'] > *:not([data-part='indicator']),
+  [data-ui='button'] [data-part='start'] > *:not([data-part='indicator'], [data-ui='kbd']),
+  [data-ui='button'] [data-part='end'] > *:not([data-part='indicator'], [data-ui='kbd']),
   [data-ui='button'] [data-part='icon'] > *:not([data-part='indicator']) {
     block-size: 100%;
     display: block;
     inline-size: 100%;
+  }
+
+  /**
+   * A key in a slot is sized by its own family. The slot above is a glyph's
+   * box: it stated `display: block` on the key, which put the legend on a line
+   * box's baseline instead of the key's centre, sixteen pixels square, and the
+   * icon's font size, which `size="inherit"` read as the text's. Measured, a
+   * `Kbd` legend stood 1.5px above the label's centre and a `Shortcut` 1.5px
+   * below it. Here the slot takes the key's measure and the label's type, and
+   * the flex container centres the key on the label.
+   */
+  [data-ui='button'] :is([data-part='start'], [data-part='end']):has(> [data-ui='kbd']) {
+    block-size: auto;
+    font-size: inherit;
+    inline-size: auto;
   }
 
   /**

@@ -237,6 +237,10 @@
     align-items: center;
     direction: ltr;
     display: inline-flex;
+    /* The root is a `kbd`: without these it keeps the user agent's monospace
+       face and its line box, which a key in the combination does not share. */
+    font-family: var(--slotted-kbd-font-family, var(--slotted-control-font-family, sans-serif));
+    line-height: 1;
     /**
      * A shortcut wider than its column wraps between caps and never inside
      * one. The row gets taller; no instruction gets shorter.

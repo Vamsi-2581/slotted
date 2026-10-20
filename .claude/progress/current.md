@@ -1,7 +1,8 @@
 # Checkpoint
 
-- Plano: `docs/history/plans/2026-10-20-sixth-iteration.md` (cinco itens), todos feitos.
-- Release `v0.1.0-beta.6` publicado: workflow Release run 39484218882 (success, 3 min 37 s); os seis pacotes com `latest` = `0.1.0-beta.6` no npm. CI do commit liberado: run 39482147085 (success); CI ignorado no commit `chore(release)`.
-- Fluxo de publicação: uma validação (CI no push); `release.yml` só constrói e publica.
-- Git: ramo `main`, igual a `origin/main`.
-- Próxima ação: nenhuma em curso.
+- Plano: sete achados da sessão (StrictMode, kbd, menu width, app-shell seam, app-shell gutter, table empty, app-shell ring inset) e release `v0.1.0-beta.7`. Sem ficheiro de plano.
+- Feitos: StrictMode (`c3400bef`, `destroy` reversível em `@slotted/core/presence`), Table vazia (`accb6dc0`), app-shell seam + gutter + ring inset (`e0004b71`, cenário `tools/harness/scenarios/app-shell-nav-edges.mjs`).
+- Em curso: kbd (centro da legenda), depois menu `width`.
+- Git: ramo `main`, à frente de `origin/main` por 3 commits; árvore limpa.
+- Testes: `src/strict-mode.test.tsx`, `src/table` (82), `core/src/presence` (26), estilos app-shell/side-navigation, contrato app-shell, cenário de browser app-shell: todos passam.
+- Próxima ação: medir `[data-part=legend]` vs `[data-part=label]` num cenário React com `Button end={<Kbd size="inherit" variant="plain">N</Kbd>}` e `Shortcut keys="mod+k"`.

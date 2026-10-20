@@ -325,13 +325,31 @@ export function createPositioner(
     });
   }
 
-  watch();
+  /**
+   * The watch starts in the frame after creation. Starting it walks every
+   * scrolling ancestor of both elements through their computed style and
+   * reads the anchor's box for the layout-shift observer: in the task that
+   * opens a layer, after the layer's nodes were written, each of those reads is
+   * a style recalculation the first frame waits for. The first position is the
+   * family's own `update()`; a change in the frame before the watch starts is
+   * caught by the watch's own first measurement.
+   */
+  let watchFrame = 0;
+  const view = floating.ownerDocument.defaultView;
+  if (view !== null && typeof view.requestAnimationFrame === 'function') {
+    watchFrame = view.requestAnimationFrame(() => {
+      watchFrame = 0;
+      if (!destroyed) watch();
+    });
+  } else {
+    watch();
+  }
 
   return {
     update,
     setAnchor(next) {
       current = next;
-      if (destroyed) return;
+      if (destroyed || watchFrame !== 0) return;
       watch();
     },
     setOptions(next) {
@@ -341,6 +359,7 @@ export function createPositioner(
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      if (watchFrame !== 0) view?.cancelAnimationFrame(watchFrame);
       stopAutoUpdate?.();
       stopAutoUpdate = null;
     },

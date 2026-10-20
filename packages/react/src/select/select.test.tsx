@@ -591,8 +591,8 @@ describe('Select', () => {
 
   /**
    * A press on the field's label reaches the trigger as a click the label
-   * forwards: a pointer click (detail 1) at the label's coordinates, outside
-   * the button. It focuses the control and leaves the list closed, as the
+   * forwards: a pointer click (detail 1) whose press went down on the label,
+   * not on the control's frame. It focuses the control and leaves the list closed, as the
    * select-only example's label does and as a native select does.
    */
   it('focuses without opening when its field label is pressed', () => {
@@ -602,10 +602,12 @@ describe('Select', () => {
         <Basic />
       </Field>,
     );
+    fireEvent.pointerDown(screen.getByText('Fruit'));
     fireEvent.click(trigger(), { detail: 1, clientX: -40, clientY: -20 });
     expect(trigger()).toHaveFocus();
     expect(trigger()).toHaveAttribute('aria-expanded', 'false');
 
+    fireEvent.pointerDown(trigger());
     fireEvent.click(trigger(), { detail: 1, clientX: 0, clientY: 0 });
     expect(trigger()).toHaveAttribute('aria-expanded', 'true');
   });

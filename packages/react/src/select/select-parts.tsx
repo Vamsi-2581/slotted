@@ -2,6 +2,7 @@ import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { tabbables } from '@slotted/core/focus';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
+import type { PositionerHandle } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { createTypeahead, isPrintable } from '@slotted/core/typeahead';
@@ -67,15 +68,6 @@ function moveTabFrom(trigger: HTMLElement | null, layer: HTMLElement | null, bac
   (next ?? trigger).focus({ preventScroll: true });
 }
 
-/**
- * Whether a click landed on the control's frame. A click a `label` elsewhere
- * forwards to the button carries the label's coordinates, which lie outside it.
- */
-function pressedOnFrame(button: HTMLElement, x: number, y: number) {
-  const box = (button.parentElement ?? button).getBoundingClientRect();
-  return x >= box.left && x <= box.right && y >= box.top && y <= box.bottom;
-}
-
 function attach<T>(node: T, ...refs: (Ref<T> | undefined)[]) {
   for (const ref of refs) {
     if (typeof ref === 'function') ref(node);
@@ -111,6 +103,25 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
    * to answer the same width.
    */
   const [frame, setFrame] = useState<HTMLDivElement | null>(null);
+  /** The last press went down on the frame; see `onClick`. */
+  const pressedFrame = useRef(false);
+  useEffect(() => {
+    if (frame === null) return undefined;
+    const doc = frame.ownerDocument;
+    /* Every press resets it in the capture phase, and one on the frame sets it after. */
+    const reset = () => {
+      pressedFrame.current = false;
+    };
+    const press = () => {
+      pressedFrame.current = true;
+    };
+    doc.addEventListener('pointerdown', reset, true);
+    frame.addEventListener('pointerdown', press);
+    return () => {
+      doc.removeEventListener('pointerdown', reset, true);
+      frame.removeEventListener('pointerdown', press);
+    };
+  }, [frame]);
   const [narrow, setNarrow] = useState(false);
 
   const pending = useRef<string | null>(null);
@@ -284,11 +295,16 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
 
   const onClick = (event: MouseEvent<HTMLButtonElement>) => {
     /* A press on the field's label arrives here as the click the label
-       forwards: a pointer click at the label's coordinates, outside the frame.
-       It focuses the control and does not open the list — the select-only
-       example's label only focuses, and so does a native select's. A keyboard
-       or assistive-technology click carries detail 0 and opens. */
-    if (event.detail > 0 && !pressedOnFrame(event.currentTarget, event.clientX, event.clientY)) {
+       forwards: a pointer click whose press went down on the label, not on
+       the frame. It focuses the control and does not open the list — the
+       select-only example's label only focuses, and so does a native
+       select's. A keyboard or assistive-technology click carries detail 0 and
+       opens. The press is recorded rather than the click's coordinates
+       compared with the frame's box: that box is a layout read in the click's
+       own task, after the release changed the frame's style. */
+    const fromFrame = pressedFrame.current;
+    pressedFrame.current = false;
+    if (event.detail > 0 && !fromFrame) {
       event.currentTarget.focus({ preventScroll: true });
       return;
     }
@@ -706,7 +722,14 @@ export function SelectContent({
   const [surfaceNode, setSurfaceNode] = useState<HTMLElement | null>(null);
   const [container, setContainer] = useState<Element | null>(null);
   const [status, setStatus] = useState<PresenceStatus>('unmounted');
-  const [positioned, setPositioned] = useState(false);
+  /**
+   * The reader is about to open the popup: the trigger took focus or a press.
+   * The portal's layer is made then, because making it reads the trigger's
+   * computed style, and a read in the open's own task is a style recalculation
+   * the first frame waits for. A press focuses before it clicks, in a task of
+   * its own.
+   */
+  const [warm, setWarm] = useState(false);
   /**
    * How many options the popup is holding, counted from the DOM after every
    * render. It is what decides whether the empty row is drawn, and counting is
@@ -733,18 +756,38 @@ export function SelectContent({
   useEffect(() => presence.current?.setNode(layerNode), [layerNode]);
   useEffect(() => select.setContentNode(surfaceNode), [select, surfaceNode]);
 
+  /**
+   * Open renders the popup in the commit that opens it, rather than once the
+   * presence has reported `entering` in a render of its own.
+   */
   const mounted =
-    select.mount === 'eager' || (select.mount === 'lazy' && select.seen) || status !== 'unmounted';
+    select.mount === 'eager' ||
+    (select.mount === 'lazy' && select.seen) ||
+    select.open ||
+    status !== 'unmounted';
 
   useEffect(() => {
-    if (!mounted) {
+    const trigger = select.triggerNode;
+    if (trigger === null || warm) return undefined;
+    const prepare = () => setWarm(true);
+    trigger.addEventListener('focusin', prepare);
+    trigger.addEventListener('pointerdown', prepare);
+    return () => {
+      trigger.removeEventListener('focusin', prepare);
+      trigger.removeEventListener('pointerdown', prepare);
+    };
+  }, [select.triggerNode, warm]);
+
+  const layered = mounted || warm;
+  useLayoutEffect(() => {
+    if (!layered) {
       setContainer(null);
       return;
     }
     const handle = createPortalRoot({ origin: select.triggerNode, disabled: !select.portal });
     setContainer(handle.container);
     return () => handle.release();
-  }, [mounted, select.portal, select.triggerNode]);
+  }, [layered, select.portal, select.triggerNode]);
 
   const {
     align,
@@ -759,9 +802,33 @@ export function SelectContent({
     width,
   } = select;
 
-  useEffect(() => {
+  const positioner = useRef<PositionerHandle | null>(null);
+  const revealFrame = useRef(0);
+
+  /**
+   * `data-open` is written by the measurement that places the popup, on the
+   * element, in the task that opened it: the position, the side and the open
+   * state reach one style update together, and the first frame after the
+   * click shows the popup where it belongs. A render to say "positioned" was
+   * a frame of its own. The highlighted option is revealed in the next frame,
+   * whose layout the browser computes anyway, rather than by a read here
+   * after the writes.
+   */
+  const place = useCallback((handle: PositionerHandle, layer: HTMLElement) => {
+    void handle.update().then(() => {
+      if (positioner.current !== handle || !latest.current.open) return;
+      layer.setAttribute('data-open', '');
+      const view = layer.ownerDocument.defaultView;
+      if (view === null || revealFrame.current !== 0) return;
+      revealFrame.current = view.requestAnimationFrame(() => {
+        revealFrame.current = 0;
+        revealOption(latest.current.contentNode, latest.current.highlighted);
+      });
+    });
+  }, []);
+
+  useLayoutEffect(() => {
     if (layerNode === null || select.triggerNode === null) return;
-    let live = true;
 
     /* The anchor is the frame rather than the button inside it, so the popup is
        as wide as the control the reader sees: the trigger is the frame less its
@@ -783,14 +850,13 @@ export function SelectContent({
       strategy,
     });
 
-    void handle.update().then(() => {
-      if (live) setPositioned(true);
-    });
+    positioner.current = handle;
+    if (latest.current.open) place(handle, layerNode);
 
     return () => {
-      live = false;
       handle.destroy();
-      setPositioned(false);
+      positioner.current = null;
+      layerNode.removeAttribute('data-open');
     };
   }, [
     align,
@@ -805,7 +871,22 @@ export function SelectContent({
     sideOffset,
     strategy,
     width,
+    place,
   ]);
+
+  useLayoutEffect(() => {
+    const handle = positioner.current;
+    if (handle === null || layerNode === null) return;
+    if (select.open) {
+      place(handle, layerNode);
+      return;
+    }
+    layerNode.removeAttribute('data-open');
+    if (revealFrame.current !== 0) {
+      layerNode.ownerDocument.defaultView?.cancelAnimationFrame(revealFrame.current);
+      revealFrame.current = 0;
+    }
+  }, [layerNode, place, select.open]);
 
   /**
    * One layer in the single stack. The control is a branch, so pressing the
@@ -891,12 +972,13 @@ export function SelectContent({
 
   /**
    * A browser scrolls a focused element into view; nothing here is focused.
-   * It runs again once the popup is positioned: the height that bounds the
-   * list arrives with the position, after the highlight has landed.
+   * On open the reveal waits for the position (above): the height that bounds
+   * the list arrives with it.
    */
   useEffect(() => {
+    if (layerNode?.hasAttribute('data-open') !== true) return;
     revealOption(surfaceNode, select.highlighted);
-  }, [positioned, select.highlighted, surfaceNode]);
+  }, [layerNode, select.highlighted, surfaceNode]);
 
   /**
    * The field takes focus as the popup opens, however it was opened — a press
@@ -960,7 +1042,6 @@ export function SelectContent({
   const rootProps: SelectPositionerProps = {
     'data-align': align,
     ...(select.open ? {} : { inert: true }),
-    ...(select.open && positioned ? { 'data-open': '' } : {}),
     'data-part': 'positioner',
     'data-size': select.size,
     'data-ui': 'select',

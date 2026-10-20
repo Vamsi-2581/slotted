@@ -1,10 +1,10 @@
 # Checkpoint
 
-- Plano: `docs/history/plans/2026-10-19-fourth-iteration.md` (13 itens, 5 fatias; tabela Resultado e Problemas conhecidos preenchidos).
-- Ramo `main`, HEAD `d06d8cf8`. Árvore com as mudanças das cinco fatias, não commitadas.
-- Concluído: itens 1 a 13.
-- Testes: `pnpm check` exit 0 depois da fatia 5; core 2191/2191, React 4078/4078, Angular 3211/3211; `node tools/harness/scenarios/table-edges.mjs` ok; `@slotted/styles` 1681/1681; typecheck Angular exit 0; React `tsc --noEmit` limpo após `pnpm --filter @slotted/core build`.
-- Não corrido: build do site `apps/docs` (os testes `page-sections` leem `apps/docs/dist` desatualizado); `pnpm check:full`; `pnpm eval:agent-docs`.
-- Ajustes de escopo: item 2 sem teste de razão que falhe antes; item 8 só React; item 10 nomeia API de React por exigência do critério de aceite; item 12 só React.
-- Problemas conhecidos: ver a seção do plano.
-- Próxima ação: pedir ao utilizador a decisão sobre commit (`git add -A && git commit`) e sobre o build do site para `page-sections`.
+- Plano: `docs/history/plans/2026-10-19-fourth-iteration.md` (13 itens concluídos; Resultado e Problemas conhecidos preenchidos).
+- Ramo `main`, igual a `origin/main`. Iteração em commits de `015558e1` a `320d486b`, mais este checkpoint.
+- Tarefa em curso: release `v0.1.0-beta.4`.
+- Concluído no release: build dos bindings; `pack-beta`; `pnpm eval:agent-docs` dos cinco casos de `compose-screen` (atende; relatório `docs/history/evals/2026-10-20-agent-docs.md`); `pnpm check:full` local exit 0; CI verde em `320d486b` (run 39360504382).
+- Correções feitas durante o release: `SlDatePicker` genérico sobre o tipo do valor (os exemplos de dia não compilavam com strictTemplates); contrato gerado de `@slotted/theme` regenerado para `--slotted-table-edge-inset`; saem os testes de tempo de relógio da tabela e do accordion.
+- Árvore: limpa, exceto `.swp` não rastreado (swap de um vim aberto pelo utilizador, pid 3337605), que faz `pnpm release` recusar a árvore.
+- Problemas conhecidos: ver o plano (NG0953 no CI sem linha de base).
+- Próxima ação: com o vim fechado e o CI deste checkpoint verde, `pnpm release --dry-run` e depois `pnpm release`; acompanhar com `gh run watch` o workflow Release da tag.

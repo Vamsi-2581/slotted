@@ -78,8 +78,12 @@
   },
   "spacing": {
     "between": "the ring's own step, --slotted-segmented-control-gap, defaulting to the track's inset",
-    "divider": false,
-    "reason": "Segments stand apart so each one, its hover ground and the thumb on it, is a shape of its own on the track. Set flush with a short rule between two, the rules read as a ruler's marks across the control and a hover ground ran into its neighbour's edge."
+    "reason": "Segments stand apart so each one, its hover ground and the thumb on it, is a shape of its own on the track. Set flush, a hover ground ran into its neighbour's edge."
+  },
+  "divider": {
+    "drawnOn": "the middle of the gap before every segment after the first, half the segment's height",
+    "givesWayTo": "the checked segment and the one after it, and the segment under the pointer and the one after it",
+    "reason": "A track of words with nothing between them reads as a sentence. The rule is a light tint centred in the gap, so it divides without touching a shape: drawn on a segment's edge it met the thumb's edge and the hover ground."
   },
   "motion": {
     "thumb": "--slotted-duration-medium",

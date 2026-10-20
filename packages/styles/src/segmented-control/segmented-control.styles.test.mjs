@@ -111,12 +111,11 @@ test('keeps the target at the control’s own height rather than the thumb’s',
 });
 
 /**
- * Segments stand apart by the ring's own step, with no rule between them: the
- * thumb is one column wide and moves by its own width plus that step, so the
- * arithmetic still reads nothing from layout.
+ * Segments stand apart by the ring's own step: the thumb is one column wide
+ * and moves by its own width plus that step, so the arithmetic still reads
+ * nothing from layout.
  */
 test('spaces the segments apart and moves the thumb by a column and a gap', () => {
-  assert.doesNotMatch(dense, /\[data-part='item'\]\+\[data-part='item'\]::before/);
   assert.match(dense, /--_spacing:var\(--slotted-segmented-control-gap,var\(--_inset\)\)/);
   assert.match(dense, /gap:var\(--_spacing\)/);
   assert.match(dense, /translate:calc\(var\(--_index\)\*\(100%\+var\(--_spacing\)\)\)/);
@@ -191,6 +190,7 @@ test('slides the thumb over the dividers and the hover ground', () => {
   const item = dense.slice(start);
   assert.doesNotMatch(item.slice(0, item.indexOf('}')), /z-index/);
   assert.match(dense, /\[data-part='item'\]::after\{[^}]*z-index:-1/);
+  assert.match(dense, /\[data-part='item'\]\+\[data-part='item'\]::before\{[^}]*z-index:-1/);
   assert.match(
     dense,
     /:has\(\[data-part='control'\]:enabled\)::after\{[^}]*background:var\(--slotted-segmented-control-hover-background/,
@@ -311,4 +311,31 @@ test('clips a label along the line only, and lets it shrink to its column', () =
   assert.match(label, /overflow-x:clip/);
   assert.match(label, /min-inline-size:0/);
   assert.doesNotMatch(label, /overflow:hidden/);
+});
+
+/**
+ * A rule in the middle of each gap, a light tint of the ink, half the
+ * segment's height, that gives way beside the thumb and beside the segment
+ * under the pointer, where it would touch a shape.
+ */
+test('rules the middle of each gap and gives way beside the thumb and the pointer', () => {
+  const start = dense.indexOf(
+    "[data-ui='segmented-control'][data-part='item']+[data-part='item']::before{",
+  );
+  assert.notEqual(start, -1);
+  const rule = dense.slice(start, dense.indexOf('}', start));
+  assert.match(
+    rule,
+    /inset-inline-start:calc\(\(var\(--_spacing\)\+var\(--_border-width\)\)\/-2\)/,
+  );
+  assert.match(
+    rule,
+    /background:var\(--slotted-segmented-control-divider-color,color-mix\(inoklab,var\(--slotted-text\)14%,transparent\)\)/,
+  );
+  assert.match(rule, /inset-block:25%/);
+  assert.match(dense, /\[data-part='item'\]\[data-checked\]\+\[data-part='item'\]::before,/);
+  assert.match(
+    dense,
+    /\[data-part='item'\]:hover:has\(\[data-part='control'\]:enabled\)\+\[data-part='item'\]::before\{opacity:0/,
+  );
 });

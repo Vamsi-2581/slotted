@@ -206,11 +206,11 @@
     padding-inline: var(--_padding-inline);
     /**
      * Positioned without a `z-index`: the segment paints after the thumb, which
-     * comes first in the DOM, so its words lie over the thumb, and its hover
-     * ground — a pseudo-element at `z-index: -1` — lies under it. A segment at
-     * `z-index: 1` lifted its ground over the thumb as well, and a thumb
-     * crossing a hovered segment lost part of its edge for the length of the
-     * slide.
+     * comes first in the DOM, so its words lie over the thumb, and its divider
+     * and its hover ground — pseudo-elements at `z-index: -1` — lie under it.
+     * A segment at `z-index: 1` lifted both over the thumb as well, and a thumb
+     * crossing a hovered segment or a divider lost part of its edge for the
+     * length of the slide.
      */
     position: relative;
     transition: color var(--slotted-control-transition-duration)
@@ -240,15 +240,57 @@
   }
 
   /**
-   * ── The space between two segments ────────────────────────────────────
+   * ── Between two segments ──────────────────────────────────────────────
    *
    * Segments stand apart by the same step as the ring of track around them,
    * so each one — its hover ground, the thumb on it — is a shape of its own
-   * on the track. The first appearance set them flush and drew a short rule
-   * between two: the rule read as a ruler's marks across the control, and a
-   * hover ground ran into its neighbour's edge. With room between them and a
-   * ground under the pointer, nothing has to divide them.
+   * on the track, and a rule in the middle of that room says the control is
+   * divided: a track of words with nothing between them reads as a sentence.
+   *
+   * The rule is centred in the gap rather than on a segment's edge, half the
+   * segment's height, rounded at its ends, in a light tint of the ink rather
+   * than an opaque border colour. It gives way wherever it would touch a
+   * shape: beside the thumb, and beside the segment under the pointer, whose
+   * ground would otherwise meet it. It lies under the thumb, so a thumb that
+   * crosses it while sliding passes over it.
    */
+  [data-ui='segmented-control'] [data-part='item'] + [data-part='item']::before {
+    /* No system colour behind it: an unthemed decoration disappears rather
+       than shouting, which is what `fallbacks.test.mjs` holds a pseudo-element
+       to. In forced colours the thumb's own edge is what divides. */
+    background: var(
+      --slotted-segmented-control-divider-color,
+      color-mix(in oklab, var(--slotted-text) 14%, transparent)
+    );
+    border-radius: var(--slotted-radius-full, 9999px);
+    content: '';
+    inline-size: var(--_border-width);
+    inset-block: 25%;
+    inset-inline-start: calc((var(--_spacing) + var(--_border-width)) / -2);
+    position: absolute;
+    transition: opacity var(--_travel) var(--slotted-easing-standard);
+    z-index: -1;
+  }
+
+  [data-ui='segmented-control'][data-part='root'][data-orientation='vertical']
+    [data-part='item']
+    + [data-part='item']::before {
+    block-size: var(--_border-width);
+    inline-size: auto;
+    inset-block: calc((var(--_spacing) + var(--_border-width)) / -2) auto;
+    inset-inline: 25%;
+  }
+
+  [data-ui='segmented-control'] [data-part='item'][data-checked]::before,
+  [data-ui='segmented-control'] [data-part='item'][data-checked] + [data-part='item']::before,
+  [data-ui='segmented-control'][data-part='root']:not([data-readonly])
+    [data-part='item']:hover:has([data-part='control']:enabled)::before,
+  [data-ui='segmented-control'][data-part='root']:not([data-readonly])
+    [data-part='item']:hover:has([data-part='control']:enabled)
+    + [data-part='item']::before {
+    opacity: 0;
+  }
+
   /**
    * The radio itself, carrying the focus the platform gives it and the whole
    * hit area of the segment. It reaches past the thumb and over the ring of
@@ -567,6 +609,9 @@
   }
 
   [data-ui='segmented-control'][data-part='root'][data-variant='underline'] [data-part='indicator'],
+  [data-ui='segmented-control'][data-part='root'][data-variant='underline']
+    [data-part='item']
+    + [data-part='item']::before,
   [data-ui='segmented-control'][data-part='root'][data-variant='underline']
     [data-part='item']::after {
     display: none;

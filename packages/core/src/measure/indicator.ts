@@ -12,11 +12,14 @@
  * The mark is an element this module creates and appends to the container,
  * `aria-hidden` and with the part name the caller gives. It writes two
  * properties on it, `--_indicator-start` and `--_indicator-length`, in pixels,
- * and `hidden` while there is no target. `data-positioned` arrives with the
- * second position, in the same style update as the values that move: a
+ * and `hidden` while there is no target. `data-moving` is written with a
+ * position whose target changed, and removed with one whose target is the
+ * same element measured again — a font that arrived, a list that resized. A
  * transition starts when the style after a change declares one, so a
- * stylesheet that transitions only a positioned mark places the first position
- * without motion and slides every one after it.
+ * stylesheet that transitions only a moving mark slides it when the selection
+ * moves, and places it without motion on the first position and on every
+ * re-measurement: a bar that slid and stretched by itself as the page loaded
+ * was the defect.
  *
  * It measures when the target can have moved: an item selected, added or
  * removed (a mutation under the container), and the container or the target
@@ -59,6 +62,8 @@ export function createIndicator(
   let observed: HTMLElement | null = null;
   let start = Number.NaN;
   let length = Number.NaN;
+  /** The element the last written position measured. */
+  let placed: HTMLElement | null = null;
   let destroyed = false;
 
   const resize = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => update());
@@ -90,9 +95,11 @@ export function createIndicator(
     hide(false);
     if (nextStart === start && nextLength === length) return;
 
-    if (!Number.isNaN(start) && !element.hasAttribute('data-positioned')) {
-      element.setAttribute('data-positioned', '');
+    const moving = placed !== null && target !== placed;
+    if (moving !== element.hasAttribute('data-moving')) {
+      element.toggleAttribute('data-moving', moving);
     }
+    placed = target;
     start = nextStart;
     length = nextLength;
     element.style.setProperty('--_indicator-start', `${start}px`);

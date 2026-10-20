@@ -394,12 +394,12 @@ test('hides a panel with the attribute the platform already understands', () => 
 
 test('transitions what the eye has to follow, and takes every duration from the scale', () => {
   assert.match(
-    rule(`${marker}[data-positioned]`),
-    /transition:translate var\(--slotted-control-transition-duration\)/,
+    rule(`${marker}[data-moving]`),
+    /transition:translate var\(--slotted-duration-medium\) var\(--_marker-easing\)/,
   );
   assert.match(
     css,
-    /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\[data-part='marker'\]\[data-positioned\] \{\s*transition: none;/,
+    /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\[data-part='marker'\]\[data-moving\] \{\s*transition: none;/,
   );
   assert.match(rule(part('tab')), /transition:/);
   assert.match(

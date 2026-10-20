@@ -45,7 +45,7 @@ describe('createIndicator', () => {
     expect(handle.element.hidden).toBe(false);
     expect(handle.element.style.getPropertyValue('--_indicator-start')).toBe('10px');
     expect(handle.element.style.getPropertyValue('--_indicator-length')).toBe('60px');
-    expect(handle.element.hasAttribute('data-positioned')).toBe(false);
+    expect(handle.element.hasAttribute('data-moving')).toBe(false);
   });
 
   it('follows the selection when it moves, and adds the scroll the row has taken', async () => {
@@ -66,7 +66,22 @@ describe('createIndicator', () => {
       `${180 - 100 + list.scrollLeft}px`,
     );
     expect(handle.element.style.getPropertyValue('--_indicator-length')).toBe('90px');
-    expect(handle.element.hasAttribute('data-positioned')).toBe(true);
+    expect(handle.element.hasAttribute('data-moving')).toBe(true);
+  });
+
+  it('places the same target measured again without motion', async () => {
+    const { list, a } = row();
+    const handle = createIndicator(list, {
+      orientation: () => 'horizontal',
+      target: () => list.querySelector('[data-selected] > button'),
+    });
+    handles.push(handle);
+
+    place(a, 110, 50, 72, 40);
+    handle.update();
+
+    expect(handle.element.style.getPropertyValue('--_indicator-length')).toBe('72px');
+    expect(handle.element.hasAttribute('data-moving')).toBe(false);
   });
 
   it('measures the block axis of a vertical row, and hides the mark with no target', async () => {

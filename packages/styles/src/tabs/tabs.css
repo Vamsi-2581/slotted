@@ -507,20 +507,26 @@
   }
 
   /**
-   * Placed once without motion, then it slides: the first position arrives
-   * before `data-positioned`, so the bar does not travel in from the list's
-   * corner. Under reduced motion it jumps.
+   * It slides only when the selection moves: `data-moving` arrives with a
+   * position whose tab changed, and leaves with a re-measurement of the same
+   * tab, so the first position, a font arriving and a resized list place the
+   * bar without motion. The slide takes the medium duration on a curve that
+   * starts and ends slowly, `--slotted-tabs-marker-easing`: the control
+   * duration on the theme's decelerating curve covered a third of the
+   * distance in its first frame and read as a jump. Under reduced motion it
+   * jumps.
    */
-  [data-ui='tabs'] > :where([data-part='list']) > [data-part='marker'][data-positioned] {
+  [data-ui='tabs'] > :where([data-part='list']) > [data-part='marker'][data-moving] {
+    --_marker-easing: var(--slotted-tabs-marker-easing, cubic-bezier(0.4, 0, 0.2, 1));
+
     transition:
-      translate var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
-      inline-size var(--slotted-control-transition-duration)
-        var(--slotted-control-transition-easing),
-      block-size var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+      translate var(--slotted-duration-medium) var(--_marker-easing),
+      inline-size var(--slotted-duration-medium) var(--_marker-easing),
+      block-size var(--slotted-duration-medium) var(--_marker-easing);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='tabs'] > :where([data-part='list']) > [data-part='marker'][data-positioned] {
+    [data-ui='tabs'] > :where([data-part='list']) > [data-part='marker'][data-moving] {
       transition: none;
     }
   }

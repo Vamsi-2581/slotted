@@ -596,7 +596,7 @@ export const REACT_TABS_DOCS = {
       </button>
       <button data-part="dismiss" tabindex="-1" aria-label="Close Summary" />
     </div>
-    <span data-part="marker" aria-hidden="true" data-positioned />
+    <span data-part="marker" aria-hidden="true" data-moving />
   </div>
   <div data-part="actions">…</div>
   <div data-part="panel" role="tabpanel" id="p-a" aria-labelledby="t-a" tabindex="0">

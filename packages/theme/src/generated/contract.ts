@@ -4314,6 +4314,7 @@ export type ComponentToken =
   | '--slotted-tabs-hover-marker-opacity'
   | '--slotted-tabs-list-gap'
   | '--slotted-tabs-marker-color'
+  | '--slotted-tabs-marker-easing'
   | '--slotted-tabs-marker-inset'
   | '--slotted-tabs-marker-offset'
   | '--slotted-tabs-marker-radius'
@@ -6523,6 +6524,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-tabs-hover-marker-opacity",
   "--slotted-tabs-list-gap",
   "--slotted-tabs-marker-color",
+  "--slotted-tabs-marker-easing",
   "--slotted-tabs-marker-inset",
   "--slotted-tabs-marker-offset",
   "--slotted-tabs-marker-radius",

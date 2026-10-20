@@ -332,7 +332,8 @@ function Operations({ onCommit }: { onCommit?: () => void }) {
  * every panel held their own element in state, so attaching it rendered the
  * whole set a second and a third time; and the arrow engine read every
  * trigger's computed style as it was created and again on the mutation the
- * mount caused.
+ * mount caused. In jsdom the median mount went from 184–495 ms to 78–87 ms;
+ * the time is not asserted, because a loaded machine moves it past any bound.
  */
 describe('Accordion, the cost of fifty closed items', () => {
   it('mounts them in one commit and reads no computed style', () => {
@@ -345,18 +346,5 @@ describe('Accordion, the cost of fifty closed items', () => {
     expect(document.querySelectorAll('[data-part="content"]')).toHaveLength(0);
     styles.mockRestore();
     unmount();
-  });
-
-  it('mounts them within a hundred milliseconds', () => {
-    render(<Operations />).unmount();
-    const times = [0, 1, 2].map(() => {
-      const start = performance.now();
-      const { unmount } = render(<Operations />);
-      const elapsed = performance.now() - start;
-      unmount();
-      return elapsed;
-    });
-
-    expect(times.sort((a, b) => a - b)[1]).toBeLessThan(100);
   });
 });

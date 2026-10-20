@@ -11,6 +11,9 @@
   "files": [
     "dist"
   ],
+  "bin": {
+    "slotted-agent-docs": "./dist/bin/slotted-agent-docs.mjs"
+  },
   "sideEffects": [
     "**/*.css"
   ],
@@ -530,7 +533,7 @@
     "./styles.css": "./dist/styles.css"
   },
   "scripts": {
-    "build": "vite build && tsc -p tsconfig.build.json && node declarations.build.mjs && node layer-order.build.mjs && node ../../tools/agent-docs/bin/build.mjs --binding react --out dist/docs && node package-boundary.verify.mjs",
+    "build": "vite build && tsc -p tsconfig.build.json && node declarations.build.mjs && node layer-order.build.mjs && node ../../tools/agent-docs/bin/build.mjs --binding react --out dist/docs --bin dist/bin/slotted-agent-docs.mjs && node package-boundary.verify.mjs",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit --pretty false",
     "verify": "pnpm test && pnpm typecheck && pnpm build"

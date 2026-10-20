@@ -17,6 +17,7 @@ material published with it: guidelines, product skills and the token page.
 | New theme token               | `packages/theme/src/contract.json`: the token and its group                                                                                                                                                                | `pnpm --filter @slotted/theme test`, then the line above | no                        |
 | Design system book or cover   | `content/design-system/README.md`, `content/design-system/cover.html`                                                                                                                                                      | same                                                     | no                        |
 | Snippet                       | `agents-snippet.react.md`, `agents-snippet.angular.md`                                                                                                                                                                     | `pnpm --filter @slotted/agent-docs verify`               | yes                       |
+| `slotted-agent-docs` command  | `cli/slotted-agent-docs.mjs`; Node built-ins only, published as written                                                                                                                                                    | `pnpm --filter @slotted/agent-docs verify`               | no                        |
 
 ## Generated, never edited
 
@@ -29,6 +30,7 @@ material published with it: guidelines, product skills and the token page.
   `@slotted/theme` and `@slotted/themes`.
 - The release notes' guideline block, from the topics at the last tag and now.
 - The site routes and `llms.txt` of `apps/docs`, from the built packages.
+- `packages/react/dist/bin/slotted-agent-docs.mjs`, copied from `cli/` by `bin/build.mjs --bin`.
 
 ## Design System export
 

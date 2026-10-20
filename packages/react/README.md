@@ -43,7 +43,22 @@ import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
 ## Agents
 
-`dist/docs/AGENTS.snippet.md` is the section an application adds to the instructions its coding agent reads: `AGENTS.md`, or `CLAUDE.md` for Claude Code, directly or through `@AGENTS.md`. It points the agent at the family pages, the guidelines and the skills of the installed version.
+`dist/docs/AGENTS.snippet.md` is the section an application adds to the instructions its coding agent reads. It points the agent at the family pages, the guidelines and the skills of the installed version. The `slotted-agent-docs` command keeps it there, and keeps the skills where the agent finds them:
+
+```sh
+# Writes the snippet between <!-- slotted:begin --> and <!-- slotted:end --> in the file; the rest of the file is left as it is.
+slotted-agent-docs instructions write --file AGENTS.md
+# An instruction file outside the directory that holds node_modules names that directory, relative to the file.
+slotted-agent-docs instructions write --file ../AGENTS.md --app-root web
+# An application with its own theme.
+slotted-agent-docs instructions write --file AGENTS.md --theme brand --theme-css @acme/brand/theme.css
+# One entry per skill: a relative link, or a copy for an agent that does not follow links.
+slotted-agent-docs skills link --dir .agents/skills [--mode copy]
+```
+
+`instructions check` and `skills check` take the same arguments, print what differs, and exit 1 when the file or the directory is not what the matching write would produce: a `prepare` script runs the writes, CI runs the checks.
+
+Skill directories known to agents, as documentation only: `.agents/skills`, `.claude/skills`, `.github/skills`. Instruction files: `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `GEMINI.md`.
 
 ## License
 

@@ -727,7 +727,7 @@ export const SkipLinks: Story = {
     <Grid columns={1}>
       <Scene
         label="Three regions, three links"
-        note="Click the frame and press Tab: the first link appears over the bar. Press Enter and the focus moves into the content itself — not only the scroll — because main carries tabindex='-1'. Tab again for the navigation, again for the pane."
+        note="Click the frame and press Tab: the first link appears over the bar. Press Enter and the focus moves into the content itself — not only the scroll — because the link writes tabindex='-1' on main for that one focus. Tab again for the navigation, again for the pane."
       >
         <Aurora shell={{ asideMode: 'inline', navMode: 'inline' }} />
       </Scene>

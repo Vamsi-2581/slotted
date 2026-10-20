@@ -230,9 +230,11 @@ export function AppShellNavFooter({
 /**
  * The `main` landmark, and the skip link's destination.
  *
- * `tabIndex={-1}` is not decoration: a `main` without it takes the scroll and
- * leaves the focus behind in Safari and in Firefox, so the link appears to work
- * and moves nothing a screen reader follows.
+ * It carries no `tabIndex` of its own: the skip link and `focusMain()` write
+ * `tabindex="-1"` for the one focus they move (`focusTarget`), and the blur or
+ * the next pointer press inside removes it. A `main` focusable all the time
+ * takes the focus of every click on its text, and the next key draws the ring
+ * around the page. A `tabIndex` the consumer writes stays.
  */
 export function AppShellMain({
   children,
@@ -241,7 +243,6 @@ export function AppShellMain({
   ref,
   render,
   style,
-  tabIndex,
   ...nativeProps
 }: AppShellMainProps) {
   const shell = useAppShell();
@@ -257,7 +258,6 @@ export function AppShellMain({
     'data-part': 'main',
     id: id ?? shell.mainId,
     style,
-    tabIndex: tabIndex ?? -1,
   };
   return part(rootProps, render) ?? <main {...rootProps} ref={attach} />;
 }

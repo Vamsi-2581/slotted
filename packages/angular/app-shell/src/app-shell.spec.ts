@@ -255,10 +255,47 @@ describe('SlAppShell', () => {
     expect(fixture.nativeElement.querySelectorAll('[role]')).toHaveLength(0);
   });
 
-  /** Without it the link moves the scroll and leaves the focus behind. */
-  it('makes the content region focusable, because the skip link lands there', () => {
+  /**
+   * A browser focuses the nearest focusable ancestor of a pressed element; a
+   * `main` that is focusable all the time takes the focus of every click on
+   * its text, and the next Shift draws the ring around the page.
+   */
+  it('focuses the content region from the skip link only, and never from a click inside it', () => {
+    const press = (target: Element) => {
+      target.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+      const focusable = target.closest<HTMLElement>('[tabindex], a[href], button');
+      if (focusable === null) (document.activeElement as HTMLElement | null)?.blur();
+      else focusable.focus();
+    };
     const fixture = setup();
-    expect(query(fixture, '[data-part="main"]').getAttribute('tabindex')).toBe('-1');
+    document.body.appendChild(fixture.nativeElement);
+    const main = query(fixture, '[data-part="main"]');
+
+    press(main);
+    expect(document.activeElement).not.toBe(main);
+    expect(main.hasAttribute('tabindex')).toBe(false);
+
+    query(fixture, `[data-part="skip"] a[href="#${main.id}"]`).click();
+    expect(document.activeElement).toBe(main);
+
+    press(main);
+    expect(document.activeElement).not.toBe(main);
+    expect(main.hasAttribute('tabindex')).toBe(false);
+    fixture.nativeElement.remove();
+  });
+
+  it('keeps a tabindex the consumer wrote on the content region', () => {
+    @Component({
+      standalone: true,
+      imports: PARTS,
+      template: `<div slAppShell><main slAppShellMain tabindex="-1"></main></div>`,
+    })
+    class Written {}
+    TestBed.configureTestingModule({ imports: [Written] });
+    const fixture = TestBed.createComponent(Written);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('main').getAttribute('tabindex')).toBe('-1');
   });
 
   it('writes one skip link per region that rendered', () => {

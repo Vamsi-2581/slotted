@@ -1,7 +1,7 @@
 import '@slotted/styles/app-shell/app-shell.css';
 
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
-import { createFocusScope } from '@slotted/core/focus';
+import { createFocusScope, focusTarget } from '@slotted/core/focus';
 import { appShellMessages } from '@slotted/core/i18n';
 import { clamp, COMPACT_BELOW, createWidthGate } from '@slotted/core/measure';
 import { setPortalContainer } from '@slotted/core/portal';
@@ -573,7 +573,9 @@ export function AppShell({
       closeNav: () => setOpen(false, 'programmatic'),
       openAside: () => setAsideOpen(true, 'programmatic'),
       closeAside: () => setAsideOpen(false, 'programmatic'),
-      focusMain: () => nodes.current.main?.focus(),
+      focusMain: () => {
+        if (nodes.current.main) focusTarget(nodes.current.main);
+      },
       get root() {
         return root;
       },
@@ -668,7 +670,13 @@ export function AppShell({
   const skipLinks: ReactNode[] = [];
   if (regions.main) {
     skipLinks.push(
-      <a key="main" href={`#${mainId}`}>
+      <a
+        key="main"
+        href={`#${mainId}`}
+        onClick={() => {
+          if (nodes.current.main) focusTarget(nodes.current.main);
+        }}
+      >
         {t('skipToMain')}
       </a>,
     );

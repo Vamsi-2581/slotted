@@ -10,7 +10,7 @@ import {
   stepExtent,
 } from '@slotted/core/extent';
 import type { ExtentRect, ExtentSide } from '@slotted/core/extent';
-import { createFocusScope } from '@slotted/core/focus';
+import { createFocusScope, focusTarget } from '@slotted/core/focus';
 import { appShellMessages, type AppShellMessages, type PartialMessages } from '@slotted/core/i18n';
 import { clamp, COMPACT_BELOW, createWidthGate } from '@slotted/core/measure';
 import { setPortalContainer } from '@slotted/core/portal';
@@ -116,7 +116,9 @@ let nextId = 0;
   template: `@if (skipTargets().length > 0) {
       <div data-part="skip">
         @for (target of skipTargets(); track target.href) {
-          <a [href]="'#' + target.href">{{ target.label }}</a>
+          <a [href]="'#' + target.href" (click)="target.href === mainId && focusMain()">{{
+            target.label
+          }}</a>
         }
       </div>
     }
@@ -648,7 +650,7 @@ export class SlAppShell {
   }
   /** Moves focus into the content region, which is where a skip link sends it. */
   focusMain() {
-    this.nodes.main?.focus();
+    if (this.nodes.main) focusTarget(this.nodes.main);
   }
 
   /**
@@ -798,9 +800,11 @@ export class SlAppShellNavFooter {}
 /**
  * The `main` landmark, and the skip link's destination.
  *
- * `tabindex="-1"` is not decoration: a `main` without it takes the scroll and
- * leaves the focus behind in Safari and in Firefox, so the link appears to work
- * and moves nothing a screen reader follows.
+ * It carries no `tabindex` of its own: the skip link and `focusMain()` write
+ * `tabindex="-1"` for the one focus they move (`focusTarget`), and the blur or
+ * the next pointer press inside removes it. A `main` focusable all the time
+ * takes the focus of every click on its text, and the next key draws the ring
+ * around the page. A `tabindex` the consumer writes stays.
  */
 @Directive({
   selector: 'main[slAppShellMain]',
@@ -808,7 +812,6 @@ export class SlAppShellNavFooter {}
   exportAs: 'slAppShellMain',
   host: {
     'data-part': 'main',
-    tabindex: '-1',
     '[attr.id]': 'elementId',
     '[attr.aria-busy]': 'busy()',
   },

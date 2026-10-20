@@ -93,9 +93,45 @@ describe('AppShell', () => {
     expect(container.querySelectorAll('[role]')).toHaveLength(0);
   });
 
-  /** Without it the link moves the scroll and leaves the focus behind. */
-  it('makes the content region focusable, because the skip link lands there', () => {
-    render(<Shell />);
+  /**
+   * A browser focuses the nearest focusable ancestor of a pressed element; a
+   * `main` that is focusable all the time takes the focus of every click on
+   * its text, and the next Shift draws the ring around the page.
+   */
+  it('focuses the content region from the skip link only, and never from a click inside it', () => {
+    const press = (target: Element) => {
+      fireEvent.pointerDown(target);
+      const focusable = target.closest<HTMLElement>('[tabindex], a[href], button');
+      if (focusable === null) (document.activeElement as HTMLElement | null)?.blur();
+      else focusable.focus();
+    };
+    render(
+      <AppShell>
+        <AppShellMain>
+          <p>text</p>
+        </AppShellMain>
+      </AppShell>,
+    );
+    const main = screen.getByRole('main');
+
+    press(screen.getByText('text'));
+    expect(document.activeElement).not.toBe(main);
+    expect(main).not.toHaveAttribute('tabindex');
+
+    fireEvent.click(document.querySelector(`[data-part="skip"] a[href="#${main.id}"]`)!);
+    expect(document.activeElement).toBe(main);
+
+    press(screen.getByText('text'));
+    expect(document.activeElement).not.toBe(main);
+    expect(main).not.toHaveAttribute('tabindex');
+  });
+
+  it('keeps a tabIndex the consumer wrote on the content region', () => {
+    render(
+      <AppShell>
+        <AppShellMain tabIndex={-1} />
+      </AppShell>,
+    );
     expect(screen.getByRole('main')).toHaveAttribute('tabindex', '-1');
   });
 

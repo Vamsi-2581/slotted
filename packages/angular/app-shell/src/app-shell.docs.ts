@@ -146,10 +146,10 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'main',
-    element: 'main with tabindex="-1"',
+    element: 'main',
     required: true,
     purpose:
-      'The main landmark and the skip link’s destination. Without the tabindex the link moves the scroll and leaves the focus behind, in Safari and in Firefox.',
+      'The main landmark and the skip link’s destination. The skip link and focusMain() write tabindex="-1" for the focus they move, and blur or the next pointer press inside removes it: a main focusable all the time takes the focus of every click on its text, and the next key draws the ring around the page.',
   },
   {
     part: 'progress',
@@ -510,7 +510,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'skipLinks',
     title: 'The first thing a keyboard meets',
-    note: 'Press Tab from the top of the frame: a link to the content appears, then one to the navigation, then one to the pane — one per region that rendered and is open, out of the flow until focused. The content region carries tabindex="-1", so the link moves the focus as well as the scroll.',
+    note: 'Press Tab from the top of the frame: a link to the content appears, then one to the navigation, then one to the pane — one per region that rendered and is open, out of the flow until focused. The link makes the content region focusable for that one focus, so it moves the focus as well as the scroll.',
     snippet: defineSnippet({
       id: 'app-shell-angular-skip',
       language: 'angular',
@@ -860,7 +860,7 @@ export const ANGULAR_APP_SHELL_DOCS = {
       'The structure is the WAI-ARIA APG’s Landmark Regions (w3.org/WAI/ARIA/apg/practices/landmark-regions/), and every one of the five is earned from the element rather than written as a role: header in the context of the body is banner, nav is navigation, main is main, aside is complementary, footer is contentinfo. The root is a div for exactly that reason — a main inside a sectioning element stops being a landmark, and the shell has to be placeable anywhere.',
       'Both controls are the APG’s Disclosure pattern (w3.org/WAI/ARIA/apg/patterns/disclosure/): real buttons, so Enter and Space activate them natively, carrying aria-expanded and aria-controls pointing at their region. One departure is written and costed: under collapsedTo="rail" the navigation does not disappear, it narrows — aria-expanded is still true or false about the region’s full form, and the region stays in the tab order because a rail whose destinations cannot be reached is not a rail. The pane has no such departure: closed, it leaves the layout and the tab order.',
       'A document with more than one navigation or complementary landmark needs a unique label on each, so both regions carry the family’s strings and a consumer may replace either per instance. Each control’s own name changes with the state — “Open navigation” and “Close navigation”, “Open side panel” and “Close side panel” — because a control whose name never changes leaves the reader to infer the state from aria-expanded alone.',
-      'The skip links are written from the regions that rendered and are open, so no link ever points at a target nobody built or the reader closed, and main carries tabindex="-1": without it the browser moves the scroll and leaves the focus behind in Safari and Firefox, which is a link that appears to work and moves nothing a screen reader follows.',
+      'The skip links are written from the regions that rendered and are open, so no link ever points at a target nobody built or the reader closed, and the main link writes tabindex="-1" on main before it moves the focus: without it the browser moves the scroll and leaves the focus behind in Safari and Firefox. Blur or the next pointer press inside removes the attribute, so a click on the content never focuses main.',
       'While an overlaid region is modal, @slotted/core/focus contains the keyboard inside it and returns it to the control that opened it on close, and every region beside it — the banner included — takes inert, so Tab cannot reach them and a screen reader does not read them. The ways out are Escape, the veil, a destination, and whatever control the product put in the panel. Two layers can be open together only with both modes forced, and @slotted/core/dismissable-layer keeps one stack, so Escape reaches the topmost.',
       'The pane’s edge is the APG’s Window Splitter (w3.org/WAI/ARIA/apg/patterns/windowsplitter/): a focusable separator with aria-orientation="vertical", aria-controls pointing at the pane and aria-valuemin, aria-valuemax and aria-valuenow as whole percentages of the shell, named “Resize panel”. ArrowLeft and ArrowRight move it sixteen pixels, sixty-four with Shift, by the direction on the screen — so ArrowLeft grows an end pane and shrinks a start one, mirrored in right-to-left — and Home and End go to the limits.',
       'Nothing important depends on hover, the frame answers its own inline size rather than the window’s — which is what makes a 400% zoom behave like a narrow window — and every transition comes from the motion scale, so prefers-reduced-motion collapses all of them at once.',
@@ -901,7 +901,7 @@ export const ANGULAR_APP_SHELL_DOCS = {
     <div data-part="nav-body">…</div>
     <div data-part="nav-footer">…</div>
   </nav>
-  <main data-part="main" id="…-main" tabindex="-1">…</main>
+  <main data-part="main" id="…-main">…</main>
   <aside data-part="aside" id="…-aside" aria-label="Side panel" data-open>
     <div data-part="aside-header">
       …

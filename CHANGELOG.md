@@ -2,6 +2,28 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.4 — 2026-10-20
+
+- test(accordion): sai o teto de 100 ms por tempo de relógio
+- docs(evals): compose-screen atende após CP-09 e LP-14
+- test(table): sai o teste de razão por tempo de relógio
+- fix(theme): contrato gerado a par do token --slotted-table-edge-inset e de data-edges
+- fix(date-picker): SlDatePicker genérico sobre o tipo do valor
+- feat(date-picker): granularity month
+- docs(text-field): a linha type nomeia o controle que substitui cada tipo fora da lista
+- docs(agent-docs): CP-09 e LP-14
+- feat(tabs): deferPanels e useTabs().shownValue
+- feat(page): aviso em desenvolvimento quando falta PageBody
+- fix(select): o controle fechado mostra o rótulo do SelectItem sem items
+- feat(table): edges inset e flush
+- perf(overflow): a sombra de rolagem mede no primeiro relatório do ResizeObserver
+- perf(accordion): cinquenta itens fechados montam num commit e sem leitura de estilo
+- perf(combobox): abrir e mover o destaque recontam a lista uma vez por render
+
+### Guidelines
+
+- Added: CP-09, LP-14
+
 ## 0.1.0-beta.3 — 2026-10-19
 
 - docs(evals): theme-app atende após o passo dos materiais

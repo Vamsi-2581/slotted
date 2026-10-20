@@ -66,6 +66,7 @@
   "--slotted-tabs-list-gap",
   "--slotted-tabs-marker-color",
   "--slotted-tabs-marker-inset",
+  "--slotted-tabs-marker-offset",
   "--slotted-tabs-marker-radius",
   "--slotted-tabs-marker-size",
   "--slotted-tabs-scroll-color",

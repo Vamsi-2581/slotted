@@ -50,7 +50,7 @@
     /**
      * The marker: one bar the list draws under the selected tab, and the hover
      * bar under the tab the pointer is on, in the same geometry — the tab's
-     * content box, a pill on the list's edge. It is never thinner than the
+     * content box, a pill just above the list's edge. It is never thinner than the
      * thick border width, the floor the high-contrast scheme keeps for a mark
      * that carries state, and its thickness, its rounding and its inset are
      * tokens of their own: tied to the thick border width, a theme could not
@@ -62,6 +62,13 @@
     );
     --_marker-radius: var(--slotted-tabs-marker-radius, var(--slotted-radius-full, 9999px));
     --_marker-inset: var(--slotted-tabs-marker-inset, var(--_padding-inline));
+    /**
+     * The gap between the bars and the list's edge: the selected marker and the
+     * hover bar stand this far above the track, so the line reads as a line and
+     * the bar as a mark on it. An inset rather than a transform, because the
+     * marker's `translate` is its slide between tabs.
+     */
+    --_marker-offset: var(--slotted-tabs-marker-offset, 1px);
     --_track-color: var(--slotted-tabs-track-color, var(--slotted-border-subtle, ButtonBorder));
     /**
      * The length of the fade a scrolling list takes at an edge that has more
@@ -460,8 +467,8 @@
    * `--slotted-tabs-marker-inset`, which defaults to the tab's own inline
    * padding, and never the closing control: a tab followed by one gives up its
    * end padding, so the end inset is nought there. Below the width of a short
-   * label it keeps a minimum length, centred on the content. It stands on the
-   * list's edge, over the track, and the axes are physical in this one rule
+   * label it keeps a minimum length, centred on the content. It stands
+   * `--slotted-tabs-marker-offset` above the list's edge, over the track, and the axes are physical in this one rule
    * because the measurement is: the translate is from the list's left edge.
    */
   [data-ui='tabs'] > :where([data-part='list']) > [data-part='marker'] {
@@ -475,7 +482,7 @@
     block-size: var(--_marker-size);
     border-radius: var(--_marker-radius);
     inline-size: var(--_length);
-    inset-block-end: var(--_marker-lift, 0px);
+    inset-block-end: calc(var(--_marker-lift, 0px) + var(--_marker-offset));
     left: 0;
     pointer-events: none;
     position: absolute;
@@ -532,7 +539,7 @@
     block-size: var(--_marker-size);
     border-radius: var(--_marker-radius);
     content: '';
-    inset-block-end: calc(-1 * var(--_track-reach, 0px));
+    inset-block-end: calc(var(--_marker-offset) - var(--_track-reach, 0px));
     inset-inline: var(--_marker-inset);
     min-inline-size: var(--slotted-space-6, 1rem);
     opacity: 0;
@@ -578,7 +585,7 @@
     block-size: var(--_length);
     inline-size: var(--_marker-size);
     inset-block: 0 auto;
-    inset-inline: auto var(--_marker-lift, 0px);
+    inset-inline: auto calc(var(--_marker-lift, 0px) + var(--_marker-offset));
     translate: 0
       calc(var(--_indicator-start, 0px) + var(--_start-inset) + (var(--_span) - var(--_length)) / 2);
   }
@@ -589,7 +596,7 @@
     block-size: auto;
     inline-size: var(--_marker-size);
     inset-block: var(--_marker-inset);
-    inset-inline: auto calc(-1 * var(--_track-reach, 0px));
+    inset-inline: auto calc(var(--_marker-offset) - var(--_track-reach, 0px));
     min-block-size: var(--slotted-space-6, 1rem);
     min-inline-size: 0;
   }

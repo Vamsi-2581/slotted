@@ -7,8 +7,8 @@ import { captureUrl, launch } from '../shoot.mjs';
 /**
  * The tabs marker, read in Chrome: one bar per list, the thickness and the
  * rounding its tokens set, spanning the selected tab's content box — the icon
- * and the label, never the padding or the closing control — and standing on
- * the list's edge over the track. A second selection slides the same bar by
+ * and the label, never the padding or the closing control — and standing
+ * `--slotted-tabs-marker-offset` (1px) above the list's edge, over the track. A second selection slides the same bar by
  * `translate`, with no scale.
  *
  * The request came from an application that found the marker thin and
@@ -75,6 +75,7 @@ const READ = `(async () => {
       content,
       mark: vertical ? { start: mark.top, end: mark.bottom } : { start: mark.left, end: mark.right },
       edge: vertical ? { mark: mark.right, list: edge.right } : { mark: mark.bottom, list: edge.bottom },
+      offset: parseFloat(getComputedStyle(root).getPropertyValue('--slotted-tabs-marker-offset')) || 1,
       transform: style.transform,
       translate: style.translate,
     };
@@ -143,8 +144,8 @@ for (const [index, first] of reading.before.entries()) {
       `${state.probe}: the marker spans the tab's content box`,
     );
     assert.ok(
-      near(state.edge.mark, state.edge.list),
-      `${state.probe}: the marker is on the list's edge`,
+      near(state.edge.list - state.edge.mark, state.offset),
+      `${state.probe}: the marker stands its offset above the list's edge`,
     );
     assert.equal(state.transform, 'none', `${state.probe}: no scale`);
   }
@@ -154,4 +155,4 @@ for (const [index, first] of reading.before.entries()) {
     `${first.probe}: the selection moves the marker`,
   );
 }
-console.log('ok — one marker on the content box and the list edge, slid by translate');
+console.log('ok — one marker on the content box, its offset above the list edge, slid by translate');

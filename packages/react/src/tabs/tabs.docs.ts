@@ -90,7 +90,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span, aria-hidden',
     required: false,
     purpose:
-      'The bar under the selected tab. The list draws one and slides it between tabs; it spans the tab’s content box, never the close button. --slotted-tabs-marker-size, --slotted-tabs-marker-radius and --slotted-tabs-marker-inset shape it, and the hover bar takes the same geometry at --slotted-tabs-hover-marker-opacity.',
+      'The bar under the selected tab. The list draws one and slides it between tabs; it spans the tab’s content box, never the close button. --slotted-tabs-marker-size, --slotted-tabs-marker-radius, --slotted-tabs-marker-inset and --slotted-tabs-marker-offset (1px above the list’s edge) shape it, and the hover bar takes the same geometry at --slotted-tabs-hover-marker-opacity.',
   },
   {
     part: 'panel',

@@ -197,7 +197,11 @@ test('spans the tab’s content box and stands over the track', () => {
       `${ui}:not([data-orientation='vertical'])>[data-part='list']:has(>[data-part='item'][data-selected]>[data-part='dismiss'])>[data-part='marker']{--_end-inset:0px;}`,
     ),
   );
-  assert.match(rule(marker), /inset-block-end:var\(--_marker-lift,0px\)/);
+  assert.match(
+    rule(marker),
+    /inset-block-end:calc\(var\(--_marker-lift,0px\) \+ var\(--_marker-offset\)\)/,
+  );
+  assert.match(rule(ui), /--_marker-offset:var\(--slotted-tabs-marker-offset,1px\)/);
   const track = rule(at("[data-variant='line'][data-track='line']", 'list'));
   assert.match(
     track,

@@ -4263,6 +4263,7 @@ export type ComponentToken =
   | '--slotted-table-color-muted'
   | '--slotted-table-column-actions-size'
   | '--slotted-table-control-radius'
+  | '--slotted-table-edge-inset'
   | '--slotted-table-font-family'
   | '--slotted-table-font-size'
   | '--slotted-table-gap'
@@ -6465,6 +6466,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-table-color-muted",
   "--slotted-table-column-actions-size",
   "--slotted-table-control-radius",
+  "--slotted-table-edge-inset",
   "--slotted-table-font-family",
   "--slotted-table-font-size",
   "--slotted-table-gap",

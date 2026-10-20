@@ -1878,6 +1878,7 @@
     "data-drop-invalid",
     "data-drop-target",
     "data-edge",
+    "data-edges",
     "data-editable",
     "data-editing",
     "data-empty",

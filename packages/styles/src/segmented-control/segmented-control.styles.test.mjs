@@ -103,7 +103,12 @@ test('keeps the target at the control’s own height rather than the thumb’s',
     dense,
     /\[data-part='control'\]\{[^}]*inset-block:calc\(-1\*\(var\(--_inset\)\+var\(--_border-width\)\)\)/,
   );
-  assert.match(dense, /min-inline-size:max\(var\(--_inner\),var\(--slotted-target-min/);
+  /* The floor is the column's, so a segment never runs past its thumb. */
+  assert.match(
+    dense,
+    /grid-auto-columns:minmax\(max\(var\(--_inner\),var\(--slotted-target-min,24px\)\),1fr\)/,
+  );
+  assert.match(dense, /\[data-part='item'\]\{[^}]*min-inline-size:0/);
 });
 
 /**
@@ -158,19 +163,39 @@ test('hides a condensed label without taking it out of the document', () => {
  * edge, which is the pair `docs/token-foundation.md` names for the chosen row,
  * card, option and toggle, and the pair `button` and `toggle-group` both paint.
  */
-test('paints the thumb with the foundation pair, and lifts it off the track', () => {
+test('paints the thumb as a raised neutral surface, and lifts it off the track', () => {
   assert.match(
     dense,
-    /\[data-part='indicator'\]\{[^}]*box-shadow:var\(--slotted-control-shadow,none\)/,
+    /\[data-part='indicator'\]\{[^}]*box-shadow:var\(--slotted-segmented-control-indicator-shadow,var\(--slotted-shadow-xs,none\)\)/,
   );
   assert.match(
     dense,
-    /background:var\(--slotted-segmented-control-indicator-background,var\(--slotted-tone-accent-subtle-active/,
+    /background:var\(--slotted-segmented-control-indicator-background,light-dark\(var\(--slotted-surface-raised,Canvas\),color-mix/,
   );
-  assert.match(dense, /var\(--slotted-tone-accent-border/);
+  assert.doesNotMatch(dense, /--slotted-tone-accent/);
   assert.match(
     dense,
-    /color:var\(--slotted-segmented-control-checked-color,var\(--slotted-tone-accent-text/,
+    /color:var\(--slotted-segmented-control-checked-color,var\(--slotted-text,CanvasText\)\)/,
+  );
+});
+
+/**
+ * The thumb passes over the dividers and the hover ground and under the words:
+ * the segment is positioned with no `z-index`, so it paints after the thumb,
+ * and its two pseudo-elements sit at `z-index: -1`, under it. A segment at
+ * `z-index: 1` lifted both over the thumb, and a thumb crossing them lost part
+ * of its edge for the length of the slide.
+ */
+test('slides the thumb over the dividers and the hover ground', () => {
+  const start = dense.indexOf("[data-ui='segmented-control'][data-part='item']{");
+  assert.notEqual(start, -1);
+  const item = dense.slice(start);
+  assert.doesNotMatch(item.slice(0, item.indexOf('}')), /z-index/);
+  assert.match(dense, /\[data-part='item'\]\+\[data-part='item'\]::before\{[^}]*z-index:-1/);
+  assert.match(dense, /\[data-part='item'\]::after\{[^}]*z-index:-1/);
+  assert.match(
+    dense,
+    /:has\(\[data-part='control'\]:enabled\)::after\{[^}]*background:var\(--slotted-segmented-control-hover-background/,
   );
 });
 
@@ -244,21 +269,18 @@ test('answers every density through the control scale', () => {
  * sunken surface it had read as a hole in a row of raised controls, beside a
  * text field painted `--slotted-control-surface` (Nexora's list toolbar).
  */
-test('paints the track as a control, with the fill, edge and lift of a field', () => {
+test('paints the track as a neutral tint of the ground it stands on', () => {
   const root = dense.slice(dense.indexOf("[data-ui='segmented-control'][data-part='root']{"));
   const body = root.slice(0, root.indexOf('}'));
   assert.match(
     body,
-    /background:var\(--slotted-segmented-control-background,var\(--slotted-control-surface,Field\)\)/,
+    /background:var\(--slotted-segmented-control-background,color-mix\(inoklab,var\(--slotted-text,CanvasText\)6%,transparent\)\)/,
   );
   assert.match(
     body,
-    /border:var\(--_border-width\)solidvar\(--slotted-segmented-control-border-color,var\(--slotted-control-border-color,ButtonBorder\)\)/,
+    /border:var\(--_border-width\)solidvar\(--slotted-segmented-control-border-color,transparent\)/,
   );
-  assert.match(
-    body,
-    /box-shadow:var\(--slotted-segmented-control-shadow,var\(--slotted-control-shadow,none\)\)/,
-  );
+  assert.match(body, /box-shadow:var\(--slotted-segmented-control-shadow,none\)/);
 });
 
 /**
@@ -277,4 +299,18 @@ test('treats an empty label as no label, so an icon-only segment centres its ico
     dense,
     /\[data-ui='segmented-control'\]\[data-part='item'\]:not\(:has\(\[data-part='label'\]:not\(:empty\)\)\)\{padding-inline:0;\}/,
   );
+});
+
+/**
+ * The label clips along the line only, so descenders and accents are whole,
+ * and gives back the flex minimum a clipped box does not get, so a narrow
+ * column ends its words in an ellipsis rather than in the next segment.
+ */
+test('clips a label along the line only, and lets it shrink to its column', () => {
+  const start = dense.indexOf("[data-ui='segmented-control'][data-part='label']{");
+  assert.notEqual(start, -1);
+  const label = dense.slice(start, dense.indexOf('}', start));
+  assert.match(label, /overflow-x:clip/);
+  assert.match(label, /min-inline-size:0/);
+  assert.doesNotMatch(label, /overflow:hidden/);
 });

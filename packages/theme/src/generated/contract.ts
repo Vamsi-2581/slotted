@@ -4003,9 +4003,11 @@ export type ComponentToken =
   | '--slotted-segmented-control-disabled-color'
   | '--slotted-segmented-control-disabled-indicator-background'
   | '--slotted-segmented-control-divider-color'
+  | '--slotted-segmented-control-font-weight'
   | '--slotted-segmented-control-hover-background'
   | '--slotted-segmented-control-indicator-background'
   | '--slotted-segmented-control-indicator-border-color'
+  | '--slotted-segmented-control-indicator-shadow'
   | '--slotted-segmented-control-inset'
   | '--slotted-segmented-control-invalid-border-color'
   | '--slotted-segmented-control-invalid-edge-width'
@@ -6213,9 +6215,11 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-segmented-control-disabled-color",
   "--slotted-segmented-control-disabled-indicator-background",
   "--slotted-segmented-control-divider-color",
+  "--slotted-segmented-control-font-weight",
   "--slotted-segmented-control-hover-background",
   "--slotted-segmented-control-indicator-background",
   "--slotted-segmented-control-indicator-border-color",
+  "--slotted-segmented-control-indicator-shadow",
   "--slotted-segmented-control-inset",
   "--slotted-segmented-control-invalid-border-color",
   "--slotted-segmented-control-invalid-edge-width",

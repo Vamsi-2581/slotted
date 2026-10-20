@@ -900,3 +900,152 @@
     </div>
   </div>
 </section>
+
+<!--
+  The track on the grounds it is placed on: the neutral tint darkens each by the
+  same step, and the thumb is a raised surface on all three. The last panel is
+  narrower than its labels: each segment keeps to its column, so the thumb and
+  the checked segment stay one box.
+-->
+<section data-scene="grounds">
+  <style>
+    [data-demo-ground] {
+      border-radius: var(--slotted-radius-md);
+      display: grid;
+      gap: var(--slotted-space-3);
+      justify-items: start;
+      margin-block-end: var(--slotted-space-4);
+      padding: var(--slotted-space-5);
+    }
+  </style>
+
+  <div data-demo-ground style="background: var(--slotted-surface)">
+    <span data-demo-label>on --slotted-surface</span>
+    <div
+      data-ui="segmented-control"
+      data-part="root"
+      data-size="md"
+      data-orientation="horizontal"
+      data-condense="none"
+      role="radiogroup"
+      aria-label="ground-surface"
+      aria-orientation="horizontal"
+      style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 1"
+    >
+      <span data-part="indicator" aria-hidden="true"></span>
+      <label data-part="item">
+        <input data-part="control" type="radio" name="ground-surface" value="day" />
+        <span data-part="label">Day</span>
+      </label>
+      <label data-part="item" data-checked>
+        <input data-part="control" type="radio" name="ground-surface" value="agenda" checked />
+        <span data-part="label">Agenda</span>
+      </label>
+      <label data-part="item">
+        <input data-part="control" type="radio" name="ground-surface" value="journey" />
+        <span data-part="label">Journey</span>
+      </label>
+    </div>
+  </div>
+  <div data-demo-ground style="background: var(--slotted-surface-sunken)">
+    <span data-demo-label>on --slotted-surface-sunken</span>
+    <div
+      data-ui="segmented-control"
+      data-part="root"
+      data-size="md"
+      data-orientation="horizontal"
+      data-condense="none"
+      role="radiogroup"
+      aria-label="ground-surface-sunken"
+      aria-orientation="horizontal"
+      style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 1"
+    >
+      <span data-part="indicator" aria-hidden="true"></span>
+      <label data-part="item">
+        <input data-part="control" type="radio" name="ground-surface-sunken" value="day" />
+        <span data-part="label">Day</span>
+      </label>
+      <label data-part="item" data-checked>
+        <input
+          data-part="control"
+          type="radio"
+          name="ground-surface-sunken"
+          value="agenda"
+          checked
+        />
+        <span data-part="label">Agenda</span>
+      </label>
+      <label data-part="item">
+        <input data-part="control" type="radio" name="ground-surface-sunken" value="journey" />
+        <span data-part="label">Journey</span>
+      </label>
+    </div>
+  </div>
+  <div data-demo-ground style="background: var(--slotted-surface-raised)">
+    <span data-demo-label>on --slotted-surface-raised</span>
+    <div
+      data-ui="segmented-control"
+      data-part="root"
+      data-size="md"
+      data-orientation="horizontal"
+      data-condense="none"
+      role="radiogroup"
+      aria-label="ground-surface-raised"
+      aria-orientation="horizontal"
+      style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 1"
+    >
+      <span data-part="indicator" aria-hidden="true"></span>
+      <label data-part="item">
+        <input data-part="control" type="radio" name="ground-surface-raised" value="day" />
+        <span data-part="label">Day</span>
+      </label>
+      <label data-part="item" data-checked>
+        <input
+          data-part="control"
+          type="radio"
+          name="ground-surface-raised"
+          value="agenda"
+          checked
+        />
+        <span data-part="label">Agenda</span>
+      </label>
+      <label data-part="item">
+        <input data-part="control" type="radio" name="ground-surface-raised" value="journey" />
+        <span data-part="label">Journey</span>
+      </label>
+    </div>
+  </div>
+  <div data-demo-ground style="background: var(--slotted-surface-sunken); inline-size: 14rem">
+    <span data-demo-label>narrower than its labels · each segment keeps to its column</span>
+    <div
+      data-ui="segmented-control"
+      data-part="root"
+      data-size="md"
+      data-orientation="horizontal"
+      data-condense="none"
+      data-full-width
+      role="radiogroup"
+      aria-label="narrow"
+      aria-orientation="horizontal"
+      style="--slotted-segmented-control-count: 4; --slotted-segmented-control-index: 2"
+    >
+      <span data-part="indicator" aria-hidden="true"></span>
+      <label data-part="item">
+        <input data-part="control" type="radio" name="narrow" value="overview" />
+        <span data-part="label">Overview</span>
+      </label>
+      <label data-part="item">
+        <input data-part="control" type="radio" name="narrow" value="typography" />
+        <span data-part="label">Typography</span>
+      </label>
+      <label data-part="item" data-checked>
+        <input data-part="control" type="radio" name="narrow" value="payments" checked />
+        <span data-part="label">Payments</span>
+      </label>
+      <label data-part="item">
+        <input data-part="control" type="radio" name="narrow" value="lightyear" />
+        <span data-part="label">Lightyear</span>
+      </label>
+    </div>
+  </div>
+</section>

@@ -527,7 +527,7 @@ export const REACT_TEXT_FIELD_DOCS = {
         "'text' | 'search' | 'email' | 'url' | 'tel' | 'password'",
         'text',
         'TextField',
-        'The input’s own type. Any other string an input accepts still reaches the element.',
+        'The input’s own type, one of the six listed. A date, a time, a month or a number is not a TextField: use date-picker (forms.md FM-16), time-picker or number-field. Other strings still reach the element for compatibility and are not supported.',
       ],
       [
         'messages',

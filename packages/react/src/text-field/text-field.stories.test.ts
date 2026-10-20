@@ -46,3 +46,21 @@ describe('TextField stories', () => {
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });
 });
+
+/**
+ * A date, a time, a month or a number typed into a text field loses the
+ * calendar, the segments and the parsing its own family gives it. The `type`
+ * row names the six types the family supports and points every other one at
+ * the family that owns it.
+ */
+describe('TextField docs, the type prop', () => {
+  it('names the supported types and points a date at date-picker', () => {
+    const rows = Object.values(REACT_TEXT_FIELD_DOCS).flatMap((docs) => docs.api);
+    const type = rows.find((row) => row.name === 'type');
+
+    expect(type?.description).not.toMatch(/Any other string an input accepts/);
+    expect(type?.description).toMatch(/one of the six listed/);
+    expect(type?.description).toMatch(/date-picker \(forms\.md FM-16\)/);
+    expect(type?.description).toMatch(/time-picker or number-field/);
+  });
+});

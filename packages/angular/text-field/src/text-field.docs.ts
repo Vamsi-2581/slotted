@@ -518,7 +518,7 @@ export const ANGULAR_TEXT_FIELD_DOCS = {
         "'text' | 'search' | 'email' | 'url' | 'tel' | 'password'",
         'text',
         'the input element',
-        'The input’s own type, written as a static attribute. It is read before the host binding computes, so the reveal toggle can swap it and restore what you wrote.',
+        'The input’s own type, one of the six listed, written as a static attribute. It is read before the host binding computes, so the reveal toggle can swap it and restore what you wrote. A date, a time, a month or a number is not a text field: use date-picker (forms.md FM-16), time-picker or number-field. Other strings still reach the element for compatibility and are not supported.',
       ],
       [
         'copyable',
